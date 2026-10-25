@@ -6,6 +6,7 @@ import { test, expect, goTo, repoRoot, setWindowSize } from '../../helpers/app.m
 import { expectTabHighlightAligned } from '../../helpers/tabs.mjs'
 import { findWatchComponent, openMockedVideo } from '../../helpers/player.mjs'
 import { mockPlayableWatchPage } from '../../helpers/watch.mjs'
+import { readScopedStyles } from '../../../tests/helpers/component-styles.mjs'
 import {
   encryptSyncServerDeviceInfo,
   randomSyncServerDeviceId,
@@ -1038,12 +1039,8 @@ test('centers channel Home shelves within the available width', async ({ page })
 })
 
 test('full-window player shows the title overlay', async ({ page }) => {
-  const playerStyles = await readFile(
-    path.join(
-      repoRoot,
-      'src/renderer/components/ft-shaka-video-player/ft-shaka-video-player.css'
-    ),
-    'utf8'
+  const playerStyles = await readScopedStyles(
+    path.join(repoRoot, 'src/renderer/components/ft-shaka-video-player/ft-shaka-video-player.vue')
   )
   await page.addStyleTag({
     content: playerStyles.replaceAll(/:deep\(((?:[^()]|\([^()]*\))*)\)/g, '$1')
@@ -1066,12 +1063,8 @@ test('full-window player shows the title overlay', async ({ page }) => {
 })
 
 test('keeps the full-window player title below the Android status bar', async ({ page }) => {
-  const playerStyles = await readFile(
-    path.join(
-      repoRoot,
-      'src/renderer/components/ft-shaka-video-player/ft-shaka-video-player.css'
-    ),
-    'utf8'
+  const playerStyles = await readScopedStyles(
+    path.join(repoRoot, 'src/renderer/components/ft-shaka-video-player/ft-shaka-video-player.vue')
   )
   await page.addStyleTag({
     content: playerStyles.replaceAll(/:deep\(((?:[^()]|\([^()]*\))*)\)/g, '$1')
@@ -1416,12 +1409,8 @@ test('keeps Android player notices and end cards clear of visible controls', asy
 })
 
 test('paid promotion badge follows the full-window title visibility', async ({ page }) => {
-  const playerStyles = await readFile(
-    path.join(
-      repoRoot,
-      'src/renderer/components/ft-shaka-video-player/ft-shaka-video-player.css'
-    ),
-    'utf8'
+  const playerStyles = await readScopedStyles(
+    path.join(repoRoot, 'src/renderer/components/ft-shaka-video-player/ft-shaka-video-player.vue')
   )
   await page.addStyleTag({
     content: playerStyles.replaceAll(/:deep\(((?:[^()]|\([^()]*\))*)\)/g, '$1')
@@ -1488,12 +1477,8 @@ test('paid promotion badge follows the full-window title visibility', async ({ p
 
 test('Shorts top controls stay legible and blur the video beneath them', async ({ page }) => {
   await goTo(page, 'history')
-  const playerStyles = await readFile(
-    path.join(
-      repoRoot,
-      'src/renderer/components/ft-shaka-video-player/ft-shaka-video-player.css'
-    ),
-    'utf8'
+  const playerStyles = await readScopedStyles(
+    path.join(repoRoot, 'src/renderer/components/ft-shaka-video-player/ft-shaka-video-player.vue')
   )
   const captionsButtonSource = await readFile(
     path.join(
@@ -1681,12 +1666,8 @@ test('Shorts top controls stay legible and blur the video beneath them', async (
 
 test('compact chapters button marks its open icon with the seekbar accent', async ({ page }) => {
   await goTo(page, 'history')
-  const playerStyles = await readFile(
-    path.join(
-      repoRoot,
-      'src/renderer/components/ft-shaka-video-player/ft-shaka-video-player.css'
-    ),
-    'utf8'
+  const playerStyles = await readScopedStyles(
+    path.join(repoRoot, 'src/renderer/components/ft-shaka-video-player/ft-shaka-video-player.vue')
   )
   // The component scopes these rules with :deep(), which the browser cannot parse on its own
   await page.addStyleTag({
@@ -2209,12 +2190,8 @@ test.describe('select dropdown pixel grid', () => {
 
 test('a save channel setting dropdown clears the fullscreen dock content', async ({ page }) => {
   await goTo(page, 'history')
-  const playerStyles = await readFile(
-    path.join(
-      repoRoot,
-      'src/renderer/components/ft-shaka-video-player/ft-shaka-video-player.css'
-    ),
-    'utf8'
+  const playerStyles = await readScopedStyles(
+    path.join(repoRoot, 'src/renderer/components/ft-shaka-video-player/ft-shaka-video-player.vue')
   )
   // The dropdown's own placement lives in FtIconButton's stylesheet, and it is
   // what puts the fly-out over the dock edge in the first place.

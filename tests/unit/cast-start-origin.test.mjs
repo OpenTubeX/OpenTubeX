@@ -11,6 +11,7 @@ import { normalizeYatteeServerUrl } from '../../src/renderer/helpers/api/yattee.
 
 async function fixture(defaultInstance = 'http://192.168.1.2:3000', settings = {}) {
   const main = await readFile(new URL('../../src/main/index.js', import.meta.url), 'utf8')
+  const castIpc = await readFile(new URL('../../src/main/castIpc.js', import.meta.url), 'utf8')
   const handlers = new Map()
   const listeners = new Map()
   let focused = true
@@ -54,9 +55,12 @@ async function fixture(defaultInstance = 'http://192.168.1.2:3000', settings = {
       }
     }
   })
-  vm.runInContext(main.slice(main.indexOf('  const createMediaAddressResolver ='), main.indexOf('  ipcMain.handle(IpcChannels.DLNA_DISCOVER')), context)
-  vm.runInContext(main.slice(main.indexOf('  const castOwners ='), main.indexOf('  ipcMain.handle(IpcChannels.CAST_STATUS')), context)
-  const preload = (await readFile(new URL('../../src/preload/interface.js', import.meta.url), 'utf8'))
+  vm.runInContext(main.match(/  async function getConfiguredApiServerUrl\(\) \{[\s\S]*?\n  \}/)[0], context)
+  vm.runInContext(castIpc.slice(castIpc.indexOf('  const createMediaAddressResolver ='), castIpc.indexOf('  ipcMain.handle(IpcChannels.DLNA_DISCOVER')), context)
+  vm.runInContext(castIpc.slice(castIpc.indexOf('  const castOwners ='), castIpc.indexOf('  ipcMain.handle(IpcChannels.CAST_STATUS')), context)
+  const preloadTabs = (await readFile(new URL('../../src/preload/tabs.js', import.meta.url), 'utf8'))
+    .replace(/^import .*$/gm, '').replace('export const tabs =', 'const tabs =')
+  const preload = preloadTabs + (await readFile(new URL('../../src/preload/interface.js', import.meta.url), 'utf8'))
     .replace(/^import .*$/gm, '').replace('export default {', 'globalThis.preloadInterface = {')
   vm.runInContext(preload, context)
   return {

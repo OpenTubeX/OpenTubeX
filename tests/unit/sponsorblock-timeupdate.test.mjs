@@ -3,7 +3,7 @@ import { readFileSync } from 'node:fs'
 import test from 'node:test'
 import vm from 'node:vm'
 
-const source = readFileSync(new URL('../../src/renderer/components/ft-shaka-video-player/ft-shaka-video-player.js', import.meta.url), 'utf8')
+const source = readFileSync(new URL('../../src/renderer/components/ft-shaka-video-player/opentubex/useSponsorBlockPlayback.js', import.meta.url), 'utf8')
 
 function slice(startMarker, endMarker) {
   const start = source.indexOf(startMarker)
@@ -23,7 +23,7 @@ test('the highlight button state is only dispatched when it changes', () => {
     CustomEvent,
     isSponsorBlockPointSegment,
     sponsorSkips: { value: { promptSkip: new Set(['poi_highlight']) } },
-    sponsorBlockSegments: [{ uuid: 'h', category: 'poi_highlight', actionType: 'poi', startTime: 60, endTime: 60 }],
+    getSegments: () => [{ uuid: 'h', category: 'poi_highlight', actionType: 'poi', startTime: 60, endTime: 60 }],
     activeSponsorBlockHighlightSegment: { value: null },
     sponsorBlockCurrentTime: { value: 0 },
     sponsorBlockHighlightLabelVisible: true,
@@ -31,7 +31,7 @@ test('the highlight button state is only dispatched when it changes', () => {
     getActivePromptSponsorBlockToast: () => null,
     getActiveSponsorBlockToast: () => null,
   })
-  vm.runInContext(slice('    /**\n     * Last state sent to the highlight button', '    // the highlight button only advertises'), context)
+  vm.runInContext(slice('  /**\n   * Last state sent to the highlight button', '  // the highlight button only advertises'), context)
 
   for (const time of [0, 0.25, 0.5, 10, 30]) context.updateSponsorBlockHighlightState(time)
   assert.deepEqual(dispatched, [{ visible: true, labelVisible: true, shortcutAvailable: true }])
@@ -73,6 +73,7 @@ function setupScheduler() {
     isSponsorBlockPointSegment,
     sponsorSkips: { value: { autoSkip: new Set(['sponsor']) } },
     sponsorBlockSegments: [{ uuid: 'a', category: 'sponsor', actionType: 'skip', startTime: 30, endTime: 40 }],
+    getSegments: () => context.sponsorBlockSegments,
     sponsorBlockDoNotSkipSegments: new Map(),
     useSponsorBlock: { value: true },
     props: { sponsorBlockAutoSkipDisabled: false },
@@ -80,8 +81,8 @@ function setupScheduler() {
     canSeek: () => true,
     skipSponsorBlockSegments() {},
   })
-  vm.runInContext(`${slice('    let sponsorBlockSkipScheduleTimeout = null', '    function clearSponsorBlockNotFoundRefetchTimeout()')}
-${slice('    function getNextSponsorBlockAutoSkipSegment(', '    function syncSponsorBlockMuteSegments(')}`, context)
+  vm.runInContext(`${slice('  let sponsorBlockSkipScheduleTimeout = null', '  function clearSponsorBlockNotFoundRefetchTimeout()')}
+${slice('  function getNextSponsorBlockAutoSkipSegment(', '  function syncSponsorBlockMuteSegments(')}`, context)
   const active = () => tasks.filter(task => !task.signal.aborted)
   return { context, tasks, video, active }
 }

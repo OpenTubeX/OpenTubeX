@@ -3,7 +3,7 @@ import { readFile } from 'node:fs/promises'
 import vm from 'node:vm'
 import test from 'node:test'
 
-const source = await readFile(new URL('../../src/main/ytDlp.js', import.meta.url), 'utf8')
+const source = await readFile(new URL('../../src/main/ytDlpDownloads.js', import.meta.url), 'utf8')
 const start = source.indexOf('  function handleStdoutLine(line)')
 const end = source.indexOf('    const subtitleMatch', start)
 

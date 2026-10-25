@@ -3,10 +3,10 @@ import { readFileSync } from 'node:fs'
 import test from 'node:test'
 import vm from 'node:vm'
 
-const source = readFileSync(new URL('../../src/main/ytDlp.js', import.meta.url), 'utf8')
+const source = readFileSync(new URL('../../src/main/ytDlpBinaries.js', import.meta.url), 'utf8')
 const start = source.indexOf('/** @type {Map<string, { fileKey: string, version: string }>} */')
 const end = source.indexOf('\n}\n', source.indexOf('async function getYtDlpVersion(', start)) + 3
-assert.ok(start !== -1 && end > start, 'getYtDlpVersion should be found in ytDlp.js')
+assert.ok(start !== -1 && end > start, 'getYtDlpVersion should be found in ytDlpBinaries.js')
 
 function createProbe () {
   const calls = []
@@ -27,7 +27,7 @@ function createProbe () {
     delimiter: ':',
     join: (...parts) => parts.join('/')
   })
-  vm.runInContext(`${source.slice(start, end)}\nglobalThis.getYtDlpVersion = getYtDlpVersion`, context)
+  vm.runInContext(`${source.slice(start, end).replace('export async function getYtDlpVersion(', 'async function getYtDlpVersion(')}\nglobalThis.getYtDlpVersion = getYtDlpVersion`, context)
   return { calls, files, context, getYtDlpVersion: context.getYtDlpVersion }
 }
 

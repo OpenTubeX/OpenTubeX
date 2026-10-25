@@ -7,9 +7,9 @@ import cp from 'node:child_process'
 import test from 'node:test'
 import { runInNewContext } from 'node:vm'
 
-const source = await readFile(new URL('../../src/main/index.js', import.meta.url), 'utf8')
-const start = source.indexOf('  async function executeIpBlockRecoveryScript(')
-const end = source.indexOf('  const ipBlockRecoveryScriptCooldownMs', start)
+const source = await readFile(new URL('../../src/main/ipBlockRecovery.js', import.meta.url), 'utf8')
+const start = source.indexOf('\nasync function executeIpBlockRecoveryScript(')
+const end = source.indexOf('\nconst ipBlockRecoveryScriptCooldownMs', start)
 assert.ok(start > 0 && end > start)
 
 function loadRunner(platform, spawn, fileStat = async () => ({ isFile: () => true })) {

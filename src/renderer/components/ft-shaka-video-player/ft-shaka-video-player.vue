@@ -1899,6 +1899,25 @@
 
 <style src="shaka-player/dist/controls.css" />
 <style scoped src="./ft-shaka-video-player.css" />
+<style scoped src="./opentubex/musicAudio.css" />
+<style scoped src="./opentubex/shortsPlayer.css" />
+<style scoped src="./opentubex/endedScreen.css" />
+<style scoped src="./opentubex/chapters.css" />
+<style scoped src="./opentubex/playerMenu.css" />
+<style scoped src="./opentubex/controlBar.css" />
+<style scoped src="./opentubex/playerOverlays.css" />
+<style scoped src="./opentubex/sponsorBlock.css" />
+<style scoped src="./opentubex/seekBarMarkers.css" />
+<style scoped src="./opentubex/fullscreen.css" />
+<style scoped src="./opentubex/bufferSpinner.css" />
+<style scoped src="./opentubex/fullscreenControls.css" />
+<style scoped src="./opentubex/controlBarItems.css" />
+<style scoped src="./opentubex/captions.css" />
+<style scoped src="./opentubex/scrollMiniPlayer.css" />
+<style scoped src="./opentubex/videoLayout.css" />
+<style scoped src="./opentubex/phonePlayerOptions.css" />
+<style scoped src="./opentubex/classicPlayerControls.css" />
+<style scoped src="./opentubex/portraitFullscreenDocks.css" />
 <style>
 /* Unscoped: pseudo-elements on range inputs do not work reliably with Vue scoped CSS. */
 .ftVideoPlayer.scrollMiniPlayer .scrollMiniVolumeBar {

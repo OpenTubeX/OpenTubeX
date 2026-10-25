@@ -1,0 +1,469 @@
+/* stylelint-disable liberty/use-logical-spec */
+
+.ftVideoPlayer.shortsPlayer:not(.scrollMiniPlayer, [data-inline-mini-drag]) {
+  /*
+    Keep the container from becoming a focus-scroll area and let the seek
+    thumb extend below the video. The video and poster own the rounded crop.
+  */
+  overflow: visible !important;
+}
+
+.ftVideoPlayer.shortsPlayer:not(:fullscreen, .fullWindow) {
+  inline-size: 100%;
+  block-size: 100%;
+  aspect-ratio: auto;
+}
+
+/* Interpolate the Shorts fade while sharing its value with glass and icons. */
+@property --ft-controls-fade {
+  syntax: '<number>';
+  inherits: true;
+  initial-value: 1;
+}
+
+.shortsTopControls {
+  position: absolute;
+  z-index: 4;
+  inset-inline: 0;
+  inset-block-start: 0;
+  display: flex;
+  justify-content: space-between;
+  box-sizing: border-box;
+  padding: 16px;
+  border-start-start-radius: inherit;
+  border-start-end-radius: inherit;
+  color: #fff;
+  visibility: hidden;
+  opacity: 0;
+  background: linear-gradient(rgb(0 0 0 / 38%), transparent);
+  pointer-events: none;
+  transform: translateZ(0);
+  transition:
+    var(--shorts-controls-fade-property, opacity) 600ms cubic-bezier(0.4, 0, 0.6, 1),
+    visibility 0s linear 600ms;
+}
+
+/* As in the watch player, fade glass and icons separately so the row never
+   becomes a backdrop root that cuts the blur off from the video. */
+.ftVideoPlayer.shortsPlayer:where(:not(.classicPlayerControls)) > .shortsTopControls {
+  --ft-controls-fade: 0;
+
+  /* The transition needs the property's name, rather than its value. */
+  /* stylelint-disable-next-line custom-property-no-missing-var-function */
+  --shorts-controls-fade-property: --ft-controls-fade;
+
+  opacity: 1;
+  background: linear-gradient(rgb(0 0 0 / calc(38% * var(--ft-controls-fade))), transparent);
+}
+
+.ftVideoPlayer.presentationModeChanging .shortsTopControls {
+  transition: none !important;
+}
+
+.ftVideoPlayer.shortsPlayer.shortsPaused > .shortsTopControls,
+.ftVideoPlayer.shortsPlayer:has(:deep(.shaka-controls-container[shown='true'])) > .shortsTopControls {
+  --ft-controls-fade: 1;
+
+  visibility: visible;
+  opacity: 1;
+  transition:
+    var(--shorts-controls-fade-property, opacity) 150ms ease,
+    inset-inline-start 250ms ease,
+    max-inline-size 250ms ease;
+}
+
+.shortsTopControlsGroup {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.shortsTopControl {
+  display: grid;
+  place-items: center;
+  inline-size: 46px;
+  block-size: 46px;
+  padding: 0;
+  border: 0;
+  border-radius: 50%;
+  color: inherit;
+  background-color: rgb(0 0 0 / 32%);
+  backdrop-filter: blur(8px) saturate(120%);
+  cursor: pointer;
+  font-size: 19px;
+  pointer-events: auto;
+  transition: background-color 150ms ease;
+}
+
+.shortsTopControl:hover,
+.shortsTopControl:focus-visible,
+.shortsTopControl.active {
+  background-color: rgb(0 0 0 / 52%);
+}
+
+.shortsVolumeControl {
+  display: flex;
+  align-items: center;
+  min-inline-size: 46px;
+  border-radius: calc(24px * var(--ui-roundness));
+  background-color: rgb(0 0 0 / 32%);
+  backdrop-filter: blur(8px) saturate(120%);
+  pointer-events: auto;
+  transition: background-color 150ms ease;
+}
+
+.shortsVolumeControl .shortsTopControl {
+  flex: none;
+  background-color: transparent;
+  backdrop-filter: none;
+}
+
+.shortsVolumeControl:is(:hover, :focus-within) {
+  background-color: rgb(0 0 0 / 44%);
+}
+
+.ftVideoPlayer.shortsPlayer:not(.classicPlayerControls) .shortsTopControlsGroup > .shortsTopControl,
+.ftVideoPlayer.shortsPlayer:not(.classicPlayerControls) .shortsVolumeControl {
+  position: relative;
+  isolation: isolate;
+  background: transparent;
+  backdrop-filter: none;
+}
+
+.ftVideoPlayer.shortsPlayer:not(.classicPlayerControls) .shortsTopControlsGroup > .shortsTopControl::before,
+.ftVideoPlayer.shortsPlayer:not(.classicPlayerControls) .shortsVolumeControl::before {
+  content: '';
+  position: absolute;
+  z-index: -1;
+  inset: 0;
+  border-radius: inherit;
+  background: linear-gradient(145deg, rgb(255 255 255 / 12%), rgb(255 255 255 / 3%)), rgb(0 0 0 / 42%);
+  box-shadow: 0 2px 8px rgb(0 0 0 / 28%), inset 0 1px rgb(255 255 255 / 24%), inset 0 0 0 1px rgb(255 255 255 / 16%), inset 0 -2px 8px rgb(0 0 0 / 22%);
+  backdrop-filter: blur(10px) saturate(1.15);
+  opacity: var(--ft-controls-fade);
+  pointer-events: none;
+}
+
+.ftVideoPlayer.shortsPlayer:not(.classicPlayerControls) .shortsTopControlsGroup > .shortsTopControl:is(:hover, :focus-visible, .active)::before,
+.ftVideoPlayer.shortsPlayer:not(.classicPlayerControls) .shortsVolumeControl:is(:hover, :focus-within)::before {
+  background: linear-gradient(rgb(255 255 255 / 12%), rgb(255 255 255 / 12%)), linear-gradient(145deg, rgb(255 255 255 / 12%), rgb(255 255 255 / 3%)), rgb(0 0 0 / 42%);
+}
+
+.ftVideoPlayer.shortsPlayer:not(.classicPlayerControls) .shortsTopControl > *,
+:where(.ftVideoPlayer.shortsPlayer:not(.classicPlayerControls)) .shortsVolumeSlider {
+  filter: opacity(var(--ft-controls-fade));
+}
+
+.shortsVolumeSlider {
+  direction: ltr;
+  inline-size: 0;
+  margin-inline: 0;
+  opacity: 0;
+  background: linear-gradient(to right, var(--primary-color) var(--shorts-volume), rgb(255 255 255 / 54%) var(--shorts-volume), rgb(255 255 255 / 54%) 100%);
+  transition: inline-size 160ms ease, margin-inline 160ms ease, opacity 120ms ease;
+}
+
+.shortsCaptionsControl {
+  position: relative;
+}
+
+.shortsCaptionsControlIcon {
+  inline-size: 28px;
+  block-size: 28px;
+  fill: currentcolor;
+}
+
+.shortsCaptionsControlSlash {
+  position: absolute;
+  inset-block-start: 50%;
+  inset-inline-start: 50%;
+  inline-size: 25px;
+  block-size: 2.5px;
+  border-radius: calc(999px * var(--ui-roundness));
+  background-color: currentcolor;
+  pointer-events: none;
+  transform: translate(-50%, -50%) rotate(45deg) scaleX(1);
+  transition: transform 200ms cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.shortsCaptionsControl.active > .shortsCaptionsControlSlash {
+  transform: translate(-50%, -50%) rotate(45deg) scaleX(0);
+}
+
+.shortsVolumeControl:is(:hover, :focus-within) .shortsVolumeSlider {
+  inline-size: 96px;
+  margin-inline: 0 12px;
+  opacity: 1;
+}
+
+:global(.capacitorTabs .ftVideoPlayer.shortsPlayer .shortsVolumeControl) {
+  display: none;
+}
+
+:global(.capacitorTabs .ftVideoPlayer.shortsPlayer .shaka-big-buttons-container),
+:global(.capacitorTabs .ftVideoPlayer.shortsPlayer .shaka-play-button-container) {
+  display: none;
+}
+
+.ftVideoPlayer.shortsPlayer :deep(.shaka-controls-button-panel) {
+  display: none;
+}
+
+/*
+  Keep the quick speed presets in their familiar lower-player position without
+  bringing back the standard Shorts control panel. The row scrolls when custom
+  labels or presets outgrow the narrow portrait player.
+*/
+.ftVideoPlayer.shortsPlayer :deep(
+  .shaka-controls-button-panel:has(> .ft-quick-playback-rate-bar)
+) {
+  position: absolute;
+  inset-block-end: 14px;
+  inset-inline: 16px;
+  z-index: 2;
+  display: flex;
+  justify-content: center;
+  box-sizing: border-box;
+  inline-size: auto;
+  block-size: auto;
+  padding: 0;
+  opacity: var(--shorts-quick-playback-rate-bar-opacity, 0);
+  pointer-events: none;
+  transition: opacity 50ms linear;
+}
+
+.ftVideoPlayer.shortsPlayer :deep(
+  .shaka-controls-button-panel:has(> .ft-quick-playback-rate-bar:is(:hover, :focus-within))
+) {
+  opacity: 1;
+}
+
+/* stylelint-disable-next-line selector-max-compound-selectors */
+:global(.capacitorPhoneLayout .ftVideoPlayer.shortsPlayer .shaka-controls-button-panel:has(> .ft-quick-playback-rate-bar)) {
+  opacity: 1;
+}
+
+.ftVideoPlayer.shortsPlayer :deep(
+  .shaka-controls-button-panel > :not(.ft-quick-playback-rate-bar)
+) {
+  display: none !important;
+}
+
+.ftVideoPlayer.shortsPlayer :deep(
+  .shaka-controls-button-panel > .ft-quick-playback-rate-bar
+) {
+  max-inline-size: 100%;
+  margin: 0;
+  padding-block: 2px;
+  padding-inline: 6px;
+  border-radius: calc(999px * var(--ui-roundness));
+  pointer-events: auto;
+}
+
+.ftVideoPlayer.shortsPlayer:is(:fullscreen, .fullWindow) :deep(
+  .shaka-controls-button-panel:has(> .ft-quick-playback-rate-bar)
+) {
+  inset-inline: auto;
+  inset-inline-start: max(
+    calc((100% - var(--shorts-video-width)) / 2),
+    var(--shorts-metadata-min-width)
+  );
+  inline-size: var(--shorts-video-width);
+}
+
+.ftVideoPlayer.shortsPlayer :deep(.shaka-bottom-controls) {
+  position: absolute;
+  inset-block-end: 0;
+  inset-inline: 0;
+  inline-size: 100%;
+  block-size: 0;
+  min-block-size: 0;
+  padding-block-end: 0;
+  margin: 0;
+  overflow: visible;
+  background: transparent !important;
+}
+
+.ftVideoPlayer.shortsPlayer :deep(.shaka-bottom-controls::before) {
+  content: '';
+  position: absolute;
+  inset: -24px 0 0;
+}
+
+.ftVideoPlayer.shortsPlayer :deep(.shaka-seek-bar-container) {
+  position: absolute;
+  inset-block: auto -2px;
+  inset-inline: calc(12px * var(--ui-roundness));
+  inline-size: auto;
+  block-size: 3px;
+  margin: 0;
+  z-index: 1;
+  opacity: 1;
+  transition: none;
+}
+
+.ftVideoPlayer.shortsPlayer:has(:deep(.ft-quick-playback-rate-bar)) :deep(
+  .shaka-seek-bar-container
+) {
+  z-index: 3;
+}
+
+.ftVideoPlayer.shortsPlayer:is(:fullscreen, .fullWindow) {
+  --shorts-metadata-min-width: min(
+    220px,
+    calc((100vw - var(--shorts-dock-width, 0px)) / 3)
+  );
+  --shorts-video-width: min(
+    calc(100dvh * var(--shorts-aspect-ratio)),
+    calc(
+      100vw - var(--shorts-dock-width, 0px) -
+      var(--shorts-metadata-min-width)
+    )
+  );
+}
+
+.ftVideoPlayer.shortsPlayer:is(:fullscreen, .fullWindow) :deep(.shaka-seek-bar-container) {
+  inset-inline: auto;
+  inset-inline-start: max(
+    calc((100% - var(--shorts-video-width)) / 2),
+    var(--shorts-metadata-min-width)
+  );
+  inline-size: var(--shorts-video-width);
+  transform: none;
+}
+
+.ftVideoPlayer.shortsPlayer :deep(.shaka-seek-bar-container .shaka-range-element::-webkit-slider-thumb) {
+  opacity: 0;
+  transform: scale(0);
+  transition: opacity 120ms ease, transform 120ms ease;
+}
+
+.ftVideoPlayer.shortsPlayer :deep(
+  .shaka-seek-bar-container:is(:hover, :focus-within) .shaka-range-element::-webkit-slider-thumb
+) {
+  opacity: 1;
+  transform: scale(1);
+}
+
+.ftVideoPlayer.shortsPlayer :deep(.shaka-seek-bar-container .shaka-range-element::-moz-range-thumb) {
+  opacity: 0;
+  transform: scale(0);
+  transition: opacity 120ms ease, transform 120ms ease;
+}
+
+.ftVideoPlayer.shortsPlayer :deep(
+  .shaka-seek-bar-container:is(:hover, :focus-within) .shaka-range-element::-moz-range-thumb
+) {
+  opacity: 1;
+  transform: scale(1);
+}
+
+.shortsReplayIcon {
+  inline-size: 24px;
+  block-size: 24px;
+  fill: currentcolor;
+}
+
+.ftVideoPlayer.shortsPlayer :deep(.shaka-scrim-container) {
+  display: none;
+}
+
+.ftVideoPlayer.shortsPlayer :deep(.shaka-overflow-menu:not(.phonePlayerOptions > *)),
+.ftVideoPlayer.shortsPlayer :deep(.shaka-settings-menu:not(.phonePlayerOptions > *)) {
+  inset: var(--shorts-menu-top, 72px) var(--shorts-menu-right, 16px) auto auto !important;
+  max-inline-size: calc(100% - 16px);
+  max-block-size: calc(100% - 88px);
+  transform: none !important;
+}
+
+.ftVideoPlayer.shortsPlayer :deep(.shaka-context-menu) {
+  max-inline-size: calc(100% - 16px);
+  max-block-size: calc(100% - 16px);
+  overflow-y: auto;
+  translate: var(--shorts-context-menu-x, 0) var(--shorts-context-menu-y, 0);
+}
+
+.ftVideoPlayer.shortsPlayer:fullscreen .shortsTopControls,
+.ftVideoPlayer.shortsPlayer.fullWindow .shortsTopControls {
+  inset-block: 0;
+  inset-inline: calc((100% - var(--shorts-dock-width, 0px)) / 2) auto;
+  box-sizing: border-box;
+  block-size: 100%;
+  inline-size: auto;
+  max-inline-size: calc(100% - var(--shorts-dock-width, 0px));
+  aspect-ratio: var(--shorts-aspect-ratio);
+  transform: translateX(-50%);
+  align-items: flex-start;
+  background: none;
+  transition:
+    opacity 600ms cubic-bezier(0.4, 0, 0.6, 1),
+    visibility 0s linear 600ms,
+    inset-inline-start 250ms ease,
+    max-inline-size 250ms ease;
+}
+
+.shortsFullscreenMetadata {
+  display: none;
+}
+
+.ftVideoPlayer.shortsPlayer:fullscreen .shortsFullscreenMetadata,
+.ftVideoPlayer.shortsPlayer.fullWindow .shortsFullscreenMetadata {
+  position: absolute;
+  z-index: 5;
+  inset-block: 0;
+  inset-inline-start: 0;
+  display: grid;
+  grid-template-columns:
+    minmax(var(--shorts-metadata-min-width), 1fr)
+    auto
+    minmax(0, 1fr);
+  box-sizing: border-box;
+  block-size: 100%;
+  inline-size: calc(100% - var(--shorts-dock-width, 0px));
+  color: #fff;
+  pointer-events: none;
+  transition: inline-size 250ms ease;
+}
+
+.shortsFullscreenMetadataSide {
+  grid-column: 1;
+  align-self: end;
+  min-inline-size: 0;
+  padding-block-end: 24px;
+  padding-inline: 16px;
+}
+
+.shortsFullscreenVideoSpace {
+  grid-column: 2;
+  block-size: 100%;
+  inline-size: var(--shorts-video-width);
+  aspect-ratio: var(--shorts-aspect-ratio);
+}
+
+.ftVideoPlayer.shortsPlayer:fullscreen :deep(.playerFullscreenTitleOverlay),
+.ftVideoPlayer.shortsPlayer.fullWindow :deep(.playerFullscreenTitleOverlay) {
+  display: none;
+}
+
+.ftVideoPlayer.shortsPlayer:fullscreen:is(
+  .fullscreenDockLayoutOpen,
+  .fullscreenMetadataOpen,
+  .fullscreenTranscriptOpen,
+  .fullscreenSponsorBlockOpen,
+  .fullscreenLiveChatOpen,
+  .fullscreenCommentsOpen,
+  .fullscreenPlaylistOpen, .fullscreenQueueOpen, .fullscreenRecommendationsOpen,
+  .chaptersOverlayOpen
+),
+  .ftVideoPlayer.shortsPlayer.fullWindow:is(
+  .fullscreenDockLayoutOpen,
+  .fullscreenMetadataOpen,
+  .fullscreenTranscriptOpen,
+  .fullscreenSponsorBlockOpen,
+  .fullscreenLiveChatOpen,
+  .fullscreenCommentsOpen,
+  .fullscreenPlaylistOpen, .fullscreenQueueOpen, .fullscreenRecommendationsOpen,
+  .chaptersOverlayOpen
+) {
+  --shorts-dock-width: var(--side-panel-width);
+}

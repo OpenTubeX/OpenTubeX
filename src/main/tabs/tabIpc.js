@@ -364,7 +364,7 @@ export async function setupTabsIPC(options = {}) {
     const delayMs = Number.isFinite(options.delayMs)
       ? Math.max(0, Math.min(5000, options.delayMs))
       : undefined
-    manager._scheduleTabPreviewRefresh(tab, delayMs)
+    manager.previews.scheduleRefresh(tab, delayMs)
   })
 
   ipcMain.handle(IpcChannels.TABS_RESTORE_CLOSED, async (event, closedTabId = null) => {

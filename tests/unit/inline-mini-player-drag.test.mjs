@@ -5,6 +5,8 @@ import vm from 'node:vm'
 import { getScrollMiniInlineLayoutHeight } from '../../src/renderer/helpers/scrollMiniPlayer.js'
 
 const source = readFileSync(new URL('../../src/renderer/components/ft-shaka-video-player/opentubex/useScrollMiniPlayer.js', import.meta.url), 'utf8')
+const morphSource = readFileSync(new URL('../../src/renderer/components/ft-shaka-video-player/opentubex/scrollMiniPlayerMorph.js', import.meta.url), 'utf8')
+  .replace(/^export /gm, '')
 const dragSource = source.slice(source.indexOf('  let inlineDrag ='), source.indexOf('  function updateScrollMiniVideoAspectRatio'))
 
 test('mobile morph keeps player and video layout fixed between animation frames', () => {
@@ -19,7 +21,7 @@ test('mobile morph keeps player and video layout fixed between animation frames'
   const surfaces = [{ style: videoStyle, classList: { contains: () => false } }]
   const attributes = new Set()
   const video = { style: videoStyle }
-  const methods = vm.runInNewContext(`${source.slice(source.indexOf('  function renderMobileMiniMorph('), source.indexOf('  function releaseMobileMiniBarTransition('))}\n({ renderMobileMiniMorph, clearMobileMiniMorph })`, {
+  const methods = vm.runInNewContext(`${morphSource}\ncreateMobileMiniMorph({ container, video, mobileMiniBarOverlay })`, {
     container: { value: {
       style,
       hasAttribute: name => attributes.has(name),
@@ -30,7 +32,6 @@ test('mobile morph keeps player and video layout fixed between animation frames'
     } },
     video: { value: video },
     mobileMiniBarOverlay: { value: { style: overlayStyle } },
-    mobileMiniMorphBase: null,
   })
   const render = methods.renderMobileMiniMorph
   const from = { left: 8, top: 80, width: 400, height: 225 }
@@ -116,7 +117,7 @@ for (const hidden of [false, true]) {
       ...placeholder, hidden, style: style(), naturalWidth: 0, naturalHeight: 0,
       getBoundingClientRect: () => ({ left: 40, top: 20, width: 1, height: 1 })
     }
-    const methods = vm.runInNewContext(`${source.slice(source.indexOf('  function renderMobileMiniMorph('), source.indexOf('  function releaseMobileMiniBarTransition('))}\n({ renderMobileMiniMorph, clearMobileMiniMorph })`, {
+    const methods = vm.runInNewContext(`${morphSource}\ncreateMobileMiniMorph({ container, video, mobileMiniBarOverlay })`, {
       container: { value: {
         style: style(), hasAttribute: name => attributes.has(name),
         setAttribute: name => attributes.add(name), removeAttribute: name => attributes.delete(name),
@@ -126,7 +127,7 @@ for (const hidden of [false, true]) {
         removeEventListener: type => listeners.delete(type)
       } },
       video: { value: { videoWidth: 400, videoHeight: 225 } },
-      mobileMiniBarOverlay: { value: null }, mobileMiniMorphBase: null,
+      mobileMiniBarOverlay: { value: null },
       getComputedStyle: () => ({ borderTopLeftRadius: '12px' }),
       requestAnimationFrame: callback => { frames.set(1, callback); return 1 },
       cancelAnimationFrame: id => frames.delete(id)
@@ -180,11 +181,10 @@ function fixture({ reducedMotion = false, available = true, phonePanel = false, 
     getBoundingClientRect() { reads++; return from },
   } }
   const eligibility = source.slice(source.indexOf('  function canUseScrollMiniPlayerBase('), source.indexOf('  function canShowCrossTabMiniPlayer('))
-  const methods = vm.runInNewContext(`${eligibility}\n${dragSource}\n({ beginScrollMiniPlayerDrag, moveScrollMiniPlayerDrag, updateScrollMiniPlayerBackProgress, finishScrollMiniPlayerDrag, cancelScrollMiniPlayerDrag, canUseScrollMiniPlayerBase })`, {
+  const methods = vm.runInNewContext(`${morphSource}\nconst { renderMobileMiniMorph, clearMobileMiniMorph } = createMobileMiniMorph({ container, video, mobileMiniBarOverlay })\n${eligibility}\n${dragSource}\n({ beginScrollMiniPlayerDrag, moveScrollMiniPlayerDrag, updateScrollMiniPlayerBackProgress, finishScrollMiniPlayerDrag, cancelScrollMiniPlayerDrag, canUseScrollMiniPlayerBase })`, {
     process: { env: { IS_CAPACITOR: false } },
     container,
     video: { value: { getBoundingClientRect: () => from, style: { removeProperty() {} } } },
-    mobileMiniMorphBase: null,
     usesMobileMiniBar: () => mobile,
     performance: { now: () => 0 },
     SCROLL_MINI_LAYOUT_ANIMATION_DURATION_MS: 300,
@@ -584,7 +584,7 @@ for (const hidden of [false, true]) {
       })
     }
     const video = { removeAttribute() {}, getBoundingClientRect: () => ({ left: 8, top: element.getBoundingClientRect().top + 6, width: 112, height: 63 }) }
-    const measure = vm.runInNewContext(`${source.slice(source.indexOf('  function measureMobileMiniBar('), source.indexOf('  function measureInlinePlayer('))}\nmeasureMobileMiniBar`, {
+    const measure = vm.runInNewContext(`${morphSource}\ncreateMobileMiniMorph({ container, video, getMobileMiniBarRect }).measureMobileMiniBar`, {
       document: { getElementById: () => ({ append() {} }) },
       container: { value: { cloneNode: () => element } },
       video: { value: { cloneNode: () => video } },

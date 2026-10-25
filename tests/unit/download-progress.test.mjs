@@ -3,7 +3,7 @@ import { readFileSync } from 'node:fs'
 import test from 'node:test'
 import vm from 'node:vm'
 
-const source = readFileSync(new URL('../../src/main/ytDlp.js', import.meta.url), 'utf8')
+const source = readFileSync(new URL('../../src/main/ytDlpDownloads.js', import.meta.url), 'utf8')
 const handler = source.slice(source.indexOf('  function setDownloadPhase(phase) {'), source.indexOf('\n  let stdoutBuffer', source.indexOf('  function handleStdoutLine(line) {')))
 
 function replay(lines, initialStatus = 'downloading') {

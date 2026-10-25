@@ -37,7 +37,6 @@ import { useTabContext, useTabLifecycle } from '../../tabs/TabContext'
 import { tabMediaCoordinator } from '../../tabs/TabMediaCoordinator'
 import { AmbientModeButton } from './player-components/AmbientModeButton'
 import {
-  AB_REPEAT_ICON,
   AbRepeatControl,
   setAbRepeatContext,
 } from './player-components/AbRepeatControl'
@@ -80,8 +79,7 @@ import {
   repairInvidiousManifest,
   translateSponsorBlockCategory
 } from '../../helpers/player/utils'
-import { findCaptionByLocale, getPreferredCaption } from '../../../captionLanguages'
-import { getActiveCueText } from '../../helpers/player/secondary-captions'
+import { getPreferredCaption } from '../../../captionLanguages'
 import { createLocalCaption, LOCAL_CAPTION_FILE_TYPES, normalizeLocalCaptionText } from '../../helpers/player/localCaptions'
 import {
   addKeyboardShortcutToActionTitle,
@@ -96,16 +94,10 @@ import {
   removeFromArrayIfExists,
   copyToClipboard,
 } from '../../helpers/utils'
-import { isHexColor, resolveColorValue } from '../../helpers/colors'
+import { isHexColor } from '../../helpers/colors'
 import { applyAnimationSpeed, getAnimationSpeedMultiplier } from '../../helpers/animationSpeed'
 import {
-  FULLSCREEN_DOCK_GAP,
-  FULLSCREEN_DOCK_OUTER_INSET,
-  toggleFullscreenDockCollapsed,
-} from '../../helpers/fullscreenDocks'
-import {
   addOverlayScrollbars,
-  clampOverlayScrollLeft,
   clampOverlayScrollTop,
   removeOverlayScrollbars,
   updateOverlayScrollbars,
@@ -137,28 +129,11 @@ import { parseChannelPreferences, removeChannelPreference } from '../../helpers/
 import { findLegacyFormatForQuality } from '../../helpers/player/legacyFormats'
 import { waitForYtDlpFormatAvailability } from '../../helpers/player/ytDlpFormatAvailability'
 import { getDashQualityFromDimensions } from '../../helpers/player/videoQuality'
-import {
-  DEFAULT_VIDEO_ZOOM,
-  formatVideoZoom,
-  getVideoFillZoom,
-  getVideoFillZoomProximity,
-  resolveVideoZoomPinch,
-  sanitizeVideoZoom,
-  stepVideoZoom,
-  VIDEO_ZOOM_LEVELS,
-} from '../../helpers/player/videoZoom'
+import { DEFAULT_VIDEO_ZOOM, formatVideoZoom, VIDEO_ZOOM_LEVELS } from '../../helpers/player/videoZoom'
 import { DEFAULT_VOLUME_BOOST, sanitizeVolumeBoost, VOLUME_BOOST_LEVELS } from '../../helpers/player/volumeBoost'
 import { shouldStartPaidPromotionTimer } from '../../helpers/player/paidPromotion'
-import { resolveSponsorBlockEnterTarget, resolveSponsorBlockEnterTargets } from '../../helpers/player/sponsorBlockShortcut'
-import { createSponsorBlockMuteController } from '../../helpers/player/sponsorBlockMute'
-import { findSponsorBlockSeekBarSegment, updateSponsorBlockSeekBarState } from '../../helpers/player/sponsorBlockSeekBar'
-import {
-  AbRepeatValidation,
-  formatAbRepeatTimestamp,
-  getAbRepeatBoundaryDelay,
-  isCompleteAbRepeatRange,
-  validateAbRepeatRange,
-} from '../../helpers/player/abRepeat'
+import { updateSponsorBlockSeekBarState } from '../../helpers/player/sponsorBlockSeekBar'
+import { formatAbRepeatTimestamp } from '../../helpers/player/abRepeat'
 import {
   SEEK_HISTORY_MIN_JUMP_SECONDS,
   getSeekHistory,
@@ -168,16 +143,17 @@ import {
   stepSeekHistoryForward,
 } from '../../helpers/player/seekHistory'
 import { matchesKeyboardShortcut } from '../../helpers/keyboardShortcuts'
-import { getSponsorBlockContributionStats, voteOnSponsorBlockSegment } from '../../helpers/sponsorblock'
-import { getSponsorBlockCategoryVoteOptions } from '../../helpers/player/sponsorBlockCategories'
 import {
   DEFAULT_CAPTION_SETTINGS,
   getCaptionCssVariables,
   getCaptionPlayerVariables,
   parseCaptionSettings,
 } from '../../helpers/player/caption-settings'
+import { AB_REPEAT_BOUNDARY_TOLERANCE_SECONDS, AB_REPEAT_VALUE_CHANGE_ICON, useAbRepeat } from './opentubex/useAbRepeat'
+import { useAdaptiveControlPanelLayout } from './opentubex/useAdaptiveControlPanelLayout'
 import { useAmbientMode } from './opentubex/useAmbientMode'
 import { useAutoPictureInPicture } from './opentubex/useAutoPictureInPicture'
+import { FULLSCREEN_DOCK_HEADER_SELECTOR, useFullscreenDocks } from './opentubex/useFullscreenDocks'
 import { createMobilePlayerAdjustments } from '../../helpers/mobilePlayerAdjustments'
 import {
   isCapacitorMobilePlayer,
@@ -186,10 +162,19 @@ import {
 import { useSeekPreviewThumbnail } from './opentubex/useSeekPreviewThumbnail'
 import { useMusicVisualizer } from './opentubex/useMusicVisualizer'
 import { useScrollMiniPlayer } from './opentubex/useScrollMiniPlayer'
+import { useSecondaryCaptions } from './opentubex/useSecondaryCaptions'
 import { useSilenceSkipping } from './opentubex/useSilenceSkipping'
 import { useSleepTimer } from './opentubex/useSleepTimer'
-import { useSponsorBlockSubmission } from './opentubex/useSponsorBlockSubmission'
+import {
+  SPONSORBLOCK_CATEGORIES,
+  SPONSORBLOCK_INFO_ACTION_TYPES,
+  SPONSORBLOCK_INFO_CATEGORIES,
+  SPONSORBLOCK_PLAYBACK_ACTION_TYPES,
+  SPONSORBLOCK_SEGMENT_START_TOLERANCE_SECONDS,
+  useSponsorBlockPlayback,
+} from './opentubex/useSponsorBlockPlayback'
 import { usePlayerAudioOutput } from './opentubex/usePlayerAudioOutput'
+import { useVideoZoom } from './opentubex/useVideoZoom'
 import { useVoiceOverTranslation } from './opentubex/useVoiceOverTranslation'
 import FtVideoAnnotations from '../FtVideoAnnotations/FtVideoAnnotations.vue'
 import FtShareButton from '../FtShareButton/FtShareButton.vue'
@@ -202,49 +187,10 @@ import { useRootClass } from '../../helpers/rootClasses'
 /** @typedef {import('../../helpers/sponsorblock').SponsorBlockCategory} SponsorBlockCategory */
 /** @typedef {string | { path: string, viewBox: string }} ValueChangeIcon */
 
-const SPONSORBLOCK_HIGHLIGHT_LABEL_PLAYBACK_MS = 5000
-const SPONSORBLOCK_SEGMENT_START_TOLERANCE_SECONDS = 0.1
-const SPONSORBLOCK_SKIP_SCHEDULE_LEAD_MS = 500
-const SPONSORBLOCK_SKIP_POLL_INTERVAL_MS = 4
-const SPONSORBLOCK_TERMINAL_OUTRO_TOLERANCE_SECONDS = 1
-const AB_REPEAT_MIN_RANGE_SECONDS = 0.05
-const AB_REPEAT_BOUNDARY_TOLERANCE_SECONDS = 0.012
-const AB_REPEAT_VALUE_CHANGE_ICON = AB_REPEAT_ICON
 /** Seeks closer together than this, such as repeated arrow key presses, form one jump. */
 const SEEK_HISTORY_JUMP_WINDOW_MS = 1000
-const SPONSORBLOCK_NOT_FOUND_REFETCH_RECENT_VIDEO_AGE_MS = 24 * 60 * 60 * 1000
-const SPONSORBLOCK_NOT_FOUND_REFETCH_MIN_DELAY_MS = 10000
-const SPONSORBLOCK_NOT_FOUND_REFETCH_MAX_DELAY_MS = 40000
-const SPONSORBLOCK_CATEGORIES = Object.freeze([
-  'sponsor',
-  'selfpromo',
-  'interaction',
-  'intro',
-  'outro',
-  'preview',
-  'hook',
-  'music_offtopic',
-  'filler',
-  'poi_highlight',
-])
-const SPONSORBLOCK_INFO_CATEGORIES = Object.freeze([...SPONSORBLOCK_CATEGORIES, 'exclusive_access'])
-const SPONSORBLOCK_INFO_ACTION_TYPES = Object.freeze(['skip', 'mute', 'full', 'poi'])
-const SPONSORBLOCK_PLAYBACK_ACTION_TYPES = Object.freeze(['skip', 'mute', 'poi'])
 const SABR_BACKOFF_PREVIEW_REFRESH_DELAY_MS = 150
 const FULL_WINDOW_ANIMATION_DURATION_MS = 400
-const FULLSCREEN_DOCK_PREFERRED_MIN_HEIGHT = 360
-const FULLSCREEN_DOCK_COMPACT_MIN_HEIGHT = 96
-const FULLSCREEN_DOCK_HEADER_SELECTOR = [
-  '.chapterOverlayHeader',
-  '.fullscreenMetadataHeader',
-  '.transcriptHeader',
-  '.sponsorBlockHeader',
-  '.liveChatDockHeader',
-  '.fullscreenCommentHeader',
-  '.playlistDockHeader',
-  '.queueHeader',
-  '.recommendationsDockHeader',
-].join(', ')
 
 // The UTF-8 characters "h", "t", "t", and "p".
 const HTTP_IN_HEX = 0x68747470
@@ -317,17 +263,6 @@ const shakaControlKeysToShortcuts = {
 
 /** @type {Map<string, string>} */
 const LOCALE_MAPPINGS = new Map(process.env.SHAKA_LOCALE_MAPPINGS)
-
-/**
- * The secondary caption language the user picked while its settings write is still pending.
- * The store commits the setting only after the write, but text track changes, in this player
- * or in one that replaces it, read it back right away. Shared, so a replacement player sees it too.
- * @type {string | null}
- */
-let pendingSecondaryCaptionLocale = null
-// Counts the picks, so an earlier write that settles late cannot clear a later pending pick,
-// even one of the same language. The settings store skips the commit of a superseded write.
-let secondaryCaptionLocalePicks = 0
 
 export default defineComponent({
   name: 'FtShakaVideoPlayer',
@@ -1068,82 +1003,30 @@ export default defineComponent({
         showFullscreenQueue.value || showFullscreenRecommendations.value ||
         (showChaptersOverlay.value && props.chapters.length > 0)
     })
-    const fullscreenDockLayoutOpen = ref(false)
-    let fullscreenDockLayoutFrame = null
-    /** @type {Animation | null} */
-    let fullscreenDockVideoAnimation = null
-    let fullscreenDockAnimationGeneration = 0
-
-    function cancelFullscreenDockVideoAnimation() {
-      fullscreenDockAnimationGeneration++
-      fullscreenDockVideoAnimation?.cancel()
-      fullscreenDockVideoAnimation = null
-    }
-
-    function getFullscreenDockVideoGeometry() {
-      const element = video.value
-      if (!element || !element.videoWidth || !element.videoHeight) return null
-      const bounds = element.getBoundingClientRect()
-      const fit = Math.min(bounds.width / element.videoWidth, bounds.height / element.videoHeight)
-      return {
-        width: element.videoWidth * fit,
-        x: bounds.left + bounds.width / 2,
-        y: bounds.top + bounds.height / 2,
-      }
-    }
-
-    // Commit the final layout once, then animate the fitted video on the
-    // compositor. Animating its width also reflows Shaka, captions, annotations
-    // and ResizeObservers on every frame, even when the dock only slides in.
-    watch(fullscreenDockLayoutOpen, async () => {
-      const before = getFullscreenDockVideoGeometry()
-      cancelFullscreenDockVideoAnimation()
-      const generation = fullscreenDockAnimationGeneration
-      if (!before || presentationModeChanging.value || isReducedMotionEnabled() ||
-        (!isFullscreen.value && !fullWindowEnabled.value)) return
-
-      await nextTick()
-      if (generation !== fullscreenDockAnimationGeneration || presentationModeChanging.value) return
-      const after = getFullscreenDockVideoGeometry()
-      if (!after || after.width <= 0) return
-      const scale = before.width / after.width
-      // Zoom/pan uses `transform`. Individual scale/translate keep that intact;
-      // compensate for scaling its translation around the element's centre.
-      const transform = new DOMMatrix(getComputedStyle(video.value).transform)
-      const x = before.x - after.x + transform.e * (1 - scale)
-      const y = before.y - after.y + transform.f * (1 - scale)
-      const animation = applyAnimationSpeed(video.value.animate([
-        { scale: String(scale), translate: `${x}px ${y}px` },
-        { scale: '1', translate: '0px 0px' },
-      ], { duration: 250, easing: 'ease' }))
-      fullscreenDockVideoAnimation = animation
-      animation.addEventListener('finish', () => {
-        if (fullscreenDockVideoAnimation === animation) fullscreenDockVideoAnimation = null
-      })
+    const {
+      expandCollapsedFullscreenDock,
+      fullscreenDockCanReorder,
+      fullscreenDockCanResize,
+      fullscreenDockLayoutOpen,
+      fullscreenDockOrder,
+      fullscreenDockReordering,
+      fullscreenDockResizing,
+      fullscreenDockStyle,
+      handleFullscreenDockHeaderDoubleClick,
+      handleFullscreenDockReorderPointerDown,
+      handleFullscreenDockResizeKeydown,
+      handleFullscreenDockResizePointerDown,
+      resetFullscreenDockHeights,
+    } = useFullscreenDocks({
+      container,
+      video,
+      fullscreenDockOpen,
+      isFullscreenDockOpen,
+      isFullscreen,
+      isFullWindow: () => fullWindowEnabled.value,
+      isPortraitLayout: () => portraitFullscreenDocks.value,
+      presentationModeChanging,
     })
-
-    watch(presentationModeChanging, changing => {
-      if (changing) cancelFullscreenDockVideoAnimation()
-    })
-
-    watch(fullscreenDockOpen, (open) => {
-      if (fullscreenDockLayoutFrame !== null) {
-        cancelAnimationFrame(fullscreenDockLayoutFrame)
-        fullscreenDockLayoutFrame = null
-      }
-
-      if (open) {
-        fullscreenDockLayoutOpen.value = true
-      } else {
-        // Paint the layout once after teleported dock content settles, then start the reverse transition.
-        fullscreenDockLayoutFrame = requestAnimationFrame(() => {
-          fullscreenDockLayoutFrame = requestAnimationFrame(() => {
-            fullscreenDockLayoutFrame = null
-            fullscreenDockLayoutOpen.value = false
-          })
-        })
-      }
-    }, { flush: 'post' })
     const chapterThumbnails = ref([])
     const currentChapterTitle = computed(() => {
       return props.chapters[props.currentChapterIndex]?.title ?? t('Chapters.Chapters')
@@ -1174,16 +1057,6 @@ export default defineComponent({
     }))
     const isInAnyPlaylist = computed(() => store.getters.getPlaylistVideoCounts.has(props.videoId))
 
-    const fullscreenDockOrder = reactive(['metadata', 'transcript', 'sponsorBlock', 'liveChat', 'comments', 'queue', 'playlist', 'recommendations', 'chapters'])
-    const fullscreenDockWeights = reactive(Object.fromEntries(fullscreenDockOrder.map(dock => [dock, 1])))
-    const fullscreenDockCollapsedState = Object.fromEntries(fullscreenDockOrder.map(dock => [dock, null]))
-    const fullscreenDockResizing = ref(false)
-    const fullscreenDockReordering = ref(false)
-    let resizingFullscreenDock = null
-    let resizingFullscreenDockWeightBefore = 0
-    let resizingFullscreenDockTotalWeight = 0
-    let resizingFullscreenDockBounds = null
-
     function isFullscreenDockOpen(dock) {
       switch (dock) {
         case 'metadata': return showFullscreenMetadata.value
@@ -1198,244 +1071,6 @@ export default defineComponent({
         default: return false
       }
     }
-
-    function getFullscreenOpenDocks(includeDock) {
-      const openDocks = fullscreenDockOrder.filter(isFullscreenDockOpen)
-
-      // Keep a closed dock in the slot it will enter so its transition stays
-      // horizontal while the currently open docks resize around it.
-      if (includeDock && !openDocks.includes(includeDock)) {
-        openDocks.push(includeDock)
-        openDocks.sort((a, b) => fullscreenDockOrder.indexOf(a) - fullscreenDockOrder.indexOf(b))
-      }
-
-      return openDocks
-    }
-
-    function fullscreenDockStyle(dock) {
-      if (portraitFullscreenDocks.value) return null
-      const openDocks = getFullscreenOpenDocks(dock)
-      const index = openDocks.indexOf(dock)
-      const totalWeight = openDocks.reduce((total, name) => total + fullscreenDockWeights[name], 0)
-      const weightBefore = openDocks
-        .slice(0, index)
-        .reduce((total, name) => total + fullscreenDockWeights[name], 0)
-      const weightAfter = totalWeight - weightBefore - fullscreenDockWeights[dock]
-
-      return {
-        insetBlockStart: index === 0
-          ? 'calc(var(--safe-area-inset-top, env(safe-area-inset-top, 0px)) + 12px)'
-          : `calc((100% - var(--fullscreen-actions-footer-space, 0px)) * ${weightBefore / totalWeight} + 6px)`,
-        insetBlockEnd: index === openDocks.length - 1
-          ? 'calc(var(--safe-area-inset-bottom, env(safe-area-inset-bottom, 0px)) + 12px + var(--fullscreen-actions-footer-space, 0px))'
-          : `calc((100% - var(--fullscreen-actions-footer-space, 0px)) * ${weightAfter / totalWeight} + var(--fullscreen-actions-footer-space, 0px) + 6px)`,
-      }
-    }
-
-    function getFullscreenDockBounds() {
-      const bounds = container.value.getBoundingClientRect()
-      const footerSpace = parseFloat(getComputedStyle(container.value).getPropertyValue('--fullscreen-actions-footer-space')) || 0
-      return { top: bounds.top, height: Math.max(1, bounds.height - footerSpace) }
-    }
-
-    function fullscreenDockCanResize(dock) {
-      if (portraitFullscreenDocks.value) return false
-      const openDocks = getFullscreenOpenDocks()
-      const index = openDocks.indexOf(dock)
-      return index >= 0 && index < openDocks.length - 1
-    }
-
-    function fullscreenDockCanReorder(dock) {
-      if (portraitFullscreenDocks.value) return false
-      const openDocks = getFullscreenOpenDocks()
-      return openDocks.length > 1 && openDocks.includes(dock)
-    }
-
-    function resetFullscreenDockHeights() {
-      for (const dock of fullscreenDockOrder) {
-        fullscreenDockWeights[dock] = 1
-        fullscreenDockCollapsedState[dock] = null
-      }
-    }
-
-    function handleFullscreenDockHeaderDoubleClick(event, dock) {
-      if (portraitFullscreenDocks.value) return
-      const target = event.target instanceof Element ? event.target : null
-      const header = target?.closest(FULLSCREEN_DOCK_HEADER_SELECTOR)
-      const interactiveTarget = target?.closest('button, a, input, select, textarea, [role="button"]')
-      if (!header || interactiveTarget || !event.currentTarget.contains(header)) {
-        return
-      }
-
-      const toggled = toggleFullscreenDockCollapsed(
-        getFullscreenOpenDocks(),
-        dock,
-        fullscreenDockWeights,
-        fullscreenDockCollapsedState,
-        getFullscreenDockBounds().height
-      )
-
-      if (toggled) {
-        event.preventDefault()
-      }
-    }
-
-    function setFullscreenDockBoundary(dock, firstWeight) {
-      const openDocks = getFullscreenOpenDocks()
-      const index = openDocks.indexOf(dock)
-      const nextDock = openDocks[index + 1]
-      if (!nextDock) {
-        return
-      }
-
-      const pairWeight = fullscreenDockWeights[dock] + fullscreenDockWeights[nextDock]
-      const totalWeight = openDocks.reduce((total, name) => total + fullscreenDockWeights[name], 0)
-      // Only enforce the comfortable minimum when every open dock can have
-      // it. Dense stacks keep the full header plus a small content sliver so
-      // dividers stay useful without clipping the header.
-      const panelChrome = FULLSCREEN_DOCK_OUTER_INSET + FULLSCREEN_DOCK_GAP / 2
-      const layoutHeight = getFullscreenDockBounds().height
-      const preferredMinimumFits = openDocks.length === 2 && layoutHeight >=
-        openDocks.length * FULLSCREEN_DOCK_PREFERRED_MIN_HEIGHT +
-        FULLSCREEN_DOCK_OUTER_INSET * 2 +
-        FULLSCREEN_DOCK_GAP * (openDocks.length - 1)
-      const minimumHeight = preferredMinimumFits
-        ? FULLSCREEN_DOCK_PREFERRED_MIN_HEIGHT
-        : FULLSCREEN_DOCK_COMPACT_MIN_HEIGHT
-      const minimumShare = minimumHeight + panelChrome
-      const minimumWeight = Math.min(
-        pairWeight / 2,
-        minimumShare / layoutHeight * totalWeight
-      )
-      const clampedWeight = Math.min(pairWeight - minimumWeight, Math.max(minimumWeight, firstWeight))
-      fullscreenDockWeights[dock] = clampedWeight
-      fullscreenDockWeights[nextDock] = pairWeight - clampedWeight
-      fullscreenDockCollapsedState[dock] = null
-      fullscreenDockCollapsedState[nextDock] = null
-    }
-
-    function handleFullscreenDockResizePointerDown(event, dock) {
-      if (event.button !== 0 || !fullscreenDockCanResize(dock)) {
-        return
-      }
-
-      const openDocks = getFullscreenOpenDocks()
-      const index = openDocks.indexOf(dock)
-      fullscreenDockResizing.value = true
-      resizingFullscreenDock = dock
-      resizingFullscreenDockWeightBefore = openDocks
-        .slice(0, index)
-        .reduce((total, name) => total + fullscreenDockWeights[name], 0)
-      resizingFullscreenDockTotalWeight = openDocks
-        .reduce((total, name) => total + fullscreenDockWeights[name], 0)
-      resizingFullscreenDockBounds = getFullscreenDockBounds()
-      window.addEventListener('pointermove', handleFullscreenDockResizePointerMove)
-      window.addEventListener('pointerup', stopFullscreenDockResize)
-      window.addEventListener('pointercancel', stopFullscreenDockResize)
-      event.preventDefault()
-    }
-
-    function handleFullscreenDockResizePointerMove(event) {
-      const pointerWeight = (event.clientY - resizingFullscreenDockBounds.top) /
-        resizingFullscreenDockBounds.height * resizingFullscreenDockTotalWeight
-      setFullscreenDockBoundary(resizingFullscreenDock, pointerWeight - resizingFullscreenDockWeightBefore)
-    }
-
-    function stopFullscreenDockResize() {
-      fullscreenDockResizing.value = false
-      resizingFullscreenDock = null
-      resizingFullscreenDockBounds = null
-      window.removeEventListener('pointermove', handleFullscreenDockResizePointerMove)
-      window.removeEventListener('pointerup', stopFullscreenDockResize)
-      window.removeEventListener('pointercancel', stopFullscreenDockResize)
-    }
-
-    onUnmounted(stopFullscreenDockResize)
-
-    function handleFullscreenDockResizeKeydown(event, dock) {
-      if (event.key !== 'ArrowUp' && event.key !== 'ArrowDown') {
-        return
-      }
-
-      const openDocks = getFullscreenOpenDocks()
-      const totalWeight = openDocks.reduce((total, name) => total + fullscreenDockWeights[name], 0)
-      const movement = (event.key === 'ArrowUp' ? -20 : 20) / getFullscreenDockBounds().height * totalWeight
-      setFullscreenDockBoundary(dock, fullscreenDockWeights[dock] + movement)
-      event.preventDefault()
-    }
-
-    let reorderingFullscreenDock = null
-    let reorderingFullscreenDockBounds = null
-
-    function handleFullscreenDockReorderPointerDown(event, dock) {
-      const target = event.target instanceof Element ? event.target : null
-      const header = target?.closest(FULLSCREEN_DOCK_HEADER_SELECTOR)
-      const interactiveTarget = target?.closest('button, a, input, select, textarea, [role="button"]')
-      if (
-        event.button !== 0 || !fullscreenDockCanReorder(dock) || !header ||
-        interactiveTarget || !event.currentTarget.contains(header)
-      ) {
-        return
-      }
-
-      fullscreenDockReordering.value = true
-      reorderingFullscreenDock = dock
-      reorderingFullscreenDockBounds = getFullscreenDockBounds()
-      window.addEventListener('pointermove', handleFullscreenDockReorderPointerMove)
-      window.addEventListener('pointerup', stopFullscreenDockReorder)
-      window.addEventListener('pointercancel', stopFullscreenDockReorder)
-      event.preventDefault()
-    }
-
-    function handleFullscreenDockReorderPointerMove(event) {
-      const openDocks = getFullscreenOpenDocks()
-      const currentIndex = openDocks.indexOf(reorderingFullscreenDock)
-      const otherDocks = openDocks.filter(dock => dock !== reorderingFullscreenDock)
-      // Hit-test against the target layout derived from the dock weights.
-      // Measuring the panels while they animate towards their new slots would
-      // force a layout pass per pointer move and oscillate around the pointer.
-      const bounds = reorderingFullscreenDockBounds
-      const totalWeight = openDocks.reduce((total, name) => total + fullscreenDockWeights[name], 0)
-      let insertionIndex = otherDocks.length
-      let weightBefore = 0
-      let otherIndex = 0
-      for (const dock of openDocks) {
-        if (dock !== reorderingFullscreenDock) {
-          const midpoint = bounds.top +
-            (weightBefore + fullscreenDockWeights[dock] / 2) / totalWeight * bounds.height
-          if (event.clientY < midpoint) {
-            insertionIndex = otherIndex
-            break
-          }
-          otherIndex++
-        }
-        weightBefore += fullscreenDockWeights[dock]
-      }
-      if (insertionIndex === currentIndex) {
-        return
-      }
-
-      const orderIndex = fullscreenDockOrder.indexOf(reorderingFullscreenDock)
-      fullscreenDockOrder.splice(orderIndex, 1)
-      if (insertionIndex === otherDocks.length) {
-        const lastOpenIndex = fullscreenDockOrder.indexOf(otherDocks.at(-1))
-        fullscreenDockOrder.splice(lastOpenIndex + 1, 0, reorderingFullscreenDock)
-      } else {
-        const nextOpenIndex = fullscreenDockOrder.indexOf(otherDocks[insertionIndex])
-        fullscreenDockOrder.splice(nextOpenIndex, 0, reorderingFullscreenDock)
-      }
-    }
-
-    function stopFullscreenDockReorder() {
-      fullscreenDockReordering.value = false
-      reorderingFullscreenDock = null
-      reorderingFullscreenDockBounds = null
-      window.removeEventListener('pointermove', handleFullscreenDockReorderPointerMove)
-      window.removeEventListener('pointerup', stopFullscreenDockReorder)
-      window.removeEventListener('pointercancel', stopFullscreenDockReorder)
-    }
-
-    onUnmounted(stopFullscreenDockReorder)
 
     function getShareTimestamp() {
       const currentTime = Math.floor(video.value?.currentTime ?? 0)
@@ -1743,10 +1378,7 @@ export default defineComponent({
           syncAndroidStatusBarVisibility()
         })
       } else {
-        if (controlPanelLayoutFrame !== null) {
-          cancelAnimationFrame(controlPanelLayoutFrame)
-          controlPanelLayoutFrame = null
-        }
+        cancelControlPanelLayout()
         handleTemporaryPlaybackRateFocusLoss()
         syncAndroidStatusBarVisibility()
       }
@@ -1845,42 +1477,23 @@ export default defineComponent({
     // Timing belongs to the current video, rather than the saved appearance settings.
     let captionTimingOffset = props.sabrReloadState?.captionTimingOffset ?? 0
 
-    const secondaryCaptionText = ref('')
-    const secondaryCaptionsAtTop = computed(() => captionSettings.value.anchor.startsWith('bottom'))
-    /** @type {{ url: string, label: string, language: string, mimeType: string } | null} */
-    let secondaryCaption = null
-    /** @type {import('../../helpers/player/secondary-captions').SecondaryCaptionCue[]} */
-    let secondaryCaptionCues = []
-    /** @type {AbortController | null} */
-    let secondaryCaptionAbortController = null
-    // Follows Shaka's caption area, which makes room for the visible controls and the fullscreen side dock
-    const secondaryCaptionsBox = ref({})
-    /** @type {ResizeObserver | null} */
-    let secondaryCaptionsBoxObserver = null
-    /** @type {HTMLElement | null} */
-    let observedTextContainer = null
-    onBeforeUnmount(() => {
-      secondaryCaptionAbortController?.abort()
-      secondaryCaptionsBoxObserver?.disconnect()
+    const {
+      getSecondaryCaption,
+      isShownAsMainCaption,
+      restoreSecondaryCaption,
+      secondaryCaptionsAtTop,
+      secondaryCaptionsBox,
+      secondaryCaptionText,
+      selectSecondaryCaption,
+      updateSecondaryCaptionText,
+    } = useSecondaryCaptions({
+      captionSettings,
+      container,
+      getCaptionTimingOffset: () => captionTimingOffset,
+      getPlayer: () => player,
+      props,
+      video,
     })
-
-    function observeSecondaryCaptionsBox() {
-      const textContainer = container.value?.querySelector('.shaka-text-container')
-      // Shaka replaces the container when it reloads, so follow the current one
-      if (!(textContainer instanceof HTMLElement) || textContainer === observedTextContainer) return
-
-      secondaryCaptionsBoxObserver ??= new ResizeObserver(() => {
-        if (!observedTextContainer) return
-        secondaryCaptionsBox.value = {
-          inset: `${observedTextContainer.offsetTop}px auto auto ${observedTextContainer.offsetLeft}px`,
-          inlineSize: `${observedTextContainer.offsetWidth}px`,
-          blockSize: `${observedTextContainer.offsetHeight}px`,
-        }
-      })
-      secondaryCaptionsBoxObserver.disconnect()
-      observedTextContainer = textContainer
-      secondaryCaptionsBoxObserver.observe(textContainer)
-    }
 
     function updateCaptionTiming(offset) {
       if (!Number.isFinite(offset)) return
@@ -2261,19 +1874,6 @@ export default defineComponent({
       return store.getters.getSponsorBlockShowSkippedToast
     })
 
-    const sponsorBlockEnableSubmission = computed(() => {
-      return !props.offline && store.getters.getSponsorBlockEnableSubmission
-    })
-
-    /** @type {import('vue').ComputedRef<number>} */
-    const sponsorBlockSkippedToastDuration = computed(() => {
-      return store.getters.getSponsorBlockSkippedToastDuration
-    })
-
-    const sponsorBlockSkippedToastDurationMs = computed(() => {
-      return Math.max(2, Math.min(15, sponsorBlockSkippedToastDuration.value)) * 1000
-    })
-
     const sponsorSkips = computed(() => {
       // save some work when sponsorblock is disabled
       if (!useSponsorBlock.value) {
@@ -2379,23 +1979,7 @@ export default defineComponent({
     let sponsorBlockSegments = []
     let sponsorBlockLoadedVideoId = null
     let sponsorBlockRequestGeneration = 0
-    const sponsorBlockInfoSegments = ref([])
-    const sponsorBlockInfoOpen = ref(props.sponsorBlockInfoOpen)
-    const sponsorBlockInfoLoading = ref(false)
-    const sponsorBlockContributionStats = ref(null)
-    const sponsorBlockContributionStatsError = ref(false)
-    const sponsorBlockContributionStatsLoaded = ref(false)
-    const sponsorBlockContributionStatsLoading = ref(false)
-    const sponsorBlockVotePending = ref(null)
-    const sponsorBlockUserVotes = reactive({})
-    let terminalSponsorBlockOutroStarted = false
     let sponsorBlockAverageVideoDuration = 0
-    const hasSponsorBlockMusicOfftopicSegment = ref(false)
-    const activeSponsorBlockHighlightSegment = ref(null)
-    let sponsorBlockHighlightLabelVisible = true
-    let sponsorBlockHighlightLabelRemainingMs = SPONSORBLOCK_HIGHLIGHT_LABEL_PLAYBACK_MS
-    let sponsorBlockHighlightLabelStartedAt = null
-    let sponsorBlockHighlightLabelTimeout = null
 
     /**
      * Yes a map would be much more suitable for this (unlike objects they retain the order that items were inserted),
@@ -2403,38 +1987,112 @@ export default defineComponent({
      * @type {import('vue').Ref<{uuid: string, translatedCategory: string, colors: string[], timeoutId: ReturnType<typeof setTimeout>|0, hideAt: number|null, hideRemainingMs: number, unskipped: boolean, countdownPaused: boolean, isHighlight: boolean, isMute: boolean, unskipTime: number|null}[]>}
      */
     const skippedSponsorBlockSegments = ref([])
-    const sponsorBlockToastEditingUuid = ref(null)
-    const sponsorBlockToastEditingSegment = computed(() => {
-      return sponsorBlockInfoSegments.value.find(segment => segment.uuid === sponsorBlockToastEditingUuid.value)
+    const {
+      sponsorBlockSubmission,
+      cancelSponsorBlockSkipSchedule,
+      changeSponsorBlockInfoSegmentCategory,
+      clampSponsorBlockToastEditorScroll,
+      clearSponsorBlockMuteSegments,
+      clearSponsorBlockNotFoundRefetchTimeout,
+      closeSponsorBlockInfo,
+      copyAndDownvoteSponsorBlockInfoSegment,
+      dismissPromptSponsorBlockSegment,
+      emitSponsorBlockInfoState,
+      emitTerminalSponsorBlockOutroStarted,
+      formatSponsorBlockToastCategories,
+      getSponsorBlockHighlightState,
+      getSponsorBlockPromptActionLabel,
+      getSponsorBlockPromptLabel,
+      getSponsorBlockPromptTimeLabel,
+      getSponsorBlockSeekBarTooltipLabel,
+      getSponsorBlockToastActionLabel,
+      getSponsorBlockToastColors,
+      getSponsorBlockToastLabel,
+      getSponsorBlockToastTimeLabel,
+      hasSponsorBlockMusicOfftopicSegment,
+      isSponsorBlockToastCountdownPaused,
+      pauseSponsorBlockHighlightLabelCountdown,
+      pauseSponsorBlockToastCountdown,
+      promptSponsorBlockSegments,
+      redoSkipSponsorBlockSegment,
+      refreshSponsorBlockContributionStats,
+      refreshSponsorBlockInfo,
+      removePromptSponsorBlockToast,
+      removeSponsorBlockToast,
+      resetSponsorBlockHighlightLabel,
+      resetSponsorBlockPlaybackState,
+      resumeSponsorBlockToastCountdown,
+      scheduleSponsorBlockNotFoundRefetch,
+      scheduleSponsorBlockSkip,
+      skipPromptSponsorBlockSegment,
+      skipSponsorBlockInfoSegment,
+      skipToSponsorBlockHighlight,
+      sponsorBlockContributionStatsLoaded,
+      sponsorBlockContributionStatsLoading,
+      sponsorBlockCurrentTime,
+      sponsorBlockDismissedPromptSegments,
+      sponsorBlockDoNotSkipSegments,
+      sponsorBlockEnableSubmission,
+      sponsorBlockInfoLoading,
+      sponsorBlockInfoOpen,
+      sponsorBlockInfoSegments,
+      sponsorBlockMuteController,
+      sponsorBlockToastEditingSegment,
+      sponsorBlockToastEditingUuid,
+      sponsorBlockVotePending,
+      startSponsorBlockHighlightLabelCountdown,
+      stopSponsorBlockToastTimer,
+      syncPromptSponsorBlockSegments,
+      syncSponsorBlockMuteSegments,
+      syncSponsorBlockPlaybackState,
+      toggleActiveSponsorBlockSkipState,
+      toggleSponsorBlockInfo,
+      toggleSponsorBlockToastEditing,
+      unskipSponsorBlockSegment,
+      updateSponsorBlockHighlightState,
+      upsertSkippedSponsorBlockToast,
+      voteOnSponsorBlockInfoSegment,
+    } = useSponsorBlockPlayback({
+      canSeek,
+      cancelFullscreenSponsorBlockRestore: () => {
+        restoreFullscreenSponsorBlock = false
+      },
+      container,
+      emit,
+      events,
+      getPlayer: () => player,
+      getRequestGeneration: () => sponsorBlockRequestGeneration,
+      getSegments: () => sponsorBlockSegments,
+      getUi: () => ui,
+      hardwareKeyboardAttached,
+      isLive,
+      locale,
+      props,
+      refreshSponsorBlockMarkers,
+      resetAccumulatedSeek: () => {
+        accumulatedSeekSeconds = 0
+      },
+      setAverageVideoDuration: (duration) => {
+        sponsorBlockAverageVideoDuration = duration
+      },
+      setCurrentTime,
+      setSegments: (segments) => {
+        sponsorBlockSegments = segments
+      },
+      setupSponsorBlock,
+      showOverlayControls,
+      skipSponsorBlockSegments,
+      skippedSponsorBlockSegments,
+      sponsorBlockShowSkippedToast,
+      sponsorSkips,
+      t,
+      useSponsorBlock,
+      video,
     })
-    const promptSponsorBlockSegments = ref([])
-    const sponsorBlockToastNow = ref(Date.now())
-    const sponsorBlockCurrentTime = ref(0)
-    const currentChapterEndSeconds = computed(() => {
-      if (isLive.value) return null
-      const currentTime = sponsorBlockCurrentTime.value
-      const chapter = props.chapters.find(({ startSeconds, endSeconds }) =>
-        startSeconds <= currentTime && currentTime < endSeconds)
-      return Number.isFinite(chapter?.endSeconds) ? chapter.endSeconds : null
-    })
-    let sponsorBlockToastTimeInterval = null
-    const manuallyMutedSponsorBlockSegments = new Set()
-    const sponsorBlockDoNotMuteSegments = new Set()
-    const notifiedSponsorBlockMuteSegments = new Set()
-    const sponsorBlockMuteController = createSponsorBlockMuteController({
-      getMuted: () => video.value?.muted ?? false,
-      setMuted: muted => {
-        if (video.value) {
-          video.value.muted = muted
-        }
-      }
-    })
-
     const {
       cancelCurrentSponsorBlockDraft,
       clearSponsorBlockDrafts,
       closeSponsorBlockSubmissionMenu,
-      copySponsorBlockSegmentToDraft,
       deleteSponsorBlockDraft,
       endSponsorBlockDraft,
       getSponsorBlockSubmissionVideoDuration,
@@ -2467,144 +2125,14 @@ export default defineComponent({
       updateSponsorBlockDraftCategory,
       updateSponsorBlockDraftEditField,
       updateSponsorBlockSubmissionState,
-    } = useSponsorBlockSubmission({
-      canSeek,
-      setCurrentTime,
-      events,
-      getPlayer: () => player,
-      isLive,
-      onSubmittedSegments: (submittedSegments) => {
-        const playbackSegments = submittedSegments.filter(segment => {
-          return SPONSORBLOCK_PLAYBACK_ACTION_TYPES.includes(segment.actionType)
-        })
-        sponsorBlockSegments = sponsorBlockSegments.concat(playbackSegments).sort((a, b) => a.startTime - b.startTime)
-        sponsorBlockInfoSegments.value = sponsorBlockInfoSegments.value
-          .concat(submittedSegments.map(segment => ({ ...segment, locked: 0, votes: 0 })))
-          .sort((a, b) => a.startTime - b.startTime)
-        scheduleSponsorBlockSkip()
-        emitSponsorBlockInfoState()
-        refreshSponsorBlockMarkers()
-        if (sponsorBlockInfoOpen.value) {
-          refreshSponsorBlockContributionStats()
-        } else {
-          sponsorBlockContributionStatsLoaded.value = false
-        }
-      },
-      props,
-      showOverlayControls,
-      sponsorBlockCurrentTime,
-      setSponsorBlockPreviewMuted: muted => sponsorBlockMuteController.setSourceActive('preview', muted),
-      t,
-      useSponsorBlock,
-      video,
+    } = sponsorBlockSubmission
+    const currentChapterEndSeconds = computed(() => {
+      if (isLive.value) return null
+      const currentTime = sponsorBlockCurrentTime.value
+      const chapter = props.chapters.find(({ startSeconds, endSeconds }) =>
+        startSeconds <= currentTime && currentTime < endSeconds)
+      return Number.isFinite(chapter?.endSeconds) ? chapter.endSeconds : null
     })
-
-    /**
-     * Segment UUIDs that the user has explicitly unskipped, mapped to the time range the user has to leave
-     * before they are auto-skipped again (the whole range of segments that were skipped together).
-     * @type {Map<string, { startTime: number, endTime: number }>}
-     */
-    let sponsorBlockDoNotSkipSegments = new Map()
-    /**
-     * Set of segment UUIDs whose prompt has been dismissed until playback leaves the segment.
-     * @type {Set<string>}
-     */
-    let sponsorBlockDismissedPromptSegments = new Set()
-    let sponsorBlockNotFoundRefetchTimeout = null
-    let sponsorBlockSkipScheduleTimeout = null
-    let sponsorBlockSkipScheduleInterval = null
-    let sponsorBlockSkipScheduleTaskController = null
-    // Identifies the boundary the pending schedule waits for, so timeupdates
-    // only reschedule after a seek, rate change or a different next segment.
-    let sponsorBlockSkipScheduleKey = null
-
-    function cancelSponsorBlockSkipSchedule() {
-      clearTimeout(sponsorBlockSkipScheduleTimeout)
-      clearInterval(sponsorBlockSkipScheduleInterval)
-      sponsorBlockSkipScheduleTaskController?.abort()
-      sponsorBlockSkipScheduleTimeout = null
-      sponsorBlockSkipScheduleInterval = null
-      sponsorBlockSkipScheduleTaskController = null
-      sponsorBlockSkipScheduleKey = null
-    }
-
-    function clearSponsorBlockNotFoundRefetchTimeout() {
-      if (sponsorBlockNotFoundRefetchTimeout !== null) {
-        clearTimeout(sponsorBlockNotFoundRefetchTimeout)
-        sponsorBlockNotFoundRefetchTimeout = null
-      }
-    }
-
-    function isRecentVideoForSponsorBlockRefetch() {
-      if (!Number.isFinite(props.published) || props.published <= 0) {
-        return false
-      }
-
-      const videoAgeMs = Date.now() - props.published
-      return videoAgeMs >= 0 && videoAgeMs <= SPONSORBLOCK_NOT_FOUND_REFETCH_RECENT_VIDEO_AGE_MS
-    }
-
-    function scheduleSponsorBlockNotFoundRefetch() {
-      clearSponsorBlockNotFoundRefetchTimeout()
-
-      if (
-        !useSponsorBlock.value ||
-        !isRecentVideoForSponsorBlockRefetch() ||
-        props.videoId === '' ||
-        sponsorBlockInfoSegments.value.length > 0
-      ) {
-        return
-      }
-
-      const videoId = props.videoId
-      const refetchDelayMs = SPONSORBLOCK_NOT_FOUND_REFETCH_MIN_DELAY_MS +
-        Math.random() * (SPONSORBLOCK_NOT_FOUND_REFETCH_MAX_DELAY_MS - SPONSORBLOCK_NOT_FOUND_REFETCH_MIN_DELAY_MS)
-
-      sponsorBlockNotFoundRefetchTimeout = setTimeout(() => {
-        sponsorBlockNotFoundRefetchTimeout = null
-
-        if (!ui || !player || props.videoId !== videoId || sponsorBlockInfoSegments.value.length > 0) {
-          return
-        }
-
-        refetchSponsorBlockSegmentsWhenNotFound()
-      }, refetchDelayMs)
-    }
-
-    async function refetchSponsorBlockSegmentsWhenNotFound() {
-      const videoId = props.videoId
-      const generation = sponsorBlockRequestGeneration
-      let segments, averageDuration
-
-      try {
-        ({ segments, averageDuration } = await getSponsorBlockSegments(
-          videoId,
-          SPONSORBLOCK_INFO_CATEGORIES,
-          SPONSORBLOCK_INFO_ACTION_TYPES
-        ))
-      } catch (e) {
-        console.error(e)
-        return
-      }
-
-      if (!ui || !player || generation !== sponsorBlockRequestGeneration || videoId !== props.videoId) {
-        return
-      }
-
-      if (segments.length > 0) {
-        sponsorBlockInfoSegments.value = segments
-        sponsorBlockSegments = segments.filter(segment => {
-          return SPONSORBLOCK_PLAYBACK_ACTION_TYPES.includes(segment.actionType) && sponsorSkips.value.seekBar.includes(segment.category)
-        })
-        sponsorBlockAverageVideoDuration = averageDuration
-        hasSponsorBlockMusicOfftopicSegment.value = segments.some(segment => segment.category === 'music_offtopic')
-        refreshSponsorBlockMarkers()
-        syncSponsorBlockPlaybackState()
-      } else {
-        scheduleSponsorBlockNotFoundRefetch()
-      }
-      emitSponsorBlockInfoState()
-    }
 
     async function setupSponsorBlock() {
       const videoId = props.videoId
@@ -2615,20 +2143,9 @@ export default defineComponent({
       let averageDuration = 0
       let refetchWhenNotFound = false
 
-      clearSponsorBlockNotFoundRefetchTimeout()
-      cancelSponsorBlockSkipSchedule()
-
-      // Reset the do-not-skip set for the new video
-      sponsorBlockDoNotSkipSegments = new Map()
-      sponsorBlockDismissedPromptSegments = new Set()
-      clearSponsorBlockMuteSegments()
       sponsorBlockSegments = []
-      sponsorBlockInfoSegments.value = []
-      terminalSponsorBlockOutroStarted = false
       sponsorBlockAverageVideoDuration = 0
-      hasSponsorBlockMusicOfftopicSegment.value = false
-      activeSponsorBlockHighlightSegment.value = null
-      updateSponsorBlockHighlightState(0)
+      resetSponsorBlockPlaybackState()
 
       sponsorBlockInfoLoading.value = true
       emitSponsorBlockInfoState()
@@ -2675,938 +2192,6 @@ export default defineComponent({
 
       refreshSponsorBlockMarkers()
       syncSponsorBlockPlaybackState()
-    }
-
-    function syncSponsorBlockPlaybackState() {
-      if (useSponsorBlock.value && canSeek()) {
-        const currentTime = video.value?.currentTime ?? 0
-        syncPromptSponsorBlockSegments(currentTime)
-        updateSponsorBlockHighlightState(currentTime)
-        syncSponsorBlockMuteSegments(currentTime, !props.sponsorBlockAutoSkipDisabled)
-        scheduleSponsorBlockSkip()
-      }
-    }
-
-    async function refreshSponsorBlockInfo() {
-      if (props.offline || sponsorBlockVotePending.value !== null) return
-      const refreshTasks = [setupSponsorBlock()]
-      if (sponsorBlockEnableSubmission.value) {
-        refreshTasks.push(refreshSponsorBlockContributionStats())
-      }
-      await Promise.all(refreshTasks)
-    }
-
-    async function refreshSponsorBlockContributionStats() {
-      if (!sponsorBlockEnableSubmission.value || sponsorBlockContributionStatsLoading.value) {
-        return
-      }
-
-      sponsorBlockContributionStatsLoading.value = true
-      sponsorBlockContributionStatsError.value = false
-      emitSponsorBlockInfoState()
-
-      try {
-        sponsorBlockContributionStats.value = await getSponsorBlockContributionStats()
-      } catch {
-        sponsorBlockContributionStatsError.value = true
-      } finally {
-        sponsorBlockContributionStatsLoaded.value = true
-        sponsorBlockContributionStatsLoading.value = false
-        emitSponsorBlockInfoState()
-      }
-    }
-
-    function emitSponsorBlockInfoState() {
-      const detail = {
-        open: sponsorBlockInfoOpen.value,
-        loading: sponsorBlockInfoLoading.value,
-        contributionStats: sponsorBlockContributionStats.value,
-        contributionStatsError: sponsorBlockContributionStatsError.value,
-        contributionStatsLoaded: sponsorBlockContributionStatsLoaded.value,
-        contributionStatsLoading: sponsorBlockContributionStatsLoading.value,
-        submissionEnabled: sponsorBlockEnableSubmission.value,
-        pendingUuid: sponsorBlockVotePending.value,
-        segments: sponsorBlockInfoSegments.value.map(segment => ({
-          ...segment,
-          color: getSponsorBlockInfoSegmentColor(segment.category),
-          timeLabel: formatSponsorBlockInfoSegmentTime(segment),
-          translatedCategory: translateSponsorBlockCategory(segment.category),
-          userVote: sponsorBlockUserVotes[segment.uuid] ?? null,
-        }))
-      }
-
-      emit('sponsorblock-info-change', detail)
-      events.dispatchEvent(new CustomEvent('sponsorBlockInfoStateChanged', { detail }))
-    }
-
-    function toggleSponsorBlockInfo() {
-      sponsorBlockInfoOpen.value = !sponsorBlockInfoOpen.value
-      if (
-        sponsorBlockInfoOpen.value &&
-        sponsorBlockEnableSubmission.value &&
-        !sponsorBlockContributionStatsLoaded.value &&
-        !sponsorBlockContributionStatsLoading.value
-      ) {
-        refreshSponsorBlockContributionStats()
-      }
-      if (!sponsorBlockInfoOpen.value) {
-        restoreFullscreenSponsorBlock = false
-      }
-      ui?.getControls().hideSettingsMenus()
-      showOverlayControls()
-      emitSponsorBlockInfoState()
-    }
-
-    function closeSponsorBlockInfo() {
-      sponsorBlockInfoOpen.value = false
-      restoreFullscreenSponsorBlock = false
-      emitSponsorBlockInfoState()
-    }
-
-    function getSponsorBlockInfoSegmentColor(category) {
-      return getSponsorBlockToastColor(category)
-    }
-
-    function formatSponsorBlockInfoTimestamp(seconds) {
-      const safeSeconds = Number.isFinite(seconds) ? Math.max(seconds, 0) : 0
-      const totalMilliseconds = Math.round(safeSeconds * 1000)
-      const milliseconds = String(totalMilliseconds % 1000).padStart(3, '0')
-      const totalSeconds = Math.floor(totalMilliseconds / 1000)
-      const secondsPart = String(totalSeconds % 60).padStart(2, '0')
-      const totalMinutes = Math.floor(totalSeconds / 60)
-      const minutesPart = totalMinutes % 60
-      const hours = Math.floor(totalMinutes / 60)
-
-      return hours > 0
-        ? `${hours}:${String(minutesPart).padStart(2, '0')}:${secondsPart}.${milliseconds}`
-        : `${minutesPart}:${secondsPart}.${milliseconds}`
-    }
-
-    function formatSponsorBlockInfoSegmentTime(segment) {
-      if (segment.actionType === 'full') {
-        return t('Video.Player.SponsorBlock.FullVideo')
-      }
-
-      const start = formatSponsorBlockInfoTimestamp(segment.startTime)
-      return isSponsorBlockPointSegment(segment)
-        ? start
-        : `${start} ${t('Video.Player.SponsorBlock.TimeDivider')} ${formatSponsorBlockInfoTimestamp(segment.endTime)}`
-    }
-
-    function getSponsorBlockVoteContribution(vote) {
-      if (vote === 1) return 1
-      if (vote === 0) return -1
-      return 0
-    }
-
-    async function voteOnSponsorBlockInfoSegment(uuid, vote, copyToDraft = false) {
-      if (!sponsorBlockEnableSubmission.value || sponsorBlockVotePending.value !== null) {
-        return
-      }
-
-      const segment = sponsorBlockInfoSegments.value.find(item => item.uuid === uuid)
-      if (!segment) {
-        return
-      }
-
-      const previousVote = sponsorBlockUserVotes[segment.uuid]
-      const videoId = props.videoId
-      const nextVote = !copyToDraft && previousVote === vote ? null : vote
-      const type = nextVote === null ? 20 : nextVote
-      sponsorBlockVotePending.value = segment.uuid
-      emitSponsorBlockInfoState()
-
-      try {
-        if (copyToDraft) {
-          if (!await copySponsorBlockSegmentToDraft(segment)) return
-          closeSponsorBlockInfo()
-          if (sponsorBlockToastEditingUuid.value === uuid) sponsorBlockToastEditingUuid.value = null
-          // Keep the original from interrupting inspection and preview of the corrected draft.
-          sponsorBlockSegments = sponsorBlockSegments.filter(item => item.uuid !== uuid)
-          refreshSponsorBlockToastSegments(uuid)
-          cancelSponsorBlockSkipSchedule()
-          refreshSponsorBlockMarkers()
-          syncSponsorBlockPlaybackState()
-          if (previousVote === 0) return
-        }
-        await voteOnSponsorBlockSegment(videoId, segment.uuid, type)
-        if (props.videoId !== videoId) return
-        const currentVotes = Number.isFinite(segment.votes) ? segment.votes : 0
-        segment.votes = currentVotes - getSponsorBlockVoteContribution(previousVote) +
-          getSponsorBlockVoteContribution(nextVote)
-
-        if (nextVote === null) {
-          delete sponsorBlockUserVotes[segment.uuid]
-        } else {
-          sponsorBlockUserVotes[segment.uuid] = nextVote
-        }
-      } catch (error) {
-        console.error(error)
-        showToast({ message: t('Video.Player.SponsorBlock.VoteFailed'), icon: ['fas', 'circle-exclamation'] })
-      } finally {
-        sponsorBlockVotePending.value = null
-        emitSponsorBlockInfoState()
-      }
-    }
-
-    async function changeSponsorBlockInfoSegmentCategory(uuid, category) {
-      if (!sponsorBlockEnableSubmission.value || sponsorBlockVotePending.value !== null) return
-      const segment = sponsorBlockInfoSegments.value.find(item => item.uuid === uuid)
-      if (!segment || segment.category === category ||
-        !getSponsorBlockCategoryVoteOptions(segment.actionType).includes(category)) return
-
-      const videoId = props.videoId
-      sponsorBlockVotePending.value = uuid
-      emitSponsorBlockInfoState()
-      try {
-        await voteOnSponsorBlockSegment(videoId, uuid, category)
-        if (props.videoId !== videoId) return
-        segment.category = category
-        hasSponsorBlockMusicOfftopicSegment.value = sponsorBlockInfoSegments.value.some(item => item.category === 'music_offtopic')
-        sponsorBlockSegments = sponsorBlockSegments.filter(item => item.uuid !== uuid)
-        if (SPONSORBLOCK_PLAYBACK_ACTION_TYPES.includes(segment.actionType) && sponsorSkips.value.seekBar.includes(category)) {
-          sponsorBlockSegments.push(segment)
-          sponsorBlockSegments.sort((a, b) => a.startTime - b.startTime)
-        }
-        refreshSponsorBlockToastSegments(uuid)
-        cancelSponsorBlockSkipSchedule()
-        refreshSponsorBlockMarkers()
-        syncSponsorBlockPlaybackState()
-        showToast({ message: t('Video.Player.SponsorBlock.CategoryVoteSuccess'), icon: ['fas', 'check'] })
-      } catch (error) {
-        console.error(error)
-        showToast({ message: t('Video.Player.SponsorBlock.VoteFailed'), icon: ['fas', 'circle-exclamation'] })
-      } finally {
-        sponsorBlockVotePending.value = null
-        emitSponsorBlockInfoState()
-      }
-    }
-
-    function copyAndDownvoteSponsorBlockInfoSegment(uuid) {
-      return voteOnSponsorBlockInfoSegment(uuid, 0, true)
-    }
-
-    function skipSponsorBlockInfoSegment(uuid) {
-      const segment = sponsorBlockInfoSegments.value.find(item => item.uuid === uuid)
-      if (!segment || !canSeek()) {
-        return
-      }
-
-      if (segment.actionType === 'mute') {
-        manuallyMutedSponsorBlockSegments.add(uuid)
-        const currentTime = video.value.currentTime
-        if (currentTime < segment.startTime || currentTime >= segment.endTime) {
-          accumulatedSeekSeconds = 0
-          video.value.currentTime = segment.startTime
-          sponsorBlockCurrentTime.value = segment.startTime
-        }
-        syncSponsorBlockMuteSegments(video.value.currentTime)
-        showOverlayControls()
-        return
-      }
-
-      const seekRange = player.seekRange()
-      accumulatedSeekSeconds = 0
-      video.value.currentTime = Math.min(
-        Math.max(getSponsorBlockSegmentSkipTarget(segment), seekRange.start),
-        seekRange.end
-      )
-      showOverlayControls()
-    }
-
-    function startSponsorBlockToastTimer() {
-      if (sponsorBlockToastTimeInterval !== null) {
-        return
-      }
-
-      sponsorBlockToastTimeInterval = setInterval(() => {
-        sponsorBlockToastNow.value = Date.now()
-      }, 250)
-    }
-
-    function stopSponsorBlockToastTimer() {
-      if (sponsorBlockToastTimeInterval !== null) {
-        clearInterval(sponsorBlockToastTimeInterval)
-        sponsorBlockToastTimeInterval = null
-      }
-    }
-
-    /**
-     * @param {string} uuid
-     */
-    function removeSponsorBlockToast(uuid) {
-      // also accepts any segment of a grouped toast
-      const index = skippedSponsorBlockSegments.value.findIndex(segment => segment.uuid === uuid || segment.groupUuids?.includes(uuid))
-      if (index !== -1) {
-        if (sponsorBlockToastEditingUuid.value === skippedSponsorBlockSegments.value[index].uuid) sponsorBlockToastEditingUuid.value = null
-        clearTimeout(skippedSponsorBlockSegments.value[index].timeoutId)
-        skippedSponsorBlockSegments.value.splice(index, 1)
-      }
-    }
-
-    /**
-     * @param {string} uuid
-     */
-    function removePromptSponsorBlockToast(uuid) {
-      const index = promptSponsorBlockSegments.value.findIndex(segment => segment.uuid === uuid)
-      if (index !== -1) {
-        promptSponsorBlockSegments.value.splice(index, 1)
-      }
-    }
-
-    /**
-     * @param {SponsorBlockCategory} category
-     * @returns {string}
-     */
-    function getSponsorBlockToastColor(category) {
-      const colorName = sponsorSkips.value.categoryData[category]?.color
-      return resolveColorValue(colorName, '#39be70')
-    }
-
-    /**
-     * One color per distinct category, in the order the categories are listed in the toast.
-     * @param {{ category: SponsorBlockCategory }[]} segments
-     * @returns {string[]}
-     */
-    function getSponsorBlockToastColors(segments) {
-      return [...new Set(segments.map(({ category }) => category))].map(getSponsorBlockToastColor)
-    }
-
-    /**
-     * @param {{ uuid: string, groupUuids?: string[], translatedCategory: string, colors: string[], isHighlight?: boolean, unskipTime?: number }} toast
-     */
-    function upsertSkippedSponsorBlockToast({ uuid, groupUuids = [uuid], translatedCategory, colors, isHighlight = false, unskipTime }) {
-      const hideAt = Date.now() + sponsorBlockSkippedToastDurationMs.value
-
-      // segments skipped together share one toast, so replace older toasts for any of them
-      skippedSponsorBlockSegments.value
-        .filter(skipped => skipped.uuid !== uuid && (skipped.groupUuids ?? [skipped.uuid]).some(groupUuid => groupUuids.includes(groupUuid)))
-        .forEach(skipped => removeSponsorBlockToast(skipped.uuid))
-
-      const existingSkip = skippedSponsorBlockSegments.value.find(skipped => skipped.uuid === uuid)
-
-      if (existingSkip) {
-        clearTimeout(existingSkip.timeoutId)
-        existingSkip.groupUuids = groupUuids
-        existingSkip.translatedCategory = translatedCategory
-        existingSkip.colors = colors
-        existingSkip.unskipped = false
-        existingSkip.hideRemainingMs = sponsorBlockSkippedToastDurationMs.value
-        existingSkip.isHighlight = isHighlight
-        existingSkip.isMute = false
-        existingSkip.unskipTime = unskipTime ?? null
-        // A toast under the pointer or focus stays until it is left, even when its segment is skipped again
-        if (existingSkip.countdownPaused) {
-          existingSkip.hideAt = null
-          existingSkip.timeoutId = 0
-          return
-        }
-        existingSkip.hideAt = hideAt
-        existingSkip.timeoutId = setTimeout(() => {
-          removeSponsorBlockToast(uuid)
-        }, sponsorBlockSkippedToastDurationMs.value)
-        return
-      }
-
-      skippedSponsorBlockSegments.value.push({
-        uuid,
-        groupUuids,
-        translatedCategory,
-        colors,
-        unskipped: false,
-        hideAt,
-        hideRemainingMs: sponsorBlockSkippedToastDurationMs.value,
-        countdownPaused: false,
-        isHighlight,
-        isMute: false,
-        unskipTime: unskipTime ?? null,
-        timeoutId: setTimeout(() => {
-          removeSponsorBlockToast(uuid)
-        }, sponsorBlockSkippedToastDurationMs.value)
-      })
-    }
-
-    /**
-     * @param {{ uuid: string, translatedCategory: string, color: string }} toast
-     */
-    function upsertMutedSponsorBlockToast({ uuid, translatedCategory, color }) {
-      const existingToast = skippedSponsorBlockSegments.value.find(skipped => skipped.uuid === uuid)
-
-      if (existingToast) {
-        clearTimeout(existingToast.timeoutId)
-        existingToast.translatedCategory = translatedCategory
-        existingToast.colors = [color]
-        existingToast.unskipped = !(video.value?.muted ?? true)
-        existingToast.hideAt = null
-        existingToast.hideRemainingMs = 0
-        existingToast.countdownPaused = false
-        existingToast.isHighlight = false
-        existingToast.isMute = true
-        existingToast.unskipTime = null
-        existingToast.timeoutId = 0
-        return
-      }
-
-      skippedSponsorBlockSegments.value.push({
-        uuid,
-        translatedCategory,
-        colors: [color],
-        unskipped: !(video.value?.muted ?? true),
-        hideAt: null,
-        hideRemainingMs: 0,
-        countdownPaused: false,
-        isHighlight: false,
-        isMute: true,
-        unskipTime: null,
-        timeoutId: 0
-      })
-    }
-
-    /**
-     * @param {{ category: SponsorBlockCategory }[]} segments
-     * @returns {string}
-     */
-    function formatSponsorBlockToastCategories(segments) {
-      const translatedCategories = [...new Set(segments.map(({ category }) => translateSponsorBlockCategory(category)))]
-      return new Intl.ListFormat(locale.value, { style: 'long', type: 'conjunction' }).format(translatedCategories)
-    }
-
-    /**
-     * @param {{ startTime: number, endTime: number }[]} segments
-     * @returns {{ startTime: number, endTime: number }}
-     */
-    function getSponsorBlockSegmentsRange(segments) {
-      return {
-        startTime: Math.min(...segments.map(segment => segment.startTime)),
-        endTime: Math.max(...segments.map(segment => segment.endTime))
-      }
-    }
-
-    /**
-     * Updates the toast containing a segment after segments were removed from or re-added to playback.
-     * @param {string} uuid
-     */
-    function refreshSponsorBlockToastSegments(uuid) {
-      const toast = skippedSponsorBlockSegments.value.find(item => item.uuid === uuid || item.groupUuids?.includes(uuid))
-      if (!toast) {
-        return
-      }
-
-      // describe the segments the toast still acts on, or drop it and its unskip state when none remain
-      const toastSegments = getSponsorBlockToastSegments(toast.uuid)
-      if (toastSegments.length === 0) {
-        (toast.groupUuids ?? [toast.uuid]).forEach(groupUuid => sponsorBlockDoNotSkipSegments.delete(groupUuid))
-        removeSponsorBlockToast(toast.uuid)
-        return
-      }
-
-      toast.translatedCategory = formatSponsorBlockToastCategories(toastSegments)
-      toast.colors = getSponsorBlockToastColors(toastSegments)
-      // an unskipped group stays unskipped until playback passes its remaining segments,
-      // keeping the original start so playback before them doesn't count as leaving the group
-      const previousRange = toastSegments.map(segment => sponsorBlockDoNotSkipSegments.get(segment.uuid)).find(Boolean)
-      if (previousRange) {
-        const range = { startTime: previousRange.startTime, endTime: getSponsorBlockSegmentsRange(toastSegments).endTime }
-        toast.groupUuids?.forEach(groupUuid => sponsorBlockDoNotSkipSegments.delete(groupUuid))
-        toastSegments.forEach(segment => sponsorBlockDoNotSkipSegments.set(segment.uuid, range))
-      }
-    }
-
-    /**
-     * Returns the segments a skipped toast stands for, as segments skipped in one go share a toast.
-     * @param {string} uuid
-     */
-    function getSponsorBlockToastSegments(uuid) {
-      const toastEntry = skippedSponsorBlockSegments.value.find(skipped => skipped.uuid === uuid)
-      const groupUuids = toastEntry?.groupUuids ?? [uuid]
-      return sponsorBlockSegments.filter(segment => groupUuids.includes(segment.uuid))
-    }
-
-    /**
-     * @param {string} uuid
-     * @returns {string}
-     */
-    function getSponsorBlockToastTimeLabel(uuid) {
-      const toastEntry = skippedSponsorBlockSegments.value.find(skipped => skipped.uuid === uuid)
-      const segments = getSponsorBlockToastSegments(uuid)
-
-      if (!toastEntry || segments.length === 0) {
-        return '0s'
-      }
-
-      const endTime = Math.max(...segments.map(segment => segment.endTime))
-      const remainingSeconds = toastEntry.unskipped || toastEntry.isMute
-        ? Math.max(endTime - sponsorBlockCurrentTime.value, 0)
-        : (toastEntry.countdownPaused
-            ? Math.max(toastEntry.hideRemainingMs, 0)
-            : Math.max((toastEntry.hideAt ?? 0) - sponsorBlockToastNow.value, 0)) / 1000
-
-      if (remainingSeconds < 60) {
-        return `${Math.ceil(remainingSeconds)}s`
-      }
-
-      return formatDurationAsTimestamp(Math.ceil(remainingSeconds))
-    }
-
-    /**
-     * @param {string} uuid
-     * @returns {boolean}
-     */
-    function isSponsorBlockToastCountdownPaused(uuid) {
-      const toastEntry = skippedSponsorBlockSegments.value.find(skipped => skipped.uuid === uuid)
-      return Boolean(toastEntry?.countdownPaused && !toastEntry.unskipped && !toastEntry.isMute)
-    }
-
-    /**
-     * @param {boolean} unskipped
-     * @param {string} uuid
-     * @returns {string}
-     */
-    function getSponsorBlockToastActionLabel(unskipped, uuid) {
-      const segment = sponsorBlockSegments.find(candidate => candidate.uuid === uuid)
-      const actionLabel = segment?.actionType === 'mute'
-        ? unskipped
-          ? t('Video.Player.SponsorBlock.MuteActionType')
-          : t('Video.Player.SponsorBlock.MuteToastUnmute')
-        : unskipped
-          ? t('Video.Player.SponsorBlock.SkipToastReskip')
-          : t('Video.Player.SponsorBlock.SkipToastUnskip')
-
-      const activeToast = getActiveSponsorBlockToast()
-      if (!hardwareKeyboardAttached.value || getActivePromptSponsorBlockToast() || activeToast?.uuid !== uuid) {
-        return actionLabel
-      }
-
-      return addKeyboardShortcutToActionTitle(
-        actionLabel,
-        t('Keys.enter')
-      )
-    }
-
-    function getSponsorBlockToastLabel(uuid, translatedCategory, isHighlight) {
-      if (isHighlight) {
-        return t('Video.Player.SponsorBlock.SkippedToHighlight')
-      }
-
-      const segment = sponsorBlockSegments.find(candidate => candidate.uuid === uuid)
-      return segment?.actionType === 'mute'
-        ? t('Video.Player.SponsorBlock.MutedSegment', { segmentCategory: translatedCategory })
-        : t('Video.Player.Skipped segment', { segmentCategory: translatedCategory })
-    }
-
-    /**
-     * @param {string} translatedCategory
-     * @returns {string}
-     */
-    function getSponsorBlockPromptLabel(translatedCategory, uuid) {
-      const segment = sponsorBlockSegments.find(candidate => candidate.uuid === uuid)
-      if (segment?.actionType === 'mute') {
-        return t('Video.Player.SponsorBlock.MutePrompt', { segmentCategory: translatedCategory })
-      }
-
-      return t('Video.Player.SponsorBlock.SkipPrompt', { segmentCategory: translatedCategory })
-    }
-
-    /**
-     * @param {string} uuid
-     * @returns {string}
-     */
-    function getSponsorBlockPromptActionLabel(uuid) {
-      const segment = sponsorBlockSegments.find(candidate => candidate.uuid === uuid)
-      const actionLabel = segment?.actionType === 'mute'
-        ? t('Video.Player.SponsorBlock.MuteActionType')
-        : t('Video.Player.SponsorBlock.SkipPromptAction')
-
-      if (!hardwareKeyboardAttached.value || getActivePromptSponsorBlockToast()?.uuid !== uuid) {
-        return actionLabel
-      }
-
-      return addKeyboardShortcutToActionTitle(
-        actionLabel,
-        t('Keys.enter')
-      )
-    }
-
-    /**
-     * @param {{ category: SponsorBlockCategory, startTime: number, endTime: number }} segment
-     * @returns {number}
-     */
-    function getSponsorBlockSegmentSkipTarget(segment) {
-      return isSponsorBlockPointSegment(segment) ? segment.startTime : segment.endTime
-    }
-
-    /**
-     * @param {{ category: SponsorBlockCategory, startTime: number, endTime: number }} segment
-     * @param {number} currentTime
-     * @returns {boolean}
-     */
-    function isSponsorBlockSegmentActiveForPrompt(segment, currentTime) {
-      if (isSponsorBlockPointSegment(segment)) {
-        return currentTime < segment.startTime
-      }
-
-      return currentTime >= segment.startTime && currentTime < segment.endTime
-    }
-
-    /**
-     * @param {string} uuid
-     * @returns {string}
-     */
-    function getSponsorBlockPromptTimeLabel(uuid) {
-      const segment = sponsorBlockSegments.find(seg => seg.uuid === uuid)
-      if (!segment) {
-        return '0s'
-      }
-
-      const remainingSeconds = Math.max(
-        getSponsorBlockSegmentSkipTarget(segment) - sponsorBlockCurrentTime.value,
-        0
-      )
-
-      if (remainingSeconds < 60) {
-        return `${Math.ceil(remainingSeconds)}s`
-      }
-
-      return formatDurationAsTimestamp(Math.ceil(remainingSeconds))
-    }
-
-    /**
-     * @returns {{uuid: string, translatedCategory: string, timeoutId: ReturnType<typeof setTimeout>|0, hideAt: number|null, unskipped: boolean}|null}
-     */
-    function getActiveSponsorBlockToast() {
-      if (skippedSponsorBlockSegments.value.length === 0) {
-        return null
-      }
-
-      return skippedSponsorBlockSegments.value[skippedSponsorBlockSegments.value.length - 1]
-    }
-
-    /**
-     * @returns {{ uuid: string, translatedCategory: string, color: string }|null}
-     */
-    function getActivePromptSponsorBlockToast() {
-      if (promptSponsorBlockSegments.value.length === 0) {
-        return null
-      }
-
-      return promptSponsorBlockSegments.value[promptSponsorBlockSegments.value.length - 1]
-    }
-
-    /**
-     * @param {{ uuid: string, translatedCategory: string, color: string }} toast
-     */
-    function upsertPromptSponsorBlockToast({ uuid, translatedCategory, color }) {
-      const existingPrompt = promptSponsorBlockSegments.value.find(prompt => prompt.uuid === uuid)
-
-      if (existingPrompt) {
-        existingPrompt.translatedCategory = translatedCategory
-        existingPrompt.color = color
-        return
-      }
-
-      promptSponsorBlockSegments.value.push({
-        uuid,
-        translatedCategory,
-        color
-      })
-    }
-
-    /**
-     * @param {string} uuid
-     */
-    function dismissPromptSponsorBlockSegment(uuid) {
-      sponsorBlockDismissedPromptSegments.add(uuid)
-      removePromptSponsorBlockToast(uuid)
-    }
-
-    /**
-     * @param {string} uuid
-     * @returns {boolean}
-     */
-    function skipPromptSponsorBlockSegment(uuid) {
-      const segment = sponsorBlockSegments.find(seg => seg.uuid === uuid)
-      if (!segment || isSponsorBlockPointSegment(segment) || !canSeek()) {
-        return false
-      }
-
-      sponsorBlockDismissedPromptSegments.add(uuid)
-      removePromptSponsorBlockToast(uuid)
-
-      if (segment.actionType === 'mute') {
-        manuallyMutedSponsorBlockSegments.add(uuid)
-        syncSponsorBlockMuteSegments(video.value.currentTime)
-        return true
-      }
-
-      const seekRange = player.seekRange()
-      const targetTime = Math.min(
-        Math.max(getSponsorBlockSegmentSkipTarget(segment), seekRange.start),
-        seekRange.end
-      )
-      accumulatedSeekSeconds = 0
-      video.value.currentTime = targetTime
-      sponsorBlockCurrentTime.value = targetTime
-
-      if (sponsorBlockShowSkippedToast.value) {
-        upsertSkippedSponsorBlockToast({
-          uuid,
-          translatedCategory: translateSponsorBlockCategory(segment.category),
-          colors: [getSponsorBlockToastColor(segment.category)]
-        })
-      }
-
-      return true
-    }
-
-    function skipToSponsorBlockHighlight() {
-      const segment = activeSponsorBlockHighlightSegment.value
-      if (!segment || !canSeek()) {
-        return false
-      }
-
-      const unskipTime = video.value.currentTime
-      const seekRange = player.seekRange()
-      const targetTime = Math.min(
-        Math.max(segment.startTime, seekRange.start),
-        seekRange.end
-      )
-      accumulatedSeekSeconds = 0
-      video.value.currentTime = targetTime
-      sponsorBlockCurrentTime.value = targetTime
-      updateSponsorBlockHighlightState(targetTime)
-
-      if (sponsorBlockShowSkippedToast.value) {
-        upsertSkippedSponsorBlockToast({
-          uuid: segment.uuid,
-          translatedCategory: translateSponsorBlockCategory(segment.category),
-          colors: [getSponsorBlockToastColor(segment.category)],
-          isHighlight: true,
-          unskipTime
-        })
-      }
-
-      showOverlayControls()
-      return true
-    }
-
-    function toggleActiveSponsorBlockSkipState() {
-      const promptToastEntry = getActivePromptSponsorBlockToast()
-      const toastEntry = getActiveSponsorBlockToast()
-
-      const targets = resolveSponsorBlockEnterTargets(
-        !!promptToastEntry,
-        !!toastEntry,
-        !!activeSponsorBlockHighlightSegment.value
-      )
-
-      // a target can turn out to be a no-op (e.g. a toast whose segment vanished on a SponsorBlock
-      // refresh), so fall through to the next one instead of swallowing the key press
-      for (const target of targets) {
-        let handled = false
-
-        switch (target) {
-          case 'prompt':
-            handled = skipPromptSponsorBlockSegment(promptToastEntry.uuid)
-            break
-          case 'toast':
-            handled = toastEntry.unskipped
-              ? redoSkipSponsorBlockSegment(toastEntry.uuid)
-              : unskipSponsorBlockSegment(toastEntry.uuid)
-            break
-          case 'highlight':
-            handled = skipToSponsorBlockHighlight()
-            break
-        }
-
-        if (handled) {
-          return true
-        }
-      }
-
-      return false
-    }
-
-    /**
-     * @param {number} currentTime
-     */
-    function syncPromptSponsorBlockSegments(currentTime) {
-      const { promptSkip } = sponsorSkips.value
-
-      if (promptSkip.size === 0) {
-        promptSponsorBlockSegments.value = []
-        return
-      }
-
-      const activePromptUUIDs = new Set()
-
-      for (const uuid of sponsorBlockDismissedPromptSegments) {
-        const segment = sponsorBlockSegments.find(seg => seg.uuid === uuid)
-        if (!segment || !isSponsorBlockSegmentActiveForPrompt(segment, currentTime)) {
-          sponsorBlockDismissedPromptSegments.delete(uuid)
-        }
-      }
-
-      sponsorBlockSegments.forEach(segment => {
-        if (isSponsorBlockPointSegment(segment) || !promptSkip.has(segment.category) || sponsorBlockDoNotSkipSegments.has(segment.uuid)) {
-          return
-        }
-
-        if (!isSponsorBlockSegmentActiveForPrompt(segment, currentTime)) {
-          return
-        }
-
-        activePromptUUIDs.add(segment.uuid)
-
-        if (sponsorBlockDismissedPromptSegments.has(segment.uuid)) {
-          return
-        }
-
-        upsertPromptSponsorBlockToast({
-          uuid: segment.uuid,
-          translatedCategory: translateSponsorBlockCategory(segment.category),
-          color: getSponsorBlockToastColor(segment.category)
-        })
-      })
-
-      promptSponsorBlockSegments.value
-        .filter(segment => !activePromptUUIDs.has(segment.uuid))
-        .forEach(segment => removePromptSponsorBlockToast(segment.uuid))
-    }
-
-    /**
-     * Last state sent to the highlight button. Timeupdates only dispatch when
-     * it changes; rebuilt buttons start from it.
-     * @type {{ visible: boolean, labelVisible: boolean, shortcutAvailable: boolean } | null}
-     */
-    let sponsorBlockHighlightState = null
-
-    /**
-     * @param {number} currentTime
-     */
-    function updateSponsorBlockHighlightState(currentTime = sponsorBlockCurrentTime.value) {
-      const { promptSkip } = sponsorSkips.value
-      const nextHighlightSegment = promptSkip.has('poi_highlight')
-        ? sponsorBlockSegments.find(segment => {
-          return isSponsorBlockPointSegment(segment) &&
-            segment.category === 'poi_highlight' &&
-            segment.startTime - currentTime > 0.5
-        }) ?? null
-        : null
-
-      activeSponsorBlockHighlightSegment.value = nextHighlightSegment
-      const state = {
-        visible: nextHighlightSegment !== null,
-        labelVisible: sponsorBlockHighlightLabelVisible,
-        shortcutAvailable: resolveSponsorBlockEnterTarget(
-          !!getActivePromptSponsorBlockToast(),
-          !!getActiveSponsorBlockToast(),
-          nextHighlightSegment !== null
-        ) === 'highlight'
-      }
-      if (
-        sponsorBlockHighlightState?.visible === state.visible &&
-        sponsorBlockHighlightState.labelVisible === state.labelVisible &&
-        sponsorBlockHighlightState.shortcutAvailable === state.shortcutAvailable
-      ) {
-        return
-      }
-      sponsorBlockHighlightState = state
-      events.dispatchEvent(new CustomEvent('sponsorBlockHighlightStateChanged', { detail: state }))
-    }
-
-    // the highlight button only advertises the Enter shortcut while no toast is claiming it
-    watch(
-      () => skippedSponsorBlockSegments.value.length > 0 || promptSponsorBlockSegments.value.length > 0,
-      () => {
-        if (activeSponsorBlockHighlightSegment.value) {
-          updateSponsorBlockHighlightState()
-        }
-      }
-    )
-
-    function pauseSponsorBlockHighlightLabelCountdown() {
-      if (sponsorBlockHighlightLabelStartedAt === null) {
-        return
-      }
-
-      clearTimeout(sponsorBlockHighlightLabelTimeout)
-      sponsorBlockHighlightLabelTimeout = null
-      sponsorBlockHighlightLabelRemainingMs = Math.max(
-        sponsorBlockHighlightLabelRemainingMs - (Date.now() - sponsorBlockHighlightLabelStartedAt),
-        0
-      )
-      sponsorBlockHighlightLabelStartedAt = null
-    }
-
-    function startSponsorBlockHighlightLabelCountdown() {
-      if (!sponsorBlockHighlightLabelVisible || sponsorBlockHighlightLabelStartedAt !== null) {
-        return
-      }
-
-      sponsorBlockHighlightLabelStartedAt = Date.now()
-      sponsorBlockHighlightLabelTimeout = setTimeout(() => {
-        sponsorBlockHighlightLabelVisible = false
-        sponsorBlockHighlightLabelRemainingMs = 0
-        sponsorBlockHighlightLabelStartedAt = null
-        sponsorBlockHighlightLabelTimeout = null
-        updateSponsorBlockHighlightState()
-      }, sponsorBlockHighlightLabelRemainingMs)
-    }
-
-    function resetSponsorBlockHighlightLabel() {
-      clearTimeout(sponsorBlockHighlightLabelTimeout)
-      sponsorBlockHighlightLabelVisible = true
-      sponsorBlockHighlightLabelRemainingMs = SPONSORBLOCK_HIGHLIGHT_LABEL_PLAYBACK_MS
-      sponsorBlockHighlightLabelStartedAt = null
-      sponsorBlockHighlightLabelTimeout = null
-      updateSponsorBlockHighlightState()
-    }
-
-    /**
-     * @param {string} uuid
-     */
-    function pauseSponsorBlockToastCountdown(uuid) {
-      const toastEntry = skippedSponsorBlockSegments.value.find(skipped => skipped.uuid === uuid)
-      if (!toastEntry || toastEntry.unskipped || toastEntry.isMute || toastEntry.countdownPaused) {
-        return
-      }
-
-      clearTimeout(toastEntry.timeoutId)
-      toastEntry.hideRemainingMs = Math.max((toastEntry.hideAt ?? 0) - Date.now(), 0)
-      toastEntry.hideAt = null
-      toastEntry.timeoutId = 0
-      toastEntry.countdownPaused = true
-    }
-
-    function toggleSponsorBlockToastEditing(uuid) {
-      if (!sponsorBlockEnableSubmission.value || sponsorBlockVotePending.value !== null) return
-      if (!sponsorBlockInfoSegments.value.some(segment => segment.uuid === uuid)) return
-      sponsorBlockToastEditingUuid.value = sponsorBlockToastEditingUuid.value === uuid ? null : uuid
-      if (sponsorBlockToastEditingUuid.value === uuid) pauseSponsorBlockToastCountdown(uuid)
-    }
-
-    function clampSponsorBlockToastEditorScroll() {
-      nextTick(() => {
-        const scroller = container.value?.querySelector('.sponsorBlockToastEditor')
-        if (scroller) clampOverlayScrollTop(scroller, scroller.querySelector('.sponsorBlockEditActions'))
-      })
-    }
-
-    /**
-     * @param {string} uuid
-     */
-    function resumeSponsorBlockToastCountdown(uuid) {
-      if (sponsorBlockToastEditingUuid.value === uuid) return
-      const toastEntry = skippedSponsorBlockSegments.value.find(skipped => skipped.uuid === uuid)
-      if (!toastEntry || toastEntry.unskipped || toastEntry.isMute || !toastEntry.countdownPaused) {
-        return
-      }
-
-      toastEntry.hideAt = Date.now() + toastEntry.hideRemainingMs
-      toastEntry.timeoutId = setTimeout(() => {
-        removeSponsorBlockToast(uuid)
-      }, toastEntry.hideRemainingMs)
-      toastEntry.countdownPaused = false
     }
 
     /**
@@ -3691,327 +2276,6 @@ export default defineComponent({
           colors: getSponsorBlockToastColors(skippedSegments)
         })
       }
-    }
-
-    function getNextSponsorBlockAutoSkipSegment(currentTime) {
-      const { autoSkip } = sponsorSkips.value
-
-      return sponsorBlockSegments.find(segment =>
-        segment.actionType === 'skip' &&
-        !isSponsorBlockPointSegment(segment) &&
-        !sponsorBlockDoNotSkipSegments.has(segment.uuid) &&
-        autoSkip.has(segment.category) &&
-        segment.startTime > currentTime &&
-        segment.endTime > segment.startTime
-      ) ?? null
-    }
-
-    function startSponsorBlockSkipPolling(segment) {
-      function checkBoundary() {
-        const videoElement = video.value
-        if (!videoElement || videoElement.paused || videoElement.ended) {
-          cancelSponsorBlockSkipSchedule()
-          return false
-        }
-
-        const currentTime = videoElement.currentTime
-        if (currentTime < segment.startTime) {
-          const remainingMs = (segment.startTime - currentTime) * 1000 / videoElement.playbackRate
-          if (remainingMs > SPONSORBLOCK_SKIP_SCHEDULE_LEAD_MS) {
-            // Woke too early (e.g. playback stalled): wait for the same boundary again.
-            cancelSponsorBlockSkipSchedule()
-            scheduleSponsorBlockSkip()
-            return false
-          }
-          return true
-        }
-
-        cancelSponsorBlockSkipSchedule()
-        skipSponsorBlockSegments(currentTime)
-        scheduleSponsorBlockSkip()
-        return false
-      }
-
-      function scheduleTaskCheck() {
-        return scheduleSponsorBlockSkipTask(() => {
-          if (checkBoundary()) {
-            scheduleTaskCheck()
-          }
-        }, SPONSORBLOCK_SKIP_POLL_INTERVAL_MS)
-      }
-
-      if (!scheduleTaskCheck()) {
-        sponsorBlockSkipScheduleInterval = setInterval(checkBoundary, SPONSORBLOCK_SKIP_POLL_INTERVAL_MS)
-      }
-    }
-
-    function scheduleSponsorBlockSkipTask(callback, delayMs) {
-      if (typeof window.scheduler?.postTask !== 'function') {
-        return false
-      }
-
-      const controller = sponsorBlockSkipScheduleTaskController ?? new AbortController()
-      sponsorBlockSkipScheduleTaskController = controller
-      window.scheduler.postTask(callback, {
-        delay: delayMs,
-        priority: 'user-blocking',
-        signal: controller.signal
-      }).catch((error) => {
-        if (error !== controller.signal.reason) {
-          console.error(error)
-        }
-      })
-      return true
-    }
-
-    function scheduleSponsorBlockSkip() {
-      const videoElement = video.value
-      if (
-        !useSponsorBlock.value ||
-        props.sponsorBlockAutoSkipDisabled ||
-        !videoElement ||
-        videoElement.paused ||
-        videoElement.ended ||
-        !Number.isFinite(videoElement.playbackRate) ||
-        videoElement.playbackRate <= 0 ||
-        sponsorBlockSegments.length === 0 ||
-        !canSeek()
-      ) {
-        cancelSponsorBlockSkipSchedule()
-        return
-      }
-
-      const segment = getNextSponsorBlockAutoSkipSegment(videoElement.currentTime)
-      if (!segment) {
-        cancelSponsorBlockSkipSchedule()
-        return
-      }
-
-      // Seeks and pauses cancel the schedule, so an unchanged key means the
-      // pending timer still fires at the right time.
-      const scheduleKey = `${segment.uuid}:${segment.startTime}:${videoElement.playbackRate}`
-      if (scheduleKey === sponsorBlockSkipScheduleKey) {
-        return
-      }
-      cancelSponsorBlockSkipSchedule()
-      sponsorBlockSkipScheduleKey = scheduleKey
-
-      const delayMs = (segment.startTime - videoElement.currentTime) * 1000 / videoElement.playbackRate
-      if (delayMs <= SPONSORBLOCK_SKIP_SCHEDULE_LEAD_MS) {
-        startSponsorBlockSkipPolling(segment)
-        return
-      }
-
-      if (!scheduleSponsorBlockSkipTask(
-        () => startSponsorBlockSkipPolling(segment),
-        delayMs - SPONSORBLOCK_SKIP_SCHEDULE_LEAD_MS
-      )) {
-        sponsorBlockSkipScheduleTimeout = setTimeout(() => {
-          sponsorBlockSkipScheduleTimeout = null
-          startSponsorBlockSkipPolling(segment)
-        }, delayMs - SPONSORBLOCK_SKIP_SCHEDULE_LEAD_MS)
-      }
-    }
-
-    function syncSponsorBlockMuteSegments(currentTime, autoMuteEnabled = true) {
-      const activeMuteSegments = new Set()
-
-      for (const uuid of manuallyMutedSponsorBlockSegments) {
-        const segment = sponsorBlockSegments.find(candidate => candidate.uuid === uuid)
-        if (!segment || currentTime < segment.startTime || currentTime >= segment.endTime) {
-          manuallyMutedSponsorBlockSegments.delete(uuid)
-        }
-      }
-
-      for (const uuid of sponsorBlockDoNotMuteSegments) {
-        const segment = sponsorBlockSegments.find(candidate => candidate.uuid === uuid)
-        if (!segment || currentTime < segment.startTime || currentTime >= segment.endTime) {
-          sponsorBlockDoNotMuteSegments.delete(uuid)
-        }
-      }
-
-      sponsorBlockSegments.forEach(segment => {
-        const isActive = segment.actionType === 'mute' &&
-          currentTime >= segment.startTime &&
-          currentTime < segment.endTime &&
-          (manuallyMutedSponsorBlockSegments.has(segment.uuid) ||
-            sponsorBlockDoNotMuteSegments.has(segment.uuid) ||
-            (autoMuteEnabled && sponsorSkips.value.autoSkip.has(segment.category)))
-
-        if (!isActive) {
-          return
-        }
-
-        activeMuteSegments.add(segment.uuid)
-      })
-
-      for (const uuid of notifiedSponsorBlockMuteSegments) {
-        if (!activeMuteSegments.has(uuid)) {
-          notifiedSponsorBlockMuteSegments.delete(uuid)
-          removeSponsorBlockToast(uuid)
-        }
-      }
-
-      const shouldMute = sponsorBlockSegments.some(segment => {
-        return activeMuteSegments.has(segment.uuid) &&
-          !sponsorBlockDoNotMuteSegments.has(segment.uuid)
-      })
-
-      sponsorBlockMuteController.setSourceActive('segments', activeMuteSegments.size > 0)
-      sponsorBlockMuteController.setSourceSuppressed('segments', !shouldMute)
-
-      sponsorBlockSegments.forEach(segment => {
-        if (!activeMuteSegments.has(segment.uuid) ||
-            !sponsorBlockShowSkippedToast.value ||
-            notifiedSponsorBlockMuteSegments.has(segment.uuid)) {
-          return
-        }
-
-        notifiedSponsorBlockMuteSegments.add(segment.uuid)
-        upsertMutedSponsorBlockToast({
-          uuid: segment.uuid,
-          translatedCategory: translateSponsorBlockCategory(segment.category),
-          color: getSponsorBlockToastColor(segment.category)
-        })
-      })
-    }
-
-    function clearSponsorBlockMuteSegments(preserveDecisions = false) {
-      if (!preserveDecisions) {
-        manuallyMutedSponsorBlockSegments.clear()
-        sponsorBlockDoNotMuteSegments.clear()
-      }
-      notifiedSponsorBlockMuteSegments.clear()
-      skippedSponsorBlockSegments.value
-        .filter(segment => segment.isMute)
-        .forEach(segment => removeSponsorBlockToast(segment.uuid))
-      sponsorBlockMuteController.setSourceActive('segments', false)
-    }
-
-    /**
-     * Unskips a SponsorBlock segment by seeking back to its start time
-     * and preventing it from being auto-skipped again until the user leaves the segment.
-     * @param {string} uuid - The UUID of the segment to unskip
-     * @returns {boolean} whether anything was actually unskipped
-     */
-    function unskipSponsorBlockSegment(uuid) {
-      // a grouped toast keeps working when its first segment was removed (e.g. after a category change)
-      const segment = getSponsorBlockToastSegments(uuid)[0]
-      if (!segment) {
-        return false
-      }
-
-      const toastEntry = skippedSponsorBlockSegments.value.find(skipped => skipped.uuid === uuid)
-
-      if (segment.actionType === 'mute') {
-        sponsorBlockDoNotMuteSegments.add(uuid)
-        manuallyMutedSponsorBlockSegments.delete(uuid)
-        syncSponsorBlockMuteSegments(video.value.currentTime, !props.sponsorBlockAutoSkipDisabled)
-        if (toastEntry) {
-          toastEntry.unskipped = true
-        }
-        return true
-      }
-
-      if (isSponsorBlockPointSegment(segment)) {
-        if (!toastEntry?.isHighlight || toastEntry.unskipTime === null || !canSeek()) {
-          return false
-        }
-
-        const seekRange = player.seekRange()
-        const targetTime = Math.min(
-          Math.max(toastEntry.unskipTime, seekRange.start),
-          seekRange.end
-        )
-        accumulatedSeekSeconds = 0
-        video.value.currentTime = targetTime
-        sponsorBlockCurrentTime.value = targetTime
-        removeSponsorBlockToast(uuid)
-        updateSponsorBlockHighlightState(targetTime)
-        return true
-      }
-
-      const groupSegments = getSponsorBlockToastSegments(uuid)
-      const range = getSponsorBlockSegmentsRange(groupSegments)
-      groupSegments.forEach(groupSegment => {
-        sponsorBlockDoNotSkipSegments.set(groupSegment.uuid, range)
-        sponsorBlockDismissedPromptSegments.add(groupSegment.uuid)
-        removePromptSponsorBlockToast(groupSegment.uuid)
-      })
-
-      if (canSeek()) {
-        const seekRange = player.seekRange()
-        const targetTime = Math.max(range.startTime, seekRange.start)
-        accumulatedSeekSeconds = 0
-        video.value.currentTime = targetTime
-        sponsorBlockCurrentTime.value = targetTime
-      }
-
-      // Update the toast entry to show it's been unskipped
-      // Keep showing it for the duration of the segment (no timeout)
-      if (toastEntry) {
-        clearTimeout(toastEntry.timeoutId)
-        toastEntry.unskipped = true
-        toastEntry.hideAt = null
-        toastEntry.hideRemainingMs = 0
-        toastEntry.countdownPaused = false
-        toastEntry.timeoutId = 0
-      }
-
-      return true
-    }
-
-    /**
-     * Re-skips a SponsorBlock segment that was previously unskipped,
-     * seeking to the end of the segment and restoring auto-skip behavior.
-     * @param {string} uuid - The UUID of the segment to re-skip
-     * @returns {boolean} whether anything was actually re-skipped
-     */
-    function redoSkipSponsorBlockSegment(uuid) {
-      const segment = getSponsorBlockToastSegments(uuid)[0]
-      if (!segment || isSponsorBlockPointSegment(segment)) {
-        return false
-      }
-
-      if (segment.actionType === 'mute') {
-        sponsorBlockDoNotMuteSegments.delete(uuid)
-        manuallyMutedSponsorBlockSegments.add(uuid)
-        syncSponsorBlockMuteSegments(video.value.currentTime, !props.sponsorBlockAutoSkipDisabled)
-        sponsorBlockMuteController.enforceMuted()
-        const toastEntry = skippedSponsorBlockSegments.value.find(skipped => skipped.uuid === uuid)
-        if (toastEntry) {
-          toastEntry.unskipped = false
-        }
-        return true
-      }
-
-      const groupSegments = getSponsorBlockToastSegments(uuid)
-      groupSegments.forEach(groupSegment => {
-        sponsorBlockDoNotSkipSegments.delete(groupSegment.uuid)
-        sponsorBlockDismissedPromptSegments.add(groupSegment.uuid)
-        removePromptSponsorBlockToast(groupSegment.uuid)
-      })
-
-      if (canSeek()) {
-        const seekRange = player.seekRange()
-        const targetTime = Math.min(Math.max(...groupSegments.map(groupSegment => groupSegment.endTime)), seekRange.end)
-        accumulatedSeekSeconds = 0
-        video.value.currentTime = targetTime
-        sponsorBlockCurrentTime.value = targetTime
-      }
-
-      // Update the toast entry to show it's been re-skipped and reset the timeout
-      const toastEntry = skippedSponsorBlockSegments.value.find(skipped => skipped.uuid === uuid)
-      if (toastEntry) {
-        upsertSkippedSponsorBlockToast({
-          uuid,
-          groupUuids: toastEntry.groupUuids,
-          translatedCategory: toastEntry.translatedCategory,
-          colors: toastEntry.colors
-        })
-      }
-
-      return true
     }
 
     // #endregion SponsorBlock
@@ -4302,165 +2566,41 @@ export default defineComponent({
 
     watch(volumeBoost, value => playerAudioOutput.setGain('boost', value))
 
-    const enableVideoZoom = computed(() => store.getters.getEnableVideoZoom)
-    const selectedVideoZoom = computed(() => {
-      return sanitizeVideoZoom(store.getters.getTabVideoZoom(mediaTabId))
-    })
-    const videoZoomGestureZoom = ref(null)
-    const videoFillZoomProximity = ref(0)
-    const videoFillZoomSnapReady = ref(false)
-
-    const videoZoomPossible = computed(() => {
-      // Audio only playback has no video surface to crop and the shorts player
-      // deliberately lets its content overflow the container, which is what
-      // keeps a scaled video from spilling over the page for the other layouts.
-      return enableVideoZoom.value && props.format !== 'audio' && !props.shortsPlayer && !useVrMode.value
-    })
-
-    /** @type {import('vue').ComputedRef<number>} */
-    const videoZoom = computed(() => {
-      if (!videoZoomPossible.value) {
-        return DEFAULT_VIDEO_ZOOM
-      }
-
-      return videoZoomGestureZoom.value ?? selectedVideoZoom.value
-    })
-
-    /**
-     * Which part of the zoomed video is visible, as a fraction of the hidden
-     * overflow on each axis (-1 to 1). Kept relative so it survives zoom
-     * changes, and per player because the framing only matters for the video
-     * that is currently on screen.
-     */
-    const videoZoomOffset = reactive({ x: 0, y: 0 })
-
-    /** Whether a shift-drag is currently moving the zoomed video. */
-    const videoZoomPanning = ref(false)
-    const videoZoomPinching = ref(false)
-
-    /** Whether releasing the pointer would start a pan, which the cursor shows. */
-    const videoZoomPanReady = ref(false)
-
-    const videoZoomPannable = computed(() => videoZoom.value !== DEFAULT_VIDEO_ZOOM)
-
-    const videoZoomStyle = computed(() => {
-      if (!videoZoomPannable.value) {
-        return undefined
-      }
-
-      // The translation is applied in the video's own coordinate system, which
-      // the scale then magnifies, so the offset that reaches the edge of the
-      // crop shrinks as the zoom grows.
-      const limit = 50 * (videoZoom.value - 1) / videoZoom.value
-
-      return {
-        transform: `scale(${videoZoom.value}) translate(${videoZoomOffset.x * limit}%, ${videoZoomOffset.y * limit}%)`
-      }
+    const {
+      cancelVideoZoomPan,
+      changeVideoZoom,
+      endVideoZoomPan,
+      endVideoZoomPinchPointer,
+      handleVideoZoomFullscreenChange,
+      handleVideoZoomModifierKey,
+      handleVideoZoomPointerEnter,
+      handleVideoZoomPointerLeave,
+      moveVideoZoomPan,
+      moveVideoZoomPinch,
+      startVideoZoomGesture,
+      suppressVideoZoomClick,
+      updateVideoZoom,
+      videoFillZoomProximity,
+      videoFillZoomSnapReady,
+      videoZoom,
+      videoZoomGestureZoom,
+      videoZoomPanReady,
+      videoZoomPanning,
+      videoZoomPinching,
+      videoZoomPossible,
+      videoZoomStyle,
+    } = useVideoZoom({
+      container,
+      isNativeFullscreenActive: () => isNativeFullscreenActive(),
+      mediaTabId,
+      onPinchStart: () => cancelMobileFullscreenGesture(),
+      props,
+      showValueChange,
+      useVrMode,
+      video,
     })
 
-    watch(videoZoomPannable, (pannable) => {
-      if (!pannable) {
-        recenterVideoZoom()
-        videoZoomPanReady.value = false
-      }
-    })
-
-    // The zoom level belongs to this player (and therefore this tab), while the
-    // framing belongs to one specific video. A player reused for the next video
-    // keeps its zoom level but starts centered again.
-    watch(() => props.videoId, () => {
-      invalidateVideoZoomPinch()
-      recenterVideoZoom()
-      if (selectedVideoZoom.value > VIDEO_ZOOM_LEVELS.at(-1)) updateVideoZoom(VIDEO_ZOOM_LEVELS.at(-1))
-    })
-
-    function recenterVideoZoom() {
-      videoZoomOffset.x = 0
-      videoZoomOffset.y = 0
-    }
-
-    /** @param {number} value */
-    function updateVideoZoom(value) {
-      store.commit('setTabVideoZoom', {
-        tabId: mediaTabId,
-        value: sanitizeVideoZoom(value)
-      })
-    }
-
-    /** @param {number} direction `1` to zoom in, `-1` to zoom out */
-    function changeVideoZoom(direction) {
-      const newZoom = stepVideoZoom(videoZoom.value, direction)
-
-      if (newZoom !== videoZoom.value) {
-        updateVideoZoom(newZoom)
-      }
-
-      showValueChange(formatVideoZoom(newZoom), 'search')
-    }
-
-    // #region video zoom panning
-
-    /** @type {{ pointerId: number, x: number, y: number, offsetX: number, offsetY: number } | null} */
-    let videoZoomPanStart = null
-    let videoZoomPointerInside = false
-    let videoZoomSuppressClick = false
-    let videoZoomSuppressClickTimer = null
-    const videoZoomTouchPointers = new Map()
-    let videoZoomPinchStart = null
-
-    function handleVideoZoomPointerEnter(event) {
-      videoZoomPointerInside = true
-      videoZoomPanReady.value = videoZoomPannable.value && event.shiftKey
-    }
-
-    function handleVideoZoomPointerLeave() {
-      videoZoomPointerInside = false
-
-      if (!videoZoomPanStart) {
-        videoZoomPanReady.value = false
-      }
-    }
-
-    function getVideoZoomGestureGeometry() {
-      const videoElement = video.value
-      if (!videoElement) return null
-
-      const bounds = videoElement.getBoundingClientRect()
-      const transform = getComputedStyle(videoElement).transform
-      const matrix = transform === 'none' ? new DOMMatrix() : new DOMMatrix(transform)
-      const scale = Math.hypot(matrix.a, matrix.b)
-      if (bounds.width <= 0 || bounds.height <= 0 || scale <= 0) return null
-      const size = {
-        width: bounds.width / scale,
-        height: bounds.height / scale,
-      }
-      const maximumTranslation = {
-        x: size.width * (scale - 1) / 2,
-        y: size.height * (scale - 1) / 2,
-      }
-
-      return {
-        zoom: scale,
-        center: {
-          x: bounds.left + bounds.width / 2 - matrix.e,
-          y: bounds.top + bounds.height / 2 - matrix.f,
-        },
-        offset: {
-          x: maximumTranslation.x > 0
-            ? clampVideoZoomOffset(matrix.e / maximumTranslation.x)
-            : 0,
-          y: maximumTranslation.y > 0
-            ? clampVideoZoomOffset(matrix.f / maximumTranslation.y)
-            : 0,
-        },
-        size,
-      }
-    }
-
-    /** @param {KeyboardEvent} event */
-    function handleVideoZoomModifierKey(event) {
-      videoZoomPanReady.value = videoZoomPointerInside && videoZoomPannable.value && event.shiftKey
-    }
+    // #region pointer gestures
 
     // Teleporting the player releases Chromium's pointer capture. Keep the
     // active stream on window so a fast swipe can finish outside the player.
@@ -4513,78 +2653,7 @@ export default defineComponent({
         finishTemporaryPlaybackRateHold(TEMPORARY_PLAYBACK_RATE_POINTER_SOURCE)
       }
       startMobileFullscreenGesture(event)
-
-      if (
-        event.pointerType === 'touch' &&
-        videoZoomPossible.value &&
-        isVideoZoomGestureTarget(event.target)
-      ) {
-        videoZoomTouchPointers.set(event.pointerId, { x: event.clientX, y: event.clientY })
-        if (videoZoomTouchPointers.size === 2) {
-          const points = [...videoZoomTouchPointers.values()]
-          const geometry = getVideoZoomGestureGeometry()
-          if (geometry) {
-            cancelMobileFullscreenGesture()
-            const fullscreen = isNativeFullscreenActive()
-            videoZoomGestureZoom.value = geometry.zoom
-            videoZoomOffset.x = geometry.offset.x
-            videoZoomOffset.y = geometry.offset.y
-            const focal = {
-              x: (points[0].x + points[1].x) / 2 - geometry.center.x,
-              y: (points[0].y + points[1].y) / 2 - geometry.center.y,
-            }
-            videoZoomPinchStart = {
-              distance: Math.max(1, Math.hypot(points[1].x - points[0].x, points[1].y - points[0].y)),
-              zoom: geometry.zoom,
-              offset: geometry.offset,
-              focal,
-              currentFocal: focal,
-              center: geometry.center,
-              size: geometry.size,
-              videoId: props.videoId,
-              fullscreen,
-              fillZoom: fullscreen
-                ? getVideoFillZoom(
-                    { width: container.value.clientWidth, height: container.value.clientHeight },
-                    geometry.size,
-                    { width: video.value.videoWidth, height: video.value.videoHeight },
-                  )
-                : null,
-            }
-            videoFillZoomProximity.value = 0
-            videoFillZoomSnapReady.value = false
-            videoZoomPinching.value = true
-            videoZoomSuppressClick = true
-            for (const pointerId of videoZoomTouchPointers.keys()) {
-              container.value?.setPointerCapture(pointerId)
-            }
-            event.preventDefault()
-            event.stopPropagation()
-            return
-          }
-        }
-      }
-
-      if (!videoZoomPannable.value || !event.shiftKey || event.button !== 0) {
-        return
-      }
-
-      // shaka-player's controls cover the video, so the drag is claimed in the
-      // capture phase before they can turn it into a play/pause click.
-      event.preventDefault()
-      event.stopPropagation()
-
-      videoZoomPanStart = {
-        pointerId: event.pointerId,
-        x: event.clientX,
-        y: event.clientY,
-        offsetX: videoZoomOffset.x,
-        offsetY: videoZoomOffset.y,
-      }
-      videoZoomPanning.value = true
-      // Chromium still fires the click that follows a prevented pointerdown.
-      videoZoomSuppressClick = true
-      container.value?.setPointerCapture(event.pointerId)
+      startVideoZoomGesture(event)
     }
 
     /** @param {PointerEvent} event */
@@ -4594,83 +2663,9 @@ export default defineComponent({
         temporaryPlaybackRatePointerCancelled = true
         finishTemporaryPlaybackRateHold(TEMPORARY_PLAYBACK_RATE_POINTER_SOURCE)
       }
-      if (videoZoomTouchPointers.has(event.pointerId)) {
-        videoZoomTouchPointers.set(event.pointerId, { x: event.clientX, y: event.clientY })
-      }
-
-      if (videoZoomPinchStart?.invalidated) {
-        event.preventDefault()
-        event.stopPropagation()
-        return
-      }
-
-      if (videoZoomPinchStart && videoZoomTouchPointers.size >= 2) {
-        const points = [...videoZoomTouchPointers.values()]
-        const focal = {
-          x: (points[0].x + points[1].x) / 2 - videoZoomPinchStart.center.x,
-          y: (points[0].y + points[1].y) / 2 - videoZoomPinchStart.center.y,
-        }
-        const distance = Math.hypot(points[1].x - points[0].x, points[1].y - points[0].y)
-        const resolved = resolveVideoZoomPinch({
-          startZoom: videoZoomPinchStart.zoom,
-          startOffset: videoZoomPinchStart.offset,
-          startFocal: videoZoomPinchStart.focal,
-          focal,
-          scale: distance / videoZoomPinchStart.distance,
-          size: videoZoomPinchStart.size,
-          maximumZoom: Math.max(VIDEO_ZOOM_LEVELS.at(-1), videoZoomPinchStart.fillZoom ?? 0),
-        })
-        videoZoomGestureZoom.value = resolved.zoom
-        videoZoomOffset.x = resolved.offset.x
-        videoZoomOffset.y = resolved.offset.y
-        videoZoomPinchStart.currentFocal = focal
-        const movingTowardFill = videoZoomPinchStart.fillZoom !== null &&
-          Math.abs(resolved.zoom - videoZoomPinchStart.zoom) >= 0.01 &&
-          Math.abs(resolved.zoom - videoZoomPinchStart.fillZoom) <
-            Math.abs(videoZoomPinchStart.zoom - videoZoomPinchStart.fillZoom)
-        const fill = getVideoFillZoomProximity(resolved.zoom, videoZoomPinchStart.fillZoom)
-        videoFillZoomProximity.value = movingTowardFill ? fill.proximity : 0
-        videoFillZoomSnapReady.value = movingTowardFill && fill.snap
-        event.preventDefault()
-        event.stopPropagation()
-        return
-      }
-
+      if (moveVideoZoomPinch(event)) return
       if (moveMobileFullscreenGesture(event)) return
-
-      if (!videoZoomPanStart) {
-        videoZoomPanReady.value = videoZoomPointerInside && videoZoomPannable.value && event.shiftKey
-        return
-      }
-
-      if (event.pointerId !== videoZoomPanStart.pointerId) {
-        return
-      }
-
-      event.preventDefault()
-      event.stopPropagation()
-
-      const videoElement = video.value
-      if (!videoElement) {
-        return
-      }
-
-      // `offsetWidth`/`offsetHeight` are the layout size, which the zoom
-      // transform does not change, so this is the overflow the crop hides.
-      const maxX = videoElement.offsetWidth * (videoZoom.value - 1) / 2
-      const maxY = videoElement.offsetHeight * (videoZoom.value - 1) / 2
-
-      if (maxX > 0) {
-        videoZoomOffset.x = clampVideoZoomOffset(
-          videoZoomPanStart.offsetX + (event.clientX - videoZoomPanStart.x) / maxX
-        )
-      }
-
-      if (maxY > 0) {
-        videoZoomOffset.y = clampVideoZoomOffset(
-          videoZoomPanStart.offsetY + (event.clientY - videoZoomPanStart.y) / maxY
-        )
-      }
+      moveVideoZoomPan(event)
     }
 
     /** @param {PointerEvent} event */
@@ -4690,120 +2685,53 @@ export default defineComponent({
     function handleVideoZoomPointerCancel(event) {
       if (endVideoZoomPinchPointer(event, true)) return
       cancelMobileFullscreenGesture(event)
-
-      if (!endVideoZoomPan(event)) {
-        return
-      }
-
-      // A cancelled gesture never produces the click that clears this itself,
-      // so it would otherwise swallow the next unrelated click on the player.
-      videoZoomSuppressClick = false
+      cancelVideoZoomPan(event)
     }
 
-    function invalidateVideoZoomPinch() {
-      if (!videoZoomPinchStart || videoZoomPinchStart.invalidated) return
-      videoZoomPinchStart.invalidated = true
-      videoZoomOffset.x = videoZoomPinchStart.offset.x
-      videoZoomOffset.y = videoZoomPinchStart.offset.y
-      videoZoomGestureZoom.value = null
-      videoZoomPinching.value = false
-      videoFillZoomProximity.value = 0
-      videoFillZoomSnapReady.value = false
-    }
-
-    function endVideoZoomPinchPointer(event, cancelled = false) {
-      if (!videoZoomTouchPointers.has(event.pointerId)) return false
-
-      videoZoomTouchPointers.delete(event.pointerId)
-      if (!videoZoomPinchStart) return false
-
-      event.preventDefault()
-      event.stopPropagation()
-      if (container.value?.hasPointerCapture(event.pointerId)) {
-        container.value.releasePointerCapture(event.pointerId)
-      }
-
-      const stale = videoZoomPinchStart.invalidated ||
-        videoZoomPinchStart.videoId !== props.videoId ||
-        videoZoomPinchStart.fullscreen !== isNativeFullscreenActive()
-      if (stale) invalidateVideoZoomPinch()
-      const gestureZoom = videoZoomGestureZoom.value ?? videoZoomPinchStart.zoom
-      const fillZoom = videoZoomPinchStart.fillZoom
-      const finalZoom = !cancelled && videoFillZoomSnapReady.value && fillZoom !== null
-        ? fillZoom
-        : gestureZoom
-      if (!stale) {
-        if (finalZoom === fillZoom && !cancelled) recenterVideoZoom()
-        updateVideoZoom(finalZoom)
-        if (!cancelled) showValueChange(formatVideoZoom(finalZoom), 'search', false, 0, false)
-      }
-      videoZoomGestureZoom.value = null
-      videoZoomPinchStart = null
-      videoZoomPinching.value = false
-      videoFillZoomProximity.value = 0
-      videoFillZoomSnapReady.value = false
-      videoZoomTouchPointers.clear()
-      clearTimeout(videoZoomSuppressClickTimer)
-      videoZoomSuppressClickTimer = setTimeout(() => {
-        videoZoomSuppressClick = false
-        videoZoomSuppressClickTimer = null
-      }, 0)
-      return true
-    }
-
-    /**
-     * @param {PointerEvent} event
-     * @returns {boolean} whether the event ended this player's pan
-     */
-    function endVideoZoomPan(event) {
-      if (!videoZoomPanStart || event.pointerId !== videoZoomPanStart.pointerId) {
-        return false
-      }
-
-      // A cancelled pointer has already lost the capture.
-      if (container.value?.hasPointerCapture(event.pointerId)) {
-        container.value.releasePointerCapture(event.pointerId)
-      }
-
-      videoZoomPanStart = null
-      videoZoomPanning.value = false
-      videoZoomPanReady.value = videoZoomPointerInside && videoZoomPannable.value && event.shiftKey
-
-      return true
-    }
-
-    /** Swallows the click that a finished pan would otherwise leave behind. */
+    /** @param {MouseEvent} event */
     function handleVideoZoomClickCapture(event) {
       if (handleMobilePlayerSurfaceClick(event)) {
         return
       }
 
-      if (!videoZoomSuppressClick) {
-        return
-      }
-
-      videoZoomSuppressClick = false
-      clearTimeout(videoZoomSuppressClickTimer)
-      videoZoomSuppressClickTimer = null
-      event.preventDefault()
-      event.stopPropagation()
+      suppressVideoZoomClick(event)
     }
 
-    /**
-     * @param {number} value
-     * @returns {number}
-     */
-    function clampVideoZoomOffset(value) {
-      return Math.min(Math.max(value, -1), 1)
-    }
-
-    // #endregion video zoom panning
+    // #endregion pointer gestures
 
     // #region A-B repeat
 
-    const abRepeatStart = ref(null)
-    const abRepeatEnd = ref(null)
-    const abRepeatEnabled = ref(false)
+    const disableAbRepeat = computed(() => store.getters.getDisableAbRepeat)
+    const {
+      abRepeatAvailable,
+      abRepeatEnabled,
+      abRepeatEnd,
+      abRepeatStart,
+      abRepeatValidation,
+      abRepeatValidationMessage,
+      checkAbRepeatBoundary,
+      clearAbRepeat,
+      clearAbRepeatBoundarySchedule,
+      hasValidAbRepeatRange,
+      refreshAbRepeatMarkers,
+      repeatAbRangeFromStart,
+      resetAbRepeat,
+      scheduleAbRepeatBoundary,
+      setCurrentAbRepeatBoundary,
+      toggleAbRepeat,
+      updateAbRepeatDuration,
+    } = useAbRepeat({
+      addMarkers,
+      container,
+      disableAbRepeat,
+      getPlayer: () => player,
+      isLive,
+      onRepeat: () => repeatStatsTracker?.repeat(),
+      resetSeekAccumulation: () => { accumulatedSeekSeconds = 0 },
+      showValueChange,
+      t,
+      video,
+    })
     const repeatStats = reactive({ active: false, repeats: 0, seconds: 0 })
     const hideRepeatStats = computed(() => store.getters.getHideRepeatStats)
     const repeatStatsTime = computed(() => formatDurationAsTimestamp(repeatStats.seconds))
@@ -4841,328 +2769,9 @@ export default defineComponent({
       repeatStatsTracker?.destroy()
       repeatStatsLoopObserver?.disconnect()
     })
-    const abRepeatDuration = ref(Number.POSITIVE_INFINITY)
-    const disableAbRepeat = computed(() => store.getters.getDisableAbRepeat)
-    const abRepeatValidation = computed(() => validateAbRepeatRange(
-      abRepeatStart.value,
-      abRepeatEnd.value,
-      abRepeatDuration.value
-    ))
-    const abRepeatAvailable = computed(() => isCompleteAbRepeatRange(
-      abRepeatStart.value,
-      abRepeatEnd.value,
-      abRepeatDuration.value
-    ))
-    /**
-     * @param {string | null} validation
-     * @returns {string}
-     */
-    function getAbRepeatValidationMessage(validation) {
-      switch (validation) {
-        case AbRepeatValidation.END_NOT_AFTER_START:
-          return t('Video.Player.A-B Repeat.End Before Start')
-        case AbRepeatValidation.OUTSIDE_DURATION:
-          return t('Video.Player.A-B Repeat.Outside Duration')
-        default:
-          return ''
-      }
-    }
-    const abRepeatValidationMessage = computed(() => (
-      getAbRepeatValidationMessage(abRepeatValidation.value)
-    ))
-
-    let abRepeatBoundaryTimeout = null
-    let abRepeatDragCleanup = null
-
-    function clearAbRepeatBoundarySchedule() {
-      clearTimeout(abRepeatBoundaryTimeout)
-      abRepeatBoundaryTimeout = null
-    }
-
-    /**
-     * @param {'start' | 'end'} point
-     * @param {number} value
-     * @returns {number}
-     */
-    function clampAbRepeatBoundary(point, value) {
-      const seekRange = player?.seekRange()
-      const rangeStart = Number.isFinite(seekRange?.start) ? seekRange.start : 0
-      const rangeEnd = Number.isFinite(seekRange?.end) ? seekRange.end : getAbRepeatDuration()
-
-      if (point === 'start') {
-        const latestStart = abRepeatEnd.value === null
-          ? rangeEnd
-          : abRepeatEnd.value - AB_REPEAT_MIN_RANGE_SECONDS
-        return Math.min(Math.max(value, rangeStart), Math.max(rangeStart, latestStart))
-      }
-
-      const earliestEnd = abRepeatStart.value === null
-        ? rangeStart
-        : abRepeatStart.value + AB_REPEAT_MIN_RANGE_SECONDS
-      return Math.max(Math.min(value, rangeEnd), Math.min(rangeEnd, earliestEnd))
-    }
-
-    /**
-     * @param {'start' | 'end'} point
-     * @param {number} clientX
-     * @param {HTMLElement} seekBar
-     */
-    function setAbRepeatBoundaryFromPointer(point, clientX, seekBar) {
-      const bounds = seekBar.getBoundingClientRect()
-      const seekRange = player?.seekRange()
-      if (!seekRange || bounds.width <= 0) {
-        return
-      }
-
-      const position = Math.min(Math.max((clientX - bounds.left) / bounds.width, 0), 1)
-      const value = seekRange.start + position * (seekRange.end - seekRange.start)
-      setAbRepeatBoundary(point, clampAbRepeatBoundary(point, value))
-    }
-
-    /**
-     * @param {'start' | 'end'} point
-     * @param {PointerEvent} event
-     */
-    function startAbRepeatMarkerDrag(point, event) {
-      const seekBar = container.value?.querySelector('.shaka-seek-bar-container')
-      if (!(seekBar instanceof HTMLElement)) {
-        return
-      }
-
-      event.preventDefault()
-      event.stopPropagation()
-      abRepeatDragCleanup?.()
-
-      const pointerId = event.pointerId
-      let latestClientX = event.clientX
-      let updateFrame = null
-
-      const applyPendingPosition = () => {
-        updateFrame = null
-        setAbRepeatBoundaryFromPointer(point, latestClientX, seekBar)
-      }
-      const queuePosition = (clientX) => {
-        latestClientX = clientX
-        if (updateFrame === null) {
-          updateFrame = requestAnimationFrame(applyPendingPosition)
-        }
-      }
-      const handlePointerMove = (moveEvent) => {
-        if (moveEvent.pointerId !== pointerId) {
-          return
-        }
-        moveEvent.preventDefault()
-        queuePosition(moveEvent.clientX)
-      }
-      const cleanup = () => {
-        window.removeEventListener('pointermove', handlePointerMove)
-        window.removeEventListener('pointerup', handlePointerEnd)
-        window.removeEventListener('pointercancel', handlePointerEnd)
-        if (updateFrame !== null) {
-          cancelAnimationFrame(updateFrame)
-          updateFrame = null
-        }
-        container.value?.classList.remove('abRepeatDragging')
-        abRepeatDragCleanup = null
-      }
-      const handlePointerEnd = (endEvent) => {
-        if (endEvent.pointerId !== pointerId) {
-          return
-        }
-        setAbRepeatBoundaryFromPointer(point, endEvent.clientX, seekBar)
-        cleanup()
-      }
-
-      abRepeatDragCleanup = cleanup
-      container.value?.classList.add('abRepeatDragging')
-      window.addEventListener('pointermove', handlePointerMove, { passive: false })
-      window.addEventListener('pointerup', handlePointerEnd)
-      window.addEventListener('pointercancel', handlePointerEnd)
-    }
-
-    /**
-     * @param {'start' | 'end'} point
-     * @param {KeyboardEvent} event
-     */
-    function handleAbRepeatMarkerKeydown(point, event) {
-      if (event.key !== 'ArrowLeft' && event.key !== 'ArrowRight') {
-        return
-      }
-
-      event.preventDefault()
-      event.stopPropagation()
-      const currentValue = point === 'start' ? abRepeatStart.value : abRepeatEnd.value
-      if (currentValue === null) {
-        return
-      }
-
-      const direction = event.key === 'ArrowLeft' ? -1 : 1
-      const step = event.shiftKey ? 1 : 0.1
-      setAbRepeatBoundary(point, clampAbRepeatBoundary(point, currentValue + direction * step))
-      requestAnimationFrame(() => {
-        container.value?.querySelector(`.abRepeatMarker${point === 'start' ? 'A' : 'B'}`)?.focus()
-      })
-    }
-
-    function getAbRepeatDuration() {
-      const duration = video.value?.duration
-      return Number.isFinite(duration) && duration >= 0
-        ? duration
-        : Number.POSITIVE_INFINITY
-    }
-
-    function hasValidAbRepeatRange() {
-      return abRepeatAvailable.value
-    }
-
-    function repeatAbRangeFromStart(countRepeat = false) {
-      const videoElement = video.value
-      if (!videoElement || !hasValidAbRepeatRange()) {
-        return
-      }
-
-      clearAbRepeatBoundarySchedule()
-      if (countRepeat) repeatStatsTracker?.repeat()
-      accumulatedSeekSeconds = 0
-      videoElement.currentTime = abRepeatStart.value
-    }
-
-    function checkAbRepeatBoundary(countRepeat = true) {
-      clearAbRepeatBoundarySchedule()
-      const videoElement = video.value
-      if (!videoElement || !abRepeatEnabled.value || !hasValidAbRepeatRange()) {
-        return
-      }
-
-      if (
-        videoElement.currentTime < abRepeatStart.value - AB_REPEAT_BOUNDARY_TOLERANCE_SECONDS ||
-        videoElement.currentTime >= abRepeatEnd.value - AB_REPEAT_BOUNDARY_TOLERANCE_SECONDS
-      ) {
-        repeatAbRangeFromStart(countRepeat && !videoElement.paused && !videoElement.seeking &&
-          videoElement.currentTime >= abRepeatEnd.value - AB_REPEAT_BOUNDARY_TOLERANCE_SECONDS)
-        return
-      }
-
-      scheduleAbRepeatBoundary()
-    }
-
-    function scheduleAbRepeatBoundary() {
-      clearAbRepeatBoundarySchedule()
-
-      const videoElement = video.value
-      if (
-        !videoElement ||
-        videoElement.paused ||
-        videoElement.seeking ||
-        !abRepeatEnabled.value ||
-        !hasValidAbRepeatRange()
-      ) {
-        return
-      }
-
-      if (videoElement.currentTime < abRepeatStart.value || videoElement.currentTime >= abRepeatEnd.value) {
-        repeatAbRangeFromStart()
-        return
-      }
-
-      const delay = getAbRepeatBoundaryDelay(
-        videoElement.currentTime,
-        abRepeatEnd.value,
-        videoElement.playbackRate
-      )
-
-      abRepeatBoundaryTimeout = setTimeout(checkAbRepeatBoundary, Math.max(4, delay))
-    }
-
-    /**
-     * @param {'start' | 'end'} point
-     * @param {number | null} value
-     * @returns {string | null}
-     */
-    function setAbRepeatBoundary(point, value) {
-      if (disableAbRepeat.value) {
-        return null
-      }
-
-      const nextStart = point === 'start' ? value : abRepeatStart.value
-      const nextEnd = point === 'end' ? value : abRepeatEnd.value
-      const validation = validateAbRepeatRange(nextStart, nextEnd, abRepeatDuration.value)
-      if (validation !== null) {
-        return validation
-      }
-
-      const hadValidRange = hasValidAbRepeatRange()
-      if (point === 'start') {
-        abRepeatStart.value = value
-      } else {
-        abRepeatEnd.value = value
-      }
-
-      const validRange = hasValidAbRepeatRange()
-      if (!validRange) {
-        abRepeatEnabled.value = false
-      } else if (!hadValidRange) {
-        abRepeatEnabled.value = true
-      }
-      if (validRange && video.value) {
-        video.value.loop = false
-      }
-
-      refreshAbRepeatMarkers()
-      scheduleAbRepeatBoundary()
-      return null
-    }
-
-    /** @param {'start' | 'end'} point */
-    function setCurrentAbRepeatBoundary(point) {
-      const currentTime = video.value?.currentTime
-      if (disableAbRepeat.value || isLive.value || !Number.isFinite(currentTime)) {
-        return
-      }
-
-      const validation = setAbRepeatBoundary(point, currentTime)
-      const label = point === 'start'
-        ? t('Video.Player.A-B Repeat.Point A')
-        : t('Video.Player.A-B Repeat.Point B')
-      const message = getAbRepeatValidationMessage(validation) ||
-        `${label} ${formatAbRepeatTimestamp(currentTime)}`
-      showValueChange(message, AB_REPEAT_VALUE_CHANGE_ICON)
-    }
-
-    function toggleAbRepeat() {
-      if (disableAbRepeat.value || !hasValidAbRepeatRange()) {
-        return
-      }
-
-      abRepeatEnabled.value = !abRepeatEnabled.value
-      if (abRepeatEnabled.value && video.value) {
-        video.value.loop = false
-      }
-      refreshAbRepeatMarkers()
-      scheduleAbRepeatBoundary()
-    }
-
-    function clearAbRepeat() {
-      abRepeatDragCleanup?.()
-      abRepeatStart.value = null
-      abRepeatEnd.value = null
-      abRepeatEnabled.value = false
-      clearAbRepeatBoundarySchedule()
-      refreshAbRepeatMarkers()
-    }
-
-    function resetAbRepeat() {
-      abRepeatDuration.value = Number.POSITIVE_INFINITY
-      clearAbRepeat()
-    }
 
     function handleAbRepeatDurationChange() {
-      abRepeatDuration.value = getAbRepeatDuration()
-      if (abRepeatValidation.value !== null) {
-        abRepeatEnabled.value = false
-      }
-      refreshAbRepeatMarkers()
-      scheduleAbRepeatBoundary()
+      updateAbRepeatDuration()
       updateVideoElementGeometry()
       syncMediaSessionPosition()
     }
@@ -5841,26 +3450,6 @@ export default defineComponent({
       ].some(className => target.classList.contains(className))
     }
 
-    /**
-     * Pinch gestures may begin on non-interactive descendants of Shaka's
-     * surface, including the SVG inside its central play button. Menus and the
-     * bottom control panel retain their own two-finger interactions.
-     * @param {EventTarget | null} target
-     * @returns {boolean}
-     */
-    function isVideoZoomGestureTarget(target) {
-      if (target === video.value) return true
-      if (!(target instanceof Element)) return false
-
-      return target.closest('.shaka-controls-container') !== null &&
-        target.closest([
-          '.shaka-controls-button-panel',
-          '.shaka-seek-bar-container',
-          '.shaka-settings-menu',
-          '.shaka-context-menu',
-        ].join(',')) === null
-    }
-
     const mobileSideSwipesEnabled = computed(() => process.env.IS_CAPACITOR && (
       ['brightness', 'volume', 'speed'].includes(store.getters.getMobileLeftSwipeAction) ||
       ['brightness', 'volume', 'speed'].includes(store.getters.getMobileRightSwipeAction)
@@ -6248,20 +3837,6 @@ export default defineComponent({
       if (chapterPreview) {
         chapterPreview.style.display = 'none'
       }
-    }
-
-    /**
-     * @param {number} hoverTime
-     * @param {number} secondsPerPixel
-     * @returns {string}
-     */
-    function getSponsorBlockSeekBarTooltipLabel(hoverTime, secondsPerPixel) {
-      const segments = sponsorBlockSegments.concat(
-        sponsorBlockCompleteDraftSegments.value.filter(segment => !isSponsorBlockFullVideoSegment(segment))
-      )
-      const segment = findSponsorBlockSeekBarSegment(segments, hoverTime, secondsPerPixel)
-
-      return segment ? translateSponsorBlockCategory(segment.category) : ''
     }
 
     /**
@@ -6900,15 +4475,6 @@ export default defineComponent({
     let overflowMenuElement = null
     let cleanupPhoneOptionsMenu = null
 
-    /** @type {ResizeObserver|null} */
-    let controlPanelResizeObserver = null
-
-    /** @type {MutationObserver|null} */
-    let controlPanelMutationObserver = null
-
-    /** @type {AbortController|null} */
-    let volumePointerListeners = null
-
     /** @type {MutationObserver|null} */
     let fullscreenControlsVisibilityObserver = null
     let androidStatusBarVisible = true
@@ -6919,286 +4485,6 @@ export default defineComponent({
 
     function handleSubMenuClose() {
       isSubMenuOpened.value = false
-    }
-
-    /** @type {number|null} */
-    let controlPanelLayoutFrame = null
-
-    const controlPanelCompactClasses = [
-      'ft-controls-hide-highlight-label',
-      'ft-controls-compact-chapters',
-      'ft-controls-stack-times',
-      'ft-controls-overflow-pip',
-      'ft-controls-overflow-captions'
-    ]
-
-    /**
-     * @param {HTMLElement} controlPanel
-     * @returns {boolean}
-     */
-    function controlPanelOverflows(controlPanel) {
-      let contentWidth = 0
-      let crossesPanelEdge = false
-      const controlPanelBounds = controlPanel.getBoundingClientRect()
-      // Full-window transitions scale the player container. Keep margins in
-      // the same visual coordinate space as the bounding rectangles so a
-      // measurement during the animation does not leave the compact layout
-      // enabled after the transition.
-      const inlineScale = controlPanel.clientWidth > 0
-        ? controlPanelBounds.width / controlPanel.clientWidth
-        : 1
-
-      for (const child of controlPanel.children) {
-        if (!(child instanceof HTMLElement)) {
-          continue
-        }
-
-        const style = window.getComputedStyle(child)
-        if (style.display === 'none' || style.position === 'absolute') {
-          continue
-        }
-
-        const childBounds = child.getBoundingClientRect()
-        crossesPanelEdge ||= childBounds.left < controlPanelBounds.left - 1 ||
-          childBounds.right > controlPanelBounds.right + 1
-
-        contentWidth += childBounds.width +
-          ((Number.parseFloat(style.marginLeft) || 0) * inlineScale) +
-          ((Number.parseFloat(style.marginRight) || 0) * inlineScale)
-      }
-
-      return crossesPanelEdge ||
-        contentWidth > controlPanelBounds.width + inlineScale
-    }
-
-    /**
-     * Apply space-saving modes in priority order, only when the next mode is needed.
-     * @param {HTMLElement} controlPanel
-     */
-    function updateControlPanelLayout(controlPanel) {
-      if (!controlPanel.isConnected) {
-        return
-      }
-
-      // Measure a hidden copy so intermediate compact states do not interrupt
-      // chapter transitions or change the preset strip's scroll position.
-      const measurementPanel = /** @type {HTMLElement} */ (controlPanel.cloneNode(true))
-      measurementPanel.classList.add('ft-controls-measuring')
-      measurementPanel.classList.remove(...controlPanelCompactClasses)
-      measurementPanel.ariaHidden = 'true'
-      measurementPanel.inert = true
-      measurementPanel.style.position = 'absolute'
-      measurementPanel.style.visibility = 'hidden'
-      measurementPanel.style.width = window.getComputedStyle(controlPanel).width
-
-      // A clone does not inherit the real volume group's hover/focus state.
-      const volumeGroup = controlPanel.querySelector('.ft-volume-control-group')
-      const measurementVolumeGroup = measurementPanel.querySelector('.ft-volume-control-group')
-      if (volumeGroup && measurementVolumeGroup instanceof HTMLElement) {
-        measurementVolumeGroup.style.width = window.getComputedStyle(volumeGroup).width
-      }
-      controlPanel.after(measurementPanel)
-
-      for (const compactClass of controlPanelCompactClasses) {
-        if (!controlPanelOverflows(measurementPanel)) {
-          break
-        }
-
-        measurementPanel.classList.add(compactClass)
-      }
-
-      for (const compactClass of controlPanelCompactClasses) {
-        controlPanel.classList.toggle(compactClass, measurementPanel.classList.contains(compactClass))
-      }
-      measurementPanel.remove()
-
-      const quickRateBar = controlPanel.querySelector('.ft-quick-playback-rate-bar')
-      if (quickRateBar) {
-        clampOverlayScrollLeft(quickRateBar)
-      }
-
-      // Pill ends must follow the visible controls, including buttons hidden
-      // by the adaptive layout rather than by Shaka's own visibility class.
-      for (const button of controlPanel.querySelectorAll(':scope > .shaka-spacer ~ button')) {
-        button.toggleAttribute('data-ft-control-hidden', window.getComputedStyle(button).display === 'none')
-      }
-
-      updateRightControlGlass(controlPanel)
-    }
-
-    /** @param {HTMLElement} controlPanel */
-    function updateRightControlGlass(controlPanel) {
-      const rightGlass = controlPanel.querySelector(':scope > .ft-right-control-glass')
-      if (rightGlass instanceof HTMLElement) {
-        const rightButtons = [...controlPanel.querySelectorAll(':scope > .shaka-spacer ~ button:not(.shaka-hidden)')]
-          .filter(button => button.getClientRects().length > 0)
-        rightGlass.hidden = rightButtons.length === 0
-
-        if (rightButtons.length > 0) {
-          const panelBounds = controlPanel.getBoundingClientRect()
-          const firstBounds = rightButtons[0].getBoundingClientRect()
-          const lastBounds = rightButtons[rightButtons.length - 1].getBoundingClientRect()
-          const scale = controlPanel.clientWidth > 0 ? panelBounds.width / controlPanel.clientWidth : 1
-          rightGlass.style.left = `${(firstBounds.left - panelBounds.left) / scale}px`
-          rightGlass.style.width = `${(lastBounds.right - firstBounds.left) / scale}px`
-        }
-      }
-    }
-
-    /** @param {HTMLElement} controlPanel */
-    function scheduleControlPanelLayout(controlPanel) {
-      // Background tabs remain mounted but are hidden with display:none. Do not
-      // let their zero-size control bars enter a resize/mutation feedback loop.
-      // The active-tab watcher schedules a fresh measurement when presented.
-      if (!isActiveTab.value || scrollMiniPlayerActive.value || scrollMiniPlayerAnimating.value || scrollMiniPlayerDragStyle.value) {
-        return
-      }
-
-      if (controlPanelLayoutFrame !== null) {
-        cancelAnimationFrame(controlPanelLayoutFrame)
-      }
-
-      controlPanelLayoutFrame = requestAnimationFrame(() => {
-        controlPanelLayoutFrame = null
-        if (!scrollMiniPlayerActive.value && !scrollMiniPlayerAnimating.value && !scrollMiniPlayerDragStyle.value) {
-          updateControlPanelLayout(controlPanel)
-        }
-      })
-    }
-
-    function setupAdaptiveControlPanelLayout() {
-      controlPanelResizeObserver?.disconnect()
-      controlPanelMutationObserver?.disconnect()
-      volumePointerListeners?.abort()
-      volumePointerListeners = null
-
-      const controlPanel = container.value?.querySelector('.shaka-controls-button-panel')
-      if (!(controlPanel instanceof HTMLElement)) {
-        return
-      }
-
-      const muteButton = controlPanel.querySelector(':scope > .shaka-mute-button')
-      const volumeBar = controlPanel.querySelector(':scope > .shaka-volume-bar-container')
-
-      if (muteButton instanceof HTMLElement && volumeBar instanceof HTMLElement) {
-        const volumeGroup = document.createElement('div')
-        volumeGroup.classList.add('ft-volume-control-group')
-        muteButton.before(volumeGroup)
-        volumeGroup.append(muteButton, volumeBar)
-
-        let focusedByPointer = false
-        const blurPointerFocus = () => {
-          if (!focusedByPointer) return
-          if (volumeGroup.contains(document.activeElement)) {
-            document.activeElement.blur()
-          }
-          focusedByPointer = false
-        }
-        volumeGroup.addEventListener('pointerdown', () => {
-          focusedByPointer = true
-          volumePointerListeners?.abort()
-          volumePointerListeners = new AbortController()
-          window.addEventListener('pointerup', (event) => {
-            const bounds = volumeGroup.getBoundingClientRect()
-            if (event.clientX < bounds.left || event.clientX > bounds.right ||
-                event.clientY < bounds.top || event.clientY > bounds.bottom) {
-              blurPointerFocus()
-            }
-            volumePointerListeners?.abort()
-            volumePointerListeners = null
-          }, { signal: volumePointerListeners.signal })
-          window.addEventListener('pointercancel', () => {
-            blurPointerFocus()
-            volumePointerListeners?.abort()
-            volumePointerListeners = null
-          }, { signal: volumePointerListeners.signal })
-        })
-        volumeGroup.addEventListener('pointerleave', (event) => {
-          if (event.buttons === 0) blurPointerFocus()
-        })
-        volumeGroup.addEventListener('keydown', () => { focusedByPointer = false })
-      }
-
-      const regularTime = controlPanel.querySelector(':scope > .shaka-current-time:not(.ft-playback-adjusted-time)')
-      const adjustedTime = controlPanel.querySelector(':scope > .ft-playback-adjusted-time')
-
-      if (regularTime instanceof HTMLElement && adjustedTime instanceof HTMLElement) {
-        const timeDisplayGroup = document.createElement('div')
-        timeDisplayGroup.classList.add('ft-time-display-group')
-        regularTime.before(timeDisplayGroup)
-        timeDisplayGroup.append(regularTime, adjustedTime)
-        timeDisplayGroup.addEventListener('click', (event) => {
-          if (event.target !== regularTime) {
-            regularTime.click()
-            return
-          }
-
-          events.dispatchEvent(new CustomEvent('timeDisplayToggled'))
-        })
-      }
-
-      for (const control of controlPanel.querySelectorAll(':scope > button, :scope > .ft-volume-control-group, :scope > .ft-time-display-group')) {
-        if (control.querySelector(':scope > .ft-control-glass')) {
-          continue
-        }
-        const glass = document.createElement('span')
-        glass.classList.add('ft-control-glass')
-        glass.setAttribute('aria-hidden', 'true')
-        control.append(glass)
-      }
-
-      const spacer = controlPanel.querySelector(':scope > .shaka-spacer')
-      if (spacer instanceof HTMLElement && !controlPanel.querySelector(':scope > .ft-right-control-glass')) {
-        const rightGlass = document.createElement('span')
-        rightGlass.classList.add('ft-right-control-glass')
-        rightGlass.setAttribute('aria-hidden', 'true')
-        rightGlass.hidden = true
-        spacer.after(rightGlass)
-      }
-
-      const timeDisplayGroup = controlPanel.querySelector('.ft-time-display-group')
-      controlPanelResizeObserver = new ResizeObserver(entries => {
-        if (entries.some(entry => entry.target === controlPanel || entry.target === timeDisplayGroup)) {
-          scheduleControlPanelLayout(controlPanel)
-        }
-        // Button visibility and volume/preset sizes can move the right controls
-        // without resizing the panel. Keep their glass aligned with the buttons.
-        updateRightControlGlass(controlPanel)
-      })
-      controlPanelResizeObserver.observe(controlPanel)
-      for (const control of controlPanel.querySelectorAll(':scope > button, :scope > .ft-volume-control-group, :scope > .ft-quick-playback-rate-bar')) {
-        controlPanelResizeObserver.observe(control)
-      }
-      if (timeDisplayGroup) {
-        // Tabular timestamps usually change text without changing width.
-        // Measure only when the rendered group actually changes size.
-        controlPanelResizeObserver.observe(timeDisplayGroup)
-      }
-
-      controlPanelMutationObserver = new MutationObserver(mutations => {
-        if (mutations.some(mutation => {
-          const target = mutation.target
-          if (target === controlPanel || target instanceof SVGElement ||
-            (mutation.type !== 'attributes' && timeDisplayGroup?.contains(target))) {
-            return false
-          }
-          // Shaka replaces icon paths and reapplies classes on media events.
-          // Neither an icon update nor an unchanged class affects geometry.
-          return mutation.type !== 'attributes' || mutation.oldValue !== target.getAttribute('class')
-        })) {
-          scheduleControlPanelLayout(controlPanel)
-        }
-      })
-      controlPanelMutationObserver.observe(controlPanel, {
-        attributeFilter: ['class'],
-        attributes: true,
-        attributeOldValue: true,
-        characterData: true,
-        childList: true,
-        subtree: true
-      })
-
-      scheduleControlPanelLayout(controlPanel)
     }
 
     function syncAndroidStatusBarVisibility() {
@@ -7948,32 +5234,6 @@ export default defineComponent({
       updateSponsorBlockSeekBarState(seekBarContainer)
     }
 
-    /**
-     * @param {number} currentTime
-     */
-    function emitTerminalSponsorBlockOutroStarted(currentTime) {
-      if (terminalSponsorBlockOutroStarted || video.value?.paused || !useSponsorBlock.value) {
-        return
-      }
-
-      const videoDuration = getSponsorBlockSubmissionVideoDuration()
-      if (!Number.isFinite(videoDuration)) {
-        return
-      }
-
-      const terminalOutro = sponsorBlockSegments.find(segment =>
-        segment.category === 'outro' &&
-        Math.abs(segment.endTime - videoDuration) <= SPONSORBLOCK_TERMINAL_OUTRO_TOLERANCE_SECONDS &&
-        currentTime >= segment.startTime &&
-        currentTime <= segment.endTime
-      )
-
-      if (terminalOutro) {
-        terminalSponsorBlockOutroStarted = true
-        emit('terminal-outro-started', currentTime)
-      }
-    }
-
     const videoElementWidth = ref(0)
     const videoElementHeight = ref(0)
     /** Height of the video element in CSS pixels, used to scale the captions with the player. */
@@ -8070,6 +5330,20 @@ export default defineComponent({
       props,
       tabId,
       video,
+    })
+
+    const {
+      cancelControlPanelLayout,
+      destroyAdaptiveControlPanelLayout,
+      scheduleControlPanelLayout,
+      setupAdaptiveControlPanelLayout,
+    } = useAdaptiveControlPanelLayout({
+      container,
+      events,
+      isActiveTab,
+      scrollMiniPlayerActive,
+      scrollMiniPlayerAnimating,
+      scrollMiniPlayerDragStyle,
     })
 
     // The page reserves room below its content for the bar (mirrors the template's classes).
@@ -9198,11 +6472,11 @@ export default defineComponent({
                 const activeTrack = controls.getPlayer().getTextTracks().find(track => track.active)
                 // A translated main track leaves even a video's only original track free to show as the second one,
                 // and a remembered secondary track always needs a way to turn it off
-                return secondaryCaption !== null || (activeTrack
+                return getSecondaryCaption() !== null || (activeTrack
                   ? props.captions.some(caption => !isShownAsMainCaption(caption, activeTrack))
                   : props.captions.length > 1)
               },
-              isSelected: caption => caption === secondaryCaption,
+              isSelected: caption => caption === getSecondaryCaption(),
               select: caption => selectSecondaryCaption(caption),
             },
             {
@@ -9339,135 +6613,11 @@ export default defineComponent({
       }
     }
 
-    /**
-     * Shows a second caption track alongside the main captions, Shaka can only display one track itself.
-     * @param {{ url: string, label: string, language: string, mimeType: string } | null} caption
-     * @param {boolean} [remember] keep the language for later videos
-     * @returns {Promise<boolean>}
-     */
-    async function selectSecondaryCaption(caption, remember = true) {
-      secondaryCaptionAbortController?.abort()
-      secondaryCaptionAbortController = null
-      secondaryCaption = caption
-      secondaryCaptionCues = []
-      updateSecondaryCaptionText()
-
-      const language = caption?.language ?? ''
-      if (remember && language !== getRememberedSecondaryCaptionLocale()) {
-        const pick = ++secondaryCaptionLocalePicks
-        pendingSecondaryCaptionLocale = language
-        store.dispatch('updateSecondaryCaptionLocale', language).finally(() => {
-          if (secondaryCaptionLocalePicks === pick) {
-            pendingSecondaryCaptionLocale = null
-          }
-        })
-      }
-
-      if (!caption) {
-        return true
-      }
-
-      const abortController = new AbortController()
-      secondaryCaptionAbortController = abortController
-      const { signal } = abortController
-
-      try {
-        const response = await fetch(await getSubtitleRequestUrl(caption.url, store.getters), { signal })
-        if (!response.ok) {
-          throw new Error(`Secondary captions request failed with HTTP ${response.status}`)
-        }
-
-        const parserFactory = shaka.text.TextEngine.findParser(caption.mimeType)
-        const cues = parserFactory().parseMedia(
-          new TextEncoder().encode(await response.text()),
-          { periodStart: 0, segmentStart: 0, segmentEnd: Infinity, vttOffset: 0 },
-          caption.url,
-          []
-        )
-
-        if (signal.aborted) {
-          return false
-        }
-
-        secondaryCaptionCues = cues
-        updateSecondaryCaptionText()
-        return true
-      } catch (error) {
-        if (signal.aborted) {
-          return false
-        }
-        console.error('Failed to load secondary captions', error)
-        secondaryCaption = null
-        return false
-      } finally {
-        if (secondaryCaptionAbortController === abortController) {
-          secondaryCaptionAbortController = null
-        }
-      }
-    }
-
-    /** @returns {string} the language of the remembered secondary captions, or an empty string */
-    function getRememberedSecondaryCaptionLocale() {
-      return pendingSecondaryCaptionLocale ?? store.getters.getSecondaryCaptionLocale
-    }
-
-    /**
-     * Loads the remembered secondary captions once the main captions are shown for a video.
-     */
-    function restoreSecondaryCaption() {
-      const language = getRememberedSecondaryCaptionLocale()
-      const activeTrack = player?.getTextTracks().find(track => track.active)
-
-      if (!language || !activeTrack || player.isLive() || (secondaryCaption && props.captions.includes(secondaryCaption))) {
-        return
-      }
-
-      const caption = findCaptionByLocale(
-        props.captions.filter(caption => !isShownAsMainCaption(caption, activeTrack)),
-        language
-      )
-
-      if (caption) {
-        selectSecondaryCaption(caption, false)
-      }
-    }
-
-    /**
-     * @param {{ label: string, language: string }} caption
-     * @param {shaka.extern.Track | undefined} activeTrack
-     */
-    function isShownAsMainCaption(caption, activeTrack) {
-      return activeTrack?.language === caption.language && activeTrack.label === caption.label
-    }
-
-    function updateSecondaryCaptionText() {
-      const activeTrack = secondaryCaptionCues.length > 0 ? player?.getTextTracks().find(track => track.active) : undefined
-
-      // Only shown together with the main captions, so turning captions off hides both
-      secondaryCaptionText.value = activeTrack && !isShownAsMainCaption(secondaryCaption, activeTrack)
-        ? getActiveCueText(secondaryCaptionCues, (video.value?.currentTime ?? 0) - captionTimingOffset)
-        : ''
-
-      if (secondaryCaptionText.value) {
-        observeSecondaryCaptionsBox()
-      }
-    }
-
     function handleTextTrackChanged() {
       syncShortsCaptionsEnabled()
       restoreSecondaryCaption()
       updateSecondaryCaptionText()
     }
-
-    watch(() => props.captions, () => {
-      if (secondaryCaption && !props.captions.includes(secondaryCaption)) {
-        secondaryCaptionAbortController?.abort()
-        secondaryCaptionAbortController = null
-        secondaryCaption = null
-        secondaryCaptionCues = []
-        updateSecondaryCaptionText()
-      }
-    })
 
     function toggleCaptions() {
       const textTracks = player.getTextTracks()
@@ -10005,16 +7155,7 @@ export default defineComponent({
       }
 
       if (isNativeFullscreenActive() || fullWindowEnabled.value) {
-        const openDocks = getFullscreenOpenDocks('metadata')
-        if (open && openDocks.length === 1 && fullscreenDockCollapsedState.metadata != null) {
-          toggleFullscreenDockCollapsed(
-            openDocks,
-            'metadata',
-            fullscreenDockWeights,
-            fullscreenDockCollapsedState,
-            getFullscreenDockBounds().height
-          )
-        }
+        if (open) expandCollapsedFullscreenDock('metadata')
         setFullscreenMetadata(open)
       } else {
         restoreFullscreenMetadata = open
@@ -10884,7 +8025,7 @@ export default defineComponent({
 
       class SponsorBlockHighlightButtonFactory {
         create(rootElement, controls) {
-          return new SponsorBlockHighlightButton(events, rootElement, controls, sponsorBlockHighlightState)
+          return new SponsorBlockHighlightButton(events, rootElement, controls, getSponsorBlockHighlightState())
         }
       }
 
@@ -12219,70 +9360,6 @@ export default defineComponent({
 
     // #region seek bar markers
 
-    function clearAbRepeatMarkers() {
-      container.value?.querySelectorAll('.abRepeatMarker, .abRepeatRange').forEach(marker => marker.remove())
-    }
-
-    function refreshAbRepeatMarkers() {
-      clearAbRepeatMarkers()
-
-      const seekBarContainer = container.value?.querySelector('.shaka-seek-bar-container')
-      if (
-        disableAbRepeat.value ||
-        !seekBarContainer ||
-        !player ||
-        (abRepeatStart.value === null && abRepeatEnd.value === null)
-      ) {
-        return
-      }
-
-      const { start, end } = player.seekRange()
-      const duration = end - start
-      if (!Number.isFinite(duration) || duration <= 0) {
-        return
-      }
-
-      // The media duration can extend beyond the last seekable sample.
-      // Keep the saved boundaries visible at the nearest timeline edge.
-      const position = time => Math.min(100, Math.max(0, ((time - start) / duration) * 100))
-      const markers = []
-      if (hasValidAbRepeatRange()) {
-        const range = document.createElement('div')
-        range.className = `abRepeatRange${abRepeatEnabled.value ? '' : ' abRepeatRangeInactive'}`
-        range.style.left = `${position(abRepeatStart.value)}%`
-        range.style.width = `${position(abRepeatEnd.value) - position(abRepeatStart.value)}%`
-        markers.push(range)
-      }
-
-      markers.push(...[
-        ['A', abRepeatStart.value],
-        ['B', abRepeatEnd.value],
-      ]
-        .filter(([_point, time]) => time !== null)
-        .map(([point, time]) => {
-          const marker = document.createElement('button')
-          marker.type = 'button'
-          marker.className = `abRepeatMarker abRepeatMarker${point}${abRepeatEnabled.value ? '' : ' abRepeatMarkerInactive'}`
-          marker.style.left = `calc(${position(time)}% - 22px)`
-          marker.dataset.point = point
-          marker.ariaLabel = t('Video.Player.A-B Repeat.Adjust Point', {
-            point,
-            timestamp: formatAbRepeatTimestamp(time),
-          })
-          marker.addEventListener('pointerdown', event => startAbRepeatMarkerDrag(
-            point === 'A' ? 'start' : 'end',
-            event
-          ))
-          marker.addEventListener('keydown', event => handleAbRepeatMarkerKeydown(
-            point === 'A' ? 'start' : 'end',
-            event
-          ))
-          return marker
-        }))
-
-      addMarkers(markers)
-    }
-
     function clearSponsorBlockMarkers() {
       container.value.querySelectorAll('.sponsorBlockMarker').forEach(marker => marker.remove())
     }
@@ -12516,10 +9593,7 @@ export default defineComponent({
       const wasFullscreen = isFullscreen.value
       finishAndroidFullscreenExit(true)
       androidFullscreenHostActive.value = !!androidFullscreenHost && document.fullscreenElement === androidFullscreenHost
-      if (videoZoomPinchStart && videoZoomPinchStart.fullscreen !== fullscreen) invalidateVideoZoomPinch()
-      if (!fullscreen && selectedVideoZoom.value > VIDEO_ZOOM_LEVELS.at(-1)) {
-        updateVideoZoom(VIDEO_ZOOM_LEVELS.at(-1))
-      }
+      handleVideoZoomFullscreenChange(fullscreen)
       isFullscreen.value = fullscreen
       if (props.shortsPlayer) {
         resetShortsOverflowMenu()
@@ -13009,10 +10083,8 @@ export default defineComponent({
       unbindAndroidMediaErrors?.()
       clearSabrBackoffTimer()
       clearPreRollTimer()
-      clearTimeout(sponsorBlockHighlightLabelTimeout)
       cancelSponsorBlockSkipSchedule()
       clearAbRepeatBoundarySchedule()
-      abRepeatDragCleanup?.()
     })
 
     /**
@@ -13558,15 +10630,6 @@ export default defineComponent({
 
     // #endregion setup
 
-    watch(() => skippedSponsorBlockSegments.value.length, (length) => {
-      if (length > 0) {
-        sponsorBlockToastNow.value = Date.now()
-        startSponsorBlockToastTimer()
-      } else {
-        stopSponsorBlockToastTimer()
-      }
-    })
-
     // #region tear down
 
     onBeforeUnmount(() => {
@@ -13585,10 +10648,6 @@ export default defineComponent({
       player?.removeEventListener('loaded', applyCaptionTiming)
       clearTimeout(paidPromotionTimer)
       disableTwitchTsVideoGap?.()
-      if (fullscreenDockLayoutFrame !== null) {
-        cancelAnimationFrame(fullscreenDockLayoutFrame)
-      }
-      cancelFullscreenDockVideoAnimation()
       cancelPendingVolumeUserSet()
       fullWindowAnimation?.cancel()
       hasLoaded.value = false
@@ -13669,18 +10728,7 @@ export default defineComponent({
         overflowMenuElement = null
       }
 
-      if (controlPanelResizeObserver) {
-        controlPanelResizeObserver.disconnect()
-        controlPanelResizeObserver = null
-      }
-
-      if (controlPanelMutationObserver) {
-        controlPanelMutationObserver.disconnect()
-        controlPanelMutationObserver = null
-      }
-
-      volumePointerListeners?.abort()
-      volumePointerListeners = null
+      destroyAdaptiveControlPanelLayout()
 
       if (fullscreenControlsVisibilityObserver) {
         fullscreenControlsVisibilityObserver.disconnect()
@@ -13697,23 +10745,11 @@ export default defineComponent({
         setAndroidStatusBarVisible(true).catch(() => {})
       }
 
-      if (controlPanelLayoutFrame !== null) {
-        cancelAnimationFrame(controlPanelLayoutFrame)
-        controlPanelLayoutFrame = null
-      }
-
       if (videoResizeObserver) {
         videoResizeObserver.disconnect()
       }
 
       cleanUpCustomPlayerControls()
-
-      videoZoomTouchPointers.clear()
-      videoZoomPinchStart = null
-      videoZoomGestureZoom.value = null
-      videoFillZoomProximity.value = 0
-      videoFillZoomSnapReady.value = false
-      clearTimeout(videoZoomSuppressClickTimer)
 
       if (!shortsNavigationSuspended.value) {
         tabMediaCoordinator.setMiniPlayer(mediaTabId, false)
