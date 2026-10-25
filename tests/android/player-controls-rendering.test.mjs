@@ -39,6 +39,7 @@ for (const classic of [false, true]) {
                   <div class="ft-time-display-group"><button class="shaka-current-time">1:18:15 / 1:55:22</button></div>
                   <button class="ft-chapters-button"><span class="ft-chapters-icon">▣</span><span class="ft-chapters-current-title">Chapter title</span><span class="ft-chapters-chevron">⌄</span></button>
                   <div class="shaka-spacer"></div>
+                  <span class="ft-right-control-glass" aria-hidden="true" hidden></span>
                   <div class="ft-quick-playback-rate-bar"><button class="ft-quick-playback-rate-button">Normal</button></div>
                   <button class="caption-toggle-button">CC</button>
                   <button class="shaka-pip-button">PiP</button>
@@ -58,17 +59,32 @@ for (const classic of [false, true]) {
         await frame.locator('.shaka-controls-button-panel').waitFor()
         const layout = () => frame.evaluate(layoutSource => {
           const panel = document.querySelector('.shaka-controls-button-panel')
-          // Exercise the component's actual layout function in this frame.
+          // Exercise the component's actual layout function in this frame. The
+          // frame has no OverlayScrollbars, so the speed preset scroll clamp is a no-op.
           // eslint-disable-next-line no-new-func
-          new Function(`${layoutSource}\nupdateControlPanelLayout(arguments[0])`)(panel)
+          new Function(`const clampOverlayScrollLeft = () => {}\n${layoutSource}\nupdateControlPanelLayout(arguments[0])\nupdateRightControlGlass(arguments[0])`)(panel)
           const visible = selector => getComputedStyle(panel.querySelector(selector)).display !== 'none'
+          const rightGlass = panel.querySelector('.ft-right-control-glass')
           return {
             pip: visible('.shaka-pip-button'),
             captions: visible('.caption-toggle-button'),
             settings: visible('.shaka-overflow-menu-button'),
             fullscreen: visible('.shaka-fullscreen-button'),
-            settingsStartRadius: getComputedStyle(panel.querySelector('.shaka-overflow-menu-button')).borderStartStartRadius,
+            // The right pill is one glass layer over the visible buttons after the spacer.
+            rightGlassStartOffset: rightGlass.getBoundingClientRect().left - panel.querySelector('.shaka-overflow-menu-button').getBoundingClientRect().left,
+            rightGlassStartRadius: getComputedStyle(rightGlass).borderStartStartRadius,
             spacerWidth: panel.querySelector('.shaka-spacer').getBoundingClientRect().width,
+            rateBarExcessWidth: (() => {
+              const rateBar = panel.querySelector('.ft-quick-playback-rate-bar')
+              const style = getComputedStyle(rateBar)
+              // Client rects include the player's CSS zoom; computed lengths don't.
+              const zoom = Number.parseFloat(getComputedStyle(rateBar.closest('.ftVideoPlayer')).zoom) || 1
+              const rates = [...rateBar.children].filter(child => getComputedStyle(child).display !== 'none')
+              const contentWidth = rates.reduce((width, child) => width + child.getBoundingClientRect().width, 0) +
+                (Math.max(0, rates.length - 1) * Number.parseFloat(style.columnGap) +
+                  Number.parseFloat(style.paddingLeft) + Number.parseFloat(style.paddingRight)) * zoom
+              return rateBar.getBoundingClientRect().width - contentWidth
+            })(),
             trailingSpace: panel.getBoundingClientRect().right - panel.querySelector('.shaka-fullscreen-button').getBoundingClientRect().right,
             classes: panel.className,
           }
@@ -79,7 +95,10 @@ for (const classic of [false, true]) {
         assert.equal(portrait.settings, true)
         assert.equal(portrait.fullscreen, true)
         assert.ok(portrait.spacerWidth < 1, JSON.stringify(portrait))
-        if (!classic) assert.notEqual(portrait.settingsStartRadius, '0px', JSON.stringify(portrait))
+        if (!classic) {
+          assert.ok(Math.abs(portrait.rightGlassStartOffset) < 1, JSON.stringify(portrait))
+          assert.notEqual(portrait.rightGlassStartRadius, '0px', JSON.stringify(portrait))
+        }
         await frame.locator('.shaka-overflow-menu').evaluate(menu => menu.classList.remove('shaka-hidden'))
         assert.equal(await frame.locator('.shaka-overflow-menu > .shaka-caption-button').isVisible(), true)
         assert.equal(await frame.locator('.shaka-overflow-menu > .shaka-pip-button').isVisible(), true)
@@ -88,7 +107,8 @@ for (const classic of [false, true]) {
         const landscape = await layout()
         assert.equal(landscape.pip, true, JSON.stringify(landscape))
         assert.equal(landscape.captions, true, JSON.stringify(landscape))
-        assert.ok(landscape.spacerWidth < 1, JSON.stringify(landscape))
+        // Extra width goes to the spacer; the speed strip stays no wider than its presets.
+        assert.ok(landscape.rateBarExcessWidth < 1, JSON.stringify(landscape))
         assert.ok(Math.abs(landscape.trailingSpace) < 1, JSON.stringify(landscape))
         const player = frame.locator('.ftVideoPlayer')
         await player.evaluate(element => element.classList.add('shortsPlayer'))
