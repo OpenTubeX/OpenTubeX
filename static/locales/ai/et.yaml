@@ -750,6 +750,15 @@ Settings:
     Swipe Left or Right to Seek in Fullscreen: Täisekraanil kerimiseks pühkige vasakule või paremale
     Show Swipe to Seek Preview: Näita pühkimisega kerimise eelvaadet
     Enable Google Cast: "Luba Google Cast"
+    Sections:
+      Playback: Taasesitus
+      Autoplay: Automaatne esitus
+      Playback Speed: Taasesituse kiirus
+      Player Controls: Pleieri juhtnupud
+      Gestures: Žestid
+      Viewing Modes: Vaaterežiimid
+      Shorts: Shorts
+      Screenshots: Ekraanipildid
   Channel Settings:
     Channel Settings: Kanali seaded
     Channel Settings Description: Jäta iga kanali jaoks eraldi meelde vaatamise ajal valitud seaded, et need rakenduksid uuesti, kui vaatad järgmisel korral selle kanali videot.

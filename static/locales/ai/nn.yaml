@@ -850,6 +850,15 @@ Settings:
     Swipe Left or Right to Seek in Fullscreen: Sveip til venstre eller høgre for å spole i fullskjerm
     Show Swipe to Seek Preview: Vis førehandsvising ved spoling med sveip
     Enable Google Cast: "Aktiver Google Cast"
+    Sections:
+      Playback: Avspeling
+      Autoplay: Automatisk avspeling
+      Playback Speed: Avspelingsfart
+      Player Controls: Avspelarkontrollar
+      Gestures: Rørsler
+      Viewing Modes: Visingsmodusar
+      Shorts: Shorts
+      Screenshots: Skjermbilete
   Channel Settings:
     Channel Settings: Kanalinnstillingar
     Channel Settings Description: Hugs innstillingane du vel medan du ser på kvar einskild kanal, slik at dei blir brukte att neste gong du ser ein av videoane til kanalen.

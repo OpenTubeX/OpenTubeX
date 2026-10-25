@@ -763,6 +763,15 @@ Settings:
     Swipe Left or Right to Seek in Fullscreen: החלקה שמאלה או ימינה כדי לדלג במסך מלא
     Show Swipe to Seek Preview: הצגת תצוגה מקדימה בעת דילוג בהחלקה
     Enable Google Cast: "הפעלת Google Cast"
+    Sections:
+      Playback: ניגון
+      Autoplay: ניגון אוטומטי
+      Playback Speed: מהירות ניגון
+      Player Controls: פקדי הנגן
+      Gestures: מחוות
+      Viewing Modes: מצבי צפייה
+      Shorts: Shorts
+      Screenshots: צילומי מסך
   Channel Settings:
     Channel Settings: הגדרות ערוץ
     Channel Settings Description: שמירת ההגדרות שנבחרו בזמן צפייה לכל ערוץ בנפרד, כדי שיוחלו שוב בצפייה הבאה באחד מסרטוניו.

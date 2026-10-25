@@ -994,6 +994,15 @@ Settings:
     Swipe Left or Right to Seek in Fullscreen: Llisca cap a l’esquerra o la dreta per avançar o retrocedir a pantalla completa
     Show Swipe to Seek Preview: Mostra la previsualització en lliscar per cercar
     Enable Google Cast: "Activa Google Cast"
+    Sections:
+      Playback: Reproducció
+      Autoplay: Reproducció automàtica
+      Playback Speed: Velocitat de reproducció
+      Player Controls: Controls del reproductor
+      Gestures: Gestos
+      Viewing Modes: Modes de visualització
+      Shorts: Shorts
+      Screenshots: Captures de pantalla
   Channel Settings:
     Channel Settings: Configuració dels canals
     Channel Settings Description: Recorda per separat la configuració que trieu mentre mireu cada canal, per tornar-la a aplicar la propera vegada que mireu un dels seus vídeos.

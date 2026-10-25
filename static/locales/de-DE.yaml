@@ -866,6 +866,15 @@ Settings:
         Destructive pressed: Destruktive Aktion beim Drücken
         Text and icons on destructive actions: Text und Symbole auf destruktiven Aktionen
   Player Settings:
+    Sections:
+      Playback: Wiedergabe
+      Autoplay: Automatische Wiedergabe
+      Playback Speed: Wiedergabegeschwindigkeit
+      Player Controls: Player-Steuerelemente
+      Gestures: Gesten
+      Viewing Modes: Ansichtsmodi
+      Shorts: Shorts
+      Screenshots: Screenshots
     Lights Off: Licht aus
     Show Lights Off Toggle: Schalter für „Licht aus“ anzeigen
     Show Volume Boost Toggle: Schalter für Lautstärkeverstärkung anzeigen

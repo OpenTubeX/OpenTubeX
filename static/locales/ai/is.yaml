@@ -754,6 +754,15 @@ Settings:
     Swipe Left or Right to Seek in Fullscreen: Strjúktu til vinstri eða hægri til að spóla á öllum skjánum
     Show Swipe to Seek Preview: Sýna forskoðun þegar strokið er til að spóla
     Enable Google Cast: "Virkja Google Cast"
+    Sections:
+      Playback: Spilun
+      Autoplay: Sjálfvirk spilun
+      Playback Speed: Spilunarhraði
+      Player Controls: Stýringar spilara
+      Gestures: Bendingar
+      Viewing Modes: Skoðunarhamir
+      Shorts: Shorts
+      Screenshots: Skjámyndir
   Channel Settings:
     Channel Settings: Rásarstillingar
     Channel Settings Description: Muna stillingarnar sem þú velur við áhorf fyrir hverja rás, svo þær verði notaðar aftur næst þegar þú horfir á myndband frá henni.

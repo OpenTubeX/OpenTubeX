@@ -1441,10 +1441,10 @@ test.describe('paired switch alignment', { tag: '@scale' }, () => {
     const section = await goToSettingsSection(page, 'playback')
     // Keep two columns while narrowing the content enough to wrap long labels.
     await section.evaluate(element => { element.parentElement.style.inlineSize = '800px' })
-    const grid = section.locator('.playerSwitchGrid')
+    const grids = section.locator('.playerSwitchGrid')
     for (const direction of ['ltr', 'rtl']) {
       await page.evaluate(value => { document.body.dir = value }, direction)
-      const geometry = await grid.evaluate(element => {
+      const geometry = await grids.evaluateAll(elements => elements.map(element => {
         const controls = Array.from(element.querySelectorAll('.switch-ctn'))
           .filter(toggle => getComputedStyle(toggle).display !== 'none')
           .map(toggle => {
@@ -1460,9 +1460,9 @@ test.describe('paired switch alignment', { tag: '@scale' }, () => {
             }
           })
         return { columns: getComputedStyle(element).gridTemplateColumns.split(' ').length, controls }
-      })
-      expect(geometry.columns).toBe(2)
-      const pairs = geometry.controls.flatMap((control, index, controls) => index % 2 === 0 && controls[index + 1] ? [[control, controls[index + 1]]] : [])
+      }))
+      expect(geometry.map(grid => grid.columns)).toEqual(geometry.map(() => 2))
+      const pairs = geometry.flatMap(grid => grid.controls.flatMap((control, index, controls) => index % 2 === 0 && controls[index + 1] ? [[control, controls[index + 1]]] : []))
       expect(pairs.some(([left, right]) => Math.abs(left.textHeight - right.textHeight) > 1)).toBe(true)
       for (const [left, right] of pairs) {
         for (const key of ['labelCenter', 'textCenter', 'trackCenter']) {
@@ -1473,7 +1473,7 @@ test.describe('paired switch alignment', { tag: '@scale' }, () => {
     if (uiScale === 100) {
       await page.evaluate(() => { document.body.dir = 'ltr' })
       const screenshot = testInfo.outputPath('aligned-player-switches.png')
-      await grid.screenshot({ path: screenshot })
+      await grids.first().screenshot({ path: screenshot })
       await testInfo.attach('aligned-player-switches', { path: screenshot, contentType: 'image/png' })
     }
   })

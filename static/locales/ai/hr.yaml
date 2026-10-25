@@ -752,6 +752,15 @@ Settings:
     Swipe Left or Right to Seek in Fullscreen: Povucite ulijevo ili udesno za premotavanje na cijelom zaslonu
     Show Swipe to Seek Preview: Prikaži pretpregled pri premotavanju povlačenjem
     Enable Google Cast: "Omogući Google Cast"
+    Sections:
+      Playback: Reprodukcija
+      Autoplay: Automatska reprodukcija
+      Playback Speed: Brzina reprodukcije
+      Player Controls: Kontrole playera
+      Gestures: Geste
+      Viewing Modes: Načini prikaza
+      Shorts: Shorts
+      Screenshots: Snimke zaslona
   Channel Settings:
     Channel Settings: Postavke kanala
     Channel Settings Description: Postavke koje odaberete tijekom gledanja pamte se zasebno za svaki kanal kako bi se ponovno primijenile kada sljedeći put gledate neki njegov videozapis.

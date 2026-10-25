@@ -737,6 +737,15 @@ Settings:
     Swipe Left or Right to Seek in Fullscreen: Swipe left or right to seek in fullscreen
     Show Swipe to Seek Preview: Show swipe-to-seek preview
     Enable Google Cast: "Enable Google Cast"
+    Sections:
+      Playback: Playback
+      Autoplay: Autoplay
+      Playback Speed: Playback Speed
+      Player Controls: Player Controls
+      Gestures: Gestures
+      Viewing Modes: Viewing Modes
+      Shorts: Shorts
+      Screenshots: Screenshots
   Channel Settings:
     Channel Settings: Channel Settings
     Channel Settings Description: Remember the settings you pick while watching for each channel individually, so they are applied again the next time you watch one of its videos.

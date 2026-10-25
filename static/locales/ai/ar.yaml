@@ -758,6 +758,15 @@ Settings:
     Swipe Left or Right to Seek in Fullscreen: اسحب إلى اليسار أو اليمين للتقديم أو الترجيع في وضع ملء الشاشة
     Show Swipe to Seek Preview: إظهار معاينة السحب للتقديم أو الترجيع
     Enable Google Cast: "تفعيل Google Cast"
+    Sections:
+      Playback: التشغيل
+      Autoplay: التشغيل التلقائي
+      Playback Speed: سرعة التشغيل
+      Player Controls: عناصر تحكم المشغّل
+      Gestures: الإيماءات
+      Viewing Modes: أوضاع العرض
+      Shorts: Shorts
+      Screenshots: لقطات الشاشة
   Channel Settings:
     Channel Settings: إعدادات القناة
     Channel Settings Description: تذكر الإعدادات التي تختارها أثناء المشاهدة لكل قناة على حدة، بحيث يتم تطبيقها مرة أخرى في المرة التالية التي تشاهد فيها أحد مقاطع الفيديو الخاصة بها.

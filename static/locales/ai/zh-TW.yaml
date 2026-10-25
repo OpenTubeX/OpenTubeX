@@ -749,6 +749,15 @@ Settings:
     Swipe Left or Right to Seek in Fullscreen: 全螢幕時向左或向右滑動以快轉或倒轉
     Show Swipe to Seek Preview: 滑動快轉或倒轉時顯示預覽
     Enable Google Cast: "啟用 Google Cast"
+    Sections:
+      Playback: 播放
+      Autoplay: 自動播放
+      Playback Speed: 播放速度
+      Player Controls: 播放器控制項
+      Gestures: 手勢
+      Viewing Modes: 觀看模式
+      Shorts: Shorts
+      Screenshots: 螢幕截圖
   Channel Settings:
     Channel Settings: 頻道設定
     Channel Settings Description: 為各頻道分別記住觀看時選擇的設定，下次觀看該頻道的影片時便會再次套用。

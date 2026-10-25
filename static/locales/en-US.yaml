@@ -1091,6 +1091,15 @@ Settings:
     Secondary Color Theme: Secondary Color Theme
         #* Main Color Theme
   Player Settings:
+    Sections:
+      Playback: Playback
+      Autoplay: Autoplay
+      Playback Speed: Playback Speed
+      Player Controls: Player Controls
+      Gestures: Gestures
+      Viewing Modes: Viewing Modes
+      Shorts: Shorts
+      Screenshots: Screenshots
     Lights Off: Lights Off
     Show Lights Off Toggle: Show Lights Off Toggle
     Show Volume Boost Toggle: Show Volume Boost Toggle

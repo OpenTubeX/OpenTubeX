@@ -764,6 +764,15 @@ Settings:
     Swipe Left or Right to Seek in Fullscreen: முழுத்திரையில் முன்னோக்கி அல்லது பின்னோக்கி நகர இடது அல்லது வலது பக்கம் ஸ்வைப் செய்யவும்
     Show Swipe to Seek Preview: தேட ஸ்வைப் செய்யும்போது முன்னோட்டத்தைக் காட்டு
     Enable Google Cast: "Google Cast-ஐ இயக்கு"
+    Sections:
+      Playback: இயக்கம்
+      Autoplay: தானியங்கு இயக்கம்
+      Playback Speed: இயக்க வேகம்
+      Player Controls: பிளேயர் கட்டுப்பாடுகள்
+      Gestures: சைகைகள்
+      Viewing Modes: பார்வை முறைகள்
+      Shorts: Shorts
+      Screenshots: திரைப்பிடிப்புகள்
   Channel Settings:
     Channel Settings: சேனல் அமைப்புகள்
     Channel Settings Description: ஒவ்வொரு சேனலையும் பார்க்கும்போது தேர்ந்தெடுக்கும் அமைப்புகளைத் தனித்தனியாக நினைவில் கொண்டு, அதன் காணொளியை அடுத்த முறை பார்க்கும்போது மீண்டும் பயன்படுத்தும்.

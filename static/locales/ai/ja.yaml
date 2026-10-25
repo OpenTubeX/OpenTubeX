@@ -750,6 +750,15 @@ Settings:
     Swipe Left or Right to Seek in Fullscreen: 全画面で左右にスワイプしてシーク
     Show Swipe to Seek Preview: スワイプでシークするときにプレビューを表示
     Enable Google Cast: "Google Castを有効にする"
+    Sections:
+      Playback: 再生
+      Autoplay: 自動再生
+      Playback Speed: 再生速度
+      Player Controls: プレーヤーのコントロール
+      Gestures: ジェスチャー
+      Viewing Modes: 表示モード
+      Shorts: ショート
+      Screenshots: スクリーンショット
   Channel Settings:
     Channel Settings: チャンネル設定
     Channel Settings Description: 視聴中に選んだ設定をチャンネルごとに記憶し、次回そのチャンネルの動画を見るときに再度適用します。

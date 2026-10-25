@@ -781,6 +781,15 @@ Settings:
     Swipe Left or Right to Seek in Fullscreen: Праводзьце налева або направа для перамоткі ў поўнаэкранным рэжыме
     Show Swipe to Seek Preview: Паказваць папярэдні прагляд пры перамотцы жэстам
     Enable Google Cast: "Уключыць Google Cast"
+    Sections:
+      Playback: Прайграванне
+      Autoplay: Аўтапрайграванне
+      Playback Speed: Хуткасць прайгравання
+      Player Controls: Элементы кіравання плэерам
+      Gestures: Жэсты
+      Viewing Modes: Рэжымы прагляду
+      Shorts: Shorts
+      Screenshots: Здымкі экрана
   Channel Settings:
     Channel Settings: Налады каналаў
     Channel Settings Description: Запамінаць асобныя налады, абраныя падчас прагляду кожнага канала, і ўжываць іх пры наступным праглядзе відэа з гэтага канала.

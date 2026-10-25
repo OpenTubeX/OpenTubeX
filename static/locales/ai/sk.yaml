@@ -750,6 +750,15 @@ Settings:
     Swipe Left or Right to Seek in Fullscreen: Potiahnutím doľava alebo doprava posúvať prehrávanie na celej obrazovke
     Show Swipe to Seek Preview: Zobraziť náhľad pri pretáčaní potiahnutím
     Enable Google Cast: "Povoliť Google Cast"
+    Sections:
+      Playback: Prehrávanie
+      Autoplay: Automatické prehrávanie
+      Playback Speed: Rýchlosť prehrávania
+      Player Controls: Ovládacie prvky prehrávača
+      Gestures: Gestá
+      Viewing Modes: Režimy zobrazenia
+      Shorts: Shorts
+      Screenshots: Snímky obrazovky
   Channel Settings:
     Channel Settings: Nastavenia kanálov
     Channel Settings Description: Nastavenia, ktoré vyberiete pri sledovaní, sa zapamätajú pre každý kanál samostatne a znova sa použijú pri ďalšom sledovaní jeho videa.

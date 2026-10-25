@@ -763,6 +763,15 @@ Settings:
     Swipe Left or Right to Seek in Fullscreen: Kelaa koko näytössä pyyhkäisemällä vasemmalle tai oikealle
     Show Swipe to Seek Preview: Näytä esikatselu pyyhkäisemällä kelattaessa
     Enable Google Cast: "Ota Google Cast käyttöön"
+    Sections:
+      Playback: Toisto
+      Autoplay: Automaattinen toisto
+      Playback Speed: Toistonopeus
+      Player Controls: Soittimen säätimet
+      Gestures: Eleet
+      Viewing Modes: Katselutilat
+      Shorts: Shorts
+      Screenshots: Kuvakaappaukset
   Channel Settings:
     Channel Settings: Kanava-asetukset
     Channel Settings Description: Muista katselun aikana valitsemasi asetukset kanavakohtaisesti, jotta niitä käytetään uudelleen, kun katsot seuraavan kerran saman kanavan videota.

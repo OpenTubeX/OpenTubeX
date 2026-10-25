@@ -171,9 +171,6 @@ test.describe('German playback settings on a narrow screen', () => {
 
     await expect(defaultRate).toBeVisible()
     await expect(customize).toBeVisible()
-    // Electron has one extra volume slider. Remove it so the shared renderer
-    // uses the same slider positions as the Capacitor screen in this regression.
-    await defaultRate.evaluate(element => { element.previousElementSibling.remove() })
     const metrics = await content.evaluate((element) => {
       const contentBounds = element.getBoundingClientRect()
       const labelBounds = Array.from(element.querySelectorAll('.pure-material-slider .label'))
