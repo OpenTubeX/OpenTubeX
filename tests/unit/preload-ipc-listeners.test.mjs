@@ -13,7 +13,10 @@ async function loadPreloadInterface() {
   const IpcChannels = new Proxy({}, {
     get: (_target, property) => String(property)
   })
-  const source = (await readFile(new URL('../../src/preload/interface.js', import.meta.url), 'utf8'))
+  const tabsSource = (await readFile(new URL('../../src/preload/tabs.js', import.meta.url), 'utf8'))
+    .replace(/^import .*$/gm, '')
+    .replace('export const tabs =', 'const tabs =')
+  const source = tabsSource + (await readFile(new URL('../../src/preload/interface.js', import.meta.url), 'utf8'))
     .replace(/^import .*$/gm, '')
     .replace('export default {', 'globalThis.preloadInterface = {')
 

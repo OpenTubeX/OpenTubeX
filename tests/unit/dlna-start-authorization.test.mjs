@@ -4,7 +4,7 @@ import test from 'node:test'
 import vm from 'node:vm'
 
 async function fixture() {
-  const main = await readFile(new URL('../../src/main/index.js', import.meta.url), 'utf8')
+  const castIpc = await readFile(new URL('../../src/main/castIpc.js', import.meta.url), 'utf8')
   const preload = await readFile(new URL('../../src/preload/interface.js', import.meta.url), 'utf8')
   const handlers = new Map()
   const attempts = []
@@ -31,7 +31,7 @@ async function fixture() {
     navigator: { userActivation: { isActive: true } },
     ipcRenderer: { invoke: (channel, payload) => { invocations.push(payload); return handlers.get(channel)(event, payload) } }
   })
-  vm.runInContext(main.slice(main.indexOf('  const dlnaOwners ='), main.indexOf('  ipcMain.handle(IpcChannels.DLNA_RECOVER')), context)
+  vm.runInContext(castIpc.slice(castIpc.indexOf('  const dlnaOwners ='), castIpc.indexOf('  ipcMain.handle(IpcChannels.DLNA_RECOVER')), context)
   const dlna = vm.runInContext(`({${preload.slice(preload.indexOf('  dlna: {'), preload.indexOf('\n  /**', preload.indexOf('  dlna: {')))}}).dlna`, context)
   return {
     dlna, attempts, invocations, context,

@@ -11,10 +11,6 @@ import { isPortableBuild } from './applicationDataPaths'
 import path from 'path'
 import { createDesktopShareHandler, loadWindowsShare } from './desktopShare'
 import cp from 'child_process'
-import * as http from 'node:http'
-import * as https from 'node:https'
-import { randomUUID } from 'crypto'
-import { load as loadYaml } from 'js-yaml'
 import { getFonts } from 'font-list'
 
 import {
@@ -25,47 +21,33 @@ import {
   getConfiguredKeyboardShortcuts,
   getElectronAccelerator,
   SEARCH_CHAR_LIMIT,
-  MULTIPLE_TABS_CONFIRM_THRESHOLD,
   BASE_THEME_BACKGROUND_COLORS,
   LIGHT_BASE_THEMES,
   DARK_BASE_THEMES,
-  DOWNLOADED_MEDIA_MIME_TYPES,
 } from '../constants'
-import {
-  CUSTOM_THEMES_DIRECTORY,
-  customThemeIdFromValue,
-  customThemeValue,
-  isCustomThemeValue,
-  normalizeCustomTheme,
-  normalizeCustomThemes,
-} from '../customTheme'
+import { isCustomThemeValue } from '../customTheme'
 import { MATERIAL_SYSTEM_SEED, MATERIAL_THEME_VALUES, materialColorScheme, materialSeedPalette, materialThemeMode, normalizeSystemAccentColor } from '../materialTheme.js'
-import { resolveSystemTheme, resolveSystemThemeSettings } from '../appearanceSettings'
+import { resolveSystemTheme } from '../appearanceSettings'
 import { applySyncServerUserAgent } from '../syncServerUserAgent'
 import * as baseHandlers from '../datastores/handlers/base'
 import { liveReminders, onLegacyDatastoreChanges, onLegacyDatastoreImported, waitForDatastores } from '../datastores'
 import { extractExpiryTimestamp, ImageCache } from './ImageCache'
 import { constants as fsConstants, existsSync } from 'fs'
-import { createReadStream } from 'node:fs'
 import asyncFs from 'fs/promises'
 import { promisify } from 'util'
-import { Readable } from 'node:stream'
 import { hostname, release } from 'node:os'
 import { brotliDecompress } from 'zlib'
 
 import packageDetails from '../../package.json'
 import { handleOpenInExternalPlayer } from './externalPlayer'
-import { discoverDlnaDevices, startDlnaCast, stopDlnaCast, hasDlnaCastFailed, getDlnaCastPosition } from './dlnaCast'
+import { stopDlnaCast } from './dlnaCast'
 import { ChromecastManager } from './chromecast'
-import { fetchCastMedia, resolveCastMediaAddresses } from './castMediaServer'
 import { handleTwitchChatReplayPage, handleTwitchSubOnlyVod } from './twitchChat'
 import { applyTwitchPlaylistOrigin } from '../twitchPlaylistOrigin'
-import { getDlnaFfmpegExecutable, isYtDlpStoryboardUrl, getYtDlpDownloadFile, getYtDlpExternalStreamCookieHeader, getYtDlpExternalStreamHeaders, handleYtDlpCancelDownload, handleYtDlpCheckBinaryUpdate, handleYtDlpClearDownloads, handleYtDlpControlDownload, handleYtDlpDownload, handleYtDlpDownloadBinary, handleYtDlpGetInfo, handleYtDlpGetSubtitle, handleYtDlpGetPlaybackInfo, handleYtDlpGetHistoryMetadata, handleYtDlpCancelHistoryRepair, handleYtDlpGetRecommendations, handleYtDlpSearch, handleYtDlpListDownloads, handleYtDlpOpenDownload, handleYtDlpQueueAction, handleYtDlpRemoveDownload, refreshYtDlpDownloadQueue, restoreYtDlpDownloadQueue, shutdownYtDlpDownloads } from './ytDlp'
-import { applyYtDlpPlaybackCacheSettings, handleYtDlpPlaybackCacheClear, handleYtDlpPlaybackCacheDelete, handleYtDlpPlaybackCacheGet, handleYtDlpPlaybackCacheSet } from './ytDlpPlaybackCache'
+import { isYtDlpStoryboardUrl, getYtDlpExternalStreamCookieHeader, getYtDlpExternalStreamHeaders, refreshYtDlpDownloadQueue, restoreYtDlpDownloadQueue, shutdownYtDlpDownloads } from './ytDlp'
+import { applyYtDlpPlaybackCacheSettings } from './ytDlpPlaybackCache'
 import { generatePoToken } from './poTokenGenerator'
-import { expandMultipleOnlyPluralMessages, selectPluralForm } from '../renderer/i18n/plurals'
-import { composeLocaleMessages } from '../localeComposition'
-import { buildProxyUrl, DEFAULT_PROXY_SETTINGS, isNonPublicNetworkAddress, isOpenTubeXUrl } from './utils'
+import { buildProxyUrl, DEFAULT_PROXY_SETTINGS, isOpenTubeXUrl } from './utils'
 import { isInvidiousInstanceUrl } from './invidiousAuthorization'
 import { normalizeYatteeServerUrl } from '../renderer/helpers/api/yattee'
 import { usesInvidiousApi, usesInvidiousInstance } from '../apiBackends'
@@ -75,16 +57,10 @@ import { tabPreviewStorage } from './tabs/TabPreviewStorage'
 import { setupTabsIPC } from './tabs/tabIpc'
 import { clearAllTabSessions, loadAllTabSessions } from './tabs/TabSessionStore'
 import { isShareableOpenTubeXRoute, transformOpenTubeXRouteUrl } from '../renderer/helpers/share'
-import {
-  buildSearchUrl,
-  DEFAULT_SEARCH_ENGINES_SETTING,
-  getFaviconUrl,
-  parseSearchEngines
-} from '../searchEngines'
-import { fetchFaviconDataUrl, resolveFaviconUrl } from './favicon'
+import { DEFAULT_SEARCH_ENGINES_SETTING } from '../searchEngines'
 import { LiveReminderManager } from './LiveReminderManager'
 import { requestVoiceOverTranslation } from './voiceOverTranslation'
-import { clearVideoMetadataCache, getVideoMetadataCacheSize, updateVideoMetadataCache } from './videoMetadataCache'
+import { setupVideoMetadataCacheIpc } from './videoMetadataCache'
 import { shouldAdvanceDockMediaSequence } from './dockMediaSession'
 import { clearStorage, compactStorageDatabases, getStorageUsage } from './storage'
 import { getLinuxDistributionInfo } from './linuxDistribution'
@@ -103,6 +79,15 @@ import { createBackupArchiveFactory } from './backupArchive'
 import { createDatastoreRequestTracker } from './datastoreRequests'
 import { getWindowButtonLayout, onWindowButtonLayoutChanged } from './windowButtonLayout'
 import { setDiagnosticLogging, setupDiagnosticLogIpc } from './diagnosticLog'
+import { createMainTranslator } from './mainTranslator'
+import { createConfirmations } from './confirmations'
+import { setupCustomThemes } from './customThemes'
+import { contextMenuLabel, setupContextMenu, truncateSelectionForLabel } from './contextMenu'
+import { setupIpBlockRecoveryIpc } from './ipBlockRecovery'
+import { isSubscriptionAutoRefreshInProgress, setupSubscriptionAutoRefreshIpc } from './subscriptionAutoRefresh'
+import { setupCastIpc } from './castIpc'
+import { createUrlOpener, getDirectOpenUrl } from './openUrl'
+import { handleDownloadMediaRequest, setupYtDlpIpc } from './ytDlpIpc'
 
 function getSystemAccentColor() {
   try {
@@ -227,7 +212,6 @@ function runApp() {
 
   const devServerPort = process.env.OPENTUBEX_DEV_SERVER_PORT ?? '9080'
   const ROOT_APP_URL = process.env.NODE_ENV === 'development' ? `http://localhost:${devServerPort}` : 'app://bundle/index.html'
-  const CUSTOM_THEMES_PATH = path.join(app.getPath('userData'), CUSTOM_THEMES_DIRECTORY)
 
   const dockMediaSessions = new Map()
   const dockMediaTrackedWindowIds = new Set()
@@ -326,100 +310,8 @@ function runApp() {
     updateDockMenu()
   }
 
-  function getCustomThemePath(id) {
-    if (!/^[\w-]{1,80}$/.test(id)) throw new TypeError('Invalid custom theme ID')
-    return path.join(CUSTOM_THEMES_PATH, `${id}.json`)
-  }
-
-  async function writeCustomThemeFile(theme) {
-    const themePath = getCustomThemePath(theme.id)
-    const temporaryPath = `${themePath}.${randomUUID()}.tmp`
-    await asyncFs.writeFile(temporaryPath, `${JSON.stringify(theme, null, 2)}\n`, 'utf8')
-    await asyncFs.rename(temporaryPath, themePath)
-  }
-
-  async function loadCustomThemes() {
-    await asyncFs.mkdir(CUSTOM_THEMES_PATH, { recursive: true })
-    const entries = await asyncFs.readdir(CUSTOM_THEMES_PATH, { withFileTypes: true })
-    const themes = []
-    for (const entry of entries.sort((left, right) => left.name.localeCompare(right.name))) {
-      if (!entry.isFile() || path.extname(entry.name) !== '.json') continue
-      try {
-        themes.push(normalizeCustomTheme(
-          JSON.parse(await asyncFs.readFile(path.join(CUSTOM_THEMES_PATH, entry.name), 'utf8'))
-        ))
-      } catch (error) {
-        console.error(`Failed to load custom theme ${entry.name}:`, error)
-      }
-    }
-    return themes.sort((left, right) =>
-      left.name.localeCompare(right.name) || left.id.localeCompare(right.id))
-  }
-
-  async function saveCustomTheme(theme) {
-    getCustomThemePath(theme?.id)
-    const normalizedTheme = normalizeCustomTheme(theme)
-    await asyncFs.mkdir(CUSTOM_THEMES_PATH, { recursive: true })
-    await writeCustomThemeFile(normalizedTheme)
-    return await loadCustomThemes()
-  }
-
-  async function deleteCustomTheme(id) {
-    await asyncFs.unlink(getCustomThemePath(id))
-    return await loadCustomThemes()
-  }
-
-  async function replaceCustomThemes(themes) {
-    const normalizedThemes = normalizeCustomThemes(themes)
-    const themeIds = new Set()
-    for (const theme of normalizedThemes) {
-      if (themeIds.has(theme.id)) throw new TypeError(`Duplicate custom theme ID: ${theme.id}`)
-      themeIds.add(theme.id)
-    }
-
-    await asyncFs.mkdir(CUSTOM_THEMES_PATH, { recursive: true })
-    await Promise.all(normalizedThemes.map(writeCustomThemeFile))
-
-    const entries = await asyncFs.readdir(CUSTOM_THEMES_PATH, { withFileTypes: true })
-    await Promise.all(entries.map(async entry => {
-      if (!entry.isFile() || path.extname(entry.name) !== '.json') return
-      const id = path.basename(entry.name, '.json')
-      if (!themeIds.has(id)) await asyncFs.unlink(path.join(CUSTOM_THEMES_PATH, entry.name))
-    }))
-
-    return await loadCustomThemes()
-  }
-
-  async function publishCustomThemes(themes) {
-    const selectedTheme = (await baseHandlers.settings._findOne('baseTheme'))?.value
-    const selectedCustomTheme = isCustomThemeValue(selectedTheme)
-      ? themes.find(({ id }) => id === customThemeIdFromValue(selectedTheme)) ?? themes[0]
-      : null
-    if (selectedCustomTheme) {
-      nativeTheme.themeSource = selectedCustomTheme.isDark ? 'dark' : 'light'
-    }
-    BrowserWindow.getAllWindows().forEach((window) => {
-      if (isOpenTubeXUrl(window.webContents.getURL())) {
-        window.webContents.send(IpcChannels.CUSTOM_THEME_UPDATED, themes)
-      }
-    })
-  }
-
-  async function getSelectedCustomTheme(value) {
-    const id = customThemeIdFromValue(value)
-    const themes = await loadCustomThemes()
-    return id === null ? themes[0] ?? null : themes.find(theme => theme.id === id) ?? null
-  }
-
   let backendPreference = 'local'
   let backendFallback = true
-  const DEFAULT_CONFIRM_CLOSE_APP = true
-  const DEFAULT_CONFIRM_CLOSE_WINDOW_WITH_MULTIPLE_TABS = true
-  const MULTIPLE_TABS_CONFIRMATION_SETTING_KEYS = {
-    close: 'confirmCloseMultipleTabs',
-    load: 'confirmLoadMultipleTabs',
-    unload: 'confirmUnloadMultipleTabs'
-  }
   const DEFAULT_STARTUP_BEHAVIOR = 'loadLastActiveTab'
   const VALID_STARTUP_BEHAVIORS = new Set([
     'loadAllTabs',
@@ -431,75 +323,7 @@ function runApp() {
   const closeConfirmedWindowIds = new Set()
   const closingWindowIds = new Set()
   const appShortcutBlockedWindows = new WeakSet()
-  let quitPromptInProgress = null
-  const windowClosePromptsInProgress = new Map()
   let isQuitConfirmed = false
-  /** @type {{ webContents: import('electron').WebContents, tabId: string } | null} */
-  let subscriptionAutoRefreshOwner = null
-  let subscriptionAutoRefreshProgress = 0
-  /** @type {Promise<{ exitCode: number | null, signal: NodeJS.Signals | null, stdout: string, stderr: string }> | null} */
-  let ipBlockRecoveryScriptPromise = null
-  const faviconPromises = new Map()
-  let configuredSearchEngines = parseSearchEngines(DEFAULT_SEARCH_ENGINES_SETTING)
-  // Menus must not queue a settings read behind unrelated writes on slow storage.
-  const configuredSearchEnginesReady = baseHandlers.settings._findOne('contextMenuSearchEngines')
-    .then(setting => {
-      configuredSearchEngines = parseSearchEngines(setting?.value ?? DEFAULT_SEARCH_ENGINES_SETTING)
-    })
-    .catch(error => {
-      console.warn('Failed to load context-menu search engines:', error)
-    })
-
-  /**
-   * @returns {Promise<ReturnType<typeof parseSearchEngines>>}
-   */
-  async function getConfiguredSearchEngines() {
-    await configuredSearchEnginesReady
-    return configuredSearchEngines
-  }
-
-  /**
-   * @param {string} searchUrl
-   * @returns {Promise<string>}
-   */
-  function resolveSearchEngineFavicon(searchUrl) {
-    const fallback = getFaviconUrl(searchUrl)
-    if (!fallback) return Promise.resolve('')
-
-    const origin = new URL(fallback).origin
-    if (!faviconPromises.has(origin)) {
-      const promise = process.env.OPENTUBEX_E2E_USER_DATA_DIR
-        ? Promise.resolve(fallback)
-        : resolveFaviconUrl(searchUrl, (url, options) => net.fetch(url, options))
-            .then(icon => fetchFaviconDataUrl(icon, (url, options) => net.fetch(url, options)))
-      faviconPromises.set(origin, promise)
-    }
-
-    return faviconPromises.get(origin)
-  }
-
-  /**
-   * @param {string} url
-   * @returns {string | null}
-   */
-  function getOpenTubeXRouteFromUrl(url) {
-    const parsed = URL.parse(url)
-
-    if (!parsed || !isOpenTubeXUrl(parsed)) {
-      return null
-    }
-
-    if (!parsed.hash) {
-      return '/'
-    }
-
-    const route = parsed.hash.startsWith('#')
-      ? parsed.hash.slice(1)
-      : parsed.hash
-
-    return route || '/'
-  }
-
   async function getStartupBehavior() {
     try {
       const value = (await baseHandlers.settings._findOne('startupBehavior'))?.value
@@ -507,41 +331,6 @@ function runApp() {
     } catch (error) {
       console.error('Failed to load startup behavior preference:', error)
       return DEFAULT_STARTUP_BEHAVIOR
-    }
-  }
-
-  async function getConfirmCloseApp() {
-    try {
-      const value = (await baseHandlers.settings._findOne('confirmCloseApp'))?.value
-      return typeof value === 'boolean' ? value : DEFAULT_CONFIRM_CLOSE_APP
-    } catch (error) {
-      console.error('Failed to load close confirmation preference:', error)
-      return DEFAULT_CONFIRM_CLOSE_APP
-    }
-  }
-
-  async function getConfirmCloseWindowWithMultipleTabs() {
-    try {
-      const value = (await baseHandlers.settings._findOne('confirmCloseWindowWithMultipleTabs'))?.value
-      return typeof value === 'boolean' ? value : DEFAULT_CONFIRM_CLOSE_WINDOW_WITH_MULTIPLE_TABS
-    } catch (error) {
-      console.error('Failed to load window close confirmation preference:', error)
-      return DEFAULT_CONFIRM_CLOSE_WINDOW_WITH_MULTIPLE_TABS
-    }
-  }
-
-  /**
-   * @param {'close' | 'load' | 'unload'} action
-   * @returns {Promise<boolean>}
-   */
-  async function getConfirmMultipleTabsAction(action) {
-    const settingKey = MULTIPLE_TABS_CONFIRMATION_SETTING_KEYS[action]
-    try {
-      const value = (await baseHandlers.settings._findOne(settingKey))?.value
-      return typeof value === 'boolean' ? value : true
-    } catch (error) {
-      console.error(`Failed to load ${action} tabs confirmation preference:`, error)
-      return true
     }
   }
 
@@ -569,315 +358,17 @@ function runApp() {
     }
   }
 
-  async function repairSystemThemeSettingsFromMain(themes) {
-    const [systemLightTheme, systemDarkTheme] = await Promise.all([
-      baseHandlers.settings._findOne('systemLightTheme'),
-      baseHandlers.settings._findOne('systemDarkTheme')
-    ])
-    const currentSettings = {
-      systemLightTheme: systemLightTheme?.value ?? 'light',
-      systemDarkTheme: systemDarkTheme?.value ?? 'dark',
-    }
-    const resolvedSettings = resolveSystemThemeSettings(currentSettings, themes)
-
-    await Promise.all(Object.entries(resolvedSettings).map(([key, value]) => (
-      value === currentSettings[key] ? null : updateSettingFromMain(key, value, currentSettings[key])
-    )))
-  }
-
-  /**
-   * @param {string} key
-   * @param {Record<string, unknown>} messages
-   * @returns {string | undefined}
-   */
-  function getLocaleMessage(key, messages) {
-    const value = key.split('.').reduce((current, segment) => {
-      return current != null && typeof current === 'object' ? current[segment] : undefined
-    }, messages)
-
-    return typeof value === 'string' ? value : undefined
-  }
-
-  /**
-   * @param {string} locale
-   * @param {'human' | 'ai'} source
-   * @returns {Promise<Record<string, unknown>>}
-   */
-  async function loadLocaleMessages(locale, source = 'human') {
-    const directory = source === 'ai' ? 'locales/ai' : 'locales'
-    const localePath = process.env.NODE_ENV === 'development'
-      ? path.resolve(__dirname, `../../static/${directory}`, `${locale}.yaml`)
-      : path.resolve(__dirname, `static/${directory}`, `${locale}.json.br`)
-
-    if (process.env.NODE_ENV === 'development') {
-      const contents = await asyncFs.readFile(localePath, 'utf8')
-      return loadYaml(contents)
-    }
-
-    const contents = await asyncFs.readFile(localePath)
-    const decompressed = await brotliDecompressAsync(contents)
-    return JSON.parse(decompressed.toString('utf8'))
-  }
-
-  /**
-   * @returns {Promise<(key: string, parameters?: Record<string, string | number>, pluralChoice?: number) => string>}
-   */
-  async function createMainTranslator() {
-    const fallbackLocale = 'en-US'
-    const storedLocale = (await baseHandlers.settings._findOne('currentLocale'))?.value
-    const storedAITranslationPreference = (await baseHandlers.settings._findOne('useAITranslationCompletions'))?.value
-    const useAITranslationCompletions = storedAITranslationPreference == null
-      ? true
-      : storedAITranslationPreference === true
-    const currentLocale = typeof storedLocale === 'string' && storedLocale !== 'system'
-      ? storedLocale
-      : app.getLocale().replace('_', '-')
-
-    const baseLocale = currentLocale.split('-')[0]
-    const candidateLocales = [...new Set([currentLocale, baseLocale, fallbackLocale].filter(Boolean))]
-    const humanMessages = new Map()
-    const aiMessages = new Map()
-
-    for (const locale of candidateLocales) {
-      try {
-        humanMessages.set(locale, await loadLocaleMessages(locale))
-      } catch (error) {
-        if (locale === fallbackLocale) {
-          console.error('Failed to load fallback locale for close confirmation dialog:', error)
-        }
-      }
-    }
-
-    if (useAITranslationCompletions) {
-      for (const locale of [currentLocale, baseLocale]) {
-        if (!locale || aiMessages.has(locale)) continue
-        try {
-          aiMessages.set(locale, await loadLocaleMessages(locale, 'ai'))
-        } catch {
-          // Complete locales do not have an AI overlay.
-        }
-      }
-    }
-
-    const messagesByLocale = []
-    const currentMessages = composeLocaleMessages({
-      locale: currentLocale,
-      humanMessages,
-      aiMessages,
-      includeAI: useAITranslationCompletions,
-    })
-    if (Object.keys(currentMessages).length > 0) {
-      messagesByLocale.push({
-        locale: currentLocale,
-        messages: expandMultipleOnlyPluralMessages(currentLocale, currentMessages),
-      })
-    }
-
-    if (currentLocale !== fallbackLocale && humanMessages.has(fallbackLocale)) {
-      messagesByLocale.push({
-        locale: fallbackLocale,
-        messages: expandMultipleOnlyPluralMessages(fallbackLocale, humanMessages.get(fallbackLocale)),
-      })
-    }
-
-    return (key, parameters = {}, pluralChoice) => {
-      for (const { locale, messages } of messagesByLocale) {
-        const message = getLocaleMessage(key, messages)
-        if (message) {
-          const selectedMessage = pluralChoice == null
-            ? message
-            : selectPluralForm(locale, message, pluralChoice)
-
-          if (selectedMessage == null) continue
-
-          return Object.entries(parameters).reduce(
-            (text, [name, value]) => text.replaceAll(`{${name}}`, String(value)),
-            selectedMessage
-          )
-        }
-      }
-
-      return key
-    }
-  }
-
-  /**
-   * @param {import('electron').BrowserWindow | null | undefined} browserWindow
-   * @param {boolean} [allowHideWindow]
-   * @param {boolean} [hideWithoutPrompt] Hide the window instead of quitting when the user skips the prompt.
-   * @returns {Promise<boolean>}
-   */
-  async function confirmCloseApp(browserWindow, allowHideWindow = false, hideWithoutPrompt = false) {
-    if (isQuitting || isQuitConfirmed) {
-      return true
-    }
-
-    if (!await getConfirmCloseApp()) {
-      if (!hideWithoutPrompt) return true
-      hideWindowToTray(browserWindow)
-      return false
-    }
-
-    if (quitPromptInProgress) {
-      return quitPromptInProgress
-    }
-
-    quitPromptInProgress = (async () => {
-      const t = await createMainTranslator()
-      const buttons = allowHideWindow
-        ? [
-            t('Close Confirmation.Quit'),
-            t('Close Confirmation.Hide Window'),
-            t('Cancel'),
-            t('Close Confirmation.Never Ask Again')
-          ]
-        : [
-            t('Close Confirmation.Quit'),
-            t('Cancel'),
-            t('Close Confirmation.Never Ask Again')
-          ]
-      const { response } = await dialog.showMessageBox(browserWindow ?? undefined, {
-        type: 'question',
-        title: t('Close Confirmation.Title'),
-        message: t('Close Confirmation.Message'),
-        detail: allowHideWindow
-          ? `${t('Close Confirmation.Background Sync Warning')}\n\n${t('Confirmations.Settings Hint')}`
-          : t('Confirmations.Settings Hint'),
-        buttons,
-        defaultId: 1,
-        cancelId: allowHideWindow ? 2 : 1,
-        noLink: true
-      })
-
-      if (allowHideWindow && response === 1) {
-        hideWindowToTray(browserWindow)
-        return false
-      }
-
-      if (response === (allowHideWindow ? 3 : 2)) {
-        try {
-          await updateSettingFromMain('confirmCloseApp', false)
-        } catch (error) {
-          console.error('Failed to disable the app close confirmation:', error)
-        }
-        if (hideWithoutPrompt) {
-          hideWindowToTray(browserWindow)
-          return false
-        }
-        isQuitConfirmed = true
-        return true
-      }
-
-      if (response === 0) {
-        isQuitConfirmed = true
-        return true
-      }
-
-      return false
-    })().finally(() => {
-      quitPromptInProgress = null
-    })
-
-    return quitPromptInProgress
-  }
-
-  /**
-   * @param {import('electron').BrowserWindow} browserWindow
-   * @param {number} count
-   * @returns {Promise<boolean>}
-   */
-  async function confirmCloseWindowWithMultipleTabs(browserWindow, count) {
-    if (isQuitting || !await getConfirmCloseWindowWithMultipleTabs()) {
-      return true
-    }
-
-    const existingPrompt = windowClosePromptsInProgress.get(browserWindow.id)
-    if (existingPrompt) return existingPrompt
-
-    const prompt = (async () => {
-      const t = await createMainTranslator()
-      const { response } = await dialog.showMessageBox(browserWindow, {
-        type: 'question',
-        title: t('Close Window Confirmation.Title'),
-        message: t('Close Window Confirmation.Message', { count }, count),
-        detail: t('Confirmations.Settings Hint'),
-        buttons: [
-          t('Close Window Confirmation.Close Window'),
-          t('Cancel'),
-          t('Confirmations.Never Ask Again')
-        ],
-        defaultId: 1,
-        cancelId: 1,
-        noLink: true
-      })
-
-      if (response === 2) {
-        try {
-          await updateSettingFromMain('confirmCloseWindowWithMultipleTabs', false)
-        } catch (error) {
-          console.error('Failed to disable the multi-tab window close confirmation:', error)
-        }
-        return true
-      }
-
-      return response === 0
-    })().finally(() => {
-      windowClosePromptsInProgress.delete(browserWindow.id)
-    })
-
-    windowClosePromptsInProgress.set(browserWindow.id, prompt)
-    return prompt
-  }
-
-  let multipleTabsActionRequestCount = 0
-
-  /**
-   * Ask the renderer to confirm a bulk tab action.
-   * @param {TabManager | null | undefined} manager
-   * @param {number} count the number of tabs affected
-   * @param {'close' | 'load' | 'unload'} action
-   * @returns {Promise<boolean>}
-   */
-  async function confirmMultipleTabsAction(manager, count, action) {
-    if (count < MULTIPLE_TABS_CONFIRM_THRESHOLD || !await getConfirmMultipleTabsAction(action)) {
-      return true
-    }
-
-    const browserWindow = manager?.browserWindow
-    if (!browserWindow || browserWindow.isDestroyed()) {
-      return true
-    }
-
-    const requestId = `${action}-multiple-tabs-${++multipleTabsActionRequestCount}`
-    return new Promise(resolve => {
-      /**
-       * @param {import('electron').IpcMainEvent} _event
-       * @param {{ requestId?: string, confirmed?: boolean }} response
-       */
-      const listener = (_event, response) => {
-        if (response?.requestId !== requestId) return
-
-        finish(response.confirmed === true)
-      }
-
-      const handleWindowClosed = () => finish(false)
-
-      /**
-       * @param {boolean} confirmed
-       */
-      function finish(confirmed) {
-        clearTimeout(timeoutId)
-        ipcMain.removeListener(IpcChannels.TABS_CONFIRM_MULTIPLE_ACTION_RESPONSE, listener)
-        browserWindow.removeListener('closed', handleWindowClosed)
-        resolve(confirmed)
-      }
-
-      const timeoutId = setTimeout(() => finish(false), 30_000)
-      ipcMain.on(IpcChannels.TABS_CONFIRM_MULTIPLE_ACTION_RESPONSE, listener)
-      browserWindow.once('closed', handleWindowClosed)
-      manager.bridge.send(IpcChannels.TABS_CONFIRM_MULTIPLE_ACTION, { requestId, count, action })
-    })
-  }
+  const {
+    confirmCloseApp,
+    confirmCloseWindowWithMultipleTabs,
+    confirmMultipleTabsAction
+  } = createConfirmations({
+    isQuitting: () => isQuitting,
+    isQuitConfirmed: () => isQuitConfirmed,
+    confirmQuit: () => { isQuitConfirmed = true },
+    hideWindowToTray,
+    updateSettingFromMain
+  })
 
   // Becomes true once the user asks the app to quit (e.g. Ctrl+Q / "Quit" menu
   // item / last-window-closed on non-darwin). Window close handlers use this to
@@ -903,60 +394,6 @@ function runApp() {
 
   // Registered per-webContents in 'web-contents-created' so the shared
   // BrowserWindow renderer can resolve native menu targets through TabManager.
-  const sharedContextMenuLabelKeys = {
-    Blue: 'Settings.Theme Settings.Main Color Theme.Blue',
-    'Close Tab': 'Close Tab',
-    Copy: 'Copy',
-    Cut: 'Cut',
-    Green: 'Settings.Theme Settings.Main Color Theme.Green',
-    'Mark All as Seen': 'Subscriptions.Mark All as Seen',
-    'New Tab': 'New Tab',
-    'New Window': 'New Window',
-    Orange: 'Settings.Theme Settings.Main Color Theme.Orange',
-    Paste: 'Paste',
-    Pink: 'Settings.Theme Settings.Main Color Theme.Pink',
-    Red: 'Settings.Theme Settings.Main Color Theme.Red',
-    Ungrouped: 'Tab Organizer.Ungrouped',
-    Yellow: 'Settings.Theme Settings.Main Color Theme.Yellow'
-  }
-
-  /**
-   * @param {string} key
-   * @param {Record<string, string | number>} [parameters]
-   * @param {string} [fallback]
-   * @returns {{ key: string, parameters: Record<string, string | number>, fallback: string }}
-   */
-  function contextMenuLabel(key, parameters = {}, fallback = key) {
-    return {
-      key: sharedContextMenuLabelKeys[key] ?? `Context Menu.${key}`,
-      parameters,
-      fallback
-    }
-  }
-
-  // Keep the interpolated selection short, so that the surrounding translated text
-  // (e.g. the trailing "in a New Tab") stays readable instead of being cut off
-  const SELECTION_LABEL_MAX_LENGTH = 30
-
-  // Counting grapheme clusters rather than UTF-16 code units, so that the cut
-  // never lands inside an emoji or a combining character sequence
-  const selectionLabelSegmenter = new Intl.Segmenter()
-
-  /**
-   * @param {string} text
-   */
-  function truncateSelectionForLabel(text) {
-    const graphemes = []
-    for (const { segment } of selectionLabelSegmenter.segment(text)) {
-      if (graphemes.length === SELECTION_LABEL_MAX_LENGTH) {
-        return `${graphemes.join('').trimEnd()}…`
-      }
-      graphemes.push(segment)
-    }
-
-    return text
-  }
-
   /** @type {Record<string, Function | boolean>} */
   const contextMenuOptions = {
     showSearchWithGoogle: false,
@@ -965,465 +402,11 @@ function runApp() {
     showSelectAll: false,
     showCopyLink: false,
     prepend: (defaultActions, parameters, webContents) => {
-      const manager = TabManager.getFromWebContents(webContents)
-      const contextMenuTab = manager?.contextMenuTabId != null
-        ? manager.tabs.get(manager.contextMenuTabId)
-        : undefined
-      const contextMenuTabs = contextMenuTab && manager
-        ? (manager.contextMenuSelectedTabIds.length > 0
-            ? manager.contextMenuSelectedTabIds
-            : [contextMenuTab.id])
-            .map(tabId => manager.tabs.get(tabId))
-            .filter(Boolean)
-        : []
-      const isBulkTabAction = contextMenuTabs.length > 1
-      const isContextMenuTabUnloaded = contextMenuTab?.loadState === 'unloaded'
-      const isTabBarContextMenu = contextMenuTab != null || manager?.contextMenuSurface === 'tabBar'
-      const subscriptionFeedTab = manager?.contextMenuSurface === 'subscriptionFeedTab'
-        ? manager.contextMenuSubscriptionFeedTab
-        : null
-      const isSubscriptionNewFeedTab = subscriptionFeedTab != null &&
-        manager?.contextMenuSubscriptionNewFeedTab === true
-      const subscriptionFeedLabelKeys = {
-        videos: 'Reload Videos',
-        shorts: 'Reload Shorts',
-        live: 'Reload Live',
-        posts: 'Reload Posts',
-        all: 'Reload All Feeds'
-      }
-      const contextMenuTabYouTubeUrls = contextMenuTabs.map(tab => {
-        const route = tab.route?.fullPath ?? getOpenTubeXRouteFromUrl(tab.url)
-        return isShareableOpenTubeXRoute(route)
-          ? transformOpenTubeXRouteUrl(route, true)
-          : null
-      })
       const pageUrl = parameters.pageURL || ''
       const isInAppUrl = isOpenTubeXUrl(pageUrl) && parameters.linkURL.split('#')[0] === pageUrl.split('#')[0]
 
-      const moveTargets = contextMenuTab != null && manager != null
-        ? TabManager.listMoveTargets(manager.browserWindow.id)
-        : []
-      const contextMenuTabIds = contextMenuTab != null && manager != null
-        ? Array.from(manager.tabs.keys())
-        : []
-      const contextMenuTabIndex = contextMenuTabIds.indexOf(contextMenuTab?.id)
-      const selectedTabIndexes = contextMenuTabs
-        .map(tab => contextMenuTabIds.indexOf(tab.id))
-        .filter(index => index !== -1)
-      const firstSelectedTabIndex = selectedTabIndexes.length > 0
-        ? Math.min(...selectedTabIndexes)
-        : contextMenuTabIndex
-      const lastSelectedTabIndex = selectedTabIndexes.length > 0
-        ? Math.max(...selectedTabIndexes)
-        : contextMenuTabIndex
-      const allSelectedTabsPinned = contextMenuTabs.every(tab => tab.isPinned === true)
-      const selectedTabIdSet = new Set(contextMenuTabs.map(tab => tab.id))
-      const canMoveContextMenuTabsTo = (toEnd) => {
-        return [true, false].some(isPinned => {
-          const groupIds = Array.from(manager?.tabs.values() ?? [])
-            .filter(tab => tab.isPinned === isPinned)
-            .map(tab => tab.id)
-          const selectedGroupIds = groupIds.filter(tabId => selectedTabIdSet.has(tabId))
-          if (selectedGroupIds.length === 0) return false
-
-          const destinationIds = toEnd
-            ? groupIds.slice(-selectedGroupIds.length)
-            : groupIds.slice(0, selectedGroupIds.length)
-          return destinationIds.some((tabId, index) => tabId !== selectedGroupIds[index])
-        })
-      }
-      const canMoveContextMenuTabsToBeginning = canMoveContextMenuTabsTo(false)
-      const canMoveContextMenuTabsToEnd = canMoveContextMenuTabsTo(true)
-      const selectedTabColor = contextMenuTabs.every(tab => tab.color === contextMenuTabs[0]?.color)
-        ? contextMenuTabs[0]?.color ?? null
-        : undefined
-      const selectedTabGroupId = contextMenuTabs.length > 0 &&
-        contextMenuTabs.every(tab => tab.groupId === contextMenuTabs[0].groupId)
-        ? contextMenuTabs[0].groupId ?? null
-        : undefined
-      const tabGroups = Array.from(manager?.tabGroups.values() ?? [])
-      const selectedTabGroup = typeof selectedTabGroupId === 'string'
-        ? manager?.tabGroups.get(selectedTabGroupId)
-        : null
-      const hasSelectedUnloadedTab = contextMenuTabs.some(tab => tab.loadState === 'unloaded')
-      const hasSelectedLoadedTab = contextMenuTabs.some(tab => !['unloaded', 'unloading'].includes(tab.loadState))
-      /**
-       * Apply a bulk tab action as one renderer update instead of one per tab.
-       * @param {() => void} run
-       */
-      const runBatchedTabAction = (run) => {
-        manager?.runBatched(run).catch(error => {
-          console.error('Failed to apply a bulk tab action:', error)
-        })
-      }
-      const closeContextMenuTabs = async (tabIds) => {
-        if (!manager) return
-
-        const existingTabIds = tabIds.filter(tabId => manager.tabs.has(tabId))
-        if (existingTabIds.length === 0) return
-
-        const isLastWindow = BrowserWindow.getAllWindows().length === 1
-        const closesWindow = existingTabIds.length === manager.tabs.size
-        if (closesWindow && isLastWindow) {
-          // The quit confirmation already covers this case
-          if (!await confirmCloseApp(manager.browserWindow)) return
-        } else if (!await confirmMultipleTabsAction(manager, existingTabIds.length, 'close')) {
-          return
-        }
-
-        const hasRemainingTabs = await manager.closeTabs(existingTabIds)
-        if (!hasRemainingTabs) {
-          if (isLastWindow) closeConfirmedWindowIds.add(manager.browserWindow.id)
-          manager.browserWindow.close()
-        }
-      }
-
       return [
-        {
-          // While a refresh runs, the same entry cancels it
-          label: contextMenuLabel(subscriptionFeedLabelKeys[subscriptionFeedTab] ?? 'Reload Videos'),
-          refreshingLabel: contextMenuLabel('Cancel Refresh'),
-          visible: subscriptionFeedTab != null,
-          click: () => {
-            if (!manager || !subscriptionFeedTab) return
-
-            if (isSubscriptionAutoRefreshInProgress()) {
-              requestSubscriptionAutoRefreshCancellation()
-              return
-            }
-
-            if (!manager.presentedTabId) return
-
-            manager.bridge.send(IpcChannels.SUBSCRIPTION_FEED_REQUEST_RELOAD, {
-              tabId: manager.presentedTabId,
-              feedTab: subscriptionFeedTab
-            })
-          }
-        },
-        {
-          label: contextMenuLabel('Mark All as Seen'),
-          visible: isSubscriptionNewFeedTab &&
-            manager?.contextMenuSubscriptionNewFeedHasContent === true,
-          click: () => {
-            if (!manager?.presentedTabId || !subscriptionFeedTab || subscriptionFeedTab === 'all') {
-              return
-            }
-
-            manager.bridge.send(IpcChannels.SUBSCRIPTION_FEED_REQUEST_MARK_SEEN, {
-              tabId: manager.presentedTabId,
-              feedTab: subscriptionFeedTab
-            })
-          }
-        },
-        {
-          type: 'separator',
-          visible: subscriptionFeedTab != null
-        },
-        {
-          label: isBulkTabAction
-            ? contextMenuLabel(
-                'Close Multiple Tabs',
-                { count: contextMenuTabs.length },
-                `Close ${contextMenuTabs.length} Tabs`
-              )
-            : contextMenuLabel('Close Tab'),
-          visible: contextMenuTab != null,
-          click: async () => {
-            if (!manager || !contextMenuTab) return
-
-            await closeContextMenuTabs(contextMenuTabs.map(tab => tab.id))
-          }
-        },
-        {
-          label: isBulkTabAction
-            ? contextMenuLabel(
-                'Duplicate Multiple Tabs',
-                { count: contextMenuTabs.length },
-                `Duplicate ${contextMenuTabs.length} Tabs`
-              )
-            : contextMenuLabel('Duplicate Tab'),
-          visible: contextMenuTab != null,
-          click: () => {
-            if (!manager || !contextMenuTab) return
-
-            runBatchedTabAction(() => {
-              for (const tab of contextMenuTabs) manager.duplicateTab(tab.id)
-            })
-          }
-        },
-        {
-          label: contextMenuLabel(isBulkTabAction ? 'Move Tabs' : 'Move Tab'),
-          visible: contextMenuTab != null,
-          submenu: [
-            {
-              label: contextMenuLabel('To Beginning'),
-              enabled: canMoveContextMenuTabsToBeginning,
-              click: () => {
-                if (!manager || !contextMenuTab) return
-
-                if (isBulkTabAction) {
-                  runBatchedTabAction(() => {
-                    for (const tab of [...contextMenuTabs].reverse()) {
-                      manager.moveTab(tab.id, 0)
-                    }
-                  })
-                } else {
-                  manager.moveTab(contextMenuTab.id, 0)
-                }
-              }
-            },
-            {
-              label: contextMenuLabel('To End'),
-              enabled: canMoveContextMenuTabsToEnd,
-              click: () => {
-                if (!manager || !contextMenuTab) return
-
-                if (isBulkTabAction) {
-                  runBatchedTabAction(() => {
-                    for (const tab of contextMenuTabs) {
-                      manager.moveTab(tab.id, manager.tabs.size)
-                    }
-                  })
-                } else {
-                  manager.moveTab(contextMenuTab.id, manager.tabs.size)
-                }
-              }
-            }
-          ]
-        },
-        {
-          label: contextMenuLabel(isBulkTabAction ? 'Move Tabs to Group' : 'Move Tab to Group'),
-          visible: contextMenuTab != null,
-          submenu: [
-            {
-              label: contextMenuLabel('Ungrouped'),
-              type: 'radio',
-              checked: selectedTabGroupId === null,
-              click: () => {
-                manager?.setTabsGroup(contextMenuTabs.map(tab => tab.id), null)
-              }
-            },
-            ...tabGroups.map(group => ({
-              label: group.name,
-              type: 'radio',
-              groupColor: group.color ?? 'default',
-              checked: selectedTabGroupId === group.id,
-              click: () => {
-                manager?.setTabsGroup(contextMenuTabs.map(tab => tab.id), group.id)
-              }
-            })),
-            { type: 'separator' },
-            {
-              label: contextMenuLabel('Manage Tab Groups…'),
-              click: () => {
-                manager?.bridge.send(IpcChannels.TABS_OPEN_ORGANIZER)
-              }
-            }
-          ]
-        },
-        {
-          label: contextMenuLabel('Collapse Group'),
-          visible: contextMenuTab != null && selectedTabGroup != null && !selectedTabGroup.isCollapsed,
-          click: () => {
-            manager?.updateTabGroup(selectedTabGroup.id, { isCollapsed: true })
-          }
-        },
-        {
-          type: 'separator',
-          visible: contextMenuTab != null
-        },
-        {
-          label: contextMenuLabel('Close Tabs'),
-          visible: contextMenuTab != null,
-          submenu: [
-            {
-              label: contextMenuLabel(manager?.contextMenuTabBarVertical ? 'To the Top' : 'To the Left'),
-              enabled: firstSelectedTabIndex > 0,
-              click: () => {
-                closeContextMenuTabs(contextMenuTabIds.slice(0, firstSelectedTabIndex))
-              }
-            },
-            {
-              label: contextMenuLabel(manager?.contextMenuTabBarVertical ? 'To the Bottom' : 'To the Right'),
-              enabled: lastSelectedTabIndex < contextMenuTabIds.length - 1,
-              click: () => {
-                closeContextMenuTabs(contextMenuTabIds.slice(lastSelectedTabIndex + 1))
-              }
-            },
-            {
-              label: contextMenuLabel('Other Tabs'),
-              enabled: contextMenuTabIds.length > contextMenuTabs.length,
-              click: () => {
-                const selectedIds = new Set(contextMenuTabs.map(tab => tab.id))
-                closeContextMenuTabs(contextMenuTabIds.filter(tabId => !selectedIds.has(tabId)))
-              }
-            }
-          ]
-        },
-        {
-          type: 'separator',
-          visible: contextMenuTab != null
-        },
-        {
-          label: contextMenuLabel(isBulkTabAction ? 'Copy YouTube Links' : 'Copy YouTube Link'),
-          visible: contextMenuTabYouTubeUrls.length > 0 && contextMenuTabYouTubeUrls.every(Boolean),
-          click: () => {
-            if (!contextMenuTabYouTubeUrls.every(Boolean)) return
-
-            clipboard.writeText(contextMenuTabYouTubeUrls.join('\n'))
-          }
-        },
-        {
-          type: 'separator',
-          visible: contextMenuTabYouTubeUrls.length > 0 && contextMenuTabYouTubeUrls.every(Boolean)
-        },
-        {
-          label: contextMenuLabel(allSelectedTabsPinned
-            ? isBulkTabAction ? 'Unpin Tabs' : 'Unpin Tab'
-            : isBulkTabAction ? 'Pin Tabs' : 'Pin Tab'),
-          visible: contextMenuTab != null,
-          click: () => {
-            if (!manager || !contextMenuTab) return
-
-            runBatchedTabAction(() => {
-              for (const tab of contextMenuTabs) {
-                manager.setTabPinned(tab.id, !allSelectedTabsPinned)
-              }
-            })
-          }
-        },
-        {
-          label: contextMenuLabel('Tab Color'),
-          visible: contextMenuTab != null,
-          submenu: [
-            { key: 'Default', color: null },
-            { key: 'Red', color: 'red' },
-            { key: 'Orange', color: 'orange' },
-            { key: 'Yellow', color: 'yellow' },
-            { key: 'Green', color: 'green' },
-            { key: 'Blue', color: 'blue' },
-            { key: 'Purple', color: 'purple' },
-            { key: 'Pink', color: 'pink' }
-          ].map(({ key, color }) => ({
-            label: contextMenuLabel(key),
-            type: 'radio',
-            checked: selectedTabColor === color,
-            click: () => {
-              if (!manager || !contextMenuTab) return
-
-              runBatchedTabAction(() => {
-                for (const tab of contextMenuTabs) manager.setTabColor(tab.id, color)
-              })
-            }
-          }))
-        },
-        {
-          type: 'separator',
-          visible: contextMenuTab != null
-        },
-        {
-          label: contextMenuLabel('New Tab'),
-          visible: isTabBarContextMenu && contextMenuTab == null,
-          click: () => {
-            manager?.createTabWithPreference({ makeActive: true }).catch(error => {
-              console.error('Failed to create a new tab from the tab bar context menu:', error)
-            })
-          }
-        },
-        {
-          label: contextMenuLabel('New Window'),
-          visible: isTabBarContextMenu && contextMenuTab == null,
-          click: () => {
-            createWindow({ replaceMainWindow: false }).catch(error => {
-              console.error('Failed to create a new window from the tab bar context menu:', error)
-            })
-          }
-        },
-        {
-          label: contextMenuLabel('Reopen Closed Tab'),
-          visible: isTabBarContextMenu && contextMenuTab == null,
-          enabled: manager?.closedTabs.length > 0,
-          click: () => {
-            manager?.restoreClosedTab()
-          }
-        },
-        {
-          label: contextMenuLabel(isBulkTabAction ? 'Reload Tabs' : 'Reload Tab'),
-          visible: contextMenuTab != null,
-          click: () => {
-            if (!manager || !contextMenuTab) return
-
-            for (const tab of contextMenuTabs) manager.requestReload(tab.id)
-          }
-        },
-        {
-          label: contextMenuLabel('Load Tabs'),
-          visible: contextMenuTab != null && isBulkTabAction,
-          enabled: hasSelectedUnloadedTab,
-          click: async () => {
-            if (!manager || !contextMenuTab) return
-
-            const tabIds = contextMenuTabs
-              .filter(tab => tab.loadState === 'unloaded')
-              .map(tab => tab.id)
-            if (!await confirmMultipleTabsAction(manager, tabIds.length, 'load')) return
-
-            await manager.runBatched(() => {
-              for (const tabId of tabIds) manager.loadTab(tabId)
-            })
-          }
-        },
-        {
-          label: contextMenuLabel(
-            isBulkTabAction ? 'Unload Tabs' : isContextMenuTabUnloaded ? 'Load Tab' : 'Unload Tab'
-          ),
-          visible: contextMenuTab != null,
-          enabled: isBulkTabAction
-            ? hasSelectedLoadedTab
-            : contextMenuTab != null && (
-              isContextMenuTabUnloaded ||
-                (contextMenuTab.loadState !== 'unloaded' &&
-                  (contextMenuTab.id !== manager?.activeTabId || (manager?.tabs.size ?? 0) > 1))
-            ),
-          click: async () => {
-            if (!manager || !contextMenuTab) return
-
-            if (!isBulkTabAction && isContextMenuTabUnloaded) {
-              manager.loadTab(contextMenuTab.id)
-              return
-            }
-
-            const tabIds = contextMenuTabs
-              .filter(tab => !['unloaded', 'unloading'].includes(tab.loadState))
-              .map(tab => tab.id)
-            if (!await confirmMultipleTabsAction(manager, tabIds.length, 'unload')) return
-
-            await manager.unloadTabs(tabIds)
-          }
-        },
-        {
-          type: 'separator',
-          visible: contextMenuTab != null && moveTargets.length > 0
-        },
-        {
-          label: contextMenuLabel(isBulkTabAction ? 'Move Tabs to Window' : 'Move Tab to Window'),
-          visible: contextMenuTab != null && moveTargets.length > 0,
-          submenu: moveTargets.map(({ windowId, label }) => ({
-            label,
-            click: async () => {
-              if (!contextMenuTab) {
-                return
-              }
-              for (const tab of contextMenuTabs) {
-                await TabManager.moveTabToWindow(tab.id, windowId)
-              }
-            }
-          }))
-        },
-        {
-          type: 'separator',
-          visible: contextMenuTab != null
-        },
+        ...contextMenu.createTabItems(webContents),
         {
           label: contextMenuLabel('Open in a New Tab'),
           // Only show the option for in-app URLs and not external ones
@@ -1489,37 +472,7 @@ function runApp() {
       const selectionText = parameters.selectionText.trim()
       const selectionLabelText = truncateSelectionForLabel(selectionText)
       const textShortEnoughForSearch = selectionText.length <= SEARCH_CHAR_LIMIT
-      const activeSearchEngines = (await getConfiguredSearchEngines())
-        .filter(engine => engine.enabled)
-      const externalSearchItems = activeSearchEngines.map(engine => ({
-        label: engine.name,
-        icon: getFaviconUrl(engine.url),
-        faviconSource: engine.url,
-        click: async () => {
-          try {
-            await shell.openExternal(buildSearchUrl(engine.url, selectionText))
-          } catch (error) {
-            console.error(`Failed to search with ${engine.name}:`, error)
-          }
-        }
-      }))
-      const externalSearch = activeSearchEngines.length === 1
-        ? {
-            label: contextMenuLabel(
-              'Search With',
-              { engine: activeSearchEngines[0].name },
-              `Search with ${activeSearchEngines[0].name}`
-            ),
-            icon: getFaviconUrl(activeSearchEngines[0].url),
-            faviconSource: activeSearchEngines[0].url,
-            visible: selectionText.length > 0,
-            click: externalSearchItems[0].click
-          }
-        : {
-            label: contextMenuLabel('Search With Multiple', {}, 'Search with...'),
-            visible: selectionText.length > 0 && activeSearchEngines.length > 1,
-            submenu: externalSearchItems
-          }
+      const externalSearch = await contextMenu.createExternalSearchItem(selectionText)
 
       return [
         {
@@ -1615,179 +568,11 @@ function runApp() {
     },
   }
 
-  let contextMenuSessionId = 0
-  /** @type {Map<number, { sessionId: number, actions: Map<string, Function> }>} */
-  const contextMenuSessions = new Map()
-  /** @type {Map<number, number>} */
-  const latestContextMenuRequests = new Map()
-
-  function createDefaultContextMenuActions(parameters, webContents) {
-    const hasSelection = parameters.selectionText.length > 0
-    const can = action => parameters.editFlags[`can${action}`] === true
-
-    return {
-      separator: () => ({ type: 'separator' }),
-      cut: () => ({
-        label: contextMenuLabel('Cut'),
-        visible: parameters.isEditable,
-        enabled: can('Cut') && hasSelection,
-        click: () => webContents.cut()
-      }),
-      copy: () => ({
-        label: contextMenuLabel('Copy'),
-        visible: parameters.isEditable || hasSelection,
-        enabled: can('Copy') && hasSelection,
-        click: () => webContents.copy()
-      }),
-      paste: () => ({
-        label: contextMenuLabel('Paste'),
-        visible: parameters.isEditable,
-        enabled: can('Paste'),
-        click: () => webContents.paste()
-      }),
-      selectAll: () => ({
-        label: contextMenuLabel('Select All'),
-        click: () => webContents.selectAll()
-      }),
-      saveImageAs: () => ({
-        label: contextMenuLabel('Save Image As…'),
-        visible: parameters.mediaType === 'image',
-        click: () => webContents.downloadURL(parameters.srcURL)
-      }),
-      copyImage: () => ({
-        label: contextMenuLabel('Copy Image'),
-        visible: parameters.mediaType === 'image',
-        click: () => webContents.copyImageAt(parameters.x, parameters.y)
-      }),
-      copyImageAddress: () => ({
-        label: contextMenuLabel('Copy Image Address'),
-        visible: parameters.mediaType === 'image',
-        click: () => clipboard.writeText(parameters.srcURL)
-      })
-    }
-  }
-
-  function removeUnusedContextMenuItems(items) {
-    const visibleItems = items.filter(item => item && item.visible !== false)
-    const cleanedItems = []
-
-    for (const item of visibleItems) {
-      if (item.type === 'separator' && (cleanedItems.length === 0 || cleanedItems.at(-1).type === 'separator')) {
-        continue
-      }
-      cleanedItems.push(item)
-    }
-
-    if (cleanedItems.at(-1)?.type === 'separator') cleanedItems.pop()
-    return cleanedItems
-  }
-
-  /**
-   * @param {unknown} label
-   * @returns {{ text: string, key: string | undefined, parameters: unknown }}
-   */
-  function serializeContextMenuLabel(label) {
-    if (
-      label != null &&
-      typeof label === 'object' &&
-      typeof label.key === 'string' &&
-      typeof label.fallback === 'string'
-    ) {
-      return {
-        text: label.fallback,
-        key: label.key,
-        parameters: label.parameters
-      }
-    }
-
-    return {
-      text: String(label ?? ''),
-      key: undefined,
-      parameters: undefined
-    }
-  }
-
-  function serializeContextMenuItems(items, actions, actionPrefix = 'item') {
-    return removeUnusedContextMenuItems(items).map((item, index) => {
-      if (item.type === 'separator') return { type: 'separator' }
-
-      const actionId = `${actionPrefix}-${index}`
-      const hasAction = item.enabled !== false && typeof item.click === 'function'
-      if (hasAction) actions.set(actionId, () => item.click(item))
-
-      const submenu = Array.isArray(item.submenu)
-        ? serializeContextMenuItems(item.submenu, actions, actionId)
-        : undefined
-      const label = serializeContextMenuLabel(item.label)
-      const refreshingLabel = item.refreshingLabel == null
-        ? null
-        : serializeContextMenuLabel(item.refreshingLabel)
-
-      return {
-        type: item.type ?? 'normal',
-        label: label.text,
-        labelKey: label.key,
-        labelParameters: label.parameters,
-        // Shown instead of the label while a subscription refresh is running,
-        // so that an open menu doesn't go stale when the refresh ends
-        refreshingLabel: refreshingLabel?.text,
-        refreshingLabelKey: refreshingLabel?.key,
-        refreshingLabelParameters: refreshingLabel?.parameters,
-        enabled: item.enabled !== false,
-        checked: item.checked === true,
-        icon: typeof item.icon === 'string' ? item.icon : undefined,
-        groupColor: typeof item.groupColor === 'string' ? item.groupColor : undefined,
-        faviconSource: typeof item.faviconSource === 'string' ? item.faviconSource : undefined,
-        actionId: hasAction ? actionId : undefined,
-        submenu
-      }
-    })
-  }
-
-  ipcMain.handle(IpcChannels.CONTEXT_MENU_OPEN, async (event, rawParameters = {}) => {
-    const webContents = event.sender
-    const sessionId = ++contextMenuSessionId
-    latestContextMenuRequests.set(webContents.id, sessionId)
-    const parameters = {
-      x: Number.isFinite(rawParameters.x) ? rawParameters.x : 0,
-      y: Number.isFinite(rawParameters.y) ? rawParameters.y : 0,
-      pageURL: typeof rawParameters.pageURL === 'string' ? rawParameters.pageURL : '',
-      linkURL: typeof rawParameters.linkURL === 'string' ? rawParameters.linkURL : '',
-      linkText: typeof rawParameters.linkText === 'string' ? rawParameters.linkText : '',
-      srcURL: typeof rawParameters.srcURL === 'string' ? rawParameters.srcURL : '',
-      mediaType: ['image', 'video'].includes(rawParameters.mediaType) ? rawParameters.mediaType : 'none',
-      selectionText: typeof rawParameters.selectionText === 'string' ? rawParameters.selectionText : '',
-      isEditable: rawParameters.isEditable === true,
-      editFlags: {
-        canCut: rawParameters.editFlags?.canCut === true,
-        canCopy: rawParameters.editFlags?.canCopy === true,
-        canPaste: rawParameters.editFlags?.canPaste === true,
-        canSelectAll: rawParameters.editFlags?.canSelectAll === true
-      }
-    }
-    const defaultActions = createDefaultContextMenuActions(parameters, webContents)
-    const defaultItems = [
-      defaultActions.cut(),
-      defaultActions.copy(),
-      defaultActions.paste(),
-      defaultActions.separator(),
-      defaultActions.saveImageAs(),
-      defaultActions.copyImage(),
-      defaultActions.copyImageAddress(),
-      defaultActions.separator()
-    ]
-    const items = [
-      ...contextMenuOptions.prepend(defaultActions, parameters, webContents),
-      ...defaultItems,
-      ...await contextMenuOptions.append(defaultActions, parameters, webContents)
-    ]
-    const actions = new Map()
-    const serializedItems = serializeContextMenuItems(items, actions)
-
-    if (latestContextMenuRequests.get(webContents.id) === sessionId) {
-      contextMenuSessions.set(webContents.id, { sessionId, actions })
-    }
-    return { sessionId, items: serializedItems }
+  const contextMenu = setupContextMenu(contextMenuOptions, {
+    createWindow,
+    confirmCloseApp,
+    confirmMultipleTabsAction,
+    closeConfirmedWindowIds
   })
 
   const updateWatchQueue = createFileWatchQueue(path.join(app.getPath('userData'), 'watch-queue.json'))
@@ -1813,24 +598,6 @@ function runApp() {
     } catch (error) {
       return { error: error.message }
     }
-  })
-
-  ipcMain.handle(IpcChannels.CONTEXT_MENU_EXECUTE, async (event, payload) => {
-    const session = contextMenuSessions.get(event.sender.id)
-    if (!session || payload?.sessionId !== session.sessionId) return
-
-    const action = session.actions.get(payload?.actionId)
-    if (action) await action()
-  })
-
-  ipcMain.handle(IpcChannels.RESOLVE_FAVICON, async (event, url) => {
-    if (!isOpenTubeXUrl(event.senderFrame.url) || typeof url !== 'string') return ''
-
-    if (!(await getConfiguredSearchEngines()).some(engine => engine.enabled && engine.url === url)) {
-      return ''
-    }
-
-    return resolveSearchEngineFavicon(url)
   })
 
   if (process.platform === 'win32' && !isPortableBuild()) {
@@ -1862,9 +629,6 @@ function runApp() {
   const trayClosingWindowIds = new Set()
   let trayWindows = []
   const trayMaximizedWindows = {}
-  /** @type {Map<number, Array<{url: string, tabId: string | null}>>} */
-  const pendingOpenUrlsByWebContentsId = new Map()
-  const openUrlReadyWebContentsIds = new Set()
   const activeNotifications = new Set()
   const ozonePlatform = app.commandLine.getSwitchValue('ozone-platform')
   const isWaylandPlatform = detectWaylandPlatform({
@@ -2558,73 +1322,7 @@ function runApp() {
       storyboardRequestIds.delete(details.id)
     })
 
-    protocol.handle('downloadmedia', async (request) => {
-      if (!['GET', 'HEAD'].includes(request.method)) {
-        return new Response(null, { status: 405, headers: { Allow: 'GET, HEAD' } })
-      }
-
-      const url = new URL(request.url)
-      const [, rawId, videoId] = url.pathname.split('/')
-      if (url.host !== 'file' || !/^\d+$/.test(rawId ?? '')) {
-        return new Response(null, { status: 400 })
-      }
-
-      const file = await getYtDlpDownloadFile(Number(rawId), videoId ?? '', url.searchParams.get('path'))
-      if (file === null) return new Response(null, { status: 404 })
-
-      let fileSize
-      try {
-        const fileStats = await asyncFs.stat(file.path)
-        if (!fileStats.isFile()) {
-          return new Response(null, { status: 404 })
-        }
-        fileSize = fileStats.size
-      } catch {
-        return new Response(null, { status: 404 })
-      }
-      const extension = path.extname(file.path).toLowerCase()
-      const mimeType = file.mode === 'audio' && extension === '.webm'
-        ? 'audio/webm'
-        : file.mode === 'audio' && extension === '.mp4'
-          ? 'audio/mp4'
-          : DOWNLOADED_MEDIA_MIME_TYPES[extension.slice(1)] ?? 'application/octet-stream'
-      const headers = {
-        'Accept-Ranges': 'bytes',
-        'Content-Type': mimeType
-      }
-      if (fileSize === 0) {
-        return new Response(null, { status: 200, headers: { ...headers, 'Content-Length': '0' } })
-      }
-      const rangeMatch = /^bytes=(\d*)-(\d*)$/.exec(request.headers.get('range') ?? '')
-      let start = 0
-      let end = fileSize - 1
-      let status = 200
-
-      if (rangeMatch !== null) {
-        const [, rawStart, rawEnd] = rangeMatch
-        if (rawStart === '') {
-          const suffixLength = Number(rawEnd)
-          start = Math.max(0, fileSize - suffixLength)
-        } else {
-          start = Number(rawStart)
-          if (rawEnd !== '') end = Math.min(Number(rawEnd), end)
-        }
-        if (!Number.isSafeInteger(start) || !Number.isSafeInteger(end) || start > end || start >= fileSize) {
-          return new Response(null, {
-            status: 416,
-            headers: { ...headers, 'Content-Range': `bytes */${fileSize}` }
-          })
-        }
-        status = 206
-        headers['Content-Range'] = `bytes ${start}-${end}/${fileSize}`
-      }
-
-      headers['Content-Length'] = String(end - start + 1)
-      const body = request.method === 'HEAD'
-        ? null
-        : Readable.toWeb(createReadStream(file.path, { start, end }))
-      return new Response(body, { status, headers })
-    })
+    protocol.handle('downloadmedia', handleDownloadMediaRequest)
 
     if (replaceHttpCache) {
       // in-memory image cache
@@ -2808,7 +1506,7 @@ function runApp() {
 
     let firstWindow
 
-    const directStartupUrl = getDirectOpenUrl(startupUrl)
+    const directStartupUrl = getDirectOpenUrl(startupUrl, ROOT_APP_URL)
 
     if (savedSessions.length === 0) {
       firstWindow = await createWindow({
@@ -3652,328 +2350,13 @@ function runApp() {
     return newWindow
   }
 
-  /**
-   * @param {string | null | undefined} url
-   * @param {object} [options]
-   * @param {boolean} [options.replaceMainWindow]
-   * @param {boolean} [options.showWindowNow]
-   * @param {boolean} [options.reuseEmptyRootTab]
-   * @returns {Promise<import('electron').BrowserWindow>}
-   */
-  async function createWindowForOpenUrl(url, options = {}) {
-    const { reuseEmptyRootTab = false, ...createWindowOptions } = options
-    const directOpenUrl = getDirectOpenUrl(url)
-    const newWindow = await createWindow({
-      ...createWindowOptions,
-      ...(directOpenUrl ? { windowStartupUrl: directOpenUrl } : {})
-    })
-
-    if (!directOpenUrl) {
-      openUrlInWindow(newWindow, url, { reuseEmptyRootTab })
-    }
-
-    return newWindow
-  }
-
-  /**
-   * @param {import('electron').BrowserWindow | undefined | null} browserWindow
-   * @param {string | null | undefined} url
-   * @param {{ reuseEmptyRootTab?: boolean }} [options]
-   */
-  function openUrlInWindow(browserWindow, url, options = {}) {
-    if (!browserWindow || browserWindow.isDestroyed() || !url) {
-      return
-    }
-
-    const tabManager = TabManager.getForWindow(browserWindow.id)
-    if (tabManager) {
-      openUrlInTab(tabManager, url, options).catch(error => {
-        console.error('Failed to open URL in a tab:', error)
-      })
-      return
-    }
-
-    sendOpenUrlToWebContents(browserWindow.webContents, url)
-  }
-
-  /**
-   * @param {TabManager} tabManager
-   * @param {string} url
-   * @param {{ reuseEmptyRootTab?: boolean }} options
-   */
-  async function openUrlInTab(tabManager, url, options) {
-    const directOpenUrl = getDirectOpenUrl(url)
-    if (directOpenUrl) {
-      await tabManager.createTabWithPreference({
-        url: directOpenUrl,
-        makeActive: true
-      })
-      return
-    }
-
-    let tab = options.reuseEmptyRootTab ? getReusableOpenUrlTab(tabManager) : null
-
-    if (!tab) {
-      tab = await tabManager.createTabWithPreference({
-        url: ROOT_APP_URL,
-        makeActive: true
-      })
-    }
-
-    sendOpenUrlToWebContents(tabManager.browserWindow.webContents, url, tab.id)
-  }
-
-  /**
-   * @param {TabManager} tabManager
-   * @returns {import('./tabs/TabManager').TabInfo | null}
-   */
-  function getReusableOpenUrlTab(tabManager) {
-    if (tabManager.tabs.size !== 1 || !tabManager.activeTabId) {
-      return null
-    }
-
-    const activeTab = tabManager.tabs.get(tabManager.activeTabId)
-    return activeTab && TabManager.getOpenTubeXRoute(activeTab.url) === '/'
-      ? activeTab
-      : null
-  }
-
-  /**
-   * @param {string | null | undefined} url
-   * @returns {string | null}
-   */
-  function getDirectOpenUrl(url) {
-    if (typeof url !== 'string' || url.trim().length === 0) {
-      return null
-    }
-
-    const parsed = URL.parse(url)
-    if (!parsed) {
-      return null
-    }
-
-    if (isOpenTubeXUrl(parsed)) {
-      return url
-    }
-
-    const videoParams = getDirectVideoParams(parsed)
-    if (videoParams.videoId) {
-      return createAppRouteUrl(`/watch/${videoParams.videoId}`, {
-        timestamp: videoParams.timestamp,
-        playlistId: videoParams.playlistId,
-        commentId: videoParams.commentId,
-        short: videoParams.isShort ? 'true' : null
-      })
-    }
-
-    const playlistId = getDirectPlaylistId(parsed)
-    if (playlistId) {
-      return createAppRouteUrl(`/playlist/${encodeURIComponent(playlistId)}`, getRemainingUrlQuery(parsed, ['list']))
-    }
-
-    const searchQuery = getDirectSearchQuery(parsed)
-    if (searchQuery) {
-      return createAppRouteUrl(`/search/${encodeURIComponent(searchQuery)}`, getRemainingUrlQuery(parsed, ['q', 'search_query']))
-    }
-
-    const hashtag = parsed.pathname.match(/^\/hashtag\/(?<tag>[^#&/?]+)\/?$/)?.groups?.tag
-    if (hashtag) {
-      return createAppRouteUrl(`/hashtag/${encodeURIComponent(hashtag)}`)
-    }
-
-    const postId = parsed.pathname.match(/^\/post\/(?<postId>.+)/)?.groups?.postId
-    if (postId) {
-      return createAppRouteUrl(`/post/${encodeURIComponent(postId)}`, {
-        authorId: parsed.searchParams.get('ucid')
-      })
-    }
-
-    const feedType = parsed.pathname.match(/^\/feed\/(?<type>trending|subscriptions|history|playlists|you|library)/)?.groups?.type
-    if (feedType) {
-      return createAppRouteUrl(feedType === 'playlists' || feedType === 'you' || feedType === 'library'
-        ? '/userplaylists'
-        : `/${feedType}`)
-    }
-
-    return null
-  }
-
-  /**
-   * @param {URL} url
-   * @returns {{ videoId: string | null, timestamp: string | null, playlistId: string | null, commentId: string | null, isShort: boolean }}
-   */
-  function getDirectVideoParams(url) {
-    const params = {
-      videoId: null,
-      timestamp: null,
-      playlistId: null,
-      commentId: null,
-      isShort: false
-    }
-
-    const setVideoId = (value) => {
-      const videoId = getYoutubeId(value)
-      if (videoId) {
-        params.videoId = videoId
-        params.timestamp = getDirectTimestamp(url)
-        params.playlistId = url.searchParams.get('list')
-        params.commentId = url.searchParams.get('lc')
-      }
-    }
-
-    if (url.pathname === '/watch') {
-      setVideoId(url.searchParams.get('v'))
-    } else if (url.hostname === 'youtu.be') {
-      setVideoId(url.pathname.slice(1))
-    } else {
-      const videoPath = url.pathname.match(/^\/(?:embed|shorts|live)\/(?<videoId>[\w-]+)/)?.groups?.videoId
-      params.isShort = url.pathname.startsWith('/shorts/')
-      setVideoId(videoPath)
-    }
-
-    return params
-  }
-
-  /**
-   * @param {string | null | undefined} value
-   * @returns {string | null}
-   */
-  function getYoutubeId(value) {
-    return typeof value === 'string'
-      ? value.match(/^[\w-]{11}/)?.[0] ?? null
-      : null
-  }
-
-  /**
-   * @param {URL} url
-   * @returns {string | null}
-   */
-  function getDirectTimestamp(url) {
-    const timestamp = url.searchParams.get('t')
-    if (!timestamp) {
-      return null
-    }
-
-    const timeParts = timestamp.match(/^(?:(?<hours>\d+)h)?(?:(?<minutes>\d+)m)?(?:(?<seconds>\d+)s?)?$/)?.groups
-    if (!timeParts || (!timeParts.hours && !timeParts.minutes && !timeParts.seconds)) {
-      return timestamp
-    }
-
-    return String(
-      Number(timeParts.seconds ?? 0) +
-      (Number(timeParts.minutes ?? 0) * 60) +
-      (Number(timeParts.hours ?? 0) * 3600)
-    )
-  }
-
-  /**
-   * @param {URL} url
-   * @returns {string | null}
-   */
-  function getDirectPlaylistId(url) {
-    if (!/^(\/playlist\/?|\/embed\/videoseries\/?)$/.test(url.pathname)) {
-      return null
-    }
-
-    return url.searchParams.get('list')
-  }
-
-  /**
-   * @param {URL} url
-   * @returns {string | null}
-   */
-  function getDirectSearchQuery(url) {
-    if (!/^(\/results|\/search\/?)$/.test(url.pathname)) {
-      return null
-    }
-
-    return url.searchParams.get('search_query') ?? url.searchParams.get('q')
-  }
-
-  /**
-   * @param {URL} url
-   * @param {string[]} excludedKeys
-   * @returns {Record<string, string>}
-   */
-  function getRemainingUrlQuery(url, excludedKeys) {
-    const excluded = new Set(excludedKeys)
-    const query = {}
-
-    for (const [key, value] of url.searchParams) {
-      if (!excluded.has(key)) {
-        query[key] = value
-      }
-    }
-
-    return query
-  }
-
-  /**
-   * @param {string} path
-   * @param {Record<string, string | number | null | undefined>} [query]
-   * @returns {string}
-   */
-  function createAppRouteUrl(path, query = {}) {
-    const searchParams = new URLSearchParams()
-
-    for (const [key, value] of Object.entries(query)) {
-      if (value !== null && value !== undefined && String(value).length > 0) {
-        searchParams.set(key, String(value))
-      }
-    }
-
-    const search = searchParams.toString()
-    return `${ROOT_APP_URL}#${path}${search.length > 0 ? `?${search}` : ''}`
-  }
-
-  /**
-   * @param {import('electron').WebContents} webContents
-   * @param {string} url
-   * @param {string | null} [tabId]
-   * @returns {boolean}
-   */
-  function sendOpenUrlToWebContents(webContents, url, tabId = null) {
-    const payload = { url, tabId }
-    if (
-      !webContents.isDestroyed() &&
-      openUrlReadyWebContentsIds.has(webContents.id) &&
-      isOpenTubeXUrl(webContents.getURL())
-    ) {
-      webContents.send(IpcChannels.OPEN_URL, payload)
-      return true
-    }
-
-    const pendingOpenUrls = pendingOpenUrlsByWebContentsId.get(webContents.id) ?? []
-    pendingOpenUrls.push(payload)
-    // Protocol activations are user-driven, but keep the startup queue bounded
-    // in case a desktop environment repeatedly delivers the same URL.
-    if (pendingOpenUrls.length > 20) {
-      pendingOpenUrls.shift()
-    }
-    pendingOpenUrlsByWebContentsId.set(webContents.id, pendingOpenUrls)
-    return false
-  }
-
-  /**
-   * @param {import('electron').IpcMainEvent} event
-   */
-  function openPendingUrlForReadyWebContents(event) {
-    if (!isOpenTubeXUrl(event.senderFrame.url)) {
-      return
-    }
-
-    openUrlReadyWebContentsIds.add(event.sender.id)
-
-    const pendingOpenUrls = pendingOpenUrlsByWebContentsId.get(event.sender.id)
-    if (!pendingOpenUrls || !BrowserWindow.fromWebContents(event.sender)) {
-      return
-    }
-
-    pendingOpenUrlsByWebContentsId.delete(event.sender.id)
-    for (const pendingOpenUrl of pendingOpenUrls) {
-      event.reply(IpcChannels.OPEN_URL, pendingOpenUrl)
-    }
-  }
+  const {
+    createWindowForOpenUrl,
+    openUrlInWindow,
+    openPendingUrlForReadyWebContents,
+    forgetOpenUrlRenderer,
+    forgetOpenUrlWebContents
+  } = createUrlOpener({ rootAppUrl: ROOT_APP_URL, createWindow })
 
   ipcMain.handle(IpcChannels.SHARE_LINK, createDesktopShareHandler({
     platform: process.platform,
@@ -4048,152 +2431,7 @@ function runApp() {
     return liveReminderManager.cancel(videoId)
   })
 
-  const MAX_VIDEO_METADATA_THUMBNAIL_BYTES = 5 * 1024 * 1024
-  const MAX_VIDEO_METADATA_THUMBNAIL_REDIRECTS = 3
-  const VIDEO_METADATA_THUMBNAIL_MIME_TYPES = new Set([
-    'image/avif',
-    'image/gif',
-    'image/jpeg',
-    'image/png',
-    'image/webp'
-  ])
-  let videoMetadataCacheGeneration = 0
-
-  async function isAllowedNetworkMediaUrl(parsedUrl, allowedPrivateOrigin) {
-    if (!['http:', 'https:'].includes(parsedUrl.protocol)) return false
-    if (parsedUrl.origin === allowedPrivateOrigin) return true
-
-    const hostname = parsedUrl.hostname.startsWith('[') && parsedUrl.hostname.endsWith(']')
-      ? parsedUrl.hostname.slice(1, -1)
-      : parsedUrl.hostname
-
-    try {
-      const { endpoints } = await session.defaultSession.resolveHost(hostname, {
-        cacheUsage: 'disallowed'
-      })
-      return endpoints.length > 0 && endpoints.every(({ address }) => !isNonPublicNetworkAddress(address))
-    } catch {
-      return false
-    }
-  }
-
-  async function fetchVideoMetadataThumbnail(url) {
-    if (typeof url !== 'string' || url.length > 20_000) return null
-
-    let parsedUrl
-    try {
-      parsedUrl = new URL(url)
-    } catch {
-      return null
-    }
-    if (!['http:', 'https:'].includes(parsedUrl.protocol)) return null
-
-    let allowedPrivateOrigin = null
-    try {
-      const configuredInstance = await getConfiguredApiServerUrl()
-      if (typeof configuredInstance === 'string' && configuredInstance !== '') {
-        allowedPrivateOrigin = new URL(configuredInstance).origin
-      }
-    } catch { }
-
-    const abortController = new AbortController()
-    const timeout = setTimeout(() => abortController.abort(), 15_000)
-
-    try {
-      let response
-
-      for (let redirectCount = 0; redirectCount <= MAX_VIDEO_METADATA_THUMBNAIL_REDIRECTS; redirectCount += 1) {
-        if (!await isAllowedNetworkMediaUrl(parsedUrl, allowedPrivateOrigin)) return null
-
-        response = await net.fetch(parsedUrl.href, {
-          // Thumbnail replacements often keep the same URL. Comparing a cached
-          // response would hide the change until its HTTP cache entry expires.
-          cache: 'no-store',
-          credentials: 'omit',
-          redirect: 'manual',
-          signal: abortController.signal
-        })
-
-        if (response.status < 300 || response.status >= 400) break
-        if (redirectCount === MAX_VIDEO_METADATA_THUMBNAIL_REDIRECTS) return null
-
-        const location = response.headers.get('location')
-        if (location === null) return null
-
-        await response.body?.cancel()
-        parsedUrl = new URL(location, parsedUrl)
-        if (parsedUrl.href.length > 20_000) return null
-      }
-
-      if (!response) return null
-      const mimeType = response.headers.get('content-type')?.split(';', 1)[0].toLowerCase()
-      const contentLength = Number(response.headers.get('content-length'))
-
-      if (
-        !response.ok ||
-        !VIDEO_METADATA_THUMBNAIL_MIME_TYPES.has(mimeType) ||
-        (Number.isFinite(contentLength) && contentLength > MAX_VIDEO_METADATA_THUMBNAIL_BYTES) ||
-        !response.body
-      ) {
-        return null
-      }
-
-      const chunks = []
-      let byteLength = 0
-      const reader = response.body.getReader()
-
-      while (true) {
-        const { done, value } = await reader.read()
-        if (done) break
-
-        byteLength += value.byteLength
-        if (byteLength > MAX_VIDEO_METADATA_THUMBNAIL_BYTES) {
-          await reader.cancel()
-          return null
-        }
-        chunks.push(Buffer.from(value))
-      }
-
-      return `data:${mimeType};base64,${Buffer.concat(chunks).toString('base64')}`
-    } catch (error) {
-      if (error?.name !== 'AbortError') {
-        console.warn('Could not cache the video thumbnail', error)
-      }
-      return null
-    } finally {
-      clearTimeout(timeout)
-    }
-  }
-
-  ipcMain.handle(IpcChannels.VIDEO_METADATA_CACHE_UPDATE, async (event, metadata) => {
-    if (!isOpenTubeXUrl(event.senderFrame.url) || !isValidVideoId(metadata?.videoId)) {
-      return null
-    }
-
-    const generation = videoMetadataCacheGeneration
-    const thumbnail = await fetchVideoMetadataThumbnail(metadata.thumbnailUrl)
-    if (generation !== videoMetadataCacheGeneration) return null
-
-    return updateVideoMetadataCache({ ...metadata, thumbnail })
-  })
-
-  ipcMain.handle(IpcChannels.VIDEO_METADATA_CACHE_CLEAR, async (event) => {
-    if (!isOpenTubeXUrl(event.senderFrame.url)) return false
-
-    videoMetadataCacheGeneration += 1
-    await clearVideoMetadataCache()
-    for (const window of BrowserWindow.getAllWindows()) {
-      if (!window.webContents.isDestroyed() && isOpenTubeXUrl(window.webContents.getURL())) {
-        window.webContents.send(IpcChannels.VIDEO_METADATA_CACHE_CLEARED)
-      }
-    }
-    return true
-  })
-
-  ipcMain.handle(IpcChannels.VIDEO_METADATA_CACHE_GET_SIZE, async (event) => {
-    if (!isOpenTubeXUrl(event.senderFrame.url)) return 0
-    return getVideoMetadataCacheSize()
-  })
+  setupVideoMetadataCacheIpc({ getConfiguredApiServerUrl })
 
   ipcMain.handle(IpcChannels.STORAGE_GET_USAGE, async (event) => {
     if (!isOpenTubeXUrl(event.senderFrame.url)) return {}
@@ -4210,126 +2448,7 @@ function runApp() {
     return compactStorageDatabases()
   })
 
-  ipcMain.handle(IpcChannels.SUBSCRIPTION_AUTO_REFRESH_ACQUIRE, async (event, tabId, feedTab) => {
-    const canAcquire = () => {
-      const manager = TabManager.getFromWebContents(event.sender)
-      return manager != null &&
-        typeof tabId === 'string' &&
-        manager.activeTabId === tabId &&
-        !event.sender.isDestroyed() &&
-        isOpenTubeXUrl(event.senderFrame.url)
-    }
-
-    if (!canAcquire()) {
-      return false
-    }
-
-    const activeIpBlockRecovery = ipBlockRecoveryScriptPromise
-    if (activeIpBlockRecovery != null) {
-      try {
-        await activeIpBlockRecovery
-      } catch {
-        // Refresh after the recovery attempt finishes, even when it failed.
-      }
-    }
-
-    if (
-      !canAcquire() ||
-      (subscriptionAutoRefreshOwner && !subscriptionAutoRefreshOwner.webContents.isDestroyed())
-    ) {
-      return false
-    }
-
-    await backgroundSubscriptions.setBackground(false)
-    if (!canAcquire() || isSubscriptionAutoRefreshInProgress()) return false
-    const owner = event.sender
-    subscriptionAutoRefreshOwner = {
-      webContents: owner,
-      tabId,
-      feedTab: typeof feedTab === 'string' ? feedTab : null
-    }
-    subscriptionAutoRefreshProgress = 0
-    owner.once('destroyed', () => {
-      if (subscriptionAutoRefreshOwner?.webContents.id === owner.id) {
-        subscriptionAutoRefreshOwner = null
-        subscriptionAutoRefreshProgress = 0
-        broadcastSubscriptionAutoRefreshState()
-      }
-    })
-    broadcastSubscriptionAutoRefreshState()
-    return true
-  })
-
-  ipcMain.handle(IpcChannels.SUBSCRIPTION_AUTO_REFRESH_GET_STATE, (event) => {
-    if (!isOpenTubeXUrl(event.senderFrame.url)) {
-      return { inProgress: false, percentage: 0, tab: null }
-    }
-
-    return {
-      inProgress: isSubscriptionAutoRefreshInProgress(),
-      percentage: subscriptionAutoRefreshProgress,
-      tab: subscriptionAutoRefreshOwner?.feedTab ?? null
-    }
-  })
-
-  ipcMain.on(IpcChannels.SUBSCRIPTION_AUTO_REFRESH_SET_PROGRESS, (event, tabId, percentage) => {
-    if (
-      subscriptionAutoRefreshOwner?.webContents.id !== event.sender.id ||
-      subscriptionAutoRefreshOwner?.tabId !== tabId ||
-      !Number.isFinite(percentage)
-    ) {
-      return
-    }
-
-    subscriptionAutoRefreshProgress = Math.min(100, Math.max(0, percentage))
-    broadcastSubscriptionAutoRefreshState()
-  })
-
-  ipcMain.on(IpcChannels.SUBSCRIPTION_AUTO_REFRESH_CANCEL, (event) => {
-    if (!isOpenTubeXUrl(event.senderFrame.url)) {
-      return
-    }
-
-    requestSubscriptionAutoRefreshCancellation()
-  })
-
-  function isSubscriptionAutoRefreshInProgress() {
-    return subscriptionAutoRefreshOwner !== null && !subscriptionAutoRefreshOwner.webContents.isDestroyed()
-  }
-
-  // Any window may ask for the cancellation, only the one running the refresh
-  // can carry it out
-  function requestSubscriptionAutoRefreshCancellation() {
-    if (isSubscriptionAutoRefreshInProgress()) {
-      subscriptionAutoRefreshOwner.webContents.send(IpcChannels.SUBSCRIPTION_AUTO_REFRESH_CANCEL)
-    }
-  }
-
-  ipcMain.handle(IpcChannels.SUBSCRIPTION_AUTO_REFRESH_RELEASE, (event, tabId) => {
-    if (
-      subscriptionAutoRefreshOwner?.webContents.id === event.sender.id &&
-      subscriptionAutoRefreshOwner?.tabId === tabId
-    ) {
-      subscriptionAutoRefreshOwner = null
-      subscriptionAutoRefreshProgress = 0
-      broadcastSubscriptionAutoRefreshState()
-      updateBackgroundSubscriptionVisibility()
-    }
-  })
-
-  function broadcastSubscriptionAutoRefreshState() {
-    const state = {
-      inProgress: isSubscriptionAutoRefreshInProgress(),
-      percentage: subscriptionAutoRefreshProgress,
-      tab: subscriptionAutoRefreshOwner?.feedTab ?? null
-    }
-
-    for (const window of BrowserWindow.getAllWindows()) {
-      if (!window.webContents.isDestroyed() && isOpenTubeXUrl(window.webContents.getURL())) {
-        window.webContents.send(IpcChannels.SUBSCRIPTION_AUTO_REFRESH_STATE_CHANGED, state)
-      }
-    }
-  }
+  setupSubscriptionAutoRefreshIpc({ backgroundSubscriptions, updateBackgroundSubscriptionVisibility })
 
   ipcMain.on(IpcChannels.SET_WINDOW_TITLE, (event, payload) => {
     if (!isOpenTubeXUrl(event.senderFrame.url)) {
@@ -4592,45 +2711,6 @@ function runApp() {
     return result.filePaths[0]
   }
 
-  /**
-   * @param {import('electron').WebContents} webContents
-   * @param {string | undefined} [currentPath]
-   * @returns {Promise<string | undefined>}
-   */
-  async function chooseIpBlockRecoveryScript(webContents, currentPath) {
-    if (typeof currentPath !== 'string' || currentPath.length === 0) {
-      currentPath = app.getPath('home')
-    }
-
-    /** @type {import('electron').FileFilter[]} */
-    const filters = process.platform === 'win32'
-      ? [
-          { name: 'Windows Script Files', extensions: ['bat', 'ps1', 'vbs'] },
-          { name: 'All Files', extensions: ['*'] }
-        ]
-      : [
-          { name: 'Shell Script Files', extensions: ['sh'] },
-          { name: 'All Files', extensions: ['*'] }
-        ]
-
-    const dialogOptions = {
-      defaultPath: currentPath,
-      properties: ['openFile'],
-      filters
-    }
-
-    const window = BrowserWindow.fromWebContents(webContents)
-    const result = window
-      ? await dialog.showOpenDialog(window, dialogOptions)
-      : await dialog.showOpenDialog(dialogOptions)
-
-    if (result.canceled || result.filePaths.length === 0) {
-      return undefined
-    }
-
-    return result.filePaths[0]
-  }
-
   ipcMain.on(IpcChannels.CHOOSE_DEFAULT_FOLDER, async (event) => {
     if (!isOpenTubeXUrl(event.senderFrame.url)) {
       return
@@ -4639,17 +2719,6 @@ function runApp() {
     const currentPath = (await baseHandlers.settings._findOne('screenshotFolderPath'))?.value
 
     await chooseDefaultFolder(event.sender, currentPath)
-  })
-
-  ipcMain.handle(IpcChannels.CHOOSE_IP_BLOCK_RECOVERY_SCRIPT, async (event, currentPath) => {
-    if (
-      !isOpenTubeXUrl(event.senderFrame.url) ||
-      (currentPath != null && typeof currentPath !== 'string')
-    ) {
-      return
-    }
-
-    return await chooseIpBlockRecoveryScript(event.sender, currentPath)
   })
 
   ipcMain.handle(IpcChannels.WRITE_TO_DEFAULT_FOLDER, async (event, filename, arrayBuffer) => {
@@ -4706,158 +2775,7 @@ function runApp() {
     return true
   })
 
-  /**
-   * @param {string} scriptPath
-   * @returns {Promise<{ exitCode: number | null, signal: NodeJS.Signals | null, stdout: string, stderr: string }>}
-   */
-  async function executeIpBlockRecoveryScript(scriptPath) {
-    const configuredPath = (await baseHandlers.settings._findOne('videoIpBlockScriptPath'))?.value
-    if (typeof configuredPath !== 'string' || configuredPath.trim().length === 0 ||
-      path.resolve(scriptPath) !== path.resolve(configuredPath)) {
-      throw new Error('Requested recovery script does not match the saved setting')
-    }
-    const normalizedPath = path.normalize(path.resolve(configuredPath))
-    if (!(await asyncFs.stat(normalizedPath)).isFile()) {
-      throw new Error('Recovery script must be a file')
-    }
-
-    let command = normalizedPath
-    let args = []
-    let windowsVerbatimArguments = false
-    if (process.platform === 'win32') {
-      const systemDirectory = path.join(process.env.SystemRoot, 'System32')
-      const extension = path.extname(normalizedPath).toLowerCase()
-      if (extension === '.bat' || extension === '.cmd') {
-        // Batch files require cmd.exe. Reject expansion and command syntax even
-        // inside quotes, and disable AutoRun and delayed environment expansion.
-        // eslint-disable-next-line no-control-regex -- Control characters must not reach cmd.exe.
-        if (/[\x00-\x1f"%!&|<>^]/.test(normalizedPath)) {
-          throw new Error('Recovery batch script path contains shell syntax')
-        }
-        command = path.join(systemDirectory, 'cmd.exe')
-        args = ['/d', '/v:off', '/s', '/c', `""${normalizedPath}""`]
-        windowsVerbatimArguments = true
-      } else if (extension === '.ps1') {
-        command = path.join(systemDirectory, 'WindowsPowerShell', 'v1.0', 'powershell.exe')
-        args = ['-NoProfile', '-NonInteractive', '-File', normalizedPath]
-      } else if (extension === '.vbs') {
-        command = path.join(systemDirectory, 'cscript.exe')
-        args = ['//Nologo', normalizedPath]
-      }
-    }
-    const maxOutputLength = 16_384
-
-    return new Promise((resolve, reject) => {
-      const child = cp.spawn(command, args, {
-        shell: false,
-        windowsVerbatimArguments,
-        windowsHide: true
-      })
-
-      let stdout = ''
-      let stderr = ''
-
-      child.stdout?.on('data', (chunk) => {
-        stdout += chunk.toString()
-        if (stdout.length > maxOutputLength) {
-          stdout = stdout.slice(-maxOutputLength)
-        }
-      })
-
-      child.stderr?.on('data', (chunk) => {
-        stderr += chunk.toString()
-        if (stderr.length > maxOutputLength) {
-          stderr = stderr.slice(-maxOutputLength)
-        }
-      })
-
-      child.once('error', (error) => {
-        reject(error)
-      })
-
-      child.once('close', (exitCode, signal) => {
-        resolve({
-          exitCode,
-          signal,
-          stdout,
-          stderr
-        })
-      })
-    })
-  }
-
-  const ipBlockRecoveryScriptCooldownMs = 10_000
-
-  /**
-   * @param {string} scriptPath
-   * @returns {boolean} whether a new run was started
-   */
-  function startIpBlockRecoveryScript(scriptPath) {
-    if (ipBlockRecoveryScriptPromise != null) {
-      return false
-    }
-
-    ipBlockRecoveryScriptPromise = executeIpBlockRecoveryScript(scriptPath)
-      .finally(() => {
-        setTimeout(() => {
-          ipBlockRecoveryScriptPromise = null
-        }, ipBlockRecoveryScriptCooldownMs)
-      })
-
-    // The execute handler still observes and forwards the rejection. Attaching a
-    // handler here prevents a fast spawn failure from becoming unhandled before
-    // the renderer has time to invoke it.
-    ipBlockRecoveryScriptPromise.catch(() => {})
-    return true
-  }
-
-  /**
-   * @param {import('electron').IpcMainInvokeEvent} event
-   * @param {unknown} scriptPath
-   * @returns {scriptPath is string}
-   */
-  function isValidIpBlockRecoveryRequest(event, scriptPath) {
-    return isOpenTubeXUrl(event.senderFrame.url) &&
-      typeof scriptPath === 'string' &&
-      scriptPath.trim().length > 0
-  }
-
-  ipcMain.handle(IpcChannels.START_IP_BLOCK_RECOVERY_SCRIPT, (event, scriptPath) => {
-    if (!isValidIpBlockRecoveryRequest(event, scriptPath)) {
-      return false
-    }
-
-    return startIpBlockRecoveryScript(scriptPath)
-  })
-
-  ipcMain.handle(IpcChannels.EXECUTE_IP_BLOCK_RECOVERY_SCRIPT, async (event, scriptPath) => {
-    if (
-      !isValidIpBlockRecoveryRequest(event, scriptPath)
-    ) {
-      return
-    }
-
-    try {
-      startIpBlockRecoveryScript(scriptPath)
-
-      return await ipBlockRecoveryScriptPromise
-    } catch (error) {
-      console.error('EXECUTE_IP_BLOCK_RECOVERY_SCRIPT failed', error)
-      throw new Error('Failed to execute script', { cause: error })
-    }
-  })
-
-  ipcMain.handle(IpcChannels.WAIT_FOR_IP_BLOCK_RECOVERY_SCRIPT, async (event) => {
-    if (!isOpenTubeXUrl(event.senderFrame.url)) {
-      return
-    }
-
-    try {
-      await ipBlockRecoveryScriptPromise
-    } catch {
-      // Resume subscription fetching after the recovery attempt finishes.
-    }
-  })
+  setupIpBlockRecoveryIpc()
 
   /** @type {Map<number, number>} */
   const activePowerSaveBlockers = new Map()
@@ -4978,44 +2896,6 @@ function runApp() {
   })
 
   ipcMain.on(IpcChannels.OPEN_IN_EXTERNAL_PLAYER, handleOpenInExternalPlayer)
-  /** Relays may reach a non-public address only for the user's Invidious instance or Yattee server, after native consent. */
-  const createMediaAddressResolver = async (sender, isDlna) => {
-    let privateInstance = null
-    try {
-      const configuredInstance = await getConfiguredApiServerUrl()
-      if (typeof configuredInstance === 'string' && configuredInstance !== '') {
-        const instance = new URL(configuredInstance)
-        if (['http:', 'https:'].includes(instance.protocol)) {
-          privateInstance = instance.origin + instance.pathname
-        }
-      }
-    } catch { }
-    let privateApproval = null
-    const authorizePrivateUrl = async url => {
-      if (!privateInstance || !isInvidiousInstanceUrl(url.href, privateInstance) ||
-          /%(?:25)*(?:2e|2f|5c)/i.test(url.pathname) || sender.isDestroyed()) return false
-      // Settings can be written by the renderer. Only a native dialog grants
-      // access, for this session and this instance's origin and path.
-      privateApproval ??= (async () => {
-        const t = await createMainTranslator()
-        if (sender.isDestroyed()) return false
-        const { response } = await dialog.showMessageBox(BrowserWindow.fromWebContents(sender), {
-          type: 'question',
-          title: isDlna ? t('Video.Player.DLNA.Cast') : t('Video.Player.Google Cast.Cast'),
-          message: t('Video.Player.Google Cast.Allow Private Instance', { instance: privateInstance }),
-          buttons: [t('Cancel'), t('Yes')],
-          defaultId: 0,
-          cancelId: 0,
-          noLink: true
-        })
-        return response === 1
-      })()
-      return await privateApproval && !sender.isDestroyed()
-    }
-    const resolveAddresses = url => resolveCastMediaAddresses(url, authorizePrivateUrl,
-      hostname => session.defaultSession.resolveHost(hostname, { cacheUsage: 'disallowed' }))
-    return { privateInstance, resolveAddresses }
-  }
   /** The API server the user configured, which may run on a private network */
   async function getConfiguredApiServerUrl() {
     if ((await baseHandlers.settings._findOne('backendPreference'))?.value === 'yattee') {
@@ -5023,347 +2903,10 @@ function runApp() {
     }
     return (await baseHandlers.settings._findOne('defaultInvidiousInstance'))?.value
   }
-  ipcMain.handle(IpcChannels.DLNA_DISCOVER, event => {
-    if (!isOpenTubeXUrl(event.senderFrame.url)) return []
-    return discoverDlnaDevices()
-  })
-  const dlnaOwners = new WeakSet()
-  const startDlnaForWindow = async (event, payload) => {
-    if (!isOpenTubeXUrl(event.senderFrame.url)) {
-      return { error: 'Casting requires an active OpenTubeX window' }
-    }
-    const sourceHeaders = mediaUrl => {
-      let headers = {}
-      if (typeof mediaUrl === 'string' && /^https?:\/\//.test(mediaUrl)) {
-        try {
-          const url = new URL(mediaUrl)
-          if (url.hostname.endsWith('.googlevideo.com') && url.pathname === '/videoplayback') {
-            headers = { Referer: 'https://www.youtube.com/', Origin: 'https://www.youtube.com' }
-          }
-          const invidiousAuthorization = invidiousAuthorizations.get(event.sender.id)
-          if (invidiousAuthorization && isInvidiousInstanceUrl(mediaUrl, invidiousAuthorization.url)) {
-            headers.Authorization = invidiousAuthorization.authorization
-          }
-          Object.assign(headers, getYtDlpExternalStreamHeaders(event.sender, mediaUrl))
-          const cookies = getYtDlpExternalStreamCookieHeader(event.sender, mediaUrl)
-          if (cookies !== null) headers.Cookie = cookies
-        } catch { /* startDlnaCast reports an invalid URL. */ }
-      }
-      return headers
-    }
-    let muxOptions = {}
-    if (payload?.audioUrl !== undefined) {
-      try {
-        muxOptions = { ffmpegPath: await getDlnaFfmpegExecutable(), audioHeaders: sourceHeaders(payload.audioUrl) }
-      } catch (error) { return { error: error.message, muxUnavailable: true } }
-    }
-    const { resolveAddresses } = await createMediaAddressResolver(event.sender, true)
-    // Validate before the renderer requests media, so a refused source cannot start a cast
-    // and a private instance's dialog cannot outlast the renderer's timeout.
-    for (const sourceUrl of [payload?.mediaUrl, payload?.audioUrl]) {
-      let url
-      try { url = new URL(sourceUrl) } catch { continue /* startDlnaCast reports an invalid URL. */ }
-      if (!await resolveAddresses(url)) return { error: 'Media address is not allowed' }
-    }
-    if (event.sender.isDestroyed()) return { error: 'Casting requires an active OpenTubeX window' }
-    const result = await startDlnaCast(event.sender.id, payload, sourceHeaders(payload?.mediaUrl), muxOptions, resolveAddresses)
-    if (result.castId) {
-      if (event.sender.isDestroyed()) {
-        stopDlnaCast(event.sender.id).catch(console.error)
-      } else if (!dlnaOwners.has(event.sender)) {
-        dlnaOwners.add(event.sender)
-        event.sender.once('destroyed', () => stopDlnaCast(event.sender.id).catch(console.error))
-      }
-    }
-    return result
-  }
-  ipcMain.handle(IpcChannels.DLNA_START, async (event, payload) => {
-    if (!event.sender.isFocused()) return { error: 'Casting requires an active OpenTubeX window' }
-    const result = await startDlnaForWindow(event, payload)
-    if (result.muxUnavailable && payload?.audioUrl && typeof payload.fallbackMediaUrl === 'string') {
-      // Validation can outlast activation and focus. Retry within the same
-      // authorized operation, using the normal source and owner checks.
-      return {
-        ...await startDlnaForWindow(event, {
-          deviceId: payload.deviceId,
-          mediaUrl: payload.fallbackMediaUrl,
-          title: payload.title,
-          startSeconds: payload.startSeconds
-        }),
-        usedFallback: true
-      }
-    }
-    return result
-  })
-  ipcMain.handle(IpcChannels.DLNA_RECOVER, async (event, castId, payload) => {
-    if (!isOpenTubeXUrl(event.senderFrame.url) || typeof castId !== 'string' ||
-        payload?.audioUrl !== undefined || !hasDlnaCastFailed(event.sender.id, castId)) {
-      return { error: 'No failed cast is available to recover' }
-    }
-    const position = await getDlnaCastPosition(event.sender.id, castId)
-    await stopDlnaCast(event.sender.id, castId)
-    return startDlnaForWindow(event, {
-      ...payload, startSeconds: (Number.isFinite(payload?.startSeconds) ? payload.startSeconds : 0) + (position ?? 0)
-    })
-  })
-  ipcMain.handle(IpcChannels.DLNA_HAS_FAILED, (event, castId) => {
-    if (!isOpenTubeXUrl(event.senderFrame.url) || typeof castId !== 'string') return false
-    return hasDlnaCastFailed(event.sender.id, castId)
-  })
-  ipcMain.handle(IpcChannels.DLNA_STOP, (event, castId) => {
-    if (!isOpenTubeXUrl(event.senderFrame.url) || typeof castId !== 'string') return false
-    return stopDlnaCast(event.sender.id, castId)
-  })
 
-  ipcMain.handle(IpcChannels.CAST_DISCOVER, async event => {
-    if (!isOpenTubeXUrl(event.senderFrame.url) || !event.sender.isFocused()) return []
-    try { return await chromecast.discover() } catch (error) { return { error: error.message, ...(error.code ? { errorCode: error.code } : {}) } }
-  })
-  const castOwners = new WeakSet()
-  const castPreparations = new Map()
-  ipcMain.handle(IpcChannels.CAST_PREPARE, event => {
-    if (!isOpenTubeXUrl(event.senderFrame.url) || !event.sender.isFocused()) return { error: 'Casting requires an active OpenTubeX window', errorCode: 'CAST_NOT_AUTHORIZED' }
-    const ownerId = event.sender.id
-    const preparationId = randomUUID()
-    castPreparations.set(ownerId, { preparationId, frameId: event.senderFrame.routingId, frameUrl: event.senderFrame.url })
-    if (!castOwners.has(event.sender)) {
-      castOwners.add(event.sender)
-      event.sender.once('destroyed', () => {
-        castPreparations.delete(ownerId)
-        if (chromecast.active?.ownerId === ownerId) chromecast.stop(ownerId, chromecast.active.castId).catch(console.error)
-      })
-    }
-    return { preparationId }
-  })
-  ipcMain.on(IpcChannels.CAST_CANCEL_PREPARATION, (event, preparationId) => {
-    if (isOpenTubeXUrl(event.senderFrame.url) && castPreparations.get(event.sender.id)?.preparationId === preparationId) {
-      castPreparations.delete(event.sender.id)
-    }
-  })
-  ipcMain.handle(IpcChannels.CAST_START, async (event, payload, preparationId) => {
-    const ownerId = event.sender.id
-    const preparation = castPreparations.get(ownerId)
-    if (!isOpenTubeXUrl(event.senderFrame.url) || !preparation || preparation.preparationId !== preparationId ||
-        preparation.frameId !== event.senderFrame.routingId || preparation.frameUrl !== event.senderFrame.url) {
-      return { error: 'Cast start is not authorized', errorCode: 'CAST_NOT_AUTHORIZED' }
-    }
-    // Consume the focused-window grant once, preserving it across subtitle work.
-    castPreparations.delete(ownerId)
-    const getHeaders = mediaUrl => {
-      const url = new URL(mediaUrl)
-      const headers = { 'User-Agent': session.defaultSession.getUserAgent() }
-      if (url.hostname.endsWith('.googlevideo.com') && url.pathname === '/videoplayback') {
-        headers.Referer = 'https://www.youtube.com/'
-        headers.Origin = 'https://www.youtube.com'
-      }
-      const authorization = invidiousAuthorizations.get(ownerId)
-      if (authorization && isInvidiousInstanceUrl(mediaUrl, authorization.url)) headers.Authorization = authorization.authorization
-      Object.assign(headers, getYtDlpExternalStreamHeaders(event.sender, mediaUrl))
-      applyTwitchPlaylistOrigin(url, headers)
-      const cookies = getYtDlpExternalStreamCookieHeader(event.sender, mediaUrl)
-      if (cookies !== null) headers.Cookie = cookies
-      return headers
-    }
-    const { privateInstance, resolveAddresses } = await createMediaAddressResolver(event.sender, false)
-    const fetchMedia = async (url, options) => fetchCastMedia(new URL(url).protocol === 'https:' ? https : http, url, {
-      ...options, proxy: await session.defaultSession.resolveProxy(url)
-    })
-    // Ask before launching the receiver, so a private source's native consent
-    // dialog does not consume the receiver's media-loading timeout.
-    if (privateInstance && isInvidiousInstanceUrl(payload?.source?.url, privateInstance) &&
-        !await resolveAddresses(new URL(payload.source.url))) return { error: 'Private Cast media was not authorized', errorCode: 'CAST_PRIVATE_NOT_AUTHORIZED' }
-    if (event.sender.isDestroyed()) return { error: 'Cast start cancelled', errorCode: 'CAST_CANCELLED' }
-    const onProgress = stage => {
-      const frame = event.senderFrame
-      if (!event.sender.isDestroyed() && frame && !frame.detached) {
-        try {
-          frame.send(IpcChannels.CAST_PROGRESS, { preparationId, stage })
-        } catch {
-          // Progress is advisory; the frame may close between the guard and send.
-        }
-      }
-    }
-    const result = await chromecast.start(ownerId, payload, getHeaders, resolveAddresses, fetchMedia, onProgress)
-    if (result.castId) {
-      if (event.sender.isDestroyed()) await chromecast.stop(ownerId, result.castId)
-    }
-    return result
-  })
-  ipcMain.handle(IpcChannels.CAST_STATUS, (event, castId) => {
-    if (!isOpenTubeXUrl(event.senderFrame.url) || typeof castId !== 'string') return { connected: false }
-    return chromecast.status(event.sender.id, castId)
-  })
-  ipcMain.handle(IpcChannels.CAST_CONTROL, (event, castId, action, value) => {
-    if (!isOpenTubeXUrl(event.senderFrame.url) || !event.sender.isFocused() || typeof castId !== 'string') {
-      return { error: 'Casting requires an active OpenTubeX window', errorCode: 'CAST_NOT_AUTHORIZED' }
-    }
-    return chromecast.control(event.sender.id, castId, action, value)
-  })
-  ipcMain.handle(IpcChannels.CAST_STOP, (event, castId) => {
-    if (!isOpenTubeXUrl(event.senderFrame.url) || typeof castId !== 'string') return { connected: false }
-    return chromecast.stop(event.sender.id, castId)
-  })
-
-  ipcMain.handle(IpcChannels.YT_DLP_DOWNLOAD, (event, payload, retryDownloadId) => {
-    const automaticDownloadAuthorized = subscriptionAutoRefreshOwner?.webContents.id === event.sender.id &&
-      payload?.refreshOwnerTabId === subscriptionAutoRefreshOwner.tabId
-    return handleYtDlpDownload(event, payload, retryDownloadId, automaticDownloadAuthorized)
-  })
-
-  ipcMain.on(IpcChannels.YT_DLP_CANCEL_DOWNLOAD, handleYtDlpCancelDownload)
-  ipcMain.handle(IpcChannels.YT_DLP_CONTROL_DOWNLOAD, handleYtDlpControlDownload)
-  ipcMain.handle(IpcChannels.YT_DLP_QUEUE_ACTION, handleYtDlpQueueAction)
-  ipcMain.handle(IpcChannels.YT_DLP_LIST_DOWNLOADS, handleYtDlpListDownloads)
-  ipcMain.handle(IpcChannels.YT_DLP_CLEAR_DOWNLOADS, handleYtDlpClearDownloads)
-  ipcMain.handle(IpcChannels.YT_DLP_OPEN_DOWNLOAD, handleYtDlpOpenDownload)
-  ipcMain.handle(IpcChannels.YT_DLP_REMOVE_DOWNLOAD, handleYtDlpRemoveDownload)
-
-  ipcMain.handle(IpcChannels.YT_DLP_GET_INFO, handleYtDlpGetInfo)
-
-  ipcMain.handle(IpcChannels.YT_DLP_GET_SUBTITLE, handleYtDlpGetSubtitle)
-  ipcMain.handle(IpcChannels.YT_DLP_CANCEL_HISTORY_REPAIR, handleYtDlpCancelHistoryRepair)
-  ipcMain.handle(IpcChannels.YT_DLP_GET_HISTORY_METADATA, handleYtDlpGetHistoryMetadata)
-  ipcMain.handle(IpcChannels.YT_DLP_GET_PLAYBACK_INFO, handleYtDlpGetPlaybackInfo)
+  setupYtDlpIpc()
   ipcMain.handle(IpcChannels.TWITCH_CHAT_REPLAY_PAGE, handleTwitchChatReplayPage)
   ipcMain.handle(IpcChannels.TWITCH_SUB_ONLY_VOD, handleTwitchSubOnlyVod)
-  ipcMain.handle(IpcChannels.YT_DLP_GET_RECOMMENDATIONS, handleYtDlpGetRecommendations)
-  ipcMain.handle(IpcChannels.YT_DLP_SEARCH, handleYtDlpSearch)
-  ipcMain.handle(IpcChannels.YT_DLP_PLAYBACK_CACHE_GET, handleYtDlpPlaybackCacheGet)
-  ipcMain.handle(IpcChannels.YT_DLP_PLAYBACK_CACHE_SET, handleYtDlpPlaybackCacheSet)
-  ipcMain.handle(IpcChannels.YT_DLP_PLAYBACK_CACHE_DELETE, handleYtDlpPlaybackCacheDelete)
-  ipcMain.handle(IpcChannels.YT_DLP_PLAYBACK_CACHE_CLEAR, handleYtDlpPlaybackCacheClear)
-
-  ipcMain.handle(IpcChannels.YT_DLP_CHECK_BINARY_UPDATE, handleYtDlpCheckBinaryUpdate)
-  ipcMain.handle(IpcChannels.YT_DLP_DOWNLOAD_BINARY, handleYtDlpDownloadBinary)
-
-  ipcMain.handle(IpcChannels.YT_DLP_CHOOSE_EXECUTABLE, async (event, currentPath) => {
-    if (
-      !isOpenTubeXUrl(event.senderFrame.url) ||
-      (currentPath != null && typeof currentPath !== 'string')
-    ) {
-      return
-    }
-
-    if (typeof currentPath !== 'string' || currentPath.length === 0) {
-      currentPath = app.getPath('home')
-    }
-
-    /** @type {import('electron').FileFilter[]} */
-    const filters = process.platform === 'win32'
-      ? [
-          { name: 'Executable Files', extensions: ['exe'] },
-          { name: 'All Files', extensions: ['*'] }
-        ]
-      : [{ name: 'All Files', extensions: ['*'] }]
-
-    const dialogOptions = {
-      defaultPath: currentPath,
-      properties: ['openFile'],
-      filters
-    }
-
-    const window = BrowserWindow.fromWebContents(event.sender)
-    const result = window
-      ? await dialog.showOpenDialog(window, dialogOptions)
-      : await dialog.showOpenDialog(dialogOptions)
-
-    if (result.canceled || result.filePaths.length === 0) {
-      return undefined
-    }
-
-    return result.filePaths[0]
-  })
-
-  ipcMain.handle(IpcChannels.YT_DLP_CHOOSE_COOKIES, async (event, currentPath) => {
-    if (
-      !isOpenTubeXUrl(event.senderFrame.url) ||
-      (currentPath != null && typeof currentPath !== 'string')
-    ) {
-      return
-    }
-
-    if (typeof currentPath !== 'string' || currentPath.length === 0) {
-      currentPath = app.getPath('home')
-    }
-
-    const dialogOptions = {
-      defaultPath: currentPath,
-      properties: ['openFile'],
-      filters: [
-        { name: 'Cookie Files', extensions: ['txt'] },
-        { name: 'All Files', extensions: ['*'] }
-      ]
-    }
-
-    const window = BrowserWindow.fromWebContents(event.sender)
-    const result = window
-      ? await dialog.showOpenDialog(window, dialogOptions)
-      : await dialog.showOpenDialog(dialogOptions)
-
-    if (result.canceled || result.filePaths.length === 0) {
-      return undefined
-    }
-
-    return result.filePaths[0]
-  })
-
-  ipcMain.handle(IpcChannels.YT_DLP_CHOOSE_BROWSER_PROFILE, async (event, currentPath) => {
-    if (
-      !isOpenTubeXUrl(event.senderFrame.url) ||
-      (currentPath != null && typeof currentPath !== 'string')
-    ) {
-      return
-    }
-
-    if (typeof currentPath !== 'string' || currentPath.length === 0) {
-      currentPath = app.getPath('home')
-    }
-
-    const dialogOptions = {
-      defaultPath: currentPath,
-      properties: ['openDirectory']
-    }
-
-    const window = BrowserWindow.fromWebContents(event.sender)
-    const result = window
-      ? await dialog.showOpenDialog(window, dialogOptions)
-      : await dialog.showOpenDialog(dialogOptions)
-
-    if (result.canceled || result.filePaths.length === 0) {
-      return undefined
-    }
-
-    return result.filePaths[0]
-  })
-
-  ipcMain.handle(IpcChannels.YT_DLP_CHOOSE_DOWNLOAD_FOLDER, async (event, currentPath) => {
-    if (
-      !isOpenTubeXUrl(event.senderFrame.url) ||
-      (currentPath != null && typeof currentPath !== 'string')
-    ) {
-      return
-    }
-
-    if (typeof currentPath !== 'string' || currentPath.length === 0) {
-      currentPath = app.getPath('downloads')
-    }
-
-    const dialogOptions = {
-      defaultPath: currentPath,
-      properties: ['openDirectory']
-    }
-
-    const window = BrowserWindow.fromWebContents(event.sender)
-    const result = window
-      ? await dialog.showOpenDialog(window, dialogOptions)
-      : await dialog.showOpenDialog(dialogOptions)
-
-    if (result.canceled || result.filePaths.length === 0) {
-      return undefined
-    }
-
-    return result.filePaths[0]
-  })
 
   ipcMain.handle(IpcChannels.GET_REPLACE_HTTP_CACHE, (event) => {
     if (isOpenTubeXUrl(event.senderFrame.url)) {
@@ -5488,66 +3031,8 @@ function runApp() {
     return clipboard.readText()
   })
 
-  ipcMain.handle(IpcChannels.CUSTOM_THEME_LOAD, async (event) => {
-    if (!isOpenTubeXUrl(event.senderFrame.url)) return
-    return await loadCustomThemes()
-  })
-
-  ipcMain.handle(IpcChannels.CUSTOM_THEME_SAVE, async (event, theme) => {
-    if (!isOpenTubeXUrl(event.senderFrame.url)) return
-
-    const themes = await saveCustomTheme(theme)
-    await repairSystemThemeSettingsFromMain(themes)
-    await publishCustomThemes(themes)
-    return themes
-  })
-
-  ipcMain.handle(IpcChannels.CUSTOM_THEME_REPLACE, async (event, themes) => {
-    if (!isOpenTubeXUrl(event.senderFrame.url)) return
-
-    const normalizedThemes = await replaceCustomThemes(themes)
-    await repairSystemThemeSettingsFromMain(normalizedThemes)
-    await publishCustomThemes(normalizedThemes)
-    return normalizedThemes
-  })
-
-  ipcMain.handle(IpcChannels.CUSTOM_THEME_DELETE, async (event, themeId) => {
-    if (!isOpenTubeXUrl(event.senderFrame.url)) return
-
-    const deletedTheme = (await loadCustomThemes()).find(({ id }) => id === themeId)
-    const themes = await deleteCustomTheme(themeId)
-    if (deletedTheme) {
-      const deletedThemeValue = customThemeValue(themeId)
-      const [baseTheme, systemLightTheme, systemDarkTheme] = await Promise.all([
-        baseHandlers.settings._findOne('baseTheme'),
-        baseHandlers.settings._findOne('systemLightTheme'),
-        baseHandlers.settings._findOne('systemDarkTheme')
-      ])
-      if (systemLightTheme?.value === deletedThemeValue) {
-        await updateSettingFromMain(
-          'systemLightTheme',
-          resolveSystemTheme(deletedTheme.basedOn, 'light'),
-          deletedThemeValue
-        )
-      }
-      if (systemDarkTheme?.value === deletedThemeValue) {
-        await updateSettingFromMain(
-          'systemDarkTheme',
-          resolveSystemTheme(deletedTheme.basedOn, 'dark'),
-          deletedThemeValue
-        )
-      }
-      if (baseTheme?.value === deletedThemeValue) {
-        await updateSettingFromMain('mainColor', deletedTheme.mainColor)
-        await updateSettingFromMain('secColor', deletedTheme.secondaryColor)
-        await updateSettingFromMain('baseTheme', deletedTheme.basedOn)
-        updateThemeSource(deletedTheme.basedOn)
-      }
-    }
-    await repairSystemThemeSettingsFromMain(themes)
-    await publishCustomThemes(themes)
-    return themes
-  })
+  const { loadCustomThemes, getSelectedCustomTheme } = setupCustomThemes({ updateSettingFromMain, updateThemeSource })
+  setupCastIpc({ chromecast, invidiousAuthorizations, getConfiguredApiServerUrl })
 
   // ************************************************* //
   // DB related IPC calls
@@ -5601,7 +3086,7 @@ function runApp() {
               checkScheduledBackup()
               break
             case 'contextMenuSearchEngines':
-              configuredSearchEngines = parseSearchEngines(data.value)
+              contextMenu.setSearchEngines(data.value)
               break
             // Update app menu on related setting update
             case 'backendFallback':
@@ -5669,7 +3154,7 @@ function runApp() {
         case DBActions.GENERAL.DELETE:
           await baseHandlers.settings.delete(data)
           if (data === 'contextMenuSearchEngines') {
-            configuredSearchEngines = parseSearchEngines(DEFAULT_SEARCH_ENGINES_SETTING)
+            contextMenu.setSearchEngines(DEFAULT_SEARCH_ENGINES_SETTING)
           }
           return null
 
@@ -6519,7 +4004,7 @@ function runApp() {
     // renderer that has not registered its OPEN_URL listener yet.
     webContents.on('did-start-navigation', (_event, _url, isInPlace, isMainFrame) => {
       if (isMainFrame && !isInPlace) {
-        openUrlReadyWebContentsIds.delete(webContents.id)
+        forgetOpenUrlRenderer(webContents.id)
         const browserWindow = BrowserWindow.fromWebContents(webContents)
         if (browserWindow) {
           appShortcutBlockedWindows.delete(browserWindow)
@@ -6528,10 +4013,8 @@ function runApp() {
     })
 
     webContents.once('destroyed', () => {
-      contextMenuSessions.delete(webContents.id)
-      latestContextMenuRequests.delete(webContents.id)
-      pendingOpenUrlsByWebContentsId.delete(webContents.id)
-      openUrlReadyWebContentsIds.delete(webContents.id)
+      contextMenu.forgetWebContents(webContents.id)
+      forgetOpenUrlWebContents(webContents.id)
       invidiousAuthorizations.delete(webContents.id)
     })
   })

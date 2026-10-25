@@ -4,7 +4,7 @@ import test from 'node:test'
 import { runInNewContext } from 'node:vm'
 
 const source = await readFile(new URL('../../src/main/index.js', import.meta.url), 'utf8')
-const handlerSource = source.slice(source.indexOf('  let broadcastWatchQueueRevision = 0\n  ipcMain.handle(IpcChannels.WATCH_QUEUE_UPDATE,'), source.indexOf('\n\n  ipcMain.handle(IpcChannels.CONTEXT_MENU_EXECUTE,'))
+const handlerSource = source.slice(source.indexOf('  let broadcastWatchQueueRevision = 0\n  ipcMain.handle(IpcChannels.WATCH_QUEUE_UPDATE,'), source.indexOf('\n\n  if (process.platform === \'win32\' && !isPortableBuild())'))
 
 function windowFixture({ destroyed = false, contentsDestroyed = false, url = 'app://bundle/index.html', failSend = false } = {}) {
   const messages = []
