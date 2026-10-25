@@ -20,6 +20,7 @@ Requests such as "implement issue #X" authorize local changes, not a PR. Open a 
 - Fix unrelated test failures, including flaky ones and tests that pass on retry: reproduce on the latest `origin/development`, find the root cause, fix and verify it, and push directly to `origin/development`, however large the fix is (authorized without further approval; keep it out of the current task's branch and PR). Never skip, quarantine, or defer the test (`test.fixme`, `test.skip`, follow-up issues), and never loosen an assertion to hide a regression. Then rebase the working branch onto the updated `origin/development` and rerun the affected checks.
 - For bugfixes, demonstrate the failure first, add a regression test where practical, and verify the fix. Verify new features with checks appropriate to the affected code. If automated verification is impractical, explain why and report the evidence used, unless the user waived verification.
 - When changing sync-server collections or capabilities, search tests for and update every expectation for collection lists, upload counts, and capabilities, including capability-dependent cases in `e2e/tests/network/sync-server.spec.mjs`, and run the affected E2E test against a local server with the new capability.
+- Many unit tests read source files as text and slice them by exact markers and indentation. When moving or reformatting code, grep `tests/` and `e2e/` for the file and the moved names, and point those tests at the new location without changing their assertions.
 
 ### E2E
 
@@ -34,6 +35,11 @@ Requests such as "implement issue #X" authorize local changes, not a PR. Open a 
 - Debug builds install as `org.opentubex.app.dev` (OpenTubeX Dev). Launch `org.opentubex.app.dev/org.opentubex.app.MainActivity`; instrumentation uses `org.opentubex.app.dev.test`. Use `assembleNightly` only to build the published nightly identity. See `android/SIGNING.md`.
 - Verify Android-targeted work (native code, Capacitor behavior, mobile-only components affecting Android, bugs seen on Android) on an emulator with a current debug APK, and report the API level, WebView version, and result. Electron tests and mobile-sized viewports do not replace this.
 - iOS-only changes do not need an emulator, nor do shared renderer or CSS changes merely because the component also appears on phones; cover responsive effects with Electron tests. Use the emulator if an Android-specific failure emerges.
+
+## Code organization
+
+- Keep new OpenTubeX code out of files that also exist in `upstream/development`. Put each feature in its own module: an `opentubex/` folder beside the component or view, `src/renderer/app/` for `App.vue`, or a sibling module in `src/main/`. Hook it in with an import plus one call, spread, or composable invocation. Leave upstream code where it is, even where OpenTubeX changed it.
+- `ft-shaka-video-player.vue` loads `ft-shaka-video-player.css` first and the `opentubex/*.css` feature files after it, so the `<style>` order is the cascade order. Add rules to the feature file they belong to. If an upstream rule of equal specificity must override a new rule, put the new rule in `ft-shaka-video-player.css` before it.
 
 ## UI
 
@@ -70,5 +76,6 @@ When adding or changing translatable strings:
 ## Upstream, naming, and related repositories
 
 - Merge `upstream/development`. Prefer OpenTubeX changes when resolving conflicts, and replace "FreeTube" with "OpenTubeX" in new translations.
+- After an upstream merge, check that no upstream method or computed property has the same name as one spread in from an OpenTubeX module, for example in `Watch.js`. The later key replaces the earlier one without a warning.
 - Never use the FreeTube name or branding to promote OpenTubeX: not in repository descriptions or tags, store or package-repository listings (AUR, APT, RPM, Flatpak), the website, or other marketing material. See discussion #391.
 - Related repositories (Website, APT, RPM, Flatpak, AUR) live next to the main checkout. Find it with `git worktree list --porcelain` (listed first) and look in its parent directory, not a linked worktree's parent. To change one, fetch its origin and create a worktree from origin's default branch instead of working in its main checkout.
