@@ -761,6 +761,7 @@ Settings:
       Viewing Modes: Λειτουργίες προβολής
       Shorts: Shorts
       Screenshots: Στιγμιότυπα οθόνης
+    Enable FCast: "Ενεργοποίηση FCast"
   Channel Settings:
     Channel Settings: Ρυθμίσεις καναλιών
     Channel Settings Description: Απομνημόνευση των ρυθμίσεων που επιλέγετε κατά την παρακολούθηση, ξεχωριστά για κάθε κανάλι, ώστε να εφαρμόζονται ξανά την επόμενη φορά που θα παρακολουθήσετε κάποιο βίντεό του.
@@ -1691,6 +1692,8 @@ Video:
       Untrusted Receiver: "Το πιστοποιητικό του δέκτη δεν είναι έμπιστο. Χρησιμοποιήστε έναν πιστοποιημένο δέκτη Google Cast."
     FCast:
       Cast: "Μετάδοση σε δέκτη FCast"
+      No Devices: "Δεν βρέθηκαν δέκτες FCast"
+      No Source: "Δεν υπάρχει συμβατή ροή για το FCast"
     Secondary Captions: Δευτερεύοντες υπότιτλοι
     Subtitle File:
       Load: "Φόρτωση αρχείου υποτίτλων…"

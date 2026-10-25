@@ -759,6 +759,7 @@ Settings:
       Viewing Modes: Moddau gwylio
       Shorts: Shorts
       Screenshots: Sgrinluniau
+    Enable FCast: "Galluogi FCast"
   Channel Settings:
     Channel Settings: Gosodiadau sianeli
     Channel Settings Description: Cofiwch y gosodiadau a ddewiswch wrth wylio ar gyfer pob sianel ar wahân, fel eu bod yn cael eu gosod eto y tro nesaf y byddwch yn gwylio un o'i fideos.
@@ -1693,6 +1694,8 @@ Video:
       Untrusted Receiver: "Nid yw tystysgrif y derbynnydd yn ddibynadwy. Defnyddiwch dderbynnydd Google Cast sydd wedi ei ddilysu."
     FCast:
       Cast: "Castio i dderbynnydd FCast"
+      No Devices: "Heb ganfod derbynyddion FCast"
+      No Source: "Dim ffrwd gydnaws ar gyfer FCast"
     Secondary Captions: Isdeitlau eilaidd
     Subtitle File:
       Load: "Llwytho ffeil isdeitlau…"

@@ -3,19 +3,24 @@ import { readFile } from 'node:fs/promises'
 import { compileFunction } from 'node:vm'
 import test from 'node:test'
 
-test('Android exposes the Google Cast setting and enabled player action', async () => {
-  const settings = await readFile(new URL('../../src/renderer/components/PlayerSettings/PlayerSettings.vue', import.meta.url), 'utf8')
-  const toggle = settings.match(/<FtToggleSwitch\s[^>]*setting-key="showChromecastButton"[^>]*>/s)?.[0]
-  assert.ok(toggle)
-  const condition = toggle.match(/v-if="([^"]+)"/)?.[1] ?? 'true'
-  assert.equal(compileFunction(`return ${condition}`, ['USING_ELECTRON', 'IS_CAPACITOR', 'IS_IOS'])(false, true, false), true,
-    'Google Cast setting is missing on Android')
-  const watch = await readFile(new URL('../../src/renderer/views/Watch/Watch.vue', import.meta.url), 'utf8')
-  const action = watch.match(/<WatchCast\s[^>]*>/s)?.[0]
-  const visible = action.match(/:google-cast-enabled="([^"]+)"/)[1]
-  assert.equal(compileFunction(`return ${visible}`, ['supportsChromecast', '$store'])(true,
-    { getters: { getShowChromecastButton: true } }), true, 'Enabled Google Cast action is missing on Android')
-})
+for (const [name, setting, binding, getter] of [
+  ['Google Cast', 'showChromecastButton', 'google-cast-enabled', 'getShowChromecastButton'],
+  ['FCast', 'showFcastButton', 'fcast-enabled', 'getShowFcastButton']
+]) {
+  test(`Android exposes the ${name} setting and enabled player action`, async () => {
+    const settings = await readFile(new URL('../../src/renderer/components/PlayerSettings/PlayerSettings.vue', import.meta.url), 'utf8')
+    const toggle = settings.match(new RegExp(`<FtToggleSwitch\\s[^>]*setting-key="${setting}"[^>]*>`, 's'))?.[0]
+    assert.ok(toggle)
+    const condition = toggle.match(/v-if="([^"]+)"/)?.[1] ?? 'true'
+    assert.equal(compileFunction(`return ${condition}`, ['USING_ELECTRON', 'IS_CAPACITOR', 'IS_IOS'])(false, true, false), true,
+      `${name} setting is missing on Android`)
+    const watch = await readFile(new URL('../../src/renderer/views/Watch/Watch.vue', import.meta.url), 'utf8')
+    const action = watch.match(/<WatchCast\s[^>]*>/s)?.[0]
+    const visible = action.match(new RegExp(`:${binding}="([^"]+)"`))[1]
+    assert.equal(compileFunction(`return ${visible}`, ['supportsChromecast', '$store'])(true,
+      { getters: { [getter]: true } }), true, `Enabled ${name} action is missing on Android`)
+  })
+}
 
 const { createMobileChromecast } = await import('../../src/renderer/helpers/player/chromecast.js')
 

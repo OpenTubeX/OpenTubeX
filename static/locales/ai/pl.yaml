@@ -382,6 +382,7 @@ Settings:
       Viewing Modes: Tryby wyświetlania
       Shorts: Shorts
       Screenshots: Zrzuty ekranu
+    Enable FCast: "Włącz FCast"
   Channel Settings:
     Enable Channel Playback Settings: Włącz ustawienia odtwarzania dla kanałów
     Auto Save Playback Speed: Automatycznie zapisuj zmiany prędkości odtwarzania
@@ -1003,6 +1004,8 @@ Video:
       Untrusted Receiver: "Certyfikat odbiornika nie jest zaufany. Użyj uwierzytelnionego odbiornika Google Cast."
     FCast:
       Cast: "Przesyłaj do odbiornika FCast"
+      No Devices: "Nie znaleziono odbiorników FCast"
+      No Source: "Brak zgodnego strumienia dla FCast"
     Secondary Captions: Dodatkowe napisy
     Subtitle File:
       Load: "Wczytaj plik napisów…"

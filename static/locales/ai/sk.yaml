@@ -759,6 +759,7 @@ Settings:
       Viewing Modes: Režimy zobrazenia
       Shorts: Shorts
       Screenshots: Snímky obrazovky
+    Enable FCast: "Povoliť FCast"
   Channel Settings:
     Channel Settings: Nastavenia kanálov
     Channel Settings Description: Nastavenia, ktoré vyberiete pri sledovaní, sa zapamätajú pre každý kanál samostatne a znova sa použijú pri ďalšom sledovaní jeho videa.
@@ -1672,6 +1673,8 @@ Video:
       Untrusted Receiver: "Certifikát prijímača nie je dôveryhodný. Použite overený prijímač Google Cast."
     FCast:
       Cast: "Odoslať do prijímača FCast"
+      No Devices: "Nenašli sa žiadne prijímače FCast"
+      No Source: "Žiadny kompatibilný stream pre FCast"
     Secondary Captions: Druhé titulky
     Subtitle File:
       Load: "Načítať súbor s titulkami…"

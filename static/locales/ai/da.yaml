@@ -783,6 +783,7 @@ Settings:
       Viewing Modes: Visningstilstande
       Shorts: Shorts
       Screenshots: Skærmbilleder
+    Enable FCast: "Aktivér FCast"
   Channel Settings:
     Channel Settings: Kanalindstillinger
     Channel Settings Description: Husk de indstillinger, du vælger under afspilning, for hver kanal, så de anvendes igen, næste gang du ser en af kanalens videoer.
@@ -1740,6 +1741,8 @@ Video:
       Untrusted Receiver: "Modtagerens certifikat er ikke betroet. Brug en godkendt Google Cast-modtager."
     FCast:
       Cast: "Cast til en FCast-modtager"
+      No Devices: "Ingen FCast-modtagere fundet"
+      No Source: "Ingen kompatibel stream til FCast"
     Secondary Captions: Sekundære undertekster
     Subtitle File:
       Load: "Indlæs undertekstfil…"

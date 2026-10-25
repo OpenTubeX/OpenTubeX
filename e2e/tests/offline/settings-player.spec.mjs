@@ -22,9 +22,9 @@ test.describe('fresh AI video summary default', () => {
   })
 })
 
-test('DLNA and Google Cast casting are opt in from Player Settings', async ({ page }) => {
+test('DLNA, Google Cast and FCast casting are opt in from Player Settings', async ({ page }) => {
   const playback = await goToSettingsSection(page, 'playback')
-  for (const label of ['Enable DLNA casting', 'Enable Google Cast']) {
+  for (const label of ['Enable DLNA casting', 'Enable Google Cast', 'Enable FCast']) {
     const toggle = playback.getByRole('checkbox', { name: label })
     await expect(toggle).not.toBeChecked()
     await playback.locator('label.switch-label').filter({ hasText: label }).click()

@@ -971,6 +971,7 @@ Settings:
       Viewing Modes: Načini ogleda
       Shorts: Shorts
       Screenshots: Posnetki zaslona
+    Enable FCast: "Omogoči FCast"
   Channel Settings:
     Channel Settings: Nastavitve kanalov
     Channel Settings Description: Zapomni si nastavitve, ki jih med gledanjem izberete za vsak kanal posebej, in jih znova uporabi ob naslednjem ogledu enega od njegovih videoposnetkov.
@@ -2130,6 +2131,8 @@ Video:
       Untrusted Receiver: "Potrdilo sprejemnika ni zaupanja vredno. Uporabite preverjen sprejemnik Google Cast."
     FCast:
       Cast: "Predvajaj na sprejemniku FCast"
+      No Devices: "Ni najdenih sprejemnikov FCast"
+      No Source: "Ni združljivega toka za FCast"
     Secondary Captions: Sekundarni podnapisi
     Subtitle File:
       Load: "Naloži datoteko s podnapisi…"

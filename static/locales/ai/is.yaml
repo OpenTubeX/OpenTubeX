@@ -763,6 +763,7 @@ Settings:
       Viewing Modes: Skoðunarhamir
       Shorts: Shorts
       Screenshots: Skjámyndir
+    Enable FCast: "Virkja FCast"
   Channel Settings:
     Channel Settings: Rásarstillingar
     Channel Settings Description: Muna stillingarnar sem þú velur við áhorf fyrir hverja rás, svo þær verði notaðar aftur næst þegar þú horfir á myndband frá henni.
@@ -1694,6 +1695,8 @@ Video:
       Untrusted Receiver: "Vottorði móttakarans er ekki treyst. Notaðu auðkenndan Google Cast-móttakara."
     FCast:
       Cast: "Senda í FCast-móttakara"
+      No Devices: "Engir FCast-móttakarar fundust"
+      No Source: "Enginn samhæfur straumur fyrir FCast"
     Secondary Captions: Aukaskjátextar
     Subtitle File:
       Load: "Hlaða inn skjátextaskrá…"

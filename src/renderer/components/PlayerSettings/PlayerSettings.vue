@@ -333,6 +333,14 @@
         setting-key="showChromecastButton"
         @change="store.dispatch('updateShowChromecastButton', $event)"
       />
+      <FtToggleSwitch
+        v-if="USING_ELECTRON || (IS_CAPACITOR && !IS_IOS)"
+        :label="t('Settings.Player Settings.Enable FCast')"
+        :compact="true"
+        :default-value="store.getters.getShowFcastButton"
+        setting-key="showFcastButton"
+        @change="store.dispatch('updateShowFcastButton', $event)"
+      />
     </div>
     <h4 class="groupTitle">
       {{ t('Settings.Player Settings.Sections.Gestures') }}

@@ -767,6 +767,7 @@ Settings:
       Viewing Modes: أوضاع العرض
       Shorts: Shorts
       Screenshots: لقطات الشاشة
+    Enable FCast: "تفعيل FCast"
   Channel Settings:
     Channel Settings: إعدادات القناة
     Channel Settings Description: تذكر الإعدادات التي تختارها أثناء المشاهدة لكل قناة على حدة، بحيث يتم تطبيقها مرة أخرى في المرة التالية التي تشاهد فيها أحد مقاطع الفيديو الخاصة بها.
@@ -1708,6 +1709,8 @@ Video:
       Untrusted Receiver: "شهادة جهاز الاستقبال غير موثوقة. استخدم جهاز استقبال Google Cast مصادقًا عليه."
     FCast:
       Cast: "البث إلى جهاز استقبال FCast"
+      No Devices: "لم يُعثر على أجهزة استقبال FCast"
+      No Source: "لا يوجد بث متوافق مع FCast"
     Secondary Captions: ترجمات ثانوية
     Subtitle File:
       Load: "تحميل ملف ترجمة…"

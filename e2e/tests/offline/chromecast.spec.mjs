@@ -24,11 +24,11 @@ test.use({
 async function mockCast(app) {
   await app.electronApp.evaluate(({ ipcMain }) => {
     const state = { currentTime: 5, duration: 30, paused: false, connected: true, volume: 0.5, muted: false, activeTrackIds: [] }
-    globalThis.castTest = { state, starts: [], stops: [], controls: [], failStart: false, startDelayMs: 0, startCompletions: 0, failStatus: false, failStop: false, statusCalls: 0 }
+    globalThis.castTest = { state, starts: [], stops: [], controls: [], protocols: [], failStart: false, startDelayMs: 0, startCompletions: 0, failStatus: false, failStop: false, statusCalls: 0 }
     const preparations = new Map()
     let nextPreparation = 0
     for (const name of ['cast-discover', 'cast-prepare', 'cast-start', 'cast-status', 'cast-control', 'cast-stop']) ipcMain.removeHandler(name)
-    ipcMain.handle('cast-discover', () => [{ id: 'test-tv', name: 'Test TV' }])
+    ipcMain.handle('cast-discover', (_, protocol) => protocol === 'fcast' ? [{ id: 'fcast-tv', name: 'FCast TV' }] : [{ id: 'test-tv', name: 'Test TV' }])
     ipcMain.handle('cast-prepare', async event => {
       const preparationId = String(++nextPreparation)
       preparations.set(event.sender.id, preparationId)
@@ -38,10 +38,11 @@ async function mockCast(app) {
     ipcMain.on('cast-cancel-preparation', (event, preparationId) => {
       if (preparations.get(event.sender.id) === preparationId) preparations.delete(event.sender.id)
     })
-    ipcMain.handle('cast-start', async (event, payload, preparationId) => {
+    ipcMain.handle('cast-start', async (event, payload, preparationId, protocol) => {
       if (preparations.get(event.sender.id) !== preparationId) return { error: 'Cast start is not authorized' }
       preparations.delete(event.sender.id)
       globalThis.castTest.starts.push(payload)
+      globalThis.castTest.protocols.push(['start', protocol])
       globalThis.castTest.progress = stage => event.sender.send('cast-progress', { preparationId, stage })
       globalThis.castTest.progress('connecting')
       if (globalThis.castTest.holdStart) await new Promise(resolve => { globalThis.castTest.finishStart = resolve })
@@ -56,15 +57,16 @@ async function mockCast(app) {
       }
       state.currentTime = payload.startSeconds
       state.paused = payload.paused
-      return { castId: 'session-id', deviceName: 'Test TV', status: { ...state } }
+      return { castId: 'session-id', deviceName: payload.deviceId === 'fcast-tv' ? 'FCast TV' : 'Test TV', status: { ...state } }
     })
     ipcMain.handle('cast-status', () => {
       globalThis.castTest.statusCalls++
       if (globalThis.castTest.failStatus) throw new Error('Cast status unavailable')
       return { ...state }
     })
-    ipcMain.handle('cast-control', (_, id, action, value) => {
+    ipcMain.handle('cast-control', (_, id, action, value, protocol) => {
       globalThis.castTest.controls.push({ id, action, value })
+      globalThis.castTest.protocols.push(['control', protocol])
       if (action === 'pause') state.paused = true
       if (action === 'play') state.paused = false
       if (action === 'seek') state.currentTime = value
@@ -73,8 +75,9 @@ async function mockCast(app) {
       if (action === 'caption') state.activeTrackIds = value === 0 ? [] : [value]
       return { ...state }
     })
-    ipcMain.handle('cast-stop', (_, id) => {
+    ipcMain.handle('cast-stop', (_, id, protocol) => {
       globalThis.castTest.stops.push(id)
+      globalThis.castTest.protocols.push(['stop', protocol])
       if (globalThis.castTest.failStop) throw new Error('Cast stop unavailable')
       return { ...state, connected: false }
     })
@@ -225,6 +228,75 @@ test('both casting protocols share one button with Google Cast and DLNA tabs', a
   await expect(page.getByRole('option', { name: 'DLNA TV', exact: true })).toBeVisible()
   await page.evaluate(() => window.$store.dispatch('updateShowDlnaCastButton', false))
   await expect(castButtons).toHaveCount(0)
+})
+
+test('FCast casts from its own tab without subtitles and blocks the other protocols', async ({ app, page }) => {
+  const watch = await openCastVideo(app, page)
+  await mockDlna(app)
+  await page.evaluate(async () => {
+    await window.$store.dispatch('updateShowFcastButton', true)
+    await window.$store.dispatch('updateShowDlnaCastButton', true)
+  })
+  await selectLocalEnglishCaption(page, watch)
+  await watch.evaluate(vm => { vm.$refs.player.setCurrentTime(5); vm.$refs.player.play() })
+  const castButton = page.locator('.castControl > button')
+  const tabs = page.getByRole('tab')
+  const googleTab = page.getByRole('tab', { name: 'Google Cast', exact: true })
+  const fcastTab = page.getByRole('tab', { name: 'FCast', exact: true })
+  const dlnaTab = page.getByRole('tab', { name: 'DLNA', exact: true })
+  await castButton.click()
+  await expect(tabs).toHaveText(['Google Cast', 'FCast', 'DLNA'])
+  await googleTab.press('ArrowRight')
+  await expect(fcastTab).toBeFocused()
+  await expect(fcastTab).toHaveAttribute('aria-selected', 'true')
+  await expect(page.getByRole('option', { name: 'FCast TV', exact: true })).toBeVisible()
+  await fcastTab.press('ArrowRight')
+  await expect(dlnaTab).toBeFocused()
+  await dlnaTab.press('ArrowRight')
+  await expect(googleTab).toBeFocused()
+  await googleTab.press('ArrowLeft')
+  await expect(dlnaTab).toBeFocused()
+  await dlnaTab.press('ArrowLeft')
+  await expect(fcastTab).toBeFocused()
+  await page.getByRole('option', { name: 'FCast TV', exact: true }).click()
+  await expect(castButton).toHaveAttribute('aria-pressed', 'true')
+  await expect(castButton).toHaveAttribute('title', 'Casting to FCast TV')
+  await expect.poll(() => page.locator('.ftVideoPlayer video').evaluate(video => video.paused)).toBe(true)
+  const [payload] = await app.electronApp.evaluate(() => globalThis.castTest.starts)
+  expect(payload).toMatchObject({ deviceId: 'fcast-tv', source: { url: 'https://cast-media.test/video.mp4', contentType: 'video/mp4' }, captions: [], captionIndex: null, paused: false })
+
+  await castButton.click()
+  await expect(googleTab).toBeDisabled()
+  await expect(dlnaTab).toBeDisabled()
+  await expect(page.getByRole('option', { name: 'English', exact: true })).toHaveCount(0)
+  await page.getByRole('option', { name: 'Pause', exact: true }).click()
+  await castButton.click()
+  await page.getByRole('option', { name: 'Return to local playback', exact: true }).click()
+  await expect(castButton).toHaveAttribute('aria-pressed', 'false')
+  expect(await app.electronApp.evaluate(() => globalThis.castTest.protocols)).toEqual([['start', 'fcast'], ['control', 'fcast'], ['stop', 'fcast']])
+  await castButton.click()
+  await expect(googleTab).toBeEnabled()
+  await expect(dlnaTab).toBeEnabled()
+})
+
+test('FCast alone uses the casting button with FCast labels', async ({ app, page }) => {
+  await openCastVideo(app, page)
+  await app.electronApp.evaluate(({ ipcMain }) => {
+    ipcMain.removeHandler('cast-discover')
+    ipcMain.handle('cast-discover', () => [])
+  })
+  await page.evaluate(async () => {
+    await window.$store.dispatch('updateShowChromecastButton', false)
+    await window.$store.dispatch('updateShowFcastButton', true)
+  })
+  const castButton = page.locator('.videoOptions .fcastControl > button')
+  await expect(castButton).toHaveAttribute('title', 'Cast to an FCast receiver')
+  await castButton.click()
+  await expect(page.getByRole('tab')).toHaveCount(0)
+  await expect(page.getByRole('option', { name: 'No FCast receivers found', exact: true })).toBeVisible()
+  await page.keyboard.press('Escape')
+  await page.evaluate(() => window.$store.dispatch('updateShowFcastButton', false))
+  await expect(page.locator('.castControl')).toHaveCount(0)
 })
 
 test('reopening the casting menu refreshes each receiver list once per opening', async ({ app, page }) => {
@@ -811,6 +883,80 @@ test('packaged sender discovers and plays on the selected authenticated Cast rec
     await expect(page.getByRole('option', { name: 'Play', exact: true })).toBeVisible()
     await page.keyboard.press('Escape')
     await choice(page, 'Return to local playback')
+    await expect(button).toHaveAttribute('aria-pressed', 'false')
+    await expect.poll(() => page.locator('.ftVideoPlayer video').evaluate(video => video.currentTime)).toBeGreaterThanOrEqual(9)
+    await expect.poll(() => page.locator('.ftVideoPlayer video').evaluate(video => video.paused)).toBe(true)
+  } finally {
+    upstream?.closeAllConnections()
+    upstream?.close()
+    await rm(directory, { recursive: true, force: true })
+  }
+})
+
+test('packaged helper discovers and plays on the selected FCast receiver', async ({ app, page }) => {
+  test.skip(!process.env.OPENTUBEX_FCAST_TEST_DEVICE, 'Requires an explicitly selected FCast receiver')
+  const directory = await mkdtemp(path.join(tmpdir(), 'otx-fcast-electron-'))
+  let upstream
+  const instanceRequests = []
+  const mediaRequests = []
+  try {
+    const filename = path.join(directory, 'video.mp4')
+    await promisify(execFile)('ffmpeg', ['-v', 'error', '-i', path.resolve('e2e/fixtures/media/demo.webm'), '-c:v', 'libx264', '-preset', 'ultrafast', '-c:a', 'aac', '-movflags', '+faststart', filename])
+    const media = await readFile(filename)
+    upstream = createServer((request, response) => {
+      instanceRequests.push(request.headers)
+      if (request.headers.authorization !== 'Bearer fcast-test') return response.writeHead(401).end()
+      // Private destinations stay within the approved instance path.
+      if (request.url === '/inv/videoplayback') return response.writeHead(302, { location: '/inv/video.mp4' }).end()
+      mediaRequests.push(request.url)
+      const range = /^bytes=(\d+)-(\d*)$/.exec(request.headers.range ?? '')
+      const start = range ? Number(range[1]) : 0
+      const end = range?.[2] ? Math.min(Number(range[2]), media.length - 1) : media.length - 1
+      response.writeHead(range ? 206 : 200, {
+        'content-type': 'video/mp4',
+        'content-length': end - start + 1,
+        'accept-ranges': 'bytes',
+        ...(range ? { 'content-range': `bytes ${start}-${end}/${media.length}` } : {})
+      }).end(request.method === 'HEAD' ? undefined : media.subarray(start, end + 1))
+    })
+    await new Promise(resolve => upstream.listen(0, '127.0.0.1', resolve))
+    const instanceUrl = `http://127.0.0.1:${upstream.address().port}/inv`
+    // The private instance needs native consent; answer it and record the prompt.
+    await app.electronApp.evaluate(({ dialog }) => {
+      globalThis.fcastPrompts = []
+      dialog.showMessageBox = async (_window, options) => { globalThis.fcastPrompts.push(options.title); return { response: 1 } }
+    })
+    await page.evaluate(async url => {
+      await window.$store.dispatch('updateDefaultInvidiousInstance', url)
+      await window.$store.dispatch('updateShowChromecastButton', false)
+      await window.$store.dispatch('updateShowFcastButton', true)
+    }, instanceUrl)
+    await mockPlayableWatchPage(app, page)
+    await openMockedVideo(page)
+    await page.evaluate(url => window.ftElectron.setInvidiousAuthorization('Bearer fcast-test', url), instanceUrl)
+    const watch = await watchViewHandle(page)
+    await watch.evaluate((vm, url) => {
+      vm.legacyFormats = [...vm.legacyFormats, { mimeType: 'video/mp4; codecs="avc1, mp4a.40.2"', url, height: 720 }]
+      vm.$refs.player.setCurrentTime(5)
+      vm.$refs.player.play()
+    }, `${instanceUrl}/videoplayback`)
+    const button = page.locator('.fcastControl > button')
+    const choose = async name => {
+      await button.click()
+      await page.getByRole('option', { name, exact: true }).click({ timeout: 30_000 })
+    }
+    await choose(process.env.OPENTUBEX_FCAST_TEST_DEVICE)
+    await expect(button).toHaveAttribute('aria-pressed', 'true', { timeout: 30_000 })
+    expect(await app.electronApp.evaluate(() => globalThis.fcastPrompts)).toEqual(['Cast to an FCast receiver'])
+    await expect.poll(() => page.locator('.ftVideoPlayer video').evaluate(video => video.paused)).toBe(true)
+    expect(instanceRequests.every(headers => headers.authorization === 'Bearer fcast-test')).toBe(true)
+    expect(mediaRequests.length).toBeGreaterThan(0)
+    await choose('Forward 10 seconds')
+    await choose('Pause')
+    await button.click()
+    await expect(page.getByRole('option', { name: 'Play', exact: true })).toBeVisible()
+    await page.keyboard.press('Escape')
+    await choose('Return to local playback')
     await expect(button).toHaveAttribute('aria-pressed', 'false')
     await expect.poll(() => page.locator('.ftVideoPlayer video').evaluate(video => video.currentTime)).toBeGreaterThanOrEqual(9)
     await expect.poll(() => page.locator('.ftVideoPlayer video').evaluate(video => video.paused)).toBe(true)

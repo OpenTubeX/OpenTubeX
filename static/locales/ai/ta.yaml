@@ -773,6 +773,7 @@ Settings:
       Viewing Modes: பார்வை முறைகள்
       Shorts: Shorts
       Screenshots: திரைப்பிடிப்புகள்
+    Enable FCast: "FCast-ஐ இயக்கு"
   Channel Settings:
     Channel Settings: சேனல் அமைப்புகள்
     Channel Settings Description: ஒவ்வொரு சேனலையும் பார்க்கும்போது தேர்ந்தெடுக்கும் அமைப்புகளைத் தனித்தனியாக நினைவில் கொண்டு, அதன் காணொளியை அடுத்த முறை பார்க்கும்போது மீண்டும் பயன்படுத்தும்.
@@ -1718,6 +1719,8 @@ Video:
       Untrusted Receiver: "பெறுநரின் சான்றிதழ் நம்பகமானது அல்ல. அங்கீகரிக்கப்பட்ட Google Cast பெறுநரைப் பயன்படுத்தவும்."
     FCast:
       Cast: "FCast பெறுநருக்கு ஒளிபரப்பு"
+      No Devices: "FCast பெறுநர்கள் கிடைக்கவில்லை"
+      No Source: "FCast-க்கு இணக்கமான ஓடை இல்லை"
     Secondary Captions: இரண்டாம் வசனங்கள்
     Subtitle File:
       Load: "வசனக் கோப்பை ஏற்று…"

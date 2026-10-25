@@ -772,6 +772,7 @@ Settings:
       Viewing Modes: מצבי צפייה
       Shorts: Shorts
       Screenshots: צילומי מסך
+    Enable FCast: "הפעלת FCast"
   Channel Settings:
     Channel Settings: הגדרות ערוץ
     Channel Settings Description: שמירת ההגדרות שנבחרו בזמן צפייה לכל ערוץ בנפרד, כדי שיוחלו שוב בצפייה הבאה באחד מסרטוניו.
@@ -1715,6 +1716,8 @@ Video:
       Untrusted Receiver: "האישור של המקלט אינו מהימן. יש להשתמש במקלט Google Cast מאומת."
     FCast:
       Cast: "שידור למקלט FCast"
+      No Devices: "לא נמצאו מקלטי FCast"
+      No Source: "אין זרם תואם ל־FCast"
     Secondary Captions: כתוביות משניות
     Subtitle File:
       Load: "טעינת קובץ כתוביות…"

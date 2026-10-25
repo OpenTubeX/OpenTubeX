@@ -956,6 +956,7 @@ Settings:
       Viewing Modes: Peržiūros režimai
       Shorts: Shorts
       Screenshots: Ekrano kopijos
+    Enable FCast: "Įjungti FCast"
   Channel Settings:
     Channel Settings: Kanalo nustatymai
     Channel Settings Description: Atskirai įsiminti kiekvienam kanalui žiūrint pasirinktus nustatymus, kad jie vėl būtų pritaikyti kitą kartą žiūrint vieną iš jo vaizdo įrašų.
@@ -2054,6 +2055,8 @@ Video:
       Untrusted Receiver: "Imtuvo sertifikatas nėra patikimas. Naudokite autentifikuotą Google Cast imtuvą."
     FCast:
       Cast: "Perduoti į FCast imtuvą"
+      No Devices: "FCast imtuvų nerasta"
+      No Source: "Nėra su FCast suderinamo srauto"
     Secondary Captions: Antriniai subtitrai
     Subtitle File:
       Load: "Įkelti subtitrų failą…"
