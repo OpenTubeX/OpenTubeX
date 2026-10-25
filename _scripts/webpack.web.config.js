@@ -5,6 +5,8 @@ const HtmlWebpackPlugin = require('html-webpack-plugin')
 const { VueLoaderPlugin } = require('vue-loader')
 const CopyWebpackPlugin = require('copy-webpack-plugin')
 const getStartupSplash = require('./startupSplash')
+const getBuildCommit = require('./buildCommit')
+const RelativeImportMetaUrlPlugin = require('./RelativeImportMetaUrlPlugin')
 const MiniCssExtractPlugin = require('mini-css-extract-plugin')
 const MinimizerPlugin = require('minimizer-webpack-plugin')
 const ProcessLocalesPlugin = require('./ProcessLocalesPlugin')
@@ -160,6 +162,7 @@ const config = {
     __filename: false
   },
   plugins: [
+    new RelativeImportMetaUrlPlugin(),
     new webpack.DefinePlugin({
       'process.platform': 'undefined',
       'process.env.IS_ELECTRON': false,
@@ -167,7 +170,7 @@ const config = {
       'process.env.IS_CAPACITOR': isCapacitor,
       'process.env.IS_IOS': isCapacitor && process.env.CAPACITOR_PLATFORM === 'ios',
       'process.env.SUPPORTS_LOCAL_API': isCapacitor,
-      'process.env.BUILD_COMMIT': JSON.stringify(process.env.GITHUB_SHA ?? ''),
+      'process.env.BUILD_COMMIT': JSON.stringify(getBuildCommit()),
       __VUE_OPTIONS_API__: 'true',
       __VUE_PROD_DEVTOOLS__: 'false',
       __VUE_PROD_HYDRATION_MISMATCH_DETAILS__: 'false',

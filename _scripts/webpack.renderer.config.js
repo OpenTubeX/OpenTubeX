@@ -8,6 +8,7 @@ const MinimizerPlugin = require('minimizer-webpack-plugin')
 const ProcessLocalesPlugin = require('./ProcessLocalesPlugin')
 const CopyWebpackPlugin = require('copy-webpack-plugin')
 const getStartupSplash = require('./startupSplash')
+const getBuildCommit = require('./buildCommit')
 const {
   SHAKA_LOCALE_MAPPINGS,
   SHAKA_LOCALES_PREBUNDLED,
@@ -190,7 +191,7 @@ const config = {
       'process.env.IS_CAPACITOR': false,
       'process.env.IS_IOS': false,
       'process.env.SUPPORTS_LOCAL_API': true,
-      'process.env.BUILD_COMMIT': JSON.stringify(process.env.GITHUB_SHA ?? ''),
+      'process.env.BUILD_COMMIT': JSON.stringify(getBuildCommit()),
       __VUE_OPTIONS_API__: 'true',
       __VUE_PROD_DEVTOOLS__: 'false',
       __VUE_PROD_HYDRATION_MISMATCH_DETAILS__: 'false',

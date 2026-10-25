@@ -11,16 +11,36 @@ def liteName = liteBuild ? ' Lite' : ''
 def releaseKeystorePath = System.getenv("ANDROID_RELEASE_KEYSTORE")
 def releaseStorePassword = System.getenv("ANDROID_RELEASE_STORE_PASSWORD")
 def releaseSigningConfigured = releaseKeystorePath?.trim() && releaseStorePassword?.trim()
+// F-Droid builds unsigned release APKs and publishes the signed GitHub APKs
+// when they match.
+def unsignedRelease = project.hasProperty('unsignedRelease')
 
 gradle.taskGraph.whenReady { graph ->
     def releaseTaskScheduled = graph.allTasks.any { task ->
         task.project == project && task.name.toLowerCase().contains("release")
     }
-    if (releaseTaskScheduled && !releaseSigningConfigured) {
+    if (releaseTaskScheduled && !releaseSigningConfigured && !unsignedRelease) {
         throw new GradleException(
             "Release signing is not configured. Set ANDROID_RELEASE_KEYSTORE and " +
-            "ANDROID_RELEASE_STORE_PASSWORD."
+            "ANDROID_RELEASE_STORE_PASSWORD, or pass -PunsignedRelease for an unsigned build."
         )
+    }
+}
+
+def versionProperties = new Properties()
+file('version.properties').withInputStream { versionProperties.load(it) }
+def baseVersionCode = (System.getenv("ANDROID_VERSION_CODE") ?: versionProperties.versionCode).toInteger()
+// F-Droid needs a distinct version code for every APK. Prefer 64-bit APKs
+// on devices that also run 32-bit code; the universal APK keeps digit 0.
+def abiVersionCodes = ['armeabi-v7a': 1, 'x86': 2, 'arm64-v8a': 3, 'x86_64': 4]
+androidComponents {
+    onVariants(selector().all()) { variant ->
+        variant.outputs.each { output ->
+            def abi = output.filters.find {
+                it.filterType == com.android.build.api.variant.FilterConfiguration.FilterType.ABI
+            }?.identifier
+            if (abi) output.versionCode.set(baseVersionCode * 10 + abiVersionCodes[abi])
+        }
     }
 }
 
@@ -82,8 +102,9 @@ android {
         applicationId "org.opentubex.app"
         minSdkVersion rootProject.ext.minSdkVersion
         targetSdkVersion rootProject.ext.targetSdkVersion
-        versionCode = (System.getenv("ANDROID_VERSION_CODE") ?: "1").toInteger()
-        versionName = System.getenv("ANDROID_VERSION_NAME") ?: "0.33.0-dev"
+        versionCode = baseVersionCode * 10
+        versionName = System.getenv("ANDROID_VERSION_NAME") ?:
+            new groovy.json.JsonSlurper().parse(rootProject.file('../package.json')).version
         buildConfigField "boolean", "BUNDLES_YT_DLP", (!liteBuild).toString()
         ndk { abiFilters.addAll((project.findProperty('testAbi') ?: 'arm64-v8a,armeabi-v7a,x86_64,x86').split(',')) }
         testInstrumentationRunner(optimizedTestBuild
@@ -106,6 +127,11 @@ android {
         }
     }
     testBuildType project.findProperty('testBuildType') ?: 'debug'
+    // F-Droid rejects this block because only Google can read it.
+    dependenciesInfo {
+        includeInApk = false
+        includeInBundle = false
+    }
     signingConfigs {
         nightly {
             // This public testing key keeps nightly APK updates installable.
@@ -172,7 +198,7 @@ android {
                 resValue "string", "app_name", "OpenTubeX Lite"
                 resValue "string", "title_activity_main", "OpenTubeX Lite"
             }
-            if (releaseSigningConfigured) {
+            if (releaseSigningConfigured && !unsignedRelease) {
                 signingConfig signingConfigs.production
             }
         }

@@ -124,7 +124,6 @@ jobs:
     - name: Install pnpm
       uses: pnpm/action-setup@ea17c68df8912ef543352723c149a84f56e3d413 # v6.1.0
       with:
-        version: latest-12
         cache: false
 
     - name: Set up MSBuild for LANCommander Interposer
@@ -241,10 +240,14 @@ jobs:
         fi
         printf '%s' "$ANDROID_RELEASE_KEYSTORE_BASE64" | base64 --decode > "$ANDROID_RELEASE_KEYSTORE"
         chmod 600 "$ANDROID_RELEASE_KEYSTORE"
-        # Stable promotion must update a nightly built from the same commit.
-        ANDROID_VERSION_CODE="$(( $(git rev-list --count HEAD) * 2 + 1 ))"
-        ANDROID_VERSION_NAME="$(jq --raw-output .version package.json)"
-        export ANDROID_VERSION_CODE ANDROID_VERSION_NAME
+        # Gradle reads the version code recorded by Create Draft Release, as
+        # F-Droid's rebuild does. Stable promotion must update a nightly built
+        # from the same commit.
+        expected_code="$(( $(git rev-list --count HEAD) * 2 + 1 ))"
+        if ! grep --quiet --line-regexp "versionCode=${expected_code}" android/app/version.properties; then
+          echo "android/app/version.properties must contain versionCode=${expected_code}." >&2
+          exit 1
+        fi
         pnpm run capacitor:sync:android
         ./android/gradlew --project-dir android :app:assembleRelease -PsplitApks
         python3 _scripts/android_apks.py android/app/build/outputs/apk/release android-apks --release

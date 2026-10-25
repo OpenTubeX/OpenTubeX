@@ -127,6 +127,12 @@ abstract class PackNativeRuntime implements TransformAction<RuntimePackerParamet
                     }
                 }
             }
+            // 7-Zip stores directory modes, which would otherwise follow the
+            // build user's umask and break reproducible builds.
+            Files.walk(staging.toPath()).withCloseable { paths ->
+                paths.filter { Files.isDirectory(it, java.nio.file.LinkOption.NOFOLLOW_LINKS) }
+                    .forEach { Files.setAttribute(it, 'unix:mode', 0755) }
+            }
             packedDir = Files.createTempDirectory('opentubex-packed-').toFile()
             File packed = new File(packedDir, 'runtime.zip')
             def command = [packerExecutable, 'a', '-tzip', '-mm=Deflate', '-mx=9', '-mfb=258',
@@ -180,6 +186,17 @@ if (FileSystems.default.supportedFileAttributeViews().contains('posix')) {
         } catch (IOException ignored) {
             // Keep regular Android builds working where this packer is unavailable.
         }
+    }
+}
+
+// F-Droid compares its rebuild with the published APK, so a release must not
+// silently fall back to the other packer.
+gradle.taskGraph.whenReady { graph ->
+    def releaseTaskScheduled = graph.allTasks.any { task ->
+        task.project == project && task.name.toLowerCase().contains('release')
+    }
+    if (releaseTaskScheduled && !project.hasProperty('lite') && availablePackerExecutable == 'none') {
+        throw new GradleException('Release builds require 7-Zip (7zz or 7z) to pack the native runtimes.')
     }
 }
 
