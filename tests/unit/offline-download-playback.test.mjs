@@ -179,7 +179,7 @@ for (const android of [false, true]) {
 }
 
 test('Electron protocol lookup accepts only the requested file recorded in the download', async () => {
-  const mainSource = await readFile(new URL('../../src/main/ytDlp.js', import.meta.url), 'utf8')
+  const mainSource = await readFile(new URL('../../src/main/ytDlpDownloads.js', import.meta.url), 'utf8')
   const start = mainSource.indexOf('export async function getYtDlpDownloadFile(')
   const files = [
     { videoId: 'dupevideo01', path: '/downloads/First.webm' },
