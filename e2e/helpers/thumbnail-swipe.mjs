@@ -337,6 +337,8 @@ export async function verifyReverseSwipes(page, session, target, screenshot = as
   }
   await configure('markAsFullySeen')
   await swipeAction(page, session, target, 'Mark As Fully Watched')
+  // The next swipe offers the reverse action only once the history entry updates.
+  await expect.poll(async () => (await history())?.isWatched).toBe(true)
   await page.evaluate(() => document.querySelector('#app').__vue_app__.config.globalProperties.$store.commit('setWatchedPercentageThreshold', 0))
   await swipeAction(page, session, target, 'Unmark As Watched')
   await expect.poll(history).toBeUndefined()
