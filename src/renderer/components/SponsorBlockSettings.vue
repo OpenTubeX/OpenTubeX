@@ -9,23 +9,9 @@
         setting-key="useSponsorBlock"
         @change="handleUpdateSponsorBlock"
       />
-      <FtToggleSwitch
-        :label="$t('Settings.SponsorBlock Settings.UseDeArrowTitles')"
-        :default-value="useDeArrowTitles"
-        setting-key="useDeArrowTitles"
-        :tooltip="$t('Tooltips.SponsorBlock Settings.UseDeArrowTitles')"
-        @change="handleUpdateUseDeArrowTitles"
-      />
-      <FtToggleSwitch
-        :label="$t('Settings.SponsorBlock Settings.UseDeArrowThumbnails')"
-        :default-value="useDeArrowThumbnails"
-        setting-key="useDeArrowThumbnails"
-        :tooltip="$t('Tooltips.SponsorBlock Settings.UseDeArrowThumbnails')"
-        @change="handleUpdateUseDeArrowThumbnails"
-      />
     </FtFlexBox>
     <template
-      v-if="showSponsorBlockChannelControl"
+      v-if="showSponsorBlockUrl"
     >
       <FtFlexBox
         v-if="useSponsorBlock"
@@ -69,7 +55,10 @@
           @blur="handleUpdateSponsorBlockUrl"
         />
       </FtFlexBox>
-      <FtFlexBox class="sponsorBlockExcludedChannels">
+      <FtFlexBox
+        v-if="useSponsorBlock"
+        class="sponsorBlockExcludedChannels"
+      >
         <FtInputTags
           :label="t('Settings.SponsorBlock Settings.Excluded Channels.Excluded Channels')"
           :tag-name-placeholder="t('Settings.Distraction Free Settings.Hide Channels Placeholder')"
@@ -147,23 +136,6 @@
         </div>
       </FtFlexBox>
       <FtFlexBox
-        v-if="useDeArrowThumbnails"
-      >
-        <FtInput
-          ref="deArrowThumbnailGeneratorUrl"
-          :icon="['fas', 'link']"
-          :label="$t('Settings.SponsorBlock Settings[\'DeArrow Thumbnail Generator API Url (Default is https://dearrow-thumb.ajay.app)\']')"
-          placeholder="https://dearrow-thumb.ajay.app"
-          :supporting-text="$t('Form Inputs.Default Value', { value: 'https://dearrow-thumb.ajay.app' })"
-          :show-action-button="false"
-          :show-label="true"
-          :value="deArrowThumbnailGeneratorUrl"
-          setting-key="deArrowThumbnailGeneratorUrl"
-          @blur="handleUpdateDeArrowThumbnailGeneratorUrl"
-        />
-      </FtFlexBox>
-
-      <FtFlexBox
         v-if="useSponsorBlock"
         class="sponsorBlockCategories"
       >
@@ -240,15 +212,12 @@ const useDeArrowTitles = computed(() => store.getters.getUseDeArrowTitles)
 /** @type {import('vue').ComputedRef<boolean>} */
 const useDeArrowThumbnails = computed(() => store.getters.getUseDeArrowThumbnails)
 
-const showSponsorBlockChannelControl = computed(() => (
+// DeArrow also uses the SponsorBlock server
+const showSponsorBlockUrl = computed(() => (
   useSponsorBlock.value || useDeArrowTitles.value || useDeArrowThumbnails.value
 ))
 
-/** @type {import('vue').ComputedRef<string>} */
-const deArrowThumbnailGeneratorUrl = computed(() => store.getters.getDeArrowThumbnailGeneratorUrl)
-
 const sponsorBlockUrlInputRef = useTemplateRef('sponsorBlockUrlInput')
-const deArrowThumbnailGeneratorUrlRef = useTemplateRef('deArrowThumbnailGeneratorUrl')
 
 const sponsorBlockChannelWhitelist = computed(() => store.getters.getSponsorBlockChannelWhitelist)
 const sponsorBlockChannelInfo = ref({})
@@ -301,20 +270,6 @@ function handleUpdateSponsorBlock(value) {
 /**
  * @param {boolean} value
  */
-function handleUpdateUseDeArrowTitles(value) {
-  store.dispatch('updateUseDeArrowTitles', value)
-}
-
-/**
- * @param {boolean} value
- */
-function handleUpdateUseDeArrowThumbnails(value) {
-  store.dispatch('updateUseDeArrowThumbnails', value)
-}
-
-/**
- * @param {boolean} value
- */
 function handleUpdateSponsorBlockShowSkippedToast(value) {
   store.dispatch('updateSponsorBlockShowSkippedToast', value)
 }
@@ -362,18 +317,6 @@ function handleUpdateSponsorBlockUrl(value) {
   }
 }
 
-/**
- * @param {string} value
- */
-function handleUpdateDeArrowThumbnailGeneratorUrl(value) {
-  const cleanValue = cleanupUrl(value)
-  store.dispatch('updateDeArrowThumbnailGeneratorUrl', cleanValue)
-
-  if (cleanValue !== value) {
-    deArrowThumbnailGeneratorUrlRef.value?.setText(cleanValue)
-  }
-}
-
 function handleInvalidChannel() {
   showToast(t('Settings.Distraction Free Settings.Hide Channels Invalid'))
 }
@@ -403,7 +346,7 @@ async function findChannelTagInfoWrapper(text) {
 }
 
 function shouldResolveChannel(id) {
-  return showSponsorBlockChannelControl.value &&
+  return useSponsorBlock.value &&
     showSponsorBlockChannels.value &&
     Array.isArray(sponsorBlockChannelWhitelist.value) &&
     sponsorBlockChannelWhitelist.value.includes(id) &&
@@ -433,9 +376,9 @@ async function resolveChannelInfo(id, options, revision) {
   }
 }
 
-watch([sponsorBlockChannelWhitelist, showSponsorBlockChannels, backendOptions, showSponsorBlockChannelControl], ([ids, showTags, options, showControl]) => {
+watch([sponsorBlockChannelWhitelist, showSponsorBlockChannels, backendOptions, useSponsorBlock], ([ids, showTags, options, enabled]) => {
   const revision = ++lookupRevision
-  if (!showControl || !showTags || !Array.isArray(ids)) return
+  if (!enabled || !showTags || !Array.isArray(ids)) return
 
   for (const id of ids) {
     if (shouldResolveChannel(id)) resolveChannelInfo(id, options, revision)

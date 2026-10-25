@@ -1498,6 +1498,7 @@ Settings:
     UseDeArrowThumbnails: 썸네일에 DeArrow 사용
     DeArrow Thumbnail Generator API Url (Default is https://dearrow-thumb.ajay.app): DeArrow 썸네일 API URL
     Custom Color: 사용자 지정 색상
+    DeArrow Settings: DeArrow
   Return YouTube Dislike Settings:
     Return YouTube Dislike Settings: Return YouTube Dislike
     Enable Return YouTube Dislike: Return YouTube Dislike 활성화

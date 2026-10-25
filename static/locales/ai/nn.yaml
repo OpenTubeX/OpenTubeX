@@ -1422,6 +1422,7 @@ Settings:
     UseDeArrowThumbnails: Bruk DeArrow for miniatyrbilete
     DeArrow Thumbnail Generator API Url (Default is https://dearrow-thumb.ajay.app): URL til DeArrow-miniatyr-API
     Custom Color: Tilpassa farge
+    DeArrow Settings: DeArrow
   Return YouTube Dislike Settings:
     Return YouTube Dislike Settings: Return YouTube Dislike
     Enable Return YouTube Dislike: Slå på Return YouTube Dislike

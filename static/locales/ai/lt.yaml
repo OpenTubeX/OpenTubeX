@@ -1511,6 +1511,7 @@ Settings:
     UseDeArrowThumbnails: Naudoti „DeArrow“ miniatiūroms
     DeArrow Thumbnail Generator API Url (Default is https://dearrow-thumb.ajay.app): DeArrow miniatiūrų API URL
     Custom Color: Pasirinktinė spalva
+    DeArrow Settings: DeArrow
   Return YouTube Dislike Settings:
     Return YouTube Dislike Settings: Return YouTube Dislike
     Enable Return YouTube Dislike: Įjungti „Return YouTube Dislike“

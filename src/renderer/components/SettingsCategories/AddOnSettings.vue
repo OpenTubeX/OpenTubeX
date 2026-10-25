@@ -1,6 +1,7 @@
 <template>
   <div class="settingsCategory">
     <SponsorBlockSettings />
+    <DeArrowSettings />
     <RydSettings />
     <AiSlopListSettings v-if="SUPPORTS_LOCAL_API" />
     <VoiceOverTranslationSettings v-if="USING_ELECTRON || IS_CAPACITOR" />
@@ -9,6 +10,7 @@
 
 <script setup>
 import AiSlopListSettings from '../AiSlopListSettings.vue'
+import DeArrowSettings from '../DeArrowSettings.vue'
 import RydSettings from '../RydSettings.vue'
 import SponsorBlockSettings from '../SponsorBlockSettings.vue'
 import VoiceOverTranslationSettings from '../VoiceOverTranslationSettings.vue'
