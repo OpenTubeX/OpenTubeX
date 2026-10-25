@@ -514,7 +514,7 @@ import { cardDownloadId, playDownloadedFile, refreshDownloadRecords } from '../.
 import { queueSwipeAction, findSwipeDownload, downloadSwipeAction } from '../../helpers/videoSwipeActions'
 import { supportsYtDlp } from '../../helpers/ytDlpCapabilities'
 import { FtIcon } from '@opentubex/icons'
-import { computed, inject, onBeforeUnmount, onMounted, ref, toRef, useTemplateRef, watch } from 'vue'
+import { computed, inject, onBeforeUnmount, ref, toRef, useTemplateRef, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useRoute } from 'vue-router'
 
@@ -551,9 +551,7 @@ import {
 import { getLocalVideoChannels } from '../../helpers/api/local.js'
 import { isOnAiSlopList } from '../../helpers/aiSlopList.js'
 import { isHistoryEntryWatched } from '../../helpers/history.js'
-import { liveReminder, supportsLiveReminders } from '../../helpers/liveReminders'
 import { getUpcomingPremiereTimestamp } from '../../helpers/subscription-entries.js'
-import { isThumbnailPreviewImageUsable } from '../../helpers/thumbnailPreview.js'
 import { deArrowData, deArrowThumbnail, getSponsorBlockVideoLabel } from '../../helpers/sponsorblock.js'
 import {
   morphThumbnailIntoNewTab,
@@ -564,6 +562,8 @@ import { useRelativeTimeClock } from '../../composables/useRelativeTimeClock.js'
 import { thumbnailSizeSettingKey, VIEW_TYPE_SETTINGS } from '../../composables/useThumbnailSizeSlider'
 import { useHideSubscriptionFeedType } from '../../composables/useHideSubscriptionFeedType'
 import { useResultChannelAvatar } from '../../composables/useResultChannelAvatar.js'
+import { useThumbnailHoverPreview } from './opentubex/useThumbnailHoverPreview.js'
+import { useUpcomingPremiere } from './opentubex/useUpcomingPremiere.js'
 import { formatDate, formatDateTime } from '../../helpers/dateFormat.js'
 import { getYoutubeVideoShareUrl } from '../../helpers/share'
 import thumbnailPlaceholder from '../../assets/img/thumbnail_placeholder.svg'
@@ -740,20 +740,10 @@ watch(enableDownloads, (enabled) => {
 })
 const isPremium = ref(false)
 const hideViews = ref(false)
-const thumbnailPreviewActive = ref(false)
-const thumbnailPreviewLoaded = ref(false)
-const THUMBNAIL_PREVIEW_DELAY = 250
-let thumbnailPreviewLoader = null
-let thumbnailPreviewLoaderUrl = null
-let thumbnailPreviewTimer = null
 const deArrowTogglePinned = ref(false)
 const showCollaboratorsPrompt = ref(false)
 const isFetchingCollaborators = ref(false)
 const sponsorBlockFullVideoCategory = ref(null)
-const liveReminderActive = ref(false)
-const liveReminderLoading = ref(false)
-let liveReminderLoadGeneration = 0
-let removeLiveReminderUpdatedListener = null
 
 const historyEntry = computed(() => store.getters.getHistoryCacheById[id.value])
 
@@ -762,15 +752,6 @@ const historyEntryExists = computed(() => historyEntry.value !== undefined)
 const isWatched = computed(() => isHistoryEntryWatched(historyEntry.value))
 
 const premiereTimestamp = computed(() => getUpcomingPremiereTimestamp(props.data))
-const premiereNow = ref(Date.now())
-const MAX_TIMEOUT_DELAY = 2_147_483_647
-let premiereStartTimer = null
-
-const canToggleLiveReminder = computed(() => (
-  supportsLiveReminders &&
-  premiereTimestamp.value != null &&
-  premiereTimestamp.value > premiereNow.value
-))
 
 const canMarkAsWatched = computed(() => {
   if (isLive.value) {
@@ -785,29 +766,6 @@ const canMarkAsWatched = computed(() => {
 
   return !isUpcoming.value
 })
-
-function clearPremiereStartTimer() {
-  if (premiereStartTimer != null) {
-    clearTimeout(premiereStartTimer)
-    premiereStartTimer = null
-  }
-}
-
-function schedulePremiereStartInvalidation() {
-  clearPremiereStartTimer()
-
-  const timestamp = premiereTimestamp.value
-  const now = Date.now()
-  premiereNow.value = now
-  if (timestamp == null || timestamp <= now) {
-    return
-  }
-
-  premiereStartTimer = setTimeout(() => {
-    premiereStartTimer = null
-    schedulePremiereStartInvalidation()
-  }, Math.min(timestamp - now + 1, MAX_TIMEOUT_DELAY))
-}
 
 const canMarkAsFullySeen = computed(() => canMarkAsWatched.value &&
   Number.isFinite(lengthSeconds.value) && lengthSeconds.value > 0)
@@ -841,88 +799,18 @@ const thumbnailPreference = computed(() => store.getters.getThumbnailPreference)
 /** @type {import('vue').ComputedRef<boolean>} */
 const blurThumbnails = computed(() => store.getters.getBlurThumbnails)
 
-const thumbnailPreviewUrl = computed(() => {
-  if (
-    !store.getters.getShowThumbnailPreviews ||
-    thumbnailPreference.value === 'hidden' ||
-    props.appearance === 'youtubeShort'
-  ) {
-    return null
-  }
-
-  return typeof props.data.thumbnailPreviewUrl === 'string'
-    ? props.data.thumbnailPreviewUrl
-    : null
+const {
+  thumbnailPreviewActive,
+  thumbnailPreviewLoaded,
+  thumbnailPreviewUrl,
+  startThumbnailPreview,
+  stopThumbnailPreview,
+  resetThumbnailPreview
+} = useThumbnailHoverPreview({
+  getData: () => props.data,
+  getAppearance: () => props.appearance,
+  thumbnailPreference
 })
-
-function clearThumbnailPreviewTimer() {
-  if (thumbnailPreviewTimer !== null) {
-    clearTimeout(thumbnailPreviewTimer)
-    thumbnailPreviewTimer = null
-  }
-}
-
-function startThumbnailPreview() {
-  clearThumbnailPreviewTimer()
-
-  const previewUrl = thumbnailPreviewUrl.value
-  if (!previewUrl) {
-    return
-  }
-
-  if (thumbnailPreviewLoaderUrl !== previewUrl) {
-    const loader = new Image()
-    thumbnailPreviewLoader = loader
-    thumbnailPreviewLoaderUrl = previewUrl
-    thumbnailPreviewLoaded.value = false
-
-    loader.onload = () => {
-      if (
-        thumbnailPreviewLoader === loader &&
-        thumbnailPreviewUrl.value === previewUrl
-      ) {
-        if (isThumbnailPreviewImageUsable(loader)) {
-          thumbnailPreviewLoaded.value = true
-        } else {
-          resetThumbnailPreview()
-        }
-      }
-    }
-    loader.onerror = () => {
-      if (thumbnailPreviewLoader === loader) {
-        thumbnailPreviewLoader = null
-        thumbnailPreviewLoaderUrl = null
-        thumbnailPreviewLoaded.value = false
-      }
-    }
-    loader.src = previewUrl
-  }
-
-  thumbnailPreviewTimer = setTimeout(() => {
-    thumbnailPreviewTimer = null
-    if (thumbnailPreviewUrl.value === previewUrl) {
-      thumbnailPreviewActive.value = true
-    }
-  }, THUMBNAIL_PREVIEW_DELAY)
-}
-
-function stopThumbnailPreview() {
-  clearThumbnailPreviewTimer()
-  thumbnailPreviewActive.value = false
-}
-
-function resetThumbnailPreview() {
-  stopThumbnailPreview()
-  if (thumbnailPreviewLoader !== null) {
-    thumbnailPreviewLoader.onload = null
-    thumbnailPreviewLoader.onerror = null
-  }
-  thumbnailPreviewLoader = null
-  thumbnailPreviewLoaderUrl = null
-  thumbnailPreviewLoaded.value = false
-}
-
-watch(thumbnailPreviewUrl, resetThumbnailPreview)
 
 /** @type {import('vue').ComputedRef<'local' | 'invidious'>} */
 const backendPreference = computed(() => store.getters.getBackendPreference)
@@ -1257,88 +1145,6 @@ const videoMenuOptions = computed(() => {
   }
   return normalizedOptions
 })
-
-function getLiveReminderPayload() {
-  return {
-    videoId: id.value,
-    startTimestamp: premiereTimestamp.value,
-    notificationTitle: t('Video.Scheduled video starting'),
-    notificationBody: t('Video.Live notification body', { videoTitle: title.value })
-  }
-}
-
-async function syncLiveReminder() {
-  const generation = ++liveReminderLoadGeneration
-  const videoId = id.value
-  const startTimestamp = premiereTimestamp.value
-
-  if (!canToggleLiveReminder.value) {
-    liveReminderActive.value = false
-    return
-  }
-
-  try {
-    const reminder = await liveReminder.get(videoId)
-    if (
-      generation !== liveReminderLoadGeneration ||
-      videoId !== id.value ||
-      startTimestamp !== premiereTimestamp.value
-    ) {
-      return
-    }
-
-    if (reminder && reminder.startTimestamp !== startTimestamp) {
-      liveReminderActive.value = await liveReminder.schedule(getLiveReminderPayload())
-    } else {
-      liveReminderActive.value = reminder !== null
-    }
-  } catch (error) {
-    console.error('Failed to load live stream reminder', error)
-  }
-}
-
-async function toggleLiveReminder() {
-  if (liveReminderLoading.value || !canToggleLiveReminder.value) return
-
-  const videoId = id.value
-  liveReminderLoading.value = true
-  try {
-    if (liveReminderActive.value) {
-      await liveReminder.cancel(videoId)
-      if (videoId !== id.value) return
-      liveReminderActive.value = false
-      showToast({
-        message: t('Video.Notification cancelled'),
-        image: toastThumbnail.value,
-        icon: ['fas', 'calendar-days']
-      })
-    } else {
-      const scheduled = await liveReminder.schedule(getLiveReminderPayload())
-      if (videoId !== id.value) return
-      liveReminderActive.value = scheduled
-      showToast({
-        message: scheduled
-          ? t('Video.Notification enabled')
-          : t('Video.Notification unavailable'),
-        image: toastThumbnail.value,
-        icon: ['fas', 'calendar-days']
-      })
-    }
-  } catch (error) {
-    console.error('Failed to update live stream reminder', error)
-    if (videoId === id.value) {
-      showToast({
-        message: t('Video.Notification unavailable'),
-        image: toastThumbnail.value,
-        icon: ['fas', 'calendar-days']
-      })
-    }
-  } finally {
-    if (videoId === id.value) {
-      liveReminderLoading.value = false
-    }
-  }
-}
 
 function getYoutubeChannelUrl() {
   return `https://youtube.com/channel/${channelId.value}`
@@ -2567,22 +2373,17 @@ watch([id, showDeArrowTitle, showDeArrowThumbnail], async ([videoId, titles, thu
   }
 }, { immediate: true })
 
-watch(premiereTimestamp, schedulePremiereStartInvalidation, { immediate: true })
-watch([id, premiereTimestamp], syncLiveReminder, { immediate: true })
-
-onMounted(() => {
-  removeLiveReminderUpdatedListener = liveReminder.onUpdated((videoId, scheduled) => {
-    if (videoId === id.value) {
-      liveReminderActive.value = scheduled
-    }
-  })
-})
+// The reminder lookup runs immediately, so it waits for parseVideoData to set the ID.
+const {
+  premiereNow,
+  canToggleLiveReminder,
+  liveReminderActive,
+  liveReminderLoading,
+  toggleLiveReminder
+} = useUpcomingPremiere({ id, title, premiereTimestamp, toastThumbnail, t })
 
 onBeforeUnmount(() => {
   debounceGetDeArrowThumbnail.cancel()
-  resetThumbnailPreview()
-  clearPremiereStartTimer()
-  removeLiveReminderUpdatedListener?.()
 })
 
 watch([useSponsorBlock, id], ([enabled, videoId]) => {
