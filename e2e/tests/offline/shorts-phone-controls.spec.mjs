@@ -23,8 +23,14 @@ async function openShort({ app, page }) {
     component.proxy.updateShortsPlayerState(30, [{ width: 360, height: 640 }])
     await component.proxy.$nextTick()
   })
-  await watch.dispose()
   await expect(page.locator('.ftVideoPlayer')).toHaveClass(/shortsPlayer/)
+  // The Shorts player reloads the video, which can replace pauses and seeks
+  // made before it finishes.
+  await expect.poll(() => watch.evaluate(component => {
+    const player = component.proxy.$refs.player.$.setupState
+    return player.hasLoaded && player.videoLayoutReady
+  })).toBe(true)
+  await watch.dispose()
 }
 
 async function showShortPoster(page, watch) {
