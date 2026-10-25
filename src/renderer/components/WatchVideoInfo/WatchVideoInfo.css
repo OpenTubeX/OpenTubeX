@@ -252,6 +252,21 @@
   cursor: initial;
 }
 
+@media (pointer: coarse), (width <= 680px) {
+  .videoOptions :deep(.iconButton) {
+    min-inline-size: 48px;
+    min-block-size: 48px;
+  }
+
+  .videoOptions .downloadButton {
+    min-block-size: 48px;
+  }
+
+  .videoOptions.compact .downloadButton {
+    min-inline-size: 48px;
+  }
+}
+
 
 @media screen and (width <= 460px) {
   .datePublishedAndViewCount {
