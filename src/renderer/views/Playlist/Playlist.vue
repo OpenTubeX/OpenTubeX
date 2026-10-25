@@ -1083,6 +1083,9 @@ function parseUserPlaylist(playlist) {
 // react to route changes...
 watch(playlistId, () => {
   resetState()
+  // The search box and edit mode start fresh for the next playlist, so their state must too.
+  videoSearchQuery.value = isUserPlaylistRequested.value && searchQueryTextPresent.value ? searchQueryTextRequested.value : ''
+  playlistInEditMode.value = false
   getPlaylistInfoDebounce()
 })
 

@@ -25,7 +25,8 @@ const CLOSING_BRACKETS = { ')': '(', ']': '[', '}': '{' }
 const IPV4_PATTERN = /(?<![\d.])(?:(?:25[0-5]|2[0-4]\d|1?\d?\d)\.){3}(?:25[0-5]|2[0-4]\d|1?\d?\d)(?![\d.])/g
 const IPV6_PATTERN = /(?<![\w:])(?:(?:[\da-f]{1,4}:){3,7}[\da-f]{1,4}|(?:[\da-f]{1,4}:){1,6}:(?:[\da-f]{1,4}(?::[\da-f]{1,4})*)?|::[\da-f]{1,4}(?::[\da-f]{1,4}){0,6})(?![\w:])/gi
 const EMAIL_PATTERN = /(?<![\w.+-])[\w.+-]+@[\w-]+(?:\.[\w-]+)+\b/g
-const HOME_DIRECTORY_PATTERN = /(\/home\/|\/Users\/|[A-Z]:\\{1,2}Users\\{1,2})[^/\\\s"']+/gi
+// Windows user folders can contain spaces, so a name continues past spaces when the path does
+const HOME_DIRECTORY_PATTERN = /(\/home\/|\/Users\/|[A-Z]:\\{1,2}Users\\{1,2})(?:[^/\\\s"':]+(?: +[^/\\\s"':]+)*(?=[/\\])|[^/\\\s"']+)/gi
 // googlevideo hosts name the CDN node closest to the user
 const GOOGLEVIDEO_NODE_PATTERN = /\brr\d+---sn-[\da-z-]+\.googlevideo\.com\b/gi
 // Long opaque path segments are usually tokens, signatures or session IDs

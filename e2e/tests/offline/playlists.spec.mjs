@@ -931,6 +931,48 @@ test.describe('custom playlists overview order', () => {
   })
 })
 
+test.describe('switching between pinned playlists', () => {
+  const pinnedPlaylist = (name, titles) => ({
+    _id: `pinned-${name.toLowerCase()}`,
+    playlistName: `Pinned ${name}`,
+    protected: false,
+    description: '',
+    videos: titles.map((title, index) => ({
+      videoId: `pinned${name}${index}`.padEnd(11, '0'),
+      title,
+      author: 'Test Channel',
+      authorId: 'UC-test-channel-id',
+      lengthSeconds: 120,
+      timeAdded: Date.now() - index,
+      playlistItemId: `pinned-${name}-${index}`,
+      type: 'video'
+    })),
+    createdAt: Date.now(),
+    lastUpdatedAt: Date.now()
+  })
+
+  test.use({
+    seed: {
+      settings: { pinnedPlaylistIds: ['pinned-a', 'pinned-b'] },
+      playlists: [pinnedPlaylist('A', ['Linux news', 'Cooking show']), pinnedPlaylist('B', ['Garden tour', 'Bike repair'])]
+    }
+  })
+
+  test('a search typed on one playlist does not filter the next one', async ({ page }) => {
+    await page.locator('.sideNav .pinnedPlaylists .navChannel[title="Pinned A"]').click()
+    const search = page.locator('.playlistInfo').getByRole('searchbox', { name: 'Search for Videos' })
+    await search.fill('linux')
+    await expect(page).toHaveURL(/searchQueryText=linux/)
+    await expect(page.getByText('Cooking show')).toHaveCount(0)
+
+    await page.locator('.sideNav .pinnedPlaylists .navChannel[title="Pinned B"]').click()
+    await expect(page.locator('.playlistInfo')).toContainText('Pinned B')
+    await expect(search).toHaveValue('')
+    await expect(page.getByText('Garden tour')).toBeVisible()
+    await expect(page.getByText('Bike repair')).toBeVisible()
+  })
+})
+
 test.describe('custom playlist order', () => {
   test.use({
     seed: {

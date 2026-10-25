@@ -43,6 +43,8 @@ function setup(t, items = ['A', 'B', 'C'].map(id => ({ videoId: id, playlistItem
     hasUnloadedPlaylistVideos: ref(false),
     canPlayNextVideo: ref(true),
     router: { push(payload) { navigations.push(payload) } },
+    store: { getters: {} },
+    navigationDownloadId: () => undefined,
     Math: Object.assign(Object.create(Math), { random: () => 0 }),
     showToast() {},
     t: key => key,

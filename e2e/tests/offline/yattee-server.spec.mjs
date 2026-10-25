@@ -200,6 +200,22 @@ test('plays muxed streams when the server has no adaptive streams', async ({ pag
   await expect(page.locator(`${activeTab} .errorContainer`)).toHaveCount(0)
 })
 
+test('shows no comments instead of an error when comments are turned off', async ({ page }) => {
+  await page.route(`${SERVER}/api/v1/videos/**`, route => route.fulfill({ json: videoResponse }))
+  // The server reports videos with comments turned off as 404s
+  await page.route(`${SERVER}/api/v1/comments/**`, route => route.fulfill({ status: 404, json: { detail: 'Comments are disabled' } }))
+  await page.route(`${SERVER}/proxy/relay?**`, async route => {
+    const upstream = new URL(new URL(route.request().url()).searchParams.get('url'))
+    return fulfillRange(route, await media[upstream.searchParams.get('itag') === '248' ? 'video' : 'audio'])
+  })
+
+  await page.locator(sel.searchInput).fill(`https://www.youtube.com/watch?v=${VIDEO_ID}`)
+  await page.locator(sel.searchInput).press('Enter')
+  // Like Invidious's "Comments not found", without an error toast or a retry button
+  await expect(page.locator(`${activeTab} .noCommentMsg`)).toHaveText('There are no comments available for this video')
+  await expect(page.locator('.toast', { hasText: 'Error' })).toHaveCount(0)
+})
+
 test.describe('with the Invidious proxy setting also turned on', () => {
   test.use({ seed: { settings: { ...SETTINGS, proxyVideos: true } } })
 

@@ -37,7 +37,7 @@ function harness({ laterPageError = null, backend = 'local' } = {}) {
     isFetchingPlaylistContinuation, hasUnloadedPlaylistVideos, computed, watch: observe,
     isLoading, playlistItems, getPlaylistInfoRun: false,
     playlistTitle: ref(''), playlistTotalVideoCount: ref(0), channelName: ref(''), channelId: ref(''),
-    store: { commit() {} }, playlistCacheTabId: 'android-tab',
+    store: { commit() {} }, playlistCacheTabId: 'android-tab', navigationDownloadId: () => undefined,
     process: { env: { SUPPORTS_LOCAL_API: true } }, backendPreference: ref(backend), usesInvidiousApi,
     applyReversePlaylistState: videos => videos.slice(),
     findIndexOfCurrentVideoInPlaylist: videos => videos.findIndex(item => item.videoId === props.videoId),

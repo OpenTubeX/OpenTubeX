@@ -44,6 +44,23 @@ test('credentials and identifying values are removed from text', () => {
   assert.ok(text.includes('/home/<user>/.local/bin/yt-dlp'))
 })
 
+test('Windows user folders with spaces are redacted completely', () => {
+  assert.equal(
+    redactDiagnosticText([
+      "ENOENT: open 'C:\\Users\\John Smith\\Documents\\backup.db'",
+      'at tick (C:\\Users\\Anna Maria Lopez\\AppData\\Local\\Programs\\opentubex\\resources\\app.asar\\dist\\main.js:1:2)',
+      '{"path":"C:\\\\Users\\\\John Smith\\\\yt-dlp.exe"}',
+      'C:\\Users\\Bob and C:\\Users\\Alice\\yt-dlp.exe at /home/carol and more',
+    ].join('\n')),
+    [
+      "ENOENT: open 'C:\\Users\\<user>\\Documents\\backup.db'",
+      'at tick (C:\\Users\\<user>\\AppData\\Local\\Programs\\opentubex\\resources\\app.asar\\dist\\main.js:1:2)',
+      '{"path":"C:\\\\Users\\\\<user>\\\\yt-dlp.exe"}',
+      'C:\\Users\\<user> and C:\\Users\\<user>\\yt-dlp.exe at /home/<user> and more',
+    ].join('\n')
+  )
+})
+
 test('IPv6 addresses that start with compressed zero groups are redacted', () => {
   assert.equal(
     redactDiagnosticText('from ::2, ::abcd:1234 and ::ffff:c000:280 via ::1 in Foo::abc'),

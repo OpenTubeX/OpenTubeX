@@ -45,7 +45,7 @@ import {
 } from './subscription-entries'
 import { mapConcurrently } from './concurrent-map'
 import { includeAutomaticDownloadChannels, startAutomaticDownloadsForChannel } from './automaticDownloads'
-import { reportSubscriptionUploads } from './uploadNotifications'
+import { includeNotificationChannels, reportSubscriptionUploads } from './uploadNotifications'
 import { extractAssignedJsonObject } from './assigned-json'
 import { getInvidiousSubscriptionPremiereUpdate, getLocalSubscriptionPremiereUpdate, shouldRefreshSubscriptionPremiere } from './subscription-premieres'
 import { shouldShowProgressStartToast } from './progressPresentation'
@@ -795,7 +795,7 @@ async function refreshSubscriptionVideosFromRemoteUnlocked({
   errorChannels = []
 }, activeProfile) {
   const activeSubscriptionList = getSubscriptionsForFeed(activeProfile.subscriptions, 'videos')
-  const subscriptionList = includeAutomaticDownloadChannels(activeSubscriptionList, 'videos')
+  const subscriptionList = includeNotificationChannels(includeAutomaticDownloadChannels(activeSubscriptionList, 'videos'), 'videos')
   if (subscriptionList.length === 0) {
     completeSubscriptionRefresh('videos', activeProfile._id)
     return []
@@ -904,7 +904,7 @@ async function refreshSubscriptionShortsFromRemoteUnlocked({
   errorChannels = []
 }, activeProfile) {
   const activeSubscriptionList = getSubscriptionsForFeed(activeProfile.subscriptions, 'shorts')
-  const subscriptionList = includeAutomaticDownloadChannels(activeSubscriptionList, 'shorts')
+  const subscriptionList = includeNotificationChannels(includeAutomaticDownloadChannels(activeSubscriptionList, 'shorts'), 'shorts')
   if (subscriptionList.length === 0) {
     completeSubscriptionRefresh('shorts', activeProfile._id)
     return []
@@ -999,7 +999,7 @@ async function refreshSubscriptionLiveFromRemoteUnlocked({
   errorChannels = []
 }, activeProfile) {
   const activeSubscriptionList = getSubscriptionsForFeed(activeProfile.subscriptions, 'live')
-  const subscriptionList = includeAutomaticDownloadChannels(activeSubscriptionList, 'live')
+  const subscriptionList = includeNotificationChannels(includeAutomaticDownloadChannels(activeSubscriptionList, 'live'), 'live')
   if (subscriptionList.length === 0) {
     completeSubscriptionRefresh('live', activeProfile._id)
     return []
@@ -1107,8 +1107,8 @@ async function refreshSubscriptionPostsFromRemoteUnlocked({
   showStartToast = false,
   errorChannels = []
 }, activeProfile) {
-  const activeSubscriptionList = getSubscriptionsForFeed(activeProfile.subscriptions, 'posts')
-  if (activeSubscriptionList.length === 0) {
+  const subscriptionList = includeNotificationChannels(getSubscriptionsForFeed(activeProfile.subscriptions, 'posts'), 'posts')
+  if (subscriptionList.length === 0) {
     completeSubscriptionRefresh('posts', activeProfile._id)
     return []
   }
@@ -1146,7 +1146,7 @@ async function refreshSubscriptionPostsFromRemoteUnlocked({
       }
 
       channelCount++
-      setSubscriptionRefreshProgress((channelCount / activeSubscriptionList.length) * 100)
+      setSubscriptionRefreshProgress((channelCount / subscriptionList.length) * 100)
 
       if (posts === null) return
       activeRefresh.errors.delete(channel.id)
@@ -1182,7 +1182,7 @@ async function refreshSubscriptionPostsFromRemoteUnlocked({
       }
     }
 
-    await fetchSubscriptionsInBatches(activeSubscriptionList, processChannel)
+    await fetchSubscriptionsInBatches(subscriptionList, processChannel)
 
     store.dispatch('batchUpdateSubscriptionDetails', subscriptionUpdates)
 

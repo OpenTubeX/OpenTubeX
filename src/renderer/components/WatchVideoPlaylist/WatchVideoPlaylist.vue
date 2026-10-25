@@ -295,6 +295,7 @@ import {
   untilEndOfLocalPlayList,
 } from '../../helpers/api/local'
 import { invidiousGetPlaylistInfo } from '../../helpers/api/invidious'
+import { navigationDownloadId } from '../../helpers/downloadPlayback'
 import { isHistoryEntryWatched } from '../../helpers/history'
 import { clampOverlayScrollTop, restoreOverlayScrollTop } from '../../helpers/overlayScrollbars'
 import { getPlaylistSkipAvailability, getSortedPlaylistItems, isPlaylistSortOrder, SORT_BY_VALUES } from '../../helpers/playlists'
@@ -686,6 +687,9 @@ watch(() => props.playlistId, () => {
 
   if (cachedPlaylist?.id === props.playlistId) {
     loadCachedPlaylistInformation(cachedPlaylist)
+  } else if (selectedUserPlaylist.value != null) {
+    parseUserPlaylist(selectedUserPlaylist.value)
+    if (shuffleEnabled.value) shufflePlaylistItems()
   } else if (!process.env.SUPPORTS_LOCAL_API || usesInvidiousApi(backendPreference.value)) {
     getPlaylistInformationInvidious()
   } else {
@@ -1027,13 +1031,14 @@ function playNextVideo() {
     return
   }
 
+  const downloadId = navigationDownloadId(store.getters, targetPlaylistItem.videoId, props.downloadId)
   const routerPushPayload = {
     path: `/watch/${targetPlaylistItem.videoId}`,
     query: {
       playlistId: props.playlistId,
       playlistType: props.playlistType,
       playlistItemId: targetPlaylistItem.playlistItemId,
-      ...(props.downloadId ? { downloadId: props.downloadId } : {})
+      ...(downloadId ? { downloadId } : {})
     }
   }
 
@@ -1092,6 +1097,7 @@ function playPreviousVideo() {
 
   showToast({ message: t('Playing Previous Video'), icon: ['fas', 'step-backward'] })
 
+  const downloadId = navigationDownloadId(store.getters, targetPlaylistItem.videoId, props.downloadId)
   router.push(
     {
       path: `/watch/${targetPlaylistItem.videoId}`,
@@ -1099,7 +1105,7 @@ function playPreviousVideo() {
         playlistId: props.playlistId,
         playlistType: props.playlistType,
         playlistItemId: targetPlaylistItem.playlistItemId,
-        ...(props.downloadId ? { downloadId: props.downloadId } : {})
+        ...(downloadId ? { downloadId } : {})
       }
     }
   )
@@ -1270,6 +1276,8 @@ async function getPlaylistInformationInvidious() {
 
 function parseUserPlaylist(playlist) {
   playlistTitle.value = playlist.playlistName
+  // A YouTube playlist shown before must not count this one's videos as unavailable
+  playlistTotalVideoCount.value = playlist.videos.length
   channelName.value = ''
   channelId.value = ''
 

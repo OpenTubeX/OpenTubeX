@@ -18,6 +18,20 @@ export function configureUploadNotifications(value) {
 }
 
 /**
+ * Adds channels with notifications for the feed type to the set fetched for a
+ * subscription feed, even when the current profile filters those channels out.
+ * @param {{ id: string }[]} subscriptions
+ * @param {'videos' | 'shorts' | 'live' | 'posts'} feedType
+ */
+export function includeNotificationChannels(subscriptions, feedType) {
+  if (!supported || !store.getters.getEnableUploadNotifications || configuration?.enabled !== true) return subscriptions
+  const includedIds = new Set(subscriptions.map(channel => channel.id))
+  const missing = (store.getters.getProfileList[0]?.subscriptions ?? []).filter(channel =>
+    !includedIds.has(channel.id) && configuration.channels[channel.id]?.feedTypes.includes(feedType))
+  return missing.length === 0 ? subscriptions : [...subscriptions, ...missing]
+}
+
+/**
  * Reports a freshly fetched channel feed, ordered newest first. Feeds without
  * notifications turned on are not sent; the receiver would discard them.
  * @param {string} channelId

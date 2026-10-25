@@ -77,6 +77,20 @@ export function cardDownloadId(downloads, videoId, inheritedId, localId) {
   return localId !== undefined ? String(localId) : inheritedId
 }
 
+/**
+ * Picks the download that playlist and queue navigation open, matching what
+ * the video's card links to.
+ * @param {object} getters the store getters
+ * @param {string} videoId
+ * @param {string} [inheritedId] the download the current video was opened from
+ */
+export function navigationDownloadId(getters, videoId, inheritedId) {
+  // iOS plays downloads natively from the card click instead of on the watch page.
+  if (process.env.IS_IOS) return inheritedId
+  const localId = getters.getEnableDownloads ? getters.getLocalPlaybackDownloadIds.get(videoId) : undefined
+  return cardDownloadId(getters.getYtDlpDownloads, videoId, inheritedId, localId)
+}
+
 export function downloadFileTitle(download, file) {
   return file.title || (download.videoId && download.videoId === file.videoId ? download.title : '') ||
     file.path?.split(/[/\\]/).at(-1)?.replace(/\.[^.]+$/, '') || file.videoId
