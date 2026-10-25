@@ -4756,7 +4756,8 @@ html[data-reduced-motion='reduce'] .musicVisualizerCanvas {
   Structured cues (e.g. TTML) nest flex containers, which an inline background
   can't cover, so their words keep their own backgrounds.
 */
-:deep(:has(> .shaka-text-wrapper > [style*='display: inline'])) {
+/* stylelint-disable-next-line selector-max-compound-selectors -- Restrict matching to caption cue containers. */
+:deep(.shaka-text-container div:has(> .shaka-text-wrapper > [style*='display: inline'])) {
   display: block !important;
 }
 

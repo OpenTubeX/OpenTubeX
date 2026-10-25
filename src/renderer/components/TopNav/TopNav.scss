@@ -31,10 +31,6 @@
 
   @media only screen and (width <= 680px) {
     position: fixed;
-
-    &:has(+ .sideNav + .routerView .floatingRefreshSection) {
-      box-shadow: none;
-    }
   }
 }
 

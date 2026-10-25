@@ -48,7 +48,7 @@
   --select-indicator-space: calc(8px + var(--select-tooltip-space) + var(--select-sync-space) + var(--select-reset-space));
 }
 
-.select:has(.selectTooltip) {
+.select.containsTooltip {
   --select-tooltip-space: 32px;
 }
 
