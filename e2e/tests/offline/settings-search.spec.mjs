@@ -323,7 +323,7 @@ test.describe('settings search highlights', () => {
       'Server URL',
       'Executable path',
       'SponsorBlock API URL',
-      'API URL',
+      'Excluded Channels',
       'Proxy Host',
       'Edit custom theme',
       'Remove Password',
@@ -334,6 +334,10 @@ test.describe('settings search highlights', () => {
       await expect(page.locator('.settingsNoResults')).toBeVisible()
       await expect(page.locator('.settingsSearchResultMatch')).toHaveCount(0, { timeout: 1_000 })
     }
+
+    // Like the SponsorBlock API URL, this stays visible while its feature is off.
+    await search.fill('DeArrow thumbnail API URL')
+    await expect(page.getByRole('button', { name: 'DeArrow thumbnail API URL', exact: true })).toBeVisible()
 
     await search.fill('')
     const playback = await goToSettingsSection(page, 'playback')
