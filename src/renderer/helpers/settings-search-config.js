@@ -149,7 +149,7 @@ export const SETTINGS_SEARCH_SOURCES = {
   playback: [{
     type: 'player',
     key: 'Settings.Player Settings',
-    exclude: new Set(['Proxy Videos Through Invidious', 'Voice-over Translation', ...QUICK_PLAYBACK_SPEED_SUBPAGE_KEYS])
+    exclude: new Set(['Proxy Videos Through Invidious', 'Sections', 'Voice-over Translation', ...QUICK_PLAYBACK_SPEED_SUBPAGE_KEYS])
   }, {
     type: 'player',
     key: 'Settings.Player Settings',

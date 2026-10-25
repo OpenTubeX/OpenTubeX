@@ -758,6 +758,15 @@ Settings:
     Swipe Left or Right to Seek in Fullscreen: Vuốt sang trái hoặc phải để tua khi toàn màn hình
     Show Swipe to Seek Preview: Hiển thị bản xem trước khi vuốt để tua
     Enable Google Cast: "Bật Google Cast"
+    Sections:
+      Playback: Phát
+      Autoplay: Tự động phát
+      Playback Speed: Tốc độ phát
+      Player Controls: Điều khiển trình phát
+      Gestures: Cử chỉ
+      Viewing Modes: Chế độ xem
+      Shorts: Shorts
+      Screenshots: Ảnh chụp màn hình
   Channel Settings:
     Channel Settings: Cài đặt kênh
     Channel Settings Description: Ghi nhớ riêng các cài đặt bạn chọn khi xem từng kênh để áp dụng lại vào lần sau khi bạn xem video của kênh đó.

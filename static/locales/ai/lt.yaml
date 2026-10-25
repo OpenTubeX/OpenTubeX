@@ -947,6 +947,15 @@ Settings:
     Swipe Left or Right to Seek in Fullscreen: Perbraukite į kairę arba dešinę, kad persuktumėte viso ekrano režimu
     Show Swipe to Seek Preview: Rodyti peržiūrą persukant braukimu
     Enable Google Cast: "Įjungti Google Cast"
+    Sections:
+      Playback: Atkūrimas
+      Autoplay: Automatinis atkūrimas
+      Playback Speed: Atkūrimo greitis
+      Player Controls: Grotuvo valdikliai
+      Gestures: Gestai
+      Viewing Modes: Peržiūros režimai
+      Shorts: Shorts
+      Screenshots: Ekrano kopijos
   Channel Settings:
     Channel Settings: Kanalo nustatymai
     Channel Settings Description: Atskirai įsiminti kiekvienam kanalui žiūrint pasirinktus nustatymus, kad jie vėl būtų pritaikyti kitą kartą žiūrint vieną iš jo vaizdo įrašų.

@@ -926,6 +926,15 @@ Settings:
     Swipe Left or Right to Seek in Fullscreen: 전체 화면에서 좌우로 스와이프하여 탐색
     Show Swipe to Seek Preview: 스와이프로 탐색할 때 미리보기 표시
     Enable Google Cast: "Google Cast 활성화"
+    Sections:
+      Playback: 재생
+      Autoplay: 자동 재생
+      Playback Speed: 재생 속도
+      Player Controls: 플레이어 컨트롤
+      Gestures: 제스처
+      Viewing Modes: 보기 모드
+      Shorts: Shorts
+      Screenshots: 스크린샷
   Channel Settings:
     Channel Settings: 채널 설정
     Channel Settings Description: 채널마다 시청 중 선택한 설정을 기억하고, 다음에 해당 채널의 동영상을 시청할 때 다시 적용합니다.

@@ -450,8 +450,10 @@ test.describe('synced setting indicators', () => {
     for (const { y } of boxes) {
       rowSizes.set(y, (rowSizes.get(y) ?? 0) + 1)
     }
-    expect([...rowSizes.values()]).toEqual([3, 3, 3])
-    expect(new Set(boxes.map(({ width }) => width)).size).toBe(1)
+    expect([...rowSizes.values()]).toEqual([2, 2, 2, 3])
+    for (const y of rowSizes.keys()) {
+      expect(new Set(boxes.filter(box => box.y === y).map(({ width }) => width)).size).toBe(1)
+    }
 
     await page.evaluate(async () => {
       const store = window.$store

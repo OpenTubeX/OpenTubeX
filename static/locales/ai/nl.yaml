@@ -763,6 +763,15 @@ Settings:
     Swipe Left or Right to Seek in Fullscreen: Veeg naar links of rechts om te spoelen op volledig scherm
     Show Swipe to Seek Preview: Voorbeeld tonen bij vegen om te spoelen
     Enable Google Cast: "Google Cast inschakelen"
+    Sections:
+      Playback: Afspelen
+      Autoplay: Automatisch afspelen
+      Playback Speed: Afspeelsnelheid
+      Player Controls: Spelerbediening
+      Gestures: Gebaren
+      Viewing Modes: Weergavemodi
+      Shorts: Shorts
+      Screenshots: Schermafbeeldingen
   Channel Settings:
     Channel Settings: Kanaalinstellingen
     Channel Settings Description: Onthoud de instellingen die je tijdens het kijken kiest afzonderlijk voor elk kanaal, zodat ze weer worden toegepast wanneer je een andere video van dat kanaal bekijkt.

@@ -749,6 +749,15 @@ Settings:
     Swipe Left or Right to Seek in Fullscreen: Tam ekranda ileri veya geri sarmak için sola veya sağa kaydırın
     Show Swipe to Seek Preview: Kaydırarak sararken önizlemeyi göster
     Enable Google Cast: "Google Cast özelliğini etkinleştir"
+    Sections:
+      Playback: Oynatma
+      Autoplay: Otomatik oynatma
+      Playback Speed: Oynatma hızı
+      Player Controls: Oynatıcı denetimleri
+      Gestures: Hareketler
+      Viewing Modes: Görüntüleme modları
+      Shorts: Shorts
+      Screenshots: Ekran görüntüleri
   Channel Settings:
     Channel Settings: Kanal Ayarları
     Channel Settings Description: İzlerken seçtiğiniz ayarları her kanal için ayrı ayrı hatırlayarak kanalın bir sonraki videosunda yeniden uygular.

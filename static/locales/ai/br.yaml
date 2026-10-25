@@ -750,6 +750,15 @@ Settings:
     Swipe Left or Right to Seek in Fullscreen: Riklañ a-gleiz pe a-zehou evit mont war-raok pe war-gil e skramm leun
     Show Swipe to Seek Preview: Diskouez ar rakwel pa rikler evit mont en a-raok pe war-gil
     Enable Google Cast: "Gweredekaat Google Cast"
+    Sections:
+      Playback: Lenn
+      Autoplay: Lenn emgefreek
+      Playback Speed: Tizh lenn
+      Player Controls: Kontrolloù al lenner
+      Gestures: Jestroù
+      Viewing Modes: Modoù gwelout
+      Shorts: Shorts
+      Screenshots: Tapadennoù skramm
   Channel Settings:
     Channel Settings: "Arventennoù ar chadennoù"
     Channel Settings Description: "Derc'hel soñj, evit pep chadenn, eus an arventennoù a zibabit pa sellit. Arloet e vint en-dro ar wech da-heul ma sellot ouzh unan eus he videoioù."

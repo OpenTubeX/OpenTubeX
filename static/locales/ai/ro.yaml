@@ -752,6 +752,15 @@ Settings:
     Swipe Left or Right to Seek in Fullscreen: Glisați la stânga sau la dreapta pentru a derula pe tot ecranul
     Show Swipe to Seek Preview: Afișează previzualizarea la derulare prin glisare
     Enable Google Cast: "Activează Google Cast"
+    Sections:
+      Playback: Redare
+      Autoplay: Redare automată
+      Playback Speed: Viteză de redare
+      Player Controls: Comenzile playerului
+      Gestures: Gesturi
+      Viewing Modes: Moduri de vizualizare
+      Shorts: Shorts
+      Screenshots: Capturi de ecran
   Channel Settings:
     Channel Settings: Setări pentru canale
     Channel Settings Description: Rețineți separat pentru fiecare canal setările alese în timpul vizionării, pentru a fi aplicate din nou când vizionați alt videoclip al canalului.

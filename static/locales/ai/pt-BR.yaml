@@ -719,6 +719,15 @@ Settings:
     Swipe Left or Right to Seek in Fullscreen: Deslizar para a esquerda ou direita para avançar ou retroceder em tela cheia
     Show Swipe to Seek Preview: Mostrar prévia ao deslizar para avançar ou retroceder
     Enable Google Cast: "Ativar Google Cast"
+    Sections:
+      Playback: Reprodução
+      Autoplay: Reprodução automática
+      Playback Speed: Velocidade de reprodução
+      Player Controls: Controles do player
+      Gestures: Gestos
+      Viewing Modes: Modos de visualização
+      Shorts: Shorts
+      Screenshots: Capturas de tela
   Channel Settings:
     Channel Settings: Configurações dos canais
     Channel Settings Description: Memorizar individualmente para cada canal as configurações escolhidas durante a visualização, para que sejam aplicadas quando voltar a ver um dos seus vídeos.

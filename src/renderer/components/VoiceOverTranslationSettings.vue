@@ -21,8 +21,9 @@
         @change="updateVoiceOverTranslationPrepareInBackground"
       />
     </div>
-    <div class="voiceOverTranslationControls">
+    <FtFlexBox>
       <FtSelect
+        size-to-content
         :placeholder="t('Settings.Player Settings.Voice-over Translation.Language')"
         :value="voiceOverTranslationLanguage"
         setting-key="voiceOverTranslationLanguage"
@@ -32,6 +33,8 @@
         :disabled="!useVoiceOverTranslation"
         @change="updateVoiceOverTranslationLanguage"
       />
+    </FtFlexBox>
+    <FtSliderGrid>
       <FtSlider
         :label="t('Settings.Player Settings.Voice-over Translation.Voice Volume')"
         :default-value="voiceOverTranslationVolume"
@@ -54,13 +57,13 @@
         :disabled="!useVoiceOverTranslation"
         @change="updateVoiceOverTranslationOriginalVolume"
       />
-      <p
-        class="voiceOverTranslationLanguageHint"
-        :class="{ disabled: !useVoiceOverTranslation }"
-      >
-        {{ t('Settings.Player Settings.Voice-over Translation.Supported Source Languages') }}
-      </p>
-    </div>
+    </FtSliderGrid>
+    <p
+      class="voiceOverTranslationLanguageHint"
+      :class="{ disabled: !useVoiceOverTranslation }"
+    >
+      {{ t('Settings.Player Settings.Voice-over Translation.Supported Source Languages') }}
+    </p>
   </FtSettingsSection>
 </template>
 
@@ -68,9 +71,11 @@
 import { computed } from 'vue'
 import { useI18n } from 'vue-i18n'
 
+import FtFlexBox from './ft-flex-box/ft-flex-box.vue'
 import FtSelect from './FtSelect/FtSelect.vue'
 import FtSettingsSection from './FtSettingsSection/FtSettingsSection.vue'
 import FtSlider from './FtSlider/FtSlider.vue'
+import FtSliderGrid from './FtSliderGrid/FtSliderGrid.vue'
 import FtToggleSwitch from './FtToggleSwitch/FtToggleSwitch.vue'
 
 import store from '../store/index'
@@ -119,32 +124,10 @@ function updateVoiceOverTranslationOriginalVolume(value) {
 </script>
 
 <style scoped>
-.voiceOverTranslationControls {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(min(300px, 100%), 1fr));
-  align-items: start;
-  gap: 1rem 2rem;
-  inline-size: 100%;
-  margin-block-end: 1rem;
-  padding-inline: 8px;
-  box-sizing: border-box;
-  user-select: none;
-}
-
-.voiceOverTranslationControls :deep(.select),
-.voiceOverTranslationControls :deep(.pure-material-slider) {
-  box-sizing: border-box;
-  inline-size: 100%;
-  margin-inline: 0;
-}
-
-.voiceOverTranslationControls :deep(.pure-material-slider) {
-  margin-block: 5px 0;
-}
-
 .voiceOverTranslationLanguageHint {
-  grid-column: 1 / -1;
-  margin: 0;
+  margin-block: 1rem 0;
+  padding-inline: 20px;
+  user-select: none;
   color: var(--secondary-text-color);
   font-size: 0.9em;
   text-align: center;

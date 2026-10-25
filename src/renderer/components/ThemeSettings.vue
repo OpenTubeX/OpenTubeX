@@ -4,6 +4,7 @@
   >
     <FtFlexBox class="themeSelectRow">
       <FtSelect
+        size-to-content
         :placeholder="$t('Settings.Theme Settings.Base Theme.Base Theme')"
         :value="baseTheme"
         setting-key="baseTheme"
@@ -13,6 +14,7 @@
         @change="updateBaseTheme"
       />
       <FtSelect
+        size-to-content
         :placeholder="$t('Settings.Theme Settings.Icon Pack.Icon Pack')"
         :value="iconPack"
         setting-key="iconPack"
@@ -22,6 +24,7 @@
         @change="updateIconPack"
       />
       <FtSelect
+        size-to-content
         :placeholder="$t('Settings.Theme Settings.Toast Position.Toast Position')"
         :value="toastPosition"
         setting-key="toastPosition"
@@ -44,6 +47,7 @@
       class="themeSelectRow"
     >
       <FtSelect
+        size-to-content
         :placeholder="t('Settings.Theme Settings.Light Theme')"
         :value="systemLightTheme"
         setting-key="systemLightTheme"
@@ -53,6 +57,7 @@
         @change="store.dispatch('updateSystemLightTheme', $event)"
       />
       <FtSelect
+        size-to-content
         :placeholder="t('Settings.Theme Settings.Dark Theme')"
         :value="systemDarkTheme"
         setting-key="systemDarkTheme"
@@ -64,6 +69,7 @@
     </FtFlexBox>
     <FtFlexBox class="themeSelectRow">
       <FtSelect
+        size-to-content
         :placeholder="t('Settings.Theme Settings.Font.App Font')"
         :value="appFont"
         setting-key="appFont"
@@ -84,6 +90,7 @@
       </FtSelect>
       <FtSelect
         v-if="!isMaterialThemeSelected"
+        size-to-content
         :placeholder="$t('Settings.Theme Settings.Main Color Theme.Main Color Theme')"
         :value="mainColor"
         setting-key="mainColor"
@@ -97,6 +104,7 @@
       />
       <FtSelect
         v-if="!isMaterialThemeSelected"
+        size-to-content
         :placeholder="$t('Settings.Theme Settings.Secondary Color Theme')"
         :value="secColor"
         setting-key="secColor"
@@ -155,6 +163,7 @@
       class="themeSelectRow"
     >
       <FtSelect
+        size-to-content
         :placeholder="t('Settings.General Settings.Mobile Layout.Mobile Layout')"
         :value="capacitorLayoutMode"
         setting-key="capacitorLayoutMode"
@@ -325,6 +334,7 @@
         class="themeSelectRow"
       >
         <FtSelect
+          size-to-content
           :placeholder="t('Settings.Theme Settings.Tab Layout.Tab Layout')"
           :value="tabBarPosition"
           setting-key="tabBarPosition"
@@ -334,6 +344,7 @@
           @change="updateTabBarPosition"
         />
         <FtSelect
+          size-to-content
           :placeholder="t('Settings.Theme Settings.Tab Loading Indicator.Tab Loading Indicator')"
           :value="store.getters.getTabLoadingIndicator"
           setting-key="tabLoadingIndicator"
@@ -1065,9 +1076,9 @@ function handleRestartPrompt(value) {
 }
 
 .themeSelectRow :deep(.select) {
-  flex: 1 1 calc(200px + var(--select-indicator-space));
+  flex: 0 1 auto;
   min-inline-size: 0;
-  max-inline-size: calc(200px + var(--select-indicator-space));
+  max-inline-size: 100%;
 }
 
 .themeSwitchGrid.themeSwitchGrid {
@@ -1111,7 +1122,6 @@ function handleRestartPrompt(value) {
 
   .themeSelectRow :deep(.select) {
     flex: 0 0 auto;
-    inline-size: min(calc(200px + var(--select-indicator-space)), 100%);
   }
 
 }
@@ -1129,8 +1139,17 @@ function handleRestartPrompt(value) {
 }
 
 @container settings-content (width <= 460px) {
+  /* Stack the selects at the width of the widest caption so they share edges. */
   .themeSelectRow {
-    flex-direction: column;
+    display: grid;
+    grid-template-columns: minmax(0, max-content);
+    justify-content: center;
+  }
+
+  .themeSelectRow :deep(.select) {
+    box-sizing: border-box;
+    inline-size: auto;
+    justify-self: stretch;
   }
 }
 

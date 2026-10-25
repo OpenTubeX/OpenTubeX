@@ -373,6 +373,15 @@ Settings:
     Swipe Left or Right to Seek in Fullscreen: Przesuń w lewo lub w prawo, aby przewijać na pełnym ekranie
     Show Swipe to Seek Preview: Pokazuj podgląd podczas przewijania przesunięciem
     Enable Google Cast: "Włącz Google Cast"
+    Sections:
+      Playback: Odtwarzanie
+      Autoplay: Autoodtwarzanie
+      Playback Speed: Prędkość odtwarzania
+      Player Controls: Elementy sterujące odtwarzacza
+      Gestures: Gesty
+      Viewing Modes: Tryby wyświetlania
+      Shorts: Shorts
+      Screenshots: Zrzuty ekranu
   Channel Settings:
     Enable Channel Playback Settings: Włącz ustawienia odtwarzania dla kanałów
     Auto Save Playback Speed: Automatycznie zapisuj zmiany prędkości odtwarzania

@@ -750,6 +750,15 @@ Settings:
     Swipe Left or Right to Seek in Fullscreen: Húzás balra vagy jobbra a tekeréshez teljes képernyőn
     Show Swipe to Seek Preview: Előnézet megjelenítése csúsztatásos tekeréskor
     Enable Google Cast: "Google Cast engedélyezése"
+    Sections:
+      Playback: Lejátszás
+      Autoplay: Automatikus lejátszás
+      Playback Speed: Lejátszási sebesség
+      Player Controls: Lejátszóvezérlők
+      Gestures: Kézmozdulatok
+      Viewing Modes: Megtekintési módok
+      Shorts: Shorts
+      Screenshots: Képernyőképek
   Channel Settings:
     Channel Settings: Csatornabeállítások
     Channel Settings Description: Csatornánként megjegyzi a videónézés közben kiválasztott beállításokat, és a csatorna következő videójánál újra alkalmazza őket.

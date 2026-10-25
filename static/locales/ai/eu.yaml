@@ -750,6 +750,15 @@ Settings:
     Swipe Left or Right to Seek in Fullscreen: Irristatu ezkerrera edo eskuinera pantaila osoan aurrera edo atzera egiteko
     Show Swipe to Seek Preview: Erakutsi aurrebista hatza irristatuz aurrera edo atzera egitean
     Enable Google Cast: "Gaitu Google Cast"
+    Sections:
+      Playback: Erreprodukzioa
+      Autoplay: Erreprodukzio automatikoa
+      Playback Speed: Erreprodukzio-abiadura
+      Player Controls: Erreproduzitzailearen kontrolak
+      Gestures: Keinuak
+      Viewing Modes: Ikuspegi moduak
+      Shorts: Shorts
+      Screenshots: Pantaila-argazkiak
   Channel Settings:
     Channel Settings: Kanalen ezarpenak
     Channel Settings Description: Gogoratu kanal bakoitzerako bideoak ikustean aukeratutako ezarpenak, kanal horretako beste bideo bat ikusten duzunean berriro aplikatzeko.

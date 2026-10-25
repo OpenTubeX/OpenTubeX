@@ -781,6 +781,15 @@ Settings:
     Swipe Left or Right to Seek in Fullscreen: برای جلو یا عقب بردن در حالت تمام‌صفحه، به چپ یا راست بکشید
     Show Swipe to Seek Preview: نمایش پیش‌نمایش هنگام جلو و عقب بردن با کشیدن
     Enable Google Cast: "فعال کردن Google Cast"
+    Sections:
+      Playback: پخش
+      Autoplay: پخش خودکار
+      Playback Speed: سرعت پخش
+      Player Controls: کنترل‌های پخش‌کننده
+      Gestures: اشاره‌ها
+      Viewing Modes: حالت‌های نمایش
+      Shorts: Shorts
+      Screenshots: نماگرفت‌ها
   Channel Settings:
     Channel Settings: تنظیمات کانال
     Channel Settings Description: تنظیمات انتخابی هنگام تماشای هر کانال را جداگانه به‌خاطر بسپار تا دفعهٔ بعد برای ویدیوهای آن دوباره اعمال شوند.

@@ -962,6 +962,15 @@ Settings:
     Swipe Left or Right to Seek in Fullscreen: Podrsnite levo ali desno za previjanje v celozaslonskem načinu
     Show Swipe to Seek Preview: Pokaži predogled pri previjanju s potegom
     Enable Google Cast: "Omogoči Google Cast"
+    Sections:
+      Playback: Predvajanje
+      Autoplay: Samodejno predvajanje
+      Playback Speed: Hitrost predvajanja
+      Player Controls: Kontrolniki predvajalnika
+      Gestures: Kretnje
+      Viewing Modes: Načini ogleda
+      Shorts: Shorts
+      Screenshots: Posnetki zaslona
   Channel Settings:
     Channel Settings: Nastavitve kanalov
     Channel Settings Description: Zapomni si nastavitve, ki jih med gledanjem izberete za vsak kanal posebej, in jih znova uporabi ob naslednjem ogledu enega od njegovih videoposnetkov.

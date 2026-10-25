@@ -2,11 +2,21 @@
   margin-block: 1rem;
 }
 
+.groupTitle:not(:first-child) {
+  margin-block-start: 1.5em;
+}
+
+/* Each group sizes its two columns to its own labels and centers them. */
 .playerSwitchGrid {
   align-items: center;
   display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  column-gap: 24px;
+  grid-template-columns: repeat(2, minmax(0, max-content));
+  justify-content: center;
+  column-gap: 48px;
+}
+
+.screenshotFormatRow {
+  align-items: center;
 }
 
 @container settings-content (width <= 680px) {
@@ -20,6 +30,7 @@
     margin-inline: auto;
   }
 
+  /* Stacked selects share one width so their edges line up across groups. */
   .playerSelectGrid {
     align-items: center;
     flex-direction: column;
@@ -27,8 +38,13 @@
 
   .playerSelectGrid :deep(.select) {
     box-sizing: border-box;
-    inline-size: min(100%, 270px);
+    inline-size: min(100%, 400px);
     margin-inline-end: 0;
+  }
+
+  /* The shared width already fits the caption, so let the field shrink with it. */
+  .playerSelectGrid :deep(.select.contentSized) {
+    grid-template-columns: minmax(0, 1fr) var(--select-indicator-space);
   }
 
 }

@@ -42,9 +42,9 @@ test('flows Player switches across balanced rows when some are unavailable', asy
     }))
   })
   const playback = await goToSettingsSection(page, 'playback')
-  const switches = playback.locator('.playerSwitchGrid .switch-ctn')
-  await switches.first().evaluate(element => {
-    for (const toggle of Array.from(element.parentElement.children).slice(0, 4)) {
+  const grid = playback.locator('.playerSwitchGrid').filter({ hasText: 'Show Music Mode Toggle' })
+  await grid.evaluate(element => {
+    for (const toggle of Array.from(element.children).slice(0, 3)) {
       toggle.style.display = 'none'
     }
   })
@@ -55,7 +55,7 @@ test('flows Player switches across balanced rows when some are unavailable', asy
 
   for (const direction of ['ltr', 'rtl']) {
     await page.evaluate(value => { document.documentElement.dir = value }, direction)
-    const layout = await playback.locator('.playerSwitchGrid').evaluate(element => {
+    const layout = await grid.evaluate(element => {
       const bounds = element.getBoundingClientRect()
       const direction = getComputedStyle(element).direction
       const switches = Array.from(element.querySelectorAll('.switch-ctn'))
@@ -79,7 +79,7 @@ test('flows Player switches across balanced rows when some are unavailable', asy
   }
 
   await playback.evaluate(element => { element.parentElement.style.inlineSize = '600px' })
-  const narrowLayout = await playback.locator('.playerSwitchGrid').evaluate(element => {
+  const narrowLayout = await grid.evaluate(element => {
     const positions = Array.from(element.querySelectorAll('.switch-ctn'))
       .filter(toggle => getComputedStyle(toggle).display !== 'none')
       .map(toggle => toggle.getBoundingClientRect().left)

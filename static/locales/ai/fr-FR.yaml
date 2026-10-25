@@ -749,6 +749,15 @@ Settings:
     Swipe Left or Right to Seek in Fullscreen: Balayer vers la gauche ou la droite pour avancer ou reculer en plein écran
     Show Swipe to Seek Preview: Afficher l’aperçu lors du balayage pour avancer ou reculer
     Enable Google Cast: "Activer Google Cast"
+    Sections:
+      Playback: Lecture
+      Autoplay: Lecture automatique
+      Playback Speed: Vitesse de lecture
+      Player Controls: Commandes du lecteur
+      Gestures: Gestes
+      Viewing Modes: Modes d’affichage
+      Shorts: Shorts
+      Screenshots: Captures d’écran
   Channel Settings:
     Channel Settings: Paramètres des chaînes
     Channel Settings Description: Mémorisez séparément pour chaque chaîne les paramètres choisis pendant le visionnage afin de les appliquer de nouveau à la prochaine vidéo de cette chaîne.

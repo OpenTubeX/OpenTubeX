@@ -750,6 +750,15 @@ Settings:
     Swipe Left or Right to Seek in Fullscreen: Sychwch i’r chwith neu’r dde i symud drwy’r fideo ar sgrin lawn
     Show Swipe to Seek Preview: Dangos rhagolwg wrth lithro i symud drwy’r fideo
     Enable Google Cast: "Galluogi Google Cast"
+    Sections:
+      Playback: Chwarae
+      Autoplay: Awtochwarae
+      Playback Speed: Cyflymder chwarae
+      Player Controls: Rheolyddion y chwaraewr
+      Gestures: Ystumiau
+      Viewing Modes: Moddau gwylio
+      Shorts: Shorts
+      Screenshots: Sgrinluniau
   Channel Settings:
     Channel Settings: Gosodiadau sianeli
     Channel Settings Description: Cofiwch y gosodiadau a ddewiswch wrth wylio ar gyfer pob sianel ar wahân, fel eu bod yn cael eu gosod eto y tro nesaf y byddwch yn gwylio un o'i fideos.

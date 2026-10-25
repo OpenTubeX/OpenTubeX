@@ -750,6 +750,15 @@ Settings:
     Swipe Left or Right to Seek in Fullscreen: Geser ke kiri atau kanan untuk mencari posisi dalam layar penuh
     Show Swipe to Seek Preview: Tampilkan pratinjau saat menggeser untuk mencari posisi
     Enable Google Cast: "Aktifkan Google Cast"
+    Sections:
+      Playback: Pemutaran
+      Autoplay: Putar otomatis
+      Playback Speed: Kecepatan pemutaran
+      Player Controls: Kontrol pemutar
+      Gestures: Gestur
+      Viewing Modes: Mode tampilan
+      Shorts: Shorts
+      Screenshots: Tangkapan layar
   Channel Settings:
     Channel Settings: Pengaturan Saluran
     Channel Settings Description: Ingat pengaturan yang Anda pilih saat menonton untuk setiap saluran, lalu terapkan lagi saat Anda menonton video saluran tersebut berikutnya.

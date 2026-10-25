@@ -752,6 +752,15 @@ Settings:
     Swipe Left or Right to Seek in Fullscreen: Σύρετε αριστερά ή δεξιά για αναζήτηση σε πλήρη οθόνη
     Show Swipe to Seek Preview: Εμφάνιση προεπισκόπησης κατά τη μετακίνηση με σάρωση
     Enable Google Cast: "Ενεργοποίηση Google Cast"
+    Sections:
+      Playback: Αναπαραγωγή
+      Autoplay: Αυτόματη αναπαραγωγή
+      Playback Speed: Ταχύτητα αναπαραγωγής
+      Player Controls: Στοιχεία ελέγχου προγράμματος αναπαραγωγής
+      Gestures: Χειρονομίες
+      Viewing Modes: Λειτουργίες προβολής
+      Shorts: Shorts
+      Screenshots: Στιγμιότυπα οθόνης
   Channel Settings:
     Channel Settings: Ρυθμίσεις καναλιών
     Channel Settings Description: Απομνημόνευση των ρυθμίσεων που επιλέγετε κατά την παρακολούθηση, ξεχωριστά για κάθε κανάλι, ώστε να εφαρμόζονται ξανά την επόμενη φορά που θα παρακολουθήσετε κάποιο βίντεό του.
