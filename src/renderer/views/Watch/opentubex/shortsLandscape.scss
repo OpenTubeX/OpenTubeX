@@ -1,0 +1,210 @@
+// Landscape phones cross the tablet tab-strip breakpoint, but still need the
+// compact Shorts controls when there is little vertical space.
+@media (orientation: landscape) and (height <= 600px) {
+  :global(.capacitorTabletLayout .videoLayout.shortsPlayerActive .videoArea) {
+    --shorts-player-height: max(
+      0px,
+      calc(100dvh - var(--top-nav-sticky-offset) - var(--mobile-progress-bar-space) - 48px)
+    ) !important;
+  }
+
+  :global(.capacitorTabs .videoLayout.shortsPlayerActive .videoArea .videoAreaMargin) {
+    grid-template-columns: minmax(0, 1fr);
+    column-gap: 0;
+    inline-size: 100%;
+    max-inline-size: 100%;
+  }
+
+  :global(.capacitorTabs .videoLayout.shortsPlayerActive .videoArea) {
+    --shorts-landscape-player-width: min(100%, 600px, calc(var(--shorts-player-height) * var(--shorts-aspect-ratio)));
+  }
+
+  :global(.capacitorTabs .videoLayout.shortsPlayerActive .videoArea .shortsSwipeViewport),
+  :global(.capacitorTabs .videoLayout.shortsPlayerActive .videoArea .videoPlayer),
+  :global(.capacitorTabs .videoLayout.shortsPlayerActive .shortsExternalMetadata),
+  :global(.capacitorTabs .videoLayout.shortsPlayerActive .shortsNextPreview) {
+    grid-column: 1;
+  }
+
+  :global(.capacitorTabs .videoLayout.shortsPlayerActive .videoArea .shortsSwipeViewport),
+  :global(.capacitorTabs .videoLayout.shortsPlayerActive .videoArea .videoPlayer) {
+    inline-size: var(--shorts-landscape-player-width);
+    justify-self: center;
+    background-color: #000;
+  }
+
+  :global(.capacitorTabs .videoLayout.shortsPlayerActive .videoPlayerError) {
+    overflow: visible;
+  }
+
+  :global(.capacitorTabs .videoLayout.shortsPlayerActive .videoArea .ftVideoPlayer.shortsPlayer:has(.phonePlayerOptions[open])) {
+    overflow: visible;
+  }
+
+  :global(.capacitorTabs .videoLayout.shortsPlayerActive .videoPlayerError .errorContainer) {
+    inset-block: 0;
+    inset-inline: 50% auto;
+    box-sizing: border-box;
+    display: flex;
+    flex-direction: column;
+    justify-content: safe center;
+    inline-size: min(560px, calc(100vw - 200px));
+    padding: 8px;
+    overflow: hidden auto;
+    transform: translateX(-50%);
+  }
+
+  :global(.capacitorTabs .videoLayout.shortsPlayerActive .videoPlayerError .errorContainer:dir(rtl)) {
+    transform: translateX(50%);
+  }
+
+  :global(.capacitorTabs .videoLayout.shortsPlayerActive .videoPlayerError .errorWrapper) {
+    box-sizing: border-box;
+    inline-size: 100%;
+    flex: none;
+  }
+
+  :global(.capacitorTabs .videoLayout.shortsPlayerActive .videoPlayerError .errorContent) {
+    min-inline-size: 0;
+  }
+
+  :global(.capacitorTabs .videoLayout.shortsPlayerActive .videoPlayerError :is(.errorMessage, .errorActionButton)) {
+    overflow-wrap: anywhere;
+  }
+
+  @media (width < 600px) {
+    :global(.capacitorTabs .videoLayout.shortsPlayerActive .videoPlayerError .errorWrapper) {
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    :global(.capacitorTabs .videoLayout.shortsPlayerActive .videoPlayerError .errorIcon) {
+      font-size: 32px;
+    }
+  }
+
+  :global(.capacitorTabs .videoLayout.shortsPlayerActive .streamPlaceholderOverlay) {
+    flex-direction: column;
+    text-align: center;
+  }
+
+  :global(.capacitorTabs .videoLayout.shortsPlayerActive .streamPlaceholderText) {
+    overflow-wrap: anywhere;
+  }
+
+  :global(.capacitorTabs .videoLayout.shortsPlayerActive .shortsExternalMetadata) {
+    position: absolute;
+    z-index: 4;
+    grid-row: 1;
+    inset-block: calc(var(--shorts-player-height) - 16px) auto;
+    inset-inline: 16px auto;
+    inline-size: min(35%, 360px, calc((100% - var(--shorts-landscape-player-width)) / 2 - 24px));
+    padding: 0;
+    color: var(--primary-text-color);
+    transform: translateY(-100%);
+  }
+
+  :global(.capacitorTabs .videoLayout.shortsPlayerActive :is(.shortsExternalTitle, .shortsSkeletonTitle)) {
+    display: block;
+  }
+
+  :global(.capacitorTabs .videoLayout.shortsPlayerActive .shortsMetadataAction) {
+    display: none;
+  }
+
+  @media (width < 480px) {
+    :global(.capacitorTabs .videoLayout.shortsPlayerActive :is(.shortsExternalTitle, .shortsSkeletonTitle)) {
+      display: none;
+    }
+
+    :global(.capacitorTabs .videoLayout.shortsPlayerActive .shortsMetadataAction) {
+      display: flex;
+    }
+  }
+
+  :global(.capacitorTabs .videoLayout.shortsPlayerActive .shortsExternalTitleButton) {
+    display: -webkit-box;
+    overflow: hidden;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 2;
+  }
+
+  :global(.capacitorTabs .videoLayout.shortsPlayerActive .shortsActionRail) {
+    position: absolute;
+    z-index: 5;
+    inset-block: 12px auto;
+    inset-inline: auto 8px;
+    box-sizing: border-box;
+    block-size: max(0px, calc(var(--shorts-player-height) - 20px));
+    inline-size: 66px;
+    margin: 0;
+    padding-block: 0;
+    padding-inline: 0 24px;
+    overflow: hidden auto;
+    overscroll-behavior: contain;
+    justify-content: safe flex-end;
+    gap: 8px;
+  }
+
+  :global(.capacitorTabs .videoLayout.shortsPlayerActive .shortsActionRail > :not(.os-scrollbar)) {
+    flex-shrink: 0;
+  }
+
+  :global(.capacitorTabs .videoLayout.shortsPlayerActive :is(
+    .shortsChannelRow,
+    .shortsSkeletonChannelRow,
+    .shortsFullscreenChannelRow,
+    .shortsAction:not(.shortsActionSkeleton) > span,
+    .shortsSkeletonVolume
+  )) {
+    display: none;
+  }
+
+  :global(.capacitorTabs .videoLayout.shortsPlayerActive .shortsNavigation) {
+    position: static;
+    gap: 8px;
+    transform: none;
+  }
+
+  :global(.capacitorTabs .videoLayout.shortsPlayerActive .shortsNavigationButton) {
+    inline-size: 42px;
+    block-size: 42px;
+  }
+
+  :global(.capacitorTabs .videoLayout.shortsPlayerActive :is(
+    .shortsActionSkeleton > span,
+    .shortsSkeletonSound,
+    .shortsSkeletonControlGroup span
+  )) {
+    inline-size: 42px;
+    block-size: 42px;
+    flex: none;
+  }
+
+  :global(.capacitorTabs .videoLayout.shortsPlayerActive .shortsSkeletonControls) {
+    padding: 4px;
+    flex-wrap: wrap;
+  }
+
+  :global(.capacitorTabs .videoLayout.shortsPlayerActive .shortsSkeletonControlGroup) {
+    gap: 2px;
+  }
+
+  :global(.capacitorTabs .videoLayout.shortsPlayerActive .shortsPlayerPlaceholder) {
+    container: shorts-landscape-player / inline-size;
+  }
+}
+
+@container shorts-landscape-player (width < 100px) {
+  :global(.shortsSkeletonControls) {
+    align-items: center;
+    flex-direction: column;
+    justify-content: flex-start;
+    padding: 2px;
+  }
+
+  :global(.shortsSkeletonControlGroup) {
+    flex-direction: column;
+    gap: 0;
+  }
+}

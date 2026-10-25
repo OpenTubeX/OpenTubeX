@@ -1394,3 +1394,7 @@
 
 <script src="./Watch.js" />
 <style scoped src="./Watch.scss" lang="scss" />
+<style scoped src="./opentubex/mobileLayout.scss" lang="scss" />
+<style scoped src="./opentubex/shortsLandscape.scss" lang="scss" />
+<style scoped src="./opentubex/skeletons.scss" lang="scss" />
+<style scoped src="./opentubex/phonePanels.scss" lang="scss" />

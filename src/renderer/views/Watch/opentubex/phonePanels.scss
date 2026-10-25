@@ -1,0 +1,46 @@
+.videoLayout .phonePanelButton {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  box-sizing: border-box;
+  inline-size: calc(100% - 32px);
+  min-block-size: var(--phone-touch-target, 48px);
+  margin-block: 12px;
+  margin-inline: 16px;
+  padding-block: 12px;
+  padding-inline: 16px;
+  border: 0;
+  border-radius: calc(12px * var(--ui-roundness));
+  background: var(--card-bg-color);
+  color: var(--primary-text-color);
+  font: inherit;
+  text-align: start;
+  cursor: pointer;
+
+  .phoneCommentsLabel {
+    min-inline-size: 0;
+    flex: 1;
+  }
+}
+
+.phoneQueuePreview {
+  display: block;
+  margin-block-start: 4px;
+  font-size: 0.875em;
+  color: var(--secondary-text-color);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+:global(.phonePanelContent .shortsPhoneSheetContent) {
+  display: block;
+  inline-size: 100%;
+  block-size: auto;
+  overflow: visible;
+  background: transparent;
+}
+
+:global(.phonePanelContent .shortsPhoneSheetContent .shortsAuxPanelTarget) {
+  overflow: visible;
+}

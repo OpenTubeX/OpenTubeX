@@ -1,0 +1,138 @@
+/* The Android fullscreen element contains the whole watch layout. Keep the
+   player over it even before Vue applies its fullWindow class. */
+:global(.capacitorTabs .videoLayout:not(.shortsPlayerActive):is(:fullscreen, :popover-open)) {
+  overflow: hidden;
+  background: #000;
+}
+
+:global(.capacitorTabs .videoLayout:popover-open) {
+  position: fixed;
+  inset: 0;
+  inline-size: 100vw;
+  block-size: 100vh;
+  max-inline-size: none;
+  max-block-size: none;
+  margin: 0;
+  padding: 0;
+  border: 0;
+}
+
+:global(.capacitorTabs .videoLayout:not(.shortsPlayerActive):is(:fullscreen, :popover-open) .videoArea .videoPlayer) {
+  position: fixed;
+  inset: 0;
+  z-index: 4;
+  inline-size: 100%;
+  block-size: 100%;
+  max-inline-size: none;
+  margin: 0;
+}
+
+:global(.capacitorTabs .videoLayout:not(.shortsPlayerActive):is(:fullscreen, :popover-open) .videoArea .videoPlayer .ftVideoPlayer) {
+  inline-size: 100%;
+  block-size: 100%;
+  aspect-ratio: auto;
+}
+
+:global(.capacitorPhoneLayout .videoLayout.shortsPlayerActive .shortsActionRail) {
+  position: relative;
+  grid-column: 1;
+  grid-row: 1;
+  place-self: start end;
+  block-size: max(0px, calc(var(--shorts-player-height) - 60px));
+  justify-content: safe flex-end;
+  inset: auto;
+  inline-size: auto;
+  margin: 0;
+  margin-block-start: 60px;
+  padding-inline-end: 8px;
+  box-sizing: border-box;
+  align-items: center;
+  gap: 8px;
+  padding-block-end: 0;
+  overflow: hidden auto;
+  overscroll-behavior: contain;
+}
+
+:global(.capacitorPhoneLayout .shortsActionRail > :not(.os-scrollbar)) {
+  flex-shrink: 0;
+}
+
+:global(.capacitorPhoneLayout .videoLayout.shortsPlayerActive .videoArea .videoAreaMargin) {
+  grid-template-columns: minmax(0, 1fr);
+  column-gap: 0;
+  inline-size: 100%;
+  max-inline-size: 100%;
+}
+
+@media (width <= 680px) {
+  :global(.capacitorPhoneLayout .videoLayout.shortsPlayerActive .videoArea) {
+    // The phone route starts below its top toolbar and reserves the bottom tab bar.
+    // Both the skeleton and the loaded player use this height.
+    --shorts-player-height: max(
+      0px,
+      calc(
+        100dvh - var(--top-nav-sticky-offset) - var(--mobile-nav-height) -
+        var(--mobile-progress-bar-space) - 48px
+      )
+    ) !important;
+  }
+}
+
+:global(.capacitorPhoneLayout .videoLayout.shortsPlayerActive :is(.shortsChannelRow, .shortsSkeletonChannelRow)) {
+  display: none;
+}
+
+:global(.capacitorPhoneLayout .videoLayout.shortsPlayerActive :is(.shortsExternalTitle, .shortsSkeletonTitle)) {
+  display: none;
+}
+
+:global(.capacitorPhoneLayout .videoLayout.shortsPlayerActive .shortsExternalMetadata) {
+  padding-block: 0;
+}
+
+:global(.capacitorPhoneLayout .videoLayout.shortsPlayerActive .shortsMetadataAction) {
+  display: flex;
+}
+
+:global(.capacitorPhoneLayout .videoLayout.shortsPlayerActive .videoArea .shortsSwipeViewport),
+:global(.capacitorPhoneLayout .videoLayout.shortsPlayerActive .videoArea .videoPlayer),
+:global(.capacitorPhoneLayout .videoLayout.shortsPlayerActive .shortsExternalMetadata),
+:global(.capacitorPhoneLayout .videoLayout.shortsPlayerActive .shortsNextPreview) {
+  grid-column: 1;
+}
+
+:global(.capacitorPhoneLayout .videoLayout.shortsPlayerActive .shortsCommentsPanel),
+:global(.capacitorPhoneLayout .videoLayout.shortsPlayerActive .shortsAuxPanel) {
+  inset-inline: 0 auto;
+  box-sizing: border-box;
+  inline-size: calc(100% - 58px);
+  max-inline-size: 420px;
+}
+
+:global(.capacitorPhoneLayout .videoLayout.shortsPlayerActive .shortsAction) {
+  gap: 0;
+  max-inline-size: 44px;
+}
+
+:global(.capacitorPhoneLayout .videoLayout.shortsPlayerActive .shortsAction:not(.shortsActionSkeleton) > span),
+:global(.capacitorPhoneLayout .videoLayout.shortsPlayerActive .shortsSkeletonVolume) {
+  display: none;
+}
+
+:global(.capacitorPhoneLayout .videoLayout.shortsPlayerActive .shortsActionSkeleton > span),
+:global(.capacitorPhoneLayout .videoLayout.shortsPlayerActive .shortsSkeletonSound),
+:global(.capacitorPhoneLayout .videoLayout.shortsPlayerActive .shortsSkeletonControlGroup span) {
+  inline-size: 42px;
+  block-size: 42px;
+}
+
+:global(.capacitorPhoneLayout .videoLayout.shortsPlayerActive .shortsNavigation) {
+  gap: 8px;
+}
+
+:global(.capacitorPhoneLayout .videoLayout.shortsPlayerActive .shortsComponentAction .iconButton),
+:global(.capacitorPhoneLayout .videoLayout.shortsPlayerActive .shortsSoundThumbnail),
+:global(.capacitorPhoneLayout .videoLayout.shortsPlayerActive .shortsNavigationButton) {
+  inline-size: 42px;
+  block-size: 42px;
+}
