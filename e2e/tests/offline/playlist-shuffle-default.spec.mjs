@@ -155,6 +155,16 @@ test('switching the watch view to another user playlist loads it from the librar
   await openMockedVideo(page)
   const watch = await watchViewHandle(page)
   const panel = page.locator('.watchVideoPlaylist').filter({ visible: true })
+  // Start from a YouTube playlist with more videos than the user playlists
+  await watch.evaluate(async (vm, videos) => {
+    vm.$store.commit('setCachedPlaylist', {
+      tabId: vm.tabId ?? 'web',
+      value: { id: 'PLyoutube', title: 'YouTube mix', channelName: '', channelId: '', totalVideoCount: 100, items: videos, continuationData: null },
+    })
+    await vm.tabRouter.push({ path: `/watch/${videos[0].videoId}`, query: { playlistId: 'PLyoutube', playlistItemId: videos[0].playlistItemId } })
+  }, videos)
+  await expect(panel.locator('.playlistTitle')).toHaveText('YouTube mix')
+  await expect(panel).toContainText('94 unavailable videos are hidden')
   // Without a playlist page visit there is no cached copy, as when opening a video from History or the command palette.
   for (const playlist of [{ _id: playlistId, playlistName: 'Music mix', videos }, otherPlaylist]) {
     await watch.evaluate(async (vm, playlist) => {
@@ -163,6 +173,7 @@ test('switching the watch view to another user playlist loads it from the librar
     }, playlist)
     await expect(panel.locator('.playlistTitle')).toHaveText(playlist.playlistName)
     await expect(panel.locator('.playlistItem')).toHaveCount(playlist.videos.length)
+    await expect(panel).not.toContainText('unavailable')
   }
   await expect(page.locator('.toast', { hasText: 'API Error' })).toHaveCount(0)
   await watch.dispose()

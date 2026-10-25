@@ -1276,6 +1276,8 @@ async function getPlaylistInformationInvidious() {
 
 function parseUserPlaylist(playlist) {
   playlistTitle.value = playlist.playlistName
+  // A YouTube playlist shown before must not count this one's videos as unavailable
+  playlistTotalVideoCount.value = playlist.videos.length
   channelName.value = ''
   channelId.value = ''
 
