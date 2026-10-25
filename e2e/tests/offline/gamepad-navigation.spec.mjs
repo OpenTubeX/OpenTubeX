@@ -254,7 +254,7 @@ test('adjusts and leaves sliders and commits select options', async ({ attachScr
   await expect(select).toHaveAttribute('aria-expanded', 'false')
   await expect(select.locator('.selectedValue')).toHaveText(optionName)
 
-  const slider = playbackSettings.locator('input[type="range"]').first()
+  const slider = playbackSettings.locator('input[type="range"]:enabled').first()
   await slider.focus()
   await pressGamepadButton(page, 'primary')
   await expect(slider).toHaveAttribute('data-gamepad-active', 'true')
@@ -388,7 +388,7 @@ test.describe('configured gamepad highlight roundness', () => {
     await attachScreenshot('focused changed switch label')
 
     const playbackSettings = await goToSettingsSection(page, 'playback')
-    const slider = playbackSettings.locator('input[type="range"]').first()
+    const slider = playbackSettings.locator('input[type="range"]:enabled').first()
     await slider.focus()
     await pressGamepadButton(page, 'primary')
     await expect(slider).toHaveAttribute('data-gamepad-active', 'true')
