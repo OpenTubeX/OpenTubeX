@@ -42,6 +42,11 @@
     margin-inline-end: 0;
   }
 
+  /* The shared width already fits the caption, so let the field shrink with it. */
+  .playerSelectGrid :deep(.select.contentSized) {
+    grid-template-columns: minmax(0, 1fr) var(--select-indicator-space);
+  }
+
 }
 
 @media only screen and (width <= 680px) {
