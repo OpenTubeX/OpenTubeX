@@ -13,7 +13,7 @@ const code = (await readFile(new URL('../../src/renderer/helpers/player/ytDlpPla
   .replace(/^import .+$/gm, '')
   .replace(/^export /gm, '')
 
-function playbackLoader({ timeoutAttempts = Infinity, timeoutFormatId = '137', probeError = new DOMException('signal timed out', 'TimeoutError'), panorama = false, hlsProbeResult = () => true, incompleteAfterAttempt = Infinity, legacyProbeGate } = {}) {
+function playbackLoader({ audioSampleRate = 44_100, timeoutAttempts = Infinity, timeoutFormatId = '137', probeError = new DOMException('signal timed out', 'TimeoutError'), panorama = false, hlsProbeResult = () => true, incompleteAfterAttempt = Infinity, legacyProbeGate } = {}) {
   const extractions = []
   const saved = []
   const hlsProbes = []
@@ -37,7 +37,7 @@ function playbackLoader({ timeoutAttempts = Infinity, timeoutFormatId = '137', p
             width: format.height === null ? null : format.height * 16 / 9,
             fps: 30, dynamicRange: 'SDR', language: null,
             formatNote: panorama && format.height !== null ? 'mesh' : null,
-            audioSampleRate: 44_100, audioChannels: 2, bitrate: 100_000,
+            audioSampleRate, audioChannels: 2, bitrate: 100_000,
             url: `https://media.test/${videoId}/${format.formatId}?expire=4102444800`,
           })),
         }
@@ -85,6 +85,14 @@ for (const [kind, timeoutFormatId] of [['adaptive', '137'], ['progressive', '18'
     assert.equal(saved.length, 0)
   })
 }
+
+test('omits unknown audio sample rates from DASH manifests', async () => {
+  // ExoPlayer, used by FCast's Android receiver, rejects audioSamplingRate="NaN".
+  const { getSource } = playbackLoader({ audioSampleRate: null })
+  const manifest = decodeURIComponent((await getSource('video000001')).manifestSrc)
+  assert.match(manifest, /<AdaptationSet[^>]*contentType="audio"/)
+  assert.doesNotMatch(manifest, /NaN/)
+})
 
 test('keeps usable formats cacheable when another format is rejected without a timeout', async () => {
   const { getSource, extractions, saved } = playbackLoader({ probeError: new Error('403 Forbidden') })

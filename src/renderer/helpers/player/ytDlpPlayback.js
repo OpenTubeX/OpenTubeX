@@ -246,7 +246,7 @@ async function getExternalYtDlpPlaybackSourceFromYtDlp(url, useAuthentication) {
   const adaptiveFormats = preferredHttpFormats.filter(format => isVideoFormat(format) !== isAudioFormat(format))
   const localFormats = getCompatibleAdaptiveFormats(await convertAdaptiveFormats(adaptiveFormats, info.duration))
   if (localFormats.some(format => format.has_video) && localFormats.some(format => format.has_audio)) {
-    const manifest = await FormatUtils.toDash({ adaptive_formats: localFormats })
+    const manifest = await createDashManifest({ adaptive_formats: localFormats })
     return {
       info,
       source: {
@@ -917,7 +917,7 @@ async function loadYtDlpPlaybackSource(
       const localFormats = await convertPostLiveDvrFormats(postLiveDvrFormats, duration)
 
       if (localFormats.some(format => format.has_video) && localFormats.some(format => format.has_audio)) {
-        const manifest = await FormatUtils.toDash(
+        const manifest = await createDashManifest(
           { adaptive_formats: localFormats },
           true,
           undefined,
@@ -968,7 +968,7 @@ async function loadYtDlpPlaybackSource(
       const localFormats = getCompatibleAdaptiveFormats(await convertAdaptiveFormats(adaptiveFormats, info.duration, () => { adaptiveProbeTimedOut = true }))
 
       if (localFormats.some(format => format.has_video) && localFormats.some(format => format.has_audio)) {
-        const manifest = await FormatUtils.toDash({ adaptive_formats: localFormats })
+        const manifest = await createDashManifest({ adaptive_formats: localFormats })
         const legacyFormats = await legacyFormatsPromise
 
         const source = {
@@ -1107,4 +1107,9 @@ async function loadYtDlpPlaybackSource(
   }
 
   throw extractionError ?? new Error('yt-dlp did not return any playable formats')
+}
+
+/** youtubei.js writes NaN for yt-dlp audio formats without a sample rate, which ExoPlayer rejects. */
+async function createDashManifest(...args) {
+  return (await FormatUtils.toDash(...args)).replaceAll(' audioSamplingRate="NaN"', '')
 }
