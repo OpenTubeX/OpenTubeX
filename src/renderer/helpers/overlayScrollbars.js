@@ -537,10 +537,10 @@ export function clampOverlayScrollTop(element, contentElement = null) {
     const maximumScrollTop = getMaximumOverlayScrollTop(scrollOffsetElement, contentElement)
     // Chromium can retain native overflow after the library has already measured
     // the shorter range. Check both measurements before preserving the offset.
-    const retainedOverflow = contentElement && instance && Math.max(
+    const retainedOverflow = contentElement && instance && (Math.max(
       instance.state().overflowAmount.y,
       scrollOffsetElement.scrollHeight - scrollOffsetElement.clientHeight
-    ) > maximumScrollTop + SCROLL_BOUNDARY_TOLERANCE
+    ) > maximumScrollTop + SCROLL_BOUNDARY_TOLERANCE || hasRetainedTrackOverflow(instance, scrollOffsetElement))
     if (isScrollTopOutOfBounds(scrollOffsetElement, maximumScrollTop) || retainedOverflow ||
       Math.abs(scrollOffsetElement.scrollTop - previousScrollTop) > SCROLL_BOUNDARY_TOLERANCE) {
       if (instance) {
@@ -634,6 +634,27 @@ function getMaximumOverlayScrollTop(element, contentElement, viewportHeight = el
       contentMarginBlockEnd +
       Number.parseFloat(getComputedStyle(element).paddingBottom)
   return Math.max(0, contentEnd - viewportHeight)
+}
+
+/**
+ * Scrollbar tracks follow the offset inside the viewport, so after content
+ * shrinks at the end of the range they can keep the old range open. Rounded
+ * layout offsets can hide a retained pixel or two from the content check, so
+ * compare the native range with and without the tracks.
+ *
+ * @param {import('overlayscrollbars').OverlayScrollbars} instance
+ * @param {HTMLElement} element
+ */
+function hasRetainedTrackOverflow(instance, element) {
+  if (element.scrollTop + element.clientHeight < element.scrollHeight - SCROLL_BOUNDARY_TOLERANCE) return false
+  const { scrollbarHorizontal, scrollbarVertical } = instance.elements()
+  const scrollbars = [scrollbarHorizontal.scrollbar, scrollbarVertical.scrollbar]
+  const displays = scrollbars.map(scrollbar => scrollbar.style.display)
+  const scrollHeight = element.scrollHeight
+  scrollbars.forEach(scrollbar => { scrollbar.style.display = 'none' })
+  const contentScrollHeight = element.scrollHeight
+  scrollbars.forEach((scrollbar, index) => { scrollbar.style.display = displays[index] })
+  return contentScrollHeight < scrollHeight
 }
 
 /**

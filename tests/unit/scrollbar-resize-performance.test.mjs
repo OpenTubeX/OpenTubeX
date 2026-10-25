@@ -75,18 +75,25 @@ test('nested resize reconciliation clamps an invalid offset without viewport gro
 const clampFunction = source.slice(source.indexOf('export function clampOverlayScrollTop('), source.indexOf('/**\n * Recalculates a nested horizontal scroll'))
 const measurementFunctions = source.slice(source.indexOf('function getMaximumOverlayScrollTop('), source.indexOf('/**\n * `v-overlay-scrollbars`'))
 
-function setupClamp({ scrollTop = 211, overflow = 426, nativeOverflow = overflow, retainedTracks = false, offsetAfterUpdate = null } = {}) {
+function setupClamp({
+  scrollTop = 211, overflow = 426, nativeOverflow = overflow, retainedTracks = false, offsetAfterUpdate = null,
+  contentHeight = 773, trackOverflow = 0
+} = {}) {
   const writes = []
   let currentOffset = scrollTop
   let currentOverflow = overflow
   let currentNativeOverflow = nativeOverflow
+  let currentTrackOverflow = trackOverflow
   const element = {
     clientHeight: 598, offsetTop: 0, offsetParent: null,
-    get scrollHeight() { return this.clientHeight + currentNativeOverflow },
+    // Visible tracks positioned at the old offset can keep extra range open.
+    get scrollHeight() {
+      return this.clientHeight + currentNativeOverflow + (scrollbars.some(bar => bar.style.display !== 'none') ? currentTrackOverflow : 0)
+    },
     get scrollTop() { return currentOffset },
     set scrollTop(value) { writes.push(value); currentOffset = value }
   }
-  const content = { offsetTop: 20, offsetHeight: 773, offsetParent: element }
+  const content = { offsetTop: 20, offsetHeight: contentHeight, offsetParent: element }
   const scrollbars = [{ style: { display: '' } }, { style: { display: 'block' } }]
   const instance = {
     elements: () => ({
@@ -101,6 +108,7 @@ function setupClamp({ scrollTop = 211, overflow = 426, nativeOverflow = overflow
       }
       if (element.scrollTop === 0 && (!retainedTracks || scrollbars.every(bar => bar.style.display === 'none'))) {
         currentOverflow = currentNativeOverflow = 215
+        currentTrackOverflow = 0
       }
     },
     state: () => ({ overflowAmount: { y: currentOverflow } })
@@ -160,6 +168,16 @@ test('clamping leaves an accurate scroll range and valid offset untouched', () =
   fixture.clamp()
   assert.deepEqual(fixture.writes, [])
   assert.equal(fixture.element.scrollTop, 211)
+})
+
+test('clamping discards track overflow hidden by rounded content offsets', () => {
+  // The rounded content end allows one more pixel than the real range, and the
+  // tracks at the end of the old range hold two pixels open beyond it.
+  const fixture = setupClamp({ scrollTop: 217, overflow: 217, nativeOverflow: 215, contentHeight: 774, trackOverflow: 2 })
+  fixture.clamp()
+  assert.deepEqual(fixture.writes, [0, 215])
+  assert.equal(fixture.element.scrollHeight - fixture.element.clientHeight, 215)
+  assert.deepEqual(fixture.scrollbars.map(bar => bar.style.display), ['', 'block'])
 })
 
 test('clamping tolerates fractional range differences without resetting the origin', () => {
