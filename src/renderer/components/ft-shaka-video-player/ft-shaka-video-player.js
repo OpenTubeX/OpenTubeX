@@ -13308,9 +13308,8 @@ export default defineComponent({
       syncShortsCaptionsEnabled()
       emit('subtitles-state-updated', player.getTextTracks().some(track => track.active))
 
-      if (props.chapters.length > 0) {
-        createChapterMarkers()
-      }
+      // Chapters that arrived while the tracks above loaded already drew markers
+      refreshChapterMarkers()
       refreshAbRepeatMarkers()
 
       applyPendingPresentationModes()

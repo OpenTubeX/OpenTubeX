@@ -94,6 +94,17 @@ for (const backend of ['local', 'invidious']) {
         }))
       }
 
+      // The player finishes loading only after the storyboard request settles.
+      // Hold it until the chapters have arrived, as on a slow instance.
+      let finishStoryboard = () => {}
+      if (backend === 'invidious') {
+        const storyboardResponse = new Promise(resolve => { finishStoryboard = resolve })
+        await page.route(`${instance}/api/v1/storyboards/**`, async route => {
+          await storyboardResponse
+          await route.fulfill({ status: 404 })
+        })
+      }
+
       let finishChapters
       const chapterResponse = new Promise(resolve => { finishChapters = resolve })
       let chapterRequestPending = false
@@ -153,6 +164,13 @@ for (const backend of ['local', 'invidious']) {
         await expect.poll(() => watch.evaluate(vm => vm.videoChapters.map(chapter => chapter.title)))
           .toEqual(['Late community chapter'])
         await expect(page.locator('.chapterMarker')).toHaveCount(1)
+        if (backend === 'invidious') {
+          const storyboardFailed = page.waitForEvent('console', message => message.text().includes('addThumbnailsTrack'))
+          finishStoryboard()
+          await storyboardFailed
+          await page.evaluate(() => new Promise(resolve => requestAnimationFrame(resolve)))
+          await expect(page.locator('.chapterMarker')).toHaveCount(1)
+        }
         const chaptersButton = page.locator('.ft-chapters-button').first()
         await expect(chaptersButton).toBeVisible()
         // Chapter thumbnails download storyboard sheets, so they wait for a chapter list to open.
@@ -163,6 +181,7 @@ for (const backend of ['local', 'invidious']) {
         await watch.dispose()
       } finally {
         finishChapters()
+        finishStoryboard()
       }
     })
   })
