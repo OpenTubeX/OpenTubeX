@@ -518,6 +518,7 @@ for (const paused of [true, false]) {
       rememberInlinePlayerLayoutHeight() {},
       loadChapterThumbnails() {},
       syncShortsCaptionsEnabled() {},
+      refreshChapterMarkers() {},
       refreshAbRepeatMarkers() {},
       applyPendingPresentationModes() {},
     })

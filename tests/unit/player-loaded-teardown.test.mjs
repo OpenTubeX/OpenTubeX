@@ -49,6 +49,7 @@ function createLoad () {
     handleError() {},
     loadChapterThumbnails() { calls.push('loadChapterThumbnails') },
     syncShortsCaptionsEnabled() {},
+    refreshChapterMarkers() {},
     refreshAbRepeatMarkers() {},
     applyPendingPresentationModes() {},
   })
