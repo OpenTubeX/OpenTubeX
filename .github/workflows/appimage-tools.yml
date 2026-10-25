@@ -1,7 +1,8 @@
 name: Update AppImage tools
 
-# Dependabot cannot track the AppImage tools that release.yml downloads, so this
-# opens a PR when AppImage/appimagetool or AppImage/type2-runtime tags a new release.
+# Dependabot cannot track the AppImage tools that release.yml downloads or the
+# Anylinux build image that build.yml and release.yml run, so this opens a PR when
+# AppImage/appimagetool or AppImage/type2-runtime tags a new release or the image changes.
 # Editing a workflow needs UPSTREAM_SYNC_TOKEN's Workflows write access.
 on:
   schedule:
@@ -70,6 +71,24 @@ jobs:
           update AppImage/appimagetool appimagetool-x86_64.AppImage:appimagetool.AppImage
           update AppImage/type2-runtime runtime-x86_64:runtime runtime-armhf:runtime-armhf
 
+          image=ghcr.io/pkgforge-dev/archlinux:latest
+          images=(.github/workflows/build.yml "$file")
+          if grep -nP "${image//./\\.}(?!@sha256:[0-9a-f]{64}(?=\s|$))" "${images[@]}"; then
+            echo "::error::Pin every $image reference above by digest."
+            exit 1
+          fi
+          current=$(grep -ohP "${image//./\\.}@sha256:\K[0-9a-f]{64}" "${images[@]}" | sort -u)
+          latest=$(docker buildx imagetools inspect "$image" --format '{{.Manifest.Digest}}')
+          latest=${latest#sha256:}
+          if [[ ! "$current" =~ ^[0-9a-f]{64}$ || ! "$latest" =~ ^[0-9a-f]{64}$ ]]; then
+            echo "::error::Cannot update $image from ${current:-nothing} to ${latest:-nothing}."
+            exit 1
+          fi
+          if [[ "$current" != "$latest" ]]; then
+            sed -i "s|$image@sha256:$current|$image@sha256:$latest|g" "${images[@]}"
+            echo "- \`$image\` digest \`${latest:0:12}\` (from \`${current:0:12}\`)" >> "$RUNNER_TEMP/changes.md"
+          fi
+
           if [[ -f "$RUNNER_TEMP/changes.md" ]]; then
             {
               echo 'changes<<EOF'
@@ -100,8 +119,8 @@ jobs:
           commit-message: "ci(release): update AppImage tools"
           title: "ci(release): update AppImage tools"
           body: |
-            Updates the AppImage tools pinned in `release.yml` for the ARMv7l AppImage:
+            Updates the pinned AppImage tools in `release.yml` (ARMv7l) and the Anylinux build image in `build.yml` and `release.yml`:
 
             ${{ steps.update.outputs.changes }}
 
-            The checksums come from the digests GitHub records for the release assets.
+            The tool checksums come from the digests GitHub records for the release assets, and the image digest from its registry manifest.
