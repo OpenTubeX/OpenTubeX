@@ -411,6 +411,7 @@ const seekCount = ref(0)
 const seeking = ref(false)
 const chatOpen = ref(true)
 const useTheatreMode = ref(false)
+let theatreModeToggledManually = false
 let theatreModeAnimations = []
 const windowWidth = ref(window.innerWidth)
 const fullscreenLiveChatOpen = ref(false)
@@ -448,9 +449,10 @@ const chaptersPanelOpen = computed(() => Boolean(source.value && chapters.value.
 const hasSidebar = computed(() => Boolean(chatAvailable.value && chatOpen.value) || chaptersPanelOpen.value)
 const theatreTogglePossible = computed(() => windowWidth.value > 1350 && hasSidebar.value)
 // Like on the watch page, with theatre as the default, the first panel opened
-// on media without a sidebar appears below the video instead of beside it.
+// on media without a sidebar appears below the video instead of beside it,
+// unless the user has chosen a layout.
 watch(hasSidebar, (has, had) => {
-  if (has && !had && !loading.value && theatreTogglePossible.value &&
+  if (has && !had && !loading.value && theatreTogglePossible.value && !theatreModeToggledManually &&
     store.getters.getDefaultViewingMode === 'theatre') useTheatreMode.value = true
 })
 
@@ -459,6 +461,7 @@ function handleChaptersOverlayChange(open) {
 }
 
 async function toggleTheatreMode() {
+  theatreModeToggledManually = true
   const elements = Array.from(videoLayout.value?.querySelectorAll('.externalMediaPlayer, .externalMediaInfo, .externalMediaSidebar') ?? [])
   const reducedMotion = isReducedMotionEnabled()
   const previousRects = reducedMotion ? [] : elements.map(element => element.getBoundingClientRect())
@@ -853,6 +856,7 @@ async function loadMedia(url, useCookies = store.getters.getYtDlpPlaybackAlwaysU
   seeking.value = false
   chatOpen.value = true
   useTheatreMode.value = store.getters.getDefaultViewingMode === 'theatre'
+  theatreModeToggledManually = false
   fullscreenLiveChatOpen.value = false
   fullscreenLiveChatTarget.value = null
   setTabTitle(hostname.value || 'Watch')
