@@ -90,6 +90,7 @@ function createRefresh({ online = true, feed = 'Shorts', error = new TypeError('
     isAndroidSubscriptionRefreshActive: async () => false,
     finishAndroidSubscriptionRefresh: finishNative,
     includeAutomaticDownloadChannels: channels => channels,
+    includeNotificationChannels: channels => channels,
     startAutomaticDownloadsForChannel: async () => {},
     reportSubscriptionUploads: () => {},
     getChannelPlaylistId: id => id,

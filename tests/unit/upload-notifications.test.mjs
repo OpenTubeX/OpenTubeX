@@ -319,3 +319,23 @@ test('the renderer reports only feeds with notifications turned on', async () =>
   context.reportSubscriptionUploads('UCa', 'videos', [])
   assert.deepEqual(reported, ['UCa/videos'])
 })
+
+test('refreshes of another profile also fetch channels with notifications turned on', async () => {
+  const source = await readFile(new URL('../../src/renderer/helpers/uploadNotifications.js', import.meta.url), 'utf8')
+  const alpha = { id: 'UCa' }
+  const beta = { id: 'UCb' }
+  const gamma = { id: 'UCc' }
+  const context = vm.createContext({
+    process: { env: { IS_ELECTRON: true } },
+    store: { getters: { getEnableUploadNotifications: true, getProfileList: [{ subscriptions: [alpha, beta, gamma] }] } },
+    window: { ftElectron: { subscriptionAutoRefresh: { configureUploadNotifications: async () => {} } } },
+  })
+  vm.runInContext(source.replace(/^import .*\n/gm, '').replace(/^export /gm, ''), context)
+  const fetched = (subscriptions, feedType) => Array.from(context.includeNotificationChannels(subscriptions, feedType), channel => channel.id)
+  assert.deepEqual(fetched([alpha], 'videos'), ['UCa'])
+  await context.configureUploadNotifications({ enabled: true, channels: { UCa: { feedTypes: ['videos'] }, UCb: { feedTypes: ['videos'] }, UCc: { feedTypes: ['posts'] } } })
+  assert.deepEqual(fetched([alpha], 'videos'), ['UCa', 'UCb'])
+  assert.deepEqual(fetched([], 'posts'), ['UCc'])
+  context.store.getters.getEnableUploadNotifications = false
+  assert.deepEqual(fetched([alpha], 'videos'), ['UCa'])
+})
