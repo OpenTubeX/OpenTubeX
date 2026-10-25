@@ -35,7 +35,7 @@ adb -s DEVICE_SERIAL shell am start --user 0 \
   -n org.opentubex.app.dev/org.opentubex.app.MainActivity
 ```
 
-Release builds require the private OpenTubeX Android release key. Gradle refuses to run a release task unless both environment variables are present:
+Signed release builds require the private OpenTubeX Android release key. Gradle refuses to run a release task unless both environment variables are present, or `-PunsignedRelease` requests an unsigned APK, as F-Droid's rebuild does:
 
 - `ANDROID_RELEASE_KEYSTORE`: absolute path to the private keystore
 - `ANDROID_RELEASE_STORE_PASSWORD`: keystore password

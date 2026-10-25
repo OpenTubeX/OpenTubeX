@@ -198,7 +198,7 @@ android {
                 resValue "string", "app_name", "OpenTubeX Lite"
                 resValue "string", "title_activity_main", "OpenTubeX Lite"
             }
-            if (releaseSigningConfigured) {
+            if (releaseSigningConfigured && !unsignedRelease) {
                 signingConfig signingConfigs.production
             }
         }
