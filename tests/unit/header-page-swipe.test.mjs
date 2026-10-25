@@ -4,8 +4,8 @@ import { test } from 'node:test'
 import vm from 'node:vm'
 import { findSwipeTab, shouldFinishPageSwipe } from '../../src/renderer/helpers/capacitorPageSwipe.js'
 
-const source = readFileSync(new URL('../../src/renderer/App.vue', import.meta.url), 'utf8')
-const handlers = source.slice(source.indexOf('const pageSwipe ='), source.indexOf('/** @type', source.indexOf('const pageSwipe =')))
+const source = readFileSync(new URL('../../src/renderer/app/usePageSwipe.js', import.meta.url), 'utf8')
+const handlers = source.slice(source.indexOf('const pageSwipe ='), source.indexOf('\n  return {', source.indexOf('const pageSwipe =')))
 
 function headerGesture(targetSelector = 'button') {
   const captures = []

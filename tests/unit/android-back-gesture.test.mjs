@@ -5,11 +5,11 @@ import vm from 'node:vm'
 import { nextTick, ref, watch } from 'vue'
 import { createAndroidBackGestureHandler, getAndroidBackPlayer, registerAndroidBackPlayer, settleAndroidBackAnimation } from '../../src/renderer/helpers/androidBackGesture.js'
 
-const appSource = readFileSync(new URL('../../src/renderer/App.vue', import.meta.url), 'utf8')
+const appSource = readFileSync(new URL('../../src/renderer/app/useAndroidBack.js', import.meta.url), 'utf8')
 const dialogSource = readFileSync(new URL('../../src/renderer/helpers/androidBackDialog.js', import.meta.url), 'utf8')
   .replace(/^import .*$/gm, '').replace(/^export /gm, '')
 
-/** Evaluates App.vue's preview selection, including its helpers, with test globals. */
+/** Evaluates the Android Back preview selection, including its helpers, with test globals. */
 function loadPreviewSelection(context) {
   const start = appSource.indexOf('function isSideNavShown()')
   const createAndroidBackDialogPreview = vm.runInNewContext(`${dialogSource}; createAndroidBackDialogPreview`, {
@@ -17,7 +17,7 @@ function loadPreviewSelection(context) {
     isReducedMotionEnabled: () => false, requestAnimationFrame: context.requestAnimationFrame,
     getComputedStyle: () => ({ inlineSize: '200px' }),
   })
-  return vm.runInNewContext(`${appSource.slice(start, appSource.indexOf('\nfunction handleAndroidPictureInPictureChange', start))}\ngetAndroidBackPreview`, {
+  return vm.runInNewContext(`${appSource.slice(start, appSource.indexOf('\n  return {', start))}\ngetAndroidBackPreview`, {
     mobileContextLink: { value: null }, mobileContextActions: { value: null }, createAndroidBackDialogPreview,
     isAnyPromptOpen: { value: false }, settingsWindowOpen: { value: false },
     getComputedStyle: () => ({ inlineSize: '200px' }), ...context,
@@ -148,7 +148,7 @@ test('root allows the system preview only when no confirmation, history, fullscr
   let layerVisible = false
   const refs = Object.fromEntries(['isSideNavOpen', 'settingsWindowOpen', 'isAnyPromptOpen', 'mobileContextLink', 'mobileContextActions']
     .map(name => [name, { value: null }]))
-  const shouldIntercept = vm.runInNewContext(`${source.slice(start, source.indexOf('\n/** @param {Element} target */', start))}\nshouldInterceptAndroidBack`, {
+  const shouldIntercept = vm.runInNewContext(`${source.slice(start, source.indexOf('\n  /** @param {Element} target */', start))}\nshouldInterceptAndroidBack`, {
     store: { getters }, presentedTabId: { value: 'one' }, document, window: { matchMedia: () => ({ matches: wide }) },
     hasVisibleGamepadLayer: () => layerVisible, ...refs
   })

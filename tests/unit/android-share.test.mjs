@@ -76,8 +76,8 @@ for (const [type, youtubePath, invidiousPath] of [
 }
 
 test('long-press sharing captures the public URL before dismissing the menu', async () => {
-  const app = readFileSync(new URL('../../src/renderer/App.vue', import.meta.url), 'utf8')
-  const handler = app.match(/async function shareMobileContextLink\(\) \{[\s\S]*?\n\}/)[0]
+  const app = readFileSync(new URL('../../src/renderer/app/useMobileContextMenu.js', import.meta.url), 'utf8')
+  const handler = app.match(/async function shareMobileContextLink\(\) \{[\s\S]*?\n {2}\}/)[0]
   const calls = []
   const url = ref('https://youtu.be/video123?t=42')
   const run = new Function('mobileContextLinkCopyUrl', 'closeMobileLinkActions', 'shareLink', `${handler}\nreturn shareMobileContextLink`)(

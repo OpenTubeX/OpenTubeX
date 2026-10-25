@@ -5,7 +5,7 @@ import vm from 'node:vm'
 
 import { fillYatteeShortDates } from '../../src/renderer/helpers/api/yattee.js'
 
-const source = readFileSync(new URL('../../src/renderer/App.vue', import.meta.url), 'utf8')
+const source = readFileSync(new URL('../../src/renderer/app/useSubscriptionAutoRefresh.js', import.meta.url), 'utf8')
 function section(start, end) {
   let offset = source.indexOf(start)
   if (source.slice(offset - 6, offset) === 'async ') offset -= 6
@@ -67,7 +67,7 @@ test('an imported background completion prevents an unnecessary foreground refre
     getSubscriptionTabRefreshHandler: () => async () => { calls.push('refresh'); return [] },
     t: value => value
   })
-  vm.runInContext(section('async function processPendingSubscriptionAutoRefreshes', '/**\n * @param {\'videos\' | \'shorts\' | \'live\' | \'posts\'} tab\n * @param {string} profileId\n */\nfunction scheduleSubscriptionTabAutoRefreshLockRetry'), context)
+  vm.runInContext(section('async function processPendingSubscriptionAutoRefreshes', '/**\n   * @param {\'videos\' | \'shorts\' | \'live\' | \'posts\'} tab\n   * @param {string} profileId\n   */\n  function scheduleSubscriptionTabAutoRefreshLockRetry'), context)
   await context.processPendingSubscriptionAutoRefreshes()
   assert.deepEqual(calls, ['schedule'])
 })

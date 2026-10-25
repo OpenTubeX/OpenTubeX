@@ -3,8 +3,8 @@ import { readFileSync } from 'node:fs'
 import test from 'node:test'
 import vm from 'node:vm'
 
-const source = readFileSync(new URL('../../src/renderer/App.vue', import.meta.url), 'utf8')
-const handlers = source.slice(source.indexOf('function handleKeyboardShortcutKeyup('), source.indexOf('async function prepareAndReloadTab('))
+const source = readFileSync(new URL('../../src/renderer/app/useTabSwitcher.js', import.meta.url), 'utf8')
+const handlers = source.slice(source.indexOf('function handleKeyboardShortcutKeyup('), source.indexOf('\n  return {', source.indexOf('function handleKeyboardShortcutKeyup(')))
 
 function createSwitcher() {
   const timers = new Map()
@@ -35,7 +35,7 @@ function createSwitcher() {
     clearTimeout: id => timers.delete(id)
   }
   const api = vm.runInNewContext(`
-    ${source.slice(source.indexOf('let tabSwitcherPreviewRequestId'), source.indexOf('let findbarMatches'))}
+    ${source.slice(source.indexOf('let tabSwitcherPreviewRequestId'), source.indexOf('const tabSwitcherTabs'))}
     ${handlers}
     ;({ cycleTabSwitcher, cancelTabSwitcher, handleKeyboardShortcutKeyup })`, context)
   return {

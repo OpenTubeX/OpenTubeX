@@ -3,9 +3,9 @@ import { readFileSync } from 'node:fs'
 import test from 'node:test'
 import vm from 'node:vm'
 
-const app = readFileSync(new URL('../../src/renderer/App.vue', import.meta.url), 'utf8')
+const app = readFileSync(new URL('../../src/renderer/app/useAndroidBack.js', import.meta.url), 'utf8')
 const start = app.indexOf('function getAndroidBackTarget() {')
-const source = app.slice(start, app.indexOf('\nasync function handleAndroidBack()', start))
+const source = app.slice(start, app.indexOf('\n  async function handleAndroidBack()', start))
 
 for (const focusedInsideOverview of [false, true]) {
   test(`Android Back prioritizes the tab overview and preserves ${focusedInsideOverview ? 'nested action focus' : 'background search'}`, () => {

@@ -5,13 +5,13 @@ import vm from 'node:vm'
 import { nextTick, ref, watch } from 'vue'
 import { settleAndroidBackAnimation } from '../../src/renderer/helpers/androidBackGesture.js'
 
-const appSource = readFileSync(new URL('../../src/renderer/App.vue', import.meta.url), 'utf8')
+const appSource = readFileSync(new URL('../../src/renderer/app/useAndroidBack.js', import.meta.url), 'utf8')
 const sheetSource = readFileSync(new URL('../../src/renderer/composables/useBottomSheetDismiss.js', import.meta.url), 'utf8')
   .replace(/^import .*$/gm, '').replace(/^export /gm, '')
 
 function appFunction(name, context = {}) {
   const start = appSource.indexOf(`function ${name}(`)
-  const end = appSource.indexOf('\n}\n', start) + 2
+  const end = appSource.indexOf('\n  }\n', start) + 4
   return vm.runInNewContext(`${appSource.slice(start, end)}\n${name}`, context)
 }
 

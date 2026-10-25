@@ -5,8 +5,8 @@ import test from 'node:test'
 import { classifyRequestFailure } from '../../src/renderer/helpers/api/requestDiagnostics.js'
 import { createNetworkRecovery } from '../../src/renderer/helpers/networkRecovery.js'
 
-const source = await readFile(new URL('../../src/renderer/App.vue', import.meta.url), 'utf8')
-const initializeSource = source.slice(source.indexOf('async function initializeManagedExternalSoftware('), source.indexOf('/**\n * Checks installed managed tools'))
+const source = await readFile(new URL('../../src/renderer/app/useManagedExternalSoftware.js', import.meta.url), 'utf8')
+const initializeSource = source.slice(source.indexOf('async function initializeManagedExternalSoftware('), source.indexOf('/**\n   * Checks installed managed tools'))
 const flush = async () => { for (let i = 0; i < 100; i++) await Promise.resolve() }
 
 function setup(t, online, checkInternet) {

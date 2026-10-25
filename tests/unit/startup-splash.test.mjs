@@ -195,8 +195,8 @@ test('mobile appearance cache preserves colors and the visibility preference', (
 })
 
 test('saving edits to selected custom themes refreshes both mobile splash appearances', async t => {
-  const source = await readFile(new URL('../../src/renderer/App.vue', import.meta.url), 'utf8')
-  const watchers = source.slice(source.indexOf('watch(baseTheme, updateTheme)'), source.indexOf('const secColor ='))
+  const source = await readFile(new URL('../../src/renderer/app/useAppearance.js', import.meta.url), 'utf8')
+  const watchers = source.slice(source.indexOf('watch(() => store.getters.getMaterialSeedColor, updateTheme)'), source.indexOf('const uiRoundness ='))
   const cache = source.slice(source.indexOf('function cacheCapacitorStartupAppearance()'), source.indexOf('function updateSystemBarsStyle()'))
   for (const selection of ['custom:paper', 'system']) {
     const getters = reactive({
@@ -208,7 +208,7 @@ test('saving edits to selected custom themes refreshes both mobile splash appear
     const scope = effectScope()
     t.after(() => scope.stop())
     scope.run(() => vm.runInNewContext(`${cache}\n${watchers}\ncacheCapacitorStartupAppearance()`, {
-      isCapacitor: true, appearanceSettingsReady: true,
+      isCapacitor: true, isAppearanceSettingsReady: () => true,
       store: { getters }, baseTheme: computed(() => getters.getBaseTheme),
       appFont: ref('default'), updateAppFont: () => {},
       computed, watch, getThemeBackground, calculateColorLuminance: () => '#000000',
@@ -228,7 +228,7 @@ test('saving edits to selected custom themes refreshes both mobile splash appear
 
 test('Capacitor waits for data, tab presentation, and route content before revealing', async () => {
   const source = await readFile(new URL('../../src/renderer/App.vue', import.meta.url), 'utf8')
-  const watcher = source.slice(source.indexOf('const STARTUP_PRELOAD_TIMEOUT_MS'), source.indexOf('watch(presentedTabId, async'))
+  const watcher = source.slice(source.indexOf('const STARTUP_PRELOAD_TIMEOUT_MS'), source.indexOf('watch(historyRetentionDays, scheduleHistoryCleanup)'))
   let callback
   let reveals = 0
   let releaseRoute

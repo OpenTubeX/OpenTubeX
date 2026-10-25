@@ -4,8 +4,9 @@ import test from 'node:test'
 import vm from 'node:vm'
 
 const source = await readFile(new URL('../../src/renderer/App.vue', import.meta.url), 'utf8')
-const start = source.indexOf('function updateSystemBarsStyle() {')
-const updateSource = source.slice(start, source.indexOf('\nfunction updateAppFont', start))
+const appearanceSource = await readFile(new URL('../../src/renderer/app/useAppearance.js', import.meta.url), 'utf8')
+const start = appearanceSource.indexOf('function updateSystemBarsStyle() {')
+const updateSource = appearanceSource.slice(start, appearanceSource.indexOf('\n  function updateAppFont', start))
 
 test('Android keeps its native startup surface while temporary settings load', () => {
   const start = source.indexOf('function updateTheme() {')

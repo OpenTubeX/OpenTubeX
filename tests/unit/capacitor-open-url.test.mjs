@@ -3,9 +3,9 @@ import { readFileSync } from 'node:fs'
 import test from 'node:test'
 import vm from 'node:vm'
 
-const app = readFileSync('src/renderer/App.vue', 'utf8')
-const start = app.indexOf('  const openUrl = async url => {', app.indexOf('async function enableCapacitorIntegrations()'))
-const fragment = app.slice(start, app.indexOf('  const backButtonHandle', start))
+const app = readFileSync('src/renderer/app/useCapacitorIntegrations.js', 'utf8')
+const start = app.indexOf('    const openUrl = async url => {', app.indexOf('async function enableCapacitorIntegrations()'))
+const fragment = app.slice(start, app.indexOf('    const backButtonHandle', start))
 
 for (const [input, expected] of [
   ['opentubex://https://www.youtube.com/watch?v=test', 'https://www.youtube.com/watch?v=test'],

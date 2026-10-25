@@ -35,9 +35,9 @@ test('unknown shortcut IDs cannot navigate to arbitrary routes', () => {
 })
 
 test('retained startup clicks and running-app clicks navigate and update localized shortcuts', async () => {
-  const source = await readFile(new URL('../../src/renderer/App.vue', import.meta.url), 'utf8')
+  const source = await readFile(new URL('../../src/renderer/app/useCapacitorIntegrations.js', import.meta.url), 'utf8')
   const start = source.indexOf('async function enableCapacitorIntegrations() {')
-  const integration = source.slice(start, source.indexOf('\nconst windowTitle', start))
+  const integration = source.slice(start, source.indexOf('\n  return {', start))
   const listeners = new Map()
   const paths = []
   const youtubeLinks = []

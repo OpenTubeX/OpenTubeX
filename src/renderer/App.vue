@@ -582,7 +582,6 @@
 </template>
 
 <script setup>
-import { useBottomSheetDismiss } from './composables/useBottomSheetDismiss'
 import { installIosContextMenu } from './helpers/iosContextMenu'
 import '@fontsource-variable/geist'
 import '@fontsource-variable/google-sans'
@@ -596,22 +595,23 @@ import FtRetryImage from './components/FtRetryImage.vue'
 import { initializeCapacitorYtDlp, ytDlp } from './helpers/ytDlp'
 import { playDownloadedFile, refreshDownloadRecords } from './helpers/downloadPlayback'
 import { supportsYtDlp } from './helpers/ytDlpCapabilities'
-import { parseAutomaticDownloadRules } from './helpers/automaticDownloadRules'
-import { isAppHidden, setAndroidAppActive, setAndroidAppVisible } from './helpers/appVisibility.js'
 import { initializeShimmerVisibility } from './helpers/shimmerVisibility.js'
-import { createAppShortcuts, getAppShortcutPath } from './helpers/appShortcuts'
-import { getHomeWidgetPage } from './helpers/homeWidgetData'
-import { syncContinueWatchingWidget } from './helpers/homeWidgets'
-import { AppShortcuts } from '@capawesome/capacitor-app-shortcuts'
-import { playbackScreenWake } from './helpers/playbackScreenWake'
 import { FtIcon } from '@opentubex/icons'
-import { App as CapacitorApp } from '@capacitor/app'
-import { Capacitor, SystemBars, SystemBarsStyle } from '@capacitor/core'
-import { clampOverlayScrollTop, restoreOverlayScrollTop } from './helpers/overlayScrollbars'
-import { computed, defineAsyncComponent, nextTick, onBeforeUnmount, onMounted, provide, ref, shallowRef, unref, useId, useTemplateRef, watch } from 'vue'
+import { Capacitor } from '@capacitor/core'
+import { computed, defineAsyncComponent, nextTick, onBeforeUnmount, onMounted, provide, ref, useTemplateRef, watch } from 'vue'
 import { useScrollClamp } from './composables/useScrollClamp'
 import { usePhoneLayout } from './composables/usePhoneLayout'
 import { useTitleBarOverlay } from './composables/useTitleBarOverlay'
+import { useAndroidBack } from './app/useAndroidBack'
+import { useAppearance } from './app/useAppearance'
+import { useCapacitorIntegrations } from './app/useCapacitorIntegrations'
+import { useFindbar } from './app/useFindbar'
+import { useManagedExternalSoftware } from './app/useManagedExternalSoftware'
+import { useMobileContextMenu } from './app/useMobileContextMenu'
+import { useMultipleTabsActionConfirmation } from './app/useMultipleTabsActionConfirmation'
+import { usePageSwipe } from './app/usePageSwipe'
+import { useSubscriptionAutoRefresh } from './app/useSubscriptionAutoRefresh'
+import { useTabSwitcher } from './app/useTabSwitcher'
 import { useI18n } from 'vue-i18n'
 import { routerKey, useRoute, useRouter } from 'vue-router'
 
@@ -625,29 +625,21 @@ import TabContent from './components/TabContent/TabContent.vue'
 import FtPrompt from './components/FtPrompt/FtPrompt.vue'
 import SharedYoutubeLinkPrompt from './components/SharedYoutubeLinkPrompt/SharedYoutubeLinkPrompt.vue'
 import { initializeAndroidIncomingShare } from './helpers/androidIncomingShare'
-import { extractSharedYoutubeLink } from './helpers/sharedYoutubeLink'
 import SubscriptionRefreshErrors from './components/SubscriptionRefreshErrors.vue'
 import FtButton from './components/FtButton/FtButton.vue'
 import FtToast from './components/FtToast/FtToast.vue'
 import { initializeNetworkRecovery } from './helpers/networkRecovery'
 import FtProgressBar from './components/FtProgressBar/FtProgressBar.vue'
 import FtContextMenu from './components/FtContextMenu/FtContextMenu.vue'
-import { lockBodyScroll, unlockBodyScroll } from './components/FtPrompt/scrollLock'
 import { vSaferHtml } from './directives/vSaferHtml.js'
 
 import store from './store/index'
-import { MATERIAL_SYSTEM_SEED, MATERIAL_THEME_VALUES, normalizeSystemAccentColor } from '../materialTheme.js'
-import { androidDynamicColors, desktopSystemAccentColor, getAndroidDynamicColors, onAndroidDynamicColorsChanged } from './helpers/dynamicColors'
 import {
-  exitAndroidApp,
   getAndroidHardwareKeyboardState,
-  isAndroidLauncherReturnInProgress,
-  setAndroidPictureInPictureDocumentState,
-  setAndroidSystemBarsBackground
+  setAndroidPictureInPictureDocumentState
 } from './helpers/androidUi'
 import {
   applyThemeToDocument,
-  getThemeBackground,
   handleCustomThemeUpdated,
   loadCustomThemes,
 } from './helpers/customTheme'
@@ -655,92 +647,25 @@ import { repairSystemThemeSettings } from './helpers/customThemeSync'
 
 import packageDetails from '../../package.json'
 import { MULTIPLE_TABS_CONFIRM_THRESHOLD, KeyboardShortcuts } from '../constants'
-import { updateTrayIcon } from './helpers/trayIcon'
-import { resolveBaseTheme, resolveSystemThemeSettings } from '../appearanceSettings'
-import { calculateColorLuminance, resolveColor } from './helpers/colors'
 import { matchesKeyboardShortcut } from './helpers/keyboardShortcuts'
 import { hasVisibleGamepadLayer, initializeGamepadNavigation } from './helpers/gamepadNavigation'
-import { initializeAndroidBack } from './helpers/androidBack'
-import { getAndroidBackPlayer, getAndroidBackSheet } from './helpers/androidBackGesture'
-import { createAndroidBackDialogPreview } from './helpers/androidBackDialog'
-import { getSettingsWindowIconButton, getUtilityWindowCloseKeyframes, getUtilityWindowMorphHooks } from './helpers/utilityWindowMorph'
+import { getUtilityWindowMorphHooks } from './helpers/utilityWindowMorph'
 import { keyboardEventInitFromShortcut, OPEN_COMMAND_PALETTE_EVENT } from './helpers/commandPalette'
 import { createCommandPaletteRegistry } from './helpers/commandPaletteRegistry'
 import {
   resolveExternalLinkAction,
   resolveMobileContextLinkCopyUrl,
 } from './helpers/mobileLinkActions'
-import { startProgressBarOperation } from './helpers/progressBar'
 import { initializePlatformInfo, isLinuxWayland, supportsAutoPictureInPictureMinimize } from './helpers/platform'
-import { cacheStartupAppearance, revealStartupSplash } from './helpers/startupSplash'
+import { revealStartupSplash } from './helpers/startupSplash'
 import { mirrorAppState } from './helpers/rootClasses'
-import {
-  shouldShowProgressStartToast,
-  shouldUseProgressToast,
-} from './helpers/progressPresentation'
+import { shouldUseProgressToast } from './helpers/progressPresentation'
 import { fetchReleasePages, findUpdateReleases, formatReleaseChangelog } from './helpers/releaseUpdates'
-import { copyToClipboard, getInvidiousApiErrorMessage, isUnloadedBackgroundTabClick, openExternalLink, openInternalPath, shareLink, showApiErrorToast, showToast } from './helpers/utils'
-import { getChannelLinkDetails, getChannelLinkMenuItems } from './helpers/channel-context-menu'
-import { openNotificationSettings } from './helpers/capacitorUi'
-import { initializeCapacitorLiveReminderActions } from './helpers/liveReminders'
-import {
-  addAndroidMediaSessionActionListener,
-  shouldPauseAndroidPlaybackOnAppStateChange,
-} from './helpers/androidMediaSession'
-import {
-  acknowledgeAndroidSubscriptionRefreshResult,
-  addAndroidSubscriptionRefreshCancelledListener,
-  configureAndroidSubscriptionRefresh,
-  getAndroidSubscriptionRefreshState,
-  getNextAndroidSubscriptionRefreshResult,
-  requestAndroidSubscriptionRefreshNotificationPermission,
-  startAndroidSubscriptionRefresh,
-  updateAndroidSubscriptionRefresh
-} from './helpers/androidSubscriptionRefresh'
-import { configureUploadNotifications } from './helpers/uploadNotifications'
-import { createUploadNotificationConfiguration } from '../newUploadNotifications'
-import {
-  AndroidSubscriptionRefreshPayloadError,
-  createAndroidSubscriptionRefreshConfiguration,
-  createSubscriptionRefreshStartGuard,
-  normalizeAndroidSubscriptionRefreshPayload,
-  processAndroidSubscriptionRefreshChannelResult
-} from './helpers/androidSubscriptionRefreshData'
-import { hasConfiguredRestrictedPlaybackAuthentication, shouldHideMembersOnlyContent } from './helpers/restricted-playback'
-import { normalizeLocalSubscriptionFeed } from './helpers/api/local'
-import { invidiousGetVideoInformation, normalizeInvidiousSubscriptionFeed } from './helpers/api/invidious'
-import { fillYatteeShortDates } from './helpers/api/yattee'
-import { classifyRequestFailure, formatRequestDiagnostic } from './helpers/api/requestDiagnostics'
-import { reconcileFetchedSubscriptionEntries } from './helpers/subscription-entries'
-import { parseSubscriptionRss } from './helpers/api/feed-rss'
-import {
-  enrichSubscriptionRssEntries,
-  enrichSubscriptionShortDates,
-  cancelSubscriptionRefresh,
-  notifySubscriptionChannelRefreshed,
-  refreshSubscriptionLiveFromRemote,
-  refreshSubscriptionPostsFromRemote,
-  refreshSubscriptionShortsFromRemote,
-  refreshSubscriptionVideosFromRemote,
-  SUBSCRIPTION_REFRESH_CANCEL_STORAGE_KEY,
-  SUBSCRIPTION_REFRESH_CANCELLED_EVENT,
-  SUBSCRIPTION_REFRESH_COMPLETED_EVENT,
-  SUBSCRIPTION_REFRESH_FINISHED_EVENT,
-  SUBSCRIPTION_REFRESH_LOCK_NAME,
-  SUBSCRIPTION_REFRESH_PROGRESS_EVENT,
-  SUBSCRIPTION_REFRESH_STARTED_EVENT
-} from './helpers/subscriptions'
+import { copyToClipboard, isUnloadedBackgroundTabClick, openExternalLink, openInternalPath, showToast } from './helpers/utils'
 import { translateWindowTitle } from './helpers/strings'
 import { formatTabTitle } from './tabs/tabTitle'
-import { normalizeScrollbarThumbWidth } from './constants/scrollbar'
-import { getAppFontFamily } from './helpers/appFont'
 import { canMarkHistoryEntryAsWatched } from './helpers/history'
-import { setupPhoneViewport } from './helpers/phoneViewport'
-import { createCapacitorUiScale } from './helpers/capacitorUiScale'
 import { usesCapacitorTabletLayout } from './helpers/capacitorLayout'
-import { findSwipeTab, shouldFinishPageSwipe } from './helpers/capacitorPageSwipe'
-import { getTabAccentColor } from './constants/tabColors'
-import { getThumbnailListStyles } from './constants/thumbnailSize'
 import {
   getNextTabBarPosition,
   isVerticalTabBarPosition,
@@ -759,8 +684,7 @@ import { getTabNavigationService } from './tabs/TabNavigationService'
 import { initializeCapacitorTabPreviews } from './tabs/capacitorTabPreviews'
 import { initializeCapacitorTabService } from './tabs/CapacitorTabService'
 import { tabMediaCoordinator } from './tabs/TabMediaCoordinator'
-import { tabRuntimeRegistry } from './tabs/TabRuntimeRegistry'
-import { getTabAvatarUrl, getTabPageIcon, getTabPreviewFallbackUrl } from './tabs/tabPreview'
+import { getTabPageIcon } from './tabs/tabPreview'
 import { preloadResolvedRoute, preloadUtilityRoutes } from './router/index'
 import { installRoutePreloadIntent } from './helpers/routePreloadIntent'
 import { getTabsKeptLoaded } from './tabs/TabResidency'
@@ -800,191 +724,6 @@ const tabContainers = computed(() => {
 const activeTabId = computed(() => store.getters.getActiveTabId)
 const presentedTabId = computed(() => store.getters.getPresentedTabId)
 const selectionRevision = computed(() => store.state.tabs.selectionRevision)
-const pageSwipeNeighborIds = computed(() => {
-  if (!isCapacitor || activeTabId.value !== presentedTabId.value) return []
-  return [-1, 1]
-    .map(direction => findSwipeTab(store.getters.getTabs, presentedTabId.value, direction)?.id)
-    .filter(Boolean)
-})
-
-const topNav = useTemplateRef('topNav')
-const organizerSwipeActive = ref(false)
-const pageSwipe = shallowRef(null)
-let pageSwipePointer = null
-let pageSwipeClickPointerId = null
-let pageSwipeClickTimeout = null
-
-function clearPageSwipeClick() {
-  window.clearTimeout(pageSwipeClickTimeout)
-  pageSwipeClickTimeout = null
-  pageSwipeClickPointerId = null
-}
-
-function startPageSwipe(event) {
-  if (event.isPrimary) clearPageSwipeClick()
-  if (!isCapacitor || event.pointerType !== 'touch' || !event.isPrimary ||
-      pageSwipe.value || organizerSwipeActive.value || isAnyPromptOpen.value ||
-      activeTabId.value !== presentedTabId.value ||
-      !event.target.closest('.topNavInner') ||
-      event.target.closest('input, textarea, select, [contenteditable], [role="dialog"], [role="menu"], .dropdownLayer, .ft-input-component .options')) return
-
-  const width = document.querySelector('.app > .routerView')?.getBoundingClientRect().width
-  if (!width) return
-  pageSwipePointer = {
-    id: event.pointerId,
-    fromId: presentedTabId.value,
-    x: event.clientX,
-    y: event.clientY,
-    time: event.timeStamp,
-    width,
-    dragging: false,
-    cancelled: false
-  }
-}
-
-function movePageSwipe(event) {
-  const pointer = pageSwipePointer
-  if (!pointer || pointer.id !== event.pointerId || pointer.cancelled) return
-
-  const distance = event.clientX - pointer.x
-  const verticalDistance = Math.abs(event.clientY - pointer.y)
-  if (!pointer.dragging) {
-    if (Math.max(Math.abs(distance), verticalDistance) < 10) return
-    if (verticalDistance > Math.abs(distance) * 1.2) {
-      const organizer = topNav.value?.organizerSwipe
-      if (event.clientY <= pointer.y || !organizer?.begin()) {
-        pageSwipePointer = null
-        return
-      }
-      pointer.organizer = organizer
-      organizerSwipeActive.value = true
-    } else if (Math.abs(distance) < verticalDistance * 1.2) {
-      return
-    }
-  }
-
-  if (isAnyPromptOpen.value || activeTabId.value !== pointer.fromId || presentedTabId.value !== pointer.fromId) {
-    // Keep tracking the release so cancellation cannot turn a drag into a click.
-    pointer.cancelled = true
-    pageSwipe.value = null
-    if (pointer.organizer) {
-      pointer.organizer.cancel()
-      organizerSwipeActive.value = false
-    }
-    return
-  }
-
-  if (!pointer.dragging) {
-    pointer.dragging = true
-    pageSwipeClickPointerId = event.pointerId
-    event.currentTarget.setPointerCapture(event.pointerId)
-  }
-  event.preventDefault()
-
-  if (pointer.organizer) {
-    pointer.organizer.update(event.clientY - pointer.y)
-    return
-  }
-
-  const direction = distance < 0 ? 1 : -1
-  const target = findSwipeTab(store.getters.getTabs, pointer.fromId, direction)
-  pageSwipe.value = target
-    ? {
-        fromId: pointer.fromId,
-        toId: target.id,
-        direction,
-        offset: Math.max(-pointer.width, Math.min(pointer.width, distance)),
-        width: pointer.width,
-        scrollTop: window.scrollY,
-        settling: false
-      }
-    : null
-}
-
-function suppressPageSwipeClick(event) {
-  if (event.detail === 0 || event.pointerId !== pageSwipeClickPointerId) return
-  clearPageSwipeClick()
-  event.preventDefault()
-  event.stopPropagation()
-}
-
-async function finishPageSwipe(event, cancelled = false) {
-  const pointer = pageSwipePointer
-  if (!pointer || pointer.id !== event.pointerId) return
-  pageSwipePointer = null
-  // Keep suppression for the click dispatched with pointerup, then expire it
-  // even when capture release or cancellation produces no click.
-  if (pointer.dragging) pageSwipeClickTimeout = window.setTimeout(clearPageSwipeClick, 0)
-  if (pointer.organizer) {
-    try {
-      await pointer.organizer.finish(event.timeStamp - pointer.time, cancelled || pointer.cancelled || isAnyPromptOpen.value || activeTabId.value !== pointer.fromId || presentedTabId.value !== pointer.fromId)
-    } finally {
-      organizerSwipeActive.value = false
-    }
-    return
-  }
-  const swipe = pageSwipe.value
-  if (!swipe) return
-
-  const commit = !cancelled && !isAnyPromptOpen.value && shouldFinishPageSwipe(swipe.offset, swipe.width, event.timeStamp - pointer.time) &&
-    findSwipeTab(store.getters.getTabs, swipe.fromId, swipe.direction)?.id === swipe.toId
-  const reducedMotion = document.documentElement.dataset.reducedMotion === 'reduce' ||
-    window.matchMedia('(prefers-reduced-motion: reduce)').matches
-  if (!reducedMotion) {
-    // Let a fast drag paint once before starting the release transition.
-    await nextTick()
-    await new Promise(resolve => requestAnimationFrame(() => requestAnimationFrame(resolve)))
-    if (pageSwipe.value !== swipe) return
-  }
-  const settledSwipe = {
-    ...swipe,
-    offset: commit ? Math.sign(swipe.offset) * swipe.width : 0,
-    settling: true
-  }
-  pageSwipe.value = settledSwipe
-  await nextTick()
-  if (!reducedMotion) {
-    const target = document.querySelector('.pageSwipeTo')
-    if (target) {
-      await new Promise(resolve => {
-        const finish = () => {
-          target.removeEventListener('transitionend', onTransition)
-          target.removeEventListener('transitioncancel', onTransition)
-          window.clearTimeout(timeoutId)
-          resolve()
-        }
-        const onTransition = transition => {
-          if (transition.target === target && transition.propertyName === 'left') finish()
-        }
-        target.addEventListener('transitionend', onTransition)
-        target.addEventListener('transitioncancel', onTransition)
-        // Covers the slowest 25% animation-speed setting if WebView skips the event.
-        const timeoutId = window.setTimeout(finish, 1000)
-      })
-    }
-  }
-  if (pageSwipe.value !== settledSwipe) return
-  try {
-    if (commit && !isAnyPromptOpen.value && activeTabId.value === swipe.fromId && presentedTabId.value === swipe.fromId &&
-        findSwipeTab(store.getters.getTabs, swipe.fromId, swipe.direction)?.id === swipe.toId) {
-      await capacitorTabService.activateTab(swipe.toId)
-    }
-  } finally {
-    pageSwipe.value = null
-  }
-}
-
-function cancelPageSwipe(event) {
-  if (event) {
-    finishPageSwipe(event, true)
-    return
-  }
-  clearPageSwipeClick()
-  topNav.value?.organizerSwipe?.cancel()
-  organizerSwipeActive.value = false
-  pageSwipePointer = null
-  pageSwipe.value = null
-}
 
 /** @type {import('vue').ComputedRef<boolean>} */
 const isSideNavOpen = computed(() => store.getters.getIsSideNavOpen)
@@ -1086,8 +825,16 @@ function closeSideNav() {
 
 /** @type {import('vue').ComputedRef<boolean>} */
 const isAnyPromptOpen = computed(() => store.getters.isAnyPromptOpen)
-const sharedYoutubeLink = ref(null)
-let sharedYoutubeLinkId = 0
+const {
+  pageSwipe,
+  organizerSwipeActive,
+  pageSwipeNeighborIds,
+  startPageSwipe,
+  movePageSwipe,
+  suppressPageSwipeClick,
+  finishPageSwipe,
+  cancelPageSwipe
+} = usePageSwipe({ isAnyPromptOpen, activeTabId, presentedTabId, capacitorTabService })
 
 /** @type {import('vue').ComputedRef<boolean>} */
 const showSearchFilters = computed(() => store.getters.getShowSearchFilters)
@@ -1111,9 +858,6 @@ const subscriptionRefreshInProgress = computed(() => store.getters.getSubscripti
 const progressUsesToast = computed(() => {
   return shouldUseProgressToast(store.getters.getShowProgressBarToast)
 })
-const showProgressStartToast = computed(() => {
-  return shouldShowProgressStartToast(store.getters.getShowProgressBarToast)
-})
 
 const showProgressBar = computed(() => {
   return (localProgressBarVisible.value && !progressUsesToast.value) ||
@@ -1131,44 +875,7 @@ const landingPage = computed(() => '/' + store.getters.getLandingPage)
 const defaultInvidiousInstance = computed(() => store.getters.getDefaultInvidiousInstance)
 
 /** @type {import('vue').ComputedRef<string>} */
-const subscriptionFeedAutoRefreshInterval = computed(() => store.getters.getSubscriptionFeedAutoRefreshInterval)
-
-/** @type {import('vue').ComputedRef<string>} */
-const subscriptionShortsAutoRefreshInterval = computed(() => store.getters.getSubscriptionShortsAutoRefreshInterval)
-
-/** @type {import('vue').ComputedRef<string>} */
-const subscriptionLiveAutoRefreshInterval = computed(() => store.getters.getSubscriptionLiveAutoRefreshInterval)
-
-/** @type {import('vue').ComputedRef<string>} */
-const subscriptionPostsAutoRefreshInterval = computed(() => store.getters.getSubscriptionPostsAutoRefreshInterval)
-
-/** @type {import('vue').ComputedRef<boolean>} */
-const enableClosedAppSubscriptionRefresh = computed(() => store.getters.getEnableClosedAppSubscriptionRefresh)
-
-/** @type {import('vue').ComputedRef<string | null>} */
-const activeSubscriptionProfileId = computed(() => store.getters.getActiveProfile?._id ?? null)
-
-/** @type {import('vue').ComputedRef<string>} */
 const historyRetentionDays = computed(() => store.getters.getHistoryRetentionDays)
-
-/** @type {import('vue').ComputedRef<boolean>} */
-const hideSubscriptionsVideos = computed(() => store.getters.getHideSubscriptionsVideos)
-
-/** @type {import('vue').ComputedRef<boolean>} */
-const hideSubscriptionsShorts = computed(() => store.getters.getHideSubscriptionsShorts)
-
-/** @type {import('vue').ComputedRef<boolean>} */
-const hideSubscriptionsLive = computed(() => store.getters.getHideLiveStreams || store.getters.getHideSubscriptionsLive)
-
-/** @type {import('vue').ComputedRef<boolean>} */
-const hideSubscriptionsPosts = computed(() => store.getters.getHideSubscriptionsCommunity || store.getters.getUseRssFeeds)
-
-const hiddenSubscriptionFeedTypes = computed(() => [
-  ...(hideSubscriptionsVideos.value ? ['videos'] : []),
-  ...(hideSubscriptionsShorts.value ? ['shorts'] : []),
-  ...(hideSubscriptionsLive.value ? ['live'] : []),
-  ...(hideSubscriptionsPosts.value ? ['posts'] : [])
-])
 
 const dataReady = ref(false)
 // Page-wide and teleported styles read the layout from <html>.
@@ -1176,129 +883,73 @@ watch(useTemplateRef('appRoot'), (app, _previous, onCleanup) => {
   if (app) onCleanup(mirrorAppState(app))
 }, { flush: 'sync' })
 useTitleBarOverlay(() => [dataReady.value, tabBarPosition.value])
-const subscriptionCacheReady = computed(() => store.getters.getSubscriptionCacheReady)
 const showTutorial = ref(false)
-const findbarVisible = ref(false)
-const findbarQuery = ref('')
-const findbarMatchIndex = ref(0)
-const findbarMatchCount = ref(0)
-const findbarInputRef = useTemplateRef('findbarInputRef')
-const tabSwitcherVisible = ref(false)
-const tabSwitcherSelectedIndex = ref(-1)
-const tabSwitcherPreviewUrls = ref({})
-const tabSwitcherPreviewPending = ref({})
-const tabSwitcherFailedAvatarUrls = ref({})
-const tabSwitcherFailedPreviewUrls = ref({})
-const tabSwitcherPointerActive = ref(false)
-const tabSwitcherRef = useTemplateRef('tabSwitcherRef')
+const {
+  findbarVisible,
+  findbarQuery,
+  findbarStatus,
+  openFindbar,
+  closeFindbar,
+  findInPage,
+  handleFindbarNavigationShortcut
+} = useFindbar({ presentedTabId, t })
+const {
+  tabSwitcherVisible,
+  tabSwitcherTabs,
+  tabSwitcherSelectedIndex,
+  tabSwitcherSelectedTabId,
+  tabSwitcherPreviewUrls,
+  tabSwitcherPreviewPending,
+  tabSwitcherPointerActive,
+  showTabIcons,
+  showTabPreviews,
+  handleKeyboardShortcutKeyup,
+  cycleTabSwitcher,
+  isTabSwitcherActive,
+  getUsableTabSwitcherAvatarUrl,
+  getUsableTabSwitcherPreviewUrl,
+  handleTabSwitcherAvatarError,
+  handleTabSwitcherPreviewError,
+  setTabSwitcherSelectedIndex,
+  activateTabSwitcherPointer,
+  clearTabSwitcherSelection,
+  handleTabSwitcherWheel,
+  commitTabSwitcherSelection,
+  cancelTabSwitcher,
+  getTabSwitcherItemStyle
+} = useTabSwitcher()
 const commandPaletteOpen = ref(false)
 const hardwareKeyboardAttached = ref(!isCapacitor)
 provide('hardwareKeyboardAttached', hardwareKeyboardAttached)
-const mobileContextLink = ref(null)
-const mobileContextActions = shallowRef(null)
-const mobileContextMenuTarget = shallowRef(document.fullscreenElement ?? document.body)
-function updateMobileContextMenuTarget() {
-  mobileContextMenuTarget.value = document.fullscreenElement ?? document.body
-}
-document.addEventListener('fullscreenchange', updateMobileContextMenuTarget)
-onBeforeUnmount(() => document.removeEventListener('fullscreenchange', updateMobileContextMenuTarget))
-const mobileContextMenuPath = ref([])
-const mobileContextMenuStack = computed(() => {
-  const stack = [{ label: mobileContextLinkLabel.value, items: unref(mobileContextActions.value?.actions) ?? [] }]
-  for (const label of mobileContextMenuPath.value) {
-    const action = stack.at(-1).items.find(item => item.label === label)
-    if (!action?.submenu) break
-    stack.push({ label: action.label, items: action.submenu })
-  }
-  return stack
-})
-const mobileContextMenuItems = computed(() => mobileContextMenuStack.value.at(-1).items)
-const mobileContextQuickActions = computed(() => mobileContextMenuItems.value.filter(action => action.quickAction))
-const mobileContextThumbnailActions = computed(() => mobileContextMenuStack.value.length === 1
-  ? unref(mobileContextActions.value?.thumbnailActions) ?? []
-  : [])
-const mobileContextMenuRows = computed(() => {
-  const rows = mobileContextMenuItems.value.filter(action => !action.quickAction)
-  return rows.filter((action, index) => action.type !== 'separator' || (
-    index > 0 && index < rows.length - 1 && rows[index - 1].type !== 'separator'
-  ))
-})
-const mobileContextMenuTitle = computed(() => mobileContextMenuStack.value.at(-1).label)
-provide('openMobileContextActions', async (menu) => {
-  mobileContextMenuPath.value = []
-  mobileContextLink.value = null
-  mobileContextActions.value = menu
-  await nextTick()
-  mobileLinkActionsRef.value?.focus({ preventScroll: true })
-})
-const mobileLinkActionsPromptId = useId()
-const mobileLinkActionsRef = useTemplateRef('mobileLinkActionsRef')
 const {
-  startDrag: startMobileContextDrag, moveTouch: moveMobileContextTouch, filterClick: filterMobileContextClick,
-  updateScrollAction: updateMobileContextScrollAction,
-  enter: enterMobileContextSheet, leave: leaveMobileContextSheet
-} = useBottomSheetDismiss(mobileLinkActionsRef, closeMobileLinkActions, {
-  canDismissOnBack: () => mobileContextMenuStack.value.length === 1
-})
-const mobileLinkActionsScrollRef = useTemplateRef('mobileLinkActionsScrollRef')
-const mobileLinkActionsContentRef = useTemplateRef('mobileLinkActionsContentRef')
-watch(mobileLinkActionsContentRef, (content, _, onCleanup) => {
-  if (!content) return
-  const scroller = mobileLinkActionsScrollRef.value
-  const observer = new ResizeObserver(() => clampOverlayScrollTop(scroller, content))
-  observer.observe(content)
-  observer.observe(scroller)
-  onCleanup(() => observer.disconnect())
-})
-watch([mobileContextLink, mobileContextActions, mobileContextMenuPath], async () => {
-  await nextTick()
-  if (mobileLinkActionsScrollRef.value) restoreOverlayScrollTop(mobileLinkActionsScrollRef.value, 0)
-})
-let mobileLinkActionsLocked = false
-const mobileContextLinkLabel = computed(() => {
-  if (mobileContextActions.value) return mobileContextActions.value.title
-  const link = mobileContextLink.value
-  if (!link) return ''
-
-  const itemTitle = link.closest('.ft-list-item')?.querySelector('.h3Title, .playlistTitle')?.textContent
-  return link.dataset.tabTitle?.trim() ||
-    link.getAttribute('aria-label')?.trim() ||
-    link.textContent?.trim() ||
-    itemTitle?.trim() ||
-    link.href
-})
-watch(() => mobileContextMenuStack.value.length, (depth) => {
-  if (mobileContextMenuPath.value.length >= depth) {
-    mobileContextMenuPath.value = mobileContextMenuPath.value.slice(0, depth - 1)
-  }
-})
-const mobileContextLinkCanOpenInTab = computed(() => {
-  if (!store.getters.getTabsEnabled) return false
-  const href = mobileContextLink.value?.href ?? ''
-  return href.startsWith(`${window.location.href.split('#')[0]}#`) ||
-    /^https?:\/\/(?:www\.|m\.)?(?:youtube\.com|youtu\.be)\//.test(href)
-})
-const mobileContextLinkCopyUrl = computed(() => {
-  const href = mobileContextLink.value?.href
-  return href
-    ? resolveMobileContextLinkCopyUrl(href, window.location.href.split('#')[0])
-    : null
-})
-watch(() => mobileContextLink.value !== null || mobileContextActions.value !== null, (isOpen) => {
-  if (isOpen && !mobileLinkActionsLocked) {
-    lockBodyScroll()
-    store.commit('addOpenPrompt', mobileLinkActionsPromptId)
-    mobileLinkActionsLocked = true
-  }
-})
-function releaseMobileContextSheet() {
-  if (mobileContextLink.value || mobileContextActions.value || !mobileLinkActionsLocked) return
-  store.commit('removeOpenPrompt', mobileLinkActionsPromptId)
-  unlockBodyScroll()
-  mobileLinkActionsLocked = false
-}
+  mobileContextLink,
+  mobileContextActions,
+  mobileContextMenuTarget,
+  mobileContextMenuStack,
+  mobileContextQuickActions,
+  mobileContextThumbnailActions,
+  mobileContextMenuRows,
+  mobileContextMenuTitle,
+  mobileLinkActionsRef,
+  startMobileContextDrag,
+  moveMobileContextTouch,
+  filterMobileContextClick,
+  updateMobileContextScrollAction,
+  enterMobileContextSheet,
+  leaveMobileContextSheet,
+  mobileContextLinkCanOpenInTab,
+  mobileContextLinkCopyUrl,
+  releaseMobileContextSheet,
+  handleMobileLinkContextMenu,
+  closeOwnedMobileContextMenu,
+  closeMobileLinkActions,
+  backMobileContextMenu,
+  runMobileContextAction,
+  copyMobileContextLink,
+  shareMobileContextLink,
+  openMobileContextLink
+} = useMobileContextMenu({ t, route, router, getEventLink, handleYoutubeLink, handleExternalLink })
 const tabOrganizerOpen = ref(false)
-const showAndroidExitPrompt = ref(false)
 const settingsSearchTarget = ref(null)
 watch(() => store.getters.getSettingsWindowSectionRequest, request => {
   if (request) settingsSearchTarget.value = null
@@ -1318,25 +969,8 @@ if (process.env.IS_ELECTRON) {
     }
   }, { immediate: true, flush: 'sync' })
 }
-const subscriptionAutoRefreshTimers = {
-  videos: null,
-  shorts: null,
-  live: null,
-  posts: null
-}
 const HISTORY_CLEANUP_INTERVAL = 60 * 60 * 1000
-const SUBSCRIPTION_AUTO_REFRESH_FAILURE_RETRY_INTERVAL = 60 * 1000
-const SUBSCRIPTION_AUTO_REFRESH_LOCK_RETRY_INTERVAL = 1000
-const LEGACY_SUBSCRIPTION_AUTO_REFRESH_STORAGE_KEY_PREFIX = 'opentubex.subscriptionAutoRefresh.'
-const SUBSCRIPTION_AUTO_REFRESH_COMPLETION_STORAGE_KEY_PREFIX = 'opentubex.subscriptionAutoRefresh.completed.'
-const SUBSCRIPTION_AUTO_REFRESH_DEADLINE_STORAGE_KEY_PREFIX = 'opentubex.subscriptionAutoRefresh.deadline.'
-const SUBSCRIPTION_AUTO_REFRESH_PROGRESS_STORAGE_KEY = 'opentubex.subscriptionAutoRefresh.inProgress'
 let historyCleanupTimer = null
-const subscriptionAutoRefreshTabs = ['videos', 'shorts', 'live', 'posts']
-let removeSubscriptionAutoRefreshActiveChangedListener = null
-let removeSubscriptionAutoRefreshCancelListener = null
-let removeSubscriptionAutoRefreshStateChangedListener = null
-let removeBackgroundResultsAvailableListener = null
 let removeTabsStateListener = null
 let stopMemoryPressureMonitor = null
 let removeReloadRequestListener = null
@@ -1351,11 +985,6 @@ let removeCapacitorTabPreviews = null
 let removeYtDlpBinaryUpdatedListener = null
 let removeAndroidYtDlpSettingsListener = null
 let removeOpenTabOrganizerListener = null
-let removeAndroidSubscriptionRefreshCancelledListener = null
-let androidSubscriptionRefreshStateTimer = null
-let androidExternalRefreshProgress = null
-let androidExternalRefreshReloadTime = null
-let androidSubscriptionRefreshStateVersion = 0
 let removeGamepadNavigation = () => {}
 /** @type {number|null} */
 let utilityRoutePreloadId = null
@@ -1408,294 +1037,8 @@ function cancelUtilityRoutePreload() {
   }
   utilityRoutePreloadId = null
 }
-const pendingSubscriptionAutoRefreshes = []
-const pendingSubscriptionAutoRefreshKeys = new Set()
-const cancelledSubscriptionAutoRefreshKeys = new Set()
-let processingSubscriptionAutoRefreshes = false
-let tabSwitcherPreviewRequestId = 0
-let tabSwitcherOpenTimer = null
-let tabSwitcherScrollPending = false
-const TAB_SWITCHER_HOLD_DELAY_MS = 150
-let findbarMatches = []
-const findbarStateByTabId = new Map()
 
-const tabSwitcherTabs = computed(() => store.getters.getTabs)
-const showTabIcons = computed(() => store.getters.getShowTabIcons)
-const showTabPreviews = computed(() => store.getters.getShowTabPreviews)
-const findbarStatus = computed(() => {
-  if (findbarQuery.value.trim().length === 0) {
-    return ''
-  }
-
-  if (findbarMatchCount.value === 0) {
-    return t('No matches')
-  }
-
-  return `${findbarMatchIndex.value}/${findbarMatchCount.value}`
-})
-const tabSwitcherSelectedTabId = computed(() => {
-  const tab = tabSwitcherTabs.value[tabSwitcherSelectedIndex.value]
-  return tab ? `tab-switcher-option-${tab.id}` : undefined
-})
-
-/**
- * Falls back to OpenTubeX-managed external software when the configured system
- * executables are unavailable. Selected managed executables are updated when
- * automatic updates are enabled or the user accepts an available update.
- * @param {('yt-dlp' | 'ffmpeg')[] | null} requestedUpdates
- */
-async function initializeManagedExternalSoftware(requestedUpdates = null) {
-  if (!supportsYtDlp || ytDlp.isBundledIosRuntime) {
-    return
-  }
-
-  const recovery = initializeNetworkRecovery()
-  // Native tool downloads do not pass through the renderer fetch wrapper.
-  // Wait before displaying download progress or checking for updates.
-  await recovery.run('managed-tools', async () => {})
-
-  const info = await ytDlp.ytDlpGetInfo()
-  if (info === null) {
-    return
-  }
-
-  /** @type {('yt-dlp' | 'ffmpeg' | 'ffprobe')[]} */
-  const missingBinaries = []
-  /** @type {('yt-dlp' | 'ffmpeg')[]} */
-  const binariesToUpdate = []
-
-  if (!info.ytDlp.available) {
-    missingBinaries.push('yt-dlp')
-  }
-  if (!info.ffmpeg.available) {
-    missingBinaries.push('ffmpeg')
-  }
-  if (!info.ffprobe.available) {
-    missingBinaries.push('ffprobe')
-  }
-
-  const updateMode = store.getters.getExternalSoftwareUpdateMode
-  const automaticUpdates = updateMode === 'automatic'
-  let missingManagedBinaries = missingBinaries
-  if (!automaticUpdates && missingBinaries.length > 0) {
-    const managedInfo = await ytDlp.ytDlpGetInfo({
-      ytDlpSource: 'managed',
-      ytDlpPath: '',
-      ffmpegSource: 'managed',
-      ffmpegPath: ''
-    })
-    if (managedInfo !== null) {
-      missingManagedBinaries = missingBinaries.filter(binary => {
-        if (binary === 'yt-dlp') {
-          return !managedInfo.ytDlp.available
-        }
-        return binary === 'ffmpeg' ? !managedInfo.ffmpeg.available : !managedInfo.ffprobe.available
-      })
-    }
-  }
-
-  if (missingManagedBinaries.includes('yt-dlp') ||
-    ((isCapacitor || store.getters.getYtDlpSource === 'managed') &&
-      (automaticUpdates || requestedUpdates?.includes('yt-dlp')))) {
-    binariesToUpdate.push('yt-dlp')
-  }
-  if (missingManagedBinaries.includes('ffmpeg') || missingManagedBinaries.includes('ffprobe') ||
-    (!isCapacitor && store.getters.getYtDlpFfmpegSource === 'managed' &&
-      (automaticUpdates || requestedUpdates?.includes('ffmpeg')))) {
-    binariesToUpdate.push('ffmpeg')
-  }
-
-  const settingUpdates = []
-  if (missingBinaries.includes('yt-dlp') && store.getters.getYtDlpSource !== 'managed') {
-    settingUpdates.push(store.dispatch('updateYtDlpSource', 'managed'))
-  }
-  if ((missingBinaries.includes('ffmpeg') || missingBinaries.includes('ffprobe')) &&
-    store.getters.getYtDlpFfmpegSource !== 'managed') {
-    settingUpdates.push(store.dispatch('updateYtDlpFfmpegSource', 'managed'))
-  }
-  await Promise.all(settingUpdates)
-
-  if (binariesToUpdate.length === 0) {
-    if (updateMode === 'ask' && requestedUpdates === null) {
-      await notifyAboutManagedExternalSoftwareUpdates([])
-    }
-    return
-  }
-
-  await recovery.run('managed-tools', async () => {})
-
-  let downloadStarted = missingManagedBinaries.length > 0
-  let toolProgressPercentage = 0
-  let progressOperation = null
-
-  function showToolProgress(message) {
-    const progress = {
-      icon: ['fas', 'download'],
-      message,
-      percentage: toolProgressPercentage,
-    }
-    if (progressOperation === null) {
-      progressOperation = startProgressBarOperation(store, progress)
-    } else {
-      progressOperation.update(progress)
-    }
-  }
-
-  if (downloadStarted) {
-    const tools = binariesToUpdate.join(' and ')
-    const message = t('Settings.Download Settings.Managed Tools Download Started Template', { tools })
-    if (showProgressStartToast.value) {
-      showToast({ message, icon: ['fas', 'download'] })
-    }
-    showToolProgress(message)
-  }
-
-  const progressByBinary = Object.fromEntries(
-    binariesToUpdate.map(binary => [binary, 0])
-  )
-  const removeProgressListener = ytDlp.addYtDlpBinaryDownloadProgressListener(({ binary, percent, inProgress }) => {
-    if (!binariesToUpdate.includes(binary) || !inProgress || percent === null) {
-      return
-    }
-
-    if (!downloadStarted) {
-      downloadStarted = true
-      const tools = binariesToUpdate.join(' and ')
-      const message = t('Settings.Download Settings.Managed Tools Update Started Template', { tools })
-      if (showProgressStartToast.value) {
-        showToast({ message, icon: ['fas', 'download'] })
-      }
-      showToolProgress(message)
-    }
-
-    progressByBinary[binary] = Math.max(progressByBinary[binary] ?? 0, percent)
-    const percentages = Object.values(progressByBinary)
-    const combinedPercentage = percentages.reduce((sum, value) => sum + value, 0) / percentages.length
-    toolProgressPercentage = Math.max(toolProgressPercentage, combinedPercentage)
-    progressOperation.update({ percentage: toolProgressPercentage })
-  })
-
-  try {
-    const results = await Promise.all(binariesToUpdate.map(async binary => {
-      try {
-        const result = await recovery.run('managed-tools', async () => {
-          const result = await ytDlp.ytDlpDownloadBinary(binary)
-          if (result === null || 'error' in result) {
-            throw new Error(result?.error ?? '')
-          }
-          return result
-        }, {
-          isNetworkError: async error => {
-            const failure = classifyRequestFailure(error)
-            return failure === 'network' || (failure === 'api' && !await recovery.checkConnection())
-          },
-        })
-        return { binary, result }
-      } catch (error) {
-        return { binary, result: { error: String(error) } }
-      }
-    }))
-    const failures = results.filter(({ result }) => result === null || 'error' in result)
-    const updatedBinaries = results
-      .filter(({ result }) => result !== null && 'version' in result && result.updated)
-      .map(({ binary }) => binary)
-
-    if (failures.length === 0 && updatedBinaries.length > 0) {
-      toolProgressPercentage = 100
-      progressOperation?.update({ percentage: toolProgressPercentage })
-      const updatedTools = updatedBinaries.join(' and ')
-      showToast({
-        message: missingManagedBinaries.length > 0
-          ? t('Settings.Download Settings.Managed Tools Download Finished Template', { tools: updatedTools })
-          : t('Settings.Download Settings.Managed Tools Update Finished Template', { tools: updatedTools }),
-        icon: ['fas', 'check'],
-      })
-    } else {
-      if (failures.length > 0) {
-        const errors = failures.map(({ binary, result }) => `${binary}: ${result?.error ?? ''}`).join('; ')
-        showToast({
-          message: t('Settings.Download Settings.Managed Tools Download Error Template', { errors }),
-          icon: ['fas', 'circle-exclamation'],
-        })
-      }
-    }
-  } finally {
-    removeProgressListener()
-    progressOperation?.finish()
-  }
-
-  if (updateMode === 'ask' && requestedUpdates === null) {
-    await notifyAboutManagedExternalSoftwareUpdates(missingManagedBinaries)
-  }
-}
-
-/**
- * Checks installed managed tools and offers an explicit update action.
- * @param {('yt-dlp' | 'ffmpeg' | 'ffprobe')[]} binariesInstalledThisRun
- */
-async function notifyAboutManagedExternalSoftwareUpdates(binariesInstalledThisRun) {
-  await initializeNetworkRecovery().run('managed-tools', async () => {})
-  const candidates = []
-  if ((isCapacitor || store.getters.getYtDlpSource === 'managed') && !binariesInstalledThisRun.includes('yt-dlp')) {
-    candidates.push('yt-dlp')
-  }
-  if (!isCapacitor && store.getters.getYtDlpFfmpegSource === 'managed' &&
-    !binariesInstalledThisRun.includes('ffmpeg') && !binariesInstalledThisRun.includes('ffprobe')) {
-    candidates.push('ffmpeg')
-  }
-
-  const checks = await Promise.all(candidates.map(async binary => {
-    const result = await ytDlp.ytDlpCheckBinaryUpdate(binary)
-    if (result !== null && 'error' in result) {
-      console.warn(`Checking for a managed ${binary} update failed`, result.error)
-    }
-    return result?.available === true ? binary : null
-  }))
-  const availableUpdates = checks.filter(binary => binary !== null)
-  if (availableUpdates.length === 0) {
-    return
-  }
-
-  showManagedExternalSoftwareUpdatePrompt(availableUpdates)
-}
-
-/**
- * @param {('yt-dlp' | 'ffmpeg')[]} availableUpdates
- */
-function showManagedExternalSoftwareUpdatePrompt(availableUpdates) {
-  showToast({
-    message: t('Settings.Download Settings.Managed Tools Update Available Template', {
-      tools: availableUpdates.join(' and ')
-    }),
-    time: Infinity,
-    icon: ['fas', 'download'],
-    buttons: [
-      { label: t('Cancel') },
-      {
-        label: t('Settings.Download Settings.Update Managed Tools'),
-        primary: true,
-        action: () => {
-          initializeManagedExternalSoftware(availableUpdates)
-            .catch(error => console.error('Failed to update managed external software', error))
-        }
-      }
-    ]
-  })
-}
-
-const MANAGED_TOOLS_UPDATE_PREVIEW_EVENT = 'opentubex:preview-managed-tools-update'
-
-/**
- * Allows the real actionable update prompt to be previewed from DevTools.
- * @param {Event} event
- */
-function previewManagedExternalSoftwareUpdatePrompt(event) {
-  const detail = event instanceof CustomEvent ? event.detail : null
-  const availableUpdates = Array.isArray(detail)
-    ? detail.filter(binary => binary === 'yt-dlp' || binary === 'ffmpeg')
-    : []
-  showManagedExternalSoftwareUpdatePrompt(availableUpdates.length > 0 ? [...new Set(availableUpdates)] : ['yt-dlp'])
-}
+const { initializeManagedExternalSoftware } = useManagedExternalSoftware({ t })
 
 async function initializeTutorial(hasExistingInstallation, lastUsedVersion, persistedAudience) {
   try {
@@ -1751,7 +1094,6 @@ onMounted(async () => {
   }
 
   if (isElectron) {
-    window.addEventListener(MANAGED_TOOLS_UPDATE_PREVIEW_EVENT, previewManagedExternalSoftwareUpdatePrompt)
     tabsReady = store.dispatch('initializeTabs').then((removeListener) => {
       removeTabsStateListener = removeListener
       window.ftElectron.tabs.rendererReady()
@@ -1907,8 +1249,7 @@ onMounted(async () => {
     }
 
     if (isCapacitor) {
-      removeAndroidSubscriptionRefreshCancelledListener =
-        await addAndroidSubscriptionRefreshCancelledListener(cancelSubscriptionRefresh)
+      await listenForAndroidSubscriptionRefreshCancellation()
     }
 
     await nextTick()
@@ -2002,46 +1343,16 @@ onMounted(async () => {
   document.addEventListener('pointerout', handleNumberInputPointer, { passive: true })
   document.addEventListener('dragstart', handleDragStart)
   window.addEventListener('blur', cancelTabSwitcher)
-  window.addEventListener('online', refreshOverdueSubscriptionFeeds)
-  window.addEventListener('storage', handleSubscriptionAutoRefreshStorage)
-  window.addEventListener(SUBSCRIPTION_REFRESH_CANCELLED_EVENT, handleSubscriptionRefreshCancelled)
-  window.addEventListener(SUBSCRIPTION_REFRESH_COMPLETED_EVENT, handleSubscriptionRefreshCompleted)
-  window.addEventListener(SUBSCRIPTION_REFRESH_FINISHED_EVENT, handleSubscriptionRefreshFinished)
-  window.addEventListener(SUBSCRIPTION_REFRESH_PROGRESS_EVENT, handleSubscriptionRefreshProgress)
-  window.addEventListener(SUBSCRIPTION_REFRESH_STARTED_EVENT, handleSubscriptionRefreshStarted)
-  document.addEventListener('visibilitychange', handleSubscriptionAutoRefreshVisibilityChange)
   if (process.env.IS_ELECTRON) {
     removeOpenTabOrganizerListener = window.ftElectron.tabs.onOpenOrganizer(openTabOrganizer)
-    removeBackgroundResultsAvailableListener = window.ftElectron.subscriptionAutoRefresh.onBackgroundResultsAvailable(
-      handleSubscriptionAutoRefreshVisibilityChange
-    )
-    removeSubscriptionAutoRefreshStateChangedListener = window.ftElectron.subscriptionAutoRefresh.onStateChanged(
-      applySubscriptionAutoRefreshState
-    )
-    removeSubscriptionAutoRefreshCancelListener = window.ftElectron.subscriptionAutoRefresh.onCancelRequested(
-      cancelSubscriptionRefresh
-    )
-    synchronizeSubscriptionRefreshInProgress()
-    removeSubscriptionAutoRefreshActiveChangedListener = window.ftElectron.tabs.onActiveChanged((isActive) => {
-      if (isActive) {
-        synchronizeSubscriptionRefreshInProgress()
-        refreshOverdueSubscriptionFeeds()
-      }
-    })
-  } else {
-    synchronizeSubscriptionRefreshInProgress()
   }
+  addSubscriptionRefreshListeners()
 })
 
 onBeforeUnmount(() => {
   cancelPageSwipe()
   removeShimmerVisibility?.()
   removeInternetConnectivitySettingsListener?.()
-  if (mobileLinkActionsLocked) {
-    store.commit('removeOpenPrompt', mobileLinkActionsPromptId)
-    unlockBodyScroll()
-    mobileLinkActionsLocked = false
-  }
   tabletTabStripQuery.removeEventListener('change', handleTabletTabStripChange)
   capacitorTabService?.dispose()
   removeCapacitorTabPreviews?.()
@@ -2050,13 +1361,11 @@ onBeforeUnmount(() => {
   removeCustomThemeListener()
   cancelUtilityRoutePreload()
   cancelTabSwitcher()
-  systemColorScheme.removeEventListener('change', handleSystemColorSchemeChange)
   if (isElectron) {
     window.ftElectron.tabs.setPreviewCapturePaused(false)
     window.ftElectron.tabs.setShortcutsBlocked(false).catch(() => {})
   }
   cancelWatchSideNavTransitionReset()
-  clearSubscriptionFeedAutoRefreshTimer()
   clearInterval(historyCleanupTimer)
   store.dispatch('stopSyncServerAutoSync')
   document.removeEventListener('keydown', handleKeyboardShortcuts)
@@ -2077,19 +1386,6 @@ onBeforeUnmount(() => {
   document.removeEventListener('click', handleClick)
   document.removeEventListener('auxclick', handleAuxClick)
   window.removeEventListener('blur', cancelTabSwitcher)
-  window.removeEventListener('online', refreshOverdueSubscriptionFeeds)
-  window.removeEventListener('storage', handleSubscriptionAutoRefreshStorage)
-  window.removeEventListener(MANAGED_TOOLS_UPDATE_PREVIEW_EVENT, previewManagedExternalSoftwareUpdatePrompt)
-  window.removeEventListener(SUBSCRIPTION_REFRESH_CANCELLED_EVENT, handleSubscriptionRefreshCancelled)
-  window.removeEventListener(SUBSCRIPTION_REFRESH_COMPLETED_EVENT, handleSubscriptionRefreshCompleted)
-  window.removeEventListener(SUBSCRIPTION_REFRESH_FINISHED_EVENT, handleSubscriptionRefreshFinished)
-  window.removeEventListener(SUBSCRIPTION_REFRESH_PROGRESS_EVENT, handleSubscriptionRefreshProgress)
-  window.removeEventListener(SUBSCRIPTION_REFRESH_STARTED_EVENT, handleSubscriptionRefreshStarted)
-  document.removeEventListener('visibilitychange', handleSubscriptionAutoRefreshVisibilityChange)
-  removeSubscriptionAutoRefreshActiveChangedListener?.()
-  removeSubscriptionAutoRefreshCancelListener?.()
-  removeSubscriptionAutoRefreshStateChangedListener?.()
-  removeBackgroundResultsAvailableListener?.()
   removeTabsStateListener?.()
   stopMemoryPressureMonitor?.()
   removeReloadRequestListener?.()
@@ -2103,9 +1399,6 @@ onBeforeUnmount(() => {
   removeYtDlpBinaryUpdatedListener?.()
   removeAndroidYtDlpSettingsListener?.()
   removeOpenTabOrganizerListener?.()
-  removeAndroidSubscriptionRefreshCancelledListener?.()
-  clearTimeout(androidSubscriptionRefreshStateTimer)
-  androidSubscriptionRefreshStateVersion++
 })
 
 watch([activeTabId, selectionRevision], ([tabId, revision]) => {
@@ -2148,37 +1441,6 @@ watch([
   if (!cancelled) revealStartupSplash()
 }, { flush: 'post' })
 
-watch(presentedTabId, async (tabId, previousTabId) => {
-  if (!isElectron || tabId === previousTabId) {
-    return
-  }
-
-  if (previousTabId) {
-    findbarStateByTabId.set(previousTabId, {
-      visible: findbarVisible.value,
-      query: findbarQuery.value,
-      matchIndex: Math.max(0, findbarMatchIndex.value - 1)
-    })
-  }
-
-  clearFindbarHighlights()
-  const state = findbarStateByTabId.get(tabId) ?? {
-    visible: false,
-    query: '',
-    matchIndex: 0
-  }
-  findbarVisible.value = state.visible
-  findbarQuery.value = state.query
-  findbarMatchIndex.value = 0
-  findbarMatchCount.value = 0
-
-  if (state.visible && state.query.trim().length > 0) {
-    await nextTick()
-    highlightFindbarMatches(state.query.trim())
-    selectFindbarMatch(state.matchIndex)
-  }
-})
-
 watch(historyRetentionDays, scheduleHistoryCleanup)
 
 function scheduleHistoryCleanup(days) {
@@ -2195,1211 +1457,34 @@ function scheduleHistoryCleanup(days) {
   }, HISTORY_CLEANUP_INTERVAL)
 }
 
-watch([dataReady, activeSubscriptionProfileId], ([ready, profileId]) => {
-  clearSubscriptionFeedAutoRefreshTimer()
-  if (ready && profileId) {
-    migrateLegacySubscriptionAutoRefreshDeadlines()
-    synchronizeSubscriptionAutoRefreshProfile(profileId)
-  }
-})
-
-watch([subscriptionFeedAutoRefreshInterval, hideSubscriptionsVideos], () => {
-  resetSubscriptionTabAutoRefreshForAllProfiles('videos')
-})
-
-watch([subscriptionShortsAutoRefreshInterval, hideSubscriptionsShorts], () => {
-  resetSubscriptionTabAutoRefreshForAllProfiles('shorts')
-})
-
-watch([subscriptionLiveAutoRefreshInterval, hideSubscriptionsLive], () => {
-  resetSubscriptionTabAutoRefreshForAllProfiles('live')
-})
-
-watch([subscriptionPostsAutoRefreshInterval, hideSubscriptionsPosts], () => {
-  resetSubscriptionTabAutoRefreshForAllProfiles('posts')
-})
-
-const androidSubscriptionRefreshConfiguration = computed(() => {
-  if (process.env.IS_IOS || (!isCapacitor && !isElectron) || !dataReady.value) return null
-
-  return createAndroidSubscriptionRefreshConfiguration({
-    profiles: store.getters.getProfileList,
-    automaticDownloadRules: supportsYtDlp && store.getters.getEnableDownloads ? parseAutomaticDownloadRules(store.getters.getYtDlpAutomaticDownloadRules) : {},
-    closedAppRefreshEnabled: enableClosedAppSubscriptionRefresh.value,
-    backend: store.getters.getBackendPreference,
-    useRss: store.getters.getUseRssFeeds,
-    fallback: store.getters.getBackendFallback,
-    region: store.getters.getRegion,
-    intervals: {
-      videos: subscriptionFeedAutoRefreshInterval.value,
-      shorts: subscriptionShortsAutoRefreshInterval.value,
-      live: subscriptionLiveAutoRefreshInterval.value,
-      posts: subscriptionPostsAutoRefreshInterval.value
-    },
-    // Yattee servers have no posts, so only the local API fallback can refresh them
-    hiddenFeedTypes: store.getters.getBackendPreference === 'yattee' && !store.getters.getBackendFallback
-      ? [...new Set([...hiddenSubscriptionFeedTypes.value, 'posts'])]
-      : hiddenSubscriptionFeedTypes.value,
-    instanceUrl: store.getters.getApiServerUrl,
-    authorization: store.getters.getApiServerAuthorization,
-    titles: Object.fromEntries(subscriptionAutoRefreshTabs.map(tab => [
-      tab,
-      getSubscriptionRefreshNotificationTitle(tab)
-    ])),
-    cancelLabel: t('Feed.Cancel Refresh')
-  })
-})
-
-watch(androidSubscriptionRefreshConfiguration, async configuration => {
-  if (configuration === null) return
-  try {
-    if (isElectron) {
-      await window.ftElectron.subscriptionAutoRefresh.configureBackground({
-        ...configuration, enabled: enableClosedAppSubscriptionRefresh.value
-      })
-      return
-    }
-    await configureAndroidSubscriptionRefresh(configuration)
-    if (Object.values(configuration.intervals).some(interval => interval > 0)) {
-      const denied = await requestAndroidSubscriptionRefreshNotificationPermission()
-      if (denied) showAndroidSubscriptionRefreshNotificationWarning()
-    }
-  } catch (error) {
-    console.error('Failed to configure closed-app subscription refreshes', error)
-  }
-}, { deep: true })
-
-const uploadNotificationConfiguration = computed(() => {
-  if (process.env.IS_IOS || (!isCapacitor && !isElectron) || !dataReady.value) return null
-
-  return createUploadNotificationConfiguration({
-    enabled: store.getters.getEnableUploadNotifications,
-    subscriptions: store.getters.getProfileList[0]?.subscriptions ?? [],
-    hiddenFeedTypes: hiddenSubscriptionFeedTypes.value,
-    showMembersOnly: hasConfiguredRestrictedPlaybackAuthentication(store.getters),
-    titles: {
-      videos: t('Subscriptions.New video from {channel}', { channel: '{channel}' }),
-      shorts: t('Subscriptions.New short from {channel}', { channel: '{channel}' }),
-      live: t('Subscriptions.{channel} is live', { channel: '{channel}' }),
-      posts: t('Subscriptions.New post from {channel}', { channel: '{channel}' })
-    }
-  })
-})
-
-watch(uploadNotificationConfiguration, async configuration => {
-  if (configuration === null) return
-  try {
-    await configureUploadNotifications(configuration)
-    if (configuration.enabled && isCapacitor && await requestAndroidSubscriptionRefreshNotificationPermission()) {
-      showAndroidSubscriptionRefreshNotificationWarning()
-    }
-  } catch (error) {
-    console.error('Failed to configure upload notifications', error)
-  }
-}, { deep: true })
-
-watch([dataReady, subscriptionCacheReady], ([ready, cacheReady]) => {
-  if ((isCapacitor || isElectron) && ready && cacheReady) {
-    reconcileAndroidSubscriptionRefreshResults()
-  }
-})
-
-/**
- * @param {'videos' | 'shorts' | 'live' | 'posts'} tab
- */
-function resetSubscriptionTabAutoRefreshForAllProfiles(tab) {
-  if (!dataReady.value) {
-    return
-  }
-
-  const interval = parseInt(getSubscriptionAutoRefreshInterval(tab).value, 10)
-  const enabled = isSubscriptionTabAutoRefreshEnabled(tab)
-  const timestamp = enabled ? Date.now() + interval : null
-
-  for (const profile of store.getters.getProfileList) {
-    setStoredSubscriptionTabNextAutoRefreshTimestamp(profile._id, tab, timestamp)
-  }
-
-  const profileId = activeSubscriptionProfileId.value
-  if (profileId) {
-    scheduleSubscriptionTabAutoRefresh(tab, profileId, timestamp)
-  }
-}
-
-/**
- * @param {'videos' | 'shorts' | 'live' | 'posts'} tab
- * @param {string} profileId
- * @param {number | null} [scheduledTimestamp]
- */
-function scheduleSubscriptionTabAutoRefresh(tab, profileId, scheduledTimestamp) {
-  clearSubscriptionTabAutoRefreshTimer(tab)
-
-  if (!dataReady.value || profileId !== activeSubscriptionProfileId.value) {
-    return
-  }
-
-  if (!isSubscriptionTabAutoRefreshEnabled(tab)) {
-    setSubscriptionTabNextAutoRefreshTimestamp(tab, profileId, null)
-    return
-  }
-
-  const interval = parseInt(getSubscriptionAutoRefreshInterval(tab).value, 10)
-  const now = Date.now()
-  const storedTimestamp = scheduledTimestamp === undefined
-    ? getStoredSubscriptionTabNextAutoRefreshTimestamp(profileId, tab)
-    : scheduledTimestamp
-  const nextAutoRefreshTimestamp = storedTimestamp ?? now + interval
-
-  setSubscriptionTabNextAutoRefreshTimestamp(tab, profileId, nextAutoRefreshTimestamp)
-  subscriptionAutoRefreshTimers[tab] = setTimeout(() => {
-    subscriptionAutoRefreshTimers[tab] = null
-    enqueueSubscriptionAutoRefresh(tab, profileId)
-  }, Math.max(0, nextAutoRefreshTimestamp - now))
-}
-
-/**
- * @param {'videos' | 'shorts' | 'live' | 'posts'} tab
- * @param {string} profileId
- */
-function enqueueSubscriptionAutoRefresh(tab, profileId) {
-  const key = `${profileId}:${tab}`
-  if (pendingSubscriptionAutoRefreshKeys.has(key)) {
-    return
-  }
-
-  pendingSubscriptionAutoRefreshKeys.add(key)
-  pendingSubscriptionAutoRefreshes.push({ tab, profileId, key })
-  processPendingSubscriptionAutoRefreshes()
-}
-
-async function processPendingSubscriptionAutoRefreshes() {
-  if (processingSubscriptionAutoRefreshes) {
-    return
-  }
-
-  processingSubscriptionAutoRefreshes = true
-  try {
-    while (pendingSubscriptionAutoRefreshes.length > 0) {
-      const { tab, profileId, key } = pendingSubscriptionAutoRefreshes.shift()
-
-      try {
-        if (
-          profileId !== activeSubscriptionProfileId.value ||
-          !isSubscriptionTabAutoRefreshEnabled(tab) ||
-          navigator.onLine === false ||
-          isAppHidden()
-        ) {
-          continue
-        }
-
-        if (process.env.IS_ELECTRON && !await window.ftElectron.tabs.isActive()) {
-          continue
-        }
-
-        const storedTimestamp = getStoredSubscriptionTabNextAutoRefreshTimestamp(profileId, tab)
-        if (storedTimestamp !== null && storedTimestamp > Date.now()) {
-          scheduleSubscriptionTabAutoRefresh(tab, profileId, storedTimestamp)
-          continue
-        }
-
-        if (isElectron || isCapacitor) {
-          await reconcileAndroidSubscriptionRefreshResults()
-          const refreshedTimestamp = getStoredSubscriptionTabNextAutoRefreshTimestamp(profileId, tab)
-          if (refreshedTimestamp !== null && refreshedTimestamp > Date.now()) {
-            scheduleSubscriptionTabAutoRefresh(tab, profileId, refreshedTimestamp)
-            continue
-          }
-        }
-        cancelledSubscriptionAutoRefreshKeys.delete(key)
-        const result = await getSubscriptionTabRefreshHandler(tab)({
-          t,
-          showStartToast: true
-        })
-        const wasCancelled = cancelledSubscriptionAutoRefreshKeys.delete(key)
-
-        if (result === null) {
-          if (wasCancelled) {
-            scheduleSubscriptionTabAutoRefresh(tab, profileId, Date.now() + getSubscriptionTabAutoRefreshInterval(tab))
-          } else {
-            scheduleSubscriptionTabAutoRefreshLockRetry(tab, profileId)
-          }
-        }
-      } catch (error) {
-        cancelledSubscriptionAutoRefreshKeys.delete(key)
-        console.error(`Failed to auto refresh subscription ${tab}`, error)
-        scheduleSubscriptionTabAutoRefreshRetry(
-          tab,
-          profileId,
-          SUBSCRIPTION_AUTO_REFRESH_FAILURE_RETRY_INTERVAL
-        )
-      } finally {
-        pendingSubscriptionAutoRefreshKeys.delete(key)
-      }
-    }
-  } finally {
-    processingSubscriptionAutoRefreshes = false
-  }
-}
-
-/**
- * @param {'videos' | 'shorts' | 'live' | 'posts'} tab
- * @param {string} profileId
- */
-function scheduleSubscriptionTabAutoRefreshLockRetry(tab, profileId) {
-  scheduleSubscriptionTabAutoRefreshRetry(tab, profileId, SUBSCRIPTION_AUTO_REFRESH_LOCK_RETRY_INTERVAL)
-}
-
-/**
- * @param {'videos' | 'shorts' | 'live' | 'posts'} tab
- * @param {string} profileId
- * @param {number} delay
- */
-function scheduleSubscriptionTabAutoRefreshRetry(tab, profileId, delay) {
-  if (profileId !== activeSubscriptionProfileId.value) {
-    return
-  }
-
-  clearSubscriptionTabAutoRefreshTimer(tab)
-  subscriptionAutoRefreshTimers[tab] = setTimeout(() => {
-    subscriptionAutoRefreshTimers[tab] = null
-    enqueueSubscriptionAutoRefresh(tab, profileId)
-  }, delay)
-}
-
-function refreshOverdueSubscriptionFeeds() {
-  const profileId = activeSubscriptionProfileId.value
-  if (!dataReady.value || !profileId) {
-    return
-  }
-
-  for (const tab of subscriptionAutoRefreshTabs) {
-    const timestamp = getStoredSubscriptionTabNextAutoRefreshTimestamp(profileId, tab)
-    if (timestamp !== null && timestamp <= Date.now() && isSubscriptionTabAutoRefreshEnabled(tab)) {
-      enqueueSubscriptionAutoRefresh(tab, profileId)
-    } else {
-      scheduleSubscriptionTabAutoRefresh(tab, profileId, timestamp)
-    }
-  }
-}
-
-async function handleSubscriptionAutoRefreshVisibilityChange() {
-  if (!isAppHidden()) {
-    synchronizeSubscriptionRefreshInProgress()
-    if ((isCapacitor || isElectron) && subscriptionCacheReady.value) {
-      await reconcileAndroidSubscriptionRefreshResults()
-    }
-    refreshOverdueSubscriptionFeeds()
-  }
-}
-
-async function synchronizeSubscriptionRefreshInProgress() {
-  const version = ++androidSubscriptionRefreshStateVersion
-  clearTimeout(androidSubscriptionRefreshStateTimer)
-  androidSubscriptionRefreshStateTimer = null
-  try {
-    let state
-    if (process.env.IS_ELECTRON) {
-      state = await window.ftElectron.subscriptionAutoRefresh.isInProgress()
-    } else if (process.env.IS_CAPACITOR && !process.env.IS_IOS) {
-      state = await getAndroidSubscriptionRefreshState()
-      if (version !== androidSubscriptionRefreshStateVersion) return
-      // This renderer already publishes its own start/progress/finish events.
-      // In particular, an idle Refresh All batch must not block its next feed.
-      if (state.ownedByRenderer) return
-      applySubscriptionAutoRefreshState(state)
-      if (subscriptionCacheReady.value && !isAppHidden()) {
-        await reconcileAndroidSubscriptionRefreshResults()
-        // A retained renderer writes directly to the shared cache rather than
-        // the scheduled worker's result queue. Limit full cache/feed rebuilds
-        // while progress moves, then flush the remaining writes on completion.
-        // The first native read also catches writes after the startup cache load.
-        const progress = state.rendererActive ? `${state.tab}:${state.percentage}` : null
-        if (androidExternalRefreshReloadTime === null ||
-          (progress !== androidExternalRefreshProgress &&
-            (progress === null || androidExternalRefreshProgress === null ||
-              performance.now() - androidExternalRefreshReloadTime >= 5000))) {
-          await store.dispatch('grabAllSubscriptions')
-          androidExternalRefreshProgress = progress
-          androidExternalRefreshReloadTime = performance.now()
-          for (const tab of subscriptionAutoRefreshTabs) notifySubscriptionChannelRefreshed(tab)
-        }
-      }
-      if (version === androidSubscriptionRefreshStateVersion && state.inProgress && !isAppHidden()) {
-        androidSubscriptionRefreshStateTimer = setTimeout(synchronizeSubscriptionRefreshInProgress, 1000)
-      }
-      return
-    } else if (navigator.locks) {
-      const { held } = await navigator.locks.query()
-      const inProgress = held.some(lock => lock.name === SUBSCRIPTION_REFRESH_LOCK_NAME)
-      if (!inProgress) {
-        localStorage.removeItem(SUBSCRIPTION_AUTO_REFRESH_PROGRESS_STORAGE_KEY)
-      }
-      const progressState = inProgress ? getStoredSubscriptionRefreshProgressState() : null
-      state = {
-        inProgress,
-        percentage: progressState?.percentage ?? 0,
-        tab: progressState?.tab ?? null
-      }
-    } else {
-      const progressState = getStoredSubscriptionRefreshProgressState()
-      state = {
-        inProgress: progressState !== null,
-        percentage: progressState?.percentage ?? 0,
-        tab: progressState?.tab ?? null
-      }
-    }
-
-    applySubscriptionAutoRefreshState(state)
-  } catch {
-    // Live start/finish events still keep the common path synchronized.
-    if (process.env.IS_CAPACITOR && !process.env.IS_IOS && version === androidSubscriptionRefreshStateVersion && !isAppHidden()) {
-      androidSubscriptionRefreshStateTimer = setTimeout(synchronizeSubscriptionRefreshInProgress, 1000)
-    }
-  }
-}
-
-/**
- * @param {'videos' | 'shorts' | 'live' | 'posts'} tab
- */
-function getSubscriptionAutoRefreshInterval(tab) {
-  switch (tab) {
-    case 'shorts':
-      return subscriptionShortsAutoRefreshInterval
-    case 'live':
-      return subscriptionLiveAutoRefreshInterval
-    case 'posts':
-      return subscriptionPostsAutoRefreshInterval
-    default:
-      return subscriptionFeedAutoRefreshInterval
-  }
-}
-
-/**
- * @param {'videos' | 'shorts' | 'live' | 'posts'} tab
- */
-function getSubscriptionTabRefreshHandler(tab) {
-  switch (tab) {
-    case 'shorts':
-      return refreshSubscriptionShortsFromRemote
-    case 'live':
-      return refreshSubscriptionLiveFromRemote
-    case 'posts':
-      return refreshSubscriptionPostsFromRemote
-    default:
-      return refreshSubscriptionVideosFromRemote
-  }
-}
-
-/**
- * @param {'videos' | 'shorts' | 'live' | 'posts'} tab
- */
-function getSubscriptionTabAutoRefreshInterval(tab) {
-  return parseInt(getSubscriptionAutoRefreshInterval(tab).value, 10)
-}
-
-/**
- * @param {'videos' | 'shorts' | 'live' | 'posts'} tab
- */
-function isSubscriptionTabAutoRefreshEnabled(tab) {
-  const interval = getSubscriptionTabAutoRefreshInterval(tab)
-
-  return (
-    dataReady.value &&
-    !isSubscriptionTabHidden(tab) &&
-    !Number.isNaN(interval) &&
-    interval > 0
-  )
-}
-
-/**
- * @param {'videos' | 'shorts' | 'live' | 'posts'} tab
- */
-function isSubscriptionTabHidden(tab) {
-  switch (tab) {
-    case 'shorts':
-      return hideSubscriptionsShorts.value
-    case 'live':
-      return hideSubscriptionsLive.value
-    case 'posts':
-      return hideSubscriptionsPosts.value
-    default:
-      return hideSubscriptionsVideos.value
-  }
-}
-
-/**
- * @param {'videos' | 'shorts' | 'live' | 'posts'} tab
- * @param {string} profileId
- * @param {number | null} timestamp
- */
-function setSubscriptionTabNextAutoRefreshTimestamp(tab, profileId, timestamp) {
-  setStoredSubscriptionTabNextAutoRefreshTimestamp(profileId, tab, timestamp)
-
-  if (profileId === activeSubscriptionProfileId.value) {
-    commitSubscriptionTabNextAutoRefreshTimestamp(tab, timestamp)
-  }
-}
-
-/**
- * @param {'videos' | 'shorts' | 'live' | 'posts'} tab
- * @param {number | null} timestamp
- */
-function commitSubscriptionTabNextAutoRefreshTimestamp(tab, timestamp) {
-  switch (tab) {
-    case 'shorts':
-      store.commit('setSubscriptionShortsNextAutoRefreshTimestamp', timestamp)
-      break
-    case 'live':
-      store.commit('setSubscriptionLiveNextAutoRefreshTimestamp', timestamp)
-      break
-    case 'posts':
-      store.commit('setSubscriptionPostsNextAutoRefreshTimestamp', timestamp)
-      break
-    default:
-      store.commit('setSubscriptionFeedNextAutoRefreshTimestamp', timestamp)
-  }
-}
-
-/**
- * @param {'videos' | 'shorts' | 'live' | 'posts'} tab
- * @param {number | null} timestamp
- */
-function commitSubscriptionTabLastRefreshTimestamp(tab, timestamp) {
-  switch (tab) {
-    case 'shorts':
-      store.commit('setSubscriptionShortsLastRefreshTimestamp', timestamp)
-      break
-    case 'live':
-      store.commit('setSubscriptionLiveLastRefreshTimestamp', timestamp)
-      break
-    case 'posts':
-      store.commit('setSubscriptionPostsLastRefreshTimestamp', timestamp)
-      break
-    default:
-      store.commit('setSubscriptionFeedLastRefreshTimestamp', timestamp)
-  }
-}
-
-/**
- * @param {string} prefix
- * @param {string} profileId
- * @param {'videos' | 'shorts' | 'live' | 'posts'} tab
- */
-function getSubscriptionAutoRefreshStorageKey(prefix, profileId, tab) {
-  return `${prefix}${encodeURIComponent(profileId)}/${tab}`
-}
-
-/**
- * @param {string} key
- */
-function getStoredSubscriptionAutoRefreshTimestamp(key) {
-  try {
-    const timestamp = Number(localStorage.getItem(key))
-    return Number.isFinite(timestamp) && timestamp > 0 ? timestamp : null
-  } catch {
-    return null
-  }
-}
-
-/**
- * @param {string} key
- * @param {number | null} timestamp
- */
-function setStoredSubscriptionAutoRefreshTimestamp(key, timestamp) {
-  try {
-    if (timestamp === null) {
-      localStorage.removeItem(key)
-    } else {
-      localStorage.setItem(key, String(timestamp))
-    }
-  } catch {
-    // Auto refresh still works for the current session when storage is unavailable.
-  }
-}
-
-/**
- * @param {string} profileId
- * @param {'videos' | 'shorts' | 'live' | 'posts'} tab
- */
-function getStoredSubscriptionTabNextAutoRefreshTimestamp(profileId, tab) {
-  const key = getSubscriptionAutoRefreshStorageKey(
-    SUBSCRIPTION_AUTO_REFRESH_DEADLINE_STORAGE_KEY_PREFIX,
-    profileId,
-    tab
-  )
-  const timestamp = getStoredSubscriptionAutoRefreshTimestamp(key)
-  return timestamp
-}
-
-function migrateLegacySubscriptionAutoRefreshDeadlines() {
-  for (const tab of subscriptionAutoRefreshTabs) {
-    const legacyKey = `${LEGACY_SUBSCRIPTION_AUTO_REFRESH_STORAGE_KEY_PREFIX}${tab}`
-    const legacyTimestamp = getStoredSubscriptionAutoRefreshTimestamp(legacyKey)
-    if (legacyTimestamp === null) {
-      continue
-    }
-
-    for (const profile of store.getters.getProfileList) {
-      const profileKey = getSubscriptionAutoRefreshStorageKey(
-        SUBSCRIPTION_AUTO_REFRESH_DEADLINE_STORAGE_KEY_PREFIX,
-        profile._id,
-        tab
-      )
-      if (getStoredSubscriptionAutoRefreshTimestamp(profileKey) === null) {
-        setStoredSubscriptionAutoRefreshTimestamp(profileKey, legacyTimestamp)
-      }
-    }
-
-    setStoredSubscriptionAutoRefreshTimestamp(legacyKey, null)
-  }
-}
-
-/**
- * @param {string} profileId
- * @param {'videos' | 'shorts' | 'live' | 'posts'} tab
- * @param {number | null} timestamp
- */
-function setStoredSubscriptionTabNextAutoRefreshTimestamp(profileId, tab, timestamp) {
-  setStoredSubscriptionAutoRefreshTimestamp(
-    getSubscriptionAutoRefreshStorageKey(
-      SUBSCRIPTION_AUTO_REFRESH_DEADLINE_STORAGE_KEY_PREFIX,
-      profileId,
-      tab
-    ),
-    timestamp
-  )
-}
-
-/**
- * @param {string} profileId
- * @param {'videos' | 'shorts' | 'live' | 'posts'} tab
- */
-function getStoredSubscriptionTabLastRefreshTimestamp(profileId, tab) {
-  return getStoredSubscriptionAutoRefreshTimestamp(
-    getSubscriptionAutoRefreshStorageKey(
-      SUBSCRIPTION_AUTO_REFRESH_COMPLETION_STORAGE_KEY_PREFIX,
-      profileId,
-      tab
-    )
-  )
-}
-
-/**
- * @param {string} profileId
- */
-function synchronizeSubscriptionAutoRefreshProfile(profileId) {
-  for (const tab of subscriptionAutoRefreshTabs) {
-    commitSubscriptionTabLastRefreshTimestamp(
-      tab,
-      getStoredSubscriptionTabLastRefreshTimestamp(profileId, tab)
-    )
-    scheduleSubscriptionTabAutoRefresh(tab, profileId)
-  }
-}
-
-/**
- * @param {CustomEvent<{tab: 'videos' | 'shorts' | 'live' | 'posts', profileId: string}>} event
- */
-function handleSubscriptionRefreshCancelled(event) {
-  const { tab, profileId } = event.detail
-  if (
-    profileId !== activeSubscriptionProfileId.value ||
-    !subscriptionAutoRefreshTabs.includes(tab)
-  ) {
-    return
-  }
-
-  cancelledSubscriptionAutoRefreshKeys.add(`${profileId}:${tab}`)
-  if (process.env.IS_CAPACITOR && !process.env.IS_IOS) {
-    // A reopened renderer has no local refresh promise to reschedule. Move its
-    // overdue timer now so cancelling native work does not immediately restart it.
-    const storedTimestamp = getStoredSubscriptionTabNextAutoRefreshTimestamp(profileId, tab)
-    const now = Date.now()
-    const timestamp = !isSubscriptionTabAutoRefreshEnabled(tab)
-      ? null
-      : storedTimestamp === null || storedTimestamp <= now
-        ? now + getSubscriptionTabAutoRefreshInterval(tab)
-        : storedTimestamp
-    setStoredSubscriptionTabNextAutoRefreshTimestamp(profileId, tab, timestamp)
-    scheduleSubscriptionTabAutoRefresh(tab, profileId, timestamp)
-  }
-}
-
-/**
- * @param {CustomEvent<{tab: 'videos' | 'shorts' | 'live' | 'posts', profileId: string, timestamp: number}>} event
- */
-function handleSubscriptionRefreshCompleted(event) {
-  const { tab, profileId, timestamp } = event.detail
-  if (
-    !subscriptionAutoRefreshTabs.includes(tab) ||
-    typeof profileId !== 'string' ||
-    !Number.isFinite(timestamp) ||
-    timestamp < getStoredSubscriptionTabLastRefreshTimestamp(profileId, tab)
-  ) {
-    return
-  }
-
-  if (isElectron) {
-    window.ftElectron.subscriptionAutoRefresh.backgroundCompleted({ profileId, feedType: tab, timestamp }).catch(console.error)
-  }
-  setStoredSubscriptionAutoRefreshTimestamp(
-    getSubscriptionAutoRefreshStorageKey(
-      SUBSCRIPTION_AUTO_REFRESH_COMPLETION_STORAGE_KEY_PREFIX,
-      profileId,
-      tab
-    ),
-    timestamp
-  )
-
-  const interval = parseInt(getSubscriptionAutoRefreshInterval(tab).value, 10)
-  const nextTimestamp = isSubscriptionTabAutoRefreshEnabled(tab) ? timestamp + interval : null
-  setStoredSubscriptionTabNextAutoRefreshTimestamp(profileId, tab, nextTimestamp)
-
-  if (profileId === activeSubscriptionProfileId.value) {
-    commitSubscriptionTabLastRefreshTimestamp(tab, timestamp)
-    scheduleSubscriptionTabAutoRefresh(tab, profileId, nextTimestamp)
-  }
-}
-
-/**
- * @param {CustomEvent<{tab: string, profileId: string, refreshId: number}>} event
- */
-async function handleSubscriptionRefreshStarted(event) {
-  const isCurrentStart = subscriptionRefreshStartGuard.begin()
-  if (isCapacitor) {
-    const { acquired, notificationsDenied } = await startAndroidSubscriptionRefresh(
-      event.detail.refreshId,
-      getSubscriptionRefreshNotificationTitle(event.detail.tab),
-      t('Feed.Cancel Refresh'),
-      event.detail.tab
-    )
-    if (!isCurrentStart()) return
-    if (notificationsDenied) showAndroidSubscriptionRefreshNotificationWarning()
-    if (!acquired) {
-      cancelSubscriptionRefresh()
-    }
-  }
-  if (!process.env.IS_ELECTRON) {
-    try {
-      localStorage.setItem(SUBSCRIPTION_AUTO_REFRESH_PROGRESS_STORAGE_KEY, JSON.stringify({
-        ...event.detail,
-        percentage: 0
-      }))
-    } catch {
-      // The owner still has its renderer-local progress state.
-    }
-  }
-  applySubscriptionAutoRefreshState({
-    inProgress: true,
-    percentage: 0,
-    tab: event.detail.tab
-  })
-}
-
-const subscriptionRefreshStartGuard = createSubscriptionRefreshStartGuard()
-let androidSubscriptionRefreshNotificationWarningShown = false
-
-function showAndroidSubscriptionRefreshNotificationWarning() {
-  if (androidSubscriptionRefreshNotificationWarningShown) return
-  androidSubscriptionRefreshNotificationWarningShown = true
-  showToast({
-    message: t('Video.Notification unavailable'),
-    icon: ['fas', 'triangle-exclamation'],
-    buttons: [{
-      label: t('Settings.Settings'),
-      primary: true,
-      action: () => openNotificationSettings()
-    }]
-  })
-}
-
-/**
- * @param {CustomEvent<{
- *   percentage: number,
- *   ownerTabId?: string | null,
- *   refreshId?: number
- * }>} event
- */
-function handleSubscriptionRefreshProgress(event) {
-  const percentage = normalizeSubscriptionRefreshProgress(event.detail.percentage)
-  store.commit('setSubscriptionFeedRefreshProgress', percentage)
-
-  if (isCapacitor) {
-    updateAndroidSubscriptionRefresh(event.detail.refreshId, percentage)
-  }
-
-  if (process.env.IS_ELECTRON) {
-    window.ftElectron.subscriptionAutoRefresh.setProgress(
-      event.detail.ownerTabId ?? store.getters.getActiveTabId,
-      percentage
-    )
-    return
-  }
-
-  try {
-    const progressState = getStoredSubscriptionRefreshProgressState() ?? {}
-    localStorage.setItem(SUBSCRIPTION_AUTO_REFRESH_PROGRESS_STORAGE_KEY, JSON.stringify({
-      ...progressState,
-      percentage
-    }))
-  } catch {
-    // The owner still has its renderer-local progress state.
-  }
-}
-
-/**
- * @param {CustomEvent<{refreshId: number}>} event
- */
-function handleSubscriptionRefreshFinished(event) {
-  subscriptionRefreshStartGuard.finish()
-  if (!process.env.IS_ELECTRON) {
-    try {
-      localStorage.removeItem(SUBSCRIPTION_AUTO_REFRESH_PROGRESS_STORAGE_KEY)
-    } catch {
-      // The owner still clears its renderer-local progress state.
-    }
-  }
-  applySubscriptionAutoRefreshState({ inProgress: false, percentage: 0 })
-}
-
-function getSubscriptionRefreshNotificationTitle(tab) {
-  switch (tab) {
-    case 'shorts':
-      return t('Subscriptions.Refreshing Subscription Shorts')
-    case 'live':
-      return t('Subscriptions.Refreshing Subscription Live Streams')
-    case 'posts':
-      return t('Subscriptions.Refreshing Subscription Posts')
-    default:
-      return t('Subscriptions.Refreshing Subscription Videos')
-  }
-}
-
-let reconcilingAndroidSubscriptionRefreshResults = null
-
-function reconcileAndroidSubscriptionRefreshResults() {
-  if (reconcilingAndroidSubscriptionRefreshResults) return reconcilingAndroidSubscriptionRefreshResults
-  const importing = isElectron
-    ? navigator.locks.request('opentubex-background-subscription-import', importAndroidSubscriptionRefreshResults)
-    : importAndroidSubscriptionRefreshResults()
-  reconcilingAndroidSubscriptionRefreshResults = importing.finally(() => {
-    reconcilingAndroidSubscriptionRefreshResults = null
-  })
-  return reconcilingAndroidSubscriptionRefreshResults
-}
-
-async function importAndroidSubscriptionRefreshResults() {
-  try {
-    while (true) {
-      const result = await getNextAndroidSubscriptionRefreshResult()
-      if (result === null) return
-
-      if (
-        typeof result.id !== 'string' ||
-        typeof result.profileId !== 'string' ||
-        !subscriptionAutoRefreshTabs.includes(result.feedType)
-      ) {
-        await acknowledgeAndroidSubscriptionRefreshResult(result.id)
-        continue
-      }
-
-      if (result.kind === 'channel') {
-        await processAndroidSubscriptionRefreshChannelResult(
-          result,
-          reconcileAndroidSubscriptionRefreshChannelResult,
-          acknowledgeAndroidSubscriptionRefreshResult
-        )
-        continue
-      } else if (result.kind === 'completion' && store.getters.profileById(result.profileId)) {
-        handleSubscriptionRefreshCompleted({
-          detail: {
-            tab: result.feedType,
-            profileId: result.profileId,
-            timestamp: Number(result.timestamp) || Date.now()
-          }
-        })
-      } else if (
-        result.kind === 'failure' &&
-        result.diagnostic &&
-        store.getters.profileById(result.profileId)
-      ) {
-        const diagnostic = formatRequestDiagnostic(result.diagnostic)
-        console.error(`Closed-app subscription refresh request failed: ${diagnostic}`)
-        showApiErrorToast(store.getters.getBackendPreference === 'local' ? t('Local API Error (Click to copy)') : getInvidiousApiErrorMessage(store.getters.getBackendPreference), diagnostic)
-      }
-
-      await acknowledgeAndroidSubscriptionRefreshResult(result.id)
-    }
-  } catch (error) {
-    console.error('Failed to reconcile closed-app subscription refresh data', error)
-  }
-}
-
-async function reconcileAndroidSubscriptionRefreshChannelResult(result) {
-  if (
-    typeof result.channelId !== 'string' ||
-    !store.getters.getSubscribedChannelIdSet.has(result.channelId)
-  ) {
-    return
-  }
-
-  const feedType = result.feedType
-  const timestamp = new Date(Number(result.timestamp) || Date.now())
-  const config = getAndroidSubscriptionCacheConfig(feedType)
-  const previousCache = config.getCache()[result.channelId]
-  if (previousCache?.timestamp > timestamp) return
-  let entries = result.payload?.backgroundFormat === 'entries'
-    ? result.payload.entries
-    : result.payload?.backgroundFormat === 'rss'
-      ? (() => {
-          try { return parseSubscriptionRss(result.payload.text, result.channelId).videos } catch (error) {
-            throw new AndroidSubscriptionRefreshPayloadError(error)
-          }
-        })()
-      : normalizeAndroidSubscriptionRefreshPayload(
-          result.payload?.backgroundFormat?.startsWith('local')
-            ? (type, payload, id) => normalizeLocalSubscriptionFeed(type, payload, id, timestamp.getTime())
-            : normalizeInvidiousSubscriptionFeed,
-          feedType,
-          result.payload,
-          result.channelId
-        )
-  if (!Array.isArray(entries)) throw new AndroidSubscriptionRefreshPayloadError(new Error('Invalid saved entries'))
-  entries = entries.filter(entry => !shouldHideMembersOnlyContent(entry.isMembersOnly, store.getters))
-  if (feedType !== 'posts') {
-    const channel = store.getters.getSubscribedChannelsById.get(result.channelId)
-    const cachedThumbnails = new Map((previousCache?.videos ?? []).map(video => [video.videoId, video.thumbnailUrl]))
-    for (const entry of entries) {
-      if (!entry.author || entry.author === 'N/A') entry.author = channel?.name
-      if (!entry.authorId || entry.authorId === 'N/A') entry.authorId = result.channelId
-      if (feedType === 'shorts') {
-        entry.isShort = true
-        // RSS has no selected portrait image; keep the last known Shorts thumbnail.
-        entry.thumbnailUrl ||= cachedThumbnails.get(entry.videoId)
-      }
-    }
-  }
-  if (feedType === 'shorts') {
-    // Yattee Shorts are dated through the server like in foreground refreshes, not by YouTube
-    entries = store.getters.getBackendPreference === 'yattee' && !result.payload?.backgroundFormat?.startsWith('local')
-      ? await fillYatteeShortDates(entries, previousCache?.[config.entriesKey], invidiousGetVideoInformation)
-      : await enrichSubscriptionShortDates(entries, result.channelId)
-  }
-  entries = await enrichSubscriptionRssEntries(entries)
-  const reconciledEntries = reconcileFetchedSubscriptionEntries(
-    entries,
-    previousCache?.[config.entriesKey],
-    config.idKey,
-    previousCache?.timestamp,
-    feedType === 'posts' ? undefined : store.getters.getHistoryCacheById
-  )
-
-  const applied = await store.dispatch(config.action, {
-    channelId: result.channelId,
-    [config.entriesKey]: reconciledEntries,
-    timestamp
-  })
-  if (applied === false) return
-
-  const committedTimestamp = config.getCache()[result.channelId]?.timestamp
-  if (!(committedTimestamp instanceof Date) || committedTimestamp.getTime() < timestamp.getTime()) {
-    throw new Error(`The ${feedType} cache write did not complete`)
-  }
-  notifySubscriptionChannelRefreshed(feedType)
-}
-
-function getAndroidSubscriptionCacheConfig(feedType) {
-  switch (feedType) {
-    case 'shorts':
-      return {
-        action: 'updateSubscriptionShortsCacheByChannel',
-        entriesKey: 'videos',
-        idKey: 'videoId',
-        getCache: () => store.getters.getShortsCache
-      }
-    case 'live':
-      return {
-        action: 'updateSubscriptionLiveCacheByChannel',
-        entriesKey: 'videos',
-        idKey: 'videoId',
-        getCache: () => store.getters.getLiveCache
-      }
-    case 'posts':
-      return {
-        action: 'updateSubscriptionPostsCacheByChannel',
-        entriesKey: 'posts',
-        idKey: 'postId',
-        getCache: () => store.getters.getPostsCache
-      }
-    default:
-      return {
-        action: 'updateSubscriptionVideosCacheByChannel',
-        entriesKey: 'videos',
-        idKey: 'videoId',
-        getCache: () => store.getters.getVideoCache
-      }
-  }
-}
-
-/**
- * @param {StorageEvent} event
- */
-function handleSubscriptionAutoRefreshStorage(event) {
-  if (!process.env.IS_ELECTRON && event.key === SUBSCRIPTION_REFRESH_CANCEL_STORAGE_KEY) {
-    if (event.newValue !== null) {
-      cancelSubscriptionRefresh()
-    }
-    return
-  }
-
-  if (!process.env.IS_ELECTRON && event.key === SUBSCRIPTION_AUTO_REFRESH_PROGRESS_STORAGE_KEY) {
-    if (process.env.IS_CAPACITOR && !process.env.IS_IOS) {
-      synchronizeSubscriptionRefreshInProgress()
-      return
-    }
-    const state = getSubscriptionRefreshProgressState(event.newValue)
-    applySubscriptionAutoRefreshState({
-      inProgress: state !== null,
-      percentage: state?.percentage ?? 0,
-      tab: state?.tab ?? null
-    })
-    return
-  }
-
-  const deadline = parseSubscriptionAutoRefreshStorageKey(
-    event.key,
-    SUBSCRIPTION_AUTO_REFRESH_DEADLINE_STORAGE_KEY_PREFIX
-  )
-  if (deadline && deadline.profileId === activeSubscriptionProfileId.value) {
-    const timestamp = Number(event.newValue)
-    if (event.newValue === null || !Number.isFinite(timestamp) || timestamp <= 0) {
-      clearSubscriptionTabAutoRefreshTimer(deadline.tab)
-      commitSubscriptionTabNextAutoRefreshTimestamp(deadline.tab, null)
-    } else {
-      scheduleSubscriptionTabAutoRefresh(deadline.tab, deadline.profileId, timestamp)
-    }
-    return
-  }
-
-  const completion = parseSubscriptionAutoRefreshStorageKey(
-    event.key,
-    SUBSCRIPTION_AUTO_REFRESH_COMPLETION_STORAGE_KEY_PREFIX
-  )
-  if (completion && completion.profileId === activeSubscriptionProfileId.value) {
-    const timestamp = Number(event.newValue)
-    commitSubscriptionTabLastRefreshTimestamp(
-      completion.tab,
-      Number.isFinite(timestamp) && timestamp > 0 ? timestamp : null
-    )
-  }
-}
-
-/**
- * @param {{inProgress: boolean, percentage: number, tab?: string | null}} state
- */
-function applySubscriptionAutoRefreshState(state) {
-  const wasInProgress = store.getters.getSubscriptionFeedRefreshInProgress
-  const previousTab = store.getters.getSubscriptionFeedRefreshTab
-  const nextTab = state.inProgress ? state.tab ?? null : null
-  let percentage = normalizeSubscriptionRefreshProgress(state.percentage)
-
-  // The refresh owner updates progress locally before the main process broadcasts
-  // it to every renderer. An older broadcast can therefore arrive after a newer
-  // local update, so keep progress monotonic for the duration of this refresh.
-  if (state.inProgress && wasInProgress && nextTab === previousTab) {
-    percentage = Math.max(store.getters.getSubscriptionFeedRefreshProgress, percentage)
-  }
-
-  store.commit('setSubscriptionFeedRefreshInProgress', state.inProgress)
-  store.commit('setSubscriptionFeedRefreshTab', nextTab)
-  store.commit('setSubscriptionFeedRefreshProgress', percentage)
-}
-
-/**
- * @param {number} percentage
- */
-function normalizeSubscriptionRefreshProgress(percentage) {
-  return Number.isFinite(percentage) ? Math.min(100, Math.max(0, percentage)) : 0
-}
-
-function getStoredSubscriptionRefreshProgressState() {
-  try {
-    return getSubscriptionRefreshProgressState(
-      localStorage.getItem(SUBSCRIPTION_AUTO_REFRESH_PROGRESS_STORAGE_KEY)
-    )
-  } catch {
-    return null
-  }
-}
-
-/**
- * @param {string | null} value
- * @returns {{percentage: number, tab?: string} | null}
- */
-function getSubscriptionRefreshProgressState(value) {
-  if (value === null) {
-    return null
-  }
-
-  try {
-    const state = JSON.parse(value)
-    return {
-      ...state,
-      percentage: normalizeSubscriptionRefreshProgress(state.percentage)
-    }
-  } catch {
-    return null
-  }
-}
-
-/**
- * @param {string | null} key
- * @param {string} prefix
- * @returns {{profileId: string, tab: 'videos' | 'shorts' | 'live' | 'posts'} | null}
- */
-function parseSubscriptionAutoRefreshStorageKey(key, prefix) {
-  if (!key?.startsWith(prefix)) {
-    return null
-  }
-
-  const separatorIndex = key.lastIndexOf('/')
-  const tab = key.slice(separatorIndex + 1)
-  if (separatorIndex < prefix.length || !subscriptionAutoRefreshTabs.includes(tab)) {
-    return null
-  }
-
-  try {
-    return {
-      profileId: decodeURIComponent(key.slice(prefix.length, separatorIndex)),
-      tab
-    }
-  } catch {
-    return null
-  }
-}
-
-function clearSubscriptionFeedAutoRefreshTimer() {
-  clearSubscriptionTabAutoRefreshTimer('videos')
-  clearSubscriptionTabAutoRefreshTimer('shorts')
-  clearSubscriptionTabAutoRefreshTimer('live')
-  clearSubscriptionTabAutoRefreshTimer('posts')
-}
-
-/**
- * @param {'videos' | 'shorts' | 'live' | 'posts'} tab
- */
-function clearSubscriptionTabAutoRefreshTimer(tab) {
-  clearTimeout(subscriptionAutoRefreshTimers[tab])
-  subscriptionAutoRefreshTimers[tab] = null
-}
+const {
+  addSubscriptionRefreshListeners,
+  listenForAndroidSubscriptionRefreshCancellation
+} = useSubscriptionAutoRefresh({ dataReady, t })
 
 /** @type {import('vue').ComputedRef<string>} */
 const baseTheme = computed(() => store.getters.getBaseTheme)
-const capacitorUiScale = isCapacitor ? createCapacitorUiScale(window, document) : null
-watch(() => store.getters.getUiScale, value => {
-  capacitorUiScale?.setScale(value)
-  document.documentElement.style.setProperty('--phone-touch-target', `${Math.max(48, 4800 / value)}px`)
-}, { immediate: true })
-onBeforeUnmount(setupPhoneViewport(window, document, isCapacitor && !process.env.IS_IOS))
-onBeforeUnmount(() => capacitorUiScale?.dispose())
-
-const appFont = computed(() => store.getters.getAppFont)
+let appearanceSettingsReady = false
 let removeCustomThemeListener = () => {}
-const systemColorScheme = window.matchMedia('(prefers-color-scheme: dark)')
-const systemUsesDarkTheme = ref(systemColorScheme.matches)
-systemColorScheme.addEventListener('change', handleSystemColorSchemeChange)
-
-if (isCapacitor) {
-  let dynamicColorsListener
-  let disposed = false
-  const receiveColors = (colors) => {
-    if (disposed) return
-    androidDynamicColors.value = colors
-    const theme = baseTheme.value === 'system'
-      ? (systemUsesDarkTheme.value ? store.getters.getSystemDarkTheme : store.getters.getSystemLightTheme)
-      : baseTheme.value
-    if (MATERIAL_THEME_VALUES.includes(theme)) updateTheme()
-  }
-  onMounted(async () => {
-    try {
-      dynamicColorsListener = await onAndroidDynamicColorsChanged(receiveColors)
-      if (disposed) {
-        await dynamicColorsListener?.remove()
-        return
-      }
-      receiveColors(await getAndroidDynamicColors())
-    } catch (error) {
-      console.error('Failed to load Android dynamic colors:', error)
-    }
-  })
-  onBeforeUnmount(() => {
-    disposed = true
-    dynamicColorsListener?.remove()
-  })
-}
-
-if (isElectron) {
-  let disposed = false
-  let receivedUpdate = false
-  const receiveAccent = color => {
-    if (disposed) return
-    desktopSystemAccentColor.value = normalizeSystemAccentColor(color)
-    if (baseTheme.value === 'dynamic' || store.getters.getMaterialSeedColor === MATERIAL_SYSTEM_SEED) updateTheme()
-  }
-  const removeListener = window.ftElectron.handleSystemAccentColorUpdated(color => {
-    receivedUpdate = true
-    receiveAccent(color)
-  })
-  window.ftElectron.getSystemAccentColor().then(color => {
-    if (!receivedUpdate) receiveAccent(color)
-  }).catch(error => console.error('Failed to load system accent color:', error))
-  onBeforeUnmount(() => {
-    disposed = true
-    removeListener()
-  })
-}
+const {
+  systemUsesDarkTheme,
+  refreshTrayIcon,
+  cacheCapacitorStartupAppearance,
+  updateSystemBarsStyle,
+  sanitizeAppearanceSettings
+} = useAppearance({ baseTheme, updateTheme, isAppearanceSettingsReady: () => appearanceSettingsReady })
 
 watch(baseTheme, updateTheme)
-watch(() => store.getters.getMaterialSeedColor, updateTheme)
-watch(appFont, updateAppFont)
-watch(() => store.getters.getSystemLightTheme, updateTheme)
-watch(() => store.getters.getSystemDarkTheme, updateTheme)
 
 /** @type {import('vue').ComputedRef<string>} */
 const mainColor = computed(() => store.getters.getMainColor)
 
 watch(mainColor, updateTheme)
-watch(() => store.getters.getHideStartupSplash, cacheCapacitorStartupAppearance)
-watch(() => store.getters.getCustomThemes, cacheCapacitorStartupAppearance)
 
 /** @type {import('vue').ComputedRef<string>} */
 const secColor = computed(() => store.getters.getSecColor)
 
 watch(secColor, updateTheme)
-
-/** @type {import('vue').ComputedRef<number>} */
-const uiRoundness = computed(() => store.getters.getUiRoundness)
-
-watch(uiRoundness, updateUiRoundness)
-
-/** @type {import('vue').ComputedRef<number>} */
-const scrollbarThumbWidth = computed(() => store.getters.getScrollbarThumbWidth)
-
-watch(scrollbarThumbWidth, updateScrollbarThumbWidth)
-
-/** @type {import('vue').ComputedRef<number>} */
-const thumbnailSize = computed(() => store.getters.getThumbnailSize)
-
-watch(thumbnailSize, updateThumbnailListSize)
-
-let appearanceSettingsReady = false
-watch(() => store.getters.getTrayIconPreset, refreshTrayIcon)
-
-function refreshTrayIcon() {
-  if (isElectron && appearanceSettingsReady) {
-    updateTrayIcon(store.getters.getTrayIconPreset).catch(error => console.error('Unable to update tray icon', error))
-  }
-}
 
 function updateTheme() {
   // Keep Android's cached native background until the saved theme is known.
@@ -3417,92 +1502,7 @@ function updateTheme() {
   updateSystemBarsStyle()
 }
 
-function cacheCapacitorStartupAppearance() {
-  if (!isCapacitor || !appearanceSettingsReady) return
-  const appearance = (dark) => {
-    const theme = baseTheme.value === 'system'
-      ? (dark ? store.getters.getSystemDarkTheme : store.getters.getSystemLightTheme)
-      : baseTheme.value
-    const background = getThemeBackground(theme, store.getters.getCustomThemes, dark, store.getters.getMaterialSeedColor)
-    return { background, dark: calculateColorLuminance(background) !== '#000000' }
-  }
-  cacheStartupAppearance({
-    light: appearance(false),
-    dark: appearance(true),
-    hideSplash: store.getters.getHideStartupSplash
-  })
-}
-
-function updateSystemBarsStyle() {
-  if (!Capacitor.isNativePlatform() || !Capacitor.isPluginAvailable('SystemBars')) return
-
-  // Native video needs a transparent WebView; use the theme backdrop behind it.
-  const bodyStyle = getComputedStyle(document.body)
-  const backgroundColor = bodyStyle.getPropertyValue('--bg-color').trim() || bodyStyle.backgroundColor
-  const usesDarkIcons = calculateColorLuminance(backgroundColor) === '#000000'
-  Promise.all([
-    setAndroidSystemBarsBackground(backgroundColor, ['system', 'dynamic'].includes(baseTheme.value)),
-    SystemBars.setStyle({
-      style: usesDarkIcons ? SystemBarsStyle.Light : SystemBarsStyle.Dark
-    })
-  ]).catch((error) => {
-    console.error('Failed to update system bar style:', error)
-  })
-}
-
-function updateAppFont() {
-  document.body.style.setProperty(
-    '--app-font-family',
-    getAppFontFamily(appFont.value)
-  )
-}
-
-async function sanitizeAppearanceSettings(customThemes) {
-  const systemThemes = resolveSystemThemeSettings({
-    systemLightTheme: store.getters.getSystemLightTheme,
-    systemDarkTheme: store.getters.getSystemDarkTheme,
-  }, customThemes)
-  const settings = [
-    ['BaseTheme', resolveBaseTheme(store.getters.getBaseTheme, 'system', customThemes)],
-    ['SystemLightTheme', systemThemes.systemLightTheme],
-    ['SystemDarkTheme', systemThemes.systemDarkTheme],
-    ['MainColor', resolveColor(store.getters.getMainColor, 'Red')],
-    ['SecColor', resolveColor(store.getters.getSecColor, 'Blue')],
-  ]
-
-  await Promise.all(settings.map(([name, value]) =>
-    store.getters[`get${name}`] === value ? null : store.dispatch(`update${name}`, value)))
-}
-
-function handleSystemColorSchemeChange(event) {
-  systemUsesDarkTheme.value = event.matches
-  if (['system', 'dynamic'].includes(baseTheme.value)) updateTheme()
-}
-
-function updateUiRoundness() {
-  document.body.style.setProperty('--ui-roundness', String(uiRoundness.value / 100))
-}
-
-function updateScrollbarThumbWidth() {
-  document.body.style.setProperty(
-    '--scrollbar-thumb-width',
-    `${normalizeScrollbarThumbWidth(scrollbarThumbWidth.value)}px`
-  )
-}
-
-// Setting these once on the body keeps a thumbnail size change from
-// re-rendering every list that shows thumbnails.
-function updateThumbnailListSize() {
-  for (const [property, value] of Object.entries(getThumbnailListStyles(thumbnailSize.value))) {
-    document.body.style.setProperty(property, value)
-  }
-}
-
 updateTheme()
-updateAppFont()
-updateUiRoundness()
-updateScrollbarThumbWidth()
-updateThumbnailListSize()
 
 const showReleaseNotes = ref(false)
 const changeLogTitle = ref('')
@@ -3758,227 +1758,6 @@ function goHistoryFromCommandPalette(offset) {
     return navigation.go(presentedTabId.value, offset)
   }
   return router.go(offset)
-}
-
-const ANDROID_EXIT_PROMPT_VALUES = ['quit', 'cancel', 'neverAskAgain']
-const androidExitPromptNames = computed(() => [
-  t('Close Confirmation.Quit'),
-  t('Cancel'),
-  t('Close Confirmation.Never Ask Again')
-])
-
-async function requestAndroidAppExit() {
-  if (!store.getters.getConfirmCloseApp) {
-    await exitAndroidApp()
-    return
-  }
-
-  showAndroidExitPrompt.value = true
-}
-
-/** @param {'quit' | 'cancel' | 'neverAskAgain' | null} option */
-async function handleAndroidExitPromptAnswer(option) {
-  showAndroidExitPrompt.value = false
-  if (option === 'neverAskAgain') {
-    await store.dispatch('updateConfirmCloseApp', false)
-  }
-  if (option === 'quit' || option === 'neverAskAgain') {
-    await exitAndroidApp()
-  }
-}
-
-function getAndroidBackTarget() {
-  const modalDialog = [...document.querySelectorAll('dialog:modal')].at(-1)
-  const settingsWindow = settingsWindowOpen.value ? document.querySelector('.settingsWindow') : null
-  const openDialog = [...document.querySelectorAll('dialog[open]')].at(-1)
-  const focused = document.activeElement instanceof HTMLElement ? document.activeElement : document
-  const prompt = [...document.querySelectorAll('.prompt:not([inert])')].at(-1)
-  const phoneSearch = document.querySelector('.topNav.phoneSearchOpen')
-  const phoneTabDialog = document.querySelector('.capacitorPhoneTabDialog')
-  const tabTarget = phoneTabDialog?.contains(focused) ? focused : phoneTabDialog
-  const searchTarget = phoneSearch?.contains(focused) ? focused : phoneSearch
-  // Color pickers in settings are teleported out of the window they belong to.
-  const colorPicker = document.querySelector('.colorPickerPopover')
-  const colorPickerTarget = colorPicker?.contains(focused) ? focused : colorPicker
-  // Focused popups inside a prompt or settings close before their window.
-  const promptTarget = prompt?.contains(focused) ? focused : prompt
-  return colorPickerTarget ?? modalDialog ?? promptTarget ?? (settingsWindow?.contains(focused) ? focused : settingsWindow) ?? openDialog ?? tabTarget ?? searchTarget ?? focused
-}
-
-async function handleAndroidBack() {
-  if (mobileContextLink.value !== null || mobileContextActions.value !== null) {
-    backMobileContextMenu()
-    return
-  }
-
-  const sideNavShown = isSideNavBackTarget()
-  const hadOpenLayer = hasVisibleGamepadLayer() || sideNavShown
-  const target = getAndroidBackTarget()
-  const escapeEvent = new KeyboardEvent('keydown', {
-    key: 'Escape',
-    code: 'Escape',
-    bubbles: true,
-    cancelable: true,
-  })
-
-  if (sideNavShown) {
-    closeSideNav()
-    return
-  }
-  if (!target.dispatchEvent(escapeEvent) || hadOpenLayer) {
-    return
-  }
-  if (document.fullscreenElement !== null) {
-    await document.exitFullscreen()
-    return
-  }
-
-  const tabId = presentedTabId.value
-  if (tabId && store.getters.getTabHistoryState(tabId).canGoBack) {
-    await navigation.back(tabId)
-    return
-  }
-
-  await requestAndroidAppExit()
-}
-
-function shouldInterceptAndroidBack() {
-  const tabId = presentedTabId.value
-  return Boolean(store.getters.getConfirmCloseApp ||
-    (tabId && store.getters.getTabHistoryState(tabId).canGoBack) ||
-    isSideNavShown() || settingsWindowOpen.value || isAnyPromptOpen.value ||
-    mobileContextLink.value || mobileContextActions.value ||
-    document.fullscreenElement || document.querySelector('.ftVideoPlayer.fullWindow, dialog[open], .topNav.phoneSearchOpen, .iconDropdown') ||
-    hasVisibleGamepadLayer())
-}
-
-/** Narrow layouts show the bottom navigation bar instead of the drawer. */
-function isSideNavShown() {
-  return isSideNavOpen.value && window.matchMedia('(width > 680px)').matches
-}
-
-/** Back closes the side nav only when no layer is open above it. */
-function isSideNavBackTarget() {
-  return isSideNavShown() && !isAnyPromptOpen.value && !settingsWindowOpen.value &&
-    !mobileContextLink.value && !mobileContextActions.value && !document.querySelector('dialog[open]') &&
-    !getAndroidBackPopup(document.activeElement ?? document.body)
-}
-
-/** @param {Element} target */
-function getAndroidBackPopup(target) {
-  const popup = target.closest?.('[data-settings-escape-scope], .iconDropdown, .colorPickerPopover, .contextMenu')
-  if (popup) return popup
-  const id = target.closest?.('[aria-expanded="true"][aria-controls]')?.getAttribute('aria-controls')
-  const controlled = id ? document.getElementById(id) : null
-  // Disclosure buttons also control panels, which Back does not close.
-  return controlled?.matches('[role="listbox"], [role="menu"], [role="dialog"]') ? controlled : null
-}
-
-/**
- * Shrink the visible part of a page into a card, like Android's in-app Back.
- * Pages have no visible fixed-position children, which a transform would move.
- * @param {HTMLElement} page
- */
-function getAndroidBackPageKeyframes(page) {
-  const bounds = page.getBoundingClientRect()
-  const top = Math.max(0, -bounds.top)
-  const left = Math.max(0, -bounds.left)
-  const bottom = Math.max(0, bounds.bottom - window.innerHeight)
-  const right = Math.max(0, bounds.right - window.innerWidth)
-  const transformOrigin = `${window.innerWidth / 2 - bounds.left}px ${window.innerHeight / 2 - bounds.top}px`
-  const visible = `${top}px ${right}px ${bottom}px ${left}px`
-  return [
-    { transformOrigin, transform: 'scale(1)', clipPath: `inset(${visible} round 0px)` },
-    { transformOrigin, transform: 'scale(0.9)', clipPath: `inset(${visible} round 32px)` }
-  ]
-}
-
-/** Use the first preview that can begin; the rest keep their ordinary Back. */
-function combineAndroidBackPreviews(previews) {
-  let active = null
-  return {
-    begin() {
-      active = previews.find(preview => preview?.begin()) ?? null
-      return active !== null
-    },
-    update(progress) { active?.update(progress) },
-    finish(commit) { return active?.finish(commit) },
-    cancel() { active?.cancel() },
-  }
-}
-
-function getAndroidBackPreview() {
-  if (mobileContextLink.value || mobileContextActions.value) {
-    return mobileLinkActionsRef.value ? getAndroidBackSheet(mobileLinkActionsRef.value) : null
-  }
-  if (isSideNavBackTarget()) {
-    const drawer = document.querySelector('.sideNav')
-    if (!drawer) return null
-    const overlay = useWatchSideNavOverlay.value
-    return createAndroidBackDialogPreview(drawer, handleAndroidBack, isSideNavBackTarget, () => overlay
-      ? [
-          { transform: 'translateX(0)' },
-          { transform: `translateX(${(isLocaleRightToLeft.value ? 1 : -1) * drawer.getBoundingClientRect().width}px)` }
-        ]
-      // The rail pushes the page, so it collapses like the button does.
-      : [{ inlineSize: getComputedStyle(drawer).inlineSize }, { inlineSize: 'var(--desktop-nav-rail-width)' }])
-  }
-  const target = getAndroidBackTarget()
-  const sheet = getAndroidBackSheet(target) ?? getAndroidBackSheet(target.closest?.('[data-bottom-sheet]'))
-  if (sheet && !target.classList.contains('compactSheet')) return sheet
-  const popup = getAndroidBackPopup(target)
-  if (popup) {
-    return createAndroidBackDialogPreview(popup, handleAndroidBack, () =>
-      popup.isConnected && getAndroidBackPopup(getAndroidBackTarget()) === popup)
-  }
-  const dialog = target.closest?.('.settingsWindow, .prompt, dialog[open]')
-  if (dialog && !target.closest?.('[aria-expanded="true"]')) {
-    const nested = dialog.hasAttribute('data-android-back-nested')
-    const content = nested
-      ? dialog.querySelector('.settingsContent') ?? dialog
-      : dialog
-    const isAvailable = () =>
-      content.isConnected && dialog.hasAttribute('data-android-back-nested') === nested &&
-      getAndroidBackTarget().closest?.('.settingsWindow, .prompt, dialog[open]') === dialog
-    if (!nested && dialog.matches('.settingsWindow')) {
-      // An opening morph owns the window. Ordinary Back closes it once the morph ends.
-      if (store.getters.getSettingsWindowMorphing) return null
-      // The gesture plays the morph into the header button, so closing must not replay it.
-      return createAndroidBackDialogPreview(dialog, () => store.dispatch('hideSettingsWindow'), isAvailable, element =>
-        getUtilityWindowCloseKeyframes(element, getSettingsWindowIconButton(store.getters.getSettingsWindowView)))
-    }
-    return createAndroidBackDialogPreview(content, handleAndroidBack, isAvailable)
-  }
-  const tabOverlay = target.closest?.('.capacitorPhoneTabOverlay')
-  if (tabOverlay) {
-    // Back returns from tab history to open tabs inside the switcher.
-    const isClosing = () => tabOverlay.isConnected && !tabOverlay.querySelector('.capacitorPhoneTabDialog:is([inert], [data-android-back-nested])') &&
-      getAndroidBackTarget().closest?.('.capacitorPhoneTabOverlay') === tabOverlay
-    if (!isClosing()) return null
-    return createAndroidBackDialogPreview(tabOverlay, handleAndroidBack, isClosing, () => [
-      { opacity: 1, transform: 'none' },
-      { opacity: 0, transform: 'scale(0.94)' }
-    ])
-  }
-  const search = target.closest?.('.topNav.phoneSearchOpen')
-  const searchContainer = search?.querySelector('.searchContainer')
-  if (searchContainer) {
-    return createAndroidBackDialogPreview(searchContainer, handleAndroidBack, () =>
-      searchContainer.isConnected && getAndroidBackTarget().closest?.('.topNav.phoneSearchOpen') === search, () => [
-      { opacity: 1, transform: 'none' },
-      { opacity: 0, transform: `translateX(${isLocaleRightToLeft.value ? -24 : 24}px)` }
-    ])
-  }
-  const tabId = presentedTabId.value
-  if (!tabId || settingsWindowOpen.value || isAnyPromptOpen.value || hasVisibleGamepadLayer() ||
-    document.fullscreenElement || document.querySelector('dialog[open], .topNav.phoneSearchOpen')) return null
-  const page = document.querySelector(`.tabContent[data-tab-id="${CSS.escape(tabId)}"]`)
-  return combineAndroidBackPreviews([
-    getAndroidBackPlayer(tabId),
-    page && createAndroidBackDialogPreview(page, handleAndroidBack, () =>
-      page.isConnected && presentedTabId.value === tabId && store.getters.getTabHistoryState(tabId).canGoBack,
-    getAndroidBackPageKeyframes)
-  ])
 }
 
 function handleAndroidPictureInPictureChange(event) {
@@ -4279,437 +2058,6 @@ function isTypingTarget(target) {
   )
 }
 
-/**
- * @param {KeyboardEvent} event
- * @returns {boolean}
- */
-function handleFindbarNavigationShortcut(event) {
-  const shortcuts = KeyboardShortcuts.APP.GENERAL
-  const isNextShortcut = [
-    shortcuts.FIND_NEXT,
-    shortcuts.FIND_NEXT_ALT,
-  ].some(shortcut => matchesKeyboardShortcut(event, shortcut))
-  const isPreviousShortcut = [
-    shortcuts.FIND_PREVIOUS,
-    shortcuts.FIND_PREVIOUS_ALT,
-  ].some(shortcut => matchesKeyboardShortcut(event, shortcut))
-
-  if (!isNextShortcut && !isPreviousShortcut) {
-    return false
-  }
-
-  event.preventDefault()
-  findInPage(isPreviousShortcut)
-  return true
-}
-
-function openFindbar() {
-  findbarVisible.value = true
-
-  const selection = window.getSelection()?.toString().trim()
-  if (selection) {
-    findbarQuery.value = selection
-  }
-
-  nextTick(() => {
-    findbarInputRef.value?.focus()
-    findbarInputRef.value?.select()
-    findInPage()
-  })
-}
-
-function closeFindbar() {
-  findbarVisible.value = false
-  findbarMatchIndex.value = 0
-  findbarMatchCount.value = 0
-  clearFindbarHighlights()
-}
-
-/**
- * @param {boolean | Event} [backwards]
- */
-function findInPage(backwards = null) {
-  const query = findbarQuery.value.trim()
-  if (query.length === 0) {
-    findbarMatchIndex.value = 0
-    findbarMatchCount.value = 0
-    clearFindbarHighlights()
-    return
-  }
-
-  const input = findbarInputRef.value
-  const selectionStart = input?.selectionStart ?? query.length
-  const selectionEnd = input?.selectionEnd ?? query.length
-  const isNavigation = typeof backwards === 'boolean'
-  const direction = backwards === true ? -1 : 1
-
-  if (!isNavigation || findbarMatches.length === 0) {
-    highlightFindbarMatches(query)
-  } else {
-    selectFindbarMatch(findbarMatchIndex.value - 1 + direction)
-  }
-
-  requestAnimationFrame(() => {
-    input?.focus()
-    input?.setSelectionRange(selectionStart, selectionEnd)
-  })
-}
-
-/**
- * @param {string} query
- */
-function highlightFindbarMatches(query) {
-  clearFindbarHighlights()
-
-  const walker = document.createTreeWalker(
-    tabRuntimeRegistry.getRoot(presentedTabId.value) ?? document.body,
-    NodeFilter.SHOW_TEXT,
-    {
-      acceptNode: (node) => {
-        if (
-          isFindbarTextNode(node) ||
-          isNonSearchableTextNode(node) ||
-          isHiddenTextNode(node)
-        ) {
-          return NodeFilter.FILTER_REJECT
-        }
-
-        return NodeFilter.FILTER_ACCEPT
-      }
-    }
-  )
-  const normalizedQuery = query.toLocaleLowerCase()
-  const ranges = []
-
-  while (walker.nextNode()) {
-    const node = walker.currentNode
-    const text = node.textContent ?? ''
-    const normalizedText = text.toLocaleLowerCase()
-    let index = normalizedText.indexOf(normalizedQuery)
-
-    while (index !== -1) {
-      ranges.push({
-        node,
-        start: index,
-        end: index + normalizedQuery.length
-      })
-      index = normalizedText.indexOf(normalizedQuery, index + normalizedQuery.length)
-    }
-  }
-
-  const matches = ranges.map((rangeInfo) => {
-    const range = document.createRange()
-    range.setStart(rangeInfo.node, rangeInfo.start)
-    range.setEnd(rangeInfo.node, rangeInfo.end)
-    return range
-  })
-
-  findbarMatches = matches
-  findbarMatchCount.value = matches.length
-  paintFindbarHighlights()
-  selectFindbarMatch(matches.length > 0 ? 0 : -1)
-}
-
-function clearFindbarHighlights() {
-  window.CSS.highlights.delete('findbarmatch')
-  window.CSS.highlights.delete('findbarmatchcurrent')
-  findbarMatches = []
-}
-
-function paintFindbarHighlights() {
-  const highlight = new window.Highlight(...findbarMatches)
-  highlight.priority = 0
-  window.CSS.highlights.set('findbarmatch', highlight)
-}
-
-/**
- * @param {number} index
- */
-function selectFindbarMatch(index) {
-  const matches = findbarMatches
-  if (matches.length === 0) {
-    findbarMatchIndex.value = 0
-    findbarMatchCount.value = 0
-    return
-  }
-
-  const nextIndex = (index + matches.length) % matches.length
-  const currentMatch = matches[nextIndex]
-  const currentHighlight = new window.Highlight(currentMatch)
-  currentHighlight.priority = 1
-
-  window.CSS.highlights.set('findbarmatchcurrent', currentHighlight)
-  scrollFindbarMatchIntoView(currentMatch)
-
-  findbarMatchIndex.value = nextIndex + 1
-  findbarMatchCount.value = matches.length
-}
-
-/**
- * @param {Range} match
- */
-function scrollFindbarMatchIntoView(match) {
-  const rect = match.getBoundingClientRect()
-  if (rect.width === 0 && rect.height === 0) {
-    return
-  }
-
-  const targetBlockCenter = rect.top + rect.height / 2
-  const viewportBlockCenter = window.innerHeight / 2
-  window.scrollBy({
-    top: targetBlockCenter - viewportBlockCenter,
-    behavior: 'smooth'
-  })
-}
-
-/**
- * @param {Node} node
- * @returns {boolean}
- */
-function isFindbarTextNode(node) {
-  return node.parentElement?.closest('.findbar') != null
-}
-
-/**
- * @param {Node} node
- * @returns {boolean}
- */
-function isNonSearchableTextNode(node) {
-  return node.parentElement?.closest('datalist, input, option, optgroup, script, select, style, template, textarea') != null
-}
-
-/**
- * @param {Node} node
- * @returns {boolean}
- */
-function isHiddenTextNode(node) {
-  const element = node.parentElement
-  if (element == null) {
-    return true
-  }
-
-  const style = window.getComputedStyle(element)
-  return style.display === 'none' ||
-    style.visibility === 'hidden' ||
-    element.closest('[aria-hidden="true"]') != null
-}
-
-/**
- * @param {KeyboardEvent} event
- */
-function handleKeyboardShortcutKeyup(event) {
-  if (!isTabSwitcherActive()) {
-    return
-  }
-
-  if (event.key === 'Control' || !event.ctrlKey) {
-    event.preventDefault()
-    commitTabSwitcherSelection()
-  }
-}
-
-/**
- * @param {number} direction
- */
-function cycleTabSwitcher(direction) {
-  const tabs = tabSwitcherTabs.value
-  if (tabs.length <= 1) {
-    return
-  }
-
-  if (!isTabSwitcherActive()) {
-    const activeIndex = Math.max(0, tabs.findIndex(tab => tab.id === store.getters.getActiveTabId))
-    tabSwitcherSelectedIndex.value = wrapTabSwitcherIndex(activeIndex + direction, tabs.length)
-    // A quick release commits the selection without mounting the menu,
-    // measuring its scrollbar, or requesting/decoding previews.
-    tabSwitcherOpenTimer = setTimeout(() => {
-      tabSwitcherOpenTimer = null
-      if (showTabPreviews.value) {
-        window.ftElectron.tabs.setPreviewCapturePaused(true)
-      }
-      tabSwitcherVisible.value = true
-      scrollTabSwitcherSelectionIntoView()
-      loadTabSwitcherPreviews()
-    }, TAB_SWITCHER_HOLD_DELAY_MS)
-    return
-  }
-
-  tabSwitcherSelectedIndex.value = wrapTabSwitcherIndex(
-    tabSwitcherSelectedIndex.value + direction,
-    tabs.length
-  )
-  scrollTabSwitcherSelectionIntoView()
-}
-
-/**
- * @param {number} index
- * @param {number} length
- * @returns {number}
- */
-function wrapTabSwitcherIndex(index, length) {
-  return (index + length) % length
-}
-
-function isTabSwitcherActive() {
-  return tabSwitcherOpenTimer != null || tabSwitcherVisible.value
-}
-
-function loadTabSwitcherPreviews() {
-  if (
-    !showTabPreviews.value ||
-    !process.env.IS_ELECTRON ||
-    typeof window.ftElectron?.tabs?.getCachedPreviews !== 'function'
-  ) {
-    return
-  }
-
-  const requestId = ++tabSwitcherPreviewRequestId
-  const tabIds = tabSwitcherTabs.value.map(tab => tab.id)
-  tabSwitcherPreviewPending.value = Object.fromEntries(tabIds.map(tabId => [tabId, true]))
-
-  window.ftElectron.tabs.getCachedPreviews(tabIds).then((previews) => {
-    if (requestId !== tabSwitcherPreviewRequestId || !tabSwitcherVisible.value) {
-      return
-    }
-
-    tabSwitcherPreviewUrls.value = Object.fromEntries(
-      Object.entries(previews).filter(([, dataUrl]) => typeof dataUrl === 'string' && dataUrl.length > 0)
-    )
-  }).catch(() => {}).finally(() => {
-    if (requestId === tabSwitcherPreviewRequestId && tabSwitcherVisible.value) {
-      tabSwitcherPreviewPending.value = {}
-    }
-  })
-}
-
-function getUsableTabSwitcherAvatarUrl(tab) {
-  const avatarUrl = getTabAvatarUrl(tab) || getTabPreviewFallbackUrl(tab)
-  return avatarUrl !== tabSwitcherFailedAvatarUrls.value[tab.id] ? avatarUrl : null
-}
-
-function getUsableTabSwitcherPreviewUrl(tab) {
-  const previewUrl = tabSwitcherPreviewUrls.value[tab.id]
-  return previewUrl !== tabSwitcherFailedPreviewUrls.value[tab.id] ? previewUrl : null
-}
-
-function handleTabSwitcherAvatarError(tab) {
-  tabSwitcherFailedAvatarUrls.value = {
-    ...tabSwitcherFailedAvatarUrls.value,
-    [tab.id]: getUsableTabSwitcherAvatarUrl(tab)
-  }
-}
-
-function handleTabSwitcherPreviewError(tab) {
-  tabSwitcherFailedPreviewUrls.value = {
-    ...tabSwitcherFailedPreviewUrls.value,
-    [tab.id]: getUsableTabSwitcherPreviewUrl(tab)
-  }
-}
-
-/**
- * @param {number} index
- */
-function setTabSwitcherSelectedIndex(index) {
-  tabSwitcherSelectedIndex.value = index
-}
-
-function activateTabSwitcherPointer() {
-  tabSwitcherPointerActive.value = true
-}
-
-function clearTabSwitcherSelection() {
-  tabSwitcherSelectedIndex.value = -1
-  tabSwitcherPointerActive.value = false
-}
-
-/**
- * @param {WheelEvent} event
- */
-function handleTabSwitcherWheel(event) {
-  const switcher = tabSwitcherRef.value
-  if (!(switcher instanceof HTMLElement)) {
-    return
-  }
-
-  const delta = Math.abs(event.deltaX) > Math.abs(event.deltaY)
-    ? event.deltaX
-    : event.deltaY
-
-  if (delta === 0) {
-    return
-  }
-
-  // Prefer vertical scrolling when the switcher wraps into multiple rows;
-  // fall back to horizontal when that is the only overflow axis.
-  if (switcher.scrollHeight > switcher.clientHeight) {
-    switcher.scrollTop += delta
-  } else {
-    switcher.scrollLeft += delta
-  }
-}
-
-function scrollTabSwitcherSelectionIntoView() {
-  if (!tabSwitcherVisible.value || tabSwitcherScrollPending) return
-  tabSwitcherScrollPending = true
-  nextTick(() => {
-    tabSwitcherScrollPending = false
-    if (!tabSwitcherVisible.value) return
-    const selectedTabId = tabSwitcherSelectedTabId.value
-    if (selectedTabId == null) {
-      return
-    }
-
-    document.getElementById(selectedTabId)?.scrollIntoView({
-      block: 'nearest',
-      inline: 'nearest'
-    })
-  })
-}
-
-/**
- * @param {number} [index]
- */
-function commitTabSwitcherSelection(index) {
-  if (typeof index === 'number') {
-    tabSwitcherSelectedIndex.value = index
-  }
-
-  const selectedTab = tabSwitcherTabs.value[tabSwitcherSelectedIndex.value]
-  cancelTabSwitcher()
-
-  if (selectedTab && selectedTab.id !== store.getters.getActiveTabId) {
-    store.dispatch('activateTab', selectedTab.id)
-  }
-}
-
-function cancelTabSwitcher() {
-  clearTimeout(tabSwitcherOpenTimer)
-  tabSwitcherOpenTimer = null
-  tabSwitcherSelectedIndex.value = -1
-  if (!tabSwitcherVisible.value) {
-    return
-  }
-
-  tabSwitcherVisible.value = false
-  tabSwitcherPreviewUrls.value = {}
-  tabSwitcherPreviewPending.value = {}
-  tabSwitcherFailedAvatarUrls.value = {}
-  tabSwitcherFailedPreviewUrls.value = {}
-  tabSwitcherPointerActive.value = false
-  tabSwitcherPreviewRequestId++
-  window.ftElectron.tabs.setPreviewCapturePaused(false)
-}
-
-/**
- * @param {{color?: string | null}} tab
- * @returns {Record<string, string | undefined>}
- */
-function getTabSwitcherItemStyle(tab) {
-  return {
-    '--tab-switcher-accent-color': getTabAccentColor(tab.color) || undefined
-  }
-}
-
 async function prepareAndReloadTab(tabId = activeTabId.value) {
   const tab = store.getters.getTabById(tabId)
   if (!tab) {
@@ -4735,8 +2083,6 @@ function getShortcutTabIds() {
     : activeTabId.value ? [activeTabId.value] : []
 }
 
-const multipleTabsActionPrompt = ref(null)
-const multipleTabsActionPromptCount = ref(0)
 /** @type {import('vue').Ref<Array<'olderVersionChanges' | 'libraryFormatChanged'>>} */
 const libraryNotices = ref([])
 const libraryNotice = computed(() => {
@@ -4771,117 +2117,16 @@ function dismissLibraryNotice() {
   if (notice) window.ftElectron.libraryNotices.dismiss(notice)
 }
 
-const MULTIPLE_TABS_ACTION_PROMPT_VALUES = ['confirm', 'cancel', 'neverAskAgain']
-
-/** @type {((confirmed: boolean) => void) | null} */
-let multipleTabsActionPromptResolve = null
-/** @type {Promise<boolean> | null} */
-let multipleTabsActionPromptPromise = null
-
-const multipleTabsActionPromptTitle = computed(() => {
-  if (multipleTabsActionPrompt.value === 'load') return t('Load Multiple Tabs Confirmation.Title')
-  if (multipleTabsActionPrompt.value === 'unload') return t('Unload Multiple Tabs Confirmation.Title')
-  return t('Close Multiple Tabs Confirmation.Title')
-})
-const multipleTabsActionPromptMessage = computed(() => {
-  const count = multipleTabsActionPromptCount.value
-  const parameters = { count }
-  if (multipleTabsActionPrompt.value === 'load') return t('Load Multiple Tabs Confirmation.Message', parameters, count)
-  if (multipleTabsActionPrompt.value === 'unload') return t('Unload Multiple Tabs Confirmation.Message', parameters, count)
-  return t('Close Multiple Tabs Confirmation.Message', parameters, count)
-})
-const multipleTabsActionPromptNames = computed(() => [
-  multipleTabsActionPrompt.value === 'load'
-    ? t(
-        'Load Multiple Tabs Confirmation.Load Tabs',
-        { count: multipleTabsActionPromptCount.value },
-        multipleTabsActionPromptCount.value
-      )
-    : multipleTabsActionPrompt.value === 'unload'
-      ? t(
-          'Unload Multiple Tabs Confirmation.Unload Tabs',
-          { count: multipleTabsActionPromptCount.value },
-          multipleTabsActionPromptCount.value
-        )
-      : t(
-          'Close Multiple Tabs Confirmation.Close Tabs',
-          { count: multipleTabsActionPromptCount.value },
-          multipleTabsActionPromptCount.value
-        ),
-  t('Cancel'),
-  t('Confirmations.Never Ask Again')
-])
-
-/**
- * @param {'close' | 'load' | 'unload'} action
- */
-function isMultipleTabsActionConfirmationEnabled(action) {
-  if (action === 'load') return store.getters.getConfirmLoadMultipleTabs
-  if (action === 'unload') return store.getters.getConfirmUnloadMultipleTabs
-  return store.getters.getConfirmCloseMultipleTabs
-}
-
-/**
- * @param {'close' | 'load' | 'unload'} action
- */
-function disableMultipleTabsActionConfirmation(action) {
-  if (action === 'load') return store.dispatch('updateConfirmLoadMultipleTabs', false)
-  if (action === 'unload') return store.dispatch('updateConfirmUnloadMultipleTabs', false)
-  return store.dispatch('updateConfirmCloseMultipleTabs', false)
-}
-
-/**
- * Ask the user to confirm an action affecting several tabs at once. Concurrent
- * requests for the same action share one prompt; a different action is rejected.
- * @param {number} count
- * @param {'close' | 'load' | 'unload'} action
- * @returns {Promise<boolean>}
- */
-function confirmMultipleTabsAction(count, action) {
-  if (!isMultipleTabsActionConfirmationEnabled(action)) return Promise.resolve(true)
-
-  if (multipleTabsActionPromptPromise) {
-    if (multipleTabsActionPrompt.value !== action) return Promise.resolve(false)
-
-    multipleTabsActionPromptCount.value = Math.max(multipleTabsActionPromptCount.value, count)
-    return multipleTabsActionPromptPromise
-  }
-
-  multipleTabsActionPrompt.value = action
-  multipleTabsActionPromptCount.value = count
-  multipleTabsActionPromptPromise = new Promise(resolve => {
-    multipleTabsActionPromptResolve = resolve
-  })
-  return multipleTabsActionPromptPromise
-}
-
-/**
- * @param {'confirm' | 'cancel' | 'neverAskAgain' | null} option
- */
-async function handleMultipleTabsActionPromptAnswer(option) {
-  const action = multipleTabsActionPrompt.value
-  multipleTabsActionPrompt.value = null
-  multipleTabsActionPromptCount.value = 0
-  const resolve = multipleTabsActionPromptResolve
-  multipleTabsActionPromptResolve = null
-  multipleTabsActionPromptPromise = null
-  if (option === 'neverAskAgain' && action != null) {
-    try {
-      await disableMultipleTabsActionConfirmation(action)
-    } catch (error) {
-      console.error('Failed to disable the bulk tab action confirmation', error)
-    }
-  }
-  resolve?.(option === 'confirm' || option === 'neverAskAgain')
-}
-
-/**
- * @param {{ requestId: string, count: number, action: 'close' | 'load' | 'unload' }} request
- */
-async function handleConfirmMultipleTabsActionRequest({ requestId, count, action }) {
-  const confirmed = await confirmMultipleTabsAction(count, action)
-  window.ftElectron.tabs.respondConfirmMultipleAction(requestId, confirmed)
-}
+const {
+  multipleTabsActionPrompt,
+  MULTIPLE_TABS_ACTION_PROMPT_VALUES,
+  multipleTabsActionPromptTitle,
+  multipleTabsActionPromptMessage,
+  multipleTabsActionPromptNames,
+  confirmMultipleTabsAction,
+  handleMultipleTabsActionPromptAnswer,
+  handleConfirmMultipleTabsActionRequest
+} = useMultipleTabsActionConfirmation({ t })
 
 async function closeShortcutTabs() {
   const tabIds = getShortcutTabIds()
@@ -5032,100 +2277,6 @@ function handleClick(event) {
   if (link !== null && isExternalLink(link)) {
     handleLinkClick(event, link)
   }
-}
-
-async function handleMobileLinkContextMenu(event) {
-  if (event.target instanceof Element && event.target.closest('.ft-list-video') && !event.target.closest('.channelName')) return
-  const link = getEventLink(event)
-  if (!link) return
-
-  event.preventDefault()
-  event.stopPropagation()
-  const channel = getChannelLinkDetails(link)
-  mobileContextActions.value = channel
-    ? { title: channel.name, actions: getChannelLinkMenuItems(channel, t) }
-    : null
-  mobileContextLink.value = link
-  await nextTick()
-  mobileLinkActionsRef.value?.focus({ preventScroll: true })
-}
-
-function closeOwnedMobileContextMenu(event) {
-  if (mobileContextActions.value?.actions === event.detail) closeMobileLinkActions()
-}
-
-watch(() => route.fullPath, closeMobileLinkActions)
-
-function closeMobileLinkActions() {
-  mobileContextMenuPath.value = []
-  mobileContextLink.value = null
-  mobileContextActions.value = null
-}
-
-async function backMobileContextMenu() {
-  if (mobileContextMenuStack.value.length === 1) {
-    closeMobileLinkActions()
-    return
-  }
-  const triggerLabel = mobileContextMenuStack.value.at(-1).label
-  mobileContextMenuPath.value = mobileContextMenuPath.value.slice(0, mobileContextMenuStack.value.length - 2)
-  await nextTick()
-  mobileLinkActionsRef.value?.querySelector(`[role="menuitem"][aria-label="${CSS.escape(triggerLabel)}"]:not(:disabled)`)?.focus({ preventScroll: true })
-}
-
-async function runMobileContextAction(action) {
-  if (action.enabled === false) return
-  if (action.submenu) {
-    mobileContextMenuPath.value = [...mobileContextMenuStack.value.slice(1).map(level => level.label), action.label]
-    await nextTick()
-    mobileLinkActionsRef.value?.querySelector('.mobileLinkActionsBack')?.focus({ preventScroll: true })
-    return
-  }
-  closeMobileLinkActions()
-  return action.run()
-}
-
-async function copyMobileContextLink() {
-  const url = mobileContextLinkCopyUrl.value
-  if (!url) return
-
-  closeMobileLinkActions()
-  await copyToClipboard(url)
-}
-
-async function shareMobileContextLink() {
-  const url = mobileContextLinkCopyUrl.value
-  if (!url) return
-
-  closeMobileLinkActions()
-  await shareLink(url)
-}
-
-async function openMobileContextLink(newTab) {
-  const link = mobileContextLink.value
-  if (!link) return
-
-  const href = link.href
-  closeMobileLinkActions()
-  const internalPrefix = `${window.location.href.split('#')[0]}#`
-  if (href.startsWith(internalPrefix)) {
-    const destination = router.resolve(new URL(href).hash.slice(1))
-    await openInternalPath({
-      path: destination.path,
-      query: destination.query,
-      title: link.dataset.tabTitle || undefined,
-      doCreateNewTab: newTab,
-      makeActive: true
-    })
-    return
-  }
-
-  if (/^https?:\/\/((www\.|m\.)?youtube\.com|youtu\.be)\//.test(href)) {
-    await handleYoutubeLink(href, { doCreateNewTab: newTab })
-    return
-  }
-
-  handleExternalLink(href)
 }
 
 /**
@@ -5363,168 +2514,6 @@ function enableOpenUrl() {
   })
 }
 
-async function handleAndroidSharedText(text) {
-  const id = ++sharedYoutubeLinkId
-  const url = extractSharedYoutubeLink(text)
-  let info = null
-  try {
-    info = url ? await store.dispatch('getYoutubeUrlInfo', url) : null
-  } catch (error) {
-    console.error('Unable to resolve shared YouTube link', error)
-  }
-  if (id !== sharedYoutubeLinkId) return
-  sharedYoutubeLink.value = null
-  if (!info || ['invalid_url', 'unknown'].includes(info.urlType) || (info.urlType === 'video' && !/^[\w-]{11}$/.test(info.videoId))) {
-    showToast({ message: t('Share.No YouTube Link'), icon: ['fas', 'circle-exclamation'] })
-    return
-  }
-  sharedYoutubeLink.value = { id, url, videoId: info.videoId ?? '' }
-}
-
-function openSharedYoutubeLink() {
-  const url = sharedYoutubeLink.value?.url
-  sharedYoutubeLink.value = null
-  if (url) handleYoutubeLink(url)
-}
-
-async function enableCapacitorIntegrations() {
-  const openUrl = async url => {
-    if (!url) return
-    const widgetPage = getHomeWidgetPage(url)
-    if (widgetPage) {
-      await store.dispatch('hideSettingsWindow')
-      if (widgetPage.route) return openInternalPath(widgetPage.route)
-      const focusSearch = () => {
-        if (document.getElementById('app')?.inert) {
-          // The startup splash keeps the app inert until it is hidden.
-          document.addEventListener('startup-splash-hidden', focusSearch, { once: true })
-        } else {
-          window.dispatchEvent(new CustomEvent('opentubex:focus-search'))
-        }
-      }
-      // A cold start opens the URL before the top navigation is mounted, and
-      // open prompts make it inert, so its search cannot take focus yet.
-      const canFocusSearch = () => dataReady.value && !isAnyPromptOpen.value
-      if (canFocusSearch()) {
-        focusSearch()
-      } else {
-        const stop = watch(canFocusSearch, ready => {
-          if (!ready) return
-          stop()
-          // Let the update render and mount the top navigation first.
-          nextTick(focusSearch)
-        })
-      }
-      return
-    }
-    // iOS URL handling can remove the embedded protocol's colon.
-    const target = url.replace(/^opentubex(?:-nightly)?:(?:\/\/)?/, '').replace(/^(https?)\/\//, '$1://')
-    return handleYoutubeLink(target)
-  }
-  const backButtonHandle = Capacitor.getPlatform() === 'android'
-    ? await CapacitorApp.addListener('backButton', handleAndroidBack)
-    : null
-  const removeAndroidBack = Capacitor.getPlatform() === 'android'
-    ? await initializeAndroidBack({
-        back: handleAndroidBack,
-        getPreview: getAndroidBackPreview,
-        shouldIntercept: shouldInterceptAndroidBack
-      }).catch(error => {
-        console.error('Unable to enable predictive back', error)
-        return null
-      })
-    : null
-  const urlHandle = await CapacitorApp.addListener('appUrlOpen', ({ url }) => {
-    openUrl(url)
-  })
-  const shortcutHandle = await AppShortcuts.addListener('click', async ({ shortcutId }) => {
-    const path = getAppShortcutPath(shortcutId)
-    if (!path) return
-    await store.dispatch('hideSettingsWindow')
-    await openInternalPath({ path })
-  })
-  const stopShortcutUpdates = watch(locale, () => {
-    const shortcuts = createAppShortcuts({
-      subscriptions: t('Subscriptions.Subscriptions'),
-      userplaylists: t('Playlists'),
-      history: t('History.History'),
-      downloads: t('Settings.Download Settings.Download Settings'),
-    })
-    AppShortcuts.set({ shortcuts: supportsYtDlp ? shortcuts : shortcuts.filter(shortcut => shortcut.id !== 'downloads') }).catch(error => console.error('Failed to update app shortcuts', error))
-  }, { immediate: true })
-  const stopHomeWidgetUpdates = syncContinueWatchingWidget(store, watch)
-  const removeReminderActions = await initializeCapacitorLiveReminderActions((videoId) => {
-    handleYoutubeLink(`https://www.youtube.com/watch?v=${videoId}`)
-  })
-  const removeMediaActions = await addAndroidMediaSessionActionListener(({ action, ...details }) => {
-    tabMediaCoordinator.dispatchAction(action, details)
-  })
-  const handleTaskRemoved = () => tabMediaCoordinator.pauseAll()
-  window.addEventListener('opentubex:android-task-removed', handleTaskRemoved)
-  let receivedAppState = false
-  let backgroundStateTimeout = null
-  let appStateVersion = 0
-  const appStateHandle = await CapacitorApp.addListener('appStateChange', ({ isActive }) => {
-    if (Capacitor.getPlatform() === 'android') setAndroidAppActive(isActive)
-    receivedAppState = true
-    appStateVersion += 1
-    const version = appStateVersion
-    playbackScreenWake?.setAppActive(isActive)
-    clearTimeout(backgroundStateTimeout)
-    if (Capacitor.getPlatform() === 'android' && !isActive) {
-      // The launcher briefly stops the PiP Activity while returning to its
-      // existing task. Do not hide or pause playback for that handoff.
-      const checkBackgroundState = async () => {
-        if (await isAndroidLauncherReturnInProgress()) {
-          if (version === appStateVersion) {
-            backgroundStateTimeout = setTimeout(checkBackgroundState, 10_000)
-          }
-          return
-        }
-        const state = await CapacitorApp.getState().catch(() => ({ isActive: false }))
-        if (version !== appStateVersion || state.isActive) return
-        setAndroidAppVisible(false)
-        if (shouldPauseAndroidPlaybackOnAppStateChange(
-          false,
-          store.getters.getContinuePlaybackWhenScreenIsLocked
-        )) tabMediaCoordinator.pauseAll()
-      }
-      backgroundStateTimeout = setTimeout(checkBackgroundState, 250)
-      return
-    }
-    setAndroidAppVisible(isActive)
-    if (shouldPauseAndroidPlaybackOnAppStateChange(
-      isActive,
-      store.getters.getContinuePlaybackWhenScreenIsLocked
-    )) tabMediaCoordinator.pauseAll()
-  })
-  const appState = await CapacitorApp.getState()
-  if (!receivedAppState) {
-    if (Capacitor.getPlatform() === 'android') setAndroidAppActive(appState.isActive)
-    playbackScreenWake?.setAppActive(appState.isActive)
-    setAndroidAppVisible(appState.isActive)
-  }
-  const launch = await CapacitorApp.getLaunchUrl()
-  await openUrl(launch?.url)
-
-  return () => {
-    clearTimeout(backgroundStateTimeout)
-    stopShortcutUpdates()
-    stopHomeWidgetUpdates()
-    shortcutHandle.remove()
-    backButtonHandle?.remove()
-    removeAndroidBack?.()
-    urlHandle.remove()
-    appStateHandle.remove()
-    window.removeEventListener('opentubex:android-task-removed', handleTaskRemoved)
-    playbackScreenWake?.setAppActive(false)
-    setAndroidAppActive(null)
-    setAndroidAppVisible(null)
-    removeReminderActions()
-    removeMediaActions()
-  }
-}
-
 const windowTitle = computed(() => {
   const routePath = route.path
   if (
@@ -5602,6 +2591,48 @@ watch(locale, (value) => {
 
   document.body.dir = isLocaleRightToLeft.value ? 'rtl' : 'ltr'
 }, { immediate: true })
+
+// Follows isLocaleRightToLeft, which sets the direction of Back previews.
+const {
+  showAndroidExitPrompt,
+  ANDROID_EXIT_PROMPT_VALUES,
+  androidExitPromptNames,
+  requestAndroidAppExit,
+  handleAndroidExitPromptAnswer,
+  handleAndroidBack,
+  shouldInterceptAndroidBack,
+  getAndroidBackPreview
+} = useAndroidBack({
+  t,
+  navigation,
+  presentedTabId,
+  settingsWindowOpen,
+  isAnyPromptOpen,
+  isSideNavOpen,
+  closeSideNav,
+  useWatchSideNavOverlay,
+  isLocaleRightToLeft,
+  mobileContextLink,
+  mobileContextActions,
+  mobileLinkActionsRef,
+  backMobileContextMenu
+})
+
+const {
+  sharedYoutubeLink,
+  handleAndroidSharedText,
+  openSharedYoutubeLink,
+  enableCapacitorIntegrations
+} = useCapacitorIntegrations({
+  t,
+  locale,
+  dataReady,
+  isAnyPromptOpen,
+  handleYoutubeLink,
+  handleAndroidBack,
+  getAndroidBackPreview,
+  shouldInterceptAndroidBack
+})
 
 /** @type {import('vue').ComputedRef<string>} */
 const currentInvidiousInstanceUrl = computed(() => store.getters.getCurrentInvidiousInstanceUrl)

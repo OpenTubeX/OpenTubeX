@@ -53,7 +53,7 @@ test('mobile thumbnail actions retain availability, state, and handlers', () => 
 })
 
 test('the thumbnail row is reactive and only appears at the root of its mobile menu', async () => {
-  const app = await readFile(new URL('../../src/renderer/App.vue', import.meta.url), 'utf8')
+  const app = await readFile(new URL('../../src/renderer/app/useMobileContextMenu.js', import.meta.url), 'utf8')
   const start = app.indexOf('const mobileContextThumbnailActions = computed(')
   const context = {
     computed, unref,

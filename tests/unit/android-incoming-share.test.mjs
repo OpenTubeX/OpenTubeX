@@ -6,7 +6,7 @@ import { usesInvidiousApi } from '../../src/apiBackends.js'
 import { extractSharedYoutubeLink } from '../../src/renderer/helpers/sharedYoutubeLink.js'
 import { parseHistoryRepairPlayer } from '../../src/historyRepair.js'
 
-const app = readFileSync('src/renderer/App.vue', 'utf8')
+const app = readFileSync('src/renderer/app/useCapacitorIntegrations.js', 'utf8')
 const component = readFileSync('src/renderer/components/SharedYoutubeLinkPrompt/SharedYoutubeLinkPrompt.vue', 'utf8')
 const handler = app.slice(app.indexOf('async function handleAndroidSharedText('), app.indexOf('async function enableCapacitorIntegrations()'))
 const actions = component.slice(component.indexOf('async function loadVideo('), component.indexOf('</script>'))

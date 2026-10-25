@@ -3,9 +3,9 @@ import { readFile } from 'node:fs/promises'
 import test from 'node:test'
 import vm from 'node:vm'
 
-const source = await readFile(new URL('../../src/renderer/App.vue', import.meta.url), 'utf8')
+const source = await readFile(new URL('../../src/renderer/app/useSubscriptionAutoRefresh.js', import.meta.url), 'utf8')
 const start = source.indexOf('async function synchronizeSubscriptionRefreshInProgress()')
-const synchronize = source.slice(start, source.indexOf('\n/**', start))
+const synchronize = source.slice(start, source.indexOf('\n  /**', start))
 
 function setup(state, hidden = false) {
   const shown = []
@@ -29,7 +29,7 @@ function setup(state, hidden = false) {
     reconcileAndroidSubscriptionRefreshResults: async () => { calls.push('import') },
     store: { dispatch: async action => { calls.push(action) } },
   })
-  vm.runInContext(source.slice(source.indexOf('let androidExternalRefreshProgress'), source.indexOf('let removeGamepadNavigation')), context)
+  vm.runInContext(source.slice(source.indexOf('let androidExternalRefreshProgress'), source.indexOf('const pendingSubscriptionAutoRefreshes')), context)
   vm.runInContext(synchronize, context)
   return {
     shown, timers, calls, notifications,
@@ -151,7 +151,7 @@ async function setupCancellation({ deadline = Date.now() - 1000, enabled = true 
   const cancellationStart = subscriptions.indexOf('export function requestSubscriptionRefreshCancellation()')
   vm.runInContext(subscriptions.slice(cancellationStart, subscriptions.indexOf('\n/**', cancellationStart)).replace('export ', ''), context)
   const handlerStart = source.indexOf('function handleSubscriptionRefreshCancelled(event)')
-  vm.runInContext(source.slice(handlerStart, source.indexOf('\n/**', handlerStart)), context)
+  vm.runInContext(source.slice(handlerStart, source.indexOf('\n  /**', handlerStart)), context)
   window.addEventListener('cancelled', event => context.handleSubscriptionRefreshCancelled(event))
   return { context, calls, events }
 }
