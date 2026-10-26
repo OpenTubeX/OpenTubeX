@@ -81,7 +81,8 @@ jobs:
         run: |
           # Pushing to the fork already updated an open PR.
           open=$(gh pr list --repo "$GITHUB_REPOSITORY" --base development --head upstream-sync --state open \
-            --json headRepository --jq "[.[] | select(.headRepository.name == \"${SYNC_FORK#*/}\")] | length")
+            --json headRepositoryOwner,headRepository \
+            --jq "[.[] | select(.headRepositoryOwner.login + \"/\" + .headRepository.name == \"$SYNC_FORK\")] | length")
           if [[ "$open" -eq 0 ]]; then
             # The fork has the same owner as this repository, so name its node explicitly
             number=$(gh api graphql \
