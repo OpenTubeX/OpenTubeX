@@ -105,7 +105,9 @@ test.describe('desktop quick playback speed bar', () => {
 
   test('keeps custom speeds outside the native playback range', async ({ app, page }) => {
     await mockPlayableWatchPage(app, page)
-    await openMockedVideo(page)
+    const video = await openMockedVideo(page)
+    // While playing, the controls hide again after a few idle seconds.
+    await video.evaluate(element => element.pause())
     await page.evaluate(() => window.$store.dispatch(
       'updateQuickPlaybackSpeedBarOptions', JSON.stringify([0.05, 20, 1].map(speed => ({ speed })))
     ))
