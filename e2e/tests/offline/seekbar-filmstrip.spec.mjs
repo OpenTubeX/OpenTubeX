@@ -1,5 +1,6 @@
 import { test, expect, setPlayerFullscreen } from '../../helpers/app.mjs'
 import { routeDemoMedia } from '../../helpers/media.mjs'
+import { mockCapacitorPhoneLayout } from '../../helpers/mobile.mjs'
 import { openMockedVideo } from '../../helpers/player.mjs'
 import { mockPlayableWatchPage } from '../../helpers/watch.mjs'
 
@@ -7,7 +8,9 @@ test.use({
   seed: {
     settings: {
       videoPlaybackEngine: 'built-in',
-      ytDlpPlaybackEngineDefaultMigration: true
+      ytDlpPlaybackEngineDefaultMigration: true,
+      enableMobileFullscreenSeek: true,
+      showMobileSeekPreview: true
     }
   }
 })
@@ -27,9 +30,11 @@ function storyboardSprite(frames) {
   return `<svg xmlns="http://www.w3.org/2000/svg" width="${COLUMNS * TILE_WIDTH}" height="${Math.ceil(frames / COLUMNS) * TILE_HEIGHT}">${tiles.join('')}</svg>`
 }
 
-test('dragging the seek bar thumb shows a storyboard filmstrip at it', { tag: '@scale' }, async ({ app, page, attachScreenshot }) => {
-  await mockPlayableWatchPage(app, page)
-  await routeDemoMedia(page)
+/**
+ * Opens the paused demo video with a storyboard track of one tile per second.
+ * @param {import('@playwright/test').Page} page
+ */
+async function openVideoWithStoryboard(page) {
   const video = await openMockedVideo(page)
   const duration = await video.evaluate(element => element.duration)
   const frames = Math.ceil(duration)
@@ -51,6 +56,13 @@ test('dragging the seek bar thumb shows a storyboard filmstrip at it', { tag: '@
       URL.revokeObjectURL(url)
     }
   }, { frames, columns: COLUMNS, width: TILE_WIDTH, height: TILE_HEIGHT })
+  return { video, duration }
+}
+
+test('dragging the seek bar thumb shows a storyboard filmstrip at it', { tag: '@scale' }, async ({ app, page, attachScreenshot }) => {
+  await mockPlayableWatchPage(app, page)
+  await routeDemoMedia(page)
+  const { video, duration } = await openVideoWithStoryboard(page)
 
   const player = page.locator('.ftVideoPlayer')
   const bar = player.locator('.shaka-seek-bar')
@@ -159,4 +171,39 @@ test('dragging the seek bar thumb shows a storyboard filmstrip at it', { tag: '@
   await expect(filmstrip).toBeHidden()
   await player.hover({ position: { x: 20, y: 20 } })
   await expect(dock).toBeVisible()
+})
+
+test('fullscreen swipe-to-seek shows the seek bar preview over paused controls', async ({ app, page }) => {
+  const touch = await page.context().newCDPSession(page)
+  await touch.send('Emulation.setTouchEmulationEnabled', { enabled: true, maxTouchPoints: 1 })
+  await mockPlayableWatchPage(app, page)
+  await routeDemoMedia(page)
+  const { video } = await openVideoWithStoryboard(page)
+  await video.evaluate(element => { element.currentTime = 15 })
+  await expect.poll(() => video.evaluate(element => !element.seeking && element.currentTime === 15)).toBe(true)
+  await mockCapacitorPhoneLayout(page)
+  await setPlayerFullscreen(page, true)
+  const player = page.locator('.ftVideoPlayer')
+  const controls = player.locator('.shaka-controls-container')
+  await expect(controls).toHaveAttribute('shown')
+  // Shaka hides the cursor once the last input stops counting as recent; only
+  // the pause keeps the controls up from then on.
+  await expect(player).toHaveClass(/no-cursor/, { timeout: 15000 })
+  await expect(controls).toHaveAttribute('shown')
+
+  const box = await player.boundingBox()
+  const start = { x: box.x + box.width * 0.35, y: box.y + box.height * 0.4 }
+  await touch.send('Input.dispatchTouchEvent', { type: 'touchStart', touchPoints: [start] })
+  for (let step = 1; step <= 5; step++) {
+    await touch.send('Input.dispatchTouchEvent', { type: 'touchMove', touchPoints: [{ x: start.x + box.width * 0.04 * step, y: start.y }] })
+  }
+  await expect(player.locator('.ft-seek-filmstrip')).toBeVisible()
+  await expect(player.locator('.shaka-player-ui-thumbnail-time')).toHaveText('0:21')
+  // Seeking must not let Shaka fade out the paused controls, which hold the preview.
+  await page.waitForTimeout(500)
+  await expect(controls).toHaveAttribute('shown')
+
+  await touch.send('Input.dispatchTouchEvent', { type: 'touchEnd', touchPoints: [] })
+  await expect(player.locator('.ft-seek-filmstrip')).toBeHidden()
+  await expect.poll(() => video.evaluate(element => element.currentTime)).toBe(21)
 })

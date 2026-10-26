@@ -24,8 +24,10 @@ export class SeekPreviewBar extends shaka.ui.SeekBar {
     this.eventManager.listen(controls, 'seekpreviewchange', event => {
       const wasPreviewing = this.previewTime !== null
       this.previewTime = event.time
-      controls.setSeeking(this.previewTime !== null)
+      // Reveal the controls before seeking starts: Shaka only keeps them up for
+      // a paused video while it is not seeking, and the touch has not moved yet.
       if (!wasPreviewing && this.previewTime !== null) controls.showUI()
+      controls.setSeeking(this.previewTime !== null)
       this.setValue(this.previewTime ?? this.video.currentTime)
       this.update()
       if (this.previewTime !== null && event.showPreview) {

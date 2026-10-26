@@ -55,7 +55,7 @@ function fixture() {
   const controls = {
     video: { currentTime: 15, paused: false }, listeners: new Map(), seeking: false, shown: 0, events: [],
     timePreview: { style: { visibility: 'visible' } },
-    setSeeking(value) { this.seeking = value }, showUI() { this.shown++ },
+    setSeeking(value) { this.seeking = value }, showUI() { this.shown++; this.seekingWhenShown = this.seeking },
     dispatchEvent(event) { this.events.push(event) },
   }
   const bar = factory.create({}, controls)
@@ -86,6 +86,7 @@ test('preview thumb and played track follow the gesture instead of progress upda
   assert.equal(bar.container.style.getPropertyValue('--sponsorblock-played'), '70')
   assert.equal(controls.seeking, true)
   assert.equal(controls.shown, 1)
+  assert.equal(controls.seekingWhenShown, false, 'Shaka keeps paused controls up only while not seeking')
   assert.equal(controls.video.currentTime, 15)
   assert.equal(controls.video.paused, false)
   bar.setValue(15.5)
