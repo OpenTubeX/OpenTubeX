@@ -268,6 +268,8 @@ export async function launchApp(userDataDir, extraArgs = [], options = {}, windo
   await context.route(INTERNET_CHECK_URL, route => route.fulfill({ status: 204 }))
   // Covers reloads and later windows. The first document may already exist.
   await context.addInitScript(installRendererAccessors)
+  electronApp.windows().forEach(recoverCollectedEvaluations)
+  electronApp.on('window', recoverCollectedEvaluations)
   await notifyPhase('electronConnected')
 
   let page
@@ -410,9 +412,67 @@ export async function evaluateMainProcess(electronApp, fn, arg) {
     try {
       return await electronApp.evaluate(fn, arg)
     } catch (error) {
-      if (attempt === 3 || !error.message.includes('Resulting promise was garbage collected')) throw error
+      if (attempt === 3 || !error.message.includes(COLLECTED_RESULT_ERROR)) throw error
     }
   }
+}
+
+const COLLECTED_RESULT_ERROR = 'Resulting promise was garbage collected'
+
+/**
+ * Makes `page.evaluate()` survive a garbage collection that drops its result.
+ *
+ * Until V8 holds on to evaluation promises (https://crbug.com/536271637),
+ * DevTools tracks the promise of an async evaluation only weakly. A collection
+ * after the promise settles but before DevTools reads it fails the call with
+ * "Resulting promise was garbage collected" even though the function ran.
+ * Retrying would repeat side effects such as store dispatches, so the page
+ * keeps async results until the next call and the error path reads them back.
+ *
+ * @param {import('@playwright/test').Page} page
+ */
+function recoverCollectedEvaluations(page) {
+  const evaluate = page.evaluate.bind(page)
+  let lastId = 0
+  let finishedIds = []
+  page.evaluate = async (pageFunction, arg) => {
+    if (typeof pageFunction !== 'function') return evaluate(pageFunction, arg)
+    const id = ++lastId
+    const releasedIds = finishedIds
+    finishedIds = []
+    try {
+      return await evaluate(evaluateAndKeepResult, { id, releasedIds, source: String(pageFunction), arg })
+    } catch (error) {
+      if (!error.message.includes(COLLECTED_RESULT_ERROR)) throw error
+      const kept = await evaluate(takeKeptResult, id)
+      if (!kept) throw error
+      return kept.value
+    } finally {
+      finishedIds.push(id)
+    }
+  }
+}
+
+/** Runs in the page; see recoverCollectedEvaluations. */
+function evaluateAndKeepResult({ id, releasedIds, source, arg }) {
+  const results = (globalThis.__e2eEvaluationResults ??= new Map())
+  for (const releasedId of releasedIds) results.delete(releasedId)
+  // eslint-disable-next-line no-eval -- runs the serialized page function like Playwright does
+  const result = globalThis.eval(`(${source})`)(arg)
+  if (typeof result?.then !== 'function') return result
+  return Promise.resolve(result).then((value) => {
+    results.set(id, value)
+    return value
+  })
+}
+
+/** Runs in the page and returns a result kept by evaluateAndKeepResult. */
+function takeKeptResult(id) {
+  const results = globalThis.__e2eEvaluationResults
+  if (!results?.has(id)) return null
+  const value = results.get(id)
+  results.delete(id)
+  return { value }
 }
 
 /**

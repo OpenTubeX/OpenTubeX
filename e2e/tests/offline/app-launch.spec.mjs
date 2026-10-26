@@ -64,3 +64,24 @@ test.describe('main process evaluation', () => {
     expect(await app.electronApp.evaluate(() => globalThis.__e2eUserDataReads)).toBe(2)
   })
 })
+
+test.describe('renderer evaluation', () => {
+  test.use({ launchArgs: ['--js-flags=--expose-gc'] })
+
+  test('returns results collected before DevTools reads them without running again', async ({ page }) => {
+    const theme = await page.evaluate(async () => {
+      window.__e2eThemeUpdates = (window.__e2eThemeUpdates ?? 0) + 1
+      await window.$store.dispatch('updateBaseTheme', 'materialDark')
+      // One of these collections runs after the result settles but before
+      // DevTools reads it.
+      const collect = depth => queueMicrotask(() => {
+        window.gc()
+        if (depth > 0) collect(depth - 1)
+      })
+      collect(8)
+      return window.$store.getters.getBaseTheme
+    })
+    expect(theme).toBe('materialDark')
+    expect(await page.evaluate(() => window.__e2eThemeUpdates)).toBe(1)
+  })
+})
