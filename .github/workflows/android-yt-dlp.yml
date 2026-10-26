@@ -1,0 +1,73 @@
+name: Update Android yt-dlp
+
+# Dependabot cannot track the yt-dlp release that android/app/build.gradle
+# bundles, so this opens a PR when yt-dlp/yt-dlp publishes a new stable release.
+# A PR opened with GITHUB_TOKEN would not run CI, so this uses UPSTREAM_SYNC_TOKEN.
+on:
+  schedule:
+    - cron: "17 6 * * 1"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: android-yt-dlp
+  cancel-in-progress: false
+
+jobs:
+  update:
+    if: github.repository == 'OpenTubeX/OpenTubeX'
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    env:
+      GH_TOKEN: ${{ secrets.UPSTREAM_SYNC_TOKEN }}
+    defaults:
+      run:
+        shell: bash
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          ref: development
+          persist-credentials: false
+
+      - name: Update pinned version and checksum
+        id: update
+        run: |
+          set -euo pipefail
+          file=android/app/build.gradle
+          current=$(grep -oP "^def ytDlpVersion = '\K[0-9.]+(?='$)" "$file")
+          latest=$(gh api repos/yt-dlp/yt-dlp/releases/latest --jq .tag_name)
+          if [[ ! "$latest" =~ ^[0-9]+(\.[0-9]+)+$ ]]; then
+            echo "::error::Unexpected yt-dlp release tag: ${latest:-nothing}."
+            exit 1
+          fi
+          if [[ "$(printf '%s\n' "$current" "$latest" | sort -V | tail -n 1)" == "$current" ]]; then
+            exit 0
+          fi
+          hash=$(gh api "repos/yt-dlp/yt-dlp/releases/tags/$latest" \
+            --jq '.assets[] | select(.name == "yt-dlp") | .digest // empty | ltrimstr("sha256:")')
+          if [[ ! "$hash" =~ ^[0-9a-f]{64}$ ]] || ! grep -qE "^def ytDlpSha256 = '[0-9a-f]{64}'$" "$file"; then
+            echo "::error::Cannot update yt-dlp from $current to $latest."
+            exit 1
+          fi
+          sed -i -E \
+            -e "s/^def ytDlpVersion = '[0-9.]+'$/def ytDlpVersion = '$latest'/" \
+            -e "s/^def ytDlpSha256 = '[0-9a-f]{64}'$/def ytDlpSha256 = '$hash'/" "$file"
+          echo "changes=[yt-dlp $latest](https://github.com/yt-dlp/yt-dlp/releases/tag/$latest) (from $current)" >> "$GITHUB_OUTPUT"
+
+      - name: Create or update pull request
+        if: steps.update.outputs.changes
+        uses: peter-evans/create-pull-request@5f6978faf089d4d20b00c7766989d076bb2fc7f1 # v8.1.1
+        with:
+          token: ${{ secrets.UPSTREAM_SYNC_TOKEN }}
+          base: development
+          branch: android-yt-dlp
+          delete-branch: true
+          commit-message: "build(android): update bundled yt-dlp"
+          title: "build(android): update bundled yt-dlp"
+          body: |
+            Updates the yt-dlp release that the Android APK bundles in `android/app/build.gradle` to ${{ steps.update.outputs.changes }}.
+
+            The checksum comes from the digest GitHub records for the release's `yt-dlp` asset. The Gradle build verifies the download against it.
