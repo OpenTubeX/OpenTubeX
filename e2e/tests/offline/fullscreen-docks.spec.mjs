@@ -215,3 +215,34 @@ test('full-window docks preserve zoom, stacked panel controls and rapid toggles'
     await watch.dispose()
   }
 })
+
+test('full-window docks keep value change popups centered on the pushed video', { tag: '@scale' }, async ({ app, page }) => {
+  await mockPlayableWatchPage(app, page)
+  await openMockedVideo(page)
+  const player = page.locator('.ftVideoPlayer')
+  await player.hover({ position: { x: 20, y: 20 } })
+  await expect(player.locator('.shaka-controls-container')).toHaveAttribute('shown', 'true')
+  await player.locator('.full-window-button').click()
+  await expect(player).toHaveClass(/fullWindow/)
+  const watch = await page.evaluateHandle(findWatchComponent)
+  try {
+    await player.locator('video').evaluate(element => element.pause())
+    await watch.evaluate(component => component.proxy.$refs.player.setFullscreenMetadata(true))
+    await expect(player).toHaveClass(/fullscreenDockLayoutOpen/)
+    const popup = player.locator('.valueChangePopup')
+    for (const dir of ['ltr', 'rtl']) {
+      await page.evaluate(dir => { document.body.dir = dir }, dir)
+      await page.keyboard.press('ArrowDown')
+      await expect(popup).toBeVisible()
+      const offset = await popup.evaluate(element => {
+        const popupBounds = element.getBoundingClientRect()
+        const videoBounds = element.closest('.ftVideoPlayer').querySelector(':scope > .player').getBoundingClientRect()
+        return (popupBounds.left + popupBounds.width / 2) - (videoBounds.left + videoBounds.width / 2)
+      })
+      expect(Math.abs(offset), dir).toBeLessThan(1)
+    }
+  } finally {
+    await page.evaluate(() => { document.body.dir = 'ltr' })
+    await watch.dispose()
+  }
+})
