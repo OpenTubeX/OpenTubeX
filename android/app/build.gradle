@@ -101,7 +101,8 @@ def downloadYtDlp = tasks.register('downloadYtDlp') {
     inputs.property('sha256', ytDlpSha256)
     outputs.dir(ytDlpOutput)
     doLast {
-        def bytes = new URL("https://github.com/yt-dlp/yt-dlp/releases/download/${ytDlpVersion}/yt-dlp").bytes
+        def bytes = new URL("https://github.com/yt-dlp/yt-dlp/releases/download/${ytDlpVersion}/yt-dlp")
+            .getBytes(connectTimeout: 30_000, readTimeout: 60_000)
         def hash = java.security.MessageDigest.getInstance('SHA-256').digest(bytes).encodeHex().toString()
         if (hash != ytDlpSha256) throw new GradleException("yt-dlp ${ytDlpVersion} has SHA-256 ${hash}, expected ${ytDlpSha256}")
         def target = new File(ytDlpOutput.get().asFile, 'res/raw/ytdlp')
