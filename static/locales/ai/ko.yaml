@@ -201,6 +201,7 @@ Subscriptions:
   Posts:
     RSS Message: YouTube는 게시물용 RSS 피드를 제공하지 않습니다. 게시물을 보려면 "{rssSetting}" 설정을 끄거나 이 탭을 숨기려면 "{hideSetting}" 설정을 켜세요.
 Trending:
+  Music: 음악
   Load Error: 인기 급상승 콘텐츠를 불러올 수 없습니다.
   Unsupported Backend: 인기 급상승 콘텐츠에는 로컬 API가 필요합니다. 로컬 API를 선택하거나 백엔드 대체 사용을 활성화하세요.
 Most Popular Feed Empty: 이 Invidious 인스턴스의 인기 콘텐츠 피드가 비어 있습니다.

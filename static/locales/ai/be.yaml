@@ -200,6 +200,7 @@ Subscriptions:
   Posts:
     RSS Message: YouTube не дае RSS-стужак для допісаў. Адключыце наладу "{rssSetting}", каб праглядаць допісы, або ўключыце наладу "{hideSetting}", каб схаваць гэту ўкладку.
 Trending:
+  Music: Музыка
   Load Error: Не ўдалося загрузіць папулярнае.
   Unsupported Backend: Для папулярнага патрэбны Local API. Выберыце Local API або ўключыце рэзервовы серверны механізм.
 Most Popular Feed Empty: Стужка «Самае папулярнае» гэтага асобніка Invidious пустая.

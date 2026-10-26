@@ -185,6 +185,7 @@ Subscriptions:
   Newest First: Berrienak lehenik
   Oldest First: Zaharrenak lehenik
 Trending:
+  Music: Musika
   Load Error: Ezin izan dira joerak kargatu.
   Unsupported Backend: Joerek API lokala behar dute. Hautatu API lokala edo gaitu ordezko motorra.
 Most Popular Feed Empty: Invidious instantzia honen Ikusienak jarioa hutsik dago.

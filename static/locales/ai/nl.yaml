@@ -187,6 +187,7 @@ Subscriptions:
   Posts:
     RSS Message: YouTube biedt geen RSS-feeds voor berichten. Schakel de instelling "{rssSetting}" uit om berichten te bekijken of schakel de instelling "{hideSetting}" in om dit tabblad te verbergen.
 Trending:
+  Music: Muziek
   Load Error: Trending kan niet worden geladen.
   Unsupported Backend: Voor Trending is de Local API vereist. Selecteer de Local API of schakel terugvallen op een andere backend in.
 Most Popular Feed Empty: De feed Populairst van deze Invidious-instantie is leeg.

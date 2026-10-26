@@ -187,6 +187,7 @@ Subscriptions:
   Posts:
     RSS Message: لا يوفّر YouTube خلاصات RSS للمنشورات. عطّل إعداد "{rssSetting}" لعرض المنشورات أو فعّل إعداد "{hideSetting}" لإخفاء علامة التبويب هذه.
 Trending:
+  Music: موسيقى
   Load Error: تعذر تحميل العناصر الشائعة.
   Unsupported Backend: يتطلب الاتجاه واجهة برمجة التطبيقات المحلية. حدد واجهة برمجة التطبيقات المحلية أو قم بتمكين الخلفية الاحتياطية.
 Most Popular Feed Empty: الموجز الأكثر شهرة لهذا المثيل Invidious فارغ.

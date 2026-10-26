@@ -185,6 +185,7 @@ Subscriptions:
   Newest First: 新しい順
   Oldest First: 古い順
 Trending:
+  Music: 音楽
   Load Error: トレンドを読み込めませんでした。
   Unsupported Backend: トレンドにはLocal APIが必要です。Local APIを選択するか、バックエンドのフォールバックを有効にしてください。
 Most Popular Feed Empty: このInvidiousインスタンスの「人気」フィードは空です。

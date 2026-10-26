@@ -200,6 +200,7 @@ Subscriptions:
   Posts:
     RSS Message: 'YouTube no proporciona fuentes RSS para publicaciones. Desactiva el ajuste "{rssSetting}" para ver las publicaciones o activa "{hideSetting}" para ocultar esta pestaña.'
 Trending:
+  Music: Música
   Sports: Deportes
   Load Error: No se pudo cargar Tendencias.
   Unsupported Backend: Tendencias requiere la API local. Selecciona la API local o activa la fuente alternativa del backend.

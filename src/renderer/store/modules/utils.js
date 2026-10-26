@@ -65,6 +65,7 @@ const state = {
   popularCache: null,
   trendingCache: {
     gaming: null,
+    music: null,
     sports: null,
     podcasts: null
   },
@@ -105,6 +106,7 @@ const state = {
   lastPopularRefreshTimestamp: '',
   lastTrendingRefreshTimestamp: {
     gaming: '',
+    music: '',
     sports: '',
     podcasts: ''
   },
@@ -1044,7 +1046,7 @@ const mutations = {
 
   /**
    * @param {typeof state} state
-   * @param {{page: 'gaming' | 'sports' | 'podcasts', timestamp: Date}} param1
+   * @param {{page: 'gaming' | 'music' | 'sports' | 'podcasts', timestamp: Date}} param1
    */
   setLastTrendingRefreshTimestamp (state, { page, timestamp }) {
     state.lastTrendingRefreshTimestamp[page] = timestamp
@@ -1056,7 +1058,7 @@ const mutations = {
 
   /**
    * @param {typeof state} state
-   * @param {'gaming' | 'sports' | 'podcasts'} page
+   * @param {'gaming' | 'music' | 'sports' | 'podcasts'} page
    */
   clearTrendingCache(state, page) {
     state.trendingCache[page] = null

@@ -185,6 +185,7 @@ Subscriptions:
   Newest First: Terbaru dahulu
   Oldest First: Terlama dahulu
 Trending:
+  Music: Musik
   Load Error: Trending tidak dapat dimuat.
   Unsupported Backend: Trending memerlukan Local API. Pilih Local API atau aktifkan backend cadangan.
 Most Popular Feed Empty: Umpan Paling Populer pada instans Invidious ini kosong.

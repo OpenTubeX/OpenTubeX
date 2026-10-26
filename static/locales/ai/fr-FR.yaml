@@ -185,6 +185,7 @@ Subscriptions:
   Newest First: Plus récents d’abord
   Oldest First: Plus anciens d’abord
 Trending:
+  Music: Musique
   Load Error: Les tendances n’ont pas pu être chargées.
   Unsupported Backend: Les tendances nécessitent l’API locale. Sélectionnez l’API locale ou activez le recours à une autre source.
 Most Popular Feed Empty: Le flux « Les plus populaires » de cette instance Invidious est vide.

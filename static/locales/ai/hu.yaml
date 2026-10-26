@@ -185,6 +185,7 @@ Subscriptions:
   Newest First: Legújabb elöl
   Oldest First: Legrégebbi elöl
 Trending:
+  Music: Zene
   Load Error: A felkapott tartalmak nem tölthetők be.
   Unsupported Backend: A felkapott tartalmakhoz a Local API szükséges. Válassza a Local API-t, vagy engedélyezze a tartalék háttérszolgáltatást.
 Most Popular Feed Empty: Ennek az Invidious-példánynak üres a Legnépszerűbb hírfolyama.

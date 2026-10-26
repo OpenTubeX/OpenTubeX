@@ -187,6 +187,7 @@ Subscriptions:
   Posts:
     RSS Message: YouTube không cung cấp nguồn cấp RSS cho bài đăng. Tắt cài đặt "{rssSetting}" để xem bài đăng hoặc bật cài đặt "{hideSetting}" để ẩn thẻ này.
 Trending:
+  Music: Âm nhạc
   Load Error: Không thể tải nội dung thịnh hành.
   Unsupported Backend: Nội dung thịnh hành cần Local API. Hãy chọn Local API hoặc bật phương án dự phòng cho dịch vụ nền.
 Most Popular Feed Empty: Bảng tin Phổ biến nhất của máy chủ Invidious này đang trống.

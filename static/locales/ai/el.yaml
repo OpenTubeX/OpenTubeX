@@ -185,6 +185,7 @@ Subscriptions:
   Newest First: Νεότερα πρώτα
   Oldest First: Παλαιότερα πρώτα
 Trending:
+  Music: Μουσική
   Load Error: Δεν ήταν δυνατή η φόρτωση των τάσεων.
   Unsupported Backend: Οι τάσεις απαιτούν το Τοπικό API. Επιλέξτε το Τοπικό API ή ενεργοποιήστε την εφεδρική χρήση συστήματος υποστήριξης.
 Most Popular Feed Empty: Η ροή «Δημοφιλέστερα» αυτού του στιγμιοτύπου Invidious είναι κενή.

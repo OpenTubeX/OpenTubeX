@@ -185,6 +185,7 @@ Subscriptions:
   Newest First: 最新優先
   Oldest First: 最舊優先
 Trending:
+  Music: 音樂
   Load Error: 無法載入熱門趨勢。
   Unsupported Backend: 熱門趨勢需要 Local API。請選擇 Local API 或啟用後端備援。
 Most Popular Feed Empty: 此 Invidious 伺服器的「最熱門」動態消息沒有內容。

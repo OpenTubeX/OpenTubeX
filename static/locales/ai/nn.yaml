@@ -185,6 +185,7 @@ Subscriptions:
   Newest First: Nyaste først
   Oldest First: Eldste først
 Trending:
+  Music: Musikk
   Load Error: Klarte ikkje å laste inn populært innhald.
   Unsupported Backend: Populært innhald krev Local API. Vel Local API eller slå på ein reserveleverandør.
 Most Popular Feed Empty: «Most Popular»-straumen frå denne Invidious-instansen er tom.

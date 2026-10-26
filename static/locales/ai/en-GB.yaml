@@ -186,6 +186,7 @@ Subscriptions:
   Posts:
     RSS Message: YouTube does not provide RSS feeds for posts. Disable the "{rssSetting}" setting to view posts or enable the "{hideSetting}" setting to hide this tab.
 Trending:
+  Music: Music
   Load Error: Trending could not be loaded.
   Unsupported Backend: Trending requires the Local API. Select the Local API or enable backend fallback.
 Most Popular Feed Empty: This Invidious instance's Most Popular feed is empty.

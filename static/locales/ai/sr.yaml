@@ -189,6 +189,7 @@ Subscriptions:
   Posts:
     RSS Message: YouTube не пружа RSS изворе за објаве. Искључите подешавање „{rssSetting}“ да бисте видели објаве или укључите подешавање „{hideSetting}“ да бисте сакрили ову картицу.
 Trending:
+  Music: Музика
   Load Error: Садржај у тренду није могао да се учита.
   Unsupported Backend: За садржај у тренду потребан је Local API. Изаберите Local API или укључите резервни начин рада.
 Most Popular Feed Empty: Извор „Најпопуларније“ ове Invidious инстанце је празан.

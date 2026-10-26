@@ -15,6 +15,20 @@ export function getChannelHandleFromEndpoint(endpoint) {
   return typeof url === 'string' && url.startsWith('/@') ? url.slice(1) : undefined
 }
 
+/**
+ * Picks the trending chart from YouTube Music's charts page. Its title is localized, but it is the only
+ * auto-generated (`OLAK5uy_`) playlist there. The global charts have no trending chart, so they fall back
+ * to the first video chart, the daily top music videos.
+ * @param {import('youtubei.js').IParsedResponse} charts
+ * @returns {string | undefined} the playlist browse ID
+ */
+export function getLocalMusicChartPlaylistId(charts) {
+  const playlists = charts.contents_memo?.getType(YTNodes.MusicTwoRowItem)
+    .filter(item => item.item_type === 'playlist') ?? []
+
+  return (playlists.find(item => item.id.startsWith('VLOLAK5uy_')) ?? playlists[0])?.id
+}
+
 export function createLocalFeedParsers(shouldHideMembersOnly) {
   const TRACKING_PARAM_NAMES = [
     'utm_source',

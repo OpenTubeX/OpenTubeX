@@ -185,6 +185,7 @@ Subscriptions:
   Newest First: Od nejnovějších
   Oldest First: Od nejstarších
 Trending:
+  Music: Hudba
   Load Error: Trendy se nepodařilo načíst.
   Unsupported Backend: Trendy vyžadují místní API. Vyberte místní API nebo povolte záložního poskytovatele.
 Most Popular Feed Empty: Kanál Nejoblíbenější je na této instanci Invidious prázdný.

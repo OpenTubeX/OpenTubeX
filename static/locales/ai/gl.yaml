@@ -187,6 +187,7 @@ Subscriptions:
   Posts:
     RSS Message: 'YouTube non fornece fontes RSS para as publicacións. Desactiva a opción "{rssSetting}" para ver as publicacións ou activa "{hideSetting}" para ocultar esta lapela.'
 Trending:
+  Music: Música
   Load Error: Non se puideron cargar as tendencias.
   Unsupported Backend: As tendencias requiren a API local. Selecciona a API local ou activa o servizo alternativo.
 Most Popular Feed Empty: A fonte «Máis populares» desta instancia de Invidious está baleira.

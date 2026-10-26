@@ -185,6 +185,7 @@ Subscriptions:
   Newest First: Cele mai noi primele
   Oldest First: Cele mai vechi primele
 Trending:
+  Music: Muzică
   Load Error: Tendințele nu au putut fi încărcate.
   Unsupported Backend: Tendințele necesită API-ul local. Selectați API-ul local sau activați furnizorul de rezervă.
 Most Popular Feed Empty: Fluxul „Cele mai populare” al acestei instanțe Invidious este gol.

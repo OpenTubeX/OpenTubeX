@@ -187,6 +187,7 @@ Subscriptions:
   Posts:
     RSS Message: 'YouTube býður ekki upp á RSS-strauma fyrir færslur. Slökktu á stillingunni "{rssSetting}" til að skoða færslur eða kveiktu á stillingunni "{hideSetting}" til að fela þennan flipa.'
 Trending:
+  Music: Tónlist
   Load Error: Ekki tókst að hlaða vinsælu efni.
   Unsupported Backend: Vinsælt efni krefst Local API. Veldu Local API eða virkjaðu varaleið bakenda.
 Most Popular Feed Empty: Straumurinn Vinsælast á þessu Invidious-tilviki er tómur.

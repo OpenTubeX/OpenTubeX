@@ -204,6 +204,7 @@ Subscriptions:
   Posts:
     RSS Message: 'یوتیوب برای پست‌ها خوراک RSS ارائه نمی‌کند. برای دیدن پست‌ها تنظیم "{rssSetting}" را غیرفعال کنید یا برای پنهان‌کردن این زبانه تنظیم "{hideSetting}" را فعال کنید.'
 Trending:
+  Music: موسیقی
   Load Error: موارد پرطرف‌دار بارگذاری نشدند.
   Unsupported Backend: نمایش موارد پرطرف‌دار به Local API نیاز دارد. Local API را انتخاب کنید یا بازگشت به بک‌اند را فعال کنید.
 Most Popular Feed Empty: خوراک Most Popular این نمونه Invidious خالی است.

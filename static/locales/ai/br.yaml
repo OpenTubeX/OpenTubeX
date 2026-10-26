@@ -185,6 +185,7 @@ Subscriptions:
   Newest First: "Ar re nevesañ da gentañ"
   Oldest First: "Ar re goshañ da gentañ"
 Trending:
+  Music: Sonerezh
   Load Error: "N'eus ket bet gallet kargañ ar re diouzh ar c'hiz."
   Unsupported Backend: "Ezhomm ez eus eus an API lec'hel evit ar re diouzh ar c'hiz. Dibabit an API lec'hel pe gweredekait an diskoulm backend erlec'hiañ."
 Most Popular Feed Empty: "Goullo eo gwazh «Ar muiañ a verzh» an istañs Invidious-mañ."

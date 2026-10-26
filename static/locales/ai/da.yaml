@@ -189,6 +189,7 @@ Subscriptions:
   Posts:
     RSS Message: YouTube tilbyder ikke RSS-feeds til opslag. Deaktivér indstillingen "{rssSetting}" for at se opslag, eller aktivér indstillingen "{hideSetting}" for at skjule denne fane.
 Trending:
+  Music: Musik
   Load Error: Populært indhold kunne ikke indlæses.
   Unsupported Backend: Populært indhold kræver Local API. Vælg Local API, eller slå reservebackend til.
 Most Popular Feed Empty: Denne Invidious-instans' feed med det mest populære indhold er tomt.

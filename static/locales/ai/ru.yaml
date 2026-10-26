@@ -160,6 +160,7 @@ Subscriptions:
   Posts:
     RSS Message: YouTube не предоставляет RSS-ленты для публикаций. Отключите настройку «{rssSetting}», чтобы просматривать публикации, или включите настройку «{hideSetting}», чтобы скрыть эту вкладку.
 Trending:
+  Music: Музыка
   Load Error: Не удалось загрузить популярные видео.
   Unsupported Backend: Для просмотра популярных видео требуется Local API. Выберите Local API или разрешите использовать резервный бэкенд.
 Most Popular Feed Empty: Лента «Самое популярное» на этом экземпляре Invidious пуста.

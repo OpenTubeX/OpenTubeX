@@ -236,6 +236,7 @@ Channels:
   Empty: La llista de canals està buida.
   Unsubscribe Prompt: Segur que us voleu donar de baixa de "{channelName}"?
 Trending:
+  Music: Música
   Sports: Esports
   Load Error: No s'han pogut carregar les tendències.
   Unsupported Backend: Les tendències requereixen l'API local. Seleccioneu l'API local o activeu el motor alternatiu.

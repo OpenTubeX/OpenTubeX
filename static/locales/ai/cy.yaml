@@ -185,6 +185,7 @@ Subscriptions:
   Newest First: Mwyaf newydd yn gyntaf
   Oldest First: Hynaf yn gyntaf
 Trending:
+  Music: Cerddoriaeth
   Load Error: Nid oedd modd llwytho Trendio.
   Unsupported Backend: Mae angen yr API Lleol ar Trendio. Dewiswch yr API Lleol neu alluogi'r darparwr wrth gefn.
 Most Popular Feed Empty: Mae ffrwd Mwyaf Poblogaidd yr enghraifft Invidious hon yn wag.

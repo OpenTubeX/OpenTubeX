@@ -187,6 +187,7 @@ Subscriptions:
 Channels:
   Load More Channels: Daha çox kanal yüklə
 Trending:
+  Music: Musiqi
   Load Error: Trend məzmununu yükləmək mümkün olmadı.
   Unsupported Backend: Trend məzmunu üçün Yerli API tələb olunur. Yerli API-ni seçin və ya ehtiyat arxa xidmətə keçidi aktivləşdirin.
 Most Popular Feed Empty: Bu Invidious serverinin Ən Tanınmış lenti boşdur.

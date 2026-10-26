@@ -219,6 +219,7 @@ Subscriptions:
   Posts:
     RSS Message: YouTube neteikia įrašų RSS kanalų. Išjunkite nustatymą „{rssSetting}“, kad matytumėte įrašus, arba įjunkite nustatymą „{hideSetting}“, kad paslėptumėte šį skirtuką.
 Trending:
+  Music: Muzika
   Load Error: Nepavyko įkelti tendencijų.
   Unsupported Backend: Tendencijoms reikia Local API. Pasirinkite Local API arba įjunkite atsarginę serverio sąsają.
 Most Popular Feed Empty: Šio Invidious serverio „Populiariausių“ kanalas tuščias.

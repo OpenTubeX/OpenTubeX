@@ -185,6 +185,7 @@ Subscriptions:
   Newest First: 最新优先
   Oldest First: 最早优先
 Trending:
+  Music: 音乐
   Load Error: 无法加载热门内容。
   Unsupported Backend: 热门内容需要使用 Local API。请选择 Local API 或启用后端回退。
 Most Popular Feed Empty: 此 Invidious 实例的“最受欢迎”订阅源为空。

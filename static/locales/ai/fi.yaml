@@ -187,6 +187,7 @@ Subscriptions:
   Posts:
     RSS Message: 'YouTube ei tarjoa julkaisuille RSS-syötteitä. Poista "{rssSetting}" käytöstä nähdäksesi julkaisut tai ota "{hideSetting}" käyttöön piilottaaksesi tämän välilehden.'
 Trending:
+  Music: Musiikki
   Load Error: Nousussa olevia videoita ei voitu ladata.
   Unsupported Backend: Nousussa olevat videot edellyttävät paikallista APIa. Valitse paikallinen API tai ota käyttöön varajärjestelmä.
 Most Popular Feed Empty: Tämän Invidious-instanssin Suosituimmat-syöte on tyhjä.

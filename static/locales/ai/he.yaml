@@ -187,6 +187,7 @@ Subscriptions:
   Posts:
     RSS Message: 'YouTube לא מספק עדכוני RSS לפוסטים. השביתו את ההגדרה "{rssSetting}" כדי לראות פוסטים, או הפעילו את ההגדרה "{hideSetting}" כדי להסתיר את הכרטיסייה הזאת.'
 Trending:
+  Music: מוזיקה
   Load Error: לא ניתן לטעון את התוכן החם.
   Unsupported Backend: לתוכן החם דרוש Local API. יש לבחור ב־Local API או להפעיל מעבר לספק חלופי.
 Most Popular Feed Empty: עדכון התוכן הפופולרי ביותר של מופע Invidious זה ריק.

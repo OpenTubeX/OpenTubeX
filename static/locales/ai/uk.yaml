@@ -187,6 +187,7 @@ Subscriptions:
   Posts:
     RSS Message: 'YouTube не надає RSS-каналів для дописів. Вимкніть налаштування "{rssSetting}", щоб переглядати дописи, або ввімкніть "{hideSetting}", щоб приховати цю вкладку.'
 Trending:
+  Music: Музика
   Load Error: Не вдалося завантажити популярне.
   Unsupported Backend: Для популярного потрібен Local API. Виберіть Local API або ввімкніть резервний серверний модуль.
 Most Popular Feed Empty: Стрічка «Найпопулярніше» цього сервера Invidious порожня.

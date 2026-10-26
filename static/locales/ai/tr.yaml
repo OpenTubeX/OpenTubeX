@@ -185,6 +185,7 @@ Subscriptions:
   Newest First: Önce en yeniler
   Oldest First: Önce en eskiler
 Trending:
+  Music: Müzik
   Load Error: Öne çıkanlar yüklenemedi.
   Unsupported Backend: Öne çıkanlar için Yerel API gerekir. Yerel API'yi seçin veya arka uç yedeğini etkinleştirin.
 Most Popular Feed Empty: Bu Invidious örneğinin Popüler Olanlar akışı boş.

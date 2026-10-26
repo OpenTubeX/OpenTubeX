@@ -187,6 +187,7 @@ Subscriptions:
   Posts:
     RSS Message: 'YouTube tillhandahåller inte RSS-flöden för inlägg. Inaktivera inställningen "{rssSetting}" för att visa inlägg eller aktivera inställningen "{hideSetting}" för att dölja den här fliken.'
 Trending:
+  Music: Musik
   Load Error: Trendande innehåll kunde inte läsas in.
   Unsupported Backend: Trendande innehåll kräver lokalt API. Välj lokalt API eller aktivera reservserverdelen.
 Most Popular Feed Empty: Flödet Populärast på den här Invidious-instansen är tomt.

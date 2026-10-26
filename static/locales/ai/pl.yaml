@@ -70,6 +70,7 @@ Subscriptions:
   Show Tabbed View: Pokaż widok kart
   Show Combined View: Pokaż widok łączny
 Trending:
+  Music: Muzyka
   Load Error: Nie udało się wczytać popularnych treści.
   Unsupported Backend: Popularne treści wymagają lokalnego API. Wybierz lokalne API lub włącz zapasowy backend.
 Most Popular Feed Empty: Kanał „Najpopularniejsze” tej instancji Invidious jest pusty.

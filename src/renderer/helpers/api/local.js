@@ -1,5 +1,5 @@
 import { normalizeCommentFetchResponse, parseLocalCommentImageAttachment } from './local-comment-response'
-import { createLocalFeedParsers, getChannelHandleFromEndpoint } from './local-feed-parsers'
+import { createLocalFeedParsers, getChannelHandleFromEndpoint, getLocalMusicChartPlaylistId } from './local-feed-parsers'
 import { createOriginalChannelNameResolver } from './original-channel-name'
 import { runBackgroundJob } from '../background-jobs.js'
 import { ClientType, Constants, Innertube, Mixins, Parser, Platform, Player, Session, UniversalCache, Utils, YT, YTNodes } from 'youtubei.js'
@@ -339,7 +339,7 @@ export async function untilEndOfLocalPlayList(playlist, callback, { runCallbackO
 
 /**
  * @param {string} location
- * @param {'gaming' | 'sports' | 'podcasts'} tab
+ * @param {'gaming' | 'music' | 'sports' | 'podcasts'} tab
  */
 export async function getLocalTrending(location, tab) {
   const innertube = await createInnertube({ location })
@@ -347,6 +347,25 @@ export async function getLocalTrending(location, tab) {
   let args
 
   switch (tab) {
+    case 'music': {
+      // https://music.youtube.com/charts
+      // The charts ignore the session location and use the requester's IP unless a country is selected.
+      // Unsupported countries return the global charts.
+      const charts = await innertube.actions.execute('/browse', {
+        browseId: 'FEmusic_charts',
+        formData: { selectedValues: [location] },
+        client: 'YTMUSIC',
+        parse: true
+      })
+      const playlistId = getLocalMusicChartPlaylistId(charts)
+
+      if (!playlistId) {
+        throw new Error('No music chart found')
+      }
+
+      const playlist = await innertube.getPlaylist(playlistId)
+      return parseLocalPlaylistVideos(playlist.items)
+    }
     case 'gaming':
       // https://www.youtube.com/gaming/trending
       args = {

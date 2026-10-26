@@ -187,6 +187,7 @@ Subscriptions:
   Posts:
     RSS Message: 'YouTube ne pruža RSS izvore za objave. Isključite postavku "{rssSetting}" za prikaz objava ili uključite postavku "{hideSetting}" kako biste sakrili ovu karticu.'
 Trending:
+  Music: Glazba
   Load Error: Popularni sadržaj nije moguće učitati.
   Unsupported Backend: Popularni sadržaj zahtijeva Local API. Odaberite Local API ili omogućite pričuvni pozadinski sustav.
 Most Popular Feed Empty: Izvor Najpopularnije na ovoj Invidious instanci je prazan.

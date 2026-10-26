@@ -197,6 +197,7 @@ Subscriptions:
   Posts:
     RSS Message: 'பதிவுகளுக்கு YouTube RSS ஊட்டங்களை வழங்குவதில்லை. பதிவுகளைக் காண "{rssSetting}" அமைப்பை முடக்கவும் அல்லது இந்தத் தாவலை மறைக்க "{hideSetting}" அமைப்பை இயக்கவும்.'
 Trending:
+  Music: இசை
   Load Error: பிரபலமானவற்றை ஏற்ற முடியவில்லை.
   Unsupported Backend: பிரபலமானவற்றுக்கு Local API தேவை. Local API-ஐத் தேர்ந்தெடுக்கவும் அல்லது பின்தள மாற்றுவழியை இயக்கவும்.
 Most Popular Feed Empty: இந்த Invidious நிகழ்வின் மிகவும் பிரபலமானவை ஊட்டம் காலியாக உள்ளது.

@@ -228,6 +228,7 @@ Subscriptions:
   Posts:
     RSS Message: YouTube ne zagotavlja virov RSS za objave. Izklopite nastavitev »{rssSetting}«, če želite videti objave, ali vklopite nastavitev »{hideSetting}«, če želite skriti ta zavihek.
 Trending:
+  Music: Glasba
   Trending Tabs: Zavihki priljubljene vsebine
   Load Error: Priljubljene vsebine ni bilo mogoče naložiti.
   Unsupported Backend: Priljubljena vsebina zahteva Local API. Izberite Local API ali omogočite nadomestno zaledje.
