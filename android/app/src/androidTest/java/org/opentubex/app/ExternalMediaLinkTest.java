@@ -19,6 +19,8 @@ public class ExternalMediaLinkTest {
         "https://www.reddit.com/r/videos/comments/abc123/example/",
         "https://www.facebook.com/reel/1234567890",
         "https://www.facebook.com/example/videos/1234567890/",
+        "https://www.facebook.com/watch?v=1234567890",
+        "https://m.facebook.com/watch/?v=1234567890",
         "https://www.dailymotion.com/video/x8abc12",
         "https://dai.ly/x8abc12",
         "https://www.twitch.tv/videos/1234567890",

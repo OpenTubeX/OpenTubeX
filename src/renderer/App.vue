@@ -5432,6 +5432,12 @@ async function enableCapacitorIntegrations() {
     // iOS URL handling can remove the embedded protocol's colon.
     const target = url.replace(/^opentubex(?:-nightly)?:(?:\/\/)?/, '').replace(/^(https?)\/\//, '$1://')
     if (supportsYtDlp && shouldOpenExternalMediaUrl(target, store.getters.getCurrentInvidiousInstanceUrl)) {
+      const mediaUrl = new URL(target)
+      // Android intent filters cannot require Facebook's video ID query parameter.
+      if ((mediaUrl.hostname === 'facebook.com' || mediaUrl.hostname.endsWith('.facebook.com')) &&
+        /^\/watch\/?$/.test(mediaUrl.pathname) && !/^\d+$/.test(mediaUrl.searchParams.get('v') ?? '')) {
+        return openExternalLink(target)
+      }
       await store.dispatch('hideSettingsWindow')
       return openExternalMedia(target)
     }
