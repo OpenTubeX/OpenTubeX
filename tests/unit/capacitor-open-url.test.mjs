@@ -2,10 +2,28 @@ import assert from 'node:assert/strict'
 import { readFileSync } from 'node:fs'
 import test from 'node:test'
 import vm from 'node:vm'
+import { shouldOpenExternalMediaUrl } from '../../src/renderer/helpers/externalMediaUrl.js'
 
 const app = readFileSync('src/renderer/App.vue', 'utf8')
 const start = app.indexOf('  const openUrl = async url => {', app.indexOf('async function enableCapacitorIntegrations()'))
 const fragment = app.slice(start, app.indexOf('  const backButtonHandle', start))
+
+function urlOpener(supportsYtDlp = true) {
+  const youtube = []
+  const externalMedia = []
+  const browser = []
+  const openUrl = vm.runInNewContext(`${fragment}\nopenUrl`, {
+    URL,
+    getHomeWidgetPage: () => null,
+    handleYoutubeLink: url => youtube.push(url),
+    openExternalMedia: url => externalMedia.push(url),
+    openExternalLink: url => browser.push(url),
+    shouldOpenExternalMediaUrl,
+    supportsYtDlp,
+    store: { dispatch: async () => {}, getters: { getCurrentInvidiousInstanceUrl: 'https://invidious.example' } }
+  })
+  return { openUrl, youtube, externalMedia, browser }
+}
 
 for (const [input, expected] of [
   ['opentubex://https://www.youtube.com/watch?v=test', 'https://www.youtube.com/watch?v=test'],
@@ -14,10 +32,56 @@ for (const [input, expected] of [
   ['opentubex-nightly:https://youtu.be/test', 'https://youtu.be/test'],
   ['https://youtu.be/test', 'https://youtu.be/test'],
 ]) {
-  test(`Capacitor opens ${input} as a YouTube URL`, () => {
-    const urls = []
-    const openUrl = vm.runInNewContext(`${fragment}\nopenUrl`, { getHomeWidgetPage: () => null, handleYoutubeLink: url => urls.push(url) })
-    openUrl(input)
-    assert.deepEqual(urls, [expected])
+  test(`Capacitor opens ${input} as a YouTube URL`, async () => {
+    const { openUrl, youtube, externalMedia } = urlOpener()
+    await openUrl(input)
+    assert.deepEqual(youtube, [expected])
+    assert.deepEqual(externalMedia, [])
   })
 }
+
+test('Capacitor opens links from other sites with yt-dlp', async () => {
+  const { openUrl, youtube, externalMedia } = urlOpener()
+  await openUrl('https://www.instagram.com/reel/Chunk8-jurw/')
+  await openUrl('opentubex://https//vimeo.com/56015672')
+  await openUrl('https://invidious.example/watch?v=abcdefghijk')
+  assert.deepEqual(externalMedia, ['https://www.instagram.com/reel/Chunk8-jurw/', 'https://vimeo.com/56015672'])
+  assert.deepEqual(youtube, ['https://invidious.example/watch?v=abcdefghijk'])
+})
+
+test('builds without yt-dlp pass other links to the YouTube URL handler', async () => {
+  const { openUrl, youtube, externalMedia } = urlOpener(false)
+  await openUrl('https://www.instagram.com/reel/Chunk8-jurw/')
+  assert.deepEqual(youtube, ['https://www.instagram.com/reel/Chunk8-jurw/'])
+  assert.deepEqual(externalMedia, [])
+})
+
+test('Facebook watch landing URLs without a numeric video ID open in the browser', async () => {
+  const urls = [
+    'https://www.facebook.com/watch/',
+    'https://facebook.com/watch',
+    'https://m.facebook.com/watch/?v=',
+    'https://www.facebook.com/watch/?v=invalid',
+    'https://www.facebook.com/watch/?v=123abc',
+    'opentubex://https://www.facebook.com/watch/?ref=tab',
+  ]
+  const { openUrl, youtube, externalMedia, browser } = urlOpener()
+  for (const url of urls) await openUrl(url)
+  assert.deepEqual(browser, urls.map(url => url.replace('opentubex://', '')))
+  assert.deepEqual(externalMedia, [])
+  assert.deepEqual(youtube, [])
+})
+
+test('Facebook watch links with numeric video IDs still open with yt-dlp', async () => {
+  const urls = [
+    'https://www.facebook.com/watch?v=1234567890',
+    'https://m.facebook.com/watch/?v=1234567890&ref=sharing',
+    'https://www.facebook.com/reel/1234567890',
+    'https://facebook.com.example/watch/',
+  ]
+  const { openUrl, youtube, externalMedia, browser } = urlOpener()
+  for (const url of urls) await openUrl(url)
+  assert.deepEqual(externalMedia, urls)
+  assert.deepEqual(browser, [])
+  assert.deepEqual(youtube, [])
+})

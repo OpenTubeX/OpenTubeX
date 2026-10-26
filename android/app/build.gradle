@@ -129,6 +129,7 @@ android {
             new groovy.json.JsonSlurper().parse(rootProject.file('../package.json')).version
         buildConfigField "boolean", "BUNDLES_YT_DLP", (!liteBuild).toString()
         buildConfigField "String", "YT_DLP_VERSION", "\"${ytDlpVersion}\""
+        manifestPlaceholders += [bundlesYtDlp: (!liteBuild).toString()]
         ndk { abiFilters.addAll((project.findProperty('testAbi') ?: 'arm64-v8a,armeabi-v7a,x86_64,x86').split(',')) }
         testInstrumentationRunner(optimizedTestBuild
             ? "org.opentubex.app.OptimizedApkInstrumentation"

@@ -3,7 +3,7 @@ import { readFileSync } from 'node:fs'
 import test from 'node:test'
 import { compileFunction } from 'node:vm'
 import { usesInvidiousApi } from '../../src/apiBackends.js'
-import { extractSharedYoutubeLink } from '../../src/renderer/helpers/sharedYoutubeLink.js'
+import { extractSharedMediaLink, extractSharedYoutubeLink } from '../../src/renderer/helpers/sharedYoutubeLink.js'
 import { parseHistoryRepairPlayer } from '../../src/historyRepair.js'
 
 const app = readFileSync('src/renderer/App.vue', 'utf8')
@@ -76,16 +76,50 @@ test('canonical watch links require an exact video ID before parser truncation',
   assert.equal(extractSharedYoutubeLink(`https://youtube.com/watch?v=${id}X ${url}`), url)
 })
 
-function shareHandler(dispatch) {
+function shareHandler(dispatch, { ytDlp = true } = {}) {
   const state = { value: null }
   const opened = []
+  const externalMedia = []
   const toasts = []
   const errors = []
-  const { share, open } = compileFunction(`let sharedYoutubeLinkId = 0\n${handler}\nreturn { share: handleAndroidSharedText, open: openSharedYoutubeLink }`, ['sharedYoutubeLink', 'store', 'extractSharedYoutubeLink', 'showToast', 't', 'handleYoutubeLink', 'console'])(
-    state, { dispatch }, extractSharedYoutubeLink, toast => toasts.push(toast), key => key, url => opened.push(url), { error: (...args) => errors.push(args) }
+  const store = { dispatch: async (action, ...args) => action === 'hideSettingsWindow' ? undefined : dispatch(action, ...args), getters: { getCurrentInvidiousInstanceUrl: 'https://invidious.example' } }
+  const { share, open } = compileFunction(`let sharedYoutubeLinkId = 0\n${handler}\nreturn { share: handleAndroidSharedText, open: openSharedYoutubeLink }`, ['sharedYoutubeLink', 'store', 'extractSharedYoutubeLink', 'extractSharedMediaLink', 'supportsYtDlp', 'openExternalMedia', 'showToast', 't', 'handleYoutubeLink', 'console'])(
+    state, store, extractSharedYoutubeLink, extractSharedMediaLink, ytDlp, url => externalMedia.push(url), toast => toasts.push(toast), key => key, url => opened.push(url), { error: (...args) => errors.push(args) }
   )
-  return { state, opened, toasts, errors, share, open }
+  return { state, opened, externalMedia, toasts, errors, share, open }
 }
+
+test('shared text finds yt-dlp media links and prefers YouTube links', () => {
+  const reel = 'https://www.instagram.com/reel/abc123/?igsh=xyz'
+  assert.equal(extractSharedMediaLink(`Watch this ${reel}`), reel)
+  assert.equal(extractSharedMediaLink('vimeo.com/12345'), 'http://vimeo.com/12345')
+  for (const text of [undefined, 'No link', `https://youtu.be/${id}`, 'https://invidious.example/watch?v=abcdefghijk', 'mailto:test@example.com']) {
+    assert.equal(extractSharedMediaLink(text, 'https://invidious.example'), null, text)
+  }
+})
+
+test('shared non-YouTube links open in the yt-dlp media view', async () => {
+  const reel = 'https://www.instagram.com/reel/abc123/'
+  const h = shareHandler(async () => assert.fail('YouTube URL resolution must not run'))
+  await h.share(`Shared reel ${reel}`)
+  assert.deepEqual(h.externalMedia, [reel])
+  assert.equal(h.state.value, null)
+  assert.deepEqual(h.toasts, [])
+})
+
+test('YouTube links win over other shared links', async () => {
+  const h = shareHandler(async () => ({ urlType: 'video', videoId: id }))
+  await h.share(`https://www.instagram.com/reel/abc123/ https://youtu.be/${id}`)
+  assert.deepEqual(h.externalMedia, [])
+  assert.equal(h.state.value.videoId, id)
+})
+
+test('builds without yt-dlp keep rejecting non-YouTube links', async () => {
+  const h = shareHandler(async () => null, { ytDlp: false })
+  await h.share('https://www.instagram.com/reel/abc123/')
+  assert.deepEqual(h.externalMedia, [])
+  assert.equal(h.toasts[0].message, 'Share.No YouTube Link')
+})
 
 test('shares show actions before navigation and repeated shares reopen the dialog', async () => {
   const h = shareHandler(async () => ({ urlType: 'video', videoId: id }))

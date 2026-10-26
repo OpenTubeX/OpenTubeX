@@ -625,7 +625,8 @@ import TabContent from './components/TabContent/TabContent.vue'
 import FtPrompt from './components/FtPrompt/FtPrompt.vue'
 import SharedYoutubeLinkPrompt from './components/SharedYoutubeLinkPrompt/SharedYoutubeLinkPrompt.vue'
 import { initializeAndroidIncomingShare } from './helpers/androidIncomingShare'
-import { extractSharedYoutubeLink } from './helpers/sharedYoutubeLink'
+import { extractSharedMediaLink, extractSharedYoutubeLink } from './helpers/sharedYoutubeLink'
+import { shouldOpenExternalMediaUrl } from './helpers/externalMediaUrl'
 import SubscriptionRefreshErrors from './components/SubscriptionRefreshErrors.vue'
 import FtButton from './components/FtButton/FtButton.vue'
 import FtToast from './components/FtToast/FtToast.vue'
@@ -5363,9 +5364,20 @@ function enableOpenUrl() {
   })
 }
 
+function openExternalMedia(url) {
+  return openInternalPath({ path: '/external-media', query: { url } })
+}
+
 async function handleAndroidSharedText(text) {
   const id = ++sharedYoutubeLinkId
   const url = extractSharedYoutubeLink(text)
+  const mediaUrl = !url && supportsYtDlp ? extractSharedMediaLink(text, store.getters.getCurrentInvidiousInstanceUrl) : null
+  if (mediaUrl) {
+    sharedYoutubeLink.value = null
+    await store.dispatch('hideSettingsWindow')
+    if (id === sharedYoutubeLinkId) openExternalMedia(mediaUrl)
+    return
+  }
   let info = null
   try {
     info = url ? await store.dispatch('getYoutubeUrlInfo', url) : null
@@ -5419,6 +5431,16 @@ async function enableCapacitorIntegrations() {
     }
     // iOS URL handling can remove the embedded protocol's colon.
     const target = url.replace(/^opentubex(?:-nightly)?:(?:\/\/)?/, '').replace(/^(https?)\/\//, '$1://')
+    if (supportsYtDlp && shouldOpenExternalMediaUrl(target, store.getters.getCurrentInvidiousInstanceUrl)) {
+      const mediaUrl = new URL(target)
+      // Android intent filters cannot require Facebook's video ID query parameter.
+      if ((mediaUrl.hostname === 'facebook.com' || mediaUrl.hostname.endsWith('.facebook.com')) &&
+        /^\/watch\/?$/.test(mediaUrl.pathname) && !/^\d+$/.test(mediaUrl.searchParams.get('v') ?? '')) {
+        return openExternalLink(target)
+      }
+      await store.dispatch('hideSettingsWindow')
+      return openExternalMedia(target)
+    }
     return handleYoutubeLink(target)
   }
   const backButtonHandle = Capacitor.getPlatform() === 'android'

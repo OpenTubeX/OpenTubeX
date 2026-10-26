@@ -1,4 +1,5 @@
 import Autolinker from 'autolinker'
+import { shouldOpenExternalMediaUrl } from './externalMediaUrl.js'
 
 const YOUTUBE_HOSTS = new Set(['youtube.com', 'www.youtube.com', 'm.youtube.com', 'music.youtube.com', 'youtu.be'])
 
@@ -22,4 +23,13 @@ export function extractSharedYoutubeLink(text) {
     }
   }
   return null
+}
+
+/** Extract the first non-YouTube web URL for yt-dlp, e.g. an Instagram reel. */
+export function extractSharedMediaLink(text, invidiousInstanceUrl = '') {
+  if (typeof text !== 'string') return null
+  return Autolinker.parse(text, { email: false, phone: false })
+    .filter(match => match.getType() === 'url')
+    .map(match => match.getUrl())
+    .find(href => shouldOpenExternalMediaUrl(href, invidiousInstanceUrl)) ?? null
 }
