@@ -516,18 +516,18 @@ function updateDescriptionFadeState() {
  * @returns {string}
  */
 function parseDescriptionHtml(descriptionText) {
-  // Each lazy match stops at the next occurrence of its own prefix, so remote text
-  // that repeats a prefix without the terminator can't take quadratic time
+  // Attributes match through their closing quote, and URL parts stop at the next
+  // occurrence of their own prefix, so remote text can't take quadratic time
   return descriptionText
     .replaceAll('target="_blank"', '')
     .replaceAll(/\/redirect(?:(?!\/redirect).)+?(?=q=)/g, '')
     .replaceAll('q=', '')
     .replaceAll(/rel="nofollow\snoopener"/g, '')
-    .replaceAll(/class=(?:(?!class=).)+?(?=")./g, '')
-    .replaceAll(/id=(?:(?!id=).)+?(?=")./g, '')
-    .replaceAll(/data-target-new-window=(?:(?!data-target-new-window=).)+?(?=")./g, '')
-    .replaceAll(/data-url=(?:(?!data-url=).)+?(?=")./g, '')
-    .replaceAll(/data-sessionlink=(?:(?!data-sessionlink=).)+?(?=")./g, '')
+    .replaceAll(/class="[^"\n]*"/g, '')
+    .replaceAll(/id="[^"\n]*"/g, '')
+    .replaceAll(/data-target-new-window="[^"\n]*"/g, '')
+    .replaceAll(/data-url="[^"\n]*"/g, '')
+    .replaceAll(/data-sessionlink="[^"\n]*"/g, '')
     .replaceAll('&amp;', '&')
     .replaceAll('%3A', ':')
     .replaceAll('%2F', '/')

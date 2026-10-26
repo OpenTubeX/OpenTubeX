@@ -154,6 +154,11 @@ test('Invidious HTML descriptions drop YouTube redirects and tracking attributes
     parseDescriptionHtml('<a href="/watch?v=abc&amp;t=65s" data-onclick="jump_to_time" data-jump-time="65">1:05</a> Intro\n<a href="/hashtag/music">#music</a>'),
     '<a href="https://www.youtube.com/watch?v=abc&t=65s" data-onclick="jump_to_time" data-jump-time="65">1:05</a> Intro\n<a href="https://www.youtube.com/hashtag/music">#music</a>'
   )
+  // A value that repeats the attribute name is removed with its attribute
+  assert.equal(
+    parseDescriptionHtml('<a class="one class=two" id="x id=y" href="/watch?v=abc">text</a> after'),
+    '<a   href="https://www.youtube.com/watch?v=abc">text</a> after'
+  )
 })
 
 test('Invidious HTML descriptions with repeated unterminated attributes are cleaned in linear time', () => {
@@ -162,5 +167,6 @@ test('Invidious HTML descriptions with repeated unterminated attributes are clea
     const html = candidate.repeat(100_000 / candidate.length)
     assert.equal(parseDescriptionHtml(html), html)
   }
+  parseDescriptionHtml(`class="${'a'.repeat(100_000)}\n`.repeat(2))
   assert.ok(performance.now() - started < 1000)
 })

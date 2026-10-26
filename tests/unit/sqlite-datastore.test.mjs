@@ -497,15 +497,20 @@ test('modifier paths cannot reach shared prototypes', async (t) => {
   const store = memory(t)
   await store.insertAsync({ _id: 'a' })
   // Field names of an imported playlist become `$set` paths.
-  const fields = JSON.parse('{"constructor.prototype.polluted": 1, "__proto__.polluted": 1, "a.__proto__": {"polluted": 1}}')
+  // NeDB follows any inherited property, not only __proto__ and constructor.
+  const fields = JSON.parse('{"constructor.prototype.polluted": 1, "__proto__.polluted": 1, "a.__proto__": {"polluted": 1}, "toString.polluted": 1, "hasOwnProperty.polluted": 1}')
   try {
     for (const [field, value] of Object.entries(fields)) {
       await assert.rejects(store.updateAsync({ _id: 'a' }, { $set: { [field]: value } }))
       await assert.rejects(store.updateAsync({ _id: 'b' }, { $set: { [field]: value } }, { upsert: true }))
     }
     assert.equal(Object.prototype.polluted, undefined)
+    assert.equal(Object.prototype.toString.polluted, undefined)
+    assert.equal(Object.prototype.hasOwnProperty.polluted, undefined)
   } finally {
     delete Object.prototype.polluted
+    delete Object.prototype.toString.polluted
+    delete Object.prototype.hasOwnProperty.polluted
   }
   assert.deepEqual(await store.findAsync({}), [{ _id: 'a' }])
 })

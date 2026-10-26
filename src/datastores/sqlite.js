@@ -92,14 +92,15 @@ function isModifierUpdate(update) {
 }
 
 /**
- * NeDB follows inherited properties along modifier paths, so a path through
- * `__proto__` or `constructor` would change shared prototypes.
+ * NeDB follows inherited properties along modifier paths, so a path such as
+ * `toString.call` would change a shared prototype. Field names cannot contain
+ * dots and the app only modifies top-level fields.
  */
 function checkModifierPaths(update) {
   for (const fields of Object.values(update)) {
-    if (fields !== null && typeof fields === 'object' && Object.keys(fields).some(field => (
-      field.split('.').some(part => part === '__proto__' || part === 'constructor' || part === 'prototype')
-    ))) throw new Error('Modifier paths cannot contain __proto__, constructor or prototype')
+    if (fields !== null && typeof fields === 'object' && Object.keys(fields).some(field => field.includes('.') || field === '__proto__')) {
+      throw new Error('Modifier paths must be top-level fields')
+    }
   }
 }
 
