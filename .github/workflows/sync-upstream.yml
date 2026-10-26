@@ -1,7 +1,11 @@
 name: Sync upstream
 
-# UPSTREAM_SYNC_TOKEN needs Contents, Pull requests, and Workflows write access
-# plus Checks and Commit statuses read access. A separate token lets PRs run CI.
+# The sync branch carries upstream's workflow files, so it lives in a fork with
+# Actions disabled. Pushed here, they would run with this repository's secrets
+# before the PR is reviewed; a fork's PR runs without them.
+# UPSTREAM_SYNC_FORK_SSH_KEY is a write deploy key of SYNC_FORK.
+# UPSTREAM_SYNC_TOKEN needs Pull requests write access plus Checks and Commit
+# statuses read access. A separate token lets PRs run CI.
 on:
   schedule:
     - cron: "23 */6 * * *"
@@ -24,14 +28,17 @@ jobs:
       pull-requests: write
     env:
       GH_TOKEN: ${{ secrets.UPSTREAM_SYNC_TOKEN }}
+      SYNC_FORK: D3SOX/OpenTubeX-upstream-sync
     defaults:
       run:
         shell: bash
     steps:
       - name: Check authentication
+        env:
+          SSH_KEY: ${{ secrets.UPSTREAM_SYNC_FORK_SSH_KEY }}
         run: |
-          if [[ -z "$GH_TOKEN" ]]; then
-            echo "::error::Set the UPSTREAM_SYNC_TOKEN repository secret before running upstream sync."
+          if [[ -z "$GH_TOKEN" || -z "$SSH_KEY" ]]; then
+            echo "::error::Set the UPSTREAM_SYNC_TOKEN and UPSTREAM_SYNC_FORK_SSH_KEY repository secrets before running upstream sync."
             exit 1
           fi
 
@@ -40,36 +47,52 @@ jobs:
         with:
           ref: development
           fetch-depth: 0
-          token: ${{ secrets.UPSTREAM_SYNC_TOKEN }}
+          persist-credentials: false
 
-      - name: Prepare upstream pull request branch
+      # The PR branch is upstream's development itself; merging it preserves fork
+      # changes and upstream commit history, including on conflicting PRs.
+      - name: Push upstream to the sync fork
+        id: push
+        env:
+          SSH_KEY: ${{ secrets.UPSTREAM_SYNC_FORK_SSH_KEY }}
         run: |
           git fetch --no-tags https://github.com/FreeTubeApp/FreeTube.git development
-          # Reset only the runner's temporary checkout. The action restores the
-          # fork's base and pushes upstream-sync; merging its PR preserves fork
-          # changes and upstream commit history, including on conflicting PRs.
-          git reset --hard FETCH_HEAD
+          if git merge-base --is-ancestor FETCH_HEAD HEAD; then
+            echo "development already contains upstream development."
+            exit 0
+          fi
+          gh api meta --jq '.ssh_keys[] | "github.com " + .' > "$RUNNER_TEMP/known_hosts"
+          install -m 600 /dev/null "$RUNNER_TEMP/sync_key"
+          printf '%s\n' "$SSH_KEY" > "$RUNNER_TEMP/sync_key"
+          GIT_SSH_COMMAND="ssh -i $RUNNER_TEMP/sync_key -o IdentitiesOnly=yes -o UserKnownHostsFile=$RUNNER_TEMP/known_hosts" \
+            git push --force "git@github.com:$SYNC_FORK.git" FETCH_HEAD:refs/heads/upstream-sync
+          rm "$RUNNER_TEMP/sync_key"
+          echo "pushed=true" >> "$GITHUB_OUTPUT"
 
-      - name: Create or update upstream pull request
+      - name: Create upstream pull request
         id: pull_request
-        uses: peter-evans/create-pull-request@5f6978faf089d4d20b00c7766989d076bb2fc7f1 # v8.1.1
-        with:
-          token: ${{ secrets.UPSTREAM_SYNC_TOKEN }}
-          base: development
-          branch: upstream-sync
-          delete-branch: true
-          title: "chore: sync development from FreeTubeApp/FreeTube"
-          body: |
+        if: steps.push.outputs.pushed == 'true'
+        env:
+          BODY: |
             Sync [FreeTubeApp/FreeTube:development](https://github.com/FreeTubeApp/FreeTube/tree/development) into `development`.
 
             Merge with a **merge commit** to preserve fork changes and shared upstream history.
 
             @coderabbitai ignore
+        run: |
+          # Pushing to the fork already updated an open PR.
+          open=$(gh pr list --repo "$GITHUB_REPOSITORY" --base development --head upstream-sync --state open \
+            --json headRepositoryOwner --jq "[.[] | select(.headRepositoryOwner.login == \"${SYNC_FORK%%/*}\")] | length")
+          if [[ "$open" -eq 0 ]]; then
+            url=$(gh pr create --repo "$GITHUB_REPOSITORY" --base development --head "${SYNC_FORK%%/*}:upstream-sync" \
+              --title "chore: sync development from FreeTubeApp/FreeTube" --body "$BODY")
+            echo "number=${url##*/}" >> "$GITHUB_OUTPUT"
+          fi
 
       # Assignment by the PAT owner is self-activity and does not notify them.
       - name: Assign new upstream pull request as the Actions bot
-        if: steps.pull_request.outputs.pull-request-operation == 'created'
+        if: steps.pull_request.outputs.number != ''
         env:
           GH_TOKEN: ${{ github.token }}
-          PR_NUMBER: ${{ steps.pull_request.outputs.pull-request-number }}
+          PR_NUMBER: ${{ steps.pull_request.outputs.number }}
         run: gh pr edit "$PR_NUMBER" --repo "$GITHUB_REPOSITORY" --add-assignee D3SOX
