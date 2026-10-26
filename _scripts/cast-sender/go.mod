@@ -6,7 +6,7 @@ toolchain go1.27.2
 
 require (
 	github.com/gogo/protobuf v1.3.2
-	github.com/google/certificate-transparency-go v1.3.3
+	github.com/google/certificate-transparency-go v1.4.0
 	github.com/grandcat/zeroconf v1.0.0
 	github.com/vishen/go-chromecast v0.3.5-0.20260910202631-5dd70bb91787
 )
