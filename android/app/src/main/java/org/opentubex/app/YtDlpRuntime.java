@@ -7,7 +7,11 @@ import android.os.SystemClock;
 import com.yausername.ffmpeg.FFmpeg;
 import com.yausername.youtubedl_android.YoutubeDL;
 import java.io.*;
+import java.net.HttpURLConnection;
+import java.net.URL;
 import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.StandardCopyOption;
 import java.util.*;
 import java.util.concurrent.*;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -60,7 +64,19 @@ final class YtDlpRuntime {
 
     static synchronized void initialize(Context context) throws Exception {
         if (initialized) return;
+        // youtubedl-android only copies its bundled yt-dlp when none is installed,
+        // so an APK with a newer pinned release must replace an older copy itself.
+        String installed = installedVersion(context);
+        boolean outdated;
+        try { outdated = installed == null || YtDlpRelease.compare(installed, BuildConfig.YT_DLP_VERSION) < 0; }
+        catch (NumberFormatException error) { outdated = true; }
+        File installation = new File(context.getNoBackupFilesDir(), "youtubedl-android");
+        if (outdated) YtDlpFiles.deleteTree(new File(installation, "yt-dlp"));
         YoutubeDL.getInstance().init(context);
+        if (outdated) {
+            YtDlpCodeCache.invalidate(new File(installation, "yt-dlp-code"));
+            recordVersion(context, BuildConfig.YT_DLP_VERSION);
+        }
         FFmpeg.getInstance().init(context);
         try (InputStream input = context.getAssets().open("opentubex_mp3_thumbnail.py")) {
             mp3ThumbnailBootstrap = new String(YtDlpFiles.read(input, 64 * 1024), StandardCharsets.UTF_8);
@@ -226,17 +242,44 @@ final class YtDlpRuntime {
         }
     }
 
-    static YoutubeDL.UpdateStatus update(Context context, String apiUrl) throws Exception {
+    /** youtubedl-android records the release its updater installed under this key. */
+    static String installedVersion(Context context) {
+        return context.getSharedPreferences("youtubedl-android", Context.MODE_PRIVATE).getString("dlpVersion", null);
+    }
+
+    private static void recordVersion(Context context, String version) {
+        context.getSharedPreferences("youtubedl-android", Context.MODE_PRIVATE).edit().putString("dlpVersion", version).commit();
+    }
+
+    /** Installs the latest release of the repository unless it is already installed. */
+    static boolean update(Context context, String repository) throws Exception {
         initialize(context);
-        INSTALL_LOCK.writeLock().lockInterruptibly();
+        String tag = YtDlpRelease.latestTag("https://github.com", repository);
+        if (tag.equals(installedVersion(context))) return false;
+        File installation = new File(context.getNoBackupFilesDir(), "youtubedl-android");
+        File download = File.createTempFile("yt-dlp", null, context.getCacheDir());
         try {
-            YoutubeDL.UpdateStatus status = YoutubeDL.getInstance().updateYoutubeDL(context, new YoutubeDL.UpdateChannel(apiUrl));
-            if (status == YoutubeDL.UpdateStatus.DONE) {
-                YtDlpCodeCache.invalidate(new File(context.getNoBackupFilesDir(), "youtubedl-android/yt-dlp-code"));
+            // Release downloads, unlike the REST API, have no rate limit for unauthenticated clients.
+            HttpURLConnection connection = (HttpURLConnection) new URL("https://github.com/" + repository + "/releases/download/" + tag + "/yt-dlp").openConnection();
+            connection.setConnectTimeout(15_000);
+            connection.setReadTimeout(15_000);
+            try (InputStream input = connection.getInputStream(); OutputStream output = new FileOutputStream(download)) {
+                byte[] buffer = new byte[64 * 1024];
+                int count;
+                while ((count = input.read(buffer)) != -1) output.write(buffer, 0, count);
+            } finally { connection.disconnect(); }
+            // Running processes keep the previous release until the download completes.
+            INSTALL_LOCK.writeLock().lockInterruptibly();
+            try {
+                File binary = new File(installation, "yt-dlp/yt-dlp");
+                Files.createDirectories(binary.getParentFile().toPath());
+                Files.move(download.toPath(), binary.toPath(), StandardCopyOption.REPLACE_EXISTING);
+                YtDlpCodeCache.invalidate(new File(installation, "yt-dlp-code"));
+                recordVersion(context, tag);
             }
-            return status;
-        }
-        finally { INSTALL_LOCK.writeLock().unlock(); }
+            finally { INSTALL_LOCK.writeLock().unlock(); }
+            return true;
+        } finally { download.delete(); }
     }
 
     static String ffmpegVersion(Context context, String binary) throws Exception {

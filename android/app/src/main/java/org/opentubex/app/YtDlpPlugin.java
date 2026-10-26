@@ -11,12 +11,9 @@ import androidx.activity.result.ActivityResult;
 import com.getcapacitor.*;
 import com.getcapacitor.annotation.ActivityCallback;
 import com.getcapacitor.annotation.CapacitorPlugin;
-import com.yausername.youtubedl_android.YoutubeDL;
 import org.json.JSONArray;
 import org.json.JSONObject;
 import java.io.*;
-import java.net.HttpURLConnection;
-import java.net.URL;
 import java.nio.charset.StandardCharsets;
 
 import java.util.*;
@@ -244,13 +241,9 @@ public final class YtDlpPlugin extends Plugin {
     @PluginMethod public void checkUpdate(PluginCall call) {
         run(call, () -> {
             if (!"yt-dlp".equals(call.getString("binary"))) return new JSONObject().put("available", false);
-            HttpURLConnection connection = (HttpURLConnection) new URL("https://api.github.com/repos/" + repository(call.getString("channel")) + "/releases/latest").openConnection();
-            connection.setConnectTimeout(15_000); connection.setReadTimeout(15_000);
-            try (InputStream input = connection.getInputStream()) {
-                JSONObject release = new JSONObject(new String(YtDlpFiles.read(input, 32 * 1024 * 1024), StandardCharsets.UTF_8));
-                infoResult();
-                return new JSONObject().put("available", !release.getString("tag_name").equals(version));
-            } finally { connection.disconnect(); }
+            YtDlpRuntime.initialize(getContext());
+            String tag = YtDlpRelease.latestTag("https://github.com", repository(call.getString("channel")));
+            return new JSONObject().put("available", !tag.equals(YtDlpRuntime.installedVersion(getContext())));
         });
     }
     @PluginMethod public void update(PluginCall call) {
@@ -259,13 +252,12 @@ public final class YtDlpPlugin extends Plugin {
             if (!"yt-dlp".equals(binary)) return new JSONObject().put("error", "FFmpeg is updated with the Android app");
             notifyListeners("binaryProgress", new JSObject().put("binary", binary).put("percent", JSONObject.NULL).put("inProgress", true));
             try {
-            YtDlpRuntime.initialize(getContext());
-            YoutubeDL.UpdateStatus status = YtDlpRuntime.update(getContext(), "https://api.github.com/repos/" + repository(call.getString("channel")) + "/releases/latest");
+            boolean updated = YtDlpRuntime.update(getContext(), repository(call.getString("channel")));
             version = null;
             JSONObject result = infoResult();
             notifyListeners("binaryProgress", new JSObject().put("binary", binary).put("percent", 100).put("inProgress", false));
             notifyListeners("binaryUpdated", new JSObject().put("binary", binary));
-            return new JSONObject().put("updated", status == YoutubeDL.UpdateStatus.DONE).put("version", result.getJSONObject("ytDlp").getString("version"));
+            return new JSONObject().put("updated", updated).put("version", result.getJSONObject("ytDlp").getString("version"));
             } finally { notifyListeners("binaryProgress", new JSObject().put("binary", binary).put("percent", 100).put("inProgress", false)); }
         });
     }

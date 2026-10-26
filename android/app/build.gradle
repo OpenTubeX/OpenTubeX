@@ -90,6 +90,28 @@ def generateRumbleHttp = tasks.register('generateRumbleHttp', Exec) {
 }
 if (!liteBuild) tasks.named('preBuild').configure { dependsOn(generateRumbleHttp) }
 
+// Replaces the older yt-dlp that youtubedl-android bundles, so fresh installs can
+// play videos before the first managed update.
+// .github/workflows/android-yt-dlp.yml opens a PR for each new release.
+def ytDlpVersion = '2026.10.21'
+def ytDlpSha256 = 'b7af77f686e95f7845ce8d09d21957718febb8b48b30555adb9dd2292ad7bf14'
+def ytDlpOutput = layout.buildDirectory.dir('generated/yt-dlp')
+def downloadYtDlp = tasks.register('downloadYtDlp') {
+    inputs.property('version', ytDlpVersion)
+    inputs.property('sha256', ytDlpSha256)
+    outputs.dir(ytDlpOutput)
+    doLast {
+        def bytes = new URL("https://github.com/yt-dlp/yt-dlp/releases/download/${ytDlpVersion}/yt-dlp")
+            .getBytes(connectTimeout: 30_000, readTimeout: 60_000)
+        def hash = java.security.MessageDigest.getInstance('SHA-256').digest(bytes).encodeHex().toString()
+        if (hash != ytDlpSha256) throw new GradleException("yt-dlp ${ytDlpVersion} has SHA-256 ${hash}, expected ${ytDlpSha256}")
+        def target = new File(ytDlpOutput.get().asFile, 'res/raw/ytdlp')
+        target.parentFile.mkdirs()
+        target.bytes = bytes
+    }
+}
+if (!liteBuild) tasks.named('preBuild').configure { dependsOn(downloadYtDlp) }
+
 android {
     namespace = "org.opentubex.app"
     buildFeatures {
@@ -106,6 +128,7 @@ android {
         versionName = System.getenv("ANDROID_VERSION_NAME") ?:
             new groovy.json.JsonSlurper().parse(rootProject.file('../package.json')).version
         buildConfigField "boolean", "BUNDLES_YT_DLP", (!liteBuild).toString()
+        buildConfigField "String", "YT_DLP_VERSION", "\"${ytDlpVersion}\""
         ndk { abiFilters.addAll((project.findProperty('testAbi') ?: 'arm64-v8a,armeabi-v7a,x86_64,x86').split(',')) }
         testInstrumentationRunner(optimizedTestBuild
             ? "org.opentubex.app.OptimizedApkInstrumentation"
@@ -156,6 +179,7 @@ android {
         if (!liteBuild) {
             main.jniLibs.srcDirs += [new File(rumbleHttpOutput.get().asFile, 'jniLibs')]
             main.assets.srcDirs += [new File(rumbleHttpOutput.get().asFile, 'licenses')]
+            main.res.srcDirs += [new File(ytDlpOutput.get().asFile, 'res')]
         }
         main.manifest.srcFile new File(appIconOutput, 'AndroidManifest.xml')
         main.res.srcDirs += [new File(appIconOutput, 'android/main/res')]
