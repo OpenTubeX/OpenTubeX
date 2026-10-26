@@ -77,7 +77,7 @@ endorsed by, maintained by, or supported by the FreeTube project.
 
 <p align="center">
   <a href="https://youtu.be/cKilnnScH9U">
-    <img src="docs/screenshots/OpenTubeX-promo.jpg" alt="Watch the 24-second OpenTubeX promo: Power-user YouTube." width="400">
+    <img src="docs/screenshots/OpenTubeX-promo.webp" alt="Watch the 24-second OpenTubeX promo: Power-user YouTube." width="400">
   </a>
   <br>
   <a href="https://youtu.be/cKilnnScH9U">▶ Watch the promo · 24 seconds</a>
