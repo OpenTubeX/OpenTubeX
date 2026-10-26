@@ -76,11 +76,11 @@ endorsed by, maintained by, or supported by the FreeTube project.
 <hr>
 
 <p align="center">
-  <a href="https://www.youtube.com/watch?v=pzfHWmvY1U0">
-    <img src="docs/screenshots/OpenTubeX-promo.jpg" alt="Watch the 22-second OpenTubeX promo: Your videos. Your rules." width="400">
+  <a href="https://youtu.be/cKilnnScH9U">
+    <img src="docs/screenshots/OpenTubeX-promo.jpg" alt="Watch the 24-second OpenTubeX promo: Power-user YouTube." width="400">
   </a>
   <br>
-  <a href="https://www.youtube.com/watch?v=pzfHWmvY1U0">▶ Watch the promo · 22 seconds</a>
+  <a href="https://youtu.be/cKilnnScH9U">▶ Watch the promo · 24 seconds</a>
 </p>
 
 > [!NOTE]
