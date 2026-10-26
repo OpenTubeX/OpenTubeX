@@ -70,3 +70,17 @@ test('a request the caller aborts stays on its node', async () => {
   assert.equal(requests, 1)
   assert.equal(avoidUnreachableGoogleVideoHost(streamUrl('rr9---sn-dead-1')), streamUrl('rr9---sn-dead-1'))
 })
+
+test('a 502 from the native proxy switches to the backup server', async () => {
+  const requested = []
+  const response = await fetchGoogleVideo(streamUrl('rr11---sn-dead-1'), {}, async url => {
+    requested.push(new URL(url).hostname)
+    return new Response(requested.length === 1 ? null : 'ok', { status: requested.length === 1 ? 502 : 200 })
+  })
+  assert.equal(await response.text(), 'ok')
+  assert.deepEqual(requested, ['rr11---sn-dead-1.googlevideo.com', 'rr4---sn-backup-2.googlevideo.com'])
+})
+
+test('a malformed escape in an HLS path keeps the original server', () => {
+  assert.equal(getGoogleVideoFallbackUrl('https://rr3---sn-a.googlevideo.com/videoplayback/mn/%E0%A4%A/fvip/3'), null)
+})

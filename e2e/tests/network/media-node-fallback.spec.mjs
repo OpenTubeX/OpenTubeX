@@ -45,6 +45,7 @@ for (const engine of ['built-in', 'yt-dlp']) {
 
       const watchComponent = await page.evaluateHandle(findWatchComponent)
       const activeEngine = await watchComponent.evaluate(component => component.proxy.activePlaybackEngine)
+      await watchComponent.dispose()
       test.skip(activeEngine !== engine, `${engine} is unavailable, ${activeEngine} served the streams`)
 
       expect(nodes.blockedRequests).toBeGreaterThan(0)

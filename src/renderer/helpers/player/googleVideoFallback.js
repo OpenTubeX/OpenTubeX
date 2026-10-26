@@ -16,7 +16,7 @@ function getStreamParameter(url, name) {
   // HLS segment URLs carry their parameters as path segments
   const segments = url.pathname.split('/')
   const index = segments.indexOf(name, 1)
-  return index > 0 && index < segments.length - 1 ? decodeURIComponent(segments[index + 1]) : null
+  return index > 0 && index < segments.length - 1 ? segments[index + 1].replaceAll('%2C', ',') : null
 }
 
 /**
@@ -69,17 +69,22 @@ export async function fetchGoogleVideo(url, init = {}, fetchImpl = fetch) {
 
   const connection = new AbortController()
   const timer = setTimeout(() => connection.abort(), CONNECTION_TIMEOUT_MS)
+  let response
   try {
-    return await fetchImpl(url, {
+    response = await fetchImpl(url, {
       ...init,
       signal: init.signal ? AbortSignal.any([init.signal, connection.signal]) : connection.signal
     })
   } catch (error) {
     if (init.signal?.aborted) throw error
-
-    markGoogleVideoHostUnreachable(url)
-    return await fetchImpl(avoidUnreachableGoogleVideoHost(url), init)
   } finally {
     clearTimeout(timer)
   }
+
+  // Android's native proxy answers a connection failure with 502
+  if (response !== undefined && response.status !== 502) return response
+
+  await response?.body?.cancel().catch(() => {})
+  markGoogleVideoHostUnreachable(url)
+  return await fetchImpl(avoidUnreachableGoogleVideoHost(url), init)
 }

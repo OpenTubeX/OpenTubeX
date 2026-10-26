@@ -9880,7 +9880,10 @@ export default defineComponent({
         player.getNetworkingEngine().registerResponseFilter(responseFilter)
         // The retry runs the request filter again, which moves it to the backup server
         player.getNetworkingEngine().addEventListener('retry', ({ error }) => {
-          if (error.code === shaka.util.Error.Code.TIMEOUT || error.code === shaka.util.Error.Code.HTTP_ERROR) {
+          const { Code } = shaka.util.Error
+          // Android's native proxy answers a connection failure with 502
+          if (error.code === Code.TIMEOUT || error.code === Code.HTTP_ERROR ||
+            (error.code === Code.BAD_HTTP_STATUS && error.data[1] === 502)) {
             markGoogleVideoHostUnreachable(error.data[0])
           }
         })

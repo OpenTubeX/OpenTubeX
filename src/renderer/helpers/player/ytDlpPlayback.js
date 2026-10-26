@@ -2,7 +2,7 @@ import { ytDlp } from '../ytDlp'
 import { FormatUtils, Misc } from 'youtubei.js'
 
 import { MANIFEST_TYPE_DASH, MANIFEST_TYPE_HLS } from './utils'
-import { fetchGoogleVideo } from './googleVideoFallback'
+import { avoidUnreachableGoogleVideoHost, fetchGoogleVideo } from './googleVideoFallback'
 import { probeStreamByteRanges } from './streamByteRanges'
 import { getCompatibleAdaptiveFormats } from './compatibleAdaptiveFormats'
 import { hasLimitedLiveDvrWindow } from './liveManifest'
@@ -638,7 +638,8 @@ async function convertLegacyFormats(formats, onTimeout) {
       return null
     }
 
-    return mapYtDlpLegacyFormat(format)
+    // The media element loads progressive streams without the player's request filter
+    return mapYtDlpLegacyFormat({ ...format, url: avoidUnreachableGoogleVideoHost(format.url) })
   }))
 
   return results.filter(format => format !== null)

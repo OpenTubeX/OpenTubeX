@@ -47,6 +47,7 @@ function playbackLoader({ audioSampleRate = 44_100, timeoutAttempts = Infinity, 
       checkProbe(url)
       return { initRange: { start: 0, end: 99 }, indexRange: { start: 100, end: 199 } }
     },
+    avoidUnreachableGoogleVideoHost: url => url,
     fetchGoogleVideo: async url => {
       await legacyProbeGate
       checkProbe(url)
