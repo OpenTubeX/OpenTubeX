@@ -44,6 +44,17 @@ test('release note sections drop images, markup, and issue references', () => {
   ])
 })
 
+test('release note sections decode entities and keep non-promotional support headings', () => {
+  assert.deepEqual(releaseNoteSections(`## Support for Android 15
+
+- Added &#X41;&#x42;&#67; and kept &#x110000;
+
+## Support us
+
+- Donate today
+`), [{ heading: 'Support for Android 15', items: ['Added ABC and kept &#x110000;'] }])
+})
+
 test('F-Droid changelogs keep every item when they fit', () => {
   assert.equal(fdroidChangelog(notes), `Highlights
 • Sort your subscriptions into groups to filter the feed

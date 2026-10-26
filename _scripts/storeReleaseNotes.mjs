@@ -22,12 +22,11 @@ function decodeHtml(value) {
   }
 
   return value.replaceAll(/&(#(?:x[\da-f]+|\d+)|[a-z]+);/gi, (entity, name) => {
-    if (name.startsWith('#x')) {
-      return String.fromCodePoint(Number.parseInt(name.slice(2), 16))
-    }
-
     if (name.startsWith('#')) {
-      return String.fromCodePoint(Number.parseInt(name.slice(1), 10))
+      const hex = /^#x/i.test(name)
+      const codePoint = Number.parseInt(name.slice(hex ? 2 : 1), hex ? 16 : 10)
+
+      return codePoint <= 0x10FFFF ? String.fromCodePoint(codePoint) : entity
     }
 
     return namedEntities[name.toLowerCase()] ?? entity
@@ -35,7 +34,7 @@ function decodeHtml(value) {
 }
 
 function removePromotionSections(lines) {
-  const promotionHeading = /^(#{1,6})\s+(?:donate|promotion|sponsors?|support(?: us| the project)?)\b/i
+  const promotionHeading = /^(#{1,6})\s+(?:donate|promotion|sponsors?|support(?: us| the project)?)\s*$/i
   let skippedHeadingLevel = null
 
   return lines.filter((line) => {
