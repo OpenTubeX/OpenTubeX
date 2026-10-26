@@ -6,6 +6,7 @@ import * as utils from 'googlevideo/utils'
 import * as protos from 'googlevideo/protos'
 import { CompositeBuffer, UmpReader, UmpWriter } from 'googlevideo/ump'
 import * as protocol from '../../src/renderer/helpers/player/sabrProtocol.js'
+import * as googleVideoFallback from '../../src/renderer/helpers/player/googleVideoFallback.js'
 
 const source = (await readFile(new URL('../../src/renderer/helpers/player/SabrSchemePlugin.js', import.meta.url), 'utf8'))
   .replace(/^import [\s\S]*? from ['"][^'"]+['"]\n/gm, '').replaceAll('export function ', 'function ')
@@ -327,10 +328,30 @@ test('rejects HTTP 403 even when it contains a complete init segment', async () 
   transport.cleanup()
 })
 
+test('a SABR request switches to the backup server when its node cannot be reached', async t => {
+  const hosts = []
+  const { createSabrTransport } = load(async url => {
+    hosts.push(new URL(url).hostname)
+    if (hosts.length === 1) throw new TypeError('Failed to fetch')
+    return response([1, 2, 3])
+  })
+  const transport = createSabrTransport({
+    ...sabrData,
+    url: 'https://rr2---sn-sabrdead-1.googlevideo.com/videoplayback?mn=sn-sabrdead-1%2Csn-sabrbackup-2&fvip=5',
+  }, () => context)
+  t.after(() => transport.cleanup())
+  const uri = 'sabr1:audio?formatId=140-123-&sq=1'
+  const segment = await transport.request(uri, request(uri), 1).promise
+  assert.deepEqual([...segment.data], [1, 2, 3])
+  await transport.request(uri, request(uri), 1).promise
+  assert.deepEqual(hosts, ['rr2---sn-sabrdead-1.googlevideo.com', 'rr5---sn-sabrbackup-2.googlevideo.com',
+    'rr5---sn-sabrbackup-2.googlevideo.com'])
+})
+
 function load(fetch, globals = {}) {
   const schemes = new Map()
   const api = vm.runInNewContext(`${source}\n({ createSabrTransport, setupSabrScheme })`, {
-    ...utils, ...protos, ...protocol, CompositeBuffer, UmpReader,
+    ...utils, ...protos, ...protocol, ...googleVideoFallback, CompositeBuffer, UmpReader,
     shaka: { util: { AbortableOperation: Operation, Error: ShakaError }, net: {
       NetworkingEngine: { registerScheme: (key, value) => schemes.set(key, value),
         unregisterScheme: key => schemes.delete(key) },

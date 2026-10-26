@@ -22,6 +22,7 @@ import {
   parseSabrFormatId,
   readCompleteUmpParts
 } from './sabrProtocol'
+import { fetchGoogleVideo } from './googleVideoFallback'
 
 const AbortableOperation = shaka.util.AbortableOperation
 const ShakaError = shaka.util.Error
@@ -411,9 +412,9 @@ async function doRequest(
     sabrURL.searchParams.set('rn', String(currentState.sabrStreamState.requestNumber++))
     if (process.env.IS_CAPACITOR) {
       const { capacitorSabrFetch } = await import('../api/capacitor-sabr-http')
-      response = await capacitorSabrFetch(sabrURL.toString(), currentState.requestInit)
+      response = await fetchGoogleVideo(sabrURL.toString(), currentState.requestInit, capacitorSabrFetch)
     } else {
-      response = await fetch(sabrURL.toString(), currentState.requestInit)
+      response = await fetchGoogleVideo(sabrURL.toString(), currentState.requestInit, fetch)
     }
 
     operationInputs.headersReceived({})

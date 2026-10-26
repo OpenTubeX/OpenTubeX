@@ -2,6 +2,7 @@ import { ytDlp } from '../ytDlp'
 import { FormatUtils, Misc } from 'youtubei.js'
 
 import { MANIFEST_TYPE_DASH, MANIFEST_TYPE_HLS } from './utils'
+import { avoidUnreachableGoogleVideoHost, fetchGoogleVideo } from './googleVideoFallback'
 import { probeStreamByteRanges } from './streamByteRanges'
 import { getCompatibleAdaptiveFormats } from './compatibleAdaptiveFormats'
 import { hasLimitedLiveDvrWindow } from './liveManifest'
@@ -579,7 +580,7 @@ function mapYtDlpLegacyFormat(format) {
  */
 async function probeYtDlpUrl(url, onTimeout) {
   try {
-    const response = await fetch(url, { signal: AbortSignal.timeout(URL_PROBE_TIMEOUT) })
+    const response = await fetchGoogleVideo(url, { signal: AbortSignal.timeout(URL_PROBE_TIMEOUT) })
     await response.body?.cancel()
     return response.ok
   } catch (error) {
@@ -597,7 +598,7 @@ export async function checkYtDlpPlaybackUrl(url) {
   if (typeof url !== 'string' || url.length === 0) return 'inconclusive'
 
   try {
-    const response = await fetch(url, { signal: AbortSignal.timeout(URL_PROBE_TIMEOUT) })
+    const response = await fetchGoogleVideo(url, { signal: AbortSignal.timeout(URL_PROBE_TIMEOUT) })
 
     if (REJECTED_PLAYBACK_URL_STATUSES.has(response.status)) {
       await response.body?.cancel().catch(() => {})
@@ -637,7 +638,8 @@ async function convertLegacyFormats(formats, onTimeout) {
       return null
     }
 
-    return mapYtDlpLegacyFormat(format)
+    // The media element loads progressive streams without the player's request filter
+    return mapYtDlpLegacyFormat({ ...format, url: avoidUnreachableGoogleVideoHost(format.url) })
   }))
 
   return results.filter(format => format !== null)
