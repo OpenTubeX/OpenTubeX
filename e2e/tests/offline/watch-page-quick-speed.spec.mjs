@@ -217,7 +217,8 @@ test.describe('desktop quick playback speed bar', () => {
         await page.locator(sel.searchInput).press('Enter')
         const video = page.locator(`${activeTab} video`)
         const bar = page.locator(`${activeTab} .ft-quick-playback-rate-bar`)
-        await expect(bar).toBeVisible()
+        // Like openMockedVideo, allow for parsing the uncached player script.
+        await expect(bar).toBeVisible({ timeout: 30_000 })
         await expect.poll(() => video.evaluate(element => element.readyState)).toBe(0)
 
         for (const rate of [1.25, 1.5]) {

@@ -1,6 +1,13 @@
 import { test, expect, goTo, setWindowSize } from '../../helpers/app.mjs'
 import { mockUnplayableWatchPage, watchHistoryEntry, watchViewHandle } from '../../helpers/watch.mjs'
 
+// Like openMockedVideo, allow for parsing the uncached player script, which
+// takes several times longer on a busy host.
+async function openHistoryEntry(page) {
+  await page.getByText(watchHistoryEntry.title, { exact: true }).click()
+  await expect(page.locator('.videoDescription').visible()).toBeVisible({ timeout: 30_000 })
+}
+
 test.describe('description layout', () => {
   test.use({
     seed: {
@@ -12,8 +19,7 @@ test.describe('description layout', () => {
   test('keeps appended metadata visible and collapsible when it arrives after short text', { tag: '@scale' }, async ({ app, page, uiScale }, testInfo) => {
     await mockUnplayableWatchPage(app, page)
     await goTo(page, 'history')
-    await page.getByText(watchHistoryEntry.title, { exact: true }).click()
-    await expect(page.locator('.videoDescription').visible()).toBeVisible()
+    await openHistoryEntry(page)
     const view = await watchViewHandle(page)
     const card = page.locator('.videoDescription').visible()
     for (const { metadata, selector, text } of [
@@ -113,8 +119,7 @@ test.describe('description layout', () => {
   test('keeps links and controls independent of card expansion', async ({ app, page }) => {
     await mockUnplayableWatchPage(app, page)
     await goTo(page, 'history')
-    await page.getByText(watchHistoryEntry.title, { exact: true }).click()
-    await expect(page.locator('.videoDescription').visible()).toBeVisible()
+    await openHistoryEntry(page)
     const view = await watchViewHandle(page)
     await view.evaluate(component => {
       component.videoDescription = 'A short description.'
@@ -164,8 +169,7 @@ test.describe('description layout', () => {
       await window.$store.dispatch('updateBackendFallback', true)
       await window.$store.dispatch('updateEnableDownloads', false)
     })
-    await page.getByText(watchHistoryEntry.title, { exact: true }).click()
-    await expect(page.locator('.videoDescription').visible()).toBeVisible()
+    await openHistoryEntry(page)
     const view = await watchViewHandle(page)
     await view.evaluate(component => {
       component.videoDescription = Array(12).fill('A long description line.').join('\n')
@@ -196,8 +200,7 @@ test.describe('description layout', () => {
   test('short descriptions fit their content with centered text and copy control', { tag: '@scale' }, async ({ app, page }, testInfo) => {
     await mockUnplayableWatchPage(app, page)
     await goTo(page, 'history')
-    await page.getByText(watchHistoryEntry.title, { exact: true }).click()
-    await expect(page.locator('.videoDescription').visible()).toBeVisible()
+    await openHistoryEntry(page)
     const view = await watchViewHandle(page)
     await view.evaluate(async component => {
       component.isLoading = true
