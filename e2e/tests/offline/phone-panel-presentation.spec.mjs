@@ -136,6 +136,41 @@ test('portrait Shorts actions open phone sheets instead of side panels', async (
   await expect(page.locator('.fullscreenMetadataOverlay.open')).toHaveCount(0)
 })
 
+test('phone SponsorBlock info opens in a phone sheet instead of below the description', async ({ app, page }) => {
+  await mockPlayableWatchPage(app, page)
+  await openMockedVideo(page)
+  await setWindowSize(app, page, { width: 480, height: 800 })
+  const watch = await watchViewHandle(page)
+  await watch.evaluate(vm => vm.$store.dispatch('updateUseSponsorBlock', true))
+  const sheet = page.locator('.dockedSheet[open]')
+  const sponsorAction = page.locator('.watchVideo').getByRole('button', { name: 'Open SponsorBlock info', exact: true })
+  await sponsorAction.click()
+  await expect(sheet).toBeVisible()
+  await expect(sheet.locator('.mobileSheetHeader .sponsorBlockHeader')).toHaveCount(1)
+  await expect(page.locator('.watchVideoSponsorBlock:visible')).toHaveCount(1)
+  await expect(sheet.locator('.watchVideoSponsorBlock')).toBeVisible()
+
+  const sponsorSheet = page.getByRole('dialog', { name: 'SponsorBlock' })
+  await watch.evaluate(vm => vm.openPhonePanel('description'))
+  await expect(page.getByRole('dialog', { name: 'Description' })).toBeVisible()
+  await expect(sponsorSheet).toHaveCount(0)
+  await expect(page.locator('.watchVideoSponsorBlock:visible')).toHaveCount(0)
+  await watch.evaluate(vm => vm.toggleSponsorBlockInfo())
+  await expect(sponsorSheet).toBeVisible()
+  await expect(sheet).toHaveCount(1)
+  await watch.evaluate(vm => vm.toggleSponsorBlockInfo())
+  await expect(sheet).toHaveCount(0)
+  expect(await watch.evaluate(vm => vm.showSidebarSponsorBlock)).toBe(false)
+  await sponsorAction.click()
+  await expect(sponsorSheet).toBeVisible()
+
+  await sheet.locator('.mobileSheetHeader').getByRole('button', { name: 'Close' }).click()
+  await expect(sheet).toHaveCount(0)
+  expect(await watch.evaluate(vm => ({ open: vm.showSidebarSponsorBlock, panel: vm.mobilePanel })))
+    .toEqual({ open: false, panel: null })
+  await expect(page.locator('.watchVideoSponsorBlock:visible')).toHaveCount(0)
+})
+
 for (const mode of ['browser', 'pip']) {
   test(`phone panel survives ${mode} and clamps shorter content`, { tag: '@scale' }, async ({ app, page, uiScale }) => {
     await mockPlayableWatchPage(app, page)
