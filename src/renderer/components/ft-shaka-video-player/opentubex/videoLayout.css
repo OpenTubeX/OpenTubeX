@@ -59,6 +59,16 @@
   inset-inline-end: var(--side-panel-width);
 }
 
+/* Center gesture and value change feedback on the pushed video. */
+.ftVideoPlayer:is(:fullscreen, .fullWindow).fullscreenDockLayoutOpen .valueChangePopup {
+  left: calc(50% - var(--side-panel-width) / 2);
+  max-width: calc(100% - var(--side-panel-width) - 32px);
+}
+
+.ftVideoPlayer:is(:fullscreen, .fullWindow).fullscreenDockLayoutOpen:dir(rtl) .valueChangePopup {
+  left: calc(50% + var(--side-panel-width) / 2);
+}
+
 /* Dock pushes reflow once; only the video image and panel slide animate. */
 .ftVideoPlayer:is(:fullscreen, .fullWindow) > .player {
   transition: transform 200ms ease-out;
