@@ -262,7 +262,7 @@ jobs:
         VERSION: ${{ steps.getPackageInfo.outputs.version }}
         UPINFO: 'gh-releases-zsync|OpenTubeX|OpenTubeX|latest-all|opentubex-*-amd64.AppImage.zsync'
       run: |
-        docker run --rm -v "$PWD":/work -w /work -e UPINFO ghcr.io/pkgforge-dev/archlinux:latest@sha256:b43da1aef39b5406de37fff5fdca78d9d39363aeca68ffaaefed074b601f0d0f \
+        docker run --rm -v "$PWD":/work -w /work -e UPINFO ghcr.io/pkgforge-dev/archlinux:latest@sha256:7fe9b87037ed2e1028b007f4196b746632be2b1ea22593fcda57ca5b810e5af0 \
           sh _scripts/package-anylinux-appimage.sh "build/opentubex_${VERSION}_amd64.deb"
 
     - name: Download pinned AppImage tools
@@ -303,7 +303,7 @@ jobs:
         VERSION: ${{ steps.getPackageInfo.outputs.version }}
         UPINFO: 'gh-releases-zsync|OpenTubeX|OpenTubeX|latest-all|opentubex-*-arm64.AppImage.zsync'
       run: |
-        docker run --rm -v "$PWD":/work -w /work -e UPINFO ghcr.io/pkgforge-dev/archlinux:latest@sha256:b43da1aef39b5406de37fff5fdca78d9d39363aeca68ffaaefed074b601f0d0f \
+        docker run --rm -v "$PWD":/work -w /work -e UPINFO ghcr.io/pkgforge-dev/archlinux:latest@sha256:7fe9b87037ed2e1028b007f4196b746632be2b1ea22593fcda57ca5b810e5af0 \
           sh _scripts/package-anylinux-appimage.sh "build/opentubex_${VERSION}_arm64.deb"
 
     - name: Resolve release tag
