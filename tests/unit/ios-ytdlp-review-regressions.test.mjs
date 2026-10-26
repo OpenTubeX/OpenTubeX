@@ -87,7 +87,7 @@ test('iOS media byte-range probes send a Range header through the native proxy',
     INITIAL_PROBE_BYTES: 16 * 1024,
     MAX_PROBE_ATTEMPTS: 3,
     PROBE_TIMEOUT: 10_000,
-    fetch: async (url, options) => {
+    fetchGoogleVideo: async (url, options) => {
       requests.push({ url, options })
       return { ok: false, status: 416, statusText: 'fixture' }
     },

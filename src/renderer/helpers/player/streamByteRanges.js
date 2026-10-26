@@ -5,6 +5,8 @@
  * reading a few kilobytes of the stream itself.
  */
 
+import { fetchGoogleVideo } from './googleVideoFallback'
+
 /** @typedef {{ start: number, end: number }} ByteRange */
 /** @typedef {{ initRange: ByteRange, indexRange: ByteRange }} StreamByteRanges */
 
@@ -216,7 +218,7 @@ export async function probeStreamByteRanges(url, isWebm, useRangeHeader = false)
     // Every format is probed at once, so a request that never completes would
     // stall the whole extraction rather than just dropping this one format.
     const end = requestedBytes - 1
-    const response = await fetch(sendRangeHeader ? url : `${url}&range=0-${end}`, {
+    const response = await fetchGoogleVideo(sendRangeHeader ? url : `${url}&range=0-${end}`, {
       signal: AbortSignal.timeout(PROBE_TIMEOUT),
       ...(sendRangeHeader ? { headers: { Range: `bytes=0-${end}` } } : {})
     })

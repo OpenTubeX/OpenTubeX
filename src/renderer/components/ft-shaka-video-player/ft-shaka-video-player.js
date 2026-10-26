@@ -124,6 +124,7 @@ import { AUTO_QUALITY_FALLBACK, streamsSupportAutoQuality } from '../../helpers/
 import { getMeteredAutoQualityMaxPixels, limitQualityOnMeteredNetwork } from '../../helpers/player/meteredNetworkQuality'
 import { setupSabrScheme } from '../../helpers/player/SabrSchemePlugin'
 import { prepareGoogleVideoRequest } from '../../helpers/player/playbackRequestPolicy'
+import { avoidUnreachableGoogleVideoHost, markGoogleVideoHostUnreachable } from '../../helpers/player/googleVideoFallback'
 import { getRememberedPlayerVolume, setRememberedPlayerVolume } from '../../helpers/player/volume-storage'
 import { parseChannelPreferences, removeChannelPreference } from '../../helpers/channel-preferences'
 import { findLegacyFormatForQuality } from '../../helpers/player/legacyFormats'
@@ -5896,6 +5897,7 @@ export default defineComponent({
     /** @type {shaka.extern.RequestFilter} */
     function requestFilter(type, request, _context) {
       if (type === RequestType.SEGMENT) {
+        request.uris = request.uris.map(avoidUnreachableGoogleVideoHost)
         const url = new URL(request.uris[0])
         const isSabrRequest = props.sabrData && url.protocol === `${props.sabrData.scheme}:`
 
@@ -9876,6 +9878,12 @@ export default defineComponent({
       if (process.env.SUPPORTS_LOCAL_API) {
         player.getNetworkingEngine().registerRequestFilter(requestFilter)
         player.getNetworkingEngine().registerResponseFilter(responseFilter)
+        // The retry runs the request filter again, which moves it to the backup server
+        player.getNetworkingEngine().addEventListener('retry', ({ error }) => {
+          if (error.code === shaka.util.Error.Code.TIMEOUT || error.code === shaka.util.Error.Code.HTTP_ERROR) {
+            markGoogleVideoHostUnreachable(error.data[0])
+          }
+        })
       }
       if (props.twitchSubOnlyVod) {
         player.getNetworkingEngine().registerResponseFilter(twitchSubOnlyVodResponseFilter)
