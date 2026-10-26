@@ -63,7 +63,9 @@ final class YtDlpDownloads {
         file = new AtomicFile(new File(directory, "yt-dlp-downloads.json"));
         if (!file.getBaseFile().exists()) return;
         try (InputStream input = file.openRead()) {
-            JSONObject saved = new JSONObject(new String(YtDlpFiles.read(input, 32 * 1024 * 1024), StandardCharsets.UTF_8));
+            byte[] bytes = YtDlpFiles.read(input, 32 * 1024 * 1024);
+            if (bytes.length == 0) return;
+            JSONObject saved = new JSONObject(new String(bytes, StandardCharsets.UTF_8));
             configuration = saved.optJSONObject("configuration");
             if (configuration == null) configuration = new JSONObject();
             counter = saved.optLong("counter");

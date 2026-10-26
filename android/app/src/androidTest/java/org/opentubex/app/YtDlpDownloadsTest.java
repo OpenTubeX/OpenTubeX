@@ -271,6 +271,22 @@ public class YtDlpDownloadsTest {
         }
     }
 
+    @Test public void emptyHistoryStartsAnEmptyQueueButCorruptHistoryIsPreserved() throws Exception {
+        Context context = InstrumentationRegistry.getInstrumentation().getTargetContext();
+        File state = new File(context.getCacheDir(), "yt-dlp-empty-history-" + UUID.randomUUID());
+        state.mkdirs();
+        File history = new File(state, "yt-dlp-downloads.json");
+        try {
+            assertTrue(history.createNewFile());
+            assertEquals(0, new YtDlpDownloads(context, state, () -> {}).list().length());
+            YtDlpFiles.write(history, "{".getBytes(StandardCharsets.UTF_8));
+            assertThrows(IllegalStateException.class, () -> new YtDlpDownloads(context, state, () -> {}));
+            assertArrayEquals("{".getBytes(StandardCharsets.UTF_8), YtDlpFiles.readFile(history));
+        } finally {
+            YtDlpFiles.deleteTree(state);
+        }
+    }
+
     @Test public void cookieFixtureCleanupRemovesEmptyReservationButPreservesNewSession() throws Exception {
         File cookies = File.createTempFile("cookie-cleanup-", ".txt", InstrumentationRegistry.getInstrumentation().getTargetContext().getCacheDir());
         try {
