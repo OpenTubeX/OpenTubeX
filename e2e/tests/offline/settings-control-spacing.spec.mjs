@@ -313,10 +313,11 @@ test.describe('settings control spacing', { tag: '@scale' }, () => {
     }
   })
 
-  test('General select columns leave enough room for their captions', async ({ app, page, uiScale }, testInfo) => {
-    const general = await goToSettingsSection(page, 'general')
-    const content = page.locator('.settingsContent')
-    for (const locale of ['en-US', 'de-DE']) {
+  // One test per locale keeps each within the timeout on a busy host.
+  for (const locale of ['en-US', 'de-DE']) {
+    test(`General select columns leave enough room for their ${locale} captions`, async ({ app, page, uiScale }, testInfo) => {
+      const general = await goToSettingsSection(page, 'general')
+      const content = page.locator('.settingsContent')
       await page.evaluate(locale => window.$store.dispatch('updateCurrentLocale', locale), locale)
       for (const width of [1000, 900, 801, 800, 650, 450, 800, 1000]) {
         await content.evaluate(element => { element.scrollTop = element.scrollHeight })
@@ -359,8 +360,8 @@ test.describe('settings control spacing', { tag: '@scale' }, () => {
           await captureAppFramebuffer(app, testInfo, `general-readable-captions-${locale}`)
         }
       }
-    }
-  })
+    })
+  }
 
   test('a stacked toast position puts its test button on a separate row', async ({ app, page, uiScale }, testInfo) => {
     const appearance = await goToSettingsSection(page, 'appearance')

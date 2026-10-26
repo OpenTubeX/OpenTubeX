@@ -26,19 +26,23 @@ test.describe('content disclosures', { tag: '@scale' }, () => {
     }
   })
 
-  test('includes disclosures in collapsed descriptions without regular text', async ({ app, page }, testInfo) => {
-    const autoDubbed = {
-      label: 'Auto-dubbed',
-      description: 'Audio tracks for some languages were automatically generated.',
-      attribution: ''
-    }
-    await mockWatchPage(app, page, { playable: true, contentDisclosures: [autoDubbed] })
-    const video = await openMockedVideo(page)
-    await video.evaluate(element => element.pause())
-    const watch = await watchViewHandle(page)
-    const card = page.locator('.videoDescription:visible').last()
+  const autoDubbed = {
+    label: 'Auto-dubbed',
+    description: 'Audio tracks for some languages were automatically generated.',
+    attribution: ''
+  }
+  const longText = 'Long description. '.repeat(200)
 
-    for (const text of ['', 'A short description.', 'Long description. '.repeat(200)]) {
+  // Each variant remounts and reloads the player, so one test per variant
+  // keeps each within the timeout on a busy host.
+  for (const [variant, text] of [['without regular text', ''], ['with short text', 'A short description.'], ['with long text', longText]]) {
+    test(`includes disclosures in collapsed descriptions ${variant}`, async ({ app, page }, testInfo) => {
+      await mockWatchPage(app, page, { playable: true, contentDisclosures: [autoDubbed] })
+      const video = await openMockedVideo(page)
+      await video.evaluate(element => element.pause())
+      const watch = await watchViewHandle(page)
+      const card = page.locator('.videoDescription:visible').last()
+
       await watch.evaluate(async (vm, { text, item }) => {
         vm.isLoading = true
         await vm.$nextTick()
@@ -79,15 +83,17 @@ test.describe('content disclosures', { tag: '@scale' }, () => {
       await expect(card).toHaveClass(/short/)
       await expect(card.locator('.contentDisclosureTitle')).toHaveText('How this was made')
       await expect.poll(() => card.locator('.descriptionScroll').evaluate(element => element.scrollTop)).toBe(0)
-    }
 
-    await setWindowSize(app, page, { width: 375, height: 812 })
-    await watch.evaluate(vm => { vm.videoDescription = '' })
-    const preview = page.locator('.phoneDescriptionPreview')
-    await expect(preview.locator('.contentDisclosureTitle')).toHaveText('How this was made')
-    await preview.locator('.descriptionStatus').click()
-    await expect(page.locator('.mobileSheet[open] .contentDisclosureHeader')).toHaveText(autoDubbed.label)
-  })
+      if (text === longText) {
+        await setWindowSize(app, page, { width: 375, height: 812 })
+        await watch.evaluate(vm => { vm.videoDescription = '' })
+        const preview = page.locator('.phoneDescriptionPreview')
+        await expect(preview.locator('.contentDisclosureTitle')).toHaveText('How this was made')
+        await preview.locator('.descriptionStatus').click()
+        await expect(page.locator('.mobileSheet[open] .contentDisclosureHeader')).toHaveText(autoDubbed.label)
+      }
+    })
+  }
 
   test('shows disclosures with the existing AI badge and preserves description scrolling', async ({ app, page }, testInfo) => {
     await mockWatchPage(app, page, { playable: true, contentDisclosures: [disclosure] })

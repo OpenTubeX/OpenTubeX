@@ -16,18 +16,19 @@ test.describe('description layout', () => {
     }
   })
 
-  test('keeps appended metadata visible and collapsible when it arrives after short text', { tag: '@scale' }, async ({ app, page, uiScale }, testInfo) => {
-    await mockUnplayableWatchPage(app, page)
-    await goTo(page, 'history')
-    await openHistoryEntry(page)
-    const view = await watchViewHandle(page)
-    const card = page.locator('.videoDescription').visible()
-    for (const { metadata, selector, text } of [
-      { metadata: { videoTags: ['first tag', 'second tag'] }, selector: '.videoTagLink', text: ['first tag', 'second tag'] },
-      { metadata: { videoGames: [{ title: 'Test game' }] }, selector: '.gameTitle', text: 'Test game' },
-      { metadata: { license: 'Creative Commons license' }, selector: '.license', text: 'Creative Commons license' },
-      { metadata: { contentDisclosures: [{ label: 'Auto-dubbed', description: 'Automatically generated audio tracks.' }] }, selector: '.contentDisclosureHeader', text: 'Auto-dubbed' },
-    ]) {
+  // One test per metadata kind keeps each within the timeout on a busy host.
+  for (const { kind, metadata, selector, text } of [
+    { kind: 'tags', metadata: { videoTags: ['first tag', 'second tag'] }, selector: '.videoTagLink', text: ['first tag', 'second tag'] },
+    { kind: 'games', metadata: { videoGames: [{ title: 'Test game' }] }, selector: '.gameTitle', text: 'Test game' },
+    { kind: 'license', metadata: { license: 'Creative Commons license' }, selector: '.license', text: 'Creative Commons license' },
+    { kind: 'content disclosures', metadata: { contentDisclosures: [{ label: 'Auto-dubbed', description: 'Automatically generated audio tracks.' }] }, selector: '.contentDisclosureHeader', text: 'Auto-dubbed' },
+  ]) {
+    test(`keeps appended metadata visible and collapsible when it arrives after short text (${kind})`, { tag: '@scale' }, async ({ app, page, uiScale }, testInfo) => {
+      await mockUnplayableWatchPage(app, page)
+      await goTo(page, 'history')
+      await openHistoryEntry(page)
+      const view = await watchViewHandle(page)
+      const card = page.locator('.videoDescription').visible()
       await view.evaluate(async component => {
         component.isLoading = true
         await component.$nextTick()
@@ -113,8 +114,8 @@ test.describe('description layout', () => {
           await card.screenshot({ path: testInfo.outputPath(`collapsed-tags-${theme}.png`) })
         }
       }
-    }
-  })
+    })
+  }
 
   test('keeps links and controls independent of card expansion', async ({ app, page }) => {
     await mockUnplayableWatchPage(app, page)

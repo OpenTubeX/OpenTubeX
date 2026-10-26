@@ -620,7 +620,7 @@ test.describe('Shorts feed navigation', () => {
     }
   })
 
-  test('scrolls through the cached subscriptions Shorts feed', async ({ app, page }) => {
+  async function openFirstFeedShort(app, page) {
     await mockPlayableWatchPage(app, page, { captionVideoIds: ['jNQXAC9IVRw', 'captioned-short-2'] })
     await page.route('**/api/skipSegments**', route => route.fulfill({ status: 200, contentType: 'application/json', body: '[]' }))
     const shortsTab = page
@@ -634,9 +634,17 @@ test.describe('Shorts feed navigation', () => {
 
     const player = page.locator('.ftVideoPlayer.shortsPlayer')
     await expect(player).toBeVisible({ timeout: 30_000 })
+    return {
+      player,
+      previous: page.locator('.shortsNavigationButton').first(),
+      next: page.locator('.shortsNavigationButton').last()
+    }
+  }
 
-    const previous = page.locator('.shortsNavigationButton').first()
-    const next = page.locator('.shortsNavigationButton').last()
+  // The panel and the layout and input checks each take a whole tour through
+  // the feed, so they run separately to stay within the timeout on a busy host.
+  test('keeps Shorts panels open while scrolling through the cached subscriptions feed', async ({ app, page }) => {
+    const { previous, next } = await openFirstFeedShort(app, page)
     await expect(previous).toBeDisabled()
     await expect(next).toBeEnabled()
     await expect(page.locator('.shortsNextPreview')).toBeVisible()
@@ -770,6 +778,13 @@ test.describe('Shorts feed navigation', () => {
       /#\/watch\/jNQXAC9IVRw\?short=true&shortSource=subscriptions/
     )
     await auxPanel.getByRole('button', { name: 'Close transcript' }).click()
+  })
+
+  test('scrolls through the cached subscriptions Shorts feed', async ({ app, page }) => {
+    const { player, next } = await openFirstFeedShort(app, page)
+    await expect(page.locator('.shortsNextPreview')).toBeVisible()
+    await expect(page.locator('.shortsExternalMetadata')).toBeVisible()
+    await expect(page.locator('.shortsActionRail')).toBeVisible()
 
     const [playerBounds, videoAreaBounds, metadataBounds, actionBounds, previewBounds, navigationBounds] =
       await Promise.all([

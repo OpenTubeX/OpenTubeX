@@ -99,12 +99,13 @@ async function prepareMarkers(app, page) {
   return { video, player, track, markers, waitForTrack, expectMarkerColors }
 }
 
-test('SponsorBlock markers stay visible on unbuffered track and distinguish played portions', async ({ app, page }, testInfo) => {
-  const { video, player, track, waitForTrack, expectMarkerColors } = await prepareMarkers(app, page)
-  for (const scheme of ['dark', 'light']) {
-    await page.emulateMedia({ colorScheme: scheme })
-    await expect(page.locator('body')).toHaveClass(new RegExp(`\\b${scheme}\\b`))
-    for (const [width, scale] of [[1000, 1], [420, 1.25]]) {
+// One test per scheme and size keeps each within the timeout on a busy host.
+for (const scheme of ['dark', 'light']) {
+  for (const [width, scale] of [[1000, 1], [420, 1.25]]) {
+    test(`SponsorBlock markers stay visible on unbuffered track and distinguish played portions in ${scheme} mode at ${width}px`, async ({ app, page }, testInfo) => {
+      const { video, player, track, waitForTrack, expectMarkerColors } = await prepareMarkers(app, page)
+      await page.emulateMedia({ colorScheme: scheme })
+      await expect(page.locator('body')).toHaveClass(new RegExp(`\\b${scheme}\\b`))
       await app.electronApp.evaluate(({ BrowserWindow }, scale) => {
         BrowserWindow.getAllWindows()[0].webContents.setZoomFactor(scale)
       }, scale)
@@ -144,14 +145,20 @@ test('SponsorBlock markers stay visible on unbuffered track and distinguish play
           })
         }
       }
-    }
+    })
   }
-  await video.evaluate(element => { element.currentTime = 7 })
-  await waitForTrack(7)
-  await app.electronApp.evaluate(({ BrowserWindow }) => {
-    BrowserWindow.getAllWindows()[0].webContents.setZoomFactor(1)
+}
+
+test('SponsorBlock marker shading follows buffer boundaries and seeks through buffer gaps', async ({ app, page }) => {
+  const { video, player, track, waitForTrack, expectMarkerColors } = await prepareMarkers(app, page)
+  await page.emulateMedia({ colorScheme: 'light' })
+  await expect(page.locator('body')).toHaveClass(/\blight\b/)
+  await player.evaluate(element => {
+    element.style.width = '1000px'
+    element.style.background = '#000'
   })
-  await player.evaluate(element => { element.style.width = '1000px' })
+  await player.hover()
+  await track.locator('input').focus()
   async function setBuffer(start, end) {
     await video.evaluate((element, [start, end]) => {
       Object.defineProperty(element, 'buffered', {
