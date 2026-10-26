@@ -706,7 +706,7 @@ test.describe('watch page', () => {
     await handle.hover()
   })
 
-  test('fullscreen metadata separators stay between wrapped items', async ({ app, page }) => {
+  test('fullscreen metadata wraps icon-labeled items without separators', async ({ app, page }) => {
     await mockPlayableWatchPage(app, page)
     await openMockedVideo(page)
     await setPlayerFullscreen(page, true)
@@ -715,25 +715,23 @@ test.describe('watch page', () => {
     const metadata = page.locator('.fullscreenMetadataOverlay.open .datePublishedAndViewCount')
     await expect(metadata).toBeVisible()
     await metadata.evaluate(element => { element.style.inlineSize = '160px' })
-    const separator = metadata.locator('.videoViews')
-    await expect(separator).toBeVisible()
+    const views = metadata.locator('.videoViews')
+    await expect(views).toBeVisible()
+    await expect(views.locator('.statIcon')).toBeVisible()
     for (const zoomFactor of [1, 1.25]) {
       await page.evaluate(value => window.ftElectron.setZoomFactor(value), zoomFactor)
-      const geometry = await separator.evaluate(element => {
-        const before = getComputedStyle(element, '::before')
+      const geometry = await views.evaluate(element => {
         const rect = element.getBoundingClientRect()
         const previous = element.previousElementSibling.getBoundingClientRect()
         return {
-          content: before.content,
-          left: rect.left,
+          content: getComputedStyle(element, '::before').content,
           wrapped: rect.top > previous.top,
-          separatorLeft: rect.left + parseFloat(before.left),
-          separatorWidth: parseFloat(before.width)
+          offset: rect.left - element.parentElement.getBoundingClientRect().left
         }
       })
       expect(geometry.wrapped).toBe(true)
-      expect(geometry.content).toBe('""')
-      expect(geometry.separatorLeft + geometry.separatorWidth).toBeLessThan(geometry.left)
+      expect(geometry.content).toBe('none')
+      expect(Math.abs(geometry.offset)).toBeLessThanOrEqual(1)
     }
   })
 

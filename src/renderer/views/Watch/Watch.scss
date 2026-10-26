@@ -1071,7 +1071,7 @@
       flex-wrap: wrap;
       align-items: baseline;
       align-content: flex-start;
-      gap: 2px 0.75em;
+      row-gap: 2px;
     }
 
     .shortsAuxPanelTarget :deep(.profileRow) {
@@ -1079,8 +1079,7 @@
       margin-block: 6px;
     }
 
-    .shortsAuxPanelTarget :deep(.publishedDate),
-    .shortsAuxPanelTarget :deep(.videoCategory strong) {
+    .shortsAuxPanelTarget :deep(.publishedDate) {
       white-space: nowrap;
     }
 

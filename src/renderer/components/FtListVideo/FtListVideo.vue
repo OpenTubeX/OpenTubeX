@@ -312,7 +312,10 @@
             />
             <span class="channelNameText">{{ channelName }}</span>
           </bdi>
-          <FtInlineMetadata class="videoInfo">
+          <FtInlineMetadata
+            class="videoInfo"
+            icon-labels
+          >
             <span
               v-if="!isLive && !isUpcoming && !isPremium && !isStation && !hideViews && viewCount != null"
               class="viewCount"
