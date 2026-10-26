@@ -51,7 +51,6 @@
         :title="t('Theme Discovery.Refresh')"
         :icon="['fas', 'sync']"
         :disabled="loading"
-        :use-shadow="false"
         :padding="11"
         :size="20"
         theme="base-no-default"

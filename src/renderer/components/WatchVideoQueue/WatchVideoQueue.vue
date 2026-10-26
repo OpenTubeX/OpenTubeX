@@ -155,7 +155,6 @@
             theme="base-no-default"
             :size="18"
             :padding="queueItemMenuPadding"
-            :use-shadow="false"
             @click="openQueueItemMenu(item.queueItemId)"
           />
         </li>

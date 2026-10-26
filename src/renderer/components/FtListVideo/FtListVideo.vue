@@ -445,7 +445,6 @@
             :title="t('Video.More Options')"
             theme="base-no-default"
             :size="16"
-            :use-shadow="false"
             @click="openVideoOptionsMenu"
           />
           <button

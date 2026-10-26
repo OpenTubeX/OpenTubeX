@@ -169,7 +169,6 @@
         :title="$t('Video.More Options')"
         theme="base-no-default"
         :size="18"
-        :use-shadow="false"
         dropdown-position-x="right"
         :dropdown-options="dropdownOptions"
         @click="handleOptionsClick"

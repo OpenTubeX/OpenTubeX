@@ -22,32 +22,51 @@
   line-height: 0;
   transition: background 0.15s ease-out;
 
-  &.shadow {
-    box-shadow: 0 1px 2px rgb(0 0 0 / 50%);
-  }
+  // Tonal fill like FtButton's tonal variant: the theme color tints the card
+  // color, while the icon keeps the text color so it stays readable in every
+  // palette. Mixing into the card color keeps the button visible over thumbnails.
+  &.base,
+  &.primary,
+  &.secondary,
+  &.destructive {
+    --icon-button-rest: color-mix(in srgb, var(--icon-button-tint) 16%, var(--card-bg-color));
+    --icon-button-fill: var(--icon-button-rest);
 
-  &.base {
-    background-color: var(--card-bg-color);
+    background-color: var(--icon-button-fill);
     backdrop-filter: var(--card-bg-blur, none);
     color: var(--primary-text-color);
 
+    .overlayIcon {
+      color: var(--icon-button-fill);
+    }
+
     &:not(.disabled) {
       &:hover,
-      &:focus-visible,
-      &.pressed {
-        background-color: var(--side-nav-hover-color);
-        color: var(--side-nav-hover-text-color);
-
-        .overlayIcon {
-          color: var(--side-nav-hover-color);
-        }
+      &:focus-visible {
+        --icon-button-fill: color-mix(in srgb, var(--primary-text-color) 8%, var(--icon-button-rest));
       }
 
+      &.pressed,
       &.active {
-        background-color: var(--side-nav-active-color);
-        color: var(--side-nav-active-text-color);
+        --icon-button-fill: color-mix(in srgb, var(--primary-text-color) 12%, var(--icon-button-rest));
       }
     }
+  }
+
+  &.base {
+    --icon-button-rest: color-mix(in srgb, var(--primary-text-color) 8%, var(--card-bg-color));
+  }
+
+  &.primary {
+    --icon-button-tint: var(--primary-color);
+  }
+
+  &.secondary {
+    --icon-button-tint: var(--accent-color);
+  }
+
+  &.destructive {
+    --icon-button-tint: var(--destructive-color);
   }
 
   &.base-no-default:not(.disabled) {
@@ -61,58 +80,6 @@
     &.active {
       background-color: var(--side-nav-active-color);
       color: var(--side-nav-active-text-color);
-    }
-  }
-
-  &.primary {
-    background-color: var(--primary-color);
-    color: var(--text-with-main-color);
-
-    &:not(.disabled) {
-      &:hover,
-      &:focus-visible,
-      &.pressed {
-        background-color: var(--primary-color-hover);
-      }
-
-      &.active {
-        background-color: var(--primary-color-active);
-      }
-    }
-  }
-
-
-  &.secondary {
-    background-color: var(--accent-color);
-    color: var(--text-with-accent-color);
-
-    &:not(.disabled) {
-      &:hover,
-      &:focus-visible,
-      &.pressed {
-        background-color: var(--accent-color-hover);
-      }
-
-      &.active {
-        background-color: var(--accent-color-active);
-      }
-    }
-  }
-
-  &.destructive {
-    background-color: var(--destructive-color);
-    color: var(--destructive-text-color);
-
-    &:not(.disabled) {
-      &:hover,
-      &:focus-visible,
-      &.pressed {
-        background-color: var(--destructive-hover-color);
-      }
-
-      &.active {
-        background-color: var(--destructive-active-color);
-      }
     }
   }
 

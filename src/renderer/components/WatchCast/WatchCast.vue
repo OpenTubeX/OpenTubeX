@@ -54,7 +54,6 @@
     :title="menuTitle"
     :icon="['fas', 'cast']"
     theme="base-no-default"
-    :use-shadow="false"
     :aria-pressed="casting"
     :force-dropdown="true"
     :disabled="protocolDisabled(selectedProtocol)"

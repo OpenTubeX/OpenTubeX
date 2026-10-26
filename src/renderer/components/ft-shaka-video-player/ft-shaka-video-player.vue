@@ -632,7 +632,6 @@
               :class="{ open: isInAnyPlaylist }"
               :title="$t('User Playlists.Add to Playlist')"
               :icon="isInAnyPlaylist ? ['fac', 'playlist-check'] : ['fac', 'playlist-add']"
-              :use-shadow="false"
               force-dropdown
               dropdown-modal-on-mobile
               mobile-sheet

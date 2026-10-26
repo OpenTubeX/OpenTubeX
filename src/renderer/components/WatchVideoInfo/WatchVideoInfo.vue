@@ -204,7 +204,6 @@
             :title="t('User Playlists.Add to Playlist')"
             :icon="isInAnyPlaylist ? ['fac', 'playlist-check'] : ['fac', 'playlist-add']"
             theme="base-no-default"
-            :use-shadow="false"
             force-dropdown
             mobile-sheet
           >
@@ -219,7 +218,6 @@
               bookmarked: isInQuickBookmarkPlaylist,
             }"
             :theme="quickBookmarkIconTheme"
-            :use-shadow="false"
             @click="toggleQuickBookmarked"
           />
           <FtIconButton
@@ -227,7 +225,6 @@
             :title="t('Video.Save Watched Progress')"
             :icon="['fas', 'bars-progress']"
             theme="base-no-default"
-            :use-shadow="false"
             @click="saveWatchedProgressManually"
           />
           <FtIconButton
@@ -237,7 +234,6 @@
             :icon="['fas', 'floppy-disk']"
             :overlay-icon="channelSettingSaveActions.some(action => action.saved) ? ['fas', 'check'] : null"
             theme="base-no-default"
-            :use-shadow="false"
             :dropdown-portal="channelSettingDropdownPortal"
             dropdown-class="channelSettingsDropdown"
             dropdown-position-x="left"
@@ -263,7 +259,6 @@
               <FtIconButton
                 :disabled="!action.saved"
                 :size="14"
-                :use-shadow="false"
                 theme="base-no-default"
                 :title="t('Settings.Channel Settings.Forget Value')"
                 :icon="['fas', 'trash']"
@@ -277,7 +272,6 @@
             :icon="['fas', 'shield-halved']"
             :class="{ toolbarActive: sponsorBlockPanelOpen }"
             theme="base-no-default"
-            :use-shadow="false"
             @click="emit('toggle-sponsorblock-info')"
           />
           <FtIconButton
@@ -286,7 +280,6 @@
             :icon="['fas', 'message']"
             :class="{ toolbarActive: liveChatOpen }"
             theme="base-no-default"
-            :use-shadow="false"
             :aria-pressed="liveChatOpen"
             @click="emit('toggle-live-chat')"
           />
@@ -296,7 +289,6 @@
             :icon="['fas', 'file-lines']"
             :class="{ toolbarActive: transcriptOpen }"
             theme="base-no-default"
-            :use-shadow="false"
             @click="emit('toggle-transcript')"
           />
           <FtIconButton
@@ -304,7 +296,6 @@
             :title="t('Settings.Privacy Settings.Cache Video Metadata')"
             :icon="['fas', 'clock-rotate-left']"
             theme="base-no-default"
-            :use-shadow="false"
             @click="showMetadataHistory = true"
           />
         </span>
@@ -314,7 +305,6 @@
             :title="t('Video.External Player.OpenInTemplate', { externalPlayer })"
             :icon="['fas', 'external-link-alt']"
             theme="base-no-default"
-            :use-shadow="false"
             @click="handleExternalPlayer"
           />
           <FtIconButton
@@ -322,7 +312,6 @@
             :title="t('Change Format.Change Media Formats')"
             :icon="['fas', 'file-video']"
             theme="base-no-default"
-            :use-shadow="false"
             @click="openFormatPrompt"
           />
           <FtShareButton
@@ -331,7 +320,6 @@
             :get-timestamp="getTimestamp"
             :playlist-id="playlistId"
             theme="base-no-default"
-            :use-shadow="false"
           />
           <FtButton
             v-if="!offline && supportsYtDlp && enableDownloads && !isUpcoming"

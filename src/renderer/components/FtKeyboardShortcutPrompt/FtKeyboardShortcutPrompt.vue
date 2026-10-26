@@ -124,7 +124,6 @@
                         :icon="['fas', 'undo']"
                         :padding="6"
                         :size="14"
-                        :use-shadow="false"
                         theme="base-no-default"
                         @click="resetKeyboardShortcut(binding)"
                       />

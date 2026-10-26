@@ -100,7 +100,6 @@
           :icon="['fas', 'ellipsis-v']"
           theme="base-no-default"
           :size="16"
-          :use-shadow="false"
           @click="openPlaylistOptionsMenu"
         />
       </div>

@@ -40,6 +40,8 @@ for (const { uiScale, width, iconPack, colorScheme } of [
             return Math.abs(width - height)
           }), 'Circular action buttons have equal width and height').toBeLessThanOrEqual(0.1)
           await expect(button).toHaveCSS('border-radius', '50%')
+          // Disabled actions, such as moving the last row down, have no hover fill
+          if (await button.isDisabled()) continue
           await expect.poll(() => button.evaluate(element => (
             getComputedStyle(element).backgroundColor !==
             getComputedStyle(element.closest('li')).backgroundColor

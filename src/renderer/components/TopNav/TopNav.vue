@@ -29,7 +29,6 @@
           :icon="['fas', 'arrow-left']"
           :theme="null"
           :size="20"
-          :use-shadow="false"
           dropdown-position-x="right"
           :dropdown-options="navigationHistoryDropdownOptions"
           open-on-right-or-long-click
@@ -43,7 +42,6 @@
           :icon="['fas', 'arrow-right']"
           :theme="null"
           :size="20"
-          :use-shadow="false"
           dropdown-position-x="right"
           :dropdown-options="navigationHistoryDropdownOptions"
           open-on-right-or-long-click

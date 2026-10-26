@@ -87,16 +87,14 @@
             :title="t('Home Page.Move section up', { section: section.label })"
             :disabled="sectionIndex === 0"
             :icon="['fas', 'arrow-up']"
-            :use-shadow="false"
-            theme="base"
+            theme="base-no-default"
             @click="moveQuickSection(section.id, -1)"
           />
           <FtIconButton
             :title="t('Home Page.Move section down', { section: section.label })"
             :disabled="sectionIndex === selectedSections.length - 1"
             :icon="['fas', 'arrow-down']"
-            :use-shadow="false"
-            theme="base"
+            theme="base-no-default"
             @click="moveQuickSection(section.id, 1)"
           />
         </div>
@@ -134,8 +132,7 @@
               :title="t('Home Page.Move section up', { section: setting.label })"
               :disabled="index === 0"
               :icon="['fas', 'arrow-up']"
-              :use-shadow="false"
-              theme="base"
+              theme="base-no-default"
               @click="moveQuickSetting(section, setting.id, -1)"
             />
             <FtIconButton
@@ -143,16 +140,14 @@
               :title="t('Home Page.Move section down', { section: setting.label })"
               :disabled="index === section.settings.length - 1"
               :icon="['fas', 'arrow-down']"
-              :use-shadow="false"
-              theme="base"
+              theme="base-no-default"
               @click="moveQuickSetting(section, setting.id, 1)"
             />
             <FtIconButton
               class="settingAction"
               :title="`${t('Search Bar.Remove')} ${setting.label}`"
               :icon="['fas', 'xmark']"
-              :use-shadow="false"
-              theme="base"
+              theme="base-no-default"
               @click="removeQuickSetting(setting.id)"
             />
           </div>

@@ -164,7 +164,6 @@
           :title="t('Video.More Options')"
           :icon="['fas', 'ellipsis-v']"
           theme="base-no-default"
-          :use-shadow="false"
           @click="openMenu"
         />
       </div>

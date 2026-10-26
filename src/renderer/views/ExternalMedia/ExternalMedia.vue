@@ -254,7 +254,6 @@
                   :icon="['fas', 'message']"
                   :class="{ toolbarActive: chatOpen }"
                   theme="base-no-default"
-                  :use-shadow="false"
                   :aria-pressed="chatOpen"
                   @click="toggleChat"
                 />
@@ -263,7 +262,6 @@
                   id=""
                   :external-url="mediaUrl"
                   theme="base-no-default"
-                  :use-shadow="false"
                 />
                 <FtButton
                   v-if="enableDownloads && source && !source.twitchSubOnlyVod"

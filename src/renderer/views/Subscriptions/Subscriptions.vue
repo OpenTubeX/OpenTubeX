@@ -196,7 +196,6 @@
                   : $t('Subscriptions.Show Tabbed View')"
                 :icon="newFeedView === 'tabbed' ? ['fas', 'layer-group'] : ['fac', 'horizontal-tabs']"
                 :aria-pressed="newFeedView === 'tabbed'"
-                :use-shadow="false"
                 :padding="8"
                 :size="20"
                 theme="base-no-default"

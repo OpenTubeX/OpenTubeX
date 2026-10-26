@@ -53,7 +53,6 @@
               :icon="['fas', 'copy']"
               :disabled="isLoading || segments.length === 0"
               theme="base-no-default"
-              :use-shadow="false"
               @click="copyTranscript"
             />
             <FtIconButton
@@ -61,7 +60,6 @@
               :icon="['fas', 'download']"
               :disabled="isLoading || segments.length === 0"
               theme="base-no-default"
-              :use-shadow="false"
               @click="saveTranscript"
             />
           </div>
@@ -70,7 +68,6 @@
             :title="t('Video.Transcript.Close')"
             :icon="['fas', 'xmark']"
             theme="base-no-default"
-            :use-shadow="false"
             @click="emit('close')"
           />
           <div
