@@ -234,12 +234,11 @@ test('full-window docks keep value change popups centered on the pushed video', 
       await page.evaluate(dir => { document.body.dir = dir }, dir)
       await page.keyboard.press('ArrowDown')
       await expect(popup).toBeVisible()
-      const offset = await popup.evaluate(element => {
+      await expect.poll(() => popup.evaluate(element => {
         const popupBounds = element.getBoundingClientRect()
         const videoBounds = element.closest('.ftVideoPlayer').querySelector(':scope > .player').getBoundingClientRect()
-        return (popupBounds.left + popupBounds.width / 2) - (videoBounds.left + videoBounds.width / 2)
-      })
-      expect(Math.abs(offset), dir).toBeLessThan(1)
+        return Math.abs((popupBounds.left + popupBounds.width / 2) - (videoBounds.left + videoBounds.width / 2))
+      }), dir).toBeLessThan(1)
     }
   } finally {
     await page.evaluate(() => { document.body.dir = 'ltr' })
