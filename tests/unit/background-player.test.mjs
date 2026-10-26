@@ -34,6 +34,31 @@ test('background extraction preserves upstream player data and reuses its cache'
   assert.equal(calls.length, 1)
 })
 
+test('shares one extraction between concurrent loads of the same player', async () => {
+  const cache = { get: async () => undefined, set: async () => {} }
+  let downloads = 0
+  const fetch = async () => {
+    downloads++
+    return new Response(source)
+  }
+  let jobs = 0
+  const runJob = async (operation, input) => {
+    jobs++
+    return executeBackgroundJob(operation, input)
+  }
+  const [first, second] = await Promise.all([
+    createBackgroundPlayer(cache, fetch, 'fixture', runJob),
+    createBackgroundPlayer(cache, fetch, 'fixture', runJob)
+  ])
+  assert.equal(downloads, 1)
+  assert.equal(jobs, 1)
+  // Loads set their own PO token on the player.
+  assert.notEqual(first, second)
+  assert.deepEqual(first.data, second.data)
+  await createBackgroundPlayer(cache, fetch, 'fixture', runJob)
+  assert.equal(jobs, 2)
+})
+
 test('discovers a missing player id before reading the cache', async () => {
   const cache = { get: async key => { assert.equal(key, 'fixture'); return undefined }, set: async () => {} }
   const urls = []
