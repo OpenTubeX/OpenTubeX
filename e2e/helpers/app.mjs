@@ -314,7 +314,7 @@ export async function launchApp(userDataDir, extraArgs = [], options = {}, windo
 
   // Safety guard: if the userData override ever stops working, abort
   // instead of silently running tests against the user's real profile.
-  const actualUserData = await electronApp.evaluate(({ app }) => app.getPath('userData'))
+  const actualUserData = await evaluateMainProcess(electronApp, ({ app }) => app.getPath('userData'))
   if (actualUserData !== userDataDir) {
     await electronApp.close().catch(() => {})
     throw new Error(
@@ -391,6 +391,28 @@ export function getViewport(page) {
     width: document.documentElement.clientWidth,
     height: window.innerHeight
   }))
+}
+
+/**
+ * Evaluates an idempotent function in the Electron main process.
+ *
+ * DevTools tracks the evaluation result only weakly until a microtask settles
+ * it, and the main process runs microtasks late. A garbage collection in that
+ * window, likely during startup, fails the call with "Resulting promise was
+ * garbage collected" even though the function ran, so those calls are retried.
+ *
+ * @param {import('@playwright/test').ElectronApplication} electronApp
+ * @param {Function} fn
+ * @param {unknown} [arg]
+ */
+export async function evaluateMainProcess(electronApp, fn, arg) {
+  for (let attempt = 1; ; attempt++) {
+    try {
+      return await electronApp.evaluate(fn, arg)
+    } catch (error) {
+      if (attempt === 3 || !error.message.includes('Resulting promise was garbage collected')) throw error
+    }
+  }
 }
 
 /**
