@@ -1913,6 +1913,34 @@ test('a new live device message is delivered after an older activity response fi
   }
 })
 
+test('a device request replayed under new event ids opens only once', async () => {
+  const recipient = 'test-device'
+  const opened = []
+  const acknowledged = []
+  let ids = ['first', 'second']
+  let payload
+  const f = fixture({ syncServerDeviceId: recipient }, {
+    encrypted: true,
+    desktopTabs: { async create({ route }) { opened.push(route); return true } },
+    respond: (url, options) => {
+      const path = new URL(url).pathname
+      if (options?.method === 'DELETE') acknowledged.push(path)
+      return path === '/v1/encrypted_sync/events'
+        ? ids.map(id => ({ id, recipient, payload, created_at: Date.now(), expires_at: Date.now() + 60000 }))
+        : undefined
+    },
+  })
+  payload = await privacy.encryptSyncDocument({
+    version: 1, type: 'openVideo', recipient, videoId: 'jNQXAC9IVRw', title: 'Video', position: 0,
+    expiresAt: Date.now() + 60000,
+  }, f.settings.syncServerPrivacyKey, f.settings.syncServerPrivacySalt)
+  await f.actions.refreshSyncServerEvents(f.context)
+  ids = ['third']
+  await f.actions.refreshSyncServerEvents(f.context)
+  assert.deepEqual(opened, ['/watch/jNQXAC9IVRw?timestamp=0'])
+  assert.equal(acknowledged.length, 3)
+})
+
 for (const conflict of [false, true]) {
   test(`phone reclamation survives ${conflict ? 'a conflicting upload' : 'an upload failure and retry'} and is consumed after success`, async () => {
     const deviceId = Buffer.alloc(16, 7).toString('base64url')

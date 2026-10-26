@@ -62,6 +62,16 @@ class FinishedYoutubeDL(FakeYoutubeDL):
         return result
 
 
+class WritingYoutubeDL(FakeYoutubeDL):
+    info = None
+
+    def download(self, _urls):
+        path = Path(self.prepare_filename(WritingYoutubeDL.info))
+        path.parent.mkdir(parents=True, exist_ok=True)
+        path.write_bytes(b'media')
+        return 0
+
+
 class SelectingYoutubeDL(FakeYoutubeDL):
     selected = None
 
@@ -108,9 +118,9 @@ class IOSYtDlpPythonTest(unittest.TestCase):
             ('video', ['-S', 'vcodec:vp9'], ['vp9', 'audio-opus']),
             ('video', ['--merge-output-format', 'mkv'], ['vp9', 'audio-opus']),
             ('video', ['--remux-video', 'mkv'], ['vp9', 'audio-opus']),
-            ('audio', ['-x', '-f', 'audio-opus'], ['audio-opus']),
-            ('audio', ['-x', '--audio-format', 'opus'], ['audio-opus']),
-            ('audio', ['-x', '-S', 'acodec:opus'], ['audio-opus']),
+            ('audio', ['--extract-audio', '-f', 'audio-opus'], ['audio-opus']),
+            ('audio', ['--extract-audio', '--audio-format', 'opus'], ['audio-opus']),
+            ('audio', ['--extract-audio', '-S', 'acodec:opus'], ['audio-opus']),
             ('custom', [], ['vp9', 'audio-opus']),
         ]:
             with self.subTest(mode=mode, args=args), tempfile.TemporaryDirectory() as temp:
@@ -238,6 +248,41 @@ print(context.cert_store_stats()['x509_ca'])
             with self.assertRaises(bridge.yt_dlp.utils.DownloadError):
                 bridge._download(request)
             self.assertTrue(control.exists())
+
+
+    @patch.object(bridge.yt_dlp, 'YoutubeDL', WritingYoutubeDL)
+    def test_expanded_output_paths_stay_in_staging(self):
+        for template, title in [('$HOME/%(id)s.%(ext)s', 'Fixture'), ('~/%(id)s.%(ext)s', 'Fixture'),
+                                ('%(title)s/%(id)s.%(ext)s', '..')]:
+            with self.subTest(template=template), tempfile.TemporaryDirectory() as temp:
+                root = Path(temp)
+                WritingYoutubeDL.info = {'id': 'abc', 'title': title, 'ext': 'mp4'}
+                request = {
+                    'payload': {'mode': 'custom', 'videoId': 'abcdefghijk'},
+                    'args': ['--output', template, 'https://www.youtube.com/watch?v=abcdefghijk'],
+                    'staging': str(root / 'stage'),
+                    'progressFile': str(root / 'stage' / 'progress.json'),
+                    'controlFile': str(root / 'stage' / 'control'),
+                }
+                with patch.dict(os.environ, {'HOME': str(root)}), self.assertRaises(ValueError):
+                    bridge._download(request)
+                self.assertFalse(root.joinpath('abc.mp4').exists())
+
+    @patch.object(bridge.yt_dlp, 'YoutubeDL', FakeYoutubeDL)
+    def test_download_rejects_auxiliary_file_options(self):
+        for args in [['--download-archive', 'archive.txt'], ['--cookies=cookies.txt'], ['--cache-dir', 'cache'],
+                     ['--postprocessor-args', 'ffmpeg:-y /tmp/out'], ['-x'], ['--forma', 'best']]:
+            with self.subTest(args=args), tempfile.TemporaryDirectory() as temp:
+                root = Path(temp)
+                request = {
+                    'payload': {'mode': 'custom', 'videoId': 'abcdefghijk'},
+                    'args': [*args, 'https://www.youtube.com/watch?v=abcdefghijk'],
+                    'staging': str(root / 'stage'),
+                    'progressFile': str(root / 'stage' / 'progress.json'),
+                    'controlFile': str(root / 'stage' / 'control'),
+                }
+                with self.assertRaisesRegex(ValueError, 'unsupported-custom-argument'):
+                    bridge._download(request)
 
 
 if __name__ == '__main__':

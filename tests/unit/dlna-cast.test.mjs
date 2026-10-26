@@ -121,7 +121,7 @@ test('serves MP4 byte ranges only to the selected device and token', async t => 
   const upstreamPort = await listen(upstream)
   t.after(() => close(upstream))
 
-  const proxy = createMediaServer(`http://127.0.0.1:${upstreamPort}/video`, '127.0.0.1', 'secret', {}, allowLoopback)
+  const proxy = createMediaServer(`http://127.0.0.1:${upstreamPort}/video`, '127.0.0.1', 'secret', undefined, allowLoopback)
   const proxyPort = await listen(proxy)
   t.after(() => close(proxy))
 
@@ -154,10 +154,8 @@ test('follows media redirects without forwarding credentials to another origin',
   const sourcePort = await listen(source)
   t.after(() => close(source))
 
-  const proxy = createMediaServer(`http://127.0.0.1:${sourcePort}/video`, '127.0.0.1', 'secret', {
-    Cookie: 'private=cookie',
-    Authorization: 'Bearer private'
-  }, allowLoopback)
+  const proxy = createMediaServer(`http://127.0.0.1:${sourcePort}/video`, '127.0.0.1', 'secret', url =>
+    url === `http://127.0.0.1:${sourcePort}/video` ? { Cookie: 'private=cookie', Authorization: 'Bearer private' } : {}, allowLoopback)
   const proxyPort = await listen(proxy)
   t.after(() => close(proxy))
 
@@ -169,6 +167,25 @@ test('follows media redirects without forwarding credentials to another origin',
   assert.equal(redirectedHeaders.range, 'bytes=2-5')
   assert.equal(redirectedHeaders.cookie, undefined)
   assert.equal(redirectedHeaders.authorization, undefined)
+})
+
+test('resolves credentials for each same-origin media redirect', async t => {
+  const requests = []
+  const upstream = createServer((request, response) => {
+    requests.push([request.url, request.headers.cookie])
+    if (request.url === '/media/video') response.writeHead(302, { location: '/other/video' }).end()
+    else response.writeHead(200).end('video')
+  })
+  const upstreamPort = await listen(upstream)
+  t.after(() => close(upstream))
+  const origin = `http://127.0.0.1:${upstreamPort}`
+  const proxy = createMediaServer(`${origin}/media/video`, '127.0.0.1', 'secret', url =>
+    new URL(url).pathname.startsWith('/media/') ? { Cookie: 'scoped=cookie' } : {}, allowLoopback)
+  const proxyPort = await listen(proxy)
+  t.after(() => close(proxy))
+
+  assert.equal(await (await fetch(`http://127.0.0.1:${proxyPort}/secret/video.mp4`)).text(), 'video')
+  assert.deepEqual(requests, [['/media/video', 'scoped=cookie'], ['/other/video', undefined]])
 })
 
 test('refuses media hosts and redirects the resolver does not allow', async t => {
@@ -186,7 +203,7 @@ test('refuses media hosts and redirects the resolver does not allow', async t =>
   t.after(() => close(source))
 
   const unresolved = createMediaServer(`http://127.0.0.1:${destinationPort}/video`, '127.0.0.1', 'secret')
-  const redirected = createMediaServer(`http://127.0.0.1:${sourcePort}/video`, '127.0.0.1', 'secret', {},
+  const redirected = createMediaServer(`http://127.0.0.1:${sourcePort}/video`, '127.0.0.1', 'secret', undefined,
     async url => url.hostname === '127.0.0.1' ? [{ address: '127.0.0.1', family: 4 }] : null)
   for (const proxy of [unresolved, redirected]) {
     const proxyPort = await listen(proxy)

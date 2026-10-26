@@ -92,7 +92,7 @@ export function setupCastIpc({ chromecast, fcast, invidiousAuthorizations, getCo
     let muxOptions = {}
     if (payload?.audioUrl !== undefined) {
       try {
-        muxOptions = { ffmpegPath: await getDlnaFfmpegExecutable(), audioHeaders: sourceHeaders(payload.audioUrl) }
+        muxOptions = { ffmpegPath: await getDlnaFfmpegExecutable() }
       } catch (error) { return { error: error.message, muxUnavailable: true } }
     }
     const { resolveAddresses } = await createMediaAddressResolver(event.sender, 'dlna')
@@ -104,7 +104,7 @@ export function setupCastIpc({ chromecast, fcast, invidiousAuthorizations, getCo
       if (!await resolveAddresses(url)) return { error: 'Media address is not allowed' }
     }
     if (event.sender.isDestroyed()) return { error: 'Casting requires an active OpenTubeX window' }
-    const result = await startDlnaCast(event.sender.id, payload, sourceHeaders(payload?.mediaUrl), muxOptions, resolveAddresses)
+    const result = await startDlnaCast(event.sender.id, payload, sourceHeaders, muxOptions, resolveAddresses)
     if (result.castId) {
       if (event.sender.isDestroyed()) {
         stopDlnaCast(event.sender.id).catch(console.error)

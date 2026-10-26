@@ -3,10 +3,44 @@ import { addHtmlImagePlaceholders } from '../helpers/htmlImagePlaceholder'
 
 const USE_NATIVE_SANITIZER = process.env.IS_ELECTRON || ('Sanitizer' in window && typeof HTMLElement.prototype.setHTML === 'function')
 
+const LENIENT_ELEMENTS = [
+  'br', 'code', 'del', 'em',
+  'h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'hr', 'kbd',
+  'p', 'pre', 's', 'strong', 'summary',
+  'table', 'tbody', 'td', 'th', 'thead', 'tr',
+  'ul',
+  {
+    name: 'a',
+    attributes: ['href', 'title']
+  },
+  {
+    name: 'blockquote',
+    attributes: ['data-alert']
+  },
+  {
+    name: 'details',
+    attributes: ['open']
+  },
+  {
+    name: 'img',
+    attributes: ['alt', 'height', 'loading', 'src', 'title', 'width']
+  },
+  {
+    name: 'li',
+    attributes: ['value']
+  },
+  {
+    name: 'ol',
+    attributes: ['start']
+  }
+]
+
 let sanitizer
 let lenientSanitizer
 /** @type {import('dompurify').Config | undefined} */
 let domPurifyStrictConfig
+/** @type {import('dompurify').Config | undefined} */
+let domPurifyLenientConfig
 
 /** @type {import('vue').FunctionDirective<HTMLElement, string, 'lenient'>} */
 export const vSaferHtml = (element, { value, oldValue, modifiers }) => {
@@ -14,40 +48,7 @@ export const vSaferHtml = (element, { value, oldValue, modifiers }) => {
     if (modifiers.lenient) {
       if (USE_NATIVE_SANITIZER) {
         if (lenientSanitizer === undefined) {
-          lenientSanitizer = new Sanitizer({
-            comments: false,
-            elements: [
-              'br', 'code', 'del', 'em',
-              'h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'hr', 'kbd',
-              'p', 'pre', 's', 'strong', 'summary',
-              'table', 'tbody', 'td', 'th', 'thead', 'tr',
-              'ul',
-              {
-                name: 'a',
-                attributes: ['href', 'title']
-              },
-              {
-                name: 'blockquote',
-                attributes: ['data-alert']
-              },
-              {
-                name: 'details',
-                attributes: ['open']
-              },
-              {
-                name: 'img',
-                attributes: ['alt', 'height', 'loading', 'src', 'title', 'width']
-              },
-              {
-                name: 'li',
-                attributes: ['value']
-              },
-              {
-                name: 'ol',
-                attributes: ['start']
-              }
-            ]
-          })
+          lenientSanitizer = new Sanitizer({ comments: false, elements: LENIENT_ELEMENTS })
         }
 
         element.setHTML(value, { sanitizer: lenientSanitizer })
@@ -62,7 +63,13 @@ export const vSaferHtml = (element, { value, oldValue, modifiers }) => {
           details.replaceWith(replacement)
         }
       } else {
-        element.innerHTML = DOMPurify.sanitize(value, { RETURN_TRUSTED_TYPE: false })
+        // Match the native allowlist, DOMPurify's default one keeps forms and styles.
+        domPurifyLenientConfig ??= {
+          ALLOWED_TAGS: LENIENT_ELEMENTS.map(entry => entry.name ?? entry),
+          ALLOWED_ATTR: LENIENT_ELEMENTS.flatMap(entry => entry.attributes ?? []),
+          RETURN_TRUSTED_TYPE: false
+        }
+        element.innerHTML = DOMPurify.sanitize(value, domPurifyLenientConfig)
       }
     } else if (USE_NATIVE_SANITIZER) {
       // Use a much stricter sanitzer configuration, should be used in most places
@@ -98,6 +105,15 @@ export const vSaferHtml = (element, { value, oldValue, modifiers }) => {
       }
 
       element.innerHTML = DOMPurify.sanitize(value, domPurifyStrictConfig)
+    }
+    if (!modifiers.lenient) {
+      // Remote styles could lay images over app controls, so keep only the
+      // alignment of live chat emojis.
+      for (const image of element.querySelectorAll('img[style]')) {
+        const alignMiddle = image.style.verticalAlign === 'middle'
+        image.removeAttribute('style')
+        if (alignMiddle) image.style.verticalAlign = 'middle'
+      }
     }
     addHtmlImagePlaceholders(element)
   }

@@ -92,6 +92,18 @@ function isModifierUpdate(update) {
 }
 
 /**
+ * NeDB follows inherited properties along modifier paths, so a path through
+ * `__proto__` or `constructor` would change shared prototypes.
+ */
+function checkModifierPaths(update) {
+  for (const fields of Object.values(update)) {
+    if (fields !== null && typeof fields === 'object' && Object.keys(fields).some(field => (
+      field.split('.').some(part => part === '__proto__' || part === 'constructor' || part === 'prototype')
+    ))) throw new Error('Modifier paths cannot contain __proto__, constructor or prototype')
+  }
+}
+
+/**
  * Statements that turn the stored members into `serialized`, keeping the
  * members that still surround the edit. Only the rows between the longest
  * common prefix and suffix are removed, and the new members between them go
@@ -494,8 +506,9 @@ export class SqliteDatastore {
     return statements
   }
 
-  async _insert(newDoc) {
-    const docs = (Array.isArray(newDoc) ? newDoc : [newDoc]).map(doc => {
+  /** Validated copies of new documents and their keys, which must be unique. */
+  _prepareInsert(newDocs) {
+    const docs = newDocs.map(doc => {
       const prepared = model.deepCopy(doc)
       prepared._id ??= uid(16)
       model.checkObject(prepared)
@@ -507,14 +520,31 @@ export class SqliteDatastore {
       if (seen.has(key)) throw uniqueViolation(key)
       seen.add(key)
     }
+    return { docs, statements: docs.flatMap((doc, index) => this._insertStatements(keys[index], doc)), keys }
+  }
+
+  async _insert(newDoc) {
+    const { docs, statements, keys } = this._prepareInsert(Array.isArray(newDoc) ? newDoc : [newDoc])
     const [existing] = await this._query(SQL.existingIds, [JSON.stringify(keys)])
     if (existing) throw uniqueViolation(existing[0])
-    await this._execute(docs.flatMap((doc, index) => this._insertStatements(keys[index], doc)), true)
+    await this._execute(statements, true)
     return Array.isArray(newDoc) ? docs.map(doc => model.deepCopy(doc)) : model.deepCopy(docs[0])
   }
 
   insertAsync(newDoc) {
     return this._exclusive(() => this._insert(newDoc))
+  }
+
+  /**
+   * Replaces every document in one transaction, so an invalid replacement
+   * leaves the stored documents unchanged.
+   * @param {object[]} newDocs
+   */
+  replaceAllAsync(newDocs) {
+    return this._exclusive(async () => {
+      const { statements } = this._prepareInsert(newDocs)
+      await this._execute([[SQL.removeAll], [SQL.removeAllChildren], ...statements], true)
+    })
   }
 
   /**
@@ -558,6 +588,7 @@ export class SqliteDatastore {
 
   async _update(query, update, { multi = false, upsert = false, returnUpdatedDocs = false }) {
     const modifier = isModifierUpdate(update)
+    if (modifier) checkModifierPaths(update)
     const append = modifier && Boolean(this.childField) && !returnUpdatedDocs && isAppend(update, this.childField)
     const childrenChanged = Boolean(this.childField) && (!modifier || references(update, this.childField))
     const withChildren = Boolean(this.childField) && (

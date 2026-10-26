@@ -7,6 +7,7 @@ import java.net.UnknownHostException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
+import java.util.function.Predicate;
 import okhttp3.Dns;
 import okhttp3.HttpUrl;
 import okhttp3.Interceptor;
@@ -26,6 +27,11 @@ final class CastMediaDestinations implements Interceptor {
     };
     private record Subnet(byte[] address, int prefix) {}
     private static final List<Subnet> SUBNETS = subnets();
+    private final Predicate<HttpUrl> proxied;
+
+    private CastMediaDestinations(Predicate<HttpUrl> proxied) {
+        this.proxied = proxied;
+    }
 
     private static List<Subnet> subnets() {
         var result = new ArrayList<Subnet>();
@@ -75,9 +81,13 @@ final class CastMediaDestinations implements Interceptor {
     }
 
     static OkHttpClient restrict(OkHttpClient client) {
+        return restrict(client, url -> AndroidProxy.proxies(url.uri()));
+    }
+
+    static OkHttpClient restrict(OkHttpClient client, Predicate<HttpUrl> proxied) {
         var builder = client.newBuilder().proxy(Proxy.NO_PROXY).dns(publicDns(client.dns()))
             .followRedirects(false).followSslRedirects(false);
-        builder.interceptors().add(0, new CastMediaDestinations());
+        builder.interceptors().add(0, new CastMediaDestinations(proxied));
         return builder.build();
     }
 
@@ -85,6 +95,9 @@ final class CastMediaDestinations implements Interceptor {
         Request request = chain.request();
         for (int redirects = 0; ; redirects++) {
             validate(request.url());
+            // Pinned DNS needs a direct route. Like desktop, fail closed instead of
+            // revealing the device's address while the app or Android proxy is enabled.
+            if (proxied.test(request.url())) throw new IOException("Cast media requires a direct route for validated DNS");
             Response response = chain.proceed(request);
             String location = response.header("Location");
             if (!Set.of(301, 302, 303, 307, 308).contains(response.code()) || location == null) return response;

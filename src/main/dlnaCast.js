@@ -104,7 +104,7 @@ function chooseLocalAddress(remoteAddress) {
  * @param {number} ownerId
  * @param {{ deviceId: string, mediaUrl: string, title: string, audioUrl?: string, startSeconds?: number }} payload
  */
-export async function startDlnaCast(ownerId, payload, upstreamHeaders = {}, muxOptions = {}, resolveAddresses) {
+export async function startDlnaCast(ownerId, payload, getHeaders = () => ({}), muxOptions = {}, resolveAddresses) {
   const device = discoveredDevices.get(payload?.deviceId)
   let url
   try { url = new URL(payload?.mediaUrl) } catch { return { error: 'Invalid media URL' } }
@@ -132,11 +132,11 @@ export async function startDlnaCast(ownerId, payload, upstreamHeaders = {}, muxO
     server = payload.audioUrl
       ? await createMuxedMediaServer(url.href, payload.audioUrl, device.address, token, {
           ...muxOptions,
-          videoHeaders: upstreamHeaders,
+          getHeaders,
           resolveAddresses,
           startSeconds: Number.isFinite(payload.startSeconds) ? Math.max(0, payload.startSeconds) : 0
         })
-      : createMediaServer(url.href, device.address, token, upstreamHeaders, resolveAddresses)
+      : createMediaServer(url.href, device.address, token, getHeaders, resolveAddresses)
     await new Promise((resolve, reject) => {
       server.once('error', reject)
       server.listen(0, localAddress, () => {

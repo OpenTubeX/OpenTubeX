@@ -11,6 +11,9 @@ export const YATTEE_CHANNEL_TABS = ['videos', 'shorts', 'live', 'playlists', 'ab
 // header, which is wrong when a reverse proxy doesn't forward it.
 const SERVER_ROUTE_REGEX = /\/(?:proxy\/(?:relay|fast\/)|api\/v1\/(?:captions|thumbnails)\/|api\/v1\/channels\/[^/]+\/avatar\/)/
 
+// Enough for a thumbnail every second of a 12 hour video
+const MAX_STORYBOARD_CUES = 50_000
+
 export class YatteeUnsupportedError extends Error {
   constructor(feature) {
     super(`The Yattee server does not support ${feature}.`)
@@ -197,8 +200,17 @@ export function normalizeYatteeVideo(video, serverUrl, proxyVideos) {
  * @returns the largest storyboard that is at most 90 pixels high, in the shape of YouTube.js' storyboards
  */
 export function getYatteeStoryboard(storyboards) {
+  // The server's counts decide how many cues buildVTTFileLocally generates synchronously
+  const hasUsableSize = ({ width, height, count, storyboardWidth, storyboardHeight }) => {
+    if (![width, height, count, storyboardWidth, storyboardHeight].every(value => Number.isSafeInteger(value) && value > 0)) {
+      return false
+    }
+    const thumbnailsPerSheet = storyboardWidth * storyboardHeight
+    return Math.ceil(count / thumbnailsPerSheet) * thumbnailsPerSheet <= MAX_STORYBOARD_CUES
+  }
+
   const storyboard = storyboards
-    .filter(storyboard => storyboard.templateUrl?.includes('$M') && storyboard.height <= 90 && storyboard.count > 0)
+    .filter(storyboard => storyboard.templateUrl?.includes('$M') && storyboard.height <= 90 && hasUsableSize(storyboard))
     .sort((a, b) => b.height - a.height)[0]
 
   if (!storyboard) return null

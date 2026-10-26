@@ -161,6 +161,22 @@ test('storyboards use the largest sheet up to 90 pixels high', () => {
   assert.equal(getYatteeStoryboard([]), null)
 })
 
+test('storyboards skip sheets with degenerate or excessive dimensions', () => {
+  const sheet = { templateUrl: 'https://i.ytimg.com/sb/id/storyboard3_L1/M$M.jpg', width: 80, height: 45, count: 200, interval: 4938, storyboardWidth: 10, storyboardHeight: 10 }
+  for (const invalid of [
+    { storyboardWidth: 0 },
+    { storyboardHeight: -1 },
+    { storyboardWidth: 1.5 },
+    { width: 0 },
+    { height: Number.NaN },
+    { count: Infinity },
+    { count: 1e9 },
+    { storyboardWidth: 1e6, storyboardHeight: 1e6, count: 1 },
+  ]) {
+    assert.equal(getYatteeStoryboard([{ ...sheet, ...invalid }]), null, JSON.stringify(invalid))
+  }
+})
+
 test('channel search results move the handle and subscriber count into place', () => {
   const channel = {
     type: 'channel',

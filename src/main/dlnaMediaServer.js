@@ -3,8 +3,11 @@ import https from 'node:https'
 import { Readable } from 'node:stream'
 import { fetchCastMedia } from './castMediaServer.js'
 
-/** `resolveAddresses` validates every hop, like the Cast relay, so redirects cannot reach private hosts. */
-export function createMediaServer(mediaUrl, deviceAddress, token, upstreamHeaders = {}, resolveAddresses = async () => null) {
+/**
+ * `resolveAddresses` validates every hop, like the Cast relay, so redirects cannot reach private hosts.
+ * `getHeaders` resolves credentials for each hop, so redirects only receive those scoped to their URL.
+ */
+export function createMediaServer(mediaUrl, deviceAddress, token, getHeaders = () => ({}), resolveAddresses = async () => null) {
   return createServer(async (request, response) => {
     if (
       request.url !== `/${token}/video.mp4` ||
@@ -18,14 +21,14 @@ export function createMediaServer(mediaUrl, deviceAddress, token, upstreamHeader
       const controller = new AbortController()
       response.on('close', () => controller.abort())
       const timeout = setTimeout(() => controller.abort(), 10_000)
-      const headers = new Headers(upstreamHeaders)
-      if (request.headers.range) headers.set('Range', request.headers.range)
       let upstream
       let url = new URL(mediaUrl)
       try {
         for (let redirects = 0; ; redirects++) {
           const addresses = await resolveAddresses(url)
           if (!addresses) throw new Error('Media address is not allowed')
+          const headers = new Headers(getHeaders(url.href))
+          if (request.headers.range) headers.set('Range', request.headers.range)
           upstream = await fetchCastMedia(url.protocol === 'https:' ? https : http, url, {
             method: request.method,
             headers,
@@ -37,9 +40,6 @@ export function createMediaServer(mediaUrl, deviceAddress, token, upstreamHeader
           if (redirects >= 5) throw new Error('Too many media redirects')
           const nextUrl = new URL(location, url)
           if (!['http:', 'https:'].includes(nextUrl.protocol)) throw new Error('Unsupported media redirect')
-          if (nextUrl.origin !== url.origin) {
-            for (const name of ['Authorization', 'Cookie', 'Host', 'Proxy-Authorization', 'Origin', 'Referer']) headers.delete(name)
-          }
           await upstream.body?.cancel()
           url = nextUrl
         }

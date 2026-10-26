@@ -142,3 +142,25 @@ for (const metadata of [{ tags: ['video tag'] }, { games: [{ title: 'Test game' 
     assert.equal(component.expanded(), true)
   })
 }
+
+const parseDescriptionHtml = vm.runInNewContext(`${setup.slice(setup.indexOf('function parseDescriptionHtml('), setup.indexOf('function processDescriptionHtml('))}; parseDescriptionHtml`)
+
+test('Invidious HTML descriptions drop YouTube redirects and tracking attributes', () => {
+  assert.equal(
+    parseDescriptionHtml('<a class="yt-simple-endpoint style-scope" href="/redirect?event=video_description&amp;redir_token=QUFF&amp;q=https%3A%2F%2Fexample.com%2Fpage&amp;v=abc" rel="nofollow noopener" target="_blank" dir="auto">https://example.com/page</a>'),
+    '<a  href="https://example.com/page"   dir="auto">https://example.com/page</a>'
+  )
+  assert.equal(
+    parseDescriptionHtml('<a href="/watch?v=abc&amp;t=65s" data-onclick="jump_to_time" data-jump-time="65">1:05</a> Intro\n<a href="/hashtag/music">#music</a>'),
+    '<a href="https://www.youtube.com/watch?v=abc&t=65s" data-onclick="jump_to_time" data-jump-time="65">1:05</a> Intro\n<a href="https://www.youtube.com/hashtag/music">#music</a>'
+  )
+})
+
+test('Invidious HTML descriptions with repeated unterminated attributes are cleaned in linear time', () => {
+  const started = performance.now()
+  for (const candidate of ['/redirect', 'class=', 'id=', 'data-url=', '&v', '&redir_token']) {
+    const html = candidate.repeat(100_000 / candidate.length)
+    assert.equal(parseDescriptionHtml(html), html)
+  }
+  assert.ok(performance.now() - started < 1000)
+})

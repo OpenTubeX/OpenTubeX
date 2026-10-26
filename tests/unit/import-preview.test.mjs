@@ -229,3 +229,39 @@ test('unreadable playlist video files are not restored as empty metadata-only pl
   await forEachTakeoutImportEntry(file, new Set(['playlists']), paths, entry => names.push(entry.playlist.playlistName), () => {})
   assert.deepEqual(names, ['Empty'])
 })
+
+test('repeated Takeout playlist names get suffixes in linear time', async () => {
+  const count = 2000
+  const files = { 'Account/playlists/playlists.csv': strToU8('Playlist ID,Playlist Title (Original)\nPLreserved,List (3)\n') }
+  for (let index = 0; index < count; index++) {
+    files[`Account${index}/playlists/List-videos.csv`] = strToU8('Video ID,Playlist video creation timestamp\nabcdefghijk,2025-01-01T00:00:00Z\n')
+  }
+  const file = new Blob([zipSync(files)])
+  const entries = await listYouTubeTakeoutZipEntries(file)
+  const names = []
+  const has = Set.prototype.has
+  let lookups = 0
+  Set.prototype.has = function (...args) {
+    lookups++
+    return has.apply(this, args)
+  }
+  try {
+    await forEachTakeoutImportEntry(file, new Set(['playlists']), entries, entry => names.push(entry.playlist.playlistName), error => { throw error })
+  } finally {
+    Set.prototype.has = has
+  }
+  // Rescanning every allocated suffix for each repeated name took quadratic time.
+  assert.ok(lookups < count * 20, `${lookups} lookups`)
+  assert.deepEqual(names.slice(0, 4), ['List', 'List (2)', 'List (4)', 'List (5)'])
+  assert.equal(new Set(names).size, names.length)
+})
+
+test('watch history parsing finds a long common title prefix in linear time', () => {
+  const length = 100000
+  const record = title => ({ products: ['YouTube'], title, titleUrl: 'https://www.youtube.com/watch?v=abcdefghijk', time: '2025-01-01T00:00:00Z' })
+  const start = performance.now()
+  const { entries } = parseTakeoutWatchHistory([record('a'.repeat(length)), record('a'.repeat(length / 2) + 'b'.repeat(length / 2))])
+  // Shortening the prefix one character per comparison took seconds.
+  assert.ok(performance.now() - start < 1000)
+  assert.deepEqual(entries.map(entry => entry.title), ['a'.repeat(length / 2), 'b'.repeat(length / 2)])
+})

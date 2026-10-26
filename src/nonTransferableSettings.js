@@ -20,6 +20,7 @@ export const NON_TRANSFERABLE_SETTINGS = new Set([
   'proxyPort',
   'proxyUsername',
   'proxyPassword',
+  'videoIpBlockScriptPath',
   // ExternalPlayerSettings
   'externalPlayer',
   'externalPlayerExecutable',
@@ -47,6 +48,8 @@ export const NON_TRANSFERABLE_SETTINGS = new Set([
   // DownloadSettings
   'ytDlpDownloadFolderPath',
   'ytDlpDownloadCustomArgs',
+  // Templates carry yt-dlp arguments and output paths, like the two above.
+  'ytDlpDownloadTemplates',
   // Others
   'disableSmoothScrolling',
   'useTrayIcon',

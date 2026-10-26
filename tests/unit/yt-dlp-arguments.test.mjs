@@ -81,6 +81,13 @@ test('local playlists retain order and escape literal title placeholders', () =>
   assert.match(args[args.indexOf('--output') + 1], /^100%% _ Music\/.*autonumber/)
 })
 
+test('local playlist titles cannot expand into home or environment paths', () => {
+  for (const [title, folder] of [['$HOME', '_HOME'], ['${HOME}', '_{HOME}'], ['~root', '_root']]) {
+    const args = buildYtDlpDownloadArguments({ videoIds: [videoId], mode: 'video', isPlaylist: true, title }).args
+    assert.ok(args[args.indexOf('--output') + 1].startsWith(`${folder}/`), title)
+  }
+})
+
 test('invalid IDs and custom executable overrides cannot reach either runtime', () => {
   assert.throws(() => buildYtDlpDownloadArguments({ videoId: 'bad', mode: 'audio' }), /invalid-video-id/)
   assert.throws(() => buildYtDlpDownloadArguments({ videoIds: Array(501).fill(videoId), mode: 'video' }), /too-many-videos/)

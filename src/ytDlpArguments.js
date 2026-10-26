@@ -132,7 +132,8 @@ export function buildYtDlpDownloadArguments(payload, globalArguments = '') {
     : '{title} [{id}].{ext}'
   const truncatesLongTitles = outputTemplate.includes('{title}')
   let localPlaylistTitle = typeof payload.title === 'string'
-    ? payload.title.replaceAll(/[<>:"/\\|?*]/g, '_')
+    // yt-dlp expands ~ and $VARIABLES in output templates, which contain this title literally
+    ? payload.title.replaceAll(/[<>:"/\\|?*$]/g, '_').replace(/^~/, '_')
       .split('').map(character => {
         if (character.charCodeAt(0) < 32) return '_'
         return character

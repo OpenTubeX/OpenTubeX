@@ -7,6 +7,8 @@ import cp from 'node:child_process'
 import test from 'node:test'
 import { runInNewContext } from 'node:vm'
 
+import { NON_TRANSFERABLE_SETTINGS } from '../../src/nonTransferableSettings.js'
+
 const source = await readFile(new URL('../../src/main/ipBlockRecovery.js', import.meta.url), 'utf8')
 const start = source.indexOf('\nasync function executeIpBlockRecoveryScript(')
 const end = source.indexOf('\nconst ipBlockRecoveryScriptCooldownMs', start)
@@ -95,4 +97,10 @@ test('only executes the recovery script configured in saved settings', async () 
   assert.equal(calls.length, 0)
   await run('/saved/recovery.sh', '/saved/recovery.sh')
   assert.equal(calls[0].command, '/saved/recovery.sh')
+})
+
+test('imported, backed up and synced settings cannot choose programs to execute or yt-dlp arguments', () => {
+  for (const key of ['videoIpBlockScriptPath', 'ytDlpPath', 'ytDlpFfmpegPath', 'externalPlayerExecutable', 'ytDlpDownloadCustomArgs', 'ytDlpDownloadTemplates']) {
+    assert.ok(NON_TRANSFERABLE_SETTINGS.has(key), key)
+  }
 })

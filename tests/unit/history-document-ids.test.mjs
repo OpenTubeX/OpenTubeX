@@ -123,11 +123,13 @@ for (const [name, createDatastore] of Object.entries(backends)) {
   test(`${name}: a sync waits for a history overwrite instead of creating a duplicate`, async t => {
     const { db, History } = await fixture(t, createDatastore)
     await History.upsert(record('video'))
-    const removeAsync = db.history.removeAsync.bind(db.history)
+    // SQLite replaces the history in one step, NeDB removes it before inserting.
+    const method = db.history.replaceAllAsync ? 'replaceAllAsync' : 'removeAsync'
+    const original = db.history[method].bind(db.history)
     const removing = Promise.withResolvers()
     const release = Promise.withResolvers()
-    db.history.removeAsync = async (...args) => {
-      const result = await removeAsync(...args)
+    db.history[method] = async (...args) => {
+      const result = await original(...args)
       removing.resolve()
       await release.promise
       return result
@@ -139,11 +141,23 @@ for (const [name, createDatastore] of Object.entries(backends)) {
     release.resolve()
     await Promise.all([overwrite, sync])
 
-    db.history.removeAsync = removeAsync
+    db.history[method] = original
     const stored = await db.history.findAsync({ videoId: 'video' })
     assert.equal(stored.length, 1)
     assert.equal(stored[0].timeWatched, 3)
   })
+
+  if (name === 'SQLite') {
+    test(`${name}: a failed history overwrite keeps the saved history`, async t => {
+      const { db, History } = await fixture(t, createDatastore)
+      await History.upsert(record('saved'))
+      // Imported records can carry a repeated document ID or an invalid field name.
+      for (const records of [[record('a', { _id: 'same' }), record('b', { _id: 'same' })], [record('a', { 'invalid.field': 1 })]]) {
+        await assert.rejects(History.overwrite(records))
+      }
+      assert.deepEqual((await db.history.findAsync({})).map(entry => entry.videoId), ['saved'])
+    })
+  }
 
   test(`${name}: loading history removes older duplicates so later writes target the kept record`, async t => {
     const { db, History } = await fixture(t, createDatastore)

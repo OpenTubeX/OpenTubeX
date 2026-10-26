@@ -247,6 +247,11 @@ const sideEffectHandlers = {
     }
   },
 
+  showFamilyFriendlyOnly: ({ commit }) => {
+    // Cached search results were requested with the previous restriction
+    commit('setSessionSearchHistory', [])
+  },
+
   keyboardShortcuts: (_store, value) => {
     applyKeyboardShortcutOverrides(value)
   },

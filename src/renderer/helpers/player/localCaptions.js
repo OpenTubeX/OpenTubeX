@@ -28,7 +28,7 @@ export function normalizeLocalCaptionText(fileName, text) {
       if (line.trim() === '') {
         return ''
       }
-      return line.includes('-->') ? line.replaceAll(/(\d+:\d{2})\.(\d+)/g, '$1,$2') : line
+      return line.includes('-->') ? line.replaceAll(/(?<!\d)(\d+:\d{2})\.(\d+)/g, '$1,$2') : line
     })
     .join('\n')
 }

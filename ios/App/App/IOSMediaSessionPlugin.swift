@@ -1,6 +1,26 @@
 import Capacitor
 import MediaPlayer
 
+// URLSession decompresses responses, so enforce the artwork budget while data
+// arrives instead of after a completion handler has buffered all of it.
+private final class ArtworkRequest: NSObject, URLSessionDataDelegate {
+    private var data = Data()
+    private let complete: (Data) -> Void
+
+    init(complete: @escaping (Data) -> Void) {
+        self.complete = complete
+    }
+
+    func urlSession(_ session: URLSession, dataTask: URLSessionDataTask, didReceive chunk: Data) {
+        if data.count + chunk.count > 2 * 1024 * 1024 { dataTask.cancel() } else { data.append(chunk) }
+    }
+    func urlSession(_ session: URLSession, task: URLSessionTask, didCompleteWithError error: Error?) {
+        if error == nil { complete(data) }
+        // The session retains this delegate until it is invalidated.
+        session.finishTasksAndInvalidate()
+    }
+}
+
 @objc(IOSMediaSessionPlugin)
 public class IOSMediaSessionPlugin: CAPPlugin, CAPBridgedPlugin {
     public let identifier = "IOSMediaSessionPlugin"
@@ -53,13 +73,14 @@ public class IOSMediaSessionPlugin: CAPPlugin, CAPBridgedPlugin {
                 self.artworkURL = artwork
                 center.nowPlayingInfo?.removeValue(forKey: MPMediaItemPropertyArtwork)
                 if let url = URL(string: artwork), url.scheme == "https" {
-                    self.artworkTask = URLSession.shared.dataTask(with: url) { [weak self] data, _, _ in
-                        guard let data = data, data.count <= 2 * 1024 * 1024, let image = UIImage(data: data) else { return }
+                    let request = ArtworkRequest { [weak self] data in
+                        guard let image = UIImage(data: data) else { return }
                         DispatchQueue.main.async {
                             guard self?.artworkURL == artwork else { return }
                             center.nowPlayingInfo?[MPMediaItemPropertyArtwork] = MPMediaItemArtwork(boundsSize: image.size) { _ in image }
                         }
                     }
+                    self.artworkTask = URLSession(configuration: .default, delegate: request, delegateQueue: nil).dataTask(with: url)
                     self.artworkTask?.resume()
                 }
             }

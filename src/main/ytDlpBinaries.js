@@ -23,6 +23,7 @@ const YT_DLP_RELEASE_REPOSITORIES = {
 
 let binaryInstallCounter = 0
 let managedBinaryInstallQueue = Promise.resolve()
+let managedYtDlpUpdateQueue = Promise.resolve()
 
 /** @type {Map<string, AbortController>} */
 const getInfoAbortControllers = new Map()
@@ -727,12 +728,27 @@ async function installBinariesAtomically(binaries, validate) {
 }
 
 /**
- * Downloads the latest yt-dlp release into the user data directory
+ * Downloads the latest yt-dlp release into the user data directory. Updates
+ * run one at a time, so each verifies its release against the signing time
+ * that the previous update committed and cannot roll it back.
  * @param {BinaryDownloadProgressCallback} [onProgress]
  * @param {() => void} [onDownloadStart]
  * @returns {Promise<{ version: string, updated: boolean } | { error: string }>}
  */
-export async function downloadManagedYtDlp(onProgress, onDownloadStart) {
+export function downloadManagedYtDlp(onProgress, onDownloadStart) {
+  const update = managedYtDlpUpdateQueue
+    .catch(() => {})
+    .then(() => updateManagedYtDlp(onProgress, onDownloadStart))
+  managedYtDlpUpdateQueue = update
+  return update
+}
+
+/**
+ * @param {BinaryDownloadProgressCallback} [onProgress]
+ * @param {() => void} [onDownloadStart]
+ * @returns {Promise<{ version: string, updated: boolean } | { error: string }>}
+ */
+async function updateManagedYtDlp(onProgress, onDownloadStart) {
   const configuredChannel = (await settings._findOne('ytDlpChannel'))?.value
   const channel = Object.hasOwn(YT_DLP_RELEASE_REPOSITORIES, configuredChannel) ? configuredChannel : 'stable'
   const assetName = getYtDlpAssetName(process.platform, process.arch)

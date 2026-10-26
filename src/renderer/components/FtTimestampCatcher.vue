@@ -77,7 +77,8 @@ function highlightHtmlText(inputHtml, query) {
 
 /** @type {import('vue').ComputedRef<string>} */
 const displayText = computed(() => {
-  const timestampHtml = props.inputHtml.replaceAll(/(?:(\d+):)?(\d+):(\d+)/g, (timestamp, hours, minutes, seconds) => {
+  // Starting only at the beginning of a number keeps long digit runs in remote text from taking quadratic time
+  const timestampHtml = props.inputHtml.replaceAll(/(?<!\d)(?:(\d+):)?(\d+):(\d+)/g, (timestamp, hours, minutes, seconds) => {
     let time = 60 * Number(minutes) + Number(seconds)
 
     if (hours) {

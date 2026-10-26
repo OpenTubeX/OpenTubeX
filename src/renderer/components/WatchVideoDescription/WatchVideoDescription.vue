@@ -516,22 +516,24 @@ function updateDescriptionFadeState() {
  * @returns {string}
  */
 function parseDescriptionHtml(descriptionText) {
+  // Each lazy match stops at the next occurrence of its own prefix, so remote text
+  // that repeats a prefix without the terminator can't take quadratic time
   return descriptionText
     .replaceAll('target="_blank"', '')
-    .replaceAll(/\/redirect.+?(?=q=)/g, '')
+    .replaceAll(/\/redirect(?:(?!\/redirect).)+?(?=q=)/g, '')
     .replaceAll('q=', '')
     .replaceAll(/rel="nofollow\snoopener"/g, '')
-    .replaceAll(/class=.+?(?=")./g, '')
-    .replaceAll(/id=.+?(?=")./g, '')
-    .replaceAll(/data-target-new-window=.+?(?=")./g, '')
-    .replaceAll(/data-url=.+?(?=")./g, '')
-    .replaceAll(/data-sessionlink=.+?(?=")./g, '')
+    .replaceAll(/class=(?:(?!class=).)+?(?=")./g, '')
+    .replaceAll(/id=(?:(?!id=).)+?(?=")./g, '')
+    .replaceAll(/data-target-new-window=(?:(?!data-target-new-window=).)+?(?=")./g, '')
+    .replaceAll(/data-url=(?:(?!data-url=).)+?(?=")./g, '')
+    .replaceAll(/data-sessionlink=(?:(?!data-sessionlink=).)+?(?=")./g, '')
     .replaceAll('&amp;', '&')
     .replaceAll('%3A', ':')
     .replaceAll('%2F', '/')
-    .replaceAll(/&v.+?(?=")/g, '')
-    .replaceAll(/&redirect-token.+?(?=")/g, '')
-    .replaceAll(/&redir_token.+?(?=")/g, '')
+    .replaceAll(/&v(?:(?!&v).)+?(?=")/g, '')
+    .replaceAll(/&redirect-token(?:(?!&redirect-token).)+?(?=")/g, '')
+    .replaceAll(/&redir_token(?:(?!&redir_token).)+?(?=")/g, '')
     .replaceAll('href="/', 'href="https://www.youtube.com/')
     .replaceAll('href="/hashtag/', 'href="https://wwww.youtube.com/hashtag/')
     .replaceAll('yt.www.watch.player.seekTo', 'changeDuration')

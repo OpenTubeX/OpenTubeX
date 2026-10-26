@@ -225,4 +225,11 @@ public class UploadNotificationsTest {
         assertTrue(UploadNotifications.takeNewUploads(state, "UC1", "shorts", Arrays.asList(entry("s", NOW)), NOW).isEmpty());
         assertEquals(Arrays.asList("s"), ids(UploadNotifications.takeNewUploads(state, "UC2", "shorts", Arrays.asList(entry("s", NOW)), NOW)));
     }
+
+    @Test(timeout = 2000)
+    public void stripsTagsInLinearTimeAndKeepsUnclosedText() {
+        assertEquals("a b<c", UploadNotifications.htmlToText("<p>a</p> <<i>b</i><c"));
+        String unclosed = "<".repeat(400_000);
+        assertEquals(unclosed, UploadNotifications.htmlToText(unclosed));
+    }
 }

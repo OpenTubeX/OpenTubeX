@@ -11,8 +11,8 @@ async function listen(server) {
 
 /** FFmpeg reads through local relays so credentials stay scoped to each source. */
 export async function createMuxedMediaServer(videoUrl, audioUrl, address, token, options) {
-  const video = createMediaServer(videoUrl, '127.0.0.1', token, options.videoHeaders, options.resolveAddresses)
-  const audio = createMediaServer(audioUrl, '127.0.0.1', token, options.audioHeaders, options.resolveAddresses)
+  const video = createMediaServer(videoUrl, '127.0.0.1', token, options.getHeaders, options.resolveAddresses)
+  const audio = createMediaServer(audioUrl, '127.0.0.1', token, options.getHeaders, options.resolveAddresses)
   const sources = [video, audio]
   const processes = new Set()
   const close = () => {

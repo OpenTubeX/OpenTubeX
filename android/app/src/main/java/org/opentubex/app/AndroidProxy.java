@@ -112,6 +112,12 @@ final class AndroidProxy {
         return relay.url();
     }
 
+    /** Whether the app's or Android's proxy carries requests to this target. */
+    static boolean proxies(URI target) {
+        if (relay == null) throw new IllegalStateException("Android proxy has not initialized");
+        return relay.proxies(target);
+    }
+
     static String connectionHost(URI target) {
         return relay.connectionHost(target);
     }

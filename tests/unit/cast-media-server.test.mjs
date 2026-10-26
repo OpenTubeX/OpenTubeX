@@ -621,6 +621,18 @@ test('HLS relay resources isolate import contexts and do not interpret substitut
   assert.throws(() => rewriteCastHls('#EXTM3U\n#EXT-X-DEFINE:NAME="id",VALUE="1"\n#EXT-X-DEFINE:NAME="id",VALUE="2"\n', 'https://media.test/live/', () => ''), /variable/)
 })
 
+test('HLS variable expansion is bounded', () => {
+  // Each definition doubles the previous value; 40 rounds would need terabytes.
+  const definitions = Array.from({ length: 40 }, (_, index) => `#EXT-X-DEFINE:NAME="v${index + 1}",VALUE="{$v${index}}{$v${index}}"`)
+  const playlist = `#EXTM3U\n#EXT-X-DEFINE:NAME="v0",VALUE="${'x'.repeat(1000)}"\n${definitions.join('\n')}\n`
+  assert.throws(() => rewriteCastHls(playlist, 'https://media.test/live/', () => ''), /HLS variable/)
+  // Many small references also share one budget across lines.
+  const segments = Array.from({ length: 5000 }, () => '{$v}').join('\n')
+  assert.throws(() => rewriteCastHls(`#EXTM3U\n#EXT-X-DEFINE:NAME="v",VALUE="${'x'.repeat(4000)}"\n${segments}\n`, 'https://media.test/live/', () => ''), /HLS variable/)
+  // Every registered resource retains the variable context.
+  assert.throws(() => rewriteCastHls(`#EXTM3U\n#EXT-X-DEFINE:NAME="v",VALUE="${'x'.repeat(10000)}"\n`, 'https://media.test/live/', () => ''), /HLS variable/)
+})
+
 test('HLS child playlists retain imported variables across the relay', async t => {
   const requests = []
   const upstream = createServer((request, response) => {

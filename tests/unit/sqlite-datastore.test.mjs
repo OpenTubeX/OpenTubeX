@@ -493,6 +493,34 @@ test('rejects duplicate IDs and invalid updates without partial writes', async (
   assert.deepEqual(await store.findAsync({}), [{ _id: 'a' }])
 })
 
+test('modifier paths cannot reach shared prototypes', async (t) => {
+  const store = memory(t)
+  await store.insertAsync({ _id: 'a' })
+  // Field names of an imported playlist become `$set` paths.
+  const fields = JSON.parse('{"constructor.prototype.polluted": 1, "__proto__.polluted": 1, "a.__proto__": {"polluted": 1}}')
+  try {
+    for (const [field, value] of Object.entries(fields)) {
+      await assert.rejects(store.updateAsync({ _id: 'a' }, { $set: { [field]: value } }))
+      await assert.rejects(store.updateAsync({ _id: 'b' }, { $set: { [field]: value } }, { upsert: true }))
+    }
+    assert.equal(Object.prototype.polluted, undefined)
+  } finally {
+    delete Object.prototype.polluted
+  }
+  assert.deepEqual(await store.findAsync({}), [{ _id: 'a' }])
+})
+
+test('replaceAllAsync keeps every document when a replacement is invalid', async (t) => {
+  const store = memory(t, { childField: 'videos' })
+  await store.insertAsync([{ _id: 'a', videos: [{ videoId: 'v' }] }, { _id: 'b' }])
+  for (const docs of [[{ _id: 'c' }, { _id: 'c' }], [{ _id: 'c', 'a.b': 1 }]]) {
+    await assert.rejects(store.replaceAllAsync(docs))
+  }
+  assert.deepEqual(await store.findAsync({}).sort({ _id: 1 }), [{ _id: 'a', videos: [{ videoId: 'v' }] }, { _id: 'b' }])
+  await store.replaceAllAsync([{ _id: 'a' }, { _id: 'c', videos: [{ videoId: 'w' }] }])
+  assert.deepEqual(await store.findAsync({}).sort({ _id: 1 }), [{ _id: 'a' }, { _id: 'c', videos: [{ videoId: 'w' }] }])
+})
+
 test('large batch inserts check duplicate IDs in linear time', async (t) => {
   const store = memory(t)
   const docs = Array.from({ length: 20000 }, (_, index) => ({ _id: `video-${index}` }))

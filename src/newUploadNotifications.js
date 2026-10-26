@@ -62,13 +62,20 @@ export function normalizeUploadEntries(entries) {
  * @param {string} html
  */
 function htmlToText(html) {
-  let text = html.replaceAll(/<br\s*\/?>/gi, '\n')
-  // Repeat until stable so removing one tag cannot join the pieces of another.
-  let previous
-  do {
-    previous = text
-    text = text.replaceAll(/<[^>]*>/g, '')
-  } while (text !== previous)
+  const breaks = html.replaceAll(/<br\s*\/?>/gi, '\n')
+  // Scan instead of matching /<[^>]*>/, which retries every unclosed '<' to the end.
+  // One pass removes each '<' through the next '>'; any '<' left has no '>' after it.
+  let text = ''
+  for (let index = 0; index < breaks.length;) {
+    const open = breaks.indexOf('<', index)
+    const close = open < 0 ? -1 : breaks.indexOf('>', open)
+    if (close < 0) {
+      text += breaks.slice(index)
+      break
+    }
+    text += breaks.slice(index, open)
+    index = close + 1
+  }
   return text
     .replaceAll(/&(?:#(\d+)|#x([\da-f]+)|(amp|lt|gt|quot|apos|nbsp));/gi, (match, decimal, hex, name) => {
       if (name) return { amp: '&', lt: '<', gt: '>', quot: '"', apos: "'", nbsp: '\u00A0' }[name.toLowerCase()]

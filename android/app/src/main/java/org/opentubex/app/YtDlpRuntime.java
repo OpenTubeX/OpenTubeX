@@ -30,6 +30,7 @@ final class YtDlpRuntime {
     private static boolean initialized;
     private static String mp3ThumbnailBootstrap;
     private static String rumbleHttpBootstrap;
+    private static String outputPathsBootstrap;
 
     private static final class RunningProcess {
         final Process process;
@@ -83,6 +84,9 @@ final class YtDlpRuntime {
         }
         try (InputStream input = context.getAssets().open("opentubex_rumble_http.py")) {
             rumbleHttpBootstrap = new String(YtDlpFiles.read(input, 64 * 1024), StandardCharsets.UTF_8);
+        }
+        try (InputStream input = context.getAssets().open("opentubex_output_paths.py")) {
+            outputPathsBootstrap = new String(YtDlpFiles.read(input, 64 * 1024), StandardCharsets.UTF_8);
         }
         initialized = true;
     }
@@ -141,7 +145,8 @@ final class YtDlpRuntime {
             String marker = "__OPENTUBEX_PROCESS_" + UUID.randomUUID() + "__:";
             String bootstrap = "import os,sys,runpy\nos.setsid()\nprint('" + marker + "'+str(os.getpid()),flush=True)\nsys.argv=sys.argv[1:]\nsys.path.insert(0,sys.argv[0])\n"
                 + mp3ThumbnailBootstrap + "\ninstall_mp3_thumbnail_writer()\n"
-                + rumbleHttpBootstrap + "\ninstall_rumble_http()\nrunpy.run_path(sys.argv[0],run_name='__main__')";
+                + rumbleHttpBootstrap + "\ninstall_rumble_http()\n"
+                + outputPathsBootstrap + "\ninstall_output_containment()\nrunpy.run_path(sys.argv[0],run_name='__main__')";
             List<String> command = new ArrayList<>(asList(nativeDir + "/libpython.so", "-u", "-c", bootstrap,
                 entryPoint.getAbsolutePath(),
                 "--ignore-config", "--no-plugin-dirs", "--no-cache-dir", "--js-runtimes", "quickjs:" + nativeDir + "/libqjs.so",

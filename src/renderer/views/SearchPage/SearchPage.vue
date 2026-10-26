@@ -296,7 +296,9 @@ watch(route, () => {
 }, { deep: true })
 
 watch(showFamilyFriendlyOnly, (enabled) => {
-  if (enabled && (isRetryingWithCookies.value || apiUsed.value === 'yt-dlp')) {
+  // Replace unrestricted results and ignore responses still loading for them,
+  // the setting cleared the search cache before this runs
+  if (enabled) {
     checkSearchCache({
       query: processedQuery.value,
       options: {},
