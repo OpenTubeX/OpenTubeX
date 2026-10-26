@@ -30,7 +30,7 @@ export function useMobileFullscreenGestures({
   const mobileFullscreenSwiping = ref(false)
   const mobileFullscreenSwipeSettling = ref(false)
   const mobileFullscreenSwipeOffset = ref(0)
-  /** @type {import('vue').Ref<{ time: number, seconds: number } | null>} */
+  /** @type {import('vue').Ref<{ time: number } | null>} */
   const mobileSeekPreview = ref(null)
   /** @type {import('vue').Ref<number | null>} */
   const mobileMiniPlayerDismissOffset = ref(null)
@@ -209,7 +209,7 @@ export function useMobileFullscreenGestures({
       // At most two minutes per player width keeps long videos controllable.
       const seconds = Math.round(deltaX / mobileFullscreenGesture.width * Math.min(120, end - start))
       const time = Math.max(start, Math.min(end, startTime + seconds))
-      mobileSeekPreview.value = { time, seconds: time - startTime }
+      mobileSeekPreview.value = { time }
       event.preventDefault()
       event.stopPropagation()
       return true

@@ -47,8 +47,73 @@
   transition: none;
 }
 
-:deep(.ft-has-popularity .shaka-player-ui-thumbnail-container) {
+:deep(.ft-has-popularity :is(.shaka-player-ui-thumbnail-container, .ft-seek-filmstrip)) {
   margin-block-end: 40px;
+}
+
+/* Storyboard strip while dragging the seek bar; height and positions from JS */
+:deep(.ft-seek-filmstrip) {
+  position: absolute;
+  inset-inline: 0;
+  bottom: 15px;
+  z-index: 1;
+  display: none;
+  height: var(--ft-seek-filmstrip-height);
+  overflow: hidden;
+  border-radius: calc(8px * var(--ui-roundness));
+  background-color: rgb(0 0 0 / 60%);
+  box-shadow: 0 4px 12px rgb(0 0 0 / 40%);
+  pointer-events: none;
+}
+
+:deep(.ft-seek-filmstrip-active > .ft-seek-filmstrip) {
+  display: block;
+}
+
+/* On small players the central play button would cover the strip and its time. */
+.ftVideoPlayer:has(:deep(.ft-seek-filmstrip-active)) :deep(.shaka-big-buttons-container) {
+  visibility: hidden;
+}
+
+:deep(.ft-seek-filmstrip-active .shaka-player-ui-thumbnail-image-container) {
+  display: none;
+}
+
+:deep(.ft-seek-filmstrip-active .shaka-player-ui-thumbnail-container) {
+  bottom: calc(23px + var(--ft-seek-filmstrip-height));
+}
+
+:deep(.ft-seek-filmstrip-frame) {
+  position: absolute;
+  top: 0;
+  height: 100%;
+  overflow: hidden;
+}
+
+:deep(.ft-seek-filmstrip-frame > div) {
+  background-repeat: no-repeat;
+  transform-origin: 0 0;
+}
+
+/* Separate adjacent frames without changing their time scale. */
+:deep(.ft-seek-filmstrip-frame::after) {
+  content: '';
+  position: absolute;
+  inset-block: 0;
+  right: 0;
+  width: 2px;
+  background-color: rgb(0 0 0 / 60%);
+}
+
+:deep(.ft-seek-filmstrip-marker) {
+  position: absolute;
+  top: 0;
+  z-index: 1;
+  width: 2px;
+  height: 100%;
+  margin-left: -1px;
+  background-color: #fff;
+  box-shadow: 0 0 3px rgb(0 0 0 / 80%);
 }
 
 :deep(.shaka-seek-bar-container .shaka-range-element::-moz-range-thumb) {

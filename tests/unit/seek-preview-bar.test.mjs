@@ -11,29 +11,60 @@ function fixture() {
   class SeekBar {
     constructor(parent, controls) {
       this.video = controls.video
+      this.controls = controls
+      this.player = {}
       this.eventManager = { listen: (_, type, listener) => controls.listeners.set(type, listener) }
       const properties = new Map()
-      this.container = { style: { background: '', setProperty: (name, value) => properties.set(name, value), getPropertyValue: name => properties.get(name) } }
+      this.container = {
+        style: { background: '', setProperty: (name, value) => properties.set(name, value), getPropertyValue: name => properties.get(name) },
+        querySelector: () => controls.timePreview,
+      }
+      this.bar = {
+        min: '0', max: '30', events: [],
+        getBoundingClientRect: () => ({ left: 100, width: 312 }),
+        dispatchEvent(event) { this.events.push(event) },
+      }
       this.setValue(this.video.currentTime)
       this.update()
     }
+    getValue() { return this.value }
     setValue(time) { this.value = time }
     update() {
       this.paintedTime = this.value
       this.container.style.background = `linear-gradient(to right, red 0%, red 0%, red ${this.value / 30 * 100}%, white ${this.value / 30 * 100}%, white 90%, black 90%)`
     }
+    onChangeStart() {}
+    onChange() {}
+    onChangeEnd() {}
+  }
+  class SeekFilmstrip {
+    constructor() { this.time = null }
+    show(time) { this.time = time }
+    hide() { this.time = null }
   }
   vm.runInNewContext(source.replace(/^import .*\n/gm, '').replace('export class', 'class'), {
     updateSponsorBlockSeekBarState,
-    shaka: { ui: { SeekBar, Controls: { registerSeekBar: value => { factory = value } } } },
+    SeekFilmstrip,
+    THUMB_SIZE: 12,
+    MouseEvent: class { constructor(type) { this.type = type } },
+    shaka: {
+      ui: { SeekBar, Controls: { registerSeekBar: value => { factory = value } } },
+      util: { FakeEvent: class { constructor(type, init) { Object.assign(this, { type }, init) } } },
+    },
   })
   const controls = {
-    video: { currentTime: 15, paused: false }, listeners: new Map(), seeking: false, shown: 0,
-    setSeeking(value) { this.seeking = value }, showUI() { this.shown++ },
+    video: { currentTime: 15, paused: false }, listeners: new Map(), seeking: false, shown: 0, events: [],
+    timePreview: { style: { visibility: 'visible' } },
+    setSeeking(value) { this.seeking = value }, showUI() { this.shown++; this.seekingWhenShown = this.seeking },
+    dispatchEvent(event) { this.events.push(event) },
   }
   const bar = factory.create({}, controls)
-  const preview = time => controls.listeners.get('seekpreviewchange')({ time })
-  return { bar, controls, preview }
+  const preview = (time, showPreview = false) => controls.listeners.get('seekpreviewchange')({ time, showPreview })
+  const drag = time => {
+    bar.setValue(time)
+    bar.onChange()
+  }
+  return { bar, controls, preview, drag }
 }
 
 test('ordinary seek bar updates keep following playback', () => {
@@ -55,6 +86,7 @@ test('preview thumb and played track follow the gesture instead of progress upda
   assert.equal(bar.container.style.getPropertyValue('--sponsorblock-played'), '70')
   assert.equal(controls.seeking, true)
   assert.equal(controls.shown, 1)
+  assert.equal(controls.seekingWhenShown, false, 'Shaka keeps paused controls up only while not seeking')
   assert.equal(controls.video.currentTime, 15)
   assert.equal(controls.video.paused, false)
   bar.setValue(15.5)
@@ -102,4 +134,72 @@ test('preview state stays within each player', () => {
   assert.equal(first.bar.value, 21)
   assert.equal(second.bar.value, 5)
   assert.equal(second.controls.seeking, false)
+})
+
+test('swipe previews show the seek bar time and filmstrip at the thumb', () => {
+  const { bar, controls, preview } = fixture()
+  preview(20, true)
+  assert.equal(bar.filmstrip.time, 20)
+  const hover = bar.bar.events.at(-1)
+  assert.equal(hover.type, 'mousemove')
+  assert.equal(hover.clientX, 100 + 6 + 20.001 / 30 * 300)
+  assert.deepEqual({ ...controls.events.at(-1) }, { type: 'seekbarvaluechange', time: 20 })
+
+  preview(20, false)
+  assert.equal(bar.filmstrip.time, null, 'Turning off previews hides them during the gesture')
+  assert.equal(controls.timePreview.style.visibility, 'hidden')
+  assert.equal(bar.value, 20, 'The thumb still follows the gesture')
+
+  controls.timePreview.style.visibility = 'visible'
+  preview(21, true)
+  preview(null, true)
+  assert.equal(bar.filmstrip.time, null)
+  assert.equal(controls.timePreview.style.visibility, 'hidden')
+})
+
+test('dragging the thumb shows the filmstrip but tapping does not', () => {
+  const { bar, controls, drag } = fixture()
+  bar.onChangeStart()
+  drag(15.1)
+  assert.equal(bar.filmstrip.time, null, 'Movement below the drag threshold is still a tap')
+  bar.onChangeEnd()
+  assert.equal(controls.timePreview.style.visibility, 'visible', 'Shaka hides its own tap preview')
+
+  bar.onChangeStart()
+  drag(16)
+  assert.equal(bar.filmstrip.time, 16)
+  drag(15.2)
+  assert.equal(bar.filmstrip.time, 15.2, 'The filmstrip stays until the drag ends')
+  bar.onChangeEnd()
+  assert.equal(bar.filmstrip.time, null)
+  assert.equal(controls.timePreview.style.visibility, 'hidden')
+
+  controls.timePreview.style.visibility = 'visible'
+  drag(20)
+  assert.equal(bar.filmstrip.time, null, 'Keyboard changes do not show the filmstrip')
+})
+
+test('a mouse only shows the filmstrip when dragging the thumb itself', () => {
+  const { bar, controls, drag } = fixture()
+  const press = clientX => {
+    controls.listeners.get('mousedown')({ clientX })
+    bar.onChangeStart()
+  }
+  // The thumb for 15 of 30 seconds is centred at 100 + 6 + 150.
+  press(256 + 60)
+  drag(20)
+  assert.equal(bar.filmstrip.time, null, 'Dragging from elsewhere on the track keeps the single preview')
+  bar.onChangeEnd()
+
+  bar.setValue(15)
+  press(256 + 5)
+  drag(20)
+  assert.equal(bar.filmstrip.time, 20)
+  bar.onChangeEnd()
+
+  // Touch input has no mouse press and keeps showing the filmstrip.
+  bar.setValue(15)
+  bar.onChangeStart()
+  drag(20)
+  assert.equal(bar.filmstrip.time, 20)
 })
