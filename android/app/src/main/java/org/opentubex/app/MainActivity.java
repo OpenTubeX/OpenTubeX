@@ -11,6 +11,8 @@ import com.getcapacitor.BridgeActivity;
 import com.getcapacitor.PluginHandle;
 import com.capacitorjs.plugins.share.SharePlugin;
 
+import java.net.CookieHandler;
+
 public class MainActivity extends BridgeActivity {
     private InputManager inputManager;
     private int lastOrientation;
@@ -81,6 +83,11 @@ public class MainActivity extends BridgeActivity {
         registerPlugin(AndroidSharePlugin.class);
         registerPlugin(HomeWidgetsPlugin.class);
         super.onCreate(savedInstanceState);
+        // Capacitor's cookie plugin makes HttpURLConnection share the WebView
+        // cookie store, including the YouTube sign-in created for yt-dlp. Keep
+        // native requests stateless like desktop: once YouTube recognizes a
+        // visitor it serves preroll ads, which SABR enforces as long backoffs.
+        CookieHandler.setDefault(null);
         lastOrientation = getResources().getConfiguration().orientation;
         // Capacitor must select its no-title theme before the decor is created.
         StartupBackground.apply(getWindow(), StartupBackground.getColor(this));

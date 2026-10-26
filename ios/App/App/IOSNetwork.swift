@@ -240,8 +240,10 @@ public class IOSHttpPlugin: CAPPlugin, CAPBridgedPlugin {
                 return
             }
             // Each request owns its session so completion never invalidates
-            // other concurrent API requests. Default cookie storage is shared.
-            let session = URLSession(configuration: .default,
+            // other concurrent API requests. Keep them stateless like desktop:
+            // once YouTube recognizes a visitor it serves preroll ads, which
+            // SABR enforces as long backoffs.
+            let session = URLSession(configuration: .ephemeral,
                                      delegate: call.getBool("disableRedirects") == true ? request : nil,
                                      delegateQueue: nil)
             let task = session.dataTask(with: request.getUrlRequest()) { [weak self] data, response, error in
@@ -251,7 +253,6 @@ public class IOSHttpPlugin: CAPPlugin, CAPBridgedPlugin {
                     if let error {
                         call.reject(error.localizedDescription, (error as NSError).domain, error)
                     } else if let response = response as? HTTPURLResponse {
-                        HttpRequestHandler.setCookiesFromResponse(response, self?.bridge?.config)
                         call.resolve(HttpRequestHandler.buildResponse(data, response,
                             responseType: ResponseType(string: call.getString("responseType"))))
                     } else {

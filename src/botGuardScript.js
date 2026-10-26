@@ -28,6 +28,8 @@ export default async function (videoId, context, initialAttestationData, ytConfi
       'https://www.youtube.com/youtubei/v1/att/get?prettyPrint=false&alt=json',
       {
         method: 'POST',
+        // Android runs this script in its shared WebView cookie store
+        credentials: 'omit',
         headers: {
           Accept: '*/*',
           'Content-Type': 'application/json',
@@ -82,6 +84,7 @@ export default async function (videoId, context, initialAttestationData, ytConfi
 
   const integrityTokenResponse = await fetch(buildURL('GenerateIT', true), {
     method: 'POST',
+    credentials: 'omit',
     headers: {
       'content-type': 'application/json+protobuf',
       'x-goog-api-key': GOOG_API_KEY,
