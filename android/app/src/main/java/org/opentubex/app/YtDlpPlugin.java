@@ -37,7 +37,12 @@ public final class YtDlpPlugin extends Plugin {
     static final Object PLAYBACK_CACHE_LOCK = new Object();
 
     @Override public void load() {
-        downloads = YtDlpDownloads.get(getContext());
+        try { downloads = YtDlpDownloads.get(getContext()); }
+        catch (RuntimeException error) {
+            // Capacitor's load-failure log is muted by loggingBehavior "none".
+            android.util.Log.e("OpenTubeXYtDlp", "Unable to load yt-dlp", error);
+            throw error;
+        }
         downloads.observe(listener);
         if (downloads.hasQueued()) downloads.wake();
     }
