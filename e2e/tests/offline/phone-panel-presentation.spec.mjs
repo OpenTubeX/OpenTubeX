@@ -171,17 +171,25 @@ test('phone SponsorBlock info opens in a phone sheet instead of below the descri
   await expect(page.locator('.watchVideoSponsorBlock:visible')).toHaveCount(0)
 })
 
-test('phone fullscreen SponsorBlock action shows its content in the fullscreen dock', async ({ app, page }) => {
+test('phone fullscreen SponsorBlock action moves the open sheet into the fullscreen dock', async ({ app, page }) => {
   await mockPlayableWatchPage(app, page)
   await (await openMockedVideo(page)).evaluate(video => video.pause())
   await setWindowSize(app, page, { width: 480, height: 800 })
+  await page.setViewportSize({ width: 480, height: 800 })
   const watch = await watchViewHandle(page)
   await watch.evaluate(vm => vm.$store.dispatch('updateUseSponsorBlock', true))
-  await setPlayerFullscreen(page, true)
-  await page.locator('.fullscreenSponsorBlockToggle').click({ force: true })
+  await page.locator('.watchVideo').getByRole('button', { name: 'Open SponsorBlock info', exact: true }).click()
+  const sheet = page.locator('.dockedSheet[open]')
+  await expect(sheet).toBeVisible()
+  const player = page.locator('.ftVideoPlayer')
+  await player.evaluate(element => element.requestFullscreen())
+  await expect(sheet).toHaveCount(0)
+  await player.locator('.fullscreenSponsorBlockToggle').click({ force: true })
   const overlay = page.locator('.fullscreenSponsorBlockOverlay.open')
-  await expect(overlay).toBeVisible()
   await expect(overlay.locator('.watchVideoSponsorBlock')).toBeVisible()
+  await page.waitForTimeout(500)
+  await expect(overlay.locator('.watchVideoSponsorBlock')).toBeVisible()
+  expect(await watch.evaluate(vm => vm.showSidebarSponsorBlock)).toBe(true)
 })
 
 for (const mode of ['browser', 'pip']) {

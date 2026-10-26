@@ -1140,7 +1140,7 @@
           :title="$t('Settings.SponsorBlock Settings.SponsorBlock Settings')"
           fill
           custom-header
-          @close="closeSidebarSponsorBlock"
+          @close="fullscreenSponsorBlockOpen ? mobilePanel = null : closeSidebarSponsorBlock()"
         >
           <transition
             name="sidebar-panel"
