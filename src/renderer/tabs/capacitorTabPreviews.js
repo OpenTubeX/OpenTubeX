@@ -45,9 +45,9 @@ export function initializeCapacitorTabPreviews(store, pageSwipe) {
     cache.prune(store.getters.getTabs)
     schedule()
   }, { immediate: true, flush: 'sync' })
-  // Video can become ready after the route's initial screenshot.
+  // Images and video can become ready after the route's initial screenshot.
   // Keep the last-seen image current without capturing when the organizer opens.
-  const contentEvents = ['scroll', 'loadeddata', 'playing', 'seeked']
+  const contentEvents = ['scroll', 'load', 'loadeddata', 'playing', 'seeked']
   for (const event of contentEvents) document.addEventListener(event, schedule, true)
   document.addEventListener('visibilitychange', schedule)
   window.addEventListener('resize', schedule)
