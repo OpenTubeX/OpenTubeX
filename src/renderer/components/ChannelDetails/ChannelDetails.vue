@@ -44,7 +44,10 @@
               class="name"
               dir="auto"
             >
-              {{ name || $t('Channel.Channel Name Unavailable') }}
+              {{ name || $t('Channel.Channel Name Unavailable') }}<FtVerifiedBadge
+                :verified="verified"
+                :artist="verifiedArtist"
+              />
             </h1>
 
             <p
@@ -380,6 +383,7 @@ import FtCard from '../ft-card/ft-card.vue'
 import FtFlexBox from '../ft-flex-box/ft-flex-box.vue'
 import FtShareButton from '../FtShareButton/FtShareButton.vue'
 import FtSubscribeButton from '../FtSubscribeButton/FtSubscribeButton.vue'
+import FtVerifiedBadge from '../FtVerifiedBadge/FtVerifiedBadge.vue'
 import FtInput from '../FtInput/FtInput.vue'
 import FtIconButton from '../FtIconButton/FtIconButton.vue'
 
@@ -397,6 +401,14 @@ const props = defineProps({
   name: {
     type: String,
     default: null
+  },
+  verified: {
+    type: Boolean,
+    default: false
+  },
+  verifiedArtist: {
+    type: Boolean,
+    default: false
   },
   bannerUrl: {
     type: String,

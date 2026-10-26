@@ -305,6 +305,10 @@
                 </template>
               </template>
             </component>
+            <FtVerifiedBadge
+              :verified="comment.authorVerified"
+              :artist="comment.authorVerifiedArtist"
+            />
             <FtRetryImage
               v-if="comment.isMember && typeof comment.memberIconUrl === 'string'"
               :fallback-icon="['fas', 'user-check']"
@@ -631,6 +635,7 @@ import FtIconButton from '../FtIconButton/FtIconButton.vue'
 import FtInput from '../FtInput/FtInput.vue'
 import FtLoader from '../FtLoader/FtLoader.vue'
 import FtRetryImage from '../FtRetryImage.vue'
+import FtVerifiedBadge from '../FtVerifiedBadge/FtVerifiedBadge.vue'
 import FtSelect from '../FtSelect/FtSelect.vue'
 import FtSpinner from '../FtSpinner/FtSpinner.vue'
 import FtTimestampCatcher from '../FtTimestampCatcher.vue'

@@ -58,6 +58,30 @@ index 0000000000000000000000000000000000000000..0823bb69830d316d06a5d4c82904e8a0
 +        this.use_spinner = data.useSpinner;
 +    }
 +}
+diff --git a/dist/src/parser/classes/ContentMetadataView.d.ts b/dist/src/parser/classes/ContentMetadataView.d.ts
+index a68a61a888753329582f80f235c0669c35b88f93..fb5cb06828b3840e43f4121eb15866f41a4d3db6 100644
+--- a/dist/src/parser/classes/ContentMetadataView.d.ts
++++ b/dist/src/parser/classes/ContentMetadataView.d.ts
+@@ -7,6 +7,7 @@ import BadgeView from './BadgeView.js';
+ export type MetadataRow = {
+     metadata_parts?: {
+         text: Text | null;
++        icon_name?: string;
+         avatar_stack: AvatarStackView | null;
+         enable_truncation?: boolean;
+     }[];
+diff --git a/dist/src/parser/classes/ContentMetadataView.js b/dist/src/parser/classes/ContentMetadataView.js
+index 6e9c132df7e179f66b1b9fb32dbfae742ea1f909..6d89a7b73e6a35b2b033dca15a6ec4f9cc968d87 100644
+--- a/dist/src/parser/classes/ContentMetadataView.js
++++ b/dist/src/parser/classes/ContentMetadataView.js
+@@ -12,6 +12,7 @@ export default class ContentMetadataView extends YTNode {
+         this.metadata_rows = data.metadataRows?.map((row) => ({
+             metadata_parts: row.metadataParts?.map((part) => ({
+                 text: part.text ? Text.fromAttributed(part.text) : null,
++                icon_name: part.icon?.name,
+                 avatar_stack: Parser.parseItem(part.avatarStack, AvatarStackView),
+                 enable_truncation: data.enableTruncation
+             })),
 diff --git a/dist/src/parser/classes/EngagementPanelSectionList.d.ts b/dist/src/parser/classes/EngagementPanelSectionList.d.ts
 index f9a57b0fe2835c9929d0b94c9c69be7d2fd8a0b6..7781e54b6e0246083d23510fd503d8933fcbfcde 100644
 --- a/dist/src/parser/classes/EngagementPanelSectionList.d.ts

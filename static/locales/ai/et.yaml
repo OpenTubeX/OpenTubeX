@@ -1355,6 +1355,8 @@ Profile:
   The selected image could not be loaded: Valitud pilti ei õnnestunud laadida
   Theme Color: Kujunduse värv
 Channel:
+  Verified: Kinnitatud
+  Official Artist Channel: Ametlik esitaja kanal
   About:
     Links: Lingid
   Subscription settings: Tellimuse seaded

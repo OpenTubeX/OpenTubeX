@@ -92,6 +92,10 @@
             </template>
           </template>
         </component>
+        <FtVerifiedBadge
+          :verified="reply.authorVerified"
+          :artist="reply.authorVerifiedArtist"
+        />
         <FtRetryImage
           v-if="reply.isMember && typeof reply.memberIconUrl === 'string'"
           :fallback-icon="['fas', 'user-check']"
@@ -281,6 +285,7 @@ import FtTimestampCatcher from '../FtTimestampCatcher.vue'
 import CommentTranslationButton from './CommentTranslationButton.vue'
 import CommentImageAttachment from './CommentImageAttachment.vue'
 import FtRetryImage from '../FtRetryImage.vue'
+import FtVerifiedBadge from '../FtVerifiedBadge/FtVerifiedBadge.vue'
 import FtSpinner from '../FtSpinner/FtSpinner.vue'
 import { useRelativeTimeClock } from '../../composables/useRelativeTimeClock'
 import { formatViewCount, getRelativeTimeFromDate } from '../../helpers/utils'

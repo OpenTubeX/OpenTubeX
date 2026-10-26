@@ -36,6 +36,7 @@ import FtAgeRestricted from '../../components/FtAgeRestricted/FtAgeRestricted.vu
 import { hasConfiguredRestrictedPlaybackAuthentication } from '../../helpers/restricted-playback'
 import FtRetryImage from '../../components/FtRetryImage.vue'
 import FtSubscribeButton from '../../components/FtSubscribeButton/FtSubscribeButton.vue'
+import FtVerifiedBadge from '../../components/FtVerifiedBadge/FtVerifiedBadge.vue'
 import FtShareButton from '../../components/FtShareButton/FtShareButton.vue'
 import FtIconButton from '../../components/FtIconButton/FtIconButton.vue'
 import FtAddToPlaylistDropdown from '../../components/FtAddToPlaylistDropdown/FtAddToPlaylistDropdown.vue'
@@ -82,6 +83,7 @@ import {
   parseLocalTextRuns,
   parseLocalWatchNextVideo
 } from '../../helpers/api/local'
+import { getAuthorVerification } from '../../helpers/api/local-feed-parsers'
 import {
   convertInvidiousToLocalFormat,
   generateInvidiousDashManifestLocally,
@@ -210,6 +212,7 @@ export default defineComponent({
     'watch-video-recommendations': WatchVideoRecommendations,
     'ft-age-restricted': FtAgeRestricted,
     FtSubscribeButton,
+    FtVerifiedBadge,
     FtShareButton,
     FtIconButton,
     FtAddToPlaylistDropdown,
@@ -392,6 +395,8 @@ export default defineComponent({
       /** @type {'chapters' | 'keyMoments'} */
       videoChaptersKind: 'chapters',
       channelName: '',
+      channelVerified: false,
+      channelVerifiedArtist: false,
       channelThumbnail: '',
       channelId: '',
       channelCollaborators: [],
@@ -2517,6 +2522,8 @@ export default defineComponent({
       this.videoCurrentChapterIndex = 0
       this.videoChaptersKind = 'chapters'
       this.channelName = ''
+      this.channelVerified = false
+      this.channelVerifiedArtist = false
       this.channelThumbnail = ''
       this.channelId = ''
       this.channelCollaborators = []
@@ -3621,6 +3628,9 @@ export default defineComponent({
 
         this.channelId = result.basic_info.channel_id ?? ownerChannelId ?? primaryCollaborator?.id ?? descriptionHeader?.channel_navigation_endpoint?.payload?.browseId ?? ''
         this.channelName = result.basic_info.author ?? ownerChannelName ?? primaryCollaborator?.name ?? descriptionHeader?.channel.text ?? ''
+        const { authorVerified, authorVerifiedArtist } = getAuthorVerification(ownerAuthor)
+        this.channelVerified = authorVerified
+        this.channelVerifiedArtist = authorVerifiedArtist
         this.channelThumbnail = primaryCollaborator?.thumbnail ?? ownerAuthor?.best_thumbnail?.url ?? descriptionHeader?.channel_thumbnail[0]?.url ?? descriptionChannel?.channel_avatar[0]?.url ?? ''
         this.$store.commit('setVideoAvatar', {
           videoId: this.videoId,
@@ -4278,6 +4288,8 @@ export default defineComponent({
 
           this.channelId = result.authorId
           this.channelName = result.author
+          this.channelVerified = result.authorVerified === true
+          this.channelVerifiedArtist = false
           this.channelCollaborators = []
           const channelThumb = result.authorThumbnails.at(-1)
           this.channelThumbnail = channelThumb ? youtubeImageUrlToInvidious(channelThumb.url) : ''

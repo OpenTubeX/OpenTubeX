@@ -116,6 +116,28 @@ function blankCommentLikeCount(body) {
   }, 'Unable to blank the comment like count in the fixture')
 }
 
+function markVerifiedOwner(body) {
+  return mutateFirstObject(body, value => {
+    if (!value.videoOwnerRenderer) return false
+
+    value.videoOwnerRenderer.badges = [{
+      metadataBadgeRenderer: { style: 'BADGE_STYLE_TYPE_VERIFIED', icon: { iconType: 'CHECK_CIRCLE_THICK' }, tooltip: 'Verified' }
+    }]
+    return true
+  }, 'Unable to verify the video owner in the watch fixture')
+}
+
+function markVerifiedCommentAuthors(body) {
+  const response = JSON.parse(body)
+  const authors = (response.frameworkUpdates?.entityBatchUpdate?.mutations ?? [])
+    .map(mutation => mutation.payload?.commentEntityPayload)
+    .filter(payload => payload?.properties?.replyLevel === 0 && payload.author)
+    .map(payload => payload.author)
+  if (authors[0]) authors[0].isVerified = true
+  if (authors[1]) authors[1].isArtist = true
+  return Buffer.from(JSON.stringify(response))
+}
+
 function addCommentImages(body, attachments) {
   const response = JSON.parse(body)
   const mutations = response.frameworkUpdates?.entityBatchUpdate?.mutations ?? []
@@ -154,6 +176,7 @@ function addCommentImages(body, attachments) {
  * @param {boolean} [options.commentTimestamp] add a timestamp to one top-level comment
  * @param {boolean} [options.blankCommentLikes] replace one comment's zero-like count with YouTube's whitespace representation
  * @param {object[]} [options.commentImages] add image attachments to comments and replies
+ * @param {boolean} [options.verifiedAuthors] verify the video owner and the first top-level comment author, and mark the second as an official artist
  * @param {number[]|null} [options.popularity] replace replay intensities, or remove popularity metadata
  * @param {{label: string, description: string, attribution: string}[]} [options.contentDisclosures] include structured content disclosures
  * @param {object[]} [options.infoPanels] raw info panel renderers to show below the video
@@ -170,6 +193,7 @@ export async function mockWatchPage(app, page, {
   commentTimestamp = false,
   blankCommentLikes = false,
   commentImages = [],
+  verifiedAuthors = false,
   popularity,
   contentDisclosures,
   infoPanels
@@ -349,6 +373,12 @@ export async function mockWatchPage(app, page, {
         }
         if (commentImages.length && body.includes('commentSurfaceEntityPayload')) {
           body = addCommentImages(body, commentImages)
+        }
+        if (verifiedAuthors && url.includes('/next') && body.includes('videoOwnerRenderer')) {
+          body = markVerifiedOwner(body)
+        }
+        if (verifiedAuthors && body.includes('"replyLevel":0')) {
+          body = markVerifiedCommentAuthors(body)
         }
         if (popularity !== undefined && url.includes('/next')) {
           const json = JSON.parse(body)

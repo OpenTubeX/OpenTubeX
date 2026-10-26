@@ -1,5 +1,5 @@
 import { normalizeCommentFetchResponse, parseLocalCommentImageAttachment } from './local-comment-response'
-import { createLocalFeedParsers, getChannelHandleFromEndpoint, getLocalMusicChartPlaylistId } from './local-feed-parsers'
+import { createLocalFeedParsers, getAuthorVerification, getChannelHandleFromEndpoint, getLocalMusicChartPlaylistId } from './local-feed-parsers'
 import { createOriginalChannelNameResolver } from './original-channel-name'
 import { runBackgroundJob } from '../background-jobs.js'
 import { ClientType, Constants, Innertube, Mixins, Parser, Platform, Player, Session, UniversalCache, Utils, YT, YTNodes } from 'youtubei.js'
@@ -1810,6 +1810,7 @@ function parseListItem(item, channelId, channelName) {
         thumbnail: channel.author.best_thumbnail?.url.replace(/^\/\//, 'https://'),
         name: channel.author.name,
         id: channel.author.id,
+        ...getAuthorVerification(channel.author),
         subscribers,
         videos,
         handle: null,
@@ -1847,6 +1848,7 @@ function parseListItem(item, channelId, channelName) {
         thumbnail: channel.author.best_thumbnail?.url.replace(/^\/\//, 'https://'),
         name: channel.author.name,
         id: channel.author.id,
+        ...getAuthorVerification(channel.author),
         subscribers,
         videos,
         handle,
@@ -1893,6 +1895,7 @@ export function parseLocalWatchNextVideo(video) {
       title: video.title.text?.trim(),
       author: video.author.name,
       authorId: video.author.id,
+      ...getAuthorVerification(video.author),
       lengthSeconds: video.duration.seconds
     }
   } else if (video.is(YTNodes.LockupView)) {
@@ -1914,6 +1917,7 @@ export function parseLocalWatchNextVideo(video) {
       author: video.author.name,
       authorId: video.author.id,
       authorHandle: getChannelHandleFromEndpoint(video.author.endpoint),
+      ...getAuthorVerification(video.author),
       viewCount: video.view_count == null ? null : extractNumberFromString(video.view_count.text),
       published,
       lengthSeconds: isNaN(video.duration.seconds) ? '' : video.duration.seconds,
@@ -2091,6 +2095,8 @@ export function mapLocalLegacyFormat(format) {
  * @property {string} author
  * @property {string} authorId
  * @property {string} authorThumb
+ * @property {boolean} authorVerified
+ * @property {boolean} authorVerifiedArtist
  * @property {boolean} isPinned
  * @property {boolean} isOwner
  * @property {boolean} isMember
@@ -2137,6 +2143,7 @@ export function parseLocalComment(comment, commentThread = undefined) {
     authorLink: authorId,
     author: comment.author?.name ?? '',
     authorId,
+    ...getAuthorVerification(comment.author),
     authorThumb: comment.author?.best_thumbnail?.url ?? '',
     isPinned: comment.is_pinned,
     isOwner: !!comment.author_is_channel_owner,

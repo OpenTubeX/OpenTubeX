@@ -38,6 +38,8 @@ function channelView({ routeTab, tabs = ['videos', 'shorts', 'live', 'playlists'
     isLoading: ref(true),
     id: ref('UCchannel'),
     channelName: ref(''),
+    channelVerified: ref(false),
+    channelVerifiedArtist: ref(false),
     thumbnailUrl: ref(''),
     bannerUrl: ref(''),
     isFamilyFriendly: ref(true),

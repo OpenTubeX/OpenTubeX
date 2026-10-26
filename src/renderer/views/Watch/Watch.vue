@@ -261,6 +261,10 @@
                         alt=""
                       />
                       <span dir="auto">{{ channelName }}</span>
+                      <FtVerifiedBadge
+                        :verified="channelVerified"
+                        :artist="channelVerifiedArtist"
+                      />
                     </component>
                     <FtSubscribeButton
                       v-if="!hideUnsubscribeButton"
@@ -447,6 +451,10 @@
                   alt=""
                 />
                 <span dir="auto">{{ channelName }}</span>
+                <FtVerifiedBadge
+                  :verified="channelVerified"
+                  :artist="channelVerifiedArtist"
+                />
               </component>
               <FtSubscribeButton
                 v-if="!hideUnsubscribeButton"
@@ -697,6 +705,8 @@
               :title="videoTitle"
               :channel-id="channelId"
               :channel-name="channelName"
+              :channel-verified="channelVerified"
+              :channel-verified-artist="channelVerifiedArtist"
               :channel-thumbnail="channelThumbnail"
               :channel-collaborators="channelCollaborators"
               :published="videoPublished"
@@ -859,6 +869,8 @@
           :title="videoTitle"
           :channel-id="channelId"
           :channel-name="channelName"
+          :channel-verified="channelVerified"
+          :channel-verified-artist="channelVerifiedArtist"
           :channel-thumbnail="channelThumbnail"
           :channel-collaborators="channelCollaborators"
           :published="videoPublished"

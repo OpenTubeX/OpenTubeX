@@ -55,6 +55,8 @@ test('restores a pinned comment that is missing from the current response', () =
     authorId: 'UCpinned',
     authorLink: 'UCpinned',
     authorThumb: 'https://example.com/pinned.jpg',
+    authorVerified: true,
+    authorVerifiedArtist: false,
     dataType: 'local',
     hasOwnerReplied: false,
     hasReplyToken: true,
@@ -83,6 +85,8 @@ test('restores a pinned comment that is missing from the current response', () =
   const currentComment = { ...pinnedComment, id: 'current-comment', text: 'Current text' }
   assert.deepEqual(restored.commentIds, new Set([pinnedComment.id]))
   assert.equal(restored.commentSnapshots[0].hasReplyToken, false)
+  assert.equal(restored.commentSnapshots[0].authorVerified, true)
+  assert.equal(restored.commentSnapshots[0].authorVerifiedArtist, false)
   assert.deepEqual(
     mergePinnedCommentSnapshots([currentComment], restored.commentSnapshots),
     [

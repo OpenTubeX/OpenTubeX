@@ -3,7 +3,7 @@ import { readFile } from 'node:fs/promises'
 import test from 'node:test'
 import { compileFunction } from 'node:vm'
 import { YTNodes } from 'youtubei.js'
-import { createLocalFeedParsers } from '../../src/renderer/helpers/api/local-feed-parsers.js'
+import { createLocalFeedParsers, getAuthorVerification } from '../../src/renderer/helpers/api/local-feed-parsers.js'
 
 const { parseLocalSubscriberCount, parseLocalTextRuns } = createLocalFeedParsers(() => false)
 import { parseLocalVideoSummary } from '../../src/renderer/helpers/video-summary.js'
@@ -44,6 +44,7 @@ async function loadMetadata(info, avoidTranslation = 'disabled', options = {}) {
     MANIFEST_TYPE_HLS: 'hls',
     parseLocalVideoCollaborators,
     parseLocalSubscriberCount,
+    getAuthorVerification,
     window: { innerWidth: options.windowWidth ?? 1000 },
     formatNumber: String,
     showApiErrorToast() {},

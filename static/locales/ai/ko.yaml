@@ -1623,6 +1623,8 @@ Profile:
   Open Profile Dropdown: 프로필 드롭다운 열기
   Go To Profile Manager: 프로필 관리자로 이동
 Channel:
+  Verified: 인증됨
+  Official Artist Channel: 공식 아티스트 채널
   Subscription settings: 구독 설정
   Failed to save subscription settings: 채널 설정을 저장하지 못했습니다
   Videos per day: 일일 동영상 수

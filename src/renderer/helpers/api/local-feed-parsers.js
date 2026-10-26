@@ -29,6 +29,36 @@ export function getLocalMusicChartPlaylistId(charts) {
   return (playlists.find(item => item.id.startsWith('VLOLAK5uy_')) ?? playlists[0])?.id
 }
 
+/**
+ * Matches Invidious, where `authorVerified` also covers official artist channels.
+ * @param {import('youtubei.js').Misc.Author | undefined} author
+ */
+export function getAuthorVerification(author) {
+  return {
+    authorVerified: !!(author?.is_verified || author?.is_verified_artist),
+    authorVerifiedArtist: !!author?.is_verified_artist
+  }
+}
+
+/**
+ * Lockup views and channel page headers mark verified channels with an icon attached to the channel name.
+ * Some lockup layouts set it as the metadata part's icon instead.
+ * @param {import('youtubei.js').Misc.Text | undefined} text
+ * @param {string} [iconName]
+ */
+export function getTextVerification(text, iconName) {
+  const imageNames = (text?.runs ?? []).flatMap(run => {
+    return run.attachment?.element?.type?.imageType?.image?.sources?.map(source => source.clientResource?.imageName) ?? []
+  })
+  if (iconName) imageNames.push(iconName)
+  const authorVerifiedArtist = imageNames.includes('AUDIO_BADGE')
+
+  return {
+    authorVerified: authorVerifiedArtist || imageNames.includes('CHECK_CIRCLE_FILLED'),
+    authorVerifiedArtist
+  }
+}
+
 export function createLocalFeedParsers(shouldHideMembersOnly) {
   const TRACKING_PARAM_NAMES = [
     'utm_source',
@@ -55,6 +85,7 @@ export function createLocalFeedParsers(shouldHideMembersOnly) {
     let subscriberText
     /** @type {string[]} */
     const tags = []
+    let verification = { authorVerified: false, authorVerifiedArtist: false }
 
     switch (channel.header.type) {
       case 'C4TabbedHeader': {
@@ -73,6 +104,7 @@ export function createLocalFeedParsers(shouldHideMembersOnly) {
         if (!onlyIdNameThumbnail) {
           bannerUrl = header.banner?.[0]?.url
           subscriberText = header.subscribers?.text
+          verification = getAuthorVerification(header.author)
         }
         break
       }
@@ -155,6 +187,10 @@ export function createLocalFeedParsers(shouldHideMembersOnly) {
           thumbnailUrl = channel.metadata.thumbnail[0].url
         }
 
+        if (!onlyIdNameThumbnail) {
+          verification = getTextVerification(header.content.title.text)
+        }
+
         if (!onlyIdNameThumbnail && header.content.banner) {
           bannerUrl = header.content.banner.image[0]?.url
         }
@@ -200,7 +236,8 @@ export function createLocalFeedParsers(shouldHideMembersOnly) {
       thumbnailUrl,
       bannerUrl,
       subscriberText,
-      tags
+      tags,
+      ...verification
     }
   }
 
@@ -319,6 +356,7 @@ export function createLocalFeedParsers(shouldHideMembersOnly) {
         playlistId: gridPlaylist.id,
         channelName: gridPlaylist.author?.name,
         channelId: gridPlaylist.author?.id,
+        ...getAuthorVerification(gridPlaylist.author),
         authorThumbnailUrl: getResultAuthorThumbnailUrl(gridPlaylist),
         videoCount: extractNumberFromString(gridPlaylist.video_count.text),
         isAlbum: gridPlaylist.thumbnail_overlays?.some(overlay => overlay.icon_type === 'MUSIC') ?? false
@@ -377,6 +415,7 @@ export function createLocalFeedParsers(shouldHideMembersOnly) {
         thumbnail: thumbnailRenderer ? thumbnailRenderer.thumbnail[0].url : playlist.thumbnails[0].url,
         channelName: internalChannelName,
         channelId: internalChannelId,
+        ...getAuthorVerification(playlist.author),
         authorThumbnailUrl: getResultAuthorThumbnailUrl(playlist),
         playlistId: playlist.id,
         videoCount: extractNumberFromString(playlist.video_count.text),
@@ -490,6 +529,7 @@ export function createLocalFeedParsers(shouldHideMembersOnly) {
         title: video_.title.text?.trim(),
         author: video_.author.name,
         authorId: (video_.author?.id != null && video_.author.id !== 'N/A') ? video_.author.id : null,
+        ...getAuthorVerification(video_.author),
         hasCollaborators: (video_.author?.id == null || video_.author.id === 'N/A') && isCollaborativeVideoAuthor(video_.author?.name),
         viewCount,
         published,
@@ -536,6 +576,7 @@ export function createLocalFeedParsers(shouldHideMembersOnly) {
         title: movie.title.text?.trim(),
         author: movie.author.name !== 'N/A' ? movie.author.name : channelName,
         authorId: movie.author.id !== 'N/A' ? movie.author.id : channelId,
+        ...getAuthorVerification(movie.author),
         description: movie.description_snippet?.text,
         lengthSeconds: isNaN(movie.duration.seconds) ? '' : movie.duration.seconds,
         liveNow: false,
@@ -572,6 +613,7 @@ export function createLocalFeedParsers(shouldHideMembersOnly) {
         title: video.title.text?.trim(),
         author: video.author?.name ?? channelName,
         authorId: (video.author?.id != null && video.author.id !== 'N/A') ? video.author.id : channelId,
+        ...getAuthorVerification(video.author),
         hasCollaborators: (video.author?.id == null || video.author.id === 'N/A') && isCollaborativeVideoAuthor(video.author?.name),
         collaborators: parseLocalCollaboratorItems(video.author?.collaborators),
         viewCount: video.views.text == null ? null : extractNumberFromString(video.views.text),
@@ -592,6 +634,7 @@ export function createLocalFeedParsers(shouldHideMembersOnly) {
         title: movie.title.text,
         author: movie.author.name !== 'N/A' ? movie.author.name : channelName,
         authorId: movie.author.id !== 'N/A' ? movie.author.id : channelId,
+        ...getAuthorVerification(movie.author),
         lengthSeconds: isNaN(movie.duration.seconds) ? '' : movie.duration.seconds,
         isUpcoming: movie.is_upcoming,
         premiereDate: movie.upcoming
@@ -637,6 +680,7 @@ export function createLocalFeedParsers(shouldHideMembersOnly) {
         author: video.author.name !== 'N/A' ? video.author.name : channelName,
         authorId: video.author.id !== 'N/A' ? video.author.id : channelId,
         authorHandle: getChannelHandleFromEndpoint(video.author.endpoint),
+        ...getAuthorVerification(video.author),
         authorThumbnailUrl: getResultAuthorThumbnailUrl(video),
         hasCollaborators: video.author.id === 'N/A' && isCollaborativeVideoAuthor(video.author.name),
         collaborators: parseLocalCollaboratorItems(video.author.collaborators),
@@ -721,13 +765,16 @@ export function createLocalFeedParsers(shouldHideMembersOnly) {
           return null
         }
 
-        const maybeChannelText = lockupView.metadata?.metadata?.metadata_rows?.[0]?.metadata_parts?.[0]?.text
+        const maybeChannelPart = lockupView.metadata?.metadata?.metadata_rows?.[0]?.metadata_parts?.[0]
+        const maybeChannelText = maybeChannelPart?.text
+        let verification = getTextVerification(undefined)
 
         if (maybeChannelText && maybeChannelText.endpoint?.metadata.page_type === 'WEB_PAGE_TYPE_CHANNEL') {
           if (maybeChannelText.text !== 'Playlist' || !channelName) {
             channelName = maybeChannelText.text
           }
           channelId = maybeChannelText.endpoint.payload.browseId
+          verification = getTextVerification(maybeChannelText, maybeChannelPart.icon_name)
         }
 
         const isShow = lockupView.content_type === 'SHOW'
@@ -739,6 +786,7 @@ export function createLocalFeedParsers(shouldHideMembersOnly) {
           thumbnail: lockupView.content_image.primary_thumbnail.image[0].url,
           channelName,
           channelId,
+          ...verification,
           videoCount: isShow ? undefined : extractNumberFromString(thumbnailOverlayBadgeView.badges[0].text),
           ...(isShow ? { itemCountText: thumbnailOverlayBadgeView.badges[0].text } : {}),
           isPodcast: lockupView.content_type === 'PODCAST',
@@ -844,18 +892,19 @@ export function createLocalFeedParsers(shouldHideMembersOnly) {
         // 2. When YouTube uses a 2+ row layout without channel endpoints (e.g. recommended),
         //    the uploader name is the first part of the first row if it's not views/date text
         // 3. Otherwise fall back to channelName/channelId from the caller (e.g. channel video tabs)
-        let authorPart = metadataParts
+        let authorMetadataPart = metadataParts
           .find(part => part.text?.endpoint?.metadata.page_type === 'WEB_PAGE_TYPE_CHANNEL')
-          ?.text
 
-        if (!authorPart && metadataRows.length >= 2) {
-          const firstPart = metadataRows[0].metadata_parts?.[0]?.text
-          const firstPartText = firstPart?.text
+        if (!authorMetadataPart && metadataRows.length >= 2) {
+          const firstPart = metadataRows[0].metadata_parts?.[0]
+          const firstPartText = firstPart?.text?.text
 
           if (firstPartText && !isViewCountText(firstPartText) && !firstPartText.endsWith('ago') && !isPremieresTimeText(firstPartText)) {
-            authorPart = firstPart
+            authorMetadataPart = firstPart
           }
         }
+
+        const authorPart = authorMetadataPart?.text
 
         const imageEndpoint = lockupView.metadata?.image?.renderer_context?.command_context?.on_tap
         const imageAuthorId = imageEndpoint?.payload?.browseId
@@ -879,6 +928,7 @@ export function createLocalFeedParsers(shouldHideMembersOnly) {
           author,
           authorId,
           authorHandle,
+          ...getTextVerification(authorPart, authorMetadataPart?.icon_name),
           hasCollaborators,
           collaborators,
           viewCount,

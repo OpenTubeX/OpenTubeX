@@ -8,6 +8,8 @@
       v-else-if="(isFamilyFriendly || !showFamilyFriendlyOnly)"
       :id="id"
       :name="channelName"
+      :verified="channelVerified"
+      :verified-artist="channelVerifiedArtist"
       :banner-url="bannerUrl"
       :has-error-message="!!errorMessage"
       :can-pin="hasLoadedDetails && !errorMessage"
@@ -426,6 +428,8 @@ const isCurrentTabLoading = computed(() => {
 
 const id = ref('')
 const channelName = ref('')
+const channelVerified = ref(false)
+const channelVerifiedArtist = ref(false)
 const bannerUrl = ref('')
 const thumbnailUrl = ref('')
 const subCount = ref(0)
@@ -880,6 +884,8 @@ async function getChannelLocal() {
     }
 
     channelName.value = channelName_
+    channelVerified.value = parsedHeader.authorVerified
+    channelVerifiedArtist.value = parsedHeader.authorVerifiedArtist
     thumbnailUrl.value = channelThumbnailUrl
     bannerUrl.value = parsedHeader.bannerUrl ?? null
     isFamilyFriendly.value = !!channelInstance.metadata.is_family_safe
@@ -1153,6 +1159,8 @@ async function getChannelInfoInvidious() {
     const channelName_ = response.author
     const channelId = response.authorId
     channelName.value = channelName_
+    channelVerified.value = response.authorVerified === true
+    channelVerifiedArtist.value = false
     id.value = channelId
     isFamilyFriendly.value = response.isFamilyFriendly
     subCount.value = response.subCount
@@ -2575,6 +2583,8 @@ function setErrorMessage(message, responseHasNameAndThumbnail = false) {
 
   bannerUrl.value = null
   subCount.value = null
+  channelVerified.value = false
+  channelVerifiedArtist.value = false
 }
 
 const showFetchMoreButton = computed(() => {

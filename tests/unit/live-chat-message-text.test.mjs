@@ -22,12 +22,15 @@ function componentFunction(name, globals = {}) {
 }
 
 const parseLiveChatMessage = componentFunction('parseLiveChatMessage')
+const isLiveChatAuthorVerified = componentFunction('isLiveChatAuthorVerified')
 const parseLiveChatComment = componentFunction('parseLiveChatComment', {
+  isLiveChatAuthorVerified,
   parseLiveChatMessage,
   props: { channelId: 'channel-id' }
 })
 const parseLiveChatSuperChat = componentFunction('parseLiveChatSuperChat', {
   getRandomColorClass: () => 'color-class',
+  isLiveChatAuthorVerified,
   parseLiveChatMessage
 })
 
@@ -85,5 +88,23 @@ for (const authorName of [{ simpleText: '@donor' }, { runs: [{ text: '@donor' }]
     assert.equal(parsed.author.name, '@donor')
     assert.equal(parsed.author.id, 'donor-channel')
     assert.equal(parsed.superChat.amount, '$10.00')
+  })
+}
+
+for (const [iconType, expected] of [['VERIFIED', true], ['MODERATOR', false]]) {
+  test(`marks live-chat authors with a ${iconType} badge as ${expected ? 'verified' : 'unverified'}`, () => {
+    const message = new YTNodes.LiveChatTextMessage({
+      id: 'message-id',
+      message: { simpleText: 'Hello' },
+      authorName: { simpleText: '@creator' },
+      authorExternalChannelId: 'creator-channel',
+      authorPhoto: { thumbnails: [{ url: 'avatar' }] },
+      authorBadges: [{ liveChatAuthorBadgeRenderer: { icon: { iconType }, tooltip: iconType } }],
+      contextMenuEndpoint: {},
+      contextMenuAccessibility: { accessibilityData: { label: 'Menu' } },
+      timestampUsec: '1000000'
+    })
+
+    assert.equal(parseLiveChatComment(message).author.isVerified, expected)
   })
 }

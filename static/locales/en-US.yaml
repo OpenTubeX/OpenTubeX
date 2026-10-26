@@ -2151,6 +2151,8 @@ Channel:
   More videos hidden: '+{count} more | +{count} more'
   Subscribe: Subscribe
   Unsubscribe: Unsubscribe
+  Verified: Verified
+  Official Artist Channel: Official Artist Channel
   Show in subscription feed: Show in subscription feed
   Notify about new uploads: Notify about new uploads
   Upload Notifications On: "You'll be notified about new uploads from {channelName} when your subscriptions refresh"

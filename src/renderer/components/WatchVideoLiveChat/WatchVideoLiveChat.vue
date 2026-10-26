@@ -274,6 +274,10 @@
                 >
                   {{ superChat.author.name }}
                 </RouterLink>
+                <FtVerifiedBadge
+                  :verified="superChat.author.isVerified"
+                  class="liveChatVerifiedBadge"
+                />
               </div>
               <p
                 class="donationAmount"
@@ -340,6 +344,10 @@
                     >
                       {{ comment.author.name }}
                     </RouterLink>
+                    <FtVerifiedBadge
+                      :verified="comment.author.isVerified"
+                      class="liveChatVerifiedBadge"
+                    />
                   </div>
                   <p
                     class="donationAmount"
@@ -384,6 +392,10 @@
                   >
                     {{ comment.author.name }}
                   </RouterLink>
+                  <FtVerifiedBadge
+                    :verified="comment.author.isVerified"
+                    class="liveChatVerifiedBadge"
+                  />
                   <span
                     v-if="comment.badge?.url"
                     class="badge"
@@ -434,6 +446,7 @@ import { YTNodes } from 'youtubei.js'
 import FtCard from '../ft-card/ft-card.vue'
 import FtButton from '../FtButton/FtButton.vue'
 import FtRetryImage from '../FtRetryImage.vue'
+import FtVerifiedBadge from '../FtVerifiedBadge/FtVerifiedBadge.vue'
 import FtToggleSwitch from '../FtToggleSwitch/FtToggleSwitch.vue'
 import FtRadioButton from '../FtRadioButton/FtRadioButton.vue'
 import { vSaferHtml } from '../../directives/vSaferHtml.js'
@@ -1051,6 +1064,14 @@ function handleError(error) {
 }
 
 /**
+ * Live chat marks verified authors with a `VERIFIED` icon badge instead of a badge style.
+ * @param {import('youtubei.js').Misc.Author} author
+ */
+function isLiveChatAuthorVerified(author) {
+  return author.badges?.some(badge => badge.is(YTNodes.LiveChatAuthorBadge) && badge.icon_type === 'VERIFIED') ?? false
+}
+
+/**
  * @param {import('youtubei.js').YTNodes.LiveChatTextMessage} comment
  */
 function parseLiveChatComment(comment) {
@@ -1067,6 +1088,7 @@ function parseLiveChatComment(comment) {
       thumbnailUrl: comment.author.thumbnails.at(-1).url,
       isOwner: comment.author.id === props.channelId,
       isModerator: comment.author.is_moderator,
+      isVerified: isLiveChatAuthorVerified(comment.author),
       isMember: !!badge
     }
   }
@@ -1092,7 +1114,8 @@ function parseLiveChatSuperChat(superChat) {
     author: {
       id: superChat.author.id,
       name: superChat.author.name,
-      thumbnailUrl: superChat.author.thumbnails[0].url
+      thumbnailUrl: superChat.author.thumbnails[0].url,
+      isVerified: isLiveChatAuthorVerified(superChat.author)
     },
     superChat: {
       amount: superChat.purchase_amount,

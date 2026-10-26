@@ -34,7 +34,10 @@
             class="h3Title"
             dir="auto"
           >
-            {{ name }}
+            {{ name }}<FtVerifiedBadge
+              :verified="data.authorVerified"
+              :artist="data.authorVerifiedArtist"
+            />
           </h3>
         </component>
         <div
@@ -102,6 +105,7 @@ import { FtIcon } from '@opentubex/icons'
 import { computed, onBeforeUnmount, onMounted, ref, useTemplateRef, watch } from 'vue'
 
 import FtSubscribeButton from '../FtSubscribeButton/FtSubscribeButton.vue'
+import FtVerifiedBadge from '../FtVerifiedBadge/FtVerifiedBadge.vue'
 import { vSaferHtml } from '../../directives/vSaferHtml'
 
 import store from '../../store/index'
