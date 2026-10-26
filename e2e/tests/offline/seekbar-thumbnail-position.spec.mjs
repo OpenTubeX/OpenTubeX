@@ -34,6 +34,10 @@ test('keeps short-video thumbnails centered on the cursor at different widths', 
   })
   expect(await video.evaluate(element => element.duration)).toBeLessThan(5)
   const player = page.locator('.ftVideoPlayer')
+  // A slow runner can finish the short video before it is paused, and the end
+  // screen would then cover the seek bar.
+  await video.evaluate(element => { element.currentTime = 0 })
+  await expect(player.locator('.endedScreen')).toHaveCount(0)
   const bar = player.locator('.shaka-seek-bar')
   const preview = player.locator('.shaka-player-ui-thumbnail-container')
   const image = preview.locator('img')
