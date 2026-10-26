@@ -12,14 +12,14 @@ const MONTHS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', '
 const WEEKDAYS = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat']
 
 function decodeHtml(value) {
-  const namedEntities = {
-    amp: '&',
-    apos: '\'',
-    gt: '>',
-    lt: '<',
-    nbsp: ' ',
-    quot: '"',
-  }
+  const namedEntities = new Map([
+    ['amp', '&'],
+    ['apos', '\''],
+    ['gt', '>'],
+    ['lt', '<'],
+    ['nbsp', ' '],
+    ['quot', '"'],
+  ])
 
   return value.replaceAll(/&(#(?:x[\da-f]+|\d+)|[a-z]+);/gi, (entity, name) => {
     if (name.startsWith('#')) {
@@ -29,7 +29,7 @@ function decodeHtml(value) {
       return codePoint <= 0x10FFFF ? String.fromCodePoint(codePoint) : entity
     }
 
-    return namedEntities[name.toLowerCase()] ?? entity
+    return namedEntities.get(name.toLowerCase()) ?? entity
   })
 }
 
