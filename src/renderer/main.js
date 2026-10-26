@@ -9,6 +9,7 @@ import App from './App.vue'
 import { initializeTabNavigationService } from './tabs/TabNavigationService'
 import { showExternalPlayerUnsupportedActionToast, showToast } from './helpers/utils'
 import { installViewTransitions } from './helpers/viewTransitions'
+import { installTitleTooltips } from './helpers/titleTooltips'
 import { initializeAppScrollbars, overlayScrollbarsDirective } from './helpers/overlayScrollbars'
 import { releaseAutomaticDownloadSchedule } from './helpers/automaticDownloads'
 import { initializeAndroidDynamicColors } from './helpers/dynamicColors'
@@ -19,6 +20,7 @@ import 'overlayscrollbars/styles/overlayscrollbars.css'
 // Only the positioning and stacking rules are used, FtToast supplies the design
 import 'vue-sonner/style.css'
 import './helpers/anchoredPosition.css'
+import './helpers/titleTooltips.css'
 
 import { FtIcon, FtIconLayers } from './icons/iconComponents'
 
@@ -43,6 +45,7 @@ app
   .use(i18n)
 
 installViewTransitions(router)
+installTitleTooltips()
 
 const tabNavigation = initializeTabNavigationService(router, store)
 

@@ -1,0 +1,30 @@
+.ftTitleTooltip {
+  position: fixed;
+  inset: auto;
+  box-sizing: border-box;
+  max-inline-size: min(320px, calc(100vw - 16px));
+  margin: 0;
+  padding-block: 5px;
+  padding-inline: 8px;
+  overflow: hidden;
+  border: 1px solid var(--border-color);
+  border-radius: calc(6px * var(--ui-roundness));
+  background-color: var(--card-bg-color);
+  backdrop-filter: var(--card-bg-blur, none);
+  box-shadow: 0 4px 14px rgb(0 0 0 / 24%);
+  color: var(--primary-text-color);
+  font-family: var(--app-font-family);
+  font-size: 12px;
+  line-height: 1.35;
+  overflow-wrap: anywhere;
+  pointer-events: none;
+  white-space: pre-line;
+  opacity: 1;
+  transition: opacity 0.12s ease;
+}
+
+@starting-style {
+  .ftTitleTooltip:popover-open {
+    opacity: 0;
+  }
+}
