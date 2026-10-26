@@ -1375,6 +1375,8 @@ Channel:
   Channel Name Unavailable: チャンネル名を取得できません
   Search Result Types: 検索結果の種類
   All Results: すべて
+  Posts:
+    Original post unavailable: "元の投稿は利用できません"
 Video:
   Info panel source: '出典: {source}'
   External DRM Protected: "DRMで保護された動画は、独自のクローズドソースコンポーネントが必要なため、OpenTubeXでは再生できません。"

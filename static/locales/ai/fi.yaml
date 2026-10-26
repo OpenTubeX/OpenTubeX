@@ -1410,6 +1410,8 @@ Channel:
   View All: Näytä kaikki
   Videos:
     This channel has videos but none could be displayed, try fetching more: "Tällä kanavalla on videoita, mutta yhtäkään ei voitu näyttää. Yritä ladata lisää"
+  Posts:
+    Original post unavailable: "Alkuperäinen julkaisu ei ole saatavilla"
 Video:
   Info panel source: 'Lähde: {source}'
   External DRM Protected: "DRM-suojattuja videoita ei voida katsoa OpenTubeXissä, koska ne vaativat ei-vapaita, suljetun koodin osia."

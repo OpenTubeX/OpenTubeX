@@ -1403,6 +1403,8 @@ Channel:
   View All: Xem tất cả
   Videos:
     This channel has videos but none could be displayed, try fetching more: "Kênh này có video nhưng không thể hiển thị video nào. Hãy thử tải thêm"
+  Posts:
+    Original post unavailable: "Bài đăng gốc không khả dụng"
 Video:
   Info panel source: 'Nguồn: {source}'
   External DRM Protected: "Không thể phát video được bảo vệ DRM trong OpenTubeX vì chúng yêu cầu các thành phần nguồn đóng độc quyền."

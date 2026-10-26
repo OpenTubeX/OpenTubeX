@@ -2221,7 +2221,7 @@ async function getCommunityPostsLocal() {
       posts = communityTab.posts
     }
 
-    latestCommunityPosts.value = parseLocalCommunityPosts(posts)
+    latestCommunityPosts.value = parseLocalCommunityPosts(communityTab)
     communityContinuationData.value = communityTab.has_continuation ? communityTab : null
     setElementListLoading('community', false)
 
@@ -2266,7 +2266,7 @@ async function getCommunityPostsLocalMore() {
       posts = continuation.posts
     }
 
-    latestCommunityPosts.value = latestCommunityPosts.value.concat(parseLocalCommunityPosts(posts))
+    latestCommunityPosts.value = latestCommunityPosts.value.concat(parseLocalCommunityPosts(continuation))
     communityContinuationData.value = continuation.has_continuation ? continuation : null
   } catch (err) {
     if (!isCurrentRequest()) return

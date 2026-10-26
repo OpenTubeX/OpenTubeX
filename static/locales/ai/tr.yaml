@@ -1374,6 +1374,8 @@ Channel:
   Channel Name Unavailable: Kanal adı kullanılamıyor
   Search Result Types: Arama sonucu türleri
   All Results: Tümü
+  Posts:
+    Original post unavailable: "Orijinal gönderi kullanılamıyor"
 Video:
   Info panel source: 'Kaynak: {source}'
   External DRM Protected: "DRM korumalı videolar, özel kapalı kaynak bileşenleri gerektirdiğinden OpenTubeX ile oynatılamaz."

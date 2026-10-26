@@ -830,6 +830,8 @@ Channel:
   Channel Name Unavailable: Nazwa kanału jest niedostępna
   Search Result Types: Typy wyników wyszukiwania
   All Results: Wszystkie
+  Posts:
+    Original post unavailable: "Oryginalny post jest niedostępny"
 Video:
   Info panel source: 'Źródło: {source}'
   Remove Video from Queue: Usuń z kolejki

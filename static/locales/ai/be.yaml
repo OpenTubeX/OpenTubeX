@@ -1445,6 +1445,8 @@ Channel:
   View All: Паказаць усе
   Videos:
     This channel has videos but none could be displayed, try fetching more: "На гэтым канале ёсць відэа, але ніводнае не ўдалося паказаць. Паспрабуйце загрузіць больш"
+  Posts:
+    Original post unavailable: "Арыгінальны допіс недаступны"
 Video:
   Info panel source: 'Крыніца: {source}'
   External DRM Protected: "Відэа, абароненыя DRM, нельга прайграваць у OpenTubeX, бо для іх патрэбны прапрыетарныя кампаненты з закрытым зыходным кодам."

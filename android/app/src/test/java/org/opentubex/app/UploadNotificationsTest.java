@@ -88,6 +88,28 @@ public class UploadNotificationsTest {
     }
 
     @Test
+    public void readsSharedPostsInsteadOfTheirOriginalPosts() throws Exception {
+        JSONObject original = new JSONObject().put("backstagePostRenderer", new JSONObject()
+            .put("postId", "original")
+            .put("contentText", new JSONObject().put("runs", new JSONArray().put(new JSONObject().put("text", "Original"))))
+            .put("publishedTimeText", new JSONObject().put("runs", new JSONArray().put(new JSONObject().put("text", "2 days ago")))));
+        JSONObject payload = new JSONObject().put("backgroundFormat", "local").put("data", new JSONObject()
+            .put("contents", new JSONArray().put(new JSONObject().put("backstagePostThreadRenderer", new JSONObject()
+                .put("post", new JSONObject().put("sharedPostRenderer", new JSONObject()
+                    .put("postId", "shared")
+                    .put("content", new JSONObject().put("runs", new JSONArray().put(new JSONObject().put("text", "Look at this"))))
+                    .put("publishedTimeText", new JSONObject().put("runs", new JSONArray()
+                        .put(new JSONObject().put("text", "shared 1 hour ago"))))
+                    .put("originalPost", original)))))));
+
+        JSONArray entries = UploadNotifications.entries("posts", payload, NOW);
+        assertEquals(1, entries.length());
+        assertEquals("shared", entries.getJSONObject(0).getString("id"));
+        assertEquals("Look at this", entries.getJSONObject(0).getString("title"));
+        assertEquals((NOW / 1000 - 3600) * 1000, entries.getJSONObject(0).getLong("published"));
+    }
+
+    @Test
     public void readsShortsFromTheLocalShortsTab() throws Exception {
         JSONObject shortLockup = new JSONObject().put("shortsLockupViewModel", new JSONObject()
             .put("entityId", "shorts-shelf-item-short1")

@@ -1375,6 +1375,8 @@ Channel:
   Channel Name Unavailable: Kanali nimi pole saadaval
   Search Result Types: Otsingutulemuste tüübid
   All Results: Kõik
+  Posts:
+    Original post unavailable: "Algne postitus pole saadaval"
 Video:
   Info panel source: 'Allikas: {source}'
   External DRM Protected: "DRMiga kaitstud videoid ei saa OpenTubeXis esitada, kuna nende jaoks on vaja omanduslikke suletud lähtekoodiga komponente."

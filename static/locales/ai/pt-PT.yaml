@@ -1402,6 +1402,8 @@ Channel:
   View All: Ver tudo
   Videos:
     This channel has videos but none could be displayed, try fetching more: "Este canal tem vídeos, mas nenhum pôde ser apresentado. Tente carregar mais"
+  Posts:
+    Original post unavailable: "Publicação original indisponível"
 Video:
   Info panel source: 'Fonte: {source}'
   External DRM Protected: "Os vídeos protegidos por DRM não podem ser reproduzidos no OpenTubeX, uma vez que requerem componentes proprietários e de código fechado."

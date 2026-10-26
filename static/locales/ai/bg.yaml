@@ -1387,6 +1387,8 @@ Channel:
   All Results: Всички
   Videos:
     This channel has videos but none could be displayed, try fetching more: "Този канал има видеоклипове, но нито един не може да бъде показан. Опитайте да заредите още"
+  Posts:
+    Original post unavailable: "Оригиналната публикация не е налична"
 Video:
   Info panel source: 'Източник: {source}'
   External DRM Protected: "Видеата, защитени с DRM, не могат да се възпроизвеждат в OpenTubeX, тъй като изискват собствени компоненти със затворен код."

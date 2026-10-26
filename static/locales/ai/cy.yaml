@@ -1382,6 +1382,8 @@ Channel:
   All Results: Pob un
   Videos:
     This channel has videos but none could be displayed, try fetching more: "Mae gan y sianel hon fideos ond ni ellid dangos yr un ohonynt. Ceisiwch lwytho mwy"
+  Posts:
+    Original post unavailable: "Nid yw'r postiad gwreiddiol ar gael"
 Video:
   Info panel source: 'Ffynhonnell: {source}'
   External DRM Protected: "Nid oes modd chwarae fideos gwarchodedig DRM yn OpenTubeX, gan fod angen cydrannau ffynhonnell gaeedig perchnogol arnynt."

@@ -1587,7 +1587,7 @@ export async function getLocalChannelCommunity(id, signal) {
     // if the channel doesn't have a community tab, YouTube returns the home tab instead
     // so we need to check that we got the right tab
     if (communityTab.current_tab?.endpoint.metadata.url?.endsWith('/posts')) {
-      return parseLocalCommunityPosts(communityTab.posts)
+      return parseLocalCommunityPosts(communityTab)
     } else {
       return []
     }
@@ -2180,7 +2180,7 @@ export async function getLocalCommunityPost(postId, channelId) {
   }
 
   const postPage = await innertube.getPost(postId, channelId)
-  return parseLocalCommunityPost(postPage.posts[0])
+  return parseLocalCommunityPosts(postPage)[0]
 }
 
 /**

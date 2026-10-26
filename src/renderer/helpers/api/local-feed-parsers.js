@@ -1146,51 +1146,52 @@ export function createLocalFeedParsers(shouldHideMembersOnly) {
   }
 
   /**
-   * Parse community posts
-   * @param {import('youtubei.js').YTNodes.BackstagePost[] | import('youtubei.js').YTNodes.SharedPost[] | import('youtubei.js').YTNodes.Post[] } posts
+   * Parse the community posts on a channel posts tab or post page
+   * @param {import('youtubei.js').Mixins.Feed} feed
    */
-  function parseLocalCommunityPosts(posts) {
-    const foundIds = []
-    // `posts` includes the SharedPost's attached post for some reason so we need to filter that out.
-    // see: https://github.com/FreeTubeApp/FreeTube/issues/3252#issuecomment-1546675781
-    // we don't currently support SharedPost's so that is also filtered out
-    for (const post of posts) {
-      if (post.type === 'SharedPost') {
-        // `original_post` can be null if it was deleted
-        if (post.original_post) {
-          foundIds.push(post.original_post.id)
-        }
-        foundIds.push(post.id)
-      }
-    }
-
-    return posts.filter(post => {
-      return !foundIds.includes(post.id)
-    }).map(parseLocalCommunityPost)
+  function parseLocalCommunityPosts(feed) {
+    // `feed.posts` is grouped by post type and also lists the original post inside each SharedPost,
+    // so read the post threads to keep the page order and skip the nested original posts.
+    return feed.memo.getType(YTNodes.BackstagePostThread)
+      .map(thread => thread.post)
+      .filter(post => post != null)
+      .map(parseLocalCommunityPost)
   }
 
   /**
    * Parse community post
-   * @param {import('youtubei.js').YTNodes.BackstagePost} post
+   * @param {import('youtubei.js').YTNodes.BackstagePost | import('youtubei.js').YTNodes.SharedPost} post
    */
   function parseLocalCommunityPost(post) {
+    if (post.type === 'SharedPost') {
+      return {
+        postText: parseLocalPostText(post.content),
+        postId: post.id,
+        authorThumbnails: fixProtocolRelativeThumbnails(post.thumbnail),
+        publishedTime: calculatePublishedDate(post.published.text),
+        // YouTube only shows likes and comments on the original post
+        voteCount: null,
+        postContent: {
+          type: 'sharedPost',
+          // `original_post` is null if it was deleted
+          content: post.original_post ? parseLocalCommunityPost(post.original_post) : null
+        },
+        commentCount: null,
+        authorId: post.author.id,
+        author: post.author.name,
+        type: 'community'
+      }
+    }
+
     let replyCount = post.action_buttons?.reply_button?.text ?? null
     if (replyCount !== null) {
       replyCount = parseLocalSubscriberCount(post?.action_buttons.reply_button.text)
     }
 
-    const authorThumbnails = post.author.thumbnails
-
-    authorThumbnails.forEach((thumbnail) => {
-      if (thumbnail.url.startsWith('//')) {
-        thumbnail.url = 'https:' + thumbnail.url
-      }
-    })
-
     return {
-      postText: post.content.isEmpty() ? '' : Autolinker.link(parseLocalTextRuns(post.content.runs, 16)),
+      postText: parseLocalPostText(post.content),
       postId: post.id,
-      authorThumbnails,
+      authorThumbnails: fixProtocolRelativeThumbnails(post.author.thumbnails),
       publishedTime: calculatePublishedDate(post.published.text),
       // YouTube hides the vote/like count on posts when it is zero
       voteCount: post.vote_count ? parseLocalSubscriberCount(post.vote_count.text) : 0,
@@ -1200,6 +1201,26 @@ export function createLocalFeedParsers(shouldHideMembersOnly) {
       author: post.author.name,
       type: 'community'
     }
+  }
+
+  /**
+   * @param {import('youtubei.js').Misc.Text} content
+   */
+  function parseLocalPostText(content) {
+    return content.isEmpty() ? '' : Autolinker.link(parseLocalTextRuns(content.runs, 16))
+  }
+
+  /**
+   * @param {import('youtubei.js').Misc.Thumbnail[]} thumbnails
+   */
+  function fixProtocolRelativeThumbnails(thumbnails) {
+    thumbnails.forEach((thumbnail) => {
+      if (thumbnail.url.startsWith('//')) {
+        thumbnail.url = 'https:' + thumbnail.url
+      }
+    })
+
+    return thumbnails
   }
 
   function parseLocalAttachment(attachment) {
@@ -1273,13 +1294,15 @@ export function createLocalFeedParsers(shouldHideMembersOnly) {
       const page = payload.continuation ? new Mixins.Feed(null, { data: payload.continuation }) : channel
       entries = feedType === 'shorts'
         ? parseLocalChannelShorts(channel.videos, channelId, name)
-        : feedType === 'posts' ? parseLocalCommunityPosts(channel.posts) : parseLocalChannelVideos(page.videos, channelId, name)
+        : feedType === 'posts' ? parseLocalCommunityPosts(channel) : parseLocalChannelVideos(page.videos, channelId, name)
     }
     // Channel and playlist pages express publication dates relative to the fetch time.
     const elapsed = Math.max(0, Date.now() - timestamp)
     for (const entry of entries) {
       if (Number.isFinite(entry.published) && !entry.isUpcoming) entry.published -= elapsed
       if (Number.isFinite(entry.publishedTime)) entry.publishedTime -= elapsed
+      const originalPost = entry.postContent?.type === 'sharedPost' ? entry.postContent.content : null
+      if (Number.isFinite(originalPost?.publishedTime)) originalPost.publishedTime -= elapsed
     }
     return entries
   }

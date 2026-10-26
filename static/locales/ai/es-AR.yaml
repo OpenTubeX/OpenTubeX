@@ -1626,6 +1626,7 @@ Channel:
     Reveal Answers: Revelar las respuestas
     Hide Answers: Ocultar las respuestas
     Video hidden by OpenTubeX: Video oculto por OpenTubeX
+    Original post unavailable: "La publicación original no está disponible"
 Video:
   Info panel source: 'Fuente: {source}'
   External DRM Protected: "Los videos restringidos con DRM no pueden reproducirse en OpenTubeX, dado que requieren componentes propietarios de fuente cerrada."

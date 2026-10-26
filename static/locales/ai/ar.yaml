@@ -1405,6 +1405,8 @@ Channel:
   View All: عرض الكل
   Videos:
     This channel has videos but none could be displayed, try fetching more: "تحتوي هذه القناة على فيديوهات، لكن تعذر عرض أي منها. حاول جلب المزيد"
+  Posts:
+    Original post unavailable: "المنشور الأصلي غير متاح"
 Video:
   Info panel source: 'المصدر: {source}'
   External DRM Protected: "لا يمكن تشغيل مقاطع الفيديو المحمية بنظام إدارة الحقوق الرقمية في OpenTubeX، لأنها تتطلب مكونات خاصة ومغلقة المصدر."

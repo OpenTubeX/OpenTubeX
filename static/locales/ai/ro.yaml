@@ -1402,6 +1402,8 @@ Channel:
   View All: Vezi tot
   Videos:
     This channel has videos but none could be displayed, try fetching more: "Acest canal are videoclipuri, dar niciunul nu a putut fi afișat. Încearcă să încarci mai multe"
+  Posts:
+    Original post unavailable: "Postarea originală nu este disponibilă"
 Video:
   Info panel source: 'Sursă: {source}'
   External DRM Protected: "Videoclipurile protejate DRM nu pot fi redate în OpenTubeX, deoarece necesită componente proprietare, cu sursă închisă."

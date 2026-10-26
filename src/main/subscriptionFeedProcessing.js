@@ -18,7 +18,7 @@ export function processSubscriptionFeed({ format, data: serializedData, text, fe
     const channel = new YT.Channel(null, { data })
     const suffix = { videos: '/videos', live: '/streams', posts: '/posts' }[feedType]
     const selected = channel.current_tab?.endpoint.metadata.url?.endsWith(suffix)
-    if (feedType === 'posts') return { posts: selected ? parsers.parseLocalCommunityPosts(channel.posts) : [] }
+    if (feedType === 'posts') return { posts: selected ? parsers.parseLocalCommunityPosts(channel) : [] }
     const { id = channelId, name, thumbnailUrl } = parsers.parseLocalChannelHeader(channel, true)
     return {
       channelId: id,

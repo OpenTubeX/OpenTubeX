@@ -1363,6 +1363,8 @@ Channel:
   All Results: All
   Videos:
     This channel has videos but none could be displayed, try fetching more: "This channel has videos but none could be displayed, try fetching more"
+  Posts:
+    Original post unavailable: "Original post unavailable"
 Video:
   Info panel source: 'Source: {source}'
   External DRM Protected: "DRM protected videos cannot be played in OpenTubeX, as they require proprietary, closed source components."

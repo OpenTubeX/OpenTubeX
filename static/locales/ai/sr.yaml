@@ -1430,6 +1430,8 @@ Channel:
   View All: Прикажи све
   Videos:
     This channel has videos but none could be displayed, try fetching more: "Овај канал има видео-снимке, али ниједан није могао да се прикаже. Покушајте да учитате још"
+  Posts:
+    Original post unavailable: "Оригинална објава није доступна"
 Video:
   Info panel source: 'Извор: {source}'
   External DRM Protected: "Видео снимци заштићени DRM не могу се репродуковати у OpenTubeX-у, јер захтевају власничке компоненте затвореног кода."

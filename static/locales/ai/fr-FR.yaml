@@ -1373,6 +1373,8 @@ Channel:
   Channel Name Unavailable: Nom de la chaîne indisponible
   Search Result Types: Types de résultats de recherche
   All Results: Tous
+  Posts:
+    Original post unavailable: "Publication d’origine indisponible"
 Video:
   Info panel source: 'Source : {source}'
   External DRM Protected: "Les vidéos protégées par DRM ne peuvent pas être lues dans OpenTubeX, car elles nécessitent des composants propriétaires et à source fermée."

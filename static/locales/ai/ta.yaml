@@ -1416,6 +1416,8 @@ Channel:
   View All: அனைத்தையும் பார்
   Videos:
     This channel has videos but none could be displayed, try fetching more: "இந்தச் சேனலில் காணொளிகள் உள்ளன, ஆனால் எதையும் காட்ட முடியவில்லை. மேலும் காணொளிகளை ஏற்ற முயற்சிக்கவும்"
+  Posts:
+    Original post unavailable: "அசல் இடுகை கிடைக்கவில்லை"
 Video:
   Info panel source: 'மூலம்: {source}'
   External DRM Protected: "டி.ஆர்.எம் பாதுகாக்கப்பட்ட வீடியோக்களை OpenTubeX-இல் இயக்க முடியாது, ஏனெனில் அவற்றுக்கு தனியுரிம, மூடிய மூல கூறுகள் தேவைப்படுகின்றன."

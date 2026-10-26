@@ -1387,6 +1387,8 @@ Channel:
   All Results: Sve
   Videos:
     This channel has videos but none could be displayed, try fetching more: "Ovaj kanal ima videozapise, ali nijedan se nije mogao prikazati. Pokušajte učitati još"
+  Posts:
+    Original post unavailable: "Izvorna objava nije dostupna"
 Video:
   Info panel source: 'Izvor: {source}'
   External DRM Protected: "DRM-om zaštićena videa ne mogu se reproducirati u OpenTubeXu jer zahtijevaju vlasničke komponente zatvorenog koda."

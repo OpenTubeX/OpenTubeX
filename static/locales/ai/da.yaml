@@ -1434,6 +1434,8 @@ Channel:
   View All: Vis alle
   Videos:
     This channel has videos but none could be displayed, try fetching more: "Denne kanal har videoer, men ingen kunne vises. Prøv at hente flere"
+  Posts:
+    Original post unavailable: "Det oprindelige opslag er ikke tilgængeligt"
 Video:
   Info panel source: 'Kilde: {source}'
   External DRM Protected: "DRM-beskyttede videoer kan ikke afspilles i OpenTubeX, da de kræver proprietære komponenter med lukket kilde."

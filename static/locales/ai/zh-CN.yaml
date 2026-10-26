@@ -1374,6 +1374,8 @@ Channel:
   Channel Name Unavailable: 频道名称不可用
   Search Result Types: 搜索结果类型
   All Results: 全部
+  Posts:
+    Original post unavailable: "原帖不可用"
 Video:
   Info panel source: '来源：{source}'
   External DRM Protected: "OpenTubeX 无法播放受 DRM 保护的视频，因它们需要专有的、闭源的部件。"

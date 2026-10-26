@@ -1413,6 +1413,8 @@ Channel:
   View All: Alles bekijken
   Videos:
     This channel has videos but none could be displayed, try fetching more: "Dit kanaal heeft video’s, maar er konden er geen worden weergegeven. Probeer er meer te laden"
+  Posts:
+    Original post unavailable: "Oorspronkelijk bericht niet beschikbaar"
 Video:
   Info panel source: 'Bron: {source}'
   External DRM Protected: "Video's die beschermd worden door DRM kunnen niet worden afgespeeld in OpenTubeX omdat ze propriëtaire onderdelen met gesloten broncode vereisen."
