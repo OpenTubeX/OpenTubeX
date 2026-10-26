@@ -2255,6 +2255,11 @@ Form Inputs:
 Search Filters:
   Possible Age Restriction Hint: "YouTube potrebbe aver applicato una restrizione di età a questa ricerca."
   Cookie Search Failed: "La ricerca con i cookie configurati non è riuscita."
+  Showing results for: "Sono mostrati i risultati per {query}"
+  Search instead for: "Cerca invece {query}"
+  Including results for: "Sono inclusi i risultati per {query}"
+  Search only for: "Cerca solo {query}"
+  Did you mean: "Forse cercavi {query}?"
 
 Storage Startup Error:
   Title: "Impossibile caricare i dati dell’app"

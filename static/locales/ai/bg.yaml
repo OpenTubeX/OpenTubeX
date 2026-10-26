@@ -2285,6 +2285,11 @@ Form Inputs:
 Search Filters:
   Possible Age Restriction Hint: "YouTube може да е наложил възрастово ограничение на тази заявка за търсене."
   Cookie Search Failed: "Търсенето с настроените бисквитки е неуспешно."
+  Showing results for: "Показват се резултати за {query}"
+  Search instead for: "Търсене вместо това на {query}"
+  Including results for: "Включително резултати за {query}"
+  Search only for: "Търсене само на {query}"
+  Did you mean: "Може би имахте предвид {query}?"
 
 Storage Startup Error:
   Title: "Данните на приложението не могат да се заредят"

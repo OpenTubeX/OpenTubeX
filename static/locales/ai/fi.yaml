@@ -2311,6 +2311,11 @@ Form Inputs:
 Search Filters:
   Possible Age Restriction Hint: "YouTube on saattanut asettaa tälle hakukyselylle ikärajoituksen."
   Cookie Search Failed: "Haku määritetyillä evästeillä epäonnistui."
+  Showing results for: "Näytetään tulokset haulle {query}"
+  Search instead for: "Hae sen sijaan {query}"
+  Including results for: "Sisältää tuloksia haulle {query}"
+  Search only for: "Hae vain {query}"
+  Did you mean: "Tarkoititko {query}?"
 
 Storage Startup Error:
   Title: "Sovelluksen tietoja ei voitu ladata"

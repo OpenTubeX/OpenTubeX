@@ -33,6 +33,7 @@ function createSearch (backend) {
   const errors = []
   const notices = []
   const updatedChannels = []
+  const localSearches = []
   const searchSettings = { prioritize: 'relevance', time: '', type: 'all', duration: '', features: [] }
   const history = ['previous search', 'cached replacement'].map(query => ({
     query,
@@ -55,6 +56,8 @@ function createSearch (backend) {
     nextPageRef: { value: null },
     shownResults: { value: [] },
     searchNotice: { value: null },
+    searchCorrection: { value: null },
+    spellCorrection: { value: true },
     searchParams: { value: '' },
     cookieSearchFailed: { value: false },
     isRetryingWithCookies: { value: false }
@@ -85,7 +88,16 @@ function createSearch (backend) {
       }
     },
     getLocalSearchContinuation: continuation,
-    getLocalSearchResults: async () => ({ results: [], continuationData: null, searchNotice: null, searchParams: 'encoded filters' }),
+    getLocalSearchResults: async (query, _settings, _safetyMode, _signal, spellCorrection) => {
+      localSearches.push({ query, spellCorrection })
+      return {
+        results: [],
+        continuationData: null,
+        searchNotice: null,
+        searchCorrection: spellCorrection ? { type: 'showingResultsFor', correctedQuery: `${query} corrected` } : null,
+        searchParams: 'encoded filters'
+      }
+    },
     getInvidiousSearchResults: continuation,
     extractLocalCacheableSearchContinuation: value => value,
     updateSubscriptionDetails: results => updatedChannels.push(results),
@@ -98,11 +110,11 @@ function createSearch (backend) {
     console: { error: error => errors.push(error) },
     process: { env: { SUPPORTS_LOCAL_API: true } }
   })
-  const select = query => checkSearchCache({ query, searchSettings, options: {} })
+  const select = (query, spellCorrection) => checkSearchCache({ query, searchSettings, options: {}, spellCorrection })
   const result = id => backend === 'local'
     ? { results: [{ id }], continuationData: `${id} continuation` }
     : [{ id }]
-  return { state, history, previous, current, requests, errors, notices, updatedChannels, select, nextPage, result }
+  return { state, history, previous, current, requests, errors, notices, updatedChannels, localSearches, select, nextPage, result }
 }
 
 test('restores the completed empty Local search after an Invidious pagination fallback', async () => {
@@ -159,3 +171,27 @@ for (const backend of ['local', 'invidious']) {
     })
   }
 }
+
+test('caches searches with and without spelling correction separately', async () => {
+  const search = createSearch('local')
+  const correction = { type: 'showingResultsFor', correctedQuery: 'speling corrected' }
+  search.select('speling')
+  await new Promise(setImmediate)
+  assert.deepEqual(search.state.searchCorrection.value, correction)
+
+  search.select('speling', false)
+  await new Promise(setImmediate)
+  assert.equal(search.state.searchCorrection.value, null)
+  assert.deepEqual(search.localSearches, [
+    { query: 'speling', spellCorrection: true },
+    { query: 'speling', spellCorrection: false }
+  ])
+
+  search.select('speling')
+  search.select('speling', false)
+  assert.equal(search.state.spellCorrection.value, false)
+  assert.equal(search.state.searchCorrection.value, null)
+  search.select('speling')
+  assert.deepEqual(search.state.searchCorrection.value, correction)
+  assert.equal(search.localSearches.length, 2)
+})

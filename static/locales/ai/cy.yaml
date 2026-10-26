@@ -2287,6 +2287,11 @@ Form Inputs:
 Search Filters:
   Possible Age Restriction Hint: "Mae’n bosibl bod YouTube wedi gosod cyfyngiad oedran ar yr ymholiad chwilio hwn."
   Cookie Search Failed: "Methodd y chwiliad gyda’r cwcis wedi’u ffurfweddu."
+  Showing results for: "Yn dangos canlyniadau ar gyfer {query}"
+  Search instead for: "Chwilio am {query} yn lle hynny"
+  Including results for: "Yn cynnwys canlyniadau ar gyfer {query}"
+  Search only for: "Chwilio am {query} yn unig"
+  Did you mean: "Oeddech chi'n golygu {query}?"
 
 Storage Startup Error:
   Title: "Methu llwytho data'r ap"

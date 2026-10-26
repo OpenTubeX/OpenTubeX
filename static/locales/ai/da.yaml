@@ -2348,6 +2348,11 @@ Form Inputs:
 Search Filters:
   Possible Age Restriction Hint: "YouTube kan have aldersbegrænset denne søgeforespørgsel."
   Cookie Search Failed: "Søgning med de konfigurerede cookies mislykkedes."
+  Showing results for: "Viser resultater for {query}"
+  Search instead for: "Søg i stedet efter {query}"
+  Including results for: "Inkluderer resultater for {query}"
+  Search only for: "Søg kun efter {query}"
+  Did you mean: "Mente du {query}?"
 
 Storage Startup Error:
   Title: "Appdata kunne ikke indlæses"

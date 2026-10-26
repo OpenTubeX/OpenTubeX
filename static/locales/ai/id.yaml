@@ -2272,6 +2272,11 @@ Form Inputs:
 Search Filters:
   Possible Age Restriction Hint: "YouTube mungkin telah menerapkan batasan usia pada kueri pencarian ini."
   Cookie Search Failed: "Pencarian dengan cookie yang dikonfigurasi gagal."
+  Showing results for: "Menampilkan hasil untuk {query}"
+  Search instead for: "Telusuri {query} sebagai gantinya"
+  Including results for: "Termasuk hasil untuk {query}"
+  Search only for: "Hanya telusuri {query}"
+  Did you mean: "Mungkin maksud Anda {query}?"
 
 Storage Startup Error:
   Title: "Data aplikasi tidak dapat dimuat"

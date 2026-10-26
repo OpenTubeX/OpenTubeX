@@ -2309,6 +2309,11 @@ Form Inputs:
 Search Filters:
   Possible Age Restriction Hint: "Este posibil ca YouTube să fi aplicat o restricție de vârstă pentru această căutare."
   Cookie Search Failed: "Căutarea cu modulele cookie configurate a eșuat."
+  Showing results for: "Se afișează rezultate pentru {query}"
+  Search instead for: "Caută în schimb {query}"
+  Including results for: "Include rezultate pentru {query}"
+  Search only for: "Caută doar {query}"
+  Did you mean: "Ai vrut să scrii {query}?"
 
 Storage Startup Error:
   Title: "Datele aplicației nu au putut fi încărcate"

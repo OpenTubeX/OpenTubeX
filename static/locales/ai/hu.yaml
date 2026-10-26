@@ -2257,6 +2257,11 @@ Form Inputs:
 Search Filters:
   Possible Age Restriction Hint: "Előfordulhat, hogy a YouTube korhatárt állított be ehhez a keresési lekérdezéshez."
   Cookie Search Failed: "A keresés a beállított sütikkel sikertelen volt."
+  Showing results for: "Találatok a következőre: {query}"
+  Search instead for: "Keresés helyette erre: {query}"
+  Including results for: "A következő találatait is tartalmazza: {query}"
+  Search only for: "Csak erre keressen: {query}"
+  Did you mean: "Erre gondolt: {query}?"
 
 Storage Startup Error:
   Title: "Nem sikerült betölteni az alkalmazás adatait"

@@ -68,6 +68,11 @@ Search Listing:
 Search Filters:
   Possible Age Restriction Hint: "Магчыма, YouTube наклаў узроставае абмежаванне на гэты пошукавы запыт."
   Cookie Search Failed: "Пошук з наладжанымі кукі не ўдаўся."
+  Showing results for: "Паказваюцца вынікі для {query}"
+  Search instead for: "Шукаць замест гэтага {query}"
+  Including results for: "Уключаючы вынікі для {query}"
+  Search only for: "Шукаць толькі {query}"
+  Did you mean: "Магчыма, вы мелі на ўвазе {query}?"
   Prioritize:
     Prioritize: Аддаваць перавагу
     Popularity: Папулярнасць

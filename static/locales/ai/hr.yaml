@@ -2289,6 +2289,11 @@ Form Inputs:
 Search Filters:
   Possible Age Restriction Hint: "YouTube je možda postavio dobno ograničenje za ovaj upit za pretraživanje."
   Cookie Search Failed: "Pretraživanje s konfiguriranim kolačićima nije uspjelo."
+  Showing results for: "Prikazuju se rezultati za {query}"
+  Search instead for: "Umjesto toga traži {query}"
+  Including results for: "Uključujući rezultate za {query}"
+  Search only for: "Traži samo {query}"
+  Did you mean: "Jeste li mislili {query}?"
 
 Storage Startup Error:
   Title: "Nije moguće učitati podatke aplikacije"

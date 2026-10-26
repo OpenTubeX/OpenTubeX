@@ -2262,6 +2262,11 @@ Form Inputs:
 Search Filters:
   Possible Age Restriction Hint: "YouTube kan ha satt en aldersgrense for dette søket."
   Cookie Search Failed: "Søk med de konfigurerte informasjonskapslene mislyktes."
+  Showing results for: "Viser resultater for {query}"
+  Search instead for: "Søk i stedet etter {query}"
+  Including results for: "Inkluderer resultater for {query}"
+  Search only for: "Søk bare etter {query}"
+  Did you mean: "Mente du {query}?"
 
 Storage Startup Error:
   Title: "Kunne ikke laste appdata"

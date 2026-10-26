@@ -13,6 +13,7 @@ import store from '../../store/index'
 import { PlayerCache } from './PlayerCache'
 import { createBackgroundPlayer } from './background-player.js'
 import { loadSearchContinuation } from '../search-continuation'
+import { disableSearchSpellCorrection, parseSearchCorrection } from '../search-correction'
 import {
   getCommentTranslationSource,
   requestCommentTranslation
@@ -382,23 +383,34 @@ export async function getLocalTrending(location, tab) {
  * @param {object} filters
  * @param {boolean} safetyMode
  * @param {AbortSignal} [signal]
+ * @param {boolean} [spellCorrection]
  */
-export async function getLocalSearchResults(query, filters, safetyMode, signal) {
+export async function getLocalSearchResults(query, filters, safetyMode, signal, spellCorrection = true) {
   let searchParams = ''
   const innertube = await createInnertube({
     safetyMode,
     signal,
     fetchFunc: (input, init) => {
       if (new URL(input instanceof Request ? input.url : input).pathname === '/youtubei/v1/search') {
+        const body = JSON.parse(init.body)
+        // Continuation requests carry no params.
+        if (!spellCorrection && body.params) {
+          body.params = disableSearchSpellCorrection(body.params)
+          init = { ...init, body: JSON.stringify(body) }
+        }
         // Reuse YouTube.js' encoded filters for an explicit yt-dlp retry.
-        searchParams = JSON.parse(init.body).params ?? ''
+        searchParams = body.params ?? ''
       }
       return localApiFetch(input, init)
     },
   })
   const response = await innertube.search(query, convertSearchFilters(filters))
 
-  return { ...handleSearchResponse(response), searchParams }
+  return {
+    ...handleSearchResponse(response),
+    searchCorrection: parseSearchCorrection(response.results),
+    searchParams
+  }
 }
 
 /**

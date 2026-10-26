@@ -68,6 +68,11 @@ Search Listing:
 Search Filters:
   Possible Age Restriction Hint: "Es posible que YouTube haya aplicado una restricción de edad a esta búsqueda."
   Cookie Search Failed: "La búsqueda con las cookies configuradas falló."
+  Showing results for: "Mostrando resultados de {query}"
+  Search instead for: "Buscar {query} en su lugar"
+  Including results for: "Incluye resultados de {query}"
+  Search only for: "Buscar solo {query}"
+  Did you mean: "¿Quisiste decir {query}?"
   Prioritize:
     Prioritize: Priorizar
     Popularity: Popularidad

@@ -2265,6 +2265,11 @@ Form Inputs:
 Search Filters:
   Possible Age Restriction Hint: "YouTube en deus marteze lakaet un harz oad war ar goulenn klask-mañ."
   Cookie Search Failed: "Cʼhwitet eo ar cʼhlask gant an toupinoù kefluniet."
+  Showing results for: "O tiskouez disoc'hoù evit {query}"
+  Search instead for: "Klask {query} kentoc'h"
+  Including results for: "En ur lakaat disoc'hoù evit {query}"
+  Search only for: "Klask {query} hepken"
+  Did you mean: "Ha soñjal a raes e {query}?"
 
 Storage Startup Error:
   Title: "N'eus ket bet gallet kargañ roadennoù an arload"

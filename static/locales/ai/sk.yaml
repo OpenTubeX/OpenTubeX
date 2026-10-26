@@ -2256,6 +2256,11 @@ Form Inputs:
 Search Filters:
   Possible Age Restriction Hint: "YouTube mohol pre tento vyhľadávací dopyt nastaviť vekové obmedzenie."
   Cookie Search Failed: "Vyhľadávanie s nastavenými súbormi cookie zlyhalo."
+  Showing results for: "Zobrazujú sa výsledky pre {query}"
+  Search instead for: "Namiesto toho hľadať {query}"
+  Including results for: "Vrátane výsledkov pre {query}"
+  Search only for: "Hľadať iba {query}"
+  Did you mean: "Mali ste na mysli {query}?"
 
 Storage Startup Error:
   Title: "Údaje aplikácie sa nepodarilo načítať"

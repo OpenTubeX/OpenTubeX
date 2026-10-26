@@ -2259,6 +2259,11 @@ Form Inputs:
 Search Filters:
   Possible Age Restriction Hint: "YouTube võib olla sellele otsingupäringule vanusepiirangu kehtestanud."
   Cookie Search Failed: "Otsing seadistatud küpsistega ebaõnnestus."
+  Showing results for: "Kuvatakse tulemused päringule {query}"
+  Search instead for: "Otsi hoopis {query}"
+  Including results for: "Sisaldab tulemusi päringule {query}"
+  Search only for: "Otsi ainult {query}"
+  Did you mean: "Kas mõtlesite {query}?"
 
 Storage Startup Error:
   Title: "Rakenduse andmeid ei saanud laadida"

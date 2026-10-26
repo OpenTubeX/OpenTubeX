@@ -68,6 +68,11 @@ Search Listing:
 Search Filters:
   Possible Age Restriction Hint: "ممکن است YouTube برای این عبارت جستجو محدودیت سنی اعمال کرده باشد."
   Cookie Search Failed: "جستجو با کوکی‌های تنظیم‌شده ناموفق بود."
+  Showing results for: "نمایش نتایج برای {query}"
+  Search instead for: "به‌جای آن جستجو برای {query}"
+  Including results for: "شامل نتایج برای {query}"
+  Search only for: "فقط جستجو برای {query}"
+  Did you mean: "منظورتان {query} بود؟"
   Prioritize:
     Prioritize: اولویت‌بندی
     Popularity: محبوبیت

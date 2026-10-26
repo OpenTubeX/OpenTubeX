@@ -66,6 +66,11 @@ Search Listing:
 Search Filters:
   Possible Age Restriction Hint: "YouTube இந்தத் தேடல் வினவலுக்கு வயதுக் கட்டுப்பாடு விதித்திருக்கலாம்."
   Cookie Search Failed: "கட்டமைக்கப்பட்ட குக்கிகளுடன் தேடல் தோல்வியடைந்தது."
+  Showing results for: "{query} க்கான முடிவுகள் காட்டப்படுகின்றன"
+  Search instead for: "அதற்குப் பதிலாக {query} ஐத் தேடு"
+  Including results for: "{query} க்கான முடிவுகளும் அடங்கும்"
+  Search only for: "{query} ஐ மட்டும் தேடு"
+  Did you mean: "{query} என்று சொல்ல வந்தீர்களா?"
   Prioritize:
     Prioritize: முன்னுரிமை அளி
 Stats:

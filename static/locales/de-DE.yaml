@@ -51,6 +51,11 @@ Search / Go to URL: Suchen / URL öffnen
 Search Filters:
   Possible Age Restriction Hint: "YouTube hat diese Suchanfrage möglicherweise mit einer Altersbeschränkung versehen."
   Cookie Search Failed: "Die Suche mit den konfigurierten Cookies ist fehlgeschlagen."
+  Showing results for: "Ergebnisse für {query} werden angezeigt"
+  Search instead for: "Stattdessen nach {query} suchen"
+  Including results for: "Einschließlich Ergebnissen für {query}"
+  Search only for: "Nur nach {query} suchen"
+  Did you mean: "Meintest du {query}?"
   Search Filters: Suchfilter
   Prioritize:
     Most Relevant: Relevanz

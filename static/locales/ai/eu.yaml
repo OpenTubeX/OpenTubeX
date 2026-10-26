@@ -2266,6 +2266,11 @@ Form Inputs:
 Search Filters:
   Possible Age Restriction Hint: "Baliteke YouTube-k bilaketa-kontsulta honi adin-murrizketa ezarri izana."
   Cookie Search Failed: "Konfiguratutako cookieekin egindako bilaketak huts egin du."
+  Showing results for: "{query} bilaketaren emaitzak erakusten"
+  Search instead for: "Bilatu {query} horren ordez"
+  Including results for: "{query} bilaketaren emaitzak barne"
+  Search only for: "Bilatu {query} soilik"
+  Did you mean: "{query} esan nahi zenuen?"
 
 Storage Startup Error:
   Title: "Ezin izan dira aplikazioaren datuak kargatu"

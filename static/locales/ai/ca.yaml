@@ -81,6 +81,11 @@ Search Listing:
 Search Filters:
   Possible Age Restriction Hint: "És possible que YouTube hagi aplicat una restricció d’edat a aquesta consulta de cerca."
   Cookie Search Failed: "La cerca amb les galetes configurades ha fallat."
+  Showing results for: "Es mostren resultats de {query}"
+  Search instead for: "Cerca {query} en lloc d'això"
+  Including results for: "Inclou resultats de {query}"
+  Search only for: "Cerca només {query}"
+  Did you mean: "Volies dir {query}?"
   Prioritize:
     Prioritize: Prioritza
     Popularity: Popularitat

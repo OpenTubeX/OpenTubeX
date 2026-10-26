@@ -2313,6 +2313,11 @@ Form Inputs:
 Search Filters:
   Possible Age Restriction Hint: "ייתכן ש-YouTube החיל הגבלת גיל על שאילתת החיפוש הזו."
   Cookie Search Failed: "החיפוש באמצעות קובצי העוגיות שהוגדרו נכשל."
+  Showing results for: "מוצגות תוצאות עבור {query}"
+  Search instead for: "לחפש במקום זאת את {query}"
+  Including results for: "כולל תוצאות עבור {query}"
+  Search only for: "לחפש רק את {query}"
+  Did you mean: "האם התכוונת ל-{query}?"
 
 Storage Startup Error:
   Title: "לא ניתן לטעון את נתוני האפליקציה"

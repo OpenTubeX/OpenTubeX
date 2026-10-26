@@ -2256,6 +2256,11 @@ Form Inputs:
 Search Filters:
   Possible Age Restriction Hint: "YouTube bu arama sorgusuna yaş kısıtlaması uygulamış olabilir."
   Cookie Search Failed: "Yapılandırılan çerezlerle arama başarısız oldu."
+  Showing results for: "{query} için sonuçlar gösteriliyor"
+  Search instead for: "Bunun yerine {query} için ara"
+  Including results for: "{query} için sonuçlar dahil"
+  Search only for: "Yalnızca {query} için ara"
+  Did you mean: "Bunu mu demek istediniz: {query}"
 
 Storage Startup Error:
   Title: "Uygulama verileri yüklenemedi"

@@ -2283,6 +2283,11 @@ Form Inputs:
 Search Filters:
   Possible Age Restriction Hint: "YouTube gæti hafa sett aldurstakmörk á þessa leitarfyrirspurn."
   Cookie Search Failed: "Leit með stilltum vafrakökum mistókst."
+  Showing results for: "Sýnir niðurstöður fyrir {query}"
+  Search instead for: "Leita frekar að {query}"
+  Including results for: "Inniheldur niðurstöður fyrir {query}"
+  Search only for: "Leita aðeins að {query}"
+  Did you mean: "Áttirðu við {query}?"
 
 Storage Startup Error:
   Title: "Ekki tókst að hlaða gögnum forritsins"

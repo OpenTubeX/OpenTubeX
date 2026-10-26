@@ -2301,6 +2301,11 @@ Form Inputs:
 Search Filters:
   Possible Age Restriction Hint: "YouTube có thể đã áp dụng giới hạn độ tuổi cho truy vấn tìm kiếm này."
   Cookie Search Failed: "Tìm kiếm bằng cookie đã cấu hình thất bại."
+  Showing results for: "Đang hiển thị kết quả cho {query}"
+  Search instead for: "Thay vào đó, tìm kiếm {query}"
+  Including results for: "Bao gồm kết quả cho {query}"
+  Search only for: "Chỉ tìm kiếm {query}"
+  Did you mean: "Có phải bạn muốn tìm {query}?"
 
 Storage Startup Error:
   Title: "Không thể tải dữ liệu ứng dụng"

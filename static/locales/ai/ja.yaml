@@ -2256,6 +2256,11 @@ Form Inputs:
 Search Filters:
   Possible Age Restriction Hint: "YouTube がこの検索クエリに年齢制限を適用している可能性があります。"
   Cookie Search Failed: "設定済みの Cookie を使用した検索に失敗しました。"
+  Showing results for: "{query} の検索結果を表示しています"
+  Search instead for: "代わりに {query} で検索"
+  Including results for: "{query} の検索結果を含みます"
+  Search only for: "{query} のみを検索"
+  Did you mean: "もしかして: {query}"
 
 Storage Startup Error:
   Title: "アプリのデータを読み込めませんでした"

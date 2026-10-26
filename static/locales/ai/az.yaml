@@ -2266,6 +2266,11 @@ Form Inputs:
 Search Filters:
   Possible Age Restriction Hint: "YouTube bu axtarış sorğusuna yaş məhdudiyyəti qoymuş ola bilər."
   Cookie Search Failed: "Konfiqurasiya edilmiş kukilərlə axtarış alınmadı."
+  Showing results for: "{query} üçün nəticələr göstərilir"
+  Search instead for: "Bunun əvəzinə {query} axtarın"
+  Including results for: "{query} üçün nəticələr daxil edilir"
+  Search only for: "Yalnız {query} axtarın"
+  Did you mean: "{query} nəzərdə tutursunuz?"
 
 Storage Startup Error:
   Title: "Tətbiq məlumatları yüklənmədi"

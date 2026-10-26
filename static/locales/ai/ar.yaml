@@ -2289,6 +2289,11 @@ Form Inputs:
 Search Filters:
   Possible Age Restriction Hint: "قد يكون YouTube قد فرض قيدًا عمريًا على عبارة البحث هذه."
   Cookie Search Failed: "فشل البحث باستخدام ملفات تعريف الارتباط المحددة."
+  Showing results for: "عرض النتائج لـ {query}"
+  Search instead for: "البحث بدلاً من ذلك عن {query}"
+  Including results for: "تتضمن نتائج لـ {query}"
+  Search only for: "البحث فقط عن {query}"
+  Did you mean: "هل تقصد {query}؟"
 
 Storage Startup Error:
   Title: "تعذر تحميل بيانات التطبيق"

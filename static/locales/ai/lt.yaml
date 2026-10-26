@@ -72,6 +72,11 @@ Search Listing:
 Search Filters:
   Possible Age Restriction Hint: "YouTube galėjo pritaikyti amžiaus apribojimą šiai paieškos užklausai."
   Cookie Search Failed: "Paieška su sukonfigūruotais slapukais nepavyko."
+  Showing results for: "Rodomi rezultatai pagal {query}"
+  Search instead for: "Vietoj to ieškoti {query}"
+  Including results for: "Įtraukiami rezultatai pagal {query}"
+  Search only for: "Ieškoti tik {query}"
+  Did you mean: "Ar turėjote omenyje {query}?"
   Prioritize:
     Prioritize: Teikti pirmenybę
     Popularity: Populiarumui

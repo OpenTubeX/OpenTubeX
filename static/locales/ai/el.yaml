@@ -2287,6 +2287,11 @@ Form Inputs:
 Search Filters:
   Possible Age Restriction Hint: "Το YouTube ενδέχεται να έχει επιβάλει ηλικιακό περιορισμό σε αυτό το ερώτημα αναζήτησης."
   Cookie Search Failed: "Η αναζήτηση με τα ρυθμισμένα cookies απέτυχε."
+  Showing results for: "Εμφάνιση αποτελεσμάτων για {query}"
+  Search instead for: "Αναζήτηση για {query} αντί αυτού"
+  Including results for: "Συμπεριλαμβάνονται αποτελέσματα για {query}"
+  Search only for: "Αναζήτηση μόνο για {query}"
+  Did you mean: "Μήπως εννοούσατε {query};"
 
 Storage Startup Error:
   Title: "Δεν ήταν δυνατή η φόρτωση των δεδομένων της εφαρμογής"

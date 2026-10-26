@@ -145,6 +145,11 @@ Search Listing:
 Search Filters:
   Possible Age Restriction Hint: "YouTube may have age-restricted this search query."
   Cookie Search Failed: "Search failed with the configured cookies."
+  Showing results for: "Showing results for {query}"
+  Search instead for: "Search instead for {query}"
+  Including results for: "Including results for {query}"
+  Search only for: "Search only for {query}"
+  Did you mean: "Did you mean {query}?"
   Search Filters: Search Filters
   Prioritize:
     Prioritize: Prioritize

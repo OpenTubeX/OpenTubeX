@@ -938,7 +938,8 @@ const mutations = {
 
   addToSessionSearchHistory (state, payload) {
     const sameSearch = state.sessionSearchHistory.findIndex((search) => {
-      return search.query === payload.query && searchFiltersMatch(payload.searchSettings, search.searchSettings)
+      return search.query === payload.query && searchFiltersMatch(payload.searchSettings, search.searchSettings) &&
+        (search.spellCorrection ?? true) === (payload.spellCorrection ?? true)
     })
 
     if (sameSearch !== -1) {
@@ -955,6 +956,7 @@ const mutations = {
       }
       if (Object.hasOwn(payload, 'searchNotice')) {
         state.sessionSearchHistory[sameSearch].searchNotice = payload.searchNotice
+        state.sessionSearchHistory[sameSearch].searchCorrection = payload.searchCorrection
         state.sessionSearchHistory[sameSearch].searchParams = payload.searchParams
       }
       state.sessionSearchHistory.push(...state.sessionSearchHistory.splice(sameSearch, 1))

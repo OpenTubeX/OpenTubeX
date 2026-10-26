@@ -33,6 +33,14 @@
   text-align: center;
 }
 
+.searchCorrection {
+  margin-block: 0 16px;
+}
+
+.searchCorrection p {
+  margin-block: 4px;
+}
+
 .searchNotice {
   margin-block: 32px 16px;
   text-align: center;

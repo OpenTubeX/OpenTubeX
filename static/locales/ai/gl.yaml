@@ -2313,6 +2313,11 @@ Form Inputs:
 Search Filters:
   Possible Age Restriction Hint: "É posible que YouTube aplicase unha restrición de idade a esta busca."
   Cookie Search Failed: "Fallou a busca coas cookies configuradas."
+  Showing results for: "Mostrando resultados de {query}"
+  Search instead for: "Buscar {query} no seu lugar"
+  Including results for: "Inclúe resultados de {query}"
+  Search only for: "Buscar só {query}"
+  Did you mean: "Quixeches dicir {query}?"
 
 Storage Startup Error:
   Title: "Non se puideron cargar os datos da aplicación"

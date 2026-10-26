@@ -2258,6 +2258,11 @@ Form Inputs:
 Search Filters:
   Possible Age Restriction Hint: "YouTube 可能對此搜尋查詢設定了年齡限制。"
   Cookie Search Failed: "使用已設定的 Cookie 搜尋失敗。"
+  Showing results for: "顯示「{query}」的搜尋結果"
+  Search instead for: "改為搜尋：{query}"
+  Including results for: "包含「{query}」的搜尋結果"
+  Search only for: "僅搜尋：{query}"
+  Did you mean: "你是不是要找：{query}"
 
 Storage Startup Error:
   Title: "無法載入應用程式資料"

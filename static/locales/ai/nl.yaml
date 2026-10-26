@@ -2322,6 +2322,11 @@ Form Inputs:
 Search Filters:
   Possible Age Restriction Hint: "YouTube heeft mogelijk een leeftijdsbeperking ingesteld voor deze zoekopdracht."
   Cookie Search Failed: "Zoeken met de ingestelde cookies is mislukt."
+  Showing results for: "Resultaten voor {query} worden weergegeven"
+  Search instead for: "In plaats daarvan zoeken naar {query}"
+  Including results for: "Inclusief resultaten voor {query}"
+  Search only for: "Alleen zoeken naar {query}"
+  Did you mean: "Bedoelde je {query}?"
 
 Storage Startup Error:
   Title: "Appgegevens konden niet worden geladen"

@@ -68,6 +68,11 @@ Search Listing:
 Search Filters:
   Possible Age Restriction Hint: "YouTube에서 이 검색어에 연령 제한을 적용했을 수 있습니다."
   Cookie Search Failed: "설정된 쿠키를 사용한 검색에 실패했습니다."
+  Showing results for: "{query}에 대한 결과 표시 중"
+  Search instead for: "대신 {query} 검색"
+  Including results for: "{query}에 대한 결과 포함"
+  Search only for: "{query}만 검색"
+  Did you mean: "{query}을(를) 찾으셨나요?"
   Prioritize:
     Prioritize: 우선순위
     Popularity: 인기순

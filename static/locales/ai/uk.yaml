@@ -2304,6 +2304,11 @@ Form Inputs:
 Search Filters:
   Possible Age Restriction Hint: "Можливо, YouTube встановив вікове обмеження для цього пошукового запиту."
   Cookie Search Failed: "Пошук із налаштованими файлами cookie не вдався."
+  Showing results for: "Показано результати для {query}"
+  Search instead for: "Натомість шукати {query}"
+  Including results for: "Включно з результатами для {query}"
+  Search only for: "Шукати лише {query}"
+  Did you mean: "Можливо, ви мали на увазі {query}?"
 
 Storage Startup Error:
   Title: "Не вдалося завантажити дані застосунку"

@@ -1488,6 +1488,11 @@ Form Inputs:
 Search Filters:
   Possible Age Restriction Hint: "YouTube mógł nałożyć ograniczenie wiekowe na to zapytanie wyszukiwania."
   Cookie Search Failed: "Wyszukiwanie z użyciem skonfigurowanych plików cookie nie powiodło się."
+  Showing results for: "Wyświetlane są wyniki dla {query}"
+  Search instead for: "Zamiast tego wyszukaj {query}"
+  Including results for: "Uwzględniono wyniki dla {query}"
+  Search only for: "Szukaj tylko {query}"
+  Did you mean: "Czy chodziło Ci o {query}?"
 
 Storage Startup Error:
   Title: "Nie udało się wczytać danych aplikacji"

@@ -2282,6 +2282,11 @@ Form Inputs:
 Search Filters:
   Possible Age Restriction Hint: "YouTube kan ha åldersbegränsat den här sökfrågan."
   Cookie Search Failed: "Sökning med de konfigurerade kakorna misslyckades."
+  Showing results for: "Visar resultat för {query}"
+  Search instead for: "Sök i stället efter {query}"
+  Including results for: "Inklusive resultat för {query}"
+  Search only for: "Sök bara efter {query}"
+  Did you mean: "Menade du {query}?"
 
 Storage Startup Error:
   Title: "Kunde inte läsa in appdata"

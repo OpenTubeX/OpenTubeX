@@ -92,6 +92,11 @@ Search Listing:
 Search Filters:
   Possible Age Restriction Hint: "YouTube je morda za to iskalno poizvedbo nastavil starostno omejitev."
   Cookie Search Failed: "Iskanje z nastavljenimi piškotki ni uspelo."
+  Showing results for: "Prikazani so rezultati za {query}"
+  Search instead for: "Namesto tega išči {query}"
+  Including results for: "Vključno z rezultati za {query}"
+  Search only for: "Išči samo {query}"
+  Did you mean: "Ste mislili {query}?"
   Features:
     360 Video: 360-stopinjski videoposnetek
   Clear Filters: Počisti filtre
