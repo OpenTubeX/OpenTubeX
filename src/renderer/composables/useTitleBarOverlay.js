@@ -56,12 +56,16 @@ export function useTitleBarOverlay(layout) {
   let observedBar = null
   let barHeight = 32
   let pointerOnControls = false
+  /** @type {WeakSet<Animation>} */
+  const awaitedAnimations = new WeakSet()
 
   function sync() {
     frame = 0
     // A player entering full window covers the controls once it finishes
     // animating there.
     for (const animation of document.querySelector('.ftVideoPlayer.fullWindow')?.getAnimations() ?? []) {
+      if (awaitedAnimations.has(animation)) continue
+      awaitedAnimations.add(animation)
       animation.finished.then(scheduleSync, () => {})
     }
     const bar = findBarUnderControls()
