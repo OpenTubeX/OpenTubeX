@@ -16,8 +16,25 @@ export async function captureAppFramebuffer(app, testInfo, name) {
 }
 
 const SIZE = { width: 1710, height: 1026 }
+const CHANNEL_ID = 'UCsXVk37bltHxD1rDPwtNM8Q'
 const VIDEO_ID = 'AY5qcIq5u2g'
 const TIMESTAMP = 3 * 3600 + 41 * 60 + 58
+
+/** Open a YouTube URL from the search bar, or by route where the phone layout hides it. */
+async function openScreenshotUrl(page, url, route) {
+  const search = page.locator(sel.searchInput)
+  if (!await search.isVisible()) {
+    await page.evaluate(route => { location.hash = route }, route)
+    return
+  }
+  await search.fill(url)
+  await search.press('Enter')
+}
+
+async function clearScreenshotSearch(page) {
+  const search = page.locator(sel.searchInput)
+  if (await search.isVisible()) await search.fill('')
+}
 
 /** Load the same public subscription feed for README and discussion screenshots. */
 export async function openScreenshotSubscriptions(page) {
@@ -27,24 +44,22 @@ export async function openScreenshotSubscriptions(page) {
     await store.dispatch('updateFetchSubscriptionsAutomatically', false)
     await store.dispatch('updateVideoPlaybackEngine', 'yt-dlp')
   })
-  await page.locator(sel.searchInput).fill('https://www.youtube.com/channel/UCsXVk37bltHxD1rDPwtNM8Q')
-  await page.locator(sel.searchInput).press('Enter')
+  await openScreenshotUrl(page, `https://www.youtube.com/channel/${CHANNEL_ID}`, `/channel/${CHANNEL_ID}`)
   const subscribe = page.locator('.ftSubscribeButton .subscribeButton').first()
-  await expect(subscribe).toHaveText(/^\s*Subscribe/)
+  await expect(subscribe).toHaveText(/^\s*Subscribe/, { timeout: 60_000 })
   await subscribe.click()
   await expect(subscribe).toHaveText(/^\s*Unsubscribe/)
-  await page.locator(sel.searchInput).fill('')
+  await clearScreenshotSearch(page)
   await goTo(page, 'subscriptions')
   await page.locator('.subscriptionsHeaderRefreshWidget .refreshButton').click()
-  await expect(page.locator('.ft-list-video').nth(11)).toBeVisible({ timeout: 60_000 })
+  await expect(page.locator('.ft-list-video').nth(3)).toBeVisible({ timeout: 60_000 })
   await expect(page.locator('.subscriptionsHeaderRefreshWidget .refreshButton button'))
     .toHaveAttribute('title', /Refresh/)
 }
 
 /** Load the README's public video and pause on its selected decoded frame. */
 export async function openScreenshotWatch(page) {
-  await page.locator(sel.searchInput).fill(`https://www.youtube.com/watch?v=${VIDEO_ID}&t=${TIMESTAMP}`)
-  await page.locator(sel.searchInput).press('Enter')
+  await openScreenshotUrl(page, `https://www.youtube.com/watch?v=${VIDEO_ID}&t=${TIMESTAMP}`, `/watch/${VIDEO_ID}?timestamp=${TIMESTAMP}`)
   await expect(page.locator('.videoTitle')).toContainText('FLYING OVER JAPAN', { timeout: 60_000 })
   const video = page.locator('.ftVideoPlayer video')
   await expect(video).toBeVisible({ timeout: 60_000 })
@@ -58,10 +73,10 @@ export async function openScreenshotWatch(page) {
     element.currentTime = timestamp
   }, TIMESTAMP)
   await expectPausedFrame(page)
-  await page.locator(sel.searchInput).fill('')
+  await clearScreenshotSearch(page)
 }
 
-async function expectPausedFrame(page) {
+export async function expectPausedFrame(page) {
   await expect.poll(() => page.locator('.ftVideoPlayer video').evaluate(element => ({
     paused: element.paused,
     seeking: element.seeking,
@@ -92,17 +107,20 @@ export async function openScreenshotSettings(page) {
 }
 
 /**
- * Capture one of the README and theme-preview scenes once its content is ready.
+ * Wait until one of the README and theme-preview scenes is ready to capture.
  * @param {import('@playwright/test').Page} page
  * @param {'subscriptions'|'watch'|'settings'} view
- * @param {string} destination
  */
-export async function captureAppScreenshot(page, view, destination) {
+export async function prepareAppScreenshot(page, view) {
   // Content scenes must contain their expected imagery, even if a regression
   // removes the img elements entirely. Settings has no required imagery.
   if (view === 'subscriptions') {
-    for (let index = 0; index < 12; index++) {
-      const thumbnail = page.locator('.ft-list-video').nth(index).locator('img.thumbnailImage').first()
+    // The phone layout only renders the videos near its smaller viewport.
+    const videos = page.locator('.ft-list-video')
+    await expect(videos.nth(3)).toBeVisible()
+    const count = await videos.evaluateAll(items => items.filter(item => item.getBoundingClientRect().top < innerHeight).length)
+    for (let index = 0; index < count; index++) {
+      const thumbnail = videos.nth(index).locator('img.thumbnailImage').first()
       await expect(thumbnail).toBeVisible()
       await expectImagesLoaded(thumbnail)
     }
@@ -131,8 +149,20 @@ export async function captureAppScreenshot(page, view, destination) {
     await document.fonts.ready
     document.activeElement?.blur()
   })
-  await page.mouse.move(0, 0)
   await expect(page.locator('[data-sonner-toast]')).toHaveCount(0)
+  // Overlay scrollbars show briefly after content loads or scrolls.
+  await expect(page.locator('.os-scrollbar-visible:not(.os-scrollbar-unusable):not(.app-scrollbar-idle)')).toHaveCount(0)
+}
+
+/**
+ * Capture one of the README and theme-preview scenes once its content is ready.
+ * @param {import('@playwright/test').Page} page
+ * @param {'subscriptions'|'watch'|'settings'} view
+ * @param {string} destination
+ */
+export async function captureAppScreenshot(page, view, destination) {
+  await prepareAppScreenshot(page, view)
+  await page.mouse.move(0, 0)
   await page.screenshot({ path: destination, animations: 'disabled' })
   if (view === 'watch') await expectPausedFrame(page)
 }

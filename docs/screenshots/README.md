@@ -1,4 +1,4 @@
-# Updating the README screenshots
+# Updating the README and website screenshots
 
 From the repository root, run:
 
@@ -52,3 +52,43 @@ and uses `development` image URLs for official Flatpak builds. Flatpark checks
 out the release tag and uses that tag in its image URLs. The helper preserves
 the rest of each package's metadata. Package releases do not run the capture
 command.
+
+## Android
+
+The website shows phone screenshots of the Android app. To refresh them, build
+the debug APK, start an emulator, and pass its serial:
+
+```sh
+pnpm run capacitor:sync:android
+(cd android && ./gradlew assembleDebug)
+pnpm run screenshots:android emulator-5554
+```
+
+The command installs `android/app/build/outputs/apk/debug/app-debug.apk`, which
+is the OpenTubeX Dev app, and **clears that app's data** so the captures start
+from app defaults. Use an emulator, or a device where losing the Dev app's data
+is fine. The device language must be English (United States).
+
+It connects to the app's WebView with Playwright, captures the same views as
+the desktop command, and saves the full screen with `adb screencap`:
+
+| Files | View |
+| --- | --- |
+| `OpenTubeX1-mobile-dark.png`, `OpenTubeX1-mobile-light.png` | Subscriptions |
+| `OpenTubeX2-mobile-dark.png`, `OpenTubeX2-mobile-light.png` | Flying over Japan, paused at 3:41:58 |
+| `OpenTubeX3-mobile-dark.png`, `OpenTubeX3-mobile-light.png` | Settings, on the General category |
+
+The phone captures enable Appearance > Move Settings to App Header, so Settings
+opens as an app page without a minimize button. Emulators report the host
+keyboard as a hardware keyboard, so the command tells the app that none is
+attached, as on a phone.
+
+Unlike the desktop command, the watch page uses the default built-in playback
+engine. Clearing the app's data restores the yt-dlp version bundled in the
+APK, which can be too old for YouTube to serve its streams.
+
+While capturing, the command sets the display to 1080 × 2340 at 420 dpi,
+switches the system dark theme, and uses System UI demo mode for a clean
+status bar showing 12:00. It restores these settings afterwards. If a scene
+fails, no images are replaced, and the command prints the directory with that
+attempt's captures and a failure screenshot.

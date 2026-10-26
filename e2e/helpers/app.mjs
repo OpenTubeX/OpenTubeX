@@ -644,9 +644,14 @@ export async function goTo(page, route) {
   }
 
   if (route === 'settings') {
-    await page.locator('.profileTrigger').click()
-    await expect(page.locator('.quickSettingsMenu')).toBeVisible()
-    await page.locator('.allSettingsShortcut').click()
+    const headerButton = page.locator('.topNav .settingsButton')
+    if (await headerButton.isVisible()) {
+      await headerButton.click()
+    } else {
+      await page.locator('.profileTrigger').click()
+      await expect(page.locator('.quickSettingsMenu')).toBeVisible()
+      await page.locator('.allSettingsShortcut').click()
+    }
     await expect(page.locator('.settingsWindow')).toBeVisible()
     await expect(page.locator('.quickSettingsMenu')).toBeHidden()
     return
