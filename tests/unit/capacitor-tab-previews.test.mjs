@@ -142,7 +142,7 @@ for (const previewState of ['missing', 'cached', 'capturing']) {
   })
 }
 
-for (const event of ['loadeddata', 'playing', 'seeked']) {
+for (const event of ['load', 'loadeddata', 'playing', 'seeked']) {
   test(`${event} replaces a cached loading screenshot before the organizer opens`, async t => {
     const state = setup(t)
     t.mock.timers.tick(600)
