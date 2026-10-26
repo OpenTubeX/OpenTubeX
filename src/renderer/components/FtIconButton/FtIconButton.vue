@@ -11,7 +11,6 @@
       :title="title"
       :class="{
         [theme]: true,
-        shadow: useShadow,
         pressed: openOnRightOrLongClick && dropdownShown,
         disabled
       }"
@@ -244,10 +243,6 @@ const props = defineProps({
   theme: {
     type: String,
     default: 'base'
-  },
-  useShadow: {
-    type: Boolean,
-    default: true
   },
   padding: {
     type: Number,

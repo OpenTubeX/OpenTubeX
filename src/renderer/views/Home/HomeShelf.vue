@@ -13,7 +13,6 @@
       :title="t('Home Page.Previous shelf page', { section: label })"
       :icon="['fas', 'angle-left']"
       :disabled="pageIndex === 0"
-      :use-shadow="false"
       theme="base-no-default"
       @click="changePage(-1)"
     />
@@ -42,7 +41,6 @@
       :title="t('Home Page.Next shelf page', { section: label })"
       :icon="['fas', 'angle-right']"
       :disabled="pageIndex === pageCount - 1"
-      :use-shadow="false"
       theme="base-no-default"
       @click="changePage(1)"
     />

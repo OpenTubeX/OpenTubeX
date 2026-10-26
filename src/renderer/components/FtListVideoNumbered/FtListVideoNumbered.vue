@@ -90,7 +90,6 @@
         theme="base-no-default"
         :size="18"
         :padding="touchLayout ? 15 : 6"
-        :use-shadow="false"
         @click="openPlaylistItemMenu"
       />
     </template>

@@ -712,8 +712,7 @@
                 class="quickPlaybackSpeedIconButton"
                 :title="t('Settings.Player Settings.Edit Playback Speed Name')"
                 :icon="['fas', 'edit']"
-                :use-shadow="false"
-                theme="base"
+                theme="base-no-default"
                 @click="editingQuickPlaybackSpeedNameId = option.id"
               />
             </div>
@@ -734,8 +733,7 @@
                 class="quickPlaybackSpeedIconButton"
                 :title="t('Settings.Player Settings.Use Automatic Playback Speed Name')"
                 :icon="['fas', 'undo']"
-                :use-shadow="false"
-                theme="base"
+                theme="base-no-default"
                 @click="resetQuickPlaybackSpeedName(option.id)"
               />
             </div>
@@ -758,8 +756,7 @@
             :disabled="quickPlaybackSpeedBarEntries.length <= 1"
             :title="t('Delete')"
             :icon="['fas', 'trash']"
-            :use-shadow="false"
-            theme="base"
+            theme="base-no-default"
             @click="deleteQuickPlaybackSpeed(option.id)"
           />
         </div>

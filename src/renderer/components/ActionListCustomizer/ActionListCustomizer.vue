@@ -107,8 +107,7 @@
           :title="t('Home Page.Move section up', { section: item.label })"
           :disabled="index === 0"
           :icon="['fas', 'arrow-up']"
-          :use-shadow="false"
-          theme="base"
+          theme="base-no-default"
           @click="moveItem(item.id, -1)"
         />
         <FtIconButton
@@ -116,8 +115,7 @@
           :title="t('Home Page.Move section down', { section: item.label })"
           :disabled="index === selectedItems.length - 1"
           :icon="['fas', 'arrow-down']"
-          :use-shadow="false"
-          theme="base"
+          theme="base-no-default"
           @click="moveItem(item.id, 1)"
         />
         <FtIconButton
@@ -125,8 +123,7 @@
           :title="`${t('Search Bar.Remove')} ${item.label}`"
           :disabled="item.required"
           :icon="['fas', 'xmark']"
-          :use-shadow="false"
-          theme="base"
+          theme="base-no-default"
           @click="removeItem(item.id)"
         />
       </div>

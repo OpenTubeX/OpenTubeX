@@ -124,7 +124,6 @@
                     :title="t('Settings.SponsorBlock Settings.Generated SponsorBlock User ID Copy Button')"
                     :icon="['fas', 'copy']"
                     theme="secondary"
-                    :use-shadow="false"
                     :size="14"
                     :padding="5"
                     @click="handleCopyGeneratedSponsorBlockUserId"

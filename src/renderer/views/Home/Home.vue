@@ -46,7 +46,6 @@
                 :title="t('Home Page.Move section up', { section: sectionLabel(section.id) })"
                 :icon="['fas', 'arrow-up']"
                 :disabled="index === 0"
-                :use-shadow="false"
                 theme="base-no-default"
                 @click="moveSection(section.id, -1)"
               />
@@ -54,7 +53,6 @@
                 :title="t('Home Page.Move section down', { section: sectionLabel(section.id) })"
                 :icon="['fas', 'arrow-down']"
                 :disabled="index === configurableSections.length - 1"
-                :use-shadow="false"
                 theme="base-no-default"
                 @click="moveSection(section.id, 1)"
               />
@@ -168,7 +166,6 @@
               :title="t('KeyboardShortcutPrompt.Refresh')"
               :icon="['fas', 'sync']"
               :disabled="recommendationsLoading"
-              :use-shadow="false"
               theme="base-no-default"
               @click="refreshRecommendations"
             />
@@ -252,7 +249,6 @@
                     :title="t('Display Label', { label: action.label, value: action.type === 'blockChannel' ? video.author : (recommendationDisplayTitles.get(video.videoId) ?? video.title) })"
                     :icon="recommendationFeedbackFor(video.videoId) === action.type ? (action.selectedIcon ?? action.icon) : action.icon"
                     :aria-pressed="action.selectedIcon ? recommendationFeedbackFor(video.videoId) === action.type : null"
-                    :use-shadow="false"
                     theme="base-no-default"
                     @click="recommendationFeedback(video, action.type)"
                   />

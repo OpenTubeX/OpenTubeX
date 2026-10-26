@@ -135,7 +135,6 @@
           :icon="['fas', 'sync']"
           :size="12"
           :padding="8"
-          :use-shadow="false"
           class="reloadComments"
           :class="{ reloadCommentsAligned: canSortComments }"
           @click="reloadCommentData"
@@ -570,7 +569,6 @@
             :icon="['fas', 'sync']"
             :size="12"
             :padding="8"
-            :use-shadow="false"
             class="reloadComments"
             @click="reloadCommentData"
           />

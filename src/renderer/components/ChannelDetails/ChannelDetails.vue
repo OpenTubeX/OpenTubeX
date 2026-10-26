@@ -361,8 +361,7 @@
           :icon="['fas', 'search']"
           :aria-expanded="searchExpanded"
           :aria-pressed="searchExpanded"
-          :theme="searchExpanded ? 'secondary' : 'base'"
-          :use-shadow="false"
+          :theme="searchExpanded ? 'secondary' : 'base-no-default'"
           @click="toggleSearch"
         />
       </FtFlexBox>

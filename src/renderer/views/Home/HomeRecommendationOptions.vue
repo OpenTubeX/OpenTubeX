@@ -7,7 +7,6 @@
     dropdown-position-x="left"
     dropdown-portal
     dropdown-class="recommendationOptionsPopover"
-    :use-shadow="false"
     theme="base-no-default"
   >
     <template #dropdown-header>
