@@ -12,11 +12,13 @@ function withCheckout(callback) {
   const originalDirectory = process.cwd()
   const source = path.join(directory, 'source')
   const checkout = path.join(directory, 'checkout')
+  // Keep the developer's Git configuration, such as tag.gpgSign, out of the fixture repositories.
+  const env = { ...process.env, GIT_CONFIG_GLOBAL: '/dev/null', GIT_CONFIG_NOSYSTEM: '1' }
   const git = (...args) => execFileSync('git', args, {
     cwd: source,
     encoding: 'utf8',
     env: {
-      ...process.env,
+      ...env,
       GIT_AUTHOR_NAME: 'Release notes test',
       GIT_AUTHOR_EMAIL: 'test@example.com',
       GIT_COMMITTER_NAME: 'Release notes test',
@@ -26,7 +28,7 @@ function withCheckout(callback) {
   }).trim()
 
   try {
-    execFileSync('git', ['init', '--quiet', source])
+    execFileSync('git', ['init', '--quiet', source], { env })
     const tree = git('mktree')
     const commit = (message, parent) => git('commit-tree', tree, '-m', message, ...(parent ? ['-p', parent] : []))
     const previous = commit('Previous release')
@@ -37,7 +39,7 @@ function withCheckout(callback) {
     git('update-ref', 'refs/heads/other', unrelated)
     git('tag', 'previous', previous)
     git('symbolic-ref', 'HEAD', 'refs/heads/development')
-    execFileSync('git', ['clone', '--quiet', '--no-local', source, checkout])
+    execFileSync('git', ['clone', '--quiet', '--no-local', source, checkout], { env })
 
     // GitHub can report a merge that happened after the runner's checkout.
     const later = commit('Merged after checkout', target)
