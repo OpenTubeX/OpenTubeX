@@ -44,15 +44,17 @@ test('release note sections drop images, markup, and issue references', () => {
   ])
 })
 
-test('release note sections decode entities and keep non-promotional support headings', () => {
+test('release note sections decode entities, split numbered items, and keep non-promotional support headings', () => {
   assert.deepEqual(releaseNoteSections(`## Support for Android 15
 
 - Added &#X41;&#x42;&#67; and kept &#x110000; &constructor;
+1. First numbered item
+2) Second numbered item
 
 ## Support us
 
 - Donate today
-`), [{ heading: 'Support for Android 15', items: ['Added ABC and kept &#x110000; &constructor;'] }])
+`), [{ heading: 'Support for Android 15', items: ['Added ABC and kept &#x110000; &constructor;', 'First numbered item', 'Second numbered item'] }])
 })
 
 test('F-Droid changelogs keep every item when they fit', () => {

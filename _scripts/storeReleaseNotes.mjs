@@ -161,7 +161,7 @@ export function releaseNoteSections(markdown) {
 
   for (const line of cleanMarkdown(markdown).split('\n')) {
     const heading = line.match(/^#{1,6}\s+(.+)$/)
-    const bullet = line.match(/^\s*[-*+]\s+(.+)$/)
+    const bullet = line.match(/^\s*(?:[-*+]|\d+[.)])\s+(.+)$/)
 
     if (heading) {
       sections.push({ heading: heading[1].trim(), items: [] })
