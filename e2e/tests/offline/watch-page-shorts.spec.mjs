@@ -885,6 +885,8 @@ test.describe('Shorts feed navigation', () => {
       handleBounds.x + handleBounds.width / 2,
       handleBounds.y + handleBounds.height / 2
     )
+    // The idle scrollbar only becomes hit-testable after the move reveals it.
+    await scrollbarHandle.hover()
     await page.mouse.down()
     await page.mouse.move(
       handleBounds.x + handleBounds.width / 2,
