@@ -272,6 +272,10 @@ test('shows age-restricted and unlisted badges below the video title', async ({ 
 
 for (const blur of [false, true]) {
   test(`paints the toolbar's Save to dropdown above the cards below it${blur ? ' with blurred cards' : ''}`, { tag: '@scale' }, async ({ app, page }) => {
+    // Scrolling the toolbar to the top docks the scroll mini player, and
+    // scrolling back before the click undocks it. Either animation can pass
+    // over the dropdown while its hit test runs.
+    await page.evaluate(() => window.$store.dispatch('updateScrollMiniPlayerEnabled', false))
     await mockPlayableWatchPage(app, page)
     await openMockedVideo(page)
     if (blur) {
