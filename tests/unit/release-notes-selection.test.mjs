@@ -37,7 +37,7 @@ function withCheckout(callback) {
     const unrelated = commit('Another branch', previous)
     git('update-ref', 'refs/heads/development', target)
     git('update-ref', 'refs/heads/other', unrelated)
-    git('tag', 'previous', previous)
+    git('-c', 'tag.gpgSign=false', 'tag', 'previous', previous)
     git('symbolic-ref', 'HEAD', 'refs/heads/development')
     execFileSync('git', ['clone', '--quiet', '--no-local', source, checkout], { env })
 
