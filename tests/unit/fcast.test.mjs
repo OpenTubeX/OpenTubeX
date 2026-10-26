@@ -37,6 +37,10 @@ async function receiverForTest(t, { version = 3, onPlay } = {}) {
     const check = () => receiver.received(opcode).length >= count ? resolve(receiver.received(opcode).at(count - 1)) : setImmediate(check)
     check()
   })
+  receiver.disconnected = () => new Promise(resolve => {
+    const check = () => receiver.sockets.size ? setImmediate(check) : resolve()
+    check()
+  })
   const server = createServer(socket => {
     receiver.sockets.add(socket)
     socket.on('close', () => receiver.sockets.delete(socket))
@@ -160,10 +164,10 @@ test('FCast reports natural completion separately from a receiver stop', async t
   result = await manager.start(7, payload(upstream.url), () => ({}), allowLocal, fetch)
   receiver.send(FcastOpcode.PLAYBACK_UPDATE, { generationTime: Date.now(), state: 1, time: 40, duration: 120 })
   receiver.send(FcastOpcode.PLAYBACK_UPDATE, { generationTime: Date.now(), state: 0, time: 0, duration: 0 })
-  await new Promise(resolve => setTimeout(resolve, 50))
+  // The receiver sees the socket close only after the sender has handled the stop.
+  await receiver.disconnected()
   assert.deepEqual(manager.status(7, result.castId), { connected: false })
   assert.equal(manager.active, null)
-  assert.equal(receiver.sockets.size, 0)
 })
 
 test('FCast stops its session when another sender replaces the video', async t => {
