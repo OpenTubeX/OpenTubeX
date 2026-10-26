@@ -892,7 +892,7 @@
           :current-video-quality="currentVideoQuality"
           :current-subtitles-state="currentSubtitlesState"
           :current-volume="currentVolume"
-          :sponsor-block-panel-open="showSidebarSponsorBlock"
+          :sponsor-block-panel-open="phonePanelsEnabled ? mobilePanel === 'sponsorBlock' : showSidebarSponsorBlock"
           :sponsor-block-available="useSponsorBlock"
           :transcript-open="phonePanelsEnabled ? mobilePanel === 'transcript' : showTranscript"
           :transcript-available="transcriptAvailable"
@@ -1135,12 +1135,12 @@
         :disabled="!fullscreenSponsorBlockOpen || shortsPhonePanelsEnabled"
       >
         <FtPhonePanel
-          :enabled="shortsPhonePanelsEnabled"
+          :enabled="(phonePanelsEnabled && !fullscreenSponsorBlockOpen) || shortsPhonePanelsEnabled"
           :open="mobilePanel === 'sponsorBlock'"
           :title="$t('Settings.SponsorBlock Settings.SponsorBlock Settings')"
           fill
           custom-header
-          @close="closeShortsPhonePanel"
+          @close="fullscreenSponsorBlockOpen ? mobilePanel = null : closeSidebarSponsorBlock()"
         >
           <transition
             name="sidebar-panel"

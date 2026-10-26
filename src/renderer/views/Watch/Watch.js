@@ -2060,6 +2060,7 @@ export default defineComponent({
         this.sidebarPanelLeaving = true
       }
       if (!open && this.mobilePanel === 'sponsorBlock') this.mobilePanel = null
+      if (open && !this.showSidebarSponsorBlock && this.phonePanelsEnabled) this.mobilePanel = 'sponsorBlock'
       this.showSidebarSponsorBlock = open
       this.sponsorBlockInfoLoading = loading
       this.sponsorBlockInfoPendingUuid = pendingUuid
@@ -2088,6 +2089,10 @@ export default defineComponent({
       if (this.shortsPhonePanelsEnabled) {
         if (this.mobilePanel === 'sponsorBlock') this.closeShortsPhonePanel()
         else this.openShortsPhonePanel('sponsorBlock')
+        return
+      }
+      if (this.phonePanelsEnabled && this.showSidebarSponsorBlock && this.mobilePanel !== 'sponsorBlock') {
+        this.mobilePanel = 'sponsorBlock'
         return
       }
       if (this.customShortsPlayerActive && !this.showSidebarSponsorBlock) {
