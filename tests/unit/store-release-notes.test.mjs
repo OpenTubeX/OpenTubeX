@@ -1,5 +1,8 @@
 import assert from 'node:assert/strict'
-import { readFileSync } from 'node:fs'
+import { spawnSync } from 'node:child_process'
+import { mkdtempSync, readFileSync, rmSync, writeFileSync } from 'node:fs'
+import { tmpdir } from 'node:os'
+import { join } from 'node:path'
 import test from 'node:test'
 
 import {
@@ -95,4 +98,31 @@ test('RPM changelogs escape macros', () => {
 - Use Ctrl & the guide for 100%% of shortcuts
 - Fixed a crash that happened on startup
 `)
+})
+
+test('the converter rejects empty notes and invalid source dates', (t) => {
+  const directory = mkdtempSync(join(tmpdir(), 'store-release-notes-'))
+  t.after(() => rmSync(directory, { recursive: true, force: true }))
+  const convert = (format, markdown, env = {}) => {
+    const input = join(directory, 'notes.md')
+
+    writeFileSync(input, markdown)
+    return spawnSync(process.execPath, ['_scripts/storeReleaseNotes.mjs', format, input], {
+      encoding: 'utf8',
+      env: { ...process.env, ...env },
+    })
+  }
+
+  for (const format of ['appstream', 'debian', 'fdroid', 'rpm']) {
+    const result = convert(format, '## Highlights\n')
+
+    assert.equal(result.status, 1, format)
+    assert.match(result.stderr, /has no release note items/)
+  }
+
+  const invalidDate = convert('rpm', notes, { SOURCE_DATE_EPOCH: 'abc' })
+
+  assert.equal(invalidDate.status, 1)
+  assert.match(invalidDate.stderr, /Invalid SOURCE_DATE_EPOCH: abc/)
+  assert.match(convert('rpm', notes, { SOURCE_DATE_EPOCH: '1759651750' }).stdout, /^\* Sun Oct 05 2025 /)
 })

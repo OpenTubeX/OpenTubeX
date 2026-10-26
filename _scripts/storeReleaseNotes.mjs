@@ -307,7 +307,13 @@ const FORMATS = {
 function sourceDate() {
   const epoch = process.env.SOURCE_DATE_EPOCH
 
-  return epoch ? new Date(Number(epoch) * 1000) : new Date()
+  if (!epoch) { return new Date() }
+
+  const date = new Date(Number(epoch) * 1000)
+
+  if (Number.isNaN(date.getTime())) { throw new Error(`Invalid SOURCE_DATE_EPOCH: ${epoch}`) }
+
+  return date
 }
 
 function main() {
@@ -317,9 +323,11 @@ function main() {
     throw new Error(`Usage: storeReleaseNotes.mjs <${Object.keys(FORMATS).join(' | ')}> RELEASE_NOTES_MARKDOWN`)
   }
 
-  const output = FORMATS[format](fs.readFileSync(inputPath, 'utf8'))
+  const markdown = fs.readFileSync(inputPath, 'utf8')
 
-  if (!output.trim()) { throw new Error('The release notes have no items.') }
+  if (releaseNoteSections(markdown).length === 0) { throw new Error(`${inputPath} has no release note items.`) }
+
+  const output = FORMATS[format](markdown)
 
   process.stdout.write(output.endsWith('\n') ? output : `${output}\n`)
 }
