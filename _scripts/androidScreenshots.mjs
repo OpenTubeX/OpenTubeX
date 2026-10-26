@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict'
 import { execFileSync } from 'node:child_process'
-import { copyFile, mkdtemp, rm, writeFile } from 'node:fs/promises'
+import { copyFile, mkdir, mkdtemp, rm, writeFile } from 'node:fs/promises'
 import { tmpdir } from 'node:os'
 import path from 'node:path'
 import { setTimeout as delay } from 'node:timers/promises'
@@ -19,6 +19,8 @@ assert.ok(serial, 'Pass the serial of an emulator or device that no one else is 
 const APP_ID = 'org.opentubex.app.dev'
 const APK = fileURLToPath(new URL('../android/app/build/outputs/apk/debug/app-debug.apk', import.meta.url))
 const DESTINATION = fileURLToPath(new URL('../docs/screenshots', import.meta.url))
+// F-Droid and IzzyOnDroid read store screenshots from the fastlane metadata.
+const FASTLANE_DESTINATION = fileURLToPath(new URL('../fastlane/metadata/android/en-US/images/phoneScreenshots', import.meta.url))
 const SIZE = '1080x2340'
 const DENSITY = '420'
 const THEMES = ['dark', 'light']
@@ -158,6 +160,10 @@ try {
 
   // Only replace the committed images once every scene succeeded.
   for (const name of captures) await copyFile(path.join(output, name), path.join(DESTINATION, name))
+  await mkdir(FASTLANE_DESTINATION, { recursive: true })
+  for (const number of [1, 2, 3]) {
+    await copyFile(path.join(output, `OpenTubeX${number}-mobile-dark.png`), path.join(FASTLANE_DESTINATION, `${number}.png`))
+  }
   await rm(output, { recursive: true, force: true })
 } catch (error) {
   await writeFile(path.join(output, 'failure.png'), screencap())

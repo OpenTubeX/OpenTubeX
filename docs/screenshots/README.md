@@ -92,3 +92,9 @@ switches the system dark theme, and uses System UI demo mode for a clean
 status bar showing 12:00. It restores these settings afterwards. If a scene
 fails, no images are replaced, and the command prints the directory with that
 attempt's captures and a failure screenshot.
+
+The command also copies the dark captures to
+`fastlane/metadata/android/en-US/images/phoneScreenshots/` as `1.png` to
+`3.png`. F-Droid and IzzyOnDroid show those in their app listings. The
+[OpenTubeX F-Droid repository](https://github.com/OpenTubeX/fdroid) keeps its
+own copies, so update them there after a refresh.
