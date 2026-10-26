@@ -52,25 +52,54 @@
       </div>
     </div>
     <div class="videoMetrics">
-      <FtInlineMetadata class="datePublishedAndViewCount">
+      <FtInlineMetadata
+        class="datePublishedAndViewCount"
+        icon-labels
+      >
         <span
-          v-if="publishedDateText"
+          v-if="isPremiereInProgress"
           class="publishedDate"
-        >{{ publishedDateText }}</span>
+        ><FtIcon
+          :icon="['fas', 'tower-broadcast']"
+          class="statIcon"
+          aria-hidden="true"
+        />{{ t('Video.Premiere started', { timeAgo: publishedTimeAgo }) }}</span>
+        <span
+          v-else-if="publishedDateText"
+          class="publishedDate"
+          :title="publishedDateText"
+        ><FtIcon
+          :icon="['fas', 'calendar-days']"
+          class="statIcon"
+          role="img"
+          :aria-label="publishedString"
+        />{{ dateString }}</span>
         <span
           v-if="publishedTimeAgo && !isPremiereInProgress"
           class="publishedTimeAgo"
-        >{{ publishedTimeAgo }}</span>
+        ><FtIcon
+          :icon="['fas', 'clock']"
+          class="statIcon"
+          aria-hidden="true"
+        />{{ publishedTimeAgo }}</span>
         <span
           v-if="parsedViewCount"
           class="videoViews"
-        >{{ parsedViewCount }}</span>
+        ><FtIcon
+          :icon="['fas', 'eye']"
+          class="statIcon"
+          aria-hidden="true"
+        />{{ parsedViewCount }}</span>
         <bdi
           v-if="category"
           class="videoCategory"
-        >
-          <strong>{{ t('Description.Video Category') }}</strong> {{ category }}
-        </bdi>
+          :title="`${t('Description.Video Category')} ${category}`"
+        ><FtIcon
+          :icon="['fas', 'icons']"
+          class="statIcon"
+          role="img"
+          :aria-label="t('Description.Video Category')"
+        />{{ category }}</bdi>
       </FtInlineMetadata>
       <WatchVideoLikes
         :like-count="likeCount"
@@ -820,10 +849,6 @@ const publishedString = computed(() => {
 })
 
 const publishedDateText = computed(() => {
-  if (isPremiereInProgress.value) {
-    return t('Video.Premiere started', { timeAgo: publishedTimeAgo.value })
-  }
-
   if (!dateString.value) {
     return ''
   }

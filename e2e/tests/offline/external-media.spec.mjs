@@ -1868,18 +1868,21 @@ test('plays a non-YouTube URL and shows the available yt-dlp metadata', async ({
   await expect(page.locator(`${activeTab} .externalMediaDescription`)).toBeVisible()
   const metadata = page.locator(`${activeTab} .externalMediaMetricsRow .externalMediaMetrics`)
   await expect(metadata.locator(':scope > *')).toHaveText([
-    'Published on Jul 16, 2019',
+    'Jul 16, 2019',
     '7 years ago',
     '1,190 views',
     '42 watching',
-    'Video Category: People & Blogs'
+    'People & Blogs'
   ])
+  await expect(metadata.locator(':scope > * > .statIcon:first-child')).toHaveCount(5)
+  await expect(metadata.locator('.publishedDate')).toHaveAttribute('title', /^Published on Jul\s16,\s2019$/)
+  await expect(metadata.getByRole('img', { name: 'Video Category:', exact: true })).toHaveCount(1)
   await page.evaluate(async () => {
     const store = window.$store
     await store.dispatch('updateDateFormat', 'YYYY-MM-DD')
     await store.dispatch('updateHideVideoViews', true)
   })
-  await expect(metadata.locator('.publishedDate')).toHaveText('Published on 2019-07-16')
+  await expect(metadata.locator('.publishedDate')).toHaveText('2019-07-16')
   await expect(metadata.locator('.videoViews')).toHaveCount(0)
   await page.evaluate(async () => {
     const store = window.$store
@@ -1909,6 +1912,7 @@ test('plays a non-YouTube URL and shows the available yt-dlp metadata', async ({
   await expect(page.locator(`${activeTab} .externalMediaDetails`)).toContainText('4 comments')
   await expect(page.locator(`${activeTab} .externalMediaDetails`)).toContainText('3 reposts')
   await expect(page.locator(`${activeTab} .externalMediaDetails`)).toContainText('5 saves')
+  await expect(page.locator(`${activeTab} .externalMediaDetails .externalMediaMetrics`).last().locator('.statIcon')).toHaveCount(3)
   await expect(page.locator(`${activeTab} .externalMediaDetails`)).toContainText('People & Blogs')
   await expect(page.locator(`${activeTab} .externalMediaDetails`)).toContainText('Age restricted')
   await expect(page.locator(`${activeTab} .externalMediaExtra`)).toContainText('Example series')
@@ -2025,7 +2029,7 @@ test('plays a non-YouTube URL and shows the available yt-dlp metadata', async ({
   await page.locator(sel.searchInput).fill(nextMediaUrl)
   await page.locator(sel.searchInput).press('Enter')
   await expect(page.locator(`${activeTab} .externalMediaDetails h1`)).toHaveText('Another episode')
-  await expect(metadata.locator('.publishedDate')).toHaveText('Published on Jul 16, 2019')
+  await expect(metadata.locator('.publishedDate')).toHaveText('Jul 16, 2019')
   await expect(metadata.locator('.publishedTimeAgo')).toHaveText('7 years ago')
   await expect(metadata.locator('.videoViews')).toHaveText('0 views')
   await expect(ratings.locator('.likeCount')).toHaveText('1')
@@ -2126,7 +2130,7 @@ test('shows an upcoming external stream before formats are available', async ({ 
   await expect(page.locator(`${activeTab} .externalMediaDetails h1`)).toHaveText('Upcoming stream')
   await expect(page.locator(`${activeTab} .externalMediaDetails .likeBarContainer`)).toHaveCount(0)
   await expect(page.locator(`${activeTab} .externalMediaBadges`)).toContainText('Upcoming')
-  await expect(page.locator(`${activeTab} .externalMediaDetails`)).not.toContainText('Published on')
+  await expect(page.locator(`${activeTab} .externalMediaDetails .publishedDate`)).toHaveCount(0)
   await expect(page.locator(`${activeTab} .publishedTimeAgo`)).toHaveCount(0)
   await expect(page.locator(`${activeTab} .externalMediaExtra`)).toContainText('Release date')
   await expect(page.locator(`${activeTab} .externalMediaExtra`)).toContainText('1 Oct 2026')

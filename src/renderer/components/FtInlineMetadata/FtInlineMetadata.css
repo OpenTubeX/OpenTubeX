@@ -24,3 +24,16 @@
   border-radius: 50%;
   background-color: currentcolor;
 }
+
+.ftInlineMetadata.iconLabels {
+  column-gap: 1em;
+}
+
+.ftInlineMetadata.iconLabels > *::before {
+  content: none;
+}
+
+.ftInlineMetadata .statIcon {
+  margin-inline-end: 0.4em;
+  opacity: 0.8;
+}

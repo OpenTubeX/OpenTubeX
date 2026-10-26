@@ -12,7 +12,7 @@ test.use({
   },
 })
 
-test('desktop Shorts information keeps separator dots between metadata labels', { tag: '@scale' }, async ({ app, page }, testInfo) => {
+test('desktop Shorts information labels metadata with icons instead of separator dots', { tag: '@scale' }, async ({ app, page }, testInfo) => {
   await mockPlayableWatchPage(app, page)
   await openMockedVideo(page)
   const watch = await page.evaluateHandle(findWatchComponent)
@@ -29,27 +29,30 @@ test('desktop Shorts information keeps separator dots between metadata labels', 
   const metadata = page.locator('.shortsAuxPanelOpen .datePublishedAndViewCount')
   await expect(metadata).toBeVisible()
   await expect(metadata.locator(':scope > *')).toHaveCount(4)
+  await expect(metadata.locator(':scope > * > .statIcon:first-child')).toHaveCount(4)
+  await expect(metadata).not.toContainText('Published on')
+  await expect(metadata).not.toContainText('Video Category')
+  await expect(metadata.locator('.publishedDate')).toHaveAttribute('title', /^Published on /)
+  await expect(metadata.locator('.videoCategory')).toHaveText('Science & Technology')
+  await expect(metadata.locator('.videoCategory')).toHaveAttribute('title', 'Video Category: Science & Technology')
+  await expect(metadata.getByRole('img', { name: 'Published on', exact: true })).toHaveCount(1)
+  await expect(metadata.getByRole('img', { name: 'Video Category:', exact: true })).toHaveCount(1)
 
   for (const width of ['', '160px']) {
     await metadata.evaluate((element, value) => { element.style.inlineSize = value }, width)
     await expect.poll(() => metadata.evaluate(element => {
       const items = Array.from(element.children)
       const container = element.getBoundingClientRect()
-      return items.slice(1).every((item, index) => {
-        const before = getComputedStyle(item, '::before')
+      return items.every((item, index) => {
+        if (getComputedStyle(item, '::before').content !== 'none') return false
         const bounds = item.getBoundingClientRect()
-        const previous = items[index].getBoundingClientRect()
-        // The divider is a single CSS dot; no extra bullet glyph may paint
-        // on top of it or the adjacent text.
-        if (before.content !== '""') return false
-        const offset = parseFloat(before.insetInlineStart)
-        const width = parseFloat(before.width)
-        const start = bounds.left + offset
-        const end = start + width
-        if (Math.abs(bounds.top - previous.top) > 1) return end <= container.left
-        return start > previous.right && end < bounds.left
+        if (index === 0) return true
+        const previous = items[index - 1].getBoundingClientRect()
+        // A wrapped item starts its own line; otherwise it must not touch the previous label.
+        if (Math.abs(bounds.top - previous.top) > 1) return Math.abs(bounds.left - container.left) <= 1
+        return bounds.left > previous.right
       })
-    }), { message: 'metadata separators must not overlap their labels' }).toBe(true)
+    }), { message: 'icon-labeled metadata must not draw separators or overlap' }).toBe(true)
   }
   await metadata.evaluate(element => { element.style.inlineSize = '' })
   await page.screenshot({ path: testInfo.outputPath('shorts-video-info.png') })

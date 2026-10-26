@@ -490,7 +490,7 @@
   flex-wrap: wrap;
   align-items: baseline;
   align-content: flex-start;
-  gap: 2px 0.75em;
+  row-gap: 2px;
 }
 
 .fullscreenMetadataTarget :deep(.profileRow) {
@@ -498,8 +498,7 @@
   margin-block: 6px;
 }
 
-.fullscreenMetadataTarget :deep(.publishedDate),
-.fullscreenMetadataTarget :deep(.videoCategory strong) {
+.fullscreenMetadataTarget :deep(.publishedDate) {
   white-space: nowrap;
 }
 

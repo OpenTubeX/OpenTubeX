@@ -158,22 +158,51 @@
               >{{ badge }}</span>
             </div>
             <div class="externalMediaMetricsRow">
-              <FtInlineMetadata class="externalMediaMetrics">
+              <FtInlineMetadata
+                class="externalMediaMetrics"
+                icon-labels
+              >
                 <time
                   v-if="publishedDate"
                   class="publishedDate"
                   :datetime="publishedDate"
-                >{{ publishedDateLabel }} {{ formattedPublishedDate }}</time>
+                  :title="`${publishedDateLabel} ${formattedPublishedDate}`"
+                ><FtIcon
+                  :icon="['fas', 'calendar-days']"
+                  class="statIcon"
+                  role="img"
+                  :aria-label="publishedDateLabel"
+                />{{ formattedPublishedDate }}</time>
                 <span
                   v-if="publishedTimeAgo"
                   class="publishedTimeAgo"
-                >{{ publishedTimeAgo }}</span>
+                ><FtIcon
+                  :icon="['fas', 'clock']"
+                  class="statIcon"
+                  aria-hidden="true"
+                />{{ publishedTimeAgo }}</span>
                 <span
                   v-if="formattedViewCount"
                   class="videoViews"
-                >{{ formattedViewCount }}</span>
-                <span v-if="metadata.concurrentViewCount !== null">{{ t('Global.Counts.Watching Count', { count: formattedConcurrentViewCount }, metadata.concurrentViewCount) }}</span>
-                <bdi v-if="metadata.categories.length"><strong>{{ t('Description.Video Category') }}</strong> {{ metadata.categories.join(', ') }}</bdi>
+                ><FtIcon
+                  :icon="['fas', 'eye']"
+                  class="statIcon"
+                  aria-hidden="true"
+                />{{ formattedViewCount }}</span>
+                <span v-if="metadata.concurrentViewCount !== null"><FtIcon
+                  :icon="['fas', 'users']"
+                  class="statIcon"
+                  aria-hidden="true"
+                />{{ t('Global.Counts.Watching Count', { count: formattedConcurrentViewCount }, metadata.concurrentViewCount) }}</span>
+                <bdi
+                  v-if="metadata.categories.length"
+                  :title="`${t('Description.Video Category')} ${metadata.categories.join(', ')}`"
+                ><FtIcon
+                  :icon="['fas', 'icons']"
+                  class="statIcon"
+                  role="img"
+                  :aria-label="t('Description.Video Category')"
+                />{{ metadata.categories.join(', ') }}</bdi>
               </FtInlineMetadata>
               <WatchVideoLikes
                 :like-count="metadata.likeCount"
@@ -183,11 +212,16 @@
             <FtInlineMetadata
               v-if="engagement.length"
               class="externalMediaMetrics"
+              icon-labels
             >
               <span
                 v-for="item in engagement"
                 :key="item.label"
-              >{{ item.text }}</span>
+              ><FtIcon
+                :icon="item.icon"
+                class="statIcon"
+                aria-hidden="true"
+              />{{ item.text }}</span>
             </FtInlineMetadata>
             <div class="externalMediaCreator">
               <component
@@ -624,13 +658,13 @@ function engagementCount(value, label) {
 }
 const engagement = computed(() => {
   const counts = [
-    ['commentCount', value => t('Global.Counts.Comment Count', { count: numberFormat.value.format(value) }, value)],
-    ['repostCount', value => engagementCount(value, t('Video.External Media.Reposts', {}, value))],
-    ['saveCount', value => engagementCount(value, t('Video.External Media.Saves', {}, value))]
+    ['commentCount', 'comment', value => t('Global.Counts.Comment Count', { count: numberFormat.value.format(value) }, value)],
+    ['repostCount', 'retweet', value => engagementCount(value, t('Video.External Media.Reposts', {}, value))],
+    ['saveCount', 'bookmark', value => engagementCount(value, t('Video.External Media.Saves', {}, value))]
   ]
-  return counts.flatMap(([key, format]) => metadata.value[key] === null
+  return counts.flatMap(([key, icon, format]) => metadata.value[key] === null
     ? []
-    : [{ label: key, text: format(metadata.value[key]) }])
+    : [{ label: key, icon: ['fas', icon], text: format(metadata.value[key]) }])
 })
 const metadataRows = computed(() => {
   const values = [
