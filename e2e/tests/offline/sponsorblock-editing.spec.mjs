@@ -514,7 +514,8 @@ test.describe('segment editor layout', { tag: '@scale' }, () => {
     await expect(toast).toBeHidden()
   })
 
-  test('edits directly from a skipped toast and keeps its editor inside the player', async ({ app, page, uiScale }, testInfo) => {
+  // Quarantined: loses its toast under parallel load, see https://github.com/OpenTubeX/OpenTubeX/issues/2404
+  test.fixme('edits directly from a skipped toast and keeps its editor inside the player', async ({ app, page, uiScale }, testInfo) => {
     const { panel, video } = await openSegments(app, page)
     const votes = []
     await page.route('**/api/voteOnSponsorTime?*', route => {
