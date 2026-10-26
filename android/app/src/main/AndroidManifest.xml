@@ -123,10 +123,10 @@
                 <data android:scheme="https" />
                 <data android:host="instagram.com" />
                 <data android:host="www.instagram.com" />
-                <data android:pathPrefix="/reel/" />
-                <data android:pathPrefix="/reels/" />
-                <data android:pathPrefix="/p/" />
-                <data android:pathPrefix="/tv/" />
+                <data android:pathPattern="/reel/..*" />
+                <data android:pathPattern="/reels/..*" />
+                <data android:pathPattern="/p/..*" />
+                <data android:pathPattern="/tv/..*" />
             </intent-filter>
 
             <intent-filter>
@@ -135,7 +135,7 @@
                 <category android:name="android.intent.category.BROWSABLE" />
                 <data android:scheme="https" />
                 <data android:host="www.tiktok.com" />
-                <data android:pathPattern="/@.*/video/.*" />
+                <data android:pathPattern="/@.*/video/..*" />
             </intent-filter>
 
             <intent-filter>
@@ -145,6 +145,7 @@
                 <data android:scheme="https" />
                 <data android:host="vm.tiktok.com" />
                 <data android:host="vt.tiktok.com" />
+                <data android:pathPattern="/..*" />
             </intent-filter>
 
             <intent-filter>
@@ -157,7 +158,7 @@
                 <data android:host="twitter.com" />
                 <data android:host="www.twitter.com" />
                 <data android:host="mobile.twitter.com" />
-                <data android:pathPattern="/.*/status/.*" />
+                <data android:pathPattern="/.*/status/..*" />
             </intent-filter>
 
             <intent-filter>
@@ -168,8 +169,8 @@
                 <data android:host="reddit.com" />
                 <data android:host="www.reddit.com" />
                 <data android:host="old.reddit.com" />
-                <data android:pathPattern="/r/.*/comments/.*" />
-                <data android:pathPattern="/user/.*/comments/.*" />
+                <data android:pathPattern="/r/.*/comments/..*" />
+                <data android:pathPattern="/user/.*/comments/..*" />
             </intent-filter>
 
             <intent-filter>
@@ -181,9 +182,9 @@
                 <data android:host="www.facebook.com" />
                 <data android:host="m.facebook.com" />
                 <data android:pathPrefix="/watch" />
-                <data android:pathPrefix="/reel/" />
+                <data android:pathPattern="/reel/..*" />
                 <data android:pathPrefix="/video.php" />
-                <data android:pathPattern="/.*/videos/.*" />
+                <data android:pathPattern="/.*/videos/..*" />
             </intent-filter>
 
             <intent-filter>
@@ -193,7 +194,7 @@
                 <data android:scheme="https" />
                 <data android:host="dailymotion.com" />
                 <data android:host="www.dailymotion.com" />
-                <data android:pathPrefix="/video/" />
+                <data android:pathPattern="/video/..*" />
             </intent-filter>
 
             <intent-filter>
@@ -202,6 +203,7 @@
                 <category android:name="android.intent.category.BROWSABLE" />
                 <data android:scheme="https" />
                 <data android:host="dai.ly" />
+                <data android:pathPattern="/..*" />
             </intent-filter>
 
             <intent-filter>
@@ -212,8 +214,8 @@
                 <data android:host="twitch.tv" />
                 <data android:host="www.twitch.tv" />
                 <data android:host="m.twitch.tv" />
-                <data android:pathPrefix="/videos/" />
-                <data android:pathPattern="/.*/clip/.*" />
+                <data android:pathPattern="/videos/..*" />
+                <data android:pathPattern="/.*/clip/..*" />
             </intent-filter>
 
             <intent-filter>
@@ -222,6 +224,7 @@
                 <category android:name="android.intent.category.BROWSABLE" />
                 <data android:scheme="https" />
                 <data android:host="clips.twitch.tv" />
+                <data android:pathPattern="/..*" />
             </intent-filter>
 
             <intent-filter>
@@ -231,7 +234,7 @@
                 <data android:scheme="https" />
                 <data android:host="soundcloud.com" />
                 <data android:host="m.soundcloud.com" />
-                <data android:pathPattern="/.*/.*" />
+                <data android:pathPattern="/.*/..*" />
             </intent-filter>
 
             <intent-filter>
@@ -240,8 +243,8 @@
                 <category android:name="android.intent.category.BROWSABLE" />
                 <data android:scheme="https" />
                 <data android:host="www.bilibili.com" />
-                <data android:pathPrefix="/video/" />
-                <data android:pathPrefix="/bangumi/play/" />
+                <data android:pathPattern="/video/..*" />
+                <data android:pathPattern="/bangumi/play/..*" />
             </intent-filter>
 
             <intent-filter>
@@ -260,7 +263,7 @@
                 <category android:name="android.intent.category.BROWSABLE" />
                 <data android:scheme="https" />
                 <data android:host="bsky.app" />
-                <data android:pathPattern="/profile/.*/post/.*" />
+                <data android:pathPattern="/profile/.*/post/..*" />
             </intent-filter>
 
             <intent-filter>
@@ -269,7 +272,7 @@
                 <category android:name="android.intent.category.BROWSABLE" />
                 <data android:scheme="https" />
                 <data android:host="odysee.com" />
-                <data android:pathPattern="/@.*/.*" />
+                <data android:pathPattern="/@.*/..*" />
             </intent-filter>
 
             <intent-filter>
@@ -278,8 +281,8 @@
                 <category android:name="android.intent.category.BROWSABLE" />
                 <data android:scheme="https" />
                 <data android:host="kick.com" />
-                <data android:pathPattern="/.*/videos/.*" />
-                <data android:pathPattern="/.*/clips/.*" />
+                <data android:pathPattern="/.*/videos/..*" />
+                <data android:pathPattern="/.*/clips/..*" />
             </intent-filter>
 
             <intent-filter>
@@ -288,7 +291,7 @@
                 <category android:name="android.intent.category.BROWSABLE" />
                 <data android:scheme="https" />
                 <data android:host="www.nicovideo.jp" />
-                <data android:pathPrefix="/watch/" />
+                <data android:pathPattern="/watch/..*" />
             </intent-filter>
 
             <intent-filter>
@@ -298,8 +301,8 @@
                 <data android:scheme="https" />
                 <data android:host="vk.com" />
                 <data android:host="vkvideo.ru" />
-                <data android:pathPrefix="/video" />
-                <data android:pathPrefix="/clip" />
+                <data android:pathPattern="/video.*_.*" />
+                <data android:pathPattern="/clip.*_.*" />
             </intent-filter>
 
             <intent-filter>
@@ -308,8 +311,8 @@
                 <category android:name="android.intent.category.BROWSABLE" />
                 <data android:scheme="https" />
                 <data android:host="*.bandcamp.com" />
-                <data android:pathPrefix="/track/" />
-                <data android:pathPrefix="/album/" />
+                <data android:pathPattern="/track/..*" />
+                <data android:pathPattern="/album/..*" />
             </intent-filter>
 
         </activity-alias>
