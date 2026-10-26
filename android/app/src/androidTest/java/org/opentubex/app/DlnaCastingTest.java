@@ -20,6 +20,7 @@ import java.nio.charset.StandardCharsets;
 import java.util.concurrent.*;
 import java.util.concurrent.atomic.AtomicReference;
 import org.json.JSONObject;
+import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import java.util.Arrays;
@@ -27,6 +28,16 @@ import java.util.List;
 
 @RunWith(AndroidJUnit4.class)
 public class DlnaCastingTest {
+    @Before public void allowCastNotifications() {
+        // Android 13+ hides the cast service's foreground notification without this
+        // permission, and startup may otherwise cover the activity with its request.
+        if (android.os.Build.VERSION.SDK_INT >= 33) {
+            Context context = InstrumentationRegistry.getInstrumentation().getTargetContext();
+            InstrumentationRegistry.getInstrumentation().getUiAutomation().grantRuntimePermission(context.getPackageName(),
+                android.Manifest.permission.POST_NOTIFICATIONS);
+        }
+    }
+
     @Test public void nativeDiscoveryControlAndRangedMediaWorkThroughTheBridge() throws Exception {
         verifyCastMenu(false);
     }
@@ -55,16 +66,7 @@ public class DlnaCastingTest {
 
     private void verifyCastMenu(boolean merged, boolean privateInstance, boolean notificationStop, boolean startupFailure) throws Exception {
         Context context = InstrumentationRegistry.getInstrumentation().getTargetContext();
-        ConnectivityManager manager = (ConnectivityManager) context.getSystemService(Context.CONNECTIVITY_SERVICE);
-        InetAddress local = null;
-        for (Network network : manager.getAllNetworks()) {
-            NetworkCapabilities capabilities = manager.getNetworkCapabilities(network);
-            if (capabilities == null || !capabilities.hasTransport(NetworkCapabilities.TRANSPORT_WIFI)) continue;
-            for (LinkAddress link : manager.getLinkProperties(network).getLinkAddresses()) {
-                if (local == null && link.getAddress() instanceof Inet4Address) local = link.getAddress();
-            }
-        }
-        assertNotNull("Wi-Fi IPv4 address", local);
+        InetAddress local = wifiAddress(context);
         String host = local.getHostAddress();
         byte[] video;
         try (InputStream input = InstrumentationRegistry.getInstrumentation().getContext().getAssets().open("hls-1080.mp4")) {
@@ -322,7 +324,11 @@ public class DlnaCastingTest {
                     assertEquals("Native mux startup falls back in the same cast", "2", evaluate(webView, "window.dlnaStartAttempts.length"));
                     assertEquals("true", evaluate(webView, "!!dlnaStartAttempts[0].audioUrl && !dlnaStartAttempts[1].audioUrl"));
                 }
-                assertEquals(privateInstance ? Arrays.asList("SetAVTransportURI", "Play", "GetPositionInfo", "Stop", "SetAVTransportURI", "Play", "Seek") : merged ? Arrays.asList("SetAVTransportURI", "Play") : Arrays.asList("SetAVTransportURI", "Play", "Seek"), actions);
+                List<String> expectedActions = privateInstance ? Arrays.asList("SetAVTransportURI", "Play", "GetPositionInfo", "Stop", "SetAVTransportURI", "Play", "Seek") : merged ? Arrays.asList("SetAVTransportURI", "Play") : Arrays.asList("SetAVTransportURI", "Play", "Seek");
+                // The fixture receives the fallback video while handling Play; recovery seeks after Play returns.
+                long actionsDeadline = System.nanoTime() + TimeUnit.SECONDS.toNanos(15);
+                while (actions.size() < expectedActions.size() && System.nanoTime() < actionsDeadline) Thread.sleep(50);
+                assertEquals(expectedActions, actions);
                 assertEquals("true", evaluate(webView, "document.querySelector('video').paused"));
                 awaitScreenWake(scenario, true);
                 try (android.os.ParcelFileDescriptor state = InstrumentationRegistry.getInstrumentation().getUiAutomation(android.app.UiAutomation.FLAG_DONT_SUPPRESS_ACCESSIBILITY_SERVICES).executeShellCommand("dumpsys power")) {
@@ -421,7 +427,9 @@ public class DlnaCastingTest {
             audio = java.util.Base64.getMimeDecoder().decode(readBody(input));
         }
         ExecutorService clients = Executors.newCachedThreadPool();
-        try (ServerSocket source = new ServerSocket(0, 8, InetAddress.getByName("127.0.0.1"))) {
+        // The source relays fetch through the app proxy, which refuses loopback destinations.
+        InetAddress local = wifiAddress(context);
+        try (ServerSocket source = new ServerSocket(0, 8, local)) {
             Thread listener = new Thread(() -> {
                 while (!source.isClosed()) {
                     try {
@@ -440,7 +448,7 @@ public class DlnaCastingTest {
                 }
             });
             listener.start();
-            String base = "http://127.0.0.1:" + source.getLocalPort();
+            String base = "http://" + local.getHostAddress() + ":" + source.getLocalPort();
             HttpUrl videoUrl = HttpUrl.get(base + "/video");
             HttpUrl audioUrl = HttpUrl.get(base + "/audio");
             String liveSources = InstrumentationRegistry.getArguments().getString("youtubeSources");
@@ -501,6 +509,19 @@ public class DlnaCastingTest {
                 } finally { request.disconnect(); received.delete(); }
             }
         } finally { clients.shutdownNow(); }
+    }
+
+    private static InetAddress wifiAddress(Context context) {
+        ConnectivityManager manager = (ConnectivityManager) context.getSystemService(Context.CONNECTIVITY_SERVICE);
+        for (Network network : manager.getAllNetworks()) {
+            NetworkCapabilities capabilities = manager.getNetworkCapabilities(network);
+            if (capabilities == null || !capabilities.hasTransport(NetworkCapabilities.TRANSPORT_WIFI)) continue;
+            for (LinkAddress link : manager.getLinkProperties(network).getLinkAddresses()) {
+                if (link.getAddress() instanceof Inet4Address) return link.getAddress();
+            }
+        }
+        fail("Wi-Fi IPv4 address");
+        return null;
     }
 
     private static byte[] readBody(InputStream input) throws IOException {
