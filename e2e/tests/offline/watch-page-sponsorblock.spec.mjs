@@ -64,6 +64,14 @@ async function measureSponsorBlockSkipStartTime(app, page, { rendererLoad = fals
 
     let loadInterval
     window.__sponsorBlockLoadTasks = 0
+    window.__sponsorBlockFirstTaskAfterBoundary = null
+    const currentTime = Object.getOwnPropertyDescriptor(HTMLMediaElement.prototype, 'currentTime')
+    // A busy host can deschedule the renderer across the boundary. Note when
+    // the first task after the boundary ran, so the skip is timed from there.
+    const boundaryProbe = setInterval(() => {
+      const time = currentTime.get.call(element)
+      if (time >= 15) window.__sponsorBlockFirstTaskAfterBoundary ??= time
+    }, 4)
     if (rendererLoad) {
       // Use fixed-duration work so the load does not depend on host CPU speed.
       // Leave gaps for the skip scheduler to run while playback advances.
@@ -74,14 +82,15 @@ async function measureSponsorBlockSkipStartTime(app, page, { rendererLoad = fals
       }, 50)
     }
 
-    const currentTime = Object.getOwnPropertyDescriptor(HTMLMediaElement.prototype, 'currentTime')
     Object.defineProperty(element, 'currentTime', {
       configurable: true,
       get: currentTime.get,
       set(value) {
         if (value === 20) {
           window.__sponsorBlockSkipStartedAt = currentTime.get.call(this)
+          window.__sponsorBlockFirstTaskAfterBoundary ??= window.__sponsorBlockSkipStartedAt
           clearInterval(loadInterval)
+          clearInterval(boundaryProbe)
         }
         currentTime.set.call(this, value)
       }
@@ -94,7 +103,10 @@ async function measureSponsorBlockSkipStartTime(app, page, { rendererLoad = fals
   if (rendererLoad) {
     expect(await page.evaluate(() => window.__sponsorBlockLoadTasks)).toBeGreaterThan(0)
   }
-  return page.evaluate(() => window.__sponsorBlockSkipStartedAt)
+  return page.evaluate(() => ({
+    skipStartedAt: window.__sponsorBlockSkipStartedAt,
+    firstTaskAfterBoundary: window.__sponsorBlockFirstTaskAfterBoundary
+  }))
 }
 
 test.describe('watch page', () => {
@@ -593,13 +605,13 @@ test.describe('watch page', () => {
   })
 
   test('skips SponsorBlock segments at their boundary without timeupdate events', async ({ app, page }) => {
-    const skipStartedAt = await measureSponsorBlockSkipStartTime(app, page)
+    const { skipStartedAt, firstTaskAfterBoundary } = await measureSponsorBlockSkipStartTime(app, page)
     expect(skipStartedAt).toBeGreaterThanOrEqual(15)
-    expect(skipStartedAt).toBeLessThan(15.05)
+    expect(skipStartedAt - firstTaskAfterBoundary).toBeLessThan(0.05)
   })
 
   test('skips SponsorBlock segments promptly under renderer load', async ({ app, page }) => {
-    const skipStartedAt = await measureSponsorBlockSkipStartTime(app, page, { rendererLoad: true })
+    const { skipStartedAt } = await measureSponsorBlockSkipStartTime(app, page, { rendererLoad: true })
     expect(skipStartedAt).toBeGreaterThanOrEqual(15)
     expect(skipStartedAt).toBeLessThan(15.3)
   })
