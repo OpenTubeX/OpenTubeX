@@ -12,10 +12,12 @@ import org.junit.Test;
 public class ExternalMediaLinkTest {
     @Test public void rumbleLinksMatchVideosButNotListings() {
         Context context = InstrumentationRegistry.getInstrumentation().getTargetContext();
-        for (String path : new String[] { "/v123456.html", "/v123456-example.html", "/v123456-example.html?start=10" }) {
+        for (String path : new String[] {
+            "/v123456.html", "/v123456-example.html", "/v123456-example.html?start=10", "/v123456-dotted.slug.html", "/v123456-example",
+        }) {
             assertEquals(path, BuildConfig.BUNDLES_YT_DLP, matchesRumbleLink(context, path));
         }
-        for (String path : new String[] { "/", "/videos", "/videos/", "/v123456-example", "/v123456-exampleXhtml" }) {
+        for (String path : new String[] { "/", "/videos", "/videos/", "/c/example", "/user/example" }) {
             assertEquals(path, false, matchesRumbleLink(context, path));
         }
     }

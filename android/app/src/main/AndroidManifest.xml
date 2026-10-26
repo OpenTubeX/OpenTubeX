@@ -251,6 +251,7 @@
                 <data android:scheme="https" />
                 <data android:host="rumble.com" />
                 <data android:pathPattern="/v.*\\.html" />
+                <data android:pathPattern="/v.*-.*" />
             </intent-filter>
 
             <intent-filter>
