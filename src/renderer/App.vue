@@ -1849,8 +1849,10 @@ onMounted(async () => {
     await store.dispatch('setRandomCurrentInvidiousInstance')
   }
 
+  const startupInvidiousInstance = store.getters.getCurrentInvidiousInstance
   store.dispatch('fetchInvidiousInstances').then(() => {
-    if (defaultInvidiousInstance.value === '') {
+    // Keep an instance chosen while the list was loading
+    if (defaultInvidiousInstance.value === '' && store.getters.getCurrentInvidiousInstance === startupInvidiousInstance) {
       store.dispatch('setRandomCurrentInvidiousInstance')
     }
   })

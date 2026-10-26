@@ -72,6 +72,32 @@ test.describe('AI translation completions', () => {
   })
 })
 
+test.describe('Invidious instance list refresh', () => {
+  /** Resolves with a function that answers the held instance list request. */
+  let listRequested
+
+  test.use({
+    // eslint-disable-next-line no-empty-pattern -- Playwright requires a fixture object
+    onPhase: async ({}, use) => use(async (phase, _page, electronApp) => {
+      if (phase !== 'electronConnected') return
+      let requested
+      listRequested = new Promise(resolve => { requested = resolve })
+      await electronApp.context().route('https://api.invidious.io/instances.json', route => {
+        requested(json => route.fulfill({ json }))
+      })
+    })
+  })
+
+  test('keeps an instance chosen while the list was loading', async ({ page }) => {
+    const fulfill = await listRequested
+    await page.evaluate(() => window.$store.commit('setCurrentInvidiousInstance', 'https://chosen.invidious.test'))
+    const refreshed = 'https://refreshed.invidious.test'
+    fulfill([['refreshed.invidious.test', { api: true, cors: true, uri: refreshed }]])
+    await expect.poll(() => page.evaluate(() => window.$store.getters.getInvidiousInstancesList)).toEqual([refreshed])
+    expect(await page.evaluate(() => window.$store.getters.getCurrentInvidiousInstance)).toBe('https://chosen.invidious.test')
+  })
+})
+
 test.describe('date and time format preferences', () => {
   test.use({ seed: { settings: { currentLocale: 'en-US' } } })
 
