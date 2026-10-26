@@ -18,6 +18,7 @@ import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.LinkedBlockingQueue;
+import java.util.concurrent.RejectedExecutionException;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 
@@ -29,6 +30,18 @@ public class LibraryDatabasePlugin extends Plugin {
     // transactions, so startup can read history and playlists concurrently.
     private final Map<String, ExecutorService> executors = new ConcurrentHashMap<>();
     private final Map<String, LibraryDatabase> databases = new ConcurrentHashMap<>();
+
+    private volatile boolean destroyed;
+
+    /** Calls can still arrive from the WebView after its activity destroyed this plugin. */
+    private void run(PluginCall call, String name, Runnable task) {
+        try {
+            if (destroyed) throw new RejectedExecutionException("Library database closed");
+            executor(name).execute(task);
+        } catch (RejectedExecutionException error) {
+            call.reject("Library database closed", error);
+        }
+    }
 
     private ExecutorService executor(String name) {
         return executors.computeIfAbsent(name, key -> {
@@ -64,7 +77,7 @@ public class LibraryDatabasePlugin extends Plugin {
         }
         JSArray statements = call.getArray("statements");
         boolean transaction = Boolean.TRUE.equals(call.getBoolean("transaction", false));
-        executor(name).execute(() -> {
+        run(call, name, () -> {
             try {
                 if (statements == null) throw new IllegalArgumentException("Missing statements");
                 JSObject result = new JSObject();
@@ -86,7 +99,7 @@ public class LibraryDatabasePlugin extends Plugin {
         }
         String sql = call.getString("sql");
         JSArray params = call.getArray("params");
-        executor(name).execute(() -> {
+        run(call, name, () -> {
             File file = null;
             try {
                 if (sql == null) throw new IllegalArgumentException("Missing statement");
@@ -130,7 +143,7 @@ public class LibraryDatabasePlugin extends Plugin {
             call.reject("Missing database name");
             return;
         }
-        executor(name).execute(() -> {
+        run(call, name, () -> {
             try {
                 database(name).drop();
                 databases.remove(name);
@@ -143,6 +156,7 @@ public class LibraryDatabasePlugin extends Plugin {
 
     @Override
     protected void handleOnDestroy() {
+        destroyed = true;
         for (Map.Entry<String, ExecutorService> entry : executors.entrySet()) {
             entry.getValue().execute(() -> {
                 LibraryDatabase database = databases.remove(entry.getKey());
