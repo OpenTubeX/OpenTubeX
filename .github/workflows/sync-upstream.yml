@@ -71,15 +71,24 @@ jobs:
             Merge with a **merge commit** to preserve fork changes and shared upstream history.
 
             @coderabbitai ignore
+          CREATE_PULL_REQUEST: |
+            mutation($repository: ID!, $fork: ID!, $title: String!, $body: String!) {
+              createPullRequest(input: {repositoryId: $repository, headRepositoryId: $fork,
+                baseRefName: "development", headRefName: "upstream-sync", title: $title, body: $body}) {
+                pullRequest { number }
+              }
+            }
         run: |
           # Pushing to the fork already updated an open PR.
           open=$(gh pr list --repo "$GITHUB_REPOSITORY" --base development --head upstream-sync --state open \
             --json headRepository --jq "[.[] | select(.headRepository.name == \"${SYNC_FORK#*/}\")] | length")
           if [[ "$open" -eq 0 ]]; then
-            # head_repo selects the fork, which has the same owner as this repository
-            number=$(gh api "repos/$GITHUB_REPOSITORY/pulls" -f base=development -f head=upstream-sync \
-              -f head_repo="${SYNC_FORK#*/}" -f title="chore: sync development from FreeTubeApp/FreeTube" \
-              -f body="$BODY" --jq .number)
+            # The fork has the same owner as this repository, so name its node explicitly
+            number=$(gh api graphql \
+              -f repository="$(gh api "repos/$GITHUB_REPOSITORY" --jq .node_id)" \
+              -f fork="$(gh api "repos/$SYNC_FORK" --jq .node_id)" \
+              -f title="chore: sync development from FreeTubeApp/FreeTube" -f body="$BODY" \
+              -f query="$CREATE_PULL_REQUEST" --jq .data.createPullRequest.pullRequest.number)
             echo "number=$number" >> "$GITHUB_OUTPUT"
           fi
 
