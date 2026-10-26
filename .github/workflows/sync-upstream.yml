@@ -3,9 +3,9 @@ name: Sync upstream
 # The sync branch carries upstream's workflow files, so it lives in a fork with
 # Actions disabled. Pushed here, they would run with this repository's secrets
 # before the PR is reviewed; a fork's PR runs without them.
-# UPSTREAM_SYNC_FORK_SSH_KEY is a write deploy key of SYNC_FORK.
-# UPSTREAM_SYNC_TOKEN needs Pull requests write access plus Checks and Commit
-# statuses read access. A separate token lets PRs run CI.
+# UPSTREAM_SYNC_TOKEN needs Contents and Workflows write access to SYNC_FORK,
+# Pull requests write access here, plus Checks and Commit statuses read access.
+# A separate token lets PRs run CI.
 on:
   schedule:
     - cron: "23 */6 * * *"
@@ -34,11 +34,9 @@ jobs:
         shell: bash
     steps:
       - name: Check authentication
-        env:
-          SSH_KEY: ${{ secrets.UPSTREAM_SYNC_FORK_SSH_KEY }}
         run: |
-          if [[ -z "$GH_TOKEN" || -z "$SSH_KEY" ]]; then
-            echo "::error::Set the UPSTREAM_SYNC_TOKEN and UPSTREAM_SYNC_FORK_SSH_KEY repository secrets before running upstream sync."
+          if [[ -z "$GH_TOKEN" ]]; then
+            echo "::error::Set the UPSTREAM_SYNC_TOKEN repository secret before running upstream sync."
             exit 1
           fi
 
@@ -53,20 +51,14 @@ jobs:
       # changes and upstream commit history, including on conflicting PRs.
       - name: Push upstream to the sync fork
         id: push
-        env:
-          SSH_KEY: ${{ secrets.UPSTREAM_SYNC_FORK_SSH_KEY }}
         run: |
           git fetch --no-tags https://github.com/FreeTubeApp/FreeTube.git development
           if git merge-base --is-ancestor FETCH_HEAD HEAD; then
             echo "development already contains upstream development."
             exit 0
           fi
-          gh api meta --jq '.ssh_keys[] | "github.com " + .' > "$RUNNER_TEMP/known_hosts"
-          install -m 600 /dev/null "$RUNNER_TEMP/sync_key"
-          printf '%s\n' "$SSH_KEY" > "$RUNNER_TEMP/sync_key"
-          GIT_SSH_COMMAND="ssh -i $RUNNER_TEMP/sync_key -o IdentitiesOnly=yes -o UserKnownHostsFile=$RUNNER_TEMP/known_hosts" \
-            git push --force "git@github.com:$SYNC_FORK.git" FETCH_HEAD:refs/heads/upstream-sync
-          rm "$RUNNER_TEMP/sync_key"
+          gh auth setup-git
+          git push --force "https://github.com/$SYNC_FORK.git" FETCH_HEAD:refs/heads/upstream-sync
           echo "pushed=true" >> "$GITHUB_OUTPUT"
 
       - name: Create upstream pull request
