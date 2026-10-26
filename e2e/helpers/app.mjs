@@ -596,8 +596,10 @@ export const test = base.extend({
   launchArgs: [[], { option: true }],
   showTutorial: [false, { option: true }],
   localeOverrides: [{}, { option: true }],
+  /** Runs at each startup phase, e.g. to mock requests the app sends while starting. */
+  onPhase: [undefined, { option: true }],
 
-  app: async ({ seed, uiScale, launchArgs, showTutorial, localeOverrides }, use, testInfo) => {
+  app: async ({ seed, uiScale, launchArgs, showTutorial, localeOverrides, onPhase }, use, testInfo) => {
     const userDataDir = await createUserDataDir(uiScale === 100
       ? seed
       : { ...seed, settings: { uiScale, ...seed.settings } })
@@ -628,7 +630,7 @@ export const test = base.extend({
         }
       }
 
-      const { electronApp, page } = await launchApp(userDataDir, launchArgs, { appRoot })
+      const { electronApp, page } = await launchApp(userDataDir, launchArgs, { appRoot, onPhase })
 
       /** Runs an optional checkpoint with the exited process before launching again. */
       const relaunch = async (beforeLaunch) => {
@@ -640,7 +642,7 @@ export const test = base.extend({
         await appHandle.electronApp.close()
         await exited
         await beforeLaunch?.(oldProcess)
-        const next = await launchApp(userDataDir, launchArgs, { appRoot })
+        const next = await launchApp(userDataDir, launchArgs, { appRoot, onPhase })
         appHandle.electronApp = next.electronApp
         appHandle.page = next.page
         return next

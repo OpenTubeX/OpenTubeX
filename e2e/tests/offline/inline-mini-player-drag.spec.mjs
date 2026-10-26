@@ -1109,11 +1109,19 @@ test.describe('a restored Watch tab', () => {
           activeTabId: 'browse'
         }
       }]
+    },
+    // The tab bar loads the restored tab's icon while the app starts. Mock the
+    // Watch requests before then, or that load reaches YouTube or is aborted.
+    // An aborted request holds back the next YouTube requests for retries.
+    // eslint-disable-next-line no-empty-pattern -- Playwright requires a fixture object
+    onPhase: async ({}, use) => {
+      await use(async (phase, page, electronApp) => {
+        if (phase === 'windowCreated') await mockPlayableWatchPage({ electronApp }, page)
+      })
     }
   })
 
   test('prepares and opens subscriptions on the first restored Watch dock', async ({ app, page }) => {
-    await mockPlayableWatchPage(app, page)
     await page.locator('.tab[data-tab-id="watch"]').click()
     const watchTab = page.locator('.tabContent[data-tab-id="watch"]')
     const player = watchTab.locator('.ftVideoPlayer')
