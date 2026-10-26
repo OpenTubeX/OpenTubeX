@@ -393,6 +393,16 @@
   display: block;
 }
 
+/* Clears the window controls a custom title bar shows over the player on
+   Windows and macOS. */
+/* stylelint-disable length-zero-no-unit -- calc() needs units in the fallbacks */
+.ftVideoPlayer.fullWindow :deep(.playerFullscreenTitleOverlay) {
+  margin-left: env(titlebar-area-x, 0px);
+  margin-right: calc(100vw - env(titlebar-area-x, 0px) - env(titlebar-area-width, 100vw));
+  max-width: calc(env(titlebar-area-width, 100%) - 10px);
+}
+/* stylelint-enable length-zero-no-unit */
+
 :deep(.shaka-controls-container[shown='true'] > .playerFullscreenTitleOverlay) {
   opacity: 1;
 }

@@ -20,9 +20,11 @@ export function flattenColors(context, colors) {
   return `#${[red, green, blue].map(value => value.toString(16).padStart(2, '0')).join('')}`
 }
 
+const TRANSPARENT = '#00000000'
+
 /**
- * Finds the bar the window controls overlay is drawn over: the top tab bar,
- * the top navigation, or a vertical tab column.
+ * Finds what the window controls overlay is drawn over: the top tab bar, the
+ * top navigation, a vertical tab column, or a full window player.
  * @returns {Element | null}
  */
 function findBarUnderControls() {
@@ -33,7 +35,7 @@ function findBarUnderControls() {
   // The title bar area is the space beside the controls.
   const x = titleBarArea.left > 0 ? titleBarArea.left / 2 : (titleBarArea.right + innerWidth) / 2
   return document.elementsFromPoint(x, titleBarArea.height / 2)
-    .find(element => element.matches('.tabBar, .topNav')) ?? null
+    .find(element => element.matches('.tabBar, .topNav, .ftVideoPlayer.fullWindow')) ?? null
 }
 
 /**
@@ -52,9 +54,16 @@ export function useTitleBarOverlay(layout) {
   let observer = null
   /** @type {Element | null} */
   let observedBar = null
+  let barHeight = 32
+  let pointerOnControls = false
 
   function sync() {
     frame = 0
+    // A player entering full window covers the controls once it finishes
+    // animating there.
+    for (const animation of document.querySelector('.ftVideoPlayer.fullWindow')?.getAnimations() ?? []) {
+      animation.finished.then(scheduleSync, () => {})
+    }
     const bar = findBarUnderControls()
     if (bar !== observedBar) {
       observedBar = bar
@@ -62,16 +71,24 @@ export function useTitleBarOverlay(layout) {
     }
     if (!bar) return
 
-    const color = flattenColors(context, [
-      getComputedStyle(document.body).backgroundColor,
-      getComputedStyle(bar).backgroundColor
-    ])
-    const overlay = {
-      color,
-      symbolColor: calculateColorLuminance(color),
-      // The top navigation and vertical tabs are taller than a title bar, so
-      // the controls in their corner keep the tab bar's height.
-      height: bar.matches('.tabBar.position-top') ? bar.getBoundingClientRect().height : 32
+    let overlay
+    if (bar.matches('.ftVideoPlayer')) {
+      // The controls float over the video and show with the player's own.
+      const shown = pointerOnControls || bar.getAttribute('data-player-controls-shown') === 'true'
+      overlay = { color: TRANSPARENT, symbolColor: shown ? '#ffffff' : TRANSPARENT, height: barHeight }
+    } else {
+      const color = flattenColors(context, [
+        getComputedStyle(document.body).backgroundColor,
+        getComputedStyle(bar).backgroundColor
+      ])
+      overlay = {
+        color,
+        symbolColor: calculateColorLuminance(color),
+        // The top navigation and vertical tabs are taller than a title bar, so
+        // the controls in their corner keep the tab bar's height.
+        height: bar.matches('.tabBar.position-top') ? bar.getBoundingClientRect().height : 32
+      }
+      barHeight = overlay.height
     }
     // The UI scale changes the overlay's size in device pixels.
     const serialized = JSON.stringify([overlay, window.devicePixelRatio])
@@ -90,7 +107,27 @@ export function useTitleBarOverlay(layout) {
     observer.observe(document.body, { attributes: true, attributeFilter: ['class', 'style'] })
     const app = document.querySelector('.app')
     if (app) observer.observe(app, { attributes: true, attributeFilter: ['class', 'style'] })
-    if (observedBar) observer.observe(observedBar, { attributes: true, attributeFilter: ['class', 'style'] })
+    if (observedBar) {
+      observer.observe(observedBar, { attributes: true, attributeFilter: ['class', 'style', 'data-player-controls-shown'] })
+    }
+  }
+
+  /**
+   * Moving onto the window controls leaves the page, which hides the player's
+   * controls, so the window's stay shown while the pointer is on them.
+   * @param {MouseEvent} event
+   */
+  function handlePointerLeave(event) {
+    const titleBarArea = navigator.windowControlsOverlay.getTitlebarAreaRect()
+    pointerOnControls = event.clientY < titleBarArea.height &&
+      (event.clientX < titleBarArea.left || event.clientX >= titleBarArea.right)
+    scheduleSync()
+  }
+
+  function handlePointerEnter() {
+    if (!pointerOnControls) return
+    pointerOnControls = false
+    scheduleSync()
   }
 
   /** @param {TransitionEvent} event */
@@ -106,6 +143,8 @@ export function useTitleBarOverlay(layout) {
     window.addEventListener('resize', scheduleSync)
     navigator.windowControlsOverlay.addEventListener('geometrychange', scheduleSync)
     document.addEventListener('transitionend', handleTransitionEnd)
+    document.documentElement.addEventListener('mouseleave', handlePointerLeave)
+    document.documentElement.addEventListener('mouseenter', handlePointerEnter)
     scheduleSync()
   })
 
@@ -114,6 +153,8 @@ export function useTitleBarOverlay(layout) {
     window.removeEventListener('resize', scheduleSync)
     navigator.windowControlsOverlay.removeEventListener('geometrychange', scheduleSync)
     document.removeEventListener('transitionend', handleTransitionEnd)
+    document.documentElement.removeEventListener('mouseleave', handlePointerLeave)
+    document.documentElement.removeEventListener('mouseenter', handlePointerEnter)
     if (frame !== 0) cancelAnimationFrame(frame)
   })
 }
