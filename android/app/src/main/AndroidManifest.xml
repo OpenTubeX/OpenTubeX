@@ -212,6 +212,15 @@
                 <data android:host="twitch.tv" />
                 <data android:host="www.twitch.tv" />
                 <data android:host="m.twitch.tv" />
+                <data android:pathPrefix="/videos/" />
+                <data android:pathPattern="/.*/clip/.*" />
+            </intent-filter>
+
+            <intent-filter>
+                <action android:name="android.intent.action.VIEW" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
+                <data android:scheme="https" />
                 <data android:host="clips.twitch.tv" />
             </intent-filter>
 
@@ -222,6 +231,7 @@
                 <data android:scheme="https" />
                 <data android:host="soundcloud.com" />
                 <data android:host="m.soundcloud.com" />
+                <data android:pathPattern="/.*/.*" />
             </intent-filter>
 
             <intent-filter>
@@ -248,14 +258,6 @@
                 <category android:name="android.intent.category.DEFAULT" />
                 <category android:name="android.intent.category.BROWSABLE" />
                 <data android:scheme="https" />
-                <data android:host="streamable.com" />
-            </intent-filter>
-
-            <intent-filter>
-                <action android:name="android.intent.action.VIEW" />
-                <category android:name="android.intent.category.DEFAULT" />
-                <category android:name="android.intent.category.BROWSABLE" />
-                <data android:scheme="https" />
                 <data android:host="bsky.app" />
                 <data android:pathPattern="/profile/.*/post/.*" />
             </intent-filter>
@@ -266,6 +268,7 @@
                 <category android:name="android.intent.category.BROWSABLE" />
                 <data android:scheme="https" />
                 <data android:host="odysee.com" />
+                <data android:pathPattern="/@.*/.*" />
             </intent-filter>
 
             <intent-filter>
@@ -274,6 +277,8 @@
                 <category android:name="android.intent.category.BROWSABLE" />
                 <data android:scheme="https" />
                 <data android:host="kick.com" />
+                <data android:pathPattern="/.*/videos/.*" />
+                <data android:pathPattern="/.*/clips/.*" />
             </intent-filter>
 
             <intent-filter>
