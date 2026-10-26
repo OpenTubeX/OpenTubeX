@@ -124,7 +124,11 @@ import { AUTO_QUALITY_FALLBACK, streamsSupportAutoQuality } from '../../helpers/
 import { getMeteredAutoQualityMaxPixels, limitQualityOnMeteredNetwork } from '../../helpers/player/meteredNetworkQuality'
 import { setupSabrScheme } from '../../helpers/player/SabrSchemePlugin'
 import { prepareGoogleVideoRequest } from '../../helpers/player/playbackRequestPolicy'
-import { avoidUnreachableGoogleVideoHost, markGoogleVideoHostUnreachable } from '../../helpers/player/googleVideoFallback'
+import {
+  avoidUnreachableGoogleVideoHost,
+  GOOGLEVIDEO_CONNECTION_TIMEOUT_MS,
+  markGoogleVideoHostUnreachable
+} from '../../helpers/player/googleVideoFallback'
 import { getRememberedPlayerVolume, setRememberedPlayerVolume } from '../../helpers/player/volume-storage'
 import { parseChannelPreferences, removeChannelPreference } from '../../helpers/channel-preferences'
 import { findLegacyFormatForQuality } from '../../helpers/player/legacyFormats'
@@ -5899,6 +5903,11 @@ export default defineComponent({
       if (type === RequestType.SEGMENT) {
         request.uris = request.uris.map(avoidUnreachableGoogleVideoHost)
         const url = new URL(request.uris[0])
+        if (url.hostname.endsWith('.googlevideo.com')) {
+          // Give up on an unresponsive node as quickly as the other googlevideo requests do.
+          // The parameters are shared with the player configuration, so replace them.
+          request.retryParameters = { ...request.retryParameters, connectionTimeout: GOOGLEVIDEO_CONNECTION_TIMEOUT_MS }
+        }
         const isSabrRequest = props.sabrData && url.protocol === `${props.sabrData.scheme}:`
 
         prepareGoogleVideoRequest(request, isSabrRequest)

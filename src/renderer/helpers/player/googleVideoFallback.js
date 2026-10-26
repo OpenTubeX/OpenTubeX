@@ -1,6 +1,6 @@
 // A googlevideo node can stop responding, for example an ISP-hosted cache.
 // Like YouTube's player, switch to the backup server named in the URL.
-const CONNECTION_TIMEOUT_MS = 5_000
+export const GOOGLEVIDEO_CONNECTION_TIMEOUT_MS = 5_000
 
 /** Nodes that didn't respond during this session */
 const unreachableHosts = new Set()
@@ -16,7 +16,7 @@ function getStreamParameter(url, name) {
   // HLS segment URLs carry their parameters as path segments
   const segments = url.pathname.split('/')
   const index = segments.indexOf(name, 1)
-  return index > 0 && index < segments.length - 1 ? segments[index + 1].replaceAll('%2C', ',') : null
+  return index > 0 && index < segments.length - 1 ? segments[index + 1].replaceAll(/%2C/gi, ',') : null
 }
 
 /**
@@ -68,7 +68,7 @@ export async function fetchGoogleVideo(url, init = {}, fetchImpl = fetch) {
   if (getGoogleVideoFallbackUrl(url) === null) return fetchImpl(url, init)
 
   const connection = new AbortController()
-  const timer = setTimeout(() => connection.abort(), CONNECTION_TIMEOUT_MS)
+  const timer = setTimeout(() => connection.abort(), GOOGLEVIDEO_CONNECTION_TIMEOUT_MS)
   let response
   try {
     response = await fetchImpl(url, {

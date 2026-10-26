@@ -84,3 +84,8 @@ test('a 502 from the native proxy switches to the backup server', async () => {
 test('a malformed escape in an HLS path keeps the original server', () => {
   assert.equal(getGoogleVideoFallbackUrl('https://rr3---sn-a.googlevideo.com/videoplayback/mn/%E0%A4%A/fvip/3'), null)
 })
+
+test('HLS paths may encode the comma between servers in lowercase', () => {
+  assert.equal(new URL(getGoogleVideoFallbackUrl('https://rr3---sn-a.googlevideo.com/videoplayback/mn/sn-a%2csn-b/fvip/3')).hostname,
+    'rr3---sn-b.googlevideo.com')
+})

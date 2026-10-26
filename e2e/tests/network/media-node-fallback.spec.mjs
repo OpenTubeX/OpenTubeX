@@ -20,7 +20,7 @@ async function blockAssignedMediaNodes(page) {
     const url = new URL(request.url())
     // HLS segment URLs carry their parameters as path segments
     const segments = url.pathname.split('/')
-    const servers = url.searchParams.get('mn') ?? (segments[segments.indexOf('mn') + 1] ?? '').replaceAll('%2C', ',')
+    const servers = url.searchParams.get('mn') ?? (segments[segments.indexOf('mn') + 1] ?? '').replaceAll(/%2C/gi, ',')
     if (url.hostname.endsWith(`---${servers.split(',')[0]}.googlevideo.com`)) {
       nodes.blockedRequests++
       return
