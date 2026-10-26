@@ -2614,7 +2614,9 @@ final class AppTests: XCTestCase {
         XCTAssertEqual(result?["disconnected"] as? Bool, true)
         XCTAssertEqual(result?["recoveredStatus"] as? Int, 200)
         XCTAssertEqual(result?["recoveredBody"] as? String, "header-retained")
-        XCTAssertEqual(result?["cookie"] as? String, "cookie-retained")
+        // IOSHttp carries the YouTube API requests, which must not link loads
+        // through stored cookies.
+        XCTAssertEqual(result?["cookie"] as? String, plugin == "IOSHttp" ? "cookie-missing" : "cookie-retained")
         XCTAssertEqual(result?["cross"] as? String, "authorization-absent")
         XCTAssertEqual(result?["noRedirectStatus"] as? Int, 302)
         XCTAssertTrue((result?["timeoutError"] as? String)?.lowercased().contains("timed out") == true, String(describing: result?["timeoutError"]))
