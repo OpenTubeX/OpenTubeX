@@ -252,9 +252,9 @@ repositories {
 }
 
 dependencies {
-    implementation "com.squareup.okhttp3:okhttp:5.5.0"
+    implementation "com.squareup.okhttp3:okhttp:5.5.1"
     implementation "org.brotli:dec:0.1.2"
-    testImplementation "com.squareup.okhttp3:mockwebserver:5.5.0"
+    testImplementation "com.squareup.okhttp3:mockwebserver:5.5.1"
     // Lite builds still compile the yt-dlp code paths, which BuildConfig.BUNDLES_YT_DLP disables.
     def ytDlpConfiguration = liteBuild ? 'compileOnly' : 'implementation'
     add(ytDlpConfiguration, "io.github.junkfood02.youtubedl-android:library:0.18.1")
