@@ -514,8 +514,7 @@ test.describe('segment editor layout', { tag: '@scale' }, () => {
     await expect(toast).toBeHidden()
   })
 
-  // Quarantined: loses its toast under parallel load, see https://github.com/OpenTubeX/OpenTubeX/issues/2404
-  test.fixme('edits directly from a skipped toast and keeps its editor inside the player', async ({ app, page, uiScale }, testInfo) => {
+  test('edits directly from a skipped toast and keeps its editor inside the player', async ({ app, page, uiScale }, testInfo) => {
     const { panel, video } = await openSegments(app, page)
     const votes = []
     await page.route('**/api/voteOnSponsorTime?*', route => {
@@ -523,13 +522,13 @@ test.describe('segment editor layout', { tag: '@scale' }, () => {
       return route.fulfill({ status: 200 })
     })
     await panel.getByRole('button', { name: 'Close', exact: true }).click()
-    await page.evaluate(() => {
-      window.$store.commit('setSponsorBlockSkippedToastDuration', 1)
-    })
-    await video.evaluate(element => {
+    const skip = () => video.evaluate(element => {
       element.currentTime = 11.2
       element.dispatchEvent(new Event('timeupdate'))
     })
+    // The longest duration leaves time to reach the toast under load
+    await page.evaluate(() => window.$store.commit('setSponsorBlockSkippedToastDuration', 15))
+    await skip()
     const player = page.locator('.ftVideoPlayer')
     const toast = player.locator('.skippedSegment')
     await expect(toast).toBeVisible()
@@ -537,6 +536,11 @@ test.describe('segment editor layout', { tag: '@scale' }, () => {
     // toast beneath the fixed header. Hover clear of its rounded corner.
     await page.evaluate(() => window.scrollTo(0, 0))
     await toast.hover({ position: { x: 12, y: 12 } })
+    // Skipping again under the pointer pauses a full 2 s countdown. Element
+    // screenshots briefly move the pointer out of the toast, so it needs more
+    // than whatever remained when the hover landed.
+    await page.evaluate(() => window.$store.commit('setSponsorBlockSkippedToastDuration', 2))
+    await skip()
     for (const name of ['Close', 'Edit']) {
       const button = toast.getByRole('button', { name, exact: true })
       await expect(button.locator('.ft-icon')).toHaveAttribute('aria-hidden', 'true')
@@ -561,8 +565,8 @@ test.describe('segment editor layout', { tag: '@scale' }, () => {
     expect(votes[0].category).toBe('intro')
     expect(votes[0]).not.toHaveProperty('type')
     await page.mouse.move(0, 0)
-    // Outlast the 1 s toast duration: an open editor must keep the toast.
-    await page.waitForTimeout(1100)
+    // Outlast the 2 s toast duration: an open editor must keep the toast.
+    await page.waitForTimeout(2100)
     await expect(toast).toBeVisible()
     const expectCenteredCancel = () => expect.poll(() => toast.getByRole('button', { name: 'Cancel', exact: true }).evaluate(element => {
       const button = element.getBoundingClientRect()
