@@ -1910,6 +1910,7 @@ Description:
   Video Category: '视频类别：'
   Video Tags: 视频标签
   Games: 游戏
+  Music: 音乐
 Tooltips:
   General Settings:
     Preferred Video Codec: 自动模式优先使用硬件解码。更改对下一个视频生效。指定编解码器可能限制可用分辨率；不可用时会使用其他编解码器。

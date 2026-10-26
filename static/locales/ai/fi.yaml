@@ -1958,6 +1958,7 @@ Description:
   Video Category: 'Videon luokka:'
   Video Tags: Videon tunnisteet
   Games: Pelit
+  Music: Musiikki
 Tooltips:
   General Settings:
     Preferred Video Codec: Automaattinen valinta suosii laitteistopurkua. Muutokset koskevat seuraavaa videota. Koodekkivalinta voi rajoittaa tarkkuuksia; puuttuvat koodekit korvataan.

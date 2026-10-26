@@ -1913,6 +1913,7 @@ Description:
   Video Category: '影片類別：'
   Video Tags: 影片標籤
   Games: 遊戲
+  Music: 音樂
 Tooltips:
   General Settings:
     Preferred Video Codec: 自動模式優先使用硬體解碼。變更從下一部影片生效。指定編解碼器可能限制可用解析度；無法使用時會改用其他編解碼器。

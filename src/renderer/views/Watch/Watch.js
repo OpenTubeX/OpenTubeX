@@ -52,6 +52,7 @@ import { isOnAiSlopList } from '../../helpers/aiSlopList'
 import { isVideoHiddenByPreferences } from '../../helpers/subscriptions'
 import { downloadWatchRoute, isPlayableDownloadFile, navigationDownloadId } from '../../helpers/downloadPlayback'
 import { parseLocalVideoGames } from '../../helpers/video-games'
+import { parseLocalVideoMusicTracks, parseVideoMusicTracks } from '../../helpers/video-music'
 import { parseChannelPreferences } from '../../helpers/channel-preferences'
 import {
   showInvidiousFallbackToast,
@@ -374,6 +375,8 @@ export default defineComponent({
       videoTags: [],
       /** @type {import('../../helpers/video-games').LocalVideoGame[]} */
       videoGames: [],
+      /** @type {import('../../helpers/video-music').VideoMusicTrack[]} */
+      videoMusicTracks: [],
       license: '',
       videoViewCount: null,
       videoLikeCount: null,
@@ -2498,6 +2501,7 @@ export default defineComponent({
       this.videoCategory = ''
       this.videoTags = []
       this.videoGames = []
+      this.videoMusicTracks = []
       this.license = ''
       this.videoViewCount = null
       this.videoLikeCount = null
@@ -3599,6 +3603,7 @@ export default defineComponent({
         this.videoViewCount = Number.isFinite(viewCount) ? viewCount : null
         this.license = result.secondary_info?.metadata?.rows.find(element => element.title?.text === 'License')?.contents[0]?.text
         this.videoGames = parseLocalVideoGames(result)
+        this.videoMusicTracks = parseLocalVideoMusicTracks(result)
 
         this.channelCollaborators = parseLocalVideoCollaborators(result)
         const primaryCollaborator = this.channelCollaborators[0]
@@ -4260,6 +4265,7 @@ export default defineComponent({
 
           this.videoCategory = result.genre ?? ''
           this.videoTags = result.keywords ?? []
+          this.videoMusicTracks = parseVideoMusicTracks(result.musicTracks)
           this.videoGenreIsMusic = this.videoCategory === 'Music'
           this.musicMediaType = result.musicMediaType
 

@@ -1953,6 +1953,7 @@ Description:
   Video Category: 'فئة الفيديو:'
   Video Tags: علامات الفيديو
   Games: ألعاب
+  Music: الموسيقى
 Tooltips:
   General Settings:
     Preferred Video Codec: يفضل الوضع التلقائي فك الترميز بالأجهزة. تسري التغييرات على الفيديو التالي. قد يحد تفضيل ترميز من الدقات؛ تُستخدم بدائل للترميزات غير المتاحة.

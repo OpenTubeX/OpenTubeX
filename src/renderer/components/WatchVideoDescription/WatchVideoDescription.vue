@@ -1,6 +1,6 @@
 <template>
   <FtCard
-    v-if="shownDescription.length > 0 || tags.length > 0 || games.length > 0 || license || (contentDisclosures?.length ?? 0) > 0"
+    v-if="shownDescription.length > 0 || tags.length > 0 || games.length > 0 || musicTracks.length > 0 || license || (contentDisclosures?.length ?? 0) > 0"
     ref="descriptionCard"
     :class="{
       videoDescription: true,
@@ -116,6 +116,50 @@
           </li>
         </ul>
       </template>
+      <template v-if="musicTracks.length > 0">
+        <h3 class="musicHeading">
+          {{ t('Description.Music') }}
+        </h3>
+        <ul class="musicTrackList">
+          <li
+            v-for="(track, index) in shownMusicTracks"
+            :key="index"
+            class="musicTrack"
+          >
+            <FtRetryImage
+              v-if="track.thumbnail"
+              :fallback-icon="['fas', 'music']"
+              :src="track.thumbnail"
+              class="musicTrackArt"
+              alt=""
+              loading="lazy"
+            />
+            <span class="musicTrackText">
+              <component
+                :is="track.videoId ? 'RouterLink' : 'bdi'"
+                :to="track.videoId && `/watch/${track.videoId}`"
+                :tabindex="track.videoId ? linkTabIndex : null"
+                class="musicTrackTitle"
+              >{{ track.title }}</component>
+              <component
+                :is="track.channelId ? 'RouterLink' : 'bdi'"
+                v-if="track.artist"
+                :to="track.channelId && `/channel/${track.channelId}`"
+                :tabindex="track.channelId ? linkTabIndex : null"
+                class="musicTrackArtist"
+              >{{ track.artist }}</component>
+              <bdi
+                v-if="track.album"
+                class="musicTrackDetail"
+              >{{ track.album }}</bdi>
+              <bdi
+                v-if="track.license"
+                class="musicTrackDetail"
+              >{{ track.license }}</bdi>
+            </span>
+          </li>
+        </ul>
+      </template>
       <div
         v-if="tags.length > 0"
         class="videoTags"
@@ -205,6 +249,11 @@ const props = defineProps({
     type: Array,
     default: () => [],
   },
+  /** @type {import('vue').PropType<import('../../helpers/video-music').VideoMusicTrack[]>} */
+  musicTracks: {
+    type: Array,
+    default: () => [],
+  },
   contentDisclosures: {
     type: Array,
     default: () => [],
@@ -274,6 +323,14 @@ const shownGames = computed(() => {
   return props.games.map(game => ({ ...game, channelId: undefined }))
 })
 
+const shownMusicTracks = computed(() => {
+  if (!store.getters.getDisableChannelLinks) {
+    return props.musicTracks
+  }
+
+  return props.musicTracks.map(track => ({ ...track, channelId: undefined }))
+})
+
 /**
  * @param {number} timestamp
  */
@@ -330,7 +387,7 @@ let hasMeasured = false
  */
 function isShortDescription() {
   // Text dimensions cannot account for the metadata sections below the description.
-  if (props.tags.length > 0 || props.games.length > 0 || props.license || (props.contentDisclosures?.length ?? 0) > 0) {
+  if (props.tags.length > 0 || props.games.length > 0 || props.musicTracks.length > 0 || props.license || (props.contentDisclosures?.length ?? 0) > 0) {
     return false
   }
 
@@ -355,7 +412,7 @@ function measureDescription() {
   }
 
   const descriptionElem = descriptionContainer.value?.$el
-  const hasMetadata = props.tags.length > 0 || props.games.length > 0 || Boolean(props.license) || (props.contentDisclosures?.length ?? 0) > 0
+  const hasMetadata = props.tags.length > 0 || props.games.length > 0 || props.musicTracks.length > 0 || Boolean(props.license) || (props.contentDisclosures?.length ?? 0) > 0
   if (!descriptionElem || (
     descriptionElem.clientHeight === 0 && descriptionElem.scrollHeight === 0 &&
     (!hasMetadata || !descriptionCard.value?.$el?.clientHeight)
@@ -426,7 +483,7 @@ onMounted(() => {
 onBeforeUnmount(() => descriptionResizeObserver?.disconnect())
 
 watch(isExpanded, () => nextTick(updateDescriptionLayout))
-watch([shownDescription, () => props.tags, () => props.games, () => props.license, () => props.contentDisclosures], async () => {
+watch([shownDescription, () => props.tags, () => props.games, () => props.musicTracks, () => props.license, () => props.contentDisclosures], async () => {
   // Metadata can arrive or disappear after the card has mounted.
   // Control visibility follows the content, independently of the user's expansion choice.
   hasMeasured = false

@@ -2449,6 +2449,7 @@ Description:
   Video Category: 'Categoria del vídeo:'
   Video Tags: Etiquetes del vídeo
   Games: Jocs
+  Music: Música
 Tooltips:
   General Settings:
     Preferred Video Codec: El mode automàtic prefereix la descodificació per maquinari. Els canvis s'apliquen al vídeo següent. La preferència de còdec pot limitar les resolucions; els còdecs no disponibles se substitueixen.

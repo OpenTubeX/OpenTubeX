@@ -1909,6 +1909,7 @@ Description:
   Video Category: 'Catégorie de la vidéo :'
   Video Tags: Mots-clés de la vidéo
   Games: Jeux
+  Music: Musique
 Tooltips:
   General Settings:
     Preferred Video Codec: Le mode automatique privilégie le décodage matériel. Les changements s'appliquent à la prochaine vidéo. Le choix du codec peut limiter les résolutions ; les codecs indisponibles sont remplacés.

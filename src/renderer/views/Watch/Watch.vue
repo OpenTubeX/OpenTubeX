@@ -765,6 +765,7 @@
               :license="license"
               :content-disclosures="contentDisclosures"
               :games="videoGames"
+              :music-tracks="videoMusicTracks"
               always-expanded
               class="watchVideo"
               @timestamp-event="changeTimestamp"
@@ -1002,6 +1003,7 @@
           :license="license"
           :content-disclosures="contentDisclosures"
           :games="videoGames"
+          :music-tracks="videoMusicTracks"
           preview-only
           class="watchVideo phoneDescriptionPreview"
           @expand="openPhonePanel('description')"
@@ -1021,6 +1023,7 @@
             :license="license"
             :content-disclosures="contentDisclosures"
             :games="videoGames"
+            :music-tracks="videoMusicTracks"
             :always-expanded="fullscreenMetadataOpen || phonePanelsEnabled"
             class="watchVideo"
             :class="{ theatreWatchVideo: useTheatreMode }"

@@ -2295,6 +2295,7 @@ Description:
   Video Category: '동영상 카테고리:'
   Video Tags: 동영상 태그
   Games: 게임
+  Music: 음악
 Tooltips:
   General Settings:
     Preferred Video Codec: 자동 모드는 하드웨어 디코딩을 우선합니다. 변경 사항은 다음 동영상에 적용됩니다. 코덱 선택에 따라 해상도가 제한될 수 있으며, 사용할 수 없는 코덱은 다른 코덱으로 대체됩니다.

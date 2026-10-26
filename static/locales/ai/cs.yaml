@@ -1911,6 +1911,7 @@ Description:
   Video Category: 'Kategorie videa:'
   Video Tags: Štítky videa
   Games: Hry
+  Music: Hudba
 Tooltips:
   General Settings:
     Preferred Video Codec: Automatický režim upřednostňuje hardwarové dekódování. Změny platí pro další video. Preference kodeku může omezit rozlišení; nedostupné kodeky se nahradí.

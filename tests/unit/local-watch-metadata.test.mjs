@@ -8,6 +8,7 @@ import { createLocalFeedParsers } from '../../src/renderer/helpers/api/local-fee
 const { parseLocalSubscriberCount, parseLocalTextRuns } = createLocalFeedParsers(() => false)
 import { parseLocalVideoSummary } from '../../src/renderer/helpers/video-summary.js'
 import { parseLocalVideoGames } from '../../src/renderer/helpers/video-games.js'
+import { parseLocalVideoMusicTracks } from '../../src/renderer/helpers/video-music.js'
 import { parseLocalVideoCollaborators } from '../../src/renderer/helpers/video-collaborators.js'
 import { getVideoPopularity } from '../../src/renderer/helpers/player/videoPopularity.js'
 
@@ -34,6 +35,7 @@ async function loadMetadata(info, avoidTranslation = 'disabled', options = {}) {
     areLocalCommentsDisabled: () => true,
     parseLocalEndscreen: () => [],
     parseLocalVideoGames,
+    parseLocalVideoMusicTracks,
     parseLocalVideoSummary,
     getVideoPopularity,
     YTNodes,

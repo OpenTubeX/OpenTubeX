@@ -2219,6 +2219,7 @@ Description:
   Video Category: 'Videokategori:'
   Video Tags: Videoemneord
   Games: Spel
+  Music: Musikk
 Tooltips:
   General Settings:
     Preferred Video Codec: Automatisk føretrekkjer maskinvaredekoding. Endringar gjeld frå neste video. Eit kodekval kan avgrense oppløysingar; utilgjengelege kodekar blir erstatta.

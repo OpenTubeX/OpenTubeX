@@ -1992,6 +1992,7 @@ Description:
   Video Category: 'Videokategori:'
   Video Tags: Videotags
   Games: Spil
+  Music: Musik
 Tooltips:
   General Settings:
     Preferred Video Codec: Automatisk foretrækker hardwareafkodning. Ændringer gælder fra næste video. Et codecvalg kan begrænse opløsninger; utilgængelige codecs erstattes.

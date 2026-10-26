@@ -1950,6 +1950,7 @@ Description:
   Video Category: 'Danh mục video:'
   Video Tags: Thẻ video
   Games: Trò chơi
+  Music: Âm nhạc
 Tooltips:
   General Settings:
     Preferred Video Codec: Chế độ tự động ưu tiên giải mã phần cứng. Thay đổi áp dụng cho video tiếp theo. Tùy chọn codec có thể giới hạn độ phân giải; codec không có sẵn sẽ được thay thế.

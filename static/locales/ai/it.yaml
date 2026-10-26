@@ -1910,6 +1910,7 @@ Description:
   Video Category: 'Categoria del video:'
   Video Tags: Tag del video
   Games: Giochi
+  Music: Musica
 Tooltips:
   General Settings:
     Preferred Video Codec: La modalità automatica preferisce la decodifica hardware. Le modifiche si applicano al prossimo video. La preferenza del codec può limitare le risoluzioni; i codec non disponibili vengono sostituiti.

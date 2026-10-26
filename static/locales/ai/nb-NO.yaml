@@ -1915,6 +1915,7 @@ Description:
   Video Category: 'Videokategori:'
   Video Tags: Videoetiketter
   Games: Spill
+  Music: Musikk
 Tooltips:
   General Settings:
     Preferred Video Codec: Automatisk foretrekker maskinvaredekoding. Endringer gjelder fra neste video. Et kodekvalg kan begrense oppløsninger; utilgjengelige kodeker erstattes.

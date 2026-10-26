@@ -2411,6 +2411,7 @@ Description:
   Video Category: 'Kategorija videoposnetka:'
   Video Tags: Oznake videoposnetka
   Games: Igre
+  Music: Glasba
 Tooltips:
   General Settings:
     Preferred Video Codec: Samodejni način daje prednost strojnemu dekodiranju. Spremembe veljajo za naslednji video. Izbira kodeka lahko omeji ločljivosti; nedostopni kodeki se nadomestijo.

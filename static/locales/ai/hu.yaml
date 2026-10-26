@@ -1912,6 +1912,7 @@ Description:
   Video Category: 'Videókategória:'
   Video Tags: Videócímkék
   Games: Játékok
+  Music: Zene
 Tooltips:
   General Settings:
     Preferred Video Codec: Az automatikus mód a hardveres dekódolást részesíti előnyben. A változások a következő videóra érvényesek. A kodekválasztás korlátozhatja a felbontásokat; a nem elérhető kodekeket másik helyettesíti.

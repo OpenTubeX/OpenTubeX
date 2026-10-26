@@ -19,7 +19,7 @@ async function flushDescriptionUpdates() {
 }
 
 function descriptionComponent({ laidOut = false } = {}) {
-  const props = reactive({ description: '', descriptionHtml: '', tags: [], games: [], license: null, contentDisclosures: [], previewOnly: false, alwaysExpanded: false })
+  const props = reactive({ description: '', descriptionHtml: '', tags: [], games: [], musicTracks: [], license: null, contentDisclosures: [], previewOnly: false, alwaysExpanded: false })
   const htmlTextFixtures = new Map([
     ['', ''],
     ['<p>Restored HTML description</p>', 'Restored HTML description'],
@@ -102,7 +102,7 @@ test('Invidious HTML descriptions and copy text follow reconnecting metadata', a
   assert.equal(await component.copy(), '')
 })
 
-for (const metadata of [{ tags: ['video tag'] }, { games: [{ title: 'Test game' }] }, { license: 'Creative Commons' }, { contentDisclosures: [{ label: 'Auto-dubbed' }] }]) {
+for (const metadata of [{ tags: ['video tag'] }, { games: [{ title: 'Test game' }] }, { musicTracks: [{ title: 'Test song' }] }, { license: 'Creative Commons' }, { contentDisclosures: [{ label: 'Auto-dubbed' }] }]) {
   test(`description controls account for ${Object.keys(metadata)[0]} arriving after short text`, async t => {
     const component = descriptionComponent({ laidOut: true })
     t.after(component.dispose)
@@ -120,7 +120,7 @@ for (const metadata of [{ tags: ['video tag'] }, { games: [{ title: 'Test game' 
     assert.equal(component.expanded(), false)
 
     // Removing auto-collapsed metadata restores the original short-text card.
-    Object.assign(component.props, { tags: [], games: [], license: null, contentDisclosures: [] })
+    Object.assign(component.props, { tags: [], games: [], musicTracks: [], license: null, contentDisclosures: [] })
     await flushDescriptionUpdates()
     assert.equal(component.controls(), false)
     assert.equal(component.expanded(), true)
@@ -132,7 +132,7 @@ for (const metadata of [{ tags: ['video tag'] }, { games: [{ title: 'Test game' 
 
     component.expand()
     // Later metadata updates must preserve the user's explicit expansion.
-    Object.assign(component.props, { tags: [], games: [], license: null, contentDisclosures: [] })
+    Object.assign(component.props, { tags: [], games: [], musicTracks: [], license: null, contentDisclosures: [] })
     await flushDescriptionUpdates()
     assert.equal(component.controls(), false)
     assert.equal(component.expanded(), true)

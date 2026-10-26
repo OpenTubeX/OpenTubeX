@@ -14,6 +14,12 @@ const COMMENTS_DISABLED_VIDEO = {
   title: 'Public Works - How to turn your water on and off',
   url: 'https://www.youtube.com/watch?v=Mapn4dhcFlc'
 }
+// YouTube credits the song in the description's music section.
+const MUSIC_VIDEO = {
+  id: 'dQw4w9WgXcQ',
+  title: 'Never Gonna Give You Up',
+  url: 'https://www.youtube.com/watch?v=dQw4w9WgXcQ'
+}
 const FULLSCREEN_PLAYLIST_ID = 'fullscreen-preview'
 const FULLSCREEN_PLAYLIST = {
   _id: FULLSCREEN_PLAYLIST_ID,
@@ -283,6 +289,17 @@ test.describe('watch page metadata', () => {
     await openVideo(page)
     await expect(page.getByText('jawed').first()).toBeVisible()
     await expect(page.locator(sel.activeTab).locator('img.tabAvatar')).toBeVisible()
+  })
+
+  test('shows the music credited in the description', async ({ page, innertube }) => {
+    test.skip(innertube.replay, 'watch page hydration needs the real API')
+    await openVideo(page, MUSIC_VIDEO)
+    const description = page.locator('.videoDescription').visible()
+    await expect(description.locator('.musicHeading')).toHaveText('Music')
+    const track = description.locator('.musicTrack').first()
+    await expect(track.locator('.musicTrackTitle')).toContainText('Never Gonna Give You Up')
+    await expect(track.locator('.musicTrackArtist')).toHaveText('Rick Astley')
+    await expect(track.locator('img.musicTrackArt[src]').first()).toHaveAttribute('src', /^https:\/\//)
   })
 })
 

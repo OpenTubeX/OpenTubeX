@@ -1958,6 +1958,7 @@ Description:
   Video Category: 'Categoria videoclipului:'
   Video Tags: Etichete video
   Games: Jocuri
+  Music: Muzică
 Tooltips:
   General Settings:
     Preferred Video Codec: Modul automat preferă decodarea hardware. Modificările se aplică următorului videoclip. Preferința de codec poate limita rezoluțiile; codecurile indisponibile sunt înlocuite.

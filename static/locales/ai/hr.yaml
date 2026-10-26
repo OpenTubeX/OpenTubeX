@@ -1938,6 +1938,7 @@ Description:
   Video Category: 'Kategorija videozapisa:'
   Video Tags: Oznake videozapisa
   Games: Igre
+  Music: Glazba
 Tooltips:
   General Settings:
     Preferred Video Codec: Automatski način preferira hardversko dekodiranje. Promjene vrijede za sljedeći video. Odabir kodeka može ograničiti rezolucije; nedostupni kodeci zamjenjuju se.

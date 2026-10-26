@@ -1927,6 +1927,7 @@ Description:
   Video Category: 'Kategori Video:'
   Video Tags: Tag Video
   Games: Gim
+  Music: Musik
 Tooltips:
   General Settings:
     Preferred Video Codec: Mode otomatis mengutamakan dekode perangkat keras. Perubahan berlaku untuk video berikutnya. Pilihan codec dapat membatasi resolusi; codec yang tidak tersedia diganti.

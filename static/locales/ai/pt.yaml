@@ -1964,6 +1964,7 @@ Description:
   Video Category: 'Categoria do vídeo:'
   Video Tags: Etiquetas do vídeo
   Games: Jogos
+  Music: Música
 Tooltips:
   General Settings:
     Preferred Video Codec: O modo automático prefere a descodificação por hardware. As alterações aplicam-se ao próximo vídeo. A preferência de codec pode limitar as resoluções; os codecs indisponíveis são substituídos.

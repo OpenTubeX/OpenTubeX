@@ -2331,6 +2331,7 @@ Description:
   Video Category: 'Vaizdo įrašo kategorija:'
   Video Tags: Vaizdo įrašo žymos
   Games: Žaidimai
+  Music: Muzika
 Tooltips:
   General Settings:
     Preferred Video Codec: Automatinis režimas teikia pirmenybę aparatiniam dekodavimui. Pakeitimai taikomi kitam vaizdo įrašui. Kodeko pasirinkimas gali riboti raišką; nepasiekiami kodekai pakeičiami.

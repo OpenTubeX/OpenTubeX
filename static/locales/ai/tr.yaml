@@ -1911,6 +1911,7 @@ Description:
   Video Category: 'Video Kategorisi:'
   Video Tags: Video Etiketleri
   Games: Oyunlar
+  Music: Müzik
 Tooltips:
   General Settings:
     Preferred Video Codec: Otomatik mod donanım çözmeyi tercih eder. Değişiklikler sonraki videoya uygulanır. Codec tercihi çözünürlükleri sınırlayabilir; kullanılamayan codec'ler değiştirilir.

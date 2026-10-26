@@ -1969,6 +1969,7 @@ Description:
   Video Category: 'Videocategorie:'
   Video Tags: Videotags
   Games: Games
+  Music: Muziek
 Tooltips:
   General Settings:
     Preferred Video Codec: Automatisch geeft de voorkeur aan hardwaredecodering. Wijzigingen gelden vanaf de volgende video. Een codecvoorkeur kan resoluties beperken; niet-beschikbare codecs worden vervangen.
