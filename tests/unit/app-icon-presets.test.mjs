@@ -14,6 +14,7 @@ const read = path => readFileSync(join(output, path), 'utf8')
 test('every app icon preset has a unique launcher alias, translations and packaged artwork', () => {
   const manifest = read('AndroidManifest.xml')
   const aliases = [...manifest.matchAll(/<activity-alias\b[\s\S]*?<\/activity-alias>/g)].map(([alias]) => alias)
+    .filter(alias => alias.includes('android:targetActivity=".LauncherActivity"'))
   assert.equal(aliases.length, APP_ICON_PRESETS.length)
   assert.equal(new Set(APP_ICON_PRESETS.map(({ id }) => id)).size, APP_ICON_PRESETS.length)
   assert.equal(aliases.filter(alias => alias.includes('android:enabled="true"')).length, 1)

@@ -106,6 +106,208 @@
 
         </activity>
 
+        <!-- Popular sites with a dedicated extractor in the bundled yt-dlp.
+             Lite builds disable this alias because they omit yt-dlp. Android 12+
+             leaves these unverified links off until the user enables them under
+             the app's "Open by default" settings. -->
+        <activity-alias
+            android:name=".ExternalMediaLinkActivity"
+            android:targetActivity=".MainActivity"
+            android:enabled="${bundlesYtDlp}"
+            android:exported="true">
+
+            <intent-filter>
+                <action android:name="android.intent.action.VIEW" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
+                <data android:scheme="https" />
+                <data android:host="instagram.com" />
+                <data android:host="www.instagram.com" />
+                <data android:pathPrefix="/reel/" />
+                <data android:pathPrefix="/reels/" />
+                <data android:pathPrefix="/p/" />
+                <data android:pathPrefix="/tv/" />
+            </intent-filter>
+
+            <intent-filter>
+                <action android:name="android.intent.action.VIEW" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
+                <data android:scheme="https" />
+                <data android:host="www.tiktok.com" />
+                <data android:pathPattern="/@.*/video/.*" />
+            </intent-filter>
+
+            <intent-filter>
+                <action android:name="android.intent.action.VIEW" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
+                <data android:scheme="https" />
+                <data android:host="vm.tiktok.com" />
+                <data android:host="vt.tiktok.com" />
+            </intent-filter>
+
+            <intent-filter>
+                <action android:name="android.intent.action.VIEW" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
+                <data android:scheme="https" />
+                <data android:host="x.com" />
+                <data android:host="www.x.com" />
+                <data android:host="twitter.com" />
+                <data android:host="www.twitter.com" />
+                <data android:host="mobile.twitter.com" />
+                <data android:pathPattern="/.*/status/.*" />
+            </intent-filter>
+
+            <intent-filter>
+                <action android:name="android.intent.action.VIEW" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
+                <data android:scheme="https" />
+                <data android:host="reddit.com" />
+                <data android:host="www.reddit.com" />
+                <data android:host="old.reddit.com" />
+                <data android:pathPattern="/r/.*/comments/.*" />
+                <data android:pathPattern="/user/.*/comments/.*" />
+            </intent-filter>
+
+            <intent-filter>
+                <action android:name="android.intent.action.VIEW" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
+                <data android:scheme="https" />
+                <data android:host="facebook.com" />
+                <data android:host="www.facebook.com" />
+                <data android:host="m.facebook.com" />
+                <data android:pathPrefix="/watch" />
+                <data android:pathPrefix="/reel/" />
+                <data android:pathPrefix="/video.php" />
+                <data android:pathPattern="/.*/videos/.*" />
+            </intent-filter>
+
+            <intent-filter>
+                <action android:name="android.intent.action.VIEW" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
+                <data android:scheme="https" />
+                <data android:host="dailymotion.com" />
+                <data android:host="www.dailymotion.com" />
+                <data android:pathPrefix="/video/" />
+            </intent-filter>
+
+            <intent-filter>
+                <action android:name="android.intent.action.VIEW" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
+                <data android:scheme="https" />
+                <data android:host="dai.ly" />
+            </intent-filter>
+
+            <intent-filter>
+                <action android:name="android.intent.action.VIEW" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
+                <data android:scheme="https" />
+                <data android:host="twitch.tv" />
+                <data android:host="www.twitch.tv" />
+                <data android:host="m.twitch.tv" />
+                <data android:host="clips.twitch.tv" />
+            </intent-filter>
+
+            <intent-filter>
+                <action android:name="android.intent.action.VIEW" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
+                <data android:scheme="https" />
+                <data android:host="soundcloud.com" />
+                <data android:host="m.soundcloud.com" />
+            </intent-filter>
+
+            <intent-filter>
+                <action android:name="android.intent.action.VIEW" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
+                <data android:scheme="https" />
+                <data android:host="www.bilibili.com" />
+                <data android:pathPrefix="/video/" />
+                <data android:pathPrefix="/bangumi/play/" />
+            </intent-filter>
+
+            <intent-filter>
+                <action android:name="android.intent.action.VIEW" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
+                <data android:scheme="https" />
+                <data android:host="rumble.com" />
+                <data android:pathPattern="/v.*" />
+            </intent-filter>
+
+            <intent-filter>
+                <action android:name="android.intent.action.VIEW" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
+                <data android:scheme="https" />
+                <data android:host="streamable.com" />
+            </intent-filter>
+
+            <intent-filter>
+                <action android:name="android.intent.action.VIEW" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
+                <data android:scheme="https" />
+                <data android:host="bsky.app" />
+                <data android:pathPattern="/profile/.*/post/.*" />
+            </intent-filter>
+
+            <intent-filter>
+                <action android:name="android.intent.action.VIEW" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
+                <data android:scheme="https" />
+                <data android:host="odysee.com" />
+            </intent-filter>
+
+            <intent-filter>
+                <action android:name="android.intent.action.VIEW" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
+                <data android:scheme="https" />
+                <data android:host="kick.com" />
+            </intent-filter>
+
+            <intent-filter>
+                <action android:name="android.intent.action.VIEW" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
+                <data android:scheme="https" />
+                <data android:host="www.nicovideo.jp" />
+                <data android:pathPrefix="/watch/" />
+            </intent-filter>
+
+            <intent-filter>
+                <action android:name="android.intent.action.VIEW" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
+                <data android:scheme="https" />
+                <data android:host="vk.com" />
+                <data android:host="vkvideo.ru" />
+                <data android:pathPrefix="/video" />
+                <data android:pathPrefix="/clip" />
+            </intent-filter>
+
+            <intent-filter>
+                <action android:name="android.intent.action.VIEW" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
+                <data android:scheme="https" />
+                <data android:host="*.bandcamp.com" />
+                <data android:pathPrefix="/track/" />
+                <data android:pathPrefix="/album/" />
+            </intent-filter>
+
+        </activity-alias>
+
         <activity
             android:name=".LauncherActivity"
             android:theme="@android:style/Theme.NoDisplay"
