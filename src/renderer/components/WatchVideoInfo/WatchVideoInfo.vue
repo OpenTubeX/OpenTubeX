@@ -195,7 +195,7 @@
       <div
         ref="videoOptions"
         class="videoOptions"
-        :class="{ compact: optionsCompact }"
+        :class="optionsLayout"
       >
         <span class="videoOptionsMobileRow">
           <slot name="cast-action" />
@@ -384,7 +384,7 @@ import FtRetryImage from '../FtRetryImage.vue'
 import { ytDlp } from '../../helpers/ytDlp'
 import { supportsYtDlp } from '../../helpers/ytDlpCapabilities'
 import { FtIcon } from '@opentubex/icons'
-import { computed, onBeforeUnmount, onMounted, ref, useTemplateRef, watch } from 'vue'
+import { computed, onBeforeUnmount, onMounted, onUpdated, ref, useTemplateRef, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 
 import FtAddToPlaylistDropdown from '../FtAddToPlaylistDropdown/FtAddToPlaylistDropdown.vue'
@@ -665,12 +665,14 @@ const showMetadataHistory = ref(false)
 
 const videoButtons = useTemplateRef('videoButtons')
 const videoOptions = useTemplateRef('videoOptions')
-const optionsCompact = ref(false)
+/** @type {import('vue').Ref<'full' | 'compact' | 'stacked'>} */
+const optionsLayout = ref('full')
 let labeledDownloadWidth = 0
+let compactDownloadWidth = 0
 let optionsLayoutFrame = null
 
 /**
- * Width of an action group on one line, including its divider. Compact
+ * Width of an action group on one line, including its divider. Stacked
  * toolbars let groups wrap, so their rendered width no longer reflects this.
  * @param {HTMLElement} group
  */
@@ -694,9 +696,9 @@ function getInlineMargins(style) {
 }
 
 /**
- * Hides the Download label when the toolbar with the label would be wider than
- * the card. CSS cannot measure how wide the toolbar would be with the label
- * shown once it is hidden.
+ * Keeps the toolbar on one line, hiding the Download label first. When even
+ * the icons do not fit, each group gets its own row. CSS cannot measure how
+ * wide the toolbar would be in the other layouts.
  */
 function updateOptionsLayout() {
   const row = videoButtons.value
@@ -705,17 +707,27 @@ function updateOptionsLayout() {
 
   const download = toolbar.querySelector('.downloadButton')
   const downloadWidth = download?.getBoundingClientRect().width ?? 0
-  if (!optionsCompact.value) {
+  if (optionsLayout.value === 'compact') {
+    compactDownloadWidth = downloadWidth
+  } else {
     labeledDownloadWidth = downloadWidth
   }
 
   const style = getComputedStyle(toolbar)
   const groups = [...toolbar.children].filter(group => group.getClientRects().length > 0)
-  const contentWidth = groups.reduce((width, group) => width + getUnwrappedGroupWidth(group), 0) +
+  const iconsWidth = groups.reduce((width, group) => width + getUnwrappedGroupWidth(group), 0) +
     parseFloat(style.columnGap) * Math.max(groups.length - 1, 0) +
-    parseFloat(style.paddingInlineStart) + parseFloat(style.paddingInlineEnd)
+    parseFloat(style.paddingInlineStart) + parseFloat(style.paddingInlineEnd) - downloadWidth
+  const availableWidth = row.clientWidth + 0.5
 
-  optionsCompact.value = contentWidth - downloadWidth + labeledDownloadWidth > row.clientWidth + 0.5
+  if (iconsWidth + labeledDownloadWidth <= availableWidth) {
+    optionsLayout.value = 'full'
+  } else if (download && !compactDownloadWidth) {
+    // Measure the icon-only Download button before deciding on stacking
+    optionsLayout.value = 'compact'
+  } else {
+    optionsLayout.value = iconsWidth + compactDownloadWidth <= availableWidth ? 'compact' : 'stacked'
+  }
 }
 
 function scheduleOptionsLayout() {
@@ -732,6 +744,10 @@ onMounted(() => {
   }
   updateOptionsLayout()
 })
+
+// A wrapped group spans the card, so showing or hiding one of its actions may
+// not resize anything the observer watches
+onUpdated(scheduleOptionsLayout)
 
 onBeforeUnmount(() => {
   optionsResizeObserver.disconnect()
