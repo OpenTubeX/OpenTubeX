@@ -271,7 +271,7 @@ print(context.cert_store_stats()['x509_ca'])
     @patch.object(bridge.yt_dlp, 'YoutubeDL', FakeYoutubeDL)
     def test_download_rejects_auxiliary_file_options(self):
         for args in [['--download-archive', 'archive.txt'], ['--cookies=cookies.txt'], ['--cache-dir', 'cache'],
-                     ['--postprocessor-args', 'ffmpeg:-y /tmp/out'], ['-x'], ['--forma', 'best']]:
+                     ['--postprocessor-args', 'ffmpeg:-y /tmp/out'], ['--forma', 'best']]:
             with self.subTest(args=args), tempfile.TemporaryDirectory() as temp:
                 root = Path(temp)
                 request = {

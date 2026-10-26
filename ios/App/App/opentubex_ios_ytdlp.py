@@ -27,7 +27,9 @@ class _QuietLogger:
 
 # Like Android's YtDlpArguments, only media options cross the bridge. yt-dlp
 # also accepts abbreviations and options that write files outside staging.
+# iOS also accepts -x and --concat-playlist, which its staging export supports.
 _FLAGS = {
+    '-x',
     '--no-simulate', '--no-playlist', '--yes-playlist', '--no-warnings', '--no-progress', '--ignore-no-formats-error',
     '--write-auto-subs', '--write-subs', '--extract-audio', '--skip-download', '--no-quiet',
     '--split-chapters', '--embed-subs', '--embed-thumbnail', '--embed-metadata', '--embed-chapters',
@@ -47,6 +49,7 @@ _VALUES = {
     '--fragment-retries', '--concurrent-fragments', '--limit-rate', '--sleep-interval',
     '--max-sleep-interval', '--sleep-requests', '--geo-bypass-country', '--user-agent',
     '--progress-template', '--referer', '--add-headers', '--proxy', '--trim-filenames',
+    '--concat-playlist',
 }
 
 
