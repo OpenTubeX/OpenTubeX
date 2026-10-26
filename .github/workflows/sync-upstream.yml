@@ -28,7 +28,7 @@ jobs:
       pull-requests: write
     env:
       GH_TOKEN: ${{ secrets.UPSTREAM_SYNC_TOKEN }}
-      SYNC_FORK: D3SOX/OpenTubeX-upstream-sync
+      SYNC_FORK: OpenTubeX/OpenTubeX-upstream-sync
     defaults:
       run:
         shell: bash
@@ -82,11 +82,13 @@ jobs:
         run: |
           # Pushing to the fork already updated an open PR.
           open=$(gh pr list --repo "$GITHUB_REPOSITORY" --base development --head upstream-sync --state open \
-            --json headRepositoryOwner --jq "[.[] | select(.headRepositoryOwner.login == \"${SYNC_FORK%%/*}\")] | length")
+            --json headRepository --jq "[.[] | select(.headRepository.name == \"${SYNC_FORK#*/}\")] | length")
           if [[ "$open" -eq 0 ]]; then
-            url=$(gh pr create --repo "$GITHUB_REPOSITORY" --base development --head "${SYNC_FORK%%/*}:upstream-sync" \
-              --title "chore: sync development from FreeTubeApp/FreeTube" --body "$BODY")
-            echo "number=${url##*/}" >> "$GITHUB_OUTPUT"
+            # head_repo selects the fork, which has the same owner as this repository
+            number=$(gh api "repos/$GITHUB_REPOSITORY/pulls" -f base=development -f head=upstream-sync \
+              -f head_repo="${SYNC_FORK#*/}" -f title="chore: sync development from FreeTubeApp/FreeTube" \
+              -f body="$BODY" --jq .number)
+            echo "number=$number" >> "$GITHUB_OUTPUT"
           fi
 
       # Assignment by the PAT owner is self-activity and does not notify them.
