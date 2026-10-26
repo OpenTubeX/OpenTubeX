@@ -170,7 +170,10 @@ test.describe('settings', () => {
     await expect(dialog.getByText('Pairing code expires at')).toBeVisible()
     expect(createdSession).toMatchObject({ version: 1, recipient_device_name: 'Travel laptop' })
     expect(createdSession.recipient_token_hash).toMatch(/^[\w-]{43}$/)
-    expect(JSON.stringify(createdSession)).not.toMatch(/privacy|passphrase|password|username|jwt/i)
+    // Random keys can contain words like "jwt", so check the field names instead of the serialized values.
+    expect(Object.keys(createdSession).sort()).toEqual([
+      'id', 'recipient_device_id', 'recipient_device_name', 'recipient_public_key', 'recipient_token_hash', 'version'
+    ])
 
     await page.evaluate(() => {
       const store = window.$store
