@@ -1135,7 +1135,7 @@
         :disabled="!fullscreenSponsorBlockOpen || shortsPhonePanelsEnabled"
       >
         <FtPhonePanel
-          :enabled="phonePanelsEnabled || shortsPhonePanelsEnabled"
+          :enabled="(phonePanelsEnabled && !fullscreenSponsorBlockOpen) || shortsPhonePanelsEnabled"
           :open="mobilePanel === 'sponsorBlock'"
           :title="$t('Settings.SponsorBlock Settings.SponsorBlock Settings')"
           fill

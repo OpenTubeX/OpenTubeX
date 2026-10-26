@@ -171,6 +171,19 @@ test('phone SponsorBlock info opens in a phone sheet instead of below the descri
   await expect(page.locator('.watchVideoSponsorBlock:visible')).toHaveCount(0)
 })
 
+test('phone fullscreen SponsorBlock action shows its content in the fullscreen dock', async ({ app, page }) => {
+  await mockPlayableWatchPage(app, page)
+  await (await openMockedVideo(page)).evaluate(video => video.pause())
+  await setWindowSize(app, page, { width: 480, height: 800 })
+  const watch = await watchViewHandle(page)
+  await watch.evaluate(vm => vm.$store.dispatch('updateUseSponsorBlock', true))
+  await setPlayerFullscreen(page, true)
+  await page.locator('.fullscreenSponsorBlockToggle').click({ force: true })
+  const overlay = page.locator('.fullscreenSponsorBlockOverlay.open')
+  await expect(overlay).toBeVisible()
+  await expect(overlay.locator('.watchVideoSponsorBlock')).toBeVisible()
+})
+
 for (const mode of ['browser', 'pip']) {
   test(`phone panel survives ${mode} and clamps shorter content`, { tag: '@scale' }, async ({ app, page, uiScale }) => {
     await mockPlayableWatchPage(app, page)
