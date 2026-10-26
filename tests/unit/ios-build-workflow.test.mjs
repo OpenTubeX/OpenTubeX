@@ -112,6 +112,8 @@ if 'bootstatus' in args and os.environ.get('IOS_MOCK_FAIL_BOOT'):
     const args = JSON.parse(tested.stdout)
     assert.equal(args[args.indexOf('-destination') + 1], 'platform=iOS Simulator,id=test-simulator')
     assert.equal(args[args.indexOf('-parallel-testing-enabled') + 1], 'NO')
+    assert.equal(args[args.indexOf('-test-timeouts-enabled') + 1], 'YES')
+    assert.equal(args[args.indexOf('-maximum-test-execution-time-allowance') + 1], '300')
     assert.ok(args.includes('-skip-testing:AppTests/AppTests/testApplicationAndDirectPlayback'))
     assert.ok(!args.includes('-retry-tests-on-failure'))
     const failedEnv = join(directory, 'failed-env')
