@@ -1,6 +1,11 @@
+import path from 'node:path'
+
 import packageDetails from '../package.json' with { type: 'json' }
 import { patchLinuxMprisName } from './patchLinuxMprisName.mjs'
 import { prepareWindowsInstallerTranslations } from './windowsInstallerTranslations.mjs'
+
+// Release builds write the deb and rpm changelogs here with storeReleaseNotes.mjs.
+const packageChangelogs = process.env.PACKAGE_CHANGELOG_DIR
 
 /** @type {import('electron-builder').Configuration} */
 export default {
@@ -73,7 +78,10 @@ export default {
       'at-spi2-core',
       '(libuuid or libuuid1)'
     ],
-    fpm: ['--rpm-rpmbuild-define=_build_id_links none']
+    fpm: [
+      '--rpm-rpmbuild-define=_build_id_links none',
+      ...(packageChangelogs ? ['--rpm-changelog', path.join(packageChangelogs, 'rpm')] : []),
+    ]
   },
   deb: {
     depends: [
@@ -86,7 +94,8 @@ export default {
       'libatspi2.0-0',
       'libuuid1',
       'libsecret-1-0'
-    ]
+    ],
+    ...(packageChangelogs && { fpm: ['--deb-changelog', path.join(packageChangelogs, 'debian')] }),
   },
   toolsets: {
     appimage: '1.0.3'

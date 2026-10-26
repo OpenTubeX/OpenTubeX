@@ -180,6 +180,23 @@ jobs:
           "$(apt_package libgtk-3-0t64 libgtk-3-0)" \
           libnotify4 libnss3 libsecret-1-0 libxss1 libxtst6 patchelf strace wget xauth xdg-utils xvfb
 
+    # electron-builder adds these to the deb and rpm packages (see ebuilder.config.mjs).
+    - name: Prepare Linux package changelogs
+      if: startsWith(matrix.runtime, 'linux')
+      env:
+        GH_TOKEN: ${{ github.token }}
+        RELEASE_ID: ${{ inputs.releaseId }}
+      shell: bash
+      run: |
+        set -euo pipefail
+
+        changelog_dir="${RUNNER_TEMP}/package-changelogs"
+        mkdir -p "$changelog_dir"
+        gh api "repos/${GITHUB_REPOSITORY}/releases/${RELEASE_ID}" --jq .body > "${changelog_dir}/release-notes.md"
+        node _scripts/storeReleaseNotes.mjs debian "${changelog_dir}/release-notes.md" > "${changelog_dir}/debian"
+        node _scripts/storeReleaseNotes.mjs rpm "${changelog_dir}/release-notes.md" > "${changelog_dir}/rpm"
+        echo "PACKAGE_CHANGELOG_DIR=${changelog_dir}" >> "$GITHUB_ENV"
+
     - name: Build x64 with Node.js ${{ matrix.node-version}}
       if: contains(matrix.runtime, 'x64')
       shell: bash
