@@ -39,7 +39,7 @@ include ':capawesome-capacitor-clipboard'
 project(':capawesome-capacitor-clipboard').projectDir = new File('../node_modules/.pnpm/@capawesome+capacitor-clipboard@0.1.2_patch_hash=729c6071cbf0e196e2212b015677cdd162c287_3e03c52dbfb27d0586ba4fa212038a19/node_modules/@capawesome/capacitor-clipboard/android')
 
 include ':capawesome-capacitor-screen-orientation'
-project(':capawesome-capacitor-screen-orientation').projectDir = new File('../node_modules/.pnpm/@capawesome+capacitor-screen-orientation@8.0.3_@capacitor+core@8.5.3/node_modules/@capawesome/capacitor-screen-orientation/android')
+project(':capawesome-capacitor-screen-orientation').projectDir = new File('../node_modules/.pnpm/@capawesome+capacitor-screen-orientation@8.0.4_@capacitor+core@8.5.3/node_modules/@capawesome/capacitor-screen-orientation/android')
 
 include ':capawesome-capacitor-settings-launcher'
 project(':capawesome-capacitor-settings-launcher').projectDir = new File('../node_modules/.pnpm/@capawesome+capacitor-settings-launcher@0.1.2_@capacitor+core@8.5.3/node_modules/@capawesome/capacitor-settings-launcher/android')

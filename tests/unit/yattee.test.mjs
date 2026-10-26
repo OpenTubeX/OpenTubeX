@@ -172,6 +172,8 @@ test('storyboards skip sheets with degenerate or excessive dimensions', () => {
     { count: Infinity },
     { count: 1e9 },
     { storyboardWidth: 1e6, storyboardHeight: 1e6, count: 1 },
+    // Every cue repeats the sheet URL
+    { templateUrl: `https://i.ytimg.com/sb/${'a'.repeat(20_000)}/M$M.jpg`, count: 50_000 },
   ]) {
     assert.equal(getYatteeStoryboard([{ ...sheet, ...invalid }]), null, JSON.stringify(invalid))
   }

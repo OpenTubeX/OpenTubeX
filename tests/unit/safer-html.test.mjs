@@ -20,13 +20,13 @@ globalThis.purifyConfigs = configs
 const { vSaferHtml } = await import('../../src/renderer/directives/vSaferHtml.js')
 hooks.deregister()
 
-function image(style) {
-  const element = { style: { ...style }, removeAttribute: name => { if (name === 'style') element.style = {} } }
+function styled(tagName, style) {
+  const element = { tagName, style: { ...style }, removeAttribute: name => { if (name === 'style') element.style = {} } }
   return element
 }
 
-function render(images, modifiers = {}) {
-  const element = { querySelectorAll: () => images }
+function render(styledElements, modifiers = {}) {
+  const element = { querySelectorAll: selector => selector === '[style]' ? styledElements : [] }
   vSaferHtml(element, { value: '<p>html</p>', oldValue: null, modifiers })
   return configs.at(-1)
 }
@@ -38,10 +38,12 @@ test('the lenient fallback only keeps the release note markup the native sanitiz
   for (const attribute of ['style', 'action', 'formaction', 'class']) assert.ok(!config.ALLOWED_ATTR.includes(attribute), attribute)
 })
 
-test('remote image styles cannot position images, only the emoji alignment remains', () => {
-  const overlay = image({ position: 'fixed', inset: '0', zIndex: '9999' })
-  const emoji = image({ verticalAlign: 'middle', position: 'absolute' })
-  render([overlay, emoji])
+test('remote styles cannot position content, only the emoji alignment remains', () => {
+  const overlay = styled('IMG', { position: 'fixed', inset: '0', zIndex: '9999' })
+  const link = styled('A', { position: 'fixed', inset: '0', verticalAlign: 'middle' })
+  const emoji = styled('IMG', { verticalAlign: 'middle', position: 'absolute' })
+  render([overlay, link, emoji])
   assert.deepEqual(overlay.style, {})
+  assert.deepEqual(link.style, {})
   assert.deepEqual(emoji.style, { verticalAlign: 'middle' })
 })

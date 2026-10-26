@@ -11,8 +11,8 @@ export const YATTEE_CHANNEL_TABS = ['videos', 'shorts', 'live', 'playlists', 'ab
 // header, which is wrong when a reverse proxy doesn't forward it.
 const SERVER_ROUTE_REGEX = /\/(?:proxy\/(?:relay|fast\/)|api\/v1\/(?:captions|thumbnails)\/|api\/v1\/channels\/[^/]+\/avatar\/)/
 
-// Enough for a thumbnail every second of a 12 hour video
-const MAX_STORYBOARD_CUES = 50_000
+// Characters of the VTT that buildVTTFileLocally generates synchronously
+const MAX_STORYBOARD_VTT_LENGTH = 16_000_000
 
 export class YatteeUnsupportedError extends Error {
   constructor(feature) {
@@ -201,12 +201,13 @@ export function normalizeYatteeVideo(video, serverUrl, proxyVideos) {
  */
 export function getYatteeStoryboard(storyboards) {
   // The server's counts decide how many cues buildVTTFileLocally generates synchronously
-  const hasUsableSize = ({ width, height, count, storyboardWidth, storyboardHeight }) => {
+  const hasUsableSize = ({ templateUrl, width, height, count, storyboardWidth, storyboardHeight }) => {
     if (![width, height, count, storyboardWidth, storyboardHeight].every(value => Number.isSafeInteger(value) && value > 0)) {
       return false
     }
     const thumbnailsPerSheet = storyboardWidth * storyboardHeight
-    return Math.ceil(count / thumbnailsPerSheet) * thumbnailsPerSheet <= MAX_STORYBOARD_CUES
+    // Every cue has a timing line and repeats the sheet URL
+    return Math.ceil(count / thumbnailsPerSheet) * thumbnailsPerSheet * (templateUrl.length + 64) <= MAX_STORYBOARD_VTT_LENGTH
   }
 
   const storyboard = storyboards

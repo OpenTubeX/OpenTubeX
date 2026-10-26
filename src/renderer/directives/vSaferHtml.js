@@ -107,12 +107,12 @@ export const vSaferHtml = (element, { value, oldValue, modifiers }) => {
       element.innerHTML = DOMPurify.sanitize(value, domPurifyStrictConfig)
     }
     if (!modifiers.lenient) {
-      // Remote styles could lay images over app controls, so keep only the
-      // alignment of live chat emojis.
-      for (const image of element.querySelectorAll('img[style]')) {
-        const alignMiddle = image.style.verticalAlign === 'middle'
-        image.removeAttribute('style')
-        if (alignMiddle) image.style.verticalAlign = 'middle'
+      // Remote styles could lay content over app controls, so keep only the
+      // alignment of live chat emojis. DOMPurify allows styles on every element.
+      for (const styled of element.querySelectorAll('[style]')) {
+        const alignMiddle = styled.tagName === 'IMG' && styled.style.verticalAlign === 'middle'
+        styled.removeAttribute('style')
+        if (alignMiddle) styled.style.verticalAlign = 'middle'
       }
     }
     addHtmlImagePlaceholders(element)
