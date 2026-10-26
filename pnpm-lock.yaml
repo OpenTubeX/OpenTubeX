@@ -293,8 +293,8 @@ importers:
         specifier: ^4.0.3
         version: 4.0.3
       dbus-native:
-        specifier: ^0.16.1
-        version: 0.16.1
+        specifier: ^0.16.2
+        version: 0.16.2
       dompurify:
         specifier: ^3.4.17
         version: 3.4.17
@@ -2357,8 +2357,8 @@ packages:
   csstype@3.2.3:
     resolution: {integrity: sha512-z1HGKcYy2xA8AGQfwrn0PAy+PB7X/GSj3UVJW9qKyn43xWa+gl5nXmU4qqLMRzWVLFC8KusUX8T/0kCiOYpAIQ==}
 
-  dbus-native@0.16.1:
-    resolution: {integrity: sha512-SP/c0emPuNQSGGt53rvZwLMkEyFvJH7t/2ZfBOoXdU3WeX5PY9Ku8RNLyPitrbsaVUSW/ZlTEEClKrp/f9BcWQ==}
+  dbus-native@0.16.2:
+    resolution: {integrity: sha512-RxWBtKt3xaLBK7kVlY/a2CoEJdyBLJr/lORwte3YTdyIxZV5sqPoV/ntiqwo2LKIf3jTA0qjIKxr7x0praPEsg==}
     engines: {node: '>=22.12.0'}
     hasBin: true
 
@@ -7491,7 +7491,7 @@ snapshots:
 
   csstype@3.2.3: {}
 
-  dbus-native@0.16.1:
+  dbus-native@0.16.2:
     dependencies:
       xml2js: 0.6.2
 
