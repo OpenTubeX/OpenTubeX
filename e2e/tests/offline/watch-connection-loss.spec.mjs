@@ -126,7 +126,9 @@ for (const width of [1600, 480]) {
     await expect.poll(() => sponsorSegments.allTextContents()).toEqual(loadedSponsorSegments)
     await expect(page.locator('.sponsorBlockMarker')).toHaveCount(1)
     await expect(page.getByRole('button', { name: 'Reload Comments', exact: true }).first()).toBeDisabled()
+    if (width === 480) await watch.evaluate(vm => { vm.mobilePanel = 'sponsorBlock' })
     await expect(page.getByRole('button', { name: 'Refresh SponsorBlock information', exact: true })).toBeDisabled()
+    if (width === 480) await watch.evaluate(vm => { vm.mobilePanel = 'comments' })
     await expect(page.locator('.transcriptSegment')).not.toHaveCount(0)
     const transcriptLanguage = 'Transcript language'
     await expect(page.locator(`.transcriptHeaderAction[aria-label="${transcriptLanguage}"]`)).toBeDisabled()
@@ -147,6 +149,7 @@ for (const width of [1600, 480]) {
     expect(await watch.evaluate(vm => JSON.stringify(vm.recommendedVideos))).toBe(cachedRecommendations)
     // The re-mounted list eagerly renders five rows; the others load as they enter the viewport.
     await expect.poll(() => recommendations.evaluateAll(rows => rows.slice(0, 5).map(row => row.textContent))).toEqual(loadedRecommendations.slice(0, 5))
+    if (width === 480) await watch.evaluate(vm => { vm.mobilePanel = 'sponsorBlock' })
     await expect(page.getByRole('button', { name: 'Refresh SponsorBlock information', exact: true })).toBeEnabled()
     if (width === 480) {
       // A closed mobile sheet excludes its controls from role locators.
