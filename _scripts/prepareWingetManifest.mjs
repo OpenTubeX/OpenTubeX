@@ -4,142 +4,14 @@ import path from 'node:path'
 import process from 'node:process'
 import { fileURLToPath } from 'node:url'
 
+import { releaseNotesText } from './storeReleaseNotes.mjs'
+
 const PACKAGE_IDENTIFIER = 'OpenTubeX.OpenTubeX'
 const MAX_WINGET_TAGS = 16
 const MAX_WINGET_RELEASE_NOTES_LENGTH = 10_000
 
-function decodeHtml(value) {
-  const namedEntities = {
-    amp: '&',
-    apos: '\'',
-    gt: '>',
-    lt: '<',
-    nbsp: ' ',
-    quot: '"',
-  }
-
-  return value.replaceAll(/&(#(?:x[\da-f]+|\d+)|[a-z]+);/gi, (entity, name) => {
-    if (name.startsWith('#x')) {
-      return String.fromCodePoint(Number.parseInt(name.slice(2), 16))
-    }
-
-    if (name.startsWith('#')) {
-      return String.fromCodePoint(Number.parseInt(name.slice(1), 10))
-    }
-
-    return namedEntities[name.toLowerCase()] ?? entity
-  })
-}
-
-function removePromotionSections(lines) {
-  const promotionHeading = /^(#{1,6})\s+(?:donate|promotion|sponsors?|support(?: us| the project)?)\b/i
-  let skippedHeadingLevel = null
-
-  return lines.filter((line) => {
-    const heading = line.match(/^(#{1,6})\s+/)
-
-    if (skippedHeadingLevel !== null) {
-      if (!heading || heading[1].length > skippedHeadingLevel) { return false }
-      skippedHeadingLevel = null
-    }
-
-    const promotion = line.match(promotionHeading)
-
-    if (promotion) {
-      skippedHeadingLevel = promotion[1].length
-      return false
-    }
-
-    return true
-  })
-}
-
-function stripHtmlMarkup(value) {
-  let plainText = ''
-
-  for (let index = 0; index < value.length;) {
-    if (value.startsWith('<!--', index)) {
-      const commentEnd = value.indexOf('-->', index + 4)
-
-      index = commentEnd === -1 ? value.length : commentEnd + 3
-    } else if (value[index] === '<') {
-      const tag = value.slice(index).match(/^<\/?[a-z][a-z0-9:-]*(?:\s[^<>]*)?\s*\/?>/i)
-
-      if (tag) {
-        index += tag[0].length
-      } else {
-        plainText += value[index]
-        index += 1
-      }
-    } else {
-      plainText += value[index]
-      index += 1
-    }
-  }
-
-  return plainText
-}
-
 export function cleanReleaseNotes(markdown) {
-  let notes = markdown.replaceAll('\r\n', '\n')
-
-  notes = notes.replaceAll(/<(?:picture|svg|video)\b[^]*?<\/(?:picture|svg|video)>/gi, '')
-  notes = notes.replaceAll(/<a\b[^>]*>\s*<img\b[^>]*>\s*<\/a>/gi, '')
-  notes = notes.replaceAll(/<img\b[^>]*\/?\s*>/gi, '')
-  notes = notes.replaceAll(/\[!\[[^\]]*\]\([^)]*\)\]\([^)]*\)/g, '')
-  notes = notes.replaceAll(/\[!\[[^\]]*\]\[[^\]]*\]\]\[[^\]]*\]/g, '')
-  notes = notes.replaceAll(/!\[[^\]]*\]\([^)]*\)/g, '')
-  notes = notes.replaceAll(/!\[[^\]]*\]\[[^\]]*\]/g, '')
-
-  const firstReleaseHeading = notes.search(/^##\s+\S/m)
-
-  if (firstReleaseHeading !== -1) {
-    notes = notes.slice(firstReleaseHeading)
-  }
-
-  let lines = removePromotionSections(notes.split('\n'))
-  let inPromotionalQuote = false
-
-  lines = lines.flatMap((line) => {
-    if (/^>\s*\[!(?:IMPORTANT|NOTE|TIP)\]/i.test(line)) {
-      inPromotionalQuote = true
-      return []
-    }
-
-    if (inPromotionalQuote) {
-      if (/^>/.test(line) || line.trim() === '') { return [] }
-      inPromotionalQuote = false
-    }
-
-    return [line]
-  })
-
-  notes = lines.join('\n')
-  notes = notes.replaceAll(/<br\s*\/?>/gi, '\n')
-  notes = stripHtmlMarkup(notes)
-  notes = decodeHtml(notes)
-  notes = stripHtmlMarkup(notes)
-  notes = notes.replaceAll(/^#{1,6}\s+/gm, '')
-  notes = notes.replaceAll(/\[([^\]]+)\]\([^)]*\)/g, '$1')
-  notes = notes.replaceAll(/\[([^\]]+)\]\[[^\]]*\]/g, '$1')
-  notes = notes.replaceAll(/^\[[^\]]+\]:\s+\S+.*$/gm, '')
-  notes = notes.replaceAll(/(\*\*|__)(.*?)\1/g, '$2')
-  notes = notes.replaceAll(/`([^`]+)`/g, '$1')
-  notes = notes.replaceAll(/^\s*```.*$/gm, '')
-
-  lines = notes
-    .split('\n')
-    .map((line) => line.trimEnd())
-    .filter((line) => !/^\s*(?:image|badge)\s*$/i.test(line))
-    .filter((line) => !/product\s*hunt/i.test(line))
-    .filter((line) => !/^\s*https?:\/\/\S+\.(?:avif|gif|jpe?g|png|svg|webp)(?:\?\S*)?\s*$/i.test(line))
-
-  const cleaned = lines
-    .join('\n')
-    .replaceAll(/[ \t]+\n/g, '\n')
-    .replaceAll(/(^\s*-\s.*)\n\n(?=\s*-\s)/gm, '$1\n')
-    .replaceAll(/\n{3,}/g, '\n\n')
-    .trim()
+  const cleaned = releaseNotesText(markdown)
 
   if (cleaned.length <= MAX_WINGET_RELEASE_NOTES_LENGTH) { return cleaned }
 

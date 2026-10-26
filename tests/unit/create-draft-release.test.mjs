@@ -19,7 +19,7 @@ test('uses the push token for protected-branch version bumps', async () => {
   assert.equal(checkout.with.token, '${{ secrets.PUSH_TOKEN }}')
 })
 
-test('records the release commit Android version code for F-Droid', async (t) => {
+test('records the release commit Android version code and changelog for F-Droid', async (t) => {
   const directory = await mkdtemp(join(tmpdir(), 'draft-release-version-'))
   t.after(() => rm(directory, { recursive: true, force: true }))
   const env = {
@@ -37,9 +37,15 @@ test('records the release commit Android version code for F-Droid', async (t) =>
   await writeFile(join(directory, 'package.json'), '{"version":"0.37.0"}\n')
   const properties = await readFile('android/app/version.properties', 'utf8')
   await writeFile(join(directory, 'android/app/version.properties'), properties)
+  await mkdir(join(directory, '_scripts'))
+  await writeFile(
+    join(directory, '_scripts/storeReleaseNotes.mjs'),
+    await readFile('_scripts/storeReleaseNotes.mjs', 'utf8')
+  )
   git('add', '.')
   git('commit', '--quiet', '-m', 'first')
   git('commit', '--quiet', '--allow-empty', '-m', 'second')
+  await writeFile(join(directory, 'release-notes.md'), '## Highlights\n\n- Added groups (#548, #2248)\n')
 
   const workflow = loadYaml(await readFile('.github/workflows/create-draft-release.yml', 'utf8'))
   const bump = workflow.jobs.create.steps.find(step => step.name === 'Bump package version')
@@ -58,7 +64,12 @@ test('records the release commit Android version code for F-Droid', async (t) =>
   )
   assert.deepEqual(git('show', '--format=', '--name-only', 'HEAD').split('\n'), [
     'android/app/version.properties',
+    'fastlane/metadata/android/en-US/changelogs/default.txt',
     'package.json'
   ])
+  assert.equal(
+    await readFile(join(directory, 'fastlane/metadata/android/en-US/changelogs/default.txt'), 'utf8'),
+    'Highlights\n• Added groups\n'
+  )
   assert.equal(JSON.parse(await readFile(join(directory, 'package.json'), 'utf8')).version, '0.38.0')
 })

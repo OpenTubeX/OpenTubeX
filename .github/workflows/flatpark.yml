@@ -211,16 +211,22 @@ jobs:
         metainfo="${app_dir}/org.opentubex.OpenTubeX.metainfo.xml"
         resolver_json="${RUNNER_TEMP}/flatpark-resolver.json"
         release_url="https://github.com/${GITHUB_REPOSITORY}/releases/tag/${RELEASE_TAG}"
+        release_notes_md="${RUNNER_TEMP}/release-notes.md"
+
+        jq --raw-output .body "$RELEASE_JSON" > "$release_notes_md"
+        release_notes="$(node opentubex/_scripts/storeReleaseNotes.mjs appstream "$release_notes_md")"
 
         jq \
           --arg version "$VERSION" \
           --arg release_url "$release_url" \
+          --arg release_notes "$release_notes" \
           --arg x64 "opentubex-${VERSION}-linux-x64-portable.zip" \
           --arg arm64 "opentubex-${VERSION}-linux-arm64-portable.zip" \
           '{
             version: $version,
             releaseDate: (.published_at | split("T")[0]),
             releaseUrl: $release_url,
+            releaseNotes: $release_notes,
             sources: [
               {
                 filename: "opentubex-x86_64.zip",
