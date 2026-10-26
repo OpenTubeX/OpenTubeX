@@ -40,7 +40,8 @@ export function parseLocalVideoMusicTracks(videoInfo) {
         artist: card.subtitle ?? '',
         album: card.secondary_subtitle?.content ?? '',
         license: '',
-        thumbnail: Array.isArray(card.image) ? (card.image[0]?.url ?? '') : '',
+        // `image` is either thumbnails or a `ContentPreviewImageView` that wraps them
+        thumbnail: (Array.isArray(card.image) ? card.image : card.image?.image)?.[0]?.url ?? '',
         videoId: card.on_tap?.payload?.videoId,
         channelId: undefined
       })

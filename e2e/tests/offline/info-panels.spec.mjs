@@ -32,6 +32,13 @@ const infoPanels = [{
     sourceEndpoint: urlEndpoint(HEALTH_URL),
     disclaimer: { runs: [{ text: 'Learn more about how experts define health sources' }] }
   }
+}, {
+  // A source without a usable link, next to a disclaimer
+  infoPanelContentRenderer: {
+    paragraphs: [{ runs: [{ text: 'Example context paragraph.' }] }],
+    inlineSource: { runs: [{ text: 'Example Source' }] },
+    disclaimer: { runs: [{ text: 'Example disclaimer' }] }
+  }
 }]
 
 test.use({
@@ -65,7 +72,7 @@ test('shows info panels below the video and opens their sources externally', asy
   const card = page.locator('.infoPanels:visible')
   await expect(card).toHaveCount(1)
   const panels = card.locator('.infoPanel')
-  await expect(panels).toHaveCount(3)
+  await expect(panels).toHaveCount(4)
 
   await expect(panels.nth(0).locator('.infoPanelTitle')).toHaveText('Climate change')
   await expect(panels.nth(0).locator('.infoPanelParagraph')).toHaveText(/^Climate change refers to long-term shifts/)
@@ -74,6 +81,9 @@ test('shows info panels below the video and opens their sources externally', asy
   await expect(panels.nth(1).locator('.infoPanelParagraph')).toHaveText('DW is a German public broadcast service.')
   await expect(panels.nth(1).locator('.infoPanelSource')).toHaveText('Source: Wikipedia')
   await expect(panels.nth(2).locator('.infoPanelSource')).toHaveText('Learn more about how experts define health sources')
+  await expect(panels.nth(3).locator('.infoPanelParagraph')).toHaveText(['Example context paragraph.', 'Example disclaimer'])
+  await expect(panels.nth(3).locator('.infoPanelSource')).toHaveText('Source: Example Source')
+  await expect(panels.nth(3).locator('a')).toHaveCount(0)
 
   // The panels sit between the video information and the description.
   const order = await page.evaluate(() => {

@@ -549,6 +549,8 @@ async function performSearchInvidious(payload, options = { resetSearchPage: fals
     hasMoreResults.value = results.length > 0
 
     apiUsed.value = 'invidious'
+    // A local correction notice doesn't apply to Invidious results, e.g. after a failed local continuation.
+    searchCorrection.value = null
 
     if (searchPage.value !== 1) {
       shownResults.value = shownResults.value.concat(results)
@@ -566,6 +568,9 @@ async function performSearchInvidious(payload, options = { resetSearchPage: fals
       searchSettings: searchSettings.value,
       searchPage: searchPage.value,
       hasMoreResults: hasMoreResults.value,
+      searchNotice: searchNotice.value,
+      searchCorrection: null,
+      searchParams: searchParams.value,
       spellCorrection: spellCorrection.value,
       apiUsed: apiUsed.value
     }

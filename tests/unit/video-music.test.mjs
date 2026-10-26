@@ -99,6 +99,16 @@ test('extracts the song, artist, album, album art and song video', () => {
   ])
 })
 
+test('reads album art wrapped in a content preview image', () => {
+  const card = rawMusicCard({
+    image: { contentPreviewImageViewModel: { image: { sources: [{ url: 'https://yt3.googleusercontent.com/wrapped-art' }] } } }
+  })
+
+  const [track] = parseLocalVideoMusicTracks(videoInfo({ items: [musicSection([card])] }))
+
+  assert.equal(track.thumbnail, 'https://yt3.googleusercontent.com/wrapped-art')
+})
+
 test('keeps a song that YouTube does not link to a video', () => {
   const card = rawMusicCard({ onTap: undefined })
   // YouTube leaves the key out when it doesn't know the album

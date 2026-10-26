@@ -32,15 +32,10 @@
 }
 
 .infoPanelParagraph {
-  display: -webkit-box;
   margin-block: 0 4px;
-  overflow: hidden;
   font-size: 15px;
   line-height: 1.4;
   opacity: 0.9;
-  -webkit-box-orient: vertical;
-  -webkit-line-clamp: 4;
-  line-clamp: 4;
 }
 
 .infoPanelSource {

@@ -26,6 +26,13 @@
         >
           {{ paragraph }}
         </p>
+        <p
+          v-if="panel.source && panel.disclaimer"
+          class="infoPanelParagraph"
+          dir="auto"
+        >
+          {{ panel.disclaimer }}
+        </p>
         <a
           v-if="panel.url"
           class="infoPanelSource"
@@ -41,6 +48,13 @@
             aria-hidden="true"
           />
         </a>
+        <span
+          v-else-if="panel.source || panel.disclaimer"
+          class="infoPanelSource"
+          dir="auto"
+        >
+          {{ panel.source ? $t('Video.Info panel source', { source: panel.source }) : panel.disclaimer }}
+        </span>
       </div>
     </div>
   </FtCard>
