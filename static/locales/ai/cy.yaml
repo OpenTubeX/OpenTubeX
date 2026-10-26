@@ -1381,6 +1381,7 @@ Channel:
   Videos:
     This channel has videos but none could be displayed, try fetching more: "Mae gan y sianel hon fideos ond ni ellid dangos yr un ohonynt. Ceisiwch lwytho mwy"
 Video:
+  Info panel source: 'Ffynhonnell: {source}'
   External DRM Protected: "Nid oes modd chwarae fideos gwarchodedig DRM yn OpenTubeX, gan fod angen cydrannau ffynhonnell gaeedig perchnogol arnynt."
   Invalid Media URL: "URL cyfryngau annilys"
   Mark As Fully Watched: Marcio fel wedi ei wylio yn llawn

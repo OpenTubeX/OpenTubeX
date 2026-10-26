@@ -757,6 +757,11 @@
               @save-channel-subtitles-state="handleChannelSubtitlesStateManualSave"
               @save-channel-volume="handleChannelVolumeManualSave"
             />
+            <WatchVideoInfoPanels
+              v-if="shortsMetadataOpen && !isLoading && infoPanels"
+              :panels="infoPanels"
+              class="watchVideo"
+            />
             <watch-video-description
               v-if="shortsMetadataOpen && !isLoading && !hideVideoDescription"
               :description="videoDescription"
@@ -947,6 +952,11 @@
             />
           </template>
         </watch-video-info>
+        <WatchVideoInfoPanels
+          v-if="!isLoading && infoPanels && (!customShortsPlayerActive || fullscreenMetadataOpen)"
+          :panels="infoPanels"
+          class="watchVideo"
+        />
         <button
           v-if="phonePanelsEnabled && $store.getters.getNextQueuedVideo && !isLoading"
           type="button"

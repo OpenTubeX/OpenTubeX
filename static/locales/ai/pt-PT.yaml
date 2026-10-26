@@ -1401,6 +1401,7 @@ Channel:
   Videos:
     This channel has videos but none could be displayed, try fetching more: "Este canal tem vídeos, mas nenhum pôde ser apresentado. Tente carregar mais"
 Video:
+  Info panel source: 'Fonte: {source}'
   External DRM Protected: "Os vídeos protegidos por DRM não podem ser reproduzidos no OpenTubeX, uma vez que requerem componentes proprietários e de código fechado."
   Invalid Media URL: "URL de conteúdo multimédia inválido"
   Mark As Fully Watched: Marcar como visto na íntegra

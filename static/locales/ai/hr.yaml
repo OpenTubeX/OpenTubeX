@@ -1386,6 +1386,7 @@ Channel:
   Videos:
     This channel has videos but none could be displayed, try fetching more: "Ovaj kanal ima videozapise, ali nijedan se nije mogao prikazati. Pokušajte učitati još"
 Video:
+  Info panel source: 'Izvor: {source}'
   External DRM Protected: "DRM-om zaštićena videa ne mogu se reproducirati u OpenTubeXu jer zahtijevaju vlasničke komponente zatvorenog koda."
   Invalid Media URL: "Nevažeći URL medija"
   Mark As Fully Watched: Označi kao pogledano do kraja

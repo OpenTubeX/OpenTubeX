@@ -1598,6 +1598,7 @@ Channel:
   Videos:
     This channel has videos but none could be displayed, try fetching more: "Denne kanalen har videoar, men ingen kunne visast. Prøv å hente fleire"
 Video:
+  Info panel source: 'Kjelde: {source}'
   External DRM Protected: "DRM-verna videoar kan ikkje spelast av i OpenTubeX fordi dei krev proprietære komponentar med lukka kjeldekode."
   Invalid Media URL: "Ugyldig medie-URL"
   Mark As Fully Watched: Merk som ferdig sett

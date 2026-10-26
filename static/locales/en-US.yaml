@@ -2697,6 +2697,7 @@ Video:
   Playlist:
     Unavailable videos are hidden: 1 unavailable video is hidden | {count} unavailable videos are hidden
   How this was made: How this was made
+  Info panel source: 'Source: {source}'
 #& Playlists
 Playlist:
   #& About

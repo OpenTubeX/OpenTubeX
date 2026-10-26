@@ -60,6 +60,7 @@ function loader({ android = Promise.resolve({ data: {} }), token = Promise.resol
     decipherFormats: async () => {},
     extractTotalAdTimeMilliseconds: () => 0,
     extractLocalContentDisclosures: () => null,
+    extractLocalInfoPanels: () => null,
     Constants, Utils, YT, ClientType,
     createInnertube: () => assert.fail('Unexpected fallback'),
     Response,

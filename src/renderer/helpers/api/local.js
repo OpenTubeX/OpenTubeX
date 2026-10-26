@@ -706,6 +706,7 @@ async function getLocalVrHlsManifest(videoId, session, poToken) {
  *   androidLiveDashManifestUrl: string | null,
  *   getVrHlsManifest: () => Promise<string | null>,
  *   contentDisclosures: { label: string, description: string, attribution: string }[] | null,
+ *   infoPanels: LocalInfoPanel[] | null,
  *   musicMediaType: import('../player/musicMediaType').MusicMediaType
  * }>}
  */
@@ -954,6 +955,7 @@ export async function getLocalVideoInfo(id, { shouldGeneratePoToken = () => true
       watchPageIpBlocked,
       musicMediaType,
       contentDisclosures: extractLocalContentDisclosures(info),
+      infoPanels: extractLocalInfoPanels(info),
     }
   }
 
@@ -1030,6 +1032,7 @@ export async function getLocalVideoInfo(id, { shouldGeneratePoToken = () => true
     watchPageIpBlocked,
     musicMediaType,
     contentDisclosures: extractLocalContentDisclosures(info),
+    infoPanels: extractLocalInfoPanels(info),
     getVrHlsManifest: () => getLocalVrHlsManifest(id, htmlExtracts.session, contentPoToken),
   }
 }
@@ -1061,6 +1064,66 @@ export function extractLocalContentDisclosures(info) {
   }
 
   return null
+}
+
+/**
+ * @typedef {object} LocalInfoPanel
+ * @property {string} title
+ * @property {string[]} paragraphs
+ * @property {string} source
+ * @property {string} disclaimer
+ * @property {string} url
+ */
+
+// Topic panels start their first paragraph with the source name, e.g. "Wikipedia • The Holocaust was..."
+const INFO_PANEL_SOURCE_PREFIX_REGEX = /^([^•]{1,80}?) • /
+
+/**
+ * Extracts information panels (publicly funded broadcaster notices, topic context, health sources) from YouTube VideoInfo response
+ * @param {import('youtubei.js').YT.VideoInfo} info
+ * @returns {LocalInfoPanel[] | null}
+ */
+export function extractLocalInfoPanels(info) {
+  const memo = info?.page?.[1]?.contents_memo
+  if (!memo) {
+    return null
+  }
+
+  const containers = memo.getType(YTNodes.InfoPanelContainer).filter(container => container.content)
+  const nestedContents = new Set(containers.map(container => container.content))
+
+  const panels = [
+    ...containers.map(container => ({ title: container.title.text, content: container.content })),
+    ...memo.getType(YTNodes.InfoPanelContent)
+      .filter(content => !nestedContents.has(content))
+      .map(content => ({ title: content.title.text, content })),
+  ].map(({ title, content }) => {
+    const paragraphs = (content.paragraphs ?? content.attributed_paragraphs ?? [])
+      .map(paragraph => paragraph.text?.trim())
+      .filter(Boolean)
+    let source = content.inline_source?.text || content.source.text || ''
+    const disclaimer = content.disclaimer?.text ?? ''
+
+    const sourcePrefix = !source && paragraphs.length > 0 ? INFO_PANEL_SOURCE_PREFIX_REGEX.exec(paragraphs[0]) : null
+    if (sourcePrefix) {
+      source = sourcePrefix[1]
+      paragraphs[0] = paragraphs[0].slice(sourcePrefix[0].length)
+    }
+
+    let url = content.source_endpoint?.payload?.url ?? content.source_endpoint?.metadata?.url ?? ''
+    if (url.startsWith('//')) {
+      url = `https:${url}`
+    }
+    if (!/^https?:\/\//.test(url) || !URL.canParse(url)) {
+      url = ''
+    } else if (!source && !disclaimer) {
+      source = new URL(url).hostname
+    }
+
+    return { title: title ?? '', paragraphs, source, disclaimer, url }
+  }).filter(panel => panel.title || panel.paragraphs.length > 0)
+
+  return panels.length > 0 ? panels : null
 }
 
 /**

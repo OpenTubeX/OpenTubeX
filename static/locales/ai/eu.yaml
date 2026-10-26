@@ -1374,6 +1374,7 @@ Channel:
   Search Result Types: Bilaketa-emaitzen motak
   All Results: Guztiak
 Video:
+  Info panel source: 'Iturria: {source}'
   External DRM Protected: "DRM babestutako bideoak ezin dira erreproduzitu OpenTubeXn, kode itxiko osagai jabedunak behar baitituzte."
   Invalid Media URL: "Multimedia URLa ez da baliozkoa"
   Mark As Fully Watched: Markatu osorik ikusita bezala

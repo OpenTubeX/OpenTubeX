@@ -1404,6 +1404,7 @@ Channel:
   Videos:
     This channel has videos but none could be displayed, try fetching more: "На цьому каналі є відео, але жодне не вдалося показати. Спробуйте завантажити ще"
 Video:
+  Info panel source: 'Джерело: {source}'
   External DRM Protected: "Відео, захищені DRM, неможливо відтворити в OpenTubeX, оскільки для цього потрібні пропрієтарні компоненти з закритим вихідним кодом."
   Invalid Media URL: "Недійсна URL-адреса медіа"
   Mark As Fully Watched: Позначити як повністю переглянуте

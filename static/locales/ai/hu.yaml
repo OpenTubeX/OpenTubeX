@@ -1374,6 +1374,7 @@ Channel:
   Search Result Types: Keresési találatok típusai
   All Results: Összes
 Video:
+  Info panel source: 'Forrás: {source}'
   External DRM Protected: "A DRM-védelemmel ellátott videók nem játszhatók le az OpenTubeX-ban, mivel ezekhez zárt forráskódú, tulajdonosi komponensekre van szükség."
   Invalid Media URL: "Érvénytelen média-URL"
   Mark As Fully Watched: Megjelölés teljesen megtekintettként

@@ -1700,6 +1700,7 @@ Channel:
   Videos:
     This channel has videos but none could be displayed, try fetching more: "Šiame kanale yra vaizdo įrašų, bet nė vieno nepavyko parodyti. Pabandykite įkelti daugiau"
 Video:
+  Info panel source: 'Šaltinis: {source}'
   External DRM Protected: "DRM apsaugotų vaizdo įrašų negalima leisti naudojant OpenTubeX, nes jiems reikia nuosavybinių uždarojo kodo komponentų."
   Invalid Media URL: "Neteisingas medijos URL"
   Mark As Fully Watched: Pažymėti kaip visiškai peržiūrėtą

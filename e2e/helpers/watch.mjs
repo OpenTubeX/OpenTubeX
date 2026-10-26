@@ -156,6 +156,7 @@ function addCommentImages(body, attachments) {
  * @param {object[]} [options.commentImages] add image attachments to comments and replies
  * @param {number[]|null} [options.popularity] replace replay intensities, or remove popularity metadata
  * @param {{label: string, description: string, attribution: string}[]} [options.contentDisclosures] include structured content disclosures
+ * @param {object[]} [options.infoPanels] raw info panel renderers to show below the video
  */
 export async function mockWatchPage(app, page, {
   playable = false,
@@ -170,7 +171,8 @@ export async function mockWatchPage(app, page, {
   blankCommentLikes = false,
   commentImages = [],
   popularity,
-  contentDisclosures
+  contentDisclosures,
+  infoPanels
 } = {}) {
   const counters = new Map()
   const includeCaptions = captionTranslations || captionCueSettings !== '' ||
@@ -324,6 +326,14 @@ export async function mockWatchPage(app, page, {
             }
           })
           body = Buffer.from(JSON.stringify(json))
+        }
+        if (infoPanels && url.includes('/next')) {
+          const json = JSON.parse(body)
+          const contents = json.contents?.twoColumnWatchNextResults?.results?.results?.contents
+          if (contents) {
+            contents.unshift({ itemSectionRenderer: { contents: infoPanels } })
+            body = Buffer.from(JSON.stringify(json))
+          }
         }
         if (ownerReply && body.includes('"replyLevel":0')) {
           body = addOwnerReplyMarker(body)

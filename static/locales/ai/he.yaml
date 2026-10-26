@@ -1409,6 +1409,7 @@ Channel:
   Videos:
     This channel has videos but none could be displayed, try fetching more: "בערוץ הזה יש סרטונים, אך לא ניתן היה להציג אף אחד מהם. נסו לטעון עוד"
 Video:
+  Info panel source: 'מקור: {source}'
   External DRM Protected: "סרטונים המוגנים ב-DRM אינם יכולים להתנגן ב-OpenTubeX, מכיוון שהם דורשים רכיבים קנייניים בקוד סגור."
   Invalid Media URL: "כתובת URL של מדיה אינה תקינה"
   Mark As Fully Watched: סימון כנצפה במלואו

@@ -1753,6 +1753,7 @@ Channel:
   Videos:
     This channel has videos but none could be displayed, try fetching more: "Ta kanal ima videoposnetke, vendar nobenega ni bilo mogoče prikazati. Poskusite naložiti več"
 Video:
+  Info panel source: 'Vir: {source}'
   External DRM Protected: "Videoposnetkov z zaščito DRM ni mogoče predvajati v OpenTubeX, saj zahtevajo lastniške zaprtokodne komponente."
   Invalid Media URL: "Neveljaven URL predstavnosti"
   Mark As Fully Watched: Označi kot ogledano do konca

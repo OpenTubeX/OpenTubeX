@@ -1404,6 +1404,7 @@ Channel:
   Videos:
     This channel has videos but none could be displayed, try fetching more: "تحتوي هذه القناة على فيديوهات، لكن تعذر عرض أي منها. حاول جلب المزيد"
 Video:
+  Info panel source: 'المصدر: {source}'
   External DRM Protected: "لا يمكن تشغيل مقاطع الفيديو المحمية بنظام إدارة الحقوق الرقمية في OpenTubeX، لأنها تتطلب مكونات خاصة ومغلقة المصدر."
   Invalid Media URL: "رابط الوسائط غير صالح"
   Mark As Fully Watched: وضع علامة على أنه تمت مشاهدته بالكامل

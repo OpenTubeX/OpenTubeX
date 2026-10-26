@@ -829,6 +829,7 @@ Channel:
   Search Result Types: Typy wyników wyszukiwania
   All Results: Wszystkie
 Video:
+  Info panel source: 'Źródło: {source}'
   Remove Video from Queue: Usuń z kolejki
   External DRM Protected: "OpenTubeX nie może odtwarzać filmów chronionych przez DRM, ponieważ wymagają one obsługi zastrzeżonych prawnie komponentów o zamkniętym kodzie."
   Invalid Media URL: "Nieprawidłowy adres URL multimediów"

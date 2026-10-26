@@ -1377,6 +1377,7 @@ Channel:
   Search Result Types: Axtarış nəticələrinin növləri
   All Results: Hamısı
 Video:
+  Info panel source: 'Mənbə: {source}'
   External DRM Protected: "DRM ilə qorunan videolar xüsusi, qapalı mənbəli komponentlər tələb etdiyindən OpenTubeX vasitəsilə oynadıla bilmir."
   Invalid Media URL: "Yanlış media URL-si"
   Mark As Fully Watched: Tam baxılmış kimi işarələ

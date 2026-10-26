@@ -1374,6 +1374,7 @@ Channel:
   Search Result Types: Typy výsledkov hľadania
   All Results: Všetko
 Video:
+  Info panel source: 'Zdroj: {source}'
   External DRM Protected: "Videá chránené DRM nemôžu byť prehrávané v OpenTubeX, pretože vyžadujú proprietárne, uzavreté zdrojové komponenty."
   Invalid Media URL: "Neplatná adresa URL média"
   Mark As Fully Watched: Označiť ako úplne pozreté

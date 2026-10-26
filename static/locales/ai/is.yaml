@@ -1385,6 +1385,7 @@ Channel:
   Videos:
     This channel has videos but none could be displayed, try fetching more: "Þessi rás er með myndskeið en ekki var hægt að birta neitt þeirra. Prófaðu að sækja fleiri"
 Video:
+  Info panel source: 'Heimild: {source}'
   External DRM Protected: "Ekki er hægt að spila DRM-varin myndskeið í OpenTubeX, þar sem þau krefjast notkunar lokaðs séreignarhugbúnaðar."
   Invalid Media URL: "Ógild slóð á miðil"
   Mark As Fully Watched: Merkja sem fullhorft

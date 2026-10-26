@@ -1372,6 +1372,7 @@ Channel:
   Search Result Types: Types de résultats de recherche
   All Results: Tous
 Video:
+  Info panel source: 'Source : {source}'
   External DRM Protected: "Les vidéos protégées par DRM ne peuvent pas être lues dans OpenTubeX, car elles nécessitent des composants propriétaires et à source fermée."
   Invalid Media URL: "URL du média invalide"
   Mark As Fully Watched: Marquer comme entièrement vue

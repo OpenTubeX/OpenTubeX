@@ -1374,6 +1374,7 @@ Channel:
   Search Result Types: 検索結果の種類
   All Results: すべて
 Video:
+  Info panel source: '出典: {source}'
   External DRM Protected: "DRMで保護された動画は、独自のクローズドソースコンポーネントが必要なため、OpenTubeXでは再生できません。"
   Invalid Media URL: "無効なメディアURL"
   Mark As Fully Watched: 最後まで視聴済みにする

@@ -1387,6 +1387,7 @@ Channel:
   Videos:
     This channel has videos but none could be displayed, try fetching more: "Αυτό το κανάλι έχει βίντεο, αλλά κανένα δεν μπόρεσε να εμφανιστεί. Δοκιμάστε να φορτώσετε περισσότερα"
 Video:
+  Info panel source: 'Πηγή: {source}'
   External DRM Protected: "Τα βίντεο που προστατεύονται με DRM δεν μπορούν να αναπαραχθούν στο OpenTubeX, καθώς απαιτούν ιδιόκτητα εξαρτήματα κλειστού κώδικα."
   Invalid Media URL: "Μη έγκυρο URL πολυμέσων"
   Mark As Fully Watched: Σήμανση ως πλήρως προβληθέν

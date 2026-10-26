@@ -23,6 +23,7 @@ import WatchVideoDownloadPrompt from '../../components/WatchVideoDownloadPrompt/
 import { retainIosMediaSources } from '../../helpers/player/dlnaCast'
 import WatchVideoInfo from '../../components/WatchVideoInfo/WatchVideoInfo.vue'
 import WatchVideoDescription from '../../components/WatchVideoDescription/WatchVideoDescription.vue'
+import WatchVideoInfoPanels from '../../components/WatchVideoInfoPanels/WatchVideoInfoPanels.vue'
 import WatchVideoTranscript from '../../components/WatchVideoTranscript/WatchVideoTranscript.vue'
 import WatchVideoChapters from '../../components/WatchVideoChapters/WatchVideoChapters.vue'
 import WatchVideoSponsorBlock from '../../components/WatchVideoSponsorBlock/WatchVideoSponsorBlock.vue'
@@ -197,6 +198,7 @@ export default defineComponent({
     WatchVideoDownloadPrompt,
     'watch-video-info': WatchVideoInfo,
     'watch-video-description': WatchVideoDescription,
+    WatchVideoInfoPanels,
     WatchVideoSummary,
     'watch-video-transcript': WatchVideoTranscript,
     'watch-video-chapters': WatchVideoChapters,
@@ -345,6 +347,8 @@ export default defineComponent({
       preparingVideoLoadGeneration: null,
       hasAiGeneratedContent: false,
       contentDisclosures: null,
+      /** @type {import('../../helpers/api/local').LocalInfoPanel[] | null} */
+      infoPanels: null,
       hasPaidPromotion: false,
       paidPromotionDurationMs: 10000,
       upcomingTimestamp: null,
@@ -2484,6 +2488,7 @@ export default defineComponent({
       this.shortsPlaybackAfterSeekSeconds = 0
       this.hasAiGeneratedContent = false
       this.contentDisclosures = null
+      this.infoPanels = null
       this.hasPaidPromotion = false
       this.paidPromotionDurationMs = 10000
       this.upcomingTimestamp = null
@@ -3473,12 +3478,14 @@ export default defineComponent({
           watchPageIpBlocked,
           musicMediaType,
           contentDisclosures,
+          infoPanels,
           androidLiveHlsManifestUrl,
           androidLiveDashManifestUrl,
         } = videoInfo
 
         this.musicMediaType = musicMediaType
         this.contentDisclosures = contentDisclosures ?? null
+        this.infoPanels = infoPanels ?? null
 
         if (watchPageIpBlocked) {
           this.ipBlockDetectedInCurrentChain = true
@@ -4310,6 +4317,7 @@ export default defineComponent({
           this.isFamilyFriendly = result.isFamilyFriendly
           this.isPostLiveDvr = !!result.isPostLiveDvr
           this.contentDisclosures = null
+          this.infoPanels = null
           this.hasAiGeneratedContent = false
           this.isUnlisted = !result.isListed
 

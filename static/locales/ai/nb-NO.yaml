@@ -1373,6 +1373,7 @@ Channel:
   Search Result Types: Typer søkeresultater
   All Results: Alle
 Video:
+  Info panel source: 'Kilde: {source}'
   External DRM Protected: "DRM-beskyttede videoer kan ikke bli avspilt i OpenTubeX, ettersom de krever proprietære komponenter med lukket kildekode."
   Invalid Media URL: "Ugyldig medie-URL"
   Mark As Fully Watched: Merk som ferdig sett

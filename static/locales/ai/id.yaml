@@ -1379,6 +1379,7 @@ Channel:
   Videos:
     This channel has videos but none could be displayed, try fetching more: "Kanal ini memiliki video, tetapi tidak ada yang dapat ditampilkan. Coba muat lebih banyak"
 Video:
+  Info panel source: 'Sumber: {source}'
   External DRM Protected: "Video yang dilindungi DRM tidak dapat diputar di OpenTubeX, karena memerlukan komponen sumber tertutup dan berpemilik."
   Invalid Media URL: "URL media tidak valid"
   Mark As Fully Watched: Tandai sebagai sudah ditonton sepenuhnya
