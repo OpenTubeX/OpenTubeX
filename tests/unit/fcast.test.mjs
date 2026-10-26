@@ -37,6 +37,12 @@ async function receiverForTest(t, { version = 3, onPlay } = {}) {
     const check = () => receiver.received(opcode).length >= count ? resolve(receiver.received(opcode).at(count - 1)) : setImmediate(check)
     check()
   })
+  // The sender handles packets in order, so its pong confirms it handled every earlier one.
+  receiver.handled = async () => {
+    const pongs = receiver.received(FcastOpcode.PONG).length
+    receiver.send(FcastOpcode.PING)
+    await receiver.next(FcastOpcode.PONG, pongs + 1)
+  }
   receiver.disconnected = () => new Promise(resolve => {
     const check = () => receiver.sockets.size ? setImmediate(check) : resolve()
     check()
@@ -141,7 +147,7 @@ test('FCast plays through the relay and controls the receiver until it stops', a
   await receiver.next(FcastOpcode.PONG)
   receiver.send(FcastOpcode.VOLUME_UPDATE, { generationTime: Date.now(), volume: 0.7 })
   receiver.send(FcastOpcode.PLAYBACK_UPDATE, { generationTime: Date.now(), state: 1, time: 45, duration: 120, speed: 1.5 })
-  await new Promise(resolve => setTimeout(resolve, 50))
+  await receiver.handled()
   assert.deepEqual(manager.status(7, result.castId), { connected: true, currentTime: 45, duration: 120, paused: false, buffering: false, ended: false, volume: 0.7, muted: false, activeTrackIds: [] })
   const stopped = await manager.stop(7, result.castId)
   assert.deepEqual({ connected: stopped.connected, currentTime: stopped.currentTime }, { connected: false, currentTime: 45 })
@@ -157,7 +163,7 @@ test('FCast reports natural completion separately from a receiver stop', async t
   const manager = managerForTest(t, receiver)
   let result = await manager.start(7, payload(upstream.url), () => ({}), allowLocal, fetch)
   receiver.send(FcastOpcode.EVENT, { generationTime: Date.now(), event: { type: 1, item: { container: 'video/mp4', url: receiver.received(FcastOpcode.PLAY)[0].url } } })
-  await new Promise(resolve => setTimeout(resolve, 50))
+  await receiver.handled()
   assert.equal(manager.status(7, result.castId).ended, true)
   await manager.stop(7, result.castId)
 
@@ -176,10 +182,10 @@ test('FCast stops its session when another sender replaces the video', async t =
   const manager = managerForTest(t, receiver)
   const result = await manager.start(7, payload(upstream.url), () => ({}), allowLocal, fetch)
   receiver.send(FcastOpcode.PLAY_UPDATE, { generationTime: Date.now(), playData: { container: 'video/mp4', url: receiver.received(FcastOpcode.PLAY)[0].url } })
-  await new Promise(resolve => setTimeout(resolve, 50))
+  await receiver.handled()
   assert.equal(manager.status(7, result.castId).connected, true)
   receiver.send(FcastOpcode.PLAY_UPDATE, { generationTime: Date.now(), playData: { container: 'video/mp4', url: 'https://other.test/video.mp4' } })
-  await new Promise(resolve => setTimeout(resolve, 50))
+  await receiver.disconnected()
   assert.equal(manager.status(7, result.castId).connected, false)
 })
 
@@ -292,7 +298,7 @@ test('FCast reports a receiver playback error after startup', async t => {
   const manager = managerForTest(t, receiver)
   const result = await manager.start(7, payload(upstream.url), () => ({}), allowLocal, fetch)
   receiver.send(FcastOpcode.PLAYBACK_ERROR, { message: 'Source error' })
-  await new Promise(resolve => setTimeout(resolve, 50))
+  await receiver.disconnected()
   assert.deepEqual(manager.status(7, result.castId), { connected: false, error: 'Source error', errorCode: 'CAST_LOAD_FAILED' })
   assert.deepEqual(manager.status(8, result.castId), { connected: false })
 })
