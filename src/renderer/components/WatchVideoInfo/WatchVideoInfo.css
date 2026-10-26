@@ -183,8 +183,10 @@
 }
 
 /* Last resort when even the icon-only toolbar is wider than the card */
-.videoOptions.compact {
-  flex-wrap: wrap;
+.videoOptions.stacked {
+  flex-direction: column;
+  align-items: flex-start;
+  row-gap: 4px;
 }
 
 .videoOptionsMobileRow {
@@ -199,10 +201,14 @@
 }
 
 /* Let a group that is wider than the card wrap its own buttons */
-.videoOptions.compact .videoOptionsMobileRow {
-  flex-shrink: 1;
+.videoOptions.stacked .videoOptionsMobileRow {
   flex-wrap: wrap;
-  min-inline-size: 0;
+  max-inline-size: 100%;
+}
+
+/* Hidden instead of removed, so that the toolbar can still measure it */
+.videoOptions.stacked .videoOptionsMobileRow::before {
+  display: none;
 }
 
 .videoOptionsMobileRow:not(:empty) + .videoOptionsMobileRow:not(:empty)::before {
@@ -274,16 +280,6 @@
   }
 }
 
-
-@media screen and (width <= 460px) {
-  .datePublishedAndViewCount {
-    display: flex;
-    justify-content: left;
-    flex-direction: column;
-  }
-
-
-}
 
 @media screen and (width <= 380px) {
   .videoOptionsMobileRow :deep(.iconDropdown) {

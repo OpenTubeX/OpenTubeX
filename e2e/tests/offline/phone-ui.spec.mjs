@@ -163,7 +163,7 @@ test.describe('phone UI', () => {
     await openMockedVideo(page)
     await setWindowSize(app, page, { width: 320, height: 760 })
     const toolbar = page.locator('.videoOptions')
-    await expect(toolbar).toHaveClass(/\bcompact\b/)
+    await expect(toolbar).toHaveClass(/\bstacked\b/)
     await expect.poll(() => toolbar.evaluate(element => {
       const card = element.closest('.watchVideoInfo')
       const cardBox = card.getBoundingClientRect()
@@ -174,6 +174,35 @@ test.describe('phone UI', () => {
           return box.width >= 47.5 && box.height >= 47.5 && box.right <= contentRight + 0.5
         })
     })).toBe(true)
+  })
+
+  test('stacks the video action groups and wraps the metadata inline on phones', { tag: '@scale' }, async ({ app, page, attachScreenshot }) => {
+    await page.evaluate(async () => {
+      await window.$store.dispatch('updateUseSponsorBlock', true)
+      await window.$store.dispatch('updateQuickBookmarkTargetPlaylistId', 'phone-list-0')
+      await window.$store.dispatch('updateShowDlnaCastButton', true)
+    })
+    await mockPlayableWatchPage(app, page, { captionTranslations: true })
+    await openMockedVideo(page)
+    await setWindowSize(app, page, { width: 400, height: 860 })
+    const toolbar = page.locator('.videoOptions')
+    await toolbar.scrollIntoViewIfNeeded()
+    await expect(toolbar).toHaveClass(/\bstacked\b/)
+    // Each group starts its own row, without a divider at its start
+    await expect.poll(() => toolbar.evaluate(element => {
+      const groups = [...element.children].filter(group => group.getClientRects().length > 0)
+      const groupTops = groups.map(group => Math.round(group.getBoundingClientRect().top))
+      return groups.length > 1 && new Set(groupTops).size === groups.length &&
+        groups.every(group => getComputedStyle(group, '::before').display === 'none')
+    })).toBe(true)
+    // Short icon-labeled items share rows instead of taking one row each
+    const metadataRows = await page.locator('.watchVideoInfo .datePublishedAndViewCount').evaluate(element => {
+      const items = [...element.children]
+      return { items: items.length, rows: new Set(items.map(item => Math.round(item.getBoundingClientRect().top))).size }
+    })
+    expect(metadataRows.items).toBeGreaterThan(2)
+    expect(metadataRows.rows).toBeLessThan(metadataRows.items)
+    await attachScreenshot('phone video info')
   })
 
   test('opens chapters and transcript as independent sheets', async ({ app, page }) => {
