@@ -27,6 +27,11 @@
   color: var(--primary-color);
 }
 
+.hashtagStats {
+  margin-block-start: -8px;
+  color: var(--tertiary-text-color);
+}
+
 .paginationStatus {
   margin-block: 32px 16px;
   text-align: center;

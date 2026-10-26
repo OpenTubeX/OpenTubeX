@@ -36,6 +36,7 @@ const {
   parseLocalPlaylistVideo,
   parseLockupView,
   parseLocalSubscriberCount,
+  parseLocalHashtagHeader,
   parseLocalChannelHeader,
   parseLocalChannelShorts,
   parseShort,
@@ -47,7 +48,7 @@ const {
   parseLocalListPlaylists,
   parseLocalChannelVideos
 } = createLocalFeedParsers(isMembersOnly => shouldHideMembersOnlyContent(isMembersOnly, store.getters))
-export { normalizeLocalSubscriptionFeed, parseLocalPlaylistVideos, parseLocalPlaylistVideo, parseLocalSubscriberCount, parseLocalChannelHeader, parseLocalChannelShorts, parseShort, parseLocalCommunityPosts, parseLocalTextRuns, parseLocalListVideo, parseLocalListPlaylist, parseLocalListPlaylists, parseLocalChannelVideos }
+export { normalizeLocalSubscriptionFeed, parseLocalPlaylistVideos, parseLocalPlaylistVideo, parseLocalSubscriberCount, parseLocalHashtagHeader, parseLocalChannelHeader, parseLocalChannelShorts, parseShort, parseLocalCommunityPosts, parseLocalTextRuns, parseLocalListVideo, parseLocalListPlaylist, parseLocalListPlaylists, parseLocalChannelVideos }
 
 /**
  * Uses native HTTP on Android, where YouTube does not allow WebView CORS access.

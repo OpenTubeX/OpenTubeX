@@ -1052,6 +1052,36 @@ export function createLocalFeedParsers(shouldHideMembersOnly) {
   }
 
   /**
+   * Extracts the video and channel counts from a hashtag page header,
+   * e.g. "47M videos • 5.6M channels"
+   * @param {YTNodes.HashtagHeader | YTNodes.PageHeader | undefined} header
+   * @returns {{ videoCount: number | null, channelCount: number | null }}
+   */
+  function parseLocalHashtagHeader(header) {
+    const counts = { videoCount: null, channelCount: null }
+
+    let texts
+    if (header?.type === 'PageHeader') {
+      texts = header.content?.metadata?.metadata_rows
+        .flatMap(row => row.metadata_parts ?? [])
+        .map(part => part.text?.text)
+    } else if (header?.type === 'HashtagHeader') {
+      texts = [header.hashtag_info?.text]
+    }
+
+    for (const segment of (texts ?? []).flatMap(text => text?.split('•') ?? [])) {
+      const key = /video/i.test(segment) ? 'videoCount' : /channel/i.test(segment) ? 'channelCount' : null
+      const count = key && parseLocalSubscriberCount(segment)
+
+      if (Number.isFinite(count)) {
+        counts[key] = count
+      }
+    }
+
+    return counts
+  }
+
+  /**
    * Parse community posts
    * @param {import('youtubei.js').YTNodes.BackstagePost[] | import('youtubei.js').YTNodes.SharedPost[] | import('youtubei.js').YTNodes.Post[] } posts
    */
@@ -1196,6 +1226,7 @@ export function createLocalFeedParsers(shouldHideMembersOnly) {
     parseLocalPlaylistVideo,
     parseLockupView,
     parseLocalSubscriberCount,
+    parseLocalHashtagHeader,
     parseLocalChannelHeader,
     parseLocalChannelShorts,
     parseShort,
