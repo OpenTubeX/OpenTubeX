@@ -213,6 +213,7 @@ test('finger drags on the seek bar show the filmstrip, taps do not', async ({ ap
   await touch.send('Emulation.setTouchEmulationEnabled', { enabled: true, maxTouchPoints: 1 })
   await mockPlayableWatchPage(app, page)
   await routeDemoMedia(page)
+  await mockCapacitorPhoneLayout(page)
   const { video, duration } = await openVideoWithStoryboard(page)
   await video.evaluate(element => { element.currentTime = 15 })
   await expect.poll(() => video.evaluate(element => !element.seeking && element.currentTime === 15)).toBe(true)
@@ -222,6 +223,8 @@ test('finger drags on the seek bar show the filmstrip, taps do not', async ({ ap
   await player.hover()
   const bounds = await bar.boundingBox()
   const pointAt = fraction => ({ x: bounds.x + 6 + fraction * (bounds.width - 12), y: bounds.y + bounds.height / 2 })
+  const bigButtons = player.locator('.shaka-big-buttons-container')
+  await expect(bigButtons).toBeVisible()
   const thumbFraction = () => bar.evaluate(element => (Number(element.value) - Number(element.min)) / (Number(element.max) - Number(element.min)))
 
   // Dragging the knob, and dragging from elsewhere on the track, both show it.
@@ -231,8 +234,11 @@ test('finger drags on the seek bar show the filmstrip, taps do not', async ({ ap
       await touch.send('Input.dispatchTouchEvent', { type: 'touchMove', touchPoints: [pointAt(startFraction - 0.05 * step)] })
     }
     await expect(filmstrip).toBeVisible()
+    // The central play button would cover the strip on small players.
+    await expect(bigButtons).toBeHidden()
     await touch.send('Input.dispatchTouchEvent', { type: 'touchEnd', touchPoints: [] })
     await expect(filmstrip).toBeHidden()
+    await expect(bigButtons).toBeVisible()
     await expect.poll(() => video.evaluate(element => element.currentTime)).toBeCloseTo(duration * (startFraction - 0.2), 0)
   }
 
