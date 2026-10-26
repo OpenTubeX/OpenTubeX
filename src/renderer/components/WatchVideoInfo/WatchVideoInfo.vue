@@ -384,7 +384,7 @@ import FtRetryImage from '../FtRetryImage.vue'
 import { ytDlp } from '../../helpers/ytDlp'
 import { supportsYtDlp } from '../../helpers/ytDlpCapabilities'
 import { FtIcon } from '@opentubex/icons'
-import { computed, onBeforeUnmount, onMounted, ref, useTemplateRef, watch } from 'vue'
+import { computed, onBeforeUnmount, onMounted, onUpdated, ref, useTemplateRef, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 
 import FtAddToPlaylistDropdown from '../FtAddToPlaylistDropdown/FtAddToPlaylistDropdown.vue'
@@ -744,6 +744,10 @@ onMounted(() => {
   }
   updateOptionsLayout()
 })
+
+// A wrapped group spans the card, so showing or hiding one of its actions may
+// not resize anything the observer watches
+onUpdated(scheduleOptionsLayout)
 
 onBeforeUnmount(() => {
   optionsResizeObserver.disconnect()
