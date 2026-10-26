@@ -6,7 +6,6 @@
   margin: 0;
   padding-block: 5px;
   padding-inline: 8px;
-  overflow: hidden;
   border: 1px solid var(--border-color);
   border-radius: calc(6px * var(--ui-roundness));
   background-color: var(--card-bg-color);

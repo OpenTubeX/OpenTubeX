@@ -19,9 +19,13 @@ let anchor = null
 let title = ''
 // Whether the anchor's title attribute is currently held here
 let stripped = false
+// The ARIA attribute that carries the held title to assistive technology
+/** @type {'aria-label' | 'aria-description' | null} */
+let ariaAttribute = null
 // After a press, scroll or key press the tooltip stays hidden until the pointer leaves
 let suppressed = false
 let showTimer = 0
+let positionFrame = 0
 let warmUntil = 0
 const pointer = { x: 0, y: 0 }
 
@@ -74,6 +78,13 @@ function handlePointerMove(event) {
   if (suppressed && !stripped && anchor?.hasAttribute('title')) {
     stripTitle()
   }
+  // Tooltips on large anchors follow the pointer
+  if (positionFrame === 0 && tooltip.matches(':popover-open')) {
+    positionFrame = requestAnimationFrame(() => {
+      positionFrame = 0
+      if (tooltip.matches(':popover-open')) position()
+    })
+  }
 }
 
 /**
@@ -90,7 +101,7 @@ function handleScroll(event) {
 function findAnchor(target) {
   if (!(target instanceof Element)) return null
   const titled = target.closest('[title]')
-  // The active anchor has no title attribute, so closest() skips it
+  // closest() also finds an emptied title on a child or on the active anchor itself
   if (anchor?.contains(target) && (titled === null || titled.contains(anchor))) return anchor
   // An empty title hides the tooltips of its ancestors
   return titled?.getAttribute('title').trim() ? titled : null
@@ -120,10 +131,12 @@ function setAnchor(next) {
   }
 }
 
+// An empty title rather than none, which would show the native tooltip of a titled ancestor
 function stripTitle() {
   title = anchor.getAttribute('title')
-  anchor.removeAttribute('title')
+  anchor.setAttribute('title', '')
   stripped = true
+  mirrorTitle()
   observer.observe(anchor, { attributes: true, attributeFilter: ['title'] })
 }
 
@@ -133,7 +146,38 @@ function restoreTitle() {
   // Keep a title that the anchor's owner changed or removed in the meantime
   const changed = observer.takeRecords().length > 0
   observer.disconnect()
+  clearMirror()
   if (!changed) anchor.setAttribute('title', title)
+}
+
+/**
+ * Accessibility APIs read a title as the name of an element without another
+ * name source and as its description otherwise. Keep it available that way.
+ */
+function mirrorTitle() {
+  if (ariaAttribute === null) {
+    const attribute = hasOwnName(anchor) ? 'aria-description' : 'aria-label'
+    if (anchor.hasAttribute(attribute)) return
+    ariaAttribute = attribute
+  }
+  anchor.setAttribute(ariaAttribute, title)
+}
+
+function clearMirror() {
+  if (ariaAttribute === null) return
+  anchor.removeAttribute(ariaAttribute)
+  ariaAttribute = null
+}
+
+/**
+ * @param {Element} element
+ */
+function hasOwnName(element) {
+  return element.hasAttribute('aria-label') ||
+    element.hasAttribute('aria-labelledby') ||
+    element.labels?.length > 0 ||
+    (element instanceof HTMLImageElement && element.alt !== '') ||
+    element.textContent.trim() !== ''
 }
 
 function handleTitleMutation() {
@@ -142,13 +186,15 @@ function handleTitleMutation() {
     // Removed by the anchor's owner, so there is nothing to restore
     stripped = false
     observer.disconnect()
+    clearMirror()
     setAnchor(null)
     return
   }
 
   title = value
-  anchor.removeAttribute('title')
+  anchor.setAttribute('title', '')
   observer.takeRecords()
+  mirrorTitle()
   if (!title.trim()) {
     hide()
   } else if (tooltip.matches(':popover-open')) {

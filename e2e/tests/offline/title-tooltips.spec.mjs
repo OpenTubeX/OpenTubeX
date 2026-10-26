@@ -11,8 +11,8 @@ test.describe('title tooltips', () => {
     await button.hover()
     await expect(tooltip).toBeVisible()
     await expect(tooltip).toHaveText('Expand side navigation')
-    // Chromium only draws a native tooltip for elements that still have a title
-    await expect(button).not.toHaveAttribute('title')
+    // An empty title hides the native tooltips of the element and its ancestors
+    await expect(button).toHaveAttribute('title', '')
 
     const [buttonBox, tooltipBox, viewport] = await Promise.all([
       button.boundingBox(),
@@ -66,9 +66,32 @@ test.describe('title tooltips', () => {
     await expect(tooltip).toHaveText('Compact side navigation')
     await button.evaluate(element => { element.title = 'Changed title' })
     await expect(tooltip).toHaveText('Changed title')
-    await expect(button).not.toHaveAttribute('title')
+    await expect(button).toHaveAttribute('title', '')
     await page.mouse.move(600, 600)
     await expect(button).toHaveAttribute('title', 'Changed title')
+  })
+
+  test('keep the title available to assistive technology while it is held', async ({ page }) => {
+    const tooltip = page.locator('.ftTitleTooltip')
+    // The logo link has no other name source
+    const logo = page.locator('.topNav .logo')
+    const logoTitle = await logo.getAttribute('title')
+
+    await logo.hover()
+    await expect(tooltip).toHaveText(logoTitle)
+    await expect(logo).toHaveAttribute('title', '')
+    await expect(logo).toHaveAccessibleName(logoTitle)
+
+    // An element named by aria-label keeps the title as its description
+    const button = page.locator(menuButton)
+    await button.hover()
+    await expect(tooltip).toHaveText('Expand side navigation')
+    await expect(button).toHaveAttribute('aria-description', 'Expand side navigation')
+    await expect(logo).not.toHaveAttribute('aria-label')
+
+    await page.mouse.move(600, 600)
+    await expect(button).not.toHaveAttribute('aria-description')
+    await expect(logo).toHaveAccessibleName(logoTitle)
   })
 
   test('elements with an empty title hide the tooltip of their ancestors', async ({ page }) => {
@@ -88,6 +111,12 @@ test.describe('title tooltips', () => {
 
     await page.locator('#titleTooltipOuter').hover({ position: { x: 150, y: 80 } })
     await expect(tooltip).toHaveText('Outer title')
+
+    // On a large element the tooltip follows the pointer
+    const before = await tooltip.boundingBox()
+    await page.mouse.move(300 + 110, 300 + 80)
+    await expect.poll(async () => (await tooltip.boundingBox()).x).toBeCloseTo(before.x - 40, 0)
+
     await page.locator('#titleTooltipInner').hover()
     await expect(tooltip).toBeHidden()
     await expect(page.locator('#titleTooltipOuter')).toHaveAttribute('title', 'Outer title')
