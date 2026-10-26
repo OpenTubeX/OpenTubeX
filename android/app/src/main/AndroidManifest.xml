@@ -250,7 +250,7 @@
                 <category android:name="android.intent.category.BROWSABLE" />
                 <data android:scheme="https" />
                 <data android:host="rumble.com" />
-                <data android:pathPattern="/v.*" />
+                <data android:pathPattern="/v.*\\.html" />
             </intent-filter>
 
             <intent-filter>
