@@ -15,6 +15,8 @@ const COMMENT_STRING_FIELDS = [
   'translationText'
 ]
 const COMMENT_BOOLEAN_FIELDS = [
+  'authorVerified',
+  'authorVerifiedArtist',
   'hasOwnerReplied',
   'isEdited',
   'isHearted',

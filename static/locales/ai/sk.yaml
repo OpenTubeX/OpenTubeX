@@ -185,6 +185,7 @@ Subscriptions:
   Newest First: Najnovšie ako prvé
   Oldest First: Najstaršie ako prvé
 Trending:
+  Music: Hudba
   Load Error: Trendy sa nepodarilo načítať.
   Unsupported Backend: Trendy vyžadujú miestne API. Vyberte miestne API alebo zapnite použitie záložného backendu.
 Most Popular Feed Empty: Sekcia Najpopulárnejšie tejto inštancie Invidious je prázdna.
@@ -1354,6 +1355,8 @@ Profile:
   The selected image could not be loaded: Vybraný obrázok sa nepodarilo načítať
   Theme Color: Farba motívu
 Channel:
+  Verified: Overené
+  Official Artist Channel: Oficiálny kanál interpreta
   About:
     Links: Odkazy
   Subscription settings: Nastavenia odberu
@@ -1372,7 +1375,10 @@ Channel:
   Channel Name Unavailable: Názov kanála nie je dostupný
   Search Result Types: Typy výsledkov hľadania
   All Results: Všetko
+  Posts:
+    Original post unavailable: "Pôvodný príspevok nie je k dispozícii"
 Video:
+  Info panel source: 'Zdroj: {source}'
   External DRM Protected: "Videá chránené DRM nemôžu byť prehrávané v OpenTubeX, pretože vyžadujú proprietárne, uzavreté zdrojové komponenty."
   Invalid Media URL: "Neplatná adresa URL média"
   Mark As Fully Watched: Označiť ako úplne pozreté
@@ -1910,6 +1916,7 @@ Description:
   Video Category: 'Kategória videa:'
   Video Tags: Značky videa
   Games: Hry
+  Music: Hudba
 Tooltips:
   General Settings:
     Preferred Video Codec: Automatický režim uprednostňuje hardvérové dekódovanie. Zmeny platia pre ďalšie video. Preferencia kodeku môže obmedziť rozlíšenia; nedostupné kodeky sa nahradia.
@@ -2256,6 +2263,11 @@ Form Inputs:
 Search Filters:
   Possible Age Restriction Hint: "YouTube mohol pre tento vyhľadávací dopyt nastaviť vekové obmedzenie."
   Cookie Search Failed: "Vyhľadávanie s nastavenými súbormi cookie zlyhalo."
+  Showing results for: "Zobrazujú sa výsledky pre {query}"
+  Search instead for: "Namiesto toho hľadať {query}"
+  Including results for: "Vrátane výsledkov pre {query}"
+  Search only for: "Hľadať iba {query}"
+  Did you mean: "Mali ste na mysli {query}?"
 
 Storage Startup Error:
   Title: "Údaje aplikácie sa nepodarilo načítať"

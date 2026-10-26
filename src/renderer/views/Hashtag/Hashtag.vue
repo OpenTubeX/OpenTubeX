@@ -16,6 +16,12 @@
         />
         <bdi>{{ hashtag }}</bdi>
       </h2>
+      <p
+        v-if="statsText"
+        class="hashtagStats"
+      >
+        {{ statsText }}
+      </p>
       <FtElementList
         v-if="videos.length > 0"
         :data="videos"
@@ -70,10 +76,11 @@ import FtAutoLoadNextPageWrapper from '../../components/FtAutoLoadNextPageWrappe
 import store from '../../store/index'
 import { usesInvidiousApi } from '../../../apiBackends'
 import { useRoute } from 'vue-router'
-import { getHashtagLocal, parseLocalListVideo } from '../../helpers/api/local'
-import { getInvidiousApiErrorMessage, showInvidiousFallbackToast, showApiErrorToast, showToast } from '../../helpers/utils'
+import { getHashtagLocal, parseLocalHashtagHeader, parseLocalListVideo } from '../../helpers/api/local'
+import { formatNumber, getInvidiousApiErrorMessage, showInvidiousFallbackToast, showApiErrorToast, showToast } from '../../helpers/utils'
 import { getHashtagInvidious } from '../../helpers/api/invidious'
 import { YatteeUnsupportedError } from '../../helpers/api/yattee'
+import { isRoundedNumber } from '../../helpers/viewCounts'
 import { useI18n } from 'vue-i18n'
 import { useTabTitle } from '../../tabs/TabContext'
 const { t } = useI18n()
@@ -83,6 +90,8 @@ const setTabTitle = useTabTitle()
 
 const hashtag = ref('')
 const hashtagContinuationData = shallowRef(null)
+/** @type {import('vue').ShallowRef<{ videoCount: number | null, channelCount: number | null }>} */
+const counts = shallowRef({ videoCount: null, channelCount: null })
 const videos = shallowRef([])
 /** @type {import('vue').Ref<'local' | 'invidious'>} */
 const apiUsed = ref('local')
@@ -91,6 +100,23 @@ const isLoading = ref(true)
 const isLoadingMore = ref(false)
 const hasMoreResults = ref(false)
 const unsupported = ref(false)
+
+/**
+ * YouTube only provides rounded counts (e.g. 47M), so keep them compact
+ * @param {number} count
+ */
+function formatCount(count) {
+  return formatNumber(count, isRoundedNumber(count) ? { notation: 'compact' } : undefined)
+}
+
+/** @type {import('vue').ComputedRef<string>} */
+const statsText = computed(() => {
+  const { videoCount, channelCount } = counts.value
+  return [
+    videoCount !== null && t('Global.Counts.Video Count', { count: formatCount(videoCount) }, videoCount),
+    channelCount !== null && t('Global.Counts.Channel Count', { count: formatCount(channelCount) }, channelCount)
+  ].filter(Boolean).join(' • ')
+})
 
 /** @type {import('vue').ComputedRef<'local' | 'invidious' | 'yattee'>} */
 const backendPreference = computed(() => {
@@ -116,6 +142,7 @@ function resetData() {
   unsupported.value = false
   hashtag.value = ''
   hashtagContinuationData.value = null
+  counts.value = { videoCount: null, channelCount: null }
   videos.value = []
   apiUsed.value = 'local'
   pageNumber.value = 1
@@ -166,6 +193,7 @@ async function getInvidiousHashtag(page = 1) {
 async function getLocalHashtag() {
   try {
     const hashtagData = await getHashtagLocal(hashtag.value)
+    counts.value = parseLocalHashtagHeader(hashtagData.header)
     videos.value = hashtagData.videos.map((video) => parseLocalListVideo(video)).filter(_ => _)
     apiUsed.value = 'local'
     hashtagContinuationData.value = hashtagData.has_continuation ? hashtagData : null

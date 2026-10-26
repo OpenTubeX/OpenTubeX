@@ -68,6 +68,11 @@ Search Listing:
 Search Filters:
   Possible Age Restriction Hint: "Магчыма, YouTube наклаў узроставае абмежаванне на гэты пошукавы запыт."
   Cookie Search Failed: "Пошук з наладжанымі кукі не ўдаўся."
+  Showing results for: "Паказваюцца вынікі для {query}"
+  Search instead for: "Шукаць замест гэтага {query}"
+  Including results for: "Уключаючы вынікі для {query}"
+  Search only for: "Шукаць толькі {query}"
+  Did you mean: "Магчыма, вы мелі на ўвазе {query}?"
   Prioritize:
     Prioritize: Аддаваць перавагу
     Popularity: Папулярнасць
@@ -195,6 +200,7 @@ Subscriptions:
   Posts:
     RSS Message: YouTube не дае RSS-стужак для допісаў. Адключыце наладу "{rssSetting}", каб праглядаць допісы, або ўключыце наладу "{hideSetting}", каб схаваць гэту ўкладку.
 Trending:
+  Music: Музыка
   Load Error: Не ўдалося загрузіць папулярнае.
   Unsupported Backend: Для папулярнага патрэбны Local API. Выберыце Local API або ўключыце рэзервовы серверны механізм.
 Most Popular Feed Empty: Стужка «Самае папулярнае» гэтага асобніка Invidious пустая.
@@ -1416,6 +1422,8 @@ Profile:
   Theme Color: Колер тэмы
   Go To Profile Manager: Перайсці да кіравання профілямі
 Channel:
+  Verified: Пацверджаны
+  Official Artist Channel: Афіцыйны канал выканаўцы
   About:
     Links: Спасылкі
   Subscription settings: Налады падпіскі
@@ -1437,7 +1445,10 @@ Channel:
   View All: Паказаць усе
   Videos:
     This channel has videos but none could be displayed, try fetching more: "На гэтым канале ёсць відэа, але ніводнае не ўдалося паказаць. Паспрабуйце загрузіць больш"
+  Posts:
+    Original post unavailable: "Арыгінальны допіс недаступны"
 Video:
+  Info panel source: 'Крыніца: {source}'
   External DRM Protected: "Відэа, абароненыя DRM, нельга прайграваць у OpenTubeX, бо для іх патрэбны прапрыетарныя кампаненты з закрытым зыходным кодам."
   Invalid Media URL: "Няправільны URL медыя"
   Mark As Fully Watched: Пазначыць як цалкам прагледжанае
@@ -2004,6 +2015,7 @@ Description:
   Video Category: 'Катэгорыя відэа:'
   Video Tags: Тэгі відэа
   Games: Гульні
+  Music: Музыка
 Tooltips:
   General Settings:
     Preferred Video Codec: Аўтаматычны рэжым аддае перавагу апаратнаму дэкадаванню. Змены дзейнічаюць з наступнага відэа. Выбар кодэка можа абмежаваць разрозненні; недаступныя кодэкі замяняюцца.

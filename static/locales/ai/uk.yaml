@@ -187,6 +187,7 @@ Subscriptions:
   Posts:
     RSS Message: 'YouTube не надає RSS-каналів для дописів. Вимкніть налаштування "{rssSetting}", щоб переглядати дописи, або ввімкніть "{hideSetting}", щоб приховати цю вкладку.'
 Trending:
+  Music: Музика
   Load Error: Не вдалося завантажити популярне.
   Unsupported Backend: Для популярного потрібен Local API. Виберіть Local API або ввімкніть резервний серверний модуль.
 Most Popular Feed Empty: Стрічка «Найпопулярніше» цього сервера Invidious порожня.
@@ -1381,6 +1382,8 @@ Profile:
   Theme Color: Колір теми
   Go To Profile Manager: Перейти до керування профілями
 Channel:
+  Verified: Підтверджено
+  Official Artist Channel: Офіційний канал виконавця
   About:
     Links: Посилання
   Subscription settings: Налаштування підписки
@@ -1402,7 +1405,10 @@ Channel:
   View All: Переглянути всі
   Videos:
     This channel has videos but none could be displayed, try fetching more: "На цьому каналі є відео, але жодне не вдалося показати. Спробуйте завантажити ще"
+  Posts:
+    Original post unavailable: "Оригінальний допис недоступний"
 Video:
+  Info panel source: 'Джерело: {source}'
   External DRM Protected: "Відео, захищені DRM, неможливо відтворити в OpenTubeX, оскільки для цього потрібні пропрієтарні компоненти з закритим вихідним кодом."
   Invalid Media URL: "Недійсна URL-адреса медіа"
   Mark As Fully Watched: Позначити як повністю переглянуте
@@ -1952,6 +1958,7 @@ Description:
   Video Category: 'Категорія відео:'
   Video Tags: Теги відео
   Games: Ігри
+  Music: Музика
 Tooltips:
   General Settings:
     Preferred Video Codec: Автоматичний режим віддає перевагу апаратному декодуванню. Зміни діють із наступного відео. Вибір кодека може обмежити роздільності; недоступні кодеки замінюються.
@@ -2304,6 +2311,11 @@ Form Inputs:
 Search Filters:
   Possible Age Restriction Hint: "Можливо, YouTube встановив вікове обмеження для цього пошукового запиту."
   Cookie Search Failed: "Пошук із налаштованими файлами cookie не вдався."
+  Showing results for: "Показано результати для {query}"
+  Search instead for: "Натомість шукати {query}"
+  Including results for: "Включно з результатами для {query}"
+  Search only for: "Шукати лише {query}"
+  Did you mean: "Можливо, ви мали на увазі {query}?"
 
 Storage Startup Error:
   Title: "Не вдалося завантажити дані застосунку"

@@ -68,6 +68,11 @@ Search Listing:
 Search Filters:
   Possible Age Restriction Hint: "YouTube에서 이 검색어에 연령 제한을 적용했을 수 있습니다."
   Cookie Search Failed: "설정된 쿠키를 사용한 검색에 실패했습니다."
+  Showing results for: "{query}에 대한 결과 표시 중"
+  Search instead for: "대신 {query} 검색"
+  Including results for: "{query}에 대한 결과 포함"
+  Search only for: "{query}만 검색"
+  Did you mean: "{query}을(를) 찾으셨나요?"
   Prioritize:
     Prioritize: 우선순위
     Popularity: 인기순
@@ -196,6 +201,7 @@ Subscriptions:
   Posts:
     RSS Message: YouTube는 게시물용 RSS 피드를 제공하지 않습니다. 게시물을 보려면 "{rssSetting}" 설정을 끄거나 이 탭을 숨기려면 "{hideSetting}" 설정을 켜세요.
 Trending:
+  Music: 음악
   Load Error: 인기 급상승 콘텐츠를 불러올 수 없습니다.
   Unsupported Backend: 인기 급상승 콘텐츠에는 로컬 API가 필요합니다. 로컬 API를 선택하거나 백엔드 대체 사용을 활성화하세요.
 Most Popular Feed Empty: 이 Invidious 인스턴스의 인기 콘텐츠 피드가 비어 있습니다.
@@ -1617,6 +1623,8 @@ Profile:
   Open Profile Dropdown: 프로필 드롭다운 열기
   Go To Profile Manager: 프로필 관리자로 이동
 Channel:
+  Verified: 인증됨
+  Official Artist Channel: 공식 아티스트 채널
   Subscription settings: 구독 설정
   Failed to save subscription settings: 채널 설정을 저장하지 못했습니다
   Videos per day: 일일 동영상 수
@@ -1669,9 +1677,11 @@ Channel:
     Reveal Answers: 답변 표시
     Hide Answers: 답변 숨기기
     Video hidden by OpenTubeX: OpenTubeX에서 숨긴 동영상
+    Original post unavailable: "원본 게시물을 사용할 수 없음"
   Videos:
     This channel has videos but none could be displayed, try fetching more: "이 채널에는 동영상이 있지만 표시할 수 없습니다. 더 불러오기를 시도하세요"
 Video:
+  Info panel source: '출처: {source}'
   External DRM Protected: "DRM 보호 동영상에는 독점 비공개 소스 구성 요소가 필요하므로 OpenTubeX에서 재생할 수 없습니다."
   Invalid Media URL: "유효하지 않은 미디어 URL"
   Mark As Fully Watched: 끝까지 시청한 것으로 표시
@@ -2289,6 +2299,7 @@ Description:
   Video Category: '동영상 카테고리:'
   Video Tags: 동영상 태그
   Games: 게임
+  Music: 음악
 Tooltips:
   General Settings:
     Preferred Video Codec: 자동 모드는 하드웨어 디코딩을 우선합니다. 변경 사항은 다음 동영상에 적용됩니다. 코덱 선택에 따라 해상도가 제한될 수 있으며, 사용할 수 없는 코덱은 다른 코덱으로 대체됩니다.

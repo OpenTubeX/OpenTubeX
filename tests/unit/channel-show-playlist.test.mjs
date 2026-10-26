@@ -82,6 +82,8 @@ test('parses a channel TV show as a playlist with its season count', () => {
     thumbnail: 'https://i.ytimg.com/tvfilm_banner/PLTqcR5ouTGRU/16_9_.jpg',
     channelName: 'GLITCH',
     channelId: 'UCn_FAXem2-e3HQvmK-mOH4g',
+    authorVerified: false,
+    authorVerifiedArtist: false,
     videoCount: undefined,
     itemCountText: '3 seasons',
     isPodcast: false,

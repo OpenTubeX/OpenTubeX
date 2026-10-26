@@ -185,6 +185,7 @@ Subscriptions:
   Newest First: 最新優先
   Oldest First: 最舊優先
 Trending:
+  Music: 音樂
   Load Error: 無法載入熱門趨勢。
   Unsupported Backend: 熱門趨勢需要 Local API。請選擇 Local API 或啟用後端備援。
 Most Popular Feed Empty: 此 Invidious 伺服器的「最熱門」動態消息沒有內容。
@@ -1353,6 +1354,8 @@ Profile:
   The selected image could not be loaded: 無法載入選取的圖片
   Theme Color: 佈景主題色彩
 Channel:
+  Verified: 已驗證
+  Official Artist Channel: 官方藝人頻道
   About:
     Links: 連結
   Subscription settings: 訂閱設定
@@ -1371,7 +1374,10 @@ Channel:
   Channel Name Unavailable: 無法取得頻道名稱
   Search Result Types: 搜尋結果類型
   All Results: 全部
+  Posts:
+    Original post unavailable: "原始貼文無法使用"
 Video:
+  Info panel source: '來源：{source}'
   External DRM Protected: "受 DRM 保護的影片無法在 OpenTubeX 上播放，因為它們需要專屬的封閉原始碼元件。"
   Invalid Media URL: "無效的媒體網址"
   Mark As Fully Watched: 標示為已完整觀看
@@ -1912,6 +1918,7 @@ Description:
   Video Category: '影片類別：'
   Video Tags: 影片標籤
   Games: 遊戲
+  Music: 音樂
 Tooltips:
   General Settings:
     Preferred Video Codec: 自動模式優先使用硬體解碼。變更從下一部影片生效。指定編解碼器可能限制可用解析度；無法使用時會改用其他編解碼器。
@@ -2258,6 +2265,11 @@ Form Inputs:
 Search Filters:
   Possible Age Restriction Hint: "YouTube 可能對此搜尋查詢設定了年齡限制。"
   Cookie Search Failed: "使用已設定的 Cookie 搜尋失敗。"
+  Showing results for: "顯示「{query}」的搜尋結果"
+  Search instead for: "改為搜尋：{query}"
+  Including results for: "包含「{query}」的搜尋結果"
+  Search only for: "僅搜尋：{query}"
+  Did you mean: "你是不是要找：{query}"
 
 Storage Startup Error:
   Title: "無法載入應用程式資料"

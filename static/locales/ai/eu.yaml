@@ -185,6 +185,7 @@ Subscriptions:
   Newest First: Berrienak lehenik
   Oldest First: Zaharrenak lehenik
 Trending:
+  Music: Musika
   Load Error: Ezin izan dira joerak kargatu.
   Unsupported Backend: Joerek API lokala behar dute. Hautatu API lokala edo gaitu ordezko motorra.
 Most Popular Feed Empty: Invidious instantzia honen Ikusienak jarioa hutsik dago.
@@ -1354,6 +1355,8 @@ Profile:
   The selected image could not be loaded: Ezin izan da hautatutako irudia kargatu
   Theme Color: Gaiaren kolorea
 Channel:
+  Verified: Egiaztatua
+  Official Artist Channel: Artistaren kanal ofiziala
   About:
     Links: Estekak
   Subscription settings: Harpidetzaren ezarpenak
@@ -1372,7 +1375,10 @@ Channel:
   Channel Name Unavailable: Kanalaren izena ez dago erabilgarri
   Search Result Types: Bilaketa-emaitzen motak
   All Results: Guztiak
+  Posts:
+    Original post unavailable: "Jatorrizko argitalpena ez dago erabilgarri"
 Video:
+  Info panel source: 'Iturria: {source}'
   External DRM Protected: "DRM babestutako bideoak ezin dira erreproduzitu OpenTubeXn, kode itxiko osagai jabedunak behar baitituzte."
   Invalid Media URL: "Multimedia URLa ez da baliozkoa"
   Mark As Fully Watched: Markatu osorik ikusita bezala
@@ -1920,6 +1926,7 @@ Description:
   Video Category: 'Bideoaren kategoria:'
   Video Tags: Bideoaren etiketak
   Games: Jokoak
+  Music: Musika
 Tooltips:
   General Settings:
     Preferred Video Codec: Modu automatikoak hardware bidezko deskodetzea hobesten du. Aldaketak hurrengo bideoan aplikatzen dira. Kodek-hobespenak bereizmenak muga ditzake; erabilgarri ez dauden kodekak ordezten dira.
@@ -2266,6 +2273,11 @@ Form Inputs:
 Search Filters:
   Possible Age Restriction Hint: "Baliteke YouTube-k bilaketa-kontsulta honi adin-murrizketa ezarri izana."
   Cookie Search Failed: "Konfiguratutako cookieekin egindako bilaketak huts egin du."
+  Showing results for: "{query} bilaketaren emaitzak erakusten"
+  Search instead for: "Bilatu {query} horren ordez"
+  Including results for: "{query} bilaketaren emaitzak barne"
+  Search only for: "Bilatu {query} soilik"
+  Did you mean: "{query} esan nahi zenuen?"
 
 Storage Startup Error:
   Title: "Ezin izan dira aplikazioaren datuak kargatu"

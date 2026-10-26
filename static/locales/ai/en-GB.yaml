@@ -186,6 +186,7 @@ Subscriptions:
   Posts:
     RSS Message: YouTube does not provide RSS feeds for posts. Disable the "{rssSetting}" setting to view posts or enable the "{hideSetting}" setting to hide this tab.
 Trending:
+  Music: Music
   Load Error: Trending could not be loaded.
   Unsupported Backend: Trending requires the Local API. Select the Local API or enable backend fallback.
 Most Popular Feed Empty: This Invidious instance's Most Popular feed is empty.
@@ -1340,6 +1341,8 @@ Profile:
   Theme Color: Theme Colour
   Go To Profile Manager: Go to Profile Manager
 Channel:
+  Verified: Verified
+  Official Artist Channel: Official Artist Channel
   About:
     Links: Links
   Subscription settings: Subscription settings
@@ -1360,7 +1363,10 @@ Channel:
   All Results: All
   Videos:
     This channel has videos but none could be displayed, try fetching more: "This channel has videos but none could be displayed, try fetching more"
+  Posts:
+    Original post unavailable: "Original post unavailable"
 Video:
+  Info panel source: 'Source: {source}'
   External DRM Protected: "DRM protected videos cannot be played in OpenTubeX, as they require proprietary, closed source components."
   Invalid Media URL: "Invalid media URL"
   Mark As Fully Watched: Mark As Fully Watched
@@ -1900,6 +1906,7 @@ Description:
   Video Category: 'Video Category:'
   Video Tags: Video Tags
   Games: Games
+  Music: Music
 Tooltips:
   General Settings:
     Preferred Video Codec: Auto prefers hardware decoding. Changes apply to the next video. A codec preference may limit resolutions; unavailable codecs fall back.
@@ -2249,6 +2256,11 @@ Form Inputs:
 Search Filters:
   Possible Age Restriction Hint: "YouTube may have age-restricted this search query."
   Cookie Search Failed: "Search failed with the configured cookies."
+  Showing results for: "Showing results for {query}"
+  Search instead for: "Search instead for {query}"
+  Including results for: "Including results for {query}"
+  Search only for: "Search only for {query}"
+  Did you mean: "Did you mean {query}?"
 
 Storage Startup Error:
   Title: "Could not load app data"

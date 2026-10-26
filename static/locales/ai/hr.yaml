@@ -187,6 +187,7 @@ Subscriptions:
   Posts:
     RSS Message: 'YouTube ne pruža RSS izvore za objave. Isključite postavku "{rssSetting}" za prikaz objava ili uključite postavku "{hideSetting}" kako biste sakrili ovu karticu.'
 Trending:
+  Music: Glazba
   Load Error: Popularni sadržaj nije moguće učitati.
   Unsupported Backend: Popularni sadržaj zahtijeva Local API. Odaberite Local API ili omogućite pričuvni pozadinski sustav.
 Most Popular Feed Empty: Izvor Najpopularnije na ovoj Invidious instanci je prazan.
@@ -1364,6 +1365,8 @@ Profile:
   Theme Color: Boja teme
   Go To Profile Manager: Otvori upravitelja profila
 Channel:
+  Verified: Potvrđeno
+  Official Artist Channel: Službeni kanal izvođača
   About:
     Links: Poveznice
   Subscription settings: Postavke pretplate
@@ -1384,7 +1387,10 @@ Channel:
   All Results: Sve
   Videos:
     This channel has videos but none could be displayed, try fetching more: "Ovaj kanal ima videozapise, ali nijedan se nije mogao prikazati. Pokušajte učitati još"
+  Posts:
+    Original post unavailable: "Izvorna objava nije dostupna"
 Video:
+  Info panel source: 'Izvor: {source}'
   External DRM Protected: "DRM-om zaštićena videa ne mogu se reproducirati u OpenTubeXu jer zahtijevaju vlasničke komponente zatvorenog koda."
   Invalid Media URL: "Nevažeći URL medija"
   Mark As Fully Watched: Označi kao pogledano do kraja
@@ -1937,6 +1943,7 @@ Description:
   Video Category: 'Kategorija videozapisa:'
   Video Tags: Oznake videozapisa
   Games: Igre
+  Music: Glazba
 Tooltips:
   General Settings:
     Preferred Video Codec: Automatski način preferira hardversko dekodiranje. Promjene vrijede za sljedeći video. Odabir kodeka može ograničiti rezolucije; nedostupni kodeci zamjenjuju se.
@@ -2289,6 +2296,11 @@ Form Inputs:
 Search Filters:
   Possible Age Restriction Hint: "YouTube je možda postavio dobno ograničenje za ovaj upit za pretraživanje."
   Cookie Search Failed: "Pretraživanje s konfiguriranim kolačićima nije uspjelo."
+  Showing results for: "Prikazuju se rezultati za {query}"
+  Search instead for: "Umjesto toga traži {query}"
+  Including results for: "Uključujući rezultate za {query}"
+  Search only for: "Traži samo {query}"
+  Did you mean: "Jeste li mislili {query}?"
 
 Storage Startup Error:
   Title: "Nije moguće učitati podatke aplikacije"

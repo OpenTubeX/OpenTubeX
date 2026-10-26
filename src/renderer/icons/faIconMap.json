@@ -705,6 +705,14 @@
     "ri": "user-follow-line",
     "material": "person-check-outline"
   },
+  "verified": {
+    "ri": "checkbox-circle-fill",
+    "material": "check-circle-rounded"
+  },
+  "verified-artist": {
+    "ri": "music-fill",
+    "material": "music-note-rounded"
+  },
   "user-lock": {
     "ri": "user-lock-line",
     "material": "lock-person-outline"

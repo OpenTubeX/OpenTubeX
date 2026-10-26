@@ -185,6 +185,7 @@ Subscriptions:
   Newest First: Od nejnovějších
   Oldest First: Od nejstarších
 Trending:
+  Music: Hudba
   Load Error: Trendy se nepodařilo načíst.
   Unsupported Backend: Trendy vyžadují místní API. Vyberte místní API nebo povolte záložního poskytovatele.
 Most Popular Feed Empty: Kanál Nejoblíbenější je na této instanci Invidious prázdný.
@@ -1354,6 +1355,8 @@ Profile:
   The selected image could not be loaded: Vybraný obrázek se nepodařilo načíst
   Theme Color: Barva motivu
 Channel:
+  Verified: Ověřeno
+  Official Artist Channel: Oficiální kanál interpreta
   About:
     Links: Odkazy
   Subscription settings: Nastavení odběru
@@ -1372,7 +1375,10 @@ Channel:
   Channel Name Unavailable: Název kanálu není dostupný
   Search Result Types: Typy výsledků hledání
   All Results: Vše
+  Posts:
+    Original post unavailable: "Původní příspěvek není k dispozici"
 Video:
+  Info panel source: 'Zdroj: {source}'
   External DRM Protected: "Videa chráněná DRM nelze v aplikaci OpenTubeX přehrávat, protože vyžadují proprietární komponenty s uzavřeným zdrojovým kódem."
   Invalid Media URL: "Neplatná adresa URL média"
   Mark As Fully Watched: Označit jako zcela zhlédnuté
@@ -1910,6 +1916,7 @@ Description:
   Video Category: 'Kategorie videa:'
   Video Tags: Štítky videa
   Games: Hry
+  Music: Hudba
 Tooltips:
   General Settings:
     Preferred Video Codec: Automatický režim upřednostňuje hardwarové dekódování. Změny platí pro další video. Preference kodeku může omezit rozlišení; nedostupné kodeky se nahradí.
@@ -2256,6 +2263,11 @@ Form Inputs:
 Search Filters:
   Possible Age Restriction Hint: "YouTube mohl pro tento vyhledávací dotaz nastavit věkové omezení."
   Cookie Search Failed: "Vyhledávání s nastavenými cookies selhalo."
+  Showing results for: "Zobrazují se výsledky pro {query}"
+  Search instead for: "Místo toho hledat {query}"
+  Including results for: "Včetně výsledků pro {query}"
+  Search only for: "Hledat pouze {query}"
+  Did you mean: "Měli jste na mysli {query}?"
 
 Storage Startup Error:
   Title: "Data aplikace se nepodařilo načíst"

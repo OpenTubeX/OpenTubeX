@@ -185,6 +185,7 @@ Subscriptions:
   Newest First: 最新优先
   Oldest First: 最早优先
 Trending:
+  Music: 音乐
   Load Error: 无法加载热门内容。
   Unsupported Backend: 热门内容需要使用 Local API。请选择 Local API 或启用后端回退。
 Most Popular Feed Empty: 此 Invidious 实例的“最受欢迎”订阅源为空。
@@ -1353,6 +1354,8 @@ Profile:
   The selected image could not be loaded: 无法加载所选图片
   Theme Color: 主题颜色
 Channel:
+  Verified: 已验证
+  Official Artist Channel: 官方艺人频道
   About:
     Links: 链接
   Subscription settings: 订阅设置
@@ -1371,7 +1374,10 @@ Channel:
   Channel Name Unavailable: 频道名称不可用
   Search Result Types: 搜索结果类型
   All Results: 全部
+  Posts:
+    Original post unavailable: "原帖不可用"
 Video:
+  Info panel source: '来源：{source}'
   External DRM Protected: "OpenTubeX 无法播放受 DRM 保护的视频，因它们需要专有的、闭源的部件。"
   Invalid Media URL: "无效的媒体网址"
   Mark As Fully Watched: 标记为已完整观看
@@ -1909,6 +1915,7 @@ Description:
   Video Category: '视频类别：'
   Video Tags: 视频标签
   Games: 游戏
+  Music: 音乐
 Tooltips:
   General Settings:
     Preferred Video Codec: 自动模式优先使用硬件解码。更改对下一个视频生效。指定编解码器可能限制可用分辨率；不可用时会使用其他编解码器。
@@ -2255,6 +2262,11 @@ Form Inputs:
 Search Filters:
   Possible Age Restriction Hint: "YouTube 可能对此搜索查询设置了年龄限制。"
   Cookie Search Failed: "使用已配置的 Cookie 搜索失败。"
+  Showing results for: "正在显示“{query}”的搜索结果"
+  Search instead for: "仍然搜索：{query}"
+  Including results for: "包含“{query}”的搜索结果"
+  Search only for: "仅搜索：{query}"
+  Did you mean: "您是不是要找：{query}"
 
 Storage Startup Error:
   Title: "无法加载应用数据"

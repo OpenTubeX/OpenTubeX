@@ -144,6 +144,7 @@ Subscriptions:
   Newest First: Más reciente primero
   Oldest First: Más antiguo primero
 Trending:
+  Music: Música
   Load Error: No se pudo cargar Tendencias.
   Unsupported Backend: Tendencias requiere la API local. Selecciona la API local o activa la fuente alternativa del backend.
 Most Popular Feed Empty: La fuente «Más populares» de esta instancia de Invidious está vacía.
@@ -1315,6 +1316,8 @@ Profile:
   The selected image could not be loaded: No se pudo cargar la imagen seleccionada
   Theme Color: Color del tema
 Channel:
+  Verified: Verificado
+  Official Artist Channel: Canal oficial de artista
   About:
     Links: Enlaces
   Subscription settings: Configuración de la suscripción
@@ -1335,7 +1338,10 @@ Channel:
   All Results: Todo
   Videos:
     This channel has videos but none could be displayed, try fetching more: "Este canal tiene vídeos, pero no se pudo mostrar ninguno. Intenta cargar más"
+  Posts:
+    Original post unavailable: "La publicación original no está disponible"
 Video:
+  Info panel source: 'Fuente: {source}'
   External DRM Protected: "Los vídeos restringidos con DRM no pueden reproducirse en OpenTubeX, dado que requieren componentes propietarios de fuente cerrada."
   Invalid Media URL: "URL de contenido multimedia no válida"
   Mark As Fully Watched: Marcar como visto por completo
@@ -1876,6 +1882,7 @@ Description:
   Video Category: 'Categoría del vídeo:'
   Video Tags: Etiquetas del vídeo
   Games: Juegos
+  Music: Música
 Tooltips:
   General Settings:
     Preferred Video Codec: El modo automático prefiere la decodificación por hardware. Los cambios se aplican al siguiente vídeo. La preferencia de códec puede limitar las resoluciones; los códecs no disponibles se sustituyen.
@@ -2222,6 +2229,11 @@ Form Inputs:
 Search Filters:
   Possible Age Restriction Hint: "Es posible que YouTube haya aplicado una restricción de edad a esta búsqueda."
   Cookie Search Failed: "La búsqueda con las cookies configuradas falló."
+  Showing results for: "Mostrando resultados de {query}"
+  Search instead for: "Buscar {query} en su lugar"
+  Including results for: "Incluye resultados de {query}"
+  Search only for: "Buscar solo {query}"
+  Did you mean: "¿Quisiste decir {query}?"
 
 Storage Startup Error:
   Title: "No se pudieron cargar los datos de la aplicación"

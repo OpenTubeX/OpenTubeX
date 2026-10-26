@@ -185,6 +185,7 @@ Subscriptions:
   Newest First: Plus récents d’abord
   Oldest First: Plus anciens d’abord
 Trending:
+  Music: Musique
   Load Error: Les tendances n’ont pas pu être chargées.
   Unsupported Backend: Les tendances nécessitent l’API locale. Sélectionnez l’API locale ou activez le recours à une autre source.
 Most Popular Feed Empty: Le flux « Les plus populaires » de cette instance Invidious est vide.
@@ -1352,6 +1353,8 @@ Profile:
   The selected image could not be loaded: L’image sélectionnée n’a pas pu être chargée
   Theme Color: Couleur du thème
 Channel:
+  Verified: Validé
+  Official Artist Channel: 'Chaîne officielle d''artiste'
   About:
     Links: Liens
   Subscription settings: Paramètres d'abonnement
@@ -1370,7 +1373,10 @@ Channel:
   Channel Name Unavailable: Nom de la chaîne indisponible
   Search Result Types: Types de résultats de recherche
   All Results: Tous
+  Posts:
+    Original post unavailable: "Publication d’origine indisponible"
 Video:
+  Info panel source: 'Source : {source}'
   External DRM Protected: "Les vidéos protégées par DRM ne peuvent pas être lues dans OpenTubeX, car elles nécessitent des composants propriétaires et à source fermée."
   Invalid Media URL: "URL du média invalide"
   Mark As Fully Watched: Marquer comme entièrement vue
@@ -1908,6 +1914,7 @@ Description:
   Video Category: 'Catégorie de la vidéo :'
   Video Tags: Mots-clés de la vidéo
   Games: Jeux
+  Music: Musique
 Tooltips:
   General Settings:
     Preferred Video Codec: Le mode automatique privilégie le décodage matériel. Les changements s'appliquent à la prochaine vidéo. Le choix du codec peut limiter les résolutions ; les codecs indisponibles sont remplacés.
@@ -2254,6 +2261,11 @@ Form Inputs:
 Search Filters:
   Possible Age Restriction Hint: "YouTube a peut-être appliqué une restriction d’âge à cette recherche."
   Cookie Search Failed: "La recherche avec les cookies configurés a échoué."
+  Showing results for: "Résultats pour {query}"
+  Search instead for: "Rechercher plutôt {query}"
+  Including results for: "Y compris les résultats pour {query}"
+  Search only for: "Rechercher uniquement {query}"
+  Did you mean: "Vouliez-vous dire {query} ?"
 
 Storage Startup Error:
   Title: "Impossible de charger les données de l’application"

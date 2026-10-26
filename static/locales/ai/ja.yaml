@@ -185,6 +185,7 @@ Subscriptions:
   Newest First: 新しい順
   Oldest First: 古い順
 Trending:
+  Music: 音楽
   Load Error: トレンドを読み込めませんでした。
   Unsupported Backend: トレンドにはLocal APIが必要です。Local APIを選択するか、バックエンドのフォールバックを有効にしてください。
 Most Popular Feed Empty: このInvidiousインスタンスの「人気」フィードは空です。
@@ -1354,6 +1355,8 @@ Profile:
   The selected image could not be loaded: 選択した画像を読み込めませんでした
   Theme Color: テーマカラー
 Channel:
+  Verified: 確認済み
+  Official Artist Channel: 公式アーティスト チャンネル
   About:
     Links: リンク
   Subscription settings: 登録設定
@@ -1372,7 +1375,10 @@ Channel:
   Channel Name Unavailable: チャンネル名を取得できません
   Search Result Types: 検索結果の種類
   All Results: すべて
+  Posts:
+    Original post unavailable: "元の投稿は利用できません"
 Video:
+  Info panel source: '出典: {source}'
   External DRM Protected: "DRMで保護された動画は、独自のクローズドソースコンポーネントが必要なため、OpenTubeXでは再生できません。"
   Invalid Media URL: "無効なメディアURL"
   Mark As Fully Watched: 最後まで視聴済みにする
@@ -1910,6 +1916,7 @@ Description:
   Video Category: '動画カテゴリー:'
   Video Tags: 動画タグ
   Games: ゲーム
+  Music: 音楽
 Tooltips:
   General Settings:
     Preferred Video Codec: 自動ではハードウェアデコードを優先します。変更は次の動画に適用されます。コーデックの指定により解像度が制限される場合があり、利用できない場合は別のコーデックを使用します。
@@ -2256,6 +2263,11 @@ Form Inputs:
 Search Filters:
   Possible Age Restriction Hint: "YouTube がこの検索クエリに年齢制限を適用している可能性があります。"
   Cookie Search Failed: "設定済みの Cookie を使用した検索に失敗しました。"
+  Showing results for: "{query} の検索結果を表示しています"
+  Search instead for: "代わりに {query} で検索"
+  Including results for: "{query} の検索結果を含みます"
+  Search only for: "{query} のみを検索"
+  Did you mean: "もしかして: {query}"
 
 Storage Startup Error:
   Title: "アプリのデータを読み込めませんでした"

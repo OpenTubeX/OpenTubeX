@@ -174,7 +174,10 @@
                 @click="handleChannelLinkClick"
                 @auxclick="handleChannelLinkClick"
               >
-                {{ channelName }}
+                {{ channelName }}<FtVerifiedBadge
+                  :verified="channelVerified"
+                  :artist="channelVerifiedArtist"
+                />
               </component>
             </div>
             <FtSubscribeButton
@@ -383,6 +386,7 @@ import FtCollaboratorsPrompt from '../FtCollaboratorsPrompt/FtCollaboratorsPromp
 import FtIconButton from '../FtIconButton/FtIconButton.vue'
 import FtShareButton from '../FtShareButton/FtShareButton.vue'
 import FtSubscribeButton from '../FtSubscribeButton/FtSubscribeButton.vue'
+import FtVerifiedBadge from '../FtVerifiedBadge/FtVerifiedBadge.vue'
 import WatchVideoFormatPrompt from '../WatchVideoFormatPrompt/WatchVideoFormatPrompt.vue'
 import WatchVideoMetadataHistory from '../WatchVideoMetadataHistory/WatchVideoMetadataHistory.vue'
 import WatchVideoLikes from '../WatchVideoLikes/WatchVideoLikes.vue'
@@ -437,6 +441,14 @@ const props = defineProps({
   channelName: {
     type: String,
     required: true
+  },
+  channelVerified: {
+    type: Boolean,
+    default: false
+  },
+  channelVerifiedArtist: {
+    type: Boolean,
+    default: false
   },
   channelThumbnail: {
     type: String,

@@ -614,6 +614,7 @@ export async function getInvidiousRelatedVideos(videoId, signal) {
  *  author: string,
  *  authorId: string
  *  authorUrl: string,
+ *  authorVerified: boolean,
  *  authorThumbnails: InvidiousImageObject[],
  *  subCountText: string,
  *  lengthSeconds: number,
@@ -713,6 +714,7 @@ export async function invidiousGetVideoInformation(videoId) {
  * @property {string} authorLink
  * @property {string | null} authorThumb
  * @property {string} author
+ * @property {boolean} authorVerified
  * @property {number} likes
  * @property {string} text
  * @property {string} translationText
@@ -894,6 +896,7 @@ function parseInvidiousCommentData(response) {
       authorLink: comment.authorId,
       authorThumb: youtubeImageUrlToInvidious(getInvidiousCommentAuthorThumbnail(comment)),
       author: comment.author,
+      authorVerified: comment.verified === true,
       likes: comment.likeCount,
       text: autolinker.link(invidiousImageUrlToInvidious(comment.contentHtml, getCurrentInstanceUrl())),
       translationText: comment.content,

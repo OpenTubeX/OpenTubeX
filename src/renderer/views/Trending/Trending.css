@@ -14,6 +14,7 @@
 }
 
 .pageHeader {
+  container: trending-header / inline-size;
   position: sticky;
   inset-block-start: var(--trending-top-bar-block-size);
   z-index: 3;
@@ -50,10 +51,16 @@
 
   inline-size: 100%;
   display: grid;
-  grid-template-columns: 1fr 1fr 1fr;
+  grid-template-columns: repeat(4, 1fr);
   gap: 4px 10px;
   margin-block: 10px 0;
   color: var(--tertiary-text-color);
+}
+
+@container trending-header (width < 640px) {
+  .trendingInfoTabs {
+    grid-template-columns: repeat(2, 1fr);
+  }
 }
 
 .statusMessage {

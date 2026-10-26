@@ -58,6 +58,30 @@ index 0000000000000000000000000000000000000000..0823bb69830d316d06a5d4c82904e8a0
 +        this.use_spinner = data.useSpinner;
 +    }
 +}
+diff --git a/dist/src/parser/classes/ContentMetadataView.d.ts b/dist/src/parser/classes/ContentMetadataView.d.ts
+index a68a61a888753329582f80f235c0669c35b88f93..fb5cb06828b3840e43f4121eb15866f41a4d3db6 100644
+--- a/dist/src/parser/classes/ContentMetadataView.d.ts
++++ b/dist/src/parser/classes/ContentMetadataView.d.ts
+@@ -7,6 +7,7 @@ import BadgeView from './BadgeView.js';
+ export type MetadataRow = {
+     metadata_parts?: {
+         text: Text | null;
++        icon_name?: string;
+         avatar_stack: AvatarStackView | null;
+         enable_truncation?: boolean;
+     }[];
+diff --git a/dist/src/parser/classes/ContentMetadataView.js b/dist/src/parser/classes/ContentMetadataView.js
+index 6e9c132df7e179f66b1b9fb32dbfae742ea1f909..6d89a7b73e6a35b2b033dca15a6ec4f9cc968d87 100644
+--- a/dist/src/parser/classes/ContentMetadataView.js
++++ b/dist/src/parser/classes/ContentMetadataView.js
+@@ -12,6 +12,7 @@ export default class ContentMetadataView extends YTNode {
+         this.metadata_rows = data.metadataRows?.map((row) => ({
+             metadata_parts: row.metadataParts?.map((part) => ({
+                 text: part.text ? Text.fromAttributed(part.text) : null,
++                icon_name: part.icon?.name,
+                 avatar_stack: Parser.parseItem(part.avatarStack, AvatarStackView),
+                 enable_truncation: data.enableTruncation
+             })),
 diff --git a/dist/src/parser/classes/EngagementPanelSectionList.d.ts b/dist/src/parser/classes/EngagementPanelSectionList.d.ts
 index f9a57b0fe2835c9929d0b94c9c69be7d2fd8a0b6..7781e54b6e0246083d23510fd503d8933fcbfcde 100644
 --- a/dist/src/parser/classes/EngagementPanelSectionList.d.ts
@@ -96,6 +120,43 @@ index 66690decd06b861f47529a511960365e6fb672c3..df9ebfe1a3e03c66e8c0cbd1f7ed5acd
          ]);
          this.panel_identifier = data.panelIdentifier;
          if ('identifier' in data) {
+diff --git a/dist/src/parser/classes/InfoPanelContent.d.ts b/dist/src/parser/classes/InfoPanelContent.d.ts
+index 63eebc43fb0c2040aca0fad946da55c9e596974e..6446e60398f811b650e80f907ff04dde3877e0bc 100644
+--- a/dist/src/parser/classes/InfoPanelContent.d.ts
++++ b/dist/src/parser/classes/InfoPanelContent.d.ts
+@@ -14,5 +14,7 @@ export default class InfoPanelContent extends YTNode {
+     truncate_paragraphs: boolean;
+     background: string;
+     inline_link_icon_type?: string;
++    inline_source?: Text;
++    disclaimer?: Text;
+     constructor(data: RawNode);
+ }
+diff --git a/dist/src/parser/classes/InfoPanelContent.js b/dist/src/parser/classes/InfoPanelContent.js
+index 0b35708769acd4010967d69b7596bc36c2ed3467..29e8cd426c175ef4749b3111e22f34443330a14f 100644
+--- a/dist/src/parser/classes/InfoPanelContent.js
++++ b/dist/src/parser/classes/InfoPanelContent.js
+@@ -13,6 +13,8 @@ export default class InfoPanelContent extends YTNode {
+     truncate_paragraphs;
+     background;
+     inline_link_icon_type;
++    inline_source;
++    disclaimer;
+     constructor(data) {
+         super();
+         this.title = new Text(data.title);
+@@ -28,6 +30,10 @@ export default class InfoPanelContent extends YTNode {
+         if (Reflect.has(data, 'inlineLinkIcon') && Reflect.has(data.inlineLinkIcon, 'iconType')) {
+             this.inline_link_icon_type = data.inlineLinkIcon.iconType;
+         }
++        if (Reflect.has(data, 'inlineSource'))
++            this.inline_source = new Text(data.inlineSource);
++        if (Reflect.has(data, 'disclaimer'))
++            this.disclaimer = new Text(data.disclaimer);
+     }
+ }
+ //# sourceMappingURL=InfoPanelContent.js.map
+\ No newline at end of file
 diff --git a/dist/src/parser/classes/MenuCustomIconItem.js b/dist/src/parser/classes/MenuCustomIconItem.js
 index 8fcd5ecef6871bd8455f282783b47e052b8542fa..80cff0a5a1706146816b434137948494d8268e27 100644
 --- a/dist/src/parser/classes/MenuCustomIconItem.js

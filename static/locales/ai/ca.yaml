@@ -81,6 +81,11 @@ Search Listing:
 Search Filters:
   Possible Age Restriction Hint: "És possible que YouTube hagi aplicat una restricció d’edat a aquesta consulta de cerca."
   Cookie Search Failed: "La cerca amb les galetes configurades ha fallat."
+  Showing results for: "Es mostren resultats de {query}"
+  Search instead for: "Cerca {query} en lloc d'això"
+  Including results for: "Inclou resultats de {query}"
+  Search only for: "Cerca només {query}"
+  Did you mean: "Volies dir {query}?"
   Prioritize:
     Prioritize: Prioritza
     Popularity: Popularitat
@@ -231,6 +236,7 @@ Channels:
   Empty: La llista de canals està buida.
   Unsubscribe Prompt: Segur que us voleu donar de baixa de "{channelName}"?
 Trending:
+  Music: Música
   Sports: Esports
   Load Error: No s'han pogut carregar les tendències.
   Unsupported Backend: Les tendències requereixen l'API local. Seleccioneu l'API local o activeu el motor alternatiu.
@@ -1724,6 +1730,8 @@ Profile:
   Open Profile Dropdown: Obre el desplegable del perfil
   Go To Profile Manager: Ves al gestor de perfils
 Channel:
+  Verified: Verificat
+  Official Artist Channel: 'Canal oficial d''artista'
   Subscription settings: Configuració de la subscripció
   Failed to save subscription settings: No s'han pogut desar els paràmetres del canal
   Videos per day: Vídeos per dia
@@ -1777,9 +1785,11 @@ Channel:
     Reveal Answers: Mostra les respostes
     Hide Answers: Oculta les respostes
     Video hidden by OpenTubeX: Vídeo ocult per l'OpenTubeX
+    Original post unavailable: "La publicació original no està disponible"
   Videos:
     This channel has videos but none could be displayed, try fetching more: "Aquest canal té vídeos, però no se n'ha pogut mostrar cap. Prova de carregar-ne més"
 Video:
+  Info panel source: 'Font: {source}'
   External DRM Protected: "Els vídeos protegits amb DRM no es poden reproduir a l'OpenTubeX perquè requereixen components propietaris de codi tancat."
   Invalid Media URL: "URL de contingut multimèdia no vàlida"
   Mark As Fully Watched: Marca com a vist completament
@@ -2443,6 +2453,7 @@ Description:
   Video Category: 'Categoria del vídeo:'
   Video Tags: Etiquetes del vídeo
   Games: Jocs
+  Music: Música
 Tooltips:
   General Settings:
     Preferred Video Codec: El mode automàtic prefereix la descodificació per maquinari. Els canvis s'apliquen al vídeo següent. La preferència de còdec pot limitar les resolucions; els còdecs no disponibles se substitueixen.

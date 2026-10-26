@@ -1,5 +1,5 @@
 import { normalizeCommentFetchResponse, parseLocalCommentImageAttachment } from './local-comment-response'
-import { createLocalFeedParsers, getChannelHandleFromEndpoint } from './local-feed-parsers'
+import { createLocalFeedParsers, getAuthorVerification, getChannelHandleFromEndpoint, getLocalMusicChartPlaylistId } from './local-feed-parsers'
 import { createOriginalChannelNameResolver } from './original-channel-name'
 import { runBackgroundJob } from '../background-jobs.js'
 import { ClientType, Constants, Innertube, Mixins, Parser, Platform, Player, Session, UniversalCache, Utils, YT, YTNodes } from 'youtubei.js'
@@ -13,6 +13,7 @@ import store from '../../store/index'
 import { PlayerCache } from './PlayerCache'
 import { createBackgroundPlayer } from './background-player.js'
 import { loadSearchContinuation } from '../search-continuation'
+import { disableSearchSpellCorrection, parseSearchCorrection } from '../search-correction'
 import {
   getCommentTranslationSource,
   requestCommentTranslation
@@ -36,6 +37,7 @@ const {
   parseLocalPlaylistVideo,
   parseLockupView,
   parseLocalSubscriberCount,
+  parseLocalHashtagHeader,
   parseLocalChannelHeader,
   parseLocalChannelShorts,
   parseShort,
@@ -47,7 +49,7 @@ const {
   parseLocalListPlaylists,
   parseLocalChannelVideos
 } = createLocalFeedParsers(isMembersOnly => shouldHideMembersOnlyContent(isMembersOnly, store.getters))
-export { normalizeLocalSubscriptionFeed, parseLocalPlaylistVideos, parseLocalPlaylistVideo, parseLocalSubscriberCount, parseLocalChannelHeader, parseLocalChannelShorts, parseShort, parseLocalCommunityPosts, parseLocalTextRuns, parseLocalListVideo, parseLocalListPlaylist, parseLocalListPlaylists, parseLocalChannelVideos }
+export { normalizeLocalSubscriptionFeed, parseLocalPlaylistVideos, parseLocalPlaylistVideo, parseLocalSubscriberCount, parseLocalHashtagHeader, parseLocalChannelHeader, parseLocalChannelShorts, parseShort, parseLocalCommunityPosts, parseLocalTextRuns, parseLocalListVideo, parseLocalListPlaylist, parseLocalListPlaylists, parseLocalChannelVideos }
 
 /**
  * Uses native HTTP on Android, where YouTube does not allow WebView CORS access.
@@ -337,7 +339,7 @@ export async function untilEndOfLocalPlayList(playlist, callback, { runCallbackO
 
 /**
  * @param {string} location
- * @param {'gaming' | 'sports' | 'podcasts'} tab
+ * @param {'gaming' | 'music' | 'sports' | 'podcasts'} tab
  */
 export async function getLocalTrending(location, tab) {
   const innertube = await createInnertube({ location })
@@ -345,6 +347,25 @@ export async function getLocalTrending(location, tab) {
   let args
 
   switch (tab) {
+    case 'music': {
+      // https://music.youtube.com/charts
+      // The charts ignore the session location and use the requester's IP unless a country is selected.
+      // Unsupported countries return the global charts.
+      const charts = await innertube.actions.execute('/browse', {
+        browseId: 'FEmusic_charts',
+        formData: { selectedValues: [location] },
+        client: 'YTMUSIC',
+        parse: true
+      })
+      const playlistId = getLocalMusicChartPlaylistId(charts)
+
+      if (!playlistId) {
+        throw new Error('No music chart found')
+      }
+
+      const playlist = await innertube.getPlaylist(playlistId)
+      return parseLocalPlaylistVideos(playlist.items)
+    }
     case 'gaming':
       // https://www.youtube.com/gaming/trending
       args = {
@@ -381,23 +402,34 @@ export async function getLocalTrending(location, tab) {
  * @param {object} filters
  * @param {boolean} safetyMode
  * @param {AbortSignal} [signal]
+ * @param {boolean} [spellCorrection]
  */
-export async function getLocalSearchResults(query, filters, safetyMode, signal) {
+export async function getLocalSearchResults(query, filters, safetyMode, signal, spellCorrection = true) {
   let searchParams = ''
   const innertube = await createInnertube({
     safetyMode,
     signal,
     fetchFunc: (input, init) => {
       if (new URL(input instanceof Request ? input.url : input).pathname === '/youtubei/v1/search') {
+        const body = JSON.parse(init.body)
+        // Continuation requests carry no params.
+        if (!spellCorrection && body.params) {
+          body.params = disableSearchSpellCorrection(body.params)
+          init = { ...init, body: JSON.stringify(body) }
+        }
         // Reuse YouTube.js' encoded filters for an explicit yt-dlp retry.
-        searchParams = JSON.parse(init.body).params ?? ''
+        searchParams = body.params ?? ''
       }
       return localApiFetch(input, init)
     },
   })
   const response = await innertube.search(query, convertSearchFilters(filters))
 
-  return { ...handleSearchResponse(response), searchParams }
+  return {
+    ...handleSearchResponse(response),
+    searchCorrection: parseSearchCorrection(response.results),
+    searchParams
+  }
 }
 
 /**
@@ -674,6 +706,7 @@ async function getLocalVrHlsManifest(videoId, session, poToken) {
  *   androidLiveDashManifestUrl: string | null,
  *   getVrHlsManifest: () => Promise<string | null>,
  *   contentDisclosures: { label: string, description: string, attribution: string }[] | null,
+ *   infoPanels: LocalInfoPanel[] | null,
  *   musicMediaType: import('../player/musicMediaType').MusicMediaType
  * }>}
  */
@@ -922,6 +955,7 @@ export async function getLocalVideoInfo(id, { shouldGeneratePoToken = () => true
       watchPageIpBlocked,
       musicMediaType,
       contentDisclosures: extractLocalContentDisclosures(info),
+      infoPanels: extractLocalInfoPanels(info),
     }
   }
 
@@ -998,6 +1032,7 @@ export async function getLocalVideoInfo(id, { shouldGeneratePoToken = () => true
     watchPageIpBlocked,
     musicMediaType,
     contentDisclosures: extractLocalContentDisclosures(info),
+    infoPanels: extractLocalInfoPanels(info),
     getVrHlsManifest: () => getLocalVrHlsManifest(id, htmlExtracts.session, contentPoToken),
   }
 }
@@ -1029,6 +1064,66 @@ export function extractLocalContentDisclosures(info) {
   }
 
   return null
+}
+
+/**
+ * @typedef {object} LocalInfoPanel
+ * @property {string} title
+ * @property {string[]} paragraphs
+ * @property {string} source
+ * @property {string} disclaimer
+ * @property {string} url
+ */
+
+// Topic panels start their first paragraph with the source name, e.g. "Wikipedia • The Holocaust was..."
+const INFO_PANEL_SOURCE_PREFIX_REGEX = /^([^•]{1,80}?) • /
+
+/**
+ * Extracts information panels (publicly funded broadcaster notices, topic context, health sources) from YouTube VideoInfo response
+ * @param {import('youtubei.js').YT.VideoInfo} info
+ * @returns {LocalInfoPanel[] | null}
+ */
+export function extractLocalInfoPanels(info) {
+  const memo = info?.page?.[1]?.contents_memo
+  if (!memo) {
+    return null
+  }
+
+  const containers = memo.getType(YTNodes.InfoPanelContainer).filter(container => container.content)
+  const nestedContents = new Set(containers.map(container => container.content))
+
+  const panels = [
+    ...containers.map(container => ({ title: container.title.text, content: container.content })),
+    ...memo.getType(YTNodes.InfoPanelContent)
+      .filter(content => !nestedContents.has(content))
+      .map(content => ({ title: content.title.text, content })),
+  ].map(({ title, content }) => {
+    const paragraphs = (content.paragraphs ?? content.attributed_paragraphs ?? [])
+      .map(paragraph => paragraph.text?.trim())
+      .filter(Boolean)
+    let source = content.inline_source?.text || content.source.text || ''
+    const disclaimer = content.disclaimer?.text ?? ''
+
+    const sourcePrefix = !source && paragraphs.length > 0 ? INFO_PANEL_SOURCE_PREFIX_REGEX.exec(paragraphs[0]) : null
+    if (sourcePrefix) {
+      source = sourcePrefix[1]
+      paragraphs[0] = paragraphs[0].slice(sourcePrefix[0].length)
+    }
+
+    let url = content.source_endpoint?.payload?.url ?? content.source_endpoint?.metadata?.url ?? ''
+    if (url.startsWith('//')) {
+      url = `https:${url}`
+    }
+    if (!/^https?:\/\//.test(url) || !URL.canParse(url)) {
+      url = ''
+    } else if (!source && !disclaimer) {
+      source = new URL(url).hostname
+    }
+
+    return { title: title ?? '', paragraphs, source, disclaimer, url }
+  }).filter(panel => panel.title || panel.paragraphs.length > 0)
+
+  return panels.length > 0 ? panels : null
 }
 
 /**
@@ -1492,7 +1587,7 @@ export async function getLocalChannelCommunity(id, signal) {
     // if the channel doesn't have a community tab, YouTube returns the home tab instead
     // so we need to check that we got the right tab
     if (communityTab.current_tab?.endpoint.metadata.url?.endsWith('/posts')) {
-      return parseLocalCommunityPosts(communityTab.posts)
+      return parseLocalCommunityPosts(communityTab)
     } else {
       return []
     }
@@ -1715,6 +1810,7 @@ function parseListItem(item, channelId, channelName) {
         thumbnail: channel.author.best_thumbnail?.url.replace(/^\/\//, 'https://'),
         name: channel.author.name,
         id: channel.author.id,
+        ...getAuthorVerification(channel.author),
         subscribers,
         videos,
         handle: null,
@@ -1752,6 +1848,7 @@ function parseListItem(item, channelId, channelName) {
         thumbnail: channel.author.best_thumbnail?.url.replace(/^\/\//, 'https://'),
         name: channel.author.name,
         id: channel.author.id,
+        ...getAuthorVerification(channel.author),
         subscribers,
         videos,
         handle,
@@ -1798,6 +1895,7 @@ export function parseLocalWatchNextVideo(video) {
       title: video.title.text?.trim(),
       author: video.author.name,
       authorId: video.author.id,
+      ...getAuthorVerification(video.author),
       lengthSeconds: video.duration.seconds
     }
   } else if (video.is(YTNodes.LockupView)) {
@@ -1819,6 +1917,7 @@ export function parseLocalWatchNextVideo(video) {
       author: video.author.name,
       authorId: video.author.id,
       authorHandle: getChannelHandleFromEndpoint(video.author.endpoint),
+      ...getAuthorVerification(video.author),
       viewCount: video.view_count == null ? null : extractNumberFromString(video.view_count.text),
       published,
       lengthSeconds: isNaN(video.duration.seconds) ? '' : video.duration.seconds,
@@ -1996,6 +2095,8 @@ export function mapLocalLegacyFormat(format) {
  * @property {string} author
  * @property {string} authorId
  * @property {string} authorThumb
+ * @property {boolean} authorVerified
+ * @property {boolean} authorVerifiedArtist
  * @property {boolean} isPinned
  * @property {boolean} isOwner
  * @property {boolean} isMember
@@ -2042,6 +2143,7 @@ export function parseLocalComment(comment, commentThread = undefined) {
     authorLink: authorId,
     author: comment.author?.name ?? '',
     authorId,
+    ...getAuthorVerification(comment.author),
     authorThumb: comment.author?.best_thumbnail?.url ?? '',
     isPinned: comment.is_pinned,
     isOwner: !!comment.author_is_channel_owner,
@@ -2078,7 +2180,7 @@ export async function getLocalCommunityPost(postId, channelId) {
   }
 
   const postPage = await innertube.getPost(postId, channelId)
-  return parseLocalCommunityPost(postPage.posts[0])
+  return parseLocalCommunityPosts(postPage)[0]
 }
 
 /**

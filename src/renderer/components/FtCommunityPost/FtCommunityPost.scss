@@ -16,7 +16,8 @@
   flex-direction: column;
 }
 
-.hiddenVideo {
+.hiddenVideo,
+.unavailablePost {
   font-style: italic;
   opacity: 0.85;
   text-align: center;
@@ -175,4 +176,20 @@
 
 .sliderContainer {
   display: grid;
+}
+
+.sharedPostCard {
+  border: 1px solid var(--divider-color);
+  border-radius: calc(8px * var(--ui-roundness));
+  margin-block-start: 8px;
+  padding: 12px;
+
+  .communityThumbnail {
+    block-size: 40px;
+    inline-size: 40px;
+  }
+
+  .bottomSection {
+    margin-block-start: 8px;
+  }
 }

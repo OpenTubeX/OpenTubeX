@@ -185,6 +185,7 @@ Subscriptions:
   Newest First: Önce en yeniler
   Oldest First: Önce en eskiler
 Trending:
+  Music: Müzik
   Load Error: Öne çıkanlar yüklenemedi.
   Unsupported Backend: Öne çıkanlar için Yerel API gerekir. Yerel API'yi seçin veya arka uç yedeğini etkinleştirin.
 Most Popular Feed Empty: Bu Invidious örneğinin Popüler Olanlar akışı boş.
@@ -1353,6 +1354,8 @@ Profile:
   The selected image could not be loaded: Seçilen görsel yüklenemedi
   Theme Color: Tema Rengi
 Channel:
+  Verified: Doğrulanmış
+  Official Artist Channel: Resmi Sanatçı Kanalı
   About:
     Links: Bağlantılar
   Subscription settings: Abonelik ayarları
@@ -1371,7 +1374,10 @@ Channel:
   Channel Name Unavailable: Kanal adı kullanılamıyor
   Search Result Types: Arama sonucu türleri
   All Results: Tümü
+  Posts:
+    Original post unavailable: "Orijinal gönderi kullanılamıyor"
 Video:
+  Info panel source: 'Kaynak: {source}'
   External DRM Protected: "DRM korumalı videolar, özel kapalı kaynak bileşenleri gerektirdiğinden OpenTubeX ile oynatılamaz."
   Invalid Media URL: "Geçersiz medya URL'si"
   Mark As Fully Watched: Tamamı izlendi olarak işaretle
@@ -1910,6 +1916,7 @@ Description:
   Video Category: 'Video Kategorisi:'
   Video Tags: Video Etiketleri
   Games: Oyunlar
+  Music: Müzik
 Tooltips:
   General Settings:
     Preferred Video Codec: Otomatik mod donanım çözmeyi tercih eder. Değişiklikler sonraki videoya uygulanır. Codec tercihi çözünürlükleri sınırlayabilir; kullanılamayan codec'ler değiştirilir.
@@ -2256,6 +2263,11 @@ Form Inputs:
 Search Filters:
   Possible Age Restriction Hint: "YouTube bu arama sorgusuna yaş kısıtlaması uygulamış olabilir."
   Cookie Search Failed: "Yapılandırılan çerezlerle arama başarısız oldu."
+  Showing results for: "{query} için sonuçlar gösteriliyor"
+  Search instead for: "Bunun yerine {query} için ara"
+  Including results for: "{query} için sonuçlar dahil"
+  Search only for: "Yalnızca {query} için ara"
+  Did you mean: "Bunu mu demek istediniz: {query}"
 
 Storage Startup Error:
   Title: "Uygulama verileri yüklenemedi"

@@ -185,6 +185,7 @@ Subscriptions:
   Newest First: Prima i più recenti
   Oldest First: Prima i meno recenti
 Trending:
+  Music: Musica
   Load Error: Impossibile caricare le tendenze.
   Unsupported Backend: Le tendenze richiedono l'API locale. Seleziona l'API locale oppure abilita il backend di riserva.
 Most Popular Feed Empty: Il feed Più popolari di questa istanza Invidious è vuoto.
@@ -1353,6 +1354,8 @@ Profile:
   The selected image could not be loaded: Impossibile caricare l'immagine selezionata
   Theme Color: Colore del tema
 Channel:
+  Verified: Verificato
+  Official Artist Channel: Canale ufficiale dell’artista
   About:
     Links: Link
   Subscription settings: Impostazioni iscrizione
@@ -1371,7 +1374,10 @@ Channel:
   Channel Name Unavailable: Nome del canale non disponibile
   Search Result Types: Tipi di risultati della ricerca
   All Results: Tutti
+  Posts:
+    Original post unavailable: "Post originale non disponibile"
 Video:
+  Info panel source: 'Fonte: {source}'
   External DRM Protected: "I video protetti da DRM non possono essere riprodotti in OpenTubeX, poiché richiedono componenti proprietari e closed source."
   Invalid Media URL: "URL multimediale non valido"
   Mark As Fully Watched: Segna come visto interamente
@@ -1909,6 +1915,7 @@ Description:
   Video Category: 'Categoria del video:'
   Video Tags: Tag del video
   Games: Giochi
+  Music: Musica
 Tooltips:
   General Settings:
     Preferred Video Codec: La modalità automatica preferisce la decodifica hardware. Le modifiche si applicano al prossimo video. La preferenza del codec può limitare le risoluzioni; i codec non disponibili vengono sostituiti.
@@ -2255,6 +2262,11 @@ Form Inputs:
 Search Filters:
   Possible Age Restriction Hint: "YouTube potrebbe aver applicato una restrizione di età a questa ricerca."
   Cookie Search Failed: "La ricerca con i cookie configurati non è riuscita."
+  Showing results for: "Sono mostrati i risultati per {query}"
+  Search instead for: "Cerca invece {query}"
+  Including results for: "Sono inclusi i risultati per {query}"
+  Search only for: "Cerca solo {query}"
+  Did you mean: "Forse cercavi {query}?"
 
 Storage Startup Error:
   Title: "Impossibile caricare i dati dell’app"

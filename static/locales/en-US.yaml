@@ -145,6 +145,11 @@ Search Listing:
 Search Filters:
   Possible Age Restriction Hint: "YouTube may have age-restricted this search query."
   Cookie Search Failed: "Search failed with the configured cookies."
+  Showing results for: "Showing results for {query}"
+  Search instead for: "Search instead for {query}"
+  Including results for: "Including results for {query}"
+  Search only for: "Search only for {query}"
+  Did you mean: "Did you mean {query}?"
   Search Filters: Search Filters
   Prioritize:
     Prioritize: Prioritize
@@ -352,6 +357,7 @@ Subscription Groups:
 Trending:
   Trending: Trending
   Gaming: Gaming
+  Music: Music
   Sports: Sports
   Trending Tabs: Trending Tabs
   Load Error: Trending could not be loaded.
@@ -2145,6 +2151,8 @@ Channel:
   More videos hidden: '+{count} more | +{count} more'
   Subscribe: Subscribe
   Unsubscribe: Unsubscribe
+  Verified: Verified
+  Official Artist Channel: Official Artist Channel
   Show in subscription feed: Show in subscription feed
   Notify about new uploads: Notify about new uploads
   Upload Notifications On: "You'll be notified about new uploads from {channelName} when your subscriptions refresh"
@@ -2219,6 +2227,7 @@ Channel:
     Reveal Answers: Reveal Answers
     Hide Answers: Hide Answers
     Video hidden by OpenTubeX: Video hidden by OpenTubeX
+    Original post unavailable: Original post unavailable
 Video:
   Mark As Fully Watched: Mark As Fully Watched
   AI-generated video summary: "AI-generated video summary"
@@ -2691,6 +2700,7 @@ Video:
   Playlist:
     Unavailable videos are hidden: 1 unavailable video is hidden | {count} unavailable videos are hidden
   How this was made: How this was made
+  Info panel source: 'Source: {source}'
 #& Playlists
 Playlist:
   #& About
@@ -2979,6 +2989,7 @@ Description:
   Video Category: 'Video Category:'
   Video Tags: 'Video Tags'
   Games: Games
+  Music: Music
 
 #Tooltips
 Tooltips:

@@ -187,6 +187,7 @@ Subscriptions:
   Posts:
     RSS Message: 'YouTube לא מספק עדכוני RSS לפוסטים. השביתו את ההגדרה "{rssSetting}" כדי לראות פוסטים, או הפעילו את ההגדרה "{hideSetting}" כדי להסתיר את הכרטיסייה הזאת.'
 Trending:
+  Music: מוזיקה
   Load Error: לא ניתן לטעון את התוכן החם.
   Unsupported Backend: לתוכן החם דרוש Local API. יש לבחור ב־Local API או להפעיל מעבר לספק חלופי.
 Most Popular Feed Empty: עדכון התוכן הפופולרי ביותר של מופע Invidious זה ריק.
@@ -1386,6 +1387,8 @@ Profile:
   Theme Color: צבע ערכת הנושא
   Go To Profile Manager: מעבר למנהל הפרופילים
 Channel:
+  Verified: מאומת
+  Official Artist Channel: ערוץ אומן רשמי
   About:
     Links: קישורים
   Subscription settings: הגדרות מינוי
@@ -1407,7 +1410,10 @@ Channel:
   View All: הצגת הכול
   Videos:
     This channel has videos but none could be displayed, try fetching more: "בערוץ הזה יש סרטונים, אך לא ניתן היה להציג אף אחד מהם. נסו לטעון עוד"
+  Posts:
+    Original post unavailable: "הפוסט המקורי אינו זמין"
 Video:
+  Info panel source: 'מקור: {source}'
   External DRM Protected: "סרטונים המוגנים ב-DRM אינם יכולים להתנגן ב-OpenTubeX, מכיוון שהם דורשים רכיבים קנייניים בקוד סגור."
   Invalid Media URL: "כתובת URL של מדיה אינה תקינה"
   Mark As Fully Watched: סימון כנצפה במלואו
@@ -1959,6 +1965,7 @@ Description:
   Video Category: 'קטגוריית הסרטון:'
   Video Tags: תגיות הסרטון
   Games: משחקים
+  Music: מוזיקה
 Tooltips:
   General Settings:
     Preferred Video Codec: המצב האוטומטי מעדיף פענוח בחומרה. השינויים חלים על הסרטון הבא. העדפת מקודד עשויה להגביל רזולוציות; מקודדים שאינם זמינים מוחלפים.
@@ -2313,6 +2320,11 @@ Form Inputs:
 Search Filters:
   Possible Age Restriction Hint: "ייתכן ש-YouTube החיל הגבלת גיל על שאילתת החיפוש הזו."
   Cookie Search Failed: "החיפוש באמצעות קובצי העוגיות שהוגדרו נכשל."
+  Showing results for: "מוצגות תוצאות עבור {query}"
+  Search instead for: "לחפש במקום זאת את {query}"
+  Including results for: "כולל תוצאות עבור {query}"
+  Search only for: "לחפש רק את {query}"
+  Did you mean: "האם התכוונת ל-{query}?"
 
 Storage Startup Error:
   Title: "לא ניתן לטעון את נתוני האפליקציה"

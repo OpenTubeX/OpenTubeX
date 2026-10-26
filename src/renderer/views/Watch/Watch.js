@@ -23,6 +23,7 @@ import WatchVideoDownloadPrompt from '../../components/WatchVideoDownloadPrompt/
 import { retainIosMediaSources } from '../../helpers/player/dlnaCast'
 import WatchVideoInfo from '../../components/WatchVideoInfo/WatchVideoInfo.vue'
 import WatchVideoDescription from '../../components/WatchVideoDescription/WatchVideoDescription.vue'
+import WatchVideoInfoPanels from '../../components/WatchVideoInfoPanels/WatchVideoInfoPanels.vue'
 import WatchVideoTranscript from '../../components/WatchVideoTranscript/WatchVideoTranscript.vue'
 import WatchVideoChapters from '../../components/WatchVideoChapters/WatchVideoChapters.vue'
 import WatchVideoSponsorBlock from '../../components/WatchVideoSponsorBlock/WatchVideoSponsorBlock.vue'
@@ -35,6 +36,7 @@ import FtAgeRestricted from '../../components/FtAgeRestricted/FtAgeRestricted.vu
 import { hasConfiguredRestrictedPlaybackAuthentication } from '../../helpers/restricted-playback'
 import FtRetryImage from '../../components/FtRetryImage.vue'
 import FtSubscribeButton from '../../components/FtSubscribeButton/FtSubscribeButton.vue'
+import FtVerifiedBadge from '../../components/FtVerifiedBadge/FtVerifiedBadge.vue'
 import FtShareButton from '../../components/FtShareButton/FtShareButton.vue'
 import FtIconButton from '../../components/FtIconButton/FtIconButton.vue'
 import FtAddToPlaylistDropdown from '../../components/FtAddToPlaylistDropdown/FtAddToPlaylistDropdown.vue'
@@ -52,6 +54,7 @@ import { isOnAiSlopList } from '../../helpers/aiSlopList'
 import { isVideoHiddenByPreferences } from '../../helpers/subscriptions'
 import { downloadWatchRoute, isPlayableDownloadFile, navigationDownloadId } from '../../helpers/downloadPlayback'
 import { parseLocalVideoGames } from '../../helpers/video-games'
+import { parseLocalVideoMusicTracks, parseVideoMusicTracks } from '../../helpers/video-music'
 import { parseChannelPreferences } from '../../helpers/channel-preferences'
 import {
   showInvidiousFallbackToast,
@@ -80,6 +83,7 @@ import {
   parseLocalTextRuns,
   parseLocalWatchNextVideo
 } from '../../helpers/api/local'
+import { getAuthorVerification } from '../../helpers/api/local-feed-parsers'
 import {
   convertInvidiousToLocalFormat,
   generateInvidiousDashManifestLocally,
@@ -196,6 +200,7 @@ export default defineComponent({
     WatchVideoDownloadPrompt,
     'watch-video-info': WatchVideoInfo,
     'watch-video-description': WatchVideoDescription,
+    WatchVideoInfoPanels,
     WatchVideoSummary,
     'watch-video-transcript': WatchVideoTranscript,
     'watch-video-chapters': WatchVideoChapters,
@@ -207,6 +212,7 @@ export default defineComponent({
     'watch-video-recommendations': WatchVideoRecommendations,
     'ft-age-restricted': FtAgeRestricted,
     FtSubscribeButton,
+    FtVerifiedBadge,
     FtShareButton,
     FtIconButton,
     FtAddToPlaylistDropdown,
@@ -344,6 +350,8 @@ export default defineComponent({
       preparingVideoLoadGeneration: null,
       hasAiGeneratedContent: false,
       contentDisclosures: null,
+      /** @type {import('../../helpers/api/local').LocalInfoPanel[] | null} */
+      infoPanels: null,
       hasPaidPromotion: false,
       paidPromotionDurationMs: 10000,
       upcomingTimestamp: null,
@@ -374,6 +382,8 @@ export default defineComponent({
       videoTags: [],
       /** @type {import('../../helpers/video-games').LocalVideoGame[]} */
       videoGames: [],
+      /** @type {import('../../helpers/video-music').VideoMusicTrack[]} */
+      videoMusicTracks: [],
       license: '',
       videoViewCount: null,
       videoLikeCount: null,
@@ -385,6 +395,8 @@ export default defineComponent({
       /** @type {'chapters' | 'keyMoments'} */
       videoChaptersKind: 'chapters',
       channelName: '',
+      channelVerified: false,
+      channelVerifiedArtist: false,
       channelThumbnail: '',
       channelId: '',
       channelCollaborators: [],
@@ -2481,6 +2493,7 @@ export default defineComponent({
       this.shortsPlaybackAfterSeekSeconds = 0
       this.hasAiGeneratedContent = false
       this.contentDisclosures = null
+      this.infoPanels = null
       this.hasPaidPromotion = false
       this.paidPromotionDurationMs = 10000
       this.upcomingTimestamp = null
@@ -2498,6 +2511,7 @@ export default defineComponent({
       this.videoCategory = ''
       this.videoTags = []
       this.videoGames = []
+      this.videoMusicTracks = []
       this.license = ''
       this.videoViewCount = null
       this.videoLikeCount = null
@@ -2508,6 +2522,8 @@ export default defineComponent({
       this.videoCurrentChapterIndex = 0
       this.videoChaptersKind = 'chapters'
       this.channelName = ''
+      this.channelVerified = false
+      this.channelVerifiedArtist = false
       this.channelThumbnail = ''
       this.channelId = ''
       this.channelCollaborators = []
@@ -3469,12 +3485,14 @@ export default defineComponent({
           watchPageIpBlocked,
           musicMediaType,
           contentDisclosures,
+          infoPanels,
           androidLiveHlsManifestUrl,
           androidLiveDashManifestUrl,
         } = videoInfo
 
         this.musicMediaType = musicMediaType
         this.contentDisclosures = contentDisclosures ?? null
+        this.infoPanels = infoPanels ?? null
 
         if (watchPageIpBlocked) {
           this.ipBlockDetectedInCurrentChain = true
@@ -3599,6 +3617,7 @@ export default defineComponent({
         this.videoViewCount = Number.isFinite(viewCount) ? viewCount : null
         this.license = result.secondary_info?.metadata?.rows.find(element => element.title?.text === 'License')?.contents[0]?.text
         this.videoGames = parseLocalVideoGames(result)
+        this.videoMusicTracks = parseLocalVideoMusicTracks(result)
 
         this.channelCollaborators = parseLocalVideoCollaborators(result)
         const primaryCollaborator = this.channelCollaborators[0]
@@ -3609,6 +3628,9 @@ export default defineComponent({
 
         this.channelId = result.basic_info.channel_id ?? ownerChannelId ?? primaryCollaborator?.id ?? descriptionHeader?.channel_navigation_endpoint?.payload?.browseId ?? ''
         this.channelName = result.basic_info.author ?? ownerChannelName ?? primaryCollaborator?.name ?? descriptionHeader?.channel.text ?? ''
+        const { authorVerified, authorVerifiedArtist } = getAuthorVerification(ownerAuthor)
+        this.channelVerified = authorVerified
+        this.channelVerifiedArtist = authorVerifiedArtist
         this.channelThumbnail = primaryCollaborator?.thumbnail ?? ownerAuthor?.best_thumbnail?.url ?? descriptionHeader?.channel_thumbnail[0]?.url ?? descriptionChannel?.channel_avatar[0]?.url ?? ''
         this.$store.commit('setVideoAvatar', {
           videoId: this.videoId,
@@ -4260,11 +4282,14 @@ export default defineComponent({
 
           this.videoCategory = result.genre ?? ''
           this.videoTags = result.keywords ?? []
+          this.videoMusicTracks = parseVideoMusicTracks(result.musicTracks)
           this.videoGenreIsMusic = this.videoCategory === 'Music'
           this.musicMediaType = result.musicMediaType
 
           this.channelId = result.authorId
           this.channelName = result.author
+          this.channelVerified = result.authorVerified === true
+          this.channelVerifiedArtist = false
           this.channelCollaborators = []
           const channelThumb = result.authorThumbnails.at(-1)
           this.channelThumbnail = channelThumb ? youtubeImageUrlToInvidious(channelThumb.url) : ''
@@ -4304,6 +4329,7 @@ export default defineComponent({
           this.isFamilyFriendly = result.isFamilyFriendly
           this.isPostLiveDvr = !!result.isPostLiveDvr
           this.contentDisclosures = null
+          this.infoPanels = null
           this.hasAiGeneratedContent = false
           this.isUnlisted = !result.isListed
 

@@ -187,6 +187,7 @@ Subscriptions:
   Posts:
     RSS Message: O YouTube não fornece feeds RSS para publicações. Desative a definição "{rssSetting}" para ver publicações ou ative a definição "{hideSetting}" para ocultar este separador.
 Trending:
+  Music: Música
   Load Error: Não foi possível carregar as tendências.
   Unsupported Backend: As tendências requerem a API local. Selecione a API local ou ative o sistema de ligação secundário.
 Most Popular Feed Empty: O feed «Mais populares» desta instância Invidious está vazio.
@@ -1378,6 +1379,8 @@ Profile:
   Theme Color: Cor do tema
   Go To Profile Manager: Ir para o gestor de perfis
 Channel:
+  Verified: Verificado
+  Official Artist Channel: Canal oficial do artista
   About:
     Links: Hiperligações
   Subscription settings: Definições da subscrição
@@ -1399,7 +1402,10 @@ Channel:
   View All: Ver tudo
   Videos:
     This channel has videos but none could be displayed, try fetching more: "Este canal tem vídeos, mas nenhum pôde ser apresentado. Tente carregar mais"
+  Posts:
+    Original post unavailable: "Publicação original indisponível"
 Video:
+  Info panel source: 'Fonte: {source}'
   External DRM Protected: "Os vídeos protegidos por DRM não podem ser reproduzidos no OpenTubeX, uma vez que requerem componentes proprietários e de código fechado."
   Invalid Media URL: "URL de conteúdo multimédia inválido"
   Mark As Fully Watched: Marcar como visto na íntegra
@@ -1948,6 +1954,7 @@ Description:
   Video Category: 'Categoria do vídeo:'
   Video Tags: Etiquetas do vídeo
   Games: Jogos
+  Music: Música
 Tooltips:
   General Settings:
     Preferred Video Codec: O modo automático prefere a descodificação por hardware. As alterações aplicam-se ao próximo vídeo. A preferência de codec pode limitar as resoluções; os codecs indisponíveis são substituídos.
@@ -2300,6 +2307,11 @@ Form Inputs:
 Search Filters:
   Possible Age Restriction Hint: "O YouTube pode ter aplicado uma restrição de idade a esta pesquisa."
   Cookie Search Failed: "A pesquisa com os cookies configurados falhou."
+  Showing results for: "A mostrar resultados para {query}"
+  Search instead for: "Em alternativa, pesquisar {query}"
+  Including results for: "Inclui resultados para {query}"
+  Search only for: "Pesquisar apenas {query}"
+  Did you mean: "Quis dizer {query}?"
 
 Storage Startup Error:
   Title: "Não foi possível carregar os dados da aplicação"

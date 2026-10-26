@@ -70,6 +70,7 @@ Subscriptions:
   Show Tabbed View: Pokaż widok kart
   Show Combined View: Pokaż widok łączny
 Trending:
+  Music: Muzyka
   Load Error: Nie udało się wczytać popularnych treści.
   Unsupported Backend: Popularne treści wymagają lokalnego API. Wybierz lokalne API lub włącz zapasowy backend.
 Most Popular Feed Empty: Kanał „Najpopularniejsze” tej instancji Invidious jest pusty.
@@ -809,6 +810,8 @@ Profile:
   The selected image could not be loaded: Nie udało się wczytać wybranego obrazu
   Theme Color: Kolor motywu
 Channel:
+  Verified: Zweryfikowany
+  Official Artist Channel: Oficjalny kanał wykonawcy
   About:
     Links: Odnośniki
   Subscription settings: Ustawienia subskrypcji
@@ -827,7 +830,10 @@ Channel:
   Channel Name Unavailable: Nazwa kanału jest niedostępna
   Search Result Types: Typy wyników wyszukiwania
   All Results: Wszystkie
+  Posts:
+    Original post unavailable: "Oryginalny post jest niedostępny"
 Video:
+  Info panel source: 'Źródło: {source}'
   Remove Video from Queue: Usuń z kolejki
   External DRM Protected: "OpenTubeX nie może odtwarzać filmów chronionych przez DRM, ponieważ wymagają one obsługi zastrzeżonych prawnie komponentów o zamkniętym kodzie."
   Invalid Media URL: "Nieprawidłowy adres URL multimediów"
@@ -1164,6 +1170,7 @@ Description:
   Description Copied: Opis skopiowano do schowka
   Video Tags: Tagi filmu
   Games: Gry
+  Music: Muzyka
 Tooltips:
   General Settings:
     Preferred Video Codec: Tryb automatyczny preferuje dekodowanie sprzętowe. Zmiany dotyczą następnego filmu. Wybór kodeka może ograniczyć rozdzielczości; niedostępne kodeki są zastępowane.
@@ -1488,6 +1495,11 @@ Form Inputs:
 Search Filters:
   Possible Age Restriction Hint: "YouTube mógł nałożyć ograniczenie wiekowe na to zapytanie wyszukiwania."
   Cookie Search Failed: "Wyszukiwanie z użyciem skonfigurowanych plików cookie nie powiodło się."
+  Showing results for: "Wyświetlane są wyniki dla {query}"
+  Search instead for: "Zamiast tego wyszukaj {query}"
+  Including results for: "Uwzględniono wyniki dla {query}"
+  Search only for: "Szukaj tylko {query}"
+  Did you mean: "Czy chodziło Ci o {query}?"
 
 Storage Startup Error:
   Title: "Nie udało się wczytać danych aplikacji"

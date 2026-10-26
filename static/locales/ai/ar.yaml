@@ -187,6 +187,7 @@ Subscriptions:
   Posts:
     RSS Message: لا يوفّر YouTube خلاصات RSS للمنشورات. عطّل إعداد "{rssSetting}" لعرض المنشورات أو فعّل إعداد "{hideSetting}" لإخفاء علامة التبويب هذه.
 Trending:
+  Music: موسيقى
   Load Error: تعذر تحميل العناصر الشائعة.
   Unsupported Backend: يتطلب الاتجاه واجهة برمجة التطبيقات المحلية. حدد واجهة برمجة التطبيقات المحلية أو قم بتمكين الخلفية الاحتياطية.
 Most Popular Feed Empty: الموجز الأكثر شهرة لهذا المثيل Invidious فارغ.
@@ -1381,6 +1382,8 @@ Profile:
   Theme Color: لون الموضوع
   Go To Profile Manager: الانتقال إلى مدير الملفات الشخصية
 Channel:
+  Verified: تم التحقق منه
+  Official Artist Channel: قناة فنان رسمية
   About:
     Links: روابط
   Subscription settings: إعدادات الاشتراك
@@ -1402,7 +1405,10 @@ Channel:
   View All: عرض الكل
   Videos:
     This channel has videos but none could be displayed, try fetching more: "تحتوي هذه القناة على فيديوهات، لكن تعذر عرض أي منها. حاول جلب المزيد"
+  Posts:
+    Original post unavailable: "المنشور الأصلي غير متاح"
 Video:
+  Info panel source: 'المصدر: {source}'
   External DRM Protected: "لا يمكن تشغيل مقاطع الفيديو المحمية بنظام إدارة الحقوق الرقمية في OpenTubeX، لأنها تتطلب مكونات خاصة ومغلقة المصدر."
   Invalid Media URL: "رابط الوسائط غير صالح"
   Mark As Fully Watched: وضع علامة على أنه تمت مشاهدته بالكامل
@@ -1952,6 +1958,7 @@ Description:
   Video Category: 'فئة الفيديو:'
   Video Tags: علامات الفيديو
   Games: ألعاب
+  Music: الموسيقى
 Tooltips:
   General Settings:
     Preferred Video Codec: يفضل الوضع التلقائي فك الترميز بالأجهزة. تسري التغييرات على الفيديو التالي. قد يحد تفضيل ترميز من الدقات؛ تُستخدم بدائل للترميزات غير المتاحة.
@@ -2289,6 +2296,11 @@ Form Inputs:
 Search Filters:
   Possible Age Restriction Hint: "قد يكون YouTube قد فرض قيدًا عمريًا على عبارة البحث هذه."
   Cookie Search Failed: "فشل البحث باستخدام ملفات تعريف الارتباط المحددة."
+  Showing results for: "عرض النتائج لـ {query}"
+  Search instead for: "البحث بدلاً من ذلك عن {query}"
+  Including results for: "تتضمن نتائج لـ {query}"
+  Search only for: "البحث فقط عن {query}"
+  Did you mean: "هل تقصد {query}؟"
 
 Storage Startup Error:
   Title: "تعذر تحميل بيانات التطبيق"

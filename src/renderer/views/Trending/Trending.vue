@@ -41,13 +41,33 @@
             @click="changeTab('gaming')"
             @keydown.space.enter.prevent="changeTab('gaming')"
             @keydown.left="focusTab('podcasts', $event)"
-            @keydown.right="focusTab('sports', $event)"
+            @keydown.right="focusTab('music', $event)"
           >
             <FtIcon
               :icon="['fas', 'gamepad']"
               class="trendingIcon"
             />
             {{ $t("Trending.Gaming") }}
+          </div>
+          <!-- eslint-disable-next-line vuejs-accessibility/interactive-supports-focus -->
+          <div
+            ref="musicTab"
+            class="tab"
+            role="tab"
+            :aria-selected="currentTab === 'music'"
+            aria-controls="trendingPanel"
+            :tabindex="currentTab === 'music' ? 0 : -1"
+            :class="{ selectedTab: currentTab === 'music' }"
+            @click="changeTab('music')"
+            @keydown.space.enter.prevent="changeTab('music')"
+            @keydown.left="focusTab('gaming', $event)"
+            @keydown.right="focusTab('sports', $event)"
+          >
+            <FtIcon
+              :icon="['fas', 'music']"
+              class="trendingIcon"
+            />
+            {{ t("Trending.Music") }}
           </div>
           <!-- eslint-disable-next-line vuejs-accessibility/interactive-supports-focus -->
           <div
@@ -60,7 +80,7 @@
             :class="{ selectedTab: currentTab === 'sports' }"
             @click="changeTab('sports')"
             @keydown.space.enter.prevent="changeTab('sports')"
-            @keydown.left="focusTab('gaming', $event)"
+            @keydown.left="focusTab('music', $event)"
             @keydown.right="focusTab('podcasts', $event)"
           >
             <FtIcon
@@ -166,18 +186,18 @@ const region = computed(() => {
   return store.getters.getRegion.toUpperCase()
 })
 
-/** @type {import('vue').ComputedRef<{ gaming: any[] | null, sports: any[] | null, podcasts: any[] | null }>} */
+/** @type {import('vue').ComputedRef<{ gaming: any[] | null, music: any[] | null, sports: any[] | null, podcasts: any[] | null }>} */
 const trendingCache = computed(() => {
   return store.getters.getTrendingCache
 })
 
-const isLoading = ref({ gaming: false, sports: false, podcasts: false })
-const errorMessages = ref({ gaming: null, sports: null, podcasts: null })
+const isLoading = ref({ gaming: false, music: false, sports: false, podcasts: false })
+const errorMessages = ref({ gaming: null, music: null, sports: null, podcasts: null })
 
 const { tabId } = useTabContext()
 const currentTabStorageKey = tabId ? `Trending/${tabId}/currentTab` : 'Trending/currentTab'
 
-/** @type {import('vue').Ref<'gaming' | 'sports' | 'podcasts'>} */
+/** @type {import('vue').Ref<'gaming' | 'music' | 'sports' | 'podcasts'>} */
 const currentTab = ref('gaming')
 
 const isBackendSupported = computed(() => {
@@ -229,7 +249,7 @@ function getTrendingInfo(refresh = false) {
 }
 
 /**
- * @param {'gaming' | 'sports' | 'podcasts'} category
+ * @param {'gaming' | 'music' | 'sports' | 'podcasts'} category
  */
 async function getTrendingInfoLocal(category) {
   isLoading.value[category] = true
@@ -262,11 +282,12 @@ async function getTrendingInfoLocal(category) {
 }
 
 const gamingTab = useTemplateRef('gamingTab')
+const musicTab = useTemplateRef('musicTab')
 const sportsTab = useTemplateRef('sportsTab')
 const podcastsTab = useTemplateRef('podcastsTab')
 
 /**
- * @param {'gaming' | 'sports' | 'podcasts'} tab
+ * @param {'gaming' | 'music' | 'sports' | 'podcasts'} tab
  * @param {KeyboardEvent | undefined} event
  */
 function focusTab(tab, event = undefined) {
@@ -281,6 +302,9 @@ function focusTab(tab, event = undefined) {
     case 'gaming':
       gamingTab.value?.focus()
       break
+    case 'music':
+      musicTab.value?.focus()
+      break
     case 'sports':
       sportsTab.value?.focus()
       break
@@ -291,7 +315,7 @@ function focusTab(tab, event = undefined) {
 }
 
 /**
- * @param {'gaming' | 'sports' | 'podcasts'} tab
+ * @param {'gaming' | 'music' | 'sports' | 'podcasts'} tab
  */
 function changeTab(tab) {
   if (tab === currentTab.value) {

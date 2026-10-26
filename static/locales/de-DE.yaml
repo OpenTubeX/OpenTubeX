@@ -51,6 +51,11 @@ Search / Go to URL: Suchen / URL öffnen
 Search Filters:
   Possible Age Restriction Hint: "YouTube hat diese Suchanfrage möglicherweise mit einer Altersbeschränkung versehen."
   Cookie Search Failed: "Die Suche mit den konfigurierten Cookies ist fehlgeschlagen."
+  Showing results for: "Ergebnisse für {query} werden angezeigt"
+  Search instead for: "Stattdessen nach {query} suchen"
+  Including results for: "Einschließlich Ergebnissen für {query}"
+  Search only for: "Nur nach {query} suchen"
+  Did you mean: "Meintest du {query}?"
   Search Filters: Suchfilter
   Prioritize:
     Most Relevant: Relevanz
@@ -186,6 +191,7 @@ Trending:
   Trending: Trends
   Trending Tabs: Trends-Tabs
   Gaming: Gaming
+  Music: Musik
   Sports: Sport
   Load Error: Trends konnten nicht geladen werden.
   Unsupported Backend: Trends benötigen die lokale API. Wähle die lokale API aus oder aktiviere den Backend-Fallback.
@@ -1894,6 +1900,8 @@ Channel:
   More videos hidden: '+{count} weiteres | +{count} weitere'
   Subscribe: Abonnieren
   Unsubscribe: Deabonnieren
+  Verified: Bestätigt
+  Official Artist Channel: Offizieller Künstlerkanal
   Show in subscription feed: Im Abo-Feed anzeigen
   Notify about new uploads: Über neue Uploads benachrichtigen
   Upload Notifications On: "Du wirst über neue Uploads von {channelName} benachrichtigt, wenn deine Abos aktualisiert werden"
@@ -1941,6 +1949,7 @@ Channel:
     Reveal Answers: Antworten anzeigen
     Hide Answers: Antworten verbergen
     Video hidden by OpenTubeX: Video versteckt von OpenTubeX
+    Original post unavailable: Ursprünglicher Beitrag nicht verfügbar
     View Full Post: Vollständigen Beitrag anzeigen
     Viewing Posts Only Supported By Invidious: Das Anzeigen von Beiträgen wird nur von Invidious unterstützt. Gehe zum Tab „Beiträge“ eines Kanals, um dort Inhalte ohne Invidious anzuzeigen.
   Live:
@@ -2434,6 +2443,7 @@ Video:
   Enable SponsorBlock on Channel: SponsorBlock auf Kanal aktivieren
   Disable SponsorBlock on Channel: SponsorBlock auf Kanal deaktivieren
   How this was made: Wie es erstellt wurde
+  Info panel source: 'Quelle: {source}'
 Playlist:
   #& About
   Close Playlist: Playlist schließen
@@ -2927,6 +2937,7 @@ Description:
   Description Copied: Beschreibung in die Zwischenablage kopiert
   Video Tags: Video-Tags
   Games: Spiele
+  Music: Musik
 KeyboardShortcutPrompt:
   Reopen Closed Window: Das zuletzt geschlossene Fenster wieder öffnen
   Keyboard Shortcuts: Tastenkombinationen

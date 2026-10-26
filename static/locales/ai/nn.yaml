@@ -185,6 +185,7 @@ Subscriptions:
   Newest First: Nyaste først
   Oldest First: Eldste først
 Trending:
+  Music: Musikk
   Load Error: Klarte ikkje å laste inn populært innhald.
   Unsupported Backend: Populært innhald krev Local API. Vel Local API eller slå på ein reserveleverandør.
 Most Popular Feed Empty: «Most Popular»-straumen frå denne Invidious-instansen er tom.
@@ -1541,6 +1542,8 @@ Profile:
   Open Profile Dropdown: Opna profilmenyen
   Go To Profile Manager: Gå til profilhandsaming
 Channel:
+  Verified: Stadfesta
+  Official Artist Channel: Offisiell artistkanal
   Subscription settings: Abonnementsinnstillingar
   Failed to save subscription settings: Klarte ikkje å lagre kanalinnstillingane
   Videos per day: Videoar per dag
@@ -1594,9 +1597,11 @@ Channel:
     Reveal Answers: Vis svara
     Hide Answers: Gøym svar
     Video hidden by OpenTubeX: Videoen er gøymd av OpenTubeX
+    Original post unavailable: "Det opphavlege innlegget er ikkje tilgjengeleg"
   Videos:
     This channel has videos but none could be displayed, try fetching more: "Denne kanalen har videoar, men ingen kunne visast. Prøv å hente fleire"
 Video:
+  Info panel source: 'Kjelde: {source}'
   External DRM Protected: "DRM-verna videoar kan ikkje spelast av i OpenTubeX fordi dei krev proprietære komponentar med lukka kjeldekode."
   Invalid Media URL: "Ugyldig medie-URL"
   Mark As Fully Watched: Merk som ferdig sett
@@ -2218,6 +2223,7 @@ Description:
   Video Category: 'Videokategori:'
   Video Tags: Videoemneord
   Games: Spel
+  Music: Musikk
 Tooltips:
   General Settings:
     Preferred Video Codec: Automatisk føretrekkjer maskinvaredekoding. Endringar gjeld frå neste video. Eit kodekval kan avgrense oppløysingar; utilgjengelege kodekar blir erstatta.
@@ -2650,6 +2656,11 @@ Form Inputs:
 Search Filters:
   Possible Age Restriction Hint: "YouTube kan ha sett ei aldersgrense for dette søket."
   Cookie Search Failed: "Søk med dei konfigurerte informasjonskapslane mislukkast."
+  Showing results for: "Viser resultat for {query}"
+  Search instead for: "Søk heller etter {query}"
+  Including results for: "Inkluderer resultat for {query}"
+  Search only for: "Søk berre etter {query}"
+  Did you mean: "Meinte du {query}?"
 
 Storage Startup Error:
   Title: "Kunne ikkje laste appdata"

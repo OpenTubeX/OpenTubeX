@@ -68,6 +68,11 @@ Search Listing:
 Search Filters:
   Possible Age Restriction Hint: "ممکن است YouTube برای این عبارت جستجو محدودیت سنی اعمال کرده باشد."
   Cookie Search Failed: "جستجو با کوکی‌های تنظیم‌شده ناموفق بود."
+  Showing results for: "نمایش نتایج برای {query}"
+  Search instead for: "به‌جای آن جستجو برای {query}"
+  Including results for: "شامل نتایج برای {query}"
+  Search only for: "فقط جستجو برای {query}"
+  Did you mean: "منظورتان {query} بود؟"
   Prioritize:
     Prioritize: اولویت‌بندی
     Popularity: محبوبیت
@@ -199,6 +204,7 @@ Subscriptions:
   Posts:
     RSS Message: 'یوتیوب برای پست‌ها خوراک RSS ارائه نمی‌کند. برای دیدن پست‌ها تنظیم "{rssSetting}" را غیرفعال کنید یا برای پنهان‌کردن این زبانه تنظیم "{hideSetting}" را فعال کنید.'
 Trending:
+  Music: موسیقی
   Load Error: موارد پرطرف‌دار بارگذاری نشدند.
   Unsupported Backend: نمایش موارد پرطرف‌دار به Local API نیاز دارد. Local API را انتخاب کنید یا بازگشت به بک‌اند را فعال کنید.
 Most Popular Feed Empty: خوراک Most Popular این نمونه Invidious خالی است.
@@ -1413,6 +1419,8 @@ Profile:
   Theme Color: رنگ پوسته
   Go To Profile Manager: رفتن به مدیر نمایه‌ها
 Channel:
+  Verified: تأییدشده
+  Official Artist Channel: کانال رسمی هنرمند
   About:
     Links: پیوندها
   Subscription settings: تنظیمات اشتراک
@@ -1434,7 +1442,10 @@ Channel:
   View All: مشاهدهٔ همه
   Videos:
     This channel has videos but none could be displayed, try fetching more: "این کانال ویدیو دارد، اما هیچ‌کدام نمایش داده نشد. دریافت ویدیوهای بیشتر را امتحان کنید"
+  Posts:
+    Original post unavailable: "پست اصلی در دسترس نیست"
 Video:
+  Info panel source: 'منبع: {source}'
   External DRM Protected: "ویدیوهای محافظت شده DRM را نمی توان در OpenTubeX پخش کرد، زیرا به اجزای اختصاصی و منبع بسته نیاز دارند."
   Invalid Media URL: "نشانی رسانه نامعتبر است"
   Mark As Fully Watched: علامت‌گذاری به‌عنوان کاملاً دیده‌شده
@@ -1998,6 +2009,7 @@ Description:
   Video Category: 'دسته‌بندی ویدیو:'
   Video Tags: برچسب‌های ویدیو
   Games: بازی‌ها
+  Music: موسیقی
 Tooltips:
   General Settings:
     Preferred Video Codec: حالت خودکار رمزگشایی سخت‌افزاری را ترجیح می‌دهد. تغییرات از ویدیوی بعدی اعمال می‌شوند. ترجیح کدک ممکن است وضوح‌ها را محدود کند؛ کدک‌های ناموجود جایگزین می‌شوند.

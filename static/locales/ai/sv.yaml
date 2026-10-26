@@ -187,6 +187,7 @@ Subscriptions:
   Posts:
     RSS Message: 'YouTube tillhandahåller inte RSS-flöden för inlägg. Inaktivera inställningen "{rssSetting}" för att visa inlägg eller aktivera inställningen "{hideSetting}" för att dölja den här fliken.'
 Trending:
+  Music: Musik
   Load Error: Trendande innehåll kunde inte läsas in.
   Unsupported Backend: Trendande innehåll kräver lokalt API. Välj lokalt API eller aktivera reservserverdelen.
 Most Popular Feed Empty: Flödet Populärast på den här Invidious-instansen är tomt.
@@ -1361,6 +1362,8 @@ Profile:
   Theme Color: Temafärg
   Go To Profile Manager: Gå till profilhanteraren
 Channel:
+  Verified: Verifierad
+  Official Artist Channel: Officiell artistkanal
   About:
     Links: Länkar
   Subscription settings: Prenumerationsinställningar
@@ -1381,7 +1384,10 @@ Channel:
   All Results: Alla
   Videos:
     This channel has videos but none could be displayed, try fetching more: "Den här kanalen har videor, men ingen kunde visas. Försök att hämta fler"
+  Posts:
+    Original post unavailable: "Det ursprungliga inlägget är inte tillgängligt"
 Video:
+  Info panel source: 'Källa: {source}'
   External DRM Protected: "DRM-skyddade videor kan inte spelas upp i OpenTubeX eftersom de kräver proprietära komponenter med sluten källkod."
   Invalid Media URL: "Ogiltig medie-URL"
   Mark As Fully Watched: Markera som sedd till slutet
@@ -1930,6 +1936,7 @@ Description:
   Video Category: 'Videokategori:'
   Video Tags: Videotaggar
   Games: Spel
+  Music: Musik
 Tooltips:
   General Settings:
     Preferred Video Codec: Automatiskt föredrar hårdvaruavkodning. Ändringar gäller från nästa video. Ett kodekval kan begränsa upplösningar; otillgängliga kodekar ersätts.
@@ -2282,6 +2289,11 @@ Form Inputs:
 Search Filters:
   Possible Age Restriction Hint: "YouTube kan ha åldersbegränsat den här sökfrågan."
   Cookie Search Failed: "Sökning med de konfigurerade kakorna misslyckades."
+  Showing results for: "Visar resultat för {query}"
+  Search instead for: "Sök i stället efter {query}"
+  Including results for: "Inklusive resultat för {query}"
+  Search only for: "Sök bara efter {query}"
+  Did you mean: "Menade du {query}?"
 
 Storage Startup Error:
   Title: "Kunde inte läsa in appdata"

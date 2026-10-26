@@ -187,6 +187,7 @@ Subscriptions:
   Posts:
     RSS Message: 'YouTube býður ekki upp á RSS-strauma fyrir færslur. Slökktu á stillingunni "{rssSetting}" til að skoða færslur eða kveiktu á stillingunni "{hideSetting}" til að fela þennan flipa.'
 Trending:
+  Music: Tónlist
   Load Error: Ekki tókst að hlaða vinsælu efni.
   Unsupported Backend: Vinsælt efni krefst Local API. Veldu Local API eða virkjaðu varaleið bakenda.
 Most Popular Feed Empty: Straumurinn Vinsælast á þessu Invidious-tilviki er tómur.
@@ -1363,6 +1364,8 @@ Profile:
   Theme Color: Þemalitur
   Go To Profile Manager: Opna umsjón með notandasniðum
 Channel:
+  Verified: Staðfest
+  Official Artist Channel: Opinber flytjendarás
   About:
     Links: Tenglar
   Subscription settings: Áskriftarstillingar
@@ -1383,7 +1386,10 @@ Channel:
   All Results: Allt
   Videos:
     This channel has videos but none could be displayed, try fetching more: "Þessi rás er með myndskeið en ekki var hægt að birta neitt þeirra. Prófaðu að sækja fleiri"
+  Posts:
+    Original post unavailable: "Upprunalega færslan er ekki tiltæk"
 Video:
+  Info panel source: 'Heimild: {source}'
   External DRM Protected: "Ekki er hægt að spila DRM-varin myndskeið í OpenTubeX, þar sem þau krefjast notkunar lokaðs séreignarhugbúnaðar."
   Invalid Media URL: "Ógild slóð á miðil"
   Mark As Fully Watched: Merkja sem fullhorft
@@ -1935,6 +1941,7 @@ Description:
   Video Category: 'Flokkur myndbands:'
   Video Tags: Merki myndbands
   Games: Leikir
+  Music: Tónlist
 Tooltips:
   General Settings:
     Preferred Video Codec: Sjálfvirkt val kýs vélbúnaðarafkóðun. Breytingar gilda frá næsta myndskeiði. Val á merkjakóða getur takmarkað upplausnir; ótiltækir merkjakóðar eru leystir af hólmi.
@@ -2283,6 +2290,11 @@ Form Inputs:
 Search Filters:
   Possible Age Restriction Hint: "YouTube gæti hafa sett aldurstakmörk á þessa leitarfyrirspurn."
   Cookie Search Failed: "Leit með stilltum vafrakökum mistókst."
+  Showing results for: "Sýnir niðurstöður fyrir {query}"
+  Search instead for: "Leita frekar að {query}"
+  Including results for: "Inniheldur niðurstöður fyrir {query}"
+  Search only for: "Leita aðeins að {query}"
+  Did you mean: "Áttirðu við {query}?"
 
 Storage Startup Error:
   Title: "Ekki tókst að hlaða gögnum forritsins"

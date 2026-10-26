@@ -3,11 +3,12 @@ import { readFile } from 'node:fs/promises'
 import test from 'node:test'
 import { compileFunction } from 'node:vm'
 import { YTNodes } from 'youtubei.js'
-import { createLocalFeedParsers } from '../../src/renderer/helpers/api/local-feed-parsers.js'
+import { createLocalFeedParsers, getAuthorVerification } from '../../src/renderer/helpers/api/local-feed-parsers.js'
 
 const { parseLocalSubscriberCount, parseLocalTextRuns } = createLocalFeedParsers(() => false)
 import { parseLocalVideoSummary } from '../../src/renderer/helpers/video-summary.js'
 import { parseLocalVideoGames } from '../../src/renderer/helpers/video-games.js'
+import { parseLocalVideoMusicTracks } from '../../src/renderer/helpers/video-music.js'
 import { parseLocalVideoCollaborators } from '../../src/renderer/helpers/video-collaborators.js'
 import { getVideoPopularity } from '../../src/renderer/helpers/player/videoPopularity.js'
 
@@ -34,6 +35,7 @@ async function loadMetadata(info, avoidTranslation = 'disabled', options = {}) {
     areLocalCommentsDisabled: () => true,
     parseLocalEndscreen: () => [],
     parseLocalVideoGames,
+    parseLocalVideoMusicTracks,
     parseLocalVideoSummary,
     getVideoPopularity,
     YTNodes,
@@ -42,6 +44,7 @@ async function loadMetadata(info, avoidTranslation = 'disabled', options = {}) {
     MANIFEST_TYPE_HLS: 'hls',
     parseLocalVideoCollaborators,
     parseLocalSubscriberCount,
+    getAuthorVerification,
     window: { innerWidth: options.windowWidth ?? 1000 },
     formatNumber: String,
     showApiErrorToast() {},

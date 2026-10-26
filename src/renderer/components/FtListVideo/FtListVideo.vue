@@ -300,7 +300,10 @@
               v-if="showChannelAvatar"
               :thumbnails="channelThumbnails"
             />
-            <span class="channelNameText">{{ channelName }}</span>
+            <span class="channelNameText">{{ channelName }}<FtVerifiedBadge
+              :verified="data.authorVerified"
+              :artist="data.authorVerifiedArtist"
+            /></span>
           </component>
           <bdi
             v-else-if="channelName !== null"
@@ -310,7 +313,10 @@
               v-if="showChannelAvatar"
               :thumbnails="channelThumbnails"
             />
-            <span class="channelNameText">{{ channelName }}</span>
+            <span class="channelNameText">{{ channelName }}<FtVerifiedBadge
+              :verified="data.authorVerified"
+              :artist="data.authorVerifiedArtist"
+            /></span>
           </bdi>
           <FtInlineMetadata
             class="videoInfo"
@@ -526,6 +532,7 @@ import FtCollaboratorsPrompt from '../FtCollaboratorsPrompt/FtCollaboratorsPromp
 import FtEmbeddedProgress from '../FtEmbeddedProgress/FtEmbeddedProgress.vue'
 import FtIconButton from '../FtIconButton/FtIconButton.vue'
 import FtNewContentDot from '../FtNewContentDot/FtNewContentDot.vue'
+import FtVerifiedBadge from '../FtVerifiedBadge/FtVerifiedBadge.vue'
 import WatchVideoDownloadPrompt from '../WatchVideoDownloadPrompt/WatchVideoDownloadPrompt.vue'
 import { vSaferHtml } from '../../directives/vSaferHtml.js'
 

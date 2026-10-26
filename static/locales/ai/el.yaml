@@ -185,6 +185,7 @@ Subscriptions:
   Newest First: Νεότερα πρώτα
   Oldest First: Παλαιότερα πρώτα
 Trending:
+  Music: Μουσική
   Load Error: Δεν ήταν δυνατή η φόρτωση των τάσεων.
   Unsupported Backend: Οι τάσεις απαιτούν το Τοπικό API. Επιλέξτε το Τοπικό API ή ενεργοποιήστε την εφεδρική χρήση συστήματος υποστήριξης.
 Most Popular Feed Empty: Η ροή «Δημοφιλέστερα» αυτού του στιγμιοτύπου Invidious είναι κενή.
@@ -1364,6 +1365,8 @@ Profile:
   Theme Color: Χρώμα θέματος
   Go To Profile Manager: Μετάβαση στη διαχείριση προφίλ
 Channel:
+  Verified: Επαληθευμένο
+  Official Artist Channel: Επίσημο κανάλι καλλιτέχνη
   About:
     Links: Σύνδεσμοι
   Subscription settings: Ρυθμίσεις συνδρομής
@@ -1385,7 +1388,10 @@ Channel:
   View All: Προβολή όλων
   Videos:
     This channel has videos but none could be displayed, try fetching more: "Αυτό το κανάλι έχει βίντεο, αλλά κανένα δεν μπόρεσε να εμφανιστεί. Δοκιμάστε να φορτώσετε περισσότερα"
+  Posts:
+    Original post unavailable: "Η αρχική ανάρτηση δεν είναι διαθέσιμη"
 Video:
+  Info panel source: 'Πηγή: {source}'
   External DRM Protected: "Τα βίντεο που προστατεύονται με DRM δεν μπορούν να αναπαραχθούν στο OpenTubeX, καθώς απαιτούν ιδιόκτητα εξαρτήματα κλειστού κώδικα."
   Invalid Media URL: "Μη έγκυρο URL πολυμέσων"
   Mark As Fully Watched: Σήμανση ως πλήρως προβληθέν
@@ -1935,6 +1941,7 @@ Description:
   Video Category: 'Κατηγορία βίντεο:'
   Video Tags: Ετικέτες βίντεο
   Games: Παιχνίδια
+  Music: Μουσική
 Tooltips:
   General Settings:
     Preferred Video Codec: Η αυτόματη επιλογή προτιμά αποκωδικοποίηση υλικού. Οι αλλαγές ισχύουν για το επόμενο βίντεο. Η προτίμηση κωδικοποιητή μπορεί να περιορίσει τις αναλύσεις· οι μη διαθέσιμοι αντικαθίστανται.
@@ -2287,6 +2294,11 @@ Form Inputs:
 Search Filters:
   Possible Age Restriction Hint: "Το YouTube ενδέχεται να έχει επιβάλει ηλικιακό περιορισμό σε αυτό το ερώτημα αναζήτησης."
   Cookie Search Failed: "Η αναζήτηση με τα ρυθμισμένα cookies απέτυχε."
+  Showing results for: "Εμφάνιση αποτελεσμάτων για {query}"
+  Search instead for: "Αναζήτηση για {query} αντί αυτού"
+  Including results for: "Συμπεριλαμβάνονται αποτελέσματα για {query}"
+  Search only for: "Αναζήτηση μόνο για {query}"
+  Did you mean: "Μήπως εννοούσατε {query};"
 
 Storage Startup Error:
   Title: "Δεν ήταν δυνατή η φόρτωση των δεδομένων της εφαρμογής"

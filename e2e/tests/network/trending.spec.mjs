@@ -116,6 +116,33 @@ test.describe('trending page', () => {
     await expect(page.locator('.ft-list-video').first()).toBeVisible({ timeout: 30_000 })
   })
 
+  test('shows the music chart for the selected region', async ({ page }) => {
+    // Keep the gaming tab pending, so its results don't trigger requests unrelated to the music chart
+    await controlTrendingRequests(page)
+    const chartsRequest = page.waitForRequest(request => (
+      request.url().includes('/youtubei/v1/browse') && request.postDataJSON()?.browseId === 'FEmusic_charts'
+    ))
+
+    await goTo(page, 'trending')
+    const musicTab = page.getByRole('tab', { name: 'Music' })
+    await musicTab.click()
+
+    // The charts ignore the session location, the region has to be selected explicitly
+    const body = (await chartsRequest).postDataJSON()
+    expect(body.context.client.clientName).toBe('WEB_REMIX')
+    expect(body.formData).toEqual({ selectedValues: [await page.evaluate(() => window.$store.getters.getRegion.toUpperCase())] })
+
+    await expect(musicTab).toHaveAttribute('aria-selected', 'true')
+    const videos = page.locator('#trendingPanel .ft-list-video')
+    await expect(videos.first()).toBeVisible({ timeout: 30_000 })
+    await expect(videos.first().locator('.videoDuration')).toBeVisible()
+
+    const cache = await trendingCache(page)
+    expect(cache.music.length).toBeGreaterThan(0)
+    await expect(videos.first().locator(`a[href^="#/watch/${cache.music[0]}"]`).first()).toBeVisible()
+    expect((await trendingTimestamps(page)).music).toEqual(expect.any(Number))
+  })
+
   test('keeps concurrent out-of-order category results with their requests', async ({ page }) => {
     const controlled = await controlTrendingRequests(page)
     const panel = page.locator('#trendingPanel')
@@ -129,6 +156,7 @@ test.describe('trending page', () => {
     expect(controlled.count('gaming')).toBe(1)
     expect(await trendingTimestamps(page)).toEqual({
       gaming: null,
+      music: null,
       sports: null,
       podcasts: null
     })
@@ -141,12 +169,14 @@ test.describe('trending page', () => {
 
     expect(await trendingCache(page)).toEqual({
       gaming: [videoIds.gaming],
+      music: null,
       sports: null,
       podcasts: null
     })
     await expect.poll(async () => (await trendingTimestamps(page)).gaming).not.toBeNull()
     expect(await trendingTimestamps(page)).toEqual({
       gaming: expect.any(Number),
+      music: null,
       sports: null,
       podcasts: null
     })
@@ -158,11 +188,13 @@ test.describe('trending page', () => {
     await expect.poll(async () => (await trendingCache(page)).sports).toEqual([videoIds.sports])
     expect(await trendingCache(page)).toEqual({
       gaming: [videoIds.gaming],
+      music: null,
       sports: [videoIds.sports],
       podcasts: null
     })
     expect(await trendingTimestamps(page)).toEqual({
       gaming: expect.any(Number),
+      music: null,
       sports: expect.any(Number),
       podcasts: null
     })
@@ -199,6 +231,7 @@ test.describe('trending page', () => {
     await expect(panel.locator('[data-tab-loading-indicator]')).toBeVisible()
     expect(await trendingCache(page)).toEqual({
       gaming: null,
+      music: null,
       sports: null,
       podcasts: null
     })
@@ -207,6 +240,7 @@ test.describe('trending page', () => {
     await expect(panel.locator('.ft-list-video')).toContainText('sports request result')
     expect(await trendingCache(page)).toEqual({
       gaming: null,
+      music: null,
       sports: [videoIds.sports],
       podcasts: null
     })
@@ -240,6 +274,7 @@ test.describe('trending page', () => {
       expect(controlled.total()).toBe(0)
       expect(await trendingTimestamps(page)).toEqual({
         gaming: null,
+        music: null,
         sports: null,
         podcasts: null
       })

@@ -187,6 +187,7 @@ Subscriptions:
   Posts:
     RSS Message: YouTube không cung cấp nguồn cấp RSS cho bài đăng. Tắt cài đặt "{rssSetting}" để xem bài đăng hoặc bật cài đặt "{hideSetting}" để ẩn thẻ này.
 Trending:
+  Music: Âm nhạc
   Load Error: Không thể tải nội dung thịnh hành.
   Unsupported Backend: Nội dung thịnh hành cần Local API. Hãy chọn Local API hoặc bật phương án dự phòng cho dịch vụ nền.
 Most Popular Feed Empty: Bảng tin Phổ biến nhất của máy chủ Invidious này đang trống.
@@ -1379,6 +1380,8 @@ Profile:
   Theme Color: Màu chủ đề
   Go To Profile Manager: Đi đến trình quản lý hồ sơ
 Channel:
+  Verified: Đã xác minh
+  Official Artist Channel: Kênh nghệ sĩ chính thức
   About:
     Links: Liên kết
   Subscription settings: Cài đặt đăng ký
@@ -1400,7 +1403,10 @@ Channel:
   View All: Xem tất cả
   Videos:
     This channel has videos but none could be displayed, try fetching more: "Kênh này có video nhưng không thể hiển thị video nào. Hãy thử tải thêm"
+  Posts:
+    Original post unavailable: "Bài đăng gốc không khả dụng"
 Video:
+  Info panel source: 'Nguồn: {source}'
   External DRM Protected: "Không thể phát video được bảo vệ DRM trong OpenTubeX vì chúng yêu cầu các thành phần nguồn đóng độc quyền."
   Invalid Media URL: "URL phương tiện không hợp lệ"
   Mark As Fully Watched: Đánh dấu là đã xem hết
@@ -1949,6 +1955,7 @@ Description:
   Video Category: 'Danh mục video:'
   Video Tags: Thẻ video
   Games: Trò chơi
+  Music: Âm nhạc
 Tooltips:
   General Settings:
     Preferred Video Codec: Chế độ tự động ưu tiên giải mã phần cứng. Thay đổi áp dụng cho video tiếp theo. Tùy chọn codec có thể giới hạn độ phân giải; codec không có sẵn sẽ được thay thế.
@@ -2301,6 +2308,11 @@ Form Inputs:
 Search Filters:
   Possible Age Restriction Hint: "YouTube có thể đã áp dụng giới hạn độ tuổi cho truy vấn tìm kiếm này."
   Cookie Search Failed: "Tìm kiếm bằng cookie đã cấu hình thất bại."
+  Showing results for: "Đang hiển thị kết quả cho {query}"
+  Search instead for: "Thay vào đó, tìm kiếm {query}"
+  Including results for: "Bao gồm kết quả cho {query}"
+  Search only for: "Chỉ tìm kiếm {query}"
+  Did you mean: "Có phải bạn muốn tìm {query}?"
 
 Storage Startup Error:
   Title: "Không thể tải dữ liệu ứng dụng"

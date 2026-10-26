@@ -257,12 +257,14 @@ final class UploadNotifications {
         if (node instanceof JSONArray array) {
             for (int i = 0; i < array.length(); i++) collectPosts(array.get(i), posts, now);
         } else if (node instanceof JSONObject object) {
-            JSONObject post = object.optJSONObject("backstagePostRenderer");
+            // Like the foreground parser, notify about the shared post rather than the original inside it.
+            JSONObject shared = object.optJSONObject("sharedPostRenderer");
+            JSONObject post = shared != null ? shared : object.optJSONObject("backstagePostRenderer");
             if (post == null) post = object.optJSONObject("postRenderer");
             if (post != null) {
                 posts.put(new JSONObject()
                     .put("id", post.optString("postId"))
-                    .put("title", SubscriptionRefreshDownloadMetadata.label(post.optJSONObject("contentText")))
+                    .put("title", SubscriptionRefreshDownloadMetadata.label(post.optJSONObject(shared != null ? "content" : "contentText")))
                     .put("published", SubscriptionRefreshDownloadMetadata.published(
                         SubscriptionRefreshDownloadMetadata.label(post.optJSONObject("publishedTimeText")), now) * 1000));
                 return;

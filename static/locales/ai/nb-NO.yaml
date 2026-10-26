@@ -185,6 +185,7 @@ Subscriptions:
   Newest First: Nyeste først
   Oldest First: Eldste først
 Trending:
+  Music: Musikk
   Load Error: Populært innhold kunne ikke lastes inn.
   Unsupported Backend: Populært innhold krever Local API. Velg Local API, eller slå på bruk av reserveleverandør.
 Most Popular Feed Empty: Most Popular-strømmen for denne Invidious-instansen er tom.
@@ -1353,6 +1354,8 @@ Profile:
   The selected image could not be loaded: Det valgte bildet kunne ikke lastes inn
   Theme Color: Temafarge
 Channel:
+  Verified: Bekreftet
+  Official Artist Channel: Offisiell artistkanal
   About:
     Links: Lenker
   Subscription settings: Abonnementsinnstillinger
@@ -1371,7 +1374,10 @@ Channel:
   Channel Name Unavailable: Kanalnavnet er ikke tilgjengelig
   Search Result Types: Typer søkeresultater
   All Results: Alle
+  Posts:
+    Original post unavailable: "Det opprinnelige innlegget er ikke tilgjengelig"
 Video:
+  Info panel source: 'Kilde: {source}'
   External DRM Protected: "DRM-beskyttede videoer kan ikke bli avspilt i OpenTubeX, ettersom de krever proprietære komponenter med lukket kildekode."
   Invalid Media URL: "Ugyldig medie-URL"
   Mark As Fully Watched: Merk som ferdig sett
@@ -1914,6 +1920,7 @@ Description:
   Video Category: 'Videokategori:'
   Video Tags: Videoetiketter
   Games: Spill
+  Music: Musikk
 Tooltips:
   General Settings:
     Preferred Video Codec: Automatisk foretrekker maskinvaredekoding. Endringer gjelder fra neste video. Et kodekvalg kan begrense oppløsninger; utilgjengelige kodeker erstattes.
@@ -2262,6 +2269,11 @@ Form Inputs:
 Search Filters:
   Possible Age Restriction Hint: "YouTube kan ha satt en aldersgrense for dette søket."
   Cookie Search Failed: "Søk med de konfigurerte informasjonskapslene mislyktes."
+  Showing results for: "Viser resultater for {query}"
+  Search instead for: "Søk i stedet etter {query}"
+  Including results for: "Inkluderer resultater for {query}"
+  Search only for: "Søk bare etter {query}"
+  Did you mean: "Mente du {query}?"
 
 Storage Startup Error:
   Title: "Kunne ikke laste appdata"

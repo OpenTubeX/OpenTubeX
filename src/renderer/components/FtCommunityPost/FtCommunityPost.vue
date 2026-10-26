@@ -1,8 +1,8 @@
 <template>
   <div
-    class="ft-list-post ft-list-item outside"
+    class="ft-list-post"
     :appearance="appearance"
-    :class="{ list: listType === 'list', grid: listType !== 'list' }"
+    :class="embedded ? 'sharedPostCard' : ['ft-list-item', 'outside', { list: listType === 'list', grid: listType !== 'list' }]"
   >
     <div
       class="author-div"
@@ -122,9 +122,27 @@
       />
     </div>
     <div
+      v-else-if="postType === 'sharedPost'"
+    >
+      <FtCommunityPost
+        v-if="postContent.content"
+        :data="postContent.content"
+        :appearance="appearance"
+        :hide-forbidden-titles="hideForbiddenTitles"
+        embedded
+      />
+      <p
+        v-else
+        class="unavailablePost"
+      >
+        {{ '[' + $t('Channel.Posts.Original post unavailable') + ']' }}
+      </p>
+    </div>
+    <div
       class="bottomSection"
     >
       <span
+        v-if="voteCount != null"
         class="likeCount"
         :title="$t('Global.Counts.Like Count', {count: formattedVoteCount}, voteCount)"
         :aria-label="$t('Global.Counts.Like Count', {count: formattedVoteCount}, voteCount)"
@@ -156,7 +174,7 @@
           /> {{ formattedCommentCount }}</span>
       </router-link>
       <FtShareButton
-        v-if="!hideSharingActions"
+        v-if="!hideSharingActions && !embedded"
         :id="postId"
         share-target-type="Post"
         class="shareButton"
@@ -222,6 +240,11 @@ const props = defineProps({
     type: Boolean,
     default: false
   },
+  /** Renders the original post inside a shared post */
+  embedded: {
+    type: Boolean,
+    default: false
+  },
 })
 
 const { t } = useI18n()
@@ -259,6 +282,9 @@ const showMarkAsSeen = computed(() => {
 
 const dropdownOptions = computed(() => {
   const options = []
+  if (props.embedded) {
+    return options
+  }
   if (showMarkAsSeen.value) {
     options.push({
       label: t('Subscriptions.Mark As Seen'),
@@ -305,6 +331,7 @@ let authorThumbnail = ''
 let postContent = ''
 let author = ''
 let authorId = ''
+/** @type {number?} */
 let voteCount = 0
 /** @type {number?} */
 let commentCount = null
@@ -332,19 +359,6 @@ const publishedText = computed(() => {
 })
 
 function parseCommunityData() {
-  if ('backstagePostThreadRenderer' in props.data) {
-    postText = 'Shared post'
-    postType = 'text'
-
-    authorThumbnail = 'https://yt3.ggpht.com/ytc/AAUvwnjm-0qglHJkAHqLFsCQQO97G7cCNDuDLldsrn25Lg=s88-c-k-c0x00ffffff-no-rj'
-
-    if (!process.env.SUPPORTS_LOCAL_API || usesInvidiousApi(backendPreference.value)) {
-      authorThumbnail = youtubeImageUrlToInvidious(authorThumbnail)
-    }
-
-    return
-  }
-
   postText = autolinker.link(props.data.postText)
   postContent = props.data.postContent
   postId = props.data.postId

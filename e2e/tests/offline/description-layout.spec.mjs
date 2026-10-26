@@ -20,6 +20,7 @@ test.describe('description layout', () => {
   for (const { kind, metadata, selector, text } of [
     { kind: 'tags', metadata: { videoTags: ['first tag', 'second tag'] }, selector: '.videoTagLink', text: ['first tag', 'second tag'] },
     { kind: 'games', metadata: { videoGames: [{ title: 'Test game' }] }, selector: '.gameTitle', text: 'Test game' },
+    { kind: 'music', metadata: { videoMusicTracks: [{ title: 'Test song', artist: 'Test artist', album: '', license: '', thumbnail: '' }] }, selector: '.musicTrackTitle', text: 'Test song' },
     { kind: 'license', metadata: { license: 'Creative Commons license' }, selector: '.license', text: 'Creative Commons license' },
     { kind: 'content disclosures', metadata: { contentDisclosures: [{ label: 'Auto-dubbed', description: 'Automatically generated audio tracks.' }] }, selector: '.contentDisclosureHeader', text: 'Auto-dubbed' },
   ]) {
@@ -36,6 +37,7 @@ test.describe('description layout', () => {
         component.videoDescriptionHtml = ''
         component.videoTags = []
         component.videoGames = []
+        component.videoMusicTracks = []
         component.license = null
         component.contentDisclosures = []
         component.isLoading = false
@@ -50,7 +52,7 @@ test.describe('description layout', () => {
       await expect(card).toHaveClass(/short/)
       await expect(card.locator(selector)).toHaveText(text)
       await view.evaluate(component => {
-        Object.assign(component, { videoTags: [], videoGames: [], license: null, contentDisclosures: [] })
+        Object.assign(component, { videoTags: [], videoGames: [], videoMusicTracks: [], license: null, contentDisclosures: [] })
       })
       await expect(card).not.toHaveClass(/short/)
       await expect(card.locator('.descriptionStatus')).toHaveCount(0)
@@ -72,7 +74,7 @@ test.describe('description layout', () => {
       await scroller.evaluate(element => { element.scrollTop = element.scrollHeight })
       await expect.poll(() => scroller.evaluate(element => element.scrollTop)).toBeGreaterThan(0)
       await view.evaluate(component => {
-        Object.assign(component, { videoTags: [], videoGames: [], license: null, contentDisclosures: [] })
+        Object.assign(component, { videoTags: [], videoGames: [], videoMusicTracks: [], license: null, contentDisclosures: [] })
       })
       await expect(card).not.toHaveClass(/short/)
       await expect(card.locator('.descriptionStatus')).toHaveCount(0)
@@ -127,6 +129,7 @@ test.describe('description layout', () => {
       component.videoDescriptionHtml = ''
       component.videoTags = ['first tag']
       component.videoGames = []
+      component.videoMusicTracks = []
       component.license = null
       component.contentDisclosures = []
     })
@@ -134,10 +137,13 @@ test.describe('description layout', () => {
     await expect(card).toHaveClass(/short/)
 
     // Keep the card mounted while exercising real link clicks and bubbling.
-    for (const selector of ['.videoTagLink', '.game']) {
+    for (const selector of ['.videoTagLink', '.game', '.musicTrackTitle']) {
       await view.evaluate((component, selector) => {
         component.videoTags = selector === '.videoTagLink' ? ['first tag'] : []
         component.videoGames = selector === '.game' ? [{ title: 'Test game', channelId: 'UC-test-game' }] : []
+        component.videoMusicTracks = selector === '.musicTrackTitle'
+          ? [{ title: 'Test song', artist: '', album: '', license: '', thumbnail: '', videoId: 'jNQXAC9IVRw' }]
+          : []
       }, selector)
       const link = card.locator(selector)
       await link.evaluate(element => element.addEventListener('click', event => event.preventDefault(), { once: true, capture: true }))
@@ -157,6 +163,38 @@ test.describe('description layout', () => {
 
     await card.locator('.description').click({ position: { x: 10, y: 10 } })
     await expect(card).not.toHaveClass(/short/)
+  })
+
+  test('links credited songs to their videos and artists to their channels', async ({ app, page }) => {
+    await mockUnplayableWatchPage(app, page)
+    await goTo(page, 'history')
+    await openHistoryEntry(page)
+    const view = await watchViewHandle(page)
+    await view.evaluate(component => {
+      component.videoDescription = 'A short description.'
+      component.videoDescriptionHtml = ''
+      component.videoMusicTracks = [
+        { title: 'Linked song', artist: 'Linked artist', album: 'Linked album', license: 'Test label', thumbnail: '', videoId: 'jNQXAC9IVRw', channelId: 'UC4QobU6STFB0P71PMvOGN5A' },
+        { title: 'Unlinked song', artist: 'Unlinked artist', album: '', license: '', thumbnail: '' }
+      ]
+    })
+    const card = page.locator('.videoDescription').visible()
+    await card.locator(':scope > .descriptionStatus').click()
+    await expect(card.locator('.musicHeading')).toHaveText('Music')
+
+    const [linked, unlinked] = [card.locator('.musicTrack').nth(0), card.locator('.musicTrack').nth(1)]
+    await expect(linked.locator('a.musicTrackTitle')).toHaveAttribute('href', '#/watch/jNQXAC9IVRw')
+    await expect(linked.locator('a.musicTrackArtist')).toHaveAttribute('href', '#/channel/UC4QobU6STFB0P71PMvOGN5A')
+    await expect(linked.locator('.musicTrackDetail')).toHaveText(['Linked album', 'Test label'])
+    await expect(unlinked.locator('a')).toHaveCount(0)
+    await expect(unlinked.locator('.musicTrackTitle')).toHaveText('Unlinked song')
+    await expect(unlinked.locator('.musicTrackArtist')).toHaveText('Unlinked artist')
+    await expect(unlinked.locator('.musicTrackDetail')).toHaveCount(0)
+
+    await page.evaluate(() => window.$store.dispatch('updateDisableChannelLinks', true))
+    await expect(linked.locator('a.musicTrackArtist')).toHaveCount(0)
+    await expect(linked.locator('.musicTrackArtist')).toHaveText('Linked artist')
+    await expect(linked.locator('a.musicTrackTitle')).toHaveAttribute('href', '#/watch/jNQXAC9IVRw')
   })
 
   test('keeps description controls below open toolbar dropdowns', { tag: '@scale' }, async ({ app, page, uiScale }) => {
@@ -210,6 +248,7 @@ test.describe('description layout', () => {
       component.videoDescriptionHtml = ''
       component.videoTags = []
       component.videoGames = []
+      component.videoMusicTracks = []
       component.license = null
       component.contentDisclosures = []
       component.isLoading = false

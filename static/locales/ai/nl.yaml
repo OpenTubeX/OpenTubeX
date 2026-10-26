@@ -187,6 +187,7 @@ Subscriptions:
   Posts:
     RSS Message: YouTube biedt geen RSS-feeds voor berichten. Schakel de instelling "{rssSetting}" uit om berichten te bekijken of schakel de instelling "{hideSetting}" in om dit tabblad te verbergen.
 Trending:
+  Music: Muziek
   Load Error: Trending kan niet worden geladen.
   Unsupported Backend: Voor Trending is de Local API vereist. Selecteer de Local API of schakel terugvallen op een andere backend in.
 Most Popular Feed Empty: De feed Populairst van deze Invidious-instantie is leeg.
@@ -1389,6 +1390,8 @@ Profile:
   Theme Color: Themakleur
   Go To Profile Manager: Naar profielbeheer
 Channel:
+  Verified: Geverifieerd
+  Official Artist Channel: Officieel artiestenkanaal
   About:
     Links: Links
   Subscription settings: Abonnementsinstellingen
@@ -1410,7 +1413,10 @@ Channel:
   View All: Alles bekijken
   Videos:
     This channel has videos but none could be displayed, try fetching more: "Dit kanaal heeft video’s, maar er konden er geen worden weergegeven. Probeer er meer te laden"
+  Posts:
+    Original post unavailable: "Oorspronkelijk bericht niet beschikbaar"
 Video:
+  Info panel source: 'Bron: {source}'
   External DRM Protected: "Video's die beschermd worden door DRM kunnen niet worden afgespeeld in OpenTubeX omdat ze propriëtaire onderdelen met gesloten broncode vereisen."
   Invalid Media URL: "Ongeldige media-URL"
   Mark As Fully Watched: Markeren als volledig bekeken
@@ -1968,6 +1974,7 @@ Description:
   Video Category: 'Videocategorie:'
   Video Tags: Videotags
   Games: Games
+  Music: Muziek
 Tooltips:
   General Settings:
     Preferred Video Codec: Automatisch geeft de voorkeur aan hardwaredecodering. Wijzigingen gelden vanaf de volgende video. Een codecvoorkeur kan resoluties beperken; niet-beschikbare codecs worden vervangen.
@@ -2322,6 +2329,11 @@ Form Inputs:
 Search Filters:
   Possible Age Restriction Hint: "YouTube heeft mogelijk een leeftijdsbeperking ingesteld voor deze zoekopdracht."
   Cookie Search Failed: "Zoeken met de ingestelde cookies is mislukt."
+  Showing results for: "Resultaten voor {query} worden weergegeven"
+  Search instead for: "In plaats daarvan zoeken naar {query}"
+  Including results for: "Inclusief resultaten voor {query}"
+  Search only for: "Alleen zoeken naar {query}"
+  Did you mean: "Bedoelde je {query}?"
 
 Storage Startup Error:
   Title: "Appgegevens konden niet worden geladen"

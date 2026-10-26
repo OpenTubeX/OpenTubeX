@@ -185,6 +185,7 @@ Subscriptions:
   Newest First: "Ar re nevesañ da gentañ"
   Oldest First: "Ar re goshañ da gentañ"
 Trending:
+  Music: Sonerezh
   Load Error: "N'eus ket bet gallet kargañ ar re diouzh ar c'hiz."
   Unsupported Backend: "Ezhomm ez eus eus an API lec'hel evit ar re diouzh ar c'hiz. Dibabit an API lec'hel pe gweredekait an diskoulm backend erlec'hiañ."
 Most Popular Feed Empty: "Goullo eo gwazh «Ar muiañ a verzh» an istañs Invidious-mañ."
@@ -1354,6 +1355,8 @@ Profile:
   The selected image could not be loaded: "N'eus ket bet gallet kargañ ar skeudenn diuzet"
   Theme Color: "Liv an neuz"
 Channel:
+  Verified: Gwiriet
+  Official Artist Channel: Chadenn ofisiel an arzour
   About:
     Links: Liammoù
   Subscription settings: Arventennoù ar c'houmanant
@@ -1372,7 +1375,10 @@ Channel:
   Channel Name Unavailable: "N'eo ket hegerz anv ar chadenn"
   Search Result Types: "Doareoù disoc'hoù enklask"
   All Results: "Pep tra"
+  Posts:
+    Original post unavailable: "N'eo ket hegerz an embann orin"
 Video:
+  Info panel source: 'Mammenn: {source}'
   External DRM Protected: "Ne c'heller ket lenn ar videoioù gwarezet gant DRM war OpenTubeX, peogwir e vije ezhomm implijout elfennoù perc'hennet gant gwirioù ha n'int ket digor."
   Invalid Media URL: "URL media didalvoudek"
   Mark As Fully Watched: Merkañ evel gwelet penn-da-benn
@@ -1919,6 +1925,7 @@ Description:
   Video Category: "Rummad ar video:"
   Video Tags: "Tikedennoù ar video"
   Games: "C'hoarioù"
+  Music: Sonerezh
 Tooltips:
   General Settings:
     Preferred Video Codec: Ar mod emgefreek a ro lañs d'an digodañ dre beriant. Ar c'hemmoù a vo arloet d'ar video da-heul. Dibab ur c'hodek a c'hall bevenniñ an diarunusted; kodekoù all a vez implijet ma n'int ket hegerz.
@@ -2265,6 +2272,11 @@ Form Inputs:
 Search Filters:
   Possible Age Restriction Hint: "YouTube en deus marteze lakaet un harz oad war ar goulenn klask-mañ."
   Cookie Search Failed: "Cʼhwitet eo ar cʼhlask gant an toupinoù kefluniet."
+  Showing results for: "O tiskouez disoc'hoù evit {query}"
+  Search instead for: "Klask {query} kentoc'h"
+  Including results for: "En ur lakaat disoc'hoù evit {query}"
+  Search only for: "Klask {query} hepken"
+  Did you mean: "Ha soñjal a raes e {query}?"
 
 Storage Startup Error:
   Title: "N'eus ket bet gallet kargañ roadennoù an arload"

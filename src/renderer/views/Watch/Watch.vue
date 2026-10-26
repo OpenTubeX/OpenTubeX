@@ -261,6 +261,10 @@
                         alt=""
                       />
                       <span dir="auto">{{ channelName }}</span>
+                      <FtVerifiedBadge
+                        :verified="channelVerified"
+                        :artist="channelVerifiedArtist"
+                      />
                     </component>
                     <FtSubscribeButton
                       v-if="!hideUnsubscribeButton"
@@ -447,6 +451,10 @@
                   alt=""
                 />
                 <span dir="auto">{{ channelName }}</span>
+                <FtVerifiedBadge
+                  :verified="channelVerified"
+                  :artist="channelVerifiedArtist"
+                />
               </component>
               <FtSubscribeButton
                 v-if="!hideUnsubscribeButton"
@@ -697,6 +705,8 @@
               :title="videoTitle"
               :channel-id="channelId"
               :channel-name="channelName"
+              :channel-verified="channelVerified"
+              :channel-verified-artist="channelVerifiedArtist"
               :channel-thumbnail="channelThumbnail"
               :channel-collaborators="channelCollaborators"
               :published="videoPublished"
@@ -757,6 +767,11 @@
               @save-channel-subtitles-state="handleChannelSubtitlesStateManualSave"
               @save-channel-volume="handleChannelVolumeManualSave"
             />
+            <WatchVideoInfoPanels
+              v-if="shortsMetadataOpen && !isLoading && infoPanels"
+              :panels="infoPanels"
+              class="watchVideo"
+            />
             <watch-video-description
               v-if="shortsMetadataOpen && !isLoading && !hideVideoDescription"
               :description="videoDescription"
@@ -765,6 +780,7 @@
               :license="license"
               :content-disclosures="contentDisclosures"
               :games="videoGames"
+              :music-tracks="videoMusicTracks"
               always-expanded
               class="watchVideo"
               @timestamp-event="changeTimestamp"
@@ -853,6 +869,8 @@
           :title="videoTitle"
           :channel-id="channelId"
           :channel-name="channelName"
+          :channel-verified="channelVerified"
+          :channel-verified-artist="channelVerifiedArtist"
           :channel-thumbnail="channelThumbnail"
           :channel-collaborators="channelCollaborators"
           :published="videoPublished"
@@ -946,6 +964,11 @@
             />
           </template>
         </watch-video-info>
+        <WatchVideoInfoPanels
+          v-if="!isLoading && infoPanels && (!customShortsPlayerActive || fullscreenMetadataOpen)"
+          :panels="infoPanels"
+          class="watchVideo"
+        />
         <button
           v-if="phonePanelsEnabled && $store.getters.getNextQueuedVideo && !isLoading"
           type="button"
@@ -1002,6 +1025,7 @@
           :license="license"
           :content-disclosures="contentDisclosures"
           :games="videoGames"
+          :music-tracks="videoMusicTracks"
           preview-only
           class="watchVideo phoneDescriptionPreview"
           @expand="openPhonePanel('description')"
@@ -1021,6 +1045,7 @@
             :license="license"
             :content-disclosures="contentDisclosures"
             :games="videoGames"
+            :music-tracks="videoMusicTracks"
             :always-expanded="fullscreenMetadataOpen || phonePanelsEnabled"
             class="watchVideo"
             :class="{ theatreWatchVideo: useTheatreMode }"

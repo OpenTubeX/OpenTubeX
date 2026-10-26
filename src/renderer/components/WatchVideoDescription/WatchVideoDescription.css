@@ -203,13 +203,15 @@
   text-decoration: none;
 }
 
-.gamesHeading {
+.gamesHeading,
+.musicHeading {
   margin-block: 1em 0.5em;
   font-size: 17px;
   color: var(--primary-text-color);
 }
 
-.gameList {
+.gameList,
+.musicTrackList {
   margin: 0;
   padding: 0;
   list-style: none;
@@ -247,6 +249,51 @@
 .gameSubtitle {
   font-size: 14px;
   color: var(--secondary-text-color);
+}
+
+.musicTrack {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding-block: 6px;
+}
+
+.musicTrackArt {
+  flex-shrink: 0;
+  inline-size: 64px;
+  block-size: 64px;
+  object-fit: cover;
+  border-radius: calc(5px * var(--ui-roundness));
+}
+
+.musicTrackText {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  min-inline-size: 0;
+  overflow-wrap: anywhere;
+}
+
+.musicTrackTitle {
+  color: var(--primary-text-color);
+}
+
+.musicTrackArtist,
+.musicTrackDetail {
+  font-size: 14px;
+  color: var(--secondary-text-color);
+}
+
+.musicTrackTitle,
+.musicTrackArtist {
+  text-decoration: none;
+}
+
+.musicTrackTitle[href]:hover,
+.musicTrackArtist[href]:hover,
+.musicTrackTitle[href]:focus-visible,
+.musicTrackArtist[href]:focus-visible {
+  text-decoration: underline;
 }
 
 .contentDisclosureSection {

@@ -69,6 +69,11 @@ Search Listing:
 Search Filters:
   Possible Age Restriction Hint: "Es posible que YouTube haya aplicado una restricción de edad a esta búsqueda."
   Cookie Search Failed: "La búsqueda con las cookies configuradas falló."
+  Showing results for: "Mostrando resultados de {query}"
+  Search instead for: "Buscar {query} en su lugar"
+  Including results for: "Incluye resultados de {query}"
+  Search only for: "Buscar solo {query}"
+  Did you mean: "¿Quisiste decir {query}?"
   Features:
     360 Video: Video 360
     VR180: VR180
@@ -197,6 +202,7 @@ Subscriptions:
   Posts:
     RSS Message: YouTube no proporciona fuentes RSS para las publicaciones. Desactivá el ajuste "{rssSetting}" para ver las publicaciones o activá el ajuste "{hideSetting}" para ocultar esta pestaña.
 Trending:
+  Music: Música
   Load Error: No se pudo cargar Tendencias.
   Unsupported Backend: Tendencias requiere la API local. Seleccioná la API local o activá la fuente alternativa del backend.
 Most Popular Feed Empty: El canal de contenido más popular de esta instancia de Invidious está vacío.
@@ -1542,6 +1548,8 @@ Profile:
   Open Profile Dropdown: Abrir el desplegable del Perfil
   Go To Profile Manager: Ir al administrador de perfiles
 Channel:
+  Verified: Verificado
+  Official Artist Channel: Canal oficial de artista
   Subscription settings: Configuración de la suscripción
   Failed to save subscription settings: No se pudo guardar la configuración del canal
   Videos per day: Videos por día
@@ -1618,7 +1626,9 @@ Channel:
     Reveal Answers: Revelar las respuestas
     Hide Answers: Ocultar las respuestas
     Video hidden by OpenTubeX: Video oculto por OpenTubeX
+    Original post unavailable: "La publicación original no está disponible"
 Video:
+  Info panel source: 'Fuente: {source}'
   External DRM Protected: "Los videos restringidos con DRM no pueden reproducirse en OpenTubeX, dado que requieren componentes propietarios de fuente cerrada."
   Invalid Media URL: "URL de contenido multimedia no válida"
   Mark As Fully Watched: Marcar como visto por completo
@@ -2351,6 +2361,7 @@ Description:
   Video Category: 'Categoría del video:'
   Video Tags: Etiquetas del video
   Games: Juegos
+  Music: Música
 Tooltips:
   General Settings:
     Preferred Video Codec: El modo automático prefiere la decodificación por hardware. Los cambios se aplican al siguiente video. La preferencia de códec puede limitar las resoluciones; los códecs no disponibles se reemplazan.

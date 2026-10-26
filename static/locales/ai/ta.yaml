@@ -66,6 +66,11 @@ Search Listing:
 Search Filters:
   Possible Age Restriction Hint: "YouTube இந்தத் தேடல் வினவலுக்கு வயதுக் கட்டுப்பாடு விதித்திருக்கலாம்."
   Cookie Search Failed: "கட்டமைக்கப்பட்ட குக்கிகளுடன் தேடல் தோல்வியடைந்தது."
+  Showing results for: "{query} க்கான முடிவுகள் காட்டப்படுகின்றன"
+  Search instead for: "அதற்குப் பதிலாக {query} ஐத் தேடு"
+  Including results for: "{query} க்கான முடிவுகளும் அடங்கும்"
+  Search only for: "{query} ஐ மட்டும் தேடு"
+  Did you mean: "{query} என்று சொல்ல வந்தீர்களா?"
   Prioritize:
     Prioritize: முன்னுரிமை அளி
 Stats:
@@ -192,6 +197,7 @@ Subscriptions:
   Posts:
     RSS Message: 'பதிவுகளுக்கு YouTube RSS ஊட்டங்களை வழங்குவதில்லை. பதிவுகளைக் காண "{rssSetting}" அமைப்பை முடக்கவும் அல்லது இந்தத் தாவலை மறைக்க "{hideSetting}" அமைப்பை இயக்கவும்.'
 Trending:
+  Music: இசை
   Load Error: பிரபலமானவற்றை ஏற்ற முடியவில்லை.
   Unsupported Backend: பிரபலமானவற்றுக்கு Local API தேவை. Local API-ஐத் தேர்ந்தெடுக்கவும் அல்லது பின்தள மாற்றுவழியை இயக்கவும்.
 Most Popular Feed Empty: இந்த Invidious நிகழ்வின் மிகவும் பிரபலமானவை ஊட்டம் காலியாக உள்ளது.
@@ -1387,6 +1393,8 @@ Profile:
   Theme Color: அலங்கார நிறம்
   Go To Profile Manager: சுயவிவர மேலாளருக்குச் செல்
 Channel:
+  Verified: சரிபார்க்கப்பட்டது
+  Official Artist Channel: அதிகாரப்பூர்வ கலைஞர் சேனல்
   About:
     Links: இணைப்புகள்
   Subscription settings: சந்தா அமைப்புகள்
@@ -1408,7 +1416,10 @@ Channel:
   View All: அனைத்தையும் பார்
   Videos:
     This channel has videos but none could be displayed, try fetching more: "இந்தச் சேனலில் காணொளிகள் உள்ளன, ஆனால் எதையும் காட்ட முடியவில்லை. மேலும் காணொளிகளை ஏற்ற முயற்சிக்கவும்"
+  Posts:
+    Original post unavailable: "அசல் இடுகை கிடைக்கவில்லை"
 Video:
+  Info panel source: 'மூலம்: {source}'
   External DRM Protected: "டி.ஆர்.எம் பாதுகாக்கப்பட்ட வீடியோக்களை OpenTubeX-இல் இயக்க முடியாது, ஏனெனில் அவற்றுக்கு தனியுரிம, மூடிய மூல கூறுகள் தேவைப்படுகின்றன."
   Invalid Media URL: "தவறான ஊடக URL"
   Mark As Fully Watched: முழுமையாகப் பார்த்ததாகக் குறி
@@ -1964,6 +1975,7 @@ Description:
   Video Category: 'காணொளி வகை:'
   Video Tags: காணொளிக் குறிச்சொற்கள்
   Games: விளையாட்டுகள்
+  Music: இசை
 Tooltips:
   General Settings:
     Preferred Video Codec: தானியங்கு முறை வன்பொருள் குறிவிலக்கத்தை விரும்புகிறது. மாற்றங்கள் அடுத்த வீடியோவிற்குப் பொருந்தும். கோடெக் விருப்பம் தெளிவுத்திறன்களைக் கட்டுப்படுத்தலாம்; கிடைக்காத கோடெக்குகளுக்கு மாற்று பயன்படுத்தப்படும்.

@@ -78,7 +78,10 @@
             v-if="showChannelAvatar"
             :thumbnail="channelThumbnail"
           />
-          <span class="channelNameText">{{ playlistMetadata.channelName }}</span>
+          <span class="channelNameText">{{ playlistMetadata.channelName }}<FtVerifiedBadge
+            :verified="data.authorVerified"
+            :artist="data.authorVerifiedArtist"
+          /></span>
         </RouterLink>
         <bdi
           v-else
@@ -88,7 +91,10 @@
             v-if="showChannelAvatar"
             :thumbnail="channelThumbnail"
           />
-          <span class="channelNameText">{{ playlistMetadata.channelName }}</span>
+          <span class="channelNameText">{{ playlistMetadata.channelName }}<FtVerifiedBadge
+            :verified="data.authorVerified"
+            :artist="data.authorVerifiedArtist"
+          /></span>
         </bdi>
       </div>
       <div class="buttonStack playlistButtonStack">
@@ -129,6 +135,7 @@ import { useI18n } from 'vue-i18n'
 import FtChannelAvatar from '../FtChannelAvatar/FtChannelAvatar.vue'
 import FtIconButton from '../FtIconButton/FtIconButton.vue'
 import WatchVideoDownloadPrompt from '../WatchVideoDownloadPrompt/WatchVideoDownloadPrompt.vue'
+import FtVerifiedBadge from '../FtVerifiedBadge/FtVerifiedBadge.vue'
 
 import store from '../../store/index'
 

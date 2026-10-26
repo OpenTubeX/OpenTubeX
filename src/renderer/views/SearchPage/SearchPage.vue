@@ -16,6 +16,46 @@
         {{ t("Search Filters.Search Results") }}
       </h2>
       <div
+        v-if="searchCorrection"
+        class="searchCorrection"
+        role="status"
+      >
+        <I18nT
+          v-if="searchCorrection.type === 'didYouMean'"
+          keypath="Search Filters.Did you mean"
+          tag="p"
+          scope="global"
+        >
+          <template #query>
+            <RouterLink :to="getSearchRoute(searchCorrection.correctedQuery, true)">
+              <strong>{{ searchCorrection.correctedQuery }}</strong>
+            </RouterLink>
+          </template>
+        </I18nT>
+        <template v-else>
+          <I18nT
+            :keypath="searchCorrection.type === 'showingResultsFor' ? 'Search Filters.Showing results for' : 'Search Filters.Including results for'"
+            tag="p"
+            scope="global"
+          >
+            <template #query>
+              <strong>{{ searchCorrection.correctedQuery }}</strong>
+            </template>
+          </I18nT>
+          <I18nT
+            :keypath="searchCorrection.type === 'showingResultsFor' ? 'Search Filters.Search instead for' : 'Search Filters.Search only for'"
+            tag="p"
+            scope="global"
+          >
+            <template #query>
+              <RouterLink :to="getSearchRoute(processedQuery, false)">
+                {{ processedQuery }}
+              </RouterLink>
+            </template>
+          </I18nT>
+        </template>
+      </div>
+      <div
         v-if="searchNotice"
         class="searchNotice"
         role="status"
@@ -101,8 +141,8 @@
 <script setup>
 import { FtIcon } from '@opentubex/icons'
 import { computed, onMounted, ref, shallowRef, watch } from 'vue'
-import { useI18n } from 'vue-i18n'
-import { useRoute } from 'vue-router'
+import { Translation as I18nT, useI18n } from 'vue-i18n'
+import { RouterLink, useRoute } from 'vue-router'
 
 import FtLoader from '../../components/FtLoader/FtLoader.vue'
 import FtCard from '../../components/ft-card/ft-card.vue'
@@ -151,6 +191,9 @@ const nextPageRef = shallowRef(null)
 const shownResults = shallowRef([])
 const paginationRevision = ref(0)
 const searchNotice = shallowRef(null)
+/** @type {import('vue').ShallowRef<import('../../helpers/search-correction').SearchCorrection | null>} */
+const searchCorrection = shallowRef(null)
+const spellCorrection = ref(true)
 const searchParams = ref('')
 const isRetryingWithCookies = ref(false)
 const cookieSearchFailed = ref(false)
@@ -218,6 +261,18 @@ function getRouteSearchSettings() {
   }
 }
 
+/**
+ * @param {string} searchQuery
+ * @param {boolean} useSpellCorrection
+ */
+function getSearchRoute(searchQuery, useSpellCorrection) {
+  const { spellCorrection: _, ...filters } = route.query
+  return {
+    path: `/search/${encodeURIComponent(searchQuery)}`,
+    query: useSpellCorrection ? filters : { ...filters, spellCorrection: 'false' }
+  }
+}
+
 watch(shownResults, () => {
   paginationRevision.value++
 })
@@ -229,7 +284,8 @@ watch(route, () => {
   const payload = {
     query: query_,
     options: {},
-    searchSettings: searchSettings
+    searchSettings: searchSettings,
+    spellCorrection: route.query.spellCorrection !== 'false'
   }
 
   query.value = query_
@@ -244,7 +300,8 @@ watch(showFamilyFriendlyOnly, (enabled) => {
     checkSearchCache({
       query: processedQuery.value,
       options: {},
-      searchSettings: getRouteSearchSettings()
+      searchSettings: getRouteSearchSettings(),
+      spellCorrection: route.query.spellCorrection !== 'false'
     })
   }
 })
@@ -259,7 +316,8 @@ onMounted(() => {
   const payload = {
     query: processedQuery.value,
     options: {},
-    searchSettings: searchSettings.value
+    searchSettings: searchSettings.value,
+    spellCorrection: route.query.spellCorrection !== 'false'
   }
 
   checkSearchCache(payload)
@@ -285,6 +343,8 @@ function checkSearchCache(payload) {
   searchRequestId++
   localSearchCompleted.value = false
   searchNotice.value = null
+  searchCorrection.value = null
+  spellCorrection.value = payload.spellCorrection ?? true
   searchParams.value = ''
   cookieSearchFailed.value = false
   isRetryingWithCookies.value = false
@@ -304,7 +364,8 @@ function checkSearchCache(payload) {
   }
 
   const sameSearch = sessionSearchHistory.value.filter((search) => {
-    return search.query === payload.query && searchFiltersMatch(payload.searchSettings, search.searchSettings)
+    return search.query === payload.query && searchFiltersMatch(payload.searchSettings, search.searchSettings) &&
+      (search.spellCorrection ?? true) === spellCorrection.value
   })
 
   if (sameSearch.length > 0) {
@@ -340,11 +401,14 @@ async function performSearchLocal(payload) {
     const response = await getLocalSearchResults(
       payload.query,
       payload.searchSettings,
-      showFamilyFriendlyOnly.value
+      showFamilyFriendlyOnly.value,
+      undefined,
+      spellCorrection.value
     )
     if (requestId !== searchRequestId) return
     const { results, continuationData } = response
     searchNotice.value = response.searchNotice
+    searchCorrection.value = response.searchCorrection
     searchParams.value = response.searchParams
 
     apiUsed.value = 'local'
@@ -363,7 +427,9 @@ async function performSearchLocal(payload) {
       nextPageRef: nextPageRef.value ? extractLocalCacheableSearchContinuation(nextPageRef.value) : null,
       hasMoreResults: hasMoreResults.value,
       searchNotice: searchNotice.value,
+      searchCorrection: searchCorrection.value,
       searchParams: searchParams.value,
+      spellCorrection: spellCorrection.value,
       apiUsed: apiUsed.value
     }
 
@@ -440,6 +506,7 @@ async function getNextpageLocal(payload) {
       searchSettings: searchSettings.value,
       nextPageRef: nextPageRef.value ? extractLocalCacheableSearchContinuation(nextPageRef.value) : null,
       hasMoreResults: hasMoreResults.value,
+      spellCorrection: spellCorrection.value,
       apiUsed: apiUsed.value
     }
 
@@ -482,6 +549,8 @@ async function performSearchInvidious(payload, options = { resetSearchPage: fals
     hasMoreResults.value = results.length > 0
 
     apiUsed.value = 'invidious'
+    // A local correction notice doesn't apply to Invidious results, e.g. after a failed local continuation.
+    searchCorrection.value = null
 
     if (searchPage.value !== 1) {
       shownResults.value = shownResults.value.concat(results)
@@ -499,6 +568,10 @@ async function performSearchInvidious(payload, options = { resetSearchPage: fals
       searchSettings: searchSettings.value,
       searchPage: searchPage.value,
       hasMoreResults: hasMoreResults.value,
+      searchNotice: searchNotice.value,
+      searchCorrection: null,
+      searchParams: searchParams.value,
+      spellCorrection: spellCorrection.value,
       apiUsed: apiUsed.value
     }
 
@@ -568,6 +641,7 @@ function replaceShownResults(history) {
   apiUsed.value = history.apiUsed
   localSearchCompleted.value = history.apiUsed === 'local'
   searchNotice.value = history.searchNotice ?? null
+  searchCorrection.value = history.searchCorrection ?? null
   searchParams.value = history.searchParams ?? ''
   nextPageRef.value = history.nextPageRef ?? null
   hasMoreResults.value = history.hasMoreResults ?? (

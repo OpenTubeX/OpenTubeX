@@ -185,6 +185,7 @@ Subscriptions:
   Newest First: Terbaru dahulu
   Oldest First: Terlama dahulu
 Trending:
+  Music: Musik
   Load Error: Trending tidak dapat dimuat.
   Unsupported Backend: Trending memerlukan Local API. Pilih Local API atau aktifkan backend cadangan.
 Most Popular Feed Empty: Umpan Paling Populer pada instans Invidious ini kosong.
@@ -1357,6 +1358,8 @@ Profile:
   The selected image could not be loaded: Gambar yang dipilih tidak dapat dimuat
   Theme Color: Warna Tema
 Channel:
+  Verified: Terverifikasi
+  Official Artist Channel: Channel Artis Resmi
   About:
     Links: Tautan
   Subscription settings: Pengaturan langganan
@@ -1377,7 +1380,10 @@ Channel:
   All Results: Semua
   Videos:
     This channel has videos but none could be displayed, try fetching more: "Kanal ini memiliki video, tetapi tidak ada yang dapat ditampilkan. Coba muat lebih banyak"
+  Posts:
+    Original post unavailable: "Postingan asli tidak tersedia"
 Video:
+  Info panel source: 'Sumber: {source}'
   External DRM Protected: "Video yang dilindungi DRM tidak dapat diputar di OpenTubeX, karena memerlukan komponen sumber tertutup dan berpemilik."
   Invalid Media URL: "URL media tidak valid"
   Mark As Fully Watched: Tandai sebagai sudah ditonton sepenuhnya
@@ -1926,6 +1932,7 @@ Description:
   Video Category: 'Kategori Video:'
   Video Tags: Tag Video
   Games: Gim
+  Music: Musik
 Tooltips:
   General Settings:
     Preferred Video Codec: Mode otomatis mengutamakan dekode perangkat keras. Perubahan berlaku untuk video berikutnya. Pilihan codec dapat membatasi resolusi; codec yang tidak tersedia diganti.
@@ -2272,6 +2279,11 @@ Form Inputs:
 Search Filters:
   Possible Age Restriction Hint: "YouTube mungkin telah menerapkan batasan usia pada kueri pencarian ini."
   Cookie Search Failed: "Pencarian dengan cookie yang dikonfigurasi gagal."
+  Showing results for: "Menampilkan hasil untuk {query}"
+  Search instead for: "Telusuri {query} sebagai gantinya"
+  Including results for: "Termasuk hasil untuk {query}"
+  Search only for: "Hanya telusuri {query}"
+  Did you mean: "Mungkin maksud Anda {query}?"
 
 Storage Startup Error:
   Title: "Data aplikasi tidak dapat dimuat"

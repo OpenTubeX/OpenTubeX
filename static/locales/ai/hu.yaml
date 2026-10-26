@@ -185,6 +185,7 @@ Subscriptions:
   Newest First: Legújabb elöl
   Oldest First: Legrégebbi elöl
 Trending:
+  Music: Zene
   Load Error: A felkapott tartalmak nem tölthetők be.
   Unsupported Backend: A felkapott tartalmakhoz a Local API szükséges. Válassza a Local API-t, vagy engedélyezze a tartalék háttérszolgáltatást.
 Most Popular Feed Empty: Ennek az Invidious-példánynak üres a Legnépszerűbb hírfolyama.
@@ -1354,6 +1355,8 @@ Profile:
   The selected image could not be loaded: A kiválasztott kép nem tölthető be
   Theme Color: Téma színe
 Channel:
+  Verified: Ellenőrzött
+  Official Artist Channel: Hivatalos előadói csatorna
   About:
     Links: Hivatkozások
   Subscription settings: Feliratkozási beállítások
@@ -1372,7 +1375,10 @@ Channel:
   Channel Name Unavailable: A csatorna neve nem érhető el
   Search Result Types: Keresési találatok típusai
   All Results: Összes
+  Posts:
+    Original post unavailable: "Az eredeti bejegyzés nem érhető el"
 Video:
+  Info panel source: 'Forrás: {source}'
   External DRM Protected: "A DRM-védelemmel ellátott videók nem játszhatók le az OpenTubeX-ban, mivel ezekhez zárt forráskódú, tulajdonosi komponensekre van szükség."
   Invalid Media URL: "Érvénytelen média-URL"
   Mark As Fully Watched: Megjelölés teljesen megtekintettként
@@ -1911,6 +1917,7 @@ Description:
   Video Category: 'Videókategória:'
   Video Tags: Videócímkék
   Games: Játékok
+  Music: Zene
 Tooltips:
   General Settings:
     Preferred Video Codec: Az automatikus mód a hardveres dekódolást részesíti előnyben. A változások a következő videóra érvényesek. A kodekválasztás korlátozhatja a felbontásokat; a nem elérhető kodekeket másik helyettesíti.
@@ -2257,6 +2264,11 @@ Form Inputs:
 Search Filters:
   Possible Age Restriction Hint: "Előfordulhat, hogy a YouTube korhatárt állított be ehhez a keresési lekérdezéshez."
   Cookie Search Failed: "A keresés a beállított sütikkel sikertelen volt."
+  Showing results for: "Találatok a következőre: {query}"
+  Search instead for: "Keresés helyette erre: {query}"
+  Including results for: "A következő találatait is tartalmazza: {query}"
+  Search only for: "Csak erre keressen: {query}"
+  Did you mean: "Erre gondolt: {query}?"
 
 Storage Startup Error:
   Title: "Nem sikerült betölteni az alkalmazás adatait"

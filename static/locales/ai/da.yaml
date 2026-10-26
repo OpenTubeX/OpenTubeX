@@ -189,6 +189,7 @@ Subscriptions:
   Posts:
     RSS Message: YouTube tilbyder ikke RSS-feeds til opslag. Deaktivér indstillingen "{rssSetting}" for at se opslag, eller aktivér indstillingen "{hideSetting}" for at skjule denne fane.
 Trending:
+  Music: Musik
   Load Error: Populært indhold kunne ikke indlæses.
   Unsupported Backend: Populært indhold kræver Local API. Vælg Local API, eller slå reservebackend til.
 Most Popular Feed Empty: Denne Invidious-instans' feed med det mest populære indhold er tomt.
@@ -1410,6 +1411,8 @@ Profile:
   Theme Color: Temafarve
   Go To Profile Manager: Gå til profilhåndtering
 Channel:
+  Verified: Bekræftet
+  Official Artist Channel: Officiel kunstnerkanal
   About:
     Links: Links
   Subscription settings: Abonnementsindstillinger
@@ -1431,7 +1434,10 @@ Channel:
   View All: Vis alle
   Videos:
     This channel has videos but none could be displayed, try fetching more: "Denne kanal har videoer, men ingen kunne vises. Prøv at hente flere"
+  Posts:
+    Original post unavailable: "Det oprindelige opslag er ikke tilgængeligt"
 Video:
+  Info panel source: 'Kilde: {source}'
   External DRM Protected: "DRM-beskyttede videoer kan ikke afspilles i OpenTubeX, da de kræver proprietære komponenter med lukket kilde."
   Invalid Media URL: "Ugyldig medie-URL"
   Mark As Fully Watched: Markér som set til ende
@@ -1991,6 +1997,7 @@ Description:
   Video Category: 'Videokategori:'
   Video Tags: Videotags
   Games: Spil
+  Music: Musik
 Tooltips:
   General Settings:
     Preferred Video Codec: Automatisk foretrækker hardwareafkodning. Ændringer gælder fra næste video. Et codecvalg kan begrænse opløsninger; utilgængelige codecs erstattes.
@@ -2348,6 +2355,11 @@ Form Inputs:
 Search Filters:
   Possible Age Restriction Hint: "YouTube kan have aldersbegrænset denne søgeforespørgsel."
   Cookie Search Failed: "Søgning med de konfigurerede cookies mislykkedes."
+  Showing results for: "Viser resultater for {query}"
+  Search instead for: "Søg i stedet efter {query}"
+  Including results for: "Inkluderer resultater for {query}"
+  Search only for: "Søg kun efter {query}"
+  Did you mean: "Mente du {query}?"
 
 Storage Startup Error:
   Title: "Appdata kunne ikke indlæses"

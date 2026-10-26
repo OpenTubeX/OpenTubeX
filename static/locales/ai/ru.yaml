@@ -160,6 +160,7 @@ Subscriptions:
   Posts:
     RSS Message: YouTube не предоставляет RSS-ленты для публикаций. Отключите настройку «{rssSetting}», чтобы просматривать публикации, или включите настройку «{hideSetting}», чтобы скрыть эту вкладку.
 Trending:
+  Music: Музыка
   Load Error: Не удалось загрузить популярные видео.
   Unsupported Backend: Для просмотра популярных видео требуется Local API. Выберите Local API или разрешите использовать резервный бэкенд.
 Most Popular Feed Empty: Лента «Самое популярное» на этом экземпляре Invidious пуста.
@@ -1356,6 +1357,8 @@ Profile:
   Theme Color: Цвет темы
   Go To Profile Manager: Перейти к управлению профилями
 Channel:
+  Verified: Подтверждено
+  Official Artist Channel: Официальный канал исполнителя
   About:
     Links: Ссылки
   Subscription settings: Настройки подписки
@@ -1377,7 +1380,10 @@ Channel:
   View All: Показать все
   Videos:
     This channel has videos but none could be displayed, try fetching more: "На этом канале есть видео, но ни одно не удалось показать. Попробуйте загрузить ещё"
+  Posts:
+    Original post unavailable: "Исходная публикация недоступна"
 Video:
+  Info panel source: 'Источник: {source}'
   External DRM Protected: "Видео, защищенное DRM, не может быть воспроизведено в OpenTubeX, так как оно требует использования проприетарных компонентов с закрытым исходным кодом."
   Invalid Media URL: "Недопустимый URL медиа"
   Mark As Fully Watched: Отметить как полностью просмотренное
@@ -1927,6 +1933,7 @@ Description:
   Video Category: 'Категория видео:'
   Video Tags: Теги видео
   Games: Игры
+  Music: Музыка
 Tooltips:
   General Settings:
     Preferred Video Codec: Автоматический режим предпочитает аппаратное декодирование. Изменения действуют со следующего видео. Выбор кодека может ограничить разрешения; недоступные кодеки заменяются.
@@ -2280,6 +2287,11 @@ Form Inputs:
 Search Filters:
   Possible Age Restriction Hint: "Возможно, YouTube установил возрастное ограничение для этого поискового запроса."
   Cookie Search Failed: "Поиск с настроенными файлами cookie не удался."
+  Showing results for: "Показаны результаты по запросу {query}"
+  Search instead for: "Искать вместо этого {query}"
+  Including results for: "Включая результаты по запросу {query}"
+  Search only for: "Искать только {query}"
+  Did you mean: "Возможно, вы имели в виду {query}?"
 
 Storage Startup Error:
   Title: "Не удалось загрузить данные приложения"

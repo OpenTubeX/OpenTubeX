@@ -72,6 +72,11 @@ Search Listing:
 Search Filters:
   Possible Age Restriction Hint: "YouTube galėjo pritaikyti amžiaus apribojimą šiai paieškos užklausai."
   Cookie Search Failed: "Paieška su sukonfigūruotais slapukais nepavyko."
+  Showing results for: "Rodomi rezultatai pagal {query}"
+  Search instead for: "Vietoj to ieškoti {query}"
+  Including results for: "Įtraukiami rezultatai pagal {query}"
+  Search only for: "Ieškoti tik {query}"
+  Did you mean: "Ar turėjote omenyje {query}?"
   Prioritize:
     Prioritize: Teikti pirmenybę
     Popularity: Populiarumui
@@ -214,6 +219,7 @@ Subscriptions:
   Posts:
     RSS Message: YouTube neteikia įrašų RSS kanalų. Išjunkite nustatymą „{rssSetting}“, kad matytumėte įrašus, arba įjunkite nustatymą „{hideSetting}“, kad paslėptumėte šį skirtuką.
 Trending:
+  Music: Muzika
   Load Error: Nepavyko įkelti tendencijų.
   Unsupported Backend: Tendencijoms reikia Local API. Pasirinkite Local API arba įjunkite atsarginę serverio sąsają.
 Most Popular Feed Empty: Šio Invidious serverio „Populiariausių“ kanalas tuščias.
@@ -1638,6 +1644,8 @@ Profile:
   Open Profile Dropdown: Atverti profilio išskleidžiamąjį meniu
   Go To Profile Manager: Eiti į profilių tvarkytuvę
 Channel:
+  Verified: Patvirtinta
+  Official Artist Channel: Oficialus atlikėjo kanalas
   Subscription settings: Prenumeratos nustatymai
   Failed to save subscription settings: Nepavyko išsaugoti kanalo nustatymų
   Videos per day: Vaizdo įrašų per dieną
@@ -1691,9 +1699,11 @@ Channel:
     Reveal Answers: Rodyti atsakymus
     Hide Answers: Slėpti atsakymus
     Video hidden by OpenTubeX: Vaizdo įrašą paslėpė OpenTubeX
+    Original post unavailable: "Originalus įrašas nepasiekiamas"
   Videos:
     This channel has videos but none could be displayed, try fetching more: "Šiame kanale yra vaizdo įrašų, bet nė vieno nepavyko parodyti. Pabandykite įkelti daugiau"
 Video:
+  Info panel source: 'Šaltinis: {source}'
   External DRM Protected: "DRM apsaugotų vaizdo įrašų negalima leisti naudojant OpenTubeX, nes jiems reikia nuosavybinių uždarojo kodo komponentų."
   Invalid Media URL: "Neteisingas medijos URL"
   Mark As Fully Watched: Pažymėti kaip visiškai peržiūrėtą
@@ -2325,6 +2335,7 @@ Description:
   Video Category: 'Vaizdo įrašo kategorija:'
   Video Tags: Vaizdo įrašo žymos
   Games: Žaidimai
+  Music: Muzika
 Tooltips:
   General Settings:
     Preferred Video Codec: Automatinis režimas teikia pirmenybę aparatiniam dekodavimui. Pakeitimai taikomi kitam vaizdo įrašui. Kodeko pasirinkimas gali riboti raišką; nepasiekiami kodekai pakeičiami.

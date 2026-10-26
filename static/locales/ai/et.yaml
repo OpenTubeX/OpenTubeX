@@ -185,6 +185,7 @@ Subscriptions:
   Newest First: Uuemad ees
   Oldest First: Vanemad ees
 Trending:
+  Music: Muusika
   Load Error: Trende ei saanud laadida.
   Unsupported Backend: Trendide jaoks on vaja Local API-t. Valige Local API või lubage taustaprogrammi varuvariant.
 Most Popular Feed Empty: Selle Invidiousi eksemplari Most Populari voog on tühi.
@@ -1354,6 +1355,8 @@ Profile:
   The selected image could not be loaded: Valitud pilti ei õnnestunud laadida
   Theme Color: Kujunduse värv
 Channel:
+  Verified: Kinnitatud
+  Official Artist Channel: Ametlik esitaja kanal
   About:
     Links: Lingid
   Subscription settings: Tellimuse seaded
@@ -1372,7 +1375,10 @@ Channel:
   Channel Name Unavailable: Kanali nimi pole saadaval
   Search Result Types: Otsingutulemuste tüübid
   All Results: Kõik
+  Posts:
+    Original post unavailable: "Algne postitus pole saadaval"
 Video:
+  Info panel source: 'Allikas: {source}'
   External DRM Protected: "DRMiga kaitstud videoid ei saa OpenTubeXis esitada, kuna nende jaoks on vaja omanduslikke suletud lähtekoodiga komponente."
   Invalid Media URL: "Vigane meedia URL"
   Mark As Fully Watched: Märgi täielikult vaadatuks
@@ -1913,6 +1919,7 @@ Description:
   Video Category: 'Video kategooria:'
   Video Tags: Videosildid
   Games: Mängud
+  Music: Muusika
 Tooltips:
   General Settings:
     Preferred Video Codec: Automaatrežiim eelistab riistvaralist dekodeerimist. Muudatused rakenduvad järgmisele videole. Koodeki eelistus võib eraldusvõimeid piirata; puuduvad koodekid asendatakse.
@@ -2259,6 +2266,11 @@ Form Inputs:
 Search Filters:
   Possible Age Restriction Hint: "YouTube võib olla sellele otsingupäringule vanusepiirangu kehtestanud."
   Cookie Search Failed: "Otsing seadistatud küpsistega ebaõnnestus."
+  Showing results for: "Kuvatakse tulemused päringule {query}"
+  Search instead for: "Otsi hoopis {query}"
+  Including results for: "Sisaldab tulemusi päringule {query}"
+  Search only for: "Otsi ainult {query}"
+  Did you mean: "Kas mõtlesite {query}?"
 
 Storage Startup Error:
   Title: "Rakenduse andmeid ei saanud laadida"

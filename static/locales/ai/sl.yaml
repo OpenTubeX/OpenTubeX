@@ -92,6 +92,11 @@ Search Listing:
 Search Filters:
   Possible Age Restriction Hint: "YouTube je morda za to iskalno poizvedbo nastavil starostno omejitev."
   Cookie Search Failed: "Iskanje z nastavljenimi piškotki ni uspelo."
+  Showing results for: "Prikazani so rezultati za {query}"
+  Search instead for: "Namesto tega išči {query}"
+  Including results for: "Vključno z rezultati za {query}"
+  Search only for: "Išči samo {query}"
+  Did you mean: "Ste mislili {query}?"
   Features:
     360 Video: 360-stopinjski videoposnetek
   Clear Filters: Počisti filtre
@@ -223,6 +228,7 @@ Subscriptions:
   Posts:
     RSS Message: YouTube ne zagotavlja virov RSS za objave. Izklopite nastavitev »{rssSetting}«, če želite videti objave, ali vklopite nastavitev »{hideSetting}«, če želite skriti ta zavihek.
 Trending:
+  Music: Glasba
   Trending Tabs: Zavihki priljubljene vsebine
   Load Error: Priljubljene vsebine ni bilo mogoče naložiti.
   Unsupported Backend: Priljubljena vsebina zahteva Local API. Izberite Local API ali omogočite nadomestno zaledje.
@@ -1692,6 +1698,8 @@ Profile:
   Open Profile Dropdown: Odpri spustni meni profila
   Go To Profile Manager: Pojdi v upravitelja profilov
 Channel:
+  Verified: Preverjeno
+  Official Artist Channel: Uradni kanal izvajalca
   Subscription settings: Nastavitve naročnine
   Failed to save subscription settings: Nastavitev kanala ni bilo mogoče shraniti
   Videos per day: Videoposnetkov na dan
@@ -1744,9 +1752,11 @@ Channel:
     Reveal Answers: Prikaži odgovore
     Hide Answers: Skrij odgovore
     Video hidden by OpenTubeX: OpenTubeX je skril videoposnetek
+    Original post unavailable: "Izvirna objava ni na voljo"
   Videos:
     This channel has videos but none could be displayed, try fetching more: "Ta kanal ima videoposnetke, vendar nobenega ni bilo mogoče prikazati. Poskusite naložiti več"
 Video:
+  Info panel source: 'Vir: {source}'
   External DRM Protected: "Videoposnetkov z zaščito DRM ni mogoče predvajati v OpenTubeX, saj zahtevajo lastniške zaprtokodne komponente."
   Invalid Media URL: "Neveljaven URL predstavnosti"
   Mark As Fully Watched: Označi kot ogledano do konca
@@ -2405,6 +2415,7 @@ Description:
   Video Category: 'Kategorija videoposnetka:'
   Video Tags: Oznake videoposnetka
   Games: Igre
+  Music: Glasba
 Tooltips:
   General Settings:
     Preferred Video Codec: Samodejni način daje prednost strojnemu dekodiranju. Spremembe veljajo za naslednji video. Izbira kodeka lahko omeji ločljivosti; nedostopni kodeki se nadomestijo.

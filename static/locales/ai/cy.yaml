@@ -185,6 +185,7 @@ Subscriptions:
   Newest First: Mwyaf newydd yn gyntaf
   Oldest First: Hynaf yn gyntaf
 Trending:
+  Music: Cerddoriaeth
   Load Error: Nid oedd modd llwytho Trendio.
   Unsupported Backend: Mae angen yr API Lleol ar Trendio. Dewiswch yr API Lleol neu alluogi'r darparwr wrth gefn.
 Most Popular Feed Empty: Mae ffrwd Mwyaf Poblogaidd yr enghraifft Invidious hon yn wag.
@@ -1359,6 +1360,8 @@ Profile:
   Theme Color: Lliw'r thema
   Go To Profile Manager: Mynd i'r rheolwr proffiliau
 Channel:
+  Verified: Wedi’i ddilysu
+  Official Artist Channel: Sianel Artist Swyddogol
   About:
     Links: Dolenni
   Subscription settings: Gosodiadau tanysgrifiad
@@ -1379,7 +1382,10 @@ Channel:
   All Results: Pob un
   Videos:
     This channel has videos but none could be displayed, try fetching more: "Mae gan y sianel hon fideos ond ni ellid dangos yr un ohonynt. Ceisiwch lwytho mwy"
+  Posts:
+    Original post unavailable: "Nid yw'r postiad gwreiddiol ar gael"
 Video:
+  Info panel source: 'Ffynhonnell: {source}'
   External DRM Protected: "Nid oes modd chwarae fideos gwarchodedig DRM yn OpenTubeX, gan fod angen cydrannau ffynhonnell gaeedig perchnogol arnynt."
   Invalid Media URL: "URL cyfryngau annilys"
   Mark As Fully Watched: Marcio fel wedi ei wylio yn llawn
@@ -1937,6 +1943,7 @@ Description:
   Video Category: 'Categori fideo:'
   Video Tags: Tagiau fideo
   Games: Gemau
+  Music: Cerddoriaeth
 Tooltips:
   General Settings:
     Preferred Video Codec: Mae'r modd awtomatig yn ffafrio datgodio caledwedd. Mae newidiadau'n berthnasol i'r fideo nesaf. Gall dewis codec gyfyngu ar gydraniadau; defnyddir dewisiadau eraill os nad yw codec ar gael.
@@ -2287,6 +2294,11 @@ Form Inputs:
 Search Filters:
   Possible Age Restriction Hint: "Mae’n bosibl bod YouTube wedi gosod cyfyngiad oedran ar yr ymholiad chwilio hwn."
   Cookie Search Failed: "Methodd y chwiliad gyda’r cwcis wedi’u ffurfweddu."
+  Showing results for: "Yn dangos canlyniadau ar gyfer {query}"
+  Search instead for: "Chwilio am {query} yn lle hynny"
+  Including results for: "Yn cynnwys canlyniadau ar gyfer {query}"
+  Search only for: "Chwilio am {query} yn unig"
+  Did you mean: "Oeddech chi'n golygu {query}?"
 
 Storage Startup Error:
   Title: "Methu llwytho data'r ap"

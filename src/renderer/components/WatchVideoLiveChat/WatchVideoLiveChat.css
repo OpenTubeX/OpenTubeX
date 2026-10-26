@@ -651,3 +651,11 @@
 .card.hasError .titleContainer {
   margin-block-start: 0;
 }
+
+.chatContent .liveChatVerifiedBadge {
+  margin-inline: 0 5px;
+}
+
+.superChatAuthor .liveChatVerifiedBadge {
+  margin-inline: 0;
+}

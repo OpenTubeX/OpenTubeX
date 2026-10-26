@@ -187,6 +187,7 @@ Subscriptions:
   Posts:
     RSS Message: 'YouTube non fornece fontes RSS para as publicacións. Desactiva a opción "{rssSetting}" para ver as publicacións ou activa "{hideSetting}" para ocultar esta lapela.'
 Trending:
+  Music: Música
   Load Error: Non se puideron cargar as tendencias.
   Unsupported Backend: As tendencias requiren a API local. Selecciona a API local ou activa o servizo alternativo.
 Most Popular Feed Empty: A fonte «Máis populares» desta instancia de Invidious está baleira.
@@ -1381,6 +1382,8 @@ Profile:
   Theme Color: Cor do tema
   Go To Profile Manager: Ir ao xestor de perfís
 Channel:
+  Verified: Verificado
+  Official Artist Channel: Canle oficial de artista
   About:
     Links: Ligazóns
   Subscription settings: Configuración da subscrición
@@ -1402,7 +1405,10 @@ Channel:
   View All: Ver todo
   Videos:
     This channel has videos but none could be displayed, try fetching more: "Esta canle ten vídeos, pero non se puido mostrar ningún. Proba a cargar máis"
+  Posts:
+    Original post unavailable: "A publicación orixinal non está dispoñible"
 Video:
+  Info panel source: 'Fonte: {source}'
   External DRM Protected: "Os vídeos protexidos con DRM non se poden reproducir en OpenTubeX, xa que requiren compoñentes propietarios e de código pechado."
   Invalid Media URL: "URL multimedia non válida"
   Mark As Fully Watched: Marcar como visto por completo
@@ -1961,6 +1967,7 @@ Description:
   Video Category: 'Categoría do vídeo:'
   Video Tags: Etiquetas do vídeo
   Games: Xogos
+  Music: Música
 Tooltips:
   General Settings:
     Preferred Video Codec: O modo automático prefire a descodificación por hardware. Os cambios aplícanse ao seguinte vídeo. A preferencia de códec pode limitar as resolucións; os códecs non dispoñibles substitúense.
@@ -2313,6 +2320,11 @@ Form Inputs:
 Search Filters:
   Possible Age Restriction Hint: "É posible que YouTube aplicase unha restrición de idade a esta busca."
   Cookie Search Failed: "Fallou a busca coas cookies configuradas."
+  Showing results for: "Mostrando resultados de {query}"
+  Search instead for: "Buscar {query} no seu lugar"
+  Including results for: "Inclúe resultados de {query}"
+  Search only for: "Buscar só {query}"
+  Did you mean: "Quixeches dicir {query}?"
 
 Storage Startup Error:
   Title: "Non se puideron cargar os datos da aplicación"
