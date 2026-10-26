@@ -159,7 +159,6 @@ import {
   isCapacitorMobilePlayer,
   useMobileFullscreenGestures,
 } from './opentubex/useMobileFullscreenGestures'
-import { useSeekPreviewThumbnail } from './opentubex/useSeekPreviewThumbnail'
 import { useMusicVisualizer } from './opentubex/useMusicVisualizer'
 import { useScrollMiniPlayer } from './opentubex/useScrollMiniPlayer'
 import { useSecondaryCaptions } from './opentubex/useSecondaryCaptions'
@@ -3571,17 +3570,10 @@ export default defineComponent({
       },
     })
 
-    const visibleMobileSeekPreview = computed(() => store.getters.getShowMobileSeekPreview ? mobileSeekPreview.value : null)
-    const mobileSeekThumbnailStyle = useSeekPreviewThumbnail({
-      preview: visibleMobileSeekPreview,
-      getPlayer: () => player,
-      getVideoId: () => props.videoId,
-      loadImageDimensions,
-    })
-
-    watch(mobileSeekPreview, preview => {
+    watch([mobileSeekPreview, () => store.getters.getShowMobileSeekPreview], ([preview, showPreview]) => {
       ui?.getControls().dispatchEvent(new shaka.util.FakeEvent('seekpreviewchange', {
         time: preview?.time ?? null,
+        showPreview,
       }))
     })
 
@@ -11244,14 +11236,6 @@ export default defineComponent({
       mobileFullscreenSwipeSettling,
       mobileFullscreenSwipeStyle,
       mobileSeekPreview,
-      visibleMobileSeekPreview,
-      mobileSeekPreviewMessage: computed(() => {
-        const preview = mobileSeekPreview.value
-        if (!preview) return ''
-        const sign = preview.seconds < 0 ? '−' : '+'
-        return `${formatDurationAsTimestamp(preview.time)} (${sign}${formatDurationAsTimestamp(Math.abs(preview.seconds))})`
-      }),
-      mobileSeekThumbnailStyle,
       resetFullscreenDockHeights,
       handleFullscreenDockHeaderDoubleClick,
       handleFullscreenDockResizePointerDown,

@@ -152,6 +152,11 @@
   z-index: 0;
 }
 
+/* Touch drags never hover, and the filmstrip spans the pill's corner. */
+.ftVideoPlayer:has(:deep(.ft-seek-filmstrip-active)) .fullscreenActions {
+  visibility: hidden;
+}
+
 .ftVideoPlayer:fullscreen:has(:deep(.shaka-controls-container[shown='true'])) .fullscreenActions,
 .ftVideoPlayer.fullWindow:has(:deep(.shaka-controls-container[shown='true'])) .fullscreenActions,
 .ftVideoPlayer.shortsPlayer:fullscreen .fullscreenActions,
