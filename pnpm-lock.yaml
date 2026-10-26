@@ -233,8 +233,8 @@ importers:
         specifier: ^0.1.2
         version: 0.1.2(patch_hash=729c6071cbf0e196e2212b015677cdd162c287dca48137c24250c0d056c9fd5b)(@capacitor/core@8.5.3)
       '@capawesome/capacitor-screen-orientation':
-        specifier: ^8.0.3
-        version: 8.0.3(@capacitor/core@8.5.3)
+        specifier: ^8.0.4
+        version: 8.0.4(@capacitor/core@8.5.3)
       '@capawesome/capacitor-settings-launcher':
         specifier: ^0.1.2
         version: 0.1.2(@capacitor/core@8.5.3)
@@ -691,8 +691,8 @@ packages:
     peerDependencies:
       '@capacitor/core': '>=8.0.0'
 
-  '@capawesome/capacitor-screen-orientation@8.0.3':
-    resolution: {integrity: sha512-JTSpg/9FI5MC0EvjEc99BkcsPwuBO+9rjn5G7D5e9avkq6uM5tIT5lUuap/Sfd9b6exUvXpRwkktErtpuM7T/Q==}
+  '@capawesome/capacitor-screen-orientation@8.0.4':
+    resolution: {integrity: sha512-6hmA31YRIcaG2PPWO0vXDdTcdulohp7k6qD78/Ouo57KfWBCWJTAYyGO1DJmByZgyr74jJLsk77kvzyxj1ydYg==}
     peerDependencies:
       '@capacitor/core': '>=8.0.0'
 
@@ -5575,7 +5575,7 @@ snapshots:
     dependencies:
       '@capacitor/core': 8.5.3
 
-  '@capawesome/capacitor-screen-orientation@8.0.3(@capacitor/core@8.5.3)':
+  '@capawesome/capacitor-screen-orientation@8.0.4(@capacitor/core@8.5.3)':
     dependencies:
       '@capacitor/core': 8.5.3
 
