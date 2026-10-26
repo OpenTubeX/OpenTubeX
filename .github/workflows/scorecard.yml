@@ -3,7 +3,12 @@ name: Scorecard
 on:
   # For the Branch-Protection check. Only the default branch is supported.
   branch_protection_rule:
-  push:
+  # Runs after the Gradle wrapper validation instead of on push. The
+  # Binary-Artifacts check only accepts android/gradle/wrapper/gradle-wrapper.jar
+  # when the latest commit already has a successful validation run.
+  workflow_run:
+    workflows: [ "Gradle Wrapper" ]
+    types: [ completed ]
     branches: [ "development" ]
   schedule:
     - cron: '17 4 * * 1'
@@ -13,7 +18,10 @@ permissions: {}
 jobs:
   analysis:
     # Results are only published for the default branch of OpenTubeX/OpenTubeX.
-    if: github.repository == 'OpenTubeX/OpenTubeX'
+    if: >-
+      github.repository == 'OpenTubeX/OpenTubeX' &&
+      (github.event_name != 'workflow_run' ||
+      (github.event.workflow_run.event == 'push' && github.event.workflow_run.conclusion == 'success'))
     name: Scorecard analysis
     runs-on: ubuntu-latest
 
