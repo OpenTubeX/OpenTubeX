@@ -1,4 +1,6 @@
-import { test, expect, goToSettingsSection, setPlayerFullscreen } from '../../helpers/app.mjs'
+import path from 'node:path'
+
+import { test, expect, goTo, goToSettingsSection, repoRoot, setPlayerFullscreen } from '../../helpers/app.mjs'
 import { sampleColors } from '../../helpers/colors.mjs'
 import { openMockedVideo } from '../../helpers/player.mjs'
 import { mockPlayableWatchPage } from '../../helpers/watch.mjs'
@@ -369,6 +371,44 @@ test.describe('bright main color toggle contrast', () => {
     expect(contrastRatio(enabled.background, surface.background), 'enabled container').toBeGreaterThanOrEqual(1.2)
   })
 })
+
+// Hot Pink forces black theme colors on a magenta card; Yellow is the brightest main color.
+for (const settings of [{ baseTheme: 'hotPink' }, { baseTheme: 'light', mainColor: 'Yellow' }]) {
+  test.describe(`${Object.values(settings).join(' ')} icon button contrast`, () => {
+    const media = path.join(repoRoot, 'e2e/fixtures/media/demo.webm')
+    test.use({
+      seed: {
+        settings: { ...settings, enableDownloads: true, currentLocale: 'en-US' },
+        downloads: [
+          { id: 1, title: 'Completed', status: 'completed', completedAt: Date.now(), mode: 'video', destination: media, destinations: [media], files: [] },
+          { id: 2, title: 'Failed', status: 'failed', mode: 'video', retryPayload: { videoId: 'aaaaaaaaaaa', title: 'Failed', mode: 'video' }, destinations: [], files: [] },
+        ]
+      }
+    })
+
+    test('tonal icon buttons keep readable icons at rest and on hover', async ({ page }) => {
+      await goTo(page, 'downloads')
+      const buttons = [
+        page.getByRole('button', { name: 'Retry download', exact: true }),
+        page.getByRole('button', { name: 'Clear From List', exact: true }).first(),
+        page.getByRole('button', { name: 'Remove File', exact: true }),
+      ]
+      for (const button of buttons) {
+        await expect(button).toBeVisible()
+        const name = await button.getAttribute('title')
+        await page.mouse.move(0, 0)
+        const rest = await renderedColors(button)
+        expect.soft(contrastRatio(rest.foreground, rest.background), `${name} at rest`).toBeGreaterThanOrEqual(3)
+        await button.hover()
+        // Read the settled hover fill, not an interpolated transition frame
+        await button.evaluate(element => Promise.all(element.getAnimations().map(animation => animation.finished)))
+        const hovered = await renderedColors(button)
+        expect(hovered.background, `${name} hover fill`).not.toEqual(rest.background)
+        expect.soft(contrastRatio(hovered.foreground, hovered.background), `${name} on hover`).toBeGreaterThanOrEqual(3)
+      }
+    })
+  })
+}
 
 test.describe('browser tab contrast', () => {
   test.use({ seed: { settings: { currentLocale: 'en-US' } } })

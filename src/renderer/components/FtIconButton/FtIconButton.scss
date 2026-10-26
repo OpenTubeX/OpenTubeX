@@ -22,17 +22,19 @@
   line-height: 0;
   transition: background 0.15s ease-out;
 
-  // Tonal fill: a tint of the theme color mixed into the card color, so the
-  // button stays opaque over thumbnails and readable in light and dark themes.
+  // Tonal fill like FtButton's tonal variant: the theme color tints the card
+  // color, while the icon keeps the text color so it stays readable in every
+  // palette. Mixing into the card color keeps the button visible over thumbnails.
   &.base,
   &.primary,
   &.secondary,
   &.destructive {
-    --icon-button-fill: color-mix(in srgb, var(--icon-button-tint) var(--icon-button-rest), var(--card-bg-color));
+    --icon-button-rest: color-mix(in srgb, var(--icon-button-tint) 16%, var(--card-bg-color));
+    --icon-button-fill: var(--icon-button-rest);
 
     background-color: var(--icon-button-fill);
     backdrop-filter: var(--card-bg-blur, none);
-    color: color-mix(in srgb, var(--icon-button-tint) 75%, var(--primary-text-color));
+    color: var(--primary-text-color);
 
     .overlayIcon {
       color: var(--icon-button-fill);
@@ -40,32 +42,19 @@
 
     &:not(.disabled) {
       &:hover,
-      &:focus-visible,
-      &.pressed {
-        --icon-button-fill: color-mix(in srgb, var(--icon-button-tint) var(--icon-button-hover), var(--card-bg-color));
+      &:focus-visible {
+        --icon-button-fill: color-mix(in srgb, var(--primary-text-color) 8%, var(--icon-button-rest));
       }
 
+      &.pressed,
       &.active {
-        --icon-button-fill: color-mix(in srgb, var(--icon-button-tint) var(--icon-button-active), var(--card-bg-color));
+        --icon-button-fill: color-mix(in srgb, var(--primary-text-color) 12%, var(--icon-button-rest));
       }
     }
   }
 
   &.base {
-    --icon-button-tint: var(--primary-text-color);
-    --icon-button-rest: 8%;
-    --icon-button-hover: 14%;
-    --icon-button-active: 22%;
-
-    color: var(--primary-text-color);
-  }
-
-  &.primary,
-  &.secondary,
-  &.destructive {
-    --icon-button-rest: 16%;
-    --icon-button-hover: 26%;
-    --icon-button-active: 36%;
+    --icon-button-rest: color-mix(in srgb, var(--primary-text-color) 8%, var(--card-bg-color));
   }
 
   &.primary {
