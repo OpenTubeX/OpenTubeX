@@ -88,11 +88,11 @@ import FtButton from '../FtButton/FtButton.vue'
 import FtPrompt from '../FtPrompt/FtPrompt.vue'
 import WatchVideoDownloadPrompt from '../WatchVideoDownloadPrompt/WatchVideoDownloadPrompt.vue'
 import store from '../../store'
-import { usesInvidiousApi } from '../../../apiBackends'
 import { getLocalHistoryMetadata } from '../../helpers/api/local'
 import { getInvidiousHistoryMetadata } from '../../helpers/api/invidious'
+import { requestWithFallback } from '../../helpers/api/fallback'
 import { parseHistoryRepairPlayer } from '../../../historyRepair'
-import { showInvidiousFallbackToast, showToast } from '../../helpers/utils'
+import { showToast } from '../../helpers/utils'
 import { supportsYtDlp } from '../../helpers/ytDlpCapabilities'
 
 const props = defineProps({
@@ -122,15 +122,11 @@ async function loadVideo(signal) {
     return { ...info, published: info.published * 1000, isLive: info.liveNow }
   }
   const loadLocal = async () => parseHistoryRepairPlayer(await loadMetadata(getLocalHistoryMetadata), props.videoId)
-  const prefersInvidious = usesInvidiousApi(store.getters.getBackendPreference)
-  let info
-  try {
-    info = await (prefersInvidious ? loadInvidious() : loadLocal())
-  } catch (error) {
-    if (signal.aborted || !store.getters.getBackendFallback) throw error
-    if (prefersInvidious) showInvidiousFallbackToast(store.getters.getBackendPreference)
-    info = await (prefersInvidious ? loadLocal() : loadInvidious())
-  }
+  const { result: info } = await requestWithFallback({ local: loadLocal, invidious: loadInvidious }, {
+    backend: store.getters.getBackendPreference,
+    fallback: store.getters.getBackendFallback,
+    signal,
+  })
   if (typeof info.title !== 'string' || !info.title.trim()) throw new Error('Video title unavailable')
   return { ...info, videoId: props.videoId, type: 'video', lengthSeconds: Number(info.lengthSeconds) || 0 }
 }

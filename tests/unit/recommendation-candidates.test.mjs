@@ -1,28 +1,11 @@
 import assert from 'node:assert/strict'
 import test from 'node:test'
-import { collectRecommendationCandidates, fetchRecommendationSource } from '../../src/renderer/helpers/recommendationCandidates.js'
+import { collectRecommendationCandidates, requireRecommendationResponse } from '../../src/renderer/helpers/recommendationCandidates.js'
 
-test('uses the configured fallback for failed or empty backend responses', async () => {
-  for (const preferred of [async () => { throw new Error('offline') }, async () => null]) {
-    const videos = await fetchRecommendationSource(preferred, async () => [{ videoId: 'fallback' }], new AbortController().signal)
-    assert.deepEqual(videos, [{ videoId: 'fallback' }])
-  }
-})
-
-test('does not fall back after successful empty results or when fallback is disabled', async () => {
-  const signal = new AbortController().signal
-  assert.deepEqual(await fetchRecommendationSource(async () => [], async () => {
-    assert.fail('Empty results are a successful response')
-  }, signal), [])
-  await assert.rejects(fetchRecommendationSource(async () => { throw new Error('offline') }, null, signal), /offline/)
-})
-
-test('cancellation never starts a fallback request', async () => {
-  const controller = new AbortController()
-  await assert.rejects(fetchRecommendationSource(async () => {
-    controller.abort()
-    throw controller.signal.reason
-  }, async () => { assert.fail('Must not start fallback after abort') }, controller.signal), { name: 'AbortError' })
+test('treats missing responses, but not empty results, as failures that may fall back', async () => {
+  await assert.rejects(requireRecommendationResponse(async () => null)(), /No recommendation response/)
+  await assert.rejects(requireRecommendationResponse(async () => undefined)(), /No recommendation response/)
+  assert.deepEqual(await requireRecommendationResponse(async () => [])(), [])
 })
 
 test('keeps successful sources when another source fails', async () => {

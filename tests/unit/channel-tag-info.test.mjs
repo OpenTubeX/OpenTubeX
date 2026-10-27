@@ -1,30 +1,30 @@
 import assert from 'node:assert/strict'
-import { readFileSync } from 'node:fs'
 import test from 'node:test'
-import vm from 'node:vm'
-
-import { usesInvidiousApi } from '../../src/apiBackends.js'
-
-const source = readFileSync(new URL('../../src/renderer/helpers/channels.js', import.meta.url), 'utf8')
-  .replace(/^import .*$/gm, '')
-  .replaceAll('export ', '')
+import { importWithStubs, sourceUrl } from '../helpers/module-stubs.mjs'
 
 const CHANNEL_ID = 'UCXuqSBlHAE6Xw-yeJA0Tunw'
 
-/**
- * @param {{ invidious: () => Promise<object>, local: () => Promise<object> }} backends
- */
-function loadFindChannelTagInfo({ invidious, local }) {
-  const context = {
-    process: { env: { SUPPORTS_LOCAL_API: true } },
-    usesInvidiousApi,
-    invidiousGetChannelInfo: invidious,
-    getLocalChannel: local,
+const backends = { invidious: null, local: null }
+const [{ findChannelTagInfo: findTagInfo }] = await importWithStubs([sourceUrl('src/renderer/helpers/channels.js')], {
+  [sourceUrl('src/renderer/helpers/api/invidious.js')]: {
+    invidiousGetChannelId: null,
+    invidiousGetChannelInfo: () => backends.invidious(),
+  },
+  [sourceUrl('src/renderer/helpers/api/local.js')]: {
+    getLocalChannelId: null,
+    getLocalChannel: () => backends.local(),
     parseLocalChannelHeader: channel => ({ name: channel.header.name, thumbnailUrl: channel.header.thumbnail }),
-    showInvidiousFallbackToast() {},
-    console: { error() {} },
-  }
-  return vm.runInNewContext(`${source}\nfindChannelTagInfo`, context)
+  },
+  [sourceUrl('src/renderer/helpers/utils.js')]: { showInvidiousFallbackToast() {} },
+})
+process.env.SUPPORTS_LOCAL_API = 'true'
+
+/**
+ * @param {{ invidious: () => Promise<object>, local: () => Promise<object> }} responses
+ */
+function loadFindChannelTagInfo(responses) {
+  Object.assign(backends, responses)
+  return findTagInfo
 }
 
 const localChannel = { header: { name: 'Local name', thumbnail: 'https://yt3.ggpht.com/local' } }
