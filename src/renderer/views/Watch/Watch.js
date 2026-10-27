@@ -282,13 +282,8 @@ export default defineComponent({
       startNextVideoInFullwindow: false,
       startNextVideoInPip: false,
       nextVideoAutoPictureInPictureState: null,
-      startNextVideoWithChapters: false,
-      startNextVideoWithFullscreenMetadata: false,
-      startNextVideoWithFullscreenComments: false,
-      startNextVideoWithFullscreenLiveChat: false,
-      startNextVideoWithFullscreenPlaylist: false,
-      startNextVideoWithFullscreenQueue: false,
-      startNextVideoWithFullscreenRecommendations: false,
+      /** @type {import('../../components/ft-shaka-video-player/opentubex/dockedPanels').DockedPanel[]} */
+      startNextVideoWithDockedPanels: [],
       isLoading: true,
       firstLoad: true,
       // Whether this tab has been presented while showing the current video. A
@@ -1919,6 +1914,20 @@ export default defineComponent({
       // Chromium can already reset the offset when an error becomes shorter,
       // while OverlayScrollbars still retains the previous overflow range.
       clampOverlayScrollTop(container, content)
+    },
+    /** @param {{ panel: import('../../components/ft-shaka-video-player/opentubex/dockedPanels').DockedPanel, open: boolean, target: HTMLElement | null, presentationActive?: boolean }} change */
+    handleDockPanelChange({ panel, ...change }) {
+      const handlers = {
+        metadata: this.handleFullscreenMetadataChange,
+        transcript: this.handleFullscreenTranscriptChange,
+        sponsorBlock: this.handleFullscreenSponsorBlockChange,
+        comments: this.handleFullscreenCommentsChange,
+        liveChat: this.handleFullscreenLiveChatChange,
+        playlist: this.handleFullscreenPlaylistChange,
+        queue: this.handleFullscreenQueueChange,
+        recommendations: this.handleFullscreenRecommendationsChange,
+      }
+      handlers[panel]?.(change)
     },
     handleFullscreenMetadataChange({ open, target, presentationActive = false }) {
       const wasOpen = this.fullscreenMetadataOpen
@@ -6894,13 +6903,7 @@ export default defineComponent({
         this.startNextVideoInFullwindow = uiState.startNextVideoInFullwindow
         this.startNextVideoInPip = uiState.startNextVideoInPip
         this.nextVideoAutoPictureInPictureState = uiState.autoPictureInPictureState
-        this.startNextVideoWithChapters = uiState.startNextVideoWithChapters
-        this.startNextVideoWithFullscreenMetadata = uiState.startNextVideoWithFullscreenMetadata
-        this.startNextVideoWithFullscreenComments = uiState.startNextVideoWithFullscreenComments
-        this.startNextVideoWithFullscreenLiveChat = uiState.startNextVideoWithFullscreenLiveChat
-        this.startNextVideoWithFullscreenPlaylist = uiState.startNextVideoWithFullscreenPlaylist
-        this.startNextVideoWithFullscreenQueue = uiState.startNextVideoWithFullscreenQueue
-        this.startNextVideoWithFullscreenRecommendations = uiState.startNextVideoWithFullscreenRecommendations
+        this.startNextVideoWithDockedPanels = uiState.dockedPanels
       } finally {
         this.playerTeardownInProgress = false
       }

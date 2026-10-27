@@ -159,6 +159,7 @@ import {
 import { AB_REPEAT_BOUNDARY_TOLERANCE_SECONDS, AB_REPEAT_VALUE_CHANGE_ICON, useAbRepeat } from './opentubex/useAbRepeat'
 import { useAdaptiveControlPanelLayout } from './opentubex/useAdaptiveControlPanelLayout'
 import { useAmbientMode } from './opentubex/useAmbientMode'
+import { createDockedPanelMemory, DOCKED_PANEL_CLOSE_ORDER, DOCKED_PANEL_RESTORE_ORDER } from './opentubex/dockedPanels'
 import { NORMAL_PLAYBACK_RATE, normalizePlaybackRate, usePlaybackRate } from './opentubex/usePlaybackRate'
 import { useAutoPictureInPicture } from './opentubex/useAutoPictureInPicture'
 import { FULLSCREEN_DOCK_HEADER_SELECTOR, useFullscreenDocks } from './opentubex/useFullscreenDocks'
@@ -500,31 +501,14 @@ export default defineComponent({
       type: Object,
       default: null
     },
-    startWithChapters: {
-      type: Boolean,
-      default: false
-    },
-    startWithFullscreenMetadata: {
-      type: Boolean,
-      default: false
-    },
-    startWithFullscreenComments: {
-      type: Boolean,
-      default: false
-    },
-    startWithFullscreenLiveChat: {
-      type: Boolean,
-      default: false
+    /** @type {import('vue').PropType<import('./opentubex/dockedPanels').DockedPanel[]>} */
+    startWithDockedPanels: {
+      type: Array,
+      default: () => []
     },
     queueAvailable: { type: Boolean, default: false },
     recommendationsAvailable: { type: Boolean, default: false },
     downloadAvailable: { type: Boolean, default: false },
-    startWithFullscreenQueue: { type: Boolean, default: false },
-    startWithFullscreenRecommendations: { type: Boolean, default: false },
-    startWithFullscreenPlaylist: {
-      type: Boolean,
-      default: false
-    },
     channelId: {
       type: String,
       default: ''
@@ -659,14 +643,7 @@ export default defineComponent({
     'player-reload-requested',
     'resume-playback-after-sabr-reload-done',
     'stream-recovery-notice-dismiss',
-    'fullscreen-metadata-change',
-    'fullscreen-transcript-change',
-    'fullscreen-sponsorblock-change',
-    'fullscreen-comments-change',
-    'fullscreen-live-chat-change',
-    'fullscreen-playlist-change',
-    'fullscreen-queue-change',
-    'fullscreen-recommendations-change',
+    'dock-panel-change',
     'open-download',
     'toggle-transcript',
     'toggle-quick-bookmark',
@@ -1270,15 +1247,7 @@ export default defineComponent({
     let startInFullwindow = props.startInFullwindow
     let startInFullscreen = props.startInFullscreen
     let startInPip = props.startInPip
-    let restoreChapters = props.startWithChapters
-    let restoreFullscreenMetadata = props.startWithFullscreenMetadata
-    let restoreFullscreenTranscript = false
-    let restoreFullscreenSponsorBlock = false
-    let restoreFullscreenComments = props.startWithFullscreenComments
-    let restoreFullscreenLiveChat = props.startWithFullscreenLiveChat
-    let restoreFullscreenPlaylist = props.startWithFullscreenPlaylist
-    let restoreFullscreenQueue = props.startWithFullscreenQueue
-    let restoreFullscreenRecommendations = props.startWithFullscreenRecommendations
+    const dockedPanelMemory = createDockedPanelMemory(props.startWithDockedPanels)
     let exitFullscreenCleanup = null
     let syncingChapterOverlayButton = false
 
@@ -2068,7 +2037,7 @@ export default defineComponent({
     } = useSponsorBlockPlayback({
       canSeek,
       cancelFullscreenSponsorBlockRestore: () => {
-        restoreFullscreenSponsorBlock = false
+        dockedPanelMemory.set('sponsorBlock', false)
       },
       container,
       emit,
@@ -6940,7 +6909,8 @@ export default defineComponent({
       )
       showFullscreenComments.value = open
       events.dispatchEvent(new CustomEvent('setFullscreenComments', { detail: open }))
-      emit('fullscreen-comments-change', {
+      emit('dock-panel-change', {
+        panel: 'comments',
         open,
         target: fullscreenCommentsOverlay.value
       })
@@ -6958,7 +6928,8 @@ export default defineComponent({
         (isNativeFullscreenActive() || fullWindowEnabled.value)
       )
       showFullscreenLiveChat.value = open
-      emit('fullscreen-live-chat-change', {
+      emit('dock-panel-change', {
+        panel: 'liveChat',
         open,
         target: fullscreenLiveChatTarget.value
       })
@@ -6981,7 +6952,8 @@ export default defineComponent({
       if (fullscreenTitleOverlay) {
         fullscreenTitleOverlay.ariaExpanded = String(open)
       }
-      emit('fullscreen-metadata-change', {
+      emit('dock-panel-change', {
+        panel: 'metadata',
         open,
         target: fullscreenMetadataTarget.value,
         presentationActive
@@ -6998,7 +6970,8 @@ export default defineComponent({
         (isNativeFullscreenActive() || fullWindowEnabled.value)
       )
       showFullscreenTranscript.value = open
-      emit('fullscreen-transcript-change', {
+      emit('dock-panel-change', {
+        panel: 'transcript',
         open,
         target: fullscreenTranscriptTarget.value
       })
@@ -7009,7 +6982,7 @@ export default defineComponent({
     }
 
     function dismissFullscreenTranscript() {
-      restoreFullscreenTranscript = false
+      dockedPanelMemory.set('transcript', false)
       closeFullscreenTranscript()
     }
 
@@ -7031,7 +7004,8 @@ export default defineComponent({
         shouldOpen && (isNativeFullscreenActive() || fullWindowEnabled.value)
       )
       showFullscreenSponsorBlock.value = open
-      emit('fullscreen-sponsorblock-change', {
+      emit('dock-panel-change', {
+        panel: 'sponsorBlock',
         open,
         target: fullscreenSponsorBlockTarget.value
       })
@@ -7060,7 +7034,8 @@ export default defineComponent({
         (isNativeFullscreenActive() || fullWindowEnabled.value)
       )
       showFullscreenPlaylist.value = open
-      emit('fullscreen-playlist-change', {
+      emit('dock-panel-change', {
+        panel: 'playlist',
         open,
         target: fullscreenPlaylistTarget.value
       })
@@ -7074,7 +7049,7 @@ export default defineComponent({
       const open = Boolean(shouldOpen && props.queueAvailable &&
         (isNativeFullscreenActive() || fullWindowEnabled.value))
       showFullscreenQueue.value = open
-      emit('fullscreen-queue-change', { open, target: fullscreenQueueTarget.value })
+      emit('dock-panel-change', { panel: 'queue', open, target: fullscreenQueueTarget.value })
     }
 
     function closeFullscreenQueue() {
@@ -7085,34 +7060,38 @@ export default defineComponent({
       const open = Boolean(shouldOpen && props.recommendationsAvailable &&
         (isNativeFullscreenActive() || fullWindowEnabled.value))
       showFullscreenRecommendations.value = open
-      emit('fullscreen-recommendations-change', { open, target: fullscreenRecommendationsTarget.value })
+      emit('dock-panel-change', { panel: 'recommendations', open, target: fullscreenRecommendationsTarget.value })
     }
 
     function closeFullscreenRecommendations() {
       setFullscreenRecommendations(false)
     }
 
-    function rememberDockedPanels() {
-      restoreFullscreenMetadata = showFullscreenMetadata.value
-      restoreFullscreenTranscript = showFullscreenTranscript.value
-      restoreFullscreenSponsorBlock = showFullscreenSponsorBlock.value
-      restoreFullscreenComments = showFullscreenComments.value
-      restoreFullscreenLiveChat = showFullscreenLiveChat.value
-      restoreFullscreenPlaylist = showFullscreenPlaylist.value
-      restoreFullscreenQueue = showFullscreenQueue.value
-      restoreFullscreenRecommendations = showFullscreenRecommendations.value
+    /** @type {Record<import('./opentubex/dockedPanels').DockedPanel, { shown: import('vue').Ref<boolean>, set: (open: boolean) => void }>} */
+    const dockedPanels = {
+      chapters: {
+        shown: showChaptersOverlay,
+        set: open => events.dispatchEvent(new CustomEvent('setChaptersOverlay', {
+          detail: open && props.chapters.length > 0
+        }))
+      },
+      comments: { shown: showFullscreenComments, set: setFullscreenComments },
+      liveChat: { shown: showFullscreenLiveChat, set: setFullscreenLiveChat },
+      metadata: { shown: showFullscreenMetadata, set: setFullscreenMetadata },
+      transcript: { shown: showFullscreenTranscript, set: setFullscreenTranscript },
+      sponsorBlock: { shown: showFullscreenSponsorBlock, set: setFullscreenSponsorBlock },
+      queue: { shown: showFullscreenQueue, set: setFullscreenQueue },
+      recommendations: { shown: showFullscreenRecommendations, set: setFullscreenRecommendations },
+      playlist: { shown: showFullscreenPlaylist, set: setFullscreenPlaylist },
     }
 
     function rememberAndCloseDockedPanels() {
-      rememberDockedPanels()
-      closeFullscreenMetadata()
-      closeFullscreenTranscript()
-      closeFullscreenSponsorBlock()
-      closeFullscreenLiveChat()
-      closeFullscreenComments()
-      closeFullscreenPlaylist()
-      closeFullscreenQueue()
-      closeFullscreenRecommendations()
+      for (const panel of DOCKED_PANEL_CLOSE_ORDER) {
+        dockedPanelMemory.set(panel, dockedPanels[panel].shown.value)
+      }
+      for (const panel of DOCKED_PANEL_CLOSE_ORDER) {
+        dockedPanels[panel].set(false)
+      }
     }
 
     function restoreDockedPanels() {
@@ -7120,51 +7099,8 @@ export default defineComponent({
         return
       }
 
-      if (restoreChapters) {
-        restoreChapters = false
-        events.dispatchEvent(new CustomEvent('setChaptersOverlay', {
-          detail: props.chapters.length > 0
-        }))
-      }
-
-      if (restoreFullscreenComments) {
-        restoreFullscreenComments = false
-        setFullscreenComments(true)
-      }
-
-      if (restoreFullscreenLiveChat) {
-        restoreFullscreenLiveChat = false
-        setFullscreenLiveChat(true)
-      }
-
-      if (restoreFullscreenMetadata) {
-        restoreFullscreenMetadata = false
-        setFullscreenMetadata(true)
-      }
-
-      if (restoreFullscreenTranscript) {
-        restoreFullscreenTranscript = false
-        setFullscreenTranscript(true)
-      }
-
-      if (restoreFullscreenSponsorBlock) {
-        restoreFullscreenSponsorBlock = false
-        setFullscreenSponsorBlock(true)
-      }
-
-      if (restoreFullscreenQueue) {
-        restoreFullscreenQueue = false
-        setFullscreenQueue(true)
-      }
-
-      if (restoreFullscreenRecommendations) {
-        restoreFullscreenRecommendations = false
-        setFullscreenRecommendations(true)
-      }
-
-      if (restoreFullscreenPlaylist) {
-        restoreFullscreenPlaylist = false
-        setFullscreenPlaylist(true)
+      for (const panel of DOCKED_PANEL_RESTORE_ORDER) {
+        if (dockedPanelMemory.take(panel)) dockedPanels[panel].set(true)
       }
     }
 
@@ -7186,7 +7122,7 @@ export default defineComponent({
 
     watch(() => props.queueAvailable, available => {
       if (!available) {
-        restoreFullscreenQueue = false
+        dockedPanelMemory.set('queue', false)
         if (showFullscreenQueue.value) closeFullscreenQueue()
       }
     })
@@ -7210,7 +7146,7 @@ export default defineComponent({
         if (open) expandCollapsedFullscreenDock('metadata')
         setFullscreenMetadata(open)
       } else {
-        restoreFullscreenMetadata = open
+        dockedPanelMemory.set('metadata', open)
       }
     }, { immediate: true })
 
@@ -10681,13 +10617,7 @@ export default defineComponent({
      *   startNextVideoInFullwindow: boolean,
      *   startNextVideoInPip: boolean,
      *   autoPictureInPictureState: object | null,
-     *   startNextVideoWithChapters: boolean,
-     *   startNextVideoWithFullscreenMetadata: boolean,
-     *   startNextVideoWithFullscreenComments: boolean,
-     *   startNextVideoWithFullscreenLiveChat: boolean,
-     *   startNextVideoWithFullscreenQueue: boolean,
-     *   startNextVideoWithFullscreenRecommendations: boolean,
-     *   startNextVideoWithFullscreenPlaylist: boolean
+     *   dockedPanels: import('./opentubex/dockedPanels').DockedPanel[]
      * }>}
      */
     async function destroyPlayer() {
@@ -10735,13 +10665,7 @@ export default defineComponent({
         startNextVideoInFullwindow: false,
         startNextVideoInPip: false,
         autoPictureInPictureState: null,
-        startNextVideoWithChapters: false,
-        startNextVideoWithFullscreenMetadata: false,
-        startNextVideoWithFullscreenComments: false,
-        startNextVideoWithFullscreenLiveChat: false,
-        startNextVideoWithFullscreenQueue: false,
-        startNextVideoWithFullscreenRecommendations: false,
-        startNextVideoWithFullscreenPlaylist: false
+        dockedPanels: []
       }
 
       if (ui) {
@@ -10756,13 +10680,9 @@ export default defineComponent({
             autoPictureInPictureState: isCurrentPlayerInPip
               ? getAutoPictureInPictureState()
               : null,
-            startNextVideoWithChapters: showChaptersOverlay.value,
-            startNextVideoWithFullscreenMetadata: showFullscreenMetadata.value,
-            startNextVideoWithFullscreenComments: showFullscreenComments.value,
-            startNextVideoWithFullscreenLiveChat: showFullscreenLiveChat.value,
-            startNextVideoWithFullscreenQueue: showFullscreenQueue.value,
-            startNextVideoWithFullscreenRecommendations: showFullscreenRecommendations.value,
-            startNextVideoWithFullscreenPlaylist: showFullscreenPlaylist.value
+            // The transcript and SponsorBlock panels stay closed for the next video.
+            dockedPanels: DOCKED_PANEL_RESTORE_ORDER.filter(panel =>
+              panel !== 'transcript' && panel !== 'sponsorBlock' && dockedPanels[panel].shown.value)
           }
         }
 
