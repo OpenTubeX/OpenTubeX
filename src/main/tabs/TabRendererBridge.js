@@ -1,4 +1,5 @@
 import { IpcChannels } from '../../constants.js'
+import { isOpenTubeXUrl } from '../utils.js'
 
 const MAX_QUEUED_MESSAGES = 100
 const COALESCED_CHANNELS = new Set([IpcChannels.TABS_STATE_UPDATED])
@@ -17,8 +18,10 @@ export class TabRendererBridge {
     /** @type {Array<{channel: string, args: unknown[]}>} */
     this.queue = []
 
-    browserWindow.webContents.on('did-start-navigation', (_event, _url, isInPlace, isMainFrame) => {
-      if (isMainFrame && !isInPlace) {
+    // Navigations to other documents are blocked by TabManager's will-navigate
+    // handler, which runs after this event, so they keep the current renderer.
+    browserWindow.webContents.on('did-start-navigation', (_event, url, isInPlace, isMainFrame) => {
+      if (isMainFrame && !isInPlace && isOpenTubeXUrl(url)) {
         this.ready = false
       }
     })

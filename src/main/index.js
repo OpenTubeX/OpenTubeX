@@ -4006,8 +4006,9 @@ function runApp() {
     // Drop its readiness entry so sendOpenUrlToWebContents queues messages until
     // the new renderer signals APP_READY again, instead of delivering to a
     // renderer that has not registered its OPEN_URL listener yet.
-    webContents.on('did-start-navigation', (_event, _url, isInPlace, isMainFrame) => {
-      if (isMainFrame && !isInPlace) {
+    // Blocked navigations to other documents keep the previous renderer.
+    webContents.on('did-start-navigation', (_event, url, isInPlace, isMainFrame) => {
+      if (isMainFrame && !isInPlace && isOpenTubeXUrl(url)) {
         forgetOpenUrlRenderer(webContents.id)
         const browserWindow = BrowserWindow.fromWebContents(webContents)
         if (browserWindow) {

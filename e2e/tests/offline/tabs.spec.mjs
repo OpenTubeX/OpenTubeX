@@ -302,6 +302,34 @@ test.describe('tab bar', () => {
     await expect(page.locator(sel.tabs).nth(1).locator('[data-icon="subscriptions"]')).toBeVisible()
   })
 
+  test('keeps opening tabs after a blocked navigation to another site', async ({ app, page }) => {
+    // Playwright waits for the blocked navigation before using locators, so
+    // query and click through the page instead.
+    const tabCount = () => page.evaluate(() => document.querySelectorAll('.tabBar .tab').length)
+    const openTab = () => page.evaluate(() => document.querySelector('.tabBar .newTabButton').click())
+    await expect.poll(tabCount).toBe(1)
+    await app.electronApp.evaluate(({ BrowserWindow }) => {
+      globalThis.blockedNavigationStarted = false
+      BrowserWindow.getAllWindows()[0].webContents.once('did-start-navigation', () => {
+        globalThis.blockedNavigationStarted = true
+      })
+    })
+
+    // A link whose click never reaches the document link handler navigates the window
+    await page.evaluate(() => {
+      const link = document.createElement('a')
+      link.href = 'https://example.com/blocked'
+      link.addEventListener('click', event => event.stopPropagation())
+      document.body.append(link)
+      link.click()
+      link.remove()
+    })
+    await expect.poll(() => app.electronApp.evaluate(() => globalThis.blockedNavigationStarted)).toBe(true)
+
+    await openTab()
+    await expect.poll(tabCount).toBe(2)
+  })
+
   test('Ctrl+T selects and presents the new tab before main receives mount readiness', async ({ app, page }) => {
     await app.electronApp.evaluate(({ ipcMain }) => {
       const channel = 'tabs-mount-ready'
