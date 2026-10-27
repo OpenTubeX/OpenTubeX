@@ -223,6 +223,7 @@ export function createCommandPaletteRegistry(context) {
     routePath,
     videoShortcuts,
     runShortcut,
+    quickBookmarkAvailable: store.getters.getQuickBookmarkPlaylist != null,
   })
 
   return commands
@@ -458,11 +459,12 @@ function addDownloadCommands(commands, { t, groups, downloads, isElectron }) {
 }
 
 function addPlaybackCommands(commands, context) {
-  const { t, groups, routePath, videoShortcuts, runShortcut, isCapacitor } = context
+  const { t, groups, routePath, videoShortcuts, runShortcut, isCapacitor, quickBookmarkAvailable } = context
   const onVideo = routePath.startsWith('/watch/')
 
   for (const [id, section, code, labelKey, icon, aliases] of PLAYBACK_COMMANDS) {
     if (isCapacitor && code === 'FULLWINDOW') continue
+    if (!quickBookmarkAvailable && code === 'TOGGLE_QUICK_BOOKMARK') continue
     const configuredShortcut = videoShortcuts[section][code]
     const executionShortcut = configuredShortcut || DefaultKeyboardShortcuts.VIDEO_PLAYER[section][code]
     // eslint-disable-next-line @intlify/vue-i18n/no-dynamic-keys
