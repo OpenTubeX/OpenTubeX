@@ -7,10 +7,11 @@ import com.getcapacitor.CapacitorWebView;
 
 import java.lang.ref.WeakReference;
 
-/** Keep media playback and active refreshes out of Chromium's hidden-page freezer. */
+/** Keep media playback, active refreshes and syncs out of Chromium's hidden-page freezer. */
 public final class SubscriptionRefreshWebView extends CapacitorWebView {
     private static WeakReference<SubscriptionRefreshWebView> activeView = new WeakReference<>(null);
     private static boolean playbackActive;
+    private static boolean syncActive;
 
     private boolean refreshActive;
     private int actualWindowVisibility = VISIBLE;
@@ -26,7 +27,7 @@ public final class SubscriptionRefreshWebView extends CapacitorWebView {
     @Override
     protected void onWindowVisibilityChanged(int visibility) {
         actualWindowVisibility = visibility;
-        super.onWindowVisibilityChanged(refreshActive || playbackActive ? VISIBLE : visibility);
+        super.onWindowVisibilityChanged(keepRunning() ? VISIBLE : visibility);
     }
 
     void setRefreshActive(boolean active) {
@@ -38,11 +39,24 @@ public final class SubscriptionRefreshWebView extends CapacitorWebView {
 
     static void setPlaybackActive(boolean active) {
         playbackActive = active;
+        updateActiveView();
+    }
+
+    static void setSyncActive(boolean active) {
+        syncActive = active;
+        updateActiveView();
+    }
+
+    private static void updateActiveView() {
         SubscriptionRefreshWebView view = activeView.get();
         if (view != null) view.updateVisibility();
     }
 
+    private boolean keepRunning() {
+        return refreshActive || playbackActive || syncActive;
+    }
+
     private void updateVisibility() {
-        super.onWindowVisibilityChanged(refreshActive || playbackActive ? VISIBLE : actualWindowVisibility);
+        super.onWindowVisibilityChanged(keepRunning() ? VISIBLE : actualWindowVisibility);
     }
 }

@@ -257,10 +257,27 @@ async function schedulingFixture(t, platform = {}) {
   let pendingLock = Promise.resolve()
   let releaseLock
   let hidden = false
+  const holds = new Set()
+  // Hold counts after each change, in the order native code receives them.
+  const holdCounts = []
+  let nextHold = 0
   const sandbox = {
     Date, setTimeout, clearTimeout, AbortController, console, isRecentSync, isSyncReasonEnabled, SyncLiveConnectionState, AUTO_SYNC_INTERVAL_MS,
     SyncCollectionCache: class {}, isSyncServerOffline: () => false,
     process: { env: platform }, isAppHidden: () => hidden,
+    holdBackgroundSync: () => {
+      const id = ++nextHold
+      holds.add(id)
+      holdCounts.push(holds.size)
+      return () => {
+        // Releases reach native code after a resolved begin call.
+        queueMicrotask(() => {
+          holds.delete(id)
+          holdCounts.push(holds.size)
+        })
+      }
+    },
+    setPeriodicBackgroundSync: () => {},
     withSyncLock: callback => pendingLock.then(callback),
     runSync: async () => {
       calls.push(Date.now())
@@ -287,6 +304,8 @@ async function schedulingFixture(t, platform = {}) {
   return {
     calls, context,
     liveConnection,
+    holds,
+    holdCounts,
     start: () => actions.startSyncServerAutoSync(context),
     schedule: reason => actions.scheduleSyncServer(context, reason),
     resume: () => actions.resumeHiddenEventSyncs(context),
@@ -455,8 +474,8 @@ test('periodic fallback does not sync while the mobile app is hidden', async t =
   assert.equal(f.calls.length, 1)
 })
 
-test('queued event syncs wait while the mobile app is hidden and replay on resume', async t => {
-  const f = await schedulingFixture(t, { IS_CAPACITOR: 'true' })
+test('queued event syncs wait while the iOS app is hidden and replay on resume', async t => {
+  const f = await schedulingFixture(t, { IS_CAPACITOR: 'true', IS_IOS: 'true' })
   f.schedule('history')
   f.setHidden(true)
   await f.tick(30000)
@@ -471,7 +490,7 @@ test('queued event syncs wait while the mobile app is hidden and replay on resum
 })
 
 test('stopping automatic sync discards event syncs queued while hidden', async t => {
-  const f = await schedulingFixture(t, { IS_CAPACITOR: 'true' })
+  const f = await schedulingFixture(t, { IS_CAPACITOR: 'true', IS_IOS: 'true' })
   f.schedule('history')
   f.setHidden(true)
   await f.tick(30000)
@@ -482,6 +501,50 @@ test('stopping automatic sync discards event syncs queued while hidden', async t
   f.resume()
   await f.tick(30000)
   assert.equal(f.calls.length, calls)
+})
+
+test('event syncs run while the Android app is hidden and hold it until they finish', async t => {
+  const f = await schedulingFixture(t, { IS_CAPACITOR: 'true' })
+  f.block()
+  f.schedule('history')
+  f.schedule('history')
+  assert.equal(f.holds.size, 1)
+  f.setHidden(true)
+  await f.tick(30000)
+  assert.equal(f.calls.length, 1)
+  assert.equal(f.holds.size, 1)
+  f.release()
+  await f.tick(0)
+  assert.equal(f.holds.size, 0)
+})
+
+test('a full sync queued behind a remote-only check keeps the Android app held', async t => {
+  const f = await schedulingFixture(t, { IS_CAPACITOR: 'true' })
+  f.block()
+  const remote = f.sync({ remoteOnly: true })
+  await f.tick(0)
+  const full = f.sync()
+  f.release()
+  await remote
+  await full
+  await f.tick(0)
+  assert.equal(f.calls.length, 2)
+  assert.equal(f.holdCounts.at(-1), 0)
+  assert.equal(f.holdCounts.indexOf(0), f.holdCounts.length - 1)
+})
+
+test('full syncs and stopping automatic sync release pending event sync holds', async t => {
+  const f = await schedulingFixture(t, { IS_CAPACITOR: 'true' })
+  f.schedule('history')
+  f.schedule('sessions')
+  assert.equal(f.holds.size, 2)
+  await f.sync()
+  await f.tick(0)
+  assert.equal(f.holds.size, 0)
+  f.schedule('history')
+  f.stop()
+  await f.tick(0)
+  assert.equal(f.holds.size, 0)
 })
 
 test('periodic fallback resumes after a live disconnect', async t => {

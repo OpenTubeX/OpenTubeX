@@ -1,6 +1,7 @@
 import { toRaw } from 'vue'
 import { sendJobValue, receiveJobValue } from './background-job-transfer.js'
 import { SyncServerDataLossError } from './sync-server-errors.js'
+import { setActiveTimeout } from './activeTimeout.js'
 
 // Remove nested Vue proxies when a bounded message cannot be structured-cloned.
 function unwrapJobValue(value, seen = new WeakMap()) {
@@ -34,8 +35,8 @@ export class BackgroundJobClient {
       if (!this.worker) this.start()
       const worker = this.worker
       const id = ++this.nextId
-      const timer = setTimeout(() => this.fail(worker, new Error('Background processing timed out')), 120_000)
-      this.requests.set(id, { resolve, reject, timer, value: undefined })
+      const cancelTimeout = setActiveTimeout(() => this.fail(worker, new Error('Background processing timed out')), 120_000)
+      this.requests.set(id, { resolve, reject, cancelTimeout, value: undefined })
       const postMessage = message => {
         if (this.worker !== worker) throw new Error('Background processing stopped')
         try {
@@ -62,7 +63,7 @@ export class BackgroundJobClient {
         return
       }
       this.requests.delete(data.id)
-      clearTimeout(request.timer)
+      request.cancelTimeout()
       if (data.type === 'error') {
         const error = data.error.name === 'SyncServerDataLossError'
           ? new SyncServerDataLossError(data.error.collection, data.error.deleted, data.error.previous, data.error.items)
@@ -89,7 +90,7 @@ export class BackgroundJobClient {
     this.worker?.terminate()
     this.worker = null
     for (const request of this.requests.values()) {
-      clearTimeout(request.timer)
+      request.cancelTimeout()
       request.reject(error)
     }
     this.requests.clear()
