@@ -1204,6 +1204,8 @@ test('Pause on Stream Recovery pauses a reload behind a persistent notice until 
   await video.evaluate(element => element.play())
   await expect.poll(() => video.evaluate(element => element.currentTime)).toBeGreaterThan(0)
   await expect(notice).toBeVisible()
+  // Resuming consumes the pause, so a format switch or reload keeps playing.
+  await expect.poll(() => watchView.evaluate(view => view.streamRecoveryPausesPlayback)).toBe(false)
   await expect(notice).toBeHidden({ timeout: 20_000 })
 
   // A later recovery pauses the playing stream in place; Dismiss hides it.

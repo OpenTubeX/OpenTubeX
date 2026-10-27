@@ -5107,6 +5107,9 @@ export default defineComponent({
       }
       this.waitingForPlaylistContinuation = false
       this.$refs.watchVideoPlaylist?.resetUnavailableSkipChain()
+      // Resuming consumes the recovery pause, so later format switches or
+      // reloads keep playing while the notice stays visible.
+      if (!this.isLoading) this.streamRecoveryPausesPlayback = false
     },
     handlePlayerSeeking() {
       this.waitingForPlaylistContinuation = false
