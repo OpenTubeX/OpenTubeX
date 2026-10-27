@@ -1,18 +1,20 @@
 diff --git a/lib/bus.js b/lib/bus.js
-index 10385eff055559d65b665de8c68fb9a6dc2e1672..437c1227449d890a8a2b0f5d913024d93b12b006 100644
+index 10385eff055559d65b665de8c68fb9a6dc2e1672..cda3ab5d51d2e75dd823e14179c6e4ebc6565441 100644
 --- a/lib/bus.js
 +++ b/lib/bus.js
-@@ -1011,7 +1011,14 @@ function bus(conn, opts) {
+@@ -1011,7 +1011,16 @@ function bus(conn, opts) {
        // through its own 'error'/'end' events; throwing again here would turn
        // an ordinary early close into an uncaught exception.
        if (err && err.code === 'ECONNCLOSED') return;
 -      if (err) throw err;
-+      // Thrown from the reply timer, a slow bus (such as one still starting
-+      // at login) crashed the process. Report it as a connection error and
-+      // close the unusable connection, which fails its pending calls.
++      // Any other failure, such as a bus that authenticates and then never
++      // answers, leaves a connection without a unique name, which is no use to
++      // anyone. Throwing here, inside a reply or timer callback, was the one
++      // connection failure nothing could catch (#393). Tear the transport down
++      // instead: it records the error as `lastError` and reports it through
++      // 'error' and 'close', which fail the pending calls with it as the cause.
 +      if (err) {
-+        self.connection.emit('error', err);
-+        self.connection.end();
++        self.connection.stream.destroy(err);
 +        return;
 +      }
        self.name = name;
