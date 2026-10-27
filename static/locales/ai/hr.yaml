@@ -649,6 +649,24 @@ Settings:
         Destructive pressed: Pritisnuta destruktivna radnja
         Text and icons on destructive actions: Tekst i ikone na destruktivnim radnjama
   Player Settings:
+    Buffering:
+      Buffering: Međuspremanje
+      Description: Odaberi koliko videozapisa reproduktor učitava unaprijed i zadržava učitanim.
+      Buffer Ahead Hint: Veći međuspremnik unaprijed održava reprodukciju tijekom duljih prekida veze, ali preuzima videozapis koji možda nećeš gledati.
+      Rewind Buffer Hint: Veći međuspremnik za premotavanje natrag omogućuje ti skok unatrag bez ponovnog preuzimanja, ali troši više memorije.
+      Buffer Before Playing Hint: Čekanje na više videozapisa prije reprodukcije sprječava ponovljena zaustavljanja na nestabilnim vezama, ali videozapisi se dulje pokreću i nastavljaju nakon premotavanja.
+      Preset: Predložak međuspremanja
+      Presets:
+        Data Saver: Ušteda podataka
+        Default: Standardno
+        Smooth Playback: Glatka reprodukcija
+        Custom: Prilagođeno
+      Buffer Ahead: Međuspremnik unaprijed
+      Buffer Ahead Tooltip: 'Koliko se daleko ispred trenutačnog položaja učitava. Pri visokim kvalitetama ograničenja memorije mogu ograničiti vrlo visoke vrijednosti. Standardno: {value}'
+      Rewind Buffer: Međuspremnik za premotavanje natrag
+      Rewind Buffer Tooltip: 'Koliko već pogledanog videozapisa ostaje učitano. Standardno: {value}'
+      Buffer Before Playing: Međuspremnik prije reprodukcije
+      Buffer Before Playing Tooltip: 'Koliko se videozapisa mora učitati prije nego što reprodukcija započne ili se nastavi nakon pražnjenja međuspremnika. Standardno: {value}'
     Quality Limit on Metered Networks:
       Quality Limit on Metered Networks: "Najveća kvaliteta na mrežama s ograničenjem podataka"
       No Limit: "Bez ograničenja"

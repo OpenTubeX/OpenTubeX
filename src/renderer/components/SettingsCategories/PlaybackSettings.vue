@@ -1,6 +1,7 @@
 <template>
   <div class="settingsCategory">
     <PlayerSettings />
+    <BufferSettings />
     <ChannelSettings />
     <YtDlpStreamingSettings v-if="supportsYtDlp" />
     <CaptionSettings />
@@ -9,6 +10,7 @@
 
 <script setup>
 import { supportsYtDlp } from '../../helpers/ytDlpCapabilities'
+import BufferSettings from '../BufferSettings/BufferSettings.vue'
 import CaptionSettings from '../CaptionSettings/CaptionSettings.vue'
 import ChannelSettings from '../ChannelSettings/ChannelSettings.vue'
 import PlayerSettings from '../PlayerSettings/PlayerSettings.vue'

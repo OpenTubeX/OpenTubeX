@@ -651,6 +651,24 @@ Settings:
         Destructive pressed: Thao tác xóa khi nhấn
         Text and icons on destructive actions: Chữ và biểu tượng trên thao tác xóa
   Player Settings:
+    Buffering:
+      Buffering: Bộ đệm
+      Description: Chọn lượng video mà trình phát tải trước và giữ lại.
+      Buffer Ahead Hint: Bộ đệm phía trước lớn hơn giúp phát liên tục khi mất kết nối lâu hơn, nhưng sẽ tải cả phần video có thể bạn không xem.
+      Rewind Buffer Hint: Bộ đệm tua lại lớn hơn giúp bạn tua lại mà không phải tải lại, nhưng dùng nhiều bộ nhớ hơn.
+      Buffer Before Playing Hint: Chờ tải thêm video trước khi phát giúp tránh bị dừng liên tục khi kết nối không ổn định, nhưng video sẽ bắt đầu chậm hơn và phát tiếp chậm hơn sau khi tua.
+      Preset: Thiết lập sẵn bộ đệm
+      Presets:
+        Data Saver: Tiết kiệm dữ liệu
+        Default: Mặc định
+        Smooth Playback: Phát mượt mà
+        Custom: Tùy chỉnh
+      Buffer Ahead: Bộ đệm phía trước
+      Buffer Ahead Tooltip: 'Khoảng video được tải trước tính từ vị trí hiện tại. Ở chất lượng cao, giới hạn bộ nhớ có thể hạn chế các giá trị rất cao. Mặc định: {value}'
+      Rewind Buffer: Bộ đệm tua lại
+      Rewind Buffer Tooltip: 'Lượng video đã xem được giữ lại. Mặc định: {value}'
+      Buffer Before Playing: Bộ đệm trước khi phát
+      Buffer Before Playing Tooltip: 'Lượng video cần tải xong trước khi bắt đầu phát hoặc phát tiếp sau khi bị dừng. Mặc định: {value}'
     Quality Limit on Metered Networks:
       Quality Limit on Metered Networks: "Giới hạn chất lượng trên mạng đo lưu lượng"
       No Limit: "Không giới hạn"

@@ -660,6 +660,24 @@ Settings:
       Catppuccin Latte Mauve: Catppuccin Latte Mauve
       Catppuccin Latte Red: Catppuccin Latte Red
   Player Settings:
+    Buffering:
+      Buffering: Баферовање
+      Description: Изаберите колико видео снимка плејер учитава унапред и задржава учитаним.
+      Buffer Ahead Hint: Већи бафер унапред одржава репродукцију током дужих прекида везе, али преузима видео који можда нећете гледати.
+      Rewind Buffer Hint: Већи бафер за премотавање уназад омогућава вам да се вратите без поновног преузимања, али користи више меморије.
+      Buffer Before Playing Hint: Чекање да се учита више видео снимка пре репродукције спречава честа заустављања на нестабилним везама, али видео снимци спорије почињу и спорије се настављају након премотавања.
+      Preset: Профил баферовања
+      Presets:
+        Data Saver: Уштеда података
+        Default: Подразумевано
+        Smooth Playback: Глатка репродукција
+        Custom: Прилагођено
+      Buffer Ahead: Бафер унапред
+      Buffer Ahead Tooltip: 'Колико далеко од тренутне позиције се учитава. При високим квалитетима ограничења меморије могу ограничити веома високе вредности. Подразумевано: {value}'
+      Rewind Buffer: Бафер за премотавање уназад
+      Rewind Buffer Tooltip: 'Колико већ одгледаног видео снимка остаје учитано. Подразумевано: {value}'
+      Buffer Before Playing: Бафер пре репродукције
+      Buffer Before Playing Tooltip: 'Колико видео снимка мора да се учита пре него што репродукција почне или се настави након застоја. Подразумевано: {value}'
     Quality Limit on Metered Networks:
       Quality Limit on Metered Networks: "Највиши квалитет на мрежама са ограничењем података"
       No Limit: "Без ограничења"

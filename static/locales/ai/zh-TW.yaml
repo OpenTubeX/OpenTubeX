@@ -646,6 +646,24 @@ Settings:
         Destructive pressed: 危險操作的按下狀態
         Text and icons on destructive actions: 危險操作上的文字與圖示
   Player Settings:
+    Buffering:
+      Buffering: 緩衝
+      Description: 選擇播放器要預先載入並保留多少影片內容。
+      Buffer Ahead Hint: 前向緩衝越大，越能在連線中斷較久時持續播放，但會下載您可能不會觀看的影片。
+      Rewind Buffer Hint: 倒帶緩衝越大，往回跳轉時越不必重新下載，但會使用更多記憶體。
+      Buffer Before Playing Hint: 播放前等待載入更多影片，可避免在連線不穩定時反覆停頓，但影片開始播放以及跳轉後恢復播放都會比較久。
+      Preset: 緩衝方案
+      Presets:
+        Data Saver: 節省流量
+        Default: 預設
+        Smooth Playback: 流暢播放
+        Custom: 自訂
+      Buffer Ahead: 前向緩衝
+      Buffer Ahead Tooltip: 要從目前位置往後載入多遠。在高畫質下，記憶體限制可能會限制很高的值。預設值：{value}
+      Rewind Buffer: 倒帶緩衝
+      Rewind Buffer Tooltip: 已觀看的影片要保留多少已載入的內容。預設值：{value}
+      Buffer Before Playing: 起播緩衝
+      Buffer Before Playing Tooltip: 開始播放前，或停頓後恢復播放前，需要載入多少影片。預設值：{value}
     Quality Limit on Metered Networks:
       Quality Limit on Metered Networks: "計量付費網路的畫質上限"
       No Limit: "無上限"

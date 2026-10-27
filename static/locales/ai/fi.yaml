@@ -651,6 +651,24 @@ Settings:
         Destructive pressed: Poistava toiminto painettaessa
         Text and icons on destructive actions: Poistavien toimintojen teksti ja kuvakkeet
   Player Settings:
+    Buffering:
+      Buffering: Puskurointi
+      Description: Valitse, kuinka paljon videota soitin lataa etukäteen ja pitää ladattuna.
+      Buffer Ahead Hint: Suurempi ennakkopuskuri pitää toiston käynnissä pidempienkin yhteyskatkosten ajan, mutta lataa videota, jota et ehkä katso.
+      Rewind Buffer Hint: Suurempi taaksekelauspuskuri antaa hypätä taaksepäin lataamatta uudelleen, mutta käyttää enemmän muistia.
+      Buffer Before Playing Hint: Kun odotat ennen toistoa, että videota latautuu enemmän, toistuvat katkot epävakailla yhteyksillä estyvät, mutta videot alkavat ja jatkuvat kelauksen jälkeen hitaammin.
+      Preset: Puskuroinnin esiasetus
+      Presets:
+        Data Saver: Datansäästö
+        Default: Oletus
+        Smooth Playback: Sujuva toisto
+        Custom: Mukautettu
+      Buffer Ahead: Ennakkopuskuri
+      Buffer Ahead Tooltip: 'Kuinka pitkälle nykyisen kohdan edelle ladataan. Korkeilla laaduilla muistirajat voivat rajoittaa hyvin suuria arvoja. Oletus: {value}'
+      Rewind Buffer: Taaksekelauspuskuri
+      Rewind Buffer Tooltip: 'Kuinka paljon jo katsomastasi videosta pysyy ladattuna. Oletus: {value}'
+      Buffer Before Playing: Puskuri ennen toistoa
+      Buffer Before Playing Tooltip: 'Kuinka paljon videota on ladattava ennen kuin toisto alkaa tai jatkuu puskurin tyhjennyttyä. Oletus: {value}'
     Quality Limit on Metered Networks:
       Quality Limit on Metered Networks: "Laaturaja rajoitetuissa verkoissa"
       No Limit: "Ei rajaa"

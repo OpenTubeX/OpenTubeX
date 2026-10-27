@@ -646,6 +646,24 @@ Settings:
         Destructive pressed: Azione distruttiva premuta
         Text and icons on destructive actions: Testo e icone sulle azioni distruttive
   Player Settings:
+    Buffering:
+      Buffering: Buffering
+      Description: Scegli quanta parte del video il lettore carica in anticipo e mantiene caricata.
+      Buffer Ahead Hint: Un buffer in avanti più ampio mantiene attiva la riproduzione durante interruzioni di connessione più lunghe, ma scarica video che potresti non guardare.
+      Rewind Buffer Hint: Un buffer all'indietro più ampio ti permette di tornare indietro senza scaricare di nuovo, ma usa più memoria.
+      Buffer Before Playing Hint: Attendere più video prima della riproduzione evita pause ripetute con connessioni instabili, ma i video impiegano più tempo ad avviarsi e a riprendere dopo un salto.
+      Preset: Preimpostazione del buffering
+      Presets:
+        Data Saver: Risparmio dati
+        Default: Predefinito
+        Smooth Playback: Riproduzione fluida
+        Custom: Personalizzato
+      Buffer Ahead: Buffer in avanti
+      Buffer Ahead Tooltip: 'Fin dove caricare oltre la posizione attuale. Alle qualità elevate, i limiti di memoria possono limitare i valori molto alti. Predefinito: {value}'
+      Rewind Buffer: Buffer all'indietro
+      Rewind Buffer Tooltip: 'Quanta parte del video già visto resta caricata. Predefinito: {value}'
+      Buffer Before Playing: Buffer prima della riproduzione
+      Buffer Before Playing Tooltip: 'Quanta parte del video deve essere caricata prima che la riproduzione inizi, o riprenda dopo un''interruzione. Predefinito: {value}'
     Quality Limit on Metered Networks:
       Quality Limit on Metered Networks: "Limite di qualità sulle reti a consumo"
       No Limit: "Nessun limite"

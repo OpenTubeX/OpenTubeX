@@ -647,6 +647,24 @@ Settings:
         Destructive pressed: 破壊的な操作の押下時
         Text and icons on destructive actions: 破壊的な操作上のテキストとアイコン
   Player Settings:
+    Buffering:
+      Buffering: バッファリング
+      Description: プレーヤーが動画をどれだけ先読みし、読み込んだまま保持するかを選択します。
+      Buffer Ahead Hint: 先読みバッファを増やすと、接続が長めに途切れても再生が続きますが、視聴しないかもしれない部分までダウンロードします。
+      Rewind Buffer Hint: 巻き戻しバッファを大きくすると、再ダウンロードせずに前の位置へ戻れますが、メモリの使用量が増えます。
+      Buffer Before Playing Hint: 再生前により多くの動画を読み込むと、不安定な接続で何度も止まるのを防げますが、再生の開始やシーク後の再開に時間がかかります。
+      Preset: バッファリングのプリセット
+      Presets:
+        Data Saver: データ節約
+        Default: デフォルト
+        Smooth Playback: スムーズな再生
+        Custom: カスタム
+      Buffer Ahead: 先読みバッファ
+      Buffer Ahead Tooltip: '現在の位置からどこまで先を読み込むかです。高画質では、メモリの制限により非常に大きな値が抑えられる場合があります。既定: {value}'
+      Rewind Buffer: 巻き戻しバッファ
+      Rewind Buffer Tooltip: '視聴済みの部分をどれだけ読み込んだまま保持するかです。既定: {value}'
+      Buffer Before Playing: 再生前のバッファ
+      Buffer Before Playing Tooltip: '再生を開始する前、または止まった後に再開する前に読み込んでおく必要がある動画の量です。既定: {value}'
     Quality Limit on Metered Networks:
       Quality Limit on Metered Networks: "従量制ネットワークでの画質上限"
       No Limit: "上限なし"

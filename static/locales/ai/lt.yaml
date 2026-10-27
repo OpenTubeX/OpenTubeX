@@ -834,6 +834,24 @@ Settings:
       Everforest Light Blue: Everforest Light Blue
       Everforest Light Purple: Everforest Light Purple
   Player Settings:
+    Buffering:
+      Buffering: Buferizavimas
+      Description: Pasirinkite, kiek vaizdo įrašo grotuvas įkelia iš anksto ir laiko įkelto.
+      Buffer Ahead Hint: Didesnis buferis į priekį leidžia tęsti atkūrimą per ilgesnius ryšio nutrūkimus, tačiau atsisiunčiama vaizdo įrašo dalis, kurios galbūt nežiūrėsite.
+      Rewind Buffer Hint: Didesnis buferis atgal leidžia grįžti atgal nesiunčiant iš naujo, tačiau naudoja daugiau atminties.
+      Buffer Before Playing Hint: Laukiant daugiau vaizdo įrašo prieš atkūrimą išvengiama pasikartojančių sustojimų esant nestabiliam ryšiui, tačiau vaizdo įrašų paleidimas ir tęsimas po peršokimo užtrunka ilgiau.
+      Preset: Buferizavimo profilis
+      Presets:
+        Data Saver: Duomenų taupymas
+        Default: Numatytasis
+        Smooth Playback: Sklandus atkūrimas
+        Custom: Pasirinktinis
+      Buffer Ahead: Buferis į priekį
+      Buffer Ahead Tooltip: 'Kiek toli už dabartinės vietos įkeliama. Esant aukštai kokybei, atminties apribojimai gali riboti labai dideles reikšmes. Numatyta: {value}'
+      Rewind Buffer: Buferis atgal
+      Rewind Buffer Tooltip: 'Kiek jau peržiūrėto vaizdo įrašo lieka įkelta. Numatyta: {value}'
+      Buffer Before Playing: Buferis prieš atkūrimą
+      Buffer Before Playing Tooltip: 'Kiek vaizdo įrašo turi būti įkelta, kad atkūrimas prasidėtų arba būtų tęsiamas po sustojimo. Numatyta: {value}'
     Quality Limit on Metered Networks:
       Quality Limit on Metered Networks: "Kokybės riba matuojamuose tinkluose"
       No Limit: "Be ribos"

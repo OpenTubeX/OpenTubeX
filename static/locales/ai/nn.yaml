@@ -732,6 +732,24 @@ Settings:
       Everforest Light Blue: Everforest Light Blue
       Everforest Light Purple: Everforest Light Purple
   Player Settings:
+    Buffering:
+      Buffering: Bufring
+      Description: Vel kor mykje av videoen avspelaren lastar inn på førehand og held innlasta.
+      Buffer Ahead Hint: Meir buffer framover held avspelinga i gang gjennom lengre brot i sambandet, men lastar ned video du kanskje ikkje ser.
+      Rewind Buffer Hint: Ein større buffer bakover lèt deg hoppe tilbake utan å laste ned på nytt, men brukar meir minne.
+      Buffer Before Playing Hint: Å vente på meir video før avspeling hindrar gjentekne stopp på ustabile samband, men videoar brukar lengre tid på å starte og på å halde fram etter spoling.
+      Preset: Førehandsinnstilling for bufring
+      Presets:
+        Data Saver: Datasparing
+        Default: Standard
+        Smooth Playback: Jamn avspeling
+        Custom: Eigendefinert
+      Buffer Ahead: Buffer framover
+      Buffer Ahead Tooltip: 'Kor langt forbi gjeldande posisjon som blir lasta inn. Ved høg kvalitet kan minnegrenser avgrense svært høge verdiar. Standard: {value}'
+      Rewind Buffer: Buffer bakover
+      Rewind Buffer Tooltip: 'Kor mykje av videoen du alt har sett som blir verande innlasta. Standard: {value}'
+      Buffer Before Playing: Buffer før avspeling
+      Buffer Before Playing Tooltip: 'Kor mykje av videoen som må lastast inn før avspelinga startar, eller held fram etter at ho har stoppa opp. Standard: {value}'
     Quality Limit on Metered Networks:
       Quality Limit on Metered Networks: "Kvalitetsgrense på nettverk med datamåling"
       No Limit: "Inga grense"

@@ -965,6 +965,24 @@ Settings:
       Quality Limit on Metered Networks: Qualitätsgrenze in getakteten Netzwerken
       No Limit: Keine Begrenzung
       Tooltip: Im Mobilfunknetz und in anderen getakteten Netzwerken starten Videos höchstens in dieser Qualität. Im Player kannst du weiterhin eine höhere Qualität wählen.
+    Buffering:
+      Buffering: Pufferung
+      Description: Lege fest, wie viel vom Video der Player im Voraus lädt und geladen hält.
+      Buffer Ahead Hint: Ein größerer Vorauspuffer überbrückt längere Verbindungsabbrüche, lädt aber Video herunter, das du vielleicht nicht ansiehst.
+      Rewind Buffer Hint: Ein größerer Rückspulpuffer lässt dich zurückspringen, ohne erneut herunterzuladen, belegt aber mehr Arbeitsspeicher.
+      Buffer Before Playing Hint: Mehr Puffer vor der Wiedergabe verhindert wiederholtes Stocken bei instabiler Verbindung, aber Videos starten langsamer und laufen nach dem Spulen später weiter.
+      Preset: Puffer-Voreinstellung
+      Presets:
+        Data Saver: Datensparend
+        Default: Standard
+        Smooth Playback: Flüssige Wiedergabe
+        Custom: Benutzerdefiniert
+      Buffer Ahead: Vorauspuffer
+      Buffer Ahead Tooltip: 'Wie weit über die aktuelle Stelle hinaus geladen wird. Bei hohen Qualitäten können Speichergrenzen sehr hohe Werte begrenzen. Standard: {value}'
+      Rewind Buffer: Rückspulpuffer
+      Rewind Buffer Tooltip: 'Wie viel vom bereits angesehenen Video geladen bleibt. Standard: {value}'
+      Buffer Before Playing: Puffer vor der Wiedergabe
+      Buffer Before Playing Tooltip: 'Wie viel vom Video geladen sein muss, bevor die Wiedergabe startet oder nach einem Aussetzer weiterläuft. Standard: {value}'
     Next Video Interval: Countdown für Automatische Wiedergabe
     Display Play Button In Video Player: Wiedergabetaste im Video-Player anzeigen
     Scroll Volume Over Video Player: Lautstärke durch Scrollen ändern

@@ -749,6 +749,24 @@ Settings:
       Everforest Light Blue: Everforest Claro Azul
       Everforest Light Purple: Everforest Claro Morado
   Player Settings:
+    Buffering:
+      Buffering: Almacenamiento en búfer
+      Description: Elige cuánto video carga el reproductor por adelantado y cuánto mantiene cargado.
+      Buffer Ahead Hint: Un búfer por adelantado mayor mantiene la reproducción durante cortes de conexión más largos, pero descarga video que quizás no veas.
+      Rewind Buffer Hint: Un búfer de retroceso mayor te permite regresar sin descargar de nuevo, pero usa más memoria.
+      Buffer Before Playing Hint: Esperar a que cargue más video antes de reproducir evita pausas repetidas en conexiones inestables, pero los videos tardan más en empezar y en continuar después de saltar a otro punto.
+      Preset: Preajuste de búfer
+      Presets:
+        Data Saver: Ahorro de datos
+        Default: Predeterminado
+        Smooth Playback: Reproducción fluida
+        Custom: Personalizado
+      Buffer Ahead: Búfer por adelantado
+      Buffer Ahead Tooltip: 'Cuánto se carga más allá de la posición actual. En calidades altas, los límites de memoria pueden restringir los valores muy altos. Predeterminado: {value}'
+      Rewind Buffer: Búfer de retroceso
+      Rewind Buffer Tooltip: 'Cuánto del video que ya viste permanece cargado. Predeterminado: {value}'
+      Buffer Before Playing: Búfer antes de reproducir
+      Buffer Before Playing Tooltip: 'Cuánto video tiene que cargarse antes de que empiece la reproducción, o de que continúe después de quedarse sin búfer. Predeterminado: {value}'
     Quality Limit on Metered Networks:
       Quality Limit on Metered Networks: "Límite de calidad en redes con medición"
       No Limit: "Sin límite"

@@ -647,6 +647,24 @@ Settings:
         Destructive pressed: "Ober distrujus pouezet"
         Text and icons on destructive actions: "Testenn hag arlunioù war an oberoù distrujus"
   Player Settings:
+    Buffering:
+      Buffering: Memor c'hortoz
+      Description: Dibabit pegement a video a vez karget a-raok ha miret karget gant al lenner.
+      Buffer Ahead Hint: Gant muioc'h a vemor c'hortoz a-raok e kendalc'h al lenn e-pad troc'hoù kennask hiroc'h, met pellgarget e vez video na sellot ket outañ marteze.
+      Rewind Buffer Hint: Gant ur vemor c'hortoz brasoc'h evit mont war-gil e c'hallit lammat war-gil hep pellgargañ en-dro, met muioc'h a vemor a vez implijet.
+      Buffer Before Playing Hint: Gortoz ma vefe karget muioc'h a video a-raok al lenn a vir ouzh an ehanoù liesaet gant ur c'hennask diston, met hiroc'h e vez ar videoioù o loc'hañ hag oc'h adkregiñ goude lammat.
+      Preset: Rakarventenn ar vemor c'hortoz
+      Presets:
+        Data Saver: Espern roadennoù
+        Default: Dre ziouer
+        Smooth Playback: Lenn flour
+        Custom: Personelaet
+      Buffer Ahead: Memor c'hortoz a-raok
+      Buffer Ahead Tooltip: 'Pegen pell goude al lec''h a-vremañ e vez karget. Gant galiteoù uhel e c''hall bevennoù ar vemor bevenniñ an talvoudoù uhel-tre. Dre ziouer: {value}'
+      Rewind Buffer: Memor c'hortoz evit mont war-gil
+      Rewind Buffer Tooltip: 'Pegement eus ar video sellet outañ dija a chom karget. Dre ziouer: {value}'
+      Buffer Before Playing: Memor c'hortoz a-raok al lenn
+      Buffer Before Playing Tooltip: 'Pegement a video a rank bezañ karget a-raok ma krog al lenn, pe ma kendalc''h goude bezañ ehanet. Dre ziouer: {value}'
     Quality Limit on Metered Networks:
       Quality Limit on Metered Networks: "Bevenn ar galite war ar rouedadoù muzuliet"
       No Limit: "Bevenn ebet"

@@ -651,6 +651,24 @@ Settings:
         Destructive pressed: الضغط المدمر
         Text and icons on destructive actions: النص والأيقونات على الإجراءات المدمرة
   Player Settings:
+    Buffering:
+      Buffering: التخزين المؤقت
+      Description: اختر مقدار الفيديو الذي يحمّله المشغّل مسبقًا ويبقيه محمَّلًا.
+      Buffer Ahead Hint: كلما كبر المخزن المؤقت الأمامي استمر التشغيل خلال انقطاعات الاتصال الأطول، لكنه يُنزّل فيديو قد لا تشاهده.
+      Rewind Buffer Hint: يتيح لك مخزن مؤقت أكبر للترجيع الرجوع إلى الخلف دون إعادة التنزيل، لكنه يستهلك ذاكرة أكبر.
+      Buffer Before Playing Hint: انتظار تحميل جزء أكبر من الفيديو قبل التشغيل يمنع التوقفات المتكررة عند عدم استقرار الاتصال، لكن الفيديوهات تستغرق وقتًا أطول لتبدأ ولتُستأنف بعد التنقل.
+      Preset: الإعداد المسبق للتخزين المؤقت
+      Presets:
+        Data Saver: توفير البيانات
+        Default: الافتراضي
+        Smooth Playback: تشغيل سلس
+        Custom: مخصص
+      Buffer Ahead: المخزن المؤقت الأمامي
+      Buffer Ahead Tooltip: 'إلى أي مدى بعد الموضع الحالي يتم التحميل. في الجودات العالية، قد تحدّ قيود الذاكرة من القيم المرتفعة جدًا. الافتراضي: {value}'
+      Rewind Buffer: المخزن المؤقت للترجيع
+      Rewind Buffer Tooltip: 'مقدار ما شاهدته من الفيديو ويبقى محمَّلًا. الافتراضي: {value}'
+      Buffer Before Playing: التخزين المؤقت قبل التشغيل
+      Buffer Before Playing Tooltip: 'مقدار الفيديو الذي يجب تحميله قبل بدء التشغيل، أو قبل استئنافه بعد توقفه. الافتراضي: {value}'
     Quality Limit on Metered Networks:
       Quality Limit on Metered Networks: "حد الجودة على الشبكات المحدودة"
       No Limit: "بلا حد"

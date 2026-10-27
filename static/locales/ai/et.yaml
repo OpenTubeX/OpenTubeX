@@ -647,6 +647,24 @@ Settings:
         Destructive pressed: Pöördumatu toiming vajutamisel
         Text and icons on destructive actions: Pöördumatute toimingute tekst ja ikoonid
   Player Settings:
+    Buffering:
+      Buffering: Puhverdamine
+      Description: Vali, kui palju videost mängija ette laadib ja laadituna hoiab.
+      Buffer Ahead Hint: Suurem ettepuhver hoiab esitust käigus ka pikemate ühenduskatkestuste ajal, kuid laadib alla videot, mida sa ei pruugi vaadata.
+      Rewind Buffer Hint: Suurem tagasikerimise puhver võimaldab tagasi hüpata ilma uuesti alla laadimata, kuid kasutab rohkem mälu.
+      Buffer Before Playing Hint: Kui ootad enne esitust rohkem videot ära, hoiab see ebastabiilse ühenduse korral ära korduvad seisakud, kuid videod käivituvad ja jätkuvad pärast kerimist aeglasemalt.
+      Preset: Puhverdamise eelseadistus
+      Presets:
+        Data Saver: Andmesääst
+        Default: Vaikimisi
+        Smooth Playback: Sujuv esitus
+        Custom: Kohandatud
+      Buffer Ahead: Ettepuhver
+      Buffer Ahead Tooltip: 'Kui kaugele praegusest kohast ette laaditakse. Kõrge kvaliteedi korral võivad mälupiirangud väga suuri väärtusi piirata. Vaikimisi: {value}'
+      Rewind Buffer: Tagasikerimise puhver
+      Rewind Buffer Tooltip: 'Kui palju juba vaadatud videost jääb laadituks. Vaikimisi: {value}'
+      Buffer Before Playing: Puhver enne esitust
+      Buffer Before Playing Tooltip: 'Kui palju videost peab olema laaditud, enne kui esitus algab või pärast puhvri tühjenemist jätkub. Vaikimisi: {value}'
     Quality Limit on Metered Networks:
       Quality Limit on Metered Networks: "Kvaliteedi piirang mahupiiranguga võrkudes"
       No Limit: "Piirang puudub"

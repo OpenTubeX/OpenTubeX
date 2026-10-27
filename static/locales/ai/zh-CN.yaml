@@ -646,6 +646,24 @@ Settings:
         Destructive pressed: 危险操作按下状态
         Text and icons on destructive actions: 危险操作的文本和图标
   Player Settings:
+    Buffering:
+      Buffering: 缓冲
+      Description: 选择播放器提前加载并保留多少视频内容。
+      Buffer Ahead Hint: 前向缓冲越大，越能在较长时间断网时持续播放，但会下载你可能不会观看的视频。
+      Rewind Buffer Hint: 回退缓冲越大，往回跳转时越无需重新下载，但占用的内存也越多。
+      Buffer Before Playing Hint: 播放前等待加载更多视频，可避免网络不稳定时反复卡顿，但视频开始播放以及跳转后恢复播放都会更慢。
+      Preset: 缓冲预设
+      Presets:
+        Data Saver: 省流量
+        Default: 默认
+        Smooth Playback: 流畅播放
+        Custom: 自定义
+      Buffer Ahead: 前向缓冲
+      Buffer Ahead Tooltip: 从当前位置往后加载多远。在高画质下，内存限制可能会限制很高的值。默认值：{value}
+      Rewind Buffer: 回退缓冲
+      Rewind Buffer Tooltip: 已观看的视频保留多少已加载内容。默认值：{value}
+      Buffer Before Playing: 起播缓冲
+      Buffer Before Playing Tooltip: 开始播放前，或卡顿后恢复播放前，需要加载多少视频。默认值：{value}
     Quality Limit on Metered Networks:
       Quality Limit on Metered Networks: "按流量计费网络的质量上限"
       No Limit: "无上限"

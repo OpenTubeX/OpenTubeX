@@ -649,6 +649,24 @@ Settings:
         Destructive pressed: Silinmə elementi basıldıqda
         Text and icons on destructive actions: Silinmə əməliyyatlarında mətn və nişanlar
   Player Settings:
+    Buffering:
+      Buffering: Buferləmə
+      Description: Pleyerin videonun nə qədərini əvvəlcədən yükləyəcəyini və yüklü saxlayacağını seçin.
+      Buffer Ahead Hint: Daha böyük irəli bufer daha uzun bağlantı kəsilmələrində oynatmanı davam etdirir, lakin bəlkə də izləməyəcəyiniz videonu endirir.
+      Rewind Buffer Hint: Daha böyük geri çevirmə buferi yenidən endirmədən geri qayıtmağa imkan verir, lakin daha çox yaddaş istifadə edir.
+      Buffer Before Playing Hint: Oynatmadan əvvəl videonun daha çox hissəsinin yüklənməsini gözləmək qeyri-sabit bağlantılarda təkrarlanan dayanmaların qarşısını alır, lakin videoların başlaması və keçiddən sonra davam etməsi daha uzun çəkir.
+      Preset: Buferləmə hazır ayarı
+      Presets:
+        Data Saver: Verilənlərə qənaət
+        Default: İlkin
+        Smooth Playback: Rəvan oynatma
+        Custom: Fərdi
+      Buffer Ahead: İrəli bufer
+      Buffer Ahead Tooltip: 'Cari mövqedən nə qədər irəli yüklənəcəyi. Yüksək keyfiyyətlərdə yaddaş limitləri çox yüksək dəyərləri məhdudlaşdıra bilər. İlkin: {value}'
+      Rewind Buffer: Geri çevirmə buferi
+      Rewind Buffer Tooltip: 'Artıq izlədiyiniz videonun nə qədərinin yüklü qalacağı. İlkin: {value}'
+      Buffer Before Playing: Oynatmadan əvvəl bufer
+      Buffer Before Playing Tooltip: 'Oynatma başlamazdan əvvəl və ya dayandıqdan sonra davam etməzdən əvvəl videonun nə qədərinin yüklənməli olduğu. İlkin: {value}'
     Quality Limit on Metered Networks:
       Quality Limit on Metered Networks: "Limitli şəbəkələrdə keyfiyyət həddi"
       No Limit: "Məhdudiyyət yoxdur"

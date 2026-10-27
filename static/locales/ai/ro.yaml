@@ -647,6 +647,24 @@ Settings:
         Destructive pressed: Acțiune distructivă la apăsare
         Text and icons on destructive actions: Text și pictograme pentru acțiunile distructive
   Player Settings:
+    Buffering:
+      Buffering: Memorie tampon
+      Description: Alege cât din videoclip încarcă playerul în avans și cât păstrează încărcat.
+      Buffer Ahead Hint: O memorie tampon în avans mai mare menține redarea în timpul întreruperilor mai lungi ale conexiunii, dar descarcă video pe care s-ar putea să nu-l urmărești.
+      Rewind Buffer Hint: O memorie tampon pentru derulare înapoi mai mare îți permite să sari înapoi fără a descărca din nou, dar folosește mai multă memorie.
+      Buffer Before Playing Hint: Dacă aștepți să se încarce mai mult video înainte de redare, eviți întreruperile repetate pe conexiuni instabile, dar videoclipurile pornesc mai lent și reiau redarea mai lent după un salt.
+      Preset: Presetare memorie tampon
+      Presets:
+        Data Saver: Economisire date
+        Default: Implicit
+        Smooth Playback: Redare fluentă
+        Custom: Personalizat
+      Buffer Ahead: Memorie tampon în avans
+      Buffer Ahead Tooltip: 'Cât de departe de poziția curentă se încarcă. La calități înalte, limitele de memorie pot plafona valorile foarte mari. Implicit: {value}'
+      Rewind Buffer: Memorie tampon pentru derulare înapoi
+      Rewind Buffer Tooltip: 'Cât din videoclipul deja vizionat rămâne încărcat. Implicit: {value}'
+      Buffer Before Playing: Memorie tampon înainte de redare
+      Buffer Before Playing Tooltip: 'Cât din videoclip trebuie să se încarce înainte ca redarea să înceapă sau să continue după o întrerupere. Implicit: {value}'
     Quality Limit on Metered Networks:
       Quality Limit on Metered Networks: "Limită de calitate în rețelele contorizate"
       No Limit: "Fără limită"

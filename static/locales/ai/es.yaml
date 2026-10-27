@@ -606,6 +606,24 @@ Settings:
         Destructive pressed: Acción destructiva al pulsarla
         Text and icons on destructive actions: Texto e iconos de las acciones destructivas
   Player Settings:
+    Buffering:
+      Buffering: Almacenamiento en búfer
+      Description: Elige cuánto vídeo carga el reproductor por adelantado y mantiene cargado.
+      Buffer Ahead Hint: Un búfer de avance mayor mantiene la reproducción durante cortes de conexión más largos, pero descarga vídeo que quizá no veas.
+      Rewind Buffer Hint: Un búfer de retroceso mayor te permite volver atrás sin descargar de nuevo, pero usa más memoria.
+      Buffer Before Playing Hint: Esperar a cargar más vídeo antes de reproducir evita parones repetidos en conexiones inestables, pero los vídeos tardan más en empezar y en continuar tras saltar.
+      Preset: Ajuste predefinido del búfer
+      Presets:
+        Data Saver: Ahorro de datos
+        Default: Predeterminado
+        Smooth Playback: Reproducción fluida
+        Custom: Personalizado
+      Buffer Ahead: Búfer de avance
+      Buffer Ahead Tooltip: 'Hasta dónde se carga más allá de la posición actual. En calidades altas, los límites de memoria pueden restringir los valores muy altos. Predeterminado: {value}'
+      Rewind Buffer: Búfer de retroceso
+      Rewind Buffer Tooltip: 'Cuánto del vídeo que ya has visto permanece cargado. Predeterminado: {value}'
+      Buffer Before Playing: Búfer antes de reproducir
+      Buffer Before Playing Tooltip: 'Cuánto vídeo debe cargarse antes de que empiece la reproducción, o de que continúe tras detenerse. Predeterminado: {value}'
     Quality Limit on Metered Networks:
       Quality Limit on Metered Networks: "Límite de calidad en redes con medición"
       No Limit: "Sin límite"

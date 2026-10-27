@@ -120,6 +120,7 @@ import { preferOriginalHlsAudio } from '../../helpers/player/hlsAudioTracks'
 import { getDefaultAudioVariants } from '../../helpers/player/defaultAudioTrack'
 import { MUSIC_MEDIA_TYPE } from '../../helpers/player/musicMediaType'
 import { resolveSegmentPrefetchLimit } from '../../helpers/player/segmentPrefetch'
+import { getBufferingConfig } from '../../helpers/player/buffering'
 import { AUTO_QUALITY_FALLBACK, streamsSupportAutoQuality } from '../../helpers/player/autoQuality'
 import { getMeteredAutoQualityMaxPixels, limitQualityOnMeteredNetwork } from '../../helpers/player/meteredNetworkQuality'
 import { setupSabrScheme } from '../../helpers/player/SabrSchemePlugin'
@@ -2331,6 +2332,17 @@ export default defineComponent({
       player?.configure('streaming.segmentPrefetchLimit', newValue)
     })
 
+    /** @type {import('vue').ComputedRef<ReturnType<typeof getBufferingConfig>>} */
+    const bufferingConfig = computed(() => getBufferingConfig({
+      bufferAhead: store.getters.getBufferAhead,
+      bufferBehind: store.getters.getBufferBehind,
+      bufferBeforePlaying: store.getters.getBufferBeforePlaying,
+    }))
+
+    watch(bufferingConfig, (newValue) => {
+      player?.configure({ streaming: newValue })
+    })
+
     /**
      * @param {'dash'|'audio'|'legacy'} format
      * @param {boolean} useAutoQuality
@@ -2343,12 +2355,8 @@ export default defineComponent({
       const preferredCodecs = getCodecPrefixes(store.getters.getPreferredVideoCodec)
 
       return {
-        // YouTube uses these values and they seem to work well in FreeTube too,
-        // so we might as well use them
         streaming: {
-          bufferingGoal: 180,
-          rebufferingGoal: 0.02,
-          bufferBehind: 300,
+          ...bufferingConfig.value,
           segmentPrefetchLimit: segmentPrefetchLimit.value,
           // Keep every codec selectable, automatic quality chooses them itself
           dontChooseCodecs: supportsSmoothCodecSwitching()
