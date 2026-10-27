@@ -1,3 +1,4 @@
+// @ts-check
 import { app, systemPreferences } from 'electron'
 import { getFonts } from 'font-list'
 import { hostname, release } from 'node:os'

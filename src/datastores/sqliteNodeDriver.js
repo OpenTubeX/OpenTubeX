@@ -1,3 +1,4 @@
+// @ts-check
 import { rmSync } from 'node:fs'
 import { basename, dirname, join } from 'node:path'
 import { DatabaseSync } from 'node:sqlite'
@@ -15,6 +16,7 @@ const REBUILDABLE_DATABASES = new Set(['subscription-cache'])
  * @returns {import('./sqlite.js').SqliteDriver}
  */
 export function createNodeSqliteDriver(filename, backupDirectory = dirname(filename)) {
+  /** @type {DatabaseSync | null} */
   let db = null
   const statements = new Map()
 
@@ -24,7 +26,7 @@ export function createNodeSqliteDriver(filename, backupDirectory = dirname(filen
     db.exec('PRAGMA busy_timeout = 5000')
     // Persistent settings apply only to a database this version is creating,
     // so a newer version's database stays untouched until its schema is checked.
-    if (db.prepare('PRAGMA user_version').get().user_version === 0) {
+    if (/** @type {{ user_version: number }} */ (db.prepare('PRAGMA user_version').get()).user_version === 0) {
       // Takes effect only before the first table exists. Compaction can then
       // release free pages without rewriting the whole database. Each sync is
       // slow on a busy disk, so this header write skips its own: switching to
@@ -58,14 +60,14 @@ export function createNodeSqliteDriver(filename, backupDirectory = dirname(filen
 
   return {
     async execute(list, transaction = false) {
-      open()
-      if (transaction) db.exec('BEGIN IMMEDIATE')
+      const database = open()
+      if (transaction) database.exec('BEGIN IMMEDIATE')
       try {
         const results = list.map(([sql, params = []]) => prepare(sql).all(...params))
-        if (transaction) db.exec('COMMIT')
+        if (transaction) database.exec('COMMIT')
         return results
       } catch (error) {
-        if (transaction && db.isTransaction) db.exec('ROLLBACK')
+        if (transaction && database.isTransaction) database.exec('ROLLBACK')
         throw error
       }
     },

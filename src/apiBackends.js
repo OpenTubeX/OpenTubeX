@@ -1,3 +1,4 @@
+// @ts-check
 /**
  * Invidious and Yattee servers share the Invidious-compatible API.
  * @param {string} backend

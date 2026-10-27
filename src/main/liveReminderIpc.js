@@ -1,3 +1,4 @@
+// @ts-check
 import { Notification } from 'electron'
 
 import { IpcChannels } from '../constants'

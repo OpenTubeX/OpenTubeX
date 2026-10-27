@@ -1,3 +1,4 @@
+// @ts-check
 import { app, BrowserWindow, dialog } from 'electron'
 
 import { IpcChannels } from '../constants'
@@ -21,6 +22,7 @@ export function setupBackupIpc({ createBackupArchive, updateSettingFromMain, che
 
   handleTrusted(IpcChannels.CHOOSE_SCHEDULED_BACKUP_FOLDER, async (event) => {
     const currentPath = (await baseHandlers.settings._findOne('scheduledBackupFolderPath'))?.value
+    /** @type {import('electron').OpenDialogOptions} */
     const options = { defaultPath: currentPath || app.getPath('documents'), properties: ['openDirectory', 'createDirectory'] }
     const window = BrowserWindow.fromWebContents(event.sender)
     const result = await (window ? dialog.showOpenDialog(window, options) : dialog.showOpenDialog(options))

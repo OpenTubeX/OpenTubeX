@@ -1,3 +1,4 @@
+// @ts-check
 import { createHash } from 'node:crypto'
 import { createReadStream, existsSync, lstatSync, readlinkSync, realpathSync, rmSync, statSync } from 'node:fs'
 import { basename, dirname, join, resolve } from 'node:path'
@@ -15,6 +16,7 @@ export { createNodeSqliteDriver }
  * @returns {(filename: string, backupDirectory?: string) => import('./sqlite.js').SqliteDriver}
  */
 export function createWorkerDrivers(workerPath) {
+  /** @type {ReturnType<typeof start> | null} */
   let current = null
   let nextId = 0
 
@@ -77,7 +79,7 @@ export function createNedbFileSource(filename) {
       const path = source()
       if (!path) return { data: [], indexes: [] }
       const loader = new Datastore({ inMemoryOnly: true, corruptAlertThreshold: 1 })
-      const { data, indexes } = await loader.persistence.treatRawStreamAsync(createReadStream(path, { encoding: 'utf8' }))
+      const { data, indexes } = await /** @type {any} */ (loader.persistence).treatRawStreamAsync(createReadStream(path, { encoding: 'utf8' }))
       return { data, indexes: Object.keys(indexes) }
     },
     async fingerprint() {

@@ -1,3 +1,4 @@
+// @ts-check
 let remoteSyncDispatchDepth = 0
 
 // Vuex calls action subscribers synchronously when dispatch starts. Scope this

@@ -1,3 +1,4 @@
+// @ts-check
 import { app, session } from 'electron'
 import { lstat, readdir, rm, stat } from 'node:fs/promises'
 import { basename, join } from 'node:path'

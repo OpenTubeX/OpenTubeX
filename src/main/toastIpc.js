@@ -1,3 +1,4 @@
+// @ts-check
 import { IpcChannels } from '../constants'
 import { onTrusted, sendToAppWindows } from './ipc'
 

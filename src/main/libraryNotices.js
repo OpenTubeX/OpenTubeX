@@ -1,3 +1,4 @@
+// @ts-check
 import { BrowserWindow, ipcMain } from 'electron'
 
 import { IpcChannels } from '../constants'

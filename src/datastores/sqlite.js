@@ -172,6 +172,7 @@ export async function parseLegacyDatafile(raw) {
  * @property {() => Promise<void>} drop Deletes the database.
  * @property {() => Promise<string>} [backup] Copies the database, returning the copy's name.
  * @property {(sql: string, params?: unknown[]) => Promise<unknown[][]>} [read] Runs a large read-only query.
+ * @property {() => void | Promise<void>} [close] Closes the connection; the next statement reopens it.
  *
  * @typedef {object} LegacySource The NeDB datastore this database replaces.
  * @property {() => Promise<{ data: object[], indexes: string[] }>} read

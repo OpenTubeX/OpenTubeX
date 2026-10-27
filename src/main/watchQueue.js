@@ -1,11 +1,19 @@
+// @ts-check
 import { createWatchQueueState, watchQueueMutations, PERSISTED_MUTATIONS } from '../watchQueue.js'
 import { readFile, writeFile, rename } from 'node:fs/promises'
 
+/** @typedef {{ items: object[], revision: number }} WatchQueueSnapshot */
+
 // All Electron windows share one queue. Main applies every operation in
 // order, so delayed renderer updates cannot overwrite changes.
+/**
+ * @param {{ read: () => Promise<unknown>, write: (items: object[]) => Promise<void> }} storage
+ * @returns {(request: any) => Promise<WatchQueueSnapshot>}
+ */
 export function createSharedWatchQueue(storage) {
   let state
   let revision = 0
+  /** @type {Promise<unknown>} */
   let previousRequest = Promise.resolve()
   const apply = async request => {
     if (!state) {

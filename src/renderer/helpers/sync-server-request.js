@@ -1,3 +1,4 @@
+// @ts-check
 import { SYNC_SERVER_VERSION_HEADER } from '../../syncServerUserAgent.js'
 
 /**
