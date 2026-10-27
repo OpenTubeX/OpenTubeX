@@ -4,9 +4,11 @@ import net from 'node:net'
 import test from 'node:test'
 import dbus from 'dbus-native'
 
-test('a session bus that never answers Hello reports a connection error instead of crashing', async t => {
-  // Authenticates, then stays silent, like a session bus still busy at login
+/** A session bus that authenticates, then stays silent, like one still busy at login. */
+async function silentBus(t) {
+  const sockets = []
   const server = net.createServer(socket => {
+    sockets.push(socket)
     socket.on('error', () => {})
     socket.on('data', data => {
       const text = data.toString('latin1')
@@ -16,12 +18,31 @@ test('a session bus that never answers Hello reports a connection error instead 
   })
   server.listen(0, '127.0.0.1')
   await once(server, 'listening')
-  t.after(() => server.close())
+  t.after(() => {
+    for (const socket of sockets) socket.destroy()
+    server.close()
+  })
+  return { address: `tcp:host=127.0.0.1,port=${server.address().port}`, sockets }
+}
 
-  const bus = dbus.sessionBus({ busAddress: `tcp:host=127.0.0.1,port=${server.address().port}`, timeout: 100 })
-  const [error] = await once(bus.connection, 'error')
-  await once(bus.connection, 'close')
+test('a session bus that never answers Hello reports a connection error instead of crashing', async t => {
+  const { address } = await silentBus(t)
+  const bus = dbus.sessionBus({ busAddress: address, timeout: 100 })
+  let error
+  bus.connection.on('error', value => { error = value })
+  await new Promise(resolve => bus.connection.once('close', resolve))
 
   assert.equal(error.name, 'TimeoutError')
   assert.match(error.message, /org\.freedesktop\.DBus\.Hello/)
+})
+
+test('closing a reconnecting bus after Hello failed does not dial again', async t => {
+  const { address, sockets } = await silentBus(t)
+  const bus = dbus.sessionBus({ busAddress: address, reconnect: { minDelay: 50 }, timeout: 100 })
+  bus.connection.on('error', () => {})
+  await new Promise(resolve => bus.connection.once('close', resolve))
+  await bus.close()
+
+  await new Promise(resolve => setTimeout(resolve, 200))
+  assert.equal(sockets.length, 1)
 })

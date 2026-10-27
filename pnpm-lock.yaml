@@ -178,7 +178,7 @@ patchedDependencies:
   '@material/material-color-utilities@0.4.0': b1ce5dea9a31733ac3ddd4b236a80185e050df5f98e48bb7fd93f8ccf3f58378
   '@sqlite.org/sqlite-wasm@3.53.4-build2': 579d3e536bc0f7ef69623a576db802fe6dc8d02cfb6d6f085f190534a88941a7
   '@vue/runtime-dom@3.5.44': c83073332910a00ffdd4471e0a1d9e44607292ac7992016492fbd5a237ba37fd
-  dbus-native@0.16.2: b7554914abf7a4ebf1bd6c61916946f0dac653fe8bcd6866fcaf954fff879b98
+  dbus-native@0.16.2: 545a87830b3fe706e0fda37f4188f607a55d4db21fac4dff61f27e72736ba27a
   overlayscrollbars@2.16.0: 9a3cd83cba852554004ae8b64ca0710ed81bd0c0b2d42ecceedf3e2e25127ef3
   shaka-player@5.1.12: cf2e5c9a138eec272ac8db5df51977f756e60fed28f24946e54c67fe0e465724
   vue-sonner@2.0.9: 34b2065fecd4314653c24cdfc38ff5f2910def4942ed265ec374d66c0e5c0940
@@ -295,7 +295,7 @@ importers:
         version: 4.0.3
       dbus-native:
         specifier: ^0.16.2
-        version: 0.16.2(patch_hash=b7554914abf7a4ebf1bd6c61916946f0dac653fe8bcd6866fcaf954fff879b98)
+        version: 0.16.2(patch_hash=545a87830b3fe706e0fda37f4188f607a55d4db21fac4dff61f27e72736ba27a)
       dompurify:
         specifier: ^3.4.17
         version: 3.4.17
@@ -7492,7 +7492,7 @@ snapshots:
 
   csstype@3.2.3: {}
 
-  dbus-native@0.16.2(patch_hash=b7554914abf7a4ebf1bd6c61916946f0dac653fe8bcd6866fcaf954fff879b98):
+  dbus-native@0.16.2(patch_hash=545a87830b3fe706e0fda37f4188f607a55d4db21fac4dff61f27e72736ba27a):
     dependencies:
       xml2js: 0.6.2
 

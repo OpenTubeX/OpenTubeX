@@ -1,8 +1,18 @@
 diff --git a/lib/bus.js b/lib/bus.js
-index 10385eff055559d65b665de8c68fb9a6dc2e1672..cda3ab5d51d2e75dd823e14179c6e4ebc6565441 100644
+index 10385eff055559d65b665de8c68fb9a6dc2e1672..fafc17cfa4d288f06e84d58931b078a055c45518 100644
 --- a/lib/bus.js
 +++ b/lib/bus.js
-@@ -1011,7 +1011,16 @@ function bus(conn, opts) {
+@@ -184,6 +184,9 @@ function bus(conn, opts) {
+     return new Promise(resolve => {
+       const stream = conn.stream;
+       if (closed || !stream || stream.destroyed) {
++        // The socket is gone, but a reconnecting connection may be about to
++        // dial another one. Ending it is what stops that.
++        conn.end?.();
+         // Resolve on a later tick either way, so a caller racing the teardown
+         // does not sometimes get a synchronous answer and sometimes not.
+         return setImmediate(resolve);
+@@ -1011,7 +1014,16 @@ function bus(conn, opts) {
        // through its own 'error'/'end' events; throwing again here would turn
        // an ordinary early close into an uncaught exception.
        if (err && err.code === 'ECONNCLOSED') return;
