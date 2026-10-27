@@ -173,6 +173,70 @@ test('dragging the seek bar thumb shows a storyboard filmstrip at it', { tag: '@
   await expect(dock).toBeVisible()
 })
 
+test('the filmstrip shows earlier frames of sprite-sheet storyboards with long tiles', { tag: '@scale' }, async ({ app, page }) => {
+  await mockPlayableWatchPage(app, page)
+  await routeDemoMedia(page)
+  const video = await openMockedVideo(page)
+  const duration = await video.evaluate(element => element.duration)
+  // Like YouTube's storyboards for longer videos: one sheet whose tiles span
+  // 15 seconds each, laid out by Shaka instead of individual WebVTT cues.
+  const tileSeconds = 15
+  const tiles = Math.ceil(duration / tileSeconds)
+  await page.route('https://images.test/storyboard.svg', route => route.fulfill({
+    body: storyboardSprite(tiles),
+    contentType: 'image/svg+xml'
+  }))
+  await video.evaluate(async (element, { duration, tiles, tileSeconds, width, height }) => {
+    element.pause()
+    const sheet = 'https://images.test/storyboard.svg'
+    const player = element.ui.getControls().getPlayer()
+    const vtt = `WEBVTT\n\n00:00:00.000 --> ${new Date(duration * 1000).toISOString().slice(11, 23)}\n${sheet}\n`
+    const url = URL.createObjectURL(new Blob([vtt], { type: 'text/vtt' }))
+    try {
+      await player.addThumbnailsTrack(url, 'text/vtt')
+    } finally {
+      URL.revokeObjectURL(url)
+    }
+    // Shaka only exposes its tile classes through existing instances, and keeps
+    // a progressive source's image streams in a private (minified) field.
+    const SegmentReference = (await player.getThumbnails(null, 0)).segment.constructor
+    const stream = Object.values(player).find(value => Array.isArray(value) && value[0]?.type === 'image')[0]
+    const SegmentIndex = stream.segmentIndex.constructor
+    const layout = `${tiles}x1`
+    stream.tilesLayout = layout
+    stream.width = tiles * width
+    stream.height = height
+    stream.createSegmentIndex = async () => {
+      stream.segmentIndex = new SegmentIndex([
+        new SegmentReference(0, duration, () => [sheet], 0, null, null, 0, 0, Infinity, undefined, layout, tileSeconds)
+      ])
+    }
+    await stream.createSegmentIndex()
+  }, { duration, tiles, tileSeconds, width: TILE_WIDTH, height: TILE_HEIGHT })
+
+  const player = page.locator('.ftVideoPlayer')
+  const bar = player.locator('.shaka-seek-bar')
+  const filmstrip = player.locator('.ft-seek-filmstrip')
+  await player.hover()
+  const bounds = await bar.boundingBox()
+  const pointAt = fraction => ({ x: bounds.x + 6 + fraction * (bounds.width - 12), y: bounds.y + bounds.height / 2 })
+  const fraction = await bar.evaluate(element => (Number(element.value) - Number(element.min)) / (Number(element.max) - Number(element.min)))
+  await page.mouse.move(pointAt(fraction).x, pointAt(fraction).y)
+  await page.mouse.down()
+  await page.mouse.move(pointAt(0.8).x, pointAt(0.8).y, { steps: 4 })
+  await expect(filmstrip).toBeVisible()
+
+  // Every tile shows side by side, including those before the dragged one.
+  await expect.poll(() => filmstrip.evaluate(element => [...element.querySelectorAll('.ft-seek-filmstrip-frame')]
+    .map(frame => ({ box: frame.getBoundingClientRect(), position: frame.firstElementChild.style.backgroundPosition }))
+    .sort((a, b) => a.box.left - b.box.left)
+    .map(({ box, position }, index, frames) => ({
+      position,
+      gap: index === 0 ? 0 : Math.round(box.left - frames[index - 1].box.right)
+    })))).toEqual(Array.from({ length: tiles }, (_, tile) => ({ position: `${-tile * TILE_WIDTH}px 0px`, gap: 0 })))
+  await page.mouse.up()
+})
+
 test('fullscreen swipe-to-seek shows the seek bar preview over paused controls', async ({ app, page }) => {
   const touch = await page.context().newCDPSession(page)
   await touch.send('Emulation.setTouchEmulationEnabled', { enabled: true, maxTouchPoints: 1 })

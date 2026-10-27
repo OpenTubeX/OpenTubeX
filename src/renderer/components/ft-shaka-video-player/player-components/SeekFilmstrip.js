@@ -99,7 +99,10 @@ export class SeekFilmstrip {
     const { min, max } = this.seekBar.bar
     const frames = []
     while (frames.length < count) {
-      const time = direction === 1 ? frame.startTime + frame.duration + 0.001 : frame.startTime - 0.001
+      // Shaka snaps times within 0.01% of a sprite tile's start to that tile,
+      // which can swallow a fixed step back on long tiles. Earlier tiles are
+      // never shorter than later ones, so aim for the previous tile's middle.
+      const time = direction === 1 ? frame.startTime + frame.duration + 0.001 : frame.startTime - frame.duration / 2
       if (time < Number(min) || time > Number(max)) break
       const next = await this.getFrame(time)
       if (!isUsableFrame(next) || next.startTime === frame.startTime) break
