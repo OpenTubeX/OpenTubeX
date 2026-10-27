@@ -27,6 +27,34 @@ function videoRenderer(videoId, title, channelName, index, badgeStyle) {
   }
 }
 
+/**
+ * Measures how far a badge circle overhangs the cap band of the name before it.
+ * @param {import('@playwright/test').Locator} badge
+ */
+function capBandOverhang(badge) {
+  return badge.evaluate(badge => {
+    let node = badge.previousSibling
+    while (!node.textContent.trim()) node = node.previousSibling
+    let text = node
+    const walker = document.createTreeWalker(node, NodeFilter.SHOW_TEXT)
+    while (walker.nextNode()) {
+      if (walker.currentNode.textContent.trim()) text = walker.currentNode
+    }
+    const range = document.createRange()
+    range.selectNodeContents(text)
+    const line = [...range.getClientRects()].at(-1)
+    const context = document.createElement('canvas').getContext('2d')
+    context.font = getComputedStyle(text.parentElement).font
+    const metrics = context.measureText('H')
+    const baseline = line.top + metrics.fontBoundingBoxAscent
+    const circle = badge.querySelector('path').getBoundingClientRect()
+    return {
+      top: baseline - metrics.actualBoundingBoxAscent - circle.top,
+      bottom: circle.bottom - baseline
+    }
+  })
+}
+
 function channelRenderer(channelName, index, badgeStyle) {
   const channelId = `UC${String(index).padStart(22, '0')}`
 
@@ -114,6 +142,24 @@ test.describe('watch page', () => {
 
     await threads.first().scrollIntoViewIfNeeded()
     await attachScreenshot('verified comment authors')
+  })
+
+  test('aligns badges with the cap height of the names', { tag: '@scale' }, async ({ app, page }) => {
+    await mockPlayableWatchPage(app, page, { verifiedAuthors: true })
+    await openMockedVideo(page)
+    await page.locator('.commentAutoLoadSentinel').scrollIntoViewIfNeeded()
+
+    const badges = [
+      page.locator('.watchVideoInfo .channelName .verifiedBadge'),
+      page.locator('.commentThread').first().locator('.commentAuthorWrapper .verifiedBadge').first()
+    ]
+    for (const badge of badges) {
+      await expect(badge).toBeVisible()
+      // Canvas rounds the cap height to whole pixels.
+      const { top, bottom } = await capBandOverhang(badge)
+      expect(Math.abs(top)).toBeLessThanOrEqual(1)
+      expect(Math.abs(bottom)).toBeLessThanOrEqual(1)
+    }
   })
 
   test('marks verified live chat authors', async ({ app, page, attachScreenshot }) => {
