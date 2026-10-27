@@ -19,7 +19,9 @@ export class SeekFilmstrip {
     this.element.setAttribute('aria-hidden', 'true')
     this.marker = document.createElement('div')
     this.marker.className = 'ft-seek-filmstrip-marker'
-    this.element.append(this.marker)
+    this.hint = document.createElement('div')
+    this.hint.className = 'ft-seek-filmstrip-hint'
+    this.element.append(this.marker, this.hint)
     seekBar.container.append(this.element)
     /** @type {Map<number, Promise<object | null>>} */
     this.frames = new Map()
@@ -28,8 +30,9 @@ export class SeekFilmstrip {
 
   /**
    * @param {number} time
+   * @param {number} [markerX] keeps the marker in place, scrolling the frames instead
    */
-  async show(time) {
+  async show(time, markerX) {
     const request = ++this.generation
     const { bar, container, controls } = this.seekBar
     const min = Number(bar.min)
@@ -48,7 +51,7 @@ export class SeekFilmstrip {
     const playerHeight = controls.getVideoContainer().getBoundingClientRect().height
     const height = Math.min(Math.max(width / FRAMES_PER_BAR, MIN_FRAME_WIDTH) / aspectRatio, playerHeight * MAX_PLAYER_HEIGHT_FRACTION)
     const frameWidth = height * aspectRatio
-    const markerX = THUMB_SIZE / 2 + (max > min ? (time - min) / (max - min) : 0) * (width - THUMB_SIZE)
+    markerX ??= THUMB_SIZE / 2 + (max > min ? (time - min) / (max - min) : 0) * (width - THUMB_SIZE)
 
     // Follow the actual frame boundaries: the last frame is often shorter.
     const count = Math.ceil(width / frameWidth) + 1
@@ -63,6 +66,9 @@ export class SeekFilmstrip {
         width: thumbnail.duration * pixelsPerSecond,
       }))
       .filter(frame => frame.left + frame.width > 0 && frame.left < width)
+    this.time = time
+    this.markerX = markerX
+    this.pixelsPerSecond = pixelsPerSecond
 
     container.style.setProperty('--ft-seek-filmstrip-height', `${height}px`)
     container.classList.add('ft-seek-filmstrip-active')
@@ -86,6 +92,7 @@ export class SeekFilmstrip {
   hide() {
     this.generation++
     this.frames.clear()
+    this.pixelsPerSecond = 0
     this.seekBar.container.classList.remove('ft-seek-filmstrip-active')
   }
 

@@ -16,6 +16,7 @@ function fixture() {
       this.eventManager = { listen: (_, type, listener) => controls.listeners.set(type, listener) }
       const properties = new Map()
       this.container = {
+        classList: { toggle() {}, remove() {} },
         style: { background: '', setProperty: (name, value) => properties.set(name, value), getPropertyValue: name => properties.get(name) },
         querySelector: () => controls.timePreview,
       }
@@ -38,13 +39,22 @@ function fixture() {
     onChangeEnd() {}
   }
   class SeekFilmstrip {
-    constructor() { this.time = null }
-    show(time) { this.time = time }
+    constructor() {
+      this.time = null
+      this.hint = {}
+    }
+    show(time) {
+      this.time = time
+      return Promise.resolve()
+    }
     hide() { this.time = null }
   }
   vm.runInNewContext(source.replace(/^import .*\n/gm, '').replace('export class', 'class'), {
     updateSponsorBlockSeekBarState,
     SeekFilmstrip,
+    i18n: { global: { t: key => key } },
+    window: {},
+    document: {},
     THUMB_SIZE: 12,
     MouseEvent: class { constructor(type) { this.type = type } },
     shaka: {

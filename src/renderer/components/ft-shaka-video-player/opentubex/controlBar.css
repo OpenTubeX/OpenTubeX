@@ -116,6 +116,25 @@
   box-shadow: 0 0 3px rgb(0 0 0 / 80%);
 }
 
+:deep(.ft-seek-filmstrip-hint) {
+  position: absolute;
+  bottom: 6px;
+  left: 50%;
+  z-index: 1;
+  display: none;
+  padding: 2px 8px;
+  border-radius: 999px;
+  background-color: rgb(0 0 0 / 70%);
+  color: #fff;
+  font-size: 12px;
+  white-space: nowrap;
+  transform: translateX(-50%);
+}
+
+:deep(.ft-seek-filmstrip-pullable .ft-seek-filmstrip-hint) {
+  display: block;
+}
+
 :deep(.shaka-seek-bar-container .shaka-range-element::-moz-range-thumb) {
   box-shadow: 0 1px 3px rgb(0 0 0 / 60%);
 }
