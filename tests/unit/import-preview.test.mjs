@@ -181,8 +181,8 @@ test('watch history parsing removes localized title text around the video title'
   assert.deepEqual(templated.entries.map(entry => entry.title), ['Song (Live)', 'Talk (Live)', removedUrl])
   const shared = parseTakeoutWatchHistory([record('Bekeken: Eerste video'), record('Bekeken: Tweede'), record('Bekeken: Derde video')])
   assert.deepEqual(shared.entries.map(entry => entry.title), ['Eerste video', 'Tweede', 'Derde video'])
-  const suffixed = parseTakeoutWatchHistory([record('Erste angesehen'), record('Zweite angesehen')])
-  assert.deepEqual(suffixed.entries.map(entry => entry.title), ['Erste', 'Zweite'])
+  const english = parseTakeoutWatchHistory([record('Watched Introduction to Python'), record('Watched Advanced Python')])
+  assert.deepEqual(english.entries.map(entry => entry.title), ['Introduction to Python', 'Advanced Python'])
   const repeated = parseTakeoutWatchHistory([record('Erstes Video angesehen'), record('Erstes Video angesehen')])
   assert.deepEqual(repeated.entries.map(entry => entry.title), ['Erstes Video angesehen', 'Erstes Video angesehen'])
 })
@@ -279,8 +279,7 @@ test('watch history parsing finds a long common title prefix in linear time', ()
   const length = 100000
   const record = title => ({ products: ['YouTube'], title, titleUrl: 'https://www.youtube.com/watch?v=abcdefghijk', time: '2025-01-01T00:00:00Z' })
   const start = performance.now()
-  const prefix = `${'a'.repeat(length / 2)} `
-  const { entries } = parseTakeoutWatchHistory([record(prefix + 'a'.repeat(length / 2)), record(prefix + 'b'.repeat(length / 2))])
+  const { entries } = parseTakeoutWatchHistory([record('a'.repeat(length)), record('a'.repeat(length / 2) + 'b'.repeat(length / 2))])
   // Shortening the prefix one character per comparison took seconds.
   assert.ok(performance.now() - start < 1000)
   assert.deepEqual(entries.map(entry => entry.title), ['a'.repeat(length / 2), 'b'.repeat(length / 2)])

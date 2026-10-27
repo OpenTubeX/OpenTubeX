@@ -45,7 +45,7 @@ export function previewBackupImport(data, current) {
 /**
  * Find the localized text around watched titles, such as "Watched " in
  * English. Removed videos are titled with their URL, which shows the template
- * exactly; otherwise use the text all titles share.
+ * exactly; otherwise use the start all titles share.
  */
 function findWatchTitleTemplate(records) {
   const templates = new Map()
@@ -62,24 +62,15 @@ function findWatchTitleTemplate(records) {
     return [...templates.values()].reduce((best, template) => template.count > best.count ? template : best)
   }
   if (new Set(records.map(({ title }) => title)).size < 2) return { prefix: '', suffix: '' }
+  // Without a template, a shared ending may be part of every title, so keep it.
   const first = records[0].title
   let prefixLength = first.length
-  let suffixLength = first.length
   for (const { title } of records.slice(1)) {
     let index = 0
     while (index < prefixLength && title[index] === first[index]) index++
     prefixLength = index
-    index = 0
-    while (index < suffixLength && title.at(-1 - index) === first.at(-1 - index)) index++
-    suffixLength = index
   }
-  // Every title must keep its own text between the two, and neither may split a word.
-  const shortest = records.reduce((length, { title }) => Math.min(length, title.length), Infinity)
-  suffixLength = Math.max(0, Math.min(suffixLength, shortest - prefixLength))
-  const isWordCharacter = character => /[\p{L}\p{N}]/u.test(character)
-  while (prefixLength > 0 && isWordCharacter(first[prefixLength - 1])) prefixLength--
-  while (suffixLength > 0 && isWordCharacter(first.at(-suffixLength))) suffixLength--
-  return { prefix: first.slice(0, prefixLength), suffix: first.slice(first.length - suffixLength) }
+  return { prefix: first.slice(0, prefixLength), suffix: '' }
 }
 
 /** Transform the same watch records for both the preview and the actual import. */

@@ -88,6 +88,7 @@ test('ignores unrelated or unrecognizable Takeout data', () => {
     ['comments/comments.csv', `Comment ID,Channel ID,Comment Create Timestamp,Video ID\nUgx,${channelId},2025-01-01T00:00:00Z,abcdefghijk\n`],
     ['history/watch-history.html', '<html />'],
     ['history/watch-history.json', '[]'],
+    ['subscriptions/subscriptions.csv', `Channel Id,Channel Url,Channel Title\n${channelId},"unclosed\n`],
     // My Activity mixes watches and searches in one file.
     ['My Activity/YouTube/MyActivity.json', `[${watchHistory.slice(1, -1)},${searchHistory.slice(1, -1)}]`],
   ]) {

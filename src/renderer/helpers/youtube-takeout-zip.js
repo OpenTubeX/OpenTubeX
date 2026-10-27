@@ -41,7 +41,7 @@ export function sniffTakeoutEntry(path, head, complete) {
   }
   const records = parseCsvRecords(lines, !complete)
   const record = records?.slice(1).find(values => values.some(value => value.trim() !== ''))
-  if (record?.length !== records?.[0].length) { return null }
+  if (record === undefined || record.length !== records[0].length) { return null }
   if (record.length === 3 && CHANNEL_ID_PATTERN.test(record[0]) && record[1].includes(record[0])) {
     return 'subscriptions'
   }
