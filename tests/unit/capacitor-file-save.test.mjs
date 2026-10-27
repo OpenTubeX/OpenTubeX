@@ -161,7 +161,7 @@ test('ask-path mode uses the save picker instead of the automatic screenshot fol
 })
 
 test('Android screenshot settings offer automatic saving and persist the chosen folder', async () => {
-  const source = await readFile(new URL('../../src/renderer/components/PlayerSettings/PlayerSettings.vue', import.meta.url), 'utf8')
+  const source = await readFile(new URL('../../src/renderer/components/Settings/Playback/PlayerSettings.vue', import.meta.url), 'utf8')
   const fragment = source.slice(source.indexOf('const screenshotModeNames'), source.indexOf('const screenshotFilenamePattern'))
   const changes = []
   const controls = vm.runInNewContext(`${fragment}\n({ screenshotModeValues, chooseScreenshotFolder })`, {

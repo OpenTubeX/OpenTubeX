@@ -4,7 +4,7 @@ import test from 'node:test'
 import { compile, createSSRApp, h } from 'vue'
 import { renderToString } from 'vue/server-renderer'
 
-const settings = await readFile(new URL('../../src/renderer/components/PlayerSettings/PlayerSettings.vue', import.meta.url), 'utf8')
+const settings = await readFile(new URL('../../src/renderer/components/Settings/Playback/PlayerSettings.vue', import.meta.url), 'utf8')
 const start = settings.lastIndexOf('<FtFlexBox', settings.indexOf('class="autoPictureInPictureSettings"'))
 const end = settings.indexOf('<FtFlexBox class="playerSelectGrid">', start)
 const render = compile(`<div>${settings.slice(start, end)}</div>`)

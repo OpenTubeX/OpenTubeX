@@ -3,7 +3,7 @@ import { readFile } from 'node:fs/promises'
 import test from 'node:test'
 import vm from 'node:vm'
 
-const component = await readFile(new URL('../../src/renderer/components/DataSettings/DataSettings.vue', import.meta.url), 'utf8')
+const component = await readFile(new URL('../../src/renderer/components/Settings/Data/DataSettings.vue', import.meta.url), 'utf8')
 const utils = await readFile(new URL('../../src/renderer/helpers/utils.js', import.meta.url), 'utf8')
 const functions = ['exportUnifiedBackup', 'promptAndWriteToFile'].map(name => component.match(new RegExp(`async function ${name}\\([\\s\\S]*?^\\}`, 'm'))[0])
 const writer = utils.match(/export async function writeFileWithPicker\([\s\S]*?^\}/m)[0].replace('export ', '')

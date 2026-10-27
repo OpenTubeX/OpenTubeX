@@ -81,7 +81,7 @@ test('matches names from older versions against the subscriptions', async () => 
   assert.deepEqual(notFound, ['Shared', 'Unknown'])
 })
 
-const dataSettings = await readFile(new URL('../../src/renderer/components/DataSettings/DataSettings.vue', import.meta.url), 'utf8')
+const dataSettings = await readFile(new URL('../../src/renderer/components/Settings/Data/DataSettings.vue', import.meta.url), 'utf8')
 const importer = dataSettings.slice(
   dataSettings.indexOf('const channelPlaybackSpeedsBusy'),
   dataSettings.indexOf('// #endregion channel playback speeds')

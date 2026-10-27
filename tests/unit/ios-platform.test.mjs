@@ -117,7 +117,7 @@ test('iOS webpack configuration loads with the current shared build rules', asyn
 
 test('iOS ignores imported silence skipping preferences while other platforms retain them', async () => {
   const source = await readFile(new URL('../../src/renderer/components/ft-shaka-video-player/ft-shaka-video-player.js', import.meta.url), 'utf8')
-  const settings = await readFile(new URL('../../src/renderer/components/PlayerSettings/PlayerSettings.vue', import.meta.url), 'utf8')
+  const settings = await readFile(new URL('../../src/renderer/components/Settings/Playback/PlayerSettings.vue', import.meta.url), 'utf8')
   for (const ios of [true, false]) {
     for (const enabled of [true, false]) {
       const context = vm.createContext({

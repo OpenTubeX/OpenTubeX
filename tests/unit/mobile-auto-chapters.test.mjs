@@ -5,7 +5,7 @@ import vm from 'node:vm'
 import { compile, createSSRApp, h } from 'vue'
 import { renderToString } from 'vue/server-renderer'
 
-const settingsSource = await readFile(new URL('../../src/renderer/components/PlayerSettings/PlayerSettings.vue', import.meta.url), 'utf8')
+const settingsSource = await readFile(new URL('../../src/renderer/components/Settings/Playback/PlayerSettings.vue', import.meta.url), 'utf8')
 const toggle = [...settingsSource.matchAll(/<FtToggleSwitch\s[\s\S]*?\/>/g)]
   .map(([template]) => template)
   .find(template => template.includes('Automatically Open Chapters'))

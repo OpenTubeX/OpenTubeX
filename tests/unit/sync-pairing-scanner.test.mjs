@@ -8,12 +8,12 @@ import { runInNewContext } from 'node:vm'
 import { compileScript, parse } from 'vue/compiler-sfc'
 import webpack from 'webpack'
 
-const { descriptor } = parse(await readFile(new URL('../../src/renderer/components/SyncSettings/SyncPairingScanner.vue', import.meta.url), 'utf8'))
+const { descriptor } = parse(await readFile(new URL('../../src/renderer/components/Settings/Sync/SyncPairingScanner.vue', import.meta.url), 'utf8'))
 const compiledSource = compileScript(descriptor, { id: 'pairing-scanner-test' }).content
 const source = compiledSource
   .replace(/^import[\s\S]*?from ['"][^'"]+['"]\n/gm, '')
   .replace('export default', 'const Scanner =')
-  .replace("import('../../helpers/nativePairingScanner')", 'loadNativeScanner()')
+  .replace("import('../../../helpers/nativePairingScanner')", 'loadNativeScanner()')
 
 function setup({ native = true } = {}) {
   let resolveScan
@@ -111,7 +111,7 @@ test('desktop bundles exclude the native scanner while Capacitor bundles include
   const helper = fileURLToPath(new URL('../../src/renderer/helpers/nativePairingScanner.js', import.meta.url))
   try {
     const entry = join(directory, 'pairing.js')
-    await writeFile(entry, compiledSource.replace("'../../helpers/nativePairingScanner'", JSON.stringify(helper)))
+    await writeFile(entry, compiledSource.replace("'../../../helpers/nativePairingScanner'", JSON.stringify(helper)))
     for (const native of [false, true]) {
       const stats = await new Promise((resolve, reject) => {
         webpack({

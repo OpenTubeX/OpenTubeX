@@ -107,7 +107,7 @@ for (const initialStatus of ['paused', 'pausing']) {
 }
 
 test('storage history includes only terminal downloads that the backend can clear', () => {
-  const storageSource = readFileSync(new URL('../../src/renderer/components/StorageSettings/StorageSettings.vue', import.meta.url), 'utf8')
+  const storageSource = readFileSync(new URL('../../src/renderer/components/Settings/Data/StorageSettings.vue', import.meta.url), 'utf8')
   const start = storageSource.indexOf('const finishedDownloads = computed(')
   const end = storageSource.indexOf('\nconst downloadedMediaBytes', start)
   const records = ['queued', 'preparing', 'downloading', 'processing', 'pausing', 'paused', 'completed', 'failed', 'cancelled', 'skipped']

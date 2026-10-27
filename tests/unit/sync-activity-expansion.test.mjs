@@ -4,7 +4,7 @@ import test from 'node:test'
 import vm from 'node:vm'
 import { babelParse, parse } from 'vue/compiler-sfc'
 
-const source = await readFile(new URL('../../src/renderer/components/SyncSettings/SyncActivity.vue', import.meta.url), 'utf8')
+const source = await readFile(new URL('../../src/renderer/components/Settings/Sync/SyncActivity.vue', import.meta.url), 'utf8')
 const script = parse(source).descriptor.scriptSetup.content
 const declaration = babelParse(script, { sourceType: 'module' }).program.body
   .find(node => node.type === 'FunctionDeclaration' && node.id.name === 'expandActivity')

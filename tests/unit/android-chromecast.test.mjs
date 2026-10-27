@@ -8,7 +8,7 @@ for (const [name, setting, binding, getter] of [
   ['FCast', 'showFcastButton', 'fcast-enabled', 'getShowFcastButton']
 ]) {
   test(`Android exposes the ${name} setting and enabled player action`, async () => {
-    const settings = await readFile(new URL('../../src/renderer/components/PlayerSettings/PlayerSettings.vue', import.meta.url), 'utf8')
+    const settings = await readFile(new URL('../../src/renderer/components/Settings/Playback/PlayerSettings.vue', import.meta.url), 'utf8')
     const toggle = settings.match(new RegExp(`<FtToggleSwitch\\s[^>]*setting-key="${setting}"[^>]*>`, 's'))?.[0]
     assert.ok(toggle)
     const condition = toggle.match(/v-if="([^"]+)"/)?.[1] ?? 'true'

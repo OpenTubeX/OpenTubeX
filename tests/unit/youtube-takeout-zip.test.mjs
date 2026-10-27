@@ -7,7 +7,7 @@ import { strToU8, Unzip, UnzipInflate, Zip, ZipDeflate, zipSync } from 'fflate'
 import { forEachSelectedTakeoutZipEntry, forEachTakeoutImportEntry, isSupportedTakeoutEntry, listYouTubeTakeoutZipEntries, parseTakeoutPlaylistCsv, parseTakeoutPlaylistMetadataCsv, readTakeoutPlaylistMetadata, sniffTakeoutEntry } from '../../src/renderer/helpers/youtube-takeout-zip.js'
 
 test('does not announce complete success after an empty playlist fails and a later playlist succeeds', async () => {
-  const source = await readFile(new URL('../../src/renderer/components/DataSettings/DataSettings.vue', import.meta.url), 'utf8')
+  const source = await readFile(new URL('../../src/renderer/components/Settings/Data/DataSettings.vue', import.meta.url), 'utf8')
   const messages = []
   const imported = []
   const busy = { value: false }

@@ -5,7 +5,7 @@ import vm from 'node:vm'
 import { compile, computed, createSSRApp, h } from 'vue'
 import { renderToString } from 'vue/server-renderer'
 
-const source = await readFile(new URL('../../src/renderer/components/GeneralSettings/GeneralSettings.vue', import.meta.url), 'utf8')
+const source = await readFile(new URL('../../src/renderer/components/Settings/General/GeneralSettings.vue', import.meta.url), 'utf8')
 const keys = ['landingPage', 'newTabPosition', 'tabCloseFocus', 'startupBehavior']
 const selects = [...source.matchAll(/<FtSelect\s[\s\S]*?\/>/g)]
   .map(([template]) => template)
@@ -18,7 +18,7 @@ for (const [platform, USING_ELECTRON, IS_CAPACITOR] of [
 ]) {
   test(`${platform} renders the general tab settings supported by its tab system`, async () => {
     const bindings = {
-      mode: 'general', USING_ELECTRON, IS_CAPACITOR, t: key => key,
+      USING_ELECTRON, IS_CAPACITOR, t: key => key,
       store: { getters: { getTabsEnabled: true } },
       defaultPageNames: [], defaultPageValues: [],
       NEW_TAB_POSITION_VALUES: [], TAB_CLOSE_FOCUS_VALUES: [], STARTUP_BEHAVIOR_VALUES: [],
@@ -77,7 +77,7 @@ test('mobile startup waits for saved settings before restoring tabs', async () =
   assert.deepEqual(connectivityChoices, [false])
 })
 
-const privacySource = await readFile(new URL('../../src/renderer/components/PrivacySettings.vue', import.meta.url), 'utf8')
+const privacySource = await readFile(new URL('../../src/renderer/components/Settings/Privacy/PrivacySettings.vue', import.meta.url), 'utf8')
 const historyToggle = [...privacySource.matchAll(/<FtToggleSwitch\s[\s\S]*?\/>/g)]
   .map(([template]) => template)
   .find(template => template.includes('setting-key="rememberTabNavigationHistory"'))

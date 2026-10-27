@@ -7,7 +7,7 @@ import * as releasedClient from '../helpers/released-sync-sessions.mjs'
 import { decryptSyncDocument, encryptSyncDocument } from '../../src/renderer/helpers/sync-server-privacy.js'
 import { getOtherDeviceSessions, normalizeSyncSessionsDocument, removeSyncDeviceSessions, removeSyncSession } from '../../src/renderer/helpers/sync-sessions.js'
 
-const component = await readFile(new URL('../../src/renderer/components/SyncSettings/SyncAccountManagement.vue', import.meta.url), 'utf8')
+const component = await readFile(new URL('../../src/renderer/components/Settings/Sync/SyncAccountManagement.vue', import.meta.url), 'utf8')
 const revokeSource = component.slice(component.indexOf('function openRevokePrompt('), component.indexOf('\ndefineExpose'))
 const storeSource = await readFile(new URL('../../src/renderer/store/modules/sync-server.js', import.meta.url), 'utf8')
 const deleteStart = storeSource.indexOf('  deleteSyncServerSession(')
