@@ -451,8 +451,8 @@ test.describe('video downloads', () => {
     }))
     expect(separatorSpacing.below).toBe(separatorSpacing.above)
 
-    // The hint is inside an FtPrompt, which stops clicks before the document
-    // link handler, so the link itself has to open the browser.
+    // The hint is inside an FtPrompt, which stops clicks before they reach the
+    // document, so the prompt has to pass them to the link handler itself.
     const appUrl = page.url()
     await failureHintLink.click()
     await expect.poll(() => app.electronApp.evaluate(() => globalThis.downloadHintExternalUrls))

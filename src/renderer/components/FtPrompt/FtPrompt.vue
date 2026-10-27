@@ -16,7 +16,7 @@
       @touchstart.stop
       @touchend.stop
       @dblclick.stop
-      @click.stop="($event.target === $event.currentTarget) && hide()"
+      @click.stop="handleClick"
       @keydown.enter.stop="($event.target === $event.currentTarget) && hide()"
       @keydown.space.stop
       @keydown.left.right.capture="handleArrowKeys"
@@ -86,7 +86,7 @@
 </template>
 
 <script setup>
-import { nextTick, useId, useTemplateRef } from 'vue'
+import { inject, nextTick, useId, useTemplateRef } from 'vue'
 
 import { clampOverlayScrollTop } from '../../helpers/overlayScrollbars'
 import { useSettingsOverlay } from '../../composables/useSettingsOverlay'
@@ -253,6 +253,18 @@ function click(value) {
 
 function hide() {
   click(null)
+}
+
+// Clicks stop at the prompt so handlers outside it ignore them, which also
+// hides them from the document link handler. Run that handler here instead.
+const handleDocumentClick = inject('handleDocumentClick')
+
+/**
+ * @param {MouseEvent} event
+ */
+function handleClick(event) {
+  if (event.target === event.currentTarget) hide()
+  else handleDocumentClick(event)
 }
 
 /**
