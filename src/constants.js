@@ -429,6 +429,8 @@ const DefaultKeyboardShortcuts = {
       TAKE_SCREENSHOT: 'u',
       VIDEO_ZOOM_IN: 'z',
       VIDEO_ZOOM_OUT: 'shift+z',
+      TOGGLE_QUICK_BOOKMARK: 'b',
+      OPEN_ADD_TO_PLAYLIST: 'shift+s',
     },
     PLAYBACK: {
       PLAY: 'k',

@@ -56,6 +56,8 @@ export function getKeyboardShortcutLabelMappings(t, isCapacitor = false) {
     [t('KeyboardShortcutPrompt.Video Zoom In'), ['VIDEO_ZOOM_IN']],
     [t('KeyboardShortcutPrompt.Video Zoom Out'), ['VIDEO_ZOOM_OUT']],
     [t('KeyboardShortcutPrompt.Stats'), ['STATS']],
+    [t('KeyboardShortcutPrompt.Toggle Quick Bookmark'), ['TOGGLE_QUICK_BOOKMARK']],
+    [t('User Playlists.Add to Playlist'), ['OPEN_ADD_TO_PLAYLIST']],
 
     [t('KeyboardShortcutPrompt.Play'), ['PLAY', 'PLAY_ALT']],
     [t('KeyboardShortcutPrompt.Large Rewind'), ['LARGE_REWIND']],

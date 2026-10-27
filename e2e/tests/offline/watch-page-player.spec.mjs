@@ -852,6 +852,29 @@ test('updates boolean settings from the player options', async ({ app, page }) =
   await expect(skipSilence).toHaveAttribute('aria-pressed', 'true')
 })
 
+test('toggles the quick bookmark and opens the playlist prompt with keyboard shortcuts', async ({ app, page }) => {
+  await mockPlayableWatchPage(app, page)
+  await openMockedVideo(page)
+
+  const isBookmarked = () => page.evaluate(() => window.$store.getters.getQuickBookmarkVideoIds.has('jNQXAC9IVRw'))
+  expect(await isBookmarked()).toBe(false)
+  await page.keyboard.press('b')
+  await expect.poll(isBookmarked).toBe(true)
+  await page.keyboard.press('b')
+  await expect.poll(isBookmarked).toBe(false)
+
+  const prompt = page.getByRole('dialog', { name: 'Select a playlist to add your video to', exact: true })
+  await page.keyboard.press('Shift+S')
+  await expect(prompt).toBeVisible()
+  await expect(prompt.getByText('Favorites', { exact: true })).toBeVisible()
+  // The prompt blocks player shortcuts, so pressing B again leaves the bookmark untouched.
+  await prompt.getByRole('button', { name: 'Cancel', exact: true }).focus()
+  await page.keyboard.press('b')
+  await page.keyboard.press('Escape')
+  await expect(prompt).toHaveCount(0)
+  expect(await isBookmarked()).toBe(false)
+})
+
 test('marks the chapters player-option tile active while chapters are open', async ({ app, page }) => {
   await mockPlayableWatchPage(app, page)
   const video = await openMockedVideo(page)

@@ -2577,6 +2577,7 @@ Keys:
   arrowright: Puščica desno
   arrowup: Puščica gor
 KeyboardShortcutPrompt:
+  Toggle Quick Bookmark: Dodaj na seznam predvajanja hitrega zaznamka ali odstrani z njega
   Reopen Closed Window: Znova odpri nazadnje zaprto okno
   Keyboard Shortcuts: Bližnjice na tipkovnici
   Edit Hint: Izberite bližnjico in nato pritisnite novo kombinacijo tipk. Če jo želite odstraniti, pritisnite Backspace ali Delete.

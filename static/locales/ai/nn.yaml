@@ -2362,6 +2362,7 @@ Keys:
   arrowright: Pil høgre
   arrowup: Pil opp
 KeyboardShortcutPrompt:
+  Toggle Quick Bookmark: Legg til i eller fjern frå hurtigbokmerke-spelelista
   Reopen Closed Window: Opne det sist lukka vindauget igjen
   Keyboard Shortcuts: Hurtigtastar
   Edit Hint: Vel ein hurtigtast, og trykk deretter ein ny tastekombinasjon. Trykk Backspace eller Delete for å fjerne tilordninga.
