@@ -37,23 +37,18 @@ test('music mode preserves explicit seeks and playback recovery positions', () =
 })
 
 test('music mode ignores cached progress when navigating between Shorts', () => {
-  const { navigateSubscriptionShort } = watchMethod('navigateSubscriptionShort:', { getShortThumbnailUrl: () => '' })
+  const { openSubscriptionShort } = watchMethod('openSubscriptionShort(target)')
   for (const musicMode of [true, false]) {
     let destination
     let savedPosition = false
     const short = {
       ...view, musicMode,
-      subscriptionShortsFeedActive: true,
-      shortsNavigationLockedUntil: 0,
-      subscriptionShortsFeed: [{ videoId: 'first' }, { videoId: 'second' }],
-      subscriptionShortsFeedIndex: 0,
       saveShortsPlaybackPosition: () => { savedPosition = true },
       shortsPlaybackCache: { getPosition: () => 6 },
       tabRoute: { query: { shortSource: 'subscriptions' } },
       tabRouter: { push: route => { destination = route } },
-      $store: { getters: { getThumbnailDataSaver: false } },
     }
-    navigateSubscriptionShort.call(short, 1)
+    openSubscriptionShort.call(short, { videoId: 'second' })
     assert.equal(savedPosition, true)
     assert.equal(destination.path, '/watch/second')
     assert.equal(destination.query.oneTimeTimestamp, musicMode ? undefined : '6')

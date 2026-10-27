@@ -82,9 +82,9 @@ for (const [zoom, phone] of [[1, false], [1.25, false], [1, true]]) {
     await touch('touchEnd')
     await expect(page).toHaveURL(new RegExp(`/watch/${next}`))
     await expect(player).toBeVisible()
-    await expect.poll(() => watch.evaluate(component => component.proxy.shortsSwipeSettling)).toBe(false)
+    await expect.poll(() => watch.evaluate(component => component.proxy.shortsNavigation.state.settling)).toBe(false)
     await expect(page.locator('.shortsSwipePreview')).toHaveCount(0)
-    await expect.poll(() => watch.evaluate(component => Date.now() >= component.proxy.shortsNavigationLockedUntil)).toBe(true)
+    await expect.poll(() => watch.evaluate(component => Date.now() >= component.proxy.shortsNavigation.lockedUntil)).toBe(true)
     await touch('touchStart')
     await touch('touchMove', 0, 120)
     await expect.poll(async () => (await player.boundingBox()).y).toBeCloseTo(bounds.y + 120, 0)
@@ -101,7 +101,7 @@ test('Shorts snap back on short, reversed, horizontal, and cancelled drags witho
   const player = page.locator('.ftVideoPlayer.shortsPlayer')
   const expectRestored = async () => {
     await expect.poll(async () => (await player.boundingBox()).y).toBeCloseTo(bounds.y, 0)
-    await expect.poll(() => watch.evaluate(component => component.proxy.shortsSwipeSettling)).toBe(false)
+    await expect.poll(() => watch.evaluate(component => component.proxy.shortsNavigation.state.settling)).toBe(false)
     await expect(page).toHaveURL(new RegExp(`/watch/${current}`))
     await expect.poll(() => player.locator('video').evaluate(video => video.paused)).toBe(true)
   }
@@ -131,12 +131,12 @@ test('Shorts snap back on short, reversed, horizontal, and cancelled drags witho
 test('Shorts resist dragging past feed boundaries and respect reduced motion', async ({ app, page }) => {
   const { watch, touch, bounds, cdp } = await openShorts({ app, page })
   await watch.evaluate(component => {
-    component.proxy.navigateSubscriptionShort(-1)
+    component.proxy.shortsNavigation.navigate(-1)
   })
   await expect(page).toHaveURL(new RegExp(`/watch/${previous}`))
   const player = page.locator('.ftVideoPlayer.shortsPlayer')
   await expect(player).toBeVisible()
-  await expect.poll(() => watch.evaluate(component => Date.now() >= component.proxy.shortsNavigationLockedUntil)).toBe(true)
+  await expect.poll(() => watch.evaluate(component => Date.now() >= component.proxy.shortsNavigation.lockedUntil)).toBe(true)
   await touch('touchStart')
   await touch('touchMove', 0, 120)
   const moved = (await player.boundingBox()).y - bounds.y
@@ -147,14 +147,14 @@ test('Shorts resist dragging past feed boundaries and respect reduced motion', a
   await expect(page).toHaveURL(new RegExp(`/watch/${previous}`))
   // The player reaches its resting position on the settle animation's last
   // frame, before the swipe stops settling and accepts a new touch.
-  await expect.poll(() => watch.evaluate(component => component.proxy.shortsSwipeSettling)).toBe(false)
+  await expect.poll(() => watch.evaluate(component => component.proxy.shortsNavigation.state.settling)).toBe(false)
   await page.emulateMedia({ reducedMotion: 'reduce' })
   await touch('touchStart')
   await touch('touchMove', 0, -120)
   await expect.poll(async () => (await player.boundingBox()).y).toBeCloseTo(bounds.y - 120, 0)
   await touch('touchEnd')
   await expect(page).toHaveURL(new RegExp(`/watch/${current}`))
-  await expect.poll(() => watch.evaluate(component => component.proxy.shortsSwipeSettling)).toBe(false)
+  await expect.poll(() => watch.evaluate(component => component.proxy.shortsNavigation.state.settling)).toBe(false)
   await watch.dispose()
   await cdp.detach()
 })
@@ -162,9 +162,9 @@ test('Shorts resist dragging past feed boundaries and respect reduced motion', a
 for (const cancel of [false, true]) {
   test(cancel ? 'Shorts cancel a pending release when resize precedes the DOM update' : 'Shorts animate a new preview created by reversing direction on release', async ({ app, page }) => {
     const { watch, touch, cdp } = await openShorts({ app, page })
-    await watch.evaluate(component => component.proxy.navigateSubscriptionShort(-1))
+    await watch.evaluate(component => component.proxy.shortsNavigation.navigate(-1))
     await expect(page).toHaveURL(new RegExp(`/watch/${previous}`))
-    await expect.poll(() => watch.evaluate(component => Date.now() >= component.proxy.shortsNavigationLockedUntil)).toBe(true)
+    await expect.poll(() => watch.evaluate(component => Date.now() >= component.proxy.shortsNavigation.lockedUntil)).toBe(true)
     const recorded = await page.evaluateHandle(() => {
       const state = { animate: Element.prototype.animate, animations: [] }
       Element.prototype.animate = function (...args) {
@@ -181,7 +181,7 @@ for (const cancel of [false, true]) {
       await touch('touchMove', 0, 120)
       await expect(page.locator('.shortsSwipePreview')).toHaveCount(0)
       await watch.evaluate((component, cancel) => {
-        const pointer = component.proxy.shortsSwipePointer
+        const pointer = component.proxy.shortsNavigation.state.pointer
         // Release can include coordinates newer than the last delivered move.
         component.proxy.$refs.shortsSwipeViewport.querySelector('.videoPlayer').dispatchEvent(new PointerEvent('pointerup', {
           bubbles: true,
@@ -194,7 +194,7 @@ for (const cancel of [false, true]) {
         }))
         if (cancel) window.dispatchEvent(new Event('resize'))
       }, cancel)
-      await expect.poll(() => watch.evaluate(component => component.proxy.shortsSwipeSettling)).toBe(false)
+      await expect.poll(() => watch.evaluate(component => component.proxy.shortsNavigation.state.settling)).toBe(false)
       if (cancel) {
         expect(await recorded.evaluate(state => state.animations.length)).toBe(0)
         await expect(page).toHaveURL(new RegExp(`/watch/${previous}`))
@@ -240,7 +240,7 @@ test('Shorts settling honors system and forced reduced-motion preferences', asyn
       await touch('touchMove', 0, -30)
       await expect.poll(async () => (await surface.boundingBox()).y).toBeCloseTo(bounds.y - 30, 0)
       await touch('touchEnd')
-      await expect.poll(() => watch.evaluate(component => component.proxy.shortsSwipeSettling)).toBe(false)
+      await expect.poll(() => watch.evaluate(component => component.proxy.shortsNavigation.state.settling)).toBe(false)
       expect(await recorded.evaluate(state => state.animations.length)).toBe(1)
       const duration = await recorded.evaluate(state => state.animations[0].effect.getTiming().duration)
       expect(duration > 0, `${preference} preference with ${system} system motion`).toBe(!reducedMotion)
@@ -261,7 +261,7 @@ test('Shorts controls keep touch and keyboard actions after a cancelled swipe', 
   await touch('touchStart')
   await touch('touchMove', 0, -120)
   await touch('touchCancel')
-  await expect.poll(() => watch.evaluate(component => component.proxy.shortsSwipeSettling)).toBe(false)
+  await expect.poll(() => watch.evaluate(component => component.proxy.shortsNavigation.state.settling)).toBe(false)
   const play = player.locator('.shortsTopControl').first()
   await play.focus()
   await play.press('Enter')
@@ -271,7 +271,7 @@ test('Shorts controls keep touch and keyboard actions after a cancelled swipe', 
   await cdp.send('Input.dispatchTouchEvent', { type: 'touchEnd', touchPoints: [] })
   await expect.poll(() => player.locator('video').evaluate(video => video.paused)).toBe(true)
   await expect(page).toHaveURL(new RegExp(`/watch/${current}`))
-  await expect.poll(() => watch.evaluate(component => component.proxy.shortsSwipePointer)).toBeNull()
+  await expect.poll(() => watch.evaluate(component => component.proxy.shortsNavigation.state.pointer)).toBeNull()
   await watch.dispose()
   await cdp.detach()
 })
@@ -283,7 +283,7 @@ test('resizing during a Shorts drag cancels navigation and restores the player',
   await setWindowSize(app, page, { width: 720, height: 820 })
   await touch('touchEnd')
   await expect(page).toHaveURL(new RegExp(`/watch/${current}`))
-  await expect.poll(() => watch.evaluate(component => component.proxy.shortsSwipePointer)).toBeNull()
+  await expect.poll(() => watch.evaluate(component => component.proxy.shortsNavigation.state.pointer)).toBeNull()
   await expect(page.locator('.shortsSwipePreview')).toHaveCount(0)
   await expect(page.locator('.ftVideoPlayer')).toHaveCSS('transform', 'none')
   await watch.dispose()
@@ -329,7 +329,7 @@ for (const mode of ['fullwindow', 'fullscreen']) {
     await page.screenshot({ path: screenshotPath, clip: bounds })
     await testInfo.attach('Expanded Shorts swipe after playback updates', { path: screenshotPath, contentType: 'image/png' })
     await touch('touchCancel')
-    await expect.poll(() => watch.evaluate(component => component.proxy.shortsSwipeSettling)).toBe(false)
+    await expect.poll(() => watch.evaluate(component => component.proxy.shortsNavigation.state.settling)).toBe(false)
     await expect.poll(async () => (await player.locator('video').boundingBox()).y).toBeCloseTo(bounds.y, 0)
     await touch('touchStart')
     await touch('touchMove', -120)
@@ -361,7 +361,7 @@ for (const state of ['error', 'upcoming']) {
     await expect.poll(async () => (await card.boundingBox()).y).toBeCloseTo(bounds.y - 120, 0)
     await expect.poll(async () => (await page.locator('.shortsSwipePreview').boundingBox()).width).toBeCloseTo(bounds.width, 0)
     await touch('touchCancel')
-    await expect.poll(() => watch.evaluate(component => component.proxy.shortsSwipeSettling)).toBe(false)
+    await expect.poll(() => watch.evaluate(component => component.proxy.shortsNavigation.state.settling)).toBe(false)
     await expect.poll(async () => (await card.boundingBox()).y).toBeCloseTo(bounds.y, 0)
     await touch('touchStart', 0, startY)
     await touch('touchMove', 0, startY - 120)
@@ -427,21 +427,21 @@ for (const [stage, theme, direction] of [['metadata', 'dark', -1], ['streams', '
     await watch.evaluate((component, stage) => {
       if (stage === 'metadata') component.proxy.isLoading = true
       else component.proxy.ytDlpStreamsPending = true
-      component.proxy.shortsNavigationLockedUntil = Date.now() + 60_000
+      component.proxy.shortsNavigation.lockedUntil = Date.now() + 60_000
     }, stage)
     const placeholder = page.locator('.shortsSwipeViewport > .videoPlayerPlaceholder')
     await expect(placeholder).toBeVisible()
     const bounds = await placeholder.boundingBox()
     await touch('touchStart')
-    await expect.poll(() => watch.evaluate(component => component.proxy.shortsSwipePointer)).toBeNull()
+    await expect.poll(() => watch.evaluate(component => component.proxy.shortsNavigation.state.pointer)).toBeNull()
     await touch('touchEnd')
-    await watch.evaluate(component => { component.proxy.shortsNavigationLockedUntil = Date.now() - 1 })
+    await watch.evaluate(component => { component.proxy.shortsNavigation.lockedUntil = Date.now() - 1 })
     await touch('touchStart')
     await touch('touchMove', 0, direction * 120)
     await expect.poll(async () => (await placeholder.boundingBox()).y).toBeCloseTo(bounds.y + direction * 120, 0)
     await expect(page).toHaveURL(new RegExp(`/watch/${current}`))
     await touch('touchCancel')
-    await expect.poll(() => watch.evaluate(component => component.proxy.shortsSwipeSettling)).toBe(false)
+    await expect.poll(() => watch.evaluate(component => component.proxy.shortsNavigation.state.settling)).toBe(false)
     await expect.poll(async () => (await placeholder.boundingBox()).y).toBeCloseTo(bounds.y, 0)
     await touch('touchStart')
     await touch('touchMove', 0, direction * 120)

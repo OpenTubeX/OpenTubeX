@@ -268,33 +268,24 @@ for (const engine of ['built-in', 'yt-dlp']) {
 
 test('Shorts navigation resumes a previous position and saves the current one', () => {
   const navigationSource = watchSource.slice(
-    watchSource.indexOf('    navigateSubscriptionShort: function'),
-    watchSource.indexOf('    handleShortsWindowScroll: function')
+    watchSource.indexOf('    openSubscriptionShort(target) {'),
+    watchSource.indexOf('    openShortsChannel: function')
   )
-  const methods = vm.runInNewContext(`({${navigationSource}})`, {
-    getShortThumbnailUrl: () => '',
-  })
+  const methods = vm.runInNewContext(`({${navigationSource}})`, {})
   const cache = new ShortsPlaybackCache()
   cache.savePosition('previous', 4.25)
   let destination
   const watch = {
     ...methods,
-    subscriptionShortsFeedActive: true,
     customShortsPlayerActive: true,
-    shortsNavigationLockedUntil: 0,
-    subscriptionShortsFeedIndex: 1,
-    subscriptionShortsFeed: [
-      { videoId: 'previous' }, { videoId: 'current' }, { videoId: 'next' }
-    ],
     videoId: 'current',
     shortsPlaybackCache: cache,
-    $store: { getters: { getThumbnailDataSaver: false } },
     $refs: { player: { hasPlaybackPosition: true, getCurrentTime: () => 12.5 } },
     tabRoute: { query: { shortSource: 'subscriptions' } },
     tabRouter: { push(route) { destination = route } },
   }
 
-  watch.navigateSubscriptionShort(-1)
+  watch.openSubscriptionShort({ videoId: 'previous' })
   assert.equal(cache.getPosition('current'), 12.5)
   assert.equal(destination.path, '/watch/previous')
   assert.equal(destination.query.oneTimeTimestamp, '4.25')

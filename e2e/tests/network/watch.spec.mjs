@@ -1536,7 +1536,7 @@ test.describe('custom Shorts player', () => {
 
     const watchComponent = await page.evaluateHandle(findWatchComponent)
     await expect.poll(() => watchComponent.evaluate(component =>
-      Date.now() >= component.proxy.shortsNavigationLockedUntil
+      Date.now() >= component.proxy.shortsNavigation.lockedUntil
     )).toBe(true)
     await page.locator('.shortsNavigationButton').first().click()
     await expect(page).toHaveURL(/#\/watch\/w1WKmSqwM8I/)

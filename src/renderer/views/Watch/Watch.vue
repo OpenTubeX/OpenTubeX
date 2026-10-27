@@ -24,25 +24,25 @@
           '--shorts-player-height': `${shortsPlayerHeight}px`
         }
         : undefined"
-      @wheel="handleShortsWheel"
-      @pointerdown.capture="handleShortsPointerDown"
-      @pointermove.capture="handleShortsPointerMove"
-      @pointerup.capture="handleShortsPointerUp"
-      @pointercancel.capture="handleShortsPointerCancel"
-      @lostpointercapture="handleShortsPointerCancel"
-      @click.capture="handleShortsClick"
+      @wheel="shortsNavigation.handleWheel"
+      @pointerdown.capture="shortsNavigation.handlePointerDown"
+      @pointermove.capture="shortsNavigation.handlePointerMove"
+      @pointerup.capture="shortsNavigation.handlePointerUp"
+      @pointercancel.capture="shortsNavigation.handlePointerCancel"
+      @lostpointercapture="shortsNavigation.handlePointerCancel"
+      @click.capture="shortsNavigation.handleClick"
     >
       <div class="videoAreaMargin">
         <div
           ref="shortsSwipeViewport"
           class="shortsSwipeViewport"
           :class="{
-            shortsSwipeActive: shortsSwipePointer?.dragging || shortsSwipeSettling,
-            shortsSwipeExpanded: shortsSwipePresentationTarget !== null
+            shortsSwipeActive: shortsNavigation.state.pointer?.dragging || shortsNavigation.state.settling,
+            shortsSwipeExpanded: shortsNavigation.state.presentationTarget !== null
           }"
           :style="{
-            '--shorts-swipe-offset': `${shortsSwipeOffset}px`,
-            '--shorts-swipe-preview-offset': `${shortsSwipeOffset + shortsSwipeDirection * shortsSwipeHeight}px`
+            '--shorts-swipe-offset': `${shortsNavigation.state.offset}px`,
+            '--shorts-swipe-preview-offset': `${shortsNavigation.state.offset + shortsNavigation.state.direction * shortsNavigation.state.height}px`
           }"
         >
           <div
@@ -51,12 +51,12 @@
             data-tab-loading-indicator
           >
             <FtRetryImage
-              v-if="shortsTransitionPreview"
-              :src="shortsTransitionPreview"
+              v-if="shortsNavigation.state.transitionPreview"
+              :src="shortsNavigation.state.transitionPreview"
               class="shortsTransitionPreview"
               :class="{
-                shortsTransitionNext: shortsTransitionDirection > 0,
-                shortsTransitionPrevious: shortsTransitionDirection < 0
+                shortsTransitionNext: shortsNavigation.state.transitionDirection > 0,
+                shortsTransitionPrevious: shortsNavigation.state.transitionDirection < 0
               }"
               alt=""
             />
@@ -294,16 +294,16 @@
             </ft-shaka-video-player>
           </KeepAlive>
           <Teleport
-            :to="shortsSwipePresentationTarget || 'body'"
-            :disabled="shortsSwipePresentationTarget === null"
+            :to="shortsNavigation.state.presentationTarget || 'body'"
+            :disabled="shortsNavigation.state.presentationTarget === null"
           >
             <div
-              v-if="shortsSwipePreview"
+              v-if="shortsNavigation.state.preview"
               class="shortsSwipePreview"
               aria-hidden="true"
             >
               <FtRetryImage
-                :src="shortsSwipePreview"
+                :src="shortsNavigation.state.preview"
                 alt=""
               />
             </div>
@@ -512,7 +512,7 @@
               :disabled="!hasPreviousSubscriptionShort"
               :aria-label="$t('Video.Previous')"
               :title="$t('Video.Previous')"
-              @click="navigateSubscriptionShort(-1)"
+              @click="shortsNavigation.navigate(-1)"
             >
               <ft-icon :icon="['fas', 'arrow-up']" />
             </button>
@@ -522,7 +522,7 @@
               :disabled="!hasNextSubscriptionShort"
               :aria-label="$t('Video.Next')"
               :title="$t('Video.Next')"
-              @click="navigateSubscriptionShort(1)"
+              @click="shortsNavigation.navigate(1)"
             >
               <ft-icon :icon="['fas', 'arrow-down']" />
             </button>
@@ -659,7 +659,7 @@
           class="shortsNextPreview"
           :style="{ '--shorts-next-thumbnail': `url(${nextSubscriptionShortThumbnail})` }"
           :aria-label="$t('Video.Next')"
-          @click="navigateSubscriptionShort(1)"
+          @click="shortsNavigation.navigate(1)"
         />
       </div>
       <div

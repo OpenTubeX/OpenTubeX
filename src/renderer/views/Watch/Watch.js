@@ -47,6 +47,7 @@ import FtButton from '../../components/FtButton/FtButton.vue'
 import { calculateColorLuminance } from '../../helpers/colors'
 import { applyAnimationSpeed } from '../../helpers/animationSpeed'
 import { isReducedMotionEnabled } from '../../helpers/reducedMotion'
+import { createShortsFeedNavigation } from './shortsFeedNavigation'
 import { clampOverlayScrollTop, isOverlayScrollTopOutOfBounds, restoreOverlayScrollTop } from '../../helpers/overlayScrollbars'
 import { hasReachedWatchedThreshold, isHistoryEntryWatched } from '../../helpers/history'
 import { liveReminder, supportsLiveReminders } from '../../helpers/liveReminders'
@@ -328,20 +329,8 @@ export default defineComponent({
       useCustomShortsPlayerForCurrentVideo: false,
       videoAspectRatio: null,
       shortsLinkedVideo: null,
-      shortsSwipePointer: null,
-      shortsSwipePresentationTarget: null,
-      shortsSwipeOffset: 0,
-      shortsSwipeHeight: 0,
-      shortsSwipeDirection: 0,
-      shortsSwipePreview: '',
-      shortsSwipeSettling: false,
-      shortsSwipeAnimations: markRaw([]),
-      shortsSwipeSuppressClick: false,
-      shortsNavigationLockedUntil: 0,
-      shortsLastWindowScrollY: window.scrollY,
-      shortsScrollResetPending: false,
-      shortsTransitionPreview: '',
-      shortsTransitionDirection: 0,
+      /** @type {ReturnType<typeof createShortsFeedNavigation> | null} */
+      shortsNavigation: null,
       shortsViewportHeight: window.innerHeight,
       shortsPlaybackCompleted: false,
       shortsCompletionBlockedBySeek: false,
@@ -1379,7 +1368,7 @@ export default defineComponent({
     },
     videoId() {
       this.showDownloadPrompt = false
-      this.resetShortsSwipe()
+      this.shortsNavigation.resetSwipe()
     },
     '$store.getters.getThumbnailDataSaver'() {
       const short = this.currentSubscriptionShort
@@ -1430,8 +1419,7 @@ export default defineComponent({
         }
 
         this.loadingTheatreMode = null
-        this.shortsTransitionPreview = ''
-        this.shortsTransitionDirection = 0
+        this.shortsNavigation.finishTransition()
 
         if (this.shortsMetadataOpen) {
           this.clampShortsAuxPanelScroll()
@@ -1531,6 +1519,25 @@ export default defineComponent({
     )
     retainIosMediaSources(() => this.legacyFormats.map(format => format.url))
     this.theatreModeAnimations = []
+    this.shortsNavigation = createShortsFeedNavigation({
+      isActive: () => this.subscriptionShortsFeedActive,
+      getFeed: () => this.subscriptionShortsFeed,
+      getIndex: () => this.subscriptionShortsFeedIndex,
+      isPresented: () => this.isCurrentlyPresented(),
+      isTabSelected: () => !process.env.IS_ELECTRON ||
+        this.tabId == null ||
+        this.$store.getters.getActiveTabId === this.tabId,
+      isPanelOpen: () => this.shortsNavigationPanelOpen,
+      getThumbnailUrl: short => getShortThumbnailUrl(
+        short,
+        this.backendPreference,
+        this.currentInvidiousInstanceUrl,
+        this.thumbnailPreference,
+        this.$store.getters.getThumbnailDataSaver
+      ) ?? '',
+      getViewport: () => this.$refs.shortsSwipeViewport,
+      openShort: this.openSubscriptionShort,
+    })
     this.videoId = this.tabRoute.params.id
     this.isShort = this.tabRoute.query.short === 'true'
     this.useCustomShortsPlayerForCurrentVideo = this.$store.getters.getUseCustomShortsPlayer
@@ -1547,10 +1554,9 @@ export default defineComponent({
   mounted: function () {
     connectionEvents.addEventListener('change', this.handleDownloadConnectionChange)
     this.isOffline = getConnectionState() === 'offline'
-    document.addEventListener('keydown', this.handleShortsNavigationKeydown, true)
+    this.shortsNavigation.addListeners()
     window.addEventListener('resize', this.updateShortsViewportHeight)
     window.addEventListener('resize', this.updateTheatreLayoutAvailability)
-    window.addEventListener('scroll', this.handleShortsWindowScroll, { passive: true })
     this.removeTabLifecycle = this.tabLifecycle?.register(this.tabId, {
       activate: this.activateWatchRuntime,
       deactivate: this.deactivateWatchRuntime,
@@ -1582,10 +1588,9 @@ export default defineComponent({
     this.releaseAmbientModeClass?.()
     this.releaseAmbientModeClass = null
     connectionEvents.removeEventListener('change', this.handleDownloadConnectionChange)
-    document.removeEventListener('keydown', this.handleShortsNavigationKeydown, true)
+    this.shortsNavigation.removeListeners()
     window.removeEventListener('resize', this.updateShortsViewportHeight)
     window.removeEventListener('resize', this.updateTheatreLayoutAvailability)
-    window.removeEventListener('scroll', this.handleShortsWindowScroll)
     this.theatreModeAnimations.forEach(animation => animation.cancel())
     this.clearLiveReminderStartTimer()
     this.removeLiveReminderUpdatedListener?.()
@@ -1900,7 +1905,7 @@ export default defineComponent({
       this.theatreLayoutAvailable = window.innerWidth > RESPONSIVE_THEATRE_MODE_MAX_WIDTH
     },
     updateShortsViewportHeight() {
-      this.resetShortsSwipe()
+      this.shortsNavigation.resetSwipe()
       this.shortsViewportHeight = window.innerHeight
       requestAnimationFrame(() => this.clampShortsErrorScroll())
       if (this.shortsAuxPanelOpen) {
@@ -2318,15 +2323,7 @@ export default defineComponent({
         return
       }
 
-      if (this.subscriptionShortsFeedActive) {
-        this.shortsScrollResetPending = false
-        this.shortsLastWindowScrollY = window.scrollY
-        requestAnimationFrame(() => {
-          if (this.isCurrentlyPresented()) {
-            this.shortsLastWindowScrollY = window.scrollY
-          }
-        })
-      }
+      this.shortsNavigation.resumeScrollTracking()
 
       document.removeEventListener('keydown', this.resetAutoplayInterruptionTimeout)
       document.removeEventListener('click', this.resetAutoplayInterruptionTimeout)
@@ -2336,7 +2333,7 @@ export default defineComponent({
     },
 
     deactivateWatchRuntime() {
-      this.resetShortsSwipe()
+      this.shortsNavigation.resetSwipe()
       document.removeEventListener('keydown', this.resetAutoplayInterruptionTimeout)
       document.removeEventListener('click', this.resetAutoplayInterruptionTimeout)
       clearTimeout(this.autoplayInterruptionTimeout)
@@ -2894,31 +2891,9 @@ export default defineComponent({
       ) ?? this.thumbnail
     },
 
-    navigateSubscriptionShort: function (offset) {
-      if (
-        !this.subscriptionShortsFeedActive ||
-        this.shortsSwipeSettling ||
-        Date.now() < this.shortsNavigationLockedUntil
-      ) {
-        return
-      }
-
-      const target = this.subscriptionShortsFeed[this.subscriptionShortsFeedIndex + offset]
-      if (!target) {
-        return
-      }
-
+    openSubscriptionShort(target) {
       this.saveShortsPlaybackPosition()
 
-      this.shortsTransitionDirection = Math.sign(offset)
-      this.shortsTransitionPreview = getShortThumbnailUrl(
-        target,
-        this.backendPreference,
-        this.currentInvidiousInstanceUrl,
-        this.thumbnailPreference,
-        this.$store.getters.getThumbnailDataSaver
-      ) ?? ''
-      this.shortsNavigationLockedUntil = Date.now() + 300
       const shortSource = this.tabRoute.query.shortSource === 'channel'
         ? 'channel'
         : 'subscriptions'
@@ -2942,234 +2917,6 @@ export default defineComponent({
       const player = this.$refs.player
       if (player?.hasPlaybackPosition) {
         this.shortsPlaybackCache.savePosition(this.videoId, player.getCurrentTime())
-      }
-    },
-
-    handleShortsWindowScroll: function () {
-      const scrollY = window.scrollY
-
-      const logicalTabSelected = !process.env.IS_ELECTRON ||
-        this.tabId == null ||
-        this.$store.getters.getActiveTabId === this.tabId
-
-      if (
-        !this.subscriptionShortsFeedActive ||
-        !this.isCurrentlyPresented() ||
-        !logicalTabSelected
-      ) {
-        this.shortsLastWindowScrollY = scrollY
-        return
-      }
-
-      if (this.shortsScrollResetPending) {
-        this.shortsScrollResetPending = false
-        this.shortsLastWindowScrollY = scrollY
-        return
-      }
-
-      if (Math.abs(scrollY - this.shortsLastWindowScrollY) < 4) {
-        this.shortsLastWindowScrollY = scrollY
-        return
-      }
-
-      const movedDown = scrollY > this.shortsLastWindowScrollY
-      this.shortsLastWindowScrollY = scrollY
-
-      // The document starts at its upper boundary, so native document
-      // scrolling can only intentionally advance the feed. A decrease is our
-      // own reset or tab scroll restoration; wheel, touch, and keyboard input
-      // handle navigation to the previous Short directly.
-      if (!movedDown) {
-        return
-      }
-
-      this.navigateSubscriptionShort(1)
-
-      // The short preview deliberately gives the document a small scroll range
-      // so the page scrollbar and middle-button autoscroll can navigate. Reset
-      // it after interpreting the movement; otherwise the next movement at the
-      // end of the range cannot emit another scroll event.
-      if (window.scrollY !== 0) {
-        this.shortsScrollResetPending = true
-        window.scrollTo({ top: 0 })
-      }
-    },
-
-    isShortsPanelEvent: function (event) {
-      return Boolean(event.target?.closest?.(
-        '.shortsCommentsPanel, .shortsAuxPanel, .shaka-no-propagation'
-      ))
-    },
-
-    handleShortsWheel: function (event) {
-      if (
-        !this.subscriptionShortsFeedActive ||
-        this.isShortsPanelEvent(event) ||
-        Math.abs(event.deltaY) < 20
-      ) {
-        return
-      }
-
-      event.preventDefault()
-      this.navigateSubscriptionShort(event.deltaY > 0 ? 1 : -1)
-    },
-
-    handleShortsPointerDown: function (event) {
-      this.shortsSwipeSuppressClick = false
-      if (
-        this.subscriptionShortsFeedActive &&
-        !this.shortsSwipeSettling &&
-        Date.now() >= this.shortsNavigationLockedUntil &&
-        !this.shortsNavigationPanelOpen &&
-        !this.isShortsPanelEvent(event) &&
-        !event.target?.closest?.('button, a, input, [role="slider"]') &&
-        event.pointerType === 'touch' &&
-        event.isPrimary
-      ) {
-        const presentationTarget = event.target?.closest?.('.ftVideoPlayer:is(.fullWindow, :fullscreen)')
-        this.shortsSwipePresentationTarget = presentationTarget ? markRaw(presentationTarget) : null
-        this.shortsSwipeHeight = (presentationTarget ?? this.$refs.shortsSwipeViewport).getBoundingClientRect().height
-        this.shortsSwipePointer = { id: event.pointerId, x: event.clientX, y: event.clientY, dragging: false }
-      }
-    },
-
-    handleShortsPointerMove: function (event) {
-      const pointer = this.shortsSwipePointer
-      if (!pointer || pointer.id !== event.pointerId) return
-
-      const distance = event.clientY - pointer.y
-      if (!pointer.dragging) {
-        if (Math.max(Math.abs(distance), Math.abs(event.clientX - pointer.x)) < 8) return
-        if (Math.abs(event.clientX - pointer.x) > Math.abs(distance)) {
-          this.resetShortsSwipe()
-          return
-        }
-        pointer.dragging = true
-        event.currentTarget.setPointerCapture(event.pointerId)
-      }
-
-      event.preventDefault()
-      this.shortsSwipeSuppressClick = true
-      const direction = distance < 0 ? 1 : -1
-      const target = this.subscriptionShortsFeed[this.subscriptionShortsFeedIndex + direction]
-      if (direction !== this.shortsSwipeDirection) {
-        this.shortsSwipeDirection = direction
-        this.shortsSwipePreview = target
-          ? getShortThumbnailUrl(
-            target,
-            this.backendPreference,
-            this.currentInvidiousInstanceUrl,
-            this.thumbnailPreference,
-            this.$store.getters.getThumbnailDataSaver
-          ) ?? ''
-          : ''
-      }
-      this.shortsSwipeOffset = target
-        ? Math.max(-this.shortsSwipeHeight, Math.min(this.shortsSwipeHeight, distance))
-        : distance / (1 + Math.abs(distance) / 60)
-    },
-
-    handleShortsPointerUp: function (event) {
-      const pointer = this.shortsSwipePointer
-      if (!pointer || pointer.id !== event.pointerId) return
-      if (!pointer.dragging) {
-        this.resetShortsSwipe()
-        return
-      }
-      this.handleShortsPointerMove(event)
-      this.shortsSwipePointer = null
-      event.preventDefault()
-      event.stopPropagation()
-      const target = this.subscriptionShortsFeed[this.subscriptionShortsFeedIndex + this.shortsSwipeDirection]
-      this.settleShortsSwipe(Boolean(target) && Math.abs(event.clientY - pointer.y) >= 50)
-    },
-
-    handleShortsPointerCancel: function (event) {
-      // Claiming a touch releases its implicit capture on the player surface.
-      if (event.type === 'lostpointercapture' && event.target !== event.currentTarget) return
-      if (this.shortsSwipePointer?.id !== event.pointerId) return
-      this.shortsSwipePointer = null
-      this.settleShortsSwipe(false)
-    },
-
-    handleShortsClick: function (event) {
-      if (this.shortsSwipeSuppressClick && event.detail > 0) {
-        event.preventDefault()
-        event.stopPropagation()
-        this.shortsSwipeSuppressClick = false
-      }
-    },
-
-    async settleShortsSwipe(navigate) {
-      const viewport = this.shortsSwipePresentationTarget ?? this.$refs.shortsSwipeViewport
-      const direction = this.shortsSwipeDirection
-      const from = this.shortsSwipeOffset
-      const to = navigate ? -direction * this.shortsSwipeHeight : 0
-      const reducedMotion = isReducedMotionEnabled()
-      this.shortsSwipeSettling = true
-      this.shortsSwipeOffset = to
-      const animations = markRaw([])
-      this.shortsSwipeAnimations = animations
-      await this.$nextTick()
-      if (this.shortsSwipeAnimations !== animations) return
-      const surfaces = this.shortsSwipePresentationTarget
-        ? [...viewport.children]
-        : [...viewport.querySelectorAll(':scope > .videoPlayer, :scope > .shortsSwipePreview')]
-      animations.push(...surfaces.map(element => {
-        const previewOffset = element.classList.contains('shortsSwipePreview') ? direction * this.shortsSwipeHeight : 0
-        // Keep the expanded container stationary, including the browser's fullscreen top layer.
-        const translateContents = this.shortsSwipePresentationTarget && !previewOffset
-        return applyAnimationSpeed(element.animate([
-          translateContents ? { translate: `0 ${from}px` } : { transform: `translateY(${from + previewOffset}px)` },
-          translateContents ? { translate: `0 ${to}px` } : { transform: `translateY(${to + previewOffset}px)` }
-        ], { duration: reducedMotion ? 0 : 220, easing: 'cubic-bezier(0.2, 0, 0, 1)' }))
-      }))
-      try {
-        await Promise.all(animations.map(animation => animation.finished))
-      } catch {
-        return // Resize, tab changes, and navigation cancel the old gesture.
-      }
-      if (this.shortsSwipeAnimations !== animations) return
-      this.resetShortsSwipe()
-      if (navigate) {
-        this.navigateSubscriptionShort(direction)
-        this.shortsTransitionDirection = 0
-      }
-    },
-
-    resetShortsSwipe() {
-      this.shortsSwipeAnimations.forEach(animation => animation.cancel())
-      this.shortsSwipeAnimations = markRaw([])
-      this.shortsSwipePresentationTarget = null
-      this.shortsSwipePointer = null
-      this.shortsSwipeOffset = 0
-      this.shortsSwipeDirection = 0
-      this.shortsSwipePreview = ''
-      this.shortsSwipeSettling = false
-    },
-
-    handleShortsNavigationKeydown: function (event) {
-      if (
-        !this.subscriptionShortsFeedActive ||
-        !this.isCurrentlyPresented() ||
-        this.shortsNavigationPanelOpen ||
-        event.altKey ||
-        event.ctrlKey ||
-        event.metaKey ||
-        event.shiftKey ||
-        ['INPUT', 'SELECT', 'TEXTAREA'].includes(event.target?.tagName) ||
-        event.target?.isContentEditable ||
-        event.target?.closest?.('[role="dialog"], [role="menu"]')
-      ) {
-        return
-      }
-
-      if (event.key === 'ArrowDown' || event.key === 'PageDown') {
-        event.preventDefault()
-        this.navigateSubscriptionShort(1)
-      } else if (event.key === 'ArrowUp' || event.key === 'PageUp') {
-        event.preventDefault()
-        this.navigateSubscriptionShort(-1)
       }
     },
 
