@@ -16,6 +16,7 @@ function fixture() {
       this.eventManager = { listen: (_, type, listener) => controls.listeners.set(type, listener) }
       const properties = new Map()
       this.container = {
+        classList: { toggle() {}, remove() {} },
         style: { background: '', setProperty: (name, value) => properties.set(name, value), getPropertyValue: name => properties.get(name) },
         querySelector: () => controls.timePreview,
       }
@@ -27,8 +28,9 @@ function fixture() {
       this.setValue(this.video.currentTime)
       this.update()
     }
-    getValue() { return this.value }
-    setValue(time) { this.value = time }
+    get value() { return this.getValue() }
+    getValue() { return Number(this.bar.value) }
+    setValue(time) { this.bar.value = time }
     update() {
       this.paintedTime = this.value
       this.container.style.background = `linear-gradient(to right, red 0%, red 0%, red ${this.value / 30 * 100}%, white ${this.value / 30 * 100}%, white 90%, black 90%)`
@@ -38,13 +40,22 @@ function fixture() {
     onChangeEnd() {}
   }
   class SeekFilmstrip {
-    constructor() { this.time = null }
-    show(time) { this.time = time }
+    constructor() {
+      this.time = null
+      this.hint = {}
+    }
+    show(time) {
+      this.time = time
+      return Promise.resolve()
+    }
     hide() { this.time = null }
   }
   vm.runInNewContext(source.replace(/^import .*\n/gm, '').replace('export class', 'class'), {
     updateSponsorBlockSeekBarState,
     SeekFilmstrip,
+    i18n: { global: { t: key => key } },
+    window: {},
+    document: {},
     THUMB_SIZE: 12,
     MouseEvent: class { constructor(type) { this.type = type } },
     shaka: {
@@ -202,4 +213,33 @@ test('a mouse only shows the filmstrip when dragging the thumb itself', () => {
   bar.onChangeStart()
   drag(20)
   assert.equal(bar.filmstrip.time, 20)
+})
+
+test('pulling up starts precise seeking from the last dragged time, not a pending strip render', () => {
+  const { bar, controls, drag } = fixture()
+  // The strip renders asynchronously, here always one move behind.
+  let rendering = null
+  Object.assign(bar.filmstrip, {
+    pixelsPerSecond: 50,
+    element: { getBoundingClientRect: () => ({ bottom: 50 }) },
+    show(time) {
+      this.time = rendering
+      rendering = time
+      return Promise.resolve()
+    },
+  })
+  const move = (clientX, clientY) => controls.listeners.get('mousemove')({ clientX, clientY })
+  bar.onChangeStart()
+  move(204, 100)
+  drag(10)
+  move(304, 100)
+  drag(20)
+  // Pulling straight up keeps the time even though Shaka maps the pointer again.
+  move(304, 0)
+  drag(20)
+  assert.equal(bar.value, 20)
+  // Sideways movement now follows the strip's 50 pixels per second.
+  move(354, 0)
+  drag(25)
+  assert.equal(bar.value, 21)
 })

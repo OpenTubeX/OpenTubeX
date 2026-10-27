@@ -173,6 +173,152 @@ test('dragging the seek bar thumb shows a storyboard filmstrip at it', { tag: '@
   await expect(dock).toBeVisible()
 })
 
+test('the filmstrip shows earlier frames of sprite-sheet storyboards with long tiles', { tag: '@scale' }, async ({ app, page }) => {
+  await mockPlayableWatchPage(app, page)
+  await routeDemoMedia(page)
+  const video = await openMockedVideo(page)
+  const duration = await video.evaluate(element => element.duration)
+  // Like YouTube's storyboards for longer videos: one sheet whose tiles span
+  // 15 seconds each, laid out by Shaka instead of individual WebVTT cues.
+  const tileSeconds = 15
+  const tiles = Math.ceil(duration / tileSeconds)
+  await page.route('https://images.test/storyboard.svg', route => route.fulfill({
+    body: storyboardSprite(tiles),
+    contentType: 'image/svg+xml'
+  }))
+  await video.evaluate(async (element, { duration, tiles, tileSeconds, width, height }) => {
+    element.pause()
+    const sheet = 'https://images.test/storyboard.svg'
+    const player = element.ui.getControls().getPlayer()
+    const vtt = `WEBVTT\n\n00:00:00.000 --> ${new Date(duration * 1000).toISOString().slice(11, 23)}\n${sheet}\n`
+    const url = URL.createObjectURL(new Blob([vtt], { type: 'text/vtt' }))
+    try {
+      await player.addThumbnailsTrack(url, 'text/vtt')
+    } finally {
+      URL.revokeObjectURL(url)
+    }
+    // Shaka only exposes its tile classes through existing instances, and keeps
+    // a progressive source's image streams in a private (minified) field.
+    const SegmentReference = (await player.getThumbnails(null, 0)).segment.constructor
+    const stream = Object.values(player).find(value => Array.isArray(value) && value[0]?.type === 'image')[0]
+    const SegmentIndex = stream.segmentIndex.constructor
+    const layout = `${tiles}x1`
+    stream.tilesLayout = layout
+    stream.width = tiles * width
+    stream.height = height
+    stream.createSegmentIndex = async () => {
+      stream.segmentIndex = new SegmentIndex([
+        new SegmentReference(0, duration, () => [sheet], 0, null, null, 0, 0, Infinity, undefined, layout, tileSeconds)
+      ])
+    }
+    await stream.createSegmentIndex()
+  }, { duration, tiles, tileSeconds, width: TILE_WIDTH, height: TILE_HEIGHT })
+
+  const player = page.locator('.ftVideoPlayer')
+  const bar = player.locator('.shaka-seek-bar')
+  const filmstrip = player.locator('.ft-seek-filmstrip')
+  await player.hover()
+  const bounds = await bar.boundingBox()
+  const pointAt = fraction => ({ x: bounds.x + 6 + fraction * (bounds.width - 12), y: bounds.y + bounds.height / 2 })
+  const fraction = await bar.evaluate(element => (Number(element.value) - Number(element.min)) / (Number(element.max) - Number(element.min)))
+  await page.mouse.move(pointAt(fraction).x, pointAt(fraction).y)
+  await page.mouse.down()
+  await page.mouse.move(pointAt(0.8).x, pointAt(0.8).y, { steps: 4 })
+  await expect(filmstrip).toBeVisible()
+
+  // Every tile shows side by side, including those before the dragged one.
+  await expect.poll(() => filmstrip.evaluate(element => [...element.querySelectorAll('.ft-seek-filmstrip-frame')]
+    .map(frame => ({ box: frame.getBoundingClientRect(), position: frame.firstElementChild.style.backgroundPosition }))
+    .sort((a, b) => a.box.left - b.box.left)
+    .map(({ box, position }, index, frames) => ({
+      position,
+      gap: index === 0 ? 0 : Math.round(box.left - frames[index - 1].box.right)
+    })))).toEqual(Array.from({ length: tiles }, (_, tile) => ({ position: `${-tile * TILE_WIDTH}px 0px`, gap: 0 })))
+
+  // So few frames make the strip coarser than the seek bar, so pulling up keeps the bar's scale.
+  await expect(filmstrip.locator('.ft-seek-filmstrip-hint')).toBeHidden()
+  const strip = await filmstrip.boundingBox()
+  await page.mouse.move(pointAt(0.8).x, strip.y + strip.height / 2, { steps: 2 })
+  await page.mouse.move(pointAt(0.6).x, strip.y + strip.height / 2, { steps: 2 })
+  await expect.poll(() => bar.evaluate(element => Number(element.value))).toBeCloseTo(duration * 0.6, 0)
+  await page.mouse.up()
+})
+
+test('pulling the dragged thumb up onto the filmstrip seeks at its scale', { tag: '@scale' }, async ({ app, page }) => {
+  await mockPlayableWatchPage(app, page)
+  await routeDemoMedia(page)
+  const { video } = await openVideoWithStoryboard(page)
+
+  const player = page.locator('.ftVideoPlayer')
+  const bar = player.locator('.shaka-seek-bar')
+  const filmstrip = player.locator('.ft-seek-filmstrip')
+  const marker = filmstrip.locator('.ft-seek-filmstrip-marker')
+  const hint = filmstrip.locator('.ft-seek-filmstrip-hint')
+  const previewTime = player.locator('.shaka-player-ui-thumbnail-time')
+  const chapter = player.locator('.ft-chapter-preview')
+  await player.hover()
+  const bounds = await bar.boundingBox()
+  const pointAt = fraction => ({ x: bounds.x + 6 + fraction * (bounds.width - 12), y: bounds.y + bounds.height / 2 })
+  const barTime = () => bar.evaluate(element => Number(element.value))
+  const markerCenter = async () => {
+    const box = await marker.boundingBox()
+    return box.x + box.width / 2
+  }
+
+  const fraction = await bar.evaluate(element => (Number(element.value) - Number(element.min)) / (Number(element.max) - Number(element.min)))
+  await page.mouse.move(pointAt(fraction).x, pointAt(fraction).y)
+  await page.mouse.down()
+  // One movement and a hold: the hint waits for the strip's scale, not for more movement.
+  const start = pointAt(0.5)
+  await page.mouse.move(start.x, start.y)
+  await expect(hint).toHaveText('Pull up for precise seeking')
+
+  // Pulling up keeps the time; moving sideways then scrolls the frames under a fixed marker.
+  const startTime = await barTime()
+  const startMarker = await markerCenter()
+  const strip = await filmstrip.boundingBox()
+  const stripY = strip.y + strip.height / 2
+  await page.mouse.move(start.x, stripY, { steps: 2 })
+  await expect(hint).toBeHidden()
+  expect(await barTime()).toBeCloseTo(startTime, 5)
+
+  const pixelsPerSecond = await filmstrip.evaluate(element => {
+    const frame = element.querySelector('.ft-seek-filmstrip-frame')
+    return frame.getBoundingClientRect().width
+  })
+  await page.mouse.move(start.x + 100, stripY, { steps: 4 })
+  const preciseTime = startTime + 100 / pixelsPerSecond
+  await expect.poll(barTime).toBeCloseTo(preciseTime, 1)
+  expect(Math.abs(await markerCenter() - startMarker)).toBeLessThan(1.5)
+  const previewBox = await previewTime.boundingBox()
+  expect(Math.abs(previewBox.x + previewBox.width / 2 - startMarker)).toBeLessThan(2)
+  const chapterBox = await chapter.boundingBox()
+  expect(Math.abs(chapterBox.x + chapterBox.width / 2 - startMarker)).toBeLessThan(2)
+
+  // Releasing seeks to the precise time, not to the pointer's spot on the seek bar.
+  await page.mouse.up()
+  await expect(filmstrip).toBeHidden()
+  await expect(chapter).toBeHidden()
+  await expect.poll(() => video.evaluate(element => element.currentTime)).toBeCloseTo(preciseTime, 1)
+
+  // Escape cancels a drag and returns to where it started.
+  const seekedTime = await video.evaluate(element => {
+    element.pause()
+    return element.currentTime
+  })
+  const thumb = pointAt((seekedTime - await bar.evaluate(element => Number(element.min))) / await bar.evaluate(element => Number(element.max) - Number(element.min)))
+  await page.mouse.move(thumb.x, thumb.y)
+  await page.mouse.down()
+  await page.mouse.move(pointAt(0.8).x, thumb.y, { steps: 4 })
+  await expect(filmstrip).toBeVisible()
+  await page.keyboard.press('Escape')
+  await expect(filmstrip).toBeHidden()
+  await page.mouse.move(pointAt(0.9).x, thumb.y, { steps: 2 })
+  await page.mouse.up()
+  await expect.poll(() => video.evaluate(element => element.currentTime)).toBeCloseTo(seekedTime, 2)
+  expect(await barTime()).toBeCloseTo(seekedTime, 2)
+})
+
 test('fullscreen swipe-to-seek shows the seek bar preview over paused controls', async ({ app, page }) => {
   const touch = await page.context().newCDPSession(page)
   await touch.send('Emulation.setTouchEmulationEnabled', { enabled: true, maxTouchPoints: 1 })

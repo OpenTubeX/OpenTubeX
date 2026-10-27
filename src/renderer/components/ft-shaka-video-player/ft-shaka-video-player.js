@@ -3740,12 +3740,24 @@ export default defineComponent({
      * @param {MouseEvent} event
      */
     function handleSeekBarMouseMove(event) {
-      if (!container.value || !player) return
-
       // The listener is bound to the seek bar container itself, so there is no
       // need to look it up again on every one of these very frequent events.
       const seekBarContainer = event.currentTarget
-      if (!seekBarContainer) return
+      if (!seekBarContainer || !player) return
+
+      const rect = seekBarContainer.getBoundingClientRect()
+      const { start, end } = player.seekRange()
+      const offsetX = event.clientX - rect.left
+      showChapterPreview(seekBarContainer, start + (end - start) * Math.max(0, Math.min(1, offsetX / rect.width)), offsetX)
+    }
+
+    /**
+     * @param {HTMLElement} seekBarContainer
+     * @param {number} hoverTime
+     * @param {number} offsetX the preview's centre within the seek bar container
+     */
+    function showChapterPreview(seekBarContainer, hoverTime, offsetX) {
+      if (!container.value || !player) return
 
       if (props.chapters.length === 0) {
         const chapterPreview = container.value.querySelector('.ft-chapter-preview')
@@ -3764,13 +3776,6 @@ export default defineComponent({
         chapterPreview.style.display = 'none'
         return
       }
-
-      const offsetX = event.clientX - rect.left
-      const percentage = Math.max(0, Math.min(1, offsetX / rect.width))
-
-      const seekRange = player.seekRange()
-      const duration = seekRange.end - seekRange.start
-      const hoverTime = seekRange.start + (duration * percentage)
 
       const chapter = props.chapters.find((candidate, index) => {
         return hoverTime >= candidate.startSeconds &&
@@ -3820,8 +3825,7 @@ export default defineComponent({
       const previewWidth = chapterPreview.offsetWidth
       const minX = previewWidth / 2
       const maxX = rect.width - (previewWidth / 2)
-      const targetX = percentage * rect.width
-      const clampedX = Math.max(minX, Math.min(maxX, targetX))
+      const clampedX = Math.max(minX, Math.min(maxX, offsetX))
 
       chapterPreview.style.left = `${clampedX}px`
     }
@@ -3864,6 +3868,8 @@ export default defineComponent({
       const width = seekBarContainer.getBoundingClientRect().width
       const { start, end } = player.seekRange()
       if (width > 0) updateSeekBarTooltip(seekBarContainer, event.time, (end - start) / width)
+      // Precise seeking keeps its time off the pointer's spot on the seek bar.
+      if (event.chapterX != null) showChapterPreview(seekBarContainer, event.time, event.chapterX)
     }
 
     function updateSeekBarTooltip(seekBarContainer, hoverTime, secondsPerPixel) {
