@@ -387,20 +387,20 @@ import {
 } from 'vue'
 import { useI18n } from 'vue-i18n'
 
-import DownloadSettings from '../../components/DownloadSettings.vue'
-import DataStorageSettings from '../../components/DataStorageSettings/DataStorageSettings.vue'
-import SyncSettings from '../../components/SyncSettings/SyncSettings.vue'
+import DownloadSettings from '../../components/Settings/Downloads/DownloadSettings.vue'
+import DataSection from '../../components/Settings/Data/DataSection.vue'
+import SyncSettings from '../../components/Settings/Sync/SyncSettings.vue'
 import PasswordDialog from '../../components/PasswordDialog/PasswordDialog.vue'
 import FtSettingsMenu from '../../components/FtSettingsMenu/FtSettingsMenu.vue'
 import FtKeyboardShortcutPrompt from '../../components/FtKeyboardShortcutPrompt/FtKeyboardShortcutPrompt.vue'
-import AddOnSettings from '../../components/SettingsCategories/AddOnSettings.vue'
-import AdvancedSettings from '../../components/SettingsCategories/AdvancedSettings.vue'
-import AppearanceSettings from '../../components/SettingsCategories/AppearanceSettings.vue'
-import FocusSettings from '../../components/SettingsCategories/FocusSettings.vue'
-import GeneralCategorySettings from '../../components/SettingsCategories/GeneralCategorySettings.vue'
-import PlaybackSettings from '../../components/SettingsCategories/PlaybackSettings.vue'
-import PrivacyAndHistorySettings from '../../components/SettingsCategories/PrivacyAndHistorySettings.vue'
-import SubscriptionCategorySettings from '../../components/SettingsCategories/SubscriptionCategorySettings.vue'
+import AddOnsSection from '../../components/Settings/AddOns/AddOnsSection.vue'
+import AdvancedSection from '../../components/Settings/Advanced/AdvancedSection.vue'
+import AppearanceSection from '../../components/Settings/Appearance/AppearanceSection.vue'
+import FocusSection from '../../components/Settings/Focus/FocusSection.vue'
+import GeneralSection from '../../components/Settings/General/GeneralSection.vue'
+import PlaybackSection from '../../components/Settings/Playback/PlaybackSection.vue'
+import PrivacySection from '../../components/Settings/Privacy/PrivacySection.vue'
+import SubscriptionsSection from '../../components/Settings/Subscriptions/SubscriptionsSection.vue'
 import ProfileSettings from '../ProfileSettings/ProfileSettings.vue'
 import About from '../About/About.vue'
 import Downloads from '../Downloads/Downloads.vue'
@@ -597,14 +597,14 @@ const settingsComponentsData = computed(() => [
     title: t('Settings.Categories.Appearance'),
     description: t('Settings.Categories.Appearance Description'),
     icon: ['fas', 'display'],
-    component: AppearanceSettings
+    component: AppearanceSection
   },
   {
     type: 'playback',
     title: t('Settings.Quick Settings.Playback'),
     description: t('Settings.Categories.Playback Description'),
     icon: ['fas', 'circle-play'],
-    component: PlaybackSettings
+    component: PlaybackSection
   },
   {
     type: 'add-ons',
@@ -612,14 +612,14 @@ const settingsComponentsData = computed(() => [
     title: t('Settings.Categories.Add-ons'),
     description: t('Settings.Categories.Add-ons Description'),
     icon: ['fas', 'puzzle-piece'],
-    component: AddOnSettings
+    component: AddOnsSection
   },
   {
     type: 'subscriptions',
     title: t('Subscriptions.Subscriptions'),
     description: t('Settings.Categories.Subscriptions Description'),
     icon: ['fas', 'users'],
-    component: SubscriptionCategorySettings
+    component: SubscriptionsSection
   },
   ...(supportsYtDlp
     ? [{
@@ -635,7 +635,7 @@ const settingsComponentsData = computed(() => [
     title: t('Settings.Distraction Free Settings.Distraction Free Settings'),
     description: t('Settings.Categories.Distraction Free Description'),
     icon: ['fas', 'eye-slash'],
-    component: FocusSettings
+    component: FocusSection
   },
   {
     type: 'privacy',
@@ -643,14 +643,14 @@ const settingsComponentsData = computed(() => [
     title: t('Settings.Privacy Settings.Privacy Settings'),
     description: t('Settings.Categories.Privacy Description'),
     icon: ['fas', 'lock'],
-    component: PrivacyAndHistorySettings
+    component: PrivacySection
   },
   {
     type: 'data',
     title: t('Settings.Data Settings.Data And Storage'),
     description: t('Settings.Categories.Data And Storage Description'),
     icon: ['fas', 'box-archive'],
-    component: DataStorageSettings
+    component: DataSection
   },
   {
     type: 'sync',
@@ -664,7 +664,7 @@ const settingsComponentsData = computed(() => [
     title: t('Settings.Categories.Advanced'),
     description: t('Settings.Categories.Advanced Description'),
     icon: ['fas', 'flask'],
-    component: AdvancedSettings
+    component: AdvancedSection
   }
 ])
 
@@ -674,7 +674,7 @@ const settingsSectionComponents = computed(() => [{
   title: t('Settings.General Settings.General Settings'),
   description: t('Settings.Categories.General Description'),
   icon: ['fas', 'border-all'],
-  component: GeneralCategorySettings
+  component: GeneralSection
 }, ...settingsComponentsData.value])
 const settingsSearchableValues = computed(() => createSettingsSearchIndex({
   sections: settingsSectionComponents.value,

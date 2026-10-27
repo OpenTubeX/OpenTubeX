@@ -4,7 +4,7 @@ import test from 'node:test'
 import vm from 'node:vm'
 import { parseLineDelimitedJson } from '../../src/renderer/helpers/line-delimited-json.js'
 
-const source = await readFile(new URL('../../src/renderer/components/DataSettings/DataSettings.vue', import.meta.url), 'utf8')
+const source = await readFile(new URL('../../src/renderer/components/Settings/Data/DataSettings.vue', import.meta.url), 'utf8')
 const helpers = source.slice(source.indexOf('function parseImportedLineDelimitedJson('), source.indexOf('const SUBSCRIPTIONS_PROMPT_VALUES'))
 const importer = source.slice(source.indexOf('async function importSettings()'), source.indexOf('async function exportSettings('))
 

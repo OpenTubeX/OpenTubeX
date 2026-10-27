@@ -164,7 +164,7 @@ test('continues with the latest setting write after an earlier write fails', asy
 
 
 test('a delayed quick-setting save does not clear the next picker query', async () => {
-  const source = parse(await readFile(new URL('../../src/renderer/components/QuickSettingsCustomizer/QuickSettingsCustomizer.vue', import.meta.url), 'utf8')).descriptor.scriptSetup.content
+  const source = parse(await readFile(new URL('../../src/renderer/components/Settings/Appearance/InterfaceCustomizer/QuickSettingsCustomizer.vue', import.meta.url), 'utf8')).descriptor.scriptSetup.content
   const ast = babelParse(source, { sourceType: 'module' })
   const handler = ast.program.body.find(node => node.type === 'FunctionDeclaration' && node.id.name === 'addQuickSetting')
   const save = deferred()

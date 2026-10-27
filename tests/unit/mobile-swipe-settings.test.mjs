@@ -5,7 +5,7 @@ import vm from 'node:vm'
 import { compile, computed, createSSRApp, h } from 'vue'
 import { renderToString } from 'vue/server-renderer'
 
-const source = await readFile(new URL('../../src/renderer/components/PlayerSettings/PlayerSettings.vue', import.meta.url), 'utf8')
+const source = await readFile(new URL('../../src/renderer/components/Settings/Playback/PlayerSettings.vue', import.meta.url), 'utf8')
 const selects = [...source.matchAll(/<FtSelect\s[\s\S]*?\/>/g)]
   .map(([template]) => template)
   .filter(template => /setting-key="mobile(?:Left|Right)SwipeAction"/.test(template))

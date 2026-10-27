@@ -78,7 +78,7 @@ test('fully seen thumbnail action shows only for eligible videos and invokes com
 })
 
 test('fully watched label is consistent across the menu and thumbnail action setting', async () => {
-  const settings = await readFile(new URL('../../src/renderer/components/GeneralSettings/GeneralSettings.vue', import.meta.url), 'utf8')
+  const settings = await readFile(new URL('../../src/renderer/components/Settings/General/GeneralSettings.vue', import.meta.url), 'utf8')
   const messages = loadYaml(await readFile(new URL('../../static/locales/en-US.yaml', import.meta.url), 'utf8'))
   assert.equal(messages.Video['Mark As Fully Watched'], 'Mark As Fully Watched')
   const choices = settings.slice(settings.indexOf('const extraThumbnailActionValues ='), settings.indexOf('\n/**', settings.indexOf('const extraThumbnailActionNames =')))

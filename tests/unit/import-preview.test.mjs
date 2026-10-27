@@ -82,7 +82,7 @@ test('Takeout preview reports unsupported playlist files while preserving usable
   assert.equal(rows[0].failedFiles, 2)
 })
 
-const component = await readFile(new URL('../../src/renderer/components/DataSettings/DataSettings.vue', import.meta.url), 'utf8')
+const component = await readFile(new URL('../../src/renderer/components/Settings/Data/DataSettings.vue', import.meta.url), 'utf8')
 
 function componentSection(startMarker, endMarker) {
   const start = component.indexOf(startMarker)
