@@ -22,26 +22,6 @@ export class YatteeUnsupportedError extends Error {
 }
 
 /**
- * @param {string} value
- * @returns {string} the server URL without credentials or a trailing slash, or an empty string if it is invalid
- */
-export function normalizeYatteeServerUrl(value) {
-  if (typeof value !== 'string' || value.trim() === '') return ''
-
-  try {
-    const url = new URL(value.trim())
-    if (url.protocol !== 'http:' && url.protocol !== 'https:') return ''
-    url.username = ''
-    url.password = ''
-    url.search = ''
-    url.hash = ''
-    return url.toString().replace(/\/+$/, '')
-  } catch {
-    return ''
-  }
-}
-
-/**
  * Android's WebView, which plays the streams, blocks plain HTTP from its HTTPS origin
  * unless the server is on the device itself.
  * @param {string} serverUrl

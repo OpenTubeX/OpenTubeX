@@ -3,6 +3,7 @@ const fs = require('fs/promises')
 const webpack = require('webpack')
 const CopyWebpackPlugin = require('copy-webpack-plugin')
 const MinimizerPlugin = require('minimizer-webpack-plugin')
+const ProcessBoundaryPlugin = require('./ProcessBoundaryPlugin')
 
 const isDevMode = process.env.NODE_ENV === 'development'
 
@@ -79,6 +80,7 @@ const config = {
     __filename: isDevMode
   },
   plugins: [
+    new ProcessBoundaryPlugin(),
     {
       apply(compiler) {
         const directory = path.join(__dirname, 'cast-sender')

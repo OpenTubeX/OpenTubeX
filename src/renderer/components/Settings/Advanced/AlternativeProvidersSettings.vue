@@ -209,8 +209,8 @@ import FtButton from '../../FtButton/FtButton.vue'
 import store from '../../../store/index'
 
 import { debounce, randomArrayItem, showToast } from '../../../helpers/utils'
-import { usesInvidiousInstance } from '../../../../apiBackends'
-import { checkYatteeServer, createYatteeAuthorization, normalizeYatteeServerUrl } from '../../../helpers/api/yattee'
+import { normalizeYatteeServerUrl, usesInvidiousInstance } from '../../../../apiBackends'
+import { checkYatteeServer, createYatteeAuthorization } from '../../../helpers/api/yattee'
 import { capacitorHttpFetch } from '../../../helpers/api/capacitor-http'
 
 const USING_ELECTRON = !!process.env.IS_ELECTRON
