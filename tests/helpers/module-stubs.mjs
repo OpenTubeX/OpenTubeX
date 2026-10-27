@@ -21,7 +21,10 @@ export async function importWithStubs(urls, stubs, extraExports = {}) {
   const stubUrl = target => {
     const names = [...new Set([...Object.keys(stubs[target]), ...(extraExports[target] ?? [])])]
     const source = names
-      .map(name => `export const ${name} = globalThis.${key}[${JSON.stringify(target)}].${name}`)
+      .map(name => {
+        const value = `globalThis.${key}[${JSON.stringify(target)}].${name}`
+        return name === 'default' ? `export default ${value}` : `export const ${name} = ${value}`
+      })
       .join('\n')
     return { shortCircuit: true, url: `data:text/javascript,${encodeURIComponent(source)}` }
   }
