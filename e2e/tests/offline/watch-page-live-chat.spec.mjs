@@ -96,7 +96,7 @@ test.describe('watch page', () => {
                 is: type => type.type === 'LiveChatPaidMessage',
                 id: 'donation',
                 timestamp: Date.now(),
-                message: { text: 'Thank you for the stream!' },
+                message: { text: 'Thank you for the stream! https://example.com/merch' },
                 purchase_amount: '$10.00',
                 author: {
                   id: 'donor-channel',
@@ -128,8 +128,23 @@ test.describe('watch page', () => {
     await expect(expanded.locator('.channelName')).toHaveText('@donor')
     await expect(expanded.locator('.channelName')).toHaveAttribute('href', '#/channel/donor-channel')
     await expect(expanded.locator('.donationAmount')).toHaveText('$10.00')
-    await expect(expanded.locator('.chatMessage')).toHaveText('Thank you for the stream!')
+    await expect(expanded.locator('.chatMessage')).toHaveText('Thank you for the stream! example.com/merch')
     await attachScreenshot('donor handle in live chat')
+
+    await app.electronApp.evaluate(({ shell }) => {
+      globalThis.superChatExternalUrls = []
+      shell.openExternal = async url => {
+        globalThis.superChatExternalUrls.push(url)
+      }
+    })
+    await page.evaluate(() => window.$store.dispatch('updateExternalLinkHandling', ''))
+    await expanded.locator('.chatMessage a').click()
+    await expect.poll(() => app.electronApp.evaluate(() => globalThis.superChatExternalUrls))
+      .toEqual(['https://example.com/merch'])
+    await expanded.locator('.chatMessage').click({ position: { x: 1, y: 1 } })
+    await expect(expanded).toBeVisible()
+    await expanded.click({ position: { x: 4, y: 4 } })
+    await expect(expanded).toBeHidden()
   })
 
   test('retries failed live chat avatars and preserves the pop-out target', async ({ app, page }) => {

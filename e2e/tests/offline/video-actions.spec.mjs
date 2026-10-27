@@ -393,6 +393,7 @@ test.describe('video downloads', () => {
       ...SEED,
       settings: {
         ...SEED.settings,
+        externalLinkHandling: '',
         ytDlpSource: 'system',
         ytDlpPath: '/bin/false',
         ytDlpFfmpegSource: 'system',
@@ -401,13 +402,39 @@ test.describe('video downloads', () => {
     }
   })
 
-  test('sends plain download options over IPC', async ({ page }) => {
+  test('sends plain download options over IPC', async ({ app, page }) => {
+    await app.electronApp.evaluate(({ shell }) => {
+      globalThis.downloadHintExternalUrls = []
+      shell.openExternal = async url => {
+        globalThis.downloadHintExternalUrls.push(url)
+      }
+    })
+    // /bin/false does not exist on macOS and a missing binary takes the slow
+    // "yt-dlp was not found" path, so use a stub that fails immediately.
+    const failingYtDlp = path.join(app.userDataDir, 'failing-yt-dlp.sh')
+    await writeFile(failingYtDlp, [
+      '#!/bin/sh',
+      'if [ "$1" = "--version" ]; then printf \'%s\\n\' \'2026.08.19\'; exit; fi',
+      'echo "simulated download failure" >&2',
+      'exit 1'
+    ].join('\n'))
+    await chmod(failingYtDlp, 0o755)
+    await page.evaluate(async (ytDlpPath) => {
+      await window.$store.dispatch('updateYtDlpPath', ytDlpPath)
+    }, failingYtDlp)
     await goTo(page, 'history')
 
     const video = page.locator('.ft-list-video').first()
     await video.hover()
     await video.locator('.title').click({ button: 'right' })
     await page.getByRole('menuitem', { name: 'Download Video' }).click()
+    // Downloads only start from a focused window
+    if (!await app.electronApp.evaluate(({ BrowserWindow }) => BrowserWindow.getAllWindows()[0]?.isFocused())) {
+      await app.electronApp.evaluate(({ app, BrowserWindow }) => {
+        app.focus({ steal: true })
+        BrowserWindow.getAllWindows()[0].focus()
+      })
+    }
     await page.getByRole('button', { name: 'Download', exact: true }).click()
 
     await expect(page.getByText('Download failed', { exact: true })).toBeVisible()
@@ -423,6 +450,20 @@ test.describe('video downloads', () => {
       below: Number.parseFloat(getComputedStyle(prompt.querySelector('.downloadFooter')).paddingTop)
     }))
     expect(separatorSpacing.below).toBe(separatorSpacing.above)
+
+    // The hint is inside an FtPrompt, which stops clicks before they reach the
+    // document, so the prompt has to pass them to the link handler itself.
+    const appUrl = page.url()
+    await failureHintLink.click()
+    await expect.poll(() => app.electronApp.evaluate(() => globalThis.downloadHintExternalUrls))
+      .toEqual(['https://github.com/yt-dlp/yt-dlp/issues?q=is%3Aissue%20sort%3Acreated-desc%20YouTube'])
+    await expect(page).toHaveURL(appUrl)
+    await expect(page.getByText('Download failed', { exact: true })).toBeVisible()
+    // Prompts let middle clicks through to the document link handler.
+    await failureHintLink.click({ button: 'middle' })
+    await expect.poll(() => app.electronApp.evaluate(() => globalThis.downloadHintExternalUrls))
+      .toHaveLength(2)
+    await expect(page).toHaveURL(appUrl)
   })
 
   test('shortens overly long generated file names and warns when it happens', async ({ app, page }) => {

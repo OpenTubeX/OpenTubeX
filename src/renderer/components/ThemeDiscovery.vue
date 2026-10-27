@@ -88,7 +88,6 @@
                 <a
                   v-if="entry.author"
                   :href="`https://github.com/${encodeURIComponent(entry.author)}`"
-                  @click.prevent="openExternalLink(`https://github.com/${encodeURIComponent(entry.author)}`)"
                 >{{ `@${entry.author}` }}</a>
                 <p v-if="entry.description">
                   {{ entry.description }}

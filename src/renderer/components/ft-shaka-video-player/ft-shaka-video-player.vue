@@ -713,7 +713,7 @@
             :role="portraitFullscreenDocks ? 'presentation' : 'dialog'"
             tabindex="-1"
             :aria-label="$t('Chapters.Chapters')"
-            @click.stop
+            @click.stop="handleDocumentClick"
             @dblclick.capture="handleFullscreenDockHeaderDoubleClick($event, 'chapters')"
             @dblclick.stop
             @pointerdown.capture="handleFullscreenDockReorderPointerDown($event, 'chapters')"
@@ -775,7 +775,7 @@
           :aria-label="$t('Video.Metadata', 'Video information')"
           :aria-hidden="String(!showFullscreenMetadata)"
           :inert="!showFullscreenMetadata"
-          @click.stop
+          @click.stop="handleDocumentClick"
           @dblclick.capture="handleFullscreenDockHeaderDoubleClick($event, 'metadata')"
           @dblclick.stop
           @pointerdown.capture="handleFullscreenDockReorderPointerDown($event, 'metadata')"
@@ -830,7 +830,7 @@
           :aria-label="$t('Video.Transcript.Title')"
           :aria-hidden="String(!showFullscreenTranscript)"
           :inert="!showFullscreenTranscript"
-          @click.stop
+          @click.stop="handleDocumentClick"
           @dblclick.capture="handleFullscreenDockHeaderDoubleClick($event, 'transcript')"
           @dblclick.stop
           @pointerdown.capture="handleFullscreenDockReorderPointerDown($event, 'transcript')"
@@ -866,7 +866,7 @@
           :aria-label="$t('Settings.SponsorBlock Settings.SponsorBlock Settings')"
           :aria-hidden="String(!showFullscreenSponsorBlock)"
           :inert="!showFullscreenSponsorBlock"
-          @click.stop
+          @click.stop="handleDocumentClick"
           @dblclick.capture="handleFullscreenDockHeaderDoubleClick($event, 'sponsorBlock')"
           @dblclick.stop
           @pointerdown.capture="handleFullscreenDockReorderPointerDown($event, 'sponsorBlock')"
@@ -902,7 +902,7 @@
           :aria-label="$t('Video.Live Chat')"
           :aria-hidden="String(!showFullscreenLiveChat)"
           :inert="!showFullscreenLiveChat"
-          @click.stop
+          @click.stop="handleDocumentClick"
           @dblclick.capture="handleFullscreenDockHeaderDoubleClick($event, 'liveChat')"
           @dblclick.stop
           @pointerdown.capture="handleFullscreenDockReorderPointerDown($event, 'liveChat')"
@@ -938,7 +938,7 @@
           :aria-label="$t('Comments.Comments')"
           :aria-hidden="String(!showFullscreenComments)"
           :inert="!showFullscreenComments"
-          @click.stop
+          @click.stop="handleDocumentClick"
           @dblclick.capture="handleFullscreenDockHeaderDoubleClick($event, 'comments')"
           @dblclick.stop
           @pointerdown.capture="handleFullscreenDockReorderPointerDown($event, 'comments')"
@@ -970,7 +970,7 @@
           :aria-label="$t('Playlist.Playlist')"
           :aria-hidden="String(!showFullscreenPlaylist)"
           :inert="!showFullscreenPlaylist"
-          @click.stop
+          @click.stop="handleDocumentClick"
           @dblclick.capture="handleFullscreenDockHeaderDoubleClick($event, 'playlist')"
           @dblclick.stop
           @pointerdown.capture="handleFullscreenDockReorderPointerDown($event, 'playlist')"
@@ -1006,7 +1006,7 @@
           :aria-label="$t('Video.Queue')"
           :aria-hidden="String(!showFullscreenQueue)"
           :inert="!showFullscreenQueue"
-          @click.stop
+          @click.stop="handleDocumentClick"
           @dblclick.capture="handleFullscreenDockHeaderDoubleClick($event, 'queue')"
           @dblclick.stop
           @pointerdown.capture="handleFullscreenDockReorderPointerDown($event, 'queue')"
@@ -1042,7 +1042,7 @@
           :aria-label="$t('Settings.Fullscreen Actions.Recommended Videos')"
           :aria-hidden="String(!showFullscreenRecommendations)"
           :inert="!showFullscreenRecommendations"
-          @click.stop
+          @click.stop="handleDocumentClick"
           @dblclick.capture="handleFullscreenDockHeaderDoubleClick($event, 'recommendations')"
           @dblclick.stop
           @pointerdown.capture="handleFullscreenDockReorderPointerDown($event, 'recommendations')"

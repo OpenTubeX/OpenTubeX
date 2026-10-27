@@ -88,6 +88,28 @@ test('shows a placeholder while theme screenshots load and a text fallback after
   await expect(card.getByText('Screenshot unavailable', { exact: true })).toBeVisible()
 })
 
+test('opens the theme author profile once through the external-link setting', async ({ page, app }) => {
+  await app.electronApp.evaluate(({ shell }) => {
+    globalThis.themeAuthorExternalUrls = []
+    shell.openExternal = async url => {
+      globalThis.themeAuthorExternalUrls.push(url)
+    }
+  })
+  await page.evaluate(() => window.$store.dispatch('updateExternalLinkHandling', ''))
+  await mockScreenshots(page)
+  await page.route(feedUrl, route => route.fulfill({ contentType: 'application/atom+xml', body: feed([entry(1)]) }))
+  const gallery = await openDiscovery(page)
+
+  await gallery.getByRole('link', { name: '@ThemeAuthor', exact: true }).click()
+
+  await expect.poll(() => app.electronApp.evaluate(() => globalThis.themeAuthorExternalUrls))
+    .toEqual(['https://github.com/ThemeAuthor'])
+  await page.evaluate(() => window.$store.dispatch('updateExternalLinkHandling', 'doNothing'))
+  await gallery.getByRole('link', { name: '@ThemeAuthor', exact: true }).click()
+  await expect(page.getByText('External link opening has been disabled in Settings → Privacy')).toBeVisible()
+  expect(await app.electronApp.evaluate(() => globalThis.themeAuthorExternalUrls)).toHaveLength(1)
+})
+
 test('discovers, installs, persists and updates themes without overwriting local edits on refresh', async ({ page, app }) => {
   let revision = oldRevision
   let requests = 0
@@ -142,11 +164,6 @@ test('discovers, installs, persists and updates themes without overwriting local
   await expect(selectedNumber).toHaveAttribute('aria-pressed', 'true')
   const profile = first.getByRole('link', { name: '@ThemeAuthor', exact: true })
   await expect(profile).toHaveAttribute('href', 'https://github.com/ThemeAuthor')
-  await page.evaluate(() => {
-    window.open = url => { window.openedThemeLink = url; return null }
-  })
-  await profile.click()
-  expect(await page.evaluate(() => window.openedThemeLink)).toBe('https://github.com/ThemeAuthor')
   const screenshotButton = first.locator('.themePreview button')
   await screenshotButton.click()
   const viewer = page.getByRole('dialog', { name: 'Community theme 1197', exact: true })

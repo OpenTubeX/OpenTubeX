@@ -146,13 +146,10 @@
         dir="ltr"
         lang="en"
       >
-        <!-- FtPrompt stops clicks before the document link handler; keyboard activation of links also fires click -->
-        <!-- eslint-disable-next-line vuejs-accessibility/click-events-have-key-events -->
         <div
           ref="changeLogContent"
           v-safer-html.lenient="updateChangelog"
           class="changeLogContent"
-          @click="handleClick"
         />
       </div>
       <FtFlexBox>
@@ -5188,6 +5185,7 @@ function handleExternalLink(href) {
 }
 
 provide('handleExternalLink', handleExternalLink)
+provide('handleDocumentClick', handleClick)
 
 /**
  * @param {PointerEvent} event
