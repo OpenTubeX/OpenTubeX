@@ -188,6 +188,12 @@
       var(--connection-progress-inset, 0px) +
       var(--connection-status-height, 0px)
     );
+
+    /* A fractional UI Scale puts the edge shared with the navigation bar
+       inside a device pixel, and both anti-aliased edges let the page show
+       through. Extend the background under the navigation bar, which paints
+       above it. */
+    box-shadow: 0 -4px 18px rgb(0 0 0 / 20%), 0 1px var(--card-bg-color);
   }
 
   /* stylelint-disable-next-line selector-max-compound-selectors */
