@@ -245,13 +245,10 @@
           :class="superChat.superChat.colorClass"
           role="button"
           tabindex="0"
-          @click="hideSuperChat"
+          @click.self="hideSuperChat"
           @keydown.enter.space.self.prevent="hideSuperChat"
         >
-          <div
-            class="superChatMessage"
-            @click.stop.prevent
-          >
+          <div class="superChatMessage">
             <div
               class="upperSuperChatMessage"
             >
