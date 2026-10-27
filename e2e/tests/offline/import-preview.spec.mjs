@@ -31,7 +31,7 @@ test('previews backup counts and replacement effects, updates selection, and lea
   const before = await savedData(page)
   const archive = await createUnifiedBackup({
     settings: { uiScale: 125, syncServerToken: 'private', unknown: true },
-    profiles: [{ ...before.profiles[0], subscriptions: [{ id: 'UCpreview', name: 'Preview channel' }] }],
+    profiles: [{ ...before.profiles[0], subscriptions: [{ id: 'UCpreviewxxxxxxxxxxxxxxx', name: 'Preview channel' }] }],
     playlists: [{ ...before.playlists[0], description: 'Imported details', videos: [] }],
     history: [{ videoId: 'abcdefghijk', timeWatched: 100 }],
     searchHistory: [{ _id: 'preview', query: 'preview search', lastUpdatedAt: 100 }],
@@ -68,9 +68,9 @@ test('Takeout preview shows matching and new records and remains usable when its
   const dataSection = await goToSettingsSection(page, 'data')
   const before = await savedData(page)
   const archive = zipSync({
-    'Takeout/YouTube/subscriptions/subscriptions.csv': strToU8('Channel Id,Channel Url,Channel Title\nUCpreview,url,Preview Channel\nUCpreview,url,Duplicate\n'),
-    'Another/subscriptions/subscriptions.json': strToU8(JSON.stringify([{ snippet: { resourceId: { channelId: 'UCpreview' }, title: 'Preview Channel', thumbnails: { default: { url: '' } } } }])),
-    'Another/subscriptions/subscriptions.opml': strToU8('<opml version="2.0"><body><outline title="Preview Channel" xmlUrl="https://www.youtube.com/feeds/videos.xml?channel_id=UCpreview" /></body></opml>'),
+    'Takeout/YouTube/subscriptions/subscriptions.csv': strToU8('Channel Id,Channel Url,Channel Title\nUCpreviewxxxxxxxxxxxxxxx,http://www.youtube.com/channel/UCpreviewxxxxxxxxxxxxxxx,Preview Channel\nUCpreviewxxxxxxxxxxxxxxx,http://www.youtube.com/channel/UCpreviewxxxxxxxxxxxxxxx,Duplicate\n'),
+    'Another/subscriptions/subscriptions.json': strToU8(JSON.stringify([{ snippet: { resourceId: { channelId: 'UCpreviewxxxxxxxxxxxxxxx' }, title: 'Preview Channel', thumbnails: { default: { url: '' } } } }])),
+    'Another/subscriptions/subscriptions.opml': strToU8('<opml version="2.0"><body><outline title="Preview Channel" xmlUrl="https://www.youtube.com/feeds/videos.xml?channel_id=UCpreviewxxxxxxxxxxxxxxx" /></body></opml>'),
     'Takeout/YouTube/history/watch-history.json': strToU8(JSON.stringify([
       { products: ['YouTube'], title: 'Watched Example', titleUrl: 'https://www.youtube.com/watch?v=abcdefghijk', time: '2026-01-01T00:00:00Z' },
       { products: ['YouTube'], title: 'Deleted video' },
@@ -153,8 +153,8 @@ test('Takeout preview shows matching and new records and remains usable when its
 test('offers smaller Takeout categories when history exceeds the import size limit', async ({ page }, testInfo) => {
   const dataSection = await goToSettingsSection(page, 'data')
   const archive = zipSync({
-    'Takeout/YouTube/history/watch-history.json': strToU8('[]'),
-    'Takeout/YouTube/subscriptions/subscriptions.csv': strToU8('Channel Id,Channel Url,Channel Title\nUCsmallpreview,url,Small channel\n'),
+    'Takeout/YouTube/history/watch-history.json': strToU8('[{"titleUrl": "https://www.youtube.com/watch?v=abcdefghijk"}]'),
+    'Takeout/YouTube/subscriptions/subscriptions.csv': strToU8('Channel Id,Channel Url,Channel Title\nUCsmallpreviewxxxxxxxxxx,http://www.youtube.com/channel/UCsmallpreviewxxxxxxxxxx,Small channel\n'),
   })
   new DataView(archive.buffer).setUint32(22, 256 * 1024 * 1024 + 1, true)
   const before = await savedData(page)
@@ -165,7 +165,7 @@ test('offers smaller Takeout categories when history exceeds the import size lim
   expect(await savedData(page)).toEqual(before)
   await page.getByRole('checkbox', { name: 'History', exact: true }).locator('+ label').click()
   await page.getByRole('button', { name: 'Import selected data', exact: true }).click()
-  await expect.poll(async () => (await savedData(page)).profiles[0].subscriptions.some(channel => channel.id === 'UCsmallpreview')).toBe(true)
+  await expect.poll(async () => (await savedData(page)).profiles[0].subscriptions.some(channel => channel.id === 'UCsmallpreviewxxxxxxxxxx')).toBe(true)
 })
 
 test('chooses and previews subscriptions without parsing an unselected large Takeout history', async ({ page }, testInfo) => {
@@ -179,7 +179,7 @@ test('chooses and previews subscriptions without parsing an unselected large Tak
       time: '2026-01-01T00:00:00Z',
       description: 'x'.repeat(2 * 1024 * 1024),
     }])),
-    'Takeout/YouTube/subscriptions/subscriptions.csv': strToU8('Channel Id,Channel Url,Channel Title\nUCselectedpreview,url,Selected channel\n'),
+    'Takeout/YouTube/subscriptions/subscriptions.csv': strToU8('Channel Id,Channel Url,Channel Title\nUCselectedpreviewxxxxxxx,http://www.youtube.com/channel/UCselectedpreviewxxxxxxx,Selected channel\n'),
   })
   await page.evaluate(() => {
     window.largeHistoryParseCount = 0
@@ -209,7 +209,7 @@ test('chooses and previews subscriptions without parsing an unselected large Tak
   await expect(choices.getByRole('button', { name: 'Preview changes', exact: true })).toBeVisible()
   await choices.getByRole('checkbox', { name: 'History', exact: true }).locator('+ label').click()
   await choices.getByRole('button', { name: 'Import selected data', exact: true }).click()
-  await expect.poll(async () => (await savedData(page)).profiles[0].subscriptions.some(channel => channel.id === 'UCselectedpreview')).toBe(true)
+  await expect.poll(async () => (await savedData(page)).profiles[0].subscriptions.some(channel => channel.id === 'UCselectedpreviewxxxxxxx')).toBe(true)
   expect(await page.evaluate(() => window.largeHistoryParseCount)).toBe(0)
   expect((await savedData(page)).history).toEqual(before.history)
 })

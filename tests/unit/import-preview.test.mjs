@@ -35,8 +35,10 @@ test('backup preview counts distinct identities and subscription memberships wit
 test('Takeout preview matches import names, empty playlists, deduplication, filters and excluded history', async () => {
   const watched = videoId => ({ products: ['YouTube'], title: 'Watched video', titleUrl: `https://www.youtube.com/watch?v=${videoId}`, time: '2025-01-01T00:00:00Z' })
   const searched = settings => ({ products: ['YouTube'], titleUrl: 'https://www.youtube.com/results?search_query=query', time: '2025-01-01T00:00:00Z', searchSettings: settings })
+  const channel = id => `${id},http://www.youtube.com/channel/${id}`
+  const [oldId, newId] = [`UC${'o'.repeat(22)}`, `UC${'n'.repeat(22)}`]
   const file = new Blob([zipSync({
-    'Account/subscriptions/subscriptions.csv': strToU8('Channel Id,Channel Url,Channel Title\nold,url,Old\nnew,url,"New, channel"\nnew,url,Duplicate\n'),
+    'Account/subscriptions/subscriptions.csv': strToU8(`Channel Id,Channel Url,Channel Title\n${channel(oldId)},Old\n${channel(newId)},"New, channel"\n${channel(newId)},Duplicate\n`),
     'Account/history/watch-history.json': strToU8(JSON.stringify([
       watched('abcdefghijk'), watched('abcdefghijk'), watched('lmnopqrstuv'),
       { ...watched('adadadadada'), details: [{}] }, { products: ['YouTube'], title: 'Deleted' },
@@ -50,11 +52,11 @@ test('Takeout preview matches import names, empty playlists, deduplication, filt
     'Account/playlists/List-videos.csv': strToU8('Video ID,Playlist video creation timestamp\nabcdefghijk,2025-01-01T00:00:00Z\n'),
     'Another/playlists/List-videos.csv': strToU8('Video ID,Playlist video creation timestamp\nabcdefghijk,2025-01-01T00:00:00Z\n'),
     'Account/playlists/playlists.csv': strToU8('Playlist ID,Playlist Title (Original)\nPLlist,List\nPLempty,Empty\nPLreserved,List (2)\n'),
-    'Broken/history/search-history.json': strToU8('{broken'),
+    'Broken/history/search-history.json': strToU8('[{"titleUrl": "https://www.youtube.com/results?search_query=broken"'),
     'Account/videos/unrelated.mp4': new Uint8Array(128),
   })])
   const entries = await listYouTubeTakeoutZipEntries(file)
-  const current = { subscriptions: [{ id: 'old' }], playlists: [{ playlistName: 'List' }], history: [{ videoId: 'abcdefghijk' }], searchHistory: [{ _id: 'id', query: 'query' }] }
+  const current = { subscriptions: [{ id: oldId }], playlists: [{ playlistName: 'List' }], history: [{ videoId: 'abcdefghijk' }], searchHistory: [{ _id: 'id', query: 'query' }] }
   const before = structuredClone(current)
   const rows = await previewTakeoutImport(file, entries, current)
   assert.deepEqual(counts(rows.find(row => row.category === 'subscriptions')), [1, 1, 0])
@@ -70,8 +72,9 @@ test('Takeout preview matches import names, empty playlists, deduplication, filt
 
 test('Takeout preview reports unsupported playlist files while preserving usable accounts', async () => {
   const file = new Blob([zipSync({
-    'Bad/playlists/playlists.csv': strToU8('wrong header\n'),
-    'Bad/playlists/Broken-videos.csv': strToU8('wrong header\n'),
+    // A translated header gives no column names, and no file matches a title column.
+    'Bad/playlists/playlists.csv': strToU8('Playlist-ID,Titel\nPLbad,Unknown\n'),
+    'Bad/playlists/Broken-videos.csv': strToU8('Video ID,Playlist video creation timestamp\nabcdefghijk,2025-01-01T00:00:00Z\ninvalid row\n'),
     'Good/playlists/playlists.csv': strToU8('Playlist ID,Playlist Title (Original)\nPLempty,Empty\n'),
   })])
   const rows = await previewTakeoutImport(file, await listYouTubeTakeoutZipEntries(file), { playlists: [] })
@@ -168,6 +171,22 @@ test('watch history parsing excludes malformed records from preview counts and p
   assert.equal(skipped, 2)
 })
 
+test('watch history parsing removes localized title text around the video title', () => {
+  const record = (title, videoId = 'abcdefghijk') => ({ products: ['YouTube'], title, titleUrl: `https://www.youtube.com/watch?v=${videoId}`, time: '2025-01-01T00:00:00Z' })
+  const removedUrl = 'https://www.youtube.com/watch?v=removedvide'
+  // A removed video's URL title shows the exact template, even when every remaining title shares more text.
+  const templated = parseTakeoutWatchHistory([
+    record('「Song (Live)」を視聴しました'), record('「Talk (Live)」を視聴しました'), record(`「${removedUrl}」を視聴しました`, 'removedvide'),
+  ])
+  assert.deepEqual(templated.entries.map(entry => entry.title), ['Song (Live)', 'Talk (Live)', removedUrl])
+  const shared = parseTakeoutWatchHistory([record('Bekeken: Eerste video'), record('Bekeken: Tweede'), record('Bekeken: Derde video')])
+  assert.deepEqual(shared.entries.map(entry => entry.title), ['Eerste video', 'Tweede', 'Derde video'])
+  const suffixed = parseTakeoutWatchHistory([record('Erste angesehen'), record('Zweite angesehen')])
+  assert.deepEqual(suffixed.entries.map(entry => entry.title), ['Erste', 'Zweite'])
+  const repeated = parseTakeoutWatchHistory([record('Erstes Video angesehen'), record('Erstes Video angesehen')])
+  assert.deepEqual(repeated.entries.map(entry => entry.title), ['Erstes Video angesehen', 'Erstes Video angesehen'])
+})
+
 test('preview reports existing generated playlist names as merge targets on repeated imports', async () => {
   const file = new Blob([zipSync({
     'First/playlists/List-videos.csv': strToU8('Video ID,Playlist video creation timestamp\nabcdefghijk,2025-01-01T00:00:00Z\n'),
@@ -198,8 +217,8 @@ test('preview reports existing generated playlist names as merge targets on repe
 
 test('oversized history is reported without preventing smaller subscription previews or imports', async () => {
   const archive = zipSync({
-    'Takeout/YouTube/history/watch-history.json': strToU8('[]'),
-    'Takeout/YouTube/subscriptions/subscriptions.csv': strToU8('Channel Id,Channel Url,Channel Title\nUCsmall,url,Small channel\n'),
+    'Takeout/YouTube/history/watch-history.json': strToU8('[{"titleUrl": "https://www.youtube.com/watch?v=abcdefghijk"}]'),
+    'Takeout/YouTube/subscriptions/subscriptions.csv': strToU8(`Channel Id,Channel Url,Channel Title\nUC${'s'.repeat(22)},http://www.youtube.com/channel/UC${'s'.repeat(22)},Small channel\n`),
   })
   new DataView(archive.buffer).setUint32(22, 256 * 1024 * 1024 + 1, true)
   const file = new Blob([archive])
@@ -260,7 +279,8 @@ test('watch history parsing finds a long common title prefix in linear time', ()
   const length = 100000
   const record = title => ({ products: ['YouTube'], title, titleUrl: 'https://www.youtube.com/watch?v=abcdefghijk', time: '2025-01-01T00:00:00Z' })
   const start = performance.now()
-  const { entries } = parseTakeoutWatchHistory([record('a'.repeat(length)), record('a'.repeat(length / 2) + 'b'.repeat(length / 2))])
+  const prefix = `${'a'.repeat(length / 2)} `
+  const { entries } = parseTakeoutWatchHistory([record(prefix + 'a'.repeat(length / 2)), record(prefix + 'b'.repeat(length / 2))])
   // Shortening the prefix one character per comparison took seconds.
   assert.ok(performance.now() - start < 1000)
   assert.deepEqual(entries.map(entry => entry.title), ['a'.repeat(length / 2), 'b'.repeat(length / 2)])
