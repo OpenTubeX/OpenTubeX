@@ -1,5 +1,6 @@
 import { getSearchHistoryEntryKeyFromEntry, DEFAULT_SEARCH_SETTINGS, normalizeSearchSettings } from '../../search-history.js'
 import { migrateLegacySettings } from './settings-migrations.js'
+import { parseOpmlFeeds } from './opml.js'
 import { forEachTakeoutImportEntry, parseCsvRecords } from './youtube-takeout-zip.js'
 
 function countRecords(imported, current, key) {
@@ -138,16 +139,13 @@ export function parseTakeoutSubscriptions(entry) {
     })
   }
   if (entry.path.toLowerCase().endsWith('.opml')) {
-    const parser = new DOMParser()
-    let document = parser.parseFromString(entry.content, 'application/xml')
-    if (document.querySelector('parsererror')) document = parser.parseFromString(entry.content, 'text/html')
-    const feeds = [...document.querySelectorAll('body outline[xmlUrl]')]
+    const feeds = parseOpmlFeeds(entry.content)
     if (!feeds.length) throw new Error('Invalid subscriptions file')
     return feeds.map(feed => {
-      const url = new URL(feed.getAttribute('xmlUrl'))
+      const url = new URL(feed.xmlUrl)
       const id = url.searchParams.get('channel_id') ?? (url.pathname.includes('/feed/channel/') ? url.pathname.split('/').filter(Boolean).at(-1) : null)
       if (!id) throw new Error('Invalid subscription feed')
-      return { id, name: feed.getAttribute('title'), thumbnail: null }
+      return { id, name: feed.title, thumbnail: null }
     })
   }
   return JSON.parse(entry.content).map(channel => {

@@ -362,6 +362,7 @@ import {
   isLibreTubeWatchHistoryBackup,
 } from '../../../helpers/libretube'
 import { parseLineDelimitedJson } from '../../../helpers/line-delimited-json'
+import { parseOpmlFeeds } from '../../../helpers/opml'
 import { parseChannelPreferences } from '../../../helpers/channel-preferences'
 import { resolveChannelId } from '../../../helpers/channels'
 import { parseSpeedByChannelValues, resolveSpeedByChannelValues } from '../../../helpers/speed-by-channel-import'
@@ -1123,32 +1124,7 @@ function importYouTubeSubscriptions(textDecode) {
  * @param {string} data
  */
 function importOpmlYouTubeSubscriptions(data) {
-  let xmlDom
-  const domParser = new DOMParser()
-  try {
-    xmlDom = domParser.parseFromString(data, 'application/xml')
-
-    // https://developer.mozilla.org/en-US/docs/Web/API/DOMParser/parseFromString#error_handling
-    const errorNode = xmlDom.querySelector('parsererror')
-    if (errorNode) {
-      throw errorNode.textContent
-    }
-  } catch (err) {
-    console.error('error reading OPML subscriptions file, falling back to HTML parser...')
-    console.error(err)
-    // try parsing with the html parser instead which is more lenient
-    try {
-      const htmlDom = domParser.parseFromString(data, 'text/html')
-
-      xmlDom = htmlDom
-    } catch {
-      const message = t('Settings.Data Settings.Invalid subscriptions file')
-      showToast({ message: `${message}: ${err}`, icon: ['fas', 'circle-exclamation'] })
-      return
-    }
-  }
-
-  const feedData = xmlDom.querySelectorAll('body outline[xmlUrl]')
+  const feedData = parseOpmlFeeds(data)
   if (feedData.length === 0) {
     const message = t('Settings.Data Settings.Invalid subscriptions file')
     showToast({ message: message, icon: ['fas', 'circle-exclamation'] })
@@ -1160,9 +1136,7 @@ function importOpmlYouTubeSubscriptions(data) {
 
     let count = 0
 
-    feedData.forEach((channel) => {
-      const xmlUrl = channel.getAttribute('xmlUrl')
-      const channelName = channel.getAttribute('title')
+    feedData.forEach(({ xmlUrl, title: channelName }) => {
       let channelId
       if (xmlUrl.includes('https://www.youtube.com/feeds/videos.xml?channel_id=')) {
         channelId = new URL(xmlUrl).searchParams.get('channel_id')
