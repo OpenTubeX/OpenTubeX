@@ -884,6 +884,14 @@ Settings:
     FFmpeg and FFprobe Downloaded Template: FFmpeg eta FFprobe {version} deskargatu dira
     FFmpeg and FFprobe Download Error Template: 'Ezin izan dira FFmpeg eta FFprobe deskargatu: {error}'
     Managed Tool Already Current Template: '{tool} {version} eguneratuta dago dagoeneko'
+    Managed Tool Errors:
+      Removed: 'Deskargatutako fitxategia ezabatu egin da, ziurrenik birusen aurkako software batek'
+      Unusable: 'Ezin izan da deskargatutako programa exekutatu. Baliteke birusen aurkako software batek blokeatzea, edo sistema hau ez onartzea'
+      Release Not Found: 'Ezin izan da azken bertsioa aurkitu'
+      Verification Failed: 'Ezin izan da egiaztatu deskarga bertsio ofiziala denik'
+      Downgrade: 'Deskargatutako bertsioa instalatutakoa baino zaharragoa da'
+      Invalid Archive: 'Deskargatutako artxiboa baliogabea da'
+      Rollback Failed: 'Eguneratzeak huts egin du eta ezin izan da aurreko bertsioa guztiz leheneratu'
     Managed Tool Updates: Kudeatutako tresnen eguneratzeak
     Update Modes:
       Automatic: Eguneratu automatikoki

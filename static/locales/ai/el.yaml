@@ -886,6 +886,14 @@ Settings:
     FFmpeg and FFprobe Downloaded Template: Έγινε λήψη των FFmpeg και FFprobe {version}
     FFmpeg and FFprobe Download Error Template: 'Η λήψη των FFmpeg και FFprobe απέτυχε: {error}'
     Managed Tool Already Current Template: Το {tool} {version} είναι ήδη ενημερωμένο
+    Managed Tool Errors:
+      Removed: 'Το αρχείο που λήφθηκε αφαιρέθηκε, πιθανότατα από λογισμικό προστασίας από ιούς'
+      Unusable: 'Δεν ήταν δυνατή η εκτέλεση του προγράμματος που λήφθηκε. Ενδέχεται να το αποκλείει λογισμικό προστασίας από ιούς ή να μην υποστηρίζει αυτό το σύστημα'
+      Release Not Found: 'Δεν ήταν δυνατή η εύρεση της πιο πρόσφατης έκδοσης'
+      Verification Failed: 'Δεν ήταν δυνατή η επαλήθευση της λήψης ως επίσημης έκδοσης'
+      Downgrade: 'Η έκδοση που λήφθηκε είναι παλαιότερη από την εγκατεστημένη'
+      Invalid Archive: 'Το αρχείο συμπίεσης που λήφθηκε δεν είναι έγκυρο'
+      Rollback Failed: 'Η ενημέρωση απέτυχε και η προηγούμενη έκδοση δεν ήταν δυνατό να αποκατασταθεί πλήρως'
     Managed Tool Updates: Ενημερώσεις διαχειριζόμενων εργαλείων
     Update Modes:
       Automatic: Αυτόματη ενημέρωση

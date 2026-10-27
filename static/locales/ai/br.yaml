@@ -884,6 +884,14 @@ Settings:
     FFmpeg and FFprobe Downloaded Template: "Pellgarget eo bet FFmpeg ha FFprobe {version}"
     FFmpeg and FFprobe Download Error Template: "C'hwitet eo pellgargañ FFmpeg ha FFprobe: {error}"
     Managed Tool Already Current Template: "Hizivaet eo dija {tool} {version}"
+    Managed Tool Errors:
+      Removed: 'Dilamet eo bet ar restr pellgarget, gant ur meziant enep-viruz moarvat'
+      Unusable: 'N''eus ket bet gallet lañsañ ar programm pellgarget. Marteze e vez stanket gant ur meziant enep-viruz, pe ne vez ket skoret ar reizhiad-mañ gantañ'
+      Release Not Found: 'N''eus ket bet gallet kavout an handelv diwezhañ'
+      Verification Failed: 'N''eus ket bet gallet gwiriañ ez eo ar pellgargadenn un handelv ofisiel'
+      Downgrade: 'Koshoc’h eo an handelv pellgarget eget an hini staliet'
+      Invalid Archive: 'Direizh eo an diell pellgarget'
+      Rollback Failed: 'C''hwitet eo bet an hizivadenn ha n''eus ket bet gallet assevel an handelv kent en he fezh'
     Managed Tool Updates: "Hizivadennoù an ostilhoù meret"
     Update Modes:
       Automatic: "Hizivaat ent emgefreek"

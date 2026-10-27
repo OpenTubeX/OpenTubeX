@@ -884,6 +884,14 @@ Settings:
     FFmpeg and FFprobe Downloaded Template: FFmpeg a FFprobe {version} boli stiahnuté
     FFmpeg and FFprobe Download Error Template: 'FFmpeg a FFprobe sa nepodarilo stiahnuť: {error}'
     Managed Tool Already Current Template: '{tool} {version} je už aktuálny'
+    Managed Tool Errors:
+      Removed: 'Stiahnutý súbor bol odstránený, najpravdepodobnejšie antivírusovým softvérom'
+      Unusable: 'Stiahnutý program sa nepodarilo spustiť. Môže ho blokovať antivírusový softvér alebo tento systém nepodporuje'
+      Release Not Found: 'Nepodarilo sa nájsť najnovšie vydanie'
+      Verification Failed: 'Nepodarilo sa overiť, že stiahnutý súbor je oficiálne vydanie'
+      Downgrade: 'Stiahnuté vydanie je staršie ako nainštalované'
+      Invalid Archive: 'Stiahnutý archív je neplatný'
+      Rollback Failed: 'Aktualizácia zlyhala a predchádzajúcu verziu sa nepodarilo úplne obnoviť'
     Managed Tool Updates: Aktualizácie spravovaných nástrojov
     Update Modes:
       Automatic: Aktualizovať automaticky

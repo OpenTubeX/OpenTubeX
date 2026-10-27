@@ -883,6 +883,14 @@ Settings:
     FFmpeg and FFprobe Downloaded Template: 已下载 FFmpeg 和 FFprobe {version}
     FFmpeg and FFprobe Download Error Template: '下载 FFmpeg 和 FFprobe 失败：{error}'
     Managed Tool Already Current Template: '{tool} {version} 已是最新版本'
+    Managed Tool Errors:
+      Removed: '下载的文件已被删除，很可能是杀毒软件所为'
+      Unusable: '无法运行下载的程序。可能是杀毒软件阻止了它，或者它不支持此系统'
+      Release Not Found: '找不到最新版本'
+      Verification Failed: '无法验证下载内容为官方版本'
+      Downgrade: '下载的版本比已安装的版本旧'
+      Invalid Archive: '下载的压缩包无效'
+      Rollback Failed: '更新失败，且无法完全恢复之前的版本'
     Managed Tool Updates: OpenTubeX 管理的工具更新
     Update Modes:
       Automatic: 自动更新

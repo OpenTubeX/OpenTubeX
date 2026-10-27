@@ -883,6 +883,14 @@ Settings:
     FFmpeg and FFprobe Downloaded Template: FFmpeg et FFprobe {version} ont été téléchargés
     FFmpeg and FFprobe Download Error Template: 'Échec du téléchargement de FFmpeg et FFprobe : {error}'
     Managed Tool Already Current Template: '{tool} {version} est déjà à jour'
+    Managed Tool Errors:
+      Removed: 'Le fichier téléchargé a été supprimé, très probablement par un antivirus'
+      Unusable: 'Le programme téléchargé n’a pas pu être exécuté. Un antivirus le bloque peut-être, ou il ne prend pas en charge ce système'
+      Release Not Found: 'Impossible de trouver la dernière version'
+      Verification Failed: 'Impossible de vérifier que le téléchargement est une version officielle'
+      Downgrade: 'La version téléchargée est plus ancienne que celle installée'
+      Invalid Archive: 'L’archive téléchargée n’est pas valide'
+      Rollback Failed: 'La mise à jour a échoué et la version précédente n’a pas pu être entièrement restaurée'
     Managed Tool Updates: Mises à jour des outils gérés
     Update Modes:
       Automatic: Mettre à jour automatiquement

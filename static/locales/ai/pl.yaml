@@ -447,6 +447,14 @@ Settings:
     Restricted Playback Authentication Hint: Domyślnie OpenTubeX przekazuje te ciasteczka do yt-dlp dopiero po wybraniu opcji „Spróbuj ze skonfigurowanymi ciasteczkami” dla filmu z ograniczeniem wiekowym lub dostępnego tylko dla wspierających.
     Restricted Playback Authentication Warning: Używanie yt-dlp z kontem Google może spowodować jego tymczasowe lub trwałe ograniczenie.
     Use cookies for subtitles: "Używaj plików cookie do napisów"
+    Managed Tool Errors:
+      Removed: 'Pobrany plik został usunięty, najprawdopodobniej przez oprogramowanie antywirusowe'
+      Unusable: 'Nie udało się uruchomić pobranego programu. Może go blokować oprogramowanie antywirusowe lub nie obsługuje on tego systemu'
+      Release Not Found: 'Nie udało się znaleźć najnowszego wydania'
+      Verification Failed: 'Nie udało się potwierdzić, że pobrany plik jest oficjalnym wydaniem'
+      Downgrade: 'Pobrane wydanie jest starsze niż zainstalowane'
+      Invalid Archive: 'Pobrane archiwum jest nieprawidłowe'
+      Rollback Failed: 'Aktualizacja nie powiodła się, a poprzedniej wersji nie udało się w pełni przywrócić'
   Privacy Settings:
     Internet Connectivity Checks: "Sprawdzanie połączenia z internetem"
     Internet Connectivity Checks Tooltip: "Wysyła niewielkie żądania do serwera hostowanego przez GrapheneOS w celu sprawdzenia dostępu do internetu."

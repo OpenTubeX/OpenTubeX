@@ -356,6 +356,7 @@
 
 <script setup>
 import { ytDlp } from '../helpers/ytDlp'
+import { managedToolErrorMessage } from '../helpers/managedToolErrors'
 import { FtIcon } from '@opentubex/icons'
 import { computed, onBeforeUnmount, onMounted, ref, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
@@ -738,9 +739,10 @@ function updateExternalSoftwareUpdateMode(value) {
 
 /**
  * @param {'yt-dlp' | 'ffmpeg'} binary
- * @param {string} error
+ * @param {{ error?: string, errorCode?: string } | null | undefined} result
  */
-function showDownloadErrorToast(binary, error) {
+function showDownloadErrorToast(binary, result) {
+  const error = managedToolErrorMessage(result, t)
   showToast({
     message: binary === 'yt-dlp'
       ? t('Settings.External Software Settings.yt-dlp Download Error Template', { error })
@@ -781,12 +783,12 @@ async function downloadBinary(binary) {
         })
       }
     } else {
-      showDownloadErrorToast(binary, result?.error ?? '')
+      showDownloadErrorToast(binary, result)
     }
   } catch (error) {
     // without this the button would just go back to its previous label,
     // leaving the failure unexplained
-    showDownloadErrorToast(binary, error.message)
+    showDownloadErrorToast(binary, { error: error.message })
   } finally {
     if (activeBinaryDownloads.size === 0) {
       binaryDownloadProgress.value = null

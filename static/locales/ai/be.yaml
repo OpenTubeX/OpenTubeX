@@ -920,6 +920,14 @@ Settings:
     FFmpeg and FFprobe Downloaded Template: FFmpeg і FFprobe {version} спампаваныя
     FFmpeg and FFprobe Download Error Template: 'Не ўдалося спампаваць FFmpeg і FFprobe: {error}'
     Managed Tool Already Current Template: '{tool} {version} ужо абноўлены да апошняй версіі'
+    Managed Tool Errors:
+      Removed: 'Спампаваны файл быў выдалены, хутчэй за ўсё, антывірусным праграмным забеспячэннем'
+      Unusable: 'Не ўдалося запусціць спампаваную праграму. Магчыма, яе блакуе антывірус, або яна не падтрымлівае гэтую сістэму'
+      Release Not Found: 'Не ўдалося знайсці апошні выпуск'
+      Verification Failed: 'Не ўдалося пацвердзіць, што спампаванае з’яўляецца афіцыйным выпускам'
+      Downgrade: 'Спампаваны выпуск старэйшы за ўсталяваны'
+      Invalid Archive: 'Спампаваны архіў пашкоджаны'
+      Rollback Failed: 'Абнаўленне не ўдалося, і папярэднюю версію не ўдалося цалкам аднавіць'
     Managed Tool Updates: Абнаўленні кіраваных інструментаў
     Update Modes:
       Automatic: Абнаўляць аўтаматычна

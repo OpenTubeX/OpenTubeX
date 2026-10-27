@@ -1555,6 +1555,14 @@ Settings:
     FFmpeg Downloaded Template: FFmpeg {version} wurde heruntergeladen
     FFmpeg Download Error Template: 'Herunterladen von FFmpeg fehlgeschlagen: {error}'
     Managed Tool Already Current Template: '{tool} {version} ist bereits auf dem neuesten Stand'
+    Managed Tool Errors:
+      Removed: Die heruntergeladene Datei wurde entfernt, höchstwahrscheinlich von einer Antivirensoftware
+      Unusable: Das heruntergeladene Programm konnte nicht ausgeführt werden. Möglicherweise blockiert es eine Antivirensoftware, oder es wird auf diesem System nicht unterstützt
+      Release Not Found: Die neueste Version konnte nicht gefunden werden
+      Verification Failed: Der Download konnte nicht als offizielle Version verifiziert werden
+      Downgrade: Die heruntergeladene Version ist älter als die installierte
+      Invalid Archive: Das heruntergeladene Archiv ist ungültig
+      Rollback Failed: Das Update ist fehlgeschlagen und die vorherige Version konnte nicht vollständig wiederhergestellt werden
     yt-dlp Executable Path: Ausführbare yt-dlp-Datei
     FFmpeg Executable Path: Ausführbare FFmpeg-Datei
     Restricted Playback Authentication: "yt-dlp-Cookies"

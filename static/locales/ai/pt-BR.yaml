@@ -853,6 +853,14 @@ Settings:
     FFmpeg and FFprobe Downloaded Template: O FFmpeg e o FFprobe {version} foram baixados
     FFmpeg and FFprobe Download Error Template: 'Falha ao baixar o FFmpeg e o FFprobe: {error}'
     Managed Tool Already Current Template: '{tool} {version} já está atualizado'
+    Managed Tool Errors:
+      Removed: 'O arquivo baixado foi removido, provavelmente por um antivírus'
+      Unusable: 'Não foi possível executar o programa baixado. Um antivírus pode estar bloqueando-o, ou ele não é compatível com este sistema'
+      Release Not Found: 'Não foi possível encontrar a versão mais recente'
+      Verification Failed: 'Não foi possível verificar se o download é uma versão oficial'
+      Downgrade: 'A versão baixada é mais antiga que a instalada'
+      Invalid Archive: 'O arquivo compactado baixado é inválido'
+      Rollback Failed: 'A atualização falhou e não foi possível restaurar completamente a versão anterior'
     Managed Tool Updates: Atualizações das ferramentas gerenciadas
     Update Modes:
       Automatic: Atualizar automaticamente

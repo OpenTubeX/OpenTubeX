@@ -1105,6 +1105,14 @@ Settings:
     FFmpeg and FFprobe Downloaded Template: FFmpeg in FFprobe {version} sta prenesena
     FFmpeg and FFprobe Download Error Template: 'Prenos FFmpeg in FFprobe ni uspel: {error}'
     Managed Tool Already Current Template: 'Orodje {tool} {version} je že posodobljeno'
+    Managed Tool Errors:
+      Removed: 'Prenesena datoteka je bila odstranjena, najverjetneje s protivirusno programsko opremo'
+      Unusable: 'Prenesenega programa ni bilo mogoče zagnati. Morda ga blokira protivirusna programska oprema ali pa ne podpira tega sistema'
+      Release Not Found: 'Najnovejše izdaje ni bilo mogoče najti'
+      Verification Failed: 'Prenosa ni bilo mogoče preveriti kot uradne izdaje'
+      Downgrade: 'Prenesena izdaja je starejša od nameščene'
+      Invalid Archive: 'Preneseni arhiv ni veljaven'
+      Rollback Failed: 'Posodobitev ni uspela in prejšnje različice ni bilo mogoče v celoti obnoviti'
     Managed Tool Updates: Posodobitve upravljanih orodij
     Update Modes:
       Automatic: Posodobi samodejno

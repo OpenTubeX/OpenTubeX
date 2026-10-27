@@ -1088,6 +1088,14 @@ Settings:
     FFmpeg and FFprobe Downloaded Template: Baigta atsisiųsti FFmpeg ir FFprobe {version}
     FFmpeg and FFprobe Download Error Template: 'Nepavyko atsisiųsti FFmpeg ir FFprobe: {error}'
     Managed Tool Already Current Template: '{tool} {version} jau yra naujausios versijos'
+    Managed Tool Errors:
+      Removed: 'Atsisiųstas failas buvo pašalintas, greičiausiai antivirusinės programos'
+      Unusable: 'Nepavyko paleisti atsisiųstos programos. Ją gali blokuoti antivirusinė programa arba ji nepalaiko šios sistemos'
+      Release Not Found: 'Nepavyko rasti naujausios laidos'
+      Verification Failed: 'Nepavyko patvirtinti, kad atsisiuntimas yra oficiali laida'
+      Downgrade: 'Atsisiųsta laida senesnė už įdiegtą'
+      Invalid Archive: 'Atsisiųstas archyvas netinkamas'
+      Rollback Failed: 'Atnaujinti nepavyko, o ankstesnės versijos nepavyko visiškai atkurti'
     Managed Tool Updates: Valdomų įrankių naujiniai
     Update Modes:
       Automatic: Atnaujinti automatiškai

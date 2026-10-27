@@ -892,6 +892,14 @@ Settings:
     FFmpeg and FFprobe Downloaded Template: FFmpeg і FFprobe {version} завантажено
     FFmpeg and FFprobe Download Error Template: 'Не вдалося завантажити FFmpeg і FFprobe: {error}'
     Managed Tool Already Current Template: '{tool} {version} вже оновлено до останньої версії'
+    Managed Tool Errors:
+      Removed: 'Завантажений файл було видалено, найімовірніше антивірусом'
+      Unusable: 'Не вдалося запустити завантажену програму. Можливо, її блокує антивірус або вона не підтримує цю систему'
+      Release Not Found: 'Не вдалося знайти останній випуск'
+      Verification Failed: 'Не вдалося підтвердити, що завантаження є офіційним випуском'
+      Downgrade: 'Завантажений випуск старіший за встановлений'
+      Invalid Archive: 'Завантажений архів пошкоджено'
+      Rollback Failed: 'Оновлення не вдалося, і попередню версію не вдалося повністю відновити'
     Managed Tool Updates: Оновлення керованих інструментів
     Update Modes:
       Automatic: Оновлювати автоматично

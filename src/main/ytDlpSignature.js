@@ -130,6 +130,14 @@ function verifyOpenPgpSignature(data, signature, key) {
 }
 
 /**
+ * @param {string} message
+ * @returns {Error} an error the renderer translates by its code
+ */
+function verificationError(message) {
+  return Object.assign(new Error(message), { code: 'MANAGED_TOOL_VERIFICATION_FAILED' })
+}
+
+/**
  * Checks a downloaded yt-dlp release asset against the release's SHA2-256SUMS
  * file and its signature, so a compromised connection cannot substitute the
  * executable or roll it back to an older signed release.
@@ -143,10 +151,10 @@ function verifyOpenPgpSignature(data, signature, key) {
 export function verifyYtDlpReleaseAsset(data, assetName, checksums, signature, minimumSignedAt = 0) {
   const signedAt = verifyOpenPgpSignature(checksums, signature, YT_DLP_SIGNING_KEY)
   if (signedAt === null) {
-    throw new Error('The yt-dlp checksum file is not signed by the yt-dlp release key')
+    throw verificationError('The yt-dlp checksum file is not signed by the yt-dlp release key')
   }
   if (signedAt < minimumSignedAt) {
-    throw new Error('The downloaded yt-dlp release is older than the installed one')
+    throw Object.assign(new Error('The downloaded yt-dlp release is older than the installed one'), { code: 'MANAGED_TOOL_DOWNGRADE' })
   }
 
   const expected = checksums.toString('utf8').split('\n')
@@ -155,11 +163,11 @@ export function verifyYtDlpReleaseAsset(data, assetName, checksums, signature, m
     .toLowerCase()
 
   if (expected === undefined) {
-    throw new Error(`The signed yt-dlp checksum file has no entry for ${assetName}`)
+    throw verificationError(`The signed yt-dlp checksum file has no entry for ${assetName}`)
   }
 
   if (createHash('sha256').update(data).digest('hex') !== expected) {
-    throw new Error('The downloaded yt-dlp binary does not match its signed checksum')
+    throw verificationError('The downloaded yt-dlp binary does not match its signed checksum')
   }
 
   return signedAt

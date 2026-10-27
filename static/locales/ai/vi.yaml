@@ -892,6 +892,14 @@ Settings:
     FFmpeg and FFprobe Downloaded Template: Đã tải FFmpeg và FFprobe {version}
     FFmpeg and FFprobe Download Error Template: 'Không tải được FFmpeg và FFprobe: {error}'
     Managed Tool Already Current Template: '{tool} {version} đã là phiên bản mới nhất'
+    Managed Tool Errors:
+      Removed: 'Tệp đã tải xuống đã bị xóa, rất có thể do phần mềm diệt vi-rút'
+      Unusable: 'Không thể chạy chương trình đã tải xuống. Phần mềm diệt vi-rút có thể đang chặn nó, hoặc nó không hỗ trợ hệ thống này'
+      Release Not Found: 'Không tìm thấy bản phát hành mới nhất'
+      Verification Failed: 'Không thể xác minh bản tải xuống là bản phát hành chính thức'
+      Downgrade: 'Bản phát hành đã tải xuống cũ hơn bản đã cài đặt'
+      Invalid Archive: 'Tệp nén đã tải xuống không hợp lệ'
+      Rollback Failed: 'Cập nhật thất bại và không thể khôi phục hoàn toàn phiên bản trước'
     Managed Tool Updates: Cập nhật công cụ được quản lý
     Update Modes:
       Automatic: Tự động cập nhật

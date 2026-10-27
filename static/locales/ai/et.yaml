@@ -884,6 +884,14 @@ Settings:
     FFmpeg and FFprobe Downloaded Template: FFmpeg ja FFprobe {version} on alla laaditud
     FFmpeg and FFprobe Download Error Template: 'FFmpegi ja FFprobe’i allalaadimine nurjus: {error}'
     Managed Tool Already Current Template: '{tool} {version} on juba ajakohane'
+    Managed Tool Errors:
+      Removed: 'Allalaaditud fail eemaldati, tõenäoliselt viirusetõrjetarkvara poolt'
+      Unusable: 'Allalaaditud programmi ei saanud käivitada. Viirusetõrjetarkvara võib seda blokeerida või see ei toeta seda süsteemi'
+      Release Not Found: 'Uusimat väljalaset ei leitud'
+      Verification Failed: 'Allalaadimist ei õnnestunud ametliku väljalaskena kinnitada'
+      Downgrade: 'Allalaaditud väljalase on paigaldatust vanem'
+      Invalid Archive: 'Allalaaditud arhiiv on vigane'
+      Rollback Failed: 'Värskendamine nurjus ja eelmist versiooni ei õnnestunud täielikult taastada'
     Managed Tool Updates: Hallatavate tööriistade uuendused
     Update Modes:
       Automatic: Uuenda automaatselt

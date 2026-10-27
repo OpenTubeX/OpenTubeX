@@ -883,6 +883,14 @@ Settings:
     FFmpeg and FFprobe Downloaded Template: 已下載 FFmpeg 與 FFprobe {version}
     FFmpeg and FFprobe Download Error Template: '下載 FFmpeg 與 FFprobe 失敗：{error}'
     Managed Tool Already Current Template: '{tool} {version} 已是最新版本'
+    Managed Tool Errors:
+      Removed: '下載的檔案已被移除，很可能是防毒軟體所致'
+      Unusable: '無法執行下載的程式。可能是防毒軟體封鎖了它，或者它不支援此系統'
+      Release Not Found: '找不到最新版本'
+      Verification Failed: '無法驗證下載內容為官方版本'
+      Downgrade: '下載的版本比已安裝的版本舊'
+      Invalid Archive: '下載的壓縮檔無效'
+      Rollback Failed: '更新失敗，且無法完全還原先前的版本'
     Managed Tool Updates: 受管理工具的更新
     Update Modes:
       Automatic: 自動更新

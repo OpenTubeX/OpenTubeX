@@ -398,6 +398,35 @@ test.describe('managed external software update controls', () => {
   })
 })
 
+test.describe('managed external software download errors', () => {
+  test.use({
+    seed: {
+      settings: {
+        currentLocale: 'de-DE',
+        ytDlpSource: 'managed',
+        externalSoftwareUpdateMode: 'manual'
+      }
+    }
+  })
+
+  test('translates a managed yt-dlp download that antivirus software removed', async ({ app, page }) => {
+    await app.electronApp.evaluate(({ ipcMain }) => {
+      ipcMain.removeHandler('yt-dlp-download-binary')
+      ipcMain.handle('yt-dlp-download-binary', () => ({
+        error: 'The downloaded yt-dlp binary was removed',
+        errorCode: 'MANAGED_TOOL_REMOVED'
+      }))
+    })
+
+    const section = await goToSettingsSection(page, 'advanced')
+    await section.locator('[aria-labelledby="yt-dlp-settings-heading"] .externalSoftwareToolAction').click()
+
+    await expect(page.locator('.toast', {
+      hasText: 'Herunterladen von yt-dlp fehlgeschlagen: Die heruntergeladene Datei wurde entfernt, höchstwahrscheinlich von einer Antivirensoftware'
+    })).toBeVisible()
+  })
+})
+
 test.describe('playback engine default', () => {
   test('uses the built-in engine for new users', async ({ app }) => {
     await goTo(app.page, 'settings')

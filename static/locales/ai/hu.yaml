@@ -884,6 +884,14 @@ Settings:
     FFmpeg and FFprobe Downloaded Template: Az FFmpeg és az FFprobe {version} letöltve
     FFmpeg and FFprobe Download Error Template: 'Nem sikerült letölteni az FFmpeg és az FFprobe programot: {error}'
     Managed Tool Already Current Template: 'A(z) {tool} {version} már naprakész'
+    Managed Tool Errors:
+      Removed: 'A letöltött fájlt eltávolították, valószínűleg egy víruskereső program'
+      Unusable: 'A letöltött program nem indítható el. Lehet, hogy egy víruskereső program blokkolja, vagy nem támogatja ezt a rendszert'
+      Release Not Found: 'Nem található a legújabb kiadás'
+      Verification Failed: 'Nem sikerült ellenőrizni, hogy a letöltés hivatalos kiadás-e'
+      Downgrade: 'A letöltött kiadás régebbi a telepítettnél'
+      Invalid Archive: 'A letöltött archívum érvénytelen'
+      Rollback Failed: 'A frissítés nem sikerült, és az előző verziót nem lehetett teljesen visszaállítani'
     Managed Tool Updates: Felügyelt eszközök frissítései
     Update Modes:
       Automatic: Automatikus frissítés

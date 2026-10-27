@@ -920,6 +920,14 @@ Settings:
     FFmpeg and FFprobe Downloaded Template: FFmpeg و FFprobe {version} بارگیری شدند
     FFmpeg and FFprobe Download Error Template: 'بارگیری FFmpeg و FFprobe ناموفق بود: {error}'
     Managed Tool Already Current Template: '{tool} {version} از قبل به‌روز است'
+    Managed Tool Errors:
+      Removed: 'فایل دانلودشده حذف شد، به احتمال زیاد توسط نرم‌افزار ضدویروس'
+      Unusable: 'برنامهٔ دانلودشده اجرا نشد. ممکن است نرم‌افزار ضدویروس آن را مسدود کرده باشد، یا از این سیستم پشتیبانی نکند'
+      Release Not Found: 'آخرین نسخه پیدا نشد'
+      Verification Failed: 'تأیید اینکه دانلود یک نسخهٔ رسمی است ممکن نشد'
+      Downgrade: 'نسخهٔ دانلودشده قدیمی‌تر از نسخهٔ نصب‌شده است'
+      Invalid Archive: 'بایگانی دانلودشده نامعتبر است'
+      Rollback Failed: 'به‌روزرسانی ناموفق بود و نسخهٔ قبلی به‌طور کامل بازیابی نشد'
     Managed Tool Updates: به‌روزرسانی ابزارهای مدیریت‌شده
     Update Modes:
       Automatic: به‌روزرسانی خودکار

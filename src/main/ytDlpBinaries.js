@@ -456,7 +456,7 @@ async function fetchBuffer(url) {
  */
 function getLatestReleaseDownloadUrl(repository) {
   return new Promise((resolve, reject) => {
-    const failure = new Error(`Could not find the latest ${repository} release`)
+    const failure = managedToolError('MANAGED_TOOL_RELEASE_NOT_FOUND', `Could not find the latest ${repository} release`)
     // Not following the redirect cancels it, so the release page is never downloaded
     const request = net.request({ url: `https://github.com/${repository}/releases/latest`, method: 'HEAD', redirect: 'manual' })
     request.on('redirect', (statusCode, method, redirectUrl) => {
@@ -563,7 +563,7 @@ function extractZipEntry(zip, matches) {
   }
 
   if (eocdOffset === -1) {
-    throw new Error('Invalid zip file')
+    throw managedToolError('MANAGED_TOOL_INVALID_ARCHIVE', 'Invalid zip file')
   }
 
   const entryCount = zip.readUInt16LE(eocdOffset + 10)
@@ -596,13 +596,13 @@ function extractZipEntry(zip, matches) {
         return Buffer.from(data)
       }
 
-      throw new Error(`Unsupported zip compression method: ${compressionMethod}`)
+      throw managedToolError('MANAGED_TOOL_INVALID_ARCHIVE', `Unsupported zip compression method: ${compressionMethod}`)
     }
 
     offset += 46 + nameLength + extraLength + commentLength
   }
 
-  throw new Error('Binary not found in the downloaded archive')
+  throw managedToolError('MANAGED_TOOL_INVALID_ARCHIVE', 'Binary not found in the downloaded archive')
 }
 
 /**
@@ -691,11 +691,11 @@ async function performAtomicBinaryInstall(binaries, validate) {
     }
 
     if (rollbackErrors.length > 0) {
-      throw new AggregateError(
+      throw Object.assign(new AggregateError(
         rollbackErrors,
         'Installing the managed binaries failed and could not be fully rolled back',
         { cause: error }
-      )
+      ), { code: 'MANAGED_TOOL_ROLLBACK_FAILED' })
     }
     throw error
   }
@@ -733,7 +733,7 @@ async function installBinariesAtomically(binaries, validate) {
  * that the previous update committed and cannot roll it back.
  * @param {BinaryDownloadProgressCallback} [onProgress]
  * @param {() => void} [onDownloadStart]
- * @returns {Promise<{ version: string, updated: boolean } | { error: string }>}
+ * @returns {Promise<{ version: string, updated: boolean } | { error: string, errorCode?: string }>}
  */
 export function downloadManagedYtDlp(onProgress, onDownloadStart) {
   const update = managedYtDlpUpdateQueue
@@ -746,7 +746,7 @@ export function downloadManagedYtDlp(onProgress, onDownloadStart) {
 /**
  * @param {BinaryDownloadProgressCallback} [onProgress]
  * @param {() => void} [onDownloadStart]
- * @returns {Promise<{ version: string, updated: boolean } | { error: string }>}
+ * @returns {Promise<{ version: string, updated: boolean } | { error: string, errorCode?: string }>}
  */
 async function updateManagedYtDlp(onProgress, onDownloadStart) {
   const configuredChannel = (await settings._findOne('ytDlpChannel'))?.value
@@ -776,13 +776,13 @@ async function updateManagedYtDlp(onProgress, onDownloadStart) {
       await installBinary(download.data, managedPath)
     }
   } catch (error) {
-    return { error: error.message }
+    return toErrorResult(error)
   }
 
   const version = await getYtDlpVersion(managedPath)
 
   if (version === null) {
-    return { error: 'The downloaded yt-dlp binary does not work on this system' }
+    return toErrorResult(unusableBinaryError('yt-dlp', managedPath))
   }
 
   if (download.data !== null) {
@@ -798,12 +798,46 @@ async function updateManagedYtDlp(onProgress, onDownloadStart) {
 }
 
 /**
+ * Explains why a downloaded binary failed its version check. Antivirus
+ * software often quarantines new executables or blocks them from running.
+ * @param {string} name
+ * @param {string} path
+ * @returns {Error}
+ */
+function unusableBinaryError(name, path) {
+  return existsSync(path)
+    ? managedToolError('MANAGED_TOOL_UNUSABLE', `The downloaded ${name} binary could not be run`)
+    : managedToolError('MANAGED_TOOL_REMOVED', `The downloaded ${name} binary was removed`)
+}
+
+/**
+ * Keeps the English message for logs and network failure detection while the
+ * code lets the renderer translate known failures.
+ * @param {string} code
+ * @param {string} message
+ * @returns {Error}
+ */
+function managedToolError(code, message) {
+  return Object.assign(new Error(message), { code })
+}
+
+/**
+ * @param {Error & { code?: unknown }} error
+ * @returns {{ error: string, errorCode?: string }}
+ */
+function toErrorResult(error) {
+  return typeof error.code === 'string'
+    ? { error: error.message, errorCode: error.code }
+    : { error: error.message }
+}
+
+/**
  * Downloads up-to-date FFmpeg and FFprobe builds into the user data directory.
  * They are kept together because yt-dlp locates both through one
  * `--ffmpeg-location` argument.
  * @param {BinaryDownloadProgressCallback} [onProgress]
  * @param {() => void} [onDownloadStart]
- * @returns {Promise<{ version: string, updated: boolean } | { error: string }>}
+ * @returns {Promise<{ version: string, updated: boolean } | { error: string, errorCode?: string }>}
  */
 export async function downloadManagedFfmpeg(onProgress, onDownloadStart) {
   const ffmpegPath = getManagedBinaryPath('ffmpeg')
@@ -835,7 +869,7 @@ export async function downloadManagedFfmpeg(onProgress, onDownloadStart) {
         )
       }
     } catch (error) {
-      return { error: error.message }
+      return toErrorResult(error)
     }
   } else {
     // daily builds of the latest FFmpeg release for Linux and macOS
@@ -865,7 +899,7 @@ export async function downloadManagedFfmpeg(onProgress, onDownloadStart) {
         }
       }
     } catch (error) {
-      return { error: error.message }
+      return toErrorResult(error)
     }
   }
 
@@ -878,16 +912,16 @@ export async function downloadManagedFfmpeg(onProgress, onDownloadStart) {
       ])
 
       if (ffmpegVersion === null) {
-        throw new Error('The downloaded FFmpeg binary does not work on this system')
+        throw unusableBinaryError('FFmpeg', ffmpegPath)
       }
       if (ffprobeVersion === null) {
-        throw new Error('The downloaded FFprobe binary does not work on this system')
+        throw unusableBinaryError('FFprobe', ffprobePath)
       }
 
       return ffmpegVersion
     })
   } catch (error) {
-    return { error: error.message }
+    return toErrorResult(error)
   }
 
   try {
@@ -1095,7 +1129,7 @@ export async function handleYtDlpCheckBinaryUpdate(event, binary) {
 /**
  * @param {import('electron').IpcMainInvokeEvent} event
  * @param {'yt-dlp' | 'ffmpeg'} binary
- * @returns {Promise<{ version: string, updated: boolean } | { error: string } | null>}
+ * @returns {Promise<{ version: string, updated: boolean } | { error: string, errorCode?: string } | null>}
  */
 export async function handleYtDlpDownloadBinary(event, binary) {
   if (!isOpenTubeXUrl(event.senderFrame.url)) {

@@ -899,6 +899,14 @@ Settings:
     FFmpeg and FFprobe Downloaded Template: O FFmpeg e o FFprobe {version} foram transferidos
     FFmpeg and FFprobe Download Error Template: 'Falha ao transferir o FFmpeg e o FFprobe: {error}'
     Managed Tool Already Current Template: '{tool} {version} já está atualizado'
+    Managed Tool Errors:
+      Removed: 'O ficheiro transferido foi removido, muito provavelmente por um antivírus'
+      Unusable: 'Não foi possível executar o programa transferido. Um antivírus pode estar a bloqueá-lo, ou não é compatível com este sistema'
+      Release Not Found: 'Não foi possível encontrar a versão mais recente'
+      Verification Failed: 'Não foi possível verificar se a transferência é uma versão oficial'
+      Downgrade: 'A versão transferida é mais antiga do que a instalada'
+      Invalid Archive: 'O arquivo transferido é inválido'
+      Rollback Failed: 'A atualização falhou e não foi possível restaurar completamente a versão anterior'
     Managed Tool Updates: Atualizações das ferramentas geridas
     Update Modes:
       Automatic: Atualizar automaticamente

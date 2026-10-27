@@ -51,3 +51,45 @@ globalThis.downloadManagedYtDlp = downloadManagedYtDlp`, context)
   assert.equal(installed.signedAt, 300)
   assert.match(results[1].error, /rollback/)
 })
+
+/**
+ * @param {boolean} binaryExists
+ */
+async function downloadUnusableYtDlp(binaryExists) {
+  const context = vm.createContext({
+    settings: { _findOne: async () => ({ value: 'stable' }) },
+    YT_DLP_RELEASE_REPOSITORIES: { stable: 'yt-dlp/yt-dlp' },
+    getYtDlpAssetName: () => 'yt-dlp.exe',
+    getManagedBinaryPath: () => 'C:\\managed\\yt-dlp.exe',
+    getLatestReleaseDownloadUrl: async () => 'https://example.invalid/release',
+    readDownloadValidators: async () => null,
+    downloadFile: async () => ({ data: Buffer.from('yt-dlp'), validators: {} }),
+    fetchBuffer: async () => Buffer.alloc(0),
+    verifyYtDlpReleaseAsset: () => 100,
+    installBinary: async () => {},
+    getYtDlpVersion: async () => null,
+    existsSync: () => binaryExists,
+    writeDownloadValidators: async () => {},
+    broadcastToRenderers: () => {},
+    IpcChannels: {},
+    process: { platform: 'win32', arch: 'x64' },
+    managedYtDlpUpdateQueue: Promise.resolve()
+  })
+  vm.runInContext(`${source.slice(start, end).replaceAll('export async function', 'async function').replaceAll('export function', 'function')}
+globalThis.downloadManagedYtDlp = downloadManagedYtDlp`, context)
+  return context.downloadManagedYtDlp()
+}
+
+test('a downloaded yt-dlp that antivirus software removed is reported as removed', async () => {
+  assert.deepEqual({ ...await downloadUnusableYtDlp(false) }, {
+    error: 'The downloaded yt-dlp binary was removed',
+    errorCode: 'MANAGED_TOOL_REMOVED'
+  })
+})
+
+test('a downloaded yt-dlp that cannot run is reported as unusable', async () => {
+  assert.deepEqual({ ...await downloadUnusableYtDlp(true) }, {
+    error: 'The downloaded yt-dlp binary could not be run',
+    errorCode: 'MANAGED_TOOL_UNUSABLE'
+  })
+})

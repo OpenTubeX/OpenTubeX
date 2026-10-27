@@ -897,6 +897,14 @@ Settings:
     FFmpeg and FFprobe Downloaded Template: FFmpeg ו-FFprobe {version} הורדו
     FFmpeg and FFprobe Download Error Template: 'הורדת FFmpeg ו-FFprobe נכשלה: {error}'
     Managed Tool Already Current Template: '{tool} {version} כבר מעודכן'
+    Managed Tool Errors:
+      Removed: 'הקובץ שהורד הוסר, ככל הנראה על ידי תוכנת אנטי-וירוס'
+      Unusable: 'לא ניתן היה להפעיל את התוכנה שהורדה. ייתכן שתוכנת אנטי-וירוס חוסמת אותה, או שהיא אינה תומכת במערכת זו'
+      Release Not Found: 'לא ניתן היה למצוא את הגרסה העדכנית ביותר'
+      Verification Failed: 'לא ניתן היה לאמת שההורדה היא גרסה רשמית'
+      Downgrade: 'הגרסה שהורדה ישנה יותר מהגרסה המותקנת'
+      Invalid Archive: 'הארכיון שהורד אינו תקין'
+      Rollback Failed: 'העדכון נכשל ולא ניתן היה לשחזר במלואה את הגרסה הקודמת'
     Managed Tool Updates: עדכוני כלים מנוהלים
     Update Modes:
       Automatic: עדכון אוטומטי

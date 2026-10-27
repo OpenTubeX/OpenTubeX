@@ -886,6 +886,14 @@ Settings:
     FFmpeg and FFprobe Downloaded Template: FFmpeg și FFprobe {version} au fost descărcate
     FFmpeg and FFprobe Download Error Template: 'Descărcarea FFmpeg și FFprobe a eșuat: {error}'
     Managed Tool Already Current Template: '{tool} {version} este deja actualizat'
+    Managed Tool Errors:
+      Removed: 'Fișierul descărcat a fost eliminat, cel mai probabil de un program antivirus'
+      Unusable: 'Programul descărcat nu a putut fi rulat. Este posibil ca un program antivirus să îl blocheze sau ca acesta să nu fie compatibil cu acest sistem'
+      Release Not Found: 'Nu s-a putut găsi cea mai recentă versiune'
+      Verification Failed: 'Nu s-a putut verifica faptul că descărcarea este o versiune oficială'
+      Downgrade: 'Versiunea descărcată este mai veche decât cea instalată'
+      Invalid Archive: 'Arhiva descărcată nu este validă'
+      Rollback Failed: 'Actualizarea a eșuat și versiunea anterioară nu a putut fi restaurată complet'
     Managed Tool Updates: Actualizarea instrumentelor gestionate
     Update Modes:
       Automatic: Actualizează automat

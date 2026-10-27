@@ -903,6 +903,14 @@ Settings:
     FFmpeg and FFprobe Downloaded Template: FFmpeg மற்றும் FFprobe {version} பதிவிறக்கப்பட்டன
     FFmpeg and FFprobe Download Error Template: 'FFmpeg மற்றும் FFprobe பதிவிறக்கம் தோல்வியடைந்தது: {error}'
     Managed Tool Already Current Template: '{tool} {version} ஏற்கெனவே புதுப்பித்த நிலையில் உள்ளது'
+    Managed Tool Errors:
+      Removed: 'பதிவிறக்கிய கோப்பு அகற்றப்பட்டது, பெரும்பாலும் வைரஸ் தடுப்பு மென்பொருளால்'
+      Unusable: 'பதிவிறக்கிய நிரலை இயக்க முடியவில்லை. வைரஸ் தடுப்பு மென்பொருள் அதைத் தடுக்கலாம், அல்லது அது இந்த அமைப்பை ஆதரிக்காமல் இருக்கலாம்'
+      Release Not Found: 'சமீபத்திய வெளியீட்டைக் கண்டறிய முடியவில்லை'
+      Verification Failed: 'பதிவிறக்கம் அதிகாரப்பூர்வ வெளியீடு என்பதைச் சரிபார்க்க முடியவில்லை'
+      Downgrade: 'பதிவிறக்கிய வெளியீடு நிறுவப்பட்டதை விடப் பழையது'
+      Invalid Archive: 'பதிவிறக்கிய காப்பகம் தவறானது'
+      Rollback Failed: 'புதுப்பிப்பு தோல்வியடைந்தது, முந்தைய பதிப்பை முழுமையாக மீட்டெடுக்க முடியவில்லை'
     Managed Tool Updates: நிர்வகிக்கப்பட்ட கருவிப் புதுப்பிப்புகள்
     Update Modes:
       Automatic: தானாகப் புதுப்பி

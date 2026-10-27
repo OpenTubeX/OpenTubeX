@@ -1138,6 +1138,14 @@ Settings:
     FFmpeg and FFprobe Downloaded Template: S'han baixat FFmpeg i FFprobe {version}
     FFmpeg and FFprobe Download Error Template: 'Ha fallat la baixada de FFmpeg i FFprobe: {error}'
     Managed Tool Already Current Template: '{tool} {version} ja està actualitzat'
+    Managed Tool Errors:
+      Removed: 'El fitxer baixat s’ha eliminat, molt probablement per un programari antivirus'
+      Unusable: 'No s’ha pogut executar el programa baixat. Pot ser que un antivirus el bloquegi o que no sigui compatible amb aquest sistema'
+      Release Not Found: 'No s’ha pogut trobar la versió més recent'
+      Verification Failed: 'No s’ha pogut verificar que la baixada sigui una versió oficial'
+      Downgrade: 'La versió baixada és més antiga que la instal·lada'
+      Invalid Archive: 'L’arxiu baixat no és vàlid'
+      Rollback Failed: 'L’actualització ha fallat i no s’ha pogut restaurar completament la versió anterior'
     Managed Tool Updates: Actualitzacions de les eines gestionades
     Update Modes:
       Automatic: Actualitza automàticament
