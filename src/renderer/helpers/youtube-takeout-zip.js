@@ -5,7 +5,8 @@ const MAX_ENTRY_SIZE = 256 * 1024 * 1024
 const SNIFF_SIZE = 64 * 1024
 const CANDIDATE_PATTERN = /\.(?:csv|json|opml)$/i
 const CHANNEL_ID_PATTERN = /^UC[\w-]{22}$/
-const PLAYLIST_ID_PATTERN = /^(?:PL|FL|LL|WL|LM|OL)[\w-]+$/
+// User playlists, favorites, liked videos, uploads, albums, watch later and liked music.
+const PLAYLIST_ID_PATTERN = /^(?:PL[\w-]{16,}|(?:FL|LL|UU)[\w-]{22}|OLAK5uy_[\w-]+|WL|LM)$/
 const TIMESTAMP_PATTERN = /^\d{4}-\d{2}-\d{2}[T ]\d{2}:\d{2}/
 const ACTIVITY_URL_PATTERN = /"titleUrl"\s*:\s*"https:\/\/www\.youtube\.com\/(watch\?v|results\?search_query)/g
 
@@ -45,7 +46,7 @@ export function sniffTakeoutEntry(path, head, complete) {
   if (record.length === 3 && CHANNEL_ID_PATTERN.test(record[0]) && record[1].includes(record[0])) {
     return 'subscriptions'
   }
-  if (record.length >= 2 && record.some(value => PLAYLIST_ID_PATTERN.test(value))) {
+  if (record.length >= 2 && (records[0].includes('Playlist ID') || record.some(value => PLAYLIST_ID_PATTERN.test(value)))) {
     return 'playlistMetadata'
   }
   return null

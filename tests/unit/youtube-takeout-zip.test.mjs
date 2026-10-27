@@ -89,6 +89,7 @@ test('ignores unrelated or unrecognizable Takeout data', () => {
     ['comments/comments.csv', `Comment ID,Channel ID,Comment Create Timestamp,Video ID\nUgx,${channelId},2025-01-01T00:00:00Z,abcdefghijk\n`],
     ['history/watch-history.html', '<html />'],
     ['history/watch-history.json', '[]'],
+    ['comments/comments.csv', 'Comment ID,Comment Text\nUgx,WLAN\n'],
     ['subscriptions/subscriptions.csv', `Channel Id,Channel Url,Channel Title\n${channelId},"unclosed\n`],
     // My Activity mixes watches and searches in one file.
     ['My Activity/YouTube/MyActivity.json', `[${watchHistory.slice(1, -1)},${searchHistory.slice(1, -1)}]`],
@@ -254,7 +255,7 @@ test('invalidates repeated metadata entries for an account while retaining other
 
 for (const [schema, badMetadata] of [
   ['malformed', `${metadataHeader}\nPLbad,Title,Description,not-a-date,\n`],
-  ['localized', '播放清單 ID,標題\nPLbad,清單\n'],
+  ['localized', `播放清單 ID,標題\nPL${'b'.repeat(32)},清單\n`],
   ['ambiguous', `${metadataHeader}\nPLone,A/B,,,\nPLtwo,A_B,,,`],
 ]) {
   for (const badFirst of [true, false]) {

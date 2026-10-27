@@ -192,7 +192,7 @@ for (const [name, metadata] of [
   ['malformed', 'Playlist ID,Playlist Title (Original),Playlist Create Timestamp\nPLbad,本地清單,not-a-date\n'],
   ['ambiguous', 'Playlist ID,Playlist Title (Original)\nPLone,A/B\nPLtwo,A_B\n'],
   // A translated header whose title column matches no playlist file.
-  ['localized without a matching title', '播放清單 ID,標題\nPLlocalized,其他清單\n'],
+  ['localized without a matching title', `播放清單 ID,標題\nPL${'l'.repeat(32)},其他清單\n`],
 ]) {
   test(`imports video CSVs and other selected types when playlist metadata is ${name}`, async ({ page }) => {
     const root = 'Takeout/YouTube and YouTube Music'

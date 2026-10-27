@@ -73,7 +73,7 @@ test('Takeout preview matches import names, empty playlists, deduplication, filt
 test('Takeout preview reports unsupported playlist files while preserving usable accounts', async () => {
   const file = new Blob([zipSync({
     // A translated header gives no column names, and no file matches a title column.
-    'Bad/playlists/playlists.csv': strToU8('Playlist-ID,Titel\nPLbad,Unknown\n'),
+    'Bad/playlists/playlists.csv': strToU8(`Playlist-ID,Titel\nPL${'b'.repeat(32)},Unknown\n`),
     'Bad/playlists/Broken-videos.csv': strToU8('Video ID,Playlist video creation timestamp\nabcdefghijk,2025-01-01T00:00:00Z\ninvalid row\n'),
     'Good/playlists/playlists.csv': strToU8('Playlist ID,Playlist Title (Original)\nPLempty,Empty\n'),
   })])
