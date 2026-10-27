@@ -647,6 +647,24 @@ Settings:
         Destructive pressed: Tindakan destruktif saat ditekan
         Text and icons on destructive actions: Teks dan ikon pada tindakan destruktif
   Player Settings:
+    Buffering:
+      Buffering: Buffering
+      Description: Pilih seberapa banyak video yang dimuat pemutar lebih dahulu dan tetap dimuat.
+      Buffer Ahead Hint: Buffer ke depan yang lebih besar menjaga pemutaran tetap berjalan saat koneksi terputus lebih lama, tetapi mengunduh video yang mungkin tidak Anda tonton.
+      Rewind Buffer Hint: Buffer mundur yang lebih besar memungkinkan Anda melompat mundur tanpa mengunduh ulang, tetapi menggunakan lebih banyak memori.
+      Buffer Before Playing Hint: Menunggu hingga lebih banyak bagian dari video yang sedang ditonton dimuat sebelum memutar mencegah jeda berulang pada koneksi yang tidak stabil, tetapi pemutaran lebih lama dimulai dan dilanjutkan setelah melompat.
+      Preset: Prasetel Buffering
+      Presets:
+        Data Saver: Hemat Data
+        Default: Default
+        Smooth Playback: Pemutaran Lancar
+        Custom: Khusus
+      Buffer Ahead: Buffer ke Depan
+      Buffer Ahead Tooltip: 'Seberapa jauh video dimuat melewati posisi saat ini. Pada kualitas tinggi, batas memori dapat membatasi nilai yang sangat tinggi. Default: {value}'
+      Rewind Buffer: Buffer Mundur
+      Rewind Buffer Tooltip: 'Seberapa banyak video yang sudah Anda tonton tetap dimuat. Default: {value}'
+      Buffer Before Playing: Buffer Sebelum Memutar
+      Buffer Before Playing Tooltip: 'Seberapa banyak video yang harus dimuat sebelum pemutaran dimulai, atau dilanjutkan setelah buffer habis. Default: {value}'
     Quality Limit on Metered Networks:
       Quality Limit on Metered Networks: "Batas Kualitas di Jaringan Terukur"
       No Limit: "Tanpa Batas"

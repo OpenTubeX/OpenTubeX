@@ -662,6 +662,24 @@ Settings:
       Catppuccin Latte Mauve: Catppuccin Latte Mauve
       Catppuccin Latte Red: Catppuccin Latte Red
   Player Settings:
+    Buffering:
+      Buffering: Buffering
+      Description: Vælg, hvor meget af videoen afspilleren indlæser på forhånd og holder indlæst.
+      Buffer Ahead Hint: Mere buffer fremad holder afspilningen i gang gennem længere forbindelsesudfald, men downloader video, du måske ikke ser.
+      Rewind Buffer Hint: En større buffer til tilbagespoling lader dig springe tilbage uden at downloade igen, men bruger mere hukommelse.
+      Buffer Before Playing Hint: At vente på mere video før afspilning forhindrer gentagne stop på ustabile forbindelser, men videoer tager længere tid om at starte og om at fortsætte efter spoling.
+      Preset: Bufferforudindstilling
+      Presets:
+        Data Saver: Databesparelse
+        Default: Standard
+        Smooth Playback: Jævn afspilning
+        Custom: Brugerdefineret
+      Buffer Ahead: Buffer fremad
+      Buffer Ahead Tooltip: 'Hvor langt forbi den aktuelle position der indlæses. Ved høje kvaliteter kan hukommelsesgrænser begrænse meget høje værdier. Standard: {value}'
+      Rewind Buffer: Buffer til tilbagespoling
+      Rewind Buffer Tooltip: 'Hvor meget af den video, du allerede har set, der forbliver indlæst. Standard: {value}'
+      Buffer Before Playing: Buffer før afspilning
+      Buffer Before Playing Tooltip: 'Hvor meget af videoen der skal indlæses, før afspilningen starter eller fortsætter efter at være gået i stå. Standard: {value}'
     Quality Limit on Metered Networks:
       Quality Limit on Metered Networks: "Kvalitetsgrænse på netværk med datamåling"
       No Limit: "Ingen grænse"

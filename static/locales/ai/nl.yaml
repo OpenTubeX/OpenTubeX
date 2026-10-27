@@ -651,6 +651,24 @@ Settings:
         Destructive pressed: Verwijderactie bij indrukken
         Text and icons on destructive actions: Tekst en pictogrammen bij verwijderacties
   Player Settings:
+    Buffering:
+      Buffering: Buffering
+      Description: Kies hoeveel van de video de speler vooraf laadt en geladen houdt.
+      Buffer Ahead Hint: Meer buffer vooruit houdt het afspelen gaande bij langere verbindingsonderbrekingen, maar downloadt video die je misschien niet bekijkt.
+      Rewind Buffer Hint: Een grotere terugspoelbuffer laat je terugspringen zonder opnieuw te downloaden, maar gebruikt meer geheugen.
+      Buffer Before Playing Hint: Wachten op meer video vóór het afspelen voorkomt herhaaldelijk haperen bij instabiele verbindingen, maar video’s starten langzamer en gaan na het spoelen later verder.
+      Preset: Bufferingvoorinstelling
+      Presets:
+        Data Saver: Databesparing
+        Default: Standaard
+        Smooth Playback: Vloeiend afspelen
+        Custom: Aangepast
+      Buffer Ahead: Buffer vooruit
+      Buffer Ahead Tooltip: 'Hoe ver voorbij de huidige positie wordt geladen. Bij hoge kwaliteiten kunnen geheugenlimieten zeer hoge waarden beperken. Standaard: {value}'
+      Rewind Buffer: Terugspoelbuffer
+      Rewind Buffer Tooltip: 'Hoeveel van de al bekeken video geladen blijft. Standaard: {value}'
+      Buffer Before Playing: Buffer vóór afspelen
+      Buffer Before Playing Tooltip: 'Hoeveel van de video geladen moet zijn voordat het afspelen begint, of na haperen verdergaat. Standaard: {value}'
     Quality Limit on Metered Networks:
       Quality Limit on Metered Networks: "Maximale kwaliteit op netwerken met datalimiet"
       No Limit: "Geen limiet"

@@ -435,11 +435,14 @@ test.describe('synced setting indicators', () => {
     await goTo(page, 'settings')
     const playbackSection = await goToSettingsSection(page, 'playback')
     const sliders = playbackSection.locator('.sliderGrid > *')
-    await expect(sliders).toHaveCount(9)
+    await expect(sliders).toHaveCount(12)
     await expect(sliders.nth(5)).toContainText(/Max video playback rate/i)
-    await expect(sliders.nth(6)).toContainText(/Parallel segment loading/i)
-    await expect(sliders.nth(7)).toContainText(/Upcoming videos to preload/i)
-    await expect(sliders.nth(8)).toContainText(/Concurrent Preloads/i)
+    await expect(sliders.nth(6)).toContainText(/Buffer Ahead/i)
+    await expect(sliders.nth(7)).toContainText(/Rewind Buffer/i)
+    await expect(sliders.nth(8)).toContainText(/Buffer Before Playing/i)
+    await expect(sliders.nth(9)).toContainText(/Parallel segment loading/i)
+    await expect(sliders.nth(10)).toContainText(/Upcoming videos to preload/i)
+    await expect(sliders.nth(11)).toContainText(/Concurrent Preloads/i)
 
     const boxes = await sliders.evaluateAll((elements) => elements.map((element) => {
       const { x, y, width } = element.getBoundingClientRect()
@@ -450,7 +453,7 @@ test.describe('synced setting indicators', () => {
     for (const { y } of boxes) {
       rowSizes.set(y, (rowSizes.get(y) ?? 0) + 1)
     }
-    expect([...rowSizes.values()]).toEqual([2, 2, 2, 3])
+    expect([...rowSizes.values()]).toEqual([2, 2, 2, 3, 3])
     for (const y of rowSizes.keys()) {
       expect(new Set(boxes.filter(box => box.y === y).map(({ width }) => width)).size).toBe(1)
     }

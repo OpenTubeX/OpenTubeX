@@ -27,6 +27,9 @@ export const SYNC_SETTING_LABELS = {
   materialSeedColor: 'Settings.Theme Settings.Material Accent Color',
   baseTheme: 'Settings.Theme Settings.Base Theme.Base Theme',
   blurThumbnails: 'Settings.General Settings.Blur Thumbnails',
+  bufferAhead: 'Settings.Player Settings.Buffering.Buffer Ahead',
+  bufferBeforePlaying: 'Settings.Player Settings.Buffering.Buffer Before Playing',
+  bufferBehind: 'Settings.Player Settings.Buffering.Rewind Buffer',
   capacitorLayoutMode: 'Settings.General Settings.Mobile Layout.Mobile Layout',
   alwaysShowMobileSearchBar: 'Settings.Theme Settings.Always Show Mobile Search Bar',
   channelPlaybackSpeeds: [

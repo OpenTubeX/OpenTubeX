@@ -647,6 +647,24 @@ Settings:
         Destructive pressed: Törlő művelet lenyomáskor
         Text and icons on destructive actions: Törlő műveletek szövege és ikonjai
   Player Settings:
+    Buffering:
+      Buffering: Pufferelés
+      Description: Válassza ki, hogy a lejátszó mennyit töltsön be előre a videóból, és mennyit tartson betöltve.
+      Buffer Ahead Hint: A nagyobb előretöltési puffer hosszabb kapcsolatkiesések alatt is folytatja a lejátszást, de olyan videórészt is letölt, amelyet talán meg sem néz.
+      Rewind Buffer Hint: A nagyobb visszatekerési puffer lehetővé teszi, hogy újbóli letöltés nélkül ugorjon vissza, de több memóriát használ.
+      Buffer Before Playing Hint: Ha lejátszás előtt megvárja, hogy az aktuális videóból nagyobb rész töltődjön be, az megelőzi az ismétlődő megakadásokat instabil kapcsolatnál, de a lejátszás lassabban indul, és tekerés után később folytatódik.
+      Preset: Pufferelési előbeállítás
+      Presets:
+        Data Saver: Adattakarékos
+        Default: Alapértelmezett
+        Smooth Playback: Akadásmentes lejátszás
+        Custom: Egyéni
+      Buffer Ahead: Előretöltési puffer
+      Buffer Ahead Tooltip: 'Milyen messzire töltődjön be a videó az aktuális pozíción túl. Magas minőségnél a memóriakorlátok korlátozhatják a nagyon magas értékeket. Alapértelmezett: {value}'
+      Rewind Buffer: Visszatekerési puffer
+      Rewind Buffer Tooltip: 'A már megnézett videóból mennyi maradjon betöltve. Alapértelmezett: {value}'
+      Buffer Before Playing: Puffer lejátszás előtt
+      Buffer Before Playing Tooltip: 'A videóból mennyinek kell betöltődnie, mielőtt a lejátszás elindul, vagy a puffer kiürülése után folytatódik. Alapértelmezett: {value}'
     Quality Limit on Metered Networks:
       Quality Limit on Metered Networks: "Felbontáskorlát forgalomkorlátos hálózatokon"
       No Limit: "Nincs korlát"

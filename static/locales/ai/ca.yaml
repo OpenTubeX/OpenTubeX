@@ -868,6 +868,24 @@ Settings:
       Everforest Light Blue: Everforest Light Blue
       Everforest Light Purple: Everforest Light Purple
   Player Settings:
+    Buffering:
+      Buffering: Memòria intermèdia
+      Description: Trieu quant de vídeo carrega el reproductor per avançat i quant en manté carregat.
+      Buffer Ahead Hint: Més memòria intermèdia endavant manté la reproducció durant talls de connexió més llargs, però baixa vídeo que potser no veureu.
+      Rewind Buffer Hint: Una memòria intermèdia per retrocedir més gran us permet tornar enrere sense tornar a baixar, però fa servir més memòria.
+      Buffer Before Playing Hint: Esperar més vídeo abans de reproduir evita aturades repetides amb connexions inestables, però els vídeos triguen més a començar i a continuar després de saltar.
+      Preset: Perfil de memòria intermèdia
+      Presets:
+        Data Saver: Estalvi de dades
+        Default: Per defecte
+        Smooth Playback: Reproducció fluida
+        Custom: Personalitzat
+      Buffer Ahead: Memòria intermèdia endavant
+      Buffer Ahead Tooltip: 'Fins on es carrega més enllà de la posició actual. En qualitats altes, els límits de memòria poden limitar els valors molt alts. Per defecte: {value}'
+      Rewind Buffer: Memòria intermèdia per retrocedir
+      Rewind Buffer Tooltip: 'Quant del vídeo que ja heu vist es manté carregat. Per defecte: {value}'
+      Buffer Before Playing: Memòria intermèdia abans de reproduir
+      Buffer Before Playing Tooltip: 'Quant de vídeo s''ha de carregar abans que comenci la reproducció, o que continuï després d''una aturada. Per defecte: {value}'
     Quality Limit on Metered Networks:
       Quality Limit on Metered Networks: "Qualitat màxima en xarxes amb límit de dades"
       No Limit: "Sense límit"

@@ -330,7 +330,8 @@ export const SETTINGS_SEARCH_SELECT_GROUP_LABELS = {
     'Default Video Format': ['Default Video Format'],
     'Default Quality': ['Default Quality'],
     'Quality Limit on Metered Networks': ['Quality Limit on Metered Networks'],
-    'Screenshot.Modes': []
+    'Screenshot.Modes': [],
+    'Buffering.Presets': []
   },
   channel: {
     '': [

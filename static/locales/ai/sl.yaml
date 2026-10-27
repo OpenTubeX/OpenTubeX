@@ -844,6 +844,24 @@ Settings:
       Everforest Light Blue: Everforest Light Blue
       Everforest Light Purple: Everforest Light Purple
   Player Settings:
+    Buffering:
+      Buffering: Medpomnjenje
+      Description: Izberite, koliko videoposnetka predvajalnik naloži vnaprej in ohrani naloženega.
+      Buffer Ahead Hint: Večji medpomnilnik vnaprej ohranja predvajanje med daljšimi prekinitvami povezave, vendar prenese video, ki ga morda ne boste gledali.
+      Rewind Buffer Hint: Večji medpomnilnik za previjanje nazaj vam omogoča skok nazaj brez ponovnega prenosa, vendar porabi več pomnilnika.
+      Buffer Before Playing Hint: Čakanje na več naloženega videa pred predvajanjem prepreči ponavljajoče se prekinitve ob nestabilni povezavi, vendar se videoposnetki počasneje začnejo in po previjanju počasneje nadaljujejo.
+      Preset: Prednastavitev medpomnjenja
+      Presets:
+        Data Saver: Varčevanje s podatki
+        Default: Privzeto
+        Smooth Playback: Tekoče predvajanje
+        Custom: Po meri
+      Buffer Ahead: Medpomnilnik vnaprej
+      Buffer Ahead Tooltip: 'Kako daleč od trenutnega položaja se nalaga. Pri visokih kakovostih lahko omejitve pomnilnika omejijo zelo visoke vrednosti. Privzeto: {value}'
+      Rewind Buffer: Medpomnilnik za previjanje nazaj
+      Rewind Buffer Tooltip: 'Koliko že ogledanega videoposnetka ostane naloženega. Privzeto: {value}'
+      Buffer Before Playing: Medpomnilnik pred predvajanjem
+      Buffer Before Playing Tooltip: 'Koliko videoposnetka se mora naložiti, preden se predvajanje začne ali po zastoju nadaljuje. Privzeto: {value}'
     Quality Limit on Metered Networks:
       Quality Limit on Metered Networks: "Največja kvaliteta v omrežjih z omejitvijo prenosa"
       No Limit: "Brez omejitve"

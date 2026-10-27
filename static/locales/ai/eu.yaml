@@ -647,6 +647,24 @@ Settings:
         Destructive pressed: Ekintza suntsitzailea sakatzean
         Text and icons on destructive actions: Ekintza suntsitzaileetako testua eta ikonoak
   Player Settings:
+    Buffering:
+      Buffering: Bufferra
+      Description: Aukeratu erreproduzigailuak bideoaren zenbat kargatzen duen aldez aurretik eta zenbat mantentzen duen kargatuta.
+      Buffer Ahead Hint: Aurrerako buffer handiagoak erreprodukzioari eusten dio konexio-eten luzeagoetan, baina agian ikusiko ez duzun bideoa deskargatzen du.
+      Rewind Buffer Hint: Atzera egiteko buffer handiagoak atzera jauzi egiten uzten dizu berriro deskargatu gabe, baina memoria gehiago erabiltzen du.
+      Buffer Before Playing Hint: Erreproduzitu aurretik bideo gehiago itxaroteak konexio ezegonkorretan behin eta berriz gelditzea saihesten du, baina bideoek denbora gehiago behar dute hasteko eta beste puntu batera jauzi egin ondoren jarraitzeko.
+      Preset: Bufferraren aurrezarpena
+      Presets:
+        Data Saver: Datuak aurreztea
+        Default: Lehenetsia
+        Smooth Playback: Erreprodukzio arina
+        Custom: Pertsonalizatua
+      Buffer Ahead: Aurrerako bufferra
+      Buffer Ahead Tooltip: 'Uneko posiziotik zenbat aurrerago kargatzen den. Kalitate handietan, memoria-mugek balio oso handiak muga ditzakete. Lehenetsia: {value}'
+      Rewind Buffer: Atzera egiteko bufferra
+      Rewind Buffer Tooltip: 'Dagoeneko ikusi duzun bideoaren zenbat geratzen den kargatuta. Lehenetsia: {value}'
+      Buffer Before Playing: Erreproduzitu aurreko bufferra
+      Buffer Before Playing Tooltip: 'Bideoaren zenbat kargatu behar den erreprodukzioa hasi aurretik, edo bufferra agortu ondoren jarraitu aurretik. Lehenetsia: {value}'
     Quality Limit on Metered Networks:
       Quality Limit on Metered Networks: "Kalitate-muga sare neurtuetan"
       No Limit: "Mugarik ez"

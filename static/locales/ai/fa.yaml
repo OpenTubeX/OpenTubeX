@@ -674,6 +674,24 @@ Settings:
       Catppuccin Latte Mauve: Catppuccin Latte Mauve
       Catppuccin Latte Red: Catppuccin Latte Red
   Player Settings:
+    Buffering:
+      Buffering: بافرینگ
+      Description: انتخاب کنید پخش‌کننده چه مقدار از ویدیو را از پیش بارگیری کند و بارگذاری‌شده نگه دارد.
+      Buffer Ahead Hint: بافر پیش روی بیشتر، پخش را در قطعی‌های طولانی‌تر اتصال هم ادامه می‌دهد، اما ویدیویی را بارگیری می‌کند که شاید تماشا نکنید.
+      Rewind Buffer Hint: بافر عقب‌گرد بزرگ‌تر به شما امکان می‌دهد بدون بارگیری دوباره به عقب بپرید، اما حافظهٔ بیشتری مصرف می‌کند.
+      Buffer Before Playing Hint: انتظار برای بارگیری ویدیوی بیشتر پیش از پخش، از توقف‌های مکرر در اتصال‌های ناپایدار جلوگیری می‌کند، اما شروع ویدیوها و ادامهٔ پخش پس از جابه‌جایی بیشتر طول می‌کشد.
+      Preset: پیش‌تنظیم بافر
+      Presets:
+        Data Saver: صرفه‌جویی در داده
+        Default: پیش‌فرض
+        Smooth Playback: پخش روان
+        Custom: سفارشی
+      Buffer Ahead: بافر پیش رو
+      Buffer Ahead Tooltip: 'تا چه اندازه جلوتر از موقعیت فعلی بارگیری شود. در کیفیت‌های بالا، محدودیت‌های حافظه ممکن است مقادیر خیلی بالا را محدود کنند. پیش‌فرض: {value}'
+      Rewind Buffer: بافر عقب‌گرد
+      Rewind Buffer Tooltip: 'چه مقدار از ویدیویی که قبلاً تماشا کرده‌اید بارگذاری‌شده باقی می‌ماند. پیش‌فرض: {value}'
+      Buffer Before Playing: بافر پیش از پخش
+      Buffer Before Playing Tooltip: 'چه مقدار از ویدیو باید پیش از شروع پخش، یا ادامهٔ آن پس از تمام شدن بافر، بارگیری شود. پیش‌فرض: {value}'
     Quality Limit on Metered Networks:
       Quality Limit on Metered Networks: "محدودیت کیفیت در شبکه‌های محدود"
       No Limit: "بدون محدودیت"

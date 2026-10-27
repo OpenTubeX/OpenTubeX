@@ -6,6 +6,7 @@ import { DEFAULT_SCROLLBAR_THUMB_WIDTH } from './renderer/constants/scrollbar.js
 import { DEFAULT_SCROLL_SPEED } from './renderer/helpers/scrollSpeed.js'
 import { DEFAULT_SEARCH_ENGINES_SETTING } from './searchEngines.js'
 import { DEFAULT_SEGMENT_PREFETCH_LIMIT } from './renderer/helpers/player/segmentPrefetch.js'
+import { BUFFER_PRESETS } from './renderer/helpers/player/buffering.js'
 import { DEFAULT_APP_FONT } from './renderer/helpers/appFont.js'
 import { DEFAULT_YT_DLP_PLAYBACK_CACHE_MAX_ENTRY_SIZE_MB } from './ytDlpPlaybackCacheSettings.js'
 import { DEFAULT_YT_DLP_PRELOAD_CONCURRENCY, DEFAULT_YT_DLP_PRELOAD_COUNT } from './renderer/helpers/player/ytDlpPlaybackPreload.js'
@@ -90,6 +91,10 @@ export function createDefaultSettings({ supportsLocalApi, isElectron }) {
     seekIntervalMultiplyByPlaybackRate: false,
     // How many segments per stream shaka-player downloads in parallel ahead of the playhead
     segmentPrefetchLimit: DEFAULT_SEGMENT_PREFETCH_LIMIT,
+    // Seconds of video shaka-player keeps loaded around the playhead
+    bufferAhead: BUFFER_PRESETS.default.bufferAhead,
+    bufferBehind: BUFFER_PRESETS.default.bufferBehind,
+    bufferBeforePlaying: BUFFER_PRESETS.default.bufferBeforePlaying,
     showPlaybackRateAdjustedTimestamp: false,
     useCustomShortsPlayer: true,
     loopShorts: true,

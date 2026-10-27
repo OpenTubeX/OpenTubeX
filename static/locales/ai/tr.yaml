@@ -646,6 +646,24 @@ Settings:
         Destructive pressed: Basılı yıkıcı işlem
         Text and icons on destructive actions: Yıkıcı işlemlerdeki metin ve simgeler
   Player Settings:
+    Buffering:
+      Buffering: Arabelleğe Alma
+      Description: Oynatıcının videonun ne kadarını önceden yükleyip yüklü tutacağını seçin.
+      Buffer Ahead Hint: Daha büyük ileri arabellek, daha uzun bağlantı kesintilerinde oynatmayı sürdürür ancak izlemeyebileceğiniz videoyu da indirir.
+      Rewind Buffer Hint: Daha büyük geri sarma arabelleği, yeniden indirmeden geri atlamanızı sağlar ancak daha fazla bellek kullanır.
+      Buffer Before Playing Hint: Oynatmadan önce daha fazla videonun yüklenmesini beklemek, kararsız bağlantılarda tekrarlanan duraklamaları önler ancak videoların başlaması ve sardıktan sonra devam etmesi daha uzun sürer.
+      Preset: Arabellek Ön Ayarı
+      Presets:
+        Data Saver: Veri Tasarrufu
+        Default: Öntanımlı
+        Smooth Playback: Akıcı Oynatma
+        Custom: Özel
+      Buffer Ahead: İleri Arabellek
+      Buffer Ahead Tooltip: 'Geçerli konumun ne kadar ilerisine kadar yükleneceği. Yüksek kalitelerde bellek sınırları çok yüksek değerleri kısıtlayabilir. Öntanımlı: {value}'
+      Rewind Buffer: Geri Sarma Arabelleği
+      Rewind Buffer Tooltip: 'Önceden izlediğiniz videonun ne kadarının yüklü kalacağı. Öntanımlı: {value}'
+      Buffer Before Playing: Oynatma Öncesi Arabellek
+      Buffer Before Playing Tooltip: 'Oynatmanın başlaması veya takıldıktan sonra devam etmesi için videonun ne kadarının yüklenmesi gerektiği. Öntanımlı: {value}'
     Quality Limit on Metered Networks:
       Quality Limit on Metered Networks: "Sınırlı Ağlarda Kalite Sınırı"
       No Limit: "Sınır Yok"

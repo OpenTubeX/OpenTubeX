@@ -649,6 +649,24 @@ Settings:
         Destructive pressed: Eyðandi aðgerð þegar ýtt er
         Text and icons on destructive actions: Texti og tákn á eyðandi aðgerðum
   Player Settings:
+    Buffering:
+      Buffering: Biðminni
+      Description: Veldu hversu mikið af myndskeiðinu spilarinn hleður fyrir fram og heldur hlöðnu.
+      Buffer Ahead Hint: Meira biðminni fram á við heldur spilun gangandi í gegnum lengri tengingarrof, en sækir myndskeið sem þú horfir kannski ekki á.
+      Rewind Buffer Hint: Stærra biðminni til baka gerir þér kleift að stökkva til baka án þess að sækja aftur, en notar meira minni.
+      Buffer Before Playing Hint: Að bíða eftir meira af myndskeiðinu fyrir spilun kemur í veg fyrir endurteknar stöðvanir á óstöðugum tengingum, en myndskeið eru lengur að fara af stað og að halda áfram eftir að spólað er.
+      Preset: Forstilling biðminnis
+      Presets:
+        Data Saver: Gagnasparnaður
+        Default: Sjálfgefið
+        Smooth Playback: Hnökralaus spilun
+        Custom: Sérsniðið
+      Buffer Ahead: Biðminni fram á við
+      Buffer Ahead Tooltip: 'Hversu langt fram fyrir núverandi stöðu er hlaðið. Í miklum gæðum geta minnismörk takmarkað mjög há gildi. Sjálfgefið: {value}'
+      Rewind Buffer: Biðminni til baka
+      Rewind Buffer Tooltip: 'Hversu mikið af myndskeiðinu sem þú hefur þegar horft á helst hlaðið. Sjálfgefið: {value}'
+      Buffer Before Playing: Biðminni fyrir spilun
+      Buffer Before Playing Tooltip: 'Hversu mikið af myndskeiðinu þarf að hlaðast áður en spilun hefst, eða heldur áfram eftir að hún stöðvast. Sjálfgefið: {value}'
     Quality Limit on Metered Networks:
       Quality Limit on Metered Networks: "Gæðamörk á mældum netum"
       No Limit: "Engin mörk"

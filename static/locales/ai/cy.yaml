@@ -647,6 +647,24 @@ Settings:
         Destructive pressed: Gweithred ddinistriol wedi'i gwasgu
         Text and icons on destructive actions: Testun ac eiconau ar weithredoedd dinistriol
   Player Settings:
+    Buffering:
+      Buffering: Byffro
+      Description: Dewiswch faint o fideo mae'r chwaraewr yn ei lwytho o flaen llaw ac yn ei gadw wedi'i lwytho.
+      Buffer Ahead Hint: Mae mwy o fyffer o flaen yn cadw'r chwarae i fynd drwy doriadau hirach yn y cysylltiad, ond yn llwytho i lawr fideo efallai na fyddwch chi'n ei wylio.
+      Rewind Buffer Hint: Mae byffer mynd nôl mwy yn gadael i chi neidio nôl heb lwytho i lawr eto, ond mae'n defnyddio mwy o gof.
+      Buffer Before Playing Hint: Mae aros am fwy o fideo cyn chwarae'n atal oedi dro ar ôl tro ar gysylltiadau ansefydlog, ond mae fideos yn cymryd mwy o amser i ddechrau ac i ailddechrau ar ôl neidio.
+      Preset: Proffil byffro
+      Presets:
+        Data Saver: Arbed data
+        Default: Rhagosodedig
+        Smooth Playback: Chwarae llyfn
+        Custom: Cyfaddas
+      Buffer Ahead: Byffer o flaen
+      Buffer Ahead Tooltip: 'Pa mor bell heibio''r safle presennol i''w lwytho. Ar ansawdd uchel, gall terfynau cof gyfyngu ar werthoedd uchel iawn. Rhagosodiad: {value}'
+      Rewind Buffer: Byffer mynd nôl
+      Rewind Buffer Tooltip: 'Faint o''r fideo rydych chi eisoes wedi''i wylio sy''n aros wedi''i lwytho. Rhagosodiad: {value}'
+      Buffer Before Playing: Byffer cyn chwarae
+      Buffer Before Playing Tooltip: 'Faint o fideo sy''n rhaid ei lwytho cyn i''r chwarae ddechrau, neu ailddechrau ar ôl oedi. Rhagosodiad: {value}'
     Quality Limit on Metered Networks:
       Quality Limit on Metered Networks: "Terfyn Ansawdd ar Rwydweithiau â Mesurydd"
       No Limit: "Dim Terfyn"

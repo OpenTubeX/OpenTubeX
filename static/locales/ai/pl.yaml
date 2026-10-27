@@ -336,6 +336,24 @@ Settings:
       Bundled Fonts: Dołączone czcionki
       System Fonts: Czcionki systemowe
   Player Settings:
+    Buffering:
+      Buffering: Buforowanie
+      Description: Wybierz, jaką część filmu odtwarzacz wczytuje z wyprzedzeniem i zachowuje wczytaną.
+      Buffer Ahead Hint: Większy bufor do przodu podtrzymuje odtwarzanie podczas dłuższych przerw w połączeniu, ale pobiera fragmenty filmu, które mogą nie zostać obejrzane.
+      Rewind Buffer Hint: Większy bufor do tyłu pozwala cofać się bez ponownego pobierania, ale zużywa więcej pamięci.
+      Buffer Before Playing Hint: Wczytywanie większej części filmu przed odtwarzaniem zapobiega częstym przerwom przy niestabilnym połączeniu, ale filmy dłużej się uruchamiają i wznawiają po przewinięciu.
+      Preset: Profil buforowania
+      Presets:
+        Data Saver: Oszczędzanie danych
+        Default: Domyślny
+        Smooth Playback: Płynne odtwarzanie
+        Custom: Niestandardowy
+      Buffer Ahead: Bufor do przodu
+      Buffer Ahead Tooltip: 'Jak daleko poza bieżące miejsce odtwarzania wczytywać film. Przy wysokiej jakości limity pamięci mogą ograniczać bardzo wysokie wartości. Domyślnie: {value}'
+      Rewind Buffer: Bufor do tyłu
+      Rewind Buffer Tooltip: 'Jaka część już obejrzanego filmu pozostaje wczytana. Domyślnie: {value}'
+      Buffer Before Playing: Bufor przed odtwarzaniem
+      Buffer Before Playing Tooltip: 'Jaka część filmu musi zostać wczytana, zanim odtwarzanie się rozpocznie lub zostanie wznowione po zatrzymaniu. Domyślnie: {value}'
     Enable Seek History: Włącz historię przewijania
     Quality Limit on Metered Networks:
       Quality Limit on Metered Networks: "Limit jakości w sieciach z pomiarem użycia danych"

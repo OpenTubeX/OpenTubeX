@@ -646,6 +646,24 @@ Settings:
         Destructive pressed: Action destructive à l’appui
         Text and icons on destructive actions: Texte et icônes des actions destructives
   Player Settings:
+    Buffering:
+      Buffering: Mise en mémoire tampon
+      Description: Choisissez la quantité de vidéo que le lecteur charge à l’avance et garde en mémoire.
+      Buffer Ahead Hint: Un tampon d’avance plus grand maintient la lecture pendant des coupures de connexion plus longues, mais télécharge de la vidéo que vous ne regarderez peut-être pas.
+      Rewind Buffer Hint: Un tampon de retour arrière plus grand vous permet de revenir en arrière sans retélécharger, mais utilise davantage de mémoire.
+      Buffer Before Playing Hint: Attendre davantage de vidéo avant la lecture évite les pauses répétées sur une connexion instable, mais les vidéos mettent plus de temps à démarrer et à reprendre après un déplacement.
+      Preset: Préréglage de mise en mémoire tampon
+      Presets:
+        Data Saver: Économie de données
+        Default: Par défaut
+        Smooth Playback: Lecture fluide
+        Custom: Personnalisé
+      Buffer Ahead: Tampon d’avance
+      Buffer Ahead Tooltip: 'Jusqu’où charger au-delà de la position actuelle. En haute qualité, les limites de mémoire peuvent plafonner les valeurs très élevées. Par défaut : {value}'
+      Rewind Buffer: Tampon de retour arrière
+      Rewind Buffer Tooltip: 'Quantité de vidéo déjà regardée qui reste chargée. Par défaut : {value}'
+      Buffer Before Playing: Tampon avant lecture
+      Buffer Before Playing Tooltip: 'Quantité de vidéo à charger avant que la lecture démarre, ou reprenne après avoir épuisé le tampon. Par défaut : {value}'
     Quality Limit on Metered Networks:
       Quality Limit on Metered Networks: "Qualité maximale sur les réseaux limités"
       No Limit: "Aucune limite"

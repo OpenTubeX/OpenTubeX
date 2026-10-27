@@ -647,6 +647,24 @@ Settings:
         Destructive pressed: Deštruktívna akcia pri stlačení
         Text and icons on destructive actions: Text a ikony deštruktívnych akcií
   Player Settings:
+    Buffering:
+      Buffering: Vyrovnávacia pamäť
+      Description: Vyberte, koľko videa prehrávač načíta vopred a koľko ponechá načítaného.
+      Buffer Ahead Hint: Väčšie načítanie vopred udrží prehrávanie aj počas dlhších výpadkov pripojenia, ale stiahne video, ktoré si možno nepozriete.
+      Rewind Buffer Hint: Väčšia vyrovnávacia pamäť pre posun dozadu vám umožní skočiť späť bez opätovného sťahovania, ale využíva viac pamäte.
+      Buffer Before Playing Hint: Čakanie na načítanie väčšej časti videa pred prehrávaním zabraňuje opakovanému zastavovaniu pri nestabilnom pripojení, ale videá sa spúšťajú a po posune pokračujú pomalšie.
+      Preset: Predvoľba vyrovnávacej pamäte
+      Presets:
+        Data Saver: Úspora dát
+        Default: Predvolené
+        Smooth Playback: Plynulé prehrávanie
+        Custom: Vlastné
+      Buffer Ahead: Načítanie vopred
+      Buffer Ahead Tooltip: 'Ako ďaleko za aktuálnu pozíciu sa má načítať. Pri vysokých kvalitách môžu limity pamäte obmedziť veľmi vysoké hodnoty. Predvolené: {value}'
+      Rewind Buffer: Vyrovnávacia pamäť pre posun dozadu
+      Rewind Buffer Tooltip: 'Koľko už pozretého videa zostane načítaného. Predvolené: {value}'
+      Buffer Before Playing: Načítanie pred prehrávaním
+      Buffer Before Playing Tooltip: 'Koľko videa sa musí načítať, kým sa prehrávanie spustí alebo obnoví po zastavení. Predvolené: {value}'
     Quality Limit on Metered Networks:
       Quality Limit on Metered Networks: "Obmedzenie kvality v meraných sieťach"
       No Limit: "Bez obmedzenia"

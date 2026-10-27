@@ -634,6 +634,24 @@ Settings:
         Destructive pressed: Destructive pressed
         Text and icons on destructive actions: Text and icons on destructive actions
   Player Settings:
+    Buffering:
+      Buffering: Buffering
+      Description: Choose how much video the player loads in advance and keeps loaded.
+      Buffer Ahead Hint: More buffer ahead keeps playback going through longer connection drops, but downloads video you might not watch.
+      Rewind Buffer Hint: A larger rewind buffer lets you jump back without downloading again, but uses more memory.
+      Buffer Before Playing Hint: Waiting for more video before playing prevents repeated stalls on unstable connections, but videos take longer to start and to resume after seeking.
+      Preset: Buffering Preset
+      Presets:
+        Data Saver: Data Saver
+        Default: Default
+        Smooth Playback: Smooth Playback
+        Custom: Custom
+      Buffer Ahead: Buffer Ahead
+      Buffer Ahead Tooltip: 'How far past the current position to load. At high qualities, memory limits may cap very high values. Default: {value}'
+      Rewind Buffer: Rewind Buffer
+      Rewind Buffer Tooltip: 'How much of the video you already watched stays loaded. Default: {value}'
+      Buffer Before Playing: Buffer Before Playing
+      Buffer Before Playing Tooltip: 'How much video has to load before playback starts, or resumes after stalling. Default: {value}'
     Quality Limit on Metered Networks:
       Quality Limit on Metered Networks: "Quality limit on metered networks"
       No Limit: "No limit"

@@ -651,6 +651,24 @@ Settings:
         Destructive pressed: פעולה הרסנית בלחיצה
         Text and icons on destructive actions: טקסט וסמלים בפעולות הרסניות
   Player Settings:
+    Buffering:
+      Buffering: חציצה
+      Description: בחירת כמות הווידאו שהנגן טוען מראש ושומר טעונה.
+      Buffer Ahead Hint: חציצה קדימה גדולה יותר שומרת על רצף הניגון גם בניתוקי חיבור ארוכים יותר, אך מורידה וידאו שייתכן שלא ייצפה.
+      Rewind Buffer Hint: חציצה לאחור גדולה יותר מאפשרת לחזור אחורה בלי להוריד שוב, אך צורכת יותר זיכרון.
+      Buffer Before Playing Hint: המתנה לטעינת יותר וידאו לפני הניגון מונעת עצירות חוזרות בחיבור לא יציב, אך לסרטונים לוקח יותר זמן להתחיל ולהמשיך אחרי דילוג.
+      Preset: פרופיל חציצה
+      Presets:
+        Data Saver: חיסכון בנתונים
+        Default: ברירת מחדל
+        Smooth Playback: ניגון חלק
+        Custom: מותאם אישית
+      Buffer Ahead: חציצה קדימה
+      Buffer Ahead Tooltip: 'עד כמה רחוק מעבר למיקום הנוכחי לטעון. באיכויות גבוהות, מגבלות זיכרון עלולות להגביל ערכים גבוהים מאוד. ברירת מחדל: {value}'
+      Rewind Buffer: חציצה לאחור
+      Rewind Buffer Tooltip: 'כמה מהווידאו שכבר נצפה נשאר טעון. ברירת מחדל: {value}'
+      Buffer Before Playing: חציצה לפני ניגון
+      Buffer Before Playing Tooltip: 'כמות הווידאו שצריכה להיטען לפני שהניגון מתחיל, או ממשיך אחרי שהמאגר התרוקן. ברירת מחדל: {value}'
     Quality Limit on Metered Networks:
       Quality Limit on Metered Networks: "איכות מרבית ברשתות עם הגבלת נתונים"
       No Limit: "ללא הגבלה"

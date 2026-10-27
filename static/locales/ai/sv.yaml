@@ -649,6 +649,24 @@ Settings:
         Destructive pressed: Nedtryckt destruktiv åtgärd
         Text and icons on destructive actions: Text och ikoner på destruktiva åtgärder
   Player Settings:
+    Buffering:
+      Buffering: Buffring
+      Description: Välj hur mycket av videon som spelaren läser in i förväg och behåller inläst.
+      Buffer Ahead Hint: En större buffert framåt håller uppspelningen igång vid längre avbrott i anslutningen, men laddar ned video som du kanske inte tittar på.
+      Rewind Buffer Hint: En större buffert bakåt låter dig hoppa tillbaka utan att ladda ned igen, men använder mer minne.
+      Buffer Before Playing Hint: Att vänta på mer video före uppspelning förhindrar upprepade avbrott vid instabila anslutningar, men videor tar längre tid att starta och att fortsätta efter spolning.
+      Preset: Förinställning för buffring
+      Presets:
+        Data Saver: Datasparläge
+        Default: Förvald
+        Smooth Playback: Jämn uppspelning
+        Custom: Anpassad
+      Buffer Ahead: Buffert framåt
+      Buffer Ahead Tooltip: 'Hur långt förbi den aktuella positionen som läses in. Vid höga kvaliteter kan minnesgränser begränsa mycket höga värden. Förvalt: {value}'
+      Rewind Buffer: Buffert bakåt
+      Rewind Buffer Tooltip: 'Hur mycket av den video du redan sett som förblir inläst. Förvalt: {value}'
+      Buffer Before Playing: Buffert före uppspelning
+      Buffer Before Playing Tooltip: 'Hur mycket video som måste läsas in innan uppspelningen startar, eller fortsätter efter ett avbrott. Förvalt: {value}'
     Quality Limit on Metered Networks:
       Quality Limit on Metered Networks: "Kvalitetsgräns på begränsade nätverk"
       No Limit: "Ingen gräns"
