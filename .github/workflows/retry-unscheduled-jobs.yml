@@ -1,0 +1,63 @@
+name: Retry Unscheduled Jobs
+
+# Hosted macOS arm64 runners are sometimes unavailable, and GitHub cancels the job
+# after failing to acquire one. Rerun builds that failed only for that reason.
+on:
+  workflow_run:
+    workflows: [Build]
+    types: [completed]
+
+permissions: {}
+
+jobs:
+  rerun:
+    name: Rerun jobs without a runner
+    if: >-
+      github.repository == 'OpenTubeX/OpenTubeX' &&
+      github.event.workflow_run.conclusion == 'failure' &&
+      github.event.workflow_run.run_attempt < 3
+    runs-on: ubuntu-slim
+
+    permissions:
+      actions: write
+      checks: read
+
+    steps:
+    - name: Rerun failed jobs
+      env:
+        GH_TOKEN: ${{ github.token }}
+        GH_REPO: ${{ github.repository }}
+        RUN_ID: ${{ github.event.workflow_run.id }}
+        RUN_ATTEMPT: ${{ github.event.workflow_run.run_attempt }}
+        RUN_EVENT: ${{ github.event.workflow_run.event }}
+        HEAD_BRANCH: ${{ github.event.workflow_run.head_branch }}
+        HEAD_SHA: ${{ github.event.workflow_run.head_sha }}
+      shell: bash
+      run: |
+        set -euo pipefail
+
+        job_ids="$(
+          gh api --paginate "repos/${GH_REPO}/actions/runs/${RUN_ID}/attempts/${RUN_ATTEMPT}/jobs?per_page=100" \
+            --jq '.jobs[] | select(.conclusion == "failure" or .conclusion == "cancelled") | .id'
+        )"
+        [[ -n "$job_ids" ]] || exit 0
+
+        while IFS= read -r job_id; do
+          [[ -z "$job_id" ]] && continue
+          if ! gh api --paginate "repos/${GH_REPO}/check-runs/${job_id}/annotations?per_page=100" \
+            --jq '.[].message' | grep --quiet --fixed-strings 'was not acquired by Runner'; then
+            echo "Job $job_id did not fail for lack of a runner; not retrying."
+            exit 0
+          fi
+        done <<< "$job_ids"
+
+        # A rerun joins the push build's concurrency group and would cancel a newer build.
+        if [[ "$RUN_EVENT" == 'push' ]]; then
+          branch_sha="$(gh api "repos/${GH_REPO}/commits/${HEAD_BRANCH}" --jq .sha)"
+          if [[ "$branch_sha" != "$HEAD_SHA" ]]; then
+            echo "$HEAD_BRANCH has moved on to $branch_sha; not retrying."
+            exit 0
+          fi
+        fi
+
+        gh run rerun "$RUN_ID" --failed

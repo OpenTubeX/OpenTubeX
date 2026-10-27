@@ -42,6 +42,7 @@ on:
       - '.github/workflows/no-response.yml'
       - '.github/workflows/release.yml'
       - '.github/workflows/remove-outdated-labels.yml'
+      - '.github/workflows/retry-unscheduled-jobs.yml'
       - '.github/workflows/stale.yml'
       - '.github/workflows/updateSite.yml'
 
