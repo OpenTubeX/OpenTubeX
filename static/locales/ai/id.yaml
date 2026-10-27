@@ -652,7 +652,7 @@ Settings:
       Description: Pilih seberapa banyak video yang dimuat pemutar lebih dahulu dan tetap dimuat.
       Buffer Ahead Hint: Buffer ke depan yang lebih besar menjaga pemutaran tetap berjalan saat koneksi terputus lebih lama, tetapi mengunduh video yang mungkin tidak Anda tonton.
       Rewind Buffer Hint: Buffer mundur yang lebih besar memungkinkan Anda melompat mundur tanpa mengunduh ulang, tetapi menggunakan lebih banyak memori.
-      Buffer Before Playing Hint: Menunggu lebih banyak video sebelum memutar mencegah jeda berulang pada koneksi yang tidak stabil, tetapi video lebih lama untuk dimulai dan untuk dilanjutkan setelah melompat.
+      Buffer Before Playing Hint: Menunggu hingga lebih banyak bagian dari video yang sedang ditonton dimuat sebelum memutar mencegah jeda berulang pada koneksi yang tidak stabil, tetapi pemutaran lebih lama dimulai dan dilanjutkan setelah melompat.
       Preset: Prasetel Buffering
       Presets:
         Data Saver: Hemat Data

@@ -654,7 +654,7 @@ Settings:
       Description: Odaberi koliko videozapisa reproduktor učitava unaprijed i zadržava učitanim.
       Buffer Ahead Hint: Veći međuspremnik unaprijed održava reprodukciju tijekom duljih prekida veze, ali preuzima videozapis koji možda nećeš gledati.
       Rewind Buffer Hint: Veći međuspremnik za premotavanje natrag omogućuje ti skok unatrag bez ponovnog preuzimanja, ali troši više memorije.
-      Buffer Before Playing Hint: Čekanje na više videozapisa prije reprodukcije sprječava ponovljena zaustavljanja na nestabilnim vezama, ali videozapisi se dulje pokreću i nastavljaju nakon premotavanja.
+      Buffer Before Playing Hint: Čekanje da se učita veći dio trenutačnog videozapisa prije reprodukcije sprječava ponovljena zaustavljanja na nestabilnim vezama, ali reprodukcija počinje kasnije i sporije se nastavlja nakon premotavanja.
       Preset: Predložak međuspremanja
       Presets:
         Data Saver: Ušteda podataka

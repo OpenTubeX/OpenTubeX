@@ -652,7 +652,7 @@ Settings:
       Description: Válassza ki, hogy a lejátszó mennyit töltsön be előre a videóból, és mennyit tartson betöltve.
       Buffer Ahead Hint: A nagyobb előretöltési puffer hosszabb kapcsolatkiesések alatt is folytatja a lejátszást, de olyan videórészt is letölt, amelyet talán meg sem néz.
       Rewind Buffer Hint: A nagyobb visszatekerési puffer lehetővé teszi, hogy újbóli letöltés nélkül ugorjon vissza, de több memóriát használ.
-      Buffer Before Playing Hint: Ha lejátszás előtt több videó betöltésére vár, az megelőzi az ismétlődő megakadásokat instabil kapcsolatnál, de a videók lassabban indulnak, és tekerés után később folytatódnak.
+      Buffer Before Playing Hint: Ha lejátszás előtt megvárja, hogy az aktuális videóból nagyobb rész töltődjön be, az megelőzi az ismétlődő megakadásokat instabil kapcsolatnál, de a lejátszás lassabban indul, és tekerés után később folytatódik.
       Preset: Pufferelési előbeállítás
       Presets:
         Data Saver: Adattakarékos
