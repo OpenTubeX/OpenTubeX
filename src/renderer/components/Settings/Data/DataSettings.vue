@@ -1778,15 +1778,12 @@ async function importPlaylists() {
 
   for (const file of files) {
     if (takeoutFiles.includes(file)) { continue }
-    let data
     try {
-      data = await file.text()
+      await importPlaylistDatabase(await file.text())
     } catch (err) {
-      const message = t('Settings.Data Settings.Unable to read file')
-      showToast({ message: `${message}: ${err}`, icon: ['fas', 'circle-exclamation'] })
-      continue
+      console.error('Unable to import playlist file', file.name, err)
+      showToast({ message: `${t('Settings.Data Settings.Unable to read file')}: ${file.name}`, icon: ['fas', 'circle-exclamation'] })
     }
-    await importPlaylistDatabase(data)
   }
 }
 

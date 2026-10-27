@@ -89,3 +89,26 @@ test('playlist import applies each picked database file to the previous file\'s 
   await run()
   assert.deepEqual(playlists.value[0].videos.map(video => video.videoId), ['first', 'second'])
 })
+
+test('playlist import reports a malformed database file and continues with the next one', async () => {
+  const toasts = []
+  const writes = []
+  const run = vm.runInNewContext(importSource + '\nimportPlaylists', {
+    allPlaylists: { value: [] },
+    pickFilesWithPicker: async () => [
+      { name: 'broken.db', text: async () => '[not json]' },
+      { name: 'valid.db', text: async () => JSON.stringify({ playlistName: 'Valid', videos: [] }) },
+    ],
+    IMPORT_DIRECTORY_ID: 'import', START_IN_DIRECTORY: 'documents',
+    parseImportedLineDelimitedJson: data => [JSON.parse(data)],
+    normalizeImportedPlaylistThumbnail: async () => {},
+    isJsonObject: value => value !== null && typeof value === 'object' && !Array.isArray(value),
+    store: { dispatch: async (action, payload) => writes.push({ action, payload }) },
+    showToast: value => toasts.push(value.message),
+    t: value => value,
+    console: { error: () => {} },
+  })
+  await run()
+  assert.deepEqual(writes.map(({ payload }) => Array.from(payload, playlist => playlist.playlistName)), [['Valid']])
+  assert.ok(toasts.includes('Settings.Data Settings.Unable to read file: broken.db'))
+})
