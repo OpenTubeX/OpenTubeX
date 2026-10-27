@@ -1,0 +1,20 @@
+diff --git a/lib/bus.js b/lib/bus.js
+index 10385eff055559d65b665de8c68fb9a6dc2e1672..437c1227449d890a8a2b0f5d913024d93b12b006 100644
+--- a/lib/bus.js
++++ b/lib/bus.js
+@@ -1011,7 +1011,14 @@ function bus(conn, opts) {
+       // through its own 'error'/'end' events; throwing again here would turn
+       // an ordinary early close into an uncaught exception.
+       if (err && err.code === 'ECONNCLOSED') return;
+-      if (err) throw err;
++      // Thrown from the reply timer, a slow bus (such as one still starting
++      // at login) crashed the process. Report it as a connection error and
++      // close the unusable connection, which fails its pending calls.
++      if (err) {
++        self.connection.emit('error', err);
++        self.connection.end();
++        return;
++      }
+       self.name = name;
+     });
+   } else {
