@@ -884,6 +884,14 @@ Settings:
     FFmpeg and FFprobe Downloaded Template: 'FFmpeg ve FFprobe {version} indirildi'
     FFmpeg and FFprobe Download Error Template: 'FFmpeg ve FFprobe indirilemedi: {error}'
     Managed Tool Already Current Template: '{tool} {version} zaten güncel'
+    Managed Tool Errors:
+      Removed: 'İndirilen dosya, büyük olasılıkla bir virüsten koruma yazılımı tarafından kaldırıldı'
+      Unusable: 'İndirilen program çalıştırılamadı. Bir virüsten koruma yazılımı onu engelliyor olabilir veya bu sistemi desteklemiyor olabilir'
+      Release Not Found: 'En son sürüm bulunamadı'
+      Verification Failed: 'İndirilen dosyanın resmi bir sürüm olduğu doğrulanamadı'
+      Downgrade: 'İndirilen sürüm, yüklü olandan daha eski'
+      Invalid Archive: 'İndirilen arşiv geçersiz'
+      Rollback Failed: 'Güncelleme başarısız oldu ve önceki sürüm tamamen geri yüklenemedi'
     Managed Tool Updates: Yönetilen Araç Güncellemeleri
     Update Modes:
       Automatic: Otomatik güncelle

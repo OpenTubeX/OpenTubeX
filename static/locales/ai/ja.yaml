@@ -885,6 +885,14 @@ Settings:
     FFmpeg and FFprobe Downloaded Template: FFmpegとFFprobe {version}をダウンロードしました
     FFmpeg and FFprobe Download Error Template: 'FFmpegとFFprobeのダウンロードに失敗しました: {error}'
     Managed Tool Already Current Template: '{tool} {version}は最新です'
+    Managed Tool Errors:
+      Removed: 'ダウンロードしたファイルが削除されました。ウイルス対策ソフトウェアによって削除された可能性が高いです'
+      Unusable: 'ダウンロードしたプログラムを実行できませんでした。ウイルス対策ソフトウェアがブロックしているか、このシステムに対応していない可能性があります'
+      Release Not Found: '最新のリリースが見つかりませんでした'
+      Verification Failed: 'ダウンロードしたものが公式リリースであることを確認できませんでした'
+      Downgrade: 'ダウンロードしたリリースはインストール済みのものより古いです'
+      Invalid Archive: 'ダウンロードしたアーカイブが無効です'
+      Rollback Failed: '更新に失敗し、以前のバージョンを完全に復元できませんでした'
     Managed Tool Updates: 管理対象ツールの更新
     Update Modes:
       Automatic: 自動的に更新

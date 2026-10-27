@@ -889,6 +889,14 @@ Settings:
     FFmpeg and FFprobe Downloaded Template: FFmpeg og FFprobe {version} hafa verið hlaðin niður
     FFmpeg and FFprobe Download Error Template: 'Ekki tókst að hlaða niður FFmpeg og FFprobe: {error}'
     Managed Tool Already Current Template: '{tool} {version} er þegar í nýjustu útgáfu'
+    Managed Tool Errors:
+      Removed: 'Skránin sem var sótt var fjarlægð, líklegast af vírusvarnarforriti'
+      Unusable: 'Ekki tókst að keyra forritið sem var sótt. Vírusvarnarforrit gæti verið að loka á það, eða það styður ekki þetta kerfi'
+      Release Not Found: 'Ekki tókst að finna nýjustu útgáfuna'
+      Verification Failed: 'Ekki tókst að staðfesta að niðurhalið sé opinber útgáfa'
+      Downgrade: 'Útgáfan sem var sótt er eldri en sú sem er uppsett'
+      Invalid Archive: 'Safnskráin sem var sótt er ógild'
+      Rollback Failed: 'Uppfærslan mistókst og ekki tókst að endurheimta fyrri útgáfu að fullu'
     Managed Tool Updates: Uppfærslur verkfæra í umsjón OpenTubeX
     Update Modes:
       Automatic: Uppfæra sjálfkrafa

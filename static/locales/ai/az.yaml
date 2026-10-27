@@ -887,6 +887,14 @@ Settings:
     FFmpeg and FFprobe Downloaded Template: FFmpeg və FFprobe {version} endirildi
     FFmpeg and FFprobe Download Error Template: 'FFmpeg və FFprobe endirmək alınmadı: {error}'
     Managed Tool Already Current Template: '{tool} {version} artıq ən son versiyadır'
+    Managed Tool Errors:
+      Removed: 'Endirilən fayl, çox güman ki, antivirus proqramı tərəfindən silindi'
+      Unusable: 'Endirilən proqram işə salına bilmədi. Onu antivirus proqramı bloklaya bilər və ya bu sistemi dəstəkləmir'
+      Release Not Found: 'Ən son buraxılış tapılmadı'
+      Verification Failed: 'Endirmənin rəsmi buraxılış olduğu təsdiqlənə bilmədi'
+      Downgrade: 'Endirilən buraxılış quraşdırılmış olandan köhnədir'
+      Invalid Archive: 'Endirilən arxiv etibarsızdır'
+      Rollback Failed: 'Yeniləmə alınmadı və əvvəlki versiya tam bərpa edilə bilmədi'
     Managed Tool Updates: İdarə olunan vasitələrin yeniləmələri
     Update Modes:
       Automatic: Avtomatik yenilə

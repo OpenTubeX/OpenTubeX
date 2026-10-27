@@ -884,6 +884,14 @@ Settings:
     FFmpeg and FFprobe Downloaded Template: FFmpeg og FFprobe {version} er lastet ned
     FFmpeg and FFprobe Download Error Template: 'Kunne ikke laste ned FFmpeg og FFprobe: {error}'
     Managed Tool Already Current Template: '{tool} {version} er allerede oppdatert'
+    Managed Tool Errors:
+      Removed: 'Den nedlastede filen ble fjernet, mest sannsynlig av antivirusprogramvare'
+      Unusable: 'Det nedlastede programmet kunne ikke kjøres. Antivirusprogramvare kan blokkere det, eller det støtter ikke dette systemet'
+      Release Not Found: 'Fant ikke den nyeste utgivelsen'
+      Verification Failed: 'Nedlastingen kunne ikke bekreftes som en offisiell utgivelse'
+      Downgrade: 'Den nedlastede utgivelsen er eldre enn den installerte'
+      Invalid Archive: 'Det nedlastede arkivet er ugyldig'
+      Rollback Failed: 'Oppdateringen mislyktes, og den forrige versjonen kunne ikke gjenopprettes fullstendig'
     Managed Tool Updates: Oppdateringer for administrerte verktøy
     Update Modes:
       Automatic: Oppdater automatisk

@@ -887,6 +887,14 @@ Settings:
     FFmpeg and FFprobe Downloaded Template: Preuzeti su FFmpeg i FFprobe {version}
     FFmpeg and FFprobe Download Error Template: 'Preuzimanje alata FFmpeg i FFprobe nije uspjelo: {error}'
     Managed Tool Already Current Template: '{tool} {version} već je ažuran'
+    Managed Tool Errors:
+      Removed: 'Preuzeta datoteka je uklonjena, najvjerojatnije od strane antivirusnog softvera'
+      Unusable: 'Preuzeti program nije moguće pokrenuti. Možda ga blokira antivirusni softver ili ne podržava ovaj sustav'
+      Release Not Found: 'Nije moguće pronaći najnovije izdanje'
+      Verification Failed: 'Nije moguće potvrditi da je preuzimanje službeno izdanje'
+      Downgrade: 'Preuzeto izdanje starije je od instaliranog'
+      Invalid Archive: 'Preuzeta arhiva nije valjana'
+      Rollback Failed: 'Ažuriranje nije uspjelo i prethodnu verziju nije bilo moguće u potpunosti vratiti'
     Managed Tool Updates: Ažuriranja alata kojima upravlja aplikacija
     Update Modes:
       Automatic: Ažuriraj automatski

@@ -898,6 +898,14 @@ Settings:
     FFmpeg and FFprobe Downloaded Template: FFmpeg en FFprobe {version} zijn gedownload
     FFmpeg and FFprobe Download Error Template: 'Downloaden van FFmpeg en FFprobe mislukt: {error}'
     Managed Tool Already Current Template: '{tool} {version} is al bijgewerkt'
+    Managed Tool Errors:
+      Removed: 'Het gedownloade bestand is verwijderd, waarschijnlijk door antivirussoftware'
+      Unusable: 'Het gedownloade programma kon niet worden uitgevoerd. Antivirussoftware blokkeert het mogelijk, of het ondersteunt dit systeem niet'
+      Release Not Found: 'Kan de nieuwste release niet vinden'
+      Verification Failed: 'De download kon niet worden geverifieerd als officiële release'
+      Downgrade: 'De gedownloade release is ouder dan de geïnstalleerde'
+      Invalid Archive: 'Het gedownloade archief is ongeldig'
+      Rollback Failed: 'De update is mislukt en de vorige versie kon niet volledig worden hersteld'
     Managed Tool Updates: Updates voor beheerde hulpprogramma's
     Update Modes:
       Automatic: Automatisch bijwerken

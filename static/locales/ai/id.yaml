@@ -885,6 +885,14 @@ Settings:
     FFmpeg and FFprobe Downloaded Template: FFmpeg dan FFprobe {version} telah diunduh
     FFmpeg and FFprobe Download Error Template: 'Gagal mengunduh FFmpeg dan FFprobe: {error}'
     Managed Tool Already Current Template: '{tool} {version} sudah versi terbaru'
+    Managed Tool Errors:
+      Removed: 'File yang diunduh telah dihapus, kemungkinan besar oleh perangkat lunak antivirus'
+      Unusable: 'Program yang diunduh tidak dapat dijalankan. Perangkat lunak antivirus mungkin memblokirnya, atau program tersebut tidak mendukung sistem ini'
+      Release Not Found: 'Tidak dapat menemukan rilis terbaru'
+      Verification Failed: 'Unduhan tidak dapat diverifikasi sebagai rilis resmi'
+      Downgrade: 'Rilis yang diunduh lebih lama daripada yang terpasang'
+      Invalid Archive: 'Arsip yang diunduh tidak valid'
+      Rollback Failed: 'Pembaruan gagal dan versi sebelumnya tidak dapat dipulihkan sepenuhnya'
     Managed Tool Updates: Pembaruan Alat Terkelola
     Update Modes:
       Automatic: Perbarui otomatis

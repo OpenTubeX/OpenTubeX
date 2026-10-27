@@ -898,6 +898,14 @@ Settings:
     FFmpeg and FFprobe Downloaded Template: FFmpeg ja FFprobe {version} ladattiin
     FFmpeg and FFprobe Download Error Template: 'FFmpeg- ja FFprobe-ohjelmien lataus epäonnistui: {error}'
     Managed Tool Already Current Template: '{tool} {version} on jo ajan tasalla'
+    Managed Tool Errors:
+      Removed: 'Ladattu tiedosto poistettiin, todennäköisesti virustorjuntaohjelmiston toimesta'
+      Unusable: 'Ladattua ohjelmaa ei voitu suorittaa. Virustorjuntaohjelmisto saattaa estää sen, tai se ei tue tätä järjestelmää'
+      Release Not Found: 'Uusinta julkaisua ei löytynyt'
+      Verification Failed: 'Latausta ei voitu vahvistaa viralliseksi julkaisuksi'
+      Downgrade: 'Ladattu julkaisu on asennettua vanhempi'
+      Invalid Archive: 'Ladattu arkisto on virheellinen'
+      Rollback Failed: 'Päivitys epäonnistui, eikä aiempaa versiota voitu palauttaa kokonaan'
     Managed Tool Updates: Hallittujen työkalujen päivitykset
     Update Modes:
       Automatic: Päivitä automaattisesti

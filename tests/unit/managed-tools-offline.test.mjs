@@ -4,6 +4,7 @@ import vm from 'node:vm'
 import test from 'node:test'
 import { classifyRequestFailure } from '../../src/renderer/helpers/api/requestDiagnostics.js'
 import { createNetworkRecovery } from '../../src/renderer/helpers/networkRecovery.js'
+import { managedToolErrorMessage } from '../../src/renderer/helpers/managedToolErrors.js'
 
 const source = await readFile(new URL('../../src/renderer/App.vue', import.meta.url), 'utf8')
 const initializeSource = source.slice(source.indexOf('async function initializeManagedExternalSoftware('), source.indexOf('/**\n * Checks installed managed tools'))
@@ -20,6 +21,7 @@ function setup(t, online, checkInternet) {
     isElectron: false, isCapacitor: true, supportsYtDlp: true,
     initializeNetworkRecovery: () => recovery,
     classifyRequestFailure,
+    managedToolErrorMessage,
     getConnectionState: () => recovery.state,
     navigator: { get onLine() { return online } },
     store: { getters: { getExternalSoftwareUpdateMode: 'automatic', getYtDlpSource: 'managed', getYtDlpFfmpegSource: 'managed' } },
@@ -85,6 +87,14 @@ test('managed tool failures while connected remain visible', async t => {
   app.context.ytDlp.ytDlpDownloadBinary = async () => ({ error: 'Invalid archive' })
   await app.context.initializeManagedExternalSoftware()
   assert.equal(app.toasts.some(toast => toast.message.includes('Error')), true)
+})
+
+test('known managed tool failures are translated in the error toast', async t => {
+  const app = setup(t, true)
+  app.context.t = (key, params) => params === undefined ? `<${key}>` : `<${key}> ${Object.values(params).join(' ')}`
+  app.context.ytDlp.ytDlpDownloadBinary = async () => ({ error: 'The downloaded yt-dlp binary was removed', errorCode: 'MANAGED_TOOL_REMOVED' })
+  await app.context.initializeManagedExternalSoftware()
+  assert.ok(app.toasts.some(toast => toast.message.includes('yt-dlp: <Settings.External Software Settings.Managed Tool Errors.Removed>')))
 })
 
 for (const stage of ['info', 'download']) {

@@ -594,6 +594,7 @@ import '@fontsource-variable/manrope'
 import '@fontsource-variable/plus-jakarta-sans'
 import FtRetryImage from './components/FtRetryImage.vue'
 import { initializeCapacitorYtDlp, ytDlp } from './helpers/ytDlp'
+import { managedToolErrorMessage } from './helpers/managedToolErrors'
 import { playDownloadedFile, refreshDownloadRecords } from './helpers/downloadPlayback'
 import { supportsYtDlp } from './helpers/ytDlpCapabilities'
 import { parseAutomaticDownloadRules } from './helpers/automaticDownloadRules'
@@ -1582,7 +1583,7 @@ async function initializeManagedExternalSoftware(requestedUpdates = null) {
         const result = await recovery.run('managed-tools', async () => {
           const result = await ytDlp.ytDlpDownloadBinary(binary)
           if (result === null || 'error' in result) {
-            throw new Error(result?.error ?? '')
+            throw Object.assign(new Error(result?.error ?? ''), { code: result?.errorCode })
           }
           return result
         }, {
@@ -1593,7 +1594,7 @@ async function initializeManagedExternalSoftware(requestedUpdates = null) {
         })
         return { binary, result }
       } catch (error) {
-        return { binary, result: { error: String(error) } }
+        return { binary, result: { error: String(error), errorCode: error?.code } }
       }
     }))
     const failures = results.filter(({ result }) => result === null || 'error' in result)
@@ -1613,7 +1614,7 @@ async function initializeManagedExternalSoftware(requestedUpdates = null) {
       })
     } else {
       if (failures.length > 0) {
-        const errors = failures.map(({ binary, result }) => `${binary}: ${result?.error ?? ''}`).join('; ')
+        const errors = failures.map(({ binary, result }) => `${binary}: ${managedToolErrorMessage(result, t)}`).join('; ')
         showToast({
           message: t('Settings.Download Settings.Managed Tools Download Error Template', { errors }),
           icon: ['fas', 'circle-exclamation'],

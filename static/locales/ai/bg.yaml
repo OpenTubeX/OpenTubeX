@@ -887,6 +887,14 @@ Settings:
     FFmpeg and FFprobe Downloaded Template: FFmpeg и FFprobe {version} са изтеглени
     FFmpeg and FFprobe Download Error Template: 'Изтеглянето на FFmpeg и FFprobe беше неуспешно: {error}'
     Managed Tool Already Current Template: '{tool} {version} вече е актуален'
+    Managed Tool Errors:
+      Removed: 'Изтегленият файл е премахнат, най-вероятно от антивирусен софтуер'
+      Unusable: 'Изтеглената програма не може да бъде стартирана. Възможно е антивирусен софтуер да я блокира или тя да не поддържа тази система'
+      Release Not Found: 'Не може да бъде намерена най-новата версия'
+      Verification Failed: 'Изтеглянето не може да бъде потвърдено като официална версия'
+      Downgrade: 'Изтеглената версия е по-стара от инсталираната'
+      Invalid Archive: 'Изтегленият архив е невалиден'
+      Rollback Failed: 'Актуализацията е неуспешна и предишната версия не може да бъде напълно възстановена'
     Managed Tool Updates: Актуализации на управляваните инструменти
     Update Modes:
       Automatic: Автоматично обновяване

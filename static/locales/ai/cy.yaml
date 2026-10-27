@@ -885,6 +885,14 @@ Settings:
     FFmpeg and FFprobe Downloaded Template: Mae FFmpeg a FFprobe {version} wedi'u lawrlwytho
     FFmpeg and FFprobe Download Error Template: 'Methodd lawrlwytho FFmpeg a FFprobe: {error}'
     Managed Tool Already Current Template: 'Mae {tool} {version} eisoes yn gyfredol'
+    Managed Tool Errors:
+      Removed: 'Cafodd y ffeil a lwythwyd i lawr ei thynnu, yn fwyaf tebygol gan feddalwedd gwrthfeirws'
+      Unusable: 'Nid oedd modd rhedeg y rhaglen a lwythwyd i lawr. Efallai bod meddalwedd gwrthfeirws yn ei rhwystro, neu nad yw''n cefnogi''r system hon'
+      Release Not Found: 'Methu dod o hyd i''r rhyddhad diweddaraf'
+      Verification Failed: 'Nid oedd modd gwirio bod y llwyth i lawr yn rhyddhad swyddogol'
+      Downgrade: 'Mae''r rhyddhad a lwythwyd i lawr yn hŷn na''r un sydd wedi''i osod'
+      Invalid Archive: 'Mae''r archif a lwythwyd i lawr yn annilys'
+      Rollback Failed: 'Methodd y diweddariad ac nid oedd modd adfer y fersiwn flaenorol yn llawn'
     Managed Tool Updates: Diweddariadau offer a reolir
     Update Modes:
       Automatic: Diweddaru'n awtomatig

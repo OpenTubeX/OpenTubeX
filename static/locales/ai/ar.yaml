@@ -893,6 +893,14 @@ Settings:
     FFmpeg and FFprobe Downloaded Template: تم تنزيل FFmpeg وFFprobe {version}
     FFmpeg and FFprobe Download Error Template: 'فشل تنزيل FFmpeg وFFprobe: {error}'
     Managed Tool Already Current Template: '{tool} {version} محدث بالفعل'
+    Managed Tool Errors:
+      Removed: 'أُزيل الملف الذي تم تنزيله، على الأرجح بواسطة برنامج مكافحة الفيروسات'
+      Unusable: 'تعذّر تشغيل البرنامج الذي تم تنزيله. قد يكون برنامج مكافحة الفيروسات يحظره، أو أنه لا يدعم هذا النظام'
+      Release Not Found: 'تعذّر العثور على أحدث إصدار'
+      Verification Failed: 'تعذّر التحقق من أن التنزيل إصدار رسمي'
+      Downgrade: 'الإصدار الذي تم تنزيله أقدم من الإصدار المثبت'
+      Invalid Archive: 'الأرشيف الذي تم تنزيله غير صالح'
+      Rollback Failed: 'فشل التحديث وتعذّرت استعادة الإصدار السابق بالكامل'
     Managed Tool Updates: تحديثات الأداة المُدارة
     Update Modes:
       Automatic: التحديث تلقائيا
