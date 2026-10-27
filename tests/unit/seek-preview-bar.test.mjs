@@ -196,7 +196,7 @@ test('a mouse only shows the filmstrip when dragging the thumb itself', () => {
     controls.listeners.get('mousedown')({ clientX })
     bar.onChangeStart()
   }
-  // The thumb for 15 of 30 seconds is centred at 100 + 6 + 150.
+  // The thumb for 15 of 30 seconds is centered at 100 + 6 + 150.
   press(256 + 60)
   drag(20)
   assert.equal(bar.filmstrip.time, null, 'Dragging from elsewhere on the track keeps the single preview')

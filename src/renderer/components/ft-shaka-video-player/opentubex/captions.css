@@ -330,7 +330,7 @@
 }
 
 /*
-  The centred options would carry the rows into the middle of a submenu that keeps
+  The centered options would carry the rows into the middle of a submenu that keeps
   the taller menu height, so they are pinned to the bottom with their space reserved.
 */
 :deep(.shaka-sub-menu.ft-menu-grid:has(> .ft-caption-actions)) {

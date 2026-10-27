@@ -173,7 +173,7 @@ test.describe('secondary captions', () => {
     ])
     expect(Math.abs(menuHeight - settingsMenuHeight)).toBeLessThan(1)
 
-    // A short list is centred below the header like the other submenus
+    // A short list is centered below the header like the other submenus
     const [optionsBounds, firstBounds, lastBounds] = await Promise.all([
       options.boundingBox(),
       options.getByRole('button').first().boundingBox(),

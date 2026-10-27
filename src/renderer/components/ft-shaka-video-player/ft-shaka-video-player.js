@@ -3762,7 +3762,7 @@ export default defineComponent({
     /**
      * @param {HTMLElement} seekBarContainer
      * @param {number} hoverTime
-     * @param {number} offsetX the preview's centre within the seek bar container
+     * @param {number} offsetX the preview's center within the seek bar container
      */
     function showChapterPreview(seekBarContainer, hoverTime, offsetX) {
       if (!container.value || !player) return

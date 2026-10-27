@@ -21,7 +21,7 @@ const wordSrc = readFileSync(join(here, 'wordmark-paths.svg'), 'utf8')
 const wordPath = wordSrc.match(/<path\b[^>]*\bd="([^"]+)"[^>]*>/)?.[1]
 
 // Native geometry boxes (from `inkscape --query`).
-const MARK = { side: 657.69397, artY: 107.644, artH: 442.406 } // mark sits in a square viewBox, vertically centred
+const MARK = { side: 657.69397, artY: 107.644, artH: 442.406 } // mark sits in a square viewBox, vertically centered
 const WORD = { x: 12.0117, y: 78.8086, w: 1667.92, h: 282.422 }
 const round = (n) => Number(n.toFixed(3))
 
@@ -36,7 +36,7 @@ function wordGroup (color, scale, tx, ty) {
 }
 
 // ---------------------------------------------------------------------------
-// 1) Square app icon: dark squircle background + centred white mark.
+// 1) Square app icon: dark squircle background + centered white mark.
 // ---------------------------------------------------------------------------
 function appIcon (size) {
   const radius = round(size * 0.225)
@@ -76,10 +76,10 @@ function lockup ({ background, markColor, wordColor, radius = 0, pad = 46 }) {
   const contentW = markW + gap + wordW
   const W = round(contentW + pad * 2)
 
-  // Mark: place so its art is vertically centred in H.
+  // Mark: place so its art is vertically centered in H.
   const markTx = pad
   const markTy = H / 2 - (MARK.artY + MARK.artH / 2) * markScale
-  // Wordmark: start after the mark, vertically centred.
+  // Wordmark: start after the mark, vertically centered.
   const wordTx = pad + markW + gap
   const wordTy = (H - wordH) / 2
 

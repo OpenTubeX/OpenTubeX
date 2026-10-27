@@ -5,7 +5,7 @@ import { SeekFilmstrip, THUMB_SIZE } from './SeekFilmstrip'
 
 // Pointer movement after pressing the bar that turns a tap into a drag.
 const DRAG_THRESHOLD = 4
-// Distance from the thumb's centre that still grabs it with a mouse.
+// Distance from the thumb's center that still grabs it with a mouse.
 const THUMB_GRAB_RADIUS = THUMB_SIZE / 2 + 2
 // How much finer than the seek bar the filmstrip must be to offer precise seeking.
 const PRECISE_MIN_ZOOM = 2

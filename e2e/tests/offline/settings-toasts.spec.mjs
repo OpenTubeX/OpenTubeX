@@ -650,7 +650,7 @@ test.describe('settings', () => {
     await page.locator('.toast', { hasText: 'Gamma toast' }).hover()
     await expect(rows.first()).toHaveAttribute('data-expanded', 'true')
 
-    const centres = await page.locator('.toast').evaluateAll((elements) => {
+    const centers = await page.locator('.toast').evaluateAll((elements) => {
       return elements
         .map((element) => {
           const { x, y, width, height } = element.getBoundingClientRect()
@@ -661,9 +661,9 @@ test.describe('settings', () => {
 
     // Walking from one toast to the next must never drop out of the stack, or
     // it collapses under the pointer and immediately reopens
-    for (let index = 1; index < centres.length; index++) {
-      const from = centres[index - 1]
-      const to = centres[index]
+    for (let index = 1; index < centers.length; index++) {
+      const from = centers[index - 1]
+      const to = centers[index]
 
       for (let step = 1; step <= 12; step++) {
         await page.mouse.move(
@@ -679,7 +679,7 @@ test.describe('settings', () => {
     const widest = Math.max(...(await page.locator('.toast').evaluateAll((elements) => {
       return elements.map(element => element.getBoundingClientRect().right)
     })))
-    await page.mouse.move(widest + 120, centres[0].y)
+    await page.mouse.move(widest + 120, centers[0].y)
     await expect(rows.first()).toHaveAttribute('data-expanded', 'false')
 
     await page.mouse.move(800, 300)

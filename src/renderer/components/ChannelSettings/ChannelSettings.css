@@ -148,7 +148,7 @@
   display: flex;
   flex-wrap: wrap;
 
-  /* Centres a lone card instead of stretching it across the whole prompt */
+  /* Centers a lone card instead of stretching it across the whole prompt */
   justify-content: center;
   gap: 1em;
   margin-block: 0 1em;
@@ -196,7 +196,7 @@
 .channelThumbnailPlaceholder {
   display: grid;
 
-  /* Icons default to a 1.25em wide box, which would sit off-centre in the circle */
+  /* Icons default to a 1.25em wide box, which would sit off-center in the circle */
   --icon-width: 1em;
 
   place-items: center;
@@ -229,13 +229,13 @@
   min-block-size: 56px;
 
   /* Per-row room for FtSelect's floating label so wrapped auto-fit rows stay clear.
-     Applied to every preference so side-by-side controls keep a shared centre line. */
+     Applied to every preference so side-by-side controls keep a shared center line. */
   padding-block-start: 30px;
 }
 
 /* Each control ships its own spacing for use in a settings page, which would
    leave the rows here indented by different amounts. Drop FtSelect's margins
-   too so the select box centres with the slider. */
+   too so the select box centers with the slider. */
 .channelPreference :deep(.pure-material-slider) {
   inline-size: auto;
   margin: 0;
