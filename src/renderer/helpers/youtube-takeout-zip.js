@@ -5,7 +5,7 @@ const MAX_ENTRY_SIZE = 256 * 1024 * 1024
 const SNIFF_SIZE = 64 * 1024
 const CANDIDATE_PATTERN = /\.(?:csv|json|opml)$/i
 const CHANNEL_ID_PATTERN = /^UC[\w-]{22}$/
-const PLAYLIST_ID_PATTERN = /^PL[\w-]+$/
+const PLAYLIST_ID_PATTERN = /^(?:PL|FL|LL|WL|LM|OL)[\w-]+$/
 const TIMESTAMP_PATTERN = /^\d{4}-\d{2}-\d{2}[T ]\d{2}:\d{2}/
 const ACTIVITY_URL_PATTERN = /"titleUrl"\s*:\s*"https:\/\/www\.youtube\.com\/(watch\?v|results\?search_query)/g
 

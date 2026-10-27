@@ -70,6 +70,7 @@ test('detects Takeout entries by content under any localized path', () => {
     ['searchHistory', searchHistory],
     ['playlists', '影片 ID,播放清單影片的建立時間戳記\n-abcdefghij,2025-01-01T00:00:00+00:00\n'],
     ['playlistMetadata', `Playlist-ID,Titel\n${playlistId},Liste\n`],
+    ['playlistMetadata', `Playlist-ID,Titel\nFL${channelId.slice(2)},Favoriten\n${playlistId},Liste\n`],
   ]
   for (const root of ['Takeout/YouTube and YouTube Music', 'Takeout/YouTube und YouTube Music', 'Takeout/YouTube 和 YouTube Music']) {
     for (const [type, content] of entries) {
@@ -145,6 +146,7 @@ test('rejects localized playlist metadata whose title column cannot be identifie
   const content = `Playlist-ID,Titel,Sichtbarkeit\n${playlistId},Liste,Privat\n`
   assert.equal(parseTakeoutPlaylistMetadataCsv(content, []), null)
   assert.deepEqual(parseTakeoutPlaylistMetadataCsv(content, ['Liste-Videos']), [{ playlistName: 'Liste' }])
+  assert.deepEqual(parseTakeoutPlaylistMetadataCsv(`${content}FL${channelId.slice(2)},Favoriten,Privat\n`, ['Liste-Videos', 'Favoriten-Videos']), [{ playlistName: 'Liste' }, { playlistName: 'Favoriten' }])
   assert.equal(parseTakeoutPlaylistMetadataCsv(content, ['Liste-Videos', 'Privat-Videos']), null)
 })
 
