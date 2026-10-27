@@ -377,8 +377,13 @@ export async function readTakeoutPlaylistMetadata(file) {
     metadataByDirectory.set(directory, entry)
   }, (error, entry) => {
     if (entry.type === null) {
-      // Unclassified, so only relevant if it shares its path with the metadata.
+      // Unclassified, so it matters only as the metadata itself or a playlist's video file.
       unreadablePaths.add(entry.path)
+      if (/\.csv$/i.test(entry.path)) {
+        damagedPaths.add(entry.path)
+        const directory = getDirectory(entry.path)
+        csvPathsByDirectory.set(directory, [...(csvPathsByDirectory.get(directory) ?? []), entry.path])
+      }
       return
     }
     metadataByDirectory.set(getDirectory(entry.path), null)

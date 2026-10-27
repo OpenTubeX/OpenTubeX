@@ -193,6 +193,32 @@ for (const suffixed of [false, true]) {
   })
 }
 
+test('reports a playlist file that cannot be decompressed instead of importing it as empty', async () => {
+  const root = 'Takeout/YouTube/playlists'
+  const chunks = []
+  const zip = new Zip((error, chunk) => {
+    if (error) throw error
+    chunks.push(chunk)
+  })
+  for (const [path, content, unreadable] of [
+    [`${root}/playlists.csv`, `Playlist ID,Playlist Title (Original)\n${playlistId},List\n`],
+    [`${root}/List-videos.csv`, 'Video ID,Playlist video creation timestamp\nabcdefghijk,2025-01-01T00:00:00Z\n', true],
+  ]) {
+    const entry = new ZipDeflate(path)
+    zip.add(entry)
+    const chunkIndex = chunks.length
+    entry.push(strToU8(content), true)
+    if (unreadable) chunks[chunkIndex + 1][0] = 7 // Reserved DEFLATE block type after the local header.
+  }
+  zip.end()
+  const file = new Blob(chunks)
+  const names = []
+  const errors = []
+  await forEachTakeoutImportEntry(file, new Set(['playlists']), await listYouTubeTakeoutZipEntries(file), entry => names.push(entry.playlist.playlistName), error => errors.push(error.message))
+  assert.deepEqual(names, [])
+  assert.deepEqual(errors, [`Invalid Takeout entry: ${root}/List-videos.csv`])
+})
+
 test('learns the real file suffix when a shorter title prefixes another playlist file', async () => {
   const root = 'Takeout/YouTube/playlists'
   const file = new Blob([zipSync({
