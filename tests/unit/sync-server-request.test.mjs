@@ -25,6 +25,10 @@ async function loadClient(env, version, requests, nativeRequest, browserRequest,
     createAbortError, waitForRequest,
     ensureAndroidLocalNetworkAccess: localNetworkAccess,
     URL, URLSearchParams, Request, Response, Headers, AbortController, setTimeout, clearTimeout,
+    setActiveTimeout: (callback, ms) => {
+      const timeout = setTimeout(callback, ms)
+      return () => clearTimeout(timeout)
+    },
     CapacitorHttp: {
       request: async options => {
         requests.push(options)

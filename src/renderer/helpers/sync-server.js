@@ -44,6 +44,7 @@ import { areSyncSettingValuesEqual, mergeSettingEntry, resolveMergedThemeEntry }
 import { getCapacitorTabService } from '../tabs/CapacitorTabService'
 import { capacitorHttpFetch } from './api/capacitor-http'
 import { delegateRequests } from './networkRecovery'
+import { setActiveTimeout } from './activeTimeout'
 
 import {
   SUBSCRIPTION_CHANNEL_SETTINGS_SYNC_KEY,
@@ -133,7 +134,7 @@ export class SyncServerClient {
     // a long poll held past its header timeout would mark the server as failed
     // and delay every other sync request until the poll itself timed out.
     const releaseRequest = delegateRequests(controller.signal, { ownDeadline: true })
-    const timeout = setTimeout(() => controller.abort(), timeoutMs)
+    const cancelTimeout = setActiveTimeout(() => controller.abort(), timeoutMs)
     const headers = createSyncServerRequestHeaders({
       hasBody: options.body != null,
       headers: options.headers,
@@ -177,7 +178,7 @@ export class SyncServerClient {
       }
       throw new SyncServerError(error?.message || 'Unable to reach sync server')
     } finally {
-      clearTimeout(timeout)
+      cancelTimeout()
       this.requestControllers.delete(controller)
       releaseRequest()
     }

@@ -111,6 +111,13 @@ function fixture (overrides = {}, { encrypted = false, respond, connectionState 
     AbortController,
     setTimeout: timer ?? setTimeout,
     clearTimeout,
+    setActiveTimeout: (callback, ms) => {
+      const timeout = (timer ?? setTimeout)(callback, ms)
+      return () => clearTimeout(timeout)
+    },
+    holdBackgroundSync: () => () => {},
+    setPeriodicBackgroundSync: () => {},
+    onPeriodicBackgroundSync: () => {},
     structuredClone,
     TextEncoder,
     TextDecoder,

@@ -50,12 +50,14 @@ public class MainActivity extends BridgeActivity {
         super.onStart();
         AppVisibility.setVisible(true);
         SubscriptionRefreshWorker.onAppVisibilityChanged(this);
+        BackgroundSync.onAppVisibilityChanged(this);
     }
 
     @Override
     public void onStop() {
         AppVisibility.setVisible(false);
         SubscriptionRefreshWorker.onAppVisibilityChanged(this);
+        BackgroundSync.onAppVisibilityChanged(this);
         super.onStop();
     }
 
@@ -78,6 +80,7 @@ public class MainActivity extends BridgeActivity {
         registerPlugin(LibraryDatabasePlugin.class);
         registerPlugin(AndroidMediaSessionPlugin.class);
         registerPlugin(SubscriptionRefreshPlugin.class);
+        registerPlugin(BackgroundSyncPlugin.class);
         registerPlugin(SabrHttpPlugin.class);
         registerPlugin(VoiceOverHttpPlugin.class);
         registerPlugin(AndroidSharePlugin.class);

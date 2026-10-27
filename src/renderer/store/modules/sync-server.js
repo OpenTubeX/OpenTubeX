@@ -3,6 +3,7 @@ import { SyncLiveConnectionState, SyncCollectionCache, createSyncActivity, valid
 import i18n from '../../i18n/index'
 import { showToastOnAllTabs } from '../../helpers/utils'
 import { isAppHidden } from '../../helpers/appVisibility.js'
+import { holdBackgroundSync, onPeriodicBackgroundSync, setPeriodicBackgroundSync } from '../../helpers/androidBackgroundSync.js'
 import { connectionEvents, getConnectionState } from '../../helpers/networkRecovery.js'
 import {
   SyncServerClient,
@@ -84,8 +85,16 @@ const activeSyncClients = new Set()
 let autoSyncTimer = null
 let autoSyncController = new AbortController()
 const eventSyncTimers = new Map()
-// Event syncs that came due while a mobile app was hidden; replayed on resume.
+// Event syncs that came due while the iOS app was hidden; replayed on resume.
 const hiddenEventSyncReasons = new Set()
+
+function clearEventSyncTimers() {
+  for (const pending of eventSyncTimers.values()) {
+    clearTimeout(pending.timer)
+    pending.releaseHold()
+  }
+  eventSyncTimers.clear()
+}
 let lifecycleSyncStarted = false
 let reminderSyncListenerStarted = false
 let deviceRefreshId = 0
@@ -1502,14 +1511,17 @@ const actions = {
     if (isSyncServerOffline() || (options.automatic && autoSyncSignal.aborted)) return Promise.resolve(null)
     // A remote-only check may skip all merges, so it cannot consume local work.
     if (activeSyncPromise && activeSyncRemoteOnly && !options.remoteOnly) {
+      // The running check releases its hold before the queued sync takes one.
+      const releaseHold = holdBackgroundSync()
       return activeSyncPromise.catch(() => {}).then(() => {
         if (options.automatic && autoSyncSignal.aborted) return null
         return actions.syncWithSyncServer(context, options)
-      })
+      }).finally(releaseHold)
     }
     if (!activeSyncPromise) {
       activeSyncRemoteOnly = options.remoteOnly === true
       let syncStarted = false
+      const releaseHold = holdBackgroundSync()
       activeSyncPromise = withSyncLock(() => {
         if (!context.rootState.settings.syncServerEnabled || isSyncServerOffline() ||
             (options.automatic && autoSyncSignal.aborted)) return null
@@ -1520,8 +1532,7 @@ const actions = {
         syncStarted = !options.remoteOnly
         if (syncStarted) {
           // A full sync includes every collection, consuming all pending edits.
-          for (const pending of eventSyncTimers.values()) clearTimeout(pending.timer)
-          eventSyncTimers.clear()
+          clearEventSyncTimers()
         }
         return runSync(context, options)
       }).finally(() => {
@@ -1532,6 +1543,7 @@ const actions = {
             ? 'restartSyncServerAutoSync'
             : 'startSyncServerAutoSync')
         }
+        releaseHold()
       })
     }
     return activeSyncPromise
@@ -1561,6 +1573,13 @@ const actions = {
             console.error('Sync server reconnect sync failed', error)
           }
         }
+      })
+      // Live notifications stop while the app is hidden; check periodically instead.
+      onPeriodicBackgroundSync(() => {
+        const settings = rootState.settings
+        if (!settings.syncServerEnabled || !settings.syncServerAutoSync || !settings.syncServerToken ||
+            !isSyncReasonEnabled(settings, 'automatic')) return
+        return dispatch('syncWithSyncServer', { skipIfRecent: true, automatic: true, remoteOnly: true })
       })
       document.addEventListener('visibilitychange', () => {
         if (process.env.IS_CAPACITOR && isAppHidden()) dispatch('stopSyncServerLive')
@@ -1653,6 +1672,7 @@ const actions = {
 
     if (autoSyncController.signal.aborted) autoSyncController = new AbortController()
     if (!isSyncReasonEnabled(rootState.settings, 'automatic')) return
+    setPeriodicBackgroundSync(true)
     const { signal } = autoSyncController
     autoSyncTimer = setTimeout(async () => {
       autoSyncTimer = null
@@ -1738,9 +1758,9 @@ const actions = {
   stopSyncServerAutoSync({ dispatch }) {
     autoSyncController.abort()
     dispatch('stopSyncServerLive')
+    setPeriodicBackgroundSync(false)
     clearTimeout(autoSyncTimer)
-    for (const pending of eventSyncTimers.values()) clearTimeout(pending.timer)
-    eventSyncTimers.clear()
+    clearEventSyncTimers()
     hiddenEventSyncReasons.clear()
     autoSyncTimer = null
   },
@@ -1757,7 +1777,8 @@ const actions = {
     const firstChangeAt = previous?.firstChangeAt ?? Date.now()
     const { delay, maxWait } = EVENT_SYNC_DELAYS[reason] ?? { delay: EVENT_SYNC_DEBOUNCE_MS, maxWait: Infinity }
     clearTimeout(previous?.timer)
-    const pending = { firstChangeAt, timer: null }
+    // Keep a hidden Android app running until the pending edits are synced.
+    const pending = { firstChangeAt, timer: null, releaseHold: previous?.releaseHold ?? holdBackgroundSync() }
     eventSyncTimers.set(reason, pending)
     pending.timer = setTimeout(async () => {
       // Edits made during a sync retain their own deadline. Once due, wait for
@@ -1767,21 +1788,27 @@ const actions = {
       }
       if (eventSyncTimers.get(reason) !== pending) return
       eventSyncTimers.delete(reason)
-      if (isSyncServerOffline() ||
-          !rootState.settings.syncServerEnabled ||
-          !rootState.settings.syncServerAutoSync ||
-          !rootState.settings.syncServerToken ||
-          !isSyncReasonEnabled(rootState.settings, reason)) return
-      if (process.env.IS_CAPACITOR && isAppHidden()) {
-        hiddenEventSyncReasons.add(reason)
-        return
+      try {
+        if (isSyncServerOffline() ||
+            !rootState.settings.syncServerEnabled ||
+            !rootState.settings.syncServerAutoSync ||
+            !rootState.settings.syncServerToken ||
+            !isSyncReasonEnabled(rootState.settings, reason)) return
+        // iOS suspends a hidden app, which would stall the sync until it resumes.
+        if (process.env.IS_IOS && isAppHidden()) {
+          hiddenEventSyncReasons.add(reason)
+          return
+        }
+        // The sync holds the app running from here on.
+        dispatch('syncWithSyncServer', {
+          skipIfRecent: reason === 'automatic',
+          automatic: true,
+        }).catch(error => {
+          console.error('Sync server event sync failed', error)
+        })
+      } finally {
+        pending.releaseHold()
       }
-      dispatch('syncWithSyncServer', {
-        skipIfRecent: reason === 'automatic',
-        automatic: true,
-      }).catch(error => {
-        console.error('Sync server event sync failed', error)
-      })
     }, Math.max(0, Math.min(delay, firstChangeAt + maxWait - Date.now())))
   },
 
