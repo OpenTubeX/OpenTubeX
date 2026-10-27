@@ -5,13 +5,13 @@ import { expect, goToSettingsSection, test } from '../../helpers/app.mjs'
 test('previews and imports selected data from a YouTube Takeout ZIP', async ({ page }) => {
   const root = 'Takeout/YouTube and YouTube Music'
   const archive = zipSync({
-    [`${root}/subscriptions/subscriptions.csv`]: strToU8('Channel Id,Channel Url,Channel Title\nUCtakeouttest,https://www.youtube.com/channel/UCtakeouttest,Takeout Channel\n'),
+    [`${root}/subscriptions/subscriptions.csv`]: strToU8('Channel Id,Channel Url,Channel Title\nUCtakeouttestxxxxxxxxxxx,https://www.youtube.com/channel/UCtakeouttestxxxxxxxxxxx,Takeout Channel\n'),
     [`${root}/history/watch-history.json`]: strToU8(JSON.stringify([{
       products: ['YouTube'],
       title: 'Watched Example',
       titleUrl: 'https://www.youtube.com/watch?v=abcdefghijk',
       time: '2025-01-01T00:00:00Z',
-      subtitles: [{ name: 'Channel', url: 'https://www.youtube.com/channel/UCtakeouttest' }]
+      subtitles: [{ name: 'Channel', url: 'https://www.youtube.com/channel/UCtakeouttestxxxxxxxxxxx' }]
     }])),
     [`${root}/history/search-history.json`]: strToU8(JSON.stringify([{
       products: ['YouTube'],
@@ -54,7 +54,7 @@ test('previews and imports selected data from a YouTube Takeout ZIP', async ({ p
   await expect.poll(() => page.evaluate(() => {
     const store = window.$store
     return {
-      subscribed: store.getters.getProfileList[0].subscriptions.some(channel => channel.id === 'UCtakeouttest'),
+      subscribed: store.getters.getProfileList[0].subscriptions.some(channel => channel.id === 'UCtakeouttestxxxxxxxxxxx'),
       watched: Boolean(store.getters.getHistoryCacheById.abcdefghijk),
       playlists: store.getters.getAllPlaylists.filter(playlist => playlist.playlistName.startsWith('My list')).map(playlist => playlist.playlistName).sort(),
       playlistVideoIds: store.getters.getAllPlaylists.find(playlist => playlist.playlistName === 'My list')?.videos.map(video => video.videoId),
@@ -141,10 +141,58 @@ test('imports original titles, descriptions, timestamps and empty playlists from
   }
 })
 
+test('imports a Takeout ZIP with localized folders, file names, headers and titles', async ({ page }) => {
+  const root = 'Takeout/YouTube und YouTube Music'
+  const channelId = `UC${'d'.repeat(22)}`
+  const watched = (title, videoId) => ({ products: ['YouTube'], title, titleUrl: `https://www.youtube.com/watch?v=${videoId}`, time: '2025-01-01T00:00:00Z' })
+  const archive = zipSync({
+    [`${root}/Abos/Abos.csv`]: strToU8(`Kanal-ID,Kanal-URL,Kanaltitel\n${channelId},http://www.youtube.com/channel/${channelId},Deutscher Kanal\n`),
+    [`${root}/Verlauf/Wiedergabeverlauf.json`]: strToU8(JSON.stringify([
+      watched('Erstes Video angesehen', 'abcdefghijk'),
+      watched('https://www.youtube.com/watch?v=lmnopqrstuv angesehen', 'lmnopqrstuv'),
+    ])),
+    [`${root}/Verlauf/Suchverlauf.json`]: strToU8(JSON.stringify([{
+      products: ['YouTube'], title: 'Gesucht: Beispiel', titleUrl: 'https://www.youtube.com/results?search_query=beispiel', time: '2025-01-01T00:00:00Z'
+    }])),
+    [`${root}/Playlists/Musik_Rock-Videos.csv`]: strToU8('Video-ID,Zeitstempel der Erstellung des Playlist-Videos\nabcdefghijk,2025-01-01T00:00:00+00:00\n'),
+    [`${root}/Playlists/Playlists.csv`]: strToU8(`Playlist-ID,Playlist-Titel (Original),Erstellungszeitstempel,Aktualisierungszeitstempel,Sichtbarkeit\nPL${'g'.repeat(32)},Musik/Rock,2024-01-01T00:00:00+00:00,2025-01-01T00:00:00+00:00,Privat\n`),
+  })
+
+  const dataSection = await goToSettingsSection(page, 'data')
+  await page.evaluate(bytes => {
+    Object.defineProperty(window, 'showOpenFilePicker', {
+      configurable: true,
+      value: async () => [{ getFile: async () => new File([new Uint8Array(bytes)], 'takeout.zip', { type: 'application/zip' }) }]
+    })
+  }, [...archive])
+  await dataSection.getByRole('button', { name: 'Import YouTube Takeout ZIP' }).click()
+  const selection = page.locator('.takeoutSelectionCentered')
+  await expect(selection.getByRole('checkbox')).toHaveCount(4)
+  await selection.getByRole('button', { name: 'Preview changes', exact: true }).click()
+  await selection.getByRole('button', { name: 'Import selected data' }).click()
+
+  await expect.poll(() => page.evaluate(() => {
+    const store = window.$store
+    const playlist = store.getters.getAllPlaylists.find(playlist => playlist.playlistName === 'Musik/Rock')
+    return {
+      subscriptions: store.getters.getProfileList[0].subscriptions.map(channel => channel.name),
+      titles: ['abcdefghijk', 'lmnopqrstuv'].map(videoId => store.getters.getHistoryCacheById[videoId]?.title),
+      search: store.getters.getSearchHistoryEntries.some(entry => entry.query === 'beispiel'),
+      playlist: playlist && { videoIds: playlist.videos.map(video => video.videoId), createdAt: playlist.createdAt },
+    }
+  })).toEqual({
+    subscriptions: ['Deutscher Kanal'],
+    titles: ['Erstes Video', 'https://www.youtube.com/watch?v=lmnopqrstuv'],
+    search: true,
+    playlist: { videoIds: ['abcdefghijk'], createdAt: Date.parse('2024-01-01T00:00:00Z') },
+  })
+})
+
 for (const [name, metadata] of [
-  ['malformed', 'wrong header\n'],
+  ['malformed', 'Playlist ID,Playlist Title (Original),Playlist Create Timestamp\nPLbad,本地清單,not-a-date\n'],
   ['ambiguous', 'Playlist ID,Playlist Title (Original)\nPLone,A/B\nPLtwo,A_B\n'],
-  ['localized', '播放清單 ID,標題\nPLlocalized,本地清單\n'],
+  // A translated header whose title column matches no playlist file.
+  ['localized without a matching title', `播放清單 ID,標題\nPL${'l'.repeat(32)},其他清單\n`],
 ]) {
   test(`imports video CSVs and other selected types when playlist metadata is ${name}`, async ({ page }) => {
     const root = 'Takeout/YouTube and YouTube Music'
@@ -153,7 +201,7 @@ for (const [name, metadata] of [
       [`${root}/playlists/本地清單-videos.csv`]: strToU8('影片 ID,播放清單影片的建立時間戳記\nabcdefghijk,2025-01-01T00:00:00Z\n'),
       'Good account/playlists/Good_List-videos.csv': strToU8('Video ID,Playlist video creation timestamp\nlmnopqrstuv,2025-01-01T00:00:00Z\n'),
       'Good account/playlists/playlists.csv': strToU8('Playlist ID,Playlist Title (Original),Playlist Description (Original),Playlist Create Timestamp,Playlist Update Timestamp\nPLgood,Good/List,Good account,2024-01-01T00:00:00Z,2025-01-01T00:00:00Z\nPLempty,Good empty,,,\n'),
-      [`${root}/subscriptions/subscriptions.csv`]: strToU8('Channel Id,Channel Url,Channel Title\nUCmetadatafailure,https://www.youtube.com/channel/UCmetadatafailure,Metadata failure channel\n'),
+      [`${root}/subscriptions/subscriptions.csv`]: strToU8('Channel Id,Channel Url,Channel Title\nUCmetadatafailurexxxxxxx,https://www.youtube.com/channel/UCmetadatafailurexxxxxxx,Metadata failure channel\n'),
       [`${root}/history/watch-history.json`]: strToU8(JSON.stringify([{
         products: ['YouTube'], title: 'Watched Example', titleUrl: 'https://www.youtube.com/watch?v=abcdefghijk', time: '2025-01-01T00:00:00Z'
       }])),
@@ -175,7 +223,7 @@ for (const [name, metadata] of [
       const store = window.$store
       const goodPlaylist = store.getters.getAllPlaylists.find(playlist => playlist.playlistName === 'Good/List')
       return {
-        subscribed: store.getters.getProfileList[0].subscriptions.some(channel => channel.id === 'UCmetadatafailure'),
+        subscribed: store.getters.getProfileList[0].subscriptions.some(channel => channel.id === 'UCmetadatafailurexxxxxxx'),
         watched: Boolean(store.getters.getHistoryCacheById.abcdefghijk),
         searched: store.getters.getSearchHistoryEntries.some(entry => entry.query === 'metadata failure'),
         playlistCount: store.getters.getAllPlaylists.length,

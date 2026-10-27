@@ -42,6 +42,37 @@ export function previewBackupImport(data, current) {
   return rows
 }
 
+/**
+ * Find the localized text around watched titles, such as "Watched " in
+ * English. Removed videos are titled with their URL, which shows the template
+ * exactly; otherwise use the start all titles share.
+ */
+function findWatchTitleTemplate(records) {
+  const templates = new Map()
+  for (const { title, titleUrl } of records) {
+    const index = title.indexOf(titleUrl)
+    if (index === -1) continue
+    const prefix = title.slice(0, index)
+    const suffix = title.slice(index + titleUrl.length)
+    const template = templates.get(`${prefix}\n${suffix}`) ?? { prefix, suffix, count: 0 }
+    template.count++
+    templates.set(`${prefix}\n${suffix}`, template)
+  }
+  if (templates.size > 0) {
+    return [...templates.values()].reduce((best, template) => template.count > best.count ? template : best)
+  }
+  if (new Set(records.map(({ title }) => title)).size < 2) return { prefix: '', suffix: '' }
+  // Without a template, a shared ending may be part of every title, so keep it.
+  const first = records[0].title
+  let prefixLength = first.length
+  for (const { title } of records.slice(1)) {
+    let index = 0
+    while (index < prefixLength && title[index] === first[index]) index++
+    prefixLength = index
+  }
+  return { prefix: first.slice(0, prefixLength), suffix: '' }
+}
+
 /** Transform the same watch records for both the preview and the actual import. */
 export function parseTakeoutWatchHistory(history) {
   let skipped = 0
@@ -50,13 +81,10 @@ export function parseTakeoutWatchHistory(history) {
     if (typeof item.title !== 'string' || !Number.isFinite(Date.parse(item.time))) { skipped++; return false }
     return true
   })
-  const first = records[0]?.title ?? ''
-  let commonLength = records.length > 1 ? first.length : 0
-  for (const record of records.slice(1)) {
-    let index = 0
-    while (index < commonLength && record.title[index] === first[index]) index++
-    commonLength = index
-  }
+  const { prefix, suffix } = findWatchTitleTemplate(records)
+  const getTitle = title => title.length >= prefix.length + suffix.length && title.startsWith(prefix) && title.endsWith(suffix)
+    ? title.slice(prefix.length, title.length - suffix.length)
+    : title
   const knownKeys = new Set(['header', 'description', 'products', 'details', 'activityControls', 'title', 'titleUrl', 'time', 'subtitles'])
   const unknownKeys = new Set()
   const entries = records.map(record => {
@@ -67,7 +95,7 @@ export function parseTakeoutWatchHistory(history) {
     const timeWatched = Date.parse(record.time)
     return {
       videoId: record.titleUrl.replaceAll(/https:\/\/www\.youtube\.com\/watch\?v=/gi, ''),
-      title: record.title.slice(commonLength),
+      title: getTitle(record.title),
       timeWatched,
       author: typeof author?.name === 'string' ? author.name : '',
       authorId: typeof author?.url === 'string' ? author.url.replaceAll(/https:\/\/www\.youtube\.com\/channel\//gi, '') : '',

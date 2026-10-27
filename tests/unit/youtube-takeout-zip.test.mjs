@@ -4,7 +4,7 @@ import test from 'node:test'
 import vm from 'node:vm'
 import { strToU8, Unzip, UnzipInflate, Zip, ZipDeflate, zipSync } from 'fflate'
 
-import { classifyTakeoutEntry, forEachSelectedTakeoutZipEntry, isSupportedTakeoutEntry, listYouTubeTakeoutZipEntries, parseTakeoutPlaylistCsv, parseTakeoutPlaylistMetadataCsv, readTakeoutPlaylistMetadata } from '../../src/renderer/helpers/youtube-takeout-zip.js'
+import { forEachSelectedTakeoutZipEntry, forEachTakeoutImportEntry, isSupportedTakeoutEntry, listYouTubeTakeoutZipEntries, parseTakeoutPlaylistCsv, parseTakeoutPlaylistMetadataCsv, readTakeoutPlaylistMetadata, sniffTakeoutEntry } from '../../src/renderer/helpers/youtube-takeout-zip.js'
 
 test('does not announce complete success after an empty playlist fails and a later playlist succeeds', async () => {
   const source = await readFile(new URL('../../src/renderer/components/DataSettings/DataSettings.vue', import.meta.url), 'utf8')
@@ -58,14 +58,97 @@ test('uses Takeout metadata instead of the sanitized video filename', () => {
   })
 })
 
-test('detects supported Takeout entries under the archive root', () => {
-  const root = 'takeout-001/Takeout/YouTube and YouTube Music'
-  assert.equal(classifyTakeoutEntry(`${root}/subscriptions/subscriptions.csv`), 'subscriptions')
-  assert.equal(classifyTakeoutEntry(`${root}/history/watch-history.json`), 'history')
-  assert.equal(classifyTakeoutEntry(`${root}/history/search-history.json`), 'searchHistory')
-  assert.equal(classifyTakeoutEntry(`${root}/playlists/My list.csv`), 'playlists')
-  assert.equal(classifyTakeoutEntry(`${root}/videos/my-video.mp4`), null)
-  assert.equal(classifyTakeoutEntry(`${root}/playlists/playlists.csv`), 'playlistMetadata')
+const channelId = `UC${'c'.repeat(22)}`
+const playlistId = `PL${'p'.repeat(32)}`
+const watchHistory = JSON.stringify([{ header: 'YouTube', title: 'Watched video', titleUrl: 'https://www.youtube.com/watch?v=abcdefghijk', time: '2025-01-01T00:00:00Z', products: ['YouTube'] }])
+const searchHistory = JSON.stringify([{ header: 'YouTube', title: 'Searched for query', titleUrl: 'https://www.youtube.com/results?search_query=query', time: '2025-01-01T00:00:00Z', products: ['YouTube'] }])
+
+test('detects Takeout entries by content under any localized path', () => {
+  const entries = [
+    ['subscriptions', `Kanal-ID,Kanal-URL,Kanaltitel\n${channelId},http://www.youtube.com/channel/${channelId},Kanal\n`],
+    ['history', watchHistory.replaceAll('=', '\\u003d')],
+    ['searchHistory', searchHistory],
+    ['playlists', '影片 ID,播放清單影片的建立時間戳記\n-abcdefghij,2025-01-01T00:00:00+00:00\n'],
+    ['playlistMetadata', `Playlist-ID,Titel\n${playlistId},Liste\n`],
+    ['playlistMetadata', `Playlist-ID,Titel\nFL${channelId.slice(2)},Favoriten\n${playlistId},Liste\n`],
+  ]
+  for (const root of ['Takeout/YouTube and YouTube Music', 'Takeout/YouTube und YouTube Music', 'Takeout/YouTube 和 YouTube Music']) {
+    for (const [type, content] of entries) {
+      const extension = type.endsWith('istory') ? 'json' : 'csv'
+      assert.equal(sniffTakeoutEntry(`${root}/Ordner/Datei.${extension}`, `\uFEFF${content}`, true), type)
+    }
+  }
+  assert.equal(sniffTakeoutEntry('Takeout/YouTube/abonnements.opml', `<opml><body><outline xmlUrl="https://www.youtube.com/feeds/videos.xml?channel_id=${channelId}" /></body></opml>`, true), 'subscriptions')
+})
+
+test('ignores unrelated or unrecognizable Takeout data', () => {
+  for (const [path, content] of [
+    ['videos/clip.mp4', 'Video ID,Timestamp\nabcdefghijk,2025-01-01T00:00:00Z'],
+    ['playlists/Empty-videos.csv', 'Video ID,Playlist video creation timestamp\n'],
+    ['channels/channel.csv', `Channel ID,Channel Title (Original),Channel Visibility\n${channelId},Me,Public\n`],
+    ['comments/comments.csv', `Comment ID,Channel ID,Comment Create Timestamp,Video ID\nUgx,${channelId},2025-01-01T00:00:00Z,abcdefghijk\n`],
+    ['history/watch-history.html', '<html />'],
+    ['history/watch-history.json', '[]'],
+    ['comments/comments.csv', 'Comment ID,Comment Text\nUgx,WLAN\n'],
+    ['subscriptions/subscriptions.csv', `Channel Id,Channel Url,Channel Title\n${channelId},"unclosed\n`],
+    // My Activity mixes watches and searches in one file.
+    ['My Activity/YouTube/MyActivity.json', `[${watchHistory.slice(1, -1)},${searchHistory.slice(1, -1)}]`],
+  ]) {
+    assert.equal(sniffTakeoutEntry(path, content, true), null, path)
+  }
+})
+
+test('classifies a partial head by its first complete record', () => {
+  const row = 'abcdefghijk,2025-01-01T00:00:00Z\n'
+  const head = `Video ID,Playlist video creation timestamp\n${row.repeat(3)}abcdef`
+  assert.equal(sniffTakeoutEntry('playlists/List-videos.csv', head, false), 'playlists')
+  const metadata = `Playlist ID,Playlist Description (Original)\n${playlistId},"Line one\nline two"\n${playlistId},"unfinished`
+  assert.equal(sniffTakeoutEntry('playlists/playlists.csv', metadata, false), 'playlistMetadata')
+  assert.equal(sniffTakeoutEntry('playlists/List-videos.csv', 'Video ID,Playlist video creation timestamp\nabcdefghijk,2025-01', false), null)
+})
+
+test('imports localized playlist metadata by matching titles to file names', async () => {
+  const root = 'Takeout/YouTube et YouTube Music/playlists'
+  const header = 'ID de la playlist,Ajouter les nouvelles vidéos en haut,Titre de la playlist (original),Langue du titre de la playlist (original),Horodatage de création de la playlist,Horodatage de mise à jour de la playlist,Visibilité de la playlist'
+  const file = new Blob([zipSync({
+    [`${root}/Musique_Rock-vidéos.csv`]: strToU8('ID vidéo,Horodatage de création de la vidéo de la playlist\nabcdefghijk,2025-01-01T00:00:00+00:00\n'),
+    [`${root}/Vide-vidéos.csv`]: strToU8('ID vidéo,Horodatage de création de la vidéo de la playlist\n'),
+    [`${root}/playlists.csv`]: strToU8(`${header}\n${playlistId},False,Musique/Rock,fr,2024-01-01T00:00:00+00:00,2025-01-01T00:00:00+00:00,Privée\nPL${'v'.repeat(32)},False,Vide,,2024-02-01T00:00:00+00:00,2024-03-01T00:00:00+00:00,Privée\n`),
+  })])
+  const entries = await listYouTubeTakeoutZipEntries(file)
+  assert.deepEqual(entries.map(entry => entry.path), [`${root}/Musique_Rock-vidéos.csv`, `${root}/playlists.csv`])
+  const { metadata, errors } = await readTakeoutPlaylistMetadata(file)
+  assert.deepEqual(errors, [])
+  assert.deepEqual(metadata.get(`${root}/Musique_Rock-vidéos.csv`), {
+    playlistName: 'Musique/Rock', createdAt: Date.parse('2024-01-01T00:00:00Z'), lastUpdatedAt: Date.parse('2025-01-01T00:00:00Z'),
+  })
+  assert.equal(metadata.get(`${root}/Vide-vidéos.csv`).playlistName, 'Vide')
+  const playlists = []
+  await forEachTakeoutImportEntry(file, new Set(['playlists']), entries, entry => playlists.push(entry.playlist), error => { throw error })
+  assert.deepEqual(playlists.map(playlist => [playlist.playlistName, playlist.videos.map(video => video.videoId)]), [['Musique/Rock', ['abcdefghijk']], ['Vide', []]])
+})
+
+test('reports a damaged playlist file instead of importing its metadata as an empty playlist', async () => {
+  const root = 'Takeout/YouTube/playlists'
+  const file = new Blob([zipSync({
+    [`${root}/playlists.csv`]: strToU8(`Playlist ID,Playlist Title (Original)\n${playlistId},List\nPLempty,Empty\n`),
+    [`${root}/List-videos.csv`]: strToU8('Video ID,Playlist video creation timestamp\nabcdefghijk,not-a-date\n'),
+    [`${root}/Empty-videos.csv`]: strToU8('Video ID,Playlist video creation timestamp\n'),
+  })])
+  const entries = await listYouTubeTakeoutZipEntries(file)
+  const names = []
+  const errors = []
+  await forEachTakeoutImportEntry(file, new Set(['playlists']), entries, entry => names.push(entry.playlist.playlistName), error => errors.push(error.message))
+  assert.deepEqual(names, ['Empty'])
+  assert.deepEqual(errors, [`Invalid Takeout entry: ${root}/List-videos.csv`])
+})
+
+test('rejects localized playlist metadata whose title column cannot be identified', () => {
+  const content = `Playlist-ID,Titel,Sichtbarkeit\n${playlistId},Liste,Privat\n`
+  assert.equal(parseTakeoutPlaylistMetadataCsv(content, []), null)
+  assert.deepEqual(parseTakeoutPlaylistMetadataCsv(content, ['Liste-Videos']), [{ playlistName: 'Liste' }])
+  assert.deepEqual(parseTakeoutPlaylistMetadataCsv(`${content}FL${channelId.slice(2)},Favoriten,Privat\n`, ['Liste-Videos', 'Favoriten-Videos']), [{ playlistName: 'Liste' }, { playlistName: 'Favoriten' }])
+  assert.equal(parseTakeoutPlaylistMetadataCsv(content, ['Liste-Videos', 'Privat-Videos']), null)
 })
 
 const metadataHeader = 'Playlist ID,Playlist Title (Original),Playlist Description (Original),Playlist Create Timestamp,Playlist Update Timestamp'
@@ -109,6 +192,44 @@ for (const suffixed of [false, true]) {
     }
   })
 }
+
+test('reports a playlist file that cannot be decompressed instead of importing it as empty', async () => {
+  const root = 'Takeout/YouTube/playlists'
+  const chunks = []
+  const zip = new Zip((error, chunk) => {
+    if (error) throw error
+    chunks.push(chunk)
+  })
+  for (const [path, content, unreadable] of [
+    [`${root}/playlists.csv`, `Playlist ID,Playlist Title (Original)\n${playlistId},List\n`],
+    [`${root}/List-videos.csv`, 'Video ID,Playlist video creation timestamp\nabcdefghijk,2025-01-01T00:00:00Z\n', true],
+  ]) {
+    const entry = new ZipDeflate(path)
+    zip.add(entry)
+    const chunkIndex = chunks.length
+    entry.push(strToU8(content), true)
+    if (unreadable) chunks[chunkIndex + 1][0] = 7 // Reserved DEFLATE block type after the local header.
+  }
+  zip.end()
+  const file = new Blob(chunks)
+  const names = []
+  const errors = []
+  await forEachTakeoutImportEntry(file, new Set(['playlists']), await listYouTubeTakeoutZipEntries(file), entry => names.push(entry.playlist.playlistName), error => errors.push(error.message))
+  assert.deepEqual(names, [])
+  assert.deepEqual(errors, [`Invalid Takeout entry: ${root}/List-videos.csv`])
+})
+
+test('learns the real file suffix when a shorter title prefixes another playlist file', async () => {
+  const root = 'Takeout/YouTube/playlists'
+  const file = new Blob([zipSync({
+    [`${root}/playlists.csv`]: strToU8(`${metadataHeader}\nPLone,List,Empty,,\nPLtwo,List-videos,Populated,,`),
+    [`${root}/List-videos-videos.csv`]: strToU8('Video ID,Playlist video creation timestamp\nabcdefghijk,2025-01-01T00:00:00Z'),
+  })])
+  const { metadata, errors } = await readTakeoutPlaylistMetadata(file)
+  assert.deepEqual(errors, [])
+  assert.equal(metadata.get(`${root}/List-videos-videos.csv`).playlistName, 'List-videos')
+  assert.equal(metadata.get(`${root}/List-videos.csv`).playlistName, 'List')
+})
 
 test('rejects metadata rows that match the same discovered video file', async () => {
   const root = 'Takeout/YouTube/playlists'
@@ -159,8 +280,8 @@ test('invalidates repeated metadata entries for an account while retaining other
 })
 
 for (const [schema, badMetadata] of [
-  ['malformed', 'wrong header\n'],
-  ['localized', '播放清單 ID,標題\nPLbad,清單\n'],
+  ['malformed', `${metadataHeader}\nPLbad,Title,Description,not-a-date,\n`],
+  ['localized', `播放清單 ID,標題\nPL${'b'.repeat(32)},清單\n`],
   ['ambiguous', `${metadataHeader}\nPLone,A/B,,,\nPLtwo,A_B,,,`],
 ]) {
   for (const badFirst of [true, false]) {
@@ -238,8 +359,8 @@ test('rejects ambiguous sanitized filenames within an account', async () => {
 test('lists supported entries and reads only selected archive content', async () => {
   const root = 'Takeout/YouTube and YouTube Music'
   const archive = zipSync({
-    [`${root}/subscriptions/subscriptions.csv`]: strToU8('Channel Id,Channel Url,Channel Title\nUC123,https://youtube.com/channel/UC123,Example'),
-    [`${root}/history/watch-history.json`]: strToU8('[]'),
+    [`${root}/subscriptions/subscriptions.csv`]: strToU8(`Channel Id,Channel Url,Channel Title\n${channelId},http://www.youtube.com/channel/${channelId},Example`),
+    [`${root}/history/watch-history.json`]: strToU8(watchHistory),
     [`${root}/playlists/Favorites.csv`]: strToU8('Video ID,Playlist video creation timestamp\nabcdefghijk,2025-01-01T00:00:00+00:00'),
     [`${root}/videos/movie.mp4`]: new Uint8Array(100000),
   })
@@ -250,13 +371,13 @@ test('lists supported entries and reads only selected archive content', async ()
   const entries = []
   await forEachSelectedTakeoutZipEntry(file, new Set(['history']), entry => entries.push(entry))
   assert.deepEqual(entries.map(entry => entry.type), ['history'])
-  assert.equal(entries[0].content, '[]')
+  assert.equal(entries[0].content, watchHistory)
   assert.equal(isSupportedTakeoutEntry(entries[0]), true)
   assert.equal(isSupportedTakeoutEntry({ type: 'history', path: 'history/watch-history.json', content: '<html />' }), false)
 })
 
 test('rejects oversized selected entries before inflation', async () => {
-  const archive = zipSync({ 'Takeout/YouTube/history/watch-history.json': strToU8('[]') })
+  const archive = zipSync({ 'Takeout/YouTube/history/watch-history.json': strToU8(watchHistory) })
   new DataView(archive.buffer).setUint32(22, 256 * 1024 * 1024 + 1, true)
   const file = new Blob([archive])
   assert.equal((await listYouTubeTakeoutZipEntries(file)).length, 1)
@@ -278,7 +399,9 @@ test('stops inflating an understated entry after the output limit while retainin
     push(chunk, final) {
       if (this.history) {
         historyPushes++
-        // Exercise the real limit without allocating a 256 MiB test fixture.
+        // Classify the entry from a real head, then exercise the real limit
+        // without allocating a 256 MiB test fixture.
+        this.ondata(null, strToU8(watchHistory.padEnd(64 * 1024)), false)
         this.ondata(null, { length: 256 * 1024 * 1024 + 1 }, final)
       } else {
         super.push(chunk, final)
@@ -289,7 +412,7 @@ test('stops inflating an understated entry after the output limit while retainin
   vm.runInContext(source.replace(/^import .*\n/m, '').replaceAll('export ', ''), context)
   const archive = zipSync({
     'Account/history/watch-history.json': strToU8('[123456789]'),
-    'Account/subscriptions/subscriptions.csv': strToU8('Channel Id,Channel Url,Channel Title\nnew,url,New'),
+    'Account/subscriptions/subscriptions.csv': strToU8(`Channel Id,Channel Url,Channel Title\n${channelId},http://www.youtube.com/channel/${channelId},New`),
   })
   const header = new DataView(archive.buffer)
   header.setUint32(22, 1, true)
@@ -310,7 +433,7 @@ test('stops inflating an understated entry after the output limit while retainin
   assert.equal(errors.length, 1)
   assert.match(errors[0].message, /Takeout entry is too large/)
   assert.deepEqual(entries.map(entry => entry.type), ['subscriptions'])
-  assert.match(entries[0].content, /new,url,New/)
+  assert.match(entries[0].content, /,New$/)
 })
 
 for (const unreadableFirst of [true, false]) {
@@ -350,7 +473,8 @@ test('parses Takeout playlist CSV and rejects other CSV files', () => {
   assert.deepEqual(quotedPlaylist.videos.map(video => video.videoId), ['abcdefghijk'])
   assert.notEqual(parseTakeoutPlaylistCsv('Video ID,Playlist Video Creation Timestamp\nabcdefghijk,2025-01-01T00:00:00+00:00', 'My list.csv'), null)
   assert.notEqual(parseTakeoutPlaylistCsv('影片 ID,播放清單影片的建立時間戳記\nabcdefghijk,2025-01-01T00:00:00+00:00', 'My list.csv'), null)
-  assert.equal(parseTakeoutPlaylistCsv('Video,Timestamp\nabcdefghijk,2025-01-01T00:00:00+00:00', 'My list.csv'), null)
+  assert.notEqual(parseTakeoutPlaylistCsv('Video-ID,Zeitstempel\nabcdefghijk,2025-01-01T00:00:00+00:00', 'My list.csv'), null)
+  assert.equal(parseTakeoutPlaylistCsv('Video ID,Title,Timestamp\nabcdefghijk,Title,2025-01-01T00:00:00+00:00', 'My list.csv'), null)
 })
 
 test('strips only the final Takeout video-file suffix from playlist names', () => {
