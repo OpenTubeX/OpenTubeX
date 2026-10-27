@@ -8,12 +8,13 @@ import { getCompatibleAdaptiveFormats } from '../../src/renderer/helpers/player/
 import { waitForYtDlpFormatAvailability } from '../../src/renderer/helpers/player/ytDlpFormatAvailability.js'
 import { getEarliestYtDlpFormatExpiry, isYtDlpPlaybackSourceCacheable, YtDlpPlaybackSourceCache } from '../../src/renderer/helpers/player/ytDlpPlaybackCache.js'
 import { preloadYtDlpPlaybackSources } from '../../src/renderer/helpers/player/ytDlpPlaybackPreload.js'
+import { avoidUnreachableGoogleVideoHost, setAlwaysUseGoogleVideoBackupServer } from '../../src/renderer/helpers/player/googleVideoFallback.js'
 
 const code = (await readFile(new URL('../../src/renderer/helpers/player/ytDlpPlayback.js', import.meta.url), 'utf8'))
   .replace(/^import .+$/gm, '')
   .replace(/^export /gm, '')
 
-function playbackLoader({ audioSampleRate = 44_100, timeoutAttempts = Infinity, timeoutFormatId = '137', probeError = new DOMException('signal timed out', 'TimeoutError'), panorama = false, hlsProbeResult = () => true, incompleteAfterAttempt = Infinity, legacyProbeGate } = {}) {
+function playbackLoader({ audioSampleRate = 44_100, timeoutAttempts = Infinity, timeoutFormatId = '137', probeError = new DOMException('signal timed out', 'TimeoutError'), panorama = false, hlsProbeResult = () => true, incompleteAfterAttempt = Infinity, legacyProbeGate, legacyUrl } = {}) {
   const extractions = []
   const saved = []
   const hlsProbes = []
@@ -38,7 +39,7 @@ function playbackLoader({ audioSampleRate = 44_100, timeoutAttempts = Infinity, 
             fps: 30, dynamicRange: 'SDR', language: null,
             formatNote: panorama && format.height !== null ? 'mesh' : null,
             audioSampleRate, audioChannels: 2, bitrate: 100_000,
-            url: `https://media.test/${videoId}/${format.formatId}?expire=4102444800`,
+            url: format.formatId === '18' && legacyUrl ? legacyUrl : `https://media.test/${videoId}/${format.formatId}?expire=4102444800`,
           })),
         }
       },
@@ -47,7 +48,6 @@ function playbackLoader({ audioSampleRate = 44_100, timeoutAttempts = Infinity, 
       checkProbe(url)
       return { initRange: { start: 0, end: 99 }, indexRange: { start: 100, end: 199 } }
     },
-    avoidUnreachableGoogleVideoHost: url => url,
     fetchGoogleVideo: async url => {
       await legacyProbeGate
       checkProbe(url)
@@ -75,6 +75,25 @@ function playbackLoader({ audioSampleRate = 44_100, timeoutAttempts = Infinity, 
   const getSource = compileFunction(`${code}\nreturn getYtDlpPlaybackSource`, Object.keys(dependencies))(...Object.values(dependencies))
   return { getSource, extractions, saved, hlsProbes }
 }
+
+test('cached progressive formats use the current backup server setting', async t => {
+  const legacyUrl = 'https://rr1---sn-assigned-1.googlevideo.com/videoplayback?expire=4102444800&mn=sn-assigned-1%2Csn-backup-2&fvip=4'
+  const { getSource, extractions, saved } = playbackLoader({ legacyUrl, timeoutAttempts: 0 })
+  setAlwaysUseGoogleVideoBackupServer(true)
+  t.after(() => setAlwaysUseGoogleVideoBackupServer(false))
+
+  const source = await getSource('video000001')
+  assert.equal(source.legacyFormats[0].url, legacyUrl)
+  assert.equal(saved[0].source.legacyFormats[0].url, legacyUrl)
+  assert.equal(new URL(avoidUnreachableGoogleVideoHost(source.legacyFormats[0].url)).hostname,
+    'rr4---sn-backup-2.googlevideo.com')
+
+  setAlwaysUseGoogleVideoBackupServer(false)
+  const cached = await getSource('video000001')
+  assert.equal(cached, source)
+  assert.deepEqual(extractions, ['video000001'])
+  assert.equal(avoidUnreachableGoogleVideoHost(cached.legacyFormats[0].url), legacyUrl)
+})
 
 for (const [kind, timeoutFormatId] of [['adaptive', '137'], ['progressive', '18']]) {
   test(`does not cache a partial source after ${kind} format probe timeouts`, async () => {
