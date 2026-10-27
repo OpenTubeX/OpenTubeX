@@ -192,6 +192,18 @@ for (const suffixed of [false, true]) {
   })
 }
 
+test('learns the real file suffix when a shorter title prefixes another playlist file', async () => {
+  const root = 'Takeout/YouTube/playlists'
+  const file = new Blob([zipSync({
+    [`${root}/playlists.csv`]: strToU8(`${metadataHeader}\nPLone,List,Empty,,\nPLtwo,List-videos,Populated,,`),
+    [`${root}/List-videos-videos.csv`]: strToU8('Video ID,Playlist video creation timestamp\nabcdefghijk,2025-01-01T00:00:00Z'),
+  })])
+  const { metadata, errors } = await readTakeoutPlaylistMetadata(file)
+  assert.deepEqual(errors, [])
+  assert.equal(metadata.get(`${root}/List-videos-videos.csv`).playlistName, 'List-videos')
+  assert.equal(metadata.get(`${root}/List-videos.csv`).playlistName, 'List')
+})
+
 test('rejects metadata rows that match the same discovered video file', async () => {
   const root = 'Takeout/YouTube/playlists'
   const file = new Blob([zipSync({

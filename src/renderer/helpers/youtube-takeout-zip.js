@@ -331,8 +331,10 @@ function findTakeoutPlaylistFileSuffix(titles, fileNames) {
   let best = '-videos'
   let bestCount = 0
   for (const [suffix, count] of counts) {
-    // On ties, keep both filename forms in play so ambiguity is detected.
-    if (count > bestCount || (count === bestCount && best === '')) {
+    // On ties, prefer a suffix over none so both filename forms stay in play and
+    // ambiguity is detected. A title that prefixes another playlist's file leaves
+    // the real suffix plus extra text, so the shorter suffix is the real one.
+    if (count > bestCount || (count === bestCount && suffix !== '' && (best === '' || suffix.length < best.length))) {
       best = suffix
       bestCount = count
     }
