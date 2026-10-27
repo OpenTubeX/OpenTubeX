@@ -354,6 +354,7 @@ Settings:
   Return to Settings Menu: Tilbake til innstillingsmenyen
   General Settings:
     Preferred Video Codec: Føretrekt videokodek
+    Always Use Backup Media Server: "Bruk alltid reservemedietenaren"
     Automatically switch stream extraction methods: "Byt automatisk mellom metodar for straumuttrekk"
     Enable Tabs: "Slå på faner"
     Thumbnail Swipe Gestures:
@@ -2246,6 +2247,7 @@ Description:
 Tooltips:
   General Settings:
     Preferred Video Codec: Automatisk føretrekkjer maskinvaredekoding. Endringar gjeld frå neste video. Eit kodekval kan avgrense oppløysingar; utilgjengelege kodekar blir erstatta.
+    Always Use Backup Media Server: "Straumar videoar frå reservetenaren YouTube oppgjev i staden for den tildelte, til dømes når mellomlageret hos internettleverandøren din ofte er tregt. Elles byter OpenTubeX berre når den tildelte tenaren ikkje svarar."
     Automatically switch stream extraction methods: "Prøv yt-dlp dersom innebygd avspeling mislukkast, eller innebygd avspeling dersom yt-dlp mislukkast."
     Enable Tabs: "Held den gjeldande sida open. Andre faner vert tekne vare på til appen vert starta på nytt; slå på faner igjen for å gjenopprette dei."
     Data Saver Thumbnails: "Bruk miniatyrbilete med lågare oppløysing for å redusere databruken."

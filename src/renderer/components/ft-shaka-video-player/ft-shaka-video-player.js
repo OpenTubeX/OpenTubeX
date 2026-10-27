@@ -7528,7 +7528,8 @@ export default defineComponent({
             mediaElement.autoplay = false
           }
 
-          await loadPlaybackSource(format.url, playbackPosition, format.mimeType)
+          // The media element loads progressive streams without the request filter
+          await loadPlaybackSource(avoidUnreachableGoogleVideoHost(format.url), playbackPosition, format.mimeType)
           loaded = true
         } catch (error) {
           handleError(error, 'setLegacyFormat', event.detail)

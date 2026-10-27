@@ -339,6 +339,7 @@ Settings:
       Disk: le disque
   General Settings:
     Preferred Video Codec: Codec vidéo préféré
+    Always Use Backup Media Server: "Toujours utiliser le serveur multimédia de secours"
     Automatically switch stream extraction methods: "Changer automatiquement de méthode d’extraction des flux"
     Enable Tabs: "Activer les onglets"
     Thumbnail Swipe Gestures:
@@ -1937,6 +1938,7 @@ Description:
 Tooltips:
   General Settings:
     Preferred Video Codec: Le mode automatique privilégie le décodage matériel. Les changements s'appliquent à la prochaine vidéo. Le choix du codec peut limiter les résolutions ; les codecs indisponibles sont remplacés.
+    Always Use Backup Media Server: "Diffuse les vidéos depuis le serveur de secours indiqué par YouTube au lieu du serveur attribué, par exemple lorsque le cache de votre fournisseur d'accès est souvent lent. Sinon, OpenTubeX ne bascule que lorsque le serveur attribué ne répond pas."
     Automatically switch stream extraction methods: "Essayer yt-dlp si la lecture intégrée échoue, ou la lecture intégrée si yt-dlp échoue."
     Enable Tabs: "Garde la page actuelle ouverte. Les autres onglets sont conservés jusqu’au redémarrage de l’application ; réactivez les onglets pour les restaurer."
     Data Saver Thumbnails: "Utiliser des miniatures de résolution inférieure pour réduire la consommation de données."

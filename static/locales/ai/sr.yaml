@@ -350,6 +350,7 @@ Settings:
       Disk: диск
   General Settings:
     Preferred Video Codec: Жељени видео кодек
+    Always Use Backup Media Server: "Увек користи резервни медијски сервер"
     Automatically switch stream extraction methods: "Аутоматски мењај методе издвајања стримова"
     Enable Tabs: "Омогући картице"
     Thumbnail Swipe Gestures:
@@ -2014,6 +2015,7 @@ Description:
 Tooltips:
   General Settings:
     Preferred Video Codec: Аутоматски режим даје предност хардверском декодирању. Промене важе за следећи видео. Избор кодека може ограничити резолуције; недоступни кодеци се замењују.
+    Always Use Backup Media Server: "Пушта видео снимке са резервног сервера који наводи YouTube уместо са додељеног, на пример када је кеш вашег интернет провајдера често спор. У супротном OpenTubeX прелази само када додељени сервер не одговара."
     Automatically switch stream extraction methods: "Покушај са yt-dlp ако уграђена репродукција не успе или са уграђеном репродукцијом ако yt-dlp не успе."
     Enable Tabs: "Тренутна страница остаје отворена. Остале картице се чувају до поновног покретања апликације; поново омогућите картице да бисте их вратили."
     Data Saver Thumbnails: "Користите сличице ниже резолуције да бисте смањили потрошњу података."

@@ -344,6 +344,7 @@ Settings:
       Disk: כונן
   General Settings:
     Preferred Video Codec: מקודד וידאו מועדף
+    Always Use Backup Media Server: "תמיד להשתמש בשרת המדיה החלופי"
     Automatically switch stream extraction methods: "החלפה אוטומטית בין שיטות חילוץ זרמים"
     Enable Tabs: "הפעלת לשוניות"
     Thumbnail Swipe Gestures:
@@ -1988,6 +1989,7 @@ Description:
 Tooltips:
   General Settings:
     Preferred Video Codec: המצב האוטומטי מעדיף פענוח בחומרה. השינויים חלים על הסרטון הבא. העדפת מקודד עשויה להגביל רזולוציות; מקודדים שאינם זמינים מוחלפים.
+    Always Use Backup Media Server: "מזרים סרטונים מהשרת החלופי ש-YouTube מציין במקום מהשרת שהוקצה, למשל כשהמטמון של ספק האינטרנט שלך איטי לעיתים קרובות. אחרת OpenTubeX עובר אליו רק כשהשרת שהוקצה לא מגיב."
     Automatically switch stream extraction methods: "לנסות את yt-dlp אם הניגון המובנה נכשל, או את הניגון המובנה אם yt-dlp נכשל."
     Enable Tabs: "העמוד הנוכחי נשאר פתוח. הלשוניות האחרות נשמרות עד להפעלה מחדש של היישום; יש להפעיל שוב לשוניות כדי לשחזר אותן."
     Data Saver Thumbnails: "שימוש בתמונות ממוזערות ברזולוציה נמוכה יותר להפחתת השימוש בנתונים."

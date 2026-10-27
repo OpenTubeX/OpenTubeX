@@ -340,6 +340,7 @@ Settings:
       Disk: disc
   General Settings:
     Preferred Video Codec: Codec video preferat
+    Always Use Backup Media Server: "Folosește mereu serverul media de rezervă"
     Automatically switch stream extraction methods: "Schimbă automat metodele de extragere a fluxurilor"
     Enable Tabs: "Activează filele"
     Thumbnail Swipe Gestures:
@@ -1986,6 +1987,7 @@ Description:
 Tooltips:
   General Settings:
     Preferred Video Codec: Modul automat preferă decodarea hardware. Modificările se aplică următorului videoclip. Preferința de codec poate limita rezoluțiile; codecurile indisponibile sunt înlocuite.
+    Always Use Backup Media Server: "Redă videoclipurile de pe serverul de rezervă indicat de YouTube în locul celui atribuit, de exemplu când memoria cache a furnizorului de internet este adesea lentă. Altfel, OpenTubeX comută doar când serverul atribuit nu răspunde."
     Automatically switch stream extraction methods: "Încearcă yt-dlp dacă redarea integrată eșuează, sau redarea integrată dacă yt-dlp eșuează."
     Enable Tabs: "Păstrează pagina curentă deschisă. Celelalte file sunt păstrate până la repornirea aplicației; activați din nou filele pentru a le restaura."
     Data Saver Thumbnails: "Folosește miniaturi cu rezoluție mai mică pentru a reduce consumul de date."

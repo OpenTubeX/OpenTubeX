@@ -158,6 +158,7 @@ Settings:
     Alternative providers: Dostawcy filmów i metadanych
   General Settings:
     Preferred Video Codec: Preferowany kodek wideo
+    Always Use Backup Media Server: "Zawsze używaj zapasowego serwera multimediów"
     Automatically switch stream extraction methods: "Automatycznie przełączaj metody wyodrębniania strumieni"
     Enable Tabs: "Włącz karty"
     Thumbnail Swipe Gestures:
@@ -1193,6 +1194,7 @@ Description:
 Tooltips:
   General Settings:
     Preferred Video Codec: Tryb automatyczny preferuje dekodowanie sprzętowe. Zmiany dotyczą następnego filmu. Wybór kodeka może ograniczyć rozdzielczości; niedostępne kodeki są zastępowane.
+    Always Use Backup Media Server: "Odtwarza filmy z zapasowego serwera wskazanego przez YouTube zamiast z przydzielonego, na przykład gdy pamięć podręczna Twojego dostawcy internetu często działa wolno. W przeciwnym razie OpenTubeX przełącza się tylko wtedy, gdy przydzielony serwer nie odpowiada."
     Automatically switch stream extraction methods: "Wypróbuj yt-dlp, jeśli wbudowane odtwarzanie się nie powiedzie, lub wbudowane odtwarzanie, jeśli yt-dlp się nie powiedzie."
     Enable Tabs: "Bieżąca strona pozostaje otwarta. Pozostałe karty są zachowywane do ponownego uruchomienia aplikacji; włącz karty ponownie, aby je przywrócić."
     Data Saver Thumbnails: "Używaj miniatur o niższej rozdzielczości, aby zmniejszyć zużycie danych."

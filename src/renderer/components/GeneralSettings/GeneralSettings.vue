@@ -86,6 +86,15 @@
         @change="updateBackendFallback"
       />
       <FtToggleSwitch
+        v-if="mode === 'providers' && SUPPORTS_LOCAL_API"
+        :label="t('Settings.General Settings.Always Use Backup Media Server')"
+        :default-value="store.getters.getAlwaysUseBackupMediaServer"
+        setting-key="alwaysUseBackupMediaServer"
+        :compact="true"
+        :tooltip="t('Tooltips.General Settings.Always Use Backup Media Server')"
+        @change="store.dispatch('updateAlwaysUseBackupMediaServer', $event)"
+      />
+      <FtToggleSwitch
         v-if="mode === 'providers'"
         :label="t('Settings.Player Settings.Proxy Videos Through Invidious')"
         :compact="true"

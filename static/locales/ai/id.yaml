@@ -340,6 +340,7 @@ Settings:
       Disk: disk
   General Settings:
     Preferred Video Codec: Codec video pilihan
+    Always Use Backup Media Server: "Selalu gunakan server media cadangan"
     Automatically switch stream extraction methods: "Ganti metode ekstraksi stream secara otomatis"
     Enable Tabs: "Aktifkan Tab"
     Thumbnail Swipe Gestures:
@@ -1955,6 +1956,7 @@ Description:
 Tooltips:
   General Settings:
     Preferred Video Codec: Mode otomatis mengutamakan dekode perangkat keras. Perubahan berlaku untuk video berikutnya. Pilihan codec dapat membatasi resolusi; codec yang tidak tersedia diganti.
+    Always Use Backup Media Server: "Memutar video dari server cadangan yang disebutkan YouTube alih-alih server yang ditetapkan, misalnya saat cache penyedia internet Anda sering lambat. Jika tidak, OpenTubeX hanya beralih saat server yang ditetapkan tidak merespons."
     Automatically switch stream extraction methods: "Coba yt-dlp jika pemutaran bawaan gagal, atau pemutaran bawaan jika yt-dlp gagal."
     Enable Tabs: "Halaman saat ini tetap terbuka. Tab lain disimpan hingga aplikasi dimulai ulang; aktifkan tab lagi untuk memulihkannya."
     Data Saver Thumbnails: "Gunakan thumbnail beresolusi lebih rendah untuk mengurangi penggunaan data."

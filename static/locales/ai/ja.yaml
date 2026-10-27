@@ -340,6 +340,7 @@ Settings:
       Disk: ディスク
   General Settings:
     Preferred Video Codec: 優先する動画コーデック
+    Always Use Backup Media Server: "常にバックアップのメディアサーバーを使用"
     Automatically switch stream extraction methods: "ストリーム抽出方式を自動的に切り替える"
     Enable Tabs: "タブを有効にする"
     Thumbnail Swipe Gestures:
@@ -1939,6 +1940,7 @@ Description:
 Tooltips:
   General Settings:
     Preferred Video Codec: 自動ではハードウェアデコードを優先します。変更は次の動画に適用されます。コーデックの指定により解像度が制限される場合があり、利用できない場合は別のコーデックを使用します。
+    Always Use Backup Media Server: "割り当てられたサーバーの代わりに、YouTube が指定するバックアップサーバーから動画を再生します。インターネットプロバイダーのキャッシュが頻繁に遅い場合などに有効です。オフの場合、OpenTubeX は割り当てられたサーバーが応答しないときにのみ切り替えます。"
     Automatically switch stream extraction methods: "内蔵エンジンで再生できない場合はyt-dlpを、yt-dlpで再生できない場合は内蔵エンジンを試します。"
     Enable Tabs: "現在のページは開いたままになります。他のタブはアプリを再起動するまで保持されます。タブを再度有効にすると復元できます。"
     Data Saver Thumbnails: "低解像度のサムネイルを使用してデータ使用量を減らします。"

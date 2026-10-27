@@ -344,6 +344,7 @@ Settings:
       Disk: ổ đĩa
   General Settings:
     Preferred Video Codec: Codec video ưu tiên
+    Always Use Backup Media Server: "Luôn dùng máy chủ phương tiện dự phòng"
     Automatically switch stream extraction methods: "Tự động chuyển đổi phương thức trích xuất luồng"
     Enable Tabs: "Bật thẻ"
     Thumbnail Swipe Gestures:
@@ -1978,6 +1979,7 @@ Description:
 Tooltips:
   General Settings:
     Preferred Video Codec: Chế độ tự động ưu tiên giải mã phần cứng. Thay đổi áp dụng cho video tiếp theo. Tùy chọn codec có thể giới hạn độ phân giải; codec không có sẵn sẽ được thay thế.
+    Always Use Backup Media Server: "Phát video từ máy chủ dự phòng mà YouTube chỉ định thay vì máy chủ được gán, ví dụ khi bộ nhớ đệm của nhà cung cấp internet của bạn thường chậm. Nếu không, OpenTubeX chỉ chuyển khi máy chủ được gán không phản hồi."
     Automatically switch stream extraction methods: "Thử yt-dlp nếu trình phát tích hợp bị lỗi, hoặc trình phát tích hợp nếu yt-dlp bị lỗi."
     Enable Tabs: "Giữ trang hiện tại mở. Các thẻ khác được giữ đến khi khởi động lại ứng dụng; bật lại thẻ để khôi phục chúng."
     Data Saver Thumbnails: "Sử dụng ảnh thu nhỏ có độ phân giải thấp hơn để giảm mức sử dụng dữ liệu."

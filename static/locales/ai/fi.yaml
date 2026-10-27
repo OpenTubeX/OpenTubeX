@@ -344,6 +344,7 @@ Settings:
       Disk: levytila
   General Settings:
     Preferred Video Codec: Ensisijainen videokoodekki
+    Always Use Backup Media Server: "Käytä aina varamediapalvelinta"
     Automatically switch stream extraction methods: "Vaihda suoratoiston poimintamenetelmiä automaattisesti"
     Enable Tabs: "Ota välilehdet käyttöön"
     Thumbnail Swipe Gestures:
@@ -1986,6 +1987,7 @@ Description:
 Tooltips:
   General Settings:
     Preferred Video Codec: Automaattinen valinta suosii laitteistopurkua. Muutokset koskevat seuraavaa videota. Koodekkivalinta voi rajoittaa tarkkuuksia; puuttuvat koodekit korvataan.
+    Always Use Backup Media Server: "Toistaa videot YouTuben ilmoittamalta varapalvelimelta määritetyn palvelimen sijaan, esimerkiksi kun internetpalveluntarjoajasi välimuisti on usein hidas. Muuten OpenTubeX vaihtaa palvelinta vain, kun määritetty palvelin ei vastaa."
     Automatically switch stream extraction methods: "Kokeile yt-dlp:tä, jos sisäänrakennettu toisto epäonnistuu, tai sisäänrakennettua toistoa, jos yt-dlp epäonnistuu."
     Enable Tabs: "Pitää nykyisen sivun auki. Muut välilehdet säilyvät sovelluksen uudelleenkäynnistykseen asti; ota välilehdet uudelleen käyttöön palauttaaksesi ne."
     Data Saver Thumbnails: "Käytä pienemmän tarkkuuden pikkukuvia datankäytön vähentämiseksi."

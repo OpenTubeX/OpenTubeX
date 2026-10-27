@@ -5,6 +5,14 @@ export const GOOGLEVIDEO_CONNECTION_TIMEOUT_MS = 5_000
 /** Nodes that didn't respond during this session */
 const unreachableHosts = new Set()
 
+/** Skips the assigned node, for example a cache that is often slow but still responds */
+let alwaysUseBackupServer = false
+
+/** @param {boolean} value */
+export function setAlwaysUseGoogleVideoBackupServer(value) {
+  alwaysUseBackupServer = value
+}
+
 /**
  * @param {URL} url
  * @param {string} name
@@ -49,10 +57,10 @@ export function markGoogleVideoHostUnreachable(url) {
 
 /**
  * @param {string} url
- * @returns {string} the URL on the backup server if its node didn't respond before
+ * @returns {string} the URL on the backup server if its node didn't respond before or the user always wants it
  */
 export function avoidUnreachableGoogleVideoHost(url) {
-  if (unreachableHosts.size === 0 || !unreachableHosts.has(new URL(url).hostname)) return url
+  if (!alwaysUseBackupServer && (unreachableHosts.size === 0 || !unreachableHosts.has(new URL(url).hostname))) return url
 
   return getGoogleVideoFallbackUrl(url) ?? url
 }

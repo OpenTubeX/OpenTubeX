@@ -466,6 +466,7 @@ Settings:
   Return to Settings Menu: Nazaj v meni z nastavitvami
   General Settings:
     Preferred Video Codec: Prednostni video kodek
+    Always Use Backup Media Server: "Vedno uporabi rezervni predstavnostni strežnik"
     Automatically switch stream extraction methods: "Samodejno preklapljaj metode pridobivanja tokov"
     Enable Tabs: "Omogoči zavihke"
     Thumbnail Swipe Gestures:
@@ -2438,6 +2439,7 @@ Description:
 Tooltips:
   General Settings:
     Preferred Video Codec: Samodejni način daje prednost strojnemu dekodiranju. Spremembe veljajo za naslednji video. Izbira kodeka lahko omeji ločljivosti; nedostopni kodeki se nadomestijo.
+    Always Use Backup Media Server: "Predvaja videoposnetke z rezervnega strežnika, ki ga navede YouTube, namesto z dodeljenega, na primer kadar je predpomnilnik vašega ponudnika interneta pogosto počasen. Sicer OpenTubeX preklopi le, ko dodeljeni strežnik ne odgovarja."
     Automatically switch stream extraction methods: "Poskusi yt-dlp, če vgrajeno predvajanje ne uspe, ali vgrajeno predvajanje, če yt-dlp ne uspe."
     Enable Tabs: "Trenutna stran ostane odprta. Drugi zavihki se ohranijo do ponovnega zagona aplikacije; znova omogočite zavihke, da jih obnovite."
     Data Saver Thumbnails: "Uporabite sličice z nižjo ločljivostjo za zmanjšanje porabe podatkov."

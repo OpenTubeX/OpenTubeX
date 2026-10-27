@@ -339,6 +339,7 @@ Settings:
       Disk: 磁盘
   General Settings:
     Preferred Video Codec: 首选视频编解码器
+    Always Use Backup Media Server: "始终使用备用媒体服务器"
     Automatically switch stream extraction methods: "自动切换流提取方法"
     Enable Tabs: "启用标签页"
     Thumbnail Swipe Gestures:
@@ -1938,6 +1939,7 @@ Description:
 Tooltips:
   General Settings:
     Preferred Video Codec: 自动模式优先使用硬件解码。更改对下一个视频生效。指定编解码器可能限制可用分辨率；不可用时会使用其他编解码器。
+    Always Use Backup Media Server: "从 YouTube 指定的备用服务器而非分配的服务器播放视频，例如当你的网络服务提供商的缓存经常很慢时。否则，OpenTubeX 仅在分配的服务器无响应时才切换。"
     Automatically switch stream extraction methods: "内置播放失败时尝试 yt-dlp，yt-dlp 失败时尝试内置播放。"
     Enable Tabs: "保持当前页面打开。其他标签页会保留到应用重启，再次启用标签页即可恢复。"
     Data Saver Thumbnails: "使用较低分辨率的缩略图以减少数据用量。"

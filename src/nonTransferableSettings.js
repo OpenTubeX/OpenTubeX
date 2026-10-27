@@ -12,6 +12,8 @@ export const NON_TRANSFERABLE_SETTINGS = new Set([
   'appFont',
   // Diagnostic logging is for troubleshooting this device.
   'diagnosticLogging',
+  // Media servers depend on the current internet connection.
+  'alwaysUseBackupMediaServer',
   /* Depends on process.env.IS_ELECTRON */
   // ProxySettings
   'useProxy',
