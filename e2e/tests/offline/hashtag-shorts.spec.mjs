@@ -104,12 +104,15 @@ test('pages through the Shorts of a hashtag whose main tab ends early', async ({
   const shortsTab = tabs.getByRole('tab', { name: 'Shorts' })
   await expect(videosTab).toHaveAttribute('aria-selected', 'true')
   await expect(page.locator('.ft-list-video')).toHaveCount(2)
+  await expect(page.locator('.ft-list-video.youtubeShort')).toHaveCount(0)
   await expect(page.getByText('There are no more results for this search')).toBeVisible()
 
   await shortsTab.click()
   await expect(shortsTab).toHaveAttribute('aria-selected', 'true')
   await expect(page.getByText('Hashtag short 2')).toBeVisible()
   await expect(page.getByText('Hashtag video 1')).toHaveCount(0)
+  await expect(page.locator('.ft-list-video.youtubeShort')).toHaveCount(2)
+  await expect(page.getByRole('tabpanel', { name: 'Shorts' })).toBeVisible()
 
   await page.getByRole('button', { name: 'Fetch more results' }).click()
   await expect(page.getByText('Hashtag short 3')).toBeVisible()

@@ -29,6 +29,7 @@
       >
         <!-- eslint-disable-next-line vuejs-accessibility/interactive-supports-focus -->
         <div
+          :id="videosTabId"
           ref="videosTab"
           class="tab"
           role="tab"
@@ -43,6 +44,7 @@
         </div>
         <!-- eslint-disable-next-line vuejs-accessibility/interactive-supports-focus -->
         <div
+          :id="shortsTabId"
           ref="shortsTab"
           class="tab"
           role="tab"
@@ -59,12 +61,14 @@
       <div
         :id="panelId"
         :role="hasShortsTab ? 'tabpanel' : undefined"
+        :aria-labelledby="hasShortsTab ? (currentTab === 'shorts' ? shortsTabId : videosTabId) : undefined"
       >
         <FtLoader v-if="currentTab === 'shorts' && isLoadingShorts" />
         <FtElementList
           v-else-if="shownItems.length > 0"
           :key="currentTab"
           :data="shownItems"
+          :youtube-style-shorts="currentTab === 'shorts' && useCustomShortsPlayer"
         />
         <FtFlexBox
           v-else
@@ -133,6 +137,8 @@ const setTabTitle = useTabTitle()
 
 const headingId = useId()
 const panelId = useId()
+const videosTabId = useId()
+const shortsTabId = useId()
 const videosTab = useTemplateRef('videosTab')
 const shortsTab = useTemplateRef('shortsTab')
 
@@ -176,6 +182,8 @@ const statsText = computed(() => {
     channelCount !== null && t('Global.Counts.Channel Count', { count: formatCount(channelCount) }, channelCount)
   ].filter(Boolean).join(' • ')
 })
+
+const useCustomShortsPlayer = computed(() => store.getters.getUseCustomShortsPlayer)
 
 /** @type {import('vue').ComputedRef<'local' | 'invidious' | 'yattee'>} */
 const backendPreference = computed(() => {
