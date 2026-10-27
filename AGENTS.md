@@ -8,6 +8,7 @@ Requests such as "implement issue #X" authorize local changes, not a PR. Open a 
 - For a PR that needs a milestone, copy the linked issue's milestone. If it has none, assign the open milestone with the lowest version in its title: query open milestones with `gh api --paginate` and compare titles by numeric version order (1.10 after 1.9), not alphabetically or by milestone number. Pass the exact title to `gh pr create --milestone` or `gh pr edit --milestone`. If no version milestone is open, report that instead of creating one.
 - When a PR with a milestone is created, gains a closing issue link, or changes milestone, assign its milestone to every issue it closes that has none, immediately, even while the PR is open. Keep existing issue milestones and verify the assignments on GitHub.
 - Follow `.github/PULL_REQUEST_TEMPLATE.md` for release-note screenshots and recordings.
+- End the PR description with a blurb about the model and harness that made the changes. Use the public model name the harness reports for the model that made the changes. If the harness does not expose a model name, use the harness name. Do not guess.
 
 ## Documentation
 
