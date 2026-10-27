@@ -2539,6 +2539,7 @@ Keys:
   arrowright: Flecha hacía la derecha
   arrowup: Flecha hacia arriba
 KeyboardShortcutPrompt:
+  Toggle Quick Bookmark: Agregar a la lista de reproducción de marcador rápido o quitar de ella
   Reopen Closed Window: Volver a abrir la última ventana cerrada
   Keyboard Shortcuts: Atajos de teclado
   Edit Hint: Seleccioná un atajo y presioná una combinación de teclas nueva. Presioná Retroceso o Supr para quitar la asignación.

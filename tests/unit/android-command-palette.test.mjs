@@ -116,3 +116,20 @@ for (const isCapacitor of [true, false]) {
     assert.deepEqual(bindings.map(binding => binding.code), isCapacitor ? ['FULLSCREEN'] : ['FULLWINDOW', 'FULLSCREEN'])
   })
 }
+
+for (const quickBookmarkPlaylist of [null, { _id: 'favorites' }]) {
+  test(`quick bookmark command requires a quick bookmark playlist: ${quickBookmarkPlaylist != null}`, () => {
+    const commands = createRegistry({
+      isElectron: false,
+      downloads: [],
+      isCapacitor: false,
+      routePath: '/watch/jNQXAC9IVRw',
+      routeAvailable: () => true,
+      t: key => key,
+      tm: path => path.split('.').reduce((value, key) => value?.[key], messages),
+      store: { getters: { getChannelsHiddenParsed: [], getForbiddenTitlesParsed: [], getTabs: [], getProfileList: [], getAllPlaylists: [], getYtDlpDownloads: {}, getQuickBookmarkPlaylist: quickBookmarkPlaylist } },
+    })
+    assert.equal(commands.some(command => command.id === 'playback.quick-bookmark'), quickBookmarkPlaylist != null)
+    assert.ok(commands.some(command => command.id === 'playback.add-to-playlist'))
+  })
+}

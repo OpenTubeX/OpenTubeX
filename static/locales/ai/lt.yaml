@@ -2477,6 +2477,7 @@ Keys:
   arrowright: Rodyklė dešinėn
   arrowup: Rodyklė aukštyn
 KeyboardShortcutPrompt:
+  Toggle Quick Bookmark: Pridėti į sparčiųjų žymių grojaraštį arba pašalinti iš jo
   Reopen Closed Window: Vėl atverti paskutinį užvertą langą
   Keyboard Shortcuts: Spartieji klavišai
   Edit Hint: Pasirinkite spartųjį klavišą, tada paspauskite naują klavišų derinį. Jei norite panaikinti priskyrimą, paspauskite Backspace arba Delete.

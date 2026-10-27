@@ -39,6 +39,8 @@ const PLAYBACK_COMMANDS = [
   ['playback.previous', 'PLAYBACK', 'SKIP_TO_PREV', 'KeyboardShortcutPrompt.Skip to Previous Video', ['fas', 'step-backward'], ['previous video']],
   ['playback.next', 'PLAYBACK', 'SKIP_TO_NEXT', 'KeyboardShortcutPrompt.Skip to Next Video', ['fas', 'step-forward'], ['next video']],
   ['playback.screenshot', 'GENERAL', 'TAKE_SCREENSHOT', 'KeyboardShortcutPrompt.Take Screenshot', ['fas', 'file-image'], ['capture']],
+  ['playback.quick-bookmark', 'GENERAL', 'TOGGLE_QUICK_BOOKMARK', 'KeyboardShortcutPrompt.Toggle Quick Bookmark', ['fas', 'bookmark'], ['bookmarked', 'favorite']],
+  ['playback.add-to-playlist', 'GENERAL', 'OPEN_ADD_TO_PLAYLIST', 'User Playlists.Add to Playlist', ['fac', 'playlist-add'], ['save']],
 ]
 
 /**
@@ -221,6 +223,7 @@ export function createCommandPaletteRegistry(context) {
     routePath,
     videoShortcuts,
     runShortcut,
+    quickBookmarkAvailable: store.getters.getQuickBookmarkPlaylist != null,
   })
 
   return commands
@@ -456,11 +459,12 @@ function addDownloadCommands(commands, { t, groups, downloads, isElectron }) {
 }
 
 function addPlaybackCommands(commands, context) {
-  const { t, groups, routePath, videoShortcuts, runShortcut, isCapacitor } = context
+  const { t, groups, routePath, videoShortcuts, runShortcut, isCapacitor, quickBookmarkAvailable } = context
   const onVideo = routePath.startsWith('/watch/')
 
   for (const [id, section, code, labelKey, icon, aliases] of PLAYBACK_COMMANDS) {
     if (isCapacitor && code === 'FULLWINDOW') continue
+    if (!quickBookmarkAvailable && code === 'TOGGLE_QUICK_BOOKMARK') continue
     const configuredShortcut = videoShortcuts[section][code]
     const executionShortcut = configuredShortcut || DefaultKeyboardShortcuts.VIDEO_PLAYER[section][code]
     // eslint-disable-next-line @intlify/vue-i18n/no-dynamic-keys

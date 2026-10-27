@@ -9269,6 +9269,18 @@ export default defineComponent({
           }
           blurTooltipButtons()
           break
+        case props.quickBookmarkEnabled && !store.getters.isAnyPromptOpen &&
+          matches(KeyboardShortcuts.VIDEO_PLAYER.GENERAL.TOGGLE_QUICK_BOOKMARK):
+          event.preventDefault()
+          if (!event.repeat) toggleQuickBookmark()
+          break
+        case props.playlistVideoData != null && !store.getters.isAnyPromptOpen &&
+          matches(KeyboardShortcuts.VIDEO_PLAYER.GENERAL.OPEN_ADD_TO_PLAYLIST):
+          event.preventDefault()
+          if (!event.repeat) {
+            store.dispatch('showAddToPlaylistPromptForManyVideos', { videos: [{ ...props.playlistVideoData }] })
+          }
+          break
       }
     }
 

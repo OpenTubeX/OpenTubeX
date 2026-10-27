@@ -24,6 +24,8 @@ for (const locale of ['en-US', 'de-DE']) {
       ['REDO_SEEK', 'KeyboardShortcutPrompt.Redo Seek'],
       ['TOGGLE_SKIP_SILENCE', 'KeyboardShortcutPrompt.Toggle Skip Silence'],
       ['FULLWINDOW', 'KeyboardShortcutPrompt.Full Window'],
+      ['TOGGLE_QUICK_BOOKMARK', 'KeyboardShortcutPrompt.Toggle Quick Bookmark'],
+      ['OPEN_ADD_TO_PLAYLIST', 'User Playlists.Add to Playlist'],
       ['START_SPONSORBLOCK_SEGMENT', 'Video.Player.SponsorBlock.StartSegmentNow'],
       ['END_SPONSORBLOCK_SEGMENT', 'Video.Player.SponsorBlock.SetSegmentEndNow'],
       ['OPEN_SPONSORBLOCK_SUBMISSION_MENU', 'Video.Player.SponsorBlock.OpenSubmissionMenu'],
