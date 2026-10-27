@@ -259,6 +259,7 @@ export const SETTINGS_SEARCH_SOURCES = {
   }, {
     type: 'external-software',
     key: 'Settings.External Software Settings',
+    exclude: new Set(['Managed Tool Errors']),
     electronOnly: true
   }, {
     type: 'proxy',

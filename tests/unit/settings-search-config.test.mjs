@@ -660,3 +660,15 @@ test('diagnostics actions are searchable on every platform', () => {
     assert.ok(!labels.includes(locale.Settings.Diagnostics['Report Copied']))
   }
 })
+
+test('managed tool error messages never become settings search results', () => {
+  const labels = createSettingsSearchIndex({
+    sections: [{ type: 'advanced', title: 'Advanced', description: '' }],
+    tm: path => getAtPath(locale, path),
+    store: { getters: {} },
+    usingElectron: true,
+  }).get('advanced').map(entry => entry.label)
+  for (const message of Object.values(locale.Settings['External Software Settings']['Managed Tool Errors'])) {
+    assert.equal(labels.includes(message), false, message)
+  }
+})
