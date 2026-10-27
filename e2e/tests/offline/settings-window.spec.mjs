@@ -1413,13 +1413,12 @@ test.describe('localized compact settings breadcrumb', () => {
   })
 })
 
-// At 150%, whole CSS pixel offsets such as 41px land between device pixels.
-test.describe('at 150% display scale', () => {
-  test.use({ launchArgs: ['--force-device-scale-factor=1.5'] })
-
+test.describe('fractional window positions', () => {
+  // Wayland reports fractional pointer positions while dragging, and fractional
+  // UI scales turn whole CSS pixels into fractional device pixels.
   test('keeps the header border on whole device pixels while dragging and scrolling', { tag: '@scale' }, async ({ app, page }) => {
     await page.evaluate(() => {
-      localStorage.setItem('opentubex-settings-window-bounds', JSON.stringify({ x: 41, y: 41, width: 850, height: 520 }))
+      localStorage.setItem('opentubex-settings-window-bounds', JSON.stringify({ x: 180.92, y: 60.6875, width: 850, height: 520 }))
     })
     await goTo(page, 'settings')
     const dialog = page.locator('.settingsWindow')
