@@ -63,7 +63,8 @@ class SkipDeflate {
 /**
  * Stream candidate entries, classifying each from its first decoded bytes and
  * inflating the rest only when its type is selected.
- * `onFound` receives every candidate, with a null type when it is unsupported.
+ * `onFound` receives every candidate and its decoded start, with a null type
+ * when it is unsupported.
  */
 async function streamTakeoutZip(file, selectedTypes, onFound, onContent, onEntryError) {
   const pending = []
@@ -123,7 +124,7 @@ async function streamTakeoutZip(file, selectedTypes, onFound, onContent, onEntry
       content += decoder.decode(chunk, { stream: !final })
       if (type === undefined && (content.length >= SNIFF_SIZE || final)) {
         type = sniffTakeoutEntry(entry.name, content, final)
-        onFound({ type, path: entry.name })
+        onFound({ type, path: entry.name, head: content })
         if (type === null || !selectedTypes.has(type)) {
           stop()
           return
@@ -169,7 +170,7 @@ export async function listYouTubeTakeoutZipEntries(file) {
   const entries = []
   await streamTakeoutZip(file, new Set(), entry => {
     if (entry.type !== null) {
-      entries.push({ ...entry, type: entry.type === 'playlistMetadata' ? 'playlists' : entry.type })
+      entries.push({ type: entry.type === 'playlistMetadata' ? 'playlists' : entry.type, path: entry.path })
     }
   }, () => {}, () => {})
   return entries
@@ -354,9 +355,11 @@ export async function readTakeoutPlaylistMetadata(file) {
   const metadataByDirectory = new Map()
   const csvPathsByDirectory = new Map()
   const unreadablePaths = new Set()
+  const damagedPaths = new Set()
   await streamTakeoutZip(file, new Set(['playlistMetadata']), entry => {
     // Empty playlists have header-only files that cannot be classified.
     if (entry.type === 'playlistMetadata' || !/\.csv$/i.test(entry.path)) { return }
+    if (entry.type === null && /\n[^\r\n]*\S/.test(entry.head.trimEnd())) { damagedPaths.add(entry.path) }
     const directory = getDirectory(entry.path)
     const paths = csvPathsByDirectory.get(directory) ?? []
     paths.push(entry.path)
@@ -428,7 +431,14 @@ export async function readTakeoutPlaylistMetadata(file) {
       continue
     }
     // Commit each account only after all its records have unambiguous filenames.
-    for (const [path, playlist] of accountMetadata) { metadata.set(path, playlist) }
+    for (const [path, playlist] of accountMetadata) {
+      // A damaged video file must not turn into an empty playlist.
+      if (damagedPaths.has(path)) {
+        errors.push(new Error(`Invalid Takeout entry: ${path}`))
+      } else {
+        metadata.set(path, playlist)
+      }
+    }
   }
   return { metadata, errors }
 }

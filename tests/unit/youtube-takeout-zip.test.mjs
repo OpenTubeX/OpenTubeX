@@ -126,6 +126,21 @@ test('imports localized playlist metadata by matching titles to file names', asy
   assert.deepEqual(playlists.map(playlist => [playlist.playlistName, playlist.videos.map(video => video.videoId)]), [['Musique/Rock', ['abcdefghijk']], ['Vide', []]])
 })
 
+test('reports a damaged playlist file instead of importing its metadata as an empty playlist', async () => {
+  const root = 'Takeout/YouTube/playlists'
+  const file = new Blob([zipSync({
+    [`${root}/playlists.csv`]: strToU8(`Playlist ID,Playlist Title (Original)\n${playlistId},List\nPLempty,Empty\n`),
+    [`${root}/List-videos.csv`]: strToU8('Video ID,Playlist video creation timestamp\nabcdefghijk,not-a-date\n'),
+    [`${root}/Empty-videos.csv`]: strToU8('Video ID,Playlist video creation timestamp\n'),
+  })])
+  const entries = await listYouTubeTakeoutZipEntries(file)
+  const names = []
+  const errors = []
+  await forEachTakeoutImportEntry(file, new Set(['playlists']), entries, entry => names.push(entry.playlist.playlistName), error => errors.push(error.message))
+  assert.deepEqual(names, ['Empty'])
+  assert.deepEqual(errors, [`Invalid Takeout entry: ${root}/List-videos.csv`])
+})
+
 test('rejects localized playlist metadata whose title column cannot be identified', () => {
   const content = `Playlist-ID,Titel,Sichtbarkeit\n${playlistId},Liste,Privat\n`
   assert.equal(parseTakeoutPlaylistMetadataCsv(content, []), null)
