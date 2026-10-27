@@ -267,6 +267,32 @@ test('a single update shows its version once and renders the release notes', asy
   )
 })
 
+test.describe('with external links enabled', () => {
+  test.use({ seed: { settings: { externalLinkHandling: '' } } })
+
+  test('release-note links open externally instead of replacing the app window', async ({ app, page }) => {
+    await app.electronApp.evaluate(({ shell }) => {
+      globalThis.releaseNoteExternalUrls = []
+      shell.openExternal = async url => {
+        globalThis.releaseNoteExternalUrls.push(url)
+      }
+    })
+    // An in-window navigation would load this page instead of the app
+    await page.route('https://github.com/**', route => route.fulfill({ contentType: 'text/html', body: 'GitHub' }))
+    await showUpdatePrompt(page, [
+      release(`OpenTubeX ${newestUpdateVersion}`, `v${newestUpdateVersion}-beta`, NEWEST_NOTES)
+    ])
+    const appUrl = page.url()
+
+    await page.locator(`.changeLogText a[href$="${COMMIT_HASH}"]`).click()
+
+    await expect.poll(() => app.electronApp.evaluate(() => globalThis.releaseNoteExternalUrls))
+      .toEqual([`https://github.com/OpenTubeX/OpenTubeX/commit/${COMMIT_HASH}`])
+    expect(page.url()).toBe(appUrl)
+    await expect(page.locator('.changeLogTitle')).toBeVisible()
+  })
+})
+
 test('skipped updates keep a heading per release', async ({ page, attachScreenshot }) => {
   await showUpdatePrompt(page, [
     release(`OpenTubeX ${newestUpdateVersion}`, `v${newestUpdateVersion}-beta`, 'Newest notes'),

@@ -4,6 +4,8 @@ export const MAX_MANIFEST_SIZE = 2_000_000
 export const MAX_CAST_SUBTITLE_BYTES = 8 * 1024 * 1024
 export const MIN_RESOURCE_GRACE_MS = 120_000
 const MAX_RESOURCES = 65_536
+// Variable contexts are retained in every registered resource key.
+const MAX_HLS_VARIABLES_SIZE = 8192
 const escapeXml = value => String(value).replaceAll('&', '&amp;').replaceAll('<', '&lt;')
   .replaceAll('>', '&gt;').replaceAll('"', '&quot;')
 
@@ -104,10 +106,15 @@ export function rewriteCastHls(text, base, register, parentVariables = {}) {
   if (text.length > MAX_MANIFEST_SIZE || !text.trimStart().startsWith('#EXTM3U')) throw new Error('Invalid Cast HLS manifest')
   const variables = new Map()
   let variableSnapshot = {}
+  let variablesSize = 0
   let nextIsPlaylist = false
+  // Nested definitions can grow exponentially; bound all expansion per manifest.
+  let expansionBudget = MAX_MANIFEST_SIZE
   function substitute(value) {
     return value.replaceAll(/\{\$([a-zA-Z0-9_-]+)\}/g, (_, name) => {
       if (!variables.has(name)) throw new Error('Undefined HLS variable')
+      expansionBudget -= variables.get(name).length
+      if (expansionBudget < 0) throw new Error('HLS variable expansion is too large')
       return variables.get(name)
     })
   }
@@ -125,7 +132,9 @@ export function rewriteCastHls(text, base, register, parentVariables = {}) {
       if (definitions[0] === 'NAME') value = attributes.VALUE
       else if (definitions[0] === 'IMPORT') value = Object.hasOwn(parentVariables, name) ? parentVariables[name] : undefined
       else value = new URL(base).searchParams.get(name) ?? undefined
-      if (!/^[a-zA-Z0-9_-]+$/.test(name) || variables.has(name) || value === undefined || /["\r\n]/.test(value)) {
+      variablesSize += name.length + (value?.length ?? 0)
+      if (!/^[a-zA-Z0-9_-]+$/.test(name) || variables.has(name) || value === undefined || /["\r\n]/.test(value) ||
+          variablesSize > MAX_HLS_VARIABLES_SIZE) {
         throw new Error('Invalid HLS variable definition')
       }
       variables.set(name, value)

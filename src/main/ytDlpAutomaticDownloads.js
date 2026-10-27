@@ -315,9 +315,14 @@ export async function authorizeAutomaticDownload(payload, discoveryPreviouslyAut
   sanitizedPayload.titleIncludes = automaticTitleTerms(rule.titleIncludes)
   sanitizedPayload.titleExcludes = automaticTitleTerms(rule.titleExcludes)
 
+  // Templates only choose the format. The authorized video and the rule's
+  // constraints must win over any other targets a template might contain.
   return {
-    ...sanitizedPayload,
     ...structuredClone(templateOptions),
+    ...sanitizedPayload,
+    videoIds: undefined,
+    isPlaylist: undefined,
+    playlistId: undefined,
     template,
     automatic: true
   }

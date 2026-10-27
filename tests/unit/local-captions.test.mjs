@@ -27,6 +27,13 @@ test('converts SRT timing and separators that Shaka cannot parse', () => {
   assert.equal(normalizeLocalCaptionText('movie.vtt', vtt), vtt)
 })
 
+test('normalizes long digit runs in SRT timing lines in linear time', () => {
+  const digits = '1'.repeat(100_000)
+  const started = performance.now()
+  assert.equal(normalizeLocalCaptionText('movie.srt', `${digits} --> 00:00:02.000`), `${digits} --> 00:00:02,000`)
+  assert.ok(performance.now() - started < 1000)
+})
+
 test('rejects files that are not SRT or WebVTT subtitles', () => {
   for (const fileName of ['movie.ass', 'movie.txt', 'srt', 'movie.srt.zip']) {
     assert.equal(createLocalCaption(fileName, srt, []), null, fileName)

@@ -524,7 +524,7 @@ for (const [path, expected] of [['/channel/UCchannel/about', true], ['/channel/U
   test(`pending avatar writes ${expected ? 'complete' : 'are rejected'} after navigating to ${path}`, async t => {
     const manager = createManager(t)
     const tab = manager.createTab({ route: '/channel/UCchannel' })
-    const bytes = Buffer.from('updated-avatar')
+    const bytes = jpegHeader(48, 48)
     nativeImage.createFromBuffer = () => ({
       isEmpty: () => false,
       getSize: () => ({ width: 48, height: 48 }),
@@ -544,6 +544,41 @@ for (const [path, expected] of [['/channel/UCchannel/about', true], ['/channel/U
     assert.equal(tab.avatarFileName, expected ? 'updated-avatar.jpg' : null)
   })
 }
+
+function pngHeader(width, height) {
+  const buffer = Buffer.alloc(24)
+  Buffer.from('89504e470d0a1a0a0000000d49484452', 'hex').copy(buffer)
+  buffer.writeUInt32BE(width, 16)
+  buffer.writeUInt32BE(height, 20)
+  return buffer
+}
+
+function jpegHeader(width, height) {
+  // Start of image, a JFIF segment and a baseline start of frame
+  const buffer = Buffer.from('ffd8ffe000104a46494600010100000100010000ffc0000b08000000000101110000', 'hex')
+  buffer.writeUInt16BE(height, 25)
+  buffer.writeUInt16BE(width, 27)
+  return buffer
+}
+
+test('avatar images are only decoded when their header dimensions fit the pixel budget', async t => {
+  const manager = createManager(t)
+  const tab = manager.createTab({ route: '/channel/UCchannel' })
+  const decoded = []
+  nativeImage.createFromBuffer = buffer => {
+    decoded.push(buffer)
+    return { isEmpty: () => true }
+  }
+  t.after(() => { delete nativeImage.createFromBuffer })
+  for (const bytes of [pngHeader(20_000, 20_000), jpegHeader(65_535, 65_535), Buffer.from('not an image')]) {
+    assert.equal(await manager.applyTabAvatar(tab, bytes, tab.route.path), false)
+  }
+  assert.equal(decoded.length, 0)
+  for (const bytes of [pngHeader(900, 900), jpegHeader(900, 900)]) {
+    await manager.applyTabAvatar(tab, bytes, tab.route.path)
+  }
+  assert.equal(decoded.length, 2)
+})
 
 test('clearing a session cancels pending writes instead of resurrecting it', async t => {
   t.mock.timers.enable({ apis: ['setTimeout'] })
@@ -1023,3 +1058,25 @@ for (const [percentage, count] of [[10, 1], [25, 1], [75, 3], [100, 4], [NaN, 2]
     }
   })
 }
+
+test('app windows cannot navigate their document to another origin', t => {
+  const manager = createManager(t)
+  for (const [url, prevented] of [
+    ['https://github.com/OpenTubeX/OpenTubeX/pull/1', true],
+    ['file:///etc/passwd', true],
+    ['app://bundle/index.html#/history', false]
+  ]) {
+    let defaultPrevented = false
+    manager.browserWindow.webContents.emit('will-navigate', { url, preventDefault: () => { defaultPrevented = true } })
+    assert.equal(defaultPrevented, prevented, url)
+  }
+})
+
+test('repeated query parameters are collected without copying the accumulated values', () => {
+  const count = 20_000
+  const start = performance.now()
+  const route = getRouteFromUrl(`app://bundle/index.html#/search/test?${'q=x&'.repeat(count)}`)
+  assert.equal(route.query.q.length, count)
+  // Rebuilding the array per occurrence takes seconds at this size.
+  assert.ok(performance.now() - start < 500)
+})

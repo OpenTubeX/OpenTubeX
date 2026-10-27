@@ -244,6 +244,10 @@ final class AndroidProxyRelay implements AutoCloseable {
         } catch (IOException ignored) { closeSocket(remote); }
     }
 
+    synchronized boolean proxies(URI target) {
+        return resolveSystemProxy(configuration, target).enabled;
+    }
+
     synchronized String connectionHost(URI target) {
         ProxyConfiguration route = resolveSystemProxy(configuration, target);
         return route.enabled ? route.hostname : target.getHost();

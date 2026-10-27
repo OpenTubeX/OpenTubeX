@@ -49,7 +49,7 @@ test('authenticated Cast receiver plays MP4, DASH, HLS and shared merged tracks'
   t.after(() => { upstream.closeAllConnections(); upstream.close() })
   const upstreamUrl = `http://127.0.0.1:${upstream.address().port}`
   const merged = await createMuxedMediaServer(`${upstreamUrl}/video-only.mp4`, `${upstreamUrl}/audio.m4a`, '127.0.0.1', 'merged', {
-    videoHeaders: {}, audioHeaders: {}, startSeconds: 0, ffmpegPath: 'ffmpeg'
+    startSeconds: 0, ffmpegPath: 'ffmpeg'
   })
   await new Promise(resolve => merged.listen(0, '127.0.0.1', resolve))
   t.after(() => { merged.closeAllConnections(); merged.close() })

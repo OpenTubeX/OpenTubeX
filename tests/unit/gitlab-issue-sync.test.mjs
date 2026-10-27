@@ -385,6 +385,8 @@ test('rewrites GitLab uploads and escapes only GitHub-to-GitLab quick actions', 
   assert.match(body, /https:\/\/gitlab.com\/-\/project\/85121418\/uploads\/hash\/video.mp4/)
   assert.ok(body.includes('@person\n/close'))
   assert.equal(content('/close\n  /label ~bug'), '&#47;close\n  &#47;label ~bug')
+  // GitLab matches command names case-insensitively, with Unicode case folding, after deleting \r.
+  assert.equal(content('/Close\r\n/REOPEN now\r/cloſe\n/assign_reviewer2'), '&#47;Close\r\n&#47;REOPEN now\r&#47;cloſe\n&#47;assign_reviewer2')
   assert.equal(content('```sh\n/close\n```\n/close'), '```sh\n/close\n```\n&#47;close')
   assert.equal(content('~~~~\n/close\n~~~\n/close\n~~~~'), '~~~~\n/close\n~~~\n/close\n~~~~')
 })

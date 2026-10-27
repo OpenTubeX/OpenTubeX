@@ -629,10 +629,28 @@ async function fetchRssVideoUpcomingInfoUncached(videoId) {
     // request that never settles would hold its worker forever, leaving the
     // channel's feed permanently unresolved. A timeout counts as a failed
     // lookup, so it is not cached and the next refresh tries again.
+    const signal = AbortSignal.timeout(RSS_ENRICHMENT_TIMEOUT_MS)
+
+    // Like the premiere poller, only contact YouTube directly with the local API
+    if (!process.env.SUPPORTS_LOCAL_API || usesInvidiousApi(store.getters.getBackendPreference)) {
+      const response = await invidiousFetch(`${store.getters.getApiServerUrl}/api/v1/videos/${encodeURIComponent(videoId)}`, signal)
+      const video = response.ok ? await response.json() : null
+      if (video?.videoId !== videoId) {
+        return { isUpcoming: false, failed: true }
+      }
+      if (video.isUpcoming !== true) {
+        return { isUpcoming: false }
+      }
+      return {
+        isUpcoming: true,
+        premiereDate: video.premiereTimestamp > 0 ? new Date(video.premiereTimestamp * 1000) : undefined
+      }
+    }
+
     const response = await localApiFetch(
       `https://www.youtube.com/watch?v=${videoId}`,
       {
-        signal: AbortSignal.timeout(RSS_ENRICHMENT_TIMEOUT_MS),
+        signal,
         nativeTimeoutMs: RSS_ENRICHMENT_TIMEOUT_MS,
       }
     )

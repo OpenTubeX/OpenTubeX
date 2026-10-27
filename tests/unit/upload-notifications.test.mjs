@@ -196,6 +196,17 @@ test('post text decodes named and numeric entities', () => {
   assert.equal(post.title, "a\u00A0b 'c' & &unknown; &#99999999;")
 })
 
+test('post text strips tags in linear time', () => {
+  const [post] = normalizeUploadEntries([{ postId: 'p', postText: '<p>a</p> <<i>b</i><c' }])
+  assert.equal(post.title, 'a b<c')
+
+  const unclosed = '<'.repeat(400_000)
+  const start = performance.now()
+  const [long] = normalizeUploadEntries([{ postId: 'q', postText: unclosed }])
+  assert.equal(long.title, unclosed)
+  assert.ok(performance.now() - start < 1000)
+})
+
 test('withheld members-first uploads notify once they become public', () => {
   const state = createUploadNotificationState()
   const ids = uploads => uploads.map(upload => upload.id)

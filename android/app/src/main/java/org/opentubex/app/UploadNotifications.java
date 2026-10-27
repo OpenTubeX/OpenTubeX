@@ -275,12 +275,18 @@ final class UploadNotifications {
 
     /** Mirrors htmlToText in src/newUploadNotifications.js. */
     static String htmlToText(String html) {
-        String text = html.replaceAll("(?i)<br\\s*/?>", "\n");
-        String previous;
-        do {
-            previous = text;
-            text = text.replaceAll("<[^>]*>", "");
-        } while (!text.equals(previous));
+        String breaks = html.replaceAll("(?i)<br\\s*/?>", "\n");
+        // Scan instead of matching <[^>]*>, which retries every unclosed '<' to the end.
+        // One pass removes each '<' through the next '>'; any '<' left has no '>' after it.
+        StringBuilder stripped = new StringBuilder(breaks.length());
+        for (int index = 0; index < breaks.length();) {
+            int open = breaks.indexOf('<', index);
+            int close = open < 0 ? -1 : breaks.indexOf('>', open);
+            if (close < 0) { stripped.append(breaks, index, breaks.length()); break; }
+            stripped.append(breaks, index, open);
+            index = close + 1;
+        }
+        String text = stripped.toString();
         java.util.regex.Matcher matcher = java.util.regex.Pattern
             .compile("(?i)&(?:#(\\d+)|#x([\\da-f]+)|(amp|lt|gt|quot|apos|nbsp));").matcher(text);
         StringBuilder result = new StringBuilder();

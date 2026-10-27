@@ -11,18 +11,18 @@ const fragment = app.slice(start, app.indexOf('  const backButtonHandle', start)
 function urlOpener(supportsYtDlp = true) {
   const youtube = []
   const externalMedia = []
-  const browser = []
+  const externalLinks = []
   const openUrl = vm.runInNewContext(`${fragment}\nopenUrl`, {
     URL,
     getHomeWidgetPage: () => null,
     handleYoutubeLink: url => youtube.push(url),
     openExternalMedia: url => externalMedia.push(url),
-    openExternalLink: url => browser.push(url),
+    handleExternalLink: url => externalLinks.push(url),
     shouldOpenExternalMediaUrl,
     supportsYtDlp,
     store: { dispatch: async () => {}, getters: { getCurrentInvidiousInstanceUrl: 'https://invidious.example' } }
   })
-  return { openUrl, youtube, externalMedia, browser }
+  return { openUrl, youtube, externalMedia, externalLinks }
 }
 
 for (const [input, expected] of [
@@ -56,7 +56,7 @@ test('builds without yt-dlp pass other links to the YouTube URL handler', async 
   assert.deepEqual(externalMedia, [])
 })
 
-test('Facebook watch landing URLs without a numeric video ID open in the browser', async () => {
+test('Facebook watch landing URLs without a numeric video ID follow the external link setting', async () => {
   const urls = [
     'https://www.facebook.com/watch/',
     'https://facebook.com/watch',
@@ -65,9 +65,9 @@ test('Facebook watch landing URLs without a numeric video ID open in the browser
     'https://www.facebook.com/watch/?v=123abc',
     'opentubex://https://www.facebook.com/watch/?ref=tab',
   ]
-  const { openUrl, youtube, externalMedia, browser } = urlOpener()
+  const { openUrl, youtube, externalMedia, externalLinks } = urlOpener()
   for (const url of urls) await openUrl(url)
-  assert.deepEqual(browser, urls.map(url => url.replace('opentubex://', '')))
+  assert.deepEqual(externalLinks, urls.map(url => url.replace('opentubex://', '')))
   assert.deepEqual(externalMedia, [])
   assert.deepEqual(youtube, [])
 })
@@ -79,9 +79,9 @@ test('Facebook watch links with numeric video IDs still open with yt-dlp', async
     'https://www.facebook.com/reel/1234567890',
     'https://facebook.com.example/watch/',
   ]
-  const { openUrl, youtube, externalMedia, browser } = urlOpener()
+  const { openUrl, youtube, externalMedia, externalLinks } = urlOpener()
   for (const url of urls) await openUrl(url)
   assert.deepEqual(externalMedia, urls)
-  assert.deepEqual(browser, [])
+  assert.deepEqual(externalLinks, [])
   assert.deepEqual(youtube, [])
 })

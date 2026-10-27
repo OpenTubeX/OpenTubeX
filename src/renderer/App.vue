@@ -146,10 +146,13 @@
         dir="ltr"
         lang="en"
       >
+        <!-- FtPrompt stops clicks before the document link handler; keyboard activation of links also fires click -->
+        <!-- eslint-disable-next-line vuejs-accessibility/click-events-have-key-events -->
         <div
           ref="changeLogContent"
           v-safer-html.lenient="updateChangelog"
           class="changeLogContent"
+          @click="handleClick"
         />
       </div>
       <FtFlexBox>
@@ -5438,7 +5441,7 @@ async function enableCapacitorIntegrations() {
       // Android intent filters cannot require Facebook's video ID query parameter.
       if ((mediaUrl.hostname === 'facebook.com' || mediaUrl.hostname.endsWith('.facebook.com')) &&
         /^\/watch\/?$/.test(mediaUrl.pathname) && !/^\d+$/.test(mediaUrl.searchParams.get('v') ?? '')) {
-        return openExternalLink(target)
+        return handleExternalLink(target)
       }
       await store.dispatch('hideSettingsWindow')
       return openExternalMedia(target)

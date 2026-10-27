@@ -107,7 +107,8 @@ export function content(body = '', fromGitlab = false) {
       if (url !== node.url) return serialize({ ...node, url })
     }
     if (node.type === 'text') {
-      if (!fromGitlab) return original.replace(/^( {0,3})\/(?=[a-z_]+(?:\s|$))/gm, '$1&#47;')
+      // GitLab matches command names with Unicode case folding after deleting \r.
+      if (!fromGitlab) return original.replace(/^( {0,3})\/(?=[\p{L}\p{N}_]+(?:\s|$))/gmu, '$1&#47;')
       // These attributes are GitLab-specific image metadata, not Markdown grammar.
       if (parent?.children[index - 1]?.type === 'image') original = original.replace(/^\{[ \t]*(?:(?:width|height)=\d+(?:px|%)?[ \t]*)+\}/, '')
       return original.replace(/(^|[(<"'\s])\/uploads\//g, `$1${uploadsUrl}`)

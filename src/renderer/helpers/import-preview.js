@@ -50,9 +50,12 @@ export function parseTakeoutWatchHistory(history) {
     if (typeof item.title !== 'string' || !Number.isFinite(Date.parse(item.time))) { skipped++; return false }
     return true
   })
-  let commonStart = records.length > 1 ? records[0].title : ''
+  const first = records[0]?.title ?? ''
+  let commonLength = records.length > 1 ? first.length : 0
   for (const record of records.slice(1)) {
-    while (!record.title.startsWith(commonStart)) commonStart = commonStart.slice(0, -1)
+    let index = 0
+    while (index < commonLength && record.title[index] === first[index]) index++
+    commonLength = index
   }
   const knownKeys = new Set(['header', 'description', 'products', 'details', 'activityControls', 'title', 'titleUrl', 'time', 'subtitles'])
   const unknownKeys = new Set()
@@ -64,7 +67,7 @@ export function parseTakeoutWatchHistory(history) {
     const timeWatched = Date.parse(record.time)
     return {
       videoId: record.titleUrl.replaceAll(/https:\/\/www\.youtube\.com\/watch\?v=/gi, ''),
-      title: record.title.slice(commonStart.length),
+      title: record.title.slice(commonLength),
       timeWatched,
       author: typeof author?.name === 'string' ? author.name : '',
       authorId: typeof author?.url === 'string' ? author.url.replaceAll(/https:\/\/www\.youtube\.com\/channel\//gi, '') : '',

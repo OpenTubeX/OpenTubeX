@@ -37,7 +37,7 @@ function withoutImports (source) {
 const helperSource = await readFile(new URL('../../src/renderer/helpers/sync-server.js', import.meta.url), 'utf8')
 const storeSource = await readFile(new URL('../../src/renderer/store/modules/sync-server.js', import.meta.url), 'utf8')
 
-function fixture (overrides = {}, { encrypted = false, respond, connectionState = 'online', online = true, browser = false, deferLock = false, syncableSettingKeys = ['channelPlaybackSpeeds'], reminderService, connected = false, timer, locks, desktopTabs, connectionChanges, capacitor = false, backgroundJob = runBackgroundJob, settingsReader } = {}) {
+function fixture (overrides = {}, { encrypted = false, respond, connectionState = 'online', online = true, browser = false, deferLock = false, syncableSettingKeys = ['channelPlaybackSpeeds'], reminderService, connected = false, timer, locks, desktopTabs, connectionChanges, capacitor = false, backgroundJob = runBackgroundJob, settingsReader, receiptStorage } = {}) {
   const connectionEvents = new EventTarget()
   const network = { state: connectionState, online }
   const requests = []
@@ -102,7 +102,7 @@ function fixture (overrides = {}, { encrypted = false, respond, connectionState 
       ...(locks ? { locks } : deferLock ? { locks: { request: (name, options, callback) => Promise.resolve().then(() => (callback ?? options)({ name })) } } : {}) },
     connectionEvents,
     ...(browser ? { window: new EventTarget(), document: new EventTarget(), isAppHidden: () => false } : {}),
-    ...(desktopTabs ? { getCapacitorTabService: () => desktopTabs, window: { ftElectron: { tabs: desktopTabs } }, localStorage: { getItem: key => storedReceipts.get(key) ?? null, setItem: (key, value) => storedReceipts.set(key, value) } } : {}),
+    ...(desktopTabs ? { getCapacitorTabService: () => desktopTabs, window: { ftElectron: { tabs: desktopTabs } }, localStorage: receiptStorage ?? { getItem: key => storedReceipts.get(key) ?? null, setItem: (key, value) => storedReceipts.set(key, value) } } : {}),
     crypto,
     Date,
     URL,
@@ -1911,6 +1911,79 @@ test('a new live device message is delivered after an older activity response fi
     f.actions.stopSyncServerLive(f.context)
     await listening
   }
+})
+
+test('a device request replayed under new event ids opens only once', async () => {
+  const recipient = 'test-device'
+  const opened = []
+  const acknowledged = []
+  let ids = ['first', 'second']
+  let payload
+  const f = fixture({ syncServerDeviceId: recipient }, {
+    encrypted: true,
+    desktopTabs: { async create({ route }) { opened.push(route); return true } },
+    respond: (url, options) => {
+      const path = new URL(url).pathname
+      if (options?.method === 'DELETE') acknowledged.push(path)
+      return path === '/v1/encrypted_sync/events'
+        ? ids.map(id => ({ id, recipient, payload, created_at: Date.now(), expires_at: Date.now() + 60000 }))
+        : undefined
+    },
+  })
+  payload = await privacy.encryptSyncDocument({
+    version: 1, type: 'openVideo', recipient, videoId: 'jNQXAC9IVRw', title: 'Video', position: 0,
+    expiresAt: Date.now() + 60000,
+  }, f.settings.syncServerPrivacyKey, f.settings.syncServerPrivacySalt)
+  await f.actions.refreshSyncServerEvents(f.context)
+  ids = ['third']
+  await f.actions.refreshSyncServerEvents(f.context)
+  assert.deepEqual(opened, ['/watch/jNQXAC9IVRw?timestamp=0'])
+  assert.equal(acknowledged.length, 3)
+})
+
+test('a device request opens only after its receipt is saved', async () => {
+  const recipient = 'test-device'
+  const opened = []
+  const acknowledged = []
+  const stored = new Map()
+  let quotaExceeded = true
+  let failOpen = false
+  let payload
+  const f = fixture({ syncServerDeviceId: recipient }, {
+    encrypted: true,
+    desktopTabs: { async create({ route }) { if (failOpen) return false; opened.push(route); return true } },
+    receiptStorage: {
+      getItem: key => stored.get(key) ?? null,
+      setItem: (key, value) => {
+        if (quotaExceeded) throw new Error('QuotaExceededError')
+        stored.set(key, value)
+      },
+    },
+    respond: (url, options) => {
+      const path = new URL(url).pathname
+      if (options?.method === 'DELETE') acknowledged.push(path)
+      return path === '/v1/encrypted_sync/events'
+        ? [{ id: 'event', recipient, payload, created_at: Date.now(), expires_at: Date.now() + 60000 }]
+        : undefined
+    },
+  })
+  payload = await privacy.encryptSyncDocument({
+    version: 1, type: 'openVideo', recipient, videoId: 'jNQXAC9IVRw', title: 'Video', position: 0,
+    expiresAt: Date.now() + 60000,
+  }, f.settings.syncServerPrivacyKey, f.settings.syncServerPrivacySalt)
+  // A receipt that cannot be saved would let the next refresh open the video again
+  await f.actions.refreshSyncServerEvents(f.context).catch(() => {})
+  assert.deepEqual(opened, [])
+  assert.deepEqual(acknowledged, [])
+  // A failed open forgets the receipt, so the next refresh retries it
+  quotaExceeded = false
+  failOpen = true
+  await f.actions.refreshSyncServerEvents(f.context).catch(() => {})
+  assert.deepEqual(opened, [])
+  failOpen = false
+  await f.actions.refreshSyncServerEvents(f.context)
+  await f.actions.refreshSyncServerEvents(f.context)
+  assert.deepEqual(opened, ['/watch/jNQXAC9IVRw?timestamp=0'])
 })
 
 for (const conflict of [false, true]) {

@@ -225,7 +225,8 @@ function searchParamsToQuery(searchParams) {
   for (const [key, value] of searchParams) {
     if (key in query) {
       const existing = query[key]
-      query[key] = Array.isArray(existing) ? [...existing, value] : [existing, value]
+      if (Array.isArray(existing)) existing.push(value)
+      else query[key] = [existing, value]
     } else {
       query[key] = value
     }

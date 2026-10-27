@@ -25,6 +25,46 @@ class _QuietLogger:
         self.last_error = message
 
 
+# Like Android's YtDlpArguments, only media options cross the bridge. yt-dlp
+# also accepts abbreviations and options that write files outside staging.
+# iOS also accepts -x and --concat-playlist, which its staging export supports.
+_FLAGS = {
+    '-x',
+    '--no-simulate', '--no-playlist', '--yes-playlist', '--no-warnings', '--no-progress', '--ignore-no-formats-error',
+    '--write-auto-subs', '--write-subs', '--extract-audio', '--skip-download', '--no-quiet',
+    '--split-chapters', '--embed-subs', '--embed-thumbnail', '--embed-metadata', '--embed-chapters',
+    '--no-overwrites', '--force-keyframes-at-cuts', '--flat-playlist', '--dump-single-json',
+    '--ignore-errors', '--abort-on-error', '--continue', '--no-continue', '--write-thumbnail',
+    '--write-info-json', '--write-description', '--restrict-filenames', '--windows-filenames',
+    '--no-mtime', '--no-embed-subs', '--no-embed-thumbnail', '--no-embed-metadata',
+    '--no-embed-chapters', '--no-write-subs', '--no-write-auto-subs', '--no-check-certificates',
+}
+_VALUES = {
+    '--output', '--output-na-placeholder', '--format', '-f', '--format-sort', '-S',
+    '--merge-output-format', '--remux-video', '--recode-video', '--audio-format', '--audio-quality',
+    '--sponsorblock-remove', '--sponsorblock-mark', '--sub-langs', '--sub-format', '--convert-subs',
+    '--extractor-args', '--match-filter', '--min-filesize', '--max-filesize', '--dateafter',
+    '--datebefore', '--match-title', '--reject-title', '--download-sections', '--print',
+    '--playlist-end', '--playlist-start', '--playlist-items', '--socket-timeout', '--retries',
+    '--fragment-retries', '--concurrent-fragments', '--limit-rate', '--sleep-interval',
+    '--max-sleep-interval', '--sleep-requests', '--geo-bypass-country', '--user-agent',
+    '--progress-template', '--referer', '--add-headers', '--proxy', '--trim-filenames',
+    '--concat-playlist',
+}
+
+
+def _validate_arguments(args):
+    value = False
+    for arg in args:
+        option = arg.split('=', 1)[0]
+        if value:
+            value = False
+        elif option in _VALUES:
+            value = '=' not in arg
+        elif option not in _FLAGS and not re.fullmatch(r'https?://\S+', arg):
+            raise ValueError('unsupported-custom-argument')
+
+
 def _option(args, name, default=None):
     try:
         return args[args.index(name) + 1]
@@ -120,6 +160,7 @@ def _download(request):
                 'eta': None if processing else progress.get('eta')}
         progress_file.write_text(json.dumps(data), encoding='utf-8')
 
+    _validate_arguments(request['args'])
     parsed = yt_dlp.parse_options(['--ignore-config', *request['args']])
     # Inspect the unvalidated options: yt-dlp supplies bestaudio/best itself
     # for -x, so the parsed selector alone cannot identify a user's -f choice.
@@ -140,11 +181,6 @@ def _download(request):
     if defaults:
         parsed = yt_dlp.parse_options(['--ignore-config', *defaults, *request['args']])
     options = parsed.ydl_opts
-    # Templates may create subdirectories, but all output must remain in this
-    # job's staging directory until the security-scoped Files export succeeds.
-    for template in options['outtmpl'].values():
-        if template and (Path(template).is_absolute() or '..' in Path(template).parts):
-            raise ValueError('Output template must stay inside the download folder')
     logger = _QuietLogger()
     options.update({
         'paths': {'home': str(folder), 'temp': str(folder)},
@@ -164,6 +200,18 @@ def _download(request):
         if control_file.exists():
             raise yt_dlp.utils.DownloadError('Download interrupted')
         with yt_dlp.YoutubeDL(options) as ydl:
+            prepare_filename = ydl.prepare_filename
+
+            def contained_filename(*args, **kwargs):
+                # Templates may create subdirectories, but all output must remain in this
+                # job's staging directory until the security-scoped Files export succeeds.
+                # Check yt-dlp's result: it expands ~ and $VARIABLES and keeps '..' titles.
+                filename = prepare_filename(*args, **kwargs)
+                if filename and not Path(filename).resolve().is_relative_to(folder.resolve()):
+                    raise ValueError('Output template must stay inside the download folder')
+                return filename
+
+            ydl.prepare_filename = contained_filename
             ydl.add_post_processor(CollectPlaylistFilesPP(ydl), when='playlist')
             result = ydl.download(parsed.urls)
         if result != 0:

@@ -280,11 +280,16 @@ class History {
       const migratedRecords = records.map(migrateLegacyHistoryRecord)
       const retained = new Set(migratedRecords.map(record => record.videoId))
       const removed = (await db.history.findAsync({}, { videoId: 1 })).map(record => record.videoId).filter(id => !retained.has(id))
+
+      // SQLite replaces the history in one transaction, so an invalid imported
+      // record keeps the saved history. NeDB, used by unit tests, cannot.
+      if (typeof db.history.replaceAllAsync === 'function') {
+        await db.history.replaceAllAsync(migratedRecords)
+      } else {
+        await db.history.removeAsync({}, { multi: true })
+        await db.history.insertAsync(migratedRecords)
+      }
       if (removed.length) await recommendations.remove(removed)
-
-      await db.history.removeAsync({}, { multi: true })
-
-      await db.history.insertAsync(migratedRecords)
     })
   }
 

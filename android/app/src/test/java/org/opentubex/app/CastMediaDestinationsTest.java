@@ -66,7 +66,7 @@ public class CastMediaDestinationsTest {
             OkHttpClient client = CastMediaDestinations.restrict(new OkHttpClient.Builder().addInterceptor(chain -> {
                 requested.add(chain.request().url().toString());
                 return response(chain.request(), 302).newBuilder().header("Location", target).build();
-            }).build());
+            }).build(), url -> false);
             try (Response ignored = client.newCall(new Request.Builder().url("https://8.8.8.8/media").build()).execute()) {
                 fail("Unsafe redirect accepted");
             } catch (IOException expected) {}
@@ -80,7 +80,7 @@ public class CastMediaDestinationsTest {
             requested.add(chain.request());
             return requested.size() == 1 ? response(chain.request(), 307).newBuilder().header("Location", "https://1.1.1.1/next").build()
                 : response(chain.request(), 200);
-        }).build());
+        }).build(), url -> false);
         HttpUrl original = HttpUrl.get("https://8.8.8.8/media");
         try (Response result = client.newCall(new Request.Builder().url(original).tag(HttpUrl.class, original)
             .header("Range", "bytes=100-").method("HEAD", null).build()).execute()) {
@@ -93,12 +93,24 @@ public class CastMediaDestinationsTest {
         assertEquals(original, requested.get(1).tag(HttpUrl.class));
     }
 
+    @Test public void refusesRequestsTheAppProxyWouldCarry() throws Exception {
+        List<String> requested = new ArrayList<>();
+        OkHttpClient client = CastMediaDestinations.restrict(new OkHttpClient.Builder().addInterceptor(chain -> {
+            requested.add(chain.request().url().toString());
+            return response(chain.request(), 302).newBuilder().header("Location", "https://1.1.1.1/proxied").build();
+        }).build(), url -> url.host().equals("1.1.1.1"));
+        try (Response ignored = client.newCall(new Request.Builder().url("https://8.8.8.8/media").build()).execute()) {
+            fail("Proxied destination fetched directly");
+        } catch (IOException expected) {}
+        assertEquals(List.of("https://8.8.8.8/media"), requested);
+    }
+
     @Test public void limitsRedirectLoops() throws Exception {
         AtomicInteger requests = new AtomicInteger();
         OkHttpClient client = CastMediaDestinations.restrict(new OkHttpClient.Builder().addInterceptor(chain -> {
             requests.incrementAndGet();
             return response(chain.request(), 302).newBuilder().header("Location", "/loop").build();
-        }).build());
+        }).build(), url -> false);
         try (Response ignored = client.newCall(new Request.Builder().url("https://8.8.8.8/media").build()).execute()) { fail(); }
         catch (IOException expected) { assertEquals(6, requests.get()); }
     }

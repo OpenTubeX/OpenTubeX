@@ -17,7 +17,35 @@ const TAB_PREVIEW_REFRESH_DELAY_MS = 700
 const TAB_PREVIEW_CAPTURE_STYLE_ID = 'opentubex-tab-preview-capture-style'
 const TAB_PREVIEW_CAPTURE_CLASS = 'opentubex-tab-preview-capturing'
 const MAX_TAB_AVATAR_DOWNLOAD_BYTES = 2 * 1024 * 1024
+const MAX_TAB_AVATAR_SOURCE_PIXELS = 4096 * 4096
 const TAB_AVATAR_SIZE = 64
+
+/**
+ * Read the dimensions of the formats nativeImage decodes from buffers (PNG and
+ * JPEG) from their headers, so oversized remote images are rejected before a
+ * full bitmap is allocated for them.
+ * @param {Buffer} buffer
+ * @returns {{width: number, height: number} | null}
+ */
+function getImageSize(buffer) {
+  if (buffer.length >= 24 && buffer.readUInt32BE(0) === 0x89504e47 && buffer.toString('latin1', 12, 16) === 'IHDR') {
+    return { width: buffer.readUInt32BE(16), height: buffer.readUInt32BE(20) }
+  }
+  if (buffer[0] !== 0xff || buffer[1] !== 0xd8) return null
+  let offset = 2
+  while (offset + 9 <= buffer.length && buffer[offset] === 0xff) {
+    const marker = buffer[offset + 1]
+    if (marker === 0xff) {
+      offset++
+    } else if (marker >= 0xc0 && marker <= 0xcf && marker !== 0xc4 && marker !== 0xc8 && marker !== 0xcc) {
+      // Start of frame; C4, C8 and CC are other segments in that range.
+      return { width: buffer.readUInt16BE(offset + 7), height: buffer.readUInt16BE(offset + 5) }
+    } else {
+      offset += 2 + buffer.readUInt16BE(offset + 2)
+    }
+  }
+  return null
+}
 
 /** @typedef {import('./TabManager.js').TabManager} TabManager */
 /** @typedef {import('./TabManager.js').TabInfo} TabInfo */
@@ -409,7 +437,8 @@ export class TabPreviewController {
           ? Buffer.from(avatarBytes.buffer, avatarBytes.byteOffset, avatarBytes.byteLength)
           : null
       if (sourceBuffer == null) return false
-      if (sourceBuffer.length === 0 || sourceBuffer.length > MAX_TAB_AVATAR_DOWNLOAD_BYTES) {
+      const sourceSize = sourceBuffer.length <= MAX_TAB_AVATAR_DOWNLOAD_BYTES ? getImageSize(sourceBuffer) : null
+      if (sourceSize === null || sourceSize.width * sourceSize.height > MAX_TAB_AVATAR_SOURCE_PIXELS) {
         return false
       }
 

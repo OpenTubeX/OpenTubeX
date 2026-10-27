@@ -399,7 +399,7 @@ export class TabManager {
     })
 
     tabManagers.set(browserWindow.id, this)
-    this._installWindowOpenHandler()
+    this._installNavigationHandlers()
 
     browserWindow.on('closed', () => {
       clearTimeout(this._sessionSaveTimer)
@@ -428,7 +428,13 @@ export class TabManager {
     })
   }
 
-  _installWindowOpenHandler() {
+  _installNavigationHandlers() {
+    // The preload API stays attached across navigations, so an external page
+    // must never replace the app document. Links are handled by the renderer.
+    this.browserWindow.webContents.on('will-navigate', (event) => {
+      if (!isOpenTubeXUrl(event.url)) event.preventDefault()
+    })
+
     this.browserWindow.webContents.setWindowOpenHandler((details) => {
       const parsedUrl = URL.parse(details.url)
       const currentUrl = this.browserWindow.webContents.getURL()

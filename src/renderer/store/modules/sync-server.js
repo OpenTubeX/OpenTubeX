@@ -993,18 +993,27 @@ const actions = {
           const receiptKey = `sync-received:${JSON.stringify([settings.syncServerUrl, settings.syncServerUsername, settings.syncServerDeviceId])}`
           let receipts = []
           try { receipts = JSON.parse(localStorage.getItem(receiptKey) ?? '[]') } catch {}
-          if (!Array.isArray(receipts)) receipts = []
-          if (!receipts.includes(event.id) && validateDeviceRequest(value, settings.syncServerDeviceId)) {
+          // The server assigns event ids, so recognize replays by the encrypted request
+          // itself (its millisecond expiry is unique per send) until it expires.
+          receipts = Array.isArray(receipts) ? receipts.filter(receipt => Array.isArray(receipt) && receipt[1] > Date.now()) : []
+          const requestId = `${value?.expiresAt}:${value?.videoId}`
+          if (validateDeviceRequest(value, settings.syncServerDeviceId) && !receipts.some(([id]) => id === requestId)) {
             const route = `/watch/${value.videoId}?timestamp=${Math.floor(value.position)}`
+            // Save the receipt first, so a receipt that cannot be saved never lets the
+            // next refresh open the video again. A failed open forgets it for a retry.
+            localStorage.setItem(receiptKey, JSON.stringify([...receipts, [requestId, value.expiresAt]]))
             let opened
-            if (process.env.IS_CAPACITOR) {
-              const { getCapacitorTabService } = await import('../../tabs/CapacitorTabService')
-              opened = await getCapacitorTabService().createTab(route, value.title, false)
-            } else {
-              opened = await window.ftElectron.tabs.create({ route, title: value.title, makeActive: false })
+            try {
+              if (process.env.IS_CAPACITOR) {
+                const { getCapacitorTabService } = await import('../../tabs/CapacitorTabService')
+                opened = await getCapacitorTabService().createTab(route, value.title, false)
+              } else {
+                opened = await window.ftElectron.tabs.create({ route, title: value.title, makeActive: false })
+              }
+            } finally {
+              if (!opened) localStorage.setItem(receiptKey, JSON.stringify(receipts))
             }
             if (!opened) throw new Error('Unable to open the received video')
-            localStorage.setItem(receiptKey, JSON.stringify([...receipts, event.id].slice(-200)))
             showToastOnAllTabs(i18n.global.t('Settings.Sync Settings.Video Received', { title: value.title }), 6000, ['fas', 'devices'])
           }
           await client.acknowledgeDeviceRequest(event.id)
