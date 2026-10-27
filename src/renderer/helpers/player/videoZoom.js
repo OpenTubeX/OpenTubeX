@@ -88,7 +88,7 @@ export function getVideoFillZoomProximity(zoom, fillZoom) {
 
 /**
  * Resolves a two-finger zoom while keeping the content beneath the gesture's
- * focal point stationary. Focal coordinates are relative to the video centre.
+ * focal point stationary. Focal coordinates are relative to the video center.
  */
 export function resolveVideoZoomPinch({
   startZoom,

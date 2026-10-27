@@ -14,6 +14,7 @@ Requests such as "implement issue #X" authorize local changes, not a PR. Open a 
 
 - Create new documentation, writeups, implementation notes, plans, or summaries only when requested; explain changes and validation in the PR description. Update existing documentation only when the change makes it inaccurate.
 - When a behavior change could invalidate a user guide in `OpenTubeX/opentubex.github.io`, check it. For a material inaccuracy, name the guide and passage, step, or screenshot, explain the mismatch, and get approval before changing the website, unless already authorized. Limit the update to those inaccuracies and link the application and website PRs. New features and cosmetic differences alone need no update or approval request.
+- Use American English spelling (center, color, behavior) in code, comments, tests, commit messages, and PR text, even where nearby comments use British spelling. Translations in `static/locales` keep their locale's spelling.
 
 ## Testing
 

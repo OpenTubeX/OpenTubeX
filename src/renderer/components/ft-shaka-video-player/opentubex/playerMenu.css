@@ -164,7 +164,7 @@
 /*
   The submenus are laid out as tiles too, so that switching between the menu and
   a submenu doesn't change the shape of the popup. Wrapping flex rather than a
-  grid: the options are all one size, and a row that isn't full stays centred
+  grid: the options are all one size, and a row that isn't full stays centered
   instead of being pushed to one side.
 */
 :deep(.shaka-sub-menu.ft-menu-grid) {
@@ -173,7 +173,7 @@
 
   /*
     The menu keeps its height while a submenu is open, so the options are
-    centred in whatever is left below the header rather than stretched over it.
+    centered in whatever is left below the header rather than stretched over it.
   */
   place-content: center;
   gap: 4px;
@@ -196,7 +196,7 @@
   margin-block-end: 0;
 }
 
-/* Keep the title centred in the header instead of after the back icon. */
+/* Keep the title centered in the header instead of after the back icon. */
 :deep(.shaka-sub-menu.ft-menu-grid > .shaka-back-to-overflow-button > .shaka-ui-icon),
 :deep(.shaka-overflow-menu.ft-menu-grid .ft-caption-timing-menu .shaka-ui-icon),
 :deep(.shaka-overflow-menu.ft-menu-grid .ft-caption-list-menu .shaka-ui-icon:not(.shaka-chosen-item)) {
@@ -320,7 +320,7 @@
   margin: 0;
 }
 
-/* A centred title would run into the codecs, so it follows the back icon. */
+/* A centered title would run into the codecs, so it follows the back icon. */
 :deep(.shaka-sub-menu.ft-menu-grid:has(> .ft-quality-codecs) > .shaka-back-to-overflow-button) {
   justify-content: flex-start;
   padding-inline-start: 40px;
@@ -405,7 +405,7 @@
   flex: 0 0 auto;
 }
 
-/* Centre the title like the headers of the other submenus */
+/* Center the title like the headers of the other submenus */
 :deep(.shaka-overflow-menu.ft-menu-grid .ft-caption-list-menu > .shaka-back-to-overflow-button) {
   position: relative;
   justify-content: center;
@@ -436,7 +436,7 @@
   display: flex;
   flex-flow: row wrap;
 
-  /* Centred like the other submenus, but a list that scrolls starts at its first option */
+  /* Centered like the other submenus, but a list that scrolls starts at its first option */
   place-content: safe center;
   gap: 4px;
   padding: 4px;

@@ -59,7 +59,7 @@ export function setupPhoneOptionsMenu(menu, controls, t) {
     }
   }
 
-  // The grid's options are centred, so share the free space evenly above the
+  // The grid's options are centered, so share the free space evenly above the
   // action, between it and the options, and below them.
   function spaceAroundAction(submenu, action) {
     const options = [...submenu.children]

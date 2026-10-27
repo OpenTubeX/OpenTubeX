@@ -86,7 +86,7 @@ export function useFullscreenDocks({
     if (!after || after.width <= 0) return
     const scale = before.width / after.width
     // Zoom/pan uses `transform`. Individual scale/translate keep that intact;
-    // compensate for scaling its translation around the element's centre.
+    // compensate for scaling its translation around the element's center.
     const transform = new DOMMatrix(getComputedStyle(video.value).transform)
     const x = before.x - after.x + transform.e * (1 - scale)
     const y = before.y - after.y + transform.f * (1 - scale)

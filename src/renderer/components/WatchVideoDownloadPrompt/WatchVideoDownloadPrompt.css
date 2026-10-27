@@ -248,7 +248,7 @@
   overflow-wrap: anywhere;
   text-align: start;
 
-  /* yt-dlp's messages are joined with newlines, which centred prose would run together */
+  /* yt-dlp's messages are joined with newlines, which centered prose would run together */
   white-space: pre-wrap;
 }
 
