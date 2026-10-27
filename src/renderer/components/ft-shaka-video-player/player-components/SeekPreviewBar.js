@@ -31,6 +31,8 @@ export class SeekPreviewBar extends shaka.ui.SeekBar {
      */
     this.precise = null
     /** @private */
+    this.lastDragValue = 0
+    /** @private */
     this.cancelTime = 0
     /** @private */
     this.cancelled = false
@@ -91,6 +93,7 @@ export class SeekPreviewBar extends shaka.ui.SeekBar {
     this.cancelTime = this.video.currentTime
     super.onChangeStart()
     this.dragStartValue = this.mouseGrabbedThumb === false ? null : this.getValue()
+    this.lastDragValue = this.getValue()
   }
 
   // Notify after Shaka updates the preview text for mouse, touch and keyboard.
@@ -114,6 +117,7 @@ export class SeekPreviewBar extends shaka.ui.SeekBar {
       const width = preview.clientWidth
       preview.style.left = `${Math.min(this.bar.offsetWidth - width, Math.max(0, this.precise.markerX - width / 2))}px`
     }
+    this.lastDragValue = this.getValue()
   }
 
   /** @private */
@@ -131,9 +135,13 @@ export class SeekPreviewBar extends shaka.ui.SeekBar {
   applyPreciseSeek() {
     if (!this.filmstripShown || this.dragStartValue === null || !this.pointer) return
     if (!this.precise) {
-      const { markerX, pixelsPerSecond, element } = this.filmstrip
+      const { pixelsPerSecond, element } = this.filmstrip
       if (!this.isPreciseFiner() || this.pointer.y >= element.getBoundingClientRect().bottom) return
-      this.precise = { x: this.pointer.x, time: this.filmstrip.time, markerX, secondsPerPixel: 1 / pixelsPerSecond }
+      // Start where the previous move left the thumb: Shaka has already mapped this
+      // move's x onto the bar, and the strip may still be rendering an older time.
+      const time = this.lastDragValue
+      const markerX = this.getThumbClientX(time) - this.bar.getBoundingClientRect().left
+      this.precise = { x: this.pointer.x, time, markerX, secondsPerPixel: 1 / pixelsPerSecond }
     }
     const time = this.precise.time + (this.pointer.x - this.precise.x) * this.precise.secondsPerPixel
     this.bar.value = String(Math.min(Number(this.bar.max), Math.max(Number(this.bar.min), time)))

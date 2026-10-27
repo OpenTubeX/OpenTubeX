@@ -66,8 +66,6 @@ export class SeekFilmstrip {
         width: thumbnail.duration * pixelsPerSecond,
       }))
       .filter(frame => frame.left + frame.width > 0 && frame.left < width)
-    this.time = time
-    this.markerX = markerX
     this.pixelsPerSecond = pixelsPerSecond
 
     container.style.setProperty('--ft-seek-filmstrip-height', `${height}px`)
