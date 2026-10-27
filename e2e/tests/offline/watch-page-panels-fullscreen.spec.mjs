@@ -706,6 +706,36 @@ test.describe('watch page', () => {
     await handle.hover()
   })
 
+  test('fullscreen metadata opens description links externally without toggling playback', async ({ app, page }) => {
+    await app.electronApp.evaluate(({ shell }) => {
+      globalThis.fullscreenExternalUrls = []
+      shell.openExternal = async url => {
+        globalThis.fullscreenExternalUrls.push(url)
+      }
+    })
+    await mockPlayableWatchPage(app, page)
+    await openMockedVideo(page)
+    await page.evaluate(() => window.$store.dispatch('updateExternalLinkHandling', ''))
+    const video = await waitForPlayback(page)
+    await setPlayerFullscreen(page, true)
+    await page.locator('.playerFullscreenTitleOverlay').click({ force: true })
+
+    const metadata = page.locator('.fullscreenMetadataOverlay.open')
+    await expect(metadata).toBeVisible()
+    await metadata.locator('.description').evaluate((element) => {
+      element.insertAdjacentHTML('beforeend', '<a href="https://example.com/fullscreen-link">Fullscreen link</a>')
+    })
+    const paused = await video.evaluate(element => element.paused)
+
+    // The dock stops clicks before they reach the document link handler
+    await metadata.getByRole('link', { name: 'Fullscreen link', exact: true }).click()
+
+    await expect.poll(() => app.electronApp.evaluate(() => globalThis.fullscreenExternalUrls))
+      .toEqual(['https://example.com/fullscreen-link'])
+    await expect(metadata).toBeVisible()
+    expect(await video.evaluate(element => element.paused)).toBe(paused)
+  })
+
   test('fullscreen metadata wraps icon-labeled items without separators', async ({ app, page }) => {
     await mockPlayableWatchPage(app, page)
     await openMockedVideo(page)

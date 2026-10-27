@@ -671,6 +671,9 @@ export default defineComponent({
   setup: function (props, { emit, expose }) {
     const { locale, t } = useI18n()
     const hardwareKeyboardAttached = inject('hardwareKeyboardAttached', ref(!process.env.IS_CAPACITOR))
+    // Panels over the video stop clicks so the player ignores them, which also
+    // hides them from the document link handler. Run that handler there instead.
+    const handleDocumentClick = inject('handleDocumentClick')
     const { tabId, isTabPresented } = useTabContext()
     const shortsNavigationSuspended = ref(false)
     let suspendedShortsError = null
@@ -11283,6 +11286,7 @@ export default defineComponent({
       mobileFullscreenSwipeStyle,
       mobileSeekPreview,
       resetFullscreenDockHeights,
+      handleDocumentClick,
       handleFullscreenDockHeaderDoubleClick,
       handleFullscreenDockResizePointerDown,
       handleFullscreenDockResizeKeydown,
