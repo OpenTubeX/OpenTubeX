@@ -37,12 +37,18 @@ test('a session bus that never answers Hello reports a connection error instead 
 })
 
 test('closing a reconnecting bus after Hello failed does not dial again', async t => {
-  const { address, sockets } = await silentBus(t)
+  const { address } = await silentBus(t)
   const bus = dbus.sessionBus({ busAddress: address, reconnect: { minDelay: 50 }, timeout: 100 })
   bus.connection.on('error', () => {})
+  // A regression would keep redialing and hold the test process open.
+  const end = bus.connection.end.bind(bus.connection)
+  t.after(() => end())
   await new Promise(resolve => bus.connection.once('close', resolve))
+  // Under load, Hello can time out before the server even accepts the first
+  // dial, so compare the socket itself rather than counting accepted ones.
+  const stream = bus.connection.stream
   await bus.close()
 
   await new Promise(resolve => setTimeout(resolve, 200))
-  assert.equal(sockets.length, 1)
+  assert.equal(bus.connection.stream, stream, 'the bus dialed a new socket after it was closed')
 })
