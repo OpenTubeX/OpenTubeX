@@ -341,8 +341,10 @@ async function changeTab(tab) {
 }
 
 async function getLocalHashtagShortsMore() {
+  const feed = hashtagFeed.value
   try {
     const continuation = await shortsContinuationData.value.getContinuation()
+    if (feed !== hashtagFeed.value) return
     shortsContinuationData.value = continuation.has_continuation ? continuation : null
     shorts.value = shorts.value.concat(continuation.videos.map(short => parseShort(short)))
   } catch (error) {

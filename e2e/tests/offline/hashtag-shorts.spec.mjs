@@ -1,4 +1,4 @@
-import { test, expect } from '../../helpers/app.mjs'
+import { test, expect, sel } from '../../helpers/app.mjs'
 
 test.use({
   seed: {
@@ -159,4 +159,44 @@ test('keeps showing the videos while the Shorts are still loading', async ({ pag
   releaseShorts()
   await tabs.getByRole('tab', { name: 'Shorts' }).click()
   await expect(page.getByText('Hashtag short 1')).toBeVisible()
+})
+
+test('drops a Shorts page that arrives after opening another hashtag', async ({ page }) => {
+  let releaseContinuation
+  const continuationReleased = new Promise(resolve => { releaseContinuation = resolve })
+  await page.route('https://www.youtube.com/youtubei/v1/browse**', async route => {
+    const request = route.request().postDataJSON()
+    if (request.continuation === 'hashtag-shorts-page-2') {
+      await continuationReleased
+      return route.fulfill({
+        json: { onResponseReceivedActions: [{ appendContinuationItemsAction: { continuationItems: [short(3)] } }] }
+      })
+    }
+    return route.fulfill({
+      json: decodeURIComponent(request.params ?? '') === decodeURIComponent(SHORTS_PARAMS)
+        ? hashtagPage('shorts', [short(1), short(2), shortsContinuation])
+        : hashtagPage('all', [video(1)])
+    })
+  })
+
+  const hashtagTab = await page.evaluate(() => window.ftElectron.tabs.create({ route: '/hashtag/lofi', makeActive: false }))
+  await page.locator(`.tab[data-tab-id="${hashtagTab.id}"]`).click()
+  await page.getByRole('tablist', { name: 'lofi' }).getByRole('tab', { name: 'Shorts' }).click()
+  await expect(page.getByText('Hashtag short 2')).toBeVisible()
+  const continuationRequest = page.waitForRequest(request => request.postDataJSON()?.continuation === 'hashtag-shorts-page-2')
+  await page.getByRole('button', { name: 'Fetch more results' }).click()
+  await continuationRequest
+
+  await page.locator(sel.searchInput).fill('https://www.youtube.com/hashtag/jazz')
+  await page.locator(sel.searchInput).press('Enter')
+  const jazzTabs = page.getByRole('tablist', { name: 'jazz' })
+  await expect(jazzTabs).toBeVisible()
+  await jazzTabs.getByRole('tab', { name: 'Shorts' }).click()
+  await expect(page.getByText('Hashtag short 2')).toBeVisible()
+
+  const staleResponse = page.waitForResponse(response => response.request().postDataJSON()?.continuation === 'hashtag-shorts-page-2')
+  releaseContinuation()
+  await staleResponse
+  await expect(page.getByRole('button', { name: 'Fetch more results' })).toBeVisible()
+  await expect(page.locator('.ft-list-video')).toHaveCount(2)
 })
