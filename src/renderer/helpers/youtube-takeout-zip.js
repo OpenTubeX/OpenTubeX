@@ -353,9 +353,11 @@ function getDirectory(path) {
  * @param {string} metadataPath
  * @param {string} content The metadata CSV.
  * @param {string[]} csvPaths The other CSV paths in its directory.
+ * @param {boolean} [skipMissing] Ignore records without a video file instead of
+ * expecting it at their default path.
  * @returns {Map<string, object>}
  */
-function matchTakeoutPlaylistMetadata(metadataPath, content, csvPaths) {
+function matchTakeoutPlaylistMetadata(metadataPath, content, csvPaths, skipMissing = false) {
   const directory = getDirectory(metadataPath)
   const files = csvPaths.map(path => ({ path, name: path.slice(directory.length).replace(/\.csv$/i, '') }))
   const fileNames = files.map(({ name }) => name)
@@ -366,12 +368,13 @@ function matchTakeoutPlaylistMetadata(metadataPath, content, csvPaths) {
   const titles = playlists.map(playlist => sanitizeTakeoutFilename(playlist.playlistName))
   const suffix = findTakeoutPlaylistFileSuffix(titles, fileNames)
   const accountMetadata = new Map()
-  const pending = playlists.map((playlist, index) => {
+  const pending = playlists.flatMap((playlist, index) => {
     const title = titles[index]
     const paths = files
       .filter(({ name }) => name.startsWith(title) && [suffix, ''].includes(name.slice(title.length).toLowerCase()))
       .map(({ path }) => path)
-    return { playlist, paths: new Set(paths.length ? paths : [`${directory}${title}${suffix || '-videos'}.csv`]) }
+    if (paths.length === 0 && skipMissing) { return [] }
+    return [{ playlist, paths: new Set(paths.length ? paths : [`${directory}${title}${suffix || '-videos'}.csv`]) }]
   })
   const claimantsByPath = new Map()
   for (const entry of pending) {
@@ -605,7 +608,7 @@ export async function forEachTakeoutPlaylistFile(files, onPlaylist, onError) {
   let metadata = new Map()
   if (metadataEntries.length === 1 && videoEntries.length > 0) {
     try {
-      metadata = matchTakeoutPlaylistMetadata(metadataEntries[0].path, metadataEntries[0].content, videoEntries.map(entry => entry.path))
+      metadata = matchTakeoutPlaylistMetadata(metadataEntries[0].path, metadataEntries[0].content, videoEntries.map(entry => entry.path), true)
     } catch (error) {
       onError(error, metadataEntries[0].path)
     }

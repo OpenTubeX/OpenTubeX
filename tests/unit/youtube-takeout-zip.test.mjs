@@ -546,3 +546,12 @@ test('numbers picked playlists that share a title and reports unusable files', a
   await forEachTakeoutPlaylistFile([new File([`${metadataHeader}\n${playlistId},Mix,,,\n`], 'playlists.csv')], async () => assert.fail(), (error, filename) => errors.push(filename))
   assert.deepEqual(errors, ['playlists.csv'])
 })
+
+test('uses picked playlist metadata when unpicked titles share a file name', async () => {
+  const playlists = []
+  await forEachTakeoutPlaylistFile([
+    new File(['Video ID,Playlist video creation timestamp\nabcdefghijk,2025-01-01T00:00:00Z\n'], 'Rock_Pop-videos.csv'),
+    new File([`${metadataHeader}\n${playlistId},Rock/Pop,Loud,,\nPLotherslash,Other/List,,,\nPLothercolon,Other:List,,,\n`], 'playlists.csv'),
+  ], async playlist => playlists.push([playlist.playlistName, playlist.description]), error => { throw error })
+  assert.deepEqual(playlists, [['Rock/Pop', 'Loud']])
+})
