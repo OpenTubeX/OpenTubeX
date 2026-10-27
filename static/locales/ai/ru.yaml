@@ -1510,6 +1510,10 @@ Video:
   Premiere started: Идёт премьера. Началась {timeAgo}
   Player:
     Playing in Picture-in-Picture: Воспроизводится в режиме «Картинка в картинке»
+    Stream Recovery:
+      DASH Fallback: "Не удалось воспроизвести аудиопоток, переключение на форматы DASH: {error}"
+      Error Copied: "Ошибка скопирована в буфер обмена"
+      Legacy Fallback: "Не удалось воспроизвести поток, переключение на устаревшие форматы: {error}"
     Caption Timing:
       Adjust Timing: Настроить время…
       Caption Timing: Время субтитров

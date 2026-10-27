@@ -1521,6 +1521,10 @@ Video:
     filler: Útúrdúrar
   Player:
     Playing in Picture-in-Picture: Spilast í mynd-í-mynd
+    Stream Recovery:
+      DASH Fallback: "Hljóðstreymið mistókst, skipt yfir í DASH-snið: {error}"
+      Error Copied: "Villa afrituð á klippispjald"
+      Legacy Fallback: "Streymið mistókst, skipt yfir í eldri snið: {error}"
     Caption Timing:
       Adjust Timing: Stilla tímasetningu…
       Caption Timing: Tímasetning skjátexta

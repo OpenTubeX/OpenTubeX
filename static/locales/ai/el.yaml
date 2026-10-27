@@ -1518,6 +1518,10 @@ Video:
   Premiere started: Η πρεμιέρα βρίσκεται σε εξέλιξη. Ξεκίνησε {timeAgo}
   Player:
     Playing in Picture-in-Picture: Αναπαραγωγή σε λειτουργία εικόνας εντός εικόνας
+    Stream Recovery:
+      DASH Fallback: "Η ροή ήχου απέτυχε, γίνεται εναλλαγή σε μορφές DASH: {error}"
+      Error Copied: "Το σφάλμα αντιγράφηκε στο πρόχειρο"
+      Legacy Fallback: "Η ροή απέτυχε, γίνεται εναλλαγή σε παλαιού τύπου μορφές: {error}"
     Caption Timing:
       Adjust Timing: Προσαρμογή χρονισμού…
       Caption Timing: Χρονισμός υποτίτλων

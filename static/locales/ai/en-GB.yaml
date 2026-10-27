@@ -1483,6 +1483,10 @@ Video:
   Premiere started: Premiere in progress. Started {timeAgo}
   Player:
     Playing in Picture-in-Picture: Playing in Picture-in-Picture
+    Stream Recovery:
+      DASH Fallback: "The audio stream failed, switching to DASH formats: {error}"
+      Error Copied: "Error copied to clipboard"
+      Legacy Fallback: "The stream failed, switching to legacy formats: {error}"
     Caption Timing:
       Adjust Timing: Adjust timing…
       Caption Timing: Caption timing

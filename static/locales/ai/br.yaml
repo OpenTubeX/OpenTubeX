@@ -1508,6 +1508,10 @@ Video:
     filler: "Dihanadennoù"
   Player:
     Playing in Picture-in-Picture: O vezañ lennet e mod Skeudenn e-barzh skeudenn
+    Stream Recovery:
+      DASH Fallback: "C'hwitet eo al lanv son, o tremen d'ar furmadoù DASH: {error}"
+      Error Copied: "Eilet eo bet ar fazi er golver"
+      Legacy Fallback: "C'hwitet eo al lanv, o tremen d'ar furmadoù kozh: {error}"
     Caption Timing:
       Adjust Timing: Kempenn an amzer…
       Caption Timing: Amzer an istitloù

@@ -1561,6 +1561,10 @@ Video:
   Premiere started: Премијера је у току. Почела је {timeAgo}
   Player:
     Playing in Picture-in-Picture: Репродукује се у режиму слика у слици
+    Stream Recovery:
+      DASH Fallback: "Аудио стрим није успео, пребацивање на DASH формате: {error}"
+      Error Copied: "Грешка је копирана у оставу"
+      Legacy Fallback: "Стрим није успео, пребацивање на старије формате: {error}"
     Caption Timing:
       Adjust Timing: Подеси време…
       Caption Timing: Време титлова

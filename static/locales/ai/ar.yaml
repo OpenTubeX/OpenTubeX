@@ -1535,6 +1535,10 @@ Video:
   Premiere started: العرض الأول قيد التقدم. بدأ {timeAgo}
   Player:
     Playing in Picture-in-Picture: يتم التشغيل في وضع صورة داخل صورة
+    Stream Recovery:
+      DASH Fallback: "فشل بث الصوت، جارٍ التبديل إلى صيغ DASH: {error}"
+      Error Copied: "تم نسخ الخطأ إلى الحافظة"
+      Legacy Fallback: "فشل البث، جارٍ التبديل إلى الصيغ القديمة: {error}"
     Caption Timing:
       Adjust Timing: ضبط التوقيت…
       Caption Timing: توقيت الترجمة

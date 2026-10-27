@@ -1540,6 +1540,10 @@ Video:
   Premiere started: Ensi-ilta on käynnissä. Alkoi {timeAgo}
   Player:
     Playing in Picture-in-Picture: Toistetaan kuva kuvassa -tilassa
+    Stream Recovery:
+      DASH Fallback: "Äänistriimi epäonnistui, vaihdetaan DASH-formaatteihin: {error}"
+      Error Copied: "Virhe kopioitu leikepöydälle"
+      Legacy Fallback: "Striimi epäonnistui, vaihdetaan vanhoihin formaatteihin: {error}"
     Caption Timing:
       Adjust Timing: Säädä ajoitusta…
       Caption Timing: Tekstityksen ajoitus

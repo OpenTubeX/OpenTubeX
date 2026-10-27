@@ -1509,6 +1509,10 @@ Video:
     filler: Gaitik kanpokoak
   Player:
     Playing in Picture-in-Picture: Irudiz irudi moduan erreproduzitzen
+    Stream Recovery:
+      DASH Fallback: "Audio-jarioak huts egin du, DASH formatuetara aldatzen: {error}"
+      Error Copied: "Errorea arbelera kopiatu da"
+      Legacy Fallback: "Jarioak huts egin du, formatu zaharretara aldatzen: {error}"
     Caption Timing:
       Adjust Timing: Doitu denboraketa…
       Caption Timing: Azpitituluen denboraketa

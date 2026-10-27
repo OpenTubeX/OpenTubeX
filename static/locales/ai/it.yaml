@@ -1498,6 +1498,10 @@ Video:
   Premiere started: Première in corso. Iniziata {timeAgo}
   Player:
     Playing in Picture-in-Picture: In riproduzione in modalità immagine nell'immagine
+    Stream Recovery:
+      DASH Fallback: "Lo stream audio non è riuscito, passaggio ai formati DASH: {error}"
+      Error Copied: "Errore copiato negli appunti"
+      Legacy Fallback: "Lo stream non è riuscito, passaggio ai formati legacy: {error}"
     Caption Timing:
       Adjust Timing: Regola la sincronizzazione…
       Caption Timing: Sincronizzazione dei sottotitoli

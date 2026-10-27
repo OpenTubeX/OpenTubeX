@@ -1585,6 +1585,10 @@ Video:
     filler: Адступленні
   Player:
     Playing in Picture-in-Picture: Прайграецца ў рэжыме «Карцінка ў карцінцы»
+    Stream Recovery:
+      DASH Fallback: "Не ўдалося прайграць аўдыяпаток, пераключэнне на фарматы DASH: {error}"
+      Error Copied: "Памылка скапіявана ў буфер абмену"
+      Legacy Fallback: "Не ўдалося прайграць паток, пераключэнне на састарэлыя фарматы: {error}"
     Caption Timing:
       Adjust Timing: Наладзіць час…
       Caption Timing: Час субцітраў

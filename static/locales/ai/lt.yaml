@@ -1857,6 +1857,10 @@ Video:
     filler: Nukrypimai
   Player:
     Playing in Picture-in-Picture: Leidžiama vaizdo vaizde režimu
+    Stream Recovery:
+      DASH Fallback: "Garso srautas nepavyko, perjungiama į DASH formatus: {error}"
+      Error Copied: "Klaida nukopijuota į iškarpinę"
+      Legacy Fallback: "Srautas nepavyko, perjungiama į senuosius formatus: {error}"
     Caption Timing:
       Adjust Timing: Koreguoti laiką…
       Caption Timing: Subtitrų laikas

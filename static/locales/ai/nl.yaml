@@ -1548,6 +1548,10 @@ Video:
     filler: Uitweidingen
   Player:
     Playing in Picture-in-Picture: Wordt afgespeeld in beeld-in-beeld
+    Stream Recovery:
+      DASH Fallback: "De audiostream is mislukt, er wordt overgeschakeld naar DASH-formaten: {error}"
+      Error Copied: "Fout gekopieerd naar klembord"
+      Legacy Fallback: "De stream is mislukt, er wordt overgeschakeld naar verouderde formaten: {error}"
     Caption Timing:
       Adjust Timing: Timing aanpassen…
       Caption Timing: Ondertiteltiming

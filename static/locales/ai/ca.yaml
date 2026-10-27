@@ -1955,6 +1955,10 @@ Video:
       looping playlists: reproduir llistes de reproducció en bucle
   Player:
     Playing in Picture-in-Picture: S'està reproduint en mode d'imatge sobre imatge
+    Stream Recovery:
+      DASH Fallback: "El flux d'àudio ha fallat, s'està canviant als formats DASH: {error}"
+      Error Copied: "S'ha copiat l'error al porta-retalls"
+      Legacy Fallback: "El flux ha fallat, s'està canviant als formats antics: {error}"
     Caption Timing:
       Adjust Timing: Ajusta el temps…
       Caption Timing: Temps dels subtítols

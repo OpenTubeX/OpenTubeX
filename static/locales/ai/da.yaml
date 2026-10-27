@@ -1567,6 +1567,10 @@ Video:
     hook: Introduktion/hilsen
   Player:
     Playing in Picture-in-Picture: Afspilles som billede-i-billede
+    Stream Recovery:
+      DASH Fallback: "Lydstreamen mislykkedes, skifter til DASH-formater: {error}"
+      Error Copied: "Fejl kopieret til udklipsholder"
+      Legacy Fallback: "Streamen mislykkedes, skifter til ældre formater: {error}"
     Caption Timing:
       Adjust Timing: Juster timing…
       Caption Timing: Underteksttiming

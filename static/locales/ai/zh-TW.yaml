@@ -1501,6 +1501,10 @@ Video:
     hook: 開場／問候
   Player:
     Playing in Picture-in-Picture: 正在以子母畫面模式播放
+    Stream Recovery:
+      DASH Fallback: "音訊串流失敗，正在切換至 DASH 格式：{error}"
+      Error Copied: "錯誤已複製到剪貼簿"
+      Legacy Fallback: "串流失敗，正在切換至舊版格式：{error}"
     Caption Timing:
       Adjust Timing: 調整時間…
       Caption Timing: 字幕時間

@@ -1511,6 +1511,10 @@ Video:
     hook: Pembuka/Sapaan
   Player:
     Playing in Picture-in-Picture: Diputar dalam mode Gambar-dalam-Gambar
+    Stream Recovery:
+      DASH Fallback: "Streaming audio gagal, beralih ke format DASH: {error}"
+      Error Copied: "Galat disalin ke papan klip"
+      Legacy Fallback: "Streaming gagal, beralih ke format lama: {error}"
     Caption Timing:
       Adjust Timing: Sesuaikan waktu…
       Caption Timing: Waktu takarir

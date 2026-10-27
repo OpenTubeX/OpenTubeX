@@ -1933,6 +1933,10 @@ Video:
       looping playlists: ponavljanje seznamov predvajanja
   Player:
     Playing in Picture-in-Picture: Predvaja se v načinu slika v sliki
+    Stream Recovery:
+      DASH Fallback: "Zvočni pretok ni uspel, preklop na formate DASH: {error}"
+      Error Copied: "Napaka kopirana v odložišče"
+      Legacy Fallback: "Pretok ni uspel, preklop na starejše formate: {error}"
     Caption Timing:
       Adjust Timing: Prilagodi čas…
       Caption Timing: Čas podnapisov

@@ -1542,6 +1542,10 @@ Video:
     hook: פתיח/ברכות
   Player:
     Playing in Picture-in-Picture: מתנגן במצב תמונה בתוך תמונה
+    Stream Recovery:
+      DASH Fallback: "זרם השמע נכשל, עובר לתבניות DASH: {error}"
+      Error Copied: "השגיאה הועתקה ללוח"
+      Legacy Fallback: "הזרם נכשל, עובר לתבניות מדור קודם: {error}"
     Caption Timing:
       Adjust Timing: התאמת התזמון…
       Caption Timing: תזמון כתוביות

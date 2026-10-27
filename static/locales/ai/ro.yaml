@@ -1533,6 +1533,10 @@ Video:
   Premiere started: Premiera este în curs. A început {timeAgo}
   Player:
     Playing in Picture-in-Picture: Se redă în modul imagine în imagine
+    Stream Recovery:
+      DASH Fallback: "Fluxul audio a eșuat, se trece la formatele DASH: {error}"
+      Error Copied: "Eroare copiată în clipboard"
+      Legacy Fallback: "Fluxul a eșuat, se trece la formatele vechi: {error}"
     Caption Timing:
       Adjust Timing: Ajustează sincronizarea…
       Caption Timing: Sincronizarea subtitrărilor

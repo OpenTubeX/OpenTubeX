@@ -1516,6 +1516,10 @@ Video:
   Premiere started: Премиерата е в ход. Започна {timeAgo}
   Player:
     Playing in Picture-in-Picture: Възпроизвежда се в режим „Картина в картината“
+    Stream Recovery:
+      DASH Fallback: "Аудио потокът се провали, превключване към DASH формати: {error}"
+      Error Copied: "Грешката е копирана в клипборда"
+      Legacy Fallback: "Потокът се провали, превключване към остарели формати: {error}"
     Caption Timing:
       Adjust Timing: Настройване на времето…
       Caption Timing: Време на субтитрите

@@ -1535,6 +1535,10 @@ Video:
   Premiere started: Прем’єра триває. Почалася {timeAgo}
   Player:
     Playing in Picture-in-Picture: Відтворюється в режимі «Картинка в картинці»
+    Stream Recovery:
+      DASH Fallback: "Не вдалося відтворити аудіопотік, перемикання на формати DASH: {error}"
+      Error Copied: "Помилку скопійовано в буфер обміну"
+      Legacy Fallback: "Не вдалося відтворити потік, перемикання на застарілі формати: {error}"
     Caption Timing:
       Adjust Timing: Налаштувати синхронізацію…
       Caption Timing: Синхронізація субтитрів

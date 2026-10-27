@@ -1501,6 +1501,10 @@ Video:
     hook: Sissejuhatus/tervitus
   Player:
     Playing in Picture-in-Picture: Esitatakse pilt-pildis-režiimis
+    Stream Recovery:
+      DASH Fallback: "Helivoog ebaõnnestus, lülitun DASH-vormingutele: {error}"
+      Error Copied: "Viga kopeeriti lõikelauale"
+      Legacy Fallback: "Voog ebaõnnestus, lülitun pärandvormingutele: {error}"
     Caption Timing:
       Adjust Timing: Muuda ajastust…
       Caption Timing: Subtiitrite ajastus

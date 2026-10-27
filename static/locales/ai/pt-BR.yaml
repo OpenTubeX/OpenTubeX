@@ -1469,6 +1469,10 @@ Video:
   Premiere started: Estreia em curso. Começou {timeAgo}
   Player:
     Playing in Picture-in-Picture: Reproduzindo em imagem na imagem
+    Stream Recovery:
+      DASH Fallback: "A transmissão de áudio falhou, mudando para formatos DASH: {error}"
+      Error Copied: "Erro copiado para a área de transferência"
+      Legacy Fallback: "A transmissão falhou, mudando para formatos legados: {error}"
     Caption Timing:
       Adjust Timing: Ajustar sincronização…
       Caption Timing: Sincronização das legendas

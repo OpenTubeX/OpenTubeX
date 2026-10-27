@@ -1579,6 +1579,10 @@ Video:
     filler: حاشیه‌روی
   Player:
     Playing in Picture-in-Picture: در حال پخش در حالت تصویر در تصویر
+    Stream Recovery:
+      DASH Fallback: "پخش جریانی صدا ناموفق بود، در حال تغییر به قالب‌های DASH: {error}"
+      Error Copied: "خطا در کلیپ‌بورد کپی شد"
+      Legacy Fallback: "پخش جریانی ناموفق بود، در حال تغییر به قالب‌های قدیمی: {error}"
     Caption Timing:
       Adjust Timing: تنظیم زمان‌بندی…
       Caption Timing: زمان‌بندی زیرنویس

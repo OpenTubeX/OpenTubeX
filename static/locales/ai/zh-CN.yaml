@@ -1498,6 +1498,10 @@ Video:
   Premiere started: 首映正在进行，开始时间：{timeAgo}
   Player:
     Playing in Picture-in-Picture: 正在以画中画模式播放
+    Stream Recovery:
+      DASH Fallback: "音频流播放失败，正在切换到 DASH 格式：{error}"
+      Error Copied: "错误已复制到剪贴板"
+      Legacy Fallback: "流播放失败，正在切换到旧版格式：{error}"
     Caption Timing:
       Adjust Timing: 调整时间…
       Caption Timing: 字幕时间

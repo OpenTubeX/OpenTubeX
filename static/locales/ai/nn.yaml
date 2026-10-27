@@ -1747,6 +1747,10 @@ Video:
     filler: Avsporingar
   Player:
     Playing in Picture-in-Picture: Spelast av i bilete-i-bilete
+    Stream Recovery:
+      DASH Fallback: "Lydstraumen feila, byter til DASH-format: {error}"
+      Error Copied: "Feil kopiert til utklippstavla"
+      Legacy Fallback: "Straumen feila, byter til eldre format: {error}"
     Caption Timing:
       Adjust Timing: Juster timing…
       Caption Timing: Underteksttiming

@@ -1520,6 +1520,10 @@ Video:
     filler: Gwyriadau
   Player:
     Playing in Picture-in-Picture: Yn chwarae mewn llun-mewn-llun
+    Stream Recovery:
+      DASH Fallback: "Methodd y ffrwd sain, yn newid i fformatau DASH: {error}"
+      Error Copied: "Gwall wedi'i gopïo i'r clipfwrdd"
+      Legacy Fallback: "Methodd y ffrwd, yn newid i fformatau etifeddol: {error}"
     Caption Timing:
       Adjust Timing: Addasu amseru…
       Caption Timing: Amseru isdeitlau

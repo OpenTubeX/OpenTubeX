@@ -1189,7 +1189,9 @@ test.describe('watch page', () => {
 
     expect(rejectedManifestRequests).toBeGreaterThan(0)
     expect(await app.electronApp.evaluate(() => globalThis.__ytDlpPostLiveCalls)).toBe(1)
+    // A failed initial load still autoplays the fallback, but explains it.
     await waitForPlayback(page)
+    await expect(page.locator(`${activeTab} .streamRecoveryNotice`)).toContainText('trying yt-dlp instead')
 
     await page.getByRole('button', { name: 'Change Media Formats' }).click()
     const prompt = page.getByRole('dialog', { name: 'Change Media Formats' })

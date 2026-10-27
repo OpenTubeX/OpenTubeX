@@ -2133,6 +2133,10 @@ Video:
   Hide Channel: Kanal ausblenden
   More Options: Weitere Optionen
   Player:
+    Stream Recovery:
+      DASH Fallback: "Der Audiostream ist fehlgeschlagen, es wird zu DASH-Formaten gewechselt: {error}"
+      Error Copied: "Fehler in die Zwischenablage kopiert"
+      Legacy Fallback: "Der Stream ist fehlgeschlagen, es wird zu Legacy-Formaten gewechselt: {error}"
     Caption Timing:
       Adjust Timing: Timing anpassen…
       Caption Timing: Untertitel-Timing

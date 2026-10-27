@@ -1544,6 +1544,10 @@ Video:
     filler: Digresións
   Player:
     Playing in Picture-in-Picture: Reproducindo en imaxe en imaxe
+    Stream Recovery:
+      DASH Fallback: "Fallou a emisión de son, cambiando aos formatos DASH: {error}"
+      Error Copied: "Erro copiado no portapapeis"
+      Legacy Fallback: "Fallou a emisión, cambiando aos formatos antigos: {error}"
     Caption Timing:
       Adjust Timing: Axustar a sincronización…
       Caption Timing: Sincronización dos subtítulos

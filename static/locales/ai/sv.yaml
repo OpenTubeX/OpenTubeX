@@ -1513,6 +1513,10 @@ Video:
   Premiere started: Premiären pågår. Startade {timeAgo}
   Player:
     Playing in Picture-in-Picture: Spelas upp i bild-i-bild
+    Stream Recovery:
+      DASH Fallback: "Ljudströmmen misslyckades, byter till DASH-format: {error}"
+      Error Copied: "Felet har kopierats till urklipp"
+      Legacy Fallback: "Strömmen misslyckades, byter till äldre format: {error}"
     Caption Timing:
       Adjust Timing: Justera timing…
       Caption Timing: Undertexttiming

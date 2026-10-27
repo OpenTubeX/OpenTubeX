@@ -177,6 +177,8 @@ const SABR_ERROR_RECOVERY_SETTLE_SECONDS = 30
 // content, otherwise seeking around a broken stream would keep handing it fresh
 // recovery attempts.
 const SABR_ERROR_RECOVERY_MAX_TICK_SECONDS = 2
+// Natural playback after which a recovered stream counts as healthy again.
+const STREAM_RECOVERY_NOTICE_SETTLE_SECONDS = 10
 // The refill above deliberately has no time limit, so a video that breaks every
 // time it has played just past the settle threshold could otherwise reload for
 // ever. This is the hard stop for a whole video: once it is spent the format
@@ -576,6 +578,15 @@ export default defineComponent({
       ipBlockRecoveryAttemptedForCurrentVideo: false,
       androidHttpErrorRecoveryAttemptedForCurrentVideo: false,
       streamErrorReloadAttemptedForCurrentVideo: false,
+      /**
+       * Persistent explanation of the last automatic stream-failure recovery.
+       * @type {string|null}
+       */
+      streamRecoveryNotice: null,
+      // Recovery pauses only interrupted playback, not a failed initial load.
+      streamRecoveryPausesPlayback: false,
+      streamRecoveryPlayedSeconds: 0,
+      playbackProgressedForCurrentVideo: false,
       sabrErrorRecoveryAttempts: 0,
       sabrErrorRecoveriesForCurrentVideo: 0,
       /** @type {number|null} */
@@ -2388,6 +2399,8 @@ export default defineComponent({
           this.ipBlockRecoveryAttemptedForCurrentVideo = false
           this.androidHttpErrorRecoveryAttemptedForCurrentVideo = false
           this.streamErrorReloadAttemptedForCurrentVideo = false
+          this.streamRecoveryNotice = null
+          this.playbackProgressedForCurrentVideo = false
           this.playbackEngineFallbackAttemptedForCurrentVideo = false
           this.playbackEngineFallbackTarget = null
           this.ytDlpDefaultClientsFallbackToastShown = false
@@ -4845,6 +4858,17 @@ export default defineComponent({
       this.shortsCompletionBlockedBySeek = shortsCompletion.blockedBySeek
       this.shortsPlaybackAfterSeekSeconds = shortsCompletion.playbackAfterSeekSeconds
 
+      if (elapsedSeconds > 0 && elapsedSeconds <= SABR_ERROR_RECOVERY_MAX_TICK_SECONDS) {
+        this.playbackProgressedForCurrentVideo = true
+        // The recovered stream has proven itself after a stretch of natural playback.
+        if (this.streamRecoveryNotice !== null) {
+          this.streamRecoveryPlayedSeconds += elapsedSeconds
+          if (this.streamRecoveryPlayedSeconds >= STREAM_RECOVERY_NOTICE_SETTLE_SECONDS) {
+            this.streamRecoveryNotice = null
+          }
+        }
+      }
+
       // A looping media element does not fire `ended`. Persist the completed
       // state just before a Short wraps to zero, but never from a seek-driven
       // time update.
@@ -5428,6 +5452,8 @@ export default defineComponent({
       this.playbackEngineFallbackAttemptedForCurrentVideo = false
       this.playbackEngineFallbackTarget = playbackEngine
       this.errorMessage = null
+      // A manual engine switch replaces the recovered stream the notice describes.
+      this.streamRecoveryNotice = null
 
       const activePlaybackSourceAvailable = this.activeFormat === 'legacy'
         ? this.legacyFormats.length > 0
@@ -5795,6 +5821,17 @@ export default defineComponent({
     },
 
     /**
+     * Explains an automatic stream-failure recovery until the user dismisses
+     * it or the recovered stream plays on.
+     * @param {string} message
+     */
+    showStreamRecoveryNotice: function (message) {
+      this.streamRecoveryNotice = message
+      this.streamRecoveryPausesPlayback = this.playbackProgressedForCurrentVideo
+      this.streamRecoveryPlayedSeconds = 0
+    },
+
+    /**
      * Starts the one stream-error recovery allowed for the current video.
      * @param {string} specificError
      * @returns {boolean} whether recovery started
@@ -5806,10 +5843,7 @@ export default defineComponent({
 
       this.streamErrorReloadAttemptedForCurrentVideo = true
       this.handleWatchProgressAutoSaveWhenProgressEnabled()
-      this.showTabToast({
-        message: `${this.t('Video.Reloading video after streaming URL error')}: ${specificError}`,
-        icon: ['fas', 'sync'],
-      })
+      this.showStreamRecoveryNotice(`${this.t('Video.Reloading video after streaming URL error')}: ${specificError}`)
       return true
     },
 
@@ -5928,6 +5962,7 @@ export default defineComponent({
       }
 
       const { Code } = shaka.util.Error
+      const errorLabel = `[PLAYER_ERROR: ${error.code === Code.BAD_HTTP_STATUS ? error.data[1] : error.code}]`
 
       if (error.code === Code.HTTP_ERROR) {
         if (!navigator.onLine) {
@@ -6028,7 +6063,8 @@ export default defineComponent({
       if (
         await this.reloadSabrStream(
           this.$refs.player?.getSabrReloadState(),
-          'Refreshing SABR stream after playback error'
+          `${this.t('Video.Reloading video after streaming URL error')}: ${errorLabel}`,
+          true
         )
       ) { return }
 
@@ -6049,8 +6085,7 @@ export default defineComponent({
         }
 
         this.handleWatchProgressAutoSaveWhenProgressEnabled()
-        const status = error.code === Code.BAD_HTTP_STATUS ? error.data[1] : error.code
-        this.errorMessage = `[PLAYER_ERROR: ${status}] Unable to recover the video stream. Please reload this video.`
+        this.errorMessage = `${errorLabel} Unable to recover the video stream. Please reload this video.`
       }
 
       if (
@@ -6072,6 +6107,7 @@ export default defineComponent({
           await stopPlaybackRecovery()
         } else {
           console.error('Unable to play audio formats. Reverting to DASH formats...')
+          this.showStreamRecoveryNotice(this.t('Video.Player.Stream Recovery.DASH Fallback', { error: errorLabel }))
           this.enableDashFormat()
         }
       } else {
@@ -6082,6 +6118,7 @@ export default defineComponent({
           case 'dash':
             if (this.legacyFormats.length > 0) {
               console.error('Unable to play DASH formats. Reverting to legacy formats...')
+              this.showStreamRecoveryNotice(this.t('Video.Player.Stream Recovery.Legacy Fallback', { error: errorLabel }))
               this.enableLegacyFormat()
             } else {
               await stopPlaybackRecovery()
@@ -6092,6 +6129,7 @@ export default defineComponent({
             break
           case 'audio':
             console.error('Unable to play audio formats. Reverting to DASH formats...')
+            this.showStreamRecoveryNotice(this.t('Video.Player.Stream Recovery.DASH Fallback', { error: errorLabel }))
             this.enableDashFormat()
             break
         }
@@ -6170,10 +6208,7 @@ export default defineComponent({
 
         this.alignActiveFormatWithAvailableSources()
 
-        this.showTabToast({
-          message: this.t('Change Format.yt-dlp Fallback Template', { error: reason }),
-          icon: ['fas', 'exchange-alt'],
-        })
+        this.showStreamRecoveryNotice(this.t('Change Format.yt-dlp Fallback Template', { error: reason }))
         this.ytDlpStreamsPending = false
         return true
       }
@@ -6194,10 +6229,7 @@ export default defineComponent({
       }
 
       this.ytDlpStreamsPending = true
-      this.showTabToast({
-        message: this.t('Change Format.Built-in Fallback Template', { error: reason }),
-        icon: ['fas', 'exchange-alt'],
-      })
+      this.showStreamRecoveryNotice(this.t('Change Format.Built-in Fallback Template', { error: reason }))
 
       try {
         const fallbackApplied = await this.extractYtDlpPlaybackSource(
@@ -7117,7 +7149,12 @@ export default defineComponent({
         this.sabrErrorRecoveriesForCurrentVideo < MAX_SABR_ERROR_RECOVERIES_PER_VIDEO
     },
 
-    async reloadSabrStream(payload, toastMessage) {
+    /**
+     * @param {object} payload
+     * @param {string} message
+     * @param {boolean} [failure] whether a stream failure caused the reload
+     */
+    async reloadSabrStream(payload, message, failure = false) {
       if (!this.canReloadSabrStream()) {
         if (this.isSabrVideoStream() && !this.isLoading) {
           console.warn(
@@ -7137,13 +7174,13 @@ export default defineComponent({
       this.sabrErrorRecoveryLastSeconds = this.getTimestamp()
       this.sabrErrorRecoveryPlayedSeconds = 0
       console.warn(
-        `${toastMessage} for ${this.videoId} at ${this.sabrErrorRecoveryLastSeconds}s and ` +
+        `${message} for ${this.videoId} at ${this.sabrErrorRecoveryLastSeconds}s and ` +
         `${payload?.playbackRate ?? this.currentPlaybackRate}x speed. Reload ${this.sabrErrorRecoveryAttempts} of ` +
         `${MAX_SABR_ERROR_RECOVERIES} since playback last settled, ${this.sabrErrorRecoveriesForCurrentVideo} of ` +
         `${MAX_SABR_ERROR_RECOVERIES_PER_VIDEO} for this video`
       )
       try {
-        await this.performSabrReload(payload, toastMessage)
+        await this.performSabrReload(payload, message, failure)
       } catch (error) {
         console.error('SABR reload failed', error)
         return false
@@ -7161,6 +7198,7 @@ export default defineComponent({
       this.handleWatchProgressAutoSaveWhenProgressEnabled()
       if (this.legacyFormats.length > 0) {
         console.error('Unable to recover the SABR stream. Reverting to legacy formats...')
+        this.showStreamRecoveryNotice(this.t('Video.Player.Stream Recovery.Legacy Fallback', { error: '[PLAYER_ERROR: SABR_RELOAD]' }))
         this.enableLegacyFormat()
       } else {
         const timestamp = this.getTimestamp()
@@ -7205,13 +7243,17 @@ export default defineComponent({
       }
     },
 
-    async performSabrReload(payload, toastMessage) {
+    async performSabrReload(payload, message, failure = false) {
       this.pendingSabrReloadContext = payload?.reloadPlaybackContext
         ? { videoId: this.videoId, context: payload.reloadPlaybackContext }
         : null
       this.setPlayerReloadState(payload)
       this.preserveTitleOnNextReload = true
-      this.showTabToast({ message: toastMessage, icon: ['fas', 'sync'] })
+      if (failure) {
+        this.showStreamRecoveryNotice(message)
+      } else {
+        this.showTabToast({ message, icon: ['fas', 'sync'] })
+      }
 
       const timestamp = this.getTimestamp()
       if (timestamp > 0) {

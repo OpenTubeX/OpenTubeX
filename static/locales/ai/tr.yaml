@@ -1498,6 +1498,10 @@ Video:
   Premiere started: İlk gösterim sürüyor. {timeAgo} başladı
   Player:
     Playing in Picture-in-Picture: Resim içinde resim modunda oynatılıyor
+    Stream Recovery:
+      DASH Fallback: "Ses akışı başarısız oldu, DASH biçimlerine geçiliyor: {error}"
+      Error Copied: "Hata panoya kopyalandı"
+      Legacy Fallback: "Akış başarısız oldu, eski biçimlere geçiliyor: {error}"
     Caption Timing:
       Adjust Timing: Zamanlamayı ayarla…
       Caption Timing: Altyazı zamanlaması

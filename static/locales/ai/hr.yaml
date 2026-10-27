@@ -1520,6 +1520,10 @@ Video:
     filler: Digresije
   Player:
     Playing in Picture-in-Picture: Reproducira se u načinu slika u slici
+    Stream Recovery:
+      DASH Fallback: "Audio stream nije uspio, prebacivanje na DASH formate: {error}"
+      Error Copied: "Greška kopirana u međuspremnik"
+      Legacy Fallback: "Stream nije uspio, prebacivanje na starije formate: {error}"
     Caption Timing:
       Adjust Timing: Prilagodi vrijeme…
       Caption Timing: Vrijeme titlova

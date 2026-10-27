@@ -1503,6 +1503,10 @@ Video:
     filler: Avsporinger
   Player:
     Playing in Picture-in-Picture: Spilles av i bilde-i-bilde
+    Stream Recovery:
+      DASH Fallback: "Lydstrømmen mislyktes, bytter til DASH-formater: {error}"
+      Error Copied: "Feil kopiert til utklippstavlen"
+      Legacy Fallback: "Strømmen mislyktes, bytter til eldre formater: {error}"
     Caption Timing:
       Adjust Timing: Juster timing…
       Caption Timing: Underteksttiming

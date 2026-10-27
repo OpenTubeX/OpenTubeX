@@ -1511,6 +1511,10 @@ Video:
     filler: Mövzudan kənar söhbətlər
   Player:
     Playing in Picture-in-Picture: Şəkil içində şəkil rejimində oynadılır
+    Stream Recovery:
+      DASH Fallback: "Səs yayımı uğursuz oldu, DASH formatlarına keçilir: {error}"
+      Error Copied: "Xəta mübadilə buferinə kopyalandı"
+      Legacy Fallback: "Yayım uğursuz oldu, köhnə formatlara keçilir: {error}"
     Caption Timing:
       Adjust Timing: Vaxtı tənzimlə…
       Caption Timing: Altyazı vaxtı

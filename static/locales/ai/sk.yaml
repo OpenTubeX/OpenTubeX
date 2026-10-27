@@ -1499,6 +1499,10 @@ Video:
   Premiere started: Prebieha premiéra. Začala sa {timeAgo}
   Player:
     Playing in Picture-in-Picture: Prehráva sa v režime obraz v obraze
+    Stream Recovery:
+      DASH Fallback: "Zvukový stream zlyhal, prepína sa na formáty DASH: {error}"
+      Error Copied: "Chyba skopírovaná do schránky"
+      Legacy Fallback: "Stream zlyhal, prepína sa na staršie formáty: {error}"
     Caption Timing:
       Adjust Timing: Upraviť časovanie…
       Caption Timing: Časovanie titulkov

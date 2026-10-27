@@ -1499,6 +1499,10 @@ Video:
   Premiere started: プレミア公開中です。{timeAgo}に開始しました
   Player:
     Playing in Picture-in-Picture: ピクチャーインピクチャーで再生中
+    Stream Recovery:
+      DASH Fallback: "音声ストリームが失敗したため、DASH 形式に切り替えます: {error}"
+      Error Copied: "エラーをクリップボードにコピーしました"
+      Legacy Fallback: "ストリームが失敗したため、レガシー形式に切り替えます: {error}"
     Caption Timing:
       Adjust Timing: タイミングを調整…
       Caption Timing: 字幕のタイミング

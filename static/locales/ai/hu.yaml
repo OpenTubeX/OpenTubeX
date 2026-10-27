@@ -1499,6 +1499,10 @@ Video:
   Premiere started: A premier folyamatban van, {timeAgo} kezdődött
   Player:
     Playing in Picture-in-Picture: Lejátszás kép a képben módban
+    Stream Recovery:
+      DASH Fallback: "A hangstream sikertelen, váltás DASH formátumokra: {error}"
+      Error Copied: "Hiba a vágólapra másolva"
+      Legacy Fallback: "A stream sikertelen, váltás a régi formátumokra: {error}"
     Caption Timing:
       Adjust Timing: Időzítés módosítása…
       Caption Timing: Feliratok időzítése

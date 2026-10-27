@@ -1532,6 +1532,10 @@ Video:
   Premiere started: Đang công chiếu. Bắt đầu {timeAgo}
   Player:
     Playing in Picture-in-Picture: Đang phát ở chế độ hình trong hình
+    Stream Recovery:
+      DASH Fallback: "Luồng âm thanh bị lỗi, đang chuyển sang định dạng DASH: {error}"
+      Error Copied: "Đã sao chép lỗi vào bộ nhớ tạm"
+      Legacy Fallback: "Luồng bị lỗi, đang chuyển sang định dạng cũ: {error}"
     Caption Timing:
       Adjust Timing: Điều chỉnh thời gian…
       Caption Timing: Thời gian phụ đề
