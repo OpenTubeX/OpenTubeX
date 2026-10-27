@@ -13,6 +13,8 @@ const ACTIVE_WINDOW_REPORT_INTERFACE = 'io.github.OpenTubeX.KWinActiveWindow'
 const ACTIVE_WINDOW_QUERY_TIMEOUT = 1_500
 const KDE_DESKTOP_POPUP_CLASS = /(?:^|\.)(?:krunner|plasmashell)$/i
 const WINDOW_SEARCH_TERM = 'OpenTubeX'
+// D-Bus can still be starting when the session restores the app at login
+const BACKEND_RETRY_DELAYS = [3_000, 10_000, 30_000]
 
 /**
  * @param {NodeJS.ProcessEnv} environment
@@ -212,8 +214,23 @@ async function queryKwinWindows(kwin, runner, processId) {
 
 /**
  * Connect to KWin through the user's D-Bus session and verify the interfaces
- * used by the monitor.
+ * used by the monitor. Retries while the bus times out.
  *
+ * @param {number[]} [retryDelays]
+ * @returns {ReturnType<typeof connectKdeWaylandWindowStateBackend>}
+ */
+export async function createKdeWaylandWindowStateBackend(retryDelays = BACKEND_RETRY_DELAYS) {
+  for (const delay of retryDelays) {
+    try {
+      return await connectKdeWaylandWindowStateBackend()
+    } catch {
+      await new Promise(resolve => setTimeout(resolve, delay))
+    }
+  }
+  return connectKdeWaylandWindowStateBackend().catch(() => null)
+}
+
+/**
  * @returns {Promise<{
  *   close: () => Promise<void>,
  *   queryWindow: (uuid: string) => Promise<KwinWindowInfo | null>,
@@ -224,7 +241,7 @@ async function queryKwinWindows(kwin, runner, processId) {
  *   }
  * } | null>}
  */
-export async function createKdeWaylandWindowStateBackend() {
+async function connectKdeWaylandWindowStateBackend() {
   let bus
   let scriptDirectory
   let scripting
@@ -360,7 +377,7 @@ workspace.windowActivated.connect(reportActiveWindow)
       queryWindow: uuid => queryKwinWindow(kwin, uuid),
       queryWindows: processId => queryKwinWindows(kwin, runner, processId),
     }
-  } catch {
+  } catch (error) {
     if (scripting !== undefined && scriptPluginName !== undefined) {
       await scripting.unloadScript(scriptPluginName).catch(() => {})
     }
@@ -368,6 +385,9 @@ workspace.windowActivated.connect(reportActiveWindow)
       await rm(scriptDirectory, { force: true, recursive: true }).catch(() => {})
     }
     await bus?.close().catch(() => {})
+    // A slow bus can answer later. A missing or refusing KWin fails at once
+    // and stays that way, so only timeouts are retried.
+    if (error?.code === 'ETIMEDOUT' || error?.cause?.code === 'ETIMEDOUT') throw error
     return null
   }
 }

@@ -472,3 +472,46 @@ async function focusedStatesAfterBlur (
 
   return focusedStates
 }
+
+/** Session buses whose KWin calls fail with each given error in turn. */
+function failingSessionBuses(t, errors) {
+  const originalSessionBus = dbus.sessionBus
+  const attempts = []
+  dbus.sessionBus = () => {
+    const error = errors[attempts.length]
+    const bus = { connection: new EventEmitter(), closed: false }
+    bus.getService = () => ({ getInterface: async () => { throw error } })
+    bus.close = async () => { bus.closed = true }
+    attempts.push(bus)
+    return bus
+  }
+  t.after(() => {
+    dbus.sessionBus = originalSessionBus
+  })
+  return attempts
+}
+
+// dbus-native fails the calls of a connection whose Hello timed out with the timeout as their cause
+const slowBusError = () => Object.assign(new Error('Connection closed'), {
+  code: 'ECONNCLOSED',
+  cause: Object.assign(new Error('No reply within 2000ms'), { code: 'ETIMEDOUT' }),
+})
+
+test('retries KWin while the session bus is too slow to answer', async t => {
+  const refused = Object.assign(new Error('The name org.kde.KWin was not provided'), {
+    dbusName: 'org.freedesktop.DBus.Error.ServiceUnknown',
+  })
+  const attempts = failingSessionBuses(t, [slowBusError(), slowBusError(), refused, slowBusError()])
+
+  assert.equal(await createKdeWaylandWindowStateBackend([0, 0, 0]), null)
+  // A refusing KWin does not change on a retry
+  assert.equal(attempts.length, 3)
+  assert.ok(attempts.every(bus => bus.closed))
+})
+
+test('gives up on a session bus that stays too slow', async t => {
+  const attempts = failingSessionBuses(t, Array.from({ length: 4 }, slowBusError))
+
+  assert.equal(await createKdeWaylandWindowStateBackend([0, 0, 0]), null)
+  assert.equal(attempts.length, 4)
+})
