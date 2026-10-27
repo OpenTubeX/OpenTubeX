@@ -68,6 +68,24 @@ test('hides videos from blocklisted channels only when the blocklist is passed',
   assert.equal(isVideoHiddenByPreferences(video), false)
 })
 
+test('hides collaboration videos when any collaborator is on the blocklist', () => {
+  const aiSlopChannels = new Set(parseAiSlopList(`@GuestSlop\n${CHANNEL_ID}`))
+  const collaboration = {
+    title: 'Title',
+    author: 'Main and Guest',
+    authorId: null,
+    collaborators: [{ id: 'UCmain', name: 'Main', handle: '@Main' }, { id: 'UCguest', name: 'Guest', handle: '@guestSLOP' }]
+  }
+
+  assert.equal(isVideoHiddenByPreferences(collaboration, { aiSlopChannels }), true)
+  assert.equal(isOnAiSlopList(aiSlopChannels, {
+    collaborators: [{ id: 'UCmain', name: 'Main' }, { id: CHANNEL_ID, name: 'Guest' }]
+  }), true)
+  assert.equal(isOnAiSlopList(aiSlopChannels, {
+    collaborators: [{ id: 'UCmain', name: 'Main', handle: '@Main' }, { id: 'UCguest', name: 'Guest' }]
+  }), false)
+})
+
 test('hides collaboration videos by their main author and regular videos by author ID', () => {
   const hiddenChannelNames = new Set([CHANNEL_ID])
   const collaboration = {
