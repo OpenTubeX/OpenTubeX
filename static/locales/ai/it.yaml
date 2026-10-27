@@ -647,6 +647,7 @@ Settings:
         Destructive pressed: Azione distruttiva premuta
         Text and icons on destructive actions: Testo e icone sulle azioni distruttive
   Player Settings:
+    Pause on Stream Recovery: "Metti in pausa al ripristino dello stream"
     Buffering:
       Buffering: Buffering
       Description: Scegli quanta parte del video il lettore carica in anticipo e mantiene caricata.
@@ -1978,6 +1979,7 @@ Tooltips:
   Proxy Settings:
     IP Block Recovery Script Path: Percorso del file di script da eseguire quando viene rilevato un blocco IP. OpenTubeX ne attende il completamento, quindi ricarica il video. Se è abilitato il metodo di riserva, lo script viene eseguito solo quando anche questo non riesce.
   Player Settings:
+    Pause on Stream Recovery: "Quando lo stream video non riesce e il lettore lo ricarica o passa a un altro formato o motore, la riproduzione viene messa in pausa e l'errore rimane nella parte superiore del lettore finché non lo chiudi. Se disattivato, la riproduzione continua e l'errore appare brevemente come notifica."
     Continue Playback When Screen Is Locked: 'Mantiene l’audio in riproduzione in background e fornisce i controlli multimediali di Android. Disattiva questa opzione per mettere in pausa quando l’app non è più visibile.'
     Enable Caption Translations: Se abilitato, il pulsante dei sottotitoli e la scorciatoia C preferiscono una traccia tradotta automaticamente nella lingua scelta quando il video non offre una traccia originale corrispondente.
     Use Quick Playback Speed Bar: Mostra una barra rapida della velocità di riproduzione tra i controlli a destra del lettore. Se è abilitato il salvataggio manuale della velocità per canale, la barra include anche il pulsante per salvare la velocità del canale corrente.

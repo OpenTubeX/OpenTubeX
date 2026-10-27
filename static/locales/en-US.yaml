@@ -1201,6 +1201,7 @@ Settings:
     Enable Skip Silence by Default: Enable Skip Silence by Default
     Enable Video Zoom: Enable Video Zoom
     Enable Seek History: Enable Seek History
+    Pause on Stream Recovery: Pause on Stream Recovery
     Continue Playback When Screen Is Locked: Continue playback when the screen is locked
     Voice-over Translation:
       Title: Voice-over translation
@@ -3096,6 +3097,7 @@ Tooltips:
     Enable Skip Silence by Default: Enables silence skipping for new tabs. Changing it in one tab does not affect other tabs.
     Enable Video Zoom: Shows the Zoom control in the player's settings menu and enables its keyboard shortcuts and panning controls.
     Enable Seek History: Remembers where you jumped from in each video until the app closes. Shows the Seek history list in the player's settings menu and enables its keyboard shortcuts.
+    Pause on Stream Recovery: "When the video stream fails and the player reloads it or switches to another format or engine, pause playback and keep the error at the top of the player until you dismiss it. When disabled, playback continues and the error appears briefly as a notification."
     Continue Playback When Screen Is Locked: Keeps audio playing in the background and provides Android media controls. Turn this off to pause when the app is no longer visible.
     Voice-over Translation: Sends the video ID, duration, and selected language to the unofficial Yandex voice-over translation service when you request a translation. Disabled by default.
     Hold to Double Playback Speed: Hold the Spacebar or left mouse button over the player to temporarily double the current playback speed.

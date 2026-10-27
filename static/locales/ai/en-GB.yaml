@@ -635,6 +635,7 @@ Settings:
         Destructive pressed: Destructive pressed
         Text and icons on destructive actions: Text and icons on destructive actions
   Player Settings:
+    Pause on Stream Recovery: "Pause on Stream Recovery"
     Buffering:
       Buffering: Buffering
       Description: Choose how much video the player loads in advance and keeps loaded.
@@ -1969,6 +1970,7 @@ Tooltips:
   Proxy Settings:
     IP Block Recovery Script Path: Script file path to run when an IP block is detected. OpenTubeX waits for it to finish, then reloads the video. If fallback is enabled, it runs only when fallback also fails.
   Player Settings:
+    Pause on Stream Recovery: "When the video stream fails and the player reloads it or switches to another format or engine, pause playback and keep the error at the top of the player until you dismiss it. When disabled, playback continues and the error appears briefly as a notification."
     Continue Playback When Screen Is Locked: 'Keeps audio playing in the background and provides Android media controls. Turn this off to pause when the app is no longer visible.'
     Enable Caption Translations: When enabled, the captions button and C shortcut prefer an automatically translated track in the preferred caption language when the video does not provide a matching original track.
     Use Quick Playback Speed Bar: Shows a quick playback speed bar in the player controls on the right side. If manual per-channel playback speed saving is enabled, the bar also includes the button to save the speed for the current channel.

@@ -337,6 +337,7 @@ Settings:
       Bundled Fonts: Dołączone czcionki
       System Fonts: Czcionki systemowe
   Player Settings:
+    Pause on Stream Recovery: "Wstrzymaj przy odzyskiwaniu strumienia"
     Buffering:
       Buffering: Buforowanie
       Description: Wybierz, jaką część filmu odtwarzacz wczytuje z wyprzedzeniem i zachowuje wczytaną.
@@ -1220,6 +1221,7 @@ Tooltips:
     Yattee Server: Instancja yattee-server, z której OpenTubeX wczytuje filmy, kanały, playlisty i wyniki wyszukiwania. Nazwa użytkownika i hasło są przechowywane wyłącznie na tym urządzeniu.
     Proxy Videos Through Yattee Server: Przesyła strumienie wideo i audio przez serwer. Pozostaw tę opcję włączoną, chyba że serwer korzysta z tego samego połączenia internetowego co Ty, ponieważ YouTube udostępnia strumienie tylko adresowi, który o nie poprosił. Miniatury są zawsze wczytywane bezpośrednio z YouTube.
   Player Settings:
+    Pause on Stream Recovery: "Gdy strumień wideo zawiedzie, a odtwarzacz załaduje go ponownie lub przełączy się na inny format lub silnik, odtwarzanie zostanie wstrzymane, a błąd pozostanie u góry odtwarzacza, dopóki go nie zamkniesz. Po wyłączeniu odtwarzanie jest kontynuowane, a błąd pojawia się na chwilę jako powiadomienie."
     Continue Playback When Screen Is Locked: 'Utrzymuje odtwarzanie dźwięku w tle i udostępnia elementy sterowania multimediami Androida. Wyłącz, aby wstrzymywać odtwarzanie, gdy aplikacja nie jest już widoczna.'
     Use YouTube-style Shorts: Wyświetla Shorts w pionowej siatce na stronach subskrypcji i kanałów oraz używa odtwarzacza Shorts w stylu YouTube.
     Loop Shorts: Po włączeniu Shorts są automatycznie odtwarzane od początku. Po wyłączeniu zatrzymują się na końcu i wyświetlają przycisk ponownego odtwarzania.

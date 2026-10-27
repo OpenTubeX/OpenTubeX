@@ -4858,7 +4858,11 @@ export default defineComponent({
       this.shortsCompletionBlockedBySeek = shortsCompletion.blockedBySeek
       this.shortsPlaybackAfterSeekSeconds = shortsCompletion.playbackAfterSeekSeconds
 
-      if (elapsedSeconds > 0 && elapsedSeconds <= SABR_ERROR_RECOVERY_MAX_TICK_SECONDS) {
+      if (
+        elapsedSeconds > 0 &&
+        elapsedSeconds <= SABR_ERROR_RECOVERY_MAX_TICK_SECONDS &&
+        !this.isPlaybackPaused()
+      ) {
         this.playbackProgressedForCurrentVideo = true
         // The recovered stream has proven itself after a stretch of natural playback.
         if (this.streamRecoveryNotice !== null) {
@@ -5822,10 +5826,16 @@ export default defineComponent({
 
     /**
      * Explains an automatic stream-failure recovery until the user dismisses
-     * it or the recovered stream plays on.
+     * it or the recovered stream plays on. With the setting disabled, playback
+     * continues and the explanation is a transient toast.
      * @param {string} message
      */
     showStreamRecoveryNotice: function (message) {
+      if (!this.$store.getters.getPauseOnStreamRecovery) {
+        this.showTabToast({ message, icon: ['fas', 'sync'] })
+        return
+      }
+
       this.streamRecoveryNotice = message
       this.streamRecoveryPausesPlayback = this.playbackProgressedForCurrentVideo
       this.streamRecoveryPlayedSeconds = 0
@@ -6063,7 +6073,7 @@ export default defineComponent({
       if (
         await this.reloadSabrStream(
           this.$refs.player?.getSabrReloadState(),
-          `${this.t('Video.Reloading video after streaming URL error')}: ${errorLabel}`,
+          `Refreshing SABR stream after playback error: ${errorLabel}`,
           true
         )
       ) { return }

@@ -1057,6 +1057,7 @@ Settings:
     Loop Shorts: Shorts wiederholen
     Enable Video Zoom: Videozoom aktivieren
     Enable Seek History: Sprungverlauf aktivieren
+    Pause on Stream Recovery: Bei Stream-Wiederherstellung pausieren
     Voice-over Translation:
       Title: Voice-over-Übersetzung
       Attribution: (bereitgestellt von Yandex)
@@ -2788,6 +2789,7 @@ Tooltips:
     Enable Seek History: >-
       Merkt sich bis zum Schließen der App, von wo du in jedem Video weggesprungen bist. Zeigt den Sprungverlauf im
       Einstellungsmenü des Players an und aktiviert die zugehörigen Tastenkürzel.
+    Pause on Stream Recovery: "Wenn der Videostream fehlschlägt und der Player ihn neu lädt oder zu einem anderen Format oder einer anderen Engine wechselt, wird die Wiedergabe pausiert und der Fehler oben im Player angezeigt, bis du ihn ausblendest. Wenn deaktiviert, läuft die Wiedergabe weiter und der Fehler erscheint kurz als Benachrichtigung."
     Continue Playback When Screen Is Locked: >-
       Spielt Audio im Hintergrund weiter und stellt Android-Mediensteuerungen bereit. Deaktiviere diese Option, um die
       Wiedergabe anzuhalten, sobald die App nicht mehr sichtbar ist.
