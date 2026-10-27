@@ -37,6 +37,10 @@
   margin-block: 0 16px;
 }
 
+.searchCorrection.centered {
+  text-align: center;
+}
+
 .searchCorrection p {
   margin-block: 4px;
 }

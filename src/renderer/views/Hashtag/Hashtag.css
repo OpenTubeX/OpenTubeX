@@ -42,3 +42,11 @@
     inline-size: 100%;
   }
 }
+
+.hashtagTabs {
+  margin-block-end: 16px;
+}
+
+.tabIcon {
+  color: var(--primary-color);
+}

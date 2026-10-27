@@ -2,6 +2,8 @@
  * @typedef {object} SearchCorrection
  * @property {'showingResultsFor' | 'includingResultsFor' | 'didYouMean'} type
  * @property {string} correctedQuery
+ * @property {boolean} canSearchOriginal YouTube offers no uncorrected search for
+ * some queries, such as hashtags, and ignores the request to turn correction off
  */
 
 const CORRECTION_TYPES = {
@@ -15,7 +17,7 @@ const CORRECTION_TYPES = {
 const NO_SPELL_CORRECTION_BYTES = [0x42, 0x02, 0x08, 0x01]
 
 /**
- * @param {{ type: string, corrected_query?: { toString(): string } }[] | undefined} results
+ * @param {{ type: string, corrected_query?: { toString(): string }, original_query_endpoint?: unknown }[] | undefined} results
  * @returns {SearchCorrection | null}
  */
 export function parseSearchCorrection(results) {
@@ -23,7 +25,7 @@ export function parseSearchCorrection(results) {
   const correctedQuery = node?.corrected_query?.toString().trim()
 
   return correctedQuery
-    ? { type: CORRECTION_TYPES[node.type], correctedQuery }
+    ? { type: CORRECTION_TYPES[node.type], correctedQuery, canSearchOriginal: node.original_query_endpoint !== undefined }
     : null
 }
 

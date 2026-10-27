@@ -33,9 +33,10 @@ const label = computed(() => props.artist ? t('Channel.Official Artist Channel')
 <style scoped>
 .verifiedBadge {
   flex-shrink: 0;
-  margin-inline-start: 0.3em;
-  font-size: 0.9em;
-  vertical-align: -0.1em;
+  margin-inline-start: 0.4em;
+  /* The scaled glyph fills 1em, so the badge spans from the baseline to the cap height. */
+  font-size: 1cap;
+  vertical-align: baseline;
   opacity: 0.75;
 }
 </style>

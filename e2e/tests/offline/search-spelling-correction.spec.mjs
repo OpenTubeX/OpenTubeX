@@ -50,6 +50,24 @@ function searchResponse(request) {
         correctedQueryEndpoint: { searchEndpoint: { query: 'minecraft speedrun' } }
       }
     }, searchVideo('original', 'Original spelling result'))
+  } else if (request.query === '#cooking') {
+    // YouTube offers no "Search only for" link for hashtags and ignores the
+    // request to turn spelling correction off.
+    contents.push({
+      includingResultsForRenderer: {
+        includingResultsFor: text('Including results for:'),
+        correctedQuery: text('cooking'),
+        correctedQueryEndpoint: { searchEndpoint: { query: 'cooking' } }
+      }
+    }, searchVideo('hashtag', 'Hashtag result'))
+  } else if (request.query === 'qwzxv plorf') {
+    contents.push({
+      didYouMeanRenderer: {
+        didYouMean: text('Did you mean:'),
+        correctedQuery: text('quiz plot'),
+        correctedQueryEndpoint: { searchEndpoint: { query: 'quiz plot' } }
+      }
+    })
   } else {
     contents.push(searchVideo('suggested', 'Suggested spelling result'))
   }
@@ -112,4 +130,39 @@ test('searches for the original query when YouTube corrects its spelling', async
   await expect(correction).toHaveCount(0)
   expect(requests.map(request => request.query)).toEqual(['minecarft speedrn', 'minecarft speedrn', 'minecraft speedrun'])
   expect(requests[2].params).toBe(requests[0].params)
+})
+
+test('omits the uncorrected search when YouTube offers none', async ({ page }) => {
+  await page.route(/^https?:\/\//, abortUnmockedRequest)
+  await page.route('https://www.youtube.com/youtubei/v1/search**', route => route.fulfill({ json: searchResponse(route.request().postDataJSON()) }))
+
+  await page.locator(sel.searchInput).fill('#cooking')
+  await page.locator(sel.searchInput).press('Enter')
+
+  const correction = page.locator('.searchCorrection')
+  await expect(page.getByText('Hashtag result')).toBeVisible()
+  await expect(correction).toHaveText('Including results for cooking')
+  await expect(correction.getByRole('link')).toHaveCount(0)
+})
+
+test('centers the spelling suggestion with the empty results message', { tag: '@scale' }, async ({ page, attachScreenshot }) => {
+  await page.route(/^https?:\/\//, abortUnmockedRequest)
+  await page.route('https://www.youtube.com/youtubei/v1/search**', route => route.fulfill({ json: searchResponse(route.request().postDataJSON()) }))
+
+  await page.locator(sel.searchInput).fill('qwzxv plorf')
+  await page.locator(sel.searchInput).press('Enter')
+
+  const suggestion = page.locator('.searchCorrection p')
+  const status = page.locator('.searchStatus')
+  await expect(suggestion).toHaveText('Did you mean quiz plot?')
+  await expect(status).toBeVisible()
+
+  const centerOf = locator => locator.evaluate(element => {
+    const range = document.createRange()
+    range.selectNodeContents(element)
+    const { left, right } = range.getBoundingClientRect()
+    return (left + right) / 2
+  })
+  expect(Math.abs(await centerOf(suggestion) - await centerOf(status))).toBeLessThanOrEqual(1)
+  await attachScreenshot('centered spelling suggestion')
 })

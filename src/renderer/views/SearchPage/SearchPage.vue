@@ -18,6 +18,7 @@
       <div
         v-if="searchCorrection"
         class="searchCorrection"
+        :class="{ centered: shownResults.length === 0 }"
         role="status"
       >
         <I18nT
@@ -43,6 +44,7 @@
             </template>
           </I18nT>
           <I18nT
+            v-if="searchCorrection.canSearchOriginal"
             :keypath="searchCorrection.type === 'showingResultsFor' ? 'Search Filters.Search instead for' : 'Search Filters.Search only for'"
             tag="p"
             scope="global"

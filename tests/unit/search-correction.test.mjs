@@ -7,21 +7,41 @@ const text = value => ({ toString: () => value })
 
 test('parses an automatic search correction', () => {
   const results = [
-    { type: 'ShowingResultsFor', corrected_query: text('minecraft speedrun'), original_query: text('minecarft speedrn') },
+    {
+      type: 'ShowingResultsFor',
+      corrected_query: text('minecraft speedrun'),
+      original_query: text('minecarft speedrn'),
+      original_query_endpoint: {}
+    },
     { type: 'Video' }
   ]
 
-  assert.deepEqual(parseSearchCorrection(results), { type: 'showingResultsFor', correctedQuery: 'minecraft speedrun' })
+  assert.deepEqual(parseSearchCorrection(results), {
+    type: 'showingResultsFor',
+    correctedQuery: 'minecraft speedrun',
+    canSearchOriginal: true
+  })
 })
 
 test('parses search suggestions without automatic correction', () => {
   assert.deepEqual(parseSearchCorrection([{ type: 'Video' }, { type: 'DidYouMean', corrected_query: text('how to tie a tie') }]), {
     type: 'didYouMean',
-    correctedQuery: 'how to tie a tie'
+    correctedQuery: 'how to tie a tie',
+    canSearchOriginal: false
   })
-  assert.deepEqual(parseSearchCorrection([{ type: 'IncludingResultsFor', corrected_query: text('lofi') }]), {
+  assert.deepEqual(parseSearchCorrection([{ type: 'IncludingResultsFor', corrected_query: text('lofi'), original_query_endpoint: {} }]), {
     type: 'includingResultsFor',
-    correctedQuery: 'lofi'
+    correctedQuery: 'lofi',
+    canSearchOriginal: true
+  })
+})
+
+test('marks corrections that YouTube offers no uncorrected search for', () => {
+  // YouTube omits the "Search only for" link for hashtag searches.
+  assert.deepEqual(parseSearchCorrection([{ type: 'IncludingResultsFor', corrected_query: text('cooking') }]), {
+    type: 'includingResultsFor',
+    correctedQuery: 'cooking',
+    canSearchOriginal: false
   })
 })
 
