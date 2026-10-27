@@ -18,7 +18,7 @@ function settingsWindow(isCapacitor, width) {
   const window = { innerWidth: width }
   const initialState = component.slice(component.indexOf('const isMaximized ='), component.indexOf('const activeSection ='))
   const windowState = component.slice(component.indexOf('const windowBounds ='), component.indexOf('const settingsWindowMorphing ='))
-  const functions = ['updateNarrowLayout', 'toggleMaximized', 'handleHeaderDoubleClick', 'startDragging', 'startResizing']
+  const functions = ['updateNarrowLayout', 'getWindowTranslate', 'toggleMaximized', 'handleHeaderDoubleClick', 'startDragging', 'startResizing']
     .map(componentFunction).join('\n')
   const api = vm.runInNewContext(`${initialState}\n${windowState}\n${functions}\n;({
     isWindowMaximized, windowStyle, updateNarrowLayout,

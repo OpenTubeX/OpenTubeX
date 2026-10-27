@@ -560,7 +560,7 @@ const windowStyle = computed(() => isWindowMaximized.value
       left: '0',
       top: '0',
       // Translation keeps movement separate from layout and bounds animations.
-      translate: `${windowBounds.value.x}px ${windowBounds.value.y}px`,
+      translate: getWindowTranslate(windowBounds.value),
       inlineSize: `${windowBounds.value.width}px`,
       blockSize: `${windowBounds.value.height}px`
     })
@@ -1542,7 +1542,7 @@ function dragWindow(event) {
   })
   // Updating reactive bounds here also rerenders the settings controls and their
   // scrollbar directives. Only commit the final bounds when the drag stops.
-  settingsWindowRef.value.style.translate = `${draggedBounds.x}px ${draggedBounds.y}px`
+  settingsWindowRef.value.style.translate = getWindowTranslate(draggedBounds)
 }
 
 function stopDragging(event) {
@@ -1646,6 +1646,14 @@ function clampWindowToViewport() {
   if (isWindowMaximized.value) return
   windowBounds.value = clampBounds(draggedBounds ?? windowBounds.value)
   if (draggedBounds !== null) draggedBounds = windowBounds.value
+}
+
+// Whole CSS pixels still fall between device pixels at fractional UI or display
+// scales. A window translated there blurs its borders across two pixel rows, and
+// once a pane scrolls on its own layer it covers part of the header border.
+function getWindowTranslate({ x, y }) {
+  const ratio = window.devicePixelRatio || 1
+  return `${Math.round(x * ratio) / ratio}px ${Math.round(y * ratio) / ratio}px`
 }
 
 function clampBounds(bounds) {

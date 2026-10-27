@@ -1,5 +1,6 @@
 import { readFile } from 'node:fs/promises'
 
+import { sampleColors } from '../../helpers/colors.mjs'
 import {
   test,
   expect,
@@ -1409,5 +1410,42 @@ test.describe('localized compact settings breadcrumb', () => {
     await expect.poll(() => category.locator('.settingsBreadcrumbText').evaluate(element => (
       element.scrollWidth <= element.clientWidth + 1
     ))).toBe(true)
+  })
+})
+
+test.describe('fractional window positions', () => {
+  // Wayland reports fractional pointer positions while dragging, and fractional
+  // UI scales turn whole CSS pixels into fractional device pixels.
+  test('keeps the header border on whole device pixels while dragging and scrolling', { tag: '@scale' }, async ({ app, page }) => {
+    await page.evaluate(() => {
+      localStorage.setItem('opentubex-settings-window-bounds', JSON.stringify({ x: 180.92, y: 60.6875, width: 850, height: 520 }))
+    })
+    await goTo(page, 'settings')
+    const dialog = page.locator('.settingsWindow')
+    const header = dialog.locator('.settingsWindowHeader')
+    await expect(dialog).not.toHaveClass(/settings-window-enter-active/)
+    const devicePixelOffset = () => dialog.evaluate((element) => {
+      const { left, top } = element.getBoundingClientRect()
+      return Math.max(...[left, top].map(value => Math.abs(value * devicePixelRatio - Math.round(value * devicePixelRatio))))
+    })
+    await expect.poll(devicePixelOffset).toBeLessThan(0.01)
+
+    const label = await dialog.locator('.settingsBreadcrumbLabel').first().boundingBox()
+    await page.mouse.move(label.x + label.width / 2, label.y + label.height / 2)
+    await page.mouse.down()
+    await page.mouse.move(label.x + label.width / 2 + 30, label.y + label.height / 2 + 20, { steps: 3 })
+    await expect.poll(devicePixelOffset).toBeLessThan(0.01)
+    await page.mouse.up()
+    await expect.poll(devicePixelOffset).toBeLessThan(0.01)
+
+    // Scrolling composites the content pane, which must not paint over the border.
+    const { width, height } = await header.boundingBox()
+    const borderPoints = [0.5, 0.75].flatMap(x => [0.2, 0.9, 1.6].map(y => [width * x, height - y]))
+    const before = await sampleColors(app, header, borderPoints)
+    const content = dialog.locator('.settingsContent')
+    await content.hover()
+    await page.mouse.wheel(0, 137)
+    await expect.poll(() => content.evaluate(element => element.scrollTop)).toBeGreaterThan(0)
+    expect(await sampleColors(app, header, borderPoints)).toEqual(before)
   })
 })
