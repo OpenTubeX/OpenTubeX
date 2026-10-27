@@ -3,11 +3,11 @@ import test from 'node:test'
 
 import {
   normalizeReleaseImage,
-  normalizePullRequestPages,
   parseReleaseNote,
   parseReleaseNoteCategory,
   probeImageSize,
   renderReleaseNotes,
+  selectPullRequests,
   validateDownloadedImageUrl,
   validatePullRequestEvent,
 } from '../../_scripts/releaseNotes.mjs'
@@ -139,57 +139,52 @@ test('pull request bodies have to keep every release note marker', () => {
   )
 })
 
-test('paginated pull request results are flattened', () => {
-  assert.deepEqual(normalizePullRequestPages([
+test('only pull requests that merged a release commit into the target are selected', () => {
+  const pullRequest = (number, mergeCommit, mergedAt, {
+    baseRefName = 'development',
+    nameWithOwner = 'OpenTubeX/OpenTubeX',
+  } = {}) => ({
+    baseRefName,
+    baseRepository: { nameWithOwner },
+    body: `PR ${number}`,
+    mergeCommit: mergeCommit && { oid: mergeCommit },
+    mergedAt,
+    number,
+  })
+  const second = pullRequest(2, 'second', '2026-02-01T00:00:00Z')
+  const first = pullRequest(1, 'first', '2026-01-01T00:00:00Z')
+
+  assert.deepEqual(selectPullRequests([
     {
       data: {
         repository: {
-          pullRequests: {
-            nodes: [{
-              body: 'First',
-              closingIssuesReferences: { nodes: [{ number: 10 }] },
-              mergeCommit: { oid: 'first' },
-              mergedAt: '2026-01-01T00:00:00Z',
-              number: 1,
-              title: 'First PR',
-              url: 'https://github.com/OpenTubeX/OpenTubeX/pull/1',
-            }],
-          },
+          commit0: { associatedPullRequests: { nodes: [second, pullRequest(3, null, null)] } },
+          commit1: { associatedPullRequests: { nodes: [] } },
+          commit2: null,
         },
       },
     },
     {
       data: {
         repository: {
-          pullRequests: {
-            nodes: [{
-              body: 'Second',
-              mergeCommit: { oid: 'second' },
-              mergedAt: '2026-02-01T00:00:00Z',
-              number: 2,
-              title: 'Second PR',
-              url: 'https://github.com/OpenTubeX/OpenTubeX/pull/2',
-            }],
+          commit0: { associatedPullRequests: { nodes: [first, second] } },
+          commit1: {
+            associatedPullRequests: {
+              nodes: [
+                pullRequest(4, 'other-branch', '2026-01-02T00:00:00Z', { baseRefName: 'deps-batch' }),
+                pullRequest(5, 'upstream', '2026-01-03T00:00:00Z', { nameWithOwner: 'FreeTubeApp/FreeTube' }),
+                pullRequest(6, 'outside-range', '2026-01-04T00:00:00Z'),
+              ],
+            },
           },
         },
       },
     },
-  ]), [{
-    body: 'First',
-    closingIssuesReferences: { nodes: [{ number: 10 }] },
-    mergeCommit: { oid: 'first' },
-    mergedAt: '2026-01-01T00:00:00Z',
-    number: 1,
-    title: 'First PR',
-    url: 'https://github.com/OpenTubeX/OpenTubeX/pull/1',
-  }, {
-    body: 'Second',
-    mergeCommit: { oid: 'second' },
-    mergedAt: '2026-02-01T00:00:00Z',
-    number: 2,
-    title: 'Second PR',
-    url: 'https://github.com/OpenTubeX/OpenTubeX/pull/2',
-  }])
+  ], {
+    commits: ['first', 'second', 'other-branch', 'upstream'],
+    repository: 'opentubex/opentubex',
+    target: 'development',
+  }), [first, second])
 })
 
 test('a release note and optional Markdown images are parsed', () => {

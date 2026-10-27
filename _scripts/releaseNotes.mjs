@@ -26,31 +26,20 @@ const ALLOWED_IMAGE_DOWNLOAD_HOSTS = new Set([
   'github-production-user-asset-6210df.s3.amazonaws.com',
   'release-assets.githubusercontent.com',
 ])
-const MERGED_PULL_REQUESTS_QUERY = `
-query($owner: String!, $repo: String!, $base: String!, $endCursor: String) {
-  repository(owner: $owner, name: $repo) {
-    pullRequests(
-      first: 100
-      after: $endCursor
-      states: MERGED
-      baseRefName: $base
-      orderBy: { field: CREATED_AT, direction: DESC }
-    ) {
-      nodes {
-        body
-        closingIssuesReferences(first: 100) {
-          nodes { number }
-        }
-        mergeCommit { oid }
-        mergedAt
-        number
-        title
-        url
-      }
-      pageInfo { hasNextPage endCursor }
-    }
+// Each alias resolves one commit, so a batch stays well within GitHub's GraphQL node limit.
+const COMMIT_BATCH_SIZE = 50
+const PULL_REQUEST_FIELDS = `
+  baseRefName
+  baseRepository { nameWithOwner }
+  body
+  closingIssuesReferences(first: 100) {
+    nodes { number }
   }
-}
+  mergeCommit { oid }
+  mergedAt
+  number
+  title
+  url
 `
 
 function extractMarkedSection(body, marker) {
@@ -449,49 +438,73 @@ function gitIsAncestor(ancestor, descendant) {
   throw new Error(`Could not compare Git commits ${ancestor} and ${descendant}.`)
 }
 
-export function selectPullRequests(pullRequests, previousTag, target) {
+export function listReleaseCommits(previousTag, target) {
   if (!gitIsAncestor(previousTag, target)) { throw new Error(`${previousTag} is not an ancestor of ${target}.`) }
 
-  // API results can include merges made after checkout. Match against the fixed
-  // release range without asking Git to resolve those newer commit objects.
-  const commits = new Set(execFileSync('git', ['rev-list', `${previousTag}..${target}`], {
+  return execFileSync('git', ['rev-list', `${previousTag}..${target}`], {
     encoding: 'utf8',
     maxBuffer: 10 * 1024 * 1024,
-  }).split('\n').filter(Boolean))
-
-  return pullRequests
-    .filter(({ mergeCommit }) => commits.has(mergeCommit?.oid))
-    .sort((left, right) => left.mergedAt.localeCompare(right.mergedAt))
+  }).split('\n').filter(Boolean)
 }
 
-export function normalizePullRequestPages(pages) {
-  return pages.flatMap((page) => page.data.repository.pullRequests.nodes)
+export function selectPullRequests(responses, { commits, repository, target }) {
+  const commitSet = new Set(commits)
+  const pullRequests = new Map()
+
+  for (const response of responses) {
+    for (const commit of Object.values(response.data.repository)) {
+      for (const pullRequest of commit?.associatedPullRequests.nodes ?? []) {
+        // Commits can also belong to open pull requests or to pull requests that
+        // merged into another branch, so only keep the one that merged each commit.
+        if (
+          commitSet.has(pullRequest.mergeCommit?.oid) &&
+          pullRequest.baseRefName === target &&
+          pullRequest.baseRepository.nameWithOwner.toLowerCase() === repository.toLowerCase()
+        ) {
+          pullRequests.set(pullRequest.number, pullRequest)
+        }
+      }
+    }
+  }
+
+  return [...pullRequests.values()].sort((left, right) => left.mergedAt.localeCompare(right.mergedAt))
 }
 
-export function listMergedPullRequests(repository, target) {
+// Look up pull requests per release commit instead of listing every merged pull
+// request, whose combined bodies outgrow the output buffer as the history grows.
+export function listMergedPullRequests(repository, target, commits) {
   const [owner, repo] = repository.split('/')
 
   if (!owner || !repo) { throw new Error(`Invalid GitHub repository: ${repository}.`) }
 
-  const output = execFileSync('gh', [
-    'api',
-    'graphql',
-    '--paginate',
-    '--slurp',
-    '-f',
-    `query=${MERGED_PULL_REQUESTS_QUERY}`,
-    '-F',
-    `owner=${owner}`,
-    '-F',
-    `repo=${repo}`,
-    '-F',
-    `base=${target}`,
-  ], {
-    encoding: 'utf8',
-    maxBuffer: 10 * 1024 * 1024,
-  })
+  const responses = []
 
-  return normalizePullRequestPages(JSON.parse(output))
+  for (let index = 0; index < commits.length; index += COMMIT_BATCH_SIZE) {
+    const aliases = commits.slice(index, index + COMMIT_BATCH_SIZE).map((oid, offset) => `
+    commit${offset}: object(oid: "${oid}") {
+      ... on Commit {
+        associatedPullRequests(first: 10) {
+          nodes { ${PULL_REQUEST_FIELDS} }
+        }
+      }
+    }`).join('')
+
+    responses.push(JSON.parse(execFileSync('gh', [
+      'api',
+      'graphql',
+      '-f',
+      `query=query($owner: String!, $repo: String!) { repository(owner: $owner, name: $repo) { ${aliases} } }`,
+      '-F',
+      `owner=${owner}`,
+      '-F',
+      `repo=${repo}`,
+    ], {
+      encoding: 'utf8',
+      maxBuffer: 10 * 1024 * 1024,
+    })))
+  }
+
+  return selectPullRequests(responses, { commits, repository, target })
 }
 
 function indentContinuationLines(value) {
@@ -575,8 +588,8 @@ async function generate(outputPath, options) {
     throw new Error('GITHUB_REPOSITORY, PREVIOUS_TAG, TARGET_BRANCH, and TARGET_SHA are required.')
   }
 
-  const pullRequests = listMergedPullRequests(repository, targetBranch)
-  const selectedPullRequests = selectPullRequests(pullRequests, previousTag, targetSha)
+  const commits = listReleaseCommits(previousTag, targetSha)
+  const selectedPullRequests = listMergedPullRequests(repository, targetBranch, commits)
   const releaseNotes = await renderReleaseNotes(selectedPullRequests, options)
 
   fs.writeFileSync(outputPath, releaseNotes)

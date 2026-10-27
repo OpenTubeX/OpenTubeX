@@ -5,7 +5,7 @@ import { tmpdir } from 'node:os'
 import path from 'node:path'
 import test from 'node:test'
 
-import { selectPullRequests } from '../../_scripts/releaseNotes.mjs'
+import { listReleaseCommits } from '../../_scripts/releaseNotes.mjs'
 
 function withCheckout(callback) {
   const directory = mkdtempSync(path.join(tmpdir(), 'release-notes-selection-'))
@@ -52,32 +52,17 @@ function withCheckout(callback) {
   }
 }
 
-test('release notes exclude merges after checkout and keep only the release range in order', () => {
-  withCheckout(({ previous, first, target, unrelated, later }) => {
-    const pullRequest = (oid, number) => ({
-      mergeCommit: { oid },
-      mergedAt: `2026-09-08T07:30:0${number}Z`,
-      number,
-    })
-    const firstPullRequest = pullRequest(first, 1)
-    const targetPullRequest = pullRequest(target, 2)
-
-    assert.deepEqual(selectPullRequests([
-      pullRequest(later, 3),
-      targetPullRequest,
-      pullRequest(previous, 0),
-      pullRequest(unrelated, 4),
-      { mergeCommit: null },
-      firstPullRequest,
-    ], 'previous', target), [firstPullRequest, targetPullRequest])
-    assert.deepEqual(selectPullRequests([firstPullRequest], 'previous', previous), [])
+test('release commits exclude merges after checkout and keep only the release range', () => {
+  withCheckout(({ previous, first, target }) => {
+    assert.deepEqual(listReleaseCommits('previous', target), [target, first])
+    assert.deepEqual(listReleaseCommits('previous', previous), [])
   })
 })
 
 test('release notes still reject invalid release boundaries', () => {
   withCheckout(({ target, unrelated, later }) => {
-    assert.throws(() => selectPullRequests([], unrelated, target), /is not an ancestor/)
-    assert.throws(() => selectPullRequests([], 'missing-tag', target), /Could not compare Git commits/)
-    assert.throws(() => selectPullRequests([], 'previous', later), /Could not compare Git commits/)
+    assert.throws(() => listReleaseCommits(unrelated, target), /is not an ancestor/)
+    assert.throws(() => listReleaseCommits('missing-tag', target), /Could not compare Git commits/)
+    assert.throws(() => listReleaseCommits('previous', later), /Could not compare Git commits/)
   })
 })
