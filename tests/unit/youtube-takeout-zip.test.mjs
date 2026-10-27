@@ -555,3 +555,14 @@ test('uses picked playlist metadata when unpicked titles share a file name', asy
   ], async playlist => playlists.push([playlist.playlistName, playlist.description]), error => { throw error })
   assert.deepEqual(playlists, [['Rock/Pop', 'Loud']])
 })
+
+test('imports the readable picked playlist CSVs when another cannot be read', async () => {
+  const playlists = []
+  const errors = []
+  await forEachTakeoutPlaylistFile([
+    { name: 'Gone-videos.csv', text: async () => { throw new Error('NotReadableError') } },
+    new File(['Video ID,Playlist video creation timestamp\nabcdefghijk,2025-01-01T00:00:00Z\n'], 'Kept-videos.csv'),
+  ], async playlist => playlists.push(playlist.playlistName), (error, filename) => errors.push(filename))
+  assert.deepEqual(playlists, ['Kept'])
+  assert.deepEqual(errors, ['Gone-videos.csv'])
+})

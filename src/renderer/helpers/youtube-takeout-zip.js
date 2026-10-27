@@ -602,7 +602,14 @@ export async function forEachTakeoutImportEntry(file, selected, entries, onEntry
  * @param {(error: Error, filename: string) => void} onError
  */
 export async function forEachTakeoutPlaylistFile(files, onPlaylist, onError) {
-  const entries = await Promise.all(files.map(async file => ({ path: file.name, content: await file.text() })))
+  const entries = []
+  for (const file of files) {
+    try {
+      entries.push({ path: file.name, content: await file.text() })
+    } catch (error) {
+      onError(error, file.name)
+    }
+  }
   const metadataEntries = entries.filter(entry => sniffTakeoutEntry(entry.path, entry.content, true) === 'playlistMetadata')
   const videoEntries = entries.filter(entry => !metadataEntries.includes(entry))
   let metadata = new Map()
