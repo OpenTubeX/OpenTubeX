@@ -319,6 +319,9 @@ const unsupportedCast = {
 
 const androidCast = process.env.IS_CAPACITOR && !process.env.IS_IOS ? registerPlugin('Chromecast') : null
 
+/** Google Cast and FCast need the Android plugin or the desktop main process. */
+export const supportsCasting = !!(androidCast || process.env.IS_ELECTRON)
+
 export const chromecast = androidCast
   ? createMobileChromecast(androidCast)
   : process.env.IS_ELECTRON ? electronCast('chromecast') : unsupportedCast

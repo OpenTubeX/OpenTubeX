@@ -2,7 +2,8 @@ import store from '../store/index'
 import { normalizeUploadEntries } from '../../newUploadNotifications'
 import { configureAndroidUploadNotifications, observeAndroidUploads } from './androidSubscriptionRefresh'
 
-const supported = process.env.IS_ELECTRON || (process.env.IS_CAPACITOR && !process.env.IS_IOS)
+/** The desktop main process or the Android background worker shows the notifications. */
+export const supportsUploadNotifications = !!(process.env.IS_ELECTRON || (process.env.IS_CAPACITOR && !process.env.IS_IOS))
 /** @type {ReturnType<typeof import('../../newUploadNotifications').createUploadNotificationConfiguration> | null} */
 let configuration = null
 
@@ -11,7 +12,7 @@ let configuration = null
  */
 export function configureUploadNotifications(value) {
   configuration = value
-  if (!supported) return Promise.resolve()
+  if (!supportsUploadNotifications) return Promise.resolve()
   return process.env.IS_ELECTRON
     ? window.ftElectron.subscriptionAutoRefresh.configureUploadNotifications(value)
     : configureAndroidUploadNotifications(value)
@@ -24,7 +25,7 @@ export function configureUploadNotifications(value) {
  * @param {'videos' | 'shorts' | 'live' | 'posts'} feedType
  */
 export function includeNotificationChannels(subscriptions, feedType) {
-  if (!supported || !store.getters.getEnableUploadNotifications || configuration?.enabled !== true) return subscriptions
+  if (!supportsUploadNotifications || !store.getters.getEnableUploadNotifications || configuration?.enabled !== true) return subscriptions
   const includedIds = new Set(subscriptions.map(channel => channel.id))
   const missing = (store.getters.getProfileList[0]?.subscriptions ?? []).filter(channel =>
     !includedIds.has(channel.id) && configuration.channels[channel.id]?.feedTypes.includes(feedType))
@@ -39,7 +40,7 @@ export function includeNotificationChannels(subscriptions, feedType) {
  * @param {object[]} entries
  */
 export function reportSubscriptionUploads(channelId, feedType, entries) {
-  if (!supported || !store.getters.getEnableUploadNotifications) return
+  if (!supportsUploadNotifications || !store.getters.getEnableUploadNotifications) return
   if (configuration?.enabled !== true || !configuration.channels[channelId]?.feedTypes.includes(feedType)) return
   const value = { channelId, feedType, entries: normalizeUploadEntries(entries) }
   const request = process.env.IS_ELECTRON

@@ -258,6 +258,7 @@ import FtSelect from '../FtSelect/FtSelect.vue'
 import FtToggleSwitch from '../FtToggleSwitch/FtToggleSwitch.vue'
 
 import store from '../../store/index'
+import { supportsUploadNotifications } from '../../helpers/uploadNotifications'
 
 import { MAIN_PROFILE_ID } from '../../../constants'
 import { showToast } from '../../helpers/utils'
@@ -399,9 +400,8 @@ const isSubscriptionOptionsEnabled = computed(() => {
   return !props.hideProfileDropdownToggle && isSubscribed.value
 })
 
-const uploadNotificationsSupported = process.env.IS_ELECTRON || (process.env.IS_CAPACITOR && !process.env.IS_IOS)
 const isNotificationBellEnabled = computed(() => (
-  uploadNotificationsSupported && isSubscriptionOptionsEnabled.value
+  supportsUploadNotifications && isSubscriptionOptionsEnabled.value
 ))
 
 const isProfileDropdownOpen = ref(false)

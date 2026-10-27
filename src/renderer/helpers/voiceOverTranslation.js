@@ -1,3 +1,6 @@
+/** The desktop main process or the Android app requests the translation; browsers block the service. */
+export const supportsVoiceOverTranslation = !!(process.env.IS_ELECTRON || (process.env.IS_CAPACITOR && !process.env.IS_IOS))
+
 /** Requests translation using the platform's HTTP implementation. */
 export async function requestVoiceOverTranslation(payload) {
   if (process.env.IS_ELECTRON) {

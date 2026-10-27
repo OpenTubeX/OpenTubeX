@@ -21,6 +21,7 @@ import WatchCast from '../../components/WatchCast/WatchCast.vue'
 import { selectCastSource } from '../../helpers/player/castSource'
 import WatchVideoDownloadPrompt from '../../components/WatchVideoDownloadPrompt/WatchVideoDownloadPrompt.vue'
 import { retainIosMediaSources } from '../../helpers/player/dlnaCast'
+import { supportsCasting } from '../../helpers/player/chromecast'
 import WatchVideoInfo from '../../components/WatchVideoInfo/WatchVideoInfo.vue'
 import WatchVideoDescription from '../../components/WatchVideoDescription/WatchVideoDescription.vue'
 import WatchVideoInfoPanels from '../../components/WatchVideoInfoPanels/WatchVideoInfoPanels.vue'
@@ -257,7 +258,7 @@ export default defineComponent({
       t,
       isElectron: process.env.IS_ELECTRON,
       isCapacitor: process.env.IS_CAPACITOR,
-      supportsChromecast: process.env.IS_ELECTRON || (process.env.IS_CAPACITOR && !process.env.IS_IOS),
+      supportsChromecast: supportsCasting,
       phoneLayout: usePhoneLayout(),
       portraitLayout: usePhoneLayout('(orientation: portrait)'),
       currentLocale: locale,

@@ -57,6 +57,7 @@ import { ScreenshotButton } from './player-components/ScreenshotButton'
 import { SkipSilenceButton } from './player-components/SkipSilenceButton'
 import { LevelSelection } from './player-components/LevelSelection'
 import { VoiceOverTranslationButton } from './player-components/VoiceOverTranslationButton'
+import { supportsVoiceOverTranslation } from '../../helpers/voiceOverTranslation'
 import { SleepTimer } from './player-components/SleepTimer'
 import { SeekHistoryMenu } from './player-components/SeekHistoryMenu'
 import { ShortsVideoInfoButton } from './player-components/ShortsVideoInfoButton'
@@ -1134,7 +1135,7 @@ export default defineComponent({
       return Number.isFinite(volume) ? Math.min(1, Math.max(0, volume)) : 0.1
     })
     const voiceOverTranslationAvailable = computed(() => {
-      return !props.offline && (process.env.IS_ELECTRON || (process.env.IS_CAPACITOR && !process.env.IS_IOS)) &&
+      return !props.offline && supportsVoiceOverTranslation &&
         useVoiceOverTranslationSetting.value &&
         props.videoId !== '' &&
         !isLive.value
