@@ -1098,7 +1098,7 @@ Settings:
     Invalid JSON row, skipping item: Érvénytelen JSON a(z) {row}. sorban, az elem kihagyva
     Import subscriptions formats: 'Támogatott formátumok: OpenTubeX / FreeTube (.db), YouTube Takeout (.csv, .json, .opml), NewPipe (.json), LibreTube biztonsági másolat vagy FreeTube exportálás (.json)'
     Import history formats: 'Támogatott formátumok: OpenTubeX / FreeTube (.db), YouTube Takeout (.json), LibreTube biztonsági másolat (.json)'
-    Import playlists formats: 'Támogatott formátumok: OpenTubeX / FreeTube (.db)'
+    Import playlists formats: 'Támogatott formátumok: OpenTubeX / FreeTube (.db), YouTube Takeout (.csv)'
     Import search history formats: 'Támogatott formátumok: OpenTubeX / FreeTube (.db), YouTube Takeout (.json)'
     Channel playback speeds: "Csatornák lejátszási sebességei"
     Import channel playback speeds: "Csatornák lejátszási sebességeinek importálása"

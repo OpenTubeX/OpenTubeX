@@ -1098,7 +1098,7 @@ Settings:
     Invalid JSON row, skipping item: Neplatný JSON v riadku {row}, položka sa preskočí
     Import subscriptions formats: 'Podporované formáty: OpenTubeX / FreeTube (.db), YouTube Takeout (.csv, .json, .opml), NewPipe (.json), záloha LibreTube alebo export FreeTube (.json)'
     Import history formats: 'Podporované formáty: OpenTubeX / FreeTube (.db), YouTube Takeout (.json), záloha LibreTube (.json)'
-    Import playlists formats: 'Podporované formáty: OpenTubeX / FreeTube (.db)'
+    Import playlists formats: 'Podporované formáty: OpenTubeX / FreeTube (.db), YouTube Takeout (.csv)'
     Import search history formats: 'Podporované formáty: OpenTubeX / FreeTube (.db), YouTube Takeout (.json)'
     Channel playback speeds: "Rýchlosti prehrávania kanálov"
     Import channel playback speeds: "Importovať rýchlosti prehrávania kanálov"

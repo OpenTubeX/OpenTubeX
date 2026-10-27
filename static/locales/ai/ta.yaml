@@ -1128,7 +1128,7 @@ Settings:
     Non-transferable setting key: 'மாற்ற முடியாத அமைப்புச் சாவி: {key}'
     Import subscriptions formats: 'ஆதரிக்கப்படும் வடிவங்கள்: OpenTubeX / FreeTube (.db), YouTube Takeout (.csv, .json, .opml), NewPipe (.json), LibreTube காப்புநகல் அல்லது FreeTube ஏற்றுமதி (.json)'
     Import history formats: 'ஆதரிக்கப்படும் வடிவங்கள்: OpenTubeX / FreeTube (.db), YouTube Takeout (.json), LibreTube காப்புநகல் (.json)'
-    Import playlists formats: 'ஆதரிக்கப்படும் வடிவங்கள்: OpenTubeX / FreeTube (.db)'
+    Import playlists formats: 'ஆதரிக்கப்படும் வடிவங்கள்: OpenTubeX / FreeTube (.db), YouTube Takeout (.csv)'
     Import search history formats: 'ஆதரிக்கப்படும் வடிவங்கள்: OpenTubeX / FreeTube (.db), YouTube Takeout (.json)'
     Channel playback speeds: "சேனல் இயக்க வேகங்கள்"
     Import channel playback speeds: "சேனல் இயக்க வேகங்களை இறக்குமதி செய்"

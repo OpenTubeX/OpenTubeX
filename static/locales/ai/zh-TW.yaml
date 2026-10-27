@@ -1097,7 +1097,7 @@ Settings:
     Invalid JSON row, skipping item: 第 {row} 列的 JSON 無效，略過此項目
     Import subscriptions formats: '支援的格式：OpenTubeX / FreeTube (.db)、YouTube Takeout (.csv, .json, .opml)、NewPipe (.json)、LibreTube 備份或 FreeTube 匯出檔 (.json)'
     Import history formats: '支援的格式：OpenTubeX / FreeTube (.db)、YouTube Takeout (.json)、LibreTube 備份 (.json)'
-    Import playlists formats: '支援的格式：OpenTubeX / FreeTube (.db)'
+    Import playlists formats: '支援的格式：OpenTubeX / FreeTube (.db)、YouTube Takeout (.csv)'
     Import search history formats: '支援的格式：OpenTubeX / FreeTube (.db)、YouTube Takeout (.json)'
     Channel playback speeds: "頻道播放速度"
     Import channel playback speeds: "匯入頻道播放速度"

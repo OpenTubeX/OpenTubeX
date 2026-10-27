@@ -1067,7 +1067,7 @@ Settings:
     Invalid JSON row, skipping item: JSON inválido na linha {row}; o item será ignorado
     Import subscriptions formats: 'Formatos suportados: OpenTubeX / FreeTube (.db), YouTube Takeout (.csv, .json, .opml), NewPipe (.json), backup do LibreTube ou exportação do FreeTube (.json)'
     Import history formats: 'Formatos suportados: OpenTubeX / FreeTube (.db), YouTube Takeout (.json), backup do LibreTube (.json)'
-    Import playlists formats: 'Formatos suportados: OpenTubeX / FreeTube (.db)'
+    Import playlists formats: 'Formatos suportados: OpenTubeX / FreeTube (.db), YouTube Takeout (.csv)'
     Import search history formats: 'Formatos suportados: OpenTubeX / FreeTube (.db), YouTube Takeout (.json)'
     Channel playback speeds: "Velocidades de reprodução dos canais"
     Import channel playback speeds: "Importar velocidades de reprodução dos canais"

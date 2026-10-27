@@ -1340,7 +1340,7 @@ Settings:
     Non-transferable setting key: '전송할 수 없는 설정 키: {key}'
     Import subscriptions formats: '지원 형식: OpenTubeX / FreeTube (.db), YouTube Takeout (.csv, .json, .opml), NewPipe (.json), LibreTube 백업 또는 FreeTube 내보내기 (.json)'
     Import history formats: '지원 형식: OpenTubeX / FreeTube (.db), YouTube Takeout (.json), LibreTube 백업 (.json)'
-    Import playlists formats: '지원 형식: OpenTubeX / FreeTube (.db)'
+    Import playlists formats: '지원 형식: OpenTubeX / FreeTube (.db), YouTube Takeout (.csv)'
     Import search history formats: '지원 형식: OpenTubeX / FreeTube (.db), YouTube Takeout (.json)'
     Channel playback speeds: "채널별 재생 속도"
     Import channel playback speeds: "채널별 재생 속도 가져오기"

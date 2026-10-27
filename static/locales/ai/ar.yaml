@@ -1117,7 +1117,7 @@ Settings:
     Non-transferable setting key: 'مفتاح الإعداد غير القابل للتحويل: {key}'
     Import subscriptions formats: 'التنسيقات المدعومة: OpenTubeX / FreeTube (.db)، أو YouTube Takeout (.csv، .json، .opml)، NewPipe (.json)، النسخ الاحتياطي LibreTube أو تصدير FreeTube (.json)'
     Import history formats: 'التنسيقات المدعومة: OpenTubeX / FreeTube (.db)، وYouTube Takeout (.json)، والنسخ الاحتياطي LibreTube (.json)'
-    Import playlists formats: 'التنسيقات المدعومة: OpenTubeX / FreeTube (.db)'
+    Import playlists formats: 'التنسيقات المدعومة: OpenTubeX / FreeTube (.db)، وYouTube Takeout (.csv)'
     Import search history formats: 'التنسيقات المدعومة: OpenTubeX / FreeTube (.db)، YouTube Takeout (.json)'
     Channel playback speeds: "سرعات تشغيل القنوات"
     Import channel playback speeds: "استيراد سرعات تشغيل القنوات"

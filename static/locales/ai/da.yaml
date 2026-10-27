@@ -1140,7 +1140,7 @@ Settings:
     Non-transferable setting key: 'Indstillingsnøglen kan ikke overføres: {key}'
     Import subscriptions formats: 'Understøttede formater: OpenTubeX / FreeTube (.db), YouTube Takeout (.csv, .json, .opml), NewPipe (.json), LibreTube-sikkerhedskopi eller FreeTube-eksport (.json)'
     Import history formats: 'Understøttede formater: OpenTubeX / FreeTube (.db), YouTube Takeout (.json), LibreTube-sikkerhedskopi (.json)'
-    Import playlists formats: 'Understøttede formater: OpenTubeX / FreeTube (.db)'
+    Import playlists formats: 'Understøttede formater: OpenTubeX / FreeTube (.db), YouTube Takeout (.csv)'
     Import search history formats: 'Understøttede formater: OpenTubeX / FreeTube (.db), YouTube Takeout (.json)'
     Channel playback speeds: "Afspilningshastigheder for kanaler"
     Import channel playback speeds: "Importér afspilningshastigheder for kanaler"

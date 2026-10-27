@@ -4,7 +4,7 @@ import test from 'node:test'
 import vm from 'node:vm'
 import { strToU8, Unzip, UnzipInflate, Zip, ZipDeflate, zipSync } from 'fflate'
 
-import { forEachSelectedTakeoutZipEntry, forEachTakeoutImportEntry, isSupportedTakeoutEntry, listYouTubeTakeoutZipEntries, parseTakeoutPlaylistCsv, parseTakeoutPlaylistMetadataCsv, readTakeoutPlaylistMetadata, sniffTakeoutEntry } from '../../src/renderer/helpers/youtube-takeout-zip.js'
+import { forEachSelectedTakeoutZipEntry, forEachTakeoutImportEntry, forEachTakeoutPlaylistFile, isSupportedTakeoutEntry, listYouTubeTakeoutZipEntries, parseTakeoutPlaylistCsv, parseTakeoutPlaylistMetadataCsv, readTakeoutPlaylistMetadata, sniffTakeoutEntry } from '../../src/renderer/helpers/youtube-takeout-zip.js'
 
 test('does not announce complete success after an empty playlist fails and a later playlist succeeds', async () => {
   const source = await readFile(new URL('../../src/renderer/components/Settings/Data/DataSettings.vue', import.meta.url), 'utf8')
@@ -511,4 +511,38 @@ test('still rejects malformed Takeout playlist rows after removing leading space
   for (const row of [' -abcdefghi,2025-01-01T00:00:00+00:00', ' -abcd efghi,2025-01-01T00:00:00+00:00', ' -abcdefghij,invalid date']) {
     assert.equal(parseTakeoutPlaylistCsv(`Video ID,Playlist video creation timestamp\n${row}\n`, 'Favorites.csv'), null)
   }
+})
+
+test('imports picked playlist CSVs with titles from a picked playlists.csv', async () => {
+  const videos = 'Video ID,Playlist video creation timestamp\nabcdefghijk,2025-01-01T00:00:00Z\n'
+  const files = [
+    new File([videos], 'Rock_Pop-videos.csv'),
+    new File(['Video ID,Playlist video creation timestamp\n'], 'Empty-videos.csv'),
+    new File([videos], 'Unlisted-videos.csv'),
+    new File([`${metadataHeader}\n${playlistId},Rock/Pop,Loud,2024-01-01T00:00:00Z,2025-01-01T00:00:00Z\nPLempty,Empty,,,\nPLother,Not picked,,,\n`], 'playlists.csv'),
+  ]
+  const playlists = []
+  await forEachTakeoutPlaylistFile(files, async playlist => playlists.push(playlist), error => { throw error })
+  assert.deepEqual(playlists.map(playlist => [playlist.playlistName, playlist.description, playlist.videos.map(video => video.videoId)]), [
+    ['Rock/Pop', 'Loud', ['abcdefghijk']],
+    ['Empty', '', []],
+    ['Unlisted', undefined, ['abcdefghijk']],
+  ])
+})
+
+test('numbers picked playlists that share a title and reports unusable files', async () => {
+  const videos = 'Video ID,Playlist video creation timestamp\nabcdefghijk,2025-01-01T00:00:00Z\n'
+  const playlists = []
+  const errors = []
+  await forEachTakeoutPlaylistFile([
+    new File([videos], 'Mix-videos.csv'),
+    new File([videos], 'Mix.csv'),
+    new File(['not a playlist'], 'notes.csv'),
+  ], async playlist => playlists.push(playlist.playlistName), (error, filename) => errors.push(filename))
+  assert.deepEqual(playlists, ['Mix', 'Mix (2)'])
+  assert.deepEqual(errors, ['notes.csv'])
+
+  errors.length = 0
+  await forEachTakeoutPlaylistFile([new File([`${metadataHeader}\n${playlistId},Mix,,,\n`], 'playlists.csv')], async () => assert.fail(), (error, filename) => errors.push(filename))
+  assert.deepEqual(errors, ['playlists.csv'])
 })

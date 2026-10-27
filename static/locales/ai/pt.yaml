@@ -1124,7 +1124,7 @@ Settings:
     Non-transferable setting key: 'Chave de definição não transferível: {key}'
     Import subscriptions formats: 'Formatos suportados: OpenTubeX / FreeTube (.db), YouTube Takeout (.csv, .json, .opml), NewPipe (.json), cópia de segurança do LibreTube ou exportação do FreeTube (.json)'
     Import history formats: 'Formatos suportados: OpenTubeX / FreeTube (.db), YouTube Takeout (.json), cópia de segurança do LibreTube (.json)'
-    Import playlists formats: 'Formatos suportados: OpenTubeX / FreeTube (.db)'
+    Import playlists formats: 'Formatos suportados: OpenTubeX / FreeTube (.db), YouTube Takeout (.csv)'
     Import search history formats: 'Formatos suportados: OpenTubeX / FreeTube (.db), YouTube Takeout (.json)'
     Channel playback speeds: "Velocidades de reprodução dos canais"
     Import channel playback speeds: "Importar velocidades de reprodução dos canais"

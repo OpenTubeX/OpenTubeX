@@ -1109,7 +1109,7 @@ Settings:
     Non-transferable setting key: 'Cheie de setare netransferabilă: {key}'
     Import subscriptions formats: 'Formate acceptate: OpenTubeX / FreeTube (.db), YouTube Takeout (.csv, .json, .opml), NewPipe (.json), copie de rezervă LibreTube sau export FreeTube (.json)'
     Import history formats: 'Formate acceptate: OpenTubeX / FreeTube (.db), YouTube Takeout (.json), copie de rezervă LibreTube (.json)'
-    Import playlists formats: 'Formate acceptate: OpenTubeX / FreeTube (.db)'
+    Import playlists formats: 'Formate acceptate: OpenTubeX / FreeTube (.db), YouTube Takeout (.csv)'
     Import search history formats: 'Formate acceptate: OpenTubeX / FreeTube (.db), YouTube Takeout (.json)'
     Channel playback speeds: "Viteze de redare ale canalelor"
     Import channel playback speeds: "Importă vitezele de redare ale canalelor"

@@ -1353,7 +1353,7 @@ Settings:
     Non-transferable setting key: 'Neperkeliamas nustatymo raktas: {key}'
     Import subscriptions formats: 'Palaikomi formatai: OpenTubeX / FreeTube (.db), YouTube Takeout (.csv, .json, .opml), NewPipe (.json), LibreTube atsarginė kopija arba FreeTube eksportas (.json)'
     Import history formats: 'Palaikomi formatai: OpenTubeX / FreeTube (.db), YouTube Takeout (.json), LibreTube atsarginė kopija (.json)'
-    Import playlists formats: 'Palaikomi formatai: OpenTubeX / FreeTube (.db)'
+    Import playlists formats: 'Palaikomi formatai: OpenTubeX / FreeTube (.db), YouTube Takeout (.csv)'
     Import search history formats: 'Palaikomi formatai: OpenTubeX / FreeTube (.db), YouTube Takeout (.json)'
     Channel playback speeds: "Kanalų atkūrimo greičiai"
     Import channel playback speeds: "Importuoti kanalų atkūrimo greičius"

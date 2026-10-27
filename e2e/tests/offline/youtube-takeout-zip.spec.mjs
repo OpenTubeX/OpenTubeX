@@ -64,29 +64,37 @@ test('previews and imports selected data from a YouTube Takeout ZIP', async ({ p
   })).toEqual({ subscribed: true, watched: true, playlists: ['My list', 'My list (2)', 'My list (3)'], playlistVideoIds: ['abcdefghijk', '-abcdefghij'], olderDescription: 'Older account', search: false })
 })
 
-test('imports a Takeout playlist CSV through Import Playlists', async ({ page }) => {
+test('imports picked Takeout playlist CSVs through Import Playlists', async ({ page }) => {
   const dataSection = await goToSettingsSection(page, 'data')
   await page.evaluate(() => {
     Object.defineProperty(window, 'showOpenFilePicker', {
       configurable: true,
       value: async options => {
         if (!Array.isArray(options.types[0].accept['text/csv'])) { throw new Error('Invalid CSV picker accept option') }
-        return [{
-          getFile: async () => new File(
+        if (options.multiple !== true) { throw new Error('Picker does not allow several files') }
+        return [
+          new File(
             ['Video ID,Playlist Video Creation Timestamp\nabcdefghijk,2025-01-01T00:00:00+00:00\n  -abcdefghij,2025-01-02T00:00:00+00:00\n'],
             'Takeout favorites-videos.csv',
             { type: 'text/csv' }
-          )
-        }]
+          ),
+          new File(['Video ID,Playlist Video Creation Timestamp\nlmnopqrstuv,2025-01-03T00:00:00+00:00\n'], 'Rock_Pop-videos.csv', { type: 'text/csv' }),
+          new File(['Playlist ID,Playlist Title (Original),Playlist Description (Original)\nPLaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa,Rock/Pop,Loud\n'], 'playlists.csv', { type: 'text/csv' }),
+        ].map(file => ({ getFile: async () => file }))
       }
     })
   })
 
   await dataSection.getByRole('button', { name: 'Import Playlists' }).click()
   await expect.poll(() => page.evaluate(() => {
-    const store = window.$store
-    return store.getters.getAllPlaylists.find(playlist => playlist.playlistName === 'Takeout favorites')?.videos.map(video => video.videoId)
-  })).toEqual(['abcdefghijk', '-abcdefghij'])
+    return window.$store.getters.getAllPlaylists
+      .filter(playlist => ['Takeout favorites', 'Rock/Pop'].includes(playlist.playlistName))
+      .map(playlist => [playlist.playlistName, playlist.description, playlist.videos.map(video => video.videoId)])
+      .sort()
+  })).toEqual([
+    ['Rock/Pop', 'Loud', ['lmnopqrstuv']],
+    ['Takeout favorites', undefined, ['abcdefghijk', '-abcdefghij']],
+  ])
 })
 
 test('imports original titles, descriptions, timestamps and empty playlists from Takeout metadata', async ({ page }) => {

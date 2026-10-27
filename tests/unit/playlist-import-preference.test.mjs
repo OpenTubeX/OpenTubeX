@@ -16,7 +16,7 @@ for (const preference of [undefined, false, true]) {
       const writes = []
       const run = vm.runInNewContext(importSource + '\nimportPlaylists', {
         allPlaylists: { value: existing ? [current] : [] },
-        readFileWithPicker: async () => ({ filename: 'playlist.db', content: JSON.stringify(imported) }),
+        pickFilesWithPicker: async () => [{ name: 'playlist.db', text: async () => JSON.stringify(imported) }],
         IMPORT_DIRECTORY_ID: 'import', START_IN_DIRECTORY: 'documents',
         parseImportedLineDelimitedJson: data => [JSON.parse(data)],
         normalizeImportedPlaylistThumbnail: async () => {},
@@ -59,3 +59,33 @@ for (const addVideosToTop of [false, true]) {
     assert.deepEqual(current.videos.map(video => video.playlistItemId), ['first', 'duplicate'])
   })
 }
+
+test('playlist import applies each picked database file to the previous file\'s result', async () => {
+  const playlists = { value: [{ _id: 'custom', playlistName: 'My playlist', videos: [] }] }
+  const file = videoId => ({
+    name: `${videoId}.db`,
+    text: async () => JSON.stringify({ _id: 'custom', playlistName: 'My playlist', videos: [{ videoId, title: videoId, lengthSeconds: 60, timeAdded: 1 }] }),
+  })
+  const run = vm.runInNewContext(importSource + '\nimportPlaylists', {
+    allPlaylists: playlists,
+    pickFilesWithPicker: async () => [file('first'), file('second')],
+    IMPORT_DIRECTORY_ID: 'import', START_IN_DIRECTORY: 'documents',
+    parseImportedLineDelimitedJson: data => [JSON.parse(data)],
+    normalizeImportedPlaylistThumbnail: async () => {},
+    isJsonObject: value => value !== null && typeof value === 'object' && !Array.isArray(value),
+    deepCopy: structuredClone,
+    processToBeAddedPlaylistVideo: () => {},
+    // Saves finish after the dispatch returns, like the datastore round trip
+    store: {
+      dispatch: async (action, payload) => {
+        await new Promise(resolve => setImmediate(resolve))
+        playlists.value = playlists.value.map(playlist => playlist._id === payload._id ? { ...playlist, ...payload } : playlist)
+      },
+    },
+    showToast: () => {},
+    t: value => value,
+    console,
+  })
+  await run()
+  assert.deepEqual(playlists.value[0].videos.map(video => video.videoId), ['first', 'second'])
+})

@@ -1098,7 +1098,7 @@ Settings:
     Invalid JSON row, skipping item: '{row}行目のJSONが無効なため、この項目をスキップします'
     Import subscriptions formats: '対応形式: OpenTubeX / FreeTube（.db）、YouTube Takeout（.csv、.json、.opml）、NewPipe（.json）、LibreTubeバックアップまたはFreeTubeエクスポート（.json）'
     Import history formats: '対応形式: OpenTubeX / FreeTube（.db）、YouTube Takeout（.json）、LibreTubeバックアップ（.json）'
-    Import playlists formats: '対応形式: OpenTubeX / FreeTube（.db）'
+    Import playlists formats: '対応形式: OpenTubeX / FreeTube（.db）、YouTube Takeout（.csv）'
     Import search history formats: '対応形式: OpenTubeX / FreeTube（.db）、YouTube Takeout（.json）'
     Channel playback speeds: "チャンネル別の再生速度"
     Import channel playback speeds: "チャンネル別再生速度のインポート"
