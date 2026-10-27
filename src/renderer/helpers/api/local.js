@@ -26,7 +26,7 @@ import { getAndroidLiveDashManifestUrl, getAndroidLiveHlsManifestUrl, getLiveDvr
 import { shouldHideMembersOnlyContent } from '../restricted-playback'
 import { getThumbnailPreviewUrl } from '../thumbnailPreview'
 import { normalizeVideoPopularityResponse } from '../player/videoPopularity'
-import { parseLocalVideoChannels } from '../video-collaborators'
+import { parseLocalCollaboratorItems, parseLocalVideoChannels } from '../video-collaborators'
 
 import { evaluatePlayerScript, generateContentPoToken } from './local-api-platform'
 import { calculatePublishedDate, deepCopy, extractNumberFromString, getChannelPlaylistId, getRelativeTimeFromDate } from '../utils'
@@ -1918,6 +1918,7 @@ export function parseLocalWatchNextVideo(video) {
       authorId: video.author.id,
       authorHandle: getChannelHandleFromEndpoint(video.author.endpoint),
       ...getAuthorVerification(video.author),
+      collaborators: parseLocalCollaboratorItems(video.author.collaborators),
       viewCount: video.view_count == null ? null : extractNumberFromString(video.view_count.text),
       published,
       lengthSeconds: isNaN(video.duration.seconds) ? '' : video.duration.seconds,
