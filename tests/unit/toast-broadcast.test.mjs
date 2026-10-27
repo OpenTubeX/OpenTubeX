@@ -2,59 +2,59 @@ import assert from 'node:assert/strict'
 import { readFile } from 'node:fs/promises'
 import test from 'node:test'
 import vm from 'node:vm'
+import { APP_URL, createIpcMainFake, importWithElectron, ipcEvent } from '../helpers/main-process.mjs'
 
-const mainSource = await readFile(new URL('../../src/main/index.js', import.meta.url), 'utf8')
-const listenerSource = mainSource.slice(
-  mainSource.indexOf('  ipcMain.on(IpcChannels.SHOW_TOAST,'),
-  mainSource.indexOf('  const isValidLiveReminderSender')
-)
+const ipcMain = createIpcMainFake()
+let sent = []
+const [{ setupToastIpc }, { IpcChannels }] = await importWithElectron([
+  new URL('../../src/main/toastIpc.js', import.meta.url).href,
+  new URL('../../src/constants.js', import.meta.url).href,
+], {
+  ipcMain,
+  BrowserWindow: {
+    getAllWindows: () => [1, 2].map(id => ({
+      isDestroyed: () => false,
+      webContents: {
+        isDestroyed: () => false,
+        getURL: () => APP_URL,
+        send: (...args) => sent.push({ id, args }),
+      },
+    })),
+  },
+})
+setupToastIpc()
 
-function fixture() {
-  const sent = []
-  let receive
-  vm.runInNewContext(listenerSource, {
-    ipcMain: { on: (_channel, handler) => { receive = handler } },
-    IpcChannels: { SHOW_TOAST: 'show-toast' },
-    isOpenTubeXUrl: url => url === 'app://opentubex',
-    BrowserWindow: {
-      getAllWindows: () => [1, 2].map(id => ({
-        webContents: {
-          isDestroyed: () => false,
-          getURL: () => 'app://opentubex',
-          send: (...args) => sent.push({ id, args }),
-        },
-      })),
-    },
-  })
-  return { sent, receive }
+function receive(event, ...args) {
+  ipcMain.send(IpcChannels.SHOW_TOAST, event, ...args)
 }
 
-const sender = { senderFrame: { url: 'app://opentubex' } }
+test.beforeEach(() => {
+  sent = []
+})
 
 test('broadcasts the sync settings action to both windows', () => {
-  const { sent, receive } = fixture()
-  receive(sender, 'Sync stopped', 15000, ['fas', 'triangle-exclamation'], 'open-sync-settings')
+  receive(ipcEvent(), 'Sync stopped', 15000, ['fas', 'triangle-exclamation'], 'open-sync-settings')
   assert.deepEqual(sent.map(({ id }) => id), [1, 2])
   for (const { args } of sent) {
-    assert.deepEqual(args, ['show-toast', 'Sync stopped', 15000, ['fas', 'triangle-exclamation'], 'open-sync-settings'])
+    assert.deepEqual(args, [IpcChannels.SHOW_TOAST, 'Sync stopped', 15000, ['fas', 'triangle-exclamation'], 'open-sync-settings'])
   }
 })
 
 test('rejects unknown toast actions and malformed or untrusted messages', () => {
-  const { sent, receive } = fixture()
   for (const action of ['open-url', '', {}, [], true]) {
-    receive(sender, 'Sync stopped', 15000, null, action)
+    receive(ipcEvent(), 'Sync stopped', 15000, null, action)
   }
-  receive(sender, { message: 'Sync stopped' }, 15000, null, 'open-sync-settings')
-  receive({ senderFrame: { url: 'https://untrusted.example' } }, 'Sync stopped', 15000, null, 'open-sync-settings')
+  receive(ipcEvent(), { message: 'Sync stopped' }, 15000, null, 'open-sync-settings')
+  receive(ipcEvent(), 'Sync stopped', 15000, ['fas'], null)
+  receive(ipcEvent('https://untrusted.example'), 'Sync stopped', 15000, null, 'open-sync-settings')
+  receive({ senderFrame: null }, 'Sync stopped', 15000, null, null)
   assert.equal(sent.length, 0)
 })
 
 test('preserves ordinary broadcasts without an action', () => {
-  const { sent, receive } = fixture()
-  receive(sender, 'Finished', null, null)
+  receive(ipcEvent(), 'Finished', null, null)
   assert.equal(sent.length, 2)
-  assert.deepEqual(sent[0].args, ['show-toast', 'Finished', null, null, null])
+  assert.deepEqual(sent[0].args, [IpcChannels.SHOW_TOAST, 'Finished', null, null, null])
 })
 
 test('keeps the sync shortcut in the non-Electron toast fallback', async () => {

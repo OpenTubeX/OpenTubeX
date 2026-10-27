@@ -3,7 +3,7 @@ import { createFileWatchQueue } from './watchQueue.js'
 import {
   app, BrowserWindow, dialog, Menu, ipcMain,
   powerSaveBlocker, screen, session,
-  nativeTheme, systemPreferences, net, protocol, clipboard,
+  nativeTheme, net, protocol, clipboard,
   shell, Tray, Notification, ShareMenu, nativeImage
 } from 'electron'
 import './applicationDataBootstrap'
@@ -11,7 +11,6 @@ import { isPortableBuild } from './applicationDataPaths'
 import path from 'path'
 import { createDesktopShareHandler, loadWindowsShare } from './desktopShare'
 import cp from 'child_process'
-import { getFonts } from 'font-list'
 
 import {
   IpcChannels,
@@ -26,16 +25,15 @@ import {
   DARK_BASE_THEMES,
 } from '../constants'
 import { isCustomThemeValue } from '../customTheme'
-import { MATERIAL_SYSTEM_SEED, MATERIAL_THEME_VALUES, materialColorScheme, materialSeedPalette, materialThemeMode, normalizeSystemAccentColor } from '../materialTheme.js'
+import { MATERIAL_SYSTEM_SEED, MATERIAL_THEME_VALUES, materialColorScheme, materialSeedPalette, materialThemeMode } from '../materialTheme.js'
 import { resolveSystemTheme } from '../appearanceSettings'
 import { applySyncServerUserAgent } from '../syncServerUserAgent'
 import * as baseHandlers from '../datastores/handlers/base'
-import { liveReminders, onLegacyDatastoreChanges, onLegacyDatastoreImported, waitForDatastores } from '../datastores'
+import { liveReminders, waitForDatastores } from '../datastores'
 import { extractExpiryTimestamp, ImageCache } from './ImageCache'
 import { constants as fsConstants, existsSync } from 'fs'
 import asyncFs from 'fs/promises'
 import { promisify } from 'util'
-import { hostname, release } from 'node:os'
 import { brotliDecompress } from 'zlib'
 
 import packageDetails from '../../package.json'
@@ -63,8 +61,7 @@ import { LiveReminderManager } from './LiveReminderManager'
 import { requestVoiceOverTranslation } from './voiceOverTranslation'
 import { setupVideoMetadataCacheIpc } from './videoMetadataCache'
 import { shouldAdvanceDockMediaSequence } from './dockMediaSession'
-import { clearStorage, compactStorageDatabases, getStorageUsage } from './storage'
-import { getLinuxDistributionInfo } from './linuxDistribution'
+import { setupStorageIpc } from './storage'
 import {
   createKdeWaylandWindowStateBackend,
   isWaylandPlatform as detectWaylandPlatform,
@@ -88,15 +85,14 @@ import { setupIpBlockRecoveryIpc } from './ipBlockRecovery'
 import { isSubscriptionAutoRefreshInProgress, setupSubscriptionAutoRefreshIpc } from './subscriptionAutoRefresh'
 import { setupCastIpc } from './castIpc'
 import { createUrlOpener, getDirectOpenUrl } from './openUrl'
+import { sendToAppWindows } from './ipc'
+import { setupBackupIpc } from './backupIpc'
+import { setupLibraryNotices } from './libraryNotices'
+import { setupLiveReminderIpc } from './liveReminderIpc'
+import { getSystemAccentColor, setupSystemInfoIpc } from './systemInfoIpc'
+import { setupToastIpc } from './toastIpc'
+import { setupWatchQueueIpc } from './watchQueueIpc'
 import { handleDownloadMediaRequest, setupYtDlpIpc } from './ytDlpIpc'
-
-function getSystemAccentColor() {
-  try {
-    return normalizeSystemAccentColor(systemPreferences.getAccentColor())
-  } catch {
-    return null
-  }
-}
 
 const castSenderPath = path.resolve(__dirname, process.env.NODE_ENV === 'development' ? '../../dist/opentubex-cast' : 'opentubex-cast') + (process.platform === 'win32' ? '.exe' : '')
 const chromecast = new ChromecastManager(castSenderPath.replace(/\.asar([\\/])/, '.asar.unpacked$1'), powerSaveBlocker)
@@ -133,49 +129,8 @@ Options:
 function runApp() {
   let deferredDatastoresStarted = false
 
-  const libraryNotices = new Set()
-  /** @type {string[]} */
-  let pendingLibraryNotices = []
-  function sendLibraryNoticesChanged() {
-    for (const window of BrowserWindow.getAllWindows()) {
-      TabManager.getForWindow(window.id)?.bridge.send(IpcChannels.LIBRARY_NOTICES_CHANGED)
-    }
-  }
-  /**
-   * Datastores open one after another, so each notice shows once per start
-   * for all of them. Every window shows it in an app dialog until one of
-   * them dismisses it, so a reloaded or closed window doesn't lose it.
-   * @param {'olderVersionChanges' | 'libraryFormatChanged'} key
-   */
-  function showLibraryNotice(key) {
-    // E2E profiles start from seeded NeDB files, so every test would import
-    // them. Only tests that opt in see these notices.
-    if (process.env.OPENTUBEX_E2E_USER_DATA_DIR && process.env.OPENTUBEX_E2E_LIBRARY_NOTICES !== 'true') return
-    if (libraryNotices.has(key)) return
-    libraryNotices.add(key)
-    pendingLibraryNotices.push(key)
-    // Windows that haven't loaded yet get the notices once they mount.
-    sendLibraryNoticesChanged()
-  }
-
-  ipcMain.handle(IpcChannels.GET_LIBRARY_NOTICES, event => {
-    if (!isOpenTubeXUrl(event.senderFrame.url) || !TabManager.getFromWebContents(event.sender)) return []
-    return pendingLibraryNotices
-  })
-
-  ipcMain.on(IpcChannels.DISMISS_LIBRARY_NOTICE, (event, key) => {
-    if (!isOpenTubeXUrl(event.senderFrame.url) || !TabManager.getFromWebContents(event.sender)) return
-    if (!pendingLibraryNotices.includes(key)) return
-    pendingLibraryNotices = pendingLibraryNotices.filter(notice => notice !== key)
-    sendLibraryNoticesChanged()
-  })
-
   // Registered synchronously, before any datastore loading started above can finish.
-  onLegacyDatastoreChanges(change => {
-    console.warn('Applied library changes made by an older version', change)
-    showLibraryNotice('olderVersionChanges')
-  })
-  onLegacyDatastoreImported(() => showLibraryNotice('libraryFormatChanged'))
+  setupLibraryNotices()
   /** @type {Set<string>} */
   const ALLOWED_RENDERER_FILES = process.env.NODE_ENV === 'production'
     // __FREETUBE_ALLOWED_PATHS__ is replaced by the injectAllowedPaths.mjs script
@@ -579,29 +534,7 @@ function runApp() {
   })
 
   const updateWatchQueue = createFileWatchQueue(path.join(app.getPath('userData'), 'watch-queue.json'))
-  let broadcastWatchQueueRevision = 0
-  ipcMain.handle(IpcChannels.WATCH_QUEUE_UPDATE, async (event, request) => {
-    if (!isOpenTubeXUrl(event.senderFrame.url)) {
-      return { error: 'Invalid watch queue sender' }
-    }
-    try {
-      const snapshot = await updateWatchQueue(request)
-      if (snapshot.revision > broadcastWatchQueueRevision) {
-        broadcastWatchQueueRevision = snapshot.revision
-        for (const window of BrowserWindow.getAllWindows()) {
-          try {
-            if (window.isDestroyed() || window.webContents.isDestroyed() || !isOpenTubeXUrl(window.webContents.getURL())) continue
-            window.webContents.send(IpcChannels.WATCH_QUEUE_UPDATED, snapshot)
-          } catch (error) {
-            console.warn('Could not update a window\'s watch queue', error)
-          }
-        }
-      }
-      return snapshot
-    } catch (error) {
-      return { error: error.message }
-    }
-  })
+  setupWatchQueueIpc(updateWatchQueue)
 
   if (process.platform === 'win32' && !isPortableBuild()) {
     app.setUserTasks([
@@ -802,11 +735,7 @@ function runApp() {
   })
 
   function broadcastLiveReminderUpdate(videoId, scheduled) {
-    for (const window of BrowserWindow.getAllWindows()) {
-      if (!window.webContents.isDestroyed() && isOpenTubeXUrl(window.webContents.getURL())) {
-        window.webContents.send(IpcChannels.LIVE_REMINDER_UPDATED, videoId, scheduled)
-      }
-    }
+    sendToAppWindows(IpcChannels.LIVE_REMINDER_UPDATED, videoId, scheduled)
   }
 
   function showLiveReminderNotification(reminder) {
@@ -2373,83 +2302,12 @@ function runApp() {
     openPendingUrlForReadyWebContents(event)
   })
 
-  ipcMain.on(IpcChannels.SHOW_TOAST, (event, message, time, icon, buttonAction) => {
-    if (
-      !isOpenTubeXUrl(event.senderFrame.url) ||
-      typeof message !== 'string' ||
-      (time !== null && typeof time !== 'number') ||
-      (icon != null && (!Array.isArray(icon) || icon.length !== 2 || icon.some(part => typeof part !== 'string'))) ||
-      (buttonAction != null && buttonAction !== 'open-sync-settings')
-    ) {
-      return
-    }
-
-    for (const window of BrowserWindow.getAllWindows()) {
-      if (!window.webContents.isDestroyed() && isOpenTubeXUrl(window.webContents.getURL())) {
-        window.webContents.send(IpcChannels.SHOW_TOAST, message, time, icon ?? null, buttonAction ?? null)
-      }
-    }
-  })
-
-  const isValidLiveReminderSender = event => isOpenTubeXUrl(event.senderFrame.url)
-  const isValidVideoId = videoId => typeof videoId === 'string' && /^[\w-]{11}$/.test(videoId)
-
-  ipcMain.handle(IpcChannels.LIVE_REMINDER_GET, (event, videoId) => {
-    if (!isValidLiveReminderSender(event) || !isValidVideoId(videoId) || !supportsNativeNotifications(Notification)) {
-      return null
-    }
-    return liveReminderManager.get(videoId)
-  })
-
-  ipcMain.handle(IpcChannels.LIVE_REMINDER_LIST, (event) => {
-    if (!isValidLiveReminderSender(event) || !supportsNativeNotifications(Notification)) {
-      return []
-    }
-    return liveReminderManager.list()
-  })
-
-  ipcMain.handle(IpcChannels.LIVE_REMINDER_SCHEDULE, (event, reminder) => {
-    if (
-      !isValidLiveReminderSender(event) ||
-      !supportsNativeNotifications(Notification) ||
-      !isValidVideoId(reminder?.videoId) ||
-      !Number.isFinite(reminder?.startTimestamp) ||
-      reminder.startTimestamp <= Date.now() ||
-      typeof reminder.notificationTitle !== 'string' ||
-      reminder.notificationTitle.length === 0 ||
-      reminder.notificationTitle.length > 200 ||
-      typeof reminder.notificationBody !== 'string' ||
-      reminder.notificationBody.length === 0 ||
-      reminder.notificationBody.length > 500
-    ) {
-      return false
-    }
-    return liveReminderManager.schedule(reminder)
-  })
-
-  ipcMain.handle(IpcChannels.LIVE_REMINDER_CANCEL, (event, videoId) => {
-    if (!isValidLiveReminderSender(event) || !isValidVideoId(videoId)) {
-      return false
-    }
-    return liveReminderManager.cancel(videoId)
-  })
+  setupToastIpc()
+  setupLiveReminderIpc(liveReminderManager)
 
   setupVideoMetadataCacheIpc({ getConfiguredApiServerUrl })
 
-  ipcMain.handle(IpcChannels.STORAGE_GET_USAGE, async (event) => {
-    if (!isOpenTubeXUrl(event.senderFrame.url)) return {}
-    return getStorageUsage()
-  })
-
-  ipcMain.handle(IpcChannels.STORAGE_CLEAR, async (event, category) => {
-    if (!isOpenTubeXUrl(event.senderFrame.url) || !event.sender.isFocused()) return false
-    return clearStorage(category)
-  })
-
-  ipcMain.handle(IpcChannels.STORAGE_COMPACT_DATABASES, async (event) => {
-    if (!isOpenTubeXUrl(event.senderFrame.url)) return false
-    return compactStorageDatabases()
-  })
+  setupStorageIpc()
 
   setupSubscriptionAutoRefreshIpc({ backgroundSubscriptions, updateBackgroundSubscriptionVisibility })
 
@@ -2517,20 +2375,6 @@ function runApp() {
     })
   })
 
-  const publishSystemAccentColor = () => {
-    const color = getSystemAccentColor()
-    for (const window of BrowserWindow.getAllWindows()) {
-      if (!window.webContents.isDestroyed() && isOpenTubeXUrl(window.webContents.getURL())) {
-        window.webContents.send(IpcChannels.SYSTEM_ACCENT_COLOR_UPDATED, color)
-      }
-    }
-  }
-  systemPreferences.on('accent-color-changed', publishSystemAccentColor)
-  if (process.platform === 'darwin') {
-    const subscription = systemPreferences.subscribeNotification('AppleColorPreferencesChangedNotification', publishSystemAccentColor)
-    app.once('will-quit', () => systemPreferences.unsubscribeNotification(subscription))
-  }
-
   ipcMain.handle(IpcChannels.GENERATE_PO_TOKEN, (event, videoId, context, initialAttestationData, ytConfig) => {
     if (isOpenTubeXUrl(event.senderFrame.url)) {
       return generatePoToken(videoId, context, initialAttestationData, ytConfig, proxyUrl)
@@ -2573,50 +2417,17 @@ function runApp() {
 
   // #endregion navigation history
 
-  ipcMain.handle(IpcChannels.GET_DEVICE_NAME, (event) => {
-    if (isOpenTubeXUrl(event.senderFrame.url)) {
-      return hostname()
-    }
-  })
-
+  setupSystemInfoIpc()
   setupDiagnosticLogIpc()
   baseHandlers.settings._findOne('diagnosticLogging').then((setting) => {
     setDiagnosticLogging(setting?.value === true)
   }).catch(error => console.error('Failed to read the diagnostic logging setting', error))
-
-  ipcMain.handle(IpcChannels.GET_DEVICE_INFO, async (event) => {
-    if (isOpenTubeXUrl(event.senderFrame.url)) {
-      const linuxDistribution = process.platform === 'linux'
-        ? await getLinuxDistributionInfo()
-        : null
-      return {
-        platform: linuxDistribution?.platform || process.platform,
-        architecture: process.arch,
-        release: linuxDistribution?.release || release(),
-      }
-    }
-  })
 
   ipcMain.handle(IpcChannels.GET_SYSTEM_LOCALE, (event) => {
     if (isOpenTubeXUrl(event.senderFrame.url)) {
       // we should switch to getPreferredSystemLanguages at some point and iterate through until we find a supported locale
       return app.getSystemLocale()
     }
-  })
-
-  ipcMain.handle(IpcChannels.GET_SYSTEM_FONTS, async (event) => {
-    if (!isOpenTubeXUrl(event.senderFrame.url)) return []
-
-    const fonts = await getFonts({ disableQuoting: true })
-    return [...new Set(fonts
-      .filter(font => typeof font === 'string')
-      .map(font => font.trim())
-      .filter(Boolean))]
-  })
-
-  ipcMain.handle(IpcChannels.GET_SYSTEM_ACCENT_COLOR, (event) => {
-    if (isOpenTubeXUrl(event.senderFrame.url)) return getSystemAccentColor()
-    return null
   })
 
   ipcMain.handle(IpcChannels.IS_WAYLAND_PLATFORM, (event) => {
@@ -2645,26 +2456,7 @@ function runApp() {
     })
   })
 
-  ipcMain.handle(IpcChannels.CREATE_BACKUP_ARCHIVE, async (event, sections, settings) => {
-    if (!isOpenTubeXUrl(event.senderFrame.url)) return null
-    if (!Array.isArray(sections) || sections.some(section => typeof section !== 'string') ||
-      (settings !== undefined && (settings === null || typeof settings !== 'object' || Array.isArray(settings)))) {
-      throw new TypeError('Invalid backup sections or settings')
-    }
-    return createBackupArchive({ sections, settings })
-  })
-
-  ipcMain.handle(IpcChannels.CHOOSE_SCHEDULED_BACKUP_FOLDER, async (event) => {
-    if (!isOpenTubeXUrl(event.senderFrame.url)) return
-    const currentPath = (await baseHandlers.settings._findOne('scheduledBackupFolderPath'))?.value
-    const options = { defaultPath: currentPath || app.getPath('documents'), properties: ['openDirectory', 'createDirectory'] }
-    const window = BrowserWindow.fromWebContents(event.sender)
-    const result = await (window ? dialog.showOpenDialog(window, options) : dialog.showOpenDialog(options))
-    if (result.canceled || !result.filePaths[0]) return
-    await updateSettingFromMain('scheduledBackupFolderPath', result.filePaths[0])
-    checkScheduledBackup()
-    return result.filePaths[0]
-  })
+  setupBackupIpc({ createBackupArchive, updateSettingFromMain, checkScheduledBackup })
 
   /**
    * @param {import('electron').WebContents} webContents
