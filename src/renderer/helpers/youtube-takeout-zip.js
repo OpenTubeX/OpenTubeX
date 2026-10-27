@@ -348,6 +348,61 @@ function getDirectory(path) {
 }
 
 /**
+ * Assign each metadata record to the path of its video file, after all records
+ * have unambiguous filenames.
+ * @param {string} metadataPath
+ * @param {string} content The metadata CSV.
+ * @param {string[]} csvPaths The other CSV paths in its directory.
+ * @param {boolean} [skipMissing] Ignore records without a video file instead of
+ * expecting it at their default path.
+ * @returns {Map<string, object>}
+ */
+function matchTakeoutPlaylistMetadata(metadataPath, content, csvPaths, skipMissing = false) {
+  const directory = getDirectory(metadataPath)
+  const files = csvPaths.map(path => ({ path, name: path.slice(directory.length).replace(/\.csv$/i, '') }))
+  const fileNames = files.map(({ name }) => name)
+  const playlists = parseTakeoutPlaylistMetadataCsv(content, fileNames)
+  if (playlists === null) {
+    throw new Error(`Invalid playlist metadata CSV: ${metadataPath}`)
+  }
+  const titles = playlists.map(playlist => sanitizeTakeoutFilename(playlist.playlistName))
+  const suffix = findTakeoutPlaylistFileSuffix(titles, fileNames)
+  const accountMetadata = new Map()
+  const pending = playlists.flatMap((playlist, index) => {
+    const title = titles[index]
+    const paths = files
+      .filter(({ name }) => name.startsWith(title) && [suffix, ''].includes(name.slice(title.length).toLowerCase()))
+      .map(({ path }) => path)
+    if (paths.length === 0 && skipMissing) { return [] }
+    return [{ playlist, paths: new Set(paths.length ? paths : [`${directory}${title}${suffix || '-videos'}.csv`]) }]
+  })
+  const claimantsByPath = new Map()
+  for (const entry of pending) {
+    for (const path of entry.paths) {
+      const claimants = claimantsByPath.get(path) ?? []
+      claimants.push(entry)
+      claimantsByPath.set(path, claimants)
+    }
+  }
+  // Assign forced matches first, removing each claimed path from other rows.
+  // A queue also resolves suffix-overlapping titles without rescanning every row.
+  const queue = pending.filter(entry => entry.paths.size === 1)
+  for (let i = 0; i < queue.length; i++) {
+    const entry = queue[i]
+    if (entry.paths.size !== 1) { continue }
+    const path = entry.paths.values().next().value
+    accountMetadata.set(path, entry.playlist)
+    for (const other of claimantsByPath.get(path)) {
+      if (other !== entry && other.paths.delete(path) && other.paths.size === 1) { queue.push(other) }
+    }
+  }
+  if (accountMetadata.size !== pending.length) {
+    throw new Error(`Ambiguous playlist metadata: ${metadataPath}`)
+  }
+  return accountMetadata
+}
+
+/**
  * Read metadata first: Takeout can store playlists.csv after its video files.
  * The extra archive scan between discovery and import avoids buffering video
  * CSVs or inflating unselected metadata during discovery.
@@ -396,46 +451,11 @@ export async function readTakeoutPlaylistMetadata(file) {
       errors.push(new Error(`Unreadable duplicate playlist metadata CSV: ${entry.path}`))
       continue
     }
-    const files = (csvPathsByDirectory.get(directory) ?? [])
-      .map(path => ({ path, name: path.slice(directory.length).replace(/\.csv$/i, '') }))
-    const fileNames = files.map(({ name }) => name)
-    const playlists = parseTakeoutPlaylistMetadataCsv(entry.content, fileNames)
-    if (playlists === null) {
-      errors.push(new Error(`Invalid playlist metadata CSV: ${entry.path}`))
-      continue
-    }
-    const titles = playlists.map(playlist => sanitizeTakeoutFilename(playlist.playlistName))
-    const suffix = findTakeoutPlaylistFileSuffix(titles, fileNames)
-    const accountMetadata = new Map()
-    const pending = playlists.map((playlist, index) => {
-      const title = titles[index]
-      const paths = files
-        .filter(({ name }) => name.startsWith(title) && [suffix, ''].includes(name.slice(title.length).toLowerCase()))
-        .map(({ path }) => path)
-      return { playlist, paths: new Set(paths.length ? paths : [`${directory}${title}${suffix || '-videos'}.csv`]) }
-    })
-    const claimantsByPath = new Map()
-    for (const entry of pending) {
-      for (const path of entry.paths) {
-        const claimants = claimantsByPath.get(path) ?? []
-        claimants.push(entry)
-        claimantsByPath.set(path, claimants)
-      }
-    }
-    // Assign forced matches first, removing each claimed path from other rows.
-    // A queue also resolves suffix-overlapping titles without rescanning every row.
-    const queue = pending.filter(entry => entry.paths.size === 1)
-    for (let i = 0; i < queue.length; i++) {
-      const entry = queue[i]
-      if (entry.paths.size !== 1) { continue }
-      const path = entry.paths.values().next().value
-      accountMetadata.set(path, entry.playlist)
-      for (const other of claimantsByPath.get(path)) {
-        if (other !== entry && other.paths.delete(path) && other.paths.size === 1) { queue.push(other) }
-      }
-    }
-    if (accountMetadata.size !== pending.length) {
-      errors.push(new Error(`Ambiguous playlist metadata: ${entry.path}`))
+    let accountMetadata
+    try {
+      accountMetadata = matchTakeoutPlaylistMetadata(entry.path, entry.content, csvPathsByDirectory.get(directory) ?? [])
+    } catch (error) {
+      errors.push(error)
       continue
     }
     // Commit each account only after all its records have unambiguous filenames.
@@ -500,11 +520,33 @@ export function isSupportedTakeoutEntry(entry) {
   }
 }
 
+/**
+ * Number the names of playlists that share one within an import, skipping
+ * names that other playlists in it already use.
+ * @param {Set<string>} reservedNames The trimmed names of every playlist in the import.
+ */
+function createTakeoutPlaylistNamer(reservedNames) {
+  // The next suffix to try for each name. Lower suffixes are taken already.
+  const nextSuffixes = new Map()
+  const allocatedNames = new Set()
+  return playlist => {
+    const name = playlist.playlistName.trim()
+    let playlistName = name
+    let suffix = nextSuffixes.get(name)
+    if (suffix !== undefined) {
+      while (reservedNames.has(`${name} (${suffix})`) || allocatedNames.has(`${name} (${suffix})`)) {
+        suffix++
+      }
+      playlistName = `${name} (${suffix})`
+    }
+    nextSuffixes.set(name, (suffix ?? 1) + 1)
+    allocatedNames.add(playlistName)
+    return { ...playlist, playlistName }
+  }
+}
+
 /** Read supported data one entry at a time, using the same names for preview and import. */
 export async function forEachTakeoutImportEntry(file, selected, entries, onEntry, onError) {
-  // The next suffix to try for each name. Lower suffixes are taken already.
-  const nextPlaylistSuffixes = new Map()
-  const allocatedPlaylistNames = new Set()
   let metadata = new Map()
   if (selected.has('playlists')) {
     try {
@@ -515,25 +557,14 @@ export async function forEachTakeoutImportEntry(file, selected, entries, onEntry
       onError(error, 'playlists')
     }
   }
-  const reservedPlaylistNames = new Set([
+  const namePlaylist = createTakeoutPlaylistNamer(new Set([
     ...[...metadata.values()].map(playlist => playlist.playlistName.trim()),
     ...entries.filter(entry => entry.type === 'playlists')
       .map(entry => (metadata.get(entry.path)?.playlistName ?? getTakeoutPlaylistName(entry.path.split('/').at(-1))).trim()),
-  ])
+  ]))
   const importedPaths = new Set()
   async function importPlaylist(playlist) {
-    const name = playlist.playlistName.trim()
-    let playlistName = name
-    let suffix = nextPlaylistSuffixes.get(name)
-    if (suffix !== undefined) {
-      while (reservedPlaylistNames.has(`${name} (${suffix})`) || allocatedPlaylistNames.has(`${name} (${suffix})`)) {
-        suffix++
-      }
-      playlistName = `${name} (${suffix})`
-    }
-    nextPlaylistSuffixes.set(name, (suffix ?? 1) + 1)
-    allocatedPlaylistNames.add(playlistName)
-    await onEntry({ type: 'playlists', playlist: { ...playlist, playlistName } })
+    await onEntry({ type: 'playlists', playlist: namePlaylist(playlist) })
   }
   await forEachSelectedTakeoutZipEntry(file, selected, async entry => {
     if (entry.type === 'playlists') { importedPaths.add(entry.path) }
@@ -559,6 +590,54 @@ export async function forEachTakeoutImportEntry(file, selected, entries, onEntry
       } catch (error) {
         onError(error, 'playlists', path)
       }
+    }
+  }
+}
+
+/**
+ * Read playlist CSVs picked from an extracted Takeout. A picked playlists.csv
+ * supplies the original titles and descriptions of the picked playlists only.
+ * @param {File[]} files
+ * @param {(playlist: object) => Promise<void>} onPlaylist
+ * @param {(error: Error, filename: string) => void} onError
+ */
+export async function forEachTakeoutPlaylistFile(files, onPlaylist, onError) {
+  const entries = []
+  for (const file of files) {
+    try {
+      entries.push({ path: file.name, content: await file.text() })
+    } catch (error) {
+      onError(error, file.name)
+    }
+  }
+  const metadataEntries = entries.filter(entry => sniffTakeoutEntry(entry.path, entry.content, true) === 'playlistMetadata')
+  const videoEntries = entries.filter(entry => !metadataEntries.includes(entry))
+  let metadata = new Map()
+  if (metadataEntries.length === 1 && videoEntries.length > 0) {
+    try {
+      metadata = matchTakeoutPlaylistMetadata(metadataEntries[0].path, metadataEntries[0].content, videoEntries.map(entry => entry.path), true)
+    } catch (error) {
+      onError(error, metadataEntries[0].path)
+    }
+  } else {
+    // Metadata alone names no video files, and several cannot be told apart.
+    metadataEntries.forEach(entry => onError(new Error(`Unusable playlist metadata CSV: ${entry.path}`), entry.path))
+  }
+  const playlists = []
+  for (const entry of videoEntries) {
+    const playlist = parseTakeoutPlaylistCsv(entry.content, entry.path, metadata.get(entry.path))
+    if (playlist === null) {
+      onError(new Error(`Invalid Takeout entry: ${entry.path}`), entry.path)
+    } else {
+      playlists.push({ path: entry.path, playlist })
+    }
+  }
+  const namePlaylist = createTakeoutPlaylistNamer(new Set(playlists.map(({ playlist }) => playlist.playlistName.trim())))
+  for (const { path, playlist } of playlists) {
+    try {
+      await onPlaylist(namePlaylist(playlist))
+    } catch (error) {
+      onError(error, path)
     }
   }
 }

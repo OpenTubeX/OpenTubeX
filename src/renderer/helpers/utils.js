@@ -541,15 +541,17 @@ export function openInternalPath({ path, query = undefined, doCreateNewWindow = 
  * @param {{[key: string]: string | string[]}} acceptedTypes
  * @param {string} [rememberDirectoryId]
  * @param {'desktop' | 'documents' | 'downloads' | 'music' | 'pictures' | 'videos'} [startInDirectory]
- * @returns {Promise<File | null>}
+ * @param {boolean} [multiple]
+ * @returns {Promise<File[]>} No files when the picker was canceled.
  */
-export async function pickFileWithPicker(
+export async function pickFilesWithPicker(
   fileTypeDescription,
   acceptedTypes,
   rememberDirectoryId,
-  startInDirectory
+  startInDirectory,
+  multiple = true
 ) {
-  let file
+  let files
 
   // Only supported in Electron and desktop Chromium browsers
   // https://developer.mozilla.org/en-US/docs/Web/API/Window/showOpenFilePicker#browser_compatibility
@@ -558,9 +560,9 @@ export async function pickFileWithPicker(
   if (process.env.IS_ELECTRON || 'showOpenFilePicker' in window) {
     try {
       /** @type {FileSystemFileHandle[]} */
-      const [handle] = await window.showOpenFilePicker({
+      const handles = await window.showOpenFilePicker({
         excludeAcceptAllOption: true,
-        multiple: false,
+        multiple,
         id: rememberDirectoryId,
         startIn: startInDirectory,
         types: [{
@@ -572,22 +574,23 @@ export async function pickFileWithPicker(
         }],
       })
 
-      file = await handle.getFile()
+      files = await Promise.all(handles.map(handle => handle.getFile()))
     } catch (error) {
       // user pressed cancel in the file picker
       if (error.name === 'AbortError') {
-        return null
+        return []
       }
 
       throw error
     }
   } else {
-    /** @type {File|null} */
-    const fallbackFile = await new Promise((resolve) => {
+    /** @type {File[]} */
+    files = await new Promise((resolve) => {
       const extensions = Object.values(acceptedTypes).flat()
 
       const fileInput = document.createElement('input')
       fileInput.type = 'file'
+      fileInput.multiple = multiple
       // WebKit's native picker cannot identify our line-delimited JSON .db files, and Android 8 has
       // no MIME types for subtitle files, so its picker would only offer cloud storage for them.
       // Let them select any file; importers still validate the filename and contents.
@@ -596,7 +599,7 @@ export async function pickFileWithPicker(
         ? ''
         : extensions.join(',')
       fileInput.onchange = () => {
-        resolve(fileInput.files[0])
+        resolve(Array.from(fileInput.files))
         fileInput.onchange = null
       }
 
@@ -605,7 +608,7 @@ export async function pickFileWithPicker(
         setTimeout(() => {
           if (fileInput.files.length === 0 && typeof fileInput.onchange === 'function') {
             // if there are no files and the onchange has not been triggered, the file-picker was canceled
-            resolve(null)
+            resolve([])
             fileInput.onchange = null
           }
         }, 1000)
@@ -613,15 +616,21 @@ export async function pickFileWithPicker(
       window.addEventListener('focus', listenForEnd, { once: true })
       fileInput.click()
     })
-
-    if (fallbackFile === null) {
-      return null
-    }
-
-    file = fallbackFile
   }
 
-  return file
+  return files
+}
+
+/**
+ * @param {string} fileTypeDescription
+ * @param {{[key: string]: string | string[]}} acceptedTypes
+ * @param {string} [rememberDirectoryId]
+ * @param {'desktop' | 'documents' | 'downloads' | 'music' | 'pictures' | 'videos'} [startInDirectory]
+ * @returns {Promise<File | null>}
+ */
+export async function pickFileWithPicker(fileTypeDescription, acceptedTypes, rememberDirectoryId, startInDirectory) {
+  const [file] = await pickFilesWithPicker(fileTypeDescription, acceptedTypes, rememberDirectoryId, startInDirectory, false)
+  return file ?? null
 }
 
 /**

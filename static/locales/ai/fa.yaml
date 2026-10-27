@@ -1151,7 +1151,7 @@ Settings:
     Non-transferable setting key: 'کلید تنظیمات انتقال‌ناپذیر: {key}'
     Import subscriptions formats: 'قالب‌های پشتیبانی‌شده: OpenTubeX / FreeTube (.db)، YouTube Takeout (.csv، .json، .opml)، NewPipe (.json)، پشتیبان LibreTube یا خروجی FreeTube (.json)'
     Import history formats: 'قالب‌های پشتیبانی‌شده: OpenTubeX / FreeTube (.db)، YouTube Takeout (.json)، پشتیبان LibreTube (.json)'
-    Import playlists formats: 'قالب‌های پشتیبانی‌شده: OpenTubeX / FreeTube (.db)'
+    Import playlists formats: 'قالب‌های پشتیبانی‌شده: OpenTubeX / FreeTube (.db)، YouTube Takeout (.csv)'
     Import search history formats: 'قالب‌های پشتیبانی‌شده: OpenTubeX / FreeTube (.db)، YouTube Takeout (.json)'
     Channel playback speeds: "سرعت‌های پخش کانال‌ها"
     Import channel playback speeds: "وارد کردن سرعت‌های پخش کانال‌ها"

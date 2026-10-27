@@ -1097,7 +1097,7 @@ Settings:
     Invalid JSON row, skipping item: '{row}. satırdaki JSON geçersiz, öğe atlanıyor'
     Import subscriptions formats: 'Desteklenen biçimler: OpenTubeX / FreeTube (.db), YouTube Takeout (.csv, .json, .opml), NewPipe (.json), LibreTube yedeği veya FreeTube dışa aktarımı (.json)'
     Import history formats: 'Desteklenen biçimler: OpenTubeX / FreeTube (.db), YouTube Takeout (.json), LibreTube yedeği (.json)'
-    Import playlists formats: 'Desteklenen biçimler: OpenTubeX / FreeTube (.db)'
+    Import playlists formats: 'Desteklenen biçimler: OpenTubeX / FreeTube (.db), YouTube Takeout (.csv)'
     Import search history formats: 'Desteklenen biçimler: OpenTubeX / FreeTube (.db), YouTube Takeout (.json)'
     Channel playback speeds: "Kanal oynatma hızları"
     Import channel playback speeds: "Kanal oynatma hızlarını içe aktar"

@@ -1102,7 +1102,7 @@ Settings:
     Invalid JSON row, skipping item: Ogiltig JSON på rad {row}. Objektet hoppas över
     Import subscriptions formats: 'Format som stöds: OpenTubeX / FreeTube (.db), YouTube Takeout (.csv, .json, .opml), NewPipe (.json), LibreTube-säkerhetskopia eller FreeTube-export (.json)'
     Import history formats: 'Format som stöds: OpenTubeX / FreeTube (.db), YouTube Takeout (.json), LibreTube-säkerhetskopia (.json)'
-    Import playlists formats: 'Format som stöds: OpenTubeX / FreeTube (.db)'
+    Import playlists formats: 'Format som stöds: OpenTubeX / FreeTube (.db), YouTube Takeout (.csv)'
     Import search history formats: 'Format som stöds: OpenTubeX / FreeTube (.db), YouTube Takeout (.json)'
     Channel playback speeds: "Uppspelningshastigheter för kanaler"
     Import channel playback speeds: "Importera uppspelningshastigheter för kanaler"

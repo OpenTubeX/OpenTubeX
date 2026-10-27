@@ -1117,7 +1117,7 @@ Settings:
     Non-transferable setting key: 'Ключ налаштування, який не можна перенести: {key}'
     Import subscriptions formats: 'Підтримувані формати: OpenTubeX / FreeTube (.db), YouTube Takeout (.csv, .json, .opml), NewPipe (.json), резервна копія LibreTube або експорт FreeTube (.json)'
     Import history formats: 'Підтримувані формати: OpenTubeX / FreeTube (.db), YouTube Takeout (.json), резервна копія LibreTube (.json)'
-    Import playlists formats: 'Підтримувані формати: OpenTubeX / FreeTube (.db)'
+    Import playlists formats: 'Підтримувані формати: OpenTubeX / FreeTube (.db), YouTube Takeout (.csv)'
     Import search history formats: 'Підтримувані формати: OpenTubeX / FreeTube (.db), YouTube Takeout (.json)'
     Channel playback speeds: "Швидкості відтворення каналів"
     Import channel playback speeds: "Імпортувати швидкості відтворення каналів"

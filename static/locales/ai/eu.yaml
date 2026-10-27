@@ -1098,7 +1098,7 @@ Settings:
     Invalid JSON row, skipping item: '{row}. errenkadako JSONa ez da baliozkoa; elementua saltatzen'
     Import subscriptions formats: 'Onartutako formatuak: OpenTubeX / FreeTube (.db), YouTube Takeout (.csv, .json, .opml), NewPipe (.json), LibreTube babeskopia edo FreeTube esportazioa (.json)'
     Import history formats: 'Onartutako formatuak: OpenTubeX / FreeTube (.db), YouTube Takeout (.json), LibreTube babeskopia (.json)'
-    Import playlists formats: 'Onartutako formatuak: OpenTubeX / FreeTube (.db)'
+    Import playlists formats: 'Onartutako formatuak: OpenTubeX / FreeTube (.db), YouTube Takeout (.csv)'
     Import search history formats: 'Onartutako formatuak: OpenTubeX / FreeTube (.db), YouTube Takeout (.json)'
     Channel playback speeds: "Kanalen erreprodukzio-abiadurak"
     Import channel playback speeds: "Inportatu kanalen erreprodukzio-abiadurak"

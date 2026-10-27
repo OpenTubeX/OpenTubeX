@@ -1151,7 +1151,7 @@ Settings:
     Non-transferable setting key: 'Ключ налады нельга перанесці: {key}'
     Import subscriptions formats: 'Фарматы, якія падтрымліваюцца: OpenTubeX / FreeTube (.db), YouTube Takeout (.csv, .json, .opml), NewPipe (.json), рэзервовая копія LibreTube або экспарт FreeTube (.json)'
     Import history formats: 'Фарматы, якія падтрымліваюцца: OpenTubeX / FreeTube (.db), YouTube Takeout (.json), рэзервовая копія LibreTube (.json)'
-    Import playlists formats: 'Фарматы, якія падтрымліваюцца: OpenTubeX / FreeTube (.db)'
+    Import playlists formats: 'Фарматы, якія падтрымліваюцца: OpenTubeX / FreeTube (.db), YouTube Takeout (.csv)'
     Import search history formats: 'Фарматы, якія падтрымліваюцца: OpenTubeX / FreeTube (.db), YouTube Takeout (.json)'
     Channel playback speeds: "Хуткасці прайгравання каналаў"
     Import channel playback speeds: "Імпартаваць хуткасці прайгравання каналаў"

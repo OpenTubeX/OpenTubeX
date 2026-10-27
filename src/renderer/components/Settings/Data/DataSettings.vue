@@ -346,6 +346,7 @@ import {
   deepCopy,
   escapeHTML,
   getTodayDateStrLocalTimezone,
+  pickFilesWithPicker,
   pickFileWithPicker,
   readFileWithPicker,
   showToast,
@@ -371,7 +372,7 @@ import FtImportPreview from '../../FtImportPreview/FtImportPreview.vue'
 import FtLoader from '../../FtLoader/FtLoader.vue'
 import { BACKUP_SECTIONS, createUnifiedBackup, mergeBackupHistoryRecord, mergeBackupPlaylist, mergeBackupProfile, readUnifiedBackup } from '../../../helpers/unifiedBackup'
 import { compactAllDatastores, DBHistoryHandlers, DBPlaylistHandlers, DBProfileHandlers, DBSearchHistoryHandlers, DBWatchStatsHandlers } from '../../../../datastores/handlers/index'
-import { forEachTakeoutImportEntry, listYouTubeTakeoutZipEntries, parseTakeoutPlaylistCsv } from '../../../helpers/youtube-takeout-zip'
+import { forEachTakeoutImportEntry, forEachTakeoutPlaylistFile, listYouTubeTakeoutZipEntries } from '../../../helpers/youtube-takeout-zip'
 import {
   mergeSearchHistoryEntries,
   normalizeSearchHistoryEntry,
@@ -1751,9 +1752,9 @@ async function normalizeImportedPlaylistThumbnail(playlist) {
 }
 
 async function importPlaylists() {
-  let response
+  let files
   try {
-    response = await readFileWithPicker(
+    files = await pickFilesWithPicker(
       t('Settings.Data Settings.Playlist File'),
       {
         'application/x-freetube-db': '.db',
@@ -1768,25 +1769,46 @@ async function importPlaylists() {
     return
   }
 
-  if (response === null) {
-    return
+  // Playlist CSVs from one Takeout are imported together, so their names stay unique and
+  // a picked playlists.csv can supply their original titles.
+  const takeoutFiles = files.filter(file => file.name.toLowerCase().endsWith('.csv'))
+  if (takeoutFiles.length > 0) {
+    await importTakeoutPlaylistFiles(takeoutFiles)
   }
 
-  const data = response.content
-
-  if (response.filename.toLowerCase().endsWith('.csv')) {
+  for (const file of files) {
+    if (takeoutFiles.includes(file)) { continue }
     try {
-      const playlist = parseTakeoutPlaylistCsv(data, response.filename)
-      if (playlist === null) { throw new Error('Invalid playlist CSV') }
-      await importTakeoutPlaylist(playlist)
-      showToast({ message: t('Settings.Data Settings.All playlists has been successfully imported'), icon: ['fas', 'bookmark'] })
-    } catch (error) {
-      console.error('Unable to import Takeout playlist', response.filename, error)
-      showToast({ message: `${t('Settings.Data Settings.Unable to read file')}: ${response.filename}`, icon: ['fas', 'circle-exclamation'] })
+      await importPlaylistDatabase(await file.text())
+    } catch (err) {
+      console.error('Unable to import playlist file', file.name, err)
+      showToast({ message: `${t('Settings.Data Settings.Unable to read file')}: ${file.name}`, icon: ['fas', 'circle-exclamation'] })
     }
-    return
   }
+}
 
+async function importTakeoutPlaylistFiles(files) {
+  let imported = false
+  let failed = false
+  const reportError = (error, filename) => {
+    failed = true
+    console.error('Unable to import Takeout playlist', filename, error)
+    showToast({ message: `${t('Settings.Data Settings.Unable to read file')}: ${filename}`, icon: ['fas', 'circle-exclamation'] })
+  }
+  try {
+    await forEachTakeoutPlaylistFile(files, async playlist => {
+      await importTakeoutPlaylist(playlist)
+      imported = true
+    }, reportError)
+  } catch (error) {
+    reportError(error, files.map(file => file.name).join(', '))
+  }
+  if (imported && !failed) {
+    showToast({ message: t('Settings.Data Settings.All playlists has been successfully imported'), icon: ['fas', 'bookmark'] })
+  }
+}
+
+async function importPlaylistDatabase(data) {
   let playlists
 
   // for the sake of backwards compatibility,
@@ -1852,6 +1874,8 @@ async function importPlaylists() {
   ]
 
   const newPlaylists = []
+  // Later picked files must see these writes
+  const updates = []
   let importedCount = 0
 
   for (const playlistData of playlists) {
@@ -1990,7 +2014,7 @@ async function importPlaylists() {
       ? playlistVideos.slice(existingPlaylist.videos.length).concat(playlistVideos.slice(0, existingPlaylist.videos.length))
       : playlistVideos
     // Update playlist's `lastUpdatedAt` & other attributes
-    store.dispatch('updatePlaylist', {
+    updates.push(store.dispatch('updatePlaylist', {
       _id: existingPlaylist._id,
       // Only these attributes would be updated (besides videos)
       playlistName: playlistObject.playlistName,
@@ -2000,15 +2024,17 @@ async function importPlaylists() {
       ...(Object.hasOwn(playlistObject, 'shuffleByDefault') ? { shuffleByDefault: playlistObject.shuffleByDefault } : {}),
       ...(Object.hasOwn(playlistObject, 'sortOrder') ? { sortOrder: playlistObject.sortOrder } : {}),
       videos: orderedVideos
-    })
+    }))
   })
+
+  await Promise.all(updates)
 
   if (importedCount === 0) {
     return
   }
 
   if (newPlaylists.length > 0) {
-    store.dispatch('addPlaylists', newPlaylists)
+    await store.dispatch('addPlaylists', newPlaylists)
   }
 
   showToast({

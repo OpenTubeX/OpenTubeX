@@ -189,7 +189,9 @@ test('desktop save dialogs still write and close their file stream', async () =>
   assert.deepEqual(writes, ['{}', 'closed'])
 })
 
-const pickSource = source.match(/export async function pickFileWithPicker\([\s\S]*?^\}/m)[0].replace('export ', '')
+const pickSource = ['pickFilesWithPicker', 'pickFileWithPicker']
+  .map(name => source.match(new RegExp(`export async function ${name}\\([\\s\\S]*?^\\}`, 'm'))[0].replace('export ', ''))
+  .join('\n')
 const readSource = source.match(/export async function readFileWithPicker\([\s\S]*?^\}/m)[0].replace('export ', '')
 
 test('iOS can select exported database files whose extension WebKit does not recognize', async () => {

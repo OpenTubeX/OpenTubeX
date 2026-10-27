@@ -1098,7 +1098,7 @@ Settings:
     Invalid JSON row, skipping item: JSON pada baris {row} tidak valid, melewati item
     Import subscriptions formats: 'Format yang didukung: OpenTubeX / FreeTube (.db), YouTube Takeout (.csv, .json, .opml), NewPipe (.json), cadangan LibreTube, atau ekspor FreeTube (.json)'
     Import history formats: 'Format yang didukung: OpenTubeX / FreeTube (.db), YouTube Takeout (.json), cadangan LibreTube (.json)'
-    Import playlists formats: 'Format yang didukung: OpenTubeX / FreeTube (.db)'
+    Import playlists formats: 'Format yang didukung: OpenTubeX / FreeTube (.db), YouTube Takeout (.csv)'
     Import search history formats: 'Format yang didukung: OpenTubeX / FreeTube (.db), YouTube Takeout (.json)'
     Channel playback speeds: "Kecepatan pemutaran kanal"
     Import channel playback speeds: "Impor kecepatan pemutaran kanal"

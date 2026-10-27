@@ -1117,7 +1117,7 @@ Settings:
     Non-transferable setting key: 'Khóa cài đặt không thể chuyển: {key}'
     Import subscriptions formats: 'Định dạng được hỗ trợ: OpenTubeX / FreeTube (.db), YouTube Takeout (.csv, .json, .opml), NewPipe (.json), bản sao lưu LibreTube hoặc bản xuất FreeTube (.json)'
     Import history formats: 'Định dạng được hỗ trợ: OpenTubeX / FreeTube (.db), YouTube Takeout (.json), bản sao lưu LibreTube (.json)'
-    Import playlists formats: 'Định dạng được hỗ trợ: OpenTubeX / FreeTube (.db)'
+    Import playlists formats: 'Định dạng được hỗ trợ: OpenTubeX / FreeTube (.db), YouTube Takeout (.csv)'
     Import search history formats: 'Định dạng được hỗ trợ: OpenTubeX / FreeTube (.db), YouTube Takeout (.json)'
     Channel playback speeds: "Tốc độ phát của kênh"
     Import channel playback speeds: "Nhập tốc độ phát của kênh"

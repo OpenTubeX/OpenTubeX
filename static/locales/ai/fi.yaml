@@ -1122,7 +1122,7 @@ Settings:
     Non-transferable setting key: 'Asetusavainta ei voi siirtää: {key}'
     Import subscriptions formats: 'Tuetut muodot: OpenTubeX / FreeTube (.db), YouTube Takeout (.csv, .json, .opml), NewPipe (.json), LibreTube-varmuuskopio tai FreeTube-vienti (.json)'
     Import history formats: 'Tuetut muodot: OpenTubeX / FreeTube (.db), YouTube Takeout (.json), LibreTube-varmuuskopio (.json)'
-    Import playlists formats: 'Tuetut muodot: OpenTubeX / FreeTube (.db)'
+    Import playlists formats: 'Tuetut muodot: OpenTubeX / FreeTube (.db), YouTube Takeout (.csv)'
     Import search history formats: 'Tuetut muodot: OpenTubeX / FreeTube (.db), YouTube Takeout (.json)'
     Channel playback speeds: "Kanavien toistonopeudet"
     Import channel playback speeds: "Tuo kanavien toistonopeudet"
