@@ -217,15 +217,6 @@
   flex: 0 0 auto;
 }
 
-:deep(.shaka-overflow-menu.ft-menu-grid .ft-caption-timing-menu > .shaka-back-to-overflow-button) {
-  position: relative;
-  box-sizing: border-box;
-  justify-content: center;
-  block-size: var(--ft-submenu-header-size);
-  padding-block: 0 var(--ft-menu-padding);
-  margin-block-end: 0;
-}
-
 :deep(.ft-caption-timing-controls) {
   flex: 1 1 0;
   min-block-size: 0;

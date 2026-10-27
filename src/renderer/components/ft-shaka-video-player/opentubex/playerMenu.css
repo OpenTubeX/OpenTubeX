@@ -13,6 +13,15 @@
 }
 
 /*
+  Shaka pads a submenu's header evenly, so the menu's padding above it leaves
+  the title low. Without that padding the title sits midway between the menu's
+  edge and the divider.
+*/
+:deep(.shaka-overflow-menu:not(.ft-menu-grid, .phonePlayerOptions > *):has(> .shaka-sub-menu:not(.shaka-hidden))) {
+  padding-block-start: 0;
+}
+
+/*
   The overflow menu grew a row for every new option, so it ended up taller than
   most players. Every entry is a tile instead: icon on top, name below it and the
   current value underneath. The column count follows the menu width, so narrow
@@ -198,7 +207,7 @@
 
 /* Keep the title centered in the header instead of after the back icon. */
 :deep(.shaka-sub-menu.ft-menu-grid > .shaka-back-to-overflow-button > .shaka-ui-icon),
-:deep(.shaka-overflow-menu.ft-menu-grid .ft-caption-timing-menu .shaka-ui-icon),
+:deep(.shaka-overflow-menu.ft-menu-grid :is(.ft-caption-timing-menu, .ft-caption-appearance-menu) .shaka-ui-icon),
 :deep(.shaka-overflow-menu.ft-menu-grid .ft-caption-list-menu .shaka-ui-icon:not(.shaka-chosen-item)) {
   position: absolute;
   inset-inline-start: 10px;
@@ -406,8 +415,13 @@
 }
 
 /* Center the title like the headers of the other submenus */
-:deep(.shaka-overflow-menu.ft-menu-grid .ft-caption-list-menu > .shaka-back-to-overflow-button) {
+:deep(.shaka-overflow-menu.ft-menu-grid :is(
+  .ft-caption-list-menu,
+  .ft-caption-timing-menu,
+  .ft-caption-appearance-menu
+) > .shaka-back-to-overflow-button) {
   position: relative;
+  box-sizing: border-box;
   justify-content: center;
   block-size: var(--ft-submenu-header-size);
   padding-block: 0 var(--ft-menu-padding);
