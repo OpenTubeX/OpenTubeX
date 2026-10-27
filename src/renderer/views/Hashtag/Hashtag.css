@@ -46,3 +46,7 @@
 .hashtagTabs {
   margin-block-end: 16px;
 }
+
+.tabIcon {
+  color: var(--primary-color);
+}

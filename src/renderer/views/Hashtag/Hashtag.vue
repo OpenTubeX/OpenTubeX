@@ -40,6 +40,10 @@
           @keydown.space.enter.prevent="changeTab('videos')"
           @keydown.left.right="focusTab(shortsTab, $event)"
         >
+          <FtIcon
+            :icon="['fa', 'video']"
+            class="tabIcon"
+          />
           {{ $t('Global.Videos') }}
         </div>
         <!-- eslint-disable-next-line vuejs-accessibility/interactive-supports-focus -->
@@ -55,6 +59,10 @@
           @keydown.space.enter.prevent="changeTab('shorts')"
           @keydown.left.right="focusTab(videosTab, $event)"
         >
+          <FtIcon
+            :icon="['fa', 'clapperboard']"
+            class="tabIcon"
+          />
           {{ $t('Global.Shorts') }}
         </div>
       </FtTabs>
