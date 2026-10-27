@@ -76,6 +76,8 @@ public final class BackgroundSyncWorker extends Worker {
             // The renderer releases this hold when its sync finishes.
             if (hold != null && keeper) BackgroundSync.end(context, hold);
         }
+        // A sync still running at the deadline needs another keeper.
+        BackgroundSync.onAppVisibilityChanged(context);
         return Result.success();
     }
 }

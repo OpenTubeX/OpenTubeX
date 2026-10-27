@@ -4,6 +4,9 @@ import assert from 'node:assert/strict'
 import { setActiveTimeout } from '../../src/renderer/helpers/activeTimeout.js'
 import { BackgroundJobClient } from '../../src/renderer/helpers/background-job-client.js'
 
+// Only mobile builds count running time.
+process.env.IS_CAPACITOR = 'true'
+
 // Moving the clock alone leaves the next timer overdue, like a frozen app
 // running its overdue timers once on resume.
 function suspend(t, ms) {
