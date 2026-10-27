@@ -428,6 +428,13 @@ test.describe('video downloads', () => {
     await video.hover()
     await video.locator('.title').click({ button: 'right' })
     await page.getByRole('menuitem', { name: 'Download Video' }).click()
+    // Downloads only start from a focused window
+    if (!await app.electronApp.evaluate(({ BrowserWindow }) => BrowserWindow.getAllWindows()[0]?.isFocused())) {
+      await app.electronApp.evaluate(({ app, BrowserWindow }) => {
+        app.focus({ steal: true })
+        BrowserWindow.getAllWindows()[0].focus()
+      })
+    }
     await page.getByRole('button', { name: 'Download', exact: true }).click()
 
     await expect(page.getByText('Download failed', { exact: true })).toBeVisible()
@@ -450,7 +457,7 @@ test.describe('video downloads', () => {
     await failureHintLink.click()
     await expect.poll(() => app.electronApp.evaluate(() => globalThis.downloadHintExternalUrls))
       .toEqual(['https://github.com/yt-dlp/yt-dlp/issues?q=is%3Aissue%20sort%3Acreated-desc%20YouTube'])
-    expect(page.url()).toBe(appUrl)
+    await expect(page).toHaveURL(appUrl)
     await expect(page.getByText('Download failed', { exact: true })).toBeVisible()
   })
 
