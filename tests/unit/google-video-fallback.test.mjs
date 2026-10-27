@@ -5,7 +5,8 @@ import {
   avoidUnreachableGoogleVideoHost,
   fetchGoogleVideo,
   getGoogleVideoFallbackUrl,
-  markGoogleVideoHostUnreachable
+  markGoogleVideoHostUnreachable,
+  setAlwaysUseGoogleVideoBackupServer
 } from '../../src/renderer/helpers/player/googleVideoFallback.js'
 
 const streamUrl = host => `https://${host}.googlevideo.com/videoplayback?expire=1&mn=sn-dead-1%2Csn-backup-2&fvip=4&itag=251`
@@ -88,4 +89,22 @@ test('a malformed escape in an HLS path keeps the original server', () => {
 test('HLS paths may encode the comma between servers in lowercase', () => {
   assert.equal(new URL(getGoogleVideoFallbackUrl('https://rr3---sn-a.googlevideo.com/videoplayback/mn/sn-a%2csn-b/fvip/3')).hostname,
     'rr3---sn-b.googlevideo.com')
+})
+
+test('the backup server can be used for every request', async t => {
+  setAlwaysUseGoogleVideoBackupServer(true)
+  t.after(() => setAlwaysUseGoogleVideoBackupServer(false))
+
+  assert.equal(new URL(avoidUnreachableGoogleVideoHost(streamUrl('rr12---sn-slow-1'))).hostname, 'rr4---sn-backup-2.googlevideo.com')
+  const withoutBackup = 'https://rr1---sn-a.googlevideo.com/videoplayback?itag=251'
+  assert.equal(avoidUnreachableGoogleVideoHost(withoutBackup), withoutBackup)
+
+  const requested = []
+  const response = await fetchGoogleVideo(streamUrl('rr12---sn-slow-1'), {}, async (url, init) => {
+    requested.push(new URL(url).hostname)
+    assert.equal(init.signal, undefined)
+    return new Response('ok')
+  })
+  assert.equal(await response.text(), 'ok')
+  assert.deepEqual(requested, ['rr4---sn-backup-2.googlevideo.com'])
 })

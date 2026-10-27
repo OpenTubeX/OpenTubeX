@@ -37,6 +37,7 @@ import { filterAvailableNavigationItems } from '../../../navigationAvailability.
 import { navigationItemsFromLegacySettings, normalizeNavigationItems } from '../../../navigationItems.js'
 import { migrateStoredAiVideoSummarySetting, migrateSyncServerUrl } from '../../helpers/settings-migrations.js'
 import { setDiagnosticLogging } from '../../helpers/diagnostics.js'
+import { setAlwaysUseGoogleVideoBackupServer } from '../../helpers/player/googleVideoFallback.js'
 export { NON_TRANSFERABLE_SETTINGS } from '../../../nonTransferableSettings.js'
 
 const CHANNEL_SETTINGS_SYNC_MIGRATION_SETTING = 'channelSettingsSyncMigration'
@@ -210,6 +211,10 @@ export const DEFAULT_SETTINGS = Object.freeze(structuredClone(state))
 const sideEffectHandlers = {
   diagnosticLogging: (_store, value) => {
     setDiagnosticLogging(value === true)
+  },
+
+  alwaysUseBackupMediaServer: (_store, value) => {
+    setAlwaysUseGoogleVideoBackupServer(value === true)
   },
 
   useAiSlopList: ({ dispatch }, value) => {

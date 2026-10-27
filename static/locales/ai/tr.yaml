@@ -339,6 +339,7 @@ Settings:
       Disk: disk
   General Settings:
     Preferred Video Codec: Tercih edilen video codec'i
+    Always Use Backup Media Server: "Her zaman yedek medya sunucusunu kullan"
     Automatically switch stream extraction methods: "Akış çıkarma yöntemlerini otomatik değiştir"
     Enable Tabs: "Sekmeleri Etkinleştir"
     Thumbnail Swipe Gestures:
@@ -1939,6 +1940,7 @@ Description:
 Tooltips:
   General Settings:
     Preferred Video Codec: Otomatik mod donanım çözmeyi tercih eder. Değişiklikler sonraki videoya uygulanır. Codec tercihi çözünürlükleri sınırlayabilir; kullanılamayan codec'ler değiştirilir.
+    Always Use Backup Media Server: "Videoları atanan sunucu yerine YouTube'un belirttiği yedek sunucudan oynatır; örneğin internet sağlayıcınızın önbelleği sık sık yavaş olduğunda. Aksi halde OpenTubeX yalnızca atanan sunucu yanıt vermediğinde geçiş yapar."
     Automatically switch stream extraction methods: "Yerleşik oynatma başarısız olursa yt-dlp’yi, yt-dlp başarısız olursa yerleşik oynatmayı dene."
     Enable Tabs: "Geçerli sayfa açık kalır. Diğer sekmeler uygulama yeniden başlatılana kadar saklanır; onları geri yüklemek için sekmeleri yeniden etkinleştirin."
     Data Saver Thumbnails: "Veri kullanımını azaltmak için daha düşük çözünürlüklü küçük resimler kullanın."

@@ -340,6 +340,7 @@ Settings:
       Disk: "ar bladenn"
   General Settings:
     Preferred Video Codec: Kodek video gwellañ karet
+    Always Use Backup Media Server: "Implijout atav ar servijer media a-gein"
     Automatically switch stream extraction methods: "Cheñch hentennadoù eztennañ al lanvioù ent emgefre"
     Enable Tabs: "Gweredekaat an ivinelloù"
     Thumbnail Swipe Gestures:
@@ -1948,6 +1949,7 @@ Description:
 Tooltips:
   General Settings:
     Preferred Video Codec: Ar mod emgefreek a ro lañs d'an digodañ dre beriant. Ar c'hemmoù a vo arloet d'ar video da-heul. Dibab ur c'hodek a c'hall bevenniñ an diarunusted; kodekoù all a vez implijet ma n'int ket hegerz.
+    Always Use Backup Media Server: "Kas a ra ar videoioù diwar ar servijer a-gein meneget gant YouTube e-lec'h an hini roet, da skouer pa vez gorrek alies krubuilh ho pourchaser kenrouedad. A-hend-all ne cheñch OpenTubeX nemet pa ne respont ket ar servijer roet."
     Automatically switch stream extraction methods: "Klask yt-dlp ma c’hwit al lenn enkorfet, pe al lenn enkorfet ma c’hwit yt-dlp."
     Enable Tabs: "Chom a ra ar bajenn vremanel digor. Miret e vez an ivinelloù all betek adlocʼhañ an arload; gweredekait an ivinelloù en-dro evit o adsevel."
     Data Saver Thumbnails: "Implijit skeudennoù bihan gant un diarunusted izeloc’h evit espern roadennoù."

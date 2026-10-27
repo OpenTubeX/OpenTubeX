@@ -340,6 +340,7 @@ Settings:
       Disk: lemez
   General Settings:
     Preferred Video Codec: Előnyben részesített videokodek
+    Always Use Backup Media Server: "Mindig a tartalék médiaszerver használata"
     Automatically switch stream extraction methods: "Adatfolyam-kinyerési módszerek automatikus váltása"
     Enable Tabs: "Lapok engedélyezése"
     Thumbnail Swipe Gestures:
@@ -1940,6 +1941,7 @@ Description:
 Tooltips:
   General Settings:
     Preferred Video Codec: Az automatikus mód a hardveres dekódolást részesíti előnyben. A változások a következő videóra érvényesek. A kodekválasztás korlátozhatja a felbontásokat; a nem elérhető kodekeket másik helyettesíti.
+    Always Use Backup Media Server: "A videókat a YouTube által megadott tartalék szerverről játssza le a kijelölt helyett, például ha az internetszolgáltató gyorsítótára gyakran lassú. Egyébként az OpenTubeX csak akkor vált, ha a kijelölt szerver nem válaszol."
     Automatically switch stream extraction methods: "A yt-dlp kipróbálása, ha a beépített lejátszás sikertelen, vagy a beépített lejátszás kipróbálása, ha a yt-dlp sikertelen."
     Enable Tabs: "Nyitva tartja az aktuális oldalt. A többi lap az alkalmazás újraindításáig megmarad; visszaállításukhoz engedélyezd újra a lapokat."
     Data Saver Thumbnails: "Alacsonyabb felbontású bélyegképek használata az adatforgalom csökkentéséhez."

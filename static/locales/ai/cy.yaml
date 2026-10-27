@@ -340,6 +340,7 @@ Settings:
       Disk: disg
   General Settings:
     Preferred Video Codec: Codec fideo dewisol
+    Always Use Backup Media Server: "Defnyddio'r gweinydd cyfryngau wrth gefn bob amser"
     Automatically switch stream extraction methods: "Newid dulliau echdynnu ffrydiau yn awtomatig"
     Enable Tabs: "Galluogi tabiau"
     Thumbnail Swipe Gestures:
@@ -1966,6 +1967,7 @@ Description:
 Tooltips:
   General Settings:
     Preferred Video Codec: Mae'r modd awtomatig yn ffafrio datgodio caledwedd. Mae newidiadau'n berthnasol i'r fideo nesaf. Gall dewis codec gyfyngu ar gydraniadau; defnyddir dewisiadau eraill os nad yw codec ar gael.
+    Always Use Backup Media Server: "Yn ffrydio fideos o'r gweinydd wrth gefn y mae YouTube yn ei enwi yn lle'r un a neilltuwyd, er enghraifft pan fo storfa eich darparwr rhyngrwyd yn aml yn araf. Fel arall, dim ond pan nad yw'r gweinydd a neilltuwyd yn ymateb y mae OpenTubeX yn newid."
     Automatically switch stream extraction methods: "Rhoi cynnig ar yt-dlp os bydd y chwarae mewnol yn methu, neu ar y chwarae mewnol os bydd yt-dlp yn methu."
     Enable Tabs: "Mae’r dudalen bresennol yn aros ar agor. Cedwir tabiau eraill nes i’r ap ailgychwyn; galluogwch dabiau eto i’w hadfer."
     Data Saver Thumbnails: "Defnyddiwch fân-luniau cydraniad is i leihau defnydd data."

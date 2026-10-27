@@ -435,6 +435,7 @@ Settings:
   Return to Settings Menu: 설정 메뉴로 돌아가기
   General Settings:
     Preferred Video Codec: 선호하는 동영상 코덱
+    Always Use Backup Media Server: "항상 백업 미디어 서버 사용"
     Automatically switch stream extraction methods: "스트림 추출 방식 자동 전환"
     Enable Tabs: "탭 활성화"
     Thumbnail Swipe Gestures:
@@ -2322,6 +2323,7 @@ Description:
 Tooltips:
   General Settings:
     Preferred Video Codec: 자동 모드는 하드웨어 디코딩을 우선합니다. 변경 사항은 다음 동영상에 적용됩니다. 코덱 선택에 따라 해상도가 제한될 수 있으며, 사용할 수 없는 코덱은 다른 코덱으로 대체됩니다.
+    Always Use Backup Media Server: "할당된 서버 대신 YouTube가 지정한 백업 서버에서 동영상을 스트리밍합니다. 인터넷 제공업체의 캐시가 자주 느릴 때 유용합니다. 그렇지 않으면 OpenTubeX는 할당된 서버가 응답하지 않을 때만 전환합니다."
     Automatically switch stream extraction methods: "내장 엔진의 재생이 실패하면 yt-dlp를 시도하고, yt-dlp가 실패하면 내장 엔진의 재생을 시도합니다."
     Enable Tabs: "현재 페이지는 열린 상태로 유지됩니다. 다른 탭은 앱을 다시 시작할 때까지 보관되며, 탭을 다시 활성화하면 복원됩니다."
     Data Saver Thumbnails: "낮은 해상도의 썸네일을 사용하여 데이터 사용량을 줄입니다."

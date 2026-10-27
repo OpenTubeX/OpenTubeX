@@ -21,6 +21,7 @@ const REPORTED_SETTINGS = [
   'defaultQuality',
   'preferredVideoCodec',
   'proxyVideos',
+  'alwaysUseBackupMediaServer',
   'useProxy',
   'proxyProtocol',
   'ytDlpSource',

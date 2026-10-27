@@ -674,6 +674,7 @@ Settings:
       Unloading Tabs: Unloading multiple tabs
     Fallback to Non-Preferred Backend on Failure: Fallback to Non-Preferred Backend
       on Failure
+    Always Use Backup Media Server: Always use backup media server
     Enable Search Suggestions: Enable Search Suggestions
     Open Deep Links In New Window: Open URLs Passed to OpenTubeX in a New Window
     Minimize to system tray: Minimize to system tray
@@ -3035,6 +3036,10 @@ Tooltips:
     Fallback to Non-Preferred Backend on Failure: When your preferred API has a problem,
       OpenTubeX will automatically attempt to use your non-preferred API as a fallback
       method when enabled.
+    Always Use Backup Media Server: Streams videos from the backup server YouTube names
+      instead of the assigned one, for example when your internet provider's cache is
+      often slow. Otherwise OpenTubeX switches only when the assigned server doesn't
+      respond.
     Thumbnail Preference: All thumbnails throughout OpenTubeX will be replaced with
       a frame of the video, blurred or hidden instead of the default thumbnail.
     Show Thumbnail Previews: Show animated previews when hovering over video thumbnails.

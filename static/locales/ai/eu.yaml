@@ -340,6 +340,7 @@ Settings:
       Disk: diskoa
   General Settings:
     Preferred Video Codec: Hobetsitako bideo-kodeka
+    Always Use Backup Media Server: "Erabili beti babeskopia-multimedia zerbitzaria"
     Automatically switch stream extraction methods: "Aldatu automatikoki korronteak erauzteko metodoak"
     Enable Tabs: "Gaitu fitxak"
     Thumbnail Swipe Gestures:
@@ -1949,6 +1950,7 @@ Description:
 Tooltips:
   General Settings:
     Preferred Video Codec: Modu automatikoak hardware bidezko deskodetzea hobesten du. Aldaketak hurrengo bideoan aplikatzen dira. Kodek-hobespenak bereizmenak muga ditzake; erabilgarri ez dauden kodekak ordezten dira.
+    Always Use Backup Media Server: "YouTubek adierazten duen ordezko zerbitzaritik erreproduzitzen ditu bideoak esleitutakotik beharrean, adibidez zure Interneteko hornitzailearen cachea sarritan motela denean. Bestela, esleitutako zerbitzariak erantzuten ez duenean soilik aldatzen du OpenTubeXek."
     Automatically switch stream extraction methods: "Probatu yt-dlp erreprodukzio integratuak huts egiten badu, edo erreprodukzio integratua yt-dlp-k huts egiten badu."
     Enable Tabs: "Uneko orria irekita mantentzen du. Beste fitxak aplikazioa berrabiarazi arte gordetzen dira; gaitu fitxak berriro berreskuratzeko."
     Data Saver Thumbnails: "Erabili bereizmen txikiagoko miniaturak datuen erabilera murrizteko."

@@ -342,6 +342,7 @@ Settings:
       Disk: disks
   General Settings:
     Preferred Video Codec: Valinn myndmerkjakóði
+    Always Use Backup Media Server: "Nota alltaf vara-miðlaþjón"
     Automatically switch stream extraction methods: "Skipta sjálfkrafa um aðferðir til að sækja streymi"
     Enable Tabs: "Virkja flipa"
     Thumbnail Swipe Gestures:
@@ -1964,6 +1965,7 @@ Description:
 Tooltips:
   General Settings:
     Preferred Video Codec: Sjálfvirkt val kýs vélbúnaðarafkóðun. Breytingar gilda frá næsta myndskeiði. Val á merkjakóða getur takmarkað upplausnir; ótiltækir merkjakóðar eru leystir af hólmi.
+    Always Use Backup Media Server: "Streymir myndböndum frá varaþjóninum sem YouTube tilgreinir í stað úthlutaða þjónsins, til dæmis þegar skyndiminni netþjónustunnar þinnar er oft hægt. Annars skiptir OpenTubeX aðeins þegar úthlutaði þjónninn svarar ekki."
     Automatically switch stream extraction methods: "Prófa yt-dlp ef innbyggð spilun bregst, eða innbyggða spilun ef yt-dlp bregst."
     Enable Tabs: "Heldur núverandi síðu opinni. Aðrir flipar eru geymdir þar til forritið er endurræst; virkjaðu flipa aftur til að endurheimta þá."
     Data Saver Thumbnails: "Nota smámyndir í lægri upplausn til að draga úr gagnanotkun."

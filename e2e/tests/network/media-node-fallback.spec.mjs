@@ -53,3 +53,19 @@ for (const engine of ['built-in', 'yt-dlp']) {
     })
   })
 }
+
+test.describe('with the backup media server always on', () => {
+  test.use({ seed: { settings: { alwaysUseBackupMediaServer: true, playbackEngineFallback: false } } })
+
+  test('never requests the assigned media node', async ({ page, innertube }) => {
+    test.skip(innertube.replay, 'needs the media servers of the real API')
+    test.setTimeout(120_000)
+    const nodes = await blockAssignedMediaNodes(page)
+
+    await openVideoOrSkip(test, page, VIDEO)
+    await waitForPlaybackOrSkip(test, page)
+
+    expect(nodes.blockedRequests).toBe(0)
+    expect(nodes.served.size).toBeGreaterThan(0)
+  })
+})

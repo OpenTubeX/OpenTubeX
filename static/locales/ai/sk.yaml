@@ -340,6 +340,7 @@ Settings:
       Disk: disk
   General Settings:
     Preferred Video Codec: Preferovaný videokodek
+    Always Use Backup Media Server: "Vždy používať záložný mediálny server"
     Automatically switch stream extraction methods: "Automaticky prepínať metódy extrakcie streamov"
     Enable Tabs: "Povoliť karty"
     Thumbnail Swipe Gestures:
@@ -1939,6 +1940,7 @@ Description:
 Tooltips:
   General Settings:
     Preferred Video Codec: Automatický režim uprednostňuje hardvérové dekódovanie. Zmeny platia pre ďalšie video. Preferencia kodeku môže obmedziť rozlíšenia; nedostupné kodeky sa nahradia.
+    Always Use Backup Media Server: "Streamuje videá zo záložného servera, ktorý uvádza YouTube, namiesto prideleného, napríklad keď je vyrovnávacia pamäť vášho poskytovateľa internetu často pomalá. Inak OpenTubeX prepne len vtedy, keď pridelený server neodpovedá."
     Automatically switch stream extraction methods: "Vyskúšať yt-dlp, ak zlyhá vstavané prehrávanie, alebo vstavané prehrávanie, ak zlyhá yt-dlp."
     Enable Tabs: "Aktuálna stránka zostane otvorená. Ostatné karty sa uchovajú do reštartovania aplikácie; opäť povoľte karty, aby ste ich obnovili."
     Data Saver Thumbnails: "Používať náhľady s nižším rozlíšením na zníženie spotreby dát."

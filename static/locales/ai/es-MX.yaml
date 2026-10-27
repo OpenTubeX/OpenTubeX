@@ -371,6 +371,7 @@ Settings:
       Disk: disco
   General Settings:
     Preferred Video Codec: Códec de video preferido
+    Always Use Backup Media Server: "Usar siempre el servidor multimedia de respaldo"
     Automatically switch stream extraction methods: "Cambiar automáticamente los métodos de extracción de transmisiones"
     Enable Tabs: "Activar pestañas"
     Thumbnail Swipe Gestures:
@@ -2292,6 +2293,7 @@ Description:
 Tooltips:
   General Settings:
     Preferred Video Codec: El modo automático prefiere la decodificación por hardware. Los cambios se aplican al siguiente video. La preferencia de códec puede limitar las resoluciones; los códecs no disponibles se sustituyen.
+    Always Use Backup Media Server: "Reproduce los videos desde el servidor de respaldo que indica YouTube en lugar del asignado, por ejemplo cuando la caché de tu proveedor de internet suele ser lenta. De lo contrario, OpenTubeX solo cambia cuando el servidor asignado no responde."
     Automatically switch stream extraction methods: "Probar yt-dlp si falla la reproducción integrada, o la reproducción integrada si falla yt-dlp."
     Enable Tabs: "Mantiene abierta la página actual. Las demás pestañas se conservan hasta reiniciar la aplicación; vuelve a activar las pestañas para restaurarlas."
     Data Saver Thumbnails: "Usar miniaturas de menor resolución para reducir el consumo de datos."

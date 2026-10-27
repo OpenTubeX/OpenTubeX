@@ -344,6 +344,7 @@ Settings:
       Disk: schijf
   General Settings:
     Preferred Video Codec: Voorkeursvideocodec
+    Always Use Backup Media Server: "Altijd de back-upmediaserver gebruiken"
     Automatically switch stream extraction methods: "Automatisch wisselen van streamextractiemethode"
     Enable Tabs: "Tabbladen inschakelen"
     Thumbnail Swipe Gestures:
@@ -1997,6 +1998,7 @@ Description:
 Tooltips:
   General Settings:
     Preferred Video Codec: Automatisch geeft de voorkeur aan hardwaredecodering. Wijzigingen gelden vanaf de volgende video. Een codecvoorkeur kan resoluties beperken; niet-beschikbare codecs worden vervangen.
+    Always Use Backup Media Server: "Streamt video's vanaf de back-upserver die YouTube opgeeft in plaats van de toegewezen server, bijvoorbeeld wanneer de cache van je internetprovider vaak traag is. Anders schakelt OpenTubeX alleen over wanneer de toegewezen server niet reageert."
     Automatically switch stream extraction methods: "Probeer yt-dlp als de ingebouwde afspeelengine faalt, of de ingebouwde afspeelengine als yt-dlp faalt."
     Enable Tabs: "Houdt de huidige pagina open. Andere tabbladen blijven bewaard totdat de app opnieuw wordt gestart; schakel tabbladen weer in om ze te herstellen."
     Data Saver Thumbnails: "Gebruik miniaturen met een lagere resolutie om het dataverbruik te verminderen."

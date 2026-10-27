@@ -456,6 +456,7 @@ Settings:
   Return to Settings Menu: Grįžti į nustatymų meniu
   General Settings:
     Preferred Video Codec: Pageidaujamas vaizdo kodekas
+    Always Use Backup Media Server: "Visada naudoti atsarginį medijos serverį"
     Automatically switch stream extraction methods: "Automatiškai keisti srauto išgavimo metodus"
     Enable Tabs: "Įjungti skirtukus"
     Thumbnail Swipe Gestures:
@@ -2358,6 +2359,7 @@ Description:
 Tooltips:
   General Settings:
     Preferred Video Codec: Automatinis režimas teikia pirmenybę aparatiniam dekodavimui. Pakeitimai taikomi kitam vaizdo įrašui. Kodeko pasirinkimas gali riboti raišką; nepasiekiami kodekai pakeičiami.
+    Always Use Backup Media Server: "Transliuoja vaizdo įrašus iš YouTube nurodyto atsarginio serverio vietoje priskirto, pavyzdžiui, kai jūsų interneto tiekėjo podėlis dažnai būna lėtas. Kitu atveju OpenTubeX persijungia tik tada, kai priskirtas serveris neatsako."
     Automatically switch stream extraction methods: "Bandyti yt-dlp, jei integruotas atkūrimas nepavyksta, arba integruotą atkūrimą, jei yt-dlp nepavyksta."
     Enable Tabs: "Dabartinis puslapis lieka atvertas. Kitos kortelės išsaugomos iki programos paleidimo iš naujo; vėl įjunkite korteles, kad jas atkurtumėte."
     Data Saver Thumbnails: "Naudoti mažesnės raiškos miniatiūras, kad sumažėtų duomenų naudojimas."

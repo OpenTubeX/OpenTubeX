@@ -344,6 +344,7 @@ Settings:
       Disk: القرص
   General Settings:
     Preferred Video Codec: ترميز الفيديو المفضل
+    Always Use Backup Media Server: "استخدام خادم الوسائط الاحتياطي دائمًا"
     Automatically switch stream extraction methods: "تبديل طرق استخراج الدفق تلقائيًا"
     Enable Tabs: "تفعيل علامات التبويب"
     Thumbnail Swipe Gestures:
@@ -1981,6 +1982,7 @@ Description:
 Tooltips:
   General Settings:
     Preferred Video Codec: يفضل الوضع التلقائي فك الترميز بالأجهزة. تسري التغييرات على الفيديو التالي. قد يحد تفضيل ترميز من الدقات؛ تُستخدم بدائل للترميزات غير المتاحة.
+    Always Use Backup Media Server: "يبث مقاطع الفيديو من الخادم الاحتياطي الذي يحدده YouTube بدلًا من الخادم المخصص، مثلًا عندما تكون ذاكرة التخزين المؤقت لدى مزود الإنترنت بطيئة غالبًا. وإلا فلن ينتقل OpenTubeX إليه إلا عندما لا يستجيب الخادم المخصص."
     Automatically switch stream extraction methods: "جرّب yt-dlp إذا فشل التشغيل المدمج، أو التشغيل المدمج إذا فشل yt-dlp."
     Enable Tabs: "تبقى الصفحة الحالية مفتوحة. تُحفظ علامات التبويب الأخرى حتى إعادة تشغيل التطبيق؛ فعّل علامات التبويب مجددًا لاستعادتها."
     Data Saver Thumbnails: "استخدم صورًا مصغرة بدقة أقل لتقليل استهلاك البيانات."

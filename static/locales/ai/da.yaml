@@ -351,6 +351,7 @@ Settings:
       Disk: diskplads
   General Settings:
     Preferred Video Codec: Foretrukket videocodec
+    Always Use Backup Media Server: "Brug altid backup-medieserveren"
     Automatically switch stream extraction methods: "Skift automatisk mellem metoder til streamudtræk"
     Enable Tabs: "Aktivér faner"
     Thumbnail Swipe Gestures:
@@ -2020,6 +2021,7 @@ Description:
 Tooltips:
   General Settings:
     Preferred Video Codec: Automatisk foretrækker hardwareafkodning. Ændringer gælder fra næste video. Et codecvalg kan begrænse opløsninger; utilgængelige codecs erstattes.
+    Always Use Backup Media Server: "Streamer videoer fra den backupserver, YouTube angiver, i stedet for den tildelte, for eksempel når din internetudbyders cache ofte er langsom. Ellers skifter OpenTubeX kun, når den tildelte server ikke svarer."
     Automatically switch stream extraction methods: "Prøv yt-dlp, hvis den indbyggede afspilning fejler, eller indbygget afspilning, hvis yt-dlp fejler."
     Enable Tabs: "Holder den aktuelle side åben. Andre faner bevares, indtil appen genstartes; aktivér faner igen for at gendanne dem."
     Data Saver Thumbnails: "Brug miniaturebilleder med lavere opløsning for at reducere dataforbruget."

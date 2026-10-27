@@ -180,6 +180,7 @@ function addCommentImages(body, attachments) {
  * @param {number[]|null} [options.popularity] replace replay intensities, or remove popularity metadata
  * @param {{label: string, description: string, attribution: string}[]} [options.contentDisclosures] include structured content disclosures
  * @param {object[]} [options.infoPanels] raw info panel renderers to show below the video
+ * @param {string} [options.mediaUrl] serve the demo video's progressive format from this URL
  */
 export async function mockWatchPage(app, page, {
   playable = false,
@@ -196,7 +197,8 @@ export async function mockWatchPage(app, page, {
   verifiedAuthors = false,
   popularity,
   contentDisclosures,
-  infoPanels
+  infoPanels,
+  mediaUrl
 } = {}) {
   const counters = new Map()
   const includeCaptions = captionTranslations || captionCueSettings !== '' ||
@@ -258,6 +260,7 @@ export async function mockWatchPage(app, page, {
     if (url.includes('/youtubei/v1/player')) {
       const videoId = JSON.parse(request.postData() ?? '{}').videoId ?? 'jNQXAC9IVRw'
       const json = demoPlayerResponse(videoId)
+      if (mediaUrl) json.streamingData.formats[0].url = mediaUrl
 
       if (includeCaptions && (captionVideoIds === null || captionVideoIds.includes(videoId))) {
         const displayNames = new Intl.DisplayNames(['en'], { type: 'language' })
