@@ -294,7 +294,7 @@ export function createLocalFeedParsers(shouldHideMembersOnly) {
       return {
         type: 'video',
         videoId: shortsLockupView.on_tap_endpoint.payload.videoId,
-        title: shortsLockupView.overlay_metadata.primary_text.text?.trim(),
+        title: (shortsLockupView.overlay_metadata.primary_text?.text ?? getShortsLockupAccessibleTitle(shortsLockupView))?.trim(),
         author: channelName,
         authorId: channelId,
         viewCount: shortsLockupView.overlay_metadata.secondary_text ? parseLocalSubscriberCount(shortsLockupView.overlay_metadata.secondary_text.text) : null,
@@ -304,6 +304,17 @@ export function createLocalFeedParsers(shouldHideMembersOnly) {
         lengthSeconds: ''
       }
     }
+  }
+
+  /**
+   * Slim lockups, such as on hashtag pages, only carry the title in their
+   * accessibility text, e.g. "Title, 1.2 thousand views - play Short"
+   * @param {import('youtubei.js').YTNodes.ShortsLockupView} short
+   */
+  function getShortsLockupAccessibleTitle(short) {
+    const text = short.accessibility_text ?? ''
+    const end = text.lastIndexOf(', ')
+    return end === -1 ? text : text.slice(0, end)
   }
 
   /**

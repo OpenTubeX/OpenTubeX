@@ -2169,8 +2169,35 @@ export function parseLocalComment(comment, commentThread = undefined) {
 }
 
 export async function getHashtagLocal(hashtag) {
-  const innertube = await createInnertube()
+  // YouTube returns empty pages when continuing the Shorts tab with a locally generated session.
+  const innertube = await createInnertube({ generateSessionLocally: false })
   return await innertube.getHashtag(hashtag)
+}
+
+/**
+ * Matched by URL because the tab titles are localized.
+ * @param {YT.HashtagFeed} hashtagFeed
+ */
+export function hasHashtagShortsTab(hashtagFeed) {
+  return getHashtagShortsTab(hashtagFeed) !== undefined
+}
+
+/**
+ * @param {YT.HashtagFeed} hashtagFeed
+ */
+function getHashtagShortsTab(hashtagFeed) {
+  return hashtagFeed.page.contents_memo?.getType(YTNodes.Tab)
+    .find(tab => tab.endpoint.metadata.url?.endsWith('/shorts'))
+}
+
+/**
+ * YouTube lists only a few videos on a hashtag's main tab, without a
+ * continuation, and paginates its Shorts tab.
+ * @param {YT.HashtagFeed} hashtagFeed
+ */
+export async function getHashtagShortsLocal(hashtagFeed) {
+  const response = await getHashtagShortsTab(hashtagFeed).endpoint.call(hashtagFeed.actions)
+  return new Mixins.Feed(hashtagFeed.actions, response)
 }
 
 export async function getLocalCommunityPost(postId, channelId) {

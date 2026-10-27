@@ -8,7 +8,7 @@
       v-else
       class="card"
     >
-      <h2>
+      <h2 :id="headingId">
         <ft-icon
           :icon="['fas', 'hashtag']"
           aria-hidden="false"
@@ -22,61 +22,104 @@
       >
         {{ statsText }}
       </p>
-      <FtElementList
-        v-if="videos.length > 0"
-        :data="videos"
-      />
-      <FtFlexBox
-        v-else
+      <FtTabs
+        v-if="hasShortsTab"
+        class="hashtagTabs"
+        :aria-labelledby="headingId"
       >
-        <p
-          class="message"
-        >
-          {{
-            unsupported
-              ? $t('Yattee Server.Unsupported page', { fallbackSetting: $t('Settings.General Settings.Fallback to Non-Preferred Backend on Failure') })
-              : $t("Hashtag.This hashtag does not currently have any videos")
-          }}
-        </p>
-      </FtFlexBox>
-
-      <FtAutoLoadNextPageWrapper
-        v-if="hasMoreResults"
-        :loading="isLoadingMore"
-        @load-next-page="handleFetchMore"
-      >
+        <!-- eslint-disable-next-line vuejs-accessibility/interactive-supports-focus -->
         <div
-          class="getNextPage"
-          role="button"
-          tabindex="0"
-          @click="handleFetchMore"
-          @keydown.enter.space.prevent="handleFetchMore"
+          ref="videosTab"
+          class="tab"
+          role="tab"
+          :aria-selected="currentTab === 'videos'"
+          :aria-controls="panelId"
+          :tabindex="currentTab === 'videos' ? 0 : -1"
+          @click="changeTab('videos')"
+          @keydown.space.enter.prevent="changeTab('videos')"
+          @keydown.left.right="focusTab(shortsTab, $event)"
         >
-          <FtIcon :icon="['fas', 'search']" /> {{ $t("Search Filters.Fetch more results") }}
+          {{ $t('Global.Videos') }}
         </div>
-      </FtAutoLoadNextPageWrapper>
-      <p
-        v-else-if="videos.length > 0"
-        class="message paginationStatus"
-        role="status"
+        <!-- eslint-disable-next-line vuejs-accessibility/interactive-supports-focus -->
+        <div
+          ref="shortsTab"
+          class="tab"
+          role="tab"
+          :aria-selected="currentTab === 'shorts'"
+          :aria-controls="panelId"
+          :tabindex="currentTab === 'shorts' ? 0 : -1"
+          @click="changeTab('shorts')"
+          @keydown.space.enter.prevent="changeTab('shorts')"
+          @keydown.left.right="focusTab(videosTab, $event)"
+        >
+          {{ $t('Global.Shorts') }}
+        </div>
+      </FtTabs>
+      <div
+        :id="panelId"
+        :role="hasShortsTab ? 'tabpanel' : undefined"
       >
-        {{ $t("Search Filters.There are no more results for this search") }}
-      </p>
+        <FtLoader v-if="currentTab === 'shorts' && isLoadingShorts" />
+        <FtElementList
+          v-else-if="shownItems.length > 0"
+          :key="currentTab"
+          :data="shownItems"
+        />
+        <FtFlexBox
+          v-else
+        >
+          <p
+            class="message"
+          >
+            {{
+              unsupported
+                ? $t('Yattee Server.Unsupported page', { fallbackSetting: $t('Settings.General Settings.Fallback to Non-Preferred Backend on Failure') })
+                : $t("Hashtag.This hashtag does not currently have any videos")
+            }}
+          </p>
+        </FtFlexBox>
+
+        <FtAutoLoadNextPageWrapper
+          v-if="hasMoreResults"
+          :key="currentTab"
+          :loading="isLoadingMore"
+          @load-next-page="handleFetchMore"
+        >
+          <div
+            class="getNextPage"
+            role="button"
+            tabindex="0"
+            @click="handleFetchMore"
+            @keydown.enter.space.prevent="handleFetchMore"
+          >
+            <FtIcon :icon="['fas', 'search']" /> {{ $t("Search Filters.Fetch more results") }}
+          </div>
+        </FtAutoLoadNextPageWrapper>
+        <p
+          v-else-if="shownItems.length > 0"
+          class="message paginationStatus"
+          role="status"
+        >
+          {{ $t("Search Filters.There are no more results for this search") }}
+        </p>
+      </div>
     </FtCard>
   </div>
 </template>
 <script setup>
-import { computed, onMounted, ref, shallowRef, watch } from 'vue'
+import { computed, onMounted, ref, shallowRef, useId, useTemplateRef, watch } from 'vue'
 import { FtIcon } from '@opentubex/icons'
 import FtCard from '../../components/ft-card/ft-card.vue'
 import FtElementList from '../../components/FtElementList/FtElementList.vue'
 import FtFlexBox from '../../components/ft-flex-box/ft-flex-box.vue'
+import FtTabs from '../../components/FtTabs/FtTabs.vue'
 import FtLoader from '../../components/FtLoader/FtLoader.vue'
 import FtAutoLoadNextPageWrapper from '../../components/FtAutoLoadNextPageWrapper.vue'
 import store from '../../store/index'
 import { usesInvidiousApi } from '../../../apiBackends'
 import { useRoute } from 'vue-router'
-import { getHashtagLocal, parseLocalHashtagHeader, parseLocalListVideo } from '../../helpers/api/local'
+import { getHashtagLocal, getHashtagShortsLocal, hasHashtagShortsTab, parseLocalHashtagHeader, parseLocalListVideo, parseShort } from '../../helpers/api/local'
 import { formatNumber, getInvidiousApiErrorMessage, showInvidiousFallbackToast, showApiErrorToast, showToast } from '../../helpers/utils'
 import { getHashtagInvidious } from '../../helpers/api/invidious'
 import { YatteeUnsupportedError } from '../../helpers/api/yattee'
@@ -88,18 +131,34 @@ const { t } = useI18n()
 const route = useRoute()
 const setTabTitle = useTabTitle()
 
+const headingId = useId()
+const panelId = useId()
+const videosTab = useTemplateRef('videosTab')
+const shortsTab = useTemplateRef('shortsTab')
+
 const hashtag = ref('')
+const hashtagFeed = shallowRef(null)
 const hashtagContinuationData = shallowRef(null)
 /** @type {import('vue').ShallowRef<{ videoCount: number | null, channelCount: number | null }>} */
 const counts = shallowRef({ videoCount: null, channelCount: null })
 const videos = shallowRef([])
+/** @type {import('vue').Ref<'videos' | 'shorts'>} */
+const currentTab = ref('videos')
+const shorts = shallowRef([])
+const shortsContinuationData = shallowRef(null)
+const shortsLoaded = ref(false)
+const isLoadingShorts = ref(false)
 /** @type {import('vue').Ref<'local' | 'invidious'>} */
 const apiUsed = ref('local')
 const pageNumber = ref(1)
 const isLoading = ref(true)
 const isLoadingMore = ref(false)
-const hasMoreResults = ref(false)
+const hasMoreVideos = ref(false)
 const unsupported = ref(false)
+
+const hasShortsTab = computed(() => hashtagFeed.value !== null && hasHashtagShortsTab(hashtagFeed.value))
+const shownItems = computed(() => currentTab.value === 'shorts' ? shorts.value : videos.value)
+const hasMoreResults = computed(() => currentTab.value === 'shorts' ? shortsContinuationData.value !== null : hasMoreVideos.value)
 
 /**
  * YouTube only provides rounded counts (e.g. 47M), so keep them compact
@@ -141,13 +200,19 @@ function resetData() {
   isLoading.value = true
   unsupported.value = false
   hashtag.value = ''
+  hashtagFeed.value = null
   hashtagContinuationData.value = null
+  currentTab.value = 'videos'
+  shorts.value = []
+  shortsContinuationData.value = null
+  shortsLoaded.value = false
+  isLoadingShorts.value = false
   counts.value = { videoCount: null, channelCount: null }
   videos.value = []
   apiUsed.value = 'local'
   pageNumber.value = 1
   isLoadingMore.value = false
-  hasMoreResults.value = false
+  hasMoreVideos.value = false
 }
 
 async function getHashtag() {
@@ -171,7 +236,7 @@ async function getInvidiousHashtag(page = 1) {
     isLoading.value = false
     apiUsed.value = 'invidious'
     videos.value = videos.value.concat(fetchedVideos)
-    hasMoreResults.value = fetchedVideos.length > 0
+    hasMoreVideos.value = fetchedVideos.length > 0
     pageNumber.value += 1
   } catch (error) {
     console.error(error)
@@ -196,8 +261,9 @@ async function getLocalHashtag() {
     counts.value = parseLocalHashtagHeader(hashtagData.header)
     videos.value = hashtagData.videos.map((video) => parseLocalListVideo(video)).filter(_ => _)
     apiUsed.value = 'local'
+    hashtagFeed.value = hashtagData
     hashtagContinuationData.value = hashtagData.has_continuation ? hashtagData : null
-    hasMoreResults.value = hashtagContinuationData.value !== null
+    hasMoreVideos.value = hashtagContinuationData.value !== null
     isLoading.value = false
   } catch (error) {
     console.error(error)
@@ -218,7 +284,7 @@ async function getLocalHashtagMore() {
     const continuation = await hashtagContinuationData.value.getContinuation()
     const newVideos = continuation.videos.map((video) => parseLocalListVideo(video)).filter(_ => _)
     hashtagContinuationData.value = continuation.has_continuation ? continuation : null
-    hasMoreResults.value = hashtagContinuationData.value !== null
+    hasMoreVideos.value = hashtagContinuationData.value !== null
     videos.value = videos.value.concat(newVideos)
   } catch (error) {
     console.error(error)
@@ -234,6 +300,57 @@ async function getLocalHashtagMore() {
   }
 }
 
+/**
+ * @param {HTMLElement | null} tab
+ * @param {KeyboardEvent} event
+ */
+function focusTab(tab, event) {
+  if (event.altKey) return
+
+  event.preventDefault()
+  store.dispatch('showOutlines')
+  tab?.focus()
+}
+
+/**
+ * @param {'videos' | 'shorts'} tab
+ */
+async function changeTab(tab) {
+  currentTab.value = tab
+  if (tab !== 'shorts' || shortsLoaded.value || isLoadingShorts.value) {
+    return
+  }
+
+  const feed = hashtagFeed.value
+  isLoadingShorts.value = true
+  try {
+    const shortsData = await getHashtagShortsLocal(feed)
+    // Ignore responses for a hashtag the page has since left.
+    if (feed !== hashtagFeed.value) return
+    shorts.value = shortsData.videos.map(short => parseShort(short))
+    shortsContinuationData.value = shortsData.has_continuation ? shortsData : null
+    shortsLoaded.value = true
+  } catch (error) {
+    console.error(error)
+    showApiErrorToast(t('Local API Error (Click to copy)'), error)
+  } finally {
+    if (feed === hashtagFeed.value) {
+      isLoadingShorts.value = false
+    }
+  }
+}
+
+async function getLocalHashtagShortsMore() {
+  try {
+    const continuation = await shortsContinuationData.value.getContinuation()
+    shortsContinuationData.value = continuation.has_continuation ? continuation : null
+    shorts.value = shorts.value.concat(continuation.videos.map(short => parseShort(short)))
+  } catch (error) {
+    console.error(error)
+    showApiErrorToast(t('Local API Error (Click to copy)'), error)
+  }
+}
+
 async function handleFetchMore() {
   if (isLoadingMore.value) {
     return
@@ -241,7 +358,9 @@ async function handleFetchMore() {
 
   isLoadingMore.value = true
   try {
-    if (process.env.SUPPORTS_LOCAL_API && apiUsed.value === 'local') {
+    if (currentTab.value === 'shorts') {
+      await getLocalHashtagShortsMore()
+    } else if (process.env.SUPPORTS_LOCAL_API && apiUsed.value === 'local') {
       await getLocalHashtagMore()
     } else if (apiUsed.value === 'invidious') {
       await getInvidiousHashtag(pageNumber.value)
