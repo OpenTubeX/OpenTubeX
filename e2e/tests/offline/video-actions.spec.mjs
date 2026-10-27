@@ -459,6 +459,11 @@ test.describe('video downloads', () => {
       .toEqual(['https://github.com/yt-dlp/yt-dlp/issues?q=is%3Aissue%20sort%3Acreated-desc%20YouTube'])
     await expect(page).toHaveURL(appUrl)
     await expect(page.getByText('Download failed', { exact: true })).toBeVisible()
+    // Prompts let middle clicks through to the document link handler.
+    await failureHintLink.click({ button: 'middle' })
+    await expect.poll(() => app.electronApp.evaluate(() => globalThis.downloadHintExternalUrls))
+      .toHaveLength(2)
+    await expect(page).toHaveURL(appUrl)
   })
 
   test('shortens overly long generated file names and warns when it happens', async ({ app, page }) => {
