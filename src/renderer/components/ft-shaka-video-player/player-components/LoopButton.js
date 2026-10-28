@@ -64,7 +64,7 @@ export class LoopButton extends shaka.ui.Element {
     this.button_.classList.add('loop-button', 'shaka-no-propagation', 'shaka-tooltip')
 
     /** @private */
-    this.icon_ = new shaka.ui.Icon(this.button_, shaka.ui.Enums.MaterialDesignSVGIcons.LOOP)
+    this.icon_ = new shaka.ui.Icon(this.button_, shaka.ui.Enums.MaterialDesignSVGIcons.UNLOOP)
 
     const label = document.createElement('label')
     label.classList.add(
@@ -157,9 +157,10 @@ export class LoopButton extends shaka.ui.Element {
   updateLocalisedStrings_() {
     this.nameSpan_.textContent = this.localization.resolve('LOOP')
     this.currentState_.textContent = this.localization.resolve(this.loopEnabled_ ? 'ON' : 'OFF')
+    // Since Shaka 5.3, LOOP is the active glyph and UNLOOP the inactive one.
     this.icon_.use(this.loopEnabled_
-      ? shaka.ui.Enums.MaterialDesignSVGIcons.UNLOOP
-      : shaka.ui.Enums.MaterialDesignSVGIcons.LOOP)
+      ? shaka.ui.Enums.MaterialDesignSVGIcons.LOOP
+      : shaka.ui.Enums.MaterialDesignSVGIcons.UNLOOP)
     this.button_.ariaLabel = this.localization.resolve(this.loopEnabled_ ? 'EXIT_LOOP_MODE' : 'ENTER_LOOP_MODE')
     this.button_.ariaPressed = this.loopEnabled_ ? 'true' : 'false'
   }
