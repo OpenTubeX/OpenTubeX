@@ -86,7 +86,7 @@ async function checkActionRows(captionsMenu) {
   const sideBySide = Math.abs(load.y - timing.y) <= 1
   if (sideBySide) {
     expect(load.x + load.width).toBeLessThanOrEqual(timing.x + 1)
-    expect(load.width + timing.width).toBeGreaterThanOrEqual(row.width - 1)
+    expect(timing.x + timing.width - load.x).toBeGreaterThanOrEqual(row.width - 1)
   } else {
     expect(load.y + load.height).toBeLessThanOrEqual(timing.y + 1)
     expect(Math.min(load.width, timing.width)).toBeGreaterThanOrEqual(row.width - 1)

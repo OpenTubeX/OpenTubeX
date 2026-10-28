@@ -336,6 +336,8 @@
   inset-block-end: 0;
   inset-inline: 0;
   flex-flow: row wrap;
+  gap: 4px;
+  padding-block-start: 4px;
   margin: 0;
 }
 
@@ -349,7 +351,9 @@
   padding-block: 0;
   padding-inline: 10px;
   margin: 0;
-  border-radius: 0;
+
+  /* Rounded like the tiles above them, so they follow the menu's corners. */
+  border-radius: calc(10px * var(--ui-roundness));
   white-space: nowrap;
 }
 
