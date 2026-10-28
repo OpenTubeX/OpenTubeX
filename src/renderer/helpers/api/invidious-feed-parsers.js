@@ -229,9 +229,8 @@ export function createInvidiousFeedParsers(instanceUrl, proxyImages = () => true
     if (video.liveNow) {
       video.published = Date.now()
     } else if (video.isUpcoming) {
-      if (typeof video.published === 'number') {
-        video.subscriptionFeedPublished = video.published * 1000
-      }
+      // Invidious reports the time it parsed the page for upcoming entries, not
+      // their announcement, so the subscription feed tracks first-seen time.
       video.published = video.premiereTimestamp * 1000
     } else if (typeof video.published === 'number') {
       video.published *= 1000

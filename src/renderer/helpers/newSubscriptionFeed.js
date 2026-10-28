@@ -5,6 +5,7 @@ import {
   isMembersOnlySubscriptionVideoVisible,
   isSubscriptionFeedTypeEnabled
 } from './subscription-channels'
+import { getSubscriptionVideoSortTimestamp } from './subscription-entries'
 import { isVideoHiddenByPreferences } from './subscriptions'
 import { getNewSubscriptionEntriesSnapshot } from './subscription-entry-snapshot'
 
@@ -47,6 +48,7 @@ export function getEnabledSubscriptionFeedSources(getters) {
  * @param {boolean} options.onlyShowLatestFromChannel
  * @param {number} options.onlyShowLatestFromChannelNumber
  * @param {boolean} options.restrictedPlaybackConfigured
+ * @param {boolean} options.showScheduledLiveStreamsFirst
  * @param {'newest' | 'oldest'} options.sortBy
  */
 export function getNewSubscriptionFeedEntries({
@@ -59,8 +61,10 @@ export function getNewSubscriptionFeedEntries({
   onlyShowLatestFromChannel,
   onlyShowLatestFromChannelNumber,
   restrictedPlaybackConfigured,
+  showScheduledLiveStreamsFirst,
   sortBy,
 }) {
+  const now = Date.now()
   const entries = {
     videos: [],
     shorts: [],
@@ -108,7 +112,11 @@ export function getNewSubscriptionFeedEntries({
   })
 
   let mediaEntries = ['videos', 'shorts', 'live'].flatMap(category => {
-    return entries[category].map(entry => ({ category, entry, timestamp: entryTimestamp(entry) }))
+    return entries[category].map(entry => ({
+      category,
+      entry,
+      timestamp: getNewSubscriptionEntryTimestamp(entry, showScheduledLiveStreamsFirst, now)
+    }))
   })
 
   mediaEntries = mediaEntries.filter(({ entry }) => !isVideoHiddenByPreferences(entry, {
@@ -154,7 +162,7 @@ export function getNewSubscriptionFeedEntries({
     shorts: applySortPreference(mediaByCategory.shorts),
     live: applySortPreference(mediaByCategory.live),
     posts: applySortPreference(entries.posts
-      .sort((a, b) => entryTimestamp(b) - entryTimestamp(a))
+      .sort((a, b) => getNewSubscriptionEntryTimestamp(b) - getNewSubscriptionEntryTimestamp(a))
       .filter(entry => {
         const lowerCaseAuthor = entry.author?.toLowerCase()
         return entry.postId != null &&
@@ -163,6 +171,13 @@ export function getNewSubscriptionFeedEntries({
   }
 }
 
-function entryTimestamp(entry) {
-  return entry.published ?? entry.publishedTime ?? 0
+/**
+ * Sorts scheduled entries like the subscription feed and posts by their
+ * publication time.
+ * @param {object} entry
+ * @param {boolean} [showScheduledLiveStreamsFirst]
+ * @param {number} [now]
+ */
+export function getNewSubscriptionEntryTimestamp(entry, showScheduledLiveStreamsFirst = true, now = Date.now()) {
+  return getSubscriptionVideoSortTimestamp(entry, showScheduledLiveStreamsFirst, now) ?? entry.publishedTime ?? 0
 }

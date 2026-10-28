@@ -555,6 +555,7 @@ import {
 import { liveReminder, supportsLiveReminders } from '../../helpers/liveReminders'
 import {
   getEnabledSubscriptionFeedSources,
+  getNewSubscriptionEntryTimestamp,
   getNewSubscriptionFeedEntries,
 } from '../../helpers/newSubscriptionFeed'
 import { hasConfiguredRestrictedPlaybackAuthentication } from '../../helpers/restricted-playback'
@@ -657,17 +658,20 @@ const newSubscriptionContent = computed(() => getNewSubscriptionFeedEntries({
   onlyShowLatestFromChannel: store.getters.getOnlyShowLatestFromChannel,
   onlyShowLatestFromChannelNumber: store.getters.getOnlyShowLatestFromChannelNumber,
   restrictedPlaybackConfigured: hasConfiguredRestrictedPlaybackAuthentication(store.getters),
+  showScheduledLiveStreamsFirst: store.getters.getShowScheduledLiveStreamsFirst,
   sortBy: store.getters.getNewSubscriptionFeedSortBy === 'oldest' ? 'oldest' : 'newest',
 }))
-const newSubscriptionEntries = computed(() => (
-  Object.entries(newSubscriptionContent.value)
+const newSubscriptionEntries = computed(() => {
+  const showScheduledLiveStreamsFirst = store.getters.getShowScheduledLiveStreamsFirst
+  const now = Date.now()
+  return Object.entries(newSubscriptionContent.value)
     .flatMap(([category, entries]) => entries.map(entry => ({
       category,
       entry,
-      timestamp: newSubscriptionEntryTimestamp(entry)
+      timestamp: getNewSubscriptionEntryTimestamp(entry, showScheduledLiveStreamsFirst, now)
     })))
     .toSorted((a, b) => b.timestamp - a.timestamp)
-))
+})
 const newSubscriptionFeedRoute = Object.freeze({
   path: '/subscriptions',
   query: { tab: 'new' },
@@ -753,10 +757,6 @@ function playlistThumbnail(playlist) {
   return playlist.videos.length > 0
     ? videoThumbnail(playlist.videos[0])
     : thumbnailPlaceholder
-}
-
-function newSubscriptionEntryTimestamp(entry) {
-  return entry.published ?? entry.publishedTime ?? 0
 }
 
 function newSubscriptionEntryTitle(entry) {

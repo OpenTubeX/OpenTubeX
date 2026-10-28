@@ -792,3 +792,77 @@ test.describe('subscriptions feed with upcoming premieres shown', () => {
     await expect(menu.locator('.separator + .separator')).toHaveCount(0)
   })
 })
+
+test.describe('scheduled live streams in the Live tab', () => {
+  const liveStream = (videoId, title, published, extra = {}) => feedVideo(videoId, title, CHANNEL_A, published, {
+    isNewInSubscriptionFeed: false,
+    isUpcoming: false,
+    ...extra
+  })
+  const scheduledTime = now + 2 * HOUR
+
+  test.use({
+    seed: {
+      ...seed,
+      settings: {
+        fetchSubscriptionsAutomatically: false,
+        showScheduledLiveStreamsFirst: true
+      },
+      profiles: [{
+        ...seed.profiles[0],
+        subscriptions: [{ id: CHANNEL_A, name: 'Channel A', thumbnail: '' }]
+      }],
+      subscriptionCache: [{
+        _id: CHANNEL_A,
+        videos: [],
+        videosTimestamp: new Date(now - HOUR).toISOString(),
+        shorts: [],
+        shortsTimestamp: new Date(now - HOUR).toISOString(),
+        liveStreams: [
+          liveStream('scheduled01', 'Scheduled stream', scheduledTime, {
+            isUpcoming: true,
+            premiereDate: new Date(scheduledTime).toISOString(),
+            subscriptionFeedPublished: now - 2 * HOUR
+          }),
+          liveStream('pastlive001', 'Recent stream', now - HOUR),
+          liveStream('pastlive002', 'Older stream', now - 3 * HOUR)
+        ],
+        liveStreamsTimestamp: new Date(now - HOUR).toISOString(),
+        communityPosts: [],
+        communityPostsTimestamp: new Date(now - HOUR).toISOString()
+      }]
+    }
+  })
+
+  const liveTitles = page => page.locator('.ft-list-video .title').evaluateAll(titles => (
+    titles.map(title => title.textContent.trim())
+  ))
+
+  test('re-sorts the Live tab when scheduled streams stop being shown first', async ({ page }) => {
+    await goTo(page, 'subscriptions')
+    await page.locator('[data-subscription-feed-tab="live"]').click()
+    await expect.poll(() => liveTitles(page)).toEqual(['Scheduled stream', 'Recent stream', 'Older stream'])
+
+    const settings = await goToSettingsSection(page, 'subscription')
+    await settings.locator('[data-setting-key="showScheduledLiveStreamsFirst"] .switch-label').click()
+    await page.locator('.settingsWindow').getByRole('button', { name: 'Close', exact: true }).click()
+
+    await expect.poll(() => liveTitles(page)).toEqual(['Recent stream', 'Scheduled stream', 'Older stream'])
+  })
+
+  test('moves a scheduled stream to its start time when it starts', async ({ page }) => {
+    await page.evaluate(() => window.$store.dispatch('updateShowScheduledLiveStreamsFirst', false))
+    // Timers created before installing the clock cannot be advanced.
+    await goTo(page, 'trending')
+    await page.clock.install({ time: now })
+    await goTo(page, 'subscriptions')
+    await page.locator('[data-subscription-feed-tab="live"]').click()
+    await expect.poll(() => liveTitles(page)).toEqual(['Recent stream', 'Scheduled stream', 'Older stream'])
+
+    await page.clock.fastForward(2 * HOUR + 1000)
+
+    await expect.poll(() => liveTitles(page)).toEqual(['Scheduled stream', 'Recent stream', 'Older stream'])
+    await expect(page.locator('.ft-list-video').filter({ hasText: 'Scheduled stream' }).locator('.videoDuration'))
+      .toHaveText('Live')
+  })
+})
