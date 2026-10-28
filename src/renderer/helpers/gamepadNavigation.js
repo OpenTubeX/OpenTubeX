@@ -219,6 +219,8 @@ export function activateGamepadFocus() {
   if (
     !(activeElement instanceof HTMLElement) ||
     activeElement === document.body ||
+    // Shaka focuses its container to keep its shortcuts working, which leaves nothing to activate
+    activeElement.classList.contains('shaka-video-container') ||
     !isVisible(activeElement)
   ) {
     return moveGamepadFocus('down')

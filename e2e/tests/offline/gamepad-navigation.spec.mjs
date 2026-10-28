@@ -409,6 +409,24 @@ test('uses the menu button to toggle playback', async ({ app, page }) => {
   await expect.poll(() => video.evaluate(element => element.paused)).toBe(false)
 })
 
+test('moves the focus into the page when the player only holds it for its shortcuts', async ({ app, page }) => {
+  await mockPlayableWatchPage(app, page)
+  const video = await openMockedVideo(page)
+  await video.evaluate(element => element.pause())
+  await page.bringToFront()
+  await connectMockGamepad(page)
+
+  // Shaka focuses its container after clicks on the video and closed menus.
+  const container = page.locator('.tabContent[aria-hidden="false"] .shaka-video-container')
+  await container.focus()
+  await expect(container).toBeFocused()
+
+  await pressGamepadButton(page, 'primary')
+  await expect(container).not.toBeFocused()
+  await expect.poll(() => page.evaluate(() => document.activeElement?.matches(':focus-visible'))).toBe(true)
+  expect(await video.evaluate(element => element.paused)).toBe(true)
+})
+
 test('backs out of the player menu without leaving the video', async ({ app, page }) => {
   await mockPlayableWatchPage(app, page)
   await openMockedVideo(page)

@@ -114,9 +114,11 @@
   font-size: 11px;
   line-height: 1.25;
   text-align: center;
+}
 
-  /* The chevron of the submenu entries doesn't fit into a tile. */
-  background-image: none;
+/* The chevron of the submenu entries doesn't fit into a tile. */
+:deep(.shaka-overflow-menu.ft-menu-grid > button > .shaka-overflow-button-label::after) {
+  content: none;
 }
 
 /* Names that don't fit into a tile get cut off. */

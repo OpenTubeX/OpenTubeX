@@ -60,6 +60,12 @@ Requests such as "implement issue #X" authorize local changes, not a PR. Open a 
 
 - The npm `allow` list in `.github/dependabot.yml` must contain exactly the direct dependencies in `package.json` that are absent from the latest `upstream/development:package.json`; upstream manages shared ones. Fetch `upstream/development` and resync the list whenever dependencies or the Dependabot configuration change.
 - Do not add migrations, compatibility aliases, or legacy handling for behavior or data formats introduced only by unshipped changes in the current PR. Change them directly; if that breaks local development data, tell the user instead of shipping a migration path.
+- When `shaka-player` changes version, including through an upstream merge, diff the old and new `ui/` sources and check our customizations against them; a passing E2E suite missed the 5.3 regressions. Check:
+  - icon constants by how Shaka's own buttons use them, not by name (5.3 swapped the meaning of `LOOP` and `UNLOOP`);
+  - the signatures of methods our subclasses override, passing new arguments through to `super` (5.3 added `onChangeStart(fromTouchEvent)`);
+  - our CSS overrides against Shaka's new rules, including pseudo-elements (5.3 moved the submenu chevron to `::after`);
+  - how often Shaka dispatches the events we react to, and where it moves focus (5.3 sends `submenuclose` on every seek bar input and focuses the player container);
+  - that every hunk of `patches/shaka-player@<version>.patch` is ported to both the `ui/` source and the compiled `dist/shaka-player.ui-es2021.js` the app runs.
 
 ## Translations
 
