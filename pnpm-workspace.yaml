@@ -21,6 +21,7 @@ minimumReleaseAgeExclude:
   - serialize-javascript@7.1.4
   - '@vot.js/core@3.2.0'
   - '@vot.js/shared@3.2.0'
+  - dbus-native@0.16.3
 
 patchedDependencies:
   '@capacitor-community/screen-brightness@8.0.0': patches/@capacitor-community__screen-brightness@8.0.0.patch
@@ -32,7 +33,6 @@ patchedDependencies:
   '@material/material-color-utilities@0.4.0': patches/@material__material-color-utilities@0.4.0.patch
   '@sqlite.org/sqlite-wasm@3.53.4-build2': patches/@sqlite.org__sqlite-wasm@3.53.4-build2.patch
   '@vue/runtime-dom@3.5.44': patches/@vue__runtime-dom@3.5.44.patch
-  dbus-native@0.16.2: patches/dbus-native@0.16.2.patch
   overlayscrollbars@2.16.0: patches/overlayscrollbars@2.16.0.patch
   shaka-player@5.3.2: patches/shaka-player@5.3.2.patch
   vue-sonner@2.0.9: patches/vue-sonner@2.0.9.patch
