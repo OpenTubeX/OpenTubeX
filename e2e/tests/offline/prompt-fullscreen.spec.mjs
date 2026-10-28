@@ -93,3 +93,33 @@ test('keeps the Tab Organizer open behind its nested prompt when Escape exits pl
   await expect(page.locator('.prompt')).toHaveCount(0)
   await expect(page.locator('.app > .tabOrganizerBackdrop .tabOrganizer:not([inert])')).toBeVisible()
 })
+
+test.describe('with external link confirmation', () => {
+  test.use({ seed: { settings: { externalLinkHandling: 'openLinkAfterPrompt' } } })
+
+  test('keeps a prompt behind another prompt open when Escape exits player fullscreen', async ({ app, page }) => {
+    await mockPlayableWatchPage(app, page)
+    await openMockedVideo(page)
+    await setPlayerFullscreen(page, true)
+
+    await showAddToPlaylistPrompt(page)
+    const addPrompt = page.getByRole('dialog', { name: 'Select a playlist to add your video to', exact: true })
+    await addPrompt.evaluate(element => {
+      const link = document.createElement('a')
+      link.href = 'https://example.com/'
+      link.textContent = 'External link'
+      element.append(link)
+    })
+    await addPrompt.getByRole('link', { name: 'External link' }).click()
+    const linkPrompt = page.getByRole('dialog', { name: 'Are you sure you want to open this link?' })
+    await expect(linkPrompt).toBeVisible()
+    await expect(page.locator(':fullscreen .prompt:not([inert])')).toHaveCount(2)
+
+    await pressBrowserEscape(app, page)
+
+    await expect.poll(() => page.evaluate(() => document.fullscreenElement)).toBeNull()
+    await expect(linkPrompt).toHaveCount(0)
+    await expect(page.locator('.app > .prompt')).toHaveCount(1)
+    await expect(addPrompt).toBeVisible()
+  })
+})

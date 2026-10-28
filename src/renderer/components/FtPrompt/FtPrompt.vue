@@ -158,7 +158,7 @@ const emit = defineEmits(['click'])
 const settingsOverlayActive = useSettingsOverlay(() => emit('click', null))
 
 const id = useId()
-const teleportTarget = useFullscreenTeleportTarget(() => emit('click', null), () => props.inert)
+const teleportTarget = useFullscreenTeleportTarget(() => emit('click', null), () => !isTopmostPrompt())
 
 const promptCard = useTemplateRef('promptCard')
 const promptContentScroller = useTemplateRef('promptContentScroller')
@@ -284,13 +284,16 @@ function focusItem(index) {
   store.dispatch('showOutlines')
 }
 
+function isTopmostPrompt() {
+  return [...document.querySelectorAll('.prompt:not([inert])')].at(-1) === prompt.value
+}
+
 /**
  * @param {KeyboardEvent} event
  */
 function handleEscape(event) {
   if (event.target instanceof Element && event.target.closest('dialog[open]')) return
-  const isTopmostPrompt = [...document.querySelectorAll('.prompt:not([inert])')].at(-1) === prompt.value
-  if (event.key === 'Escape' && !props.inert && !event.defaultPrevented && isTopmostPrompt) {
+  if (event.key === 'Escape' && !props.inert && !event.defaultPrevented && isTopmostPrompt()) {
     event.preventDefault()
     hide()
   }

@@ -16,13 +16,22 @@ export function useFullscreenTeleportTarget(dismiss, keepOpen = () => false) {
   const target = shallowRef(fullscreenElement ?? '.app')
   if (!fullscreenElement) return target
 
+  let timeout
   const handleFullscreenChange = () => {
     if (document.fullscreenElement === fullscreenElement) return
     document.removeEventListener('fullscreenchange', handleFullscreenChange)
-    if (keepOpen()) target.value = '.app'
-    else dismiss()
+    // Vue re-renders between listeners, so decide before any overlay moves or
+    // closes, as either changes which overlay is topmost for the others.
+    const keep = keepOpen()
+    timeout = setTimeout(() => {
+      if (keep) target.value = '.app'
+      else dismiss()
+    })
   }
   document.addEventListener('fullscreenchange', handleFullscreenChange)
-  onBeforeUnmount(() => document.removeEventListener('fullscreenchange', handleFullscreenChange))
+  onBeforeUnmount(() => {
+    document.removeEventListener('fullscreenchange', handleFullscreenChange)
+    clearTimeout(timeout)
+  })
   return target
 }
