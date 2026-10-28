@@ -132,7 +132,8 @@ export class SeekPreviewBar extends shaka.ui.SeekBar {
 
   /** @private */
   updateHint() {
-    const available = this.filmstripShown && this.isPreciseFiner()
+    // A resize can make the strip no finer than the bar, but the drag stays precise.
+    const available = this.filmstripShown && (this.precise !== null || this.isPreciseFiner())
     if (available) {
       this.filmstrip.hint.textContent = this.precise
         ? i18n.global.t('Video.Player.Precise seeking, drag down to exit')
@@ -189,9 +190,7 @@ export class SeekPreviewBar extends shaka.ui.SeekBar {
     super.onChangeEnd()
     this.dragStartValue = null
     this.hideSeekPreview()
-    if (this.showUIAlways !== null) {
-      this.controls.getConfig().showUIAlways = this.showUIAlways
-      this.showUIAlways = null
+    if (this.restoreShowUIAlways()) {
       // Hide as if the pointer had just left when the drag ends outside the player.
       if (this.controls.getVideoContainer().matches(':hover')) {
         this.controls.showUI()
@@ -199,6 +198,23 @@ export class SeekPreviewBar extends shaka.ui.SeekBar {
         this.controls.hideUI()
       }
     }
+  }
+
+  release() {
+    // Rebuilding the controls mid-drag skips onChangeEnd, and the new config copies the old one.
+    this.restoreShowUIAlways()
+    super.release()
+  }
+
+  /**
+   * @private
+   * @returns {boolean} whether a mouse drag was keeping the controls shown
+   */
+  restoreShowUIAlways() {
+    if (this.showUIAlways === null) return false
+    this.controls.getConfig().showUIAlways = this.showUIAlways
+    this.showUIAlways = null
+    return true
   }
 
   /** @private */

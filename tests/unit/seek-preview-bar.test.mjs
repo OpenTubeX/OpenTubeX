@@ -17,8 +17,13 @@ function fixture() {
       // Window listeners share event types with the bar's own, so keep them apart.
       this.eventManager = { listen: (target, type, listener) => controls.listeners.set(target === window ? `window:${type}` : type, listener) }
       const properties = new Map()
+      const classes = new Set()
       this.container = {
-        classList: { toggle() {}, remove() {} },
+        classList: {
+          toggle: (name, force) => force ? classes.add(name) : classes.delete(name),
+          remove: (...names) => names.forEach(name => classes.delete(name)),
+          contains: name => classes.has(name),
+        },
         style: { background: '', setProperty: (name, value) => properties.set(name, value), getPropertyValue: name => properties.get(name) },
         querySelector: () => controls.timePreview,
       }
@@ -40,6 +45,7 @@ function fixture() {
     onChangeStart(fromTouchEvent = false) { this.changeStartedFromTouch = fromTouchEvent }
     onChange() {}
     onChangeEnd() {}
+    release() { this.released = true }
   }
   class SeekFilmstrip {
     constructor() {
@@ -228,6 +234,14 @@ test('a mouse drag from anywhere on the track shows the filmstrip and keeps the 
   bar.onChangeEnd()
   assert.deepEqual([controls.shown, controls.hidden], [1, 1], 'Releasing outside hides them like leaving the player')
 
+  // Shaka rebuilds its controls without ending the drag.
+  press()
+  drag(28)
+  bar.release()
+  assert.equal(bar.released, true)
+  assert.equal(controls.config.showUIAlways, false, 'The rebuilt controls must not stay forced up')
+  assert.deepEqual([controls.shown, controls.hidden], [1, 1])
+
   // Touch input has no mouse press, and Shaka keeps showing the controls for it.
   bar.setValue(15)
   bar.onChangeStart()
@@ -275,7 +289,7 @@ test('pulling up starts precise seeking from the last dragged time, not a pendin
   assert.equal(bar.value, 21)
 })
 
-test('dragging back below the strip returns to seeking at the bar scale', () => {
+test('dragging back below the strip returns to seeking at the bar scale', async () => {
   const { bar, controls, drag } = fixture()
   Object.assign(bar.filmstrip, {
     pixelsPerSecond: 50,
@@ -294,6 +308,14 @@ test('dragging back below the strip returns to seeking at the bar scale', () => 
   move(354, 40)
   drag(25)
   assert.equal(bar.value, 21)
+  // Resizing can leave the strip no finer than the bar; the drag stays precise and says so.
+  bar.filmstrip.pixelsPerSecond = 1
+  drag(25)
+  assert.equal(bar.value, 21)
+  await Promise.resolve()
+  assert.equal(bar.container.classList.contains('ft-seek-filmstrip-precise'), true)
+  assert.equal(bar.filmstrip.hint.textContent, 'Video.Player.Precise seeking, drag down to exit')
+  bar.filmstrip.pixelsPerSecond = 50
   // Below the strip, Shaka's value from the pointer's x applies again.
   move(354, 50)
   drag(25)
