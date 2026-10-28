@@ -1920,11 +1920,10 @@ test.describe('quick settings customization at fractional UI scale', () => {
     await expect(scrollbar).toHaveClass(/os-scrollbar-visible/)
     await options.evaluate(element => element.scrollTo(0, element.scrollHeight))
     await expect.poll(() => options.evaluate(element => element.scrollTop)).toBeGreaterThan(0)
-    // Scroll events position the overlay track after the viewport offset changes.
     await expect(async () => {
       const [popoverBounds, scrollbarBounds] = await Promise.all([
         settingPopover.evaluate(element => element.getBoundingClientRect().toJSON()),
-        scrollbar.evaluate(element => element.getBoundingClientRect().toJSON()),
+        scrollbar.evaluate(element => element.querySelector('.os-scrollbar-track').getBoundingClientRect().toJSON()),
       ])
       expect(scrollbarBounds.x).toBeGreaterThanOrEqual(popoverBounds.x - 1)
       expect(scrollbarBounds.y).toBeGreaterThanOrEqual(popoverBounds.y - 1)
@@ -1939,7 +1938,7 @@ test.describe('quick settings customization at fractional UI scale', () => {
     await hoveredOption.hover()
     const [hoveredOptionBounds, scrollbarTrackBounds] = await Promise.all([
       hoveredOption.evaluate(element => element.getBoundingClientRect().toJSON()),
-      scrollbar.evaluate(element => element.getBoundingClientRect().toJSON()),
+      scrollbar.evaluate(element => element.querySelector('.os-scrollbar-track').getBoundingClientRect().toJSON()),
     ])
     expect(hoveredOptionBounds.x + hoveredOptionBounds.width).toBeLessThanOrEqual(
       scrollbarTrackBounds.x + 1

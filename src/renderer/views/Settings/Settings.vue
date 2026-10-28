@@ -1390,7 +1390,7 @@ function preserveScrollPositions(standalone = isStandaloneViewOpen.value) {
 function getCurrentScrollViewports(standalone = isStandaloneViewOpen.value) {
   const content = standalone ? standaloneScrollRef.value : settingsPageRef.value
   if (!content) return new Set()
-  const selector = '[data-overlayscrollbars-initialize]'
+  const selector = '[data-overlayscrollbars-viewport]'
   return new Set([
     ...(content.matches(selector) ? [content] : []),
     ...content.querySelectorAll(selector)

@@ -431,19 +431,18 @@ test('panel scrollbar stays aligned with its viewport while scrolling', async ({
   const track = segments.locator(':scope > .os-scrollbar-vertical')
   await expect(track).toBeAttached()
   await segments.hover()
-  const initialHandleOffset = await track.evaluate(element => (
-    element.querySelector('.os-scrollbar-handle').getBoundingClientRect().top - element.getBoundingClientRect().top
-  ))
-  await page.mouse.wheel(0, 200)
-  await expect.poll(() => segments.evaluate(element => element.scrollTop)).toBeGreaterThan(0)
-  const alignment = await segments.evaluate(element => {
-    const scrollbar = element.querySelector(':scope > .os-scrollbar-vertical')
-    const handle = scrollbar.querySelector('.os-scrollbar-handle')
+  const measureAlignment = () => segments.evaluate(element => {
+    const scrollbarTrack = element.querySelector(':scope > .os-scrollbar-vertical .os-scrollbar-track')
+    const handle = scrollbarTrack.querySelector('.os-scrollbar-handle')
     return {
-      trackOffset: scrollbar.getBoundingClientRect().top - element.getBoundingClientRect().top,
-      handleOffset: handle.getBoundingClientRect().top - scrollbar.getBoundingClientRect().top,
+      trackOffset: scrollbarTrack.getBoundingClientRect().top - element.getBoundingClientRect().top,
+      handleOffset: handle.getBoundingClientRect().top - scrollbarTrack.getBoundingClientRect().top,
     }
   })
-  expect(Math.abs(alignment.trackOffset)).toBeLessThan(1)
-  expect(alignment.handleOffset).toBeGreaterThan(initialHandleOffset)
+  const initial = await measureAlignment()
+  await page.mouse.wheel(0, 200)
+  await expect.poll(() => segments.evaluate(element => element.scrollTop)).toBeGreaterThan(0)
+  const alignment = await measureAlignment()
+  expect(Math.abs(alignment.trackOffset - initial.trackOffset)).toBeLessThan(1)
+  expect(alignment.handleOffset).toBeGreaterThan(initial.handleOffset)
 })

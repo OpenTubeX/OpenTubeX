@@ -1,0 +1,220 @@
+/* Scrollbars drawn by overlayScrollbars.js, so they float above the content
+   instead of taking up layout space. Containers restyle their bars through
+   the --os-* custom properties, which are set on `.os-scrollbar` itself. */
+
+html[data-overlayscrollbars-initialize],
+[data-overlayscrollbars-viewport] {
+  scrollbar-width: none;
+}
+
+/* Marking a container scrolls it on both axes, and positions its bars
+   against it. Overflow and positioning it sets itself take precedence. */
+:where([data-overlayscrollbars-viewport]) {
+  position: relative;
+  overflow: auto;
+}
+
+.os-scrollbar {
+  --os-viewport-percent: 0;
+
+  /* The padding is subtracted from the track, so the handle ends up exactly as
+     wide as the configured thumb width. */
+  --os-size: var(--scrollbar-track-width);
+  --os-padding-perpendicular: 2px;
+  --os-padding-axis: 2px;
+  --os-handle-interactive-area-offset: 4px;
+  --os-handle-min-size: 33px;
+  --os-handle-max-size: none;
+
+  /* A wide thumb would cover the content beside it, so it rests at the default
+     width and only grows to the configured width while hovered or dragged. */
+  --os-handle-perpendicular-size: min(var(--scrollbar-thumb-width), 6px);
+  --os-handle-perpendicular-size-hover: 100%;
+  --os-handle-perpendicular-size-active: 100%;
+  --os-handle-border-radius: calc(var(--scrollbar-thumb-width) * var(--ui-roundness));
+  --os-handle-bg: var(--scrollbar-color);
+  --os-handle-bg-hover: var(--scrollbar-color-hover);
+  --os-handle-bg-active: var(
+    --scrollbar-color-active,
+    color-mix(in srgb, var(--scrollbar-color-hover) 80%, #fff)
+  );
+
+  position: absolute;
+  box-sizing: border-box;
+
+  /* Tracks move out of this box to follow the scroll offset. Layout
+     containment draws and hit-tests them there without letting them extend
+     the container's scroll range. */
+  contain: size layout style;
+  pointer-events: none;
+  opacity: 0;
+  visibility: hidden;
+  transition:
+    opacity 0.15s,
+    visibility 0.15s,
+    inset 0.15s;
+}
+
+body > .os-scrollbar {
+  position: fixed;
+  z-index: 99999;
+}
+
+.os-scrollbar-transitionless {
+  transition: none !important;
+}
+
+.os-scrollbar-visible {
+  opacity: 1;
+  visibility: visible;
+}
+
+/* Hovering a track keeps it usable even after the pointer stops moving. */
+.os-scrollbar.app-scrollbar-idle:not(:hover) {
+  opacity: 0;
+  visibility: hidden;
+}
+
+.os-scrollbar-vertical {
+  inset-block: 0 var(--os-size);
+  inset-inline-end: 0;
+  inline-size: var(--os-size);
+  padding-block: var(--os-padding-axis);
+  padding-inline: var(--os-padding-perpendicular);
+}
+
+.os-scrollbar-horizontal {
+  inset-block-end: 0;
+  inset-inline: 0 var(--os-size);
+  block-size: var(--os-size);
+  padding-block: var(--os-padding-perpendicular);
+  padding-inline: var(--os-padding-axis);
+}
+
+.os-scrollbar-vertical.os-scrollbar-cornerless {
+  inset-block-end: 0;
+}
+
+.os-scrollbar-horizontal.os-scrollbar-cornerless {
+  inset-inline-end: 0;
+}
+
+.os-scrollbar-track {
+  position: relative;
+  box-sizing: border-box;
+  container-type: size;
+  inline-size: 100%;
+  block-size: 100%;
+  pointer-events: none;
+}
+
+.os-scrollbar-handle {
+  position: absolute;
+  box-sizing: border-box;
+  pointer-events: none;
+  border-radius: var(--os-handle-border-radius);
+  background: var(--os-handle-bg);
+}
+
+.os-scrollbar-handle:hover {
+  background: var(--os-handle-bg-hover);
+}
+
+.os-scrollbar-handle:active {
+  background: var(--os-handle-bg-active);
+}
+
+.os-scrollbar-track-interactive .os-scrollbar-track,
+.os-scrollbar-handle-interactive .os-scrollbar-handle {
+  pointer-events: auto;
+  touch-action: none;
+}
+
+.os-scrollbar-unusable,
+.os-scrollbar-unusable * {
+  pointer-events: none !important;
+}
+
+.os-scrollbar-unusable .os-scrollbar-handle {
+  opacity: 0 !important;
+  transition: none !important;
+}
+
+/* Hit areas reach across the padding, and the handle's a little further
+   towards the content. */
+.os-scrollbar-track::before,
+.os-scrollbar-handle::before {
+  position: absolute;
+  inset: 0;
+  display: block;
+  content: '';
+}
+
+.os-scrollbar-vertical .os-scrollbar-track::before {
+  inset-inline: calc(var(--os-padding-perpendicular) * -1);
+}
+
+.os-scrollbar-horizontal .os-scrollbar-track::before {
+  inset-block: calc(var(--os-padding-perpendicular) * -1);
+}
+
+.os-scrollbar-vertical .os-scrollbar-handle::before {
+  inset-inline:
+    calc((var(--os-padding-perpendicular) + var(--os-handle-interactive-area-offset)) * -1)
+    calc(var(--os-padding-perpendicular) * -1);
+}
+
+.os-scrollbar-horizontal .os-scrollbar-handle::before {
+  inset-block:
+    calc((var(--os-padding-perpendicular) + var(--os-handle-interactive-area-offset)) * -1)
+    calc(var(--os-padding-perpendicular) * -1);
+}
+
+/* Scroll-linked animations translate handles from the track's start. */
+.os-scrollbar-vertical .os-scrollbar-handle {
+  inset-block-start: 0;
+  inset-inline-end: 0;
+  inline-size: var(--os-handle-perpendicular-size);
+  block-size: calc(var(--os-viewport-percent) * 100%);
+  min-block-size: var(--os-handle-min-size);
+  max-block-size: var(--os-handle-max-size);
+  transition:
+    opacity 0.15s,
+    background-color 0.15s,
+    inline-size 0.15s;
+}
+
+.os-scrollbar-horizontal .os-scrollbar-handle {
+  inset-block-end: 0;
+  inset-inline-start: 0;
+  inline-size: calc(var(--os-viewport-percent) * 100%);
+  min-inline-size: var(--os-handle-min-size);
+  max-inline-size: var(--os-handle-max-size);
+  block-size: var(--os-handle-perpendicular-size);
+  transition:
+    opacity 0.15s,
+    background-color 0.15s,
+    block-size 0.15s;
+}
+
+.os-scrollbar-vertical:hover .os-scrollbar-handle {
+  inline-size: var(--os-handle-perpendicular-size-hover);
+}
+
+.os-scrollbar-vertical:active .os-scrollbar-handle {
+  inline-size: var(--os-handle-perpendicular-size-active);
+}
+
+.os-scrollbar-horizontal:hover .os-scrollbar-handle {
+  block-size: var(--os-handle-perpendicular-size-hover);
+}
+
+.os-scrollbar-horizontal:active .os-scrollbar-handle {
+  block-size: var(--os-handle-perpendicular-size-active);
+}
+
+@media print {
+  .os-scrollbar {
+    display: none;
+  }
+}

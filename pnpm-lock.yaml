@@ -178,7 +178,6 @@ patchedDependencies:
   '@material/material-color-utilities@0.4.0': b1ce5dea9a31733ac3ddd4b236a80185e050df5f98e48bb7fd93f8ccf3f58378
   '@sqlite.org/sqlite-wasm@3.53.4-build2': 579d3e536bc0f7ef69623a576db802fe6dc8d02cfb6d6f085f190534a88941a7
   '@vue/runtime-dom@3.5.44': c83073332910a00ffdd4471e0a1d9e44607292ac7992016492fbd5a237ba37fd
-  overlayscrollbars@2.16.0: 9a3cd83cba852554004ae8b64ca0710ed81bd0c0b2d42ecceedf3e2e25127ef3
   shaka-player@5.3.2: 5bec65ad2e66031115f73a4ee17ce31d82c973b66f5147c3acf6e869aee69c63
   vue-sonner@2.0.9: 34b2065fecd4314653c24cdfc38ff5f2910def4942ed265ec374d66c0e5c0940
   youtubei.js@18.3.0: 0003a0f2832c7de4790869f6008eb27a3d3fd9c6a8746042692b677c3f291a1e
@@ -313,9 +312,6 @@ importers:
       marked:
         specifier: ^18.1.1
         version: 18.1.1
-      overlayscrollbars:
-        specifier: ^2.16.0
-        version: 2.16.0(patch_hash=9a3cd83cba852554004ae8b64ca0710ed81bd0c0b2d42ecceedf3e2e25127ef3)
       process:
         specifier: ^0.11.10
         version: 0.11.10
@@ -4198,9 +4194,6 @@ packages:
   optionator@0.9.4:
     resolution: {integrity: sha512-6IpQ7mKUxRcZNLIObR0hz7lxsapSSIYNZJwXPGeF0mTVqGKFIXj1DQcMoT22S3ROcLyY/rz0PWaWZ9ayWmad9g==}
     engines: {node: '>= 0.8.0'}
-
-  overlayscrollbars@2.16.0:
-    resolution: {integrity: sha512-N03oje/q7j93D0aLZtoCdsDSYLmhheSsv8H7oSLE7HhdV9P/bmCURtLV/KbPye7P/bpfyt/obSfDpGUYoJ0OWg==}
 
   p-cancelable@2.1.1:
     resolution: {integrity: sha512-BZOr3nRQHOntUjTrH8+Lh54smKHoHyur8We1V8DSMVrl5A2malOOwuJRnKRDjSnkoeBh4at6BwEnb5I7Jl31wg==}
@@ -9678,8 +9671,6 @@ snapshots:
       prelude-ls: 1.2.1
       type-check: 0.4.0
       word-wrap: 1.2.5
-
-  overlayscrollbars@2.16.0(patch_hash=9a3cd83cba852554004ae8b64ca0710ed81bd0c0b2d42ecceedf3e2e25127ef3): {}
 
   p-cancelable@2.1.1: {}
 

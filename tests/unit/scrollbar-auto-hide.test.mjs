@@ -26,8 +26,7 @@ function setup(context) {
   const remove = addScrollbarAutoHide({
     host,
     scrollEventElement,
-    scrollbarHorizontal: { scrollbar: bars[0] },
-    scrollbarVertical: { scrollbar: bars[1] }
+    scrollbars: bars
   })
   context.after(remove)
   return { document, host, scrollEventElement, bars, remove }

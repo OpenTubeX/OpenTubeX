@@ -2,15 +2,17 @@ const HIDDEN_CLASS = 'app-scrollbar-idle'
 const AUTO_HIDE_DELAY = 1300
 
 /**
- * Preserve move-to-show scrollbars without the library rewriting both bars'
- * classes on every scroll frame. Only visibility transitions touch the DOM.
+ * Shows scrollbars while the pointer moves or the content scrolls, and hides
+ * them once both rest. Only visibility transitions touch the DOM, so scroll
+ * frames never rewrite the bars' classes.
  *
- * @param {import('overlayscrollbars').Elements} elements
+ * @param {object} elements
+ * @param {HTMLElement} elements.host element whose pointer movement shows the bars
+ * @param {EventTarget} elements.scrollEventElement target of the scroll events
+ * @param {HTMLElement[]} elements.scrollbars
  * @returns {() => void} removes listeners and the pending hide timer
  */
-export function addScrollbarAutoHide(elements) {
-  const { host, scrollEventElement, scrollbarHorizontal, scrollbarVertical } = elements
-  const scrollbars = [scrollbarHorizontal.scrollbar, scrollbarVertical.scrollbar]
+export function addScrollbarAutoHide({ host, scrollEventElement, scrollbars }) {
   const document = host.ownerDocument
   let hidden = false
   let hideTimer

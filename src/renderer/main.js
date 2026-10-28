@@ -16,7 +16,7 @@ import { initializeAndroidDynamicColors } from './helpers/dynamicColors'
 import { observeAndroidNetworkMetered } from './helpers/androidUi'
 import { networkMetered } from './helpers/player/meteredNetworkQuality'
 // import the styles
-import 'overlayscrollbars/styles/overlayscrollbars.css'
+import './helpers/overlayScrollbars.css'
 // Only the positioning and stacking rules are used, FtToast supplies the design
 import 'vue-sonner/style.css'
 import './helpers/anchoredPosition.css'

@@ -29,7 +29,6 @@ test('Capacitor keeps the native page scrollbar and removes startup suppression'
   assert.equal(instance, null)
   assert.equal(overlayTarget, null)
   assert.equal(documentElement.hasAttribute('data-overlayscrollbars-initialize'), false)
-  assert.equal(body.hasAttribute('data-overlayscrollbars-initialize'), false)
 })
 
 test('desktop initializes the themed page scrollbar as before', () => {
@@ -44,7 +43,6 @@ test('desktop initializes the themed page scrollbar as before', () => {
 
   assert.equal(instance.target, body)
   assert.equal(documentElement.hasAttribute('data-overlayscrollbars-initialize'), true)
-  assert.equal(body.hasAttribute('data-overlayscrollbars-initialize'), true)
 })
 
 test('page scrollbar visibility follows overlapping fullscreen and full-window states', () => {

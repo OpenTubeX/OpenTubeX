@@ -628,7 +628,7 @@ test.describe('watch page', () => {
         leaveActive: panelElement.isConnected &&
           panelElement.classList.contains('chapters-panel-leave-active'),
         scrollbar: viewport && {
-          initializing: viewport.hasAttribute('data-overlayscrollbars-initialize'),
+          overlay: viewport.hasAttribute('data-overlayscrollbars-viewport'),
           nativeScrollbarWidth: getComputedStyle(viewport).scrollbarWidth
         },
         layout: {
@@ -640,7 +640,7 @@ test.describe('watch page', () => {
     })
     expect(leaving.leaveActive).toBe(true)
     expect(leaving.scrollbar).toEqual({
-      initializing: true,
+      overlay: true,
       nativeScrollbarWidth: 'none'
     })
 

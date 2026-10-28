@@ -792,8 +792,7 @@ watch(() => props.fullscreenOverlay, (fullscreenOverlay) => {
 /**
  * Sends the fullscreen dock back to the first comment, for the reloads and sort
  * changes that replace the whole list. The old offset points at comments that
- * are gone, and OverlayScrollbars restores it over the shorter list once that
- * has rendered, leaving the dock parked past its end until it is scrolled up.
+ * are gone and would leave the dock parked past the end of the shorter list.
  */
 function toggleCommentVisibility() {
   if (canPerformInitialCommentLoading.value) getCommentData()

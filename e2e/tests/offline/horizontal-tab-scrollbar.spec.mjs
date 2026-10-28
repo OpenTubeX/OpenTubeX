@@ -106,6 +106,11 @@ test.describe('RTL horizontal scrolling', () => {
       await page.mouse.up()
       await expect.poll(() => container.evaluate(element => element.scrollLeft)).toBeLessThan(-500)
       await expect.poll(() => page.evaluate(async () => (await window.ftElectron.tabs.getState()).tabBarScrollPosition)).toBeLessThan(-500)
+      // A track press scrolls towards it: right of the handle is the start in RTL.
+      const beforeTrackClick = await container.evaluate(element => element.scrollLeft)
+      const trackBox = await scrollbar.locator('.os-scrollbar-track').boundingBox()
+      await page.mouse.click(trackBox.x + trackBox.width - 4, trackBox.y + trackBox.height / 2)
+      await expect.poll(() => container.evaluate(element => element.scrollLeft)).toBeGreaterThan(beforeTrackClick + 100)
       await container.evaluate(element => element.dispatchEvent(new WheelEvent('wheel', { bubbles: true, cancelable: true, deltaY: 10000 })))
       await page.evaluate(groupId => window.ftElectron.tabs.updateGroup(groupId, { isCollapsed: true }), groupId)
       await expect(scrollbar).toHaveClass(/os-scrollbar-unusable/)

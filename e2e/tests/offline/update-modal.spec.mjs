@@ -124,7 +124,7 @@ test('release-note scrollbar stays anchored during touch scrolling without scrol
   // The dialog itself can still move during its opening animation. Compare
   // the track with its viewport in the same frame, not with the screen.
   const trackOffset = () => scroller.evaluate(element => {
-    const track = element.querySelector(':scope > .os-scrollbar-vertical')
+    const track = element.querySelector(':scope > .os-scrollbar-vertical .os-scrollbar-track')
     return track.getBoundingClientRect().top - element.getBoundingClientRect().top
   })
   const initialOffset = await trackOffset()

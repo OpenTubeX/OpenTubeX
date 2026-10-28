@@ -1,7 +1,7 @@
 /**
  * Initializes the document scrollbar for the current platform. Capacitor uses
- * Android's native page scrollbar, while desktop and web keep the themed
- * OverlayScrollbars instance. Nested scroll containers are handled separately.
+ * Android's native page scrollbar, while desktop and web draw the themed
+ * overlay scrollbar. Nested scroll containers are handled separately.
  *
  * @template T
  * @param {{ documentElement: HTMLElement, body: HTMLElement }} pageDocument
@@ -16,7 +16,6 @@ export function initializePageScrollbar(
 ) {
   if (useNativePageScrollbar) {
     pageDocument.documentElement.removeAttribute('data-overlayscrollbars-initialize')
-    pageDocument.body.removeAttribute('data-overlayscrollbars-initialize')
     return null
   }
 

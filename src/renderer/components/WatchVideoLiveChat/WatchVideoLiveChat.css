@@ -437,7 +437,7 @@
 .liveChatComments {
   --live-chat-fade-size: 16px;
 
-  /* OverlayScrollbars float over the inline-end edge; keep that strip unmasked. */
+  /* Overlay scrollbars float over the inline-end edge; keep that strip unmasked. */
   --live-chat-scrollbar-reserve: 14px;
 
   inline-size: 100%;

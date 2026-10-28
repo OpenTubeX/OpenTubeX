@@ -10,7 +10,7 @@ test.use({ seed: { settings: { currentLocale: 'en-US' } } })
  * @param {import('@playwright/test').Page} page
  * @param {string} name
  * @param {string} selector
- * @param {{ class: string } | { viewportToken: [string, string] } | { properties: string[] }} change
+ * @param {{ class: string } | { scrollbarState: true } | { properties: string[] }} change
  * @param {number} [maxRestyled]
  */
 async function expectLocalRestyle(page, name, selector, change, maxRestyled = 10) {
@@ -24,15 +24,21 @@ async function expectLocalRestyle(page, name, selector, change, maxRestyled = 10
         element.classList.add(change.class)
         return () => element.classList.remove(change.class)
       }
-      if (change.viewportToken) {
-        // OverlayScrollbars rewrites this whenever a scroller's size, content,
-        // or overflow changes.
-        const attribute = 'data-overlayscrollbars-viewport'
-        const [from, to] = change.viewportToken
-        const value = element.getAttribute(attribute)
-        const tokens = value.split(' ').filter(token => token !== from)
-        element.setAttribute(attribute, [...tokens, to].join(' '))
-        return () => element.setAttribute(attribute, value)
+      if (change.scrollbarState) {
+        // The scrollbar helper writes these whenever a scroller's size,
+        // content, or overflow changes.
+        const scrollbar = element.querySelector(':scope > .os-scrollbar-vertical')
+        const viewportPercent = scrollbar.style.getPropertyValue('--os-viewport-percent')
+        const toggle = () => {
+          scrollbar.classList.toggle('os-scrollbar-visible')
+          scrollbar.classList.toggle('os-scrollbar-unusable')
+        }
+        toggle()
+        scrollbar.style.setProperty('--os-viewport-percent', '0.5')
+        return () => {
+          toggle()
+          scrollbar.style.setProperty('--os-viewport-percent', viewportPercent)
+        }
       }
       const values = change.properties.map(property => [property, element.style.getPropertyValue(property)])
       for (const [property] of values) element.style.setProperty(property, '123px')
@@ -83,14 +89,13 @@ test('class changes restyle only the changed element', async ({ page }) => {
   await expectLocalRestyle(page, 'settings window class', '.settingsWindow', change)
 })
 
-// Inherited overflow properties, or a rule that hides the children while the
-// viewport attribute holds a token, restyle all of the content on each update.
+// A rule that matches content through a scrollbar's state, or state kept on
+// the scroller itself, would restyle all of the content on each update.
 test('scroller state changes restyle only the scroller', async ({ page }) => {
   await openSettings(page)
-  const viewport = '.settingsContent[data-overlayscrollbars-viewport~="overflowYScroll"]'
-  // The scrollbars beside the viewport restyle with it.
-  await expectLocalRestyle(page, 'overflow change', viewport, { viewportToken: ['overflowYScroll', 'overflowYHidden'] }, 30)
-  await expectLocalRestyle(page, 'measuring state', viewport, { viewportToken: ['', 'measuring'] }, 30)
+  const viewport = '.settingsContent[data-overlayscrollbars-viewport]'
+  await expect(page.locator(`${viewport} > .os-scrollbar-vertical`)).toHaveClass(/os-scrollbar-visible/)
+  await expectLocalRestyle(page, 'scrollbar state', viewport, { scrollbarState: true }, 30)
 })
 
 test.describe('thumbnail grid', () => {

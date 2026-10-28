@@ -18,7 +18,7 @@ export function normalizeScrollSpeed(value) {
 
 /**
  * Applies the configured speed to one scrolling element. Register this on
- * every OverlayScrollbars scroll offset element so native event bubbling can
+ * every scroll container with overlay scrollbars so native event bubbling can
  * hand input from a nested boundary to its parent.
  *
  * @param {HTMLElement} element
@@ -83,11 +83,13 @@ export function addScrollSpeedHandler(element, getScrollSpeed) {
     })
   }
 
+  // The document's scroll events go to the document, not its scrolling element.
+  const scrollEventTarget = element === element.ownerDocument?.scrollingElement ? element.ownerDocument : element
   element.addEventListener('wheel', handleWheel, { passive: false })
-  element.addEventListener('scrollend', clearSmoothTargets)
+  scrollEventTarget.addEventListener('scrollend', clearSmoothTargets)
   return () => {
     element.removeEventListener('wheel', handleWheel)
-    element.removeEventListener('scrollend', clearSmoothTargets)
+    scrollEventTarget.removeEventListener('scrollend', clearSmoothTargets)
   }
 }
 
