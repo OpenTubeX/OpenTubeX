@@ -39,12 +39,23 @@ export function readStoredTabImages(prefix) {
     for (const file of await listFiles()) {
       const name = file.name.slice(0, -'.json'.length)
       if (!name.startsWith(prefix)) continue
+      let data
       try {
-        const { data } = await Filesystem.readFile({ path: filePath(name), directory, encoding: Encoding.UTF8 })
-        const entry = JSON.parse(data)
-        if (typeof entry?.image === 'string' && entry.image.startsWith('data:image/')) entries.set(name, entry)
+        ({ data } = await Filesystem.readFile({ path: filePath(name), directory, encoding: Encoding.UTF8 }))
       } catch (error) {
         console.warn('Failed to read cached tab image:', error)
+        continue
+      }
+      let entry
+      try {
+        entry = JSON.parse(data)
+      } catch {}
+      if (typeof entry?.image === 'string' && entry.image.startsWith('data:image/')) {
+        entries.set(name, entry)
+      } else {
+        // A damaged file, such as one from an interrupted write, never becomes valid.
+        await Filesystem.deleteFile({ path: filePath(name), directory })
+          .catch(error => console.warn(`Failed to remove cached tab image ${name}:`, error))
       }
     }
     return entries

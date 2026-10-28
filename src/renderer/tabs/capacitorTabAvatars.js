@@ -87,19 +87,22 @@ export function initializeCapacitorTabAvatars(store, tabsReady, fetchAvatar = fe
   const failed = new Set()
 
   async function download(key, source) {
+    const revision = discardRevision
+    // A clear or a newer source makes this download's result obsolete.
+    const current = () => !disposed && revision === discardRevision && attempted.get(key) === source
     try {
       const dataUrl = await fetchAvatar(source, store.getters)
-      if (disposed || attempted.get(key) !== source) return
+      if (!current()) return
       if (!dataUrl) {
         failed.add(key)
         return
       }
       const entry = { source, image: await shrinkAvatar(dataUrl) }
-      if (disposed || attempted.get(key) !== source) return
+      if (!current()) return
       avatars.set(key, entry)
       writeStoredTabImage(AVATAR_PREFIX + key, entry)
     } catch (error) {
-      if (!disposed && attempted.get(key) === source) failed.add(key)
+      if (current()) failed.add(key)
       console.warn('Failed to cache mobile tab avatar:', error)
     }
   }
@@ -142,7 +145,8 @@ export function initializeCapacitorTabAvatars(store, tabsReady, fetchAvatar = fe
     if (disposed || restoreRevision !== discardRevision) return
     for (const [name, { source, image }] of stored) {
       const key = name.slice(AVATAR_PREFIX.length)
-      if (!avatars.has(key) && typeof source === 'string') avatars.set(key, { source, image })
+      if (typeof source !== 'string') removeStoredTabImage(name)
+      else if (!avatars.has(key)) avatars.set(key, { source, image })
     }
   }).catch(error => console.warn('Failed to restore mobile tab avatars:', error)).finally(() => {
     if (disposed) return

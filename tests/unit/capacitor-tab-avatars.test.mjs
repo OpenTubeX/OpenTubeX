@@ -166,3 +166,34 @@ test('a failed clear is reported even when the folder cannot be listed', async t
   await assert.rejects(clearStoredTabImages(), /I\/O error/)
   await assert.rejects(getStoredTabImagesSize(), /I\/O error/)
 })
+
+test('a download started before a clear cannot bring the avatar back', async t => {
+  const state = setup(t)
+  const pending = []
+  state.fetchAvatar.mock.mockImplementation(() => new Promise(resolve => pending.push(resolve)))
+  const dispose = state.start()
+  await settle()
+  clearCapacitorTabAvatars()
+  state.store.getters.getPresentedTabId = 'other'
+  await settle()
+  assert.equal(pending.length, 2, 'tab use starts a new download of the same source')
+  pending[0]('data:image/jpeg;base64,old')
+  await settle()
+  assert.equal(getCapacitorTabAvatar(channelTab), null)
+  assert.equal(state.filesystem.files.size, 0)
+  pending[1]('data:image/jpeg;base64,new')
+  await settle()
+  assert.equal(getCapacitorTabAvatar(channelTab), 'data:image/jpeg;base64,176x176')
+  dispose()
+})
+
+test('damaged stored images are deleted instead of being skipped forever', async t => {
+  const filesystem = createFilesystem()
+  filesystem.files.set('tab-previews/avatar-channel-UCbbbbbbbbbbbbbbbbbbbbbb.json', '{"source":')
+  filesystem.files.set('tab-previews/avatar-channel-UCcccccccccccccccccccccc.json', JSON.stringify({ image: 'data:image/jpeg;base64,x' }))
+  const state = setup(t, filesystem)
+  const dispose = state.start()
+  await settle()
+  assert.deepEqual([...filesystem.files.keys()], [`tab-previews/avatar-channel-${channelId}.json`])
+  dispose()
+})
