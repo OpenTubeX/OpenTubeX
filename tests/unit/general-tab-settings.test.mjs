@@ -66,6 +66,7 @@ test('mobile startup waits for saved settings before restoring tabs', async () =
     initializeNetworkRecovery: () => ({ setInternetChecksEnabled: value => connectivityChoices.push(value) }),
     initializeCapacitorYtDlp: () => {},
     initializeCapacitorTabPreviews: () => {},
+    initializeCapacitorTabAvatars: () => {},
     capacitorTabService: { initialize: async () => { restored = true } },
   })
   await Promise.resolve()

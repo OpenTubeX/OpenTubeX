@@ -759,6 +759,7 @@ import { dismissAutoSyncNotice, shouldShowAutoSyncNotice, showAutoSyncNoticeOnce
 import { invalidateAllYtDlpPlaybackSources } from './helpers/player/ytDlpPlayback'
 import { getTabNavigationService } from './tabs/TabNavigationService'
 import { initializeCapacitorTabPreviews } from './tabs/capacitorTabPreviews'
+import { initializeCapacitorTabAvatars } from './tabs/capacitorTabAvatars'
 import { initializeCapacitorTabService } from './tabs/CapacitorTabService'
 import { tabMediaCoordinator } from './tabs/TabMediaCoordinator'
 import { tabRuntimeRegistry } from './tabs/TabRuntimeRegistry'
@@ -1350,6 +1351,7 @@ let removeCapacitorIntegrationListeners = null
 let removeAndroidIncomingShare = null
 let capacitorPullToRefreshSetup = null
 let removeCapacitorTabPreviews = null
+let removeCapacitorTabAvatars = null
 let removeYtDlpBinaryUpdatedListener = null
 let removeAndroidYtDlpSettingsListener = null
 let removeOpenTabOrganizerListener = null
@@ -1792,7 +1794,8 @@ onMounted(async () => {
   })
   if (isCapacitor) {
     tabsReady = settingsReady.then(() => capacitorTabService.initialize(route))
-    removeCapacitorTabPreviews = initializeCapacitorTabPreviews(store, computed(() => pageSwipe.value || organizerSwipeActive.value))
+    removeCapacitorTabPreviews = initializeCapacitorTabPreviews(store, computed(() => pageSwipe.value || organizerSwipeActive.value), tabsReady)
+    removeCapacitorTabAvatars = initializeCapacitorTabAvatars(store, tabsReady)
   }
   const customThemesReady = loadCustomThemes().catch((error) => {
     console.error('Failed to load custom theme:', error)
@@ -2049,6 +2052,7 @@ onBeforeUnmount(() => {
   tabletTabStripQuery.removeEventListener('change', handleTabletTabStripChange)
   capacitorTabService?.dispose()
   removeCapacitorTabPreviews?.()
+  removeCapacitorTabAvatars?.()
   document.documentElement.classList.remove('hideOutlines')
   removeGamepadNavigation()
   removeCustomThemeListener()

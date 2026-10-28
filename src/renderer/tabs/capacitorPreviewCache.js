@@ -1,8 +1,16 @@
-// Last-seen images are local to this runtime and never enter persisted/synced tabs.
-export function createCapacitorPreviewCache(capture, entries = new Map(), limit = 24) {
+// Last-seen images stay on this device and never enter persisted/synced tabs.
+// `storage` mirrors them to disk so they survive restarts.
+export function createCapacitorPreviewCache(capture, entries = new Map(), limit = 24, storage = null) {
   let generation = 0
   let pending = null
   let pendingGeneration = 0
+  const remove = id => {
+    entries.delete(id)
+    storage?.remove(id)
+  }
+  const evict = () => {
+    while (entries.size > limit) remove(entries.keys().next().value)
+  }
   return {
     entries,
     get(tab) {
@@ -13,8 +21,24 @@ export function createCapacitorPreviewCache(capture, entries = new Map(), limit 
     clear() { generation += 1; entries.clear() },
     prune(tabs) {
       for (const [id, entry] of entries) {
-        if (!tabs.some(tab => tab.id === id && tab.route.fullPath === entry.route)) entries.delete(id)
+        if (!tabs.some(tab => tab.id === id && tab.route.fullPath === entry.route)) remove(id)
       }
+    },
+    /**
+     * Add the stored previews of open tabs as the least recently seen, keeping
+     * newer captures. Delete the others before they count toward the limit.
+     */
+    restore(stored, tabs) {
+      const current = new Map(entries)
+      entries.clear()
+      const oldestFirst = [...stored].sort(([, a], [, b]) => (a.capturedAt || 0) - (b.capturedAt || 0))
+      for (const [id, { route, image }] of oldestFirst) {
+        if (current.has(id)) continue
+        if (tabs.some(tab => tab.id === id && tab.route.fullPath === route)) entries.set(id, { route, image })
+        else storage?.remove(id)
+      }
+      for (const [id, entry] of current) entries.set(id, entry)
+      evict()
     },
     async capture(tab) {
       const revision = generation
@@ -33,7 +57,8 @@ export function createCapacitorPreviewCache(capture, entries = new Map(), limit 
           if (!image || revision !== generation) return
           entries.delete(id)
           entries.set(id, { route, image })
-          while (entries.size > limit) entries.delete(entries.keys().next().value)
+          storage?.write(id, { route, image, capturedAt: Date.now() })
+          evict()
         } catch (error) {
           console.warn('Failed to capture mobile tab preview:', error)
         }

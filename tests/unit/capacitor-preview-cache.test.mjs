@@ -104,3 +104,41 @@ test('synced tabs fall back without a local preview, even when their IDs collide
   assert.equal(cache.get(tab('a', '/history')), null)
   assert.equal(cache.get(tab('a')), 'local image')
 })
+
+test('stored previews are mirrored and restored as the least recently seen', async () => {
+  const written = []
+  const removed = []
+  const storage = { write: (id, entry) => written.push([id, entry.route]), remove: id => removed.push(id) }
+  const cache = createCapacitorPreviewCache(async () => 'fresh', new Map(), 3, storage)
+  await cache.capture(tab('a'))
+  assert.deepEqual(written, [['a', '/home']])
+
+  cache.restore(new Map([
+    ['c', { route: '/c', image: 'c', capturedAt: 2 }],
+    ['a', { route: '/home', image: 'stale', capturedAt: 3 }],
+    ['b', { route: '/b', image: 'b', capturedAt: 1 }],
+    ['invalid', { image: 'no route' }],
+  ]), [tab('a'), tab('b', '/b'), tab('c', '/c')])
+  assert.deepEqual([...cache.entries.keys()], ['b', 'c', 'a'])
+  assert.equal(cache.get(tab('a')), 'fresh')
+  assert.deepEqual(removed, ['invalid'])
+  removed.length = 0
+
+  await cache.capture(tab('d'))
+  assert.deepEqual([...cache.entries.keys()], ['c', 'a', 'd'])
+  cache.prune([tab('a'), tab('d')])
+  assert.deepEqual(removed, ['b', 'c'])
+})
+
+test('previews of closed tabs do not push open tabs out of a restore', () => {
+  const removed = []
+  const cache = createCapacitorPreviewCache(async () => null, new Map([['a', { route: '/home', image: 'a' }]]), 2, {
+    write () {}, remove: id => removed.push(id),
+  })
+  cache.restore(new Map([
+    ['b', { route: '/b', image: 'b', capturedAt: 1 }],
+    ['closed', { route: '/closed', image: 'closed', capturedAt: 2 }],
+  ]), [tab('a'), tab('b', '/b')])
+  assert.deepEqual([...cache.entries.keys()], ['b', 'a'])
+  assert.deepEqual(removed, ['closed'])
+})

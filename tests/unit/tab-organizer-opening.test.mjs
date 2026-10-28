@@ -23,6 +23,12 @@ function createOrganizer () {
     Capacitor: { isPluginAvailable: () => true },
     registerPlugin: () => ({ take: () => { captures++; return frame } }),
     shallowReactive: value => value,
+    clearCapacitorTabAvatars () {},
+    readStoredTabImages: async () => new Map(),
+    writeStoredTabImage: async () => {},
+    removeStoredTabImage: async () => {},
+    removeStoredTabImages: async () => {},
+    clearStoredTabImages: async () => {},
     watch: (_, callback, options) => { if (options.immediate) callback(); return () => {} },
     setTimeout: (callback, ms) => { timers.set(callback, ms); return callback },
     clearTimeout: callback => timers.delete(callback),
@@ -52,7 +58,7 @@ function createOrganizer () {
     organizerSwipeProgress: () => 0,
     console,
   })
-  const api = vm.runInContext(`${previews.replace(/^import .*$/gm, '').replaceAll('export ', '')}
+  const api = vm.runInContext(`${previews.replace(/^import [^;]*?from .*$/gm, '').replaceAll('export ', '')}
     initializeCapacitorTabPreviews({ getters: {
       getShowTabPreviews: true, getPresentedTab: ${JSON.stringify(tab)},
       getActiveTabId: 'active', getTabs: [${JSON.stringify(tab)}]

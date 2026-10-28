@@ -179,21 +179,24 @@
             @click="requestCleanup('http-cache')"
           />
         </StorageItem>
-        <StorageItem
-          :title="t('Settings.Storage Settings.Tab Image Cache')"
-          :size="sizeText('tabPreviews')"
-          :description="t('Settings.Storage Settings.Tab Image Cache Description')"
-          location="tab-previews/"
-          location-is-directory
-        >
-          <FtButton
-            :label="t('Settings.Storage Settings.Clear Tab Image Cache')"
-            theme="destructive"
-            :icon="['fas', 'trash']"
-            :disabled="isUsageEmpty('tabPreviews')"
-            @click="requestCleanup('tab-previews')"
-          />
-        </StorageItem>
+      </template>
+      <StorageItem
+        v-if="SUPPORTS_STORAGE_USAGE"
+        :title="t('Settings.Storage Settings.Tab Image Cache')"
+        :size="sizeText('tabPreviews')"
+        :description="t('Settings.Storage Settings.Tab Image Cache Description')"
+        :location="storedDataLocation('tab-previews/')"
+        location-is-directory
+      >
+        <FtButton
+          :label="t('Settings.Storage Settings.Clear Tab Image Cache')"
+          theme="destructive"
+          :icon="['fas', 'trash']"
+          :disabled="isUsageEmpty('tabPreviews')"
+          @click="requestCleanup('tab-previews')"
+        />
+      </StorageItem>
+      <template v-if="USING_ELECTRON">
         <StorageItem
           :title="t('Settings.Storage Settings.Playback Caches')"
           :size="playbackCachesText"
@@ -373,6 +376,8 @@ import {
   normalizeYtDlpPlaybackCacheMaxEntrySize
 } from '../../../../ytDlpPlaybackCacheSettings'
 import { clearAndroidCache, getAndroidStorageUsage } from '../../../helpers/androidStorage'
+import { clearCapacitorTabImages } from '../../../tabs/capacitorTabPreviews'
+import { getStoredTabImagesSize } from '../../../tabs/capacitorTabImageStorage'
 import { formatBytes } from '../../../helpers/fileSize'
 import { invalidateAllYtDlpPlaybackSources } from '../../../helpers/player/ytDlpPlayback'
 import { showToast } from '../../../helpers/utils'
@@ -453,9 +458,18 @@ const chartCategories = computed(() => IS_CAPACITOR
         color: 'var(--storage-chart-browser-caches)'
       },
       {
+        key: 'app-caches',
+        label: t('Settings.Storage Settings.Application Caches'),
+        ...chartUsage(['tabPreviews']),
+        color: 'var(--storage-chart-app-caches)'
+      },
+      {
         key: 'app-data',
         label: t('Settings.Storage Settings.Stored App Data'),
-        bytes: Number.isFinite(usage.value.androidAppData) ? usage.value.androidAppData : 0,
+        // The tab image cache lives in the app data directory.
+        bytes: Number.isFinite(usage.value.androidAppData)
+          ? Math.max(0, usage.value.androidAppData - (Number.isFinite(usage.value.tabPreviews) ? usage.value.tabPreviews : 0))
+          : 0,
         exact: Number.isFinite(usage.value.androidAppData),
         color: 'var(--storage-chart-app-data)'
       }
@@ -680,7 +694,11 @@ async function refreshUsage() {
       usage.value = nextUsage
       downloads.value = nextDownloads
     } else if (IS_CAPACITOR) {
-      usage.value = await getAndroidStorageUsage()
+      const [androidUsage, tabPreviews] = await Promise.all([
+        getAndroidStorageUsage(),
+        getStoredTabImagesSize().catch(() => null)
+      ])
+      usage.value = { ...androidUsage, tabPreviews }
     }
   } catch (error) {
     console.error('Failed to calculate storage usage', error)
@@ -737,7 +755,11 @@ async function performCleanup(action) {
       await requireCleanupSuccess(clearAndroidCache())
       break
     case 'tab-previews':
-      await requireCleanupSuccess(window.ftElectron.storage.clear('tab-previews'))
+      if (IS_CAPACITOR) {
+        await clearCapacitorTabImages()
+      } else {
+        await requireCleanupSuccess(window.ftElectron.storage.clear('tab-previews'))
+      }
       break
     case 'playback-caches':
       await Promise.all([

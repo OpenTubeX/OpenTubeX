@@ -1,6 +1,7 @@
 import store from '../store/index'
 import { getSyncTabRoute } from '../helpers/sync-sessions'
 import { getExternalMediaPlatformIcon, getExternalMediaUrl } from './tabPageIcon'
+import { getCapacitorTabAvatar } from './capacitorTabAvatars.js'
 
 export { getTabPageIcon } from './tabPageIcon'
 
@@ -26,6 +27,10 @@ export function getTabPreviewFallbackUrl(tab) {
 
 export function getTabAvatarUrl(tab) {
   if (tab?.avatarUrl) return tab.avatarUrl
+  if (process.env.IS_CAPACITOR) {
+    const cached = getCapacitorTabAvatar(tab)
+    if (cached) return cached
+  }
 
   const path = tab?.route?.path ?? ''
   const channelId = path.match(/^\/channel\/([^/]+)/)?.[1]
