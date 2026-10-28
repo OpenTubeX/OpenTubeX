@@ -228,7 +228,11 @@ export function useAbRepeat({
     videoElement.currentTime = abRepeatStart.value
   }
 
-  function checkAbRepeatBoundary(countRepeat = true) {
+  /**
+   * @param {boolean} [countRepeat]
+   * @param {boolean} [scheduled] whether this is the check scheduled for when playback reaches B
+   */
+  function checkAbRepeatBoundary(countRepeat = true, scheduled = false) {
     clearAbRepeatBoundarySchedule()
     const videoElement = video.value
     if (!videoElement || !abRepeatEnabled.value || !hasValidAbRepeatRange()) {
@@ -239,7 +243,11 @@ export function useAbRepeat({
       videoElement.currentTime < abRepeatStart.value - AB_REPEAT_BOUNDARY_TOLERANCE_SECONDS ||
       videoElement.currentTime >= abRepeatEnd.value - AB_REPEAT_BOUNDARY_TOLERANCE_SECONDS
     ) {
-      repeatAbRangeFromStart(countRepeat && !videoElement.paused && !videoElement.seeking &&
+      // With B at the media end, playback can end, which pauses it, just before the
+      // scheduled check runs. Its pause and ended events are still queued, and returning
+      // to A here leaves the ended handler nothing to count, so this still counts.
+      const playing = !videoElement.paused || (scheduled && videoElement.ended)
+      repeatAbRangeFromStart(countRepeat && playing && !videoElement.seeking &&
         videoElement.currentTime >= abRepeatEnd.value - AB_REPEAT_BOUNDARY_TOLERANCE_SECONDS)
       return
     }
@@ -272,7 +280,7 @@ export function useAbRepeat({
       videoElement.playbackRate
     )
 
-    abRepeatBoundaryTimeout = setTimeout(checkAbRepeatBoundary, Math.max(4, delay))
+    abRepeatBoundaryTimeout = setTimeout(() => checkAbRepeatBoundary(true, true), Math.max(4, delay))
   }
 
   /**
