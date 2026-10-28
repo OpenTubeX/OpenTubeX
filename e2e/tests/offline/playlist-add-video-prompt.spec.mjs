@@ -51,7 +51,7 @@ test('previews only one video in the phone layout', async ({ app, page }) => {
 test.describe('with hidden thumbnails', () => {
   test.use({ seed: { settings: { thumbnailPreference: 'hidden' } } })
 
-  test('omits the thumbnails', async ({ page }) => {
+  test('omits the thumbnails and the channel of videos without one', async ({ page }) => {
     await showPrompt(page, [video(1), { ...video(2), author: undefined }])
     const prompt = page.getByRole('dialog', { name: 'Select a playlist to add your 2 videos to', exact: true })
 
