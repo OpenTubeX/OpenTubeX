@@ -1,5 +1,5 @@
 import { test, expect } from '@playwright/test'
-import { createShardMatrix } from '../../shards.mjs'
+import { createShardMatrix, REPEAT_EACH, REPEAT_LIMIT } from '../../shards.mjs'
 import config from '../../playwright.config.mjs'
 
 function report(counts) {
@@ -31,6 +31,18 @@ test('PR shards run every packed-app test but only changed network tests', () =>
   const { include } = createShardMatrix(full, report({ offline: 3, network: 2 }))
   expect(shardCounts(include)).toEqual({ offline: 16, performance: 3, browser: 1, network: 1 })
   expect(createShardMatrix(full, report({ offline: 3 })).include.some(shard => shard.project === 'network')).toBe(false)
+})
+
+test('PR shards repeat changed offline tests unless a shared change selects too many', () => {
+  const repeat = changed => createShardMatrix(full, report(changed), 'all', true).include
+    .filter(shard => shard.project === 'repeat')
+  expect(repeat({ offline: 10, 'offline-95': 2, 'offline-125': 2, network: 2 })).toEqual([
+    { project: 'repeat', projects: 'offline offline-95 offline-125', repeatEach: REPEAT_EACH, shard: 1, shardTotal: 1 }
+  ])
+  expect(repeat({ offline: REPEAT_LIMIT })).toHaveLength(REPEAT_EACH)
+  expect(repeat({ offline: REPEAT_LIMIT + 1 })).toEqual([])
+  expect(repeat({ network: 2 })).toEqual([])
+  expect(createShardMatrix(full, report({ offline: 3 })).include.some(shard => shard.project === 'repeat')).toBe(false)
 })
 
 test('offline shards also run the scaled projects', () => {

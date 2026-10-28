@@ -36,20 +36,18 @@ jobs:
       run: |
         set -euo pipefail
 
-        job_ids="$(
+        # A job that never got a runner has runner_id 0. Its "not acquired by
+        # Runner" annotation is not reliably visible to this token.
+        runner_ids="$(
           gh api --paginate "repos/${GH_REPO}/actions/runs/${RUN_ID}/attempts/${RUN_ATTEMPT}/jobs?per_page=100" \
-            --jq '.jobs[] | select(.conclusion == "failure" or .conclusion == "cancelled") | .id'
+            --jq '.jobs[] | select(.conclusion == "failure" or .conclusion == "cancelled") | .runner_id // 0'
         )"
-        [[ -n "$job_ids" ]] || exit 0
+        [[ -n "$runner_ids" ]] || exit 0
 
-        while IFS= read -r job_id; do
-          [[ -z "$job_id" ]] && continue
-          if ! gh api --paginate "repos/${GH_REPO}/check-runs/${job_id}/annotations?per_page=100" \
-            --jq '.[].message' | grep --quiet --fixed-strings 'was not acquired by Runner'; then
-            echo "Job $job_id did not fail for lack of a runner; not retrying."
-            exit 0
-          fi
-        done <<< "$job_ids"
+        if grep --quiet --invert-match --line-regexp 0 <<< "$runner_ids"; then
+          echo "A job failed after acquiring a runner; not retrying."
+          exit 0
+        fi
 
         # A rerun joins the push build's concurrency group and would cancel a newer build.
         if [[ "$RUN_EVENT" == 'push' ]]; then

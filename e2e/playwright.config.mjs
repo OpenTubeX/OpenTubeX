@@ -11,6 +11,9 @@ export default defineConfig({
   outputDir: './results',
   fullyParallel: true,
   timeout: 60_000,
+  // A CI retry keeps unrelated flaky tests from failing PRs. The flaky
+  // reporter records each one for the flaky-test issue.
+  retries: process.env.CI ? 1 : 0,
   expect: {
     timeout: 15_000
   },
@@ -19,7 +22,7 @@ export default defineConfig({
   // display (see helpers/app.mjs). CI sets E2E_XVFB=1 to require it.
   // CI runners have 4 vCPUs; a third Electron worker makes timing checks flaky.
   workers: process.env.CI ? (process.env.E2E_XVFB ? 2 : 1) : undefined,
-  reporter: [['list'], ['html', { outputFolder: 'report', open: 'never' }]],
+  reporter: [['list'], ['html', { outputFolder: 'report', open: 'never' }], ['./flaky-reporter.mjs']],
   use: {
     trace: 'retain-on-failure'
   },

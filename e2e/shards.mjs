@@ -6,24 +6,17 @@ const SHARD_GROUPS = {
   network: ['network']
 }
 
+// PRs rerun changed offline tests to catch flaky tests before they merge.
+// A change to a shared helper selects most of the suite; skip those PRs.
+export const REPEAT_EACH = 5
+export const REPEAT_LIMIT = 100
+
 /**
  * Plan shards from the tests that will actually run in each group. Only the
  * network group, which talks to YouTube, uses the changed-test report on PRs.
+ * With `repeatChanged`, a `repeat` group reruns changed offline tests.
  */
-export function createShardMatrix(fullReport, changedReport = fullReport, selectedProject = 'all') {
-  const countTests = report => {
-    const counts = {}
-    const visit = suite => {
-      for (const spec of suite.specs ?? []) {
-        for (const test of spec.tests) {
-          counts[test.projectName] = (counts[test.projectName] ?? 0) + 1
-        }
-      }
-      for (const child of suite.suites ?? []) visit(child)
-    }
-    visit(report)
-    return counts
-  }
+export function createShardMatrix(fullReport, changedReport = fullReport, selectedProject = 'all', repeatChanged = false) {
   const fullCounts = countTests(fullReport)
   const changedCounts = countTests(changedReport)
   const groups = selectedProject === 'all'
@@ -48,5 +41,31 @@ export function createShardMatrix(fullReport, changedReport = fullReport, select
     const shardTotal = Math.min(16, Math.ceil(count / testsPerShard))
     return Array.from({ length: shardTotal }, (_, index) => ({ ...entry, shard: index + 1, shardTotal }))
   })
+  const repeatCount = countRepeatTests(changedReport)
+  if (repeatChanged && repeatCount > 0 && repeatCount <= REPEAT_LIMIT) {
+    const shardTotal = Math.ceil(repeatCount * REPEAT_EACH / 100)
+    const entry = { project: 'repeat', projects: SHARD_GROUPS.offline.join(' '), repeatEach: REPEAT_EACH }
+    include.push(...Array.from({ length: shardTotal }, (_, index) => ({ ...entry, shard: index + 1, shardTotal })))
+  }
   return { include }
+}
+
+/** Count the offline tests in a report, including their scaled runs. */
+export function countRepeatTests(report) {
+  const counts = countTests(report)
+  return SHARD_GROUPS.offline.reduce((total, project) => total + (counts[project] ?? 0), 0)
+}
+
+function countTests(report) {
+  const counts = {}
+  const visit = suite => {
+    for (const spec of suite.specs ?? []) {
+      for (const test of spec.tests) {
+        counts[test.projectName] = (counts[test.projectName] ?? 0) + 1
+      }
+    }
+    for (const child of suite.suites ?? []) visit(child)
+  }
+  visit(report)
+  return counts
 }
