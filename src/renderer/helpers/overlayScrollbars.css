@@ -2,9 +2,11 @@
    instead of taking up layout space. Containers restyle their bars through
    the --os-* custom properties, which are set on `.os-scrollbar` itself. */
 
+/* Native scrollbars would take up space beside the drawn ones, also where
+   other styles, such as Shaka's menus, configure them. */
 html[data-overlayscrollbars-initialize],
 [data-overlayscrollbars-viewport] {
-  scrollbar-width: none;
+  scrollbar-width: none !important;
 }
 
 /* Marking a container scrolls it on both axes, and positions its bars
