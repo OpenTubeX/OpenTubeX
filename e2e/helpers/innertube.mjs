@@ -214,7 +214,10 @@ export async function setupInnertube(app, testInfo) {
       // requests can race test teardown, so tolerate disposed contexts.
       let response
       try {
-        response = await route.fetch()
+        // route.fetch() skips the session's header rewrites, and YouTube blocks the app:// origin.
+        response = await route.fetch({
+          headers: { ...request.headers(), origin: 'https://www.youtube.com', referer: 'https://www.youtube.com/' }
+        })
       } catch {
         return route.abort().catch(() => {})
       }
