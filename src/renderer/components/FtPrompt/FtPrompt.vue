@@ -89,6 +89,7 @@
 import { inject, nextTick, useId, useTemplateRef } from 'vue'
 
 import { clampOverlayScrollTop } from '../../helpers/overlayScrollbars'
+import { useFullscreenTeleportTarget } from '../../composables/useFullscreenTeleportTarget'
 import { useSettingsOverlay } from '../../composables/useSettingsOverlay'
 import store from '../../store/index'
 
@@ -157,7 +158,7 @@ const emit = defineEmits(['click'])
 const settingsOverlayActive = useSettingsOverlay(() => emit('click', null))
 
 const id = useId()
-const teleportTarget = document.fullscreenElement ?? '.app'
+const teleportTarget = useFullscreenTeleportTarget(() => emit('click', null))
 
 const promptCard = useTemplateRef('promptCard')
 const promptContentScroller = useTemplateRef('promptContentScroller')

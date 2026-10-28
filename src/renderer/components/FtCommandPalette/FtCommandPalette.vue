@@ -183,6 +183,7 @@ import { filterCommandPaletteCommands, filterCommandPaletteCommandsAsync, highli
 import { hasDownloadSearchChanged, isLocalVideoMutation, iterateLocalVideoCommands } from '../../helpers/commandPaletteVideos'
 import { clampOverlayScrollTop, restoreOverlayScrollTop } from '../../helpers/overlayScrollbars'
 import { getLocalizedShortcut } from '../../helpers/utils'
+import { useFullscreenTeleportTarget } from '../../composables/useFullscreenTeleportTarget'
 import store from '../../store/index'
 import FtProfileIcon from '../FtProfileIcon/FtProfileIcon.vue'
 import FtLoader from '../FtLoader/FtLoader.vue'
@@ -208,7 +209,7 @@ const { locale, t } = useI18n()
 const promptId = `command-palette-${useId().replaceAll(':', '')}`
 const listId = `command-palette-list-${useId().replaceAll(':', '')}`
 const statusId = `command-palette-status-${useId().replaceAll(':', '')}`
-const teleportTarget = document.fullscreenElement ?? '.app'
+const teleportTarget = useFullscreenTeleportTarget(close)
 const query = ref('')
 const selectedIndex = ref(0)
 const inputRef = useTemplateRef('inputRef')

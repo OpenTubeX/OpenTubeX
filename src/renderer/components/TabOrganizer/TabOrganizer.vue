@@ -682,6 +682,7 @@
 <script setup>
 import FtTabs from '../FtTabs/FtTabs.vue'
 import { useChannelTabAvatars } from '../../composables/useChannelTabAvatars'
+import { useFullscreenTeleportTarget } from '../../composables/useFullscreenTeleportTarget'
 import FtRetryImage from '../FtRetryImage.vue'
 import { FtIcon } from '@opentubex/icons'
 import { computed, nextTick, onBeforeMount, onBeforeUnmount, onMounted, ref, useId, useTemplateRef, watch } from 'vue'
@@ -729,7 +730,7 @@ const titleId = `tab-organizer-title-${useId().replaceAll(':', '')}`
 const promptId = `tab-organizer-${useId().replaceAll(':', '')}`
 const syncedSessionIdPrefix = `tab-organizer-synced-session-${useId().replaceAll(':', '')}`
 const syncedSessionPanelId = `${syncedSessionIdPrefix}-panel`
-const teleportTarget = document.fullscreenElement ?? '.app'
+const teleportTarget = useFullscreenTeleportTarget(close)
 const query = ref('')
 const newGroupName = ref('')
 const showCreateGroupPrompt = ref(false)
