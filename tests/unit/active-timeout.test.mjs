@@ -71,7 +71,12 @@ test('background jobs survive the app being suspended while they run', async t =
   })
   try {
     const result = jobs.run('clone', { value: [] })
-    for (let i = 0; i < 20 && !finish; i++) await Promise.resolve()
+    // The transfer yields through the mocked setTimeout once it has run for
+    // 4 ms of real time, which a loaded machine can reach before the message.
+    for (let i = 0; i < 20 && !finish; i++) {
+      await Promise.resolve()
+      t.mock.timers.tick(0)
+    }
     run(t, 10000)
     suspend(t, 5 * 60 * 1000)
     finish()
