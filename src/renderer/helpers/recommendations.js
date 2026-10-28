@@ -82,10 +82,21 @@ function normalizedWeights(weights) {
   return new Map([...weights].map(([key, value]) => [key, maximum ? value / maximum : 0]))
 }
 function tie(a, b) { return a < b ? -1 : a > b ? 1 : 0 }
-function rotate(items, round) {
-  if (!items.length) return []
-  const offset = Math.max(0, Math.floor(number(round))) % items.length
-  return [...items.slice(offset), ...items.slice(0, offset)]
+// Mulberry32: a feed's round reproduces its sample when the feed is reranked.
+function seededRandom(seed) {
+  let state = Math.floor(number(seed)) >>> 0
+  return () => {
+    state = (state + 0x6D2B79F5) >>> 0
+    let t = Math.imul(state ^ (state >>> 15), 1 | state)
+    t ^= t + Math.imul(t ^ (t >>> 7), 61 | t)
+    return (((t ^ (t >>> 14)) >>> 0) + 1) / 4294967297
+  }
+}
+// Gumbel noise turns an argmax over log weights into sampling proportional to weight.
+function gumbel(random) { return -Math.log(-Math.log(random())) }
+function sampleOrder(items, weight, random) {
+  return items.map(item => ({ item, key: Math.log(weight(item)) + gumbel(random) }))
+    .sort((a, b) => b.key - a.key).map(({ item }) => item)
 }
 
 export function recommendationSubscriptionIds(subscriptions) {
@@ -152,7 +163,8 @@ function * buildRecommendationProfileSteps(history, {
       yield
       if (!valid(video)) continue
       const existing = sources.get(video.videoId)
-      sources.set(video.videoId, { video: { ...video, ...evidence.get(video.videoId) }, weight: Math.max(weight, existing?.weight ?? 0), at: existing?.at || now, strong: true })
+      // Old saves fade like history, but a floor keeps them a lasting interest.
+      sources.set(video.videoId, { video: { ...video, ...evidence.get(video.videoId) }, weight: Math.max(weight, existing?.weight ?? 0), at: Math.max(number(existing?.at), number(video.timeAdded)), floor: 0.25, strong: true })
       if (++count >= 500) break
     }
   }
@@ -160,7 +172,7 @@ function * buildRecommendationProfileSteps(history, {
     yield
     if (record.feedback === 'positive') {
       const existing = sources.get(record.videoId)
-      sources.set(record.videoId, { video: { ...existing?.video, ...record }, weight: Math.max(1.8, existing?.weight ?? 0), at: Math.max(number(existing?.at), number(record.feedbackAt)), strong: true })
+      sources.set(record.videoId, { video: { ...existing?.video, ...record }, weight: Math.max(1.8, existing?.weight ?? 0), at: Math.max(number(existing?.at), number(record.feedbackAt)), floor: existing?.floor, strong: true })
     }
   }
   const usable = [...sources.values()].filter(source => !rejectedIds.has(source.video.videoId) && !blockedChannels.has(source.video.authorId))
@@ -184,13 +196,13 @@ function * buildRecommendationProfileSteps(history, {
   const channelWeights = new Map()
   for (const [index, source] of usable.entries()) {
     const vector = vectorForFeatures(documents[index])
-    const weight = source.weight * decay(source.at, now, 60)
+    const weight = source.weight * Math.max(source.floor ?? 0, decay(source.at, now, 60))
     source.vector = vector
     source.score = weight
     sumInto(longTerm, vector, weight)
     sumInto(session, vector, source.weight * decay(source.at, now, 0.5))
     const channel = id(source.video.authorId)
-    if (channel) channelWeights.set(channel, (channelWeights.get(channel) ?? 0) + source.weight * decay(source.at, now, 30))
+    if (channel) channelWeights.set(channel, (channelWeights.get(channel) ?? 0) + source.weight * Math.max(source.floor ?? 0, decay(source.at, now, 30)))
     yield
   }
   for (const record of evidence.values()) {
@@ -210,43 +222,63 @@ function * buildRecommendationProfileSteps(history, {
     }
   }
   const interests = normalize(longTerm)
-  const topicCandidates = usable.toSorted((a, b) => b.score - a.score || tie(a.video.videoId, b.video.videoId))
+  // Each round samples the whole learning budget in proportion to its weight,
+  // so recent interests lead without a top-N window repeating the same seeds.
+  const random = seededRandom(round)
+  const topicCandidates = sampleOrder(usable.toSorted((a, b) => tie(a.video.videoId, b.video.videoId)), source => source.score, random)
   // MMR seed selection covers different interests before repeating one topic.
   const seeds = []
-  const seedPool = rotate(topicCandidates.filter(source => source.strong).slice(0, 24), round)
+  const seedPool = topicCandidates.filter(source => source.strong)
+    .map(source => ({ source, key: Math.log(source.score) + gumbel(random) }))
   while (seeds.length < 4 && seedPool.length) {
     let bestIndex = 0
     let bestScore = -Infinity
     for (let i = 0; i < seedPool.length; i++) {
-      const source = seedPool[i]
+      const { source, key } = seedPool[i]
       const similarity = Math.max(0, ...seeds.map(seed => cosine(seed.vector, source.vector)))
       const channelCount = seeds.filter(seed => seed.video.authorId === source.video.authorId).length
-      const score = Math.sqrt(source.score) * (1 - similarity * 0.8) / (1 + channelCount * 2) / (1 + i * 0.015)
+      const score = key + Math.log((1 - similarity * 0.8) / (1 + channelCount * 2))
       if (score > bestScore) { bestScore = score; bestIndex = i }
     }
-    seeds.push(seedPool.splice(bestIndex, 1)[0])
+    seeds.push(seedPool.splice(bestIndex, 1)[0].source)
   }
-  const queryPool = [...seeds, ...rotate(topicCandidates.slice(0, 30), round)]
+  // Related videos already cover the seeds, so searches prefer other interests.
+  const coveredBySeed = source => seeds.some(seed => cosine(seed.vector, source.vector) > 0.8)
+  const queryPool = [...topicCandidates.slice(0, 30).filter(source => !coveredBySeed(source)), ...seeds]
   const queries = []
+  const queryTokens = new Set()
   const queryVectors = []
+  const specificity = term => idf.get(term) ?? 1
   for (const source of queryPool) {
+    // The sampled source carries the interest; its rarest adjacent words make a
+    // specific search. Words shared by many titles, such as a series name, are
+    // common. Channel-name words would only find more of what the channel
+    // requests already fetch, so they are a last resort for topic-named channels.
+    const author = new Set(recommendationTokens(source.video.author))
     const tokens = [...new Set(recommendationTokens(source.video.title))]
-    const pairs = tokens.slice(1).map((token, i) => [tokens[i], token])
-      .sort((a, b) => b.reduce((score, token) => score + (longTerm.get(token) ?? 0), 0) - a.reduce((score, token) => score + (longTerm.get(token) ?? 0), 0))
-    const pair = pairs.find(pair => !queries.includes(pair.join(' ')))
-    if (!pair || queryVectors.some(vector => cosine(vector, source.vector) > 0.8)) continue
+    const pair = tokens.slice(1).map((token, i) => [tokens[i], token])
+      .map(pair => ({ pair, authorWords: pair.filter(token => author.has(token)).length, score: specificity(pair[0]) + specificity(pair[1]) }))
+      .sort((a, b) => a.authorWords - b.authorWords || b.score - a.score)[0]?.pair
+    // A title whose best words were already searched repeats that topic; its
+    // weaker words would make a generic search.
+    if (!pair || pair.some(token => queryTokens.has(token)) || queryVectors.some(vector => cosine(vector, source.vector) > 0.8)) continue
     queries.push(pair.join(' ')); queryVectors.push(source.vector)
+    for (const token of pair) queryTokens.add(token)
     if (queries.length === 3) break
   }
-  const channels = rotate([...channelWeights].sort((a, b) => b[1] - a[1] || tie(a[0], b[0])).slice(0, 12), round).slice(0, 3).map(([channel]) => channel)
+  const channels = sampleOrder([...channelWeights].sort((a, b) => tie(a[0], b[0])), ([, weight]) => weight, random)
+    .slice(0, 3).map(([channel]) => channel)
   return {
     channels,
     queries,
-    seeds: seeds.map(source => ({ videoId: source.video.videoId, title: source.video.title, authorId: source.video.authorId, weight: Math.min(1, source.score) })),
+    // Engagement, not recency, sets graph weight: an old favorite's related videos still count.
+    seeds: seeds.map(source => ({ videoId: source.video.videoId, title: source.video.title, authorId: source.video.authorId, weight: Math.min(1, source.weight) })),
+    // Candidates fetched for an earlier round's seeds keep their graph evidence.
+    graphSources: new Map(usable.map(source => [source.video.videoId, { title: source.video.title, weight: Math.min(1, source.weight) }])),
     channelWeights: normalizedWeights(channelWeights),
-    tokenWeights: normalizedWeights(longTerm),
     seenVideoIds,
     interests,
+    idf,
     session: normalize(session),
     negative: new Map([...normalize(negative)].map(([term, weight]) => [term, weight * Math.min(1, negativeStrength)])),
     evidence,
@@ -262,7 +294,6 @@ function * buildRecommendationProfileSteps(history, {
 /** Rank by personalized relevance, graph evidence, confidence and feed novelty. */
 function * scoreRecommendationCandidateSteps(candidates, profile, { exploration = 0.2, now = Date.now() } = {}) {
   const scored = new Map()
-  const seedMap = new Map(profile.seeds.map(seed => [seed.videoId, seed]))
   for (const video of (Array.isArray(candidates) ? candidates : [])) {
     yield
     if (!valid(video) || profile.seenVideoIds.has(video.videoId) || profile.rejectedIds.has(video.videoId) || profile.blockedChannels.has(video.authorId)) continue
@@ -272,8 +303,8 @@ function * scoreRecommendationCandidateSteps(candidates, profile, { exploration 
     const negativeAffinity = cosine(profile.negative, vector)
     const channelAffinity = profile.channelWeights.get(id(video.authorId)) ?? 0
     const sources = video.recommendationSources ?? []
-    const related = sources.filter(source => source.type === 'related' && seedMap.has(source.id))
-    const graphAffinity = Math.min(1, related.reduce((total, source) => total + seedMap.get(source.id).weight * 0.6, 0))
+    const related = sources.filter(source => source.type === 'related' && profile.graphSources.has(source.id))
+    const graphAffinity = Math.min(1, related.reduce((total, source) => total + profile.graphSources.get(source.id).weight * 0.6, 0))
     const subscribed = profile.subscriptions.has(video.authorId)
     // Graph evidence may admit a video with entirely different title vocabulary.
     const relevance = affinity * 0.48 + sessionAffinity * 0.17 + channelAffinity * 0.18 + graphAffinity * 0.32 + (subscribed ? 0.06 : 0)
@@ -290,16 +321,33 @@ function * scoreRecommendationCandidateSteps(candidates, profile, { exploration 
     const negativePenalty = Math.max(0.04, 1 - negativeAffinity * 1.3)
     const score = (relevance + novelty) * freshness * repetition * negativePenalty
     const reason = related.length
-      ? { type: 'related', text: seedMap.get(related[0].id).title }
+      ? { type: 'related', text: profile.graphSources.get(related[0].id).title }
       : channelAffinity > affinity
         ? { type: 'channel', text: video.author ?? '' }
         : subscribed && !profile.hasInterests
           ? { type: 'subscription', text: video.author ?? '' }
-          : { type: 'topic', text: [...recommendationFeatures(video)].filter(([term]) => !term.includes(' ')).sort((a, b) => (profile.tokenWeights.get(b[0]) ?? 0) - (profile.tokenWeights.get(a[0]) ?? 0))[0]?.[0] ?? '' }
+          : { type: 'topic', text: topicReason(vector, profile.interests, profile.idf) }
     const item = { video, score, affinity, graphAffinity, novelty, vector, reason, discovery: channelAffinity === 0 && !subscribed }
     if (!scored.has(video.videoId) || score > scored.get(video.videoId).score) scored.set(video.videoId, item)
   }
   return [...scored.values()].sort((a, b) => b.score - a.score || tie(a.video.videoId, b.video.videoId))
+}
+
+// Name the most specific word that clearly matches the interests. The most
+// frequent words in history are generic; a word seen once may be coincidental.
+function topicReason(vector, interests, idf) {
+  let strongest = 0
+  for (const term of vector.keys()) {
+    if (!term.includes(' ')) strongest = Math.max(strongest, interests.get(term) ?? 0)
+  }
+  let topic = ''
+  let best = 0
+  for (const term of vector.keys()) {
+    const interest = interests.get(term) ?? 0
+    const specificity = idf.get(term) ?? 0
+    if (!term.includes(' ') && interest > 0 && interest >= strongest * 0.1 && specificity > best) { topic = term; best = specificity }
+  }
+  return topic
 }
 
 // Kept items are already shown; they count toward the limit and diversity but are not returned.
