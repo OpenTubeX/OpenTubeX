@@ -225,6 +225,8 @@ User Playlists:
     More videos could not be loaded.: لا يمكن تحميل المزيد من مقاطع الفيديو.
   Playlist Thumbnail: "الصورة المصغرة لقائمة التشغيل"
   Restore Default Thumbnail: "استعادة الصورة المصغرة الافتراضية"
+  AddVideoPrompt:
+    And N more videos: 'و{count} فيديو آخر | و{count} فيديو آخر | و{count} فيديو آخر | و{count} فيديوهات أخرى | و{count} فيديو آخر | و{count} فيديو آخر'
 History:
   From Date: 'من'
   To Date: 'إلى'

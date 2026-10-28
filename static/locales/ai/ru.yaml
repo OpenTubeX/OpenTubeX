@@ -193,6 +193,8 @@ User Playlists:
     More videos could not be loaded.: Не удалось загрузить другие видео.
   Playlist Thumbnail: "Миниатюра плейлиста"
   Restore Default Thumbnail: "Восстановить миниатюру по умолчанию"
+  AddVideoPrompt:
+    And N more videos: 'и ещё {count} видео | и ещё {count} видео | и ещё {count} видео'
 History:
   From Date: 'С'
   To Date: 'По'

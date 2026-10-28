@@ -346,6 +346,7 @@ User Playlists:
     Toast:
       You haven't selected any playlist yet.: Encara no heu seleccionat cap llista de reproducció.
       Video(s) added to {playlistCount} playlists: S'han afegit els vídeos a 1 llista de reproducció | S'han afegit els vídeos a {playlistCount} llistes de reproducció | S'han afegit els vídeos a {playlistCount} llistes de reproducció
+    And N more videos: 'i {count} vídeo més | i {count} de vídeos més | i {count} vídeos més'
   CreatePlaylistPrompt:
     New Playlist Name: Nom de la llista de reproducció nova
     Create: Crea

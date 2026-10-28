@@ -220,6 +220,8 @@ User Playlists:
     More videos could not be loaded.: Flere videoer kunne ikke lastes inn.
   Playlist Thumbnail: "Spillelistens miniatyrbilde"
   Restore Default Thumbnail: "Gjenopprett standard miniatyrbilde"
+  AddVideoPrompt:
+    And N more videos: 'og {count} video til | og {count} videoer til'
 History:
   From Date: 'Fra'
   To Date: 'Til'

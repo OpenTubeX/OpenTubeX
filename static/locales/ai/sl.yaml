@@ -338,6 +338,7 @@ User Playlists:
     Toast:
       You haven't selected any playlist yet.: Izbrali niste še nobenega seznama predvajanja.
       Video(s) added to {playlistCount} playlists: Videoposnetki so dodani na 1 seznam predvajanja | Videoposnetki so dodani na {playlistCount} seznama predvajanja | Videoposnetki so dodani na {playlistCount} sezname predvajanja | Videoposnetki so dodani na {playlistCount} seznamov predvajanja
+    And N more videos: 'in še {count} videoposnetek | in še {count} videoposnetka | in še {count} videoposnetki | in še {count} videoposnetkov'
   CreatePlaylistPrompt:
     New Playlist Name: Ime novega seznama predvajanja
     Create: Ustvari

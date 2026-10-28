@@ -220,6 +220,8 @@ User Playlists:
     More videos could not be loaded.: Ezin izan dira bideo gehiago kargatu.
   Playlist Thumbnail: "Erreprodukzio-zerrendaren miniatura"
   Restore Default Thumbnail: "Leheneratu miniatura lehenetsia"
+  AddVideoPrompt:
+    And N more videos: 'eta beste bideo {count} | eta beste {count} bideo'
 History:
   From Date: 'Hasiera'
   To Date: 'Amaiera'

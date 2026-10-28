@@ -220,6 +220,8 @@ User Playlists:
     More videos could not be loaded.: Nem tölthető be több videó.
   Playlist Thumbnail: "Lejátszási lista bélyegképe"
   Restore Default Thumbnail: "Alapértelmezett bélyegkép visszaállítása"
+  AddVideoPrompt:
+    And N more videos: 'és még {count} videó | és még {count} videó'
 History:
   From Date: 'Kezdő dátum'
   To Date: 'Záró dátum'

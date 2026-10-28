@@ -225,6 +225,8 @@ User Playlists:
     More videos could not be loaded.: Er kunnen geen video's meer worden geladen.
   Playlist Thumbnail: "Afspeellijstminiatuur"
   Restore Default Thumbnail: "Standaardminiatuur herstellen"
+  AddVideoPrompt:
+    And N more videos: 'en nog {count} video | en nog {count} video’s'
 History:
   From Date: 'Van'
   To Date: 'Tot'

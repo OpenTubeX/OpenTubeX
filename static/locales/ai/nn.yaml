@@ -222,6 +222,7 @@ User Playlists:
   AddVideoPrompt:
     Toast:
       Video(s) added to {playlistCount} playlists: Video lagd til i 1 speleliste | Videoar lagde til i {playlistCount} spelelister
+    And N more videos: 'og {count} video til | og {count} videoar til'
   CreatePlaylistPrompt:
     New Playlist Name: Namn på den nye spelelista
     Create: Opprett

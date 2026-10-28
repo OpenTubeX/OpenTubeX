@@ -220,6 +220,8 @@ User Playlists:
     More videos could not be loaded.: Impossibile caricare altri video.
   Playlist Thumbnail: "Miniatura della playlist"
   Restore Default Thumbnail: "Ripristina miniatura predefinita"
+  AddVideoPrompt:
+    And N more videos: 'e altri {count} video | e altri {count} di video | e altri {count} video'
 History:
   From Date: 'Dal'
   To Date: 'Al'

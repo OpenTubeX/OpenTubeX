@@ -221,6 +221,8 @@ User Playlists:
     More videos could not be loaded.: Δεν ήταν δυνατή η φόρτωση περισσότερων βίντεο.
   Playlist Thumbnail: "Μικρογραφία λίστας αναπαραγωγής"
   Restore Default Thumbnail: "Επαναφορά προεπιλεγμένης μικρογραφίας"
+  AddVideoPrompt:
+    And N more videos: 'και {count} ακόμη βίντεο | και {count} ακόμη βίντεο'
 History:
   From Date: 'Από'
   To Date: 'Έως'

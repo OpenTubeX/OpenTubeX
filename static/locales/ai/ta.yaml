@@ -233,6 +233,8 @@ User Playlists:
     More videos could not be loaded.: மேலும் காணொளிகளை ஏற்ற முடியவில்லை.
   Playlist Thumbnail: "பிளேலிஸ்ட் சிறுபடம்"
   Restore Default Thumbnail: "இயல்புநிலை சிறுபடத்தை மீட்டமை"
+  AddVideoPrompt:
+    And N more videos: 'மேலும் {count} காணொளி | மேலும் {count} காணொளிகள்'
 History:
   From Date: 'தொடக்க தேதி'
   To Date: 'முடிவு தேதி'

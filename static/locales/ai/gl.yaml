@@ -225,6 +225,8 @@ User Playlists:
     More videos could not be loaded.: Non se puideron cargar máis vídeos.
   Playlist Thumbnail: "Miniatura da lista de reprodución"
   Restore Default Thumbnail: "Restaurar a miniatura predeterminada"
+  AddVideoPrompt:
+    And N more videos: 'e {count} vídeo máis | e {count} vídeos máis'
 History:
   From Date: 'Desde'
   To Date: 'Ata'

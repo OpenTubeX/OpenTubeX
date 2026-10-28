@@ -220,6 +220,8 @@ User Playlists:
     More videos could not be loaded.: Ekki tókst að hlaða fleiri myndböndum.
   Playlist Thumbnail: "Smámynd spilunarlista"
   Restore Default Thumbnail: "Endurheimta sjálfgefna smámynd"
+  AddVideoPrompt:
+    And N more videos: 'og {count} myndskeið til viðbótar | og {count} myndskeið til viðbótar'
 History:
   From Date: 'Frá'
   To Date: 'Til'

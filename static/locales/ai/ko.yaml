@@ -303,6 +303,7 @@ User Playlists:
     Toast:
       You haven't selected any playlist yet.: 아직 재생목록을 선택하지 않았습니다.
       Video(s) added to {playlistCount} playlists: 재생목록 {playlistCount}개에 동영상을 추가했습니다
+    And N more videos: '외 동영상 {count}개'
   CreatePlaylistPrompt:
     New Playlist Name: 새 재생목록 이름
     Create: 만들기

@@ -225,6 +225,8 @@ User Playlists:
     More videos could not be loaded.: לא ניתן לטעון סרטונים נוספים.
   Playlist Thumbnail: "תמונה ממוזערת של רשימת ההשמעה"
   Restore Default Thumbnail: "החזרת התמונה הממוזערת לברירת המחדל"
+  AddVideoPrompt:
+    And N more videos: 'ועוד {count} סרטון | ועוד {count} סרטונים | ועוד {count} סרטונים'
 History:
   From Date: 'מתאריך'
   To Date: 'עד תאריך'

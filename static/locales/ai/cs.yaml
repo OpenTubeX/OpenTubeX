@@ -220,6 +220,8 @@ User Playlists:
     More videos could not be loaded.: Další videa se nepodařilo načíst.
   Playlist Thumbnail: "Miniatura playlistu"
   Restore Default Thumbnail: "Obnovit výchozí miniaturu"
+  AddVideoPrompt:
+    And N more videos: 'a {count} další video | a {count} další videa | a {count} dalších videí'
 History:
   From Date: 'Od'
   To Date: 'Do'

@@ -222,6 +222,8 @@ User Playlists:
     More videos could not be loaded.: Daha çox video yükləmək mümkün olmadı.
   Playlist Thumbnail: "Pleylist miniatürü"
   Restore Default Thumbnail: "Standart miniatürü bərpa et"
+  AddVideoPrompt:
+    And N more videos: 'və daha {count} video | və daha {count} video'
 History:
   From Date: 'Başlanğıc'
   To Date: 'Son'

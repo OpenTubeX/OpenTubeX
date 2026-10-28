@@ -479,6 +479,7 @@ User Playlists:
       This playlist has a video with a duration error: This playlist contains at least one video that doesn't have a duration, it will be sorted as if their duration is zero.
   AddVideoPrompt:
     Select a playlist to add your N videos to: 'Select a playlist to add your video to | Select a playlist to add your {videoCount} videos to'
+    And N more videos: 'and {count} more video | and {count} more videos'
     N playlists selected: '{playlistCount} Selected'
     Search in Playlists: Search in Playlists
     Allow Adding Duplicate Video(s): Allow Adding Duplicate Video(s)

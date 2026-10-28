@@ -220,6 +220,8 @@ User Playlists:
     More videos could not be loaded.: "N'eus ket bet gallet kargañ muioc'h a videoioù."
   Playlist Thumbnail: "Skeudennig ar roll-lenn"
   Restore Default Thumbnail: "Adlakaat ar skeudennig dre ziouer"
+  AddVideoPrompt:
+    And N more videos: 'ha {count} video all | ha {count} video all | ha {count} video all | ha {count} video all | ha {count} video all'
 History:
   From Date: 'Adalek'
   To Date: 'Betek'

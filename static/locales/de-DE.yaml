@@ -271,6 +271,7 @@ User Playlists:
       You haven't selected any playlist yet.: Du hast noch keine Playlist ausgewählt.
       "Video(s) added to {playlistCount} playlists": "Video(s) wurde(n) zu 1 Playlist hinzugefügt | Video(s) wurde(n) zu {playlistCount} Playlists hinzugefügt"
     Select a playlist to add your N videos to: Wähle eine Playlist, der du dein Video hinzufügen möchtest | Wähle eine Playlist, der du deine {videoCount} Videos hinzufügen möchtest
+    And N more videos: 'und {count} weiteres Video | und {count} weitere Videos'
     Added {count} Times: 'Bereits hinzugefügt | {count} Mal hinzugefügt'
     Allow Adding Duplicate Video(s): Hinzufügen doppelter Videos zulassen
     "{videoCount}/{totalVideoCount} Videos Will Be Added": '{videoCount}/{totalVideoCount} Videos werden hinzugefügt'

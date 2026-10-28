@@ -13,6 +13,33 @@
       >
         {{ title }}
       </h2>
+      <ul class="videoSummary">
+        <li
+          v-for="(video, index) in previewVideos"
+          :key="index"
+          class="videoSummaryItem"
+        >
+          <img
+            v-if="video.thumbnail"
+            :src="video.thumbnail"
+            class="videoSummaryThumbnail"
+            alt=""
+          >
+          <div class="videoSummaryText">
+            <span class="videoSummaryTitle">{{ video.title }}</span>
+            <span
+              v-if="video.author"
+              class="videoSummaryAuthor"
+            >{{ video.author }}</span>
+          </div>
+        </li>
+        <li
+          v-if="hiddenVideoCount > 0"
+          class="videoSummaryMore"
+        >
+          {{ t('User Playlists.AddVideoPrompt.And N more videos', { count: hiddenVideoCount }, hiddenVideoCount) }}
+        </li>
+      </ul>
       <p class="selected-count">
         {{ t('User Playlists.AddVideoPrompt.N playlists selected', {
           playlistCount: selectedPlaylistCount,
@@ -20,10 +47,11 @@
       </p>
       <div
         v-if="allPlaylists.length > 1"
-        class="searchInputsRow"
+        class="controlsRow"
       >
         <FtInput
           ref="searchBar"
+          class="searchInput"
           input-type="search"
           :label="t('User Playlists.AddVideoPrompt.Search in Playlists')"
           :icon="['fas', 'search']"
@@ -32,41 +60,47 @@
           :maxlength="255"
           @input="updateQueryDebounce"
         />
+        <div
+          :id="optionsTargetId"
+          class="optionsTarget"
+        />
       </div>
     </template>
-    <div
+    <Teleport
       v-if="allPlaylists.length > 1"
-      class="optionsRow"
+      defer
+      :to="`#${optionsTargetId}`"
+      :disabled="phoneLayout"
     >
-      <div
-        class="tightOptions"
-      >
-        <FtToggleSwitch
-          class="matchingVideoToggle"
-          :label="t('User Playlists.Playlists with Matching Videos')"
-          :compact="true"
-          :default-value="doSearchPlaylistsWithMatchingVideos"
-          @change="doSearchPlaylistsWithMatchingVideos = !doSearchPlaylistsWithMatchingVideos"
-        />
-        <FtToggleSwitch
-          v-if="anyPlaylistContainsVideosToBeAdded"
-          class="allowDuplicateToggle"
-          :label="t('User Playlists.AddVideoPrompt.Allow Adding Duplicate Video(s)')"
-          :compact="true"
-          :default-value="addingDuplicateVideosEnabled"
-          @change="addingDuplicateVideosEnabled = !addingDuplicateVideosEnabled"
+      <div class="optionsRow">
+        <div class="optionToggles">
+          <FtToggleSwitch
+            class="matchingVideoToggle"
+            :label="t('User Playlists.Playlists with Matching Videos')"
+            :compact="true"
+            :default-value="doSearchPlaylistsWithMatchingVideos"
+            @change="doSearchPlaylistsWithMatchingVideos = !doSearchPlaylistsWithMatchingVideos"
+          />
+          <FtToggleSwitch
+            v-if="anyPlaylistContainsVideosToBeAdded"
+            class="allowDuplicateToggle"
+            :label="t('User Playlists.AddVideoPrompt.Allow Adding Duplicate Video(s)')"
+            :compact="true"
+            :default-value="addingDuplicateVideosEnabled"
+            @change="addingDuplicateVideosEnabled = !addingDuplicateVideosEnabled"
+          />
+        </div>
+        <FtSelect
+          class="sortSelect"
+          :value="sortBy"
+          :select-names="sortBySelectNames"
+          :select-values="SORT_BY_SELECT_VALUES"
+          :placeholder="t('Global.Sort By')"
+          :icon="sortBySelectIcon"
+          @change="sortBy = $event"
         />
       </div>
-      <FtSelect
-        class="sortSelect"
-        :value="sortBy"
-        :select-names="sortBySelectNames"
-        :select-values="SORT_BY_SELECT_VALUES"
-        :placeholder="t('Global.Sort By')"
-        :icon="sortBySelectIcon"
-        @change="sortBy = $event"
-      />
-    </div>
+    </Teleport>
     <div
       class="playlists-container"
     >
@@ -119,7 +153,7 @@
 </template>
 
 <script setup>
-import { computed, nextTick, onBeforeUnmount, onMounted, ref, useTemplateRef, watch } from 'vue'
+import { computed, nextTick, onBeforeUnmount, onMounted, ref, useId, useTemplateRef, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 
 import FtFlexBox from '../ft-flex-box/ft-flex-box.vue'
@@ -131,6 +165,7 @@ import FtSelect from '../FtSelect/FtSelect.vue'
 import FtToggleSwitch from '../FtToggleSwitch/FtToggleSwitch.vue'
 
 import store from '../../store/index'
+import { usePhoneLayout } from '../../composables/usePhoneLayout'
 
 import {
   debounce,
@@ -141,6 +176,10 @@ import {
 } from '../../helpers/utils'
 
 const { locale, t } = useI18n()
+
+// Phones keep the playlist options in the scrolling content and preview fewer videos, so the fixed header leaves room for the playlists
+const phoneLayout = usePhoneLayout()
+const optionsTargetId = useId()
 
 const SORT_BY_VALUES = {
   NameAscending: 'name_ascending',
@@ -210,6 +249,19 @@ const thumbnailPreference = computed(() => store.getters.getThumbnailPreference)
 const toBeAddedToPlaylistVideoList = computed(() => store.getters.getToBeAddedToPlaylistVideoList)
 
 const toBeAddedToPlaylistVideoCount = computed(() => toBeAddedToPlaylistVideoList.value.length)
+
+// Phones only preview one video, so the playlists keep enough room
+const maxPreviewVideos = computed(() => phoneLayout.value ? 1 : 3)
+
+const previewVideos = computed(() => {
+  return toBeAddedToPlaylistVideoList.value.slice(0, maxPreviewVideos.value).map((video) => ({
+    title: video.title,
+    author: video.author,
+    thumbnail: getVideoThumbnailUrl(video.videoId, backendPreference.value, currentInvidiousInstanceUrl.value, thumbnailPreference.value),
+  }))
+})
+
+const hiddenVideoCount = computed(() => Math.max(0, toBeAddedToPlaylistVideoCount.value - maxPreviewVideos.value))
 
 const toBeAddedToPlaylistVideoIdList = computed(() => {
   return toBeAddedToPlaylistVideoList.value.map((v) => v.videoId)
