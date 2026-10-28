@@ -111,7 +111,7 @@ test('dragging the seek bar shows a storyboard filmstrip at the thumb', { tag: '
   await expect(filmstrip).toBeHidden()
   await expect.poll(() => video.evaluate(element => element.currentTime)).toBeCloseTo(duration * 0.7, 0)
 
-  // So does grabbing the thumb itself.
+  // Drag back and forth from the current position to check the frames and marker.
   const thumb = await thumbAt()
   await page.mouse.move(thumb.x, thumb.y)
   await page.mouse.down()
@@ -245,7 +245,7 @@ test('the filmstrip shows earlier frames of sprite-sheet storyboards with long t
   await page.mouse.up()
 })
 
-test('pulling the dragged thumb up past the filmstrip middle seeks at its scale', { tag: '@scale' }, async ({ app, page }) => {
+test('pulling the dragged thumb up past the filmstrip middle seeks at its scale', { tag: '@scale' }, async ({ app, page, attachScreenshot }) => {
   await mockPlayableWatchPage(app, page)
   await routeDemoMedia(page)
   const { video } = await openVideoWithStoryboard(page)
@@ -309,6 +309,7 @@ test('pulling the dragged thumb up past the filmstrip middle seeks at its scale'
   await page.mouse.move(start.x + 100, start.y, { steps: 2 })
   await expect(hint).toHaveText('Pull up for precise seeking')
   await expect.poll(async () => Math.abs(await markerCenter() - (start.x + 100))).toBeLessThan(1.5)
+  await attachScreenshot('seek hint after leaving precise seeking')
   const barScaleTime = await barTime()
   await page.mouse.move(start.x + 140, start.y, { steps: 2 })
   await expect.poll(async () => Math.abs(await markerCenter() - (start.x + 140))).toBeLessThan(1.5)

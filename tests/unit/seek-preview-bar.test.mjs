@@ -316,10 +316,17 @@ test('dragging back below the strip returns to seeking at the bar scale', async 
   assert.equal(bar.container.classList.contains('ft-seek-filmstrip-precise'), true)
   assert.equal(bar.filmstrip.hint.textContent, 'Video.Player.Precise seeking, drag down to exit')
   bar.filmstrip.pixelsPerSecond = 50
+  // A pending storyboard lookup must not delay the hint when precise seeking ends.
+  let finishStoryboardLookup
+  bar.filmstrip.show = () => new Promise(resolve => { finishStoryboardLookup = resolve })
   // Below the strip, Shaka's value from the pointer's x applies again.
   move(354, 50)
   drag(25)
   assert.equal(bar.value, 25)
+  assert.equal(bar.container.classList.contains('ft-seek-filmstrip-precise'), false)
+  assert.equal(bar.filmstrip.hint.textContent, 'Video.Player.Pull up for precise seeking')
+  finishStoryboardLookup()
+  bar.filmstrip.show = () => Promise.resolve()
   move(364, 50)
   drag(26)
   assert.equal(bar.value, 26)

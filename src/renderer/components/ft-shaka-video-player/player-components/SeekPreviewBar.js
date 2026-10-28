@@ -155,6 +155,7 @@ export class SeekPreviewBar extends shaka.ui.SeekBar {
     // Starting higher up than that leaves room to move without toggling back and forth.
     if (this.precise && this.pointer.y >= strip.bottom) {
       this.exitPreciseSeek()
+      this.updateHint()
       return
     }
     if (!this.precise) {
