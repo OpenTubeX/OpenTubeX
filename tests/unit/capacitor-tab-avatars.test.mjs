@@ -197,3 +197,12 @@ test('damaged stored images are deleted instead of being skipped forever', async
   assert.deepEqual([...filesystem.files.keys()], [`tab-previews/avatar-channel-${channelId}.json`])
   dispose()
 })
+
+test('avatars that may be transparent are stored without losing alpha', async t => {
+  const state = setup(t)
+  state.fetchAvatar.mock.mockImplementation(async () => 'data:image/png;base64,logo')
+  const dispose = state.start()
+  await settle()
+  assert.equal(getCapacitorTabAvatar(channelTab), 'data:image/png;base64,176x176')
+  dispose()
+})

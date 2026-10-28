@@ -69,7 +69,10 @@ async function shrinkAvatar(dataUrl) {
   canvas.width = Math.max(1, Math.round(image.naturalWidth * scale))
   canvas.height = Math.max(1, Math.round(image.naturalHeight * scale))
   canvas.getContext('2d').drawImage(image, 0, 0, canvas.width, canvas.height)
-  return canvas.toDataURL('image/jpeg', 0.85)
+  // JPEG keeps the usual photo avatars small; other formats may be transparent.
+  return dataUrl.startsWith('data:image/jpeg')
+    ? canvas.toDataURL('image/jpeg', 0.85)
+    : canvas.toDataURL('image/png')
 }
 
 /**
