@@ -26,6 +26,11 @@ test('shows the video being added', async ({ page, attachScreenshot }) => {
   await expect(items).toContainText('Channel 1')
   await expectImagesLoaded(items.locator('img'))
   await expect(prompt.locator('.videoSummaryMore')).toHaveCount(0)
+
+  const heading = await prompt.locator('.playlistPromptHeading').boundingBox()
+  const item = await items.boundingBox()
+  expect(item.width).toBeLessThan(heading.width / 2)
+  expect(Math.abs((item.x + item.width / 2) - (heading.x + heading.width / 2))).toBeLessThan(1)
   await attachScreenshot('add-to-playlist-single-video')
 })
 

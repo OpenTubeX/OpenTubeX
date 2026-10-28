@@ -26,8 +26,9 @@
   max-inline-size: 360px;
 }
 
+/* Shrink to the content so a lone video is centered */
 .videoSummaryItem:only-child {
-  flex-basis: auto;
+  flex: 0 1 auto;
   max-inline-size: 100%;
 }
 
