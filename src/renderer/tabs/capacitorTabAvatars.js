@@ -116,10 +116,11 @@ export function initializeCapacitorTabAvatars(store, tabsReady, fetchAvatar = fe
     }
   }
 
-  const stop = watch(() => store.getters.getTabs.map(tab => {
+  // Switching tabs counts as use, so avatars cleared from Storage settings return.
+  const stop = watch(() => [store.getters.getPresentedTabId, ...store.getters.getTabs.map(tab => {
     const key = getAvatarKey(tab.route?.path)
     return key && `${key}:${getRemoteAvatarUrl(store.getters, key)}`
-  }).join('\n'), sync)
+  })].join('\n'), sync)
 
   const restoreRevision = discardRevision
   Promise.all([readStoredTabImages(AVATAR_PREFIX), tabsReady]).then(([stored]) => {

@@ -54,6 +54,7 @@ function setup(t, filesystem = createFilesystem()) {
   const store = {
     getters: reactive({
       getTabs: [channelTab],
+      getPresentedTabId: channelTab.id,
       getChannelThumbnail: id => thumbnails[id] ?? null,
       getVideoAvatar: () => null,
     }),
@@ -120,9 +121,9 @@ test('clearing waits for tab use before downloading avatars again', async t => {
   assert.equal(state.fetchAvatar.mock.callCount(), 1)
   assert.equal(getCapacitorTabAvatar(channelTab), null)
 
-  state.store.getters.getTabs = [channelTab, { id: 'other', route: { path: '/history' } }]
+  state.store.getters.getPresentedTabId = 'other'
   await settle()
-  assert.equal(state.fetchAvatar.mock.callCount(), 2)
+  assert.equal(state.fetchAvatar.mock.callCount(), 2, 'switching tabs refills the cache')
   assert.equal(getCapacitorTabAvatar(channelTab), 'data:image/jpeg;base64,176x176')
   dispose()
 })
