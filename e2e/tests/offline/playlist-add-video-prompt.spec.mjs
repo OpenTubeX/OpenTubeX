@@ -126,4 +126,16 @@ test.describe('with long option labels', () => {
       })
     })).toEqual([])
   })
+
+  test('keeps the switches\' touch targets apart in the phone layout', async ({ app, page }) => {
+    await setWindowSize(app, page, { width: 480, height: 800 })
+    await showPrompt(page, [video(1), video(2)])
+    const toggles = page.locator('.prompt .promptContent .optionToggles')
+
+    await expect(toggles.locator('.allowDuplicateToggle')).toBeVisible()
+    await expect.poll(() => toggles.evaluate((element) => {
+      const [first, second] = [...element.querySelectorAll('.switch-label')].map(label => label.getBoundingClientRect())
+      return first.bottom - second.top
+    })).toBeLessThanOrEqual(0)
+  })
 })

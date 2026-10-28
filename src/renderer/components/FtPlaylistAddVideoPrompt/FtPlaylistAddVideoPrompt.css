@@ -131,14 +131,9 @@
     gap: 16px;
   }
 
-  /* Overlap the tall phone touch targets a little, so the visible switches
-    aren't spaced further apart than the other controls */
+  /* The content's top padding adds to the space above the first switch's tall touch target */
   .optionToggles {
     margin-block-start: -4px;
-  }
-
-  .optionToggles :deep(.switch-ctn.compact) {
-    margin-block: -4px;
   }
 }
 
