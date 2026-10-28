@@ -158,7 +158,7 @@ const emit = defineEmits(['click'])
 const settingsOverlayActive = useSettingsOverlay(() => emit('click', null))
 
 const id = useId()
-const teleportTarget = useFullscreenTeleportTarget(() => emit('click', null))
+const teleportTarget = useFullscreenTeleportTarget(() => emit('click', null), () => props.inert)
 
 const promptCard = useTemplateRef('promptCard')
 const promptContentScroller = useTemplateRef('promptContentScroller')

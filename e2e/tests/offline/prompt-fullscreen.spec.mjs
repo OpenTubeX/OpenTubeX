@@ -23,12 +23,14 @@ async function pressBrowserEscape(app, page) {
   }, page.url())
 }
 
+const showAddToPlaylistPrompt = page => page.evaluate(() => window.$store.dispatch('showAddToPlaylistPromptForManyVideos', {
+  videos: [{ videoId: 'jNQXAC9IVRw', title: 'Me at the zoo', author: 'jawed', lengthSeconds: 19 }]
+}))
+
 const overlays = [
   {
     name: 'prompt',
-    open: page => page.evaluate(() => window.$store.dispatch('showAddToPlaylistPromptForManyVideos', {
-      videos: [{ videoId: 'jNQXAC9IVRw', title: 'Me at the zoo', author: 'jawed', lengthSeconds: 19 }]
-    })),
+    open: showAddToPlaylistPrompt,
     selector: '.prompt',
   },
   {
@@ -54,3 +56,23 @@ for (const overlay of overlays) {
     await expect(page.locator('.app')).not.toHaveAttribute('inert')
   })
 }
+
+test('keeps the prompt behind a nested prompt open when Escape exits player fullscreen', async ({ app, page }) => {
+  await mockPlayableWatchPage(app, page)
+  await openMockedVideo(page)
+  await setPlayerFullscreen(page, true)
+
+  await showAddToPlaylistPrompt(page)
+  const addPrompt = page.getByRole('dialog', { name: 'Select a playlist to add your video to', exact: true })
+  await addPrompt.getByRole('button', { name: 'Create new Playlist', exact: true }).click()
+  await expect(page.locator(':fullscreen .prompt')).toHaveCount(2)
+
+  await pressBrowserEscape(app, page)
+
+  await expect.poll(() => page.evaluate(() => document.fullscreenElement)).toBeNull()
+  await expect(page.locator('.prompt')).toHaveCount(1)
+  await expect(page.locator('.app > .prompt:not([inert])')).toHaveCount(1)
+  await expect(addPrompt).toBeVisible()
+  await addPrompt.getByRole('button', { name: 'Cancel', exact: true }).click()
+  await expect(addPrompt).toHaveCount(0)
+})
