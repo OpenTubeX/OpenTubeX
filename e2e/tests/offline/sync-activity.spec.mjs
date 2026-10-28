@@ -56,6 +56,29 @@ async function expectActivityRange(scroller, atEnd = true) {
   }, atEnd)).toBe(true)
 }
 
+test.describe('account activity navigation', () => {
+  // en-GB lacks the Buffering labels that Settings search indexes.
+  test.use({ seed: { settings: { syncServerUrl: '', currentLocale: 'en-US' } } })
+
+  test('focuses a slider setting from activity without opening its tooltip', async ({ page }) => {
+    const sync = await goToSettingsSection(page, 'sync')
+    await page.evaluate(() => {
+      const store = window.$store
+      store.commit('setSyncServerToken', 'test-token')
+      store.commit('setSyncServerActivity', [
+        { id: 'buffer', deviceName: 'Laptop', key: 'bufferBeforePlaying', value: 3, createdAt: Date.now() },
+      ])
+      store.commit('setSyncServerLiveSupported', true)
+      store.commit('setSyncServerEnabled', true)
+    })
+    await sync.locator('.syncActivity .activitySetting').click()
+
+    const slider = page.getByRole('slider', { name: /Buffer Before Playing/ })
+    await expect(slider).toBeFocused()
+    await expect(page.getByRole('tooltip')).toBeHidden()
+  })
+})
+
 test.describe('account activity labels', () => {
   test.use({ seed: { settings: { syncServerUrl: '' } } })
 
