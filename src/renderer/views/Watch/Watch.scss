@@ -404,6 +404,21 @@
       touch-action: pan-x pinch-zoom;
     }
 
+    // The error message scrolls on its own, which would let the browser claim vertical swipes.
+    // Its scroll timeline is only active while the message overflows.
+    .shortsSwipeViewport > .videoPlayer .errorContainer {
+      animation: shorts-error-overflow linear both;
+      animation-timeline: scroll(self block);
+      touch-action: if(style(--shorts-error-overflow: 1): auto; else: pan-x pinch-zoom);
+    }
+
+    @keyframes shorts-error-overflow {
+      from,
+      to {
+        --shorts-error-overflow: 1;
+      }
+    }
+
     .shortsSwipePreview {
       position: absolute;
       inset: 0;

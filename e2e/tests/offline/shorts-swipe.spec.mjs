@@ -353,6 +353,8 @@ for (const state of ['error', 'upcoming']) {
     }, state)
     const card = page.locator(state === 'error' ? '.videoPlayerError' : '.videoPlayer:has(.premiereDate)')
     await expect(card).toBeVisible()
+    // The browser would otherwise claim vertical swipes for the scrollable error message.
+    if (state === 'error') await expect(card.locator('.errorContainer')).toHaveCSS('touch-action', 'pan-x pinch-zoom')
     const bounds = await card.boundingBox()
     // Start above the centered error actions so the gesture does not target a button.
     const startY = -bounds.height / 4
@@ -372,6 +374,20 @@ for (const state of ['error', 'upcoming']) {
     await cdp.detach()
   })
 }
+
+test('overflowing Shorts error messages scroll instead of swiping', async ({ app, page }) => {
+  const { watch, touch, cdp } = await openShorts({ app, page })
+  await watch.evaluate(component => { component.proxy.errorMessage = 'Playback failed. '.repeat(300) })
+  const container = page.locator('.videoPlayerError .errorContainer')
+  await expect(container).toHaveCSS('touch-action', 'auto')
+  await touch('touchStart')
+  await touch('touchMove', 0, -120)
+  await touch('touchEnd')
+  await expect.poll(() => container.evaluate(element => element.scrollTop)).toBeGreaterThan(0)
+  await expect(page).toHaveURL(new RegExp(`/watch/${current}`))
+  await watch.dispose()
+  await cdp.detach()
+})
 
 for (const [zoom, theme] of [[1, 'dark'], [1.25, 'light']]) {
   test(`landscape Shorts swipe previews match the portrait player at ${zoom * 100}% UI scale in ${theme} theme`, async ({ app, page }, testInfo) => {
