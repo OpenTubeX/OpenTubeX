@@ -348,6 +348,7 @@ test('quit waits for the queued tray icon cache write', async () => {
     clearInterval,
     scheduledBackupTimer: undefined,
     scheduledBackups: { stop: async () => {} },
+    windowSessionWrites: new Set(),
     updateWatchQueue: async () => {},
     baseHandlers: { compactAllDatastores: async () => {} },
     shutdownYtDlpDownloads: async () => {},
@@ -374,7 +375,32 @@ test('quit waits for pending watch queue writes', async () => {
     clearInterval,
     scheduledBackupTimer: undefined,
     scheduledBackups: { stop: async () => {} },
+    windowSessionWrites: new Set(),
     updateWatchQueue: () => queueWrite,
+    baseHandlers: { compactAllDatastores: async () => {} },
+    shutdownYtDlpDownloads: async () => {},
+    session: { defaultSession: { clearCache: async () => {}, clearStorageData: async () => {} } },
+  })
+  vm.runInContext(`let resourcesCleanUpDone = false; let resourcesCleanUpPromise = null; ${source.slice(source.indexOf('  async function cleanUpResources()'), source.indexOf('  // MacOS event'))}`, context)
+  let finished = false
+  const cleanup = context.cleanUpResources().then(() => { finished = true })
+  await new Promise(resolve => setImmediate(resolve))
+  assert.equal(finished, false)
+  finishWrite()
+  await cleanup
+  assert.equal(finished, true)
+})
+
+test('quit waits for the session write of a window closed just before', async () => {
+  let finishWrite
+  const sessionWrite = new Promise(resolve => { finishWrite = resolve })
+  const context = vm.createContext({
+    trayIconWrite: Promise.resolve(),
+    clearInterval,
+    scheduledBackupTimer: undefined,
+    scheduledBackups: { stop: async () => {} },
+    windowSessionWrites: new Set([sessionWrite]),
+    updateWatchQueue: async () => {},
     baseHandlers: { compactAllDatastores: async () => {} },
     shutdownYtDlpDownloads: async () => {},
     session: { defaultSession: { clearCache: async () => {}, clearStorageData: async () => {} } },

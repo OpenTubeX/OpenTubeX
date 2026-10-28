@@ -291,6 +291,7 @@ test('shares queue changes across windows without restoring cleared items', asyn
   test.setTimeout(120_000)
   await goTo(page, 'history')
   await chooseVideoOption(page, 'Queue video one', 'Add to Queue')
+  const firstWindowId = await app.electronApp.evaluate(({ BrowserWindow }) => BrowserWindow.getAllWindows()[0].id)
   const second = await openNewWindowFromTabBar(app, page)
   await waitForAppReady(second)
   await goTo(second, 'history')
@@ -306,8 +307,15 @@ test('shares queue changes across windows without restoring cleared items', asyn
     window.$store.commit('addVideoToWatchQueue', { video: { videoId, title: videoId } })
   }, `concurrent-${index}`)))
   for (const window of [page, second]) await expect(window.locator('.queueItem')).toHaveCount(3)
-  await second.close()
+  // Close it like a user would. Page.close() skips the window's close handler,
+  // which keeps its session, so the relaunch could open that window first.
+  const secondClosed = second.waitForEvent('close')
+  await app.electronApp.evaluate(({ BrowserWindow }, firstWindowId) => {
+    BrowserWindow.getAllWindows().find(window => window.id !== firstWindowId).close()
+  }, firstWindowId)
+  await secondClosed
   ;({ page } = await app.relaunch())
+  expect(await app.electronApp.evaluate(({ BrowserWindow }) => BrowserWindow.getAllWindows().length)).toBe(1)
   await expect(page.locator('.queueItem')).toHaveCount(3)
   await expect(page.locator('.queueItem h3').first()).toHaveText('Queue video two')
   expect(await page.locator('.queueItem h3').allTextContents()).toEqual(expect.arrayContaining(['concurrent-0', 'concurrent-1']))

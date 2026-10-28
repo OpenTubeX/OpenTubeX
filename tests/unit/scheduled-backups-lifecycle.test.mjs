@@ -24,6 +24,7 @@ function lifecycle(platform) {
     clearInterval: () => calls.push('clear timer'),
     scheduledBackupTimer: {},
     scheduledBackups: { stop: async () => calls.push('stop backups') },
+    windowSessionWrites: new Set(),
     trayIconWrite: Promise.resolve(),
     updateWatchQueue: async () => {},
     baseHandlers: { compactAllDatastores: async () => {} },

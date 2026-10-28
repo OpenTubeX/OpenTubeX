@@ -279,6 +279,8 @@ function runApp() {
   ])
   const closeConfirmedWindowIds = new Set()
   const closingWindowIds = new Set()
+  /** @type {Set<Promise<void>>} */
+  const windowSessionWrites = new Set()
   const appShortcutBlockedWindows = new WeakSet()
   let isQuitConfirmed = false
   async function getStartupBehavior() {
@@ -2216,19 +2218,13 @@ function runApp() {
       //     always been restored historically, keep that behavior)
       // Otherwise the user manually closed one of several windows and we don't
       // want it resurrected the next time the app runs.
-      if (isQuitting || isLastWindow) {
-        try {
-          await tabManager._saveSession()
-        } catch (err) {
-          console.error('Failed to persist tab session on window close', err)
-        }
-      } else {
-        try {
-          await tabManager.clearSession()
-        } catch (err) {
-          console.error('Failed to clear tab session on window close', err)
-        }
-      }
+      const sessionWrite = isQuitting || isLastWindow
+        ? tabManager._saveSession().catch(err => console.error('Failed to persist tab session on window close', err))
+        : tabManager.clearSession().catch(err => console.error('Failed to clear tab session on window close', err))
+      // Quitting waits for this, so a window closed just before does not come back.
+      windowSessionWrites.add(sessionWrite)
+      await sessionWrite
+      windowSessionWrites.delete(sessionWrite)
 
       // Keep the legacy single-window `bounds` setting up to date so brand-new
       // windows (with no saved session of their own) still open at the user's
@@ -3721,6 +3717,7 @@ function runApp() {
     resourcesCleanUpPromise ??= (async () => {
       clearInterval(scheduledBackupTimer)
       await scheduledBackups.stop().catch(error => console.error('Could not finish scheduled backup', error))
+      await Promise.all(windowSessionWrites)
 
       await Promise.allSettled([
         trayIconWrite,
