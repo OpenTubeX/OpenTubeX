@@ -104,3 +104,26 @@ test('synced tabs fall back without a local preview, even when their IDs collide
   assert.equal(cache.get(tab('a', '/history')), null)
   assert.equal(cache.get(tab('a')), 'local image')
 })
+
+test('stored previews are mirrored and restored as the least recently seen', async () => {
+  const written = []
+  const removed = []
+  const storage = { write: (id, entry) => written.push([id, entry.route]), remove: id => removed.push(id) }
+  const cache = createCapacitorPreviewCache(async () => 'fresh', new Map(), 3, storage)
+  await cache.capture(tab('a'))
+  assert.deepEqual(written, [['a', '/home']])
+
+  cache.restore(new Map([
+    ['c', { route: '/c', image: 'c', capturedAt: 2 }],
+    ['a', { route: '/home', image: 'stale', capturedAt: 3 }],
+    ['b', { route: '/b', image: 'b', capturedAt: 1 }],
+    ['invalid', { image: 'no route' }],
+  ]))
+  assert.deepEqual([...cache.entries.keys()], ['b', 'c', 'a'])
+  assert.equal(cache.get(tab('a')), 'fresh')
+
+  await cache.capture(tab('d'))
+  assert.deepEqual([...cache.entries.keys()], ['c', 'a', 'd'])
+  cache.prune([tab('a'), tab('d')])
+  assert.deepEqual(removed, ['b', 'c'])
+})

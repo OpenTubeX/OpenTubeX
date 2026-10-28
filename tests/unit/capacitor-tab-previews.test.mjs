@@ -3,7 +3,8 @@ import test from 'node:test'
 import { readFileSync } from 'node:fs'
 import vm from 'node:vm'
 import { Capacitor } from '@capacitor/core'
-import { computed, nextTick, ref, shallowRef } from 'vue'
+import { computed, nextTick, reactive, ref, shallowRef } from 'vue'
+import { createFilesystem, filesystemPluginHeader } from '../helpers/capacitor-filesystem.mjs'
 
 const appSource = readFileSync(new URL('../../src/renderer/App.vue', import.meta.url), 'utf8')
 const initializePreviews = appSource.match(/initializeCapacitorTabPreviews\(store, [^\n]+/)[0]
@@ -12,28 +13,29 @@ const initializePreviews = appSource.match(/initializeCapacitorTabPreviews\(stor
 globalThis.androidBridge = {}
 Capacitor.PluginHeaders = [
   { name: 'Screenshot', methods: [{ name: 'take', rtype: 'promise' }] },
-  { name: 'Filesystem', methods: [{ name: 'deleteFile', rtype: 'promise' }] },
+  filesystemPluginHeader,
 ]
 Capacitor.nativePromise = async () => {}
 const {
+  clearCapacitorTabImages,
   prepareForTabOrganizer,
   getCapacitorTabPreview,
   initializeCapacitorTabPreviews,
 } = await import('../../src/renderer/tabs/capacitorTabPreviews.js')
 delete globalThis.androidBridge
 
-function setup(t, { cleanupError, decodeError, videos = [] } = {}) {
+function setup(t, { decodeError, videos = [], filesystem } = {}) {
   const preview = 'data:image/jpeg;base64,cHJldmlldw=='
   let captureImage = preview
   const uri = '/cache/temporary-screenshot.jpg'
   const tab = { id: 'tab', route: { fullPath: '/home' }, loadState: 'loaded' }
-  const store = { getters: {
+  const store = { getters: reactive({
     getShowTabPreviews: true,
     getPresentedTab: tab,
     getPresentedTabId: tab.id,
     getActiveTabId: tab.id,
     getTabs: [tab],
-  } }
+  }) }
   const document = new EventTarget()
   let overlayReads = 0
   const drawImage = t.mock.fn(source => {
@@ -84,26 +86,25 @@ function setup(t, { cleanupError, decodeError, videos = [] } = {}) {
     if (decodeError) throw decodeError
     return { dataUrl: captureImage }
   })
-  const remove = t.mock.fn(async () => {
-    if (cleanupError) throw cleanupError
-  })
+  const remove = t.mock.fn(async () => {})
+  filesystem ??= createFilesystem(remove)
   t.mock.method(Capacitor, 'nativePromise', async (plugin, method, options) => {
     if (plugin === 'Screenshot' && method === 'take') return take(options)
-    if (plugin === 'Filesystem' && method === 'deleteFile') return remove(options)
+    if (plugin === 'Filesystem') return filesystem.call(method, options)
     assert.fail(`Unexpected native call: ${plugin}.${method}`)
   })
   const warn = t.mock.method(console, 'warn', () => {})
   const pageSwipe = shallowRef(null)
   const organizerSwipeActive = ref(false)
   const dispose = vm.runInNewContext(initializePreviews, {
-    initializeCapacitorTabPreviews, store, pageSwipe, organizerSwipeActive, computed,
+    initializeCapacitorTabPreviews, store, pageSwipe, organizerSwipeActive, computed, tabsReady: Promise.resolve(),
   })
   t.after(() => {
     dispose()
     for (const restore of restoreGlobals) restore()
   })
   overlayReads = 0
-  return { document, store, tab, preview, uri, take, remove, warn, drawImage, pageSwipe, organizerSwipeActive,
+  return { document, store, tab, preview, uri, take, remove, warn, filesystem, dispose, drawImage, pageSwipe, organizerSwipeActive,
     setCaptureImage: image => { captureImage = image }, overlayReads: () => overlayReads }
 }
 
@@ -337,7 +338,7 @@ test('a held header swipe cannot cache a partial page preview', async t => {
 test('starting and cancelling a swipe discards an in-flight partial screenshot', async t => {
   const state = setup(t)
   let resolve
-  t.mock.method(Capacitor, 'nativePromise', () => new Promise(done => { resolve = done }))
+  state.take.mock.mockImplementation(() => new Promise(done => { resolve = done }))
   t.mock.timers.tick(600)
   await new Promise(setImmediate)
   assert.equal(typeof resolve, 'function')
@@ -352,7 +353,7 @@ test('capture resumes when an invalidated screenshot outlasts the post-swipe tim
   const state = setup(t)
   let resolve
   let calls = 0
-  t.mock.method(Capacitor, 'nativePromise', () => {
+  state.take.mock.mockImplementation(() => {
     calls += 1
     return calls === 1
       ? new Promise(done => { resolve = done })
@@ -420,3 +421,55 @@ for (const cancellation of ['none', 'direct', 'pointercancel']) {
     assert.deepEqual(updates, cancelled ? [] : [0.5], 'layout preparation retains the latest finger position')
   })
 }
+
+test('captured previews are restored after the app restarts', async t => {
+  const state = setup(t)
+  await captureScheduledPreview(t)
+  assert.equal(state.filesystem.files.size, 1)
+  state.dispose()
+  assert.equal(getCapacitorTabPreview(state.tab), null)
+
+  const dispose = initializeCapacitorTabPreviews(state.store, shallowRef(null), Promise.resolve())
+  await new Promise(setImmediate)
+  assert.equal(getCapacitorTabPreview(state.tab), state.preview)
+  assert.equal(state.take.mock.callCount(), 1, 'the restored preview needs no new screenshot')
+  dispose()
+})
+
+test('restored previews of closed or navigated tabs are deleted', async t => {
+  const state = setup(t)
+  await captureScheduledPreview(t)
+  state.dispose()
+  state.tab.route.fullPath = '/history'
+
+  const dispose = initializeCapacitorTabPreviews(state.store, shallowRef(null), Promise.resolve())
+  await new Promise(setImmediate)
+  assert.equal(getCapacitorTabPreview(state.tab), null)
+  assert.equal(state.filesystem.files.size, 0)
+  dispose()
+})
+
+test('closing a tab and disabling previews delete stored previews', async t => {
+  const state = setup(t)
+  await captureScheduledPreview(t)
+  assert.equal(state.filesystem.files.size, 1)
+  state.store.getters.getTabs = []
+  await new Promise(setImmediate)
+  assert.equal(state.filesystem.files.size, 0)
+
+  state.store.getters.getTabs = [state.tab]
+  await captureScheduledPreview(t)
+  assert.equal(state.filesystem.files.size, 1)
+  state.store.getters.getShowTabPreviews = false
+  await new Promise(setImmediate)
+  assert.equal(getCapacitorTabPreview(state.tab), null)
+  assert.equal(state.filesystem.files.size, 0)
+})
+
+test('clearing the tab image cache removes stored previews', async t => {
+  const state = setup(t)
+  await captureScheduledPreview(t)
+  await clearCapacitorTabImages()
+  assert.equal(getCapacitorTabPreview(state.tab), null)
+  assert.equal(state.filesystem.files.size, 0)
+})
