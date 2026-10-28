@@ -188,7 +188,7 @@
     "stylelint-use-logical-spec": "^5.0.1",
     "terser": "^5.51.2",
     "typescript": "^7.0.2",
-    "unist-util-visit": "^5.1.0",
+    "unist-util-visit": "^5.2.0",
     "vfile": "^6.0.3",
     "vue-eslint-parser": "^10.4.1",
     "vue-loader": "^17.4.2",
