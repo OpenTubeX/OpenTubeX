@@ -778,7 +778,11 @@ async function enrichScrapedUpcomingPublicationDates(channelId, videos) {
     const response = await localApiFetch(
       `https://www.youtube.com/feeds/videos.xml?channel_id=${channelId}`,
       {
-        signal: AbortSignal.timeout(RSS_ENRICHMENT_TIMEOUT_MS),
+        // Cancelling the refresh must not wait for this optional lookup.
+        signal: AbortSignal.any([
+          AbortSignal.timeout(RSS_ENRICHMENT_TIMEOUT_MS),
+          ...(activeRefresh ? [activeRefresh.controller.signal] : [])
+        ]),
         nativeTimeoutMs: RSS_ENRICHMENT_TIMEOUT_MS,
       }
     )

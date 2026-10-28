@@ -23,12 +23,12 @@ const CHANNEL_ID = 'UCaaaaaaaaaaaaaaaaaaaaaa'
 const scheduledTime = Date.parse('2027-01-01T12:00:00Z')
 const announcementTime = Date.parse('2026-10-20T12:00:00Z')
 
-function fetchLiveTab(showScheduledLiveStreamsFirst) {
+function fetchLiveTab(showScheduledLiveStreamsFirst, activeRefresh = null) {
   const requests = []
   const getChannelLiveLocal = vm.runInNewContext(`${harnessSource}; getChannelLiveLocal`, {
     AbortSignal,
     RSS_ENRICHMENT_TIMEOUT_MS: 1000,
-    activeRefresh: null,
+    activeRefresh,
     store: { getters: { getShowScheduledLiveStreamsFirst: showScheduledLiveStreamsFirst } },
     mergeUpcomingSubscriptionFeedPublished,
     getLocalChannelLiveStreams: async () => ({
@@ -37,8 +37,9 @@ function fetchLiveTab(showScheduledLiveStreamsFirst) {
         { videoId: 'past', isUpcoming: false, published: announcementTime }
       ]
     }),
-    localApiFetch: async url => {
+    localApiFetch: async (url, { signal }) => {
       requests.push(url)
+      signal.throwIfAborted()
       return { ok: true, text: async () => '' }
     },
     parseYouTubeRSSPublicationDates: () => [{ videoId: 'scheduled', published: announcementTime }]
@@ -62,4 +63,14 @@ test('skips the RSS lookup for live streams while scheduled entries are shown fi
 
   assert.equal(videos[0].subscriptionFeedPublished, undefined)
   assert.deepEqual(requests, [])
+})
+
+test('stops the RSS lookup when the refresh is cancelled', async () => {
+  const controller = new AbortController()
+  controller.abort()
+  const { requests, result } = fetchLiveTab(false, { controller })
+  const { videos } = await result
+
+  assert.equal(videos[0].subscriptionFeedPublished, undefined)
+  assert.equal(requests.length, 1)
 })
