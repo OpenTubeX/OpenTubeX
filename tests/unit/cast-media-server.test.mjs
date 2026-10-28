@@ -387,7 +387,17 @@ test('destination resolution rejects non-public results without explicit authori
 
 async function listen(server) {
   await new Promise(resolve => server.listen(0, '127.0.0.1', resolve))
-  return `http://127.0.0.1:${server.address().port}`
+  const host = `127.0.0.1:${server.address().port}`
+  // Tools on a developer's machine, such as editor port detection, probe new
+  // loopback listeners as `localhost`. Every request a test causes targets the
+  // returned origin, so keep those probes out of handlers that record requests.
+  const handlers = server.listeners('request')
+  server.removeAllListeners('request')
+  server.on('request', (request, response) => {
+    if (request.headers.host !== host) return response.writeHead(421).end()
+    for (const handler of handlers) handler.call(server, request, response)
+  })
+  return `http://${host}`
 }
 function close(server) {
   server.closeAllConnections()
