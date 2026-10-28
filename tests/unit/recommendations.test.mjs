@@ -31,7 +31,9 @@ test('duplicate history imports do not amplify preferences', () => {
 })
 test('recent engagement beats stale channel frequency', () => {
   const history = [watched('recent'), ...[1, 2, 3].map(i => watched(`old${i}`, { authorId: 'old', timeWatched: now - 90 * DAY }))]
-  assert.equal(profile(history).channels[0], 'linux')
+  assert.ok(profile(history).channelWeights.get('linux') > profile(history).channelWeights.get('old'))
+  const firstChannels = Array.from({ length: 100 }, (_, round) => profile(history, { round }).channels[0])
+  assert.ok(firstChannels.filter(channel => channel === 'linux').length > 60)
 })
 test('watching more of a video strengthens its channel preference', () => {
   const p = profile([watched('strong'), watched('weak', { authorId: 'weak', watchProgress: 5 })])
@@ -83,6 +85,27 @@ test('Unicode segmentation supports CJK and avoids substring matches', () => {
 test('English and German stopwords do not create discovery queries', () => {
   assert.deepEqual(profile([watched('seed', { title: 'the and oder und das die 1234' })]).queries, [])
   assert.ok(profile([watched('seed')]).queries.every(query => query.split(' ').length === 2))
+})
+test('discovery searches and topic reasons favor distinctive words over generic or channel words', () => {
+  const generic = ['honest review', 'ultimate guide', 'beginners tutorial']
+  const subjects = ['sourdough bread', 'sicilian najdorf', 'tubeless tires', 'lydian mode', 'server rack', 'smash burger', 'disc brakes', 'queens gambit']
+  const history = Array.from({ length: 48 }, (_, i) => watched(`topic${i}`, {
+    title: `${generic[i % 3]} ${subjects[i % 8]}${i % 2 ? ' | Topic Weekly' : ''}`, author: 'Topic Weekly', authorId: `channel${i % 8}`, timeWatched: now - i * DAY,
+  }))
+  const generalWords = new Set(['honest', 'review', 'ultimate', 'guide', 'beginners', 'tutorial', 'topic', 'weekly'])
+  for (let round = 0; round < 10; round++) {
+    const queries = profile(history, { round }).queries
+    const words = queries.flatMap(query => query.split(' '))
+    assert.equal(queries.length, 3)
+    assert.ok(!words.some(word => generalWords.has(word)), queries.join(', '))
+    assert.equal(new Set(words).size, words.length)
+  }
+  // A channel named after its topic still yields a search when no other words remain.
+  assert.deepEqual(profile([watched('seed', { title: 'Linux desktop', author: 'Linux Desktop Channel' })]).queries, ['linux desktop'])
+  for (const keywords of [[], ['review']]) {
+    const [item] = scoreRecommendationCandidates([video('candidate', { title: 'Honest review: sourdough starter', keywords })], profile(history), options)
+    assert.deepEqual(item.reason, { type: 'topic', text: 'sourdough' })
+  }
 })
 test('dismissal excludes the video and penalizes similar topics without blocking unrelated interests', () => {
   const history = [watched('linux'), watched('food', { title: 'Sourdough bread baking', authorId: 'food' })]
@@ -157,6 +180,39 @@ test('seed rotation opens additional discovery sources on later refreshes', () =
   const history = Array.from({ length: 12 }, (_, i) => watched(`seed${i}`, { authorId: `channel${i}` }))
   assert.notDeepEqual(profile(history, { round: 0 }).channels, profile(history, { round: 3 }).channels)
   assert.notDeepEqual(profile(history, { round: 0 }).seeds, profile(history, { round: 4 }).seeds)
+})
+test('refreshes sample seeds and channels from the whole history instead of the most recent watches', () => {
+  const history = Array.from({ length: 300 }, (_, i) => watched(`seed${i}`, { title: `Topic${i} explained`, authorId: `channel${i % 60}`, timeWatched: now - i * DAY / 2 }))
+  const profiles = Array.from({ length: 30 }, (_, round) => profile(history, { round }))
+  const seeds = profiles.flatMap(p => p.seeds.map(seed => Number(seed.videoId.slice(4))))
+  assert.ok(new Set(seeds).size > seeds.length * 0.7)
+  assert.ok(seeds.filter(index => index >= 24).length > seeds.length / 2)
+  assert.ok(seeds.filter(index => index < 120).length > seeds.length / 2)
+  assert.ok(new Set(profiles.flatMap(p => p.channels)).size > 30)
+})
+test('old favorites fade instead of monopolizing seeds and channels', () => {
+  const history = Array.from({ length: 12 }, (_, i) => watched(`watched${i}`, { title: `Topic${i} explained`, authorId: `channel${i}`, timeWatched: now - i * DAY }))
+  const favorites = Array.from({ length: 12 }, (_, i) => watched(`favorite${i}`, { title: `Clip${i} highlights`, authorId: `favorite${i % 6}`, timeAdded: now - 365 * DAY }))
+  const profiles = Array.from({ length: 20 }, (_, round) => profile(history, { round, favorites }))
+  const seeds = profiles.flatMap(p => p.seeds.map(seed => seed.videoId))
+  const channels = profiles.flatMap(p => p.channels)
+  assert.ok(seeds.filter(id => id.startsWith('favorite')).length < seeds.length / 2)
+  assert.ok(channels.filter(id => id.startsWith('favorite')).length < channels.length / 2)
+  const favoriteWeight = timeAdded => profile([watched('watched')], { favorites: [watched('favorite', { authorId: 'saved', timeAdded })] }).channelWeights.get('saved')
+  assert.ok(favoriteWeight(now - 365 * DAY) < favoriteWeight(now) / 2)
+  assert.ok(favoriteWeight(now - 365 * DAY) > 0)
+  const liked = watched('liked', { authorId: 'liked', timeAdded: now - 365 * DAY })
+  const likedWeight = profile([watched('watched')], { favorites: [liked], records: [{ ...liked, feedback: 'positive', feedbackAt: now - 365 * DAY }] }).channelWeights.get('liked')
+  assert.ok(likedWeight >= favoriteWeight(now - 365 * DAY))
+})
+test('related videos keep graph evidence after their seed rotates out', () => {
+  const history = Array.from({ length: 40 }, (_, i) => watched(`seed${i}`, { title: `Topic${i} explained`, authorId: `channel${i}` }))
+  const p = profile(history)
+  const earlier = history.find(entry => !p.seeds.some(seed => seed.videoId === entry.videoId))
+  const candidate = video('graph', { title: 'Unrelated vocabulary', recommendationSources: [{ type: 'related', id: earlier.videoId }] })
+  const [item] = scoreRecommendationCandidates([candidate], p, options)
+  assert.ok(item.graphAffinity > 0)
+  assert.deepEqual(item.reason, { type: 'related', text: earlier.title })
 })
 test('subscriptions provide a cold-start feed without inventing unrelated interests', () => {
   assert.deepEqual(ids(rank([video('sub', { authorId: 'subscribed' }), video('other')], [], { subscriptions: [{ id: 'subscribed' }] })), ['sub'])

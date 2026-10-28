@@ -22,7 +22,8 @@ export function useHomeRecommendations(visible) {
   let requestController = null
   let initialized = false
   let restoringCachedFeed = false
-  let round = 0
+  // Seeds each feed's sample; a random start keeps app launches from repeating one feed.
+  let round = Math.floor(Math.random() * 2 ** 32)
   let limit = 24
   let feedId = crypto.randomUUID()
   const ranked = shallowRef([])
