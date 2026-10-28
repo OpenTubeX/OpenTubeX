@@ -382,8 +382,10 @@ test.describe('settings', () => {
       }
 
       await minimizedButton.click()
-      await expect(page.getByRole('dialog', { name: windowName, exact: true })).toBeVisible()
+      await expect(settingsWindow).toBeVisible()
       await page.locator('.settingsCloseButton').click()
+      // A close during the restore morph waits for it, so let it finish before opening the next view.
+      await expect(settingsWindow).toBeHidden()
       await expect(page.locator('.minimizedUtilityButton')).toHaveCount(0)
     }
   })
