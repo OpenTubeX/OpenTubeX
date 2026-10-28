@@ -333,9 +333,9 @@
 
 .commentHeaderIconAction {
   display: inline-flex;
-  inline-size: 28px;
-  block-size: 28px;
-  flex: 0 0 28px;
+  inline-size: 32px;
+  block-size: 32px;
+  flex: 0 0 32px;
   align-items: center;
   justify-content: center;
   padding: 0;
@@ -363,7 +363,7 @@
 }
 
 .commentHeaderIconActionAligned {
-  margin-block-start: 39px;
+  margin-block-start: calc(30px + (var(--form-control-height) - 32px) / 2);
 }
 
 .commentTools {
@@ -427,8 +427,8 @@
 }
 
 .reloadComments :deep(.iconButton) {
-  inline-size: 28px;
-  block-size: 28px;
+  inline-size: 32px;
+  block-size: 32px;
 
   /* FtIconButton's inline padding scales independently of authored CSS at
      non-100% Electron zoom factors. Keep this toolbar control a fixed size. */
@@ -437,7 +437,7 @@
 }
 
 .reloadCommentsAligned {
-  margin-block-start: calc(30px + (var(--form-control-height) - 28px) / 2);
+  margin-block-start: calc(30px + (var(--form-control-height) - 32px) / 2);
 }
 
 .comment {
