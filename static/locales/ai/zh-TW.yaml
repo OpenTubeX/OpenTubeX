@@ -647,6 +647,7 @@ Settings:
         Destructive pressed: 危險操作的按下狀態
         Text and icons on destructive actions: 危險操作上的文字與圖示
   Player Settings:
+    Pause on Stream Recovery: "串流復原時暫停"
     Buffering:
       Buffering: 緩衝
       Description: 選擇播放器要預先載入並保留多少影片內容。
@@ -1501,6 +1502,10 @@ Video:
     hook: 開場／問候
   Player:
     Playing in Picture-in-Picture: 正在以子母畫面模式播放
+    Stream Recovery:
+      DASH Fallback: "音訊串流失敗，正在切換至 DASH 格式：{error}"
+      Error Copied: "錯誤已複製到剪貼簿"
+      Legacy Fallback: "串流失敗，正在切換至舊版格式：{error}"
     Caption Timing:
       Adjust Timing: 調整時間…
       Caption Timing: 字幕時間
@@ -1977,6 +1982,7 @@ Tooltips:
   Proxy Settings:
     IP Block Recovery Script Path: 偵測到 IP 封鎖時要執行的指令碼檔案路徑。OpenTubeX 會等候指令碼執行完畢，再重新載入影片。若已啟用備援功能，則僅在備援也失敗時執行。
   Player Settings:
+    Pause on Stream Recovery: "當影片串流失敗且播放器重新載入或切換至其他格式或引擎時，暫停播放，並在播放器頂端保留錯誤訊息，直到你將其關閉。停用後，播放會繼續，錯誤會以通知短暫顯示。"
     Continue Playback When Screen Is Locked: '在背景繼續播放音訊並提供 Android 媒體控制項。關閉此選項後，應用程式不再顯示時將暫停播放。'
     Enable Caption Translations: 啟用後，若影片未提供符合偏好字幕語言的原始字幕軌，字幕按鈕與 C 快捷鍵會優先選用自動翻譯的字幕軌。
     Use Quick Playback Speed Bar: 在播放器右側的控制項中顯示快速播放速度列。若已啟用手動儲存各頻道播放速度，速度列也會顯示用來儲存目前頻道播放速度的按鈕。

@@ -648,6 +648,7 @@ Settings:
         Destructive pressed: Pöördumatu toiming vajutamisel
         Text and icons on destructive actions: Pöördumatute toimingute tekst ja ikoonid
   Player Settings:
+    Pause on Stream Recovery: "Peata voo taastamisel"
     Buffering:
       Buffering: Puhverdamine
       Description: Vali, kui palju videost mängija ette laadib ja laadituna hoiab.
@@ -1501,6 +1502,10 @@ Video:
     hook: Sissejuhatus/tervitus
   Player:
     Playing in Picture-in-Picture: Esitatakse pilt-pildis-režiimis
+    Stream Recovery:
+      DASH Fallback: "Helivoog ebaõnnestus, lülitun DASH-vormingutele: {error}"
+      Error Copied: "Viga kopeeriti lõikelauale"
+      Legacy Fallback: "Voog ebaõnnestus, lülitun pärandvormingutele: {error}"
     Caption Timing:
       Adjust Timing: Muuda ajastust…
       Caption Timing: Subtiitrite ajastus
@@ -1978,6 +1983,7 @@ Tooltips:
   Proxy Settings:
     IP Block Recovery Script Path: Skriptifaili asukoht, mida kasutatakse IP-blokeeringu tuvastamisel. OpenTubeX ootab skripti lõppemist ja laadib seejärel video uuesti. Kui varumeetod on lubatud, käivitatakse skript ainult siis, kui ka varumeetod nurjub.
   Player Settings:
+    Pause on Stream Recovery: "Kui videovoog ebaõnnestub ja mängija laadib selle uuesti või lülitub teisele vormingule või mootorile, peatatakse taasesitus ja viga jääb mängija ülaossa, kuni selle sulged. Kui see on välja lülitatud, jätkub taasesitus ja viga kuvatakse lühidalt teavitusena."
     Continue Playback When Screen Is Locked: 'Jätab heli taustal mängima ja pakub Androidi meediajuhtelemente. Lülita see välja, et esitus peatataks, kui rakendus pole enam nähtav.'
     Enable Caption Translations: Kui see on lubatud ja videol pole eelistatud subtiitrikeeles sobivat originaalrada, eelistavad subtiitrinupp ja kiirklahv C automaatselt tõlgitud rada.
     Use Quick Playback Speed Bar: Kuvab paremal asuvates pleieri juhtelementides esituskiiruse kiirvalikuriba. Kui esituskiiruse kanalipõhine käsitsi salvestamine on lubatud, sisaldab riba ka praeguse kanali kiiruse salvestamise nuppu.

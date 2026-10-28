@@ -650,6 +650,7 @@ Settings:
         Destructive pressed: Eyðandi aðgerð þegar ýtt er
         Text and icons on destructive actions: Texti og tákn á eyðandi aðgerðum
   Player Settings:
+    Pause on Stream Recovery: "Gera hlé við endurheimt streymis"
     Buffering:
       Buffering: Biðminni
       Description: Veldu hversu mikið af myndskeiðinu spilarinn hleður fyrir fram og heldur hlöðnu.
@@ -1521,6 +1522,10 @@ Video:
     filler: Útúrdúrar
   Player:
     Playing in Picture-in-Picture: Spilast í mynd-í-mynd
+    Stream Recovery:
+      DASH Fallback: "Hljóðstreymið mistókst, skipt yfir í DASH-snið: {error}"
+      Error Copied: "Villa afrituð á klippispjald"
+      Legacy Fallback: "Streymið mistókst, skipt yfir í eldri snið: {error}"
     Caption Timing:
       Adjust Timing: Stilla tímasetningu…
       Caption Timing: Tímasetning skjátexta
@@ -2000,6 +2005,7 @@ Tooltips:
   Proxy Settings:
     IP Block Recovery Script Path: Slóð að skriftuskrá sem keyra skal þegar vart verður við að IP-tölu hafi verið lokað. OpenTubeX bíður eftir að keyrslu ljúki og endurhleður síðan myndbandinu. Ef varaleið er virk er skriftan aðeins keyrð þegar varaleiðin bregst einnig.
   Player Settings:
+    Pause on Stream Recovery: "Þegar myndstreymið bregst og spilarinn endurhleður það eða skiptir yfir í annað snið eða aðra vél er gert hlé á spilun og villan helst efst í spilaranum þar til þú lokar henni. Þegar slökkt er á þessu heldur spilun áfram og villan birtist stuttlega sem tilkynning."
     Continue Playback When Screen Is Locked: 'Heldur hljóði í spilun í bakgrunni og birtir miðlunarstýringar Android. Slökktu á þessu til að gera hlé þegar forritið er ekki lengur sýnilegt.'
     Enable Caption Translations: Þegar þetta er virkt velja skjátextahnappurinn og flýtileiðin C sjálfkrafa þýddan texta á völdu tungumáli ef myndbandið býður ekki upp á samsvarandi frumtexta.
     Use Quick Playback Speed Bar: Sýnir stiku til að breyta spilunarhraða hratt hægra megin í stjórntækjum spilarans. Ef kveikt er á handvirkri vistun spilunarhraða fyrir hverja rás birtist þar einnig hnappur til að vista hraðann fyrir núverandi rás.

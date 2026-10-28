@@ -750,6 +750,7 @@ Settings:
       Everforest Light Blue: Everforest Claro Azul
       Everforest Light Purple: Everforest Claro Morado
   Player Settings:
+    Pause on Stream Recovery: "Pausar al recuperar la transmisión"
     Buffering:
       Buffering: Almacenamiento en búfer
       Description: Elige cuánto video carga el reproductor por adelantado y cuánto mantiene cargado.
@@ -1786,6 +1787,10 @@ Video:
     Show Modified Details: Mostrar Detalles Modificados
   Player:
     Playing in Picture-in-Picture: Reproduciendo en modo Imagen en imagen
+    Stream Recovery:
+      DASH Fallback: "La transmisión de audio falló, cambiando a formatos DASH: {error}"
+      Error Copied: "Error copiado al portapapeles"
+      Legacy Fallback: "La transmisión falló, cambiando a formatos heredados: {error}"
     Caption Timing:
       Adjust Timing: Ajustar sincronización…
       Caption Timing: Sincronización de subtítulos
@@ -2329,6 +2334,7 @@ Tooltips:
   Proxy Settings:
     IP Block Recovery Script Path: Ruta del archivo de script que se ejecutará al detectar un bloqueo de IP. OpenTubeX espera a que termine y después recarga el video. Si la fuente alternativa está activada, solo se ejecuta cuando esta también falla.
   Player Settings:
+    Pause on Stream Recovery: "Cuando la transmisión de video falla y el reproductor la recarga o cambia a otro formato o motor, la reproducción se pausa y el error permanece en la parte superior del reproductor hasta que lo descartes. Si está desactivado, la reproducción continúa y el error aparece brevemente como notificación."
     Continue Playback When Screen Is Locked: 'Mantiene el audio reproduciéndose en segundo plano y ofrece controles multimedia de Android. Desactiva esta opción para pausar cuando la aplicación deje de estar visible.'
     Enable Caption Translations: Al activarlo, el botón de subtítulos y el atajo C prefieren una pista traducida automáticamente al idioma de subtítulos elegido cuando el video no ofrece una pista original coincidente.
     Use Quick Playback Speed Bar: Muestra una barra rápida de velocidad de reproducción en los controles situados a la derecha del reproductor. Si está activado el guardado manual de la velocidad por canal, la barra también incluye un botón para guardar la velocidad del canal actual.

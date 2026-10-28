@@ -648,6 +648,7 @@ Settings:
         Destructive pressed: Törlő művelet lenyomáskor
         Text and icons on destructive actions: Törlő műveletek szövege és ikonjai
   Player Settings:
+    Pause on Stream Recovery: "Szüneteltetés a stream helyreállításakor"
     Buffering:
       Buffering: Pufferelés
       Description: Válassza ki, hogy a lejátszó mennyit töltsön be előre a videóból, és mennyit tartson betöltve.
@@ -1499,6 +1500,10 @@ Video:
   Premiere started: A premier folyamatban van, {timeAgo} kezdődött
   Player:
     Playing in Picture-in-Picture: Lejátszás kép a képben módban
+    Stream Recovery:
+      DASH Fallback: "A hangstream sikertelen, váltás DASH formátumokra: {error}"
+      Error Copied: "Hiba a vágólapra másolva"
+      Legacy Fallback: "A stream sikertelen, váltás a régi formátumokra: {error}"
     Caption Timing:
       Adjust Timing: Időzítés módosítása…
       Caption Timing: Feliratok időzítése
@@ -1976,6 +1981,7 @@ Tooltips:
   Proxy Settings:
     IP Block Recovery Script Path: Az IP-cím letiltásának észlelésekor futtatandó parancsfájl elérési útja. Az OpenTubeX megvárja a befejezését, majd újratölti a videót. Ha a tartalék módszer engedélyezett, csak akkor fut le, ha az is sikertelen.
   Player Settings:
+    Pause on Stream Recovery: "Ha a videostream meghiúsul, és a lejátszó újratölti, vagy másik formátumra vagy motorra vált, a lejátszás szünetel, és a hiba a lejátszó tetején marad, amíg el nem veted. Kikapcsolva a lejátszás folytatódik, és a hiba röviden értesítésként jelenik meg."
     Continue Playback When Screen Is Locked: 'A háttérben folytatja a hang lejátszását, és Android-médiavezérlőket biztosít. Kapcsold ki, ha az alkalmazás elrejtésekor szüneteltetni szeretnéd a lejátszást.'
     Enable Caption Translations: Bekapcsolva a feliratok gomb és a C billentyűparancs az előnyben részesített feliratnyelvre automatikusan lefordított sávot választja, ha a videóhoz nincs ezen a nyelven eredeti sáv.
     Use Quick Playback Speed Bar: Gyors lejátszásisebesség-sáv megjelenítése a lejátszó jobb oldali vezérlői között. Ha engedélyezett a lejátszási sebesség csatornánkénti kézi mentése, a sávon az aktuális csatorna sebességének mentésére szolgáló gomb is megjelenik.

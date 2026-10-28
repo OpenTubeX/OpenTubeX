@@ -652,6 +652,7 @@ Settings:
         Destructive pressed: Verwijderactie bij indrukken
         Text and icons on destructive actions: Tekst en pictogrammen bij verwijderacties
   Player Settings:
+    Pause on Stream Recovery: "Pauzeren bij streamherstel"
     Buffering:
       Buffering: Buffering
       Description: Kies hoeveel van de video de speler vooraf laadt en geladen houdt.
@@ -1548,6 +1549,10 @@ Video:
     filler: Uitweidingen
   Player:
     Playing in Picture-in-Picture: Wordt afgespeeld in beeld-in-beeld
+    Stream Recovery:
+      DASH Fallback: "De audiostream is mislukt, er wordt overgeschakeld naar DASH-formaten: {error}"
+      Error Copied: "Fout gekopieerd naar klembord"
+      Legacy Fallback: "De stream is mislukt, er wordt overgeschakeld naar verouderde formaten: {error}"
     Caption Timing:
       Adjust Timing: Timing aanpassen…
       Caption Timing: Ondertiteltiming
@@ -2033,6 +2038,7 @@ Tooltips:
   Proxy Settings:
     IP Block Recovery Script Path: Pad naar het scriptbestand dat wordt uitgevoerd wanneer een IP-blokkade wordt gedetecteerd. OpenTubeX wacht tot het klaar is en laadt daarna de video opnieuw. Als terugvallen is ingeschakeld, wordt het alleen uitgevoerd wanneer ook dat mislukt.
   Player Settings:
+    Pause on Stream Recovery: "Wanneer de videostream mislukt en de speler deze opnieuw laadt of overschakelt naar een ander formaat of een andere engine, wordt het afspelen gepauzeerd en blijft de fout bovenaan de speler staan tot je deze sluit. Indien uitgeschakeld, gaat het afspelen door en verschijnt de fout kort als melding."
     Continue Playback When Screen Is Locked: 'Blijft audio op de achtergrond afspelen en biedt Android-mediabediening. Schakel dit uit om te pauzeren wanneer de app niet meer zichtbaar is.'
     Enable Caption Translations: Als dit is ingeschakeld en de video geen overeenkomend oorspronkelijk ondertitelingsspoor heeft, geven de ondertitelingsknop en sneltoets C de voorkeur aan een automatisch vertaald spoor in de voorkeurstaal voor ondertiteling.
     Use Quick Playback Speed Bar: Toont rechts in de spelerbediening een balk om snel de afspeelsnelheid te kiezen. Als het handmatig opslaan van afspeelsnelheid per kanaal is ingeschakeld, bevat de balk ook een knop om de snelheid voor het huidige kanaal op te slaan.

@@ -652,6 +652,7 @@ Settings:
         Destructive pressed: Ação destrutiva ao premir
         Text and icons on destructive actions: Texto e ícones nas ações destrutivas
   Player Settings:
+    Pause on Stream Recovery: "Pausar na recuperação da transmissão"
     Buffering:
       Buffering: Armazenamento em buffer
       Description: Escolha quanto do vídeo o reprodutor carrega antecipadamente e mantém carregado.
@@ -1532,6 +1533,10 @@ Video:
   Premiere started: Estreia em curso. Começou {timeAgo}
   Player:
     Playing in Picture-in-Picture: A reproduzir em imagem na imagem
+    Stream Recovery:
+      DASH Fallback: "A transmissão de áudio falhou, a mudar para formatos DASH: {error}"
+      Error Copied: "Erro copiado para a área de transferência"
+      Legacy Fallback: "A transmissão falhou, a mudar para formatos antigos: {error}"
     Caption Timing:
       Adjust Timing: Ajustar sincronização…
       Caption Timing: Sincronização das legendas
@@ -2013,6 +2018,7 @@ Tooltips:
   Proxy Settings:
     IP Block Recovery Script Path: Caminho do ficheiro de script a executar quando é detetado um bloqueio de IP. O OpenTubeX aguarda que termine e depois recarrega o vídeo. Se o método alternativo estiver ativado, o script só é executado quando esse método também falha.
   Player Settings:
+    Pause on Stream Recovery: "Quando a transmissão de vídeo falha e o leitor a recarrega ou muda para outro formato ou motor, a reprodução é pausada e o erro fica no topo do leitor até o dispensar. Quando desativado, a reprodução continua e o erro aparece brevemente como notificação."
     Continue Playback When Screen Is Locked: 'Mantém o áudio em reprodução em segundo plano e fornece controlos multimédia do Android. Desative para pausar quando a aplicação deixar de estar visível.'
     Enable Caption Translations: Quando esta opção está ativada e o vídeo não fornece uma faixa original no idioma de legendas preferido, o botão de legendas e o atalho C dão preferência a uma faixa traduzida automaticamente para esse idioma.
     Use Quick Playback Speed Bar: Mostra uma barra de acesso rápido à velocidade de reprodução nos controlos do lado direito do reprodutor. Se a gravação manual da velocidade por canal estiver ativada, a barra também inclui o botão para guardar a velocidade do canal atual.

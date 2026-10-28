@@ -99,8 +99,8 @@ function driveWatchView(page, script, options = {}) {
     watchView.legacyFormats = legacyFormats
 
     const reloads = []
-    watchView.performSabrReload = async (_payload, toastMessage) => {
-      reloads.push(toastMessage)
+    watchView.performSabrReload = async (_payload, message) => {
+      reloads.push(message)
       if (rejectReload) throw new Error('Synthetic SABR reload rejection')
     }
 
@@ -207,7 +207,7 @@ for (const reloadRequest of [false, true]) {
     // Diagnostic reports must show each reload against the limits and why recovery stopped
     await expect.poll(() => messages.filter(message => /SABR|Showing error/.test(message))).toEqual([
       ...Array.from({ length: MAX_SABR_ERROR_RECOVERIES }, (_, index) => expect.stringMatching(new RegExp(
-        `^${result.reloads[index]} for jNQXAC9IVRw at \\d+s and [\\d.]+x speed\\. Reload ${index + 1} of ${MAX_SABR_ERROR_RECOVERIES} ` +
+        `^${result.reloads[index].replace(/[.*+?^${}()|[\]\\]/g, '\\$&')} for jNQXAC9IVRw at \\d+s and [\\d.]+x speed\\. Reload ${index + 1} of ${MAX_SABR_ERROR_RECOVERIES} ` +
         `since playback last settled, ${index + 1} of ${MAX_SABR_ERROR_RECOVERIES_PER_VIDEO} for this video$`
       ))),
       `Not reloading the SABR stream for jNQXAC9IVRw after ${MAX_SABR_ERROR_RECOVERIES} reloads since playback last settled and ${MAX_SABR_ERROR_RECOVERIES} for this video`,
@@ -1170,6 +1170,94 @@ test('sizes the fullscreen playback-error reload toast to its content', async ({
   expect(Math.abs(trailingSpace - paddingEnd)).toBeLessThanOrEqual(1)
 })
 
+test('Pause on Stream Recovery pauses a reload behind a persistent notice until playback recovers or it is dismissed', async ({ app, page }) => {
+  await mockPlayableWatchPage(app, page)
+  const video = await openMockedVideo(page)
+  const outgoingPlayer = await page.locator('.ftVideoPlayer').elementHandle()
+  const watchView = await watchViewHandle(page)
+  const forbidden = { severity: 2, category: 1, code: 1001, data: ['https://example.invalid/videoplayback', 403] }
+  // Only interrupted playback pauses; a failure before any progress keeps autoplay.
+  await expect.poll(() => watchView.evaluate(view => view.playbackProgressedForCurrentVideo)).toBe(true)
+
+  await watchView.evaluate(async (view, error) => {
+    await view.$store.dispatch('updatePauseOnStreamRecovery', true)
+    view.streamingDataExpiryDate = new Date(Date.now() + 3_600_000)
+    // Not awaited: the reload replaces this player while the call runs.
+    view.handlePlayerError(error)
+  }, forbidden)
+
+  // The reload replaces the player. The replacement waits paused and keeps
+  // the specific error visible instead of flashing a toast.
+  const player = page.locator('.ftVideoPlayer')
+  await expect.poll(() => outgoingPlayer.evaluate(element => element.isConnected), { timeout: 30_000 }).toBe(false)
+  const notice = player.locator('.streamRecoveryNotice')
+  await expect(notice).toContainText('Reloading video after streaming URL error: [BAD_HTTP_STATUS: 403]')
+  await expect.poll(() => video.evaluate(element => element.readyState)).toBeGreaterThanOrEqual(2)
+  await expect.poll(() => video.evaluate(element => element.paused)).toBe(true)
+  await expect(notice).toBeVisible()
+
+  await notice.getByRole('button', { name: 'Copy' }).click()
+  await expect(page.locator('.toast', { hasText: 'Error copied to clipboard' })).toBeVisible()
+  await expect(notice).toBeVisible()
+
+  // Ten seconds of natural playback prove the recovered stream and clear it.
+  await video.evaluate(element => element.play())
+  await expect.poll(() => video.evaluate(element => element.currentTime)).toBeGreaterThan(0)
+  await expect(notice).toBeVisible()
+  // Resuming consumes the pause, so a format switch or reload keeps playing.
+  await expect.poll(() => watchView.evaluate(view => view.streamRecoveryPausesPlayback)).toBe(false)
+  await expect(notice).toBeHidden({ timeout: 20_000 })
+
+  // A later recovery pauses the playing stream in place; Dismiss hides it.
+  await watchView.evaluate(async (view, error) => {
+    view.reloadView = async () => {}
+    view.streamErrorReloadAttemptedForCurrentVideo = false
+    await view.handlePlayerError(error)
+  }, forbidden)
+  await expect(notice).toBeVisible()
+  await expect.poll(() => video.evaluate(element => element.paused)).toBe(true)
+  await notice.getByRole('button', { name: 'Dismiss' }).click()
+  await expect(notice).toBeHidden()
+
+  // A seek is a jump, not natural playback, so it never counts toward clearing.
+  await video.evaluate(element => element.play())
+  await expect.poll(() => watchView.evaluate(view => view.isPlaybackPaused())).toBe(false)
+  const playedAfterSeek = await watchView.evaluate((view) => {
+    view.showStreamRecoveryNotice('Seek check')
+    view.handlePlayerSeeking()
+    view.handleTimeUpdate(view.currentTime + 1)
+    return view.streamRecoveryPlayedSeconds
+  })
+  expect(playedAfterSeek).toBe(0)
+
+  // Turning the setting off drops the open notice and its pause.
+  await expect(notice).toBeVisible()
+  await watchView.evaluate(view => view.$store.dispatch('updatePauseOnStreamRecovery', false))
+  await expect(notice).toBeHidden()
+})
+
+test('by default stream recovery keeps playing and shows a transient toast', async ({ app, page }) => {
+  await mockPlayableWatchPage(app, page)
+  const video = await openMockedVideo(page)
+  const outgoingPlayer = await page.locator('.ftVideoPlayer').elementHandle()
+  const watchView = await watchViewHandle(page)
+
+  await watchView.evaluate(async (view) => {
+    view.streamingDataExpiryDate = new Date(Date.now() + 3_600_000)
+    // Not awaited: the reload replaces this player while the call runs.
+    view.handlePlayerError({ severity: 2, category: 1, code: 1001, data: ['https://example.invalid/videoplayback', 403] })
+  })
+
+  await expect(page.locator('.toast', {
+    hasText: 'Reloading video after streaming URL error: [BAD_HTTP_STATUS: 403]'
+  })).toBeVisible()
+  await expect.poll(() => outgoingPlayer.evaluate(element => element.isConnected), { timeout: 30_000 }).toBe(false)
+  const before = await video.evaluate(element => element.currentTime)
+  await expect.poll(() => video.evaluate(element => element.currentTime)).toBeGreaterThan(before)
+  expect(await video.evaluate(element => element.paused)).toBe(false)
+  await expect(page.locator('.streamRecoveryNotice')).toHaveCount(0)
+})
+
 test('a SABR reload preserves the tab title while adding its resume timestamp', async ({ app, page }) => {
   await mockUnplayableWatchPage(app, page)
   await goTo(page, 'history')
@@ -1389,8 +1477,8 @@ test('a second SABR failure after successful playback refetches instead of dropp
   ])
 
   expect(result.reloads).toEqual([
-    'Refreshing SABR stream after playback error',
-    'Refreshing SABR stream after playback error'
+    'Refreshing SABR stream after playback error: [PLAYER_ERROR: 1002]',
+    'Refreshing SABR stream after playback error: [PLAYER_ERROR: 1002]'
   ])
   expect(result.finalFormat).toBe('dash')
 })
@@ -1559,7 +1647,7 @@ test('a SABR failure refetches when no 360p fallback is available', async ({ app
 
   const result = await driveWatchView(page, [{ error: true }], { legacyFormats: [] })
 
-  expect(result.reloads).toEqual(['Refreshing SABR stream after playback error'])
+  expect(result.reloads).toEqual(['Refreshing SABR stream after playback error: [PLAYER_ERROR: 1002]'])
   expect(result.finalFormat).toBe('dash')
 })
 

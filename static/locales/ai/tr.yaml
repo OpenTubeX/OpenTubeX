@@ -647,6 +647,7 @@ Settings:
         Destructive pressed: Basılı yıkıcı işlem
         Text and icons on destructive actions: Yıkıcı işlemlerdeki metin ve simgeler
   Player Settings:
+    Pause on Stream Recovery: "Akış kurtarmada duraklat"
     Buffering:
       Buffering: Arabelleğe Alma
       Description: Oynatıcının videonun ne kadarını önceden yükleyip yüklü tutacağını seçin.
@@ -1498,6 +1499,10 @@ Video:
   Premiere started: İlk gösterim sürüyor. {timeAgo} başladı
   Player:
     Playing in Picture-in-Picture: Resim içinde resim modunda oynatılıyor
+    Stream Recovery:
+      DASH Fallback: "Ses akışı başarısız oldu, DASH biçimlerine geçiliyor: {error}"
+      Error Copied: "Hata panoya kopyalandı"
+      Legacy Fallback: "Akış başarısız oldu, eski biçimlere geçiliyor: {error}"
     Caption Timing:
       Adjust Timing: Zamanlamayı ayarla…
       Caption Timing: Altyazı zamanlaması
@@ -1975,6 +1980,7 @@ Tooltips:
   Proxy Settings:
     IP Block Recovery Script Path: IP engeli algılandığında çalıştırılacak betik dosyasının yolu. OpenTubeX betiğin tamamlanmasını bekler ve videoyu yeniden yükler. Yedek arka uç etkinse yalnızca yedek arka uç da başarısız olduğunda çalışır.
   Player Settings:
+    Pause on Stream Recovery: "Video akışı başarısız olduğunda ve oynatıcı onu yeniden yüklediğinde ya da başka bir biçime veya motora geçtiğinde oynatma duraklatılır ve hata siz kapatana kadar oynatıcının üstünde kalır. Devre dışı bırakıldığında oynatma devam eder ve hata kısa süreliğine bildirim olarak görünür."
     Continue Playback When Screen Is Locked: 'Sesi arka planda çalmaya devam eder ve Android medya kontrolleri sağlar. Uygulama artık görünür olmadığında duraklatmak için bunu kapatın.'
     Enable Caption Translations: Etkinleştirildiğinde ve videoda eşleşen özgün bir parça olmadığında alt yazı düğmesi ile C kısayolu, tercih edilen alt yazı diline otomatik çevrilmiş parçayı seçer.
     Use Quick Playback Speed Bar: Sağdaki oynatıcı denetimlerinde hızlı oynatma hızı çubuğunu gösterir. Kanal başına oynatma hızını elle kaydetme etkinse çubukta geçerli kanalın hızını kaydetme düğmesi de bulunur.

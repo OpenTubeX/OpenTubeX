@@ -45,7 +45,7 @@ async function replayStreamForbiddenErrors(page, errorCount, options = {}) {
 
     const reloads = []
     const recoveries = []
-    const toasts = []
+    const messages = []
     // The real reload runs, so that a reset of the one-shot reload state during
     // a same-video reload would show up here as an extra reload.
     const reloadView = view.reloadView.bind(view)
@@ -62,8 +62,12 @@ async function replayStreamForbiddenErrors(page, errorCount, options = {}) {
       return true
     }
     view.showTabToast = (toastOptions) => {
-      toasts.push(typeof toastOptions === 'string' ? toastOptions : toastOptions.message)
+      messages.push(typeof toastOptions === 'string' ? toastOptions : toastOptions.message)
     }
+    // Stream-failure recoveries explain themselves in the persistent notice.
+    const stopWatchingNotice = view.$watch('streamRecoveryNotice', (notice) => {
+      if (notice !== null) messages.push(notice)
+    }, { flush: 'sync' })
 
     // 1001 = BAD_HTTP_STATUS (NETWORK); 3016 = VIDEO_ERROR (MEDIA).
     const playerError = () => legacyVideoError
@@ -82,11 +86,12 @@ async function replayStreamForbiddenErrors(page, errorCount, options = {}) {
         reloads: reloads.length,
         recoveries: recoveries.length,
         errorMessage: view.errorMessage || '',
-        toasts: [...toasts]
+        messages: [...messages]
       })
     }
 
-    return { steps, reloads, recoveries, toasts }
+    stopWatchingNotice()
+    return { steps, reloads, recoveries, messages }
   }, {
     count: errorCount,
     sessionExpired: !!options.sessionExpired,
@@ -113,7 +118,7 @@ test('a streaming URL 403 reloads the video before blaming the IP', async ({ app
     reloads: 1,
     recoveries: 0,
     errorMessage: '',
-    toasts: [
+    messages: [
       'Reloading video after streaming URL error: [BAD_HTTP_STATUS: 403] Potential causes: IP block or streaming URL deciphering failed'
     ]
   }])
@@ -129,7 +134,7 @@ test('a streaming URL 403 that survives the reload runs the recovery script', as
       reloads: 1,
       recoveries: 0,
       errorMessage: '',
-      toasts: [
+      messages: [
         'Reloading video after streaming URL error: [BAD_HTTP_STATUS: 403] Potential causes: IP block or streaming URL deciphering failed'
       ]
     },
@@ -137,7 +142,7 @@ test('a streaming URL 403 that survives the reload runs the recovery script', as
       reloads: 1,
       recoveries: 1,
       errorMessage: '[BAD_HTTP_STATUS: 403] Potential causes: IP block or streaming URL deciphering failed',
-      toasts: [
+      messages: [
         'Reloading video after streaming URL error: [BAD_HTTP_STATUS: 403] Potential causes: IP block or streaming URL deciphering failed',
         'The built-in engine could not play the stream, trying yt-dlp instead: [PLAYER_ERROR: 403]',
         'yt-dlp could not provide the streams, using the built-in engine instead: yt-dlp could not be found'
@@ -156,7 +161,7 @@ test('an expired watch session 403 reloads the video before showing the error', 
     reloads: 1,
     recoveries: 0,
     errorMessage: '',
-    toasts: [
+    messages: [
       'Reloading video after streaming URL error: [BAD_HTTP_STATUS: 403] YouTube watch session expired. Please reopen this video.'
     ]
   }])
@@ -172,7 +177,7 @@ test('an expired watch session 403 that survives the reload shows the error', as
       reloads: 1,
       recoveries: 0,
       errorMessage: '',
-      toasts: [
+      messages: [
         'Reloading video after streaming URL error: [BAD_HTTP_STATUS: 403] YouTube watch session expired. Please reopen this video.'
       ]
     },
@@ -180,7 +185,7 @@ test('an expired watch session 403 that survives the reload shows the error', as
       reloads: 1,
       recoveries: 0,
       errorMessage: '[BAD_HTTP_STATUS: 403] YouTube watch session expired. Please reopen this video.',
-      toasts: [
+      messages: [
         'Reloading video after streaming URL error: [BAD_HTTP_STATUS: 403] YouTube watch session expired. Please reopen this video.',
         'The built-in engine could not play the stream, trying yt-dlp instead: [PLAYER_ERROR: 403]',
         'yt-dlp could not provide the streams, using the built-in engine instead: yt-dlp could not be found'
@@ -202,7 +207,7 @@ test('an expired legacy VIDEO_ERROR reloads the video before showing the error',
     reloads: 1,
     recoveries: 0,
     errorMessage: '',
-    toasts: [
+    messages: [
       'Reloading video after streaming URL error: [VIDEO_ERROR] YouTube watch session expired. Please reopen this video.'
     ]
   }])
@@ -221,7 +226,7 @@ test('an expired legacy VIDEO_ERROR that survives the reload shows the error', a
       reloads: 1,
       recoveries: 0,
       errorMessage: '',
-      toasts: [
+      messages: [
         'Reloading video after streaming URL error: [VIDEO_ERROR] YouTube watch session expired. Please reopen this video.'
       ]
     },
@@ -229,7 +234,7 @@ test('an expired legacy VIDEO_ERROR that survives the reload shows the error', a
       reloads: 1,
       recoveries: 0,
       errorMessage: '[VIDEO_ERROR] YouTube watch session expired. Please reopen this video.',
-      toasts: [
+      messages: [
         'Reloading video after streaming URL error: [VIDEO_ERROR] YouTube watch session expired. Please reopen this video.',
         'The built-in engine could not play the stream, trying yt-dlp instead: [PLAYER_ERROR: 3016]',
         'yt-dlp could not provide the streams, using the built-in engine instead: yt-dlp could not be found'

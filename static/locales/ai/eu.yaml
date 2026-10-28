@@ -648,6 +648,7 @@ Settings:
         Destructive pressed: Ekintza suntsitzailea sakatzean
         Text and icons on destructive actions: Ekintza suntsitzaileetako testua eta ikonoak
   Player Settings:
+    Pause on Stream Recovery: "Pausatu jarioa berreskuratzean"
     Buffering:
       Buffering: Bufferra
       Description: Aukeratu erreproduzigailuak bideoaren zenbat kargatzen duen aldez aurretik eta zenbat mantentzen duen kargatuta.
@@ -1509,6 +1510,10 @@ Video:
     filler: Gaitik kanpokoak
   Player:
     Playing in Picture-in-Picture: Irudiz irudi moduan erreproduzitzen
+    Stream Recovery:
+      DASH Fallback: "Audio-jarioak huts egin du, DASH formatuetara aldatzen: {error}"
+      Error Copied: "Errorea arbelera kopiatu da"
+      Legacy Fallback: "Jarioak huts egin du, formatu zaharretara aldatzen: {error}"
     Caption Timing:
       Adjust Timing: Doitu denboraketa…
       Caption Timing: Azpitituluen denboraketa
@@ -1985,6 +1990,7 @@ Tooltips:
   Proxy Settings:
     IP Block Recovery Script Path: IP blokeoa hautematean exekutatuko den script-fitxategiaren bide-izena. OpenTubeX aplikazioak amaitu arte itxaroten du eta gero bideoa berriro kargatzen du. Ordezko motorra gaituta badago, hark ere huts egiten duenean soilik exekutatzen da.
   Player Settings:
+    Pause on Stream Recovery: "Bideo-jarioak huts egiten duenean eta erreproduzigailuak berriro kargatzen duenean edo beste formatu edo motor batera aldatzen denean, erreprodukzioa pausatu egiten da eta errorea erreproduzigailuaren goialdean geratzen da baztertu arte. Desgaituta badago, erreprodukzioak jarraitzen du eta errorea jakinarazpen gisa agertzen da laburki."
     Continue Playback When Screen Is Locked: 'Audioa atzeko planoan erreproduzitzen mantentzen du eta Android multimedia-kontrolak eskaintzen ditu. Desaktibatu aplikazioa ikusgai ez dagoenean erreprodukzioa pausatzeko.'
     Enable Caption Translations: Gaituta dagoenean, azpitituluen botoiak eta C lasterbideak hobetsitako azpititulu-hizkuntzara automatikoki itzulitako pista aukeratzen dute, bideoak hizkuntza horretako jatorrizko pistarik ez badu.
     Use Quick Playback Speed Bar: Erreprodukzio-abiaduraren barra azkar bat erakusten du eskuineko erreproduzigailu-kontroletan. Kanal bakoitzaren erreprodukzio-abiadura eskuz gordetzea gaituta badago, barrak uneko kanalerako abiadura gordetzeko botoia ere izango du.
