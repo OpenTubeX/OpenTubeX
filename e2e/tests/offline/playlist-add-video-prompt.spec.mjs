@@ -80,9 +80,15 @@ test.describe('with several playlists', () => {
 
     await expect(searchRow.locator('.matchingVideoToggle')).toBeVisible()
     await expect(searchRow.locator('.sortSelect')).toBeVisible()
-    const search = await searchRow.locator('.searchInput').boundingBox()
-    const sort = await searchRow.locator('.sortSelect').boundingBox()
-    expect(Math.abs((search.y + search.height / 2) - (sort.y + sort.height / 2))).toBeLessThan(4)
+    // Measure in one frame, as the prompt may still be animating open
+    const centerOffset = await searchRow.evaluate((row) => {
+      const center = (selector) => {
+        const box = row.querySelector(selector).getBoundingClientRect()
+        return box.top + box.height / 2
+      }
+      return Math.abs(center('.searchInput') - center('.sortSelect'))
+    })
+    expect(centerOffset).toBeLessThan(4)
 
     await prompt.getByText('Playlists with matching videos', { exact: true }).click()
     await expect(toggle).toBeChecked()
@@ -112,11 +118,14 @@ test.describe('with long option labels', () => {
     const searchRow = page.locator('.prompt .controlsRow')
 
     await expect(searchRow.locator('.allowDuplicateToggle')).toBeVisible()
-    const row = await searchRow.boundingBox()
-    for (const control of ['.matchingVideoToggle', '.allowDuplicateToggle', '.sortSelect']) {
-      const box = await searchRow.locator(control).boundingBox()
-      expect(box.x, control).toBeGreaterThanOrEqual(row.x - 1)
-      expect(box.x + box.width, control).toBeLessThanOrEqual(row.x + row.width + 1)
-    }
+    // Measure in one frame, as the prompt may still be animating open
+    const overflowingControls = await searchRow.evaluate((row) => {
+      const rowBox = row.getBoundingClientRect()
+      return ['.matchingVideoToggle', '.allowDuplicateToggle', '.sortSelect'].filter((selector) => {
+        const box = row.querySelector(selector).getBoundingClientRect()
+        return box.left < rowBox.left - 0.5 || box.right > rowBox.right + 0.5
+      })
+    })
+    expect(overflowingControls).toEqual([])
   })
 })
