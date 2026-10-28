@@ -371,6 +371,8 @@ test('finger drags on the seek bar show the filmstrip, taps do not', async ({ ap
   const bigButtons = player.locator('.shaka-big-buttons-container')
   await expect(bigButtons).toBeVisible()
   const thumbFraction = () => bar.evaluate(element => (Number(element.value) - Number(element.min)) / (Number(element.max) - Number(element.min)))
+  // Shaka only moves the thumb to a seek on its next refresh tick.
+  await expect.poll(thumbFraction).toBeCloseTo(15 / duration, 2)
 
   // Dragging the knob, and dragging from elsewhere on the track, both show it.
   for (const startFraction of [await thumbFraction(), 0.7]) {
