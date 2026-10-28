@@ -423,3 +423,73 @@ test.describe('native caption timing', () => {
     }
   })
 })
+
+test.describe('caption actions in the frosted grid menu', { tag: '@scale' }, () => {
+  test.use({
+    seed: {
+      settings: {
+        videoPlaybackEngine: 'built-in',
+        ytDlpPlaybackEngineDefaultMigration: true,
+        enableSubtitlesByDefault: true,
+        usePlayerMenuGrid: true,
+        useFrostedGlassPlayerUi: true
+      }
+    }
+  })
+
+  test('keeps the action backgrounds inside the rounded menu corners', async ({ app, page }, testInfo) => {
+    await mockPlayableWatchPage(app, page, { captionTranslations: true })
+    const video = await openMockedVideo(page)
+    await video.evaluate(element => element.pause())
+    const player = page.locator('.ftVideoPlayer')
+    await player.hover()
+    await player.getByRole('button', { name: 'More settings' }).click()
+    await player.locator('.shaka-overflow-menu > .shaka-caption-button').click()
+    const languageMenu = player.locator('.shaka-text-languages')
+    const timingRow = languageMenu.locator(':scope > .ft-caption-actions > .ft-caption-timing-button')
+    await expect(timingRow).toBeVisible()
+
+    for (const roundness of [100, 200]) {
+      await page.evaluate(value => window.$store.dispatch('updateUiRoundness', value), roundness)
+      await expect(page.locator('body')).toHaveCSS('--ui-roundness', String(roundness / 100))
+      const outside = await languageMenu.evaluate((menu) => {
+        const outer = menu.closest('.shaka-overflow-menu')
+        const bounds = outer.getBoundingClientRect()
+        const outerStyle = getComputedStyle(outer)
+        const insideMenu = (x, y) => {
+          for (const [radius, cx, cy] of [
+            [outerStyle.borderBottomLeftRadius, bounds.left, bounds.bottom],
+            [outerStyle.borderBottomRightRadius, bounds.right, bounds.bottom]
+          ]) {
+            const r = Number.parseFloat(radius)
+            const centerX = cx === bounds.left ? cx + r : cx - r
+            const centerY = cy - r
+            const inCorner = (cx === bounds.left ? x < centerX : x > centerX) && y > centerY
+            if (inCorner && Math.hypot(x - centerX, y - centerY) > r + 0.5) return false
+          }
+          return x >= bounds.left - 0.5 && x <= bounds.right + 0.5 && y <= bounds.bottom + 0.5
+        }
+        const points = []
+        for (const button of menu.querySelectorAll(':scope > .ft-caption-actions > button')) {
+          const rect = button.getBoundingClientRect()
+          const style = getComputedStyle(button)
+          for (const [radius, side] of [[style.borderBottomLeftRadius, -1], [style.borderBottomRightRadius, 1]]) {
+            const r = Math.min(Number.parseFloat(radius), rect.width / 2, rect.height / 2)
+            const centerX = side < 0 ? rect.left + r : rect.right - r
+            const centerY = rect.bottom - r
+            for (let step = 0; step <= 8; step++) {
+              const angle = (step / 8) * Math.PI / 2
+              const x = centerX + side * r * Math.sin(angle)
+              const y = centerY + r * Math.cos(angle)
+              if (!insideMenu(x, y)) points.push({ button: button.className, x, y })
+            }
+          }
+        }
+        return points
+      })
+      expect(outside, `roundness ${roundness}%`).toEqual([])
+      await timingRow.hover()
+      await player.locator('.shaka-overflow-menu').screenshot({ path: testInfo.outputPath(`caption-actions-roundness-${roundness}.png`) })
+    }
+  })
+})
