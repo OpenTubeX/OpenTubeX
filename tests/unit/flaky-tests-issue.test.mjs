@@ -48,14 +48,16 @@ test('deleting a line after a fix resets that test and keeps the others', () => 
 })
 
 test('keeps untrusted titles and branches inert in Markdown and in the entry data', () => {
-  const hostile = { ...filmstrip, title: 'ping @someone `x` | --> <b>[link](https://evil.test)' }
+  const hostile = { ...filmstrip, title: 'ping @someone `x` | --> --!> <b>[link](https://evil.test)' }
   const body = run('', [hostile], 'feature/`a`-->')
   const [line] = items(body)
 
-  assert.ok(line.includes("`ping @someone 'x' | --> <b>[link](https://evil.test)`"), line)
+  assert.ok(line.includes("`ping @someone 'x' | --> --!> <b>[link](https://evil.test)`"), line)
   assert.ok(line.includes("on `feature/'a'-->`"), line)
+  // No ">" may end the comment early, whether as "-->" or "--!>".
   const data = line.slice(line.indexOf('<!-- flaky-test'))
-  assert.equal(data.match(/-->/g).length, 1)
+  assert.ok(data.endsWith(' -->'), data)
+  assert.equal(data.slice(0, -1).includes('>'), false)
   assert.equal(data.includes('|'), false)
   assert.deepEqual(items(run(body, [hostile], 'pr-b')).map(item => item.match(/\*\*(\d+)×/)[1]), ['2'])
 })
