@@ -79,8 +79,7 @@ export function initializeCapacitorTabPreviews(store, pageSwipe, tabsReady = Pro
   const restoreRevision = discardRevision
   Promise.all([readStoredTabImages(PREVIEW_PREFIX), tabsReady]).then(([stored]) => {
     if (disposed || restoreRevision !== discardRevision || !store.getters.getShowTabPreviews) return
-    cache.restore(new Map([...stored].map(([name, entry]) => [name.slice(PREVIEW_PREFIX.length), entry])))
-    cache.prune(store.getters.getTabs)
+    cache.restore(new Map([...stored].map(([name, entry]) => [name.slice(PREVIEW_PREFIX.length), entry])), store.getters.getTabs)
   }).catch(error => console.warn('Failed to restore mobile tab previews:', error))
   // Images and video can become ready after the route's initial screenshot.
   // Keep the last-seen image current without capturing when the organizer opens.

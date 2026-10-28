@@ -24,13 +24,18 @@ export function createCapacitorPreviewCache(capture, entries = new Map(), limit 
         if (!tabs.some(tab => tab.id === id && tab.route.fullPath === entry.route)) remove(id)
       }
     },
-    /** Add stored previews as the least recently seen, keeping newer captures. */
-    restore(stored) {
+    /**
+     * Add the stored previews of open tabs as the least recently seen, keeping
+     * newer captures. Delete the others before they count toward the limit.
+     */
+    restore(stored, tabs) {
       const current = new Map(entries)
       entries.clear()
       const oldestFirst = [...stored].sort(([, a], [, b]) => (a.capturedAt || 0) - (b.capturedAt || 0))
       for (const [id, { route, image }] of oldestFirst) {
-        if (typeof route === 'string' && !current.has(id)) entries.set(id, { route, image })
+        if (current.has(id)) continue
+        if (tabs.some(tab => tab.id === id && tab.route.fullPath === route)) entries.set(id, { route, image })
+        else storage?.remove(id)
       }
       for (const [id, entry] of current) entries.set(id, entry)
       evict()

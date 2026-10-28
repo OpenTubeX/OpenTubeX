@@ -118,12 +118,27 @@ test('stored previews are mirrored and restored as the least recently seen', asy
     ['a', { route: '/home', image: 'stale', capturedAt: 3 }],
     ['b', { route: '/b', image: 'b', capturedAt: 1 }],
     ['invalid', { image: 'no route' }],
-  ]))
+  ]), [tab('a'), tab('b', '/b'), tab('c', '/c')])
   assert.deepEqual([...cache.entries.keys()], ['b', 'c', 'a'])
   assert.equal(cache.get(tab('a')), 'fresh')
+  assert.deepEqual(removed, ['invalid'])
+  removed.length = 0
 
   await cache.capture(tab('d'))
   assert.deepEqual([...cache.entries.keys()], ['c', 'a', 'd'])
   cache.prune([tab('a'), tab('d')])
   assert.deepEqual(removed, ['b', 'c'])
+})
+
+test('previews of closed tabs do not push open tabs out of a restore', () => {
+  const removed = []
+  const cache = createCapacitorPreviewCache(async () => null, new Map([['a', { route: '/home', image: 'a' }]]), 2, {
+    write () {}, remove: id => removed.push(id),
+  })
+  cache.restore(new Map([
+    ['b', { route: '/b', image: 'b', capturedAt: 1 }],
+    ['closed', { route: '/closed', image: 'closed', capturedAt: 2 }],
+  ]), [tab('a'), tab('b', '/b')])
+  assert.deepEqual([...cache.entries.keys()], ['b', 'a'])
+  assert.deepEqual(removed, ['closed'])
 })
