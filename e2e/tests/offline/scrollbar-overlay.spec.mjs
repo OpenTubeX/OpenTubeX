@@ -293,6 +293,19 @@ test.describe('overlay scrollbars', () => {
     await expect(page.locator('html')).not.toHaveAttribute('data-overlayscrollbars-initialize')
     await expect(page.locator('body > .os-scrollbar')).toHaveCount(0)
     expect(await page.evaluate(() => document.documentElement.clientWidth < window.innerWidth)).toBe(true)
+    // Nested containers that rely on the default overflow still scroll.
+    const nested = await page.evaluate(() => {
+      const viewport = document.createElement('div')
+      Object.assign(viewport.style, { position: 'fixed', top: '100px', left: '100px', width: '200px', height: '100px' })
+      const content = document.createElement('div')
+      content.style.height = '300px'
+      viewport.append(content)
+      document.body.append(viewport)
+      document.querySelector('#app').__vue_app__._context.directives['overlay-scrollbars'].mounted(viewport, { value: true })
+      viewport.scrollTop = 100
+      return { scrollTop: viewport.scrollTop, bars: viewport.querySelectorAll('.os-scrollbar').length, nativeScrollbar: viewport.clientWidth < viewport.offsetWidth }
+    })
+    expect(nested).toEqual({ scrollTop: 100, bars: 0, nativeScrollbar: true })
   })
 
   test('remeasures the page after its scrolling is locked and unlocked', async ({ page }) => {

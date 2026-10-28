@@ -25,6 +25,7 @@ import { setAndroidAlwaysShowScrollbars, setAndroidPageScrollbarsHidden } from '
  */
 
 const VIEWPORT_ATTRIBUTE = 'data-overlayscrollbars-viewport'
+const NATIVE_VIEWPORT_ATTRIBUTE = 'data-overlayscrollbars-native-viewport'
 // A remaining range up to this size is rounding at fractional zoom levels,
 // not content a bar could scroll to.
 const SCROLL_BOUNDARY_TOLERANCE = 1
@@ -657,12 +658,17 @@ function toggleOverlayScrollbars(element, enabled) {
   const instance = instances.get(element)
 
   if (enabled && !instance) {
-    // WebViews without scroll-linked animations keep their native scrollbars.
-    if (typeof ScrollTimeline === 'undefined') return
+    // Browsers without scroll-linked animations keep their native scrollbars,
+    // but the container still scrolls like a marked one.
+    if (typeof ScrollTimeline === 'undefined') {
+      element.setAttribute(NATIVE_VIEWPORT_ATTRIBUTE, '')
+      return
+    }
     create(element)
-  } else if (!enabled && instance) {
-    instance.destroy()
+  } else if (!enabled) {
+    instance?.destroy()
     element.removeAttribute(VIEWPORT_ATTRIBUTE)
+    element.removeAttribute(NATIVE_VIEWPORT_ATTRIBUTE)
   }
 }
 
