@@ -123,3 +123,28 @@ test.describe('with external link confirmation', () => {
     await expect(addPrompt).toBeVisible()
   })
 })
+
+test('moves a busy prompt out of player fullscreen when Escape exits it', async ({ app, page }) => {
+  await mockPlayableWatchPage(app, page)
+  await openMockedVideo(page)
+  await setPlayerFullscreen(page, true)
+
+  await page.evaluate(() => window.dispatchEvent(new Event('opentubex:open-tab-organizer')))
+  await page.locator(':fullscreen .tabOrganizerBackdrop').getByRole('button', { name: 'Create Group', exact: true }).click()
+  const groupPrompt = page.getByRole('dialog', { name: 'Create Group', exact: true })
+  await groupPrompt.getByRole('textbox').fill('Research')
+  // Hold group creation open so the prompt stays busy.
+  await app.electronApp.evaluate(({ ipcMain }) => {
+    ipcMain.removeHandler('tabs-create-group')
+    ipcMain.handle('tabs-create-group', () => new Promise(resolve => { globalThis.__e2eFinishCreateGroup = resolve }))
+  })
+  await groupPrompt.getByRole('button', { name: 'Create Group', exact: true }).click()
+  await expect(page.locator(':fullscreen .prompt .promptCard[inert]')).toHaveCount(1)
+
+  await pressBrowserEscape(app, page)
+
+  await expect.poll(() => page.evaluate(() => document.fullscreenElement)).toBeNull()
+  await expect(page.locator('.app > .prompt')).toHaveCount(1)
+  await expect(groupPrompt).toBeVisible()
+  await app.electronApp.evaluate(() => globalThis.__e2eFinishCreateGroup(null))
+})
