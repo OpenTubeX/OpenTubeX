@@ -52,10 +52,14 @@ async function receiverForTest(t, { version = 3, onPlay } = {}) {
     socket.on('close', () => receiver.sockets.delete(socket))
     socket.on('error', () => {})
     if (version) socket.write(encodeFcastPacket(FcastOpcode.VERSION, { version }))
-    socket.on('data', createFcastPacketReader(async (opcode, body) => {
+    const read = createFcastPacketReader(async (opcode, body) => {
       receiver.packets.push({ opcode, body })
       if (opcode === FcastOpcode.PLAY) await onPlay?.(body, receiver)
-    }))
+    })
+    // Other local clients can probe the port; drop them like the sender does.
+    socket.on('data', chunk => {
+      try { read(chunk) } catch { socket.destroy() }
+    })
   })
   await new Promise(resolve => server.listen(0, '127.0.0.1', resolve))
   t.after(() => {
