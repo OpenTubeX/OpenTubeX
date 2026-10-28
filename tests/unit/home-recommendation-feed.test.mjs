@@ -6,7 +6,6 @@ import { computed, effectScope, reactive, ref, shallowRef, toRaw, watch } from '
 import { getRecommendationLearningEntries, recommendationSubscriptionIds } from '../../src/renderer/helpers/recommendations.js'
 import { runCooperatively } from '../../src/renderer/helpers/cooperativeTask.js'
 import { mergeRecommendationCandidates } from '../../src/renderer/helpers/recommendationCandidates.js'
-import { shouldHideMembersOnlyContent } from '../../src/renderer/helpers/restricted-playback.js'
 import { getUpcomingPremiereTimestamp } from '../../src/renderer/helpers/subscription-entries.js'
 import { isOnAiSlopList } from '../../src/renderer/helpers/aiSlopList.js'
 
@@ -37,6 +36,7 @@ function createFeed({ records = [], candidates = [], playlists = [], settings = 
     getRecommendationEpoch: 'epoch',
     getRecommendationExploration: 0.2,
     getVideoCache: {},
+    getMembersOnlyChannelIdSet: new Set(),
     ...settings,
     get getRecommendationRecords() { return Object.values(state.recommendations.recommendationRecords) },
   })
@@ -55,7 +55,6 @@ function createFeed({ records = [], candidates = [], playlists = [], settings = 
     useTabContext: () => ({}),
     getRecommendationLearningEntries, recommendationSubscriptionIds, mergeRecommendationCandidates, getUpcomingPremiereTimestamp,
     isVideoHiddenByPreferences,
-    shouldHideMembersOnlyContent: (membersOnly, getters) => shouldHideMembersOnlyContent(membersOnly, getters, true),
     buildRecommendationProfileAsync: async (...args) => { work.profiles++; return buildProfile(...args) },
     rankRecommendationCandidatesAsync: async (videos, profile, { limit, kept = [] }) => {
       work.rankings++
@@ -165,7 +164,7 @@ for (const { name, settings, updated, candidate } of [
   { name: 'hidden channels', settings: { getActiveChannelsHiddenNames: new Set(['hidden']) }, updated: { getActiveChannelsHiddenNames: new Set() }, candidate: { authorId: 'hidden' } },
   { name: 'the AI slop list', settings: { getUseAiSlopList: true, getAiSlopBlockedChannels: new Set(['@slop']) }, updated: { getUseAiSlopList: false, getAiSlopBlockedChannels: new Set() }, candidate: { authorHandle: '@Slop' } },
   { name: 'forbidden titles', settings: { getActiveForbiddenTitles: ['hidden subject'] }, updated: { getActiveForbiddenTitles: [] }, candidate: { title: 'Hidden subject' } },
-  { name: 'membership authentication', settings: { getYtDlpPlaybackAuthMode: 'none' }, updated: { getYtDlpPlaybackAuthMode: 'file', getYtDlpPlaybackCookiesPath: '/fixture/cookies.txt' }, candidate: { isMembersOnly: true } },
+  { name: 'members-only channels', settings: { getMembersOnlyChannelIdSet: new Set() }, updated: { getMembersOnlyChannelIdSet: new Set(['member']) }, candidate: { authorId: 'member', isMembersOnly: true } },
 ]) {
   test(`revisiting Home reranks cached candidates after changing ${name}`, async () => {
     const first = createFeed({ settings, candidates: [{ videoId: 'normal' }, { videoId: 'filtered', ...candidate }] })

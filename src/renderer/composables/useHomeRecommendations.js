@@ -7,7 +7,6 @@ import { requestWithFallback } from '../helpers/api/fallback'
 import { getLocalChannelVideos, getLocalSearchResults, getLocalRelatedVideos } from '../helpers/api/local'
 import { getInvidiousChannelVideos, getInvidiousSearchResults, getInvidiousRelatedVideos } from '../helpers/api/invidious'
 import { isVideoHiddenByPreferences } from '../helpers/subscriptions'
-import { shouldHideMembersOnlyContent } from '../helpers/restricted-playback'
 import { getUpcomingPremiereTimestamp } from '../helpers/subscription-entries'
 import { useTabContext } from '../tabs/TabContext'
 
@@ -71,13 +70,13 @@ export function useHomeRecommendations(visible) {
   }
   function isVisible(video) {
     return video != null && typeof video === 'object' &&
-      !shouldHideMembersOnlyContent(video.isMembersOnly, store.getters) &&
       !isVideoHiddenByPreferences(video, {
         hideLiveStreams: store.getters.getHideLiveStreams,
         hideUpcomingPremieres: store.getters.getHideUpcomingPremieres,
         hiddenChannelNames: store.getters.getActiveChannelsHiddenNames,
         aiSlopChannels: store.getters.getAiSlopBlockedChannels,
         forbiddenTitles: store.getters.getActiveForbiddenTitles,
+        membersOnlyChannelIds: store.getters.getMembersOnlyChannelIdSet,
       })
   }
   async function makeProfile(isCancelled) {
@@ -151,7 +150,7 @@ export function useHomeRecommendations(visible) {
     // The update time stands in for the list contents, which are too large to serialize
     aiSlopList: [store.getters.getUseAiSlopList, store.getters.getAiSlopListFetchedAt],
     forbiddenTitles: store.getters.getActiveForbiddenTitles,
-    hideMembersOnly: shouldHideMembersOnlyContent(true, store.getters),
+    membersOnlyChannels: [...store.getters.getMembersOnlyChannelIdSet],
   }))
   function nextVisibilityChange() {
     if (!store.getters.getHideUpcomingPremieres) return Infinity

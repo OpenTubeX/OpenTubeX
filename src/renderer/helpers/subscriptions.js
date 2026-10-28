@@ -505,6 +505,7 @@ export function isUpcomingPremiere(video, now = Date.now()) {
  *  hiddenChannelNames?: Set<string>,
  *  aiSlopChannels?: Set<string>,
  *  forbiddenTitles?: string[],
+ *  membersOnlyChannelIds?: Set<string> | null,
  * }} preferences
  */
 export function isVideoHiddenByPreferences(video, {
@@ -513,7 +514,8 @@ export function isVideoHiddenByPreferences(video, {
   hideChannelsBasedOnText = true,
   hiddenChannelNames = new Set(),
   aiSlopChannels = new Set(),
-  forbiddenTitles = []
+  forbiddenTitles = [],
+  membersOnlyChannelIds = null
 } = {}) {
   if (hideLiveStreams && (video.liveNow || video.isUpcoming)) {
     return true
@@ -536,6 +538,15 @@ export function isVideoHiddenByPreferences(video, {
   }
 
   if (isOnAiSlopList(aiSlopChannels, video)) {
+    return true
+  }
+
+  if (
+    membersOnlyChannelIds != null &&
+    video.isMembersOnly === true &&
+    !membersOnlyChannelIds.has(video.authorId) &&
+    !membersOnlyChannelIds.has(video.collaborators?.[0]?.id)
+  ) {
     return true
   }
 

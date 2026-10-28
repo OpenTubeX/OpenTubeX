@@ -143,6 +143,7 @@ const shouldBeVisible = computed(() => {
     aiSlopChannels: aiSlopChannels.value,
     forbiddenTitles: forbiddenTitles.value,
     hideChannelsBasedOnText: false,
+    membersOnlyChannelIds: store.getters.getMembersOnlyChannelIdSet,
   })
 })
 

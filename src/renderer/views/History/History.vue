@@ -271,6 +271,7 @@
             :show-watched-style-in-history="true"
             :use-channels-hidden-preference="false"
             :hide-forbidden-titles="false"
+            :hide-members-only="false"
           />
           <FtAutoLoadNextPageWrapper
             v-if="showLoadMoreButton"

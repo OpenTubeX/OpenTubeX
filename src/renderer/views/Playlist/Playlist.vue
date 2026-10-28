@@ -128,6 +128,7 @@
             :use-channels-hidden-preference="false"
             :use-hide-upcoming-premieres-preference="false"
             :hide-forbidden-titles="false"
+            :hide-members-only="false"
             :always-show-add-to-playlist-button="true"
             :quick-bookmark-button-enabled="quickBookmarkButtonEnabled"
             :can-move-video-up="canMoveVideos"

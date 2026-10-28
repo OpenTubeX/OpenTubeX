@@ -109,6 +109,7 @@ const visibleData = computed(() => props.offline
       aiSlopChannels: store.getters.getAiSlopBlockedChannels,
       forbiddenTitles: store.getters.getActiveForbiddenTitles,
       hideChannelsBasedOnText: false,
+      membersOnlyChannelIds: store.getters.getMembersOnlyChannelIdSet,
     })))
 
 const emit = defineEmits(['pause-player', 'close'])

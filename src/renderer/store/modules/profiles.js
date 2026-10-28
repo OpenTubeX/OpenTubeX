@@ -3,6 +3,7 @@ import { DBProfileHandlers } from '../../../datastores/handlers/index'
 import { getProfileWithUpdatedSubscriptionDetails } from '../../helpers/subscription-profile-details'
 import { copySubscriptionChannelSettings, getChannelWithUpdatedSettings, getNextSubscriptionSettingsTimestamp, isValidSubscriptionSettingsTimestamp } from '../../helpers/subscription-channels'
 import { DEFAULT_PROFILE_ICON } from '../../helpers/profileIcons'
+import { hasConfiguredRestrictedPlaybackAuthentication } from '../../helpers/restricted-playback'
 
 const state = {
   profileList: [{
@@ -51,6 +52,16 @@ const getters = {
     const mainProfile = state.profileList[0]
 
     return new Map(mainProfile.subscriptions.map((channel) => [channel.id, channel]))
+  },
+
+  /** Channels whose members-only videos are shown, which also requires authenticated playback */
+  getMembersOnlyChannelIdSet: (state, getters) => {
+    if (!hasConfiguredRestrictedPlaybackAuthentication(getters)) return new Set()
+
+    // Channel settings are kept in sync across profiles, so the main profile has them all
+    return new Set(state.profileList[0].subscriptions
+      .filter(channel => channel.showMembersOnly === true)
+      .map(channel => channel.id))
   },
 }
 

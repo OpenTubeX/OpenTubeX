@@ -21,6 +21,7 @@
       :use-channels-hidden-preference="useChannelsHiddenPreference"
       :use-hide-upcoming-premieres-preference="useHideUpcomingPremieresPreference"
       :hide-forbidden-titles="hideForbiddenTitles"
+      :hide-members-only="hideMembersOnly"
       :always-show-add-to-playlist-button="alwaysShowAddToPlaylistButton"
       :quick-bookmark-button-enabled="quickBookmarkButtonEnabled"
       :can-move-video-up="canMoveVideoUp && index > 0"
@@ -105,6 +106,10 @@ const props = defineProps({
     default: true,
   },
   hideForbiddenTitles: {
+    type: Boolean,
+    default: true
+  },
+  hideMembersOnly: {
     type: Boolean,
     default: true
   },

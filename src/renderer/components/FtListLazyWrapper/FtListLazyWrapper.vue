@@ -136,6 +136,10 @@ const props = defineProps({
     type: Boolean,
     default: true
   },
+  hideMembersOnly: {
+    type: Boolean,
+    default: true
+  },
   searchQueryText: {
     type: String,
     required: false,
@@ -269,7 +273,8 @@ const showResult = computed(() => {
       hideUpcomingPremieres: hideUpcomingPremieres.value,
       hiddenChannelNames: channelsHiddenNames.value,
       aiSlopChannels: aiSlopChannels.value,
-      forbiddenTitles: forbiddenTitles.value
+      forbiddenTitles: forbiddenTitles.value,
+      membersOnlyChannelIds: props.hideMembersOnly ? store.getters.getMembersOnlyChannelIdSet : null
     })) {
       return false
     }
