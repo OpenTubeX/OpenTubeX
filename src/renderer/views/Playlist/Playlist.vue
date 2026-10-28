@@ -101,7 +101,7 @@
         </button>
       </FtFlexBox>
       <template
-        v-if="shownPlaylistItems.length > 0 || moreVideoDataAvailable"
+        v-if="(isUserPlaylistRequested ? shownPlaylistItems : visiblePlaylistItems).length > 0 || moreVideoDataAvailable"
       >
         <FtSelect
           v-if="isUserPlaylistRequested && shownPlaylistItems.length > 1"

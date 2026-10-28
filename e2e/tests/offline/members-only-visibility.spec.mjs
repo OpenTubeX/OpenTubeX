@@ -122,6 +122,51 @@ test.describe('community post attachments', () => {
   })
 })
 
+async function routePlaylist(page, lockups) {
+  await page.route('https://i.ytimg.com/**', route => fulfillVisualFixture(route, 'video-thumbnail'))
+  await page.route('https://www.youtube.com/youtubei/v1/browse**', route => route.fulfill({
+    json: {
+      metadata: { playlistMetadataRenderer: { title: 'Mixed playlist', description: '' } },
+      sidebar: {
+        playlistSidebarRenderer: {
+          items: [{
+            playlistSidebarPrimaryInfoRenderer: {
+              title: { simpleText: 'Mixed playlist' },
+              stats: [{ simpleText: '2 videos' }, { simpleText: 'No views' }],
+              thumbnailRenderer: {
+                playlistVideoThumbnailRenderer: { thumbnail: { thumbnails: [{ url: 'https://i.ytimg.com/vi/sampleVid01/hqdefault.jpg', width: 480, height: 360 }] } }
+              }
+            }
+          }]
+        }
+      },
+      contents: {
+        twoColumnBrowseResultsRenderer: {
+          tabs: [{
+            tabRenderer: {
+              selected: true,
+              content: {
+                sectionListRenderer: {
+                  contents: [{
+                    itemSectionRenderer: {
+                      contents: [{
+                        playlistVideoListRenderer: {
+                          playlistId: 'PL-mixed-playlist',
+                          contents: lockups.map(lockup => ({ lockupViewModel: lockup }))
+                        }
+                      }]
+                    }
+                  }]
+                }
+              }
+            }
+          }]
+        }
+      }
+    }
+  }))
+}
+
 test.describe('YouTube playlists', () => {
   test.use({
     seed: {
@@ -151,48 +196,7 @@ test.describe('YouTube playlists', () => {
     membersVideo.metadata.lockupMetadataViewModel.metadata.contentMetadataViewModel.metadataRows[1].badges = [{
       badgeViewModel: { badgeText: 'Members only', badgeStyle: 'BADGE_MEMBERS_ONLY' }
     }]
-    await page.route('https://i.ytimg.com/**', route => fulfillVisualFixture(route, 'video-thumbnail'))
-    await page.route('https://www.youtube.com/youtubei/v1/browse**', route => route.fulfill({
-      json: {
-        metadata: { playlistMetadataRenderer: { title: 'Mixed playlist', description: '' } },
-        sidebar: {
-          playlistSidebarRenderer: {
-            items: [{
-              playlistSidebarPrimaryInfoRenderer: {
-                title: { simpleText: 'Mixed playlist' },
-                stats: [{ simpleText: '2 videos' }, { simpleText: 'No views' }],
-                thumbnailRenderer: {
-                  playlistVideoThumbnailRenderer: { thumbnail: { thumbnails: [{ url: 'https://i.ytimg.com/vi/sampleVid01/hqdefault.jpg', width: 480, height: 360 }] } }
-                }
-              }
-            }]
-          }
-        },
-        contents: {
-          twoColumnBrowseResultsRenderer: {
-            tabs: [{
-              tabRenderer: {
-                selected: true,
-                content: {
-                  sectionListRenderer: {
-                    contents: [{
-                      itemSectionRenderer: {
-                        contents: [{
-                          playlistVideoListRenderer: {
-                            playlistId: 'PL-mixed-playlist',
-                            contents: [{ lockupViewModel: publicVideo }, { lockupViewModel: membersVideo }]
-                          }
-                        }]
-                      }
-                    }]
-                  }
-                }
-              }
-            }]
-          }
-        }
-      }
-    }))
+    await routePlaylist(page, [publicVideo, membersVideo])
     await page.locator(sel.searchInput).fill('https://www.youtube.com/playlist?list=PL-mixed-playlist')
     await page.locator(sel.searchInput).press('Enter')
 
@@ -204,5 +208,21 @@ test.describe('YouTube playlists', () => {
       channelId, settings: { showMembersOnly: true }
     }), 'UC-sample-channel')
     await expect(items.getByText('Members playlist video')).toBeVisible()
+  })
+
+  test('says a YouTube playlist has no videos when all of them are hidden members-only videos', async ({ page }) => {
+    const lockup = JSON.parse(await readFile(new URL('../../fixtures/innertube/watch/review-channel-lockup.json', import.meta.url), 'utf8'))
+    lockup.metadata.lockupMetadataViewModel.metadata.contentMetadataViewModel.metadataRows[1].badges = [{
+      badgeViewModel: { badgeText: 'Members only', badgeStyle: 'BADGE_MEMBERS_ONLY' }
+    }]
+    await routePlaylist(page, [lockup])
+    await page.locator(sel.searchInput).fill('https://www.youtube.com/playlist?list=PL-mixed-playlist')
+    await page.locator(sel.searchInput).press('Enter')
+
+    await expect(page.getByText('This playlist currently has no videos.')).toBeVisible()
+    await page.evaluate(channelId => window.$store.dispatch('updateChannelSettings', {
+      channelId, settings: { showMembersOnly: true }
+    }), 'UC-sample-channel')
+    await expect(page.locator('.playlistItemsCard').getByText('Sample recommendation', { exact: true })).toBeVisible()
   })
 })
