@@ -300,7 +300,8 @@ function create(element) {
       if (observe) {
         observedElements.set(node, instance)
         getResizeObserver().observe(node)
-      } else if (node.parentNode !== element) {
+      } else if (node.parentNode !== element && observedElements.get(node) === instance) {
+        // A child moved into another marked container belongs to that one now.
         observedElements.delete(node)
         getResizeObserver().unobserve(node)
       }

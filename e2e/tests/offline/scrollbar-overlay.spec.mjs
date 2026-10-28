@@ -654,6 +654,33 @@ test.describe('overlay scrollbars', () => {
       expect(classMutations).toBe(0)
     })
 
+    test('keeps measuring a child that moved into another scroll container', async ({ page }) => {
+      await page.evaluate(() => {
+        const directive = document.querySelector('#app').__vue_app__._context.directives['overlay-scrollbars']
+        // Observers run in creation order, so the receiving container sees the move first.
+        for (const name of ['receiver', 'sender']) {
+          const viewport = document.createElement('div')
+          viewport.dataset.movedChildTest = name
+          Object.assign(viewport.style, { position: 'fixed', top: '100px', left: name === 'receiver' ? '100px' : '400px', width: '200px', height: '100px', zIndex: '9999' })
+          document.body.append(viewport)
+          directive.mounted(viewport, { value: true })
+        }
+        const child = document.createElement('div')
+        child.style.height = '50px'
+        document.querySelector('[data-moved-child-test="sender"]').append(child)
+      })
+      await page.evaluate(() => new Promise(resolve => requestAnimationFrame(() => requestAnimationFrame(resolve))))
+      await page.evaluate(() => {
+        const child = document.querySelector('[data-moved-child-test="sender"] > div:not(.os-scrollbar)')
+        document.querySelector('[data-moved-child-test="receiver"]').prepend(child)
+      })
+      await page.evaluate(() => new Promise(resolve => requestAnimationFrame(() => requestAnimationFrame(resolve))))
+      await page.evaluate(() => {
+        document.querySelector('[data-moved-child-test="receiver"] > div:not(.os-scrollbar)').style.height = '300px'
+      })
+      await expect(page.locator('[data-moved-child-test="receiver"] > .os-scrollbar-vertical')).toHaveClass(/os-scrollbar-visible/)
+    })
+
     test('lets handle presses reach the container as scroll intent', async ({ page }) => {
       const viewport = await addNestedCustomSpeedScroller(page, 'data-handle-press-test', 0)
       await viewport.evaluate(element => element.addEventListener('pointerdown', event => {
