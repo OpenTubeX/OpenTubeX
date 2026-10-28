@@ -42,7 +42,6 @@ html[data-overlayscrollbars-initialize],
   );
 
   position: absolute;
-  box-sizing: border-box;
 
   /* Tracks move out of this box to follow the scroll offset. Layout
      containment draws and hit-tests them there without letting them extend
@@ -55,6 +54,12 @@ html[data-overlayscrollbars-initialize],
     opacity 0.15s,
     visibility 0.15s,
     inset 0.15s;
+}
+
+/* The padding is part of the bar's size, also inside the player, whose
+   styles revert box-sizing for every descendant. */
+body .os-scrollbar {
+  box-sizing: border-box;
 }
 
 body > .os-scrollbar {
