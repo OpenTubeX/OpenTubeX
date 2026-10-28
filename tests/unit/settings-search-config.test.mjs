@@ -40,6 +40,32 @@ test('automatic tab unloading controls are searchable only on Electron', () => {
   }
 })
 
+test('buffering and yt-dlp streaming settings are searchable in Advanced', () => {
+  const searchLabels = (type, usingElectron, isCapacitor = false) => createSettingsSearchIndex({
+    sections: [{ type, title: type, description: '' }],
+    tm: path => getAtPath(locale, path),
+    store: { getters: {} },
+    usingElectron,
+    isCapacitor,
+  }).get(type).map(({ label }) => label)
+  const bufferingLabels = ['Buffering', 'Buffer Ahead', 'Rewind Buffer', 'Buffer Before Playing']
+  const ytDlpLabels = ['yt-dlp Streaming', 'Preload Upcoming Videos', 'Parallel Segment Loading', 'Concurrent Preloads']
+
+  const playback = searchLabels('playback', true)
+  for (const label of [...bufferingLabels, ...ytDlpLabels]) {
+    assert.ok(!playback.includes(label), label)
+  }
+  for (const [usingElectron, isCapacitor] of [[true, false], [false, true], [false, false]]) {
+    const advanced = searchLabels('advanced', usingElectron, isCapacitor)
+    for (const label of bufferingLabels) {
+      assert.ok(advanced.includes(label), label)
+    }
+    for (const label of ytDlpLabels) {
+      assert.equal(advanced.includes(label), usingElectron || isCapacitor, label)
+    }
+  }
+})
+
 test('scheduled backup settings are searchable only on desktop', () => {
   for (const [usingElectron, isCapacitor] of [[true, false], [false, true], [false, false]]) {
     const entries = createSettingsSearchIndex({

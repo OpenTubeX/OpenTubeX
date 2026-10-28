@@ -1,7 +1,7 @@
 import { test, expect, goToSettingsSection, latestSettings, readDatastore } from '../../helpers/app.mjs'
 
 async function openPlayerSettings(page) {
-  const section = await goToSettingsSection(page, 'playback')
+  const section = await goToSettingsSection(page, 'advanced')
   const heading = section.getByRole('heading', { name: 'yt-dlp Streaming', exact: true })
   const ytDlpSection = heading.locator('xpath=../..')
 

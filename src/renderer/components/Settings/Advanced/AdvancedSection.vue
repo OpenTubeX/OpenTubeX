@@ -2,8 +2,10 @@
   <div class="settingsCategory">
     <TabUnloadingSettings v-if="USING_ELECTRON" />
     <AlternativeProvidersSettings />
+    <BufferSettings />
     <ExternalPlayerSettings v-if="USING_ELECTRON" />
     <ExternalSoftwareSettings v-if="USING_ELECTRON || (IS_CAPACITOR && supportsYtDlp)" />
+    <YtDlpStreamingSettings v-if="supportsYtDlp" />
     <ProxySettings v-if="USING_ELECTRON || IS_CAPACITOR" />
     <ExperimentalSettings v-if="USING_ELECTRON" />
     <DiagnosticsSettings />
@@ -18,6 +20,8 @@ import ExternalPlayerSettings from './ExternalPlayerSettings.vue'
 import ExternalSoftwareSettings from './ExternalSoftwareSettings.vue'
 import AlternativeProvidersSettings from './AlternativeProvidersSettings.vue'
 import ProxySettings from './ProxySettings.vue'
+import BufferSettings from './BufferSettings.vue'
+import YtDlpStreamingSettings from './YtDlpStreamingSettings.vue'
 import { supportsYtDlp } from '../../../helpers/ytDlpCapabilities'
 
 const IS_CAPACITOR = !!process.env.IS_CAPACITOR && !process.env.IS_IOS
