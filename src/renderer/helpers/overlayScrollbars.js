@@ -182,8 +182,18 @@ function create(element) {
   }
 
   function update(force = false) {
-    // Hidden containers report their new size once they are shown again.
-    if (!element.isConnected || (!isPage && !element.checkVisibility())) return
+    if (!element.isConnected) return
+    // A hidden container has nothing to scroll. It reports its size again
+    // once shown, so skip measuring it until then.
+    if (!isPage && !element.checkVisibility()) {
+      for (const bar of scrollbars) {
+        bar.usable = false
+        setClass(bar.scrollbar, 'os-scrollbar-visible', false)
+        setClass(bar.scrollbar, 'os-scrollbar-unusable', true)
+      }
+      instance.measurement = ''
+      return
+    }
 
     const style = getComputedStyle(scrollElement)
     const rtl = (isPage ? getComputedStyle(document.body) : style).direction === 'rtl'
