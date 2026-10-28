@@ -346,6 +346,60 @@ test.describe('Shorts transcript navigation', () => {
     await expect(transcriptButton).toHaveCount(0)
   })
 
+  test('fits the transcript inside the Shorts panel with a single scroller', { tag: '@scale' }, async ({ app, page }) => {
+    const cues = Array.from({ length: 40 }, (_, index) => (
+      `00:00:${String(index + 1).padStart(2, '0')}.000 --> 00:00:${String(index + 2).padStart(2, '0')}.000\nCue ${index + 1}`
+    ))
+    await mockPlayableWatchPage(app, page, {
+      captionVideoIds: CAPTIONED_SHORT_IDS,
+      captionText: `Cue 0\n\n${cues.join('\n\n')}`
+    })
+    await page.locator(sel.searchInput)
+      .fill(`https://www.youtube.com/shorts/${CAPTIONED_SHORT_IDS[0]}`)
+    await page.locator(sel.searchInput).press('Enter')
+    const video = await waitForPlayback(page)
+    await video.evaluate(element => element.pause())
+
+    await page.locator('.shortsComponentAction')
+      .filter({ hasText: 'Transcript' })
+      .getByRole('button')
+      .click()
+    const panel = page.locator('.shortsAuxPanel')
+    const target = panel.locator('.shortsAuxPanelTarget')
+    const card = target.locator('.watchVideoTranscript')
+    const list = card.locator('.transcriptSegments')
+    await expect(panel).toHaveClass(/shortsAuxPanelOpen/)
+    await expect(list.locator('.transcriptSegment')).toHaveCount(41)
+    // Measure after the panel's slide-in, which moves every bounding box.
+    await panel.evaluate(element => Promise.all(element.getAnimations().map(animation => animation.finished)))
+    await expect.poll(() => list.evaluate(element => element.scrollHeight - element.clientHeight))
+      .toBeGreaterThan(100)
+
+    // Only the segment list scrolls; the panel target must not overflow.
+    await expect.poll(() => target.evaluate(element => element.scrollHeight - element.clientHeight))
+      .toBeLessThanOrEqual(1)
+    const [targetBounds, cardBounds] = await Promise.all([target.boundingBox(), card.boundingBox()])
+    expect(cardBounds.y + cardBounds.height).toBeLessThanOrEqual(targetBounds.y + targetBounds.height + 1)
+
+    await list.evaluate(element => { element.scrollTop = element.scrollHeight })
+    const lastSegment = list.locator('.transcriptSegment').last()
+    await expect.poll(async () => {
+      const [segmentBounds, listBounds] = await Promise.all([lastSegment.boundingBox(), list.boundingBox()])
+      return segmentBounds.y + segmentBounds.height - (listBounds.y + listBounds.height)
+    }).toBeLessThanOrEqual(1)
+    const listBounds = await list.boundingBox()
+    expect(listBounds.y + listBounds.height).toBeLessThanOrEqual(targetBounds.y + targetBounds.height + 1)
+
+    // The scrollbar sits on the panel edge, beside the segments rather than over them.
+    const [scrollbarBounds, segmentBounds] = await Promise.all([
+      list.locator(':scope > .os-scrollbar-vertical').boundingBox(),
+      lastSegment.boundingBox(),
+    ])
+    expect(Math.abs(scrollbarBounds.x + scrollbarBounds.width - (targetBounds.x + targetBounds.width)))
+      .toBeLessThanOrEqual(1)
+    expect(segmentBounds.x + segmentBounds.width).toBeLessThanOrEqual(scrollbarBounds.x + 1)
+  })
+
   test('docks, scrolls, and clamps video information across Shorts navigation', async ({ app, page }) => {
     await mockPlayableWatchPage(app, page)
     await setWindowSize(app, page, { width: 1325, height: 760 })

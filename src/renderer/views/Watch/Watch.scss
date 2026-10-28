@@ -1016,15 +1016,25 @@
     .shortsAuxPanelTarget :deep(.watchVideoTranscript) {
       display: flex;
       flex-direction: column;
+      box-sizing: border-box;
       block-size: 100%;
+      margin-block-end: 0;
       max-block-size: none;
+      // The segment list keeps the end padding so its scrollbar sits on the
+      // panel edge instead of inside the card's padding.
+      padding-inline-end: 0;
       overflow: hidden;
+    }
+
+    .shortsAuxPanelTarget :deep(.watchVideoTranscript > :not(.transcriptSegments)) {
+      margin-inline-end: 16px;
     }
 
     .shortsAuxPanelTarget :deep(.transcriptSegments) {
       flex: 1 1 auto;
       min-block-size: 0;
       max-block-size: none;
+      padding-inline-end: 16px;
       overscroll-behavior: contain;
     }
 
