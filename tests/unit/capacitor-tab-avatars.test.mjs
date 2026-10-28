@@ -110,3 +110,19 @@ test('a failed download is not retried until the source changes', async t => {
   assert.equal(state.filesystem.files.size, 0)
   dispose()
 })
+
+test('clearing waits for tab use before downloading avatars again', async t => {
+  const state = setup(t)
+  const dispose = state.start()
+  await settle()
+  clearCapacitorTabAvatars()
+  await settle()
+  assert.equal(state.fetchAvatar.mock.callCount(), 1)
+  assert.equal(getCapacitorTabAvatar(channelTab), null)
+
+  state.store.getters.getTabs = [channelTab, { id: 'other', route: { path: '/history' } }]
+  await settle()
+  assert.equal(state.fetchAvatar.mock.callCount(), 2)
+  assert.equal(getCapacitorTabAvatar(channelTab), 'data:image/jpeg;base64,176x176')
+  dispose()
+})

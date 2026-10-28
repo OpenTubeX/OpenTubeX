@@ -12,7 +12,6 @@ const AVATAR_SIZE = 176
 /** @type {Map<string, { source: string, image: string }>} */
 const avatars = shallowReactive(new Map())
 const attempted = new Map()
-let resync = () => {}
 
 /**
  * Channel tabs share their channel's avatar; watch tabs use their creator's.
@@ -28,7 +27,8 @@ function getAvatarKey(path) {
 function getRemoteAvatarUrl(getters, key) {
   const separator = key.indexOf('-')
   const id = key.slice(separator + 1)
-  return key.slice(0, separator) === 'channel' ? getters.getChannelThumbnail(id) : getters.getVideoAvatar(id)
+  const url = key.slice(0, separator) === 'channel' ? getters.getChannelThumbnail(id) : getters.getVideoAvatar(id)
+  return url?.startsWith('//') ? `https:${url}` : url
 }
 
 /**
@@ -42,9 +42,9 @@ export function getCapacitorTabAvatar(tab) {
 }
 
 export function clearCapacitorTabAvatars() {
+  // Pending downloads are discarded; open tabs refill the cache as they are used.
   avatars.clear()
   attempted.clear()
-  resync()
 }
 
 async function fetchAvatarDataUrl(source, getters) {
@@ -113,7 +113,6 @@ export function initializeCapacitorTabAvatars(store, tabsReady, fetchAvatar = fe
     }
   }
 
-  resync = sync
   const stop = watch(() => store.getters.getTabs.map(tab => {
     const key = getAvatarKey(tab.route?.path)
     return key && `${key}:${getRemoteAvatarUrl(store.getters, key)}`
@@ -133,7 +132,6 @@ export function initializeCapacitorTabAvatars(store, tabsReady, fetchAvatar = fe
 
   return () => {
     disposed = true
-    resync = () => {}
     stop()
   }
 }
