@@ -48,6 +48,7 @@ function harness({ random } = {}) {
     applyReversePlaylistState: videos => videos.slice(),
     findIndexOfCurrentVideoInPlaylist: videos => videos.findIndex(item => item.videoId === props.videoId),
     parseLocalPlaylistVideos: videos => videos,
+    parseVisibleLocalPlaylistVideos: videos => videos,
     extractNumberFromString: value => Number(value),
     getLocalPlaylist: () => firstPage.promise,
     untilEndOfLocalPlayList: async (_page, callback, options) => {

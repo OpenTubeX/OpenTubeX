@@ -123,6 +123,12 @@ test.describe('community post attachments', () => {
   })
 })
 
+function setShowMembersOnly(page, showMembersOnly) {
+  return page.evaluate(showMembersOnly => window.$store.dispatch('updateChannelSettings', {
+    channelId: 'UC-sample-channel', settings: { showMembersOnly }
+  }), showMembersOnly)
+}
+
 async function routePlaylist(page, lockups) {
   await page.route('https://i.ytimg.com/**', route => fulfillVisualFixture(route, 'video-thumbnail'))
   await page.route('https://www.youtube.com/youtubei/v1/browse**', route => route.fulfill({
@@ -237,6 +243,10 @@ test.describe('YouTube playlists', () => {
     await expect(playLink).toHaveAttribute('href', /\/watch\/sampleVid01/)
     await page.locator('.playlistInfo').getByRole('button', { name: 'Add to Queue', exact: true }).click()
     await expect.poll(() => page.evaluate(() => window.$store.getters.getWatchQueue.map(video => video.videoId))).toEqual(['sampleVid01'])
+    await setShowMembersOnly(page, true)
+    await expect(playLink).toHaveAttribute('href', /\/watch\/memberVid01/)
+    await setShowMembersOnly(page, false)
+    await expect(playLink).toHaveAttribute('href', /\/watch\/sampleVid01/)
 
     await playLink.evaluate(link => link.click())
     const watchPlaylist = page.locator('.watchVideoPlaylist')
