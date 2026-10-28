@@ -11,7 +11,7 @@ html[data-overlayscrollbars-initialize],
 
 /* Marking a container scrolls it on both axes, and positions its bars
    against it. Overflow and positioning it sets itself take precedence. */
-:where([data-overlayscrollbars-viewport], [data-overlayscrollbars-native-viewport]) {
+:where([data-overlayscrollbars-viewport]) {
   position: relative;
   overflow: auto;
 }

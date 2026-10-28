@@ -25,7 +25,9 @@ import { setAndroidAlwaysShowScrollbars, setAndroidPageScrollbarsHidden } from '
  */
 
 const VIEWPORT_ATTRIBUTE = 'data-overlayscrollbars-viewport'
-const NATIVE_VIEWPORT_ATTRIBUTE = 'data-overlayscrollbars-native-viewport'
+// Browsers without scroll-linked animations, such as Firefox, position the
+// bars from scroll events instead.
+const SCROLL_LINKED = typeof ScrollTimeline !== 'undefined'
 // A remaining range up to this size is rounding at fractional zoom levels,
 // not content a bar could scroll to.
 const SCROLL_BOUNDARY_TOLERANCE = 1
@@ -45,6 +47,7 @@ const PAINT_ONLY_PROPERTIES = new Set([
  * @property {HTMLElement} track
  * @property {HTMLElement} handle
  * @property {boolean} usable
+ * @property {number} span how far the handle travels along the track
  * @property {Animation | null} handleAnimation
  * @property {{ x: Animation | null, y: Animation | null }} trackAnimations
  */
@@ -58,6 +61,8 @@ const PAINT_ONLY_PROPERTIES = new Set([
  * @property {Scrollbar} vertical
  * @property {{ x?: ScrollTimeline, y?: ScrollTimeline }} timelines
  * @property {string} measurement
+ * @property {{ x: number, y: number }} ranges the scroll ranges of the last update
+ * @property {boolean} rtl
  * @property {boolean} atEnd whether the container is scrolled to its vertical end
  * @property {number} clientHeight the viewport height of the last update
  * @property {number} range the vertical scroll range of the last update
@@ -107,7 +112,7 @@ function createScrollbar(axis) {
   scrollbar.append(track)
 
   /** @type {Scrollbar} */
-  return { axis, scrollbar, track, handle, usable: false, handleAnimation: null, trackAnimations: { x: null, y: null } }
+  return { axis, scrollbar, track, handle, usable: false, span: 0, handleAnimation: null, trackAnimations: { x: null, y: null } }
 }
 
 /**
@@ -160,6 +165,8 @@ function create(element) {
     vertical,
     timelines: {},
     measurement: '',
+    ranges: { x: 0, y: 0 },
+    rtl: false,
     atEnd: false,
     clientHeight: -1,
     range: 0,
@@ -229,7 +236,18 @@ function create(element) {
         : bar.track.clientHeight - bar.handle.offsetHeight
     })
 
+    instance.ranges = ranges
+    instance.rtl = rtl
     scrollbars.forEach((bar, index) => {
+      bar.span = Math.max(0, spans[index])
+    })
+    if (!SCROLL_LINKED) {
+      positionFromScroll()
+      instance.drag?.()
+      return
+    }
+
+    scrollbars.forEach((bar) => {
       if (!bar.usable) {
         bar.handleAnimation?.cancel()
         bar.handleAnimation = null
@@ -240,7 +258,7 @@ function create(element) {
         return
       }
 
-      const span = Math.max(0, spans[index])
+      const span = bar.span
       const translate = bar.axis === 'x' ? 'translateX' : 'translateY'
       bar.handleAnimation = setScrollLinkedKeyframes(bar.handleAnimation, bar.handle, [
         { transform: `${translate}(0px)` },
@@ -271,6 +289,31 @@ function create(element) {
 
     instance.drag?.()
   }
+
+  let positionFrame = null
+  function positionFromScroll() {
+    positionFrame = null
+    const { scrollLeft, scrollTop } = scrollElement
+    for (const bar of scrollbars) {
+      if (!bar.usable) {
+        bar.handle.style.removeProperty('transform')
+        bar.track.style.removeProperty('transform')
+        continue
+      }
+      const range = instance.ranges[bar.axis]
+      const offset = bar.axis === 'x' ? scrollLeft : scrollTop
+      const travel = Math.min(Math.abs(offset) / range, 1) * bar.span
+      bar.handle.style.transform = bar.axis === 'x'
+        ? `translateX(${instance.rtl ? -travel : travel}px)`
+        : `translateY(${travel}px)`
+      // Like the scroll-linked animations, which nested tracks need to stay in view.
+      if (!isPage) bar.track.style.transform = `translate(${scrollLeft}px, ${scrollTop}px)`
+    }
+  }
+  const schedulePosition = () => {
+    positionFrame ??= requestAnimationFrame(positionFromScroll)
+  }
+  const positionEventTarget = isPage ? window : element
 
   /** @param {boolean} [intended] whether the app has just set the offset itself */
   function syncScrollPosition(intended = false) {
@@ -366,12 +409,15 @@ function create(element) {
     mutationObserver.observe(element, { childList: true, subtree: true, characterData: true })
   }
   element.append(horizontal.scrollbar, vertical.scrollbar)
+  if (!SCROLL_LINKED) positionEventTarget.addEventListener('scroll', schedulePosition, { passive: true })
   for (const type of ANIMATION_END_EVENTS) {
     animationEventTarget.addEventListener(type, onAnimationEnd, { passive: true })
   }
 
   function destroy() {
     if (updateFrame !== null) cancelAnimationFrame(updateFrame)
+    if (positionFrame !== null) cancelAnimationFrame(positionFrame)
+    positionEventTarget.removeEventListener('scroll', schedulePosition)
     mutationObserver.disconnect()
     pageStyleObserver.disconnect()
     element.removeEventListener('scroll', onScroll)
@@ -601,8 +647,7 @@ function updatePageScrollbarPosition(instance) {
  * natively, so `window.scrollTo`, `window.scrollY` and its scroll events work.
  */
 export function initializeAppScrollbars({ useNativePageScrollbar = false } = {}) {
-  // Browsers without scroll-linked animations keep their native scrollbars.
-  initializePageScrollbar(document, useNativePageScrollbar || typeof ScrollTimeline === 'undefined', create)
+  initializePageScrollbar(document, useNativePageScrollbar, create)
 
   if (useNativePageScrollbar) {
     observePageScrollbarVisibility(document, hidden => {
@@ -658,17 +703,10 @@ function toggleOverlayScrollbars(element, enabled) {
   const instance = instances.get(element)
 
   if (enabled && !instance) {
-    // Browsers without scroll-linked animations keep their native scrollbars,
-    // but the container still scrolls like a marked one.
-    if (typeof ScrollTimeline === 'undefined') {
-      element.setAttribute(NATIVE_VIEWPORT_ATTRIBUTE, '')
-      return
-    }
     create(element)
-  } else if (!enabled) {
-    instance?.destroy()
+  } else if (!enabled && instance) {
+    instance.destroy()
     element.removeAttribute(VIEWPORT_ATTRIBUTE)
-    element.removeAttribute(NATIVE_VIEWPORT_ATTRIBUTE)
   }
 }
 

@@ -285,27 +285,33 @@ test.describe('overlay scrollbars', () => {
     }
   })
 
-  test('keeps the native page scrollbar without scroll-linked animations', async ({ page }) => {
+  test('positions the bars from scroll events without scroll-linked animations', async ({ page }) => {
     await page.addInitScript(() => { delete window.ScrollTimeline })
     await page.reload()
     await waitForAppReady(page)
     await addPageOverflow(page)
-    await expect(page.locator('html')).not.toHaveAttribute('data-overlayscrollbars-initialize')
-    await expect(page.locator('body > .os-scrollbar')).toHaveCount(0)
-    expect(await page.evaluate(() => document.documentElement.clientWidth < window.innerWidth)).toBe(true)
-    // Nested containers that rely on the default overflow still scroll.
-    const nested = await page.evaluate(() => {
-      const viewport = document.createElement('div')
-      Object.assign(viewport.style, { position: 'fixed', top: '100px', left: '100px', width: '200px', height: '100px' })
-      const content = document.createElement('div')
-      content.style.height = '300px'
-      viewport.append(content)
-      document.body.append(viewport)
-      document.querySelector('#app').__vue_app__._context.directives['overlay-scrollbars'].mounted(viewport, { value: true })
-      viewport.scrollTop = 100
-      return { scrollTop: viewport.scrollTop, bars: viewport.querySelectorAll('.os-scrollbar').length, nativeScrollbar: viewport.clientWidth < viewport.offsetWidth }
-    })
-    expect(nested).toEqual({ scrollTop: 100, bars: 0, nativeScrollbar: true })
+    const handleTop = () => page.locator(`${PAGE_SCROLLBAR} .os-scrollbar-handle`).evaluate(element => element.getBoundingClientRect().top)
+    const initialHandleTop = await handleTop()
+    await page.evaluate(() => window.scrollTo(0, 1000))
+    await expect.poll(handleTop).toBeGreaterThan(initialHandleTop + 50)
+    expect(await page.evaluate(() => document.documentElement.clientWidth)).toBe(await page.evaluate(() => window.innerWidth))
+
+    // Nested containers that rely on the default overflow still scroll, with
+    // their tracks in view and custom scroll speed applied.
+    const viewport = await addNestedCustomSpeedScroller(page, 'data-scroll-event-scrollbar-test', 0)
+    await viewport.evaluate(element => { element.style.removeProperty('overflow-y') })
+    await viewport.hover()
+    await page.mouse.wheel(0, 40)
+    await expect.poll(() => viewport.evaluate(element => element.scrollTop)).toBe(80)
+    await expect.poll(() => viewport.evaluate(element => {
+      const view = element.getBoundingClientRect()
+      const track = element.querySelector(':scope > .os-scrollbar-vertical .os-scrollbar-track').getBoundingClientRect()
+      const handle = element.querySelector(':scope > .os-scrollbar-vertical .os-scrollbar-handle').getBoundingClientRect()
+      return {
+        trackStart: Math.round(track.top - view.top),
+        handleProgress: Math.round((handle.top - track.top) / (track.height - handle.height) * 100) / 100,
+      }
+    })).toEqual({ trackStart: 2, handleProgress: 0.4 })
   })
 
   test('remeasures the page after its scrolling is locked and unlocked', async ({ page }) => {
