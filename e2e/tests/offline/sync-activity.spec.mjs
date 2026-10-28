@@ -75,7 +75,10 @@ test.describe('account activity navigation', () => {
 
     const slider = page.getByRole('slider', { name: /Buffer Before Playing/ })
     await expect(slider).toBeFocused()
-    await expect(page.getByRole('tooltip')).toBeHidden()
+    const tooltip = page.getByRole('tooltip', { includeHidden: true })
+      .filter({ hasText: 'How much video has to load before playback starts' })
+    await expect(tooltip).toBeAttached()
+    await expect(tooltip).toBeHidden()
   })
 })
 
