@@ -696,7 +696,7 @@ async function refreshUsage() {
     } else if (IS_CAPACITOR) {
       const [androidUsage, tabPreviews] = await Promise.all([
         getAndroidStorageUsage(),
-        getStoredTabImagesSize()
+        getStoredTabImagesSize().catch(() => null)
       ])
       usage.value = { ...androidUsage, tabPreviews }
     }

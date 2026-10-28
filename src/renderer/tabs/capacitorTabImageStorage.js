@@ -16,13 +16,17 @@ function enqueue(operation) {
 }
 
 async function listFiles() {
+  let files
   try {
-    const { files } = await Filesystem.readdir({ path: folder, directory })
-    return files.filter(file => file.type !== 'directory' && file.name.endsWith('.json'))
-  } catch {
-    // The folder does not exist until the first image is stored.
+    ({ files } = await Filesystem.readdir({ path: folder, directory }))
+  } catch (error) {
+    // The folder does not exist until the first image is stored. Any other
+    // failure must not pass for an empty cache.
+    const exists = await Filesystem.stat({ path: folder, directory }).then(() => true, () => false)
+    if (exists) throw error
     return []
   }
+  return files.filter(file => file.type !== 'directory' && file.name.endsWith('.json'))
 }
 
 /**

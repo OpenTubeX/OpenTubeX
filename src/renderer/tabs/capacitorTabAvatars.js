@@ -12,6 +12,8 @@ const AVATAR_SIZE = 176
 /** @type {Map<string, { source: string, image: string }>} */
 const avatars = shallowReactive(new Map())
 const attempted = new Map()
+// Bumped on every clear, so a slow disk read cannot bring cleared avatars back.
+let discardRevision = 0
 
 /**
  * Channel tabs share their channel's avatar; watch tabs use their creator's.
@@ -43,6 +45,7 @@ export function getCapacitorTabAvatar(tab) {
 
 export function clearCapacitorTabAvatars() {
   // Pending downloads are discarded; open tabs refill the cache as they are used.
+  discardRevision += 1
   avatars.clear()
   attempted.clear()
 }
@@ -118,8 +121,9 @@ export function initializeCapacitorTabAvatars(store, tabsReady, fetchAvatar = fe
     return key && `${key}:${getRemoteAvatarUrl(store.getters, key)}`
   }).join('\n'), sync)
 
+  const restoreRevision = discardRevision
   Promise.all([readStoredTabImages(AVATAR_PREFIX), tabsReady]).then(([stored]) => {
-    if (disposed) return
+    if (disposed || restoreRevision !== discardRevision) return
     for (const [name, { source, image }] of stored) {
       const key = name.slice(AVATAR_PREFIX.length)
       if (!avatars.has(key) && typeof source === 'string') avatars.set(key, { source, image })

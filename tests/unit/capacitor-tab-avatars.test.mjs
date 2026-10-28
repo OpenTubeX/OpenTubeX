@@ -126,3 +126,29 @@ test('clearing waits for tab use before downloading avatars again', async t => {
   assert.equal(getCapacitorTabAvatar(channelTab), 'data:image/jpeg;base64,176x176')
   dispose()
 })
+
+test('clearing during startup keeps stored avatars from coming back', async t => {
+  const filesystem = createFilesystem()
+  filesystem.files.set(`tab-previews/avatar-channel-${channelId}.json`, JSON.stringify({ source: remote, image: 'data:image/jpeg;base64,old' }))
+  const state = setup(t, filesystem)
+  state.fetchAvatar.mock.mockImplementation(async () => null)
+  const dispose = state.start()
+  clearCapacitorTabAvatars()
+  await settle()
+  assert.equal(getCapacitorTabAvatar(channelTab), null)
+  dispose()
+})
+
+test('a failed clear is reported even when the folder cannot be listed', async t => {
+  const filesystem = createFilesystem()
+  filesystem.files.set('tab-previews/preview-tab.json', '{}')
+  setup(t, filesystem)
+  const call = filesystem.call
+  filesystem.call = async (method, options) => {
+    if (method === 'rmdir' || method === 'readdir') throw new Error('I/O error')
+    return call(method, options)
+  }
+  const { clearStoredTabImages, getStoredTabImagesSize } = await import('../../src/renderer/tabs/capacitorTabImageStorage.js')
+  await assert.rejects(clearStoredTabImages(), /I\/O error/)
+  await assert.rejects(getStoredTabImagesSize(), /I\/O error/)
+})

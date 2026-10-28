@@ -2,7 +2,7 @@ import assert from 'node:assert/strict'
 
 export const filesystemPluginHeader = {
   name: 'Filesystem',
-  methods: ['readdir', 'readFile', 'writeFile', 'deleteFile', 'rmdir'].map(name => ({ name, rtype: 'promise' })),
+  methods: ['readdir', 'readFile', 'writeFile', 'deleteFile', 'rmdir', 'stat'].map(name => ({ name, rtype: 'promise' })),
 }
 
 /** An in-memory stand-in for the app's files directory. */
@@ -28,6 +28,9 @@ export function createFilesystem (remove = async () => {}) {
           await remove(options)
           files.delete(options.path)
           return
+        case 'stat':
+          if (list(options.path).length === 0) throw new Error('File does not exist.')
+          return { type: 'directory' }
         case 'rmdir':
           for (const name of list(options.path)) files.delete(name)
           return
