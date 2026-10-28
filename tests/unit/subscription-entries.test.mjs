@@ -334,6 +334,18 @@ test('marks a seen members-only video as new when it becomes public', () => {
   assert.equal(reconciled[0].isNewInSubscriptionFeed, true)
 })
 
+test('uses the public release date when a members-only video becomes public', () => {
+  const releasedAt = now - 40 * 60_000
+  const reconciled = reconcileFetchedSubscriptionEntries(
+    [video('members-first', releasedAt, { isMembersOnly: false })],
+    [video('members-first', now - 14 * 24 * HOUR, { isMembersOnly: true })],
+    'videoId',
+    now - 2 * HOUR
+  )
+
+  assert.equal(reconciled[0].published, releasedAt)
+})
+
 test('keeps a seen members-only video seen when its membership state is unknown', () => {
   const reconciled = reconcileFetchedSubscriptionEntries(
     [video('members-first', now - HOUR)],
