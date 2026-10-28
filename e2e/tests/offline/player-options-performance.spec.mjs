@@ -151,15 +151,22 @@ test.describe('player options while seeking', () => {
     const video = await openMockedVideo(page)
     await video.evaluate(element => element.pause())
     const player = page.locator('.ftVideoPlayer')
-    const countMenuClosesWhileScrubbing = () => player.evaluate((element) => {
+    // Shaka seeks 125 ms after the last input and hides the menus again then.
+    // Wait for that seek so it cannot close a menu opened after this scrub.
+    const countMenuClosesWhileScrubbing = () => player.evaluate(async (element) => {
       const controls = element.ui.getControls()
       const seekBar = element.querySelector('.shaka-seek-bar')
+      const seeking = new Promise(resolve => element.querySelector('video').addEventListener('seeking', resolve, { once: true }))
       let closes = 0
-      const countClose = () => { closes++ }
+      // Each submenu also announces once, with its container, whenever the
+      // overflow menu hides. Count the controls' announcement, which the seek
+      // bar requests on every input.
+      const countClose = event => { if (!event.container) closes++ }
       controls.addEventListener('submenuclose', countClose)
       for (let step = 0; step < 10; step++) {
         seekBar.dispatchEvent(new Event('input'))
       }
+      await seeking
       controls.removeEventListener('submenuclose', countClose)
       return closes
     })
