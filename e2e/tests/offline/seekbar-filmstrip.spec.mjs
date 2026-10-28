@@ -300,12 +300,11 @@ test('pulling the dragged thumb up onto the filmstrip seeks at its scale', { tag
   await expect(filmstrip).toBeHidden()
   await expect(chapter).toBeHidden()
   await expect.poll(() => video.evaluate(element => element.currentTime)).toBeCloseTo(preciseTime, 1)
+  // Releasing above the bar must not count as a click on the paused video.
+  expect(await video.evaluate(element => element.paused)).toBe(true)
 
   // Escape cancels a drag and returns to where it started.
-  const seekedTime = await video.evaluate(element => {
-    element.pause()
-    return element.currentTime
-  })
+  const seekedTime = await video.evaluate(element => element.currentTime)
   const thumb = pointAt((seekedTime - await bar.evaluate(element => Number(element.min))) / await bar.evaluate(element => Number(element.max) - Number(element.min)))
   await page.mouse.move(thumb.x, thumb.y)
   await page.mouse.down()

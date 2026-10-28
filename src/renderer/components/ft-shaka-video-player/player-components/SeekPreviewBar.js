@@ -22,6 +22,8 @@ export class SeekPreviewBar extends shaka.ui.SeekBar {
     /** @private */
     this.filmstripShown = false
     /** @private */
+    this.barPressed = false
+    /** @private */
     this.filmstrip = new SeekFilmstrip(this)
     /** @private @type {{ x: number, y: number } | null} */
     this.pointer = null
@@ -57,6 +59,17 @@ export class SeekPreviewBar extends shaka.ui.SeekBar {
     // itself. Capture the press before Shaka moves the thumb to the pointer.
     this.eventManager.listen(this.container, 'mousedown', event => {
       this.mouseGrabbedThumb = Math.abs(event.clientX - this.getThumbClientX(this.getValue())) <= THUMB_GRAB_RADIUS
+    }, true)
+    // Releasing a press on the bar elsewhere, such as over the filmstrip, makes
+    // the browser click the controls container, which Shaka takes as a click on
+    // the video that plays or pauses it.
+    this.eventManager.listen(window, 'mousedown', event => {
+      this.barPressed = this.container.contains(event.target)
+    }, true)
+    this.eventManager.listen(window, 'click', event => {
+      if (!this.barPressed) return
+      this.barPressed = false
+      if (!this.container.contains(event.target)) event.stopPropagation()
     }, true)
     // Shaka reads the pointer only for its x position, so track it before Shaka does.
     for (const type of ['mousemove', 'mouseup', 'touchmove', 'touchend']) {
