@@ -1,6 +1,7 @@
 import { readFile } from 'node:fs/promises'
 import { test, expect, goTo, sel } from '../../helpers/app.mjs'
 import { fulfillVisualFixture } from '../../helpers/visual-fixtures.mjs'
+import { mockPlayableWatchPage } from '../../helpers/watch.mjs'
 
 const MEMBER_CHANNEL = 'UCmmmmmmmmmmmmmmmmmmmmmm'
 const OTHER_CHANNEL = 'UCoooooooooooooooooooooo'
@@ -137,6 +138,15 @@ async function routePlaylist(page, lockups) {
                 playlistVideoThumbnailRenderer: { thumbnail: { thumbnails: [{ url: 'https://i.ytimg.com/vi/sampleVid01/hqdefault.jpg', width: 480, height: 360 }] } }
               }
             }
+          }, {
+            playlistSidebarSecondaryInfoRenderer: {
+              videoOwner: {
+                videoOwnerRenderer: {
+                  title: { runs: [{ text: 'StudioPreview', navigationEndpoint: { browseEndpoint: { browseId: 'UC-sample-channel' } } }] },
+                  thumbnail: { thumbnails: [] }
+                }
+              }
+            }
           }]
         }
       },
@@ -208,6 +218,40 @@ test.describe('YouTube playlists', () => {
       channelId, settings: { showMembersOnly: true }
     }), 'UC-sample-channel')
     await expect(items.getByText('Members playlist video')).toBeVisible()
+  })
+
+  test('plays and queues YouTube playlists without hidden members-only videos', async ({ app, page }) => {
+    const lockup = JSON.parse(await readFile(new URL('../../fixtures/innertube/watch/review-channel-lockup.json', import.meta.url), 'utf8'))
+    const membersVideo = structuredClone(lockup)
+    membersVideo.contentId = 'memberVid01'
+    membersVideo.metadata.lockupMetadataViewModel.title.content = 'Members playlist video'
+    membersVideo.metadata.lockupMetadataViewModel.metadata.contentMetadataViewModel.metadataRows[1].badges = [{
+      badgeViewModel: { badgeText: 'Members only', badgeStyle: 'BADGE_MEMBERS_ONLY' }
+    }]
+    await mockPlayableWatchPage(app, page)
+    await routePlaylist(page, [membersVideo, lockup])
+    await page.locator(sel.searchInput).fill('https://www.youtube.com/playlist?list=PL-mixed-playlist')
+    await page.locator(sel.searchInput).press('Enter')
+
+    const playLink = page.locator('.playlistThumbnail a')
+    await expect(playLink).toHaveAttribute('href', /\/watch\/sampleVid01/)
+    await page.locator('.playlistInfo').getByRole('button', { name: 'Add to Queue', exact: true }).click()
+    await expect.poll(() => page.evaluate(() => window.$store.getters.getWatchQueue.map(video => video.videoId))).toEqual(['sampleVid01'])
+
+    await playLink.evaluate(link => link.click())
+    const watchPlaylist = page.locator('.watchVideoPlaylist')
+    await expect(watchPlaylist.getByText('Sample recommendation', { exact: true })).toBeVisible()
+    await expect(watchPlaylist.getByText('Members playlist video')).toHaveCount(0)
+
+    // Opening the video directly loads the playlist without the playlist page's cache
+    const tab = await page.evaluate(() => window.ftElectron.tabs.create({
+      route: '/watch/sampleVid01?playlistId=PL-mixed-playlist',
+      makeActive: false
+    }))
+    await page.locator(`.tab[data-tab-id="${tab.id}"]`).click()
+    const directPlaylist = page.locator('.watchVideoPlaylist:visible')
+    await expect(directPlaylist.getByText('Sample recommendation', { exact: true })).toBeVisible()
+    await expect(directPlaylist.getByText('Members playlist video')).toHaveCount(0)
   })
 
   test('says a YouTube playlist has no videos when all of them are hidden members-only videos', async ({ page }) => {

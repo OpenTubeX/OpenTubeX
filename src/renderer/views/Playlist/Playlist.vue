@@ -923,7 +923,8 @@ async function getPlaylistLocal() {
 
     playlistTitle.value = result.info.title
     playlistDescription.value = result.info.description ?? ''
-    firstVideoId.value = playlistItems_[0]?.videoId ?? ''
+    const membersOnlyChannelIds = store.getters.getMembersOnlyChannelIdSet
+    firstVideoId.value = playlistItems_.find(video => !isVideoHiddenByPreferences(video, { membersOnlyChannelIds }))?.videoId ?? ''
     playlistThumbnail.value = result.info.thumbnails[0].url
     viewCount.value = result.info.views.toLowerCase() === 'no views' ? 0 : extractNumberFromString(result.info.views)
     videoCount.value = extractNumberFromString(result.info.total_items)
@@ -1721,7 +1722,7 @@ function cachePlaylistForWatchTransition(to) {
         totalVideoCount: videoCount.value,
         channelName: channelName.value,
         channelId: channelId.value,
-        items: sortedPlaylistItems.value,
+        items: isUserPlaylistRequested.value ? sortedPlaylistItems.value : visiblePlaylistItems.value,
         continuationData: continuationData.value
           ? extractLocalCacheablePlaylistContinuation(continuationData.value)
           : null,

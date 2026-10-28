@@ -378,6 +378,7 @@ import {
   deepCopy,
 } from '../../helpers/utils'
 import { getPlaylistSnapshot } from '../../helpers/api/playlist-snapshot'
+import { isVideoHiddenByPreferences } from '../../helpers/subscriptions'
 import { createLocalPlaylistAvailabilityChecker } from '../../helpers/api/local'
 import { getInvidiousPlaylistAvailability } from '../../helpers/api/invidious'
 import { findDeadPlaylistItems, isUnavailableInvidiousResponse, isUnavailablePlayerResponse } from '../../helpers/playlist-dead-videos'
@@ -835,11 +836,14 @@ async function loadSnapshot(id) {
   snapshotController = new AbortController()
   snapshotPending.value = true
   try {
-    return await getPlaylistSnapshot(id, {
+    const snapshot = await getPlaylistSnapshot(id, {
       backend: backendPreference.value,
       fallback: store.getters.getBackendFallback,
       signal: snapshotController.signal,
     })
+    // YouTube playlists follow the channels' members-only settings
+    const membersOnlyChannelIds = store.getters.getMembersOnlyChannelIdSet
+    return { ...snapshot, videos: snapshot.videos.filter(video => !isVideoHiddenByPreferences(video, { membersOnlyChannelIds })) }
   } catch (error) {
     if (!snapshotController.signal.aborted) {
       console.error(error)
