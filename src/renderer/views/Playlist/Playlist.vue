@@ -259,6 +259,7 @@ import FtAutoLoadNextPageWrapper from '../../components/FtAutoLoadNextPageWrappe
 import AutoScrollWrapper from '../../components/AutoScrollWrapper/AutoScrollWrapper.vue'
 
 import store from '../../store/index'
+import { isVideoHiddenByPreferences } from '../../helpers/subscriptions'
 import { usesInvidiousApi } from '../../../apiBackends'
 import { getThumbnailListStyles } from '../../constants/thumbnailSize'
 import { thumbnailSizeSettingKey } from '../../composables/useThumbnailSizeSlider'
@@ -754,8 +755,9 @@ const sortedPlaylistItems = computed(() => {
 
 const visiblePlaylistItems = computed(() => {
   if (!isUserPlaylistRequested.value) {
-    // No filtering for non user playlists yet
-    return sortedPlaylistItems.value
+    // User playlists keep their members-only videos, YouTube playlists follow the channel settings
+    const membersOnlyChannelIds = store.getters.getMembersOnlyChannelIdSet
+    return sortedPlaylistItems.value.filter(video => !isVideoHiddenByPreferences(video, { membersOnlyChannelIds }))
   }
 
   if (userPlaylistVisibleLimit.value < sometimesFilteredUserPlaylistItems.value.length) {
