@@ -1,4 +1,4 @@
-import { onBeforeUnmount, shallowRef } from 'vue'
+import { nextTick, onBeforeUnmount, shallowRef } from 'vue'
 
 /**
  * Teleport target for a modal overlay: the fullscreen element while one is
@@ -14,10 +14,22 @@ export function useFullscreenTeleportTarget(dismiss, keepOpen = () => false) {
   /** @type {import('vue').ShallowRef<Element | string>} */
   const target = shallowRef(document.fullscreenElement ?? '.app')
 
+  /** @param {Element | string} value */
+  const moveTo = (value) => {
+    // Moving the overlay's nodes drops focus from them, so restore it.
+    const focused = document.activeElement
+    target.value = value
+    nextTick(() => {
+      if (focused instanceof HTMLElement && focused.isConnected && document.activeElement === document.body) {
+        focused.focus()
+      }
+    })
+  }
+
   let timeout
   const handleFullscreenChange = () => {
     if (document.fullscreenElement) {
-      target.value = document.fullscreenElement
+      moveTo(document.fullscreenElement)
       return
     }
     if (target.value === '.app') return
@@ -25,7 +37,7 @@ export function useFullscreenTeleportTarget(dismiss, keepOpen = () => false) {
     // closes, as either changes which overlay is topmost for the others.
     const keep = keepOpen()
     timeout = setTimeout(() => {
-      if (keep) target.value = '.app'
+      if (keep) moveTo('.app')
       else dismiss()
     })
   }

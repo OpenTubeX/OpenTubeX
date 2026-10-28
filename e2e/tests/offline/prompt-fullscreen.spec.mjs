@@ -155,10 +155,12 @@ test('moves an open prompt into player fullscreen', async ({ app, page }) => {
 
   await showAddToPlaylistPrompt(page)
   const addPrompt = page.getByRole('dialog', { name: 'Select a playlist to add your video to', exact: true })
-  await addPrompt.getByRole('button', { name: 'Cancel', exact: true }).focus()
+  const cancel = addPrompt.getByRole('button', { name: 'Cancel', exact: true })
+  await cancel.focus()
   await page.keyboard.press('f')
 
   await expect.poll(() => page.evaluate(() => document.fullscreenElement?.matches('.ftVideoPlayer'))).toBe(true)
   await expect(page.locator(':fullscreen .prompt')).toHaveCount(1)
   await expect(addPrompt).toBeVisible()
+  await expect(cancel).toBeFocused()
 })
