@@ -1218,6 +1218,22 @@ test('Pause on Stream Recovery pauses a reload behind a persistent notice until 
   await expect.poll(() => video.evaluate(element => element.paused)).toBe(true)
   await notice.getByRole('button', { name: 'Dismiss' }).click()
   await expect(notice).toBeHidden()
+
+  // A seek is a jump, not natural playback, so it never counts toward clearing.
+  await video.evaluate(element => element.play())
+  await expect.poll(() => watchView.evaluate(view => view.isPlaybackPaused())).toBe(false)
+  const playedAfterSeek = await watchView.evaluate((view) => {
+    view.showStreamRecoveryNotice('Seek check')
+    view.handlePlayerSeeking()
+    view.handleTimeUpdate(view.currentTime + 1)
+    return view.streamRecoveryPlayedSeconds
+  })
+  expect(playedAfterSeek).toBe(0)
+
+  // Turning the setting off drops the open notice and its pause.
+  await expect(notice).toBeVisible()
+  await watchView.evaluate(view => view.$store.dispatch('updatePauseOnStreamRecovery', false))
+  await expect(notice).toBeHidden()
 })
 
 test('by default stream recovery keeps playing and shows a transient toast', async ({ app, page }) => {

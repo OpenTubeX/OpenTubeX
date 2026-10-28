@@ -323,7 +323,10 @@
           class="streamRecoveryNoticeIcon"
           :icon="['fas', 'circle-exclamation']"
         />
-        <span class="streamRecoveryNoticeMessage">{{ streamRecoveryNotice }}</span>
+        <span
+          class="streamRecoveryNoticeMessage"
+          :title="streamRecoveryNotice"
+        >{{ streamRecoveryNotice }}</span>
         <button
           type="button"
           class="streamRecoveryNoticeButton"

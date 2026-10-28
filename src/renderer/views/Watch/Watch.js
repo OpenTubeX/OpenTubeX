@@ -587,6 +587,8 @@ export default defineComponent({
       streamRecoveryPausesPlayback: false,
       streamRecoveryPlayedSeconds: 0,
       playbackProgressedForCurrentVideo: false,
+      // The first time update after a seek is a jump, not natural playback.
+      skipNextPlaybackTick: false,
       sabrErrorRecoveryAttempts: 0,
       sabrErrorRecoveriesForCurrentVideo: 0,
       /** @type {number|null} */
@@ -1351,6 +1353,10 @@ export default defineComponent({
     }
   },
   watch: {
+    '$store.getters.getPauseOnStreamRecovery'(enabled) {
+      // Turning the setting off also drops the open notice and its pause.
+      if (!enabled) this.streamRecoveryNotice = null
+    },
     castingActive(active) {
       // Unloading this tab under memory pressure would stop the cast.
       keepTabLoaded(this.tabId, 'casting', active)
@@ -4858,7 +4864,9 @@ export default defineComponent({
       this.shortsCompletionBlockedBySeek = shortsCompletion.blockedBySeek
       this.shortsPlaybackAfterSeekSeconds = shortsCompletion.playbackAfterSeekSeconds
 
-      if (
+      if (this.skipNextPlaybackTick) {
+        this.skipNextPlaybackTick = false
+      } else if (
         elapsedSeconds > 0 &&
         elapsedSeconds <= SABR_ERROR_RECOVERY_MAX_TICK_SECONDS &&
         !this.isPlaybackPaused()
@@ -5112,6 +5120,7 @@ export default defineComponent({
       if (!this.isLoading) this.streamRecoveryPausesPlayback = false
     },
     handlePlayerSeeking() {
+      this.skipNextPlaybackTick = true
       this.waitingForPlaylistContinuation = false
       this.liveChatSeekRequest = { seconds: this.$refs.player.getCurrentTime() }
 

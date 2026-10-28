@@ -201,9 +201,14 @@
 }
 
 .streamRecoveryNoticeMessage {
+  /* Keep Copy and Dismiss inside small players; Copy and the tooltip keep the full text. */
+  display: -webkit-box;
   flex: 1 1 16em;
+  overflow: hidden;
   overflow-wrap: anywhere;
   user-select: text;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 3;
 }
 
 .streamRecoveryNoticeButton {
