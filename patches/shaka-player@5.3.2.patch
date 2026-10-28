@@ -1,5 +1,5 @@
 diff --git a/dist/shaka-player.ui-es2021.js b/dist/shaka-player.ui-es2021.js
-index de6cc053c83ff44f7442a64dedd19d3e57818360..f9528705a35519bf4e58f50083525295bf01e78d 100644
+index de6cc053c83ff44f7442a64dedd19d3e57818360..fe967aba3ffb1c8f0f7842b048e2485c929dbf83 100644
 --- a/dist/shaka-player.ui-es2021.js
 +++ b/dist/shaka-player.ui-es2021.js
 @@ -1715,11 +1715,11 @@ b&&b.isLinear()||lO(this.h,a.seekOffset||c);break;case "seekto":if(a.seekTime==n
@@ -50,7 +50,7 @@ index de6cc053c83ff44f7442a64dedd19d3e57818360..f9528705a35519bf4e58f50083525295
  function YP(a,b,c,d=!1){var e=a.i.ownerDocument.activeElement;c=Array.from(c.querySelectorAll("button, input, select, textarea, a[href], [tabindex]")).filter(h=>h.tabIndex>=0&&rP(h));if(c.length){var f=c[0],g=c[c.length-1];d&&!c.some(h=>h==e)?(b.preventDefault(),a.$.has("Shift")?g.focus():f.focus()):a.$.has("Shift")?e==f&&(b.preventDefault(),g.focus()):e==g&&(b.preventDefault(),f.focus())}}
  var Z=class extends ta{constructor(a,b,c,d,e){super();this.Da=!0;this.h=e;this.F=new Gz(c,a,this.h.castReceiverAppId,this.h.castAndroidReceiverCompatible);this.oa=null;this.Ra=!0;this.C=this.F.Id();this.u=c;this.m=this.F.wb();this.Na=a;this.i=b;this.jd=d;this.P=this.F.dc();this.Nc=this.m.Ub();this.Nc.setCustomPlayer(this.m);this.o=this.P.getCurrentAd();this.wa=[];this.I=[];this.A=null;this.ea=!1;this.M=[];this.ha=null;this.Kb=[];this.qb=null;this.Oc=[];this.vc=!1;this.W=new Se(()=>{this.h.showUIAlways||
 -this.h.showUIAlwaysOnAudioOnly&&this.m.mc()||(this.i.classList.add("no-cursor"),this.vc=!1,GP(this))});this.pb=new Se(()=>{this.h.showUIAlways||this.h.showUIAlwaysOnAudioOnly&&this.m.mc()||this.h.menuOpenUntilUserClosesIt&&this.Bb()||(this.l.removeAttribute("shown"),zP(this),AP(this),this.xa&&this.xa.gf(),this.U.aa(this.h.closeMenusDelay))});this.U=new Se(()=>{var f=this.i.ownerDocument.activeElement,g=this.M.some(h=>h.contains(f));for(let h of this.M)Y(h,!1);g&&BP(this,this.ha);this.dispatchEvent(new D("submenuclose"));
-+this.h.showUIAlwaysOnAudioOnly&&this.m.mc()||(this.i.classList.add("no-cursor"),this.vc=!1,GP(this))});this.pb=new Se(()=>{this.h.showUIAlways||this.h.showUIAlwaysOnAudioOnly&&this.m.mc()||this.h.menuOpenUntilUserClosesIt&&(this.Bb()||this.sg())||(this.l.removeAttribute("shown"),zP(this),AP(this),this.xa&&this.xa.gf(),this.U.aa(this.h.closeMenusDelay))});this.U=new Se(()=>{var f=this.i.ownerDocument.activeElement,g=this.M.some(h=>h.contains(f));for(let h of this.M)Y(h,!1);g&&BP(this,this.ha);this.dispatchEvent(new D("submenuclose"));
++this.h.showUIAlwaysOnAudioOnly&&this.m.mc()||(this.i.classList.add("no-cursor"),this.vc=!1,GP(this))});this.pb=new Se(()=>{this.h.showUIAlways||this.h.showUIAlwaysOnAudioOnly&&this.m.mc()||this.h.menuOpenUntilUserClosesIt&&(this.Bb()||this.sg())||(this.l.removeAttribute("shown"),zP(this),AP(this),this.xa&&this.xa.gf(),this.U.aa(this.h.closeMenusDelay))});this.U=new Se(()=>{var f=this.i.ownerDocument.activeElement,g=this.M.some(h=>h.contains(f)),k=this.Bb();for(let h of this.M)Y(h,!1);g&&BP(this,this.ha);k&&this.dispatchEvent(new D("submenuclose"));
  this.N?.j();this.h.enableTooltips&&this.J.classList.add("shaka-tooltips-on");this.h.enableTooltips&&(this.O.classList.add("shaka-tooltips-on"),this.Wa?.classList.add("shaka-tooltips-on"))});this.qa=new Se(()=>{this.dj()});this.Lb=null;this.uc=new Se(()=>{var f=this.Lb;this.Lb=null;var g=this.i.ownerDocument.activeElement;!f||g&&g!=this.i.ownerDocument.body||rP(f)||BP(this)});this.xc=new Se(()=>{this.Ha()&&(yP(this),AP(this))});this.wc=new MutationObserver(f=>{var g=h=>h instanceof HTMLElement&&(h.classList.contains("shaka-text-container")||
  h.classList.contains("shaka-speech-to-text-container"));f.some(h=>Array.from(h.addedNodes).some(g))&&AP(this,!1)});this.wc.observe(this.i,{childList:!0});this.ra=this.V=null;this.fb=!1;this.L=[];this.Wa=null;this.R=sP();this.N=new KO(this.Na,this.R);this.j=new ab;this.D=null;this.configure(this.h);CP(this);this.$=new Set;HP(this);this.xc.Ia(this.h.refreshTickInSeconds);this.j.B(this.R,"locale-updated",()=>{KP(this)});this.j.B(this.R,"locale-changed",f=>{f=f.locales[0];this.P.setLocale(f);this.i.setAttribute("lang",
  f);KP(this)});this.P.setContainers(this.G,this.H);this.j.B(this.m,"textchanged",()=>{AP(this);var f=this.m.ab().find(g=>g.active);f&&(this.qb=f)});this.j.ia(this.m,["trackschanged","manifestupdated","loaded"],()=>{this.m.we()&&KP(this)});this.j.B(this.m,"unloading",f=>{this.o||(f=f.isSwitchingContent||!1,this.wa=[],this.qb=null,this.hb()&&!f&&LP(this),this.Od()&&!f&&this.Lc(),this.I.length&&(this.I=[],this.dispatchEvent(new D("chaptersupdated"))))});this.sa=new nO(this)}async destroy(a=!1){document.pictureInPictureElement==
@@ -75,7 +75,7 @@ index de6cc053c83ff44f7442a64dedd19d3e57818360..f9528705a35519bf4e58f50083525295
  function tS(a){var b=a.player.getConfiguration().abr.enabled;if(a.player.mc()){a.j.textContent="";a.j.style.display="none";a.h&&(a.h.textContent="",a.h.style.display="none");var c=a.player.Vb()||[],d=c.find(e=>e.active);d&&(b?(a.i.textContent=d.bandwidth?uS(a,d,c):"Unknown",a.i.style.display=""):a.i.style.display="none")}else c=a.player.getVideoTracks()||[],(d=c.find(e=>e.active))?(b?(a.i.textContent=d.height&&d.width?vS(a,d,c):d.bandwidth?wS(d.bandwidth):"Unknown",a.i.style.display=""):a.i.style.display=
  "none",b=xS(a,d.width,d.height),a.j.textContent=b,a.j.style.display=b!==""?"":"none",a.h&&(a.h.textContent=b,a.h.style.display=b!==""?"":"none")):a.h&&(b=a.player.getStats(),b=xS(a,b.width,b.height),a.h.textContent=b,a.h.style.display=b!==""?"":"none")}function uS(a,b,c){var d=wS(b.bandwidth);if(a.controls.h.showAudioCodec){let e=f=>{var g="";f&&(g=qe(f).toUpperCase());return g?" "+g:g};c.some(f=>e(f.codecs)!=e(b.codecs))&&(d+=e(b.codecs))}return d}
 diff --git a/ui/controls.js b/ui/controls.js
-index e5ba02a18cbe4bca7b2edcc44c8ed768bdefa6ac..edb0fcf01b760cebae28dee9bef058f2866bd733 100644
+index e5ba02a18cbe4bca7b2edcc44c8ed768bdefa6ac..7a8cfe8d1cfe94a1d4af5caed1d7212b2867b154 100644
 --- a/ui/controls.js
 +++ b/ui/controls.js
 @@ -270,7 +270,8 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
@@ -88,7 +88,27 @@ index e5ba02a18cbe4bca7b2edcc44c8ed768bdefa6ac..edb0fcf01b760cebae28dee9bef058f2
          return;
        }
        this.controlsContainer_.removeAttribute('shown');
-@@ -683,6 +684,15 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
+@@ -302,13 +303,18 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
+       const activeElement = this.videoContainer_.ownerDocument.activeElement;
+       const focusIsInMenu = this.menus_.some(
+           (menu) => menu.contains(activeElement));
++      // The seek bar hides the menus on every input, so only announce a close
++      // when a menu was open.  Every menu element refreshes on this event.
++      const anyMenuWasOpen = this.anySettingsMenusAreOpen();
+       for (const menu of this.menus_) {
+         shaka.ui.Utils.setDisplay(menu, /* visible= */ false);
+       }
+       if (focusIsInMenu) {
+         this.restoreFocus(this.settingsMenuOpener_);
+       }
+-      this.dispatchEvent(new shaka.util.FakeEvent('submenuclose'));
++      if (anyMenuWasOpen) {
++        this.dispatchEvent(new shaka.util.FakeEvent('submenuclose'));
++      }
+       this.hideTextStylePreview();
+       if (this.config_.enableTooltips) {
+         this.controlsButtonPanel_.classList.add('shaka-tooltips-on');
+@@ -683,6 +689,15 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
      }
  
      if (this.controlsContainer_) {
@@ -104,7 +124,7 @@ index e5ba02a18cbe4bca7b2edcc44c8ed768bdefa6ac..edb0fcf01b760cebae28dee9bef058f2
        shaka.util.Dom.removeAllChildren(this.controlsContainer_);
        this.releaseChildElements_();
        this.bigButtonsContainer_ = null;
-@@ -957,7 +967,8 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
+@@ -957,7 +972,8 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
      if (seeking) {
        this.mouseStillTimer_.stop();
      } else {
@@ -114,7 +134,7 @@ index e5ba02a18cbe4bca7b2edcc44c8ed768bdefa6ac..edb0fcf01b760cebae28dee9bef058f2
      }
    }
  
-@@ -2098,7 +2109,8 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
+@@ -2098,7 +2114,8 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
      if (event.type == 'touchend' ||
          event.type == 'wheel' ||
          event.type == 'keyup'|| !this.lastTouchEventTime_) {
@@ -124,7 +144,7 @@ index e5ba02a18cbe4bca7b2edcc44c8ed768bdefa6ac..edb0fcf01b760cebae28dee9bef058f2
      }
    }
  
-@@ -2808,22 +2820,17 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
+@@ -2808,22 +2825,17 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
        this.seekBar_.setValue(this.video_.currentTime);
        this.seekBar_.update();
  

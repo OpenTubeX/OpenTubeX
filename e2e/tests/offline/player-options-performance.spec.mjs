@@ -135,3 +135,41 @@ for (const usePlayerMenuGrid of [true, false]) {
     })
   })
 }
+
+test.describe('player options while seeking', () => {
+  test.use({
+    seed: {
+      settings: {
+        videoPlaybackEngine: 'built-in',
+        ytDlpPlaybackEngineDefaultMigration: true,
+      }
+    }
+  })
+
+  test('scrubbing only refreshes the menu entries when it closes a menu', async ({ app, page }) => {
+    await mockPlayableWatchPage(app, page)
+    const video = await openMockedVideo(page)
+    await video.evaluate(element => element.pause())
+    const player = page.locator('.ftVideoPlayer')
+    const countMenuClosesWhileScrubbing = () => player.evaluate((element) => {
+      const controls = element.ui.getControls()
+      const seekBar = element.querySelector('.shaka-seek-bar')
+      let closes = 0
+      const countClose = () => { closes++ }
+      controls.addEventListener('submenuclose', countClose)
+      for (let step = 0; step < 10; step++) {
+        seekBar.dispatchEvent(new Event('input'))
+      }
+      controls.removeEventListener('submenuclose', countClose)
+      return closes
+    })
+
+    expect(await countMenuClosesWhileScrubbing()).toBe(0)
+
+    await player.hover()
+    await player.getByRole('button', { name: 'More settings' }).click()
+    await expect(player.locator('.shaka-overflow-menu')).toBeVisible()
+    expect(await countMenuClosesWhileScrubbing()).toBe(1)
+    await expect(player.locator('.shaka-overflow-menu')).toBeHidden()
+  })
+})
