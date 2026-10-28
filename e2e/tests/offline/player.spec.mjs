@@ -1568,6 +1568,22 @@ test('video zoom can be disabled', async ({ app, page }) => {
   await watchComponent.dispose()
 })
 
+test('grid menu tiles leave out the submenu chevron', async ({ app, page }) => {
+  await openDemoVideo({ app, page })
+  const player = page.locator(`${activeTab} .ftVideoPlayer`)
+  await player.hover()
+  await player.getByRole('button', { name: 'More settings' }).click()
+
+  const overflowMenu = player.locator('.shaka-overflow-menu')
+  await expect(overflowMenu).toHaveClass(/ft-menu-grid/)
+  await expect(overflowMenu).toBeVisible()
+  const chevrons = await overflowMenu.locator(':scope > button > .shaka-overflow-button-label-inline').evaluateAll(labels => labels
+    .filter(label => label.checkVisibility())
+    .map(label => getComputedStyle(label, '::after').content))
+  expect(chevrons.length).toBeGreaterThan(0)
+  expect(new Set(chevrons)).toEqual(new Set(['none']))
+})
+
 test('keeps the context menu open when the pointer leaves a playing video', async ({ app, page, attachScreenshot }) => {
   await openDemoVideo({ app, page })
   await page.locator('.ftVideoPlayer').click({ button: 'right' })
