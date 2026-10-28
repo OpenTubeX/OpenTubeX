@@ -12,7 +12,9 @@ async function expectValidScrollRange(scroller) {
       : viewport.top
     const scrollable = element.scrollHeight > element.clientHeight
     return {
-      offsetValid: element.scrollTop <= Math.max(0, element.scrollHeight - element.clientHeight) + 1,
+      // scrollHeight and clientHeight are rounded, while the end offset at a
+      // fractional UI scale is not. Allow both roundings, in device pixels.
+      offsetValid: (element.scrollTop - Math.max(0, element.scrollHeight - element.clientHeight)) * devicePixelRatio <= 2,
       contentEndValid: element.scrollTop === 0 || end >= viewport.bottom - 1,
       scrollbarValid: !!scrollbar && (scrollable || !scrollbar.classList.contains('os-scrollbar-visible') || scrollbar.classList.contains('os-scrollbar-unusable')),
       scrollTop: element.scrollTop,
