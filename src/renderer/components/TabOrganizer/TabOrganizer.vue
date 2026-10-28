@@ -730,7 +730,7 @@ const titleId = `tab-organizer-title-${useId().replaceAll(':', '')}`
 const promptId = `tab-organizer-${useId().replaceAll(':', '')}`
 const syncedSessionIdPrefix = `tab-organizer-synced-session-${useId().replaceAll(':', '')}`
 const syncedSessionPanelId = `${syncedSessionIdPrefix}-panel`
-const teleportTarget = useFullscreenTeleportTarget(close)
+const teleportTarget = useFullscreenTeleportTarget(close, () => showCreateGroupPrompt.value || sessionToDelete.value !== null || sessionToOpen.value !== null)
 const query = ref('')
 const newGroupName = ref('')
 const showCreateGroupPrompt = ref(false)

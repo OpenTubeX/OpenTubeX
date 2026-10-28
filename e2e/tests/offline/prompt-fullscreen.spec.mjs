@@ -76,3 +76,20 @@ test('keeps the prompt behind a nested prompt open when Escape exits player full
   await addPrompt.getByRole('button', { name: 'Cancel', exact: true }).click()
   await expect(addPrompt).toHaveCount(0)
 })
+
+test('keeps the Tab Organizer open behind its nested prompt when Escape exits player fullscreen', async ({ app, page }) => {
+  await mockPlayableWatchPage(app, page)
+  await openMockedVideo(page)
+  await setPlayerFullscreen(page, true)
+
+  await page.evaluate(() => window.dispatchEvent(new Event('opentubex:open-tab-organizer')))
+  const organizer = page.locator(':fullscreen .tabOrganizerBackdrop')
+  await organizer.getByRole('button', { name: 'Create Group', exact: true }).click()
+  await expect(page.locator(':fullscreen .prompt')).toHaveCount(1)
+
+  await pressBrowserEscape(app, page)
+
+  await expect.poll(() => page.evaluate(() => document.fullscreenElement)).toBeNull()
+  await expect(page.locator('.prompt')).toHaveCount(0)
+  await expect(page.locator('.app > .tabOrganizerBackdrop .tabOrganizer:not([inert])')).toBeVisible()
+})
