@@ -101,11 +101,16 @@ jobs:
             "--only-changed=origin/$PR_BASE_REF" --pass-with-no-tests > "$changed_report"
         fi
         node --input-type=module - "$full_report" "$changed_report" <<'NODE' >> "$GITHUB_OUTPUT"
-        import { readFileSync } from 'node:fs'
-        import { createShardMatrix } from './e2e/shards.mjs'
+        import { appendFileSync, readFileSync } from 'node:fs'
+        import { countRepeatTests, createShardMatrix, REPEAT_EACH, REPEAT_LIMIT } from './e2e/shards.mjs'
 
         const [full, changed] = process.argv.slice(2).map(file => JSON.parse(readFileSync(file, 'utf8')))
-        console.log(`matrix=${JSON.stringify(createShardMatrix(full, changed, process.env.SELECTED_PROJECT))}`)
+        const isPullRequest = !!process.env.PR_BASE_REF
+        console.log(`matrix=${JSON.stringify(createShardMatrix(full, changed, process.env.SELECTED_PROJECT, isPullRequest))}`)
+        const repeatCount = isPullRequest ? countRepeatTests(changed) : 0
+        if (repeatCount > REPEAT_LIMIT) {
+          appendFileSync(process.env.GITHUB_STEP_SUMMARY, `This PR changes ${repeatCount} offline E2E tests, more than the ${REPEAT_LIMIT} that are repeated ${REPEAT_EACH} times to catch flaky tests.\n`)
+        }
         NODE
       shell: bash
 
@@ -155,8 +160,8 @@ jobs:
     steps:
     - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
       with:
-        # Playwright needs the base branch history to identify network tests changed by a PR.
-        fetch-depth: ${{ github.event_name == 'pull_request' && matrix.project == 'network' && '0' || '1' }}
+        # Playwright needs the base branch history to identify tests changed by a PR.
+        fetch-depth: ${{ github.event_name == 'pull_request' && (matrix.project == 'network' || matrix.project == 'repeat') && '0' || '1' }}
         persist-credentials: false
         ref: ${{ inputs.checkoutRef }}
 
@@ -231,11 +236,14 @@ jobs:
 
     # The network project talks to the real YouTube servers on the first
     # attempt and automatically falls back to recorded fixtures on retry.
-    # PRs run every packed-app test, but only changed network tests.
+    # PRs run every packed-app test, but only changed network tests. The
+    # repeat shards rerun changed offline tests without retries, so a new
+    # flaky test fails its PR.
     - name: Run E2E tests
       env:
         PROJECTS: ${{ matrix.projects }}
         E2E_XVFB: '1'
+        E2E_FLAKY_REPORT: ${{ runner.temp }}/e2e-flaky.json
       run: |
         test_args=("--shard=${{ matrix.shard }}/${{ matrix.shardTotal }}")
         for project in $PROJECTS; do
@@ -243,6 +251,9 @@ jobs:
         done
         if [ "${{ github.event_name }}" = "pull_request" ] && [ "${{ matrix.project }}" = "network" ]; then
           test_args+=("--only-changed=origin/${GITHUB_BASE_REF}" "--pass-with-no-tests")
+        fi
+        if [ "${{ matrix.project }}" = "repeat" ]; then
+          test_args+=("--only-changed=origin/${GITHUB_BASE_REF}" "--repeat-each=${{ matrix.repeatEach }}" "--retries=0")
         fi
 
         xvfb-run --auto-servernum --server-args='-screen 0 1920x1080x24' pnpm exec playwright test -c e2e/playwright.config.mjs "${test_args[@]}"
@@ -264,6 +275,16 @@ jobs:
           e2e/report/
           e2e/results/
         retention-days: 14
+
+    # Read by the Flaky E2E Tests workflow.
+    - name: Upload flaky tests
+      if: ${{ !cancelled() }}
+      uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+      with:
+        name: e2e-flaky-${{ github.run_attempt }}-${{ matrix.project }}-${{ matrix.shard }}
+        path: ${{ runner.temp }}/e2e-flaky.json
+        if-no-files-found: ignore
+        retention-days: 7
 
   # Keep a stable required-check name while the test suite runs as a matrix.
   e2e:

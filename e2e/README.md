@@ -77,7 +77,7 @@ Performance checks measure work (layout, style and render counts), resource
 retention or responsiveness under CPU throttling. Prefer deterministic counts
 over single-run wall-clock budgets: shared runners make those noisy, and the
 paired comparison below already gates the main timings. The project runs with
-one worker, without tracing and without retries.
+one worker and without tracing.
 
 ## Playing a video without YouTube
 
@@ -171,7 +171,9 @@ Packed-app tests always run in full on PRs: Playwright's import-based
 `--only-changed` selection cannot associate them with source or CSS changes.
 Only the network project, which talks to YouTube, is limited to changed tests
 and passes without running any when none are affected. Network tests use the
-fixture fallback on retry. Run the performance project locally with
+fixture fallback on retry. The `repeat` shards also run changed offline tests
+five times without retries, so a PR cannot add a flaky test; they are skipped
+when a shared change selects more than 100 tests. Run the performance project locally with
 `pnpm exec playwright test -c e2e/playwright.config.mjs --project=performance`.
 
 The browser job also runs `tests/android/mobile-performance.test.mjs`
@@ -181,7 +183,10 @@ Playwright. They do not replace native Android emulator testing.
 
 The Playwright HTML report and functional-test traces are uploaded as artifacts.
 The performance project disables tracing to avoid distorting measurements.
-Neither the performance project nor the paired comparison retries.
+On CI, Playwright retries each failed test once. A test that passes only on
+retry does not fail the run: it gets a warning annotation and an entry in the
+open "Flaky E2E tests" issue, which the Flaky E2E Tests workflow maintains.
+The paired comparison does not retry.
 
 ## Performance comparison
 
