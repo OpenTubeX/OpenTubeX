@@ -16,18 +16,38 @@ import {
   stepSeekHistoryForward,
 } from '../../src/renderer/helpers/player/seekHistory.js'
 
+/** @param {import('../../src/renderer/helpers/player/seekHistory.js').SeekHistory} history */
+const positionsOf = history => history.entries.map(({ position }) => position)
+/** @param {import('../../src/renderer/helpers/player/seekHistory.js').SeekHistory} history */
+const summarize = history => ({ positions: positionsOf(history), index: history.index })
+
 test('returns to the position before an accidental jump and forward again', () => {
   const history = recordSeekHistoryJump(EMPTY_SEEK_HISTORY, 120)
 
   const back = stepSeekHistoryBack(history, 600)
   assert.equal(back.target, 120)
-  assert.deepEqual(back.history, { positions: [120, 600], index: 0 })
+  assert.deepEqual(summarize(back.history), { positions: [120, 600], index: 0 })
   assert.equal(stepSeekHistoryBack(back.history, 125), null)
 
   const forward = stepSeekHistoryForward(back.history, 130)
   assert.equal(forward.target, 600)
-  assert.deepEqual(forward.history, { positions: [130, 600], index: 1 })
+  assert.deepEqual(summarize(forward.history), { positions: [130, 600], index: 1 })
   assert.equal(stepSeekHistoryForward(forward.history, 610), null)
+})
+
+test('remembers when each place was last left', () => {
+  let history = recordSeekHistoryJump(EMPTY_SEEK_HISTORY, 120, 1000)
+  history = recordSeekHistoryJump(history, 600, 2000)
+  assert.deepEqual(history.entries, [{ position: 120, leftAt: 1000 }, { position: 600, leftAt: 2000 }])
+
+  history = stepSeekHistoryBack(history, 900, 3000).history
+  assert.deepEqual(history.entries.at(-1), { position: 900, leftAt: 3000 })
+
+  history = stepSeekHistoryBack(history, 610, 4000).history
+  assert.deepEqual(history.entries[1], { position: 610, leftAt: 4000 })
+
+  history = stepSeekHistoryForward(history, 125, 5000).history
+  assert.deepEqual(history.entries[0], { position: 125, leftAt: 5000 })
 })
 
 test('has nothing to step to without jumps', () => {
@@ -40,27 +60,27 @@ test('keeps newer entries when jumping elsewhere after stepping back', () => {
   history = recordSeekHistoryJump(history, 300)
   history = stepSeekHistoryBack(history, 900).history
   history = stepSeekHistoryBack(history, 310).history
-  assert.deepEqual(history, { positions: [60, 310, 900], index: 0 })
+  assert.deepEqual(summarize(history), { positions: [60, 310, 900], index: 0 })
 
   // The revisited entry moves to the end with the position it was left at.
   history = recordSeekHistoryJump(history, 90)
-  assert.deepEqual(history, { positions: [310, 900, 90], index: 3 })
+  assert.deepEqual(summarize(history), { positions: [310, 900, 90], index: 3 })
 
   const back = stepSeekHistoryBack(history, 1200)
   assert.equal(back.target, 90)
-  assert.deepEqual(back.history.positions, [310, 900, 90, 1200])
+  assert.deepEqual(positionsOf(back.history), [310, 900, 90, 1200])
 })
 
 test('treats nearby positions as the same place', () => {
   let history = recordSeekHistoryJump(EMPTY_SEEK_HISTORY, 100)
   history = recordSeekHistoryJump(history, 400)
   history = recordSeekHistoryJump(history, 103)
-  assert.deepEqual(history, { positions: [400, 103], index: 2 })
+  assert.deepEqual(summarize(history), { positions: [400, 103], index: 2 })
 
   // Stepping back from a recorded place skips over it.
   const back = stepSeekHistoryBack(history, 105)
   assert.equal(back.target, 400)
-  assert.deepEqual(back.history, { positions: [400, 105], index: 0 })
+  assert.deepEqual(summarize(back.history), { positions: [400, 105], index: 0 })
 })
 
 test('drops the oldest entries beyond the limit', () => {
@@ -69,8 +89,8 @@ test('drops the oldest entries beyond the limit', () => {
     history = recordSeekHistoryJump(history, index * 60)
   }
 
-  assert.equal(history.positions.length, SEEK_HISTORY_MAX_ENTRIES)
-  assert.equal(history.positions[0], 60)
+  assert.equal(history.entries.length, SEEK_HISTORY_MAX_ENTRIES)
+  assert.equal(history.entries[0].position, 60)
   assert.equal(history.index, SEEK_HISTORY_MAX_ENTRIES)
 })
 
@@ -98,7 +118,7 @@ test('shares a video\'s history between the players showing it', () => {
 
   setSeekHistory('shared-video', recordSeekHistoryJump(first.value, 30))
   setSeekHistory('shared-video', recordSeekHistoryJump(second.value, 300))
-  assert.deepEqual(first.value.positions, [30, 300])
+  assert.deepEqual(positionsOf(first.value), [30, 300])
   clearSeekHistories()
   assert.equal(second.value, EMPTY_SEEK_HISTORY)
 })
@@ -133,7 +153,7 @@ function recorder() {
     noteSeekHistoryJump(target)
     state.video.value.currentTime = target
   }
-  return { state, seek, positions: () => state.seekHistory.value.positions }
+  return { state, seek, positions: () => positionsOf(state.seekHistory.value) }
 }
 
 test('records where a jump started once it leaves that place', () => {

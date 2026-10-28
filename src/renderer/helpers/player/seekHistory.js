@@ -15,15 +15,21 @@ export const SEEK_HISTORY_MAX_ENTRIES = 50
 const SEEK_HISTORY_MAX_VIDEOS = 50
 
 /**
+ * @typedef {object} SeekHistoryEntry
+ * @property {number} position
+ * @property {number} leftAt When the viewer last left the position, in milliseconds since the epoch.
+ */
+
+/**
  * @typedef {object} SeekHistory
- * @property {readonly number[]} positions Places jumped away from, oldest first.
- * @property {number} index The entry being revisited, or `positions.length` while none is.
+ * @property {readonly SeekHistoryEntry[]} entries Places jumped away from, oldest first.
+ * @property {number} index The entry being revisited, or `entries.length` while none is.
  */
 
 /** @typedef {{ history: SeekHistory, target: number }} SeekHistoryStep */
 
 /** @type {SeekHistory} */
-export const EMPTY_SEEK_HISTORY = Object.freeze({ positions: Object.freeze([]), index: 0 })
+export const EMPTY_SEEK_HISTORY = Object.freeze({ entries: Object.freeze([]), index: 0 })
 
 /**
  * Histories last for the app session, so they survive player reloads and
@@ -48,7 +54,7 @@ export function getSeekHistory(key) {
 export function setSeekHistory(key, history) {
   // Reinsert so that the least recently changed video is evicted first.
   histories.delete(key)
-  if (history.positions.length === 0) return
+  if (history.entries.length === 0) return
 
   histories.set(key, history)
   if (histories.size > SEEK_HISTORY_MAX_VIDEOS) {
@@ -61,14 +67,14 @@ export function clearSeekHistories() {
 }
 
 /**
- * @param {readonly number[]} positions
- * @param {number} position
- * @returns {number[]}
+ * @param {readonly SeekHistoryEntry[]} entries
+ * @param {SeekHistoryEntry} entry
+ * @returns {SeekHistoryEntry[]}
  */
-function appendPosition(positions, position) {
+function appendEntry(entries, entry) {
   return [
-    ...positions.filter(entry => Math.abs(entry - position) >= SEEK_HISTORY_SAME_PLACE_SECONDS),
-    position,
+    ...entries.filter(({ position }) => Math.abs(position - entry.position) >= SEEK_HISTORY_SAME_PLACE_SECONDS),
+    entry,
   ].slice(-SEEK_HISTORY_MAX_ENTRIES)
 }
 
@@ -77,42 +83,46 @@ function appendPosition(positions, position) {
  * as it is the place being left.
  * @param {SeekHistory} history
  * @param {number} from
+ * @param {number} [now]
  * @returns {SeekHistory}
  */
-export function recordSeekHistoryJump(history, from) {
-  const positions = appendPosition(
-    history.positions.filter((_, index) => index !== history.index),
-    from
+export function recordSeekHistoryJump(history, from, now = Date.now()) {
+  const entries = appendEntry(
+    history.entries.filter((_, index) => index !== history.index),
+    { position: from, leftAt: now }
   )
-  return { positions, index: positions.length }
+  return { entries, index: entries.length }
 }
 
 /**
  * @param {SeekHistory} history
  * @param {number} current
+ * @param {number} [now]
  * @returns {SeekHistoryStep | null}
  */
-export function stepSeekHistoryBack(history, current) {
+export function stepSeekHistoryBack(history, current, now = Date.now()) {
   // Remember the place being left so that stepping forward returns to it.
-  const positions = history.index < history.positions.length
-    ? history.positions.with(history.index, current)
-    : appendPosition(history.positions, current)
-  const index = Math.min(history.index, positions.length - 1)
+  const left = { position: current, leftAt: now }
+  const entries = history.index < history.entries.length
+    ? history.entries.with(history.index, left)
+    : appendEntry(history.entries, left)
+  const index = Math.min(history.index, entries.length - 1)
 
   if (index <= 0) return null
 
-  return { history: { positions, index: index - 1 }, target: positions[index - 1] }
+  return { history: { entries, index: index - 1 }, target: entries[index - 1].position }
 }
 
 /**
  * @param {SeekHistory} history
  * @param {number} current
+ * @param {number} [now]
  * @returns {SeekHistoryStep | null}
  */
-export function stepSeekHistoryForward(history, current) {
+export function stepSeekHistoryForward(history, current, now = Date.now()) {
   const { index } = history
-  if (index >= history.positions.length - 1) return null
+  if (index >= history.entries.length - 1) return null
 
-  const positions = history.positions.with(index, current)
-  return { history: { positions, index: index + 1 }, target: positions[index + 1] }
+  const entries = history.entries.with(index, { position: current, leftAt: now })
+  return { history: { entries, index: index + 1 }, target: entries[index + 1].position }
 }

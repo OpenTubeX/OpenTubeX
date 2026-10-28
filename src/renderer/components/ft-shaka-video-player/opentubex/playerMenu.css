@@ -395,6 +395,19 @@
   text-overflow: ellipsis;
 }
 
+:deep(.seek-history-entry > .seek-history-left-at) {
+  flex-shrink: 0;
+  margin-inline-start: auto;
+  padding-inline-start: 16px;
+  font-size: 0.85em;
+  opacity: 0.75;
+}
+
+:deep(.seek-history-menu.ft-menu-grid > .seek-history-entry > .seek-history-left-at) {
+  flex-basis: 100%;
+  padding-inline-start: 0;
+}
+
 :deep(.ab-repeat-button[aria-pressed='true'] .shaka-ui-icon) {
   color: var(--primary-color);
 }
