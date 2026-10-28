@@ -6,7 +6,7 @@ import { mockPlayableWatchPage } from '../../helpers/watch.mjs'
  * @param {import('@playwright/test').Page} page
  */
 async function openBufferSettings(page) {
-  await goToSettingsSection(page, 'playback')
+  await goToSettingsSection(page, 'advanced')
   const section = page.locator('.settingsSection').filter({
     has: page.getByRole('heading', { name: 'Buffering', exact: true })
   })

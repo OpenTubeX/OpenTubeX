@@ -1,7 +1,7 @@
 import { test, expect, goToSettingsSection, latestSettings, readDatastore } from '../../helpers/app.mjs'
 
 async function openYtDlpStreamingSettings(page) {
-  const section = await goToSettingsSection(page, 'playback')
+  const section = await goToSettingsSection(page, 'advanced')
   const heading = section.getByRole('heading', { name: 'yt-dlp Streaming', exact: true })
   const ytDlpSection = heading.locator('xpath=../..')
   return {
@@ -27,7 +27,7 @@ test.describe('yt-dlp playback preloading', () => {
 
     await expect(heading).toBeVisible()
     const sectionHeadings = await section.getByRole('heading', { level: 3 }).allTextContents()
-    expect(sectionHeadings.indexOf('yt-dlp Streaming')).toBe(sectionHeadings.indexOf('Captions') - 1)
+    expect(sectionHeadings.indexOf('yt-dlp Streaming')).toBe(sectionHeadings.indexOf('yt-dlp Cookies') + 1)
 
     await expect(toggle).not.toBeChecked()
     await expect(toggle).toBeEnabled()

@@ -95,6 +95,14 @@ const QUICK_PLAYBACK_SPEED_SUBPAGE_KEYS = new Set([
   'Playback Speed'
 ])
 
+const YT_DLP_STREAMING_KEYS = new Set([
+  'yt-dlp Streaming',
+  'Preload Upcoming Videos',
+  'Parallel Segment Loading',
+  'Upcoming Videos to Preload',
+  'Concurrent Preloads'
+])
+
 export const SETTINGS_SEARCH_SOURCES = {
   general: [{
     type: 'general',
@@ -149,7 +157,14 @@ export const SETTINGS_SEARCH_SOURCES = {
   playback: [{
     type: 'player',
     key: 'Settings.Player Settings',
-    exclude: new Set(['Proxy Videos Through Invidious', 'Sections', 'Voice-over Translation', ...QUICK_PLAYBACK_SPEED_SUBPAGE_KEYS])
+    exclude: new Set([
+      'Proxy Videos Through Invidious',
+      'Sections',
+      'Voice-over Translation',
+      'Buffering',
+      ...QUICK_PLAYBACK_SPEED_SUBPAGE_KEYS,
+      ...YT_DLP_STREAMING_KEYS
+    ])
   }, {
     type: 'player',
     key: 'Settings.Player Settings',
@@ -251,7 +266,7 @@ export const SETTINGS_SEARCH_SOURCES = {
   }, {
     type: 'player',
     key: 'Settings.Player Settings',
-    include: new Set(['Proxy Videos Through Invidious'])
+    include: new Set(['Proxy Videos Through Invidious', 'Buffering'])
   }, {
     type: 'external-player',
     key: 'Settings.External Player Settings',
@@ -260,6 +275,11 @@ export const SETTINGS_SEARCH_SOURCES = {
     type: 'external-software',
     key: 'Settings.External Software Settings',
     exclude: new Set(['Managed Tool Errors']),
+    electronOnly: true
+  }, {
+    type: 'yt-dlp-streaming',
+    key: 'Settings.Player Settings',
+    include: YT_DLP_STREAMING_KEYS,
     electronOnly: true
   }, {
     type: 'proxy',
