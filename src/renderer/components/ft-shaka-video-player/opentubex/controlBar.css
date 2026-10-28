@@ -136,6 +136,11 @@
   display: block;
 }
 
+:deep(.ft-seek-filmstrip-precise .ft-seek-filmstrip-hint) {
+  background-color: var(--accent-color);
+  color: var(--text-with-accent-color);
+}
+
 :deep(.shaka-seek-bar-container .shaka-range-element::-moz-range-thumb) {
   box-shadow: 0 1px 3px rgb(0 0 0 / 60%);
 }

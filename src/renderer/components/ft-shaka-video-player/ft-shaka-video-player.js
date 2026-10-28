@@ -6745,7 +6745,8 @@ export default defineComponent({
       handleScrollMiniPlayerLeave(event)
       container.value?.style.removeProperty('--shorts-quick-playback-rate-bar-opacity')
 
-      if (props.shortsPlayer && !video.value.paused) {
+      // Dragging the seek bar keeps the controls up until the drag ends.
+      if (props.shortsPlayer && !video.value.paused && !ui?.getControls().isSeeking()) {
         ui?.getControls().getControlsContainer().removeAttribute('shown')
       }
     }

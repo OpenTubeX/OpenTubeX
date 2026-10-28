@@ -17,8 +17,13 @@ function fixture() {
       // Window listeners share event types with the bar's own, so keep them apart.
       this.eventManager = { listen: (target, type, listener) => controls.listeners.set(target === window ? `window:${type}` : type, listener) }
       const properties = new Map()
+      const classes = new Set()
       this.container = {
-        classList: { toggle() {}, remove() {} },
+        classList: {
+          toggle: (name, force) => force ? classes.add(name) : classes.delete(name),
+          remove: (...names) => names.forEach(name => classes.delete(name)),
+          contains: name => classes.has(name),
+        },
         style: { background: '', setProperty: (name, value) => properties.set(name, value), getPropertyValue: name => properties.get(name) },
         querySelector: () => controls.timePreview,
       }
@@ -40,6 +45,7 @@ function fixture() {
     onChangeStart(fromTouchEvent = false) { this.changeStartedFromTouch = fromTouchEvent }
     onChange() {}
     onChangeEnd() {}
+    release() { this.released = true }
   }
   class SeekFilmstrip {
     constructor() {
@@ -68,7 +74,11 @@ function fixture() {
   const controls = {
     video: { currentTime: 15, paused: false }, listeners: new Map(), seeking: false, shown: 0, events: [],
     timePreview: { style: { visibility: 'visible' } },
+    config: { showUIAlways: false }, hovered: true, hidden: 0,
     setSeeking(value) { this.seeking = value }, showUI() { this.shown++; this.seekingWhenShown = this.seeking },
+    hideUI() { this.hidden++ },
+    getConfig() { return this.config },
+    getVideoContainer() { return { matches: selector => selector === ':hover' && controls.hovered } },
     dispatchEvent(event) { this.events.push(event) },
   }
   const bar = factory.create({}, controls)
@@ -200,29 +210,46 @@ test('dragging the thumb shows the filmstrip but tapping does not', () => {
   assert.equal(bar.filmstrip.time, null, 'Keyboard changes do not show the filmstrip')
 })
 
-test('a mouse only shows the filmstrip when dragging the thumb itself', () => {
+test('a mouse drag from anywhere on the track shows the filmstrip and keeps the controls up', () => {
   const { bar, controls, drag } = fixture()
-  const press = clientX => {
-    controls.listeners.get('mousedown')({ clientX })
+  const press = () => {
+    controls.listeners.get('mousedown')()
     bar.onChangeStart()
   }
-  // The thumb for 15 of 30 seconds is centered at 100 + 6 + 150.
-  press(256 + 60)
-  drag(20)
-  assert.equal(bar.filmstrip.time, null, 'Dragging from elsewhere on the track keeps the single preview')
+  // Shaka has already moved the thumb to the pressed spot, so only the drag counts.
+  bar.setValue(20)
+  press()
+  drag(20.1)
+  assert.equal(bar.filmstrip.time, null, 'Pressing elsewhere on the track is still a tap')
+  drag(22)
+  assert.equal(bar.filmstrip.time, 22)
+  assert.equal(controls.config.showUIAlways, true, 'Leaving the player or resting must not hide the controls')
   bar.onChangeEnd()
+  assert.equal(controls.config.showUIAlways, false)
+  assert.deepEqual([controls.shown, controls.hidden], [1, 0], 'Releasing over the player restarts its hide delay')
 
-  bar.setValue(15)
-  press(256 + 5)
-  drag(20)
-  assert.equal(bar.filmstrip.time, 20)
+  controls.hovered = false
+  press()
+  drag(25)
   bar.onChangeEnd()
+  assert.deepEqual([controls.shown, controls.hidden], [1, 1], 'Releasing outside hides them like leaving the player')
 
-  // Touch input has no mouse press and keeps showing the filmstrip.
+  // Shaka rebuilds its controls without ending the drag.
+  press()
+  drag(28)
+  bar.release()
+  assert.equal(bar.released, true)
+  assert.equal(controls.config.showUIAlways, false, 'The rebuilt controls must not stay forced up')
+  assert.deepEqual([controls.shown, controls.hidden], [1, 1])
+
+  // Touch input has no mouse press, and Shaka keeps showing the controls for it.
   bar.setValue(15)
   bar.onChangeStart()
   drag(20)
   assert.equal(bar.filmstrip.time, 20)
+  assert.equal(controls.config.showUIAlways, false)
+  bar.onChangeEnd()
+  assert.deepEqual([controls.shown, controls.hidden], [1, 1])
 })
 
 test('pulling up starts precise seeking from the last dragged time, not a pending strip render', () => {
@@ -231,7 +258,7 @@ test('pulling up starts precise seeking from the last dragged time, not a pendin
   let rendering = null
   Object.assign(bar.filmstrip, {
     pixelsPerSecond: 50,
-    element: { getBoundingClientRect: () => ({ bottom: 50 }) },
+    element: { getBoundingClientRect: () => ({ top: 0, height: 50, bottom: 50 }) },
     show(time) {
       this.time = rendering
       rendering = time
@@ -244,7 +271,15 @@ test('pulling up starts precise seeking from the last dragged time, not a pendin
   drag(10)
   move(304, 100)
   drag(20)
-  // Pulling straight up keeps the time even though Shaka maps the pointer again.
+  // The lower half of the strip still follows the pointer's spot on the bar.
+  move(304, 30)
+  drag(20)
+  move(314, 30)
+  drag(20.5)
+  assert.equal(bar.value, 20.5)
+  move(304, 30)
+  drag(20)
+  // Pulling up past its middle keeps the time even though Shaka maps the pointer again.
   move(304, 0)
   drag(20)
   assert.equal(bar.value, 20)
@@ -252,4 +287,55 @@ test('pulling up starts precise seeking from the last dragged time, not a pendin
   move(354, 0)
   drag(25)
   assert.equal(bar.value, 21)
+})
+
+test('dragging back below the strip returns to seeking at the bar scale', async () => {
+  const { bar, controls, drag } = fixture()
+  Object.assign(bar.filmstrip, {
+    pixelsPerSecond: 50,
+    element: { getBoundingClientRect: () => ({ top: 0, height: 50, bottom: 50 }) },
+  })
+  const move = (clientX, clientY) => controls.listeners.get('window:mousemove')({ clientX, clientY })
+  bar.onChangeStart()
+  move(304, 100)
+  drag(20)
+  move(304, 0)
+  drag(20)
+  move(354, 0)
+  drag(25)
+  assert.equal(bar.value, 21)
+  // Back in the lower half it stays precise.
+  move(354, 40)
+  drag(25)
+  assert.equal(bar.value, 21)
+  // Resizing can leave the strip no finer than the bar; the drag stays precise and says so.
+  bar.filmstrip.pixelsPerSecond = 1
+  drag(25)
+  assert.equal(bar.value, 21)
+  await Promise.resolve()
+  assert.equal(bar.container.classList.contains('ft-seek-filmstrip-precise'), true)
+  assert.equal(bar.filmstrip.hint.textContent, 'Video.Player.Precise seeking, drag down to exit')
+  bar.filmstrip.pixelsPerSecond = 50
+  // A pending storyboard lookup must not delay the hint when precise seeking ends.
+  let finishStoryboardLookup
+  bar.filmstrip.show = () => new Promise(resolve => { finishStoryboardLookup = resolve })
+  // Below the strip, Shaka's value from the pointer's x applies again.
+  move(354, 50)
+  drag(25)
+  assert.equal(bar.value, 25)
+  assert.equal(bar.container.classList.contains('ft-seek-filmstrip-precise'), false)
+  assert.equal(bar.filmstrip.hint.textContent, 'Video.Player.Pull up for precise seeking')
+  finishStoryboardLookup()
+  bar.filmstrip.show = () => Promise.resolve()
+  move(364, 50)
+  drag(26)
+  assert.equal(bar.value, 26)
+  // Pulling up again resumes from there.
+  move(364, 0)
+  drag(26)
+  move(314, 0)
+  drag(21)
+  assert.equal(bar.value, 25)
+  bar.onChangeEnd()
+  assert.equal(bar.value, 25)
 })

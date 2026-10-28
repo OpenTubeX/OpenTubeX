@@ -5,8 +5,6 @@ import { SeekFilmstrip, THUMB_SIZE } from './SeekFilmstrip'
 
 // Pointer movement after pressing the bar that turns a tap into a drag.
 const DRAG_THRESHOLD = 4
-// Distance from the thumb's center that still grabs it with a mouse.
-const THUMB_GRAB_RADIUS = THUMB_SIZE / 2 + 2
 // How much finer than the seek bar the filmstrip must be to offer precise seeking.
 const PRECISE_MIN_ZOOM = 2
 
@@ -17,8 +15,13 @@ export class SeekPreviewBar extends shaka.ui.SeekBar {
     this.previewTime = null
     /** @private @type {number | null} */
     this.dragStartValue = null
-    /** @private @type {boolean | null} */
-    this.mouseGrabbedThumb = null
+    /** @private */
+    this.mousePressed = false
+    /**
+     * The controls' own setting while a mouse drag keeps them shown.
+     * @private @type {boolean | null}
+     */
+    this.showUIAlways = null
     /** @private */
     this.filmstripShown = false
     /** @private */
@@ -26,7 +29,7 @@ export class SeekPreviewBar extends shaka.ui.SeekBar {
     /** @private @type {{ x: number, y: number } | null} */
     this.pointer = null
     /**
-     * Like YouTube, pulling the pointer up onto the filmstrip scrubs at its scale.
+     * Like YouTube, pulling the pointer up past the filmstrip's middle scrubs at its scale.
      * @private @type {{ x: number, time: number, markerX: number, secondsPerPixel: number } | null}
      */
     this.precise = null
@@ -53,10 +56,8 @@ export class SeekPreviewBar extends shaka.ui.SeekBar {
       }
     })
     this.eventManager.listen(this.player, 'unloading', () => this.hideSeekPreview())
-    // Like YouTube, a mouse only shows the filmstrip while dragging the thumb
-    // itself. Capture the press before Shaka moves the thumb to the pointer.
-    this.eventManager.listen(this.container, 'mousedown', event => {
-      this.mouseGrabbedThumb = Math.abs(event.clientX - this.getThumbClientX(this.getValue())) <= THUMB_GRAB_RADIUS
+    this.eventManager.listen(this.container, 'mousedown', () => {
+      this.mousePressed = true
     }, true)
     // Shaka reads the pointer only for its x position, so track it before Shaka does.
     for (const type of ['mousemove', 'mouseup', 'touchmove', 'touchend']) {
@@ -92,8 +93,15 @@ export class SeekPreviewBar extends shaka.ui.SeekBar {
   onChangeStart(fromTouchEvent) {
     this.cancelTime = this.video.currentTime
     super.onChangeStart(fromTouchEvent)
-    this.dragStartValue = this.mouseGrabbedThumb === false ? null : this.getValue()
+    this.dragStartValue = this.getValue()
     this.lastDragValue = this.getValue()
+    if (this.mousePressed) {
+      // Keep the controls up while dragging, even when the pointer leaves the player or rests.
+      const config = this.controls.getConfig()
+      this.showUIAlways = config.showUIAlways
+      config.showUIAlways = true
+    }
+    this.mousePressed = false
   }
 
   // Notify after Shaka updates the preview text for mouse, touch and keyboard.
@@ -108,7 +116,7 @@ export class SeekPreviewBar extends shaka.ui.SeekBar {
     }
     if (this.filmstripShown) {
       // The strip's scale is only known once it has rendered.
-      this.filmstrip.show(this.getValue(), this.precise?.markerX).then(() => this.updatePullHint())
+      this.filmstrip.show(this.getValue(), this.precise?.markerX).then(() => this.updateHint())
     }
     this.controls.dispatchEvent(new shaka.util.FakeEvent('seekbarvaluechange', { time: this.getValue(), chapterX: this.precise?.markerX }))
     if (this.precise) {
@@ -123,10 +131,16 @@ export class SeekPreviewBar extends shaka.ui.SeekBar {
   }
 
   /** @private */
-  updatePullHint() {
-    const pullable = this.filmstripShown && !this.precise && this.isPreciseFiner()
-    if (pullable) this.filmstrip.hint.textContent = i18n.global.t('Video.Player.Pull up for precise seeking')
-    this.container.classList.toggle('ft-seek-filmstrip-pullable', pullable)
+  updateHint() {
+    // A resize can make the strip no finer than the bar, but the drag stays precise.
+    const available = this.filmstripShown && (this.precise !== null || this.isPreciseFiner())
+    if (available) {
+      this.filmstrip.hint.textContent = this.precise
+        ? i18n.global.t('Video.Player.Precise seeking, drag down to exit')
+        : i18n.global.t('Video.Player.Pull up for precise seeking')
+    }
+    this.container.classList.toggle('ft-seek-filmstrip-pullable', available)
+    this.container.classList.toggle('ft-seek-filmstrip-precise', available && this.precise !== null)
   }
 
   /**
@@ -136,9 +150,17 @@ export class SeekPreviewBar extends shaka.ui.SeekBar {
    */
   applyPreciseSeek() {
     if (!this.filmstripShown || this.dragStartValue === null || !this.pointer) return
+    const strip = this.filmstrip.element.getBoundingClientRect()
+    // Dragging back below the strip returns to Shaka's value from the pointer's x position.
+    // Starting higher up than that leaves room to move without toggling back and forth.
+    if (this.precise && this.pointer.y >= strip.bottom) {
+      this.exitPreciseSeek()
+      this.updateHint()
+      return
+    }
     if (!this.precise) {
-      const { pixelsPerSecond, element } = this.filmstrip
-      if (!this.isPreciseFiner() || this.pointer.y >= element.getBoundingClientRect().bottom) return
+      if (!this.isPreciseFiner() || this.pointer.y > strip.top + strip.height / 2) return
+      const { pixelsPerSecond } = this.filmstrip
       // Start where the previous move left the thumb: Shaka has already mapped this
       // move's x onto the bar, and the strip may still be rendering an older time.
       const time = this.lastDragValue
@@ -168,8 +190,32 @@ export class SeekPreviewBar extends shaka.ui.SeekBar {
     this.cancelled = false
     super.onChangeEnd()
     this.dragStartValue = null
-    this.mouseGrabbedThumb = null
     this.hideSeekPreview()
+    if (this.restoreShowUIAlways()) {
+      // Hide as if the pointer had just left when the drag ends outside the player.
+      if (this.controls.getVideoContainer().matches(':hover')) {
+        this.controls.showUI()
+      } else {
+        this.controls.hideUI()
+      }
+    }
+  }
+
+  release() {
+    // Rebuilding the controls mid-drag skips onChangeEnd, and the new config copies the old one.
+    this.restoreShowUIAlways()
+    super.release()
+  }
+
+  /**
+   * @private
+   * @returns {boolean} whether a mouse drag was keeping the controls shown
+   */
+  restoreShowUIAlways() {
+    if (this.showUIAlways === null) return false
+    this.controls.getConfig().showUIAlways = this.showUIAlways
+    this.showUIAlways = null
+    return true
   }
 
   /** @private */
@@ -200,15 +246,21 @@ export class SeekPreviewBar extends shaka.ui.SeekBar {
   }
 
   /** @private */
-  hideSeekPreview() {
-    // The chapter title followed the precise time; the pointer may be far from the bar.
-    const chapter = this.precise && this.container.querySelector('.ft-chapter-preview')
-    if (chapter) chapter.style.display = 'none'
-    this.pointer = null
+  exitPreciseSeek() {
+    if (!this.precise) return
     this.precise = null
+    // The chapter title followed the precise time; the pointer may be far from the bar.
+    const chapter = this.container.querySelector('.ft-chapter-preview')
+    if (chapter) chapter.style.display = 'none'
+  }
+
+  /** @private */
+  hideSeekPreview() {
+    this.exitPreciseSeek()
+    this.pointer = null
     if (!this.filmstripShown) return
     this.filmstripShown = false
-    this.container.classList.remove('ft-seek-filmstrip-pullable')
+    this.container.classList.remove('ft-seek-filmstrip-pullable', 'ft-seek-filmstrip-precise')
     this.filmstrip.hide()
     // Hide the time with the filmstrip instead of letting it drop to the bar.
     const preview = this.container.querySelector('.shaka-player-ui-thumbnail-container')
