@@ -2505,40 +2505,6 @@ a:visited {
   animation-duration: 200ms;
 }
 
-/* Scrollbars are drawn by OverlayScrollbars (see helpers/overlayScrollbars.js)
-   so they float above the content instead of taking up layout space. The
-   library resets every --os-* variable on `.os-scrollbar` itself, so these have
-   to be set on the same element rather than inherited from `body`. */
-body .os-scrollbar {
-  box-sizing: border-box;
-
-  /* The padding is subtracted from the track, so the handle ends up exactly as
-     wide as the configured thumb width. */
-  --os-size: var(--scrollbar-track-width);
-  --os-padding-perpendicular: 2px;
-  --os-padding-axis: 2px;
-  --os-handle-interactive-area-offset: 4px;
-
-  /* A wide thumb would cover the content beside it, so it rests at the default
-     width and only grows to the configured width while hovered or dragged. */
-  --os-handle-perpendicular-size: min(var(--scrollbar-thumb-width), 6px);
-  --os-handle-perpendicular-size-hover: 100%;
-  --os-handle-perpendicular-size-active: 100%;
-  --os-handle-border-radius: calc(var(--scrollbar-thumb-width) * var(--ui-roundness));
-  --os-handle-bg: var(--scrollbar-color);
-  --os-handle-bg-hover: var(--scrollbar-color-hover);
-  --os-handle-bg-active: var(
-    --scrollbar-color-active,
-    color-mix(in srgb, var(--scrollbar-color-hover) 80%, #fff)
-  );
-}
-
-/* Hovering a track keeps it usable even after the pointer stops moving. */
-body .os-scrollbar.app-scrollbar-idle:not(:hover) {
-  opacity: 0;
-  visibility: hidden;
-}
-
 /* shared shimmer for skeleton loading placeholders */
 .htmlImagePlaceholder {
   overflow: hidden;

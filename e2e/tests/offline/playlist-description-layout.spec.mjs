@@ -31,7 +31,8 @@ test.describe('playlist description', { tag: '@scale' }, () => {
     await page.getByRole('link', { name: 'Playlist with a long description', exact: true }).click()
     const scroller = page.locator('.playlistDescription')
     await expect(scroller).toHaveText(description.trim())
-    await expect(scroller).toHaveAttribute('data-overlayscrollbars-viewport', /overflowYScroll/)
+    await expect(scroller).toHaveAttribute('data-overlayscrollbars-viewport')
+    await expect(scroller.locator(':scope > .os-scrollbar-vertical')).toHaveClass(/os-scrollbar-visible/)
 
     // Narrow landscape uses list layout and retains its existing description cap.
     for (const { maxHeightFraction = 0.1, ...size } of [{ width: 1440, height: 950 }, { width: 375, height: 812 }, { width: 812, height: 375, maxHeightFraction: 0.2 }, { width: 1440, height: 900 }]) {

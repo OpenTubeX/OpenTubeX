@@ -1,4 +1,4 @@
-import { test, expect, goToSettingsSection, sel } from '../../helpers/app.mjs'
+import { test, expect, goToSettingsSection, sel, waitForAppReady } from '../../helpers/app.mjs'
 
 // The page's own scrollbars are the ones appended to the body.
 const PAGE_SCROLLBAR = 'body > .os-scrollbar-vertical'
@@ -282,6 +282,59 @@ test.describe('overlay scrollbars', () => {
 
       expect(classMutations).toBe(0)
       await expect(page.locator(PAGE_SCROLLBAR)).toHaveCSS('opacity', '1')
+    }
+  })
+
+  test('positions the bars from scroll events without scroll-linked animations', { tag: '@scale' }, async ({ page, uiScale }) => {
+    await page.addInitScript(() => { delete window.ScrollTimeline })
+    await page.reload()
+    await waitForAppReady(page)
+    await addPageOverflow(page)
+    const handleTop = () => page.locator(`${PAGE_SCROLLBAR} .os-scrollbar-handle`).evaluate(element => element.getBoundingClientRect().top)
+    const initialHandleTop = await handleTop()
+    await page.evaluate(() => window.scrollTo(0, 1000))
+    await expect.poll(handleTop).toBeGreaterThan(initialHandleTop + 50)
+    expect(await page.evaluate(() => document.documentElement.clientWidth)).toBe(await page.evaluate(() => window.innerWidth))
+
+    // Nested containers that rely on the default overflow still scroll, with
+    // their tracks in view and custom scroll speed applied.
+    const viewport = await addNestedCustomSpeedScroller(page, 'data-scroll-event-scrollbar-test', 0)
+    await viewport.evaluate(element => { element.style.removeProperty('overflow-y') })
+    await viewport.hover()
+    await page.mouse.wheel(0, 40)
+    // Wheel deltas are device pixels, so UI scale changes the CSS scroll distance.
+    await expect.poll(() => viewport.evaluate((element, distance) => Math.abs(element.scrollTop - distance), 80 * 100 / uiScale)).toBeLessThanOrEqual(1)
+    await expect.poll(() => viewport.evaluate(element => {
+      const view = element.getBoundingClientRect()
+      const track = element.querySelector(':scope > .os-scrollbar-vertical .os-scrollbar-track').getBoundingClientRect()
+      const handle = element.querySelector(':scope > .os-scrollbar-vertical .os-scrollbar-handle').getBoundingClientRect()
+      const progress = element.scrollTop / (element.scrollHeight - element.clientHeight)
+      return {
+        trackStart: Math.round(track.top - view.top),
+        handleOffset: Math.abs((handle.top - track.top) / (track.height - handle.height) - progress) < 0.02,
+      }
+    })).toEqual({ trackStart: 2, handleOffset: true })
+  })
+
+  test('remeasures the page after its scrolling is locked and unlocked', async ({ page }) => {
+    await addPageOverflow(page)
+    const scrollbar = page.locator(PAGE_SCROLLBAR)
+    await expect(scrollbar).not.toHaveClass(/os-scrollbar-unusable/)
+    await page.evaluate(() => { document.documentElement.style.overflow = 'hidden' })
+    await expect(scrollbar).toHaveClass(/os-scrollbar-unusable/)
+    await page.evaluate(() => { document.documentElement.style.overflow = '' })
+    await expect(scrollbar).not.toHaveClass(/os-scrollbar-unusable/)
+  })
+
+  test('follows a page direction change', async ({ page }) => {
+    await addPageOverflow(page)
+    const viewport = await addNestedCustomSpeedScroller(page, 'data-direction-scrollbar-test', 0)
+    for (const scrollbar of [page.locator(PAGE_SCROLLBAR), viewport.locator(':scope > .os-scrollbar-vertical')]) {
+      await expect(scrollbar).not.toHaveClass(/os-scrollbar-rtl/)
+      await page.evaluate(() => { document.body.dir = 'rtl' })
+      await expect(scrollbar).toHaveClass(/os-scrollbar-rtl/)
+      await page.evaluate(() => { document.body.dir = 'ltr' })
+      await expect(scrollbar).not.toHaveClass(/os-scrollbar-rtl/)
     }
   })
 
@@ -634,6 +687,70 @@ test.describe('overlay scrollbars', () => {
       expect(classMutations).toBe(0)
     })
 
+    test('keeps measuring a child that moved into another scroll container', { tag: '@scale' }, async ({ page }) => {
+      await page.evaluate(() => {
+        const directive = document.querySelector('#app').__vue_app__._context.directives['overlay-scrollbars']
+        // Observers run in creation order, so the receiving container sees the move first.
+        for (const name of ['receiver', 'sender']) {
+          const viewport = document.createElement('div')
+          viewport.dataset.movedChildTest = name
+          Object.assign(viewport.style, { position: 'fixed', top: '100px', left: name === 'receiver' ? '100px' : '400px', width: '200px', height: '100px', zIndex: '9999' })
+          document.body.append(viewport)
+          directive.mounted(viewport, { value: true })
+        }
+        const child = document.createElement('div')
+        child.style.height = '50px'
+        document.querySelector('[data-moved-child-test="sender"]').append(child)
+      })
+      await page.evaluate(() => new Promise(resolve => requestAnimationFrame(() => requestAnimationFrame(resolve))))
+      await page.evaluate(() => {
+        const child = document.querySelector('[data-moved-child-test="sender"] > div:not(.os-scrollbar)')
+        document.querySelector('[data-moved-child-test="receiver"]').prepend(child)
+      })
+      await page.evaluate(() => new Promise(resolve => requestAnimationFrame(() => requestAnimationFrame(resolve))))
+      await page.evaluate(() => {
+        document.querySelector('[data-moved-child-test="receiver"] > div:not(.os-scrollbar)').style.height = '300px'
+      })
+      await expect(page.locator('[data-moved-child-test="receiver"] > .os-scrollbar-vertical')).toHaveClass(/os-scrollbar-visible/)
+    })
+
+    test('ends a handle drag when moving the bars releases the pointer', { tag: '@scale' }, async ({ page }) => {
+      const viewport = await addNestedCustomSpeedScroller(page, 'data-lost-capture-test', 0)
+      await viewport.hover()
+      const box = await viewport.locator(':scope > .os-scrollbar-vertical .os-scrollbar-handle').boundingBox()
+      await page.mouse.move(box.x + box.width / 2, box.y + box.height / 2)
+      await page.mouse.down()
+      await page.mouse.move(box.x + box.width / 2, box.y + box.height / 2 + 30)
+      await expect.poll(() => viewport.evaluate(element => element.scrollTop)).toBeGreaterThan(0)
+      // Replacing the children takes the bars along, which drops the capture.
+      await viewport.evaluate(element => {
+        const content = document.createElement('div')
+        content.style.height = '300px'
+        element.replaceChildren(content)
+      })
+      await expect(viewport.locator(':scope > .os-scrollbar-vertical')).toHaveCount(1)
+      // Without the capture, a release away from the bar never reaches it.
+      await page.mouse.move(20, 20)
+      await page.mouse.up()
+      await viewport.evaluate(element => { element.scrollTop = 0 })
+      await viewport.evaluate(element => { element.firstElementChild.style.height = '400px' })
+      await page.evaluate(() => new Promise(resolve => requestAnimationFrame(() => requestAnimationFrame(resolve))))
+      expect(await viewport.evaluate(element => element.scrollTop)).toBe(0)
+    })
+
+    test('lets handle presses reach the container as scroll intent', async ({ page }) => {
+      const viewport = await addNestedCustomSpeedScroller(page, 'data-handle-press-test', 0)
+      await viewport.evaluate(element => element.addEventListener('pointerdown', event => {
+        window.__handlePressReachedContainer = event.target.closest('.os-scrollbar-vertical') !== null
+      }))
+      await viewport.hover()
+      const box = await viewport.locator(':scope > .os-scrollbar-vertical .os-scrollbar-handle').boundingBox()
+      await page.mouse.move(box.x + box.width / 2, box.y + box.height / 2)
+      await page.mouse.down()
+      await page.mouse.up()
+      expect(await page.evaluate(() => window.__handlePressReachedContainer)).toBe(true)
+    })
+
     test('keeps hovered bars visible', async ({ page }) => {
       const viewport = await addNestedCustomSpeedScroller(page, 'data-idle-scrollbar-test', 0)
       const scrollbar = viewport.locator(':scope > .os-scrollbar-vertical')
@@ -669,45 +786,42 @@ test.describe('overlay scrollbars', () => {
       await expect(scrollbar).toHaveCSS('opacity', '1')
     })
 
-    test('uses scroll-linked tracks for touch and library positioning for wheel input', async ({ page }) => {
-      const session = await page.context().newCDPSession(page)
-      await session.send('Emulation.setTouchEmulationEnabled', { enabled: true })
-      await expect.poll(() => page.evaluate(() => matchMedia('(pointer: coarse)').matches)).toBe(true)
+    test('keeps tracks in view with scroll-linked animations without extending the range', { tag: '@scale' }, async ({ page }) => {
+      const viewport = await addNestedCustomSpeedScroller(page, 'data-scroll-linked-scrollbar-test', 0)
+      const scrollbar = viewport.locator(':scope > .os-scrollbar-vertical')
+      await expect(scrollbar).toHaveClass(/os-scrollbar-visible/)
+      expect(await scrollbar.evaluate(element => ['.os-scrollbar-track', '.os-scrollbar-handle'].every(selector =>
+        element.querySelector(selector).getAnimations().some(animation => animation.timeline instanceof ScrollTimeline)
+      ))).toBe(true)
 
-      await page.evaluate(() => {
-        const element = document.createElement('div')
-        element.dataset.inputModeScrollbarTest = ''
-        Object.assign(element.style, {
-          height: '100px',
-          left: '100px',
-          overflowY: 'auto',
-          position: 'fixed',
-          top: '100px',
-          width: '200px',
-          zIndex: '9999',
-        })
-        const content = document.createElement('div')
-        content.style.height = '300px'
-        element.append(content)
-        document.body.append(element)
-        document.querySelector('#app').__vue_app__._context.directives['overlay-scrollbars']
-          .mounted(element, { value: true })
+      const geometry = () => viewport.evaluate(element => {
+        const view = element.getBoundingClientRect()
+        const track = element.querySelector(':scope > .os-scrollbar-vertical .os-scrollbar-track').getBoundingClientRect()
+        const handle = element.querySelector(':scope > .os-scrollbar-vertical .os-scrollbar-handle').getBoundingClientRect()
+        return {
+          trackStart: Math.round(track.top - view.top),
+          trackEnd: Math.round(view.bottom - track.bottom),
+          handleProgress: Math.round((handle.top - track.top) / (track.height - handle.height) * 100) / 100,
+        }
       })
-      const scroller = page.locator('[data-input-mode-scrollbar-test]')
-      const track = scroller.locator(':scope > .os-scrollbar-vertical')
-      const hasScrollTimeline = () => track.evaluate(element => element.getAnimations().some(animation =>
-        animation.timeline?.constructor.name === 'ScrollTimeline'
-      ))
-      await expect.poll(hasScrollTimeline).toBe(true)
+      for (const [scrollTop, handleProgress] of [[0, 0], [100, 0.5], [200, 1]]) {
+        await viewport.evaluate((element, top) => { element.scrollTop = top }, scrollTop)
+        await expect.poll(geometry).toEqual({ trackStart: 2, trackEnd: 2, handleProgress })
+      }
 
-      await scroller.hover()
-      await page.mouse.wheel(0, 80)
-      await expect.poll(() => scroller.evaluate(element => element.scrollTop)).toBeGreaterThan(0)
-      await expect.poll(hasScrollTimeline).toBe(false)
-
-      await scroller.evaluate(element => element.dispatchEvent(new Event('touchstart')))
-      await expect.poll(hasScrollTimeline).toBe(true)
-      await session.detach()
+      // Bars must not keep a range open that the shrunken content no longer has.
+      await viewport.evaluate(element => { element.firstElementChild.style.height = '150px' })
+      // Fractional UI scales can leave the end offset at a fractional pixel.
+      await expect.poll(() => viewport.evaluate(element => ({
+        scrollHeight: element.scrollHeight,
+        atEnd: Math.abs(element.scrollTop - 50) <= 1,
+      }))).toEqual({ scrollHeight: 150, atEnd: true })
+      // At fractional UI scales the end offset can be fractional, which moves
+      // the track by less than a pixel.
+      await expect.poll(async () => {
+        const { trackStart, trackEnd, handleProgress } = await geometry()
+        return Math.abs(trackStart - 2) <= 1 && Math.abs(trackEnd - 2) <= 1 && handleProgress === 1
+      }).toBe(true)
     })
 
     test('only adds a blocking wheel listener while a custom speed is active', async ({ page }) => {

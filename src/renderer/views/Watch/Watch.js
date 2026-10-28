@@ -1911,8 +1911,7 @@ export default defineComponent({
       const container = this.$refs.errorContainer
       if (!container) return
       const content = container.querySelector('.errorWrapper')
-      // Chromium can already reset the offset when an error becomes shorter,
-      // while OverlayScrollbars still retains the previous overflow range.
+      // A shorter error can leave the offset past the end of its content.
       clampOverlayScrollTop(container, content)
     },
     /** @param {{ panel: import('../../components/ft-shaka-video-player/opentubex/dockedPanels').DockedPanel, open: boolean, target: HTMLElement | null, presentationActive?: boolean }} change */

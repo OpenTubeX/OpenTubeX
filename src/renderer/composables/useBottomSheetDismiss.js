@@ -75,8 +75,7 @@ export function useBottomSheetDismiss(sheet, dismiss, { canDismissOnBack = () =>
     if (!sheet.value || isLeaving || event.button !== 0 || event.isPrimary === false || drag) return
     suppressClick = false
     const handle = event.target.closest('.bottomSheetHandle')
-    // Check the touched content and ancestor scrollports, including an inner
-    // OverlayScrollbars host used as its viewport, up to the fixed sheet.
+    // Check the touched content and ancestor scrollports up to the fixed sheet.
     if (!handle) {
       for (let element = event.target; element && element !== sheet.value; element = element.parentElement) {
         if (element.scrollTop > 1) return

@@ -772,8 +772,8 @@ function startLiveChatLocal() {
 const commentsRef = useTemplateRef('commentsRef')
 
 watch(() => props.fullscreenOverlay, () => {
-  // Entering and leaving the dock both change the viewport height; OverlayScrollbars
-  // can keep an obsolete end offset and leave the list parked on empty space.
+  // Entering and leaving the dock both change the viewport height, so the
+  // previous end offset no longer marks the live edge.
   if (stayAtBottom) {
     scrollToLiveAfterLayout()
   }
@@ -783,8 +783,8 @@ watch(() => props.fullscreenOverlay, () => {
  * Keep the live edge glued across dock open/close animations and height shares.
  * Content changes are synchronized immediately, while viewport changes settle
  * first so a dock transition does not force scrollbar layout on every frame.
- * OverlayScrollbars otherwise restores a stale scrollTop past the content end —
- * empty view until the user scrolls up (same failure mode as the comments dock).
+ * A stale scrollTop past the content end would otherwise leave an empty view
+ * until the user scrolls up (same failure mode as the comments dock).
  */
 watch(commentsRef, (element, _previous, onCleanup) => {
   if (element == null) {
@@ -827,8 +827,8 @@ watch(commentsRef, (element, _previous, onCleanup) => {
 }, { flush: 'post' })
 
 /**
- * OverlayScrollbars measures its viewport after Vue renders. Waiting through
- * the following frame ensures both sidebar creation and dock teleporting have
+ * The viewport settles its size after Vue renders. Waiting through the
+ * following frame ensures both sidebar creation and dock teleporting have
  * their final height before the chat is anchored to the live edge.
  */
 function scrollToLiveAfterLayout() {
@@ -1151,8 +1151,8 @@ function pushComment(comment) {
   const shouldStayAtBottom = stayAtBottom
   comments.push(comment)
 
-  // Trim before re-anchoring so OverlayScrollbars does not restore a scrollTop
-  // that pointed past messages that were just removed from the top.
+  // Trim before re-anchoring so the anchored scrollTop cannot point past
+  // messages that were just removed from the top.
   const commentLimit = shouldStayAtBottom
     ? MAX_LIVE_CHAT_COMMENTS
     : MAX_LIVE_CHAT_READBACK_COMMENTS
@@ -1457,8 +1457,8 @@ function scrollToBottom(behavior = scrollingBehaviour.value) {
   const contentElement = liveChatComments.querySelector('.liveChatCommentList')
 
   if (behavior === 'instant' || behavior === 'auto') {
-    // Force OverlayScrollbars to accept the new end offset; a plain scrollTo can
-    // lose to its restored pre-teleport / pre-trim position.
+    // Jump to the new end and clamp it to the rendered comments, replacing a
+    // pre-teleport / pre-trim position.
     restoreOverlayScrollTop(liveChatComments, top)
     clampOverlayScrollTop(liveChatComments, contentElement)
     scrollToLiveHoldTimer = setTimeout(() => {

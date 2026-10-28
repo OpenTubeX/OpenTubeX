@@ -343,8 +343,8 @@ const tabOrganizerTooltip = computed(() => {
 const tabBarRef = useTemplateRef('tabBarRef')
 const tabsContentRef = useTemplateRef('tabsContentRef')
 const dropZoneRef = useTemplateRef('dropZoneRef')
-// The app makes room for a visible horizontal scrollbar, which OverlayScrollbars
-// toggles through the class of the scrollbar it adds to the container. Only
+// The app makes room for a visible horizontal scrollbar, which the overlay
+// scrollbar helper toggles through the class of the bar it adds to the container. Only
 // that class and the container's own children are watched, so the tabs' class
 // changes, which are frequent while loading, playing and dragging, cost nothing.
 const horizontalScrollbarVisible = ref(false)

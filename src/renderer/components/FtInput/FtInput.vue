@@ -340,6 +340,9 @@ async function togglePasswordVisibility() {
   passwordVisible.value = !passwordVisible.value
   await nextTick()
   if (selectionStart !== null && selectionEnd !== null) {
+    // Chromium resets the selection of the retyped input at its next layout.
+    // Lay it out first, so that reset cannot discard the restored selection.
+    input.getBoundingClientRect()
     input.setSelectionRange(selectionStart, selectionEnd, selectionDirection)
   }
 }

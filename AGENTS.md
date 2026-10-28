@@ -53,7 +53,7 @@ Requests such as "implement issue #X" authorize local changes, not a PR. Open a 
 
 - Every nested scrollable element must use `v-overlay-scrollbars` (or `addOverlayScrollbars` outside Vue) to match the theme and scrollbar settings. Native nested scrollbars are a bug unless documented as an exception. Verify the integration whenever adding or changing scrollable CSS.
 - Keep headers outside the scroll viewport so content and scrollbars cannot pass behind them; prefer a fixed header with a separate inner scroller.
-- When switching menu views, restore the viewport position of OverlayScrollbars-managed elements with `restoreOverlayScrollTop`. After DOM updates that reduce the scroll range, call `clampOverlayScrollTop` with the rendered content end, observing a stable content wrapper when practical. Do not rely on focus, DOM replacement, or a possibly stale `scrollHeight`.
+- When switching menu views, restore the viewport position of elements with overlay scrollbars with `restoreOverlayScrollTop`. After DOM updates that reduce the scroll range, call `clampOverlayScrollTop` with the rendered content end, observing a stable content wrapper when practical. Do not rely on focus, DOM replacement, or a possibly stale `scrollHeight`.
 - Cover every relevant range-reducing trigger (resize, responsive layout changes, searching, filtering, collapsing, removing, replacing content) with regression tests: scroll to the bottom first, then verify valid offsets, no empty space, and scrollbar thumb/overflow state matching the new range.
 
 ## Dependencies and data formats

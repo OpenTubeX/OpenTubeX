@@ -1,5 +1,4 @@
 import { watch } from 'vue'
-import { ClickScrollPlugin, OverlayScrollbars } from 'overlayscrollbars'
 
 import store from '../store/index'
 import {
@@ -11,176 +10,592 @@ import { initializePageScrollbar, observePageScrollbarVisibility } from './pageS
 import { addScrollbarAutoHide } from './scrollbarAutoHide'
 import { setAndroidAlwaysShowScrollbars, setAndroidPageScrollbarsHidden } from './androidUi'
 
-// Kept out of the core bundle by the library, so `clickScroll` below silently
-// does nothing unless it is registered.
-OverlayScrollbars.plugin(ClickScrollPlugin)
-
 /*
  * Chromium's own overlay scrollbars can't be styled and fade out when idle,
- * so we hide the native ones and draw our own instead. The look is themed in
- * themes.css via the library's --os-* custom properties.
- */
-
-/**
- * Every live instance and how it was set up.
+ * so scroll containers hide their native scrollbars and get drawn ones that
+ * float above the content. Scrolling itself stays native; the bars only
+ * display and drive it.
  *
- * @type {Map<import('overlayscrollbars').OverlayScrollbars, HTMLElement | object>}
+ * Each bar is appended to its scroll container (the page's to the body) as
+ * `.os-scrollbar > .os-scrollbar-track > .os-scrollbar-handle` and themed in
+ * overlayScrollbars.css through --os-* custom properties. Scroll-linked
+ * animations position tracks and handles, so they follow compositor-driven
+ * scrolling in the same frame. Size and content observers only remeasure
+ * their sizes.
  */
-const instances = new Map()
-/** @type {WeakMap<import('overlayscrollbars').OverlayScrollbars, () => void>} */
-const removeScrollSpeedHandlers = new WeakMap()
-/** @type {WeakMap<import('overlayscrollbars').OverlayScrollbars, () => void>} */
-const removeAutoHideHandlers = new WeakMap()
+
+const VIEWPORT_ATTRIBUTE = 'data-overlayscrollbars-viewport'
+// Browsers without scroll-linked animations, such as Firefox, position the
+// bars from scroll events instead.
+const SCROLL_LINKED = typeof ScrollTimeline !== 'undefined'
+// A remaining range up to this size is rounding at fractional zoom levels,
+// not content a bar could scroll to.
 const SCROLL_BOUNDARY_TOLERANCE = 1
-const suspendScrollbarPosition = new WeakMap()
+const CLICK_SCROLL_DISTANCE = 0.9
+const CLIPPED_OVERFLOW = new Set(['hidden', 'clip'])
+const ANIMATION_END_EVENTS = ['transitionend', 'transitioncancel', 'animationend', 'animationcancel']
+// Transitions of these, such as hover effects, cannot change a scroll range.
+const PAINT_ONLY_PROPERTIES = new Set([
+  'background-color', 'border-color', 'box-shadow', 'color', 'fill', 'filter',
+  'opacity', 'outline-color', 'stroke', 'text-decoration-color', 'visibility'
+])
 
-function scrollbarOptions(initialization) {
-  const options = {
-    scrollbars: {
-      // Our move-to-show handler changes classes only when visibility changes.
-      // The library's 'move' mode rewrites them on every scroll frame.
-      autoHide: 'never',
-      // Tracks overlay content, so clicks on an empty track must reach what is
-      // underneath. Only scrollbars in their own strip (the tab bar) opt in.
-      // Track taps on a phone are easy to trigger while using nearby content,
-      // so mobile never does; the handle remains draggable everywhere.
-      clickScroll: !process.env.IS_CAPACITOR &&
-        (initialization.target ?? initialization).matches('[data-scrollbar-click-scroll]')
+/**
+ * @typedef {object} Scrollbar
+ * @property {'x' | 'y'} axis
+ * @property {HTMLElement} scrollbar
+ * @property {HTMLElement} track
+ * @property {HTMLElement} handle
+ * @property {boolean} usable
+ * @property {number} span how far the handle travels along the track
+ * @property {Animation | null} handleAnimation
+ * @property {{ x: Animation | null, y: Animation | null }} trackAnimations
+ */
+
+/**
+ * @typedef {object} Instance
+ * @property {HTMLElement} element the element the bars were added to
+ * @property {HTMLElement} scrollElement the element whose offsets scroll
+ * @property {boolean} isPage
+ * @property {Scrollbar} horizontal
+ * @property {Scrollbar} vertical
+ * @property {{ x?: ScrollTimeline, y?: ScrollTimeline }} timelines
+ * @property {string} measurement
+ * @property {{ x: number, y: number }} ranges the scroll ranges of the last update
+ * @property {boolean} rtl
+ * @property {boolean} atEnd whether the container is scrolled to its vertical end
+ * @property {number} clientHeight the viewport height of the last update
+ * @property {number} range the vertical scroll range of the last update
+ * @property {(intended?: boolean) => void} syncScrollPosition
+ * @property {(() => void) | null} drag reapplies an active handle drag
+ * @property {(force?: boolean) => void} update
+ * @property {() => void} destroy
+ */
+
+/** @type {Map<HTMLElement, Instance>} */
+const instances = new Map()
+/** @type {WeakMap<Instance, () => void>} */
+const removeScrollSpeedHandlers = new WeakMap()
+/** @type {WeakMap<Instance, () => void>} */
+const removeAutoHideHandlers = new WeakMap()
+/** Observed elements, including scroll containers' direct children, to their instance. */
+const observedElements = new WeakMap()
+let resizeObserver = null
+
+function getResizeObserver() {
+  resizeObserver ??= new ResizeObserver(entries => {
+    /** @type {Map<Instance, boolean>} */
+    const changed = new Map()
+    for (const { target } of entries) {
+      const instance = observedElements.get(target)
+      // A resized track (thumb width, corner, layout overrides) changes the
+      // handle's travel even when the scroll container measures the same.
+      if (instance) changed.set(instance, changed.get(instance) || target.classList.contains('os-scrollbar-track'))
     }
-  }
-
-  if (initialization === document.body) {
-    // The page viewport is always a normal block-flow body. Avoid repeatedly
-    // reading all flow-related computed styles while long feeds are changing;
-    // only direction can change at runtime. Tab-bar mutations stay inside its
-    // clipped viewport and cannot change the page's scroll range.
-    options.update = {
-      debounce: { resize: [0, 33] },
-      // Batch the content-size check too, before it can force page layout.
-      deferContentMutation: true,
-      ignoreMutation: ignorePageScrollbarMutation,
-      flowDirectionStyles: () => ({ direction: document.documentElement.dir })
-    }
-  }
-
-  return options
+    // Updating inside the callback, after layout and before paint, keeps
+    // the bars in step with the frame that changed the content.
+    for (const [instance, force] of changed) instance.update(force)
+  })
+  return resizeObserver
 }
 
-/** @param {MutationRecord} mutation */
-function ignorePageScrollbarMutation(mutation) {
-  const element = mutation.target instanceof Element ? mutation.target : mutation.target.parentElement
-  // Moving/resizing a fixed utility window cannot change the page's scroll
-  // range. Remeasuring it here forces layout on every drag frame.
-  if (mutation.type === 'attributes' && mutation.attributeName === 'style' && element?.matches('.settingsWindow')) {
-    return true
-  }
-  return element?.closest('.tabBar') != null
+/** @param {'x' | 'y'} axis */
+function createScrollbar(axis) {
+  const scrollbar = document.createElement('div')
+  scrollbar.className = `os-scrollbar os-scrollbar-${axis === 'x' ? 'horizontal' : 'vertical'} ` +
+    'os-scrollbar-handle-interactive os-scrollbar-cornerless os-scrollbar-unusable'
+  const track = document.createElement('div')
+  track.className = 'os-scrollbar-track'
+  const handle = document.createElement('div')
+  handle.className = 'os-scrollbar-handle'
+  track.append(handle)
+  scrollbar.append(track)
+
+  /** @type {Scrollbar} */
+  return { axis, scrollbar, track, handle, usable: false, span: 0, handleAnimation: null, trackAnimations: { x: null, y: null } }
 }
 
 /**
- * @param {HTMLElement | object} initialization the target element, or a full
- * initialization object when the caller wants to pick the scrolling element
+ * @param {Element} element
+ * @param {string} className
+ * @param {boolean} enabled
  */
-function create(initialization) {
-  const instance = OverlayScrollbars(initialization, scrollbarOptions(initialization))
-  instances.set(instance, initialization)
-  updateAutoHideHandler(instance)
-  updateScrollSpeedHandler(instance)
-  instance.on('destroyed', () => {
-    instances.delete(instance)
+function setClass(element, className, enabled) {
+  // Even unchanged class writes would notify mutation observers watching the bars.
+  if (element.classList.contains(className) !== enabled) {
+    element.classList.toggle(className, enabled)
+  }
+}
+
+/**
+ * @param {Animation | null} animation
+ * @param {HTMLElement} target
+ * @param {Keyframe[]} keyframes
+ * @param {ScrollTimeline} timeline
+ */
+function setScrollLinkedKeyframes(animation, target, keyframes, timeline) {
+  if (animation) {
+    animation.effect.setKeyframes(keyframes)
+    return animation
+  }
+  // Without filling, an offset at the exact end of the range is outside the
+  // animation's active interval and would drop the transform.
+  return target.animate(keyframes, { timeline, fill: 'both' })
+}
+
+/**
+ * @param {HTMLElement} element
+ * @returns {Instance}
+ */
+function create(element) {
+  const isPage = element === document.body
+  const scrollElement = isPage ? document.documentElement : element
+  const horizontal = createScrollbar('x')
+  const vertical = createScrollbar('y')
+  const scrollbars = [horizontal, vertical]
+  const clickScroll = !process.env.IS_CAPACITOR && element.matches('[data-scrollbar-click-scroll]')
+  let updateFrame = null
+
+  /** @type {Instance} */
+  const instance = {
+    element,
+    scrollElement,
+    isPage,
+    horizontal,
+    vertical,
+    timelines: {},
+    measurement: '',
+    ranges: { x: 0, y: 0 },
+    rtl: false,
+    atEnd: false,
+    clientHeight: -1,
+    range: 0,
+    syncScrollPosition,
+    drag: null,
+    update,
+    destroy
+  }
+
+  const getTimeline = (axis) => {
+    instance.timelines[axis] ??= new ScrollTimeline({ source: scrollElement, axis })
+    return instance.timelines[axis]
+  }
+
+  function update(force = false) {
+    if (!element.isConnected) return
+    // A hidden container has nothing to scroll. It reports its size again
+    // once shown, so skip measuring it until then.
+    if (!isPage && !element.checkVisibility()) {
+      for (const bar of scrollbars) {
+        bar.usable = false
+        setClass(bar.scrollbar, 'os-scrollbar-visible', false)
+        setClass(bar.scrollbar, 'os-scrollbar-unusable', true)
+      }
+      instance.measurement = ''
+      return
+    }
+
+    const style = getComputedStyle(scrollElement)
+    const rtl = (isPage ? getComputedStyle(document.body) : style).direction === 'rtl'
+    const sizes = {
+      x: { scroll: scrollElement.scrollWidth, client: scrollElement.clientWidth },
+      y: { scroll: scrollElement.scrollHeight, client: scrollElement.clientHeight }
+    }
+    const ranges = {
+      x: Math.max(0, sizes.x.scroll - sizes.x.client),
+      y: Math.max(0, sizes.y.scroll - sizes.y.client)
+    }
+
+    // A container scrolled to its end stays there while its viewport resizes,
+    // also through intermediate layouts that shortened its range.
+    if (!isPage && instance.atEnd && sizes.y.client !== instance.clientHeight &&
+      scrollElement.scrollTop < ranges.y - SCROLL_BOUNDARY_TOLERANCE) {
+      scrollElement.scrollTop = ranges.y
+    }
+    instance.clientHeight = sizes.y.client
+    instance.range = ranges.y
+    instance.atEnd = ranges.y > SCROLL_BOUNDARY_TOLERANCE &&
+      scrollElement.scrollTop >= ranges.y - SCROLL_BOUNDARY_TOLERANCE
+
+    const measurement = [
+      sizes.x.scroll, sizes.x.client, sizes.y.scroll, sizes.y.client,
+      style.overflowX, style.overflowY, rtl
+    ].join()
+    if (!force && measurement === instance.measurement) return
+    instance.measurement = measurement
+
+    for (const bar of scrollbars) {
+      const overflow = bar.axis === 'x' ? style.overflowX : style.overflowY
+      bar.usable = !CLIPPED_OVERFLOW.has(overflow) && ranges[bar.axis] > SCROLL_BOUNDARY_TOLERANCE
+      const { scroll, client } = sizes[bar.axis]
+      bar.scrollbar.style.setProperty('--os-viewport-percent', String(bar.usable ? client / scroll : 1))
+    }
+    for (const bar of scrollbars) {
+      setClass(bar.scrollbar, 'os-scrollbar-visible', bar.usable)
+      setClass(bar.scrollbar, 'os-scrollbar-unusable', !bar.usable)
+      setClass(bar.scrollbar, 'os-scrollbar-cornerless', !horizontal.usable || !vertical.usable)
+      setClass(bar.scrollbar, 'os-scrollbar-rtl', rtl)
+    }
+
+    // Measure every usable bar before writing any animation, so restyling one
+    // cannot force another layout for the next.
+    const spans = scrollbars.map(bar => {
+      if (!bar.usable) return 0
+      return bar.axis === 'x'
+        ? bar.track.clientWidth - bar.handle.offsetWidth
+        : bar.track.clientHeight - bar.handle.offsetHeight
+    })
+
+    instance.ranges = ranges
+    instance.rtl = rtl
+    scrollbars.forEach((bar, index) => {
+      bar.span = Math.max(0, spans[index])
+    })
+    if (!SCROLL_LINKED) {
+      positionFromScroll()
+      instance.drag?.()
+      return
+    }
+
+    scrollbars.forEach((bar) => {
+      if (!bar.usable) {
+        bar.handleAnimation?.cancel()
+        bar.handleAnimation = null
+        for (const axis of ['x', 'y']) {
+          bar.trackAnimations[axis]?.cancel()
+          bar.trackAnimations[axis] = null
+        }
+        return
+      }
+
+      const span = bar.span
+      const translate = bar.axis === 'x' ? 'translateX' : 'translateY'
+      bar.handleAnimation = setScrollLinkedKeyframes(bar.handleAnimation, bar.handle, [
+        { transform: `${translate}(0px)` },
+        { transform: `${translate}(${bar.axis === 'x' && rtl ? -span : span}px)` }
+      ], getTimeline(bar.axis))
+
+      // Nested bars are laid out at the scroll origin, where they can never
+      // extend the scroll range. Their tracks move back into view by
+      // the scrolled distance. The page's bars are fixed to the window.
+      for (const axis of /** @type {const} */ (['x', 'y'])) {
+        if (isPage || ranges[axis] === 0) {
+          bar.trackAnimations[axis]?.cancel()
+          bar.trackAnimations[axis] = null
+          continue
+        }
+        const offset = axis === 'x' && rtl ? -ranges.x : ranges[axis]
+        bar.trackAnimations[axis] = setScrollLinkedKeyframes(
+          bar.trackAnimations[axis],
+          bar.track,
+          // Separate properties, so both axes can be compensated at once.
+          axis === 'x'
+            ? [{ translate: '0px 0px' }, { translate: `${offset}px 0px` }]
+            : [{ transform: 'translateY(0px)' }, { transform: `translateY(${offset}px)` }],
+          getTimeline(axis)
+        )
+      }
+    })
+
+    instance.drag?.()
+  }
+
+  let positionFrame = null
+  function positionFromScroll() {
+    positionFrame = null
+    const { scrollLeft, scrollTop } = scrollElement
+    for (const bar of scrollbars) {
+      if (!bar.usable) {
+        bar.handle.style.removeProperty('transform')
+        bar.track.style.removeProperty('transform')
+        continue
+      }
+      const range = instance.ranges[bar.axis]
+      const offset = bar.axis === 'x' ? scrollLeft : scrollTop
+      const travel = Math.min(Math.abs(offset) / range, 1) * bar.span
+      bar.handle.style.transform = bar.axis === 'x'
+        ? `translateX(${instance.rtl ? -travel : travel}px)`
+        : `translateY(${travel}px)`
+      // Like the scroll-linked animations, which nested tracks need to stay in view.
+      if (!isPage) bar.track.style.transform = `translate(${scrollLeft}px, ${scrollTop}px)`
+    }
+  }
+  const schedulePosition = () => {
+    positionFrame ??= requestAnimationFrame(positionFromScroll)
+  }
+  const positionEventTarget = isPage ? window : element
+
+  /** @param {boolean} [intended] whether the app has just set the offset itself */
+  function syncScrollPosition(intended = false) {
+    const range = scrollElement.scrollHeight - scrollElement.clientHeight
+    // A changed range can have clamped the offset, which must not count as
+    // scrolling away from the end. The update for that layout decides.
+    if (!intended && range !== instance.range) {
+      scheduleUpdate()
+      return
+    }
+    instance.atEnd = range > SCROLL_BOUNDARY_TOLERANCE &&
+      scrollElement.scrollTop >= range - SCROLL_BOUNDARY_TOLERANCE
+  }
+
+  const onScroll = () => syncScrollPosition()
+
+  const scheduleUpdate = () => {
+    updateFrame ??= requestAnimationFrame(() => {
+      updateFrame = null
+      update()
+    })
+  }
+
+  /** Keeps observing the container's direct children, whose sizes make up its content. */
+  const observeChildren = (nodes, observe) => {
+    for (const node of nodes) {
+      if (!(node instanceof HTMLElement) || node.classList.contains('os-scrollbar')) continue
+      if (observe) {
+        observedElements.set(node, instance)
+        getResizeObserver().observe(node)
+      } else if (node.parentNode !== element && observedElements.get(node) === instance) {
+        // A child moved into another marked container belongs to that one now.
+        observedElements.delete(node)
+        getResizeObserver().unobserve(node)
+      }
+    }
+  }
+
+  // Locking the page's scrolling changes its overflow without resizing it.
+  const pageStyleObserver = new MutationObserver(() => scheduleUpdate())
+
+  const mutationObserver = new MutationObserver(records => {
+    let contentChanged = false
+    for (const record of records) {
+      if (record.target === element) {
+        observeChildren(record.addedNodes, true)
+        observeChildren(record.removedNodes, false)
+      }
+      contentChanged ||= !(record.target instanceof Element && record.target.closest('.os-scrollbar'))
+    }
+    // Code that replaces a container's children takes the bars with them.
+    for (const { scrollbar } of scrollbars) {
+      if (scrollbar.parentNode !== element) element.append(scrollbar)
+    }
+    // Removed children no longer report their size, and content can overflow
+    // a child that keeps its own size.
+    if (contentChanged) scheduleUpdate()
+  })
+
+  const onWindowResize = () => update()
+  // Transforms and out-of-flow content change the scroll range without
+  // resizing anything observed. Remeasure once their animations settle.
+  const onAnimationEnd = (event) => {
+    if (event.target instanceof Element && event.target.closest('.os-scrollbar')) return
+    if (event.propertyName !== undefined && PAINT_ONLY_PROPERTIES.has(event.propertyName)) return
+    scheduleUpdate()
+  }
+  const animationEventTarget = isPage ? document : element
+
+  for (const bar of scrollbars) {
+    addHandleDrag(instance, bar)
+    if (clickScroll) addClickScroll(instance, bar)
+    observedElements.set(bar.track, instance)
+    getResizeObserver().observe(bar.track)
+  }
+
+  if (isPage) {
+    // The window's height and the document's content are separate sizes.
+    for (const observed of [document.documentElement, document.body]) {
+      observedElements.set(observed, instance)
+      getResizeObserver().observe(observed)
+    }
+    window.addEventListener('resize', onWindowResize)
+    for (const observed of [document.documentElement, document.body]) {
+      pageStyleObserver.observe(observed, { attributes: true, attributeFilter: ['class', 'style'] })
+    }
+  } else {
+    element.setAttribute(VIEWPORT_ATTRIBUTE, '')
+    element.addEventListener('scroll', onScroll, { passive: true })
+    observedElements.set(element, instance)
+    getResizeObserver().observe(element)
+    observeChildren(element.children, true)
+    mutationObserver.observe(element, { childList: true, subtree: true, characterData: true })
+  }
+  element.append(horizontal.scrollbar, vertical.scrollbar)
+  if (!SCROLL_LINKED) positionEventTarget.addEventListener('scroll', schedulePosition, { passive: true })
+  for (const type of ANIMATION_END_EVENTS) {
+    animationEventTarget.addEventListener(type, onAnimationEnd, { passive: true })
+  }
+
+  function destroy() {
+    if (updateFrame !== null) cancelAnimationFrame(updateFrame)
+    if (positionFrame !== null) cancelAnimationFrame(positionFrame)
+    positionEventTarget.removeEventListener('scroll', schedulePosition)
+    mutationObserver.disconnect()
+    pageStyleObserver.disconnect()
+    element.removeEventListener('scroll', onScroll)
+    window.removeEventListener('resize', onWindowResize)
+    for (const type of ANIMATION_END_EVENTS) {
+      animationEventTarget.removeEventListener(type, onAnimationEnd)
+    }
+    const observer = getResizeObserver()
+    const observed = [
+      ...(isPage ? [document.documentElement, document.body] : [element, ...element.children]),
+      ...scrollbars.map(bar => bar.track)
+    ]
+    for (const target of observed) {
+      if (observedElements.get(target) === instance) {
+        observedElements.delete(target)
+        observer.unobserve(target)
+      }
+    }
+    for (const bar of scrollbars) {
+      bar.handleAnimation?.cancel()
+      bar.trackAnimations.x?.cancel()
+      bar.trackAnimations.y?.cancel()
+      bar.scrollbar.remove()
+    }
+    instance.drag = null
     removeScrollSpeedHandler(instance)
     removeAutoHideHandlers.get(instance)?.()
     removeAutoHideHandlers.delete(instance)
-  })
-
-  if (initialization === document.body) {
-    updateBodyScrollbarPosition(instance)
-    optimizeBodyScrollbarDrag(instance)
-  } else if (initialization.elements?.viewport instanceof HTMLElement) {
-    reconcileScrollbarOnResize(initialization.elements.viewport, instance)
-    synchronizeScrollbarPosition(initialization.elements.viewport, instance)
+    instances.delete(element)
   }
 
+  instances.set(element, instance)
+  updateAutoHideHandler(instance)
+  updateScrollSpeedHandler(instance)
+  if (isPage) updatePageScrollbarPosition(instance)
   return instance
 }
 
-/** Change visibility policy without rebuilding observers, tracks or offsets. */
-function updateAutoHideHandler(instance) {
-  removeAutoHideHandlers.get(instance)?.()
-  removeAutoHideHandlers.delete(instance)
-  if (store.getters.getAlwaysShowScrollbars) {
-    const { scrollbarHorizontal, scrollbarVertical } = instance.elements()
-    for (const { scrollbar } of [scrollbarHorizontal, scrollbarVertical]) {
-      scrollbar.classList.remove('app-scrollbar-idle')
+/**
+ * Pointer moves can arrive faster than Chromium paints a long video feed, so
+ * a dragged handle scrolls at most once per frame. Each frame places the grab
+ * point under the pointer within the current track and range, which keeps it
+ * there when content loads during the drag.
+ *
+ * @param {Instance} instance
+ * @param {Scrollbar} bar
+ */
+function addHandleDrag(instance, bar) {
+  const { handle, track, axis } = bar
+
+  handle.addEventListener('pointerdown', (event) => {
+    if (event.button !== 0 || !event.isPrimary || !bar.usable) return
+    // The press still reaches the container, whose handlers can read it as
+    // scroll intent.
+    event.preventDefault()
+
+    const pointerId = event.pointerId
+    const handleBounds = handle.getBoundingClientRect()
+    const rtl = axis === 'x' && bar.scrollbar.classList.contains('os-scrollbar-rtl')
+    // Where along the handle it was grabbed, which stays under the pointer
+    // when the handle's length changes.
+    const grabRatio = axis === 'y'
+      ? (event.clientY - handleBounds.top) / handleBounds.height
+      : (rtl ? handleBounds.right - event.clientX : event.clientX - handleBounds.left) / handleBounds.width
+    let pointer = axis === 'x' ? event.clientX : event.clientY
+    let frame = null
+
+    const applyDrag = () => {
+      frame = null
+      const { scrollElement } = instance
+      const trackBounds = track.getBoundingClientRect()
+      const handleLength = axis === 'x' ? handle.offsetWidth : handle.offsetHeight
+      const span = (axis === 'x' ? track.clientWidth : track.clientHeight) - handleLength
+      const grab = grabRatio * handleLength
+      const range = axis === 'x'
+        ? scrollElement.scrollWidth - scrollElement.clientWidth
+        : scrollElement.scrollHeight - scrollElement.clientHeight
+      if (span <= 0 || range <= 0) return
+
+      const handleOffset = axis === 'y'
+        ? pointer - grab - trackBounds.top
+        : rtl ? trackBounds.right - pointer - grab : pointer - grab - trackBounds.left
+      const progress = Math.min(Math.max(handleOffset / span, 0), 1)
+      if (axis === 'x') {
+        scrollElement.scrollTo({ left: (rtl ? -progress : progress) * range, behavior: 'instant' })
+      } else {
+        scrollElement.scrollTo({ top: progress * range, behavior: 'instant' })
+      }
     }
-  } else {
-    removeAutoHideHandlers.set(instance, addScrollbarAutoHide(instance.elements()))
-  }
+
+    const scheduleDrag = () => {
+      frame ??= requestAnimationFrame(applyDrag)
+    }
+
+    const onPointerMove = (moveEvent) => {
+      if (moveEvent.pointerId !== pointerId) return
+      moveEvent.preventDefault()
+      moveEvent.stopPropagation()
+      pointer = axis === 'x' ? moveEvent.clientX : moveEvent.clientY
+      scheduleDrag()
+    }
+
+    const finish = (finishEvent) => {
+      if (finishEvent.pointerId !== pointerId) return
+      finishEvent.stopPropagation()
+      handle.removeEventListener('pointermove', onPointerMove)
+      handle.removeEventListener('pointerup', finish)
+      handle.removeEventListener('pointercancel', finish)
+      handle.removeEventListener('lostpointercapture', finish)
+      if (instance.drag === scheduleDrag) instance.drag = null
+      if (frame !== null) {
+        cancelAnimationFrame(frame)
+        applyDrag()
+      }
+    }
+
+    handle.addEventListener('pointermove', onPointerMove)
+    handle.addEventListener('pointerup', finish)
+    handle.addEventListener('pointercancel', finish)
+    // Moving the bars, when a container's children are replaced, releases
+    // the capture without a pointerup.
+    handle.addEventListener('lostpointercapture', finish)
+    instance.drag = scheduleDrag
+    handle.setPointerCapture(pointerId)
+  })
 }
 
 /**
- * Keep nested scrollbar tracks fixed during compositor-driven touch scrolling.
- * The library positions tracks inside a reused viewport from scroll events,
- * which can arrive after Chromium has already painted the scrolled content.
+ * Scrolls a page towards a pressed point on the track. Only bars in their own
+ * strip opt in; elsewhere the empty track lets clicks reach the content below.
+ *
+ * @param {Instance} instance
+ * @param {Scrollbar} bar
  */
-function synchronizeScrollbarPosition(element, instance) {
-  if (!window.ScrollTimeline) return
-  const timeline = new window.ScrollTimeline({ source: element, axis: 'y' })
-  const { scrollbarVertical, scrollbarHorizontal } = instance.elements()
-  let animations = []
-  let previousRange = -1
-  let suspended = false
-  let touchScrolling = process.env.IS_CAPACITOR || window.matchMedia('(pointer: coarse)').matches
-  const cancelAnimations = () => {
-    animations.forEach(animation => animation.cancel())
-    animations = []
-    previousRange = -1
-  }
-  const update = () => {
-    if (suspended || !touchScrolling) return
-    const { overflowAmount } = instance.state()
-    // Only vertical overflow needs synchronization. The library still handles
-    // two-axis scrollers and older WebViews.
-    if (overflowAmount.x > 1 || overflowAmount.y <= 0) {
-      cancelAnimations()
-      return
-    }
-    if (overflowAmount.y === previousRange) return
-    previousRange = overflowAmount.y
-    const frames = { transform: ['translateY(0px)', `translateY(${previousRange}px)`] }
-    if (animations.length) animations.forEach(animation => animation.effect.setKeyframes(frames))
-    else animations = [scrollbarVertical, scrollbarHorizontal].map(({ scrollbar }) => scrollbar.animate(frames, { timeline }))
-  }
-  // OverlayScrollbars positions the track during wheel scrolling. Its updates
-  // can compete with the scroll-linked animation and make the thumb jump.
-  const onWheel = () => {
-    if (!touchScrolling) return
-    touchScrolling = false
-    cancelAnimations()
-  }
-  const onTouchStart = () => {
-    if (touchScrolling) return
-    touchScrolling = true
-    update()
-  }
-  element.addEventListener('wheel', onWheel, { passive: true })
-  element.addEventListener('touchstart', onTouchStart, { passive: true })
-  suspendScrollbarPosition.set(instance, () => {
-    suspended = true
-    cancelAnimations()
-    return () => {
-      suspended = false
-      update()
-    }
+function addClickScroll(instance, bar) {
+  const { scrollbar, track, handle, axis } = bar
+  scrollbar.classList.add('os-scrollbar-track-interactive')
+
+  track.addEventListener('pointerdown', (event) => {
+    if (event.button !== 0 || !event.isPrimary || !bar.usable || event.target !== track) return
+    event.preventDefault()
+
+    const { scrollElement } = instance
+    const handleBounds = handle.getBoundingClientRect()
+    const pointer = axis === 'x' ? event.clientX : event.clientY
+    // Offsets are physical, also in RTL, where scrollLeft is negative.
+    const direction = pointer > (axis === 'x' ? handleBounds.right : handleBounds.bottom) ? 1 : -1
+    const page = (axis === 'x' ? scrollElement.clientWidth : scrollElement.clientHeight) * CLICK_SCROLL_DISTANCE
+    scrollElement.scrollBy(axis === 'x' ? { left: direction * page } : { top: direction * page })
   })
-  update()
-  instance.on('updated', update)
-  instance.on('destroyed', () => {
-    suspendScrollbarPosition.delete(instance)
-    element.removeEventListener('wheel', onWheel)
-    element.removeEventListener('touchstart', onTouchStart)
-    cancelAnimations()
-  })
+}
+
+/** Change visibility policy without rebuilding the bars or losing offsets. */
+function updateAutoHideHandler(instance) {
+  removeAutoHideHandlers.get(instance)?.()
+  removeAutoHideHandlers.delete(instance)
+  const { horizontal, vertical } = instance
+  if (store.getters.getAlwaysShowScrollbars) {
+    for (const { scrollbar } of [horizontal, vertical]) {
+      scrollbar.classList.remove('app-scrollbar-idle')
+    }
+  } else {
+    removeAutoHideHandlers.set(instance, addScrollbarAutoHide({
+      host: instance.element,
+      scrollEventElement: instance.isPage ? window : instance.element,
+      scrollbars: [horizontal.scrollbar, vertical.scrollbar]
+    }))
+  }
 }
 
 /**
@@ -188,16 +603,15 @@ function synchronizeScrollbarPosition(element, instance) {
  * only install them while a custom speed is active. At 100%, Chromium handles
  * wheel and touchpad input without renderer involvement.
  *
- * @param {import('overlayscrollbars').OverlayScrollbars} instance
+ * @param {Instance} instance
  */
 function updateScrollSpeedHandler(instance) {
   const usesCustomSpeed = normalizeScrollSpeed(store.getters.getScrollSpeed) !== DEFAULT_SCROLL_SPEED
   const hasHandler = removeScrollSpeedHandlers.has(instance)
 
   if (usesCustomSpeed && !hasHandler) {
-    const { scrollOffsetElement } = instance.elements()
     removeScrollSpeedHandlers.set(instance, addScrollSpeedHandler(
-      scrollOffsetElement,
+      instance.scrollElement,
       () => store.getters.getScrollSpeed
     ))
   } else if (!usesCustomSpeed && hasHandler) {
@@ -205,28 +619,26 @@ function updateScrollSpeedHandler(instance) {
   }
 }
 
-/** @param {import('overlayscrollbars').OverlayScrollbars} instance */
+/** @param {Instance} instance */
 function removeScrollSpeedHandler(instance) {
   removeScrollSpeedHandlers.get(instance)?.()
   removeScrollSpeedHandlers.delete(instance)
 }
 
 /**
- * Keeps the page scrollbar clear of a right-side vertical tab rail.
- * OverlayScrollbars appends this element directly to the body, so app padding
- * cannot move it out from underneath the fixed rail by itself. A left-side
- * rail does not cover the scrollbar's normal window edge and needs no offset.
+ * Keeps the page scrollbar clear of a right-side vertical tab rail, which is
+ * fixed above the window edge the bar is attached to. A left-side rail does
+ * not cover that edge and needs no offset.
  *
- * @param {import('overlayscrollbars').OverlayScrollbars} instance
+ * @param {Instance} instance
  */
-function updateBodyScrollbarPosition(instance) {
-  const { scrollbar } = instance.elements().scrollbarVertical
+function updatePageScrollbarPosition(instance) {
+  const { scrollbar } = instance.vertical
   const position = store.getters.getTabBarPosition
   const width = `${store.getters.getVerticalTabBarWidth}px`
 
-  // OverlayScrollbars transitions physical edges by default. Moving between
-  // layouts should be atomic so the page scrollbar never sweeps across (or
-  // briefly remains behind) the fixed tab rail.
+  // Moving between layouts should be atomic so the page scrollbar never
+  // sweeps across (or briefly remains behind) the fixed tab rail.
   scrollbar.classList.add('os-scrollbar-transitionless')
   scrollbar.style.removeProperty('left')
   scrollbar.style.removeProperty('right')
@@ -241,167 +653,8 @@ function updateBodyScrollbarPosition(instance) {
 }
 
 /**
- * Opening transitions and widening wrapped content can shorten the scroll
- * range. Chromium can retain the obsolete end offset as the viewport grows,
- * which also leaves a scrollbar for overflow that no longer exists. Remeasure
- * from the true origin, then restore the old position within the new range.
- *
- * @param {HTMLElement} element
- * @param {import('overlayscrollbars').OverlayScrollbars} instance
- */
-function reconcileScrollbarOnResize(element, instance) {
-  let previousHeight = element.clientHeight
-  let previousWidth = element.getBoundingClientRect().width
-  let resizeFrame = null
-  const resizeObserver = new ResizeObserver(() => {
-    if (resizeFrame !== null) {
-      cancelAnimationFrame(resizeFrame)
-    }
-
-    resizeFrame = requestAnimationFrame(() => {
-      resizeFrame = null
-      const height = element.clientHeight
-      // Preserve fractional widths: even a subpixel change can unwrap a line.
-      const width = element.getBoundingClientRect().width
-      const viewportGrew = height > previousHeight || width > previousWidth
-      previousHeight = height
-      previousWidth = width
-      // The library already observes ordinary size changes. Our extra pass is
-      // needed only for invalid offsets or a retained end after either axis grows.
-      const scrollTop = element.scrollTop
-      if (scrollTop <= 0) return
-      const maximumScrollTop = Math.max(0, element.scrollHeight - height)
-      const outOfBounds = scrollTop > maximumScrollTop + SCROLL_BOUNDARY_TOLERANCE
-      if (!outOfBounds && (!viewportGrew || scrollTop < maximumScrollTop - SCROLL_BOUNDARY_TOLERANCE)) return
-      const resumeScrollbars = suspendScrollbarPosition.get(instance)?.()
-      try {
-        // Content can shrink (trimmed live chat) or the viewport can grow after a
-        // dock transition while an obsolete end offset is still applied — that
-        // parks the view on empty space until the user scrolls up.
-        if (outOfBounds) {
-          element.scrollTop = maximumScrollTop
-          instance.update(true)
-          return
-        }
-
-        element.scrollTop = 0
-        instance.update(true)
-        element.scrollTop = Math.min(scrollTop, instance.state().overflowAmount.y)
-        instance.update(true)
-      } finally {
-        resumeScrollbars?.()
-      }
-    })
-  })
-
-  resizeObserver.observe(element)
-  instance.on('destroyed', () => {
-    resizeObserver.disconnect()
-    if (resizeFrame !== null) {
-      cancelAnimationFrame(resizeFrame)
-    }
-  })
-}
-
-/**
- * OverlayScrollbars applies every pointermove directly while a handle is
- * dragged. Mouse input can arrive faster than Chromium can paint a long video
- * feed, making the handle trail the pointer. Coalesce the page scrollbar's
- * moves to one native scroll per animation frame.
- *
- * @param {import('overlayscrollbars').OverlayScrollbars} instance
- */
-function optimizeBodyScrollbarDrag(instance) {
-  const { handle, track } = instance.elements().scrollbarVertical
-
-  const onPointerDown = (event) => {
-    if (event.button !== 0 || !event.isPrimary) {
-      return
-    }
-
-    event.preventDefault()
-    event.stopImmediatePropagation()
-
-    const pointerId = event.pointerId
-    const handleBounds = handle.getBoundingClientRect()
-    const grabRatio = (event.clientY - handleBounds.top) / handleBounds.height
-    let clientY = event.clientY
-    let frame = null
-
-    if (track.clientHeight <= handle.clientHeight || instance.state().overflowAmount.y <= 0) {
-      return
-    }
-
-    const applyDrag = () => {
-      frame = null
-      const scrollRange = instance.state().overflowAmount.y
-      const currentHandleBounds = handle.getBoundingClientRect()
-      const trackRange = track.clientHeight - handle.clientHeight
-      const handleOffset = clientY -
-        (currentHandleBounds.top + currentHandleBounds.height * grabRatio)
-
-      if (trackRange <= 0 || scrollRange <= 0) {
-        return
-      }
-
-      window.scrollTo(
-        window.scrollX,
-        window.scrollY + handleOffset / trackRange * scrollRange
-      )
-    }
-
-    const scheduleDrag = () => {
-      frame ??= requestAnimationFrame(applyDrag)
-    }
-
-    const onPointerMove = (moveEvent) => {
-      if (moveEvent.pointerId !== pointerId) {
-        return
-      }
-
-      moveEvent.preventDefault()
-      moveEvent.stopPropagation()
-      clientY = moveEvent.clientY
-      scheduleDrag()
-    }
-
-    const onUpdated = (_, { updateHints }) => {
-      if (updateHints.overflowAmountChanged || updateHints.overflowEdgeChanged) {
-        scheduleDrag()
-      }
-    }
-
-    const finish = (finishEvent) => {
-      if (finishEvent.pointerId !== pointerId) {
-        return
-      }
-
-      finishEvent.stopPropagation()
-      handle.removeEventListener('pointermove', onPointerMove)
-      handle.removeEventListener('pointerup', finish)
-      handle.removeEventListener('pointercancel', finish)
-      instance.off('updated', onUpdated)
-
-      if (frame !== null) {
-        cancelAnimationFrame(frame)
-        applyDrag()
-      }
-    }
-
-    handle.addEventListener('pointermove', onPointerMove)
-    handle.addEventListener('pointerup', finish)
-    handle.addEventListener('pointercancel', finish)
-    instance.on('updated', onUpdated)
-    handle.setPointerCapture(pointerId)
-  }
-
-  handle.addEventListener('pointerdown', onPointerDown, true)
-  instance.on('destroyed', () => handle.removeEventListener('pointerdown', onPointerDown, true))
-}
-
-/**
- * Replaces the main window's scrollbars. `window.scrollTo`, `window.scrollY`
- * and the document's scroll events keep working when the body is the target.
+ * Replaces the main window's scrollbars. The document keeps scrolling
+ * natively, so `window.scrollTo`, `window.scrollY` and its scroll events work.
  */
 export function initializeAppScrollbars({ useNativePageScrollbar = false } = {}) {
   initializePageScrollbar(document, useNativePageScrollbar, create)
@@ -414,10 +667,19 @@ export function initializeAppScrollbars({ useNativePageScrollbar = false } = {})
     })
   }
 
+  // Switching between LTR and RTL languages flips the direction every bar
+  // inherits, which no size change reports.
+  const directionObserver = new MutationObserver(() => {
+    for (const instance of instances.values()) instance.update()
+  })
+  for (const element of [document.documentElement, document.body]) {
+    directionObserver.observe(element, { attributes: true, attributeFilter: ['dir'] })
+  }
+
   watch(
     () => normalizeScrollSpeed(store.getters.getScrollSpeed),
     () => {
-      for (const instance of instances.keys()) {
+      for (const instance of instances.values()) {
         updateScrollSpeedHandler(instance)
       }
     },
@@ -427,17 +689,14 @@ export function initializeAppScrollbars({ useNativePageScrollbar = false } = {})
   watch(
     () => [store.getters.getTabBarPosition, store.getters.getVerticalTabBarWidth],
     () => {
-      for (const [instance, initialization] of instances) {
-        if (initialization === document.body) {
-          updateBodyScrollbarPosition(instance)
-        }
-      }
+      const instance = instances.get(document.body)
+      if (instance) updatePageScrollbarPosition(instance)
     }
   )
 
   // Cancel pending hides in place; retained tabs can have many live scrollers.
   watch(() => store.getters.getAlwaysShowScrollbars, enabled => {
-    for (const instance of instances.keys()) updateAutoHideHandler(instance)
+    for (const instance of instances.values()) updateAutoHideHandler(instance)
     if (useNativePageScrollbar) {
       setAndroidAlwaysShowScrollbars(enabled).catch(error => {
         console.warn('Could not update Android scrollbar visibility', error)
@@ -451,18 +710,13 @@ export function initializeAppScrollbars({ useNativePageScrollbar = false } = {})
  * @param {boolean} enabled
  */
 function toggleOverlayScrollbars(element, enabled) {
-  const instance = OverlayScrollbars(element)
+  const instance = instances.get(element)
 
   if (enabled && !instance) {
-    // Hides the native scrollbars for the moment before the library takes over,
-    // the same way index.ejs does it for the page itself.
-    element.setAttribute('data-overlayscrollbars-initialize', '')
-    // Reusing the element as the viewport keeps it the scrolling element, so
-    // existing scrollTop/scrollLeft handling and CSS carry on working.
-    create({ target: element, elements: { viewport: element } })
+    create(element)
   } else if (!enabled && instance) {
-    element.removeAttribute('data-overlayscrollbars-initialize')
     instance.destroy()
+    element.removeAttribute(VIEWPORT_ATTRIBUTE)
   }
 }
 
@@ -487,129 +741,74 @@ export function removeOverlayScrollbars(element) {
   toggleOverlayScrollbars(element, false)
 }
 
-/** Forces an existing instance to remeasure its overflow. @param {HTMLElement} element */
+/** Remeasures an element's scrollbars. @param {HTMLElement} element */
 export function updateOverlayScrollbars(element) {
-  OverlayScrollbars(element)?.update(true)
+  instances.get(element)?.update(true)
 }
 
 /**
- * Forces any pending layout update before restoring a consumer-managed scroll
- * position. This is needed when a scroll container moves between layouts,
- * because OverlayScrollbars otherwise restores its previous offset afterwards.
+ * Restores a consumer-managed scroll position, for example after a scroll
+ * container moves between layouts, and updates its bars for the new range.
  *
  * @param {HTMLElement} element
  * @param {number} scrollTop
  */
 export function restoreOverlayScrollTop(element, scrollTop) {
-  const instance = OverlayScrollbars(element)
-  instance?.update(true)
   element.scrollTop = scrollTop
-  // Setting an offset can change the browser's effective scroll range when a
-  // previously valid position became stale after the viewport grew.
-  instance?.update(true)
+  const instance = instances.get(element)
+  instance?.syncScrollPosition(true)
+  instance?.update()
 }
 
 /**
- * Recalculates a nested scroll container's range and clamps an offset that was
- * valid before dynamically rendered content became shorter.
+ * Clamps an offset that was valid before dynamically rendered content became
+ * shorter, when the scroll range extends past the content's real end.
  *
  * @param {HTMLElement} element
  * @param {HTMLElement | null} contentElement the element whose rendered end defines the real scroll range
  */
 export function clampOverlayScrollTop(element, contentElement = null) {
-  if (element === document.body) {
-    const scrollOffsetElement = document.documentElement
-    const maximumScrollTop = getMaximumOverlayScrollTop(scrollOffsetElement, contentElement, window.innerHeight)
-    scrollOffsetElement.scrollTop = Math.min(scrollOffsetElement.scrollTop, maximumScrollTop)
-    return
+  const isPage = element === document.body
+  const scrollElement = isPage ? document.documentElement : element
+  const maximumScrollTop = getMaximumOverlayScrollTop(
+    scrollElement,
+    contentElement,
+    isPage ? window.innerHeight : scrollElement.clientHeight
+  )
+  const instance = instances.get(element)
+  if (isScrollTopOutOfBounds(scrollElement, maximumScrollTop)) {
+    scrollElement.scrollTop = maximumScrollTop
+    if (!isPage) instance?.syncScrollPosition(true)
   }
-
-  const instance = OverlayScrollbars(element)
-  // A compositor animation can retain the old track offset during this DOM update.
-  // Remove that overflow contribution before measuring the shortened content.
-  const resumeScrollbars = suspendScrollbarPosition.get(instance)?.()
-  try {
-    const scrollOffsetElement = instance?.elements().scrollOffsetElement ?? element
-    // Remeasuring a resized viewport can reset its native offset. Preserve the
-    // position reached before that update so it cannot become our clamp target.
-    const previousScrollTop = scrollOffsetElement.scrollTop
-    instance?.update(true)
-    const maximumScrollTop = getMaximumOverlayScrollTop(scrollOffsetElement, contentElement)
-    // Chromium can retain native overflow after the library has already measured
-    // the shorter range. Check both measurements before preserving the offset.
-    const retainedOverflow = contentElement && instance && (Math.max(
-      instance.state().overflowAmount.y,
-      scrollOffsetElement.scrollHeight - scrollOffsetElement.clientHeight
-    ) > maximumScrollTop + SCROLL_BOUNDARY_TOLERANCE || hasRetainedTrackOverflow(instance, scrollOffsetElement))
-    if (isScrollTopOutOfBounds(scrollOffsetElement, maximumScrollTop) || retainedOverflow ||
-      Math.abs(scrollOffsetElement.scrollTop - previousScrollTop) > SCROLL_BOUNDARY_TOLERANCE) {
-      if (instance) {
-        // Chromium can preserve the old overflow range when content shrinks
-        // beneath a non-zero offset. Remeasure from the true origin so both the
-        // viewport and OverlayScrollbars discard that stale range, then restore
-        // the clamped position within the newly measured range.
-        const { scrollbarHorizontal, scrollbarVertical } = instance.elements()
-        const scrollbars = retainedOverflow ? [scrollbarHorizontal.scrollbar, scrollbarVertical.scrollbar] : []
-        const displays = scrollbars.map(scrollbar => scrollbar.style.display)
-        try {
-          // Transformed tracks can retain their old overflow box in Chromium
-          // even at the origin. Exclude them from this measurement; restoring
-          // them below and updating at the clamped offset happens before paint.
-          scrollbars.forEach(scrollbar => { scrollbar.style.display = 'none' })
-          scrollOffsetElement.scrollTop = 0
-          instance.update(true)
-        } finally {
-          scrollbars.forEach((scrollbar, index) => { scrollbar.style.display = displays[index] })
-        }
-        scrollOffsetElement.scrollTop = Math.min(previousScrollTop, maximumScrollTop, instance.state().overflowAmount.y)
-        instance.update(true)
-      } else {
-        scrollOffsetElement.scrollTop = maximumScrollTop
-      }
-    }
-  } finally {
-    resumeScrollbars?.()
-  }
+  instance?.update()
 }
 
 /**
- * Recalculates a nested horizontal scroll container's range and clamps an
- * offset that was valid before dynamically rendered content became narrower.
+ * Clamps a horizontal offset that was valid before dynamically rendered
+ * content became narrower.
+ *
  * @param {HTMLElement} element
  * @param {HTMLElement | null} contentElement
  */
 export function clampOverlayScrollLeft(element, contentElement = null) {
-  const instance = OverlayScrollbars(element)
-  const scrollOffsetElement = instance?.elements().scrollOffsetElement ?? element
-  instance?.update(true)
-
   const maximumScrollLeft = Math.max(
     0,
-    (contentElement?.scrollWidth ?? scrollOffsetElement.scrollWidth) - scrollOffsetElement.clientWidth
+    (contentElement?.scrollWidth ?? element.scrollWidth) - element.clientWidth
   )
-  const rtl = getComputedStyle(scrollOffsetElement).direction === 'rtl'
+  const rtl = getComputedStyle(element).direction === 'rtl'
   const isOutOfBounds = rtl
-    ? scrollOffsetElement.scrollLeft < -maximumScrollLeft - SCROLL_BOUNDARY_TOLERANCE
-    : scrollOffsetElement.scrollLeft > maximumScrollLeft + SCROLL_BOUNDARY_TOLERANCE
-  if (!isOutOfBounds) return
-
-  if (instance) {
-    scrollOffsetElement.scrollLeft = 0
-    instance.update(true)
-    const available = instance.state().overflowAmount.x
-    scrollOffsetElement.scrollLeft = rtl
-      ? -Math.min(maximumScrollLeft, available)
-      : Math.min(maximumScrollLeft, available)
-    instance.update(true)
-  } else {
-    scrollOffsetElement.scrollLeft = rtl ? -maximumScrollLeft : maximumScrollLeft
+    ? element.scrollLeft < -maximumScrollLeft - SCROLL_BOUNDARY_TOLERANCE
+    : element.scrollLeft > maximumScrollLeft + SCROLL_BOUNDARY_TOLERANCE
+  if (isOutOfBounds) {
+    element.scrollLeft = rtl ? -maximumScrollLeft : maximumScrollLeft
   }
+  instances.get(element)?.update()
 }
 
 /**
  * Checks whether a nested scroll container is beyond its content's real end
- * without forcing an OverlayScrollbars update. Useful for hot scroll handlers
- * that should only call `clampOverlayScrollTop` when a clamp is necessary.
+ * without updating its bars. Useful for hot scroll handlers that should only
+ * call `clampOverlayScrollTop` when a clamp is necessary.
  *
  * @param {HTMLElement} element
  * @param {HTMLElement | null} contentElement the element whose rendered end defines the real scroll range
@@ -637,36 +836,13 @@ function getMaximumOverlayScrollTop(element, contentElement, viewportHeight = el
 }
 
 /**
- * Scrollbar tracks follow the offset inside the viewport, so after content
- * shrinks at the end of the range they can keep the old range open. Rounded
- * layout offsets can hide a retained pixel or two from the content check, so
- * compare the native range with and without the tracks.
- *
- * @param {import('overlayscrollbars').OverlayScrollbars} instance
- * @param {HTMLElement} element
- */
-function hasRetainedTrackOverflow(instance, element) {
-  if (element.scrollTop + element.clientHeight < element.scrollHeight - SCROLL_BOUNDARY_TOLERANCE) return false
-  const { scrollbarHorizontal, scrollbarVertical } = instance.elements()
-  const scrollbars = [scrollbarHorizontal.scrollbar, scrollbarVertical.scrollbar]
-  const displays = scrollbars.map(scrollbar => scrollbar.style.display)
-  const scrollHeight = element.scrollHeight
-  scrollbars.forEach(scrollbar => { scrollbar.style.display = 'none' })
-  const contentScrollHeight = element.scrollHeight
-  scrollbars.forEach((scrollbar, index) => { scrollbar.style.display = displays[index] })
-  return contentScrollHeight < scrollHeight
-}
-
-/**
  * @param {HTMLElement} element
  * @param {number} maximumScrollTop
  */
 function isScrollTopOutOfBounds(element, maximumScrollTop) {
   // Electron zoom can leave the real scroll boundary at a fractional CSS
   // pixel even though offsetHeight / clientHeight round the calculated end to
-  // an integer. Treat that subpixel difference as the same position; trying
-  // to clamp it makes OverlayScrollbars restore the fractional boundary and
-  // starts a reset / restore loop on every subsequent scroll event.
+  // an integer. Treat that subpixel difference as the same position.
   return element.scrollTop > maximumScrollTop + SCROLL_BOUNDARY_TOLERANCE
 }
 
@@ -699,15 +875,12 @@ export const overlayScrollbarsDirective = {
   },
 
   unmounted(element) {
-    const hadOverlayScrollbars = OverlayScrollbars(element) != null
-    toggleOverlayScrollbars(element, false)
-    if (!hadOverlayScrollbars) {
-      return
-    }
+    const instance = instances.get(element)
+    if (!instance) return
 
     // A parent transition can keep this element visible after Vue has already
-    // unmounted the directive. Keep native scrollbars suppressed during that
+    // unmounted the directive. Keep its native scrollbars hidden during that
     // leave animation; the element is about to be removed from the DOM.
-    element.setAttribute('data-overlayscrollbars-initialize', '')
+    instance.destroy()
   }
 }

@@ -205,7 +205,7 @@ import { provide, computed, nextTick, onBeforeUnmount, ref, useId, useTemplateRe
 
 import FtPrompt from '../FtPrompt/FtPrompt.vue'
 import { usePhoneLayout } from '../../composables/usePhoneLayout'
-import { clampOverlayScrollTop } from '../../helpers/overlayScrollbars'
+import { clampOverlayScrollTop, restoreOverlayScrollTop } from '../../helpers/overlayScrollbars'
 import { getAnchoredPosition, supportsAnchorPositioning } from '../../helpers/anchoredPosition'
 import { useAnchoredViewportBounds } from '../../composables/useAnchoredViewportBounds'
 import { useSettingsOverlay } from '../../composables/useSettingsOverlay'
@@ -341,7 +341,7 @@ watch(dropdownShown, (shown) => {
   if (shown && !useModal.value && !ownsPhoneSheet.value) {
     window.addEventListener('resize', scheduleDropdownViewportUpdate)
     if (!usesDropdownAnchor.value) {
-      window.addEventListener('scroll', scheduleDropdownViewportUpdate, { capture: true, passive: true })
+      window.addEventListener('scroll', handleViewportScroll, { capture: true, passive: true })
     }
   } else {
     removeDropdownViewportListeners()
@@ -504,6 +504,10 @@ function keepDropdownInViewport() {
     parseFloat(fullscreenStyle?.getPropertyValue('--app-safe-area-inset-top')) || 0)
   const bottomMargin = viewportMargin + (parseFloat(fullscreenStyle?.getPropertyValue('--safe-area-inset-bottom')) || 0)
   const minTop = Math.max(viewportMargin + safeTop, getTopChromeBottom() + 4)
+  // Measuring the unconstrained menu removes its scroll range, which resets
+  // the offset. Restore it once the menu is constrained again.
+  const scroller = dropdownContent.value ?? dropdown.value
+  const scrollTop = scroller.scrollTop
   dropdown.value.style.removeProperty('transform')
   dropdown.value.style.removeProperty('max-block-size')
   dropdown.value.style.removeProperty('overflow-y')
@@ -515,6 +519,7 @@ function keepDropdownInViewport() {
     dropdown.value.style.maxBlockSize = `${availableHeight}px`
     dropdown.value.style.overflowY = dropdownContent.value ? 'hidden' : 'auto'
   }
+  if (scroller.scrollTop !== scrollTop) restoreOverlayScrollTop(scroller, scrollTop)
 
   if (dropdownContentInner.value) {
     clampOverlayScrollTop(dropdownContent.value ?? dropdown.value, dropdownContentInner.value)
@@ -583,9 +588,15 @@ function scheduleDropdownViewportUpdate() {
   })
 }
 
+/** Scrolling the dropdown's own content does not move it. @param {Event} event */
+function handleViewportScroll(event) {
+  if (event.target instanceof Node && dropdown.value?.contains(event.target)) return
+  scheduleDropdownViewportUpdate()
+}
+
 function removeDropdownViewportListeners() {
   window.removeEventListener('resize', scheduleDropdownViewportUpdate)
-  window.removeEventListener('scroll', scheduleDropdownViewportUpdate, true)
+  window.removeEventListener('scroll', handleViewportScroll, true)
 
   if (dropdownViewportUpdateFrame != null) {
     cancelAnimationFrame(dropdownViewportUpdateFrame)
