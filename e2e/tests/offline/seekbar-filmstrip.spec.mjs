@@ -59,7 +59,7 @@ async function openVideoWithStoryboard(page) {
   return { video, duration }
 }
 
-test('dragging the seek bar thumb shows a storyboard filmstrip at it', { tag: '@scale' }, async ({ app, page, attachScreenshot }) => {
+test('dragging the seek bar shows a storyboard filmstrip at the thumb', { tag: '@scale' }, async ({ app, page, attachScreenshot }) => {
   await mockPlayableWatchPage(app, page)
   await routeDemoMedia(page)
   const { video, duration } = await openVideoWithStoryboard(page)
@@ -101,16 +101,17 @@ test('dragging the seek bar thumb shows a storyboard filmstrip at it', { tag: '@
     return element.filmstripShown
   })).toBe(false)
 
-  // Like YouTube, dragging from elsewhere on the track keeps the single thumbnail.
+  // Dragging from elsewhere on the track shows the filmstrip too.
   await page.mouse.move(pointAt(0.6).x, pointAt(0.6).y)
   await page.mouse.down()
   await page.mouse.move(pointAt(0.7).x, pointAt(0.7).y, { steps: 4 })
-  await expect(previewImage).toBeVisible()
-  await expect(filmstrip).toBeHidden()
+  await expect(filmstrip).toBeVisible()
+  await expect(previewImage).toBeHidden()
   await page.mouse.up()
+  await expect(filmstrip).toBeHidden()
   await expect.poll(() => video.evaluate(element => element.currentTime)).toBeCloseTo(duration * 0.7, 0)
 
-  // Grabbing the thumb itself shows the filmstrip while dragging.
+  // So does grabbing the thumb itself.
   const thumb = await thumbAt()
   await page.mouse.move(thumb.x, thumb.y)
   await page.mouse.down()
@@ -244,7 +245,7 @@ test('the filmstrip shows earlier frames of sprite-sheet storyboards with long t
   await page.mouse.up()
 })
 
-test('pulling the dragged thumb up onto the filmstrip seeks at its scale', { tag: '@scale' }, async ({ app, page }) => {
+test('pulling the dragged thumb up past the filmstrip middle seeks at its scale', { tag: '@scale' }, async ({ app, page }) => {
   await mockPlayableWatchPage(app, page)
   await routeDemoMedia(page)
   const { video } = await openVideoWithStoryboard(page)
@@ -273,13 +274,21 @@ test('pulling the dragged thumb up onto the filmstrip seeks at its scale', { tag
   await page.mouse.move(start.x, start.y)
   await expect(hint).toHaveText('Pull up for precise seeking')
 
-  // Pulling up keeps the time; moving sideways then scrolls the frames under a fixed marker.
+  // The lower half of the strip still seeks by the pointer's spot on the bar.
+  const strip = await filmstrip.boundingBox()
+  await page.mouse.move(start.x, strip.y + strip.height * 0.75, { steps: 2 })
+  await page.mouse.move(start.x + 40, strip.y + strip.height * 0.75, { steps: 2 })
+  await expect.poll(async () => Math.abs(await markerCenter() - (start.x + 40))).toBeLessThan(1.5)
+  await expect(hint).toHaveText('Pull up for precise seeking')
+  await page.mouse.move(start.x, strip.y + strip.height * 0.75, { steps: 2 })
+
+  // Pulling up past the middle keeps the time; moving sideways then scrolls the frames under a fixed marker.
   const startTime = await barTime()
   const startMarker = await markerCenter()
-  const strip = await filmstrip.boundingBox()
-  const stripY = strip.y + strip.height / 2
+  const stripY = strip.y + strip.height * 0.25
   await page.mouse.move(start.x, stripY, { steps: 2 })
-  await expect(hint).toBeHidden()
+  await expect(hint).toHaveText('Precise seeking · Drag down to exit')
+  await expect(player.locator('.shaka-seek-bar-container')).toHaveClass(/ft-seek-filmstrip-precise/)
   expect(await barTime()).toBeCloseTo(startTime, 5)
 
   const pixelsPerSecond = await filmstrip.evaluate(element => {
@@ -287,13 +296,31 @@ test('pulling the dragged thumb up onto the filmstrip seeks at its scale', { tag
     return frame.getBoundingClientRect().width
   })
   await page.mouse.move(start.x + 100, stripY, { steps: 4 })
-  const preciseTime = startTime + 100 / pixelsPerSecond
-  await expect.poll(barTime).toBeCloseTo(preciseTime, 1)
+  await expect.poll(barTime).toBeCloseTo(startTime + 100 / pixelsPerSecond, 1)
   expect(Math.abs(await markerCenter() - startMarker)).toBeLessThan(1.5)
   const previewBox = await previewTime.boundingBox()
   expect(Math.abs(previewBox.x + previewBox.width / 2 - startMarker)).toBeLessThan(2)
   const chapterBox = await chapter.boundingBox()
   expect(Math.abs(chapterBox.x + chapterBox.width / 2 - startMarker)).toBeLessThan(2)
+
+  // Dragging back down to the lower half stays precise; below the strip returns to the bar's scale.
+  await page.mouse.move(start.x + 100, strip.y + strip.height * 0.75, { steps: 2 })
+  await expect(hint).toHaveText('Precise seeking · Drag down to exit')
+  await page.mouse.move(start.x + 100, start.y, { steps: 2 })
+  await expect(hint).toHaveText('Pull up for precise seeking')
+  await expect.poll(async () => Math.abs(await markerCenter() - (start.x + 100))).toBeLessThan(1.5)
+  const barScaleTime = await barTime()
+  await page.mouse.move(start.x + 140, start.y, { steps: 2 })
+  await expect.poll(async () => Math.abs(await markerCenter() - (start.x + 140))).toBeLessThan(1.5)
+  expect(await barTime()).toBeGreaterThan(barScaleTime + 40 / pixelsPerSecond)
+
+  // Pulling up again resumes precise seeking from there.
+  const resumeTime = await barTime()
+  await page.mouse.move(start.x + 140, stripY, { steps: 2 })
+  await expect(hint).toHaveText('Precise seeking · Drag down to exit')
+  await page.mouse.move(start.x + 40, stripY, { steps: 4 })
+  const preciseTime = resumeTime - 100 / pixelsPerSecond
+  await expect.poll(barTime).toBeCloseTo(preciseTime, 1)
 
   // Releasing seeks to the precise time, not to the pointer's spot on the seek bar.
   await page.mouse.up()
@@ -316,6 +343,54 @@ test('pulling the dragged thumb up onto the filmstrip seeks at its scale', { tag
   await page.mouse.up()
   await expect.poll(() => video.evaluate(element => element.currentTime)).toBeCloseTo(seekedTime, 2)
   expect(await barTime()).toBeCloseTo(seekedTime, 2)
+})
+
+test.describe('with a short interface hide delay', () => {
+  test.use({
+    seed: {
+      settings: {
+        videoPlaybackEngine: 'built-in',
+        ytDlpPlaybackEngineDefaultMigration: true,
+        playingInterfaceHideDelay: 0.5
+      }
+    }
+  })
+
+  test('dragging the seek bar keeps the controls up outside the player until release', async ({ app, page }) => {
+    await mockPlayableWatchPage(app, page)
+    await routeDemoMedia(page)
+    const { video } = await openVideoWithStoryboard(page)
+    await video.evaluate(element => element.play())
+
+    const player = page.locator('.ftVideoPlayer')
+    const controls = player.locator('.shaka-controls-container')
+    const bar = player.locator('.shaka-seek-bar')
+    const filmstrip = player.locator('.ft-seek-filmstrip')
+    await player.hover()
+    const bounds = await bar.boundingBox()
+    const playerBox = await player.boundingBox()
+    const y = bounds.y + bounds.height / 2
+    await page.mouse.move(bounds.x + bounds.width * 0.3, y)
+    // Shaka ignores presses until the controls it just revealed re-enable the bar.
+    await expect(controls).toHaveAttribute('shown')
+    await expect(bar).toBeEnabled()
+    await page.mouse.down()
+    await page.mouse.move(bounds.x + bounds.width * 0.4, y, { steps: 4 })
+    await expect(filmstrip).toBeVisible()
+
+    // Neither leaving the player nor resting outside it hides the controls mid-drag.
+    const outside = { x: bounds.x + bounds.width * 0.5, y: playerBox.y + playerBox.height + 20 }
+    await page.mouse.move(outside.x, outside.y, { steps: 4 })
+    await page.waitForTimeout(2000)
+    await expect(controls).toHaveAttribute('shown')
+    await expect(filmstrip).toBeVisible()
+
+    // Releasing outside lets them fade like leaving the player does.
+    await page.mouse.up()
+    await expect(filmstrip).toBeHidden()
+    await expect.poll(() => video.evaluate(element => element.paused)).toBe(false)
+    await expect(controls).not.toHaveAttribute('shown', { timeout: 5000 })
+  })
 })
 
 test('fullscreen swipe-to-seek shows the seek bar preview over paused controls', async ({ app, page }) => {

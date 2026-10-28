@@ -1515,6 +1515,7 @@ Video:
       Reset: 重置
     Most Replayed: "重播次数最多"
     Pull up for precise seeking: "向上拖动以精确定位"
+    Precise seeking, drag down to exit: "精确定位 · 向下拖动以退出"
     Cast: "投屏"
     Music Mode: "音乐模式"
     Music Mode Description: "在此标签页中以1倍速播放视频，并从头开始播放新视频。已保存的默认播放设置保持不变。"
