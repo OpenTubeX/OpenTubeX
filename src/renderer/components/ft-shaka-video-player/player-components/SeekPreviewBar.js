@@ -89,9 +89,9 @@ export class SeekPreviewBar extends shaka.ui.SeekBar {
     updateSponsorBlockSeekBarState(this.container)
   }
 
-  onChangeStart() {
+  onChangeStart(fromTouchEvent) {
     this.cancelTime = this.video.currentTime
-    super.onChangeStart()
+    super.onChangeStart(fromTouchEvent)
     this.dragStartValue = this.mouseGrabbedThumb === false ? null : this.getValue()
     this.lastDragValue = this.getValue()
   }

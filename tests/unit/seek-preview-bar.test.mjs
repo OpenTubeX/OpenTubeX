@@ -37,7 +37,7 @@ function fixture() {
       this.paintedTime = this.value
       this.container.style.background = `linear-gradient(to right, red 0%, red 0%, red ${this.value / 30 * 100}%, white ${this.value / 30 * 100}%, white 90%, black 90%)`
     }
-    onChangeStart() {}
+    onChangeStart(fromTouchEvent = false) { this.changeStartedFromTouch = fromTouchEvent }
     onChange() {}
     onChangeEnd() {}
   }
@@ -137,6 +137,14 @@ test('releasing a committed seek keeps its new position', () => {
   assert.equal(bar.value, 21)
   assert.equal(bar.paintedTime, 21)
   assert.equal(controls.seeking, false)
+})
+
+test('touch interactions reach Shaka as touch, so it hides the time preview after a tap', () => {
+  const { bar } = fixture()
+  bar.onChangeStart(true)
+  assert.equal(bar.changeStartedFromTouch, true)
+  bar.onChangeStart()
+  assert.equal(bar.changeStartedFromTouch, false)
 })
 
 test('preview state stays within each player', () => {

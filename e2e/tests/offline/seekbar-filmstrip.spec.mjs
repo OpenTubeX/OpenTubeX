@@ -401,4 +401,6 @@ test('finger drags on the seek bar show the filmstrip, taps do not', async ({ ap
   await touch.send('Input.dispatchTouchEvent', { type: 'touchEnd', touchPoints: [] })
   await expect.poll(() => video.evaluate(element => element.currentTime)).toBeCloseTo(duration * 0.8, 0)
   expect(await player.evaluate(element => element.filmstripShown)).toBe(false)
+  // Shaka shows the time at the finger and hides it again after the tap.
+  await expect(player.locator('.shaka-player-ui-thumbnail-container')).toHaveCSS('visibility', 'hidden')
 })
