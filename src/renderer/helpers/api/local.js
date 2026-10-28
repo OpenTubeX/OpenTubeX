@@ -1925,7 +1925,8 @@ export function parseLocalWatchNextVideo(video) {
       lengthSeconds: isNaN(video.duration.seconds) ? '' : video.duration.seconds,
       liveNow: video.is_live,
       isPremiere: video.is_premiere,
-      isUpcoming: video.is_premiere
+      isUpcoming: video.is_premiere,
+      isMembersOnly: video.badges?.some(badge => badge.style === 'BADGE_STYLE_TYPE_MEMBERS_ONLY') ?? false
     }
   }
 }

@@ -1,4 +1,4 @@
-import { test, expect, sel } from '../../helpers/app.mjs'
+import { test, expect, goTo, sel } from '../../helpers/app.mjs'
 
 const MEMBER_CHANNEL = 'UCmmmmmmmmmmmmmmmmmmmmmm'
 const OTHER_CHANNEL = 'UCoooooooooooooooooooooo'
@@ -55,4 +55,67 @@ test('hides members-only results unless the subscription shows them, even with p
 
   await page.evaluate(() => window.$store.dispatch('updateYtDlpPlaybackAuthMode', 'none'))
   await expect(subscribedVideo).toHaveCount(0)
+})
+
+test.describe('community post attachments', () => {
+  test.use({
+    seed: {
+      settings: {
+        fetchSubscriptionsAutomatically: false,
+        hideSubscriptionsCommunity: false,
+        useRssFeeds: false,
+        ytDlpPlaybackAuthMode: 'browser',
+        ytDlpPlaybackCookiesBrowser: 'firefox'
+      },
+      profiles: [{
+        _id: 'allChannels',
+        name: 'All Channels',
+        bgColor: '#000000',
+        textColor: '#FFFFFF',
+        subscriptions: [{ id: MEMBER_CHANNEL, name: 'Member channel', thumbnail: '' }]
+      }],
+      subscriptionCache: [{
+        _id: MEMBER_CHANNEL,
+        communityPosts: [{
+          postId: 'members-post',
+          postText: 'Watch the members video',
+          author: 'Member channel',
+          authorId: MEMBER_CHANNEL,
+          authorThumbnails: [],
+          publishedTime: Date.now() - 60000,
+          voteCount: null,
+          commentCount: null,
+          postContent: {
+            type: 'video',
+            content: {
+              type: 'video',
+              videoId: 'attachedvid',
+              title: 'Attached members video',
+              author: 'Member channel',
+              authorId: MEMBER_CHANNEL,
+              isMembersOnly: true,
+              lengthSeconds: 60,
+              viewCount: 1
+            }
+          },
+          type: 'community'
+        }],
+        communityPostsTimestamp: new Date(Date.now() - 60000).toISOString()
+      }]
+    }
+  })
+
+  test('hides an attached members-only video unless the subscription shows it', async ({ page }) => {
+    await goTo(page, 'subscriptions')
+    await page.locator('[data-subscription-feed-tab="posts"]').click()
+
+    const post = page.locator('.ft-list-post').filter({ hasText: 'Watch the members video' })
+    await expect(post.locator('.hiddenVideo')).toBeVisible()
+    await expect(post.getByText('Attached members video')).toHaveCount(0)
+
+    await page.evaluate(channelId => window.$store.dispatch('updateChannelSettings', {
+      channelId, settings: { showMembersOnly: true }
+    }), MEMBER_CHANNEL)
+    await expect(post.getByText('Attached members video')).toBeVisible()
+  })
 })
