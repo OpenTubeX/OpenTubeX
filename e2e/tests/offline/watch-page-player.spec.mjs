@@ -1306,6 +1306,7 @@ test.describe('with seek history enabled', () => {
     const popup = player.locator('.valueChangePopup')
     const seekHistoryButton = player.locator('.shaka-overflow-menu .seek-history-button')
     const entries = player.locator('.seek-history-menu .seek-history-entry')
+    const entryLabels = entries.locator(':scope > span:first-child')
     const openOverflowMenu = async () => {
       await player.hover()
       await player.getByRole('button', { name: 'More settings' }).click({ force: true })
@@ -1353,7 +1354,8 @@ test.describe('with seek history enabled', () => {
     await expect(seekHistoryIcon.locator('path')).not.toHaveCount(0)
     await expect(seekHistoryButton.locator('.shaka-current-selection-span')).toHaveText('2 positions')
     await seekHistoryButton.click()
-    await expect(entries).toHaveText(['0:27 · Ending', '0:01 · Opening'])
+    await expect(entryLabels).toHaveText(['0:27 · Ending', '0:01 · Opening'])
+    await expect(entries.locator('.seek-history-left-at')).toHaveText(['moments ago', 'moments ago'])
     await entries.first().click()
     await expect.poll(currentTime).toBeCloseTo(27, 1)
     await page.keyboard.press('Escape')
@@ -1361,7 +1363,7 @@ test.describe('with seek history enabled', () => {
     // Leaving the clicked position replaces the nearby 0:01 entry.
     await openOverflowMenu()
     await seekHistoryButton.click()
-    await expect(entries).toHaveText([`${clickedTimestamp} · Opening`, '0:27 · Ending'])
+    await expect(entryLabels).toHaveText([`${clickedTimestamp} · Opening`, '0:27 · Ending'])
     await page.keyboard.press('Escape')
 
     // Returning to an entry is undone like any other jump.
@@ -1382,8 +1384,18 @@ test.describe('with seek history enabled', () => {
 
     await openOverflowMenu()
     await seekHistoryButton.click()
-    await expect(entries).toHaveText(['0:27 · Ending', `${clickedTimestamp} · Opening`])
+    await expect(entryLabels).toHaveText(['0:27 · Ending', `${clickedTimestamp} · Opening`])
     await expect(entries.first()).toHaveAttribute('aria-selected', 'true')
+    await page.keyboard.press('Escape')
+
+    // Reopening the menu updates how long ago each place was left.
+    await page.evaluate(() => {
+      const now = Date.now
+      Date.now = () => now() + 330_000
+    })
+    await openOverflowMenu()
+    await seekHistoryButton.click()
+    await expect(entries.locator('.seek-history-left-at')).toHaveText(['5 minutes ago', '5 minutes ago'])
   })
 
   test('keeps a seek history for each video until the app closes', async ({ app, page }) => {

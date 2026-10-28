@@ -6,7 +6,7 @@ import i18n from '../../../i18n/index'
 import { PlayerIcons } from '../../../../constants'
 import { currentIconPack } from '../../../icons/iconPackState'
 import { resolveIconifyId } from '../../../icons/resolveIconifyId'
-import { formatDurationAsTimestamp } from '../../../helpers/utils'
+import { formatDurationAsTimestamp, getRelativeTimeFromDate } from '../../../helpers/utils'
 import { scheduleOverflowMenuScrollClamp } from './overflowMenu'
 
 export class SeekHistoryMenu extends shaka.ui.SettingsMenu {
@@ -52,6 +52,11 @@ export class SeekHistoryMenu extends shaka.ui.SettingsMenu {
       }
     })
 
+    // Shaka opens the menu first, so only the text changes under the focus it moves.
+    this.eventManager.listen(this.button, 'click', () => {
+      this.updateLeftAtLabels_()
+    })
+
     this.eventManager.listen(events, 'localeChanged', () => {
       this.updateLocalisedStrings_()
     })
@@ -82,7 +87,7 @@ export class SeekHistoryMenu extends shaka.ui.SettingsMenu {
 
   /** @private */
   updateEntries_() {
-    const { positions, index } = this.history_.value
+    const { entries, index } = this.history_.value
     const previousCount = this.menu.querySelectorAll('.seek-history-entry').length
 
     for (const entry of this.menu.querySelectorAll('.seek-history-entry')) {
@@ -90,8 +95,8 @@ export class SeekHistoryMenu extends shaka.ui.SettingsMenu {
     }
 
     // Newest first, as the most recent place is the likeliest to return to.
-    for (let entryIndex = positions.length - 1; entryIndex >= 0; entryIndex--) {
-      const position = positions[entryIndex]
+    for (let entryIndex = entries.length - 1; entryIndex >= 0; entryIndex--) {
+      const { position, leftAt } = entries[entryIndex]
       const button = document.createElement('button')
       button.classList.add('seek-history-entry')
       button.dataset.position = String(position)
@@ -99,6 +104,11 @@ export class SeekHistoryMenu extends shaka.ui.SettingsMenu {
       const label = document.createElement('span')
       label.textContent = this.formatPosition_(position)
       button.appendChild(label)
+
+      const leftAtLabel = document.createElement('span')
+      leftAtLabel.classList.add('seek-history-left-at')
+      leftAtLabel.dataset.leftAt = String(leftAt)
+      button.appendChild(leftAtLabel)
 
       if (entryIndex === index) {
         label.classList.add('shaka-chosen-item')
@@ -109,15 +119,25 @@ export class SeekHistoryMenu extends shaka.ui.SettingsMenu {
       this.menu.appendChild(button)
     }
 
-    const status = i18n.global.t('Video.Player.Seek History.Positions', { count: positions.length }, positions.length)
+    this.updateLeftAtLabels_()
+
+    const status = i18n.global.t('Video.Player.Seek History.Positions', { count: entries.length }, entries.length)
     this.currentSelection.textContent = status
     this.button.setAttribute('shaka-status', status)
 
-    if (this.isSubMenuOpened && positions.length < previousCount) {
+    if (this.isSubMenuOpened && entries.length < previousCount) {
       scheduleOverflowMenuScrollClamp(this.parent, this.menu.lastElementChild)
     }
 
     this.updateVisibility_()
+  }
+
+  /** @private */
+  updateLeftAtLabels_() {
+    const now = Date.now()
+    for (const label of this.menu.querySelectorAll('.seek-history-left-at')) {
+      label.textContent = getRelativeTimeFromDate(Number(label.dataset.leftAt), true, true, now)
+    }
   }
 
   /**
@@ -134,7 +154,7 @@ export class SeekHistoryMenu extends shaka.ui.SettingsMenu {
   /** @private */
   updateVisibility_() {
     const wasHidden = this.button.classList.contains('shaka-hidden')
-    const hidden = this.history_.value.positions.length === 0 || this.isSubMenuOpened
+    const hidden = this.history_.value.entries.length === 0 || this.isSubMenuOpened
     this.button.classList.toggle('shaka-hidden', hidden)
 
     // Only an empty history hides the entry while the menu shows it.
