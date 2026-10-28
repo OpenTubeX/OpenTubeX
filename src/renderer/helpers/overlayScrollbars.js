@@ -308,8 +308,7 @@ function create(element) {
     }
   }
 
-  // Locking the page's scrolling or switching its direction changes it
-  // without resizing it.
+  // Locking the page's scrolling changes its overflow without resizing it.
   const pageStyleObserver = new MutationObserver(() => scheduleUpdate())
 
   const mutationObserver = new MutationObserver(records => {
@@ -355,7 +354,7 @@ function create(element) {
     }
     window.addEventListener('resize', onWindowResize)
     for (const observed of [document.documentElement, document.body]) {
-      pageStyleObserver.observe(observed, { attributes: true, attributeFilter: ['class', 'dir', 'style'] })
+      pageStyleObserver.observe(observed, { attributes: true, attributeFilter: ['class', 'style'] })
     }
   } else {
     element.setAttribute(VIEWPORT_ATTRIBUTE, '')
@@ -610,6 +609,15 @@ export function initializeAppScrollbars({ useNativePageScrollbar = false } = {})
         console.warn('Could not update Android fullscreen scrollbar visibility', error)
       })
     })
+  }
+
+  // Switching between LTR and RTL languages flips the direction every bar
+  // inherits, which no size change reports.
+  const directionObserver = new MutationObserver(() => {
+    for (const instance of instances.values()) instance.update()
+  })
+  for (const element of [document.documentElement, document.body]) {
+    directionObserver.observe(element, { attributes: true, attributeFilter: ['dir'] })
   }
 
   watch(

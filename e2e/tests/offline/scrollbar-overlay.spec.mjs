@@ -307,12 +307,14 @@ test.describe('overlay scrollbars', () => {
 
   test('follows a page direction change', async ({ page }) => {
     await addPageOverflow(page)
-    const scrollbar = page.locator(PAGE_SCROLLBAR)
-    await expect(scrollbar).not.toHaveClass(/os-scrollbar-rtl/)
-    await page.evaluate(() => { document.body.dir = 'rtl' })
-    await expect(scrollbar).toHaveClass(/os-scrollbar-rtl/)
-    await page.evaluate(() => { document.body.dir = 'ltr' })
-    await expect(scrollbar).not.toHaveClass(/os-scrollbar-rtl/)
+    const viewport = await addNestedCustomSpeedScroller(page, 'data-direction-scrollbar-test', 0)
+    for (const scrollbar of [page.locator(PAGE_SCROLLBAR), viewport.locator(':scope > .os-scrollbar-vertical')]) {
+      await expect(scrollbar).not.toHaveClass(/os-scrollbar-rtl/)
+      await page.evaluate(() => { document.body.dir = 'rtl' })
+      await expect(scrollbar).toHaveClass(/os-scrollbar-rtl/)
+      await page.evaluate(() => { document.body.dir = 'ltr' })
+      await expect(scrollbar).not.toHaveClass(/os-scrollbar-rtl/)
+    }
   })
 
   test('the main scroll container reserves no layout space for its scrollbar', async ({ page }) => {
