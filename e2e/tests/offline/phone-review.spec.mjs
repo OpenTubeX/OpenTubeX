@@ -72,13 +72,19 @@ test('docked phone panel animations respect the configured animation speed', asy
   expect(await page.evaluate(() => window.__panelOpeningRate)).toBe(0.25)
   const sheet = page.locator('.dockedSheet[open]')
   await sheet.evaluate(el => Promise.all(el.getAnimations().map(animation => animation.finished)))
+  // Under load, the expansion animation can finish before a later evaluation
+  // could find it through getAnimations(), so keep the one the drag creates.
+  await sheet.evaluate(el => {
+    const animate = el.animate
+    el.animate = (...args) => (window.__panelDragAnimation = animate.apply(el, args))
+  })
   const header = await sheet.locator('.mobileSheetHeader').boundingBox()
   await page.mouse.move(20, header.y + 5)
   await page.mouse.down()
   await page.mouse.move(20, 5, { steps: 8 })
   await page.mouse.up()
-  expect(await sheet.evaluate(async el => {
-    const animation = el.getAnimations()[0]
+  expect(await page.evaluate(async () => {
+    const animation = window.__panelDragAnimation
     await animation.ready
     return animation.playbackRate
   })).toBe(0.25)
