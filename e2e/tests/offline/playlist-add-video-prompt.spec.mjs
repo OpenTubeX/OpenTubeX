@@ -127,7 +127,7 @@ test.describe('with long option labels', () => {
     })).toEqual([])
   })
 
-  test('keeps the switches\' touch targets apart in the phone layout', async ({ app, page }) => {
+  test('keeps the switches\' touch targets apart in the phone layout @scale', async ({ app, page }) => {
     await setWindowSize(app, page, { width: 480, height: 800 })
     await showPrompt(page, [video(1), video(2)])
     const toggles = page.locator('.prompt .promptContent .optionToggles')
