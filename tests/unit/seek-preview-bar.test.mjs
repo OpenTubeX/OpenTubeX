@@ -8,17 +8,20 @@ const source = readFileSync(new URL('../../src/renderer/components/ft-shaka-vide
 
 function fixture() {
   let factory
+  const window = {}
   class SeekBar {
     constructor(parent, controls) {
       this.video = controls.video
       this.controls = controls
       this.player = {}
-      this.eventManager = { listen: (_, type, listener) => controls.listeners.set(type, listener) }
+      // Window listeners share event types with the bar's own, so keep them apart.
+      this.eventManager = { listen: (target, type, listener) => controls.listeners.set(target === window ? `window:${type}` : type, listener) }
       const properties = new Map()
       this.container = {
         classList: { toggle() {}, remove() {} },
         style: { background: '', setProperty: (name, value) => properties.set(name, value), getPropertyValue: name => properties.get(name) },
         querySelector: () => controls.timePreview,
+        contains: node => node === controls.barElement,
       }
       this.bar = {
         min: '0', max: '30', events: [],
@@ -54,7 +57,7 @@ function fixture() {
     updateSponsorBlockSeekBarState,
     SeekFilmstrip,
     i18n: { global: { t: key => key } },
-    window: {},
+    window,
     document: {},
     THUMB_SIZE: 12,
     MouseEvent: class { constructor(type) { this.type = type } },
@@ -66,6 +69,7 @@ function fixture() {
   const controls = {
     video: { currentTime: 15, paused: false }, listeners: new Map(), seeking: false, shown: 0, events: [],
     timePreview: { style: { visibility: 'visible' } },
+    barElement: {},
     setSeeking(value) { this.seeking = value }, showUI() { this.shown++; this.seekingWhenShown = this.seeking },
     dispatchEvent(event) { this.events.push(event) },
   }
@@ -228,7 +232,7 @@ test('pulling up starts precise seeking from the last dragged time, not a pendin
       return Promise.resolve()
     },
   })
-  const move = (clientX, clientY) => controls.listeners.get('mousemove')({ clientX, clientY })
+  const move = (clientX, clientY) => controls.listeners.get('window:mousemove')({ clientX, clientY })
   bar.onChangeStart()
   move(204, 100)
   drag(10)
@@ -242,4 +246,20 @@ test('pulling up starts precise seeking from the last dragged time, not a pendin
   move(354, 0)
   drag(25)
   assert.equal(bar.value, 21)
+})
+
+test('releasing a press on the bar elsewhere does not click the video', () => {
+  const { controls } = fixture()
+  const click = target => {
+    let stopped = false
+    controls.listeners.get('window:click')({ target, stopPropagation: () => { stopped = true } })
+    return stopped
+  }
+  controls.listeners.get('window:mousedown')({ target: controls.barElement })
+  assert.equal(click({}), true, 'the click on the controls container is stopped')
+  assert.equal(click({}), false, 'only the click that ends the press')
+  controls.listeners.get('window:mousedown')({ target: controls.barElement })
+  assert.equal(click(controls.barElement), false, 'clicks on the bar still reach it')
+  controls.listeners.get('window:mousedown')({ target: {} })
+  assert.equal(click({}), false, 'presses elsewhere are not affected')
 })
