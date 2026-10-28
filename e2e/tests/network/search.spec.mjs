@@ -1,5 +1,6 @@
 import { sel } from '../../helpers/app.mjs'
 import { test, expect } from '../../helpers/innertube.mjs'
+import { demoPlayerResponse } from '../../helpers/media.mjs'
 
 test.describe('search', () => {
   test('search returns video results', async ({ page }) => {
@@ -194,5 +195,26 @@ test.describe('search', () => {
       // Full watch page hydration needs the real API.
       await expect(page.locator('.tabContent[aria-hidden="false"] .videoTitle')).toBeVisible({ timeout: 30_000 })
     }
+  })
+
+  test('search results show upload times that YouTube omits for Topic videos', async ({ page, innertube }) => {
+    if (innertube.replay) {
+      // The replayed demo player response has no publish date.
+      await page.route(/\/youtubei\/v1\/player/, route => route.fulfill({
+        contentType: 'application/json',
+        body: JSON.stringify(demoPlayerResponse(JSON.parse(route.request().postData()).videoId, {
+          microformat: { playerMicroformatRenderer: { publishDate: '2020-01-01T00:00:00Z' } }
+        }))
+      }))
+    }
+
+    await page.locator(sel.searchInput).fill('vivaldi four seasons spring topic')
+    await page.locator(sel.searchInput).press('Enter')
+
+    const topicVideo = page.locator('.ft-list-video')
+      .filter({ has: page.locator('.channelNameText', { hasText: / - Topic$/ }) })
+      .first()
+    await expect(topicVideo).toBeVisible({ timeout: 30_000 })
+    await expect(topicVideo.locator('.uploadedTime')).toBeVisible({ timeout: 30_000 })
   })
 })

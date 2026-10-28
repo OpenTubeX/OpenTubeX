@@ -164,9 +164,11 @@ import {
 } from '../../helpers/utils'
 import {
   extractLocalCacheableSearchContinuation,
+  getLocalMissingPublicationDates,
   getLocalSearchContinuation,
   getLocalSearchResults
 } from '../../helpers/api/local'
+import { applyPublicationDates } from '../../helpers/api/missing-publication'
 import { getInvidiousSearchResults } from '../../helpers/api/invidious'
 import { SEARCH_CHAR_LIMIT } from '../../../constants'
 import { useTabContext, useTabTitle } from '../../tabs/TabContext'
@@ -440,6 +442,7 @@ async function performSearchLocal(payload) {
     store.commit('addToSessionSearchHistory', historyPayload)
 
     updateSubscriptionDetails(results)
+    fillPublicationDates(payload.query, results)
   } catch (err) {
     if (requestId !== searchRequestId) return
     console.error(err)
@@ -454,6 +457,22 @@ async function performSearchLocal(payload) {
       isLoading.value = false
     }
   }
+}
+
+async function fillPublicationDates(query, results) {
+  const requestId = searchRequestId
+  const dates = await getLocalMissingPublicationDates(results)
+  // Authenticated yt-dlp results replace these without a new request ID and stay out of the shared cache.
+  if (dates.size === 0 || requestId !== searchRequestId || apiUsed.value !== 'local') return
+
+  shownResults.value = applyPublicationDates(shownResults.value, dates)
+  store.commit('addToSessionSearchHistory', {
+    query,
+    data: shownResults.value,
+    searchSettings: searchSettings.value,
+    spellCorrection: spellCorrection.value,
+    apiUsed: apiUsed.value
+  })
 }
 
 async function retrySearchWithCookies() {
@@ -517,6 +536,7 @@ async function getNextpageLocal(payload) {
     store.commit('addToSessionSearchHistory', historyPayload)
 
     updateSubscriptionDetails(results)
+    fillPublicationDates(payload.query, results)
   } catch (err) {
     if (requestId !== searchRequestId) return
     console.error(err)

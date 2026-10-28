@@ -1,6 +1,7 @@
 import { normalizeCommentFetchResponse, parseLocalCommentImageAttachment } from './local-comment-response'
 import { createLocalFeedParsers, getAuthorVerification, getChannelHandleFromEndpoint, getLocalMusicChartPlaylistId } from './local-feed-parsers'
 import { createOriginalChannelNameResolver } from './original-channel-name'
+import { fetchMissingPublicationDates } from './missing-publication.js'
 import { runBackgroundJob } from '../background-jobs.js'
 import { ClientType, Constants, Innertube, Mixins, Parser, Platform, Player, Session, UniversalCache, Utils, YT, YTNodes } from 'youtubei.js'
 import Autolinker from 'autolinker'
@@ -2237,6 +2238,18 @@ export async function createLocalPlaylistAvailabilityChecker(signal) {
     fetchFunc: async (input, init) => checkHistoryRepairResponse(await localApiFetch(input, init)),
   })
   return (videoId, requestSignal) => fetchPublicPlayerMetadata(innertube, videoId, requestSignal)
+}
+
+/**
+ * Fetch the publication dates YouTube omits from search results, such as for auto-generated Topic videos.
+ * @param {any[]} entries
+ */
+export function getLocalMissingPublicationDates(entries) {
+  let innertube
+  return fetchMissingPublicationDates(entries, async videoId => {
+    innertube ??= createInnertube()
+    return fetchPublicPlayerMetadata(await innertube, videoId)
+  })
 }
 
 async function fetchPublicPlayerMetadata(innertube, videoId, signal) {

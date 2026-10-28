@@ -1,5 +1,6 @@
 import assert from 'node:assert/strict'
 import { usesInvidiousApi } from '../../src/apiBackends.js'
+import { applyPublicationDates } from '../../src/renderer/helpers/api/missing-publication.js'
 import { readFileSync } from 'node:fs'
 import test from 'node:test'
 import vm from 'node:vm'
@@ -15,7 +16,7 @@ const mutationEnd = utilsSource.indexOf('  setShowAddToPlaylistPrompt (', mutati
 assert.ok(mutationStart >= 0 && mutationEnd > mutationStart, 'Update the harness after changing the search cache mutation boundaries')
 const addToSessionSearchHistory = vm.runInNewContext(`({
   ${utilsSource.slice(mutationStart, mutationEnd)}
-}).addToSessionSearchHistory`, { searchFiltersMatch: () => true })
+}).addToSessionSearchHistory`, { searchFiltersMatch: () => true, MAX_SESSION_SEARCHES: 30 })
 
 function deferred () {
   let resolve, reject
@@ -26,7 +27,7 @@ function deferred () {
   return { promise, resolve, reject }
 }
 
-function createSearch (backend) {
+function createSearch (backend, { searchResults = [], missingPublicationDates = async () => new Map() } = {}) {
   const previous = deferred()
   const current = deferred()
   const requests = []
@@ -88,10 +89,12 @@ function createSearch (backend) {
       }
     },
     getLocalSearchContinuation: continuation,
+    getLocalMissingPublicationDates: missingPublicationDates,
+    applyPublicationDates,
     getLocalSearchResults: async (query, _settings, _safetyMode, _signal, spellCorrection) => {
       localSearches.push({ query, spellCorrection })
       return {
-        results: [],
+        results: searchResults,
         continuationData: null,
         searchNotice: null,
         searchCorrection: spellCorrection ? { type: 'showingResultsFor', correctedQuery: `${query} corrected` } : null,
@@ -195,3 +198,48 @@ test('caches searches with and without spelling correction separately', async ()
   assert.deepEqual(search.state.searchCorrection.value, correction)
   assert.equal(search.localSearches.length, 2)
 })
+
+test('fills publication dates that Local search results omit', async () => {
+  const dates = deferred()
+  const search = createSearch('local', {
+    searchResults: [{ type: 'video', videoId: 'topic' }, { type: 'video', videoId: 'dated', published: 1 }],
+    missingPublicationDates: () => dates.promise
+  })
+  search.select('topic search')
+  await new Promise(setImmediate)
+  assert.equal(search.state.shownResults.value[0].published, undefined)
+
+  dates.resolve(new Map([['topic', 1577836800000]]))
+  await new Promise(setImmediate)
+  assert.deepEqual(search.state.shownResults.value.map(result => result.published), [1577836800000, 1])
+  assert.equal(search.history.at(-1).query, 'topic search')
+  assert.equal(search.history.at(-1).data, search.state.shownResults.value)
+})
+
+for (const change of ['a different search', 'an authenticated retry']) {
+  test(`ignores publication dates that arrive after ${change}`, async () => {
+    const dates = deferred()
+    const search = createSearch('local', {
+      searchResults: [{ type: 'video', videoId: 'topic' }],
+      missingPublicationDates: () => dates.promise
+    })
+    search.select('topic search')
+    await new Promise(setImmediate)
+    const cached = search.history.at(-1)
+    const cachedData = cached.data
+
+    if (change === 'a different search') {
+      search.select('cached replacement')
+    } else {
+      search.state.apiUsed.value = 'yt-dlp'
+      search.state.shownResults.value = [{ type: 'video', videoId: 'topic' }]
+    }
+    const shown = search.state.shownResults.value
+    dates.resolve(new Map([['topic', 1577836800000]]))
+    await new Promise(setImmediate)
+
+    assert.equal(search.state.shownResults.value, shown)
+    assert.equal(cached.data, cachedData)
+    assert.equal(cachedData[0].published, undefined)
+  })
+}
