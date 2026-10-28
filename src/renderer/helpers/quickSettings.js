@@ -27,13 +27,13 @@ export const BASIC_QUICK_SETTING_DEFINITIONS = Object.freeze([
   {
     id: 'defaultVideoFormat',
     section: 'playback',
-    labelKey: 'Settings.Player Settings.Default Video Format.Default Video Format',
+    labelKey: 'Settings.Player Settings.Default Media Format.Default Media Format',
     control: 'select',
     values: ['dash', 'legacy', 'audio'],
     optionLabelKeys: [
-      'Settings.Player Settings.Default Video Format.Dash Formats',
-      'Settings.Player Settings.Default Video Format.Legacy Formats',
-      'Settings.Player Settings.Default Video Format.Audio Formats',
+      'Settings.Player Settings.Default Media Format.Dash Formats',
+      'Settings.Player Settings.Default Media Format.Legacy Formats',
+      'Settings.Player Settings.Default Media Format.Audio Formats',
     ],
     icon: ['fas', 'file-video'],
   },

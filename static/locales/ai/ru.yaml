@@ -157,8 +157,6 @@ Subscriptions:
   Show Combined View: Показывать общим списком
   Newest First: Сначала новые
   Oldest First: Сначала старые
-  Posts:
-    RSS Message: YouTube не предоставляет RSS-ленты для публикаций. Отключите настройку «{rssSetting}», чтобы просматривать публикации, или включите настройку «{hideSetting}», чтобы скрыть эту вкладку.
 Trending:
   Music: Музыка
   Load Error: Не удалось загрузить популярные видео.
@@ -170,7 +168,6 @@ Feed:
 User Playlists:
   Save: "Сохранить"
   Edit: "Изменить"
-  This playlist is private or does not exist.: "Этот плейлист закрыт или не существует."
   Pin to Navigation: "Закрепить в навигации"
   Unpin from Navigation: "Открепить от навигации"
   Reorder Hint: Перетащите или используйте клавиши со стрелками, чтобы изменить порядок
@@ -186,8 +183,6 @@ User Playlists:
   Remove Saved Playlist: "Удалить сохранённый плейлист"
   Load More Playlists: Загрузить ещё плейлисты
   Save to: Сохранить в…
-  Move Video to the Top: Переместить видео в начало
-  Move Video to the Bottom: Переместить видео в конец
   Quick Bookmark Icon: Значок быстрой закладки
   Custom Emoji: Пользовательский эмодзи
   Choose Image: Выбрать изображение
@@ -692,10 +687,6 @@ Settings:
         Outline: Обводка
         Drop Shadow: Тень
       Reset: Сбросить оформление субтитров
-    Default Viewing Mode:
-      Full Window (Always On): Во всё окно (всегда)
-      Full Screen (Always On): Полноэкранный режим (всегда)
-      Tooltip: Большинство режимов просмотра по умолчанию применяется только в начале каждого сеанса просмотра. Изменения, внесённые во время сеанса, сохраняются до его окончания. Постоянные режимы просмотра применяются при каждом переходе к новому видео независимо от изменений режима при просмотре предыдущего видео.
     Auto Picture in Picture:
       Auto Picture in Picture: Автоматически включать режим «Картинка в картинке»
       On Tab Change: При переключении вкладок
@@ -742,8 +733,6 @@ Settings:
     Reorder Playback Speed: Перетащите, чтобы изменить порядок скоростей
     Playback Speed: Скорость воспроизведения
     Parallel Segment Loading: Параллельная загрузка сегментов
-    Screenshot:
-      Mode: Режим снимка экрана
     Rotate Wide Videos to Landscape in Fullscreen: 'Поворачивать широкие видео горизонтально в полноэкранном режиме'
     Swipe Up or Down to Enter or Exit Fullscreen: 'Проведите вверх или вниз, чтобы открыть или закрыть полноэкранный режим'
     Preload Upcoming Videos: "Предзагружать следующие видео"
@@ -1036,8 +1025,6 @@ Settings:
     Show Video Title: Показывать название видео
     Show Bottom Right Actions Dock: Показывать панель действий в правом нижнем углу
     Paused Interface Hide Delay: Задержка скрытия интерфейса во время паузы
-    Add: Добавить
-    Remove: Удалить
   Data Settings:
     Scheduled backups: "Резервное копирование по расписанию"
     Scheduled backup description: "Сохраняйте полные ZIP-копии, пока OpenTubeX открыт. Пропущенные копии создаются при запуске. Ограничение действует только на запланированные копии в этой папке."
@@ -1080,16 +1067,7 @@ Settings:
     Data And Storage: Данные и хранилище
     Profile Directory: Папка профиля
     Open Profile Directory: Открыть папку профиля
-    Settings File: Файл настроек
-    Import Settings: Импортировать настройки
-    Export Settings: Экспортировать настройки
-    Settings Tooltip: Настройки, зависящие от ОС или пользователя, а также экспериментальные настройки нельзя экспортировать или импортировать (например, прокси, внешний проигрыватель и папка снимков экрана...)
     Invalid JSON row, skipping item: Недопустимый JSON в строке {row}, элемент пропущен
-    All settings have been successfully imported: Все настройки успешно импортированы
-    All settings have been successfully exported: Все настройки успешно экспортированы
-    Setting object has insufficient data, skipping item: В объекте настройки недостаточно данных, элемент пропущен
-    Unknown setting key: 'Неизвестный ключ настройки: {key}'
-    Non-transferable setting key: 'Ключ настройки, которую нельзя перенести: {key}'
     Import subscriptions formats: 'Поддерживаемые форматы: OpenTubeX / FreeTube (.db), YouTube Takeout (.csv, .json, .opml), NewPipe (.json), резервная копия LibreTube или экспорт FreeTube (.json)'
     Import history formats: 'Поддерживаемые форматы: OpenTubeX / FreeTube (.db), YouTube Takeout (.json), резервная копия LibreTube (.json)'
     Import playlists formats: 'Поддерживаемые форматы: OpenTubeX / FreeTube (.db), YouTube Takeout (.csv)'
@@ -1274,9 +1252,6 @@ Settings:
     Reloading video after IP block recovery: Повторная загрузка видео после восстановления доступа по IP
     Failed to select IP block recovery script: Не удалось выбрать скрипт восстановления после блокировки IP
   SponsorBlock Settings:
-    Excluded Channels:
-      Excluded Channels: "Исключённые каналы"
-      Tooltip: "Введите ID канала, чтобы сегменты SponsorBlock в его видео не пропускались. ID должен совпадать точно, с учётом регистра."
     Enable SponsorBlock Submission: Разрешить отправку данных в SponsorBlock
     SponsorBlock Private User ID (optional): Личный ID пользователя (необязательно)
     SponsorBlock Private User ID Tooltip: Вставьте личный идентификатор пользователя SponsorBlock из расширения браузера. Оставьте поле пустым, чтобы использовать идентификатор, созданный приложением.
@@ -1292,16 +1267,12 @@ Settings:
     Return YouTube Dislike Settings: Return YouTube Dislike
     Enable Return YouTube Dislike: Включить Return YouTube Dislike
     Return YouTube Dislike Url: URL API
-  Parental Control Settings:
-    Disable Channel Links: Отключить ссылки на каналы
   Password Dialog:
     Incorrect Password: Неверный пароль
     Unlock: Разблокировать
     Unlocking: Разблокировка…
   Search Settings: Поиск настроек
   No Settings Found: Настройки не найдены
-  Experimental Settings:
-    Disable Hardware Acceleration: Отключить аппаратное ускорение
   Interface Customizer:
     Customize Interface: "Настроить интерфейс"
     Preview: "Предпросмотр"
@@ -1382,7 +1353,6 @@ Profile:
   Use Initial: Использовать инициал
   The selected image could not be loaded: Не удалось загрузить выбранное изображение
   Theme Color: Цвет темы
-  Go To Profile Manager: Перейти к управлению профилями
 Channel:
   Verified: Подтверждено
   Official Artist Channel: Официальный канал исполнителя
@@ -1404,9 +1374,6 @@ Channel:
   Channel Name Unavailable: Название канала недоступно
   Search Result Types: Типы результатов поиска
   All Results: Все
-  View All: Показать все
-  Videos:
-    This channel has videos but none could be displayed, try fetching more: "На этом канале есть видео, но ни одно не удалось показать. Попробуйте загрузить ещё"
   Posts:
     Original post unavailable: "Исходная публикация недоступна"
 Video:
@@ -1465,9 +1432,6 @@ Video:
   Configure Restricted Playback Cookies Hint: "Настройте файлы cookie в разделе «Настройки → Внешнее ПО → Файлы cookie yt-dlp»."
   Try With Configured Cookies: Попробовать с настроенными файлами cookie
   Restricted Playback Authentication Failed Template: 'yt-dlp не удалось получить доступ к этому видео с настроенными файлами cookie: {error}'
-  Private: Приватные видео нельзя смотреть в OpenTubeX, поскольку для этого нужно войти в Google и быть владельцем видео.
-  Collapse Playlist: Свернуть плейлист
-  Expand Playlist: Развернуть плейлист
   Unmark As Watched: Отметить как непросмотренное
   Video has been unmarked as watched: Видео отмечено как непросмотренное
   Save Channel Playback Speed: Сохранить скорость воспроизведения для канала
@@ -1492,8 +1456,6 @@ Video:
   Notification unavailable: Системные уведомления недоступны
   Scheduled video starting: Запланированное видео начинается
   Live notification body: '{videoTitle} начинается сейчас'
-  Premiere: Премьера
-  AI: ИИ
   AI-generated content: Контент, созданный ИИ
   Collaborators: Соавторы
   Live Chat Replay: Повтор чата трансляции
@@ -1725,9 +1687,6 @@ Video:
       Load: "Загрузить файл субтитров…"
       Subtitle Files: "Файлы субтитров"
       Error: "Не удалось загрузить файл субтитров. Выберите файл SRT или WebVTT."
-  Station: Станция
-  Playlist:
-    Unavailable videos are hidden: 1 недоступное видео скрыто | {count} недоступных видео скрыто | {count} недоступных видео скрыто
   External Media:
     Dislikes: "Дизлайк | Дизлайки | Дизлайков"
     Reposts: "Репост | Репосты | Репостов"
@@ -1753,7 +1712,6 @@ Video:
       subscriber_only: "Только подписчики"
       needs_auth: "Требуется вход"
       unlisted: "Отсутствует в списках"
-  How this was made: Как это было создано
   Save Queue to Playlist: "Сохранить очередь в плейлист"
   Live Chat is currently not supported with the Yattee server. A direct connection to YouTube is required.: Чат трансляции в настоящее время не поддерживается сервером Yattee. Требуется прямое подключение к YouTube.
 Playlist:
@@ -1765,7 +1723,6 @@ Playlist:
   Playlist Preload Complete: "Предзагружено видео: {count}."
   Playlist Preload Partial: "Предзагружено {preloaded} из {requested} видео. Не удалось загрузить {failed}."
   Playlist Preload Pagination Failed: "Не удалось загрузить весь плейлист, поэтому предзагрузка отменена."
-  Unavailable videos are hidden: Недоступные видео скрыты
   Add Playlist to Queue: "Добавить плейлист в очередь"
   Playlist Added to Queue: "Плейлист добавлен в очередь"
 Change Format:
@@ -1933,7 +1890,6 @@ Comments:
   Getting comment replies, please wait: Загрузка ответов на комментарий…
   Reload Comments: Перезагрузить комментарии
   Reply Count: 1 ответ | {replyCount} ответа | {replyCount} ответов
-  Comments are turned off: Комментарии отключены
   YouTube did not provide advertised replies: YouTube указал, что на этот комментарий есть ответы, но не предоставил их. Возможно, они удалены или скрыты, поэтому кнопка ответов убрана.
   Pinned by you: Закреплено вами
   A reply is pinned: Ответ закреплён
@@ -2054,12 +2010,8 @@ Tooltips:
     Use Fixed Tab Width: Устанавливает одинаковую ширину всех вкладок на горизонтальной панели вместо подгонки под заголовок.
     Use Custom Title Bar: Заменяет системную строку заголовка панелью вкладок или, если вкладки расположены не сверху, верхней панелью навигации, чтобы сэкономить место по вертикали. Кнопки управления окном отображаются в углу этой панели.
     Use Grid Player Menu: Располагает меню настроек проигрывателя видео в виде сетки плиток вместо списка строк.
-  Experimental Settings:
-    Disable Hardware Acceleration: Отключает аппаратное ускорение GPU. Может устранить графические проблемы, но, вероятно, снизит производительность.
 The playlist is at the beginning. Enable loop to continue playing: Достигнуто начало плейлиста. Включите повтор, чтобы продолжить воспроизведение
 External link opening has been disabled in Settings → Privacy: Открытие внешних ссылок отключено в разделе «Настройки» → «Конфиденциальность»
-Screenshot Clipboard Success: Снимок экрана сохранён в буфер обмена
-Screenshot Clipboard Error: Не удалось скопировать снимок экрана в буфер обмена
 KeyboardShortcutPrompt:
   Toggle Quick Bookmark: Добавить в плейлист закладок или удалить из него
   Reopen Closed Window: Открыть последнее закрытое окно
@@ -2247,8 +2199,6 @@ Channels:
   Load More Channels: "Загрузить больше каналов"
 Search Bar:
   Use Suggestion: Использовать подсказку
-  Open Search Container: Открыть поле поиска
-  Search: Поиск
 Theme Discovery:
   Discover Themes: "Найти темы"
   Refresh: "Обновить"

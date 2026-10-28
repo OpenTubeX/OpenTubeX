@@ -75,15 +75,6 @@ export class LevelSelection extends shaka.ui.SettingsMenu {
       this.updateLocalisedStrings_()
     })
 
-    if (this.isSubMenu) {
-      this.eventManager.listen(this.controls, 'submenuopen', () => {
-        this.button.classList.add('shaka-hidden')
-      })
-      this.eventManager.listen(this.controls, 'submenuclose', () => {
-        this.button.classList.remove('shaka-hidden')
-      })
-    }
-
     /** @private */
     this.stopValueWatch_ = watch(this.value_, () => {
       this.updateState_()

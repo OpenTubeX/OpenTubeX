@@ -607,6 +607,8 @@ Settings:
         Destructive pressed: Acción destructiva al pulsarla
         Text and icons on destructive actions: Texto e iconos de las acciones destructivas
   Player Settings:
+    Default Media Format:
+      Default Media Format: 'Formato multimedia predeterminado'
     Buffering:
       Buffering: Almacenamiento en búfer
       Description: Elige cuánto vídeo carga el reproductor por adelantado y mantiene cargado.

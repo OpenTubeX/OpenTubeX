@@ -652,6 +652,8 @@ Settings:
         Destructive pressed: Thao tác xóa khi nhấn
         Text and icons on destructive actions: Chữ và biểu tượng trên thao tác xóa
   Player Settings:
+    Default Media Format:
+      Default Media Format: 'Định dạng phương tiện mặc định'
     Buffering:
       Buffering: Bộ đệm
       Description: Chọn lượng video mà trình phát tải trước và giữ lại.

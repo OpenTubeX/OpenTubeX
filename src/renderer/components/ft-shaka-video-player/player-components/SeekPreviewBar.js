@@ -116,6 +116,8 @@ export class SeekPreviewBar extends shaka.ui.SeekBar {
       const preview = this.container.querySelector('.shaka-player-ui-thumbnail-container')
       const width = preview.clientWidth
       preview.style.left = `${Math.min(this.bar.offsetWidth - width, Math.max(0, this.precise.markerX - width / 2))}px`
+      // Shaka centers and clamps the preview with a transform instead, so drop it while we position it
+      preview.style.transform = ''
     }
     this.lastDragValue = this.getValue()
   }

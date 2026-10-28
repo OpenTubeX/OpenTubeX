@@ -184,8 +184,6 @@ Subscriptions:
   Show Combined View: Mostrar vista combinada
   Newest First: Mais recentes primeiro
   Oldest First: Mais antigos primeiro
-  Posts:
-    RSS Message: O YouTube não fornece feeds RSS para publicações. Desative a definição "{rssSetting}" para ver publicações ou ative a definição "{hideSetting}" para ocultar este separador.
 Trending:
   Music: Música
   Load Error: Não foi possível carregar as tendências.
@@ -197,7 +195,6 @@ Feed:
 User Playlists:
   Save: "Guardar"
   Edit: "Editar"
-  This playlist is private or does not exist.: "Esta playlist é privada ou não existe."
   Pin to Navigation: "Afixar na navegação"
   Unpin from Navigation: "Desafixar da navegação"
   Reorder Hint: Arraste ou use as teclas de seta para reordenar
@@ -213,8 +210,6 @@ User Playlists:
   Remove Saved Playlist: "Remover lista de reprodução guardada"
   Load More Playlists: Carregar mais listas de reprodução
   Save to: Guardar em…
-  Move Video to the Top: Mover vídeo para o início
-  Move Video to the Bottom: Mover vídeo para o fim
   Quick Bookmark Icon: Ícone de marcador rápido
   Custom Emoji: Emoji personalizado
   Choose Image: Escolher imagem
@@ -651,8 +646,6 @@ Settings:
       Catppuccin Macchiato Sapphire: "Catppuccin Macchiato safira"
       Catppuccin Macchiato Blue: "Catppuccin Macchiato azul"
       Catppuccin Macchiato Lavender: "Catppuccin Macchiato lavanda"
-      Catppuccin Latte Mauve: Catppuccin Latte Mauve
-      Catppuccin Latte Red: Catppuccin Latte Red
   Player Settings:
     Buffering:
       Buffering: Armazenamento em buffer
@@ -721,10 +714,6 @@ Settings:
         Outline: Contorno
         Drop Shadow: Sombra projetada
       Reset: Repor aspeto das legendas
-    Default Viewing Mode:
-      Full Window (Always On): Janela inteira (sempre ativo)
-      Full Screen (Always On): Ecrã inteiro (sempre ativo)
-      Tooltip: A maioria dos modos de visualização predefinidos só é aplicada no início de cada sessão. As alterações efetuadas durante a sessão mantêm-se até esta terminar. Os modos sempre ativos são aplicados sempre que muda para um novo vídeo, independentemente das alterações efetuadas ao visualizar o vídeo anterior.
     Auto Picture in Picture:
       Auto Picture in Picture: Entrar automaticamente em imagem na imagem
       On Tab Change: Ao mudar de separador
@@ -771,11 +760,6 @@ Settings:
     Reorder Playback Speed: Arraste para reordenar a velocidade de reprodução
     Playback Speed: Velocidade de reprodução
     Parallel Segment Loading: Carregamento paralelo de segmentos
-    Screenshot:
-      Mode: Modo de captura de ecrã
-      Modes:
-        Save To Folder: Guardar na pasta
-        Clipboard: Copiar para a área de transferência
     Rotate Wide Videos to Landscape in Fullscreen: 'Rodar vídeos largos para a orientação horizontal em ecrã inteiro'
     Swipe Up or Down to Enter or Exit Fullscreen: 'Deslize para cima ou para baixo para entrar ou sair do ecrã inteiro'
     Preload Upcoming Videos: "Pré-carregar os próximos vídeos"
@@ -1068,8 +1052,6 @@ Settings:
     Show Video Title: Mostrar título do vídeo
     Show Bottom Right Actions Dock: Mostrar barra de ações no canto inferior direito
     Paused Interface Hide Delay: Atraso até ocultar a interface durante a pausa
-    Add: Adicionar
-    Remove: Remover
   Data Settings:
     Scheduled backups: "Cópias de segurança agendadas"
     Scheduled backup description: "Guarde cópias ZIP completas enquanto o OpenTubeX estiver aberto. As cópias em falta são feitas ao iniciar. O limite aplica-se apenas às cópias agendadas nesta pasta."
@@ -1112,16 +1094,7 @@ Settings:
     Data And Storage: Dados e armazenamento
     Profile Directory: Pasta do perfil
     Open Profile Directory: Abrir pasta do perfil
-    Settings File: Ficheiro de definições
-    Import Settings: Importar definições
-    Export Settings: Exportar definições
-    Settings Tooltip: As definições específicas do sistema operativo ou do utilizador e as definições experimentais não podem ser exportadas nem importadas (por exemplo, proxy, leitor externo, pasta de capturas de ecrã...)
     Invalid JSON row, skipping item: JSON inválido na linha {row}; o item será ignorado
-    All settings have been successfully imported: Todas as definições foram importadas com sucesso
-    All settings have been successfully exported: Todas as definições foram exportadas com sucesso
-    Setting object has insufficient data, skipping item: O objeto de definição não tem dados suficientes; o item será ignorado
-    Unknown setting key: 'Chave de definição desconhecida: {key}'
-    Non-transferable setting key: 'Chave de definição não transferível: {key}'
     Import subscriptions formats: 'Formatos suportados: OpenTubeX / FreeTube (.db), YouTube Takeout (.csv, .json, .opml), NewPipe (.json), cópia de segurança do LibreTube ou exportação do FreeTube (.json)'
     Import history formats: 'Formatos suportados: OpenTubeX / FreeTube (.db), YouTube Takeout (.json), cópia de segurança do LibreTube (.json)'
     Import playlists formats: 'Formatos suportados: OpenTubeX / FreeTube (.db), YouTube Takeout (.csv)'
@@ -1306,9 +1279,6 @@ Settings:
     Reloading video after IP block recovery: A recarregar o vídeo após a recuperação do bloqueio de IP
     Failed to select IP block recovery script: Falha ao selecionar o script de recuperação de bloqueio de IP
   SponsorBlock Settings:
-    Excluded Channels:
-      Excluded Channels: "Canais excluídos"
-      Tooltip: "Introduza o ID de um canal para impedir que os segmentos do SponsorBlock sejam ignorados nos seus vídeos. O ID tem de corresponder exatamente e distingue maiúsculas de minúsculas."
     Enable SponsorBlock Submission: Ativar envio para o SponsorBlock
     SponsorBlock Private User ID (optional): ID privado de utilizador (opcional)
     SponsorBlock Private User ID Tooltip: Cole o ID de utilizador privado do SponsorBlock obtido na extensão do navegador. Deixe este campo vazio para usar um ID gerado pela aplicação.
@@ -1324,16 +1294,12 @@ Settings:
     Return YouTube Dislike Settings: Return YouTube Dislike
     Enable Return YouTube Dislike: Ativar Return YouTube Dislike
     Return YouTube Dislike Url: URL da API
-  Parental Control Settings:
-    Disable Channel Links: Desativar hiperligações dos canais
   Password Dialog:
     Incorrect Password: Palavra-passe incorreta
     Unlock: Desbloquear
     Unlocking: A desbloquear…
   Search Settings: Procurar nas definições
   No Settings Found: Nenhuma definição encontrada
-  Experimental Settings:
-    Disable Hardware Acceleration: Desativar aceleração por hardware
   Interface Customizer:
     Customize Interface: "Personalizar interface"
     Preview: "Pré-visualização"
@@ -1414,7 +1380,6 @@ Profile:
   Use Initial: Usar inicial
   The selected image could not be loaded: Não foi possível carregar a imagem selecionada
   Theme Color: Cor do tema
-  Go To Profile Manager: Ir para o gestor de perfis
 Channel:
   Verified: Verificado
   Official Artist Channel: Canal oficial do artista
@@ -1436,9 +1401,6 @@ Channel:
   Channel Name Unavailable: Nome do canal indisponível
   Search Result Types: Tipos de resultados da pesquisa
   All Results: Todos
-  View All: Ver tudo
-  Videos:
-    This channel has videos but none could be displayed, try fetching more: "Este canal tem vídeos, mas nenhum pôde ser apresentado. Tente carregar mais"
   Posts:
     Original post unavailable: "Publicação original indisponível"
 Video:
@@ -1497,9 +1459,6 @@ Video:
   Configure Restricted Playback Cookies Hint: "Configure os cookies em Definições → Software externo → Cookies do yt-dlp."
   Try With Configured Cookies: Tentar com os cookies configurados
   Restricted Playback Authentication Failed Template: 'O yt-dlp não conseguiu aceder a este vídeo com os cookies configurados: {error}'
-  Private: Os vídeos privados não podem ser vistos no OpenTubeX porque exigem um início de sessão Google e que o utilizador seja proprietário do vídeo.
-  Collapse Playlist: Recolher lista de reprodução
-  Expand Playlist: Expandir lista de reprodução
   Unmark As Watched: Desmarcar como reproduzido
   Video has been unmarked as watched: O vídeo foi desmarcado como reproduzido
   Save Channel Playback Speed: Guardar velocidade de reprodução do canal
@@ -1524,8 +1483,6 @@ Video:
   Notification unavailable: As notificações do sistema não estão disponíveis
   Scheduled video starting: O vídeo agendado vai começar
   Live notification body: '{videoTitle} está a começar agora'
-  Premiere: Estreia
-  AI: AI
   AI-generated content: Conteúdo gerado por IA
   Collaborators: Colaboradores
   Live Chat Replay: Repetição da conversa em direto
@@ -1538,7 +1495,6 @@ Video:
   Chat Filter: Filtro da conversa
   Top Chat: Principais mensagens
   All Messages: Todas as mensagens
-  Popout Live Chat: Abrir conversa numa janela separada
   Live chat replay is enabled. Chat messages will appear here as the video plays.: A repetição da conversa em direto está ativada. As mensagens aparecem aqui à medida que o vídeo é reproduzido.
   Premiere started: Estreia em curso. Começou {timeAgo}
   Player:
@@ -1758,12 +1714,6 @@ Video:
       Load: "Carregar ficheiro de legendas…"
       Subtitle Files: "Ficheiros de legendas"
       Error: "Não foi possível carregar o ficheiro de legendas. Escolha um ficheiro SRT ou WebVTT."
-  Watch:
-    'Remaining preroll-ad time: {remindingTimeSeconds}s': 'Tempo restante do anúncio inicial: {remindingTimeSeconds}s'
-    'Remaining SABR backoff time: {remindingTimeSeconds}s': 'Tempo restante de espera do SABR: {remindingTimeSeconds}s'
-  Station: Estação
-  Playlist:
-    Unavailable videos are hidden: 1 vídeo indisponível está oculto | {count} vídeos indisponíveis estão ocultos | {count} vídeos indisponíveis estão ocultos
   External Media:
     Dislikes: "Voto negativo | Votos negativos | Votos negativos"
     Reposts: "Republicação | Republicações | Republicações"
@@ -1789,7 +1739,6 @@ Video:
       subscriber_only: "Apenas subscritores"
       needs_auth: "É necessário iniciar sessão"
       unlisted: "Não listado"
-  How this was made: Como isto foi feito
   Save Queue to Playlist: "Guardar fila numa lista de reprodução"
   Live Chat is currently not supported with the Yattee server. A direct connection to YouTube is required.: Atualmente, a conversa em direto não é suportada pelo servidor Yattee. É necessária uma ligação direta ao YouTube.
 Playlist:
@@ -1801,7 +1750,6 @@ Playlist:
   Playlist Preload Complete: "Vídeos pré-carregados: {count}."
   Playlist Preload Partial: "Foram pré-carregados {preloaded} de {requested} vídeos. Não foi possível pré-carregar {failed}."
   Playlist Preload Pagination Failed: "Não foi possível carregar a lista completa, por isso o pré-carregamento foi cancelado."
-  Unavailable videos are hidden: Os vídeos indisponíveis estão ocultos
   Add Playlist to Queue: "Adicionar lista de reprodução à fila"
   Playlist Added to Queue: "Lista de reprodução adicionada à fila"
 Change Format:
@@ -1969,7 +1917,6 @@ Comments:
   Getting comment replies, please wait: A obter respostas ao comentário. Aguarde
   Reload Comments: Recarregar comentários
   Reply Count: 1 resposta | {replyCount} respostas | {replyCount} respostas
-  Comments are turned off: Os comentários estão desativados
   YouTube did not provide advertised replies: O YouTube indicou que este comentário tem respostas, mas não as forneceu. Podem ter sido eliminadas ou ocultadas, pelo que o botão de resposta foi removido.
   Pinned by you: Afixado por si
   A reply is pinned: Está afixada uma resposta
@@ -2090,12 +2037,8 @@ Tooltips:
     Use Fixed Tab Width: Atribui a mesma largura a todos os separadores na barra horizontal, em vez de ajustar a largura ao respetivo título.
     Use Custom Title Bar: Substitui a barra de título do sistema pela barra de separadores ou, quando os separadores não estão no topo, pela navegação superior, para poupar espaço vertical. Os controlos da janela aparecem no canto dessa barra.
     Use Grid Player Menu: Organiza o menu de definições do reprodutor de vídeo numa grelha de mosaicos em vez de uma lista de linhas.
-  Experimental Settings:
-    Disable Hardware Acceleration: Desativa a aceleração por hardware da GPU. Pode resolver problemas gráficos, mas provavelmente reduzirá o desempenho.
 The playlist is at the beginning. Enable loop to continue playing: A lista de reprodução está no início. Ative a repetição para continuar a reproduzir
 External link opening has been disabled in Settings → Privacy: A abertura de hiperligações externas foi desativada em Definições → Privacidade
-Screenshot Clipboard Success: Captura de ecrã guardada na área de transferência
-Screenshot Clipboard Error: Não foi possível copiar a captura de ecrã para a área de transferência
 KeyboardShortcutPrompt:
   Toggle Quick Bookmark: Adicionar ou remover da lista de reprodução do marcador rápido
   Reopen Closed Window: Reabrir a última janela fechada
@@ -2287,7 +2230,6 @@ Channels:
   Load More Channels: "Carregar mais canais"
 Search Bar:
   Use Suggestion: Usar sugestão
-  Open Search Container: Abrir o campo de pesquisa
 Theme Discovery:
   Discover Themes: "Descobrir temas"
   Refresh: "Recarregar"

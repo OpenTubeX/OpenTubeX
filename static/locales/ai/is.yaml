@@ -184,8 +184,6 @@ Subscriptions:
   Show Combined View: Sýna sameinað
   Newest First: Nýjast fyrst
   Oldest First: Elst fyrst
-  Posts:
-    RSS Message: 'YouTube býður ekki upp á RSS-strauma fyrir færslur. Slökktu á stillingunni "{rssSetting}" til að skoða færslur eða kveiktu á stillingunni "{hideSetting}" til að fela þennan flipa.'
 Trending:
   Music: Tónlist
   Load Error: Ekki tókst að hlaða vinsælu efni.
@@ -197,7 +195,6 @@ Feed:
 User Playlists:
   Save: "Vista"
   Edit: "Breyta"
-  This playlist is private or does not exist.: "Þessi spilunarlisti er lokaður eða er ekki til."
   Pin to Navigation: "Festa við valmynd"
   Unpin from Navigation: "Losa úr valmynd"
   Reorder Hint: Dragðu eða notaðu örvalyklana til að endurraða
@@ -650,6 +647,8 @@ Settings:
         Destructive pressed: Eyðandi aðgerð þegar ýtt er
         Text and icons on destructive actions: Texti og tákn á eyðandi aðgerðum
   Player Settings:
+    Default Media Format:
+      Default Media Format: 'Sjálfgefið miðlasnið'
     Buffering:
       Buffering: Biðminni
       Description: Veldu hversu mikið af myndskeiðinu spilarinn hleður fyrir fram og heldur hlöðnu.

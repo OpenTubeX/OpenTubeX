@@ -835,6 +835,8 @@ Settings:
       Everforest Light Blue: Everforest Light Blue
       Everforest Light Purple: Everforest Light Purple
   Player Settings:
+    Default Media Format:
+      Default Media Format: 'Numatytasis medijos formatas'
     Buffering:
       Buffering: Buferizavimas
       Description: Pasirinkite, kiek vaizdo įrašo grotuvas įkelia iš anksto ir laiko įkelto.

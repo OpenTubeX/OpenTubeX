@@ -55,7 +55,7 @@ for (const premiere of [false, true]) {
     await expect(player.locator('.shaka-playbackrate-button')).toBeVisible()
     await attachScreenshot('DVR playback speed controls')
     await player.locator('.shaka-playbackrate-button').click()
-    await player.locator('.shaka-playback-rates').getByRole('button', { name: '2x', exact: true }).click()
+    await player.locator('.shaka-playback-rates .shaka-playback-rate-preset-btn[data-rate="2"]').click()
     await expect.poll(() => video.evaluate(element => element.playbackRate)).toBe(2)
     await expect(bar.locator('[data-rate="2"]')).toHaveClass(/is-current-rate/)
     await view.evaluate(view => { view.isLiveDvrEnabled = false })

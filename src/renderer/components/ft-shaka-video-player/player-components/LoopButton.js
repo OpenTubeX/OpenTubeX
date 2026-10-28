@@ -99,16 +99,6 @@ export class LoopButton extends shaka.ui.Element {
       this.updateLocalisedStrings_()
     })
 
-    if (this.isSubMenu) {
-      this.eventManager.listen(this.controls, 'submenuopen', () => {
-        this.updateVisibility_()
-      })
-
-      this.eventManager.listen(this.controls, 'submenuclose', () => {
-        this.updateVisibility_()
-      })
-    }
-
     this.eventManager.listen(this.localization, shaka.ui.Localization.LOCALE_CHANGED, () => {
       this.updateLocalisedStrings_()
     })
@@ -183,5 +173,10 @@ export class LoopButton extends shaka.ui.Element {
       scheduleOverflowMenuScrollClamp(this.parent)
     }
     this.loopVisible_ = loopVisible
+  }
+
+  /** @override */
+  checkAvailability() {
+    this.updateVisibility_()
   }
 }

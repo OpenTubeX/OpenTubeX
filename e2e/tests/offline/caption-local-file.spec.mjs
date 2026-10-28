@@ -136,7 +136,7 @@ for (const usePlayerMenuGrid of [true, false]) {
       await player.screenshot({ path: testInfo.outputPath('local-subtitles-shown.png') })
 
       captionsMenu = await openCaptionsMenu(page)
-      await expect(captionsMenu.getByRole('button', { name: 'Mein Film.de.srt', exact: true })).toHaveAttribute('aria-selected', 'true')
+      await expect(captionsMenu.getByRole('menuitemradio', { name: 'Mein Film.de.srt', exact: true })).toHaveAttribute('aria-checked', 'true')
       await captionsMenu.screenshot({ path: testInfo.outputPath('captions-menu-with-local-track.png') })
       await captionsMenu.getByRole('button', { name: 'Off', exact: true }).click()
       await expect(caption).toHaveCount(0)
@@ -262,7 +262,7 @@ test.describe('local subtitle files', () => {
     }
 
     captionsMenu = await openCaptionsMenu(page)
-    await captionsMenu.getByRole('button', { name: 'movie.vtt', exact: true }).click()
+    await captionsMenu.getByRole('menuitemradio', { name: 'movie.vtt', exact: true }).click()
     await expect(caption).toHaveText('First file')
   })
 })

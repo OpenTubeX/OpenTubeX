@@ -652,6 +652,8 @@ Settings:
         Destructive pressed: الضغط المدمر
         Text and icons on destructive actions: النص والأيقونات على الإجراءات المدمرة
   Player Settings:
+    Default Media Format:
+      Default Media Format: 'تنسيق الوسائط الافتراضي'
     Buffering:
       Buffering: التخزين المؤقت
       Description: اختر مقدار الفيديو الذي يحمّله المشغّل مسبقًا ويبقيه محمَّلًا.

@@ -650,6 +650,8 @@ Settings:
         Destructive pressed: Nedtryckt destruktiv åtgärd
         Text and icons on destructive actions: Text och ikoner på destruktiva åtgärder
   Player Settings:
+    Default Media Format:
+      Default Media Format: 'Förvalt medieformat'
     Buffering:
       Buffering: Buffring
       Description: Välj hur mycket av videon som spelaren läser in i förväg och behåller inläst.

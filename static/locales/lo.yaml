@@ -894,8 +894,8 @@ Settings:
     Max Video Playback Rate: ຄວາມໄວໃນການຫຼິ້ນສູງສຸດ
     Parallel Segment Loading: ການໂຫຼດສ່ວນຂອງວິດີໂອແບບຂະໜານ
     Video Playback Rate Interval: ໄລຍະຫ່າງການປັບຄວາມໄວວິດີໂອ
-    Default Video Format:
-      Default Video Format: ຮູບແບບວິດີໂອເລີ່ມຕົ້ນ
+    Default Media Format:
+      Default Media Format: ຮູບແບບວິດີໂອເລີ່ມຕົ້ນ
       Dash Formats: ຮູບແບບ DASH
       Legacy Formats: ຮູບແບບເກົ່າ (Legacy)
       Audio Formats: ຮູບແບບສຽງ
@@ -2231,7 +2231,7 @@ Tooltips:
   Player Settings:
     Enable Caption Translations: ເມື່ອເປີດໃຊ້, ປຸ່ມຄຳບັນຍາຍ ແລະ ຄີລັດ C ຈະເລືອກໃຊ້ຄຳບັນຍາຍທີ່ແປອັດຕະໂນມັດ ຫາກວິດີໂອບໍ່ມີພາສາຕົ້ນສະບັບທີ່ກົງກັບຄວາມຕ້ອງການ.
     Proxy Videos Through Invidious: ຈະເຊື່ອມຕໍ່ຜ່ານ Invidious ເພື່ອສະແດງວິດີໂອ ແທນການເຊື່ອມຕໍ່ໂດຍກົງຫາ YouTube.
-    Default Video Format: ຕັ້ງຄ່າຮູບແບບທີ່ໃຊ້ເມື່ອຫຼິ້ນວິດີໂອ. DASH ສາມາດຫຼິ້ນຄວາມລະອຽດສູງໄດ້. Legacy ຈຳກັດທີ່ 360p ແຕ່ປະຢັດແບນວິດ. Audio ແມ່ນສຽງຢ່າງດຽວ.
+    Default Media Format: ຕັ້ງຄ່າຮູບແບບທີ່ໃຊ້ເມື່ອຫຼິ້ນວິດີໂອ. DASH ສາມາດຫຼິ້ນຄວາມລະອຽດສູງໄດ້. Legacy ຈຳກັດທີ່ 360p ແຕ່ປະຢັດແບນວິດ. Audio ແມ່ນສຽງຢ່າງດຽວ.
     Use Quick Playback Speed Bar: ສະແດງແຖບປັບຄວາມໄວໃນການຫຼິ້ນຢູ່ດ້ານຂວາຂອງຕົວຫຼິ້ນ.
     Scroll Playback Rate Over Video Player: ໃນຂະນະທີ່ເມົາສ໌ຢູ່ເທິງວິດີໂອ, ກົດປຸ່ມ Control ຄ້າງໄວ້ແລ້ວເລື່ອນເມົາສ໌ເພື່ອປັບຄວາມໄວ.
     Skip by Scrolling Over Video Player: ໃຊ້ລໍ້ເມົາສ໌ເພື່ອເລື່ອນເວລາວິດີໂອ ແບບສະໄຕລ໌ MPV.

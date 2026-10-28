@@ -28,7 +28,9 @@ function seekBar({ start = 0, end = 4.2, width = 1000.5, left = 42.25, step = 'a
     },
     controls: { getChapters: () => [] },
     adCuePoints_: [],
-    thumbnailContainer_: { clientWidth: 150, style: {} },
+    // Exercise the measured fallback, CSS clamp() only positions with a transform
+    canClampInCss_: false,
+    thumbnailContainer_: { clientWidth: 150, style: {}, classList: { contains: () => false, toggle() {} } },
     thumbnailImageContainer_: { style: {} },
     thumbnailTime_: {},
     timeFormatter_: value => String(Math.floor(value))

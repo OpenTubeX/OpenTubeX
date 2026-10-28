@@ -328,7 +328,7 @@ export const SETTINGS_SEARCH_SELECT_GROUP_LABELS = {
     'Default Viewing Mode': ['Default Viewing Mode', 'Tooltip'],
     'Auto Picture in Picture': ['Auto Picture in Picture'],
     'Swipe Gestures': ['Left', 'Right', 'Fullscreen Brightness'],
-    'Default Video Format': ['Default Video Format'],
+    'Default Media Format': ['Default Media Format'],
     'Default Quality': ['Default Quality'],
     'Quality Limit on Metered Networks': ['Quality Limit on Metered Networks'],
     'Screenshot.Modes': [],

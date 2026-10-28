@@ -80,16 +80,6 @@ export class ChapterOverlayButton extends shaka.ui.Element {
       this.updateLocalisedStrings_()
     })
 
-    if (this.isSubMenu) {
-      this.eventManager.listen(this.controls, 'submenuopen', () => {
-        this.updateVisibility_()
-      })
-
-      this.eventManager.listen(this.controls, 'submenuclose', () => {
-        this.updateVisibility_()
-      })
-    }
-
     /** @private */
     this.stopCurrentChapterTitleWatch_ = watch(this.currentChapterTitle_, () => {
       this.updateLocalisedStrings_()
@@ -130,5 +120,10 @@ export class ChapterOverlayButton extends shaka.ui.Element {
   /** @private */
   updateVisibility_() {
     this.button_.classList.toggle('shaka-hidden', !this.chaptersAvailable_.value || this.isSubMenuOpened)
+  }
+
+  /** @override */
+  checkAvailability() {
+    this.updateVisibility_()
   }
 }

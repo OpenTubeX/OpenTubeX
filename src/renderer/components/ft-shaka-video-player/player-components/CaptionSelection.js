@@ -56,7 +56,9 @@ export class CaptionSelection extends shaka.ui.TextSelection {
       // choices current; refresh only the custom actions from reactive props.
       for (const [type, opened] of [['submenuopen', true], ['submenuclose', false]]) {
         this.eventManager.unlisten(controls, type)
-        this.eventManager.listen(controls, type, () => {
+        this.eventManager.listen(controls, type, (event) => {
+          // Like shaka.ui.Element, only react to submenus in our own container
+          if (event.container && event.container !== this.parent) return
           this.isSubMenuOpened = opened
           this.updateButtonDisplay_()
           if (opened) {

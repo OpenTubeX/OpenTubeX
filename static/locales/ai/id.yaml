@@ -648,6 +648,8 @@ Settings:
         Destructive pressed: Tindakan destruktif saat ditekan
         Text and icons on destructive actions: Teks dan ikon pada tindakan destruktif
   Player Settings:
+    Default Media Format:
+      Default Media Format: 'Format Media Bawaan'
     Buffering:
       Buffering: Buffering
       Description: Pilih seberapa banyak video yang dimuat pemutar lebih dahulu dan tetap dimuat.

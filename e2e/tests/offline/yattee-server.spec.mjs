@@ -176,7 +176,7 @@ test('plays relayed DASH streams through the Yattee server without contacting Yo
 
   await player.locator('.shaka-overflow-menu-button').click()
   await player.locator('.shaka-overflow-menu').getByRole('button', { name: /Captions/ }).click()
-  await player.locator('.shaka-text-languages').getByRole('button', { name: 'English' }).click()
+  await player.locator('.shaka-text-languages').getByRole('menuitemradio', { name: 'English' }).click()
   await expect.poll(() => captionRequests).toEqual([
     `${SERVER}/api/v1/captions/${VIDEO_ID}/content?lang=en&token=caption-token`
   ])
@@ -323,7 +323,7 @@ test('shows channel handles and subscriber counts in search results', async ({ p
   await page.locator(sel.searchInput).press('Enter')
   const channel = page.locator(`${activeTab} .ft-list-channel`)
   await expect(channel.locator('.handle')).toHaveText('@LinusTechTips')
-  await expect(channel.locator('.subscriberCount')).toHaveText('16,900,000 subscribers')
+  await expect(channel.locator('.subscriberCount')).toHaveText('16.9M subscribers')
 })
 
 test('only offers the search filters that the server supports', async ({ page }) => {

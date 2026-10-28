@@ -189,6 +189,11 @@
   padding-block-start: calc(var(--ft-submenu-header-size) + 4px);
 }
 
+/* The playback speed slider and its presets each fill a row, instead of shrinking to their content. */
+:deep(.shaka-sub-menu.ft-menu-grid > :is(.shaka-playback-rate-slider-section, .shaka-playback-rate-presets)) {
+  flex-basis: 100%;
+}
+
 /*
   Taken out of the flow, so that it stays put while the options are centered.
   The menu's padding above the header looks like part of it, so the same space

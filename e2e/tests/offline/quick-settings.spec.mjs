@@ -33,7 +33,7 @@ const ADDITIONAL_QUICK_SETTINGS = [
   ['autoplayPlaylists', 'Autoplay Playlist Videos', 'Playback'],
   ['defaultPlayback', 'Default Playback Rate', 'Playback'],
   ['scrollMiniPlayerEnabled', 'Keep a mini player on screen when scrolling down', 'Playback'],
-  ['defaultVideoFormat', 'Default Video Format', 'Playback'],
+  ['defaultVideoFormat', 'Default Media Format', 'Playback'],
   ['useDeArrowTitles', 'Use DeArrow Video Titles', 'Add-ons'],
   ['useDeArrowThumbnails', 'Use DeArrow for thumbnails', 'Add-ons'],
   ['hideLiveChat', 'Hide Live Chat', 'Content'],

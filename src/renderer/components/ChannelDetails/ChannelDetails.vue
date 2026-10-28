@@ -389,7 +389,7 @@ import FtIconButton from '../FtIconButton/FtIconButton.vue'
 
 import store from '../../store/index'
 
-import { ctrlFHandler, formatNumber } from '../../helpers/utils'
+import { ctrlFHandler, formatSubscriberCount } from '../../helpers/utils'
 import { clampOverlayScrollLeft } from '../../helpers/overlayScrollbars'
 import { useTabContext } from '../../tabs/TabContext'
 
@@ -567,7 +567,7 @@ const formattedSubCount = computed(() => {
   if (hideChannelSubscriptions.value) {
     return null
   }
-  return formatNumber(props.subCount)
+  return formatSubscriberCount(props.subCount)
 })
 
 function subscribed() {

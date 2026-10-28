@@ -8,12 +8,12 @@ const bundle = readFileSync(new URL('../../node_modules/shaka-player/dist/shaka-
 for (const compiled of [false, true]) {
   test(`${compiled ? 'shipped bundle' : 'Shaka source'} uses the delay for movement, touch, keyboard and seeking`, () => {
     const scheduled = []
-    const timer = { stop() {}, tickAfter: seconds => scheduled.push(seconds), Y: seconds => scheduled.push(seconds) }
+    const timer = { stop() {}, tickAfter: seconds => scheduled.push(seconds), aa: seconds => scheduled.push(seconds) }
     const container = { classList: { remove() {} }, dataset: {} }
     let move, seek
     if (compiled) {
-      move = vm.runInNewContext(`(${bundle.match(/function oJ\(a,b\)\{[^\n]+/)[0]})`, { uJ() {}, mI() {} })
-      seek = vm.runInNewContext(`({${bundle.match(/\$g\(a\)\{[\s\S]*?\}/)[0]}})`)['$g']
+      move = vm.runInNewContext(`(${bundle.match(/function xP\(a,b\)\{[\s\S]*?\}(?=function QP\()/)[0]})`, { GP() {}, yP() {} })
+      seek = vm.runInNewContext(`({${bundle.match(/bi\(a\)\{\(this\.ea=\s*a\)[\s\S]*?\}/)[0]}})`).bi
     } else {
       move = vm.runInNewContext(`({${source.match(/  onMouseMove_\(event\) \{[\s\S]*?\n  \}/)[0]}})`).onMouseMove_
       seek = vm.runInNewContext(`({${source.match(/  setSeeking\(seeking\) \{[\s\S]*?\n  \}/)[0]}})`).setSeeking
@@ -22,13 +22,13 @@ for (const compiled of [false, true]) {
       videoContainer_: container, controlsContainer_: container,
       mouseStillTimer_: timer, hideSettingsMenusTimer_: timer,
       computeOpacity() {}, isOpaque: () => true,
-      m: container, h: container, U: timer, R: timer, Fa: () => true,
+      i: container, l: container, U: timer, W: timer, Ha: () => true,
     }
     for (const delay of [undefined, '0.5', '3', '7.5', '10']) {
       if (delay === undefined) delete container.dataset.playingInterfaceHideDelay
       else container.dataset.playingInterfaceHideDelay = delay
       for (const type of ['mousemove', 'touchend', 'wheel', 'keyup']) {
-        controls.lastTouchEventTime_ = controls.S = null
+        controls.lastTouchEventTime_ = controls.V = null
         if (compiled) move(controls, { type })
         else move.call(controls, { type })
         assert.equal(scheduled.pop(), delay === undefined ? 3 : Number(delay))

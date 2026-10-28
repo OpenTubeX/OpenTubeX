@@ -47,6 +47,7 @@ async function loadMetadata(info, avoidTranslation = 'disabled', options = {}) {
     getAuthorVerification,
     window: { innerWidth: options.windowWidth ?? 1000 },
     formatNumber: String,
+    formatSubscriberCount: String,
     showApiErrorToast() {},
     console: { error: error => errors.push(String(error)) },
   }

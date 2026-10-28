@@ -113,7 +113,7 @@ import store from '../../store/index'
 import { isOnAiSlopList } from '../../helpers/aiSlopList'
 import { youtubeImageUrlToInvidious } from '../../helpers/api/invidious'
 import { getOriginalChannelName } from '../../helpers/api/local'
-import { formatNumber } from '../../helpers/utils'
+import { formatNumber, formatSubscriberCount } from '../../helpers/utils'
 
 const props = defineProps({
   data: {
@@ -211,7 +211,7 @@ watch([() => props.data, () => store.getters.getAvoidTranslation], ([data, prefe
 
 const formattedSubscriberCount = computed(() => {
   if (subscriberCount != null) {
-    return formatNumber(subscriberCount)
+    return formatSubscriberCount(subscriberCount)
   }
 
   return ''

@@ -308,7 +308,7 @@ Subscriptions:
   'This profile has a large number of subscriptions. Forcing RSS to avoid rate limiting': This profile has a large number of subscriptions.  Forcing RSS to avoid rate limiting
   'Your Subscription list is currently empty. Start adding subscriptions to see them here.': Your Subscription list is currently empty. To import subscriptions, open Settings → Data and select Import Subscriptions. You can also search for a channel and subscribe to it.
   Disabled Automatic Fetching: You have disabled automatic subscription fetching. Refresh subscriptions to see them here.
-  Empty Channels: Your subscribed channels currently does not have any videos.
+  Empty Channels: Your subscribed channels currently do not have any videos.
   Empty Posts: Your subscribed channels currently do not have any posts.
   Load More Videos: Load More Videos
   Load More Posts: Load More Posts
@@ -1230,8 +1230,8 @@ Settings:
     Max Video Playback Rate: Max Video Playback Rate
     Parallel Segment Loading: Parallel Segment Loading
     Video Playback Rate Interval: Video Playback Rate Interval
-    Default Video Format:
-      Default Video Format: Default Video Format
+    Default Media Format:
+      Default Media Format: Default Media Format
       Dash Formats: DASH Formats
       Legacy Formats: Legacy Formats
       Audio Formats: Audio Formats
@@ -3075,7 +3075,7 @@ Tooltips:
     Enable Caption Translations: When enabled, the captions button and C shortcut prefer an automatically translated track in the preferred caption language when the video does not provide a matching original track.
     Proxy Videos Through Invidious: Will connect to Invidious to serve videos instead
       of making a direct connection to YouTube.
-    Default Video Format: Set the formats used when a video plays. DASH formats can
+    Default Media Format: Set the formats used when a video plays. DASH formats can
       play higher qualities. Legacy formats are limited to a max of 360p but use less
       bandwidth. Audio formats are audio only streams.
     Use Quick Playback Speed Bar: Shows a quick playback speed bar in the player controls on the right side. If manual per-channel playback speed saving is enabled, the bar also includes the button to save the speed for the current channel.

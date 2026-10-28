@@ -333,6 +333,9 @@ test.describe('grid submenu headers', { tag: '@scale' }, () => {
     await player.locator('.shaka-playbackrate-button').click()
     const speeds = player.locator('.shaka-playback-rates')
     await expect(speeds).toBeVisible()
+    // The speed slider fills its row rather than shrinking to its thumb
+    const slider = await speeds.locator('.shaka-playback-rate-slider').boundingBox()
+    expect(slider.width).toBeGreaterThan((await speeds.boundingBox()).width / 2)
     await expectCenteredTitle(speeds)
     await speeds.screenshot({ path: testInfo.outputPath('speed.png') })
 

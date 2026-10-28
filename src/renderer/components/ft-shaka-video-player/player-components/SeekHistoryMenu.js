@@ -56,15 +56,6 @@ export class SeekHistoryMenu extends shaka.ui.SettingsMenu {
       this.updateLocalisedStrings_()
     })
 
-    if (this.isSubMenu) {
-      this.eventManager.listen(this.controls, 'submenuopen', () => {
-        this.updateVisibility_()
-      })
-      this.eventManager.listen(this.controls, 'submenuclose', () => {
-        this.updateVisibility_()
-      })
-    }
-
     /** @private */
     this.stopHistoryWatch_ = watch([history, chapters], () => this.updateEntries_())
 
@@ -150,5 +141,10 @@ export class SeekHistoryMenu extends shaka.ui.SettingsMenu {
     if (hidden && !wasHidden && !this.isSubMenuOpened) {
       scheduleOverflowMenuScrollClamp(this.parent)
     }
+  }
+
+  /** @override */
+  checkAvailability() {
+    this.updateVisibility_()
   }
 }

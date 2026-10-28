@@ -41,7 +41,7 @@ Requests such as "implement issue #X" authorize local changes, not a PR. Open a 
 
 - After any visual change or implementation, show the user a screenshot (static appearance) or short recording (interaction, animation, transitions) of the finished result in the final response.
 - UI Scale changes Electron's zoom factor, so fractional CSS-pixel geometry is legitimate. Changes involving scrolling, measurements, positioning, reflow, or animation boundaries must work at non-100% scales; do not treat subpixel differences from integer layout properties as stale or invalid state.
-- Custom Shaka overflow-menu controls must hide while a submenu is open; follow the `submenuopen` / `submenuclose` pattern using `isSubMenuOpened` and `shaka-hidden`.
+- Custom Shaka overflow-menu controls must hide while a submenu is open: override `checkAvailability()` and toggle `shaka-hidden` from `isSubMenuOpened`, which `shaka.ui.Element` updates on `submenuopen` / `submenuclose`.
 - Labeled action buttons, such as Enable, Load more, Refresh, and Reset, need a relevant icon from the registry beside their visible label; hide decorative icons from assistive technology.
 
 ### Icons

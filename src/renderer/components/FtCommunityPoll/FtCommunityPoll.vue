@@ -3,7 +3,6 @@
     <div
       class="vote-count"
     >
-      <!-- Format the votes to be split by commas ie. 1000 -> 1,000 -->
       {{ $t('Channel.Posts.votes', {votes: formattedVotes}, data.totalVotes) }}
     </div>
     <div
@@ -76,6 +75,7 @@ import { computed, ref } from 'vue'
 import { FtIcon } from '@opentubex/icons'
 
 import { formatNumber } from '../../helpers/utils'
+import { isRoundedNumber } from '../../helpers/viewCounts'
 
 const props = defineProps({
   data: {
@@ -85,7 +85,8 @@ const props = defineProps({
 })
 
 const formattedVotes = computed(() => {
-  return formatNumber(props.data.totalVotes)
+  const votes = props.data.totalVotes
+  return formatNumber(votes, votes != null && isRoundedNumber(votes) ? { notation: 'compact' } : undefined)
 })
 
 const revealAnswer = ref(false)

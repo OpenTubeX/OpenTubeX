@@ -27,11 +27,6 @@ export class AndroidPictureInPictureButton extends shaka.ui.Element {
     })
     this.eventManager.listen(events, 'localeChanged', () => this.updateLocalisedStrings_())
 
-    if (this.isSubMenu) {
-      this.eventManager.listen(this.controls, 'submenuopen', () => this.updateVisibility_())
-      this.eventManager.listen(this.controls, 'submenuclose', () => this.updateVisibility_())
-    }
-
     this.updateLocalisedStrings_()
   }
 
@@ -42,5 +37,10 @@ export class AndroidPictureInPictureButton extends shaka.ui.Element {
 
   updateVisibility_() {
     this.button_.classList.toggle('shaka-hidden', this.isSubMenuOpened)
+  }
+
+  /** @override */
+  checkAvailability() {
+    this.updateVisibility_()
   }
 }

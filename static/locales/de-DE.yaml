@@ -945,11 +945,11 @@ Settings:
     Channel Video Quality Manager: Verwaltung der Videoqualitäten
     No Saved Video Qualities: Keine gespeicherten Videoqualitäten
     Playback Speed: Wiedergabegeschwindigkeit
-    Default Video Format:
-      Default Video Format: Standard-Videoformat
+    Default Media Format:
       Dash Formats: DASH-Formate
       Legacy Formats: Veraltete Formate
       Audio Formats: Audioformate
+      Default Media Format: Standard-Medienformat
     Default Quality:
       Default Quality: Standardqualität
       Auto: Automatisch
@@ -2762,7 +2762,7 @@ Tooltips:
     Notify About New Uploads: "Zeigt auf diesem Gerät Systembenachrichtigungen für Kanäle, deren Benachrichtigungen du in ihren Abo-Einstellungen aktiviert hast. OpenTubeX sucht beim Aktualisieren der Abos nach neuen Inhalten, wähle daher ein automatisches Aktualisierungsintervall. Um auch bei geschlossener App benachrichtigt zu werden, aktiviere zusätzlich die Aktualisierung bei geschlossener App."
   Player Settings:
     Enable Caption Translations: Wenn aktiviert, bevorzugen die Untertitel-Schaltfläche und das Tastenkürzel C eine automatisch übersetzte Spur in der bevorzugten Untertitelsprache, wenn das Video keine passende Originalspur bereitstellt.
-    Default Video Format: Lege die Formate fest, die bei der Wiedergabe eines Videos verwendet werden. DASH-Formate können höhere Auflösungen wiedergeben. Altformate sind auf maximal 360p beschränkt, verbrauchen aber weniger Bandbreite. Audioformate sind reine Audiostreams.
+    Default Media Format: Lege die Formate fest, die bei der Wiedergabe eines Videos verwendet werden. DASH-Formate können höhere Auflösungen wiedergeben. Altformate sind auf maximal 360p beschränkt, verbrauchen aber weniger Bandbreite. Audioformate sind reine Audiostreams.
     Proxy Videos Through Invidious: Stellt eine Verbindung mit Invidious her, um Videos bereitzustellen, anstatt eine direkte Verbindung mit YouTube herzustellen.
     Use Quick Playback Speed Bar: Zeigt in den Player-Steuerelementen auf der rechten Seite eine schnelle Wiedergabegeschwindigkeitsleiste an. Wenn das manuelle Speichern der kanalbezogenen Wiedergabegeschwindigkeit aktiviert ist, enthält die Leiste außerdem die Schaltfläche, um die Geschwindigkeit für den aktuellen Kanal zu speichern.
     Scroll Playback Rate Over Video Player: Während sich der Cursor über dem Video befindet, halte die Strg-Taste (Befehlstaste auf dem Mac) gedrückt und bewege das Mausrad vorwärts oder rückwärts, um die Abspielgeschwindigkeit zu steuern. Halte die Strg-Taste (Befehlstaste auf dem Mac) gedrückt und klicke mit der linken Maustaste, um schnell zur Standard-Wiedergabegeschwindigkeit zurückzukehren (1x, sofern sie nicht in den Einstellungen geändert wurde).

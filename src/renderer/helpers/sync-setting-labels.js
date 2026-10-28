@@ -74,7 +74,7 @@ export const SYNC_SETTING_LABELS = {
   defaultProfile: 'Profile.Make Default Profile',
   defaultQuality: 'Settings.Player Settings.Default Quality.Default Quality',
   defaultSkipInterval: 'Settings.Player Settings.Fast-Forward / Rewind Interval',
-  defaultVideoFormat: 'Settings.Player Settings.Default Video Format.Default Video Format',
+  defaultVideoFormat: 'Settings.Player Settings.Default Media Format.Default Media Format',
   defaultViewingMode: 'Settings.Player Settings.Default Viewing Mode.Default Viewing Mode',
   defaultVolume: 'Settings.Player Settings.Default Volume',
   disableAbRepeat: 'Settings.Distraction Free Settings.Disable A-B Repeat',
@@ -434,7 +434,7 @@ export const SYNC_SETTING_VALUE_LABELS = {
   currentLocale: { system: `${general}System Default` },
   dateFormat: { locale: `${general}Language Default` },
   defaultQuality: { ...qualities, auto: `${player}Default Quality.Auto` },
-  defaultVideoFormat: { dash: `${player}Default Video Format.Dash Formats`, legacy: `${player}Default Video Format.Legacy Formats`, audio: `${player}Default Video Format.Audio Formats` },
+  defaultVideoFormat: { dash: `${player}Default Media Format.Dash Formats`, legacy: `${player}Default Media Format.Legacy Formats`, audio: `${player}Default Media Format.Audio Formats` },
   defaultViewingMode: {
     default: `${general}Thumbnail Preference.Default`,
     theatre: `${player}Default Viewing Mode.Theater`,

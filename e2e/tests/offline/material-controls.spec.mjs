@@ -228,7 +228,7 @@ test.describe('select indicators', { tag: '@scale' }, () => {
     for (const width of [1200, 400]) {
       // Keep the CSS viewport width independent of the UI scale.
       await setWindowSize(app, page, { width: Math.round(width * uiScale / 100), height: width === 1200 ? 800 : 900 })
-      for (const [category, name] of [['general', 'Default Landing Page'], ['general', 'On Startup'], ['player', 'Screenshot Mode'], ['player', 'Default Video Format'], ['player', 'Default Quality']]) {
+      for (const [category, name] of [['general', 'Default Landing Page'], ['general', 'On Startup'], ['player', 'Screenshot Mode'], ['player', 'Default Media Format'], ['player', 'Default Quality']]) {
         if (await page.locator('.settingsBackButton').isVisible()) {
           await page.locator('.settingsBackButton').click()
         }

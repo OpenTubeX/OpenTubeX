@@ -248,6 +248,8 @@ const CAPTION_POSITION_AREAS = Object.freeze({
 })
 
 const NORMAL_PLAYBACK_RATE = 1
+// Preset pills in shaka-player's playback rate menu, the slider covers every other rate
+const PLAYBACK_RATE_PRESETS = [0.5, 0.75, 1, 1.5, 2]
 
 /*
   Mapping of Shaka localization keys for control labels to FreeTube shortcuts.
@@ -1798,27 +1800,20 @@ export default defineComponent({
       return enableChannelSettings.value && !autoUpdateChannelPlaybackSpeeds.value && props.channelId !== ''
     })
 
+    watch(maxVideoPlaybackRate, (newValue) => {
+      configurePlayerControls(() => ui.configure({
+        playbackRateSliderMax: newValue
+      }))
+    })
+
     const videoPlaybackRateInterval = computed(() => {
       return parseFloat(store.getters.getVideoPlaybackRateInterval)
     })
 
-    const playbackRates = computed(() => {
-      const interval = videoPlaybackRateInterval.value
-      const playbackRates = []
-      let i = interval
-
-      while (i <= maxVideoPlaybackRate.value) {
-        playbackRates.unshift(i)
-        i += interval
-        i = parseFloat(i.toFixed(2))
-      }
-
-      return playbackRates
-    })
-
-    watch(playbackRates, (newValue) => {
+    watch(videoPlaybackRateInterval, (newValue) => {
       configurePlayerControls(() => ui.configure({
-        playbackRates: newValue
+        playbackRateSliderMin: newValue,
+        playbackRateSliderStep: newValue,
       }))
     })
 
@@ -2362,7 +2357,10 @@ export default defineComponent({
           ...bufferingConfig.value,
           segmentPrefetchLimit: segmentPrefetchLimit.value,
           // Keep every codec selectable, automatic quality chooses them itself
-          dontChooseCodecs: supportsSmoothCodecSwitching()
+          dontChooseCodecs: supportsSmoothCodecSwitching(),
+          // Otherwise shaka-player downloads whole src= files (e.g. downloaded MP3s) through its
+          // networking engine to read their ID3 tags, which fails for downloadmedia:// URLs
+          processSrcEqualMetadata: false
         },
         manifest: {
           disableVideo: format === 'audio',
@@ -2371,6 +2369,11 @@ export default defineComponent({
           segmentRelativeVttTiming: true,
           dash: {
             manifestPreprocessorTXml: manifestPreprocessorTXml
+          },
+          // shaka-player 5.2 stopped defaulting to sequence mode. Without it, HLS segments that
+          // restart their timestamps after a discontinuity get appended at the wrong position
+          hls: {
+            sequenceMode: true
           },
         },
         abrFactory: () => new AutoQualityAbrManager(preferredCodecs, decodingAttributes, (videoIds) => {
@@ -3246,7 +3249,10 @@ export default defineComponent({
           // Android rotation is owned by the native orientation preference.
           // A second WebView lock races it and ignores portrait-only fullscreen.
           forceLandscapeOnFullscreen: !(process.env.IS_CAPACITOR && !process.env.IS_IOS),
-          playbackRates: playbackRates.value,
+          playbackRateSliderMax: maxVideoPlaybackRate.value,
+          playbackRateSliderMin: videoPlaybackRateInterval.value,
+          playbackRateSliderStep: videoPlaybackRateInterval.value,
+          playbackRates: PLAYBACK_RATE_PRESETS,
           tapSeekDistance: defaultSkipInterval.value,
 
           // we have our own ones (shaka-player's ones are quite limited)
@@ -3883,6 +3889,20 @@ export default defineComponent({
       if (event.chapterX != null) showChapterPreview(seekBarContainer, event.time, event.chapterX)
     }
 
+    /**
+     * Shaka previews keyboard seeks on a timer it starts on keydown, replacing the tooltip text.
+     * Run after it, so the labels stay.
+     * @param {KeyboardEvent} event
+     */
+    function handleSeekBarKeyDown(event) {
+      const seekBarContainer = event.currentTarget.closest('.shaka-seek-bar-container')
+      setTimeout(() => {
+        const previous = seekBarTooltipLabels.get(seekBarContainer?.querySelector('.shaka-player-ui-thumbnail-time'))
+        if (!player || !previous) return
+        updateSeekBarTooltip(seekBarContainer, Number(event.target.value), previous.secondsPerPixel)
+      })
+    }
+
     function updateSeekBarTooltip(seekBarContainer, hoverTime, secondsPerPixel) {
       const thumbnailTime = seekBarContainer.querySelector('.shaka-player-ui-thumbnail-time')
       if (!thumbnailTime) return
@@ -3982,6 +4002,9 @@ export default defineComponent({
 
       seekBarContainer.removeEventListener('mousemove', handleSeekBarTooltipMouseMove)
       seekBarContainer.addEventListener('mousemove', handleSeekBarTooltipMouseMove)
+      const seekBar = seekBarContainer.querySelector('.shaka-seek-bar')
+      seekBar?.removeEventListener('keydown', handleSeekBarKeyDown)
+      seekBar?.addEventListener('keydown', handleSeekBarKeyDown)
       const controls = ui.getControls()
       controls.removeEventListener('seekbarvaluechange', handleSeekBarValueChange)
       controls.addEventListener('seekbarvaluechange', handleSeekBarValueChange)
@@ -8619,10 +8642,35 @@ export default defineComponent({
     }
 
     /**
-     * @param {number} step
+     * @param {number} delta
+     * @param {boolean} snapToClosestInterval Whether to move along the playback rate slider's interval steps
      */
-    function changePlayBackRate(step) {
-      applyPlaybackRate(getCurrentPlaybackRate() + step)
+    function changePlayBackRate(delta, snapToClosestInterval = false) {
+      const currentPlaybackRate = getCurrentPlaybackRate() ?? NORMAL_PLAYBACK_RATE
+
+      if (!snapToClosestInterval) {
+        applyPlaybackRate(currentPlaybackRate + delta)
+        return
+      }
+
+      applyPlaybackRate(getSteppedPlaybackRate(currentPlaybackRate, delta))
+    }
+
+    /**
+     * Moves along the playback rate slider's interval steps, like its - and + buttons.
+     * @param {number} currentPlaybackRate
+     * @param {number} delta
+     * @returns {number}
+     */
+    function getSteppedPlaybackRate(currentPlaybackRate, delta) {
+      // Modified from https://github.com/shaka-project/shaka-player/blob/v5.3.2/ui/playback_rate_selection.js#L206-L221
+      // Rates between two steps snap towards the direction of the change,
+      // so the next step is never skipped.
+      const step = videoPlaybackRateInterval.value
+      const snapped = Math.round(currentPlaybackRate / step + (delta < 0 ? 0.001 : -0.001)) * step
+      // Eliminate floating-point noise (e.g. 0.05 * 20 → 1.0000000000000002).
+      const next = parseFloat((Math.round((snapped + delta) / step) * step).toPrecision(10))
+      return Math.max(step, Math.min(maxVideoPlaybackRate.value, next))
     }
 
     /**
@@ -9020,13 +9068,13 @@ export default defineComponent({
         case matches(KeyboardShortcuts.VIDEO_PLAYER.PLAYBACK.DECREASE_VIDEO_SPEED_ALT):
           // Decrease playback rate by user configured interval
           event.preventDefault()
-          changePlayBackRate(-videoPlaybackRateInterval.value)
+          changePlayBackRate(-videoPlaybackRateInterval.value, true)
           break
         case matches(KeyboardShortcuts.VIDEO_PLAYER.PLAYBACK.INCREASE_VIDEO_SPEED):
         case matches(KeyboardShortcuts.VIDEO_PLAYER.PLAYBACK.INCREASE_VIDEO_SPEED_ALT):
           // Increase playback rate by user configured interval
           event.preventDefault()
-          changePlayBackRate(videoPlaybackRateInterval.value)
+          changePlayBackRate(videoPlaybackRateInterval.value, true)
           break
         case matches(KeyboardShortcuts.VIDEO_PLAYER.PLAYBACK.TOGGLE_NORMAL_PLAYBACK_SPEED):
           // Toggle between 1x and the previous playback speed
@@ -9703,19 +9751,15 @@ export default defineComponent({
       if (hasLoaded.value || !container.value) return
       const rate = getCurrentPlaybackRate()
       for (const menu of container.value.querySelectorAll('.shaka-playback-rates')) {
-        menu.querySelector('.shaka-ui-icon.shaka-chosen-item')?.remove()
-        for (const button of menu.querySelectorAll('button:not(.shaka-back-to-overflow-button)')) {
-          const label = button.querySelector('span')
-          const selected = Math.abs(Number.parseFloat(label.textContent) - rate) < 0.01
-          button.ariaSelected = String(selected)
-          label.classList.toggle('shaka-chosen-item', selected)
-          if (selected) {
-            const icon = new shaka.ui.Icon(null, PlayerIcons.DONE_FILLED).getSvgElement()
-            icon.classList.add('shaka-chosen-item')
-            icon.ariaHidden = 'true'
-            button.appendChild(icon)
-          }
+        for (const button of menu.querySelectorAll('.shaka-playback-rate-preset-btn')) {
+          const selected = Math.abs(Number.parseFloat(button.dataset.rate) - rate) < 0.01
+          button.ariaChecked = String(selected)
+          button.classList.toggle('shaka-chosen-item', selected)
         }
+        const slider = menu.querySelector('.shaka-playback-rate-slider')
+        if (slider) slider.value = String(rate)
+        const value = menu.querySelector('.shaka-playback-rate-value')
+        if (value) value.textContent = `${rate.toFixed(2)}x`
       }
       for (const button of container.value.querySelectorAll('.shaka-playbackrate-button')) {
         button.setAttribute('shaka-status', `${rate}x`)
@@ -9726,41 +9770,82 @@ export default defineComponent({
     }
 
     /**
+     * @param {EventTarget | null} target
+     * @returns {boolean}
+     */
+    function isPlayerMenuTarget(target) {
+      return isActiveTab.value && target instanceof Element && !!container.value?.contains(target)
+    }
+
+    function markPlaybackRateUserSet() {
+      playbackRateUserSet = true
+      setTimeout(() => {
+        if (!player) {
+          return
+        }
+
+        emit('playback-rate-user-set', player.getPlaybackRate())
+      }, 10)
+    }
+
+    /**
      * @param {MouseEvent} event
      */
     function handlePlaybackRateMenuClick(event) {
       const target = event.target
-      if (!isActiveTab.value || !(target instanceof Element) || !container.value?.contains(target)) {
+      if (!isPlayerMenuTarget(target)) {
         return
       }
-      const playbackRatesContainer = target.closest('.shaka-playback-rates')
 
-      if (playbackRatesContainer) {
-        const button = target.closest('button')
+      const button = target.closest('.shaka-playback-rates :is(.shaka-playback-rate-preset-btn, .shaka-playback-rate-step-btn)')
+      if (!button) {
+        return
+      }
 
-        if (button && !button.classList.contains('shaka-back-to-overflow-button')) {
-          if (!hasLoaded.value || pendingPlaybackRateRestore !== null) {
-            const rate = normalizePlaybackRate(Number.parseFloat(button.querySelector('span')?.textContent ?? ''))
-            if (rate !== null) {
-              event.preventDefault()
-              event.stopPropagation()
-              setPlaybackRate(rate)
-              ui.getControls().hideSettingsMenus()
-            }
-            return
-          }
-          playbackRateUserSet = true
-          setTimeout(() => {
-            if (!player) {
-              return
-            }
+      if (hasLoaded.value && pendingPlaybackRateRestore === null) {
+        markPlaybackRateUserSet()
+        return
+      }
 
-            emit('playback-rate-user-set', player.getPlaybackRate())
-          }, 10)
+      event.preventDefault()
+      event.stopPropagation()
+
+      if (button.classList.contains('shaka-playback-rate-preset-btn')) {
+        const rate = normalizePlaybackRate(Number.parseFloat(button.dataset.rate))
+        if (rate !== null) {
+          setPlaybackRate(rate)
+          ui.getControls().hideSettingsMenus()
         }
+      } else if (!button.disabled) {
+        const interval = videoPlaybackRateInterval.value
+        const delta = button === button.parentElement.querySelector('.shaka-playback-rate-step-btn') ? -interval : interval
+        setPlaybackRate(getSteppedPlaybackRate(getCurrentPlaybackRate() ?? NORMAL_PLAYBACK_RATE, delta))
       }
     }
 
+    /**
+     * @param {Event} event
+     */
+    function handlePlaybackRateSliderInput(event) {
+      const target = event.target
+      if (!isPlayerMenuTarget(target) || !target.matches('.shaka-playback-rates .shaka-playback-rate-slider')) {
+        return
+      }
+
+      if (hasLoaded.value && pendingPlaybackRateRestore === null) {
+        if (event.type === 'change') {
+          markPlaybackRateUserSet()
+        }
+        return
+      }
+
+      // Shaka's rate controller may not exist yet, so handle the value ourselves.
+      event.stopPropagation()
+      const rate = normalizePlaybackRate(Number.parseFloat(target.value))
+      if (rate !== null) {
+        setPlaybackRate(rate)
+      }
+    }
     /**
      * @param {MouseEvent} event
      */
@@ -10027,6 +10112,8 @@ export default defineComponent({
       window.addEventListener('opentubex:android-window-focus', restoreAndroidStatusBarVisibility)
       // Use event delegation on document with capture phase to catch events before shaka-no-propagation stops them from bubbling
       document.addEventListener('click', handlePlaybackRateMenuClick, true)
+      document.addEventListener('input', handlePlaybackRateSliderInput, true)
+      document.addEventListener('change', handlePlaybackRateSliderInput, true)
       document.addEventListener('click', handleQualityMenuClick, true)
 
       // Set up IPC listener for exit fullscreen when tab becomes inactive (Electron only)
@@ -10727,6 +10814,8 @@ export default defineComponent({
       document.removeEventListener('fullscreenchange', fullscreenChangeHandler)
       window.removeEventListener('opentubex:android-window-focus', restoreAndroidStatusBarVisibility)
       document.removeEventListener('click', handlePlaybackRateMenuClick, true)
+      document.removeEventListener('input', handlePlaybackRateSliderInput, true)
+      document.removeEventListener('change', handlePlaybackRateSliderInput, true)
       document.removeEventListener('click', handleQualityMenuClick, true)
       window.removeEventListener('blur', handleTemporaryPlaybackRateFocusLoss)
       window.removeEventListener('blur', handleSeekBarWindowBlur)

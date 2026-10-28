@@ -648,6 +648,8 @@ Settings:
         Destructive pressed: Καταστροφική ενέργεια κατά το πάτημα
         Text and icons on destructive actions: Κείμενο και εικονίδια καταστροφικών ενεργειών
   Player Settings:
+    Default Media Format:
+      Default Media Format: 'Προεπιλεγμένη μορφή πολυμέσων'
     Buffering:
       Buffering: Προσωρινή αποθήκευση
       Description: Επιλέξτε πόσο βίντεο φορτώνει εκ των προτέρων και διατηρεί φορτωμένο το πρόγραμμα αναπαραγωγής.

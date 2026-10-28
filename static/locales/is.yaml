@@ -104,6 +104,8 @@ Subscriptions:
   All Subscription Tabs Hidden: Allir áskriftaflipar eru faldir. Til að sjá efni hér, skaltu gera einhverja flipa sýnilega í "{subsection}" hlutanum í "{settingsSection}".
   Load More Posts: Hlaða inn fleiri færslum
   Empty Posts: Rásirnar sem þú ert áskrifandi að eru ekki með neinar færslur.
+  Posts:
+    RSS Message: YouTube býður ekki upp á RSS-strauma fyrir færslur. Afvirktu stillinguna "{rssSetting}" til að skoða færslur eða virktu stillinguna "{hideSetting}" til að fela þennan flipa.
 More: 'Meira'
 Trending:
   Trending: 'Í umræðunni'
@@ -197,6 +199,7 @@ User Playlists:
   Export list of URLs: Flytja út lista með vefslóðum
   Move Video to the Top: Færa myndskeið efst
   Move Video to the Bottom: Færa myndskeið neðst
+  This playlist is private or does not exist.: Þessi spilunarlisti er lokaður eða ekki tiltækur.
 History:
   # On History Page
   History: 'Áhorf'
@@ -384,8 +387,7 @@ Settings:
     Enable Theatre Mode by Default: 'Sjálfgefið virkja bíóham (theater mode)'
     Default Volume: 'Sjálfgefinn hljóðstyrkur'
     Default Playback Rate: 'Sjálfgefinn afspilunarhraði'
-    Default Video Format:
-      Default Video Format: 'Sjálfgefið skráasnið myndskeiða'
+    Default Media Format:
       Dash Formats: 'DASH-skráasnið'
       Legacy Formats: 'Eldri skráasnið'
       Audio Formats: 'Hljóðskráasnið'
@@ -969,7 +971,7 @@ Tooltips:
     Open Deep Links In New Window: Slóðir sem beint er til OpenTubeX, til dæmis með endurbeiningum vafraviðbóta eða skipanalínuviðföngum, verða opnaðar í nýjum glugga.
   Player Settings:
     Proxy Videos Through Invidious: 'Mun tengjast við Invidious til að miðla myndskeiðum í stað þess að tengjast beint við YouTube.'
-    Default Video Format: 'Stillu skráasniðin sem notuð eru við afspilun myndskeiða. DASH-snið (Dynamic Adaptive Streaming over HTTP) er hægt að spila í meiri gæðum. Eldri snið takmarkast við 360p en nota minni bandbreidd. Hljóðsnið eru streymi einungis með hljóði.'
+    Default Media Format: 'Stillu skráasniðin sem notuð eru við afspilun myndskeiða. DASH-snið (Dynamic Adaptive Streaming over HTTP) er hægt að spila í meiri gæðum. Eldri snið takmarkast við 360p en nota minni bandbreidd. Hljóðsnið eru streymi einungis með hljóði.'
     Scroll Playback Rate Over Video Player: Á meðan bendillinn er yfir myndspilaranum, ýttu og haltu niðri Ctrl-lyklinum ('Command' slaufulykill á Mac) og skrunaðu með músarhjólinu áfram eða afturábak til að stýra hraða afspilunar. Ýttu og haltu niðri Ctrl-lyklinum ('Command' slaufulykill á Mac) og smelltu með vinstri músarhnappnum til að snúa aftur í sjálfgefinn hraða (1x nema ef því hefur verið breytt í stillingunum).
     Skip by Scrolling Over Video Player: Nota skrunhjólið til að fletta í gegnum myndskeið, svipað og í MPV.
   Subscription Settings:

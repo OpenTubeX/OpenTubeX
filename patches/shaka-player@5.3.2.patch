@@ -1,0 +1,265 @@
+diff --git a/dist/shaka-player.ui-es2021.js b/dist/shaka-player.ui-es2021.js
+index de6cc053c83ff44f7442a64dedd19d3e57818360..f9528705a35519bf4e58f50083525295bf01e78d 100644
+--- a/dist/shaka-player.ui-es2021.js
++++ b/dist/shaka-player.ui-es2021.js
+@@ -1715,11 +1715,11 @@ b&&b.isLinear()||lO(this.h,a.seekOffset||c);break;case "seekto":if(a.seekTime==n
+ 1);break;case "skipad":b&&b.skip()}}};x("shaka.ui.MediaSession",nO);nO.prototype.commonActionHandler=nO.prototype.Li;nO.prototype.addMediaSessionHandler=nO.prototype.gb;nO.prototype.setupChapters=nO.prototype.Oj;nO.prototype.setupPoster=nO.prototype.dg;nO.prototype.setupAlbum=nO.prototype.Mj;nO.prototype.setupArtist=nO.prototype.Nj;nO.prototype.setupTitle=nO.prototype.He;nO.prototype.release=nO.prototype.release;nO.prototype.configure=nO.prototype.configure;function oO(a,b){a.bar.value=a.H(b.clientX)}function pO(a,b){b.preventDefault();a.bar.value=a.H(b.changedTouches[0].clientX)}
+ var qO=class extends GN{constructor(a,b,c,d,e=!1){super(a,b);this.container=U("div");this.container.classList.add("shaka-range-container");this.container.classList.add(...c);this.A=this.i=!1;this.bar=document.createElement("input");this.F=new Se(()=>{this.onChangeEnd();this.i=!1});this.bar.classList.add("shaka-range-element");this.bar.classList.add(...d);this.bar.type="range";this.bar.step="any";this.bar.min="0";this.bar.max="1";this.bar.value="0";this.bar.disabled=!this.controls.Ha();this.container.appendChild(this.bar);
+ this.parent.appendChild(this.container);this.U=new Se(()=>{this.bar.disabled=!1});this.eventManager.B(this.controls,"showingui",()=>{this.U.aa(0)});this.eventManager.B(this.controls,"hidingui",()=>{this.U.stop();document.activeElement!=this.bar&&(this.bar.disabled=!0)});this.eventManager.B(this.bar,"mousedown",f=>{!this.bar.disabled&&this.controls.Ha()&&(f.preventDefault(),this.bar.focus(),this.F.stop(),this.A=this.i=!0,oO(this,f),this.onChangeStart(),this.onChange(),f.stopPropagation())});this.eventManager.B(document,
+-"mousemove",f=>{this.A&&(oO(this,f),this.onChange())});this.eventManager.B(document,"mouseup",f=>{this.A&&(this.A=!1,this.i&&(this.i=!1,oO(this,f),this.onChangeEnd()))});this.eventManager.B(this.bar,"input",()=>{this.onChange()});navigator.maxTouchPoints>0&&(this.eventManager.B(this.bar,"touchstart",f=>{!this.bar.disabled&&this.controls.Ha()&&(this.F.stop(),this.i=!0,pO(this,f),this.onChangeStart(!0),this.onChange(),f.stopPropagation())}),this.eventManager.B(this.bar,"touchmove",f=>{this.i&&(pO(this,
++"mousemove",f=>{this.A&&(oO(this,f),this.onChange())});this.eventManager.B(document,"mouseup",f=>{this.A&&(this.A=!1,f.target!==this.bar&&(()=>{const ftDragClick=g=>{g.stopPropagation()};window.addEventListener("click",ftDragClick,{capture:!0,once:!0});setTimeout(()=>window.removeEventListener("click",ftDragClick,!0))})(),this.i&&(this.i=!1,oO(this,f),this.onChangeEnd()))});this.eventManager.B(this.bar,"input",()=>{this.onChange()});navigator.maxTouchPoints>0&&(this.eventManager.B(this.bar,"touchstart",f=>{!this.bar.disabled&&this.controls.Ha()&&(this.F.stop(),this.i=!0,pO(this,f),this.onChangeStart(!0),this.onChange(),f.stopPropagation())}),this.eventManager.B(this.bar,"touchmove",f=>{this.i&&(pO(this,
+ f),this.onChange(),f.stopPropagation())}),this.eventManager.ia(this.bar,["touchend","touchcancel"],f=>{this.i&&(this.i=!1,pO(this,f),this.onChangeEnd(),f.stopPropagation())}));this.eventManager.B(this.bar,"mouseup",f=>{this.i&&(this.A=this.i=!1,oO(this,f),this.onChangeEnd(),f.stopPropagation())});this.eventManager.B(this.bar,"blur",()=>{this.i&&(this.A=this.i=!1,this.onChangeEnd());this.controls.Ha()||(this.bar.disabled=!0)});this.eventManager.B(this.bar,"contextmenu",f=>{f.preventDefault();f.stopPropagation()});
+ e&&this.eventManager.B(this.container,"wheel",f=>{if(!f.ctrlKey&&!f.metaKey){f.preventDefault();var g=parseFloat(this.bar.min),h=parseFloat(this.bar.max),k=parseFloat(this.bar.step)||1;f=this.getValue()+(f.deltaY>0?-k:k);f=Math.max(g,Math.min(h,f));this.setValue(f);this.onChange()}})}release(){this.F&&(this.F.stop(),this.F=null);super.release()}setRange(a,b){this.bar.min=a;this.bar.max=b}setStep(a){this.bar.step=a}getMin(){return parseFloat(this.bar.min)}getMax(){return parseFloat(this.bar.max)}setBackground(a){this.container.style.background=
+ a}onChangeStart(){}onChange(){}onChangeEnd(){}changeTo(a){this.i||(this.i=!0,this.onChangeStart());var b=parseFloat(this.bar.min),c=parseFloat(this.bar.max);this.bar.value=a>c?c:a<b?b:a;this.onChange();this.F.aa(.5)}endMouseInteraction(){this.A&&(this.i=this.A=!1,this.onChangeEnd())}getValue(){return parseFloat(this.bar.value)}setValue(a){this.i||(this.bar.value=a)}H(a){var b=this.bar.getBoundingClientRect(),c=parseFloat(this.bar.min),d=parseFloat(this.bar.max),e=parseFloat(this.bar.step)||1,f=b.left+
+-6;b=b.right-6;a=c+(Math.max(f,Math.min(b,a))-f)/(b-f)*(d-c);a=Math.round((a-c)/e)*e+c;return a=Math.min(d,Math.max(c,a))}};x("shaka.ui.RangeElement",qO);qO.prototype.setValue=qO.prototype.setValue;qO.prototype.getValue=qO.prototype.getValue;qO.prototype.endMouseInteraction=qO.prototype.endMouseInteraction;qO.prototype.changeTo=qO.prototype.changeTo;qO.prototype.onChangeEnd=qO.prototype.onChangeEnd;qO.prototype.onChange=qO.prototype.onChange;qO.prototype.onChangeStart=qO.prototype.onChangeStart;
++6;b=b.right-6;a=c+(Math.max(f,Math.min(b,a))-f)/(b-f)*(d-c);this.bar.step!="any"&&(a=Math.round((a-c)/e)*e+c);return a=Math.min(d,Math.max(c,a))}};x("shaka.ui.RangeElement",qO);qO.prototype.setValue=qO.prototype.setValue;qO.prototype.getValue=qO.prototype.getValue;qO.prototype.endMouseInteraction=qO.prototype.endMouseInteraction;qO.prototype.changeTo=qO.prototype.changeTo;qO.prototype.onChangeEnd=qO.prototype.onChangeEnd;qO.prototype.onChange=qO.prototype.onChange;qO.prototype.onChangeStart=qO.prototype.onChangeStart;
+ qO.prototype.setBackground=qO.prototype.setBackground;qO.prototype.getMax=qO.prototype.getMax;qO.prototype.getMin=qO.prototype.getMin;qO.prototype.setStep=qO.prototype.setStep;qO.prototype.setRange=qO.prototype.setRange;function rO(a){if(a.C.length){var b=a.player.ya(),c=b.end-b.start,d=[],e=a.I.seekBarColors.adBreaks,f=!1;for(let g of a.C)if(g.start==-1&&!g.end)f=!0;else if(!g.end&&g.start>=b.start||typeof g.end=="number"&&g.end>b.start){let h=(Math.max(g.start,b.start)-b.start)/c||0,k=h+.01;g.end&&(k=(g.end-b.start)/c||0);d.push({position:h*100+"%",width:(k-h)*100+"%"})}f&&d.push({position:"99%",width:"1%"});a.L.style.background=sO(d,e)}else a.L.style.background="transparent",a.K.stop()}
+ function tO(a){var b=a.I.seekBarColors.chapters,c=a.controls.I;if(c.length&&b&&b!=="transparent"){var d=a.player.ya(),e=d.end-d.start;if(e<5)e<=0?a.o.aa(.1):(a.D.style.background="transparent",a.o?.stop());else{e=new Set;for(let f of c)f.startTime<d.start||f.startTime>d.end||(f.startTime>d.start&&e.add(f.startTime),f.endTime&&f.endTime<d.end-1&&e.add(f.endTime));if(e.size){c=[];for(let f of Array.from(e).sort((g,h)=>g-h)){d=uO(a,f);if(d==null){a.o.aa(.1);return}c.push({position:d-1+"px",width:"2px"})}a.D.style.background=
+ sO(c,b)}else a.D.style.background="transparent",a.o?.stop()}}else a.D.style.background="transparent",a.o?.stop()}function vO(a){a.l.style.visibility="hidden"}function wO(a,b){var c=uO(a,b);c!=null&&xO(a,c,b)}function yO(a){var b=a.player.ya();b=b.end-b.start;return a.player.va()&&(b<5||!isFinite(b))?!1:a.ad==null||!a.ad.isLinear()}function zO(a){var b=()=>{rO(a);var c=a.player.ya();c=c.end-c.start;a.player.va()&&c>5&&a.K.Ia(.25)};b();a.player.we()||a.eventManager.Fa(a.player,"loaded",b)}
+@@ -1727,8 +1727,8 @@ function sO(a,b){return a.length&&b&&b!=="transparent"?a.map(({position:c,width:
+ function uO(a,b,c){c=c||a.bar.getBoundingClientRect();var d=parseFloat(a.bar.min);a=parseFloat(a.bar.max);return c.width<=0||a<=d?null:(b-d)/(a-d)*(c.width-12)+6}
+ async function xO(a,b,c){c<0&&(c=0);var d=a.bar.offsetWidth,e=!1;a.C.length&&(e=a.C.some(q=>q.end?c>=q.start&&c<=q.end:!1));var f=a.player.ya(),g=Math.max(Math.ceil(f.start),Math.min(Math.floor(f.end),c));if(a.player.va()){f=f.end-c;var h=f<1?a.localization.resolve("LIVE"):"-"+QN(f,f>=3600)}else h=QN(c,c>=3600);(f=AO(a,c))?a.O.textContent=h+" \u00b7 "+f.title:a.O.textContent=h;h=a.player.oe().length>0;var k=f&&f.images.length>0,l=!e&&(h||k);e=Math.max(150,d*.15);a.j.style.width=(a.l.classList.contains("portrait-thumbnail")?
+ e/2:e)+"px";a.j.style.display=l?"":"none";a.l.classList.toggle("time-only",!l);a.l.style.left="0";if(a.$)a.l.style.transform="translateX(clamp(0px, calc("+b+"px - 50%), calc("+d+"px - 100%)))";else{let q=a.l.clientWidth;a.l.style.left=Math.min(d-q,Math.max(0,b-q/2))+"px"}a.l.style.visibility="visible";if(l){a.j.style.height||(b=16/9,(d=a.player.getVideoTracks().find(q=>q.active))&&d.width&&d.height&&(b=d.width/d.height),a.j.style.height=Math.floor(a.j.clientWidth/b)+"px");var m;k&&(m=BO(f));h&&(m=
+-await a.player.gh(null,g)??m);if(m){g=m.width<m.height;a.l.classList.toggle("portrait-thumbnail",g);a.j.style.width=(g?e/2:e)+"px";var n=m.uris[0].split("#xywh=")[0];if(!a.G||n!==a.G.uris[0].split("#xywh=")[0]||m.startByte!=a.G.startByte||m.endByte!=a.G.endByte){a.G=m;a.m&&(a.m.abort(),a.m=null);if(m.codecs=="mjpg"||n.startsWith("offline:")){a.h.src='data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg"/>';try{var p=fo(m.uris,m.startByte,m.endByte,a.player.getConfiguration().streaming.retryParameters);
+-a.m=a.player.kb().request(Ag,p,{type:1});var r=await a.m.promise;a.m=null;n=SN(m,r)}catch(q){if(q.code==7001)return;throw q;}}try{a.j.removeChild(a.h)}catch(q){}a.h=U("img");a.h.alt="";a.h.classList.add("shaka-player-ui-thumbnail-image");a.h.draggable=!1;a.h.src=n;a.h.onload=()=>{n.startsWith("blob:")&&URL.revokeObjectURL(n)};a.j.insertBefore(a.h,a.j.firstChild)}p=a.j.clientWidth;r=p/m.width;m.imageHeight?a.h.height=m.imageHeight:m.sprite||(a.h.style.height="100%",a.h.style.objectFit="contain");m.imageWidth?
++await a.player.gh(null,g)??m);if(m){const ftSheet=m.sprite||m.imageWidth>m.width||m.imageHeight>m.height||m.positionX!=0||m.positionY!=0;g=m.width<m.height;a.l.classList.toggle("portrait-thumbnail",g);a.j.style.width=(g?e/2:e)+"px";var n=m.uris[0].split("#xywh=")[0];if(!a.G||n!==a.G.uris[0].split("#xywh=")[0]||m.startByte!=a.G.startByte||m.endByte!=a.G.endByte){a.G=m;a.m&&(a.m.abort(),a.m=null);if(m.codecs=="mjpg"||n.startsWith("offline:")){a.h.src='data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg"/>';try{var p=fo(m.uris,m.startByte,m.endByte,a.player.getConfiguration().streaming.retryParameters);
++a.m=a.player.kb().request(Ag,p,{type:1});var r=await a.m.promise;a.m=null;n=SN(m,r)}catch(q){if(q.code==7001)return;throw q;}}try{a.j.removeChild(a.h)}catch(q){}a.h=U("img");const ftImg=a.h;a.h.alt="";a.h.classList.add("shaka-player-ui-thumbnail-image");a.h.draggable=!1;a.h.src=n;a.h.onload=()=>{ftSheet&&ftImg.naturalWidth&&ftImg.naturalHeight&&(ftImg.width=ftImg.naturalWidth,ftImg.height=ftImg.naturalHeight);n.startsWith("blob:")&&URL.revokeObjectURL(n)};a.j.insertBefore(a.h,a.j.firstChild)}p=a.j.clientWidth;r=p/m.width;ftSheet&&a.h.naturalHeight?a.h.height=a.h.naturalHeight:m.imageHeight?a.h.height=m.imageHeight:m.sprite||(a.h.style.height="100%",a.h.style.objectFit="contain");ftSheet&&a.h.naturalWidth?a.h.width=a.h.naturalWidth:m.imageWidth?
+ a.h.width=m.imageWidth:m.sprite||(a.h.style.width="100%",a.h.style.objectFit="contain");!isNaN(r)&&isFinite(r)&&(a.h.style.left="-"+r*m.positionX+"px",a.h.style.top="-"+r*m.positionY+"px",a.h.style.transform="scale("+r+")",a.h.style.transformOrigin="left top");m=Math.floor(p*m.height/m.width);!isNaN(m)&&isFinite(m)&&(a.j.style.height=m+"px")}}}
+ function AO(a,b){a=a.controls.I;for(let c=0;c<a.length;c++){let d=a[c],e=c===a.length-1;if(d.startTime<=b&&(d.endTime>b||e&&b>=d.endTime))return d}return null}function BO(a){if(!a||!a.images.length)return null;var b=a.images[0];return{segment:null,imageHeight:b.height||0,imageWidth:b.width||0,height:b.height||0,positionX:0,positionY:0,startTime:a.startTime,duration:a.endTime-a.startTime,uris:[b.url],startByte:0,endByte:null,width:b.width||0,sprite:!1,mimeType:"",codecs:""}}
+ var CO=class extends qO{constructor(a,b){super(a,b,["shaka-seek-bar-container"],["shaka-seek-bar","shaka-no-propagation","shaka-show-controls-on-mouse-over"],!0);this.L=U("div");this.L.classList.add("shaka-ad-markers");this.container.insertBefore(this.L,this.container.childNodes[0]);this.D=U("div");this.D.classList.add("shaka-chapter-markers");this.container.insertBefore(this.D,this.container.childNodes[0]);this.I=this.controls.h;this.N=new Se(()=>{var c=this.getValue();this.player.va()||c==this.video.duration&&
+@@ -1987,7 +1987,7 @@ function YN(a,b=!1){a.Da&&!a.Ec()&&(a.sg()?a.se():a.Bb()?a.U.Ja():b&&a.Ha()?(b=a
+ function $N(a,b){if(a.C.duration)if(a.fb&&a.sg())a.fb=!1,b.cancelable&&b.preventDefault();else{var c=a.ra!=null;a.Ha()?YN(a,!0):(xP(a,b),ZN(a));b.cancelable&&b.preventDefault();c&&a.ra==null||(a.V=Date.now(),a.ra=Date.now())}}function kO(a){if(a.Da){if(a.o&&(a.o&&a.o.isPaused()?a.o.play():a.o&&a.o.pause(),a.o.isLinear()))return;a.C.duration&&(a.A&&a.A.endMouseInteraction(),a.C.paused&&!a.ea?(a.m.pd()&&(a.C.currentTime=a.m.ya().start),a.C.play()):a.C.pause())}}
+ function lO(a,b){yP(a);mO(a,a.Dc()+b)}function zP(a){a.Ha()?a.dispatchEvent(new D("showingui")):a.dispatchEvent(new D("hidingui"))}function AP(a,b=!0){var c=[],d=a.i.getElementsByClassName("shaka-text-container")[0],e=a.i.getElementsByClassName("shaka-speech-to-text-container")[0];d&&c.push(d);e&&c.push(e);if(c.length){d="0px";a.Ha()&&(d=a.T.clientHeight+"px");for(let f of c)b?f.style.bottom=d:(f.style.transition="none",f.style.bottom=d,f.getBoundingClientRect(),f.style.transition="")}}
+ function BP(a,b=null){a.l.classList.contains("shaka-keyboard-navigation")&&b&&rP(b)?b.focus():a.i.focus({preventScroll:!0})}
+-function yP(a){if(a.A)if(a.A.setValue(a.C.currentTime),a.A.update(),a.A.isShowing()){for(var b of a.M)b.classList.remove("shaka-low-position");b=a.J;b.classList.contains("shaka-tooltips-on")&&b.classList.remove("shaka-tooltips-low-position")}else{for(let c of a.M)c.classList.add("shaka-low-position");b=a.J;b.classList.contains("shaka-tooltips-on")&&b.classList.add("shaka-tooltips-low-position")}a.dispatchEvent(new D("timeandseekrangeupdated"))}
++function yP(a){if(a.A)if(a.A.setValue(a.C.currentTime),a.A.update(),a.A.isShowing()){for(var b of a.M)b.classList.toggle("shaka-low-position",!1);b=a.J;b.classList.contains("shaka-tooltips-on")&&b.classList.toggle("shaka-tooltips-low-position",!1)}else{for(let c of a.M)c.classList.toggle("shaka-low-position",!0);b=a.J;b.classList.contains("shaka-tooltips-on")&&b.classList.toggle("shaka-tooltips-low-position",!0)}a.dispatchEvent(new D("timeandseekrangeupdated"))}
+ function CP(a){a.j.B(a.m,"buffering",()=>{DP(a)});DP(a);a.j.B(window,"keydown",c=>{a.i.ownerDocument.defaultView==window&&EP(a,c)});var b=a.hb();a.j.B(document,"fullscreenchange",()=>{var c=a.hb();b&&!c&&FP(a);b=c});a.j.B(window,"click",()=>a.lc());a.j.ia(a.C,["play","pause"],()=>{GP(a)});a.j.B(a.i,"mousemove",c=>{xP(a,c)});navigator.maxTouchPoints>0&&a.j.ia(a.i,["touchmove","touchend"],c=>{xP(a,c)},{passive:!0});a.j.B(a.i,"mouseleave",()=>{a.V||a.W.Ja()});a.j.B(a.i,"wheel",c=>{xP(a,c)},{passive:!0});
+ a.j.B(a.F,"caststatuschanged",()=>{HP(a)});a.j.B(a.D,"vrstatuschanged",()=>{a.dispatchEvent(new D("vrstatuschanged"))});a.j.B(a.i,"focusout",c=>{c.relatedTarget||c.target==a.i||(a.Lb=c.target,a.uc.aa(0))});IP(a,a.i,()=>!a.h.enableKeyboardPlaybackControlsInWindow&&!a.hb());IP(a,window,()=>a.i.ownerDocument.defaultView==window&&(a.h.enableKeyboardPlaybackControlsInWindow||a.hb()));a.j.B(a.P,Uv,()=>{a.o=a.P.getCurrentAd();a.Pj();DP(a)});a.j.B(a.P,$v,()=>{a.o=null;a.cj();DP(a)});a.j.B(a.P,gw,c=>{a.wa=
+ c.cuepoints||[]});screen.orientation&&a.j.B(screen.orientation,"change",async()=>{await JP(a)})}function HP(a){var b=a.F.Va();a.dispatchEvent(new D("caststatuschanged",(new Map).set("newStatus",b)));b?a.l.getAttribute("casting")==null&&(a.l.setAttribute("casting","true"),zP(a)):a.l.getAttribute("casting")!=null&&(a.l.removeAttribute("casting"),zP(a))}
+@@ -1995,7 +1995,7 @@ async function KP(a){var b=[],c=a.m.Wi()||[],d=new Set(c.map(g=>za(g.language)))
+ async function LP(a){MP(a)?(screen.orientation&&screen.orientation.unlock(),await document.exitFullscreen()):(a=a.u,a.webkitSupportsFullscreen&&a.webkitExitFullscreen())}function NP(a){for(let b of a.L)b.release();a.L=[]}
+ function OP(a){a.l=U("div");a.l.classList.add("shaka-controls-container");a.i.appendChild(a.l);a.i.setAttribute("shaka-controls","true");navigator.maxTouchPoints>0&&(a.j.B(a.l,"touchstart",()=>{a.fb=!1}),a.j.B(a.l,"contextmenu",()=>{a.fb=!0}),a.j.B(a.l,"touchend",b=>{$N(a,b)}));a.j.B(a.l,"click",()=>{YN(a)});a.j.B(a.l,"dblclick",()=>{a.h.doubleClickForFullscreen&&a.Md()&&a.Je()})}
+ function PP(a){a.G=U("div");a.G.classList.add("shaka-client-side-ad-container");Y(a.G,!1);a.j.B(a.G,"click",()=>{YN(a)});a.i.appendChild(a.G);a.H=U("div");a.H.classList.add("shaka-server-side-ad-container");Y(a.H,!1);a.j.B(a.H,"click",()=>{YN(a)});a.i.appendChild(a.H)}
+-function xP(a,b){b.type=="mousemove"&&(a.l.classList.remove("shaka-keyboard-navigation"),GP(a));b.type=="touchstart"||b.type=="touchmove"||b.type=="touchend"||b.type=="keyup"?a.V=Date.now():a.V+1E3<Date.now()&&(a.V=null);a.V&&b.type=="mousemove"||(a.i.classList.remove("no-cursor"),a.vc=!0,a.U.stop(),a.Ha()||(yP(a),GP(a)),a.W.stop(),b.type!="touchend"&&b.type!="wheel"&&b.type!="keyup"&&a.V||a.W.aa(3))}function QP(a){return!!a.A&&a.A.isShowing()}function RP(a,b={}){a.N?.D(b)}
++function xP(a,b){b.type=="mousemove"&&(a.l.classList.remove("shaka-keyboard-navigation"),GP(a));b.type=="touchstart"||b.type=="touchmove"||b.type=="touchend"||b.type=="keyup"?a.V=Date.now():a.V+1E3<Date.now()&&(a.V=null);a.V&&b.type=="mousemove"||(a.i.classList.remove("no-cursor"),a.vc=!0,a.U.stop(),a.Ha()||(yP(a),GP(a)),a.W.stop(),b.type!="touchend"&&b.type!="wheel"&&b.type!="keyup"&&a.V||a.W.aa(Number(a.i.dataset.playingInterfaceHideDelay)||3))}function QP(a){return!!a.A&&a.A.isShowing()}function RP(a,b={}){a.N?.D(b)}
+ function MP(a){return!document.fullscreenEnabled||a.u.webkitSupportsFullscreen&&a.h.preferVideoFullScreenInVisionOS&&fb().h()=="APPLE_VR"?!1:!0}function SP(a){return"documentPictureInPicture"in window&&a.h.documentPictureInPicture.enabled}
+ async function TP(a){try{if(MP(a)){if(a.Od()&&(await a.Lc(),SP(a)&&await Ve(.05)),await a.h.fullScreenElement.requestFullscreen({navigationUI:"hide"}),a.h.forceLandscapeOnFullscreen&&screen.orientation)try{await screen.orientation.lock("landscape")}catch(b){}}else{let b=a.u;b.webkitSupportsFullscreen&&b.webkitEnterFullscreen()}}catch(b){a.dispatchEvent(new D("error",(new Map).set("detail",b)))}}
+ async function UP(a){if(window.documentPictureInPicture.window)window.documentPictureInPicture.window.close();else{var b=a.i,c=b.ownerDocument.activeElement,d=b.getBoundingClientRect(),e=await window.documentPictureInPicture.requestWindow({width:d.width,height:d.height,disallowReturnToOpener:a.h.documentPictureInPicture.disallowReturnToOpener,preferInitialWindowPlacement:a.h.documentPictureInPicture.preferInitialWindowPlacement});VP(e);d=b.parentNode||document.body;var f=U("div");f.classList.add("shaka-video-container");
+@@ -2022,16 +2022,16 @@ function iQ(a){return window.matchMedia("hover: hover").matches?a.Oc.some(b=>b.m
+ function XP(a,b){for(var c=a.i.ownerDocument.activeElement;c&&!a.M.some(d=>d==c);)c=c.parentElement;if(!c||c.classList.contains("shaka-hidden"))return!1;YP(a,b,c);return!0}
+ function YP(a,b,c,d=!1){var e=a.i.ownerDocument.activeElement;c=Array.from(c.querySelectorAll("button, input, select, textarea, a[href], [tabindex]")).filter(h=>h.tabIndex>=0&&rP(h));if(c.length){var f=c[0],g=c[c.length-1];d&&!c.some(h=>h==e)?(b.preventDefault(),a.$.has("Shift")?g.focus():f.focus()):a.$.has("Shift")?e==f&&(b.preventDefault(),g.focus()):e==g&&(b.preventDefault(),f.focus())}}
+ var Z=class extends ta{constructor(a,b,c,d,e){super();this.Da=!0;this.h=e;this.F=new Gz(c,a,this.h.castReceiverAppId,this.h.castAndroidReceiverCompatible);this.oa=null;this.Ra=!0;this.C=this.F.Id();this.u=c;this.m=this.F.wb();this.Na=a;this.i=b;this.jd=d;this.P=this.F.dc();this.Nc=this.m.Ub();this.Nc.setCustomPlayer(this.m);this.o=this.P.getCurrentAd();this.wa=[];this.I=[];this.A=null;this.ea=!1;this.M=[];this.ha=null;this.Kb=[];this.qb=null;this.Oc=[];this.vc=!1;this.W=new Se(()=>{this.h.showUIAlways||
+-this.h.showUIAlwaysOnAudioOnly&&this.m.mc()||(this.i.classList.add("no-cursor"),this.vc=!1,GP(this))});this.pb=new Se(()=>{this.h.showUIAlways||this.h.showUIAlwaysOnAudioOnly&&this.m.mc()||this.h.menuOpenUntilUserClosesIt&&this.Bb()||(this.l.removeAttribute("shown"),zP(this),AP(this),this.xa&&this.xa.gf(),this.U.aa(this.h.closeMenusDelay))});this.U=new Se(()=>{var f=this.i.ownerDocument.activeElement,g=this.M.some(h=>h.contains(f));for(let h of this.M)Y(h,!1);g&&BP(this,this.ha);this.dispatchEvent(new D("submenuclose"));
++this.h.showUIAlwaysOnAudioOnly&&this.m.mc()||(this.i.classList.add("no-cursor"),this.vc=!1,GP(this))});this.pb=new Se(()=>{this.h.showUIAlways||this.h.showUIAlwaysOnAudioOnly&&this.m.mc()||this.h.menuOpenUntilUserClosesIt&&(this.Bb()||this.sg())||(this.l.removeAttribute("shown"),zP(this),AP(this),this.xa&&this.xa.gf(),this.U.aa(this.h.closeMenusDelay))});this.U=new Se(()=>{var f=this.i.ownerDocument.activeElement,g=this.M.some(h=>h.contains(f));for(let h of this.M)Y(h,!1);g&&BP(this,this.ha);this.dispatchEvent(new D("submenuclose"));
+ this.N?.j();this.h.enableTooltips&&this.J.classList.add("shaka-tooltips-on");this.h.enableTooltips&&(this.O.classList.add("shaka-tooltips-on"),this.Wa?.classList.add("shaka-tooltips-on"))});this.qa=new Se(()=>{this.dj()});this.Lb=null;this.uc=new Se(()=>{var f=this.Lb;this.Lb=null;var g=this.i.ownerDocument.activeElement;!f||g&&g!=this.i.ownerDocument.body||rP(f)||BP(this)});this.xc=new Se(()=>{this.Ha()&&(yP(this),AP(this))});this.wc=new MutationObserver(f=>{var g=h=>h instanceof HTMLElement&&(h.classList.contains("shaka-text-container")||
+ h.classList.contains("shaka-speech-to-text-container"));f.some(h=>Array.from(h.addedNodes).some(g))&&AP(this,!1)});this.wc.observe(this.i,{childList:!0});this.ra=this.V=null;this.fb=!1;this.L=[];this.Wa=null;this.R=sP();this.N=new KO(this.Na,this.R);this.j=new ab;this.D=null;this.configure(this.h);CP(this);this.$=new Set;HP(this);this.xc.Ia(this.h.refreshTickInSeconds);this.j.B(this.R,"locale-updated",()=>{KP(this)});this.j.B(this.R,"locale-changed",f=>{f=f.locales[0];this.P.setLocale(f);this.i.setAttribute("lang",
+ f);KP(this)});this.P.setContainers(this.G,this.H);this.j.B(this.m,"textchanged",()=>{AP(this);var f=this.m.ab().find(g=>g.active);f&&(this.qb=f)});this.j.ia(this.m,["trackschanged","manifestupdated","loaded"],()=>{this.m.we()&&KP(this)});this.j.B(this.m,"unloading",f=>{this.o||(f=f.isSwitchingContent||!1,this.wa=[],this.qb=null,this.hb()&&!f&&LP(this),this.Od()&&!f&&this.Lc(),this.I.length&&(this.I=[],this.dispatchEvent(new D("chaptersupdated"))))});this.sa=new nO(this)}async destroy(a=!1){document.pictureInPictureElement==
+ this.u&&await document.exitPictureInPicture();this.N?.release();this.N=null;this.wc?.disconnect();this.wc=null;this.j?.release();this.j=null;this.W?.stop();this.W=null;this.pb?.stop();this.pb=null;this.U?.stop();this.U=null;this.qa?.stop();this.qa=null;this.uc?.stop();this.uc=null;this.xc?.stop();this.xc=null;this.D?.release();this.D=null;NP(this);this.l&&(this.i.removeChild(this.l),this.l=null);this.F&&(await this.F.destroy(a),this.F=null);this.K&&(this.i.removeChild(this.K),this.K=null);this.G&&
+-(this.i.removeChild(this.G),this.G=null);this.H&&(this.i.removeChild(this.H),this.H=null);this.Na&&(await this.Na.destroy(),this.Na=null);this.R=this.C=this.u=this.m=null;this.$.clear();this.sa&&(this.sa.release(),this.sa=null);super.release()}ck(a){this.Ra=a;HP(this)}Tl(){GP(this)}configure(a){this.h=a;this.N?.j();this.F.Ii(a.castReceiverAppId,a.castAndroidReceiverCompatible);this.A&&(this.A=null);this.xa&&(this.xa=null);this.D&&this.D.configure(a);this.l?(Hl(this.l),NP(this),this.Wa=null):(OP(this),
++(this.i.removeChild(this.G),this.G=null);this.H&&(this.i.removeChild(this.H),this.H=null);this.Na&&(await this.Na.destroy(),this.Na=null);this.R=this.C=this.u=this.m=null;this.$.clear();this.sa&&(this.sa.release(),this.sa=null);super.release()}ck(a){this.Ra=a;HP(this)}Tl(){GP(this)}configure(a){this.h=a;this.N?.j();this.F.Ii(a.castReceiverAppId,a.castAndroidReceiverCompatible);this.A&&(this.A=null);this.xa&&(this.xa=null);this.D&&this.D.configure(a);this.l?((()=>{for(const b of this.i.getElementsByClassName("shaka-no-propagation"))for(const c of ["click","dblclick","touchend"])this.j.Ma(b,c)})(),Hl(this.l),NP(this),this.Wa=null):(OP(this),
+ PP(this),this.D=new qP(this.l,this.jd,this.u,this.m,this.h,this));this.i.classList.add("shaka-video-container");this.i.hasAttribute("tabindex")||(this.i.tabIndex=-1);this.u.classList.add("shaka-video");$P(this);this.h.bigButtons.length&&aQ(this);this.h.showBufferingSpinner?this.K||bQ(this):this.K&&(this.i.removeChild(this.K),this.K=null);this.h.seekOnTaps&&(cQ(this),dQ(this));eQ(this);this.h.customContextMenu&&(this.xa=new XN(this.J,this),this.L.push(this.xa));this.M=Array.from(this.i.getElementsByClassName("shaka-settings-menu"));
+ this.M.push(...Array.from(this.i.getElementsByClassName("shaka-overflow-menu")));this.M.push(...Array.from(this.i.getElementsByClassName("shaka-sub-menu")));this.Kb=Array.from(this.i.getElementsByClassName("shaka-context-menu"));this.Oc=Array.from(this.i.getElementsByClassName("shaka-show-controls-on-mouse-over"));GP(this);a=this.i.getElementsByClassName("shaka-no-propagation");for(let b of a)this.j.ia(b,["click","dblclick"],c=>c.stopPropagation()),navigator.maxTouchPoints>0&&this.j.B(b,"touchend",
+ c=>{this.Ha()&&(xP(this,c),c.stopPropagation())});this.sa&&this.sa.configure(this.h)}$h(a){(this.Da=a)?(this.i.setAttribute("shaka-controls","true"),this.u.tabIndex=-1,this.u.controls=!1):this.i.removeAttribute("shaka-controls");GP(this)}Gj(a){this.u.controls=a;this.u.tabIndex=a?0:-1;a&&this.$h(!1)}Gm(a){this.oa=a}getAd(){return this.o}Gk(){return this.wa}Pk(){return this.I}Nk(){return this.F}Ok(){return this.oa}hl(){return this.R}Jd(){return this.i}Id(){return this.C}fl(){return this.u}wb(){return this.m}cl(){return this.Na}dc(){return this.P}Ub(){return this.Nc}ll(){return this.sa}Uk(){return this.l}xl(){return this.H}Qk(){return this.G}Rk(){return this.h}Pl(){return this.ea}bi(a){(this.ea=
+-a)?this.W.stop():this.W.aa(3)}Kl(){return this.Ra}Dc(){return this.A?this.A.getValue():this.C.currentTime}Jm(){Xf("setLastTouchEventTime","This method is no longer used.")}Bb(){return this.M.some(a=>!a.classList.contains("shaka-hidden"))}lc(){this.U.Ja()}sg(){return this.Kb.some(a=>!a.classList.contains("shaka-hidden"))}se(){for(let a of this.Kb)Y(a,!1);this.N?.j()}Md(){return this.F.Va()?!1:MP(this)||(!this.o||!this.o.isUsingAnotherMediaElement())&&this.u.webkitSupportsFullscreen?!0:!1}hb(){if(MP(this))return document.fullscreenElement?
++a)?this.W.stop():this.W.aa(Number(this.i.dataset.playingInterfaceHideDelay)||3)}Kl(){return this.Ra}Dc(){return this.A?this.A.getValue():this.C.currentTime}Jm(){Xf("setLastTouchEventTime","This method is no longer used.")}Bb(){return this.M.some(a=>!a.classList.contains("shaka-hidden"))}lc(){this.U.Ja()}sg(){return this.Kb.some(a=>!a.classList.contains("shaka-hidden"))}se(){for(let a of this.Kb)Y(a,!1);this.N?.j()}Md(){return this.F.Va()?!1:MP(this)||(!this.o||!this.o.isUsingAnotherMediaElement())&&this.u.webkitSupportsFullscreen?!0:!1}hb(){if(MP(this))return document.fullscreenElement?
+ document.fullscreenElement==this.h.fullScreenElement||!(!this.h.fullScreenElement||!this.h.fullScreenElement.contains(document.fullscreenElement)):!1;var a=this.u;return a.webkitSupportsFullscreen?a.webkitDisplayingFullscreen:!1}async Je(){this.hb()?await LP(this):await TP(this)}Cf(){return this.F.Va()?!1:document.pictureInPictureEnabled||SP(this)?!this.u.disablePictureInPicture:!1}Od(){return!!(window.documentPictureInPicture&&window.documentPictureInPicture.window||document.pictureInPictureElement)}async Lc(){try{SP(this)?
+ (this.hb()&&await LP(this),await UP(this)):document.pictureInPictureElement?await document.exitPictureInPicture():(this.hb()&&LP(this),await this.u.requestPictureInPicture())}catch(a){this.dispatchEvent(new D("error",(new Map).set("detail",a)))}}Pj(){Y(this.ka,!0);this.G&&this.G.hasChildNodes()&&Y(this.G,!0);this.H&&this.H.hasChildNodes()&&Y(this.H,!0);this.o.hasCustomClick()?this.l.setAttribute("ad-active","true"):this.l.removeAttribute("ad-active")}cj(){Y(this.ka,!1);Y(this.G,!1);Y(this.H,!1);this.l.removeAttribute("ad-active")}Ha(){return this.Da?
+ this.l.getAttribute("shown")!=null||this.l.getAttribute("casting")!=null:!1}df(){var a=!0;this.Ec()&&(a=!1);a&&this.F.Va()&&(a=!1);a&&(this.m.drmInfo()||this.m.mc())&&(a=!1);a&&this.o&&(a=!1);a&&this.m.Ka()&&(a=!1);return a}ji(a="png",b=1){if(this.df()){var c=`image/${a==="jpg"?"jpeg":a}`,d=document.createElement("canvas"),e=d.getContext("2d"),f=this.u;d.width=f.videoWidth;d.height=f.videoHeight;e.drawImage(f,0,0,d.width,d.height);b=d.toDataURL(c,b);c=document.createElement("a");c.href=b;c.download=
+@@ -2167,7 +2167,7 @@ tP("recenter_vr",new lS);async function mS(a,b=!1){if(a.controls.F.$e()&&a.contr
+ (await a.i.cancelWatchAvailability(a.j),a.j=-1);a.h.ariaPressed=a.i?.state=="connected"?"true":"false"}function nS(a){a.l||(a.i.state=="disconnected"?a.o.use(HN.CAST):a.o.use(HN.EXIT_CAST))}
+ var oS=class extends GN{constructor(a,b){super(a,b);a=fb();this.l=a.P();this.h=Dl();this.h.classList.add("shaka-remote-button");this.h.classList.add("shaka-tooltip");this.h.classList.add("shaka-no-propagation");this.h.ariaPressed="false";this.o=new KN(this.h,this.l?HN.AIRPLAY:HN.CAST);b=U("label");b.classList.add("shaka-overflow-button-label");b.classList.add("shaka-overflow-menu-only");this.u=U("span");b.appendChild(this.u);this.m=U("span");this.m.classList.add("shaka-current-selection-span");b.appendChild(this.m);
+ this.h.appendChild(b);this.parent.appendChild(this.h);this.j=-1;this.updateLocalizedStrings();Y(this.h,!1);if(this.i=Th(a,this.video))this.eventManager.B(this.controls,"caststatuschanged",()=>{mS(this)}),this.eventManager.B(this.h,"click",()=>{this.controls.Ha()&&this.i.prompt().catch(()=>{})}),this.eventManager.ia(this.i,["connect","connecting","disconnect"],()=>{mS(this);nS(this)}),this.eventManager.B(this.player,"loaded",()=>{mS(this)}),mS(this,!0),nS(this)}release(){this.i&&this.j!=-1&&this.i.cancelWatchAvailability(this.j).catch(()=>
+-{});super.release()}updateLocalizedStrings(){var a=this.l?this.localization.resolve("AIRPLAY"):this.localization.resolve("CAST");this.h.ariaLabel=a;this.u.textContent=a}checkAvailability(){mS(this,!0)}};x("shaka.ui.RemoteButton",oS);var pS=class{create(a,b){return new oS(a,b)}};lQ("remote",new pS);tP("remote",new pS);vP("remote",new pS);function qS(a){NN(a.menu);var b=0;b=a.player.mc()?rS(a):sS(a);var c=Dl();c.setAttribute("role","menuitemradio");c.setAttribute("aria-checked","false");c.classList.add("shaka-enable-abr-button");a.eventManager.B(c,"click",()=>{a.player.configure({abr:{enabled:!0}});qS(a)});a.l=U("span");a.l.textContent=a.localization.resolve("AUTO_QUALITY");c.appendChild(a.l);a.player.getConfiguration().abr.enabled&&(c.appendChild(ON()),RN(c,a.l),a.currentSelection.textContent=a.localization.resolve("AUTO_QUALITY"));
++{});super.release()}updateLocalizedStrings(){var a=this.l?this.localization.resolve("AIRPLAY"):this.localization.resolve("CAST");this.h.ariaLabel=a;this.u.textContent=a}checkAvailability(){mS(this,!0)}};x("shaka.ui.RemoteButton",oS);var pS=class{create(a,b){return new oS(a,b)}};lQ("remote",new pS);tP("remote",new pS);vP("remote",new pS);function qS(a){for(const b of a.menu.querySelectorAll(".explicit-resolution, .shaka-enable-abr-button"))a.eventManager.Ma(b,"click");NN(a.menu);var b=0;b=a.player.mc()?rS(a):sS(a);var c=Dl();c.setAttribute("role","menuitemradio");c.setAttribute("aria-checked","false");c.classList.add("shaka-enable-abr-button");a.eventManager.B(c,"click",()=>{a.player.configure({abr:{enabled:!0}});qS(a)});a.l=U("span");a.l.textContent=a.localization.resolve("AUTO_QUALITY");c.appendChild(a.l);a.player.getConfiguration().abr.enabled&&(c.appendChild(ON()),RN(c,a.l),a.currentSelection.textContent=a.localization.resolve("AUTO_QUALITY"));
+ a.button.setAttribute("shaka-status",a.currentSelection.textContent);a.menu.appendChild(c);MN(a.menu);a.controls.dispatchEvent(new D("resolutionselectionupdated"));a.updateLocalizedStrings();Y(a.button,b>0&&!a.isSubMenuOpened)}
+ function tS(a){var b=a.player.getConfiguration().abr.enabled;if(a.player.mc()){a.j.textContent="";a.j.style.display="none";a.h&&(a.h.textContent="",a.h.style.display="none");var c=a.player.Vb()||[],d=c.find(e=>e.active);d&&(b?(a.i.textContent=d.bandwidth?uS(a,d,c):"Unknown",a.i.style.display=""):a.i.style.display="none")}else c=a.player.getVideoTracks()||[],(d=c.find(e=>e.active))?(b?(a.i.textContent=d.height&&d.width?vS(a,d,c):d.bandwidth?wS(d.bandwidth):"Unknown",a.i.style.display=""):a.i.style.display=
+ "none",b=xS(a,d.width,d.height),a.j.textContent=b,a.j.style.display=b!==""?"":"none",a.h&&(a.h.textContent=b,a.h.style.display=b!==""?"":"none")):a.h&&(b=a.player.getStats(),b=xS(a,b.width,b.height),a.h.textContent=b,a.h.style.display=b!==""?"":"none")}function uS(a,b,c){var d=wS(b.bandwidth);if(a.controls.h.showAudioCodec){let e=f=>{var g="";f&&(g=qe(f).toUpperCase());return g?" "+g:g};c.some(f=>e(f.codecs)!=e(b.codecs))&&(d+=e(b.codecs))}return d}
+diff --git a/ui/controls.js b/ui/controls.js
+index e5ba02a18cbe4bca7b2edcc44c8ed768bdefa6ac..edb0fcf01b760cebae28dee9bef058f2866bd733 100644
+--- a/ui/controls.js
++++ b/ui/controls.js
+@@ -270,7 +270,8 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
+         return;
+       }
+       if (this.config_.menuOpenUntilUserClosesIt &&
+-          this.anySettingsMenusAreOpen()) {
++          (this.anySettingsMenusAreOpen() ||
++           this.anyContextMenusAreOpen())) {
+         return;
+       }
+       this.controlsContainer_.removeAttribute('shown');
+@@ -683,6 +684,15 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
+     }
+ 
+     if (this.controlsContainer_) {
++      // These bindings belong to the current layout, not the controls lifetime.
++      // Release them before replacing the DOM so old menu trees can be collected.
++      const oldElements = this.videoContainer_.getElementsByClassName(
++          'shaka-no-propagation');
++      for (const element of oldElements) {
++        for (const type of ['click', 'dblclick', 'touchend']) {
++          this.eventManager_.unlisten(element, type);
++        }
++      }
+       shaka.util.Dom.removeAllChildren(this.controlsContainer_);
+       this.releaseChildElements_();
+       this.bigButtonsContainer_ = null;
+@@ -957,7 +967,8 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
+     if (seeking) {
+       this.mouseStillTimer_.stop();
+     } else {
+-      this.mouseStillTimer_.tickAfter(/* seconds= */ 3);
++      this.mouseStillTimer_.tickAfter(/* seconds= */
++          Number(this.videoContainer_.dataset.playingInterfaceHideDelay) || 3);
+     }
+   }
+ 
+@@ -2098,7 +2109,8 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
+     if (event.type == 'touchend' ||
+         event.type == 'wheel' ||
+         event.type == 'keyup'|| !this.lastTouchEventTime_) {
+-      this.mouseStillTimer_.tickAfter(/* seconds= */ 3);
++      this.mouseStillTimer_.tickAfter(/* seconds= */
++          Number(this.videoContainer_.dataset.playingInterfaceHideDelay) || 3);
+     }
+   }
+ 
+@@ -2808,22 +2820,17 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
+       this.seekBar_.setValue(this.video_.currentTime);
+       this.seekBar_.update();
+ 
+-      if (this.seekBar_.isShowing()) {
+-        for (const menu of this.menus_) {
+-          menu.classList.remove('shaka-low-position');
+-        }
+-        const controlsButtonPanel = this.controlsButtonPanel_;
+-        if (controlsButtonPanel.classList.contains('shaka-tooltips-on')) {
+-          controlsButtonPanel.classList.remove('shaka-tooltips-low-position');
+-        }
+-      } else {
+-        for (const menu of this.menus_) {
+-          menu.classList.add('shaka-low-position');
+-        }
+-        const controlsButtonPanel = this.controlsButtonPanel_;
+-        if (controlsButtonPanel.classList.contains('shaka-tooltips-on')) {
+-          controlsButtonPanel.classList.add('shaka-tooltips-low-position');
+-        }
++      // This runs on every refresh tick. Unlike add() and remove(), toggle()
++      // with a force argument leaves an unchanged class attribute alone, so
++      // idle menus do not receive a mutation per tick.
++      const lowPosition = !this.seekBar_.isShowing();
++      for (const menu of this.menus_) {
++        menu.classList.toggle('shaka-low-position', lowPosition);
++      }
++      const controlsButtonPanel = this.controlsButtonPanel_;
++      if (controlsButtonPanel.classList.contains('shaka-tooltips-on')) {
++        controlsButtonPanel.classList.toggle(
++            'shaka-tooltips-low-position', lowPosition);
+       }
+     }
+ 
+diff --git a/ui/range_element.js b/ui/range_element.js
+index d85839a80edc90dad46acdc2b74b412efa5ff838..fa472411ca8783db233e4caae57c160808691550 100644
+--- a/ui/range_element.js
++++ b/ui/range_element.js
+@@ -125,6 +125,16 @@ shaka.ui.RangeElement = class extends shaka.ui.Element {
+     this.eventManager.listen(document, 'mouseup', (e) => {
+       if (this.isMouseChanging_) {
+         this.isMouseChanging_ = false;
++        // The mousedown default is prevented, so the browser does not capture
++        // the mouse for the range. Releasing it elsewhere then clicks their
++        // common ancestor, e.g. the controls container, which toggles playback.
++        if (e.target != this.bar) {
++          const suppressClick = (event) => event.stopPropagation();
++          window.addEventListener('click', suppressClick,
++              {capture: true, once: true});
++          setTimeout(() => window.removeEventListener(
++              'click', suppressClick, /* capture= */ true));
++        }
+         if (this.isChanging_) {
+           this.isChanging_ = false;
+           this.setBarValueForMouse_(e);
+@@ -385,8 +395,10 @@ shaka.ui.RangeElement = class extends shaka.ui.Element {
+     // Convert the percentage into a value within the input's range
+     let value = min + percent * (max - min);
+ 
+-    // Round the value to the nearest step
+-    value = Math.round((value - min) / step) * step + min;
++    // A continuous range must preserve sub-second seeking and hover positions.
++    if (this.bar.step != 'any') {
++      value = Math.round((value - min) / step) * step + min;
++    }
+ 
+     // Ensure the value stays within the min and max bounds
+     value = Math.min(max, Math.max(min, value));
+diff --git a/ui/resolution_selection.js b/ui/resolution_selection.js
+index 8ce1fc74b78213e67dc8a8ed94a33db8deab0ffd..68f452487ebdab3600f8a1d14d6ee448ef429632 100644
+--- a/ui/resolution_selection.js
++++ b/ui/resolution_selection.js
+@@ -187,6 +187,13 @@ shaka.ui.ResolutionSelection = class extends shaka.ui.SettingsMenu {
+ 
+   /** @private */
+   updateSelection_() {
++    // Release the event manager's references before discarding the choices.
++    // Track changes and submenu transitions rebuild this menu during playback.
++    for (const button of this.menu.querySelectorAll(
++      '.explicit-resolution, .shaka-enable-abr-button')) {
++      this.eventManager.unlisten(button, 'click');
++    }
++
+     // Remove old shaka-resolutions
+     shaka.ui.Utils.clearMenuKeepingBackButton(this.menu);
+ 
+diff --git a/ui/seek_bar.js b/ui/seek_bar.js
+index d0e1a6a749b4f5798c5f4c76d7bd69f3b15e3e2e..4dc0824cb25f540bf0f10d2d342b747b5fbf7fc2 100644
+--- a/ui/seek_bar.js
++++ b/ui/seek_bar.js
+@@ -915,6 +915,10 @@ shaka.ui.SeekBar = class extends shaka.ui.RangeElement {
+     if (!thumbnail) {
+       return;
+     }
++    const isThumbnailSheet = thumbnail.sprite ||
++        thumbnail.imageWidth > thumbnail.width ||
++        thumbnail.imageHeight > thumbnail.height ||
++        thumbnail.positionX != 0 || thumbnail.positionY != 0;
+     const isPortrait = thumbnail.width < thumbnail.height;
+     this.thumbnailContainer_.classList.toggle('portrait-thumbnail', isPortrait);
+     this.thumbnailImageContainer_.style.width =
+@@ -959,11 +963,17 @@ shaka.ui.SeekBar = class extends shaka.ui.RangeElement {
+       }
+       this.thumbnailImage_ = /** @type {!HTMLImageElement} */ (
+         shaka.util.Dom.createHTMLElement('img'));
++      const thumbnailImage = this.thumbnailImage_;
+       this.thumbnailImage_.alt = '';
+       this.thumbnailImage_.classList.add('shaka-player-ui-thumbnail-image');
+       this.thumbnailImage_.draggable = false;
+       this.thumbnailImage_.src = uri;
+       this.thumbnailImage_.onload = () => {
++        if (isThumbnailSheet &&
++            thumbnailImage.naturalWidth && thumbnailImage.naturalHeight) {
++          thumbnailImage.width = thumbnailImage.naturalWidth;
++          thumbnailImage.height = thumbnailImage.naturalHeight;
++        }
+         if (uri.startsWith('blob:')) {
+           URL.revokeObjectURL(uri);
+         }
+@@ -973,13 +983,17 @@ shaka.ui.SeekBar = class extends shaka.ui.RangeElement {
+     }
+     const widthImageContainer = this.thumbnailImageContainer_.clientWidth;
+     const scale = widthImageContainer / thumbnail.width;
+-    if (thumbnail.imageHeight) {
++    if (isThumbnailSheet && this.thumbnailImage_.naturalHeight) {
++      this.thumbnailImage_.height = this.thumbnailImage_.naturalHeight;
++    } else if (thumbnail.imageHeight) {
+       this.thumbnailImage_.height = thumbnail.imageHeight;
+     } else if (!thumbnail.sprite) {
+       this.thumbnailImage_.style.height = '100%';
+       this.thumbnailImage_.style.objectFit = 'contain';
+     }
+-    if (thumbnail.imageWidth) {
++    if (isThumbnailSheet && this.thumbnailImage_.naturalWidth) {
++      this.thumbnailImage_.width = this.thumbnailImage_.naturalWidth;
++    } else if (thumbnail.imageWidth) {
+       this.thumbnailImage_.width = thumbnail.imageWidth;
+     } else if (!thumbnail.sprite) {
+       this.thumbnailImage_.style.width = '100%';

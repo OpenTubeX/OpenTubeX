@@ -72,7 +72,7 @@ test.describe('remembered auto-translation', () => {
     // Picking an original track forgets the translation again
     const nextCaptionsMenu = await openCaptionsMenu(page)
     await attachScreenshot('remembered translation on the next video')
-    await nextCaptionsMenu.getByRole('button', { name: 'German', exact: true }).click()
+    await nextCaptionsMenu.getByRole('menuitemradio', { name: 'German', exact: true }).click()
     await expect.poll(() => activeTextTrack(video)).toBe('German')
     await expect.poll(() => storedSetting(page, 'autoTranslatedCaptionLocale')).toBe('')
 
@@ -319,7 +319,9 @@ test.describe('secondary captions after Shaka replaces its caption area', () => 
     await expect.poll(async () => {
       const [captionBounds, areaBounds] = await Promise.all([
         secondaryCaption.boundingBox(),
-        player.locator('.shaka-text-container').boundingBox(),
+        // The old caption area's displayer stays alive here, and Shaka re-attaches it after the
+        // replacement, which a real reload destroys. The replacement comes first, like a new one would.
+        player.locator('.shaka-text-container').first().boundingBox(),
       ])
       return captionBounds.y >= areaBounds.y - 0.5
     }).toBe(true)

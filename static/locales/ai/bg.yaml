@@ -650,6 +650,8 @@ Settings:
         Destructive pressed: Опасно действие при натискане
         Text and icons on destructive actions: Текст и икони върху опасните действия
   Player Settings:
+    Default Media Format:
+      Default Media Format: 'Формат на медията'
     Buffering:
       Buffering: Буфериране
       Description: Изберете каква част от видеото плейърът да зарежда предварително и да държи заредена.

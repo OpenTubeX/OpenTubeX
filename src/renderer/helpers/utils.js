@@ -1055,6 +1055,11 @@ export function formatViewCount(viewCount, shorten) {
   return formatNumber(viewCount, shorten && isRoundedNumber(viewCount) ? { notation: 'compact' } : undefined)
 }
 
+export function formatSubscriberCount(number) {
+  // aligns with subscriber count precision outlined here: https://support.google.com/youtube/answer/6051134
+  return formatNumber(number, number >= 1000 ? { notation: 'compact', maximumSignificantDigits: 3 } : undefined)
+}
+
 export function getTodayDateStrLocalTimezone() {
   const timeNow = new Date()
   // `Date#getTimezoneOffset` returns the difference, in minutes

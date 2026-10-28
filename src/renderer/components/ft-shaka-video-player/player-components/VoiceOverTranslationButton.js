@@ -44,15 +44,6 @@ export class VoiceOverTranslationButton extends shaka.ui.Element {
     this.eventManager.listen(this.button_, 'click', this.toggle_)
     this.eventManager.listen(events, 'localeChanged', () => this.update_())
 
-    if (this.isSubMenu) {
-      this.eventManager.listen(this.controls, 'submenuopen', () => {
-        this.updateVisibility_()
-      })
-      this.eventManager.listen(this.controls, 'submenuclose', () => {
-        this.updateVisibility_()
-      })
-    }
-
     this.stopStateWatch_ = watch([this.state_, this.enabled_], () => this.update_())
     this.update_()
   }
@@ -86,5 +77,10 @@ export class VoiceOverTranslationButton extends shaka.ui.Element {
   /** @private */
   updateVisibility_() {
     this.button_.classList.toggle('shaka-hidden', this.isSubMenuOpened)
+  }
+
+  /** @override */
+  checkAvailability() {
+    this.updateVisibility_()
   }
 }

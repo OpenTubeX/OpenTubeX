@@ -57,22 +57,12 @@ export class FullWindowButton extends shaka.ui.Element {
       this.isSubMenuOpened = false
 
       this.updateLocalisedStrings_()
-      this.updateVisibility_()
+      this.checkAvailability()
     })
 
     this.eventManager.listen(events, 'localeChanged', () => {
       this.updateLocalisedStrings_()
     })
-
-    if (this.isSubMenu) {
-      this.eventManager.listen(this.controls, 'submenuopen', () => {
-        this.updateVisibility_()
-      })
-
-      this.eventManager.listen(this.controls, 'submenuclose', () => {
-        this.updateVisibility_()
-      })
-    }
 
     this.updateLocalisedStrings_()
   }
@@ -91,8 +81,8 @@ export class FullWindowButton extends shaka.ui.Element {
     this.button_.ariaPressed = this.fullWindowEnabled_ ? 'true' : 'false'
   }
 
-  /** @private */
-  updateVisibility_() {
+  /** @override */
+  checkAvailability() {
     if (this.isSubMenuOpened) {
       this.button_.classList.add('shaka-hidden')
     } else {

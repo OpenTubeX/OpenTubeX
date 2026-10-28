@@ -1512,7 +1512,7 @@ test('auto-translates captions into an arbitrary language', async ({ app, page, 
   await expect(selectedTranslation.locator('.shaka-chosen-item')).toHaveCount(0)
 
   await header.click()
-  await captionsMenu.getByRole('button', { name: 'English (auto-generated)', exact: true }).click()
+  await captionsMenu.getByRole('menuitemradio', { name: 'English (auto-generated)', exact: true }).click()
   await overflowMenu.getByRole('button', { name: 'Captions' }).click()
   await captionsMenu.getByRole('button', { name: 'Auto-translate' }).click()
   await expect(selectedTranslation).toHaveAttribute('aria-selected', 'false')

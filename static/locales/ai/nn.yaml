@@ -733,6 +733,8 @@ Settings:
       Everforest Light Blue: Everforest Light Blue
       Everforest Light Purple: Everforest Light Purple
   Player Settings:
+    Default Media Format:
+      Default Media Format: 'Medieformat'
     Buffering:
       Buffering: Bufring
       Description: Vel kor mykje av videoen avspelaren lastar inn på førehand og held innlasta.

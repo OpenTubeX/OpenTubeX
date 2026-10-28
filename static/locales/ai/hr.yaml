@@ -650,6 +650,8 @@ Settings:
         Destructive pressed: Pritisnuta destruktivna radnja
         Text and icons on destructive actions: Tekst i ikone na destruktivnim radnjama
   Player Settings:
+    Default Media Format:
+      Default Media Format: 'Standardni format medija'
     Buffering:
       Buffering: Međuspremanje
       Description: Odaberi koliko videozapisa reproduktor učitava unaprijed i zadržava učitanim.

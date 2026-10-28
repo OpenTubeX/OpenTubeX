@@ -663,6 +663,8 @@ Settings:
       Catppuccin Latte Mauve: Catppuccin Latte Mauve
       Catppuccin Latte Red: Catppuccin Latte Red
   Player Settings:
+    Default Media Format:
+      Default Media Format: 'Standardmedieformat'
     Buffering:
       Buffering: Buffering
       Description: Vælg, hvor meget af videoen afspilleren indlæser på forhånd og holder indlæst.

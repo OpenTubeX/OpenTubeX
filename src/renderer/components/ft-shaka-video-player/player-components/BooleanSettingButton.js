@@ -84,16 +84,6 @@ export class BooleanSettingButton extends shaka.ui.Element {
       this.updateLocalisedStrings_()
     })
 
-    if (this.isSubMenu) {
-      this.eventManager.listen(this.controls, 'submenuopen', () => {
-        this.updateVisibility_()
-      })
-
-      this.eventManager.listen(this.controls, 'submenuclose', () => {
-        this.updateVisibility_()
-      })
-    }
-
     /** @private */
     this.stopValueWatch_ = watch(this.value_, () => {
       this.updateLocalisedStrings_()
@@ -127,5 +117,10 @@ export class BooleanSettingButton extends shaka.ui.Element {
   /** @private */
   updateVisibility_() {
     this.button_.classList.toggle('shaka-hidden', this.isSubMenuOpened)
+  }
+
+  /** @override */
+  checkAvailability() {
+    this.updateVisibility_()
   }
 }

@@ -750,6 +750,8 @@ Settings:
       Everforest Light Blue: Everforest Claro Azul
       Everforest Light Purple: Everforest Claro Morado
   Player Settings:
+    Default Media Format:
+      Default Media Format: 'Formato multimedia predeterminado'
     Buffering:
       Buffering: Almacenamiento en búfer
       Description: Elige cuánto video carga el reproductor por adelantado y cuánto mantiene cargado.

@@ -58,6 +58,7 @@ import { computed } from 'vue'
 import store from '../../store/index'
 
 import { formatNumber } from '../../helpers/utils'
+import { isRoundedNumber } from '../../helpers/viewCounts'
 
 const props = defineProps({
   data: {
@@ -85,11 +86,11 @@ const videoCount = props.data.videoCount
 const url = `/hashtag/${encodeURIComponent(title.substring(1))}`
 
 const formattedChannelCount = computed(() => {
-  return formatNumber(channelCount)
+  return formatNumber(channelCount, channelCount != null && isRoundedNumber(channelCount) ? { notation: 'compact' } : undefined)
 })
 
 const formattedVideosCount = computed(() => {
-  return formatNumber(videoCount)
+  return formatNumber(videoCount, videoCount != null && isRoundedNumber(videoCount) ? { notation: 'compact' } : undefined)
 })
 </script>
 

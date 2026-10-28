@@ -1,6 +1,9 @@
 import assert from 'node:assert/strict'
 import test from 'node:test'
-import { fillTsVideoGap } from '../../src/renderer/helpers/player/twitchTsVideoGap.js'
+
+// shaka-player's compiled build reads `self` while loading, which Node lacks
+globalThis.self ??= globalThis
+const { fillTsVideoGap } = await import('../../src/renderer/helpers/player/twitchTsVideoGap.js')
 
 function box (type, payload) {
   const bytes = new Uint8Array(payload.length + 8)

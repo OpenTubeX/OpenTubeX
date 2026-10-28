@@ -10,9 +10,8 @@
       <template
         v-if="authorThumbnail"
       >
-        <component
-          :is="enableChannelLinks ? 'router-link' : 'div'"
-          v-if="authorId"
+        <router-link
+          v-if="enableChannelLinks && authorId"
           :to="`/channel/${authorId}`"
           class="authorThumbnailLink"
           tabindex="-1"
@@ -24,7 +23,7 @@
             class="communityThumbnail"
             alt=""
           />
-        </component>
+        </router-link>
         <FtRetryImage
           v-else
           :fallback-icon="['fas', 'circle-user']"
@@ -219,6 +218,7 @@ import {
   formatNumber,
   getRelativeTimeFromDate,
 } from '../../helpers/utils'
+import { isRoundedNumber } from '../../helpers/viewCounts'
 import { youtubeImageUrlToInvidious } from '../../helpers/api/invidious'
 import { useRelativeTimeClock } from '../../composables/useRelativeTimeClock'
 import { loadSwiperModules } from './swiperLoader'
@@ -339,15 +339,13 @@ let commentCount = null
 parseCommunityData()
 
 const formattedCommentCount = computed(() => {
-  if (commentCount != null) {
-    return formatNumber(commentCount)
-  }
-
-  return ''
+  if (commentCount == null) return ''
+  if (props.singlePost) return formatNumber(commentCount)
+  return formatNumber(commentCount, isRoundedNumber(commentCount) ? { notation: 'compact' } : undefined)
 })
 
 const formattedVoteCount = computed(() => {
-  return formatNumber(voteCount)
+  return formatNumber(voteCount, voteCount != null && isRoundedNumber(voteCount) ? { notation: 'compact' } : undefined)
 })
 
 const publishedText = computed(() => {

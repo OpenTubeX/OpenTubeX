@@ -660,6 +660,8 @@ Settings:
         Destructive pressed: அழிக்கும் செயல் அழுத்தப்பட்டது
         Text and icons on destructive actions: அழிக்கும் செயல்களிலுள்ள உரையும் படவுருக்களும்
   Player Settings:
+    Default Media Format:
+      Default Media Format: 'இயல்புநிலை ஊடக வடிவம்'
     Buffering:
       Buffering: இடையகப்படுத்தல்
       Description: இயக்கி காணொளியின் எவ்வளவு பகுதியை முன்கூட்டியே ஏற்றி, ஏற்றப்பட்ட நிலையில் வைத்திருக்க வேண்டும் என்பதைத் தேர்ந்தெடுக்கவும்.

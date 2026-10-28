@@ -34,6 +34,6 @@ patchedDependencies:
   '@vue/runtime-dom@3.5.44': patches/@vue__runtime-dom@3.5.44.patch
   dbus-native@0.16.2: patches/dbus-native@0.16.2.patch
   overlayscrollbars@2.16.0: patches/overlayscrollbars@2.16.0.patch
-  shaka-player@5.1.12: patches/shaka-player@5.1.12.patch
+  shaka-player@5.3.2: patches/shaka-player@5.3.2.patch
   vue-sonner@2.0.9: patches/vue-sonner@2.0.9.patch
   youtubei.js@18.3.0: patches/youtubei.js@18.3.0.patch

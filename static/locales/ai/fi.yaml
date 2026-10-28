@@ -652,6 +652,8 @@ Settings:
         Destructive pressed: Poistava toiminto painettaessa
         Text and icons on destructive actions: Poistavien toimintojen teksti ja kuvakkeet
   Player Settings:
+    Default Media Format:
+      Default Media Format: 'Median oletusmuoto'
     Buffering:
       Buffering: Puskurointi
       Description: Valitse, kuinka paljon videota soitin lataa etukäteen ja pitää ladattuna.

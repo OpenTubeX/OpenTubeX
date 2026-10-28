@@ -300,6 +300,8 @@ test('pulling the dragged thumb up onto the filmstrip seeks at its scale', { tag
   await expect(filmstrip).toBeHidden()
   await expect(chapter).toBeHidden()
   await expect.poll(() => video.evaluate(element => element.currentTime)).toBeCloseTo(preciseTime, 1)
+  // Releasing over the player is not a click on it, so the paused video stays paused.
+  expect(await video.evaluate(element => element.paused)).toBe(true)
 
   // Escape cancels a drag and returns to where it started.
   const seekedTime = await video.evaluate(element => {

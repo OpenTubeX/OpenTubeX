@@ -869,6 +869,8 @@ Settings:
       Everforest Light Blue: Everforest Light Blue
       Everforest Light Purple: Everforest Light Purple
   Player Settings:
+    Default Media Format:
+      Default Media Format: 'Format multimèdia predeterminat'
     Buffering:
       Buffering: Memòria intermèdia
       Description: Trieu quant de vídeo carrega el reproductor per avançat i quant en manté carregat.
@@ -2524,7 +2526,7 @@ Tooltips:
     Continue Playback When Screen Is Locked: 'Manté l’àudio reproduint-se en segon pla i proporciona controls multimèdia d’Android. Desactiveu-ho per posar en pausa quan l’aplicació deixi de ser visible.'
     Enable Caption Translations: Si s'activa i el vídeo no proporciona cap pista original coincident, el botó de subtítols i la drecera C prefereixen una pista traduïda automàticament a la llengua de subtítols preferida.
     Proxy Videos Through Invidious: Es connecta a Invidious per servir els vídeos en lloc de connectar-se directament a YouTube.
-    Default Video Format: Defineix els formats utilitzats en reproduir un vídeo. Els formats DASH poden reproduir qualitats més altes. Els formats antics estan limitats a 360p com a màxim, però utilitzen menys amplada de banda. Els formats d'àudio només contenen fluxos d'àudio.
+    Default Media Format: Defineix els formats utilitzats en reproduir un vídeo. Els formats DASH poden reproduir qualitats més altes. Els formats antics estan limitats a 360p com a màxim, però utilitzen menys amplada de banda. Els formats d'àudio només contenen fluxos d'àudio.
     Use Quick Playback Speed Bar: Mostra una barra ràpida de velocitat de reproducció als controls de la dreta del reproductor. Si està activat el desament manual de la velocitat per canal, la barra també inclou el botó per desar la velocitat del canal actual.
     Scroll Playback Rate Over Video Player: Amb el cursor sobre el vídeo, manteniu premuda la tecla Control (Ordre al Mac) i gireu la roda del ratolí endavant o enrere per controlar la velocitat de reproducció. Manteniu premuda la tecla Control (Ordre al Mac) i feu clic amb el botó esquerre per tornar ràpidament a la velocitat predeterminada (1x, tret que s'hagi canviat a la configuració).
     Skip by Scrolling Over Video Player: Utilitzeu la roda de desplaçament per saltar pel vídeo, a l'estil de MPV.

@@ -37,6 +37,9 @@
   position: relative !important;
   inset: auto !important;
   inline-size: min(100%, 640px) !important;
+
+  /* shaka-player keeps its menus 40px narrower than the player */
+  max-inline-size: none !important;
   flex: 1;
   block-size: auto !important;
   min-block-size: 0 !important;

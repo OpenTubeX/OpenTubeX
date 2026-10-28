@@ -70,9 +70,6 @@ export class AbRepeatControl extends shaka.ui.Element {
 
     this.eventManager.listen(this.button_, 'click', () => this.handleRepeatAction_())
     this.eventManager.listen(this.clearButton_, 'click', () => context.clear())
-    this.eventManager.listenMulti(this.controls, ['submenuopen', 'submenuclose'], () => {
-      this.updateVisibility_()
-    })
     this.eventManager.listenMulti(
       this.localization,
       [shaka.ui.Localization.LOCALE_CHANGED, shaka.ui.Localization.LOCALE_UPDATED],
@@ -212,6 +209,11 @@ export class AbRepeatControl extends shaka.ui.Element {
       this.context_.getShortcut('clear')
     )
 
+    this.updateVisibility_()
+  }
+
+  /** @override */
+  checkAvailability() {
     this.updateVisibility_()
   }
 

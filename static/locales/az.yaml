@@ -91,7 +91,7 @@ Subscriptions:
   Load More Posts: Daha Çox Post Yüklə
   Subscriptions Tabs: Abunəliklər Səhifələri
   All Subscription Tabs Hidden: Bütün abunəlik səhifələri gizlidir. Məzmunu burada görmək üçün "{settingsSection}" bölməsində "{subsection}"-da bəzi səhifələri gizlətməyin.
-  Empty Channels: Abunə olduğunuz kanallarda hazırda heç bir video yoxdur.
+  Empty Channels: Abunə olduğunuz kanalların hazırda heç bir videosu yoxdur.
   Empty Posts: Abunə olduğunuz kanallarda hazırda heç bir post yoxdur.
   Disabled Automatic Fetching: Siz avtomatik abunəlik əldə etməyi bağlamısız. Abunəlikləri burada görmək üçün yeniləyin.
   Posts:
@@ -189,6 +189,7 @@ User Playlists:
   Move Video to the Bottom: Videonu Ən Aşağıya Keçir
   Export list of URLs: URL-lərin siyahısını ixrac et
   TotalTimePlaylist: 'Ümumi vaxt: {duration}'
+  This playlist is private or does not exist.: Bu pleylist ya şəxsidir, ya da mövcud deyil.
 History:
   # On History Page
   History: 'Tarixçə'
@@ -409,11 +410,11 @@ Settings:
     Default Playback Rate: İlkin Oynatma Sürəti
     Max Video Playback Rate: Ən Yüksək Video Oynatma Sürəti
     Video Playback Rate Interval: Video Oynatma Sürəti Aralığı
-    Default Video Format:
-      Default Video Format: İlkin Video Formatı
+    Default Media Format:
       Dash Formats: DASH Formatları
       Legacy Formats: Köhnə Formatlar
       Audio Formats: Səs Formatları
+      Default Media Format: İlkin Media Formatı
     Default Quality:
       Default Quality: İlkin Keyfiyyət
       Auto: Avtomatik
@@ -822,7 +823,7 @@ Tooltips:
     Open Deep Links In New Window: Brauzer yönləndirmə əlavələri və ya əmr xətti arqumentləri ilə OpenTubeX-a ötürülən URL-lər yeni pəncərədə açılır.
   Player Settings:
     Proxy Videos Through Invidious: Videoları YouTube-a birbaşa qoşulmaq əvəzinə təqdim etmək üçün Invidious-a qoşulacaq.
-    Default Video Format: Video oynadılarkən istifadə olunan formatları təyin et. DASH formatları daha yüksək keyfiyyətdə oynadıla bilir. Köhnə formatlar maksimum 360p ilə məhdudlaşır, lakin daha az şəbəkə trafiki istifadə edir. Səs formatları isə yalnız səsdən ibarət yayımlardır.
+    Default Media Format: Video oynadılarkən istifadə olunan formatları təyin et. DASH formatları daha yüksək keyfiyyətdə oynadıla bilir. Köhnə formatlar maksimum 360p ilə məhdudlaşır, lakin daha az şəbəkə trafiki istifadə edir. Səs formatları isə yalnız səsdən ibarət yayımlardır.
     Scroll Playback Rate Over Video Player: Kursor videonun üzərindəykən, oynatma sürətini tənzimləmək üçün Control düyməsini (Mac-də Command düyməsini) basıb saxlayın və siçan çarxını irəli və ya geriyə sürüşdürün. İlkin oynatma sürətinə (tənzimləmələrdə dəyişdirilməyibsə, 1x) cəld qayıtmaq üçün Control düyməsini (Mac-də Command düyməsini) basıb saxlayın və siçanın sol düyməsini klikləyin.
     Skip by Scrolling Over Video Player: MPV üslubundakı kimi, videoda ötürmək üçün siçan çarxın istifadə et.
   External Player Settings:

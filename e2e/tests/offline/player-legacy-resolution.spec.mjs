@@ -43,7 +43,7 @@ async function selectLowerResolution(page, duringLoad) {
   await player.locator('.shaka-controls-container').evaluate(element => element.setAttribute('shown', 'true'))
   await player.getByRole('button', { name: 'More settings', exact: true }).click()
   await player.locator('.legacy-quality-button').click()
-  await player.locator('.legacy-qualities').getByRole('button', { name: '240p', exact: true }).click()
+  await player.locator('.legacy-qualities').getByRole('menuitemradio', { name: '240p', exact: true }).click()
   await duringLoad?.()
   await expect.poll(() => page.evaluate(() => window.resolutionLoaded)).toBe(true)
   await expect.poll(() => video.evaluate(element => element.readyState)).toBe(4)

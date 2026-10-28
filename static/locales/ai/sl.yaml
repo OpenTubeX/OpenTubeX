@@ -845,6 +845,8 @@ Settings:
       Everforest Light Blue: Everforest Light Blue
       Everforest Light Purple: Everforest Light Purple
   Player Settings:
+    Default Media Format:
+      Default Media Format: 'Prevzeta oblika predstavnosti'
     Buffering:
       Buffering: Medpomnjenje
       Description: Izberite, koliko videoposnetka predvajalnik naloži vnaprej in ohrani naloženega.
@@ -2485,7 +2487,7 @@ Tooltips:
     Continue Playback When Screen Is Locked: 'Nadaljuje predvajanje zvoka v ozadju in omogoča predstavnostne kontrolnike Android. Izklopite, da se predvajanje začasno ustavi, ko aplikacija ni več vidna.'
     Enable Caption Translations: Ko je možnost omogočena in videoposnetek nima ustrezne izvirne sledi, imata gumb za podnapise in bližnjica C prednostno samodejno prevedeno sled v prednostnem jeziku podnapisov.
     Proxy Videos Through Invidious: Za posredovanje videoposnetkov se poveže z Invidiousom namesto neposredno z YouTubom.
-    Default Video Format: Nastavite oblike zapisa za predvajanje videoposnetkov. Oblike DASH omogočajo višjo kakovost. Starejše oblike so omejene na največ 360p, vendar porabijo manj pasovne širine. Zvočne oblike vsebujejo le zvočni pretok.
+    Default Media Format: Nastavite oblike zapisa za predvajanje videoposnetkov. Oblike DASH omogočajo višjo kakovost. Starejše oblike so omejene na največ 360p, vendar porabijo manj pasovne širine. Zvočne oblike vsebujejo le zvočni pretok.
     Use Quick Playback Speed Bar: Na desni strani kontrolnikov predvajalnika prikaže vrstico za hitro spreminjanje hitrosti predvajanja. Če je omogočeno ročno shranjevanje hitrosti predvajanja za posamezne kanale, vrstica vsebuje tudi gumb za shranjevanje hitrosti trenutnega kanala.
     Scroll Playback Rate Over Video Player: Ko je kazalec nad videoposnetkom, pridržite tipko Control (tipko Command v računalnikih Mac) in zavrtite miškin kolešček naprej ali nazaj, da spremenite hitrost predvajanja. Za hitro vrnitev na privzeto hitrost predvajanja pridržite tipko Control (tipko Command v računalnikih Mac) in kliknite levi miškin gumb (1x, razen če je bila hitrost spremenjena v nastavitvah).
     Multiply Seek Interval by Playback Rate: Ko je možnost omogočena, se presledki preskakovanja (smerne tipke in J/L) pomnožijo s trenutno hitrostjo predvajanja. Ko je onemogočena, ostanejo enaki ne glede na hitrost predvajanja.

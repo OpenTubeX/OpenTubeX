@@ -162,7 +162,7 @@ for (const usePlayerMenuGrid of [true, false]) {
       await expect.poll(offset).toBe(1.5)
       await video.evaluate(element => { element.currentTime = 7 })
       await expect(caption).toHaveText('Translated timing test caption')
-      await captionsMenu.getByRole('button', { name: 'English (auto-generated)', exact: true }).click()
+      await captionsMenu.getByRole('menuitemradio', { name: 'English (auto-generated)', exact: true }).click()
       await expect.poll(offset).toBe(1.5)
       const watch = await page.evaluateHandle(findWatchComponent)
       let oldVideo

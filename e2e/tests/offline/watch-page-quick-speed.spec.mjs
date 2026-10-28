@@ -84,7 +84,7 @@ test.describe('desktop quick playback speed bar', () => {
       await player.locator('.shaka-controls-container').evaluate(element => element.setAttribute('shown', 'true'))
       await player.getByRole('button', { name: 'More settings', exact: true }).click()
       await player.locator('.legacy-quality-button').click()
-      await player.locator('.legacy-qualities').getByRole('button', { name: '240p', exact: true }).click()
+      await player.locator('.legacy-qualities').getByRole('menuitemradio', { name: '240p', exact: true }).click()
       expect(await view.evaluate(view => view.$refs.player.hasLoaded)).toBe(true)
       expect(await page.evaluate(() => window.speedQualityLoaded)).toBe(false)
       await player.evaluate(element => element.ui.getControls().hideSettingsMenus())
@@ -93,7 +93,7 @@ test.describe('desktop quick playback speed bar', () => {
       } else {
         await player.getByRole('button', { name: 'More settings', exact: true }).click()
         await player.locator('.shaka-playbackrate-button').click()
-        await player.locator('.shaka-playback-rates').getByRole('button', { name: '1.5x', exact: true }).click()
+        await player.locator('.shaka-playback-rates .shaka-playback-rate-preset-btn[data-rate="1.5"]').click()
       }
       await expect(bar.locator('[data-rate="1.5"]')).toHaveClass(/is-current-rate/)
       await expect.poll(() => video.evaluate(element => element.playbackRate)).toBe(1.5)
@@ -173,10 +173,10 @@ test.describe('desktop quick playback speed bar', () => {
           await player.getByRole('button', { name: 'More settings', exact: true }).click()
           await player.locator('.shaka-playbackrate-button').click()
           const menu = player.locator('.shaka-playback-rates')
-          await menu.getByRole('button', { name: `${selectedRate}x`, exact: true }).click()
+          await menu.locator(`.shaka-playback-rate-preset-btn[data-rate="${selectedRate}"]`).click()
           await player.getByRole('button', { name: 'More settings', exact: true }).click()
           await player.locator('.shaka-playbackrate-button').click()
-          await expect(menu.getByRole('button', { name: `${selectedRate}x`, exact: true })).toHaveAttribute('aria-selected', 'true')
+          await expect(menu.locator(`.shaka-playback-rate-preset-btn[data-rate="${selectedRate}"]`)).toHaveAttribute('aria-checked', 'true')
           await menu.locator('.shaka-back-to-overflow-button').click()
           await player.getByRole('button', { name: 'More settings', exact: true }).click()
         }

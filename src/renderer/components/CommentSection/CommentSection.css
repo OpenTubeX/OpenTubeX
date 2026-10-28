@@ -551,7 +551,9 @@
 .commentOwner {
   background-color: var(--secondary-card-bg-color);
   backdrop-filter: var(--secondary-card-bg-blur, none);
+  border: 1px solid var(--tertiary-text-color);
   border-radius: calc(10px * var(--ui-roundness));
+  padding-block: 2px;
   padding-inline: 10px;
 }
 

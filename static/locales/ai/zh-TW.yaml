@@ -647,6 +647,8 @@ Settings:
         Destructive pressed: 危險操作的按下狀態
         Text and icons on destructive actions: 危險操作上的文字與圖示
   Player Settings:
+    Default Media Format:
+      Default Media Format: '預設媒體格式'
     Buffering:
       Buffering: 緩衝
       Description: 選擇播放器要預先載入並保留多少影片內容。

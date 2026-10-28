@@ -661,6 +661,8 @@ Settings:
       Catppuccin Latte Mauve: Catppuccin Latte Mauve
       Catppuccin Latte Red: Catppuccin Latte Red
   Player Settings:
+    Default Media Format:
+      Default Media Format: 'Подразумевани формат медија'
     Buffering:
       Buffering: Баферовање
       Description: Изаберите колико видео снимка плејер учитава унапред и задржава учитаним.

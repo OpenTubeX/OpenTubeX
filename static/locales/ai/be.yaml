@@ -675,6 +675,8 @@ Settings:
       Catppuccin Latte Mauve: Catppuccin Latte Mauve
       Catppuccin Latte Red: Catppuccin Latte Red
   Player Settings:
+    Default Media Format:
+      Default Media Format: 'Фармат медыя па змаўчанні'
     Buffering:
       Buffering: Буферызацыя
       Description: Выберыце, колькі відэа прайгравальнік загружае загадзя і трымае загружаным.

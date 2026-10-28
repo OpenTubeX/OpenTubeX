@@ -35,19 +35,15 @@ export class ShortsVideoInfoButton extends shaka.ui.Element {
       this.controls.hideSettingsMenus()
       events.dispatchEvent(new Event('toggleShortsMetadata'))
     })
-
-    if (this.isSubMenu) {
-      this.eventManager.listen(this.controls, 'submenuopen', () => {
-        this.updateVisibility_()
-      })
-      this.eventManager.listen(this.controls, 'submenuclose', () => {
-        this.updateVisibility_()
-      })
-    }
   }
 
   /** @private */
   updateVisibility_() {
     this.button_.classList.toggle('shaka-hidden', this.isSubMenuOpened)
+  }
+
+  /** @override */
+  checkAvailability() {
+    this.updateVisibility_()
   }
 }

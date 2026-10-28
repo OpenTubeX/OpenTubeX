@@ -652,6 +652,8 @@ Settings:
         Destructive pressed: Натиснута небезпечна дія
         Text and icons on destructive actions: Текст і піктограми небезпечних дій
   Player Settings:
+    Default Media Format:
+      Default Media Format: 'Типовий формат медіа'
     Buffering:
       Buffering: Буферизація
       Description: Виберіть, скільки відео програвач завантажує наперед і тримає завантаженим.

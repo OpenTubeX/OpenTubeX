@@ -337,6 +337,8 @@ Settings:
       Bundled Fonts: Dołączone czcionki
       System Fonts: Czcionki systemowe
   Player Settings:
+    Default Media Format:
+      Default Media Format: 'Domyślny format multimediów'
     Buffering:
       Buffering: Buforowanie
       Description: Wybierz, jaką część filmu odtwarzacz wczytuje z wyprzedzeniem i zachowuje wczytaną.

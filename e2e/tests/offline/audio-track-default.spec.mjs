@@ -77,7 +77,7 @@ ${media}
 
       await player.locator('.shaka-overflow-menu-button').click()
       await player.locator('.shaka-overflow-menu').getByRole('button', { name: 'Audio Tracks' }).click()
-      await player.locator('.audio-tracks').getByRole('button', { name: 'العربية - dubbed-auto' }).click()
+      await player.locator('.audio-tracks').getByRole('menuitemradio', { name: 'العربية - dubbed-auto' }).click()
       await expect.poll(() => player.evaluate(element => (
         element.ui.getControls().getPlayer().getVariantTracks().find(track => track.active)?.language
       ))).toBe('ar')

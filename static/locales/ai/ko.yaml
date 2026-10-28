@@ -814,6 +814,8 @@ Settings:
       Everforest Light Blue: Everforest Light Blue
       Everforest Light Purple: Everforest Light Purple
   Player Settings:
+    Default Media Format:
+      Default Media Format: '기본 미디어 포맷'
     Buffering:
       Buffering: 버퍼링
       Description: 플레이어가 동영상을 얼마나 미리 불러오고 유지할지 선택하세요.
