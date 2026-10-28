@@ -115,7 +115,7 @@ for (const currentLocale of ['en-US', 'de-DE']) {
         const store = window.$store
         return store.dispatch('updateShowPerformanceImpactIndicators', true)
       })
-      const streaming = await goToSettingsSection(page, 'playback')
+      const streaming = await goToSettingsSection(page, 'advanced')
       const slider = streaming.locator('.pure-material-slider').filter({ has: page.locator('.performanceImpact') })
       await expect(slider.locator('.performanceImpact')).toBeVisible()
       for (const width of [375, 320]) {
