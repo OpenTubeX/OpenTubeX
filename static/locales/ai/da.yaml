@@ -228,6 +228,7 @@ User Playlists:
   AddVideoPrompt:
     Toast:
       Video(s) added to {playlistCount} playlists: Videoen blev føjet til 1 playliste | Videoerne blev føjet til {playlistCount} playlister
+    And N more videos: 'og {count} video mere | og {count} videoer mere'
   Playlist Thumbnail: "Afspilningslistens miniaturebillede"
   Restore Default Thumbnail: "Gendan standardminiaturebillede"
 History:

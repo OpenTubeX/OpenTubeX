@@ -223,6 +223,8 @@ User Playlists:
     More videos could not be loaded.: Fler videor kunde inte läsas in.
   Playlist Thumbnail: "Spellistans miniatyrbild"
   Restore Default Thumbnail: "Återställ standardminiatyrbild"
+  AddVideoPrompt:
+    And N more videos: 'och {count} video till | och {count} videor till'
 History:
   From Date: 'Från'
   To Date: 'Till'

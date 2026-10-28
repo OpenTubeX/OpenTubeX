@@ -220,6 +220,8 @@ User Playlists:
     More videos could not be loaded.: Daha fazla video yüklenemedi.
   Playlist Thumbnail: "Oynatma listesi küçük resmi"
   Restore Default Thumbnail: "Varsayılan küçük resmi geri yükle"
+  AddVideoPrompt:
+    And N more videos: 've {count} video daha | ve {count} video daha'
 History:
   From Date: 'Başlangıç'
   To Date: 'Bitiş'

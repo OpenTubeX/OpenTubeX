@@ -98,6 +98,8 @@ User Playlists:
     More videos could not be loaded.: Nie udało się wczytać kolejnych filmów.
   Playlist Thumbnail: "Miniatura playlisty"
   Restore Default Thumbnail: "Przywróć domyślną miniaturę"
+  AddVideoPrompt:
+    And N more videos: 'i {count} inny film | i {count} inne filmy | i {count} innych filmów'
 Settings:
   Diagnostics:
     Diagnostics: Diagnostyka

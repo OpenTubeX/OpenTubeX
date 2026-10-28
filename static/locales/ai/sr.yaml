@@ -229,6 +229,7 @@ User Playlists:
   AddVideoPrompt:
     Toast:
       Video(s) added to {playlistCount} playlists: Видео-снимци су додати на 1 листу за репродукцију | Видео-снимци су додати на {playlistCount} листе за репродукцију | Видео-снимци су додати на {playlistCount} листа за репродукцију
+    And N more videos: 'и још {count} видео-снимак | и још {count} видео-снимка | и још {count} видео-снимака'
   Playlist Thumbnail: "Сличица плејлисте"
   Restore Default Thumbnail: "Врати подразумевану сличицу"
 History:

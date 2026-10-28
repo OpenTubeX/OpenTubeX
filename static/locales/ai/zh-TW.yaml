@@ -220,6 +220,8 @@ User Playlists:
     More videos could not be loaded.: 無法載入更多影片。
   Playlist Thumbnail: "播放清單縮圖"
   Restore Default Thumbnail: "還原預設縮圖"
+  AddVideoPrompt:
+    And N more videos: '以及另外 {count} 部影片'
 History:
   From Date: '開始日期'
   To Date: '結束日期'

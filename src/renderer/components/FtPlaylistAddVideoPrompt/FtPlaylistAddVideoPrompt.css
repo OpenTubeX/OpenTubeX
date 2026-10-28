@@ -6,53 +6,138 @@
   text-align: center;
 }
 
-.searchInputsRow {
-  display: grid;
-
-  /* 2 columns */
-  grid-template-columns: 1fr auto;
-  column-gap: 16px;
+.videoSummary {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px 24px;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+  margin-block: 0 8px;
+  list-style: none;
 }
 
-@media only screen and (width <= 800px) {
-  .searchInputsRow {
-    /* Switch to 2 rows from 2 columns */
-    grid-template-columns: auto;
-    grid-template-rows: auto auto;
-  }
+.videoSummaryItem {
+  display: flex;
+  flex: 1 1 220px;
+  gap: 10px;
+  align-items: center;
+  min-inline-size: 0;
+  max-inline-size: 360px;
 }
 
+.videoSummaryItem:only-child {
+  flex-basis: auto;
+  max-inline-size: 100%;
+}
+
+.videoSummaryThumbnail {
+  flex-shrink: 0;
+  inline-size: 64px;
+  aspect-ratio: 16 / 9;
+  border-radius: 4px;
+  object-fit: cover;
+}
+
+.videoSummaryText {
+  display: flex;
+  flex-direction: column;
+  min-inline-size: 0;
+}
+
+.videoSummaryTitle,
+.videoSummaryAuthor {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.videoSummaryTitle {
+  font-weight: 600;
+}
+
+.videoSummaryAuthor {
+  font-size: 0.85em;
+  color: var(--tertiary-text-color);
+}
+
+.videoSummaryMore {
+  color: var(--tertiary-text-color);
+}
+
+.controlsRow,
 .optionsRow {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(100px, 1fr));
-  align-items: center;
-  margin-block-end: 20px;
+  --settings-control-margin: 0;
+  --input-bottom-spacing: 0;
+
+  margin-block-end: 16px;
 }
 
-.tightOptions {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(100px, max-content));
-  column-gap: 16px;
+.controlsRow {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px 16px;
   align-items: center;
 }
 
-@media only screen and (width <= 800px) {
+.searchInput {
+  /* Take the free space, but let the options move below before it gets too narrow */
+  flex: 1000 1 240px;
+  min-inline-size: 0;
+}
+
+/* In the phone layout the options scroll with the playlists. The gap adds to
+  the space the switches' touch targets leave around the visible track. */
+.optionsRow {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+/* Outside the phone layout the options are teleported into the search row */
+.optionsTarget {
+  display: contents;
+}
+
+.optionsTarget > .optionsRow {
+  /* Wrap the switches and sort select together, spreading them out on their own line */
+  flex: 1 1 auto;
+  flex-flow: row wrap;
+  gap: 12px 16px;
+  min-inline-size: 0;
+  align-items: center;
+  justify-content: space-between;
+  margin-block-end: 0;
+}
+
+.optionsTarget .sortSelect {
+  inline-size: 200px;
+}
+
+/* The switches' touch targets already space them apart */
+.optionToggles {
+  display: flex;
+  flex-direction: column;
+}
+
+@media (width <= 600px), (height <= 600px) {
+  .controlsRow {
+    margin-block-end: 0;
+  }
+
   .optionsRow {
-    /* Switch to rows from columns */
-    grid-template-columns: auto;
-    align-items: stretch;
+    gap: 16px;
   }
 
-  .tightOptions {
-    /* Switch to rows from columns */
-    grid-template-columns: auto;
-    align-items: stretch;
+  /* Overlap the tall phone touch targets a little, so the visible switches
+    aren't spaced further apart than the other controls */
+  .optionToggles {
+    margin-block-start: -4px;
   }
-}
 
-.sortSelect {
-  /* Put it on the right */
-  margin-inline-start: auto;
+  .optionToggles :deep(.switch-ctn.compact) {
+    margin-block: -4px;
+  }
 }
 
 .playlists-container {

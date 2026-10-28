@@ -225,6 +225,8 @@ User Playlists:
     More videos could not be loaded.: Не вдалося завантажити інші відео.
   Playlist Thumbnail: "Мініатюра списку відтворення"
   Restore Default Thumbnail: "Відновити типову мініатюру"
+  AddVideoPrompt:
+    And N more videos: 'і ще {count} відео | і ще {count} відео | і ще {count} відео'
 History:
   From Date: 'Від'
   To Date: 'До'

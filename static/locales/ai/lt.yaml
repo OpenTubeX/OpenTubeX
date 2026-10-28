@@ -328,6 +328,7 @@ User Playlists:
     Toast:
       You haven't selected any playlist yet.: Dar nepasirinkote grojaraščio.
       Video(s) added to {playlistCount} playlists: Pridėta prie 1 grojaraščio | Pridėta prie {playlistCount} grojaraščių | Pridėta prie {playlistCount} grojaraščių
+    And N more videos: 'ir dar {count} vaizdo įrašas | ir dar {count} vaizdo įrašai | ir dar {count} vaizdo įrašų'
   CreatePlaylistPrompt:
     New Playlist Name: Naujo grojaraščio pavadinimas
     Create: Kurti

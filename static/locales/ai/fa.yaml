@@ -243,6 +243,7 @@ User Playlists:
   AddVideoPrompt:
     Toast:
       Video(s) added to {playlistCount} playlists: ویدیو به 1 فهرست پخش افزوده شد | ویدیو به {playlistCount} فهرست پخش افزوده شد
+    And N more videos: 'و {count} ویدیوی دیگر | و {count} ویدیوی دیگر'
   Playlist Thumbnail: "تصویر بندانگشتی فهرست پخش"
   Restore Default Thumbnail: "بازیابی تصویر بندانگشتی پیش‌فرض"
 History:

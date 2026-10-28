@@ -220,6 +220,8 @@ User Playlists:
     More videos could not be loaded.: Rohkem videoid ei saanud laadida.
   Playlist Thumbnail: "Esitusloendi pisipilt"
   Restore Default Thumbnail: "Taasta vaikimisi pisipilt"
+  AddVideoPrompt:
+    And N more videos: 'ja veel {count} video | ja veel {count} videot'
 History:
   From Date: 'Alates'
   To Date: 'Kuni'

@@ -221,6 +221,8 @@ User Playlists:
     More videos could not be loaded.: Nid oedd modd llwytho rhagor o fideos.
   Playlist Thumbnail: "Mân-lun y rhestr chwarae"
   Restore Default Thumbnail: "Adfer y mân-lun diofyn"
+  AddVideoPrompt:
+    And N more videos: 'a {count} fideo arall | a {count} fideo arall | a {count} fideo arall | a {count} fideo arall | a {count} fideo arall | a {count} fideo arall'
 History:
   From Date: 'O'
   To Date: 'Hyd at'

@@ -225,6 +225,8 @@ User Playlists:
     More videos could not be loaded.: Không thể tải thêm video.
   Playlist Thumbnail: "Ảnh thu nhỏ của danh sách phát"
   Restore Default Thumbnail: "Khôi phục ảnh thu nhỏ mặc định"
+  AddVideoPrompt:
+    And N more videos: 'và {count} video khác'
 History:
   From Date: 'Từ'
   To Date: 'Đến'

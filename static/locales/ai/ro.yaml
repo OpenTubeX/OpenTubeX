@@ -221,6 +221,8 @@ User Playlists:
     More videos could not be loaded.: Nu au putut fi încărcate mai multe videoclipuri.
   Playlist Thumbnail: "Miniatura listei de redare"
   Restore Default Thumbnail: "Restabilește miniatura implicită"
+  AddVideoPrompt:
+    And N more videos: 'și încă {count} videoclip | și încă {count} videoclipuri | și încă {count} de videoclipuri'
 History:
   From Date: 'De la'
   To Date: 'Până la'

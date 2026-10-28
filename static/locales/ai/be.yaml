@@ -240,6 +240,7 @@ User Playlists:
   AddVideoPrompt:
     Toast:
       Video(s) added to {playlistCount} playlists: Відэа дададзена ў 1 спіс прайгравання | Відэа дададзена ў {playlistCount} спісы прайгравання | Відэа дададзена ў {playlistCount} спісаў прайгравання
+    And N more videos: 'і яшчэ {count} відэа | і яшчэ {count} відэа | і яшчэ {count} відэа'
   Playlist Thumbnail: "Мініяцюра плэйліста"
   Restore Default Thumbnail: "Аднавіць стандартную мініяцюру"
 History:
