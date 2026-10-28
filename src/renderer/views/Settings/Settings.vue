@@ -697,7 +697,11 @@ provide(settingsSearchNavigationKey, {
   async open({ section, match }) {
     const target = await openSearchResult(section, match)
     const focusable = 'button, input, select, textarea, [tabindex]'
-    const control = target?.matches(focusable) ? target : target?.querySelector(focusable)
+    // Prefer the form field over label-row buttons, such as tooltip triggers
+    // that open their tooltip on focus.
+    const control = target?.matches(focusable)
+      ? target
+      : target?.querySelector('input, select, textarea') ?? target?.querySelector(focusable)
     settingsWindowRef.value?.focus({ preventScroll: true })
     control?.focus({ preventScroll: true })
   }
