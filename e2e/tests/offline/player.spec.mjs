@@ -1588,13 +1588,14 @@ test('shows the loop icon that matches the loop state in the context menu', asyn
   const shakaIcon = name => shakaIcons.match(new RegExp(`'${name}': '([^']+)'`))[1]
   const video = await openDemoVideo({ app, page })
   const player = page.locator('.ftVideoPlayer')
-  const loopIcon = page.locator('.shaka-context-menu .loop-button svg path')
+  const loopButton = page.locator('.shaka-context-menu .loop-button')
+  const loopIcon = loopButton.locator('svg path')
 
   await player.click({ button: 'right' })
   await expect(loopIcon).toHaveAttribute('d', shakaIcon('UNLOOP'))
-  await page.keyboard.press('Escape')
+  await loopButton.click()
+  await expect(video).toHaveJSProperty('loop', true)
 
-  await video.evaluate((element) => { element.loop = true })
   await player.click({ button: 'right' })
   await expect(loopIcon).toHaveAttribute('d', shakaIcon('LOOP'))
 })
