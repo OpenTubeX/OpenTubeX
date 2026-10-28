@@ -1,3 +1,5 @@
+import { readFileSync } from 'node:fs'
+import { createRequire } from 'node:module'
 import { goTo, sel, setPlayerFullscreen, setWindowSize, test, expect } from '../../helpers/app.mjs'
 import {
   activeTab,
@@ -1579,6 +1581,23 @@ test('keeps the context menu open when the pointer leaves a playing video', asyn
   await page.waitForTimeout(3500)
   await expect(contextMenu).toBeVisible()
   await attachScreenshot('context menu after the pointer left')
+})
+
+test('shows the loop icon that matches the loop state in the context menu', async ({ app, page }) => {
+  const shakaIcons = readFileSync(createRequire(import.meta.url).resolve('shaka-player/ui/enums.js'), 'utf8')
+  const shakaIcon = name => shakaIcons.match(new RegExp(`'${name}': '([^']+)'`))[1]
+  const video = await openDemoVideo({ app, page })
+  const player = page.locator('.ftVideoPlayer')
+  const loopButton = page.locator('.shaka-context-menu .loop-button')
+  const loopIcon = loopButton.locator('svg path')
+
+  await player.click({ button: 'right' })
+  await expect(loopIcon).toHaveAttribute('d', shakaIcon('UNLOOP'))
+  await loopButton.click()
+  await expect(video).toHaveJSProperty('loop', true)
+
+  await player.click({ button: 'right' })
+  await expect(loopIcon).toHaveAttribute('d', shakaIcon('LOOP'))
 })
 
 test('scopes the mobile fullscreen swipe movement to the video in tablet layout', async ({ app, page }) => {
