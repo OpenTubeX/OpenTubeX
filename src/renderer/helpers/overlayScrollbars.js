@@ -308,7 +308,8 @@ function create(element) {
     }
   }
 
-  // Locking the page's scrolling changes its overflow without resizing it.
+  // Locking the page's scrolling or switching its direction changes it
+  // without resizing it.
   const pageStyleObserver = new MutationObserver(() => scheduleUpdate())
 
   const mutationObserver = new MutationObserver(records => {
@@ -354,7 +355,7 @@ function create(element) {
     }
     window.addEventListener('resize', onWindowResize)
     for (const observed of [document.documentElement, document.body]) {
-      pageStyleObserver.observe(observed, { attributes: true, attributeFilter: ['class', 'style'] })
+      pageStyleObserver.observe(observed, { attributes: true, attributeFilter: ['class', 'dir', 'style'] })
     }
   } else {
     element.setAttribute(VIEWPORT_ATTRIBUTE, '')
