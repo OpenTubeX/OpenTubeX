@@ -97,12 +97,14 @@ test('uses native parsed dialog items when youtubei.js filters out collaborators
     id: 'UCprimary',
     name: 'Primary collaborator',
     thumbnail: 'https://images.test/primary-avatar.jpg',
-    subtitle: '@primary • 10 subscribers'
+    subtitle: '@primary • 10 subscribers',
+    handle: '@primary'
   }, {
     id: 'UCsecond',
     name: 'Second collaborator',
     thumbnail: 'https://images.test/second-avatar.jpg',
-    subtitle: '@second • 20 subscribers'
+    subtitle: '@second • 20 subscribers',
+    handle: '@second'
   }])
 })
 
@@ -140,12 +142,14 @@ test('uses the video owner endpoint added by youtubei.js 18', () => {
     id: 'UCprimary',
     name: 'Primary collaborator',
     thumbnail: '',
-    subtitle: ''
+    subtitle: '',
+    handle: undefined
   }, {
     id: 'UCsecond',
     name: 'Second collaborator',
     thumbnail: '',
-    subtitle: ''
+    subtitle: '',
+    handle: undefined
   }])
 })
 
