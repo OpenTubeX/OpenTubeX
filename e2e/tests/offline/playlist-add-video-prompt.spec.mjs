@@ -81,14 +81,13 @@ test.describe('with several playlists', () => {
     await expect(searchRow.locator('.matchingVideoToggle')).toBeVisible()
     await expect(searchRow.locator('.sortSelect')).toBeVisible()
     // Measure in one frame, as the prompt may still be animating open
-    const centerOffset = await searchRow.evaluate((row) => {
+    await expect.poll(() => searchRow.evaluate((row) => {
       const center = (selector) => {
         const box = row.querySelector(selector).getBoundingClientRect()
         return box.top + box.height / 2
       }
       return Math.abs(center('.searchInput') - center('.sortSelect'))
-    })
-    expect(centerOffset).toBeLessThan(4)
+    })).toBeLessThan(4)
 
     await prompt.getByText('Playlists with matching videos', { exact: true }).click()
     await expect(toggle).toBeChecked()
@@ -119,13 +118,12 @@ test.describe('with long option labels', () => {
 
     await expect(searchRow.locator('.allowDuplicateToggle')).toBeVisible()
     // Measure in one frame, as the prompt may still be animating open
-    const overflowingControls = await searchRow.evaluate((row) => {
+    await expect.poll(() => searchRow.evaluate((row) => {
       const rowBox = row.getBoundingClientRect()
       return ['.matchingVideoToggle', '.allowDuplicateToggle', '.sortSelect'].filter((selector) => {
         const box = row.querySelector(selector).getBoundingClientRect()
         return box.left < rowBox.left - 0.5 || box.right > rowBox.right + 0.5
       })
-    })
-    expect(overflowingControls).toEqual([])
+    })).toEqual([])
   })
 })
