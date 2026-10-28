@@ -266,7 +266,8 @@ export function reconcileFetchedSubscriptionEntries(
           (Number.isFinite(previousFetchTime) ? previousFetchTime : Date.now())
     }
 
-    if (previousEntry != null && keepPreviousPublicationDate(entry, previousEntry, publicationDateKey)) {
+    // A public release replaces the members-only upload date
+    if (previousEntry != null && !becamePublic && keepPreviousPublicationDate(entry, previousEntry, publicationDateKey)) {
       reconciledEntry[publicationDateKey] = previousEntry[publicationDateKey]
     }
 
