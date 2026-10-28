@@ -595,7 +595,8 @@ function updatePageScrollbarPosition(instance) {
  * natively, so `window.scrollTo`, `window.scrollY` and its scroll events work.
  */
 export function initializeAppScrollbars({ useNativePageScrollbar = false } = {}) {
-  initializePageScrollbar(document, useNativePageScrollbar, create)
+  // Browsers without scroll-linked animations keep their native scrollbars.
+  initializePageScrollbar(document, useNativePageScrollbar || typeof ScrollTimeline === 'undefined', create)
 
   if (useNativePageScrollbar) {
     observePageScrollbarVisibility(document, hidden => {

@@ -1,4 +1,4 @@
-import { test, expect, goToSettingsSection, sel } from '../../helpers/app.mjs'
+import { test, expect, goToSettingsSection, sel, waitForAppReady } from '../../helpers/app.mjs'
 
 // The page's own scrollbars are the ones appended to the body.
 const PAGE_SCROLLBAR = 'body > .os-scrollbar-vertical'
@@ -283,6 +283,16 @@ test.describe('overlay scrollbars', () => {
       expect(classMutations).toBe(0)
       await expect(page.locator(PAGE_SCROLLBAR)).toHaveCSS('opacity', '1')
     }
+  })
+
+  test('keeps the native page scrollbar without scroll-linked animations', async ({ page }) => {
+    await page.addInitScript(() => { delete window.ScrollTimeline })
+    await page.reload()
+    await waitForAppReady(page)
+    await addPageOverflow(page)
+    await expect(page.locator('html')).not.toHaveAttribute('data-overlayscrollbars-initialize')
+    await expect(page.locator('body > .os-scrollbar')).toHaveCount(0)
+    expect(await page.evaluate(() => document.documentElement.clientWidth < window.innerWidth)).toBe(true)
   })
 
   test('remeasures the page after its scrolling is locked and unlocked', async ({ page }) => {
