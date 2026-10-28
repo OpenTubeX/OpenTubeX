@@ -1167,6 +1167,7 @@ test.describe('watch page', () => {
     await page.evaluate(async () => {
       const store = window.$store
       await store.dispatch('updateVideoPlaybackEngine', 'built-in')
+      await store.dispatch('updatePauseOnStreamRecovery', true)
     })
 
     await page.locator(sel.searchInput).fill('https://www.youtube.com/watch?v=jNQXAC9IVRw')
@@ -1189,7 +1190,9 @@ test.describe('watch page', () => {
 
     expect(rejectedManifestRequests).toBeGreaterThan(0)
     expect(await app.electronApp.evaluate(() => globalThis.__ytDlpPostLiveCalls)).toBe(1)
+    // With Pause on Stream Recovery, a failed initial load still autoplays the fallback, but explains it.
     await waitForPlayback(page)
+    await expect(page.locator(`${activeTab} .streamRecoveryNotice`)).toContainText('trying yt-dlp instead')
 
     await page.getByRole('button', { name: 'Change Media Formats' }).click()
     const prompt = page.getByRole('dialog', { name: 'Change Media Formats' })

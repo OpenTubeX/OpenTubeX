@@ -31,6 +31,53 @@ function videoRenderer(videoId, title, channelName, handle, index) {
   }
 }
 
+function collaborationVideoRenderer(videoId, title, channels) {
+  return {
+    videoRenderer: {
+      videoId,
+      title: { runs: [{ text: title }] },
+      ownerText: {
+        runs: [{
+          text: channels.map(({ name }) => name).join(' and '),
+          navigationEndpoint: {
+            showDialogCommand: {
+              panelLoadingStrategy: {
+                inlineContent: {
+                  dialogViewModel: {
+                    customContent: {
+                      listViewModel: {
+                        listItems: channels.map(({ name, handle, index }) => ({
+                          listItemViewModel: {
+                            title: { content: name },
+                            subtitle: { content: `\u200e\u2068${handle}\u2069 • \u20681.2K subscribers\u2069` },
+                            rendererContext: {
+                              commandContext: {
+                                onTap: {
+                                  innertubeCommand: {
+                                    commandMetadata: { webCommandMetadata: { url: `/${handle}`, webPageType: 'WEB_PAGE_TYPE_CHANNEL' } },
+                                    browseEndpoint: { browseId: `UC${String(index).padStart(22, '0')}` }
+                                  }
+                                }
+                              }
+                            }
+                          }
+                        }))
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }]
+      },
+      lengthText: { simpleText: '4:20' },
+      viewCountText: { simpleText: '12,345 views' },
+      publishedTimeText: { simpleText: '2 days ago' }
+    }
+  }
+}
+
 function channelRenderer(channelName, handle, index) {
   const channelId = `UC${String(index).padStart(22, '0')}`
 
@@ -58,6 +105,14 @@ const searchResponse = {
                 videoRenderer('aaaaaaaaaaa', 'Handmade pottery tutorial', 'Real Potter', '@RealPotter', 1),
                 videoRenderer('bbbbbbbbbbb', 'Cat saves the world', 'Slop Factory', '@SlopFactory', 2),
                 videoRenderer('ccccccccccc', 'Ancient history explained', 'Maybe Narrated', '@Maybe%C3%91arrated', 3),
+                collaborationVideoRenderer('ddddddddddd', 'Pottery meets slop', [
+                  { name: 'Real Potter', handle: '@RealPotter', index: 1 },
+                  { name: 'Slop Factory', handle: '@SlopFactory', index: 2 }
+                ]),
+                collaborationVideoRenderer('eeeeeeeeeee', 'Pottery through the ages', [
+                  { name: 'Real Potter', handle: '@RealPotter', index: 1 },
+                  { name: 'Maybe Narrated', handle: '@MaybeÑarrated', index: 3 }
+                ]),
                 channelRenderer('Maybe Narrated', '@MaybeÑarrated', 3),
                 channelRenderer('Slop Factory', '@SlopFactory', 2)
               ]
@@ -98,6 +153,8 @@ test('hides blocklisted channels and labels warnlisted channels in search result
   const warned = results.filter({ hasText: 'Ancient history explained' })
   await expect(warned.locator('.aiSlopTag')).toHaveText('Possibly AI-generated')
   await expect(results.filter({ hasText: 'Cat saves the world' })).toHaveCount(0)
+  await expect(results.filter({ hasText: 'Pottery through the ages' }).locator('.aiSlopTag')).toHaveText('Possibly AI-generated')
+  await expect(results.filter({ hasText: 'Pottery meets slop' })).toHaveCount(0)
   await expect(results.filter({ hasText: 'Handmade pottery tutorial' }).locator('.aiSlopTag')).toHaveCount(0)
   const channels = page.locator('.ft-list-channel')
   await expect(channels.filter({ hasText: 'Maybe Narrated' }).locator('.aiSlopTag')).toHaveText('Possibly AI-generated')
@@ -106,6 +163,7 @@ test('hides blocklisted channels and labels warnlisted channels in search result
 
   await page.evaluate(() => window.$store.dispatch('updateUseAiSlopList', false))
   await expect(results.filter({ hasText: 'Cat saves the world' })).toBeVisible()
+  await expect(results.filter({ hasText: 'Pottery meets slop' })).toBeVisible()
   await expect(page.locator('.aiSlopTag')).toHaveCount(0)
   expect(await page.evaluate(() => localStorage.getItem('aiSlopList'))).toBeNull()
 })

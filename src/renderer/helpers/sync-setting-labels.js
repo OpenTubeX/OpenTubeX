@@ -93,6 +93,7 @@ export const SYNC_SETTING_LABELS = {
   enableScreenshot: 'Settings.Player Settings.Screenshot.Enable',
   enableSearchSuggestions: 'Settings.General Settings.Enable Search Suggestions',
   enableSeekHistory: 'Settings.Player Settings.Enable Seek History',
+  pauseOnStreamRecovery: 'Settings.Player Settings.Pause on Stream Recovery',
   enableSkipSilenceByDefault: 'Settings.Player Settings.Enable Skip Silence by Default',
   enableSubtitlesByDefault: 'Settings.Player Settings.Turn on Subtitles by Default',
   enableVideoMetadataCache: 'Settings.Privacy Settings.Cache Video Metadata',

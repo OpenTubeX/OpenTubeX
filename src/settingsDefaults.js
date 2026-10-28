@@ -34,6 +34,8 @@ export function createDefaultSettings({ supportsLocalApi, isElectron }) {
     autoplayPlaylists: true,
     skipUnavailablePlaylistVideos: true,
     autoplayVideos: true,
+    // Pause and keep stream-failure recovery errors visible instead of a toast
+    pauseOnStreamRecovery: false,
     // Combinable triggers for automatically entering Picture-in-Picture: 'tab', 'minimize', 'blur'
     autoPictureInPictureTriggers: [],
     mobileAutoPictureInPicture: true,

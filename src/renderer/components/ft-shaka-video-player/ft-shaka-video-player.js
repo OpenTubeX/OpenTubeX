@@ -622,6 +622,14 @@ export default defineComponent({
       type: Object,
       default: null
     },
+    streamRecoveryNotice: {
+      type: String,
+      default: null
+    },
+    pauseForStreamRecovery: {
+      type: Boolean,
+      default: false
+    },
   },
   emits: [
     'error',
@@ -651,6 +659,7 @@ export default defineComponent({
     'skip-to-prev',
     'player-reload-requested',
     'resume-playback-after-sabr-reload-done',
+    'stream-recovery-notice-dismiss',
     'fullscreen-metadata-change',
     'fullscreen-transcript-change',
     'fullscreen-sponsorblock-change',
@@ -1361,7 +1370,9 @@ export default defineComponent({
     // Capture the replacement player's initial state. The parent clears its
     // pending SABR state after this player loads, but that must not add autoplay
     // to the same media element afterward.
-    const suppressInitialAutoplay = props.suppressAutoplayAfterSabrReload
+    // A replacement player created by stream-failure recovery waits paused
+    // until the user has read the recovery notice.
+    const suppressInitialAutoplay = props.suppressAutoplayAfterSabrReload || props.pauseForStreamRecovery
     // Queue requests can arrive for a replacement player or an in-place source
     // switch. Keep autoplay armed until playback starts, even if Watch has
     // already consumed the loaded request.
@@ -10515,7 +10526,7 @@ export default defineComponent({
 
       applyPendingPresentationModes()
 
-      if (props.resumePlaybackAfterSabrReload) {
+      if (props.resumePlaybackAfterSabrReload && !props.pauseForStreamRecovery) {
         video.value?.play()
       }
       if (props.resumePlaybackAfterSabrReload || suppressInitialAutoplay) {
@@ -10749,7 +10760,7 @@ export default defineComponent({
         }
 
         pendingFormatSwitchState = null
-        if (wasPaused) {
+        if (wasPaused || props.pauseForStreamRecovery) {
           video_.pause()
         } else {
           video_.play()
@@ -10758,6 +10769,22 @@ export default defineComponent({
     )
 
     // #endregion setup
+
+    // Stream-failure recovery pauses in place so the notice can be read and
+    // reported before playback continues.
+    watch(() => props.streamRecoveryNotice, notice => {
+      if (notice !== null && props.pauseForStreamRecovery) video.value?.pause()
+    })
+
+    function dismissStreamRecoveryNotice() {
+      emit('stream-recovery-notice-dismiss')
+    }
+
+    function copyStreamRecoveryNotice() {
+      copyToClipboard(props.streamRecoveryNotice, {
+        messageOnSuccess: t('Video.Player.Stream Recovery.Error Copied')
+      })
+    }
 
     // #region tear down
 
@@ -11269,6 +11296,8 @@ export default defineComponent({
     }
 
     return {
+      copyStreamRecoveryNotice,
+      dismissStreamRecoveryNotice,
       fullscreenDockHeaderSelector: FULLSCREEN_DOCK_HEADER_SELECTOR,
       portraitFullscreenDocks,
       fullscreenDockOpen,

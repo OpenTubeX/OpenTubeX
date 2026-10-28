@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict'
 import { readFile } from 'node:fs/promises'
 import test from 'node:test'
-import { compileFunction } from 'node:vm'
+import { compileFunction, createContext, runInContext } from 'node:vm'
 import { Parser, YTNodes } from 'youtubei.js'
 
 import {
@@ -11,6 +11,7 @@ import {
   saveCachedAiSlopList
 } from '../../src/renderer/helpers/aiSlopList.js'
 import { createLocalFeedParsers, getChannelHandleFromEndpoint } from '../../src/renderer/helpers/api/local-feed-parsers.js'
+import { parseLocalCollaboratorItems } from '../../src/renderer/helpers/video-collaborators.js'
 
 const CHANNEL_ID = 'UCabcdefghijklmnopqrstuv'
 
@@ -19,6 +20,21 @@ const visibilityStart = subscriptionsSource.indexOf('export function isVideoHidd
 const visibilitySource = subscriptionsSource.slice(visibilityStart, subscriptionsSource.indexOf('\n}\n', visibilityStart) + 2)
 const isVideoHiddenByPreferences = compileFunction(`${visibilitySource.replace('export ', '')}\nreturn isVideoHiddenByPreferences`,
   ['isUpcomingPremiere', 'isOnAiSlopList'])(() => false, isOnAiSlopList)
+
+const localSource = await readFile(new URL('../../src/renderer/helpers/api/local.js', import.meta.url), 'utf8')
+const watchNextStart = localSource.indexOf('export function parseLocalWatchNextVideo(')
+const watchNextContext = createContext({
+  YTNodes,
+  parseLocalCollaboratorItems,
+  getChannelHandleFromEndpoint,
+  getThumbnailPreviewUrl: () => undefined,
+  getAuthorVerification: () => ({}),
+  calculatePublishedDate: () => undefined,
+  extractNumberFromString: () => null
+})
+runInContext(`${localSource.slice(watchNextStart, localSource.indexOf('/**', watchNextStart)).replace('export ', '')}
+globalThis.parseLocalWatchNextVideo = parseLocalWatchNextVideo`, watchNextContext)
+const { parseLocalWatchNextVideo } = watchNextContext
 
 function useLocalStorage(entries = {}) {
   const values = new Map(Object.entries(entries))
@@ -68,6 +84,24 @@ test('hides videos from blocklisted channels only when the blocklist is passed',
   assert.equal(isVideoHiddenByPreferences(video), false)
 })
 
+test('hides collaboration videos when any collaborator is on the blocklist', () => {
+  const aiSlopChannels = new Set(parseAiSlopList(`@GuestSlop\n${CHANNEL_ID}`))
+  const collaboration = {
+    title: 'Title',
+    author: 'Main and Guest',
+    authorId: null,
+    collaborators: [{ id: 'UCmain', name: 'Main', handle: '@Main' }, { id: 'UCguest', name: 'Guest', handle: '@guestSLOP' }]
+  }
+
+  assert.equal(isVideoHiddenByPreferences(collaboration, { aiSlopChannels }), true)
+  assert.equal(isOnAiSlopList(aiSlopChannels, {
+    collaborators: [{ id: 'UCmain', name: 'Main' }, { id: CHANNEL_ID, name: 'Guest' }]
+  }), true)
+  assert.equal(isOnAiSlopList(aiSlopChannels, {
+    collaborators: [{ id: 'UCmain', name: 'Main', handle: '@Main' }, { id: 'UCguest', name: 'Guest' }]
+  }), false)
+})
+
 test('hides collaboration videos by their main author and regular videos by author ID', () => {
   const hiddenChannelNames = new Set([CHANNEL_ID])
   const collaboration = {
@@ -80,6 +114,55 @@ test('hides collaboration videos by their main author and regular videos by auth
   assert.equal(isVideoHiddenByPreferences(collaboration, { hiddenChannelNames }), true)
   assert.equal(isVideoHiddenByPreferences({ title: 'Title', author: 'Main', authorId: CHANNEL_ID }, { hiddenChannelNames }), true)
   assert.equal(isVideoHiddenByPreferences({ ...collaboration, collaborators: collaboration.collaborators.toReversed() }, { hiddenChannelNames }), false)
+})
+
+test('keeps collaborators on compact watch-next videos', () => {
+  const video = Parser.parseItem({
+    compactVideoRenderer: {
+      videoId: 'abcdefghijk',
+      title: { simpleText: 'Title' },
+      longBylineText: {
+        runs: [{
+          text: 'Main and Guest',
+          navigationEndpoint: {
+            showDialogCommand: {
+              panelLoadingStrategy: {
+                inlineContent: {
+                  dialogViewModel: {
+                    customContent: {
+                      listViewModel: {
+                        listItems: [{
+                          listItemViewModel: {
+                            title: { content: 'Guest' },
+                            subtitle: { content: '\u200e\u2068@GuestSlop\u2069 • \u206810 subscribers\u2069' },
+                            rendererContext: {
+                              commandContext: {
+                                onTap: {
+                                  innertubeCommand: {
+                                    commandMetadata: { webCommandMetadata: { url: '/@GuestSlop', webPageType: 'WEB_PAGE_TYPE_CHANNEL' } },
+                                    browseEndpoint: { browseId: CHANNEL_ID }
+                                  }
+                                }
+                              }
+                            }
+                          }
+                        }]
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }]
+      }
+    }
+  }, YTNodes.CompactVideo)
+
+  const parsed = parseLocalWatchNextVideo(video)
+
+  assert.deepEqual(parsed.collaborators.map(({ id, handle }) => ({ id, handle })), [{ id: CHANNEL_ID, handle: '@GuestSlop' }])
+  assert.equal(isOnAiSlopList(new Set(parseAiSlopList('@guestslop')), parsed), true)
 })
 
 test('restores cached lists and ignores malformed caches', () => {

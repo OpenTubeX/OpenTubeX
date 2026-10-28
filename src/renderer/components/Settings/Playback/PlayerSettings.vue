@@ -39,6 +39,14 @@
         @change="store.dispatch('updateEnableSeekHistory', $event)"
       />
       <FtToggleSwitch
+        :label="t('Settings.Player Settings.Pause on Stream Recovery')"
+        :compact="true"
+        :default-value="store.getters.getPauseOnStreamRecovery"
+        setting-key="pauseOnStreamRecovery"
+        :tooltip="t('Tooltips.Player Settings.Pause on Stream Recovery')"
+        @change="store.dispatch('updatePauseOnStreamRecovery', $event)"
+      />
+      <FtToggleSwitch
         :label="t('Global.Ambient Mode')"
         :compact="true"
         :default-value="ambientMode"

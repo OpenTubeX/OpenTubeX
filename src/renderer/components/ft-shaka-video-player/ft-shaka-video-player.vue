@@ -312,6 +312,38 @@
         />
         {{ $t('Video.Player.Voice-over Translation.Progress') }}
       </div>
+      <div
+        v-if="streamRecoveryNotice !== null"
+        class="streamRecoveryNotice shaka-no-propagation"
+        role="alert"
+        @click.stop
+        @dblclick.stop
+      >
+        <ft-icon
+          class="streamRecoveryNoticeIcon"
+          :icon="['fas', 'circle-exclamation']"
+        />
+        <span
+          class="streamRecoveryNoticeMessage"
+          :title="streamRecoveryNotice"
+        >{{ streamRecoveryNotice }}</span>
+        <button
+          type="button"
+          class="streamRecoveryNoticeButton"
+          @click="copyStreamRecoveryNotice"
+        >
+          <ft-icon :icon="['fas', 'copy']" />
+          {{ $t('Copy') }}
+        </button>
+        <button
+          type="button"
+          class="streamRecoveryNoticeButton"
+          @click="dismissStreamRecoveryNotice"
+        >
+          <ft-icon :icon="['fas', 'xmark']" />
+          {{ $t('Dismiss') }}
+        </button>
+      </div>
       <FtPaidPromotionBadge
         v-if="showPaidPromotion"
         class="paidPromotionOverlay shaka-no-propagation"

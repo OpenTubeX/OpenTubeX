@@ -665,6 +665,7 @@ Settings:
   Player Settings:
     Default Media Format:
       Default Media Format: 'Standardmedieformat'
+    Pause on Stream Recovery: "Sæt på pause ved genopretning af stream"
     Buffering:
       Buffering: Buffering
       Description: Vælg, hvor meget af videoen afspilleren indlæser på forhånd og holder indlæst.
@@ -1569,6 +1570,10 @@ Video:
     hook: Introduktion/hilsen
   Player:
     Playing in Picture-in-Picture: Afspilles som billede-i-billede
+    Stream Recovery:
+      DASH Fallback: "Lydstreamen mislykkedes, skifter til DASH-formater: {error}"
+      Error Copied: "Fejl kopieret til udklipsholder"
+      Legacy Fallback: "Streamen mislykkedes, skifter til ældre formater: {error}"
     Caption Timing:
       Adjust Timing: Juster timing…
       Caption Timing: Underteksttiming
@@ -2058,6 +2063,7 @@ Tooltips:
   Proxy Settings:
     IP Block Recovery Script Path: Stien til den scriptfil, der skal køres, når der registreres en IP-blokering. OpenTubeX venter på, at den bliver færdig, og genindlæser derefter videoen. Hvis reservekilden er slået til, køres scriptet kun, når den også mislykkes.
   Player Settings:
+    Pause on Stream Recovery: "Når videostreamen fejler, og afspilleren genindlæser den eller skifter til et andet format eller en anden motor, sættes afspilningen på pause, og fejlen vises øverst i afspilleren, indtil du afviser den. Når den er slået fra, fortsætter afspilningen, og fejlen vises kortvarigt som en notifikation."
     Continue Playback When Screen Is Locked: 'Fortsætter lydafspilning i baggrunden og viser Android-mediekontroller. Slå dette fra for at sætte på pause, når appen ikke længere er synlig.'
     Enable Caption Translations: Når funktionen er slået til, vælger undertekstknappen og genvejen C automatisk et oversat spor på det foretrukne undertekstsprog, hvis videoen ikke har et tilsvarende originalspor.
     Use Quick Playback Speed Bar: Viser en linje til hurtig valg af afspilningshastighed blandt afspillerknapperne til højre. Hvis manuel lagring af afspilningshastighed for hver kanal er slået til, indeholder linjen også en knap til at gemme hastigheden for den aktuelle kanal.

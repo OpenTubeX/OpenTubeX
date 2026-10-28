@@ -8,12 +8,14 @@ const source = readFileSync(new URL('../../src/renderer/components/ft-shaka-vide
 
 function fixture() {
   let factory
+  const window = {}
   class SeekBar {
     constructor(parent, controls) {
       this.video = controls.video
       this.controls = controls
       this.player = {}
-      this.eventManager = { listen: (_, type, listener) => controls.listeners.set(type, listener) }
+      // Window listeners share event types with the bar's own, so keep them apart.
+      this.eventManager = { listen: (target, type, listener) => controls.listeners.set(target === window ? `window:${type}` : type, listener) }
       const properties = new Map()
       this.container = {
         classList: { toggle() {}, remove() {} },
@@ -54,7 +56,7 @@ function fixture() {
     updateSponsorBlockSeekBarState,
     SeekFilmstrip,
     i18n: { global: { t: key => key } },
-    window: {},
+    window,
     document: {},
     THUMB_SIZE: 12,
     MouseEvent: class { constructor(type) { this.type = type } },
@@ -228,7 +230,7 @@ test('pulling up starts precise seeking from the last dragged time, not a pendin
       return Promise.resolve()
     },
   })
-  const move = (clientX, clientY) => controls.listeners.get('mousemove')({ clientX, clientY })
+  const move = (clientX, clientY) => controls.listeners.get('window:mousemove')({ clientX, clientY })
   bar.onChangeStart()
   move(204, 100)
   drag(10)

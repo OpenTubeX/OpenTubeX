@@ -735,6 +735,7 @@ Settings:
   Player Settings:
     Default Media Format:
       Default Media Format: 'Medieformat'
+    Pause on Stream Recovery: "Set på pause ved gjenoppretting av straum"
     Buffering:
       Buffering: Bufring
       Description: Vel kor mykje av videoen avspelaren lastar inn på førehand og held innlasta.
@@ -1749,6 +1750,10 @@ Video:
     filler: Avsporingar
   Player:
     Playing in Picture-in-Picture: Spelast av i bilete-i-bilete
+    Stream Recovery:
+      DASH Fallback: "Lydstraumen feila, byter til DASH-format: {error}"
+      Error Copied: "Feil kopiert til utklippstavla"
+      Legacy Fallback: "Straumen feila, byter til eldre format: {error}"
     Caption Timing:
       Adjust Timing: Juster timing…
       Caption Timing: Underteksttiming
@@ -2285,6 +2290,7 @@ Tooltips:
   Proxy Settings:
     IP Block Recovery Script Path: Filstien til skriptet som skal køyrast når ei IP-sperre vert oppdaga. OpenTubeX ventar til det er ferdig og lastar deretter inn videoen på nytt. Dersom reserveløysinga er slått på, køyrer skriptet berre når ho òg slår feil.
   Player Settings:
+    Pause on Stream Recovery: "Når videostraumen feilar og spelaren lastar han inn på nytt eller byter til eit anna format eller ein annan motor, vert avspelinga sett på pause, og feilen vert ståande øvst i spelaren til du lukkar han. Når dette er slått av, held avspelinga fram, og feilen vert vist kort som eit varsel."
     Continue Playback When Screen Is Locked: 'Held fram med lydavspeling i bakgrunnen og viser Android-mediekontrollar. Slå av dette for å setje på pause når appen ikkje lenger er synleg.'
     Enable Caption Translations: Når dette er slått på, føretrekkjer teksteknappen og C-hurtigtasten eit automatisk omsett spor på det føretrekte tekstespråket dersom videoen ikkje har eit samsvarande originalspor.
     Use Quick Playback Speed Bar: Viser ei snøgglinje for avspelingsfart til høgre i spelarkontrollane. Dersom manuell lagring av avspelingsfart for kvar kanal er slått på, har linja òg ein knapp for å lagre farten for den gjeldande kanalen.

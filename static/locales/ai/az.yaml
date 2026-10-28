@@ -649,6 +649,7 @@ Settings:
         Destructive pressed: Silinmə elementi basıldıqda
         Text and icons on destructive actions: Silinmə əməliyyatlarında mətn və nişanlar
   Player Settings:
+    Pause on Stream Recovery: "Yayım bərpasında fasilə ver"
     Buffering:
       Buffering: Buferləmə
       Description: Pleyerin videonun nə qədərini əvvəlcədən yükləyəcəyini və yüklü saxlayacağını seçin.
@@ -1510,6 +1511,10 @@ Video:
     filler: Mövzudan kənar söhbətlər
   Player:
     Playing in Picture-in-Picture: Şəkil içində şəkil rejimində oynadılır
+    Stream Recovery:
+      DASH Fallback: "Səs yayımı uğursuz oldu, DASH formatlarına keçilir: {error}"
+      Error Copied: "Xəta mübadilə buferinə kopyalandı"
+      Legacy Fallback: "Yayım uğursuz oldu, köhnə formatlara keçilir: {error}"
     Caption Timing:
       Adjust Timing: Vaxtı tənzimlə…
       Caption Timing: Altyazı vaxtı
@@ -1987,6 +1992,7 @@ Tooltips:
   Proxy Settings:
     IP Block Recovery Script Path: IP bloklanması aşkarlandıqda icra ediləcək skript faylının yolu. OpenTubeX onun bitməsini gözləyir, sonra videonu yenidən yükləyir. Ehtiyat mənbəyə keçid aktivdirsə, skript yalnız həmin keçid də uğursuz olduqda icra edilir.
   Player Settings:
+    Pause on Stream Recovery: "Video yayımı uğursuz olduqda və pleyer onu yenidən yüklədikdə və ya başqa formata ya mühərrikə keçdikdə, oxutma dayandırılır və xəta siz bağlayana qədər pleyerin yuxarısında qalır. Söndürüldükdə oxutma davam edir və xəta qısa bildiriş kimi görünür."
     Enable Caption Translations: Aktivləşdirildikdə, videoda uyğun orijinal titr treki yoxdursa, titr düyməsi və C qısayolu üstünlük verilən titr dilinə avtomatik tərcümə olunmuş trekə üstünlük verir.
     Use Quick Playback Speed Bar: Oynadıcının sağ tərəfdəki idarəetmə hissəsində sürətli oynatma sürəti panelini göstərir. Kanal üzrə oynatma sürətinin əl ilə saxlanması aktivdirsə, paneldə cari kanalın sürətini saxlamaq üçün düymə də olur.
     Multiply Seek Interval by Playback Rate: Aktivləşdirildikdə, vaxt üzrə keçid aralıqları (ox düymələri və J/L) cari oynatma sürətinə vurulur. Bağlandıqda keçid aralıqları oynatma sürətindən asılı olmayaraq sabit qalır.

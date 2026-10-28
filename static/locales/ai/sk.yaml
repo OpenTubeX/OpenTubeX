@@ -647,6 +647,7 @@ Settings:
         Destructive pressed: Deštruktívna akcia pri stlačení
         Text and icons on destructive actions: Text a ikony deštruktívnych akcií
   Player Settings:
+    Pause on Stream Recovery: "Pozastaviť pri obnove streamu"
     Buffering:
       Buffering: Vyrovnávacia pamäť
       Description: Vyberte, koľko videa prehrávač načíta vopred a koľko ponechá načítaného.
@@ -1498,6 +1499,10 @@ Video:
   Premiere started: Prebieha premiéra. Začala sa {timeAgo}
   Player:
     Playing in Picture-in-Picture: Prehráva sa v režime obraz v obraze
+    Stream Recovery:
+      DASH Fallback: "Zvukový stream zlyhal, prepína sa na formáty DASH: {error}"
+      Error Copied: "Chyba skopírovaná do schránky"
+      Legacy Fallback: "Stream zlyhal, prepína sa na staršie formáty: {error}"
     Caption Timing:
       Adjust Timing: Upraviť časovanie…
       Caption Timing: Časovanie titulkov
@@ -1974,6 +1979,7 @@ Tooltips:
   Proxy Settings:
     IP Block Recovery Script Path: Cesta k súboru skriptu, ktorý sa spustí po zistení zablokovania IP adresy. OpenTubeX počká na jeho dokončenie a potom znova načíta video. Ak je zapnutý záložný backend, skript sa spustí až po jeho zlyhaní.
   Player Settings:
+    Pause on Stream Recovery: "Keď video stream zlyhá a prehrávač ho znova načíta alebo prepne na iný formát či engine, prehrávanie sa pozastaví a chyba zostane v hornej časti prehrávača, kým ju nezavriete. Keď je vypnuté, prehrávanie pokračuje a chyba sa krátko zobrazí ako upozornenie."
     Continue Playback When Screen Is Locked: 'Ponechá zvuk prehrávať na pozadí a poskytne ovládanie médií systému Android. Vypnutím sa prehrávanie pozastaví, keď aplikácia prestane byť viditeľná.'
     Enable Caption Translations: Ak video neposkytuje pôvodnú stopu v uprednostnenom jazyku titulkov, tlačidlo titulkov a klávesová skratka C po zapnutí uprednostnia automaticky preloženú stopu v tomto jazyku.
     Use Quick Playback Speed Bar: V pravej časti ovládacích prvkov prehrávača zobrazí panel rýchlej zmeny rýchlosti prehrávania. Ak je zapnuté ručné ukladanie rýchlosti prehrávania pre jednotlivé kanály, panel obsahuje aj tlačidlo na uloženie rýchlosti aktuálneho kanála.

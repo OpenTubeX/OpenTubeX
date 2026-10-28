@@ -4,9 +4,12 @@
  * @property {string} name
  * @property {string} thumbnail
  * @property {string} subtitle
+ * @property {string | undefined} handle including the leading `@`
  */
 
 const COLLABORATIVE_AUTHOR_TEXT_REGEX = /\s+and\s+/i
+// The collaborator subtitle starts with the channel handle, e.g. `@handle • 10 subscribers`
+const SUBTITLE_HANDLE_REGEX = /^@\S+/
 
 /**
  * YouTube replaces the regular channel link with a collaboration dialog for
@@ -42,13 +45,15 @@ export function parseLocalCollaboratorItems(collaborators) {
     const channelId = collaborator.title?.endpoint?.payload?.browseId ??
       collaborator.renderer_context?.command_context?.on_tap?.payload?.browseId
     const name = collaborator.title?.text
+    const subtitle = collaborator.subtitle?.text?.replaceAll(/[\u200e\u2068\u2069]/g, '') ?? ''
 
     return channelId && name
       ? [{
           id: channelId,
           name,
           thumbnail: collaborator.leading_accessory?.image?.[0]?.url ?? '',
-          subtitle: collaborator.subtitle?.text?.replaceAll(/[\u200e\u2068\u2069]/g, '') ?? ''
+          subtitle,
+          handle: subtitle.match(SUBTITLE_HANDLE_REGEX)?.[0]
         }]
       : []
   }) ?? []

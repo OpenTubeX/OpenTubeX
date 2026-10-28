@@ -654,6 +654,7 @@ Settings:
   Player Settings:
     Default Media Format:
       Default Media Format: 'Định dạng phương tiện mặc định'
+    Pause on Stream Recovery: "Tạm dừng khi khôi phục luồng"
     Buffering:
       Buffering: Bộ đệm
       Description: Chọn lượng video mà trình phát tải trước và giữ lại.
@@ -1534,6 +1535,10 @@ Video:
   Premiere started: Đang công chiếu. Bắt đầu {timeAgo}
   Player:
     Playing in Picture-in-Picture: Đang phát ở chế độ hình trong hình
+    Stream Recovery:
+      DASH Fallback: "Luồng âm thanh bị lỗi, đang chuyển sang định dạng DASH: {error}"
+      Error Copied: "Đã sao chép lỗi vào bộ nhớ tạm"
+      Legacy Fallback: "Luồng bị lỗi, đang chuyển sang định dạng cũ: {error}"
     Caption Timing:
       Adjust Timing: Điều chỉnh thời gian…
       Caption Timing: Thời gian phụ đề
@@ -2016,6 +2021,7 @@ Tooltips:
   Proxy Settings:
     IP Block Recovery Script Path: Đường dẫn tệp tập lệnh sẽ chạy khi phát hiện bị chặn IP. OpenTubeX chờ tập lệnh chạy xong rồi tải lại video. Nếu bật phương án dự phòng, tập lệnh chỉ chạy khi phương án đó cũng thất bại.
   Player Settings:
+    Pause on Stream Recovery: "Khi luồng video bị lỗi và trình phát tải lại hoặc chuyển sang định dạng hay công cụ khác, video sẽ tạm dừng và lỗi được hiển thị ở đầu trình phát cho đến khi bạn đóng nó. Khi tắt, video tiếp tục phát và lỗi xuất hiện ngắn dưới dạng thông báo."
     Continue Playback When Screen Is Locked: 'Tiếp tục phát âm thanh trong nền và cung cấp các nút điều khiển phương tiện của Android. Tắt tùy chọn này để tạm dừng khi ứng dụng không còn hiển thị.'
     Enable Caption Translations: Khi bật, nút phụ đề và phím tắt C sẽ ưu tiên bản phụ đề tự động dịch sang ngôn ngữ phụ đề ưu tiên nếu video không có bản gốc phù hợp.
     Use Quick Playback Speed Bar: Hiện thanh tốc độ phát nhanh trong phần điều khiển bên phải của trình phát. Nếu bật lưu tốc độ phát thủ công theo kênh, thanh này cũng có nút lưu tốc độ cho kênh hiện tại.

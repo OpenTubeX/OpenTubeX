@@ -650,6 +650,7 @@ Settings:
   Player Settings:
     Default Media Format:
       Default Media Format: 'Fformat Cyfryngau Rhagosodedig'
+    Pause on Stream Recovery: "Seibio wrth adfer ffrwd"
     Buffering:
       Buffering: Byffro
       Description: Dewiswch faint o fideo mae'r chwaraewr yn ei lwytho o flaen llaw ac yn ei gadw wedi'i lwytho.
@@ -1522,6 +1523,10 @@ Video:
     filler: Gwyriadau
   Player:
     Playing in Picture-in-Picture: Yn chwarae mewn llun-mewn-llun
+    Stream Recovery:
+      DASH Fallback: "Methodd y ffrwd sain, yn newid i fformatau DASH: {error}"
+      Error Copied: "Gwall wedi'i gopïo i'r clipfwrdd"
+      Legacy Fallback: "Methodd y ffrwd, yn newid i fformatau etifeddol: {error}"
     Caption Timing:
       Adjust Timing: Addasu amseru…
       Caption Timing: Amseru isdeitlau
@@ -2004,6 +2009,7 @@ Tooltips:
   Proxy Settings:
     IP Block Recovery Script Path: Llwybr y ffeil sgript i'w rhedeg pan ganfyddir rhwystr IP. Mae OpenTubeX yn aros iddi orffen, yna'n ail-lwytho'r fideo. Os yw'r darparwr wrth gefn wedi'i alluogi, dim ond pan fydd y darparwr hwnnw hefyd yn methu y bydd y sgript yn rhedeg.
   Player Settings:
+    Pause on Stream Recovery: "Pan fydd y ffrwd fideo yn methu a'r chwaraewr yn ei hail-lwytho neu'n newid i fformat neu beiriant arall, mae chwarae'n cael ei seibio ac mae'r gwall yn aros ar frig y chwaraewr nes i chi ei wrthod. Pan fydd wedi'i analluogi, mae chwarae'n parhau ac mae'r gwall yn ymddangos yn fyr fel hysbysiad."
     Continue Playback When Screen Is Locked: 'Yn cadw sain yn chwarae yn y cefndir ac yn darparu rheolyddion cyfryngau Android. Diffoddwch hyn i oedi pan nad yw’r ap yn weladwy mwyach.'
     Enable Caption Translations: Pan fydd wedi'i alluogi ac nad yw'r fideo'n darparu trac gwreiddiol cyfatebol, bydd y botwm capsiynau a'r llwybr byr C yn rhoi blaenoriaeth i drac sydd wedi'i gyfieithu'n awtomatig yn yr iaith capsiynau ddewisol.
     Use Quick Playback Speed Bar: Mae'n dangos bar cyflymder chwarae cyflym yn rheolyddion y chwaraewr ar y dde. Os yw cadw cyflymder chwarae â llaw fesul sianel wedi'i alluogi, mae'r bar hefyd yn cynnwys y botwm i gadw'r cyflymder ar gyfer y sianel bresennol.

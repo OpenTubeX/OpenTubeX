@@ -650,6 +650,7 @@ Settings:
   Player Settings:
     Default Media Format:
       Default Media Format: 'Format media implicit'
+    Pause on Stream Recovery: "Pauză la recuperarea fluxului"
     Buffering:
       Buffering: Memorie tampon
       Description: Alege cât din videoclip încarcă playerul în avans și cât păstrează încărcat.
@@ -1535,6 +1536,10 @@ Video:
   Premiere started: Premiera este în curs. A început {timeAgo}
   Player:
     Playing in Picture-in-Picture: Se redă în modul imagine în imagine
+    Stream Recovery:
+      DASH Fallback: "Fluxul audio a eșuat, se trece la formatele DASH: {error}"
+      Error Copied: "Eroare copiată în clipboard"
+      Legacy Fallback: "Fluxul a eșuat, se trece la formatele vechi: {error}"
     Caption Timing:
       Adjust Timing: Ajustează sincronizarea…
       Caption Timing: Sincronizarea subtitrărilor
@@ -2024,6 +2029,7 @@ Tooltips:
   Proxy Settings:
     IP Block Recovery Script Path: Calea fișierului script care se rulează când este detectată blocarea IP-ului. OpenTubeX așteaptă finalizarea acestuia, apoi reîncarcă videoclipul. Dacă este activată sursa de rezervă, scriptul rulează numai când și aceasta eșuează.
   Player Settings:
+    Pause on Stream Recovery: "Când fluxul video eșuează și playerul îl reîncarcă sau trece la alt format sau motor, redarea este pusă pe pauză, iar eroarea rămâne în partea de sus a playerului până când o închizi. Când este dezactivat, redarea continuă, iar eroarea apare pentru scurt timp ca notificare."
     Continue Playback When Screen Is Locked: 'Menține redarea audio în fundal și oferă comenzi media Android. Dezactivează pentru a întrerupe redarea când aplicația nu mai este vizibilă.'
     Enable Caption Translations: Când opțiunea este activată, butonul de subtitrări și comanda rapidă C preferă o pistă tradusă automat în limba preferată dacă videoclipul nu oferă o pistă originală corespunzătoare.
     Use Quick Playback Speed Bar: Afișează o bară rapidă pentru viteza de redare în partea dreaptă a comenzilor playerului. Dacă este activată salvarea manuală a vitezei de redare pentru fiecare canal, bara include și butonul pentru salvarea vitezei canalului curent.

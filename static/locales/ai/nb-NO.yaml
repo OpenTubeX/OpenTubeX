@@ -647,6 +647,7 @@ Settings:
         Destructive pressed: Destruktiv handling ved trykk
         Text and icons on destructive actions: Tekst og ikoner på destruktive handlinger
   Player Settings:
+    Pause on Stream Recovery: "Sett på pause ved gjenoppretting av strøm"
     Buffering:
       Buffering: Bufring
       Description: Velg hvor mye av videoen avspilleren laster inn på forhånd og holder innlastet.
@@ -1503,6 +1504,10 @@ Video:
     filler: Avsporinger
   Player:
     Playing in Picture-in-Picture: Spilles av i bilde-i-bilde
+    Stream Recovery:
+      DASH Fallback: "Lydstrømmen mislyktes, bytter til DASH-formater: {error}"
+      Error Copied: "Feil kopiert til utklippstavlen"
+      Legacy Fallback: "Strømmen mislyktes, bytter til eldre formater: {error}"
     Caption Timing:
       Adjust Timing: Juster timing…
       Caption Timing: Underteksttiming
@@ -1979,6 +1984,7 @@ Tooltips:
   Proxy Settings:
     IP Block Recovery Script Path: Filbane til skriptet som skal kjøres når en IP-blokkering oppdages. OpenTubeX venter til det er ferdig og laster deretter inn videoen på nytt. Hvis reserveløsning er slått på, kjøres skriptet bare når også reserveløsningen mislykkes.
   Player Settings:
+    Pause on Stream Recovery: "Når videostrømmen feiler og spilleren laster den inn på nytt eller bytter til et annet format eller en annen motor, settes avspillingen på pause, og feilen vises øverst i spilleren til du lukker den. Når dette er slått av, fortsetter avspillingen, og feilen vises kort som et varsel."
     Continue Playback When Screen Is Locked: 'Fortsetter lydavspillingen i bakgrunnen og viser Android-mediekontroller. Slå av dette for å sette på pause når appen ikke lenger er synlig.'
     Enable Caption Translations: Når dette er slått på, foretrekker undertekstknappen og hurtigtasten C et automatisk oversatt spor på det foretrukne undertekstspråket hvis videoen ikke har et samsvarende originalspor.
     Use Quick Playback Speed Bar: Viser et hurtigfelt for avspillingshastighet til høyre blant spillerkontrollene. Hvis manuell lagring av avspillingshastighet per kanal er slått på, inneholder feltet også en knapp for å lagre hastigheten for den gjeldende kanalen.

@@ -175,3 +175,58 @@
   font-variant-numeric: tabular-nums;
   text-shadow: 0 1px 2px rgb(0 0 0 / 70%);
 }
+
+.streamRecoveryNotice {
+  position: absolute;
+  z-index: 5;
+  inset-block-start: 12px;
+  inset-inline: 12px;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px 12px;
+  padding-block: 8px;
+  padding-inline: 12px;
+  border-radius: calc(8px * var(--ui-roundness));
+  color: #fff;
+  background: rgb(0 0 0 / 85%);
+  box-shadow: 0 2px 8px rgb(0 0 0 / 35%);
+  font-size: 14px;
+  cursor: auto;
+}
+
+.streamRecoveryNoticeIcon {
+  flex: 0 0 auto;
+  color: var(--accent-color);
+}
+
+.streamRecoveryNoticeMessage {
+  /* Keep Copy and Dismiss inside small players; Copy and the tooltip keep the full text. */
+  display: -webkit-box;
+  flex: 1 1 16em;
+  overflow: hidden;
+  overflow-wrap: anywhere;
+  user-select: text;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 3;
+}
+
+.streamRecoveryNoticeButton {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding-block: 6px;
+  padding-inline: 12px;
+  color: #fff;
+  background-color: #3a3a3a;
+  border: 0;
+  border-radius: calc(999px * var(--ui-roundness));
+  cursor: pointer;
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.streamRecoveryNoticeButton:hover,
+.streamRecoveryNoticeButton:focus-visible {
+  background-color: #5a5a5a;
+}

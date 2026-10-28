@@ -44,16 +44,24 @@ export function parseAiSlopList(text) {
 }
 
 /**
+ * Collaboration videos match when any of their channels is on the list.
  * @param {Set<string>} entries
- * @param {{ authorId?: string | null, authorHandle?: string | null }} video
+ * @param {{
+ *  authorId?: string | null,
+ *  authorHandle?: string | null,
+ *  collaborators?: { id: string, handle?: string }[]
+ * }} video
  */
-export function isOnAiSlopList(entries, { authorId, authorHandle }) {
+export function isOnAiSlopList(entries, { authorId, authorHandle, collaborators }) {
   if (entries.size === 0) {
     return false
   }
 
-  return (authorId != null && entries.has(authorId)) ||
-    (authorHandle != null && entries.has(normalizeChannelHandle(authorHandle)))
+  const isListed = (id, handle) => (id != null && entries.has(id)) ||
+    (handle != null && entries.has(normalizeChannelHandle(handle)))
+
+  return isListed(authorId, authorHandle) ||
+    (collaborators?.some(({ id, handle }) => isListed(id, handle)) ?? false)
 }
 
 /**
