@@ -11,7 +11,17 @@
 </template>
 
 <script setup>
-import { computed, onMounted, ref, shallowRef, useTemplateRef, watch } from 'vue'
+import {
+  computed,
+  onActivated,
+  onBeforeUnmount,
+  onDeactivated,
+  onMounted,
+  ref,
+  shallowRef,
+  useTemplateRef,
+  watch
+} from 'vue'
 import { useI18n } from 'vue-i18n'
 
 import SubscriptionsTabUi from './SubscriptionsTabUi/SubscriptionsTabUi.vue'
@@ -21,6 +31,7 @@ import store from '../store/index'
 import { useKeepAliveEffectScope } from '../composables/useKeepAliveEffectScope'
 import { useRelativeTimeClock } from '../composables/useRelativeTimeClock'
 import { useSubscriptionChannelUpdates } from '../composables/useSubscriptionChannelUpdates'
+import { getUpcomingPremiereTimestamp } from '../helpers/subscription-entries'
 import { getCachedRelativeTimeFormat, getRelativeTimeFromDate } from '../helpers/utils'
 import { formatShortDateTime } from '../helpers/dateFormat'
 import {
@@ -43,6 +54,13 @@ const dateFormat = computed(() => store.getters.getDateFormat)
 const timeFormat = computed(() => store.getters.getTimeFormat)
 
 let alreadyLoadedRemotely = false
+
+const MAX_TIMEOUT_MS = 2 ** 31 - 1
+/** @type {number | null} */
+let nextScheduledStartTimestamp = null
+/** @type {ReturnType<typeof setTimeout> | null} */
+let scheduledStartTimer = null
+let isActive = true
 
 const now = useRelativeTimeClock()
 
@@ -182,6 +200,43 @@ watch(
   }
 )
 
+watch(() => store.getters.getShowScheduledLiveStreamsFirst, () => {
+  if (subscriptionCacheReady.value) {
+    loadVideosFromCacheForAllActiveProfileChannels()
+  }
+})
+
+// Started streams move from their announcement position and show as live.
+function scheduleScheduledStartUpdate() {
+  clearScheduledStartTimer()
+  // A refresh can finish after this tab was hidden or closed.
+  if (!isActive || nextScheduledStartTimestamp === null) return
+
+  scheduledStartTimer = setTimeout(() => {
+    scheduledStartTimer = null
+    loadVideosFromCacheForAllActiveProfileChannels()
+  }, Math.min(Math.max(nextScheduledStartTimestamp - Date.now(), 0), MAX_TIMEOUT_MS))
+}
+
+function clearScheduledStartTimer() {
+  if (scheduledStartTimer !== null) {
+    clearTimeout(scheduledStartTimer)
+    scheduledStartTimer = null
+  }
+}
+
+function stopScheduledStartUpdates() {
+  isActive = false
+  clearScheduledStartTimer()
+}
+
+onActivated(() => {
+  isActive = true
+  scheduleScheduledStartUpdate()
+})
+onDeactivated(stopScheduledStartUpdates)
+onBeforeUnmount(stopScheduledStartUpdates)
+
 if (!subscriptionCacheReady.value) {
   watch(subscriptionCacheReady, () => {
     if (!alreadyLoadedRemotely) {
@@ -236,8 +291,18 @@ function loadVideosFromCacheForAllActiveProfileChannels() {
     return cacheEntry.videos ?? []
   })
 
-  videoList.value = updateVideoListAfterProcessing(videoList_)
+  const currentTime = Date.now()
+  nextScheduledStartTimestamp = null
+  for (const video of videoList_) {
+    const timestamp = getUpcomingPremiereTimestamp(video)
+    if (timestamp > currentTime && (nextScheduledStartTimestamp === null || timestamp < nextScheduledStartTimestamp)) {
+      nextScheduledStartTimestamp = timestamp
+    }
+  }
+
+  videoList.value = updateVideoListAfterProcessing(videoList_, currentTime)
   isLoading.value = false
+  scheduleScheduledStartUpdate()
 }
 
 // Show the channels that have been fetched so far, instead of waiting for the

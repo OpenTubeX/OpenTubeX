@@ -762,11 +762,15 @@ function parseYouTubeRSSPublicationDates(rssString) {
 }
 
 /**
+ * Only needed when scheduled entries stay at their announcement position.
  * @param {string} channelId
  * @param {object[]} videos
  */
 async function enrichScrapedUpcomingPublicationDates(channelId, videos) {
-  if (!videos.some(video => video.isUpcoming === true || video.premiere === true)) {
+  if (
+    store.getters.getShowScheduledLiveStreamsFirst ||
+    !videos.some(video => video.isUpcoming === true || video.premiere === true)
+  ) {
     return videos
   }
 
@@ -1284,9 +1288,7 @@ async function getChannelVideosLocalScraper(channel, t, errorChannels, failedAtt
 
     return {
       ...result,
-      videos: store.getters.getShowScheduledLiveStreamsFirst
-        ? result.videos
-        : await enrichScrapedUpcomingPublicationDates(channel.id, result.videos)
+      videos: await enrichScrapedUpcomingPublicationDates(channel.id, result.videos)
     }
   } catch (err) {
     handleSubscriptionFetchError(channel, err, t('Local API Error (Click to copy)'), {
@@ -1632,7 +1634,10 @@ async function getChannelLiveLocal(channel, t, errorChannels, failedAttempts = 0
       return { videos: null }
     }
 
-    return result
+    return {
+      ...result,
+      videos: await enrichScrapedUpcomingPublicationDates(channel.id, result.videos)
+    }
   } catch (err) {
     handleSubscriptionFetchError(channel, err, t('Local API Error (Click to copy)'), {
       category: 'subscription live streams',

@@ -410,6 +410,40 @@ test('shows a queued video without reloading the page', async ({ page }) => {
   await expect(page.locator('[data-home-section="watchQueue"]')).toContainText('Partly watched video')
 })
 
+test.describe('scheduled entries in Home', () => {
+  const scheduledTime = now + 30 * 86_400_000
+
+  test.use({
+    seed: {
+      ...homeSeed,
+      settings: { showScheduledLiveStreamsFirst: false },
+      subscriptionCache: [{
+        ...homeSeed.subscriptionCache[0],
+        videos: [
+          subscriptionVideo('homeprem001', 'Scheduled Home premiere', {
+            published: scheduledTime,
+            isUpcoming: true,
+            isPremiere: true,
+            premiereDate: new Date(scheduledTime).toISOString(),
+            subscriptionFeedPublished: now - 7_200_000
+          }),
+          ...homeSeed.subscriptionCache[0].videos
+        ]
+      }]
+    }
+  })
+
+  test('keeps a scheduled premiere at its announcement position in new subscription content', async ({ page }) => {
+    await goTo(page, 'home')
+
+    const titles = page.locator('[data-home-section="newSinceLastVisit"] .mediaDetails strong')
+    await expect(titles.nth(0)).toHaveText('New Home post')
+    await expect(titles.nth(1)).toHaveText('New Home short')
+    await expect(titles.nth(2)).toHaveText('New Home video')
+    await expect(titles.nth(3)).toHaveText('Scheduled Home premiere')
+  })
+})
+
 test.describe('fresh installation', () => {
   test.use({
     seed: { freshProfile: true },

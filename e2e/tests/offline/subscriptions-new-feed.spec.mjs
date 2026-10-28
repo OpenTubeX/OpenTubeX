@@ -1209,6 +1209,52 @@ test.describe('new subscriptions feed sorting', () => {
   })
 })
 
+test.describe('scheduled entries in the new subscriptions feed', () => {
+  const scheduledTime = now + 30 * 24 * HOUR
+
+  test.use({
+    seed: {
+      settings: { ...commonSettings, showScheduledLiveStreamsFirst: true },
+      profiles: [profile()],
+      subscriptionCache: [{
+        _id: CHANNEL_ID,
+        videos: [
+          video('scheduled-premiere', 'Scheduled premiere', scheduledTime, {
+            isNewInSubscriptionFeed: true,
+            isUpcoming: true,
+            isPremiere: true,
+            premiereDate: new Date(scheduledTime).toISOString(),
+            subscriptionFeedPublished: now - 2 * HOUR
+          }),
+          video('recent-upload', 'Recent upload', now - HOUR, { isNewInSubscriptionFeed: true }),
+          video('older-upload', 'Older upload', now - 3 * HOUR, { isNewInSubscriptionFeed: true })
+        ],
+        videosTimestamp: new Date(now).toISOString(),
+        shorts: [],
+        shortsTimestamp: new Date(now).toISOString(),
+        liveStreams: [],
+        liveStreamsTimestamp: new Date(now).toISOString(),
+        communityPosts: [],
+        communityPostsTimestamp: new Date(now).toISOString()
+      }]
+    }
+  })
+
+  test('keeps scheduled entries at their announcement position when they are not shown first', async ({ page }) => {
+    const videoTitles = () => page.locator('.newFeed > .autoGrid .ft-list-video').evaluateAll(cards => {
+      return cards.map(card => card.querySelector('.title').textContent.trim())
+    })
+
+    await goTo(page, 'subscriptions')
+    await page.locator('[data-subscription-feed-tab="all"]').click()
+    await expect.poll(videoTitles).toEqual(['Scheduled premiere', 'Recent upload', 'Older upload'])
+
+    await page.evaluate(() => window.$store.dispatch('updateShowScheduledLiveStreamsFirst', false))
+
+    await expect.poll(videoTitles).toEqual(['Recent upload', 'Scheduled premiere', 'Older upload'])
+  })
+})
+
 test.describe('new feed settings and seen state', () => {
   const videoPost = {
     ...post('new-post-2', 'New video post', now - 40 * 60000),

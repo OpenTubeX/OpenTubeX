@@ -199,6 +199,7 @@ const contentOptions = computed(() => ({
   onlyShowLatestFromChannel: store.getters.getOnlyShowLatestFromChannel,
   onlyShowLatestFromChannelNumber: store.getters.getOnlyShowLatestFromChannelNumber,
   restrictedPlaybackConfigured: hasConfiguredRestrictedPlaybackAuthentication(store.getters),
+  showScheduledLiveStreamsFirst: store.getters.getShowScheduledLiveStreamsFirst,
   sortBy: sortBy.value
 }))
 const getCurrentContentByCategory = () => getNewSubscriptionFeedEntries({
