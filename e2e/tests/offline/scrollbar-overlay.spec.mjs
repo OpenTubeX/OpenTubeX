@@ -681,6 +681,30 @@ test.describe('overlay scrollbars', () => {
       await expect(page.locator('[data-moved-child-test="receiver"] > .os-scrollbar-vertical')).toHaveClass(/os-scrollbar-visible/)
     })
 
+    test('ends a handle drag when moving the bars releases the pointer', async ({ page }) => {
+      const viewport = await addNestedCustomSpeedScroller(page, 'data-lost-capture-test', 0)
+      await viewport.hover()
+      const box = await viewport.locator(':scope > .os-scrollbar-vertical .os-scrollbar-handle').boundingBox()
+      await page.mouse.move(box.x + box.width / 2, box.y + box.height / 2)
+      await page.mouse.down()
+      await page.mouse.move(box.x + box.width / 2, box.y + box.height / 2 + 30)
+      await expect.poll(() => viewport.evaluate(element => element.scrollTop)).toBeGreaterThan(0)
+      // Replacing the children takes the bars along, which drops the capture.
+      await viewport.evaluate(element => {
+        const content = document.createElement('div')
+        content.style.height = '300px'
+        element.replaceChildren(content)
+      })
+      await expect(viewport.locator(':scope > .os-scrollbar-vertical')).toHaveCount(1)
+      // Without the capture, a release away from the bar never reaches it.
+      await page.mouse.move(20, 20)
+      await page.mouse.up()
+      await viewport.evaluate(element => { element.scrollTop = 0 })
+      await viewport.evaluate(element => { element.firstElementChild.style.height = '400px' })
+      await page.evaluate(() => new Promise(resolve => requestAnimationFrame(() => requestAnimationFrame(resolve))))
+      expect(await viewport.evaluate(element => element.scrollTop)).toBe(0)
+    })
+
     test('lets handle presses reach the container as scroll intent', async ({ page }) => {
       const viewport = await addNestedCustomSpeedScroller(page, 'data-handle-press-test', 0)
       await viewport.evaluate(element => element.addEventListener('pointerdown', event => {

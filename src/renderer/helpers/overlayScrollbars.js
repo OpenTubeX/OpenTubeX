@@ -479,6 +479,7 @@ function addHandleDrag(instance, bar) {
       handle.removeEventListener('pointermove', onPointerMove)
       handle.removeEventListener('pointerup', finish)
       handle.removeEventListener('pointercancel', finish)
+      handle.removeEventListener('lostpointercapture', finish)
       if (instance.drag === scheduleDrag) instance.drag = null
       if (frame !== null) {
         cancelAnimationFrame(frame)
@@ -489,6 +490,9 @@ function addHandleDrag(instance, bar) {
     handle.addEventListener('pointermove', onPointerMove)
     handle.addEventListener('pointerup', finish)
     handle.addEventListener('pointercancel', finish)
+    // Moving the bars, when a container's children are replaced, releases
+    // the capture without a pointerup.
+    handle.addEventListener('lostpointercapture', finish)
     instance.drag = scheduleDrag
     handle.setPointerCapture(pointerId)
   })
