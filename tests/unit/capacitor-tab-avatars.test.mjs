@@ -3,6 +3,7 @@ import test from 'node:test'
 import { Capacitor } from '@capacitor/core'
 import { reactive } from 'vue'
 import { createFilesystem, filesystemPluginHeader } from '../helpers/capacitor-filesystem.mjs'
+import { connectionEvents } from '../../src/renderer/helpers/networkRecovery.js'
 
 globalThis.androidBridge = {}
 Capacitor.PluginHeaders = [filesystemPluginHeader]
@@ -99,7 +100,7 @@ test('a new avatar replaces the stored one and closed tabs release theirs', asyn
   dispose()
 })
 
-test('a failed download is not retried until the source changes', async t => {
+test('a failed download is retried only when the connection comes back', async t => {
   const state = setup(t)
   state.fetchAvatar.mock.mockImplementation(async () => null)
   const dispose = state.start()
@@ -109,6 +110,15 @@ test('a failed download is not retried until the source changes', async t => {
   assert.equal(state.fetchAvatar.mock.callCount(), 1)
   assert.equal(getCapacitorTabAvatar(channelTab), null)
   assert.equal(state.filesystem.files.size, 0)
+
+  state.fetchAvatar.mock.mockImplementation(async source => `data:image/jpeg;base64,${source}`)
+  connectionEvents.dispatchEvent(new CustomEvent('change', { detail: 'offline' }))
+  await settle()
+  assert.equal(state.fetchAvatar.mock.callCount(), 1)
+  connectionEvents.dispatchEvent(new CustomEvent('change', { detail: 'restored' }))
+  await settle()
+  assert.equal(state.fetchAvatar.mock.callCount(), 2)
+  assert.equal(getCapacitorTabAvatar(channelTab), 'data:image/jpeg;base64,176x176')
   dispose()
 })
 

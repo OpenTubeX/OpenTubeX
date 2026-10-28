@@ -65,7 +65,7 @@ export function writeStoredTabImage(name, entry) {
 export function removeStoredTabImage(name) {
   if (!isValidName(name)) return Promise.resolve()
   return enqueue(() => Filesystem.deleteFile({ path: filePath(name), directory }))
-    .catch(() => {})
+    .catch(error => isMissing(error) || console.warn(`Failed to remove cached tab image ${name}:`, error))
 }
 
 /** @param {string} prefix */
@@ -73,7 +73,8 @@ export function removeStoredTabImages(prefix) {
   return enqueue(async () => {
     for (const file of await listFiles()) {
       if (!file.name.startsWith(prefix)) continue
-      await Filesystem.deleteFile({ path: `${folder}/${file.name}`, directory }).catch(() => {})
+      await Filesystem.deleteFile({ path: `${folder}/${file.name}`, directory })
+        .catch(error => isMissing(error) || console.warn(`Failed to remove cached tab image ${file.name}:`, error))
     }
   })
 }

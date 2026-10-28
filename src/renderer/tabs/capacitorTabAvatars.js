@@ -1,4 +1,5 @@
 import { shallowReactive, watch } from 'vue'
+import { connectionEvents } from '../helpers/networkRecovery.js'
 import {
   readStoredTabImages,
   removeStoredTabImage,
@@ -82,18 +83,32 @@ export function initializeCapacitorTabAvatars(store, tabsReady, fetchAvatar = fe
   if (!process.env.IS_CAPACITOR) return () => {}
   let disposed = false
   let restored = false
+  // Downloads that failed, retried once the connection comes back.
+  const failed = new Set()
 
   async function download(key, source) {
     try {
       const dataUrl = await fetchAvatar(source, store.getters)
-      if (!dataUrl || disposed || attempted.get(key) !== source) return
+      if (disposed || attempted.get(key) !== source) return
+      if (!dataUrl) {
+        failed.add(key)
+        return
+      }
       const entry = { source, image: await shrinkAvatar(dataUrl) }
       if (disposed || attempted.get(key) !== source) return
       avatars.set(key, entry)
       writeStoredTabImage(AVATAR_PREFIX + key, entry)
     } catch (error) {
+      if (!disposed && attempted.get(key) === source) failed.add(key)
       console.warn('Failed to cache mobile tab avatar:', error)
     }
+  }
+
+  function retryFailed({ detail }) {
+    if (detail === 'offline' || failed.size === 0) return
+    for (const key of failed) attempted.delete(key)
+    failed.clear()
+    sync()
   }
 
   function sync() {
@@ -135,8 +150,11 @@ export function initializeCapacitorTabAvatars(store, tabsReady, fetchAvatar = fe
     sync()
   })
 
+  connectionEvents.addEventListener('change', retryFailed)
+
   return () => {
     disposed = true
+    connectionEvents.removeEventListener('change', retryFailed)
     stop()
   }
 }
