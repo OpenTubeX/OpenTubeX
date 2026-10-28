@@ -1,3 +1,4 @@
+// @ts-check
 import { getConfiguredKeyboardShortcuts } from '../../constants.js'
 import { keyboardShortcutsEqual } from './keyboardShortcuts.js'
 import { areJsonValuesEqual } from './jsonValues.js'
@@ -64,9 +65,14 @@ function activityText(value) {
     : null
 }
 
+/**
+ * @param {unknown} entries
+ * @param {(entry: any) => unknown} getId
+ * @returns {Map<string, any>}
+ */
 function byId(entries, getId) {
-  return new Map((Array.isArray(entries) ? entries : [])
-    .map(entry => [getId(entry), entry]).filter(([id]) => typeof id === 'string' && id.length > 0))
+  return new Map(/** @type {[string, any][]} */ ((Array.isArray(entries) ? entries : [])
+    .map(entry => [getId(entry), entry]).filter(([id]) => typeof id === 'string' && id.length > 0)))
 }
 
 function addSummary(changes, field, name) {
@@ -312,10 +318,10 @@ export class SyncLiveConnectionState {
     const controller = new AbortController()
     this.controller = controller
     this.locks.request('opentubex-sync-server-live-connected', { signal: controller.signal }, () => {
-      return new Promise(resolve => {
+      return /** @type {Promise<void>} */ (new Promise(resolve => {
         if (controller.signal.aborted) resolve()
         else controller.signal.addEventListener('abort', () => resolve(), { once: true })
-      })
+      }))
     }).catch(() => {})
   }
 
@@ -333,6 +339,16 @@ export class SyncLiveConnectionState {
 
 // Long polling uses the same authenticated, cancellable HTTP transport on
 // desktop and Android. The durable server cursor handles missed notifications.
+/**
+ * @param {any} client
+ * @param {() => Promise<unknown>} onChange
+ * @param {(error: unknown) => Promise<boolean | void> | boolean | void} onError
+ * @param {object} [options]
+ * @param {() => Promise<boolean>} [options.prepare]
+ * @param {() => Promise<boolean>} [options.waitForPendingSync]
+ * @param {(connected: boolean) => void} [options.onConnectionChange]
+ * @param {(ms: number) => Promise<unknown>} [options.sleep]
+ */
 export async function watchSyncChanges(client, onChange, onError, {
   prepare = async () => true,
   waitForPendingSync = async () => false,

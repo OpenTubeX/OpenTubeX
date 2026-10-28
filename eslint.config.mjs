@@ -465,5 +465,15 @@ export default defineConfig([
       '@stylistic/space-before-function-paren': 'off',
       '@stylistic/comma-dangle': ['error', 'only-multiline'],
     },
+  },
+  {
+    // The main process, preload and shared modules have no import cycles; keep
+    // it that way. The renderer still has some, so it is not checked yet.
+    // _scripts/ProcessBoundaryPlugin.js keeps renderer-only code out of them.
+    name: 'process-boundaries',
+    files: ['src/main/**/*.js', 'src/preload/**/*.js', 'src/datastores/**/*.js', 'src/*.js'],
+    rules: {
+      'import-x/no-cycle': ['error', { ignoreExternal: true }],
+    },
   }
 ])

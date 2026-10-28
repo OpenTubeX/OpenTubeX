@@ -106,7 +106,7 @@
               />
             </button>
           </div>
-          <template v-if="uploadNotificationsSupported">
+          <template v-if="supportsUploadNotifications">
             <div class="bulkNotificationSetting">
               <FtToggleSwitch
                 :label="t('Channel.Notify about new uploads')"
@@ -288,7 +288,7 @@
               </div>
             </div>
             <div
-              v-if="uploadNotificationsSupported"
+              v-if="supportsUploadNotifications"
               class="notificationSettings"
             >
               <FtToggleSwitch
@@ -396,6 +396,7 @@ import FtSettingsSubpage from '../../FtSettingsSubpage/FtSettingsSubpage.vue'
 import FtToggleSwitch from '../../FtToggleSwitch/FtToggleSwitch.vue'
 
 import store from '../../../store/index'
+import { supportsUploadNotifications } from '../../../helpers/uploadNotifications'
 import { showToast } from '../../../helpers/utils'
 import { clampOverlayScrollTop } from '../../../helpers/overlayScrollbars'
 import { hasConfiguredRestrictedPlaybackAuthentication } from '../../../helpers/restricted-playback'
@@ -489,7 +490,6 @@ const { page: channelPage, hasMore: hasMoreChannels, displayedItems: displayedCh
 })
 
 const feedTypes = computed(() => getSubscriptionFeedTypeOptions(t))
-const uploadNotificationsSupported = process.env.IS_ELECTRON || (process.env.IS_CAPACITOR && !process.env.IS_IOS)
 const limitOptions = computed(() => getSubscriptionDailyVideoLimitOptions(t))
 const limitNames = computed(() => limitOptions.value.map(option => option.label))
 const limitValues = computed(() => limitOptions.value.map(option => option.value))

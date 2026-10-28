@@ -2,7 +2,7 @@ import assert from 'node:assert/strict'
 import { readFileSync } from 'node:fs'
 import test from 'node:test'
 import { compileFunction } from 'node:vm'
-import { usesInvidiousApi } from '../../src/apiBackends.js'
+import { importWithStubs, sourceUrl } from '../helpers/module-stubs.mjs'
 import { extractSharedMediaLink, extractSharedYoutubeLink } from '../../src/renderer/helpers/sharedYoutubeLink.js'
 import { parseHistoryRepairPlayer } from '../../src/historyRepair.js'
 
@@ -12,6 +12,11 @@ const handler = app.slice(app.indexOf('async function handleAndroidSharedText(')
 const actions = component.slice(component.indexOf('async function loadVideo('), component.indexOf('</script>'))
 const receiverSource = readFileSync('src/renderer/helpers/androidIncomingShare.js', 'utf8')
 const initializeReceiver = compileFunction(`${receiverSource.slice(receiverSource.indexOf('export async')).replace('export async', 'async')}\nreturn initializeAndroidIncomingShare`, ['AndroidShare'])
+const fallbackToasts = { show: () => {} }
+const [{ requestWithFallback }] = await importWithStubs([sourceUrl('src/renderer/helpers/api/fallback.js')], {
+  [sourceUrl('src/renderer/helpers/utils.js')]: { showInvidiousFallbackToast: backend => fallbackToasts.show(backend) },
+})
+process.env.SUPPORTS_LOCAL_API = 'true'
 const id = 'abcdefghijk'
 const video = { videoId: id, title: 'Shared video', lengthSeconds: 120, author: 'Channel', authorId: 'UC-channel', published: 100, liveNow: false }
 
@@ -214,11 +219,12 @@ function videoActions({ backend = 'local', fallback = false, local, invidious, t
     dispatch: async (...args) => calls.push(args),
     commit: (...args) => calls.push(args)
   }
-  const add = compileFunction(`${actions}\nreturn addVideo`, ['props', 'store', 'controller', 'loading', 'failed', 'getLocalHistoryMetadata', 'getInvidiousHistoryMetadata', 'parseHistoryRepairPlayer', 'emit', 'showToast', 't', 'console', 'AbortSignal', 'showInvidiousFallbackToast', 'usesInvidiousApi'])(
+  fallbackToasts.show = () => warnings.push('direct')
+  const add = compileFunction(`${actions}\nreturn addVideo`, ['props', 'store', 'controller', 'loading', 'failed', 'getLocalHistoryMetadata', 'getInvidiousHistoryMetadata', 'parseHistoryRepairPlayer', 'emit', 'showToast', 't', 'console', 'AbortSignal', 'requestWithFallback'])(
     { videoId: id }, store, controller, loading, failed,
     local ?? (async () => ({ videoDetails: { videoId: id, title: video.title, author: video.author, channelId: video.authorId, lengthSeconds: '120' } })),
     invidious ?? (async () => video), parseHistoryRepairPlayer,
-    event => emitted.push(event), () => {}, key => key, { error() {} }, { any: AbortSignal.any, timeout }, () => warnings.push('direct'), usesInvidiousApi
+    event => emitted.push(event), () => {}, key => key, { error() {} }, { any: AbortSignal.any, timeout }, requestWithFallback
   )
   return { add, calls, emitted, failed, loading, controller, warnings }
 }

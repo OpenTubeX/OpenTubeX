@@ -1,3 +1,4 @@
+// @ts-check
 import { ipcRenderer } from 'electron/renderer'
 import { IpcChannels } from '../constants.js'
 

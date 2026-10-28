@@ -1,3 +1,4 @@
+// @ts-check
 import * as privacy from './sync-server-privacy-crypto.js'
 import { runBackgroundJob } from './background-jobs.js'
 

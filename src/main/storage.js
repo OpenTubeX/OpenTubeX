@@ -1,8 +1,11 @@
+// @ts-check
 import { app, session } from 'electron'
 import { lstat, readdir, rm, stat } from 'node:fs/promises'
 import { basename, join } from 'node:path'
 
+import { IpcChannels } from '../constants'
 import * as baseHandlers from '../datastores/handlers/base'
+import { handleTrusted } from './ipc'
 import { TabManager } from './tabs/TabManager'
 import { tabPreviewStorage } from './tabs/TabPreviewStorage'
 import { clearYtDlpPlaybackCache } from './ytDlpPlaybackCache'
@@ -216,4 +219,12 @@ export async function clearStorage(category) {
 export async function compactStorageDatabases() {
   const results = await baseHandlers.compactAllDatastores()
   return results.every(result => result.status === 'fulfilled')
+}
+
+export function setupStorageIpc() {
+  handleTrusted(IpcChannels.STORAGE_GET_USAGE, () => getStorageUsage(), {})
+  // Only the focused window may clear data, after the user confirmed it there.
+  handleTrusted(IpcChannels.STORAGE_CLEAR, (event, category) =>
+    event.sender.isFocused() ? clearStorage(category) : false, false)
+  handleTrusted(IpcChannels.STORAGE_COMPACT_DATABASES, () => compactStorageDatabases(), false)
 }

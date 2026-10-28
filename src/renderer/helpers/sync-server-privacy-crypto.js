@@ -1,3 +1,4 @@
+// @ts-check
 import { base64ToBytes, bytesToBase64 } from './sync-server-protocol.js'
 
 export const PRIVACY_VERSION = 1

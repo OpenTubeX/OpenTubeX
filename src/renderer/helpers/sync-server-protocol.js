@@ -1,3 +1,4 @@
+// @ts-check
 export const SYNC_SERVER_DEVICE_ID_BYTES = 16
 
 const MAX_DEVICE_NAME_CHARS = 80

@@ -1,7 +1,9 @@
 import { invidiousGetChannelId, invidiousGetChannelInfo } from './api/invidious'
 import { getLocalChannel, getLocalChannelId, parseLocalChannelHeader } from './api/local'
-import { showInvidiousFallbackToast } from './utils'
+import { requestWithFallback } from './api/fallback'
 import { usesInvidiousApi } from '../../apiBackends'
+
+const isMissingChannelError = err => err?.message === 'This channel does not exist.'
 
 /**
  * @param {string} id
@@ -12,24 +14,24 @@ import { usesInvidiousApi } from '../../apiBackends'
  * @returns {Promise<{ channel: any, fromInvidiousApi: boolean } | { invalid: true }>}
  */
 async function findChannelById(id, backendOptions) {
-  const preferInvidiousApi = !process.env.SUPPORTS_LOCAL_API || usesInvidiousApi(backendOptions.preference)
+  let requests = 0
   try {
-    return preferInvidiousApi
-      ? { channel: await invidiousGetChannelInfo(id), fromInvidiousApi: true }
-      : { channel: await getLocalChannel(id), fromInvidiousApi: false }
+    const { api, result } = await requestWithFallback({
+      local: () => { requests++; return getLocalChannel(id) },
+      invidious: () => { requests++; return invidiousGetChannelInfo(id) },
+    }, {
+      backend: backendOptions.preference,
+      fallback: backendOptions.fallback,
+      canFallBack: err => !isMissingChannelError(err),
+    })
+    return { channel: result, fromInvidiousApi: api === 'invidious' }
   } catch (err) {
-    // don't bother with fallback if channel doesn't exist
-    if (err.message && err.message === 'This channel does not exist.') {
+    // don't bother with fallback if channel doesn't exist. Only the preferred
+    // backend decides that; a fallback's answer is reported as an error.
+    if (requests === 1 && isMissingChannelError(err)) {
       return { invalid: true }
     }
-    if (!process.env.SUPPORTS_LOCAL_API || !backendOptions.fallback) {
-      throw err
-    }
-    if (preferInvidiousApi) {
-      showInvidiousFallbackToast(backendOptions.preference)
-      return { channel: await getLocalChannel(id), fromInvidiousApi: false }
-    }
-    return { channel: await invidiousGetChannelInfo(id), fromInvidiousApi: true }
+    throw err
   }
 }
 

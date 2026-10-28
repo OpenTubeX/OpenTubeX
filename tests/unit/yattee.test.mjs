@@ -18,11 +18,11 @@ import {
   normalizeYatteeComments,
   normalizeYatteePlaylist,
   normalizeYatteeSearchItem,
-  normalizeYatteeServerUrl,
   normalizeYatteeSuggestions,
   normalizeYatteeVideo,
   resolveYatteeUrl
 } from '../../src/renderer/helpers/api/yattee.js'
+import { normalizeYatteeServerUrl } from '../../src/apiBackends.js'
 
 const server = 'https://yattee.example/server'
 const upstream = 'https://rr1---sn-test.googlevideo.com/videoplayback?expire=2000000000&itag=140&dur=30.000&xtags=lang%3Den%3Aacont%3Doriginal'

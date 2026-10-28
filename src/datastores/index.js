@@ -1,3 +1,4 @@
+// @ts-check
 import Datastore from '@seald-io/nedb'
 
 const options = {
@@ -27,7 +28,8 @@ export function onLegacyDatastoreImported(listener) {
   legacyImportListeners.add(listener)
 }
 
-let dbPath = null
+/** @type {(dbName: string) => string} */
+let dbPath
 let createDatastore
 
 if (process.env.IS_ELECTRON_MAIN) {

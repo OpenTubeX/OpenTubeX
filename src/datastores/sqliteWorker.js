@@ -1,9 +1,12 @@
+// @ts-check
 // Runs SQLite for the web build. OPFS synchronous access handles are only
 // available in dedicated workers.
 import sqlite3InitModule from '@sqlite.org/sqlite-wasm'
 import { SCHEMA_VERSION } from './sqliteSchemaVersion.js'
 
+/** @type {Promise<void> | null} */
 let lock = null
+/** @type {Promise<any> | null} */
 let pool = null
 const databases = new Map()
 
@@ -13,12 +16,12 @@ const databases = new Map()
  * previous worker to end instead of failing.
  */
 function acquireLibraryLock() {
-  return new Promise((resolve, reject) => {
+  return /** @type {Promise<void>} */ (new Promise((resolve, reject) => {
     navigator.locks.request('opentubex-library', { signal: AbortSignal.timeout(5000) }, () => {
       resolve()
       return new Promise(() => {})
     }).catch(reject)
-  })
+  }))
 }
 
 async function getPool() {

@@ -24,10 +24,9 @@ test('watch activation and disposal do not accumulate autoplay inactivity timers
     const watch = {
       ...methods,
       isTabPresented: true,
-      subscriptionShortsFeedActive: false,
       defaultAutoplayInterruptionIntervalHours: 3,
       autoplayInterruptionTimeout: null,
-      resetShortsSwipe() {},
+      shortsNavigation: { resetSwipe() {}, resumeScrollTracking() {} },
       abortAutoplayCountdown() {}
     }
     watch.activateWatchRuntime()

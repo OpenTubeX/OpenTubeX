@@ -1,5 +1,6 @@
 import { base64EncodeUtf8, createWebURL, fetchWithTimeout, randomArrayItem } from '../../helpers/utils'
-import { createYatteeAuthorization, normalizeYatteeServerUrl } from '../../helpers/api/yattee'
+import { createYatteeAuthorization } from '../../helpers/api/yattee'
+import { normalizeYatteeServerUrl } from '../../../apiBackends'
 
 const state = {
   currentInvidiousInstance: '',

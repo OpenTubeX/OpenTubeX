@@ -112,7 +112,7 @@
               @timeupdate="updateCurrentTime"
               @seeking="handleSeeking"
               @seeked="handleSeeked"
-              @fullscreen-live-chat-change="handleFullscreenLiveChatChange"
+              @dock-panel-change="handleDockPanelChange"
               @toggle-theatre-mode="toggleTheatreMode"
               @chapters-overlay-change="handleChaptersOverlayChange"
             />
@@ -544,7 +544,9 @@ function toggleChat() {
   else chatOpen.value = true
 }
 
-function handleFullscreenLiveChatChange({ open, target }) {
+/** External media has no other docked panels. */
+function handleDockPanelChange({ panel, open, target }) {
+  if (panel !== 'liveChat') return
   fullscreenLiveChatTarget.value = open ? target : null
   fullscreenLiveChatOpen.value = open && target !== null
   if (fullscreenLiveChatOpen.value) chatOpen.value = true

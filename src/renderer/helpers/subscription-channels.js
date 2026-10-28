@@ -29,7 +29,7 @@ export function getSubscriptionDailyVideoLimitOptions(t) {
 }
 
 /**
- * @param {{ feedTypes?: unknown, notificationFeedTypes?: unknown, dailyVideoLimit?: unknown, showMembersOnly?: unknown } | undefined} channel
+ * @param {{ feedTypes?: unknown, notificationFeedTypes?: unknown, dailyVideoLimit?: unknown, showMembersOnly?: unknown }} [channel]
  */
 export function normalizeSubscriptionChannelSettings(channel) {
   const dailyVideoLimit = channel?.dailyVideoLimit

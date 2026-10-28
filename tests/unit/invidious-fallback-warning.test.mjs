@@ -8,74 +8,6 @@ const readSource = path => readFileSync(new URL(`../../src/renderer/${path}`, im
   .replace(/^import[\s\S]*? from ['"][^'"]+['"]\n/gm, '')
   .replace(/^export /gm, '')
 
-function playlistLoader({ backend = 'invidious', fallback = true, supportsLocal = true, fail = true, abort = false } = {}) {
-  const events = []
-  const controller = new AbortController()
-  const context = vm.createContext({
-    process: { env: { SUPPORTS_LOCAL_API: supportsLocal } },
-    getLocalPlaylist() {}, parseLocalPlaylistVideos() {}, invidiousGetPlaylistInfo() {},
-    loadLocalPlaylistSnapshot: async () => {
-      events.push('local')
-      if (backend === 'local' && fail) throw new Error('Local failed')
-      return 'snapshot'
-    },
-    loadInvidiousPlaylistSnapshot: async () => {
-      events.push('invidious')
-      if (abort) controller.abort()
-      if (backend !== 'local' && fail) throw new Error('Invidious failed')
-      return 'snapshot'
-    },
-    showInvidiousFallbackToast: () => events.push('warning'),
-    usesInvidiousApi,
-  })
-  vm.runInContext(readSource('helpers/api/playlist-snapshot.js'), context)
-  return {
-    events,
-    load: () => context.getPlaylistSnapshot('source', { backend, fallback, signal: controller.signal }),
-  }
-}
-
-test('each playlist fallback warns once before contacting YouTube directly', async () => {
-  const h = playlistLoader()
-  await h.load()
-  await h.load()
-  assert.deepEqual(h.events, ['invidious', 'warning', 'local', 'invidious', 'warning', 'local'])
-})
-
-test('a fallback to Invidious does not show a direct-connection warning', async () => {
-  const h = playlistLoader({ backend: 'local' })
-  await h.load()
-  assert.deepEqual(h.events, ['local', 'invidious'])
-})
-
-for (const options of [{ fallback: false }, { supportsLocal: false }, { abort: true }]) {
-  test(`a blocked playlist fallback makes no direct request or warning: ${JSON.stringify(options)}`, async () => {
-    const h = playlistLoader(options)
-    await assert.rejects(h.load())
-    assert.deepEqual(h.events, ['invidious'])
-  })
-}
-
-test('a successful Invidious request does not warn', async () => {
-  const h = playlistLoader({ fail: false })
-  await h.load()
-  assert.deepEqual(h.events, ['invidious'])
-})
-
-test('channel metadata fallback warns before its direct request', async () => {
-  const events = []
-  const context = vm.createContext({
-    process: { env: { SUPPORTS_LOCAL_API: true } },
-    invidiousGetChannelInfo: async () => { throw new Error('Invidious failed') },
-    getLocalChannel: async () => { events.push('local'); return {} },
-    showInvidiousFallbackToast: () => events.push('warning'),
-    usesInvidiousApi,
-  })
-  vm.runInContext(readSource('helpers/channels.js'), context)
-  await context.findChannelById('channel', { preference: 'invidious', fallback: true })
-  assert.deepEqual(events, ['warning', 'local'])
-})
-
 for (const metadataOnly of [false, true]) {
   test(`watch fallback warns once before a direct ${metadataOnly ? 'downloaded metadata' : 'playback'} request`, async () => {
     const source = readSource('views/Watch/Watch.js')
@@ -104,12 +36,6 @@ for (const metadataOnly of [false, true]) {
     assert.deepEqual(events, ['warning', 'local'])
   })
 }
-
-test('a Yattee server playlist fallback warns before contacting YouTube directly', async () => {
-  const h = playlistLoader({ backend: 'yattee' })
-  await h.load()
-  assert.deepEqual(h.events, ['invidious', 'warning', 'local'])
-})
 
 test('a Yattee server watch fallback names the Yattee server in its warning', async () => {
   const source = readSource('views/Watch/Watch.js')

@@ -2,8 +2,8 @@ import { computed, onBeforeUnmount, ref, shallowRef, toRaw, watch } from 'vue'
 import store from '../store/index'
 import { buildRecommendationProfileAsync, rankRecommendationCandidatesAsync, recommendationSubscriptionIds, getRecommendationLearningEntries } from '../helpers/recommendations'
 import { runCooperatively } from '../helpers/cooperativeTask'
-import { collectRecommendationCandidates, fetchRecommendationSource, mergeRecommendationCandidates } from '../helpers/recommendationCandidates'
-import { showInvidiousFallbackToast } from '../helpers/utils'
+import { collectRecommendationCandidates, mergeRecommendationCandidates, requireRecommendationResponse } from '../helpers/recommendationCandidates'
+import { requestWithFallback } from '../helpers/api/fallback'
 import { getLocalChannelVideos, getLocalSearchResults, getLocalRelatedVideos } from '../helpers/api/local'
 import { getInvidiousChannelVideos, getInvidiousSearchResults, getInvidiousRelatedVideos } from '../helpers/api/invidious'
 import { isVideoHiddenByPreferences } from '../helpers/subscriptions'
@@ -231,8 +231,8 @@ export function useHomeRecommendations(visible) {
         .map(video => ({ ...video, recommendationSources: [{ type: 'subscription', id }] })))])
     requestController = new AbortController()
     const signal = requestController.signal
-    const backend = process.env.SUPPORTS_LOCAL_API ? store.getters.getBackendPreference : 'invidious'
-    const fallback = store.getters.getBackendFallback && process.env.SUPPORTS_LOCAL_API
+    const backend = store.getters.getBackendPreference
+    const fallback = store.getters.getBackendFallback
     const familyFriendly = store.getters.getShowFamilyFriendlyOnly
     const searchSettings = { type: 'video', time: '', duration: '', features: [], prioritize: 'relevance' }
     const result = await collectRecommendationCandidates(learned, {
@@ -272,13 +272,13 @@ export function useHomeRecommendations(visible) {
         nextVisibilityChange: visibilityChange,
       }
     }
-    function withFallback(local, invidious, signal) {
-      const directFallback = () => {
-        showInvidiousFallbackToast(backend)
-        return local()
-      }
-      return fetchRecommendationSource(backend === 'local' ? local : invidious,
-        fallback ? (backend === 'local' ? invidious : directFallback) : null, signal)
+    async function withFallback(local, invidious, signal) {
+      signal.throwIfAborted()
+      const { result } = await requestWithFallback({
+        local: requireRecommendationResponse(local),
+        invidious: requireRecommendationResponse(invidious),
+      }, { backend, fallback, signal })
+      return result
     }
   }
   async function feedback(video, type) {

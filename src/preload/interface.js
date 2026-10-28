@@ -1,3 +1,4 @@
+// @ts-check
 import { ipcRenderer, webFrame } from 'electron/renderer'
 import { DBActions, IpcChannels } from '../constants.js'
 import { tabs } from './tabs.js'

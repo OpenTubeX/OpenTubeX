@@ -1,99 +1,139 @@
 import assert from 'node:assert/strict'
-import { readFileSync } from 'node:fs'
 import test from 'node:test'
-import vm from 'node:vm'
+import { ref } from 'vue'
+import { createStore, deadlineKey, hooks, loadSubscriptionAutoRefresh, settle } from '../helpers/subscription-auto-refresh.mjs'
 
-import { fillYatteeShortDates } from '../../src/renderer/helpers/api/yattee.js'
+// Each platform reads its build flags when the module loads.
+const android = await loadSubscriptionAutoRefresh({ IS_CAPACITOR: 'true' })
+const electron = await loadSubscriptionAutoRefresh({ IS_ELECTRON: 'true' })
 
-const source = readFileSync(new URL('../../src/renderer/App.vue', import.meta.url), 'utf8')
-function section(start, end) {
-  let offset = source.indexOf(start)
-  if (source.slice(offset - 6, offset) === 'async ') offset -= 6
-  return source.slice(offset, source.indexOf(end, offset))
+/**
+ * Starts the composable for one platform, as App.vue does once it can handle
+ * refresh events.
+ * @param {import('node:test').TestContext} t
+ * @param {typeof android} platform
+ * @param {{ env: Record<string, string>, dataReady?: boolean }} options
+ */
+function start(t, platform, { env, dataReady = false }) {
+  for (const name of ['IS_ELECTRON', 'IS_CAPACITOR']) {
+    if (env[name]) process.env[name] = env[name]
+    else delete process.env[name]
+  }
+  const autoRefresh = platform.useSubscriptionAutoRefresh({ dataReady: ref(dataReady), t: key => key })
+  autoRefresh.start()
+  t.after(() => autoRefresh.stop())
+  return autoRefresh
 }
 
-test('concurrent background imports wait for the existing cache import', async () => {
+function electronWindow(overrides = {}) {
+  const remove = () => {}
+  window.ftElectron = {
+    subscriptionAutoRefresh: {
+      isInProgress: async () => ({ inProgress: false, percentage: 0 }),
+      backgroundCompleted: async () => {},
+      setProgress: () => {},
+      onBackgroundResultsAvailable: () => remove,
+      onStateChanged: () => remove,
+      onCancelRequested: () => remove,
+    },
+    tabs: { isActive: async () => true, onActiveChanged: () => remove },
+    ...overrides,
+  }
+}
+
+const showApp = () => document.dispatchEvent(new Event('visibilitychange'))
+
+test('concurrent background imports wait for the existing cache import', async t => {
   let finish
   let requests = 0
   const blocked = new Promise(resolve => { finish = resolve })
-  const context = vm.createContext({
-    console, isElectron: false,
-    getNextAndroidSubscriptionRefreshResult: async () => { requests++; await blocked; return null }
-  })
-  vm.runInContext(section('let reconcilingAndroidSubscriptionRefreshResults', 'async function reconcileAndroidSubscriptionRefreshChannelResult'), context)
-  const first = context.reconcileAndroidSubscriptionRefreshResults()
-  let secondFinished = false
-  const second = context.reconcileAndroidSubscriptionRefreshResults().then(() => { secondFinished = true })
-  await new Promise(resolve => setImmediate(resolve))
-  assert.equal(secondFinished, false)
-  assert.equal(requests, 1)
+  hooks.store = createStore()
+  hooks.getNextResult = async () => { requests++; await blocked; return null }
+  start(t, android, { env: { IS_CAPACITOR: 'true' } })
+  showApp()
+  showApp()
+  await settle()
+  assert.equal(requests, 1, 'the second import must reuse the running one')
   finish()
-  await Promise.all([first, second])
+  await settle()
+  assert.equal(requests, 1)
+  showApp()
+  await settle()
+  assert.equal(requests, 2, 'a finished import does not block the next one')
 })
 
-test('restoring an Electron window imports completed background results', async () => {
+test('restoring an Electron window imports completed background results', async t => {
   const calls = []
-  const context = vm.createContext({
-    isElectron: true,
-    isCapacitor: false,
-    subscriptionCacheReady: { value: true },
-    isAppHidden: () => false,
-    synchronizeSubscriptionRefreshInProgress: () => {},
-    reconcileAndroidSubscriptionRefreshResults: async () => { calls.push('import') },
-    refreshOverdueSubscriptionFeeds: () => { calls.push('schedule') }
-  })
-  vm.runInContext(section('function handleSubscriptionAutoRefreshVisibilityChange', 'async function synchronizeSubscriptionRefreshInProgress'), context)
-  await context.handleSubscriptionAutoRefreshVisibilityChange()
-  assert.deepEqual(calls, ['import', 'schedule'])
+  electronWindow()
+  navigator.locks = { request: (_name, callback) => callback() }
+  hooks.store = createStore()
+  start(t, electron, { env: { IS_ELECTRON: 'true' }, dataReady: true })
+  await settle()
+  hooks.getNextResult = async () => { calls.push('import'); return null }
+  const commit = hooks.store.commit
+  hooks.store.commit = (type, value) => {
+    if (type.endsWith('NextAutoRefreshTimestamp')) calls.push('schedule')
+    commit(type, value)
+  }
+  showApp()
+  await settle()
+  assert.equal(calls[0], 'import', 'background results are imported before feeds are rescheduled')
+  assert.deepEqual([...new Set(calls)], ['import', 'schedule'])
+  assert.equal(calls.filter(call => call === 'import').length, 1)
 })
 
-test('an imported background completion prevents an unnecessary foreground refresh', async () => {
-  const calls = []
-  let deadline = 0
-  const context = vm.createContext({
-    console, process: { env: { IS_ELECTRON: true } }, navigator: { onLine: true },
-    window: { ftElectron: { tabs: { isActive: async () => true } } },
-    isElectron: true, isCapacitor: false,
-    processingSubscriptionAutoRefreshes: false,
-    pendingSubscriptionAutoRefreshes: [{ tab: 'videos', profileId: 'all', key: 'all:videos' }],
-    pendingSubscriptionAutoRefreshKeys: new Set(['all:videos']),
-    cancelledSubscriptionAutoRefreshKeys: new Set(),
-    activeSubscriptionProfileId: { value: 'all' },
-    isSubscriptionTabAutoRefreshEnabled: () => true,
-    isAppHidden: () => false,
-    getStoredSubscriptionTabNextAutoRefreshTimestamp: () => deadline,
-    reconcileAndroidSubscriptionRefreshResults: async () => { deadline = Date.now() + 60000 },
-    scheduleSubscriptionTabAutoRefresh: () => calls.push('schedule'),
-    getSubscriptionTabRefreshHandler: () => async () => { calls.push('refresh'); return [] },
-    t: value => value
-  })
-  vm.runInContext(section('async function processPendingSubscriptionAutoRefreshes', '/**\n * @param {\'videos\' | \'shorts\' | \'live\' | \'posts\'} tab\n * @param {string} profileId\n */\nfunction scheduleSubscriptionTabAutoRefreshLockRetry'), context)
-  await context.processPendingSubscriptionAutoRefreshes()
-  assert.deepEqual(calls, ['schedule'])
+test('an imported background completion prevents an unnecessary foreground refresh', async t => {
+  t.mock.timers.enable({ apis: ['setTimeout'] })
+  const refreshes = []
+  const acknowledged = []
+  const completions = []
+  electronWindow()
+  window.ftElectron.subscriptionAutoRefresh.backgroundCompleted = async completion => { completions.push(completion) }
+  navigator.locks = { request: (_name, callback) => callback() }
+  localStorage.clear()
+  localStorage.setItem(deadlineKey('all', 'videos'), String(Date.now() - 1000))
+  hooks.store = createStore({ getSubscriptionFeedAutoRefreshInterval: '60000' })
+  start(t, electron, { env: { IS_ELECTRON: 'true' }, dataReady: true })
+  await settle()
+  const results = [{ id: 'done', kind: 'completion', profileId: 'all', feedType: 'videos', timestamp: Date.now() }]
+  hooks.getNextResult = async () => results.shift() ?? null
+  hooks.acknowledge = async id => { acknowledged.push(id) }
+  hooks.refresh = async () => { refreshes.push('refresh'); return [] }
+
+  window.dispatchEvent(new Event('online'))
+  await settle()
+  assert.deepEqual(refreshes, [], 'the feed the background refresh just loaded must not refresh again')
+  assert.deepEqual(acknowledged, ['done'])
+  assert.equal(completions.length, 1)
+  assert.ok(Number(localStorage.getItem(deadlineKey('all', 'videos'))) > Date.now(), 'the next refresh waits a full interval')
 })
 
-test('background playlist imports restore missing authors and keep explicit bylines', async () => {
+/**
+ * Imports one channel result from the closed-app refresh.
+ * @param {import('node:test').TestContext} t
+ * @param {object} result
+ */
+async function importChannelResult(t, result) {
+  const results = [{ id: 'channel', kind: 'channel', profileId: 'all', ...result }]
+  hooks.getNextResult = async () => results.shift() ?? null
+  start(t, android, { env: { IS_CAPACITOR: 'true' } })
+  showApp()
+  await settle()
+}
+
+test('background playlist imports restore missing authors and keep explicit bylines', async t => {
   const published = []
   const cache = { UCchannel: { videos: [{ videoId: 'missing', thumbnailUrl: 'https://images.example/portrait.jpg' }] } }
   let saved
-  const context = vm.createContext({
-    console, Date,
-    notifySubscriptionChannelRefreshed: tab => published.push(tab),
-    store: {
-      getters: {
-        getSubscribedChannelIdSet: new Set(['UCchannel']),
-        getSubscribedChannelsById: new Map([['UCchannel', { id: 'UCchannel', name: 'Subscribed creator' }]])
-      },
-      dispatch: async (action, value) => { saved = value.videos; cache.UCchannel = value; return true }
-    },
-    getAndroidSubscriptionCacheConfig: () => ({ getCache: () => cache, entriesKey: 'videos', idKey: 'videoId', action: 'save' }),
-    shouldHideMembersOnlyContent: () => false,
-    enrichSubscriptionRssEntries: async entries => entries,
-    enrichSubscriptionShortDates: async entries => entries.map(entry => ({ ...entry, published: 123456 })),
-    reconcileFetchedSubscriptionEntries: entries => entries
+  hooks.store = createStore({
+    getSubscribedChannelIdSet: new Set(['UCchannel']),
+    getSubscribedChannelsById: new Map([['UCchannel', { id: 'UCchannel', name: 'Subscribed creator' }]]),
+    getShortsCache: cache,
   })
-  vm.runInContext(section('async function reconcileAndroidSubscriptionRefreshChannelResult', 'function getAndroidSubscriptionCacheConfig'), context)
-  await context.reconcileAndroidSubscriptionRefreshChannelResult({
+  hooks.store.onDispatch = (_action, value) => { saved = value.videos; cache.UCchannel = value; return true }
+  hooks.notifySubscriptionChannelRefreshed = tab => published.push(tab)
+  hooks.enrichSubscriptionShortDates = async entries => entries.map(entry => ({ ...entry, published: 123456 }))
+  await importChannelResult(t, {
     channelId: 'UCchannel', feedType: 'shorts', timestamp: Date.now(),
     payload: { backgroundFormat: 'entries', entries: [
       { videoId: 'missing', author: 'N/A', authorId: 'N/A', isRSS: true },
@@ -113,33 +153,22 @@ test('background playlist imports restore missing authors and keep explicit byli
   assert.deepEqual(published, ['shorts'], 'publish imported videos while the native refresh is still active')
 })
 
-
-test('background Yattee Shorts are dated through the server instead of YouTube', async () => {
+test('background Yattee Shorts are dated through the server instead of YouTube', async t => {
   const cache = { UCchannel: { videos: [{ videoId: 'known', published: 1000 }] } }
   const lookups = []
   const published = []
   let saved
-  const context = vm.createContext({
-    console, Date,
-    notifySubscriptionChannelRefreshed: tab => published.push(tab),
-    store: {
-      getters: {
-        getBackendPreference: 'yattee',
-        getSubscribedChannelIdSet: new Set(['UCchannel']),
-        getSubscribedChannelsById: new Map([['UCchannel', { id: 'UCchannel', name: 'Subscribed creator' }]])
-      },
-      dispatch: async (_action, value) => { saved = value.videos; cache.UCchannel = value; return true }
-    },
-    getAndroidSubscriptionCacheConfig: () => ({ getCache: () => cache, entriesKey: 'videos', idKey: 'videoId', action: 'save' }),
-    shouldHideMembersOnlyContent: () => false,
-    enrichSubscriptionRssEntries: async entries => entries,
-    enrichSubscriptionShortDates: async () => { throw new Error('YouTube must not be contacted') },
-    fillYatteeShortDates,
-    invidiousGetVideoInformation: async videoId => { lookups.push(videoId); return { published: 2 } },
-    reconcileFetchedSubscriptionEntries: entries => entries
+  hooks.store = createStore({
+    getBackendPreference: 'yattee',
+    getSubscribedChannelIdSet: new Set(['UCchannel']),
+    getSubscribedChannelsById: new Map([['UCchannel', { id: 'UCchannel', name: 'Subscribed creator' }]]),
+    getShortsCache: cache,
   })
-  vm.runInContext(section('async function reconcileAndroidSubscriptionRefreshChannelResult', 'function getAndroidSubscriptionCacheConfig'), context)
-  await context.reconcileAndroidSubscriptionRefreshChannelResult({
+  hooks.store.onDispatch = (_action, value) => { saved = value.videos; cache.UCchannel = value; return true }
+  hooks.notifySubscriptionChannelRefreshed = tab => published.push(tab)
+  hooks.enrichSubscriptionShortDates = async () => { throw new Error('YouTube must not be contacted') }
+  hooks.invidiousGetVideoInformation = async videoId => { lookups.push(videoId); return { published: 2 } }
+  await importChannelResult(t, {
     channelId: 'UCchannel', feedType: 'shorts', timestamp: Date.now(),
     payload: { backgroundFormat: 'entries', entries: [
       { videoId: 'known', author: 'Subscribed creator', authorId: 'UCchannel' },
@@ -151,29 +180,28 @@ test('background Yattee Shorts are dated through the server instead of YouTube',
   assert.deepEqual(published, ['shorts'])
 })
 
-test('separate Electron renderers serialize background result imports', async () => {
+test('separate Electron renderers serialize background result imports', async t => {
   let finish
   let requests = 0
   const blocked = new Promise(resolve => { finish = resolve })
   let queue = Promise.resolve()
-  const locks = { request(name, callback) {
+  navigator.locks = { request(name, callback) {
     assert.equal(name, 'opentubex-background-subscription-import')
     const result = queue.then(callback)
     queue = result.catch(() => {})
     return result
   } }
-  const contexts = [0, 1].map(() => {
-    const context = vm.createContext({
-      console, isElectron: true, navigator: { locks },
-      getNextAndroidSubscriptionRefreshResult: async () => { requests++; await blocked; return null }
-    })
-    vm.runInContext(section('let reconcilingAndroidSubscriptionRefreshResults', 'async function reconcileAndroidSubscriptionRefreshChannelResult'), context)
-    return context
-  })
-  const imports = contexts.map(context => context.reconcileAndroidSubscriptionRefreshResults())
-  await new Promise(resolve => setImmediate(resolve))
+  electronWindow()
+  hooks.store = createStore()
+  start(t, electron, { env: { IS_ELECTRON: 'true' } })
+  start(t, electron, { env: { IS_ELECTRON: 'true' } })
+  await settle()
+  hooks.getNextResult = async () => { requests++; await blocked; return null }
+  // Both renderers import when they are shown.
+  showApp()
+  await settle()
   assert.equal(requests, 1, 'the second renderer must wait for the first import to finish')
   finish()
-  await Promise.all(imports)
+  await settle()
   assert.equal(requests, 2)
 })

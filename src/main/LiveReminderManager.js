@@ -1,3 +1,4 @@
+// @ts-check
 const MAX_TIMER_DELAY = 2_147_483_647
 
 export class LiveReminderManager {
@@ -39,6 +40,7 @@ export class LiveReminderManager {
     })
   }
 
+  /** @param {string} videoId */
   async get(videoId) {
     await this.pendingOperation
     return this.reminders.get(videoId) ?? null
@@ -49,6 +51,7 @@ export class LiveReminderManager {
     return [...this.reminders.values()].sort((a, b) => a.startTimestamp - b.startTimestamp)
   }
 
+  /** @param {import('./liveReminderIpc').LiveReminderRequest} reminder */
   schedule(reminder) {
     return this.enqueue(async () => {
       if (reminder.startTimestamp <= this.now()) {
@@ -68,6 +71,7 @@ export class LiveReminderManager {
     })
   }
 
+  /** @param {string} videoId */
   cancel(videoId) {
     return this.enqueue(async () => {
       await this.datastore.removeAsync({ _id: videoId })

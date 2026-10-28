@@ -3,7 +3,7 @@ import { SyncLiveConnectionState, SyncCollectionCache, createSyncActivity, valid
 import i18n from '../../i18n/index'
 import { showToastOnAllTabs } from '../../helpers/utils'
 import { isAppHidden } from '../../helpers/appVisibility.js'
-import { holdBackgroundSync, onPeriodicBackgroundSync, setPeriodicBackgroundSync } from '../../helpers/androidBackgroundSync.js'
+import { onPeriodicBackgroundSync } from '../../helpers/androidBackgroundSync.js'
 import { connectionEvents, getConnectionState } from '../../helpers/networkRecovery.js'
 import {
   SyncServerClient,
@@ -44,9 +44,9 @@ import { getPreviousSyncSessions, getSyncTabRoute, removeSyncDeviceSessions, rem
 import {
   AUTO_SYNC_INTERVAL_MS,
   dispatchRemoteSyncAction,
-  isRecentSync,
   isSyncReasonEnabled,
 } from '../../helpers/sync-server-scheduling'
+import { createSyncScheduler } from '../../helpers/sync-server-scheduler'
 import { isSettingSyncEnabled } from './settings'
 import { syncSubscriptionSeenVideos, syncSubscriptionSeenPosts } from '../../helpers/subscription-seen-videos'
 import { containsWatchStatsDevice, mergeWatchStats, replaceWatchStatsDevice, persistUploadedWatchStatsReset, syncWatchStats, watchStatsDeviceDays } from '../../helpers/sync-watch-stats'
@@ -56,12 +56,6 @@ import { syncLiveReminders } from '../../helpers/sync-live-reminders'
 import { liveReminder } from '../../helpers/liveReminders'
 import { MAIN_PROFILE_ID } from '../../../constants'
 
-const EVENT_SYNC_DEBOUNCE_MS = 1500
-const EVENT_SYNC_DELAYS = {
-  sessions: { delay: 10000, maxWait: 30000 },
-  history: { delay: 30000, maxWait: 60000 },
-  watchStats: { delay: 30000, maxWait: 60000 },
-}
 const ENCRYPTED_SYNC_RETRIES = 3
 const LEGACY_ENCRYPTED_COLLECTIONS = [
   'subscriptions',
@@ -79,26 +73,32 @@ let liveLockController = null
 let liveGeneration = 0
 let eventsSince = ''
 let eventsRefresh = null
-let activeSyncPromise = null
-let activeSyncRemoteOnly = false
 const activeSyncClients = new Set()
-let autoSyncTimer = null
-let autoSyncController = new AbortController()
-const eventSyncTimers = new Map()
-// Event syncs that came due while the iOS app was hidden; replayed on resume.
-const hiddenEventSyncReasons = new Set()
-
-function clearEventSyncTimers() {
-  for (const pending of eventSyncTimers.values()) {
-    clearTimeout(pending.timer)
-    pending.releaseHold()
-  }
-  eventSyncTimers.clear()
-}
 let lifecycleSyncStarted = false
 let reminderSyncListenerStarted = false
 let deviceRefreshId = 0
 let syncServerEnabledChange = Promise.resolve()
+
+/** @type {ReturnType<typeof createSyncScheduler> | null} */
+let scheduler = null
+
+// The scheduler outlives the action that creates it. It only uses what every
+// action context shares: the store's root state and dispatch.
+function getScheduler(context) {
+  scheduler ??= createSyncScheduler({
+    getSettings: () => context.rootState.settings,
+    getSyncState: () => context.rootState.syncServer,
+    runSync: options => runSync(context, options),
+    requestSync: options => context.dispatch('syncWithSyncServer', options),
+    requestAutoSync: restart => context.dispatch(restart ? 'restartSyncServerAutoSync' : 'startSyncServerAutoSync'),
+    withSyncLock,
+    isOffline: isSyncServerOffline,
+    isLiveConnected: () => liveConnection.isConnected(),
+    startLive: () => context.dispatch('startSyncServerLive'),
+    stopLive: () => context.dispatch('stopSyncServerLive'),
+  })
+  return scheduler
+}
 
 function isSyncServerOffline() {
   return getConnectionState() === 'offline' ||
@@ -877,12 +877,7 @@ const actions = {
         }
         return true
       }, {
-        waitForPendingSync: async () => {
-          const pending = activeSyncPromise
-          if (!pending) return false
-          await pending.catch(() => {})
-          return true
-        },
+        waitForPendingSync: async () => await scheduler?.waitForActiveSync() ?? false,
         onConnectionChange: connected => {
           if (generation === liveGeneration) liveConnection.setConnected(connected)
         },
@@ -1501,52 +1496,7 @@ const actions = {
   },
 
   syncWithSyncServer(context, options = {}) {
-    const autoSyncSignal = autoSyncController.signal
-    if (!context.rootState.settings.syncServerEnabled) {
-      return Promise.reject(new Error('Enable sync first'))
-    }
-    if (!context.rootState.settings.syncServerToken) {
-      return Promise.reject(new Error('Connect to a sync server first'))
-    }
-    if (isSyncServerOffline() || (options.automatic && autoSyncSignal.aborted)) return Promise.resolve(null)
-    // A remote-only check may skip all merges, so it cannot consume local work.
-    if (activeSyncPromise && activeSyncRemoteOnly && !options.remoteOnly) {
-      // The running check releases its hold before the queued sync takes one.
-      const releaseHold = holdBackgroundSync()
-      return activeSyncPromise.catch(() => {}).then(() => {
-        if (options.automatic && autoSyncSignal.aborted) return null
-        return actions.syncWithSyncServer(context, options)
-      }).finally(releaseHold)
-    }
-    if (!activeSyncPromise) {
-      activeSyncRemoteOnly = options.remoteOnly === true
-      let syncStarted = false
-      const releaseHold = holdBackgroundSync()
-      activeSyncPromise = withSyncLock(() => {
-        if (!context.rootState.settings.syncServerEnabled || isSyncServerOffline() ||
-            (options.automatic && autoSyncSignal.aborted)) return null
-        if (options.skipIfRecent &&
-            isRecentSync(context.rootState.settings.syncServerLastSyncAt)) {
-          return null
-        }
-        syncStarted = !options.remoteOnly
-        if (syncStarted) {
-          // A full sync includes every collection, consuming all pending edits.
-          clearEventSyncTimers()
-        }
-        return runSync(context, options)
-      }).finally(() => {
-        activeSyncPromise = null
-        activeSyncRemoteOnly = false
-        if (!autoSyncSignal.aborted) {
-          context.dispatch(syncStarted
-            ? 'restartSyncServerAutoSync'
-            : 'startSyncServerAutoSync')
-        }
-        releaseHold()
-      })
-    }
-    return activeSyncPromise
+    return getScheduler(context).sync(options)
   },
 
   async initializeSyncServer({ commit, dispatch, rootState }, { skipIfRecent = true } = {}) {
@@ -1563,7 +1513,7 @@ const actions = {
         } else if (detail === 'restored') {
           try {
             // A reconnect must start a fresh sync after cancellation finishes.
-            await activeSyncPromise?.catch(() => {})
+            await scheduler?.waitForActiveSync()
             dispatch('startSyncServerLive')
             if (rootState.settings.syncServerAutoSync &&
                 isSyncReasonEnabled(rootState.settings, 'automatic')) {
@@ -1661,43 +1611,8 @@ const actions = {
     }
   },
 
-  startSyncServerAutoSync({ dispatch, rootState }) {
-    dispatch('startSyncServerLive')
-    if (autoSyncTimer ||
-        !rootState.settings.syncServerEnabled ||
-        !rootState.settings.syncServerAutoSync ||
-        !rootState.settings.syncServerToken) {
-      return
-    }
-
-    if (autoSyncController.signal.aborted) autoSyncController = new AbortController()
-    if (!isSyncReasonEnabled(rootState.settings, 'automatic')) return
-    setPeriodicBackgroundSync(true)
-    const { signal } = autoSyncController
-    autoSyncTimer = setTimeout(async () => {
-      autoSyncTimer = null
-      try {
-        const connected = await liveConnection.isConnected()
-        if (signal.aborted || !rootState.settings.syncServerEnabled || !rootState.settings.syncServerAutoSync ||
-            !rootState.settings.syncServerToken || isSyncServerOffline()) return
-        // A hidden mobile app has stopped its live connection on purpose; the
-        // visibility handler syncs once it is shown again instead of polling
-        // in the background.
-        if (process.env.IS_CAPACITOR && isAppHidden()) return
-        // Live notifications replace periodic downloads, but failed uploads
-        // and reminders awaiting permission still need a retry.
-        const retryPending = rootState.syncServer.syncServerStatus === 'error' ||
-          (rootState.syncServer.syncServerLiveRemindersPending &&
-            isSyncReasonEnabled(rootState.settings, 'liveReminders'))
-        if (!connected || retryPending) {
-          await dispatch('syncWithSyncServer', { skipIfRecent: !retryPending, automatic: true })
-        }
-      } catch (error) {
-        console.error('Sync server automatic sync failed', error)
-      } finally {
-        if (!signal.aborted) dispatch('startSyncServerAutoSync')
-      }
-    }, AUTO_SYNC_INTERVAL_MS)
+  startSyncServerAutoSync(context) {
+    getScheduler(context).start()
   },
 
   async refreshSyncServerDevices({ commit, dispatch, rootState }) {
@@ -1749,73 +1664,20 @@ const actions = {
     await dispatch('updateSyncServerToken', token, { root: true })
   },
 
-  restartSyncServerAutoSync({ dispatch }) {
-    clearTimeout(autoSyncTimer)
-    autoSyncTimer = null
-    return dispatch('startSyncServerAutoSync')
+  restartSyncServerAutoSync(context) {
+    getScheduler(context).restart()
   },
 
-  stopSyncServerAutoSync({ dispatch }) {
-    autoSyncController.abort()
-    dispatch('stopSyncServerLive')
-    setPeriodicBackgroundSync(false)
-    clearTimeout(autoSyncTimer)
-    clearEventSyncTimers()
-    hiddenEventSyncReasons.clear()
-    autoSyncTimer = null
+  stopSyncServerAutoSync(context) {
+    getScheduler(context).stop()
   },
 
-  scheduleSyncServer({ dispatch, rootState }, reason = 'data') {
-    if (autoSyncController.signal.aborted || isSyncServerOffline() ||
-        !rootState.settings.syncServerEnabled ||
-        !rootState.settings.syncServerAutoSync ||
-        !rootState.settings.syncServerToken ||
-        !isSyncReasonEnabled(rootState.settings, reason)) {
-      return
-    }
-    const previous = eventSyncTimers.get(reason)
-    const firstChangeAt = previous?.firstChangeAt ?? Date.now()
-    const { delay, maxWait } = EVENT_SYNC_DELAYS[reason] ?? { delay: EVENT_SYNC_DEBOUNCE_MS, maxWait: Infinity }
-    clearTimeout(previous?.timer)
-    // Keep a hidden Android app running until the pending edits are synced.
-    const pending = { firstChangeAt, timer: null, releaseHold: previous?.releaseHold ?? holdBackgroundSync() }
-    eventSyncTimers.set(reason, pending)
-    pending.timer = setTimeout(async () => {
-      // Edits made during a sync retain their own deadline. Once due, wait for
-      // that sync to finish rather than starting a second debounce period.
-      for (let syncing = activeSyncPromise; syncing; syncing = activeSyncPromise) {
-        await syncing.catch(() => {})
-      }
-      if (eventSyncTimers.get(reason) !== pending) return
-      eventSyncTimers.delete(reason)
-      try {
-        if (isSyncServerOffline() ||
-            !rootState.settings.syncServerEnabled ||
-            !rootState.settings.syncServerAutoSync ||
-            !rootState.settings.syncServerToken ||
-            !isSyncReasonEnabled(rootState.settings, reason)) return
-        // iOS suspends a hidden app, which would stall the sync until it resumes.
-        if (process.env.IS_IOS && isAppHidden()) {
-          hiddenEventSyncReasons.add(reason)
-          return
-        }
-        // The sync holds the app running from here on.
-        dispatch('syncWithSyncServer', {
-          skipIfRecent: reason === 'automatic',
-          automatic: true,
-        }).catch(error => {
-          console.error('Sync server event sync failed', error)
-        })
-      } finally {
-        pending.releaseHold()
-      }
-    }, Math.max(0, Math.min(delay, firstChangeAt + maxWait - Date.now())))
+  scheduleSyncServer(context, reason) {
+    getScheduler(context).schedule(reason)
   },
 
-  resumeHiddenEventSyncs({ dispatch }) {
-    const reasons = [...hiddenEventSyncReasons]
-    hiddenEventSyncReasons.clear()
-    for (const reason of reasons) dispatch('scheduleSyncServer', reason)
+  resumeHiddenEventSyncs(context) {
+    getScheduler(context).resumeHidden()
   },
 
   async setSyncServerAutoSync({ dispatch }, enabled) {

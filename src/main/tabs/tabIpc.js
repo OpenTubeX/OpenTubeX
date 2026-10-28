@@ -1,3 +1,4 @@
+// @ts-check
 import { ipcMain } from 'electron'
 import { IpcChannels } from '../../constants.js'
 import { TabManager } from './TabManager.js'
@@ -266,7 +267,7 @@ export async function setupTabsIPC(options = {}) {
   ipcMain.handle(IpcChannels.TABS_RUN_ORGANIZER_ACTION, async (event, action, tabIds) => {
     const manager = getManager(event)
     if (!manager || !['close', 'load', 'unload'].includes(action) || !Array.isArray(tabIds)) {
-      return { success: false, hasRemainingTabs: manager?.tabs.size > 0 }
+      return { success: false, hasRemainingTabs: (manager?.tabs.size ?? 0) > 0 }
     }
 
     const uniqueTabIds = Array.from(new Set(tabIds.filter(tabId => (
@@ -275,7 +276,10 @@ export async function setupTabsIPC(options = {}) {
     const actionableTabIds = action === 'load'
       ? uniqueTabIds.filter(tabId => manager.tabs.get(tabId)?.loadState === 'unloaded')
       : action === 'unload'
-        ? uniqueTabIds.filter(tabId => !['unloaded', 'unloading'].includes(manager.tabs.get(tabId)?.loadState))
+        ? uniqueTabIds.filter(tabId => {
+            const loadState = manager.tabs.get(tabId)?.loadState
+            return loadState !== 'unloaded' && loadState !== 'unloading'
+          })
         : uniqueTabIds
     if (actionableTabIds.length === 0) {
       return { success: true, hasRemainingTabs: manager.tabs.size > 0 }
@@ -492,7 +496,7 @@ export async function setupTabsIPC(options = {}) {
     const manager = getManager(event)
     const tab = typeof tabId === 'string' ? manager?.tabs.get(tabId) : null
     const skipSilence = enabled === true
-    if (tab && tab.skipSilence !== skipSilence) {
+    if (manager && tab && tab.skipSilence !== skipSilence) {
       tab.skipSilence = skipSilence
       manager._broadcastStateUpdate()
       manager._scheduleSessionSave()

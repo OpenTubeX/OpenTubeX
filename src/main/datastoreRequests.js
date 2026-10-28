@@ -1,3 +1,4 @@
+// @ts-check
 /**
  * Tracks datastore requests while they run. A request can take several
  * queued steps, so waiting for a single datastore queue is not enough.

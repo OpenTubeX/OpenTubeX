@@ -4,6 +4,7 @@ import { SyncLiveConnectionState } from '../../src/renderer/helpers/sync-server-
 import { createStore } from 'vuex'
 import assert from 'node:assert/strict'
 import test from 'node:test'
+import { importWithStubs, sourceUrl } from '../helpers/module-stubs.mjs'
 import * as profileSync from '../../src/renderer/helpers/profile-sync.js'
 import { MAIN_PROFILE_ID, THEME_BG_COLOR, THEME_TEXT_COLOR } from '../../src/constants.js'
 import { getProfileWithUpdatedSubscriptionDetails } from '../../src/renderer/helpers/subscription-profile-details.js'
@@ -246,11 +247,26 @@ test('nested remote dispatches and thrown dispatches restore their origin scope'
   assert.equal(isRemoteSyncDispatch(), false)
 })
 
+const platformHooks = { holdBackgroundSync: () => () => {}, isAppHidden: () => false }
+const [{ createSyncScheduler }] = await importWithStubs([sourceUrl('src/renderer/helpers/sync-server-scheduler.js')], {
+  [sourceUrl('src/renderer/helpers/androidBackgroundSync.js')]: {
+    holdBackgroundSync: () => platformHooks.holdBackgroundSync(),
+    setPeriodicBackgroundSync: () => {},
+  },
+  [sourceUrl('src/renderer/helpers/appVisibility.js')]: { isAppHidden: () => platformHooks.isAppHidden() },
+})
+
 async function schedulingFixture(t, platform = {}) {
   t.mock.timers.enable({ apis: ['setTimeout', 'Date'], now: 1000000 })
-  const source = await readFile(new URL('../../src/renderer/store/modules/sync-server.js', import.meta.url), 'utf8')
-  const declarations = source.slice(source.indexOf('const EVENT_SYNC_'), source.indexOf('function isSyncServerOffline'))
-  const action = name => source.slice(source.indexOf(`  ${name}(`), source.indexOf('\n  },', source.indexOf(`  ${name}(`)) + 5)
+  for (const name of ['IS_CAPACITOR', 'IS_IOS']) {
+    const previous = process.env[name]
+    if (platform[name]) process.env[name] = platform[name]
+    else delete process.env[name]
+    t.after(() => {
+      if (previous === undefined) delete process.env[name]
+      else process.env[name] = previous
+    })
+  }
   const calls = []
   let releaseSync
   let blockSync = false
@@ -261,37 +277,20 @@ async function schedulingFixture(t, platform = {}) {
   // Hold counts after each change, in the order native code receives them.
   const holdCounts = []
   let nextHold = 0
-  const sandbox = {
-    Date, setTimeout, clearTimeout, AbortController, console, isRecentSync, isSyncReasonEnabled, SyncLiveConnectionState, AUTO_SYNC_INTERVAL_MS,
-    SyncCollectionCache: class {}, isSyncServerOffline: () => false,
-    process: { env: platform }, isAppHidden: () => hidden,
-    holdBackgroundSync: () => {
-      const id = ++nextHold
-      holds.add(id)
-      holdCounts.push(holds.size)
-      return () => {
-        // Releases reach native code after a resolved begin call.
-        queueMicrotask(() => {
-          holds.delete(id)
-          holdCounts.push(holds.size)
-        })
-      }
-    },
-    setPeriodicBackgroundSync: () => {},
-    withSyncLock: callback => pendingLock.then(callback),
-    runSync: async () => {
-      calls.push(Date.now())
-      if (blockSync) await new Promise(resolve => { releaseSync = resolve })
-    },
+  platformHooks.isAppHidden = () => hidden
+  platformHooks.holdBackgroundSync = () => {
+    const id = ++nextHold
+    holds.add(id)
+    holdCounts.push(holds.size)
+    return () => {
+      // Releases reach native code after a resolved begin call.
+      queueMicrotask(() => {
+        holds.delete(id)
+        holdCounts.push(holds.size)
+      })
+    }
   }
-  const { actions, liveConnection } = vm.runInNewContext(declarations + `
-    const actions = {
-      ${action('syncWithSyncServer')}
-      ${action('startSyncServerAutoSync')}
-      ${action('stopSyncServerAutoSync')}
-      ${action('scheduleSyncServer')}
-      ${action('resumeHiddenEventSyncs')}
-    }; ({ actions, liveConnection })`, sandbox)
+  const liveConnection = new SyncLiveConnectionState(null)
   const context = {
     rootState: {
       settings: settings({ syncServerEnabled: true, syncServerAutoSync: true,
@@ -299,18 +298,33 @@ async function schedulingFixture(t, platform = {}) {
         syncServerSyncSessions: true, syncServerSyncSettings: true }),
       syncServer: { syncServerStatus: 'idle' },
     },
-    dispatch: (name, payload) => Promise.resolve(actions[name]?.(context, payload)),
   }
+  const scheduler = createSyncScheduler({
+    getSettings: () => context.rootState.settings,
+    getSyncState: () => context.rootState.syncServer,
+    runSync: async () => {
+      calls.push(Date.now())
+      if (blockSync) await new Promise(resolve => { releaseSync = resolve })
+    },
+    // The store passes these requests through its actions back to the scheduler.
+    requestSync: options => scheduler.sync(options),
+    requestAutoSync: restart => restart ? scheduler.restart() : scheduler.start(),
+    withSyncLock: callback => pendingLock.then(callback),
+    isOffline: () => false,
+    isLiveConnected: () => liveConnection.isConnected(),
+    startLive: () => {},
+    stopLive: () => {},
+  })
   return {
     calls, context,
     liveConnection,
     holds,
     holdCounts,
-    start: () => actions.startSyncServerAutoSync(context),
-    schedule: reason => actions.scheduleSyncServer(context, reason),
-    resume: () => actions.resumeHiddenEventSyncs(context),
-    sync: options => actions.syncWithSyncServer(context, options),
-    stop: () => actions.stopSyncServerAutoSync(context),
+    start: () => scheduler.start(),
+    schedule: reason => scheduler.schedule(reason),
+    resume: () => scheduler.resumeHidden(),
+    sync: options => scheduler.sync(options),
+    stop: () => scheduler.stop(),
     block: () => { blockSync = true },
     setHidden: value => { hidden = value },
     holdLock: () => { pendingLock = new Promise(resolve => { releaseLock = resolve }) },

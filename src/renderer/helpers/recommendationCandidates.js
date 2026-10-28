@@ -1,21 +1,17 @@
 import { mapConcurrently } from './concurrent-map.js'
 
 /**
+ * Treats a source that answers without data as failed, so the other API may
+ * answer instead. An empty list is a valid answer.
  * @template T
- * @param {() => Promise<T>} preferred
- * @param {(() => Promise<T>) | null} fallback
- * @param {AbortSignal} signal
- * @returns {Promise<T>}
+ * @param {() => Promise<T | null | undefined>} request
+ * @returns {() => Promise<T>}
  */
-export async function fetchRecommendationSource(preferred, fallback, signal) {
-  signal.throwIfAborted()
-  try {
-    const response = await preferred()
+export function requireRecommendationResponse(request) {
+  return async () => {
+    const response = await request()
     if (response == null) throw new Error('No recommendation response')
     return response
-  } catch (error) {
-    if (!fallback || signal.aborted) throw error
-    return await fallback()
   }
 }
 

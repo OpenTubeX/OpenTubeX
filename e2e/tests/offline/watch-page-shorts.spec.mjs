@@ -10,9 +10,9 @@ async function waitForShortsNavigationReady(page) {
     const view = await watchViewHandle(page)
     try {
       return await view.evaluate(view => (
-        Date.now() >= view.shortsNavigationLockedUntil &&
-        !view.shortsSwipeSettling &&
-        !view.shortsScrollResetPending &&
+        Date.now() >= view.shortsNavigation.lockedUntil &&
+        !view.shortsNavigation.state.settling &&
+        !view.shortsNavigation.scrollResetPending &&
         window.scrollY === 0
       ))
     } finally {

@@ -7,7 +7,7 @@ import { EventEmitter } from 'node:events'
 import { createCastMediaServer, resolveCastMediaAddresses } from '../../src/main/castMediaServer.js'
 import { applyTwitchPlaylistOrigin } from '../../src/twitchPlaylistOrigin.js'
 import { isInvidiousInstanceUrl } from '../../src/main/invidiousAuthorization.js'
-import { normalizeYatteeServerUrl } from '../../src/renderer/helpers/api/yattee.js'
+import { normalizeYatteeServerUrl } from '../../src/apiBackends.js'
 
 async function fixture(defaultInstance = 'http://192.168.1.2:3000', settings = {}) {
   const main = await readFile(new URL('../../src/main/index.js', import.meta.url), 'utf8')

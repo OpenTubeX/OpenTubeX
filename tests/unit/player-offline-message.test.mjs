@@ -76,7 +76,7 @@ test('voice-over translation is unavailable offline and returns after reconnecti
   const expression = source.slice(start, source.indexOf('    const voiceOverTranslationAutoPrepare', start))
   const props = reactive({ offline: true, videoId: 'video' })
   const available = vm.runInNewContext(`${expression}\nvoiceOverTranslationAvailable`, {
-    computed, props, process: { env: { IS_ELECTRON: true } },
+    computed, props, supportsVoiceOverTranslation: true,
     useVoiceOverTranslationSetting: ref(true), isLive: ref(false),
   })
   assert.equal(available.value, false)

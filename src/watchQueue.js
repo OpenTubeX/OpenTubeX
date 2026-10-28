@@ -1,3 +1,4 @@
+// @ts-check
 export const PERSISTED_MUTATIONS = new Set([
   'addVideoToWatchQueue',
   'addVideosToWatchQueue',

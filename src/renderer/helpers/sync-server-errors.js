@@ -1,3 +1,4 @@
+// @ts-check
 /**
  * Sync server error types and the predicates that classify them.
  *
