@@ -15,18 +15,18 @@ function enqueue(operation) {
   return result
 }
 
+// The error code both native plugins use for a missing file or folder.
+const isMissing = error => error?.code === 'OS-PLUG-FILE-0008'
+
 async function listFiles() {
-  let files
   try {
-    ({ files } = await Filesystem.readdir({ path: folder, directory }))
+    const { files } = await Filesystem.readdir({ path: folder, directory })
+    return files.filter(file => file.type !== 'directory' && file.name.endsWith('.json'))
   } catch (error) {
-    // The folder does not exist until the first image is stored. Any other
-    // failure must not pass for an empty cache.
-    const exists = await Filesystem.stat({ path: folder, directory }).then(() => true, () => false)
-    if (exists) throw error
-    return []
+    // The folder does not exist until the first image is stored.
+    if (isMissing(error)) return []
+    throw error
   }
-  return files.filter(file => file.type !== 'directory' && file.name.endsWith('.json'))
 }
 
 /**
@@ -80,11 +80,9 @@ export function removeStoredTabImages(prefix) {
 
 export function clearStoredTabImages() {
   return enqueue(async () => {
-    try {
-      await Filesystem.rmdir({ path: folder, directory, recursive: true })
-    } catch (error) {
-      if ((await listFiles()).length > 0) throw error
-    }
+    await Filesystem.rmdir({ path: folder, directory, recursive: true }).catch(error => {
+      if (!isMissing(error)) throw error
+    })
   })
 }
 

@@ -141,14 +141,17 @@ test('clearing during startup keeps stored avatars from coming back', async t =>
 
 test('a failed clear is reported even when the folder cannot be listed', async t => {
   const filesystem = createFilesystem()
-  filesystem.files.set('tab-previews/preview-tab.json', '{}')
   setup(t, filesystem)
   const call = filesystem.call
   filesystem.call = async (method, options) => {
-    if (method === 'rmdir' || method === 'readdir') throw new Error('I/O error')
+    if (filesystem.files.size > 0 && (method === 'rmdir' || method === 'readdir')) throw new Error('I/O error')
     return call(method, options)
   }
   const { clearStoredTabImages, getStoredTabImagesSize } = await import('../../src/renderer/tabs/capacitorTabImageStorage.js')
+  filesystem.files.clear()
+  await clearStoredTabImages()
+  assert.equal(await getStoredTabImagesSize(), 0, 'a missing folder is an empty cache')
+  filesystem.files.set('tab-previews/preview-tab.json', '{}')
   await assert.rejects(clearStoredTabImages(), /I\/O error/)
   await assert.rejects(getStoredTabImagesSize(), /I\/O error/)
 })
