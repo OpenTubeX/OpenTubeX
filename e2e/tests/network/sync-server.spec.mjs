@@ -1309,4 +1309,70 @@ test.describe('OpenTubeX sync server', () => {
     expect(bulkRequests).toEqual([])
     expect(historyPageSizes).toContain(null)
   })
+
+  test.describe('with a large history', () => {
+    const now = Date.now()
+    test.use({
+      seed: {
+        settings: { syncServerEnabled: true },
+        // Random metadata keeps the compressed change above the server's change size limit.
+        history: Array.from({ length: 5000 }, (_, index) => ({
+          _id: `large-${index}`,
+          videoId: `large-${index}`,
+          title: `Video ${randomUUID()}`,
+          author: 'Channel',
+          authorId: `UC${randomBytes(11).toString('hex')}`,
+          published: now - index * 60000,
+          description: '',
+          lengthSeconds: 600,
+          watchProgress: 10,
+          isWatched: false,
+          timeWatched: now - index * 60000,
+          isLive: false,
+          type: 'video'
+        }))
+      }
+    })
+
+    test('uploads the full history when a change exceeds the size limit', async ({ page }, testInfo) => {
+      const capabilities = await getSyncCapabilities()
+      test.skip(capabilities.collection_changes !== 1, 'Server with collection changes required')
+      const password = 'local-test-password'
+      const section = await goToSettingsSection(page, 'sync')
+      await section.getByLabel('Sync server URL').fill(syncServerUrl)
+      await section.getByLabel('Username').fill(`opentubex-large-${randomUUID()}`)
+      await section.getByLabel('Password', { exact: true }).fill(password)
+      await section.getByLabel(/Privacy passphrase/).fill('local-test-privacy-passphrase')
+      await section.getByRole('button', { name: 'Register' }).click()
+      await expect(section.getByText(/Last synced:/)).toBeVisible()
+      await expect(section.locator('.syncProgress')).toBeHidden()
+
+      const writes = []
+      page.on('requestfinished', async request => {
+        const url = new URL(request.url())
+        if (url.pathname.startsWith('/v1/encrypted_sync/history') && request.method() !== 'GET') {
+          writes.push([request.method(), url.pathname, (await request.response())?.status()])
+        }
+      })
+      try {
+        expect(await page.evaluate(async () => {
+          const store = window.$store
+          await store.dispatch('markAllHistoryAsWatched')
+          await store.dispatch('syncWithSyncServer')
+          return store.state.syncServer.syncServerError
+        })).toBe('')
+        expect(writes).toEqual([
+          ['POST', '/v1/encrypted_sync/history/changes', 413],
+          ['PUT', '/v1/encrypted_sync/history', 200],
+        ])
+      } finally {
+        const token = await page.evaluate(() => window.$store.getters.getSyncServerToken)
+        await fetch(`${syncServerUrl}/v1/account/delete`, {
+          method: 'DELETE',
+          headers: { Authorization: token, 'Content-Type': 'application/json', 'X-Forwarded-For': rateLimitClient(testInfo) },
+          body: JSON.stringify({ password })
+        })
+      }
+    })
+  })
 })

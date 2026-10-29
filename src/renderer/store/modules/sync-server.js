@@ -750,8 +750,9 @@ async function runSync(context, { allowDataLoss = false, notifyDataLoss = true, 
                   )
                 } catch (error) {
                   // The server asks for a full upload to replace a long change log,
-                  // or while a device that cannot read changes is signed in.
-                  if (error.status !== 412) throw error
+                  // while a device that cannot read changes is signed in (412), or
+                  // when a large batch exceeds the change size limit (413).
+                  if (error.status !== 412 && error.status !== 413) throw error
                 }
               }
               saved ??= await networkClient.putEncryptedSyncCollection(
