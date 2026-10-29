@@ -160,7 +160,7 @@ import { AB_REPEAT_BOUNDARY_TOLERANCE_SECONDS, AB_REPEAT_VALUE_CHANGE_ICON, useA
 import { useAdaptiveControlPanelLayout } from './opentubex/useAdaptiveControlPanelLayout'
 import { useAmbientMode } from './opentubex/useAmbientMode'
 import { createDockedPanelMemory, DOCKED_PANEL_CLOSE_ORDER, DOCKED_PANEL_RESTORE_ORDER } from './opentubex/dockedPanels'
-import { NORMAL_PLAYBACK_RATE, normalizePlaybackRate, usePlaybackRate } from './opentubex/usePlaybackRate'
+import { NORMAL_PLAYBACK_RATE, getPlaybackRatePresets, normalizePlaybackRate, usePlaybackRate } from './opentubex/usePlaybackRate'
 import { useAutoPictureInPicture } from './opentubex/useAutoPictureInPicture'
 import { FULLSCREEN_DOCK_HEADER_SELECTOR, useFullscreenDocks } from './opentubex/useFullscreenDocks'
 import { createMobilePlayerAdjustments } from '../../helpers/mobilePlayerAdjustments'
@@ -247,9 +247,6 @@ const CAPTION_POSITION_AREAS = Object.freeze({
   'bottom-center': CaptionPositionArea.BOTTOM_CENTER,
   'bottom-right': CaptionPositionArea.BOTTOM_RIGHT,
 })
-
-// Preset pills in shaka-player's playback rate menu, the slider covers every other rate
-const PLAYBACK_RATE_PRESETS = [0.5, 0.75, 1, 1.5, 2]
 
 /*
   Mapping of Shaka localization keys for control labels to FreeTube shortcuts.
@@ -1779,20 +1776,16 @@ export default defineComponent({
       return enableChannelSettings.value && !autoUpdateChannelPlaybackSpeeds.value && props.channelId !== ''
     })
 
-    watch(maxVideoPlaybackRate, (newValue) => {
-      configurePlayerControls(() => ui.configure({
-        playbackRateSliderMax: newValue
-      }))
-    })
-
     const videoPlaybackRateInterval = computed(() => {
       return parseFloat(store.getters.getVideoPlaybackRateInterval)
     })
 
-    watch(videoPlaybackRateInterval, (newValue) => {
+    watch([videoPlaybackRateInterval, maxVideoPlaybackRate], ([interval, maximum]) => {
       configurePlayerControls(() => ui.configure({
-        playbackRateSliderMin: newValue,
-        playbackRateSliderStep: newValue,
+        playbackRateSliderMax: maximum,
+        playbackRateSliderMin: interval,
+        playbackRateSliderStep: interval,
+        playbackRates: getPlaybackRatePresets(interval, maximum),
       }))
     })
 
@@ -3231,7 +3224,7 @@ export default defineComponent({
           playbackRateSliderMax: maxVideoPlaybackRate.value,
           playbackRateSliderMin: videoPlaybackRateInterval.value,
           playbackRateSliderStep: videoPlaybackRateInterval.value,
-          playbackRates: PLAYBACK_RATE_PRESETS,
+          playbackRates: getPlaybackRatePresets(videoPlaybackRateInterval.value, maxVideoPlaybackRate.value),
           tapSeekDistance: defaultSkipInterval.value,
 
           // we have our own ones (shaka-player's ones are quite limited)
@@ -4021,6 +4014,7 @@ export default defineComponent({
       /** @type {HTMLDivElement} */
       const controlsContainer = ui.getControls().getControlsContainer()
       observeFullscreenControlsVisibility(controlsContainer)
+      syncPlaybackRateToggleState()
 
       const controls = ui.getControls()
       controls.removeEventListener('submenuopen', handleSubMenuOpen)
@@ -4777,6 +4771,23 @@ export default defineComponent({
           button.ariaPressed = active ? 'true' : 'false'
         })
       })
+    }
+
+    /**
+     * shaka-player's playback rate entry only tells its rate through its label,
+     * so the overflow menu highlights it whenever playback isn't at normal speed.
+     */
+    function syncPlaybackRateToggleState() {
+      const rate = getCurrentPlaybackRate()
+      const active = rate !== null && Math.abs(rate - NORMAL_PLAYBACK_RATE) >= 0.01
+      container.value?.querySelectorAll('.shaka-playbackrate-button').forEach((button) => {
+        button.classList.toggle('ft-active', active)
+      })
+    }
+
+    function handleRateChange() {
+      syncMediaSessionPosition()
+      syncPlaybackRateToggleState()
     }
 
     function handlePlay() {
@@ -7629,6 +7640,7 @@ export default defineComponent({
               value: videoZoom,
               updateValue: updateVideoZoom,
               levels: VIDEO_ZOOM_LEVELS,
+              defaultLevel: DEFAULT_VIDEO_ZOOM,
               formatLevel: zoom => zoom === DEFAULT_VIDEO_ZOOM ? t('Video.Player.Zoom.Off') : formatVideoZoom(zoom),
               getLabel: () => t('Video.Player.Zoom.Zoom'),
               icon: { path: PlayerIcons.ZOOM_IN_ROUNDED, viewBox: ZOOM_IN_ICON_VIEWBOX },
@@ -7653,6 +7665,7 @@ export default defineComponent({
               value: volumeBoost,
               updateValue: updateVolumeBoost,
               levels: VOLUME_BOOST_LEVELS,
+              defaultLevel: DEFAULT_VOLUME_BOOST,
               formatLevel: boost => boost === DEFAULT_VOLUME_BOOST
                 ? t('Video.Player.Volume Boost.Off')
                 : `${Math.round(boost * 100)}%`,
@@ -9327,6 +9340,7 @@ export default defineComponent({
           label.textContent = `${rate}x`
         }
       }
+      syncPlaybackRateToggleState()
     }
 
     /**
@@ -11073,7 +11087,7 @@ export default defineComponent({
       handleAbRepeatDurationChange,
       updateVolume,
       handleTimeupdate,
-      syncMediaSessionPosition,
+      handleRateChange,
       handleEnterPictureInPicture,
       handleLeavePictureInPicture,
 

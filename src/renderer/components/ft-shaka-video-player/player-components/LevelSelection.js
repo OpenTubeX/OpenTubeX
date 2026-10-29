@@ -8,7 +8,8 @@ import { resolveIconifyId } from '../../../icons/resolveIconifyId'
 
 /**
  * A settings submenu that picks one of a few preset levels, such as zoom or
- * volume boost.
+ * volume boost. Its entry is highlighted while a level other than the default
+ * is selected.
  */
 export class LevelSelection extends shaka.ui.SettingsMenu {
   /**
@@ -16,6 +17,7 @@ export class LevelSelection extends shaka.ui.SettingsMenu {
    *   value: import('vue').ComputedRef<number>,
    *   updateValue: (value: number) => void,
    *   levels: readonly number[],
+   *   defaultLevel: number,
    *   formatLevel: (value: number) => string,
    *   getLabel: () => string,
    *   icon?: string | { path: string, viewBox: string },
@@ -26,7 +28,7 @@ export class LevelSelection extends shaka.ui.SettingsMenu {
    * @param {HTMLElement} parent
    * @param {shaka.ui.Controls} controls
    */
-  constructor({ value, updateValue, levels, formatLevel, getLabel, icon, mappedIcon, className }, events, parent, controls) {
+  constructor({ value, updateValue, levels, defaultLevel, formatLevel, getLabel, icon, mappedIcon, className }, events, parent, controls) {
     super(parent, controls, icon)
 
     /** @private Follows the selected icon pack */
@@ -41,6 +43,9 @@ export class LevelSelection extends shaka.ui.SettingsMenu {
 
     /** @private */
     this.value_ = value
+
+    /** @private */
+    this.defaultLevel_ = defaultLevel
 
     /** @private */
     this.formatLevel_ = formatLevel
@@ -128,5 +133,6 @@ export class LevelSelection extends shaka.ui.SettingsMenu {
 
     this.currentSelection.textContent = status
     this.button.setAttribute('shaka-status', status)
+    this.button.classList.toggle('ft-active', currentLevel !== this.defaultLevel_)
   }
 }
