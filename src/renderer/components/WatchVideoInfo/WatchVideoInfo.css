@@ -229,6 +229,11 @@
   color: var(--primary-text-color);
 }
 
+.videoOptions :deep(.iconButton.favorite),
+.videoOptions :deep(.iconButton.favorite:not(.disabled):is(:hover, :focus-visible, .pressed)) {
+  color: var(--favorite-icon-color);
+}
+
 .videoOptions .toolbarActive :deep(.iconButton),
 .videoOptions .toolbarActive :deep(.iconButton:not(.disabled):is(:hover, :focus-visible, .pressed)) {
   color: var(--accent-color);

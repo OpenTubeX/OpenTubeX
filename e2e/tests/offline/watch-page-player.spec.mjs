@@ -875,6 +875,32 @@ test('toggles the quick bookmark and opens the playlist prompt with keyboard sho
   expect(await isBookmarked()).toBe(false)
 })
 
+test('keeps the favorite color on the bookmarked quick bookmark button at rest and while hovered', async ({ app, page }) => {
+  await mockPlayableWatchPage(app, page)
+  await openMockedVideo(page)
+
+  const button = page.locator(`${activeTab} .watchVideoInfo .quickBookmarkVideoIcon .iconButton`)
+  await button.click()
+  await expect(button).toHaveClass(/favorite/)
+
+  const colors = () => button.evaluate((element) => {
+    const probe = document.createElement('span')
+    probe.style.color = 'var(--favorite-icon-color)'
+    element.append(probe)
+    const favorite = getComputedStyle(probe).color
+    probe.remove()
+    return { favorite, button: getComputedStyle(element).color }
+  })
+
+  await page.mouse.move(0, 0)
+  const rest = await colors()
+  expect(rest.button).toBe(rest.favorite)
+
+  await button.hover()
+  const hovered = await colors()
+  expect(hovered.button).toBe(hovered.favorite)
+})
+
 test('marks the chapters player-option tile active while chapters are open', async ({ app, page }) => {
   await mockPlayableWatchPage(app, page)
   const video = await openMockedVideo(page)
