@@ -227,8 +227,16 @@ test('repeat stats ignore seeks to point B at the media end and count natural pl
 
   for (const playing of [false, true]) {
     if (playing) await video.evaluate(element => element.play())
-    await video.evaluate(element => { element.currentTime = element.duration })
-    await expect.poll(() => video.evaluate(element => !element.seeking && element.currentTime < 6)).toBe(true)
+    // Playback resumes from A, possibly before the seek there completes, so wait for
+    // that seek instead of polling for a position shortly after A.
+    await video.evaluate(element => new Promise(resolve => {
+      element.addEventListener('seeking', function returningToA() {
+        if (element.currentTime >= 6) return
+        element.removeEventListener('seeking', returningToA)
+        element.addEventListener('seeked', () => resolve(), { once: true })
+      })
+      element.currentTime = element.duration
+    }))
     await video.evaluate(element => element.pause())
     await expect(stats.locator('.repeatStatsCount')).toHaveText('0')
   }
@@ -238,4 +246,26 @@ test('repeat stats ignore seeks to point B at the media end and count natural pl
   await video.evaluate(element => element.play())
   await expect(stats.locator('.repeatStatsCount')).toHaveText('1')
   await video.evaluate(element => element.pause())
+})
+
+test('repeat stats ignore seeks past point B during playback', async ({ app, page }) => {
+  const video = await openVideo(app, page)
+  await video.evaluate(element => { element.currentTime = 5 })
+  await expect.poll(() => video.evaluate(element => element.seeking)).toBe(false)
+  await page.keyboard.press('Shift+A')
+  await video.evaluate(element => { element.currentTime = 10 })
+  await expect.poll(() => video.evaluate(element => element.seeking)).toBe(false)
+  await page.keyboard.press('Shift+B')
+  const stats = page.locator('.repeatStats')
+  await expect(stats.locator('.repeatStatsCount')).toHaveText('0')
+  await video.evaluate(element => { element.currentTime = 5 })
+  await expect.poll(() => video.evaluate(element => element.seeking)).toBe(false)
+
+  await video.evaluate(element => element.play())
+  await expect.poll(() => video.evaluate(element => element.currentTime > 5.2)).toBe(true)
+  // The seek completes while playing, so its timeupdate reports playback beyond B.
+  await video.evaluate(element => { element.currentTime = 20 })
+  await expect.poll(() => video.evaluate(element => !element.seeking && element.currentTime < 10)).toBe(true)
+  await video.evaluate(element => element.pause())
+  await expect(stats.locator('.repeatStatsCount')).toHaveText('0')
 })

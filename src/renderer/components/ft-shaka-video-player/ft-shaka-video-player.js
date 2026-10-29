@@ -156,7 +156,7 @@ import {
   getCaptionPlayerVariables,
   parseCaptionSettings,
 } from '../../helpers/player/caption-settings'
-import { AB_REPEAT_BOUNDARY_TOLERANCE_SECONDS, AB_REPEAT_VALUE_CHANGE_ICON, useAbRepeat } from './opentubex/useAbRepeat'
+import { AB_REPEAT_VALUE_CHANGE_ICON, useAbRepeat } from './opentubex/useAbRepeat'
 import { useAdaptiveControlPanelLayout } from './opentubex/useAdaptiveControlPanelLayout'
 import { useAmbientMode } from './opentubex/useAmbientMode'
 import { createDockedPanelMemory, DOCKED_PANEL_CLOSE_ORDER, DOCKED_PANEL_RESTORE_ORDER } from './opentubex/dockedPanels'
@@ -2702,9 +2702,9 @@ export default defineComponent({
       checkAbRepeatBoundary,
       clearAbRepeat,
       clearAbRepeatBoundarySchedule,
+      handleAbRepeatSeeking,
       hasValidAbRepeatRange,
       refreshAbRepeatMarkers,
-      repeatAbRangeFromStart,
       resetAbRepeat,
       scheduleAbRepeatBoundary,
       setCurrentAbRepeatBoundary,
@@ -4901,9 +4901,8 @@ export default defineComponent({
       const sleepTimerEnded = sleepTimer.consumeEndOfVideo()
       if (!sleepTimerEnded && abRepeatEnabled.value && hasValidAbRepeatRange()) {
         // Seeking to the media end can queue ended after seeked has returned
-        // playback to A. Only count a natural arrival that is still at B.
-        repeatAbRangeFromStart(!video.value.seeking &&
-          video.value.currentTime >= abRepeatEnd.value - AB_REPEAT_BOUNDARY_TOLERANCE_SECONDS)
+        // playback to A, which must not count or seek again.
+        checkAbRepeatBoundary()
         video.value.play()
         return
       }
@@ -4970,7 +4969,7 @@ export default defineComponent({
       playbackEnded.value = false
       sleepTimer.checkChapterBoundary()
       cancelSponsorBlockSkipSchedule()
-      clearAbRepeatBoundarySchedule()
+      handleAbRepeatSeeking()
       syncPlayPauseControlIcons()
       emit('seeking', video.value?.currentTime ?? 0)
     }
