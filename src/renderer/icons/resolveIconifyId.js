@@ -16,27 +16,3 @@ export { normalizeFaIcon }
 export function resolveIconifyId(icon, pack = currentIconPack.value) {
   return resolveMappedIcon(icon, pack, faAliasToCanon, faIconMap)
 }
-
-/**
- * Human-readable name for the active pack’s glyph (no FA prefix).
- * @param {string | [string, string]} icon
- * @param {IconPackId} [pack]
- * @returns {string}
- */
-export function resolvePackIconLabel(icon, pack = currentIconPack.value) {
-  const normalized = normalizeFaIcon(icon)
-  if (!normalized) {
-    return ''
-  }
-
-  const [, name] = normalized
-
-  const iconifyId = resolveIconifyId(icon, pack)
-  if (!iconifyId) {
-    return name
-  }
-
-  // "simple-icons:youtube" / "ph:sort-ascending" / "otx:playlist-add"
-  const colon = iconifyId.indexOf(':')
-  return colon === -1 ? iconifyId : iconifyId.slice(colon + 1)
-}

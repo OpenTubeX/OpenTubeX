@@ -2,14 +2,9 @@ import { registerPlugin } from '@capacitor/core'
 
 import { createAbortError } from './requestErrors.js'
 import { DESKTOP_USER_AGENT } from './capacitor-http.js'
+import { bytesToBase64 } from '../sync-server-protocol.js'
 
 const SabrHttp = registerPlugin('SabrHttp')
-
-function bytesToBase64(bytes) {
-  let binary = ''
-  for (const byte of bytes) binary += String.fromCharCode(byte)
-  return btoa(binary)
-}
 
 /**
  * Prepares a SABR protobuf request natively, then streams its response from

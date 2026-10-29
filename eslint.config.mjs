@@ -461,6 +461,12 @@ export default defineConfig([
       ecmaVersion: 'latest',
       sourceType: 'module',
     },
+    settings: {
+      'vue-i18n': {
+        localeDir: `./static/locales/{${activeLocales.join(',')}}.yaml`,
+        messageSyntaxVersion: '^11.0.0',
+      },
+    },
     rules: {
       '@stylistic/space-before-function-paren': 'off',
       '@stylistic/comma-dangle': ['error', 'only-multiline'],
