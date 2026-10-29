@@ -1,0 +1,6 @@
+More improvements
+• Queued videos now show their length, music badge, views and upload date like playlist videos. A ⋮ menu moves or removes them, and dragging slides the other videos aside.
+• Removed the "Match top bar with main color" setting, which made the header hard to read with many themes
+• Added configurable SponsorBlock submission shortcuts, with ; to start or end a segment and ' to open the submission menu.
+• The buttons below the video are easier to tap on touch screens
+…and more
