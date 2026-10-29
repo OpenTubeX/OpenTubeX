@@ -1,7 +1,7 @@
 import { toRaw } from 'vue'
 import {
   DEFAULT_CHANNEL_AVATAR, UNKNOWN_SYNC_UPLOADER_ID, uploaderToLocal, normalizeChannelAvatar, enrichSyncVideo,
-  mergeIds as mergeSyncIds, videoToRemote as syncVideoToRemote,
+  mergeIds as mergeSyncIds, videoToRemote as syncVideoToRemote, selectChangedHistory, mergeChangedHistoryBaseline,
 } from './sync-history-merge.js'
 import { runBackgroundJob } from './background-jobs.js'
 import { MAIN_PROFILE_ID } from '../../constants'
@@ -147,11 +147,9 @@ export class SyncServerClient {
         ...options,
         redirect: 'error',
         headers,
-        body: options.body == null
-          ? undefined
-          : options.body.payload?.length > 65_536
-            ? await runBackgroundJob('stringify', { value: options.body })
-            : JSON.stringify(options.body),
+        // Bodies and responses are mostly one large ciphertext string.
+        // Copying it to a worker in chunks costs far more than JSON itself.
+        body: options.body == null ? undefined : JSON.stringify(options.body),
         signal: controller.signal,
       }, timeoutMs)
       const text = await response.text()
@@ -163,7 +161,7 @@ export class SyncServerClient {
       if (!text) return null
 
       try {
-        return text.length > 65_536 ? await runBackgroundJob('parse', { value: text }) : JSON.parse(text)
+        return JSON.parse(text)
       } catch (error) {
         if (error.name !== 'SyntaxError') throw error
         return text
@@ -1032,7 +1030,9 @@ export async function syncPlaylists(client, store, previous = {}, options = {}) 
   return nextSnapshot
 }
 
-export async function syncHistory(client, store, previous = {}, options = {}) {
+// `changedIds` lists the entries changed locally since the last merge, while
+// the remote history is still the one that merge produced.
+export async function syncHistory(client, store, previous = {}, options = {}, { changedIds = null } = {}) {
   const historyChanged = new Error('Watch history changed during sync. Try again.')
   const legacy = typeof client.applyWatchHistoryChanges !== 'function'
   const acknowledgedUpserts = new Map()
@@ -1059,13 +1059,19 @@ export async function syncHistory(client, store, previous = {}, options = {}) {
     }
     let merged
     try {
+      // Sending tens of thousands of entries to the worker costs more than
+      // the merge. Unchanged entries would merge to their baseline again.
+      // A retry follows an edit made during this sync, which the IDs lack.
+      const changed = changedIds && !legacy && attempt === 0
+        ? selectChangedHistory({ localHistory, remoteHistory, previous, changedIds })
+        : null
       merged = await runBackgroundJob('mergeHistory', {
-        localHistory,
-        remoteHistory,
-        previous,
-        options: { ...options, deferRepairAcknowledgement: !legacy },
+        ...(changed ?? { localHistory, remoteHistory, previous }),
+        // Large deletions take the full merge, which asks to confirm them.
+        options: { ...options, ...(changed ? { allowDataLoss: true } : {}), deferRepairAcknowledgement: !legacy },
         acknowledged: { upserts: Array.from(acknowledgedUpserts), deletions: Array.from(acknowledgedDeletions) },
       })
+      if (changed) merged.next = mergeChangedHistoryBaseline(previous, changedIds, merged.next)
       assertHistoryCurrent()
     } catch (error) {
       store.assertActive?.()

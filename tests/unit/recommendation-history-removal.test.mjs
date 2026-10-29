@@ -13,6 +13,7 @@ import { createIdQuery } from '../../src/datastores/idQuery.js'
 import { buildRecommendationProfile } from '../../src/renderer/helpers/recommendations.js'
 import { getProfileSyncSignature } from '../../src/renderer/helpers/profile-sync.js'
 import watchQueue, { persistWatchQueue } from '../../src/renderer/store/modules/watch-queue.js'
+import { createHistoryChangeTracker } from '../../src/renderer/helpers/sync-history-changes.js'
 
 const sources = await Promise.all([
   'src/datastores/handlers/base.js',
@@ -58,6 +59,7 @@ function fixture () {
     isSettingSyncable: () => false,
     isSettingSyncEnabled: () => false,
     isRemoteSyncDispatch: () => false,
+    historyChanges: createHistoryChangeTracker(),
     SYNC_ACTION_REASONS: new Map(),
     SYNC_MUTATION_REASONS: new Map(),
   })

@@ -57,6 +57,7 @@ import { DBSettingHandlers, DBWatchStatsHandlers } from '../../../datastores/han
 import { syncLiveReminders } from '../../helpers/sync-live-reminders'
 import { liveReminder } from '../../helpers/liveReminders'
 import { MAIN_PROFILE_ID } from '../../../constants'
+import { historyChanges } from '../../helpers/sync-history-changes.js'
 
 const ENCRYPTED_SYNC_RETRIES = 3
 const LEGACY_ENCRYPTED_COLLECTIONS = [
@@ -71,6 +72,8 @@ const collectionCache = new SyncCollectionCache()
 const liveConnection = new SyncLiveConnectionState(typeof navigator !== 'undefined' ? navigator.locks : null)
 let liveClient = null
 let syncCapabilities = null
+/** The remote history revision the saved baseline was merged with. */
+let mergedHistory = null
 let liveLockController = null
 let liveGeneration = 0
 let eventsSince = ''
@@ -421,6 +424,16 @@ async function runSync(context, { allowDataLoss = false, notifyDataLoss = true, 
 
   if (!automatic || !encrypted) startProgress(stages[0])
 
+  /** @type {Set<string> | null | undefined} undefined until the history stage takes them */
+  let takenHistoryChanges
+  function takeHistoryChanges() {
+    const taken = historyChanges.take()
+    takenHistoryChanges = takenHistoryChanges === undefined
+      ? taken
+      : takenHistoryChanges && taken && new Set([...takenHistoryChanges, ...taken])
+    return takenHistoryChanges
+  }
+
   async function applyCollection(collection, targetClient) {
     switch (collection) {
       case 'seenVideos':
@@ -459,12 +472,18 @@ async function runSync(context, { allowDataLoss = false, notifyDataLoss = true, 
         result.playlistBookmarks = next.playlistBookmarks.length
         break
       case 'history': {
+        const changedIds = takeHistoryChanges()
+        // While the remote history is the one this window last merged, only
+        // local changes since then need merging.
+        const unchangedRemote = targetClient === client && mergedHistory?.identity === cacheIdentity &&
+          mergedHistory.revision === encryptedCollections?.remote.history?.revision
         const history = await syncHistory(
           targetClient,
           store,
           previous.history,
           // Imported playlist videos can enter history without uploader metadata.
-          { allowDataLoss, allowMissingUploader: encrypted }
+          { allowDataLoss, allowMissingUploader: encrypted },
+          { changedIds: unchangedRemote ? changedIds : null }
         )
         if (history !== null) {
           commit('setSyncServerHistorySupported', true)
@@ -710,11 +729,11 @@ async function runSync(context, { allowDataLoss = false, notifyDataLoss = true, 
           assertSyncStillActive()
           let revision = encryptedCollections.remote[collection].revision
           let data = client.document[collection]
-          // Sending a collection to a worker for comparison costs as much as
-          // copying it. Untouched collections are still the downloaded value,
-          // and history merges only write changed entries.
+          // Untouched collections are still the downloaded value, and history
+          // merges only write changed entries. Sending a collection to a worker
+          // for comparison would cost more than serializing it here.
           if (revision > 0 && (!client.touched.has(collection) || (collection !== 'history' &&
-              await runBackgroundJob('equal', { first: data, second: encryptedCollections.original[collection] })))) {
+              JSON.stringify(data) === JSON.stringify(encryptedCollections.original[collection])))) {
             if (collection === 'watchStats') await persistUploadedWatchStatsReset(data, store)
             if (collection === 'history') await persistUploadedHistoryRepairs(data, store)
             continue
@@ -819,7 +838,8 @@ async function runSync(context, { allowDataLoss = false, notifyDataLoss = true, 
 
     await runStage('finishing', async () => {
       const lastSyncAt = Date.now()
-      const snapshot = await runBackgroundJob('stringify', { value: next })
+      // Copying the baselines to a worker costs more than serializing them.
+      const snapshot = JSON.stringify(next)
       assertSyncStillActive()
       // Saving the snapshot writes and broadcasts it to every window. Skip that
       // when this sync confirmed the saved baseline.
@@ -831,6 +851,10 @@ async function runSync(context, { allowDataLoss = false, notifyDataLoss = true, 
     if (encryptedCollections) {
       collectionCache.markSynced(Object.keys(encryptedCollections.remote)
         .filter(collection => !skippedCollections.has(collection)))
+      // The saved baseline now matches this revision of the remote history.
+      mergedHistory = takenHistoryChanges === undefined
+        ? null
+        : { identity: cacheIdentity, revision: collectionCache.latest('history')?.revision }
     }
     if (settings.syncServerResumeAutoSync) {
       await dispatch('setSyncServerAutoSync', true)
@@ -841,6 +865,9 @@ async function runSync(context, { allowDataLoss = false, notifyDataLoss = true, 
     if (liveSupported) refreshSyncServerAccount(context)
     return result
   } catch (error) {
+    // A failed sync may have uploaded history without saving its baseline.
+    mergedHistory = null
+    if (takenHistoryChanges !== undefined) historyChanges.restore(takenHistoryChanges)
     if (error instanceof SyncServerCancelledError) {
       commit('setSyncServerProgress', null)
       commit('setSyncServerError', '')

@@ -1,6 +1,6 @@
 import { toRaw } from 'vue'
 import { historyRepairPatch, needsHistoryRepair, repairHistory } from '../../src/historyRepair.js'
-import { DEFAULT_CHANNEL_AVATAR, UNKNOWN_SYNC_UPLOADER_ID, uploaderToLocal, normalizeChannelAvatar, enrichSyncVideo, mergeIds as mergeSyncIds, videoToRemote as syncVideoToRemote } from '../../src/renderer/helpers/sync-history-merge.js'
+import { DEFAULT_CHANNEL_AVATAR, UNKNOWN_SYNC_UPLOADER_ID, uploaderToLocal, normalizeChannelAvatar, enrichSyncVideo, mergeIds as mergeSyncIds, videoToRemote as syncVideoToRemote, selectChangedHistory, mergeChangedHistoryBaseline, mergeHistory } from '../../src/renderer/helpers/sync-history-merge.js'
 import { executeBackgroundJob as runBackgroundJob } from '../../src/renderer/helpers/background-job-operations.js'
 import { EncryptedSyncAdapter } from '../../src/renderer/helpers/sync-server-privacy.js'
 import assert from 'node:assert/strict'
@@ -9,7 +9,7 @@ import test from 'node:test'
 import vm from 'node:vm'
 
 const source = await readFile(new URL('../../src/renderer/helpers/sync-server.js', import.meta.url), 'utf8')
-const context = vm.createContext({ DEFAULT_CHANNEL_AVATAR, UNKNOWN_SYNC_UPLOADER_ID, uploaderToLocal, normalizeChannelAvatar, enrichSyncVideo, mergeSyncIds, syncVideoToRemote, runBackgroundJob, toRaw })
+const context = vm.createContext({ DEFAULT_CHANNEL_AVATAR, UNKNOWN_SYNC_UPLOADER_ID, uploaderToLocal, normalizeChannelAvatar, enrichSyncVideo, mergeSyncIds, syncVideoToRemote, selectChangedHistory, mergeChangedHistoryBaseline, runBackgroundJob, toRaw })
 vm.runInContext(source
   .replace(/^import[\s\S]*? from ['"][^'"]+['"]\n/gm, '')
   .replace(/^export \{[\s\S]*?\}\n/gm, '')
@@ -536,4 +536,30 @@ test('two devices with equal watch timestamps and conflicting progress converge'
   await phone.sync(server)
   await restarted.sync(server)
   assert.equal(server.writes, finalWrites)
+})
+
+test('an edit during a merge of changed entries is uploaded by the retry', async () => {
+  const entry = id => ({ ...imported, _id: id, videoId: id, title: `Video ${id}`, timeWatched: 100, watchProgress: 10 })
+  const records = [entry('a'), entry('b')]
+  const converged = mergeHistory({ localHistory: records, remoteHistory: [], previous: {} })
+  const client = new EncryptedSyncAdapter({ history: converged.historyToUpload })
+  const history = { historyCacheSorted: records.map(record => ({ ...record })), historyRevision: 0 }
+  history.historyCacheSorted[0] = { ...records[0], timeWatched: 200, watchProgress: 20 }
+  const apply = client.applyWatchHistoryChanges.bind(client)
+  let writes = 0
+  client.applyWatchHistoryChanges = async (upserts, deletions) => {
+    await apply(upserts, deletions)
+    if (++writes === 1) {
+      // Another window watches the other video before this sync applies its result.
+      history.historyCacheSorted[1] = { ...records[1], timeWatched: 300, watchProgress: 30 }
+      history.historyRevision++
+    }
+  }
+  const next = await context.syncHistory(client, {
+    state: { history },
+    dispatch: async () => { history.historyRevision++ },
+  }, converged.next, { allowMissingUploader: true }, { changedIds: new Set(['a']) })
+  const uploaded = Object.fromEntries(client.document.history.map(item => [item.video.id, item.metadata.position_millis]))
+  assert.deepEqual(uploaded, { a: 20000, b: 30000 })
+  assert.equal(next.b.added_date, 300)
 })

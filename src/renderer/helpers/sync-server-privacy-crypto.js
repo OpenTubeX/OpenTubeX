@@ -16,6 +16,7 @@ const LEGACY_DOCUMENT_COLLECTIONS = [
   'playlistBookmarks',
 ]
 
+/** @param {BlobPart} bytes Bytes, or a string to compress as UTF-8 */
 async function transformBytes(bytes, TransformStream) {
   const stream = new globalThis.Blob([bytes])
     .stream()
@@ -162,11 +163,12 @@ export async function decryptLegacySyncDocument(payload, exportedKey) {
 export async function encryptSyncDocument(data, exportedKey, salt, { paddingBytes = PADDING_BLOCK_BYTES } = {}) {
   const key = await importPrivacyKey(exportedKey)
   const iv = crypto.getRandomValues(new Uint8Array(12))
-  const encoded = new TextEncoder().encode(JSON.stringify({ version: PRIVACY_VERSION, data }))
+  const json = JSON.stringify({ version: PRIVACY_VERSION, data })
+  // A Blob encodes the string itself, without a separate copy of every byte.
   const compressed = typeof globalThis.CompressionStream === 'function'
-    ? await compressBytes(encoded)
+    ? await compressBytes(json)
     : null
-  const payload = compressed ?? encoded
+  const payload = compressed ?? new TextEncoder().encode(json)
   const payloadOffset = compressed ? COMPRESSED_LENGTH_BYTES : 0
   const paddedLength = Math.ceil(
     (payloadOffset + payload.length) / paddingBytes

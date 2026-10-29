@@ -24,6 +24,7 @@ import {
   SYNC_MUTATION_REASONS,
   isRemoteSyncDispatch,
 } from '../helpers/sync-server-scheduling'
+import { historyChanges } from '../helpers/sync-history-changes.js'
 
 function syncOnLocalChanges(store) {
   const revisions = new Map()
@@ -84,6 +85,12 @@ function syncOnLocalChanges(store) {
   })
 }
 
+function trackHistoryChanges(store) {
+  store.subscribe(mutation => {
+    if (Object.hasOwn(history.mutations, mutation.type)) historyChanges.record(mutation)
+  })
+}
+
 function reloadRecommendationEvidenceAfterHistoryRemoval(store) {
   store.subscribe(mutation => {
     if (!store.getters.getRecommendationEpoch) return
@@ -124,7 +131,7 @@ export default createStore({
   // but we have to turn it off despite its usefulness as we have so much data in the store
   // that it causes a noticable slow-down :(
   strict: false,
-  plugins: [syncOnLocalChanges, reloadRecommendationEvidenceAfterHistoryRemoval, persistWatchQueue]
+  plugins: [syncOnLocalChanges, trackHistoryChanges, reloadRecommendationEvidenceAfterHistoryRemoval, persistWatchQueue]
 
   // TODO: Enable when deploy
   // plugins: [createPersistedState()]
