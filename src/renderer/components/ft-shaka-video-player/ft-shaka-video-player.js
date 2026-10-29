@@ -4942,8 +4942,18 @@ export default defineComponent({
         Math.abs(currentTime - backedOffTarget) < 0.001
     }
 
+    // Start positions are applied before the first frame and keep the poster.
+    let mediaFrameLoaded = false
+    let seekRevealsFrame = false
+
+    /** @param {boolean} loaded */
+    function handleMediaFrameLoaded(loaded) {
+      mediaFrameLoaded = loaded
+    }
+
     function handleSeeking() {
       if (shortsNavigationSuspended.value) return
+      seekRevealsFrame = mediaFrameLoaded
       hasPlaybackPosition.value = true
       if (!isEndSeekPosition()) endSeekTarget = null
       playbackEnded.value = false
@@ -4956,6 +4966,11 @@ export default defineComponent({
 
     function handleSeeked() {
       if (shortsNavigationSuspended.value) return
+      // A paused seek decodes the new frame without a playing event.
+      if (seekRevealsFrame && video.value?.readyState >= HTMLMediaElement.HAVE_CURRENT_DATA &&
+          video.value.videoWidth > 0) {
+        showPoster.value = false
+      }
       updateMobileMiniBarProgress()
       if (isEndSeekPosition()) playbackEnded.value = true
       // A paused seek can reach the end without dispatching an ended event.
@@ -11054,6 +11069,7 @@ export default defineComponent({
       handleEnded,
       handleSeeking,
       handleSeeked,
+      handleMediaFrameLoaded,
       handleAbRepeatDurationChange,
       updateVolume,
       handleTimeupdate,

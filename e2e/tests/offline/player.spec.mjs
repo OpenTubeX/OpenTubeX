@@ -256,6 +256,27 @@ test('a timestamped video stays paused when the window loses focus', async ({ ap
   expect(await video.evaluate(element => element.paused)).toBe(true)
 })
 
+test.describe('without autoplay', () => {
+  test.use({ seed: { settings: { ...PLAYER_SEED, autoplayVideos: false } } })
+
+  for (const timestamp of [false, true]) {
+    test(`a paused seek replaces the startup poster with the video${timestamp ? ' after a timestamp' : ''}`, async ({ app, page }) => {
+      await mockPlayableWatchPage(app, page)
+      await page.locator(sel.searchInput).fill(`https://www.youtube.com/watch?v=jNQXAC9IVRw${timestamp ? '&t=2' : ''}`)
+      await page.locator(sel.searchInput).press('Enter')
+      const video = page.locator(`${activeTab} video`)
+      const poster = page.locator(`${activeTab} .countdownPoster`)
+      await expect.poll(() => video.evaluate(element => element.readyState), { timeout: 30_000 }).toBe(4)
+      // The start position must not replace the thumbnail before the user acts.
+      await expect(poster).toBeVisible()
+
+      await video.evaluate(element => { element.currentTime = 5 })
+      await expect(poster).toBeHidden()
+      expect(await video.evaluate(element => element.paused)).toBe(true)
+    })
+  }
+})
+
 test('a Short opened in a background tab never starts playback', async ({ app, page }) => {
   await mockPlayableWatchPage(app, page)
   await page.evaluate(() => {

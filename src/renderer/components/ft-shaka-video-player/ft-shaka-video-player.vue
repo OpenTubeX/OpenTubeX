@@ -169,6 +169,8 @@
         @ended="handleEnded"
         @seeking="handleSeeking"
         @seeked="handleSeeked"
+        @loadeddata="handleMediaFrameLoaded(true)"
+        @emptied="handleMediaFrameLoaded(false)"
         @canplay="handleCanPlay"
         @resize="handleVideoResize"
         @volumechange="updateVolume"
