@@ -377,24 +377,23 @@ test('the mouse wheel over the seek bar scrolls the page instead of seeking', { 
   expect(await video.evaluate(element => element.currentTime)).toBe(5)
 })
 
-test('releasing a short drag away from the seek bar hides the time preview', async ({ app, page }) => {
+test('a click that slips off the seek bar before release hides the storyboard preview', async ({ app, page }) => {
   await mockPlayableWatchPage(app, page)
   await routeDemoMedia(page)
-  const video = await openMockedVideo(page)
-  await video.evaluate(element => element.pause())
+  await openVideoWithStoryboard(page)
 
   const player = page.locator('.ftVideoPlayer')
   const bar = player.locator('.shaka-seek-bar')
   const preview = player.locator('.shaka-player-ui-thumbnail-container')
   await player.hover()
   const bounds = await bar.boundingBox()
-  const x = bounds.x + bounds.width / 2
-  await page.mouse.move(x, bounds.y + bounds.height / 2)
-  await expect(preview).toHaveCSS('visibility', 'visible')
+  const x = bounds.x + bounds.width * 0.4
+  await page.mouse.move(x, bounds.y + 2)
+  await expect(preview.locator('.shaka-player-ui-thumbnail-image-container')).toBeVisible()
 
   // Too little sideways movement for the filmstrip, but the pointer leaves the bar.
   await page.mouse.down()
-  await page.mouse.move(x + 1, bounds.y - 80, { steps: 4 })
+  await page.mouse.move(x + 2, bounds.y - 3)
   await page.mouse.up()
   await expect(preview).toHaveCSS('visibility', 'hidden')
 })
