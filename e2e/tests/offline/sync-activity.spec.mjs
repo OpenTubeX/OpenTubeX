@@ -282,6 +282,25 @@ test.describe('account activity', () => {
     }
   })
 
+  test('keeps clear beside refresh after the settings window morphs out of the header button', { tag: '@scale' }, async ({ app, page }) => {
+    await setWindowSize(app, page, { width: 1400, height: 1000 })
+    await page.evaluate(() => window.$store.dispatch('updateMoveSettingsToAppHeader', true))
+    await seedActivity(page, 3)
+    const card = (await goToSettingsSection(page, 'sync')).locator('.syncActivity')
+    await expect.poll(() => card.locator('.activityClear').innerText()).toBe('Clear on this device')
+    await page.evaluate(() => window.$store.dispatch('closeSettingsWindowToIcon'))
+    await expect(page.locator('.settingsWindow')).toBeHidden()
+    await page.locator('.topNav [data-settings-window-icon="settings"]').click()
+    await expect(card).toBeVisible()
+    await expect(card.locator('.activityHeader')).not.toHaveClass(/activityStacked/)
+    await expect.poll(() => card.locator('.activityClear').innerText()).toBe('Clear on this device')
+    await expect.poll(() => card.evaluate(element => {
+      const clear = element.querySelector('.activityClear').getBoundingClientRect()
+      const refresh = element.querySelector('.activityAction').getBoundingClientRect()
+      return clear.top < refresh.bottom && clear.bottom > refresh.top
+    })).toBe(true)
+  })
+
   test('keeps translated activity actions inside narrow cards', { tag: '@scale' }, async ({ app, page, uiScale }, testInfo) => {
     const sync = await goToSettingsSection(page, 'sync')
     await app.electronApp.evaluate(({ BrowserWindow }) => BrowserWindow.getAllWindows()[0].setMinimumSize(0, 0))

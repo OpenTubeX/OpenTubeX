@@ -190,24 +190,30 @@ let headerObserver
 
 function updateActionLayout() {
   const header = activityHeader.value
+  const headerStyle = getComputedStyle(header)
+  const headerWidth = Number.parseFloat(headerStyle.width)
+  // Client rects include transforms such as the settings window morph, which
+  // ends without resizing anything, so measure in untransformed CSS pixels.
+  const scale = header.getBoundingClientRect().width / headerWidth
+  if (!scale) return
+  const width = element => element.getBoundingClientRect().width / scale
   const button = clearButton.value.$el
   const title = header.querySelector('.activityTitle')
   const titleIcon = title.querySelector('.activityIcon')
   const buttonIcon = button.firstElementChild
   const buttonStyle = getComputedStyle(button)
-  const titleIconWidth = titleIcon.getBoundingClientRect().width
-  const titleWidth = titleMeasure.value.getBoundingClientRect().width + titleIconWidth +
+  const titleIconWidth = width(titleIcon)
+  const titleWidth = width(titleMeasure.value) + titleIconWidth +
     (titleIconWidth ? Number.parseFloat(getComputedStyle(title).columnGap) : 0)
-  const controlsWidth = refreshButton.value.$el.getBoundingClientRect().width +
-    buttonIcon.getBoundingClientRect().width +
+  const controlsWidth = width(refreshButton.value.$el) + width(buttonIcon) +
     Number.parseFloat(buttonStyle.columnGap) +
     Number.parseFloat(buttonStyle.paddingLeft) + Number.parseFloat(buttonStyle.paddingRight) +
     Number.parseFloat(buttonStyle.borderLeftWidth) + Number.parseFloat(buttonStyle.borderRightWidth) +
-    2 * Number.parseFloat(getComputedStyle(header).columnGap)
-  const availableWidth = header.getBoundingClientRect().width - titleWidth - controlsWidth
-  actionLayout.value = fullLabelMeasure.value.getBoundingClientRect().width <= availableWidth
+    2 * Number.parseFloat(headerStyle.columnGap)
+  const availableWidth = headerWidth - titleWidth - controlsWidth
+  actionLayout.value = width(fullLabelMeasure.value) <= availableWidth
     ? 'full'
-    : shortLabelMeasure.value.getBoundingClientRect().width <= availableWidth ? 'compact' : 'stacked'
+    : width(shortLabelMeasure.value) <= availableWidth ? 'compact' : 'stacked'
 }
 
 onMounted(() => {
