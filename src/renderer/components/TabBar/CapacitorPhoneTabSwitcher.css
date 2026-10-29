@@ -36,10 +36,18 @@
   line-height: 1;
 }
 
-.capacitorPhoneTabSwitcherButton:hover,
 .capacitorPhoneTabSwitcherButton:active {
   color: var(--header-button-hover-text-color);
   background-color: var(--header-button-hover-color);
+}
+
+/* Touch input keeps :hover on the last tapped element, so the button would
+   stay highlighted after the organizer closes. */
+@media (hover: hover) {
+  .capacitorPhoneTabSwitcherButton:hover {
+    color: var(--header-button-hover-text-color);
+    background-color: var(--header-button-hover-color);
+  }
 }
 
 .capacitorPhoneTabSwitcherButton:focus-visible {

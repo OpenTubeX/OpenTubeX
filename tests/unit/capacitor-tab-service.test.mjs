@@ -3,6 +3,7 @@ import { webcrypto } from 'node:crypto'
 import test from 'node:test'
 
 import { CapacitorTabService } from '../../src/renderer/tabs/CapacitorTabService.js'
+import { tabMediaCoordinator } from '../../src/renderer/tabs/TabMediaCoordinator.js'
 import {
   activateCapacitorTab,
   addCapacitorTab,
@@ -549,6 +550,52 @@ test('the mobile tab budget protects pinned tabs, entered forms, editing and pla
   for (const id of ['tab-a', 'browse-0', 'browse-1', 'browse-2', 'browse-5', 'player', 'editor']) {
     assert.equal(store.getters.getTabById(id).loadState, 'loaded', id)
   }
+  service.dispose()
+})
+
+test('memory pressure unloads the oldest background tabs, including pinned and player tabs', t => {
+  let session = createLoadedSession()
+  for (const [id, path] of [['browse-0', '/history'], ['browse-1', '/channel/a'], ['player', '/watch/video'], ['playing', '/watch/playing'], ['kept', '/history']]) {
+    session = addCapacitorTab(session, createCapacitorTab({ path, fullPath: path, query: {} }, '', id), false)
+  }
+  session.tabs = session.tabs.map(entry => ({ ...entry, loadState: 'loaded', isLoading: false, isPinned: entry.id === 'browse-0' }))
+  const store = createStore(session)
+  const service = new CapacitorTabService(createRouter(), store, createNavigation(store))
+  tabMediaCoordinator.setPlaybackState('playing', 'playing')
+  t.after(() => tabMediaCoordinator.unregister('playing'))
+  for (const [id, order] of [['player', 1], ['browse-0', 2], ['kept', 3], ['browse-1', 4]]) {
+    service.lastPresented.set(id, order)
+  }
+  assert.equal(service.unloadLeastRecentlyUsedTabs(50, ['kept']), 2)
+  assert.deepEqual(store.getters.getTabs.filter(tab => tab.loadState === 'unloaded').map(tab => tab.id), ['browse-0', 'player'])
+  assert.equal(service.unloadLeastRecentlyUsedTabs(100, ['kept']), 1)
+  assert.equal(store.getters.getTabById('browse-1').loadState, 'unloaded')
+  for (const id of ['tab-a', 'playing', 'kept']) {
+    assert.equal(store.getters.getTabById(id).loadState, 'loaded', id)
+  }
+  assert.equal(service.unloadLeastRecentlyUsedTabs(100, ['kept']), 0)
+  service.dispose()
+})
+
+test('a WebView that reports its heap keeps background tabs loaded without memory pressure', t => {
+  Object.defineProperty(globalThis.performance, 'memory', { configurable: true, value: { usedJSHeapSize: 1, jsHeapSizeLimit: 100 } })
+  t.after(() => delete globalThis.performance.memory)
+  let session = createLoadedSession()
+  for (let index = 0; index < 6; index++) {
+    session = addCapacitorTab(session, createCapacitorTab({ path: '/history', fullPath: '/history', query: {} }, '', `browse-${index}`), false)
+  }
+  session.tabs = session.tabs.map(entry => ({ ...entry, loadState: 'loaded', isLoading: false }))
+  const store = createStore(session)
+  t.mock.timers.enable({ apis: ['setTimeout'] })
+  const service = new CapacitorTabService(createRouter(), store, createNavigation(store))
+  service.scheduleTabBudget()
+  t.mock.timers.tick(1000)
+  assert.ok(store.getters.getTabs.every(tab => tab.loadState === 'loaded'))
+
+  delete globalThis.performance.memory
+  service.scheduleTabBudget()
+  t.mock.timers.tick(1000)
+  assert.equal(store.getters.getTabs.filter(tab => tab.loadState === 'unloaded').length, 4, 'WebKit keeps the fixed budget')
   service.dispose()
 })
 

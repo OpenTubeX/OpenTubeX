@@ -725,7 +725,7 @@ import { preloadResolvedRoute, preloadUtilityRoutes } from './router/index'
 import { installRoutePreloadIntent } from './helpers/routePreloadIntent'
 import { getTabsKeptLoaded } from './tabs/TabResidency'
 import { initializeCapacitorPullToRefresh } from './helpers/capacitorPullToRefresh'
-import { startMemoryPressureMonitor } from './helpers/memoryPressure'
+import { getWebViewHeapStatistics, startMemoryPressureMonitor } from './helpers/memoryPressure'
 
 const SettingsWindow = defineAsyncComponent(() => import('./views/Settings/Settings.vue'))
 const FtPlaylistAddVideoPrompt = defineAsyncComponent(() => import('./components/FtPlaylistAddVideoPrompt/FtPlaylistAddVideoPrompt.vue'))
@@ -1240,6 +1240,22 @@ if (process.env.IS_ELECTRON) {
     }
   }, { immediate: true, flush: 'sync' })
 }
+function startTabMemoryPressureMonitor(getHeapStatistics, unloadTabs) {
+  return startMemoryPressureMonitor({
+    getHeapStatistics,
+    getSettings: () => ({
+      enabled: store.getters.getAutoUnloadTabs,
+      memoryThreshold: store.getters.getAutoUnloadMemoryThreshold,
+      tabPercentage: store.getters.getAutoUnloadTabPercentage
+    }),
+    unloadTabs,
+    notify: count => showToast({
+      message: t('Tabs Unloaded To Free Memory', { count }, count),
+      icon: ['fas', 'memory']
+    })
+  })
+}
+
 const HISTORY_CLEANUP_INTERVAL = 60 * 60 * 1000
 let historyCleanupTimer = null
 let removeTabsStateListener = null
@@ -1653,19 +1669,15 @@ onMounted(async () => {
       removeTabsStateListener = removeListener
       window.ftElectron.tabs.rendererReady()
     })
-    stopMemoryPressureMonitor = startMemoryPressureMonitor({
-      getHeapStatistics: window.ftElectron.getHeapStatistics,
-      getSettings: () => ({
-        enabled: store.getters.getAutoUnloadTabs,
-        memoryThreshold: store.getters.getAutoUnloadMemoryThreshold,
-        tabPercentage: store.getters.getAutoUnloadTabPercentage
-      }),
-      unloadTabs: percentage => window.ftElectron.tabs.unloadLeastRecentlyUsed(percentage, getTabsKeptLoaded()),
-      notify: count => showToast({
-        message: t('Tabs Unloaded To Free Memory', { count }, count),
-        icon: ['fas', 'memory']
-      })
-    })
+    stopMemoryPressureMonitor = startTabMemoryPressureMonitor(
+      window.ftElectron.getHeapStatistics,
+      percentage => window.ftElectron.tabs.unloadLeastRecentlyUsed(percentage, getTabsKeptLoaded())
+    )
+  } else if (isCapacitor && getWebViewHeapStatistics()) {
+    stopMemoryPressureMonitor = startTabMemoryPressureMonitor(
+      getWebViewHeapStatistics,
+      async percentage => capacitorTabService.unloadLeastRecentlyUsedTabs(percentage, getTabsKeptLoaded())
+    )
   }
 
   const settingsReady = store.dispatch('grabUserSettings').then(async tutorialState => {
@@ -1687,7 +1699,7 @@ onMounted(async () => {
   })
   if (isCapacitor) {
     tabsReady = settingsReady.then(() => capacitorTabService.initialize(route))
-    removeCapacitorTabPreviews = initializeCapacitorTabPreviews(store, computed(() => pageSwipe.value || organizerSwipeActive.value), tabsReady)
+    removeCapacitorTabPreviews = initializeCapacitorTabPreviews(store, computed(() => pageSwipe.value || organizerSwipeActive.value), tabsReady, tabId => navigation.isTabLoading(tabId))
     removeCapacitorTabAvatars = initializeCapacitorTabAvatars(store, tabsReady)
   }
   const customThemesReady = loadCustomThemes().catch((error) => {
