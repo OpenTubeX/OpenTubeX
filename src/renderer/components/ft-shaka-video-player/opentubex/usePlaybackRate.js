@@ -20,8 +20,15 @@ export function normalizePlaybackRate(rate) {
  * @returns {number[]}
  */
 export function getPlaybackRatePresets(step, maximum) {
+  const count = Math.floor(maximum / step + 1e-9)
+  // Settings aren't validated on import or sync, so a zero or negative interval
+  // must not loop forever. The settings UI allows at most 100 steps.
+  if (!(count > 0 && count <= 1000)) {
+    return []
+  }
+
   const rates = []
-  for (let index = 1; index * step <= maximum + 1e-9; index++) {
+  for (let index = 1; index <= count; index++) {
     // Eliminate floating-point noise (e.g. 0.1 * 3 → 0.30000000000000004).
     rates.push(parseFloat((index * step).toPrecision(10)))
   }

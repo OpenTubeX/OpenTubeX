@@ -83,6 +83,7 @@ export class TheatreModeButton extends shaka.ui.Element {
     this.icon_.use(this.theatreModeEnabled_ ? PlayerIcons.VARIABLES_DEFAULT : PlayerIcons.RECTANGLE_DEFAULT)
 
     this.currentState_.textContent = this.localization.resolve(this.theatreModeEnabled_ ? 'ON' : 'OFF')
+    this.button_.ariaPressed = this.theatreModeEnabled_ ? 'true' : 'false'
 
     const baseAriaLabel = this.theatreModeEnabled_ ? i18n.global.t('Video.Player.Exit Theatre Mode') : i18n.global.t('Video.Player.Theatre Mode')
 

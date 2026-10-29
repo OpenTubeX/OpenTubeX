@@ -7625,6 +7625,7 @@ export default defineComponent({
               value: videoZoom,
               updateValue: updateVideoZoom,
               levels: VIDEO_ZOOM_LEVELS,
+              defaultLevel: DEFAULT_VIDEO_ZOOM,
               formatLevel: zoom => zoom === DEFAULT_VIDEO_ZOOM ? t('Video.Player.Zoom.Off') : formatVideoZoom(zoom),
               getLabel: () => t('Video.Player.Zoom.Zoom'),
               icon: { path: PlayerIcons.ZOOM_IN_ROUNDED, viewBox: ZOOM_IN_ICON_VIEWBOX },
@@ -7649,6 +7650,7 @@ export default defineComponent({
               value: volumeBoost,
               updateValue: updateVolumeBoost,
               levels: VOLUME_BOOST_LEVELS,
+              defaultLevel: DEFAULT_VOLUME_BOOST,
               formatLevel: boost => boost === DEFAULT_VOLUME_BOOST
                 ? t('Video.Player.Volume Boost.Off')
                 : `${Math.round(boost * 100)}%`,
