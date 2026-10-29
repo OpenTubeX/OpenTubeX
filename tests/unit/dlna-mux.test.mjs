@@ -82,7 +82,9 @@ test('a merged stream that stalls after its first output reports failure and clo
   await listen(relay)
   t.after(() => close(relay))
   let resumeRenderer
-  relay.on('request', (_request, response) => {
+  relay.on('request', (request, response) => {
+    // Other local clients can probe the port; hold back only the stream request.
+    if (request.url !== '/secret/video.mp4') return
     const write = response.write.bind(response)
     let backedUp = true
     // Deliver the initial bytes, then hold the pipe's drain event as a paused TV would.
