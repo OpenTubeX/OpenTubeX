@@ -24,7 +24,7 @@ jobs:
     timeout-minutes: 90
 
     outputs:
-      needed: ${{ steps.duplicate.outputs.needed }}
+      needed: ${{ steps.prepare.outputs.needed }}
       tag: ${{ steps.release.outputs.tag }}
       version: ${{ steps.release.outputs.version }}
 
@@ -92,32 +92,15 @@ jobs:
           echo "release_json=$release_json"
         } >> "$GITHUB_OUTPUT"
 
-    - name: Check for an accepted update or open pull request
+    - name: Check for an open pull request
       if: steps.release.outputs.eligible == 'true'
       id: duplicate
       env:
         GH_TOKEN: ${{ github.token }}
-        RELEASE_TAG: ${{ steps.release.outputs.tag }}
         VERSION: ${{ steps.release.outputs.version }}
       shell: bash
       run: |
         set -euo pipefail
-
-        manifest="${RUNNER_TEMP}/flatpark-metainfo.xml"
-        gh api \
-          repos/flatpark/flatpark/contents/registry/org.opentubex.OpenTubeX/org.opentubex.OpenTubeX.metainfo.xml \
-          --jq .content \
-          | base64 --decode > "$manifest"
-
-        # FlatPark's own pin updater can add the release first, without its
-        # notes, details link, or screenshots. Only our submission adds the link.
-        if grep --fixed-strings --quiet \
-          "<url type=\"details\">https://github.com/${GITHUB_REPOSITORY}/releases/tag/${RELEASE_TAG}</url>" \
-          "$manifest"; then
-          echo "FlatPark already contains org.opentubex.OpenTubeX ${VERSION}."
-          echo 'needed=false' >> "$GITHUB_OUTPUT"
-          exit 0
-        fi
 
         existing_pr="$({
           gh pr list \
@@ -203,6 +186,7 @@ jobs:
 
     - name: Prepare FlatPark pins
       if: steps.duplicate.outputs.needed == 'true'
+      id: prepare
       env:
         RELEASE_JSON: ${{ steps.release.outputs.release_json }}
         RELEASE_TAG: ${{ steps.release.outputs.tag }}
@@ -249,8 +233,9 @@ jobs:
             "https://github.com/${GITHUB_REPOSITORY}/releases/download/${RELEASE_TAG}/opentubex-${VERSION}-linux-${architecture}-portable.zip"
         done
 
-        # Replace a bare release entry from FlatPark's pin updater with a
-        # complete one.
+        # FlatPark's pin updater can add the release first, without its notes,
+        # details link, screenshots, or permissions. Regenerate the entry so
+        # only what still differs from FlatPark is submitted.
         perl -0pi -e 's/^[ \t]*<release version="\Q$ENV{VERSION}\E"[^>]*>.*?<\/release>\n//ms' "$metainfo"
 
         node flatpark/scripts/update-pins.mjs "$manifest" "$metainfo" < "$resolver_json"
@@ -260,11 +245,16 @@ jobs:
         node opentubex/_scripts/syncAppStreamScreenshots.mjs \
           "$metainfo" "$RELEASE_TAG"
 
-        # The manifest is already current when FlatPark's pin updater got there first.
-        actual_changes="$(git -C flatpark diff --name-only -- . \
-          ':!registry/org.opentubex.OpenTubeX/org.opentubex.OpenTubeX.yml')"
+        if git -C flatpark diff --quiet; then
+          echo "FlatPark already contains org.opentubex.OpenTubeX ${VERSION}."
+          echo 'needed=false' >> "$GITHUB_OUTPUT"
+          exit 0
+        fi
 
-        if [[ "$actual_changes" != 'registry/org.opentubex.OpenTubeX/org.opentubex.OpenTubeX.metainfo.xml' ]]; then
+        unexpected_changes="$(git -C flatpark diff --name-only -- . \
+          ":!${manifest#flatpark/}" ":!${metainfo#flatpark/}")"
+
+        if [[ -n "$unexpected_changes" ]]; then
           echo '::error::The FlatPark pin updater changed unexpected files.'
           git -C flatpark status --short
           exit 1
@@ -288,15 +278,10 @@ jobs:
         install -Dm644 "$metainfo" submission/metainfo.xml
         git -C flatpark rev-parse HEAD > submission/base-sha
         git -C official-flatpak rev-parse HEAD > submission/official-flatpak-sha
-
-        if git -C flatpark diff --quiet -- "${manifest#flatpark/}"; then
-          echo "FlatPark's pin updater already pinned the portable archives, so this completes its AppStream release entry." > submission/summary
-        else
-          echo 'This updates the pinned x86_64 and ARM64 portable archives and adds the AppStream release entry.' > submission/summary
-        fi
+        echo 'needed=true' >> "$GITHUB_OUTPUT"
 
     - name: Store the prepared update
-      if: steps.duplicate.outputs.needed == 'true'
+      if: steps.prepare.outputs.needed == 'true'
       uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
       with:
         name: flatpark-update-${{ github.run_id }}
@@ -486,9 +471,8 @@ jobs:
 
         body="${RUNNER_TEMP}/flatpark-pr-body.md"
         official_flatpak_sha="$(< submission/official-flatpak-sha)"
-        summary="$(< submission/summary)"
         cat > "$body" <<EOF
-        OpenTubeX published [${RELEASE_TAG}](https://github.com/${GITHUB_REPOSITORY}/releases/tag/${RELEASE_TAG}). ${summary}
+        OpenTubeX published [${RELEASE_TAG}](https://github.com/${GITHUB_REPOSITORY}/releases/tag/${RELEASE_TAG}). This brings FlatPark's package in line with it: the pinned x86_64 and ARM64 portable archives, the AppStream release entry, the sandbox permissions, and the screenshots. Parts FlatPark's pin updater already updated are left as they are.
 
         FlatPark's current pin updater downloaded both release assets and calculated their SHA-256 hashes and sizes before the organization fork was updated.
 
