@@ -14,13 +14,21 @@ export function useFullscreenTeleportTarget(dismiss, keepOpen = () => false) {
   /** @type {import('vue').ShallowRef<Element | string>} */
   const target = shallowRef(document.fullscreenElement ?? '.app')
 
+  // Entering fullscreen can blur the focused element before fullscreenchange.
+  let blurred = null
+  /** @param {FocusEvent} event */
+  const handleFocusChange = (event) => {
+    blurred = event.type === 'focusout' && !event.relatedTarget ? event.target : null
+  }
+
   /** @param {Element | string} value */
   const moveTo = (value) => {
     // Moving the overlay's nodes drops focus from them, so restore it.
-    const focused = document.activeElement
+    const focused = document.activeElement === document.body ? blurred : document.activeElement
     target.value = value
     nextTick(() => {
-      if (focused instanceof HTMLElement && focused.isConnected && document.activeElement === document.body) {
+      const container = typeof value === 'string' ? document.querySelector(value) : value
+      if (focused instanceof HTMLElement && container?.contains(focused) && document.activeElement === document.body) {
         focused.focus()
       }
     })
@@ -42,8 +50,12 @@ export function useFullscreenTeleportTarget(dismiss, keepOpen = () => false) {
     })
   }
   document.addEventListener('fullscreenchange', handleFullscreenChange)
+  document.addEventListener('focusin', handleFocusChange)
+  document.addEventListener('focusout', handleFocusChange)
   onBeforeUnmount(() => {
     document.removeEventListener('fullscreenchange', handleFullscreenChange)
+    document.removeEventListener('focusin', handleFocusChange)
+    document.removeEventListener('focusout', handleFocusChange)
     clearTimeout(timeout)
   })
   return target
