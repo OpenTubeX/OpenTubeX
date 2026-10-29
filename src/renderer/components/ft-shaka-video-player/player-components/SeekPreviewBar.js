@@ -210,6 +210,8 @@ export class SeekPreviewBar extends shaka.ui.SeekBar {
     this.dragStartValue = null
     this.hideSeekPreview()
     if (this.restoreShowUIAlways()) {
+      // Shaka hides the time when the pointer leaves the bar, which the drag may already have done.
+      if (!this.container.matches(':hover')) this.hidePreviewTime()
       // Hide as if the pointer had just left when the drag ends outside the player.
       if (this.controls.getVideoContainer().matches(':hover')) {
         this.controls.showUI()
@@ -281,6 +283,11 @@ export class SeekPreviewBar extends shaka.ui.SeekBar {
     this.container.classList.remove('ft-seek-filmstrip-pullable', 'ft-seek-filmstrip-precise')
     this.filmstrip.hide()
     // Hide the time with the filmstrip instead of letting it drop to the bar.
+    this.hidePreviewTime()
+  }
+
+  /** @private */
+  hidePreviewTime() {
     const preview = this.container.querySelector('.shaka-player-ui-thumbnail-container')
     if (preview) preview.style.visibility = 'hidden'
   }
