@@ -41,6 +41,10 @@ export class SeekPreviewBar extends shaka.ui.SeekBar {
     /** @private */
     this.cancelled = false
 
+    // Shaka 5.3 seeks by a second per wheel tick over the bar and cancels the
+    // scroll. Let the wheel scroll the page as it did before.
+    this.eventManager.unlisten(this.container, 'wheel')
+
     this.eventManager.listen(controls, 'seekpreviewchange', event => {
       const wasPreviewing = this.previewTime !== null
       this.previewTime = event.time
