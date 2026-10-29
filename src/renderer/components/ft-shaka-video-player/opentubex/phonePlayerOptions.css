@@ -69,6 +69,11 @@
   max-block-size: none;
 }
 
+/* The menu scrolls with the submenus in it, below the dialog's header. */
+:deep(.phonePlayerOptions .ft-scrolling-submenu) {
+  overflow: visible;
+}
+
 :deep(.phonePlayerOptions > .shaka-back-to-overflow-button) {
   display: flex;
   position: absolute;

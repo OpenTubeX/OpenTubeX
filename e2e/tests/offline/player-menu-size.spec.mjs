@@ -141,7 +141,7 @@ test.describe('list player menu', () => {
     const presets = player.locator('.shaka-playback-rates > .shaka-playback-rate-presets')
     await expect(presets).toBeVisible()
 
-    const width = await player.locator('.shaka-playback-rates').evaluate(menu => menu.getBoundingClientRect().width)
+    const width = await presets.evaluate(element => element.getBoundingClientRect().width)
     expect(width).toBeLessThanOrEqual(400.5)
     const rows = await presets.locator('.shaka-playback-rate-preset-btn').evaluateAll(buttons => {
       return new Set(buttons.map(button => Math.round(button.getBoundingClientRect().top))).size
