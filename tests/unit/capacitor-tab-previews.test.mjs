@@ -96,15 +96,17 @@ function setup(t, { decodeError, videos = [], filesystem } = {}) {
   const warn = t.mock.method(console, 'warn', () => {})
   const pageSwipe = shallowRef(null)
   const organizerSwipeActive = ref(false)
+  const loadingTabs = new Set()
+  const navigation = { isTabLoading: tabId => loadingTabs.has(tabId) }
   const dispose = vm.runInNewContext(initializePreviews, {
-    initializeCapacitorTabPreviews, store, pageSwipe, organizerSwipeActive, computed, tabsReady: Promise.resolve(),
+    initializeCapacitorTabPreviews, store, pageSwipe, organizerSwipeActive, computed, navigation, tabsReady: Promise.resolve(),
   })
   t.after(() => {
     dispose()
     for (const restore of restoreGlobals) restore()
   })
   overlayReads = 0
-  return { document, store, tab, preview, uri, take, remove, warn, filesystem, dispose, drawImage, pageSwipe, organizerSwipeActive,
+  return { document, store, tab, preview, uri, take, remove, warn, filesystem, dispose, drawImage, pageSwipe, organizerSwipeActive, loadingTabs,
     setCaptureImage: image => { captureImage = image }, overlayReads: () => overlayReads }
 }
 
@@ -142,6 +144,21 @@ for (const previewState of ['missing', 'cached', 'capturing']) {
     assert.equal(getCapacitorTabPreview(state.tab), latest)
   })
 }
+
+test('a page spinner is not captured as the preview', async t => {
+  const state = setup(t)
+  state.loadingTabs.add(state.tab.id)
+  await captureScheduledPreview(t)
+  await captureScheduledPreview(t)
+  assert.equal(state.take.mock.callCount(), 0)
+  assert.equal(getCapacitorTabPreview(state.tab), null)
+
+  // Content can finish without another page event, e.g. when nothing loads an image.
+  state.loadingTabs.delete(state.tab.id)
+  await captureScheduledPreview(t)
+  assert.equal(state.take.mock.callCount(), 1)
+  assert.equal(getCapacitorTabPreview(state.tab), state.preview)
+})
 
 for (const event of ['load', 'loadeddata', 'playing', 'seeked']) {
   test(`${event} replaces a cached loading screenshot before the organizer opens`, async t => {

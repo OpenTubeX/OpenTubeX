@@ -306,6 +306,10 @@ export const tabMediaCoordinator = {
     return mediaByTabId.has(tabId)
   },
 
+  isPlaying(tabId) {
+    return mediaByTabId.get(tabId)?.playbackState === 'playing'
+  },
+
   unregister(tabId) {
     mediaByTabId.delete(tabId)
     if (pictureInPictureTabId === tabId) {

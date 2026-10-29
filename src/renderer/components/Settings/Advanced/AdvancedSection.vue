@@ -1,6 +1,6 @@
 <template>
   <div class="settingsCategory">
-    <TabUnloadingSettings v-if="USING_ELECTRON" />
+    <TabUnloadingSettings v-if="USING_ELECTRON || IS_CAPACITOR" />
     <AlternativeProvidersSettings />
     <BufferSettings />
     <ExternalPlayerSettings v-if="USING_ELECTRON" />

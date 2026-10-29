@@ -68,6 +68,7 @@ test('mobile startup waits for saved settings before restoring tabs', async () =
     initializeCapacitorTabPreviews: () => {},
     initializeCapacitorTabAvatars: () => {},
     capacitorTabService: { initialize: async () => { restored = true } },
+    getWebViewHeapStatistics: () => null,
   })
   await Promise.resolve()
   assert.equal(restored, false)

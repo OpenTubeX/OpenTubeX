@@ -258,7 +258,8 @@ export const SETTINGS_SEARCH_SOURCES = {
     type: 'tab-unloading',
     key: 'Settings.Tab Unloading',
     include: new Set(['Automatically unload tabs', 'Memory threshold', 'Tabs to unload']),
-    electronOnly: true
+    electronOnly: true,
+    capacitorSupported: true
   }, {
     type: 'general',
     key: 'Settings.General Settings',

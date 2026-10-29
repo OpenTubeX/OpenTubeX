@@ -15,6 +15,7 @@ import {
 } from './capacitorTabState.js'
 import { tabMediaCoordinator } from './TabMediaCoordinator.js'
 import { isAppHidden } from '../helpers/appVisibility.js'
+import { getWebViewHeapStatistics } from '../helpers/memoryPressure.js'
 import { getSyncTabRoute } from '../helpers/sync-sessions.js'
 
 const STORAGE_KEY = 'opentubex-capacitor-tabs'
@@ -473,37 +474,66 @@ export class CapacitorTabService {
   }
 
   scheduleTabBudget() {
-    if (this.budgetTimer !== null) return
+    // WebViews that report their heap unload tabs under memory pressure instead.
+    if (this.budgetTimer !== null || getWebViewHeapStatistics()) return
     this.budgetTimer = setTimeout(() => {
       this.budgetTimer = null
       this.enforceTabBudget()
     }, 1000)
   }
 
-  enforceTabBudget() {
-    let session = this.currentSession()
+  /**
+   * Background tabs that can be unloaded without interrupting the user, least
+   * recently presented first. Partially entered form values are protected.
+   * @param {object} session
+   * @param {string[]} [keptTabIds] tabs whose unloading would interrupt the user
+   */
+  unloadableTabs(session, keptTabIds = []) {
     const ids = new Set(session.tabs.map(tab => tab.id))
     for (const id of this.lastPresented.keys()) {
       if (!ids.has(id)) this.lastPresented.delete(id)
     }
-    // Keep two inactive browsing tabs warm. Player and editing routes are
-    // protected, as are pinned tabs and any partially entered form values.
+    const kept = new Set(keptTabIds)
     const roots = new Map([...(globalThis.document?.querySelectorAll('.tabContent[data-tab-id]') ?? [])]
       .map(element => [element.dataset.tabId, element]))
-    const candidates = session.tabs.filter(tab => {
-      if (tab.id === session.activeTabId || tab.id === this.store.getters.getPresentedTabId ||
-          tab.isPinned || tab.isPlaying || tab.isLoading || tab.loadState !== 'loaded') return false
-      if (!/^\/(?:home|subscriptions|subscribedchannels|trending|popular|history|userplaylists|search|channel|hashtag)(?:\/|$)/.test(tab.route.path)) return false
+    return session.tabs.filter(tab => {
+      if (tab.id === session.activeTabId || tab.id === this.store.getters.getPresentedTabId || kept.has(tab.id) ||
+          tab.isPlaying || tabMediaCoordinator.isPlaying(tab.id) || tab.isLoading || tab.loadState !== 'loaded') return false
       const root = roots.get(tab.id)
       return !root?.querySelector('[contenteditable="true"]') &&
         ![...(root?.querySelectorAll('input, textarea, select') ?? [])].some(input => input.tagName === 'SELECT' || ['checkbox', 'radio', 'range'].includes(input.type)
           ? this.changedControls.has(input)
           : !['button', 'submit', 'hidden'].includes(input.type) && input.value !== input.defaultValue)
     }).sort((left, right) => (this.lastPresented.get(left.id) ?? 0) - (this.lastPresented.get(right.id) ?? 0))
+  }
+
+  enforceTabBudget() {
+    let session = this.currentSession()
+    // Keep two inactive browsing tabs warm. Player and editing routes are
+    // protected, as are pinned tabs.
+    const candidates = this.unloadableTabs(session).filter(tab => !tab.isPinned &&
+      /^\/(?:home|subscriptions|subscribedchannels|trending|popular|history|userplaylists|search|channel|hashtag)(?:\/|$)/.test(tab.route.path))
     for (const tab of candidates.slice(0, Math.max(0, candidates.length - 2))) {
       session = unloadCapacitorTab(session, tab.id)
     }
     if (candidates.length > 2) this.commitSession(session)
+  }
+
+  /**
+   * Frees WebView memory by unloading a percentage of the least recently
+   * presented background tabs, like the desktop tab manager.
+   * @param {number} percentage
+   * @param {string[]} [keptTabIds] tabs whose unloading would interrupt the user
+   * @returns {number} The number of unloaded tabs
+   */
+  unloadLeastRecentlyUsedTabs(percentage, keptTabIds = []) {
+    if (!Number.isFinite(percentage) || percentage < 10 || percentage > 100) percentage = 50
+    let session = this.currentSession()
+    const candidates = this.unloadableTabs(session, keptTabIds)
+    const tabs = candidates.slice(0, Math.ceil(candidates.length * percentage / 100))
+    for (const tab of tabs) session = unloadCapacitorTab(session, tab.id)
+    if (tabs.length > 0) this.commitSession(session)
+    return tabs.length
   }
 
   persist() {

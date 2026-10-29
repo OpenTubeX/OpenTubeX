@@ -5,6 +5,15 @@ const CHECK_INTERVAL_MS = 30_000
 const UNLOAD_COOLDOWN_MS = 2 * 60_000
 
 /**
+ * Chromium WebViews report their JavaScript heap; WebKit does not.
+ * @returns {{ usedHeapSize: number, heapSizeLimit: number } | null}
+ */
+export function getWebViewHeapStatistics() {
+  const memory = globalThis.performance?.memory
+  return memory ? { usedHeapSize: memory.usedJSHeapSize, heapSizeLimit: memory.jsHeapSizeLimit } : null
+}
+
+/**
  * @param {object} options
  * @param {() => { usedHeapSize: number, heapSizeLimit: number }} options.getHeapStatistics
  * @param {() => { enabled: boolean, memoryThreshold: number, tabPercentage: number }} [options.getSettings]

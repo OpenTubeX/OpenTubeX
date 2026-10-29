@@ -320,6 +320,7 @@ function addSettingsSearchCommands(commands, context) {
     store,
     usingElectron: isElectron,
     isCapacitor,
+    isIos: !!process.env.IS_IOS,
     phoneLayout,
     supportsLocalApi,
     isMac,

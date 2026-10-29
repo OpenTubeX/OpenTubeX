@@ -44,13 +44,20 @@ export function prepareForTabOrganizer() {
   cache.invalidate()
 }
 
-export function initializeCapacitorTabPreviews(store, pageSwipe, tabsReady = Promise.resolve()) {
+export function initializeCapacitorTabPreviews(store, pageSwipe, tabsReady = Promise.resolve(), isTabLoading = () => false) {
   if (!process.env.IS_CAPACITOR || !Capacitor.isPluginAvailable('Screenshot')) return () => {}
   let disposed = false
   const canCapture = () => !pageSwipe.value && canCaptureCapacitorTab(store.getters, document.visibilityState === 'visible') && !hasVisibleOverlay()
   const captureCurrent = async () => {
     clearTimeout(timer)
-    if (canCapture()) await cache.capture(store.getters.getPresentedTab)
+    if (!canCapture()) return
+    // Page loaders do not mark mobile tabs as loading. Keep the last-seen
+    // preview until the spinner is gone instead of capturing a blank page.
+    if (isTabLoading(store.getters.getPresentedTabId)) {
+      timer = setTimeout(captureCurrent, 600)
+      return
+    }
+    await cache.capture(store.getters.getPresentedTab)
   }
   const schedule = () => {
     cache.invalidate()

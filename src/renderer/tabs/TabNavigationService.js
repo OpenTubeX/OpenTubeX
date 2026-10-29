@@ -650,6 +650,10 @@ export class TabNavigationService {
     }
   }
 
+  isTabLoading(tabId) {
+    return this.loadingSourcesByTabId.has(tabId)
+  }
+
   setLoadingSource(tabId, source, isLoading) {
     let sources = this.loadingSourcesByTabId.get(tabId)
     const wasLoading = (sources?.size ?? 0) > 0
