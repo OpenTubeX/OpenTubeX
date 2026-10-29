@@ -99,7 +99,7 @@ function slugify(text) {
   return text.toLowerCase().replaceAll(/[^a-z0-9]+/g, '-').replaceAll(/^-|-$/g, '').slice(0, 80)
 }
 
-function fixtureDirFor(testInfo) {
+export function fixtureDirFor(testInfo) {
   return path.join(fixturesRoot, slugify(path.basename(testInfo.file, '.spec.mjs')), slugify(testInfo.title))
 }
 
@@ -118,6 +118,7 @@ async function writeFixture(dir, name, body) {
 
 /**
  * Sets up Innertube record/replay on the given page.
+ * Pass `alwaysReplay` for captures that must never depend on the live API.
  *
  * Modes:
  * - passthrough (default): requests hit the real YouTube servers untouched.
@@ -128,10 +129,10 @@ async function writeFixture(dir, name, body) {
  *   recorded; instead the player response is replaced with one that points
  *   at the local demo video, so playback still works (see media.mjs).
  */
-export async function setupInnertube(app, testInfo) {
+export async function setupInnertube(app, testInfo, { alwaysReplay = false } = {}) {
   const page = app.page
   const record = !!process.env.E2E_RECORD
-  const replay = !record && (!!process.env.E2E_USE_FIXTURES || testInfo.retry > 0)
+  const replay = !record && (alwaysReplay || !!process.env.E2E_USE_FIXTURES || testInfo.retry > 0)
   const fixtureDir = fixtureDirFor(testInfo)
   const sharedDir = path.join(fixturesRoot, 'shared')
   // Serves repeated identical requests (e.g. continuations) in recorded order.
@@ -206,7 +207,8 @@ export async function setupInnertube(app, testInfo) {
       // URLs - or the bot checks CI runners usually get back.
       const recordable = (isSharedResource(url) || url.includes('/youtubei/v1/')) &&
         !url.includes('/youtubei/v1/player')
-      if (!recordable) {
+      const watchPage = /^https:\/\/www\.youtube\.com\/watch\?/.test(url)
+      if (!recordable && !watchPage) {
         return route.fallback()
       }
 
@@ -225,7 +227,23 @@ export async function setupInnertube(app, testInfo) {
       if (response.ok()) {
         body = await response.body().catch(() => null)
       }
-      await route.fulfill({ response }).catch(() => {})
+      // Fulfilled responses also skip the session's CORS grant, and YouTube
+      // allowed the substituted origin, which the renderer would reject.
+      const headers = Object.fromEntries(Object.entries(response.headers())
+        .filter(([name]) => !/^access-control-(allow|expose)-/i.test(name)))
+      const origin = request.headers().origin
+      if (origin) {
+        headers['access-control-allow-origin'] = origin
+        headers['access-control-allow-credentials'] = 'true'
+      }
+      if (watchPage) {
+        // Replay's watch page has no inlined /player and /next responses (see
+        // routeWatchPageHtml), so hide them to make the app request /next here too.
+        const html = body?.toString().replaceAll('ytInitialPlayerResponse', 'ytE2ePlayerResponse')
+          .replaceAll('ytInitialData', 'ytE2eData')
+        return route.fulfill({ response, headers, body: html }).catch(() => {})
+      }
+      await route.fulfill({ response, headers }).catch(() => {})
 
       if (body) {
         if (isSharedResource(url)) {
