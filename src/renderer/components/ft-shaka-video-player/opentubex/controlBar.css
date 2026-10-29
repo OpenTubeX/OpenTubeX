@@ -116,6 +116,13 @@
   box-shadow: 0 0 3px rgb(0 0 0 / 80%);
 }
 
+/* How far the pointer is between the strip's bottom (0) and the middle where precise seeking starts (1). */
+@property --ft-seek-precise-progress {
+  syntax: '<number>';
+  inherits: true;
+  initial-value: 0;
+}
+
 :deep(.ft-seek-filmstrip-hint) {
   position: absolute;
   inset-inline: 8px;
@@ -124,21 +131,34 @@
   display: none;
   width: fit-content;
   margin-inline: auto;
-  padding: 2px 8px;
+  overflow: hidden;
   border-radius: 10px;
   background-color: rgb(0 0 0 / 70%);
   color: #fff;
   font-size: 12px;
   text-align: center;
+  transition: --ft-seek-precise-progress 80ms linear;
+}
+
+:deep(.ft-seek-filmstrip-hint-label) {
+  position: relative;
+  display: block;
+  padding: 2px 8px;
+}
+
+/* An accent copy of the label rises from the bottom, so the text keeps its contrast on both sides of the fill line. */
+:deep(.ft-seek-filmstrip-hint-label::after) {
+  content: attr(data-label);
+  position: absolute;
+  inset: 0;
+  padding: inherit;
+  background-color: var(--accent-color);
+  color: var(--text-with-accent-color);
+  clip-path: inset(calc((1 - var(--ft-seek-precise-progress)) * 100%) 0 0);
 }
 
 :deep(.ft-seek-filmstrip-pullable .ft-seek-filmstrip-hint) {
   display: block;
-}
-
-:deep(.ft-seek-filmstrip-precise .ft-seek-filmstrip-hint) {
-  background-color: var(--accent-color);
-  color: var(--text-with-accent-color);
 }
 
 :deep(.shaka-seek-bar-container .shaka-range-element::-moz-range-thumb) {

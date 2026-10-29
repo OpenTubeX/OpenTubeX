@@ -50,7 +50,9 @@ function fixture() {
   class SeekFilmstrip {
     constructor() {
       this.time = null
-      this.hint = {}
+      const properties = new Map()
+      this.hint = { style: { setProperty: (name, value) => properties.set(name, value), getPropertyValue: name => properties.get(name) }, animate() {} }
+      this.hintLabel = { dataset: {}, animate() {} }
     }
     show(time) {
       this.time = time
@@ -61,6 +63,7 @@ function fixture() {
   vm.runInNewContext(source.replace(/^import .*\n/gm, '').replace('export class', 'class'), {
     updateSponsorBlockSeekBarState,
     SeekFilmstrip,
+    isReducedMotionEnabled: () => false,
     i18n: { global: { t: key => key } },
     window,
     document: {},
@@ -304,17 +307,19 @@ test('dragging back below the strip returns to seeking at the bar scale', async 
   move(354, 0)
   drag(25)
   assert.equal(bar.value, 21)
-  // Back in the lower half it stays precise.
+  // Back in the lower half it stays precise, and the hint drains toward the strip's bottom.
   move(354, 40)
   drag(25)
   assert.equal(bar.value, 21)
+  await Promise.resolve()
+  assert.equal(bar.filmstrip.hint.style.getPropertyValue('--ft-seek-precise-progress'), '0.4')
   // Resizing can leave the strip no finer than the bar; the drag stays precise and says so.
   bar.filmstrip.pixelsPerSecond = 1
   drag(25)
   assert.equal(bar.value, 21)
   await Promise.resolve()
   assert.equal(bar.container.classList.contains('ft-seek-filmstrip-precise'), true)
-  assert.equal(bar.filmstrip.hint.textContent, 'Video.Player.Precise seeking, drag down to exit')
+  assert.equal(bar.filmstrip.hintLabel.textContent, 'Video.Player.Precise seeking, drag down to exit')
   bar.filmstrip.pixelsPerSecond = 50
   // A pending storyboard lookup must not delay the hint when precise seeking ends.
   let finishStoryboardLookup
@@ -324,7 +329,7 @@ test('dragging back below the strip returns to seeking at the bar scale', async 
   drag(25)
   assert.equal(bar.value, 25)
   assert.equal(bar.container.classList.contains('ft-seek-filmstrip-precise'), false)
-  assert.equal(bar.filmstrip.hint.textContent, 'Video.Player.Pull up for precise seeking')
+  assert.equal(bar.filmstrip.hintLabel.textContent, 'Video.Player.Pull up for precise seeking')
   finishStoryboardLookup()
   bar.filmstrip.show = () => Promise.resolve()
   move(364, 50)
