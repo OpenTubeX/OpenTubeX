@@ -12,6 +12,94 @@ import { WATCH_PAGE_SEED } from '../../helpers/watch-page.mjs'
 
 test.use({ seed: { settings: WATCH_PAGE_SEED } })
 
+/**
+ * @param {import('@playwright/test').Page} page
+ * @param {Record<string, string>} manifests
+ */
+async function routePostLivePlayer(page, manifests) {
+  await page.route(/\/youtubei\/v1\/player/, (route, request) => {
+    const videoId = JSON.parse(request.postData() ?? '{}').videoId ?? 'jNQXAC9IVRw'
+    const response = demoPlayerResponse(videoId)
+    response.videoDetails.isLiveContent = true
+    response.videoDetails.isPostLiveDvr = true
+    response.streamingData = {
+      expiresInSeconds: '21540',
+      formats: [],
+      adaptiveFormats: [],
+      ...manifests
+    }
+    return route.fulfill({
+      status: 200,
+      contentType: 'application/json',
+      body: JSON.stringify(response)
+    })
+  })
+}
+
+async function mockPostLiveYtDlp(app) {
+  await app.electronApp.evaluate(({ ipcMain }, playbackInfo) => {
+    globalThis.__ytDlpPostLiveCalls = 0
+    ipcMain.removeHandler('yt-dlp-get-playback-info')
+    ipcMain.handle('yt-dlp-get-playback-info', () => {
+      globalThis.__ytDlpPostLiveCalls++
+      return playbackInfo
+    })
+  }, {
+    isLive: false,
+    liveStatus: 'post_live',
+    hlsManifestUrl: null,
+    formats: [{
+      formatId: '134',
+      url: POST_LIVE_VIDEO_URL,
+      manifestUrl: null,
+      protocol: 'http_dash_segments',
+      ext: 'mp4',
+      container: 'mp4_dash',
+      vcodec: 'avc1.42c00d',
+      acodec: 'none',
+      width: 320,
+      height: 180,
+      fps: 30,
+      bitrate: 20_000,
+      audioSampleRate: null,
+      audioChannels: null,
+      language: null,
+      formatNote: '180p',
+      dynamicRange: 'SDR',
+      availableAt: null,
+      targetDuration: 2,
+      fragmentCount: 1
+    }, {
+      formatId: '140',
+      url: POST_LIVE_AUDIO_URL,
+      manifestUrl: null,
+      protocol: 'http_dash_segments',
+      ext: 'm4a',
+      container: 'm4a_dash',
+      vcodec: 'none',
+      acodec: 'mp4a.40.2',
+      width: null,
+      height: null,
+      fps: null,
+      bitrate: 64_000,
+      audioSampleRate: 44_100,
+      audioChannels: 2,
+      language: null,
+      formatNote: 'medium',
+      dynamicRange: null,
+      availableAt: null,
+      targetDuration: 2,
+      fragmentCount: 1
+    }],
+    duration: 2,
+    storyboardVtt: null,
+    title: 'Recently ended live stream',
+    captions: [],
+    captionTranslations: [],
+    version: 'test'
+  })
+}
+
 test('shows the restricted playback setup hint and loads yt-dlp subtitles after an authenticated retry', async ({ app, page }) => {
   await mockPlayableWatchPage(app, page)
   await page.route('https://example.invalid/restricted-en.vtt', route => route.fulfill({
@@ -1080,90 +1168,14 @@ test.describe('watch page', () => {
   test('uses yt-dlp for a recently ended live stream after the built-in source fails', async ({ app, page }) => {
     await mockPlayableWatchPage(app, page)
     await routePostLiveMedia(page)
-    await page.route(/\/youtubei\/v1\/player/, (route, request) => {
-      const videoId = JSON.parse(request.postData() ?? '{}').videoId ?? 'jNQXAC9IVRw'
-      const response = demoPlayerResponse(videoId)
-      response.videoDetails.isLiveContent = true
-      response.videoDetails.isPostLiveDvr = true
-      response.streamingData = {
-        expiresInSeconds: '21540',
-        formats: [],
-        adaptiveFormats: [],
-        dashManifestUrl: 'https://example.invalid/rejected-post-live.mpd'
-      }
-      return route.fulfill({
-        status: 200,
-        contentType: 'application/json',
-        body: JSON.stringify(response)
-      })
-    })
+    await routePostLivePlayer(page, { dashManifestUrl: 'https://example.invalid/rejected-post-live.mpd' })
     let rejectedManifestRequests = 0
     await page.route(/^https:\/\/example\.invalid\/api\/manifest\/dash\//, route => {
       rejectedManifestRequests++
       return route.fulfill({ status: 403 })
     })
 
-    await app.electronApp.evaluate(({ ipcMain }, urls) => {
-      globalThis.__ytDlpPostLiveCalls = 0
-      ipcMain.removeHandler('yt-dlp-get-playback-info')
-      ipcMain.handle('yt-dlp-get-playback-info', () => {
-        globalThis.__ytDlpPostLiveCalls++
-        return {
-          isLive: false,
-          liveStatus: 'post_live',
-          hlsManifestUrl: null,
-          formats: [{
-            formatId: '134',
-            url: urls.video,
-            manifestUrl: null,
-            protocol: 'http_dash_segments',
-            ext: 'mp4',
-            container: 'mp4_dash',
-            vcodec: 'avc1.42c00d',
-            acodec: 'none',
-            width: 320,
-            height: 180,
-            fps: 30,
-            bitrate: 20_000,
-            audioSampleRate: null,
-            audioChannels: null,
-            language: null,
-            formatNote: '180p',
-            dynamicRange: 'SDR',
-            availableAt: null,
-            targetDuration: 2,
-            fragmentCount: 1
-          }, {
-            formatId: '140',
-            url: urls.audio,
-            manifestUrl: null,
-            protocol: 'http_dash_segments',
-            ext: 'm4a',
-            container: 'm4a_dash',
-            vcodec: 'none',
-            acodec: 'mp4a.40.2',
-            width: null,
-            height: null,
-            fps: null,
-            bitrate: 64_000,
-            audioSampleRate: 44_100,
-            audioChannels: 2,
-            language: null,
-            formatNote: 'medium',
-            dynamicRange: null,
-            availableAt: null,
-            targetDuration: 2,
-            fragmentCount: 1
-          }],
-          duration: 2,
-          storyboardVtt: null,
-          title: 'Recently ended live stream',
-          captions: [],
-          captionTranslations: [],
-          version: 'test'
-        }
-      })
-    }, { audio: POST_LIVE_AUDIO_URL, video: POST_LIVE_VIDEO_URL })
+    await mockPostLiveYtDlp(app)
     await page.evaluate(async () => {
       const store = window.$store
       await store.dispatch('updateVideoPlaybackEngine', 'built-in')
@@ -1198,6 +1210,52 @@ test.describe('watch page', () => {
     const prompt = page.getByRole('dialog', { name: 'Change Media Formats' })
     await expect(prompt.getByRole('button', { name: 'yt-dlp' })).toBeEnabled()
     await expect(prompt.getByRole('button', { name: 'Built-in' })).toBeEnabled()
+  })
+
+  test('uses yt-dlp for a recently ended live stream without built-in manifests', async ({ app, page }) => {
+    await mockPlayableWatchPage(app, page)
+    await routePostLiveMedia(page)
+    await routePostLivePlayer(page, {})
+    await mockPostLiveYtDlp(app)
+    await page.evaluate(() => window.$store.dispatch('updateVideoPlaybackEngine', 'built-in'))
+
+    await page.locator(sel.searchInput).fill('https://www.youtube.com/watch?v=jNQXAC9IVRw')
+    await page.locator(sel.searchInput).press('Enter')
+    await expect(page).toHaveURL(/#\/watch\/jNQXAC9IVRw/)
+    await expect(page.locator(`${activeTab} .videoTitle`)).toBeVisible()
+
+    const watchView = await watchViewHandle(page)
+    await expect.poll(() => watchView.evaluate((view) => ({
+      activeEngine: view.activePlaybackEngine,
+      errorMessage: view.errorMessage,
+      postLive: view.isPostLiveDvr,
+      streamsPending: view.ytDlpStreamsPending
+    })), { timeout: 15_000 }).toEqual({
+      activeEngine: 'yt-dlp',
+      errorMessage: null,
+      postLive: true,
+      streamsPending: false
+    })
+    expect(await app.electronApp.evaluate(() => globalThis.__ytDlpPostLiveCalls)).toBe(1)
+    await waitForPlayback(page)
+  })
+
+  test('reports missing formats for a recently ended live stream without manifests or fallback', async ({ app, page }) => {
+    await mockPlayableWatchPage(app, page)
+    await routePostLivePlayer(page, {})
+    await mockPostLiveYtDlp(app)
+    await page.evaluate(async () => {
+      await window.$store.dispatch('updateVideoPlaybackEngine', 'built-in')
+      await window.$store.dispatch('updatePlaybackEngineFallback', false)
+    })
+
+    await page.locator(sel.searchInput).fill('https://www.youtube.com/watch?v=jNQXAC9IVRw')
+    await page.locator(sel.searchInput).press('Enter')
+    await expect(page).toHaveURL(/#\/watch\/jNQXAC9IVRw/)
+
+    await expect(page.locator(`${activeTab} .videoTitle`)).toBeVisible()
+    await expect(page.locator(activeTab).getByText('This video is unavailable because of missing formats')).toBeVisible()
+    expect(await app.electronApp.evaluate(() => globalThis.__ytDlpPostLiveCalls)).toBe(0)
   })
 
   test('does not override a manual built-in selection when its live source is unavailable', async ({ app, page }) => {

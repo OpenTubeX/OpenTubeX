@@ -1018,11 +1018,11 @@ export default defineComponent({
         return this.playbackEngineFallbackTarget
       }
       if (this.ytDlpStreamsPending) {
-        // A live stream without built-in formats automatically falls back to
-        // yt-dlp even when the configured default remains the built-in engine.
+        // A live or Post Live DVR stream without built-in formats automatically
+        // falls back to yt-dlp even when the configured default remains the built-in engine.
         if (
           this.videoPlaybackEngine === 'built-in' &&
-          this.isLive &&
+          (this.isLive || this.isPostLiveDvr) &&
           this.manifestSrc === null &&
           this.legacyFormats.length === 0
         ) {
@@ -6075,7 +6075,7 @@ export default defineComponent({
     applyYtDlpPlaybackSource: async function (loadGeneration, videoId) {
       const playbackEngineSwitchGeneration = this.playbackEngineSwitchGeneration
       const liveSourceMissing =
-        this.isLive &&
+        (this.isLive || this.isPostLiveDvr) &&
         this.manifestSrc === null &&
         this.legacyFormats.length === 0
       const builtInLiveSourceMissing =
