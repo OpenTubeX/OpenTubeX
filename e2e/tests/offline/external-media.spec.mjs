@@ -2466,7 +2466,8 @@ test('keeps protected media headers with a long external storyboard', async ({ a
       return
     }
     if (request.url === '/foo/captions.vtt') captionHeaders.push(request.headers)
-    else receivedHeaders.push(request.headers)
+    // Other local processes may probe the listening port; only record the stream.
+    else if (request.url === '/foo/video.webm') receivedHeaders.push(request.headers)
     if (
       !request.headers.cookie?.includes('stream_session=test-token') ||
       request.headers.referer !== 'https://www.tiktok.com/' ||
