@@ -80,6 +80,8 @@ export default {
     ],
     fpm: [
       '--rpm-rpmbuild-define=_build_id_links none',
+      // rpm 6 writes v6 packages by default, which EL9 and EL10 cannot unpack
+      '--rpm-rpmbuild-define=_rpmformat 4',
       ...(packageChangelogs ? ['--rpm-changelog', path.join(packageChangelogs, 'rpm')] : []),
     ]
   },
