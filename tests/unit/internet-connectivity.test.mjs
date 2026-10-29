@@ -163,3 +163,55 @@ test('healthy connections stay idle and app resume checks reachability again', a
   await flush()
   assert.equal(calls, 2)
 })
+
+test('a check that fails despite a working connection is ignored until the network changes', async t => {
+  t.mock.timers.enable({ apis: ['setTimeout'] })
+  const eventTarget = new EventTarget()
+  let probes = 0
+  const connectivity = createInternetConnectivity({ eventTarget, isOnline: () => true, probe: async () => { probes++; return false } })
+  t.after(() => connectivity.dispose())
+  await flush()
+  assert.equal(connectivity.online, false)
+  connectivity.confirmReachable()
+  assert.equal(connectivity.online, true)
+  await flush()
+  assert.equal(probes, 2, 'one probe verifies the endpoint after a confirmed response')
+  assert.equal(connectivity.online, true)
+  assert.equal(await connectivity.check(), true)
+  t.mock.timers.tick(120000)
+  await flush()
+  assert.equal(probes, 2)
+  eventTarget.dispatchEvent(new Event('online'))
+  await flush()
+  assert.equal(probes, 3)
+  assert.equal(connectivity.online, false)
+})
+
+test('a check started before a confirmed response cannot mark the app offline', async t => {
+  let finish
+  const connectivity = createInternetConnectivity({ eventTarget: new EventTarget(), isOnline: () => true, probe: () => new Promise(resolve => { finish = resolve }) })
+  t.after(() => connectivity.dispose())
+  await flush()
+  finish(true)
+  await flush()
+  const pending = connectivity.check()
+  await flush()
+  connectivity.confirmReachable()
+  finish(false)
+  assert.equal(await pending, true)
+  assert.equal(connectivity.online, true)
+})
+
+test('a working check stays trusted after a confirmed response ends an outage', async t => {
+  t.mock.timers.enable({ apis: ['setTimeout'] })
+  let reachable = false
+  const connectivity = createInternetConnectivity({ eventTarget: new EventTarget(), isOnline: () => true, probe: async () => reachable })
+  t.after(() => connectivity.dispose())
+  await flush()
+  reachable = true
+  connectivity.confirmReachable()
+  await flush()
+  reachable = false
+  assert.equal(await connectivity.check(), false)
+  assert.equal(connectivity.online, false)
+})

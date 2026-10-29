@@ -187,6 +187,34 @@ test('watch history parsing removes localized title text around the video title'
   assert.deepEqual(repeated.entries.map(entry => entry.title), ['Erstes Video angesehen', 'Erstes Video angesehen'])
 })
 
+test('watch history parsing keeps title text that every video happens to share', () => {
+  const record = title => ({ products: ['YouTube'], title, titleUrl: 'https://www.youtube.com/watch?v=abcdefghijk', time: '2025-01-01T00:00:00Z' })
+  const letter = parseTakeoutWatchHistory([record('Watched Apple pie'), record('Watched Avocado toast')])
+  assert.deepEqual(letter.entries.map(entry => entry.title), ['Apple pie', 'Avocado toast'])
+  // Ads are not imported, but they show the same localized text.
+  const series = parseTakeoutWatchHistory([
+    record('Watched Episode 1'), record('Watched Episode 2'), { ...record('Watched Some ad'), details: [{ name: 'From Google Ads' }] },
+  ])
+  assert.deepEqual(series.entries.map(entry => entry.title), ['Episode 1', 'Episode 2'])
+  // Other activity without a video URL does not share the template.
+  const visited = parseTakeoutWatchHistory([
+    { products: ['YouTube'], title: 'Visited YouTube Music', time: '2025-01-01T00:00:00Z' }, record('Watched Apple pie'), record('Watched Banana bread'),
+  ])
+  assert.deepEqual(visited.entries.map(entry => entry.title), ['Apple pie', 'Banana bread'])
+  assert.equal(visited.skipped, 0)
+})
+
+test('watch history parsing reads the video ID from the watch URL query', () => {
+  const record = titleUrl => ({ products: ['YouTube'], title: 'Watched Example', titleUrl, time: '2025-01-01T00:00:00Z' })
+  const { entries, skipped } = parseTakeoutWatchHistory([
+    record('https://www.youtube.com/watch?v=abcdefghijk&t=40'),
+    record('https://www.youtube.com/watch?t=40&v=bcdefghijkl'),
+    record('https://www.youtube.com/watch?v=not a video id'),
+  ])
+  assert.deepEqual(entries.map(entry => entry.videoId), ['abcdefghijk', 'bcdefghijkl'])
+  assert.equal(skipped, 1)
+})
+
 test('preview reports existing generated playlist names as merge targets on repeated imports', async () => {
   const file = new Blob([zipSync({
     'First/playlists/List-videos.csv': strToU8('Video ID,Playlist video creation timestamp\nabcdefghijk,2025-01-01T00:00:00Z\n'),

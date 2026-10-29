@@ -5,6 +5,7 @@ import vm from 'node:vm'
 
 import { capacitorHttpFetch, DESKTOP_USER_AGENT } from '../../src/renderer/helpers/api/capacitor-http.js'
 import { createAbortError } from '../../src/renderer/helpers/api/requestErrors.js'
+import { bytesToBase64 } from '../../src/renderer/helpers/sync-server-protocol.js'
 
 const source = (await readFile(new URL('../../src/renderer/helpers/api/capacitor-sabr-http.js', import.meta.url), 'utf8'))
   .replace(/^import .*\n/gm, '')
@@ -25,7 +26,8 @@ function load(prepare, overrides = {}) {
     registerPlugin: () => ({ prepare, abort: async () => {} }),
     createAbortError,
     DESKTOP_USER_AGENT,
-    Uint8Array, Headers, Response, ReadableStream, btoa,
+    bytesToBase64,
+    Uint8Array, Headers, Response, ReadableStream,
     location: { origin: 'https://localhost' },
     fetch: async () => new Response(Uint8Array.of(1, 2, 3)),
     ...overrides,

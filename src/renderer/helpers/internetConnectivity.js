@@ -39,6 +39,11 @@ export function createInternetConnectivity({ eventTarget, isOnline, probe, enabl
   let controller
   let pending
   let retryDelay = 5000
+  // A check endpoint can be blocked while the internet works. Responses from
+  // internet hosts are counted so a check that fails despite them is ignored
+  // until the device changes networks.
+  let confirmations = 0
+  let trusted = true
 
   function publish(value) {
     if (online === value) return
@@ -47,14 +52,20 @@ export function createInternetConnectivity({ eventTarget, isOnline, probe, enabl
   }
 
   function check() {
-    if (disposed || !enabled || !isOnline()) return Promise.resolve(!disposed && isOnline())
+    if (disposed || !enabled || !trusted || !isOnline()) return Promise.resolve(!disposed && isOnline())
     if (pending) return pending
     clearTimeout(timer)
     const current = new AbortController()
+    const seenConfirmations = confirmations
     controller = current
     pending = Promise.resolve().then(() => probe(current.signal)).catch(() => false).then(reachable => {
       // Ignore results from a previous network or a disposed app.
       if (controller !== current || current.signal.aborted) return online
+      if (!reachable && confirmations !== seenConfirmations) {
+        trusted = false
+        publish(isOnline())
+        return online
+      }
       publish(isOnline() && reachable)
       if (online) {
         retryDelay = 5000
@@ -70,6 +81,7 @@ export function createInternetConnectivity({ eventTarget, isOnline, probe, enabl
   }
 
   function connectivityChanged() {
+    trusted = true
     clearTimeout(timer)
     controller?.abort()
     controller = undefined
@@ -93,6 +105,20 @@ export function createInternetConnectivity({ eventTarget, isOnline, probe, enabl
       if (enabled === value) return
       enabled = value
       connectivityChanged()
+    },
+    confirmReachable() {
+      if (disposed || !enabled || !trusted || !isOnline()) return
+      if (!online) {
+        clearTimeout(timer)
+        controller?.abort()
+        controller = undefined
+        pending = undefined
+        retryDelay = 5000
+        publish(true)
+        // Verify the endpoint; failing now shows that it is blocked.
+        check()
+      }
+      confirmations++
     },
     get online() { return online },
     get ready() { return pending ?? Promise.resolve(online) },

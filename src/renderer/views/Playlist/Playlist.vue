@@ -1731,6 +1731,7 @@ function cachePlaylistForWatchTransition(to) {
         continuationData: continuationData.value
           ? extractLocalCacheablePlaylistContinuation(continuationData.value)
           : null,
+        nextInvidiousPage: nextInvidiousPlaylistPage.value,
       }
     })
   }

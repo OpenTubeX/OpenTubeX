@@ -15,6 +15,8 @@ export function isRecoverableNetworkError(error) {
  * so an unavailable optional service cannot block YouTube or another backend.
  */
 export function createNetworkRecovery({ eventTarget, isOnline, visibilityTarget, isVisible, checkInternet, internetChecksEnabled = true, onChange = () => {} }) {
+  const deviceEvents = eventTarget
+  const isDeviceOnline = isOnline
   const connectivity = checkInternet ? createInternetConnectivity({ eventTarget, isOnline, probe: checkInternet, enabled: internetChecksEnabled, visibilityTarget, isVisible }) : null
   if (connectivity) {
     eventTarget = connectivity.events
@@ -51,24 +53,29 @@ export function createNetworkRecovery({ eventTarget, isOnline, visibilityTarget,
   eventTarget.addEventListener('offline', connectivityChanged)
   update()
 
-  function wait(delay, signal) {
+  function wait(delay, signal, canAttempt) {
     return new Promise((resolve, reject) => {
       let timer
+      const targets = deviceEvents === eventTarget ? [eventTarget] : [eventTarget, deviceEvents]
       const finish = (error) => {
         clearTimeout(timer)
-        eventTarget.removeEventListener('online', connected)
-        eventTarget.removeEventListener('offline', disconnected)
+        for (const target of targets) {
+          target.removeEventListener('online', connected)
+          target.removeEventListener('offline', disconnected)
+        }
         signal.removeEventListener('abort', aborted)
         if (error) reject(error)
         else resolve()
       }
-      const connected = () => { if (isOnline()) finish() }
-      const disconnected = () => { clearTimeout(timer) }
+      const connected = () => { if (canAttempt()) finish() }
+      const disconnected = () => { if (!canAttempt()) clearTimeout(timer) }
       const aborted = () => finish(createAbortError())
-      eventTarget.addEventListener('online', connected)
-      eventTarget.addEventListener('offline', disconnected)
+      for (const target of targets) {
+        target.addEventListener('online', connected)
+        target.addEventListener('offline', disconnected)
+      }
       signal.addEventListener('abort', aborted, { once: true })
-      if (isOnline()) timer = setTimeout(() => finish(), delay)
+      if (canAttempt()) timer = setTimeout(() => finish(), delay)
       if (signal.aborted) aborted()
     })
   }
@@ -82,7 +89,12 @@ export function createNetworkRecovery({ eventTarget, isOnline, visibilityTarget,
     })
   }
 
-  async function run(originKey, task, { signal: callerSignal, retry = true, isNetworkError = error => classifyRequestFailure(error) === 'network' } = {}) {
+  /**
+   * Requests that reach a real host keep their own backoff while the internet
+   * check fails, so a blocked check endpoint cannot stop reachable services.
+   */
+  async function run(originKey, task, { signal: callerSignal, retry = true, retryDuringOutage = false, isNetworkError = error => classifyRequestFailure(error) === 'network' } = {}) {
+    const canAttempt = retryDuringOutage ? isDeviceOnline : isOnline
     const signal = callerSignal ? AbortSignal.any([callerSignal, shutdown.signal]) : shutdown.signal
     if (signal.aborted) throw createAbortError()
     if (connectivity) await waitForPromise(connectivity.ready, signal)
@@ -101,15 +113,15 @@ export function createNetworkRecovery({ eventTarget, isOnline, visibilityTarget,
           await waitForPromise(origin.probe, signal)
           continue
         }
-        if (!online || origin.failed) {
+        if (!canAttempt() || origin.failed) {
           origin.failed = true
           let release
           origin.probe = new Promise(resolve => { release = resolve })
           try {
             let delay = 5000
             for (;;) {
-              await wait(delay, signal)
-              if (!online) continue
+              await wait(delay, signal, canAttempt)
+              if (!canAttempt()) continue
               try {
                 const result = await task(signal)
                 origin.failed = false
@@ -154,6 +166,10 @@ export function createNetworkRecovery({ eventTarget, isOnline, visibilityTarget,
     setInternetChecksEnabled(enabled) {
       connectivity?.setEnabled(enabled)
       if (!enabled && online) publish('online')
+    },
+    /** A response from an internet host proves reachability despite a failed check. */
+    confirmInternetReachable() {
+      connectivity?.confirmReachable()
     },
     get ready() { return connectivity?.ready ?? Promise.resolve(online) },
     checkConnection: () => connectivity?.check() ?? Promise.resolve(online),
@@ -202,26 +218,47 @@ export function initializeNetworkRecovery({ checkInternet, internetChecksEnabled
   return appRecovery
 }
 
+function isLocalHostname(hostname) {
+  const host = hostname.replaceAll(/^\[|\]$/g, '').toLowerCase()
+  if (host.includes(':')) return /^(::1$|::ffff:|f[cd]|fe[89ab])/.test(host)
+  if (/^\d+\.\d+\.\d+\.\d+$/.test(host)) {
+    return /^(127|10|192\.168|169\.254|172\.(1[6-9]|2\d|3[01])|100\.(6[4-9]|[7-9]\d|1[01]\d|12[0-7]))\./.test(host)
+  }
+  return host === 'localhost' || /\.(localhost|local|lan|home\.arpa)$/.test(host)
+}
+
 /** Use the same queue for native HTTP and WebView requests. */
 export function withNetworkRecovery(input, init, task, options = {}) {
   if (typeof window === 'undefined') return task(init?.signal)
   const request = input instanceof Request ? input : null
   const signal = init?.signal ?? request?.signal
+  let url
+  try {
+    url = new URL(request?.url ?? input.toString(), location.href)
+  } catch (error) {
+    return Promise.reject(error)
+  }
+  // A captive portal can answer plain HTTP, but not HTTPS with a valid certificate.
+  const confirmsInternet = url.protocol === 'https:' && !isLocalHostname(url.hostname)
+  const confirm = response => {
+    if (confirmsInternet) appRecovery?.confirmInternetReachable()
+    return response
+  }
   if (appRecovery?.ownsRequests(signal)) {
-    return task(signal).catch(async error => {
+    return task(signal).then(confirm, async error => {
       // Keep transport classification when the caller owns the retry policy.
       await options.isNetworkError?.(error)
       throw error
     })
   }
-  const url = new URL(request?.url ?? input.toString(), location.href)
   if (!['http:', 'https:'].includes(url.protocol) || url.origin === location.origin) return task(init?.signal ?? request?.signal)
   const method = (init?.method ?? request?.method ?? 'GET').toUpperCase()
   // YouTube's metadata and chat APIs use POST for read-only queries.
   const retry = ['GET', 'HEAD'].includes(method) ||
     (method === 'POST' && /(^|\.)youtube\.com$/.test(url.hostname) &&
       /^\/youtubei\/v1\/(browse|search|player|next|guide|get_transcript|navigation\/resolve_url|updated_metadata|live_chat\/get_live_chat(?:_replay)?)$/.test(url.pathname))
-  return initializeNetworkRecovery().run(url.origin, task, { ...options, signal: init?.signal ?? request?.signal, retry })
+  return initializeNetworkRecovery().run(url.origin, task, { ...options, signal: init?.signal ?? request?.signal, retry, retryDuringOutage: true })
+    .then(confirm)
 }
 
 export function installNetworkFetch({ corsDisabled = false, checkInternet = false, internetChecksEnabled = true } = {}) {
