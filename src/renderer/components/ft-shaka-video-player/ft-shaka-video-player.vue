@@ -200,12 +200,19 @@
           :src="thumbnail"
           alt=""
         />
-        <span
+        <div
           v-if="pictureInPictureActive && !audioPlayerMode"
           class="pictureInPictureMessage"
         >
-          {{ $t('Video.Player.Playing in Picture-in-Picture') }}
-        </span>
+          <FtIcon
+            :icon="['fas', 'picture-in-picture']"
+            class="pictureInPictureIcon"
+            aria-hidden="true"
+          />
+          <span class="pictureInPictureText">
+            {{ $t('Video.Player.Playing in Picture-in-Picture') }}
+          </span>
+        </div>
       </div>
       <template v-if="showEndedScreen">
         <div
