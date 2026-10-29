@@ -35,7 +35,7 @@ export function createSubscriptionNetworkRecovery({ recovery = initializeNetwork
             retrying = true
             throw error
           }
-        }, { signal: cancellation.signal, isNetworkError: error => error instanceof SubscriptionNetworkError })
+        }, { signal: cancellation.signal, retryDuringOutage: true, isNetworkError: error => error instanceof SubscriptionNetworkError })
       } catch (error) {
         if (!cancellation.signal.aborted) throw error
       }

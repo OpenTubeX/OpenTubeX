@@ -599,6 +599,17 @@ test('startup recognises WAN loss and later recovery without an OS network event
   await expect(banner).toBeHidden()
 })
 
+test('a blocked internet check neither stops reachable services nor keeps the banner', async ({ page }) => {
+  await page.route(INTERNET_CHECK_URL, route => route.abort('blockedbyclient'))
+  await page.route('https://wan.example/**', route => route.fulfill({ status: 200, body: 'working', headers: { 'access-control-allow-origin': '*' } }))
+  await page.reload()
+  const banner = page.locator('.connectionStatus')
+  await expect(banner).toHaveText('Connection lost. Trying to reconnect…')
+  expect(await page.evaluate(() => fetch('https://wan.example/data').then(response => response.text()))).toBe('working')
+  await expect(banner).toHaveText('Back online')
+  await expect(banner).toBeHidden()
+})
+
 test.describe('internet check privacy setting', () => {
   test.use({ seed: { settings: { fetchSubscriptionsAutomatically: false, internetConnectivityChecks: false } } })
 

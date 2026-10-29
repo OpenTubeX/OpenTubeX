@@ -382,17 +382,18 @@ test('the installed fetch checks internet outside its own queue and resumes star
       return new Response(null, { status: 204 })
     }
     requests++
+    if (!reachable) throw new TypeError('Failed to fetch')
     return new Response('startup')
   }, undefined, { checkInternet: true, corsDisabled: true })
   const pending = app.window.fetch('https://api.github.com/startup')
   await flush()
   assert.equal(app.recovery.state, 'offline')
-  assert.equal(requests, 0)
+  assert.equal(requests, 1)
   assert.deepEqual(probes, [INTERNET_CHECK_URL])
   reachable = true
   t.mock.timers.tick(5000)
   assert.equal(await (await pending).text(), 'startup')
-  assert.equal(requests, 1)
+  assert.equal(requests, 2)
   assert.equal(app.recovery.state, 'restored')
 })
 
@@ -494,4 +495,85 @@ test('disabled Android connectivity checks send neither probes nor permission ch
     { checkInternet: true, internetChecksEnabled: false }, unexpected)
   await flush()
   assert.equal(app.recovery.state, 'online')
+})
+
+test('a blocked connectivity probe neither blocks reachable services nor keeps the app offline', async t => {
+  t.mock.timers.enable({ apis: ['setTimeout'] })
+  let requests = 0
+  const app = await loadAppNetwork(t, async input => {
+    if (input === INTERNET_CHECK_URL) throw new TypeError('Failed to fetch')
+    requests++
+    return new Response('ok')
+  }, undefined, { checkInternet: true, corsDisabled: true })
+  assert.equal(await (await app.window.fetch('https://www.youtube.com/feed')).text(), 'ok')
+  assert.equal(app.recovery.state, 'restored', 'a real response proves internet access')
+  assert.equal(await (await app.window.fetch('https://invidious.example/api')).text(), 'ok')
+  assert.equal(requests, 2)
+})
+
+test('a local or plain HTTP response does not clear an internet outage', async t => {
+  t.mock.timers.enable({ apis: ['setTimeout'] })
+  const app = await loadAppNetwork(t, async input => {
+    if (input === INTERNET_CHECK_URL) throw new TypeError('Failed to fetch')
+    return new Response('ok')
+  }, undefined, { checkInternet: true, corsDisabled: true })
+  for (const url of ['https://192.168.1.20:3000/api', 'https://[fd00::1]/api', 'https://nas.local/api', 'https://localhost:8080/api', 'http://portal.example/']) {
+    assert.equal(await (await app.window.fetch(url)).text(), 'ok')
+    assert.equal(app.recovery.state, 'offline', url)
+  }
+})
+
+test('a wait-only task does not end an internet outage when the probe fails', async t => {
+  t.mock.timers.enable({ apis: ['setTimeout'] })
+  const recovery = createNetworkRecovery({ eventTarget: new EventTarget(), isOnline: () => true, checkInternet: async () => false })
+  t.after(() => recovery.dispose())
+  let done = false
+  recovery.run('managed-tools', async () => { done = true }).catch(() => {})
+  await flush()
+  t.mock.timers.tick(60000)
+  await flush()
+  assert.equal(done, false)
+  assert.equal(recovery.state, 'offline')
+})
+
+test('with a blocked probe, requests recover from a WAN outage on their own backoff', async t => {
+  t.mock.timers.enable({ apis: ['setTimeout'] })
+  let wan = true
+  const app = await loadAppNetwork(t, async input => {
+    if (input === INTERNET_CHECK_URL || !wan) throw new TypeError('Failed to fetch')
+    return new Response('ok')
+  }, undefined, { checkInternet: true, corsDisabled: true })
+  await app.window.fetch('https://www.youtube.com/feed')
+  wan = false
+  const pending = app.window.fetch('https://www.youtube.com/next')
+  await flush()
+  wan = true
+  t.mock.timers.tick(5000)
+  assert.equal(await (await pending).text(), 'ok')
+  assert.notEqual(app.recovery.state, 'offline')
+})
+
+test('with a blocked probe, healthy responses do not wake a failed service before its backoff', async t => {
+  t.mock.timers.enable({ apis: ['setTimeout'] })
+  let failedAttempts = 0
+  const app = await loadAppNetwork(t, async input => {
+    if (input === INTERNET_CHECK_URL) throw new TypeError('Failed to fetch')
+    if (input.startsWith('https://unavailable.example/')) {
+      failedAttempts++
+      throw new TypeError('Failed to fetch')
+    }
+    return new Response('ok')
+  }, undefined, { checkInternet: true, corsDisabled: true })
+  await app.window.fetch('https://www.youtube.com/feed')
+  await flush()
+  const controller = new AbortController()
+  const pending = app.window.fetch('https://unavailable.example/data', { signal: controller.signal }).catch(error => error.name)
+  await flush()
+  const attempts = failedAttempts
+  for (let i = 0; i < 3; i++) await app.window.fetch('https://www.youtube.com/next')
+  await flush()
+  assert.equal(failedAttempts, attempts)
+  assert.notEqual(app.recovery.state, 'offline')
+  controller.abort()
+  assert.equal(await pending, 'AbortError')
 })
