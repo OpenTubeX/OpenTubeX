@@ -81,6 +81,30 @@ for (const usePlayerMenuGrid of [true, false]) {
       await expect(options.getByRole('button', { name: 'Auto-translate' })).toBeInViewport()
       expect(await captionMenuLayout(player)).toMatchObject({ headerVisible: true, footerVisible: true })
       await attachScreenshot('caption options scrolled to the end')
+
+      // Shaka rebuilds the choices when the tracks change, here to a shorter list.
+      await player.evaluate((element) => {
+        const shakaPlayer = element.ui.getControls().getPlayer()
+        const tracks = shakaPlayer.getTextTracks().slice(0, 20)
+        shakaPlayer.getTextTracks = () => tracks
+        shakaPlayer.dispatchEvent({ type: 'trackschanged' })
+      })
+      await expect(options.locator(':scope > button')).toHaveCount(23)
+      await expect.poll(() => options.evaluate((element) => {
+        const range = element.scrollHeight - element.clientHeight
+        const last = element.querySelector(':scope > button:last-of-type').getBoundingClientRect()
+        const bottom = element.getBoundingClientRect().bottom - Number.parseFloat(getComputedStyle(element).paddingBottom)
+        const scrollbar = element.querySelector(':scope > .os-scrollbar-vertical')
+        const handle = scrollbar.querySelector('.os-scrollbar-handle').getBoundingClientRect()
+        const scrollbarTrack = scrollbar.querySelector('.os-scrollbar-track').getBoundingClientRect()
+        const usable = !scrollbar.classList.contains('os-scrollbar-unusable')
+        return {
+          validOffset: element.scrollTop >= 0 && element.scrollTop <= range + 1,
+          noEmptySpace: range <= 0 || last.bottom >= bottom - 1,
+          scrollbarMatches: usable === (range > 1) && (!usable ||
+            Math.abs((handle.top - scrollbarTrack.top) / (scrollbarTrack.height - handle.height) - element.scrollTop / range) < 0.02),
+        }
+      })).toEqual({ validOffset: true, noEmptySpace: true, scrollbarMatches: true })
     })
   })
 }
