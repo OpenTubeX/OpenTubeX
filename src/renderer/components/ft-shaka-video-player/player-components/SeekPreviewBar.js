@@ -1,6 +1,7 @@
 import shaka from 'shaka-player'
 import i18n from '../../../i18n/index'
 import { updateSponsorBlockSeekBarState } from '../../../helpers/player/sponsorBlockSeekBar'
+import { isReducedMotionEnabled } from '../../../helpers/reducedMotion'
 import { SeekFilmstrip, THUMB_SIZE } from './SeekFilmstrip'
 
 // Pointer movement after pressing the bar that turns a tap into a drag.
@@ -134,10 +135,23 @@ export class SeekPreviewBar extends shaka.ui.SeekBar {
   updateHint() {
     // A resize can make the strip no finer than the bar, but the drag stays precise.
     const available = this.filmstripShown && (this.precise !== null || this.isPreciseFiner())
+    const { hint, hintLabel } = this.filmstrip
     if (available) {
-      this.filmstrip.hint.textContent = this.precise
+      const wasPrecise = this.container.classList.contains('ft-seek-filmstrip-precise')
+      const switched = this.container.classList.contains('ft-seek-filmstrip-pullable') && wasPrecise !== (this.precise !== null)
+      hintLabel.textContent = hintLabel.dataset.label = this.precise
         ? i18n.global.t('Video.Player.Precise seeking, drag down to exit')
         : i18n.global.t('Video.Player.Pull up for precise seeking')
+      // Fills from the strip's bottom, where precise seeking ends, to its middle, where it starts.
+      const strip = this.filmstrip.element.getBoundingClientRect()
+      const progress = this.pointer ? (strip.bottom - this.pointer.y) / (strip.height / 2) : 0
+      hint.style.setProperty('--ft-seek-precise-progress', String(Math.min(1, Math.max(0, progress))))
+      if (switched && !isReducedMotionEnabled()) {
+        hint.animate({ scale: [1, 1.08, 1] }, { duration: 240, easing: 'ease-out' })
+        // The new label follows the pointer: up into precise seeking, down out of it.
+        const offset = this.precise ? '100%' : '-100%'
+        hintLabel.animate({ translate: [`0 ${offset}`, '0 0'], opacity: [0, 1] }, { duration: 200, easing: 'ease-out' })
+      }
     }
     this.container.classList.toggle('ft-seek-filmstrip-pullable', available)
     this.container.classList.toggle('ft-seek-filmstrip-precise', available && this.precise !== null)

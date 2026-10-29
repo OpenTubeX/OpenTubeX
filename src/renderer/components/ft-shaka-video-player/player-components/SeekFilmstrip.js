@@ -21,6 +21,9 @@ export class SeekFilmstrip {
     this.marker.className = 'ft-seek-filmstrip-marker'
     this.hint = document.createElement('div')
     this.hint.className = 'ft-seek-filmstrip-hint'
+    this.hintLabel = document.createElement('span')
+    this.hintLabel.className = 'ft-seek-filmstrip-hint-label'
+    this.hint.append(this.hintLabel)
     this.element.append(this.marker, this.hint)
     seekBar.container.append(this.element)
     /** @type {Map<number, Promise<object | null>>} */

@@ -261,6 +261,7 @@ test('pulling the dragged thumb up past the filmstrip middle seeks at its scale'
   const bounds = await bar.boundingBox()
   const pointAt = fraction => ({ x: bounds.x + 6 + fraction * (bounds.width - 12), y: bounds.y + bounds.height / 2 })
   const barTime = () => bar.evaluate(element => Number(element.value))
+  const hintProgress = () => hint.evaluate(element => Number(element.style.getPropertyValue('--ft-seek-precise-progress')))
   const markerCenter = async () => {
     const box = await marker.boundingBox()
     return box.x + box.width / 2
@@ -273,13 +274,16 @@ test('pulling the dragged thumb up past the filmstrip middle seeks at its scale'
   const start = pointAt(0.5)
   await page.mouse.move(start.x, start.y)
   await expect(hint).toHaveText('Pull up for precise seeking')
+  expect(await hintProgress()).toBe(0)
 
   // The lower half of the strip still seeks by the pointer's spot on the bar.
+  // The hint fills up to show how far the pointer is from precise seeking.
   const strip = await filmstrip.boundingBox()
   await page.mouse.move(start.x, strip.y + strip.height * 0.75, { steps: 2 })
   await page.mouse.move(start.x + 40, strip.y + strip.height * 0.75, { steps: 2 })
   await expect.poll(async () => Math.abs(await markerCenter() - (start.x + 40))).toBeLessThan(1.5)
   await expect(hint).toHaveText('Pull up for precise seeking')
+  await expect.poll(hintProgress).toBeCloseTo(0.5, 1)
   await page.mouse.move(start.x, strip.y + strip.height * 0.75, { steps: 2 })
 
   // Pulling up past the middle keeps the time; moving sideways then scrolls the frames under a fixed marker.
@@ -290,6 +294,7 @@ test('pulling the dragged thumb up past the filmstrip middle seeks at its scale'
   await expect(hint).toHaveText('Precise seeking · Drag down to exit')
   await expect(player.locator('.shaka-seek-bar-container')).toHaveClass(/ft-seek-filmstrip-precise/)
   expect(await barTime()).toBeCloseTo(startTime, 5)
+  await expect.poll(hintProgress).toBe(1)
 
   const pixelsPerSecond = await filmstrip.evaluate(element => {
     const frame = element.querySelector('.ft-seek-filmstrip-frame')
@@ -303,9 +308,10 @@ test('pulling the dragged thumb up past the filmstrip middle seeks at its scale'
   const chapterBox = await chapter.boundingBox()
   expect(Math.abs(chapterBox.x + chapterBox.width / 2 - startMarker)).toBeLessThan(2)
 
-  // Dragging back down to the lower half stays precise; below the strip returns to the bar's scale.
+  // Dragging back down to the lower half stays precise and drains the hint; below the strip returns to the bar's scale.
   await page.mouse.move(start.x + 100, strip.y + strip.height * 0.75, { steps: 2 })
   await expect(hint).toHaveText('Precise seeking · Drag down to exit')
+  await expect.poll(hintProgress).toBeCloseTo(0.5, 1)
   await page.mouse.move(start.x + 100, start.y, { steps: 2 })
   await expect(hint).toHaveText('Pull up for precise seeking')
   await expect.poll(async () => Math.abs(await markerCenter() - (start.x + 100))).toBeLessThan(1.5)
