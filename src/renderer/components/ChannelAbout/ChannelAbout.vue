@@ -28,8 +28,8 @@
             target="_blank"
             rel="noopener noreferrer"
             dir="auto"
-            @click.prevent.stop="handleExternalLink(link.url)"
-            @auxclick.middle.prevent.stop="handleExternalLink(link.url)"
+            @click="openLinkExternally($event, link.url)"
+            @auxclick.middle="openLinkExternally($event, link.url)"
           >
             <span
               class="aboutLinkIcon"
@@ -239,6 +239,22 @@ const searchSettings = computed(() => {
 const formattedJoined = computed(() => {
   return formatDate(props.joined, locale.value, dateFormat.value, { dateStyle: 'long' })
 })
+
+/**
+ * The document link handler opens YouTube links in the app and applies the
+ * external link setting to other sites. It skips same-origin links (web build)
+ * and channel membership pages only work in the browser, so handle those here.
+ * @param {MouseEvent} event
+ * @param {string} url
+ */
+function openLinkExternally(event, url) {
+  const { origin, pathname } = new URL(url)
+  if (origin !== window.location.origin && !/\/join\/?$/.test(pathname)) return
+
+  event.preventDefault()
+  event.stopPropagation()
+  handleExternalLink(url)
+}
 
 const formattedViews = computed(() => formatNumber(props.views))
 const formattedVideos = computed(() => formatNumber(props.videos))
