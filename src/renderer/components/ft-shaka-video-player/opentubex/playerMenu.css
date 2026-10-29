@@ -84,16 +84,17 @@
   An active entry is readable at a glance, without going over its value. Toggles
   say so through `aria-pressed`, expandable entries through `aria-expanded`,
   and entries that are active without either state mark themselves with
-  `ft-active`.
+  `ft-active`. Submenu entries are hidden while their submenu is open, and
+  Shaka leaves them expanded when the overflow menu closes over the submenu.
 */
 :deep(.shaka-overflow-menu.ft-menu-grid > button[aria-pressed='true']),
-:deep(.shaka-overflow-menu.ft-menu-grid > button[aria-expanded='true']),
+:deep(.shaka-overflow-menu.ft-menu-grid > button[aria-expanded='true']:not([aria-haspopup='true'])),
 :deep(.shaka-overflow-menu.ft-menu-grid > button.ft-active) {
   background: color-mix(in srgb, var(--primary-color) 32%, transparent);
 }
 
 :deep(.shaka-overflow-menu.ft-menu-grid > button[aria-pressed='true']:hover),
-:deep(.shaka-overflow-menu.ft-menu-grid > button[aria-expanded='true']:hover),
+:deep(.shaka-overflow-menu.ft-menu-grid > button[aria-expanded='true']:not([aria-haspopup='true']):hover),
 :deep(.shaka-overflow-menu.ft-menu-grid > button.ft-active:hover) {
   background: color-mix(in srgb, var(--primary-color) 48%, transparent);
 }

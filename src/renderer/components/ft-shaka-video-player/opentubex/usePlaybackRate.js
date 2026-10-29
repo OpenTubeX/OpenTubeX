@@ -14,6 +14,21 @@ export function normalizePlaybackRate(rate) {
 }
 
 /**
+ * The playback speed menu's presets: every interval step up to the maximum rate.
+ * @param {number} step
+ * @param {number} maximum
+ * @returns {number[]}
+ */
+export function getPlaybackRatePresets(step, maximum) {
+  const rates = []
+  for (let index = 1; index * step <= maximum + 1e-9; index++) {
+    // Eliminate floating-point noise (e.g. 0.1 * 3 → 0.30000000000000004).
+    rates.push(parseFloat((index * step).toPrecision(10)))
+  }
+  return rates
+}
+
+/**
  * Owns the player's playback rate: the rate queued until Shaka can apply it,
  * whether the user chose the current rate, normal speed for music and live
  * videos, the toggle back from normal speed, and holding to play faster.

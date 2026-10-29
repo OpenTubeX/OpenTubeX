@@ -173,7 +173,7 @@
         @resize="handleVideoResize"
         @volumechange="updateVolume"
         @timeupdate="handleTimeupdate"
-        @ratechange="syncMediaSessionPosition"
+        @ratechange="handleRateChange"
         @loadedmetadata="handleAbRepeatDurationChange(); updateMobileMiniBarProgress()"
         @durationchange="handleAbRepeatDurationChange(); updateMobileMiniBarProgress()"
         @enterpictureinpicture="handleEnterPictureInPicture"

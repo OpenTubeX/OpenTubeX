@@ -82,7 +82,7 @@ function setupPlayer({ theatrePossible = true, useSponsorBlock = true } = {}) {
     container: ref({ querySelector: () => null }),
     maxVideoPlaybackRate: ref(3),
     videoPlaybackRateInterval: ref(0.25),
-    PLAYBACK_RATE_PRESETS: [1],
+    getPlaybackRatePresets: () => [1],
     defaultSkipInterval: ref(5),
     video: ref({ muted: false, volume: 1 }),
     hasLoaded: ref(false),
