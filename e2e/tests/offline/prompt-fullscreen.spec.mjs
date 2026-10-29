@@ -1,4 +1,4 @@
-import { setPlayerFullscreen, test, expect } from '../../helpers/app.mjs'
+import { setPlayerFullscreen, setWindowSize, test, expect } from '../../helpers/app.mjs'
 import { openMockedVideo } from '../../helpers/player.mjs'
 import { mockPlayableWatchPage } from '../../helpers/watch.mjs'
 
@@ -168,3 +168,21 @@ for (const blurred of [false, true]) {
     await expect(cancel).toBeFocused()
   })
 }
+
+test('keeps a prompt open behind a modal sheet when Escape exits player fullscreen', async ({ app, page }) => {
+  await mockPlayableWatchPage(app, page)
+  await openMockedVideo(page)
+  await setWindowSize(app, page, { width: 480, height: 800 })
+  await setPlayerFullscreen(page, true)
+
+  await showAddToPlaylistPrompt(page)
+  const addPrompt = page.getByRole('dialog', { name: 'Select a playlist to add your video to', exact: true })
+  await addPrompt.locator('.sortSelect').getByRole('combobox').click()
+  await expect(page.locator(':fullscreen dialog:modal')).toHaveCount(1)
+
+  await pressBrowserEscape(app, page)
+
+  await expect.poll(() => page.evaluate(() => document.fullscreenElement)).toBeNull()
+  await expect(page.locator('.app > .prompt')).toHaveCount(1)
+  await expect(addPrompt).toBeVisible()
+})
