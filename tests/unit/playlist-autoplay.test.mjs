@@ -43,6 +43,7 @@ function harness({ laterPageError = null, backend = 'local' } = {}) {
     findIndexOfCurrentVideoInPlaylist: videos => videos.findIndex(item => item.videoId === props.videoId),
     getLocalCachedFeedContinuation: () => continuation,
     parseLocalPlaylistVideos: videos => videos,
+    parseVisibleLocalPlaylistVideos: videos => videos,
     untilEndOfLocalPlayList: async (page, callback, options) => {
       callback(page)
       continuationChecks.push(options.shouldContinue())

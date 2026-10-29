@@ -1137,6 +1137,7 @@ export default defineComponent({
         aiSlopChannels: this.$store.getters.getAiSlopBlockedChannels,
         forbiddenTitles: this.$store.getters.getActiveForbiddenTitles,
         hideChannelsBasedOnText: false,
+        membersOnlyChannelIds: this.$store.getters.getMembersOnlyChannelIdSet,
       }))
     },
     hideRecommendedVideos: function () {
@@ -6643,6 +6644,7 @@ export default defineComponent({
       return channelsHidden.some(ch => ch.name === video.authorId || ch.name === video.collaborators?.[0]?.id) ||
         channelsHidden.some(ch => ch.name === video.author) ||
         isOnAiSlopList(this.$store.getters.getAiSlopBlockedChannels, video) ||
+        isVideoHiddenByPreferences(video, { membersOnlyChannelIds: this.$store.getters.getMembersOnlyChannelIdSet }) ||
         forbiddenTitles.some((text) => video.title?.toLowerCase().includes(text)) ||
         forbiddenTitles.some((text) => video.author?.toLowerCase().includes(text))
     },

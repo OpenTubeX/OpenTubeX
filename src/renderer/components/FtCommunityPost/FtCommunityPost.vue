@@ -208,6 +208,7 @@ import FtNewContentDot from '../FtNewContentDot/FtNewContentDot.vue'
 import FtShareButton from '../FtShareButton/FtShareButton.vue'
 import FtIconButton from '../FtIconButton/FtIconButton.vue'
 import { useHideSubscriptionFeedType } from '../../composables/useHideSubscriptionFeedType'
+import { isVideoHiddenByPreferences } from '../../helpers/subscriptions'
 import { vSaferHtml } from '../../directives/vSaferHtml.js'
 
 import store from '../../store/index'
@@ -263,7 +264,9 @@ const forbiddenTitles = computed(() => {
 })
 
 const hideVideo = computed(() => {
-  return forbiddenTitles.value.some((text) => props.data.postContent.content.title?.toLowerCase().includes(text))
+  const video = props.data.postContent.content
+  return forbiddenTitles.value.some((text) => video.title?.toLowerCase().includes(text)) ||
+    isVideoHiddenByPreferences(video, { membersOnlyChannelIds: store.getters.getMembersOnlyChannelIdSet })
 })
 
 /** @type {import('vue').ComputedRef<boolean>} */

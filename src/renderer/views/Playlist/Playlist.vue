@@ -40,7 +40,7 @@
     >
       <PlaylistInfo
         :id="playlistId"
-        :first-video-id="firstVideoId"
+        :first-video-id="startVideoId"
         :first-video-playlist-item-id="firstVideoPlaylistItemId"
         :playlist-thumbnail="playlistThumbnail"
         :title="playlistTitle"
@@ -101,7 +101,7 @@
         </button>
       </FtFlexBox>
       <template
-        v-if="shownPlaylistItems.length > 0 || moreVideoDataAvailable"
+        v-if="(isUserPlaylistRequested ? shownPlaylistItems : visiblePlaylistItems).length > 0 || moreVideoDataAvailable"
       >
         <FtSelect
           v-if="isUserPlaylistRequested && shownPlaylistItems.length > 1"
@@ -128,6 +128,7 @@
             :use-channels-hidden-preference="false"
             :use-hide-upcoming-premieres-preference="false"
             :hide-forbidden-titles="false"
+            :hide-members-only="false"
             :always-show-add-to-playlist-button="true"
             :quick-bookmark-button-enabled="quickBookmarkButtonEnabled"
             :can-move-video-up="canMoveVideos"
@@ -258,6 +259,7 @@ import FtAutoLoadNextPageWrapper from '../../components/FtAutoLoadNextPageWrappe
 import AutoScrollWrapper from '../../components/AutoScrollWrapper/AutoScrollWrapper.vue'
 
 import store from '../../store/index'
+import { isVideoHiddenByPreferences } from '../../helpers/subscriptions'
 import { usesInvidiousApi } from '../../../apiBackends'
 import { getThumbnailListStyles } from '../../constants/thumbnailSize'
 import { thumbnailSizeSettingKey } from '../../composables/useThumbnailSizeSlider'
@@ -327,6 +329,12 @@ const playlistTitle = ref('')
 const playlistDescription = ref('')
 const firstVideoId = ref('')
 const firstVideoPlaylistItemId = ref('')
+// YouTube playlists start at their first video that the members-only settings show
+const startVideoId = computed(() => {
+  if (isUserPlaylistRequested.value) return firstVideoId.value
+  const membersOnlyChannelIds = store.getters.getMembersOnlyChannelIdSet
+  return shownPlaylistItems.value.find(video => !isVideoHiddenByPreferences(video, { membersOnlyChannelIds }))?.videoId ?? ''
+})
 const playlistThumbnail = ref('')
 const viewCount = ref(0)
 const videoCount = ref(0)
@@ -753,8 +761,9 @@ const sortedPlaylistItems = computed(() => {
 
 const visiblePlaylistItems = computed(() => {
   if (!isUserPlaylistRequested.value) {
-    // No filtering for non user playlists yet
-    return sortedPlaylistItems.value
+    // User playlists keep their members-only videos, YouTube playlists follow the channel settings
+    const membersOnlyChannelIds = store.getters.getMembersOnlyChannelIdSet
+    return sortedPlaylistItems.value.filter(video => !isVideoHiddenByPreferences(video, { membersOnlyChannelIds }))
   }
 
   if (userPlaylistVisibleLimit.value < sometimesFilteredUserPlaylistItems.value.length) {
@@ -1718,7 +1727,7 @@ function cachePlaylistForWatchTransition(to) {
         totalVideoCount: videoCount.value,
         channelName: channelName.value,
         channelId: channelId.value,
-        items: sortedPlaylistItems.value,
+        items: isUserPlaylistRequested.value ? sortedPlaylistItems.value : visiblePlaylistItems.value,
         continuationData: continuationData.value
           ? extractLocalCacheablePlaylistContinuation(continuationData.value)
           : null,

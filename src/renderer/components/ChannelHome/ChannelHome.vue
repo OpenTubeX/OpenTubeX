@@ -56,6 +56,7 @@ import { FtIcon } from '@opentubex/icons'
 import { computed } from 'vue'
 import FtElementList from '../FtElementList/FtElementList.vue'
 import store from '../../store/index'
+import { isVideoHiddenByPreferences } from '../../helpers/subscriptions'
 
 const props = defineProps({
   shelves: {
@@ -75,7 +76,9 @@ const filteredShelves = computed(() => {
     shelves = shelves.filter(shelf => shelf.content[0].type !== 'channel')
   }
 
-  return shelves.filter(shelf => shelf.content.length > 0)
+  // Members-only shelves disappear when none of their videos are shown
+  const membersOnlyChannelIds = store.getters.getMembersOnlyChannelIdSet
+  return shelves.filter(shelf => shelf.content.some(item => !isVideoHiddenByPreferences(item, { membersOnlyChannelIds })))
 })
 </script>
 

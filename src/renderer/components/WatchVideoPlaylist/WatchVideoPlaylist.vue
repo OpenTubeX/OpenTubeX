@@ -285,6 +285,7 @@ import FtListVideoNumbered from '../FtListVideoNumbered/FtListVideoNumbered.vue'
 import FtPrompt from '../FtPrompt/FtPrompt.vue'
 
 import store from '../../store/index'
+import { isVideoHiddenByPreferences } from '../../helpers/subscriptions'
 import { usesInvidiousApi } from '../../../apiBackends'
 
 import { getInvidiousApiErrorMessage, showInvidiousFallbackToast, deepCopy, extractNumberFromString, getVideoThumbnailUrl, showApiErrorToast, showToast, throttle } from '../../helpers/utils'
@@ -1112,11 +1113,20 @@ function playPreviousVideo() {
 }
 
 /**
+ * YouTube playlists follow the channels' members-only settings
+ * @param {object[]} items
+ */
+function parseVisibleLocalPlaylistVideos(items) {
+  const membersOnlyChannelIds = store.getters.getMembersOnlyChannelIdSet
+  return parseLocalPlaylistVideos(items).filter(video => !isVideoHiddenByPreferences(video, { membersOnlyChannelIds }))
+}
+
+/**
  * @param {object[]} videos every video loaded so far, extended in place
  * @param {object[]} items the raw items of the next page
  */
 function appendLocalPlaylistPage(videos, items) {
-  const newVideos = parseLocalPlaylistVideos(items)
+  const newVideos = parseVisibleLocalPlaylistVideos(items)
   videos.push(...newVideos)
   playlistItems.value = applyReversePlaylistState(videos.slice())
   if (!shuffleEnabled.value) return
@@ -1208,7 +1218,7 @@ async function getPlaylistInformationLocal() {
     isFetchingPlaylistContinuation.value = hasUnloadedPlaylistVideos.value
 
     // Show the first page right away; later pages append while playback continues.
-    const videos = parseLocalPlaylistVideos(playlist.items)
+    const videos = parseVisibleLocalPlaylistVideos(playlist.items)
     playlistItems.value = applyReversePlaylistState(videos.slice())
     if (shuffleEnabled.value) shufflePlaylistItems()
     isLoading.value = false
