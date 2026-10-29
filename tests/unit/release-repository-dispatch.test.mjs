@@ -103,6 +103,7 @@ const stableConsumers = {
   'aur-update': /_beta_(amd64|arm64)\.deb$/,
   'rpm-update': /\.(amd64|arm64)\.rpm$/,
   'apt-update': /\.deb$/,
+  'arch-update': /_beta_(amd64|arm64)\.deb$/,
   'snap-update': /_beta_(amd64|arm64)\.deb$/,
   'fdroid-update': /\.apk$/,
   'sidestore-update': /-ios-unsigned\.ipa$/,
@@ -148,7 +149,7 @@ test('nightly publishers wait independently so a missing IPA cannot suppress oth
   const job = workflow.jobs['notify-nightly-repositories']
   assert.equal(job.needs, 'publish-nightly')
   assert.equal(job.strategy['fail-fast'], false)
-  assert.deepEqual(job.strategy.matrix.include.map(slot => slot.repository), ['apt', 'rpm', 'aur', 'fdroid', 'flatpak', 'snap', 'sidestore'])
+  assert.deepEqual(job.strategy.matrix.include.map(slot => slot.repository), ['apt', 'rpm', 'arch', 'aur', 'fdroid', 'flatpak', 'snap', 'sidestore'])
   assert.match(job.steps.at(-1).env.GH_TOKEN, /secrets\.PUSH_TOKEN/)
   for (const slot of job.strategy.matrix.include) {
     const setup = await fixture(t, 'v0.35.2-nightly-1758')

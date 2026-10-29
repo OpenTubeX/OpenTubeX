@@ -204,6 +204,7 @@ RedirectTube, doesn’t automatically open YouTube links in OpenTubeX (although 
 * Debian / Ubuntu: [APT repository](https://apt.opentubex.org/)
 * Fedora / Enterprise Linux: [COPR repository](https://copr.fedorainfracloud.org/coprs/d3sox/opentubex/) or [RPM repository](https://rpm.opentubex.org/)
 * openSUSE: [RPM repository](https://rpm.opentubex.org/)
+* Arch Linux / Arch Linux ARM: [Arch repository](https://arch.opentubex.org/)
 * Flatpak: [OpenTubeX remote](https://flatpak.opentubex.org/), [Flatpark](https://flatpark.org/apps/org.opentubex.OpenTubeX/), and [source code](https://github.com/OpenTubeX/flatpak)
 * Snap: [Snap Store](https://snapcraft.io/opentubex) (`sudo snap install opentubex --beta`), [installation instructions](https://snap.opentubex.org/), and [source code](https://github.com/OpenTubeX/snap)
 * Nix / NixOS / macOS: [Official Nix flake](https://github.com/OpenTubeX/nix) (`nix profile install github:OpenTubeX/nix`, with flakes enabled), supporting x86_64 and ARM64. See the [installation instructions](https://opentubex.org/downloads/#install-nix).
@@ -253,6 +254,7 @@ The first build with a green check mark is the latest build.
 * Debian / Ubuntu: [APT nightly repository](https://apt.opentubex.org/#nightly-builds)
 * Fedora / Enterprise Linux: [RPM nightly repository](https://rpm.opentubex.org/#nightly-builds)
 * openSUSE: [RPM nightly repository](https://rpm.opentubex.org/#nightly-builds)
+* Arch Linux / Arch Linux ARM: [Arch nightly repository](https://arch.opentubex.org/#nightly-builds)
 * Flatpak: [Nightly branch](https://flatpak.opentubex.org/#nightly-builds) (`org.opentubex.OpenTubeX//nightly`)
 * Snap: [Edge channel](https://snap.opentubex.org/#development-builds) (`sudo snap install opentubex --edge`)
 * Arch User Repository (AUR): [Prebuilt nightly](https://aur.archlinux.org/packages/opentubex-nightly-bin/) (`opentubex-nightly-bin`), or [build the current development source](https://aur.archlinux.org/packages/opentubex-git/) (`opentubex-git`). The nightly binary package supports x86_64 and aarch64.
