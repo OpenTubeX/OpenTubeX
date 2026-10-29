@@ -220,7 +220,7 @@ export function initializeNetworkRecovery({ checkInternet, internetChecksEnabled
 
 function isLocalHostname(hostname) {
   const host = hostname.replaceAll(/^\[|\]$/g, '').toLowerCase()
-  if (host.includes(':')) return /^(::1$|f[cd]|fe[89ab])/.test(host)
+  if (host.includes(':')) return /^(::1$|::ffff:|f[cd]|fe[89ab])/.test(host)
   if (/^\d+\.\d+\.\d+\.\d+$/.test(host)) {
     return /^(127|10|192\.168|169\.254|172\.(1[6-9]|2\d|3[01])|100\.(6[4-9]|[7-9]\d|1[01]\d|12[0-7]))\./.test(host)
   }

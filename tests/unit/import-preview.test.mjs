@@ -191,16 +191,17 @@ test('watch history parsing keeps title text that every video happens to share',
   const record = title => ({ products: ['YouTube'], title, titleUrl: 'https://www.youtube.com/watch?v=abcdefghijk', time: '2025-01-01T00:00:00Z' })
   const letter = parseTakeoutWatchHistory([record('Watched Apple pie'), record('Watched Avocado toast')])
   assert.deepEqual(letter.entries.map(entry => entry.title), ['Apple pie', 'Avocado toast'])
-  // Removed videos and ads are not imported, but they show the same localized text.
+  // Ads are not imported, but they show the same localized text.
   const series = parseTakeoutWatchHistory([
     record('Watched Episode 1'), record('Watched Episode 2'), { ...record('Watched Some ad'), details: [{ name: 'From Google Ads' }] },
   ])
   assert.deepEqual(series.entries.map(entry => entry.title), ['Episode 1', 'Episode 2'])
-  const removed = parseTakeoutWatchHistory([
-    record('Watched Episode 1'), record('Watched Episode 2'), { products: ['YouTube'], title: 'Watched a video that has been removed', time: '2025-01-01T00:00:00Z' },
+  // Other activity without a video URL does not share the template.
+  const visited = parseTakeoutWatchHistory([
+    { products: ['YouTube'], title: 'Visited YouTube Music', time: '2025-01-01T00:00:00Z' }, record('Watched Apple pie'), record('Watched Banana bread'),
   ])
-  assert.deepEqual(removed.entries.map(entry => entry.title), ['Episode 1', 'Episode 2'])
-  assert.equal(removed.skipped, 0)
+  assert.deepEqual(visited.entries.map(entry => entry.title), ['Apple pie', 'Banana bread'])
+  assert.equal(visited.skipped, 0)
 })
 
 test('watch history parsing reads the video ID from the watch URL query', () => {

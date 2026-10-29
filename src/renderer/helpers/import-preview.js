@@ -46,13 +46,13 @@ export function previewBackupImport(data, current) {
 /**
  * Find the localized text around watched titles, such as "Watched " in
  * English. Removed videos are titled with their URL, which shows the template
- * exactly; otherwise use the start all titles share. Ads and
- * removed videos without a URL are not imported, but share the template.
+ * exactly; otherwise use the start all titles share. Ads are not imported,
+ * but share the template.
  */
 function findWatchTitleTemplate(records) {
   const templates = new Map()
   for (const { title, titleUrl } of records) {
-    const index = typeof titleUrl === 'string' ? title.indexOf(titleUrl) : -1
+    const index = title.indexOf(titleUrl)
     if (index === -1) continue
     const prefix = title.slice(0, index)
     const suffix = title.slice(index + titleUrl.length)
@@ -91,8 +91,7 @@ function getWatchVideoId(titleUrl) {
 export function parseTakeoutWatchHistory(history) {
   let skipped = 0
   const isWatchUrl = url => typeof url === 'string' && url.includes('www.youtube.com/watch?')
-  const titled = history.filter(item => Array.isArray(item?.products) && item.products.includes('YouTube') && typeof item.title === 'string' &&
-    (item.titleUrl === undefined || isWatchUrl(item.titleUrl)))
+  const titled = history.filter(item => Array.isArray(item?.products) && item.products.includes('YouTube') && typeof item.title === 'string' && isWatchUrl(item.titleUrl))
   const records = history.filter(item => {
     if (!Array.isArray(item?.products) || !item.products.includes('YouTube') || !isWatchUrl(item.titleUrl) || item.details != null) return false
     if (typeof item.title !== 'string' || !Number.isFinite(Date.parse(item.time)) || !getWatchVideoId(item.titleUrl)) { skipped++; return false }

@@ -517,7 +517,7 @@ test('a local or plain HTTP response does not clear an internet outage', async t
     if (input === INTERNET_CHECK_URL) throw new TypeError('Failed to fetch')
     return new Response('ok')
   }, undefined, { checkInternet: true, corsDisabled: true })
-  for (const url of ['https://192.168.1.20:3000/api', 'https://[fd00::1]/api', 'https://nas.local/api', 'https://localhost:8080/api', 'http://portal.example/']) {
+  for (const url of ['https://192.168.1.20:3000/api', 'https://[fd00::1]/api', 'https://[::ffff:127.0.0.1]/api', 'https://nas.local/api', 'https://localhost:8080/api', 'http://portal.example/']) {
     assert.equal(await (await app.window.fetch(url)).text(), 'ok')
     assert.equal(app.recovery.state, 'offline', url)
   }
