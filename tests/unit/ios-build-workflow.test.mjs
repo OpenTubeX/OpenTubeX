@@ -18,9 +18,9 @@ test('build and release publishing wait for their iOS artifact', async () => {
   assert.ok(release.jobs['publish-release'].needs.includes('upload-ios'))
   const download = release.jobs['upload-ios'].steps.find(step => step.uses?.startsWith('actions/download-artifact@'))
   assert.equal(download.with.name, '${{ needs.ios.outputs.artifact-name }}')
-  const upload = release.jobs['upload-ios'].steps.find(step => step.uses?.startsWith('softprops/action-gh-release@'))
-  assert.equal(upload.with.files, 'release-assets/*.ipa')
-  assert.equal(upload.with['fail_on_unmatched_files'], true)
+  const upload = release.jobs['upload-ios'].steps.find(step => step.name === 'Upload iOS release asset')
+  // An unmatched glob stays literal, so the upload fails without an IPA.
+  assert.match(upload.run, /^gh release upload "\$TAG" release-assets\/\*\.ipa /)
 })
 
 for (const [snapshot, ref, expected] of [

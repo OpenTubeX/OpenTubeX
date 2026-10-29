@@ -274,7 +274,7 @@ test('stable releases attach only production APKs', async (t) => {
     assert.equal(await readFile(join(directory, 'release-assets', name), 'utf8'), name)
   }
   const upload = workflow.jobs.build.steps.find(step => step.name === 'Upload release assets')
-  assert.equal(upload.with.files, 'release-assets/*')
+  assert.match(upload.run, /^gh release upload "\$TAG" release-assets\/\* /)
 })
 
 for (const [channel, resourceDir, badge] of [['nightly', 'debug', 'wrench'], ['dev', 'dev', 'flask']]) {
