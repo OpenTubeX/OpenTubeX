@@ -362,9 +362,14 @@ function load(fetch, globals = {}) {
   return { ...api, schemes }
 }
 
-function policyResponse(backoffTimeMs) {
+function policyResponse(backoffTimeMs, protectionStatus) {
   const buffer = new CompositeBuffer([])
-  new UmpWriter(buffer).write(protos.UMPPartId.NEXT_REQUEST_POLICY,
+  const writer = new UmpWriter(buffer)
+  if (protectionStatus !== undefined) {
+    writer.write(protos.UMPPartId.STREAM_PROTECTION_STATUS,
+      protos.StreamProtectionStatus.encode({ status: protectionStatus }).finish())
+  }
+  writer.write(protos.UMPPartId.NEXT_REQUEST_POLICY,
     protos.NextRequestPolicy.encode({ backoffTimeMs }).finish())
   return new Response(utils.concatenateChunks(buffer.chunks))
 }
@@ -491,6 +496,62 @@ test('server pacing after delivered media does not reload a healthy stream', asy
   assert.deepEqual([...segment.data], [1])
   assert.equal(calls, 6)
   assert.equal(reloads, 0)
+})
+
+test('withheld media pending attestation reloads after bounded backoffs despite delivered media', async t => {
+  // YouTube serves about a minute of an unattested session, then only backoffs
+  t.mock.timers.enable({ apis: ['setTimeout', 'Date'], now: 0 })
+  let calls = 0
+  let reloads = 0
+  const { createSabrTransport } = load(async () => {
+    return ++calls === 1 ? response([1]) : policyResponse(2000, 2)
+  }, { Date })
+  const transport = createSabrTransport(sabrData, () => context)
+  t.after(() => transport.cleanup())
+  transport.onReloadOnce(() => reloads++)
+  const uri = 'sabr1:audio?formatId=140-123-&sq=1'
+  await transport.request(uri, request(uri), 1).promise
+  const rejected = assert.rejects(transport.request(uri, { uris: [uri], retryParameters: { timeout: 60000 } }, 1).promise,
+    error => error.code === ShakaError.Code.OPERATION_ABORTED)
+  for (let index = 0; index < 6; index++) {
+    await flushRequests()
+    t.mock.timers.tick(2000)
+  }
+  await flushRequests()
+  t.mock.timers.tick(60000)
+  await rejected
+  assert.equal(calls, 7)
+  assert.equal(reloads, 1)
+})
+
+test('withheld media pending attestation waits to reload until playback needs it', async t => {
+  t.mock.timers.enable({ apis: ['setTimeout', 'Date'], now: 0 })
+  let calls = 0
+  let reloads = 0
+  let bufferedAheadSeconds = 40
+  const { createSabrTransport } = load(async () => {
+    return ++calls === 1 ? response([1]) : policyResponse(2000, 2)
+  }, { Date })
+  const transport = createSabrTransport(sabrData, () => ({ ...context, getBufferedAheadSeconds: () => bufferedAheadSeconds }))
+  t.after(() => transport.cleanup())
+  transport.onReloadOnce(() => reloads++)
+  const uri = 'sabr1:audio?formatId=140-123-&sq=1'
+  await transport.request(uri, request(uri), 1).promise
+  const rejected = assert.rejects(transport.request(uri, { uris: [uri], retryParameters: { timeout: 60000 } }, 1).promise,
+    error => error.code === ShakaError.Code.OPERATION_ABORTED)
+  for (let index = 0; index < 10; index++) {
+    await flushRequests()
+    t.mock.timers.tick(2000)
+  }
+  await flushRequests()
+  assert.equal(reloads, 0)
+  bufferedAheadSeconds = 5
+  t.mock.timers.tick(2000)
+  await flushRequests()
+  t.mock.timers.tick(60000)
+  await rejected
+  assert.equal(calls, 12)
+  assert.equal(reloads, 1)
 })
 
 for (const backoffMs of [100, 10000]) {
