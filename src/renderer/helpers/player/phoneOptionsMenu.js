@@ -63,7 +63,7 @@ export function setupPhoneOptionsMenu(menu, controls, t) {
   // action, between it and the options, and below them.
   function spaceAroundAction(submenu, action) {
     const options = [...submenu.children]
-      .filter(child => child !== action && child.getClientRects().length > 0)
+      .filter(child => child !== action && !child.classList.contains('os-scrollbar') && child.getClientRects().length > 0)
       .map(child => child.getBoundingClientRect())
     if (options.length === 0) return
     const top = header.getBoundingClientRect().bottom

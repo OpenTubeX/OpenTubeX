@@ -1,4 +1,5 @@
 import { setupPhoneOptionsMenu } from '../../helpers/player/phoneOptionsMenu'
+import { setupSubmenuScrolling } from '../../helpers/player/submenuScrolling'
 import { chooseAndroidDirectory } from '../../helpers/androidStorage'
 import { isAppHidden, getAndroidAppActive, waitForAndroidAppState } from '../../helpers/appVisibility.js'
 import { playbackScreenWake } from '../../helpers/playbackScreenWake'
@@ -4119,6 +4120,8 @@ export default defineComponent({
     function setupOverflowMenuLayout(controlsContainer) {
       cleanupPhoneOptionsMenu?.()
       cleanupPhoneOptionsMenu = null
+      cleanupSubmenuScrolling?.()
+      cleanupSubmenuScrolling = null
       overflowMenuResizeObserver?.disconnect()
       overflowMenuResizeObserver = null
       overflowMenuMutationObserver?.disconnect()
@@ -4157,6 +4160,7 @@ export default defineComponent({
       }
 
       addOverlayScrollbars(menu)
+      cleanupSubmenuScrolling = setupSubmenuScrolling(menu, ui.getControls())
       cleanupPhoneOptionsMenu = setupPhoneOptionsMenu(menu, ui.getControls(), t)
 
       if (!usePlayerMenuGrid.value) {
@@ -4484,6 +4488,7 @@ export default defineComponent({
     /** @type {HTMLElement|null} */
     let overflowMenuElement = null
     let cleanupPhoneOptionsMenu = null
+    let cleanupSubmenuScrolling = null
 
     /** @type {MutationObserver|null} */
     let fullscreenControlsVisibilityObserver = null
@@ -10432,6 +10437,8 @@ export default defineComponent({
 
       cleanupPhoneOptionsMenu?.()
       cleanupPhoneOptionsMenu = null
+      cleanupSubmenuScrolling?.()
+      cleanupSubmenuScrolling = null
       if (overflowMenuElement) {
         removeOverlayScrollbars(overflowMenuElement)
         overflowMenuElement = null

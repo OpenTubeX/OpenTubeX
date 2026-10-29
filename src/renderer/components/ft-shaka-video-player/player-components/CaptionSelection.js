@@ -93,13 +93,6 @@ export class CaptionSelection extends shaka.ui.TextSelection {
     // A taller list, for example in a larger player, shortens its scroll range.
     this.choicesObserver_ = new ResizeObserver(() => this.clampChoicesScroll_())
     this.choicesObserver_.observe(this.choices_)
-    // Shaka closes the submenu on any click in it, including the one that ends
-    // a drag on the scrollbar.
-    this.eventManager.listen(this.choices_, 'click', (event) => {
-      if (event.target.closest('.os-scrollbar')) {
-        event.stopPropagation()
-      }
-    })
 
     this.translationMenu_ = this.createOptionsMenu_(parent, 'ft-caption-auto-translate-button', 'ft-caption-translation')
     this.secondaryMenu_ = this.createOptionsMenu_(parent, 'ft-caption-secondary-button', 'ft-caption-secondary')

@@ -1,6 +1,11 @@
 /* stylelint-disable liberty/use-logical-spec */
 
 :deep(.shaka-overflow-menu) {
+  /* Height of a submenu's header, which is pinned above its options, and the space below it. */
+  --ft-submenu-header-size: 39px;
+  --ft-submenu-header-gap: 5px;
+  --ft-menu-padding: 5px;
+
   overscroll-behavior: contain;
 }
 
@@ -28,8 +33,8 @@
   players (where the whole control bar folds into this menu) get fewer columns.
 */
 :deep(.shaka-overflow-menu.ft-menu-grid) {
-  /* Height of a submenu's header, which is pinned above its options. */
   --ft-submenu-header-size: 36px;
+  --ft-submenu-header-gap: 4px;
   --ft-menu-padding: 6px;
 
   box-sizing: border-box;
@@ -191,8 +196,9 @@
   /*
     The menu keeps its height while a submenu is open, so the options are
     centered in whatever is left below the header rather than stretched over it.
+    Options that don't fit start at the top, where they can be scrolled to.
   */
-  place-content: center;
+  place-content: safe center;
   gap: 4px;
   padding-block-start: calc(var(--ft-submenu-header-size) + 4px);
 }
@@ -522,4 +528,62 @@
   -webkit-box-orient: vertical;
   line-clamp: 2;
   -webkit-line-clamp: 2;
+}
+
+/*
+  A submenu scrolls its options by itself, so that its header stays in view
+  above them. Layout containment makes the menu the containing block of the
+  fixed header, which takes it out of the submenu's scrolling and clipping.
+  The caption submenus scroll their options in a part of their own instead,
+  and the phone layout shows the header above the menu (`phonePlayerOptions.css`).
+*/
+/* stylelint-disable selector-max-compound-selectors -- Excluding the phone layout takes a compound of its own. */
+:deep(.shaka-overflow-menu:not(.phonePlayerOptions > *):has(> .ft-scrolling-submenu:not(.shaka-hidden))) {
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  contain: layout;
+}
+
+:deep(.shaka-overflow-menu:not(.phonePlayerOptions > *):has(> .ft-scrolling-submenu:not(.shaka-hidden)) > .os-scrollbar) {
+  display: none;
+}
+
+/* Reaches into the menu's padding, so the options scroll to its edges and their outlines aren't cut off. */
+:deep(.shaka-overflow-menu:not(.phonePlayerOptions > *) > .ft-scrolling-submenu) {
+  flex: 1 1 auto;
+  min-block-size: 0;
+  margin-block: calc(var(--ft-submenu-header-size) + var(--ft-submenu-header-gap)) calc(-1 * var(--ft-menu-padding));
+  margin-inline: calc(-1 * var(--ft-menu-padding));
+  padding: 0 var(--ft-menu-padding) var(--ft-menu-padding);
+  overflow: hidden auto;
+  overscroll-behavior: contain;
+}
+
+/* Where the header would be without the menu's padding above it, which an open submenu removes in the list. */
+:deep(.shaka-overflow-menu:not(.phonePlayerOptions > *) > .ft-scrolling-submenu > .shaka-back-to-overflow-button) {
+  position: fixed;
+  inset-block-start: 0;
+  inset-inline: var(--ft-menu-padding);
+  box-sizing: border-box;
+  block-size: var(--ft-submenu-header-size);
+  margin-block-end: 0;
+}
+
+:deep(.shaka-overflow-menu.ft-menu-grid:not(.phonePlayerOptions > *) > .ft-scrolling-submenu > .shaka-back-to-overflow-button) {
+  inset-block-start: var(--ft-menu-padding);
+}
+
+/* Sits in the header, at the end opposite the back button. */
+:deep(.shaka-overflow-menu.ft-menu-grid:not(.phonePlayerOptions > *) > .ft-scrolling-submenu > .ft-quality-codecs) {
+  position: fixed;
+  inset-block-start: calc(var(--ft-menu-padding) + (var(--ft-submenu-header-size) - var(--ft-menu-padding) - 1px - 28px) / 2);
+  inset-inline-end: calc(var(--ft-menu-padding) + 6px);
+}
+/* stylelint-enable selector-max-compound-selectors */
+
+:deep(.ft-scrolling-submenu > .os-scrollbar) {
+  --os-handle-bg: rgb(255 255 255 / 40%);
+  --os-handle-bg-hover: rgb(255 255 255 / 55%);
+  --os-handle-bg-active: rgb(255 255 255 / 70%);
 }

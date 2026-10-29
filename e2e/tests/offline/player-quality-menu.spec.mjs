@@ -262,7 +262,7 @@ for (const usePlayerMenuGrid of [true, false]) {
       expect(await codecs.evaluate(element => element.style.marginBlock)).toBe('')
       await setWindowSize(app, page, { width: 1280, height: 800 })
       await openMenu()
-      const menuBox = await menu.boundingBox()
+      const menuBox = await player.locator('.shaka-overflow-menu').boundingBox()
       const desktopSwitcher = await codecs.boundingBox()
       if (usePlayerMenuGrid) {
         expect(desktopSwitcher.y - menuBox.y).toBeLessThan(10)

@@ -60,15 +60,17 @@ test('sleep timer clamps its scrolled menu when the chapter option disappears', 
     element.style.inlineSize = '200px'
     element.style.maxBlockSize = '130px'
     element.style.minBlockSize = '0'
-    element.scrollTop = element.scrollHeight
   })
-  await expect.poll(() => menu.evaluate(element => element.scrollTop)).toBeGreaterThan(0)
-  const originalOffset = await menu.evaluate(element => element.scrollTop)
+  // The submenu scrolls its options below its header.
+  const scroller = menu.locator('.sleep-timer-menu')
+  await scroller.evaluate(element => { element.scrollTop = element.scrollHeight })
+  await expect.poll(() => scroller.evaluate(element => element.scrollTop)).toBeGreaterThan(0)
+  const originalOffset = await scroller.evaluate(element => element.scrollTop)
 
   await video.evaluate(element => { element.currentTime = 12 })
   await expect(chapterOption).toHaveClass(/shaka-hidden/)
-  await expect.poll(() => menu.evaluate((element, originalOffset) => {
-    const buttons = [...element.querySelector('.sleep-timer-menu').children]
+  await expect.poll(() => scroller.evaluate((element, originalOffset) => {
+    const buttons = [...element.children]
       .filter(button => button instanceof HTMLButtonElement && !button.classList.contains('shaka-hidden'))
     const lastButton = buttons.at(-1)
     const contentEnd = lastButton.getBoundingClientRect().bottom - element.getBoundingClientRect().top +

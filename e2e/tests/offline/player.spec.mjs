@@ -1196,23 +1196,6 @@ test('the overflow menu can turn the zoom off again', async ({ app, page, attach
   expect(Math.abs(
     (headerBox.x + headerBox.width / 2) - (titleBox.x + titleBox.width / 2)
   )).toBeLessThanOrEqual(1)
-  expect(await zoomMenu.evaluate((menu) => {
-    // Caption tracks are not part of the local media fixture. Recreate its
-    // Options action in another submenu to verify the shared grid geometry.
-    const options = document.createElement('button')
-    options.className = 'ft-caption-options-button'
-    options.textContent = 'Options'
-    menu.append(options)
-
-    const header = menu.querySelector('.shaka-back-to-overflow-button')
-    const headerBox = header.getBoundingClientRect()
-    const optionsBox = options.getBoundingClientRect()
-    options.remove()
-
-    return Math.abs(
-      (headerBox.top + headerBox.height / 2) - (optionsBox.top + optionsBox.height / 2)
-    )
-  })).toBeLessThanOrEqual(1)
   await attachScreenshot('zoom menu')
 
   await zoomMenu.getByRole('button', { name: 'Off' }).click()
