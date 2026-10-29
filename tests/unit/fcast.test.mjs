@@ -73,7 +73,8 @@ async function receiverForTest(t, { version = 3, onPlay } = {}) {
 async function upstreamForTest(t) {
   const requests = []
   const server = createHttpServer((request, response) => {
-    requests.push(request.headers)
+    // Other local clients can probe the port; record only the relay's requests.
+    if (request.url === '/video.mp4') requests.push(request.headers)
     response.writeHead(200, { 'content-type': 'video/mp4' }).end('video bytes')
   })
   await new Promise(resolve => server.listen(0, '127.0.0.1', resolve))
