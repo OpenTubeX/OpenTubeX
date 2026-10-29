@@ -235,5 +235,6 @@ test('playback speed presets list every interval step up to the maximum', () => 
   assert.deepEqual(getPlaybackRatePresets(0.1, 3).at(-1), 3)
   for (const step of [0, -0.25, Number.NaN]) {
     assert.deepEqual(getPlaybackRatePresets(step, 3), [])
+    assert.deepEqual(getPlaybackRatePresets(step, -3), [])
   }
 })

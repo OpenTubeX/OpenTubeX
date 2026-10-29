@@ -23,7 +23,7 @@ export function getPlaybackRatePresets(step, maximum) {
   const count = Math.floor(maximum / step + 1e-9)
   // Settings aren't validated on import or sync, so a zero or negative interval
   // must not loop forever. The settings UI allows at most 100 steps.
-  if (!(count > 0 && count <= 1000)) {
+  if (!(step > 0 && count > 0 && count <= 1000)) {
     return []
   }
 
