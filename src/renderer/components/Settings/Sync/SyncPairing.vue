@@ -826,7 +826,8 @@ async function verifyPrivacyKey(client, privacyKey) {
   const manifest = await client.getEncryptedSyncManifest()
   const firstCollection = manifest.collections[0]?.collection
   if (firstCollection) {
-    const collection = await client.getEncryptedSyncCollection(firstCollection)
+    // `since` keeps newer servers from refusing a collection with appended changes.
+    const collection = await client.getEncryptedSyncCollection(firstCollection, 0)
     if (!collection.payload) throw new Error(t('Settings.Sync Settings.Pairing Verification Unavailable'))
     await decryptSyncDocument(collection.payload, privacyKey)
     return

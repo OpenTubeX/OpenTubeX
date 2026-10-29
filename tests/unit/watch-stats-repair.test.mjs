@@ -2,7 +2,7 @@ import assert from 'node:assert/strict'
 import { readFileSync } from 'node:fs'
 import test from 'node:test'
 import { compileFunction } from 'node:vm'
-import { decryptSyncDocument, encryptSyncDocument } from '../../src/renderer/helpers/sync-server-privacy.js'
+import { decryptSyncDocument, encryptSyncDocument, readSyncCollection } from '../../src/renderer/helpers/sync-server-privacy.js'
 import { createWatchStatsHelpers } from '../helpers/sync-watch-stats.mjs'
 import { areJsonValuesEqual } from '../../src/renderer/helpers/jsonValues.js'
 
@@ -52,7 +52,7 @@ async function fixture({ sourceChanged = false, localChanged = false, conflict =
       return { revision: ++revision }
     }
   }
-  const bindings = { ...helpers, SyncServerClient: Client, areJsonValuesEqual, decryptSyncDocument, encryptSyncDocument,
+  const bindings = { ...helpers, SyncServerClient: Client, areJsonValuesEqual, decryptSyncDocument, encryptSyncDocument, readSyncCollection,
     i18n: { global: { t: key => key } }, ENCRYPTED_SYNC_RETRIES: 3,
     activityAccountKey: value => JSON.stringify([value.syncServerUrl, value.syncServerUsername, value.syncServerDeviceId]),
     assertSyncEnabled: () => {}, SyncServerCancelledError: Error, withSyncLock: callback => callback(),

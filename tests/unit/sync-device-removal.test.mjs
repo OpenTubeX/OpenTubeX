@@ -4,7 +4,7 @@ import test from 'node:test'
 import vm from 'node:vm'
 import * as releasedClient from '../helpers/released-sync-sessions.mjs'
 
-import { decryptSyncDocument, encryptSyncDocument } from '../../src/renderer/helpers/sync-server-privacy.js'
+import { decryptSyncDocument, encryptSyncDocument, readSyncCollection } from '../../src/renderer/helpers/sync-server-privacy.js'
 import { getOtherDeviceSessions, normalizeSyncSessionsDocument, removeSyncDeviceSessions, removeSyncSession } from '../../src/renderer/helpers/sync-sessions.js'
 
 const component = await readFile(new URL('../../src/renderer/components/Settings/Sync/SyncAccountManagement.vue', import.meta.url), 'utf8')
@@ -67,7 +67,7 @@ async function fixture({ current = false, alreadyRevoked = false, releasedUpload
     },
     trackSyncClient: client => client, releaseSyncClient() {},
     assertSyncEnabled() {}, withSyncLock: callback => callback(),
-    ENCRYPTED_SYNC_RETRIES: 3, decryptSyncDocument, encryptSyncDocument, removeSyncDeviceSessions, removeSyncSession,
+    ENCRYPTED_SYNC_RETRIES: 3, decryptSyncDocument, encryptSyncDocument, readSyncCollection, removeSyncDeviceSessions, removeSyncSession,
     normalizeSyncSessionsDocument,
     i18n: { global: { t: key => key } },
     parseSnapshot: JSON.parse,
