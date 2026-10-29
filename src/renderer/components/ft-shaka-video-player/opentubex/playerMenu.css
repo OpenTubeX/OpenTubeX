@@ -221,11 +221,15 @@
   padding-inline-end: 0;
 }
 
-/* Align the caption Options action with the submenu header beside it. */
+/*
+  Align the caption Options action with the submenu header beside it, including
+  the header's divider, so that both labels are centered in the same space.
+*/
 :deep(.shaka-sub-menu.ft-menu-grid > .ft-caption-options-button) {
   align-items: center;
   block-size: var(--ft-submenu-header-size);
   padding-block: 0 var(--ft-menu-padding) !important;
+  border-block-end: 1px solid transparent;
 }
 
 /*

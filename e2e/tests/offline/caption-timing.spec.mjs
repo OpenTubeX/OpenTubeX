@@ -40,6 +40,47 @@ for (const usePlayerMenuGrid of [true, false]) {
       }
     })
 
+    test('lines the Options action up with the captions menu title', { tag: '@scale' }, async ({ app, page }, testInfo) => {
+      await mockPlayableWatchPage(app, page)
+      await page.route('https://www.youtube.com/api/timedtext**', route => route.fulfill({
+        status: 200,
+        contentType: 'text/vtt',
+        body: 'WEBVTT\n\n00:00:05.000 --> 00:00:07.000\nTiming test caption\n'
+      }))
+      await openMockedVideo(page)
+      const player = page.locator('.ftVideoPlayer')
+      await player.hover()
+      // Keep the controls shown, they can fade out before the screenshot on slow machines
+      await player.locator('.shaka-controls-container').evaluate(element => element.setAttribute('casting', 'true'))
+      await player.getByRole('button', { name: 'More settings' }).click()
+      await player.locator('.shaka-overflow-menu > .shaka-caption-button').click()
+      const languageMenu = player.locator('.shaka-text-languages')
+      await expect(languageMenu.locator(':scope > .ft-caption-options-button')).toBeVisible()
+
+      const [titleBaseline, optionsBaseline] = await languageMenu.evaluate((menu) => {
+        /** @param {HTMLElement} element */
+        const baseline = (element) => {
+          const marker = document.createElement('span')
+          marker.style.cssText = 'display: inline-block; vertical-align: baseline'
+          element.append(marker)
+          const { top } = marker.getBoundingClientRect()
+          marker.remove()
+          return top
+        }
+        const title = menu.querySelector(':scope > .shaka-back-to-overflow-button > span')
+        const options = menu.querySelector(':scope > .ft-caption-options-button')
+        // The button is a flex container, so its text needs an inline wrapper for the marker
+        const label = document.createElement('span')
+        label.append(...options.childNodes)
+        options.append(label)
+        const result = [baseline(title), baseline(label)]
+        options.replaceChildren(...label.childNodes)
+        return result
+      })
+      expect(Math.abs(titleBaseline - optionsBaseline)).toBeLessThan(0.5)
+      await languageMenu.screenshot({ path: testInfo.outputPath('caption-options-header.png') })
+    })
+
     test('shifts displayed cues immediately and resets for the next video', async ({ app, page }, testInfo) => {
       test.setTimeout(120_000)
       await mockPlayableWatchPage(app, page, { captionTranslations: true })
