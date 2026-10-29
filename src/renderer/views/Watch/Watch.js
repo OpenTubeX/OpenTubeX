@@ -1018,11 +1018,11 @@ export default defineComponent({
         return this.playbackEngineFallbackTarget
       }
       if (this.ytDlpStreamsPending) {
-        // A live stream without built-in formats automatically falls back to
-        // yt-dlp even when the configured default remains the built-in engine.
+        // A live or Post Live DVR stream without built-in formats automatically
+        // falls back to yt-dlp even when the configured default remains the built-in engine.
         if (
           this.videoPlaybackEngine === 'built-in' &&
-          this.isLive &&
+          (this.isLive || this.isPostLiveDvr) &&
           this.manifestSrc === null &&
           this.legacyFormats.length === 0
         ) {
@@ -6075,16 +6075,16 @@ export default defineComponent({
     applyYtDlpPlaybackSource: async function (loadGeneration, videoId) {
       const playbackEngineSwitchGeneration = this.playbackEngineSwitchGeneration
       const liveSourceMissing =
-        this.isLive &&
+        (this.isLive || this.isPostLiveDvr) &&
         this.manifestSrc === null &&
         this.legacyFormats.length === 0
       const builtInLiveSourceMissing =
         this.videoPlaybackEngine === 'built-in' &&
         liveSourceMissing
 
-      // Report missing built-in live formats when automatic fallback is
-      // disabled or Built-in was selected manually.
-      if (liveSourceMissing && (this.playbackEngineFallbackTarget === 'built-in' ||
+      // Report missing built-in live formats when yt-dlp is unavailable,
+      // automatic fallback is disabled or Built-in was selected manually.
+      if (liveSourceMissing && (!supportsYtDlp || this.playbackEngineFallbackTarget === 'built-in' ||
         (this.videoPlaybackEngine === 'built-in' && !this.$store.getters.getPlaybackEngineFallback))) {
         this.ytDlpStreamsPending = false
         this.errorMessage = this.t('This video is unavailable because of missing formats. This can happen due to country unavailability.')
