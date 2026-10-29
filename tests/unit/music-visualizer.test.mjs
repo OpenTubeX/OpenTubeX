@@ -16,9 +16,21 @@ async function createVisualizer() {
   const watchers = new Map()
   const frames = new Map()
   const contexts = []
-  const track = Object.assign(new EventTarget(), { readyState: 'live', stop() { this.readyState = 'ended' } })
-  const stream = Object.assign(new EventTarget(), { getAudioTracks: () => [track], getTracks: () => [track] })
-  const video = { value: Object.assign(new EventTarget(), { paused: false, captureStream: () => stream }) }
+  const captures = []
+  const video = {
+    value: Object.assign(new EventTarget(), {
+      paused: false,
+      ended: false,
+      seeking: false,
+      captureStream() {
+        // Chromium's track stays live but silent when captured before an ended element restarts.
+        const track = Object.assign(new EventTarget(), { readyState: 'live', silent: this.ended || this.seeking, stop() { this.readyState = 'ended' } })
+        const stream = Object.assign(new EventTarget(), { getAudioTracks: () => [track], getTracks: () => [track] })
+        captures.push(track)
+        return stream
+      },
+    }),
+  }
   const active = { value: true }
   class AudioContext extends EventTarget {
     state = 'running'
@@ -47,11 +59,27 @@ async function createVisualizer() {
   mount()
   await setImmediate()
   return {
-    contexts, frames, video,
+    captures, contexts, frames, video,
     async setHidden(value) { hidden = value; document.dispatchEvent(new Event('visibilitychange')); await setImmediate() },
     async setPaused(value) { video.value.paused = value; video.value.dispatchEvent(new Event(value ? 'pause' : 'play')); await setImmediate() },
     async setActive(value) { active.value = value; watchers.get(active)(value); await setImmediate() },
     async setReducedMotion(value) { document.documentElement.dataset.reducedMotion = value; mutation(); await setImmediate() },
+    async end() {
+      Object.assign(video.value, { paused: true, ended: true })
+      captures.at(-1).readyState = 'ended'
+      captures.at(-1).dispatchEvent(new Event('ended'))
+      video.value.dispatchEvent(new Event('pause'))
+      video.value.dispatchEvent(new Event('ended'))
+      await setImmediate()
+    },
+    async replay() {
+      Object.assign(video.value, { paused: false, ended: false, seeking: true })
+      video.value.dispatchEvent(new Event('play'))
+      await setImmediate()
+      video.value.seeking = false
+      video.value.dispatchEvent(new Event('seeked'))
+      await setImmediate()
+    },
     async dispose() { unmount(); await setImmediate() },
   }
 }
@@ -143,5 +171,16 @@ test('pausing hidden playback suspends analysis after a pending resume completes
   await setImmediate()
   assert.equal(context.state, 'suspended')
   assert.equal(visualizer.frames.size, 0)
+  await visualizer.dispose()
+})
+
+test('replaying ended media captures its audio again once the restart seek completes', async () => {
+  const visualizer = await createVisualizer()
+  await visualizer.end()
+  assert.equal(visualizer.frames.size, 0)
+  await visualizer.replay()
+  assert.equal(visualizer.captures.at(-1).silent, false)
+  assert.equal(visualizer.contexts.at(-1).state, 'running')
+  assert.equal(visualizer.frames.size, 1)
   await visualizer.dispose()
 })
