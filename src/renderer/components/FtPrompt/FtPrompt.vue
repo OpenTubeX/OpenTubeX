@@ -89,6 +89,7 @@
 import { inject, nextTick, useId, useTemplateRef } from 'vue'
 
 import { clampOverlayScrollTop } from '../../helpers/overlayScrollbars'
+import { useFullscreenTeleportTarget } from '../../composables/useFullscreenTeleportTarget'
 import { useSettingsOverlay } from '../../composables/useSettingsOverlay'
 import store from '../../store/index'
 
@@ -157,7 +158,9 @@ const emit = defineEmits(['click'])
 const settingsOverlayActive = useSettingsOverlay(() => emit('click', null))
 
 const id = useId()
-const teleportTarget = document.fullscreenElement ?? '.app'
+// A modal sheet above the prompt takes Escape, as in handleEscape.
+const teleportTarget = useFullscreenTeleportTarget(() => emit('click', null),
+  () => props.busy || !isTopmostPrompt() || document.querySelector('dialog:modal') !== null)
 
 const promptCard = useTemplateRef('promptCard')
 const promptContentScroller = useTemplateRef('promptContentScroller')
@@ -283,13 +286,16 @@ function focusItem(index) {
   store.dispatch('showOutlines')
 }
 
+function isTopmostPrompt() {
+  return [...document.querySelectorAll('.prompt:not([inert])')].at(-1) === prompt.value
+}
+
 /**
  * @param {KeyboardEvent} event
  */
 function handleEscape(event) {
   if (event.target instanceof Element && event.target.closest('dialog[open]')) return
-  const isTopmostPrompt = [...document.querySelectorAll('.prompt:not([inert])')].at(-1) === prompt.value
-  if (event.key === 'Escape' && !props.inert && !event.defaultPrevented && isTopmostPrompt) {
+  if (event.key === 'Escape' && !props.inert && !event.defaultPrevented && isTopmostPrompt()) {
     event.preventDefault()
     hide()
   }

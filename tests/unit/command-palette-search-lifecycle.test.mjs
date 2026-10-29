@@ -28,6 +28,7 @@ function setup(searchVideos = palette.filterCommandPaletteCommandsAsync) {
     document: {},
     clampOverlayScrollTop() {}, restoreOverlayScrollTop() {},
     getLocalizedShortcut() {}, lockBodyScroll() {}, unlockBodyScroll() {},
+    useFullscreenTeleportTarget: () => '.app',
   })
   const sources = { history: [], playlists: [], downloads: {}, queue: [] }
   const state = component.setup({ commands: [], videoSources: sources }, { expose() {}, emit() {} })
