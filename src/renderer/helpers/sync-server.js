@@ -1061,7 +1061,8 @@ export async function syncHistory(client, store, previous = {}, options = {}, { 
     try {
       // Sending tens of thousands of entries to the worker costs more than
       // the merge. Unchanged entries would merge to their baseline again.
-      const changed = changedIds && !legacy
+      // A retry follows an edit made during this sync, which the IDs lack.
+      const changed = changedIds && !legacy && attempt === 0
         ? selectChangedHistory({ localHistory, remoteHistory, previous, changedIds })
         : null
       merged = await runBackgroundJob('mergeHistory', {
