@@ -97,6 +97,7 @@ jobs:
       id: duplicate
       env:
         GH_TOKEN: ${{ github.token }}
+        RELEASE_TAG: ${{ steps.release.outputs.tag }}
         VERSION: ${{ steps.release.outputs.version }}
       shell: bash
       run: |
@@ -108,7 +109,11 @@ jobs:
           --jq .content \
           | base64 --decode > "$manifest"
 
-        if grep --fixed-strings --quiet "<release version=\"${VERSION}\"" "$manifest"; then
+        # FlatPark's own pin updater can add the release first, without its
+        # notes, details link, or screenshots. Only our submission adds the link.
+        if grep --fixed-strings --quiet \
+          "<url type=\"details\">https://github.com/${GITHUB_REPOSITORY}/releases/tag/${RELEASE_TAG}</url>" \
+          "$manifest"; then
           echo "FlatPark already contains org.opentubex.OpenTubeX ${VERSION}."
           echo 'needed=false' >> "$GITHUB_OUTPUT"
           exit 0
@@ -244,6 +249,10 @@ jobs:
             "https://github.com/${GITHUB_REPOSITORY}/releases/download/${RELEASE_TAG}/opentubex-${VERSION}-linux-${architecture}-portable.zip"
         done
 
+        # Replace a bare release entry from FlatPark's pin updater with a
+        # complete one.
+        perl -0pi -e 's/^[ \t]*<release version="\Q$ENV{VERSION}\E"[^>]*>.*?<\/release>\n//ms' "$metainfo"
+
         node flatpark/scripts/update-pins.mjs "$manifest" "$metainfo" < "$resolver_json"
         node opentubex/_scripts/syncFlatpakFinishArgs.mjs \
           official-flatpak/org.opentubex.OpenTubeX.yml \
@@ -251,12 +260,11 @@ jobs:
         node opentubex/_scripts/syncAppStreamScreenshots.mjs \
           "$metainfo" "$RELEASE_TAG"
 
-        expected_changes="$(printf '%s\n' \
-          'registry/org.opentubex.OpenTubeX/org.opentubex.OpenTubeX.metainfo.xml' \
-          'registry/org.opentubex.OpenTubeX/org.opentubex.OpenTubeX.yml')"
-        actual_changes="$(git -C flatpark diff --name-only | sort)"
+        # The manifest is already current when FlatPark's pin updater got there first.
+        actual_changes="$(git -C flatpark diff --name-only -- . \
+          ':!registry/org.opentubex.OpenTubeX/org.opentubex.OpenTubeX.yml')"
 
-        if [[ "$actual_changes" != "$expected_changes" ]]; then
+        if [[ "$actual_changes" != 'registry/org.opentubex.OpenTubeX/org.opentubex.OpenTubeX.metainfo.xml' ]]; then
           echo '::error::The FlatPark pin updater changed unexpected files.'
           git -C flatpark status --short
           exit 1
@@ -274,6 +282,12 @@ jobs:
         if [[ "$latest_version" != "$VERSION" ]]; then
           echo "::error::Expected the latest AppStream release to be ${VERSION}, found ${latest_version}."
           exit 1
+        fi
+
+        if git -C flatpark diff --quiet -- "${manifest#flatpark/}"; then
+          echo "FlatPark's pin updater already pinned the portable archives, so this completes its AppStream release entry." > submission/summary
+        else
+          echo 'This updates the pinned x86_64 and ARM64 portable archives and adds the AppStream release entry.' > submission/summary
         fi
 
         install -Dm644 "$manifest" submission/manifest.yml
@@ -472,8 +486,9 @@ jobs:
 
         body="${RUNNER_TEMP}/flatpark-pr-body.md"
         official_flatpak_sha="$(< submission/official-flatpak-sha)"
+        summary="$(< submission/summary)"
         cat > "$body" <<EOF
-        OpenTubeX published [${RELEASE_TAG}](https://github.com/${GITHUB_REPOSITORY}/releases/tag/${RELEASE_TAG}). This updates the pinned x86_64 and ARM64 portable archives and adds the AppStream release entry.
+        OpenTubeX published [${RELEASE_TAG}](https://github.com/${GITHUB_REPOSITORY}/releases/tag/${RELEASE_TAG}). ${summary}
 
         FlatPark's current pin updater downloaded both release assets and calculated their SHA-256 hashes and sizes before the organization fork was updated.
 
