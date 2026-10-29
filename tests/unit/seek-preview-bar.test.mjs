@@ -30,6 +30,7 @@ function fixture() {
         },
         style: { background: '', setProperty: (name, value) => properties.set(name, value), getPropertyValue: name => properties.get(name) },
         querySelector: () => controls.timePreview,
+        matches: selector => selector === ':hover' && controls.barHovered,
       }
       this.bar = {
         min: '0', max: '30', events: [],
@@ -81,7 +82,7 @@ function fixture() {
   const controls = {
     video: { currentTime: 15, paused: false }, listeners: new Map(), seeking: false, shown: 0, events: [],
     timePreview: { style: { visibility: 'visible' } },
-    config: { showUIAlways: false }, hovered: true, hidden: 0,
+    config: { showUIAlways: false }, hovered: true, barHovered: true, hidden: 0,
     setSeeking(value) { this.seeking = value }, showUI() { this.shown++; this.seekingWhenShown = this.seeking },
     hideUI() { this.hidden++ },
     getConfig() { return this.config },
@@ -347,4 +348,19 @@ test('dragging back below the strip returns to seeking at the bar scale', async 
   assert.equal(bar.value, 25)
   bar.onChangeEnd()
   assert.equal(bar.value, 25)
+})
+
+test('releasing a short mouse drag off the bar hides the time Shaka shows', () => {
+  const { bar, controls, drag } = fixture()
+  // Shaka only hides it when the pointer leaves the bar, which the drag may already have done.
+  for (const barHovered of [true, false]) {
+    controls.barHovered = barHovered
+    controls.timePreview.style.visibility = 'visible'
+    controls.listeners.get('mousedown')()
+    bar.onChangeStart()
+    drag(bar.getValue() + 0.05)
+    bar.onChangeEnd()
+    assert.equal(bar.filmstrip.time, null, 'The drag is too short for the filmstrip')
+    assert.equal(controls.timePreview.style.visibility, barHovered ? 'visible' : 'hidden')
+  }
 })
