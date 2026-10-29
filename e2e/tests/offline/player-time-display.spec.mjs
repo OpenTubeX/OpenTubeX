@@ -223,6 +223,9 @@ test('changing fonts remeasures paused controls and clipped menu labels without 
 
   for (const scale of [1, 1.25]) {
     await app.electronApp.evaluate(({ BrowserWindow }, value) => BrowserWindow.getAllWindows()[0].webContents.setZoomFactor(value), scale)
+    // Resizing moves the controls under a resting pointer, and a hovered volume
+    // group expands, which would make the thresholds depend on the pointer instead of the font.
+    await page.mouse.move(1, 1)
     await player.evaluate(element => { element.style.width = '1600px' })
     await player.locator('.shaka-controls-container').evaluate(element => element.setAttribute('shown', 'true'))
     const widths = []
