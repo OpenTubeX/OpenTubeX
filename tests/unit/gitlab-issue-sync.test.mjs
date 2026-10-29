@@ -7,7 +7,7 @@ function fixture() {
   const state = {
     sources: [{ iid: 1, title: 'Report', description: 'Description', state: 'opened', confidential: false,
       imported: false, author: { id: 1, username: 'reporter' }, web_url: 'https://gitlab.com/opentubex/OpenTubeX/-/issues/1' }],
-    targets: [], mergeRequests: [], notes: [], comments: [], writes: [],
+    targets: [], mergeRequests: [], notes: [], comments: [], writes: [], releases: [], downloads: {},
   }
   let id = 100
   const copy = value => structuredClone(value)
@@ -33,6 +33,30 @@ function fixture() {
     if (body.state_event) item.state = body.state_event === 'close' ? 'closed' : 'opened'
     return copy(item)
   }]))
+  client.media = async (path, method = 'GET', body, type) => {
+    const route = path.split('?')[0]
+    if (method !== 'GET') state.writes.push({ side: 'media', route, method, body, type })
+    if (route === 'repos/OpenTubeX/media/releases') {
+      if (method === 'GET') return state.releases.map(({ assets, ...release }) => copy(release))
+      const release = { id: ++id, tag_name: body.tag_name, assets: [] }
+      state.releases.push(release)
+      return { id: release.id, tag_name: release.tag_name }
+    }
+    const releaseId = Number(route.match(/releases\/(\d+)\/assets$/)[1])
+    const release = state.releases.find(release => release.id === releaseId)
+    if (method === 'GET') {
+      const page = Number(new URL(path, 'https://api.github.com/').searchParams.get('page'))
+      return copy(release.assets.slice((page - 1) * 100, page * 100))
+    }
+    const name = new URL(path).searchParams.get('name')
+    const asset = { name, state: 'uploaded', browser_download_url: `https://github.com/OpenTubeX/media/releases/download/${release.tag_name}/${name}` }
+    release.assets.push(asset)
+    return copy(asset)
+  }
+  client.download = async path => {
+    state.writes.push({ side: 'download', route: path })
+    return state.downloads[path] ?? { status: 200, type: 'image/png', bytes: Buffer.from('image') }
+  }
   return { state, client }
 }
 
@@ -391,16 +415,20 @@ test('rewrites GitLab uploads and escapes only GitHub-to-GitLab quick actions', 
   assert.equal(content('~~~~\n/close\n~~~\n/close\n~~~~'), '~~~~\n/close\n~~~\n/close\n~~~~')
 })
 
-test('mirrors uploaded images from issue 1468 in descriptions and comments and repairs existing copies', async () => {
+test('copies uploaded images from issues 1468 and 2491 to the media repository once and repairs existing copies', async () => {
   const { state, client } = fixture()
   const file = 'c2cc7b30727ac87589b6cf25afb79c3a/Screenshot_2026-09-20_20-35-28.png'
-  const image = `![Screenshot](/uploads/${file}){width=900 height=507}`
-  const expected = `![Screenshot](https://gitlab.com/-/project/85121418/uploads/${file})`
+  const image = `![Screenshot](/uploads/${file}){width="900" height="507"}`
+  const expected = '![Screenshot](https://github.com/OpenTubeX/media/releases/download/gitlab-uploads/c2cc7b30727ac87589b6cf25afb79c3a-Screenshot_2026-09-20_20-35-28.png)'
   state.sources[0].description = image
   state.notes.push({ id: 10, body: image, author: { id: 1, username: 'reporter' } })
   await sync(client)
   assert.ok(state.targets[0].body.endsWith(expected))
   assert.ok(state.comments[0].body.endsWith(expected))
+  assert.equal(state.writes.filter(write => write.side === 'download').length, 1)
+  const upload = state.writes.find(write => write.side === 'media' && write.method === 'POST' && write.type)
+  assert.equal(upload.type, 'image/png')
+  assert.deepEqual(upload.body, Buffer.from('image'))
 
   for (const item of [state.targets[0], state.comments[0]]) {
     item.body = item.body.replace(expected, image.replace('/uploads/', 'https://gitlab.com/opentubex/OpenTubeX/uploads/'))
@@ -415,9 +443,25 @@ test('mirrors uploaded images from issue 1468 in descriptions and comments and r
   assert.deepEqual(state.writes, [])
 })
 
+test('keeps GitLab links for videos, deleted uploads and failed copies, and rolls over full releases', async () => {
+  const { state, client } = fixture()
+  const secret = 'ad58bc7f52258220477bffdbf89decab'
+  state.releases.push({ id: 1, tag_name: 'gitlab-uploads', assets: Array.from({ length: 1000 }, (_, index) => ({ name: `${index}`, state: 'uploaded', browser_download_url: '' })) })
+  state.downloads[`/uploads/${secret}/deleted.png`] = { status: 404, type: 'text/html', bytes: null }
+  state.downloads[`/uploads/${secret}/limited.png`] = { status: 429, type: 'text/html', bytes: null }
+  state.sources[0].description = ['video.mp4', 'deleted.png', 'limited.png', 'new image (1).PNG'].map(file => `![${file}](</uploads/${secret}/${file}>)`).join('\n')
+  await assert.rejects(sync(client), /Failed to copy 1 images:\nGitLab upload ad58bc7f52258220477bffdbf89decab: GitLab upload download: HTTP 429/)
+  const gitlab = 'https://gitlab.com/-/project/85121418/uploads/ad58bc7f52258220477bffdbf89decab'
+  assert.ok(state.targets[0].body.endsWith(`[video.mp4](${gitlab}/video.mp4)
+![deleted.png](${gitlab}/deleted.png)
+![limited.png](${gitlab}/limited.png)
+![new image (1).PNG](https://github.com/OpenTubeX/media/releases/download/gitlab-uploads-2/${secret}-new-image-1-.PNG)`))
+  assert.deepEqual(state.releases.map(release => release.tag_name), ['gitlab-uploads', 'gitlab-uploads-2'])
+})
+
 test('converts upload links and image dimensions without changing unrelated links or attributes', () => {
   const url = 'https://gitlab.com/-/project/85121418/uploads/hash/image.png'
-  for (const dimensions of ['{width=900 height=507}', '{width=100px}', '{height=50% width=75%}']) {
+  for (const dimensions of ['{width=900 height=507}', '{width=100px}', '{height=50% width=75%}', '{width="900" height="507"}', "{width='100px'}"]) {
     assert.equal(content(`![Screenshot](/uploads/hash/image.png)${dimensions}`, true), `![Screenshot](${url})`)
     assert.equal(content(`![Screenshot](https://example.org/image.png "Title")${dimensions}`, true), '![Screenshot](https://example.org/image.png "Title")')
   }

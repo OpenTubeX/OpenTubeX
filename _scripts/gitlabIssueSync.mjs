@@ -1,4 +1,7 @@
 import { execFileSync } from 'node:child_process'
+import { mkdtempSync, rmSync, writeFileSync } from 'node:fs'
+import { tmpdir } from 'node:os'
+import { join } from 'node:path'
 import { pathToFileURL } from 'node:url'
 import { setTimeout } from 'node:timers/promises'
 import { fromMarkdown } from 'mdast-util-from-markdown'
@@ -17,6 +20,10 @@ const project = 'opentubex/OpenTubeX'
 // GitLab serves uploads through the stable project ID, not the repository path.
 const uploadsUrl = 'https://gitlab.com/-/project/85121418/uploads/'
 const repository = 'OpenTubeX/OpenTubeX'
+// GitLab rate-limits GitHub's image proxy, so images are copied to GitHub.
+const mediaRepository = 'OpenTubeX/media'
+const mediaRelease = 'gitlab-uploads'
+const imageExtensions = ['png', 'jpg', 'jpeg', 'gif', 'webp', 'avif']
 const githubBot = 'github-actions[bot]'
 const prefix = 'opentubex-sync'
 const marker = (kind, id) => `<!-- ${prefix}:${kind}:${id} -->`
@@ -73,8 +80,8 @@ function markdown(body, transform) {
   return body
 }
 
-export function content(body = '', fromGitlab = false) {
-  const upload = url => fromGitlab && url.startsWith('/uploads/') ? uploadsUrl + url.slice('/uploads/'.length) : url
+export function content(body = '', fromGitlab = false, mirrored = () => {}) {
+  const upload = url => fromGitlab && url.startsWith('/uploads/') ? mirrored(url) ?? uploadsUrl + url.slice('/uploads/'.length) : url
   return markdown(body ?? '', (node, original, index, parent) => {
     if (node.type === 'html') {
       const html = fromHtml(original, { fragment: true, verbose: true })
@@ -110,7 +117,7 @@ export function content(body = '', fromGitlab = false) {
       // GitLab matches command names with Unicode case folding after deleting \r.
       if (!fromGitlab) return original.replace(/^( {0,3})\/(?=[\p{L}\p{N}_]+(?:\s|$))/gmu, '$1&#47;')
       // These attributes are GitLab-specific image metadata, not Markdown grammar.
-      if (parent?.children[index - 1]?.type === 'image') original = original.replace(/^\{[ \t]*(?:(?:width|height)=\d+(?:px|%)?[ \t]*)+\}/, '')
+      if (parent?.children[index - 1]?.type === 'image') original = original.replace(/^\{[ \t]*(?:(?:width|height)=(["']?)\d+(?:px|%)?\1[ \t]*)+\}/, '')
       return original.replace(/(^|[(<"'\s])\/uploads\//g, `$1${uploadsUrl}`)
     }
   })
@@ -125,17 +132,17 @@ function githubBody(header, body) {
   return `${header}\n\n${notice}${excerpt}`
 }
 
-function issueBody(issue, references) {
+function issueBody(issue, references, mirrored) {
   const header = `${marker('issue', issue.iid)}\nReported by ${content(issue.author.username)} on [GitLab](${issue.web_url}).`
-  return githubBody(header, references(content(issue.description, true), 'gitlab'))
+  return githubBody(header, references(content(issue.description, true, mirrored), 'gitlab'))
 }
 
-function commentBody(comment, side, issue, references) {
+function commentBody(comment, side, issue, references, mirrored) {
   const gitlab = side === 'gitlab'
   const author = gitlab ? comment.author.username : comment.user.login
   const url = gitlab ? `${issue.web_url}#note_${comment.id}` : comment.html_url
   const header = `${marker(side, comment.id)}\n${content(author)} on [${gitlab ? 'GitLab' : 'GitHub'}](${url}):`
-  const body = references(content(comment.body, gitlab), side)
+  const body = references(content(comment.body, gitlab, mirrored), side)
   return gitlab ? githubBody(header, body) : `${header}\n\n${body}`
 }
 
@@ -208,7 +215,74 @@ function referenceResolver(sources, targets, mergeRequests) {
   return { rewrite, pair }
 }
 
-export function createClient(token) {
+function mediaMirror(client) {
+  const mirrored = new Map()
+  const failures = []
+  let releases
+  return {
+    failures,
+    url: path => mirrored.get(path),
+    async add(bodies) {
+      const paths = new Set()
+      for (const body of bodies) content(body, true, path => { paths.add(path) })
+      for (const path of paths) {
+        const [, secret, file] = path.match(/^\/uploads\/([\da-f]{32})\/([^/?#]+)$/) ?? []
+        if (!secret || mirrored.has(path) || !imageExtensions.includes(file.split('.').at(-1).toLowerCase())) continue
+        try {
+          // Names derive from GitLab's upload secret, so each file is copied once.
+          const name = `${secret}-${file.replace(/[^\w.-]+/g, '-')}`
+          releases ??= await Promise.all((await list(client, 'media', `repos/${mediaRepository}/releases`))
+            .filter(release => release.tag_name === mediaRelease || release.tag_name.startsWith(`${mediaRelease}-`))
+            .map(async release => ({ ...release, assets: await list(client, 'media', `repos/${mediaRepository}/releases/${release.id}/assets`) })))
+          let asset = releases.flatMap(release => release.assets)
+            // An interrupted upload leaves an empty asset in the starter state.
+            .find(asset => asset.name === name && asset.state === 'uploaded')
+          if (!asset) {
+            const download = await client.download(path)
+            // Deleted uploads keep their GitLab link.
+            if (download.status === 404) continue
+            if (!download.bytes) throw new SyncError(`GitLab upload download: HTTP ${download.status}`)
+            if (!download.type?.startsWith('image/')) continue
+            let release = releases.find(release => release.assets.length < 1000)
+            if (!release) {
+              const tag = releases.length ? `${mediaRelease}-${releases.length + 1}` : mediaRelease
+              release = {
+                ...await client.media(`repos/${mediaRepository}/releases`, 'POST', {
+                  tag_name: tag, name: tag, body: 'Images copied from GitLab reports mirrored to OpenTubeX/OpenTubeX.', make_latest: 'false',
+                }),
+                assets: []
+              }
+              releases.push(release)
+            }
+            asset = await client.media(`https://uploads.github.com/repos/${mediaRepository}/releases/${release.id}/assets?name=${name}`, 'POST', download.bytes, download.type)
+            release.assets.push(asset)
+          }
+          mirrored.set(path, asset.browser_download_url)
+        } catch (error) {
+          failures.push(`GitLab upload ${secret}: ${error instanceof SyncError ? error.message : 'request failed'}`)
+        }
+      }
+    },
+  }
+}
+
+export function createClient(token, mediaToken) {
+  const gh = (args, input, env) => {
+    try {
+      return JSON.parse(execFileSync('gh', args, {
+        input,
+        env: { ...process.env, ...env },
+        encoding: 'utf8',
+        timeout: 30000,
+        maxBuffer: 20 * 1024 * 1024,
+        // Avoid emitting response bodies containing user content into Actions logs.
+        stdio: ['pipe', 'pipe', 'pipe'],
+      }))
+    } catch (error) {
+      const status = error.stderr?.toString().match(/HTTP (\d{3})/)?.[1]
+      throw new SyncError(`GitHub ${args[3]} ${args[1]} failed${status ? `: HTTP ${status}` : ''}`)
+    }
+  }
   return {
     async gl(path, method = 'GET', body) {
       const headers = { 'Content-Type': 'application/json' }
@@ -230,20 +304,28 @@ export function createClient(token) {
     async gh(path, method = 'GET', body) {
       // Space mutations to stay below GitHub's secondary content-creation limits.
       if (method !== 'GET') await setTimeout(1100)
+      return gh(['api', path, '--method', method, ...body ? ['--input', '-'] : []], body && JSON.stringify(body))
+    },
+    // GITHUB_TOKEN cannot write to the media repository.
+    async media(path, method = 'GET', body, type) {
       const args = ['api', path, '--method', method]
-      if (body) args.push('--input', '-')
+      const env = { GH_TOKEN: mediaToken }
+      if (!Buffer.isBuffer(body)) return gh([...args, ...body ? ['--input', '-'] : []], body && JSON.stringify(body), env)
+      // Asset uploads need a Content-Length, which gh only sends for file input.
+      const directory = mkdtempSync(join(tmpdir(), 'gitlab-upload-'))
       try {
-        return JSON.parse(execFileSync('gh', args, {
-          input: body ? JSON.stringify(body) : undefined,
-          encoding: 'utf8',
-          timeout: 30000,
-          maxBuffer: 20 * 1024 * 1024,
-          // Avoid emitting response bodies containing user content into Actions logs.
-          stdio: ['pipe', 'pipe', 'pipe'],
-        }))
-      } catch (error) {
-        const status = error.stderr?.toString().match(/HTTP (\d{3})/)?.[1]
-        throw new SyncError(`GitHub ${method} ${path} failed${status ? `: HTTP ${status}` : ''}`)
+        writeFileSync(join(directory, 'asset'), body)
+        return gh([...args, '--input', join(directory, 'asset'), '-H', `Content-Type: ${type}`], undefined, env)
+      } finally {
+        rmSync(directory, { recursive: true, force: true })
+      }
+    },
+    async download(path) {
+      const response = await fetch(uploadsUrl + path.slice('/uploads/'.length), { redirect: 'error', signal: AbortSignal.timeout(30000) })
+      return {
+        status: response.status,
+        type: response.headers.get('content-type'),
+        bytes: response.ok ? Buffer.from(await response.arrayBuffer()) : null,
       }
     },
   }
@@ -259,6 +341,10 @@ export async function list(client, side, path) {
   }
 }
 
+// GitLab notes written by people, excluding the sync's own copies and backlinks.
+const gitlabNote = (note, bot) => !note.system && !note.internal && !note.confidential &&
+  !(note.author.id === bot.id && (markedId(note.body, 'github') || markedId(note.body, 'link')))
+
 export async function sync(client) {
   const glBase = `projects/${encodeURIComponent(project)}/issues`
   const ghBase = `repos/${repository}/issues`
@@ -272,6 +358,7 @@ export async function sync(client) {
   let synced = 0
   const failures = []
   const prepared = []
+  const media = mediaMirror(client)
   // Establish every native issue's counterpart before rendering references,
   // including references to reports created later in the same sync run.
   for (const source of sources) {
@@ -280,6 +367,7 @@ export async function sync(client) {
     try {
       const glIssue = `${glBase}/${source.iid}`
       const notes = await list(client, 'gl', `${glIssue}/notes?sort=asc&order_by=created_at`)
+      await media.add([source.description, ...notes.filter(note => gitlabNote(note, bot)).map(note => note.body)])
       const link = notes.find(note => note.author.id === bot.id && markedId(note.body, 'link'))
       const linkedNumber = link && Number(markedId(link.body, 'link'))
       let target = linkedNumber
@@ -288,7 +376,7 @@ export async function sync(client) {
       // Never silently duplicate a linked issue that was deleted or transferred.
       if (linkedNumber && !target) throw new SyncError(`Missing linked GitHub issue for GitLab #${source.iid}`)
       if (!target) {
-        target = await client.gh(ghBase, 'POST', { title: source.title, body: issueBody(source, references.rewrite) })
+        target = await client.gh(ghBase, 'POST', { title: source.title, body: issueBody(source, references.rewrite, media.url) })
         targets.push(target)
       }
       references.pair(source, target)
@@ -300,7 +388,7 @@ export async function sync(client) {
   for (const { source, target, notes, link } of prepared) {
     try {
       const glIssue = `${glBase}/${source.iid}`
-      const body = issueBody(source, references.rewrite)
+      const body = issueBody(source, references.rewrite, media.url)
       if (target.title !== source.title || target.body !== body) {
         await client.gh(`${ghBase}/${target.number}`, 'PATCH', { title: source.title, body })
         Object.assign(target, { title: source.title, body })
@@ -329,11 +417,10 @@ export async function sync(client) {
       }
       const comments = await list(client, 'gh', `${ghBase}/${target.number}/comments`)
       for (const note of notes) {
-        if (note.system || note.internal || note.confidential ||
-          (note.author.id === bot.id && (markedId(note.body, 'github') || markedId(note.body, 'link')))) continue
+        if (!gitlabNote(note, bot)) continue
         const existing = comments.find(comment => comment.user.login === githubBot &&
           markedId(comment.body, 'gitlab') === String(note.id))
-        const body = commentBody(note, 'gitlab', source, references.rewrite)
+        const body = commentBody(note, 'gitlab', source, references.rewrite, media.url)
         if (!existing) {
           await client.gh(`${ghBase}/${target.number}/comments`, 'POST', { body })
         } else if (existing.body !== body) {
@@ -356,15 +443,21 @@ export async function sync(client) {
       failures.push(`GitLab #${source.iid}: ${error instanceof SyncError ? error.message : 'request failed'}`)
     }
   }
-  if (failures.length) throw new SyncError(`Failed to sync ${failures.length} reports:\n${failures.join('\n')}`)
+  // Reports with uncopied images still sync with GitLab links and are repaired by a later run.
+  const errors = [
+    failures.length && `Failed to sync ${failures.length} reports:\n${failures.join('\n')}`,
+    media.failures.length && `Failed to copy ${media.failures.length} images:\n${media.failures.join('\n')}`,
+  ].filter(Boolean)
+  if (errors.length) throw new SyncError(errors.join('\n'))
   return synced
 }
 
 if (process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href) {
   const token = process.env.GITLAB_ISSUE_SYNC_TOKEN
-  if (!token || !process.env.GH_TOKEN) throw new Error('GITLAB_ISSUE_SYNC_TOKEN and GH_TOKEN are required')
+  const mediaToken = process.env.MEDIA_TOKEN
+  if (!token || !mediaToken || !process.env.GH_TOKEN) throw new Error('GITLAB_ISSUE_SYNC_TOKEN, MEDIA_TOKEN and GH_TOKEN are required')
   try {
-    console.log(`Synchronized ${await sync(createClient(token))} GitLab reports.`)
+    console.log(`Synchronized ${await sync(createClient(token, mediaToken))} GitLab reports.`)
   } catch (error) {
     // Subprocess errors can contain private response bodies; report no credentials/content.
     if (error instanceof SyncError) console.error(error.message)
