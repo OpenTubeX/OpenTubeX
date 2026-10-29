@@ -28,8 +28,8 @@
             target="_blank"
             rel="noopener noreferrer"
             dir="auto"
-            @click.prevent.stop="handleExternalLink(link.url)"
-            @auxclick.middle.prevent.stop="handleExternalLink(link.url)"
+            @click="openMembershipLinkExternally($event, link.url)"
+            @auxclick.middle="openMembershipLinkExternally($event, link.url)"
           >
             <span
               class="aboutLinkIcon"
@@ -239,6 +239,20 @@ const searchSettings = computed(() => {
 const formattedJoined = computed(() => {
   return formatDate(props.joined, locale.value, dateFormat.value, { dateStyle: 'long' })
 })
+
+/**
+ * The app opens other YouTube links itself through the document link handler,
+ * but channel membership pages only work in the browser.
+ * @param {MouseEvent} event
+ * @param {string} url
+ */
+function openMembershipLinkExternally(event, url) {
+  if (!/\/join\/?$/.test(new URL(url).pathname)) return
+
+  event.preventDefault()
+  event.stopPropagation()
+  handleExternalLink(url)
+}
 
 const formattedViews = computed(() => formatNumber(props.views))
 const formattedVideos = computed(() => formatNumber(props.videos))
