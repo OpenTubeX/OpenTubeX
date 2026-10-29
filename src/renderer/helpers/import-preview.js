@@ -46,12 +46,13 @@ export function previewBackupImport(data, current) {
 /**
  * Find the localized text around watched titles, such as "Watched " in
  * English. Removed videos are titled with their URL, which shows the template
- * exactly; otherwise use the start all titles share.
+ * exactly; otherwise use the start all titles share. Ads and
+ * removed videos without a URL are not imported, but share the template.
  */
 function findWatchTitleTemplate(records) {
   const templates = new Map()
   for (const { title, titleUrl } of records) {
-    const index = title.indexOf(titleUrl)
+    const index = typeof titleUrl === 'string' ? title.indexOf(titleUrl) : -1
     if (index === -1) continue
     const prefix = title.slice(0, index)
     const suffix = title.slice(index + titleUrl.length)
@@ -71,18 +72,33 @@ function findWatchTitleTemplate(records) {
     while (index < prefixLength && title[index] === first[index]) index++
     prefixLength = index
   }
-  return { prefix: first.slice(0, prefixLength), suffix: '' }
+  // Titles can share their first letters. Keep whole words in templates that
+  // separate them with spaces.
+  const prefix = first.slice(0, prefixLength)
+  return { prefix: /\s/u.test(prefix) ? prefix.replace(/\S+$/u, '') : prefix, suffix: '' }
+}
+
+function getWatchVideoId(titleUrl) {
+  try {
+    const videoId = new URL(titleUrl).searchParams.get('v')
+    return /^[\w-]{11}$/.test(videoId) ? videoId : null
+  } catch {
+    return null
+  }
 }
 
 /** Transform the same watch records for both the preview and the actual import. */
 export function parseTakeoutWatchHistory(history) {
   let skipped = 0
+  const isWatchUrl = url => typeof url === 'string' && url.includes('www.youtube.com/watch?')
+  const titled = history.filter(item => Array.isArray(item?.products) && item.products.includes('YouTube') && typeof item.title === 'string' &&
+    (item.titleUrl === undefined || isWatchUrl(item.titleUrl)))
   const records = history.filter(item => {
-    if (!Array.isArray(item?.products) || !item.products.includes('YouTube') || typeof item.titleUrl !== 'string' || !item.titleUrl.includes('www.youtube.com/watch?v') || item.details != null) return false
-    if (typeof item.title !== 'string' || !Number.isFinite(Date.parse(item.time))) { skipped++; return false }
+    if (!Array.isArray(item?.products) || !item.products.includes('YouTube') || !isWatchUrl(item.titleUrl) || item.details != null) return false
+    if (typeof item.title !== 'string' || !Number.isFinite(Date.parse(item.time)) || !getWatchVideoId(item.titleUrl)) { skipped++; return false }
     return true
   })
-  const { prefix, suffix } = findWatchTitleTemplate(records)
+  const { prefix, suffix } = findWatchTitleTemplate(titled)
   const getTitle = title => title.length >= prefix.length + suffix.length && title.startsWith(prefix) && title.endsWith(suffix)
     ? title.slice(prefix.length, title.length - suffix.length)
     : title
@@ -95,7 +111,7 @@ export function parseTakeoutWatchHistory(history) {
     const author = Array.isArray(record.subtitles) ? record.subtitles[0] : null
     const timeWatched = Date.parse(record.time)
     return {
-      videoId: record.titleUrl.replaceAll(/https:\/\/www\.youtube\.com\/watch\?v=/gi, ''),
+      videoId: getWatchVideoId(record.titleUrl),
       title: getTitle(record.title),
       timeWatched,
       author: typeof author?.name === 'string' ? author.name : '',
