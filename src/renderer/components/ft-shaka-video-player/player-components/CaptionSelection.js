@@ -6,6 +6,7 @@ import i18n from '../../../i18n/index'
 import { CaptionTiming } from './CaptionTiming'
 import {
   addOverlayScrollbars,
+  clampOverlayScrollTop,
   removeOverlayScrollbars,
   restoreOverlayScrollTop,
 } from '../../../helpers/overlayScrollbars'
@@ -89,6 +90,9 @@ export class CaptionSelection extends shaka.ui.TextSelection {
     this.choices_ = document.createElement('div')
     this.choices_.classList.add('ft-caption-list-options')
     addOverlayScrollbars(this.choices_)
+    // A taller list, for example in a larger player, shortens its scroll range.
+    this.choicesObserver_ = new ResizeObserver(() => this.clampChoicesScroll_())
+    this.choicesObserver_.observe(this.choices_)
     // Shaka closes the submenu on any click in it, including the one that ends
     // a drag on the scrollbar.
     this.eventManager.listen(this.choices_, 'click', (event) => {
@@ -236,6 +240,7 @@ export class CaptionSelection extends shaka.ui.TextSelection {
 
   release() {
     this.actionsObserver_.disconnect()
+    this.choicesObserver_.disconnect()
     this.timing_.release()
     render(null, this.loadFileIcon_)
     this.actions_.remove()
@@ -778,6 +783,17 @@ export class CaptionSelection extends shaka.ui.TextSelection {
     }
     if (this.menu.lastElementChild !== this.actions_) {
       this.menu.appendChild(this.actions_)
+    }
+    this.clampChoicesScroll_()
+  }
+
+  /**
+   * Keeps the choices' scroll offset within their range after it shrinks.
+   * @private
+   */
+  clampChoicesScroll_() {
+    if (!this.menu.classList.contains('shaka-hidden')) {
+      clampOverlayScrollTop(this.choices_, this.choices_.querySelector(':scope > button:last-of-type'))
     }
   }
 

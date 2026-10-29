@@ -1,4 +1,4 @@
-import { test, expect } from '../../helpers/app.mjs'
+import { test, expect, setWindowSize } from '../../helpers/app.mjs'
 import { activeTab, openMockedVideo } from '../../helpers/player.mjs'
 import { mockPlayableWatchPage } from '../../helpers/watch.mjs'
 import { WATCH_PAGE_SEED } from '../../helpers/watch-page.mjs'
@@ -40,12 +40,34 @@ function captionMenuLayout(player) {
   })
 }
 
+/**
+ * Checks the scroll offset, the end of the content and the scrollbar against the options' current range.
+ * @param {import('@playwright/test').Locator} options
+ */
+async function expectValidScrollRange(options) {
+  await expect.poll(() => options.evaluate((element) => {
+    const range = element.scrollHeight - element.clientHeight
+    const last = element.querySelector(':scope > button:last-of-type').getBoundingClientRect()
+    const bottom = element.getBoundingClientRect().bottom - Number.parseFloat(getComputedStyle(element).paddingBottom)
+    const scrollbar = element.querySelector(':scope > .os-scrollbar-vertical')
+    const handle = scrollbar.querySelector('.os-scrollbar-handle').getBoundingClientRect()
+    const track = scrollbar.querySelector('.os-scrollbar-track').getBoundingClientRect()
+    const usable = !scrollbar.classList.contains('os-scrollbar-unusable')
+    return {
+      validOffset: element.scrollTop >= 0 && element.scrollTop <= range + 1,
+      noEmptySpace: range <= 0 || last.bottom >= bottom - 1,
+      scrollbarMatches: usable === (range > 1) && (!usable ||
+        Math.abs((handle.top - track.top) / (track.height - handle.height) - element.scrollTop / range) < 0.02),
+    }
+  })).toEqual({ validOffset: true, noEmptySpace: true, scrollbarMatches: true })
+}
+
 for (const usePlayerMenuGrid of [true, false]) {
   test.describe(`${usePlayerMenuGrid ? 'grid' : 'list'} player menu`, () => {
     test.use({ seed: { settings: { ...WATCH_PAGE_SEED, enableSubtitlesByDefault: true, usePlayerMenuGrid } } })
 
     test('scrolls only the caption options between a fixed header and footer @scale', async ({ app, page, attachScreenshot }) => {
-      await page.setViewportSize({ width: 1280, height: 900 })
+      await setWindowSize(app, page, { width: 1500, height: 1000 })
       await mockPlayableWatchPage(app, page, { captionTranslations: true, extraCaptionTracks })
       await openMockedVideo(page)
       const player = await openOverflowMenu(page)
@@ -90,21 +112,12 @@ for (const usePlayerMenuGrid of [true, false]) {
         shakaPlayer.dispatchEvent({ type: 'trackschanged' })
       })
       await expect(options.locator(':scope > button')).toHaveCount(23)
-      await expect.poll(() => options.evaluate((element) => {
-        const range = element.scrollHeight - element.clientHeight
-        const last = element.querySelector(':scope > button:last-of-type').getBoundingClientRect()
-        const bottom = element.getBoundingClientRect().bottom - Number.parseFloat(getComputedStyle(element).paddingBottom)
-        const scrollbar = element.querySelector(':scope > .os-scrollbar-vertical')
-        const handle = scrollbar.querySelector('.os-scrollbar-handle').getBoundingClientRect()
-        const scrollbarTrack = scrollbar.querySelector('.os-scrollbar-track').getBoundingClientRect()
-        const usable = !scrollbar.classList.contains('os-scrollbar-unusable')
-        return {
-          validOffset: element.scrollTop >= 0 && element.scrollTop <= range + 1,
-          noEmptySpace: range <= 0 || last.bottom >= bottom - 1,
-          scrollbarMatches: usable === (range > 1) && (!usable ||
-            Math.abs((handle.top - scrollbarTrack.top) / (scrollbarTrack.height - handle.height) - element.scrollTop / range) < 0.02),
-        }
-      })).toEqual({ validOffset: true, noEmptySpace: true, scrollbarMatches: true })
+      await expectValidScrollRange(options)
+
+      // So does a window size that gives the menu more room.
+      await options.evaluate(element => element.scrollTo({ top: element.scrollHeight }))
+      await setWindowSize(app, page, { width: 1260, height: 820 })
+      await expectValidScrollRange(options)
     })
   })
 }
@@ -112,7 +125,7 @@ for (const usePlayerMenuGrid of [true, false]) {
 test.describe('list player menu', () => {
   test.use({ seed: { settings: { ...WATCH_PAGE_SEED, usePlayerMenuGrid: false, videoPlaybackRateInterval: 0.1, maxVideoPlaybackRate: 3 } } })
 
-  test('wraps the playback speed presets instead of widening the menu', async ({ app, page, attachScreenshot }) => {
+  test('wraps the playback speed presets instead of widening the menu @scale', async ({ app, page, attachScreenshot }) => {
     await page.setViewportSize({ width: 1600, height: 900 })
     await mockPlayableWatchPage(app, page)
     await openMockedVideo(page)
