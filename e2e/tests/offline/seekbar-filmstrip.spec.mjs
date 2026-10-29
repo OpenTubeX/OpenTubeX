@@ -352,6 +352,31 @@ test('pulling the dragged thumb up past the filmstrip middle seeks at its scale'
   expect(await barTime()).toBeCloseTo(seekedTime, 2)
 })
 
+test('the mouse wheel over the seek bar scrolls the page instead of seeking', { tag: '@scale' }, async ({ app, page }) => {
+  await mockPlayableWatchPage(app, page)
+  await routeDemoMedia(page)
+  const video = await openMockedVideo(page)
+  await video.evaluate(element => {
+    element.pause()
+    element.currentTime = 5
+  })
+
+  const bar = page.locator('.ftVideoPlayer .shaka-seek-bar')
+  await page.locator('.ftVideoPlayer').hover()
+  await expect(bar).toBeEnabled()
+  const scrollOffsets = () => bar.evaluate(element => {
+    const offsets = []
+    for (let node = element.parentElement; node; node = node.parentElement) offsets.push(node.scrollTop)
+    return offsets
+  })
+  const before = await scrollOffsets()
+  await bar.hover()
+  await page.mouse.wheel(0, 300)
+
+  await expect.poll(async () => (await scrollOffsets()).some((offset, index) => offset > before[index])).toBe(true)
+  expect(await video.evaluate(element => element.currentTime)).toBe(5)
+})
+
 test.describe('with a short interface hide delay', () => {
   test.use({
     seed: {
