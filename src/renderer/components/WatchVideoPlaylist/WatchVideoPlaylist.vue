@@ -296,6 +296,7 @@ import {
   untilEndOfLocalPlayList,
 } from '../../helpers/api/local'
 import { invidiousGetPlaylistInfo } from '../../helpers/api/invidious'
+import { hasMoreInvidiousPlaylistPages, mergeInvidiousPlaylistVideos } from '../../helpers/api/invidious-playlists'
 import { navigationDownloadId } from '../../helpers/downloadPlayback'
 import { isHistoryEntryWatched } from '../../helpers/history'
 import { clampOverlayScrollTop, restoreOverlayScrollTop } from '../../helpers/overlayScrollbars'
@@ -1114,11 +1115,16 @@ function playPreviousVideo() {
 
 /**
  * YouTube playlists follow the channels' members-only settings
- * @param {object[]} items
+ * @param {object[]} videos
  */
-function parseVisibleLocalPlaylistVideos(items) {
+function filterVisiblePlaylistVideos(videos) {
   const membersOnlyChannelIds = store.getters.getMembersOnlyChannelIdSet
-  return parseLocalPlaylistVideos(items).filter(video => !isVideoHiddenByPreferences(video, { membersOnlyChannelIds }))
+  return videos.filter(video => !isVideoHiddenByPreferences(video, { membersOnlyChannelIds }))
+}
+
+/** @param {object[]} items */
+function parseVisibleLocalPlaylistVideos(items) {
+  return filterVisiblePlaylistVideos(parseLocalPlaylistVideos(items))
 }
 
 /**
@@ -1126,7 +1132,14 @@ function parseVisibleLocalPlaylistVideos(items) {
  * @param {object[]} items the raw items of the next page
  */
 function appendLocalPlaylistPage(videos, items) {
-  const newVideos = parseVisibleLocalPlaylistVideos(items)
+  appendPlaylistVideos(videos, parseVisibleLocalPlaylistVideos(items))
+}
+
+/**
+ * @param {object[]} videos every video loaded so far, extended in place
+ * @param {object[]} newVideos
+ */
+function appendPlaylistVideos(videos, newVideos) {
   videos.push(...newVideos)
   playlistItems.value = applyReversePlaylistState(videos.slice())
   if (!shuffleEnabled.value) return
@@ -1145,7 +1158,26 @@ function appendLocalPlaylistPage(videos, items) {
 }
 
 /**
- * @param {{ id: string, title: string, channelName: string, channelId: string, items: VideoData[], continuationData: string | null }} cachedPlaylist
+ * Invidious pages overlap, so each later page adds only the videos not seen yet.
+ * @param {string} playlistId
+ * @param {object[]} videos every visible video loaded so far, extended in place
+ * @param {object[]} loaded every video the instance returned so far
+ * @param {{ videoCount: number, pageNumber: number, pageVideoCount: number }} position
+ * @param {number} generation
+ */
+async function loadRemainingInvidiousPages(playlistId, videos, loaded, { videoCount, pageNumber, pageVideoCount }, generation) {
+  while (hasMoreInvidiousPlaylistPages(videoCount, pageNumber, loaded.length, pageVideoCount)) {
+    const page = await invidiousGetPlaylistInfo(playlistId, ++pageNumber)
+    if (generation !== playlistLoadGeneration) return
+    const merged = mergeInvidiousPlaylistVideos(loaded, page.videos)
+    appendPlaylistVideos(videos, filterVisiblePlaylistVideos(merged.slice(loaded.length)))
+    loaded = merged
+    pageVideoCount = page.pageVideoCount
+  }
+}
+
+/**
+ * @param {{ id: string, title: string, channelName: string, channelId: string, items: VideoData[], continuationData: string | null, nextInvidiousPage?: number | null }} cachedPlaylist
  */
 async function loadCachedPlaylistInformation(cachedPlaylist) {
   const generation = playlistLoadGeneration
@@ -1157,8 +1189,9 @@ async function loadCachedPlaylistInformation(cachedPlaylist) {
   channelName.value = cachedPlaylist.channelName
   channelId.value = cachedPlaylist.channelId
 
-  // Only the local API caches continuations, including when it was the fallback
-  hasUnloadedPlaylistVideos.value = process.env.SUPPORTS_LOCAL_API && cachedPlaylist.continuationData !== null
+  const nextInvidiousPage = cachedPlaylist.nextInvidiousPage ?? null
+  // The local API caches continuations, including when it was the fallback
+  hasUnloadedPlaylistVideos.value = nextInvidiousPage !== null || (process.env.SUPPORTS_LOCAL_API && cachedPlaylist.continuationData !== null)
   isFetchingPlaylistContinuation.value = hasUnloadedPlaylistVideos.value
 
   // Playback must not wait for later pages when the next video is already cached.
@@ -1174,16 +1207,22 @@ async function loadCachedPlaylistInformation(cachedPlaylist) {
   if (!isFetchingPlaylistContinuation.value) return
 
   try {
-    const continuationData = await getLocalCachedFeedContinuation('playlist', cachedPlaylist.continuationData)
-    await untilEndOfLocalPlayList(continuationData, (p) => {
-      if (generation !== playlistLoadGeneration) return
-      appendLocalPlaylistPage(videos, p.items)
-    }, { shouldContinue: () => generation === playlistLoadGeneration })
+    if (nextInvidiousPage !== null) {
+      await loadRemainingInvidiousPages(cachedPlaylist.id, videos, videos.slice(), {
+        videoCount: cachedPlaylist.totalVideoCount, pageNumber: nextInvidiousPage - 1, pageVideoCount: videos.length,
+      }, generation)
+    } else {
+      const continuationData = await getLocalCachedFeedContinuation('playlist', cachedPlaylist.continuationData)
+      await untilEndOfLocalPlayList(continuationData, (p) => {
+        if (generation !== playlistLoadGeneration) return
+        appendLocalPlaylistPage(videos, p.items)
+      }, { shouldContinue: () => generation === playlistLoadGeneration })
+    }
     if (generation === playlistLoadGeneration) hasUnloadedPlaylistVideos.value = false
   } catch (err) {
     if (generation !== playlistLoadGeneration) return
     console.error(err)
-    showApiErrorToast(t('Local API Error (Click to copy)'), err)
+    showApiErrorToast(nextInvidiousPage !== null ? getInvidiousApiErrorMessage(backendPreference.value) : t('Local API Error (Click to copy)'), err)
   } finally {
     if (generation === playlistLoadGeneration) isFetchingPlaylistContinuation.value = false
   }
@@ -1266,10 +1305,27 @@ async function getPlaylistInformationInvidious() {
     channelName.value = result.author
     channelId.value = result.authorId
 
-    playlistItems.value = applyReversePlaylistState(result.videos)
-    if (shuffleEnabled.value) shufflePlaylistItems()
+    const position = { videoCount: result.videoCount, pageNumber: 1, pageVideoCount: result.pageVideoCount }
+    hasUnloadedPlaylistVideos.value = hasMoreInvidiousPlaylistPages(position.videoCount, position.pageNumber, result.videos.length, position.pageVideoCount)
+    isFetchingPlaylistContinuation.value = hasUnloadedPlaylistVideos.value
 
+    // Show the first page right away; later pages append while playback continues.
+    const videos = filterVisiblePlaylistVideos(result.videos)
+    playlistItems.value = applyReversePlaylistState(videos.slice())
+    if (shuffleEnabled.value) shufflePlaylistItems()
     isLoading.value = false
+
+    if (!isFetchingPlaylistContinuation.value) return
+
+    try {
+      await loadRemainingInvidiousPages(props.playlistId, videos, result.videos, position, generation)
+      if (generation === playlistLoadGeneration) hasUnloadedPlaylistVideos.value = false
+    } catch (err) {
+      // Keep the pages already shown instead of replacing them through the fallback.
+      if (generation !== playlistLoadGeneration) return
+      console.error(err)
+      showApiErrorToast(getInvidiousApiErrorMessage(backendPreference.value), err)
+    }
   } catch (err) {
     if (generation !== playlistLoadGeneration) return
     console.error(err)
@@ -1281,6 +1337,8 @@ async function getPlaylistInformationInvidious() {
     } else {
       isLoading.value = false
     }
+  } finally {
+    if (generation === playlistLoadGeneration) isFetchingPlaylistContinuation.value = false
   }
 }
 
