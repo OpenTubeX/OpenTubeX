@@ -15,8 +15,6 @@ export async function executeBackgroundJob(operation, input) {
     case 'decryptSyncDocument': return privacy.decryptSyncDocument(input.payload, input.exportedKey)
     case 'decryptLegacySyncDocument': return privacy.decryptLegacySyncDocument(input.payload, input.exportedKey)
     case 'stringify': return JSON.stringify(input.value)
-    case 'parse': return JSON.parse(input.value)
-    case 'equal': return JSON.stringify(input.first) === JSON.stringify(input.second)
     case 'clone': return structuredClone(input.value)
     default: throw new Error('Unknown background operation')
   }

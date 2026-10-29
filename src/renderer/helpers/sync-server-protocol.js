@@ -4,14 +4,31 @@ export const SYNC_SERVER_DEVICE_ID_BYTES = 16
 const MAX_DEVICE_NAME_CHARS = 80
 const MAX_DEVICE_NAME_BYTES = 240
 
+const BASE64_CHUNK_BYTES = 32 * 1024
+
+// Encrypted collections are megabytes of ciphertext. Building their base64
+// one character at a time takes most of a second.
 export function bytesToBase64(bytes) {
+  if (typeof bytes.toBase64 === 'function') return bytes.toBase64()
   let binary = ''
-  for (const byte of bytes) binary += String.fromCharCode(byte)
+  for (let offset = 0; offset < bytes.length; offset += BASE64_CHUNK_BYTES) {
+    binary += String.fromCharCode(...bytes.subarray(offset, offset + BASE64_CHUNK_BYTES))
+  }
   return btoa(binary)
 }
 
 export function base64ToBytes(value) {
   if (typeof value !== 'string') throw new Error()
+  // Like atob, accepts unpadded input; callers needing canonical input check it.
+  // @ts-ignore Uint8Array.fromBase64 is newer than the TypeScript library.
+  const fromBase64 = Uint8Array.fromBase64
+  if (typeof fromBase64 === 'function') {
+    try {
+      return fromBase64.call(Uint8Array, value, { lastChunkHandling: 'loose' })
+    } catch {
+      throw new Error()
+    }
+  }
   const binary = atob(value)
   const bytes = new Uint8Array(binary.length)
   for (let index = 0; index < binary.length; index++) {

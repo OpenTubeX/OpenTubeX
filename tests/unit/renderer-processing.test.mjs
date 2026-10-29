@@ -449,16 +449,14 @@ test('background encrypted collections and concurrent jobs retain their data', a
   const exportedKey = Buffer.alloc(32, 1).toString('base64')
   const salt = Buffer.alloc(16, 2).toString('base64')
   try {
-    const [payload, unchanged, changed] = await Promise.all([
+    const [payload, copy, serialized] = await Promise.all([
       jobs.run('encryptSyncDocument', { data, exportedKey, salt }),
-      jobs.run('equal', { first: data, second: data }),
-      jobs.run('equal', { first: data, second: [] }),
+      jobs.run('clone', { value: data }),
+      jobs.run('stringify', { value: { history: data } }),
     ])
-    assert.equal(unchanged, true)
-    assert.equal(changed, false)
+    assert.deepEqual(copy, data)
+    assert.deepEqual(JSON.parse(serialized), { history: data })
     assert.deepEqual(await jobs.run('decryptSyncDocument', { payload, exportedKey }), data)
-    const restored = await jobs.run('parse', { value: await jobs.run('stringify', { value: { history: data } }) })
-    assert.deepEqual(restored, { history: data })
   } finally { jobs.dispose() }
 })
 

@@ -321,6 +321,37 @@ export function mergeHistory({ localHistory, remoteHistory, previous = {}, ackno
   return { next, baselineChanged, historyToUpload, remoteDeletions, insertions: localInsertions, updates: localUpdates, deletions: localDeletions }
 }
 
+/**
+ * Limits a merge to the entries changed locally since the last merge, while
+ * the remote history is still the one that merge produced. Every other entry
+ * would merge to its saved baseline again. Returns null when the merge must
+ * see the whole history, such as for a deletion large enough to need the
+ * data-loss confirmation.
+ */
+export function selectChangedHistory({ localHistory, remoteHistory, previous, changedIds }) {
+  if (Array.isArray(previous)) return null
+  let deleted = 0
+  const local = localHistory.filter(record => changedIds.has(record.videoId))
+  const localIds = new Set(local.map(record => record.videoId))
+  for (const id of changedIds) {
+    if (Object.hasOwn(previous, id) && !localIds.has(id)) deleted++
+  }
+  // Matches the smallest deletion mergeIds asks to confirm.
+  if (deleted >= 10 || (localHistory.length === 0 && Object.keys(previous).length > 0)) return null
+  return {
+    localHistory: local,
+    remoteHistory: remoteHistory.filter(entry => changedIds.has(entry.video.id)),
+    previous: Object.fromEntries([...changedIds].filter(id => Object.hasOwn(previous, id)).map(id => [id, previous[id]])),
+  }
+}
+
+/** Combines a merge of the changed entries with the unchanged baseline. */
+export function mergeChangedHistoryBaseline(previous, changedIds, next) {
+  const merged = { ...previous }
+  for (const id of changedIds) delete merged[id]
+  return Object.assign(merged, next)
+}
+
 export function applyRemoteHistoryChanges({ history, upserts, deletions }) {
   const byId = new Map()
   for (const entry of upserts) {

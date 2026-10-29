@@ -195,8 +195,9 @@ export class EncryptedSyncAdapter {
     return structuredClone(this.document.playlists.map(entry => entry.playlist))
   }
 
+  /** The playlist merge only reads this value, so it is not copied. */
   async getPlaylist(id) {
-    return runBackgroundJob('clone', { value: this.document.playlists.find(entry => entry.playlist.id === id) })
+    return this.document.playlists.find(entry => entry.playlist.id === id)
   }
 
   async getPlaylistBookmarks() {

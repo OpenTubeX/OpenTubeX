@@ -1,5 +1,6 @@
 import { toRaw } from 'vue'
-import { DEFAULT_CHANNEL_AVATAR, UNKNOWN_SYNC_UPLOADER_ID, uploaderToLocal, normalizeChannelAvatar, enrichSyncVideo, mergeIds as mergeSyncIds, videoToRemote as syncVideoToRemote } from '../../src/renderer/helpers/sync-history-merge.js'
+import { DEFAULT_CHANNEL_AVATAR, UNKNOWN_SYNC_UPLOADER_ID, uploaderToLocal, normalizeChannelAvatar, enrichSyncVideo, mergeIds as mergeSyncIds, videoToRemote as syncVideoToRemote, selectChangedHistory, mergeChangedHistoryBaseline } from '../../src/renderer/helpers/sync-history-merge.js'
+import { createHistoryChangeTracker } from '../../src/renderer/helpers/sync-history-changes.js'
 import { executeBackgroundJob as runBackgroundJob } from '../../src/renderer/helpers/background-job-operations.js'
 import * as releasedClient from '../helpers/released-sync-sessions.mjs'
 import * as sessions from '../../src/renderer/helpers/sync-sessions.js'
@@ -62,7 +63,7 @@ function fixture (overrides = {}, { encrypted = false, respond, connectionState 
   const storedReceipts = new Map()
   const common = {
     DBSettingHandlers: { find: () => settingsReader?.(settings) ?? Object.entries(settings).map(([_id, value]) => ({ _id, value })) },
-    DEFAULT_CHANNEL_AVATAR, UNKNOWN_SYNC_UPLOADER_ID, uploaderToLocal, normalizeChannelAvatar, enrichSyncVideo, mergeSyncIds, syncVideoToRemote,
+    DEFAULT_CHANNEL_AVATAR, UNKNOWN_SYNC_UPLOADER_ID, uploaderToLocal, normalizeChannelAvatar, enrichSyncVideo, mergeSyncIds, syncVideoToRemote, selectChangedHistory, mergeChangedHistoryBaseline,
     runBackgroundJob: backgroundJob,
     toRaw,
     ...syncLive,
@@ -125,6 +126,8 @@ function fixture (overrides = {}, { encrypted = false, respond, connectionState 
     process: { env: { IS_ELECTRON: !capacitor && Boolean(reminderService || desktopTabs), IS_CAPACITOR: capacitor } },
     packageDetails: { version: 'test' },
     MAIN_PROFILE_ID: 'main',
+    // Without recorded mutations, every sync merges the whole history.
+    historyChanges: createHistoryChangeTracker(),
     deepCopy: structuredClone,
     createSyncServerRequestHeaders,
     CUSTOM_THEMES_SYNC_KEY,
