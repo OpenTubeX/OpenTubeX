@@ -63,6 +63,7 @@ const ShakaError = shaka.util.Error
  * @property {number} cumulativeBackOffRequested
  * @property {number} cumulativeRetries
  * @property {number} startedAtMs
+ * @property {(() => number) | undefined} getBufferedAheadSeconds
  */
 /**
  * @typedef SabrStreamState
@@ -75,6 +76,7 @@ const ShakaError = shaka.util.Error
  * @property {boolean} playerReloadRequested
  * @property {number} requestNumber
  * @property {Set<string>} deliveredMediaFor
+ * @property {boolean} attestationPending
  */
 /**
  * @typedef TimeoutController
@@ -97,6 +99,8 @@ const MEDIA_CONTENT_LENGTH_FIELD_NUMBER = 14
 
 const BACKOFF_WITHOUT_MEDIA_BUDGET_MS = 20_000
 const BACKOFF_ROUNDS_WITHOUT_MEDIA = 6
+/** Leaves time for a reload before playback runs out of withheld media. */
+const WITHHELD_MEDIA_RELOAD_BUFFER_SECONDS = 10
 
 /**
  * @param {import('googlevideo/protos').FormatId} formatId
@@ -197,6 +201,20 @@ function fillBufferedRanges(player, manifest, audioFormatsActive, streamIsVideo,
         bufferedRanges.push(createBufferedRange(videoFormatId, buffered, videoSegmentIndex))
       }
     }
+  }
+}
+
+/**
+ * @param {shaka.Player} player
+ */
+function getBufferedAheadSeconds(player) {
+  try {
+    const currentTime = player.getMediaElement()?.currentTime ?? 0
+    const range = player.getBufferedInfo().total.find(({ start, end }) => start <= currentTime && currentTime < end)
+    return range ? range.end - currentTime : 0
+  } catch {
+    // The player is being destroyed, so this request is about to be aborted
+    return 0
   }
 }
 
@@ -381,8 +399,13 @@ async function doRequest(
       // Pacing is normal once this stream has delivered media. An unstarted
       // video still needs a bounded recovery even when its audio works. One
       // long policy, including extensions from another loader, is not a loop.
+      // A session pending attestation only gets about a minute of media, after
+      // which YouTube withholds the rest behind backoffs that never end. Wait
+      // until playback needs it, as a reload interrupts buffered playback too.
       if (
-        !currentState.sabrStreamState.deliveredMediaFor.has(operationInputs.streamKind) &&
+        (!currentState.sabrStreamState.deliveredMediaFor.has(operationInputs.streamKind) ||
+          (currentState.sabrStreamState.attestationPending &&
+            (currentState.getBufferedAheadSeconds?.() ?? 0) < WITHHELD_MEDIA_RELOAD_BUFFER_SECONDS)) &&
         (currentState.cumulativeBackOffRequested >= BACKOFF_ROUNDS_WITHOUT_MEDIA ||
           (currentState.cumulativeBackOffRequested > 1 &&
             currentState.cumulativeBackOffTimeMs >= BACKOFF_WITHOUT_MEDIA_BUDGET_MS))
@@ -447,6 +470,7 @@ async function doRequest(
             const streamProtectionStatus = decodePart(part, StreamProtectionStatus)
             if (!streamProtectionStatus) break
 
+            currentState.sabrStreamState.attestationPending = streamProtectionStatus.status === 2
             if (streamProtectionStatus.status === 3) {
               invalidPoToken = true
             }
@@ -851,6 +875,7 @@ export function setupSabrScheme(sabrData, getPlayer, getManifest, playerWidth, p
       playbackRate: player.getPlaybackRate(),
       width: playerWidth.value,
       height: playerHeight.value,
+      getBufferedAheadSeconds: () => getBufferedAheadSeconds(player),
     }
   })
   shaka.net.NetworkingEngine.registerScheme(sabrData.scheme, transport.request)
@@ -894,6 +919,7 @@ export function createSabrTransport(sabrData, getRequestContext) {
     playerReloadRequested: false,
     requestNumber: 0,
     deliveredMediaFor: new Set(),
+    attestationPending: false,
   }
 
   const requestSegment = (uri, request, requestType, _progressUpdated, headersReceived = () => {}) => {
@@ -1025,6 +1051,7 @@ export function createSabrTransport(sabrData, getRequestContext) {
       cumulativeBackOffRequested: 0,
       cumulativeRetries: 0,
       startedAtMs: Date.now(),
+      getBufferedAheadSeconds: context.getBufferedAheadSeconds,
     }
 
     const pendingRequest = doRequest(opInputs, currentState)
