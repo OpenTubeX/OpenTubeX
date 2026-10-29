@@ -6082,9 +6082,9 @@ export default defineComponent({
         this.videoPlaybackEngine === 'built-in' &&
         liveSourceMissing
 
-      // Report missing built-in live formats when automatic fallback is
-      // disabled or Built-in was selected manually.
-      if (liveSourceMissing && (this.playbackEngineFallbackTarget === 'built-in' ||
+      // Report missing built-in live formats when yt-dlp is unavailable,
+      // automatic fallback is disabled or Built-in was selected manually.
+      if (liveSourceMissing && (!supportsYtDlp || this.playbackEngineFallbackTarget === 'built-in' ||
         (this.videoPlaybackEngine === 'built-in' && !this.$store.getters.getPlaybackEngineFallback))) {
         this.ytDlpStreamsPending = false
         this.errorMessage = this.t('This video is unavailable because of missing formats. This can happen due to country unavailability.')
