@@ -105,3 +105,34 @@ test('automatic unloading settings @scale can be changed and disabled', async ({
   expect(alignment.verticalGap).toBeGreaterThanOrEqual(-0.01)
   await attachScreenshot('automatic tab unloading settings')
 })
+
+test('automatic unloading selects @scale stay centered in a narrow window', async ({ app, page, uiScale, attachScreenshot }) => {
+  await goToSettingsSection(page, 'advanced')
+  await page.getByRole('button', { name: 'Maximize', exact: true }).click()
+  await app.electronApp.evaluate(({ BrowserWindow }, size) => {
+    const window = BrowserWindow.getAllWindows()[0]
+    window.setBounds({ ...window.getBounds(), ...size })
+  }, { width: Math.round(400 * uiScale / 100), height: Math.round(800 * uiScale / 100) })
+  // Scaled window bounds round to whole device pixels.
+  await expect.poll(() => page.evaluate(() => Math.abs(window.innerWidth - 400))).toBeLessThanOrEqual(1)
+  const section = page.locator('.settingsSection').filter({
+    has: page.getByRole('heading', { name: 'Automatically unload tabs', exact: true })
+  })
+  await section.scrollIntoViewIfNeeded()
+  const layout = await section.locator('.sectionBody').evaluate(body => {
+    const bodyBounds = body.getBoundingClientRect()
+    const selects = Array.from(body.querySelectorAll('.select')).map(select => select.getBoundingClientRect())
+    const fields = Array.from(body.querySelectorAll('.select-text')).map(field => field.getBoundingClientRect())
+    const left = Math.min(...selects.map(bounds => bounds.left))
+    const right = Math.max(...selects.map(bounds => bounds.right))
+    return {
+      centerOffset: Math.abs((left + right) / 2 - (bodyBounds.left + bodyBounds.width / 2)),
+      fieldLeftDifference: Math.abs(fields[0].left - fields[1].left),
+      fieldWidthDifference: Math.abs(fields[0].width - fields[1].width)
+    }
+  })
+  await attachScreenshot('narrow automatic tab unloading settings')
+  expect(layout.centerOffset).toBeLessThanOrEqual(1)
+  expect(layout.fieldLeftDifference).toBeLessThanOrEqual(1)
+  expect(layout.fieldWidthDifference).toBeLessThanOrEqual(1)
+})

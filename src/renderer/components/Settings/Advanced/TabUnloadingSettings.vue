@@ -10,7 +10,7 @@
         @change="store.dispatch('updateAutoUnloadTabs', $event)"
       />
     </FtFlexBox>
-    <div class="switchGrid">
+    <div class="switchGrid generalSelectGrid">
       <FtSelect
         size-to-content
         :placeholder="t('Settings.Tab Unloading.Memory threshold')"
@@ -48,3 +48,5 @@ import FtFlexBox from '../../ft-flex-box/ft-flex-box.vue'
 
 const { t } = useI18n()
 </script>
+
+<style scoped src="../generalSelectGrid.css" />
