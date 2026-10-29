@@ -2247,10 +2247,12 @@ export async function createLocalPlaylistAvailabilityChecker(signal) {
  */
 export function getLocalMissingPublicationDates(entries) {
   let innertube
-  return fetchMissingPublicationDates(entries, async videoId => {
-    innertube ??= createInnertube()
-    return fetchPublicPlayerMetadata(await innertube, videoId)
-  })
+  const getInnertube = () => (innertube ??= createInnertube())
+  return fetchMissingPublicationDates(
+    entries,
+    async videoId => fetchPublicPlayerMetadata(await getInnertube(), videoId),
+    async videoId => (await (await getInnertube()).actions.execute('/next', { videoId, parse: false })).data
+  )
 }
 
 async function fetchPublicPlayerMetadata(innertube, videoId, signal) {
