@@ -377,7 +377,7 @@ test('the mouse wheel over the seek bar scrolls the page instead of seeking', { 
   expect(await video.evaluate(element => element.currentTime)).toBe(5)
 })
 
-test('a click that slips off the seek bar before release hides the storyboard preview', async ({ app, page }) => {
+test('a click that slips off the seek bar before release hides the storyboard preview', { tag: '@scale' }, async ({ app, page }) => {
   await mockPlayableWatchPage(app, page)
   await routeDemoMedia(page)
   await openVideoWithStoryboard(page)
