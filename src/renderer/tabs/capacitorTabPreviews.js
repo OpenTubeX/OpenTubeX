@@ -50,13 +50,14 @@ export function initializeCapacitorTabPreviews(store, pageSwipe, tabsReady = Pro
   const canCapture = () => !pageSwipe.value && canCaptureCapacitorTab(store.getters, document.visibilityState === 'visible') && !hasVisibleOverlay()
   const captureCurrent = async () => {
     clearTimeout(timer)
+    if (!canCapture()) return
     // Page loaders do not mark mobile tabs as loading. Keep the last-seen
     // preview until the spinner is gone instead of capturing a blank page.
     if (isTabLoading(store.getters.getPresentedTabId)) {
       timer = setTimeout(captureCurrent, 600)
       return
     }
-    if (canCapture()) await cache.capture(store.getters.getPresentedTab)
+    await cache.capture(store.getters.getPresentedTab)
   }
   const schedule = () => {
     cache.invalidate()
