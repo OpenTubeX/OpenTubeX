@@ -45,6 +45,14 @@ async function attachThemeScreenshot(app, testInfo, name) {
 }
 
 async function expectPanelOwnsBackground(app, card, points) {
+  // Docks slide in on the compositor, which keeps drawing the slide until a
+  // finished frame is rasterized. Let it end on its own so the capture cannot
+  // show the dock mid-slide.
+  await expect.poll(() => card.evaluate(element => {
+    let animations = 0
+    for (let node = element; node; node = node.parentElement) animations += node.getAnimations().length
+    return animations
+  })).toBe(0)
   // Compare identical pixels before and after removing the nested background
   // so the panel gradient or video behind it cannot be mistaken for a seam.
   const actual = await sampleColors(app, card, points)
