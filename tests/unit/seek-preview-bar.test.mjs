@@ -15,7 +15,11 @@ function fixture() {
       this.controls = controls
       this.player = {}
       // Window listeners share event types with the bar's own, so keep them apart.
-      this.eventManager = { listen: (target, type, listener) => controls.listeners.set(target === window ? `window:${type}` : type, listener) }
+      const key = (target, type) => target === window ? `window:${type}` : type
+      this.eventManager = {
+        listen: (target, type, listener) => controls.listeners.set(key(target, type), listener),
+        unlisten: (target, type) => controls.listeners.delete(key(target, type))
+      }
       const properties = new Map()
       const classes = new Set()
       this.container = {
