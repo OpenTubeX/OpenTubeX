@@ -284,16 +284,16 @@ jobs:
           exit 1
         fi
 
+        install -Dm644 "$manifest" submission/manifest.yml
+        install -Dm644 "$metainfo" submission/metainfo.xml
+        git -C flatpark rev-parse HEAD > submission/base-sha
+        git -C official-flatpak rev-parse HEAD > submission/official-flatpak-sha
+
         if git -C flatpark diff --quiet -- "${manifest#flatpark/}"; then
           echo "FlatPark's pin updater already pinned the portable archives, so this completes its AppStream release entry." > submission/summary
         else
           echo 'This updates the pinned x86_64 and ARM64 portable archives and adds the AppStream release entry.' > submission/summary
         fi
-
-        install -Dm644 "$manifest" submission/manifest.yml
-        install -Dm644 "$metainfo" submission/metainfo.xml
-        git -C flatpark rev-parse HEAD > submission/base-sha
-        git -C official-flatpak rev-parse HEAD > submission/official-flatpak-sha
 
     - name: Store the prepared update
       if: steps.duplicate.outputs.needed == 'true'
