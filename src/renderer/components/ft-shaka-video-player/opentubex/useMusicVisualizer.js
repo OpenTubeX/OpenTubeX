@@ -215,6 +215,12 @@ export function useMusicVisualizer({ active, video, sourceKey }) {
       }
 
       if (!capturedStream) {
+        // Chromium hands out a live but permanently silent track when capturing
+        // an element that has ended, until its restart seek completes.
+        if (videoElement.ended || videoElement.seeking) {
+          return false
+        }
+
         capturedStream = videoElement.captureStream()
         attachCapturedStreamListeners(capturedStream)
       }
@@ -298,12 +304,14 @@ export function useMusicVisualizer({ active, video, sourceKey }) {
     element?.addEventListener('play', handlePlaybackStateChange)
     element?.addEventListener('pause', handlePlaybackStateChange)
     element?.addEventListener('ended', handlePlaybackStateChange)
+    element?.addEventListener('seeked', handlePlaybackStateChange)
   }
 
   function detachVideoListeners(element) {
     element?.removeEventListener('play', handlePlaybackStateChange)
     element?.removeEventListener('pause', handlePlaybackStateChange)
     element?.removeEventListener('ended', handlePlaybackStateChange)
+    element?.removeEventListener('seeked', handlePlaybackStateChange)
   }
 
   watch(video, (nextVideo, previousVideo) => {
