@@ -11,7 +11,7 @@ export async function executeBackgroundJob(operation, input) {
     case 'mergeHistory': return mergeHistory(input)
     case 'updateHistorySnapshot': return updateHistorySnapshot(input)
     case 'applyRemoteHistoryChanges': return applyRemoteHistoryChanges(input)
-    case 'encryptSyncDocument': return privacy.encryptSyncDocument(input.data, input.exportedKey, input.salt)
+    case 'encryptSyncDocument': return privacy.encryptSyncDocument(input.data, input.exportedKey, input.salt, input.options)
     case 'decryptSyncDocument': return privacy.decryptSyncDocument(input.payload, input.exportedKey)
     case 'decryptLegacySyncDocument': return privacy.decryptLegacySyncDocument(input.payload, input.exportedKey)
     case 'stringify': return JSON.stringify(input.value)

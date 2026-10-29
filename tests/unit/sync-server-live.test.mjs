@@ -7,36 +7,28 @@ import { SyncCollectionCache, createSyncActivity, validateDeviceRequest, watchSy
 import { SYNC_SETTING_LABELS, SYNC_SETTING_VALUE_LABELS } from '../../src/renderer/helpers/sync-setting-labels.js'
 import { createSettingsSearchIndex, findSettingsSearchTarget } from '../../src/renderer/helpers/settingsSearch.js'
 
-test('cached collections are immutable, revision-specific and isolated between accounts and keys', async () => {
+test('cached collections keep their latest revision and are isolated between accounts and keys', () => {
   const cache = new SyncCollectionCache()
   cache.use('account-a:key-a')
-  const original = [{ key: 'baseTheme', value: 'dark' }]
-  await cache.put('settings', 3, original)
-  original[0].value = 'light'
-  assert.equal((await cache.get('settings', 3)).data[0].value, 'dark')
-  const copy = await cache.get('settings', 3)
-  copy.data[0].value = 'light'
-  assert.equal((await cache.get('settings', 3)).data[0].value, 'dark')
-  assert.equal(await cache.get('settings', 4), null)
+  const settings = [{ key: 'baseTheme', value: 'dark' }]
+  cache.put('settings', 3, settings)
+  assert.deepEqual(cache.latest('settings'), { revision: 3, data: settings })
   cache.use('account-a:key-b')
-  assert.equal(await cache.get('settings', 3), null)
+  assert.equal(cache.latest('settings'), null)
 })
 
-test('changing accounts discards a collection copy that is still in flight', async () => {
-  let finish
-  const cache = new SyncCollectionCache(value => new Promise(resolve => { finish = () => resolve(structuredClone(value)) }))
+test('a sync that finishes after an account change does not fill the new account cache', () => {
+  const cache = new SyncCollectionCache()
   cache.use('first-account')
-  const pending = cache.put('history', 1, [{ id: 'private' }])
   cache.use('second-account')
-  finish()
-  await pending
-  assert.equal(await cache.get('history', 1), null)
+  cache.put('history', 1, [{ id: 'private' }], 'first-account')
+  assert.equal(cache.latest('history'), null)
 })
 
 test('marking a sync finished after the cache was cleared skips the discarded collections', async () => {
   const cache = new SyncCollectionCache()
   cache.use('first-account')
-  await cache.put('history', 1, [])
+  cache.put('history', 1, [])
   cache.use('')
   cache.markSynced(['history'])
   assert.equal(cache.isSynced('history', 1), false)

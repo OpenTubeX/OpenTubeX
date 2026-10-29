@@ -7,9 +7,9 @@ import { parseCaptionSettings } from './player/caption-settings.js'
 
 // Decrypted collections are cached only for this renderer session. A new account,
 // key, or token starts with an empty cache; snapshots remain merge baselines.
+// Collections are shared with sync documents, which never edit them in place.
 export class SyncCollectionCache {
-  constructor(clone = value => structuredClone(value)) {
-    this.clone = clone
+  constructor() {
     this.identity = ''
     this.collections = new Map()
     this.syncedRevisions = new Map()
@@ -35,18 +35,14 @@ export class SyncCollectionCache {
     }
   }
 
-  async get(collection, revision) {
-    const identity = this.identity
-    const cached = this.collections.get(collection)
-    if (!cached || cached.revision !== revision) return null
-    const result = await this.clone(cached)
-    return identity === this.identity ? result : null
+  /** The newest cached revision, which a server may extend with its changes. */
+  latest(collection) {
+    return this.collections.get(collection) ?? null
   }
 
-  async put(collection, revision, data) {
-    const identity = this.identity
-    const copy = await this.clone(data)
-    if (identity === this.identity) this.collections.set(collection, { revision, data: copy })
+  /** A sync passes the identity it started with, so a late write after an account change is dropped. */
+  put(collection, revision, data, identity = this.identity) {
+    if (identity === this.identity) this.collections.set(collection, { revision, data })
   }
 }
 

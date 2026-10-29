@@ -315,9 +315,18 @@ export class SyncServerClient {
     return this.request(`/v1/encrypted_sync${query}`, { timeoutMs: MAX_ENCRYPTED_SYNC_TIMEOUT_MS })
   }
 
-  getEncryptedSyncCollection(collection) {
+  /**
+   * Servers with `collection_changes` return only the changes after `since`
+   * when they can, and refuse reads without it while changes are pending.
+   * Reading with `since` also lets the account append changes. Older servers
+   * ignore it and return the full collection.
+   * @param {string} collection
+   * @param {number} [since]
+   */
+  getEncryptedSyncCollection(collection, since) {
+    const query = since === undefined ? '' : `?since=${encodeURIComponent(since)}`
     return this.request(
-      `/v1/encrypted_sync/${encodeURIComponent(collection)}`,
+      `/v1/encrypted_sync/${encodeURIComponent(collection)}${query}`,
       { timeoutMs: MAX_ENCRYPTED_SYNC_TIMEOUT_MS }
     )
   }
@@ -333,6 +342,13 @@ export class SyncServerClient {
       method: 'PUT',
       body: { revision, payload, ...(activity ? { activity } : {}) },
       timeoutMs: MAX_ENCRYPTED_SYNC_TIMEOUT_MS,
+    })
+  }
+
+  appendEncryptedSyncChange(collection, revision, payload, activity) {
+    return this.request(`/v1/encrypted_sync/${encodeURIComponent(collection)}/changes`, {
+      method: 'POST',
+      body: { revision, payload, ...(activity ? { activity } : {}) },
     })
   }
 

@@ -30,10 +30,12 @@ import {
   createEmptySyncDocument,
   decryptLegacySyncDocument,
   decryptSyncDocument,
+  encryptSyncChange,
   encryptSyncDocument,
   loadLegacySyncDocument,
   migrateLegacyPlaybackSpeedsToSettings,
   preparePrivacyKey,
+  readSyncCollection,
 } from '../../helpers/sync-server-privacy'
 import {
   encryptSyncServerDeviceInfo,
@@ -65,7 +67,7 @@ const LEGACY_ENCRYPTED_COLLECTIONS = [
   'playlistBookmarks',
 ]
 
-const collectionCache = new SyncCollectionCache(value => runBackgroundJob('clone', { value }))
+const collectionCache = new SyncCollectionCache()
 const liveConnection = new SyncLiveConnectionState(typeof navigator !== 'undefined' ? navigator.locks : null)
 let liveClient = null
 let syncCapabilities = null
@@ -296,7 +298,8 @@ async function runSync(context, { allowDataLoss = false, notifyDataLoss = true, 
   )
   let client = networkClient
   let encryptedCollections = null
-  collectionCache.use(JSON.stringify([settings.syncServerUrl, settings.syncServerToken, settings.syncServerPrivacyKey]))
+  const cacheIdentity = JSON.stringify([settings.syncServerUrl, settings.syncServerToken, settings.syncServerPrivacyKey])
+  collectionCache.use(cacheIdentity)
   const previous = parseSnapshot(settings.syncServerSnapshot)
   const next = { ...previous }
   const historyAccount = [settings.syncServerUrl, settings.syncServerToken,
@@ -596,6 +599,7 @@ async function runSync(context, { allowDataLoss = false, notifyDataLoss = true, 
         remote,
         uploadCollections,
         unchanged,
+        migratedPlaybackSpeeds,
       } = await runStage('download', async () => {
         // The snapshot is saved only after successful collection uploads.
         // Never infer completed migration from unrelated encrypted settings.
@@ -640,29 +644,39 @@ async function runSync(context, { allowDataLoss = false, notifyDataLoss = true, 
         const original = {}
         const entries = await Promise.all(downloadCollections.map(async collection => {
           const manifestRevision = manifest.collections.find(entry => entry.collection === collection)?.revision ?? 0
-          const cached = !manifest.legacy_data && !legacyEncrypted?.payload
-            ? await collectionCache.get(collection, manifestRevision)
+          const known = !manifest.legacy_data && !legacyEncrypted?.payload
+            ? collectionCache.latest(collection)
             : null
-          if (!cached) startProgress('download')
-          const response = cached ?? await networkClient.getEncryptedSyncCollection(collection)
-          const data = cached
-            ? cached.data
-            : response.payload
-              ? await decryptSyncDocument(response.payload, settings.syncServerPrivacyKey)
-              : legacy[collection]
-          document[collection] = data ?? document[collection]
-          await collectionCache.put(collection, response.revision, document[collection])
-          original[collection] = await runBackgroundJob('clone', { value: document[collection] })
-          return [collection, response]
+          let remote = known?.revision === manifestRevision ? known : null
+          if (!remote) {
+            startProgress('download')
+            // An older cached revision lets the server send only later changes.
+            remote = await readSyncCollection(
+              collection,
+              await networkClient.getEncryptedSyncCollection(
+                collection, capabilities.collection_changes === 1 ? known?.revision ?? 0 : undefined
+              ),
+              known,
+              settings.syncServerPrivacyKey
+            )
+          }
+          // The document, its baseline and the cache share this value. The sync
+          // adapter replaces collections instead of editing them.
+          document[collection] = (remote === known ? remote.data : remote.data ?? legacy[collection]) ?? document[collection]
+          if (remote !== known) collectionCache.put(collection, remote.revision, document[collection], cacheIdentity)
+          original[collection] = document[collection]
+          return [collection, { revision: remote.revision }]
         }))
+        let migratedPlaybackSpeeds = false
         if (settings.syncServerSyncSettings &&
             isSettingSyncEnabled(settings, 'channelPlaybackSpeeds')) {
-          migrateLegacyPlaybackSpeedsToSettings(
+          document.settings = document.settings.slice()
+          migratedPlaybackSpeeds = migrateLegacyPlaybackSpeedsToSettings(
             document,
             settings.channelPlaybackSpeeds
           )
         }
-        return { document, original, remote: Object.fromEntries(entries), uploadCollections }
+        return { document, original, remote: Object.fromEntries(entries), uploadCollections, migratedPlaybackSpeeds }
       })
       if (unchanged) {
         finishProgress()
@@ -670,6 +684,7 @@ async function runSync(context, { allowDataLoss = false, notifyDataLoss = true, 
         return null
       }
       client = new EncryptedSyncAdapter(document)
+      if (migratedPlaybackSpeeds) client.touched.add('settings')
       encryptedCollections = {
         original,
         remote,
@@ -695,14 +710,18 @@ async function runSync(context, { allowDataLoss = false, notifyDataLoss = true, 
           assertSyncStillActive()
           let revision = encryptedCollections.remote[collection].revision
           let data = client.document[collection]
-          if (revision > 0 &&
-              await runBackgroundJob('equal', { first: data, second: encryptedCollections.original[collection] })) {
+          // Sending a collection to a worker for comparison costs as much as
+          // copying it. Untouched collections are still the downloaded value,
+          // and history merges only write changed entries.
+          if (revision > 0 && (!client.touched.has(collection) || (collection !== 'history' &&
+              await runBackgroundJob('equal', { first: data, second: encryptedCollections.original[collection] })))) {
             if (collection === 'watchStats') await persistUploadedWatchStatsReset(data, store)
             if (collection === 'history') await persistUploadedHistoryRepairs(data, store)
             continue
           }
           startProgress('upload')
           let activityBefore = encryptedCollections.original[collection]
+          let changes = client
           for (let attempt = 0; attempt < ENCRYPTED_SYNC_RETRIES; attempt++) {
             const activity = createSyncActivity(
               collection, activityBefore, data, settings.syncServerDeviceId, settings.syncServerDeviceName,
@@ -714,27 +733,50 @@ async function runSync(context, { allowDataLoss = false, notifyDataLoss = true, 
                   activity, settings.syncServerPrivacyKey, settings.syncServerPrivacySalt
                 )
               : undefined
-            const payload = await encryptSyncDocument(
-              data,
-              settings.syncServerPrivacyKey,
-              settings.syncServerPrivacySalt
-            )
             try {
               assertSyncStillActive()
-              const saved = await networkClient.putEncryptedSyncCollection(collection, revision, payload, activityPayload)
-              await collectionCache.put(collection, saved.revision, data)
+              const change = capabilities.collection_changes === 1 && revision > 0
+                ? changes.getChange(collection)
+                : null
+              let saved = null
+              if (change) {
+                try {
+                  // Upload only the edits. Other devices apply them to their copy.
+                  saved = await networkClient.appendEncryptedSyncChange(
+                    collection,
+                    revision,
+                    await encryptSyncChange(change, settings.syncServerPrivacyKey, settings.syncServerPrivacySalt),
+                    activityPayload
+                  )
+                } catch (error) {
+                  // The server asks for a full upload to replace a long change log,
+                  // or while a device that cannot read changes is signed in.
+                  if (error.status !== 412) throw error
+                }
+              }
+              saved ??= await networkClient.putEncryptedSyncCollection(
+                collection,
+                revision,
+                await encryptSyncDocument(data, settings.syncServerPrivacyKey, settings.syncServerPrivacySalt),
+                activityPayload
+              )
+              collectionCache.put(collection, saved.revision, data, cacheIdentity)
               assertSyncStillActive()
               if (collection === 'watchStats') await persistUploadedWatchStatsReset(data, store)
               if (collection === 'history') await persistUploadedHistoryRepairs(data, store)
               break
             } catch (error) {
               if (error.status !== 409 || attempt === ENCRYPTED_SYNC_RETRIES - 1) throw error
-              const remote = await networkClient.getEncryptedSyncCollection(collection)
-              const retryDocument = createEmptySyncDocument()
-              const remoteData = await decryptSyncDocument(
-                remote.payload,
+              const remote = await readSyncCollection(
+                collection,
+                await networkClient.getEncryptedSyncCollection(
+                  collection, capabilities.collection_changes === 1 ? revision : undefined
+                ),
+                { revision, data: activityBefore },
                 settings.syncServerPrivacyKey
               )
+              const retryDocument = createEmptySyncDocument()
+              const remoteData = remote.data ?? null
               activityBefore = remoteData
               if (collection === 'playlistBookmarks') {
                 revision = remote.revision
@@ -750,6 +792,7 @@ async function runSync(context, { allowDataLoss = false, notifyDataLoss = true, 
                 )
                 result.playlistBookmarks = next.playlistBookmarks.length
                 data = retryClient.document.playlistBookmarks
+                changes = retryClient
                 continue
               }
               retryDocument[collection] = remoteData
@@ -766,6 +809,7 @@ async function runSync(context, { allowDataLoss = false, notifyDataLoss = true, 
               if (skippedCollections.has(collection)) break
               revision = remote.revision
               data = retryClient.document[collection]
+              changes = retryClient
             }
           }
         }
@@ -1130,16 +1174,16 @@ const actions = {
       try {
         for (let attempt = 0; attempt < ENCRYPTED_SYNC_RETRIES; attempt++) {
           assertSyncEnabled(rootState, client)
-          const remote = await client.getEncryptedSyncCollection('sessionsV2')
-          let remoteValue = remote.payload
-            ? await decryptSyncDocument(remote.payload, settings.syncServerPrivacyKey)
-            : null
+          const remote = await readSyncCollection(
+            'sessionsV2', await client.getEncryptedSyncCollection('sessionsV2', 0), null, settings.syncServerPrivacyKey
+          )
+          let remoteValue = remote.data ?? null
 
           if (remoteValue === null) {
-            const legacy = await client.getEncryptedSyncCollection('sessions')
-            remoteValue = legacy.payload
-              ? await decryptSyncDocument(legacy.payload, settings.syncServerPrivacyKey)
-              : null
+            const legacy = await readSyncCollection(
+              'sessions', await client.getEncryptedSyncCollection('sessions', 0), null, settings.syncServerPrivacyKey
+            )
+            remoteValue = legacy.data ?? null
           }
 
           assertSyncEnabled(rootState, client)
@@ -1221,10 +1265,10 @@ const actions = {
       try {
         for (let attempt = 0; attempt < ENCRYPTED_SYNC_RETRIES; attempt++) {
           assertCurrentAccount(client)
-          const remote = await client.getEncryptedSyncCollection('watchStats')
-          const devices = remote.payload
-            ? await decryptSyncDocument(remote.payload, settings.syncServerPrivacyKey)
-            : []
+          const remote = await readSyncCollection(
+            'watchStats', await client.getEncryptedSyncCollection('watchStats', 0), null, settings.syncServerPrivacyKey
+          )
+          const devices = remote.data ?? []
           const records = await DBWatchStatsHandlers.find()
           const days = Object.fromEntries(records.map(record => [record.date, record.seconds]))
           const current = devices.find(device => containsWatchStatsDevice(device, settings.syncServerDeviceId))
@@ -1250,7 +1294,7 @@ const actions = {
             throw error
           }
           assertCurrentAccount(client)
-          await collectionCache.put('watchStats', saved.revision, next)
+          collectionCache.put('watchStats', saved.revision, next)
           assertCurrentAccount(client)
           const snapshot = parseSnapshot(rootState.settings.syncServerSnapshot)
           snapshot.watchStats = next
@@ -1367,7 +1411,9 @@ const actions = {
         const manifest = await client.getEncryptedSyncManifest()
         const firstCollection = manifest.collections[0]?.collection
         const remote = firstCollection
-          ? await client.getEncryptedSyncCollection(firstCollection)
+          // Older servers ignore `since`. Newer ones refuse reads without it
+          // while the collection has appended changes.
+          ? await client.getEncryptedSyncCollection(firstCollection, 0)
           : manifest.legacy_encrypted_data
             ? await client.getLegacyEncryptedSync()
             : null

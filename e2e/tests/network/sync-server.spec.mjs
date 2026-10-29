@@ -4,6 +4,7 @@ import path from 'node:path'
 
 import { test, expect, goTo, goToSettingsSection, latestSettings, createUserDataDir, launchApp, readDatastore } from '../../helpers/app.mjs'
 import { DEFAULT_CUSTOM_THEME } from '../../../src/customTheme.js'
+import { decryptSyncDocument } from '../../../src/renderer/helpers/sync-server-privacy.js'
 
 const syncServerUrl = process.env.OPENTUBEX_SYNC_SERVER_URL
 const channelId = 'UCuAXFkgsw1L7xaCfnd5JJOw'
@@ -814,6 +815,131 @@ test.describe('OpenTubeX sync server', () => {
       body: JSON.stringify({ password: 'local-test-password' })
     })
     expect(cleanupResponse.ok).toBe(true)
+  })
+
+  test('uploads only changed watch history entries while every device reads changes', async ({ page }, testInfo) => {
+    const capabilities = await getSyncCapabilities()
+    test.skip(capabilities.collection_changes !== 1, 'Server with collection changes required')
+    const username = `opentubex-changes-${randomUUID()}`
+    const password = 'local-test-password'
+    const otherUserData = await createUserDataDir({ settings: { syncServerEnabled: true } })
+    let other
+
+    async function configure(clientPage) {
+      await clientPage.evaluate(async () => {
+        const store = window.$store
+        await store.dispatch('updateSyncServerAutoSync', false)
+        for (const collection of ['Subscriptions', 'Playlists', 'Profiles', 'Sessions', 'Settings', 'WatchStats', 'LiveReminders']) {
+          await store.dispatch(`updateSyncServerSync${collection}`, false)
+        }
+      })
+      await clientPage.route('**/account/**', route => route.continue({
+        headers: { ...route.request().headers(), 'X-Forwarded-For': rateLimitClient(testInfo) }
+      }))
+    }
+
+    async function connect(clientPage, mode) {
+      const section = await goToSettingsSection(clientPage, 'sync')
+      await section.getByLabel('Sync server URL').fill(syncServerUrl)
+      await section.getByLabel('Username').fill(username)
+      await section.getByLabel('Password', { exact: true }).fill(password)
+      await section.getByLabel(/Privacy passphrase/).fill('local-test-privacy-passphrase')
+      await section.getByRole('button', { name: mode === 'register' ? 'Register' : /^Log in$/i }).click()
+      await expect(section.getByText(`Connected as ${username}`)).toBeVisible()
+      await expect(section.getByText(/Last synced:/)).toBeVisible()
+      await expect(section.locator('.syncProgress')).toBeHidden()
+    }
+
+    function recordHistoryRequests(clientPage) {
+      const requests = []
+      clientPage.on('requestfinished', async request => {
+        const url = new URL(request.url())
+        if (!url.pathname.startsWith('/v1/encrypted_sync/history')) return
+        const response = await request.response()
+        requests.push({ method: request.method(), path: `${url.pathname}${url.search}`, status: response?.status(), body: request.method() === 'GET' ? await response?.json() : null })
+      })
+      return requests
+    }
+
+    async function sync(clientPage) {
+      await clientPage.evaluate(() => window.$store.dispatch('syncWithSyncServer'))
+    }
+
+    async function watchProgress(clientPage) {
+      return clientPage.evaluate(() => window.$store.getters.getHistoryCacheSorted[0]?.watchProgress)
+    }
+
+    async function watchAgain(clientPage, seconds) {
+      await clientPage.evaluate(async seconds => {
+        const store = window.$store
+        const record = store.getters.getHistoryCacheSorted[0]
+        await store.dispatch('updateHistory', { ...record, timeWatched: Date.now(), watchProgress: seconds })
+      }, seconds)
+    }
+
+    try {
+      other = await launchApp(otherUserData)
+      await configure(page)
+      await configure(other.page)
+      await connect(page, 'register')
+      await connect(other.page, 'login')
+      expect(await watchProgress(other.page)).toBe(45)
+
+      const uploads = recordHistoryRequests(page)
+      await watchAgain(page, 120)
+      await sync(page)
+      expect(uploads.map(({ method, path, status }) => [method, path.replace(/\?.*/, ''), status])).toEqual([
+        ['POST', '/v1/encrypted_sync/history/changes', 200],
+      ])
+
+      const downloads = recordHistoryRequests(other.page)
+      await sync(other.page)
+      expect(await watchProgress(other.page)).toBe(120)
+      expect(downloads).toHaveLength(1)
+      expect(downloads[0].body.payload).toBeNull()
+      expect(downloads[0].body.changes).toHaveLength(1)
+
+      // Released clients read without `since` and must not get a payload
+      // that lacks the appended change.
+      const token = await page.evaluate(() => window.$store.getters.getSyncServerToken)
+      const fullRead = await fetch(`${syncServerUrl}/v1/encrypted_sync/history`, { headers: { Authorization: token } })
+      expect(fullRead.status).toBe(409)
+
+      // A login that has never read changes makes the next upload a full one.
+      const released = await fetch(`${syncServerUrl}/v1/account/login`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'X-Forwarded-For': rateLimitClient(testInfo) },
+        body: JSON.stringify({ name: username, password }),
+      })
+      expect(released.ok).toBe(true)
+      const releasedToken = (await released.json()).jwt
+      uploads.length = 0
+      await watchAgain(page, 150)
+      await sync(page)
+      expect(uploads.map(({ method, path, status }) => [method, path.replace(/\?.*/, ''), status])).toEqual([
+        ['POST', '/v1/encrypted_sync/history/changes', 412],
+        ['PUT', '/v1/encrypted_sync/history', 200],
+      ])
+      const releasedRead = await fetch(`${syncServerUrl}/v1/encrypted_sync/history`, { headers: { Authorization: releasedToken } })
+      expect(releasedRead.status).toBe(200)
+      const privacyKey = await page.evaluate(() => window.$store.state.settings.syncServerPrivacyKey)
+      const history = await decryptSyncDocument((await releasedRead.json()).payload, privacyKey)
+      expect(history.map(entry => entry.metadata.position_millis)).toEqual([150_000])
+
+      await sync(other.page)
+      expect(await watchProgress(other.page)).toBe(150)
+    } finally {
+      const token = await page.evaluate(() => window.$store.getters.getSyncServerToken)
+      if (token) {
+        await fetch(`${syncServerUrl}/v1/account/delete`, {
+          method: 'DELETE',
+          headers: { Authorization: token, 'Content-Type': 'application/json', 'X-Forwarded-For': rateLimitClient(testInfo) },
+          body: JSON.stringify({ password })
+        })
+      }
+      await other?.electronApp.close()
+      await rm(otherUserData, { recursive: true, force: true })
+    }
   })
 
   test('syncs repaired metadata for existing playlist videos without duplicating entries', async ({ app, page }, testInfo) => {

@@ -153,7 +153,13 @@ export async function decryptLegacySyncDocument(payload, exportedKey) {
   )
 }
 
-export async function encryptSyncDocument(data, exportedKey, salt) {
+/**
+ * @param {unknown} data
+ * @param {string} exportedKey
+ * @param {string} salt
+ * @param {{ paddingBytes?: number }} [options] Size of the padding blocks that hide the exact length
+ */
+export async function encryptSyncDocument(data, exportedKey, salt, { paddingBytes = PADDING_BLOCK_BYTES } = {}) {
   const key = await importPrivacyKey(exportedKey)
   const iv = crypto.getRandomValues(new Uint8Array(12))
   const encoded = new TextEncoder().encode(JSON.stringify({ version: PRIVACY_VERSION, data }))
@@ -163,9 +169,9 @@ export async function encryptSyncDocument(data, exportedKey, salt) {
   const payload = compressed ?? encoded
   const payloadOffset = compressed ? COMPRESSED_LENGTH_BYTES : 0
   const paddedLength = Math.ceil(
-    (payloadOffset + payload.length) / PADDING_BLOCK_BYTES
-  ) * PADDING_BLOCK_BYTES
-  const plaintext = new Uint8Array(Math.max(PADDING_BLOCK_BYTES, paddedLength))
+    (payloadOffset + payload.length) / paddingBytes
+  ) * paddingBytes
+  const plaintext = new Uint8Array(Math.max(paddingBytes, paddedLength))
   plaintext.fill(0x20)
   if (compressed) {
     new DataView(plaintext.buffer).setUint32(0, compressed.length)
