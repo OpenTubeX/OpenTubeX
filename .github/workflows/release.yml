@@ -30,8 +30,9 @@ jobs:
     outputs:
       sha: ${{ steps.target.outputs.sha }}
 
+    # Reading a draft release requires write access.
     permissions:
-      contents: read
+      contents: write
 
     # Build the commit the draft release targets, not the branch tip at dispatch time.
     steps:
