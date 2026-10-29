@@ -153,5 +153,25 @@ for (const usePlayerMenuGrid of [true, false]) {
       await setWindowSize(app, page, { width: 1260, height: 820 })
       await expectValidScrollRange(submenu)
     })
+
+    test('opens caption appearance at its top again @scale', async ({ app, page }) => {
+      await mockPlayableWatchPage(app, page, { captionTranslations: true })
+      await openMockedVideo(page)
+      const player = await openOverflowMenu(page)
+      await player.locator('.shaka-overflow-menu').getByRole('button', { name: 'Captions' }).click()
+      const options = player.locator('.shaka-text-languages').getByRole('button', { name: 'Options', exact: true })
+      await options.click()
+      const appearance = player.locator('.ft-caption-appearance-menu')
+      await expect(appearance).toBeVisible()
+      // Short enough for the controls to scroll in every layout
+      await player.locator('.shaka-overflow-menu').evaluate(element => { element.style.maxHeight = '220px' })
+      await appearance.evaluate(element => element.scrollTo({ top: element.scrollHeight }))
+      await expect.poll(() => appearance.evaluate(element => element.scrollTop)).toBeGreaterThan(0)
+
+      await appearance.locator(':scope > .shaka-back-to-overflow-button').click()
+      await options.click()
+      await expect(appearance).toBeVisible()
+      expect(await appearance.evaluate(element => element.scrollTop)).toBe(0)
+    })
   })
 }

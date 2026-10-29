@@ -162,6 +162,8 @@ export class CaptionSelection extends shaka.ui.TextSelection {
       this.updateAppearanceControls_(this.getSettings_())
       this.setMenuDisplay_(this.menu, false)
       this.setMenuDisplay_(this.appearanceMenu_, true)
+      // It scrolls its controls itself and opens at their top (`setupSubmenuScrolling`).
+      restoreOverlayScrollTop(this.appearanceMenu_, 0)
       this.appearanceBackButton_.focus()
     })
 
