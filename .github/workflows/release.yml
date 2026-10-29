@@ -424,15 +424,14 @@ jobs:
             ;;
         esac
 
+    # Uploading assets does not update the release, which GITHUB_TOKEN cannot do
+    # once the default branch changes workflows after the release target.
     - name: Upload release assets
-      uses: softprops/action-gh-release@efb35369e0ad2afab669f228072c1b0d510eae64 # v3.0.3
       env:
-        GITHUB_TOKEN: ${{ github.token }}
-      with:
-        tag_name: ${{ steps.release.outputs.tag }}
-        draft: true
-        files: release-assets/*
-        fail_on_unmatched_files: true
+        GH_TOKEN: ${{ github.token }}
+        TAG: ${{ steps.release.outputs.tag }}
+      shell: bash
+      run: gh release upload "$TAG" release-assets/* --clobber --repo "$GITHUB_REPOSITORY"
 
     # publish-release only attests release assets that match these checksums.
     # Node hashes the same way on every runner OS.
@@ -484,14 +483,11 @@ jobs:
         tag="$(gh api "repos/${GITHUB_REPOSITORY}/releases/${RELEASE_ID}" --jq .tag_name)"
         echo "tag=$tag" >> "$GITHUB_OUTPUT"
     - name: Upload iOS release asset
-      uses: softprops/action-gh-release@efb35369e0ad2afab669f228072c1b0d510eae64 # v3.0.3
       env:
-        GITHUB_TOKEN: ${{ github.token }}
-      with:
-        tag_name: ${{ steps.release.outputs.tag }}
-        draft: true
-        files: release-assets/*.ipa
-        fail_on_unmatched_files: true
+        GH_TOKEN: ${{ github.token }}
+        TAG: ${{ steps.release.outputs.tag }}
+      shell: bash
+      run: gh release upload "$TAG" release-assets/*.ipa --clobber --repo "$GITHUB_REPOSITORY"
     - name: Record release asset checksums
       working-directory: release-assets
       shell: bash
@@ -558,10 +554,12 @@ jobs:
         cp "$BUNDLE" "$provenance"
         gh release upload "$TAG" "$provenance" --clobber --repo "$GITHUB_REPOSITORY"
 
+    # GITHUB_TOKEN cannot update a release whose target commit has different
+    # workflow files than the default branch, so this needs workflow access.
     - name: Publish release if it is a draft
       if: inputs.publishRelease
       env:
-        GH_TOKEN: ${{ github.token }}
+        GH_TOKEN: ${{ secrets.PUSH_TOKEN }}
         RELEASE_ID: ${{ inputs.releaseId }}
       shell: bash
       run: |
