@@ -550,10 +550,10 @@ test('phone list menu keeps its scrollbar visible without mouse movement', async
   await page.locator('.shaka-overflow-menu-button').click({ force: true })
   const dialog = page.locator('.phonePlayerOptions[open]')
   await dialog.locator('.shaka-overflow-menu').evaluate(el => { el.scrollTop = el.scrollHeight })
-  await expect(dialog.locator('.os-scrollbar-vertical')).toBeVisible()
+  await expect(dialog.locator('.shaka-overflow-menu > .os-scrollbar-vertical')).toBeVisible()
   // Outlast the scrollbar's auto-hide delay.
   await page.waitForTimeout(1500)
-  await expect(dialog.locator('.os-scrollbar-vertical')).toHaveCSS('opacity', '1')
+  await expect(dialog.locator('.shaka-overflow-menu > .os-scrollbar-vertical')).toHaveCSS('opacity', '1')
 })
 
 test('touching another list option clears an old hover highlight', async ({ app, page }) => {

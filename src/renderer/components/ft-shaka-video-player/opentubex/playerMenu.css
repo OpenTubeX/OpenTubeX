@@ -44,7 +44,12 @@
   align-content: start;
   gap: 4px;
   inline-size: min(400px, calc(100% - 24px));
-  max-block-size: min(50vh, 340px);
+
+  /*
+    Shaka sets an inline max height that reaches the top of the player, which
+    would override a max height here, so the cap shrinks the menu itself.
+  */
+  block-size: calc-size(max-content, min(size, 50vh, 340px));
   padding: var(--ft-menu-padding);
 }
 
@@ -190,6 +195,14 @@
   place-content: center;
   gap: 4px;
   padding-block-start: calc(var(--ft-submenu-header-size) + 4px);
+}
+
+/*
+  Shaka widens the list menu until every playback speed preset fits on one row,
+  so the presets wrap at the width of the grid menu instead.
+*/
+:deep(.shaka-playback-rates:not(.ft-menu-grid)) {
+  max-inline-size: 400px;
 }
 
 /* The playback speed slider and its presets each fill a row, instead of shrinking to their content. */

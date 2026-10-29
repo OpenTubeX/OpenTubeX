@@ -82,7 +82,7 @@ for (const usePlayerMenuGrid of [true, false]) {
             await page.evaluate(value => window.$store.dispatch('updateUseFrostedGlassPlayerUi', value), frosted)
             // Let track loading, font and theme updates settle before measuring.
             await page.waitForTimeout(1000)
-            const rows = await menu.evaluateHandle(element => [...element.querySelectorAll('.audio-tracks > button, .shaka-text-languages > button')])
+            const rows = await menu.evaluateHandle(element => [...element.querySelectorAll('.audio-tracks > button, .shaka-text-languages > .ft-caption-list-options > button')])
             expect(await rows.evaluate(elements => elements.length)).toBeGreaterThan(2)
             await cdp.send('Emulation.setCPUThrottlingRate', { rate: 6 })
             try {

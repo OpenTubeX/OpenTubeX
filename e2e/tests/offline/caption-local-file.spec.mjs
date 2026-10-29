@@ -68,7 +68,7 @@ async function checkActionRows(captionsMenu) {
       row: bounds(actions),
       load: bounds(actions?.querySelector('.ft-caption-load-file-button')),
       timing: bounds(actions?.querySelector('.ft-caption-timing-button')),
-      choices: [...element.querySelectorAll(':scope > button:not(.shaka-back-to-overflow-button, .ft-caption-options-button)')]
+      choices: [...element.querySelectorAll(':scope > .ft-caption-list-options > button')]
         .map(bounds),
     }
   })

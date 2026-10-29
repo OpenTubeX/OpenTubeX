@@ -96,6 +96,28 @@
 
 :deep(.shaka-text-languages) {
   position: relative;
+  flex: 1 1 auto;
+  min-block-size: 0;
+}
+
+/*
+  Only the caption choices scroll, so that the header and the actions below them
+  stay in view. The menu becomes a column that shrinks the submenu, and with it
+  the choices, to fit.
+*/
+:deep(.shaka-overflow-menu:has(> .shaka-text-languages:not(.shaka-hidden))) {
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+:deep(.shaka-overflow-menu:has(> .shaka-text-languages:not(.shaka-hidden)) > .os-scrollbar) {
+  display: none;
+}
+
+/* The grid's tiles wrap inside the choices, which fill the space between the header and the actions. */
+:deep(.shaka-sub-menu.shaka-text-languages.ft-menu-grid) {
+  flex-direction: column;
 }
 
 :deep(.ft-caption-options-button) {
