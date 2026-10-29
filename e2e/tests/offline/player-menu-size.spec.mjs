@@ -104,7 +104,14 @@ for (const usePlayerMenuGrid of [true, false]) {
       expect(await captionMenuLayout(player)).toMatchObject({ headerVisible: true, footerVisible: true })
       await attachScreenshot('caption options scrolled to the end')
 
+      // Coming back from a page that opens from the list starts at its top again.
+      await options.getByRole('button', { name: 'Auto-translate' }).click()
+      await player.locator('.ft-caption-translation-menu > .shaka-back-to-overflow-button').click()
+      await expect(player.locator('.shaka-text-languages')).toBeVisible()
+      await expect.poll(() => options.evaluate(element => element.scrollTop)).toBe(0)
+
       // Shaka rebuilds the choices when the tracks change, here to a shorter list.
+      await options.evaluate(element => element.scrollTo({ top: element.scrollHeight }))
       await player.evaluate((element) => {
         const shakaPlayer = element.ui.getControls().getPlayer()
         const tracks = shakaPlayer.getTextTracks().slice(0, 20)

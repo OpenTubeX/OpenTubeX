@@ -809,6 +809,7 @@ export class CaptionSelection extends shaka.ui.TextSelection {
       if (scrollViewport instanceof HTMLElement) {
         restoreOverlayScrollTop(scrollViewport, 0)
       }
+      restoreOverlayScrollTop(this.choices_, 0)
     })
   }
 }
