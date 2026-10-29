@@ -6,6 +6,7 @@ import i18n from '../../../i18n/index'
 import { CaptionTiming } from './CaptionTiming'
 import {
   addOverlayScrollbars,
+  clampOverlayScrollTop,
   removeOverlayScrollbars,
   restoreOverlayScrollTop,
 } from '../../../helpers/overlayScrollbars'
@@ -82,6 +83,23 @@ export class CaptionSelection extends shaka.ui.TextSelection {
     this.optionsButton_ = document.createElement('button')
     this.optionsButton_.type = 'button'
     this.optionsButton_.classList.add('ft-caption-options-button')
+
+    // Scrolls the choices on their own, so that the header and the actions below
+    // them stay in view. Shaka rebuilds the choices directly in the menu, so
+    // `addCaptionActions_` moves them in here after every rebuild.
+    this.choices_ = document.createElement('div')
+    this.choices_.classList.add('ft-caption-list-options')
+    addOverlayScrollbars(this.choices_)
+    // A taller list, for example in a larger player, shortens its scroll range.
+    this.choicesObserver_ = new ResizeObserver(() => this.clampChoicesScroll_())
+    this.choicesObserver_.observe(this.choices_)
+    // Shaka closes the submenu on any click in it, including the one that ends
+    // a drag on the scrollbar.
+    this.eventManager.listen(this.choices_, 'click', (event) => {
+      if (event.target.closest('.os-scrollbar')) {
+        event.stopPropagation()
+      }
+    })
 
     this.translationMenu_ = this.createOptionsMenu_(parent, 'ft-caption-auto-translate-button', 'ft-caption-translation')
     this.secondaryMenu_ = this.createOptionsMenu_(parent, 'ft-caption-secondary-button', 'ft-caption-secondary')
@@ -222,9 +240,12 @@ export class CaptionSelection extends shaka.ui.TextSelection {
 
   release() {
     this.actionsObserver_.disconnect()
+    this.choicesObserver_.disconnect()
     this.timing_.release()
     render(null, this.loadFileIcon_)
     this.actions_.remove()
+    removeOverlayScrollbars(this.choices_)
+    this.choices_.remove()
     for (const optionsMenu of [this.translationMenu_, this.secondaryMenu_]) {
       cancelAnimationFrame(optionsMenu.overlayFrame)
       removeOverlayScrollbars(optionsMenu.options)
@@ -718,17 +739,38 @@ export class CaptionSelection extends shaka.ui.TextSelection {
       this.secondary_.isSelected
     )
 
+    const backButton = this.menu.querySelector(':scope > .shaka-back-to-overflow-button')
     if (!this.menu.contains(this.optionsButton_)) {
-      this.menu.querySelector('.shaka-back-to-overflow-button')?.after(this.optionsButton_)
+      backButton?.after(this.optionsButton_)
     }
+
+    if (this.choices_.parentElement !== this.menu) {
+      // Shaka removed the previous choices along with their list.
+      for (const choice of this.choices_.querySelectorAll(':scope > button')) {
+        choice.remove()
+      }
+      this.optionsButton_.after(this.choices_)
+    }
+    const rebuiltChoices = [...this.menu.children].filter(child => {
+      return child.localName === 'button' && child !== backButton && child !== this.optionsButton_
+    })
+    if (rebuiltChoices.length > 0) {
+      // Moving the choice Shaka focused would drop its focus.
+      const focused = this.menu.ownerDocument.activeElement
+      this.choices_.prepend(...rebuiltChoices)
+      if (rebuiltChoices.includes(focused)) {
+        focused.focus()
+      }
+    }
+
     for (const [optionsMenu, available] of [
       [this.translationMenu_, translations.length > 0],
       [this.secondaryMenu_, this.secondary_.isAvailable()],
     ]) {
       if (!available) {
         optionsMenu.button.remove()
-      } else if (!this.menu.contains(optionsMenu.button)) {
-        this.menu.appendChild(optionsMenu.button)
+      } else if (optionsMenu.button.parentElement !== this.choices_) {
+        this.choices_.appendChild(optionsMenu.button)
       }
     }
     if (!this.localFile_.isAvailable()) {
@@ -741,6 +783,17 @@ export class CaptionSelection extends shaka.ui.TextSelection {
     }
     if (this.menu.lastElementChild !== this.actions_) {
       this.menu.appendChild(this.actions_)
+    }
+    this.clampChoicesScroll_()
+  }
+
+  /**
+   * Keeps the choices' scroll offset within their range after it shrinks.
+   * @private
+   */
+  clampChoicesScroll_() {
+    if (!this.menu.classList.contains('shaka-hidden')) {
+      clampOverlayScrollTop(this.choices_, this.choices_.querySelector(':scope > button:last-of-type'))
     }
   }
 
@@ -756,6 +809,7 @@ export class CaptionSelection extends shaka.ui.TextSelection {
       if (scrollViewport instanceof HTMLElement) {
         restoreOverlayScrollTop(scrollViewport, 0)
       }
+      restoreOverlayScrollTop(this.choices_, 0)
     })
   }
 }
