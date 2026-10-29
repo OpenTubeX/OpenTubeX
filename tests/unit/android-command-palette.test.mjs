@@ -133,3 +133,23 @@ for (const quickBookmarkPlaylist of [null, { _id: 'favorites' }]) {
     assert.ok(commands.some(command => command.id === 'playback.add-to-playlist'))
   })
 }
+
+for (const isIos of [false, true]) {
+  test(`tab unloading settings commands are ${isIos ? 'hidden on iOS' : 'shown on Android'}`, t => {
+    if (isIos) {
+      process.env.IS_IOS = 'true'
+      t.after(() => delete process.env.IS_IOS)
+    }
+    const commands = createRegistry({
+      isElectron: false,
+      downloads: [],
+      isCapacitor: true,
+      routePath: '/settings',
+      routeAvailable: () => true,
+      t: key => key,
+      tm: path => path.split('.').reduce((value, key) => value?.[key], messages),
+      store: { getters: { getChannelsHiddenParsed: [], getForbiddenTitlesParsed: [], getTabs: [], getProfileList: [], getAllPlaylists: [], getYtDlpDownloads: {} } },
+    })
+    assert.equal(commands.some(command => command.id.startsWith('settings.search.advanced.') && command.label === 'Automatically unload tabs'), !isIos)
+  })
+}
