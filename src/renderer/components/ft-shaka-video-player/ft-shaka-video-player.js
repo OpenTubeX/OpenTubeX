@@ -120,6 +120,7 @@ import {
 import { appendTimestamp, getInvidiousVideoUrl, getYoutubeVideoShareUrl } from '../../helpers/share'
 import { MANIFEST_TYPE_SABR } from '../../helpers/player/SabrManifestParser'
 import { preferOriginalHlsAudio } from '../../helpers/player/hlsAudioTracks'
+import { ignoreLoneHlsVideoDefaults } from '../../helpers/player/hlsVideoRenditions'
 import { getDefaultAudioVariants } from '../../helpers/player/defaultAudioTrack'
 import { MUSIC_MEDIA_TYPE } from '../../helpers/player/musicMediaType'
 import { resolveSegmentPrefetchLimit } from '../../helpers/player/segmentPrefetch'
@@ -6011,7 +6012,7 @@ export default defineComponent({
         }
       } else if (type === RequestType.MANIFEST && context.type === AdvancedRequestType.MASTER_PLAYLIST) {
         const manifest = new TextDecoder().decode(response.data)
-        response.data = new TextEncoder().encode(preferOriginalHlsAudio(manifest)).buffer
+        response.data = new TextEncoder().encode(ignoreLoneHlsVideoDefaults(preferOriginalHlsAudio(manifest))).buffer
       } else if (type === RequestType.MANIFEST && context.type === AdvancedRequestType.MEDIA_PLAYLIST) {
         const url = new URL(response.uri)
 

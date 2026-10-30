@@ -446,6 +446,12 @@
   padding-inline: 10px;
 }
 
+/* Toasts stay dark in every theme, so unfilled buttons can't use its text color */
+:is(.toast-holder, .progress-toast-holder) .toastActions .btn:is(.variant-outlined, .variant-text) {
+  --button-foreground: #fff;
+  --button-border: rgb(255 255 255 / 60%);
+}
+
 :is(.toast-holder, .progress-toast-holder) .toastActions.vertical .btn {
   margin-block: 0;
 }

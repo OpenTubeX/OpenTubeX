@@ -850,6 +850,7 @@ Settings:
     Managed Tools Update Started Template: Kohteelle {tools} löytyi päivitys. Ladataan…
     Managed Tools Update Finished Template: Kohteen {tools} päivitys valmis
     Managed Tools Update Available Template: Kohteelle {tools} on saatavilla päivitys.
+    Managed Tools Update Source Notice: "OpenTubeX lataa sen suoraan GitHubista, joten F-Droid ja muut sovelluskaupat eivät tarkista sitä."
     Update Managed Tools: Päivitä
     Managed Tools Download Error Template: 'Hallittuja työkaluja ei voitu ladata: {errors}'
     Download Folder: Latauskansio

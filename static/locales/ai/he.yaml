@@ -850,6 +850,7 @@ Settings:
     Managed Tools Update Started Template: נמצא עדכון עבור {tools}. מתבצעת הורדה…
     Managed Tools Update Finished Template: העדכון של {tools} הסתיים
     Managed Tools Update Available Template: קיים עדכון עבור {tools}.
+    Managed Tools Update Source Notice: "OpenTubeX מוריד אותו ישירות מ-GitHub, ולכן F-Droid וחנויות אפליקציות אחרות לא בודקות אותו."
     Update Managed Tools: עדכון
     Managed Tools Download Error Template: 'לא ניתן להוריד את הכלים המנוהלים: {errors}'
     Download Folder: תיקיית הורדות

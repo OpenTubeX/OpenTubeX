@@ -440,6 +440,7 @@ Settings:
     Auto Save Volume: Automatycznie zapisuj zmiany głośności
     Add Subscribed Channel: Dodaj subskrybowany kanał
   Download Settings:
+    Managed Tools Update Source Notice: "OpenTubeX pobiera ją bezpośrednio z GitHuba, więc F-Droid ani inne sklepy z aplikacjami jej nie sprawdzają."
     Concurrent Downloads: Jednoczesne pobieranie
     Bandwidth Limit: Limit przepustowości (KiB/s)
     Automatic Downloads Require Unmetered Network: "Tylko w sieciach bez pomiaru użycia danych"

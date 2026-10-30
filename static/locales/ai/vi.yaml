@@ -845,6 +845,7 @@ Settings:
     Managed Tools Update Started Template: Đã tìm thấy bản cập nhật cho {tools}. Đang tải…
     Managed Tools Update Finished Template: Đã cập nhật xong {tools}
     Managed Tools Update Available Template: Có bản cập nhật cho {tools}.
+    Managed Tools Update Source Notice: "OpenTubeX tải bản cập nhật trực tiếp từ GitHub, nên F-Droid và các cửa hàng ứng dụng khác không kiểm tra bản này."
     Update Managed Tools: Cập nhật
     Managed Tools Download Error Template: 'Không thể tải các công cụ được quản lý: {errors}'
     Download Folder: Thư mục tải xuống

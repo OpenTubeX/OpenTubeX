@@ -834,6 +834,7 @@ Settings:
     Managed Tools Update Started Template: Üksusele {tools} leiti uuendus. Allalaadimine…
     Managed Tools Update Finished Template: '{tools} on uuendatud'
     Managed Tools Update Available Template: Üksusele {tools} on saadaval uuendus.
+    Managed Tools Update Source Notice: "OpenTubeX laadib selle otse GitHubist, seega F-Droid ega teised rakenduspoed seda ei kontrolli."
     Update Managed Tools: Uuenda
     Managed Tools Download Error Template: 'Hallatavaid tööriistu ei õnnestunud alla laadida: {errors}'
     Download Folder: Allalaadimiskaust

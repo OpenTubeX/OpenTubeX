@@ -1040,6 +1040,7 @@ Settings:
     Managed Tools Update Started Template: Rastas {tools} naujinys. Atsisiunčiama…
     Managed Tools Update Finished Template: Baigta atnaujinti {tools}
     Managed Tools Update Available Template: Galimas {tools} naujinys.
+    Managed Tools Update Source Notice: "OpenTubeX jį atsisiunčia tiesiai iš „GitHub“, todėl „F-Droid“ ir kitos programėlių parduotuvės jo netikrina."
     Update Managed Tools: Atnaujinti
     Managed Tools Download Error Template: 'Nepavyko atsisiųsti valdomų įrankių: {errors}'
     Download Folder: Atsisiuntimų aplankas

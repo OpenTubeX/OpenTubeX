@@ -856,6 +856,7 @@ Settings:
     Managed Tools Update Started Template: '{tools}-க்கான புதுப்பிப்பு கிடைத்தது. பதிவிறக்கப்படுகிறது…'
     Managed Tools Update Finished Template: '{tools} புதுப்பிப்பு முடிந்தது'
     Managed Tools Update Available Template: '{tools}-க்கான புதுப்பிப்பு கிடைக்கிறது.'
+    Managed Tools Update Source Notice: "OpenTubeX இதை GitHub-இலிருந்து நேரடியாகப் பதிவிறக்குகிறது, எனவே F-Droid மற்றும் பிற செயலி அங்காடிகள் இதைச் சரிபார்ப்பதில்லை."
     Update Managed Tools: புதுப்பி
     Managed Tools Download Error Template: 'நிர்வகிக்கப்பட்ட கருவிகளைப் பதிவிறக்க முடியவில்லை: {errors}'
     Download Folder: பதிவிறக்கக் கோப்புறை

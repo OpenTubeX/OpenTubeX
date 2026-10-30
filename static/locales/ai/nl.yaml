@@ -850,6 +850,7 @@ Settings:
     Managed Tools Update Started Template: Er is een update voor {tools} gevonden. Downloaden…
     Managed Tools Update Finished Template: Bijwerken van {tools} voltooid
     Managed Tools Update Available Template: Er is een update voor {tools} beschikbaar.
+    Managed Tools Update Source Notice: "OpenTubeX downloadt deze rechtstreeks van GitHub, dus F-Droid en andere appwinkels controleren deze niet."
     Update Managed Tools: Bijwerken
     Managed Tools Download Error Template: 'De beheerde hulpprogramma''s kunnen niet worden gedownload: {errors}'
     Download Folder: Downloadmap

@@ -372,6 +372,26 @@ test.describe('bright main color toggle contrast', () => {
   })
 })
 
+test.describe('toast action contrast', () => {
+  test.use({ seed: { settings: { baseTheme: 'light', currentLocale: 'en-US' } } })
+
+  test('toast actions stay readable on the dark toast in a light theme', async ({ page }) => {
+    await page.evaluate(() => window.dispatchEvent(new CustomEvent('opentubex:preview-managed-tools-update')))
+    const toast = page.locator('.toast', { hasText: 'An update is available for yt-dlp.' })
+    for (const name of ['Cancel', 'Update']) {
+      const button = toast.getByRole('button', { name, exact: true })
+      await expect(button).toBeVisible()
+      await page.mouse.move(0, 0)
+      const rest = await renderedColors(button)
+      expect.soft(contrastRatio(rest.foreground, rest.background), `${name} at rest`).toBeGreaterThanOrEqual(4.5)
+      await button.hover()
+      await button.evaluate(element => Promise.all(element.getAnimations().map(animation => animation.finished)))
+      const hovered = await renderedColors(button)
+      expect.soft(contrastRatio(hovered.foreground, hovered.background), `${name} on hover`).toBeGreaterThanOrEqual(4.5)
+    }
+  })
+})
+
 // Hot Pink forces black theme colors on a magenta card; Yellow is the brightest main color.
 for (const settings of [{ baseTheme: 'hotPink' }, { baseTheme: 'light', mainColor: 'Yellow' }]) {
   test.describe(`${Object.values(settings).join(' ')} icon button contrast`, () => {
