@@ -696,7 +696,7 @@ Settings:
         Depressed: Утопленный
       Reset: Сбросить оформление субтитров
       Default: По умолчанию
-      Text Opacity: Прозрачность шрифта
+      Text Opacity: Непрозрачность текста
       Font Family:
         Font Family: Семейство шрифтов
         Monospaced Serif: Моноширинный Serif

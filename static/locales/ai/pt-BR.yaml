@@ -688,8 +688,8 @@ Settings:
         None: Nenhum
         Outline: Contorno
         Drop Shadow: Sombra projetada
-        Raised: Aumentada
-        Depressed: Reduzida
+        Raised: Em relevo
+        Depressed: Em baixo-relevo
       Reset: Redefinir aparência das legendas
       Default: Padrão
       Text Opacity: Opacidade da fonte

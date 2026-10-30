@@ -409,7 +409,7 @@ Settings:
     Enable FCast: "Włącz FCast"
     Caption Appearance:
       Default: Domyślnie
-      Text Opacity: Przezroczystość czcionki
+      Text Opacity: Nieprzezroczystość tekstu
       Font Family:
         Font Family: Rodzina czcionek
         Monospaced Serif: Szeryfowa o stałej szerokości
