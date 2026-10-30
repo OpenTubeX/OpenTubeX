@@ -356,6 +356,12 @@ export function useSponsorBlockSubmission({
     return durations.length > 0 ? Math.max(...durations) : null
   }
 
+  // Round down so the millisecond timestamp stays within the duration
+  function clampSponsorBlockDraftTime(seconds) {
+    const duration = getSponsorBlockSubmissionVideoDuration()
+    return duration == null ? seconds : Math.min(seconds, Math.floor(duration * 1000) / 1000)
+  }
+
   function openSponsorBlockSubmissionMenu() {
     if (!sponsorBlockSubmissionAvailable.value || sponsorBlockDraftSegments.value.length === 0) {
       return
@@ -414,11 +420,7 @@ export function useSponsorBlockSubmission({
       return
     }
 
-    const currentDuration = getSponsorBlockSubmissionVideoDuration()
-    const endTime = normalizeSponsorBlockDraftTime(Math.max(video.value?.currentTime ?? 0, 0))
-    const clampedEndTime = currentDuration == null
-      ? endTime
-      : Math.min(endTime ?? 0, currentDuration)
+    const clampedEndTime = clampSponsorBlockDraftTime(normalizeSponsorBlockDraftTime(Math.max(video.value?.currentTime ?? 0, 0)) ?? 0)
     if (clampedEndTime <= draft.startTime) {
       const errorMessage = t('Video.Player.SponsorBlock.EndTimeAfterStart')
       sponsorBlockSubmissionError.value = errorMessage
@@ -587,10 +589,7 @@ export function useSponsorBlockSubmission({
 
   async function setSponsorBlockDraftTime(segmentId, field, value) {
     const editValue = getSponsorBlockDraftEditValue(segmentId)
-    const duration = getSponsorBlockSubmissionVideoDuration()
-    // Round down at the video end so the millisecond timestamp stays within the duration
-    const time = value == null || duration == null ? value : Math.min(value, Math.floor(duration * 1000) / 1000)
-    editValue[field] = time == null ? '' : formatSponsorBlockDraftTimestamp(time)
+    editValue[field] = value == null ? '' : formatSponsorBlockDraftTimestamp(clampSponsorBlockDraftTime(value))
     await saveSponsorBlockDraft(segmentId)
   }
 

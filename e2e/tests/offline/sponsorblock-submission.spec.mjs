@@ -175,12 +175,17 @@ test.describe('SponsorBlock submission', { tag: '@scale' }, () => {
     })
     await page.locator('.ftVideoPlayer').hover()
     await page.locator('.sponsorblock-start-button').click()
+    await video.evaluate(element => {
+      Object.defineProperty(element, 'currentTime', { configurable: true, get: () => element.duration })
+    })
     await page.locator('.ftVideoPlayer').hover()
-    await page.locator('.sponsorblock-open-menu-button').click({ force: true })
+    await page.locator('.sponsorblock-end-button').click()
 
     const menu = page.locator('.sponsorBlockSubmissionMenu')
-    await menu.getByRole('button', { name: '(End)' }).click()
-    await expect(menu.getByRole('textbox', { name: 'Segment end time' })).toHaveValue(`0:${seconds}.000`)
+    const endTime = menu.getByRole('textbox', { name: 'Segment end time' })
+    await expect(endTime).toHaveValue(`0:${seconds}.000`)
+    await menu.getByRole('button', { name: '(End)', exact: true }).click()
+    await expect(endTime).toHaveValue(`0:${seconds}.000`)
     await expect(menu.locator('.sponsorBlockSubmissionError')).toHaveCount(0)
   })
 
