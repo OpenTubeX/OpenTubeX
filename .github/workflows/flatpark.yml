@@ -238,7 +238,13 @@ jobs:
         # only what still differs from FlatPark is submitted.
         perl -0pi -e 's/^[ \t]*<release version="\Q$ENV{VERSION}\E"[^>]*>.*?<\/release>\n//ms' "$metainfo"
 
-        node flatpark/scripts/update-pins.mjs "$manifest" "$metainfo" < "$resolver_json"
+        # FlatPark's pin updater is third-party code from a moving branch. Run it
+        # in a container so it cannot read the runner's cache token and poison
+        # caches that other workflows restore.
+        docker run --rm --interactive --user "$(id -u):$(id -g)" \
+          --volume "${PWD}/flatpark:/work/flatpark" --workdir /work \
+          node:24-slim@sha256:c86ecead9e55a5210ac1727de38a4ca840bf03dcaf34dc9749addbf383b1920c \
+          node flatpark/scripts/update-pins.mjs "$manifest" "$metainfo" < "$resolver_json"
         node opentubex/_scripts/syncFlatpakFinishArgs.mjs \
           official-flatpak/org.opentubex.OpenTubeX.yml \
           "$manifest"
