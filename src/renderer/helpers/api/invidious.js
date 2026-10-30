@@ -864,6 +864,7 @@ function parseInvidiousCommentData(response) {
     return {
       id: comment.commentId,
       authorLink: comment.authorId,
+      authorId: comment.authorId,
       authorThumb: youtubeImageUrlToInvidious(getInvidiousCommentAuthorThumbnail(comment)),
       author: comment.author,
       authorVerified: comment.verified === true,
