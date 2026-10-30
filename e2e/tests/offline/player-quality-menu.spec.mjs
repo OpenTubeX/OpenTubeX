@@ -443,6 +443,23 @@ test.describe('quality codecs from the manifest', () => {
     await expect(menu.locator('.ft-quality-codecs')).toHaveCount(0)
   })
 
+  test('lists only the playing video of alternative videos with the same resolution', async ({ app, page }) => {
+    await openAdaptiveVideo(app, page)
+    const player = page.locator(`${activeTab} .ftVideoPlayer`)
+    await player.evaluate(element => {
+      const shakaPlayer = element.ui.getControls().getPlayer()
+      shakaPlayer.getVideoTracks = () => [
+        { id: 1, label: 'Main', width: 1920, height: 1080, bandwidth: 4e6, active: true },
+        { id: 2, label: 'Sign language', width: 1920, height: 1080, bandwidth: 5e6 },
+      ].map(track => ({ codecs: 'avc1.64002a', frameRate: 30, hdr: 'SDR', roles: [], videoLayout: null, active: false, ...track }))
+      shakaPlayer.dispatchEvent({ type: 'trackschanged' })
+    })
+    await player.hover()
+    await player.locator('.shaka-overflow-menu-button').click()
+    await player.locator('.shaka-resolution-button').click()
+    await expect(player.locator('.shaka-resolutions .explicit-resolution > span')).toHaveText(['1080p'])
+  })
+
   test('lets Shaka choose the codecs without smooth codec switching', async ({ app, page }) => {
     // Shaka then limits automatic quality to the codec of the first variant
     await page.evaluate(() => {

@@ -26,8 +26,10 @@ function hasSameRoles(a, b) {
  * @param {shaka.extern.VideoTrack[]} tracks
  */
 function hasResolutionLabels(tracks) {
-  return new Set(tracks.map(track => track.label)).size > 1 &&
-    tracks.every(track => tracks.every(other => other.label !== track.label || other.height === track.height))
+  const labels = new Set(tracks.map(track => track.label))
+  return labels.size > 1 &&
+    labels.size === new Set(tracks.map(track => track.height)).size &&
+    tracks.every(track => track.height && tracks.every(other => other.label !== track.label || other.height === track.height))
 }
 
 /**
