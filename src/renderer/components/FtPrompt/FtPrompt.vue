@@ -166,7 +166,6 @@ const promptCard = useTemplateRef('promptCard')
 const promptContentScroller = useTemplateRef('promptContentScroller')
 const prompt = useTemplateRef('prompt')
 
-let promptButtons = []
 let lastActiveElement = null
 let promptContentResizeObserver = null
 let scrollLocked = false
@@ -188,7 +187,6 @@ function activatePrompt() {
 
   nextTick(() => {
     if (!settingsOverlayActive.value || !promptCard.value) return
-    promptButtons = Array.from(promptCard.value.$el.querySelectorAll('.btn.ripple, .iconButton'))
     focusItem(0)
 
     const scroller = promptContentScroller.value
@@ -271,9 +269,18 @@ function handleClick(event) {
 }
 
 /**
- * @param {number} index
+ * Queried on use, since content such as a pager can replace its buttons.
+ * @returns {HTMLElement[]}
  */
-function focusItem(index) {
+function getPromptButtons() {
+  return Array.from(promptCard.value?.$el.querySelectorAll('.btn.ripple, .iconButton') ?? [])
+}
+
+/**
+ * @param {number} index
+ * @param {HTMLElement[]} promptButtons
+ */
+function focusItem(index, promptButtons = getPromptButtons()) {
   if (promptButtons.length === 0) return
 
   if (index < 0) {
@@ -305,6 +312,7 @@ function handleEscape(event) {
  * @param {KeyboardEvent} event
  */
 function handleArrowKeys(event) {
+  const promptButtons = getPromptButtons()
   const currentIndex = promptButtons.indexOf(event.target)
 
   // Only react if a button was focused when the arrow key was pressed
@@ -315,7 +323,7 @@ function handleArrowKeys(event) {
   event.preventDefault()
 
   const direction = (event.key === 'ArrowLeft') ? -1 : 1
-  focusItem(currentIndex + direction)
+  focusItem(currentIndex + direction, promptButtons)
 }
 </script>
 

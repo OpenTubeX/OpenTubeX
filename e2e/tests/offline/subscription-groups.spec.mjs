@@ -220,6 +220,12 @@ test.describe('picking from many channels', () => {
       await page.keyboard.press('Enter')
       await expect(editor.getByRole('checkbox')).toHaveCount(200)
       await expect(editor.getByRole('checkbox', { name: 'Channel 100' })).toBeFocused()
+
+      // The next page's button replaces the one the dialog had when it opened.
+      await editor.getByRole('textbox', { name: 'Group Name' }).fill('Music')
+      await editor.getByRole('button', { name: 'Create' }).focus()
+      await page.keyboard.press('ArrowLeft')
+      await expect(loadMore).toBeFocused()
     })
   })
 })
