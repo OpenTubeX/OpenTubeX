@@ -1957,7 +1957,12 @@ Description:
   Music: Müzik
 Tooltips:
   General Settings:
-    Preferred Video Codec: Otomatik mod donanım çözmeyi tercih eder. Değişiklikler sonraki videoya uygulanır. Codec tercihi çözünürlükleri sınırlayabilir; kullanılamayan codec'ler değiştirilir.
+    Preferred Video Codec: |
+      Otomatik mod, cihazınızın donanımla çözebildiği kodekleri tercih eder.
+      AV1: en az veriyle en iyi kalite, ancak her videoda bulunmaz. Donanım çözme olmadan pili tüketebilir veya kare atlayabilir.
+      VP9: verimlilik ile uyumluluk arasında bir denge, genellikle en yüksek çözünürlüğe kadar kullanılabilir.
+      H.264: neredeyse her cihazda çözmesi en kolay olan, ancak daha fazla veri kullanır ve genellikle 1080p ile sınırlıdır.
+      Değişiklikler sonraki videodan itibaren geçerli olur. Tercih edilen kodek kullanılamıyorsa başka biri kullanılır.
     Always Use Backup Media Server: "Videoları atanan sunucu yerine YouTube'un belirttiği yedek sunucudan oynatır; örneğin internet sağlayıcınızın önbelleği sık sık yavaş olduğunda. Aksi halde OpenTubeX yalnızca atanan sunucu yanıt vermediğinde geçiş yapar."
     Automatically switch stream extraction methods: "Yerleşik oynatma başarısız olursa yt-dlp’yi, yt-dlp başarısız olursa yerleşik oynatmayı dene."
     Enable Tabs: "Geçerli sayfa açık kalır. Diğer sekmeler uygulama yeniden başlatılana kadar saklanır; onları geri yüklemek için sekmeleri yeniden etkinleştirin."

@@ -1986,7 +1986,12 @@ Description:
   Music: Cerddoriaeth
 Tooltips:
   General Settings:
-    Preferred Video Codec: Mae'r modd awtomatig yn ffafrio datgodio caledwedd. Mae newidiadau'n berthnasol i'r fideo nesaf. Gall dewis codec gyfyngu ar gydraniadau; defnyddir dewisiadau eraill os nad yw codec ar gael.
+    Preferred Video Codec: |
+      Mae'r modd awtomatig yn ffafrio codecs y gall eich dyfais eu datgodio â chaledwedd.
+      AV1: yr ansawdd gorau am y lleiaf o ddata, ond nid oes gan bob fideo ef. Heb ddatgodio caledwedd, gall ddraenio'r batri neu ollwng fframiau.
+      VP9: cydbwysedd rhwng effeithlonrwydd a chydnawsedd, ar gael fel arfer hyd at y cydraniad uchaf.
+      H.264: yr hawsaf i'w ddatgodio ar bron unrhyw ddyfais, ond mae'n defnyddio mwy o ddata ac fel arfer yn stopio ar 1080p.
+      Mae newidiadau'n berthnasol i'r fideo nesaf. Os nad yw'r codec a ffefrir ar gael, defnyddir un arall.
     Always Use Backup Media Server: "Yn ffrydio fideos o'r gweinydd wrth gefn y mae YouTube yn ei enwi yn lle'r un a neilltuwyd, er enghraifft pan fo storfa eich darparwr rhyngrwyd yn aml yn araf. Fel arall, dim ond pan nad yw'r gweinydd a neilltuwyd yn ymateb y mae OpenTubeX yn newid."
     Automatically switch stream extraction methods: "Rhoi cynnig ar yt-dlp os bydd y chwarae mewnol yn methu, neu ar y chwarae mewnol os bydd yt-dlp yn methu."
     Enable Tabs: "Mae’r dudalen bresennol yn aros ar agor. Cedwir tabiau eraill nes i’r ap ailgychwyn; galluogwch dabiau eto i’w hadfer."

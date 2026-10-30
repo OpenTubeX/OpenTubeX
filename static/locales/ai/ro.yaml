@@ -2006,7 +2006,12 @@ Description:
   Music: Muzică
 Tooltips:
   General Settings:
-    Preferred Video Codec: Modul automat preferă decodarea hardware. Modificările se aplică următorului videoclip. Preferința de codec poate limita rezoluțiile; codecurile indisponibile sunt înlocuite.
+    Preferred Video Codec: |
+      Modul automat preferă codecurile pe care dispozitivul le poate decoda hardware.
+      AV1: cea mai bună calitate cu cele mai puține date, dar nu orice videoclip îl are. Fără decodare hardware, poate descărca bateria sau poate pierde cadre.
+      VP9: un echilibru între eficiență și compatibilitate, de obicei disponibil până la cea mai mare rezoluție.
+      H.264: cel mai ușor de decodat pe aproape orice dispozitiv, dar folosește mai multe date și de obicei se oprește la 1080p.
+      Modificările se aplică de la următorul videoclip. Dacă codecul preferat nu este disponibil, se folosește altul.
     Always Use Backup Media Server: "Redă videoclipurile de pe serverul de rezervă indicat de YouTube în locul celui atribuit, de exemplu când memoria cache a furnizorului de internet este adesea lentă. Altfel, OpenTubeX comută doar când serverul atribuit nu răspunde."
     Automatically switch stream extraction methods: "Încearcă yt-dlp dacă redarea integrată eșuează, sau redarea integrată dacă yt-dlp eșuează."
     Enable Tabs: "Păstrează pagina curentă deschisă. Celelalte file sunt păstrate până la repornirea aplicației; activați din nou filele pentru a le restaura."

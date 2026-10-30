@@ -111,6 +111,7 @@
         v-if="tooltip !== ''"
         class="selectTooltip"
         :tooltip="tooltip"
+        :allow-newlines="tooltipAllowNewlines"
       />
       <FtSyncedSettingIndicator
         :setting-key="settingKey"
@@ -314,6 +315,10 @@ const props = defineProps({
   tooltip: {
     type: String,
     default: ''
+  },
+  tooltipAllowNewlines: {
+    type: Boolean,
+    default: false
   },
   disabled: {
     type: Boolean,

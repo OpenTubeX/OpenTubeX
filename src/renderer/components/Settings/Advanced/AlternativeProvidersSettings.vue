@@ -72,7 +72,7 @@
         @change="updateBackendPreference"
       />
     </div>
-    <FtFlexBox v-if="USING_ELECTRON">
+    <FtFlexBox>
       <FtSelect
         class="codecSelect"
         :placeholder="t('Settings.General Settings.Preferred Video Codec')"
@@ -81,6 +81,7 @@
         :select-names="[t('Settings.Player Settings.Default Quality.Auto'), 'AV1', 'VP9', 'H.264']"
         :select-values="['auto', 'av1', 'vp9', 'h264']"
         :tooltip="t('Tooltips.General Settings.Preferred Video Codec')"
+        tooltip-allow-newlines
         :icon="['fas', 'file-video']"
         @change="store.dispatch('updatePreferredVideoCodec', $event)"
       />
@@ -213,7 +214,6 @@ import { normalizeYatteeServerUrl, usesInvidiousInstance } from '../../../../api
 import { checkYatteeServer, createYatteeAuthorization } from '../../../helpers/api/yattee'
 import { capacitorHttpFetch } from '../../../helpers/api/capacitor-http'
 
-const USING_ELECTRON = !!process.env.IS_ELECTRON
 const IS_IOS = !!process.env.IS_IOS
 const IS_CAPACITOR = !!process.env.IS_CAPACITOR
 const SUPPORTS_LOCAL_API = !!process.env.SUPPORTS_LOCAL_API

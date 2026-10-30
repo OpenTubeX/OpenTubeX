@@ -2377,7 +2377,12 @@ Description:
   Music: Muzika
 Tooltips:
   General Settings:
-    Preferred Video Codec: Automatinis režimas teikia pirmenybę aparatiniam dekodavimui. Pakeitimai taikomi kitam vaizdo įrašui. Kodeko pasirinkimas gali riboti raišką; nepasiekiami kodekai pakeičiami.
+    Preferred Video Codec: |
+      Automatinis režimas teikia pirmenybę kodekams, kuriuos jūsų įrenginys gali dekoduoti aparatiškai.
+      AV1: geriausia kokybė su mažiausiu duomenų kiekiu, bet ne kiekvienas vaizdo įrašas jį turi. Be aparatinio dekodavimo gali eikvoti bateriją arba praleisti kadrus.
+      VP9: efektyvumo ir suderinamumo pusiausvyra, paprastai prieinamas iki didžiausios raiškos.
+      H.264: lengviausiai dekoduojamas beveik bet kuriame įrenginyje, bet naudoja daugiau duomenų ir paprastai baigiasi ties 1080p.
+      Pakeitimai taikomi kitam vaizdo įrašui. Jei pageidaujamas kodekas nepasiekiamas, naudojamas kitas.
     Always Use Backup Media Server: "Transliuoja vaizdo įrašus iš YouTube nurodyto atsarginio serverio vietoje priskirto, pavyzdžiui, kai jūsų interneto tiekėjo podėlis dažnai būna lėtas. Kitu atveju OpenTubeX persijungia tik tada, kai priskirtas serveris neatsako."
     Automatically switch stream extraction methods: "Bandyti yt-dlp, jei integruotas atkūrimas nepavyksta, arba integruotą atkūrimą, jei yt-dlp nepavyksta."
     Enable Tabs: "Dabartinis puslapis lieka atvertas. Kitos kortelės išsaugomos iki programos paleidimo iš naujo; vėl įjunkite korteles, kad jas atkurtumėte."

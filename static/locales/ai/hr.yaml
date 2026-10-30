@@ -1986,7 +1986,12 @@ Description:
   Music: Glazba
 Tooltips:
   General Settings:
-    Preferred Video Codec: Automatski način preferira hardversko dekodiranje. Promjene vrijede za sljedeći video. Odabir kodeka može ograničiti rezolucije; nedostupni kodeci zamjenjuju se.
+    Preferred Video Codec: |
+      Automatski način daje prednost kodecima koje vaš uređaj može hardverski dekodirati.
+      AV1: najbolja kvaliteta uz najmanje podataka, ali nema ga svaki videozapis. Bez hardverskog dekodiranja može prazniti bateriju ili ispuštati sličice.
+      VP9: ravnoteža učinkovitosti i kompatibilnosti, obično dostupan do najviše rezolucije.
+      H.264: najlakši za dekodiranje na gotovo svakom uređaju, ali troši više podataka i obično staje na 1080p.
+      Promjene se primjenjuju na sljedeći videozapis. Ako željeni kodek nije dostupan, koristi se drugi.
     Always Use Backup Media Server: "Reproducira videozapise s pričuvnog poslužitelja koji navodi YouTube umjesto s dodijeljenog, na primjer kad je predmemorija vašeg pružatelja interneta često spora. Inače OpenTubeX prebacuje samo kad dodijeljeni poslužitelj ne odgovara."
     Automatically switch stream extraction methods: "Pokušaj s yt-dlp ako ugrađena reprodukcija ne uspije ili s ugrađenom reprodukcijom ako yt-dlp ne uspije."
     Enable Tabs: "Trenutačna stranica ostaje otvorena. Ostale kartice čuvaju se do ponovnog pokretanja aplikacije; ponovno omogućite kartice da biste ih vratili."

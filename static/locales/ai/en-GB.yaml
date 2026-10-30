@@ -1947,7 +1947,12 @@ Description:
   Music: Music
 Tooltips:
   General Settings:
-    Preferred Video Codec: Auto prefers hardware decoding. Changes apply to the next video. A codec preference may limit resolutions; unavailable codecs fall back.
+    Preferred Video Codec: |
+      Auto prefers codecs that your device can decode in hardware.
+      AV1: the best quality for the least data, but not every video has it. Without hardware decoding, it can drain the battery or drop frames.
+      VP9: a balance of efficiency and compatibility, usually available up to the highest resolution.
+      H.264: the easiest to decode on almost any device, but it uses more data and usually stops at 1080p.
+      Changes apply to the next video. If the preferred codec is unavailable, another one is used.
     Always Use Backup Media Server: "Streams videos from the backup server YouTube names instead of the assigned one, for example when your internet provider's cache is often slow. Otherwise OpenTubeX switches only when the assigned server doesn't respond."
     Automatically switch stream extraction methods: "Try yt-dlp if built-in playback fails, or built-in playback if yt-dlp fails."
     Enable Tabs: "Keeps the current page open. Other tabs are kept until the app restarts; enable tabs again to restore them."

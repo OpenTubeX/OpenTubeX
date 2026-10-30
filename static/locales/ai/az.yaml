@@ -1969,7 +1969,12 @@ Description:
   Music: Musiqi
 Tooltips:
   General Settings:
-    Preferred Video Codec: Avtomatik rejim aparat dekodlaşdırmasına üstünlük verir. Dəyişikliklər növbəti videoya tətbiq olunur. Kodek seçimi təsvir ölçülərini məhdudlaşdıra bilər; mövcud olmayan kodeklər əvəzlənir.
+    Preferred Video Codec: |
+      Avtomatik rejim cihazınızın aparat səviyyəsində deşifrə edə bildiyi kodekləri üstün tutur.
+      AV1: ən az data ilə ən yaxşı keyfiyyət, lakin hər videoda olmur. Aparat deşifrəsi olmadan batareyanı tez boşalda və ya kadr itirə bilər.
+      VP9: səmərəlilik və uyğunluq arasında balans, adətən ən yüksək ölçüyədək mövcuddur.
+      H.264: demək olar ki, hər cihazda ən asan deşifrə olunur, lakin daha çox data işlədir və adətən 1080p-də dayanır.
+      Dəyişikliklər növbəti videoya tətbiq olunur. Üstün tutulan kodek mövcud deyilsə, başqası istifadə olunur.
     Always Use Backup Media Server: "Videoları təyin edilmiş server əvəzinə YouTube-un göstərdiyi ehtiyat serverdən yayımlayır, məsələn, internet provayderinizin keşi tez-tez yavaş olduqda. Əks halda OpenTubeX yalnız təyin edilmiş server cavab vermədikdə keçid edir."
     Automatically switch stream extraction methods: "Daxili oxutma uğursuz olarsa yt-dlp-ni, yt-dlp uğursuz olarsa daxili oxutmanı sınayın."
     Enable Tabs: "Cari səhifə açıq qalır. Digər vərəqlər tətbiq yenidən başladılana qədər saxlanılır; onları bərpa etmək üçün vərəqləri yenidən aktivləşdirin."

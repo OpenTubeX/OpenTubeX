@@ -1998,7 +1998,12 @@ Description:
   Music: Âm nhạc
 Tooltips:
   General Settings:
-    Preferred Video Codec: Chế độ tự động ưu tiên giải mã phần cứng. Thay đổi áp dụng cho video tiếp theo. Tùy chọn codec có thể giới hạn độ phân giải; codec không có sẵn sẽ được thay thế.
+    Preferred Video Codec: |
+      Chế độ tự động ưu tiên các codec mà thiết bị của bạn có thể giải mã bằng phần cứng.
+      AV1: chất lượng tốt nhất với ít dữ liệu nhất, nhưng không phải video nào cũng có. Nếu không giải mã bằng phần cứng, nó có thể làm hao pin hoặc rớt khung hình.
+      VP9: cân bằng giữa hiệu quả và khả năng tương thích, thường có đến độ phân giải cao nhất.
+      H.264: dễ giải mã nhất trên hầu hết mọi thiết bị, nhưng tốn nhiều dữ liệu hơn và thường chỉ đến 1080p.
+      Thay đổi áp dụng cho video tiếp theo. Nếu codec ưu tiên không khả dụng, một codec khác sẽ được dùng.
     Always Use Backup Media Server: "Phát video từ máy chủ dự phòng mà YouTube chỉ định thay vì máy chủ được gán, ví dụ khi bộ nhớ đệm của nhà cung cấp internet của bạn thường chậm. Nếu không, OpenTubeX chỉ chuyển khi máy chủ được gán không phản hồi."
     Automatically switch stream extraction methods: "Thử yt-dlp nếu trình phát tích hợp bị lỗi, hoặc trình phát tích hợp nếu yt-dlp bị lỗi."
     Enable Tabs: "Giữ trang hiện tại mở. Các thẻ khác được giữ đến khi khởi động lại ứng dụng; bật lại thẻ để khôi phục chúng."

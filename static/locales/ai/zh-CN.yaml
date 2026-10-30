@@ -1956,7 +1956,12 @@ Description:
   Music: 音乐
 Tooltips:
   General Settings:
-    Preferred Video Codec: 自动模式优先使用硬件解码。更改对下一个视频生效。指定编解码器可能限制可用分辨率；不可用时会使用其他编解码器。
+    Preferred Video Codec: |
+      自动模式优先使用设备可以硬件解码的编解码器。
+      AV1：以最少的数据量提供最佳画质，但并非每个视频都有。没有硬件解码时，可能会耗电较快或掉帧。
+      VP9：兼顾效率与兼容性，通常可用到最高分辨率。
+      H.264：几乎在任何设备上都最容易解码，但会使用更多数据，通常最高只有 1080p。
+      更改对下一个视频生效。如果首选编解码器不可用，会使用其他编解码器。
     Always Use Backup Media Server: "从 YouTube 指定的备用服务器而非分配的服务器播放视频，例如当你的网络服务提供商的缓存经常很慢时。否则，OpenTubeX 仅在分配的服务器无响应时才切换。"
     Automatically switch stream extraction methods: "内置播放失败时尝试 yt-dlp，yt-dlp 失败时尝试内置播放。"
     Enable Tabs: "保持当前页面打开。其他标签页会保留到应用重启，再次启用标签页即可恢复。"
