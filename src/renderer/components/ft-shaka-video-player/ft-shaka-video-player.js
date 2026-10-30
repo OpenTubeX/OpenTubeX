@@ -10834,7 +10834,8 @@ export default defineComponent({
     }
 
     function showOverlayControls() {
-      ui.getControls().showUI()
+      // Fullscreen can end after a playback-engine fallback released the UI.
+      ui?.getControls()?.showUI()
     }
 
     /**

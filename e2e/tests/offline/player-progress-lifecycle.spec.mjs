@@ -1,4 +1,4 @@
-import { test, expect } from '../../helpers/app.mjs'
+import { test, expect, setPlayerFullscreen } from '../../helpers/app.mjs'
 import { findWatchComponent, openMockedVideo } from '../../helpers/player.mjs'
 import { mockPlayableWatchPage } from '../../helpers/watch.mjs'
 
@@ -60,4 +60,23 @@ test('late timeupdates do not access the released Shaka cast proxy', async ({ ap
     await disposal.dispose()
   }
   await expect(video).toBeVisible()
+})
+
+test('leaving fullscreen after the player is torn down does not reveal released controls', async ({ app, page }) => {
+  const errors = []
+  page.on('pageerror', error => errors.push(error.message))
+  await mockPlayableWatchPage(app, page)
+  await openMockedVideo(page)
+  await setPlayerFullscreen(page, true)
+
+  // A playback-engine fallback tears the player down while it stays mounted,
+  // and fullscreen can end only afterwards.
+  const component = await page.evaluateHandle(findWatchComponent)
+  await component.evaluate(component => component.refs.player.destroyPlayer())
+  await page.evaluate(() => document.exitFullscreen())
+  await expect.poll(() => page.evaluate(() => document.fullscreenElement)).toBeNull()
+  await page.evaluate(() => new Promise(resolve => requestAnimationFrame(() => setTimeout(resolve))))
+  await component.dispose()
+
+  expect(errors).toEqual([])
 })
