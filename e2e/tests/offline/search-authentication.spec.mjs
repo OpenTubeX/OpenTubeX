@@ -359,7 +359,7 @@ if (process.argv.at(-1).includes('/playlist?')) fs.appendFileSync(${JSON.stringi
 
 test('shows the age gate, cookie setup hint, and cached notice at desktop and phone widths', async ({ app, page }) => {
   await searchForAgeGate(page)
-  await expect(page.getByText('Configure cookies in Settings → External Software → yt-dlp Cookies.')).toBeVisible()
+  await expect(page.getByText('Configure cookies in Settings → Advanced → External Software → yt-dlp Cookies.')).toBeVisible()
   await expect(page.getByRole('button', { name: 'Try with configured cookies' })).toHaveCount(0)
   await page.locator(sel.searchInput).fill('different search')
   await page.locator(sel.searchInput).press('Enter')
