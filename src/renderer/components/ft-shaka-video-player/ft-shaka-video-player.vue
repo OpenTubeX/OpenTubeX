@@ -722,7 +722,7 @@
         v-if="secondaryCaptionText"
         class="secondaryCaptions"
         :class="{ secondaryCaptionsAtTop: secondaryCaptionPosition.atTop }"
-        :style="[secondaryCaptionsBox, { textAlign: secondaryCaptionPosition.align }, captionStyle.text]"
+        :style="[secondaryCaptionsBox, { textAlign: secondaryCaptionPosition.align, alignItems: secondaryCaptionPosition.alignItems }, captionStyle.text]"
         translate="no"
       >
         <span :style="{ backgroundColor: captionStyle.background }">{{ secondaryCaptionText }}</span>

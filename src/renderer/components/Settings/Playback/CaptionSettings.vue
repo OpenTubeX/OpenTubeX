@@ -121,6 +121,16 @@ function getOpacityName(opacity) {
 }
 
 /**
+ * Opacities that aren't offered, which the settings allowed before, stay selectable.
+ * @param {readonly (number | null)[]} opacities
+ * @param {number | null} opacity
+ */
+function getOpacityOptions(opacities, opacity) {
+  const values = opacities.includes(opacity) ? [...opacities] : [...opacities, opacity]
+  return values.map(value => ({ value, name: getOpacityName(value) }))
+}
+
+/**
  * Colors that aren't in the palette, which the settings offered before, stay selectable.
  * @param {string} color
  */
@@ -147,7 +157,7 @@ const styleControls = computed(() => [
     setting: 'fontOpacity',
     label: t('Settings.Player Settings.Caption Appearance.Text Opacity'),
     icon: 'opacity',
-    options: CAPTION_FONT_OPACITIES.map(value => ({ value, name: getOpacityName(value) })),
+    options: getOpacityOptions(CAPTION_FONT_OPACITIES, captionSettings.value.fontOpacity),
   },
   {
     setting: 'fontScaleFactor',
@@ -165,7 +175,7 @@ const styleControls = computed(() => [
     setting: 'backgroundOpacity',
     label: t('Settings.Player Settings.Caption Appearance.Background Opacity'),
     icon: 'opacity',
-    options: CAPTION_BACKGROUND_OPACITIES.map(value => ({ value, name: getOpacityName(value) })),
+    options: getOpacityOptions(CAPTION_BACKGROUND_OPACITIES, captionSettings.value.backgroundOpacity),
   },
   {
     setting: 'characterEdgeStyle',

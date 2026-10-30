@@ -10,8 +10,15 @@
   transition: inset-inline-end 250ms ease, bottom cubic-bezier(0.4, 0, 0.6, 1) 0.1s;
 }
 
-/* Unless a font family is picked in the captions style, which Shaka applies to every cue. */
-.captionsUseAppFont :deep(:is(.shaka-text-container, .shaka-speech-to-text-container) *) {
+/*
+  Unless a font family is picked in the captions style, which Shaka applies to every cue,
+  also while it previews the font families of its menu.
+*/
+/* stylelint-disable-next-line selector-max-compound-selectors -- Shaka's font families only show in inline styles. */
+.captionsUseAppFont :deep(:is(.shaka-text-container, .shaka-speech-to-text-container) :not(
+  :is([style*='Courier New'], [style*='Times New Roman'], [style*='Deja Vu Sans Mono'], [style*='PT Sans Caption']),
+  :is([style*='Courier New'], [style*='Times New Roman'], [style*='Deja Vu Sans Mono'], [style*='PT Sans Caption']) *
+)) {
   font-family: var(--app-font-family) !important;
 }
 

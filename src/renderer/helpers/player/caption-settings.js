@@ -216,7 +216,11 @@ export function parseCaptionSettings(value) {
     fontOpacity: normalizeOpacity(settings.fontOpacity),
     fontScaleFactor: normalizeFontScaleFactor(settings.fontScaleFactor ?? settings.fontScale ?? settings.fontPercent),
     backgroundColor: normalizeColor(settings.backgroundColor, legacy ? '#000000' : ''),
-    backgroundOpacity: normalizeOpacity(settings.backgroundOpacity, legacy ? 0.8 : null),
+    // Only the earlier default background, black at 80%, is Shaka's default
+    backgroundOpacity: normalizeOpacity(
+      settings.backgroundOpacity,
+      legacy && normalizeColor(settings.backgroundColor, '#000000') === '' ? 0.8 : null
+    ),
     characterEdgeStyle: normalizeName(
       settings.characterEdgeStyle ?? LEGACY_EDGE_STYLES[settings.edgeStyle],
       CAPTION_EDGE_STYLES,
@@ -241,13 +245,15 @@ export function areCaptionSettingsDefault(settings) {
 /**
  * The position of the secondary captions, at the opposite edge of the main captions.
  * @param {string} positionArea
- * @returns {{ atTop: boolean, align: 'left' | 'center' | 'right' }}
+ * @returns {{ atTop: boolean, align: 'left' | 'center' | 'right', alignItems: string }}
  */
 export function getSecondaryCaptionPosition(positionArea) {
   const [row, column] = positionArea.split('_')
+  const align = column === 'LEFT' ? 'left' : column === 'RIGHT' ? 'right' : 'center'
   return {
     atTop: row !== 'TOP',
-    align: column === 'LEFT' ? 'left' : column === 'RIGHT' ? 'right' : 'center',
+    align,
+    alignItems: { left: 'flex-start', center: 'center', right: 'flex-end' }[align],
   }
 }
 

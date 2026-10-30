@@ -109,6 +109,10 @@ test('reads the settings saved before Shaka\'s style options', () => {
     positionArea: 'TOP_RIGHT',
   })
 
+  // 80% was only the default opacity of the default background
+  assert.equal(parseCaptionSettings({ backgroundColor: '#3f51b5', backgroundOpacity: 0.8 }).backgroundOpacity, 0.8)
+  assert.equal(parseCaptionSettings({ backgroundColor: '#000000', backgroundOpacity: 0.8 }).backgroundOpacity, null)
+
   // A font size between Shaka's sizes snaps to the closest one
   assert.equal(parseCaptionSettings({ fontScale: 1.3 }).fontScaleFactor, 1.25)
   assert.equal(parseCaptionSettings({ fontScale: 10 }).fontScaleFactor, 4)
@@ -133,10 +137,10 @@ test('drops unknown options', () => {
 })
 
 test('places the secondary captions at the opposite edge', () => {
-  assert.deepEqual(getSecondaryCaptionPosition('BOTTOM_CENTER'), { atTop: true, align: 'center' })
-  assert.deepEqual(getSecondaryCaptionPosition('DEFAULT'), { atTop: true, align: 'center' })
-  assert.deepEqual(getSecondaryCaptionPosition('CENTER_RIGHT'), { atTop: true, align: 'right' })
-  assert.deepEqual(getSecondaryCaptionPosition('TOP_LEFT'), { atTop: false, align: 'left' })
+  assert.deepEqual(getSecondaryCaptionPosition('BOTTOM_CENTER'), { atTop: true, align: 'center', alignItems: 'center' })
+  assert.deepEqual(getSecondaryCaptionPosition('DEFAULT'), { atTop: true, align: 'center', alignItems: 'center' })
+  assert.deepEqual(getSecondaryCaptionPosition('CENTER_RIGHT'), { atTop: true, align: 'right', alignItems: 'flex-end' })
+  assert.deepEqual(getSecondaryCaptionPosition('TOP_LEFT'), { atTop: false, align: 'left', alignItems: 'flex-start' })
 })
 
 test('styles the captions Shaka does not render like Shaka', () => {
