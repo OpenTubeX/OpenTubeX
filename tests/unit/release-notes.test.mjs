@@ -96,6 +96,18 @@ test('a release note file is parsed with its category, platforms, and images', (
   })
 })
 
+test('release notes can list their own references', () => {
+  assert.deepEqual(parseReleaseNoteFile(noteFile({ frontMatter: 'category: fix\nreferences: [2509, 41]' })).references, [2509, 41])
+
+  for (const references of ['[]', '2509', '[#2509]', '[0]', '[25a]']) {
+    assert.throws(
+      () => parseReleaseNoteFile(noteFile({ frontMatter: `category: fix\nreferences: ${references}` })),
+      /Write references as a list of issue and pull request numbers/,
+      references,
+    )
+  }
+})
+
 test('wrapped release note lines are joined', () => {
   assert.equal(parseReleaseNoteFile(noteFile({ note: 'Adds a compact\n  player.' })).note, 'Adds a compact player.')
 })
@@ -438,6 +450,17 @@ test('release notes render under their categories in creation order with platfor
 `)
 })
 
+test('improvements are only called more improvements below highlights', async () => {
+  assert.equal(await renderReleaseNotes([note(), note({ category: 'fix', note: 'Fixed a crash.' })]), `## Improvements
+
+- Adds a compact player.
+
+## Fixed bugs
+
+- Fixed a crash.
+`)
+})
+
 test('a release without release notes is rejected', async () => {
   await assert.rejects(renderReleaseNotes([]), /No release notes were found in release-notes/)
 })
@@ -460,7 +483,7 @@ test('nightly releases omit images that cannot be processed', async () => {
     onImageError: (error) => imageErrors.push(error),
   })
 
-  assert.equal(result, `## More improvements
+  assert.equal(result, `## Improvements
 
 - Adds a compact player. (#42)
 `)

@@ -23,6 +23,7 @@ Name the file after the change in kebab-case, for example `queue-video-details.m
 
 - `category`: `highlight`, `improvement`, or `fix`. Highlights lead the release, so keep them to the few changes most users will care about.
 - `platforms` (optional): any of `android`, `ios`, `linux`, `macos`, `windows`, and `desktop`. Leave it out when the change affects every platform. The update prompt in the app and the store listings skip notes for other platforms.
+- `references` (optional): issue and pull request numbers, for example `[2509]`. They replace the references from the pull requests that changed the file, for notes added after their change merged.
 
 ## Note
 

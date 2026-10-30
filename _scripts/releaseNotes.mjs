@@ -13,7 +13,7 @@ const RELEASE_NOTE_CATEGORIES = new Map([
   ['fix', '## Fixed bugs'],
 ])
 const DESKTOP_PLATFORMS = ['linux', 'macos', 'windows']
-const FRONT_MATTER_KEYS = new Set(['category', 'platforms'])
+const FRONT_MATTER_KEYS = new Set(['category', 'platforms', 'references'])
 const MAX_NOTE_LENGTH = 300
 const NO_RELEASE_NOTE_PATTERN = /^\s*-\s*\[[xX]\]\s+No release note needed\s*$/m
 const MAX_IMAGE_HEIGHT = 300
@@ -393,6 +393,16 @@ function parsePlatforms(value) {
   return [...RELEASE_NOTE_PLATFORMS.keys()].filter((platform) => platforms.has(platform))
 }
 
+function parseReferences(value) {
+  if (value === undefined) { return undefined }
+
+  if (!Array.isArray(value) || value.length === 0 || value.some((number) => !/^[1-9]\d*$/.test(number))) {
+    throw new Error('Write references as a list of issue and pull request numbers, for example references: [2509].')
+  }
+
+  return value.map(Number)
+}
+
 export function validateNoteText(note) {
   if (!note) { throw new Error('Write the release note below the front matter.') }
 
@@ -425,6 +435,7 @@ export function parseReleaseNoteFile(content) {
   }
 
   const platforms = parsePlatforms(metadata.platforms)
+  const references = parseReferences(metadata.references)
   const [noteBlock = '', ...imageBlocks] = match[2].trim().split(/\n[ \t]*\n/)
   const note = noteBlock.split('\n').map((line) => line.trim()).join(' ')
 
@@ -437,7 +448,7 @@ export function parseReleaseNoteFile(content) {
     if (image.lightUrl) { validateImageUrl(image.lightUrl) }
   }
 
-  return { category: metadata.category, images, note, platforms }
+  return { category: metadata.category, images, note, platforms, ...(references && { references }) }
 }
 
 export function isReleaseNoteFile(file) {
@@ -585,7 +596,8 @@ export function resolveReleaseNoteHistory(notes, { repository, target }) {
   return notes.map((note, index) => ({
     ...note,
     createdAt: histories[index].createdAt,
-    references: formatReferences(histories[index].commits.flatMap((commit) => pullRequests.get(commit) ?? [])),
+    // Notes added after their change merged list its references themselves.
+    references: note.references ?? formatReferences(histories[index].commits.flatMap((commit) => pullRequests.get(commit) ?? [])),
   }))
 }
 
@@ -624,9 +636,13 @@ export async function renderReleaseNotes(notes, {
     sections.get(note.category).push(releaseNote)
   }
 
+  // "More" only reads right below highlights.
+  const headingFor = (category, heading) => (
+    category === 'improvement' && sections.get('highlight').length === 0 ? '## Improvements' : heading
+  )
   const renderedSections = [...RELEASE_NOTE_CATEGORIES]
     .filter(([category]) => sections.get(category).length > 0)
-    .map(([category, heading]) => `${heading}\n\n${sections.get(category).join('\n')}`)
+    .map(([category, heading]) => `${headingFor(category, heading)}\n\n${sections.get(category).join('\n')}`)
 
   if (renderedSections.length === 0) {
     if (emptyMessage !== null) { return `${emptyMessage}\n` }
