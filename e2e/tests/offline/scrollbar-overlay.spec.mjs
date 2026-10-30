@@ -857,30 +857,8 @@ test.describe('overlay scrollbars', () => {
       })
       await page.mouse.move(250, 300)
 
-      const session = await page.context().newCDPSession(page)
-      const frames = []
-      session.on('Page.screencastFrame', ({ data, sessionId }) => {
-        frames.push(data)
-        session.send('Page.screencastFrameAck', { sessionId }).catch(() => {})
-      })
-      await session.send('Page.startScreencast', { format: 'png' })
-      for (let step = 0; step < 15; step++) {
-        await page.mouse.wheel(0, 100)
-        await page.waitForTimeout(50)
-      }
-      // UI scales change how far each wheel step scrolls, so wait for it to settle.
-      let lastScrollTop = -1
-      await expect.poll(async () => {
-        const scrollTop = await viewport.evaluate(element => element.scrollTop)
-        const settled = scrollTop > 0 && scrollTop === lastScrollTop
-        lastScrollTop = scrollTop
-        return settled
-      }).toBe(true)
-      await session.send('Page.stopScreencast')
-      await session.detach()
-
       // The handle's top edge in each frame, in CSS pixels
-      const handleTops = await page.evaluate(async ({ frames, bounds }) => {
+      const findHandleTops = frames => page.evaluate(async ({ frames, bounds }) => {
         return Promise.all(frames.map(async data => {
           const bitmap = await createImageBitmap(await (await fetch(`data:image/png;base64,${data}`)).blob())
           const canvas = new OffscreenCanvas(bitmap.width, bitmap.height)
@@ -896,6 +874,32 @@ test.describe('overlay scrollbars', () => {
         }))
       }, { frames, bounds })
 
+      const session = await page.context().newCDPSession(page)
+      const frames = []
+      session.on('Page.screencastFrame', ({ data, sessionId }) => {
+        frames.push(data)
+        session.send('Page.screencastFrameAck', { sessionId }).catch(() => {})
+      })
+      await session.send('Page.startScreencast', { format: 'png' })
+      // The first frame can predate the scroller on slow machines.
+      await expect.poll(async () => frames.length > 0 && (await findHandleTops(frames.slice(-1)))[0] !== null).toBe(true)
+      frames.length = 0
+      for (let step = 0; step < 15; step++) {
+        await page.mouse.wheel(0, 100)
+        await page.waitForTimeout(50)
+      }
+      // UI scales change how far each wheel step scrolls, so wait for it to settle.
+      let lastScrollTop = -1
+      await expect.poll(async () => {
+        const scrollTop = await viewport.evaluate(element => element.scrollTop)
+        const settled = scrollTop > 0 && scrollTop === lastScrollTop
+        lastScrollTop = scrollTop
+        return settled
+      }).toBe(true)
+      await session.send('Page.stopScreencast')
+      await session.detach()
+
+      const handleTops = await findHandleTops(frames)
       expect(handleTops.length).toBeGreaterThan(5)
       expect(handleTops).not.toContain(null)
       expect(Math.max(...handleTops) - Math.min(...handleTops)).toBeGreaterThan(1)
