@@ -21,9 +21,21 @@ function hasSameRoles(a, b) {
 }
 
 /**
+ * Whether every track label names the track's resolution, like Twitch's "720p"
+ * or "1080p60" HLS renditions, rather than an alternative video.
+ * @param {shaka.extern.VideoTrack[]} tracks
+ */
+function hasResolutionLabels(tracks) {
+  return new Set(tracks.map(track => track.label)).size > 1 &&
+    tracks.every(track => /^\d+p/.test(track.label) && Number.parseInt(track.label) === track.height)
+}
+
+/**
  * Shaka's resolution menu, but when a video is available in several video
  * codecs, the codecs get a switcher in the header and the tiles only list the
  * resolutions of the chosen one, instead of every codec's tiles side by side.
+ * Shaka also only lists the tracks with the playing track's label, which hides
+ * every other resolution when the labels name resolutions.
  */
 export class QualitySelection extends shaka.ui.ResolutionSelection {
   /**
@@ -78,7 +90,7 @@ export class QualitySelection extends shaka.ui.ResolutionSelection {
 
     if (codecs.length < 2) {
       this.codecSwitcher_.remove()
-      return
+      if (!hasResolutionLabels(tracks)) return
     }
 
     codecs.sort((a, b) => {
@@ -93,7 +105,9 @@ export class QualitySelection extends shaka.ui.ResolutionSelection {
       this.codec_ = activeTrack ? getCodecFamily(activeTrack.codecs) : codecs[0]
     }
 
-    this.updateCodecSwitcher_(codecs)
+    if (codecs.length > 1) {
+      this.updateCodecSwitcher_(codecs)
+    }
 
     const focusedTile = this.menu.querySelector('.explicit-resolution:focus')
     for (const button of this.menu.querySelectorAll('.explicit-resolution')) {

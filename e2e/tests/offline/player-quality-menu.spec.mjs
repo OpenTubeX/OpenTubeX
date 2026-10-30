@@ -21,8 +21,9 @@ const TRACKS = [
  *
  * @param {{ electronApp: import('@playwright/test').ElectronApplication }} app
  * @param {import('@playwright/test').Page} page
- * @param {(string | [string, string])[]} streams The codecs that the manifest
- * offers the stream in, optionally with a resolution other than 320x180
+ * @param {(string | [string, string, string?])[]} streams The codecs that the
+ * manifest offers the stream in, optionally with a resolution other than
+ * 320x180 and a name for its video rendition
  */
 async function openAdaptiveVideo(app, page, streams = ['avc1.42c00d']) {
   await mockPlayableWatchPage(app, page)
@@ -31,9 +32,11 @@ async function openAdaptiveVideo(app, page, streams = ['avc1.42c00d']) {
     contentType: 'application/x-mpegurl',
     body: route.request().url().endsWith('/master.m3u8')
       ? `#EXTM3U
-${streams.map(stream => [stream].flat()).map(([codec, resolution = '320x180'], index) => `#EXT-X-STREAM-INF:BANDWIDTH=84000,CODECS="${codec}",RESOLUTION=${resolution}
-video-${index}.m3u8
-`).join('')}`
+${streams.map(stream => [stream].flat()).map(([codec, resolution = '320x180', name], index) => [
+  ...(name ? [`#EXT-X-MEDIA:TYPE=VIDEO,GROUP-ID="${name}",NAME="${name}",AUTOSELECT=YES,DEFAULT=YES`] : []),
+  `#EXT-X-STREAM-INF:BANDWIDTH=84000,CODECS="${codec}",RESOLUTION=${resolution}${name ? `,VIDEO="${name}"` : ''}`,
+  `video-${index}.m3u8\n`
+].join('\n')).join('')}`
       : `#EXTM3U
 #EXT-X-TARGETDURATION:2
 #EXT-X-VERSION:7
@@ -425,6 +428,36 @@ test.describe('quality codecs from the manifest', () => {
     await expect(codecs.getByRole('button')).toHaveText(['AV1', 'VP9', 'H.264'])
     await expect(codecs.getByRole('button', { name: 'H.264' })).toHaveAttribute('aria-pressed', 'true')
     await player.locator('.shaka-resolutions').screenshot({ path: testInfo.outputPath('codecs.png') })
+  })
+
+  test('lists every resolution when the manifest names them', async ({ app, page }) => {
+    // Twitch names the video rendition of each resolution, which Shaka reports
+    // as a different label for each video track
+    await openAdaptiveVideo(app, page, [['avc1.42c00d', '1280x720', '720p'], ['avc1.42c00d', '640x360', '360p']])
+    const player = page.locator(`${activeTab} .ftVideoPlayer`)
+    await player.hover()
+    await player.locator('.shaka-overflow-menu-button').click()
+    await player.locator('.shaka-resolution-button').click()
+    const menu = player.locator('.shaka-resolutions')
+    await expect(menu.locator('.explicit-resolution > span')).toHaveText(['720p', '360p'])
+    await expect(menu.locator('.ft-quality-codecs')).toHaveCount(0)
+  })
+
+  test('lists only the resolutions of the playing alternative video', async ({ app, page }) => {
+    await openAdaptiveVideo(app, page)
+    const player = page.locator(`${activeTab} .ftVideoPlayer`)
+    await player.evaluate(element => {
+      const shakaPlayer = element.ui.getControls().getPlayer()
+      shakaPlayer.getVideoTracks = () => [
+        { id: 1, label: 'Main', width: 1920, height: 1080, bandwidth: 4e6, active: true },
+        { id: 2, label: 'Sign language', width: 1280, height: 720, bandwidth: 2e6 },
+      ].map(track => ({ codecs: 'avc1.64002a', frameRate: 30, hdr: 'SDR', roles: [], videoLayout: null, active: false, ...track }))
+      shakaPlayer.dispatchEvent({ type: 'trackschanged' })
+    })
+    await player.hover()
+    await player.locator('.shaka-overflow-menu-button').click()
+    await player.locator('.shaka-resolution-button').click()
+    await expect(player.locator('.shaka-resolutions .explicit-resolution > span')).toHaveText(['1080p'])
   })
 
   test('lets Shaka choose the codecs without smooth codec switching', async ({ app, page }) => {
