@@ -649,6 +649,8 @@ Settings:
         Destructive pressed: Pöördumatu toiming vajutamisel
         Text and icons on destructive actions: Pöördumatute toimingute tekst ja ikoonid
   Player Settings:
+    Mono Audio: 'Monoheli'
+    Show Mono Audio Toggle: 'Näita monoheli lülitit'
     Pause on Stream Recovery: "Peata voo taastamisel"
     Buffering:
       Buffering: Puhverdamine
@@ -1985,6 +1987,7 @@ Tooltips:
   Proxy Settings:
     IP Block Recovery Script Path: Skriptifaili asukoht, mida kasutatakse IP-blokeeringu tuvastamisel. OpenTubeX ootab skripti lõppemist ja laadib seejärel video uuesti. Kui varumeetod on lubatud, käivitatakse skript ainult siis, kui ka varumeetod nurjub.
   Player Settings:
+    Mono Audio: 'Esitab vasakut ja paremat helikanalit mõlemas kõrvas. Kasuta seda, kui video heli kostab ainult kõrvaklappide ühest küljest.'
     Pause on Stream Recovery: "Kui videovoog ebaõnnestub ja mängija laadib selle uuesti või lülitub teisele vormingule või mootorile, peatatakse taasesitus ja viga jääb mängija ülaossa, kuni selle sulged. Kui see on välja lülitatud, jätkub taasesitus ja viga kuvatakse lühidalt teavitusena."
     Continue Playback When Screen Is Locked: 'Jätab heli taustal mängima ja pakub Androidi meediajuhtelemente. Lülita see välja, et esitus peatataks, kui rakendus pole enam nähtav.'
     Enable Caption Translations: Kui see on lubatud ja videol pole eelistatud subtiitrikeeles sobivat originaalrada, eelistavad subtiitrinupp ja kiirklahv C automaatselt tõlgitud rada.

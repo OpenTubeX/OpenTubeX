@@ -649,6 +649,8 @@ Settings:
         Destructive pressed: Basılı yıkıcı işlem
         Text and icons on destructive actions: Yıkıcı işlemlerdeki metin ve simgeler
   Player Settings:
+    Mono Audio: 'Mono ses'
+    Show Mono Audio Toggle: 'Mono ses düğmesini göster'
     Pause on Stream Recovery: "Akış kurtarmada duraklat"
     Buffering:
       Buffering: Arabelleğe Alma
@@ -1983,6 +1985,7 @@ Tooltips:
   Proxy Settings:
     IP Block Recovery Script Path: IP engeli algılandığında çalıştırılacak betik dosyasının yolu. OpenTubeX betiğin tamamlanmasını bekler ve videoyu yeniden yükler. Yedek arka uç etkinse yalnızca yedek arka uç da başarısız olduğunda çalışır.
   Player Settings:
+    Mono Audio: 'Sol ve sağ ses kanallarını her iki kulakta da çalar. Bir videonun sesi kulaklığınızın yalnızca bir tarafından geliyorsa kullanın.'
     Pause on Stream Recovery: "Video akışı başarısız olduğunda ve oynatıcı onu yeniden yüklediğinde ya da başka bir biçime veya motora geçtiğinde oynatma duraklatılır ve hata siz kapatana kadar oynatıcının üstünde kalır. Devre dışı bırakıldığında oynatma devam eder ve hata kısa süreliğine bildirim olarak görünür."
     Continue Playback When Screen Is Locked: 'Sesi arka planda çalmaya devam eder ve Android medya kontrolleri sağlar. Uygulama artık görünür olmadığında duraklatmak için bunu kapatın.'
     Enable Caption Translations: Etkinleştirildiğinde ve videoda eşleşen özgün bir parça olmadığında alt yazı düğmesi ile C kısayolu, tercih edilen alt yazı diline otomatik çevrilmiş parçayı seçer.

@@ -1316,6 +1316,80 @@ test('volume boost amplifies the audio within its tab', async ({ app, page, atta
   await expect.poll(() => outputGain(1)).toBe(1)
 })
 
+test('mono audio plays every channel in both ears', async ({ app, page, attachScreenshot }) => {
+  // The demo media is silent, so record the node that feeds the output and
+  // render a left-only signal through its channel configuration.
+  await page.evaluate(() => {
+    const connect = AudioNode.prototype.connect
+    window.__playerOutputs = []
+    AudioNode.prototype.connect = function (target, ...args) {
+      // Skip the offline context below, which renders the test signal.
+      if (target === this.context.destination && this.context instanceof AudioContext) {
+        window.__playerOutputs.push(this)
+      }
+      return connect.call(this, target, ...args)
+    }
+  })
+  const leftOnlyOutput = () => page.evaluate(async () => {
+    const node = window.__playerOutputs.at(-1)
+    if (!node) return null
+    const context = new OfflineAudioContext(2, 128, 48000)
+    const buffer = context.createBuffer(2, 128, 48000)
+    buffer.getChannelData(0).fill(1)
+    const source = context.createBufferSource()
+    source.buffer = buffer
+    const output = context.createGain()
+    output.channelCount = node.channelCount
+    output.channelCountMode = node.channelCountMode
+    output.channelInterpretation = node.channelInterpretation
+    source.connect(output).connect(context.destination)
+    source.start()
+    const rendered = await context.startRendering()
+    return [rendered.getChannelData(0)[0], rendered.getChannelData(1)[0]]
+  })
+
+  await openDemoVideo({ app, page })
+  const player = page.locator(`${activeTab} .ftVideoPlayer`)
+  await player.hover()
+  await player.getByRole('button', { name: 'More settings' }).click()
+  const monoButton = player.locator('.shaka-overflow-menu .mono-audio-button')
+  // The mono audio toggle is opt-in.
+  await expect(player.locator('.shaka-overflow-menu')).toBeVisible()
+  await expect(monoButton).toHaveCount(0)
+  await page.evaluate(() => window.$store.dispatch('updateShowMonoAudioToggle', true))
+  // Rebuilding the controls closes the menu.
+  await expect(player.locator('.shaka-overflow-menu')).toBeHidden()
+  await player.hover()
+  await player.getByRole('button', { name: 'More settings' }).click()
+  await expect(monoButton).toHaveAttribute('aria-pressed', 'false')
+  // The player only routes its audio through Web Audio once mono is on.
+  expect(await leftOnlyOutput()).toBeNull()
+
+  await monoButton.click()
+  await expect(monoButton).toHaveAttribute('aria-pressed', 'true')
+  await attachScreenshot('mono audio toggle')
+  await expect.poll(leftOnlyOutput).toEqual([0.5, 0.5])
+  expect(await page.evaluate(() => window.$store.getters.getMonoAudio)).toBe(true)
+
+  // The setting applies to every video, so the next one starts in mono.
+  await openMockedVideo(page, 'aqz-KE-bpKQ')
+  await expect.poll(() => page.evaluate(() => window.__playerOutputs.length)).toBe(2)
+  await expect.poll(leftOnlyOutput).toEqual([0.5, 0.5])
+
+  await player.hover()
+  await player.getByRole('button', { name: 'More settings' }).click()
+  await monoButton.click()
+  await expect(monoButton).toHaveAttribute('aria-pressed', 'false')
+  await expect.poll(leftOnlyOutput).toEqual([1, 0])
+
+  // Hiding the toggle leaves the setting itself in charge.
+  await page.evaluate(() => window.$store.dispatch('updateMonoAudio', true))
+  await expect.poll(leftOnlyOutput).toEqual([0.5, 0.5])
+  await page.evaluate(() => window.$store.dispatch('updateShowMonoAudioToggle', false))
+  await expect(monoButton).toHaveCount(0)
+  await expect.poll(leftOnlyOutput).toEqual([0.5, 0.5])
+})
+
 test.describe('mobile player menus', { tag: '@scale' }, () => {
   test('options and submenus stay above the center play button', async ({ app, page, attachScreenshot }) => {
     await mockPlayableWatchPage(app, page)

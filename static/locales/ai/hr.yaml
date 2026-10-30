@@ -652,6 +652,8 @@ Settings:
         Destructive pressed: Pritisnuta destruktivna radnja
         Text and icons on destructive actions: Tekst i ikone na destruktivnim radnjama
   Player Settings:
+    Mono Audio: 'Mono zvuk'
+    Show Mono Audio Toggle: 'Prikaži prekidač za mono zvuk'
     Default Media Format:
       Default Media Format: 'Standardni format medija'
     Pause on Stream Recovery: "Pauziraj pri oporavku streama"
@@ -2012,6 +2014,7 @@ Tooltips:
   Proxy Settings:
     IP Block Recovery Script Path: Putanja datoteke skripte koja se pokreće kada se otkrije blokada IP adrese. OpenTubeX čeka da završi, a zatim ponovno učitava videozapis. Ako je pričuvna metoda omogućena, skripta se pokreće samo ako ni pričuvna metoda ne uspije.
   Player Settings:
+    Mono Audio: 'Reproducira lijevi i desni audiokanal u oba uha. Koristite kada zvuk videozapisa dolazi samo s jedne strane slušalica.'
     Pause on Stream Recovery: "Kada video stream ne uspije, a player ga ponovno učita ili prijeđe na drugi format ili pogon, reprodukcija se pauzira i greška ostaje na vrhu playera dok je ne odbaciš. Kada je isključeno, reprodukcija se nastavlja, a greška se kratko prikazuje kao obavijest."
     Continue Playback When Screen Is Locked: 'Nastavlja reprodukciju zvuka u pozadini i pruža Android kontrole medija. Isključite ovo za pauziranje kada aplikacija više nije vidljiva.'
     Enable Caption Translations: Kada je omogućeno, gumb za titlove i prečac C daju prednost automatski prevedenom zapisu na željenom jeziku titlova ako videozapis nema odgovarajući izvorni zapis.

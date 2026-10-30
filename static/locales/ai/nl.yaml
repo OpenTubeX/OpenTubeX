@@ -654,6 +654,8 @@ Settings:
         Destructive pressed: Verwijderactie bij indrukken
         Text and icons on destructive actions: Tekst en pictogrammen bij verwijderacties
   Player Settings:
+    Mono Audio: 'Mono-audio'
+    Show Mono Audio Toggle: 'Schakelaar voor mono-audio tonen'
     Default Media Format:
       Default Media Format: 'Standaardmediaformaat'
     Pause on Stream Recovery: "Pauzeren bij streamherstel"
@@ -2043,6 +2045,7 @@ Tooltips:
   Proxy Settings:
     IP Block Recovery Script Path: Pad naar het scriptbestand dat wordt uitgevoerd wanneer een IP-blokkade wordt gedetecteerd. OpenTubeX wacht tot het klaar is en laadt daarna de video opnieuw. Als terugvallen is ingeschakeld, wordt het alleen uitgevoerd wanneer ook dat mislukt.
   Player Settings:
+    Mono Audio: 'Speelt het linker- en rechteraudiokanaal in beide oren af. Gebruik dit als het geluid van een video maar uit één kant van je koptelefoon komt.'
     Pause on Stream Recovery: "Wanneer de videostream mislukt en de speler deze opnieuw laadt of overschakelt naar een ander formaat of een andere engine, wordt het afspelen gepauzeerd en blijft de fout bovenaan de speler staan tot je deze sluit. Indien uitgeschakeld, gaat het afspelen door en verschijnt de fout kort als melding."
     Continue Playback When Screen Is Locked: 'Blijft audio op de achtergrond afspelen en biedt Android-mediabediening. Schakel dit uit om te pauzeren wanneer de app niet meer zichtbaar is.'
     Enable Caption Translations: Als dit is ingeschakeld en de video geen overeenkomend oorspronkelijk ondertitelingsspoor heeft, geven de ondertitelingsknop en sneltoets C de voorkeur aan een automatisch vertaald spoor in de voorkeurstaal voor ondertiteling.

@@ -815,6 +815,8 @@ Settings:
       Everforest Light Blue: Everforest Light Blue
       Everforest Light Purple: Everforest Light Purple
   Player Settings:
+    Mono Audio: '모노 오디오'
+    Show Mono Audio Toggle: '모노 오디오 토글 표시'
     Default Media Format:
       Default Media Format: '기본 미디어 포맷'
     Pause on Stream Recovery: "스트림 복구 시 일시 정지"
@@ -2368,6 +2370,7 @@ Tooltips:
   Proxy Settings:
     IP Block Recovery Script Path: IP 차단이 감지될 때 실행할 스크립트 파일 경로입니다. OpenTubeX는 실행이 끝날 때까지 기다린 후 동영상을 다시 불러옵니다. 대체 사용이 활성화된 경우 대체 방식도 실패했을 때만 실행합니다.
   Player Settings:
+    Mono Audio: '왼쪽과 오른쪽 오디오 채널을 양쪽 귀에서 재생합니다. 동영상 소리가 헤드폰 한쪽에서만 들릴 때 사용하세요.'
     Pause on Stream Recovery: "동영상 스트림이 실패하여 플레이어가 다시 불러오거나 다른 형식 또는 엔진으로 전환하면 재생을 일시 정지하고, 닫을 때까지 플레이어 상단에 오류를 표시합니다. 끄면 재생이 계속되고 오류는 알림으로 잠시 표시됩니다."
     Continue Playback When Screen Is Locked: '백그라운드에서 오디오를 계속 재생하고 Android 미디어 컨트롤을 제공합니다. 앱이 더 이상 보이지 않을 때 일시중지하려면 이 옵션을 끄세요.'
     Enable Caption Translations: 활성화하면 동영상에 선호 자막 언어와 일치하는 원본 트랙이 없을 때 자막 버튼과 C 단축키가 자동 번역된 트랙을 우선 사용합니다.

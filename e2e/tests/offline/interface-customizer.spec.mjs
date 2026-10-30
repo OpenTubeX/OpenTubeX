@@ -403,7 +403,7 @@ test.describe('interface customizer', () => {
   })
 
   test('scrolls the phone player menu preview and clamps it when its range shrinks', { tag: '@scale' }, async ({ app, page }) => {
-    const toggles = ['ShowSkipSilenceButton', 'ShowMusicModeToggle', 'ShowLightsOffToggle', 'ShowVolumeBoostToggle']
+    const toggles = ['ShowSkipSilenceButton', 'ShowMusicModeToggle', 'ShowLightsOffToggle', 'ShowVolumeBoostToggle', 'ShowMonoAudioToggle']
     const setToggles = value => page.evaluate(async ({ toggles, value }) => {
       for (const toggle of toggles) await window.$store.dispatch(`update${toggle}`, value)
     }, { toggles, value })

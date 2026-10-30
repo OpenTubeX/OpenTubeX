@@ -649,6 +649,8 @@ Settings:
       Catppuccin Macchiato Blue: "Catppuccin Macchiato azul"
       Catppuccin Macchiato Lavender: "Catppuccin Macchiato lavanda"
   Player Settings:
+    Mono Audio: 'Áudio mono'
+    Show Mono Audio Toggle: 'Mostrar o botão de áudio mono'
     Pause on Stream Recovery: "Pausar na recuperação da transmissão"
     Buffering:
       Buffering: Armazenamento em buffer
@@ -1983,6 +1985,7 @@ Tooltips:
   Proxy Settings:
     IP Block Recovery Script Path: Caminho do ficheiro de script a executar quando é detetado um bloqueio de IP. O OpenTubeX aguarda que termine e depois recarrega o vídeo. Se o método alternativo estiver ativado, o script só é executado quando esse método também falha.
   Player Settings:
+    Mono Audio: 'Reproduz os canais de áudio esquerdo e direito nos dois ouvidos. Utilize quando o som de um vídeo só sair de um lado dos seus auscultadores.'
     Pause on Stream Recovery: "Quando a transmissão de vídeo falha e o leitor a recarrega ou muda para outro formato ou motor, a reprodução é pausada e o erro fica no topo do leitor até o dispensar. Quando desativado, a reprodução continua e o erro aparece brevemente como notificação."
     Continue Playback When Screen Is Locked: 'Mantém o áudio em reprodução em segundo plano e fornece controlos multimédia do Android. Desative para pausar quando a aplicação deixar de estar visível.'
     Enable Caption Translations: Quando esta opção está ativada e o vídeo não fornece uma faixa original no idioma de legendas preferido, o botão de legendas e o atalho C dão preferência a uma faixa traduzida automaticamente para esse idioma.

@@ -649,6 +649,8 @@ Settings:
         Destructive pressed: 破壊的な操作の押下時
         Text and icons on destructive actions: 破壊的な操作上のテキストとアイコン
   Player Settings:
+    Mono Audio: 'モノラル音声'
+    Show Mono Audio Toggle: 'モノラル音声の切り替えを表示'
     Pause on Stream Recovery: "ストリーム復旧時に一時停止"
     Buffering:
       Buffering: バッファリング
@@ -1982,6 +1984,7 @@ Tooltips:
   Proxy Settings:
     IP Block Recovery Script Path: IPブロックを検出したときに実行するスクリプトファイルのパスです。OpenTubeXは処理の完了を待ってから動画を再読み込みします。フォールバックが有効な場合は、フォールバックにも失敗したときだけ実行します。
   Player Settings:
+    Mono Audio: '左右の音声チャンネルを両耳で再生します。動画の音がヘッドホンの片側からしか聞こえないときに使用します。'
     Pause on Stream Recovery: "動画ストリームが失敗し、プレーヤーが再読み込みするか別の形式やエンジンに切り替えたとき、再生を一時停止し、閉じるまでエラーをプレーヤー上部に表示します。オフにすると再生は続行され、エラーは通知として短時間表示されます。"
     Continue Playback When Screen Is Locked: 'バックグラウンドで音声の再生を続け、Android のメディアコントロールを提供します。アプリが表示されなくなったときに一時停止するには無効にしてください。'
     Enable Caption Translations: 有効にすると、指定した字幕言語の原文トラックが動画にない場合、字幕ボタンとCキーのショートカットで自動翻訳トラックを優先します。

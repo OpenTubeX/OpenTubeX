@@ -649,6 +649,8 @@ Settings:
         Destructive pressed: Törlő művelet lenyomáskor
         Text and icons on destructive actions: Törlő műveletek szövege és ikonjai
   Player Settings:
+    Mono Audio: 'Monó hang'
+    Show Mono Audio Toggle: 'Monó hang kapcsoló megjelenítése'
     Pause on Stream Recovery: "Szüneteltetés a stream helyreállításakor"
     Buffering:
       Buffering: Pufferelés
@@ -1983,6 +1985,7 @@ Tooltips:
   Proxy Settings:
     IP Block Recovery Script Path: Az IP-cím letiltásának észlelésekor futtatandó parancsfájl elérési útja. Az OpenTubeX megvárja a befejezését, majd újratölti a videót. Ha a tartalék módszer engedélyezett, csak akkor fut le, ha az is sikertelen.
   Player Settings:
+    Mono Audio: 'A bal és a jobb hangcsatornát mindkét fülben lejátssza. Használd, ha egy videó hangja csak a fejhallgató egyik oldalán szól.'
     Pause on Stream Recovery: "Ha a videostream meghiúsul, és a lejátszó újratölti, vagy másik formátumra vagy motorra vált, a lejátszás szünetel, és a hiba a lejátszó tetején marad, amíg el nem veted. Kikapcsolva a lejátszás folytatódik, és a hiba röviden értesítésként jelenik meg."
     Continue Playback When Screen Is Locked: 'A háttérben folytatja a hang lejátszását, és Android-médiavezérlőket biztosít. Kapcsold ki, ha az alkalmazás elrejtésekor szüneteltetni szeretnéd a lejátszást.'
     Enable Caption Translations: Bekapcsolva a feliratok gomb és a C billentyűparancs az előnyben részesített feliratnyelvre automatikusan lefordított sávot választja, ha a videóhoz nincs ezen a nyelven eredeti sáv.

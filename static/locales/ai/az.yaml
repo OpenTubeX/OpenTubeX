@@ -651,6 +651,8 @@ Settings:
         Destructive pressed: Silinmə elementi basıldıqda
         Text and icons on destructive actions: Silinmə əməliyyatlarında mətn və nişanlar
   Player Settings:
+    Mono Audio: 'Mono səs'
+    Show Mono Audio Toggle: 'Mono səs açarını göstər'
     Pause on Stream Recovery: "Yayım bərpasında fasilə ver"
     Buffering:
       Buffering: Buferləmə
@@ -1995,6 +1997,7 @@ Tooltips:
   Proxy Settings:
     IP Block Recovery Script Path: IP bloklanması aşkarlandıqda icra ediləcək skript faylının yolu. OpenTubeX onun bitməsini gözləyir, sonra videonu yenidən yükləyir. Ehtiyat mənbəyə keçid aktivdirsə, skript yalnız həmin keçid də uğursuz olduqda icra edilir.
   Player Settings:
+    Mono Audio: 'Sol və sağ səs kanallarını hər iki qulaqda səsləndirir. Videonun səsi qulaqlığın yalnız bir tərəfindən gələndə istifadə edin.'
     Pause on Stream Recovery: "Video yayımı uğursuz olduqda və pleyer onu yenidən yüklədikdə və ya başqa formata ya mühərrikə keçdikdə, oxutma dayandırılır və xəta siz bağlayana qədər pleyerin yuxarısında qalır. Söndürüldükdə oxutma davam edir və xəta qısa bildiriş kimi görünür."
     Enable Caption Translations: Aktivləşdirildikdə, videoda uyğun orijinal titr treki yoxdursa, titr düyməsi və C qısayolu üstünlük verilən titr dilinə avtomatik tərcümə olunmuş trekə üstünlük verir.
     Use Quick Playback Speed Bar: Oynadıcının sağ tərəfdəki idarəetmə hissəsində sürətli oynatma sürəti panelini göstərir. Kanal üzrə oynatma sürətinin əl ilə saxlanması aktivdirsə, paneldə cari kanalın sürətini saxlamaq üçün düymə də olur.

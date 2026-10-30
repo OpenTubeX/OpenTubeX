@@ -650,6 +650,8 @@ Settings:
         Destructive pressed: Tindakan destruktif saat ditekan
         Text and icons on destructive actions: Teks dan ikon pada tindakan destruktif
   Player Settings:
+    Mono Audio: 'Audio mono'
+    Show Mono Audio Toggle: 'Tampilkan sakelar audio mono'
     Default Media Format:
       Default Media Format: 'Format Media Bawaan'
     Pause on Stream Recovery: "Jeda saat pemulihan streaming"
@@ -2001,6 +2003,7 @@ Tooltips:
   Proxy Settings:
     IP Block Recovery Script Path: Jalur berkas skrip yang dijalankan saat blokir IP terdeteksi. OpenTubeX menunggu skrip selesai, lalu memuat ulang video. Jika metode cadangan diaktifkan, skrip hanya berjalan ketika metode cadangan juga gagal.
   Player Settings:
+    Mono Audio: 'Memutar saluran audio kiri dan kanan di kedua telinga. Gunakan saat suara video hanya keluar dari satu sisi headphone Anda.'
     Pause on Stream Recovery: "Saat streaming video gagal dan pemutar memuatnya ulang atau beralih ke format atau mesin lain, pemutaran dijeda dan galat tetap ditampilkan di bagian atas pemutar sampai Anda menutupnya. Jika dinonaktifkan, pemutaran berlanjut dan galat muncul sebentar sebagai notifikasi."
     Continue Playback When Screen Is Locked: 'Menjaga audio tetap diputar di latar belakang dan menyediakan kontrol media Android. Nonaktifkan untuk menjeda saat aplikasi tidak lagi terlihat.'
     Enable Caption Translations: Jika diaktifkan, tombol takarir dan pintasan C akan memilih trek yang diterjemahkan otomatis ke bahasa takarir pilihan jika video tidak menyediakan trek asli yang cocok.

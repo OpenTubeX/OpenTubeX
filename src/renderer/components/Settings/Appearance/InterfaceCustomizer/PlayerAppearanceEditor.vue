@@ -79,6 +79,11 @@ const groups = computed(() => [
         action: 'updateShowVolumeBoostToggle',
         label: t('Settings.Player Settings.Show Volume Boost Toggle'),
       },
+      !process.env.IS_IOS && {
+        key: 'showMonoAudioToggle',
+        action: 'updateShowMonoAudioToggle',
+        label: t('Settings.Player Settings.Show Mono Audio Toggle'),
+      },
       {
         key: 'enableVideoZoom',
         action: 'updateEnableVideoZoom',

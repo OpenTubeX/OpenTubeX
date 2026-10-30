@@ -870,6 +870,8 @@ Settings:
       Everforest Light Blue: Everforest Light Blue
       Everforest Light Purple: Everforest Light Purple
   Player Settings:
+    Mono Audio: 'Àudio mono'
+    Show Mono Audio Toggle: 'Mostra el commutador d''àudio mono'
     Default Media Format:
       Default Media Format: 'Format multimèdia predeterminat'
     Pause on Stream Recovery: "Posa en pausa en recuperar el flux"
@@ -2530,6 +2532,7 @@ Tooltips:
   Proxy Settings:
     IP Block Recovery Script Path: Camí de l'script que s'executa quan es detecta un bloqueig d'IP. L'OpenTubeX espera que acabi i després torna a carregar el vídeo. Si l'alternativa està activada, només s'executa quan també falla.
   Player Settings:
+    Mono Audio: 'Reprodueix els canals d''àudio esquerre i dret a totes dues orelles. Utilitzeu-ho quan el so d''un vídeo només surti per un costat dels auriculars.'
     Pause on Stream Recovery: "Quan el flux de vídeo falla i el reproductor el torna a carregar o canvia a un altre format o motor, la reproducció es posa en pausa i l'error es manté a la part superior del reproductor fins que el descartis. Si està desactivat, la reproducció continua i l'error apareix breument com a notificació."
     Continue Playback When Screen Is Locked: 'Manté l’àudio reproduint-se en segon pla i proporciona controls multimèdia d’Android. Desactiveu-ho per posar en pausa quan l’aplicació deixi de ser visible.'
     Enable Caption Translations: Si s'activa i el vídeo no proporciona cap pista original coincident, el botó de subtítols i la drecera C prefereixen una pista traduïda automàticament a la llengua de subtítols preferida.

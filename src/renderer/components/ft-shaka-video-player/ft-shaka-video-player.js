@@ -671,6 +671,8 @@ export default defineComponent({
     const musicMode = computed(() => store.getters.getTabMusicMode(mediaTabId))
     const showMusicModeToggle = computed(() => store.getters.getShowMusicModeToggle)
     const showLightsOffToggle = computed(() => store.getters.getShowLightsOffToggle)
+    // Mono audio needs Web Audio processing, which the player does not use on iOS.
+    const showMonoAudioToggle = computed(() => !process.env.IS_IOS && store.getters.getShowMonoAudioToggle)
     const lightsOffVisible = computed(() => showLightsOffToggle.value && lightsOff.value &&
       (isTabPresented?.value ?? true))
     // Shorts request autoplay, so do not render their paused-only controls
@@ -2557,6 +2559,10 @@ export default defineComponent({
 
     watch(volumeBoost, value => playerAudioOutput.setGain('boost', value))
 
+    // Downmixing to mono shares volume boost's Web Audio graph, so it is not available on iOS either.
+    const monoAudio = computed(() => !process.env.IS_IOS && store.getters.getMonoAudio)
+    watch(monoAudio, value => playerAudioOutput.setMono(value))
+
     const {
       cancelVideoZoomPan,
       changeVideoZoom,
@@ -2968,6 +2974,7 @@ export default defineComponent({
           'ft_lights_off',
           'ft_video_zoom',
           'ft_volume_boost',
+          'ft_mono_audio',
           'ft_loop',
           'ft_ab_repeat',
           'ft_screenshot',
@@ -3020,6 +3027,7 @@ export default defineComponent({
           'ft_lights_off',
           'ft_video_zoom',
           'ft_volume_boost',
+          'ft_mono_audio',
           'ft_loop',
           'ft_ab_repeat',
           ...['pictureInPicture', 'theatreMode', 'fullWindow']
@@ -3079,6 +3087,10 @@ export default defineComponent({
 
       if (!volumeBoostPossible.value) {
         removeFromArrayIfExists(uiConfig.overflowMenuButtons, 'ft_volume_boost')
+      }
+
+      if (!showMonoAudioToggle.value) {
+        removeFromArrayIfExists(uiConfig.overflowMenuButtons, 'ft_mono_audio')
       }
 
       if (!showLightsOffToggle.value) {
@@ -7687,6 +7699,21 @@ export default defineComponent({
       registerOwnElement(shakaOverflowMenu, 'ft_volume_boost', new VolumeBoostSelectionFactory())
     }
 
+    function registerMonoAudioButton() {
+      registerOwnElement(shakaOverflowMenu, 'ft_mono_audio', {
+        create(rootElement, controls) {
+          return new BooleanSettingButton({
+            value: monoAudio,
+            updateValue: value => store.dispatch('updateMonoAudio', value),
+            events,
+            className: 'mono-audio-button',
+            mappedIcon: 'speaker',
+            getLabel: () => t('Settings.Player Settings.Mono Audio'),
+          }, rootElement, controls)
+        }
+      })
+    }
+
     function registerLightsOffButton() {
       registerOwnElement(shakaOverflowMenu, 'ft_lights_off', {
         create(rootElement, controls) {
@@ -9473,6 +9500,7 @@ export default defineComponent({
 
       voiceOverTranslation.attach(videoElement)
       playerAudioOutput.setGain('boost', volumeBoost.value)
+      playerAudioOutput.setMono(monoAudio.value)
 
       await initializeActiveTab()
 
@@ -9610,6 +9638,7 @@ export default defineComponent({
       registerMusicModeButton()
       registerVideoZoomSelection()
       registerVolumeBoostSelection()
+      registerMonoAudioButton()
       registerLightsOffButton()
       registerSkipSilenceButton()
       registerVoiceOverTranslationButton()
