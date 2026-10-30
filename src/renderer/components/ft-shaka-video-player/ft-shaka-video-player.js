@@ -8568,7 +8568,8 @@ export default defineComponent({
      * @param {KeyboardEvent} event
      */
     async function keyboardShortcutHandler(event) {
-      if (!player || !isActiveTab.value) {
+      // destroyPlayer() releases ui before the player finishes destroying.
+      if (!ui || !player || !isActiveTab.value) {
         return
       }
 
@@ -10751,9 +10752,11 @@ export default defineComponent({
           }
         }
 
-        // destroying the ui also destroys the player
-        await ui.destroy()
+        // destroying the ui also destroys the player. Release it first, as its
+        // controls lose their container before the destruction finishes.
+        const destroyingUi = ui
         ui = null
+        await destroyingUi.destroy()
         player = null
       } else if (player) {
         await player.destroy()
@@ -10834,7 +10837,8 @@ export default defineComponent({
     }
 
     function showOverlayControls() {
-      ui.getControls().showUI()
+      // Fullscreen can end after a playback-engine fallback released the UI.
+      ui?.getControls()?.showUI()
     }
 
     /**
