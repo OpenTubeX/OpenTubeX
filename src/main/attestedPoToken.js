@@ -7,12 +7,19 @@ const MAX_ATTESTED_PO_TOKEN_LENGTH = 120
 const MAX_ATTEMPTS = 3
 
 /**
+ * @param {string} token
+ */
+export function isAttestedPoToken(token) {
+  return token.length <= MAX_ATTESTED_PO_TOKEN_LENGTH
+}
+
+/**
  * @param {() => Promise<string>} mint
  * @returns {Promise<string>}
  */
 export async function mintAttestedPoToken(mint) {
   let token = await mint()
-  for (let attempt = 1; attempt < MAX_ATTEMPTS && token.length > MAX_ATTESTED_PO_TOKEN_LENGTH; attempt++) {
+  for (let attempt = 1; attempt < MAX_ATTEMPTS && !isAttestedPoToken(token); attempt++) {
     try {
       token = await mint()
     } catch {

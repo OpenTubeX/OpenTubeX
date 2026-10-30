@@ -2,7 +2,7 @@ import { session, WebContentsView } from 'electron'
 import { readFile } from 'fs/promises'
 import { join } from 'path'
 
-import { mintAttestedPoToken } from './attestedPoToken'
+import { isAttestedPoToken, mintAttestedPoToken } from './attestedPoToken'
 import { withTimeout } from './promiseTimeout'
 
 // #region queue
@@ -58,9 +58,9 @@ export function generatePoToken(videoId, context, initialAttestationData, ytConf
     enqueueAsyncFunction(sharedInit)
   }
 
-  // We use a promise queue instead of running the `internalGeneratePotoken` function directly
+  // We use a promise queue instead of running the `mintPoToken` function directly
   // so that we can reuse the same session by clearing all data
-  // associated with the session before triggering generating the next PO token.
+  // associated with the session before the next attestation.
 
   // Electron's session objects stick around for the entire lifetime of the Electron main process,
   // holding onto OS resources such as the OS DNS resolver, so if we created a new session for each PO token generation
@@ -70,15 +70,7 @@ export function generatePoToken(videoId, context, initialAttestationData, ytConf
   // - https://github.com/FreeTubeApp/FreeTube/issues/8640
   // - https://github.com/electron/electron/pull/46131
   // - https://github.com/electron/electron/commit/bac2f46ba981cc1763c0485cec44813c1d07fa18
-  return mintAttestedPoToken(() => {
-    const potokenPromise = enqueueAsyncFunction(internalGeneratePotoken, videoId, context, initialAttestationData, ytConfig, proxyUrl)
-
-    // schedule the cleanup separately,
-    // so that we can return the potoken without having to wait until the cleanup is done
-    enqueueAsyncFunction(cleanupSession)
-
-    return potokenPromise
-  })
+  return mintAttestedPoToken(() => enqueueAsyncFunction(mintPoToken, videoId, context, initialAttestationData, ytConfig, proxyUrl))
 }
 
 /** @type {import('electron').Session} */
@@ -154,6 +146,13 @@ async function sharedInit() {
 const GENERATE_TIMEOUT_MS = 30 * 1000
 
 /**
+ * The BotGuard view of the current attestation. A full BotGuard run takes a
+ * second or more, while minting from an attestation takes milliseconds.
+ * @type {{ view: WebContentsView, proxyUrl: string | undefined, expiresAt: number, expiryTimer: ReturnType<typeof setTimeout> } | null}
+ */
+let attestation = null
+
+/**
  * @param {string} videoId
  * @param {string} context
  * @param {string} initialAttestationData
@@ -161,8 +160,54 @@ const GENERATE_TIMEOUT_MS = 30 * 1000
  * @param {string|undefined} proxyUrl
  * @returns {Promise<string>}
  */
-async function internalGeneratePotoken(videoId, context, initialAttestationData, ytConfig, proxyUrl) {
+async function mintPoToken(videoId, context, initialAttestationData, ytConfig, proxyUrl) {
+  if (attestation && (attestation.proxyUrl !== proxyUrl || Date.now() >= attestation.expiresAt)) {
+    await discardAttestation()
+  }
+
+  let token
+  if (attestation) {
+    try {
+      token = await withTimeout(
+        attestation.view.webContents.executeJavaScript(`window.ftMintPoToken(${JSON.stringify(videoId)})`),
+        GENERATE_TIMEOUT_MS,
+        `PO token minting timed out after ${GENERATE_TIMEOUT_MS}ms`
+      )
+    } catch (error) {
+      console.error('Failed to mint a PO token from the current attestation, attesting again', error)
+      await discardAttestation()
+    }
+  }
+  token ??= await attest(videoId, context, initialAttestationData, ytConfig, proxyUrl)
+
+  // Every token from an untrusted attestation is pending attestation too
+  if (!isAttestedPoToken(token)) {
+    await discardAttestation()
+  }
+  return token
+}
+
+async function discardAttestation() {
+  if (!attestation) return
+  clearTimeout(attestation.expiryTimer)
+  if (!attestation.view.webContents.isDestroyed()) {
+    attestation.view.webContents.close({ waitForBeforeUnload: false })
+  }
+  attestation = null
+  await cleanupSession()
+}
+
+/**
+ * @param {string} videoId
+ * @param {string} context
+ * @param {string} initialAttestationData
+ * @param {string} ytConfig
+ * @param {string|undefined} proxyUrl
+ * @returns {Promise<string>}
+ */
+async function attest(videoId, context, initialAttestationData, ytConfig, proxyUrl) {
   let webContentsView
+  let keepView = false
 
   try {
     if (proxyUrl) {
@@ -217,19 +262,41 @@ async function internalGeneratePotoken(videoId, context, initialAttestationData,
 
     const script = cachedScript.replace('FT_PARAMS', () => `"${videoId}",${context},${initialAttestationData},${ytConfig}`)
 
-    return await withTimeout(
+    // The attestation's lifetime starts during this run, so count it from before
+    const startedAt = Date.now()
+    const token = await withTimeout(
       webContentsView.webContents.executeJavaScript(script),
       GENERATE_TIMEOUT_MS,
       `PO token generation timed out after ${GENERATE_TIMEOUT_MS}ms`
     )
+
+    const validForSecs = await webContentsView.webContents.executeJavaScript('window.ftPoTokenValidForSecs')
+    const expiresAt = startedAt + validForSecs * 1000
+    if (expiresAt > Date.now()) {
+      // Release the view once it expires, even if no other video needs a token
+      const expiryTimer = setTimeout(() => {
+        enqueueAsyncFunction(async () => {
+          if (attestation?.view === webContentsView) await discardAttestation()
+        })
+      }, expiresAt - Date.now())
+      attestation = { view: webContentsView, proxyUrl, expiresAt, expiryTimer }
+      keepView = true
+    }
+    return token
   } finally {
-    if (webContentsView) {
+    if (webContentsView && !keepView) {
       webContentsView.webContents.close({ waitForBeforeUnload: false })
+      await cleanupSession()
     }
   }
 }
 
 async function cleanupSession() {
-  await theSession.closeAllConnections()
-  await theSession.clearData()
+  try {
+    await theSession.closeAllConnections()
+    await theSession.clearData()
+  } catch (error) {
+    // Minting still works, the next attestation only reuses some session data
+    console.error('Failed to clear the PO token session', error)
+  }
 }
