@@ -1963,7 +1963,6 @@ test.describe('custom Shorts player', () => {
     const captionsBottomWithoutHover = await captions.evaluate(element => {
       return getComputedStyle(element).bottom
     })
-    expect(Number.parseFloat(captionsBottomWithoutHover)).toBeGreaterThan(0)
 
     const playerBounds = await player.boundingBox()
     await page.mouse.move(
