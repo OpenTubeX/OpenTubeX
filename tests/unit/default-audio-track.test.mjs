@@ -33,3 +33,8 @@ test('selects DASH/SABR main audio and HLS primary audio without discarding unla
   assert.deepEqual(getDefaultAudioVariants([dub]), [dub])
   assert.deepEqual(getDefaultAudioVariants([]), [])
 })
+
+test('keeps muxed HLS variants, which have no audio roles', () => {
+  const muxed = [{ audioRoles: null, primary: false }, { audioRoles: null, primary: false }]
+  assert.deepEqual(getDefaultAudioVariants(muxed), muxed)
+})
