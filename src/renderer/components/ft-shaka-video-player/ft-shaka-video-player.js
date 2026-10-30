@@ -11087,6 +11087,7 @@ export default defineComponent({
       updateSponsorBlockDraftActionType,
       updateSponsorBlockDraftCategory,
       setSponsorBlockDraftTime,
+      getSponsorBlockSubmissionVideoDuration,
       saveSponsorBlockDraft,
       toggleSponsorBlockDraftEditing,
       previewSponsorBlockDraft,
