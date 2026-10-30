@@ -95,23 +95,37 @@ test('centers queue item content between the row dividers', { tag: '@scale' }, a
   await page.evaluate(() => window.$store.dispatch('updateHideRecommendedVideos', true))
   await goTo(page, 'history')
   await page.evaluate(() => {
-    window.$store.commit('addVideoToWatchQueue', { video: { videoId: 'queuevideo1', title: 'Queue video one', author: 'Queue Test Channel', lengthSeconds: 60, viewCount: 1000, published: Date.now() - 86400000 } })
+    for (const [videoId, title] of [
+      ['queuevideo1', 'Queue video one'],
+      ['queuevideo2', 'Queue video two has a title long enough to wrap onto three lines in the queue sidebar']
+    ]) {
+      window.$store.commit('addVideoToWatchQueue', { video: { videoId, title, author: 'Queue Test Channel', lengthSeconds: 60, viewCount: 1000, published: Date.now() - 86400000 } })
+    }
   })
   await page.locator('a.title').filter({ hasText: /Current video/ }).click()
-  const item = page.locator('.watchQueue .queueItem')
-  await expect(item.locator('.videoThumbnail')).toBeVisible()
-  const { above, below } = await item.evaluate(row => {
+  const items = page.locator('.watchQueue .queueItem')
+  await expect(items.locator('.videoThumbnail')).toHaveCount(2)
+  const rows = await items.evaluateAll(rows => rows.map(row => {
     const rowBounds = row.getBoundingClientRect()
     const contentBounds = [...row.querySelectorAll('.videoThumbnail, .title, .infoLine')]
       .map(element => element.getBoundingClientRect())
+    const center = selector => {
+      const bounds = row.querySelector(selector).getBoundingClientRect()
+      return bounds.top + bounds.height / 2
+    }
     const borderBottom = parseFloat(getComputedStyle(row).borderBlockEndWidth)
     return {
       above: Math.min(...contentBounds.map(bounds => bounds.top)) - rowBounds.top,
-      below: rowBounds.bottom - borderBottom - Math.max(...contentBounds.map(bounds => bounds.bottom))
+      below: rowBounds.bottom - borderBottom - Math.max(...contentBounds.map(bounds => bounds.bottom)),
+      handleCenter: center('.queueDragHandle'),
+      thumbnailCenter: center('.videoThumbnail')
     }
-  })
+  }))
   await attachScreenshot('queue-item-spacing')
-  expect(below).toBeCloseTo(above, 0)
+  for (const row of rows) {
+    expect(row.below).toBeCloseTo(row.above, 0)
+    expect(row.thumbnailCenter).toBeCloseTo(row.handleCenter, 0)
+  }
 })
 
 test('manages the queue from video menus and the watch sidebar', { tag: '@scale' }, async ({ page }) => {
