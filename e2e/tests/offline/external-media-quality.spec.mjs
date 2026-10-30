@@ -12,13 +12,18 @@ for (const quality of ['1080', '480', 'auto']) {
     test('uses the configured default quality for Twitch playback', async ({ app, page }, testInfo) => {
       const masterUrl = 'https://quality.example.test/master.m3u8'
       const segmentUrl = 'https://quality.example.test/segment.mp4'
+      // Like Twitch's, which names each quality and only marks the source
+      // quality as not the default
       const master = `#EXTM3U
-#EXT-X-STREAM-INF:BANDWIDTH=800000,RESOLUTION=640x360,CODECS="avc1.42c028"
-360.m3u8
-#EXT-X-STREAM-INF:BANDWIDTH=2000000,RESOLUTION=1280x720,CODECS="avc1.42c028"
-720.m3u8
-#EXT-X-STREAM-INF:BANDWIDTH=4000000,RESOLUTION=1920x1080,CODECS="avc1.42c028"
+#EXT-X-MEDIA:TYPE=VIDEO,GROUP-ID="chunked",NAME="1080p",AUTOSELECT=NO,DEFAULT=NO
+#EXT-X-STREAM-INF:BANDWIDTH=4000000,RESOLUTION=1920x1080,CODECS="avc1.42c028",VIDEO="chunked"
 1080.m3u8
+#EXT-X-MEDIA:TYPE=VIDEO,GROUP-ID="720p30",NAME="720p",AUTOSELECT=YES,DEFAULT=YES
+#EXT-X-STREAM-INF:BANDWIDTH=2000000,RESOLUTION=1280x720,CODECS="avc1.42c028",VIDEO="720p30"
+720.m3u8
+#EXT-X-MEDIA:TYPE=VIDEO,GROUP-ID="360p30",NAME="360p",AUTOSELECT=YES,DEFAULT=YES
+#EXT-X-STREAM-INF:BANDWIDTH=800000,RESOLUTION=640x360,CODECS="avc1.42c028",VIDEO="360p30"
+360.m3u8
 `
       await page.route('https://quality.example.test/*.m3u8', route => route.fulfill({
         contentType: 'application/vnd.apple.mpegurl',
