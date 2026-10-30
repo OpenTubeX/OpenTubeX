@@ -101,5 +101,9 @@ export default async function (videoId, context, initialAttestationData, ytConfi
 
   const integrityTokenBasedMinter = await WebPoMinter.create({ integrityToken: response[0] }, webPoSignalOutput)
 
+  // The desktop app mints later tokens from this attestation until it needs refreshing
+  window.ftMintPoToken = id => integrityTokenBasedMinter.mintAsWebsafeString(id)
+  window.ftPoTokenValidForSecs = response[1] - (response[2] ?? 0)
+
   return await integrityTokenBasedMinter.mintAsWebsafeString(videoId)
 }
