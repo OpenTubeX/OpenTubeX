@@ -1,4 +1,14 @@
 /**
+ * @param {string} line An `#EXT-X-MEDIA:` tag
+ * @returns {Map<string, string>} The attributes, with quoted values still quoted
+ */
+export function parseHlsMediaAttributes(line) {
+  // Quoted names and URIs can contain commas.
+  return new Map([...line.slice(13).trimEnd().matchAll(/(?:^|,)([\w-]+)=("[^"]*"|[^,]*)/g)]
+    .map(([, key, value]) => [key, value]))
+}
+
+/**
  * YouTube can mark every HLS audio rendition DEFAULT=NO. Its content IDs
  * still identify the original track with suffix .4, as in the local API.
  * @param {string} manifest
@@ -12,9 +22,7 @@ export function preferOriginalHlsAudio(manifest) {
   for (const [index, line] of lines.entries()) {
     if (!line.startsWith('#EXT-X-MEDIA:')) continue
 
-    // Quoted names and URIs can contain commas.
-    const attributes = new Map([...line.slice(13).trimEnd().matchAll(/(?:^|,)([\w-]+)=("[^"]*"|[^,]*)/g)]
-      .map(([, key, value]) => [key, value]))
+    const attributes = parseHlsMediaAttributes(line)
     if (attributes.get('TYPE') !== 'AUDIO') continue
 
     const group = attributes.get('GROUP-ID')
