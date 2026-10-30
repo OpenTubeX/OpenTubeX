@@ -205,6 +205,23 @@ test.describe('picking from many channels', () => {
       { id: expect.any(String), name: 'Music', channelIds: [MANY_CHANNELS[249].id] }
     ])
   })
+
+  test.describe('without automatic loading', () => {
+    test.use({ seed: seed({ generalAutoLoadMorePaginatedItemsEnabled: false }, MANY_CHANNELS) })
+
+    test('keeps focus in the editor when loading more channels by hand', async ({ page }) => {
+      await goTo(page, 'subscribedchannels')
+      await page.getByRole('button', { name: 'New Group' }).click()
+
+      const editor = page.getByRole('dialog', { name: 'New Group' })
+      await expect(editor.getByRole('checkbox')).toHaveCount(100)
+      const loadMore = editor.getByRole('button', { name: 'Load More Channels' })
+      await loadMore.focus()
+      await page.keyboard.press('Enter')
+      await expect(editor.getByRole('checkbox')).toHaveCount(200)
+      await expect(editor.getByRole('checkbox', { name: 'Channel 100' })).toBeFocused()
+    })
+  })
 })
 
 test.describe('custom order across pages', () => {

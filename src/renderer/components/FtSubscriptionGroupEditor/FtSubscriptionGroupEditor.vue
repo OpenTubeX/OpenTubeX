@@ -49,7 +49,10 @@
       {{ t('Channels.Empty') }}
     </p>
     <template v-else>
-      <FtFlexBox class="channelPicker">
+      <FtFlexBox
+        ref="channelPicker"
+        class="channelPicker"
+      >
         <FtChannelBubble
           v-for="channel in pagedChannels"
           :key="channel.id"
@@ -71,7 +74,7 @@
           <FtButton
             :label="t('Channels.Load More Channels')"
             :icon="['fas', 'arrow-down']"
-            @click="channelPage++"
+            @click="loadMoreChannels"
           />
         </FtFlexBox>
       </FtAutoLoadNextPageWrapper>
@@ -189,6 +192,16 @@ const { page: channelPage, displayedItems: pagedChannels, hasMore: hasMoreChanne
   append: true,
   resetOn: query
 })
+
+const channelPicker = useTemplateRef('channelPicker')
+
+// The button is replaced by the next page's, so focus the first new channel instead.
+async function loadMoreChannels() {
+  const firstNewIndex = pagedChannels.value.length
+  channelPage.value++
+  await nextTick()
+  channelPicker.value?.$el.querySelectorAll('[role="checkbox"]')[firstNewIndex]?.focus()
+}
 
 const selectedSubscribedCount = computed(() => {
   return channels.value.reduce((count, channel) => count + Number(selected.has(channel.id)), 0)
