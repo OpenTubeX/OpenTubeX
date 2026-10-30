@@ -2288,6 +2288,10 @@ const DISMISSED_UPDATE_VERSION_STORAGE_KEY = 'opentubex-dismissed-update-version
 /** @type {{ tagName: string, versionNumber: string } | null} */
 let availableUpdate = null
 let releaseNotesMarkdownPromise = null
+// Release notes can be labeled for some platforms, so the prompt hides notes for others.
+const releaseNotePlatform = process.env.IS_ELECTRON
+  ? { darwin: 'macos', linux: 'linux', win32: 'windows' }[process.platform] ?? null
+  : process.env.IS_CAPACITOR ? (process.env.IS_IOS ? 'ios' : 'android') : null
 
 function getReleaseNotesMarkdown() {
   releaseNotesMarkdownPromise ??= import('./helpers/releaseNotesMarkdown')
@@ -2360,7 +2364,7 @@ async function checkForNewUpdates() {
       return
     }
 
-    const changelog = formatReleaseChangelog(releases)
+    const changelog = formatReleaseChangelog(releases, releaseNotePlatform)
       // Link usernames to their GitHub profiles
       .replaceAll(/@(\S+)\b/g, '[@$1](https://github.com/$1)')
       // Shorten pull request links to #1234

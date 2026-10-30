@@ -2,7 +2,7 @@ import assert from 'node:assert/strict'
 import { execFileSync, spawnSync } from 'node:child_process'
 import { mkdir, mkdtemp, readFile, rm, writeFile } from 'node:fs/promises'
 import { tmpdir } from 'node:os'
-import { join } from 'node:path'
+import { dirname, join } from 'node:path'
 import test from 'node:test'
 
 import { load as loadYaml } from 'js-yaml'
@@ -19,7 +19,7 @@ test('uses the push token for protected-branch version bumps', async () => {
   assert.equal(checkout.with.token, '${{ secrets.PUSH_TOKEN }}')
 })
 
-test('records the release commit Android version code and changelog for F-Droid', async (t) => {
+test('records the release commit Android version code and changelog for F-Droid and consumes the release notes', async (t) => {
   const directory = await mkdtemp(join(tmpdir(), 'draft-release-version-'))
   t.after(() => rm(directory, { recursive: true, force: true }))
   const env = {
@@ -37,11 +37,13 @@ test('records the release commit Android version code and changelog for F-Droid'
   await writeFile(join(directory, 'package.json'), '{"version":"0.37.0"}\n')
   const properties = await readFile('android/app/version.properties', 'utf8')
   await writeFile(join(directory, 'android/app/version.properties'), properties)
-  await mkdir(join(directory, '_scripts'))
-  await writeFile(
-    join(directory, '_scripts/storeReleaseNotes.mjs'),
-    await readFile('_scripts/storeReleaseNotes.mjs', 'utf8')
-  )
+  for (const file of ['_scripts/storeReleaseNotes.mjs', 'src/renderer/helpers/releaseNotePlatforms.js']) {
+    await mkdir(join(directory, dirname(file)), { recursive: true })
+    await writeFile(join(directory, file), await readFile(file, 'utf8'))
+  }
+  await mkdir(join(directory, 'release-notes'))
+  await writeFile(join(directory, 'release-notes/README.md'), '# Release notes\n')
+  await writeFile(join(directory, 'release-notes/groups.md'), '---\ncategory: highlight\n---\n\nAdded groups.\n')
   git('add', '.')
   git('commit', '--quiet', '-m', 'first')
   git('commit', '--quiet', '--allow-empty', '-m', 'second')
@@ -65,8 +67,10 @@ test('records the release commit Android version code and changelog for F-Droid'
   assert.deepEqual(git('show', '--format=', '--name-only', 'HEAD').split('\n'), [
     'android/app/version.properties',
     'fastlane/metadata/android/en-US/changelogs/default.txt',
-    'package.json'
+    'package.json',
+    'release-notes/groups.md'
   ])
+  assert.deepEqual(git('ls-files', 'release-notes').split('\n'), ['release-notes/README.md'])
   assert.equal(
     await readFile(join(directory, 'fastlane/metadata/android/en-US/changelogs/default.txt'), 'utf8'),
     'Highlights\n• Added groups\n'

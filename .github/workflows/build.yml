@@ -659,41 +659,17 @@ jobs:
       env:
         GH_TOKEN: ${{ github.token }}
         TARGET_BRANCH: development
-        TARGET_SHA: ${{ github.sha }}
       shell: bash
       run: |
         set -euo pipefail
 
-        releases="$(
-          gh release list --limit 100 \
-            --json isDraft,isPrerelease,tagName
-        )"
-
-        previous_tag=''
-        while IFS= read -r tag; do
-          if git merge-base --is-ancestor "$tag" "$TARGET_SHA"; then
-            previous_tag="$tag"
-            break
-          fi
-        done < <(
-          jq --raw-output '.[] | select(
-            .isDraft == false and .isPrerelease == false
-          ) | .tagName' <<< "$releases"
-        )
-
-        if [[ -z "$previous_tag" ]]; then
-          echo 'Could not find a previous release tag.' >&2
-          exit 1
-        fi
-
-        PREVIOUS_TAG="$previous_tag" \
-          node _scripts/releaseNotes.mjs generate-nightly nightly-changelog.md
+        node _scripts/releaseNotes.mjs generate-nightly nightly-changelog.md
 
         {
           printf '> [!WARNING]\n'
           printf '> This nightly build is intended for testing only and may be unstable. Regular users should use the [latest non-prerelease](https://github.com/OpenTubeX/OpenTubeX/releases/latest).\n\n'
-          printf 'Automated development build from commit %s.\n\n' "$TARGET_SHA"
-          printf '<details>\n<summary>Changelog since the latest stable release (%s)</summary>\n\n' "$previous_tag"
+          printf 'Automated development build from commit %s.\n\n' "$GITHUB_SHA"
+          printf '<details>\n<summary>Changelog since the latest release</summary>\n\n'
           cat nightly-changelog.md
           printf '\n</details>\n'
         } > release-notes.md

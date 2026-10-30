@@ -275,7 +275,7 @@ function main() {
 
     upload(media, releaseTag)
 
-    console.log('\nPaste this inside the release-note-image markers:\n')
+    console.log('\nAdd this to the release note file after a blank line:\n')
     console.log(renderMediaMarkup(media, options.alt))
     console.log('\nDelete the uploaded assets with:')
     for (const { assetName } of media) {

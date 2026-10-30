@@ -1,68 +1,80 @@
 import assert from 'node:assert/strict'
 import { execFileSync } from 'node:child_process'
-import { mkdtempSync, rmSync } from 'node:fs'
+import { mkdirSync, mkdtempSync, rmSync, writeFileSync } from 'node:fs'
 import { tmpdir } from 'node:os'
 import path from 'node:path'
 import test from 'node:test'
 
-import { listReleaseCommits } from '../../_scripts/releaseNotes.mjs'
+import { listReleaseNoteHistory } from '../../_scripts/releaseNotes.mjs'
 
-function withCheckout(callback) {
-  const directory = mkdtempSync(path.join(tmpdir(), 'release-notes-selection-'))
+test('release note history starts at the commit that last added the file', (t) => {
+  const directory = mkdtempSync(path.join(tmpdir(), 'release-notes-history-'))
   const originalDirectory = process.cwd()
-  const source = path.join(directory, 'source')
-  const checkout = path.join(directory, 'checkout')
-  // Keep the developer's Git configuration, such as tag.gpgSign, out of the fixture repositories.
-  const env = { ...process.env, GIT_CONFIG_GLOBAL: '/dev/null', GIT_CONFIG_NOSYSTEM: '1' }
+  t.after(() => {
+    process.chdir(originalDirectory)
+    rmSync(directory, { recursive: true, force: true })
+  })
+
+  let time = 1_700_000_000
+  // Keep the developer's Git configuration, such as commit signing, out of the fixture repository.
   const git = (...args) => execFileSync('git', args, {
-    cwd: source,
+    cwd: directory,
     encoding: 'utf8',
     env: {
-      ...env,
+      ...process.env,
+      GIT_CONFIG_GLOBAL: '/dev/null',
+      GIT_CONFIG_NOSYSTEM: '1',
       GIT_AUTHOR_NAME: 'Release notes test',
       GIT_AUTHOR_EMAIL: 'test@example.com',
       GIT_COMMITTER_NAME: 'Release notes test',
       GIT_COMMITTER_EMAIL: 'test@example.com',
+      GIT_COMMITTER_DATE: `@${time} +0000`,
     },
-    stdio: ['pipe', 'pipe', 'pipe'],
   }).trim()
-
-  try {
-    execFileSync('git', ['init', '--quiet', source], { env })
-    const tree = git('mktree')
-    const commit = (message, parent) => git('commit-tree', tree, '-m', message, ...(parent ? ['-p', parent] : []))
-    const previous = commit('Previous release')
-    const first = commit('First change', previous)
-    const target = commit('Release target', first)
-    const unrelated = commit('Another branch', previous)
-    git('update-ref', 'refs/heads/development', target)
-    git('update-ref', 'refs/heads/other', unrelated)
-    git('-c', 'tag.gpgSign=false', 'tag', 'previous', previous)
-    git('symbolic-ref', 'HEAD', 'refs/heads/development')
-    execFileSync('git', ['clone', '--quiet', '--no-local', source, checkout], { env })
-
-    // GitHub can report a merge that happened after the runner's checkout.
-    const later = commit('Merged after checkout', target)
-    git('update-ref', 'refs/heads/development', later)
-    process.chdir(checkout)
-    callback({ previous, first, target, unrelated, later })
-  } finally {
-    process.chdir(originalDirectory)
-    rmSync(directory, { recursive: true, force: true })
+  const file = 'release-notes/player.md'
+  const commit = (message, content) => {
+    time += 1
+    if (content === null) {
+      git('rm', '--quiet', file)
+    } else {
+      // Removing the only note also removes its directory.
+      mkdirSync(path.join(directory, 'release-notes'), { recursive: true })
+      writeFileSync(path.join(directory, file), content)
+      git('add', file)
+    }
+    git('commit', '--quiet', '-m', message)
+    return git('rev-parse', 'HEAD')
   }
-}
 
-test('release commits exclude merges after checkout and keep only the release range', () => {
-  withCheckout(({ previous, first, target }) => {
-    assert.deepEqual(listReleaseCommits('previous', target), [target, first])
-    assert.deepEqual(listReleaseCommits('previous', previous), [])
-  })
-})
+  git('init', '--quiet')
+  commit('Add an earlier note', 'first')
+  commit('Release', null)
+  const added = commit('Add the note again', 'second')
+  time += 1
+  git('commit', '--quiet', '--allow-empty', '-m', 'Unrelated change')
+  const updated = commit('Update the note', 'third')
+  process.chdir(directory)
 
-test('release notes still reject invalid release boundaries', () => {
-  withCheckout(({ target, unrelated, later }) => {
-    assert.throws(() => listReleaseCommits(unrelated, target), /is not an ancestor/)
-    assert.throws(() => listReleaseCommits('missing-tag', target), /Could not compare Git commits/)
-    assert.throws(() => listReleaseCommits('previous', later), /Could not compare Git commits/)
+  assert.deepEqual(listReleaseNoteHistory(file), { commits: [updated, added], createdAt: 1_700_000_003 })
+
+  // Notes can also be added while resolving a merge, such as an upstream sync.
+  const mainBranch = git('branch', '--show-current')
+  git('checkout', '--quiet', '-b', 'upstream', added)
+  time += 1
+  git('commit', '--quiet', '--allow-empty', '-m', 'Upstream change')
+  git('checkout', '--quiet', mainBranch)
+  git('merge', '--quiet', '--no-ff', '--no-commit', 'upstream')
+  time += 1
+  const mergedFile = 'release-notes/upstream.md'
+  writeFileSync(path.join(directory, mergedFile), 'upstream')
+  git('add', mergedFile)
+  git('commit', '--quiet', '-m', 'Merge upstream with a note')
+
+  assert.deepEqual(listReleaseNoteHistory(mergedFile), { commits: [git('rev-parse', 'HEAD')], createdAt: time })
+
+  writeFileSync(path.join(directory, 'release-notes/draft.md'), 'draft')
+  assert.deepEqual(listReleaseNoteHistory('release-notes/draft.md'), {
+    commits: [],
+    createdAt: Number.MAX_SAFE_INTEGER,
   })
 })

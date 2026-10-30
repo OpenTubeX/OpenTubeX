@@ -1,43 +1,36 @@
 import assert from 'node:assert/strict'
+import { mkdtempSync, rmSync, writeFileSync } from 'node:fs'
+import { tmpdir } from 'node:os'
+import path from 'node:path'
 import test from 'node:test'
 
 import {
+  formatReferences,
+  isReleaseNoteFile,
   normalizeReleaseImage,
-  parseReleaseNote,
-  parseReleaseNoteCategory,
+  parseReleaseNoteFile,
   probeImageSize,
+  readReleaseNotes,
   renderReleaseNotes,
   selectPullRequests,
   validateDownloadedImageUrl,
-  validatePullRequestEvent,
+  validatePullRequest,
 } from '../../_scripts/releaseNotes.mjs'
 
-const NOTE_MARKERS = `
-<!-- release-note:start -->
-Adds a compact player.
-<!-- release-note:end -->
-`
+function noteFile({ frontMatter = 'category: improvement', note = 'Adds a compact player.', images = '' } = {}) {
+  return `---\n${frontMatter}\n---\n\n${note}\n${images ? `\n${images}\n` : ''}`
+}
 
-const categoryMarkers = (category) => `
-<!-- release-note-category:start -->
-- [${category === 'Not noteworthy' ? 'x' : ' '}] Not noteworthy
-- [${category === 'Highlights' ? 'x' : ' '}] Highlights
-- [${category === 'More improvements' ? 'x' : ' '}] More improvements
-- [${category === 'Fixed bugs' ? 'x' : ' '}] Fixed bugs
-<!-- release-note-category:end -->
-`
-
-// Pull request bodies have to keep every marker pair of the template, so the
-// fixtures compose them the same way the template does.
-function pullRequestBody(category, { note = '', images = '' } = {}) {
-  return `${categoryMarkers(category)}
-<!-- release-note:start -->
-${note}
-<!-- release-note:end -->
-<!-- release-note-image:start -->
-${images}
-<!-- release-note-image:end -->
-`
+function note(overrides = {}) {
+  return {
+    category: 'improvement',
+    file: 'release-notes/compact-player.md',
+    images: [],
+    note: 'Adds a compact player.',
+    platforms: [],
+    references: [],
+    ...overrides,
+  }
 }
 
 function png(width, height) {
@@ -84,119 +77,13 @@ function webp(type, width, height) {
   return buffer
 }
 
-test('every pull request requires exactly one release note category', () => {
-  assert.deepEqual(validatePullRequestEvent({
-    pull_request: {
-      body: pullRequestBody('Not noteworthy'),
-    },
-  }), {
-    category: 'Not noteworthy',
-  })
 
-  assert.throws(() => validatePullRequestEvent({
-    pull_request: {
-      body: pullRequestBody('None of them'),
-    },
-  }), /Select exactly one release note category/)
-
-  assert.throws(() => parseReleaseNoteCategory(''), /Select one release note category/)
-
-  assert.throws(() => parseReleaseNoteCategory(`
-<!-- release-note-category:start -->
-- [x] Highlights
-- [x] Fixed bugs
-<!-- release-note-category:end -->
-`), /Select exactly one release note category/)
-})
-
-test('release notes are required for noteworthy categories', () => {
-  assert.throws(() => validatePullRequestEvent({
-    pull_request: {
-      body: pullRequestBody('Highlights'),
-    },
-  }), /Fill in the release note section/)
-})
-
-test('pull request bodies have to keep every release note marker', () => {
-  const body = pullRequestBody('Not noteworthy')
-  const markers = ['release-note-category', 'release-note', 'release-note-image']
-
-  for (const marker of markers) {
-    for (const side of ['start', 'end']) {
-      const withoutMarker = body.replace(`<!-- ${marker}:${side} -->`, '')
-
-      assert.throws(
-        () => validatePullRequestEvent({ pull_request: { body: withoutMarker } }),
-        new RegExp(`Keep the ${marker} markers`),
-        `removing the ${marker}:${side} marker has to be rejected`,
-      )
-    }
-  }
-
-  assert.throws(
-    () => validatePullRequestEvent({ pull_request: { body: '' } }),
-    /Keep the release-note-category markers/,
-  )
-})
-
-test('only pull requests that merged a release commit into the target are selected', () => {
-  const pullRequest = (number, mergeCommit, mergedAt, {
-    baseRefName = 'development',
-    nameWithOwner = 'OpenTubeX/OpenTubeX',
-  } = {}) => ({
-    baseRefName,
-    baseRepository: { nameWithOwner },
-    body: `PR ${number}`,
-    mergeCommit: mergeCommit && { oid: mergeCommit },
-    mergedAt,
-    number,
-  })
-  const second = pullRequest(2, 'second', '2026-02-01T00:00:00Z')
-  const first = pullRequest(1, 'first', '2026-01-01T00:00:00Z')
-
-  assert.deepEqual(selectPullRequests([
-    {
-      data: {
-        repository: {
-          commit0: { associatedPullRequests: { nodes: [second, pullRequest(3, null, null)] } },
-          commit1: { associatedPullRequests: { nodes: [] } },
-          commit2: null,
-        },
-      },
-    },
-    {
-      data: {
-        repository: {
-          commit0: { associatedPullRequests: { nodes: [first, second] } },
-          commit1: {
-            associatedPullRequests: {
-              nodes: [
-                pullRequest(4, 'other-branch', '2026-01-02T00:00:00Z', { baseRefName: 'deps-batch' }),
-                pullRequest(5, 'upstream', '2026-01-03T00:00:00Z', { nameWithOwner: 'FreeTubeApp/FreeTube' }),
-                pullRequest(6, 'outside-range', '2026-01-04T00:00:00Z'),
-              ],
-            },
-          },
-        },
-      },
-    },
-  ], {
-    commits: ['first', 'second', 'other-branch', 'upstream'],
-    repository: 'opentubex/opentubex',
-    target: 'development',
-  }), [first, second])
-})
-
-test('a release note and optional Markdown images are parsed', () => {
-  const result = parseReleaseNote(`
-${NOTE_MARKERS}
-<!-- release-note-image:start -->
-![Compact player](https://github.com/user-attachments/assets/example)
-![Queue and player](https://github.com/user-attachments/assets/second)
-<!-- release-note-image:end -->
-`)
-
-  assert.deepEqual(result, {
+test('a release note file is parsed with its category, platforms, and images', () => {
+  assert.deepEqual(parseReleaseNoteFile(noteFile({
+    frontMatter: 'category: highlight\nplatforms: [android, desktop]',
+    images: '![Compact player](https://github.com/user-attachments/assets/example)\n![Queue and player](https://github.com/user-attachments/assets/second)',
+  })), {
+    category: 'highlight',
     images: [{
       alt: 'Compact player',
       url: 'https://github.com/user-attachments/assets/example',
@@ -205,20 +92,64 @@ ${NOTE_MARKERS}
       url: 'https://github.com/user-attachments/assets/second',
     }],
     note: 'Adds a compact player.',
+    platforms: ['android', 'linux', 'macos', 'windows'],
   })
 })
 
+test('wrapped release note lines are joined', () => {
+  assert.equal(parseReleaseNoteFile(noteFile({ note: 'Adds a compact\n  player.' })).note, 'Adds a compact player.')
+})
+
+test('release note front matter accepts only known keys and values', () => {
+  const invalid = [
+    ['category: feature', /Set category to highlight, improvement, fix/],
+    ['platforms: [android]', /Set category/],
+    ['category: fix\ntitle: Something', /Unknown front matter key: title/],
+    ['category: fix\ncategory: fix', /Duplicate front matter key: category/],
+    ['category: fix\nplatforms: android', /Write platforms as a list/],
+    ['category: fix\nplatforms: [android, tv]', /Unknown platform: tv/],
+    ['category: fix\nplatforms: [android, ios, desktop]', /Leave out platforms/],
+    ['- category: fix', /Invalid front matter line/],
+  ]
+
+  for (const [frontMatter, error] of invalid) {
+    assert.throws(() => parseReleaseNoteFile(noteFile({ frontMatter })), error, frontMatter)
+  }
+
+  assert.throws(() => parseReleaseNoteFile('Adds a compact player.\n'), /Start the file with front matter/)
+})
+
+test('release note text follows the style rules', () => {
+  const invalid = [
+    ['', /Write the release note below the front matter/],
+    ['- Adds a compact player.', /without a leading bullet/],
+    ['## Compact player.', /without a leading bullet or heading/],
+    ['Adds a compact player. (#42)', /Leave out pull request and issue references/],
+    ['Fixes #42.', /Leave out pull request and issue references/],
+    ['On Android, shared links open in the app.', /Set platforms in the front matter/],
+    ['Android: shared links open in the app.', /Set platforms in the front matter/],
+    ['Adds a compact player', /End the release note with a period/],
+    [`${'Very '.repeat(60)}long.`, /Shorten the release note to 300 characters/],
+    ['Adds a compact player.\n![Screenshot](https://github.com/user-attachments/assets/example)', /Separate images from the release note text/],
+  ]
+
+  for (const [text, error] of invalid) {
+    assert.throws(() => parseReleaseNoteFile(noteFile({ note: text })), error, text)
+  }
+
+  for (const text of ['Adds `Ctrl+K`.', 'Adds the compact player (beta).', 'Android TV remotes can now seek.']) {
+    assert.equal(parseReleaseNoteFile(noteFile({ note: text })).note, text)
+  }
+})
+
 test('dark and light release note images are parsed from a picture element', () => {
-  const result = parseReleaseNote(`
-${NOTE_MARKERS}
-<!-- release-note-image:start -->
-<picture>
+  const result = parseReleaseNoteFile(noteFile({
+    images: `<picture>
   <source media="(prefers-color-scheme: dark)" srcset="https://github.com/OpenTubeX/media/releases/download/attachments/dark.webp">
   <source media="(prefers-color-scheme: light)" srcset="https://github.com/OpenTubeX/media/releases/download/attachments/light.webp">
   <img alt="The settings panel" src="https://github.com/OpenTubeX/media/releases/download/attachments/dark.webp">
-</picture>
-<!-- release-note-image:end -->
-`)
+</picture>`,
+  }))
 
   assert.deepEqual(result.images, [{
     alt: 'The settings panel',
@@ -229,33 +160,27 @@ ${NOTE_MARKERS}
 })
 
 test('themed release note images require a dark fallback and both theme sources', () => {
-  const releaseNoteWithPicture = (sources, fallback = 'dark.webp') => `
-${NOTE_MARKERS}
-<!-- release-note-image:start -->
-<picture>
+  const withPicture = (sources, fallback = 'dark.webp') => noteFile({
+    images: `<picture>
   ${sources}
   <img alt="Settings" src="https://github.com/OpenTubeX/media/releases/download/attachments/${fallback}">
-</picture>
-<!-- release-note-image:end -->
-`
+</picture>`,
+  })
 
-  assert.throws(() => parseReleaseNote(releaseNoteWithPicture(`
+  assert.throws(() => parseReleaseNoteFile(withPicture(`
     <source media="(prefers-color-scheme: dark)" srcset="https://github.com/OpenTubeX/media/releases/download/attachments/dark.webp">
   `)), /one dark source, one light source/)
 
-  assert.throws(() => parseReleaseNote(releaseNoteWithPicture(`
+  assert.throws(() => parseReleaseNoteFile(withPicture(`
     <source media="(prefers-color-scheme: dark)" srcset="https://github.com/OpenTubeX/media/releases/download/attachments/dark.webp">
     <source media="(prefers-color-scheme: light)" srcset="https://github.com/OpenTubeX/media/releases/download/attachments/light.webp">
   `, 'light.webp')), /dark source as its fallback/)
 })
 
 test('HTML entities in image attributes are decoded only once', () => {
-  const result = parseReleaseNote(`
-${NOTE_MARKERS}
-<!-- release-note-image:start -->
-<img src="https://github.com/user-attachments/assets/example?name=a&amp;amp;b" alt="A &amp; B">
-<!-- release-note-image:end -->
-`)
+  const result = parseReleaseNoteFile(noteFile({
+    images: '<img src="https://github.com/user-attachments/assets/example?name=a&amp;amp;b" alt="A &amp; B">',
+  }))
 
   assert.deepEqual(result.images, [{
     alt: 'A & B',
@@ -264,12 +189,9 @@ ${NOTE_MARKERS}
 })
 
 test('HTML image parsing ignores data attributes', () => {
-  const result = parseReleaseNote(`
-${NOTE_MARKERS}
-<!-- release-note-image:start -->
-<img data-src="https://github.com/user-attachments/assets/wrong" src="https://github.com/user-attachments/assets/right" data-alt="Wrong" alt="Right">
-<!-- release-note-image:end -->
-`)
+  const result = parseReleaseNoteFile(noteFile({
+    images: '<img data-src="https://github.com/user-attachments/assets/wrong" src="https://github.com/user-attachments/assets/right" data-alt="Wrong" alt="Right">',
+  }))
 
   assert.deepEqual(result.images, [{
     alt: 'Right',
@@ -278,33 +200,97 @@ ${NOTE_MARKERS}
 })
 
 test('initial image URLs must use HTTPS and a GitHub host', () => {
-  const releaseNoteWithImage = (url) => `
-${NOTE_MARKERS}
-<!-- release-note-image:start -->
-<img src="${url}" alt="Screenshot">
-<!-- release-note-image:end -->
-`
-
-  assert.throws(
-    () => parseReleaseNote(releaseNoteWithImage('http://github.com/user-attachments/assets/example')),
-    /must be hosted by GitHub/,
-  )
-  assert.throws(
-    () => parseReleaseNote(releaseNoteWithImage('https://example.com/image.png')),
-    /must be hosted by GitHub/,
-  )
+  for (const url of ['http://github.com/user-attachments/assets/example', 'https://example.com/image.png']) {
+    assert.throws(
+      () => parseReleaseNoteFile(noteFile({ images: `<img src="${url}" alt="Screenshot">` })),
+      /must be hosted by GitHub/,
+    )
+  }
 })
 
 test('malformed image entries are rejected after valid images', () => {
-  for (const malformedImage of ['![Broken image](', '<img src="https://github.com/user-attachments/assets/broken"']) {
-    assert.throws(() => parseReleaseNote(`
-${NOTE_MARKERS}
-<!-- release-note-image:start -->
-![Screenshot](https://github.com/user-attachments/assets/example)
-${malformedImage}
-<!-- release-note-image:end -->
-`), /must be Markdown images/)
+  for (const malformedImage of ['![Broken image](', '<img src="https://github.com/user-attachments/assets/broken"', 'More text.']) {
+    assert.throws(() => parseReleaseNoteFile(noteFile({
+      images: `![Screenshot](https://github.com/user-attachments/assets/example)\n${malformedImage}`,
+    })), /must be Markdown images/)
   }
+})
+
+test('the release note directory is read in name order and reports every invalid file', (t) => {
+  const directory = mkdtempSync(path.join(tmpdir(), 'release-notes-'))
+  t.after(() => rmSync(directory, { recursive: true, force: true }))
+
+  writeFileSync(path.join(directory, 'README.md'), '# Release notes\n')
+  writeFileSync(path.join(directory, 'b-player.md'), noteFile({ frontMatter: 'category: fix' }))
+  writeFileSync(path.join(directory, 'a-queue.md'), noteFile())
+
+  assert.deepEqual(readReleaseNotes(directory).map(({ category, file }) => [category, path.basename(file)]), [
+    ['improvement', 'a-queue.md'],
+    ['fix', 'b-player.md'],
+  ])
+
+  writeFileSync(path.join(directory, 'Bad_Name.md'), noteFile())
+  writeFileSync(path.join(directory, 'missing-period.md'), noteFile({ note: 'Adds a queue' }))
+
+  assert.throws(() => readReleaseNotes(directory), (error) => {
+    assert.match(error.message, /Bad_Name\.md: Name release note files in kebab-case/)
+    assert.match(error.message, /missing-period\.md: End the release note with a period/)
+    return true
+  })
+})
+
+test('pull requests need a release note change or the opt-out checkbox', () => {
+  assert.equal(isReleaseNoteFile('release-notes/compact-player.md'), true)
+  assert.equal(isReleaseNoteFile('release-notes/README.md'), false)
+  assert.equal(isReleaseNoteFile('release-notes/nested/note.md'), false)
+  assert.equal(isReleaseNoteFile('docs/release-notes/note.md'), false)
+
+  assert.doesNotThrow(() => validatePullRequest('', ['src/a.js', 'release-notes/compact-player.md']))
+  assert.doesNotThrow(() => validatePullRequest('- [x] No release note needed', ['src/a.js']))
+  assert.doesNotThrow(() => validatePullRequest('- [X] No release note needed\r\n', []))
+  assert.throws(() => validatePullRequest('- [ ] No release note needed', ['src/a.js', 'release-notes/README.md']), /Add or update a release note/)
+})
+
+test('only pull requests merged into the target branch are selected per commit', () => {
+  const pullRequest = (number, mergedAt, {
+    baseRefName = 'development',
+    nameWithOwner = 'OpenTubeX/OpenTubeX',
+  } = {}) => ({
+    baseRefName,
+    baseRepository: { nameWithOwner },
+    mergedAt,
+    number,
+  })
+  const first = pullRequest(1, '2026-01-01T00:00:00Z')
+  const second = pullRequest(2, '2026-02-01T00:00:00Z')
+
+  const selected = selectPullRequests([{
+    data: {
+      repository: {
+        commit0: { associatedPullRequests: { nodes: [first, second, pullRequest(3, null)] } },
+        commit1: {
+          associatedPullRequests: {
+            nodes: [
+              pullRequest(4, '2026-01-02T00:00:00Z', { baseRefName: 'deps-batch' }),
+              pullRequest(5, '2026-01-03T00:00:00Z', { nameWithOwner: 'FreeTubeApp/FreeTube' }),
+            ],
+          },
+        },
+        commit2: null,
+      },
+    },
+  }], { repository: 'opentubex/opentubex', target: 'development' })
+
+  assert.deepEqual([...selected.keys()], ['commit0'])
+  assert.deepEqual([...selected.get('commit0').values()], [first, second])
+})
+
+test('references list closed issues before pull requests in merge order without duplicates', () => {
+  const later = { closingIssuesReferences: { nodes: [{ number: 41 }] }, mergedAt: '2026-02-01T00:00:00Z', number: 43 }
+  const earlier = { closingIssuesReferences: { nodes: [{ number: 40 }, { number: 41 }] }, mergedAt: '2026-01-01T00:00:00Z', number: 42 }
+
+  assert.deepEqual(formatReferences([later, earlier, later]), [40, 41, 42, 43])
+  assert.deepEqual(formatReferences([]), [])
 })
 
 test('GitHub image storage redirects are accepted narrowly', () => {
@@ -391,18 +377,18 @@ test('themed images keep the dark fallback and limit either tall variant', async
 })
 
 test('themed images stay inside their release note list item', async () => {
-  const result = await renderReleaseNotes([{
-    body: pullRequestBody('Highlights', {
+  const result = await renderReleaseNotes([note({
+    category: 'highlight',
+    images: parseReleaseNoteFile(noteFile({
       images: `<picture>
   <source media="(prefers-color-scheme: dark)" srcset="https://github.com/OpenTubeX/media/releases/download/attachments/dark.webp">
   <source media="(prefers-color-scheme: light)" srcset="https://github.com/OpenTubeX/media/releases/download/attachments/light.webp">
   <img alt="Settings" src="https://github.com/OpenTubeX/media/releases/download/attachments/dark.webp">
 </picture>`,
-      note: 'Adds theme-aware settings.',
-    }),
-    number: 42,
-    title: 'Theme-aware settings',
-  }], {
+    })).images,
+    note: 'Adds theme-aware settings.',
+    references: [42],
+  })], {
     loadImage: async () => png(800, 300),
   })
 
@@ -417,43 +403,20 @@ test('themed images stay inside their release note list item', async () => {
 `)
 })
 
-test('release notes render under their selected categories', async () => {
+test('release notes render under their categories in creation order with platform labels', async () => {
   const result = await renderReleaseNotes([
-    {
-      body: `
-${categoryMarkers('Highlights')}
-${NOTE_MARKERS}
-<!-- release-note-image:start -->
-<img src="https://github.com/user-attachments/assets/example" alt="Screenshot" width="800" height="600">
-![Settings](https://github.com/user-attachments/assets/second)
-<!-- release-note-image:end -->
-`,
-      closingIssuesReferences: {
-        nodes: [{ number: 40 }, { number: 41 }],
-      },
-      number: 42,
-      title: 'Compact player',
-    },
-    {
-      body: pullRequestBody('More improvements', { note: 'Adds keyboard shortcuts.' }),
-      number: 43,
-      title: 'Keyboard shortcuts',
-    },
-    {
-      body: pullRequestBody('Fixed bugs', { note: 'Fixed videos failing to load.' }),
-      number: 44,
-      title: 'Fix video loading',
-    },
-    {
-      body: pullRequestBody('Not noteworthy'),
-      number: 45,
-      title: 'Refactor tests',
-    },
-    {
-      body: 'Legacy pull request body',
-      number: 46,
-      title: 'Legacy change',
-    },
+    note({ category: 'fix', createdAt: 3, note: 'Fixed videos failing to load.', references: [44] }),
+    note({
+      category: 'highlight',
+      createdAt: 2,
+      images: [
+        { alt: 'Screenshot', url: 'https://github.com/user-attachments/assets/example' },
+        { alt: '', url: 'https://github.com/user-attachments/assets/second' },
+      ],
+      references: [40, 41, 42],
+    }),
+    note({ createdAt: 5, note: 'Adds keyboard shortcuts.', platforms: ['linux', 'macos', 'windows'], references: [43] }),
+    note({ createdAt: 4, note: 'Shared links open in the app.', platforms: ['android', 'ios'] }),
   ], {
     loadImage: async () => png(800, 600),
   })
@@ -462,11 +425,12 @@ ${NOTE_MARKERS}
 
 - Adds a compact player. (#40, #41, #42)
   <img src="https://github.com/user-attachments/assets/example" alt="Screenshot" width="400">
-  <img src="https://github.com/user-attachments/assets/second" alt="Settings" width="400">
+  <img src="https://github.com/user-attachments/assets/second" alt="Adds a compact player." width="400">
 
 ## More improvements
 
-- Adds keyboard shortcuts. (#43)
+- **Android, iOS:** Shared links open in the app.
+- **Desktop:** Adds keyboard shortcuts. (#43)
 
 ## Fixed bugs
 
@@ -474,57 +438,24 @@ ${NOTE_MARKERS}
 `)
 })
 
-test('empty release note categories are omitted', async () => {
-  const result = await renderReleaseNotes([
-    {
-      body: pullRequestBody('Fixed bugs', { note: 'Adds a compact player.' }),
-      number: 42,
-      title: 'Compact player',
-    },
-  ])
-
-  assert.equal(result, `## Fixed bugs
-
-- Adds a compact player. (#42)
-`)
+test('a release without release notes is rejected', async () => {
+  await assert.rejects(renderReleaseNotes([]), /No release notes were found in release-notes/)
 })
 
-test('a release with only non-noteworthy pull requests is rejected', async () => {
-  await assert.rejects(
-    renderReleaseNotes([{
-      body: pullRequestBody('Not noteworthy'),
-      number: 42,
-      title: 'Refactor tests',
-    }]),
-    /No noteworthy pull requests/,
-  )
-})
-
-test('nightly releases can render a fallback when there are no noteworthy changes', async () => {
-  const result = await renderReleaseNotes([{
-    body: pullRequestBody('Not noteworthy'),
-    number: 42,
-    title: 'Refactor tests',
-  }], {
-    emptyMessage: 'No noteworthy changes since the latest stable release.',
+test('nightly releases can render a fallback when there are no release notes', async () => {
+  const result = await renderReleaseNotes([], {
+    emptyMessage: 'No noteworthy changes since the latest release.',
   })
 
-  assert.equal(result, 'No noteworthy changes since the latest stable release.\n')
+  assert.equal(result, 'No noteworthy changes since the latest release.\n')
 })
 
 test('nightly releases omit images that cannot be processed', async () => {
   const imageErrors = []
-  const result = await renderReleaseNotes([{
-    body: `
-${categoryMarkers('More improvements')}
-${NOTE_MARKERS}
-<!-- release-note-image:start -->
-![Screenshot](https://github.com/user-attachments/assets/example)
-<!-- release-note-image:end -->
-`,
-    number: 42,
-    title: 'Compact player',
-  }], {
+  const result = await renderReleaseNotes([note({
+    images: [{ alt: 'Screenshot', url: 'https://github.com/user-attachments/assets/example' }],
+    references: [42],
+  })], {
     loadImage: async () => { throw new Error('Image unavailable.') },
     onImageError: (error) => imageErrors.push(error),
   })
@@ -534,5 +465,5 @@ ${NOTE_MARKERS}
 - Adds a compact player. (#42)
 `)
   assert.equal(imageErrors.length, 1)
-  assert.match(imageErrors[0].message, /PR #42: Image unavailable/)
+  assert.match(imageErrors[0].message, /compact-player\.md: Image unavailable/)
 })

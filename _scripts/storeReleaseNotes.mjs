@@ -3,10 +3,14 @@ import process from 'node:process'
 import { fileURLToPath } from 'node:url'
 
 import packageDetails from '../package.json' with { type: 'json' }
+import { filterReleaseNotesForPlatforms, parsePlatformLabel } from '../src/renderer/helpers/releaseNotePlatforms.js'
 
 // F-Droid cuts "What's new" text after this many characters.
 export const FDROID_CHANGELOG_LIMIT = 500
 const FDROID_MORE = '…and more'
+const LINUX = ['linux']
+// The self-hosted F-Droid and SideStore repositories share the F-Droid text.
+const MOBILE = ['android', 'ios']
 const LINE_WIDTH = 80
 const MONTHS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']
 const WEEKDAYS = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat']
@@ -144,22 +148,45 @@ function cleanMarkdown(markdown) {
     .trim()
 }
 
-/** Converts GitHub release notes to plain text with their headings and bullets. */
-export function releaseNotesText(markdown) {
-  return cleanMarkdown(markdown).replaceAll(/^#{1,6}\s+/gm, '')
+// Publishing every note with its labels beats empty notes when a release has
+// no changes of its own for the target platforms.
+function filterForPlatforms(markdown, platforms) {
+  const filtered = filterReleaseNotesForPlatforms(markdown, platforms)
+
+  return /^\s*(?:[-*+]|\d+[.)])\s/m.test(filtered) ? { markdown: filtered, platforms } : { markdown, platforms: null }
+}
+
+// A label naming the only target platform says nothing, so it is dropped.
+function removeTargetLabel(item, platforms) {
+  return platforms?.length === 1 ? parsePlatformLabel(item).text : item
+}
+
+/**
+ * Converts GitHub release notes to plain text with their headings and bullets.
+ * @param {string} markdown
+ * @param {string[] | null} targetPlatforms Keeps only items for these platforms.
+ */
+export function releaseNotesText(markdown, targetPlatforms = null) {
+  const { markdown: filtered, platforms } = filterForPlatforms(markdown, targetPlatforms)
+
+  return cleanMarkdown(filtered)
+    .replaceAll(/^#{1,6}\s+/gm, '')
+    .replaceAll(/^(\s*[-*+]\s+)(.+)$/gm, (line, bullet, item) => `${bullet}${removeTargetLabel(item, platforms)}`)
 }
 
 /**
  * Splits GitHub release notes into headed sections of single-line items. Stores
  * cannot follow issue links, so trailing references such as (#12, #34) are dropped.
  * @param {string} markdown
+ * @param {string[] | null} targetPlatforms Keeps only items for these platforms.
  * @returns {{ heading: string | null, items: string[] }[]}
  */
-export function releaseNoteSections(markdown) {
+export function releaseNoteSections(markdown, targetPlatforms = null) {
+  const { markdown: filtered, platforms } = filterForPlatforms(markdown, targetPlatforms)
   const sections = []
   let item = null
 
-  for (const line of cleanMarkdown(markdown).split('\n')) {
+  for (const line of cleanMarkdown(filtered).split('\n')) {
     const heading = line.match(/^#{1,6}\s+(.+)$/)
     const bullet = line.match(/^\s*(?:[-*+]|\d+[.)])\s+(.+)$/)
 
@@ -185,7 +212,9 @@ export function releaseNoteSections(markdown) {
   return sections
     .map(({ heading, items }) => ({
       heading,
-      items: items.map((text) => text.replace(/\s*\(#\d+(?:,\s*#\d+)*\)$/, '')).filter(Boolean),
+      items: items
+        .map((text) => removeTargetLabel(text.replace(/\s*\(#\d+(?:,\s*#\d+)*\)$/, ''), platforms))
+        .filter(Boolean),
     }))
     .filter(({ items }) => items.length > 0)
 }
@@ -206,7 +235,7 @@ function renderFdroidChangelog(entries, hasMore) {
 
 /** Picks the items, in order, that fit F-Droid's "What's new" limit. */
 export function fdroidChangelog(markdown, limit = FDROID_CHANGELOG_LIMIT) {
-  const entries = releaseNoteSections(markdown).flatMap(({ heading, items }) => items.map((item) => ({ heading, item })))
+  const entries = releaseNoteSections(markdown, MOBILE).flatMap(({ heading, items }) => items.map((item) => ({ heading, item })))
   const complete = renderFdroidChangelog(entries, false)
 
   if (complete.length <= limit) { return complete }
@@ -231,7 +260,7 @@ function escapeXml(value) {
 
 /** Converts release notes to an AppStream release description body. */
 export function appStreamDescription(markdown) {
-  return releaseNoteSections(markdown).flatMap(({ heading, items }) => [
+  return releaseNoteSections(markdown, LINUX).flatMap(({ heading, items }) => [
     ...(heading ? [`<p>${escapeXml(heading)}</p>`] : []),
     '<ul>',
     ...items.map((item) => `  <li>${escapeXml(item)}</li>`),
@@ -268,7 +297,7 @@ function pad(value) {
 
 /** Renders a Debian changelog entry for the current package version. */
 export function debianChangelog(markdown, date = new Date()) {
-  const sections = releaseNoteSections(markdown).map(({ heading, items }) => [
+  const sections = releaseNoteSections(markdown, LINUX).map(({ heading, items }) => [
     ...(heading ? [`  [ ${heading} ]`] : []),
     ...items.map((item) => wrap(item, '  * ', '    ')),
   ].join('\n'))
@@ -285,7 +314,7 @@ ${sections.join('\n\n')}
 
 /** Renders an RPM %changelog entry for the current package version. */
 export function rpmChangelog(markdown, date = new Date()) {
-  const items = releaseNoteSections(markdown).flatMap(({ items }) => items)
+  const items = releaseNoteSections(markdown, LINUX).flatMap(({ items }) => items)
   const day = `${WEEKDAYS[date.getUTCDay()]} ${MONTHS[date.getUTCMonth()]} ${pad(date.getUTCDate())} ${date.getUTCFullYear()}`
   const entry = [
     `* ${day} ${maintainer()} - ${packageDetails.version}`,

@@ -307,6 +307,30 @@ test('skipped updates keep a heading per release', async ({ page, attachScreensh
   await attachScreenshot('update prompt with skipped releases')
 })
 
+test('release notes for other platforms are hidden', async ({ page }) => {
+  await showUpdatePrompt(page, [
+    release(`OpenTubeX ${newestUpdateVersion}`, `v${newestUpdateVersion}-beta`, [
+      '## Highlights',
+      '',
+      '- **Android, iOS:** Mobile highlight. (#1)',
+      '',
+      '## More improvements',
+      '',
+      '- Shared improvement. (#2)',
+      '- **Desktop:** Desktop improvement. (#3)',
+      '- **Android:** Android improvement. (#4)',
+      '  <img src="https://github.com/user-attachments/assets/android" alt="Android screenshot">'
+    ].join('\n'))
+  ])
+
+  await expect(page.locator('.changeLogText h2')).toHaveText(['More improvements'])
+  await expect(page.locator('.changeLogText li')).toHaveText([
+    'Shared improvement. (#2)',
+    'Desktop: Desktop improvement. (#3)'
+  ])
+  await expect(page.locator('.changeLogText img')).toHaveCount(0)
+})
+
 test('changelog images preserve their aspect ratio at phone and desktop widths', { tag: '@scale' }, async ({ page, uiScale }) => {
   const imageUrl = 'https://example.com/release-screenshot.svg'
   await page.route(imageUrl, route => route.fulfill({

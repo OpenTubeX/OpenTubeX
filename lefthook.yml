@@ -20,6 +20,11 @@ pre-commit:
       run: pnpm exec stylelint --no-color --allow-empty-input {staged_files}
       skip:
         - rebase
+    release-notes:
+      glob: "release-notes/*.md"
+      run: pnpm run lint-release-notes
+      skip:
+        - rebase
 
 # EXAMPLE USAGE
 #
