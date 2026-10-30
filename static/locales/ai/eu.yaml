@@ -1461,7 +1461,7 @@ Video:
   Retry With Built-in Extraction: Saiatu berriro erauzketa integratuarekin
   Retry With yt-dlp Extraction: Saiatu berriro yt-dlp erauzketarekin
   Reloading video after streaming URL error: Bideoa berriro kargatzen korrontearen URLak huts egin ondoren
-  Configure Restricted Playback Cookies Hint: "Konfiguratu cookieak Ezarpenak → Kanpoko softwarea → yt-dlp cookieak atalean."
+  Configure Restricted Playback Cookies Hint: "Konfiguratu cookieak Ezarpenak → Aurreratua → Kanpoko softwarea → yt-dlp cookieak atalean."
   Try With Configured Cookies: Saiatu konfiguratutako cookieekin
   Restricted Playback Authentication Failed Template: 'yt-dlp-k ezin izan du bideo hau atzitu konfiguratutako cookieekin: {error}'
   Unmark As Watched: Kendu ikusita marka

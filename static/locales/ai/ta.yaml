@@ -1505,7 +1505,7 @@ Video:
   Retry With Built-in Extraction: உள்ளமைந்த பிரித்தெடுப்புடன் மீண்டும் முயல்
   Retry With yt-dlp Extraction: yt-dlp பிரித்தெடுப்புடன் மீண்டும் முயல்
   Reloading video after streaming URL error: ஸ்ட்ரீமிங் URL பிழைக்குப் பிறகு காணொளி மீண்டும் ஏற்றப்படுகிறது
-  Configure Restricted Playback Cookies Hint: "அமைப்புகள் → வெளிப்புற மென்பொருள் → yt-dlp குக்கீகள் என்பதில் குக்கீகளை அமைக்கவும்."
+  Configure Restricted Playback Cookies Hint: "அமைப்புகள் → மேம்பட்டவை → வெளிப்புற மென்பொருள் → yt-dlp குக்கீகள் என்பதில் குக்கீகளை அமைக்கவும்."
   Try With Configured Cookies: அமைத்த குக்கீகளுடன் முயல்
   Restricted Playback Authentication Failed Template: 'அமைத்த குக்கீகளுடன் yt-dlp-ஆல் இந்தக் காணொளியை அணுக முடியவில்லை: {error}'
   Private: தனிப்பட்ட காணொளிகளுக்கு Google உள்நுழைவும் காணொளியின் உரிமையும் தேவைப்படுவதால் அவற்றை OpenTubeX-இல் பார்க்க முடியாது.

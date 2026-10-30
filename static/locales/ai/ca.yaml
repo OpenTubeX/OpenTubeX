@@ -1879,7 +1879,7 @@ Video:
   Reloading video after streaming URL error: S'està tornant a carregar el vídeo després d'un error de l'URL del flux
   MembersOnly: Aquest vídeo només per a membres requereix un compte de Google amb una subscripció activa al canal.
   AgeRestricted: Aquest vídeo amb restricció d'edat requereix un compte de Google amb l'edat verificada.
-  Configure Restricted Playback Cookies Hint: "Configureu les galetes a Configuració → Programari extern → Galetes de yt-dlp."
+  Configure Restricted Playback Cookies Hint: "Configureu les galetes a Configuració → Avançat → Programari extern → Galetes de yt-dlp."
   Try With Configured Cookies: Prova-ho amb les galetes configurades
   Restricted Playback Authentication Failed Template: 'yt-dlp no ha pogut accedir a aquest vídeo amb les galetes configurades: {error}'
   DRMProtected: Els vídeos protegits amb DRM no es poden reproduir a l'OpenTubeX perquè requereixen components propietaris de codi tancat. Per mirar aquest vídeo, obriu el lloc web oficial de YouTube en un navegador amb DRM activat.

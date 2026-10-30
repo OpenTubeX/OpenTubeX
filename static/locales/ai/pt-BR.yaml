@@ -1430,7 +1430,7 @@ Video:
   Retry With Built-in Extraction: Tentar novamente com a extração integrada
   Retry With yt-dlp Extraction: Tentar novamente com a extração do yt-dlp
   Reloading video after streaming URL error: A recarregar o vídeo após um erro no URL de transmissão
-  Configure Restricted Playback Cookies Hint: "Configure os cookies em Configurações → Software externo → Cookies do yt-dlp."
+  Configure Restricted Playback Cookies Hint: "Configure os cookies em Configurações → Avançadas → Software externo → Cookies do yt-dlp."
   Try With Configured Cookies: Tentar com os cookies configurados
   Restricted Playback Authentication Failed Template: 'O yt-dlp não conseguiu acessar a este vídeo com os cookies configurados: {error}'
   Unmark As Watched: Desmarcar como reproduzido

@@ -1461,7 +1461,7 @@ Video:
   Retry With Built-in Extraction: 内蔵の抽出方式で再試行
   Retry With yt-dlp Extraction: yt-dlpの抽出方式で再試行
   Reloading video after streaming URL error: ストリーミングURLのエラー後に動画を再読み込み中
-  Configure Restricted Playback Cookies Hint: "「設定」→「外部ソフトウェア」→「yt-dlp の Cookie」でCookieを設定してください。"
+  Configure Restricted Playback Cookies Hint: "「設定」→「詳細設定」→「外部ソフトウェア」→「yt-dlp の Cookie」でCookieを設定してください。"
   Try With Configured Cookies: 設定済みのCookieを使用して再試行
   Restricted Playback Authentication Failed Template: '設定したCookieではyt-dlpがこの動画にアクセスできませんでした: {error}'
   Unmark As Watched: 視聴済みを解除

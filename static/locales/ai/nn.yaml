@@ -1689,7 +1689,7 @@ Video:
   Reloading video after streaming URL error: Lastar inn videoen på nytt etter ein feil med straumadressa
   MembersOnly: Denne videoen er berre for medlemer og krev ein Google-konto med aktivt medlemskap i kanalen.
   AgeRestricted: Denne aldersavgrensa videoen krev ein aldersstadfesta Google-konto.
-  Configure Restricted Playback Cookies Hint: "Set opp informasjonskapslar under Innstillingar → Ekstern programvare → yt-dlp-informasjonskapslar."
+  Configure Restricted Playback Cookies Hint: "Set opp informasjonskapslar under Innstillingar → Avansert → Ekstern programvare → yt-dlp-informasjonskapslar."
   Try With Configured Cookies: Prøv med dei oppsette infokapslane
   Restricted Playback Authentication Failed Template: 'yt-dlp fekk ikkje tilgang til videoen med dei oppsette infokapslane: {error}'
   DRMProtected: DRM-verna videoar kan ikkje spelast av i OpenTubeX fordi dei krev proprietære komponentar med lukka kjeldekode. Sjå videoen på den offisielle YouTube-nettstaden i ein nettlesar med DRM-støtte.

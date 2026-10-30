@@ -1461,7 +1461,7 @@ Video:
   Retry With Built-in Extraction: Proovi uuesti sisseehitatud meetodiga
   Retry With yt-dlp Extraction: Proovi uuesti yt-dlp abil
   Reloading video after streaming URL error: Video laaditakse voogedastuse URL-i vea tõttu uuesti
-  Configure Restricted Playback Cookies Hint: "Seadista küpsised jaotises Seaded → Väline tarkvara → yt-dlp küpsised."
+  Configure Restricted Playback Cookies Hint: "Seadista küpsised jaotises Seaded → Täpsemad seaded → Väline tarkvara → yt-dlp küpsised."
   Try With Configured Cookies: Proovi seadistatud küpsistega
   Restricted Playback Authentication Failed Template: 'yt-dlp ei pääsenud seadistatud küpsistega sellele videole juurde: {error}'
   Unmark As Watched: Eemalda vaadatuks märkimine
@@ -2225,7 +2225,7 @@ Downloads:
   Insufficient Disk Space: Kettaruumi pole piisavalt. Vaja on umbes {required}, saadaval on {available}.
   Unknown Download Size: Allalaadimise maht pole teada. Sihtfailisüsteemis on saadaval {available}.
   Disk Space Check Unavailable: Enne selle allalaadimise alustamist ei saanud saadaolevat kettaruumi kontrollida.
-  Download Failure Hint: Vaata {issuesLink}, seejärel proovi jaotises Seaded → Täpsemad → Väline tarkvara vahetada yt-dlp kanaliks Nightly või Master.
+  Download Failure Hint: Vaata {issuesLink}, seejärel proovi jaotises Seaded → Täpsemad seaded → Väline tarkvara vahetada yt-dlp kanaliks Nightly või Master.
   yt-dlp YouTube Issues: yt-dlp hiljutised probleemid YouTube'iga
   Automatic Download Started: Automaatne allalaadimine algas
   Automatic Download Started Body: Sisu "{title}" laaditakse kanalilt {channel} taustal alla.
@@ -2234,7 +2234,7 @@ Downloads:
   Automatic Download Could Not Start: Video "{title}" automaatset allalaadimist ei saanud alustada.
   Automatic Download Skipped: Automaatse allalaadimise filtrid jätsid selle vahele
   Cancel Download: Tühista allalaadimine
-  yt-dlp Not Found: yt-dlp-d ei leitud. Paigalda see või määra selle asukoht jaotises Seaded → Täpsemad → Väline tarkvara.
+  yt-dlp Not Found: yt-dlp-d ei leitud. Paigalda see või määra selle asukoht jaotises Seaded → Täpsemad seaded → Väline tarkvara.
   Download Complete Template: Sisu "{title}" allalaadimine on lõppenud
   Download Failed Template: Sisu "{title}" allalaadimine nurjus
   Templates:

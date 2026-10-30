@@ -1491,7 +1491,7 @@ Video:
   Retry With Built-in Extraction: Reîncearcă folosind extragerea încorporată
   Retry With yt-dlp Extraction: Reîncearcă folosind extragerea yt-dlp
   Reloading video after streaming URL error: Se reîncarcă videoclipul după o eroare a adresei URL a fluxului
-  Configure Restricted Playback Cookies Hint: "Configurați cookie-urile în Setări → Software extern → Cookie-uri yt-dlp."
+  Configure Restricted Playback Cookies Hint: "Configurați cookie-urile în Setări → Avansat → Software extern → Cookie-uri yt-dlp."
   Try With Configured Cookies: Încearcă folosind cookie-urile configurate
   Restricted Playback Authentication Failed Template: 'yt-dlp nu a putut accesa acest videoclip cu cookie-urile configurate: {error}'
   Private: Videoclipurile private nu pot fi vizionate în OpenTubeX deoarece necesită autentificarea la Google și dreptul de proprietate asupra videoclipului.

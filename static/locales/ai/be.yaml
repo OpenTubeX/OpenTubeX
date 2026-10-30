@@ -1535,7 +1535,7 @@ Video:
   Retry With Built-in Extraction: Паўтарыць з убудаваным сродкам вымання
   Retry With yt-dlp Extraction: Паўтарыць з выманнем праз yt-dlp
   Reloading video after streaming URL error: Перазагрузка відэа пасля памылкі URL патоку
-  Configure Restricted Playback Cookies Hint: "Наладзьце файлы cookie ў раздзеле «Налады → Вонкавае праграмнае забеспячэнне → Файлы cookie yt-dlp»."
+  Configure Restricted Playback Cookies Hint: "Наладзьце файлы cookie ў раздзеле «Налады → Пашыраныя → Вонкавае праграмнае забеспячэнне → Файлы cookie yt-dlp»."
   Try With Configured Cookies: Паспрабаваць з наладжанымі кукі
   Restricted Playback Authentication Failed Template: 'yt-dlp не змог атрымаць доступ да гэтага відэа з наладжанымі кукі: {error}'
   Private: Прыватныя відэа нельга глядзець у OpenTubeX, бо для гэтага трэба ўвайсці ў Google з уліковага запісу ўладальніка відэа.

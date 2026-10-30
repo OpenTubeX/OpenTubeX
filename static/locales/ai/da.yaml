@@ -1524,7 +1524,7 @@ Video:
   Retry With Built-in Extraction: Prøv igen med indbygget udtræk
   Retry With yt-dlp Extraction: Prøv igen med udtræk via yt-dlp
   Reloading video after streaming URL error: Genindlæser video efter fejl i streaming-URL
-  Configure Restricted Playback Cookies Hint: "Konfigurer cookies under Indstillinger → Ekstern software → Cookies til yt-dlp."
+  Configure Restricted Playback Cookies Hint: "Konfigurer cookies under Indstillinger → Avanceret → Ekstern software → Cookies til yt-dlp."
   Try With Configured Cookies: Prøv med konfigurerede cookies
   Restricted Playback Authentication Failed Template: 'yt-dlp kunne ikke få adgang til denne video med de konfigurerede cookies: {error}'
   Private: Private videoer kan ikke ses i OpenTubeX, da de kræver Google-login og ejerskab af videoen.

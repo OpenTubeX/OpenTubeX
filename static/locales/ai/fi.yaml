@@ -1499,7 +1499,7 @@ Video:
   Retry With Built-in Extraction: Yritä uudelleen sisäisellä poiminnalla
   Retry With yt-dlp Extraction: Yritä uudelleen yt-dlp-poiminnalla
   Reloading video after streaming URL error: Video ladataan uudelleen suoratoisto-osoitteen virheen jälkeen
-  Configure Restricted Playback Cookies Hint: "Määritä evästeet kohdassa Asetukset → Ulkoiset ohjelmistot → yt-dlp-evästeet."
+  Configure Restricted Playback Cookies Hint: "Määritä evästeet kohdassa Asetukset → Lisäasetukset → Ulkoiset ohjelmistot → yt-dlp-evästeet."
   Try With Configured Cookies: Yritä määritetyillä evästeillä
   Restricted Playback Authentication Failed Template: 'yt-dlp ei voinut avata tätä videota määritetyillä evästeillä: {error}'
   Private: Yksityisiä videoita ei voi katsoa OpenTubeXissä, koska ne edellyttävät Google-kirjautumista ja videon omistajuutta.

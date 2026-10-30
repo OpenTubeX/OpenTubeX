@@ -1479,7 +1479,7 @@ Video:
   Retry With Built-in Extraction: Νέα προσπάθεια με ενσωματωμένη εξαγωγή
   Retry With yt-dlp Extraction: Νέα προσπάθεια με εξαγωγή yt-dlp
   Reloading video after streaming URL error: Επαναφόρτωση βίντεο μετά από σφάλμα URL ροής
-  Configure Restricted Playback Cookies Hint: "Ρυθμίστε τα cookie στις Ρυθμίσεις → Εξωτερικό λογισμικό → Cookies του yt-dlp."
+  Configure Restricted Playback Cookies Hint: "Ρυθμίστε τα cookie στις Ρυθμίσεις → Για προχωρημένους → Εξωτερικό λογισμικό → Cookies του yt-dlp."
   Try With Configured Cookies: Δοκιμή με τα ρυθμισμένα cookie
   Restricted Playback Authentication Failed Template: 'Το yt-dlp δεν μπόρεσε να αποκτήσει πρόσβαση σε αυτό το βίντεο με τα ρυθμισμένα cookie: {error}'
   Private: Τα ιδιωτικά βίντεο δεν μπορούν να προβληθούν στο OpenTubeX, επειδή απαιτούν σύνδεση στο Google και κυριότητα του βίντεο.

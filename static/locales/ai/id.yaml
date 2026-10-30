@@ -1469,7 +1469,7 @@ Video:
   Retry With Built-in Extraction: Coba lagi dengan ekstraksi bawaan
   Retry With yt-dlp Extraction: Coba lagi dengan ekstraksi yt-dlp
   Reloading video after streaming URL error: Memuat ulang video setelah galat URL streaming
-  Configure Restricted Playback Cookies Hint: "Atur kuki di Pengaturan → Perangkat Lunak Eksternal → Kuki yt-dlp."
+  Configure Restricted Playback Cookies Hint: "Atur kuki di Pengaturan → Lanjutan → Perangkat Lunak Eksternal → Kuki yt-dlp."
   Try With Configured Cookies: Coba dengan kuki yang telah dikonfigurasi
   Restricted Playback Authentication Failed Template: 'yt-dlp tidak dapat mengakses video ini dengan kuki yang telah dikonfigurasi: {error}'
   Collapse Playlist: Ciutkan Daftar Putar

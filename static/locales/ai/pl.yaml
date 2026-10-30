@@ -892,7 +892,7 @@ Video:
   Retry With Built-in Extraction: Spróbuj ponownie za pomocą wbudowanego mechanizmu
   Retry With yt-dlp Extraction: Spróbuj ponownie za pomocą yt-dlp
   Reloading video after streaming URL error: Ponowne wczytywanie filmu po błędzie adresu URL strumienia
-  Configure Restricted Playback Cookies Hint: "Skonfiguruj ciasteczka w sekcji Ustawienia → Oprogramowanie zewnętrzne → Pliki cookie yt-dlp."
+  Configure Restricted Playback Cookies Hint: "Skonfiguruj ciasteczka w sekcji Ustawienia → Zaawansowane → Oprogramowanie zewnętrzne → Pliki cookie yt-dlp."
   Try With Configured Cookies: Spróbuj ze skonfigurowanymi ciasteczkami
   Restricted Playback Authentication Failed Template: 'yt-dlp nie uzyskał dostępu do tego filmu za pomocą skonfigurowanych ciasteczek: {error}'
   Save Channel Subtitles State: Zapisz ustawienie napisów dla kanału

@@ -1463,7 +1463,7 @@ Video:
   Retry With Built-in Extraction: 使用內建擷取功能重試
   Retry With yt-dlp Extraction: 使用 yt-dlp 擷取功能重試
   Reloading video after streaming URL error: 串流網址發生錯誤，正在重新載入影片
-  Configure Restricted Playback Cookies Hint: "請前往「設定 → 外部軟體 → yt-dlp Cookie」設定 Cookie。"
+  Configure Restricted Playback Cookies Hint: "請前往「設定 → 進階 → 外部軟體 → yt-dlp Cookie」設定 Cookie。"
   Try With Configured Cookies: 使用已設定的 Cookie 重試
   Restricted Playback Authentication Failed Template: 'yt-dlp 無法使用已設定的 Cookie 存取此影片：{error}'
   Unmark As Watched: 標示為未觀看

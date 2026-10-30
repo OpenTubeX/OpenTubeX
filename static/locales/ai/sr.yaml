@@ -1518,7 +1518,7 @@ Video:
   Retry With Built-in Extraction: Покушај поново помоћу уграђеног издвајања
   Retry With yt-dlp Extraction: Покушај поново помоћу издвајања преко yt-dlp-а
   Reloading video after streaming URL error: Поновно учитавање видео-снимка након грешке URL-а стрима
-  Configure Restricted Playback Cookies Hint: "Подесите колачиће у одељку Подешавања → Спољни програми → yt-dlp колачићи."
+  Configure Restricted Playback Cookies Hint: "Подесите колачиће у одељку Подешавања → Напредно → Спољни софтвер → yt-dlp колачићи."
   Try With Configured Cookies: Покушај са подешеним колачићима
   Restricted Playback Authentication Failed Template: 'yt-dlp није могао да приступи овом видео-снимку помоћу подешених колачића: {error}'
   Private: Приватни видео-снимци не могу да се гледају у програму OpenTubeX јер захтевају пријаву на Google налог и власништво над видео-снимком.
