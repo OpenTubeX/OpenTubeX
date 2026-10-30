@@ -1,6 +1,7 @@
 import { filterReleaseNotesForPlatforms } from './releaseNotePlatforms.js'
 
 const VERSION_PATTERN = /^v?(\d+)\.(\d+)\.(\d+)(?:-beta|-nightly-(\d+))?$/
+const NOTE_ITEM = /^(?:[-*+]|\d+[.)]) /m
 
 /**
  * Fetches every page of releases by following GitHub's next-page links.
@@ -127,15 +128,16 @@ export function formatReleaseChangelog(releases, platform = null) {
   let changelog = body(releases[0] ?? {})
 
   if (releases.length > 1) {
-    // Releases with no notes for this platform would only add an empty heading.
+    // Releases left without notes for this platform would only add a heading
+    // and, for nightlies, their wrapper text.
     changelog = releases
       .map((release) => ({ release, notes: body(release) }))
-      .filter(({ notes }) => notes.trim() !== '')
+      .filter(({ release, notes }) => NOTE_ITEM.test(notes) || !NOTE_ITEM.test(release.body ?? ''))
       .map(({ release, notes }) => `## ${release.name ?? release.tag_name ?? ''}\n\n${notes}`)
       .join('\n\n')
   }
 
   // Every note with its platform label beats an update prompt without notes.
   // Nightly bodies keep their wrapper text, so look for note items.
-  return platform !== null && !/^(?:[-*+]|\d+[.)]) /m.test(changelog) ? formatReleaseChangelog(releases) : changelog
+  return platform !== null && !NOTE_ITEM.test(changelog) ? formatReleaseChangelog(releases) : changelog
 }

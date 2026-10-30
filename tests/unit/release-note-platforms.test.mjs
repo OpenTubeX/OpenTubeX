@@ -119,4 +119,9 @@ test('update changelogs show only the running platform\'s notes and skip release
 
   const nightly = { body: 'Automated development build.\n\n<details>\n\n- **Windows:** Adds jump lists.\n\n</details>', tag_name: 'v3' }
   assert.equal(formatReleaseChangelog([nightly], 'android'), nightly.body)
+  assert.equal(formatReleaseChangelog([releases[0], nightly], 'android'), '## v2\n\n- Works everywhere.')
+  assert.equal(
+    formatReleaseChangelog([releases[0], { body: 'No noteworthy changes.', name: 'v1' }], 'android'),
+    '## v2\n\n- Works everywhere.\n\n## v1\n\nNo noteworthy changes.'
+  )
 })
