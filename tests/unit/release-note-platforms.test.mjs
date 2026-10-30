@@ -88,13 +88,32 @@ test('filtering keeps nightly wrappers and removes headings emptied inside them'
 `)
 })
 
-test('update changelogs show only the running platform\'s notes for each release', () => {
+test('filtering recognizes every list marker and keeps skipping an item across blank lines', () => {
+  assert.equal(filterReleaseNotesForPlatforms([
+    '+ **iOS:** Plus item.',
+    '1. **iOS:** Numbered item.',
+    '2) Shared item.',
+    '- **iOS:** Spaced item.',
+    '',
+    '  <img src="https://github.com/user-attachments/assets/ios" alt="iOS">',
+    '',
+    'After the list.',
+  ].join('\n'), ['android']), '2) Shared item.\n\nAfter the list.')
+})
+
+test('update changelogs show only the running platform\'s notes and skip releases without any', () => {
   const releases = [
     { body: '- **Windows:** Adds jump lists.\n- Works everywhere.', name: 'v2', tag_name: 'v2' },
     { body: '- **Android:** Adds widgets.', name: 'v1', tag_name: 'v1' },
   ]
 
   assert.equal(formatReleaseChangelog(releases, 'android'), '## v2\n\n- Works everywhere.\n\n## v1\n\n- **Android:** Adds widgets.')
-  assert.equal(formatReleaseChangelog(releases.slice(1), 'linux'), '')
+  assert.equal(formatReleaseChangelog(releases, 'linux'), '## v2\n\n- Works everywhere.')
+  assert.equal(formatReleaseChangelog(releases.slice(1), 'linux'), '- **Android:** Adds widgets.')
+  // With nothing for the running platform, every note stays with its label.
+  assert.equal(
+    formatReleaseChangelog([{ body: '- **iOS:** Adds SharePlay.', name: 'v2' }, releases[1]], 'linux'),
+    '## v2\n\n- **iOS:** Adds SharePlay.\n\n## v1\n\n- **Android:** Adds widgets.'
+  )
   assert.equal(formatReleaseChangelog(releases.slice(1)), '- **Android:** Adds widgets.')
 })

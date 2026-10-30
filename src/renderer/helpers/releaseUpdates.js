@@ -124,12 +124,17 @@ export function formatReleaseChangelog(releases, platform = null) {
   const platforms = platform === null ? null : [platform]
   const body = (/** @type {{ body?: string | null }} */ release) => filterReleaseNotesForPlatforms(release.body ?? '', platforms)
 
-  if (releases.length === 1) {
-    return body(releases[0])
+  let changelog = body(releases[0] ?? {})
+
+  if (releases.length > 1) {
+    // Releases with no notes for this platform would only add an empty heading.
+    changelog = releases
+      .map((release) => ({ release, notes: body(release) }))
+      .filter(({ notes }) => notes.trim() !== '')
+      .map(({ release, notes }) => `## ${release.name ?? release.tag_name ?? ''}\n\n${notes}`)
+      .join('\n\n')
   }
 
-  return releases.map((release) => {
-    const title = release.name ?? release.tag_name ?? ''
-    return `## ${title}\n\n${body(release)}`
-  }).join('\n\n')
+  // Every note with its platform label beats an empty update prompt.
+  return changelog.trim() === '' && platform !== null ? formatReleaseChangelog(releases) : changelog
 }

@@ -94,15 +94,16 @@ export function filterReleaseNotesForPlatforms(markdown, platforms) {
   let skippingItem = false
 
   for (const line of markdown.split('\n')) {
-    const item = /^[-*] (.*)$/.exec(line)
+    const item = /^(?:[-*+]|\d+[.)]) (.*)$/.exec(line)
 
     if (item !== null) {
       skippingItem = !releaseNoteAppliesTo(item[1], platforms)
-    } else if (!/^\s+\S/.test(line)) {
+    } else if (/^\S/.test(line)) {
       skippingItem = false
     }
 
-    if (!skippingItem) {
+    // Blank lines can separate an item from its indented images, so they do not end it.
+    if (!skippingItem || line.trim() === '') {
       lines.push(line)
     }
   }
