@@ -48,3 +48,61 @@ test('Hide Comments controls post comments without hiding the post', async ({ pa
   await expect(page.locator('.noComments')).toHaveCount(0)
   await expect(page.getByText('Post with optional comments', { exact: true })).toBeVisible()
 })
+
+test.describe('subscribed comment authors', () => {
+  test.use({
+    seed: {
+      settings: { backendPreference: 'invidious', fetchSubscriptionsAutomatically: false, generalAutoLoadMorePaginatedItemsEnabled: true },
+      profiles: [{
+        _id: 'allChannels',
+        name: 'All Channels',
+        bgColor: '#d50000',
+        textColor: '#FFFFFF',
+        subscriptions: [{ id: 'UC-subscribed-author', name: 'Subscribed author', thumbnail: '' }]
+      }]
+    }
+  })
+
+  test('marks comments and replies from subscribed channels with the Subscribed badge', async ({ page }) => {
+    const comment = (author, authorId, extra = {}) => ({
+      commentId: author,
+      author,
+      authorId,
+      authorThumbnails: [],
+      contentHtml: `${author} content`,
+      published: 1_700_000_000,
+      likeCount: 0,
+      ...extra
+    })
+    await page.route('**/api/v1/post/**', route => {
+      const url = new URL(route.request().url())
+      if (!url.pathname.endsWith('/comments')) {
+        return route.fulfill({ json: { comments: [{ commentId: 'e2e-post', contentHtml: 'Post', author: 'Test Channel', authorId: 'UC-test-channel-id', authorThumbnails: [{ url: 'https://example.com/avatar.png', width: 48, height: 48 }], publishedText: '1 day ago', likeCount: 0, replyCount: 0 }] } })
+      }
+      return route.fulfill({
+        json: url.searchParams.get('continuation') === 'replies'
+          ? { comments: [comment('Subscribed reply', 'UC-subscribed-author')] }
+          : {
+              comments: [
+                comment('Subscribed author', 'UC-subscribed-author', { replies: { replyCount: 1, continuation: 'replies' } }),
+                comment('Other author', 'UC-other-author')
+              ],
+              commentCount: 2
+            }
+      })
+    })
+    await page.evaluate(() => {
+      return window.ftElectron.tabs.create({ route: '/post/e2e-post', query: { authorId: 'UC-test-channel-id' } })
+    })
+
+    const subscribed = page.locator('#comment0')
+    const subscribedBadge = subscribed.locator(':scope > .commentAuthorWrapper .commentSubscribedIcon')
+    await expect(subscribedBadge).toHaveAttribute('data-icon', 'user-check')
+    await expect(subscribed.getByRole('img', { name: 'Subscribed', exact: true })).toBeVisible()
+    await expect(page.locator('#comment1 .commentSubscribedIcon')).toHaveCount(0)
+
+    await subscribed.locator('.commentReplyToggleLabel').click()
+    const reply = page.locator('.commentReplyContent', { hasText: 'Subscribed reply' })
+    await expect(reply.getByRole('img', { name: 'Subscribed', exact: true })).toBeVisible()
+  })
+})

@@ -124,3 +124,6 @@ jobs:
             ${{ steps.update.outputs.changes }}
 
             The tool checksums come from the digests GitHub records for the release assets, and the image digest from its registry manifest.
+
+            ## Release note
+            - [x] No release note needed

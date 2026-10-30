@@ -140,6 +140,7 @@ test('adds only the viewer\'s own seeks to the seek history', () => {
 
 test('retains the latest absolute seek before metadata, including zero', () => {
   const { state, setCurrentTime } = absoluteSeekFixture({ isLive: false })
+  state.videoLayoutReady.value = false
   state.video.value.readyState = 0
   for (const time of [15, 5, 0]) {
     setCurrentTime(time)
@@ -219,6 +220,7 @@ for (const manifestType of [null, 'DASH']) {
 
 test('retains a queued seek when a timeline pointer interaction is canceled', () => {
   const { state, setCurrentTime, handleSeekBarInput } = absoluteSeekFixture({ isLive: false })
+  state.videoLayoutReady.value = false
   state.video.value.readyState = 0
   setCurrentTime(15)
   handleSeekBarInput({ type: 'pointerdown', target: { matches: () => true } })
@@ -227,6 +229,7 @@ test('retains a queued seek when a timeline pointer interaction is canceled', ()
 
 test('records a first timeline input while buffering without an earlier chapter seek', () => {
   const { state, handleSeekBarInput } = absoluteSeekFixture({ isLive: false })
+  state.videoLayoutReady.value = false
   state.video.value.readyState = 1
   handleSeekBarInput({ type: 'input', target: { matches: () => true, value: '5' } })
   assert.equal(state.pendingMetadataSeek, 5)
@@ -242,6 +245,7 @@ test('retains a first timeline seek when data is ready but canplay has not fired
 
 test('a mouse drag retains the latest timeline value and consumes its release', () => {
   const { state, handleSeekBarInput, handleSeekBarMouseChange } = absoluteSeekFixture({ isLive: false })
+  state.videoLayoutReady.value = false
   state.video.value.readyState = 1
   handleSeekBarInput({ type: 'mousedown', target: { matches: () => true, value: '5' } })
   state.ui = { getControls: () => ({ isSeeking: () => false, getDisplayTime: () => 15 }) }
@@ -251,6 +255,21 @@ test('a mouse drag retains the latest timeline value and consumes its release', 
   handleSeekBarMouseChange({ type: 'mouseup' })
   assert.equal(state.pendingMetadataSeek, 15)
   assert.equal(state.seekBarMouseDown, false)
+})
+
+test('a timeline release after playback is ready is not replayed on canplay', () => {
+  const { state, handleSeekBarInput, handleSeekBarMouseChange, handleCanPlay } = absoluteSeekFixture({ isLive: false })
+  state.ui = { getControls: () => ({ isSeeking: () => false, getDisplayTime: () => 15 }) }
+  handleSeekBarInput({ type: 'mousedown', target: { matches: () => true, value: '15' } })
+  // Shaka applies the seek before this release handler runs.
+  state.video.value.currentTime = 15
+  state.video.value.readyState = 1
+  handleSeekBarMouseChange({ type: 'mouseup' })
+  assert.equal(state.pendingMetadataSeek, null)
+  state.video.value.currentTime = 15.2
+  state.video.value.readyState = 4
+  handleCanPlay()
+  assert.equal(state.video.value.currentTime, 15.2)
 })
 
 for (const endEvent of ['mouseup', 'touchend', 'touchcancel', 'blur']) {
@@ -304,6 +323,7 @@ for (const action of ['pause', 'stop', 'exposed pause']) {
 for (const action of ['chapter', 'media session', 'timeline']) {
   test(`a newer ${action} seek replaces a seek queued before metadata`, () => {
     const { state, setCurrentTime, handleSeekBarInput } = absoluteSeekFixture({ isLive: false })
+    state.videoLayoutReady.value = false
     state.video.value.readyState = 0
     setCurrentTime(15)
     state.video.value.readyState = 1

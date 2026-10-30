@@ -541,6 +541,21 @@ test('seekbar dragging preserves paused and playing states', { tag: '@scale' }, 
   }
 })
 
+test('clicking the seekbar during playback seeks only once', async ({ app, page }) => {
+  const video = await openDemoVideo({ app, page })
+  const seekBar = page.locator(`${activeTab} .shaka-seek-bar`)
+  await seekBar.hover()
+  await video.evaluate(element => {
+    window.seekingEvents = 0
+    element.addEventListener('seeking', () => window.seekingEvents++)
+  })
+  await seekBar.click({ position: { x: 200, y: 1 } })
+  // A repeated seek would restart the audio that already played at the target.
+  await expect.poll(() => video.evaluate(element => !element.seeking && !element.paused && element.readyState >= 3)).toBe(true)
+  await page.waitForTimeout(500)
+  expect(await page.evaluate(() => window.seekingEvents)).toBe(1)
+})
+
 test('player shortcuts do not run while typing in focused inputs or selects', async ({ app, page }) => {
   const video = await openDemoVideo({ app, page })
   const search = page.locator(sel.searchInput)

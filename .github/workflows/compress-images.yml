@@ -73,3 +73,6 @@ jobs:
             Images automagically compressed by tools in `.github/workflows/compress-images.yml`
 
             ${{ steps.file_diff.outputs.file_size_diff_content_markdown }}
+
+            ## Release note
+            - [x] No release note needed

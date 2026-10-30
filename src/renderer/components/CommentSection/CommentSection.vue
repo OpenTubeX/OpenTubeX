@@ -318,13 +318,14 @@
               class="commentMemberIcon"
               alt=""
             />
-            <img
+            <FtIcon
               v-if="isSubscribedToChannel(comment.authorId)"
+              :icon="['fas', 'user-check']"
+              class="commentSubscribedIcon"
+              role="img"
               :title="$t('Comments.Subscribed')"
               :aria-label="$t('Comments.Subscribed')"
-              class="commentSubscribedIcon"
-              alt=""
-            >
+            />
             <span class="commentDate">
               {{ formatCommentTime(comment) }}
               <template v-if="comment.isEdited">
