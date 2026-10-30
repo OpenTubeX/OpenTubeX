@@ -90,6 +90,30 @@ test('dragging the bottom queue item follows the pointer upward', { tag: '@scale
   await expect(bottom).not.toHaveClass(/dragging/)
 })
 
+test('centers queue item content between the row dividers', { tag: '@scale' }, async ({ app, page, attachScreenshot }) => {
+  await setWindowSize(app, page, { width: 1500, height: 1100 })
+  await page.evaluate(() => window.$store.dispatch('updateHideRecommendedVideos', true))
+  await goTo(page, 'history')
+  await page.evaluate(() => {
+    window.$store.commit('addVideoToWatchQueue', { video: { videoId: 'queuevideo1', title: 'Queue video one', author: 'Queue Test Channel', lengthSeconds: 60, viewCount: 1000, published: Date.now() - 86400000 } })
+  })
+  await page.locator('a.title').filter({ hasText: /Current video/ }).click()
+  const item = page.locator('.watchQueue .queueItem')
+  await expect(item.locator('.videoThumbnail')).toBeVisible()
+  const { above, below } = await item.evaluate(row => {
+    const rowBounds = row.getBoundingClientRect()
+    const contentBounds = [...row.querySelectorAll('.videoThumbnail, .title, .infoLine')]
+      .map(element => element.getBoundingClientRect())
+    const borderBottom = parseFloat(getComputedStyle(row).borderBlockEndWidth)
+    return {
+      above: Math.min(...contentBounds.map(bounds => bounds.top)) - rowBounds.top,
+      below: rowBounds.bottom - borderBottom - Math.max(...contentBounds.map(bounds => bounds.bottom))
+    }
+  })
+  await attachScreenshot('queue-item-spacing')
+  expect(below).toBeCloseTo(above, 0)
+})
+
 test('manages the queue from video menus and the watch sidebar', { tag: '@scale' }, async ({ page }) => {
   await goTo(page, 'history')
 
