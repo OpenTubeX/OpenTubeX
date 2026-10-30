@@ -348,6 +348,7 @@ for (const manifestType of [null, 'DASH', 'HLS', 'SABR']) {
       // Native playback is still NOT_LOADED when canupdatestarttime fires.
       player.getLoadMode = () => manifestType === null ? 1 : 2
       player.updateStartTime = value => startTimeUpdates.push(value)
+      player.configure = () => {}
       player.load = async () => {
         player.dispatchEvent(new Event('canupdatestarttime'))
         mediaElement.dispatchEvent(new Event('loadedmetadata'))
@@ -361,6 +362,8 @@ for (const manifestType of [null, 'DASH', 'HLS', 'SABR']) {
         foregroundLoadAbortController: null,
         process: { env: {} },
         hasPlaybackPosition: { value: userSeek },
+        progressivePlayback: { value: false },
+        bufferingConfig: { value: {} },
         props: { videoId: 'video', playbackEngine: 'built-in', format: 'legacy' },
         console: { warn() {} }
       })

@@ -39,7 +39,8 @@ function fixture() {
     mediaSessionStopped: false, seekingIsPossible: { value: false },
     handlePause: () => playbackStates.push('paused'),
     scrollMiniPlayerActive: { value: false }, updateScrollMiniPlayer: noop, emit: noop,
-    player: { addEventListener: noop, removeEventListener: noop, load: async () => {} }, pendingMetadataSeek: null,
+    player: { addEventListener: noop, removeEventListener: noop, configure: noop, load: async () => {} }, pendingMetadataSeek: null,
+    progressivePlayback: { value: false }, bufferingConfig: { value: {} },
   }
   const methods = vm.runInNewContext(playbackLoadSource + '\n' + ['clearSabrBackoffTimer', 'startSabrBackoffTimer', 'handleEnded', 'pause', 'registerMediaSessionHandlers'].map(extract).join('\n') + '\n({ loadPlaybackSource, startSabrBackoffTimer, handleEnded, pause, registerMediaSessionHandlers })', context)
   return { ...methods, context, playbackStates, props: context.props, video, remaining, duration, intervals }
