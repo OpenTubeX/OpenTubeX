@@ -435,6 +435,7 @@ async function doRequest(
         await waitUnlessAborted(WITHHELD_MEDIA_POLL_MS, currentState.abortController.signal)
       }
       if (currentState.sabrStreamState.playerReloadRequested) {
+        currentState.abortStatus.playerReloadRequested = true
         throw createRecoverableNetworkError(ShakaError.Code.OPERATION_ABORTED, operationInputs.uri, operationInputs.requestType)
       }
       shouldReloadDueToBackoffLoop = true
