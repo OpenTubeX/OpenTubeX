@@ -67,6 +67,21 @@ export function translateWindowTitle(title) {
 const graphemeSegmenterCache = new Map()
 
 /**
+ * @param {string} locale
+ * @returns {Intl.Segmenter}
+ */
+function getGraphemeSegmenter(locale) {
+  let segmenter = graphemeSegmenterCache.get(locale)
+
+  if (!segmenter) {
+    segmenter = new Intl.Segmenter([locale, 'en'], { granularity: 'grapheme' })
+    graphemeSegmenterCache.set(locale, segmenter)
+  }
+
+  return segmenter
+}
+
+/**
  * Returns the first user-perceived character,
  * respecting language specific rules and
  * emojis made up of multiple codepoints
@@ -80,14 +95,17 @@ export function getFirstCharacter(text, locale) {
     return ''
   }
 
-  let segmenter = graphemeSegmenterCache.get(locale)
-
-  if (!segmenter) {
-    segmenter = new Intl.Segmenter([locale, 'en'], { granularity: 'grapheme' })
-    graphemeSegmenterCache.set(locale, segmenter)
-  }
-
   // Use iterator directly as we only need the first segment
-  const firstSegment = segmenter.segment(text)[Symbol.iterator]().next().value
+  const firstSegment = getGraphemeSegmenter(locale).segment(text)[Symbol.iterator]().next().value
   return firstSegment.segment
+}
+
+/**
+ * Returns the last user-perceived character, keeping multi-codepoint emojis whole.
+ * Grapheme boundaries do not depend on the locale.
+ * @param {string} text
+ * @returns {string}
+ */
+export function getLastCharacter(text) {
+  return getGraphemeSegmenter('en').segment(text).containing(text.length - 1)?.segment ?? ''
 }

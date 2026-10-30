@@ -300,7 +300,8 @@
               v-if="showChannelAvatar"
               :thumbnails="channelThumbnails"
             />
-            <span class="channelNameText">{{ channelName }}<FtVerifiedBadge
+            <span class="channelNameText"><FtVerifiedBadge
+              :name="channelName"
               :verified="data.authorVerified"
               :artist="data.authorVerifiedArtist"
             /></span>
@@ -313,7 +314,8 @@
               v-if="showChannelAvatar"
               :thumbnails="channelThumbnails"
             />
-            <span class="channelNameText">{{ channelName }}<FtVerifiedBadge
+            <span class="channelNameText"><FtVerifiedBadge
+              :name="channelName"
               :verified="data.authorVerified"
               :artist="data.authorVerifiedArtist"
             /></span>

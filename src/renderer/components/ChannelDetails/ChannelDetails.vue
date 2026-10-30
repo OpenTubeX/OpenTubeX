@@ -44,7 +44,8 @@
               class="name"
               dir="auto"
             >
-              {{ name || $t('Channel.Channel Name Unavailable') }}<FtVerifiedBadge
+              <FtVerifiedBadge
+                :name="name || $t('Channel.Channel Name Unavailable')"
                 :verified="verified"
                 :artist="verifiedArtist"
               />

@@ -34,7 +34,8 @@
             class="h3Title"
             dir="auto"
           >
-            {{ name }}<FtVerifiedBadge
+            <FtVerifiedBadge
+              :name="name"
               :verified="data.authorVerified"
               :artist="data.authorVerifiedArtist"
             />

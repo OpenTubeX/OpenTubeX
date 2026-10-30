@@ -78,7 +78,8 @@
             v-if="showChannelAvatar"
             :thumbnail="channelThumbnail"
           />
-          <span class="channelNameText">{{ playlistMetadata.channelName }}<FtVerifiedBadge
+          <span class="channelNameText"><FtVerifiedBadge
+            :name="playlistMetadata.channelName"
             :verified="data.authorVerified"
             :artist="data.authorVerifiedArtist"
           /></span>
@@ -91,7 +92,8 @@
             v-if="showChannelAvatar"
             :thumbnail="channelThumbnail"
           />
-          <span class="channelNameText">{{ playlistMetadata.channelName }}<FtVerifiedBadge
+          <span class="channelNameText"><FtVerifiedBadge
+            :name="playlistMetadata.channelName"
             :verified="data.authorVerified"
             :artist="data.authorVerifiedArtist"
           /></span>
