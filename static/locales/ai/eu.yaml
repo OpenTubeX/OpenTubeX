@@ -703,8 +703,6 @@ Settings:
       Background Color: Atzeko planoaren kolorea
       Background Opacity: Atzeko planoaren opakutasuna
       Font Size: Letra-tamaina
-      Vertical Position: Kokapen bertikala
-      Edge Color: Ertzaren kolorea
       Anchor:
         Anchor: Aingura
         Top Left: Goian ezkerrean
@@ -713,12 +711,34 @@ Settings:
         Bottom Left: Behean ezkerrean
         Bottom Center: Behean erdian
         Bottom Right: Behean eskuinean
+        Center Left: Erdian ezkerrean
+        Center: Erdian
+        Center Right: Erdian eskuinean
       Edge Style:
         Edge Style: Ertzaren estiloa
         None: Bat ere ez
         Outline: Ingerada
         Drop Shadow: Itzala
+        Raised: Goratua
+        Depressed: Sakondua
       Reset: Berrezarri azpitituluen itxura
+      Default: Lehenetsia
+      Text Opacity: Testuaren opakutasuna
+      Font Family:
+        Font Family: Letra-familia
+        Monospaced Serif: Tarte bakarreko serif
+        Proportional Serif: Serif proportzionala
+        Monospaced Sans-Serif: Tarte bakarreko sans-serif
+        Proportional Sans-Serif: Sans-serif proportzionala
+      Colors:
+        White: Zuria
+        Yellow: Horia
+        Green: Berdea
+        Cyan: Ziana
+        Blue: Urdina
+        Magenta: Magenta
+        Red: Gorria
+        Black: Beltza
     Auto Picture in Picture:
       Auto Picture in Picture: Sartu automatikoki Picture-in-Picture moduan
       On Tab Change: Fitxaz aldatzean
@@ -1551,7 +1571,6 @@ Video:
       Error: Ahots bidezko itzulpenak huts egin du. Saiatu berriro geroago.
       Duration Error: Ahots bidezko itzulpena gehienez lau orduko bideoetarako dago erabilgarri.
     Caption Appearance:
-      Options: Aukerak
       Sample: Honelako itxura dute azpitituluek
     Auto-translate: Itzulpen automatikoa
     Sleep Timer:

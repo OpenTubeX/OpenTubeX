@@ -66,8 +66,8 @@ test('known setting labels resolve to existing English and German translations',
 })
 
 test('caption font changes describe caption appearance rather than the unchanged edge style', () => {
-  const before = [{ key: 'defaultCaptionSettings', value: { fontScale: 1, edgeStyle: 'none' } }]
-  const after = [{ key: 'defaultCaptionSettings', value: { fontScale: 2, edgeStyle: 'none' } }]
+  const before = [{ key: 'defaultCaptionSettings', value: { fontScaleFactor: 1, characterEdgeStyle: 'NONE' } }]
+  const after = [{ key: 'defaultCaptionSettings', value: { fontScaleFactor: 2, characterEdgeStyle: 'NONE' } }]
   const activity = createSyncActivity('settings', before, after, 'device', 'Laptop')
   assert.equal(activity.changes.length, 1)
   assert.equal(SYNC_SETTING_LABELS[activity.changes[0].key], 'Settings.Player Settings.Caption Appearance.Caption Appearance')
@@ -358,11 +358,12 @@ test('complex setting activity describes each channel preference and caption fie
     { key, detail: 'showMembersOnly', item: 'Alpha', value: true },
   ])
   assert.deepEqual(createSyncActivity('settings',
-    [{ key: 'defaultCaptionSettings', value: { fontScale: 1, edgeStyle: 'none' } }],
-    [{ key: 'defaultCaptionSettings', value: { fontScale: 1.5, edgeStyle: 'outline' } }],
+    [{ key: 'defaultCaptionSettings', value: { fontColor: '', fontScaleFactor: 1, characterEdgeStyle: 'NONE' } }],
+    [{ key: 'defaultCaptionSettings', value: { fontColor: '', fontScaleFactor: 1.5, characterEdgeStyle: 'OUTLINE', fontOpacity: 0.5 } }],
     'device', 'Laptop').changes, [
+    { key: 'defaultCaptionSettings', detail: 'Text Opacity', value: 0.5 },
     { key: 'defaultCaptionSettings', detail: 'Font Size', value: 1.5 },
-    { key: 'defaultCaptionSettings', detail: 'Edge Style.Edge Style', value: 'outline' },
+    { key: 'defaultCaptionSettings', detail: 'Edge Style.Edge Style', value: 'OUTLINE' },
   ])
 })
 

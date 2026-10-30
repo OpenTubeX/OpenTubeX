@@ -703,8 +703,6 @@ Settings:
       Background Color: Farba pozadia
       Background Opacity: Nepriehľadnosť pozadia
       Font Size: Veľkosť písma
-      Vertical Position: Zvislá poloha
-      Edge Color: Farba okraja
       Anchor:
         Anchor: Ukotvenie
         Top Left: Vľavo hore
@@ -713,12 +711,34 @@ Settings:
         Bottom Left: Vľavo dole
         Bottom Center: V strede dole
         Bottom Right: Vpravo dole
+        Center Left: Vľavo v strede
+        Center: V strede
+        Center Right: Vpravo v strede
       Edge Style:
         Edge Style: Štýl okraja
         None: Žiadny
         Outline: Obrys
         Drop Shadow: Vrhaný tieň
+        Raised: Vyčnievajúce
+        Depressed: Vytlačené
       Reset: Obnoviť vzhľad titulkov
+      Default: Predvolené
+      Text Opacity: Nepriehľadnosť písma
+      Font Family:
+        Font Family: Skupina písiem
+        Monospaced Serif: Neproporcionálne pätkové
+        Proportional Serif: Proporcionálne pätkové
+        Monospaced Sans-Serif: Neproporcionálne bezpätkové
+        Proportional Sans-Serif: Proporcionálne bezpätkové
+      Colors:
+        White: Biela
+        Yellow: Žltá
+        Green: Zelená
+        Cyan: Azúrová
+        Blue: Modrá
+        Magenta: Purpurová
+        Red: Červená
+        Black: Čierna
     Auto Picture in Picture:
       Auto Picture in Picture: Automaticky prejsť do režimu obrazu v obraze
       On Tab Change: Pri prepnutí karty
@@ -1541,7 +1561,6 @@ Video:
       Error: Preklad hlasového komentára zlyhal. Skúste to znova neskôr.
       Duration Error: Preklad hlasového komentára je dostupný len pre videá s dĺžkou najviac štyri hodiny.
     Caption Appearance:
-      Options: Možnosti
       Sample: Takto vyzerajú titulky
     Auto-translate: Automatický preklad
     Sleep Timer:

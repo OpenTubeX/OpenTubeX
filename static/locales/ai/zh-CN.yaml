@@ -703,8 +703,6 @@ Settings:
       Background Color: 背景颜色
       Background Opacity: 背景不透明度
       Font Size: 字体大小
-      Vertical Position: 垂直位置
-      Edge Color: 边缘颜色
       Anchor:
         Anchor: 锚点
         Top Left: 左上方
@@ -713,12 +711,34 @@ Settings:
         Bottom Left: 左下方
         Bottom Center: 底部居中
         Bottom Right: 右下方
+        Center Left: 左侧居中
+        Center: 居中
+        Center Right: 右侧居中
       Edge Style:
         Edge Style: 边缘样式
         None: 无
         Outline: 轮廓
         Drop Shadow: 投影
+        Raised: 凸起
+        Depressed: 下沉
       Reset: 重置字幕外观
+      Default: 默认
+      Text Opacity: 字体不透明度
+      Font Family:
+        Font Family: 字体系列
+        Monospaced Serif: 等宽衬线
+        Proportional Serif: 比例衬线
+        Monospaced Sans-Serif: 等宽无衬线
+        Proportional Sans-Serif: 比例无衬线
+      Colors:
+        White: 白色
+        Yellow: 黄色
+        Green: 绿色
+        Cyan: 青色
+        Blue: 蓝色
+        Magenta: 洋红色
+        Red: 红色
+        Black: 黑色
     Auto Picture in Picture:
       Auto Picture in Picture: 自动进入画中画模式
       On Tab Change: 切换标签页时
@@ -1541,7 +1561,6 @@ Video:
       Error: 配音翻译失败。请稍后重试。
       Duration Error: 配音翻译仅适用于时长不超过四小时的视频。
     Caption Appearance:
-      Options: 选项
       Sample: 字幕显示效果示例
     Auto-translate: 自动翻译
     Sleep Timer:

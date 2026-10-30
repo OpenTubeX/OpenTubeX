@@ -706,8 +706,6 @@ Settings:
       Background Color: Χρώμα φόντου
       Background Opacity: Αδιαφάνεια φόντου
       Font Size: Μέγεθος γραμματοσειράς
-      Vertical Position: Κατακόρυφη θέση
-      Edge Color: Χρώμα περιγράμματος
       Anchor:
         Anchor: Αγκύρωση
         Top Left: Επάνω αριστερά
@@ -716,12 +714,34 @@ Settings:
         Bottom Left: Κάτω αριστερά
         Bottom Center: Κάτω στο κέντρο
         Bottom Right: Κάτω δεξιά
+        Center Left: Κέντρο αριστερά
+        Center: Κέντρο
+        Center Right: Κέντρο δεξιά
       Edge Style:
         Edge Style: Στυλ περιγράμματος
         None: Κανένα
         Outline: Περίγραμμα
         Drop Shadow: Σκιά
+        Raised: Ανάγλυφο
+        Depressed: Βυθισμένο
       Reset: Επαναφορά εμφάνισης υποτίτλων
+      Default: Προεπιλογή
+      Text Opacity: Αδιαφάνεια γραμματοσειράς
+      Font Family:
+        Font Family: Οικογένεια γραμματοσειρών
+        Monospaced Serif: Serif σταθερού πλάτους
+        Proportional Serif: Serif αναλογικού πλάτους
+        Monospaced Sans-Serif: Sans-Serif σταθερού πλάτους
+        Proportional Sans-Serif: Sans-Serif αναλογικού πλάτους
+      Colors:
+        White: Άσπρο
+        Yellow: Κίτρινο
+        Green: Πράσινο
+        Cyan: Κυανό
+        Blue: Μπλε
+        Magenta: Ματζέντα
+        Red: Κόκκινο
+        Black: Μαύρο
     Default Viewing Mode:
       Tooltip: Οι περισσότερες προεπιλεγμένες λειτουργίες προβολής εφαρμόζονται μόνο στην αρχή κάθε συνεδρίας παρακολούθησης. Οι αλλαγές που κάνετε κατά τη συνεδρία διατηρούνται μέχρι να τελειώσει. Οι μόνιμα ενεργές λειτουργίες προβολής εφαρμόζονται κάθε φορά που αλλάζετε βίντεο, ανεξάρτητα από τις αλλαγές που κάνατε κατά την προβολή του προηγούμενου βίντεο.
     Auto Picture in Picture:
@@ -1563,7 +1583,6 @@ Video:
       Error: Η μετάφραση εκφώνησης απέτυχε. Δοκιμάστε ξανά αργότερα.
       Duration Error: Η μετάφραση εκφώνησης είναι διαθέσιμη μόνο για βίντεο διάρκειας έως τεσσάρων ωρών.
     Caption Appearance:
-      Options: Επιλογές
       Sample: Έτσι εμφανίζονται οι υπότιτλοι
     Auto-translate: Αυτόματη μετάφραση
     Sleep Timer:

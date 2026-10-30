@@ -704,8 +704,6 @@ Settings:
       Background Color: Fon rəngi
       Background Opacity: Fonun qeyri-şəffaflığı
       Font Size: Şrift ölçüsü
-      Vertical Position: Şaquli mövqe
-      Edge Color: Kənar rəngi
       Anchor:
         Anchor: Bərkitmə nöqtəsi
         Top Left: Yuxarı sol
@@ -714,12 +712,34 @@ Settings:
         Bottom Left: Aşağı sol
         Bottom Center: Aşağı orta
         Bottom Right: Aşağı sağ
+        Center Left: Mərkəz sol
+        Center: Mərkəz
+        Center Right: Mərkəz sağ
       Edge Style:
         Edge Style: Kənar üslubu
         None: Heç biri
         Outline: Kontur
         Drop Shadow: Düşən kölgə
+        Raised: Qaldırılmış
+        Depressed: Əyilmiş
       Reset: Titrlərin görünüşünü sıfırla
+      Default: İlkin
+      Text Opacity: Şriftin qeyri-şəffaflığı
+      Font Family:
+        Font Family: Şrift ailəsi
+        Monospaced Serif: Sabit enli Serif
+        Proportional Serif: Proporsional Serif
+        Monospaced Sans-Serif: Sabit enli Sans-Serif
+        Proportional Sans-Serif: Proporsional Sans-Serif
+      Colors:
+        White: Ağ
+        Yellow: Sarı
+        Green: Yaşıl
+        Cyan: Firuzəyi
+        Blue: Mavi
+        Magenta: Purpur
+        Red: Qırmızı
+        Black: Qara
     Auto Picture in Picture:
       Auto Picture in Picture: Şəkil içində şəkil rejiminə avtomatik keç
       On Tab Change: Vərəqlər dəyişdirilərkən
@@ -1548,7 +1568,6 @@ Video:
       Error: Səsli tərcümə alınmadı. Daha sonra yenidən cəhd edin.
       Duration Error: Səsli tərcümə yalnız dörd saata qədər davam edən videolar üçün mövcuddur.
     Caption Appearance:
-      Options: Seçimlər
       Sample: Titrlər belə görünür
     Auto-translate: Avtomatik tərcümə
     Sleep Timer:

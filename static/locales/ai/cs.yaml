@@ -703,8 +703,6 @@ Settings:
       Background Color: Barva pozadí
       Background Opacity: Krytí pozadí
       Font Size: Velikost písma
-      Vertical Position: Svislé umístění
-      Edge Color: Barva okraje
       Anchor:
         Anchor: Ukotvení
         Top Left: Vlevo nahoře
@@ -713,12 +711,34 @@ Settings:
         Bottom Left: Vlevo dole
         Bottom Center: Uprostřed dole
         Bottom Right: Vpravo dole
+        Center Left: Vlevo uprostřed
+        Center: Uprostřed
+        Center Right: Vpravo uprostřed
       Edge Style:
         Edge Style: Styl okraje
         None: Žádný
         Outline: Obrys
         Drop Shadow: Vržený stín
+        Raised: Zvýšený
+        Depressed: Snížený
       Reset: Obnovit vzhled titulků
+      Default: Výchozí
+      Text Opacity: Průhlednost písma
+      Font Family:
+        Font Family: Rodina písem
+        Monospaced Serif: Neproporcionální patkové
+        Proportional Serif: Proporcionální patkové
+        Monospaced Sans-Serif: Neproporcionální bezpatkové
+        Proportional Sans-Serif: Proporcionální bezpatkové
+      Colors:
+        White: Bílá
+        Yellow: Žlutá
+        Green: Zelená
+        Cyan: Modrozelená
+        Blue: Modrá
+        Magenta: Purpurová
+        Red: Červená
+        Black: Černá
     Auto Picture in Picture:
       Auto Picture in Picture: Automaticky zapnout obraz v obraze
       On Tab Change: Při přepnutí karty
@@ -1541,7 +1561,6 @@ Video:
       Error: Překlad dabingu se nezdařil. Zkuste to znovu později.
       Duration Error: Překlad dabingu je dostupný pouze pro videa dlouhá nejvýše čtyři hodiny.
     Caption Appearance:
-      Options: Možnosti
       Sample: Takto vypadají titulky
     Auto-translate: Automatický překlad
     Sleep Timer:

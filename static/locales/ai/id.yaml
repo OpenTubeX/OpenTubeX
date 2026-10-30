@@ -706,8 +706,6 @@ Settings:
       Background Color: Warna Latar
       Background Opacity: Opasitas Latar
       Font Size: Ukuran Font
-      Vertical Position: Posisi Vertikal
-      Edge Color: Warna Tepi
       Anchor:
         Anchor: Jangkar
         Top Left: Kiri Atas
@@ -716,12 +714,34 @@ Settings:
         Bottom Left: Kiri Bawah
         Bottom Center: Tengah Bawah
         Bottom Right: Kanan Bawah
+        Center Left: Kiri tengah
+        Center: Tengah
+        Center Right: Kanan tengah
       Edge Style:
         Edge Style: Gaya Tepi
         None: Tidak Ada
         Outline: Garis Tepi
         Drop Shadow: Bayangan Jatuh
+        Raised: Dinaikkan
+        Depressed: Diturunkan
       Reset: Atur Ulang Tampilan Takarir
+      Default: Default
+      Text Opacity: Opasitas font
+      Font Family:
+        Font Family: Jenis font
+        Monospaced Serif: Serif Spasi Tunggal
+        Proportional Serif: Serif Proporsional
+        Monospaced Sans-Serif: Sans-Serif Spasi Tunggal
+        Proportional Sans-Serif: Sans-Serif Proporsional
+      Colors:
+        White: Putih
+        Yellow: Kuning
+        Green: Hijau
+        Cyan: Sian
+        Blue: Biru
+        Magenta: Magenta
+        Red: Merah
+        Black: Hitam
     Auto Picture in Picture:
       Auto Picture in Picture: Masuk ke Gambar-dalam-Gambar secara otomatis
       On Tab Change: Saat berganti tab
@@ -1556,7 +1576,6 @@ Video:
       Error: Terjemahan sulih suara gagal. Coba lagi nanti.
       Duration Error: Terjemahan sulih suara hanya tersedia untuk video berdurasi hingga empat jam.
     Caption Appearance:
-      Options: Opsi
       Sample: Takarir terlihat seperti ini
     Auto-translate: Terjemahkan otomatis
     Sleep Timer:

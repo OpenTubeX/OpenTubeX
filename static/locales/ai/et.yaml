@@ -703,8 +703,6 @@ Settings:
       Background Color: Taustavärv
       Background Opacity: Tausta läbipaistmatus
       Font Size: Fondi suurus
-      Vertical Position: Vertikaalne asukoht
-      Edge Color: Ääre värv
       Anchor:
         Anchor: Paigutus
         Top Left: Üleval vasakul
@@ -713,12 +711,34 @@ Settings:
         Bottom Left: All vasakul
         Bottom Center: All keskel
         Bottom Right: All paremal
+        Center Left: Keskel vasakul
+        Center: Keskel
+        Center Right: Keskel paremal
       Edge Style:
         Edge Style: Ääre stiil
         None: Puudub
         Outline: Kontuur
         Drop Shadow: Langev vari
+        Raised: Kõrgendatud
+        Depressed: Süvistatud
       Reset: Lähtesta subtiitrite välimus
+      Default: Vaikimisi
+      Text Opacity: Teksti läbipaistmatus
+      Font Family:
+        Font Family: Fondiperekond
+        Monospaced Serif: Püsilaiusega seriifkiri
+        Proportional Serif: Proportsionaalne seriifkiri
+        Monospaced Sans-Serif: Püsilaiusega seriifita kiri
+        Proportional Sans-Serif: Proportsionaalne seriifita kiri
+      Colors:
+        White: Valge
+        Yellow: Kollane
+        Green: Roheline
+        Cyan: Tsüaan
+        Blue: Sinine
+        Magenta: Magenta
+        Red: Punane
+        Black: Must
     Auto Picture in Picture:
       Auto Picture in Picture: Lülitu automaatselt pilt-pildis-režiimi
       On Tab Change: Vahekaardi vahetamisel
@@ -1543,7 +1563,6 @@ Video:
       Error: Pealelugemisega tõlge nurjus. Proovi hiljem uuesti.
       Duration Error: Pealelugemisega tõlge on saadaval ainult kuni neljatunniste videote jaoks.
     Caption Appearance:
-      Options: Valikud
       Sample: Subtiitrid näevad välja nii
     Auto-translate: Automaattõlge
     Sleep Timer:

@@ -823,5 +823,9 @@
   "reddit": { "ri": "video-line", "material": "movie-outline", "simple": "reddit" },
   "crunchyroll": { "ri": "video-line", "material": "movie-outline", "simple": "crunchyroll" },
   "bell": { "ri": "notification-3-fill", "material": "notifications-active-rounded" },
-  "bell-slash": { "ri": "notification-off-line", "material": "notifications-off-outline-rounded" }
+  "bell-slash": { "ri": "notification-off-line", "material": "notifications-off-outline-rounded" },
+  "text-size": { "ri": "font-size", "material": "format-size-rounded" },
+  "text-color": { "ri": "font-color", "material": "format-color-text-rounded" },
+  "opacity": { "ri": "contrast-drop-2-line", "material": "opacity-rounded" },
+  "fill-color": { "ri": "paint-line", "material": "format-color-fill-rounded" }
 }

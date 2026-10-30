@@ -708,8 +708,6 @@ Settings:
       Background Color: Boja pozadine
       Background Opacity: Neprozirnost pozadine
       Font Size: Veličina fonta
-      Vertical Position: Okomiti položaj
-      Edge Color: Boja ruba
       Anchor:
         Anchor: Sidrište
         Top Left: Gore lijevo
@@ -718,12 +716,34 @@ Settings:
         Bottom Left: Dolje lijevo
         Bottom Center: Dolje u sredini
         Bottom Right: Dolje desno
+        Center Left: Sredina lijevo
+        Center: Sredina
+        Center Right: Sredina desno
       Edge Style:
         Edge Style: Stil ruba
         None: Bez ruba
         Outline: Kontura
         Drop Shadow: Sjena
+        Raised: Povišeno
+        Depressed: Sniženo
       Reset: Vrati izgled titlova
+      Default: Zadano
+      Text Opacity: Prozirnost fonta
+      Font Family:
+        Font Family: Obitelj fontova
+        Monospaced Serif: Neproporcionalni Serif
+        Proportional Serif: Proporcionalni Serif
+        Monospaced Sans-Serif: Neproporcionalni Sans-Serif
+        Proportional Sans-Serif: Proporcionalni Sans-Serif
+      Colors:
+        White: Bijela
+        Yellow: Žuta
+        Green: Zelena
+        Cyan: Cijan
+        Blue: Plava
+        Magenta: Magenta
+        Red: Crvena
+        Black: Crna
     Auto Picture in Picture:
       Auto Picture in Picture: Automatski uključi prikaz slike u slici
       On Tab Change: Pri promjeni kartice
@@ -1565,7 +1585,6 @@ Video:
       Error: Glasovni prijevod nije uspio. Pokušajte ponovno poslije.
       Duration Error: Glasovni prijevod dostupan je samo za videozapise koji traju do četiri sata.
     Caption Appearance:
-      Options: Mogućnosti
       Sample: Ovako izgledaju titlovi
     Auto-translate: Automatski prijevod
     Sleep Timer:

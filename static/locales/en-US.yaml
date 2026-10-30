@@ -1141,13 +1141,31 @@ Settings:
       Background Color: Background Color
       Background Opacity: Background Opacity
       Font Size: Font Size
-      Vertical Position: Vertical Position
-      Edge Color: Edge Color
+      Text Opacity: Text Opacity
+      Default: Default
+      Font Family:
+        Font Family: Font Family
+        Monospaced Serif: Monospaced Serif
+        Proportional Serif: Proportional Serif
+        Monospaced Sans-Serif: Monospaced Sans-Serif
+        Proportional Sans-Serif: Proportional Sans-Serif
+      Colors:
+        White: White
+        Yellow: Yellow
+        Green: Green
+        Cyan: Cyan
+        Blue: Blue
+        Magenta: Magenta
+        Red: Red
+        Black: Black
       Anchor:
-        Anchor: Anchor
+        Anchor: Position
         Top Left: Top Left
         Top Center: Top Center
         Top Right: Top Right
+        Center Left: Center Left
+        Center: Center
+        Center Right: Center Right
         Bottom Left: Bottom Left
         Bottom Center: Bottom Center
         Bottom Right: Bottom Right
@@ -1156,6 +1174,8 @@ Settings:
         None: None
         Outline: Outline
         Drop Shadow: Drop Shadow
+        Raised: Raised
+        Depressed: Depressed
       Reset: Reset Caption Appearance
     Proxy Videos Through Invidious: Proxy Videos Through Invidious
     Default Viewing Mode:
@@ -2308,7 +2328,7 @@ Video:
     Load Error: The transcript could not be loaded.
     Empty: This transcript does not contain any text.
     No Results: No transcript segments match your search.
-  IP block: 'YouTube has blocked your IP address from watching videos. Please try switching to a different VPN or proxy.'
+  IP block: 'YouTube has blocked your IP address from watching videos, or this video may contain content featuring minors that YouTube restricts access to for signed-out users. If this is an IP block, try switching to a different VPN or proxy.'
   Retry With Built-in Extraction: Retry with built-in extraction
   Retry With yt-dlp Extraction: Retry with yt-dlp extraction
   Reloading video after streaming URL error: Reloading video after streaming URL error
@@ -2521,7 +2541,6 @@ Video:
       Error: Voice-over translation failed. Please try again later.
       Duration Error: Voice-over translation is only available for videos up to four hours long.
     Caption Appearance:
-      Options: Options
       Sample: Captions look like this
     Auto-translate: Auto-translate
     Secondary Captions: Secondary Captions

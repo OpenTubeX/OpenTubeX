@@ -720,8 +720,6 @@ Settings:
       Background Color: Baggrundsfarve
       Background Opacity: Baggrundens uigennemsigtighed
       Font Size: Skriftstørrelse
-      Vertical Position: Lodret placering
-      Edge Color: Kantfarve
       Anchor:
         Anchor: Forankring
         Top Left: Øverst til venstre
@@ -730,12 +728,34 @@ Settings:
         Bottom Left: Nederst til venstre
         Bottom Center: Nederst i midten
         Bottom Right: Nederst til højre
+        Center Left: Midten til venstre
+        Center: Midten
+        Center Right: Midten til højre
       Edge Style:
         Edge Style: Kanttype
         None: Ingen
         Outline: Kontur
         Drop Shadow: Slagskygge
+        Raised: Hævet
+        Depressed: Nedsænket
       Reset: Nulstil underteksternes udseende
+      Default: Standard
+      Text Opacity: Skriftens gennemsigtighed
+      Font Family:
+        Font Family: Skrifttypefamilie
+        Monospaced Serif: Serif med fast tegnafstand
+        Proportional Serif: Proportional Serif
+        Monospaced Sans-Serif: Sans-Serif med fast tegnafstand
+        Proportional Sans-Serif: Proportional Sans-Serif
+      Colors:
+        White: Hvid
+        Yellow: Gul
+        Green: Grøn
+        Cyan: Cyan
+        Blue: Blå
+        Magenta: Magenta
+        Red: Rød
+        Black: Sort
     Default Viewing Mode:
       Full Window (Always On): Helt vindue (altid slået til)
       Full Screen (Always On): Fuld skærm (altid slået til)
@@ -1611,7 +1631,6 @@ Video:
       Error: Voiceoveroversættelsen mislykkedes. Prøv igen senere.
       Duration Error: Voiceoveroversættelse er kun tilgængelig for videoer på op til fire timer.
     Caption Appearance:
-      Options: Indstillinger
       Sample: Sådan ser undertekster ud
     Auto-translate: Automatisk oversættelse
     Sleep Timer:

@@ -706,8 +706,6 @@ Settings:
       Background Color: Culoarea fundalului
       Background Opacity: Opacitatea fundalului
       Font Size: Dimensiunea fontului
-      Vertical Position: Poziția verticală
-      Edge Color: Culoarea conturului
       Anchor:
         Anchor: Ancorare
         Top Left: Sus, în stânga
@@ -716,12 +714,34 @@ Settings:
         Bottom Left: Jos, în stânga
         Bottom Center: Jos, în centru
         Bottom Right: Jos, în dreapta
+        Center Left: Centru stânga
+        Center: Centru
+        Center Right: Centru dreapta
       Edge Style:
         Edge Style: Stilul conturului
         None: Niciunul
         Outline: Contur
         Drop Shadow: Umbră
+        Raised: Ridicat
+        Depressed: Presat
       Reset: Resetează aspectul subtitrărilor
+      Default: Prestabilit
+      Text Opacity: Opacitatea fontului
+      Font Family:
+        Font Family: Familie de fonturi
+        Monospaced Serif: Serif monospațiat
+        Proportional Serif: Serif proporțional
+        Monospaced Sans-Serif: Sans serif monospațiat
+        Proportional Sans-Serif: Sans serif proporțional
+      Colors:
+        White: Alb
+        Yellow: Galben
+        Green: Verde
+        Cyan: Cyan
+        Blue: Albastru
+        Magenta: Magenta
+        Red: Roșu
+        Black: Negru
     Default Viewing Mode:
       Tooltip: Majoritatea modurilor de vizionare implicite se aplică numai la începutul fiecărei sesiuni de vizionare. Modificările făcute în timpul sesiunii se păstrează până la încheierea acesteia. Modurile de vizionare permanente se aplică de fiecare dată când treceți la un videoclip nou, indiferent de modificările făcute în timpul vizionării videoclipului anterior.
     Auto Picture in Picture:
@@ -1578,7 +1598,6 @@ Video:
       Error: Traducerea vocală a eșuat. Încercați din nou mai târziu.
       Duration Error: Traducerea vocală este disponibilă numai pentru videoclipuri de cel mult patru ore.
     Caption Appearance:
-      Options: Opțiuni
       Sample: Așa arată subtitrările
     Auto-translate: Traducere automată
     Sleep Timer:

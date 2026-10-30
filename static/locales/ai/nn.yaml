@@ -790,8 +790,6 @@ Settings:
       Background Color: Bakgrunnsfarge
       Background Opacity: Dekkevne for bakgrunnen
       Font Size: Skriftstorleik
-      Vertical Position: Loddrett plassering
-      Edge Color: Kantfarge
       Anchor:
         Anchor: Forankring
         Top Left: Oppe til venstre
@@ -800,12 +798,34 @@ Settings:
         Bottom Left: Nede til venstre
         Bottom Center: Nede i midten
         Bottom Right: Nede til høgre
+        Center Left: Midten til venstre
+        Center: Midten
+        Center Right: Midten til høgre
       Edge Style:
         Edge Style: Kantstil
         None: Ingen
         Outline: Omriss
         Drop Shadow: Slagskugge
+        Raised: Heva
+        Depressed: Senka
       Reset: Tilbakestill utsjånaden på undertekstane
+      Default: Standard
+      Text Opacity: Tekstopasitet
+      Font Family:
+        Font Family: Skriftfamilie
+        Monospaced Serif: Serif med fast breidd
+        Proportional Serif: Proporsjonal serif
+        Monospaced Sans-Serif: Sans-serif med fast breidd
+        Proportional Sans-Serif: Proporsjonal sans-serif
+      Colors:
+        White: Kvit
+        Yellow: Gul
+        Green: Grøn
+        Cyan: Cyan
+        Blue: Blå
+        Magenta: Magenta
+        Red: Raud
+        Black: Svart
     Default Viewing Mode:
       Theater: Kino
       Default Viewing Mode: Standard visingsmodus
@@ -1684,7 +1704,7 @@ Video:
     Load Error: Klarte ikkje å laste inn transkripsjonen.
     Empty: Denne transkripsjonen inneheld ingen tekst.
     No Results: Ingen delar av transkripsjonen samsvarar med søket.
-  IP block: YouTube har blokkert IP-adressa di frå å sjå videoar. Prøv å byte til ein annan VPN eller mellomtenar.
+  IP block: YouTube har blokkert IP-adressa di frå å sjå videoar, eller så kan denne videoen ha innhald med mindreårige som YouTube avgrensar tilgangen til for brukarar som ikkje er logga inn. Viss dette er ei IP-blokkering, prøv å byte til ein annan VPN eller mellomtenar.
   Retry With Built-in Extraction: Prøv igjen med innebygd uthenting
   Retry With yt-dlp Extraction: Prøv igjen med uthenting via yt-dlp
   Reloading video after streaming URL error: Lastar inn videoen på nytt etter ein feil med straumadressa
@@ -1791,7 +1811,6 @@ Video:
       Error: Taleomsetjinga mislukkast. Prøv igjen seinare.
       Duration Error: Taleomsetjing er berre tilgjengeleg for videoar som varer i opptil fire timar.
     Caption Appearance:
-      Options: Val
       Sample: Slik ser tekstinga ut
     Auto-translate: Omset automatisk
     Sleep Timer:

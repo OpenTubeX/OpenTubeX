@@ -651,8 +651,6 @@ Settings:
   Player Settings:
     Mono Audio: 'Einóma hljóð'
     Show Mono Audio Toggle: 'Sýna rofa fyrir einóma hljóð'
-    Default Media Format:
-      Default Media Format: 'Sjálfgefið miðlasnið'
     Pause on Stream Recovery: "Gera hlé við endurheimt streymis"
     Buffering:
       Buffering: Biðminni
@@ -705,8 +703,6 @@ Settings:
       Background Color: Bakgrunnslitur
       Background Opacity: Ógegnsæi bakgrunns
       Font Size: Leturstærð
-      Vertical Position: Lóðrétt staðsetning
-      Edge Color: Jaðarlitur
       Anchor:
         Anchor: Festipunktur
         Top Left: Efst til vinstri
@@ -715,12 +711,34 @@ Settings:
         Bottom Left: Neðst til vinstri
         Bottom Center: Neðst fyrir miðju
         Bottom Right: Neðst til hægri
+        Center Left: Miðja vinstri
+        Center: Miðja
+        Center Right: Miðja hægri
       Edge Style:
         Edge Style: Jaðarstíll
         None: Enginn
         Outline: Útlína
         Drop Shadow: Fallskuggi
+        Raised: Upphleypt
+        Depressed: Niðurgrafið
       Reset: Endurstilla útlit skjátexta
+      Default: Sjálfgefið
+      Text Opacity: Ógegnsæi texta
+      Font Family:
+        Font Family: Leturgerð
+        Monospaced Serif: Jafnbreitt þverendaletur
+        Proportional Serif: Hlutfallslegt þverendaletur
+        Monospaced Sans-Serif: Jafnbreið steinskrift
+        Proportional Sans-Serif: Hlutfallsleg steinskrift
+      Colors:
+        White: Hvítur
+        Yellow: Gulur
+        Green: Grænn
+        Cyan: Blágrænn
+        Blue: Blár
+        Magenta: Blárauður
+        Red: Rauður
+        Black: Svartur
     Default Viewing Mode:
       Tooltip: Flestar sjálfgefnar skoðunarstillingar eru aðeins notaðar í upphafi hverrar áhorfslotu. Breytingar sem gerðar eru í lotunni haldast þar til henni lýkur. Skoðunarstillingar sem eru alltaf virkar eru notaðar í hvert sinn sem skipt er yfir í nýtt myndband, óháð breytingum á skoðunarstillingu við áhorf á fyrra myndbandið.
     Auto Picture in Picture:
@@ -1106,7 +1124,6 @@ Settings:
     Open Profile Directory: Opna möppu notandasniðs
     Settings Tooltip: Ekki er hægt að flytja út eða inn stillingar sem eru sértækar fyrir stýrikerfi eða notanda eða eru á tilraunastigi, svo sem milliþjón, ytri spilara og möppu skjámynda.
     Invalid JSON row, skipping item: Ógilt JSON í línu {row}, sleppi atriði
-    Setting object has insufficient data, skipping item: Stillingahlutur inniheldur ekki næg gögn, sleppi atriði
     Import subscriptions formats: 'Studd snið: OpenTubeX / FreeTube (.db), YouTube Takeout (.csv, .json, .opml), NewPipe (.json), öryggisafrit LibreTube eða útflutningur úr FreeTube (.json)'
     Import history formats: 'Studd snið: OpenTubeX / FreeTube (.db), YouTube Takeout (.json), öryggisafrit LibreTube (.json)'
     Import playlists formats: 'Studd snið: OpenTubeX / FreeTube (.db), YouTube Takeout (.csv)'
@@ -1394,7 +1411,6 @@ Profile:
   Use Initial: Nota upphafsstaf
   The selected image could not be loaded: Ekki tókst að hlaða völdu myndinni
   Theme Color: Þemalitur
-  Go To Profile Manager: Opna umsjón með notandasniðum
 Channel:
   Verified: Staðfest
   Official Artist Channel: Opinber flytjendarás
@@ -1416,8 +1432,6 @@ Channel:
   Channel Name Unavailable: Heiti rásar er ekki tiltækt
   Search Result Types: Tegundir leitarniðurstaðna
   All Results: Allt
-  Videos:
-    This channel has videos but none could be displayed, try fetching more: "Þessi rás er með myndskeið en ekki var hægt að birta neitt þeirra. Prófaðu að sækja fleiri"
   Posts:
     Original post unavailable: "Upprunalega færslan er ekki tiltæk"
 Video:
@@ -1500,7 +1514,6 @@ Video:
   Notification unavailable: Kerfistilkynningar eru ekki tiltækar
   Scheduled video starting: Tímasett myndband er að hefjast
   Live notification body: '{videoTitle} hefst núna'
-  AI: Gervigreind
   AI-generated content: Efni búið til með gervigreind
   Collaborators: Samstarfsaðilar
   Live Chat Replay: Endurspilun beins spjalls
@@ -1563,7 +1576,6 @@ Video:
       Error: Raddþýðing mistókst. Reyndu aftur síðar.
       Duration Error: Raddþýðing er aðeins tiltæk fyrir myndbönd sem eru í mesta lagi fjögurra klukkustunda löng.
     Caption Appearance:
-      Options: Valkostir
       Sample: Skjátexti lítur svona út
     Auto-translate: Sjálfvirk þýðing
     Sleep Timer:
@@ -1746,8 +1758,6 @@ Video:
       Load: "Hlaða inn skjátextaskrá…"
       Subtitle Files: "Skjátextaskrár"
       Error: "Ekki tókst að hlaða inn skjátextaskránni. Veldu SRT- eða WebVTT-skrá."
-  Playlist:
-    Unavailable videos are hidden: 1 ótiltækt myndskeið er falið | {count} ótiltæk myndskeið eru falin
   External Media:
     Dislikes: "Neikvætt atkvæði | Neikvæð atkvæði"
     Reposts: "Endurbirting | Endurbirtingar"
@@ -1773,7 +1783,6 @@ Video:
       subscriber_only: "Aðeins áskrifendur"
       needs_auth: "Innskráning er nauðsynleg"
       unlisted: "Óskráð"
-  How this was made: Hvernig þetta var gert
   Save Queue to Playlist: "Vista biðröð í spilunarlista"
   Live Chat is currently not supported with the Yattee server. A direct connection to YouTube is required.: Spjall í beinni er ekki stutt með Yattee-netþjóninum. Nauðsynlegt er að vera með beina tengingu við YouTube.
 Playlist:

@@ -665,8 +665,6 @@ Settings:
       Background Color: Color del fondo
       Background Opacity: Opacidad del fondo
       Font Size: Tamaño de la fuente
-      Vertical Position: Posición vertical
-      Edge Color: Color del borde
       Anchor:
         Anchor: Anclaje
         Top Left: Arriba a la izquierda
@@ -675,12 +673,34 @@ Settings:
         Bottom Left: Abajo a la izquierda
         Bottom Center: Abajo en el centro
         Bottom Right: Abajo a la derecha
+        Center Left: Centro a la izquierda
+        Center: Centro
+        Center Right: Centro a la derecha
       Edge Style:
         Edge Style: Estilo del borde
         None: Ninguno
         Outline: Contorno
         Drop Shadow: Sombra paralela
+        Raised: Relieve
+        Depressed: Hundido
       Reset: Restablecer la apariencia de los subtítulos
+      Default: Predeterminado
+      Text Opacity: Opacidad de fuente
+      Font Family:
+        Font Family: Familia de fuente
+        Monospaced Serif: Serif monoespaciada
+        Proportional Serif: Serif proporcional
+        Monospaced Sans-Serif: Sans-serif monoespaciada
+        Proportional Sans-Serif: Sans-serif proporcional
+      Colors:
+        White: Blanco
+        Yellow: Amarillo
+        Green: Verde
+        Cyan: Cian
+        Blue: Azul
+        Magenta: Magenta
+        Red: Rojo
+        Black: Negro
     Auto Picture in Picture:
       Auto Picture in Picture: Activar automáticamente Imagen en imagen
       On Tab Change: Al cambiar de pestaña
@@ -1509,7 +1529,6 @@ Video:
       Error: Falló la traducción por voz superpuesta. Vuelve a intentarlo más tarde.
       Duration Error: La traducción por voz superpuesta solo está disponible para vídeos de hasta cuatro horas.
     Caption Appearance:
-      Options: Opciones
       Sample: Así se ven los subtítulos
     Auto-translate: Traducir automáticamente
     Sleep Timer:

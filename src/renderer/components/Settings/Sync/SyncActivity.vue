@@ -160,6 +160,19 @@ import FtButton from '../../FtButton/FtButton.vue'
 import FtLoader from '../../FtLoader/FtLoader.vue'
 import FtPrompt from '../../FtPrompt/FtPrompt.vue'
 import { SYNC_SETTING_LABELS, SYNC_SETTING_VALUE_LABELS } from '../../../helpers/sync-setting-labels'
+import {
+  CAPTION_EDGE_STYLES,
+  CAPTION_FONT_FAMILIES,
+  CAPTION_POSITION_AREAS,
+  LEGACY_ANCHORS,
+  LEGACY_EDGE_STYLES,
+} from '../../../helpers/player/caption-settings'
+import {
+  getCaptionColorName,
+  getCaptionEdgeStyleName,
+  getCaptionFontFamilyName,
+  getCaptionPositionName,
+} from '../../../helpers/player/caption-setting-names'
 
 import { settingsSearchNavigationKey } from '../../../helpers/settingsSearch'
 import { useScrollClamp } from '../../../composables/useScrollClamp'
@@ -277,20 +290,25 @@ function displayActivityValue(entry) {
     if (entry.value === 'unlimited') return t('Channel.Unlimited')
   }
   if (entry.key === 'defaultCaptionSettings') {
-    if (['Background Opacity', 'Vertical Position', 'Font Size'].includes(entry.detail) &&
-        typeof entry.value === 'number') return `${Math.round(entry.value * 100)}%`
-    if (entry.detail === 'Edge Style.Edge Style') {
-      const name = { none: 'None', outline: 'Outline', dropShadow: 'Drop Shadow' }[entry.value]
-      // eslint-disable-next-line @intlify/vue-i18n/no-dynamic-keys
-      if (name) return t(`Settings.Player Settings.Caption Appearance.Edge Style.${name}`)
+    const value = entry.value
+    if (['Background Opacity', 'Text Opacity', 'Font Size', 'Vertical Position'].includes(entry.detail)) {
+      if (typeof value === 'number') return `${Math.round(value * 100)}%`
+      if (value === null) return t('Settings.Player Settings.Caption Appearance.Default')
     }
-    if (entry.detail === 'Anchor.Anchor' && typeof entry.value === 'string') {
-      if (/^(top|bottom)-(left|center|right)$/.test(entry.value)) {
-        const name = entry.value.split('-').map(part => part[0].toUpperCase() + part.slice(1)).join(' ')
-        const key = `Settings.Player Settings.Caption Appearance.Anchor.${name}`
-        // eslint-disable-next-line @intlify/vue-i18n/no-dynamic-keys
-        if (te(key)) return t(key)
-      }
+    if (['Text Color', 'Background Color'].includes(entry.detail) && typeof value === 'string') {
+      return getCaptionColorName(value, t)
+    }
+    // Including the values of the settings before Shaka's style options
+    if (entry.detail === 'Edge Style.Edge Style') {
+      const edgeStyle = value === 'none' ? 'NONE' : LEGACY_EDGE_STYLES[value] ?? value
+      if (CAPTION_EDGE_STYLES.includes(edgeStyle)) return getCaptionEdgeStyleName(edgeStyle, t)
+    }
+    if (entry.detail === 'Anchor.Anchor') {
+      const positionArea = LEGACY_ANCHORS[value] ?? value
+      if (CAPTION_POSITION_AREAS.includes(positionArea)) return getCaptionPositionName(positionArea, t)
+    }
+    if (entry.detail === 'Font Family.Font Family' && value in CAPTION_FONT_FAMILIES) {
+      return getCaptionFontFamilyName(value, t)
     }
   }
   if (typeof entry.value === 'string' || typeof entry.value === 'number') {
@@ -345,8 +363,10 @@ const visibleEntries = computed(() => (showAll.value ? entries.value : entries.v
   if (entry.item && entry.key && (entry.key !== 'customThemes' || entry.action === 'updated')) labels.push(entry.item)
   // eslint-disable-next-line @intlify/vue-i18n/no-dynamic-keys
   if (detailKey && te(detailKey)) labels.push(t(detailKey))
+  // The caption opacities are null by default
   const hasValue = entry.key && (entry.key !== 'keyboardShortcuts' || entry.detail) &&
-    ['string', 'number', 'boolean'].includes(typeof entry.value)
+    (['string', 'number', 'boolean'].includes(typeof entry.value) ||
+      (entry.key === 'defaultCaptionSettings' && entry.value === null))
   const messageKey = entry.action === 'added'
     ? 'Settings.Sync Settings.Item Added'
     : entry.action === 'removed'

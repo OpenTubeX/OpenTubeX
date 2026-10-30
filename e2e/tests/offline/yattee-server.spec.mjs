@@ -2,7 +2,7 @@ import { readFile } from 'node:fs/promises'
 import path from 'node:path'
 
 import { test, expect, sel, abortUnmockedRequest, goToSettingsSection, repoRoot } from '../../helpers/app.mjs'
-import { activeTab, waitForPlayback } from '../../helpers/player.mjs'
+import { activeTab, waitForPlayback, openCaptionLanguages } from '../../helpers/player.mjs'
 
 const SERVER = 'https://yattee.test'
 const VIDEO_ID = 'jNQXAC9IVRw'
@@ -175,7 +175,7 @@ test('plays relayed DASH streams through the Yattee server without contacting Yo
   expect(tracks).toEqual({ variants: ['360p vp9 opus'], text: ['en'] })
 
   await player.locator('.shaka-overflow-menu-button').click()
-  await player.locator('.shaka-overflow-menu').getByRole('button', { name: /Captions/ }).click()
+  await openCaptionLanguages(player)
   await player.locator('.shaka-text-languages').getByRole('menuitemradio', { name: 'English' }).click()
   await expect.poll(() => captionRequests).toEqual([
     `${SERVER}/api/v1/captions/${VIDEO_ID}/content?lang=en&token=caption-token`

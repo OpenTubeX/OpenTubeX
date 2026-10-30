@@ -1,5 +1,5 @@
 import { test, expect } from '../../helpers/app.mjs'
-import { findWatchComponent, openMockedVideo, waitForPlayback } from '../../helpers/player.mjs'
+import { findWatchComponent, openMockedVideo, waitForPlayback, openCaptionLanguages } from '../../helpers/player.mjs'
 import { fulfillVisualFixture } from '../../helpers/visual-fixtures.mjs'
 import { mockPlayableWatchPage } from '../../helpers/watch.mjs'
 
@@ -67,7 +67,7 @@ for (const usePlayerMenuGrid of [true, false]) {
         await page.locator('.ftVideoPlayer').hover()
         await page.locator('.shaka-overflow-menu-button').click()
         await expect(page.locator('.shaka-caption-button')).toHaveAttribute('aria-pressed', 'true')
-        await page.locator('.shaka-caption-button').click()
+        await openCaptionLanguages(page.locator('.ftVideoPlayer'))
         await page.locator('.shaka-turn-captions-off-button').click()
         await expect(page.locator('.shaka-caption-button')).toHaveAttribute('aria-pressed', 'false')
         await expect.poll(() => video.evaluate(element => element.ui.getControls().getPlayer().getTextTracks().some(track => track.active))).toBe(false)
@@ -81,7 +81,7 @@ for (const usePlayerMenuGrid of [true, false]) {
       await mockPlayableWatchPage(app, page, { captionTranslations: true })
       const video = await openMockedVideo(page)
       await video.evaluate(element => element.pause())
-      await expect(page.locator('.ft-caption-appearance-menu')).toHaveCount(1)
+      await expect(page.locator('.shaka-caption-style-button')).toHaveCount(1)
       await expect.poll(() => video.evaluate(element => element.ui.getControls().getPlayer().getTextTracks().length)).toBeGreaterThan(0)
       const session = await page.context().newCDPSession(page)
       try {
@@ -117,10 +117,11 @@ for (const usePlayerMenuGrid of [true, false]) {
         await page.locator('.ftVideoPlayer').hover()
         await page.locator('.shaka-overflow-menu-button').click()
         await expect(page.locator('.shaka-overflow-menu')).toBeVisible()
-        await page.locator('.shaka-caption-button').click()
+        await openCaptionLanguages(page.locator('.ftVideoPlayer'))
         await expect(page.locator('.shaka-text-languages')).toBeVisible()
-        await page.locator('.ft-caption-options-button').click()
-        await expect(page.locator('.ft-caption-appearance-menu')).toBeVisible()
+        await page.locator('.shaka-text-languages > .shaka-back-to-overflow-button').click()
+        await page.locator('.shaka-caption-style-button').click()
+        await expect(page.locator('.shaka-caption-font-family-button')).toBeVisible()
       } finally {
         await session.detach()
       }

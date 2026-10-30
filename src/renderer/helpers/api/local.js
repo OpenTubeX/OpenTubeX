@@ -1897,6 +1897,7 @@ export function parseLocalWatchNextVideo(video) {
       author: video.author.name,
       authorId: video.author.id,
       ...getAuthorVerification(video.author),
+      collaborators: parseLocalCollaboratorItems(video.author.collaborators),
       lengthSeconds: video.duration.seconds
     }
   } else if (video.is(YTNodes.LockupView)) {

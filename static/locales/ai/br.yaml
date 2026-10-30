@@ -703,8 +703,6 @@ Settings:
       Background Color: "Liv an drekleur"
       Background Opacity: "Divoullder an drekleur"
       Font Size: "Ment an nodrezh"
-      Vertical Position: "Lec'h a-serzh"
-      Edge Color: "Liv an amlinenn"
       Anchor:
         Anchor: "Eor"
         Top Left: "En nec'h a-gleiz"
@@ -713,12 +711,34 @@ Settings:
         Bottom Left: "En traoñ a-gleiz"
         Bottom Center: "En traoñ e-kreiz"
         Bottom Right: "En traoñ a-zehou"
+        Center Left: E-kreiz a-gleiz
+        Center: E-kreiz
+        Center Right: E-kreiz a-zehoù
       Edge Style:
         Edge Style: "Stil an amlinenn"
         None: "Hini ebet"
         Outline: "Trolinenn"
         Drop Shadow: "Skeud taolet"
+        Raised: Bosennet
+        Depressed: Kleuzet
       Reset: "Adderaouekaat neuz an istitloù"
+      Default: Emgefreek
+      Text Opacity: Demerez an nodrezh
+      Font Family:
+        Font Family: Familh nodrezhoù
+        Monospaced Serif: Serif monospas
+        Proportional Serif: Serif kenfeur
+        Monospaced Sans-Serif: Sans-serif monospas
+        Proportional Sans-Serif: Sans-serif kenfeur
+      Colors:
+        White: Gwenn
+        Yellow: Melen
+        Green: Gwer
+        Cyan: Glaswer
+        Blue: Glas
+        Magenta: Majenta
+        Red: Ruz
+        Black: Du
     Auto Picture in Picture:
       Auto Picture in Picture: "Tremen er mod Skeudenn e-barzh skeudenn ent emgefreek"
       On Tab Change: "Pa vez cheñchet ivinell"
@@ -1550,7 +1570,6 @@ Video:
       Error: "C'hwitet eo treiñ ar vouezh. Klaskit en-dro diwezhatoc'h."
       Duration Error: "Troidigezh ar vouezh zo hegerz evit videoioù a beder eurvezh d'ar muiañ."
     Caption Appearance:
-      Options: "Dibarzhioù"
       Sample: "Setu neuz an istitloù"
     Auto-translate: "Treiñ ent emgefreek"
     Sleep Timer:

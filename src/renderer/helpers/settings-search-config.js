@@ -399,7 +399,9 @@ export const SETTINGS_SEARCH_SELECT_GROUP_LABELS = {
   },
   'caption-appearance': {
     Anchor: ['Anchor'],
-    'Edge Style': ['Edge Style']
+    Colors: [],
+    'Edge Style': ['Edge Style'],
+    'Font Family': ['Font Family']
   },
   'external-player': { Players: [] },
   'external-software': {
@@ -417,7 +419,7 @@ export const SETTINGS_SEARCH_EXCLUDED_MESSAGE_PATHS = {
   player: new Set(['Lights Off', 'Skip Silence', 'Playback Speed Name', 'Use Automatic Playback Speed Name']),
   'sponsor-block': new Set(['Generated SponsorBlock User ID Copy Button']),
   subscription: new Set(['Auto Refresh Interval']),
-  'caption-appearance': new Set(['Application Language']),
+  'caption-appearance': new Set(['Application Language', 'Default']),
   'external-software': new Set([
     'Download yt-dlp',
     'Update yt-dlp',

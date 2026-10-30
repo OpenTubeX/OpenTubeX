@@ -892,8 +892,6 @@ Settings:
       Background Color: Fono spalva
       Background Opacity: Fono nepermatomumas
       Font Size: Šrifto dydis
-      Vertical Position: Vertikalioji padėtis
-      Edge Color: Apvado spalva
       Anchor:
         Anchor: Tvirtinimo vieta
         Top Left: Viršuje kairėje
@@ -902,12 +900,34 @@ Settings:
         Bottom Left: Apačioje kairėje
         Bottom Center: Apačioje per vidurį
         Bottom Right: Apačioje dešinėje
+        Center Left: Centre kairėje
+        Center: Centre
+        Center Right: Centre dešinėje
       Edge Style:
         Edge Style: Apvado stilius
         None: Nėra
         Outline: Kontūras
         Drop Shadow: Krintantis šešėlis
+        Raised: Iškilus
+        Depressed: Įdubęs
       Reset: Atkurti numatytąją subtitrų išvaizdą
+      Default: Numatytoji
+      Text Opacity: Šrifto nepermatomumas
+      Font Family:
+        Font Family: Šriftų grupė
+        Monospaced Serif: Lygiaplotis su užraitais
+        Proportional Serif: Proporcingas su užraitais
+        Monospaced Sans-Serif: Lygiaplotis be užraitų
+        Proportional Sans-Serif: Proporcingas be užraitų
+      Colors:
+        White: Balta
+        Yellow: Geltona
+        Green: Žalia
+        Cyan: Žydra
+        Blue: Mėlyna
+        Magenta: Purpurinė
+        Red: Raudona
+        Black: Juoda
     Default Viewing Mode:
       Theater: Kino teatro režimas
       Default Viewing Mode: Numatytasis peržiūros režimas
@@ -1786,7 +1806,7 @@ Video:
     Load Error: Nepavyko įkelti nuorašo.
     Empty: Šiame nuoraše nėra teksto.
     No Results: Nė vienas nuorašo fragmentas neatitinka paieškos.
-  IP block: YouTube užblokavo jūsų IP adresą ir neleidžia žiūrėti vaizdo įrašų. Pabandykite prisijungti per kitą VPN arba įgaliotąjį serverį.
+  IP block: YouTube užblokavo jūsų IP adresą ir neleidžia žiūrėti vaizdo įrašų, arba šiame vaizdo įraše gali būti turinio su nepilnamečiais, prie kurio YouTube riboja prieigą neprisijungusiems naudotojams. Jei tai IP blokavimas, pabandykite naudoti kitą VPN arba tarpinį serverį.
   Retry With Built-in Extraction: Bandyti dar kartą naudojant integruotą išgavimą
   Retry With yt-dlp Extraction: Bandyti dar kartą naudojant yt-dlp išgavimą
   Reloading video after streaming URL error: Vaizdo įrašas įkeliamas iš naujo po srauto URL klaidos
@@ -1901,7 +1921,6 @@ Video:
       Error: Nepavyko parengti įgarsinto vertimo. Bandykite dar kartą vėliau.
       Duration Error: Įgarsintas vertimas galimas tik ne ilgesniems nei keturių valandų vaizdo įrašams.
     Caption Appearance:
-      Options: Parinktys
       Sample: Taip atrodo subtitrai
     Auto-translate: Automatinis vertimas
     Sleep Timer:

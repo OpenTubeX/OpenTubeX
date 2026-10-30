@@ -319,7 +319,6 @@ test.describe('settings search highlights', () => {
 
     for (const searchTerm of [
       'Screenshot Mode',
-      'Edge Color',
       'Server URL',
       'Executable path',
       'SponsorBlock API URL',
@@ -342,13 +341,9 @@ test.describe('settings search highlights', () => {
     await search.fill('')
     const playback = await goToSettingsSection(page, 'playback')
     await playback.locator('label.switch-label').filter({ hasText: 'Enable Screenshot' }).click()
-    await playback.getByRole('combobox', { name: 'Edge Style' }).click()
-    await page.getByRole('option', { name: 'Outline', exact: true }).click()
 
-    for (const searchTerm of ['Screenshot Mode', 'Edge Color']) {
-      await search.fill(searchTerm)
-      await expect(page.getByRole('button', { name: searchTerm, exact: true })).toBeVisible()
-    }
+    await search.fill('Screenshot Mode')
+    await expect(page.getByRole('button', { name: 'Screenshot Mode', exact: true })).toBeVisible()
   })
 })
 

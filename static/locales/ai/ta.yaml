@@ -718,8 +718,6 @@ Settings:
       Background Color: பின்னணி நிறம்
       Background Opacity: பின்னணி ஒளிபுகாமை
       Font Size: எழுத்துரு அளவு
-      Vertical Position: செங்குத்து இடம்
-      Edge Color: விளிம்பு நிறம்
       Anchor:
         Anchor: நிலைப்புள்ளி
         Top Left: மேல் இடது
@@ -728,12 +726,34 @@ Settings:
         Bottom Left: கீழ் இடது
         Bottom Center: கீழ் நடு
         Bottom Right: கீழ் வலது
+        Center Left: மையம் இடது
+        Center: மையம்
+        Center Right: மையம் வலது
       Edge Style:
         Edge Style: விளிம்பு பாணி
         None: ஏதுமில்லை
         Outline: வெளிக்கோடு
         Drop Shadow: விழுநிழல்
+        Raised: உயர்த்தப்பட்டது
+        Depressed: அழுத்தப்பட்டது
       Reset: வசன வரித் தோற்றத்தை மீட்டமை
+      Default: இயல்புநிலை
+      Text Opacity: உரை ஒளிபுகாமை
+      Font Family:
+        Font Family: எழுத்துருக் குடும்பம்
+        Monospaced Serif: சம அகல செரிஃப்
+        Proportional Serif: விகிதாசார செரிஃப்
+        Monospaced Sans-Serif: சம அகல சான்ஸ்-செரிஃப்
+        Proportional Sans-Serif: விகிதாசார சான்ஸ்-செரிஃப்
+      Colors:
+        White: வெள்ளை
+        Yellow: மஞ்சள்
+        Green: பச்சை
+        Cyan: சியான்
+        Blue: நீலம்
+        Magenta: மெஜந்தா
+        Red: சிவப்பு
+        Black: கருப்பு
     Default Viewing Mode:
       Tooltip: பெரும்பாலான இயல்புநிலைப் பார்வைப் பயன்முறைகள் ஒவ்வொரு பார்வை அமர்வின் தொடக்கத்தில் மட்டுமே பயன்படுத்தப்படும். அமர்வின்போது செய்த மாற்றங்கள் அது முடியும் வரை நீடிக்கும். எப்போதும் இயக்கப்படும் பார்வைப் பயன்முறைகள், முந்தைய காணொளியைப் பார்க்கும்போது செய்த மாற்றங்களைப் பொருட்படுத்தாமல், புதிய காணொளிக்கு மாறும்போதெல்லாம் பயன்படுத்தப்படும்.
     Auto Picture in Picture:
@@ -1595,7 +1615,6 @@ Video:
       Error: குரல்வழி மொழிபெயர்ப்பு தோல்வியடைந்தது. பிறகு மீண்டும் முயலவும்.
       Duration Error: நான்கு மணிநேரம் வரை நீளமுள்ள காணொளிகளுக்கு மட்டுமே குரல்வழி மொழிபெயர்ப்பு கிடைக்கும்.
     Caption Appearance:
-      Options: விருப்பங்கள்
       Sample: வசன வரிகள் இவ்வாறு தோன்றும்
     Auto-translate: தானியக்க மொழிபெயர்ப்பு
     Sleep Timer:

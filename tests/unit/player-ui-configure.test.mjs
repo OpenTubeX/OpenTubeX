@@ -50,6 +50,7 @@ function setupPlayer({ theatrePossible = true, useSponsorBlock = true } = {}) {
     requestAnimationFrame: callback => callback(),
     shaka: { util: { FakeEvent: class {} } },
     TrackLabelFormat: { LABEL: 'label', LANGUAGE: 'language', LANGUAGE_ROLE: 'language-role' },
+    CAPTION_FONT_SCALE_FACTORS: [1],
     removeFromArrayIfExists(array, element) {
       const index = array.indexOf(element)
       if (index !== -1) array.splice(index, 1)

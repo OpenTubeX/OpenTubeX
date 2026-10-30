@@ -1,13 +1,7 @@
 import { readFileSync } from 'node:fs'
 import { createRequire } from 'node:module'
 import { goTo, sel, setPlayerFullscreen, setWindowSize, test, expect } from '../../helpers/app.mjs'
-import {
-  activeTab,
-  expectDockedToBottomRight,
-  findWatchComponent,
-  openMockedVideo,
-  waitForPlayback,
-} from '../../helpers/player.mjs'
+import { activeTab, expectDockedToBottomRight, findWatchComponent, openMockedVideo, waitForPlayback, openCaptionLanguages } from '../../helpers/player.mjs'
 import { mockPlayableWatchPage, watchViewHandle } from '../../helpers/watch.mjs'
 
 // These used to live in the network suite, where they only ran when YouTube
@@ -1537,7 +1531,7 @@ test('auto-translates captions into an arbitrary language', async ({ app, page, 
   await moreOptions.click()
 
   const overflowMenu = player.locator('.shaka-overflow-menu')
-  await overflowMenu.getByRole('button', { name: 'Captions' }).click()
+  await openCaptionLanguages(player)
   await player.locator('.shaka-text-languages').getByRole('button', { name: 'Auto-translate' }).click()
 
   const translationMenu = player.locator('.ft-caption-translation-menu')
@@ -1588,7 +1582,7 @@ test('auto-translates captions into an arbitrary language', async ({ app, page, 
   await page.keyboard.press('Escape')
   await player.hover()
   await moreOptions.click()
-  await overflowMenu.getByRole('button', { name: 'Captions' }).click()
+  await openCaptionLanguages(player)
   await player.locator('.shaka-text-languages').getByRole('button', { name: 'Auto-translate' }).click()
   await expect(translations).not.toHaveClass(/ft-menu-grid/)
   const selectedTranslation = translations.getByRole('button', { name: 'German' })
@@ -1605,14 +1599,14 @@ test('auto-translates captions into an arbitrary language', async ({ app, page, 
   await header.click()
   const captionsMenu = player.locator('.shaka-text-languages')
   await captionsMenu.getByRole('button', { name: 'Off' }).click()
-  await overflowMenu.getByRole('button', { name: 'Captions' }).click()
+  await openCaptionLanguages(player)
   await captionsMenu.getByRole('button', { name: 'Auto-translate' }).click()
   await expect(selectedTranslation).toHaveAttribute('aria-selected', 'false')
   await expect(selectedTranslation.locator('.shaka-chosen-item')).toHaveCount(0)
 
   await header.click()
   await captionsMenu.getByRole('menuitemradio', { name: 'English (auto-generated)', exact: true }).click()
-  await overflowMenu.getByRole('button', { name: 'Captions' }).click()
+  await openCaptionLanguages(player)
   await captionsMenu.getByRole('button', { name: 'Auto-translate' }).click()
   await expect(selectedTranslation).toHaveAttribute('aria-selected', 'false')
   await expect(selectedTranslation.locator('.shaka-chosen-item')).toHaveCount(0)
@@ -1621,7 +1615,7 @@ test('auto-translates captions into an arbitrary language', async ({ app, page, 
   await openMockedVideo(page, nextVideoId)
   await player.hover()
   await moreOptions.click()
-  await overflowMenu.getByRole('button', { name: 'Captions' }).click()
+  await openCaptionLanguages(player)
   await player.locator('.shaka-text-languages').getByRole('button', { name: 'Auto-translate' }).click()
   const nextVideoTranslationRequest = page.waitForRequest(request => {
     const url = new URL(request.url())
@@ -3068,6 +3062,8 @@ test.describe('scroll mini player', () => {
         const cue = document.createElement('div')
         const text = document.createElement('span')
         text.setAttribute('translate', 'no')
+        // Shaka scales the cues by the configured font size
+        text.style.fontSize = '4em'
         text.textContent = 'a caption long enough to wrap over several lines in a small player, '
           .repeat(3)
         cue.append(text)

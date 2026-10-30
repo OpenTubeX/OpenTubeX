@@ -902,8 +902,6 @@ Settings:
       Background Color: Barva ozadja
       Background Opacity: Motnost ozadja
       Font Size: Velikost pisave
-      Vertical Position: Navpični položaj
-      Edge Color: Barva obrobe
       Anchor:
         Anchor: Sidrišče
         Top Left: Zgoraj levo
@@ -912,12 +910,34 @@ Settings:
         Bottom Left: Spodaj levo
         Bottom Center: Spodaj na sredini
         Bottom Right: Spodaj desno
+        Center Left: Na sredini levo
+        Center: Na sredini
+        Center Right: Na sredini desno
       Edge Style:
         Edge Style: Slog roba
         None: Brez
         Outline: Obroba
         Drop Shadow: Padajoča senca
+        Raised: Dvignjeno
+        Depressed: Znižano
       Reset: Ponastavi videz podnapisov
+      Default: Privzeto
+      Text Opacity: Neprosojnost pisave
+      Font Family:
+        Font Family: Skupina pisav
+        Monospaced Serif: Enopresledna serif
+        Proportional Serif: Sorazmerna serif
+        Monospaced Sans-Serif: Enopresledna sans-serif
+        Proportional Sans-Serif: Sorazmerna sans-serif
+      Colors:
+        White: Bela
+        Yellow: Rumena
+        Green: Zelena
+        Cyan: Cijan
+        Blue: Modra
+        Magenta: Magenta
+        Red: Rdeča
+        Black: Črna
     Default Viewing Mode:
       Theater: Kino
       Default Viewing Mode: Privzeti način gledanja
@@ -1839,7 +1859,7 @@ Video:
     Load Error: Prepisa ni bilo mogoče naložiti.
     Empty: Ta prepis ne vsebuje besedila.
     No Results: Noben del prepisa se ne ujema z iskanjem.
-  IP block: YouTube je vašemu naslovu IP onemogočil ogled videoposnetkov. Poskusite uporabiti drug VPN ali posredniški strežnik.
+  IP block: YouTube je vašemu naslovu IP onemogočil ogled videoposnetkov ali pa ta videoposnetek vsebuje vsebino z mladoletnimi osebami, do katere YouTube omejuje dostop neprijavljenim uporabnikom. Če gre za blokado naslova IP, poskusite uporabiti drug VPN ali posredniški strežnik.
   Retry With Built-in Extraction: Poskusi znova z vgrajenim pridobivanjem
   Retry With yt-dlp Extraction: Poskusi znova s pridobivanjem prek yt-dlp
   Reloading video after streaming URL error: Ponovno nalaganje videoposnetka po napaki URL-ja prenosa
@@ -1977,7 +1997,6 @@ Video:
       Error: Glasovni prevod ni uspel. Poskusite znova pozneje.
       Duration Error: Glasovni prevod je na voljo samo za videoposnetke, dolge največ štiri ure.
     Caption Appearance:
-      Options: Možnosti
       Sample: Podnapisi so videti tako
     Auto-translate: Samodejni prevod
     Sleep Timer:

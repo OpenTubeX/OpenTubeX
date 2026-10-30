@@ -710,8 +710,6 @@ Settings:
       Background Color: Achtergrondkleur
       Background Opacity: Ondoorzichtigheid van achtergrond
       Font Size: Lettergrootte
-      Vertical Position: Verticale positie
-      Edge Color: Randkleur
       Anchor:
         Anchor: Uitlijning
         Top Left: Linksboven
@@ -720,12 +718,34 @@ Settings:
         Bottom Left: Linksonder
         Bottom Center: Middenonder
         Bottom Right: Rechtsonder
+        Center Left: Midden links
+        Center: Midden
+        Center Right: Midden rechts
       Edge Style:
         Edge Style: Randstijl
         None: Geen
         Outline: Contour
         Drop Shadow: Slagschaduw
+        Raised: Verhoogd
+        Depressed: Verlaagd
       Reset: Uiterlijk van ondertiteling herstellen
+      Default: Standaard
+      Text Opacity: Ondoorzichtigheid van lettertype
+      Font Family:
+        Font Family: Lettertypegroep
+        Monospaced Serif: Serif met gelijke tekenbreedte
+        Proportional Serif: Proportionele serif
+        Monospaced Sans-Serif: Sans-serif met gelijke tekenbreedte
+        Proportional Sans-Serif: Proportionele sans-serif
+      Colors:
+        White: Wit
+        Yellow: Geel
+        Green: Groen
+        Cyan: Cyaan
+        Blue: Blauw
+        Magenta: Magenta
+        Red: Rood
+        Black: Zwart
     Default Viewing Mode:
       Full Window (Always On): Volledig venster (altijd aan)
       Full Screen (Always On): Volledig scherm (altijd aan)
@@ -1593,7 +1613,6 @@ Video:
       Error: Voice-oververtaling mislukt. Probeer het later opnieuw.
       Duration Error: Voice-oververtaling is alleen beschikbaar voor video's van maximaal vier uur.
     Caption Appearance:
-      Options: Opties
       Sample: Zo ziet ondertiteling eruit
     Auto-translate: Automatisch vertalen
     Sleep Timer:

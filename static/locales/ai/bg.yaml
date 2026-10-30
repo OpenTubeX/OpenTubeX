@@ -708,8 +708,6 @@ Settings:
       Background Color: Цвят на фона
       Background Opacity: Непрозрачност на фона
       Font Size: Размер на шрифта
-      Vertical Position: Вертикално положение
-      Edge Color: Цвят на ръба
       Anchor:
         Anchor: Закотвяне
         Top Left: Горе вляво
@@ -718,12 +716,34 @@ Settings:
         Bottom Left: Долу вляво
         Bottom Center: Долу в средата
         Bottom Right: Долу вдясно
+        Center Left: В центъра вляво
+        Center: В центъра
+        Center Right: В центъра вдясно
       Edge Style:
         Edge Style: Стил на ръба
         None: Без
         Outline: Контур
         Drop Shadow: Падаща сянка
+        Raised: Повдигнати
+        Depressed: Снижени
       Reset: Нулиране на изгледа на субтитрите
+      Default: По подразбиране
+      Text Opacity: Плътност на шрифта
+      Font Family:
+        Font Family: Семейство шрифтове
+        Monospaced Serif: Моноширинен Serif
+        Proportional Serif: Пропорционален Serif
+        Monospaced Sans-Serif: Моноширинен Sans-Serif
+        Proportional Sans-Serif: Пропорционален Sans-Serif
+      Colors:
+        White: Бяло
+        Yellow: Жълто
+        Green: Зелено
+        Cyan: Циан
+        Blue: Синьо
+        Magenta: Пурпурно
+        Red: Червено
+        Black: Черно
     Auto Picture in Picture:
       Auto Picture in Picture: Автоматично включване на Picture-in-Picture
       On Tab Change: При превключване между раздели
@@ -1561,7 +1581,6 @@ Video:
       Error: Гласовият превод е неуспешен. Опитайте отново по-късно.
       Duration Error: Гласовият превод е наличен само за видеоклипове с дължина до четири часа.
     Caption Appearance:
-      Options: Опции
       Sample: Така изглеждат субтитрите
     Auto-translate: Автоматичен превод
     Sleep Timer:

@@ -718,8 +718,6 @@ Settings:
       Background Color: Боја позадине
       Background Opacity: Непрозирност позадине
       Font Size: Величина фонта
-      Vertical Position: Вертикални положај
-      Edge Color: Боја ивице
       Anchor:
         Anchor: Положај
         Top Left: Горе лево
@@ -728,12 +726,34 @@ Settings:
         Bottom Left: Доле лево
         Bottom Center: Доле по средини
         Bottom Right: Доле десно
+        Center Left: У средини лево
+        Center: У средини
+        Center Right: У средини десно
       Edge Style:
         Edge Style: Стил ивице
         None: Без ивице
         Outline: Контура
         Drop Shadow: Бачена сенка
+        Raised: Испупчено
+        Depressed: Удубљено
       Reset: Врати подразумевани изглед титлова
+      Default: Подразумевано
+      Text Opacity: Непрозирност фонта
+      Font Family:
+        Font Family: Група фонтова
+        Monospaced Serif: Serif фиксне ширине
+        Proportional Serif: Пропорционални Serif
+        Monospaced Sans-Serif: Sans-Serif фиксне ширине
+        Proportional Sans-Serif: Пропорционални Sans-Serif
+      Colors:
+        White: Бела
+        Yellow: Жута
+        Green: Зелена
+        Cyan: Тиркизна
+        Blue: Плава
+        Magenta: Лила
+        Red: Црвена
+        Black: Црна
     Default Viewing Mode:
       Full Window (Always On): Цео прозор (увек укључено)
       Full Screen (Always On): Цео екран (увек укључено)
@@ -1605,7 +1625,6 @@ Video:
       Error: Гласовни превод није успео. Покушајте поново касније.
       Duration Error: Гласовни превод је доступан само за видео-снимке који трају највише четири сата.
     Caption Appearance:
-      Options: Опције
       Sample: Овако изгледају титлови
     Auto-translate: Аутоматски превод
     Sleep Timer:

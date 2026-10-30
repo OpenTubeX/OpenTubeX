@@ -676,8 +676,6 @@ Settings:
       Background Color: Цвет фона
       Background Opacity: Непрозрачность фона
       Font Size: Размер шрифта
-      Vertical Position: Положение по вертикали
-      Edge Color: Цвет контура
       Anchor:
         Anchor: Привязка
         Top Left: Вверху слева
@@ -686,12 +684,34 @@ Settings:
         Bottom Left: Внизу слева
         Bottom Center: Внизу по центру
         Bottom Right: Внизу справа
+        Center Left: По центру слева
+        Center: По центру
+        Center Right: По центру справа
       Edge Style:
         Edge Style: Стиль контура
         None: Нет
         Outline: Обводка
         Drop Shadow: Тень
+        Raised: Приподнятый
+        Depressed: Утопленный
       Reset: Сбросить оформление субтитров
+      Default: По умолчанию
+      Text Opacity: Непрозрачность текста
+      Font Family:
+        Font Family: Семейство шрифтов
+        Monospaced Serif: Моноширинный Serif
+        Proportional Serif: Пропорциональный Serif
+        Monospaced Sans-Serif: Моноширинный Sans-Serif
+        Proportional Sans-Serif: Пропорциональный Sans-Serif
+      Colors:
+        White: Белый
+        Yellow: Желтый
+        Green: Зеленый
+        Cyan: Голубой
+        Blue: Синий
+        Magenta: Пурпурный
+        Red: Красный
+        Black: Черный
     Auto Picture in Picture:
       Auto Picture in Picture: Автоматически включать режим «Картинка в картинке»
       On Tab Change: При переключении вкладок
@@ -1515,7 +1535,6 @@ Video:
       Error: Не удалось выполнить закадровый перевод. Повторите попытку позже.
       Duration Error: Закадровый перевод доступен только для видео длительностью до четырёх часов.
     Caption Appearance:
-      Options: Параметры
       Sample: Так выглядят субтитры
     Auto-translate: Автоперевод
     Sleep Timer:

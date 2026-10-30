@@ -160,14 +160,14 @@ function describeCollectionChanges(collection, before, after, changes, channelNa
 }
 
 const CAPTION_DETAIL_KEYS = {
-  textColor: 'Text Color',
+  fontFamily: 'Font Family.Font Family',
+  fontColor: 'Text Color',
+  fontOpacity: 'Text Opacity',
+  fontScaleFactor: 'Font Size',
   backgroundColor: 'Background Color',
   backgroundOpacity: 'Background Opacity',
-  fontScale: 'Font Size',
-  verticalPosition: 'Vertical Position',
-  anchor: 'Anchor.Anchor',
-  edgeStyle: 'Edge Style.Edge Style',
-  edgeColor: 'Edge Color',
+  characterEdgeStyle: 'Edge Style.Edge Style',
+  positionArea: 'Anchor.Anchor',
 }
 
 function describeSubscriptionSettings(before, after, changes, channelNames) {

@@ -708,8 +708,6 @@ Settings:
       Background Color: Bakgrundsfärg
       Background Opacity: Bakgrundens opacitet
       Font Size: Teckenstorlek
-      Vertical Position: Lodrät placering
-      Edge Color: Kantfärg
       Anchor:
         Anchor: Förankring
         Top Left: Överst till vänster
@@ -718,12 +716,34 @@ Settings:
         Bottom Left: Nederst till vänster
         Bottom Center: Nederst i mitten
         Bottom Right: Nederst till höger
+        Center Left: Mitten till vänster
+        Center: Mitten
+        Center Right: Mitten till höger
       Edge Style:
         Edge Style: Kantstil
         None: Ingen
         Outline: Kontur
         Drop Shadow: Slagskugga
+        Raised: Upphöjd
+        Depressed: Nedsänkt
       Reset: Återställ undertexternas utseende
+      Default: Standard
+      Text Opacity: Tecknens opacitet
+      Font Family:
+        Font Family: Fontfamilj
+        Monospaced Serif: Serif med fast bredd
+        Proportional Serif: Proportionell serif
+        Monospaced Sans-Serif: Sans-serif med fast bredd
+        Proportional Sans-Serif: Proportionell sans-serif
+      Colors:
+        White: Vit
+        Yellow: Gul
+        Green: Grön
+        Cyan: Cyan
+        Blue: Blå
+        Magenta: Magenta
+        Red: Röd
+        Black: Svart
     Auto Picture in Picture:
       Auto Picture in Picture: Aktivera automatiskt bild-i-bild
       On Tab Change: När du byter flik
@@ -1558,7 +1578,6 @@ Video:
       Error: Dubbningsöversättningen misslyckades. Försök igen senare.
       Duration Error: Dubbningsöversättning är endast tillgänglig för videor som är högst fyra timmar långa.
     Caption Appearance:
-      Options: Alternativ
       Sample: Så här ser undertexterna ut
     Auto-translate: Översätt automatiskt
     Sleep Timer:

@@ -4,10 +4,12 @@
   >
     <div class="captionSettings">
       <div
-        :class="['captionPreview', `captionAnchor-${captionSettings.anchor}`]"
-        :style="captionCssVariables"
+        class="captionPreview"
+        :class="previewPosition"
       >
-        <span>{{ t('Video.Player.Caption Appearance.Sample') }}</span>
+        <span :style="[captionStyle.text, { backgroundColor: captionStyle.background }]">
+          {{ t('Video.Player.Caption Appearance.Sample') }}
+        </span>
       </div>
       <div class="captionControls">
         <div class="captionControl">
@@ -32,129 +34,29 @@
             @change="updateEnableCaptionTranslations"
           />
         </div>
-        <FtColorPicker
-          class="captionControl captionColorControl"
-          :label="t('Settings.Player Settings.Caption Appearance.Text Color')"
-          :model-value="captionSettings.textColor"
-          :allow-alpha="false"
-          @update:model-value="updateCaptionSetting('textColor', $event)"
+        <div
+          v-for="control in styleControls"
+          :key="control.setting"
+          class="captionControl"
         >
-          <template #label>
-            {{ t('Settings.Player Settings.Caption Appearance.Text Color') }}
-            <FtSyncedSettingIndicator
-              setting-key="defaultCaptionSettings"
-              :is-changed="isCaptionSettingChanged('textColor')"
-              @reset="resetCaptionSetting('textColor')"
-            />
-          </template>
-        </FtColorPicker>
-        <FtColorPicker
-          class="captionControl captionColorControl"
-          :label="t('Settings.Player Settings.Caption Appearance.Background Color')"
-          :model-value="captionSettings.backgroundColor"
-          :allow-alpha="false"
-          @update:model-value="updateCaptionSetting('backgroundColor', $event)"
-        >
-          <template #label>
-            {{ t('Settings.Player Settings.Caption Appearance.Background Color') }}
-            <FtSyncedSettingIndicator
-              setting-key="defaultCaptionSettings"
-              :is-changed="isCaptionSettingChanged('backgroundColor')"
-              @reset="resetCaptionSetting('backgroundColor')"
-            />
-          </template>
-        </FtColorPicker>
-        <div class="captionControl">
-          <FtSlider
-            :label="t('Settings.Player Settings.Caption Appearance.Background Opacity')"
-            :default-value="Math.round(captionSettings.backgroundOpacity * 100)"
-            setting-key="defaultCaptionSettings"
-            :is-changed="isCaptionSettingChanged('backgroundOpacity')"
-            :min-value="0"
-            :max-value="100"
-            :step="5"
-            value-extension="%"
-            @input="updateCaptionSetting('backgroundOpacity', $event / 100)"
-            @reset="resetCaptionSetting('backgroundOpacity')"
-          />
-        </div>
-        <div class="captionControl">
-          <FtSlider
-            :label="t('Settings.Player Settings.Caption Appearance.Font Size')"
-            :default-value="Math.round(captionSettings.fontScale * 100)"
-            setting-key="defaultCaptionSettings"
-            :is-changed="isCaptionSettingChanged('fontScale')"
-            :min-value="MIN_CAPTION_FONT_SCALE * 100"
-            :max-value="MAX_CAPTION_FONT_SCALE * 100"
-            :step="10"
-            value-extension="%"
-            @input="updateCaptionSetting('fontScale', $event / 100)"
-            @reset="resetCaptionSetting('fontScale')"
-          />
-        </div>
-        <div class="captionControl">
           <FtSelect
-            :placeholder="t('Settings.Player Settings.Caption Appearance.Anchor.Anchor')"
-            :value="captionSettings.anchor"
+            :placeholder="control.label"
+            :value="String(captionSettings[control.setting] ?? '')"
             setting-key="defaultCaptionSettings"
-            :is-changed="isCaptionSettingChanged('anchor')"
-            :select-names="captionAnchorNames"
-            :select-values="CAPTION_ANCHORS"
-            :icon="['fas', 'border-all']"
-            @change="updateCaptionSetting('anchor', $event)"
-            @reset="resetCaptionSetting('anchor')"
+            :is-changed="isCaptionSettingChanged(control.setting)"
+            :select-names="control.options.map(option => option.name)"
+            :select-values="control.options.map(option => String(option.value ?? ''))"
+            :icon="['fas', control.icon]"
+            @change="updateCaptionSetting(control.setting, control.options.find(option => String(option.value ?? '') === $event).value)"
+            @reset="resetCaptionSetting(control.setting)"
           />
         </div>
-        <div class="captionControl">
-          <FtSlider
-            :label="t('Settings.Player Settings.Caption Appearance.Vertical Position')"
-            :default-value="Math.round(captionSettings.verticalPosition * 100)"
-            setting-key="defaultCaptionSettings"
-            :is-changed="isCaptionSettingChanged('verticalPosition')"
-            :min-value="0"
-            :max-value="50"
-            :step="1"
-            value-extension="%"
-            @input="updateCaptionSetting('verticalPosition', $event / 100)"
-            @reset="resetCaptionSetting('verticalPosition')"
-          />
-        </div>
-        <div class="captionControl">
-          <FtSelect
-            :placeholder="t('Settings.Player Settings.Caption Appearance.Edge Style.Edge Style')"
-            :value="captionSettings.edgeStyle"
-            setting-key="defaultCaptionSettings"
-            :is-changed="isCaptionSettingChanged('edgeStyle')"
-            :select-names="captionEdgeStyleNames"
-            :select-values="CAPTION_EDGE_STYLES"
-            :icon="['fas', 'palette']"
-            @change="updateCaptionSetting('edgeStyle', $event)"
-            @reset="resetCaptionSetting('edgeStyle')"
-          />
-        </div>
-        <FtColorPicker
-          v-if="captionSettings.edgeStyle !== 'none'"
-          class="captionControl captionColorControl"
-          :label="t('Settings.Player Settings.Caption Appearance.Edge Color')"
-          :model-value="captionSettings.edgeColor"
-          :allow-alpha="false"
-          @update:model-value="updateCaptionSetting('edgeColor', $event)"
-        >
-          <template #label>
-            {{ t('Settings.Player Settings.Caption Appearance.Edge Color') }}
-            <FtSyncedSettingIndicator
-              setting-key="defaultCaptionSettings"
-              :is-changed="isCaptionSettingChanged('edgeColor')"
-              @reset="resetCaptionSetting('edgeColor')"
-            />
-          </template>
-        </FtColorPicker>
       </div>
       <div class="captionActions">
         <FtButton
           :label="t('Settings.Player Settings.Caption Appearance.Reset')"
           :icon="['fas', 'undo']"
-          :disabled="isCaptionAppearanceDefault"
+          :disabled="areCaptionSettingsDefault(captionSettings)"
           @click="resetCaptionSettings"
         />
       </div>
@@ -167,22 +69,29 @@ import { computed } from 'vue'
 import { useI18n } from 'vue-i18n'
 
 import FtButton from '../../FtButton/FtButton.vue'
-import FtColorPicker from '../../FtColorPicker/FtColorPicker.vue'
 import FtSelect from '../../FtSelect/FtSelect.vue'
 import FtSettingsSection from '../../FtSettingsSection/FtSettingsSection.vue'
-import FtSlider from '../../FtSlider/FtSlider.vue'
 import FtToggleSwitch from '../../FtToggleSwitch/FtToggleSwitch.vue'
-import FtSyncedSettingIndicator from '../../FtSyncedSettingIndicator/FtSyncedSettingIndicator.vue'
 
 import {
-  CAPTION_ANCHORS,
+  areCaptionSettingsDefault,
+  CAPTION_BACKGROUND_OPACITIES,
+  CAPTION_COLORS,
   CAPTION_EDGE_STYLES,
+  CAPTION_FONT_FAMILIES,
+  CAPTION_FONT_OPACITIES,
+  CAPTION_FONT_SCALE_FACTORS,
+  CAPTION_POSITION_AREAS,
   DEFAULT_CAPTION_SETTINGS,
-  getCaptionCssVariables,
-  MAX_CAPTION_FONT_SCALE,
-  MIN_CAPTION_FONT_SCALE,
+  getCaptionStyle,
   parseCaptionSettings,
 } from '../../../helpers/player/caption-settings'
+import {
+  getCaptionColorName,
+  getCaptionEdgeStyleName,
+  getCaptionFontFamilyName,
+  getCaptionPositionName,
+} from '../../../helpers/player/caption-setting-names'
 import {
   normalizeYouTubeCaptionLanguageCode,
   YOUTUBE_CAPTION_LANGUAGE_FALLBACK_NAMES,
@@ -191,13 +100,97 @@ import store from '../../../store/index'
 
 const { t, locale } = useI18n()
 
+/** @type {import('vue').ComputedRef<import('../../../helpers/player/caption-settings').CaptionSettings>} */
 const captionSettings = computed(() => parseCaptionSettings(store.getters.getDefaultCaptionSettings))
-const isCaptionAppearanceDefault = computed(() => (
-  Object.entries(DEFAULT_CAPTION_SETTINGS).every(([setting, defaultValue]) => (
-    Object.is(captionSettings.value[setting], defaultValue)
-  ))
-))
-const captionCssVariables = computed(() => getCaptionCssVariables(captionSettings.value))
+const captionStyle = computed(() => getCaptionStyle(captionSettings.value))
+const previewPosition = computed(() => {
+  const [row, column] = captionSettings.value.positionArea === 'DEFAULT'
+    ? ['BOTTOM', 'CENTER']
+    : captionSettings.value.positionArea.split('_')
+  return [`captionRow-${row.toLowerCase()}`, `captionColumn-${(column ?? 'CENTER').toLowerCase()}`]
+})
+
+/**
+ * @param {number | null} opacity
+ * @returns {string}
+ */
+function getOpacityName(opacity) {
+  return opacity === null
+    ? t('Settings.Player Settings.Caption Appearance.Default')
+    : `${Math.round(opacity * 100)}%`
+}
+
+/**
+ * Opacities that aren't offered, which the settings allowed before, stay selectable.
+ * @param {readonly (number | null)[]} opacities
+ * @param {number | null} opacity
+ */
+function getOpacityOptions(opacities, opacity) {
+  const values = opacities.includes(opacity) ? [...opacities] : [...opacities, opacity]
+  return values.map(value => ({ value, name: getOpacityName(value) }))
+}
+
+/**
+ * Colors that aren't in the palette, which the settings offered before, stay selectable.
+ * @param {string} color
+ */
+function getColorOptions(color) {
+  const colors = Object.keys(CAPTION_COLORS)
+  if (!colors.includes(color)) colors.push(color)
+  return colors.map(value => ({ value, name: getCaptionColorName(value, t) }))
+}
+
+const styleControls = computed(() => [
+  {
+    setting: 'fontFamily',
+    label: t('Settings.Player Settings.Caption Appearance.Font Family.Font Family'),
+    icon: 'font',
+    options: Object.keys(CAPTION_FONT_FAMILIES).map(value => ({ value, name: getCaptionFontFamilyName(value, t) })),
+  },
+  {
+    setting: 'fontColor',
+    label: t('Settings.Player Settings.Caption Appearance.Text Color'),
+    icon: 'text-color',
+    options: getColorOptions(captionSettings.value.fontColor),
+  },
+  {
+    setting: 'fontOpacity',
+    label: t('Settings.Player Settings.Caption Appearance.Text Opacity'),
+    icon: 'opacity',
+    options: getOpacityOptions(CAPTION_FONT_OPACITIES, captionSettings.value.fontOpacity),
+  },
+  {
+    setting: 'fontScaleFactor',
+    label: t('Settings.Player Settings.Caption Appearance.Font Size'),
+    icon: 'text-size',
+    options: CAPTION_FONT_SCALE_FACTORS.map(value => ({ value, name: `${value * 100}%` })),
+  },
+  {
+    setting: 'backgroundColor',
+    label: t('Settings.Player Settings.Caption Appearance.Background Color'),
+    icon: 'fill-color',
+    options: getColorOptions(captionSettings.value.backgroundColor),
+  },
+  {
+    setting: 'backgroundOpacity',
+    label: t('Settings.Player Settings.Caption Appearance.Background Opacity'),
+    icon: 'opacity',
+    options: getOpacityOptions(CAPTION_BACKGROUND_OPACITIES, captionSettings.value.backgroundOpacity),
+  },
+  {
+    setting: 'characterEdgeStyle',
+    label: t('Settings.Player Settings.Caption Appearance.Edge Style.Edge Style'),
+    icon: 'palette',
+    options: CAPTION_EDGE_STYLES.map(value => ({ value, name: getCaptionEdgeStyleName(value, t) })),
+  },
+  {
+    setting: 'positionArea',
+    label: t('Settings.Player Settings.Caption Appearance.Anchor.Anchor'),
+    icon: 'border-all',
+    options: CAPTION_POSITION_AREAS.map(value => ({ value, name: getCaptionPositionName(value, t) })),
+  },
+])
+
 const enableCaptionTranslations = computed(() => store.getters.getEnableCaptionTranslations)
 const preferredCaptionLocale = computed(() => store.getters.getPreferredCaptionLocale)
 const captionLocaleOptions = computed(() => {
@@ -232,23 +225,10 @@ const preferredCaptionSelectValue = computed(() => {
   const supportedCodes = new Set(captionLocaleValues.value)
   return supportedCodes.has(canonical) ? canonical : ''
 })
-const captionAnchorNames = computed(() => [
-  t('Settings.Player Settings.Caption Appearance.Anchor.Top Left'),
-  t('Settings.Player Settings.Caption Appearance.Anchor.Top Center'),
-  t('Settings.Player Settings.Caption Appearance.Anchor.Top Right'),
-  t('Settings.Player Settings.Caption Appearance.Anchor.Bottom Left'),
-  t('Settings.Player Settings.Caption Appearance.Anchor.Bottom Center'),
-  t('Settings.Player Settings.Caption Appearance.Anchor.Bottom Right'),
-])
-const captionEdgeStyleNames = computed(() => [
-  t('Settings.Player Settings.Caption Appearance.Edge Style.None'),
-  t('Settings.Player Settings.Caption Appearance.Edge Style.Outline'),
-  t('Settings.Player Settings.Caption Appearance.Edge Style.Drop Shadow'),
-])
 
 /**
- * @param {'textColor' | 'backgroundColor' | 'backgroundOpacity' | 'fontScale' | 'verticalPosition' | 'anchor' | 'edgeStyle' | 'edgeColor'} setting
- * @param {string | number} value
+ * @param {keyof typeof DEFAULT_CAPTION_SETTINGS} setting
+ * @param {string | number | null} value
  */
 function updateCaptionSetting(setting, value) {
   store.dispatch('updateDefaultCaptionSettings', JSON.stringify({
@@ -258,7 +238,7 @@ function updateCaptionSetting(setting, value) {
 }
 
 /**
- * @param {'textColor' | 'backgroundColor' | 'backgroundOpacity' | 'fontScale' | 'verticalPosition' | 'anchor' | 'edgeStyle' | 'edgeColor'} setting
+ * @param {keyof typeof DEFAULT_CAPTION_SETTINGS} setting
  * @returns {boolean}
  */
 function isCaptionSettingChanged(setting) {
@@ -266,7 +246,7 @@ function isCaptionSettingChanged(setting) {
 }
 
 /**
- * @param {'textColor' | 'backgroundColor' | 'backgroundOpacity' | 'fontScale' | 'verticalPosition' | 'anchor' | 'edgeStyle' | 'edgeColor'} setting
+ * @param {keyof typeof DEFAULT_CAPTION_SETTINGS} setting
  */
 function resetCaptionSetting(setting) {
   updateCaptionSetting(setting, DEFAULT_CAPTION_SETTINGS[setting])

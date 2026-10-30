@@ -1,5 +1,5 @@
 import { test, expect } from '../../helpers/app.mjs'
-import { findWatchComponent, openMockedVideo } from '../../helpers/player.mjs'
+import { findWatchComponent, openMockedVideo, openCaptionLanguages } from '../../helpers/player.mjs'
 import { mockPlayableWatchPage } from '../../helpers/watch.mjs'
 
 test.use({ trace: 'off' })
@@ -31,7 +31,6 @@ for (const usePlayerMenuGrid of [true, false]) {
       expect(translations).toHaveLength(2)
       const captionsMenu = player.locator('.shaka-text-languages')
       const rows = await captionsMenu.evaluateHandle(element => [...element.querySelectorAll(':scope > button:not(.ft-caption-auto-translate-button)')])
-      const overflowMenu = player.locator('.shaka-overflow-menu')
       try {
         await player.getByRole('button', { name: 'More settings' }).click()
         for (const choices of [[], translations.slice(0, 1), translations.slice(1)]) {
@@ -40,7 +39,7 @@ for (const usePlayerMenuGrid of [true, false]) {
             component.proxy.captionTranslations = value
             await component.proxy.$nextTick()
           }, choices)
-          await overflowMenu.locator(':scope > .shaka-caption-button').click()
+          await openCaptionLanguages(player)
           await expect(captionsMenu).toBeVisible()
           const autoTranslate = captionsMenu.getByRole('button', { name: 'Auto-translate', exact: true })
           await expect(autoTranslate).toHaveCount(choices.length === 0 ? 0 : 1)
@@ -51,7 +50,7 @@ for (const usePlayerMenuGrid of [true, false]) {
             await expect(translationMenu.locator('.ft-caption-translation-options button')).toHaveText(choices.map(choice => choice.translationName))
             await translationMenu.locator(':scope > .shaka-back-to-overflow-button').click()
           }
-          // The appearance and track controls survive each translation refresh.
+          // The track controls survive each translation refresh.
           expect(await rows.evaluate(elements => elements.every(element => element.isConnected))).toBe(true)
           await captionsMenu.locator(':scope > .shaka-back-to-overflow-button').click()
         }
@@ -110,14 +109,14 @@ for (const usePlayerMenuGrid of [true, false]) {
                 // Row identity catches rebuilding deterministically without a
                 // wall-clock budget that would fail on a busy CI machine.
                 expect(await rows.evaluate(elements => elements.every(element => element.isConnected))).toBe(true)
-                await expect(menu.locator(':scope > .shaka-caption-button')).toBeVisible()
+                await expect(menu.locator(':scope > .shaka-captions-settings-button')).toBeVisible()
                 await menu.getByRole('button', { name: 'Zoom', exact: true }).click()
                 const zoomMenu = player.locator('.video-zoom-menu')
                 await expect(zoomMenu).toBeVisible()
-                await expect(menu.locator(':scope > .shaka-caption-button')).toBeHidden()
+                await expect(menu.locator(':scope > .shaka-captions-settings-button')).toBeHidden()
                 await zoomMenu.locator('.shaka-back-to-overflow-button').click()
                 await expect(zoomMenu).toBeHidden()
-                await expect(menu.locator(':scope > .shaka-caption-button')).toBeVisible()
+                await expect(menu.locator(':scope > .shaka-captions-settings-button')).toBeVisible()
                 expect(await rows.evaluate(elements => elements.every(element => element.isConnected))).toBe(true)
                 await button.evaluate(element => element.click())
                 await expect(menu).toBeHidden()

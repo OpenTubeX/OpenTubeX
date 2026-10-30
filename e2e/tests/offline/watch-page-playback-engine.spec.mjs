@@ -1,5 +1,5 @@
 import { sel, setWindowSize, test, expect } from '../../helpers/app.mjs'
-import { activeTab, openMockedVideo, waitForPlayback } from '../../helpers/player.mjs'
+import { activeTab, openMockedVideo, waitForPlayback, openCaptionLanguages } from '../../helpers/player.mjs'
 import { mockPlayableWatchPage, watchViewHandle } from '../../helpers/watch.mjs'
 import {
   DEMO_MEDIA_URL,
@@ -264,7 +264,7 @@ test('shows the restricted playback setup hint and loads yt-dlp subtitles after 
   await player.hover()
   const moreOptions = player.getByRole('button', { name: 'More settings' })
   await moreOptions.click()
-  await player.locator('.shaka-overflow-menu').getByRole('button', { name: 'Captions' }).click()
+  await openCaptionLanguages(player)
   await expect(player).toBeVisible()
   await expect(player.locator('.dlnaCastControl')).toHaveCount(0)
   await player.locator('.shaka-text-languages').getByRole('button', { name: 'Auto-translate' }).click()

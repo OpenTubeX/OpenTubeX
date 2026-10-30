@@ -703,8 +703,6 @@ Settings:
       Background Color: Couleur de l’arrière-plan
       Background Opacity: Opacité de l’arrière-plan
       Font Size: Taille de la police
-      Vertical Position: Position verticale
-      Edge Color: Couleur du contour
       Anchor:
         Anchor: Ancrage
         Top Left: En haut à gauche
@@ -713,12 +711,34 @@ Settings:
         Bottom Left: En bas à gauche
         Bottom Center: En bas au centre
         Bottom Right: En bas à droite
+        Center Left: Au centre à gauche
+        Center: Au centre
+        Center Right: Au centre à droite
       Edge Style:
         Edge Style: Style du contour
         None: Aucun
         Outline: Contour
         Drop Shadow: Ombre portée
+        Raised: Surélevé
+        Depressed: Surbaissé
       Reset: Réinitialiser l’apparence des sous-titres
+      Default: Automatique
+      Text Opacity: Opacité de la police
+      Font Family:
+        Font Family: Famille de polices
+        Monospaced Serif: Serif monospace
+        Proportional Serif: Serif proportionnelle
+        Monospaced Sans-Serif: Sans Serif monospace
+        Proportional Sans-Serif: Sans Serif proportionnelle
+      Colors:
+        White: Blanc
+        Yellow: Jaune
+        Green: Vert
+        Cyan: Cyan
+        Blue: Bleu
+        Magenta: Magenta
+        Red: Rouge
+        Black: Noir
     Auto Picture in Picture:
       Auto Picture in Picture: Activer automatiquement le mode image dans l’image
       On Tab Change: Lors du changement d’onglet
@@ -1540,7 +1560,6 @@ Video:
       Error: Échec de la traduction vocale. Veuillez réessayer plus tard.
       Duration Error: La traduction vocale est uniquement disponible pour les vidéos d’une durée maximale de quatre heures.
     Caption Appearance:
-      Options: Options
       Sample: Voici à quoi ressemblent les sous-titres
     Auto-translate: Traduction automatique
     Sleep Timer:
