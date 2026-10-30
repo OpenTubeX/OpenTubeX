@@ -42,3 +42,15 @@
   display: inline-block;
   position: relative;
 }
+
+.dialogText {
+  font-size: 1rem;
+  line-height: 1.4;
+  margin-block: 8px 16px;
+  margin-inline: 8px;
+  max-inline-size: 30em;
+}
+
+.dialogText.allowNewlines {
+  white-space: pre-wrap;
+}
