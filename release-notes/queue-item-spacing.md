@@ -2,4 +2,4 @@
 category: fix
 ---
 
-Videos in the queue now have even spacing above and below them instead of extra space at the bottom.
+Videos in the queue now sit centered in their rows, with even spacing and thumbnails aligned to the drag handles, even beside long titles.

@@ -110,6 +110,12 @@
   display: none;
 }
 
+/* Center thumbnails on the row like the drag handle and menu, even beside wrapped titles. */
+.queueVideo :deep(.videoThumbnail),
+.queueThumbnail {
+  align-self: center;
+}
+
 /* Lay out other media like the list items of YouTube videos. */
 .externalQueueVideo {
   display: grid;
