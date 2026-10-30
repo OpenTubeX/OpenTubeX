@@ -9,6 +9,8 @@ class FakeAudioNode {
   constructor () {
     /** @type {FakeAudioNode[]} */
     this.connections = []
+    this.channelCount = 2
+    this.channelCountMode = 'max'
   }
 
   connect (node) {
@@ -107,7 +109,9 @@ test('player audio stages share one media element source', async (t) => {
 
   const [voiceOver] = context.sources[0].connections
   const [boost] = voiceOver.connections
-  assert.deepEqual(boost.connections, [context.destination])
+  const [mono] = boost.connections
+  assert.deepEqual(mono.connections, [context.destination])
+  assert.equal(mono.channelCountMode, 'max')
   assert.equal(voiceOver.gain.value, 0.1)
   assert.equal(boost.gain.value, 1.5)
 
@@ -132,8 +136,9 @@ test('stage values set before the graph exists apply when it is built', async (t
   const { output, unmount } = mountAudioOutput(video)
   t.after(unmount)
 
-  // The player sets its tab's boost before the video element mounts.
+  // The player sets its tab's boost and mono before the video element mounts.
   await output.setGain('boost', 2)
+  await output.setMono(true)
   assert.equal(FakeAudioContext.instances.length, 0)
 
   video.value = createVideo()
@@ -141,8 +146,40 @@ test('stage values set before the graph exists apply when it is built', async (t
 
   const [voiceOver] = FakeAudioContext.instances[0].sources[0].connections
   const [boost] = voiceOver.connections
+  const [mono] = boost.connections
   assert.equal(voiceOver.gain.value, 0.5)
   assert.equal(boost.gain.value, 2)
+  assert.equal(mono.channelCountMode, 'explicit')
+})
+
+test('mono downmixes every channel and plays it in both ears', async (t) => {
+  const OriginalAudioContext = globalThis.AudioContext
+  globalThis.AudioContext = FakeAudioContext
+  FakeAudioContext.instances = []
+  t.after(() => {
+    globalThis.AudioContext = OriginalAudioContext
+  })
+
+  const element = createVideo()
+  const { output, unmount } = mountAudioOutput(shallowRef(element))
+  t.after(unmount)
+
+  // Leaving mono off keeps the element's audio untouched.
+  await output.setMono(false)
+  assert.equal(FakeAudioContext.instances.length, 0)
+
+  await output.setMono(true)
+  const [context] = FakeAudioContext.instances
+  const [voiceOver] = context.sources[0].connections
+  const [boost] = voiceOver.connections
+  const [mono] = boost.connections
+  assert.deepEqual(mono.connections, [context.destination])
+  assert.equal(mono.channelCount, 1)
+  assert.equal(mono.channelCountMode, 'explicit')
+
+  await output.setMono(false)
+  assert.equal(mono.channelCountMode, 'max')
+  assert.equal(context.sources.length, 1)
 })
 
 test('a suspended graph resumes while the video plays', async (t) => {

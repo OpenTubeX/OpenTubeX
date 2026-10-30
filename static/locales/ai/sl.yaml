@@ -846,6 +846,8 @@ Settings:
       Everforest Light Blue: Everforest Light Blue
       Everforest Light Purple: Everforest Light Purple
   Player Settings:
+    Mono Audio: 'Mono zvok'
+    Show Mono Audio Toggle: 'Prikaži stikalo za mono zvok'
     Default Media Format:
       Default Media Format: 'Prevzeta oblika predstavnosti'
     Pause on Stream Recovery: "Začasno ustavi ob obnovitvi pretoka"
@@ -2491,6 +2493,7 @@ Tooltips:
   Proxy Settings:
     IP Block Recovery Script Path: Pot do skriptne datoteke, ki se zažene ob zaznani blokadi naslova IP. OpenTubeX počaka, da se izvajanje konča, nato znova naloži videoposnetek. Če je omogočen nadomestni način, se skript zažene le, kadar tudi ta ne uspe.
   Player Settings:
+    Mono Audio: 'Predvaja levi in desni zvočni kanal v obeh ušesih. Uporabite, ko zvok videoposnetka prihaja le z ene strani slušalk.'
     Pause on Stream Recovery: "Ko video pretok ne uspe in predvajalnik ga znova naloži ali preklopi na drug format ali pogon, se predvajanje začasno ustavi, napaka pa ostane na vrhu predvajalnika, dokler je ne opustite. Ko je izklopljeno, se predvajanje nadaljuje, napaka pa se na kratko prikaže kot obvestilo."
     Continue Playback When Screen Is Locked: 'Nadaljuje predvajanje zvoka v ozadju in omogoča predstavnostne kontrolnike Android. Izklopite, da se predvajanje začasno ustavi, ko aplikacija ni več vidna.'
     Enable Caption Translations: Ko je možnost omogočena in videoposnetek nima ustrezne izvirne sledi, imata gumb za podnapise in bližnjica C prednostno samodejno prevedeno sled v prednostnem jeziku podnapisov.

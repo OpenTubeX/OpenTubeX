@@ -73,6 +73,7 @@ function setupPlayer({ theatrePossible = true, useSponsorBlock = true } = {}) {
     videoZoomPossible: ref(false),
     volumeBoostPossible: true,
     showLightsOffToggle: ref(false),
+    showMonoAudioToggle: ref(false),
     showMusicModeToggle: ref(false),
     showSkipSilenceButton: ref(false),
     voiceOverTranslationAvailable: ref(false),

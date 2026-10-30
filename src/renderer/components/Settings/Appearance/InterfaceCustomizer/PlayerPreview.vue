@@ -271,6 +271,7 @@ const overflowItems = computed(() => {
     store.getters.getShowLightsOffToggle && { id: 'lightsOff', icon: ['fas', 'moon'], label: t('Settings.Player Settings.Lights Off'), value: off },
     store.getters.getEnableVideoZoom && { id: 'zoom', path: PlayerIcons.ZOOM_IN_ROUNDED, viewBox: ZOOM_IN_ICON_VIEWBOX, label: t('Video.Player.Zoom.Zoom'), value: off },
     store.getters.getShowVolumeBoostToggle && !process.env.IS_IOS && { id: 'volumeBoost', icon: ['fas', 'volume-high'], label: t('Video.Player.Volume Boost.Volume Boost'), value: off },
+    store.getters.getShowMonoAudioToggle && !process.env.IS_IOS && { id: 'monoAudio', icon: ['fas', 'speaker'], label: t('Settings.Player Settings.Mono Audio'), value: off },
     { id: 'loop', path: SHAKA_PREVIEW_ICONS.LOOP, label: t('Settings.Interface Customizer.Loop'), value: off },
     !store.getters.getDisableAbRepeat && { id: 'abRepeat', path: AB_REPEAT_PREVIEW_ICON.path, viewBox: AB_REPEAT_PREVIEW_ICON.viewBox, label: t('Video.Player.A-B Repeat.Set Repeat Start'), value: off },
   ]

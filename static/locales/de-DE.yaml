@@ -886,6 +886,7 @@ Settings:
     Lights Off: Licht aus
     Show Lights Off Toggle: Schalter für „Licht aus“ anzeigen
     Show Volume Boost Toggle: Schalter für Lautstärkeverstärkung anzeigen
+    Show Mono Audio Toggle: Schalter für Mono-Audio anzeigen
     Show Music Mode Toggle: Schalter für den Musikmodus anzeigen
     Swipe Gestures:
       Fullscreen Brightness: Volle Helligkeit im Vollbild
@@ -1045,6 +1046,7 @@ Settings:
       On All Tabs: Mini-Player beim Wechseln zwischen Tabs auf dem Bildschirm behalten
       On Navigation: Beim Verlassen der Videoseite weiter abspielen
     Remember Volume: Lautstärke beibehalten
+    Mono Audio: Mono-Audio
     Customize Quick Playback Speed Bar: Schnelle Wiedergabegeschwindigkeitsleiste anpassen
     Quick Playback Speed Bar Manager: Schnelle Wiedergabegeschwindigkeitsleiste
     Add Playback Speed: Wiedergabegeschwindigkeit hinzufügen
@@ -2780,6 +2782,7 @@ Tooltips:
     Enable Skip Silence by Default: Aktiviert „Stille überspringen“ für neue Tabs. Änderungen in einem Tab wirken sich nicht auf andere Tabs aus.
     Hold to Double Playback Speed: Halte die Leertaste oder die linke Maustaste über dem Player gedrückt, um die aktuelle Wiedergabegeschwindigkeit vorübergehend zu verdoppeln.
     Ambient Mode: Lässt die Farben des Videos in den Bereich um den Player ausstrahlen.
+    Mono Audio: Spielt den linken und rechten Audiokanal auf beiden Ohren ab. Nutze dies, wenn der Ton eines Videos nur auf einer Seite deiner Kopfhörer zu hören ist.
     Default Volume: Deaktiviert, wenn Lautstärke beibehalten aktiviert ist. Schalte Lautstärke beibehalten aus, um eine feste Lautstärke beim Start jedes Videos zu setzen.
     Use YouTube-style Shorts: Zeigt Shorts auf Abo- und Kanalseiten in einem Hochformatraster an und verwendet den Shorts-Player im YouTube-Stil.
     Loop Shorts: >-

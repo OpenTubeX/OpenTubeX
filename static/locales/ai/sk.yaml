@@ -649,6 +649,8 @@ Settings:
         Destructive pressed: Deštruktívna akcia pri stlačení
         Text and icons on destructive actions: Text a ikony deštruktívnych akcií
   Player Settings:
+    Mono Audio: 'Mono zvuk'
+    Show Mono Audio Toggle: 'Zobraziť prepínač mono zvuku'
     Pause on Stream Recovery: "Pozastaviť pri obnove streamu"
     Buffering:
       Buffering: Vyrovnávacia pamäť
@@ -1982,6 +1984,7 @@ Tooltips:
   Proxy Settings:
     IP Block Recovery Script Path: Cesta k súboru skriptu, ktorý sa spustí po zistení zablokovania IP adresy. OpenTubeX počká na jeho dokončenie a potom znova načíta video. Ak je zapnutý záložný backend, skript sa spustí až po jeho zlyhaní.
   Player Settings:
+    Mono Audio: 'Prehráva ľavý aj pravý zvukový kanál do oboch uší. Použite, keď zvuk videa vychádza len z jednej strany slúchadiel.'
     Pause on Stream Recovery: "Keď video stream zlyhá a prehrávač ho znova načíta alebo prepne na iný formát či engine, prehrávanie sa pozastaví a chyba zostane v hornej časti prehrávača, kým ju nezavriete. Keď je vypnuté, prehrávanie pokračuje a chyba sa krátko zobrazí ako upozornenie."
     Continue Playback When Screen Is Locked: 'Ponechá zvuk prehrávať na pozadí a poskytne ovládanie médií systému Android. Vypnutím sa prehrávanie pozastaví, keď aplikácia prestane byť viditeľná.'
     Enable Caption Translations: Ak video neposkytuje pôvodnú stopu v uprednostnenom jazyku titulkov, tlačidlo titulkov a klávesová skratka C po zapnutí uprednostnia automaticky preloženú stopu v tomto jazyku.

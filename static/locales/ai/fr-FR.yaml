@@ -649,6 +649,8 @@ Settings:
         Destructive pressed: Action destructive à l’appui
         Text and icons on destructive actions: Texte et icônes des actions destructives
   Player Settings:
+    Mono Audio: 'Audio mono'
+    Show Mono Audio Toggle: 'Afficher le bouton d''audio mono'
     Pause on Stream Recovery: "Mettre en pause lors de la récupération du flux"
     Buffering:
       Buffering: Mise en mémoire tampon
@@ -1981,6 +1983,7 @@ Tooltips:
   Proxy Settings:
     IP Block Recovery Script Path: Chemin du script à exécuter lorsqu’un blocage d’IP est détecté. OpenTubeX attend la fin de son exécution, puis recharge la vidéo. Si le recours à une autre source est activé, le script ne s’exécute que si cette solution échoue également.
   Player Settings:
+    Mono Audio: 'Diffuse les canaux audio gauche et droit dans les deux oreilles. Utilisez cette option lorsque le son d''une vidéo ne sort que d''un côté de votre casque.'
     Pause on Stream Recovery: "Lorsque le flux vidéo échoue et que le lecteur le recharge ou passe à un autre format ou moteur, la lecture est mise en pause et l’erreur reste affichée en haut du lecteur jusqu’à ce que vous la fermiez. Si désactivé, la lecture continue et l’erreur s’affiche brièvement sous forme de notification."
     Continue Playback When Screen Is Locked: 'Maintient la lecture audio en arrière-plan et fournit les commandes multimédias d’Android. Désactivez cette option pour mettre en pause lorsque l’application n’est plus visible.'
     Enable Caption Translations: Lorsque cette option est activée et que la vidéo ne propose aucune piste d’origine correspondante, le bouton des sous-titres et le raccourci C privilégient une piste traduite automatiquement dans la langue préférée des sous-titres.

@@ -649,6 +649,8 @@ Settings:
         Destructive pressed: Ekintza suntsitzailea sakatzean
         Text and icons on destructive actions: Ekintza suntsitzaileetako testua eta ikonoak
   Player Settings:
+    Mono Audio: 'Audio monoa'
+    Show Mono Audio Toggle: 'Erakutsi audio monoaren etengailua'
     Pause on Stream Recovery: "Pausatu jarioa berreskuratzean"
     Buffering:
       Buffering: Bufferra
@@ -1992,6 +1994,7 @@ Tooltips:
   Proxy Settings:
     IP Block Recovery Script Path: IP blokeoa hautematean exekutatuko den script-fitxategiaren bide-izena. OpenTubeX aplikazioak amaitu arte itxaroten du eta gero bideoa berriro kargatzen du. Ordezko motorra gaituta badago, hark ere huts egiten duenean soilik exekutatzen da.
   Player Settings:
+    Mono Audio: 'Ezkerreko eta eskuineko audio-kanalak bi belarrietan erreproduzitzen ditu. Erabili bideo baten soinua entzungailuen alde batetik bakarrik ateratzen denean.'
     Pause on Stream Recovery: "Bideo-jarioak huts egiten duenean eta erreproduzigailuak berriro kargatzen duenean edo beste formatu edo motor batera aldatzen denean, erreprodukzioa pausatu egiten da eta errorea erreproduzigailuaren goialdean geratzen da baztertu arte. Desgaituta badago, erreprodukzioak jarraitzen du eta errorea jakinarazpen gisa agertzen da laburki."
     Continue Playback When Screen Is Locked: 'Audioa atzeko planoan erreproduzitzen mantentzen du eta Android multimedia-kontrolak eskaintzen ditu. Desaktibatu aplikazioa ikusgai ez dagoenean erreprodukzioa pausatzeko.'
     Enable Caption Translations: Gaituta dagoenean, azpitituluen botoiak eta C lasterbideak hobetsitako azpititulu-hizkuntzara automatikoki itzulitako pista aukeratzen dute, bideoak hizkuntza horretako jatorrizko pistarik ez badu.

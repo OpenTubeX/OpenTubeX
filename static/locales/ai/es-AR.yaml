@@ -726,6 +726,8 @@ Settings:
       Everforest Light Blue: Everforest Claro Azul
       Everforest Light Purple: Everforest Claro Morado
   Player Settings:
+    Mono Audio: 'Audio mono'
+    Show Mono Audio Toggle: 'Mostrar el interruptor de audio mono'
     Default Media Format:
       Default Media Format: 'Formato multimedia por defecto'
     Pause on Stream Recovery: "Pausar al recuperar la transmisión"
@@ -2438,6 +2440,7 @@ Tooltips:
   Proxy Settings:
     IP Block Recovery Script Path: Ruta del archivo de script que se ejecutará al detectar un bloqueo de IP. OpenTubeX espera a que termine y después recarga el video. Si la fuente alternativa está activada, solo se ejecuta cuando esta también falla.
   Player Settings:
+    Mono Audio: 'Reproduce los canales de audio izquierdo y derecho en ambos oídos. Usalo cuando el sonido de un video sale solo por un lado de tus auriculares.'
     Pause on Stream Recovery: "Cuando la transmisión de video falla y el reproductor la recarga o cambia a otro formato o motor, la reproducción se pausa y el error queda en la parte superior del reproductor hasta que lo descartes. Si está desactivado, la reproducción continúa y el error aparece brevemente como notificación."
     Continue Playback When Screen Is Locked: 'Mantiene el audio reproduciéndose en segundo plano y ofrece controles multimedia de Android. Desactivá esta opción para pausar cuando la aplicación deje de estar visible.'
     Enable Caption Translations: Al activarlo, el botón de subtítulos y el atajo C prefieren una pista traducida automáticamente al idioma de subtítulos elegido cuando el video no ofrece una pista original coincidente.

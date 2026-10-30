@@ -654,6 +654,8 @@ Settings:
         Destructive pressed: Thao tác xóa khi nhấn
         Text and icons on destructive actions: Chữ và biểu tượng trên thao tác xóa
   Player Settings:
+    Mono Audio: 'Âm thanh đơn kênh'
+    Show Mono Audio Toggle: 'Hiển thị nút bật/tắt âm thanh đơn kênh'
     Default Media Format:
       Default Media Format: 'Định dạng phương tiện mặc định'
     Pause on Stream Recovery: "Tạm dừng khi khôi phục luồng"
@@ -2024,6 +2026,7 @@ Tooltips:
   Proxy Settings:
     IP Block Recovery Script Path: Đường dẫn tệp tập lệnh sẽ chạy khi phát hiện bị chặn IP. OpenTubeX chờ tập lệnh chạy xong rồi tải lại video. Nếu bật phương án dự phòng, tập lệnh chỉ chạy khi phương án đó cũng thất bại.
   Player Settings:
+    Mono Audio: 'Phát kênh âm thanh trái và phải ở cả hai tai. Dùng khi âm thanh của video chỉ phát ra ở một bên tai nghe.'
     Pause on Stream Recovery: "Khi luồng video bị lỗi và trình phát tải lại hoặc chuyển sang định dạng hay công cụ khác, video sẽ tạm dừng và lỗi được hiển thị ở đầu trình phát cho đến khi bạn đóng nó. Khi tắt, video tiếp tục phát và lỗi xuất hiện ngắn dưới dạng thông báo."
     Continue Playback When Screen Is Locked: 'Tiếp tục phát âm thanh trong nền và cung cấp các nút điều khiển phương tiện của Android. Tắt tùy chọn này để tạm dừng khi ứng dụng không còn hiển thị.'
     Enable Caption Translations: Khi bật, nút phụ đề và phím tắt C sẽ ưu tiên bản phụ đề tự động dịch sang ngôn ngữ phụ đề ưu tiên nếu video không có bản gốc phù hợp.

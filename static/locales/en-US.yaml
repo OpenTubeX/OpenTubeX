@@ -1111,6 +1111,7 @@ Settings:
     Lights Off: Lights Off
     Show Lights Off Toggle: Show Lights Off Toggle
     Show Volume Boost Toggle: Show Volume Boost Toggle
+    Show Mono Audio Toggle: Show Mono Audio Toggle
     Show Music Mode Toggle: Show Music Mode Toggle
     Swipe Gestures:
       Fullscreen Brightness: Full brightness in fullscreen
@@ -1196,6 +1197,7 @@ Settings:
     Fast-Forward / Rewind Interval: Fast-Forward / Rewind Interval
     Default Volume: Default Volume
     Remember Volume: Remember Volume
+    Mono Audio: Mono Audio
     Skip Silence: Skip Silence
     Show Skip Silence Toggle: Show Skip Silence Toggle
     Enable DLNA Casting: "Enable DLNA casting"
@@ -3104,6 +3106,7 @@ Tooltips:
     Voice-over Translation: Sends the video ID, duration, and selected language to the unofficial Yandex voice-over translation service when you request a translation. Disabled by default.
     Hold to Double Playback Speed: Hold the Spacebar or left mouse button over the player to temporarily double the current playback speed.
     Ambient Mode: Blends the video's colors into the area around the player.
+    Mono Audio: Plays the left and right audio channels in both ears. Use it when a video's sound only comes out of one side of your headphones.
     Default Volume: Disabled while Remember Volume is enabled. Turn off Remember Volume to set a fixed startup volume for each video.
     Parallel Segment Loading: |
       How many video and audio segments to load at once ahead of playback.

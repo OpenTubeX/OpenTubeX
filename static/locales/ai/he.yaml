@@ -654,6 +654,8 @@ Settings:
         Destructive pressed: פעולה הרסנית בלחיצה
         Text and icons on destructive actions: טקסט וסמלים בפעולות הרסניות
   Player Settings:
+    Mono Audio: 'שמע מונו'
+    Show Mono Audio Toggle: 'הצגת מתג שמע מונו'
     Default Media Format:
       Default Media Format: 'תצורת המדיה כברירת המחדל'
     Pause on Stream Recovery: "השהה בעת שחזור הזרם"
@@ -2034,6 +2036,7 @@ Tooltips:
   Proxy Settings:
     IP Block Recovery Script Path: נתיב לקובץ סקריפט שיופעל כשמזוהה חסימה של כתובת IP. OpenTubeX ממתין לסיום הסקריפט ואז טוען מחדש את הסרטון. אם החלופה מופעלת, הסקריפט יופעל רק אם גם החלופה נכשלת.
   Player Settings:
+    Mono Audio: 'מנגן את ערוצי השמע השמאלי והימני בשתי האוזניים. השתמשו בזה כשהקול של סרטון יוצא רק מצד אחד של האוזניות.'
     Pause on Stream Recovery: "כאשר זרם הווידאו נכשל והנגן טוען אותו מחדש או עובר לתבנית או למנוע אחרים, הניגון מושהה והשגיאה נשארת בראש הנגן עד שתסגור אותה. כשהאפשרות כבויה, הניגון ממשיך והשגיאה מוצגת לזמן קצר כהתראה."
     Continue Playback When Screen Is Locked: 'משאיר את השמע מתנגן ברקע ומספק פקדי מדיה של Android. יש לכבות אפשרות זו כדי להשהות כשהיישום אינו גלוי עוד.'
     Enable Caption Translations: כשהאפשרות מופעלת והסרטון אינו מספק רצועה מקורית בשפת הכתוביות המועדפת, כפתור הכתוביות והקיצור C יעדיפו רצועת כתוביות שתורגמה אליה אוטומטית.

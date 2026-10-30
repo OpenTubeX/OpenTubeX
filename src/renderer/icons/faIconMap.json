@@ -614,6 +614,10 @@
     "ri": "arrow-down-s-line",
     "material": "keyboard-arrow-down-rounded"
   },
+  "speaker": {
+    "ri": "speaker-line",
+    "material": "speaker-outline-rounded"
+  },
   "step-backward": {
     "ri": "skip-back-line",
     "material": "skip-previous-rounded"

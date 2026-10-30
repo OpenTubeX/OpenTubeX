@@ -23,6 +23,15 @@
         @change="updateRememberVolume"
       />
       <FtToggleSwitch
+        v-if="!IS_IOS"
+        :label="t('Settings.Player Settings.Mono Audio')"
+        :compact="true"
+        :default-value="store.getters.getMonoAudio"
+        setting-key="monoAudio"
+        :tooltip="t('Tooltips.Player Settings.Mono Audio')"
+        @change="store.dispatch('updateMonoAudio', $event)"
+      />
+      <FtToggleSwitch
         v-if="!IS_CAPACITOR"
         :label="t('Settings.Player Settings.Automatically Open Chapters')"
         :compact="true"
@@ -282,6 +291,14 @@
         :default-value="store.getters.getShowVolumeBoostToggle"
         setting-key="showVolumeBoostToggle"
         @change="store.dispatch('updateShowVolumeBoostToggle', $event)"
+      />
+      <FtToggleSwitch
+        v-if="!IS_IOS"
+        :label="t('Settings.Player Settings.Show Mono Audio Toggle')"
+        :compact="true"
+        :default-value="store.getters.getShowMonoAudioToggle"
+        setting-key="showMonoAudioToggle"
+        @change="store.dispatch('updateShowMonoAudioToggle', $event)"
       />
       <FtToggleSwitch
         :label="t('Settings.Player Settings.Show Music Mode Toggle')"
