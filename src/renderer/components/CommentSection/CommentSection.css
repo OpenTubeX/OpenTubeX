@@ -643,9 +643,7 @@
 }
 
 .commentSubscribedIcon {
-  content: var(--logo-icon);
-  block-size: 14px;
-  inline-size: 14px;
+  font-size: 14px;
   vertical-align: middle;
   margin-inline: 0.25em;
 }
