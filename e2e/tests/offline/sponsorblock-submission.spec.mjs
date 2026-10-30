@@ -158,6 +158,32 @@ test.describe('SponsorBlock submission', { tag: '@scale' }, () => {
     }
   })
 
+  test('fills the video end with a timestamp within the duration', async ({ app, page }) => {
+    await mockPlayableWatchPage(app, page)
+    await page.route('**/api/skipSegments/**', route => route.fulfill({
+      body: JSON.stringify([]),
+      contentType: 'application/json'
+    }))
+    const video = await openMockedVideo(page)
+    // A duration whose millisecond rounding goes up past the video end
+    const seconds = await video.evaluate(element => {
+      element.pause()
+      element.currentTime = 10
+      const seconds = Math.ceil(element.duration)
+      Object.defineProperty(element, 'duration', { configurable: true, get: () => seconds + 0.0006 })
+      return seconds
+    })
+    await page.locator('.ftVideoPlayer').hover()
+    await page.locator('.sponsorblock-start-button').click()
+    await page.locator('.ftVideoPlayer').hover()
+    await page.locator('.sponsorblock-open-menu-button').click({ force: true })
+
+    const menu = page.locator('.sponsorBlockSubmissionMenu')
+    await menu.getByRole('button', { name: '(End)' }).click()
+    await expect(menu.getByRole('textbox', { name: 'Segment end time' })).toHaveValue(`0:${seconds}.000`)
+    await expect(menu.locator('.sponsorBlockSubmissionError')).toHaveCount(0)
+  })
+
   test('keeps the draft list scrollbar at the panel edge beside its content', async ({ app, page, uiScale }, testInfo) => {
     await mockPlayableWatchPage(app, page)
     await page.route('**/api/skipSegments/**', route => route.fulfill({

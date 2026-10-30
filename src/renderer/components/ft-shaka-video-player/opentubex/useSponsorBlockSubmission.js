@@ -587,7 +587,10 @@ export function useSponsorBlockSubmission({
 
   async function setSponsorBlockDraftTime(segmentId, field, value) {
     const editValue = getSponsorBlockDraftEditValue(segmentId)
-    editValue[field] = value == null ? '' : formatSponsorBlockDraftTimestamp(value)
+    const duration = getSponsorBlockSubmissionVideoDuration()
+    // Round down at the video end so the millisecond timestamp stays within the duration
+    const time = value == null || duration == null ? value : Math.min(value, Math.floor(duration * 1000) / 1000)
+    editValue[field] = time == null ? '' : formatSponsorBlockDraftTimestamp(time)
     await saveSponsorBlockDraft(segmentId)
   }
 
