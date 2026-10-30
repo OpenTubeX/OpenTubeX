@@ -1485,7 +1485,7 @@ Video:
   Retry With Built-in Extraction: Daxili əldəetmə üsulu ilə yenidən cəhd et
   Retry With yt-dlp Extraction: yt-dlp ilə əldəetməni yenidən sına
   Reloading video after streaming URL error: Yayım URL-i xətasından sonra video yenidən yüklənir
-  Configure Restricted Playback Cookies Hint: "Kukiləri Tənzimləmələr → Xarici proqramlar → yt-dlp kukiləri bölməsində tənzimləyin."
+  Configure Restricted Playback Cookies Hint: "Kukiləri Tənzimləmələr → Qabaqcıl → Xarici proqramlar → yt-dlp kukiləri bölməsində tənzimləyin."
   Try With Configured Cookies: Tənzimlənmiş kukilərlə sına
   Restricted Playback Authentication Failed Template: 'yt-dlp tənzimlənmiş kukilərlə bu videoya giriş əldə edə bilmədi: {error}'
   Unmark As Watched: Baxılmış işarəsini götür

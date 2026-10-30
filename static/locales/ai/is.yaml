@@ -1487,7 +1487,7 @@ Video:
   Retry With Built-in Extraction: Reyna aftur með innbyggðri útdráttaraðferð
   Retry With yt-dlp Extraction: Reyna aftur með yt-dlp-útdrætti
   Reloading video after streaming URL error: Endurhleð myndband eftir villu í streymisslóð
-  Configure Restricted Playback Cookies Hint: "Stilltu vafrakökur í Stillingar → Ytri hugbúnaður → yt-dlp-vafrakökur."
+  Configure Restricted Playback Cookies Hint: "Stilltu vafrakökur í Stillingar → Ítarlegt → Utanaðkomandi hugbúnaður → yt-dlp-vafrakökur."
   Try With Configured Cookies: Reyna með stilltum vefkökum
   Restricted Playback Authentication Failed Template: 'yt-dlp gat ekki opnað myndbandið með stilltu vefkökunum: {error}'
   Unmark As Watched: Merkja sem óskoðað

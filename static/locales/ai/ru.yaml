@@ -1455,7 +1455,7 @@ Video:
   Retry With Built-in Extraction: Повторить со встроенным извлечением
   Retry With yt-dlp Extraction: Повторить с извлечением через yt-dlp
   Reloading video after streaming URL error: Видео перезагружается после ошибки URL потока
-  Configure Restricted Playback Cookies Hint: "Настройте файлы cookie в разделе «Настройки → Внешнее ПО → Файлы cookie yt-dlp»."
+  Configure Restricted Playback Cookies Hint: "Настройте файлы cookie в разделе «Настройки → Дополнительно → Внешнее ПО → Файлы cookie yt-dlp»."
   Try With Configured Cookies: Попробовать с настроенными файлами cookie
   Restricted Playback Authentication Failed Template: 'yt-dlp не удалось получить доступ к этому видео с настроенными файлами cookie: {error}'
   Unmark As Watched: Отметить как непросмотренное

@@ -1494,7 +1494,7 @@ Video:
   Retry With Built-in Extraction: Försök igen med inbyggd utvinning
   Retry With yt-dlp Extraction: Försök igen med yt-dlp-utvinning
   Reloading video after streaming URL error: Läser in videon igen efter ett fel med strömnings-URL:en
-  Configure Restricted Playback Cookies Hint: "Konfigurera kakor under Inställningar → Extern programvara → yt-dlp-kakor."
+  Configure Restricted Playback Cookies Hint: "Konfigurera kakor under Inställningar → Avancerat → Extern programvara → yt-dlp-kakor."
   Try With Configured Cookies: Försök med konfigurerade kakor
   Restricted Playback Authentication Failed Template: 'yt-dlp kunde inte komma åt videon med de konfigurerade kakorna: {error}'
   Collapse Playlist: Fäll ihop spellista

@@ -1515,7 +1515,7 @@ Video:
   Retry With Built-in Extraction: Thử lại bằng trình trích xuất tích hợp
   Retry With yt-dlp Extraction: Thử lại bằng yt-dlp
   Reloading video after streaming URL error: Đang tải lại video sau lỗi URL luồng
-  Configure Restricted Playback Cookies Hint: "Thiết lập cookie trong Cài đặt → Phần mềm bên ngoài → Cookie yt-dlp."
+  Configure Restricted Playback Cookies Hint: "Thiết lập cookie trong Cài đặt → Nâng cao → Phần mềm bên ngoài → Cookie yt-dlp."
   Try With Configured Cookies: Thử bằng cookie đã thiết lập
   Restricted Playback Authentication Failed Template: 'yt-dlp không thể truy cập video này bằng cookie đã thiết lập: {error}'
   Unmark As Watched: Bỏ đánh dấu đã xem

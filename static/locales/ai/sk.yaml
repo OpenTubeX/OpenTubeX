@@ -1482,7 +1482,7 @@ Video:
   Retry With Built-in Extraction: Skúsiť znova so vstavaným získavaním
   Retry With yt-dlp Extraction: Skúsiť znova so získavaním cez yt-dlp
   Reloading video after streaming URL error: Video sa po chybe adresy URL streamu znova načítava
-  Configure Restricted Playback Cookies Hint: "Nastavte súbory cookie v časti Nastavenia → Externý softvér → Cookies yt-dlp."
+  Configure Restricted Playback Cookies Hint: "Nastavte súbory cookie v časti Nastavenia → Rozšírené → Externý softvér → Cookies yt-dlp."
   Try With Configured Cookies: Skúsiť s nastavenými súbormi cookie
   Restricted Playback Authentication Failed Template: 'yt-dlp nemohol získať prístup k tomuto videu s nastavenými súbormi cookie: {error}'
   Unmark As Watched: Zrušiť označenie ako pozreté

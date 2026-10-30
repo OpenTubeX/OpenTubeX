@@ -1497,7 +1497,7 @@ Video:
   Retry With Built-in Extraction: Pokušaj ponovno s ugrađenim izdvajanjem
   Retry With yt-dlp Extraction: Pokušaj ponovno s izdvajanjem putem yt-dlp-a
   Reloading video after streaming URL error: Ponovno učitavanje videozapisa nakon pogreške URL-a toka
-  Configure Restricted Playback Cookies Hint: "Konfigurirajte kolačiće u Postavke → Vanjski softver → yt-dlp kolačići."
+  Configure Restricted Playback Cookies Hint: "Konfigurirajte kolačiće u Postavke → Napredno → Vanjski softver → yt-dlp kolačići."
   Try With Configured Cookies: Pokušaj s konfiguriranim kolačićima
   Restricted Playback Authentication Failed Template: 'yt-dlp nije mogao pristupiti ovom videozapisu s konfiguriranim kolačićima: {error}'
   Collapse Playlist: Sažmi popis za reprodukciju

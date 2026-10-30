@@ -1790,7 +1790,7 @@ Video:
   Reloading video after streaming URL error: 스트리밍 URL 오류 후 동영상 다시 불러오는 중
   MembersOnly: 이 회원 전용 동영상을 보려면 이 채널의 멤버십이 활성화된 Google 계정이 필요합니다.
   AgeRestricted: 이 연령 제한 동영상을 보려면 연령 인증된 Google 계정이 필요합니다.
-  Configure Restricted Playback Cookies Hint: "설정 → 외부 소프트웨어 → yt-dlp 쿠키에서 쿠키를 설정하세요."
+  Configure Restricted Playback Cookies Hint: "설정 → 고급 → 외부 소프트웨어 → yt-dlp 쿠키에서 쿠키를 설정하세요."
   Try With Configured Cookies: 설정된 쿠키로 시도
   Restricted Playback Authentication Failed Template: 'yt-dlp에서 설정된 쿠키로 이 동영상에 접근할 수 없습니다: {error}'
   DRMProtected: DRM 보호 동영상에는 독점 비공개 소스 구성 요소가 필요하므로 OpenTubeX에서 재생할 수 없습니다. 이 동영상을 보려면 DRM을 지원하는 웹 브라우저에서 공식 YouTube 웹사이트를 이용하세요.

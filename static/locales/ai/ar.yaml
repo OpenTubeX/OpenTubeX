@@ -1517,7 +1517,7 @@ Video:
   Retry With Built-in Extraction: أعد المحاولة باستخدام الاستخراج المدمج
   Retry With yt-dlp Extraction: أعد المحاولة باستخدام استخراج yt-dlp
   Reloading video after streaming URL error: إعادة تحميل الفيديو بعد حدوث خطأ في عنوان URL
-  Configure Restricted Playback Cookies Hint: "قم بتكوين ملفات تعريف الارتباط في الإعدادات → البرامج الخارجية → ملفات تعريف ارتباط yt-dlp."
+  Configure Restricted Playback Cookies Hint: "قم بتكوين ملفات تعريف الارتباط في الإعدادات → متقدم → البرامج الخارجية → ملفات تعريف ارتباط yt-dlp."
   Try With Configured Cookies: حاول باستخدام ملفات تعريف الارتباط التي تم تكوينها
   Restricted Playback Authentication Failed Template: 'تعذر على yt-dlp الوصول إلى هذا الفيديو باستخدام ملفات تعريف الارتباط التي تم تكوينها: {error}'
   Private: لا يمكن مشاهدة مقاطع الفيديو الخاصة في OpenTubeX لأنها تتطلب تسجيل الدخول إلى Google وملكية الفيديو.
@@ -2274,7 +2274,7 @@ Downloads:
   Insufficient Disk Space: لا توجد مساحة كافية على القرص. هناك حاجة إلى حوالي {required} و{available} متاح.
   Unknown Download Size: حجم التنزيل غير معروف. {available} متاح في نظام الملفات الوجهة.
   Disk Space Check Unavailable: تعذر التحقق من مساحة القرص المتوفرة قبل بدء هذا التنزيل.
-  Download Failure Hint: تحقق من {issuesLink}، ثم حاول تبديل قناة yt-dlp إلى Nightly أو Master في الإعدادات → Advanced → External Software.
+  Download Failure Hint: تحقق من {issuesLink}، ثم حاول تبديل قناة yt-dlp إلى Nightly أو Master في الإعدادات → متقدم → البرامج الخارجية.
   yt-dlp YouTube Issues: أحدث مشكلات yt-dlp لموقع YouTube
   Automatic Download Started: بدأ التنزيل التلقائي
   Automatic Download Started Body: تنزيل "{title}" من {channel} في الخلفية.

@@ -1482,7 +1482,7 @@ Video:
   Retry With Built-in Extraction: Újrapróbálkozás a beépített kinyeréssel
   Retry With yt-dlp Extraction: Újrapróbálkozás yt-dlp-kinyeréssel
   Reloading video after streaming URL error: Videó újratöltése az adatfolyam URL-jének hibája után
-  Configure Restricted Playback Cookies Hint: "Állítsa be a sütiket a Beállítások → Külső szoftverek → yt-dlp sütik menüpontban."
+  Configure Restricted Playback Cookies Hint: "Állítsa be a sütiket a Beállítások → Speciális → Külső szoftverek → yt-dlp sütik menüpontban."
   Try With Configured Cookies: Próbálkozás a beállított sütikkel
   Restricted Playback Authentication Failed Template: 'Az yt-dlp nem tudta elérni ezt a videót a beállított sütikkel: {error}'
   Unmark As Watched: Megjelölés nem látottként

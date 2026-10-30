@@ -1482,7 +1482,7 @@ Video:
   Retry With Built-in Extraction: "Klask en-dro gant an eztennañ enframmat"
   Retry With yt-dlp Extraction: "Klask en-dro gant eztennañ yt-dlp"
   Reloading video after streaming URL error: "Oc'h adkargañ ar video goude ur fazi URL gwazh"
-  Configure Restricted Playback Cookies Hint: "Kefluniit an toupinoù en Arventennoù → Meziantoù diavaez → Toupinoù yt-dlp."
+  Configure Restricted Playback Cookies Hint: "Kefluniit an toupinoù en Arventennoù → Araokaet → Meziantoù diavaez → Toupinoù yt-dlp."
   Try With Configured Cookies: "Klask gant an toupinoù kefluniet"
   Restricted Playback Authentication Failed Template: "N'eus ket bet gallet da yt-dlp haeziñ ar video-mañ gant an toupinoù kefluniet: {error}"
   Unmark As Watched: "Tennañ ar merk sellet"

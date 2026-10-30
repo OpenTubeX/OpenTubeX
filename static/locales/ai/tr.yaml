@@ -1482,7 +1482,7 @@ Video:
   Retry With Built-in Extraction: Yerleşik çıkarmayla yeniden dene
   Retry With yt-dlp Extraction: yt-dlp çıkarmasıyla yeniden dene
   Reloading video after streaming URL error: Akış URL'si hatasından sonra video yeniden yükleniyor
-  Configure Restricted Playback Cookies Hint: "Çerezleri Ayarlar → Harici Yazılım → yt-dlp çerezleri bölümünde yapılandırın."
+  Configure Restricted Playback Cookies Hint: "Çerezleri Ayarlar → Gelişmiş → Harici Yazılım → yt-dlp çerezleri bölümünde yapılandırın."
   Try With Configured Cookies: Yapılandırılmış çerezlerle dene
   Restricted Playback Authentication Failed Template: 'yt-dlp bu videoya yapılandırılmış çerezlerle erişemedi: {error}'
   Unmark As Watched: İzlenmiş İşaretini Kaldır

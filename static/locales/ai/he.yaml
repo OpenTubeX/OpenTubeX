@@ -1520,7 +1520,7 @@ Video:
   Retry With Built-in Extraction: ניסיון חוזר עם החילוץ המובנה
   Retry With yt-dlp Extraction: ניסיון חוזר עם חילוץ באמצעות yt-dlp
   Reloading video after streaming URL error: הסרטון נטען מחדש לאחר שגיאה בכתובת ההזרמה
-  Configure Restricted Playback Cookies Hint: "הגדירו עוגיות בהגדרות → תוכנות חיצוניות → עוגיות yt-dlp."
+  Configure Restricted Playback Cookies Hint: "הגדירו עוגיות בהגדרות → מתקדם → תוכנות חיצוניות → עוגיות yt-dlp."
   Try With Configured Cookies: ניסיון עם העוגיות שהוגדרו
   Restricted Playback Authentication Failed Template: 'ל-yt-dlp לא הייתה גישה לסרטון באמצעות העוגיות שהוגדרו: {error}'
   Private: אי אפשר לצפות בסרטונים פרטיים ב-OpenTubeX כי הם דורשים התחברות ל-Google ובעלות על הסרטון.

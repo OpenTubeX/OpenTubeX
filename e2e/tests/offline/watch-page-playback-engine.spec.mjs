@@ -123,7 +123,7 @@ test('shows the restricted playback setup hint and loads yt-dlp subtitles after 
   })
 
   await expect(page.getByText(
-    'Configure cookies in Settings → External Software → yt-dlp Cookies.'
+    'Configure cookies in Settings → Advanced → External Software → yt-dlp Cookies.'
   )).toBeVisible()
   await expect(page.getByRole('button', { name: 'Try with configured cookies' })).toHaveCount(0)
 
@@ -203,7 +203,7 @@ test('shows the restricted playback setup hint and loads yt-dlp subtitles after 
   })
 
   await expect(page.getByText(
-    'Configure cookies in Settings → External Software → yt-dlp Cookies.'
+    'Configure cookies in Settings → Advanced → External Software → yt-dlp Cookies.'
   )).toHaveCount(0)
   const retry = page.getByRole('button', { name: 'Try with configured cookies' })
   await expect(retry).toBeVisible()

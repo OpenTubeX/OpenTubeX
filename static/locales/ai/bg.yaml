@@ -1499,7 +1499,7 @@ Video:
   Retry With Built-in Extraction: Нов опит с вграденото извличане
   Retry With yt-dlp Extraction: Нов опит с извличане чрез yt-dlp
   Reloading video after streaming URL error: Презареждане на видеоклипа след грешка в URL адреса на потока
-  Configure Restricted Playback Cookies Hint: "Настройте бисквитките в Настройки → Външен софтуер → Бисквитки на yt-dlp."
+  Configure Restricted Playback Cookies Hint: "Настройте бисквитките в Настройки → Разширени → Външен софтуер → Бисквитки на yt-dlp."
   Try With Configured Cookies: Опит с настроените бисквитки
   Restricted Playback Authentication Failed Template: 'yt-dlp не можа да получи достъп до този видеоклип с настроените бисквитки: {error}'
   Unmark As Watched: Премахване на отметката „Гледан“

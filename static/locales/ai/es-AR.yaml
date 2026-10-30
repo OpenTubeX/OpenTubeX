@@ -1739,7 +1739,7 @@ Video:
   Reloading video after streaming URL error: Recargando el video tras un error en la URL de emisión
   MembersOnly: Los videos solo para miembros no se pueden ver con OpenTubeX ya que requieren un inicio de sesión en Google y una membresía pagada al canal del cargador.
   AgeRestricted: Los videos con restricciones de edad no se pueden ver con OpenTubeX ya que requieren iniciar sesión en Google y usar una cuenta de YouTube verificada por edad.
-  Configure Restricted Playback Cookies Hint: "Configura las cookies en Ajustes → Software externo → Cookies de yt-dlp."
+  Configure Restricted Playback Cookies Hint: "Configura las cookies en Ajustes → Avanzado → Software externo → Cookies de yt-dlp."
   Try With Configured Cookies: Probar con las cookies configuradas
   Restricted Playback Authentication Failed Template: 'yt-dlp no pudo acceder a este video con las cookies configuradas: {error}'
   DRMProtected: Los videos restringidos con DRM no pueden reproducirse en OpenTubeX, dado que requieren componentes propietarias de fuente cerrada. Si desea ver este video, por favor véalo en la página oficial de YouTube con un buscador que tenga DRM habilitado.

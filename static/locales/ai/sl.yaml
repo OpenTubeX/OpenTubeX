@@ -1865,7 +1865,7 @@ Video:
   Reloading video after streaming URL error: Ponovno nalaganje videoposnetka po napaki URL-ja prenosa
   MembersOnly: Za ogled tega videoposnetka samo za člane potrebujete račun Google z aktivnim članstvom v tem kanalu.
   AgeRestricted: Za ogled tega videoposnetka s starostno omejitvijo potrebujete račun Google s potrjeno starostjo.
-  Configure Restricted Playback Cookies Hint: "Nastavite piškotke v Nastavitve → Zunanja programska oprema → Piškotki yt-dlp."
+  Configure Restricted Playback Cookies Hint: "Nastavite piškotke v Nastavitve → Napredno → Zunanja programska oprema → Piškotki yt-dlp."
   Try With Configured Cookies: Poskusi z nastavljenimi piškotki
   Restricted Playback Authentication Failed Template: 'yt-dlp s temi piškotki ni mogel dostopati do videoposnetka: {error}'
   DRMProtected: Videoposnetkov z zaščito DRM ni mogoče predvajati v OpenTubeX, saj zahtevajo lastniške zaprtokodne komponente. Za ogled tega videoposnetka obiščite uradno spletno mesto YouTube v brskalniku, ki podpira DRM.

@@ -1812,7 +1812,7 @@ Video:
   Reloading video after streaming URL error: Vaizdo įrašas įkeliamas iš naujo po srauto URL klaidos
   MembersOnly: Šiam tik nariams skirtam vaizdo įrašui reikia Google paskyros su aktyvia šio kanalo naryste.
   AgeRestricted: Šiam pagal amžių ribojamam vaizdo įrašui reikia Google paskyros su patvirtintu amžiumi.
-  Configure Restricted Playback Cookies Hint: "Nustatykite slapukus skiltyje Nustatymai → Išorinė programinė įranga → yt-dlp slapukai."
+  Configure Restricted Playback Cookies Hint: "Nustatykite slapukus skiltyje Nustatymai → Išplėstiniai → Išorinė programinė įranga → yt-dlp slapukai."
   Try With Configured Cookies: Bandyti su nustatytais slapukais
   Restricted Playback Authentication Failed Template: 'yt-dlp nepavyko pasiekti šio vaizdo įrašo su nustatytais slapukais: {error}'
   DRMProtected: DRM apsaugotų vaizdo įrašų negalima leisti naudojant OpenTubeX, nes jiems reikia nuosavybinių uždarojo kodo komponentų. Jei norite peržiūrėti šį vaizdo įrašą, atverkite jį oficialioje YouTube svetainėje, DRM palaikančioje žiniatinklio naršyklėje.

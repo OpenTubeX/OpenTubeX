@@ -1482,7 +1482,7 @@ Video:
   Retry With Built-in Extraction: Prøv på nytt med innebygd uthenting
   Retry With yt-dlp Extraction: Prøv på nytt med uthenting via yt-dlp
   Reloading video after streaming URL error: Laster inn videoen på nytt etter en feil med strømmeadressen
-  Configure Restricted Playback Cookies Hint: "Konfigurer informasjonskapsler under Innstillinger → Ekstern programvare → yt-dlp-informasjonskapsler."
+  Configure Restricted Playback Cookies Hint: "Konfigurer informasjonskapsler under Innstillinger → Avansert → Ekstern programvare → yt-dlp-informasjonskapsler."
   Try With Configured Cookies: Prøv med de konfigurerte informasjonskapslene
   Restricted Playback Authentication Failed Template: 'yt-dlp fikk ikke tilgang til denne videoen med de konfigurerte informasjonskapslene: {error}'
   Unmark As Watched: Merk som ikke sett

@@ -1494,7 +1494,7 @@ Video:
   Retry With Built-in Extraction: Rhoi cynnig arall arni gydag echdynnu mewnol
   Retry With yt-dlp Extraction: Rhoi cynnig arall arni gydag echdynnu yt-dlp
   Reloading video after streaming URL error: Wrthi'n ail-lwytho'r fideo ar ôl gwall URL ffrydio
-  Configure Restricted Playback Cookies Hint: "Ffurfweddwch gwcis yn Gosodiadau → Meddalwedd allanol → Cwcis yt-dlp."
+  Configure Restricted Playback Cookies Hint: "Ffurfweddwch gwcis yn Gosodiadau → Uwch → Meddalwedd allanol → Cwcis yt-dlp."
   Try With Configured Cookies: Rhoi cynnig arni gyda'r cwcis sydd wedi'u ffurfweddu
   Restricted Playback Authentication Failed Template: 'Nid oedd yt-dlp yn gallu cyrchu''r fideo hwn gyda''r cwcis sydd wedi''u ffurfweddu: {error}'
   Unmark As Watched: Dadfarcio fel wedi'i wylio
