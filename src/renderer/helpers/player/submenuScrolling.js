@@ -5,7 +5,7 @@ import {
   restoreOverlayScrollTop,
 } from '../overlayScrollbars'
 
-// Including the submenus of menu groups, such as the captions and their style.
+// Including the submenus of menu groups, such as the caption style.
 // The caption submenus scroll their options in a part of their own.
 const SCROLLING_SUBMENUS = '.shaka-sub-menu:not(.shaka-text-languages, .ft-caption-list-menu, .ft-caption-timing-menu)'
 

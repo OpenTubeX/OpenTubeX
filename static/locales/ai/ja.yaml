@@ -1561,6 +1561,7 @@ Video:
       Error: 吹き替え翻訳に失敗しました。しばらくしてから再試行してください。
       Duration Error: 吹き替え翻訳は4時間以内の動画でのみ利用できます。
     Caption Appearance:
+      Options: オプション
       Sample: 字幕はこのように表示されます
     Auto-translate: 自動翻訳
     Sleep Timer:

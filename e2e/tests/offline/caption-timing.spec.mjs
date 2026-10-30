@@ -40,6 +40,70 @@ for (const usePlayerMenuGrid of [true, false]) {
       }
     })
 
+    test('lines the Options action up with the captions menu title', { tag: '@scale' }, async ({ app, page }, testInfo) => {
+      await mockPlayableWatchPage(app, page, { captionTranslations: true })
+      await page.route('https://www.youtube.com/api/timedtext**', route => route.fulfill({
+        status: 200,
+        contentType: 'text/vtt',
+        body: 'WEBVTT\n\n00:00:05.000 --> 00:00:07.000\nTiming test caption\n'
+      }))
+      await openMockedVideo(page)
+      const player = page.locator('.ftVideoPlayer')
+      await player.hover()
+      // Keep the controls shown, they can fade out before the screenshot on slow machines
+      await player.locator('.shaka-controls-container').evaluate(element => element.setAttribute('casting', 'true'))
+      await player.getByRole('button', { name: 'More settings' }).click()
+      await openCaptionLanguages(player)
+      const languageMenu = player.locator('.shaka-text-languages')
+      await expect(languageMenu.locator(':scope > .ft-caption-options-button')).toBeVisible()
+
+      const [titleBaseline, optionsBaseline] = await languageMenu.evaluate((menu) => {
+        /** @param {HTMLElement} element */
+        const baseline = (element) => {
+          const marker = document.createElement('span')
+          marker.style.cssText = 'display: inline-block; vertical-align: baseline'
+          element.append(marker)
+          const { top } = marker.getBoundingClientRect()
+          marker.remove()
+          return top
+        }
+        const title = menu.querySelector(':scope > .shaka-back-to-overflow-button > span')
+        const options = menu.querySelector(':scope > .ft-caption-options-button')
+        // The button is a flex container, so its text needs an inline wrapper for the marker
+        const label = document.createElement('span')
+        label.append(...options.childNodes)
+        options.append(label)
+        const result = [baseline(title), baseline(label)]
+        options.replaceChildren(...label.childNodes)
+        return result
+      })
+      expect(Math.abs(titleBaseline - optionsBaseline)).toBeLessThan(0.5)
+      await languageMenu.screenshot({ path: testInfo.outputPath('caption-options-header.png') })
+    })
+
+    test('keeps the Options action off the caption choices in the phone layout', { tag: '@scale' }, async ({ app, page }) => {
+      await mockPlayableWatchPage(app, page, { captionTranslations: true })
+      await openMockedVideo(page)
+      await setWindowSize(app, page, { width: 420, height: 910 })
+      const player = page.locator('.ftVideoPlayer')
+      await player.hover()
+      // Keep the controls shown, they can fade out before the clicks on slow machines
+      await player.locator('.shaka-controls-container').evaluate(element => element.setAttribute('casting', 'true'))
+      await player.getByRole('button', { name: 'More settings' }).click()
+      await openCaptionLanguages(player)
+      const header = page.locator('.phonePlayerOptions > .shaka-back-to-overflow-button')
+      const options = page.locator('.shaka-text-languages > .ft-caption-options-button')
+      await expect(header).toBeVisible()
+      await expect(options).toBeVisible()
+
+      // It sits in the header beside the title, where it can't cover a choice
+      const [headerBounds, optionsBounds] = await Promise.all([header.boundingBox(), options.boundingBox()])
+      expect(optionsBounds.y).toBeGreaterThanOrEqual(headerBounds.y - 1)
+      expect(optionsBounds.y + optionsBounds.height).toBeLessThanOrEqual(headerBounds.y + headerBounds.height + 1)
+      await options.click()
+      await expect(page.locator('.ft-caption-style-menu')).toBeVisible()
+    })
+
     test('shifts displayed cues immediately and resets for the next video', async ({ app, page }, testInfo) => {
       test.setTimeout(120_000)
       await mockPlayableWatchPage(app, page, { captionTranslations: true })
@@ -73,7 +137,7 @@ for (const usePlayerMenuGrid of [true, false]) {
         // The timing row shares the bottom rows with the subtitle file row
         const rowBounds = await getVisibleBounds(languageMenu.locator(':scope > .ft-caption-actions'))
         expect(rowBounds.width).toBeGreaterThanOrEqual(menuBounds.width - 16)
-        const choices = languageMenu.locator(':scope > button:not(.shaka-back-to-overflow-button)')
+        const choices = languageMenu.locator(':scope > button:not(.shaka-back-to-overflow-button, .ft-caption-options-button)')
         for (const choice of await choices.all()) {
           const choiceBounds = await getVisibleBounds(choice)
           expect(choiceBounds.y + choiceBounds.height).toBeLessThanOrEqual(rowBounds.y + 1)
@@ -311,7 +375,7 @@ for (const usePlayerMenuGrid of [true, false]) {
         // A taller idle menu leaves free space, which belongs above the row rather than below it.
         expect(menuBounds.height).toBeGreaterThan(rowBounds.height * 3)
         expect(menuBounds.y + menuBounds.height - rowBounds.y - rowBounds.height).toBeLessThanOrEqual(1)
-        const choices = languageMenu.locator(':scope > button:not(.shaka-back-to-overflow-button)')
+        const choices = languageMenu.locator(':scope > button:not(.shaka-back-to-overflow-button, .ft-caption-options-button)')
         for (const choice of await choices.all()) {
           const choiceBounds = await getVisibleBounds(choice)
           expect(choiceBounds.y + choiceBounds.height).toBeLessThanOrEqual(rowBounds.y + 1)

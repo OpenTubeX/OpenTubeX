@@ -1564,6 +1564,7 @@ Video:
       Error: 語音翻譯失敗。請稍後再試。
       Duration Error: 語音翻譯僅適用於片長不超過四小時的影片。
     Caption Appearance:
+      Options: 選項
       Sample: 字幕會顯示成這樣
     Auto-translate: 自動翻譯
     Sleep Timer:

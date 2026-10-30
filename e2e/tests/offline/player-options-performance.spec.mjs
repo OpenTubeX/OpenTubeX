@@ -109,14 +109,14 @@ for (const usePlayerMenuGrid of [true, false]) {
                 // Row identity catches rebuilding deterministically without a
                 // wall-clock budget that would fail on a busy CI machine.
                 expect(await rows.evaluate(elements => elements.every(element => element.isConnected))).toBe(true)
-                await expect(menu.locator(':scope > .shaka-captions-settings-button')).toBeVisible()
+                await expect(menu.locator(':scope > .shaka-caption-button')).toBeVisible()
                 await menu.getByRole('button', { name: 'Zoom', exact: true }).click()
                 const zoomMenu = player.locator('.video-zoom-menu')
                 await expect(zoomMenu).toBeVisible()
-                await expect(menu.locator(':scope > .shaka-captions-settings-button')).toBeHidden()
+                await expect(menu.locator(':scope > .shaka-caption-button')).toBeHidden()
                 await zoomMenu.locator('.shaka-back-to-overflow-button').click()
                 await expect(zoomMenu).toBeHidden()
-                await expect(menu.locator(':scope > .shaka-captions-settings-button')).toBeVisible()
+                await expect(menu.locator(':scope > .shaka-caption-button')).toBeVisible()
                 expect(await rows.evaluate(elements => elements.every(element => element.isConnected))).toBe(true)
                 await button.evaluate(element => element.click())
                 await expect(menu).toBeHidden()

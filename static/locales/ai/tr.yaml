@@ -1561,6 +1561,7 @@ Video:
       Error: Seslendirme çevirisi başarısız oldu. Lütfen daha sonra yeniden deneyin.
       Duration Error: Seslendirme çevirisi yalnızca dört saate kadar olan videolarda kullanılabilir.
     Caption Appearance:
+      Options: Seçenekler
       Sample: Alt yazılar böyle görünür
     Auto-translate: Otomatik çevir
     Sleep Timer:

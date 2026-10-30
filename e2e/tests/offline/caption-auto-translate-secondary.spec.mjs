@@ -188,6 +188,17 @@ test.describe('secondary captions', () => {
     await expect(secondaryMenu).toBeHidden()
     await expect(captionsMenu).toBeVisible()
 
+    // The caption style, opened from the Options action, returns to the captions menu too
+    await captionsMenu.getByRole('button', { name: 'Options', exact: true }).click()
+    const styleMenu = player.locator('.ft-caption-style-menu')
+    await expect(styleMenu).toBeVisible()
+    await expect(captionsMenu).toBeHidden()
+    await styleMenu.locator(':scope > .shaka-back-to-overflow-button').click()
+    await expect(styleMenu).toBeHidden()
+    await expect(captionsMenu).toBeVisible()
+    await expect(captionsMenu.getByRole('button', { name: 'Options', exact: true })).toBeFocused()
+    await expect(overflowMenu.locator(':scope > .shaka-caption-button')).toBeHidden()
+
     await captionsMenu.getByRole('button', { name: 'Secondary Captions', exact: true }).click()
     await options.getByRole('button', { name: 'German', exact: true }).click()
     await expect(captionsMenu).toBeVisible()

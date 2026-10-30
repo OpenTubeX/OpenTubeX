@@ -12,6 +12,33 @@ import {
 } from '../../../helpers/overlayScrollbars'
 import { goBackOnEmptyClicks } from '../../../helpers/player/emptyMenuClicks'
 
+/**
+ * Shaka's caption style menu group, opened from the Options button of the captions menu
+ * rather than its own entry in the overflow menu.
+ */
+class CaptionStyleGroup extends shaka.ui.MenuGroup {
+  /**
+   * @param {!HTMLElement} parent
+   * @param {!shaka.ui.Controls} controls
+   */
+  constructor(parent, controls) {
+    super(parent, controls, shaka.ui.Enums.MaterialDesignSVGIcons.CLOSED_CAPTIONS_STYLE)
+    this.menu.classList.add('ft-caption-style-menu')
+  }
+
+  getName() {
+    return this.localization.resolve('STYLE')
+  }
+
+  getChildElementNames() {
+    return this.controls.getConfig().captionsStyleElements
+  }
+
+  checkAvailability() {
+    this.button?.classList.add('shaka-hidden')
+  }
+}
+
 export class CaptionSelection extends shaka.ui.TextSelection {
   /**
    * @param {EventTarget} events
@@ -70,6 +97,26 @@ export class CaptionSelection extends shaka.ui.TextSelection {
 
     this.translationMenu_ = this.createOptionsMenu_(parent, 'ft-caption-auto-translate-button', 'ft-caption-translation')
     this.secondaryMenu_ = this.createOptionsMenu_(parent, 'ft-caption-secondary-button', 'ft-caption-secondary')
+
+    this.styleGroup_ = new CaptionStyleGroup(parent, controls)
+    this.optionsButton_ = document.createElement('button')
+    this.optionsButton_.type = 'button'
+    // The phone layout moves it into its header while it fits (`setupPhoneOptionsMenu`)
+    this.optionsButton_.classList.add('ft-caption-options-button', 'ft-submenu-header-action')
+    this.eventManager.listen(this.optionsButton_, 'click', (event) => {
+      event.stopPropagation()
+      this.setMenuDisplay_(this.menu, false)
+      this.setMenuDisplay_(this.styleGroup_.menu, true)
+      restoreOverlayScrollTop(this.styleGroup_.menu, 0)
+      this.styleGroup_.backButton.focus({ preventScroll: true })
+    })
+    // Shaka's listener on the menu would return to the overflow menu instead
+    this.eventManager.listen(this.styleGroup_.backButton, 'click', (event) => {
+      event.stopPropagation()
+      this.setMenuDisplay_(this.styleGroup_.menu, false)
+      this.setMenuDisplay_(this.menu, true)
+      this.optionsButton_.focus({ preventScroll: true })
+    })
 
     this.loadFileButton_ = document.createElement('button')
     this.loadFileButton_.type = 'button'
@@ -136,6 +183,10 @@ export class CaptionSelection extends shaka.ui.TextSelection {
     this.actionsObserver_.disconnect()
     this.choicesObserver_.disconnect()
     this.timing_.release()
+    this.styleGroup_.release()
+    this.styleGroup_.button.remove()
+    this.styleGroup_.menu.remove()
+    this.optionsButton_.remove()
     render(null, this.loadFileIcon_)
     this.actions_.remove()
     removeOverlayScrollbars(this.choices_)
@@ -291,6 +342,7 @@ export class CaptionSelection extends shaka.ui.TextSelection {
 
   /** @private */
   updateLocalisedStrings_() {
+    this.optionsButton_.textContent = i18n.global.t('Video.Player.Caption Appearance.Options')
     this.loadFileLabel_.textContent = i18n.global.t('Video.Player.Subtitle File.Load')
     for (const [optionsMenu, label] of [
       [this.translationMenu_, i18n.global.t('Video.Player.Auto-translate')],
@@ -341,15 +393,18 @@ export class CaptionSelection extends shaka.ui.TextSelection {
     )
 
     const backButton = this.menu.querySelector(':scope > .shaka-back-to-overflow-button')
+    if (!this.menu.contains(this.optionsButton_)) {
+      backButton?.after(this.optionsButton_)
+    }
     if (this.choices_.parentElement !== this.menu) {
       // Shaka removed the previous choices along with their list.
       for (const choice of this.choices_.querySelectorAll(':scope > button')) {
         choice.remove()
       }
-      backButton?.after(this.choices_)
+      this.optionsButton_.after(this.choices_)
     }
     const rebuiltChoices = [...this.menu.children].filter(child => {
-      return child.localName === 'button' && child !== backButton
+      return child.localName === 'button' && child !== backButton && child !== this.optionsButton_
     })
     if (rebuiltChoices.length > 0) {
       // Moving the choice Shaka focused would drop its focus.
@@ -396,8 +451,11 @@ export class CaptionSelection extends shaka.ui.TextSelection {
 
   /** @private */
   updateButtonDisplay_() {
+    const hasTracks = this.player.getTextTracks().length > 0
     this.button.classList.toggle('shaka-hidden', Boolean(this.isSubMenuOpened) ||
-      (this.player.getTextTracks().length === 0 && !this.localFile_.isAvailable()))
+      (!hasTracks && !this.localFile_.isAvailable()))
+    // Like Shaka's caption style menus
+    this.optionsButton_.classList.toggle('shaka-hidden', !hasTracks || !this.controls.getConfig().captionsStyles)
   }
 
   /** @private */

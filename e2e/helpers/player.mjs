@@ -221,27 +221,21 @@ export async function waitForPlaybackOrSkip(test, page) {
 }
 
 /**
- * Opens the caption languages from the open overflow menu, through the captions
- * menu that groups them with the caption style. Picking a language returns to
- * that menu, which can stay open.
+ * Opens the caption languages from the open overflow menu.
  * @param {import('@playwright/test').Locator} player
  */
 export async function openCaptionLanguages(player) {
-  const languages = player.locator('.shaka-overflow-menu .shaka-menu-group > .shaka-caption-button')
-  if (!await languages.isVisible()) {
-    await player.locator('.shaka-overflow-menu > .shaka-captions-settings-button').click()
-  }
-  await languages.click()
+  await player.locator('.shaka-overflow-menu > .shaka-caption-button').click()
 }
 
 /**
- * Opens a menu of the caption style from the open overflow menu, for example
- * `.shaka-caption-font-color-button`.
+ * Opens a menu of the caption style from the open overflow menu, through the
+ * Options button of the captions menu, for example `.shaka-caption-font-color-button`.
  * @param {import('@playwright/test').Locator} player
  * @param {string} button
  */
 export async function openCaptionStyleMenu(player, button) {
-  await player.locator('.shaka-overflow-menu > .shaka-captions-settings-button').click()
-  await player.locator('.shaka-overflow-menu .shaka-caption-style-button').click()
+  await openCaptionLanguages(player)
+  await player.locator('.shaka-overflow-menu .ft-caption-options-button').click()
   await player.locator(`.shaka-overflow-menu ${button}`).click()
 }

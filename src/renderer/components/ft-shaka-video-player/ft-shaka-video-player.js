@@ -2966,7 +2966,7 @@ export default defineComponent({
           ...(props.shortsPlayer ? ['ft_shorts_video_info'] : []),
           props.format === 'legacy' ? 'ft_legacy_quality' : 'quality',
           ...(showPlaybackRateControls ? ['playback_rate'] : []),
-          'captions-settings',
+          'captions',
           'ft_audio_tracks',
           'ft_sleep_timer',
           'ft_seek_history',
@@ -3019,7 +3019,7 @@ export default defineComponent({
         // Keep related settings together before the one-click actions.
         uiConfig.overflowMenuButtons.push(
           'ft_audio_tracks',
-          'captions-settings',
+          'captions',
           ...(showPlaybackRateControls ? ['playback_rate'] : []),
           props.format === 'legacy' ? 'ft_legacy_quality' : 'quality',
           'ft_sleep_timer',

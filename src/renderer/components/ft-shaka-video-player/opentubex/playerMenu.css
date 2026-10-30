@@ -65,7 +65,7 @@
 }
 
 /*
-  Menu groups, such as the captions and their style, render the submenus of
+  Menu groups, such as the caption style, render the submenus of
   their entries inside themselves. While one is open, the group leaves the
   layout to it, so that it fills the menu like any other submenu.
 */
@@ -285,11 +285,25 @@
 }
 
 /*
+  Align the caption Options action with the submenu header beside it, including
+  the header's divider, so that both labels are centered in the same space.
+*/
+:deep(.shaka-sub-menu.ft-menu-grid > .ft-caption-options-button) {
+  align-items: center;
+  block-size: var(--ft-submenu-header-size);
+  padding-block: 0 var(--ft-menu-padding) !important;
+  border-block-end: 1px solid transparent;
+}
+
+/*
   The option and its quality mark (`HD`, `4K`) are siblings, so the tile wraps
   them in a row instead of stacking them. Menu groups list their entries
   instead, and `:where` keeps the specificity for the option rules below.
 */
-:deep(.shaka-sub-menu.ft-menu-grid:where(:not(.shaka-menu-group)) > button:not(.shaka-back-to-overflow-button)) {
+:deep(.shaka-sub-menu.ft-menu-grid:where(:not(.shaka-menu-group)) > button:not(
+  .shaka-back-to-overflow-button,
+  .ft-caption-options-button
+)) {
   flex-wrap: wrap;
   place-content: center;
   gap: 0 2px;
