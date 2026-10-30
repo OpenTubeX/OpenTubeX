@@ -11,10 +11,14 @@ const MAX_ATTEMPTS = 3
  * @returns {Promise<string>}
  */
 export async function mintAttestedPoToken(mint) {
-  let token
-  for (let attempt = 0; attempt < MAX_ATTEMPTS; attempt++) {
-    token = await mint()
-    if (token.length <= MAX_ATTESTED_PO_TOKEN_LENGTH) break
+  let token = await mint()
+  for (let attempt = 1; attempt < MAX_ATTEMPTS && token.length > MAX_ATTESTED_PO_TOKEN_LENGTH; attempt++) {
+    try {
+      token = await mint()
+    } catch {
+      // Playback can still recover from a session pending attestation
+      break
+    }
   }
   return token
 }
