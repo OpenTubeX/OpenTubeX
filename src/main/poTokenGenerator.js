@@ -2,6 +2,7 @@ import { session, WebContentsView } from 'electron'
 import { readFile } from 'fs/promises'
 import { join } from 'path'
 
+import { mintAttestedPoToken } from './attestedPoToken'
 import { withTimeout } from './promiseTimeout'
 
 // #region queue
@@ -69,13 +70,15 @@ export function generatePoToken(videoId, context, initialAttestationData, ytConf
   // - https://github.com/FreeTubeApp/FreeTube/issues/8640
   // - https://github.com/electron/electron/pull/46131
   // - https://github.com/electron/electron/commit/bac2f46ba981cc1763c0485cec44813c1d07fa18
-  const potokenPromise = enqueueAsyncFunction(internalGeneratePotoken, videoId, context, initialAttestationData, ytConfig, proxyUrl)
+  return mintAttestedPoToken(() => {
+    const potokenPromise = enqueueAsyncFunction(internalGeneratePotoken, videoId, context, initialAttestationData, ytConfig, proxyUrl)
 
-  // schedule the cleanup separately,
-  // so that we can return the potoken without having to wait until the cleanup is done
-  enqueueAsyncFunction(cleanupSession)
+    // schedule the cleanup separately,
+    // so that we can return the potoken without having to wait until the cleanup is done
+    enqueueAsyncFunction(cleanupSession)
 
-  return potokenPromise
+    return potokenPromise
+  })
 }
 
 /** @type {import('electron').Session} */
