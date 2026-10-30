@@ -135,6 +135,7 @@ export function formatReleaseChangelog(releases, platform = null) {
       .join('\n\n')
   }
 
-  // Every note with its platform label beats an empty update prompt.
-  return changelog.trim() === '' && platform !== null ? formatReleaseChangelog(releases) : changelog
+  // Every note with its platform label beats an update prompt without notes.
+  // Nightly bodies keep their wrapper text, so look for note items.
+  return platform !== null && !/^(?:[-*+]|\d+[.)]) /m.test(changelog) ? formatReleaseChangelog(releases) : changelog
 }
