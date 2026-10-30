@@ -816,6 +816,7 @@ Settings:
     Managed Tools Update Started Template: "{tools} üçün yeniləmə tapıldı. Endirilir…"
     Managed Tools Update Finished Template: "{tools} yeniləndi"
     Managed Tools Update Available Template: "{tools} üçün yeniləmə mövcuddur."
+    Managed Tools Update Source Notice: "OpenTubeX onu birbaşa GitHub-dan endirir, buna görə F-Droid və digər tətbiq mağazaları onu yoxlamır."
     Update Managed Tools: Yenilə
     Managed Tools Download Error Template: 'İdarə olunan vasitələri endirmək mümkün olmadı: {errors}'
     Download Folder: Endirmə qovluğu

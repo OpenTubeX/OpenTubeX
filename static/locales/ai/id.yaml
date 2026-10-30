@@ -817,6 +817,7 @@ Settings:
     Managed Tools Update Started Template: Pembaruan untuk {tools} ditemukan. Mengunduh…
     Managed Tools Update Finished Template: Selesai memperbarui {tools}
     Managed Tools Update Available Template: Pembaruan tersedia untuk {tools}.
+    Managed Tools Update Source Notice: "OpenTubeX mengunduhnya langsung dari GitHub, sehingga F-Droid dan toko aplikasi lain tidak memeriksanya."
     Update Managed Tools: Perbarui
     Managed Tools Download Error Template: 'Tidak dapat mengunduh alat terkelola: {errors}'
     Download Folder: Folder Unduhan

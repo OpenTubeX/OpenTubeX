@@ -814,6 +814,7 @@ Settings:
     Managed Tools Update Started Template: Frissítés érhető el a(z) {tools} eszközhöz. Letöltés…
     Managed Tools Update Finished Template: A(z) {tools} frissítése befejeződött
     Managed Tools Update Available Template: Frissítés érhető el a(z) {tools} eszközhöz.
+    Managed Tools Update Source Notice: "Az OpenTubeX közvetlenül a GitHubról tölti le, ezért az F-Droid és más alkalmazásboltok nem ellenőrzik."
     Update Managed Tools: Frissítés
     Managed Tools Download Error Template: 'Nem sikerült letölteni a felügyelt eszközöket: {errors}'
     Download Folder: Letöltési mappa

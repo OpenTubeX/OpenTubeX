@@ -816,6 +816,7 @@ Settings:
     Managed Tools Update Started Template: 發現 {tools} 的更新。正在下載…
     Managed Tools Update Finished Template: 已完成 {tools} 的更新
     Managed Tools Update Available Template: 已有適用於 {tools} 的更新。
+    Managed Tools Update Source Notice: "OpenTubeX 直接從 GitHub 下載更新，因此 F-Droid 和其他應用程式商店不會檢查它。"
     Update Managed Tools: 更新
     Managed Tools Download Error Template: '無法下載由應用程式管理的工具：{errors}'
     Download Folder: 下載資料夾

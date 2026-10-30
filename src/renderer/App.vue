@@ -1576,10 +1576,12 @@ async function notifyAboutManagedExternalSoftwareUpdates(binariesInstalledThisRu
  * @param {('yt-dlp' | 'ffmpeg')[]} availableUpdates
  */
 function showManagedExternalSoftwareUpdatePrompt(availableUpdates) {
+  const message = t('Settings.Download Settings.Managed Tools Update Available Template', {
+    tools: availableUpdates.join(' and ')
+  })
   showToast({
-    message: t('Settings.Download Settings.Managed Tools Update Available Template', {
-      tools: availableUpdates.join(' and ')
-    }),
+    // Android only updates yt-dlp, which app stores do not review.
+    message: isCapacitor ? `${message} ${t('Settings.Download Settings.Managed Tools Update Source Notice')}` : message,
     time: Infinity,
     icon: ['fas', 'download'],
     buttons: [

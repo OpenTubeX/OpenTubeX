@@ -852,6 +852,7 @@ Settings:
     Managed Tools Update Started Template: Знойдзена абнаўленне для {tools}. Спампоўванне…
     Managed Tools Update Finished Template: Абнаўленне {tools} завершана
     Managed Tools Update Available Template: Для {tools} даступна абнаўленне.
+    Managed Tools Update Source Notice: "OpenTubeX спампоўвае яго непасрэдна з GitHub, таму F-Droid і іншыя крамы праграм яго не правяраюць."
     Update Managed Tools: Абнавіць
     Managed Tools Download Error Template: 'Не ўдалося спампаваць кіраваныя інструменты: {errors}'
     Download Folder: Папка спампоўванняў

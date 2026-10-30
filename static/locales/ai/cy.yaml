@@ -817,6 +817,7 @@ Settings:
     Managed Tools Update Started Template: Canfuwyd diweddariad ar gyfer {tools}. Wrthi'n lawrlwytho…
     Managed Tools Update Finished Template: Wedi gorffen diweddaru {tools}
     Managed Tools Update Available Template: Mae diweddariad ar gael ar gyfer {tools}.
+    Managed Tools Update Source Notice: "Mae OpenTubeX yn ei lwytho i lawr yn uniongyrchol o GitHub, felly nid yw F-Droid a siopau apiau eraill yn ei wirio."
     Update Managed Tools: Diweddaru
     Managed Tools Download Error Template: 'Nid oedd modd lawrlwytho''r offer a reolir: {errors}'
     Download Folder: Ffolder lawrlwytho
