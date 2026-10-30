@@ -1,5 +1,7 @@
-import { test, expect, goToSettingsSection } from '../../helpers/app.mjs'
-import { activeTab, openMockedVideo } from '../../helpers/player.mjs'
+import path from 'node:path'
+
+import { test, expect, goTo, goToSettingsSection, repoRoot } from '../../helpers/app.mjs'
+import { activeTab, findWatchComponent, openMockedVideo } from '../../helpers/player.mjs'
 import { mockPlayableWatchPage } from '../../helpers/watch.mjs'
 
 /**
@@ -85,13 +87,72 @@ test('the player uses the buffer settings and follows changes', async ({ app, pa
     await window.$store.dispatch('updateVideoPlaybackEngine', 'built-in')
     await window.$store.dispatch('updateBufferAhead', 45)
     await window.$store.dispatch('updateBufferBehind', 20)
+    await window.$store.dispatch('updateBufferBeforePlaying', 4)
   })
   await mockPlayableWatchPage(app, page)
   const video = await openMockedVideo(page)
   await video.evaluate(element => element.pause())
 
+  // Progressive files ignore the rebuffering goal
   expect(await readPlayerBuffering(page)).toEqual({ bufferingGoal: 45, bufferBehind: 20, rebufferingGoal: 0.02 })
 
-  await page.evaluate(() => window.$store.dispatch('updateBufferBeforePlaying', 4))
-  await expect.poll(() => readPlayerBuffering(page)).toEqual({ bufferingGoal: 45, bufferBehind: 20, rebufferingGoal: 4 })
+  // Streams use it, so keep a DASH manifest loading
+  const manifestUrl = 'https://media.test/buffer-settings.mpd'
+  let releaseManifest
+  const manifestReady = new Promise(resolve => { releaseManifest = resolve })
+  let manifestRequested
+  const requested = new Promise(resolve => { manifestRequested = resolve })
+  await page.route(manifestUrl, async route => {
+    manifestRequested()
+    await manifestReady
+    await route.abort()
+  })
+  try {
+    const watch = await page.evaluateHandle(findWatchComponent)
+    await watch.evaluate((component, url) => {
+      component.proxy.manifestMimeType = 'application/dash+xml'
+      component.proxy.manifestSrc = url
+      component.proxy.activeFormat = 'dash'
+      component.proxy.playerLoadGeneration++
+    }, manifestUrl)
+    await requested
+    await expect.poll(() => readPlayerBuffering(page)).toEqual({ bufferingGoal: 45, bufferBehind: 20, rebufferingGoal: 4 })
+
+    await page.evaluate(() => window.$store.dispatch('updateBufferBeforePlaying', 5))
+    await expect.poll(() => readPlayerBuffering(page)).toEqual({ bufferingGoal: 45, bufferBehind: 20, rebufferingGoal: 5 })
+  } finally {
+    releaseManifest()
+  }
+})
+
+test.describe('downloaded files', () => {
+  const mediaPath = path.join(repoRoot, 'e2e/fixtures/media/demo.webm')
+  test.use({
+    seed: {
+      settings: { enableDownloads: true, bufferAhead: 600, bufferBehind: 300, bufferBeforePlaying: 3 },
+      downloads: [{
+        id: 1,
+        videoId: 'offline0001',
+        title: 'Offline download',
+        status: 'completed',
+        mode: 'video',
+        destination: mediaPath,
+        destinations: [mediaPath],
+        files: [{ videoId: 'offline0001', path: mediaPath, extension: 'webm' }],
+      }],
+    },
+  })
+
+  // Long downloads only have about 2 seconds loaded ahead, so waiting for more stalled them for good (#2532)
+  test('play without waiting for the rebuffering goal', async ({ page }) => {
+    await goTo(page, 'downloads')
+    await page.getByRole('button', { name: 'Play download', exact: true }).click()
+    await expect(page.locator(`${activeTab} video`)).toHaveJSProperty('readyState', 4)
+
+    expect(await readPlayerBuffering(page)).toEqual({ bufferingGoal: 600, bufferBehind: 300, rebufferingGoal: 0.02 })
+
+    await page.evaluate(() => window.$store.dispatch('updateBufferBeforePlaying', 5))
+    await expect.poll(() => page.evaluate(() => window.$store.getters.getBufferBeforePlaying)).toBe(5)
+    expect(await readPlayerBuffering(page)).toEqual({ bufferingGoal: 600, bufferBehind: 300, rebufferingGoal: 0.02 })
+  })
 })

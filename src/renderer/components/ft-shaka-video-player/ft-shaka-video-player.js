@@ -2309,12 +2309,15 @@ export default defineComponent({
       player?.configure('streaming.segmentPrefetchLimit', newValue)
     })
 
+    /** Whether the current source is a single file that the browser buffers itself (src=) */
+    const progressivePlayback = ref(false)
+
     /** @type {import('vue').ComputedRef<ReturnType<typeof getBufferingConfig>>} */
     const bufferingConfig = computed(() => getBufferingConfig({
       bufferAhead: store.getters.getBufferAhead,
       bufferBehind: store.getters.getBufferBehind,
       bufferBeforePlaying: store.getters.getBufferBeforePlaying,
-    }))
+    }, progressivePlayback.value))
 
     watch(bufferingConfig, (newValue) => {
       player?.configure({ streaming: newValue })
@@ -9889,6 +9892,8 @@ export default defineComponent({
       loadingPlayer.addEventListener('canupdatestarttime', prepareStartTime, { once: true })
       // Diagnostic reports have no other record of which stream each load used
       console.warn(`Loading video ${props.videoId} from ${props.playbackEngine} extraction: ${props.format} (${mimeType}) at ${Math.round(startTime ?? 0)}s`)
+      progressivePlayback.value = /^(?:audio|video)\//.test(mimeType ?? '')
+      loadingPlayer.configure({ streaming: bufferingConfig.value })
       try {
         await loadingPlayer.load(url, startTime, mimeType)
       } finally {
