@@ -106,25 +106,16 @@ test('lowers bottom captions after the player controls fade', async ({ app, page
 
   await page.mouse.move(0, 0)
   await expect(controls).not.toHaveAttribute('shown', 'true')
-  const expectedHiddenBottom = await player.evaluate(element => {
-    return Math.max(12, element.getBoundingClientRect().height * 0.04)
-  })
   await expect.poll(() => captions.evaluate(element => {
     return Number.parseFloat(getComputedStyle(element).bottom)
-  })).toBeCloseTo(expectedHiddenBottom, 1)
+  })).toBe(0)
   await expect.poll(async () => {
     const bounds = await caption.boundingBox()
     return bounds?.y + bounds?.height
   }).toBeGreaterThan(raisedCaptionBounds.y + raisedCaptionBounds.height)
-  await expect.poll(async () => {
-    const [playerBounds, captionBounds] = await Promise.all([
-      player.boundingBox(),
-      caption.boundingBox(),
-    ])
-    if (!playerBounds || !captionBounds) return Number.POSITIVE_INFINITY
-
-    const visualBottomGap = playerBounds.y + playerBounds.height -
-      (captionBounds.y + captionBounds.height)
-    return Math.abs(visualBottomGap - expectedHiddenBottom)
-  }).toBeLessThanOrEqual(1)
+  // Shaka keeps the captions within the safe area of its caption region, 5% from the edges
+  const [playerBounds, captionBounds] = await Promise.all([player.boundingBox(), caption.boundingBox()])
+  const bottomGap = playerBounds.y + playerBounds.height - (captionBounds.y + captionBounds.height)
+  expect(bottomGap).toBeGreaterThan(playerBounds.height * 0.04)
+  expect(bottomGap).toBeLessThan(playerBounds.height * 0.1)
 })

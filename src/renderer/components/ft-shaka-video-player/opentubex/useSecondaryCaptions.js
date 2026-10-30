@@ -1,4 +1,4 @@
-import { computed, onBeforeUnmount, ref, watch } from 'vue'
+import { onBeforeUnmount, ref, watch } from 'vue'
 import shaka from 'shaka-player'
 import store from '../../../store/index'
 import { findCaptionByLocale } from '../../../../captionLanguages'
@@ -19,7 +19,6 @@ let secondaryCaptionLocalePicks = 0
 /**
  * Shows a second caption track below or above the main captions, as Shaka can only display one track.
  * @param {{
- *   captionSettings: import('vue').ComputedRef<{ anchor: string }>,
  *   container: import('vue').Ref<HTMLElement | null>,
  *   getCaptionTimingOffset: () => number,
  *   getPlayer: () => shaka.Player | null,
@@ -28,7 +27,6 @@ let secondaryCaptionLocalePicks = 0
  * }} options
  */
 export function useSecondaryCaptions({
-  captionSettings,
   container,
   getCaptionTimingOffset,
   getPlayer,
@@ -36,7 +34,6 @@ export function useSecondaryCaptions({
   video,
 }) {
   const secondaryCaptionText = ref('')
-  const secondaryCaptionsAtTop = computed(() => captionSettings.value.anchor.startsWith('bottom'))
   /** @type {{ url: string, label: string, language: string, mimeType: string } | null} */
   let secondaryCaption = null
   /** @type {import('../../../helpers/player/secondary-captions').SecondaryCaptionCue[]} */
@@ -201,7 +198,6 @@ export function useSecondaryCaptions({
     getSecondaryCaption: () => secondaryCaption,
     isShownAsMainCaption,
     restoreSecondaryCaption,
-    secondaryCaptionsAtTop,
     secondaryCaptionsBox,
     secondaryCaptionText,
     selectSecondaryCaption,

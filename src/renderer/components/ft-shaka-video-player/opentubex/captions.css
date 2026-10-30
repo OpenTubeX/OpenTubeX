@@ -1,62 +1,25 @@
 /* stylelint-disable liberty/use-logical-spec */
 
+/* Shaka renders the style of the captions settings, this only fits them to the app and the player. */
 :deep(.shaka-text-container),
 :deep(.shaka-speech-to-text-container) {
-  box-sizing: border-box;
-  align-items: var(--caption-align-items) !important;
-  justify-content: var(--caption-justify-content) !important;
-  padding-top: var(--caption-top-padding);
-  padding-inline: var(--caption-edge-gap);
-
-  /*
-    The player is the only space the captions get. Subtracting the gap accounts for the offset
-    they are anchored at, so that they can't grow out of the top of the player either.
-  */
-  max-block-size: calc(100% - var(--caption-edge-gap));
-  overflow: hidden;
-  font-size: min(
-    calc(20px * var(--caption-font-scale) * var(--caption-player-scale, 1)),
-    var(--caption-max-font-size, 100vb)
-  ) !important;
-  text-align: var(--caption-text-align) !important;
-  transform: translateY(var(--caption-vertical-transform));
+  /* Shaka's font sizes scale this size, which shrinks along with small players. */
+  font-size: var(--caption-font-size, 20px) !important;
 
   /* Keep shaka's caption raise animation alongside the panel push. */
   transition: inset-inline-end 250ms ease, bottom cubic-bezier(0.4, 0, 0.6, 1) 0.1s;
 }
 
-:deep(.shaka-text-region) {
-  /* The app already provides the configured edge gap, so don't stack Shaka's 5% safe area on it. */
-  inset: 0 !important;
-  block-size: 100% !important;
-  inline-size: 100% !important;
-}
-
-:deep(.shaka-controls-container:not([shown='true'], [casting='true']) ~ .shaka-text-container) {
-  bottom: var(--caption-hidden-bottom-gap) !important;
-}
-
-.ftVideoPlayer.shortsPlayer :deep(.shaka-text-container),
-.ftVideoPlayer.shortsPlayer :deep(.shaka-speech-to-text-container) {
-  /*
-    Shorts only reveal the seek bar on hover and intentionally give Shaka's
-    bottom controls no height. Keep captions at their configured edge gap
-    instead of letting Shaka move them to that zero-height controls boundary.
-  */
-  bottom: var(--caption-hidden-bottom-gap) !important;
-}
-
-:deep(:is(.shaka-text-container, .shaka-speech-to-text-container) *) {
+/* Unless a font family is picked in the captions style, which Shaka applies to every cue. */
+.captionsUseAppFont :deep(:is(.shaka-text-container, .shaka-speech-to-text-container) *) {
   font-family: var(--app-font-family) !important;
 }
 
-:deep(.shaka-text-container div),
-:deep(.shaka-text-container span),
-:deep(.shaka-speech-to-text-container div),
-:deep(.shaka-speech-to-text-container span) {
-  background-color: transparent !important;
-  font-size: inherit !important;
-  text-align: var(--caption-text-align) !important;
+:deep(.shaka-text-container .shaka-text-wrapper:not(:has(> [style*='display: flex']))),
+:deep(.shaka-text-container [translate='no']),
+:deep(.shaka-speech-to-text-container [translate='no']) {
+  border-radius: calc(4px * var(--ui-roundness));
+  box-decoration-break: clone;
 }
 
 /*
@@ -64,34 +27,20 @@
   the wrapper owns the background and clones its rounding onto every line. The
   wrapper must stay inline for that, so its cue can't be a flex container.
   Structured cues (e.g. TTML) nest flex containers, which an inline background
-  can't cover, so their words keep their own backgrounds.
+  can't cover, so their words keep the backgrounds Shaka gives them.
 */
 /* stylelint-disable-next-line selector-max-compound-selectors -- Restrict matching to caption cue containers. */
 :deep(.shaka-text-container div:has(> .shaka-text-wrapper > [style*='display: inline'])) {
   display: block !important;
 }
 
-:deep(.shaka-text-container .shaka-text-wrapper:not(:has(> [style*='display: flex']))),
-:deep(.shaka-text-container [translate='no']),
-:deep(.shaka-speech-to-text-container [translate='no']) {
-  border-radius: calc(4px * var(--ui-roundness));
-  background-color: var(--caption-background-color) !important;
-  box-decoration-break: clone;
+:deep(.shaka-text-container .shaka-text-wrapper:not(:has(> [style*='display: flex']))) {
+  background-color: var(--caption-background) !important;
 }
 
 :deep(.shaka-text-wrapper:not(:has(> [style*='display: flex'])) [translate='no']) {
   border-radius: 0;
   background-color: transparent !important;
-}
-
-:deep(.shaka-text-container [translate='no']),
-:deep(.shaka-speech-to-text-container [translate='no']) {
-  color: var(--caption-text-color) !important;
-  -webkit-font-smoothing: antialiased;
-  -webkit-text-stroke: var(--caption-text-stroke-width) var(--caption-edge-color);
-  paint-order: stroke fill;
-  text-rendering: geometricprecision;
-  text-shadow: var(--caption-text-shadow) !important;
 }
 
 :deep(.shaka-text-languages) {
@@ -105,72 +54,19 @@
   stay in view. The menu becomes a column that shrinks the submenu, and with it
   the choices, to fit.
 */
-:deep(.shaka-overflow-menu:has(> .shaka-text-languages:not(.shaka-hidden))) {
+:deep(.shaka-overflow-menu:has(.shaka-text-languages:not(.shaka-hidden))) {
   display: flex;
   flex-direction: column;
   overflow: hidden;
 }
 
-:deep(.shaka-overflow-menu:has(> .shaka-text-languages:not(.shaka-hidden)) > .os-scrollbar) {
+:deep(.shaka-overflow-menu:has(.shaka-text-languages:not(.shaka-hidden)) > .os-scrollbar) {
   display: none;
 }
 
 /* The grid's tiles wrap inside the choices, which fill the space between the header and the actions. */
 :deep(.shaka-sub-menu.shaka-text-languages.ft-menu-grid) {
   flex-direction: column;
-}
-
-:deep(.ft-caption-options-button) {
-  position: absolute;
-  top: 0;
-  right: 8px;
-  z-index: 1;
-  width: auto !important;
-  min-width: 0 !important;
-  padding: 10px 8px !important;
-  background: transparent !important;
-  color: #fff;
-  text-decoration: underline;
-}
-
-:deep(.ft-caption-options-button:hover),
-:deep(.ft-caption-options-button:focus-visible) {
-  color: var(--primary-color);
-}
-
-.captionAppearanceSample {
-  position: absolute;
-  top: 0;
-  right: 0;
-  left: 0;
-  z-index: 3;
-  box-sizing: border-box;
-  display: flex;
-  flex-direction: column;
-  align-items: var(--caption-align-items);
-  justify-content: var(--caption-justify-content);
-  padding-top: var(--caption-top-padding);
-  padding-inline: var(--caption-edge-gap);
-  color: var(--caption-text-color);
-  font-size: min(
-    calc(20px * var(--caption-font-scale) * var(--caption-player-scale, 1)),
-    var(--caption-max-font-size, 100vb)
-  );
-  line-height: 1.4;
-  text-align: var(--caption-text-align);
-  text-shadow: var(--caption-text-shadow);
-  transform: translateY(var(--caption-vertical-transform));
-  pointer-events: none;
-}
-
-.captionAppearanceSample span {
-  padding-inline: 0.15em;
-  border-radius: calc(4px * var(--ui-roundness));
-  background-color: var(--caption-background-color);
-  -webkit-font-smoothing: antialiased;
-  -webkit-text-stroke: var(--caption-text-stroke-width) var(--caption-edge-color);
-  paint-order: stroke fill;
-  text-rendering: geometricprecision;
 }
 
 /* Shaka only displays one caption track, so the secondary one sits at the opposite edge of the player */
@@ -181,18 +77,11 @@
   box-sizing: border-box;
   display: flex;
   flex-direction: column;
-  align-items: var(--caption-align-items);
   justify-content: flex-end;
-  padding: var(--caption-edge-gap);
-  color: var(--caption-text-color);
-  font-family: var(--app-font-family);
-  font-size: min(
-    calc(20px * var(--caption-font-scale) * var(--caption-player-scale, 1)),
-    var(--caption-max-font-size, 100vb)
-  );
+
+  /* Shaka's caption region */
+  padding: 5%;
   line-height: 1.4;
-  text-align: var(--caption-text-align);
-  text-shadow: var(--caption-text-shadow);
   white-space: pre-line;
   pointer-events: none;
 }
@@ -202,17 +91,8 @@
 }
 
 .secondaryCaptions span {
-  padding-inline: 0.15em;
   border-radius: calc(4px * var(--ui-roundness));
-  background-color: var(--caption-background-color);
-  -webkit-font-smoothing: antialiased;
-  -webkit-text-stroke: var(--caption-text-stroke-width) var(--caption-edge-color);
-  paint-order: stroke fill;
-  text-rendering: geometricprecision;
-}
-
-:deep(.ft-caption-appearance-menu) {
-  min-width: 280px;
+  box-decoration-break: clone;
 }
 
 :deep(.ft-caption-timing-menu) {
@@ -225,12 +105,12 @@
   overflow: hidden;
 }
 
-:deep(.shaka-overflow-menu:has(> .ft-caption-timing-menu:not(.shaka-hidden))) {
+:deep(.shaka-overflow-menu:has(.ft-caption-timing-menu:not(.shaka-hidden))) {
   block-size: min(50vh, 280px);
   overflow: hidden;
 }
 
-:deep(.shaka-overflow-menu:has(> .ft-caption-timing-menu:not(.shaka-hidden)) > .os-scrollbar) {
+:deep(.shaka-overflow-menu:has(.ft-caption-timing-menu:not(.shaka-hidden)) > .os-scrollbar) {
   display: none;
 }
 
@@ -382,237 +262,4 @@
 :deep(.ft-caption-actions .ft-icon),
 :deep(.ft-caption-timing-controls .ft-icon) {
   margin: 0;
-}
-
-:deep(.ft-caption-appearance-controls) {
-  display: grid;
-  grid-template-columns: 1fr;
-  gap: 2px;
-  padding: 2px 6px 8px;
-  color: #fff;
-  white-space: normal;
-}
-
-:deep(.ft-caption-appearance-control) {
-  display: grid;
-  grid-template-columns: minmax(0, 1fr) auto;
-  align-items: center;
-  gap: 6px;
-  min-width: 0;
-  min-height: 34px;
-  padding: 6px 8px;
-  border-radius: calc(8px * var(--ui-roundness));
-  font-size: 13px;
-}
-
-:deep(.ft-caption-appearance-control:hover),
-:deep(.ft-caption-appearance-control:focus-within) {
-  background: rgb(255 255 255 / 10%);
-}
-
-:deep(.ft-caption-appearance-control > span) {
-  margin-left: 0;
-}
-
-:deep(.ft-caption-color-control) {
-  position: relative;
-  cursor: pointer;
-}
-
-:deep(.ft-caption-select-control) {
-  cursor: pointer;
-}
-
-:deep(.ft-caption-color-swatch),
-:deep(.ft-caption-palette-color) {
-  box-sizing: border-box;
-  padding: 0 !important;
-  border: 1px solid rgb(255 255 255 / 35%) !important;
-  background: var(--ft-caption-swatch-color) !important;
-}
-
-:deep(.ft-caption-color-swatch) {
-  width: 38px;
-  height: 26px;
-  min-height: 26px !important;
-  border-radius: calc(6px * var(--ui-roundness)) !important;
-}
-
-:deep(.ft-caption-color-swatch:focus-visible),
-:deep(.ft-caption-palette-color:focus-visible) {
-  outline: 2px solid var(--accent-color);
-  outline-offset: 2px;
-}
-
-:deep(.ft-caption-color-popover) {
-  grid-column: 1 / -1;
-  margin-top: 4px;
-  padding: 10px;
-  border: 1px solid rgb(255 255 255 / 18%);
-  border-radius: calc(8px * var(--ui-roundness));
-  background: rgb(18 18 18 / 96%);
-  box-shadow: 0 5px 18px rgb(0 0 0 / 35%);
-  cursor: default;
-}
-
-:deep(.ft-caption-color-palette) {
-  display: grid;
-  grid-template-columns: repeat(8, 1fr);
-  gap: 6px;
-}
-
-:deep(.ft-caption-palette-color) {
-  width: 22px;
-  height: 22px;
-  min-height: 22px !important;
-  border-radius: 50% !important;
-}
-
-:deep(.ft-caption-custom-color) {
-  display: grid;
-  grid-template-columns: 1fr 82px;
-  align-items: center;
-  gap: 8px;
-  margin-top: 10px;
-  font-size: 12px;
-}
-
-:deep(.ft-caption-custom-color > span) {
-  margin-left: 0;
-}
-
-:deep(.ft-caption-custom-color input) {
-  box-sizing: border-box;
-  width: 82px;
-  min-width: 0;
-  height: 30px;
-  padding-inline: 8px;
-  border: 1px solid rgb(255 255 255 / 24%);
-  border-radius: calc(6px * var(--ui-roundness));
-  outline: 0;
-  background: rgb(255 255 255 / 8%);
-  color: #fff;
-  font: inherit;
-  text-transform: lowercase;
-}
-
-:deep(.ft-caption-custom-color input:focus) {
-  border-color: var(--accent-color);
-  box-shadow: 0 0 0 2px var(--accent-color-opacity2);
-}
-
-:deep(.ft-caption-custom-color input[aria-invalid='true']) {
-  border-color: var(--destructive-color);
-}
-
-:deep(.ft-caption-appearance-controls input[type='range']) {
-  appearance: none;
-  position: relative;
-  grid-column: 1 / -1;
-  width: 100%;
-  height: 28px;
-  margin: 0;
-  background: transparent;
-  cursor: pointer;
-}
-
-:deep(.ft-caption-appearance-controls input[type='range']::-webkit-slider-runnable-track) {
-  width: 100%;
-  height: 2px;
-  border-radius: calc(1px * var(--ui-roundness));
-  background-color: var(--accent-color-opacity4);
-}
-
-:deep(.ft-caption-appearance-controls input[type='range']::-webkit-slider-thumb) {
-  appearance: none;
-  width: 2px;
-  height: 2px;
-  border: 0;
-  border-radius: 50%;
-  background-color: var(--accent-color);
-  box-shadow: 0 0 0 0 var(--accent-color-opacity1);
-  transform: scale(6);
-  transition: box-shadow 0.2s;
-}
-
-:deep(.ft-caption-appearance-controls input[type='range']:hover::-webkit-slider-thumb) {
-  box-shadow: 0 0 0 2px var(--accent-color-opacity1);
-}
-
-:deep(.ft-caption-appearance-controls input[type='range']:focus-visible::-webkit-slider-thumb) {
-  box-shadow: 0 0 0 2px var(--accent-color-opacity3);
-}
-
-:deep(.ft-caption-appearance-controls input[type='range']:active::-webkit-slider-thumb) {
-  box-shadow: 0 0 0 2px var(--accent-color-opacity4);
-}
-
-:deep(.ft-caption-appearance-controls input[type='range']::-moz-range-track) {
-  width: 100%;
-  height: 2px;
-  border-radius: calc(1px * var(--ui-roundness));
-  background-color: var(--accent-color-opacity4);
-}
-
-:deep(.ft-caption-appearance-controls input[type='range']::-moz-range-progress) {
-  height: 2px;
-  border-radius: calc(1px * var(--ui-roundness));
-  background-color: var(--accent-color);
-}
-
-:deep(.ft-caption-appearance-controls input[type='range']::-moz-range-thumb) {
-  appearance: none;
-  width: 2px;
-  height: 2px;
-  border: 0;
-  border-radius: 50%;
-  background-color: var(--accent-color);
-  box-shadow: 0 0 0 0 var(--accent-color-opacity1);
-  transform: scale(6);
-  transition: box-shadow 0.2s;
-}
-
-:deep(.ft-caption-appearance-controls input[type='range']:hover::-moz-range-thumb) {
-  box-shadow: 0 0 0 2px var(--accent-color-opacity1);
-}
-
-:deep(.ft-caption-appearance-controls input[type='range']:focus-visible::-moz-range-thumb) {
-  box-shadow: 0 0 0 2px var(--accent-color-opacity3);
-}
-
-:deep(.ft-caption-appearance-controls input[type='range']:active::-moz-range-thumb) {
-  box-shadow: 0 0 0 2px var(--accent-color-opacity4);
-}
-
-:deep(.ft-caption-appearance-controls select) {
-  box-sizing: border-box;
-  max-width: 140px;
-  min-height: 28px;
-  padding: 3px 4px 3px 8px;
-  border: 0;
-  border-radius: calc(6px * var(--ui-roundness));
-  background: transparent;
-  color: #fff;
-  color-scheme: dark;
-  text-align: right;
-  cursor: pointer;
-}
-
-:deep(.ft-caption-appearance-controls select:hover),
-:deep(.ft-caption-appearance-controls select:focus-visible) {
-  background: rgb(255 255 255 / 10%);
-}
-
-:deep(.ft-caption-appearance-controls select option) {
-  background: #1c1c1c;
-  color: #fff;
-  text-align: left;
-}
-
-:deep(.ft-caption-appearance-reset) {
-  justify-content: flex-start;
-  margin-top: 2px;
-  padding-inline: 14px !important;
-  border-top: 1px solid rgb(255 255 255 / 20%) !important;
-  border-radius: 0 !important;
 }

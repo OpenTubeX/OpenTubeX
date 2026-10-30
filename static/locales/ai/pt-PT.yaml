@@ -710,8 +710,6 @@ Settings:
       Background Color: Cor de fundo
       Background Opacity: Opacidade do fundo
       Font Size: Tamanho do tipo de letra
-      Vertical Position: Posição vertical
-      Edge Color: Cor do contorno
       Anchor:
         Anchor: Ancoragem
         Top Left: Em cima à esquerda
@@ -720,12 +718,34 @@ Settings:
         Bottom Left: Em baixo à esquerda
         Bottom Center: Em baixo ao centro
         Bottom Right: Em baixo à direita
+        Center Left: Centro à esquerda
+        Center: Centro
+        Center Right: Centro à direita
       Edge Style:
         Edge Style: Estilo do contorno
         None: Nenhum
         Outline: Contorno
         Drop Shadow: Sombra projetada
+        Raised: Em relevo
+        Depressed: Em depressão
       Reset: Repor aspeto das legendas
+      Default: Predefinição
+      Text Opacity: Opacidade do tipo de letra
+      Font Family:
+        Font Family: Família de tipos de letra
+        Monospaced Serif: Serif monoespaçada
+        Proportional Serif: Serif proporcional
+        Monospaced Sans-Serif: Sans-Serif monoespaçada
+        Proportional Sans-Serif: Sans-Serif proporcional
+      Colors:
+        White: Branco
+        Yellow: Amarelo
+        Green: Verde
+        Cyan: Azul-turquesa
+        Blue: Azul
+        Magenta: Magenta
+        Red: Vermelho
+        Black: Preto
     Default Viewing Mode:
       Full Window (Always On): Janela inteira (sempre ativo)
       Full Screen (Always On): Ecrã inteiro (sempre ativo)
@@ -1576,7 +1596,6 @@ Video:
       Error: A tradução por voz falhou. Tente novamente mais tarde.
       Duration Error: A tradução por voz só está disponível para vídeos com até quatro horas de duração.
     Caption Appearance:
-      Options: Opções
       Sample: As legendas têm este aspeto
     Auto-translate: Tradução automática
     Sleep Timer:

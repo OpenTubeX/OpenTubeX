@@ -703,8 +703,6 @@ Settings:
       Background Color: 背景色
       Background Opacity: 背景の不透明度
       Font Size: フォントサイズ
-      Vertical Position: 垂直位置
-      Edge Color: 縁取りの色
       Anchor:
         Anchor: 配置基準
         Top Left: 左上
@@ -713,12 +711,34 @@ Settings:
         Bottom Left: 左下
         Bottom Center: 下中央
         Bottom Right: 右下
+        Center Left: 左中央
+        Center: 中央
+        Center Right: 右中央
       Edge Style:
         Edge Style: 縁取りのスタイル
         None: なし
         Outline: 輪郭線
         Drop Shadow: ドロップシャドウ
+        Raised: 浮き彫り
+        Depressed: 沈み彫り
       Reset: 字幕の外観をリセット
+      Default: デフォルト
+      Text Opacity: フォントの透過度
+      Font Family:
+        Font Family: フォント ファミリー
+        Monospaced Serif: 等幅セリフ
+        Proportional Serif: プロポーショナル セリフ
+        Monospaced Sans-Serif: 等幅サンセリフ
+        Proportional Sans-Serif: プロポーショナル サンセリフ
+      Colors:
+        White: 白
+        Yellow: 黄
+        Green: 緑
+        Cyan: シアン
+        Blue: 青
+        Magenta: マゼンタ
+        Red: 赤
+        Black: 黒
     Auto Picture in Picture:
       Auto Picture in Picture: 自動的にピクチャーインピクチャーに切り替える
       On Tab Change: タブを切り替えたとき
@@ -1540,7 +1560,6 @@ Video:
       Error: 吹き替え翻訳に失敗しました。しばらくしてから再試行してください。
       Duration Error: 吹き替え翻訳は4時間以内の動画でのみ利用できます。
     Caption Appearance:
-      Options: オプション
       Sample: 字幕はこのように表示されます
     Auto-translate: 自動翻訳
     Sleep Timer:

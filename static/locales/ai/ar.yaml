@@ -710,8 +710,6 @@ Settings:
       Background Color: لون الخلفية
       Background Opacity: عتامة الخلفية
       Font Size: حجم الخط
-      Vertical Position: الوضع العمودي
-      Edge Color: لون الحافة
       Anchor:
         Anchor: مِرسَاة
         Top Left: أعلى اليسار
@@ -720,12 +718,34 @@ Settings:
         Bottom Left: أسفل اليسار
         Bottom Center: مركز القاع
         Bottom Right: أسفل اليمين
+        Center Left: وسط اليسار
+        Center: الوسط
+        Center Right: وسط اليمين
       Edge Style:
         Edge Style: نمط الحافة
         None: لا شيء
         Outline: الخطوط العريضة
         Drop Shadow: إسقاط الظل
+        Raised: بارزة
+        Depressed: غائرة
       Reset: إعادة تعيين مظهر التسمية التوضيحية
+      Default: الافتراضي
+      Text Opacity: درجة تعتيم الخط
+      Font Family:
+        Font Family: مجموعة الخطوط
+        Monospaced Serif: خطوط Serif أحادية المسافة
+        Proportional Serif: خطوط Serif التناسبية
+        Monospaced Sans-Serif: خطوط Sans-Serif أحادية المسافة
+        Proportional Sans-Serif: خطوط Sans-Serif التناسبية
+      Colors:
+        White: أبيض
+        Yellow: أصفر
+        Green: أخضر
+        Cyan: أزرق سماوي
+        Blue: أزرق
+        Magenta: أرجواني
+        Red: أحمر
+        Black: أسود
     Default Viewing Mode:
       Full Window (Always On): نافذة كاملة (مشغلة دائمًا)
       Full Screen (Always On): ملء الشاشة (تشغيل دائمًا)
@@ -1579,7 +1599,6 @@ Video:
       Error: فشلت الترجمة الصوتية. يرجى المحاولة مرة أخرى في وقت لاحق.
       Duration Error: الترجمة الصوتية متاحة فقط لمقاطع الفيديو التي تصل مدتها إلى أربع ساعات.
     Caption Appearance:
-      Options: خيارات
       Sample: التسميات التوضيحية تبدو مثل هذا
     Auto-translate: الترجمة التلقائية
     Sleep Timer:

@@ -703,8 +703,6 @@ Settings:
       Background Color: Bakgrunnslitur
       Background Opacity: Ógegnsæi bakgrunns
       Font Size: Leturstærð
-      Vertical Position: Lóðrétt staðsetning
-      Edge Color: Jaðarlitur
       Anchor:
         Anchor: Festipunktur
         Top Left: Efst til vinstri
@@ -713,12 +711,34 @@ Settings:
         Bottom Left: Neðst til vinstri
         Bottom Center: Neðst fyrir miðju
         Bottom Right: Neðst til hægri
+        Center Left: Miðja vinstri
+        Center: Miðja
+        Center Right: Miðja hægri
       Edge Style:
         Edge Style: Jaðarstíll
         None: Enginn
         Outline: Útlína
         Drop Shadow: Fallskuggi
+        Raised: Upphleypt
+        Depressed: Niðurgrafið
       Reset: Endurstilla útlit skjátexta
+      Default: Sjálfgefið
+      Text Opacity: Ógegnsæi texta
+      Font Family:
+        Font Family: Leturgerð
+        Monospaced Serif: Jafnbreitt þverendaletur
+        Proportional Serif: Hlutfallslegt þverendaletur
+        Monospaced Sans-Serif: Jafnbreið steinskrift
+        Proportional Sans-Serif: Hlutfallsleg steinskrift
+      Colors:
+        White: Hvítur
+        Yellow: Gulur
+        Green: Grænn
+        Cyan: Blágrænn
+        Blue: Blár
+        Magenta: Blárauður
+        Red: Rauður
+        Black: Svartur
     Default Viewing Mode:
       Tooltip: Flestar sjálfgefnar skoðunarstillingar eru aðeins notaðar í upphafi hverrar áhorfslotu. Breytingar sem gerðar eru í lotunni haldast þar til henni lýkur. Skoðunarstillingar sem eru alltaf virkar eru notaðar í hvert sinn sem skipt er yfir í nýtt myndband, óháð breytingum á skoðunarstillingu við áhorf á fyrra myndbandið.
     Auto Picture in Picture:
@@ -1555,7 +1575,6 @@ Video:
       Error: Raddþýðing mistókst. Reyndu aftur síðar.
       Duration Error: Raddþýðing er aðeins tiltæk fyrir myndbönd sem eru í mesta lagi fjögurra klukkustunda löng.
     Caption Appearance:
-      Options: Valkostir
       Sample: Skjátexti lítur svona út
     Auto-translate: Sjálfvirk þýðing
     Sleep Timer:

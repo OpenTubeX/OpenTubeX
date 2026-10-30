@@ -926,8 +926,6 @@ Settings:
       Background Color: Color del fons
       Background Opacity: Opacitat del fons
       Font Size: Mida de la lletra
-      Vertical Position: Posició vertical
-      Edge Color: Color de la vora
       Anchor:
         Anchor: Ancoratge
         Top Left: A dalt a l'esquerra
@@ -936,12 +934,34 @@ Settings:
         Bottom Left: A baix a l'esquerra
         Bottom Center: A baix al centre
         Bottom Right: A baix a la dreta
+        Center Left: Centre a l'esquerra
+        Center: Centre
+        Center Right: Centre a la dreta
       Edge Style:
         Edge Style: Estil de la vora
         None: Cap
         Outline: Contorn
         Drop Shadow: Ombra paral·lela
+        Raised: Amb relleu
+        Depressed: Enfonsat
       Reset: Restableix l'aparança dels subtítols
+      Default: Per defecte
+      Text Opacity: Opacitat de la lletra
+      Font Family:
+        Font Family: Família de fonts
+        Monospaced Serif: Serif monoespai
+        Proportional Serif: Serif proporcional
+        Monospaced Sans-Serif: Sans-Serif monoespai
+        Proportional Sans-Serif: Sans-Serif proporcional
+      Colors:
+        White: Blanc
+        Yellow: Groc
+        Green: Verd
+        Cyan: Cian
+        Blue: Blau
+        Magenta: Magenta
+        Red: Vermell
+        Black: Negre
     Default Viewing Mode:
       Theater: Cinema
       Default Viewing Mode: Mode de visualització predeterminat
@@ -1998,7 +2018,6 @@ Video:
       Error: Ha fallat la traducció de veu en off. Torneu-ho a provar més tard.
       Duration Error: La traducció de veu en off només està disponible per a vídeos de fins a quatre hores.
     Caption Appearance:
-      Options: Opcions
       Sample: Els subtítols tenen aquest aspecte
     Auto-translate: Traducció automàtica
     Sleep Timer:

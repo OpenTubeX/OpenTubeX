@@ -1,5 +1,5 @@
 import { test, expect, setWindowSize } from '../../helpers/app.mjs'
-import { activeTab, openMockedVideo } from '../../helpers/player.mjs'
+import { activeTab, openMockedVideo, openCaptionLanguages } from '../../helpers/player.mjs'
 import { mockPlayableWatchPage } from '../../helpers/watch.mjs'
 import { WATCH_PAGE_SEED } from '../../helpers/watch-page.mjs'
 
@@ -71,7 +71,7 @@ for (const usePlayerMenuGrid of [true, false]) {
       await mockPlayableWatchPage(app, page, { captionTranslations: true, extraCaptionTracks })
       await openMockedVideo(page)
       const player = await openOverflowMenu(page)
-      await player.locator('.shaka-overflow-menu').getByRole('button', { name: 'Captions' }).click()
+      await openCaptionLanguages(player)
       await expect(player.locator('.shaka-text-languages .shaka-turn-captions-off-button')).toBeAttached()
 
       if (usePlayerMenuGrid) {

@@ -1,5 +1,5 @@
 import { test, expect, setWindowSize } from '../../helpers/app.mjs'
-import { findWatchComponent, openMockedVideo } from '../../helpers/player.mjs'
+import { findWatchComponent, openMockedVideo, openCaptionLanguages } from '../../helpers/player.mjs'
 import { mockPlayableWatchPage } from '../../helpers/watch.mjs'
 
 /** @param {import('@playwright/test').Locator} locator */
@@ -40,47 +40,6 @@ for (const usePlayerMenuGrid of [true, false]) {
       }
     })
 
-    test('lines the Options action up with the captions menu title', { tag: '@scale' }, async ({ app, page }, testInfo) => {
-      await mockPlayableWatchPage(app, page)
-      await page.route('https://www.youtube.com/api/timedtext**', route => route.fulfill({
-        status: 200,
-        contentType: 'text/vtt',
-        body: 'WEBVTT\n\n00:00:05.000 --> 00:00:07.000\nTiming test caption\n'
-      }))
-      await openMockedVideo(page)
-      const player = page.locator('.ftVideoPlayer')
-      await player.hover()
-      // Keep the controls shown, they can fade out before the screenshot on slow machines
-      await player.locator('.shaka-controls-container').evaluate(element => element.setAttribute('casting', 'true'))
-      await player.getByRole('button', { name: 'More settings' }).click()
-      await player.locator('.shaka-overflow-menu > .shaka-caption-button').click()
-      const languageMenu = player.locator('.shaka-text-languages')
-      await expect(languageMenu.locator(':scope > .ft-caption-options-button')).toBeVisible()
-
-      const [titleBaseline, optionsBaseline] = await languageMenu.evaluate((menu) => {
-        /** @param {HTMLElement} element */
-        const baseline = (element) => {
-          const marker = document.createElement('span')
-          marker.style.cssText = 'display: inline-block; vertical-align: baseline'
-          element.append(marker)
-          const { top } = marker.getBoundingClientRect()
-          marker.remove()
-          return top
-        }
-        const title = menu.querySelector(':scope > .shaka-back-to-overflow-button > span')
-        const options = menu.querySelector(':scope > .ft-caption-options-button')
-        // The button is a flex container, so its text needs an inline wrapper for the marker
-        const label = document.createElement('span')
-        label.append(...options.childNodes)
-        options.append(label)
-        const result = [baseline(title), baseline(label)]
-        options.replaceChildren(...label.childNodes)
-        return result
-      })
-      expect(Math.abs(titleBaseline - optionsBaseline)).toBeLessThan(0.5)
-      await languageMenu.screenshot({ path: testInfo.outputPath('caption-options-header.png') })
-    })
-
     test('shifts displayed cues immediately and resets for the next video', async ({ app, page }, testInfo) => {
       test.setTimeout(120_000)
       await mockPlayableWatchPage(app, page, { captionTranslations: true })
@@ -105,7 +64,7 @@ for (const usePlayerMenuGrid of [true, false]) {
       await player.hover()
       await player.getByRole('button', { name: 'More settings' }).click()
       await player.locator('.shaka-overflow-menu').screenshot({ path: testInfo.outputPath('caption-timing-settings-entry.png') })
-      await player.locator('.shaka-overflow-menu > .shaka-caption-button').click()
+      await openCaptionLanguages(player)
       const timingRow = player.getByRole('button', { name: 'Adjust timing…', exact: true })
       const languageMenu = player.locator('.shaka-text-languages')
       for (const iconPack of ['material', 'remix']) {
@@ -114,7 +73,7 @@ for (const usePlayerMenuGrid of [true, false]) {
         // The timing row shares the bottom rows with the subtitle file row
         const rowBounds = await getVisibleBounds(languageMenu.locator(':scope > .ft-caption-actions'))
         expect(rowBounds.width).toBeGreaterThanOrEqual(menuBounds.width - 16)
-        const choices = languageMenu.locator(':scope > button:not(.shaka-back-to-overflow-button, .ft-caption-options-button)')
+        const choices = languageMenu.locator(':scope > button:not(.shaka-back-to-overflow-button)')
         for (const choice of await choices.all()) {
           const choiceBounds = await getVisibleBounds(choice)
           expect(choiceBounds.y + choiceBounds.height).toBeLessThanOrEqual(rowBounds.y + 1)
@@ -197,7 +156,7 @@ for (const usePlayerMenuGrid of [true, false]) {
       const captionsMenu = player.locator('.shaka-text-languages')
       await captionsMenu.getByRole('button', { name: 'Off', exact: true }).click()
       await expect.poll(offset).toBe(1.5)
-      await player.locator('.shaka-overflow-menu > .shaka-caption-button').click()
+      await openCaptionLanguages(player)
       await captionsMenu.getByRole('button', { name: 'Auto-translate', exact: true }).click()
       await player.locator('.ft-caption-translation-menu').getByRole('button', { name: 'German', exact: true }).click()
       await expect.poll(offset).toBe(1.5)
@@ -229,7 +188,7 @@ for (const usePlayerMenuGrid of [true, false]) {
       })
       await player.hover()
       await player.getByRole('button', { name: 'More settings' }).click()
-      await player.locator('.shaka-overflow-menu > .shaka-caption-button').click()
+      await openCaptionLanguages(player)
       await timingRow.click()
       await expect(input).toHaveValue('1.5')
       for (const iconPack of ['material', 'remix']) {
@@ -250,7 +209,7 @@ for (const usePlayerMenuGrid of [true, false]) {
             await player.hover()
             await player.getByRole('button', { name: 'More settings' }).click()
           }
-          await player.locator('.shaka-overflow-menu > .shaka-caption-button').click()
+          await openCaptionLanguages(player)
           // Fractional zoom can introduce tiny floating-point differences.
           expect((await getVisibleBounds(timingRow)).height).toBeGreaterThanOrEqual(48 - 0.01)
           await timingRow.click()
@@ -294,7 +253,7 @@ for (const usePlayerMenuGrid of [true, false]) {
       await setWindowSize(app, page, { width: 420, height: 910 })
       await player.hover()
       await player.getByRole('button', { name: 'More settings' }).click()
-      await player.locator('.shaka-overflow-menu > .shaka-caption-button').click()
+      await openCaptionLanguages(player)
       await player.getByRole('button', { name: 'Adjust timing…', exact: true }).click()
       const menu = player.locator('.ft-caption-timing-menu')
       const scroller = menu.locator('.ft-caption-timing-controls')
@@ -342,7 +301,7 @@ for (const usePlayerMenuGrid of [true, false]) {
         await setWindowSize(app, page, { width: 600, height: 800 })
         await player.hover()
         await player.getByRole('button', { name: 'More settings' }).click()
-        await player.locator('.shaka-overflow-menu > .shaka-caption-button').click()
+        await openCaptionLanguages(player)
         const languageMenu = player.locator('.shaka-text-languages')
         const timingRow = languageMenu.locator(':scope > .ft-caption-actions > .ft-caption-timing-button')
         await expect(timingRow).toBeVisible()
@@ -352,7 +311,7 @@ for (const usePlayerMenuGrid of [true, false]) {
         // A taller idle menu leaves free space, which belongs above the row rather than below it.
         expect(menuBounds.height).toBeGreaterThan(rowBounds.height * 3)
         expect(menuBounds.y + menuBounds.height - rowBounds.y - rowBounds.height).toBeLessThanOrEqual(1)
-        const choices = languageMenu.locator(':scope > button:not(.shaka-back-to-overflow-button, .ft-caption-options-button)')
+        const choices = languageMenu.locator(':scope > button:not(.shaka-back-to-overflow-button)')
         for (const choice of await choices.all()) {
           const choiceBounds = await getVisibleBounds(choice)
           expect(choiceBounds.y + choiceBounds.height).toBeLessThanOrEqual(rowBounds.y + 1)
@@ -383,7 +342,7 @@ test.describe('native caption timing', () => {
     await expect(caption).toHaveCount(0)
     await player.hover()
     await player.getByRole('button', { name: 'More settings' }).click()
-    await player.locator('.shaka-overflow-menu > .shaka-caption-button').click()
+    await openCaptionLanguages(player)
     await player.getByRole('button', { name: 'Adjust timing…', exact: true }).click()
     const menu = player.locator('.ft-caption-timing-menu')
     await menu.getByRole('spinbutton', { name: 'Offset (seconds)' }).fill('-2')
@@ -406,7 +365,7 @@ test.describe('native caption timing', () => {
     const player = page.locator('.ftVideoPlayer')
     await player.hover()
     await player.getByRole('button', { name: 'More settings' }).click()
-    await player.locator('.shaka-overflow-menu > .shaka-caption-button').click()
+    await openCaptionLanguages(player)
     await player.getByRole('button', { name: 'Adjust timing…', exact: true }).click()
     await player.getByRole('spinbutton', { name: 'Offset (seconds)' }).fill('1.5')
     const watch = await page.evaluateHandle(findWatchComponent)
@@ -452,7 +411,7 @@ test.describe('native caption timing', () => {
       await expect(caption).toHaveCount(0)
       await player.hover()
       await player.getByRole('button', { name: 'More settings' }).click()
-      await player.locator('.shaka-overflow-menu > .shaka-caption-button').click()
+      await openCaptionLanguages(player)
       await player.getByRole('button', { name: 'Adjust timing…', exact: true }).click()
       await player.getByRole('spinbutton', { name: 'Offset (seconds)' }).fill('-2')
       releaseCaptions()
@@ -485,7 +444,7 @@ test.describe('caption actions in the frosted grid menu', { tag: '@scale' }, () 
     const player = page.locator('.ftVideoPlayer')
     await player.hover()
     await player.getByRole('button', { name: 'More settings' }).click()
-    await player.locator('.shaka-overflow-menu > .shaka-caption-button').click()
+    await openCaptionLanguages(player)
     const languageMenu = player.locator('.shaka-text-languages')
     const timingRow = languageMenu.locator(':scope > .ft-caption-actions > .ft-caption-timing-button')
     await expect(timingRow).toBeVisible()

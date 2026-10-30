@@ -59,8 +59,22 @@
 }
 
 /* The submenus are rendered inside the menu, so they have to span every column. */
-:deep(.shaka-overflow-menu.ft-menu-grid > *) {
+:deep(.shaka-overflow-menu.ft-menu-grid > *),
+:deep(.shaka-overflow-menu.ft-menu-grid .shaka-sub-menu) {
   grid-column: 1 / -1;
+}
+
+/*
+  Menu groups, such as the captions and their style, render the submenus of
+  their entries inside themselves. While one is open, the group leaves the
+  layout to it, so that it fills the menu like any other submenu.
+*/
+:deep(.shaka-menu-group:has(> .shaka-sub-menu:not(.shaka-hidden))) {
+  display: contents;
+}
+
+:deep(.shaka-menu-group:has(> .shaka-sub-menu:not(.shaka-hidden)) > .os-scrollbar) {
+  display: none;
 }
 
 /*
@@ -73,7 +87,8 @@
   --os-handle-bg-active: rgb(255 255 255 / 70%);
 }
 
-:deep(.shaka-overflow-menu.ft-menu-grid > button) {
+:deep(.shaka-overflow-menu.ft-menu-grid > button),
+:deep(.shaka-menu-group.ft-menu-grid > button:not(.shaka-back-to-overflow-button)) {
   grid-column: auto;
   flex-direction: column;
   justify-content: center;
@@ -86,7 +101,9 @@
 }
 
 :deep(.shaka-overflow-menu.ft-menu-grid > button:hover),
-:deep(.shaka-overflow-menu.ft-menu-grid > button:focus-visible) {
+:deep(.shaka-menu-group.ft-menu-grid > button:not(.shaka-back-to-overflow-button):hover),
+:deep(.shaka-overflow-menu.ft-menu-grid > button:focus-visible),
+:deep(.shaka-menu-group.ft-menu-grid > button:not(.shaka-back-to-overflow-button):focus-visible) {
   background: rgb(255 255 255 / 20%);
 }
 
@@ -98,24 +115,49 @@
   Shaka leaves them expanded when the overflow menu closes over the submenu.
 */
 :deep(.shaka-overflow-menu.ft-menu-grid > button[aria-pressed='true']),
+:deep(.shaka-menu-group.ft-menu-grid > button:not(.shaka-back-to-overflow-button)[aria-pressed='true']),
 :deep(.shaka-overflow-menu.ft-menu-grid > button[aria-expanded='true']:not([aria-haspopup='true'])),
-:deep(.shaka-overflow-menu.ft-menu-grid > button.ft-active) {
+:deep(.shaka-menu-group.ft-menu-grid > button:not(.shaka-back-to-overflow-button)[aria-expanded='true']:not([aria-haspopup='true'])),
+:deep(.shaka-overflow-menu.ft-menu-grid > button.ft-active),
+:deep(.shaka-menu-group.ft-menu-grid > button:not(.shaka-back-to-overflow-button).ft-active) {
   background: color-mix(in srgb, var(--primary-color) 32%, transparent);
 }
 
 :deep(.shaka-overflow-menu.ft-menu-grid > button[aria-pressed='true']:hover),
+:deep(.shaka-menu-group.ft-menu-grid > button:not(.shaka-back-to-overflow-button)[aria-pressed='true']:hover),
 :deep(.shaka-overflow-menu.ft-menu-grid > button[aria-expanded='true']:not([aria-haspopup='true']):hover),
-:deep(.shaka-overflow-menu.ft-menu-grid > button.ft-active:hover) {
+:deep(.shaka-menu-group.ft-menu-grid > button:not(.shaka-back-to-overflow-button)[aria-expanded='true']:not([aria-haspopup='true']):hover),
+:deep(.shaka-overflow-menu.ft-menu-grid > button.ft-active:hover),
+:deep(.shaka-menu-group.ft-menu-grid > button:not(.shaka-back-to-overflow-button).ft-active:hover) {
   background: color-mix(in srgb, var(--primary-color) 48%, transparent);
 }
 
+/*
+  Shaka marks the entries of the caption style as pressed whenever they are
+  available, and the entries of a menu group show their value anyway.
+*/
+:deep(.shaka-menu-group.ft-menu-grid > button:not(.shaka-back-to-overflow-button)[aria-haspopup='true']) {
+  background: rgb(255 255 255 / 7%);
+}
+
+:deep(.shaka-menu-group.ft-menu-grid > button:not(.shaka-back-to-overflow-button)[aria-haspopup='true']:is(:hover, :focus-visible)) {
+  background: rgb(255 255 255 / 20%);
+}
+
+/* The entries of menu groups are laid out like the options of submenus, all one size. */
+:deep(.shaka-menu-group.ft-menu-grid > button:not(.shaka-back-to-overflow-button)) {
+  inline-size: 90px;
+}
+
 /* The icon sits above the label instead of next to it. */
-:deep(.shaka-overflow-menu.ft-menu-grid > button > .shaka-ui-icon) {
+:deep(.shaka-overflow-menu.ft-menu-grid > button > .shaka-ui-icon),
+:deep(.shaka-menu-group.ft-menu-grid > button:not(.shaka-back-to-overflow-button) > .shaka-ui-icon) {
   padding-inline-end: 0;
   font-size: 20px;
 }
 
-:deep(.shaka-overflow-menu.ft-menu-grid > button > .shaka-overflow-button-label) {
+:deep(.shaka-overflow-menu.ft-menu-grid > button > .shaka-overflow-button-label),
+:deep(.shaka-menu-group.ft-menu-grid > button:not(.shaka-back-to-overflow-button) > .shaka-overflow-button-label) {
   flex-direction: column;
   align-items: center;
   gap: 2px;
@@ -128,7 +170,8 @@
 }
 
 /* The chevron of the submenu entries doesn't fit into a tile. */
-:deep(.shaka-overflow-menu.ft-menu-grid > button > .shaka-overflow-button-label::after) {
+:deep(.shaka-overflow-menu.ft-menu-grid > button > .shaka-overflow-button-label::after),
+:deep(.shaka-menu-group.ft-menu-grid > button:not(.shaka-back-to-overflow-button) > .shaka-overflow-button-label::after) {
   content: none;
 }
 
@@ -234,7 +277,7 @@
 
 /* Keep the title centered in the header instead of after the back icon. */
 :deep(.shaka-sub-menu.ft-menu-grid > .shaka-back-to-overflow-button > .shaka-ui-icon),
-:deep(.shaka-overflow-menu.ft-menu-grid :is(.ft-caption-timing-menu, .ft-caption-appearance-menu) .shaka-ui-icon),
+:deep(.shaka-overflow-menu.ft-menu-grid .ft-caption-timing-menu .shaka-ui-icon),
 :deep(.shaka-overflow-menu.ft-menu-grid .ft-caption-list-menu .shaka-ui-icon:not(.shaka-chosen-item)) {
   position: absolute;
   inset-inline-start: 10px;
@@ -242,24 +285,11 @@
 }
 
 /*
-  Align the caption Options action with the submenu header beside it, including
-  the header's divider, so that both labels are centered in the same space.
-*/
-:deep(.shaka-sub-menu.ft-menu-grid > .ft-caption-options-button) {
-  align-items: center;
-  block-size: var(--ft-submenu-header-size);
-  padding-block: 0 var(--ft-menu-padding) !important;
-  border-block-end: 1px solid transparent;
-}
-
-/*
   The option and its quality mark (`HD`, `4K`) are siblings, so the tile wraps
-  them in a row instead of stacking them.
+  them in a row instead of stacking them. Menu groups list their entries
+  instead, and `:where` keeps the specificity for the option rules below.
 */
-:deep(.shaka-sub-menu.ft-menu-grid > button:not(
-  .shaka-back-to-overflow-button,
-  .ft-caption-options-button
-)) {
+:deep(.shaka-sub-menu.ft-menu-grid:where(:not(.shaka-menu-group)) > button:not(.shaka-back-to-overflow-button)) {
   flex-wrap: wrap;
   place-content: center;
   gap: 0 2px;
@@ -274,6 +304,21 @@
   text-align: center;
   background: rgb(255 255 255 / 7%);
   white-space: normal;
+}
+
+/* The swatch of a caption color sits before its name, centered together on the tile. */
+:deep(.shaka-sub-menu.shaka-text-colors.ft-menu-grid > button:not(.shaka-back-to-overflow-button)) {
+  flex-wrap: nowrap;
+  gap: 6px;
+}
+
+:deep(.shaka-text-colors.ft-menu-grid > button > .shaka-color-swatch) {
+  order: -1;
+  margin: 0;
+}
+
+:deep(.shaka-text-colors.ft-menu-grid > button > span) {
+  margin-inline-end: 0;
 }
 
 :deep(.shaka-sub-menu.ft-menu-grid > button:hover),
@@ -437,11 +482,11 @@
 }
 
 /* Keep the translation header and scrollbar outside each other's regions. */
-:deep(.shaka-overflow-menu:has(> .ft-caption-list-menu:not(.shaka-hidden))) {
+:deep(.shaka-overflow-menu:has(.ft-caption-list-menu:not(.shaka-hidden))) {
   overflow: hidden;
 }
 
-:deep(.shaka-overflow-menu:has(> .ft-caption-list-menu:not(.shaka-hidden)) > .os-scrollbar) {
+:deep(.shaka-overflow-menu:has(.ft-caption-list-menu:not(.shaka-hidden)) > .os-scrollbar) {
   display: none;
 }
 
@@ -459,11 +504,7 @@
 }
 
 /* Center the title like the headers of the other submenus */
-:deep(.shaka-overflow-menu.ft-menu-grid :is(
-  .ft-caption-list-menu,
-  .ft-caption-timing-menu,
-  .ft-caption-appearance-menu
-) > .shaka-back-to-overflow-button) {
+:deep(.shaka-overflow-menu.ft-menu-grid :is(.ft-caption-list-menu, .ft-caption-timing-menu) > .shaka-back-to-overflow-button) {
   position: relative;
   box-sizing: border-box;
   justify-content: center;
@@ -538,19 +579,19 @@
   and the phone layout shows the header above the menu (`phonePlayerOptions.css`).
 */
 /* stylelint-disable selector-max-compound-selectors -- Excluding the phone layout takes a compound of its own. */
-:deep(.shaka-overflow-menu:not(.phonePlayerOptions > *):has(> .ft-scrolling-submenu:not(.shaka-hidden))) {
+:deep(.shaka-overflow-menu:not(.phonePlayerOptions > *):has(.ft-scrolling-submenu:not(.shaka-hidden))) {
   display: flex;
   flex-direction: column;
   overflow: hidden;
   contain: layout;
 }
 
-:deep(.shaka-overflow-menu:not(.phonePlayerOptions > *):has(> .ft-scrolling-submenu:not(.shaka-hidden)) > .os-scrollbar) {
+:deep(.shaka-overflow-menu:not(.phonePlayerOptions > *):has(.ft-scrolling-submenu:not(.shaka-hidden)) > .os-scrollbar) {
   display: none;
 }
 
 /* Reaches into the menu's padding, so the options scroll to its edges and their outlines aren't cut off. */
-:deep(.shaka-overflow-menu:not(.phonePlayerOptions > *) > .ft-scrolling-submenu) {
+:deep(.shaka-overflow-menu:not(.phonePlayerOptions > *) .ft-scrolling-submenu) {
   flex: 1 1 auto;
   min-block-size: 0;
   margin-block: calc(var(--ft-submenu-header-size) + var(--ft-submenu-header-gap)) calc(-1 * var(--ft-menu-padding));
@@ -561,7 +602,7 @@
 }
 
 /* Where the header would be without the menu's padding above it, which an open submenu removes in the list. */
-:deep(.shaka-overflow-menu:not(.phonePlayerOptions > *) > .ft-scrolling-submenu > .shaka-back-to-overflow-button) {
+:deep(.shaka-overflow-menu:not(.phonePlayerOptions > *) .ft-scrolling-submenu > .shaka-back-to-overflow-button) {
   position: fixed;
   inset-block-start: 0;
   inset-inline: var(--ft-menu-padding);
@@ -570,12 +611,12 @@
   margin-block-end: 0;
 }
 
-:deep(.shaka-overflow-menu.ft-menu-grid:not(.phonePlayerOptions > *) > .ft-scrolling-submenu > .shaka-back-to-overflow-button) {
+:deep(.shaka-overflow-menu.ft-menu-grid:not(.phonePlayerOptions > *) .ft-scrolling-submenu > .shaka-back-to-overflow-button) {
   inset-block-start: var(--ft-menu-padding);
 }
 
 /* Sits in the header, at the end opposite the back button. */
-:deep(.shaka-overflow-menu.ft-menu-grid:not(.phonePlayerOptions > *) > .ft-scrolling-submenu > .ft-quality-codecs) {
+:deep(.shaka-overflow-menu.ft-menu-grid:not(.phonePlayerOptions > *) .ft-scrolling-submenu > .ft-quality-codecs) {
   position: fixed;
   inset-block-start: calc(var(--ft-menu-padding) + (var(--ft-submenu-header-size) - var(--ft-menu-padding) - 1px - 28px) / 2);
   inset-inline-end: calc(var(--ft-menu-padding) + 6px);

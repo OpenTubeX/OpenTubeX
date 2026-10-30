@@ -5,8 +5,9 @@ import {
   restoreOverlayScrollTop,
 } from '../overlayScrollbars'
 
+// Including the submenus of menu groups, such as the captions and their style.
 // The caption submenus scroll their options in a part of their own.
-const SCROLLING_SUBMENUS = ':scope > .shaka-sub-menu:not(.shaka-text-languages, .ft-caption-list-menu, .ft-caption-timing-menu)'
+const SCROLLING_SUBMENUS = '.shaka-sub-menu:not(.shaka-text-languages, .ft-caption-list-menu, .ft-caption-timing-menu)'
 
 /**
  * Open and scrolling by itself, which it doesn't in the phone layout (`phonePlayerOptions.css`).

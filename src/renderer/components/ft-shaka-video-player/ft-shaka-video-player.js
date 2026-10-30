@@ -43,6 +43,7 @@ import {
 } from './player-components/AbRepeatControl'
 import { AudioTrackSelection } from './player-components/AudioTrackSelection'
 import { CaptionSelection } from './player-components/CaptionSelection'
+import { CaptionStyleResetButton } from './player-components/CaptionStyleResetButton'
 import { CaptionToggleButton, CLOSED_CAPTIONS_OUTLINED } from './player-components/CaptionToggleButton'
 import { ChapterOverlayButton } from './player-components/ChapterOverlayButton'
 import { CopyVideoUrlButton, setCopyVideoUrlContext } from './player-components/CopyVideoUrlButton'
@@ -152,9 +153,12 @@ import {
 } from '../../helpers/player/seekHistory'
 import { matchesKeyboardShortcut } from '../../helpers/keyboardShortcuts'
 import {
+  CAPTION_FONT_FAMILIES,
+  CAPTION_FONT_SCALE_FACTORS,
   DEFAULT_CAPTION_SETTINGS,
-  getCaptionCssVariables,
   getCaptionPlayerVariables,
+  getCaptionStyle,
+  getSecondaryCaptionPosition,
   parseCaptionSettings,
 } from '../../helpers/player/caption-settings'
 import { AB_REPEAT_VALUE_CHANGE_ICON, useAbRepeat } from './opentubex/useAbRepeat'
@@ -223,6 +227,7 @@ let configuringCustomPlayerControls = false
  */
 const defaultShakaElementFactories = new Map([
   ['captions', { create: (rootElement, controls) => new shaka.ui.TextSelection(rootElement, controls) }],
+  ['captions-style-reset', { create: (rootElement, controls) => new shaka.ui.TextStyleResetButton(rootElement, controls) }],
   ['quality', { create: (rootElement, controls) => new shaka.ui.ResolutionSelection(rootElement, controls) }],
 ])
 
@@ -237,17 +242,46 @@ if (process.env.IS_IOS) {
     shaka.net.NetworkingEngine.PluginPriority.APPLICATION, true)
 }
 const TrackLabelFormat = shaka.ui.Overlay.TrackLabelFormat
-const CaptionPositionArea = shaka.config.PositionArea
 const { Severity: ErrorSeverity, Category: ErrorCategory, Code: ErrorCode } = shaka.util.Error
 
-const CAPTION_POSITION_AREAS = Object.freeze({
-  'top-left': CaptionPositionArea.TOP_LEFT,
-  'top-center': CaptionPositionArea.TOP_CENTER,
-  'top-right': CaptionPositionArea.TOP_RIGHT,
-  'bottom-left': CaptionPositionArea.BOTTOM_LEFT,
-  'bottom-center': CaptionPositionArea.BOTTOM_CENTER,
-  'bottom-right': CaptionPositionArea.BOTTOM_RIGHT,
-})
+/**
+ * The text displayer configuration of the saved caption settings.
+ * @param {import('../../helpers/player/caption-settings').CaptionSettings} settings
+ * @returns {Partial<shaka.extern.TextDisplayerConfiguration>}
+ */
+function getCaptionTextDisplayerConfig(settings) {
+  return {
+    fontFamily: CAPTION_FONT_FAMILIES[settings.fontFamily],
+    fontColor: settings.fontColor,
+    fontOpacity: settings.fontOpacity ?? Number.NaN,
+    fontScaleFactor: settings.fontScaleFactor,
+    backgroundColor: settings.backgroundColor,
+    backgroundOpacity: settings.backgroundOpacity ?? Number.NaN,
+    characterEdgeStyle: shaka.config.CharacterEdgeStyle[settings.characterEdgeStyle],
+    positionArea: shaka.config.PositionArea[settings.positionArea],
+  }
+}
+
+/**
+ * The caption settings that the captions menu configured.
+ * @param {shaka.extern.TextDisplayerConfiguration} config
+ * @returns {import('../../helpers/player/caption-settings').CaptionSettings}
+ */
+function getCaptionSettingsFromTextDisplayer(config) {
+  /** @param {Record<string, unknown>} values */
+  const nameOf = (values, value) => Object.keys(values).find(name => values[name] === value)
+  return parseCaptionSettings({
+    // Font families that aren't Shaka's come from cues, which the menu doesn't offer
+    fontFamily: nameOf(CAPTION_FONT_FAMILIES, config.fontFamily),
+    fontColor: config.fontColor,
+    fontOpacity: Number.isNaN(config.fontOpacity) ? null : config.fontOpacity,
+    fontScaleFactor: config.fontScaleFactor,
+    backgroundColor: config.backgroundColor,
+    backgroundOpacity: Number.isNaN(config.backgroundOpacity) ? null : config.backgroundOpacity,
+    characterEdgeStyle: nameOf(shaka.config.CharacterEdgeStyle, config.characterEdgeStyle),
+    positionArea: nameOf(shaka.config.PositionArea, config.positionArea),
+  })
+}
 
 /*
   Mapping of Shaka localization keys for control labels to FreeTube shortcuts.
@@ -1461,8 +1495,9 @@ export default defineComponent({
     }
 
     const captionSettings = computed(() => parseCaptionSettings(store.getters.getDefaultCaptionSettings))
-    const captionCssVariables = computed(() => getCaptionCssVariables(captionSettings.value))
-    const captionPositionArea = computed(() => CAPTION_POSITION_AREAS[captionSettings.value.anchor])
+    const captionStyle = computed(() => getCaptionStyle(captionSettings.value))
+    const captionsUseAppFont = computed(() => captionSettings.value.fontFamily === 'DEFAULT')
+    const secondaryCaptionPosition = computed(() => getSecondaryCaptionPosition(captionSettings.value.positionArea))
     // Timing belongs to the current video, rather than the saved appearance settings.
     let captionTimingOffset = props.sabrReloadState?.captionTimingOffset ?? 0
 
@@ -1470,13 +1505,11 @@ export default defineComponent({
       getSecondaryCaption,
       isShownAsMainCaption,
       restoreSecondaryCaption,
-      secondaryCaptionsAtTop,
       secondaryCaptionsBox,
       secondaryCaptionText,
       selectSecondaryCaption,
       updateSecondaryCaptionText,
     } = useSecondaryCaptions({
-      captionSettings,
       container,
       getCaptionTimingOffset: () => captionTimingOffset,
       getPlayer: () => player,
@@ -1502,55 +1535,25 @@ export default defineComponent({
     }
 
     watch([() => props.videoId, () => props.externalUrl], () => updateCaptionTiming(0))
-    const showCaptionAppearanceSample = ref(false)
-    const captionAppearanceSampleBottom = ref('var(--caption-hidden-bottom-gap)')
-    let captionAppearanceSampleTimeout = null
-
-    function previewCaptionAppearance() {
-      const textContainer = container.value?.querySelector('.shaka-text-container')
-      const displayedCaption = Array.from(
-        textContainer?.querySelectorAll('[translate="no"]') ?? []
-      ).some(element => element.textContent?.trim())
-
-      if (displayedCaption) {
-        showCaptionAppearanceSample.value = false
-        clearTimeout(captionAppearanceSampleTimeout)
-        return
-      }
-
-      if (textContainer) {
-        captionAppearanceSampleBottom.value = getComputedStyle(textContainer).bottom
-      }
-      showCaptionAppearanceSample.value = true
-      clearTimeout(captionAppearanceSampleTimeout)
-      captionAppearanceSampleTimeout = setTimeout(() => {
-        showCaptionAppearanceSample.value = false
-      }, 1000)
-    }
 
     /**
-     * @param {'textColor' | 'backgroundColor' | 'backgroundOpacity' | 'fontScale' | 'verticalPosition' | 'anchor' | 'edgeStyle' | 'edgeColor'} setting
-     * @param {string | number} value
+     * Saves the style picked in the captions menu, which configures the player.
+     * @param {shaka.Player} captionPlayer
      */
-    function updateCaptionAppearance(setting, value) {
-      store.dispatch('updateDefaultCaptionSettings', JSON.stringify({
-        ...captionSettings.value,
-        [setting]: value,
-      }))
-      previewCaptionAppearance()
+    function saveCaptionSettings(captionPlayer) {
+      const settings = getCaptionSettingsFromTextDisplayer(captionPlayer.getConfiguration().textDisplayer)
+      if (Object.entries(settings).some(([setting, value]) => !Object.is(captionSettings.value[setting], value))) {
+        store.dispatch('updateDefaultCaptionSettings', JSON.stringify(settings))
+      }
     }
 
-    function resetCaptionAppearance() {
+    function resetCaptionSettings() {
       store.dispatch('updateDefaultCaptionSettings', JSON.stringify(DEFAULT_CAPTION_SETTINGS))
-      previewCaptionAppearance()
     }
 
-    watch(captionPositionArea, positionArea => {
-      player?.configure('textDisplayer.positionArea', positionArea)
-    })
-
-    onUnmounted(() => {
-      clearTimeout(captionAppearanceSampleTimeout)
+    // The settings can also change in the settings, or on another device
+    watch(captionSettings, settings => {
+      player?.configure({ textDisplayer: getCaptionTextDisplayerConfig(settings) })
     })
 
     /** @param {boolean} value */
@@ -2381,10 +2384,8 @@ export default defineComponent({
               forced: false,
             }],
 
-        // Caption appearance is user-controlled, so discard source WebVTT positioning (for
-        // example YouTube's occasional position:63% cues) before Shaka creates the cue DOM.
         textDisplayer: {
-          positionArea: captionPositionArea.value,
+          ...getCaptionTextDisplayerConfig(captionSettings.value),
           subtitleDelay: usesNativeCaptionTracks() ? 0 : captionTimingOffset,
         },
 
@@ -2929,7 +2930,8 @@ export default defineComponent({
         textTrackLabelFormat: props.captions.length > 0 || localCaptions.value.length > 0
           ? TrackLabelFormat.LABEL
           : TrackLabelFormat.LANGUAGE,
-        displayInVrMode: useVrMode.value
+        displayInVrMode: useVrMode.value,
+        captionsFontScaleFactors: [...CAPTION_FONT_SCALE_FACTORS],
       }
 
       /** @type {string[]} */
@@ -2960,7 +2962,7 @@ export default defineComponent({
           ...(props.shortsPlayer ? ['ft_shorts_video_info'] : []),
           props.format === 'legacy' ? 'ft_legacy_quality' : 'quality',
           ...(showPlaybackRateControls ? ['playback_rate'] : []),
-          'captions',
+          'captions-settings',
           'ft_audio_tracks',
           'ft_sleep_timer',
           'ft_seek_history',
@@ -3013,7 +3015,7 @@ export default defineComponent({
         // Keep related settings together before the one-click actions.
         uiConfig.overflowMenuButtons.push(
           'ft_audio_tracks',
-          'captions',
+          'captions-settings',
           ...(showPlaybackRateControls ? ['playback_rate'] : []),
           props.format === 'legacy' ? 'ft_legacy_quality' : 'quality',
           'ft_sleep_timer',
@@ -4161,9 +4163,9 @@ export default defineComponent({
         delete label.dataset.ftOverflowTitle
       }
 
-      // Caption appearance and timing have controls rather than options, so
-      // they keep their own layouts.
-      const submenus = menu.querySelectorAll(':scope > .shaka-sub-menu:not(.ft-caption-appearance-menu, .ft-caption-timing-menu)')
+      // Including the submenus of menu groups. Caption timing has controls
+      // rather than options, so it keeps its own layout.
+      const submenus = menu.querySelectorAll('.shaka-sub-menu:not(.ft-caption-timing-menu)')
       for (const submenu of submenus) {
         const isListMenu = submenu.classList.contains('ft-caption-list-menu')
         submenu.classList.toggle('ft-menu-grid', usePlayerMenuGrid.value && !isListMenu)
@@ -5297,7 +5299,10 @@ export default defineComponent({
     const videoElementLayoutHeight = ref(0)
 
     const captionPlayerVariables = computed(() => {
-      return getCaptionPlayerVariables(videoElementLayoutHeight.value)
+      return {
+        ...getCaptionPlayerVariables(videoElementLayoutHeight.value, captionSettings.value.fontScaleFactor),
+        '--caption-background': captionStyle.value.background,
+      }
     })
 
     function updateAnnotationVideoAspectRatio() {
@@ -6517,9 +6522,6 @@ export default defineComponent({
           // component's player, which may already have been destroyed.
           return new CaptionSelection(
             events,
-            () => captionSettings.value,
-            updateCaptionAppearance,
-            resetCaptionAppearance,
             () => controls.getPlayer().isLive() ? [] : props.captionTranslations,
             caption => Boolean(findMatchingTextTrack(controls.getPlayer().getTextTracks(), caption)?.active),
             caption => selectCaptionTranslation(caption, controls.getPlayer()),
@@ -6561,6 +6563,17 @@ export default defineComponent({
 
       registerOwnElement(shakaControls, 'captions', new CaptionSelectionFactory())
       registerOwnElement(shakaOverflowMenu, 'captions', new CaptionSelectionFactory())
+
+      /** @implements {shaka.extern.IUIElement.Factory} */
+      class CaptionStyleResetButtonFactory {
+        create(rootElement, controls) {
+          return new CaptionStyleResetButton(resetCaptionSettings, rootElement, controls)
+        }
+      }
+
+      // Shaka's reset would restore its own defaults, which don't keep the position
+      registerOwnElement(shakaControls, 'captions-style-reset', new CaptionStyleResetButtonFactory())
+      registerOwnElement(shakaOverflowMenu, 'captions-style-reset', new CaptionStyleResetButtonFactory())
     }
 
     /**
@@ -9568,6 +9581,8 @@ export default defineComponent({
           captionTextDisplayer = textDisplayFactory(instance)
           return captionTextDisplayer
         },
+        // Before following the configuration, so that Shaka's defaults don't replace the settings
+        textDisplayer: getCaptionTextDisplayerConfig(captionSettings.value),
       })
       nativeCaptionTiming = bindNativeCaptionTiming(
         videoElement,
@@ -9575,6 +9590,8 @@ export default defineComponent({
         () => captionTextDisplayer?.remove(0, Infinity)
       )
       player.addEventListener('loaded', applyCaptionTiming)
+      const captionPlayer = player
+      player.addEventListener('configurationchanged', () => saveCaptionSettings(captionPlayer))
       wrapTextTrackSelection()
       player.addEventListener('textchanged', handleTextTrackChanged)
 
@@ -10920,13 +10937,12 @@ export default defineComponent({
       musicVisualizerCanvas,
       musicVisualizerEnabled,
       fullscreenAmbientBarsVisible,
-      captionCssVariables,
       captionPlayerVariables,
-      captionAppearanceSampleBottom,
-      showCaptionAppearanceSample,
+      captionsUseAppFont,
       secondaryCaptionText,
       secondaryCaptionsBox,
-      secondaryCaptionsAtTop,
+      secondaryCaptionPosition,
+      captionStyle,
       isActiveTab,
       container,
       mobileMiniBarOverlay,

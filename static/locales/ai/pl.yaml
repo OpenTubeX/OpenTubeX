@@ -407,6 +407,31 @@ Settings:
       Shorts: Shorts
       Screenshots: Zrzuty ekranu
     Enable FCast: "Włącz FCast"
+    Caption Appearance:
+      Default: Domyślnie
+      Text Opacity: Przezroczystość czcionki
+      Font Family:
+        Font Family: Rodzina czcionek
+        Monospaced Serif: Szeryfowa o stałej szerokości
+        Proportional Serif: Szeryfowa proporcjonalna
+        Monospaced Sans-Serif: Bezszeryfowa o stałej szerokości
+        Proportional Sans-Serif: Bezszeryfowa proporcjonalna
+      Colors:
+        White: Biały
+        Yellow: Żółty
+        Green: Zielony
+        Cyan: Turkusowy
+        Blue: Niebieski
+        Magenta: Magenta
+        Red: Czerwony
+        Black: Czarny
+      Anchor:
+        Center Left: Pośrodku po lewej
+        Center: Pośrodku
+        Center Right: Pośrodku po prawej
+      Edge Style:
+        Raised: Uniesione
+        Depressed: Opuszczone
   Channel Settings:
     Enable Channel Playback Settings: Włącz ustawienia odtwarzania dla kanałów
     Auto Save Playback Speed: Automatycznie zapisuj zmiany prędkości odtwarzania

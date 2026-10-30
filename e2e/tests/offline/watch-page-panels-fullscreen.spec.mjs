@@ -852,7 +852,8 @@ test.describe('fullscreen captions', () => {
     const windowedFontSizes = await captionContainers.evaluateAll(elements => {
       return elements.map(element => getComputedStyle(element).fontSize)
     })
-    expect(windowedFontSizes).toEqual(['30px', '30px'])
+    // Shaka scales the cues by the configured size, the containers have the size it scales
+    expect(windowedFontSizes).toEqual(['20px', '20px'])
 
     // The player is only a few hundred pixels tall here, so the captions scale down with it.
     await setWindowWidth(app, 400)
@@ -864,8 +865,8 @@ test.describe('fullscreen captions', () => {
       return elements.map(element => Number.parseFloat(getComputedStyle(element).fontSize))
     })
     for (const fontSize of narrowFontSizes) {
-      expect(fontSize).toBeGreaterThan(30 * 0.45)
-      expect(fontSize).toBeLessThan(30 * 0.75)
+      expect(fontSize).toBeGreaterThan(20 * 0.45)
+      expect(fontSize).toBeLessThan(20 * 0.75)
     }
 
     // Fullscreen makes the player tall again, so the configured size comes back.

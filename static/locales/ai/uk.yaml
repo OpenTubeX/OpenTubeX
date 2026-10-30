@@ -710,8 +710,6 @@ Settings:
       Background Color: Колір тла
       Background Opacity: Непрозорість тла
       Font Size: Розмір шрифту
-      Vertical Position: Вертикальне розташування
-      Edge Color: Колір обведення
       Anchor:
         Anchor: Прив’язка
         Top Left: Угорі ліворуч
@@ -720,12 +718,34 @@ Settings:
         Bottom Left: Унизу ліворуч
         Bottom Center: Унизу по центру
         Bottom Right: Унизу праворуч
+        Center Left: По центру ліворуч
+        Center: По центру
+        Center Right: По центру праворуч
       Edge Style:
         Edge Style: Стиль країв
         None: Немає
         Outline: Контур
         Drop Shadow: Відкинута тінь
+        Raised: Випуклі
+        Depressed: Увігнуті
       Reset: Скинути вигляд субтитрів
+      Default: За умовчанням
+      Text Opacity: Прозорість шрифту
+      Font Family:
+        Font Family: Сімейство шрифтів
+        Monospaced Serif: Моноширинний Serif
+        Proportional Serif: Пропорційний Serif
+        Monospaced Sans-Serif: Моноширинний Sans-Serif
+        Proportional Sans-Serif: Пропорційний Sans-Serif
+      Colors:
+        White: Білий
+        Yellow: Жовтий
+        Green: Зелений
+        Cyan: Блакитний
+        Blue: Синій
+        Magenta: Пурпурний
+        Red: Червоний
+        Black: Чорний
     Default Viewing Mode:
       Full Window (Always On): На все вікно (завжди)
       Full Screen (Always On): На весь екран (завжди)
@@ -1579,7 +1599,6 @@ Video:
       Error: Не вдалося виконати закадровий переклад. Спробуйте пізніше.
       Duration Error: Закадровий переклад доступний лише для відео тривалістю до чотирьох годин.
     Caption Appearance:
-      Options: Параметри
       Sample: Так виглядатимуть субтитри
     Auto-translate: Автопереклад
     Sleep Timer:

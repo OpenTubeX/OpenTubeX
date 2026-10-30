@@ -703,8 +703,6 @@ Settings:
       Background Color: Arka Plan Rengi
       Background Opacity: Arka Plan Opaklığı
       Font Size: Yazı Tipi Boyutu
-      Vertical Position: Dikey Konum
-      Edge Color: Kenar Rengi
       Anchor:
         Anchor: Hizalama
         Top Left: Sol Üst
@@ -713,12 +711,34 @@ Settings:
         Bottom Left: Sol Alt
         Bottom Center: Alt Orta
         Bottom Right: Sağ Alt
+        Center Left: Sol orta
+        Center: Orta
+        Center Right: Sağ orta
       Edge Style:
         Edge Style: Kenar Biçemi
         None: Yok
         Outline: Dış Çizgi
         Drop Shadow: Alt Gölge
+        Raised: Yükseltilmiş
+        Depressed: Bastırılmış
       Reset: Alt Yazı Görünümünü Sıfırla
+      Default: Varsayılan
+      Text Opacity: Yazı tipi opaklığı
+      Font Family:
+        Font Family: Yazı tipi ailesi
+        Monospaced Serif: Tek Aralıklı Serif
+        Proportional Serif: Orantılı Serif
+        Monospaced Sans-Serif: Tek Aralıklı Sans-Serif
+        Proportional Sans-Serif: Orantılı Sans-Serif
+      Colors:
+        White: Beyaz
+        Yellow: Sarı
+        Green: Yeşil
+        Cyan: Camgöbeği
+        Blue: Mavi
+        Magenta: Macenta
+        Red: Kırmızı
+        Black: Siyah
     Auto Picture in Picture:
       Auto Picture in Picture: Otomatik olarak Resim İçinde Resim moduna geç
       On Tab Change: Sekme değiştirirken
@@ -1540,7 +1560,6 @@ Video:
       Error: Seslendirme çevirisi başarısız oldu. Lütfen daha sonra yeniden deneyin.
       Duration Error: Seslendirme çevirisi yalnızca dört saate kadar olan videolarda kullanılabilir.
     Caption Appearance:
-      Options: Seçenekler
       Sample: Alt yazılar böyle görünür
     Auto-translate: Otomatik çevir
     Sleep Timer:

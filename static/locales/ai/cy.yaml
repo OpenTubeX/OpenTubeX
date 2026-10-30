@@ -706,8 +706,6 @@ Settings:
       Background Color: Lliw cefndir
       Background Opacity: Didreiddedd y cefndir
       Font Size: Maint y ffont
-      Vertical Position: Safle fertigol
-      Edge Color: Lliw ymyl
       Anchor:
         Anchor: Angor
         Top Left: Brig chwith
@@ -716,12 +714,34 @@ Settings:
         Bottom Left: Gwaelod chwith
         Bottom Center: Canol y gwaelod
         Bottom Right: Gwaelod dde
+        Center Left: Canol chwith
+        Center: Canol
+        Center Right: Canol dde
       Edge Style:
         Edge Style: Arddull ymyl
         None: Dim
         Outline: Amlinell
         Drop Shadow: Cysgod
+        Raised: Wedi codi
+        Depressed: Wedi pantio
       Reset: Ailosod golwg capsiynau
+      Default: Rhagosodiad
+      Text Opacity: Didreiddedd y testun
+      Font Family:
+        Font Family: Teulu ffont
+        Monospaced Serif: Serif unlled
+        Proportional Serif: Serif cyfrannol
+        Monospaced Sans-Serif: Sans-serif unlled
+        Proportional Sans-Serif: Sans-serif cyfrannol
+      Colors:
+        White: Gwyn
+        Yellow: Melyn
+        Green: Gwyrdd
+        Cyan: Gwyrddlas
+        Blue: Glas
+        Magenta: Magenta
+        Red: Coch
+        Black: Du
     Auto Picture in Picture:
       Auto Picture in Picture: Mynd i'r modd Llun-mewn-Llun yn awtomatig
       On Tab Change: Wrth newid tab
@@ -1564,7 +1584,6 @@ Video:
       Error: Methodd cyfieithu'r troslais. Rhowch gynnig arall arni yn nes ymlaen.
       Duration Error: Dim ond ar gyfer fideos hyd at bedair awr o hyd y mae cyfieithu troslais ar gael.
     Caption Appearance:
-      Options: Dewisiadau
       Sample: Dyma olwg y capsiynau
     Auto-translate: Cyfieithu'n awtomatig
     Sleep Timer:

@@ -1,5 +1,5 @@
 import { test, expect } from '../../helpers/app.mjs'
-import { openMockedVideo } from '../../helpers/player.mjs'
+import { openMockedVideo, openCaptionLanguages } from '../../helpers/player.mjs'
 import { mockPlayableWatchPage } from '../../helpers/watch.mjs'
 
 const SEED = {
@@ -42,7 +42,7 @@ async function openCaptionsMenu(page) {
   // Keep the controls shown, they can fade out before the click on slow machines
   await player.locator('.shaka-controls-container').evaluate(element => element.setAttribute('casting', 'true'))
   await player.getByRole('button', { name: 'More settings' }).click()
-  await player.locator('.shaka-overflow-menu').getByRole('button', { name: 'Captions' }).click()
+  await openCaptionLanguages(player)
   const captionsMenu = player.locator('.shaka-text-languages')
   await expect(captionsMenu).toBeVisible()
   return captionsMenu
@@ -186,24 +186,6 @@ test.describe('secondary captions', () => {
     // Like in Shaka's submenus, a click beside the options goes back
     await options.click({ position: { x: 2, y: 2 } })
     await expect(secondaryMenu).toBeHidden()
-    await expect(captionsMenu).toBeVisible()
-
-    // So does a click beside the caption appearance controls, but a click
-    // within a control stays, and one with a color open only closes it
-    await captionsMenu.getByRole('button', { name: 'Options', exact: true }).click()
-    const appearanceMenu = player.locator('.ft-caption-appearance-menu')
-    const appearanceControls = appearanceMenu.locator('.ft-caption-appearance-controls')
-    await expect(appearanceMenu).toBeVisible()
-    await appearanceMenu.locator('label.ft-caption-appearance-control > span').first().click()
-    await expect(appearanceMenu).toBeVisible()
-    await appearanceMenu.locator('.ft-caption-color-control > span').first().click()
-    const colorPopover = appearanceMenu.locator('.ft-caption-color-popover').visible()
-    await expect(colorPopover).toHaveCount(1)
-    await appearanceControls.click({ position: { x: 2, y: 2 } })
-    await expect(colorPopover).toHaveCount(0)
-    await expect(appearanceMenu).toBeVisible()
-    await appearanceControls.click({ position: { x: 2, y: 2 } })
-    await expect(appearanceMenu).toBeHidden()
     await expect(captionsMenu).toBeVisible()
 
     await captionsMenu.getByRole('button', { name: 'Secondary Captions', exact: true }).click()

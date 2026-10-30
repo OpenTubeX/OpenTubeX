@@ -710,8 +710,6 @@ Settings:
       Background Color: Cor do fondo
       Background Opacity: Opacidade do fondo
       Font Size: Tamaño do tipo de letra
-      Vertical Position: Posición vertical
-      Edge Color: Cor do bordo
       Anchor:
         Anchor: Ancoraxe
         Top Left: Arriba á esquerda
@@ -720,12 +718,34 @@ Settings:
         Bottom Left: Abaixo á esquerda
         Bottom Center: Abaixo no centro
         Bottom Right: Abaixo á dereita
+        Center Left: Centro á esquerda
+        Center: Centro
+        Center Right: Centro á dereita
       Edge Style:
         Edge Style: Estilo do bordo
         None: Ningún
         Outline: Contorno
         Drop Shadow: Sombra proxectada
+        Raised: Elevado
+        Depressed: Afundido
       Reset: Restablecer a aparencia dos subtítulos
+      Default: Predeterminado
+      Text Opacity: Opacidade do texto
+      Font Family:
+        Font Family: Familia tipográfica
+        Monospaced Serif: Serif monoespazada
+        Proportional Serif: Serif proporcional
+        Monospaced Sans-Serif: Sans serif monoespazada
+        Proportional Sans-Serif: Sans serif proporcional
+      Colors:
+        White: Branco
+        Yellow: Amarelo
+        Green: Verde
+        Cyan: Ciano
+        Blue: Azul
+        Magenta: Maxenta
+        Red: Vermello
+        Black: Negro
     Default Viewing Mode:
       Full Window (Always On): Xanela completa (sempre activo)
       Full Screen (Always On): Pantalla completa (sempre activo)
@@ -1588,7 +1608,6 @@ Video:
       Error: Produciuse un erro na tradución de voz. Téntao de novo máis tarde.
       Duration Error: A tradución de voz só está dispoñible para vídeos de ata catro horas.
     Caption Appearance:
-      Options: Opcións
       Sample: Os subtítulos teñen este aspecto
     Auto-translate: Tradución automática
     Sleep Timer:

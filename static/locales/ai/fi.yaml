@@ -710,8 +710,6 @@ Settings:
       Background Color: Taustan väri
       Background Opacity: Taustan peittävyys
       Font Size: Fonttikoko
-      Vertical Position: Pystysijainti
-      Edge Color: Reunan väri
       Anchor:
         Anchor: Kiinnityskohta
         Top Left: Ylhäällä vasemmalla
@@ -720,12 +718,34 @@ Settings:
         Bottom Left: Alhaalla vasemmalla
         Bottom Center: Alhaalla keskellä
         Bottom Right: Alhaalla oikealla
+        Center Left: Keskellä vasemmalla
+        Center: Keskellä
+        Center Right: Keskellä oikealla
       Edge Style:
         Edge Style: Reunatyyli
         None: Ei mitään
         Outline: Ääriviiva
         Drop Shadow: Heittovarjo
+        Raised: Korotettu
+        Depressed: Upotettu
       Reset: Palauta tekstityksen ulkoasu
+      Default: Oletus
+      Text Opacity: Fontin läpinäkymättömyys
+      Font Family:
+        Font Family: Fonttiperhe
+        Monospaced Serif: Tasalevyinen Serif
+        Proportional Serif: Suhteellinen Serif
+        Monospaced Sans-Serif: Tasalevyinen Sans-Serif
+        Proportional Sans-Serif: Suhteellinen Sans-Serif
+      Colors:
+        White: Valkoinen
+        Yellow: Keltainen
+        Green: Vihreä
+        Cyan: Syaani
+        Blue: Sininen
+        Magenta: Magenta
+        Red: Punainen
+        Black: Musta
     Default Viewing Mode:
       Full Window (Always On): Koko ikkuna (aina käytössä)
       Full Screen (Always On): Koko näyttö (aina käytössä)
@@ -1584,7 +1604,6 @@ Video:
       Error: Selostuskäännös epäonnistui. Yritä myöhemmin uudelleen.
       Duration Error: Selostuskäännös on käytettävissä vain enintään neljän tunnin videoissa.
     Caption Appearance:
-      Options: Asetukset
       Sample: Tekstitys näyttää tältä
     Auto-translate: Automaattinen käännös
     Sleep Timer:

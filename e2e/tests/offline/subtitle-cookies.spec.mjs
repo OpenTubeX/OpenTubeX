@@ -2,7 +2,7 @@ import { chmod, readFile, readdir, writeFile } from 'node:fs/promises'
 import path from 'node:path'
 
 import { test, expect } from '../../helpers/app.mjs'
-import { activeTab, openMockedVideo } from '../../helpers/player.mjs'
+import { activeTab, openMockedVideo, openCaptionLanguages } from '../../helpers/player.mjs'
 import { mockPlayableWatchPage } from '../../helpers/watch.mjs'
 
 test.use({ seed: { settings: { videoPlaybackEngine: 'built-in', ytDlpPlaybackEngineDefaultMigration: true } } })
@@ -99,7 +99,7 @@ for (const setting of ['updateYtDlpSubtitleUseCookies', 'updateYtDlpPlaybackAlwa
     await expect.poll(() => player.evaluate(element => element.ui?.getControls().getPlayer().getTextTracks().length ?? 0)).toBeGreaterThan(0)
     await player.hover()
     await player.getByRole('button', { name: 'More settings' }).click()
-    await player.locator('.shaka-overflow-menu').getByRole('button', { name: 'Captions' }).click()
+    await openCaptionLanguages(player)
     await player.locator('.shaka-text-languages').getByRole('button', { name: 'Auto-translate' }).click()
     await player.locator('.ft-caption-translation-options').getByRole('button', { name: 'German', exact: true }).click()
     await expect.poll(() => app.electronApp.evaluate(() => globalThis.subtitleCookieRequests.some(url => new URL(url).searchParams.get('tlang') === 'de'))).toBe(true)

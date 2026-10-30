@@ -691,8 +691,6 @@ Settings:
       Background Color: Background Colour
       Background Opacity: Background Opacity
       Font Size: Font Size
-      Vertical Position: Vertical Position
-      Edge Color: Edge Colour
       Anchor:
         Anchor: Anchor
         Top Left: Top Left
@@ -701,12 +699,34 @@ Settings:
         Bottom Left: Bottom Left
         Bottom Center: Bottom Centre
         Bottom Right: Bottom Right
+        Center Left: Centre left
+        Center: Centre
+        Center Right: Centre right
       Edge Style:
         Edge Style: Edge Style
         None: None
         Outline: Outline
         Drop Shadow: Drop Shadow
+        Raised: Raised
+        Depressed: Depressed
       Reset: Reset Caption Appearance
+      Default: Default
+      Text Opacity: Font opacity
+      Font Family:
+        Font Family: Font family
+        Monospaced Serif: Monospaced serif
+        Proportional Serif: Proportional serif
+        Monospaced Sans-Serif: Monospaced sans-serif
+        Proportional Sans-Serif: Proportional sans-serif
+      Colors:
+        White: White
+        Yellow: Yellow
+        Green: Green
+        Cyan: Cyan
+        Blue: Blue
+        Magenta: Magenta
+        Red: Red
+        Black: Black
     Auto Picture in Picture:
       Auto Picture in Picture: Automatically enter Picture-in-Picture
       On Tab Change: When switching tabs
@@ -1525,7 +1545,6 @@ Video:
       Error: Voice-over translation failed. Please try again later.
       Duration Error: Voice-over translation is only available for videos up to four hours long.
     Caption Appearance:
-      Options: Options
       Sample: Captions look like this
     Auto-translate: Auto-translate
     Sleep Timer:

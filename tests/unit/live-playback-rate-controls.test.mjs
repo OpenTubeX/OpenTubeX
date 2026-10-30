@@ -27,6 +27,7 @@ function controls(props, overflow = false, quickBar = true, playerIsLive = props
     getRemovedControlBarButtons,
     getBigButtons: () => [],
     TrackLabelFormat: {},
+    CAPTION_FONT_SCALE_FACTORS: [],
     volumeBoostPossible: false,
     removeFromArrayIfExists(array, item) {
       const index = array.indexOf(item)

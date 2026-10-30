@@ -902,8 +902,6 @@ Settings:
       Background Color: Barva ozadja
       Background Opacity: Motnost ozadja
       Font Size: Velikost pisave
-      Vertical Position: Navpični položaj
-      Edge Color: Barva obrobe
       Anchor:
         Anchor: Sidrišče
         Top Left: Zgoraj levo
@@ -912,12 +910,34 @@ Settings:
         Bottom Left: Spodaj levo
         Bottom Center: Spodaj na sredini
         Bottom Right: Spodaj desno
+        Center Left: Na sredini levo
+        Center: Na sredini
+        Center Right: Na sredini desno
       Edge Style:
         Edge Style: Slog roba
         None: Brez
         Outline: Obroba
         Drop Shadow: Padajoča senca
+        Raised: Dvignjeno
+        Depressed: Znižano
       Reset: Ponastavi videz podnapisov
+      Default: Privzeto
+      Text Opacity: Neprosojnost pisave
+      Font Family:
+        Font Family: Skupina pisav
+        Monospaced Serif: Enopresledna serif
+        Proportional Serif: Sorazmerna serif
+        Monospaced Sans-Serif: Enopresledna sans-serif
+        Proportional Sans-Serif: Sorazmerna sans-serif
+      Colors:
+        White: Bela
+        Yellow: Rumena
+        Green: Zelena
+        Cyan: Cijan
+        Blue: Modra
+        Magenta: Magenta
+        Red: Rdeča
+        Black: Črna
     Default Viewing Mode:
       Theater: Kino
       Default Viewing Mode: Privzeti način gledanja
@@ -1976,7 +1996,6 @@ Video:
       Error: Glasovni prevod ni uspel. Poskusite znova pozneje.
       Duration Error: Glasovni prevod je na voljo samo za videoposnetke, dolge največ štiri ure.
     Caption Appearance:
-      Options: Možnosti
       Sample: Podnapisi so videti tako
     Auto-translate: Samodejni prevod
     Sleep Timer:

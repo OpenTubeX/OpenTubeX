@@ -732,8 +732,6 @@ Settings:
       Background Color: Колер фону
       Background Opacity: Непразрыстасць фону
       Font Size: Памер шрыфту
-      Vertical Position: Вертыкальнае становішча
-      Edge Color: Колер контуру
       Anchor:
         Anchor: Прывязка
         Top Left: Зверху злева
@@ -742,12 +740,34 @@ Settings:
         Bottom Left: Знізу злева
         Bottom Center: Знізу па цэнтры
         Bottom Right: Знізу справа
+        Center Left: Па цэнтры злева
+        Center: Па цэнтры
+        Center Right: Па цэнтры справа
       Edge Style:
         Edge Style: Стыль контуру
         None: Няма
         Outline: Абводка
         Drop Shadow: Адкінуты цень
+        Raised: Прыўзняты
+        Depressed: Уціснуты
       Reset: Скінуць выгляд субцітраў
+      Default: Стандартна
+      Text Opacity: Непразрыстасць шрыфту
+      Font Family:
+        Font Family: Сямейства шрыфтоў
+        Monospaced Serif: Монашырынны Serif
+        Proportional Serif: Прапарцыйны Serif
+        Monospaced Sans-Serif: Монашырынны Sans-Serif
+        Proportional Sans-Serif: Прапарцыйны Sans-Serif
+      Colors:
+        White: Белы
+        Yellow: Жоўты
+        Green: Зялёны
+        Cyan: Блакітны
+        Blue: Сіні
+        Magenta: Пурпурны
+        Red: Чырвоны
+        Black: Чорны
     Default Viewing Mode:
       Full Window (Always On): На ўсё акно (заўсёды)
       Full Screen (Always On): На ўвесь экран (заўсёды)
@@ -1628,7 +1648,6 @@ Video:
       Error: Не ўдалося выканаць закадравы пераклад. Паўтарыце спробу пазней.
       Duration Error: Закадравы пераклад даступны толькі для відэа працягласцю да чатырох гадзін.
     Caption Appearance:
-      Options: Параметры
       Sample: Так выглядаюць субцітры
     Auto-translate: Аўтапераклад
     Sleep Timer:

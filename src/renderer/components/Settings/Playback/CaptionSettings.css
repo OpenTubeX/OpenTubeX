@@ -2,58 +2,48 @@
   user-select: none;
 }
 
+/* Lays out the sample like Shaka's caption region, 5% from the edges. */
 .captionPreview {
-  position: relative;
   box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
   block-size: 240px;
+  padding: 5%;
   margin-block-end: 1rem;
   border-radius: calc(5px * var(--ui-roundness));
   background: linear-gradient(135deg, #576574, #222f3e);
-  font-size: calc(20px * var(--caption-font-scale));
+  line-height: 1.4;
   overflow: hidden;
 }
 
 .captionPreview span {
-  position: absolute;
-  max-inline-size: 90%;
-  padding-inline: 0.15em;
+  max-inline-size: 100%;
   border-radius: calc(4px * var(--ui-roundness));
-  background-color: var(--caption-background-color);
-  color: var(--caption-text-color);
-  -webkit-font-smoothing: antialiased;
-  -webkit-text-stroke: var(--caption-text-stroke-width) var(--caption-edge-color);
-  paint-order: stroke fill;
-  text-align: var(--caption-text-align);
-  text-rendering: geometricprecision;
-  text-shadow: var(--caption-text-shadow);
+  box-decoration-break: clone;
 }
 
-.captionAnchor-top-left span,
-.captionAnchor-top-center span,
-.captionAnchor-top-right span {
-  inset-block-start: calc(var(--caption-edge-gap) + var(--caption-bottom-offset));
+.captionRow-top {
+  justify-content: flex-start;
 }
 
-.captionAnchor-bottom-left span,
-.captionAnchor-bottom-center span,
-.captionAnchor-bottom-right span {
-  inset-block-end: calc(var(--caption-edge-gap) + var(--caption-bottom-offset));
+.captionRow-center {
+  justify-content: center;
 }
 
-.captionAnchor-top-left span,
-.captionAnchor-bottom-left span {
-  inset-inline-start: var(--caption-edge-gap);
+.captionRow-bottom {
+  justify-content: flex-end;
 }
 
-.captionAnchor-top-center span,
-.captionAnchor-bottom-center span {
-  inset-inline-start: 50%;
-  transform: translateX(-50%);
+.captionColumn-left {
+  align-items: flex-start;
 }
 
-.captionAnchor-top-right span,
-.captionAnchor-bottom-right span {
-  inset-inline-end: var(--caption-edge-gap);
+.captionColumn-center {
+  align-items: center;
+}
+
+.captionColumn-right {
+  align-items: flex-end;
 }
 
 .captionControls {
@@ -76,27 +66,9 @@
   backdrop-filter: var(--card-bg-blur, none);
 }
 
-.captionControl :deep(.pure-material-slider) {
-  inline-size: 100%;
-  margin: 0;
-  padding: 0;
-}
-
 .captionControl :deep(.select) {
   inline-size: 100%;
   margin-block: 0;
-}
-
-.captionColorControl {
-  padding: 0;
-  color: color-mix(in srgb, var(--primary-text-color) 87%, transparent);
-}
-
-.captionColorControl :deep(.colorFieldTrigger) {
-  inline-size: 100%;
-  block-size: 100%;
-  min-block-size: var(--form-control-height);
-  border-radius: inherit;
 }
 
 .captionActions {

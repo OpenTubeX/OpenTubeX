@@ -710,8 +710,6 @@ Settings:
       Background Color: צבע הרקע
       Background Opacity: אטימות הרקע
       Font Size: גודל הגופן
-      Vertical Position: מיקום אנכי
-      Edge Color: צבע הקצה
       Anchor:
         Anchor: עיגון
         Top Left: למעלה משמאל
@@ -720,12 +718,34 @@ Settings:
         Bottom Left: למטה משמאל
         Bottom Center: למטה במרכז
         Bottom Right: למטה מימין
+        Center Left: במרכז משמאל
+        Center: במרכז
+        Center Right: במרכז מימין
       Edge Style:
         Edge Style: סגנון הקצה
         None: ללא
         Outline: קו מתאר
         Drop Shadow: הצללה
+        Raised: מוגבה
+        Depressed: שקוע
       Reset: איפוס מראה הכתוביות
+      Default: ברירת מחדל
+      Text Opacity: שקיפות גופן
+      Font Family:
+        Font Family: משפחת גופנים
+        Monospaced Serif: Serif ברוחב קבוע
+        Proportional Serif: Serif יחסי
+        Monospaced Sans-Serif: Sans-Serif ברוחב קבוע
+        Proportional Sans-Serif: Sans-Serif יחסי
+      Colors:
+        White: לבן
+        Yellow: צהוב
+        Green: ירוק
+        Cyan: ציאן
+        Blue: כחול
+        Magenta: מג'נטה
+        Red: אדום
+        Black: שחור
     Default Viewing Mode:
       Full Window (Always On): חלון מלא (תמיד פעיל)
       Full Screen (Always On): מסך מלא (תמיד פעיל)
@@ -1586,7 +1606,6 @@ Video:
       Error: התרגום המדובב נכשל. נסו שוב מאוחר יותר.
       Duration Error: תרגום מדובב זמין רק לסרטונים שאורכם עד ארבע שעות.
     Caption Appearance:
-      Options: אפשרויות
       Sample: כך נראות כתוביות
     Auto-translate: תרגום אוטומטי
     Sleep Timer:

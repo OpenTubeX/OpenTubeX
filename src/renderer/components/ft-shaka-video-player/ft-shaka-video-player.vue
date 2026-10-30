@@ -114,10 +114,10 @@
         pausedInterfaceRevealed,
         hidePlayerControlsWhenPaused: !showPlayerControlsWhenPaused,
         hideVideoTitleWhenPaused: !showVideoTitleWhenPaused,
-        hideFullscreenActionsWhenPaused: !showFullscreenActionsWhenPaused
+        hideFullscreenActionsWhenPaused: !showFullscreenActionsWhenPaused,
+        captionsUseAppFont
       }"
       :style="[
-        captionCssVariables,
         captionPlayerVariables,
         { '--inline-player-aspect-ratio': audioPlayerMode || forceAspectRatio ? 16 / 9 : (annotationVideoAspectRatio ?? 16 / 9) },
         scrollMiniPlayerActive ? scrollMiniPlayerStyle : undefined,
@@ -721,19 +721,11 @@
       <div
         v-if="secondaryCaptionText"
         class="secondaryCaptions"
-        :class="{ secondaryCaptionsAtTop }"
-        :style="secondaryCaptionsBox"
+        :class="{ secondaryCaptionsAtTop: secondaryCaptionPosition.atTop }"
+        :style="[secondaryCaptionsBox, { textAlign: secondaryCaptionPosition.align }, captionStyle.text]"
         translate="no"
       >
-        <span>{{ secondaryCaptionText }}</span>
-      </div>
-      <div
-        v-if="showCaptionAppearanceSample"
-        class="captionAppearanceSample"
-        :style="{ bottom: captionAppearanceSampleBottom }"
-        aria-live="polite"
-      >
-        <span>{{ $t('Video.Player.Caption Appearance.Sample') }}</span>
+        <span :style="{ backgroundColor: captionStyle.background }">{{ secondaryCaptionText }}</span>
       </div>
       <FtMobileSheet
         class="fullscreenDockSheet"

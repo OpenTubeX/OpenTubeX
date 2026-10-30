@@ -1,5 +1,5 @@
 import { test, expect, goToSettingsSection, setPlayerFullscreen } from '../../helpers/app.mjs'
-import { findWatchComponent, openMockedVideo } from '../../helpers/player.mjs'
+import { findWatchComponent, openMockedVideo, openCaptionLanguages } from '../../helpers/player.mjs'
 import { mockPlayableWatchPage } from '../../helpers/watch.mjs'
 
 test.use({
@@ -317,7 +317,7 @@ test('portrait mobile controls keep captions and PiP in settings when the row is
     const menu = player.locator('.shaka-overflow-menu')
     await expect(menu.getByRole('button', { name: 'Captions' })).toBeVisible()
     await expect(menu.locator('.shaka-pip-button')).toBeVisible()
-    await menu.getByRole('button', { name: 'Captions' }).click()
+    await openCaptionLanguages(player)
     await expect(player.locator('.shaka-text-languages')).toBeVisible()
     await expect(menu.locator('.shaka-pip-button')).toBeHidden()
     await player.locator('.shaka-text-languages .shaka-back-to-overflow-button').click()

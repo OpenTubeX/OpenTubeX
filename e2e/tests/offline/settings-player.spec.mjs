@@ -620,29 +620,6 @@ test.describe('settings', () => {
     await expect(toolbar).toBeVisible()
   })
 
-  test('aligns caption color controls with neighboring selects', async ({ page }) => {
-    await goTo(page, 'settings')
-    await page.locator('.settingsMenu [data-section="playback"]').click()
-
-    const edgeStyle = page.getByRole('combobox', { name: 'Edge Style' })
-    await edgeStyle.click()
-    await page.getByRole('option', { name: 'Drop Shadow' }).click()
-
-    const edgeStyleControl = edgeStyle.locator('..').locator('..')
-    const edgeColorControl = page.locator('.captionColorControl').filter({ hasText: 'Edge Color' })
-    const edgeColorTrigger = edgeColorControl.getByRole('button', { name: 'Edge Color' })
-    const [styleControlBounds, colorControlBounds, colorTriggerBounds] = await Promise.all([
-      edgeStyleControl.boundingBox(),
-      edgeColorControl.boundingBox(),
-      edgeColorTrigger.boundingBox()
-    ])
-
-    expect(colorControlBounds.y).toBeCloseTo(styleControlBounds.y, 0)
-    expect(colorControlBounds.height).toBeCloseTo(styleControlBounds.height, 0)
-    expect(colorTriggerBounds.y).toBeCloseTo(colorControlBounds.y, 0)
-    expect(colorTriggerBounds.height).toBeCloseTo(colorControlBounds.height, 0)
-  })
-
   test('stacks caption controls at narrow settings widths', async ({ page, attachScreenshot }) => {
     await page.evaluate(() => {
       localStorage.setItem('opentubex-settings-window-bounds', JSON.stringify({
@@ -657,7 +634,9 @@ test.describe('settings', () => {
 
     const preview = page.locator('.captionPreview')
     const initialPreviewBounds = await preview.boundingBox()
-    await page.getByRole('slider', { name: /Font Size/ }).fill('400')
+    await page.locator('.captionControl .select').filter({
+      has: page.getByRole('combobox', { name: 'Font Size' })
+    }).locator('select').selectOption('4')
     const enlargedPreviewBounds = await preview.boundingBox()
     expect(initialPreviewBounds.height).toBe(240)
     expect(enlargedPreviewBounds.height).toBe(initialPreviewBounds.height)

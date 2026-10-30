@@ -732,8 +732,6 @@ Settings:
       Background Color: رنگ پس‌زمینه
       Background Opacity: میزان کدری پس‌زمینه
       Font Size: اندازهٔ قلم
-      Vertical Position: جایگاه عمودی
-      Edge Color: رنگ لبه
       Anchor:
         Anchor: لنگر
         Top Left: بالا چپ
@@ -742,12 +740,34 @@ Settings:
         Bottom Left: پایین چپ
         Bottom Center: پایین وسط
         Bottom Right: پایین راست
+        Center Left: وسط چپ
+        Center: وسط
+        Center Right: وسط راست
       Edge Style:
         Edge Style: سبک لبه
         None: هیچ‌کدام
         Outline: دورخط
         Drop Shadow: سایه
+        Raised: برجسته
+        Depressed: فرورفته
       Reset: بازنشانی ظاهر زیرنویس
+      Default: پیش‌فرض
+      Text Opacity: ماتی قلم
+      Font Family:
+        Font Family: خانواده قلم
+        Monospaced Serif: Serif با عرض ثابت
+        Proportional Serif: Serif نسبی
+        Monospaced Sans-Serif: Sans-Serif با عرض ثابت
+        Proportional Sans-Serif: Sans-Serif نسبی
+      Colors:
+        White: سفید
+        Yellow: زرد
+        Green: سبز
+        Cyan: سبزآبی
+        Blue: آبی
+        Magenta: سرخابی
+        Red: قرمز
+        Black: مشکی
     Default Viewing Mode:
       Full Window (Always On): تمام‌پنجره (همیشه فعال)
       Full Screen (Always On): تمام‌صفحه (همیشه فعال)
@@ -1622,7 +1642,6 @@ Video:
       Error: ترجمهٔ صوتی ناموفق بود. لطفاً بعداً دوباره تلاش کنید.
       Duration Error: ترجمهٔ صوتی فقط برای ویدیوهای حداکثر چهارساعته در دسترس است.
     Caption Appearance:
-      Options: گزینه‌ها
       Sample: زیرنویس‌ها این‌گونه نمایش داده می‌شوند
     Auto-translate: ترجمهٔ خودکار
     Sleep Timer:

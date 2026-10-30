@@ -703,8 +703,6 @@ Settings:
       Background Color: 背景色彩
       Background Opacity: 背景不透明度
       Font Size: 字型大小
-      Vertical Position: 垂直位置
-      Edge Color: 邊緣色彩
       Anchor:
         Anchor: 錨點
         Top Left: 左上
@@ -713,12 +711,34 @@ Settings:
         Bottom Left: 左下
         Bottom Center: 中下
         Bottom Right: 右下
+        Center Left: 左側置中
+        Center: 置中
+        Center Right: 右側置中
       Edge Style:
         Edge Style: 邊緣樣式
         None: 無
         Outline: 外框
         Drop Shadow: 投影
+        Raised: 浮凸
+        Depressed: 內凹
       Reset: 重設字幕外觀
+      Default: 預設
+      Text Opacity: 字型透明度
+      Font Family:
+        Font Family: 字型系列
+        Monospaced Serif: 等寬襯線
+        Proportional Serif: 比例襯線
+        Monospaced Sans-Serif: 等寬無襯線
+        Proportional Sans-Serif: 比例無襯線
+      Colors:
+        White: 白色
+        Yellow: 黃色
+        Green: 綠色
+        Cyan: 青色
+        Blue: 藍色
+        Magenta: 洋紅色
+        Red: 紅色
+        Black: 黑色
     Auto Picture in Picture:
       Auto Picture in Picture: 自動進入子母畫面
       On Tab Change: 切換頁籤時
@@ -1543,7 +1563,6 @@ Video:
       Error: 語音翻譯失敗。請稍後再試。
       Duration Error: 語音翻譯僅適用於片長不超過四小時的影片。
     Caption Appearance:
-      Options: 選項
       Sample: 字幕會顯示成這樣
     Auto-translate: 自動翻譯
     Sleep Timer:

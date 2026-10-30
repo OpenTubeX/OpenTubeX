@@ -125,10 +125,6 @@ function isSettingsSearchMessageVisible(sectionType, path, options) {
     return false
   }
 
-  if (sectionType === 'caption-appearance' && group === 'Edge Color') {
-    return getCaptionEdgeStyle(store) !== 'none'
-  }
-
   if (sectionType === 'general' && [
     'Current Invidious Instance',
     'View all Invidious instance information',
@@ -388,16 +384,6 @@ function isSettingsSearchMessageVisible(sectionType, path, options) {
   }
 
   return true
-}
-
-function getCaptionEdgeStyle(store) {
-  const value = store.getters.getDefaultCaptionSettings
-  if (value !== null && typeof value === 'object') return value.edgeStyle ?? 'none'
-  try {
-    return JSON.parse(value).edgeStyle ?? 'none'
-  } catch {
-    return 'none'
-  }
 }
 
 export function flattenSettingsSearchMessageValues(

@@ -703,8 +703,6 @@ Settings:
       Background Color: Bakgrunnsfarge
       Background Opacity: Gjennomsiktighet for bakgrunn
       Font Size: Skriftstørrelse
-      Vertical Position: Loddrett plassering
-      Edge Color: Kantfarge
       Anchor:
         Anchor: Forankring
         Top Left: Øverst til venstre
@@ -713,12 +711,34 @@ Settings:
         Bottom Left: Nederst til venstre
         Bottom Center: Nederst i midten
         Bottom Right: Nederst til høyre
+        Center Left: Midten til venstre
+        Center: Midten
+        Center Right: Midten til høyre
       Edge Style:
         Edge Style: Kantstil
         None: Ingen
         Outline: Omriss
         Drop Shadow: Slagskygge
+        Raised: Hevet
+        Depressed: Senket
       Reset: Tilbakestill utseendet på undertekstene
+      Default: Standard
+      Text Opacity: Skrifttypeopasitet
+      Font Family:
+        Font Family: Skriftfamilie
+        Monospaced Serif: Serif (fast tegnavstand)
+        Proportional Serif: Serif (proporsjonal)
+        Monospaced Sans-Serif: Sans-Serif (fast tegnavstand)
+        Proportional Sans-Serif: Sans-Serif (proporsjonal)
+      Colors:
+        White: Hvit
+        Yellow: Gul
+        Green: Grønn
+        Cyan: Cyan
+        Blue: Blå
+        Magenta: Magenta
+        Red: Rød
+        Black: Svart
     Auto Picture in Picture:
       Auto Picture in Picture: Start bilde-i-bilde automatisk
       On Tab Change: Ved bytte av fane
@@ -1545,7 +1565,6 @@ Video:
       Error: Taleoversettelsen mislyktes. Prøv igjen senere.
       Duration Error: Taleoversettelse er bare tilgjengelig for videoer som varer i opptil fire timer.
     Caption Appearance:
-      Options: Alternativer
       Sample: Slik ser undertekstene ut
     Auto-translate: Oversett automatisk
     Sleep Timer:

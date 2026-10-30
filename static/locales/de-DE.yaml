@@ -916,13 +916,31 @@ Settings:
       Background Color: Hintergrundfarbe
       Background Opacity: Hintergrunddeckkraft
       Font Size: Schriftgröße
-      Vertical Position: Vertikale Position
-      Edge Color: Konturfarbe
+      Text Opacity: Textdeckkraft
+      Default: Standard
+      Font Family:
+        Font Family: Schriftart
+        Monospaced Serif: Serifen mit fester Breite
+        Proportional Serif: Proportionale Serifen
+        Monospaced Sans-Serif: Serifenlos mit fester Breite
+        Proportional Sans-Serif: Proportional serifenlos
+      Colors:
+        White: Weiß
+        Yellow: Gelb
+        Green: Grün
+        Cyan: Cyan
+        Blue: Blau
+        Magenta: Magenta
+        Red: Rot
+        Black: Schwarz
       Anchor:
         Anchor: Position
         Top Left: Oben links
         Top Center: Oben mittig
         Top Right: Oben rechts
+        Center Left: Mitte links
+        Center: Mitte
+        Center Right: Mitte rechts
         Bottom Left: Unten links
         Bottom Center: Unten mittig
         Bottom Right: Unten rechts
@@ -931,6 +949,8 @@ Settings:
         None: Keine
         Outline: Kontur
         Drop Shadow: Schlagschatten
+        Raised: Erhaben
+        Depressed: Vertieft
       Reset: Untertiteldarstellung zurücksetzen
     Enable Theatre Mode by Default: Kinomodus standardmäßig aktivieren
     Default Volume: Standard-Lautstärke
@@ -2168,7 +2188,6 @@ Video:
       Repeats: Wiederholung | Wiederholungen
       Time Spent: Wiedergabezeit
     Caption Appearance:
-      Options: Optionen
       Sample: So sehen Untertitel aus
     Sleep Timer:
       Sleep Timer: Einschlaftimer

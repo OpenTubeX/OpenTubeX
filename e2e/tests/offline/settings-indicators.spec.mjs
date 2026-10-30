@@ -122,12 +122,13 @@ test.describe('settings', () => {
     expect(resetCaptionAppearanceBounds.x + resetCaptionAppearanceBounds.width / 2)
       .toBeCloseTo(captionActionsBounds.x + captionActionsBounds.width / 2, 0)
 
-    const backgroundOpacity = page.getByRole('slider', { name: /Background Opacity/ })
-    await backgroundOpacity.fill('50')
+    const changedControl = page.locator('.captionControl .select').filter({
+      has: page.getByRole('combobox', { name: 'Background Opacity' })
+    })
+    const backgroundOpacity = changedControl.locator('select')
+    await backgroundOpacity.selectOption('0.5')
     await expect(resetCaptionAppearance).toBeEnabled()
 
-    const changedControl = page.locator('.pure-material-slider')
-      .filter({ has: backgroundOpacity })
     const resetButton = changedControl.getByRole('button', {
       name: 'Reset this setting to its default'
     })
@@ -139,7 +140,7 @@ test.describe('settings', () => {
     })).toHaveCount(1)
 
     await resetButton.click()
-    await expect(backgroundOpacity).toHaveValue('80')
+    await expect(backgroundOpacity).toHaveValue('')
     await expect(resetButton).toHaveCount(0)
     await expect(resetCaptionAppearance).toBeDisabled()
   })

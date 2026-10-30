@@ -703,8 +703,6 @@ Settings:
       Background Color: Colore dello sfondo
       Background Opacity: Opacità dello sfondo
       Font Size: Dimensione del carattere
-      Vertical Position: Posizione verticale
-      Edge Color: Colore del bordo
       Anchor:
         Anchor: Ancoraggio
         Top Left: In alto a sinistra
@@ -713,12 +711,34 @@ Settings:
         Bottom Left: In basso a sinistra
         Bottom Center: In basso al centro
         Bottom Right: In basso a destra
+        Center Left: Al centro a sinistra
+        Center: Al centro
+        Center Right: Al centro a destra
       Edge Style:
         Edge Style: Stile del bordo
         None: Nessuno
         Outline: Contorno
         Drop Shadow: Ombra
+        Raised: In rilievo
+        Depressed: Incassato
       Reset: Ripristina aspetto dei sottotitoli
+      Default: Predefinita
+      Text Opacity: Opacità carattere
+      Font Family:
+        Font Family: Famiglia di caratteri
+        Monospaced Serif: Serif a spaziatura fissa
+        Proportional Serif: Serif proporzionale
+        Monospaced Sans-Serif: Sans serif a spaziatura fissa
+        Proportional Sans-Serif: Sans serif proporzionale
+      Colors:
+        White: Bianco
+        Yellow: Giallo
+        Green: Verde
+        Cyan: Ciano
+        Blue: Blu
+        Magenta: Magenta
+        Red: Rosso
+        Black: Nero
     Auto Picture in Picture:
       Auto Picture in Picture: Attiva automaticamente Picture-in-Picture
       On Tab Change: Quando si cambia scheda
@@ -1540,7 +1560,6 @@ Video:
       Error: Traduzione vocale non riuscita. Riprova più tardi.
       Duration Error: La traduzione vocale è disponibile solo per video della durata massima di quattro ore.
     Caption Appearance:
-      Options: Opzioni
       Sample: Ecco l'aspetto dei sottotitoli
     Auto-translate: Traduzione automatica
     Sleep Timer:

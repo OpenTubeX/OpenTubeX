@@ -710,8 +710,6 @@ Settings:
       Background Color: Màu nền
       Background Opacity: Độ mờ nền
       Font Size: Cỡ chữ
-      Vertical Position: Vị trí dọc
-      Edge Color: Màu viền
       Anchor:
         Anchor: Điểm neo
         Top Left: Trên bên trái
@@ -720,12 +718,34 @@ Settings:
         Bottom Left: Dưới bên trái
         Bottom Center: Dưới ở giữa
         Bottom Right: Dưới bên phải
+        Center Left: Giữa bên trái
+        Center: Chính giữa
+        Center Right: Giữa bên phải
       Edge Style:
         Edge Style: Kiểu viền
         None: Không có
         Outline: Đường viền
         Drop Shadow: Bóng đổ
+        Raised: Tăng
+        Depressed: Chìm
       Reset: Đặt lại giao diện phụ đề
+      Default: Mặc định
+      Text Opacity: Độ mờ phông chữ
+      Font Family:
+        Font Family: Họ phông chữ
+        Monospaced Serif: Serif không cân xứng
+        Proportional Serif: Serif cân xứng
+        Monospaced Sans-Serif: Sans-Serif không cân xứng
+        Proportional Sans-Serif: Sans-Serif cân xứng
+      Colors:
+        White: Trắng
+        Yellow: Vàng
+        Green: Xanh lục
+        Cyan: Xanh lơ
+        Blue: Màu lam
+        Magenta: Đỏ tía
+        Red: Đỏ
+        Black: Đen
     Default Viewing Mode:
       Full Window (Always On): Toàn cửa sổ (luôn bật)
       Full Screen (Always On): Toàn màn hình (luôn bật)
@@ -1576,7 +1596,6 @@ Video:
       Error: Không thể dịch lồng tiếng. Vui lòng thử lại sau.
       Duration Error: Chỉ có thể dịch lồng tiếng cho video dài tối đa bốn giờ.
     Caption Appearance:
-      Options: Tùy chọn
       Sample: Phụ đề sẽ trông như thế này
     Auto-translate: Tự động dịch
     Sleep Timer:

@@ -1,5 +1,5 @@
 import { test, expect } from '../../helpers/app.mjs'
-import { openMockedVideo } from '../../helpers/player.mjs'
+import { openMockedVideo, openCaptionLanguages } from '../../helpers/player.mjs'
 import { mockPlayableWatchPage } from '../../helpers/watch.mjs'
 
 /**
@@ -55,11 +55,10 @@ for (const usePlayerMenuGrid of [true, false]) {
       await expectCenteredTitle(player.locator('.shaka-playback-rates'))
       await player.locator('.shaka-playback-rates > .shaka-back-to-overflow-button').click()
 
-      await overflowMenu.getByRole('button', { name: 'Captions' }).click()
+      await openCaptionLanguages(player)
       const captionsMenu = player.locator('.shaka-text-languages')
       await expectCenteredTitle(captionsMenu)
       for (const [entry, selector] of [
-        ['Options', '.ft-caption-appearance-menu'],
         ['Auto-translate', '.ft-caption-translation-menu'],
         ['Adjust timing…', '.ft-caption-timing-menu'],
       ]) {
@@ -70,6 +69,17 @@ for (const usePlayerMenuGrid of [true, false]) {
         await submenu.locator(':scope > .shaka-back-to-overflow-button').click()
         await expect(captionsMenu).toBeVisible()
       }
+
+      // The captions menu groups the languages with the caption style
+      await captionsMenu.locator(':scope > .shaka-back-to-overflow-button').click()
+      const captionsGroup = overflowMenu.locator(':scope > .shaka-menu-group')
+      await expectCenteredTitle(captionsGroup)
+      await captionsGroup.locator('.shaka-caption-style-button').click()
+      await expectCenteredTitle(captionsGroup.locator('.shaka-menu-group'))
+      await attachScreenshot('caption style header')
+      await captionsGroup.locator('.shaka-caption-font-color-button').click()
+      await expectCenteredTitle(captionsGroup.locator('.shaka-text-colors').first())
+      await attachScreenshot('caption font color header')
     })
   })
 }

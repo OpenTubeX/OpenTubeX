@@ -871,8 +871,6 @@ Settings:
       Background Color: 배경 색상
       Background Opacity: 배경 불투명도
       Font Size: 글꼴 크기
-      Vertical Position: 세로 위치
-      Edge Color: 테두리 색상
       Anchor:
         Anchor: 기준 위치
         Top Left: 왼쪽 위
@@ -881,12 +879,34 @@ Settings:
         Bottom Left: 왼쪽 아래
         Bottom Center: 가운데 아래
         Bottom Right: 오른쪽 아래
+        Center Left: 중앙 왼쪽
+        Center: 중앙
+        Center Right: 중앙 오른쪽
       Edge Style:
         Edge Style: 테두리 스타일
         None: 없음
         Outline: 윤곽선
         Drop Shadow: 그림자
+        Raised: 높임
+        Depressed: 낮춤
       Reset: 자막 모양 초기화
+      Default: 기본값
+      Text Opacity: 글꼴 불투명도
+      Font Family:
+        Font Family: 글꼴 모음
+        Monospaced Serif: 고정 너비 Serif
+        Proportional Serif: 비례 너비 Serif
+        Monospaced Sans-Serif: 고정 너비 Sans-Serif
+        Proportional Sans-Serif: 비례 너비 Sans-Serif
+      Colors:
+        White: 흰색
+        Yellow: 노란색
+        Green: 녹색
+        Cyan: 청록색
+        Blue: 파란색
+        Magenta: 자홍색
+        Red: 빨간색
+        Black: 검은색
     Default Viewing Mode:
       Theater: 영화관 모드
       Default Viewing Mode: 기본 보기 모드
@@ -1866,7 +1886,6 @@ Video:
       Error: 음성 번역에 실패했습니다. 나중에 다시 시도하세요.
       Duration Error: 음성 번역은 재생 시간이 최대 4시간인 동영상에서만 사용할 수 있습니다.
     Caption Appearance:
-      Options: 옵션
       Sample: 자막은 이렇게 표시됩니다
     Auto-translate: 자동 번역
     Sleep Timer:
