@@ -71,3 +71,6 @@ jobs:
             Updates the yt-dlp release that the Android APK bundles in `android/app/build.gradle` to ${{ steps.update.outputs.changes }}.
 
             The checksum comes from the digest GitHub records for the release's `yt-dlp` asset. The Gradle build verifies the download against it.
+
+            ## Release note
+            - [x] No release note needed
