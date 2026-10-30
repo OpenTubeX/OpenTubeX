@@ -390,13 +390,13 @@ async function doRequest(
   try {
     let shouldReloadDueToBackoffLoop = false
     let waitedForBackoff = false
-    const deliveredMedia = currentState.sabrStreamState.deliveredMediaFor.has(operationInputs.streamKind)
+    const hasDeliveredMedia = () => currentState.sabrStreamState.deliveredMediaFor.has(operationInputs.streamKind)
     const needsMedia = () => (currentState.getBufferedAheadSeconds?.() ?? 0) < WITHHELD_MEDIA_RELOAD_BUFFER_SECONDS
     while (currentState.sabrStreamState.backoffUntilMs > Date.now()) {
       waitedForBackoff = true
       const currentBackoffTimeMs = currentState.sabrStreamState.backoffUntilMs - Date.now()
       // The countdown covers the video, so keep it for playback that waits on it
-      if (!deliveredMedia || needsMedia()) {
+      if (!hasDeliveredMedia() || needsMedia()) {
         currentState.eventEmitter.emit('backoff-requested', { backoffMs: currentBackoffTimeMs })
       }
       await waitUnlessAborted(currentBackoffTimeMs, currentState.abortController.signal)
@@ -419,7 +419,7 @@ async function doRequest(
           (currentState.cumulativeBackOffRequested > 1 &&
             currentState.cumulativeBackOffTimeMs >= BACKOFF_WITHOUT_MEDIA_BUDGET_MS))
       ) {
-        if (!deliveredMedia) {
+        if (!hasDeliveredMedia()) {
           shouldReloadDueToBackoffLoop = true
         } else if (currentState.sabrStreamState.attestationPending) {
           currentState.sabrStreamState.mediaWithheld = true
