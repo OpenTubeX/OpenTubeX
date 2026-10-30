@@ -2,13 +2,15 @@
   user-select: none;
 }
 
-/* Lays out the sample like Shaka's caption region, 5% from the edges. */
+/* Lays out the sample like Shaka's caption region, inset 5% of the height and width.
+   Percentage padding resolves against the width, so the block padding is 5% of the fixed height. */
 .captionPreview {
   box-sizing: border-box;
   display: flex;
   flex-direction: column;
   block-size: 240px;
-  padding: 5%;
+  padding-block: 12px;
+  padding-inline: 5%;
   margin-block-end: 1rem;
   border-radius: calc(5px * var(--ui-roundness));
   background: linear-gradient(135deg, #576574, #222f3e);
