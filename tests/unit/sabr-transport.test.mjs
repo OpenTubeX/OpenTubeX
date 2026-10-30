@@ -535,22 +535,26 @@ test('withheld media pending attestation waits to reload until playback needs it
   const transport = createSabrTransport(sabrData, () => ({ ...context, getBufferedAheadSeconds: () => bufferedAheadSeconds }))
   t.after(() => transport.cleanup())
   transport.onReloadOnce(() => reloads++)
+  const waits = []
+  transport.onBackoffRequested(({ backoffMs }) => waits.push(backoffMs))
   const uri = 'sabr1:audio?formatId=140-123-&sq=1'
   await transport.request(uri, request(uri), 1).promise
   const rejected = assert.rejects(transport.request(uri, { uris: [uri], retryParameters: { timeout: 60000 } }, 1).promise,
     error => error.code === ShakaError.Code.OPERATION_ABORTED)
-  for (let index = 0; index < 10; index++) {
+  // A paused video keeps its buffer, so wait without requests or timeouts
+  for (let index = 0; index < 100; index++) {
     await flushRequests()
     t.mock.timers.tick(2000)
   }
   await flushRequests()
+  assert.equal(calls, 7)
   assert.equal(reloads, 0)
+  // Buffered playback hides the startup countdown
+  assert.deepEqual(waits, [])
   bufferedAheadSeconds = 5
   t.mock.timers.tick(2000)
-  await flushRequests()
-  t.mock.timers.tick(60000)
   await rejected
-  assert.equal(calls, 12)
+  assert.equal(calls, 7)
   assert.equal(reloads, 1)
 })
 
