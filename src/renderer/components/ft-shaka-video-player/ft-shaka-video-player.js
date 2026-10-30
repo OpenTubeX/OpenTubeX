@@ -10639,7 +10639,9 @@ export default defineComponent({
         if (Number.isFinite(end) && end > start && time >= end) endSeekTarget = end
       }
       hasPlaybackPosition.value = true
-      if (pendingMetadataSeek !== null || !hasLoaded.value || !videoLayoutReady.value || video.value.readyState < 3) pendingMetadataSeek = time
+      // Once the first canplay has passed, a lower readyState only means seeking
+      // or rebuffering. Queuing then would replay the target after canplay.
+      if (pendingMetadataSeek !== null || !hasLoaded.value || !videoLayoutReady.value) pendingMetadataSeek = time
     }
 
     function getSabrReloadState() {
