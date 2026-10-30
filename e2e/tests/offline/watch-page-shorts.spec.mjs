@@ -1051,3 +1051,36 @@ test.describe('Shorts feed navigation', () => {
     ).toHaveCount(0)
   })
 })
+
+test('restoring a Short from the tab mini player keeps the page from overflowing horizontally', { tag: '@scale' }, async ({ app, page }) => {
+  await setWindowSize(app, page, { width: 1588, height: 842 })
+  await mockPlayableWatchPage(app, page)
+  await page.locator(sel.searchInput).fill('https://www.youtube.com/shorts/jNQXAC9IVRw')
+  await page.locator(sel.searchInput).press('Enter')
+  await waitForPlayback(page)
+  const player = page.locator('.ftVideoPlayer')
+  await expect(player).toHaveClass(/shortsPlayer/)
+  await page.evaluate(() => window.$store.dispatch('updateScrollMiniPlayerOnAllTabs', true))
+  await page.locator('.tabBar .newTabButton').click()
+  await expect(page.locator('#cross-tab-mini-player-layer .ftVideoPlayer')).toBeVisible()
+  await expect(player).not.toHaveClass(/scrollMiniPlayerAnimating/)
+
+  // The closed fullscreen docks wait beside the player's right edge. Starting
+  // from the mini player in the corner, they used to widen the page.
+  await page.evaluate(() => {
+    window.restoreSamples = []
+    const sample = () => {
+      const root = document.documentElement
+      const animating = document.querySelector('.ftVideoPlayer').classList.contains('scrollMiniPlayerAnimating')
+      window.restoreSamples.push({ animating, overflow: root.scrollWidth - root.clientWidth })
+      if (animating || window.restoreSamples.length < 5) requestAnimationFrame(sample)
+    }
+    document.querySelector('.tabBar .tab').addEventListener('pointerdown', () => requestAnimationFrame(sample), { once: true, capture: true })
+  })
+  await page.locator('.tabBar .tab').first().click()
+  await expect(player).not.toHaveClass(/scrollMiniPlayer/)
+  await expect.poll(() => page.evaluate(() => window.restoreSamples.at(-1)?.animating === false && window.restoreSamples.length > 5)).toBe(true)
+  const samples = await page.evaluate(() => window.restoreSamples)
+  expect(samples.filter(sample => sample.animating).length).toBeGreaterThan(2)
+  expect(Math.max(...samples.map(sample => sample.overflow))).toBe(0)
+})

@@ -1,9 +1,11 @@
 /* stylelint-disable liberty/use-logical-spec */
 
-.ftVideoPlayer.shortsPlayer:not(.scrollMiniPlayer, [data-inline-mini-drag]) {
+.ftVideoPlayer.shortsPlayer:not(.scrollMiniPlayer, .scrollMiniPlayerAnimating, [data-inline-mini-drag]) {
   /*
     Keep the container from becoming a focus-scroll area and let the seek
     thumb extend below the video. The video and poster own the rounded crop.
+    Clip while animating out of the mini player: the closed fullscreen docks
+    wait beside the right edge and would widen the page from the corner.
   */
   overflow: visible !important;
 }
