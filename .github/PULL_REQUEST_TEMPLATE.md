@@ -17,30 +17,13 @@
 ## Description
 <!-- Please write a clear and concise description of what the pull request does. -->
 
-## Release note category
-<!-- Select exactly one category. Every pull request must select one. -->
-<!-- Select "Not noteworthy" when the pull request fixes a bug in or improves functionality that has not yet appeared in a stable release. -->
-<!-- release-note-category:start -->
-- [ ] Not noteworthy
-- [ ] Highlights
-- [ ] More improvements
-- [ ] Fixed bugs
-<!-- release-note-category:end -->
-
 ## Release note
-<!-- Required unless "Not noteworthy" is selected. -->
-<!-- Write one concise, user-facing entry without a leading bullet. -->
-<!-- release-note:start -->
+<!-- User-facing changes need a release note file. See release-notes/README.md. -->
+<!-- Check the box if the change needs no note, for example because users won't notice it or an unreleased change's note still covers it. -->
+- [ ] No release note needed
 
-<!-- release-note:end -->
-
-## Release note images
-<!-- Optional. Paste one or more Markdown images, HTML image tags, or dark/light <picture> elements here. -->
-<!-- The release notes normalize the markup and limit images taller than 300 pixels. -->
-
-<!-- release-note-image:start -->
-
-<!-- release-note-image:end -->
+## Screenshots
+<!-- Optional. Paste images or recordings that show the change. To use one in the release note, copy its URL into the release note file. -->
 
 ## Testing
 <!-- How can reviewers verify that the PR produces correct results? -->

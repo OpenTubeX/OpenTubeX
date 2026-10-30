@@ -11,7 +11,7 @@ const MAX_WINGET_TAGS = 16
 const MAX_WINGET_RELEASE_NOTES_LENGTH = 10_000
 
 export function cleanReleaseNotes(markdown) {
-  const cleaned = releaseNotesText(markdown)
+  const cleaned = releaseNotesText(markdown, ['windows'])
 
   if (cleaned.length <= MAX_WINGET_RELEASE_NOTES_LENGTH) { return cleaned }
 

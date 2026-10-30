@@ -129,9 +129,8 @@ Failures always attach a screenshot. Passing tests do not need to attach
 screenshots, including tests with visual assertions.
 
 Use `attachScreenshot` when a capture is useful for preparing a release-note
-image for a pull request. Follow the instructions under "Release note images"
-in `.github/PULL_REQUEST_TEMPLATE.md`; screenshots are optional test artifacts,
-not part of the assertions:
+image. Follow the instructions under "Images" in `release-notes/README.md`;
+screenshots are optional test artifacts, not part of the assertions:
 
 ```js
 test('...', async ({ page, attachScreenshot }) => {

@@ -1,3 +1,5 @@
+import { filterReleaseNotesForPlatforms } from './releaseNotePlatforms.js'
+
 const VERSION_PATTERN = /^v?(\d+)\.(\d+)\.(\d+)(?:-beta|-nightly-(\d+))?$/
 
 /**
@@ -115,15 +117,19 @@ export function findUpdateRelease(releases, installedVersion) {
  * A single release gets no heading, as the prompt title already names it.
  *
  * @param {Array<{ body?: string | null, name?: string | null, tag_name?: string }>} releases
+ * @param {string | null} platform Hides notes labeled only for other platforms.
  * @returns {string}
  */
-export function formatReleaseChangelog(releases) {
+export function formatReleaseChangelog(releases, platform = null) {
+  const platforms = platform === null ? null : [platform]
+  const body = (/** @type {{ body?: string | null }} */ release) => filterReleaseNotesForPlatforms(release.body ?? '', platforms)
+
   if (releases.length === 1) {
-    return releases[0].body ?? ''
+    return body(releases[0])
   }
 
   return releases.map((release) => {
     const title = release.name ?? release.tag_name ?? ''
-    return `## ${title}\n\n${release.body ?? ''}`
+    return `## ${title}\n\n${body(release)}`
   }).join('\n\n')
 }

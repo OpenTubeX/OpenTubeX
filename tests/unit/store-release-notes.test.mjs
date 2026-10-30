@@ -10,6 +10,7 @@ import {
   debianChangelog,
   fdroidChangelog,
   releaseNoteSections,
+  releaseNotesText,
   rpmChangelog,
 } from '../../_scripts/storeReleaseNotes.mjs'
 
@@ -111,6 +112,48 @@ test('RPM changelogs escape macros', () => {
 - Use Ctrl & the guide for 100%% of shortcuts
 - Fixed a crash that happened on startup
 `)
+})
+
+test('store notes keep only items for their platforms and drop a label naming the only target', () => {
+  const labeled = `## More improvements
+
+- Works everywhere. (#1)
+- **Android:** Shared links open in the app. (#2)
+- **iOS:** Adds SharePlay. (#3)
+- **Desktop:** Adds a tray icon. (#4)
+- **Linux, Windows:** Adds MPRIS controls.
+  <img src="https://github.com/user-attachments/assets/example" alt="MPRIS">
+`
+
+  assert.equal(fdroidChangelog(labeled), `More improvements
+• Works everywhere.
+• Android: Shared links open in the app.
+• iOS: Adds SharePlay.`)
+  assert.equal(appStreamDescription(labeled), `<p>More improvements</p>
+<ul>
+  <li>Works everywhere.</li>
+  <li>Adds a tray icon.</li>
+  <li>Adds MPRIS controls.</li>
+</ul>`)
+  assert.equal(releaseNotesText(labeled, ['windows']), `More improvements
+
+- Works everywhere. (#1)
+- Adds a tray icon. (#4)
+- Adds MPRIS controls.`)
+  assert.deepEqual(releaseNoteSections(labeled).flatMap(({ items }) => items), [
+    'Works everywhere.',
+    'Android: Shared links open in the app.',
+    'iOS: Adds SharePlay.',
+    'Desktop: Adds a tray icon.',
+    'Linux, Windows: Adds MPRIS controls.',
+  ])
+})
+
+test('store notes keep every labeled item when none are for their platforms', () => {
+  assert.equal(appStreamDescription('## Highlights\n\n- **Android, iOS:** Adds a mini player.\n'), `<p>Highlights</p>
+<ul>
+  <li>Android, iOS: Adds a mini player.</li>
+</ul>`)
 })
 
 test('the converter rejects empty notes and invalid source dates', (t) => {
