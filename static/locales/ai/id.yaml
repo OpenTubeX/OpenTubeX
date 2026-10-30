@@ -1975,7 +1975,12 @@ Description:
   Music: Musik
 Tooltips:
   General Settings:
-    Preferred Video Codec: Mode otomatis mengutamakan dekode perangkat keras. Perubahan berlaku untuk video berikutnya. Pilihan codec dapat membatasi resolusi; codec yang tidak tersedia diganti.
+    Preferred Video Codec: |
+      Mode otomatis mengutamakan codec yang dapat didekode perangkat Anda secara hardware.
+      AV1: kualitas terbaik dengan data paling sedikit, tetapi tidak semua video memilikinya. Tanpa dekode hardware, dapat menguras baterai atau melewatkan frame.
+      VP9: keseimbangan antara efisiensi dan kompatibilitas, biasanya tersedia hingga resolusi tertinggi.
+      H.264: paling mudah didekode di hampir semua perangkat, tetapi menggunakan lebih banyak data dan biasanya hanya sampai 1080p.
+      Perubahan berlaku untuk video berikutnya. Jika codec pilihan tidak tersedia, codec lain akan digunakan.
     Always Use Backup Media Server: "Memutar video dari server cadangan yang disebutkan YouTube alih-alih server yang ditetapkan, misalnya saat cache penyedia internet Anda sering lambat. Jika tidak, OpenTubeX hanya beralih saat server yang ditetapkan tidak merespons."
     Automatically switch stream extraction methods: "Coba yt-dlp jika pemutaran bawaan gagal, atau pemutaran bawaan jika yt-dlp gagal."
     Enable Tabs: "Halaman saat ini tetap terbuka. Tab lain disimpan hingga aplikasi dimulai ulang; aktifkan tab lagi untuk memulihkannya."

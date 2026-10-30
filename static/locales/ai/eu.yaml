@@ -1966,7 +1966,12 @@ Description:
   Music: Musika
 Tooltips:
   General Settings:
-    Preferred Video Codec: Modu automatikoak hardware bidezko deskodetzea hobesten du. Aldaketak hurrengo bideoan aplikatzen dira. Kodek-hobespenak bereizmenak muga ditzake; erabilgarri ez dauden kodekak ordezten dira.
+    Preferred Video Codec: |
+      Modu automatikoak zure gailuak hardware bidez deskodetu ditzakeen kodekak hobesten ditu.
+      AV1: kalitaterik onena datu gutxienarekin, baina bideo guztiek ez dute. Hardware bidezko deskodetzerik gabe, bateria agortu edo fotogramak gal ditzake.
+      VP9: eraginkortasunaren eta bateragarritasunaren arteko oreka, normalean bereizmen handieneraino erabilgarri.
+      H.264: ia edozein gailutan deskodetzeko errazena, baina datu gehiago erabiltzen ditu eta normalean 1080p-n gelditzen da.
+      Aldaketak hurrengo bideoan aplikatzen dira. Hobetsitako kodeka erabilgarri ez badago, beste bat erabiltzen da.
     Always Use Backup Media Server: "YouTubek adierazten duen ordezko zerbitzaritik erreproduzitzen ditu bideoak esleitutakotik beharrean, adibidez zure Interneteko hornitzailearen cachea sarritan motela denean. Bestela, esleitutako zerbitzariak erantzuten ez duenean soilik aldatzen du OpenTubeXek."
     Automatically switch stream extraction methods: "Probatu yt-dlp erreprodukzio integratuak huts egiten badu, edo erreprodukzio integratua yt-dlp-k huts egiten badu."
     Enable Tabs: "Uneko orria irekita mantentzen du. Beste fitxak aplikazioa berrabiarazi arte gordetzen dira; gaitu fitxak berriro berreskuratzeko."

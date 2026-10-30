@@ -1981,7 +1981,12 @@ Description:
   Music: Tónlist
 Tooltips:
   General Settings:
-    Preferred Video Codec: Sjálfvirkt val kýs vélbúnaðarafkóðun. Breytingar gilda frá næsta myndskeiði. Val á merkjakóða getur takmarkað upplausnir; ótiltækir merkjakóðar eru leystir af hólmi.
+    Preferred Video Codec: |
+      Sjálfvirk stilling tekur fram kóðara sem tækið þitt getur afkóðað með vélbúnaði.
+      AV1: bestu gæðin fyrir minnst gagnamagn, en ekki öll myndskeið bjóða upp á það. Án vélbúnaðarafkóðunar getur það tæmt rafhlöðuna eða sleppt römmum.
+      VP9: jafnvægi milli skilvirkni og samhæfni, yfirleitt í boði upp í hæstu upplausn.
+      H.264: auðveldast að afkóða á nánast hvaða tæki sem er, en notar meira gagnamagn og nær yfirleitt aðeins upp í 1080p.
+      Breytingar gilda frá næsta myndskeiði. Ef valinn kóðari er ekki í boði er annar notaður.
     Always Use Backup Media Server: "Streymir myndböndum frá varaþjóninum sem YouTube tilgreinir í stað úthlutaða þjónsins, til dæmis þegar skyndiminni netþjónustunnar þinnar er oft hægt. Annars skiptir OpenTubeX aðeins þegar úthlutaði þjónninn svarar ekki."
     Automatically switch stream extraction methods: "Prófa yt-dlp ef innbyggð spilun bregst, eða innbyggða spilun ef yt-dlp bregst."
     Enable Tabs: "Heldur núverandi síðu opinni. Aðrir flipar eru geymdir þar til forritið er endurræst; virkjaðu flipa aftur til að endurheimta þá."

@@ -2265,7 +2265,12 @@ Description:
   Music: Musikk
 Tooltips:
   General Settings:
-    Preferred Video Codec: Automatisk føretrekkjer maskinvaredekoding. Endringar gjeld frå neste video. Eit kodekval kan avgrense oppløysingar; utilgjengelege kodekar blir erstatta.
+    Preferred Video Codec: |
+      Automatisk føretrekkjer kodekar som eininga di kan dekode med maskinvare.
+      AV1: best kvalitet for minst data, men ikkje alle videoar har han. Utan maskinvaredekoding kan han tappa batteriet eller mista bilete.
+      VP9: ein balanse mellom effektivitet og kompatibilitet, vanlegvis tilgjengeleg opp til høgaste oppløysing.
+      H.264: den enklaste å dekode på nesten alle einingar, men brukar meir data og stoppar vanlegvis ved 1080p.
+      Endringar gjeld frå neste video. Viss den føretrekte kodeken ikkje er tilgjengeleg, vert ein annan brukt.
     Always Use Backup Media Server: "Straumar videoar frå reservetenaren YouTube oppgjev i staden for den tildelte, til dømes når mellomlageret hos internettleverandøren din ofte er tregt. Elles byter OpenTubeX berre når den tildelte tenaren ikkje svarar."
     Automatically switch stream extraction methods: "Prøv yt-dlp dersom innebygd avspeling mislukkast, eller innebygd avspeling dersom yt-dlp mislukkast."
     Enable Tabs: "Held den gjeldande sida open. Andre faner vert tekne vare på til appen vert starta på nytt; slå på faner igjen for å gjenopprette dei."

@@ -2457,7 +2457,12 @@ Description:
   Music: Glasba
 Tooltips:
   General Settings:
-    Preferred Video Codec: Samodejni način daje prednost strojnemu dekodiranju. Spremembe veljajo za naslednji video. Izbira kodeka lahko omeji ločljivosti; nedostopni kodeki se nadomestijo.
+    Preferred Video Codec: |
+      Samodejni način daje prednost kodekom, ki jih vaša naprava lahko dekodira strojno.
+      AV1: najboljša kakovost ob najmanjši porabi podatkov, vendar ga nima vsak videoposnetek. Brez strojnega dekodiranja lahko prazni baterijo ali izpušča sličice.
+      VP9: ravnovesje med učinkovitostjo in združljivostjo, običajno na voljo do najvišje ločljivosti.
+      H.264: najlažji za dekodiranje na skoraj vsaki napravi, vendar porabi več podatkov in se običajno konča pri 1080p.
+      Spremembe veljajo od naslednjega videoposnetka. Če želeni kodek ni na voljo, se uporabi drug.
     Always Use Backup Media Server: "Predvaja videoposnetke z rezervnega strežnika, ki ga navede YouTube, namesto z dodeljenega, na primer kadar je predpomnilnik vašega ponudnika interneta pogosto počasen. Sicer OpenTubeX preklopi le, ko dodeljeni strežnik ne odgovarja."
     Automatically switch stream extraction methods: "Poskusi yt-dlp, če vgrajeno predvajanje ne uspe, ali vgrajeno predvajanje, če yt-dlp ne uspe."
     Enable Tabs: "Trenutna stran ostane odprta. Drugi zavihki se ohranijo do ponovnega zagona aplikacije; znova omogočite zavihke, da jih obnovite."

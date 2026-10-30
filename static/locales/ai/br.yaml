@@ -1965,7 +1965,12 @@ Description:
   Music: Sonerezh
 Tooltips:
   General Settings:
-    Preferred Video Codec: Ar mod emgefreek a ro lañs d'an digodañ dre beriant. Ar c'hemmoù a vo arloet d'ar video da-heul. Dibab ur c'hodek a c'hall bevenniñ an diarunusted; kodekoù all a vez implijet ma n'int ket hegerz.
+    Preferred Video Codec: |
+      Ar mod emgefreek a ro lañs d'ar c'hodekoù a c'hall bezañ digodet gant periant ho trevnad.
+      AV1: ar perzhded gwellañ gant an nebeutañ a roadennoù, met n'eo ket gant pep video. Hep digodañ dre beriant e c'hall goullonderiñ ar batiri pe kolliñ skeudennoù.
+      VP9: ur c'hempouez etre efedusted ha kenglotadusted, hegerz peurliesañ betek an diarunusted uhelañ.
+      H.264: an aesañ da zigodañ war kazi pep trevnad, met implijout a ra muioc'h a roadennoù hag a-wechoù n'a ket pelloc'h eget 1080p.
+      Arloet e vo ar c'hemmoù d'ar video da-heul. Ma n'eo ket hegerz ar c'hodek dibabet, e vo implijet unan all.
     Always Use Backup Media Server: "Kas a ra ar videoioù diwar ar servijer a-gein meneget gant YouTube e-lec'h an hini roet, da skouer pa vez gorrek alies krubuilh ho pourchaser kenrouedad. A-hend-all ne cheñch OpenTubeX nemet pa ne respont ket ar servijer roet."
     Automatically switch stream extraction methods: "Klask yt-dlp ma c’hwit al lenn enkorfet, pe al lenn enkorfet ma c’hwit yt-dlp."
     Enable Tabs: "Chom a ra ar bajenn vremanel digor. Miret e vez an ivinelloù all betek adlocʼhañ an arload; gweredekait an ivinelloù en-dro evit o adsevel."

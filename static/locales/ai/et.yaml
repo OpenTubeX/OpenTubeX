@@ -1959,7 +1959,12 @@ Description:
   Music: Muusika
 Tooltips:
   General Settings:
-    Preferred Video Codec: Automaatrežiim eelistab riistvaralist dekodeerimist. Muudatused rakenduvad järgmisele videole. Koodeki eelistus võib eraldusvõimeid piirata; puuduvad koodekid asendatakse.
+    Preferred Video Codec: |
+      Automaatrežiim eelistab koodekeid, mida su seade saab riistvaraliselt dekodeerida.
+      AV1: parim kvaliteet väikseima andmemahuga, kuid igal videol seda pole. Ilma riistvaralise dekodeerimiseta võib see akut tühjendada või kaadreid vahele jätta.
+      VP9: tõhususe ja ühilduvuse tasakaal, tavaliselt saadaval kuni kõrgeima eraldusvõimeni.
+      H.264: peaaegu igas seadmes kõige kergemini dekodeeritav, kuid kasutab rohkem andmeid ja piirdub tavaliselt 1080p-ga.
+      Muudatused rakenduvad järgmisele videole. Kui eelistatud koodek pole saadaval, kasutatakse teist.
     Always Use Backup Media Server: "Voogedastab videoid YouTube'i nimetatud varuserverist määratud serveri asemel, näiteks kui sinu internetiteenuse pakkuja vahemälu on sageli aeglane. Muidu vahetab OpenTubeX serverit ainult siis, kui määratud server ei vasta."
     Automatically switch stream extraction methods: "Proovi yt-dlp-d, kui sisseehitatud taasesitus ebaõnnestub, või sisseehitatud taasesitust, kui yt-dlp ebaõnnestub."
     Enable Tabs: "Praegune leht jääb avatuks. Muud kaardid säilitatakse rakenduse taaskäivitamiseni; nende taastamiseks luba kaardid uuesti."

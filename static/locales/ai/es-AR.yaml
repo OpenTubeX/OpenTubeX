@@ -2403,7 +2403,12 @@ Description:
   Music: Música
 Tooltips:
   General Settings:
-    Preferred Video Codec: El modo automático prefiere la decodificación por hardware. Los cambios se aplican al siguiente video. La preferencia de códec puede limitar las resoluciones; los códecs no disponibles se reemplazan.
+    Preferred Video Codec: |
+      El modo automático prefiere los códecs que tu dispositivo puede decodificar por hardware.
+      AV1: la mejor calidad con el menor consumo de datos, pero no todos los videos lo tienen. Sin decodificación por hardware, puede agotar la batería o perder cuadros.
+      VP9: un equilibrio entre eficiencia y compatibilidad, normalmente disponible hasta la resolución más alta.
+      H.264: el más fácil de decodificar en casi cualquier dispositivo, pero usa más datos y normalmente llega solo a 1080p.
+      Los cambios se aplican al siguiente video. Si el códec preferido no está disponible, se usa otro.
     Always Use Backup Media Server: "Reproduce los videos desde el servidor de respaldo que indica YouTube en lugar del asignado, por ejemplo cuando la caché de tu proveedor de internet suele ser lenta. Si no, OpenTubeX solo cambia cuando el servidor asignado no responde."
     Automatically switch stream extraction methods: "Probar yt-dlp si falla la reproducción integrada, o la reproducción integrada si falla yt-dlp."
     Enable Tabs: "Mantiene abierta la página actual. Las demás pestañas se conservan hasta reiniciar la aplicación; volvé a activar las pestañas para restaurarlas."

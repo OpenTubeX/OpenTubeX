@@ -1979,7 +1979,12 @@ Description:
   Music: Musik
 Tooltips:
   General Settings:
-    Preferred Video Codec: Automatiskt föredrar hårdvaruavkodning. Ändringar gäller från nästa video. Ett kodekval kan begränsa upplösningar; otillgängliga kodekar ersätts.
+    Preferred Video Codec: |
+      Automatiskt föredrar kodekar som din enhet kan avkoda med hårdvara.
+      AV1: bäst kvalitet för minst data, men alla videor har den inte. Utan hårdvaruavkodning kan den tömma batteriet eller tappa bildrutor.
+      VP9: en balans mellan effektivitet och kompatibilitet, oftast tillgänglig upp till högsta upplösningen.
+      H.264: lättast att avkoda på nästan alla enheter, men använder mer data och slutar oftast vid 1080p.
+      Ändringar gäller från nästa video. Om den föredragna kodeken inte är tillgänglig används en annan.
     Always Use Backup Media Server: "Strömmar videor från den reservserver som YouTube anger i stället för den tilldelade, till exempel när din internetleverantörs cache ofta är långsam. Annars byter OpenTubeX bara när den tilldelade servern inte svarar."
     Automatically switch stream extraction methods: "Prova yt-dlp om den inbyggda uppspelningen misslyckas, eller inbyggd uppspelning om yt-dlp misslyckas."
     Enable Tabs: "Håller den aktuella sidan öppen. Andra flikar behålls tills appen startas om; aktivera flikar igen för att återställa dem."

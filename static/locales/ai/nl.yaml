@@ -2017,7 +2017,12 @@ Description:
   Music: Muziek
 Tooltips:
   General Settings:
-    Preferred Video Codec: Automatisch geeft de voorkeur aan hardwaredecodering. Wijzigingen gelden vanaf de volgende video. Een codecvoorkeur kan resoluties beperken; niet-beschikbare codecs worden vervangen.
+    Preferred Video Codec: |
+      Automatisch geeft de voorkeur aan codecs die je apparaat met hardware kan decoderen.
+      AV1: de beste kwaliteit voor de minste data, maar niet elke video heeft het. Zonder hardwaredecodering kan het de batterij leegtrekken of beelden overslaan.
+      VP9: een balans tussen efficiëntie en compatibiliteit, meestal beschikbaar tot de hoogste resolutie.
+      H.264: het makkelijkst te decoderen op bijna elk apparaat, maar gebruikt meer data en stopt meestal bij 1080p.
+      Wijzigingen gelden vanaf de volgende video. Als de voorkeurscodec niet beschikbaar is, wordt een andere gebruikt.
     Always Use Backup Media Server: "Streamt video's vanaf de back-upserver die YouTube opgeeft in plaats van de toegewezen server, bijvoorbeeld wanneer de cache van je internetprovider vaak traag is. Anders schakelt OpenTubeX alleen over wanneer de toegewezen server niet reageert."
     Automatically switch stream extraction methods: "Probeer yt-dlp als de ingebouwde afspeelengine faalt, of de ingebouwde afspeelengine als yt-dlp faalt."
     Enable Tabs: "Houdt de huidige pagina open. Andere tabbladen blijven bewaard totdat de app opnieuw wordt gestart; schakel tabbladen weer in om ze te herstellen."

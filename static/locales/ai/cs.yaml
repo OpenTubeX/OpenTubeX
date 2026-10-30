@@ -1956,7 +1956,12 @@ Description:
   Music: Hudba
 Tooltips:
   General Settings:
-    Preferred Video Codec: Automatický režim upřednostňuje hardwarové dekódování. Změny platí pro další video. Preference kodeku může omezit rozlišení; nedostupné kodeky se nahradí.
+    Preferred Video Codec: |
+      Automatický režim upřednostňuje kodeky, které vaše zařízení umí dekódovat hardwarově.
+      AV1: nejlepší kvalita při nejmenší spotřebě dat, ale nemá ho každé video. Bez hardwarového dekódování může vybíjet baterii nebo vynechávat snímky.
+      VP9: rovnováha mezi efektivitou a kompatibilitou, obvykle dostupný až do nejvyššího rozlišení.
+      H.264: nejsnáze dekódovatelný téměř na jakémkoli zařízení, ale spotřebuje více dat a obvykle končí u 1080p.
+      Změny se projeví u dalšího videa. Pokud preferovaný kodek není dostupný, použije se jiný.
     Always Use Backup Media Server: "Streamuje videa ze záložního serveru, který uvádí YouTube, místo přiděleného, například když je mezipaměť vašeho poskytovatele internetu často pomalá. Jinak OpenTubeX přepne jen tehdy, když přidělený server neodpovídá."
     Automatically switch stream extraction methods: "Vyzkoušet yt-dlp, pokud selže vestavěné přehrávání, nebo vestavěné přehrávání, pokud selže yt-dlp."
     Enable Tabs: "Aktuální stránka zůstane otevřená. Ostatní karty se uchovají do restartu aplikace; znovu karty povolte, chcete-li je obnovit."

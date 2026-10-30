@@ -2725,7 +2725,12 @@ See changes and update: Änderungen ansehen und aktualisieren
 Dismiss: Ausblenden
 Tooltips:
   General Settings:
-    Preferred Video Codec: Auto bevorzugt Hardware-Decodierung. Änderungen gelten ab dem nächsten Video. Eine Codec-Präferenz kann Auflösungen einschränken; nicht verfügbare Codecs werden ersetzt.
+    Preferred Video Codec: |
+      Auto bevorzugt Codecs, die dein Gerät per Hardware decodieren kann.
+      AV1: die beste Qualität bei geringstem Datenverbrauch, aber nicht jedes Video bietet ihn an. Ohne Hardware-Decodierung kann er den Akku belasten oder Bilder auslassen.
+      VP9: ein Kompromiss aus Effizienz und Kompatibilität, meist bis zur höchsten Auflösung verfügbar.
+      H.264: auf fast jedem Gerät am leichtesten zu decodieren, braucht aber mehr Daten und endet meist bei 1080p.
+      Änderungen gelten ab dem nächsten Video. Ist der bevorzugte Codec nicht verfügbar, wird ein anderer verwendet.
     Yattee Server: "Die yattee-server-Instanz, von der OpenTubeX Videos, Kanäle, Wiedergabelisten und Suchergebnisse lädt. Benutzername und Passwort werden nur auf diesem Gerät gespeichert."
     Proxy Videos Through Yattee Server: "Leitet Video- und Audiostreams über den Server. Lass dies aktiviert, außer der Server nutzt deine Internetverbindung, denn YouTube liefert Streams nur an die Adresse aus, die sie angefordert hat. Vorschaubilder werden immer direkt von YouTube geladen."
     Enable Tabs: "Die aktuelle Seite bleibt geöffnet. Andere Tabs bleiben bis zum Neustart der App erhalten; aktiviere Tabs erneut, um sie wiederherzustellen."

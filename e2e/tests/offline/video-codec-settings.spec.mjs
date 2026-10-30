@@ -20,8 +20,16 @@ test('codec preference defaults to auto and persists independently of quality', 
   await select.scrollIntoViewIfNeeded()
   await expect(select).toBeInViewport()
   await field.locator('.selectTooltip .button').focus()
-  await expect(page.locator('body > [role="tooltip"]').filter({ visible: true }))
-    .toHaveText('Auto prefers hardware decoding. Changes apply to the next video. A codec preference may limit resolutions; unavailable codecs fall back.')
+  const tooltip = page.locator('body > [role="tooltip"]').filter({ visible: true })
+  await expect(tooltip).toHaveText([
+    'Auto prefers codecs that your device can decode in hardware.',
+    'AV1: the best quality for the least data, but not every video has it. Without hardware decoding, it can drain the battery or drop frames.',
+    'VP9: a balance of efficiency and compatibility, usually available up to the highest resolution.',
+    'H.264: the easiest to decode on almost any device, but it uses more data and usually stops at 1080p.',
+    'Changes apply to the next video. If the preferred codec is unavailable, another one is used.'
+  ].join('\n'))
+  // Each codec gets its own line
+  await expect(tooltip).toHaveCSS('white-space', 'pre-wrap')
   await page.locator('.settingsWindow').evaluate(element => Promise.all(element.getAnimations().map(animation => animation.finished)))
   await attachScreenshot('advanced-codec-preference')
 })

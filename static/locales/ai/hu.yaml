@@ -1957,7 +1957,12 @@ Description:
   Music: Zene
 Tooltips:
   General Settings:
-    Preferred Video Codec: Az automatikus mód a hardveres dekódolást részesíti előnyben. A változások a következő videóra érvényesek. A kodekválasztás korlátozhatja a felbontásokat; a nem elérhető kodekeket másik helyettesíti.
+    Preferred Video Codec: |
+      Az automatikus mód azokat a kodekeket részesíti előnyben, amelyeket az eszköz hardveresen tud dekódolni.
+      AV1: a legjobb minőség a legkevesebb adatforgalommal, de nem minden videóhoz érhető el. Hardveres dekódolás nélkül merítheti az akkumulátort vagy képkockákat hagyhat ki.
+      VP9: egyensúly a hatékonyság és a kompatibilitás között, általában a legnagyobb felbontásig elérhető.
+      H.264: szinte minden eszközön a legkönnyebben dekódolható, de több adatot használ, és általában 1080p-nél véget ér.
+      A módosítások a következő videótól érvényesek. Ha az előnyben részesített kodek nem érhető el, egy másikat használ.
     Always Use Backup Media Server: "A videókat a YouTube által megadott tartalék szerverről játssza le a kijelölt helyett, például ha az internetszolgáltató gyorsítótára gyakran lassú. Egyébként az OpenTubeX csak akkor vált, ha a kijelölt szerver nem válaszol."
     Automatically switch stream extraction methods: "A yt-dlp kipróbálása, ha a beépített lejátszás sikertelen, vagy a beépített lejátszás kipróbálása, ha a yt-dlp sikertelen."
     Enable Tabs: "Nyitva tartja az aktuális oldalt. A többi lap az alkalmazás újraindításáig megmarad; visszaállításukhoz engedélyezd újra a lapokat."
