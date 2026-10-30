@@ -159,6 +159,20 @@ test.describe('tab bar', () => {
             (tabBar.classList.contains('position-bottom') ? handle.bottom <= box.top + 0.5 : handle.top >= box.bottom - 0.5)
           return top >= 0.5 && Math.abs(top - bottom) <= 0.6 && clear && style.borderTopWidth === style.borderBottomWidth
         }), { message: `balanced tab gaps at ${position}, overflow ${overflowing}` }).toBe(true)
+        if (overflowing) {
+          // The shown scrollbar's track reaches past the gap, but a click on
+          // an inactive tab's edge beside it still lands on the tab.
+          const tab = page.locator('.tab:not(.active)').first()
+          const scrollbar = page.locator('.tabsContainer > .os-scrollbar-horizontal')
+          const box = await tab.boundingBox()
+          await page.mouse.move(box.x + box.width / 2, box.y + box.height / 2)
+          await expect(scrollbar).not.toHaveClass(/app-scrollbar-idle/)
+          expect(await tab.evaluate((element, position) => {
+            const box = element.getBoundingClientRect()
+            const y = position === 'bottom' ? box.top + 1 : box.bottom - 1
+            return element.contains(document.elementFromPoint(box.left + box.width / 2, y))
+          }, position), `tab edge reachable at ${position}`).toBe(true)
+        }
       }
     }
   })

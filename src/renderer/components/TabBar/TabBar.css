@@ -54,6 +54,13 @@
   gap: 2px;
 }
 
+/* The scrollbar's track and hit areas reach past the gap, so the tab row
+   stacks above them to keep clicks on a tab's edge on the tab. */
+.tabBar:not(.vertical) .tabsContent {
+  position: relative;
+  z-index: 1;
+}
+
 /* Keep the track's full hit area while making the idle thumb less prominent. */
 .tabBar:not(.vertical) :deep(.os-scrollbar-horizontal:not(:hover) .os-scrollbar-handle) {
   block-size: 50%;
