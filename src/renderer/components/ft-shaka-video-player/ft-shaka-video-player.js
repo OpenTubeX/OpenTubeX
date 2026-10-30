@@ -10751,9 +10751,11 @@ export default defineComponent({
           }
         }
 
-        // destroying the ui also destroys the player
-        await ui.destroy()
+        // destroying the ui also destroys the player. Release it first, as its
+        // controls lose their container before the destruction finishes.
+        const destroyingUi = ui
         ui = null
+        await destroyingUi.destroy()
         player = null
       } else if (player) {
         await player.destroy()
