@@ -936,9 +936,20 @@ test('mobile bar details fade at the destination during both swipe directions', 
 
 test('scroll docking fades the details at the bottom bar position', async ({ app, page }) => {
   const player = await openMobilePlayer(app, page)
-  // The slowest animation speed leaves enough frames under parallel load to
-  // sample the morph near its midpoint.
+  // Under parallel load, real frames can skip the morph's midpoint. Step a
+  // paused clock instead, so the slowest animation speed renders every frame.
   await page.evaluate(() => window.$store.dispatch('updateAnimationSpeed', 25))
+  await page.clock.install()
+  await page.clock.pauseAt(await page.evaluate(() => Date.now() + 1000))
+  const settle = async (docked) => {
+    await expect.poll(async () => {
+      await page.clock.runFor(16)
+      return player.evaluate(element => [
+        element.classList.contains('scrollMiniPlayer'),
+        element.classList.contains('scrollMiniPlayerAnimating')
+      ])
+    }, { intervals: [0] }).toEqual([docked, false])
+  }
   await page.evaluate(() => {
     const element = document.querySelector('.ftVideoPlayer')
     window.mobileBarMorphSamples = []
@@ -957,8 +968,7 @@ test('scroll docking fades the details at the bottom bar position', async ({ app
     document.body.append(spacer)
     window.scrollTo(0, 1200)
   })
-  await expect(player).toHaveClass(/scrollMiniPlayer/)
-  await expect(player).not.toHaveClass(/scrollMiniPlayerAnimating/)
+  await settle(true)
   const samples = await page.evaluate(() => window.mobileBarMorphSamples)
   expect(samples.length).toBeGreaterThan(3)
   const first = samples[0]
@@ -976,8 +986,7 @@ test('scroll docking fades the details at the bottom bar position', async ({ app
     window.mobileBarMorphSamples = []
     window.scrollTo(0, 0)
   })
-  await expect(player).not.toHaveClass(/scrollMiniPlayer/)
-  await expect(player).not.toHaveClass(/scrollMiniPlayerAnimating/)
+  await settle(false)
   const restoring = await page.evaluate(() => window.mobileBarMorphSamples)
   expect(restoring.length).toBeGreaterThan(3)
   const restoreStart = restoring[0]
