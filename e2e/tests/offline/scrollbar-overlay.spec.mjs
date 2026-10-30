@@ -824,6 +824,85 @@ test.describe('overlay scrollbars', () => {
       }).toBe(true)
     })
 
+    test('keeps the handle in step with compositor-driven wheel scrolling', { tag: '@scale' }, async ({ page }) => {
+      // The renderer's own frames always agree, so read the composited output.
+      const viewport = page.locator('[data-composited-scrollbar-test]')
+      await page.evaluate(() => {
+        const element = document.createElement('div')
+        element.dataset.compositedScrollbarTest = ''
+        // A transparent scroller, like a prompt's, that nothing else composites
+        const wrapper = document.createElement('div')
+        Object.assign(wrapper.style, { position: 'fixed', top: '100px', left: '100px', zIndex: '9999' })
+        Object.assign(element.style, { width: '300px', height: '400px', overflowY: 'auto' })
+        for (let index = 0; index < 300; index++) {
+          const item = document.createElement('div')
+          item.textContent = `Item ${index}`
+          item.style.height = '20px'
+          element.append(item)
+        }
+        wrapper.append(element)
+        const style = document.createElement('style')
+        style.textContent = `
+          [data-composited-scrollbar-test] > .os-scrollbar { opacity: 1 !important; visibility: visible !important; }
+          [data-composited-scrollbar-test] .os-scrollbar-handle { background: rgb(255 0 0) !important; }`
+        document.head.append(style)
+        document.body.append(wrapper)
+        document.querySelector('#app').__vue_app__._context.directives['overlay-scrollbars'].mounted(element, { value: true })
+      })
+      await expect(viewport.locator(':scope > .os-scrollbar-vertical')).toHaveClass(/os-scrollbar-visible/)
+      const bounds = await viewport.evaluate(element => {
+        const handle = element.querySelector(':scope > .os-scrollbar-vertical .os-scrollbar-handle').getBoundingClientRect()
+        const { top, bottom } = element.getBoundingClientRect()
+        return { x: handle.left + handle.width / 2, top, bottom }
+      })
+      await page.mouse.move(250, 300)
+
+      const session = await page.context().newCDPSession(page)
+      const frames = []
+      session.on('Page.screencastFrame', ({ data, sessionId }) => {
+        frames.push(data)
+        session.send('Page.screencastFrameAck', { sessionId }).catch(() => {})
+      })
+      await session.send('Page.startScreencast', { format: 'png' })
+      for (let step = 0; step < 15; step++) {
+        await page.mouse.wheel(0, 100)
+        await page.waitForTimeout(50)
+      }
+      // UI scales change how far each wheel step scrolls, so wait for it to settle.
+      let lastScrollTop = -1
+      await expect.poll(async () => {
+        const scrollTop = await viewport.evaluate(element => element.scrollTop)
+        const settled = scrollTop > 0 && scrollTop === lastScrollTop
+        lastScrollTop = scrollTop
+        return settled
+      }).toBe(true)
+      await session.send('Page.stopScreencast')
+      await session.detach()
+
+      // The handle's top edge in each frame, in CSS pixels
+      const handleTops = await page.evaluate(async ({ frames, bounds }) => {
+        return Promise.all(frames.map(async data => {
+          const bitmap = await createImageBitmap(await (await fetch(`data:image/png;base64,${data}`)).blob())
+          const canvas = new OffscreenCanvas(bitmap.width, bitmap.height)
+          const context = canvas.getContext('2d')
+          context.drawImage(bitmap, 0, 0)
+          const scale = bitmap.width / innerWidth
+          const column = context.getImageData(Math.round(bounds.x * scale), 0, 1, bitmap.height).data
+          for (let y = Math.ceil(bounds.top * scale); y < Math.floor(bounds.bottom * scale); y++) {
+            const [red, green, blue] = column.slice(y * 4, y * 4 + 3)
+            if (red > 200 && green < 80 && blue < 80) return y / scale
+          }
+          return null
+        }))
+      }, { frames, bounds })
+
+      expect(handleTops.length).toBeGreaterThan(5)
+      expect(handleTops).not.toContain(null)
+      // Out-of-step tracks show the handle a wheel step ahead, then pull it back.
+      const backwardSteps = handleTops.slice(1).filter((top, index) => top < handleTops[index] - 1)
+      expect(backwardSteps).toEqual([])
+    })
+
     test('only adds a blocking wheel listener while a custom speed is active', async ({ page }) => {
       const listenerCounts = await page.evaluate(() => {
         const viewport = document.createElement('div')

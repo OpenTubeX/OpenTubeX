@@ -14,6 +14,11 @@ html[data-overlayscrollbars-initialize],
 :where([data-overlayscrollbars-viewport]) {
   position: relative;
   overflow: auto;
+
+  /* The bars' scroll-linked animations run on the compositor. Chromium doesn't
+     always composite a container's scrolling, such as a transparent one in a
+     prompt, and the bars then run a wheel step ahead of the content. */
+  will-change: scroll-position;
 }
 
 .os-scrollbar {
