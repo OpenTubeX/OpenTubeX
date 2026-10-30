@@ -292,6 +292,11 @@ async function attest(videoId, context, initialAttestationData, ytConfig, proxyU
 }
 
 async function cleanupSession() {
-  await theSession.closeAllConnections()
-  await theSession.clearData()
+  try {
+    await theSession.closeAllConnections()
+    await theSession.clearData()
+  } catch (error) {
+    // Minting still works, the next attestation only reuses some session data
+    console.error('Failed to clear the PO token session', error)
+  }
 }

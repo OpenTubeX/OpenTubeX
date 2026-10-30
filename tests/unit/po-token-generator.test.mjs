@@ -43,9 +43,9 @@ const attested = 'a'.repeat(120)
 const pending = 'p'.repeat(124)
 
 /**
- * @param {{ attest: () => string, mint?: () => string, validForSecs?: number }} botGuard
+ * @param {{ attest: () => string, mint?: () => string, validForSecs?: number | null, clearData?: () => Promise<void> }} botGuard
  */
-function load({ attest, mint = () => attested, validForSecs = 600 }) {
+function load({ attest, mint = () => attested, validForSecs = 600, clearData = async () => {} }) {
   const views = []
   let cleanups = 0
   class WebContentsView {
@@ -76,7 +76,10 @@ function load({ attest, mint = () => attested, validForSecs = 600 }) {
     async setProxy() {},
     webRequest: { onBeforeSendHeaders() {}, onHeadersReceived() {}, onBeforeRequest() {} },
     async closeAllConnections() {},
-    async clearData() { cleanups++ },
+    async clearData() {
+      cleanups++
+      await clearData()
+    },
   }
   const { generatePoToken } = vm.runInNewContext(`${source}\n({ generatePoToken })`, {
     session: { fromPartition: () => theSession, defaultSession: { getUserAgent: () => 'agent' } },
@@ -183,6 +186,15 @@ test('a token requested as the attestation expires keeps its replacement', async
   await new Promise(resolve => setImmediate(resolve))
   assert.equal(views.length, 2)
   assert.equal(views[1].closed, false)
+})
+
+test('a failed session cleanup does not fail the token', async () => {
+  const attestations = [pending, attested]
+  const { generate } = load({
+    attest: () => attestations.shift(),
+    clearData: async () => { throw new Error('cleanup failed') },
+  })
+  assert.equal(await generate(), attested)
 })
 
 test('an attestation without a lifetime is not kept', async () => {
