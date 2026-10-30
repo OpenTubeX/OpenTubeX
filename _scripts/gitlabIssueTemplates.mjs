@@ -52,14 +52,29 @@ function renderField({ type, attributes, validations }) {
   return lines.join('\n')
 }
 
+// GitLab preselects Default.md but cannot require a template, so it stands in for
+// GitHub's template chooser and asks reporters to pick a real one.
+function renderChooser(names) {
+  const config = parse(readFileSync(join(GITHUB_DIRECTORY, 'config.yml'), 'utf8'))
+  const list = names.map(name => `"${name}"`).join(' or ')
+  return [
+    `**Choose the ${list} template from the template dropdown. It replaces this text.**`,
+    'Something else?',
+    config.contact_links.map(link => `- [${link.name}](${link.url}): ${link.about}`).join('\n')
+  ].join('\n\n') + '\n'
+}
+
 /** @returns {Map<string, string>} GitLab template file names mapped to their contents */
 export function renderTemplates() {
   const templates = new Map()
+  const names = []
   for (const file of readdirSync(GITHUB_DIRECTORY).sort()) {
     if (!/\.ya?ml$/.test(file) || file === 'config.yml') continue
     const form = parse(readFileSync(join(GITHUB_DIRECTORY, file), 'utf8'))
+    names.push(form.name)
     templates.set(`${form.name}.md`, `${form.body.map(renderField).join('\n\n')}\n`)
   }
+  templates.set('Default.md', renderChooser(names))
   return templates
 }
 
