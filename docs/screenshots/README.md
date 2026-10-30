@@ -45,6 +45,20 @@ with the automatic theme discussion previews. If you already packed the current 
 run `node _scripts/screenshots.mjs` to repeat the capture without repacking.
 The regular E2E suites do not update these files.
 
+YouTube blocks GitHub-hosted runners, so the theme discussion previews replay a
+recording of the same scenes from `e2e/fixtures/theme-previews/` and
+`e2e/fixtures/innertube/capture/`. Re-record it after changing the channel,
+video, or timestamp, or to refresh the content. Put any exported custom theme in
+a directory as `theme.json`, pack the app, and run:
+
+```sh
+E2E_RECORD=1 THEME_PREVIEW_DIR=<directory> pnpm exec playwright test -c e2e/theme-previews/playwright.config.mjs
+```
+
+Recording needs the same tools as the README capture. Commit the two fixture
+directories, but not the player script it also records under
+`e2e/fixtures/innertube/shared/`.
+
 The Flatpark submission and official Flatpak release workflows reuse these
 committed images through `_scripts/syncAppStreamScreenshots.mjs`. The helper
 updates the AppStream gallery with both themes, reads dimensions from the PNGs,

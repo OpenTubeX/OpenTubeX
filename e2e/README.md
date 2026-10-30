@@ -46,6 +46,9 @@ mobile layout and breaks selectors.
 - `tests/network/` – requires YouTube. Runs nightly and via workflow dispatch.
 - `fixtures/innertube/` – gzipped recorded Innertube responses, committed to git.
 - `fixtures/media/demo.webm` – 30s VP9/Opus clip with a burnt-in timecode.
+- `fixtures/theme-previews/` – images, player metadata, and a still video of
+  the README scenes that the theme discussion previews replay (see
+  [the screenshot instructions](../docs/screenshots/README.md)).
 
 ## Projects
 

@@ -36,14 +36,18 @@ async function clearScreenshotSearch(page) {
   if (await search.isVisible()) await search.fill('')
 }
 
-/** Load the same public subscription feed for README and discussion screenshots. */
-export async function openScreenshotSubscriptions(page) {
+/**
+ * Load the same public subscription feed for README and discussion screenshots.
+ * @param {import('@playwright/test').Page} page
+ * @param {{ playbackEngine?: 'built-in' | 'yt-dlp' }} [options] fixture replays play a local file with the built-in engine
+ */
+export async function openScreenshotSubscriptions(page, { playbackEngine = 'yt-dlp' } = {}) {
   // Call after capturing Settings with all app defaults intact.
-  await page.evaluate(async () => {
+  await page.evaluate(async playbackEngine => {
     const store = window.$store
     await store.dispatch('updateFetchSubscriptionsAutomatically', false)
-    await store.dispatch('updateVideoPlaybackEngine', 'yt-dlp')
-  })
+    await store.dispatch('updateVideoPlaybackEngine', playbackEngine)
+  }, playbackEngine)
   await openScreenshotUrl(page, `https://www.youtube.com/channel/${CHANNEL_ID}`, `/channel/${CHANNEL_ID}`)
   const subscribe = page.locator('.ftSubscribeButton .subscribeButton').first()
   await expect(subscribe).toHaveText(/^\s*Subscribe/, { timeout: 60_000 })
@@ -126,6 +130,10 @@ export async function prepareAppScreenshot(page, view) {
     }
   } else if (view === 'watch') {
     await expectPausedFrame(page)
+    // Pausing on the frame seeks, which clears and refills an open chat replay.
+    if (await page.locator('.liveChatActionButton').first().isVisible()) {
+      await expect(page.locator('.liveChatComments .comment').first()).toBeVisible()
+    }
     const avatar = page.locator('.watchVideoInfo img.channelThumbnail').first()
     await expect(avatar).toBeVisible()
     await expectImagesLoaded(avatar)

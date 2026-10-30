@@ -5,6 +5,7 @@ import { normalizeCustomTheme } from '../../src/customTheme.js'
 import { PREVIEW_VIEWS } from '../../_scripts/themePreview.mjs'
 import { test, expect } from '../helpers/app.mjs'
 import { captureAppScreenshot, copyScreenshots, openScreenshotSettings, openScreenshotSubscriptions, openScreenshotWatch, sizeScreenshotWindow } from '../helpers/screenshots.mjs'
+import { setupThemePreviewFixtures } from './fixtures.mjs'
 
 const directory = process.env.THEME_PREVIEW_DIR
 if (!directory) throw new Error('Set THEME_PREVIEW_DIR to a directory containing theme.json')
@@ -28,6 +29,7 @@ test.afterEach(async ({ page }) => {
 })
 
 test('captures the submitted theme with the README feed and watch page', async ({ app, page }, testInfo) => {
+  const { record, recordScene } = await setupThemePreviewFixtures(app, testInfo)
   const tutorial = page.locator('.tutorialOverlay')
   await tutorial.getByRole('button', { name: 'Skip', exact: true }).click()
   await expect(tutorial).toBeHidden()
@@ -54,6 +56,7 @@ test('captures the submitted theme with the README feed and watch page', async (
 
   async function capture(view) {
     await captureAppScreenshot(page, view, testInfo.outputPath(`${view}.png`))
+    await recordScene?.(view)
   }
 
   // Like the README captures, photograph Settings before configuring content.
@@ -63,7 +66,7 @@ test('captures the submitted theme with the README feed and watch page', async (
   await settings.getByRole('button', { name: 'Close', exact: true }).click()
   await expect(settings).toBeHidden()
 
-  await openScreenshotSubscriptions(page)
+  await openScreenshotSubscriptions(page, { playbackEngine: record ? 'yt-dlp' : 'built-in' })
   await capture('subscriptions')
 
   await openScreenshotWatch(page)
