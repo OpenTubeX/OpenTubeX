@@ -63,7 +63,7 @@ test('late timeupdates do not access the released Shaka cast proxy', async ({ ap
 })
 
 for (const timing of ['while', 'after']) {
-  test(`leaving fullscreen ${timing} the player is torn down does not reveal released controls`, async ({ app, page }) => {
+  test(`shortcuts and leaving fullscreen ${timing} the player is torn down do not reach released controls`, async ({ app, page }) => {
     const errors = []
     page.on('pageerror', error => errors.push(error.message))
     await mockPlayableWatchPage(app, page)
@@ -71,7 +71,7 @@ for (const timing of ['while', 'after']) {
     await setPlayerFullscreen(page, true)
 
     // A playback-engine fallback tears the player down while it stays mounted,
-    // and fullscreen can end during or after that teardown.
+    // and input or the end of fullscreen can arrive during or after that teardown.
     const component = await page.evaluateHandle(findWatchComponent)
     const teardown = await component.evaluateHandle(component => {
       const player = component.refs.player.$.setupState.video.ui.getControls().getLocalPlayer()
@@ -93,6 +93,8 @@ for (const timing of ['while', 'after']) {
         await state.destroyed
       })
     }
+    await page.evaluate(() => document.activeElement?.blur())
+    await page.keyboard.press('Shift+?')
     await page.evaluate(() => document.exitFullscreen())
     await expect.poll(() => page.evaluate(() => document.fullscreenElement)).toBeNull()
     await page.evaluate(() => new Promise(resolve => requestAnimationFrame(() => setTimeout(resolve))))

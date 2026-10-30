@@ -8568,7 +8568,8 @@ export default defineComponent({
      * @param {KeyboardEvent} event
      */
     async function keyboardShortcutHandler(event) {
-      if (!player || !isActiveTab.value) {
+      // destroyPlayer() releases ui before the player finishes destroying.
+      if (!ui || !player || !isActiveTab.value) {
         return
       }
 
