@@ -819,6 +819,7 @@ Settings:
     Managed Tools Update Started Template: Pronađeno je ažuriranje za {tools}. Preuzimanje…
     Managed Tools Update Finished Template: Dovršeno je ažuriranje alata {tools}
     Managed Tools Update Available Template: Dostupno je ažuriranje za {tools}.
+    Managed Tools Update Source Notice: "OpenTubeX je preuzima izravno s GitHuba, pa je F-Droid i druge trgovine aplikacija ne provjeravaju."
     Update Managed Tools: Ažuriraj
     Managed Tools Download Error Template: 'Nije moguće preuzeti alate kojima upravlja aplikacija: {errors}'
     Download Folder: Mapa za preuzimanja

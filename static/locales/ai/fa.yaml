@@ -852,6 +852,7 @@ Settings:
     Managed Tools Update Started Template: به‌روزرسانی {tools} پیدا شد. در حال بارگیری…
     Managed Tools Update Finished Template: به‌روزرسانی {tools} تمام شد
     Managed Tools Update Available Template: به‌روزرسانی برای {tools} موجود است.
+    Managed Tools Update Source Notice: "OpenTubeX آن را مستقیماً از GitHub بارگیری می‌کند، بنابراین F-Droid و دیگر فروشگاه‌های برنامه آن را بررسی نمی‌کنند."
     Update Managed Tools: به‌روزرسانی
     Managed Tools Download Error Template: 'ابزارهای مدیریت‌شده بارگیری نشدند: {errors}'
     Download Folder: پوشهٔ بارگیری

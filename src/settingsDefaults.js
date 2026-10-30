@@ -150,7 +150,8 @@ export function createDefaultSettings({ supportsLocalApi, isElectron }) {
     ytDlpPreloadConcurrency: DEFAULT_YT_DLP_PRELOAD_CONCURRENCY,
     ytDlpFfmpegSource: 'system',
     ytDlpFfmpegPath: '',
-    externalSoftwareUpdateMode: 'automatic',
+    // F-Droid only allows downloading executable code after the user opts in.
+    externalSoftwareUpdateMode: isElectron ? 'automatic' : 'ask',
     enableDownloads: true,
     moveDownloadsToAppHeader: false,
     moveSettingsToAppHeader: false,

@@ -814,6 +814,7 @@ Settings:
     Managed Tools Update Started Template: "Kavet ez eus bet un hizivadenn evit {tools}. O pellgargañ…"
     Managed Tools Update Finished Template: "Echu eo hizivaat {tools}"
     Managed Tools Update Available Template: "Un hizivadenn zo hegerz evit {tools}."
+    Managed Tools Update Source Notice: "OpenTubeX a bellgarg anezhañ war-eeun diwar GitHub, setu ne vez ket gwiriet gant F-Droid hag ar stalioù arloadoù all."
     Update Managed Tools: "Hizivaat"
     Managed Tools Download Error Template: "N'eus ket bet gallet pellgargañ an ostilhoù meret: {errors}"
     Download Folder: "Teuliad pellgargañ"
