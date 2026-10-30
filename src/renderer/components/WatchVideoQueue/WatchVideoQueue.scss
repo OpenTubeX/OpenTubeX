@@ -105,6 +105,11 @@
   min-inline-size: 0;
 }
 
+/* The drag handle reorders the queue, so the playlist drag area would only pad the row bottom. */
+.queueVideo :deep(.restArea) {
+  display: none;
+}
+
 /* Lay out other media like the list items of YouTube videos. */
 .externalQueueVideo {
   display: grid;
@@ -254,10 +259,6 @@
 
   .fullscreenQueue .queueVideo :deep(.info) {
     min-inline-size: 0;
-  }
-
-  .fullscreenQueue .queueVideo :deep(.restArea) {
-    line-height: 0;
   }
 }
 
