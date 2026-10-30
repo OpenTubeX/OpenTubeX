@@ -10,9 +10,30 @@
       @mouseleave="setHovered(false)"
       @focus="setFocused(true)"
       @blur="setFocused(false)"
+      @click="dialogOpen = noHover"
     >
       <FtIcon :icon="['fas', 'question-circle']" />
     </button>
+    <!-- Touch screens cannot hover, and a tap would leave a focus tooltip stuck open. -->
+    <FtPrompt
+      v-if="dialogOpen"
+      autosize
+      theme="slim"
+      :option-names="[t('Close')]"
+      :option-values="[null]"
+      :option-icons="[['fas', 'xmark']]"
+      @click="dialogOpen = false"
+    >
+      <template #label="{ labelId }">
+        <p
+          :id="labelId"
+          class="dialogText"
+          :class="{ allowNewlines }"
+        >
+          {{ tooltip }}
+        </p>
+      </template>
+    </FtPrompt>
     <Teleport :to="tooltipTarget">
       <p
         v-show="visible && settingsOverlayActive"
@@ -35,9 +56,14 @@
 <script setup>
 import { FtIcon } from '@opentubex/icons'
 import { nextTick, onBeforeUnmount, ref, shallowRef, useId, useTemplateRef } from 'vue'
+import { useI18n } from 'vue-i18n'
 import { getAnchoredPosition, supportsAnchorPositioning } from '../../helpers/anchoredPosition'
 import { useAnchoredViewportBounds } from '../../composables/useAnchoredViewportBounds'
 import { useSettingsOverlay } from '../../composables/useSettingsOverlay'
+import { usePhoneLayout } from '../../composables/usePhoneLayout'
+import FtPrompt from '../FtPrompt/FtPrompt.vue'
+
+const { t } = useI18n()
 
 const buttonRef = useTemplateRef('buttonRef')
 const textRef = useTemplateRef('textRef')
@@ -49,6 +75,8 @@ const settingsOverlayActive = useSettingsOverlay(() => {
   setFocused(false)
 })
 useAnchoredViewportBounds(buttonRef, textRef, visible)
+const noHover = usePhoneLayout('(hover: none)')
+const dialogOpen = ref(false)
 const EDGE_MARGIN = 8
 const TOOLTIP_GAP = 16
 let hovered = false
@@ -62,7 +90,7 @@ let trackingPosition = false
  * @param {boolean} value
  */
 function setHovered(value) {
-  if (value && !settingsOverlayActive.value) return
+  if (value && (!settingsOverlayActive.value || noHover.value)) return
   hovered = value
   updateVisibility()
 }
@@ -71,7 +99,7 @@ function setHovered(value) {
  * @param {boolean} value
  */
 function setFocused(value) {
-  if (value && !settingsOverlayActive.value) return
+  if (value && (!settingsOverlayActive.value || noHover.value)) return
   focused = value
   updateVisibility()
 }
