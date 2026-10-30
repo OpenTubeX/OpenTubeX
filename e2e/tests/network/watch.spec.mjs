@@ -1,6 +1,6 @@
 import { openPlaylistMenuItem, sel } from '../../helpers/app.mjs'
 import { test, expect, setPlayerFullscreen } from '../../helpers/innertube.mjs'
-import { findWatchComponent, openVideoOrSkip, waitForPlaybackOrSkip } from '../../helpers/player.mjs'
+import { findWatchComponent, openVideoOrSkip, playWhenLoaded, waitForPlaybackOrSkip } from '../../helpers/player.mjs'
 
 // "Me at the zoo" - the oldest video on YouTube, short and stable.
 const VIDEO_URL = 'https://www.youtube.com/watch?v=jNQXAC9IVRw'
@@ -1594,9 +1594,7 @@ test.describe('custom Shorts player', () => {
     }
 
     const video = player.locator('video')
-    await video.evaluate(async element => {
-      if (element.paused) await element.play()
-    })
+    await playWhenLoaded(video)
     const controls = player.locator('.shaka-controls-container')
     const topControls = player.locator('.shortsTopControls')
     const seekBar = player.locator('.shaka-seek-bar-container')
@@ -1790,9 +1788,7 @@ test.describe('custom Shorts player', () => {
     expect(await page.evaluate(() => window.__shortsSeekBarFlashedWhileLoading)).toBe(false)
 
     const seekBar = player.locator('.shaka-seek-bar-container')
-    await video.evaluate(async element => {
-      if (element.paused) await element.play()
-    })
+    await playWhenLoaded(video)
     await expect(player).not.toHaveClass(/shortsPaused/)
     await expect(seekBar).toHaveCSS('opacity', '1')
     await expect(seekBar).toHaveCSS('height', '3px')
@@ -1950,9 +1946,7 @@ test.describe('custom Shorts player', () => {
       test.skip(true, `Shorts watch page unavailable from the live API: ${await errorMessage.textContent()}`)
     }
 
-    await player.locator('video').evaluate(async element => {
-      if (element.paused) await element.play()
-    })
+    await playWhenLoaded(player.locator('video'))
     await expect(player).not.toHaveClass(/shortsPaused/)
 
     const controls = player.locator('.shaka-controls-container')

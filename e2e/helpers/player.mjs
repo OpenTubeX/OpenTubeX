@@ -157,6 +157,21 @@ export async function waitForPlayback(page) {
 }
 
 /**
+ * Resumes a paused video once its source has loaded. The player can replace
+ * the source while it loads, which aborts an earlier `play()`.
+ *
+ * @param {import('@playwright/test').Locator} video
+ */
+export async function playWhenLoaded(video) {
+  await expect
+    .poll(() => video.evaluate(element => element.readyState), { message: 'waiting for the video metadata' })
+    .toBeGreaterThanOrEqual(1)
+  await video.evaluate(async element => {
+    if (element.paused) await element.play()
+  })
+}
+
+/**
  * Clicks an action in the fullscreen or full-window action pill.
  *
  * The pill only takes the pointer while Shaka's controls are shown, and it
