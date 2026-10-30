@@ -652,10 +652,10 @@
   margin-block-start: 0;
 }
 
-.chatContent .liveChatVerifiedBadge {
+.chatContent :deep(.liveChatVerifiedBadge) {
   margin-inline: 0 5px;
 }
 
-.superChatAuthor .liveChatVerifiedBadge {
+.superChatAuthor :deep(.liveChatVerifiedBadge) {
   margin-inline: 0;
 }

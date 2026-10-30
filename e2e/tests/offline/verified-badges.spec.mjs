@@ -33,7 +33,7 @@ function videoRenderer(videoId, title, channelName, index, badgeStyle) {
  */
 function capBandOverhang(badge) {
   return badge.evaluate(badge => {
-    let node = badge.previousSibling
+    let node = badge.parentElement.previousSibling
     while (!node.textContent.trim()) node = node.previousSibling
     let text = node
     const walker = document.createTreeWalker(node, NodeFilter.SHOW_TEXT)
@@ -122,6 +122,52 @@ test.describe('search results', () => {
 
     await attachScreenshot('verified search results')
   })
+
+  test('keeps badges on the line of the last character of wrapped names', { tag: '@scale' }, async ({ page }) => {
+    const channelName = 'Calm Evening Meditation Sounds And Stories'
+    const response = structuredClone(searchResponse)
+    response.contents.twoColumnSearchResultsRenderer.primaryContents.sectionListRenderer.contents[0].itemSectionRenderer.contents = [
+      channelRenderer(channelName, 1, VERIFIED),
+      videoRenderer('aaaaaaaaaaa', 'Breathing exercise', channelName, 1, VERIFIED_ARTIST)
+    ]
+    await page.route('https://www.youtube.com/youtubei/v1/search**', route => route.fulfill({ json: response }))
+
+    await page.locator(sel.searchInput).fill('meditation')
+    await page.locator(sel.searchInput).press('Enter')
+
+    const badges = [
+      page.locator('.ft-list-video .channelName .verifiedBadge'),
+      page.locator('.ft-list-channel .title .verifiedBadge')
+    ]
+    for (const badge of badges) {
+      await expect(badge).toBeVisible()
+      // Narrow the name one pixel at a time so every wrap position is checked.
+      const strandedWidths = await badge.evaluate(badge => {
+        const name = badge.closest('.channelNameText, .h3Title')
+        const walker = document.createTreeWalker(name, NodeFilter.SHOW_TEXT)
+        let text = null
+        while (walker.nextNode()) {
+          if (/\p{L}/u.test(walker.currentNode.textContent)) text = walker.currentNode
+        }
+        const end = text.textContent.trimEnd().length
+        const range = document.createRange()
+        range.setStart(text, end - 1)
+        range.setEnd(text, end)
+
+        const stranded = []
+        for (let width = 40; width <= 400; width++) {
+          name.style.display = 'inline-block'
+          name.style.inlineSize = `${width}px`
+          const lastCharacter = range.getBoundingClientRect()
+          if (badge.getBoundingClientRect().top >= lastCharacter.bottom) stranded.push(width)
+        }
+        name.style.removeProperty('display')
+        name.style.removeProperty('inline-size')
+        return stranded
+      })
+      expect(strandedWidths).toEqual([])
+    }
+  })
 })
 
 test.describe('watch page', () => {
@@ -204,6 +250,7 @@ test.describe('watch page', () => {
 
     const comments = page.locator('.liveChatComments .comment')
     await expect(comments.filter({ hasText: '@creator' }).locator('.verifiedBadge')).toHaveAttribute('aria-label', 'Verified')
+    await expect(comments.filter({ hasText: '@creator' }).locator('.verifiedBadge')).toHaveCSS('margin-inline-end', '5px')
     await expect(comments.filter({ hasText: '@viewer' })).toBeVisible()
     await expect(comments.filter({ hasText: '@viewer' }).locator('.verifiedBadge')).toHaveCount(0)
     await attachScreenshot('verified live chat author')

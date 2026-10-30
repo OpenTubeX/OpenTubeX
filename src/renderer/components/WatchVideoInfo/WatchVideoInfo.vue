@@ -174,7 +174,8 @@
                 @click="handleChannelLinkClick"
                 @auxclick="handleChannelLinkClick"
               >
-                {{ channelName }}<FtVerifiedBadge
+                <FtVerifiedBadge
+                  :name="channelName"
                   :verified="channelVerified"
                   :artist="channelVerifiedArtist"
                 />

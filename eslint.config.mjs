@@ -284,8 +284,10 @@ export default defineConfig([
       'object-shorthand': 'off',
       'vue/multi-word-component-names': 'off',
 
-      // `v-safer-html` fills the element with sanitized HTML, just like `v-html` does
+      // `v-safer-html` fills the element with sanitized HTML, just like `v-html` does,
+      // and `FtVerifiedBadge` renders the name it is given
       'vuejs-accessibility/heading-has-content': ['error', {
+        accessibleChildren: ['FtVerifiedBadge'],
         accessibleDirectives: ['safer-html'],
       }],
 

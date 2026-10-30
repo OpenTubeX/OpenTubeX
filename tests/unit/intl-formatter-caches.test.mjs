@@ -62,7 +62,7 @@ test('formatBytes reuses its two formatters', () => {
 
 test('getFirstCharacter constructs one Intl.Segmenter per locale', () => {
   const code = source('helpers/strings.js')
-  const slice = code.slice(code.indexOf('/** @type {Map<string, Intl.Segmenter>} */')).replace('export function', 'function')
+  const slice = code.slice(code.indexOf('/** @type {Map<string, Intl.Segmenter>} */')).replaceAll('export function', 'function')
   const counting = countingIntl('Segmenter')
   const getFirstCharacter = vm.runInNewContext(`${slice}\ngetFirstCharacter`, { Intl: counting.Intl })
 
@@ -71,6 +71,20 @@ test('getFirstCharacter constructs one Intl.Segmenter per locale', () => {
     assert.equal(getFirstCharacter('Ärger', 'de-DE'), 'Ä')
   }
   assert.equal(counting.constructed.length, 2)
+})
+
+test('getLastCharacter keeps the last grapheme whole and reuses one Intl.Segmenter', () => {
+  const code = source('helpers/strings.js')
+  const slice = code.slice(code.indexOf('/** @type {Map<string, Intl.Segmenter>} */')).replaceAll('export function', 'function')
+  const counting = countingIntl('Segmenter')
+  const getLastCharacter = vm.runInNewContext(`${slice}\ngetLastCharacter`, { Intl: counting.Intl })
+
+  for (let index = 0; index < 200; index++) {
+    assert.equal(getLastCharacter('family 👨‍👩‍👧'), '👨‍👩‍👧')
+    assert.equal(getLastCharacter('Café'), 'é')
+    assert.equal(getLastCharacter(''), '')
+  }
+  assert.equal(counting.constructed.length, 1)
 })
 
 test('the audio track menu constructs Intl.DisplayNames once per rebuild', () => {
