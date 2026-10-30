@@ -535,22 +535,60 @@ test('withheld media pending attestation waits to reload until playback needs it
   const transport = createSabrTransport(sabrData, () => ({ ...context, getBufferedAheadSeconds: () => bufferedAheadSeconds }))
   t.after(() => transport.cleanup())
   transport.onReloadOnce(() => reloads++)
+  const waits = []
+  transport.onBackoffRequested(({ backoffMs }) => waits.push(backoffMs))
   const uri = 'sabr1:audio?formatId=140-123-&sq=1'
   await transport.request(uri, request(uri), 1).promise
   const rejected = assert.rejects(transport.request(uri, { uris: [uri], retryParameters: { timeout: 60000 } }, 1).promise,
     error => error.code === ShakaError.Code.OPERATION_ABORTED)
-  for (let index = 0; index < 10; index++) {
+  // A paused video keeps its buffer, so wait without requests or timeouts
+  for (let index = 0; index < 100; index++) {
     await flushRequests()
     t.mock.timers.tick(2000)
   }
   await flushRequests()
+  assert.equal(calls, 7)
   assert.equal(reloads, 0)
+  // Buffered playback hides the startup countdown
+  assert.deepEqual(waits, [])
   bufferedAheadSeconds = 5
   t.mock.timers.tick(2000)
-  await flushRequests()
-  t.mock.timers.tick(60000)
   await rejected
-  assert.equal(calls, 12)
+  assert.equal(calls, 7)
+  assert.equal(reloads, 1)
+})
+
+test('withheld media pending attestation aborts waiting audio and video requests with one reload', async t => {
+  t.mock.timers.enable({ apis: ['setTimeout', 'Date'], now: 0 })
+  let calls = 0
+  let reloads = 0
+  let bufferedAheadSeconds = 40
+  const { createSabrTransport } = load(async () => {
+    calls++
+    if (calls === 1) return response([1])
+    if (calls === 2) return response([1], false, videoFormatId)
+    return policyResponse(2000, 2)
+  }, { Date })
+  const transport = createSabrTransport(sabrData, () => ({ ...context, getBufferedAheadSeconds: () => bufferedAheadSeconds }))
+  t.after(() => transport.cleanup())
+  transport.onReloadOnce(() => reloads++)
+  const audioUri = 'sabr1:audio?formatId=140-123-&sq=1'
+  const videoUri = 'sabr1:video?formatId=137-456-&resolution=1080&sq=1'
+  await transport.request(audioUri, request(audioUri), 1).promise
+  await transport.request(videoUri, request(videoUri), 1).promise
+  const rejected = [audioUri, videoUri].map(uri => assert.rejects(
+    transport.request(uri, { uris: [uri], retryParameters: { timeout: 60000 } }, 1).promise,
+    error => error.code === ShakaError.Code.OPERATION_ABORTED))
+  for (let index = 0; index < 10; index++) {
+    await flushRequests()
+    t.mock.timers.tick(2000)
+  }
+  bufferedAheadSeconds = 5
+  for (let index = 0; index < 2; index++) {
+    await flushRequests()
+    t.mock.timers.tick(1000)
+  }
+  await Promise.all(rejected)
   assert.equal(reloads, 1)
 })
 

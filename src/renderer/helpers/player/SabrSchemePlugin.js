@@ -77,6 +77,7 @@ const ShakaError = shaka.util.Error
  * @property {number} requestNumber
  * @property {Set<string>} deliveredMediaFor
  * @property {boolean} attestationPending
+ * @property {boolean} mediaWithheld
  */
 /**
  * @typedef TimeoutController
@@ -101,6 +102,7 @@ const BACKOFF_WITHOUT_MEDIA_BUDGET_MS = 20_000
 const BACKOFF_ROUNDS_WITHOUT_MEDIA = 6
 /** Leaves time for a reload before playback runs out of withheld media. */
 const WITHHELD_MEDIA_RELOAD_BUFFER_SECONDS = 10
+const WITHHELD_MEDIA_POLL_MS = 1000
 
 /**
  * @param {import('googlevideo/protos').FormatId} formatId
@@ -327,6 +329,28 @@ function createTimeoutController(callback, timeoutMs) {
 }
 
 /**
+ * @param {number} delayMs
+ * @param {AbortSignal} signal
+ */
+function waitUnlessAborted(delayMs, signal) {
+  return new Promise((resolve, reject) => {
+    if (signal.aborted) {
+      reject(signal.reason)
+      return
+    }
+    const timer = setTimeout(() => {
+      signal.removeEventListener('abort', onAbort)
+      resolve()
+    }, delayMs)
+    const onAbort = () => {
+      clearTimeout(timer)
+      reject(signal.reason)
+    }
+    signal.addEventListener('abort', onAbort, { once: true })
+  })
+}
+
+/**
  * @param {OperationInputs} operationInputs - readonly
  * @param {CurrentState} currentState - can be updated
  */
@@ -366,27 +390,16 @@ async function doRequest(
   try {
     let shouldReloadDueToBackoffLoop = false
     let waitedForBackoff = false
+    const hasDeliveredMedia = () => currentState.sabrStreamState.deliveredMediaFor.has(operationInputs.streamKind)
+    const needsMedia = () => (currentState.getBufferedAheadSeconds?.() ?? 0) < WITHHELD_MEDIA_RELOAD_BUFFER_SECONDS
     while (currentState.sabrStreamState.backoffUntilMs > Date.now()) {
       waitedForBackoff = true
       const currentBackoffTimeMs = currentState.sabrStreamState.backoffUntilMs - Date.now()
-      currentState.eventEmitter.emit('backoff-requested', { backoffMs: currentBackoffTimeMs })
-      // Wait but can be aborted
-      await new Promise((resolve, reject) => {
-        const signal = currentState.abortController.signal
-        if (signal.aborted) {
-          reject(signal.reason)
-          return
-        }
-        const timer = setTimeout(() => {
-          signal.removeEventListener('abort', onAbort)
-          resolve()
-        }, currentBackoffTimeMs)
-        const onAbort = () => {
-          clearTimeout(timer)
-          reject(signal.reason)
-        }
-        signal.addEventListener('abort', onAbort, { once: true })
-      })
+      // The countdown covers the video, so keep it for playback that waits on it
+      if (!hasDeliveredMedia() || needsMedia()) {
+        currentState.eventEmitter.emit('backoff-requested', { backoffMs: currentBackoffTimeMs })
+      }
+      await waitUnlessAborted(currentBackoffTimeMs, currentState.abortController.signal)
       // Must reset AFTER waiting to avoid requested aborted
       // Since long backoff time mostly happens on the start of video playback we only reset timeout once
       // i.e. backoff time parts received will not reset timeout - counted as video loading issue
@@ -400,18 +413,32 @@ async function doRequest(
       // video still needs a bounded recovery even when its audio works. One
       // long policy, including extensions from another loader, is not a loop.
       // A session pending attestation only gets about a minute of media, after
-      // which YouTube withholds the rest behind backoffs that never end. Wait
-      // until playback needs it, as a reload interrupts buffered playback too.
+      // which YouTube withholds the rest behind backoffs that never end.
       if (
-        (!currentState.sabrStreamState.deliveredMediaFor.has(operationInputs.streamKind) ||
-          (currentState.sabrStreamState.attestationPending &&
-            (currentState.getBufferedAheadSeconds?.() ?? 0) < WITHHELD_MEDIA_RELOAD_BUFFER_SECONDS)) &&
         (currentState.cumulativeBackOffRequested >= BACKOFF_ROUNDS_WITHOUT_MEDIA ||
           (currentState.cumulativeBackOffRequested > 1 &&
             currentState.cumulativeBackOffTimeMs >= BACKOFF_WITHOUT_MEDIA_BUDGET_MS))
       ) {
-        shouldReloadDueToBackoffLoop = true
+        if (!hasDeliveredMedia()) {
+          shouldReloadDueToBackoffLoop = true
+        } else if (currentState.sabrStreamState.attestationPending) {
+          currentState.sabrStreamState.mediaWithheld = true
+        }
       }
+    }
+    if (!shouldReloadDueToBackoffLoop && currentState.sabrStreamState.mediaWithheld) {
+      // Requests can't get withheld media, and a reload interrupts buffered
+      // playback too. Wait without either until playback needs more media,
+      // which a paused video may never do.
+      currentState.timeoutController?.clearTimeout()
+      while (!needsMedia() && !currentState.sabrStreamState.playerReloadRequested) {
+        await waitUnlessAborted(WITHHELD_MEDIA_POLL_MS, currentState.abortController.signal)
+      }
+      if (currentState.sabrStreamState.playerReloadRequested) {
+        currentState.abortStatus.playerReloadRequested = true
+        throw createRecoverableNetworkError(ShakaError.Code.OPERATION_ABORTED, operationInputs.uri, operationInputs.requestType)
+      }
+      shouldReloadDueToBackoffLoop = true
     }
     if (shouldReloadDueToBackoffLoop || currentState.cumulativeRetries >= 100) {
       // Fire fake reload event due to detecting retry loop
@@ -920,6 +947,7 @@ export function createSabrTransport(sabrData, getRequestContext) {
     requestNumber: 0,
     deliveredMediaFor: new Set(),
     attestationPending: false,
+    mediaWithheld: false,
   }
 
   const requestSegment = (uri, request, requestType, _progressUpdated, headersReceived = () => {}) => {
