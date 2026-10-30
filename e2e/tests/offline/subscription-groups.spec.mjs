@@ -170,6 +170,66 @@ test.describe('picking channels for a group', () => {
   })
 })
 
+test.describe('picking from many channels', () => {
+  const MANY_CHANNELS = Array.from({ length: 250 }, (_, index) => ({
+    id: `UC${String(index).padStart(22, '0')}`,
+    name: `Channel ${String(index).padStart(3, '0')}`
+  }))
+  test.use({ seed: seed({}, MANY_CHANNELS) })
+
+  test('only mounts the channels of the loaded pages', { tag: '@performance' }, async ({ page }) => {
+    await goTo(page, 'subscribedchannels')
+    await page.getByRole('button', { name: 'New Group' }).click()
+
+    const editor = page.getByRole('dialog', { name: 'New Group' })
+    const checkboxes = editor.getByRole('checkbox')
+    await expect(checkboxes).toHaveCount(100)
+    await expect(checkboxes.last()).toHaveText('Channel 099')
+
+    const scroller = editor.locator('.promptContentScroller')
+    await scroller.evaluate(element => { element.scrollTop = element.scrollHeight })
+    await expect(checkboxes).toHaveCount(200)
+
+    // Searching covers the channels past the loaded pages.
+    await editor.getByRole('searchbox', { name: 'Search Channels' }).fill('Channel 249')
+    await expect(checkboxes).toHaveText(['Channel 249'])
+    await checkboxes.click()
+    await editor.getByRole('searchbox', { name: 'Search Channels' }).fill('')
+    await expect(checkboxes).toHaveCount(100)
+    await expect(editor.getByText('1 selected')).toBeVisible()
+
+    await editor.getByRole('textbox', { name: 'Group Name' }).fill('Music')
+    await editor.getByRole('button', { name: 'Create', exact: true }).click()
+    await expect(editor).toBeHidden()
+    expect(await storedGroups(page)).toEqual([
+      { id: expect.any(String), name: 'Music', channelIds: [MANY_CHANNELS[249].id] }
+    ])
+  })
+
+  test.describe('without automatic loading', () => {
+    test.use({ seed: seed({ generalAutoLoadMorePaginatedItemsEnabled: false }, MANY_CHANNELS) })
+
+    test('keeps focus in the editor when loading more channels by hand', async ({ page }) => {
+      await goTo(page, 'subscribedchannels')
+      await page.getByRole('button', { name: 'New Group' }).click()
+
+      const editor = page.getByRole('dialog', { name: 'New Group' })
+      await expect(editor.getByRole('checkbox')).toHaveCount(100)
+      const loadMore = editor.getByRole('button', { name: 'Load More Channels' })
+      await loadMore.focus()
+      await page.keyboard.press('Enter')
+      await expect(editor.getByRole('checkbox')).toHaveCount(200)
+      await expect(editor.getByRole('checkbox', { name: 'Channel 100' })).toBeFocused()
+
+      // The next page's button replaces the one the dialog had when it opened.
+      await editor.getByRole('textbox', { name: 'Group Name' }).fill('Music')
+      await editor.getByRole('button', { name: 'Create' }).focus()
+      await page.keyboard.press('ArrowLeft')
+      await expect(loadMore).toBeFocused()
+    })
+  })
+})
+
 test.describe('custom order across pages', () => {
   const MANY_CHANNELS = Array.from({ length: 60 }, (_, index) => ({
     id: `UC${String(index).padStart(22, '0')}`,

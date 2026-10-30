@@ -48,21 +48,37 @@
     >
       {{ t('Channels.Empty') }}
     </p>
-    <FtFlexBox
-      v-else
-      class="channelPicker"
-    >
-      <FtChannelBubble
-        v-for="channel in displayedChannels"
-        :key="channel.id"
-        :channel-id="channel.id"
-        :channel-name="channel.name"
-        :channel-thumbnail="channel.thumbnail"
-        selectable
-        :selected="selected.has(channel.id)"
-        @change="toggleChannel(channel.id)"
-      />
-    </FtFlexBox>
+    <template v-else>
+      <FtFlexBox
+        ref="channelPicker"
+        class="channelPicker"
+      >
+        <FtChannelBubble
+          v-for="channel in pagedChannels"
+          :key="channel.id"
+          :channel-id="channel.id"
+          :channel-name="channel.name"
+          :channel-thumbnail="channel.thumbnail"
+          selectable
+          :selected="selected.has(channel.id)"
+          @change="toggleChannel(channel.id)"
+        />
+      </FtFlexBox>
+      <!-- Mounting every subscription at once takes seconds on slower devices -->
+      <FtAutoLoadNextPageWrapper
+        v-if="hasMoreChannels"
+        :key="channelPage"
+        @load-next-page="channelPage++"
+      >
+        <FtFlexBox>
+          <FtButton
+            :label="t('Channels.Load More Channels')"
+            :icon="['fas', 'arrow-down']"
+            @click="loadMoreChannels"
+          />
+        </FtFlexBox>
+      </FtAutoLoadNextPageWrapper>
+    </template>
     <template #footer>
       <FtFlexBox>
         <FtButton
@@ -104,6 +120,7 @@
 import { computed, nextTick, onMounted, reactive, ref, useTemplateRef } from 'vue'
 import { useI18n } from 'vue-i18n'
 
+import FtAutoLoadNextPageWrapper from '../FtAutoLoadNextPageWrapper.vue'
 import FtButton from '../FtButton/FtButton.vue'
 import FtChannelBubble from '../FtChannelBubble/FtChannelBubble.vue'
 import FtFlexBox from '../ft-flex-box/ft-flex-box.vue'
@@ -112,6 +129,7 @@ import FtPrompt from '../FtPrompt/FtPrompt.vue'
 
 import store from '../../store/index'
 
+import { useListPagination } from '../../composables/useListPagination'
 import { youtubeImageUrlToInvidious } from '../../helpers/api/invidious'
 import { showToast } from '../../helpers/utils'
 
@@ -168,6 +186,22 @@ const displayedChannels = computed(() => {
   if (search === '') return sortedChannels.value
   return sortedChannels.value.filter(channel => channel.name.toLowerCase().includes(search))
 })
+
+const { page: channelPage, displayedItems: pagedChannels, hasMore: hasMoreChannels } = useListPagination(displayedChannels, {
+  pageSize: 100,
+  append: true,
+  resetOn: query
+})
+
+const channelPicker = useTemplateRef('channelPicker')
+
+// The button is replaced by the next page's, so focus the first new channel instead.
+async function loadMoreChannels() {
+  const firstNewIndex = pagedChannels.value.length
+  channelPage.value++
+  await nextTick()
+  channelPicker.value?.$el.querySelectorAll('[role="checkbox"]')[firstNewIndex]?.focus()
+}
 
 const selectedSubscribedCount = computed(() => {
   return channels.value.reduce((count, channel) => count + Number(selected.has(channel.id)), 0)

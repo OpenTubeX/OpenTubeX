@@ -69,7 +69,7 @@ import { FtIcon } from '@opentubex/icons'
 import { ObserveVisibility as vObserveVisibility } from 'vue-observe-visibility'
 
 import { getCenteredChapterScrollTop } from './chapterScroll'
-import { clampOverlayScrollTop, restoreOverlayScrollTop } from '../../helpers/overlayScrollbars'
+import { clampOverlayScrollTop } from '../../helpers/overlayScrollbars'
 
 const props = defineProps({
   chapters: {
@@ -283,7 +283,8 @@ function scrollToCurrentChapter(remainingAttempts = 5) {
   // Stopping short of it lets the next touch swipe latch onto the list
   // instead of chaining to the page, so let the browser clamp to its end.
   if (top >= maxScrollTop) top = container.scrollHeight
-  restoreOverlayScrollTop(container, container.scrollTop)
+  // Writing scrollTop here would stop a composited smooth scroll that's still
+  // running, and with it the new one.
   container.scrollTo({ top, behavior: 'smooth' })
 }
 
