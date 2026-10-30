@@ -148,7 +148,7 @@ const GENERATE_TIMEOUT_MS = 30 * 1000
 /**
  * The BotGuard view of the current attestation. A full BotGuard run takes a
  * second or more, while minting from an attestation takes milliseconds.
- * @type {{ view: WebContentsView, proxyUrl: string | undefined, expiresAt: number } | null}
+ * @type {{ view: WebContentsView, proxyUrl: string | undefined, expiresAt: number, expiryTimer: ReturnType<typeof setTimeout> } | null}
  */
 let attestation = null
 
@@ -189,6 +189,7 @@ async function mintPoToken(videoId, context, initialAttestationData, ytConfig, p
 
 async function discardAttestation() {
   if (!attestation) return
+  clearTimeout(attestation.expiryTimer)
   if (!attestation.view.webContents.isDestroyed()) {
     attestation.view.webContents.close({ waitForBeforeUnload: false })
   }
@@ -261,6 +262,8 @@ async function attest(videoId, context, initialAttestationData, ytConfig, proxyU
 
     const script = cachedScript.replace('FT_PARAMS', () => `"${videoId}",${context},${initialAttestationData},${ytConfig}`)
 
+    // The attestation's lifetime starts during this run, so count it from before
+    const startedAt = Date.now()
     const token = await withTimeout(
       webContentsView.webContents.executeJavaScript(script),
       GENERATE_TIMEOUT_MS,
@@ -268,8 +271,15 @@ async function attest(videoId, context, initialAttestationData, ytConfig, proxyU
     )
 
     const validForSecs = await webContentsView.webContents.executeJavaScript('window.ftPoTokenValidForSecs')
-    if (validForSecs > 0) {
-      attestation = { view: webContentsView, proxyUrl, expiresAt: Date.now() + validForSecs * 1000 }
+    const expiresAt = startedAt + validForSecs * 1000
+    if (expiresAt > Date.now()) {
+      // Release the view once it expires, even if no other video needs a token
+      const expiryTimer = setTimeout(() => {
+        enqueueAsyncFunction(async () => {
+          if (attestation?.view === webContentsView) await discardAttestation()
+        })
+      }, expiresAt - Date.now())
+      attestation = { view: webContentsView, proxyUrl, expiresAt, expiryTimer }
       keepView = true
     }
     return token

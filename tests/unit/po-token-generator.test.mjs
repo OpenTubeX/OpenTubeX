@@ -88,7 +88,12 @@ function load({ attest, mint = () => attested, validForSecs = 600 }) {
     withTimeout,
     process: { env: {} },
     __dirname: '',
-    setTimeout,
+    // Expiry timers must not keep the test process alive
+    setTimeout: (callback, delay) => {
+      const timer = setTimeout(callback, delay)
+      timer.unref?.()
+      return timer
+    },
     clearTimeout,
     Date,
     console,
@@ -140,6 +145,44 @@ test('an expired attestation attests again', async (t) => {
   await generate()
   assert.equal(views.length, 2)
   assert.equal(views[0].closed, true)
+})
+
+test('an expired attestation is released without another token', async (t) => {
+  t.mock.timers.enable({ apis: ['setTimeout', 'Date'], now: 0 })
+  const { generate, views, cleanups } = load({ attest: () => attested, validForSecs: 60 })
+  await generate()
+  t.mock.timers.tick(60_000)
+  await new Promise(resolve => setImmediate(resolve))
+  assert.equal(views[0].closed, true)
+  assert.equal(cleanups(), 1)
+})
+
+test('the attestation lifetime counts from before the BotGuard run', async (t) => {
+  t.mock.timers.enable({ apis: ['setTimeout', 'Date'], now: 0 })
+  const { generate, views } = load({
+    attest: () => {
+      t.mock.timers.tick(10_000)
+      return attested
+    },
+    validForSecs: 60,
+  })
+  await generate()
+  t.mock.timers.tick(50_000)
+  await new Promise(resolve => setImmediate(resolve))
+  assert.equal(views[0].closed, true)
+})
+
+test('a token requested as the attestation expires keeps its replacement', async (t) => {
+  t.mock.timers.enable({ apis: ['setTimeout', 'Date'], now: 0 })
+  const { generate, views } = load({ attest: () => attested, validForSecs: 60 })
+  await generate()
+  t.mock.timers.tick(59_999)
+  const token = generate()
+  t.mock.timers.tick(1)
+  await token
+  await new Promise(resolve => setImmediate(resolve))
+  assert.equal(views.length, 2)
+  assert.equal(views[1].closed, false)
 })
 
 test('an attestation without a lifetime is not kept', async () => {
