@@ -443,14 +443,14 @@ test.describe('quality codecs from the manifest', () => {
     await expect(menu.locator('.ft-quality-codecs')).toHaveCount(0)
   })
 
-  test('lists only the playing video of alternative videos with the same resolution', async ({ app, page }) => {
+  test('lists only the resolutions of the playing alternative video', async ({ app, page }) => {
     await openAdaptiveVideo(app, page)
     const player = page.locator(`${activeTab} .ftVideoPlayer`)
     await player.evaluate(element => {
       const shakaPlayer = element.ui.getControls().getPlayer()
       shakaPlayer.getVideoTracks = () => [
         { id: 1, label: 'Main', width: 1920, height: 1080, bandwidth: 4e6, active: true },
-        { id: 2, label: 'Sign language', width: 1920, height: 1080, bandwidth: 5e6 },
+        { id: 2, label: 'Sign language', width: 1280, height: 720, bandwidth: 2e6 },
       ].map(track => ({ codecs: 'avc1.64002a', frameRate: 30, hdr: 'SDR', roles: [], videoLayout: null, active: false, ...track }))
       shakaPlayer.dispatchEvent({ type: 'trackschanged' })
     })

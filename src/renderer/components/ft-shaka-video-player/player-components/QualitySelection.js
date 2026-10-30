@@ -21,15 +21,13 @@ function hasSameRoles(a, b) {
 }
 
 /**
- * Whether the track labels name single resolutions, like Twitch's "720p" HLS
- * renditions, rather than alternative videos with resolutions of their own.
+ * Whether every track label names the track's resolution, like Twitch's "720p"
+ * or "1080p60" HLS renditions, rather than an alternative video.
  * @param {shaka.extern.VideoTrack[]} tracks
  */
 function hasResolutionLabels(tracks) {
-  const labels = new Set(tracks.map(track => track.label))
-  return labels.size > 1 &&
-    labels.size === new Set(tracks.map(track => track.height)).size &&
-    tracks.every(track => track.height && tracks.every(other => other.label !== track.label || other.height === track.height))
+  return new Set(tracks.map(track => track.label)).size > 1 &&
+    tracks.every(track => /^\d+p/.test(track.label) && Number.parseInt(track.label) === track.height)
 }
 
 /**
