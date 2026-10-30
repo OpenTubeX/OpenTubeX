@@ -187,6 +187,15 @@ test.describe('SponsorBlock submission', { tag: '@scale' }, () => {
     await menu.getByRole('button', { name: '(End)', exact: true }).click()
     await expect(endTime).toHaveValue(`0:${seconds}.000`)
     await expect(menu.locator('.sponsorBlockSubmissionError')).toHaveCount(0)
+
+    // Shaka's seek range can know the length before the media element does
+    await video.evaluate(element => {
+      Object.defineProperty(element, 'duration', { configurable: true, get: () => NaN })
+    })
+    await endTime.fill('')
+    await menu.getByRole('button', { name: '(End)', exact: true }).click()
+    await expect(endTime).toHaveValue(/^0:[1-3]\d\.\d{3}$/)
+    await expect(menu.locator('.sponsorBlockSubmissionError')).toHaveCount(0)
   })
 
   test('keeps the draft list scrollbar at the panel edge beside its content', async ({ app, page, uiScale }, testInfo) => {

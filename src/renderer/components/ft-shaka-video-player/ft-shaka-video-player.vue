@@ -1501,7 +1501,7 @@
                   </button>
                   <button
                     class="sponsorBlockDraftTimeAction"
-                    @click="setSponsorBlockDraftTime(segment.id, 'endTime', video?.duration ?? 0)"
+                    @click="setSponsorBlockDraftTime(segment.id, 'endTime', getSponsorBlockSubmissionVideoDuration())"
                   >
                     {{ $t('Video.Player.SponsorBlock.EndAction') }}
                   </button>
