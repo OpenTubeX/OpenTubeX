@@ -898,6 +898,7 @@ test.describe('overlay scrollbars', () => {
 
       expect(handleTops.length).toBeGreaterThan(5)
       expect(handleTops).not.toContain(null)
+      expect(Math.max(...handleTops) - Math.min(...handleTops)).toBeGreaterThan(1)
       // Out-of-step tracks show the handle a wheel step ahead, then pull it back.
       const backwardSteps = handleTops.slice(1).filter((top, index) => top < handleTops[index] - 1)
       expect(backwardSteps).toEqual([])
