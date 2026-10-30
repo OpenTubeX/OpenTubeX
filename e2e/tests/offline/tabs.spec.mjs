@@ -133,7 +133,7 @@ test.describe('tab bar', () => {
     }
   })
 
-  test('centers horizontal tabs beside their reserved scrollbar row', { tag: '@scale' }, async ({ page }) => {
+  test('centers horizontal tabs above their resting scrollbar', { tag: '@scale' }, async ({ page }) => {
     for (const overflowing of [false, true]) {
       if (overflowing) {
         await page.evaluate(async () => {
@@ -146,16 +146,33 @@ test.describe('tab bar', () => {
       for (const position of ['top', 'bottom']) {
         await page.evaluate(position => window.$store.commit('setTabBarPosition', position), position)
         await expect.poll(() => page.locator('.tab').first().evaluate(tab => {
-          const bar = tab.closest('.tabBar').getBoundingClientRect()
+          const tabBar = tab.closest('.tabBar')
+          const bar = tabBar.getBoundingClientRect()
           const box = tab.getBoundingClientRect()
-          const scrollbar = tab.closest('.tabBar').querySelector('.os-scrollbar-horizontal')
-          const scrollbarSpace = scrollbar.classList.contains('os-scrollbar-visible') ? scrollbar.getBoundingClientRect().height : 0
-          const position = tab.closest('.tabBar').classList.contains('position-bottom') ? 'bottom' : 'top'
-          const top = box.top - bar.top - (position === 'bottom' ? scrollbarSpace : 0)
-          const bottom = bar.bottom - box.bottom - (position === 'top' ? scrollbarSpace : 0)
+          const top = box.top - bar.top
+          const bottom = bar.bottom - box.bottom
           const style = getComputedStyle(tab)
-          return top >= 0.5 && bottom >= 0.5 && Math.abs(top - bottom) <= 0.6 && style.borderTopWidth === style.borderBottomWidth
+          // The resting thumb sits in the gap on the window edge, clear of the tabs.
+          const scrollbar = tabBar.querySelector('.os-scrollbar-horizontal')
+          const handle = scrollbar.querySelector('.os-scrollbar-handle').getBoundingClientRect()
+          const clear = !scrollbar.classList.contains('os-scrollbar-visible') ||
+            (tabBar.classList.contains('position-bottom') ? handle.bottom <= box.top + 0.5 : handle.top >= box.bottom - 0.5)
+          return top >= 0.5 && Math.abs(top - bottom) <= 0.6 && clear && style.borderTopWidth === style.borderBottomWidth
         }), { message: `balanced tab gaps at ${position}, overflow ${overflowing}` }).toBe(true)
+        if (overflowing) {
+          // The shown scrollbar's track reaches past the gap, but a click on
+          // an inactive tab's edge beside it still lands on the tab.
+          const tab = page.locator('.tab:not(.active)').first()
+          const scrollbar = page.locator('.tabsContainer > .os-scrollbar-horizontal')
+          const box = await tab.boundingBox()
+          await page.mouse.move(box.x + box.width / 2, box.y + box.height / 2)
+          await expect(scrollbar).not.toHaveClass(/app-scrollbar-idle/)
+          expect(await tab.evaluate((element, position) => {
+            const box = element.getBoundingClientRect()
+            const y = position === 'bottom' ? box.top + 1 : box.bottom - 1
+            return element.contains(document.elementFromPoint(box.left + box.width / 2, y))
+          }, position), `tab edge reachable at ${position}`).toBe(true)
+        }
       }
     }
   })

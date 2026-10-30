@@ -8,7 +8,6 @@
   box-shadow: none;
   block-size: var(--top-tab-bar-height, 32px);
   min-block-size: var(--top-tab-bar-height, 32px);
-  padding-block: 1px;
   padding-inline: var(--tab-bar-inline-padding);
   gap: 2px;
   position: sticky;
@@ -23,6 +22,8 @@
    paint over the tabs while a fast scroll outruns their repositioning. The
    vertical bar is a side column that dropdowns are allowed to cross. */
 .tabBar:not(.vertical) {
+  --tab-bar-block-gap: 1px;
+
   z-index: 8;
 }
 
@@ -39,8 +40,11 @@
   -webkit-app-region: no-drag;
 }
 
+/* Split the scrollbar space evenly around the tabs to keep them centered. The
+   gaps live inside the scroll container, so the scrollbar reaches the bar's
+   outer edge and its resting thumb stays clear of the tabs. */
 .tabBar:not(.vertical) .tabsContainer {
-  padding-block-end: var(--horizontal-tab-scrollbar-space, 0);
+  padding-block: calc(var(--tab-bar-block-gap) + var(--horizontal-tab-scrollbar-space, 0px) / 2);
 }
 
 .tabsContent {
@@ -48,6 +52,13 @@
   inline-size: max-content;
   min-inline-size: 100%;
   gap: 2px;
+}
+
+/* The scrollbar's track and hit areas reach past the gap, so the tab row
+   stacks above them to keep clicks on a tab's edge on the tab. */
+.tabBar:not(.vertical) .tabsContent {
+  position: relative;
+  z-index: 1;
 }
 
 /* Keep the track's full hit area while making the idle thumb less prominent. */
@@ -170,25 +181,19 @@
   display: flex;
   align-self: stretch;
   gap: 2px;
-  padding-block-end: var(--horizontal-tab-scrollbar-space, 0);
 }
 
 /* ===== Bottom layout: fixed row on the bottom edge ===== */
 
 .tabBar.position-bottom {
+  /* Leave the same gap on both sides, including above the compositor frame. */
+  --tab-bar-block-gap: 2px;
+
   box-shadow: none;
   block-size: var(--bottom-tab-bar-height, 34px);
   min-block-size: var(--bottom-tab-bar-height, 34px);
   position: fixed;
   inset-block: auto 0;
-
-  /* Leave the same gap on both sides, including above the compositor frame. */
-  padding-block: 2px;
-}
-
-.tabBar.position-bottom .tabsContainer,
-.tabBar.position-bottom .tabBarActions {
-  padding-block: var(--horizontal-tab-scrollbar-space, 0) 0;
 }
 
 .tabBar.position-bottom .tabsContainer :deep(.os-scrollbar-horizontal) {
@@ -360,14 +365,6 @@
 /* In a maximized window, flicking the pointer to the screen's top edge reaches
    the tabs and buttons, like a browser's tab strip. The tab list starts at the
    window edge so it doesn't clip their hit areas. */
-:global(.app.customTitleBar .tabBar.position-top .tabsViewport) {
-  margin-block-start: -1px;
-}
-
-:global(.app.customTitleBar .tabBar.position-top .tabsContent) {
-  padding-block-start: 1px;
-}
-
 :global(.app.customTitleBar .tabBar.position-top :is(.tabBarReorderItem, .newTabButton, .tabOrganizerButton)) {
   position: relative;
 }
