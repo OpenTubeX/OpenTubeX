@@ -692,16 +692,16 @@ Settings:
       Background Opacity: Background Opacity
       Font Size: Font Size
       Anchor:
-        Anchor: Anchor
+        Anchor: Position
         Top Left: Top Left
         Top Center: Top Centre
         Top Right: Top Right
         Bottom Left: Bottom Left
         Bottom Center: Bottom Centre
         Bottom Right: Bottom Right
-        Center Left: Centre left
+        Center Left: Centre Left
         Center: Centre
-        Center Right: Centre right
+        Center Right: Centre Right
       Edge Style:
         Edge Style: Edge Style
         None: None
@@ -711,13 +711,13 @@ Settings:
         Depressed: Depressed
       Reset: Reset Caption Appearance
       Default: Default
-      Text Opacity: Font opacity
+      Text Opacity: Text Opacity
       Font Family:
-        Font Family: Font family
-        Monospaced Serif: Monospaced serif
-        Proportional Serif: Proportional serif
-        Monospaced Sans-Serif: Monospaced sans-serif
-        Proportional Sans-Serif: Proportional sans-serif
+        Font Family: Font Family
+        Monospaced Serif: Monospaced Serif
+        Proportional Serif: Proportional Serif
+        Monospaced Sans-Serif: Monospaced Sans-Serif
+        Proportional Sans-Serif: Proportional Sans-Serif
       Colors:
         White: White
         Yellow: Yellow
