@@ -636,9 +636,13 @@ export async function renderReleaseNotes(notes, {
     sections.get(note.category).push(releaseNote)
   }
 
+  // "More" only reads right below highlights.
+  const headingFor = (category, heading) => (
+    category === 'improvement' && sections.get('highlight').length === 0 ? '## Improvements' : heading
+  )
   const renderedSections = [...RELEASE_NOTE_CATEGORIES]
     .filter(([category]) => sections.get(category).length > 0)
-    .map(([category, heading]) => `${heading}\n\n${sections.get(category).join('\n')}`)
+    .map(([category, heading]) => `${headingFor(category, heading)}\n\n${sections.get(category).join('\n')}`)
 
   if (renderedSections.length === 0) {
     if (emptyMessage !== null) { return `${emptyMessage}\n` }

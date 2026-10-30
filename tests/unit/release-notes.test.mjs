@@ -450,6 +450,17 @@ test('release notes render under their categories in creation order with platfor
 `)
 })
 
+test('improvements are only called more improvements below highlights', async () => {
+  assert.equal(await renderReleaseNotes([note(), note({ category: 'fix', note: 'Fixed a crash.' })]), `## Improvements
+
+- Adds a compact player.
+
+## Fixed bugs
+
+- Fixed a crash.
+`)
+})
+
 test('a release without release notes is rejected', async () => {
   await assert.rejects(renderReleaseNotes([]), /No release notes were found in release-notes/)
 })
@@ -472,7 +483,7 @@ test('nightly releases omit images that cannot be processed', async () => {
     onImageError: (error) => imageErrors.push(error),
   })
 
-  assert.equal(result, `## More improvements
+  assert.equal(result, `## Improvements
 
 - Adds a compact player. (#42)
 `)
