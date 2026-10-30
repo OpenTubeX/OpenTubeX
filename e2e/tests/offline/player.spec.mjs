@@ -1317,22 +1317,26 @@ test('volume boost amplifies the audio within its tab', async ({ app, page, atta
 })
 
 test('mono audio plays every channel in both ears', async ({ app, page, attachScreenshot }) => {
-  // The demo media is silent, so record the node that feeds the output and
-  // render a left-only signal through its channel configuration.
+  // The demo media is silent, so record the audio graph, follow the player's
+  // chain to the node that feeds the output, and render a left-only signal
+  // through that node's channel configuration.
   await page.evaluate(() => {
     const connect = AudioNode.prototype.connect
-    window.__playerOutputs = []
+    window.__playerSources = []
     AudioNode.prototype.connect = function (target, ...args) {
-      // Skip the offline context below, which renders the test signal.
-      if (target === this.context.destination && this.context instanceof AudioContext) {
-        window.__playerOutputs.push(this)
+      (this.__targets ??= []).push(target)
+      if (this instanceof MediaElementAudioSourceNode) {
+        window.__playerSources.push(this)
       }
       return connect.call(this, target, ...args)
     }
   })
   const leftOnlyOutput = () => page.evaluate(async () => {
-    const node = window.__playerOutputs.at(-1)
+    let node = window.__playerSources.at(-1)
     if (!node) return null
+    while (node.__targets[0] !== node.context.destination) {
+      node = node.__targets[0]
+    }
     const context = new OfflineAudioContext(2, 128, 48000)
     const buffer = context.createBuffer(2, 128, 48000)
     buffer.getChannelData(0).fill(1)
@@ -1373,7 +1377,7 @@ test('mono audio plays every channel in both ears', async ({ app, page, attachSc
 
   // The setting applies to every video, so the next one starts in mono.
   await openMockedVideo(page, 'aqz-KE-bpKQ')
-  await expect.poll(() => page.evaluate(() => window.__playerOutputs.length)).toBe(2)
+  await expect.poll(() => page.evaluate(() => window.__playerSources.length)).toBe(2)
   await expect.poll(leftOnlyOutput).toEqual([0.5, 0.5])
 
   await player.hover()
