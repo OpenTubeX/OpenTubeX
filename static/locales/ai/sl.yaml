@@ -1838,7 +1838,7 @@ Video:
     Load Error: Prepisa ni bilo mogoče naložiti.
     Empty: Ta prepis ne vsebuje besedila.
     No Results: Noben del prepisa se ne ujema z iskanjem.
-  IP block: YouTube je vašemu naslovu IP onemogočil ogled videoposnetkov. Poskusite uporabiti drug VPN ali posredniški strežnik.
+  IP block: YouTube je vašemu naslovu IP onemogočil ogled videoposnetkov ali pa ta videoposnetek vsebuje vsebino z mladoletnimi osebami, do katere YouTube omejuje dostop neprijavljenim uporabnikom. Če gre za blokado naslova IP, poskusite uporabiti drug VPN ali posredniški strežnik.
   Retry With Built-in Extraction: Poskusi znova z vgrajenim pridobivanjem
   Retry With yt-dlp Extraction: Poskusi znova s pridobivanjem prek yt-dlp
   Reloading video after streaming URL error: Ponovno nalaganje videoposnetka po napaki URL-ja prenosa

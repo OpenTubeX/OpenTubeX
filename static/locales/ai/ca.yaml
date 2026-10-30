@@ -1873,7 +1873,7 @@ Video:
     Load Error: No s'ha pogut carregar la transcripció.
     Empty: Aquesta transcripció no conté text.
     No Results: Cap segment de la transcripció coincideix amb la cerca.
-  IP block: YouTube ha blocat la vostra adreça IP i no podeu mirar vídeos. Proveu de canviar a una altra VPN o un altre servidor intermediari.
+  IP block: "YouTube ha blocat la vostra adreça IP per mirar vídeos, o aquest vídeo pot contenir contingut amb menors al qual YouTube restringeix l'accés als usuaris sense sessió iniciada. Si és un bloqueig d'IP, proveu de canviar a una altra VPN o servidor intermediari."
   Retry With Built-in Extraction: Torna-ho a provar amb l'extracció integrada
   Retry With yt-dlp Extraction: Torna-ho a provar amb l'extracció de yt-dlp
   Reloading video after streaming URL error: S'està tornant a carregar el vídeo després d'un error de l'URL del flux

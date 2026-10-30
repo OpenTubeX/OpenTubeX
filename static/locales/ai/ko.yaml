@@ -1763,7 +1763,7 @@ Video:
     Load Error: 스크립트를 불러올 수 없습니다.
     Empty: 이 스크립트에는 텍스트가 없습니다.
     No Results: 검색과 일치하는 스크립트 구간이 없습니다.
-  IP block: YouTube에서 이 IP 주소의 동영상 시청을 차단했습니다. 다른 VPN이나 프록시로 전환해 보세요.
+  IP block: YouTube에서 이 IP 주소의 동영상 시청을 차단했거나, 이 동영상에 YouTube가 로그인하지 않은 사용자의 접근을 제한하는 미성년자 관련 콘텐츠가 포함되어 있을 수 있습니다. IP 차단이라면 다른 VPN이나 프록시로 전환해 보세요.
   Retry With Built-in Extraction: 내장 추출로 다시 시도
   Retry With yt-dlp Extraction: yt-dlp 추출로 다시 시도
   Reloading video after streaming URL error: 스트리밍 URL 오류 후 동영상 다시 불러오는 중

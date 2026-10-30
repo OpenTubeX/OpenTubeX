@@ -96,7 +96,7 @@ Subscriptions:
   This profile has a large number of subscriptions. Forcing RSS to avoid rate limiting: Denne profilen har mange abonnementer. Tvinger bruk av RSS for å unngå adgangsbegrensning
   Error Channels: Kanaler med feil
   Disabled Automatic Fetching: Du har skrudd av automatisk innhenting av abonnementer. Gjenoppfrisk abonnementer for å se dem her.
-  Empty Channels: De kanalene du abonnerer på har for øyeblikket ingen videoer.
+  Empty Channels: Kanalene du abonnerer på har for øyeblikket ingen videoer.
   Subscriptions Tabs: Abonnementsfaner
   All Subscription Tabs Hidden: Alle abonnementsfaner er skjult. For å vise innhold her, opphev skjuling av noen faner i «{subsection}»-delen av «{settingsSection}».
   Empty Posts: Kanalene du abonnerer på, har ikke noen innlegg for øyeblikket.
@@ -838,7 +838,7 @@ Video:
   Hide Channel: Skjul kanal
   AgeRestricted: Videoer med aldersbegrensning kan ikke bli sett med OpenTubeX ettersom det kreves en Google-pålogging og at man bruker en YouTube-bruker med verifisert alder.
   MembersOnly: Videoer kun for medlemmer kan ikke bli sett med OpenTubeX ettersom de krever en Google-pålogging og et betalt medlemsskap i opplasterens kanal.
-  IP block: YouTube har blokkert din IP adresse fra å se videoer. Prøv å bytte til en annen VPN eller mellomtjener.
+  IP block: YouTube har blokkert din IP adresse fra å se videoer, eller så avbilder denne videoen mindreårige, som gjør at YouTube begrenser tilgang til videoen til innloggede brukere. Hvis dette er en IP-blokkering, prøv å bytte til en annen VPN eller mellomtjener.
   DRMProtected: Kopibeskyttede videoer kan ikke bli avspilt i OpenTubeX, ettersom det krever proprietære komponenter med lukket kildekode. Gå til den offisielle YouTube-nettsiden i en støttet nettleser for å spille av denne videoen.
   Save Watched Progress: Lagre sted i videoen
   Watched Progress Saved: Sted i videoen lagret

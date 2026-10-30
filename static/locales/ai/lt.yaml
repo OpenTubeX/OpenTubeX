@@ -1785,7 +1785,7 @@ Video:
     Load Error: Nepavyko įkelti nuorašo.
     Empty: Šiame nuoraše nėra teksto.
     No Results: Nė vienas nuorašo fragmentas neatitinka paieškos.
-  IP block: YouTube užblokavo jūsų IP adresą ir neleidžia žiūrėti vaizdo įrašų. Pabandykite prisijungti per kitą VPN arba įgaliotąjį serverį.
+  IP block: YouTube užblokavo jūsų IP adresą ir neleidžia žiūrėti vaizdo įrašų, arba šiame vaizdo įraše gali būti turinio su nepilnamečiais, prie kurio YouTube riboja prieigą neprisijungusiems naudotojams. Jei tai IP blokavimas, pabandykite naudoti kitą VPN arba tarpinį serverį.
   Retry With Built-in Extraction: Bandyti dar kartą naudojant integruotą išgavimą
   Retry With yt-dlp Extraction: Bandyti dar kartą naudojant yt-dlp išgavimą
   Reloading video after streaming URL error: Vaizdo įrašas įkeliamas iš naujo po srauto URL klaidos

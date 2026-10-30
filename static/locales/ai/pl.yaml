@@ -77,7 +77,6 @@ Most Popular Feed Empty: Kanał „Najpopularniejsze” tej instancji Invidious 
 User Playlists:
   Save: "Zapisz"
   Edit: "Edytuj"
-  This playlist is private or does not exist.: "Ta playlista jest prywatna lub nie istnieje."
   Pin to Navigation: "Przypnij do nawigacji"
   Unpin from Navigation: "Odepnij od nawigacji"
   Reorder Hint: Przeciągnij lub użyj klawiszy strzałek, aby zmienić kolejność
@@ -341,8 +340,6 @@ Settings:
   Player Settings:
     Mono Audio: 'Dźwięk mono'
     Show Mono Audio Toggle: 'Pokaż przełącznik dźwięku mono'
-    Default Media Format:
-      Default Media Format: 'Domyślny format multimediów'
     Pause on Stream Recovery: "Wstrzymaj przy odzyskiwaniu strumienia"
     Buffering:
       Buffering: Buforowanie

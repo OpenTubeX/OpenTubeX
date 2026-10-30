@@ -1712,7 +1712,7 @@ Video:
     Load Error: No se pudo cargar la transcripción.
     Empty: Esta transcripción no contiene texto.
     No Results: Ningún segmento de la transcripción coincide con la búsqueda.
-  IP block: YouTube ha bloqueado tu dirección IP para ver videos. Por favor, intenta cambiar a otra VPN o proxy.
+  IP block: YouTube bloqueó tu dirección IP para ver videos, o este video puede tener contenido con menores al que YouTube restringe el acceso para usuarios sin sesión iniciada. Si es un bloqueo de IP, probá cambiar a otra VPN o proxy.
   Retry With Built-in Extraction: Reintentar con la extracción integrada
   Retry With yt-dlp Extraction: Reintentar con la extracción de yt-dlp
   Reloading video after streaming URL error: Recargando el video tras un error en la URL de emisión

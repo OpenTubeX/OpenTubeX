@@ -25,6 +25,7 @@ function storeActions(handlers) {
     DBPlaylistHandlers: handlers, PlaylistVideoAddResult,
     pendingVideoAdds: new Map(),
     generateRandomUniqueId: () => crypto.randomUUID(),
+    deepCopy: value => JSON.parse(JSON.stringify(value)),
     processToBeAddedPlaylistVideo: () => {},
     removeUndesiredVideoAttributes: () => {},
     console,

@@ -1683,7 +1683,7 @@ Video:
     Load Error: Klarte ikkje å laste inn transkripsjonen.
     Empty: Denne transkripsjonen inneheld ingen tekst.
     No Results: Ingen delar av transkripsjonen samsvarar med søket.
-  IP block: YouTube har blokkert IP-adressa di frå å sjå videoar. Prøv å byte til ein annan VPN eller mellomtenar.
+  IP block: YouTube har blokkert IP-adressa di frå å sjå videoar, eller så kan denne videoen ha innhald med mindreårige som YouTube avgrensar tilgangen til for brukarar som ikkje er logga inn. Viss dette er ei IP-blokkering, prøv å byte til ein annan VPN eller mellomtenar.
   Retry With Built-in Extraction: Prøv igjen med innebygd uthenting
   Retry With yt-dlp Extraction: Prøv igjen med uthenting via yt-dlp
   Reloading video after streaming URL error: Lastar inn videoen på nytt etter ein feil med straumadressa

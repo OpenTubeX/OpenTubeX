@@ -651,8 +651,6 @@ Settings:
   Player Settings:
     Mono Audio: '單聲道音訊'
     Show Mono Audio Toggle: '顯示單聲道音訊開關'
-    Default Media Format:
-      Default Media Format: '預設媒體格式'
     Pause on Stream Recovery: "串流復原時暫停"
     Buffering:
       Buffering: 緩衝
