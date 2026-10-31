@@ -8,7 +8,7 @@ scratch="$(mktemp -d)"
 trap 'rm -rf "$scratch"' EXIT
 release_tag=3.14-b11
 runtime_stamp="$runtime/.opentubex-release-tag"
-pins=('yt-dlp==2026.10.26' 'yt-dlp-ejs==0.8.0' 'yt-dlp-apple-webkit-jsi==0.1.1' 'certifi==2026.7.22' 'mutagen==1.48.1')
+pins=('yt-dlp==2026.10.26' 'yt-dlp-ejs==0.8.0' 'yt-dlp-apple-webkit-jsi==0.1.1' 'certifi==2026.10.23' 'mutagen==1.48.1')
 package_stamp="$packages/.pins"
 webkit_patch="$root/_scripts/iosYtDlpWebkitNavigation.patch"
 package_version="${pins[*]} $(shasum -a 256 "$webkit_patch" | cut -d' ' -f1)"
