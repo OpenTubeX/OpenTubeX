@@ -68,6 +68,36 @@ test('rounds word-timed caption lines instead of each word', { tag: '@scale' }, 
   await attachScreenshot('word-timed captions rounded per line')
 })
 
+test('scales every word of word-timed captions by the font size once', { tag: '@scale' }, async ({ app, page, attachScreenshot }) => {
+  await mockPlayableWatchPage(app, page, {
+    captionText: '<c>Every</c><c> word</c><c> keeps</c>\n<c>the</c><c> same</c><c> size</c>'
+  })
+  const video = await openMockedVideo(page)
+  await video.evaluate(element => element.pause())
+
+  const container = page.locator('.ftVideoPlayer .shaka-text-container')
+  const words = container.locator('.shaka-text-wrapper [translate="no"]')
+  await expect(words).toHaveCount(6)
+
+  await page.evaluate(() => window.$store.dispatch('updateDefaultCaptionSettings', JSON.stringify({ fontScaleFactor: 2 })))
+  // Relative to the caption font size of the player, which it may lower to fit the bigger captions
+  await expect.poll(() => container.evaluate(element => {
+    const fontSize = parseFloat(getComputedStyle(element).fontSize)
+    return [...element.querySelectorAll('.shaka-text-wrapper [translate="no"]')]
+      .map(word => parseFloat(getComputedStyle(word).fontSize) / fontSize)
+  })).toEqual(Array(6).fill(2))
+
+  // The words stay inside the background of their lines. Measured together, as the captions can still be moving.
+  await expect.poll(() => container.locator('.shaka-text-wrapper').evaluate(line => {
+    const lineRects = [...line.getClientRects()]
+    return [...line.querySelectorAll('[translate="no"]')].every(word => {
+      const { top, bottom } = word.getBoundingClientRect()
+      return lineRects.some(rect => top >= rect.top - 0.5 && bottom <= rect.bottom + 0.5)
+    })
+  })).toBe(true)
+  await attachScreenshot('word-timed captions at 200% font size')
+})
+
 test('saves a caption style picked from the Options of the captions menu', async ({ app, page }) => {
   await mockPlayableWatchPage(app, page, { captionCueSettings: 'align:start position:0%' })
   const video = await openMockedVideo(page)
