@@ -653,6 +653,29 @@ test.describe('settings', () => {
     }, contentBounds.x + contentBounds.width)).toBe(true)
   })
 
+  test('keeps the caption preview 5% of its height from the top and bottom edges @scale', async ({ page, attachScreenshot }) => {
+    await goTo(page, 'settings')
+    await page.locator('.settingsMenu [data-section="playback"]').click()
+    const preview = page.locator('.captionPreview')
+    const caption = preview.locator('span')
+    await caption.scrollIntoViewIfNeeded()
+
+    for (const [positionArea, edge] of [['TOP_CENTER', 'top'], ['BOTTOM_CENTER', 'bottom']]) {
+      await page.evaluate(settings => {
+        return window.$store.dispatch('updateDefaultCaptionSettings', JSON.stringify(settings))
+      }, { fontScaleFactor: 1.75, positionArea })
+      await expect(preview).toHaveClass(new RegExp(`captionRow-${edge}`))
+
+      const previewBounds = await preview.boundingBox()
+      const captionBounds = await caption.boundingBox()
+      const gap = edge === 'top'
+        ? captionBounds.y - previewBounds.y
+        : previewBounds.y + previewBounds.height - captionBounds.y - captionBounds.height
+      expect(gap).toBeCloseTo(previewBounds.height * 0.05, 0)
+      await attachScreenshot(`caption preview at ${edge}`)
+    }
+  })
+
   test('enables YouTube-style Shorts by default in player settings', async ({ page }) => {
     await goTo(page, 'settings')
     await page.locator('.settingsMenu [data-section="playback"]').click()

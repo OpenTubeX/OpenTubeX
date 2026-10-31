@@ -70,15 +70,12 @@ for (const usePlayerMenuGrid of [true, false]) {
         await expect(captionsMenu).toBeVisible()
       }
 
-      // The captions menu groups the languages with the caption style
-      await captionsMenu.locator(':scope > .shaka-back-to-overflow-button').click()
-      const captionsGroup = overflowMenu.locator(':scope > .shaka-menu-group')
-      await expectCenteredTitle(captionsGroup)
-      await captionsGroup.locator('.shaka-caption-style-button').click()
-      await expectCenteredTitle(captionsGroup.locator('.shaka-menu-group'))
+      await captionsMenu.locator(':scope > .ft-caption-options-button').click()
+      const style = player.locator('.ft-caption-style-menu')
+      await expectCenteredTitle(style)
       await attachScreenshot('caption style header')
-      await captionsGroup.locator('.shaka-caption-font-color-button').click()
-      await expectCenteredTitle(captionsGroup.locator('.shaka-text-colors').first())
+      await style.locator('.shaka-caption-font-color-button').click()
+      await expectCenteredTitle(style.locator('.shaka-text-colors').first())
       await attachScreenshot('caption font color header')
     })
   })

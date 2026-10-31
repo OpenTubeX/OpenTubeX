@@ -113,6 +113,12 @@
   margin: 0;
 }
 
+/* Above the caption choices instead of over them, where it doesn't fit beside the title */
+:deep(.phonePlayerOptions .ft-caption-options-button) {
+  position: static;
+  align-self: flex-end;
+}
+
 :deep(.phonePlayerOptions .shaka-sub-menu.ft-menu-grid) {
   padding-block-start: 0;
 }

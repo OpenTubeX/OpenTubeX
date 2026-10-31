@@ -1,5 +1,5 @@
 import { test, expect, setWindowSize } from '../../helpers/app.mjs'
-import { activeTab, openMockedVideo } from '../../helpers/player.mjs'
+import { activeTab, openCaptionLanguages, openMockedVideo } from '../../helpers/player.mjs'
 import { mockPlayableWatchPage } from '../../helpers/watch.mjs'
 import { WATCH_PAGE_SEED } from '../../helpers/watch-page.mjs'
 
@@ -158,10 +158,10 @@ for (const usePlayerMenuGrid of [true, false]) {
       await mockPlayableWatchPage(app, page, { captionTranslations: true })
       await openMockedVideo(page)
       const player = await openOverflowMenu(page)
-      await player.locator('.shaka-overflow-menu > .shaka-captions-settings-button').click()
-      const styleButton = player.locator('.shaka-caption-style-button')
+      await openCaptionLanguages(player)
+      const styleButton = player.locator('.shaka-text-languages > .ft-caption-options-button')
       await styleButton.click()
-      const style = styleButton.locator('xpath=following-sibling::*[contains(@class, "shaka-menu-group")]')
+      const style = player.locator('.ft-caption-style-menu')
       await expect(style).toBeVisible()
       // Short enough for the entries to scroll in every layout
       await player.locator('.shaka-overflow-menu').evaluate(element => { element.style.maxHeight = '220px' })

@@ -1605,6 +1605,7 @@ Video:
       Error: Selostuskäännös epäonnistui. Yritä myöhemmin uudelleen.
       Duration Error: Selostuskäännös on käytettävissä vain enintään neljän tunnin videoissa.
     Caption Appearance:
+      Options: Asetukset
       Sample: Tekstitys näyttää tältä
     Auto-translate: Automaattinen käännös
     Sleep Timer:

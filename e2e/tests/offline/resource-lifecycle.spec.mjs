@@ -81,7 +81,7 @@ for (const usePlayerMenuGrid of [true, false]) {
       await mockPlayableWatchPage(app, page, { captionTranslations: true })
       const video = await openMockedVideo(page)
       await video.evaluate(element => element.pause())
-      await expect(page.locator('.shaka-caption-style-button')).toHaveCount(1)
+      await expect(page.locator('.ft-caption-options-button')).toHaveCount(1)
       await expect.poll(() => video.evaluate(element => element.ui.getControls().getPlayer().getTextTracks().length)).toBeGreaterThan(0)
       const session = await page.context().newCDPSession(page)
       try {
@@ -119,8 +119,7 @@ for (const usePlayerMenuGrid of [true, false]) {
         await expect(page.locator('.shaka-overflow-menu')).toBeVisible()
         await openCaptionLanguages(page.locator('.ftVideoPlayer'))
         await expect(page.locator('.shaka-text-languages')).toBeVisible()
-        await page.locator('.shaka-text-languages > .shaka-back-to-overflow-button').click()
-        await page.locator('.shaka-caption-style-button').click()
+        await page.locator('.ft-caption-options-button').click()
         await expect(page.locator('.shaka-caption-font-family-button')).toBeVisible()
       } finally {
         await session.detach()

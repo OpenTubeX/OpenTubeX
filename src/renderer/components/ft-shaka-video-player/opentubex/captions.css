@@ -76,6 +76,24 @@
   flex-direction: column;
 }
 
+:deep(.ft-caption-options-button) {
+  position: absolute;
+  inset-block-start: 0;
+  inset-inline-end: 8px;
+  z-index: 1;
+  inline-size: auto !important;
+  min-inline-size: 0 !important;
+  padding: 10px 8px !important;
+  background: transparent !important;
+  color: #fff;
+  text-decoration: underline;
+}
+
+:deep(.ft-caption-options-button:hover),
+:deep(.ft-caption-options-button:focus-visible) {
+  color: var(--primary-color);
+}
+
 /* Shaka only displays one caption track, so the secondary one sits at the opposite edge of the player */
 .secondaryCaptions {
   position: absolute;

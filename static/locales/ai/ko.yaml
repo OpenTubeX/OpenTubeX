@@ -1887,6 +1887,7 @@ Video:
       Error: 음성 번역에 실패했습니다. 나중에 다시 시도하세요.
       Duration Error: 음성 번역은 재생 시간이 최대 4시간인 동영상에서만 사용할 수 있습니다.
     Caption Appearance:
+      Options: 옵션
       Sample: 자막은 이렇게 표시됩니다
     Auto-translate: 자동 번역
     Sleep Timer:

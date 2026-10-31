@@ -1561,6 +1561,7 @@ Video:
       Error: 配音翻译失败。请稍后重试。
       Duration Error: 配音翻译仅适用于时长不超过四小时的视频。
     Caption Appearance:
+      Options: 选项
       Sample: 字幕显示效果示例
     Auto-translate: 自动翻译
     Sleep Timer:

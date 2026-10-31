@@ -1,5 +1,5 @@
 import { goTo, setPlayerFullscreen, test, expect } from '../../helpers/app.mjs'
-import { openMockedVideo } from '../../helpers/player.mjs'
+import { openCaptionStyleMenu, openMockedVideo } from '../../helpers/player.mjs'
 import { mockPlayableWatchPage } from '../../helpers/watch.mjs'
 
 test.use({
@@ -66,6 +66,25 @@ test('rounds word-timed caption lines instead of each word', { tag: '@scale' }, 
     await expect(word).toHaveCSS('background-color', 'rgba(0, 0, 0, 0)')
   }
   await attachScreenshot('word-timed captions rounded per line')
+})
+
+test('saves a caption style picked from the Options of the captions menu', async ({ app, page }) => {
+  await mockPlayableWatchPage(app, page, { captionCueSettings: 'align:start position:0%' })
+  const video = await openMockedVideo(page)
+  await video.evaluate(element => element.pause())
+
+  const player = page.locator('.ftVideoPlayer')
+  await player.hover()
+  // Keep the controls shown, they can fade out before the clicks on slow machines
+  await player.locator('.shaka-controls-container').evaluate(element => element.setAttribute('casting', 'true'))
+  await player.getByRole('button', { name: 'More settings' }).click()
+  await openCaptionStyleMenu(player, '.shaka-caption-size-button')
+  await player.locator('.shaka-overflow-menu').getByRole('menuitemradio', { name: '150%', exact: true }).click()
+
+  await expect.poll(() => page.evaluate(() => JSON.parse(window.$store.getters.getDefaultCaptionSettings).fontScaleFactor)).toBe(1.5)
+  // Choosing returns to the caption style, which stays open
+  await expect(player.locator('.ft-caption-style-menu')).toBeVisible()
+  await expect(player.locator('.shaka-caption-size-button')).toBeVisible()
 })
 
 test('applies UI roundness to the caption settings preview background', async ({ page, attachScreenshot }) => {

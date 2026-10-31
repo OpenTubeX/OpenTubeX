@@ -1811,6 +1811,7 @@ Video:
       Error: Taleomsetjinga mislukkast. Prøv igjen seinare.
       Duration Error: Taleomsetjing er berre tilgjengeleg for videoar som varer i opptil fire timar.
     Caption Appearance:
+      Options: Val
       Sample: Slik ser tekstinga ut
     Auto-translate: Omset automatisk
     Sleep Timer:

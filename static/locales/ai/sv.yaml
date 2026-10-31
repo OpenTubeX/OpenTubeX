@@ -1578,6 +1578,7 @@ Video:
       Error: Dubbningsöversättningen misslyckades. Försök igen senare.
       Duration Error: Dubbningsöversättning är endast tillgänglig för videor som är högst fyra timmar långa.
     Caption Appearance:
+      Options: Alternativ
       Sample: Så här ser undertexterna ut
     Auto-translate: Översätt automatiskt
     Sleep Timer:

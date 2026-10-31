@@ -1597,6 +1597,7 @@ Video:
       Error: Không thể dịch lồng tiếng. Vui lòng thử lại sau.
       Duration Error: Chỉ có thể dịch lồng tiếng cho video dài tối đa bốn giờ.
     Caption Appearance:
+      Options: Tùy chọn
       Sample: Phụ đề sẽ trông như thế này
     Auto-translate: Tự động dịch
     Sleep Timer:
