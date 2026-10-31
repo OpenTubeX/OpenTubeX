@@ -45,6 +45,9 @@ with the automatic theme discussion previews. If you already packed the current 
 run `node _scripts/screenshots.mjs` to repeat the capture without repacking.
 The regular E2E suites do not update these files.
 
+When new PNGs reach `development`, the Update Website Screenshots workflow
+converts them to WebP and pushes them to the website, which then redeploys.
+
 YouTube blocks GitHub-hosted runners, so the theme discussion previews replay a
 recording of the same scenes from `e2e/fixtures/theme-previews/` and
 `e2e/fixtures/innertube/capture/`. Re-record it after changing the channel,

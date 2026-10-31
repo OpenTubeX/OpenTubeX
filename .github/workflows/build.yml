@@ -46,6 +46,7 @@ on:
       - '.github/workflows/retry-unscheduled-jobs.yml'
       - '.github/workflows/stale.yml'
       - '.github/workflows/updateSite.yml'
+      - '.github/workflows/updateSiteScreenshots.yml'
 
   workflow_dispatch:
     inputs:
