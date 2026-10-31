@@ -1,9 +1,9 @@
 /* Include the viewport margins in the fallback's fit check while keeping
    the visible popup separated from its trigger by the requested gap. */
 @position-try --anchored-popup-above {
-  inset-block: auto calc(anchor(top) + var(--anchor-gap) - var(--anchor-bottom-margin));
+  inset-block: auto calc(anchor(top) + var(--anchor-gap) - var(--anchor-bottom-margin) - var(--anchor-shift-y));
 }
 
 @position-try --anchored-popup-below {
-  inset-block: calc(anchor(bottom) + var(--anchor-gap) - var(--anchor-min-top)) auto;
+  inset-block: calc(anchor(bottom) + var(--anchor-gap) - var(--anchor-min-top) + var(--anchor-shift-y)) auto;
 }
