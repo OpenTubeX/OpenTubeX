@@ -18,6 +18,8 @@ LITE_ABI_MIB, LITE_UNIVERSAL_MIB = 20, 35
 RUNTIME_LIBRARIES = ("python", "qjs", "ffmpeg", "ffprobe", "python.zip", "ffmpeg.zip", "opentubex_rumble_http")
 # Android provides these at runtime; every other dependency must be packaged.
 SYSTEM_LIBRARIES = {"libc.so", "libdl.so", "liblog.so", "libm.so"}
+# F-Droid rejects APKs whose code references these, even if it never runs.
+PROPRIETARY_CLASS = re.compile(rb"Lcom/google/(?:mlkit|android/gms)/[^;]*;")
 
 
 def elf_needed(data):
@@ -117,6 +119,10 @@ def inspect_apk(path, abi, lite=False):
             check_dependencies(apk, arch)
         for entry in apk.infolist():
             name = entry.filename
+            if name.endswith(".dex"):
+                match = PROPRIETARY_CLASS.search(apk.read(name))
+                if match:
+                    raise ValueError(f"{path}: {name} references proprietary class {match[0][1:-1].decode()}")
             category = (
                 "native" if name.startswith("lib/") else
                 "dex" if name.endswith(".dex") else

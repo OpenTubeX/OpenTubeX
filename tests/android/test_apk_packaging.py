@@ -73,7 +73,8 @@ class ApkPackagingTest(unittest.TestCase):
                     if runtime:
                         apk.writestr(f"lib/{arch}/libffmpeg.so", b"fixture")
 
-    def write_apk(self, name, abis, build_only=False, ffmpeg=b"fixture", python_files=(), ffmpeg_files=()):
+    def write_apk(self, name, abis, build_only=False, ffmpeg=b"fixture", python_files=(), ffmpeg_files=(),
+                  dex=b"fixture"):
         def runtime(files):
             data = io.BytesIO()
             with zipfile.ZipFile(data, "w") as archive:
@@ -85,7 +86,7 @@ class ApkPackagingTest(unittest.TestCase):
             return data.getvalue()
 
         with zipfile.ZipFile(self.source / name, "w") as apk:
-            apk.writestr("classes.dex", b"fixture")
+            apk.writestr("classes.dex", dex)
             for abi in abis:
                 for executable in ("python", "qjs", "ffprobe"):
                     apk.writestr(f"lib/{abi}/lib{executable}.so", b"fixture")
@@ -164,6 +165,16 @@ class ApkPackagingTest(unittest.TestCase):
         self.write_apk("app-arm64-v8a-nightly.apk", apks.ABIS)
         with self.assertRaisesRegex(ValueError, "expected architectures"):
             apks.prepare(self.source, self.output)
+
+    def test_rejects_proprietary_google_classes(self):
+        # F-Droid's scanner rejects references to these classes, even unused ones.
+        for descriptor in (b"Lcom/google/mlkit/vision/barcode/BarcodeScanner;",
+                           b"Lcom/google/android/gms/tasks/OnSuccessListener;"):
+            with self.subTest(descriptor=descriptor):
+                self.write_apk("app-arm64-v8a-nightly.apk", {"arm64-v8a"}, dex=b"dex\n035\0" + descriptor)
+                with self.assertRaisesRegex(ValueError, "proprietary.*" + descriptor.decode()[1:-1]):
+                    apks.prepare(self.source, self.output)
+                self.assertFalse(self.output.exists())
 
     def test_rejects_build_only_runtime_files(self):
         self.write_apk("app-arm64-v8a-nightly.apk", {"arm64-v8a"}, build_only=True)

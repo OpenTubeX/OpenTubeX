@@ -19,14 +19,7 @@
     public <init>();
 }
 
-# The barcode plugin includes an unused ML Kit backend, which Gradle excludes.
--dontwarn com.google.android.gms.tasks.OnFailureListener
--dontwarn com.google.android.gms.tasks.OnSuccessListener
--dontwarn com.google.android.gms.tasks.Task
--dontwarn com.google.mlkit.vision.barcode.BarcodeScanner
--dontwarn com.google.mlkit.vision.barcode.BarcodeScannerOptions$Builder
--dontwarn com.google.mlkit.vision.barcode.BarcodeScannerOptions
--dontwarn com.google.mlkit.vision.barcode.BarcodeScanning
--dontwarn com.google.mlkit.vision.barcode.common.Barcode
--dontwarn com.google.mlkit.vision.common.InputImage
+# strip-mlkit.gradle removes the barcode plugin's ML Kit backend. There are no
+# dontwarn rules for ML Kit, so R8 fails if a reference to it comes back.
+# The plugin's scan parameters use Gson annotations without bundling Gson.
 -dontwarn com.google.gson.annotations.SerializedName

@@ -239,11 +239,7 @@ android {
 }
 
 apply from: '../trim-runtime.gradle'
-
-// Pairing uses ZXing; exclude the plugin's unused proprietary ML Kit dependency.
-configurations.configureEach {
-    exclude group: 'com.google.mlkit', module: 'barcode-scanning'
-}
+apply from: '../strip-mlkit.gradle'
 
 repositories {
     flatDir{
@@ -269,6 +265,9 @@ dependencies {
     implementation "androidx.core:core-splashscreen:$coreSplashScreenVersion"
     implementation "androidx.webkit:webkit:$androidxWebkitVersion"
     implementation "androidx.work:work-runtime:$androidxWorkVersion"
+    // The ML Kit stand-ins implement the barcode plugin's scanner interfaces.
+    compileOnly "io.ionic.libs:ionbarcode-android:2.1.1@aar"
+    compileOnly "androidx.camera:camera-core:1.5.1"
     implementation project(':capacitor-android')
     testImplementation "junit:junit:$junitVersion"
     if (!optimizedTestBuild) {
