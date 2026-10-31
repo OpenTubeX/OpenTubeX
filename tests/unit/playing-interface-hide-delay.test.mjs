@@ -12,8 +12,8 @@ for (const compiled of [false, true]) {
     const container = { classList: { remove() {} }, dataset: {} }
     let move, seek
     if (compiled) {
-      move = vm.runInNewContext(`(${bundle.match(/function xP\(a,b\)\{[\s\S]*?\}(?=function QP\()/)[0]})`, { GP() {}, yP() {} })
-      seek = vm.runInNewContext(`({${bundle.match(/bi\(a\)\{\(this\.ea=\s*a\)[\s\S]*?\}/)[0]}})`).bi
+      move = vm.runInNewContext(`(${bundle.match(/function CP\(a,b\)\{[\s\S]*?\}(?=function VP\()/)[0]})`, { LP() {}, DP() {} })
+      seek = vm.runInNewContext(`({${bundle.match(/ci\(a\)\{\(this\.ba=\s*a\)[\s\S]*?\}/)[0]}})`).ci
     } else {
       move = vm.runInNewContext(`({${source.match(/  onMouseMove_\(event\) \{[\s\S]*?\n  \}/)[0]}})`).onMouseMove_
       seek = vm.runInNewContext(`({${source.match(/  setSeeking\(seeking\) \{[\s\S]*?\n  \}/)[0]}})`).setSeeking
