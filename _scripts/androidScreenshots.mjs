@@ -102,6 +102,12 @@ try {
     }
   })
   assert.equal(await page.evaluate(() => navigator.language), 'en-US', 'The device language is English (United States)')
+  // Clearing the app data restores the APK's bundled yt-dlp, so the startup
+  // check can offer a newer release at any point during the captures.
+  await page.addLocatorHandler(
+    page.locator('[data-sonner-toast]', { hasText: 'An update is available for yt-dlp.' }),
+    toast => toast.getByRole('button', { name: 'Cancel', exact: true }).click()
+  )
   const tutorial = page.locator('.tutorialOverlay')
   await tutorial.getByRole('button', { name: 'Skip', exact: true }).click()
   await expect(tutorial).toBeHidden()
