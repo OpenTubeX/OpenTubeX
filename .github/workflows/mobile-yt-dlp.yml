@@ -68,10 +68,10 @@ jobs:
           version=$(sed -E 's/(^|\.)0+([0-9])/\1\2/g' <<< "$latest")
           current=$(grep -oP "'yt-dlp==\K[0-9.]+(?=')" "$file")
           if newer "$current" "$version"; then
-            current_ejs=$(grep -oP "'yt-dlp-ejs==\K[0-9.]+(?=')" "$file")
+            current_ejs=$(grep -oP "'yt-dlp-ejs==\K[0-9.]+(?=')" "$file" || true)
             # yt-dlp supports only the yt-dlp-ejs release its "default" extra pins.
             ejs=$(curl -fsSL "https://pypi.org/pypi/yt-dlp/$version/json" |
-              jq -r '.info.requires_dist[]' | grep -oP '^yt-dlp-ejs==\K[0-9.]+(?=; extra == "default"$)')
+              jq -r '.info.requires_dist[]' | grep -oP '^yt-dlp-ejs==\K[0-9.]+(?=; extra == "default"$)' || true)
             if [[ -z "$ejs" || -z "$current_ejs" ]]; then
               echo "::error::Cannot update iOS yt-dlp from $current to $version."
               exit 1
