@@ -36,7 +36,8 @@ export IOS_SETUP_TEST_CALLS="$fixture/calls"
 PATH="$fixture/bin:$PATH" bash "$fixture/_scripts/setupIosYtDlp.sh"
 [[ "$(cat "$IOS_SETUP_TEST_CALLS")" == download ]]
 patch_sha="$(shasum -a 256 "$fixture/_scripts/iosYtDlpWebkitNavigation.patch" | cut -d' ' -f1)"
-[[ "$(cat "$fixture/ios/App/python-packages/.pins")" == "yt-dlp==2026.8.19 yt-dlp-ejs==0.8.0 yt-dlp-apple-webkit-jsi==0.1.1 certifi==2026.7.22 mutagen==1.48.1 $patch_sha" ]]
+eval "$(grep '^pins=' "$fixture/_scripts/setupIosYtDlp.sh")"
+[[ "$(cat "$fixture/ios/App/python-packages/.pins")" == "${pins[*]} $patch_sha" ]]
 [[ -f "$fixture/ios/App/python-packages/certifi/cacert.pem" ]]
 PATH="$fixture/bin:$PATH" bash "$fixture/_scripts/setupIosYtDlp.sh"
 [[ "$(wc -l < "$IOS_SETUP_TEST_CALLS")" == 1 ]]

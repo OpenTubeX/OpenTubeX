@@ -758,5 +758,14 @@ public final class IOSYtDlpPlugin: CAPPlugin, CAPBridgedPlugin {
     }
 
     @objc func checkUpdate(_ call: CAPPluginCall) { call.resolve(["available": false]) }
-    @objc func update(_ call: CAPPluginCall) { call.resolve(["updated": false, "version": "2026.8.19"]) }
+    @objc func update(_ call: CAPPluginCall) {
+        IOSYtDlpRuntime.run(["operation": "version"]) { result in
+            DispatchQueue.main.async {
+                switch result {
+                case .success(let info): call.resolve(["updated": false, "version": info["version"] as? String ?? ""])
+                case .failure(let error): call.reject(error.localizedDescription)
+                }
+            }
+        }
+    }
 }

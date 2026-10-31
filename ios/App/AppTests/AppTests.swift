@@ -1013,6 +1013,15 @@ final class AppTests: XCTestCase {
         XCTAssertEqual(getenv("SSL_CERT_FILE").map { String(cString: $0) }, certificates.path)
     }
 
+    func testYtDlpUpdateReportsBundledVersion() async throws {
+        try await openApplication()
+        let versions = try await webView.callAsyncJavaScript("return [(await Capacitor.Plugins.YtDlp.info()).ytDlp.version, (await Capacitor.Plugins.YtDlp.update({binary:'yt-dlp'})).version]",
+                                                            arguments: [:], in: nil, contentWorld: .page) as? [String]
+        XCTAssertEqual(versions?.count, 2)
+        XCTAssertFalse(versions?.first?.isEmpty ?? true)
+        XCTAssertEqual(versions?.first, versions?.last)
+    }
+
     func testIOSDownloadTemplatesAndFFmpegConversion() async throws {
         try await openApplication()
         let enabled = try await evaluate("testStore.getters.getEnableDownloads") as? Bool ?? false
