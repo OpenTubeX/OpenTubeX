@@ -111,7 +111,9 @@ public class PairingCameraTest {
         do {
             InstrumentationRegistry.getInstrumentation().runOnMainSync(() -> {
                 for (Activity activity : ActivityLifecycleMonitorRegistry.getInstance().getActivitiesInStage(Stage.RESUMED)) {
-                    if (activity.getClass().getName().equals("com.outsystems.plugins.barcode.view.OSBARCScannerActivity")) {
+                    // Android drops key events sent before the window gains focus.
+                    if (activity.getClass().getName().equals("com.outsystems.plugins.barcode.view.OSBARCScannerActivity")
+                            && activity.hasWindowFocus()) {
                         opened.set(true);
                     }
                 }
@@ -119,7 +121,7 @@ public class PairingCameraTest {
             if (opened.get()) return;
             Thread.sleep(100);
         } while (System.nanoTime() < deadline);
-        assertTrue("Native QR scanner opens", opened.get());
+        assertTrue("Native QR scanner opens with window focus", opened.get());
     }
 
     private static void awaitValue(WebView view, String script, String expected) throws Exception {
