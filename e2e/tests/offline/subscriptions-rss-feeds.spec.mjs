@@ -370,7 +370,7 @@ test.describe('with followed feeds', () => {
     await expect(titles).toHaveText(['Newest VOD', 'Older VOD'])
   })
 
-  test('shows progress while a feed is added', async ({ page }) => {
+  test('shows progress while a feed is added', { tag: '@scale' }, async ({ page }) => {
     await mockFeeds(page)
     let release
     const held = new Promise(resolve => { release = resolve })
