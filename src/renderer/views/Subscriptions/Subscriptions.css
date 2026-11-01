@@ -463,6 +463,12 @@
     inline-size: 100%;
   }
 
+  /* The RSS feed manager button shares the refresh status row */
+  .headerActions:has(> .headerManageFeeds) .headerRefreshWidget {
+    flex: 1 1 0;
+    min-inline-size: 0;
+  }
+
   .headerActions.hasAutoRefreshStatus:has(> .markAllSeenButton) {
     --refresh-button-row-span: 3;
 

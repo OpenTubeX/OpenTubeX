@@ -3,6 +3,7 @@ import { afterEach, beforeEach, mock, test } from 'node:test'
 import {
   clearExternalMediaPositions,
   getExternalMediaPosition,
+  getExternalMediaProgress,
   removeExternalMediaPositionsBefore,
   saveExternalMediaPosition,
 } from '../../src/renderer/helpers/externalMediaPosition.js'
@@ -59,8 +60,21 @@ test('restarts completed media and media sought back to the beginning', () => {
     saveExternalMediaPosition(url, 12, 30)
     saveExternalMediaPosition(url, seconds, 30)
     assert.equal(getExternalMediaPosition(url, 30), null)
-    assert.equal(storage.size, 0)
+    assert.deepEqual(getExternalMediaProgress(url), seconds === 0 ? null : { watched: true, progress: 1 })
+    assert.equal(storage.size, seconds === 0 ? 0 : 1)
   }
+})
+
+test('reports the progress of partly watched media', () => {
+  saveExternalMediaPosition(url, 12, 30)
+  assert.deepEqual(getExternalMediaProgress(url), { watched: false, progress: 0.4 })
+  // Live streams and positions saved before durations were stored have no progress
+  saveExternalMediaPosition(url, 12, Infinity)
+  assert.equal(getExternalMediaProgress(url), null)
+  assert.equal(getExternalMediaPosition(url, null), 12)
+  storage.set(`externalMediaPosition:${url}`, '{"seconds":12,"updatedAt":1000}')
+  assert.equal(getExternalMediaProgress(url), null)
+  assert.equal(getExternalMediaProgress('invalid'), null)
 })
 
 test('ignores invalid positions and unsupported URLs', () => {

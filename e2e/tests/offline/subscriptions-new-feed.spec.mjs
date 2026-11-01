@@ -781,6 +781,19 @@ test.describe('new subscriptions feed', () => {
     await expect(page.getByRole('menuitem', { name: 'Mark As Seen', exact: true })).toHaveCount(0)
   })
 
+  test('marks all combined New content as seen while RSS feeds are enabled', async ({ page }) => {
+    await page.evaluate(() => window.$store.dispatch('updateEnableRssFeeds', true))
+    await goTo(page, 'subscriptions')
+    await page.locator('[data-subscription-feed-tab="all"]').click()
+    await expect(page.locator('[data-rss-feeds-tab]')).toBeVisible()
+
+    const markAllAsSeen = page.getByRole('button', { name: 'Mark all as seen' })
+    await expect(page.getByText('New video', { exact: true })).toBeVisible()
+    await markAllAsSeen.click()
+    await expect(markAllAsSeen).toHaveCount(0)
+    await expect(page.getByText('There is no new content.')).toBeVisible()
+  })
+
   test('marks watched and seen videos unseen without losing progress, including after restart', async ({ app, page, attachScreenshot }) => {
     await goTo(page, 'subscriptions')
     await page.evaluate(async () => {

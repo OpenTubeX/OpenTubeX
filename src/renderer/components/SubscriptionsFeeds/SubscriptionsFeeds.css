@@ -1,0 +1,11 @@
+.noFeeds {
+  align-items: flex-start;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.message {
+  color: var(--tertiary-text-color);
+  margin-block: 16px 0;
+}
