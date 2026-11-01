@@ -800,6 +800,9 @@ Settings:
       Shorts: Shorts
       Screenshots: Снимки экрана
     Enable FCast: "Включить FCast"
+    Screenshot:
+      Legacy Formats: "Устаревшие форматы"
+      Modern Formats: "Современные форматы"
   Channel Settings:
     Channel Settings: Настройки каналов
     Channel Settings Description: Запоминать выбранные при просмотре настройки отдельно для каждого канала и применять их снова при следующем просмотре видео с этого канала.

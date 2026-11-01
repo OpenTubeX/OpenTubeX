@@ -832,6 +832,8 @@ Settings:
       Modes:
         Save To Folder: Сачувај у фасциклу
         Clipboard: Копирај у оставу
+      Legacy Formats: "Старији формати"
+      Modern Formats: "Модерни формати"
     Rotate Wide Videos to Landscape in Fullscreen: 'Окрени широке видео-снимке водоравно преко целог екрана'
     Swipe Up or Down to Enter or Exit Fullscreen: 'Превуците нагоре или надоле за улазак у приказ преко целог екрана или излазак из њега'
     Preload Upcoming Videos: "Учитај следеће видео-снимке унапред"

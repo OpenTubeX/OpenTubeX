@@ -827,6 +827,9 @@ Settings:
       Shorts: Shorts
       Screenshots: Képernyőképek
     Enable FCast: "FCast engedélyezése"
+    Screenshot:
+      Legacy Formats: "Régebbi formátumok"
+      Modern Formats: "Modern formátumok"
   Channel Settings:
     Channel Settings: Csatornabeállítások
     Channel Settings Description: Csatornánként megjegyzi a videónézés közben kiválasztott beállításokat, és a csatorna következő videójánál újra alkalmazza őket.

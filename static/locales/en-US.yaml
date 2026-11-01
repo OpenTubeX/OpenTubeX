@@ -1328,6 +1328,8 @@ Settings:
         Save To Folder: Save to Folder
         Clipboard: Copy to Clipboard
       Format Label: Screenshot Format
+      Legacy Formats: Legacy formats
+      Modern Formats: Modern formats
       Quality Label: Screenshot Quality
       Folder Label: Screenshot Folder
       Folder Button: Select Folder

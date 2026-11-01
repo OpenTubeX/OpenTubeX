@@ -829,6 +829,9 @@ Settings:
       Shorts: Shorts
       Screenshots: Skjámyndir
     Enable FCast: "Virkja FCast"
+    Screenshot:
+      Legacy Formats: "Eldri snið"
+      Modern Formats: "Nútímaleg snið"
   Channel Settings:
     Channel Settings: Rásarstillingar
     Channel Settings Description: Muna stillingarnar sem þú velur við áhorf fyrir hverja rás, svo þær verði notaðar aftur næst þegar þú horfir á myndband frá henni.

@@ -1059,6 +1059,8 @@ Settings:
       Error:
         Forbidden Characters: Caràcters prohibits
         Empty File Name: Nom de fitxer buit
+      Legacy Formats: "Formats antics"
+      Modern Formats: "Formats moderns"
     Rotate Wide Videos to Landscape in Fullscreen: 'Gira els vídeos amples al mode apaïsat en pantalla completa'
     Swipe Up or Down to Enter or Exit Fullscreen: 'Llisca amunt o avall per entrar o sortir de la pantalla completa'
     Preload Upcoming Videos: "Precarrega els vídeos següents"

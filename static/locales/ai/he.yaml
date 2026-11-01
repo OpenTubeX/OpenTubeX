@@ -824,6 +824,8 @@ Settings:
       Modes:
         Save To Folder: שמירה בתיקייה
         Clipboard: העתקה ללוח
+      Legacy Formats: "תבניות ישנות"
+      Modern Formats: "תבניות מודרניות"
     Rotate Wide Videos to Landscape in Fullscreen: 'סיבוב סרטונים רחבים לרוחב במסך מלא'
     Swipe Up or Down to Enter or Exit Fullscreen: 'החלקה למעלה או למטה כדי להיכנס למסך מלא או לצאת ממנו'
     Preload Upcoming Videos: "טעינה מראש של הסרטונים הבאים"

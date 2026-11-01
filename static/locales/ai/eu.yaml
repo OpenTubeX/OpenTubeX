@@ -827,6 +827,9 @@ Settings:
       Shorts: Shorts
       Screenshots: Pantaila-argazkiak
     Enable FCast: "Gaitu FCast"
+    Screenshot:
+      Legacy Formats: "Formatu zaharrak"
+      Modern Formats: "Formatu modernoak"
   Channel Settings:
     Channel Settings: Kanalen ezarpenak
     Channel Settings Description: Gogoratu kanal bakoitzerako bideoak ikustean aukeratutako ezarpenak, kanal horretako beste bideo bat ikusten duzunean berriro aplikatzeko.

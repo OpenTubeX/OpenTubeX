@@ -832,6 +832,9 @@ Settings:
       Shorts: Shorts
       Screenshots: Snimke zaslona
     Enable FCast: "Omogući FCast"
+    Screenshot:
+      Legacy Formats: "Stariji formati"
+      Modern Formats: "Moderni formati"
   Channel Settings:
     Channel Settings: Postavke kanala
     Channel Settings Description: Postavke koje odaberete tijekom gledanja pamte se zasebno za svaki kanal kako bi se ponovno primijenile kada sljedeći put gledate neki njegov videozapis.

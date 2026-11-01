@@ -910,6 +910,8 @@ Settings:
       Modes:
         Save To Folder: Lagre i mappe
         Clipboard: Kopier til utklippstavla
+      Legacy Formats: "Eldre format"
+      Modern Formats: "Moderne format"
     Rotate Wide Videos to Landscape in Fullscreen: 'Roter breie videoar til liggjande format i fullskjerm'
     Swipe Up or Down to Enter or Exit Fullscreen: 'Sveip opp eller ned for å opne eller avslutte fullskjerm'
     Preload Upcoming Videos: "Førehandslast komande videoar"

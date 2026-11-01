@@ -834,6 +834,8 @@ Settings:
       Modes:
         Save To Folder: Gem i mappe
         Clipboard: Kopiér til udklipsholder
+      Legacy Formats: "Ældre formater"
+      Modern Formats: "Moderne formater"
     Rotate Wide Videos to Landscape in Fullscreen: 'Roter brede videoer til liggende format i fuld skærm'
     Swipe Up or Down to Enter or Exit Fullscreen: 'Stryg op eller ned for at åbne eller forlade fuld skærm'
     Preload Upcoming Videos: "Forudindlæs kommende videoer"

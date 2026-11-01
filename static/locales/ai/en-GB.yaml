@@ -815,6 +815,9 @@ Settings:
       Shorts: Shorts
       Screenshots: Screenshots
     Enable FCast: "Enable FCast"
+    Screenshot:
+      Legacy Formats: "Legacy formats"
+      Modern Formats: "Modern formats"
   Channel Settings:
     Channel Settings: Channel Settings
     Channel Settings Description: Remember the settings you pick while watching for each channel individually, so they are applied again the next time you watch one of its videos.

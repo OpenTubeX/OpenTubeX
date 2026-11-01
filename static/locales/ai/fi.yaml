@@ -824,6 +824,8 @@ Settings:
       Modes:
         Save To Folder: Tallenna kansioon
         Clipboard: Kopioi leikepöydälle
+      Legacy Formats: "Vanhemmat muodot"
+      Modern Formats: "Nykyaikaiset muodot"
     Rotate Wide Videos to Landscape in Fullscreen: 'Kierrä leveät videot vaakasuuntaan koko näytöllä'
     Swipe Up or Down to Enter or Exit Fullscreen: 'Siirry koko näytön tilaan tai poistu siitä pyyhkäisemällä ylös tai alas'
     Preload Upcoming Videos: "Esilataa seuraavat videot"

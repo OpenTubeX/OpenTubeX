@@ -453,6 +453,9 @@ Settings:
       Edge Style:
         Raised: Uniesione
         Depressed: Opuszczone
+    Screenshot:
+      Legacy Formats: "Starsze formaty"
+      Modern Formats: "Nowoczesne formaty"
   Channel Settings:
     Enable Channel Playback Settings: Włącz ustawienia odtwarzania dla kanałów
     Auto Save Playback Speed: Automatycznie zapisuj zmiany prędkości odtwarzania

@@ -827,6 +827,9 @@ Settings:
       Shorts: Shorts
       Screenshots: Ekran görüntüleri
     Enable FCast: "FCast özelliğini etkinleştir"
+    Screenshot:
+      Legacy Formats: "Eski biçimler"
+      Modern Formats: "Modern biçimler"
   Channel Settings:
     Channel Settings: Kanal Ayarları
     Channel Settings Description: İzlerken seçtiğiniz ayarları her kanal için ayrı ayrı hatırlayarak kanalın bir sonraki videosunda yeniden uygular.
