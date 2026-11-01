@@ -2689,10 +2689,13 @@ for (const tabBarPosition of ['top', 'left']) {
       const container = page.locator('.tabsContainer')
       await container.evaluate(element => element.scrollTo(200, 200))
       await expect.poll(async () => {
-        const offset = await container.evaluate(element => element.scrollLeft)
+        const offset = await container.evaluate(element => element.scrollLeft || element.scrollTop)
+        if (offset <= 0) return false
+        // Only the horizontal bar shares its offset with the main process.
+        if (tabBarPosition !== 'top') return true
         const shared = await page.evaluate(async () => (await window.ftElectron.tabs.getState()).tabBarScrollPosition)
-        return offset > 0 && Math.abs(shared - offset) < 1
-      }).toBe(tabBarPosition === 'top')
+        return Math.abs(shared - offset) < 1
+      }).toBe(true)
 
       // Ctrl+Shift+Tab wraps around from the first tab to the last one.
       await page.keyboard.press('Control+Shift+Tab')
