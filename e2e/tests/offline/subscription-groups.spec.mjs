@@ -344,6 +344,28 @@ test.describe('editing subscription groups', () => {
     expect((await storedGroups(page)).find(group => group.id === 'music')).not.toHaveProperty('icon')
   })
 
+  test('only highlights hovered icons on screens that can hover', async ({ page }) => {
+    await goTo(page, 'subscribedchannels')
+    await groups(page).getByRole('tab', { name: 'Music' }).click()
+    await page.getByRole('button', { name: 'Edit Group' }).click()
+    const option = page.getByRole('dialog', { name: 'Edit Group' }).getByRole('button', { name: 'Gaming', exact: true })
+    const background = () => option.evaluate(element => getComputedStyle(element).backgroundColor)
+    const idleBackground = await background()
+
+    const session = await page.context().newCDPSession(page)
+    // A tap leaves touch screens reporting :hover on the tapped icon
+    await session.send('Emulation.setTouchEmulationEnabled', { enabled: true, maxTouchPoints: 5 })
+    await expect.poll(() => page.evaluate(() => matchMedia('(hover: none)').matches)).toBe(true)
+    await option.hover()
+    await expect.poll(background).toBe(idleBackground)
+
+    await session.send('Emulation.setTouchEmulationEnabled', { enabled: false })
+    await expect.poll(() => page.evaluate(() => matchMedia('(hover: hover)').matches)).toBe(true)
+    await option.hover()
+    await expect.poll(background).not.toBe(idleBackground)
+    await session.detach()
+  })
+
   test('keeps the editor open when the group cannot be deleted', async ({ page }) => {
     await page.evaluate(() => {
       window.$store._actions.updateSubscriptionGroups = [() => Promise.resolve(false)]

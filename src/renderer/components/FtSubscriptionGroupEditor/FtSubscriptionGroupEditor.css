@@ -44,14 +44,17 @@
   cursor: pointer;
 }
 
-.iconOption:hover,
-.iconOption:focus-visible {
-  background: var(--side-nav-hover-color);
+/* Touch screens keep :hover on the last tapped icon. */
+@media (hover: hover) {
+  .iconOption:hover {
+    background: var(--side-nav-hover-color);
+  }
 }
 
 /* Keep a focus indicator when outlines are hidden. */
 .iconOption:focus-visible {
   border-color: var(--primary-color);
+  background: var(--side-nav-hover-color);
 }
 
 .iconOption[aria-pressed='true'] {
