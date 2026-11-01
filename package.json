@@ -77,7 +77,7 @@
   "dependencies": {
     "@capacitor-community/keep-awake": "^8.0.1",
     "@capacitor-community/screen-brightness": "^8.0.0",
-    "@capacitor/android": "^8.5.2",
+    "@capacitor/android": "^8.6.0",
     "@capacitor/app": "^8.1.2",
     "@capacitor/barcode-scanner": "^3.1.2",
     "@capacitor/browser": "^8.0.5",
@@ -85,7 +85,7 @@
     "@capacitor/device": "^8.0.3",
     "@capacitor/filesystem": "^8.1.5",
     "@capacitor/haptics": "^8.0.2",
-    "@capacitor/ios": "^8.5.3",
+    "@capacitor/ios": "^8.6.0",
     "@capacitor/local-notifications": "^8.3.1",
     "@capacitor/share": "^8.0.3",
     "@capawesome/capacitor-app-shortcuts": "^8.0.2",

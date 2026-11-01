@@ -170,7 +170,7 @@ overrides:
 
 patchedDependencies:
   '@capacitor-community/screen-brightness@8.0.0': 92c0cd00ac50c22d0829cec4df0b63151dcb5e718a194e4ae8f015d271570ea8
-  '@capacitor/android@8.5.2': 796ade31693afbf786903e5472f424e505531dd1f76106498a3511a91d1ef445
+  '@capacitor/android@8.6.0': 796ade31693afbf786903e5472f424e505531dd1f76106498a3511a91d1ef445
   '@capacitor/barcode-scanner@3.1.2': b4c45d0161b7a4f0e708d232e3d2067f01a39f1ffb5497b5c3c7f4df318c50f3
   '@capacitor/share@8.0.3': 61a10a5a91f7c78b0670870fd26034ee015a175f24f79c0f9890ce03050a8adb
   '@capawesome/capacitor-app-shortcuts@8.0.2': 2581c86d60ce7892c0b3136523994591d24ee7313bbc5fc9b4ad1c710719c70a
@@ -193,8 +193,8 @@ importers:
         specifier: ^8.0.0
         version: 8.0.0(patch_hash=92c0cd00ac50c22d0829cec4df0b63151dcb5e718a194e4ae8f015d271570ea8)(@capacitor/core@8.6.0)
       '@capacitor/android':
-        specifier: ^8.5.2
-        version: 8.5.2(patch_hash=796ade31693afbf786903e5472f424e505531dd1f76106498a3511a91d1ef445)(@capacitor/core@8.6.0)
+        specifier: ^8.6.0
+        version: 8.6.0(patch_hash=796ade31693afbf786903e5472f424e505531dd1f76106498a3511a91d1ef445)(@capacitor/core@8.6.0)
       '@capacitor/app':
         specifier: ^8.1.2
         version: 8.1.2(@capacitor/core@8.6.0)
@@ -217,8 +217,8 @@ importers:
         specifier: ^8.0.2
         version: 8.0.2(@capacitor/core@8.6.0)
       '@capacitor/ios':
-        specifier: ^8.5.3
-        version: 8.5.3(@capacitor/core@8.6.0)
+        specifier: ^8.6.0
+        version: 8.6.0(@capacitor/core@8.6.0)
       '@capacitor/local-notifications':
         specifier: ^8.3.1
         version: 8.3.1(@capacitor/core@8.6.0)
@@ -622,10 +622,10 @@ packages:
     peerDependencies:
       '@capacitor/core': '>=8.0.0'
 
-  '@capacitor/android@8.5.2':
-    resolution: {integrity: sha512-rtiaz78egCcS+vs29wkWCL3C+RhazKMSygXcjutwWP8NmO6r5UBxOvGf3Wjz5+ahobyQ723tn9gCePwRwcNDZQ==}
+  '@capacitor/android@8.6.0':
+    resolution: {integrity: sha512-6IJS0TCfV/F/8+324CCwYd3xL6r+TH0W7zzaxYzPz9IV3YWCNvsZDuCCPHUIBC5iASb9od827ddSJ6rz+9Pu1Q==}
     peerDependencies:
-      '@capacitor/core': ^8.5.0
+      '@capacitor/core': ^8.6.0
 
   '@capacitor/app@8.1.2':
     resolution: {integrity: sha512-uKBlsrXH0IdvUn69e/KKYbZ32A06pcrUdG8LWuZ/6y33YMXZXLEEdNSwl+jKS/SrsTWqnePs8EqSWaiQM3mUGA==}
@@ -665,10 +665,10 @@ packages:
     peerDependencies:
       '@capacitor/core': '>=8.0.0'
 
-  '@capacitor/ios@8.5.3':
-    resolution: {integrity: sha512-HnnV92Jl8+3x0JUloXUMjFcUsQI8wHFVsKwkLn72DfRZXYGZW11tQbmNOWOnRTljaU18FdI1b9ipT09SzzPDNw==}
+  '@capacitor/ios@8.6.0':
+    resolution: {integrity: sha512-Y2PE4zoBqMrSTWoVMJmX2byBznjn6egmATzoEUJiGVbVubkNpAvkF/tl0SBKDyP67ngyedTx1tQq5IGYIhby1A==}
     peerDependencies:
-      '@capacitor/core': ^8.5.0
+      '@capacitor/core': ^8.6.0
 
   '@capacitor/local-notifications@8.3.1':
     resolution: {integrity: sha512-F7zu/+p/mIR958YP4axOkeI5hBKRaXDyYjbNPrAil2wWfd7OxScPSTvP9t85NpQ0eULVRu0/sntoxOg6ck477A==}
@@ -5618,7 +5618,7 @@ snapshots:
     dependencies:
       '@capacitor/core': 8.6.0
 
-  '@capacitor/android@8.5.2(patch_hash=796ade31693afbf786903e5472f424e505531dd1f76106498a3511a91d1ef445)(@capacitor/core@8.6.0)':
+  '@capacitor/android@8.6.0(patch_hash=796ade31693afbf786903e5472f424e505531dd1f76106498a3511a91d1ef445)(@capacitor/core@8.6.0)':
     dependencies:
       '@capacitor/core': 8.6.0
 
@@ -5675,7 +5675,7 @@ snapshots:
     dependencies:
       '@capacitor/core': 8.6.0
 
-  '@capacitor/ios@8.5.3(@capacitor/core@8.6.0)':
+  '@capacitor/ios@8.6.0(@capacitor/core@8.6.0)':
     dependencies:
       '@capacitor/core': 8.6.0
 
