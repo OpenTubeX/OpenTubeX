@@ -248,13 +248,18 @@
 
 /*
   Shaka widens the list menu until every playback speed preset fits on one row,
-  so the presets wrap at the width of the grid menu instead.
+  so the presets wrap at the width of the grid menu instead. The caption font
+  style sliders reuse the playback speed slider and presets.
 */
-:deep(.shaka-playback-rates:not(.ft-menu-grid)) {
+:deep(:is(.shaka-playback-rates, .ft-caption-style-slider-menu):not(.ft-menu-grid)) {
   max-inline-size: 400px;
 }
 
-/* The playback speed slider and its presets each fill a row, instead of shrinking to their content. */
+:deep(.ft-caption-style-slider-menu) {
+  min-inline-size: 240px;
+}
+
+/* The playback speed and caption style sliders and their presets each fill a row, instead of shrinking to their content. */
 :deep(.shaka-sub-menu.ft-menu-grid > :is(.shaka-playback-rate-slider-section, .shaka-playback-rate-presets)) {
   flex-basis: 100%;
 }

@@ -42,6 +42,11 @@ import {
   setAbRepeatContext,
 } from './player-components/AbRepeatControl'
 import { AudioTrackSelection } from './player-components/AudioTrackSelection'
+import {
+  CAPTION_BACKGROUND_OPACITY_SLIDER,
+  CAPTION_FONT_SIZE_SLIDER,
+  CaptionStyleSlider,
+} from './player-components/CaptionStyleSlider'
 import { CaptionSelection } from './player-components/CaptionSelection'
 import { CaptionStyleResetButton } from './player-components/CaptionStyleResetButton'
 import { CaptionToggleButton, CLOSED_CAPTIONS_OUTLINED } from './player-components/CaptionToggleButton'
@@ -155,7 +160,6 @@ import {
 import { matchesKeyboardShortcut } from '../../helpers/keyboardShortcuts'
 import {
   CAPTION_FONT_FAMILIES,
-  CAPTION_FONT_SCALE_FACTORS,
   DEFAULT_CAPTION_SETTINGS,
   getCaptionPlayerVariables,
   getCaptionStyle,
@@ -228,6 +232,8 @@ let configuringCustomPlayerControls = false
  */
 const defaultShakaElementFactories = new Map([
   ['captions', { create: (rootElement, controls) => new shaka.ui.TextSelection(rootElement, controls) }],
+  ['captions-size', { create: (rootElement, controls) => new shaka.ui.TextSize(rootElement, controls) }],
+  ['captions-background-opacity', { create: (rootElement, controls) => new shaka.ui.TextBackgroundOpacity(rootElement, controls) }],
   ['captions-style-reset', { create: (rootElement, controls) => new shaka.ui.TextStyleResetButton(rootElement, controls) }],
   ['quality', { create: (rootElement, controls) => new shaka.ui.ResolutionSelection(rootElement, controls) }],
 ])
@@ -2989,7 +2995,6 @@ export default defineComponent({
           ? TrackLabelFormat.LABEL
           : TrackLabelFormat.LANGUAGE,
         displayInVrMode: useVrMode.value,
-        captionsFontScaleFactors: [...CAPTION_FONT_SCALE_FACTORS],
       }
 
       /** @type {string[]} */
@@ -6634,6 +6639,27 @@ export default defineComponent({
       // Shaka's reset would restore its own defaults, which don't keep the position
       registerOwnElement(shakaControls, 'captions-style-reset', new CaptionStyleResetButtonFactory())
       registerOwnElement(shakaOverflowMenu, 'captions-style-reset', new CaptionStyleResetButtonFactory())
+
+      /** @implements {shaka.extern.IUIElement.Factory} */
+      class CaptionStyleSliderFactory {
+        /** @param {import('./player-components/CaptionStyleSlider').CaptionStyleSliderOptions} options */
+        constructor(options) {
+          this.options = options
+        }
+
+        create(rootElement, controls) {
+          return new CaptionStyleSlider(this.options, rootElement, controls)
+        }
+      }
+
+      // Shaka's font size and background opacity menus only offer a few fixed values
+      for (const [name, options] of [
+        ['captions-size', CAPTION_FONT_SIZE_SLIDER],
+        ['captions-background-opacity', CAPTION_BACKGROUND_OPACITY_SLIDER],
+      ]) {
+        registerOwnElement(shakaControls, name, new CaptionStyleSliderFactory(options))
+        registerOwnElement(shakaOverflowMenu, name, new CaptionStyleSliderFactory(options))
+      }
     }
 
     /**

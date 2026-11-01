@@ -52,9 +52,17 @@ export const CAPTION_COLORS = Object.freeze({
 
 /** The opacities of Shaka's opacity menus, `null` keeps the opacity of the captions. */
 export const CAPTION_FONT_OPACITIES = Object.freeze([null, 0.25, 0.5, 0.75, 1])
+/** Common background opacities, offered as presets beside the slider. */
 export const CAPTION_BACKGROUND_OPACITIES = Object.freeze([null, 0, 0.25, 0.5, 0.75, 1])
+/** The step of the background opacity slider. */
+export const CAPTION_BACKGROUND_OPACITY_STEP = 0.05
 
-/** Shaka's font sizes, extended to the 400% that the settings offered before. */
+/** The range and step of the font size slider. */
+export const MIN_CAPTION_FONT_SCALE_FACTOR = 0.5
+export const MAX_CAPTION_FONT_SCALE_FACTOR = 4
+export const CAPTION_FONT_SCALE_FACTOR_STEP = 0.05
+
+/** Common font sizes, offered as presets beside the slider. */
 export const CAPTION_FONT_SCALE_FACTORS = Object.freeze([0.5, 0.75, 1, 1.25, 1.5, 1.75, 2, 2.5, 3, 3.5, 4])
 
 /**
@@ -162,18 +170,18 @@ function normalizeOpacity(value, legacyDefault) {
 }
 
 /**
- * Picks the closest of the font sizes, so that the captions menu can show which one is used.
+ * Keeps a font size within the range of the slider and snaps it to its step.
  * @param {unknown} value
  * @returns {number}
  */
-function normalizeFontScaleFactor(value) {
+export function normalizeFontScaleFactor(value) {
   const scale = typeof value === 'string' ? Number.parseFloat(value) : value
   if (typeof scale !== 'number' || !Number.isFinite(scale)) {
     return DEFAULT_CAPTION_SETTINGS.fontScaleFactor
   }
-  return CAPTION_FONT_SCALE_FACTORS.reduce((closest, factor) => {
-    return Math.abs(factor - scale) < Math.abs(closest - scale) ? factor : closest
-  })
+  const stepped = Math.round(scale / CAPTION_FONT_SCALE_FACTOR_STEP) * CAPTION_FONT_SCALE_FACTOR_STEP
+  // Removes floating-point noise, such as 1.3 becoming 1.3000000000000003
+  return Math.min(MAX_CAPTION_FONT_SCALE_FACTOR, Math.max(MIN_CAPTION_FONT_SCALE_FACTOR, Number(stepped.toFixed(2))))
 }
 
 /**
@@ -292,6 +300,16 @@ export function getCaptionPlayerVariables(playerHeight, fontScaleFactor) {
 }
 
 /**
+ * The opacity of the background while it has none of its own, like in Shaka: opaque with a background color,
+ * or the 80% of Shaka's black background.
+ * @param {string} backgroundColor
+ * @returns {number}
+ */
+export function getDefaultBackgroundOpacity(backgroundColor) {
+  return backgroundColor ? 1 : 0.8
+}
+
+/**
  * @param {string} color a hex color
  * @param {number} opacity
  * @returns {string}
@@ -329,7 +347,7 @@ export function getCaptionStyle(settings) {
     },
     background: colorWithOpacity(
       settings.backgroundColor || '#000',
-      settings.backgroundOpacity ?? (settings.backgroundColor ? 1 : 0.8)
+      settings.backgroundOpacity ?? getDefaultBackgroundOpacity(settings.backgroundColor)
     ),
   }
 }

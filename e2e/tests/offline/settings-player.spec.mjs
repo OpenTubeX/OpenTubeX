@@ -634,9 +634,8 @@ test.describe('settings', () => {
 
     const preview = page.locator('.captionPreview')
     const initialPreviewBounds = await preview.boundingBox()
-    await page.locator('.captionControl .select').filter({
-      has: page.getByRole('combobox', { name: 'Font Size' })
-    }).locator('select').selectOption('4')
+    await page.locator('.captionControl').getByRole('slider', { name: /Font Size/ }).fill('400')
+    await expect.poll(() => page.evaluate(() => JSON.parse(window.$store.getters.getDefaultCaptionSettings).fontScaleFactor)).toBe(4)
     const enlargedPreviewBounds = await preview.boundingBox()
     expect(initialPreviewBounds.height).toBe(240)
     expect(enlargedPreviewBounds.height).toBe(initialPreviewBounds.height)
@@ -651,6 +650,16 @@ test.describe('settings', () => {
     expect(await page.locator('.captionControl').evaluateAll((elements, rightEdge) => {
       return elements.every(element => element.getBoundingClientRect().right <= rightEdge + 1)
     }, contentBounds.x + contentBounds.width)).toBe(true)
+  })
+
+  test('saves caption font sizes between the presets from the settings slider', async ({ page }) => {
+    await goTo(page, 'settings')
+    await page.locator('.settingsMenu [data-section="playback"]').click()
+
+    const control = page.locator('.captionControl').filter({ has: page.getByRole('slider', { name: /Font Size/ }) })
+    await control.getByRole('slider').fill('135')
+    await expect.poll(() => page.evaluate(() => JSON.parse(window.$store.getters.getDefaultCaptionSettings).fontScaleFactor)).toBe(1.35)
+    await expect(control).toContainText('135%')
   })
 
   test('keeps the caption preview 5% of its height from the top and bottom edges @scale', async ({ page, attachScreenshot }) => {

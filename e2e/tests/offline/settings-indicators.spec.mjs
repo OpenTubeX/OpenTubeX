@@ -122,11 +122,13 @@ test.describe('settings', () => {
     expect(resetCaptionAppearanceBounds.x + resetCaptionAppearanceBounds.width / 2)
       .toBeCloseTo(captionActionsBounds.x + captionActionsBounds.width / 2, 0)
 
-    const changedControl = page.locator('.captionControl .select').filter({
-      has: page.getByRole('combobox', { name: 'Background Opacity' })
+    const changedControl = page.locator('.captionControl .pure-material-slider').filter({
+      has: page.getByRole('slider', { name: /Background Opacity/ })
     })
-    const backgroundOpacity = changedControl.locator('select')
-    await backgroundOpacity.selectOption('0.5')
+    const backgroundOpacity = changedControl.getByRole('slider')
+    // The default black background shows its 80%
+    await expect(backgroundOpacity).toHaveValue('80')
+    await backgroundOpacity.fill('50')
     await expect(resetCaptionAppearance).toBeEnabled()
 
     const resetButton = changedControl.getByRole('button', {
@@ -140,7 +142,8 @@ test.describe('settings', () => {
     })).toHaveCount(1)
 
     await resetButton.click()
-    await expect(backgroundOpacity).toHaveValue('')
+    await expect(backgroundOpacity).toHaveValue('80')
+    expect(await page.evaluate(() => JSON.parse(window.$store.getters.getDefaultCaptionSettings).backgroundOpacity)).toBeNull()
     await expect(resetButton).toHaveCount(0)
     await expect(resetCaptionAppearance).toBeDisabled()
   })
