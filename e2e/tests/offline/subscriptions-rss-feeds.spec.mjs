@@ -386,6 +386,10 @@ test.describe('with followed feeds', () => {
     await input.press('Enter')
     await expect(progress).toBeVisible()
     await expect(input).toBeDisabled()
+    // Without animations, the bar fills the track instead of stopping partway
+    await page.evaluate(() => { document.documentElement.dataset.reducedMotion = 'reduce' })
+    await expect.poll(() => progress.evaluate(bar => getComputedStyle(bar, '::before').width === getComputedStyle(bar).width))
+      .toBe(true)
 
     release()
     await expect(manager.locator('.feedRow')).toHaveCount(3)

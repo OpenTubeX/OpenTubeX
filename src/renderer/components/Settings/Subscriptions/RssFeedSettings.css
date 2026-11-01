@@ -116,7 +116,7 @@
 }
 
 /* Without animations, a full bar still shows that the feed loads */
-:global(:root[data-reduced-motion='reduce']) .addFeedProgress::before {
+:root[data-reduced-motion='reduce'] .addFeedProgress::before {
   inline-size: 100%;
 }
 
