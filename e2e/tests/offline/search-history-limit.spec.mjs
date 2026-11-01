@@ -123,7 +123,7 @@ test('shows the configured number of search rows within the window', { tag: '@sc
     return window.innerHeight - element.getBoundingClientRect().bottom
   })).toBeGreaterThan(0)
   await expect.poll(() => list.evaluate(element => element.scrollHeight > element.clientHeight)).toBe(true)
-  expect(await visibleRows()).toBeGreaterThan(10)
+  await expect.poll(visibleRows).toBeGreaterThan(10)
 
   // A taller window gives the list more room.
   await scrollToEnd()
