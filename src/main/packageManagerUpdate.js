@@ -9,6 +9,7 @@ import { promisify } from 'node:util'
 
 const execFileAsync = promisify(execFile)
 const REPOSITORY_URL = /^\s*baseurl\s*=.*opentubex/im
+const REPOSITORY_DISABLED = /^\s*enabled\s*=\s*0/m
 
 /**
  * @param {string} file
@@ -61,22 +62,21 @@ export async function getPackageManagerUpdate(appPath, {
       : { packageManager: 'Snap', command: `sudo snap refresh ${env.SNAP_NAME}` }
   }
 
+  // Declarative Nix installs update through a rebuild that depends on the
+  // user's configuration, so only profile installs get a command.
   const nixStorePath = appPath.match(/^\/nix\/store\/[^/]+/)?.[0]
   if (nixStorePath) {
-    /** @type {string | null} */
-    let profileName = null
     try {
       const manifest = JSON.parse(await readTextFile(path.join(home, '.nix-profile', 'manifest.json')))
-      profileName = Object.entries(manifest.elements ?? {})
-        .find(([, element]) => element.storePaths?.includes(nixStorePath))?.[0] ?? null
+      const profileName = Object.entries(manifest.elements ?? {})
+        .find(([, element]) => element.storePaths?.includes(nixStorePath))?.[0]
+      if (profileName) return { packageManager: 'Nix', command: `nix profile upgrade ${profileName}` }
     } catch {}
-    return {
-      packageManager: 'Nix',
-      command: profileName === null ? 'nix flake update opentubex' : `nix profile upgrade ${profileName}`,
-    }
+    return null
   }
 
   if (platform === 'darwin') {
+    if (!appPath.startsWith('/Applications/OpenTubeX.app/')) return null
     for (const prefix of ['/opt/homebrew', '/usr/local']) {
       if (await exists(`${prefix}/Caskroom/opentubex`)) {
         return { packageManager: 'Homebrew', command: 'brew upgrade --cask opentubex' }
@@ -92,7 +92,8 @@ export async function getPackageManagerUpdate(appPath, {
     try {
       const names = (await listDirectory(directory)).filter(name => name.endsWith('.repo'))
       for (const name of names) {
-        if (REPOSITORY_URL.test(await readTextFile(path.join(directory, name)).catch(() => ''))) return true
+        const sections = (await readTextFile(path.join(directory, name)).catch(() => '')).split(/^(?=\s*\[)/m)
+        if (sections.some(section => REPOSITORY_URL.test(section) && !REPOSITORY_DISABLED.test(section))) return true
       }
     } catch {}
     return false

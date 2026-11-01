@@ -68,9 +68,9 @@ test('upgrades the Nix profile entry that contains OpenTubeX', async () => {
   assert.deepEqual(update, { packageManager: 'Nix', command: 'nix profile upgrade default' })
 })
 
-test('updates the flake input of declarative Nix installs', async () => {
+test('keeps the website download for Nix installs outside the profile', async () => {
   const update = await getPackageManagerUpdate('/nix/store/abc-opentubex-0.37.2/share/opentubex/resources/app.asar', system({}))
-  assert.deepEqual(update, { packageManager: 'Nix', command: 'nix flake update opentubex' })
+  assert.equal(update, null)
 })
 
 test('upgrades the Homebrew cask on macOS', async () => {
@@ -80,6 +80,10 @@ test('upgrades the Homebrew cask on macOS', async () => {
     { packageManager: 'Homebrew', command: 'brew upgrade --cask opentubex' }
   )
   assert.equal(await getPackageManagerUpdate(appPath, system({}, {}, { platform: 'darwin' })), null)
+  assert.equal(await getPackageManagerUpdate(
+    '/Users/user/Downloads/OpenTubeX.app/Contents/Resources/app.asar',
+    system({}, { '/opt/homebrew/Caskroom/opentubex': '' }, { platform: 'darwin' })
+  ), null)
 })
 
 test('upgrades APT installs from the OpenTubeX repository', async () => {
@@ -116,6 +120,9 @@ test('upgrades RPM installs with the tool whose repository provides OpenTubeX', 
   )
   assert.equal(await getPackageManagerUpdate(APP_PATH, system(commands, {
     '/etc/yum.repos.d/fedora.repo': '[fedora]\nbaseurl=https://example.org/fedora\n',
+  })), null)
+  assert.equal(await getPackageManagerUpdate(APP_PATH, system(commands, {
+    '/etc/yum.repos.d/opentubex.repo': '[opentubex]\nbaseurl=https://rpm.opentubex.org/\nenabled=0\n\n[other]\nbaseurl=https://example.org/\nenabled=1\n',
   })), null)
 })
 
