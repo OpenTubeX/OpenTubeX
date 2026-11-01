@@ -77,6 +77,13 @@ function childPlainText(parent, names) {
  */
 function itemLink(item, base) {
   const links = childElements(item, ['link'])
+  // Podcast episodes play from their media, their page often only has show notes
+  const media = [
+    ...childElements(item, ['enclosure']).map(element => [element.getAttribute('url'), element.getAttribute('type')]),
+    ...links.filter(link => link.getAttribute('rel') === 'enclosure').map(link => [link.getAttribute('href'), link.getAttribute('type')])
+  ].find(([url, type]) => /^(?:audio|video)\//.test(type ?? '') && normalizeHttpUrl(url, base))
+  if (media) return normalizeHttpUrl(media[0], base)
+
   // Atom links carry their target in `href`, preferring the alternate page
   const atomLink = links.find(link => link.hasAttribute('href') && (link.getAttribute('rel') ?? 'alternate') === 'alternate')
   const link = normalizeHttpUrl(atomLink?.getAttribute('href') ?? links.find(link => !link.hasAttribute('href'))?.textContent, base)
@@ -278,7 +285,7 @@ export const rssFeedsRefreshing = shallowRef(false)
 /** The feeds that the cached items belong to */
 let refreshedFeedUrls = new Set()
 let activeRefresh = null
-/** Feeds that were added or retried on their own during the active refresh */
+/** Feeds that were added or retried on their own during the active refresh, with their items cached */
 let loadedDuringRefresh = new Set()
 
 /**
@@ -366,16 +373,18 @@ export async function refreshRssFeeds(feeds) {
     const results = await Promise.allSettled(feeds.map(feed => fetchRssFeed(feed.url, controller.signal)))
     if (controller.signal.aborted) return
 
-    // Feeds added while this refresh ran aren't part of it, so keep their items
-    const refreshedUrls = new Set(feeds.map(feed => feed.url))
-    const addedUrls = [...loadedDuringRefresh].filter(url => !refreshedUrls.has(url))
+    // Feeds added or retried while this refresh ran keep their own, newer result
+    const loadedUrls = loadedDuringRefresh
     rssFeedItems.value = [
-      ...rssFeedItems.value.filter(item => addedUrls.includes(item.feedUrl)),
-      ...results.flatMap(result => result.status === 'fulfilled' ? result.value.items : [])
+      ...rssFeedItems.value.filter(item => loadedUrls.has(item.feedUrl)),
+      ...results.flatMap((result, index) => (
+        result.status === 'fulfilled' && !loadedUrls.has(feeds[index].url) ? result.value.items : []
+      ))
     ].sort(compareFeedItems)
-    rssFeedErrors.value = feeds.filter((_, index) => results[index].status === 'rejected').map(feed => feed.url)
+    rssFeedErrors.value = feeds.filter((feed, index) => results[index].status === 'rejected' && !loadedUrls.has(feed.url))
+      .map(feed => feed.url)
     rssFeedsLastRefresh.value = Date.now()
-    refreshedFeedUrls = new Set([...refreshedUrls, ...addedUrls])
+    refreshedFeedUrls = new Set([...feeds.map(feed => feed.url), ...loadedUrls])
     updateMissingRssFeedAvatars(feeds.flatMap((feed, index) => {
       const result = results[index]
       return result.status === 'fulfilled' ? [[feed, result.value]] : []

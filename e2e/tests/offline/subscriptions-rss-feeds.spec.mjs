@@ -269,6 +269,45 @@ test.describe('with followed feeds', () => {
     expect(await titles.allTextContents()).toEqual(['Newest VOD', 'Atom video', 'Older VOD'])
   })
 
+  test('keeps a feed retried while another refresh is running', async ({ page }) => {
+    const mock = await mockFeeds(page)
+    await goTo(page, 'subscriptions')
+    await page.locator('[data-rss-feeds-tab]').click()
+    const panel = page.locator('#subscriptionsPanel')
+    const titles = panel.locator('.ft-list-item .h3Title')
+    await expect(titles).toHaveText(['Newest VOD', 'Older VOD'])
+    await expect(panel.getByText('1 feed could not be refreshed.')).toBeVisible()
+
+    // The broken feed fails again in the held refresh, then a retry repairs it
+    let release
+    const held = new Promise(resolve => { release = resolve })
+    let delivered = false
+    await page.route(RSS_URL, async route => {
+      await held
+      await route.fulfill({ contentType: 'application/rss+xml', body: rssFeed })
+      delivered = true
+    })
+    const header = page.locator('.subscriptionsHeader')
+    await header.getByRole('button', { name: /^Refresh RSS/ }).click()
+    await expect(page.locator('[data-rss-feeds-tab] .tabLoadingIndicator')).toBeVisible()
+
+    mock.brokenFeedWorks = true
+    await header.getByRole('button', { name: 'Manage RSS Feeds' }).click()
+    const brokenRow = page.locator('.settingsSubpageContent .feedRow').filter({ hasText: 'Broken feed' })
+    await brokenRow.getByRole('button', { name: 'Retry Broken feed' }).click()
+    await expect(brokenRow).not.toHaveClass(/hasError/)
+    await page.locator('.settingsCloseButton').click()
+    await expect(titles).toHaveText(['Newest VOD', 'Repaired item', 'Older VOD'])
+
+    mock.brokenFeedWorks = false
+    release()
+    await expect.poll(() => delivered).toBe(true)
+    await expect(page.locator('[data-rss-feeds-tab] .tabLoadingIndicator')).toHaveCount(0)
+    await page.evaluate(() => new Promise(resolve => requestAnimationFrame(() => requestAnimationFrame(resolve))))
+    expect(await titles.allTextContents()).toEqual(['Newest VOD', 'Repaired item', 'Older VOD'])
+    await expect(panel.getByText('1 feed could not be refreshed.')).toHaveCount(0)
+  })
+
   test('keeps the feed manager button on the refresh row at phone widths', { tag: '@scale' }, async ({ app, page }) => {
     await mockFeeds(page)
     await goTo(page, 'subscriptions')
@@ -400,6 +439,30 @@ test.describe('without followed feeds', () => {
     await expect(page.getByText('The feed could not be loaded.', { exact: false })).toBeVisible()
     await expect(input).toHaveValue(ATOM_URL)
     await expect(manager.locator('.feedRow')).toHaveCount(0)
+  })
+
+  test('plays podcast episodes from their audio enclosure', async ({ page }) => {
+    await page.route(/^https?:\/\//, abortUnmockedRequest)
+    await page.route('https://rss.example.test/podcast.xml', route => route.fulfill({
+      contentType: 'application/rss+xml',
+      body: `<?xml version="1.0"?><rss version="2.0"><channel><title>Podcast</title>
+        <item><title>Episode 1</title><link>https://rss.example.test/episodes/1</link>
+          <enclosure url="https://cdn.example.test/episode-1.mp3" type="audio/mpeg" length="1"/>
+          <pubDate>${new Date(now).toUTCString()}</pubDate></item>
+      </channel></rss>`
+    }))
+    const manager = await openFeedManager(page)
+    const input = manager.getByRole('textbox', { name: 'Add Feed' })
+    await input.fill('https://rss.example.test/podcast.xml')
+    await input.press('Enter')
+    await expect(manager.locator('.feedRow')).toContainText('Podcast')
+    await page.locator('.settingsCloseButton').click()
+
+    await goTo(page, 'subscriptions')
+    await page.locator('[data-rss-feeds-tab]').click()
+    await page.locator('#subscriptionsPanel .h3Title', { hasText: 'Episode 1' }).click()
+    await expect.poll(() => page.evaluate(() => window.$router.currentRoute.value.query.url))
+      .toBe('https://cdn.example.test/episode-1.mp3')
   })
 
   test('opens the feed manager from the empty tab', async ({ page }) => {
