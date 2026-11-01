@@ -1688,9 +1688,11 @@ async function saveStateInRouter(query) {
   }
 
   try {
+    // Searching keeps the scroll position like other filters instead of jumping to the top
     await router.replace({
       path: `/playlist/${playlistId.value}`,
       query: routeQuery,
+      state: { preserveScroll: true },
     })
     // The tab title belongs to the replaced route
     if (!isLoading.value) updatePageTitle()
