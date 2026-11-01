@@ -39,3 +39,27 @@ test('saves JPEG XL screenshots', async ({ app, page }) => {
   // A bare JPEG XL codestream starts with 0xFF 0x0A.
   expect([...file.subarray(0, 2)]).toEqual([0xFF, 0x0A])
 })
+
+test('takes one screenshot while the shortcut key is held', async ({ app, page }) => {
+  await mockPlayableWatchPage(app, page)
+  await openMockedVideo(page)
+  await waitForPlayback(page)
+  await page.evaluate(() => {
+    window.__e2eJxlWorkers = 0
+    const NativeWorker = window.Worker
+    window.Worker = class extends NativeWorker {
+      constructor(url, options) {
+        super(url, options)
+        if (options?.name === 'jxl-encoder') window.__e2eJxlWorkers++
+      }
+    }
+  })
+
+  await page.evaluate(() => document.activeElement?.blur())
+  // Pressing an already pressed key sends a keydown with `repeat` set, like holding it.
+  for (let i = 0; i < 4; i++) await page.keyboard.down('u')
+  await page.keyboard.up('u')
+
+  await expect(page.locator('.toast', { hasText: 'Saved screenshot' }).first()).toBeVisible({ timeout: 30_000 })
+  expect(await page.evaluate(() => window.__e2eJxlWorkers)).toBe(1)
+})

@@ -9033,8 +9033,8 @@ export default defineComponent({
         case matches(KeyboardShortcuts.VIDEO_PLAYER.GENERAL.TAKE_SCREENSHOT):
           if (enableScreenshot.value && props.format !== 'audio') {
             event.preventDefault()
-            // Take screenshot
-            takeScreenshot()
+            // Holding the key would start a slow JPEG XL encode per repeat.
+            if (!event.repeat) takeScreenshot()
           }
           blurTooltipButtons()
           break
