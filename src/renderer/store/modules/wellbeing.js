@@ -63,14 +63,14 @@ const state = {
 
 /**
  * @param {typeof state} state
- * @param {boolean} saveShortsTime
  */
-function persist(state, saveShortsTime) {
+function persist(state) {
   const { date, shortsSeconds, unrecordedShortsSeconds, extraSeconds, ignored } = state.day
   try {
     localStorage.setItem(STORAGE_KEY, JSON.stringify({
       date,
-      ...(saveShortsTime ? { shortsSeconds: shortsSeconds - unrecordedShortsSeconds } : {}),
+      // Shorts watched without statistics stay private.
+      shortsSeconds: shortsSeconds - unrecordedShortsSeconds,
       extraSeconds,
       ignored,
       bedtimeDismissedNight: state.bedtimeDismissedNight,
@@ -125,33 +125,33 @@ const actions = {
 
     const recorded = recordsWatchStats(rootGetters)
     commit('addWellbeingPlayback', { date, seconds, isShort, recorded, now: Date.now() })
-    if (isShort) persist(state, recorded)
+    if (isShort) persist(state)
     return recorded ? dispatch('recordWatchTime', { date, seconds }) : undefined
   },
 
   /** @param {string} date */
-  startWellbeingDay({ commit, state, rootGetters }, date) {
+  startWellbeingDay({ commit, state }, date) {
     if (state.day.date === date) return
     commit('replaceWellbeingDay', createDay(date))
-    persist(state, recordsWatchStats(rootGetters))
+    persist(state)
   },
 
   /** @param {{ kind: LimitKind, extraSeconds?: number, ignore?: boolean }} payload */
-  extendWellbeingLimit({ commit, state, rootGetters }, payload) {
+  extendWellbeingLimit({ commit, state }, payload) {
     commit('extendWellbeingLimit', payload)
-    persist(state, recordsWatchStats(rootGetters))
+    persist(state)
   },
 
   /** @param {string} night */
-  dismissBedtime({ commit, state, rootGetters }, night) {
+  dismissBedtime({ commit, state }, night) {
     commit('setWellbeingBedtimeDismissed', night)
-    persist(state, recordsWatchStats(rootGetters))
+    persist(state)
   },
 
   clearWellbeingTime({ commit, state }) {
     commit('replaceWellbeingDay', { ...state.day, unrecordedSeconds: 0, shortsSeconds: 0, unrecordedShortsSeconds: 0 })
     commit('resetWellbeingSession')
-    persist(state, false)
+    persist(state)
   },
 }
 

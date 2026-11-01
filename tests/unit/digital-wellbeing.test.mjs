@@ -96,18 +96,23 @@ test('playback time counts toward limits and is only recorded when watch statist
   assert.equal(private_.state.day.shortsSeconds, 0)
 })
 
-test('Shorts watched without statistics are never saved, even after statistics turn on', () => {
+test('only Shorts watched with statistics are saved, whatever the current setting', () => {
   storage.clear()
-  const rootGetters = { getRememberHistory: true, getEnableWatchStats: false }
+  const rootGetters = { getRememberHistory: true, getEnableWatchStats: true }
   const { state, context } = createContext(rootGetters)
   const date = state.day.date
+  const saved = () => JSON.parse(storage.get('OpenTubeX/digitalWellbeing')).shortsSeconds
+  wellbeing.actions.recordPlaybackTime(context, { date, seconds: 30, isShort: true })
+  assert.equal(saved(), 30)
+
+  rootGetters.getEnableWatchStats = false
   wellbeing.actions.recordPlaybackTime(context, { date, seconds: 1200, isShort: true })
-  assert.equal(JSON.parse(storage.get('OpenTubeX/digitalWellbeing')).shortsSeconds, undefined)
+  assert.equal(state.day.shortsSeconds, 1230)
+  assert.equal(saved(), 30)
 
   rootGetters.getEnableWatchStats = true
-  wellbeing.actions.recordPlaybackTime(context, { date, seconds: 30, isShort: true })
-  assert.equal(state.day.shortsSeconds, 1230)
-  assert.equal(JSON.parse(storage.get('OpenTubeX/digitalWellbeing')).shortsSeconds, 30)
+  wellbeing.actions.recordPlaybackTime(context, { date, seconds: 15, isShort: true })
+  assert.equal(saved(), 45)
 })
 
 test('time flushed after midnight starts a new day and late time does not count today', () => {

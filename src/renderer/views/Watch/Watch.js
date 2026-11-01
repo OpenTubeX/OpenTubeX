@@ -4567,7 +4567,8 @@ export default defineComponent({
     updateCurrentChapter: function (currentSeconds) {
       this.trackRecommendationWatch(currentSeconds)
       if (this.watchTimeIsShort !== this.isShort) {
-        // Attribute pending time to the kind of video it was played in.
+        // Attribute pending time, including the last interval, to the kind of video it was played in.
+        this.watchTimeTracker.track()
         this.watchTimeTracker.flush()
         this.watchTimeIsShort = this.isShort
       }
