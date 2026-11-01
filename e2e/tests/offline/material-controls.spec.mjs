@@ -889,6 +889,8 @@ for (const width of [1600, 480]) {
     })
 
     test('keeps field text and action icons centered through focus', async ({ page, uiScale }, testInfo) => {
+      // The section slides in, and its baseline must not be measured mid-slide.
+      await page.emulateMedia({ reducedMotion: 'reduce' })
       await goToSettingsSection(page, 'download')
       const field = page.getByRole('textbox', { name: /^Download Folder/ })
       await field.scrollIntoViewIfNeeded()
