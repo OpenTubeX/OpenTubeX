@@ -66,6 +66,13 @@ test.describe('daily watch time limit', () => {
     await goTo(page, 'stats')
     await expect(page.locator('.summaryCard').filter({ hasText: 'Today' }))
       .toContainText('30 min left of your 1 hr 30 min daily limit')
+
+    // Extra time from the limit prompt counts toward the remaining time.
+    await page.evaluate(() => {
+      window.$store.dispatch('extendWellbeingLimit', { kind: 'watch', extraSeconds: 15 * 60 })
+    })
+    await expect(page.locator('.summaryCard').filter({ hasText: 'Today' }))
+      .toContainText('45 min left of your 1 hr 30 min daily limit')
   })
 })
 

@@ -24,6 +24,8 @@ function createDay(date, saved = {}) {
     // Time that watch statistics did not record, kept only in memory.
     unrecordedSeconds: 0,
     shortsSeconds: sameDay && Number.isFinite(saved.shortsSeconds) ? saved.shortsSeconds : 0,
+    // Never saved, so Shorts watched without statistics stay private.
+    unrecordedShortsSeconds: 0,
     extraSeconds: {
       watch: sameDay ? saved.extraSeconds?.watch ?? 0 : 0,
       shorts: sameDay ? saved.extraSeconds?.shorts ?? 0 : 0,
@@ -64,11 +66,11 @@ const state = {
  * @param {boolean} saveShortsTime
  */
 function persist(state, saveShortsTime) {
-  const { date, shortsSeconds, extraSeconds, ignored } = state.day
+  const { date, shortsSeconds, unrecordedShortsSeconds, extraSeconds, ignored } = state.day
   try {
     localStorage.setItem(STORAGE_KEY, JSON.stringify({
       date,
-      ...(saveShortsTime ? { shortsSeconds } : {}),
+      ...(saveShortsTime ? { shortsSeconds: shortsSeconds - unrecordedShortsSeconds } : {}),
       extraSeconds,
       ignored,
       bedtimeDismissedNight: state.bedtimeDismissedNight,
@@ -147,7 +149,7 @@ const actions = {
   },
 
   clearWellbeingTime({ commit, state }) {
-    commit('replaceWellbeingDay', { ...state.day, unrecordedSeconds: 0, shortsSeconds: 0 })
+    commit('replaceWellbeingDay', { ...state.day, unrecordedSeconds: 0, shortsSeconds: 0, unrecordedShortsSeconds: 0 })
     commit('resetWellbeingSession')
     persist(state, false)
   },
@@ -164,6 +166,7 @@ const mutations = {
     if (date !== state.day.date) return
     if (!recorded) state.day.unrecordedSeconds += seconds
     if (isShort) state.day.shortsSeconds += seconds
+    if (isShort && !recorded) state.day.unrecordedShortsSeconds += seconds
   },
 
   replaceWellbeingDay(state, day) {
