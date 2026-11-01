@@ -205,3 +205,10 @@
     content: none;
   }
 }
+
+// A tonal tint is too subtle to tell an active reminder apart from an inactive one.
+.liveReminderIcon.reminderActive :deep(.iconButton) {
+  --icon-button-rest: var(--accent-color);
+
+  color: var(--text-with-accent-color);
+}
