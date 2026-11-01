@@ -435,6 +435,7 @@ Settings:
       Disk: 디스크
   Return to Settings Menu: 설정 메뉴로 돌아가기
   General Settings:
+    Close Window With Last Tab: '마지막 탭을 닫으면 창 닫기'
     Preferred Video Codec: 선호하는 동영상 코덱
     Always Use Backup Media Server: "항상 백업 미디어 서버 사용"
     Automatically switch stream extraction methods: "스트림 추출 방식 자동 전환"
@@ -2366,6 +2367,7 @@ Description:
   Music: 음악
 Tooltips:
   General Settings:
+    Close Window With Last Tab: '끄면 마지막 탭을 닫을 때 대신 새 탭이 열리므로 창을 직접 닫을 때까지 창이 열려 있습니다.'
     Preferred Video Codec: |
       자동 모드는 기기에서 하드웨어로 디코딩할 수 있는 코덱을 우선합니다.
       AV1: 가장 적은 데이터로 최고의 화질을 제공하지만 모든 동영상에 있지는 않습니다. 하드웨어 디코딩이 없으면 배터리를 많이 소모하거나 프레임이 끊길 수 있습니다.

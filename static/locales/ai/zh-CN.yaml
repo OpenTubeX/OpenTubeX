@@ -340,6 +340,7 @@ Settings:
       Network: 网络
       Disk: 磁盘
   General Settings:
+    Close Window With Last Tab: '关闭最后一个标签页时关闭窗口'
     Preferred Video Codec: 首选视频编解码器
     Always Use Backup Media Server: "始终使用备用媒体服务器"
     Automatically switch stream extraction methods: "自动切换流提取方法"
@@ -1981,6 +1982,7 @@ Description:
   Music: 音乐
 Tooltips:
   General Settings:
+    Close Window With Last Tab: '关闭后，关闭最后一个标签页会改为打开一个新标签页，窗口会一直保持打开，直到你关闭它。'
     Preferred Video Codec: |
       自动模式优先使用设备可以硬件解码的编解码器。
       AV1：以最少的数据量提供最佳画质，但并非每个视频都有。没有硬件解码时，可能会耗电较快或掉帧。

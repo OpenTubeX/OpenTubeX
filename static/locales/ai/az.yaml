@@ -342,6 +342,7 @@ Settings:
       Network: şəbəkə
       Disk: disk
   General Settings:
+    Close Window With Last Tab: 'Son tab bağlananda pəncərəni bağla'
     Preferred Video Codec: Üstünlük verilən video kodeki
     Always Use Backup Media Server: "Həmişə ehtiyat media serverindən istifadə et"
     Automatically switch stream extraction methods: "Axın çıxarma üsullarını avtomatik dəyiş"
@@ -1994,6 +1995,7 @@ Description:
   Music: Musiqi
 Tooltips:
   General Settings:
+    Close Window With Last Tab: 'Söndürüldükdə son tabı bağlamaq əvəzinə yeni tab açır, beləliklə pəncərə siz onu bağlayana qədər açıq qalır.'
     Preferred Video Codec: |
       Avtomatik rejim cihazınızın aparat səviyyəsində deşifrə edə bildiyi kodekləri üstün tutur.
       AV1: ən az data ilə ən yaxşı keyfiyyət, lakin hər videoda olmur. Aparat deşifrəsi olmadan batareyanı tez boşalda və ya kadr itirə bilər.

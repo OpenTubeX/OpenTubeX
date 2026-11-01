@@ -340,6 +340,7 @@ Settings:
       Network: võrgu
       Disk: ketta
   General Settings:
+    Close Window With Last Tab: 'Sulge aken viimase vahekaardi sulgemisel'
     Preferred Video Codec: Eelistatud videokoodek
     Always Use Backup Media Server: "Kasuta alati varumeediaserverit"
     Automatically switch stream extraction methods: "Vaheta voo eraldamise meetodeid automaatselt"
@@ -1984,6 +1985,7 @@ Description:
   Music: Muusika
 Tooltips:
   General Settings:
+    Close Window With Last Tab: 'Kui see on välja lülitatud, avab viimase vahekaardi sulgemine hoopis uue vahekaardi ja aken jääb avatuks, kuni selle sulgete.'
     Preferred Video Codec: |
       Automaatrežiim eelistab koodekeid, mida su seade saab riistvaraliselt dekodeerida.
       AV1: parim kvaliteet väikseima andmemahuga, kuid igal videol seda pole. Ilma riistvaralise dekodeerimiseta võib see akut tühjendada või kaadreid vahele jätta.

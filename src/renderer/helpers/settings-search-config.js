@@ -3,6 +3,7 @@ const GENERAL_EVERYDAY_KEYS = new Set([
   'Auto Load Next Page',
   'General Settings',
   'Check for Updates',
+  'Close Window With Last Tab',
   'Comment Translation',
   'Confirm Before',
   'Confirmation Options',

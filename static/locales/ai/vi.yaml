@@ -345,6 +345,7 @@ Settings:
       Network: mạng
       Disk: ổ đĩa
   General Settings:
+    Close Window With Last Tab: 'Đóng cửa sổ khi đóng thẻ cuối cùng'
     Preferred Video Codec: Codec video ưu tiên
     Always Use Backup Media Server: "Luôn dùng máy chủ phương tiện dự phòng"
     Automatically switch stream extraction methods: "Tự động chuyển đổi phương thức trích xuất luồng"
@@ -2023,6 +2024,7 @@ Description:
   Music: Âm nhạc
 Tooltips:
   General Settings:
+    Close Window With Last Tab: 'Khi tắt, việc đóng thẻ cuối cùng sẽ mở một thẻ mới thay vào đó, nên cửa sổ vẫn mở cho đến khi bạn đóng nó.'
     Preferred Video Codec: |
       Chế độ tự động ưu tiên các codec mà thiết bị của bạn có thể giải mã bằng phần cứng.
       AV1: chất lượng tốt nhất với ít dữ liệu nhất, nhưng không phải video nào cũng có. Nếu không giải mã bằng phần cứng, nó có thể làm hao pin hoặc rớt khung hình.

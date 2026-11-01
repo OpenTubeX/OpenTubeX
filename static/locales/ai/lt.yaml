@@ -456,6 +456,7 @@ Settings:
       Disk: disko
   Return to Settings Menu: Grįžti į nustatymų meniu
   General Settings:
+    Close Window With Last Tab: 'Uždaryti langą uždarius paskutinį skirtuką'
     Preferred Video Codec: Pageidaujamas vaizdo kodekas
     Always Use Backup Media Server: "Visada naudoti atsarginį medijos serverį"
     Automatically switch stream extraction methods: "Automatiškai keisti srauto išgavimo metodus"
@@ -2402,6 +2403,7 @@ Description:
   Music: Muzika
 Tooltips:
   General Settings:
+    Close Window With Last Tab: 'Išjungus, uždarius paskutinį skirtuką vietoj to atidaromas naujas skirtukas, todėl langas lieka atidarytas, kol jį uždarysite.'
     Preferred Video Codec: |
       Automatinis režimas teikia pirmenybę kodekams, kuriuos jūsų įrenginys gali dekoduoti aparatiškai.
       AV1: geriausia kokybė su mažiausiu duomenų kiekiu, bet ne kiekvienas vaizdo įrašas jį turi. Be aparatinio dekodavimo gali eikvoti bateriją arba praleisti kadrus.

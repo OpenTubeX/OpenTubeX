@@ -241,6 +241,7 @@ export function createDefaultSettings({ supportsLocalApi, isElectron }) {
     enableMobileTabs: true,
     newTabPosition: 'afterCurrentInOrder',
     tabCloseFocus: 'lastActiveTab',
+    closeWindowWithLastTab: true,
     startupBehavior: 'loadLastActiveTab',
     showTabIcons: true,
     showTabPreviews: true,

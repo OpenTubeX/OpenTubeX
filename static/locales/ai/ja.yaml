@@ -340,6 +340,7 @@ Settings:
       Network: ネットワーク
       Disk: ディスク
   General Settings:
+    Close Window With Last Tab: '最後のタブを閉じたときにウィンドウを閉じる'
     Preferred Video Codec: 優先する動画コーデック
     Always Use Backup Media Server: "常にバックアップのメディアサーバーを使用"
     Automatically switch stream extraction methods: "ストリーム抽出方式を自動的に切り替える"
@@ -1981,6 +1982,7 @@ Description:
   Music: 音楽
 Tooltips:
   General Settings:
+    Close Window With Last Tab: 'オフにすると、最後のタブを閉じたときに代わりに新しいタブが開き、ウィンドウを閉じるまで開いたままになります。'
     Preferred Video Codec: |
       自動では、デバイスがハードウェアでデコードできるコーデックを優先します。
       AV1：最も少ないデータ量で最高の画質ですが、すべての動画で利用できるわけではありません。ハードウェアデコードがないと、バッテリーを消耗したりコマ落ちしたりすることがあります。

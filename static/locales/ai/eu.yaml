@@ -340,6 +340,7 @@ Settings:
       Network: sarea
       Disk: diskoa
   General Settings:
+    Close Window With Last Tab: 'Itxi leihoa azken fitxa ixtean'
     Preferred Video Codec: Hobetsitako bideo-kodeka
     Always Use Backup Media Server: "Erabili beti babeskopia-multimedia zerbitzaria"
     Automatically switch stream extraction methods: "Aldatu automatikoki korronteak erauzteko metodoak"
@@ -1991,6 +1992,7 @@ Description:
   Music: Musika
 Tooltips:
   General Settings:
+    Close Window With Last Tab: 'Desaktibatuta dagoenean, azken fitxa itxiz gero fitxa berri bat irekitzen da, eta leihoak irekita jarraitzen du zuk itxi arte.'
     Preferred Video Codec: |
       Modu automatikoak zure gailuak hardware bidez deskodetu ditzakeen kodekak hobesten ditu.
       AV1: kalitaterik onena datu gutxienarekin, baina bideo guztiek ez dute. Hardware bidezko deskodetzerik gabe, bateria agortu edo fotogramak gal ditzake.

@@ -183,6 +183,18 @@ export async function getStoredLandingRoute() {
 }
 
 /**
+ * @returns {Promise<boolean>} whether closing every tab of a window also closes the window
+ */
+export async function getStoredCloseWindowWithLastTab() {
+  try {
+    return (await baseHandlers.settings._findOne('closeWindowWithLastTab'))?.value !== false
+  } catch (error) {
+    console.error('Failed to load last tab close preference:', error)
+    return true
+  }
+}
+
+/**
  * @returns {Promise<boolean>}
  */
 export async function getStoredRememberTabNavigationHistory() {

@@ -340,6 +340,7 @@ Settings:
       Network: "ar rouedad"
       Disk: "ar bladenn"
   General Settings:
+    Close Window With Last Tab: 'Serriñ ar prenestr pa vez serret an ivinell ziwezhañ'
     Preferred Video Codec: Kodek video gwellañ karet
     Always Use Backup Media Server: "Implijout atav ar servijer media a-gein"
     Automatically switch stream extraction methods: "Cheñch hentennadoù eztennañ al lanvioù ent emgefre"
@@ -1990,6 +1991,7 @@ Description:
   Music: Sonerezh
 Tooltips:
   General Settings:
+    Close Window With Last Tab: 'Pa vez lazhet, serriñ an ivinell ziwezhañ a zigor un ivinell nevez e-lec’h, ha chom a ra digor ar prenestr betek ma vo serret ganeoc’h.'
     Preferred Video Codec: |
       Ar mod emgefreek a ro lañs d'ar c'hodekoù a c'hall bezañ digodet gant periant ho trevnad.
       AV1: ar perzhded gwellañ gant an nebeutañ a roadennoù, met n'eo ket gant pep video. Hep digodañ dre beriant e c'hall goullonderiñ ar batiri pe kolliñ skeudennoù.

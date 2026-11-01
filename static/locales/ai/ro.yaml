@@ -341,6 +341,7 @@ Settings:
       Network: rețea
       Disk: disc
   General Settings:
+    Close Window With Last Tab: 'Închide fereastra la închiderea ultimei file'
     Preferred Video Codec: Codec video preferat
     Always Use Backup Media Server: "Folosește mereu serverul media de rezervă"
     Automatically switch stream extraction methods: "Schimbă automat metodele de extragere a fluxurilor"
@@ -2031,6 +2032,7 @@ Description:
   Music: Muzică
 Tooltips:
   General Settings:
+    Close Window With Last Tab: 'Când este dezactivat, închiderea ultimei file deschide în schimb o filă nouă, astfel încât fereastra rămâne deschisă până când o închideți.'
     Preferred Video Codec: |
       Modul automat preferă codecurile pe care dispozitivul le poate decoda hardware.
       AV1: cea mai bună calitate cu cele mai puține date, dar nu orice videoclip îl are. Fără decodare hardware, poate descărca bateria sau poate pierde cadre.

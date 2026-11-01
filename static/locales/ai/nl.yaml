@@ -345,6 +345,7 @@ Settings:
       Network: netwerk
       Disk: schijf
   General Settings:
+    Close Window With Last Tab: 'Venster sluiten bij het sluiten van het laatste tabblad'
     Preferred Video Codec: Voorkeursvideocodec
     Always Use Backup Media Server: "Altijd de back-upmediaserver gebruiken"
     Automatically switch stream extraction methods: "Automatisch wisselen van streamextractiemethode"
@@ -2042,6 +2043,7 @@ Description:
   Music: Muziek
 Tooltips:
   General Settings:
+    Close Window With Last Tab: 'Indien uitgeschakeld, opent het sluiten van het laatste tabblad in plaats daarvan een nieuw tabblad, zodat het venster open blijft totdat je het sluit.'
     Preferred Video Codec: |
       Automatisch geeft de voorkeur aan codecs die je apparaat met hardware kan decoderen.
       AV1: de beste kwaliteit voor de minste data, maar niet elke video heeft het. Zonder hardwaredecodering kan het de batterij leegtrekken of beelden overslaan.

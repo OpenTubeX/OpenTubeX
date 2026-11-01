@@ -340,6 +340,7 @@ Settings:
       Network: hálózat
       Disk: lemez
   General Settings:
+    Close Window With Last Tab: 'Ablak bezárása az utolsó lap bezárásakor'
     Preferred Video Codec: Előnyben részesített videokodek
     Always Use Backup Media Server: "Mindig a tartalék médiaszerver használata"
     Automatically switch stream extraction methods: "Adatfolyam-kinyerési módszerek automatikus váltása"
@@ -1982,6 +1983,7 @@ Description:
   Music: Zene
 Tooltips:
   General Settings:
+    Close Window With Last Tab: 'Kikapcsolva az utolsó lap bezárása helyette új lapot nyit, így az ablak nyitva marad, amíg be nem zárod.'
     Preferred Video Codec: |
       Az automatikus mód azokat a kodekeket részesíti előnyben, amelyeket az eszköz hardveresen tud dekódolni.
       AV1: a legjobb minőség a legkevesebb adatforgalommal, de nem minden videóhoz érhető el. Hardveres dekódolás nélkül merítheti az akkumulátort vagy képkockákat hagyhat ki.

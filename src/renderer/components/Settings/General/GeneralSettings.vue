@@ -37,6 +37,15 @@
         @change="updateOpenDeepLinksInNewWindow"
       />
       <FtToggleSwitch
+        v-if="USING_ELECTRON"
+        :label="t('Settings.General Settings.Close Window With Last Tab')"
+        :default-value="store.getters.getCloseWindowWithLastTab"
+        setting-key="closeWindowWithLastTab"
+        :compact="true"
+        :tooltip="t('Tooltips.General Settings.Close Window With Last Tab')"
+        @change="store.dispatch('updateCloseWindowWithLastTab', $event)"
+      />
+      <FtToggleSwitch
         :label="t('Settings.General Settings.Update Relative Timestamps')"
         :tooltip="t('Tooltips.General Settings.Update Relative Timestamps')"
         :default-value="updateRelativeTimestamps"

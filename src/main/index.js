@@ -4219,8 +4219,8 @@ function runApp() {
                   const tabIds = tabManager.selectedTabIds.length > 1
                     ? [...tabManager.selectedTabIds]
                     : [tabManager.activeTabId]
-                  const closesLastWindow = tabIds.length === tabManager.tabs.size &&
-                    BrowserWindow.getAllWindows().length === 1
+                  const closesLastWindow = BrowserWindow.getAllWindows().length === 1 &&
+                    await tabManager.closingTabsClosesWindow(tabIds.length)
                   if (!closesLastWindow && !await confirmMultipleTabsAction(tabManager, tabIds.length, 'close')) {
                     return
                   }

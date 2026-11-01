@@ -341,6 +341,7 @@ Settings:
       Network: rhwydwaith
       Disk: disg
   General Settings:
+    Close Window With Last Tab: 'Cau’r ffenestr wrth gau’r tab olaf'
     Preferred Video Codec: Codec fideo dewisol
     Always Use Backup Media Server: "Defnyddio'r gweinydd cyfryngau wrth gefn bob amser"
     Automatically switch stream extraction methods: "Newid dulliau echdynnu ffrydiau yn awtomatig"
@@ -2011,6 +2012,7 @@ Description:
   Music: Cerddoriaeth
 Tooltips:
   General Settings:
+    Close Window With Last Tab: 'Pan fydd i ffwrdd, mae cau’r tab olaf yn agor tab newydd yn lle hynny, felly mae’r ffenestr yn aros ar agor nes i chi ei chau.'
     Preferred Video Codec: |
       Mae'r modd awtomatig yn ffafrio codecs y gall eich dyfais eu datgodio â chaledwedd.
       AV1: yr ansawdd gorau am y lleiaf o ddata, ond nid oes gan bob fideo ef. Heb ddatgodio caledwedd, gall ddraenio'r batri neu ollwng fframiau.
