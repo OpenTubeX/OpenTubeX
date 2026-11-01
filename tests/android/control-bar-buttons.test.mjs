@@ -97,19 +97,23 @@ test('Android places the compact controls on the control bar, in the player menu
     await expect(page.locator('.phonePlayerOptions[open] .shaka-caption-button')).toBeVisible()
     await expect(page.locator('.phonePlayerOptions[open] .sleep-timer-button')).toBeVisible()
     await expect(page.locator('.phonePlayerOptions[open] .ambient-mode-button')).toHaveCount(0)
+    // Picture in picture stays on the control bar instead of also joining the menu.
+    await expect(page.locator('.phonePlayerOptions[open] .shaka-pip-button')).toHaveCount(0)
   } finally {
     await page.evaluate(({ settings, originalRoute }) => {
       const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
       if (window.__controlBarFetch) window.fetch = window.__controlBarFetch
       delete window.__controlBarFetch
+      location.hash = originalRoute
       if (settings) {
         const { ControlBarButtons, PlayerMenuControls, HiddenPlayerMenuControls, ...values } = settings
         for (const [key, value] of Object.entries(values)) store.commit('set' + key, value)
-        store.dispatch('updateControlBarButtons', ControlBarButtons)
-        store.dispatch('updatePlayerMenuControls', PlayerMenuControls)
-        store.dispatch('updateHiddenPlayerMenuControls', HiddenPlayerMenuControls)
+        return Promise.all([
+          store.dispatch('updateControlBarButtons', ControlBarButtons),
+          store.dispatch('updatePlayerMenuControls', PlayerMenuControls),
+          store.dispatch('updateHiddenPlayerMenuControls', HiddenPlayerMenuControls),
+        ])
       }
-      location.hash = originalRoute
     }, { settings, originalRoute }).catch(() => {})
     await browser.close()
   }

@@ -3047,17 +3047,21 @@ export default defineComponent({
       // when full-window mode makes the player wide enough for the desktop
       // control layout.
       if (onlyUseOverFlowMenu.value || props.shortsPlayer) {
+        // The overflow menu holds the other buttons.
+        const compactButtons = ['captions', 'menu', 'fullscreen', ...(mobile && !props.shortsPlayer ? ['pictureInPicture'] : [])]
+        // The compact controls of phones also keep the chapters next to the
+        // time. The caption toggle keeps the caption menu.
+        const onCompactBar = id => id !== 'captions' && controlBarButtons.includes(id) &&
+          (compactButtons.includes(id) || (id === 'chapters' && mobile && !props.shortsPlayer))
         uiConfig.overflowMenuButtons = [
           ...(props.shortsPlayer ? ['ft_shorts_video_info'] : []),
-          ...menuControls(id => id !== 'theatreMode' &&
+          ...menuControls(id => id !== 'theatreMode' && !onCompactBar(id) &&
             !(id === 'autoplay' && props.shortsPlayer) &&
             !(id === 'fullWindow' && process.env.IS_CAPACITOR)),
           'recenter_vr',
           'toggle_stereoscopic',
         ]
 
-        // The overflow menu above already holds the other buttons.
-        const compactButtons = ['captions', 'menu', 'fullscreen', ...(mobile && !props.shortsPlayer ? ['pictureInPicture'] : [])]
         uiConfig.controlPanelElements.push(
           ...((props.shortsPlayer || mobile) && useQuickPlaybackSpeedBar.value && showPlaybackRateControls
             ? ['ft_quick_playback_rate_bar']

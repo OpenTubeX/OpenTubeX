@@ -13,7 +13,7 @@ function computedSource(name) {
   return source.slice(start, source.indexOf('\n    })', start) + '\n    })'.length)
 }
 
-function controls({ props = {}, overflow = false, controlBarButtons = DEFAULT_CONTROL_BAR_BUTTONS, hidden = [], menuOrder = getDefaultPlayerMenuControls(false), screenshot = false } = {}) {
+function controls({ props = {}, overflow = false, controlBarButtons = DEFAULT_CONTROL_BAR_BUTTONS, hidden = [], menuOrder = getDefaultPlayerMenuControls(false), screenshot = false, mobile = false } = {}) {
   const state = {
     computed: getter => ({ get value() { return getter() } }),
     props: { captions: [], chapters: [], format: 'dash', autoplayPossible: true, theatrePossible: true, playbackEngine: 'yt-dlp', manifestMimeType: 'application/dash+xml', ...props },
@@ -22,7 +22,7 @@ function controls({ props = {}, overflow = false, controlBarButtons = DEFAULT_CO
     localCaptions: { value: [] },
     onlyUseOverFlowMenu: { value: overflow },
     useQuickPlaybackSpeedBar: { value: false },
-    isCapacitorMobilePlayer: () => false,
+    isCapacitorMobilePlayer: () => mobile,
     store: { getters: { getControlBarButtons: controlBarButtons, getHiddenPlayerMenuControls: withoutControlBarButtons(hidden, controlBarButtons), getPlayerMenuControls: menuOrder } },
     DEFAULT_CONTROL_BAR_BUTTONS,
     getControlBarButtonDefinitions,
@@ -142,4 +142,18 @@ test('the chapters button sits next to the time on the control bar and joins the
   const compact = controls({ overflow: true })
   assert.equal(compact.controlPanelElements.includes('ft_chapters'), false)
   assert.ok(compact.overflowMenuButtons.includes('ft_chapters'))
+})
+
+test('the compact controls of phones keep their control bar buttons out of the menu', () => {
+  const config = controls({ mobile: true, overflow: true, controlBarButtons: ['chapters', 'captions', 'pictureInPicture', 'menu', 'fullscreen'] })
+  assert.ok(config.controlPanelElements.includes('ft_chapters'))
+  assert.ok(config.controlPanelElements.includes('picture_in_picture'))
+  assert.equal(config.overflowMenuButtons.includes('ft_chapters'), false)
+  assert.equal(config.overflowMenuButtons.includes('picture_in_picture'), false)
+  // The caption toggle keeps the caption menu.
+  assert.ok(config.overflowMenuButtons.includes('captions'))
+
+  const removed = controls({ mobile: true, overflow: true, controlBarButtons: ['captions', 'menu', 'fullscreen'] })
+  assert.ok(removed.overflowMenuButtons.includes('ft_chapters'))
+  assert.ok(removed.overflowMenuButtons.includes('picture_in_picture'))
 })
