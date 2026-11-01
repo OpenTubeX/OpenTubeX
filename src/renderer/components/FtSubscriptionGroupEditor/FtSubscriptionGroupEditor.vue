@@ -26,27 +26,6 @@
         @input="name = $event"
         @click="save"
       />
-      <div
-        class="iconPicker"
-        role="group"
-        :aria-label="t('Subscription Groups.Group Icon')"
-      >
-        <button
-          v-for="option in iconOptions"
-          :key="option.icon ?? ''"
-          type="button"
-          class="iconOption"
-          :aria-pressed="icon === option.icon"
-          :aria-label="option.label"
-          :title="option.label"
-          @click="icon = option.icon"
-        >
-          <FtIcon
-            :icon="['fas', option.icon ?? 'ban']"
-            aria-hidden="true"
-          />
-        </button>
-      </div>
       <FtInput
         v-if="channels.length > 1"
         class="channelSearchInput"
@@ -63,6 +42,27 @@
         {{ t('Profile.{number} selected', { number: selectedSubscribedCount }) }}
       </p>
     </template>
+    <div
+      class="iconPicker"
+      role="group"
+      :aria-label="t('Subscription Groups.Group Icon')"
+    >
+      <button
+        v-for="option in iconOptions"
+        :key="option.icon ?? ''"
+        type="button"
+        class="iconOption"
+        :aria-pressed="icon === option.icon"
+        :aria-label="option.label"
+        :title="option.label"
+        @click="icon = option.icon"
+      >
+        <FtIcon
+          :icon="['fas', option.icon ?? 'ban']"
+          aria-hidden="true"
+        />
+      </button>
+    </div>
     <p
       v-if="channels.length === 0"
       class="message"

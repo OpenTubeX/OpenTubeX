@@ -25,7 +25,9 @@
   flex-wrap: wrap;
   justify-content: center;
   gap: 4px;
-  margin-block: 4px 12px;
+  margin-block-end: 12px;
+  padding-block-end: 12px;
+  border-block-end: 1px solid var(--divider-color);
 }
 
 .iconOption {

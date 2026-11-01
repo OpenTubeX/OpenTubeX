@@ -312,6 +312,8 @@ test.describe('editing subscription groups', () => {
     await page.getByRole('button', { name: 'Edit Group' }).click()
     const editor = page.getByRole('dialog', { name: 'Edit Group' })
     const icons = editor.getByRole('group', { name: 'Group icon' })
+    // The picker scrolls with the channels, so it can't shrink their viewport on short screens
+    await expect(editor.locator('.promptContentScroller').getByRole('group', { name: 'Group icon' })).toBeVisible()
     await expect(icons.getByRole('button', { name: 'No icon' })).toHaveAttribute('aria-pressed', 'true')
     await icons.getByRole('button', { name: 'Music', exact: true }).click()
     await expect(icons.getByRole('button', { name: 'Music', exact: true })).toHaveAttribute('aria-pressed', 'true')
