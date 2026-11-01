@@ -64,6 +64,8 @@ Search Listing:
     Members Only: 仅限会员
     Possibly AI-generated: 可能由 AI 生成
 Stats:
+  Left of daily limit: "你的每日限额 {limit} 还剩 {duration}"
+  Daily limit reached: "已达到每日限额 {limit}"
   Replace old device: "替换旧设备"
   Replacement explanation: "仅当两条记录属于同一台实际设备时，才将 {device} 与此设备合并。"
   Overlapping days: "两个历史记录中共有的天数：{count}"
@@ -1074,6 +1076,25 @@ Settings:
     Refresh Subscriptions While App Is Closed: "应用关闭时刷新订阅"
     Notify About New Uploads: 新上传通知
   Distraction Free Settings:
+    Digital Wellbeing:
+      Grayscale: "灰度"
+      Off: "关闭"
+      Always: "始终"
+      During Bedtime: "就寝时间内"
+      After the Daily Limit: "达到每日限额后"
+      Daily Watch Time Limit: "每日观看时长限额"
+      Daily Shorts Limit: "每日 Shorts 限额"
+      When a Limit Is Reached: "达到限额时"
+      Remind Me: "提醒我"
+      Pause Playback: "暂停播放"
+      Take a Break Reminder: "休息提醒"
+      Every: "每 {duration}"
+      Bedtime Reminder: "就寝提醒"
+      Bedtime Start: "就寝开始时间"
+      Bedtime End: "就寝结束时间"
+      Wait Until the Video Ends: "等待视频播放完毕"
+      Silence Upload Notifications at Bedtime: "就寝时间内将新上传通知静音"
+      Stop Autoplay at Bedtime and After the Daily Limit: "在就寝时间内和达到每日限额后停止自动播放"
     Hide Popularity Graph: "隐藏热度图"
     Enable Block Lists: "启用屏蔽列表"
     AI Video Summaries: AI 视频摘要
@@ -1085,6 +1106,7 @@ Settings:
     Hide Header Sync Indicator: 隐藏应用标题栏中的同步指示器
     Hide Repeat Stats: 隐藏循环统计
     Sections:
+      Digital Wellbeing: "数字健康"
       Visible While Paused: 全窗口或全屏暂停时显示
     Hide Channel Avatars: 隐藏频道头像
     Shorten View Counts: 简写观看次数、评论数和评论点赞数
@@ -2079,6 +2101,11 @@ Tooltips:
     FFmpeg Executable Path: 合并独立的视频流和音频流以及转换音频需要 FFmpeg。默认情况下，OpenTubeX 假定可通过 PATH 环境变量找到 FFmpeg。如有需要，可在此设置自定义路径。
     Use cookies for subtitles: "使用已配置的 Cookie 获取字幕和自动翻译。启用“始终使用 Cookie”也会开启此功能。"
   Distraction Free Settings:
+    Grayscale: "以灰度显示整个应用（包括视频），减少对注意力的吸引。“就寝时间内”选项遵循就寝提醒的时间安排。"
+    Daily Watch Time Limit: "统计你今天在所有同步观看统计的设备上观看的内容，包括 Shorts。"
+    Daily Shorts Limit: "统计你今天在此设备上观看的 Shorts。"
+    Take a Break Reminder: "观看达到此时长后暂停视频。暂停 10 分钟或更久会重新开始计时。"
+    Bedtime Reminder: "在开始时间与结束时间之间暂停视频，并提醒你停止观看。"
     Shorten View Counts: 以缩写形式显示 YouTube 已取整的观看次数、评论数和评论点赞数，例如显示 14K 而不是 14,000。精确计数始终完整显示。
   Subscription Settings:
     Fetch Feed on Startup: 启用后，OpenTubeX 会在启动时和打开新窗口时自动获取订阅动态。
@@ -2435,3 +2462,17 @@ Yattee Server:
 Yattee Fallback Warning: 此请求绕过了你配置的 Yattee 服务器，直接连接到 YouTube，从而暴露你的 IP 地址。
 Update With Package Manager: '使用 {packageManager} 更新：'
 Update Command Copied: '已复制更新命令'
+Digital Wellbeing:
+  Watch time limit almost reached: "距离每日观看时长限额还剩 {duration}"
+  Shorts limit almost reached: "距离每日 Shorts 限额还剩 {duration}"
+  Daily watch time limit reached: "已达到每日观看时长限额"
+  Daily Shorts limit reached: "已达到每日 Shorts 限额"
+  Watched today: "你今天已观看 {duration}。"
+  Shorts watched today: "你今天已观看 {duration} 的 Shorts。"
+  15 More Minutes: "再看 15 分钟"
+  Ignore for Today: "今天忽略"
+  Time to take a break: "该休息一下了"
+  Watching for: "你已经连续观看 {duration}。"
+  Time for bed: "该睡觉了"
+  Bedtime started at: "你的就寝时间已于 {time} 开始。"
+  Remind Me in 10 Minutes: "10 分钟后提醒我"

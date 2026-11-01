@@ -46,6 +46,8 @@ Search Listing:
     Members Only: Только для участников
     Possibly AI-generated: Возможно, создано ИИ
 Stats:
+  Left of daily limit: "Осталось {duration} из дневного лимита {limit}"
+  Daily limit reached: "Дневной лимит {limit} достигнут"
   Replace old device: "Заменить старое устройство"
   Replacement explanation: "Объединяйте {device} с этим устройством только если обе записи относятся к одному физическому устройству."
   Overlapping days: "Дни в обеих историях: {count}"
@@ -1047,6 +1049,25 @@ Settings:
     Refresh Subscriptions While App Is Closed: "Обновлять подписки, когда приложение закрыто"
     Notify About New Uploads: Уведомлять о новом контенте
   Distraction Free Settings:
+    Digital Wellbeing:
+      Grayscale: "Оттенки серого"
+      Off: "Выкл."
+      Always: "Всегда"
+      During Bedtime: "Во время сна"
+      After the Daily Limit: "После дневного лимита"
+      Daily Watch Time Limit: "Дневной лимит времени просмотра"
+      Daily Shorts Limit: "Дневной лимит Shorts"
+      When a Limit Is Reached: "При достижении лимита"
+      Remind Me: "Напомнить"
+      Pause Playback: "Приостановить воспроизведение"
+      Take a Break Reminder: "Напоминание о перерыве"
+      Every: "Каждые {duration}"
+      Bedtime Reminder: "Напоминание о времени сна"
+      Bedtime Start: "Начало времени сна"
+      Bedtime End: "Конец времени сна"
+      Wait Until the Video Ends: "Дождаться окончания видео"
+      Silence Upload Notifications at Bedtime: "Отключать уведомления о новом контенте во время сна"
+      Stop Autoplay at Bedtime and After the Daily Limit: "Останавливать автовоспроизведение во время сна и после дневного лимита"
     Hide Popularity Graph: "Скрыть график популярности"
     Enable Block Lists: "Включить списки блокировки"
     AI Video Summaries: Сводки видео от ИИ
@@ -1058,6 +1079,7 @@ Settings:
     Hide Header Sync Indicator: Скрыть индикатор синхронизации в заголовке приложения
     Hide Repeat Stats: Скрыть статистику повторов
     Sections:
+      Digital Wellbeing: "Цифровое благополучие"
       Visible While Paused: Показывать во время паузы в полнооконном и полноэкранном режимах
     Hide Channel Avatars: Скрывать аватары каналов
     Shorten View Counts: Сокращать числа просмотров, комментариев и отметок «Нравится» у комментариев
@@ -2053,6 +2075,11 @@ Tooltips:
     FFmpeg Executable Path: FFmpeg необходим для объединения отдельных потоков видео и аудио, а также преобразования аудио. По умолчанию OpenTubeX предполагает, что FFmpeg доступен через переменную среды PATH. При необходимости здесь можно указать другой путь.
     Use cookies for subtitles: "Использовать настроенные cookie для субтитров и автоматических переводов. Также включается параметром «Всегда использовать cookie»."
   Distraction Free Settings:
+    Grayscale: "Показывает всё приложение, включая видео, в оттенках серого, чтобы оно меньше привлекало внимание. Вариант «Во время сна» следует расписанию напоминания о времени сна."
+    Daily Watch Time Limit: "Учитывает всё, что вы посмотрели сегодня на всех устройствах, синхронизирующих статистику просмотра, включая Shorts."
+    Daily Shorts Limit: "Учитывает Shorts, просмотренные сегодня на этом устройстве."
+    Take a Break Reminder: "Приостанавливает видео после указанного времени просмотра. Перерыв в 10 минут или дольше начинает отсчёт заново."
+    Bedtime Reminder: "Приостанавливает видео и напоминает прекратить просмотр между временем начала и окончания."
     Shorten View Counts: Показывает количество просмотров, комментариев и отметок «Нравится» у комментариев в сокращённом виде, если YouTube уже округлил его, например 14 тыс. вместо 14 000. Точные значения всегда показываются полностью.
   Subscription Settings:
     Fetch Feed on Startup: Если включено, OpenTubeX автоматически получает ленту подписок при запуске и открытии нового окна.
@@ -2407,3 +2434,17 @@ Yattee Server:
 Yattee Fallback Warning: Этот запрос обходит настроенный вами сервер Yattee и подключается напрямую к YouTube, раскрывая ваш IP-адрес.
 Update With Package Manager: 'Обновить с помощью {packageManager}:'
 Update Command Copied: 'Команда обновления скопирована'
+Digital Wellbeing:
+  Watch time limit almost reached: "Осталось {duration} до дневного лимита времени просмотра"
+  Shorts limit almost reached: "Осталось {duration} до дневного лимита Shorts"
+  Daily watch time limit reached: "Дневной лимит времени просмотра достигнут"
+  Daily Shorts limit reached: "Дневной лимит Shorts достигнут"
+  Watched today: "Сегодня вы посмотрели {duration}."
+  Shorts watched today: "Сегодня вы посмотрели {duration} Shorts."
+  15 More Minutes: "Ещё 15 минут"
+  Ignore for Today: "Игнорировать сегодня"
+  Time to take a break: "Пора сделать перерыв"
+  Watching for: "Вы смотрите уже {duration}."
+  Time for bed: "Пора спать"
+  Bedtime started at: "Ваше время сна началось в {time}."
+  Remind Me in 10 Minutes: "Напомнить через 10 минут"

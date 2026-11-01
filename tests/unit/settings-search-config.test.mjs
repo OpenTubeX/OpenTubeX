@@ -402,6 +402,30 @@ test('settings search results retain their source tab', () => {
   assert.equal(findSettingsSearchTab(applicationCaches), 'storage')
 })
 
+test('distraction free search results open the tab of their setting', () => {
+  const store = { getters: new Proxy({}, { get: () => false }) }
+  const values = createSettingsSearchIndex({
+    sections: [{ type: 'focus', title: 'Distraction Free', description: '' }],
+    tm: path => getAtPath(locale, path),
+    store,
+    usingElectron: true,
+    supportsLocalApi: true,
+    isMac: false,
+    isLinuxWayland: false,
+    systemUsesDarkTheme: true,
+  }).get('focus')
+  const tabOf = label => findSettingsSearchTab(values.find(match => match.label === label))
+
+  assert.equal(tabOf('Hide Video Views'), 'distraction')
+  assert.equal(tabOf('Digital Wellbeing'), 'wellbeing')
+  assert.equal(tabOf('Daily Watch Time Limit'), 'wellbeing')
+  assert.equal(tabOf('Silence Upload Notifications at Bedtime'), 'wellbeing')
+  assert.equal(tabOf('Hide Unsubscribe Button'), 'parental')
+  assert.equal(values.filter(match => match.label === 'Digital Wellbeing').length, 1)
+  // Select options are not settings of their own.
+  assert.equal(values.some(match => match.label === 'Pause Playback'), false)
+})
+
 test('persistent playback cache search results follow desktop visibility', () => {
   const sections = [{
     type: 'data',

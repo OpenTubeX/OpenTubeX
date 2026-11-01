@@ -74,6 +74,8 @@ Search Filters:
   Prioritize:
     Prioritize: முன்னுரிமை அளி
 Stats:
+  Left of daily limit: "உங்கள் {limit} தினசரி வரம்பில் {duration} மீதமுள்ளது"
+  Daily limit reached: "{limit} தினசரி வரம்பை எட்டியது"
   Replace old device: "பழைய சாதனத்தை மாற்று"
   Replacement explanation: "இரு பதிவுகளும் ஒரே சாதனத்துக்குச் சொந்தமானவை என்றால் மட்டுமே {device} ஐ இந்தச் சாதனத்துடன் இணைக்கவும்."
   Overlapping days: "இரு வரலாறுகளிலும் உள்ள நாட்கள்: {count}"
@@ -1096,6 +1098,25 @@ Settings:
     Refresh Subscriptions While App Is Closed: "செயலி மூடியிருக்கும்போது சந்தாக்களைப் புதுப்பி"
     Notify About New Uploads: புதிய பதிவேற்றங்களைப் பற்றி அறிவி
   Distraction Free Settings:
+    Digital Wellbeing:
+      Grayscale: "சாம்பல் நிறம்"
+      Off: "அணை"
+      Always: "எப்போதும்"
+      During Bedtime: "உறங்கும் நேரத்தில்"
+      After the Daily Limit: "தினசரி வரம்புக்குப் பிறகு"
+      Daily Watch Time Limit: "தினசரிப் பார்க்கும் நேர வரம்பு"
+      Daily Shorts Limit: "தினசரி Shorts வரம்பு"
+      When a Limit Is Reached: "வரம்பை எட்டும்போது"
+      Remind Me: "எனக்கு நினைவூட்டு"
+      Pause Playback: "இயக்கத்தை இடைநிறுத்து"
+      Take a Break Reminder: "இடைவேளை நினைவூட்டல்"
+      Every: "ஒவ்வொரு {duration} இடைவெளியிலும்"
+      Bedtime Reminder: "உறங்கும் நேர நினைவூட்டல்"
+      Bedtime Start: "உறங்கும் நேரத் தொடக்கம்"
+      Bedtime End: "உறங்கும் நேர முடிவு"
+      Wait Until the Video Ends: "காணொளி முடியும் வரை காத்திரு"
+      Silence Upload Notifications at Bedtime: "உறங்கும் நேரத்தில் பதிவேற்ற அறிவிப்புகளை அமைதியாக்கு"
+      Stop Autoplay at Bedtime and After the Daily Limit: "உறங்கும் நேரத்திலும் தினசரி வரம்புக்குப் பிறகும் தானியங்கு இயக்கத்தை நிறுத்து"
     Hide Popularity Graph: "பிரபலத்தன்மை வரைபடத்தை மறை"
     Enable Block Lists: "தடைப் பட்டியல்களை இயக்கு"
     AI Video Summaries: AI காணொளிச் சுருக்கங்கள்
@@ -1107,6 +1128,7 @@ Settings:
     Hide Header Sync Indicator: பயன்பாட்டுத் தலைப்பில் ஒத்திசைவு காட்டியை மறை
     Hide Repeat Stats: மீளியக்கப் புள்ளிவிவரங்களை மறை
     Sections:
+      Digital Wellbeing: "டிஜிட்டல் நலவாழ்வு"
       Visible While Paused: முழுச் சாளரம் / முழுத்திரையில் இடைநிறுத்தியிருக்கும்போது தெரிபவை
     Hide Channel Avatars: சேனல் அவதார்களை மறை
     Shorten View Counts: பார்வை, கருத்து மற்றும் கருத்து விருப்ப எண்ணிக்கைகளைச் சுருக்கு
@@ -2141,6 +2163,11 @@ Tooltips:
     FFmpeg Executable Path: தனித்தனி காணொளி மற்றும் ஒலி ஸ்ட்ரீம்களை ஒன்றிணைக்கவும் ஒலியை மாற்றவும் FFmpeg தேவை. இயல்பாக, PATH சூழல் மாறி மூலம் FFmpeg கிடைக்கும் என OpenTubeX கருதும். தேவைப்பட்டால் இங்கே தனிப்பயன் பாதையை அமைக்கலாம்.
     Use cookies for subtitles: "வசன வரிகளுக்கும் தானியங்கி மொழிபெயர்ப்புகளுக்கும் அமைக்கப்பட்ட குக்கீகளைப் பயன்படுத்தவும். “எப்போதும் குக்கீகளைப் பயன்படுத்து” என்பதும் இதை இயக்கும்."
   Distraction Free Settings:
+    Grayscale: "காணொளிகள் உட்பட முழுச் செயலியையும் சாம்பல் நிறங்களில் காட்டுகிறது, இதனால் அது குறைவாகக் கவனத்தை ஈர்க்கும். \"உறங்கும் நேரத்தில்\" விருப்பம் உறங்கும் நேர நினைவூட்டலின் அட்டவணையைப் பின்பற்றும்."
+    Daily Watch Time Limit: "பார்வைப் புள்ளிவிவரங்களை ஒத்திசைக்கும் எல்லாச் சாதனங்களிலும் இன்று நீங்கள் பார்த்தவற்றை, Shorts உட்பட, கணக்கிடுகிறது."
+    Daily Shorts Limit: "இந்தச் சாதனத்தில் இன்று நீங்கள் பார்த்த Shorts-ஐக் கணக்கிடுகிறது."
+    Take a Break Reminder: "இவ்வளவு நேரம் பார்த்த பிறகு காணொளியை இடைநிறுத்துகிறது. 10 நிமிடங்கள் அல்லது அதற்கு மேலான இடைநிறுத்தம் கணக்கை மீண்டும் தொடங்குகிறது."
+    Bedtime Reminder: "தொடக்க மற்றும் முடிவு நேரங்களுக்கு இடையில் காணொளியை இடைநிறுத்தி, பார்ப்பதை நிறுத்த உங்களுக்கு நினைவூட்டுகிறது."
     Shorten View Counts: YouTube ஏற்கெனவே முழுமைப்படுத்திய பார்வை, கருத்து மற்றும் கருத்து விருப்ப எண்ணிக்கைகளைச் சுருக்கமாகக் காட்டும். எடுத்துக்காட்டாக, 14,000 என்பதற்குப் பதில் 14K. துல்லியமான எண்ணிக்கைகள் எப்போதும் முழுமையாகக் காட்டப்படும்.
   Subscription Settings:
     Fetch Feed on Startup: இயக்கப்பட்டால், தொடக்கத்திலும் புதிய சாளரம் திறக்கப்படும்போதும் உங்கள் சந்தா ஊட்டத்தை OpenTubeX தானாகப் பெறும்.
@@ -2493,3 +2520,17 @@ Yattee Server:
 Yattee Fallback Warning: இந்தக் கோரிக்கை நீங்கள் கட்டமைத்த Yattee சேவையகத்தைத் தவிர்த்து நேரடியாக YouTube உடன் இணைகிறது. இதனால் உங்கள் IP முகவரி வெளிப்படும்.
 Update With Package Manager: '{packageManager} மூலம் புதுப்பிக்கவும்:'
 Update Command Copied: 'புதுப்பிப்புக் கட்டளை நகலெடுக்கப்பட்டது'
+Digital Wellbeing:
+  Watch time limit almost reached: "உங்கள் தினசரிப் பார்க்கும் நேர வரம்பில் {duration} மீதமுள்ளது"
+  Shorts limit almost reached: "உங்கள் தினசரி Shorts வரம்பில் {duration} மீதமுள்ளது"
+  Daily watch time limit reached: "தினசரிப் பார்க்கும் நேர வரம்பை எட்டியது"
+  Daily Shorts limit reached: "தினசரி Shorts வரம்பை எட்டியது"
+  Watched today: "இன்று நீங்கள் {duration} பார்த்துள்ளீர்கள்."
+  Shorts watched today: "இன்று நீங்கள் {duration} Shorts பார்த்துள்ளீர்கள்."
+  15 More Minutes: "இன்னும் 15 நிமிடங்கள்"
+  Ignore for Today: "இன்றைக்குப் புறக்கணி"
+  Time to take a break: "இடைவேளை எடுக்கும் நேரம்"
+  Watching for: "நீங்கள் {duration} நேரமாகப் பார்த்துக்கொண்டிருக்கிறீர்கள்."
+  Time for bed: "உறங்கும் நேரம் வந்துவிட்டது"
+  Bedtime started at: "உங்கள் உறங்கும் நேரம் {time} மணிக்குத் தொடங்கியது."
+  Remind Me in 10 Minutes: "10 நிமிடங்களில் நினைவூட்டு"

@@ -70,7 +70,7 @@ function harness({ laterPageError = null, backend = 'local' } = {}) {
       get shouldStopDueToPlaylistEnd() { return shouldStop.value },
       playNextVideo: () => playNext(), resetUnavailableSkipChain() {},
     } },
-    defaultInterval: 5, $store: { getters: { getAvoidTranslation: 'never' } },
+    defaultInterval: 5, $store: { getters: { getAvoidTranslation: 'never', getWellbeingPlaybackBlock: () => null } },
   }
   const ended = vm.runInNewContext(`({${extractSourceBetweenMarkers(watchSource, '    handleVideoEnded: function () {', '\n    playNextVideoNow:')} })`, {
     setTimeout: () => 1, setInterval: () => 1, Date,

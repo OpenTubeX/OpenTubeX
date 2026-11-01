@@ -64,6 +64,8 @@ Search Listing:
     Members Only: Yalnız üzvlər üçün
     Possibly AI-generated: Süni intellektlə yaradılmış ola bilər
 Stats:
+  Left of daily limit: "Gündəlik {limit} limitinizdən {duration} qalıb"
+  Daily limit reached: "Gündəlik {limit} limitinə çatıldı"
   Replace old device: "Köhnə cihazı əvəz et"
   Replacement explanation: "{device} qeydini bu cihazla yalnız hər iki qeyd eyni fiziki cihaza aid olduqda birləşdirin."
   Overlapping days: "Hər iki tarixçədəki günlər: {count}"
@@ -1076,6 +1078,25 @@ Settings:
     Refresh Subscriptions While App Is Closed: Tətbiq bağlı olarkən abunəlikləri yenilə
     Notify About New Uploads: Yeni yükləmələr barədə bildiriş göndər
   Distraction Free Settings:
+    Digital Wellbeing:
+      Grayscale: "Boz Tonlar"
+      Off: "Qapalı"
+      Always: "Həmişə"
+      During Bedtime: "Yatma Vaxtı Ərzində"
+      After the Daily Limit: "Gündəlik Limitdən Sonra"
+      Daily Watch Time Limit: "Gündəlik Baxış Vaxtı Limiti"
+      Daily Shorts Limit: "Gündəlik Shorts Limiti"
+      When a Limit Is Reached: "Limitə Çatdıqda"
+      Remind Me: "Mənə Xatırlat"
+      Pause Playback: "Oxutmaya Fasilə Ver"
+      Take a Break Reminder: "Fasilə Xatırlatması"
+      Every: "Hər {duration}"
+      Bedtime Reminder: "Yatma Vaxtı Xatırlatması"
+      Bedtime Start: "Yatma Vaxtının Başlanğıcı"
+      Bedtime End: "Yatma Vaxtının Sonu"
+      Wait Until the Video Ends: "Videonun Bitməsini Gözlə"
+      Silence Upload Notifications at Bedtime: "Yatma Vaxtında Yeni Yükləmə Bildirişlərini Səssizləşdir"
+      Stop Autoplay at Bedtime and After the Daily Limit: "Yatma Vaxtında və Gündəlik Limitdən Sonra Avtomatik Oynatmanı Dayandır"
     Hide Popularity Graph: "Populyarlıq qrafikini gizlət"
     Enable Block Lists: "Blok siyahılarını aktivləşdir"
     AI Video Summaries: Süni intellekt video xülasələri
@@ -1086,6 +1107,7 @@ Settings:
     Hide Startup Splash: Başlanğıc ekranını gizlət
     Hide Header Sync Indicator: Tətbiq başlığındakı sinxronizasiya göstəricisini gizlət
     Sections:
+      Digital Wellbeing: "Rəqəmsal Rifah"
       Visible While Paused: Tam pəncərədə / tam ekranda fasilə zamanı görünənlər
     Hide Channel Avatars: Kanal avatarlarını gizlət
     Shorten View Counts: Baxış, şərh və şərh bəyənmə saylarını qısalt
@@ -2092,6 +2114,11 @@ Tooltips:
     FFmpeg Executable Path: Ayrı video və səs axınlarını birləşdirmək və səs çevirməsi üçün FFmpeg tələb olunur. İlkin olaraq OpenTubeX FFmpeg-in PATH mühit dəyişəni vasitəsilə tapıla biləcəyini qəbul edir. Lazım gələrsə, burada xüsusi yol təyin etmək olar.
     Use cookies for subtitles: Titr və avtomatik tərcümələr üçün təyin edilmiş kukiləri istifadə et. "Həmişə kukilərdən istifadə et" seçimi də bunu aktivləşdirir.
   Distraction Free Settings:
+    Grayscale: "Videolar daxil olmaqla bütün tətbiqi boz tonlarda göstərir ki, daha az diqqət çəksin. \"Yatma Vaxtı Ərzində\" seçimi yatma vaxtı xatırlatmasının cədvəlinə əməl edir."
+    Daily Watch Time Limit: "Baxış statistikasını sinxronlaşdıran bütün cihazlarda bu gün baxdıqlarınızı, Shorts daxil olmaqla, sayır."
+    Daily Shorts Limit: "Bu gün bu cihazda baxdığınız Shorts videolarını sayır."
+    Take a Break Reminder: "Bu qədər baxışdan sonra videoya fasilə verir. 10 dəqiqə və ya daha uzun fasilə sayğacı yenidən başladır."
+    Bedtime Reminder: "Başlanğıc və bitmə vaxtı arasında videoya fasilə verir və baxmağı dayandırmağı sizə xatırladır."
     Shorten View Counts: YouTube-un artıq yuvarlaqlaşdırdığı baxış, şərh və şərh bəyənmə saylarını qısaldılmış formada, məsələn 14.000 əvəzinə 14K göstərir. Dəqiq saylar həmişə tam göstərilir.
   Subscription Settings:
     Fetch Feed on Startup: Aktivləşdirildikdə OpenTubeX başlanğıcda və yeni pəncərə açıldıqda abunəlik axınınızı avtomatik alır.
@@ -2445,3 +2472,17 @@ Yattee Server:
 Yattee Fallback Warning: Bu sorğu konfiqurasiya etdiyiniz Yattee serverindən yan keçərək birbaşa YouTube-a qoşulur və IP ünvanınızı açıqlayır.
 Update With Package Manager: '{packageManager} ilə yeniləyin:'
 Update Command Copied: 'Yeniləmə əmri kopyalandı'
+Digital Wellbeing:
+  Watch time limit almost reached: "Gündəlik baxış vaxtı limitinizə {duration} qalıb"
+  Shorts limit almost reached: "Gündəlik Shorts limitinizə {duration} qalıb"
+  Daily watch time limit reached: "Gündəlik baxış vaxtı limitinə çatıldı"
+  Daily Shorts limit reached: "Gündəlik Shorts limitinə çatıldı"
+  Watched today: "Bu gün {duration} baxmısınız."
+  Shorts watched today: "Bu gün {duration} Shorts baxmısınız."
+  15 More Minutes: "15 Dəqiqə Daha"
+  Ignore for Today: "Bu Gün Üçün Nəzərə Alma"
+  Time to take a break: "Fasilə vermə vaxtıdır"
+  Watching for: "{duration} müddətdir baxırsınız."
+  Time for bed: "Yatmaq vaxtıdır"
+  Bedtime started at: "Yatma vaxtınız saat {time} radələrində başladı."
+  Remind Me in 10 Minutes: "10 Dəqiqədən Sonra Xatırlat"

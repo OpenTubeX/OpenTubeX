@@ -64,6 +64,8 @@ Search Listing:
     Members Only: メンバー限定
     Possibly AI-generated: AI 生成の可能性あり
 Stats:
+  Left of daily limit: "1日の上限{limit}まで残り{duration}"
+  Daily limit reached: "1日の上限{limit}に達しました"
   Replace old device: "古いデバイスを置き換える"
   Replacement explanation: "両方の項目が同じ物理デバイスのものである場合のみ、{device} をこのデバイスと統合してください。"
   Overlapping days: "両方の履歴にある日数: {count}"
@@ -1074,6 +1076,25 @@ Settings:
     Refresh Subscriptions While App Is Closed: "アプリを閉じている間も登録チャンネルを更新"
     Notify About New Uploads: 新着アップロードを通知
   Distraction Free Settings:
+    Digital Wellbeing:
+      Grayscale: "グレースケール"
+      Off: "オフ"
+      Always: "常に"
+      During Bedtime: "就寝時間中"
+      After the Daily Limit: "1日の上限に達した後"
+      Daily Watch Time Limit: "1日の視聴時間の上限"
+      Daily Shorts Limit: "1日のショート動画の上限"
+      When a Limit Is Reached: "上限に達したとき"
+      Remind Me: "リマインドする"
+      Pause Playback: "再生を一時停止"
+      Take a Break Reminder: "休憩リマインダー"
+      Every: "{duration}ごと"
+      Bedtime Reminder: "就寝時間リマインダー"
+      Bedtime Start: "就寝時間の開始"
+      Bedtime End: "就寝時間の終了"
+      Wait Until the Video Ends: "動画が終わるまで待つ"
+      Silence Upload Notifications at Bedtime: "就寝時間中は新着アップロードの通知をミュート"
+      Stop Autoplay at Bedtime and After the Daily Limit: "就寝時間中と1日の上限に達した後は自動再生を停止"
     Hide Popularity Graph: "人気度グラフを非表示"
     Enable Block Lists: "ブロックリストを有効にする"
     AI Video Summaries: AI による動画概要
@@ -1085,6 +1106,7 @@ Settings:
     Hide Header Sync Indicator: アプリヘッダーの同期インジケーターを非表示
     Hide Repeat Stats: リピート統計を非表示
     Sections:
+      Digital Wellbeing: "デジタル ウェルビーイング"
       Visible While Paused: 全ウィンドウ表示・全画面表示で一時停止中に表示
     Hide Channel Avatars: チャンネルのアバターを非表示
     Shorten View Counts: 視聴回数、コメント数、コメントの高評価数を省略表示
@@ -2079,6 +2101,11 @@ Tooltips:
     FFmpeg Executable Path: FFmpegは、分離された動画と音声ストリームの結合や音声変換に必要です。既定では、PATH環境変数からFFmpegが見つかるものとみなします。必要に応じて、ここでカスタムパスを指定できます。
     Use cookies for subtitles: "設定した Cookie を字幕と自動翻訳に使用します。「常に Cookie を使用」でも有効になります。"
   Distraction Free Settings:
+    Grayscale: "動画を含むアプリ全体をグレースケールで表示し、注意を引きにくくします。「就寝時間中」は就寝時間リマインダーのスケジュールに従います。"
+    Daily Watch Time Limit: "視聴統計を同期しているすべてのデバイスで今日視聴した時間を、ショート動画も含めてカウントします。"
+    Daily Shorts Limit: "このデバイスで今日視聴したショート動画をカウントします。"
+    Take a Break Reminder: "この時間だけ視聴すると動画を一時停止します。10分以上視聴を中断すると、カウントは最初からやり直しになります。"
+    Bedtime Reminder: "開始時刻から終了時刻までの間、動画を一時停止して視聴をやめるようリマインドします。"
     Shorten View Counts: YouTubeですでに丸められた視聴回数、コメント数、コメントの高評価数を、14,000ではなく14Kのように省略表示します。正確な数値は常に省略せず表示します。
   Subscription Settings:
     Fetch Feed on Startup: 有効にすると、OpenTubeXの起動時と新しいウィンドウを開いたときに登録チャンネルのフィードを自動取得します。
@@ -2435,3 +2462,17 @@ Yattee Server:
 Yattee Fallback Warning: このリクエストは設定した Yattee サーバーを経由せず、YouTube に直接接続するため、IP アドレスが公開されます。
 Update With Package Manager: '{packageManager} で更新:'
 Update Command Copied: '更新コマンドをコピーしました'
+Digital Wellbeing:
+  Watch time limit almost reached: "1日の視聴時間の上限まで残り{duration}"
+  Shorts limit almost reached: "1日のショート動画の上限まで残り{duration}"
+  Daily watch time limit reached: "1日の視聴時間の上限に達しました"
+  Daily Shorts limit reached: "1日のショート動画の上限に達しました"
+  Watched today: "今日は{duration}視聴しました。"
+  Shorts watched today: "今日はショート動画を{duration}視聴しました。"
+  15 More Minutes: "あと15分"
+  Ignore for Today: "今日は無視"
+  Time to take a break: "休憩しましょう"
+  Watching for: "{duration}視聴し続けています。"
+  Time for bed: "そろそろ寝る時間です"
+  Bedtime started at: "就寝時間は{time}に始まりました。"
+  Remind Me in 10 Minutes: "10分後にリマインド"

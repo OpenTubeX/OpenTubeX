@@ -64,6 +64,8 @@ Search Listing:
     Members Only: Vain jäsenille
     Possibly AI-generated: Mahdollisesti tekoälyn tuottama
 Stats:
+  Left of daily limit: "{duration} jäljellä päivittäisestä rajastasi ({limit})"
+  Daily limit reached: "Päivittäinen raja ({limit}) täyttyi"
   Replace old device: "Korvaa vanha laite"
   Replacement explanation: "Yhdistä {device} tähän laitteeseen vain, jos molemmat merkinnät kuuluvat samalle fyysiselle laitteelle."
   Overlapping days: "Päivät molemmissa historioissa: {count}"
@@ -1090,6 +1092,25 @@ Settings:
     Refresh Subscriptions While App Is Closed: "Päivitä tilaukset sovelluksen ollessa suljettuna"
     Notify About New Uploads: Ilmoita uusista latauksista
   Distraction Free Settings:
+    Digital Wellbeing:
+      Grayscale: "Harmaasävy"
+      Off: "Pois"
+      Always: "Aina"
+      During Bedtime: "Nukkumaanmenoaikana"
+      After the Daily Limit: "Päivittäisen rajan jälkeen"
+      Daily Watch Time Limit: "Päivittäinen katseluaikaraja"
+      Daily Shorts Limit: "Päivittäinen Shorts-raja"
+      When a Limit Is Reached: "Kun raja täyttyy"
+      Remind Me: "Muistuta"
+      Pause Playback: "Keskeytä toisto"
+      Take a Break Reminder: "Taukomuistutus"
+      Every: "{duration} välein"
+      Bedtime Reminder: "Nukkumaanmenomuistutus"
+      Bedtime Start: "Nukkumaanmenoajan alku"
+      Bedtime End: "Nukkumaanmenoajan loppu"
+      Wait Until the Video Ends: "Odota videon loppuun"
+      Silence Upload Notifications at Bedtime: "Mykistä uusien latausten ilmoitukset nukkumaanmenoaikana"
+      Stop Autoplay at Bedtime and After the Daily Limit: "Lopeta automaattinen toisto nukkumaanmenoaikana ja päivittäisen rajan jälkeen"
     Hide Popularity Graph: "Piilota suosiokaavio"
     Enable Block Lists: "Ota estolistat käyttöön"
     AI Video Summaries: Tekoälyn videoyhteenvedot
@@ -1101,6 +1122,7 @@ Settings:
     Hide Header Sync Indicator: Piilota sovelluksen otsakepalkin synkronoinnin ilmaisin
     Hide Repeat Stats: Piilota toistotilastot
     Sections:
+      Digital Wellbeing: "Digitaalinen hyvinvointi"
       Visible While Paused: Näkyvissä keskeytyksen aikana koko ikkunan tai koko näytön tilassa
     Hide Channel Avatars: Piilota kanavien profiilikuvat
     Shorten View Counts: Lyhennä katselukertojen, kommenttien ja kommenttien tykkäysten määrät
@@ -2129,6 +2151,11 @@ Tooltips:
     FFmpeg Executable Path: FFmpeg tarvitaan erillisten video- ja äänivirtojen yhdistämiseen sekä äänen muuntamiseen. OpenTubeX olettaa oletusarvoisesti, että FFmpeg löytyy PATH-ympäristömuuttujan avulla. Tarvittaessa voit määrittää oman polun tässä.
     Use cookies for subtitles: "Käytä määritettyjä evästeitä tekstityksiin ja automaattisiin käännöksiin. Myös ”Käytä aina evästeitä” ottaa tämän käyttöön."
   Distraction Free Settings:
+    Grayscale: "Näyttää koko sovelluksen videoineen harmaasävyinä, jotta se vie vähemmän huomiota. ”Nukkumaanmenoaikana” noudattaa nukkumaanmenomuistutuksen aikataulua."
+    Daily Watch Time Limit: "Laskee, mitä olet katsonut tänään kaikilla laitteilla, jotka synkronoivat katselutilastot, Shorts-videot mukaan lukien."
+    Daily Shorts Limit: "Laskee Shorts-videot, jotka olet katsonut tänään tällä laitteella."
+    Take a Break Reminder: "Keskeyttää videon, kun olet katsonut näin kauan. Vähintään 10 minuutin tauko aloittaa laskennan alusta."
+    Bedtime Reminder: "Keskeyttää videon ja muistuttaa sinua lopettamaan katselun alku- ja loppuajan välillä."
     Shorten View Counts: Näyttää katselu-, kommentti- ja kommenttien tykkäysmäärät YouTuben valmiiksi pyöristämässä lyhyessä muodossa, esimerkiksi 14 t. 14 000:n sijaan. Tarkat määrät näytetään aina kokonaisina.
   Subscription Settings:
     Fetch Feed on Startup: Kun asetus on käytössä, OpenTubeX hakee tilausnäkymän automaattisesti käynnistyessään ja uuden ikkunan avautuessa.
@@ -2490,3 +2517,17 @@ Yattee Server:
 Yattee Fallback Warning: Tämä pyyntö ohittaa määrittämäsi Yattee-palvelimen ja muodostaa yhteyden suoraan YouTubeen paljastaen IP-osoitteesi.
 Update With Package Manager: 'Päivitä käyttäen {packageManager}:'
 Update Command Copied: 'Päivityskomento kopioitu'
+Digital Wellbeing:
+  Watch time limit almost reached: "{duration} jäljellä päivittäisestä katseluaikarajastasi"
+  Shorts limit almost reached: "{duration} jäljellä päivittäisestä Shorts-rajastasi"
+  Daily watch time limit reached: "Päivittäinen katseluaikaraja täyttyi"
+  Daily Shorts limit reached: "Päivittäinen Shorts-raja täyttyi"
+  Watched today: "Olet katsonut tänään {duration}."
+  Shorts watched today: "Olet katsonut Shorts-videoita tänään {duration}."
+  15 More Minutes: "15 minuuttia lisää"
+  Ignore for Today: "Ohita tältä päivältä"
+  Time to take a break: "Aika pitää tauko"
+  Watching for: "Olet katsonut jo {duration}."
+  Time for bed: "On aika mennä nukkumaan"
+  Bedtime started at: "Nukkumaanmenoaikasi alkoi klo {time}."
+  Remind Me in 10 Minutes: "Muistuta 10 minuutin kuluttua"

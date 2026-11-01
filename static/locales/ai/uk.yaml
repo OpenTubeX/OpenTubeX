@@ -64,6 +64,8 @@ Search Listing:
     Members Only: Лише для учасників
     Possibly AI-generated: Можливо, створено ШІ
 Stats:
+  Left of daily limit: "Залишилося {duration} з денного ліміту {limit}"
+  Daily limit reached: "Денний ліміт {limit} досягнуто"
   Replace old device: "Замінити старий пристрій"
   Replacement explanation: "Об’єднуйте {device} із цим пристроєм лише якщо обидва записи належать одному фізичному пристрою."
   Overlapping days: "Дні в обох історіях: {count}"
@@ -1085,6 +1087,25 @@ Settings:
     Refresh Subscriptions While App Is Closed: "Оновлювати підписки, коли застосунок закрито"
     Notify About New Uploads: Сповіщати про новий вміст
   Distraction Free Settings:
+    Digital Wellbeing:
+      Grayscale: "Відтінки сірого"
+      Off: "Вимк."
+      Always: "Завжди"
+      During Bedtime: "Під час сну"
+      After the Daily Limit: "Після денного ліміту"
+      Daily Watch Time Limit: "Денний ліміт часу перегляду"
+      Daily Shorts Limit: "Денний ліміт Shorts"
+      When a Limit Is Reached: "Коли досягнуто ліміту"
+      Remind Me: "Нагадати"
+      Pause Playback: "Призупинити відтворення"
+      Take a Break Reminder: "Нагадування про перерву"
+      Every: "Кожні {duration}"
+      Bedtime Reminder: "Нагадування про час сну"
+      Bedtime Start: "Початок часу сну"
+      Bedtime End: "Кінець часу сну"
+      Wait Until the Video Ends: "Дочекатися завершення відео"
+      Silence Upload Notifications at Bedtime: "Вимикати сповіщення про новий вміст під час сну"
+      Stop Autoplay at Bedtime and After the Daily Limit: "Зупиняти автовідтворення під час сну та після денного ліміту"
     Hide Popularity Graph: "Приховати графік популярності"
     Enable Block Lists: "Увімкнути списки блокування"
     AI Video Summaries: Підсумки відео від ШІ
@@ -1096,6 +1117,7 @@ Settings:
     Hide Header Sync Indicator: Приховати індикатор синхронізації в заголовку застосунку
     Hide Repeat Stats: Приховати статистику повторів
     Sections:
+      Digital Wellbeing: "Цифрове благополуччя"
       Visible While Paused: Видимі під час паузи в режимі на все вікно або на весь екран
     Hide Channel Avatars: Приховувати аватари каналів
     Shorten View Counts: Скорочувати кількість переглядів, коментарів і вподобань коментарів
@@ -2124,6 +2146,11 @@ Tooltips:
     FFmpeg Executable Path: FFmpeg потрібен для об'єднання окремих потоків відео й аудіо та перетворення аудіо. Типово OpenTubeX шукатиме FFmpeg за допомогою змінної середовища PATH. За потреби тут можна вказати власний шлях.
     Use cookies for subtitles: "Використовувати налаштовані cookie для субтитрів і автоматичних перекладів. Також вмикається параметром «Завжди використовувати файли cookie»."
   Distraction Free Settings:
+    Grayscale: "Показує весь застосунок, зокрема відео, у відтінках сірого, щоб він менше привертав увагу. Варіант «Під час сну» дотримується розкладу нагадування про час сну."
+    Daily Watch Time Limit: "Враховує все, що ви переглянули сьогодні на всіх пристроях, які синхронізують статистику перегляду, зокрема Shorts."
+    Daily Shorts Limit: "Враховує Shorts, переглянуті сьогодні на цьому пристрої."
+    Take a Break Reminder: "Призупиняє відео після такого часу перегляду. Перерва тривалістю 10 хвилин або більше починає відлік заново."
+    Bedtime Reminder: "Призупиняє відео й нагадує припинити перегляд між часом початку та завершення."
     Shorten View Counts: Показує кількість переглядів, коментарів і вподобань коментарів у скороченому вигляді, якщо YouTube уже округлив її, наприклад 14 тис. замість 14 000. Точні значення завжди показуються повністю.
   Subscription Settings:
     Fetch Feed on Startup: Якщо ввімкнено, OpenTubeX автоматично отримує стрічку підписок під час запуску та відкриття нового вікна.
@@ -2483,3 +2510,17 @@ Yattee Server:
 Yattee Fallback Warning: Цей запит обходить налаштований вами сервер Yattee і підключається безпосередньо до YouTube, розкриваючи вашу IP-адресу.
 Update With Package Manager: 'Оновити за допомогою {packageManager}:'
 Update Command Copied: 'Команду оновлення скопійовано'
+Digital Wellbeing:
+  Watch time limit almost reached: "Залишилося {duration} до денного ліміту часу перегляду"
+  Shorts limit almost reached: "Залишилося {duration} до денного ліміту Shorts"
+  Daily watch time limit reached: "Денний ліміт часу перегляду досягнуто"
+  Daily Shorts limit reached: "Денний ліміт Shorts досягнуто"
+  Watched today: "Сьогодні ви переглянули {duration}."
+  Shorts watched today: "Сьогодні ви переглянули {duration} Shorts."
+  15 More Minutes: "Ще 15 хвилин"
+  Ignore for Today: "Ігнорувати сьогодні"
+  Time to take a break: "Час зробити перерву"
+  Watching for: "Ви дивитеся вже {duration}."
+  Time for bed: "Час спати"
+  Bedtime started at: "Ваш час сну почався о {time}."
+  Remind Me in 10 Minutes: "Нагадати через 10 хвилин"

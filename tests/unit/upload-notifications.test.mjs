@@ -131,12 +131,34 @@ test('the desktop notifier persists state and shows localized notifications', as
       entries: [entry('m', NOW, { membersOnly: true }), entry('l', Date.now(), { live: true }), entry('b', Date.now()), entry('a')]
     })
     assert.deepEqual(shown, [
-      { title: 'One is live', body: 'Title l', url: 'https://www.youtube.com/watch?v=l' },
-      { title: 'New video from One', body: 'Title b', url: 'https://www.youtube.com/watch?v=b' }
+      { title: 'One is live', body: 'Title l', url: 'https://www.youtube.com/watch?v=l', silent: false },
+      { title: 'New video from One', body: 'Title b', url: 'https://www.youtube.com/watch?v=b', silent: false }
     ])
 
     await restarted.configure({ enabled: false })
     await assert.rejects(readFile(file))
+  } finally {
+    await rm(directory, { recursive: true, force: true })
+  }
+})
+
+test('the desktop notifier shows notifications silently during quiet hours', async () => {
+  const directory = await mkdtemp(path.join(tmpdir(), 'upload-notifications-'))
+  try {
+    const shown = []
+    const notifier = createUploadNotifier({ file: path.join(directory, 'state.json'), show: notification => shown.push(notification) })
+    const now = new Date()
+    const minute = now.getHours() * 60 + now.getMinutes()
+    await notifier.configure({
+      enabled: true,
+      titles: { videos: '{channel}' },
+      channels: { UC1: { name: 'One', feedTypes: ['videos'], membersOnly: false } },
+      // Covers the current minute and the next, so the test cannot cross the window's end.
+      quietHours: { start: minute, end: (minute + 2) % 1440 }
+    })
+    await notifier.observe({ channelId: 'UC1', feedType: 'videos', entries: [entry('a')] })
+    await notifier.observe({ channelId: 'UC1', feedType: 'videos', entries: [entry('b', Date.now()), entry('a')] })
+    assert.deepEqual(shown.map(notification => notification.silent), [true])
   } finally {
     await rm(directory, { recursive: true, force: true })
   }

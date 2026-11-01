@@ -64,6 +64,8 @@ Search Listing:
     Members Only: Kideentzat soilik
     Possibly AI-generated: Agian AA bidez sortua
 Stats:
+  Left of daily limit: "Eguneko mugatik ({limit}) {duration} geratzen zaizu"
+  Daily limit reached: "Eguneko mugara iritsi zara ({limit})"
   Replace old device: "Ordeztu gailu zaharra"
   Replacement explanation: "Batu {device} gailu honekin bi sarrerak gailu fisiko berarenak badira soilik."
   Overlapping days: "Bi historietan dauden egunak: {count}"
@@ -1074,6 +1076,25 @@ Settings:
     Refresh Subscriptions While App Is Closed: "Freskatu harpidetzak aplikazioa itxita dagoenean"
     Notify About New Uploads: Jakinarazi igoera berriak
   Distraction Free Settings:
+    Digital Wellbeing:
+      Grayscale: "Gris-eskala"
+      Off: "Desaktibatuta"
+      Always: "Beti"
+      During Bedtime: "Lotara joateko orduan"
+      After the Daily Limit: "Eguneko muga gainditu ondoren"
+      Daily Watch Time Limit: "Eguneko ikusteko denbora-muga"
+      Daily Shorts Limit: "Eguneko Shorts bideoen muga"
+      When a Limit Is Reached: "Muga batera iristean"
+      Remind Me: "Gogorarazi"
+      Pause Playback: "Pausatu erreprodukzioa"
+      Take a Break Reminder: "Atsedenaldia hartzeko gogorarazpena"
+      Every: "{duration} behin"
+      Bedtime Reminder: "Lotara joateko gogorarazpena"
+      Bedtime Start: "Lotara joateko orduaren hasiera"
+      Bedtime End: "Lotara joateko orduaren amaiera"
+      Wait Until the Video Ends: "Itxaron bideoa amaitu arte"
+      Silence Upload Notifications at Bedtime: "Isilarazi igoera berrien jakinarazpenak lotara joateko orduan"
+      Stop Autoplay at Bedtime and After the Daily Limit: "Gelditu erreprodukzio automatikoa lotara joateko orduan eta eguneko muga gainditu ondoren"
     Hide Popularity Graph: "Ezkutatu ospearen grafikoa"
     Enable Block Lists: "Gaitu blokeo-zerrendak"
     AI Video Summaries: AAren bideo-laburpenak
@@ -1085,6 +1106,7 @@ Settings:
     Hide Header Sync Indicator: Ezkutatu aplikazioaren goiburuko sinkronizazio-adierazlea
     Hide Repeat Stats: Ezkutatu errepikapenen estatistikak
     Sections:
+      Digital Wellbeing: "Ongizate digitala"
       Visible While Paused: Ikusgai pausatuta dagoenean leiho osoan edo pantaila osoan
     Hide Channel Avatars: Ezkutatu kanalen abatarrak
     Shorten View Counts: Laburtu ikustaldien, iruzkinen eta iruzkinetako atsegiteen kopuruak
@@ -2089,6 +2111,11 @@ Tooltips:
     FFmpeg Executable Path: FFmpeg beharrezkoa da bideo- eta audio-korronte bereiziak bateratzeko eta audioa bihurtzeko. Modu lehenetsian, OpenTubeX aplikazioak FFmpeg PATH ingurune-aldagaiaren bidez aurki daitekeela joko du. Behar izanez gero, bide-izen pertsonalizatu bat ezar daiteke hemen.
     Use cookies for subtitles: "Erabili konfiguratutako cookieak azpitituluetarako eta itzulpen automatikoetarako. «Erabili beti cookieak» aukerak ere gaitzen du."
   Distraction Free Settings:
+    Grayscale: "Aplikazio osoa, bideoak barne, gris-tonuetan erakusten du, arreta gutxiago erakar dezan. «Lotara joateko orduan» aukerak lotara joateko gogorarazpenaren ordutegia jarraitzen du."
+    Daily Watch Time Limit: "Gaur ikusi duzuna zenbatzen du ikustaldi-estatistikak sinkronizatzen dituzten gailu guztietan, Shorts bideoak barne."
+    Daily Shorts Limit: "Gaur gailu honetan ikusi dituzun Shorts bideoak zenbatzen ditu."
+    Take a Break Reminder: "Bideoa pausatzen du denbora hori ikusi ondoren. 10 minutuko edo gehiagoko etenaldi batek zenbaketa berriro hasten du."
+    Bedtime Reminder: "Bideoa pausatzen du eta ikusteari uzteko gogorarazten dizu hasiera- eta amaiera-orduen artean."
     Shorten View Counts: YouTube-k dagoeneko biribildu dituen ikustaldi-, iruzkin- eta iruzkinetako atsegite-kopuruak modu laburtuan erakusten ditu; adibidez, 14K, 14.000 ordez. Kopuru zehatzak osorik erakusten dira beti.
   Subscription Settings:
     Fetch Feed on Startup: Gaituta dagoenean, OpenTubeX aplikazioak harpidetza-jarioa automatikoki eskuratuko du abioan eta leiho berri bat irekitzean.
@@ -2445,3 +2472,17 @@ Yattee Server:
 Yattee Fallback Warning: Eskaera honek konfiguratutako Yattee zerbitzaria saihesten du eta zuzenean YouTubera konektatzen da, zure IP helbidea agerian utziz.
 Update With Package Manager: 'Eguneratu {packageManager} erabiliz:'
 Update Command Copied: 'Eguneratze-komandoa kopiatu da'
+Digital Wellbeing:
+  Watch time limit almost reached: "{duration} geratzen zaizu eguneko ikusteko denbora-mugara iristeko"
+  Shorts limit almost reached: "{duration} geratzen zaizu eguneko Shorts bideoen mugara iristeko"
+  Daily watch time limit reached: "Eguneko ikusteko denbora-mugara iritsi zara"
+  Daily Shorts limit reached: "Eguneko Shorts bideoen mugara iritsi zara"
+  Watched today: "Gaur {duration} eman duzu bideoak ikusten."
+  Shorts watched today: "Gaur {duration} eman duzu Shorts bideoak ikusten."
+  15 More Minutes: "Beste 15 minutu"
+  Ignore for Today: "Ez egin kasurik gaur"
+  Time to take a break: "Atsedenaldi bat hartzeko garaia da"
+  Watching for: "{duration} daramatzazu ikusten."
+  Time for bed: "Lotara joateko ordua da"
+  Bedtime started at: "Zure lotara joateko ordua ordu honetan hasi da: {time}."
+  Remind Me in 10 Minutes: "Gogorarazi 10 minutu barru"

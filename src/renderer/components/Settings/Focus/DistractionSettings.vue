@@ -1,6 +1,7 @@
 <template>
   <FtSettingsSection
     :title="t('Settings.Distraction Free Settings.Distraction Free Settings')"
+    hide-title
   >
     <h4
       class="groupTitle"

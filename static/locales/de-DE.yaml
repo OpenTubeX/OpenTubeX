@@ -1376,6 +1376,25 @@ Settings:
     Channels not found: '{count} Kanal wurde nicht gefunden | {count} Kanäle wurden nicht gefunden'
     Setting object has insufficient data, skipping item: Das Objekt enthält unzureichende Daten, Element wird übersprungen
   Distraction Free Settings:
+    Digital Wellbeing:
+      Grayscale: "Graustufen"
+      Off: "Aus"
+      Always: "Immer"
+      During Bedtime: "Zur Schlafenszeit"
+      After the Daily Limit: "Nach dem Tageslimit"
+      Daily Watch Time Limit: "Tägliches Wiedergabelimit"
+      Daily Shorts Limit: "Tägliches Shorts-Limit"
+      When a Limit Is Reached: "Bei erreichtem Limit"
+      Remind Me: "Erinnern"
+      Pause Playback: "Wiedergabe pausieren"
+      Take a Break Reminder: "Pausenerinnerung"
+      Every: "Alle {duration}"
+      Bedtime Reminder: "Schlafenszeit-Erinnerung"
+      Bedtime Start: "Beginn der Schlafenszeit"
+      Bedtime End: "Ende der Schlafenszeit"
+      Wait Until the Video Ends: "Bis zum Ende des Videos warten"
+      Silence Upload Notifications at Bedtime: "Upload-Benachrichtigungen zur Schlafenszeit stummschalten"
+      Stop Autoplay at Bedtime and After the Daily Limit: "Automatische Wiedergabe zur Schlafenszeit und nach dem Tageslimit beenden"
     AI Video Summaries: KI-Videozusammenfassungen
     Hide: Ausblenden
     Collapsed: Eingeklappt
@@ -1414,6 +1433,7 @@ Settings:
     Hide Channel Shorts: 'Tab „Shorts“ im Kanal ausblenden'
     Hide Featured Channels: Hervorgehobene Kanäle ausblenden
     Sections:
+      Digital Wellbeing: "Digitales Wohlbefinden"
       Side Bar: Seitenleiste
       Channel Page: Kanäle
       General: Allgemein
@@ -2894,6 +2914,11 @@ Tooltips:
     Replace HTTP Cache: Deaktiviert den festplattenbasierten HTTP-Cache von Electron und aktiviert einen benutzerdefinierten In-Memory-Image-Cache. Dies führt zu einer erhöhten RAM-Auslastung.
     Disable Hardware Acceleration: Deaktiviert die GPU-Hardwarebeschleunigung. Dies kann Grafikprobleme beheben, führt jedoch wahrscheinlich zu einer geringeren Leistung.
   Distraction Free Settings:
+    Grayscale: "Zeigt die ganze App einschließlich Videos in Graustufen an, damit sie weniger Aufmerksamkeit auf sich zieht. „Zur Schlafenszeit“ folgt dem Zeitplan der Schlafenszeit-Erinnerung."
+    Daily Watch Time Limit: "Zählt, was du heute auf allen Geräten angesehen hast, die Wiedergabestatistiken synchronisieren, einschließlich Shorts."
+    Daily Shorts Limit: "Zählt die Shorts, die du heute auf diesem Gerät angesehen hast."
+    Take a Break Reminder: "Pausiert das Video nach dieser Wiedergabedauer. Eine Pause von 10 Minuten oder länger setzt die Zählung zurück."
+    Bedtime Reminder: "Pausiert das Video und erinnert dich zwischen Beginn und Ende daran, mit dem Ansehen aufzuhören."
     Hide Channels: Gib eine Kanal-ID ein, um zu verhindern, dass alle Videos, Playlists und der Kanal selbst in der Suche, den Trends, den beliebtesten und den empfohlenen Videos angezeigt werden. Die eingegebene Kanal-ID muss vollständig übereinstimmen, und es wird zwischen Groß- und Kleinschreibung unterschieden.
     Hide Subscriptions Live: Diese Einstellung wird durch die App-weite Einstellung „{appWideSetting}“ im Abschnitt „{subsection}“ der „{settingsSection}“ außer Kraft gesetzt
     Hide Videos, Playlists and Channels Containing Text: Gib ein Wort, einen Teil eines Wortes oder einen Satz ein (Groß-/Kleinschreibung wird ignoriert), um alle Videos und Playlists, welche es in ihren Originaltiteln enthalten, auf ganz OpenTubeX auszublenden. Dein Verlauf, deine eigenen Playlists und Videos innerhalb Playlists sind davon nicht betroffen.
@@ -3272,6 +3297,8 @@ Tab Organizer:
   Drag Tab: Ziehen, um den Tab in eine Gruppe zu verschieben
 
 Stats:
+  Left of daily limit: "Noch {duration} von deinem Tageslimit von {limit}"
+  Daily limit reached: "Tageslimit von {limit} erreicht"
   Replace old device: "Altes Gerät ersetzen"
   Replacement explanation: "Führe {device} nur mit diesem Gerät zusammen, wenn beide Einträge zum selben physischen Gerät gehören."
   Overlapping days: "Tage in beiden Verläufen: {count}"
@@ -3634,3 +3661,17 @@ Installer:
 Invidious Fallback Warning: "Diese Anfrage umgeht deine konfigurierte Invidious-Instanz und verbindet sich direkt mit YouTube. Dabei wird deine IP-Adresse offengelegt."
 Yattee Fallback Warning: "Diese Anfrage umgeht deinen konfigurierten Yattee-Server und verbindet sich direkt mit YouTube. Dabei wird deine IP-Adresse offengelegt."
 Automatically unloaded to free memory: "Automatisch entladen, um Speicher freizugeben"
+Digital Wellbeing:
+  Watch time limit almost reached: "Noch {duration} bis zu deinem täglichen Wiedergabelimit"
+  Shorts limit almost reached: "Noch {duration} bis zu deinem täglichen Shorts-Limit"
+  Daily watch time limit reached: "Tägliches Wiedergabelimit erreicht"
+  Daily Shorts limit reached: "Tägliches Shorts-Limit erreicht"
+  Watched today: "Du hast heute {duration} angesehen."
+  Shorts watched today: "Du hast heute {duration} Shorts angesehen."
+  15 More Minutes: "15 Minuten mehr"
+  Ignore for Today: "Für heute ignorieren"
+  Time to take a break: "Zeit für eine Pause"
+  Watching for: "Du schaust seit {duration}."
+  Time for bed: "Zeit fürs Bett"
+  Bedtime started at: "Deine Schlafenszeit hat um {time} begonnen."
+  Remind Me in 10 Minutes: "In 10 Minuten erinnern"

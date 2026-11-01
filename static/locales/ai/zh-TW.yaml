@@ -64,6 +64,8 @@ Search Listing:
     Members Only: 會員專屬
     Possibly AI-generated: 可能由 AI 生成
 Stats:
+  Left of daily limit: "你的每日上限 {limit} 還剩 {duration}"
+  Daily limit reached: "已達到每日上限 {limit}"
   Replace old device: "取代舊裝置"
   Replacement explanation: "僅當兩筆記錄屬於同一台實體裝置時，才將 {device} 與此裝置合併。"
   Overlapping days: "兩份歷史記錄中共有的天數：{count}"
@@ -1074,6 +1076,25 @@ Settings:
     Refresh Subscriptions While App Is Closed: "應用程式關閉時重新整理訂閱"
     Notify About New Uploads: 新上傳通知
   Distraction Free Settings:
+    Digital Wellbeing:
+      Grayscale: "灰階"
+      Off: "關閉"
+      Always: "一律"
+      During Bedtime: "就寢時間內"
+      After the Daily Limit: "達到每日上限後"
+      Daily Watch Time Limit: "每日觀看時間上限"
+      Daily Shorts Limit: "每日 Shorts 上限"
+      When a Limit Is Reached: "達到上限時"
+      Remind Me: "提醒我"
+      Pause Playback: "暫停播放"
+      Take a Break Reminder: "休息提醒"
+      Every: "每 {duration}"
+      Bedtime Reminder: "就寢提醒"
+      Bedtime Start: "就寢開始時間"
+      Bedtime End: "就寢結束時間"
+      Wait Until the Video Ends: "等待影片結束"
+      Silence Upload Notifications at Bedtime: "就寢時間內將新上傳通知設為靜音"
+      Stop Autoplay at Bedtime and After the Daily Limit: "在就寢時間內及達到每日上限後停止自動播放"
     Hide Popularity Graph: "隱藏熱門程度圖"
     Enable Block Lists: "啟用封鎖清單"
     AI Video Summaries: AI 影片摘要
@@ -1085,6 +1106,7 @@ Settings:
     Hide Header Sync Indicator: 隱藏應用程式標題列中的同步指示器
     Hide Repeat Stats: 隱藏循環統計
     Sections:
+      Digital Wellbeing: "數位健康"
       Visible While Paused: 在全視窗／全螢幕模式暫停播放時顯示
     Hide Channel Avatars: 隱藏頻道頭像
     Shorten View Counts: 縮寫觀看次數、留言數和留言按讚數
@@ -2082,6 +2104,11 @@ Tooltips:
     FFmpeg Executable Path: 合併分開的影片與音訊串流及轉換音訊時需要 FFmpeg。OpenTubeX 預設會假設可透過 PATH 環境變數找到 FFmpeg。如有需要，可在此設定自訂路徑。
     Use cookies for subtitles: "使用已設定的 Cookie 取得字幕和自動翻譯。啟用「一律使用 Cookie」也會開啟此功能。"
   Distraction Free Settings:
+    Grayscale: "以灰階顯示整個應用程式（包括影片），減少對注意力的吸引。「就寢時間內」選項會依照就寢提醒的時間表。"
+    Daily Watch Time Limit: "計算你今天在所有同步觀看統計資料的裝置上觀看的內容，包括 Shorts。"
+    Daily Shorts Limit: "計算你今天在此裝置上觀看的 Shorts。"
+    Take a Break Reminder: "觀看達到這段時間後暫停影片。暫停 10 分鐘或更久會重新開始計算。"
+    Bedtime Reminder: "在開始時間與結束時間之間暫停影片，並提醒你停止觀看。"
     Shorten View Counts: 將 YouTube 已四捨五入的觀看次數、留言數與留言按讚數以縮寫顯示，例如以 14K 取代 14,000。精確數字一律完整顯示。
   Subscription Settings:
     Fetch Feed on Startup: 啟用後，OpenTubeX 會在啟動及開啟新視窗時自動擷取您的訂閱動態消息。
@@ -2438,3 +2465,17 @@ Yattee Server:
 Yattee Fallback Warning: 此請求繞過了您設定的 Yattee 伺服器，直接連線至 YouTube，因而暴露您的 IP 位址。
 Update With Package Manager: '使用 {packageManager} 更新：'
 Update Command Copied: '已複製更新指令'
+Digital Wellbeing:
+  Watch time limit almost reached: "距離每日觀看時間上限還剩 {duration}"
+  Shorts limit almost reached: "距離每日 Shorts 上限還剩 {duration}"
+  Daily watch time limit reached: "已達到每日觀看時間上限"
+  Daily Shorts limit reached: "已達到每日 Shorts 上限"
+  Watched today: "你今天已觀看 {duration}。"
+  Shorts watched today: "你今天已觀看 {duration} 的 Shorts。"
+  15 More Minutes: "再看 15 分鐘"
+  Ignore for Today: "今天忽略"
+  Time to take a break: "該休息一下了"
+  Watching for: "你已連續觀看 {duration}。"
+  Time for bed: "該睡覺了"
+  Bedtime started at: "你的就寢時間已於 {time} 開始。"
+  Remind Me in 10 Minutes: "10 分鐘後提醒我"

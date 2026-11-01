@@ -64,6 +64,8 @@ Search Listing:
     Members Only: Só para membros
     Possibly AI-generated: Posiblemente xerado por IA
 Stats:
+  Left of daily limit: "Quédanche {duration} do teu límite diario de {limit}"
+  Daily limit reached: "Alcanzouse o límite diario de {limit}"
   Replace old device: "Substituír dispositivo antigo"
   Replacement explanation: "Combina {device} con este dispositivo só se ambas as entradas pertencen ao mesmo dispositivo físico."
   Overlapping days: "Días nos dous historiais: {count}"
@@ -1085,6 +1087,25 @@ Settings:
     Refresh Subscriptions While App Is Closed: "Actualizar as subscricións coa aplicación pechada"
     Notify About New Uploads: Notificar novas subidas
   Distraction Free Settings:
+    Digital Wellbeing:
+      Grayscale: "Escala de grises"
+      Off: "Desactivado"
+      Always: "Sempre"
+      During Bedtime: "Á hora de durmir"
+      After the Daily Limit: "Tras alcanzar o límite diario"
+      Daily Watch Time Limit: "Límite diario de tempo de visualización"
+      Daily Shorts Limit: "Límite diario de vídeos curtos"
+      When a Limit Is Reached: "Ao alcanzar un límite"
+      Remind Me: "Lembrarmo"
+      Pause Playback: "Pausar a reprodución"
+      Take a Break Reminder: "Recordatorio para facer unha pausa"
+      Every: "Cada {duration}"
+      Bedtime Reminder: "Recordatorio da hora de durmir"
+      Bedtime Start: "Inicio da hora de durmir"
+      Bedtime End: "Fin da hora de durmir"
+      Wait Until the Video Ends: "Agardar a que remate o vídeo"
+      Silence Upload Notifications at Bedtime: "Silenciar as notificacións de novas subidas á hora de durmir"
+      Stop Autoplay at Bedtime and After the Daily Limit: "Deter a reprodución automática á hora de durmir e tras alcanzar o límite diario"
     Hide Popularity Graph: "Agochar o gráfico de popularidade"
     Enable Block Lists: "Activar as listas de bloqueo"
     AI Video Summaries: Resumos de vídeos con IA
@@ -1096,6 +1117,7 @@ Settings:
     Hide Header Sync Indicator: Agochar o indicador de sincronización da cabeceira da aplicación
     Hide Repeat Stats: Agochar as estatísticas de repetición
     Sections:
+      Digital Wellbeing: "Benestar dixital"
       Visible While Paused: Visibles durante a pausa en xanela completa ou pantalla completa
     Hide Channel Avatars: Ocultar os avatares das canles
     Shorten View Counts: Abreviar as cifras de visualizacións, de comentarios e de valoracións positivas dos comentarios
@@ -2133,6 +2155,11 @@ Tooltips:
     FFmpeg Executable Path: FFmpeg é necesario para combinar emisións de vídeo e son separadas e para converter son. De maneira predeterminada, OpenTubeX supón que pode atopar FFmpeg mediante a variable de contorno PATH. Se fai falta, podes indicar aquí unha ruta personalizada.
     Use cookies for subtitles: "Usa as cookies configuradas para os subtítulos e as traducións automáticas. Tamén se activa con «Usar sempre cookies»."
   Distraction Free Settings:
+    Grayscale: "Amosa toda a aplicación, incluídos os vídeos, en tons de gris para que chame menos a atención. «Á hora de durmir» segue o horario do recordatorio da hora de durmir."
+    Daily Watch Time Limit: "Conta o que viches hoxe en todos os dispositivos que sincronizan as estatísticas de visualización, incluídos os vídeos curtos."
+    Daily Shorts Limit: "Conta os vídeos curtos que viches hoxe neste dispositivo."
+    Take a Break Reminder: "Pausa o vídeo despois deste tempo de visualización. Unha pausa de 10 minutos ou máis reinicia a conta."
+    Bedtime Reminder: "Pausa o vídeo e lémbrache que deixes de velo entre a hora de inicio e a de fin."
     Shorten View Counts: Amosa de forma abreviada as cifras de visualizacións, de comentarios e de valoracións positivas dos comentarios que YouTube xa redondeou, por exemplo 14 mil en lugar de 14 000. As cifras exactas sempre se amosan completas.
   Subscription Settings:
     Fetch Feed on Startup: Cando está activado, OpenTubeX obtén automaticamente a fonte das subscricións ao iniciarse e ao abrir unha xanela nova.
@@ -2492,3 +2519,17 @@ Yattee Server:
 Yattee Fallback Warning: Esta solicitude omite o servidor Yattee que configuraches e conéctase directamente a YouTube, expoñendo o teu enderezo IP.
 Update With Package Manager: 'Actualizar con {packageManager}:'
 Update Command Copied: 'Copiouse a orde de actualización'
+Digital Wellbeing:
+  Watch time limit almost reached: "Quédanche {duration} do teu límite diario de tempo de visualización"
+  Shorts limit almost reached: "Quédanche {duration} do teu límite diario de vídeos curtos"
+  Daily watch time limit reached: "Alcanzouse o límite diario de tempo de visualización"
+  Daily Shorts limit reached: "Alcanzouse o límite diario de vídeos curtos"
+  Watched today: "Hoxe viches {duration} de vídeos."
+  Shorts watched today: "Hoxe viches {duration} de vídeos curtos."
+  15 More Minutes: "15 minutos máis"
+  Ignore for Today: "Ignorar por hoxe"
+  Time to take a break: "É hora de facer unha pausa"
+  Watching for: "Levas {duration} vendo vídeos."
+  Time for bed: "É hora de durmir"
+  Bedtime started at: "A túa hora de durmir comezou ás {time}."
+  Remind Me in 10 Minutes: "Lembrarmo en 10 minutos"

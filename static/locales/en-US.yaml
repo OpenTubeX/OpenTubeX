@@ -197,6 +197,8 @@ Search Filters:
   Clear Filters: Clear Filters
 # Sidebar
 Stats:
+  Left of daily limit: "{duration} left of your {limit} daily limit"
+  Daily limit reached: "Daily limit of {limit} reached"
   Replace old device: "Replace old device"
   Replacement explanation: "Combine {device} with this device only if both entries belong to the same physical device."
   Overlapping days: "Days in both histories: {count}"
@@ -1632,6 +1634,25 @@ Settings:
     To: To
     Confirm Before Unsubscribing: Confirm Before Unsubscribing
   Distraction Free Settings:
+    Digital Wellbeing:
+      Grayscale: "Grayscale"
+      Off: "Off"
+      Always: "Always"
+      During Bedtime: "During Bedtime"
+      After the Daily Limit: "After the Daily Limit"
+      Daily Watch Time Limit: "Daily Watch Time Limit"
+      Daily Shorts Limit: "Daily Shorts Limit"
+      When a Limit Is Reached: "When a Limit Is Reached"
+      Remind Me: "Remind Me"
+      Pause Playback: "Pause Playback"
+      Take a Break Reminder: "Take a Break Reminder"
+      Every: "Every {duration}"
+      Bedtime Reminder: "Bedtime Reminder"
+      Bedtime Start: "Bedtime Start"
+      Bedtime End: "Bedtime End"
+      Wait Until the Video Ends: "Wait Until the Video Ends"
+      Silence Upload Notifications at Bedtime: "Silence Upload Notifications at Bedtime"
+      Stop Autoplay at Bedtime and After the Daily Limit: "Stop Autoplay at Bedtime and After the Daily Limit"
     AI Video Summaries: AI video summaries
     Hide: Hide
     Collapsed: Collapsed
@@ -1642,6 +1663,7 @@ Settings:
     Hide Repeat Stats: Hide Repeat Stats
     Distraction Free Settings: Distraction Free
     Sections:
+      Digital Wellbeing: "Digital Wellbeing"
       Side Bar: Side Bar
       Subscriptions Page: Subscriptions Page
       Channel Page: Channel Page
@@ -3210,6 +3232,11 @@ Tooltips:
       via the PATH environment variable. If needed, a custom path can be set here.
     Use cookies for subtitles: "Use the configured cookies for subtitles and automatic translations. Also enabled by \"Always Use Cookies\"."
   Distraction Free Settings:
+    Grayscale: "Shows the whole app, including videos, in shades of gray, so it draws less attention. During Bedtime follows the bedtime reminder's schedule."
+    Daily Watch Time Limit: "Counts what you watched today on all devices that sync watch statistics, including Shorts."
+    Daily Shorts Limit: "Counts the Shorts you watched on this device today."
+    Take a Break Reminder: "Pauses the video after this much watching. A pause of 10 minutes or more starts the count again."
+    Bedtime Reminder: "Pauses the video and reminds you to stop watching between the start and end time."
     Shorten View Counts: Shows view, comment and comment like counts that YouTube has already rounded in a shortened form, e.g. 14K instead of 14,000. Exact counts are always shown in full.
     Hide Channels: Enter a channel ID to hide all videos, playlists and the channel itself from appearing in search, trending, most popular and recommended.
        The channel ID entered must be a complete match and is case sensitive.
@@ -3655,3 +3682,17 @@ Installer:
 Invidious Fallback Warning: "This request bypasses your configured Invidious instance and connects directly to YouTube, exposing your IP address."
 Yattee Fallback Warning: "This request bypasses your configured Yattee server and connects directly to YouTube, exposing your IP address."
 Automatically unloaded to free memory: "Automatically unloaded to free memory"
+Digital Wellbeing:
+  Watch time limit almost reached: "{duration} left of your daily watch time limit"
+  Shorts limit almost reached: "{duration} left of your daily Shorts limit"
+  Daily watch time limit reached: "Daily watch time limit reached"
+  Daily Shorts limit reached: "Daily Shorts limit reached"
+  Watched today: "You've watched {duration} today."
+  Shorts watched today: "You've watched {duration} of Shorts today."
+  15 More Minutes: "15 More Minutes"
+  Ignore for Today: "Ignore for Today"
+  Time to take a break: "Time to take a break"
+  Watching for: "You've been watching for {duration}."
+  Time for bed: "It's time for bed"
+  Bedtime started at: "Your bedtime started at {time}."
+  Remind Me in 10 Minutes: "Remind Me in 10 Minutes"

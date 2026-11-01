@@ -750,10 +750,10 @@ function runApp() {
   /**
    * @param {{ title: string, body: string, url: string }} options
    */
-  function showUrlNotification({ title, body, url }) {
+  function showUrlNotification({ title, body, url, silent = false }) {
     if (!supportsNativeNotifications(Notification)) return
 
-    const notification = new Notification({ title, body })
+    const notification = new Notification({ title, body, silent })
     activeNotifications.add(notification)
     notification.once('close', () => activeNotifications.delete(notification))
     notification.once('click', () => {

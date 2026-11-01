@@ -64,6 +64,8 @@ Search Listing:
     Members Only: Ainult liikmetele
     Possibly AI-generated: Võib olla tehisintellekti loodud
 Stats:
+  Left of daily limit: "Sinu päevalimiidist ({limit}) on jäänud {duration}"
+  Daily limit reached: "Päevalimiit ({limit}) on täis"
   Replace old device: "Asenda vana seade"
   Replacement explanation: "Ühenda {device} selle seadmega ainult siis, kui mõlemad kirjed kuuluvad samale füüsilisele seadmele."
   Overlapping days: "Päevad mõlemas ajaloos: {count}"
@@ -1074,6 +1076,25 @@ Settings:
     Refresh Subscriptions While App Is Closed: "Värskenda tellimusi, kui rakendus on suletud"
     Notify About New Uploads: Teavita uutest üleslaadimistest
   Distraction Free Settings:
+    Digital Wellbeing:
+      Grayscale: "Halltoonid"
+      Off: "Väljas"
+      Always: "Alati"
+      During Bedtime: "Magamaminekuajal"
+      After the Daily Limit: "Pärast päevalimiiti"
+      Daily Watch Time Limit: "Päevane vaatamisaja limiit"
+      Daily Shorts Limit: "Päevane Shorts-videote limiit"
+      When a Limit Is Reached: "Kui limiit on täis"
+      Remind Me: "Tuleta meelde"
+      Pause Playback: "Peata esitus"
+      Take a Break Reminder: "Pausi meeldetuletus"
+      Every: "Iga {duration} järel"
+      Bedtime Reminder: "Magamamineku meeldetuletus"
+      Bedtime Start: "Magamamineku algus"
+      Bedtime End: "Magamamineku lõpp"
+      Wait Until the Video Ends: "Oota video lõpuni"
+      Silence Upload Notifications at Bedtime: "Vaigista uute üleslaadimiste teavitused magamaminekuajal"
+      Stop Autoplay at Bedtime and After the Daily Limit: "Peata automaatne esitus magamaminekuajal ja pärast päevalimiiti"
     Hide Popularity Graph: "Peida populaarsuse graafik"
     Enable Block Lists: "Luba blokeerimisloendid"
     AI Video Summaries: Tehisintellekti loodud videokokkuvõtted
@@ -1085,6 +1106,7 @@ Settings:
     Hide Header Sync Indicator: Peida rakenduse päise sünkroonimisnäidik
     Hide Repeat Stats: Peida korduste statistika
     Sections:
+      Digital Wellbeing: "Digitaalne heaolu"
       Visible While Paused: Pausi ajal täisaknas või täisekraanil nähtav
     Hide Channel Avatars: Peida kanalite avatarid
     Shorten View Counts: Lühenda vaatamiste, kommentaaride ja kommentaaride meeldimiste arvu
@@ -2082,6 +2104,11 @@ Tooltips:
     FFmpeg Executable Path: FFmpeg on vajalik eraldi video- ja helivoogude ühendamiseks ning heli teisendamiseks. Vaikimisi eeldab OpenTubeX, et FFmpeg leitakse keskkonnamuutuja PATH kaudu. Vajaduse korral saab siin määrata kohandatud asukoha.
     Use cookies for subtitles: "Kasuta seadistatud küpsiseid subtiitrite ja automaattõlgete jaoks. Selle lubab ka „Kasuta alati küpsiseid“."
   Distraction Free Settings:
+    Grayscale: "Kuvab kogu rakenduse koos videotega halltoonides, et see tõmbaks vähem tähelepanu. „Magamaminekuajal“ järgib magamamineku meeldetuletuse ajakava."
+    Daily Watch Time Limit: "Loeb kokku, mida oled täna vaadanud kõigis seadmetes, mis sünkroonivad vaatamisstatistikat, sealhulgas Shorts-videod."
+    Daily Shorts Limit: "Loeb kokku Shorts-videod, mida oled täna selles seadmes vaadanud."
+    Take a Break Reminder: "Peatab video pärast nii pikka vaatamist. Vähemalt 10-minutiline paus alustab loendust uuesti."
+    Bedtime Reminder: "Peatab video ja tuletab sulle algus- ja lõpuaja vahel meelde, et vaatamine lõpetada."
     Shorten View Counts: Kuvab YouTube'i juba ümardatud vaatamiste arvu, kommentaaride arvu ja kommentaaride meeldimiste arvu lühendatud kujul, näiteks 14 000 asemel 14 tuh. Täpsed arvud kuvatakse alati täielikult.
   Subscription Settings:
     Fetch Feed on Startup: Kui see on lubatud, hangib OpenTubeX tellimuste voo automaatselt käivitumisel ja uue akna avamisel.
@@ -2438,3 +2465,17 @@ Yattee Server:
 Yattee Fallback Warning: See päring läheb sinu seadistatud Yattee serverist mööda ja ühendub otse YouTube'iga, avaldades sinu IP-aadressi.
 Update With Package Manager: 'Uuenda {packageManager} abil:'
 Update Command Copied: 'Uuenduskäsk kopeeriti'
+Digital Wellbeing:
+  Watch time limit almost reached: "Sinu päevase vaatamisaja limiidini on jäänud {duration}"
+  Shorts limit almost reached: "Sinu päevase Shorts-videote limiidini on jäänud {duration}"
+  Daily watch time limit reached: "Päevane vaatamisaja limiit on täis"
+  Daily Shorts limit reached: "Päevane Shorts-videote limiit on täis"
+  Watched today: "Oled täna vaadanud {duration}."
+  Shorts watched today: "Oled täna vaadanud Shorts-videoid {duration}."
+  15 More Minutes: "Veel 15 minutit"
+  Ignore for Today: "Ignoreeri tänaseks"
+  Time to take a break: "Aeg teha paus"
+  Watching for: "Oled vaadanud juba {duration}."
+  Time for bed: "On aeg magama minna"
+  Bedtime started at: "Sinu magamaminekuaeg algas kell {time}."
+  Remind Me in 10 Minutes: "Tuleta meelde 10 minuti pärast"

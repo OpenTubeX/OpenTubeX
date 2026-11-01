@@ -64,6 +64,8 @@ Search Listing:
     Members Only: Aelodau yn unig
     Possibly AI-generated: Wedi'i gynhyrchu gan AI o bosibl
 Stats:
+  Left of daily limit: "{duration} ar ôl o'ch terfyn dyddiol o {limit}"
+  Daily limit reached: "Wedi cyrraedd y terfyn dyddiol o {limit}"
   Replace old device: "Disodli hen ddyfais"
   Replacement explanation: "Cyfunwch {device} â'r ddyfais hon dim ond os yw'r ddau gofnod yn perthyn i'r un ddyfais ffisegol."
   Overlapping days: "Diwrnodau yn y ddau hanes: {count}"
@@ -1077,6 +1079,25 @@ Settings:
     Refresh Subscriptions While App Is Closed: "Adnewyddu tanysgrifiadau pan fydd yr ap ar gau"
     Notify About New Uploads: Hysbysu am gynnwys newydd
   Distraction Free Settings:
+    Digital Wellbeing:
+      Grayscale: "Graddlwyd"
+      Off: "I Ffwrdd"
+      Always: "Bob Amser"
+      During Bedtime: "Yn Ystod Amser Gwely"
+      After the Daily Limit: "Ar Ôl y Terfyn Dyddiol"
+      Daily Watch Time Limit: "Terfyn Amser Gwylio Dyddiol"
+      Daily Shorts Limit: "Terfyn Byrion Dyddiol"
+      When a Limit Is Reached: "Pan Gyrhaeddir Terfyn"
+      Remind Me: "Atgoffa Fi"
+      Pause Playback: "Seibio Chwarae"
+      Take a Break Reminder: "Nodyn Atgoffa i Gymryd Seibiant"
+      Every: "Bob {duration}"
+      Bedtime Reminder: "Nodyn Atgoffa Amser Gwely"
+      Bedtime Start: "Dechrau Amser Gwely"
+      Bedtime End: "Diwedd Amser Gwely"
+      Wait Until the Video Ends: "Aros Nes i'r Fideo Orffen"
+      Silence Upload Notifications at Bedtime: "Tawelu Hysbysiadau Cynnwys Newydd Amser Gwely"
+      Stop Autoplay at Bedtime and After the Daily Limit: "Atal Awtochwarae Amser Gwely ac ar Ôl y Terfyn Dyddiol"
     Hide Popularity Graph: "Cuddio’r graff poblogrwydd"
     Enable Block Lists: "Galluogi rhestrau blocio"
     AI Video Summaries: Crynodebau fideo AI
@@ -1088,6 +1109,7 @@ Settings:
     Hide Header Sync Indicator: Cuddio’r dangosydd cysoni ym mhennyn yr ap
     Hide Repeat Stats: Cuddio ystadegau ailadrodd
     Sections:
+      Digital Wellbeing: "Llesiant Digidol"
       Visible While Paused: Yn weladwy wrth oedi mewn ffenestr lawn / sgrin lawn
     Hide Channel Avatars: Cuddio afatarau sianeli
     Shorten View Counts: Byrhau cyfrif gwylwyr, sylwadau a hoffiadau sylwadau
@@ -2109,6 +2131,11 @@ Tooltips:
     FFmpeg Executable Path: Mae angen FFmpeg i uno ffrydiau fideo a sain ar wahân ac i drosi sain. Yn ddiofyn, bydd OpenTubeX yn tybio bod modd canfod FFmpeg drwy'r newidyn amgylchedd PATH. Os oes angen, gallwch osod llwybr personol yma.
     Use cookies for subtitles: "Defnyddio’r cwcis wedi’u ffurfweddu ar gyfer isdeitlau a chyfieithiadau awtomatig. Mae “Defnyddio cwcis bob amser” hefyd yn galluogi hyn."
   Distraction Free Settings:
+    Grayscale: "Mae'n dangos yr ap cyfan, gan gynnwys fideos, mewn graddlwyd, fel ei fod yn tynnu llai o sylw. Mae \"Yn Ystod Amser Gwely\" yn dilyn amserlen y nodyn atgoffa amser gwely."
+    Daily Watch Time Limit: "Mae'n cyfrif yr hyn rydych wedi'i wylio heddiw ar bob dyfais sy'n cysoni ystadegau gwylio, gan gynnwys Byrion."
+    Daily Shorts Limit: "Mae'n cyfrif y Byrion rydych wedi'u gwylio ar y ddyfais hon heddiw."
+    Take a Break Reminder: "Mae'n seibio'r fideo ar ôl gwylio am gymaint â hyn. Mae seibiant o 10 munud neu fwy yn ailddechrau'r cyfrif."
+    Bedtime Reminder: "Mae'n seibio'r fideo ac yn eich atgoffa i roi'r gorau i wylio rhwng yr amser dechrau a'r amser gorffen."
     Shorten View Counts: Mae'n dangos cyfrif gwylwyr, sylwadau a hoffiadau sylwadau y mae YouTube eisoes wedi'u talgrynnu ar ffurf fer, e.e. 14K yn lle 14,000. Dangosir yr union gyfrifon yn llawn bob amser.
   Subscription Settings:
     Fetch Feed on Startup: Pan fydd wedi'i alluogi, bydd OpenTubeX yn cyrchu eich ffrwd tanysgrifiadau'n awtomatig wrth gychwyn a phan agorir ffenestr newydd.
@@ -2466,3 +2493,17 @@ Yattee Server:
 Yattee Fallback Warning: Mae'r cais hwn yn osgoi'r gweinydd Yattee rydych wedi'i ffurfweddu ac yn cysylltu'n uniongyrchol â YouTube, gan ddatgelu eich cyfeiriad IP.
 Update With Package Manager: 'Diweddaru gyda {packageManager}:'
 Update Command Copied: 'Wedi copïo''r gorchymyn diweddaru'
+Digital Wellbeing:
+  Watch time limit almost reached: "{duration} ar ôl tan eich terfyn amser gwylio dyddiol"
+  Shorts limit almost reached: "{duration} ar ôl tan eich terfyn Byrion dyddiol"
+  Daily watch time limit reached: "Wedi cyrraedd y terfyn amser gwylio dyddiol"
+  Daily Shorts limit reached: "Wedi cyrraedd y terfyn Byrion dyddiol"
+  Watched today: "Rydych wedi gwylio {duration} heddiw."
+  Shorts watched today: "Rydych wedi gwylio {duration} o Fyrion heddiw."
+  15 More Minutes: "15 Munud Arall"
+  Ignore for Today: "Anwybyddu am Heddiw"
+  Time to take a break: "Mae'n amser cymryd seibiant"
+  Watching for: "Rydych wedi bod yn gwylio ers {duration}."
+  Time for bed: "Mae'n amser gwely"
+  Bedtime started at: "Dechreuodd eich amser gwely am {time}."
+  Remind Me in 10 Minutes: "Atgoffa Fi Ymhen 10 Munud"

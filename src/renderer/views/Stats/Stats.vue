@@ -335,8 +335,9 @@ import StatsDeviceRepair from './StatsDeviceRepair.vue'
 import store from '../../store'
 import { showToast } from '../../helpers/utils'
 import { formatDate } from '../../helpers/dateFormat'
-import { containsWatchStatsDevice, watchSecondsForDevice } from '../../helpers/sync-watch-stats'
+import { containsWatchStatsDevice, syncedWatchStatsAvailable, watchSecondsForDevice } from '../../helpers/sync-watch-stats'
 import { clampOverlayScrollLeft } from '../../helpers/overlayScrollbars'
+import { formatWholeMinutes as formatMinutes } from '../../helpers/digitalWellbeing'
 import { getCurrentSyncServerDeviceInfo, getSyncServerDeviceIcon } from '../../helpers/sync-server-sessions'
 
 const { locale, t } = useI18n()
@@ -350,15 +351,7 @@ const syncedDevices = computed(() => store.getters.getSyncedWatchStats)
 const currentDeviceId = computed(() => store.getters.getSyncServerDeviceId)
 const currentDeviceName = computed(() => store.getters.getSyncServerDeviceName)
 const currentDevicePlatform = ref('')
-const syncStatsVisible = computed(() => {
-  const supported = store.getters.getSyncServerWatchStatsSupported
-  return store.getters.getSyncServerEnabled &&
-    store.getters.getSyncServerToken &&
-    store.getters.getSyncServerPrivacyMode === 'enhanced' &&
-    supported !== false &&
-    (supported === true || syncedDevices.value.length > 0) &&
-    store.getters.getSyncServerSyncWatchStats
-})
+const syncStatsVisible = computed(() => syncedWatchStatsAvailable(store.getters))
 const selectedDevice = ref('all')
 const deviceSegments = useTemplateRef('deviceSegments')
 const deviceSegmentTrack = useTemplateRef('deviceSegmentTrack')
@@ -577,18 +570,7 @@ function formatDuration(seconds) {
 }
 
 function formatWholeMinutes(totalMinutes) {
-  const hours = Math.floor(totalMinutes / 60)
-  const minutes = totalMinutes % 60
-
-  if (hours === 0) {
-    return t('Stats.Minutes', { minutes })
-  }
-
-  if (minutes === 0) {
-    return t('Stats.Hours', { hours })
-  }
-
-  return t('Stats.Hours and minutes', { hours, minutes })
+  return formatMinutes(t, totalMinutes)
 }
 
 function formatDataLabel(label, seconds) {
@@ -626,8 +608,18 @@ function startOfDay(date) {
   return result
 }
 
+const todayHint = computed(() => {
+  const limitMinutes = store.getters.getDailyWatchTimeLimit
+  // The limit counts all devices, so other selections would not match it.
+  if (limitMinutes === 0 || (syncStatsVisible.value && selectedDevice.value !== 'all')) return t('Stats.So far today')
+  const remaining = limitMinutes * 60 - todaySeconds.value
+  return remaining > 0
+    ? t('Stats.Left of daily limit', { duration: formatDuration(remaining), limit: formatWholeMinutes(limitMinutes) })
+    : t('Stats.Daily limit reached', { limit: formatWholeMinutes(limitMinutes) })
+})
+
 const summaries = computed(() => [
-  { label: t('Stats.Today'), seconds: todaySeconds.value, hint: t('Stats.So far today') },
+  { label: t('Stats.Today'), seconds: todaySeconds.value, hint: todayHint.value },
   {
     label: t('Stats.This week'),
     seconds: currentWeekSeconds.value,

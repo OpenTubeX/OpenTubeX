@@ -745,11 +745,11 @@ export default defineComponent({
       const days = Number(this.$store.getters.getHistoryRetentionDays)
       return Number.isInteger(days) && days > 0
     },
-    enableWatchStats: function () {
-      return this.$store.getters.getEnableWatchStats
-    },
     enableVideoMetadataCache: function () {
       return process.env.IS_ELECTRON && this.$store.getters.getEnableVideoMetadataCache
+    },
+    wellbeingPauseRequest: function () {
+      return this.$store.getters.getWellbeingPauseRequest
     },
     watchStatsResetVersion: function () {
       return this.$store.getters.getWatchStatsResetVersion
@@ -1469,11 +1469,6 @@ export default defineComponent({
     userPlaylistsReady() {
       this.onMountedDependOnLocalStateLoading()
     },
-    enableWatchStats(enabled) {
-      if (!enabled) {
-        this.watchTimeTracker.clear()
-      }
-    },
     enableVideoMetadataCache(enabled) {
       if (enabled && !this.isLoading) {
         this.updateVideoMetadataCache()
@@ -1481,13 +1476,13 @@ export default defineComponent({
         this.videoMetadataHistory = null
       }
     },
-    rememberHistory(enabled) {
-      if (!enabled) {
-        this.watchTimeTracker.clear()
-      }
-    },
     watchStatsResetVersion() {
       this.watchTimeTracker.clear()
+    },
+    wellbeingPauseRequest(request) {
+      if (request && (!request.shortsOnly || this.isShort) && !this.isPlaybackPaused()) {
+        this.$refs.player?.pause()
+      }
     },
     canSkipToNextVideo() {
       this.syncMediaSessionSkipHandlers()
@@ -1511,9 +1506,11 @@ export default defineComponent({
     },
   },
   created: function () {
+    // Digital wellbeing limits count playback even when watch statistics are off.
+    this.watchTimeIsShort = false
     this.watchTimeTracker = createWatchTimeTracker(
-      () => this.rememberHistory && this.enableWatchStats && !this.isPlaybackPaused() && !this.chromecastStatus?.buffering,
-      (date, seconds) => this.$store.dispatch('recordWatchTime', { date, seconds })
+      () => !this.isPlaybackPaused() && !this.chromecastStatus?.buffering,
+      (date, seconds) => this.$store.dispatch('recordPlaybackTime', { date, seconds, isShort: this.watchTimeIsShort })
     )
     retainIosMediaSources(() => this.legacyFormats.map(format => format.url))
     this.theatreModeAnimations = []
@@ -4561,6 +4558,11 @@ export default defineComponent({
      */
     updateCurrentChapter: function (currentSeconds) {
       this.trackRecommendationWatch(currentSeconds)
+      if (this.watchTimeIsShort !== this.isShort) {
+        // Attribute pending time to the kind of video it was played in.
+        this.watchTimeTracker.flush()
+        this.watchTimeIsShort = this.isShort
+      }
       this.watchTimeTracker.track()
       this.markAsWatchedIfFinished(currentSeconds)
       this.keepHistoryEntryAlive(currentSeconds)
@@ -4871,6 +4873,12 @@ export default defineComponent({
     handleVideoPlay() {
       if (this.chromecastActive) {
         this.$refs.player?.pause()
+        return
+      }
+      const wellbeingBlock = this.$store.getters.getWellbeingPlaybackBlock(this.isShort)
+      if (wellbeingBlock) {
+        this.$refs.player?.pause()
+        this.$store.commit('showWellbeingPrompt', wellbeingBlock)
         return
       }
       this.waitingForPlaylistContinuation = false
@@ -5395,6 +5403,11 @@ export default defineComponent({
         return
       }
       this.handleWatchProgressAutoSaveWhenProgressEnabled()
+      // A bedtime reminder that waited for this video replaces whatever plays next.
+      if (this.$store.getters.getWellbeingBedtimeWaiting) {
+        this.$store.commit('showWellbeingPrompt', 'bedtime')
+        return
+      }
       // Standalone YouTube-style Shorts stop for the replay control instead of
       // advancing. Playlist Shorts still follow the playlist autoplay setting.
       if (this.customShortsPlayerActive && this.isStandaloneShort) {
@@ -5406,7 +5419,7 @@ export default defineComponent({
       if (this.isStandaloneShort) {
         return
       }
-      if (!this.autoplayEnabled) {
+      if (!this.autoplayEnabled || this.$store.getters.getWellbeingStopsAutoplay) {
         return
       }
 

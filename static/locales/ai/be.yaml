@@ -77,6 +77,8 @@ Search Filters:
     Prioritize: Аддаваць перавагу
     Popularity: Папулярнасць
 Stats:
+  Left of daily limit: "Засталося {duration} з Вашага дзённага ліміту {limit}"
+  Daily limit reached: "Дасягнуты дзённы ліміт {limit}"
   Replace old device: "Замяніць старую прыладу"
   Replacement explanation: "Аб’ядноўвайце {device} з гэтай прыладай толькі калі абодва запісы належаць адной фізічнай прыладзе."
   Overlapping days: "Дні ў абедзвюх гісторыях: {count}"
@@ -1112,6 +1114,25 @@ Settings:
     Refresh Subscriptions While App Is Closed: "Абнаўляць падпіскі, калі праграма закрыта"
     Notify About New Uploads: Апавяшчаць пра новыя загрузкі
   Distraction Free Settings:
+    Digital Wellbeing:
+      Grayscale: "Адценні шэрага"
+      Off: "Выключана"
+      Always: "Заўсёды"
+      During Bedtime: "У час сну"
+      After the Daily Limit: "Пасля дзённага ліміту"
+      Daily Watch Time Limit: "Дзённы ліміт часу прагляду"
+      Daily Shorts Limit: "Дзённы ліміт Shorts"
+      When a Limit Is Reached: "Калі ліміт дасягнуты"
+      Remind Me: "Нагадаць"
+      Pause Playback: "Прыпыніць прайграванне"
+      Take a Break Reminder: "Нагадванне зрабіць перапынак"
+      Every: "Кожныя {duration}"
+      Bedtime Reminder: "Нагадванне пра час сну"
+      Bedtime Start: "Пачатак часу сну"
+      Bedtime End: "Канец часу сну"
+      Wait Until the Video Ends: "Чакаць заканчэння відэа"
+      Silence Upload Notifications at Bedtime: "Глушыць апавяшчэнні пра новыя загрузкі ў час сну"
+      Stop Autoplay at Bedtime and After the Daily Limit: "Спыняць аўтапрайграванне ў час сну і пасля дзённага ліміту"
     Hide Popularity Graph: "Схаваць графік папулярнасці"
     Enable Block Lists: "Уключыць спісы блакіроўкі"
     AI Video Summaries: Зводкі відэа ад ШІ
@@ -1123,6 +1144,7 @@ Settings:
     Hide Header Sync Indicator: Схаваць індыкатар сінхранізацыі ў загалоўку праграмы
     Hide Repeat Stats: Схаваць статыстыку паўтораў
     Sections:
+      Digital Wellbeing: "Лічбавы дабрабыт"
       Visible While Paused: Бачныя падчас паўзы ў поўным акне або поўнаэкранным рэжыме
     Hide Channel Avatars: Хаваць аватары каналаў
     Shorten View Counts: Скарачаць колькасць праглядаў, каментарыяў і ўпадабанняў каментарыяў
@@ -2180,6 +2202,11 @@ Tooltips:
     FFmpeg Executable Path: FFmpeg патрэбны для аб'яднання асобных плыняў відэа і аўдыя ды пераўтварэння аўдыя. Прадвызначана OpenTubeX мяркуе, што FFmpeg можна знайсці праз зменную асяроддзя PATH. Пры неабходнасці тут можна задаць іншы шлях.
     Use cookies for subtitles: "Выкарыстоўваць наладжаныя кукі для субцітраў і аўтаматычных перакладаў. Таксама ўключаецца праз «Заўсёды выкарыстоўваць кукі»."
   Distraction Free Settings:
+    Grayscale: "Паказвае ўсю праграму, уключаючы відэа, у адценнях шэрага, каб яна менш прыцягвала ўвагу. Варыянт «У час сну» выкарыстоўвае расклад нагадвання пра час сну."
+    Daily Watch Time Limit: "Улічвае ўсё, што Вы прагледзелі сёння на ўсіх прыладах, якія сінхранізуюць статыстыку прагляду, уключаючы Shorts."
+    Daily Shorts Limit: "Улічвае Shorts, якія Вы прагледзелі сёння на гэтай прыладзе."
+    Take a Break Reminder: "Прыпыняе відэа пасля такога часу прагляду. Перапынак 10 хвілін або больш пачынае адлік нанова."
+    Bedtime Reminder: "Прыпыняе відэа і нагадвае Вам спыніць прагляд паміж часам пачатку і канца."
     Shorten View Counts: Паказвае колькасць праглядаў, каментарыяў і ўпадабанняў каментароў у скарочаным выглядзе, ужо акругленым YouTube, напрыклад 14 тыс. замест 14 000. Дакладная колькасць заўсёды паказваецца цалкам.
     Hide Videos on Watch: Хавае прагледжаныя відэа ва ўкладках «Відэа», Shorts і «Ужывую» на старонках падпісак і каналаў. Гэта не ўплывае на ўкладку «Галоўная» на старонках каналаў
   Subscription Settings:
@@ -2535,3 +2562,17 @@ Yattee Server:
 Yattee Fallback Warning: Гэты запыт абыходзіць наладжаны вамі сервер Yattee і падключаецца непасрэдна да YouTube, раскрываючы ваш IP-адрас.
 Update With Package Manager: 'Абнавіць праз {packageManager}:'
 Update Command Copied: 'Каманда абнаўлення скапіравана'
+Digital Wellbeing:
+  Watch time limit almost reached: "Да Вашага дзённага ліміту часу прагляду засталося {duration}"
+  Shorts limit almost reached: "Да Вашага дзённага ліміту Shorts засталося {duration}"
+  Daily watch time limit reached: "Дзённы ліміт часу прагляду дасягнуты"
+  Daily Shorts limit reached: "Дзённы ліміт Shorts дасягнуты"
+  Watched today: "Сёння Вы глядзелі відэа {duration}."
+  Shorts watched today: "Сёння Вы глядзелі Shorts {duration}."
+  15 More Minutes: "Яшчэ 15 хвілін"
+  Ignore for Today: "Ігнараваць сёння"
+  Time to take a break: "Час зрабіць перапынак"
+  Watching for: "Вы глядзіце ўжо {duration}."
+  Time for bed: "Пара спаць"
+  Bedtime started at: "Ваш час сну пачаўся ў {time}."
+  Remind Me in 10 Minutes: "Нагадаць праз 10 хвілін"

@@ -1,10 +1,10 @@
 import { readFile, rm, writeFile, rename } from 'node:fs/promises'
-import { createUploadNotificationState, forgetUnconfiguredFeeds, getUploadUrl, takeVisibleUploads } from '../newUploadNotifications.js'
+import { createUploadNotificationState, forgetUnconfiguredFeeds, getUploadUrl, isWithinQuietHours, takeVisibleUploads } from '../newUploadNotifications.js'
 
 /**
  * Single desktop source of truth for new-upload notifications, shared by
  * foreground refreshes and the background refresh process.
- * @param {{ file: string, show: (notification: { title: string, body: string, url: string }) => void }} options
+ * @param {{ file: string, show: (notification: { title: string, body: string, url: string, silent: boolean }) => void }} options
  */
 export function createUploadNotifier({ file, show }) {
   let configuration = null
@@ -72,6 +72,7 @@ export function createUploadNotifier({ file, show }) {
         const uploads = takeVisibleUploads(await load(), channelId, feedType, entries, channel.membersOnly === true)
         await save()
 
+        const silent = isWithinQuietHours(configuration.quietHours)
         for (const upload of uploads) {
           // Ended streams in the live feed are announced like videos.
           const type = upload.live ? 'live' : feedType === 'live' ? 'videos' : feedType
@@ -79,7 +80,8 @@ export function createUploadNotifier({ file, show }) {
             show({
               title: (configuration.titles?.[type] ?? '{channel}').replaceAll('{channel}', channel.name || channelId),
               body: upload.title,
-              url: getUploadUrl(feedType, upload.id)
+              url: getUploadUrl(feedType, upload.id),
+              silent
             })
           } catch (error) {
             // One failed notification must not skip the others.

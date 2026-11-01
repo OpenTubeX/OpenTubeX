@@ -64,6 +64,8 @@ Search Listing:
     Members Only: Chỉ dành cho hội viên
     Possibly AI-generated: Có thể do AI tạo
 Stats:
+  Left of daily limit: "Còn {duration} trong giới hạn hằng ngày {limit} của bạn"
+  Daily limit reached: "Đã đạt giới hạn hằng ngày {limit}"
   Replace old device: "Thay thế thiết bị cũ"
   Replacement explanation: "Chỉ kết hợp {device} với thiết bị này nếu cả hai mục thuộc cùng một thiết bị vật lý."
   Overlapping days: "Số ngày có trong cả hai lịch sử: {count}"
@@ -1085,6 +1087,25 @@ Settings:
     Refresh Subscriptions While App Is Closed: "Làm mới đăng ký khi ứng dụng đã đóng"
     Notify About New Uploads: Thông báo nội dung mới tải lên
   Distraction Free Settings:
+    Digital Wellbeing:
+      Grayscale: "Thang độ xám"
+      Off: "Tắt"
+      Always: "Luôn luôn"
+      During Bedtime: "Trong giờ đi ngủ"
+      After the Daily Limit: "Sau khi đạt giới hạn hằng ngày"
+      Daily Watch Time Limit: "Giới hạn thời gian xem hằng ngày"
+      Daily Shorts Limit: "Giới hạn Shorts hằng ngày"
+      When a Limit Is Reached: "Khi đạt giới hạn"
+      Remind Me: "Nhắc tôi"
+      Pause Playback: "Tạm dừng phát"
+      Take a Break Reminder: "Lời nhắc nghỉ giải lao"
+      Every: "Mỗi {duration}"
+      Bedtime Reminder: "Lời nhắc giờ đi ngủ"
+      Bedtime Start: "Bắt đầu giờ đi ngủ"
+      Bedtime End: "Kết thúc giờ đi ngủ"
+      Wait Until the Video Ends: "Chờ đến khi video kết thúc"
+      Silence Upload Notifications at Bedtime: "Tắt tiếng thông báo nội dung mới tải lên trong giờ đi ngủ"
+      Stop Autoplay at Bedtime and After the Daily Limit: "Dừng tự động phát trong giờ đi ngủ và sau khi đạt giới hạn hằng ngày"
     Hide Popularity Graph: "Ẩn biểu đồ mức độ phổ biến"
     Enable Block Lists: "Bật danh sách chặn"
     AI Video Summaries: Bản tóm tắt video bằng AI
@@ -1096,6 +1117,7 @@ Settings:
     Hide Header Sync Indicator: Ẩn chỉ báo đồng bộ hóa trên thanh đầu ứng dụng
     Hide Repeat Stats: Ẩn thống kê lặp lại
     Sections:
+      Digital Wellbeing: "Sức khỏe kỹ thuật số"
       Visible While Paused: Hiện khi tạm dừng ở chế độ toàn cửa sổ / toàn màn hình
     Hide Channel Avatars: Ẩn ảnh đại diện kênh
     Shorten View Counts: Rút gọn số lượt xem, bình luận và lượt thích bình luận
@@ -2121,6 +2143,11 @@ Tooltips:
     FFmpeg Executable Path: Cần FFmpeg để ghép luồng video và âm thanh riêng biệt cũng như chuyển đổi âm thanh. Theo mặc định, OpenTubeX giả định có thể tìm thấy FFmpeg qua biến môi trường PATH. Bạn có thể đặt đường dẫn tùy chỉnh tại đây nếu cần.
     Use cookies for subtitles: "Dùng cookie đã cấu hình cho phụ đề và bản dịch tự động. Cũng được bật bởi \"Luôn dùng cookie\"."
   Distraction Free Settings:
+    Grayscale: "Hiển thị toàn bộ ứng dụng, kể cả video, bằng các sắc xám để ít thu hút sự chú ý hơn. \"Trong giờ đi ngủ\" tuân theo lịch của lời nhắc giờ đi ngủ."
+    Daily Watch Time Limit: "Tính những gì bạn đã xem hôm nay trên mọi thiết bị đồng bộ thống kê xem, kể cả Shorts."
+    Daily Shorts Limit: "Tính các Shorts bạn đã xem hôm nay trên thiết bị này."
+    Take a Break Reminder: "Tạm dừng video sau khi xem trong khoảng thời gian này. Khoảng nghỉ từ 10 phút trở lên sẽ bắt đầu đếm lại."
+    Bedtime Reminder: "Tạm dừng video và nhắc bạn ngừng xem trong khoảng giữa giờ bắt đầu và giờ kết thúc."
     Shorten View Counts: Hiện số lượt xem, bình luận và lượt thích bình luận theo dạng rút gọn mà YouTube đã làm tròn, ví dụ 14K thay vì 14.000. Số chính xác luôn được hiện đầy đủ.
   Subscription Settings:
     Fetch Feed on Startup: Khi bật, OpenTubeX sẽ tự động tải bảng tin đăng ký lúc khởi động và khi mở cửa sổ mới.
@@ -2480,3 +2507,17 @@ Yattee Server:
 Yattee Fallback Warning: Yêu cầu này bỏ qua máy chủ Yattee bạn đã cấu hình và kết nối trực tiếp đến YouTube, làm lộ địa chỉ IP của bạn.
 Update With Package Manager: 'Cập nhật bằng {packageManager}:'
 Update Command Copied: 'Đã sao chép lệnh cập nhật'
+Digital Wellbeing:
+  Watch time limit almost reached: "Còn {duration} là đạt giới hạn thời gian xem hằng ngày của bạn"
+  Shorts limit almost reached: "Còn {duration} là đạt giới hạn Shorts hằng ngày của bạn"
+  Daily watch time limit reached: "Đã đạt giới hạn thời gian xem hằng ngày"
+  Daily Shorts limit reached: "Đã đạt giới hạn Shorts hằng ngày"
+  Watched today: "Hôm nay bạn đã xem {duration}."
+  Shorts watched today: "Hôm nay bạn đã xem Shorts trong {duration}."
+  15 More Minutes: "Thêm 15 phút"
+  Ignore for Today: "Bỏ qua hôm nay"
+  Time to take a break: "Đã đến lúc nghỉ giải lao"
+  Watching for: "Bạn đã xem liên tục {duration}."
+  Time for bed: "Đã đến giờ đi ngủ"
+  Bedtime started at: "Giờ đi ngủ của bạn đã bắt đầu lúc {time}."
+  Remind Me in 10 Minutes: "Nhắc tôi sau 10 phút"

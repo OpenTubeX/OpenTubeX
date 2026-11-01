@@ -64,6 +64,8 @@ Search Listing:
     Members Only: Endast medlemmar
     Possibly AI-generated: Möjligen AI-genererad
 Stats:
+  Left of daily limit: "{duration} kvar av din dagliga gräns på {limit}"
+  Daily limit reached: "Den dagliga gränsen på {limit} har nåtts"
   Replace old device: "Ersätt gammal enhet"
   Replacement explanation: "Slå bara ihop {device} med den här enheten om båda posterna tillhör samma fysiska enhet."
   Overlapping days: "Dagar i båda historikerna: {count}"
@@ -1079,6 +1081,25 @@ Settings:
     Refresh Subscriptions While App Is Closed: "Uppdatera prenumerationer medan appen är stängd"
     Notify About New Uploads: Avisera om nya uppladdningar
   Distraction Free Settings:
+    Digital Wellbeing:
+      Grayscale: "Gråskala"
+      Off: "Av"
+      Always: "Alltid"
+      During Bedtime: "Vid läggdags"
+      After the Daily Limit: "Efter den dagliga gränsen"
+      Daily Watch Time Limit: "Daglig gräns för visningstid"
+      Daily Shorts Limit: "Daglig gräns för Shorts"
+      When a Limit Is Reached: "När en gräns nås"
+      Remind Me: "Påminn mig"
+      Pause Playback: "Pausa uppspelningen"
+      Take a Break Reminder: "Påminnelse om att ta en paus"
+      Every: "Var {duration}"
+      Bedtime Reminder: "Påminnelse om läggdags"
+      Bedtime Start: "Start för läggdags"
+      Bedtime End: "Slut för läggdags"
+      Wait Until the Video Ends: "Vänta tills videon är slut"
+      Silence Upload Notifications at Bedtime: "Tysta uppladdningsaviseringar vid läggdags"
+      Stop Autoplay at Bedtime and After the Daily Limit: "Stoppa automatisk uppspelning vid läggdags och efter den dagliga gränsen"
     Hide Popularity Graph: "Dölj popularitetsgraf"
     Enable Block Lists: "Aktivera blockeringslistor"
     AI Video Summaries: AI-videosammanfattningar
@@ -1090,6 +1111,7 @@ Settings:
     Hide Header Sync Indicator: Dölj synkroniseringsindikatorn i apphuvudet
     Hide Repeat Stats: Dölj upprepningsstatistik
     Sections:
+      Digital Wellbeing: "Digitalt välmående"
       Visible While Paused: Synligt under paus i helfönster eller helskärm
     Hide Channel Avatars: Dölj kanalavatarer
     Shorten View Counts: Förkorta antal visningar, kommentarer och gilla-markeringar på kommentarer
@@ -2102,6 +2124,11 @@ Tooltips:
     FFmpeg Executable Path: FFmpeg krävs för att sammanfoga separata video- och ljudströmmar samt för ljudkonvertering. Som standard förutsätter OpenTubeX att FFmpeg kan hittas via miljövariabeln PATH. Vid behov kan du ange en egen sökväg här.
     Use cookies for subtitles: "Använd de konfigurerade kakorna för undertexter och automatiska översättningar. Aktiveras även av ”Använd alltid kakor”."
   Distraction Free Settings:
+    Grayscale: "Visar hela appen, inklusive videor, i gråskala så att den drar till sig mindre uppmärksamhet. ”Vid läggdags” följer schemat för påminnelsen om läggdags."
+    Daily Watch Time Limit: "Räknar det du har tittat på i dag på alla enheter som synkroniserar visningsstatistik, inklusive Shorts."
+    Daily Shorts Limit: "Räknar de Shorts du har tittat på på den här enheten i dag."
+    Take a Break Reminder: "Pausar videon efter så här lång visningstid. En paus på 10 minuter eller mer startar om räkningen."
+    Bedtime Reminder: "Pausar videon och påminner dig om att sluta titta mellan start- och sluttiden."
     Shorten View Counts: Visar antal visningar, kommentarer och gilla-markeringar på kommentarer i den förkortade form som YouTube redan har avrundat, exempelvis 14 tn i stället för 14 000. Exakta antal visas alltid i sin helhet.
   Subscription Settings:
     Fetch Feed on Startup: När funktionen är aktiverad hämtar OpenTubeX automatiskt ditt prenumerationsflöde vid start och när ett nytt fönster öppnas.
@@ -2461,3 +2488,17 @@ Yattee Server:
 Yattee Fallback Warning: Den här begäran kringgår din konfigurerade Yattee-server och ansluter direkt till YouTube, vilket avslöjar din IP-adress.
 Update With Package Manager: 'Uppdatera med {packageManager}:'
 Update Command Copied: 'Uppdateringskommandot har kopierats'
+Digital Wellbeing:
+  Watch time limit almost reached: "{duration} kvar av din dagliga gräns för visningstid"
+  Shorts limit almost reached: "{duration} kvar av din dagliga gräns för Shorts"
+  Daily watch time limit reached: "Den dagliga gränsen för visningstid har nåtts"
+  Daily Shorts limit reached: "Den dagliga gränsen för Shorts har nåtts"
+  Watched today: "Du har tittat i {duration} i dag."
+  Shorts watched today: "Du har tittat på Shorts i {duration} i dag."
+  15 More Minutes: "15 minuter till"
+  Ignore for Today: "Ignorera i dag"
+  Time to take a break: "Dags att ta en paus"
+  Watching for: "Du har tittat i {duration}."
+  Time for bed: "Dags att gå och lägga sig"
+  Bedtime started at: "Din läggdags började kl. {time}."
+  Remind Me in 10 Minutes: "Påminn mig om 10 minuter"
