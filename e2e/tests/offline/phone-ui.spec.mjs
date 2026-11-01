@@ -1,6 +1,6 @@
 import { expectScrollAtRenderedEnd, setWindowSize, test, expect } from '../../helpers/app.mjs'
 import { openMockedVideo } from '../../helpers/player.mjs'
-import { mockPlayableWatchPage, watchViewHandle } from '../../helpers/watch.mjs'
+import { clickVideoAction, mockPlayableWatchPage, watchViewHandle } from '../../helpers/watch.mjs'
 
 async function expectNoScrollbarOverflow(scroller) {
   await expect.poll(() => scroller.evaluate(element => {
@@ -8,24 +8,6 @@ async function expectNoScrollbarOverflow(scroller) {
     return element.scrollTop === 0 && scrollbar &&
       (!scrollbar.classList.contains('os-scrollbar-visible') || scrollbar.classList.contains('os-scrollbar-unusable'))
   })).toBe(true)
-}
-
-/**
- * Narrow toolbars move some video actions to their More menu.
- * @param {import('@playwright/test').Page} page
- * @param {RegExp} name
- */
-async function clickVideoAction(page, name) {
-  const toolbar = page.locator('.videoOptions')
-  const button = toolbar.getByRole('button', { name })
-  const more = toolbar.getByRole('button', { name: 'More options', exact: true })
-  await expect(button.or(more).first()).toBeVisible()
-  if (await button.count() > 0) {
-    await button.click()
-  } else {
-    await more.click()
-    await page.locator('dialog[open]').getByRole('button', { name }).click()
-  }
 }
 
 /** @param {import('@playwright/test').Locator} toolbar */

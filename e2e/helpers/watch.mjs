@@ -492,3 +492,41 @@ export function watchViewHandle(page, tabId = null) {
     return watchView
   }, tabId)
 }
+
+/**
+ * Narrow toolbars move some video actions to their More menu.
+ * @param {import('@playwright/test').Page} page
+ * @param {string | RegExp} name
+ */
+export async function clickVideoAction(page, name) {
+  const toolbar = page.locator('.watchVideoInfo .videoOptions')
+  const button = toolbar.getByRole('button', { name })
+  const more = toolbar.getByRole('button', { name: 'More options', exact: true })
+  await expect(button.or(more).first()).toBeVisible()
+  if (await button.count() > 0) {
+    await button.click()
+  } else {
+    await more.click()
+    await page.locator('.moreActionsList').getByRole('button', { name }).click()
+  }
+}
+
+/**
+ * Expects a video action in the toolbar or its More menu, and leaves the menu closed.
+ * @param {import('@playwright/test').Page} page
+ * @param {string | RegExp} name
+ */
+export async function expectVideoAction(page, name) {
+  const toolbar = page.locator('.watchVideoInfo .videoOptions')
+  const button = toolbar.getByRole('button', { name })
+  const more = toolbar.getByRole('button', { name: 'More options', exact: true })
+  await expect(button.or(more).first()).toBeVisible()
+  if (await button.count() > 0) {
+    return
+  }
+  await more.click()
+  const menu = page.locator('.moreActionsList')
+  await expect(menu.getByRole('button', { name })).toBeVisible()
+  await page.keyboard.press('Escape')
+  await expect(menu).toHaveCount(0)
+}

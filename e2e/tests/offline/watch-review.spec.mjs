@@ -1,7 +1,7 @@
 import path from 'node:path'
 import { test, expect, repoRoot, setWindowSize } from '../../helpers/app.mjs'
 import { openMockedVideo } from '../../helpers/player.mjs'
-import { mockPlayableWatchPage, watchViewHandle } from '../../helpers/watch.mjs'
+import { expectVideoAction, mockPlayableWatchPage, watchViewHandle } from '../../helpers/watch.mjs'
 
 async function expectWatchScrollRange(page) {
   await expect.poll(() => page.evaluate(() => {
@@ -369,7 +369,7 @@ test.describe('download opened without a connection', () => {
     await expect(page.locator('.connectionStatus')).toHaveText('Back online')
     await expect(page.locator('.watchVideoRecommendations')).toBeVisible()
     await expect(page.locator('.watchVideoRecommendations')).not.toContainText('Other saved video')
-    await expect(page.locator('.watchVideoInfo').getByRole('button', { name: /transcript/i })).toBeVisible()
+    await expectVideoAction(page, /transcript/i)
     await expect(page.locator('.ftVideoPlayer')).toBeVisible()
     const description = await watch.evaluate(vm => vm.videoDescription)
     expect(description.trim()).not.toBe('')
@@ -460,7 +460,7 @@ test.describe('download opened without a connection', () => {
       window.dispatchEvent(new Event('online'))
     })
     await expect(page.locator('.watchVideoRecommendations')).toContainText('Online suggestion')
-    await expect(page.locator('.watchVideoInfo').getByRole('button', { name: /transcript/i })).toBeVisible()
+    await expectVideoAction(page, /transcript/i)
     await expect(page.locator('.videoDescription .description')).toContainText('Restored Invidious description with a link.')
     await expect(page.locator('.videoDescription .description a')).toHaveAttribute('href', 'https://example.test/info')
     expect(await video.evaluate((element, expectedSource) => element.isConnected && element.currentSrc === expectedSource, source)).toBe(true)
@@ -495,7 +495,7 @@ test.describe('download opened without a connection', () => {
       window.dispatchEvent(new Event('online'))
     })
     await expect(page.locator('.watchVideoRecommendations')).not.toContainText('Other saved video')
-    await expect(page.locator('.watchVideoInfo').getByRole('button', { name: /transcript/i })).toBeVisible()
+    await expectVideoAction(page, /transcript/i)
     expect(await video.evaluate((element, expectedSource) => element.isConnected && element.currentSrc === expectedSource, source)).toBe(true)
   })
 
