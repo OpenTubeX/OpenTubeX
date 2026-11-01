@@ -1002,8 +1002,15 @@ const mutations = {
     state.settingsWindowView = payload
   },
 
+  /**
+   * @param {object} state
+   * @param {string | { section: string, subpage?: string } | null} payload the section, optionally with
+   * the `data-settings-subpage` button to open after showing it
+   */
   setSettingsWindowSection (state, payload) {
-    state.settingsWindowSectionRequest = payload === null ? null : { section: payload }
+    state.settingsWindowSectionRequest = payload === null
+      ? null
+      : typeof payload === 'string' ? { section: payload } : payload
   },
   rememberSettingsWindowSection (state, payload) {
     state.settingsWindowSection = payload

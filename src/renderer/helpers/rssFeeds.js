@@ -403,11 +403,7 @@ export async function refreshRssFeeds(feeds) {
   }
 }
 
-/** Opens the feed manager once the settings show the RSS feed section */
-export const rssFeedManagerRequested = shallowRef(false)
-
 export function openRssFeedManager() {
-  rssFeedManagerRequested.value = true
-  store.commit('setSettingsWindowSection', 'subscriptions')
+  store.commit('setSettingsWindowSection', { section: 'subscriptions', subpage: 'rss-feeds' })
   store.dispatch('showSettingsWindow')
 }

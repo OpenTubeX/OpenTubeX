@@ -896,6 +896,10 @@ watch([
     await nextTick()
     await activeSettingsSectionRef.value?.activateTab('storage')
   }
+  if (request.subpage) {
+    await nextTick()
+    settingsContentRef.value?.querySelector(`[data-settings-subpage="${request.subpage}"]`)?.click()
+  }
 }, { immediate: true })
 watch([() => props.searchTarget, canNavigateSettings], async ([target, canNavigate]) => {
   if (!target || !canNavigate) return

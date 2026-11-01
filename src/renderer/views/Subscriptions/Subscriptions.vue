@@ -324,7 +324,7 @@
           </button>
         </FtTabs>
         <FtSubscriptionGroupBar
-          v-if="hasSubscriptionGroups"
+          v-if="hasSubscriptionGroups && currentTab !== 'feeds'"
           ref="subscriptionGroupsRef"
           class="subscriptionGroups"
           panel-id="subscriptionsPanel"

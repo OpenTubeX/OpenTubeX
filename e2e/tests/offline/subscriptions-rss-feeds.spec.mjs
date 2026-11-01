@@ -233,6 +233,31 @@ test.describe('with followed feeds', () => {
     await expect(panel.getByText('1 feed could not be refreshed.')).toBeHidden()
   })
 
+  test('opens the feed manager from the RSS tab after settings were opened before', async ({ page }) => {
+    await mockFeeds(page)
+    const section = await goToSettingsSection(page, 'subscriptions')
+    const manager = page.locator('.settingsSubpageContent')
+    await page.locator('.settingsCloseButton').click()
+    await expect(page.locator('.settingsWindow')).toBeHidden()
+
+    await goTo(page, 'subscriptions')
+    await page.locator('[data-rss-feeds-tab]').click()
+    const header = page.locator('.subscriptionsHeader')
+    for (let attempt = 0; attempt < 2; attempt++) {
+      await header.getByRole('button', { name: 'Manage RSS Feeds' }).click()
+      await expect(manager.getByRole('textbox', { name: 'Add Feed' })).toBeVisible()
+      await page.locator('.settingsCloseButton').click()
+      await expect(page.locator('.settingsWindow')).toBeHidden()
+    }
+
+    // The settings button still opens the manager afterwards
+    await goTo(page, 'settings')
+    await page.locator('.settingsWindow').getByRole('banner').getByRole('button', { name: 'Subscriptions' }).click()
+    await expect(manager).toHaveCount(0)
+    await section.getByRole('button', { name: 'Manage RSS Feeds' }).click()
+    await expect(manager.getByRole('textbox', { name: 'Add Feed' })).toBeVisible()
+  })
+
   test('keeps a feed added while another refresh is running', async ({ page }) => {
     await mockFeeds(page)
     await goTo(page, 'subscriptions')
@@ -492,6 +517,29 @@ test.describe('without followed feeds', () => {
     await expect(panel.getByText("You don't follow any RSS feeds yet.")).toBeVisible()
     await panel.getByRole('button', { name: 'Manage RSS Feeds' }).click()
     await expect(page.locator('.settingsSubpageContent').getByRole('textbox', { name: 'Add Feed' })).toBeVisible()
+  })
+})
+
+test.describe('with subscription groups', () => {
+  test.use({
+    seed: {
+      settings: {
+        fetchSubscriptionsAutomatically: false,
+        enableRssFeeds: true,
+        followedRssFeeds: [RSS_FEED],
+        subscriptionGroups: [{ id: 'music', name: 'Music', channelIds: [] }]
+      }
+    }
+  })
+
+  test('hides the groups, which only filter channels, on the RSS tab', async ({ page }) => {
+    await mockFeeds(page)
+    await goTo(page, 'subscriptions')
+    const groups = page.getByRole('tablist', { name: 'Groups' })
+    await expect(groups).toBeVisible()
+    await page.locator('[data-rss-feeds-tab]').click()
+    await expect(page.locator('#subscriptionsPanel .ft-list-item')).toHaveCount(2)
+    await expect(groups).toHaveCount(0)
   })
 })
 
