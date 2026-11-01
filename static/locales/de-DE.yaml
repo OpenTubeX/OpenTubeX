@@ -746,6 +746,7 @@ Settings:
     UI Roundness: Rundung der Benutzeroberfläche
     Scrollbar Width: Scrollbar-Breite
     Scroll Speed: Scrollgeschwindigkeit
+    Visible Search Suggestions: Sichtbare Suchvorschläge
     Animation Speed: Animationsgeschwindigkeit
     Show Tab Icons: Tab-Symbole anzeigen
     Load Missing Tab Icons: Fehlende Tab-Symbole laden
@@ -2892,6 +2893,7 @@ Tooltips:
       Hält die Scrollbars immer sichtbar. Wenn deaktiviert, werden sie kurz nach dem Ende der Mausbewegung
       ausgeblendet und bei der nächsten Bewegung wieder eingeblendet.
     Scroll Speed: Ändert die Scrollweite von Mausrad- und Touchpad-Gesten.
+    Visible Search Suggestions: Legt fest, wie viele Einträge aus dem Suchverlauf und Suchvorschläge die Suchleiste anzeigt, bevor ihre Liste scrollt. Die Liste reicht nie über den unteren Fensterrand hinaus.
     Use Fixed Tab Width: Gibt jedem Tab in der horizontalen Tableiste dieselbe Breite, statt sie an den Titel anzupassen.
     Use Custom Title Bar: Ersetzt die Titelleiste des Systems durch die Tableiste oder, wenn die Tabs nicht oben sind, durch die obere Navigation, um vertikalen Platz zu sparen. Die Fenstersteuerung erscheint in der Ecke dieser Leiste.
     Use Grid Player Menu: Ordnet das Einstellungsmenü des Videoplayers als Kachelraster statt als Liste an.

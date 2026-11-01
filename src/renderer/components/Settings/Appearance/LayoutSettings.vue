@@ -268,6 +268,16 @@
         @change="updateScrollSpeed"
       />
       <FtSlider
+        :label="t('Settings.Theme Settings.Visible Search Suggestions')"
+        :tooltip="t('Tooltips.Theme Settings.Visible Search Suggestions')"
+        :default-value="visibleSearchSuggestions"
+        setting-key="visibleSearchSuggestions"
+        :min-value="5"
+        :max-value="50"
+        :step="1"
+        @change="store.dispatch('updateVisibleSearchSuggestions', $event)"
+      />
+      <FtSlider
         :label="t('Settings.Theme Settings.Animation Speed')"
         :default-value="animationSpeed"
         setting-key="animationSpeed"
@@ -578,6 +588,7 @@ const scrollbarThumbWidth = computed(
   () => normalizeScrollbarThumbWidth(store.getters.getScrollbarThumbWidth)
 )
 const scrollSpeed = computed(() => normalizeScrollSpeed(store.getters.getScrollSpeed))
+const visibleSearchSuggestions = computed(() => store.getters.getVisibleSearchSuggestions)
 const animationSpeed = computed(() => store.getters.getAnimationSpeed)
 
 const systemReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)')

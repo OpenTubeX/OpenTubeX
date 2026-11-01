@@ -231,6 +231,7 @@ Settings:
         Rate limited: Serwer blokuje logowanie po zbyt wielu nieudanych próbach. Spróbuj ponownie później.
         Server error: Serwer zwrócił błąd (HTTP {status}).
   Theme Settings:
+    Visible Search Suggestions: "Widoczne sugestie wyszukiwania"
     Use Custom Title Bar: Użyj niestandardowego paska tytułu
     Material Accent Color: "Kolor akcentu Material"
     Material Wallpaper Colors: "Kolory tapety"
@@ -1293,6 +1294,7 @@ Tooltips:
     Refresh Subscriptions While App Is Closed: "Odświeża kanały zgodnie z wybranymi ustawieniami. Na komputerze OpenTubeX pozostaje w zasobniku systemowym do zamknięcia programu. Android określa czas odświeżania w tle."
     Notify About New Uploads: Wyświetla na tym urządzeniu powiadomienia systemowe dla kanałów, dla których włączono powiadomienia w ich ustawieniach subskrypcji. OpenTubeX sprawdza nowe treści podczas odświeżania subskrypcji, więc wybierz interwał odświeżania. Aby otrzymywać powiadomienia, gdy aplikacja jest zamknięta, włącz także odświeżanie, gdy aplikacja jest zamknięta.
   Theme Settings:
+    Visible Search Suggestions: "Określa, ile wpisów historii wyszukiwania i sugestii pokazuje pasek wyszukiwania, zanim jego lista zacznie się przewijać. Lista nigdy nie wychodzi poza dolną krawędź okna."
     Thumbnail Size: "Skaluje miniatury filmów w siatkach i listach. Siatki ze stałą liczbą kolumn lub widok Pełna szerokość zamiast tego wypełniają każdy wiersz, więc tam suwak zmienia tylko miniatury list i Shorts. W oknach wielkości telefonu miniatury siatki są ograniczone do 100%."
     Playlist Thumbnail Size: "Skaluje miniatury filmów na stronach playlist. Siatki ze stałą liczbą kolumn lub widok Pełna szerokość zamiast tego wypełniają każdy wiersz, więc tam suwak zmienia tylko miniatury list i Shorts. W oknach wielkości telefonu miniatury siatki są ograniczone do 100%."
     Compact Settings Categories: "Ukrywa opisy i zmniejsza wysokość kategorii ustawień."
