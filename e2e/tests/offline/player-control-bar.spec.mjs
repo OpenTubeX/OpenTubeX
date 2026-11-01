@@ -236,14 +236,21 @@ test('keeps a valid scroll range when a menu opened from the control bar shrinks
   await expect(menu.getByRole('menuitemradio')).toHaveCount(8)
   await expectValidScrollRange()
 
-  // Dragging the scrollbar leaves the menu open.
+  // Dragging the scrollbar leaves the menu open, also through an adaptation
+  // that keeps the same audio tracks, as playback causes at any time.
   await setAudioTracks(languages)
   await expect(menu.getByRole('menuitemradio')).toHaveCount(languages.length)
   await menu.evaluate(element => element.scrollTo({ top: 0 }))
   const handle = menu.locator(':scope > .os-scrollbar-vertical .os-scrollbar-handle')
+  // The handle follows the scroll offset a frame later; grabbing it before
+  // then presses the empty track where it was.
+  await expect.poll(() => handle.evaluate(element => (
+    element.getBoundingClientRect().top - element.parentElement.getBoundingClientRect().top
+  ))).toBeLessThan(1)
   const handleBounds = await handle.boundingBox()
   await page.mouse.move(handleBounds.x + handleBounds.width / 2, handleBounds.y + handleBounds.height / 2)
   await page.mouse.down()
+  await player.evaluate(element => element.ui.getControls().getPlayer().dispatchEvent({ type: 'adaptation' }))
   await page.mouse.move(handleBounds.x + handleBounds.width / 2, handleBounds.y + handleBounds.height / 2 + 60, { steps: 5 })
   await page.mouse.up()
   await expect.poll(() => menu.evaluate(element => element.scrollTop)).toBeGreaterThan(0)

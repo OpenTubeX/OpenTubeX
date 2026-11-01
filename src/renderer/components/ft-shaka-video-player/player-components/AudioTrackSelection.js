@@ -27,6 +27,12 @@ export class AudioTrackSelection extends shaka.ui.SettingsMenu {
     /** @private */
     this.audioTrackCount_ = 0
 
+    /**
+     * The tracks the menu shows, so events that leave them unchanged keep it.
+     * @private
+     */
+    this.renderedTracks_ = null
+
     this.eventManager.listen(events, 'localeChanged', () => {
       this.updateLocalisedStrings_()
     })
@@ -61,7 +67,13 @@ export class AudioTrackSelection extends shaka.ui.SettingsMenu {
    * @private
    */
   updateAudioTracks_() {
-    const tracks = deduplicateAudioTracks(this.player.getAudioTracks()).values()
+    const tracks = [...deduplicateAudioTracks(this.player.getAudioTracks()).values()]
+
+    // Adaptation and variant changes fire throughout playback. Rebuilding an
+    // unchanged list would cancel a scrollbar drag and reset the menu.
+    const renderedTracks = JSON.stringify(tracks)
+    if (renderedTracks === this.renderedTracks_) return
+    this.renderedTracks_ = renderedTracks
 
     const menu = this.menu
 
