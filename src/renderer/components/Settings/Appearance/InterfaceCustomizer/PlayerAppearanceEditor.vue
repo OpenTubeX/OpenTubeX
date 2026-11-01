@@ -46,61 +46,6 @@ const groups = computed(() => [
         label: t('Settings.Player Settings.Use Quick Playback Speed Bar'),
         tooltip: t('Tooltips.Player Settings.Use Quick Playback Speed Bar'),
       },
-      {
-        key: 'enableScreenshot',
-        action: 'updateEnableScreenshot',
-        label: t('Settings.Player Settings.Screenshot.Enable'),
-      },
-    ],
-  },
-  {
-    id: 'menu',
-    label: t('Settings.Interface Customizer.Player Menu'),
-    settings: [
-      !process.env.IS_IOS && {
-        key: 'showSkipSilenceButton',
-        action: 'updateShowSkipSilenceButton',
-        label: t('Settings.Player Settings.Show Skip Silence Toggle'),
-        tooltip: t('Tooltips.Player Settings.Show Skip Silence Toggle'),
-      },
-      {
-        key: 'showMusicModeToggle',
-        action: 'updateShowMusicModeToggle',
-        label: t('Settings.Player Settings.Show Music Mode Toggle'),
-        tooltip: t('Video.Player.Music Mode Description'),
-      },
-      {
-        key: 'showLightsOffToggle',
-        action: 'updateShowLightsOffToggle',
-        label: t('Settings.Player Settings.Show Lights Off Toggle'),
-      },
-      !process.env.IS_IOS && {
-        key: 'showVolumeBoostToggle',
-        action: 'updateShowVolumeBoostToggle',
-        label: t('Settings.Player Settings.Show Volume Boost Toggle'),
-      },
-      !process.env.IS_IOS && {
-        key: 'showMonoAudioToggle',
-        action: 'updateShowMonoAudioToggle',
-        label: t('Settings.Player Settings.Show Mono Audio Toggle'),
-      },
-      {
-        key: 'enableVideoZoom',
-        action: 'updateEnableVideoZoom',
-        label: t('Settings.Player Settings.Enable Video Zoom'),
-        tooltip: t('Tooltips.Player Settings.Enable Video Zoom'),
-      },
-      {
-        key: 'enableSeekHistory',
-        action: 'updateEnableSeekHistory',
-        label: t('Settings.Player Settings.Enable Seek History'),
-        tooltip: t('Tooltips.Player Settings.Enable Seek History'),
-      },
-      {
-        key: 'disableAbRepeat',
-        action: 'updateDisableAbRepeat',
-        label: t('Settings.Distraction Free Settings.Disable A-B Repeat'),
-      },
     ],
   },
   {

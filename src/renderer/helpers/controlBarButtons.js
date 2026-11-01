@@ -1,6 +1,13 @@
 // Buttons at the end of the player's control bar. Mobile players always use
-// the compact layout, which never shows the desktop-only buttons.
+// the compact layout, which never shows the desktop-only buttons. The chapters
+// button stays next to the time, wherever it is in the order.
 export const CONTROL_BAR_BUTTON_DEFINITIONS = Object.freeze([
+  { id: 'chapters', labelKey: 'Chapters.Chapters', icon: ['fas', 'list'] },
+  { id: 'quality', labelKey: 'Settings.Interface Customizer.Resolution', icon: ['fas', 'sliders-h'], desktopOnly: true },
+  { id: 'audioTracks', labelKey: 'Video.Player.Audio Tracks', icon: ['fas', 'podcast'], desktopOnly: true },
+  { id: 'playbackRate', labelKey: 'Settings.Player Settings.Playback Speed', icon: ['fas', 'gauge'], desktopOnly: true },
+  { id: 'loop', labelKey: 'Settings.Interface Customizer.Loop', icon: ['fas', 'retweet'], desktopOnly: true },
+  { id: 'screenshot', labelKey: 'Video.Player.Take Screenshot', icon: ['fas', 'camera'], desktopOnly: true },
   { id: 'autoplay', labelKey: 'Video.Autoplay', icon: ['fas', 'autoplay'], desktopOnly: true },
   { id: 'captions', labelKey: 'Settings.Player Settings.Caption Appearance.Captions', icon: ['fas', 'closed-captioning'] },
   { id: 'menu', labelKey: 'Settings.Interface Customizer.Player Menu', icon: ['fas', 'gear'], required: true },
@@ -23,8 +30,8 @@ export function getControlBarButtonDefinitions(mobile = IS_MOBILE) {
  */
 export function getDefaultControlBarButtons(mobile = IS_MOBILE) {
   return mobile
-    ? ['captions', 'pictureInPicture', 'menu', 'fullscreen']
-    : ['autoplay', 'captions', 'menu', 'pictureInPicture', 'theatreMode', 'fullWindow', 'fullscreen']
+    ? ['chapters', 'captions', 'pictureInPicture', 'menu', 'fullscreen']
+    : ['chapters', 'screenshot', 'autoplay', 'captions', 'menu', 'pictureInPicture', 'theatreMode', 'fullWindow', 'fullscreen']
 }
 
 export const DEFAULT_CONTROL_BAR_BUTTONS = Object.freeze(getDefaultControlBarButtons())

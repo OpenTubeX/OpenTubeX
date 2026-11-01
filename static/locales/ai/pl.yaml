@@ -141,7 +141,11 @@ Settings:
   Control Bar:
     Title: "Pasek sterowania"
     Customize: "Dostosuj pasek sterowania"
-    Add Button: "Dodaj przycisk"
+    Hidden: "Ukryte"
+    Empty: "Brak elementów sterujących"
+    Move to Control Bar: "Przenieś {control} na pasek sterowania"
+    Move to Player Menu: "Przenieś {control} do menu odtwarzacza"
+    Hide: "Ukryj {control}"
   Fullscreen Actions:
     Recommended Videos: "Polecane filmy"
     Title: "Działania na pełnym ekranie"

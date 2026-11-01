@@ -909,6 +909,8 @@ test('marks the chapters player-option tile active while chapters are open', asy
   await page.locator('.app').evaluate(element => {
     element.classList.add('capacitorTabs', 'capacitorPhoneLayout')
   })
+  // On the control bar, phones show the chapters next to the time instead of in the menu.
+  await page.evaluate(() => window.$store.dispatch('updateControlBarButtons', ['captions', 'pictureInPicture', 'menu', 'fullscreen']))
 
   const watchComponent = await page.evaluateHandle(findWatchComponent)
   await watchComponent.evaluate(async (component) => {

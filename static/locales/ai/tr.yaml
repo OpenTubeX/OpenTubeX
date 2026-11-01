@@ -305,7 +305,11 @@ Settings:
   Control Bar:
     Title: "Kontrol çubuğu"
     Customize: "Kontrol çubuğunu özelleştir"
-    Add Button: "Düğme ekle"
+    Hidden: "Gizli"
+    Empty: "Kontrol yok"
+    Move to Control Bar: "{control} öğesini kontrol çubuğuna taşı"
+    Move to Player Menu: "{control} öğesini oynatıcı menüsüne taşı"
+    Hide: "{control} öğesini gizle"
   Fullscreen Actions:
     Recommended Videos: "Önerilen videolar"
     Title: "Tam ekran eylemleri"

@@ -310,7 +310,11 @@ Settings:
   Control Bar:
     Title: "Ohjauspalkki"
     Customize: "Mukauta ohjauspalkkia"
-    Add Button: "Lisää painike"
+    Hidden: "Piilotetut"
+    Empty: "Ei säätimiä"
+    Move to Control Bar: "Siirrä {control} ohjauspalkkiin"
+    Move to Player Menu: "Siirrä {control} soittimen valikkoon"
+    Hide: "Piilota {control}"
   Fullscreen Actions:
     Recommended Videos: "Suositellut videot"
     Title: "Koko näytön toiminnot"

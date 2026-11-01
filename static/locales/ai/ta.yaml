@@ -318,7 +318,11 @@ Settings:
   Control Bar:
     Title: "கட்டுப்பாட்டுப் பட்டை"
     Customize: "கட்டுப்பாட்டுப் பட்டையைத் தனிப்பயனாக்கு"
-    Add Button: "பொத்தானைச் சேர்"
+    Hidden: "மறைக்கப்பட்டவை"
+    Empty: "கட்டுப்பாடுகள் இல்லை"
+    Move to Control Bar: "{control} ஐக் கட்டுப்பாட்டுப் பட்டைக்கு நகர்த்து"
+    Move to Player Menu: "{control} ஐ இயக்கி பட்டியலுக்கு நகர்த்து"
+    Hide: "{control} ஐ மறை"
   Fullscreen Actions:
     Recommended Videos: "பரிந்துரைக்கப்பட்ட காணொளிகள்"
     Title: "முழுத்திரைச் செயல்கள்"

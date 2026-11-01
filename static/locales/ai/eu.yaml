@@ -305,7 +305,11 @@ Settings:
   Control Bar:
     Title: "Kontrol-barra"
     Customize: "Pertsonalizatu kontrol-barra"
-    Add Button: "Gehitu botoia"
+    Hidden: "Ezkutatuta"
+    Empty: "Ez dago kontrolik"
+    Move to Control Bar: "Eraman {control} kontrol-barrara"
+    Move to Player Menu: "Eraman {control} erreproduzigailuaren menura"
+    Hide: "Ezkutatu {control}"
   Fullscreen Actions:
     Recommended Videos: "Gomendatutako bideoak"
     Title: "Pantaila osoko ekintzak"

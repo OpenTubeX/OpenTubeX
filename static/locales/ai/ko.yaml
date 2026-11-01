@@ -399,7 +399,11 @@ Settings:
   Control Bar:
     Title: "컨트롤 바"
     Customize: "컨트롤 바 사용자 지정"
-    Add Button: "버튼 추가"
+    Hidden: "숨김"
+    Empty: "컨트롤 없음"
+    Move to Control Bar: "{control}을(를) 컨트롤 바로 이동"
+    Move to Player Menu: "{control}을(를) 플레이어 메뉴로 이동"
+    Hide: "{control} 숨기기"
   Fullscreen Actions:
     Recommended Videos: "추천 동영상"
     Title: "전체 화면 작업"

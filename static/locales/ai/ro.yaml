@@ -306,7 +306,11 @@ Settings:
   Control Bar:
     Title: "Bară de control"
     Customize: "Personalizează bara de control"
-    Add Button: "Adaugă buton"
+    Hidden: "Ascunse"
+    Empty: "Niciun control"
+    Move to Control Bar: "Mută {control} în bara de control"
+    Move to Player Menu: "Mută {control} în meniul playerului"
+    Hide: "Ascunde {control}"
   Fullscreen Actions:
     Recommended Videos: "Videoclipuri recomandate"
     Title: "Acțiuni pe ecran complet"

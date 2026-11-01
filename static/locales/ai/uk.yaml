@@ -310,7 +310,11 @@ Settings:
   Control Bar:
     Title: "Панель керування"
     Customize: "Налаштувати панель керування"
-    Add Button: "Додати кнопку"
+    Hidden: "Приховані"
+    Empty: "Немає елементів керування"
+    Move to Control Bar: "Перемістити «{control}» на панель керування"
+    Move to Player Menu: "Перемістити «{control}» у меню програвача"
+    Hide: "Приховати «{control}»"
   Fullscreen Actions:
     Recommended Videos: "Рекомендовані відео"
     Title: "Дії в повноекранному режимі"

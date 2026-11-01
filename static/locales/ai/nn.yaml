@@ -318,7 +318,11 @@ Settings:
   Control Bar:
     Title: "Kontrollinje"
     Customize: "Tilpass kontrollinja"
-    Add Button: "Legg til knapp"
+    Hidden: "Gøymd"
+    Empty: "Ingen kontrollar"
+    Move to Control Bar: "Flytt {control} til kontrollinja"
+    Move to Player Menu: "Flytt {control} til avspelarmenyen"
+    Hide: "Gøym {control}"
   Fullscreen Actions:
     Recommended Videos: "Tilrådde videoar"
     Title: "Fullskjermhandlingar"

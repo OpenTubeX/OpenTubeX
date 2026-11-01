@@ -95,6 +95,10 @@
     "ri": "cast-line",
     "material": "cast-outline-rounded"
   },
+  "camera": {
+    "ri": "camera-line",
+    "material": "photo-camera-outline"
+  },
   "chart-line": {
     "ri": "line-chart-line",
     "material": "show-chart-rounded"

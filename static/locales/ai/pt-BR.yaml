@@ -274,7 +274,11 @@ Settings:
   Control Bar:
     Title: "Barra de controles"
     Customize: "Personalizar barra de controles"
-    Add Button: "Adicionar botão"
+    Hidden: "Ocultos"
+    Empty: "Nenhum controle"
+    Move to Control Bar: "Mover {control} para a barra de controles"
+    Move to Player Menu: "Mover {control} para o menu do player"
+    Hide: "Ocultar {control}"
   Fullscreen Actions:
     Recommended Videos: "Vídeos recomendados"
     Title: "Ações de tela cheia"

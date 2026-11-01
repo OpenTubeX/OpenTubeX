@@ -310,7 +310,11 @@ Settings:
   Control Bar:
     Title: "סרגל הבקרה"
     Customize: "התאמה אישית של סרגל הבקרה"
-    Add Button: "הוספת לחצן"
+    Hidden: "מוסתרים"
+    Empty: "אין פקדים"
+    Move to Control Bar: "העברת {control} לסרגל הבקרה"
+    Move to Player Menu: "העברת {control} לתפריט הנגן"
+    Hide: "הסתרת {control}"
   Fullscreen Actions:
     Recommended Videos: "סרטונים מומלצים"
     Title: "פעולות במסך מלא"

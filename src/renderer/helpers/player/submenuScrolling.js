@@ -9,6 +9,9 @@ import {
 // The caption submenus scroll their options in a part of their own.
 const SCROLLING_SUBMENUS = '.shaka-sub-menu:not(.shaka-text-languages, .ft-caption-list-menu, .ft-caption-timing-menu)'
 
+/** Menus that control bar buttons open by themselves, outside of the overflow menu. */
+export const CONTROL_BAR_MENUS = ':scope > .shaka-settings-menu'
+
 /**
  * Open and scrolling by itself, which it doesn't in the phone layout (`phonePlayerOptions.css`).
  * @param {HTMLElement} submenu
@@ -34,10 +37,11 @@ function lastOption(submenu) {
  *
  * @param {HTMLElement} menu
  * @param {EventTarget} controls
+ * @param {string} [selector] the menus to set up, the overflow menu's submenus by default
  * @returns {() => void} cleanup
  */
-export function setupSubmenuScrolling(menu, controls) {
-  const submenus = [...menu.querySelectorAll(SCROLLING_SUBMENUS)]
+export function setupSubmenuScrolling(menu, controls, selector = SCROLLING_SUBMENUS) {
+  const submenus = [...menu.querySelectorAll(selector)]
   let clampFrame = null
   let openFrame = null
 

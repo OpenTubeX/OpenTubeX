@@ -308,7 +308,11 @@ Settings:
   Control Bar:
     Title: "Kontrollfält"
     Customize: "Anpassa kontrollfältet"
-    Add Button: "Lägg till knapp"
+    Hidden: "Dolda"
+    Empty: "Inga kontroller"
+    Move to Control Bar: "Flytta {control} till kontrollfältet"
+    Move to Player Menu: "Flytta {control} till spelarmenyn"
+    Hide: "Dölj {control}"
   Fullscreen Actions:
     Recommended Videos: "Rekommenderade videor"
     Title: "Fullskärmsåtgärder"

@@ -310,7 +310,11 @@ Settings:
   Control Bar:
     Title: "شريط التحكم"
     Customize: "تخصيص شريط التحكم"
-    Add Button: "إضافة زر"
+    Hidden: "مخفية"
+    Empty: "لا توجد عناصر تحكم"
+    Move to Control Bar: "نقل {control} إلى شريط التحكم"
+    Move to Player Menu: "نقل {control} إلى قائمة المشغّل"
+    Hide: "إخفاء {control}"
   Fullscreen Actions:
     Recommended Videos: "الفيديوهات المقترحة"
     Title: "إجراءات ملء الشاشة"

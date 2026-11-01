@@ -306,7 +306,11 @@ Settings:
   Control Bar:
     Title: "Bar rheoli"
     Customize: "Addasu'r bar rheoli"
-    Add Button: "Ychwanegu botwm"
+    Hidden: "Cudd"
+    Empty: "Dim rheolyddion"
+    Move to Control Bar: "Symud {control} i'r bar rheoli"
+    Move to Player Menu: "Symud {control} i ddewislen y chwaraewr"
+    Hide: "Cuddio {control}"
   Fullscreen Actions:
     Recommended Videos: "Fideos a argymhellir"
     Title: "Gweithredoedd sgrin lawn"

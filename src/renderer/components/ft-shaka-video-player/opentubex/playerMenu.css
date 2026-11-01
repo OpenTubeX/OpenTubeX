@@ -642,6 +642,34 @@
 }
 /* stylelint-enable selector-max-compound-selectors */
 
+/*
+  Menus opened from the control bar scroll by themselves, as Shaka positions
+  them and adds their options to them directly, so their header sticks to the
+  top above the options. It is opaque, the scrollbar starts below it, and
+  options scrolled into view, such as the chosen or focused one, stop below it.
+*/
+:deep(.shaka-controls-container > .ft-scrolling-submenu) {
+  --ft-bar-menu-header-size: 39px;
+
+  padding-block-start: 0;
+  scroll-padding-block-start: var(--ft-bar-menu-header-size);
+}
+
+:deep(.shaka-controls-container > .ft-scrolling-submenu > .shaka-back-to-overflow-button) {
+  position: sticky;
+  z-index: 1;
+  inset-block-start: 0;
+  box-sizing: border-box;
+  block-size: var(--ft-bar-menu-header-size);
+
+  /* Shaka clears the header's background on hover with `!important`. */
+  background: rgb(28 28 28) !important;
+}
+
+:deep(.shaka-controls-container > .ft-scrolling-submenu > .os-scrollbar-vertical) {
+  top: var(--ft-bar-menu-header-size);
+}
+
 :deep(.ft-scrolling-submenu > .os-scrollbar) {
   --os-handle-bg: rgb(255 255 255 / 40%);
   --os-handle-bg-hover: rgb(255 255 255 / 55%);

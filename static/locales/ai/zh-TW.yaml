@@ -305,7 +305,11 @@ Settings:
   Control Bar:
     Title: "控制列"
     Customize: "自訂控制列"
-    Add Button: "新增按鈕"
+    Hidden: "已隱藏"
+    Empty: "沒有控制項"
+    Move to Control Bar: "將{control}移至控制列"
+    Move to Player Menu: "將{control}移至播放器選單"
+    Hide: "隱藏{control}"
   Fullscreen Actions:
     Recommended Videos: "推薦影片"
     Title: "全螢幕操作"

@@ -305,7 +305,11 @@ Settings:
   Control Bar:
     Title: "Juhtriba"
     Customize: "Kohanda juhtriba"
-    Add Button: "Lisa nupp"
+    Hidden: "Peidetud"
+    Empty: "Juhtelemente pole"
+    Move to Control Bar: "Teisalda {control} juhtribale"
+    Move to Player Menu: "Teisalda {control} pleieri menüüsse"
+    Hide: "Peida {control}"
   Fullscreen Actions:
     Recommended Videos: "Soovitatud videod"
     Title: "Täisekraani toimingud"

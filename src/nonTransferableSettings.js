@@ -2,6 +2,7 @@ export const NON_TRANSFERABLE_SETTINGS = new Set([
   // Local migration bookkeeping is not a user preference.
   'historyWatchedStatusMigrated',
   'channelSettingsSyncMigration',
+  'controlBarButtonsMigration',
   // Backup locations and schedules belong to this device.
   'scheduledBackupEnabled',
   'scheduledBackupFolderPath',

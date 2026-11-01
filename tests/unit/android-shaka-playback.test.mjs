@@ -79,6 +79,7 @@ test('Android phone uses the central Shaka play button without a duplicate in th
     mobile,
     onlyUseOverFlowMenu: { value: true },
     props: { shortsPlayer: false, chapters: [] },
+    controlBarButtons: ['chapters', 'captions', 'pictureInPicture', 'menu', 'fullscreen'],
   })
   assert.equal(controls(true).includes('play_pause'), false)
   assert.equal(controls(true).includes('ft_skip_previous'), false)

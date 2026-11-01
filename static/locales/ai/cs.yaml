@@ -305,7 +305,11 @@ Settings:
   Control Bar:
     Title: "Ovládací panel"
     Customize: "Přizpůsobit ovládací panel"
-    Add Button: "Přidat tlačítko"
+    Hidden: "Skryté"
+    Empty: "Žádné ovládací prvky"
+    Move to Control Bar: "Přesunout {control} na ovládací panel"
+    Move to Player Menu: "Přesunout {control} do nabídky přehrávače"
+    Hide: "Skrýt {control}"
   Fullscreen Actions:
     Recommended Videos: "Doporučená videa"
     Title: "Akce na celé obrazovce"

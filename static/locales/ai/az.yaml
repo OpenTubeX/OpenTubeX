@@ -307,7 +307,11 @@ Settings:
   Control Bar:
     Title: "İdarəetmə paneli"
     Customize: "İdarəetmə panelini fərdiləşdir"
-    Add Button: "Düymə əlavə et"
+    Hidden: "Gizlədilib"
+    Empty: "İdarəetmə elementi yoxdur"
+    Move to Control Bar: "{control} elementini idarəetmə panelinə köçür"
+    Move to Player Menu: "{control} elementini pleyer menyusuna köçür"
+    Hide: "{control} elementini gizlət"
   Fullscreen Actions:
     Recommended Videos: "Tövsiyə olunan videolar"
     Title: "Tam ekran əməliyyatları"

@@ -316,7 +316,11 @@ Settings:
   Control Bar:
     Title: "Kontrollinje"
     Customize: "Tilpas kontrollinjen"
-    Add Button: "Tilføj knap"
+    Hidden: "Skjult"
+    Empty: "Ingen kontroller"
+    Move to Control Bar: "Flyt {control} til kontrollinjen"
+    Move to Player Menu: "Flyt {control} til afspillermenuen"
+    Hide: "Skjul {control}"
   Fullscreen Actions:
     Recommended Videos: "Anbefalede videoer"
     Title: "Handlinger i fuld skærm"

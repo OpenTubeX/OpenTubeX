@@ -310,7 +310,11 @@ Settings:
   Control Bar:
     Title: "Thanh điều khiển"
     Customize: "Tùy chỉnh thanh điều khiển"
-    Add Button: "Thêm nút"
+    Hidden: "Đã ẩn"
+    Empty: "Không có điều khiển"
+    Move to Control Bar: "Chuyển {control} sang thanh điều khiển"
+    Move to Player Menu: "Chuyển {control} vào menu trình phát"
+    Hide: "Ẩn {control}"
   Fullscreen Actions:
     Recommended Videos: "Video được đề xuất"
     Title: "Thao tác toàn màn hình"

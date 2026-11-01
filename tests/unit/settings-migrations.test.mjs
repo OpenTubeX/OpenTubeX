@@ -397,3 +397,52 @@ test('resets saved Quick Settings that still match the former defaults', async (
   assert.deepEqual(migrateLegacySettings({ quickSettings: formerDefaults }), { quickSettings: [...DEFAULT_QUICK_SETTINGS] })
   assert.deepEqual(migrateLegacySettings({ quickSettings: customized }), { quickSettings: customized })
 })
+
+const controlBarMigrationStart = settingsSource.indexOf('      // The chapters and screenshot buttons used to sit')
+const controlBarMigrationEnd = settingsSource.indexOf('      // Existing logged-in sync users', controlBarMigrationStart)
+
+/**
+ * @param {Record<string, unknown>} stored
+ * @param {boolean} saves whether saving the control bar succeeds
+ */
+async function migrateControlBar(stored, saves = true) {
+  const dispatches = []
+  await vm.runInNewContext(`(async () => {
+    ${settingsSource.slice(controlBarMigrationStart, controlBarMigrationEnd)}
+  })()`, {
+    CONTROL_BAR_BUTTONS_MIGRATION_SETTING: 'controlBarButtonsMigration',
+    userSettings: Object.entries(stored).map(([_id, value]) => ({ _id, value })),
+    dispatch: async (action, value) => {
+      dispatches.push([action, value])
+      if (saves) stored.controlBarButtons = value
+      return saves
+    },
+    DBSettingHandlers: { upsert: async (key, value) => { stored[key] = value } },
+    console: { error() {} },
+  })
+  // Arrays from the script's context have another realm's prototype.
+  return JSON.parse(JSON.stringify(dispatches))
+}
+
+test('saved control bars keep the chapters and screenshot buttons once', async () => {
+  const stored = { controlBarButtons: ['captions', 'menu', 'fullscreen'] }
+  assert.deepEqual(await migrateControlBar(stored), [['updateControlBarButtons', ['chapters', 'screenshot', 'captions', 'menu', 'fullscreen']]])
+  assert.equal(stored.controlBarButtonsMigration, true)
+  // Later launches leave a control bar without them alone.
+  stored.controlBarButtons = ['menu']
+  assert.deepEqual(await migrateControlBar(stored), [])
+
+  // Without a saved control bar, the defaults already have them.
+  const fresh = {}
+  assert.deepEqual(await migrateControlBar(fresh), [])
+  assert.equal(fresh.controlBarButtonsMigration, true)
+})
+
+test('a failed control bar migration retries on the next launch', async () => {
+  const stored = { controlBarButtons: ['menu'] }
+  await migrateControlBar(stored, false)
+  assert.equal(stored.controlBarButtonsMigration, undefined)
+  await migrateControlBar(stored)
+  assert.deepEqual([...stored.controlBarButtons], ['chapters', 'screenshot', 'menu'])
+  assert.equal(stored.controlBarButtonsMigration, true)
+})

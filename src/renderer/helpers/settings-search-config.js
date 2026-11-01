@@ -133,7 +133,7 @@ export const SETTINGS_SEARCH_SOURCES = {
   }, {
     type: 'control-bar',
     key: 'Settings.Control Bar',
-    include: new Set(['Title', 'Customize', 'Add Button']),
+    include: new Set(['Title', 'Customize']),
     subpage: 'customize-interface',
     subpageTab: 'controlBar'
   }, {
