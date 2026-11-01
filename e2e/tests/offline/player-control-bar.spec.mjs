@@ -236,6 +236,19 @@ test('keeps a valid scroll range when a menu opened from the control bar shrinks
   await expect(menu.getByRole('menuitemradio')).toHaveCount(8)
   await expectValidScrollRange()
 
+  // Dragging the scrollbar leaves the menu open.
+  await setAudioTracks(languages)
+  await expect(menu.getByRole('menuitemradio')).toHaveCount(languages.length)
+  await menu.evaluate(element => element.scrollTo({ top: 0 }))
+  const handle = menu.locator(':scope > .os-scrollbar-vertical .os-scrollbar-handle')
+  const handleBounds = await handle.boundingBox()
+  await page.mouse.move(handleBounds.x + handleBounds.width / 2, handleBounds.y + handleBounds.height / 2)
+  await page.mouse.down()
+  await page.mouse.move(handleBounds.x + handleBounds.width / 2, handleBounds.y + handleBounds.height / 2 + 60, { steps: 5 })
+  await page.mouse.up()
+  await expect.poll(() => menu.evaluate(element => element.scrollTop)).toBeGreaterThan(0)
+  await expect(menu).toBeVisible()
+
   // So does a window size that gives the menu more room.
   await setAudioTracks(languages)
   await expect(menu.getByRole('menuitemradio')).toHaveCount(languages.length)
