@@ -682,6 +682,7 @@ export default defineComponent({
     'toggle-quick-bookmark',
     'chapters-overlay-change',
     'chapter-thumbnails-change',
+    'looped-chapter-change',
     'sponsorblock-info-change',
     'toggle-shorts-metadata',
     'open-phone-panel',
@@ -2706,6 +2707,7 @@ export default defineComponent({
     const disableAbRepeat = computed(() => store.getters.getDisableAbRepeat)
     const {
       abRepeatAvailable,
+      abRepeatDuration,
       abRepeatEnabled,
       abRepeatEnd,
       abRepeatStart,
@@ -2719,6 +2721,7 @@ export default defineComponent({
       refreshAbRepeatMarkers,
       resetAbRepeat,
       scheduleAbRepeatBoundary,
+      setAbRepeatRange,
       setCurrentAbRepeatBoundary,
       toggleAbRepeat,
       updateAbRepeatDuration,
@@ -2776,6 +2779,57 @@ export default defineComponent({
       updateAbRepeatDuration()
       updateVideoElementGeometry()
       syncMediaSessionPosition()
+    }
+
+    /**
+     * @param {number} index
+     * @returns {{ start: number, end: number } | null}
+     */
+    function getChapterLoopRange(index) {
+      const chapter = props.chapters[index]
+      // Without the media duration, the end can't be clamped to it.
+      if (!chapter || !Number.isFinite(abRepeatDuration.value)) return null
+
+      const nextStart = props.chapters[index + 1]?.startSeconds
+      let end = chapter.endSeconds > chapter.startSeconds ? chapter.endSeconds : (nextStart ?? abRepeatDuration.value)
+      // The listed video length can exceed the media duration by a fraction of a second.
+      end = Math.min(end, abRepeatDuration.value)
+      return end > chapter.startSeconds ? { start: chapter.startSeconds, end } : null
+    }
+
+    /** The chapter that A-B repeat currently loops, -1 for none, or null when chapters can't be looped. */
+    const loopedChapterIndex = computed(() => {
+      if (disableAbRepeat.value || isLive.value || props.chapters.length === 0) return null
+      if (!abRepeatEnabled.value || !abRepeatAvailable.value) return -1
+
+      return props.chapters.findIndex((_chapter, index) => {
+        const range = getChapterLoopRange(index)
+        return range?.start === abRepeatStart.value && range.end === abRepeatEnd.value
+      })
+    })
+
+    watch(loopedChapterIndex, index => emit('looped-chapter-change', index), { immediate: true })
+    onBeforeUnmount(() => emit('looped-chapter-change', null))
+
+    /** @param {number} index */
+    function toggleChapterLoop(index) {
+      if (loopedChapterIndex.value === index) {
+        clearAbRepeat()
+        showValueChange(t('Chapters.Chapter Loop Stopped'), AB_REPEAT_VALUE_CHANGE_ICON)
+        return
+      }
+
+      const range = getChapterLoopRange(index)
+      if (loopedChapterIndex.value === null || !range) return
+
+      // Jump before applying the range, which would otherwise move playback there
+      // as an automatic repeat that seek history skips.
+      const currentTime = video.value?.currentTime
+      if (!(currentTime >= range.start && currentTime < range.end)) {
+        setCurrentTime(range.start, true)
+      }
+      if (!setAbRepeatRange(range.start, range.end)) return
+      showValueChange(t('Chapters.Looping Chapter', { chapter: props.chapters[index].title }), AB_REPEAT_VALUE_CHANGE_ICON)
     }
 
     // #endregion A-B repeat
@@ -4372,6 +4426,8 @@ export default defineComponent({
     watch(disableAbRepeat, (disabled) => {
       if (disabled) {
         resetAbRepeat()
+      } else {
+        updateAbRepeatDuration()
       }
     })
 
@@ -10845,6 +10901,7 @@ export default defineComponent({
       changeSponsorBlockInfoSegmentCategory,
       copyAndDownvoteSponsorBlockInfoSegment,
       copyChapterTimestamp,
+      toggleChapterLoop,
       destroyPlayer
     })
 
@@ -10985,6 +11042,8 @@ export default defineComponent({
       chapterThumbnails,
       closeChaptersOverlay,
       selectOverlayChapter,
+      loopedChapterIndex,
+      toggleChapterLoop,
       copyChapterTimestamp,
       fullscreenDockStyle,
       repeatStats,

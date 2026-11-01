@@ -2014,6 +2014,9 @@ Chapters:
   Open Chapters: Отвори поглавља
   Close Chapters: Затвори поглавља
   Copy Timestamp Link: Копирај везу на {timestamp}
+  Loop Chapter: 'Понављај поглавље: {chapter}'
+  Looping Chapter: 'Понавља се поглавље: {chapter}'
+  Chapter Loop Stopped: 'Понављање поглавља заустављено'
 Comments:
   Image unavailable: "Слика није доступна"
   Comment Count: 1 коментар | {count} коментара | {count} коментара

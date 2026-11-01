@@ -1941,6 +1941,9 @@ Chapters:
   Open Chapters: Otvoriť kapitoly
   Close Chapters: Zavrieť kapitoly
   Copy Timestamp Link: Kopírovať odkaz na čas {timestamp}
+  Loop Chapter: 'Opakovať kapitolu: {chapter}'
+  Looping Chapter: 'Opakuje sa kapitola: {chapter}'
+  Chapter Loop Stopped: 'Opakovanie kapitoly zastavené'
 Comments:
   Image unavailable: "Obrázok nie je dostupný"
   Comment Count: 1 komentár | {count} komentáre | {count} komentárov

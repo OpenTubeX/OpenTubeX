@@ -1968,6 +1968,9 @@ Chapters:
   Open Chapters: Άνοιγμα κεφαλαίων
   Close Chapters: Κλείσιμο κεφαλαίων
   Copy Timestamp Link: Αντιγραφή συνδέσμου στο {timestamp}
+  Loop Chapter: 'Επανάληψη κεφαλαίου: {chapter}'
+  Looping Chapter: 'Επαναλαμβάνεται το κεφάλαιο: {chapter}'
+  Chapter Loop Stopped: 'Η επανάληψη του κεφαλαίου σταμάτησε'
 Comments:
   Image unavailable: "Η εικόνα δεν είναι διαθέσιμη"
   Comment Count: 1 σχόλιο | {count} σχόλια

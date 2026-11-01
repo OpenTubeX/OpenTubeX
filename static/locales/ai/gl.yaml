@@ -1994,6 +1994,9 @@ Chapters:
   Open Chapters: Abrir os capítulos
   Close Chapters: Pechar os capítulos
   Copy Timestamp Link: Copiar a ligazón en {timestamp}
+  Loop Chapter: 'Repetir o capítulo: {chapter}'
+  Looping Chapter: 'Repetindo o capítulo: {chapter}'
+  Chapter Loop Stopped: 'Deixouse de repetir o capítulo'
 Comments:
   Image unavailable: "Imaxe non dispoñible"
   Comment Count: 1 comentario | {count} comentarios

@@ -1953,6 +1953,9 @@ Chapters:
   Open Chapters: Bölümləri aç
   Close Chapters: Bölümləri bağla
   Copy Timestamp Link: "{timestamp} vaxtındakı linki köçür"
+  Loop Chapter: 'Fəsli təkrarla: {chapter}'
+  Looping Chapter: 'Fəsil təkrarlanır: {chapter}'
+  Chapter Loop Stopped: 'Fəslin təkrarı dayandırıldı'
 Comments:
   Image unavailable: "Şəkil mövcud deyil"
   Comment Count: 1 şərh | {count} şərh

@@ -1985,6 +1985,9 @@ Chapters:
   Open Chapters: Відкрити розділи
   Close Chapters: Закрити розділи
   Copy Timestamp Link: Скопіювати посилання з позначкою {timestamp}
+  Loop Chapter: 'Повторювати розділ: {chapter}'
+  Looping Chapter: 'Розділ повторюється: {chapter}'
+  Chapter Loop Stopped: 'Повтор розділу зупинено'
 Comments:
   Image unavailable: "Зображення недоступне"
   Comment Count: 1 коментар | {count} коментарі | {count} коментарів

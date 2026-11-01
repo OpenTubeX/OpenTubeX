@@ -1300,12 +1300,16 @@
     }
 
     :deep(.chapterSeek),
-    :deep(.copyTimestamp) {
+    :deep(.chapterAction) {
       color: inherit;
     }
 
-    :deep(.copyTimestamp:hover),
-    :deep(.copyTimestamp:focus-visible) {
+    :deep(.loopChapter.active) {
+      color: var(--accent-color);
+    }
+
+    :deep(.chapterAction:hover),
+    :deep(.chapterAction:focus-visible) {
       background-color: var(--side-nav-hover-color);
     }
 

@@ -1963,6 +1963,9 @@ Chapters:
   Open Chapters: Öppna kapitel
   Close Chapters: Stäng kapitel
   Copy Timestamp Link: Kopiera länk vid {timestamp}
+  Loop Chapter: 'Upprepa kapitel: {chapter}'
+  Looping Chapter: 'Upprepar kapitel: {chapter}'
+  Chapter Loop Stopped: 'Slutade upprepa kapitel'
 Comments:
   Image unavailable: "Bilden är inte tillgänglig"
   Comment Count: 1 kommentar | {count} kommentarer

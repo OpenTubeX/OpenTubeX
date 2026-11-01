@@ -2457,6 +2457,9 @@ Chapters:
   Open Chapters: Obre els capítols
   Close Chapters: Tanca els capítols
   Copy Timestamp Link: Copia l'enllaç a {timestamp}
+  Loop Chapter: 'Repeteix el capítol: {chapter}'
+  Looping Chapter: 'S''està repetint el capítol: {chapter}'
+  Chapter Loop Stopped: 'S''ha aturat la repetició del capítol'
 Mini Player: Minireproductor
 Comments:
   Image unavailable: "Imatge no disponible"

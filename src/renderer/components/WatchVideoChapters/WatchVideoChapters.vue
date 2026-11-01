@@ -50,7 +50,19 @@
           </span>
         </button>
         <button
-          class="copyTimestamp"
+          v-if="loopedChapterIndex !== null"
+          class="chapterAction loopChapter"
+          :class="{ active: index === loopedChapterIndex }"
+          type="button"
+          :aria-label="$t('Chapters.Loop Chapter', { chapter: chapter.title })"
+          :aria-pressed="index === loopedChapterIndex ? 'true' : 'false'"
+          :title="$t('Chapters.Loop Chapter', { chapter: chapter.title })"
+          @click="emit('loop-chapter', index)"
+        >
+          <FtIcon :icon="['fas', 'retweet']" />
+        </button>
+        <button
+          class="chapterAction copyTimestamp"
           type="button"
           :aria-label="$t('Chapters.Copy Timestamp Link', { timestamp: chapter.timestamp })"
           :title="$t('Chapters.Copy Timestamp Link', { timestamp: chapter.timestamp })"
@@ -87,10 +99,15 @@ const props = defineProps({
   fallbackThumbnail: {
     type: String,
     default: ''
+  },
+  /** The looped chapter, -1 for none, or null to hide the loop buttons. */
+  loopedChapterIndex: {
+    type: Number,
+    default: null
   }
 })
 
-const emit = defineEmits(['copy-timestamp', 'timestamp-event'])
+const emit = defineEmits(['copy-timestamp', 'loop-chapter', 'timestamp-event'])
 
 const chaptersWrapper = useTemplateRef('chaptersWrapper')
 const chaptersContent = useTemplateRef('chaptersContent')

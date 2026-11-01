@@ -1982,6 +1982,9 @@ Chapters:
   Open Chapters: Mở chương
   Close Chapters: Đóng chương
   Copy Timestamp Link: Sao chép liên kết tại {timestamp}
+  Loop Chapter: 'Lặp lại chương: {chapter}'
+  Looping Chapter: 'Đang lặp lại chương: {chapter}'
+  Chapter Loop Stopped: 'Đã dừng lặp lại chương'
 Comments:
   Image unavailable: "Hình ảnh không khả dụng"
   Comment Count: '{count} bình luận'

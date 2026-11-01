@@ -1941,6 +1941,9 @@ Chapters:
   Open Chapters: チャプターを開く
   Close Chapters: チャプターを閉じる
   Copy Timestamp Link: '{timestamp}のリンクをコピー'
+  Loop Chapter: 'チャプターをループ: {chapter}'
+  Looping Chapter: 'チャプターをループ中: {chapter}'
+  Chapter Loop Stopped: 'チャプターのループを停止しました'
 Comments:
   Image unavailable: "画像は利用できません"
   Comment Count: '{count}件のコメント'

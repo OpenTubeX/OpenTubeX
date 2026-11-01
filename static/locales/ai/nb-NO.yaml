@@ -1946,6 +1946,9 @@ Chapters:
   Open Chapters: Åpne kapitler
   Close Chapters: Lukk kapitler
   Copy Timestamp Link: Kopier lenken ved {timestamp}
+  Loop Chapter: 'Gjenta kapittel: {chapter}'
+  Looping Chapter: 'Gjentar kapittel: {chapter}'
+  Chapter Loop Stopped: 'Sluttet å gjenta kapittel'
 Comments:
   Image unavailable: "Bildet er ikke tilgjengelig"
   Comment Count: 1 kommentar | {count} kommentarer

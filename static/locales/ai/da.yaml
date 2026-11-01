@@ -2020,6 +2020,9 @@ Chapters:
   Open Chapters: Åbn kapitler
   Close Chapters: Luk kapitler
   Copy Timestamp Link: Kopiér link ved {timestamp}
+  Loop Chapter: 'Gentag kapitel: {chapter}'
+  Looping Chapter: 'Gentager kapitel: {chapter}'
+  Chapter Loop Stopped: 'Gentagelse af kapitel stoppet'
 Comments:
   Image unavailable: "Billedet er ikke tilgængeligt"
   Comment Count: 1 kommentar | {count} kommentarer

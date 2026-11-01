@@ -2038,6 +2038,9 @@ Chapters:
   Open Chapters: Адкрыць раздзелы
   Close Chapters: Закрыць раздзелы
   Copy Timestamp Link: Скапіяваць спасылку на {timestamp}
+  Loop Chapter: 'Паўтараць раздзел: {chapter}'
+  Looping Chapter: 'Раздзел паўтараецца: {chapter}'
+  Chapter Loop Stopped: 'Паўтор раздзела спынены'
 Comments:
   Image unavailable: "Відарыс недаступны"
   Comment Count: 1 каментарый | {count} каментары | {count} каментарыяў
