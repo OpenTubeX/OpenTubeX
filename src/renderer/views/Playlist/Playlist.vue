@@ -846,9 +846,13 @@ const shownPlaylistItems = computed(() => {
   return playlistItems.value.filter((v) => !toBeDeletedPlaylistItemIds_.includes(v.playlistItemId))
 })
 
-// Search results keep their playlist position. Duration sorting copies user playlist items,
+// User playlist search results keep their playlist position. YouTube ones keep the number they
+// have without a search, which skips hidden videos. Duration sorting copies user playlist items,
 // so those are matched by their unique playlistItemId
-const shownPlaylistItemIndexes = computed(() => new Map(shownPlaylistItems.value.map((item, index) => [item.playlistItemId ?? item, index])))
+const shownPlaylistItemIndexes = computed(() => {
+  const items = isUserPlaylistRequested.value ? shownPlaylistItems.value : availablePlaylistItems.value
+  return new Map(items.map((item, index) => [item.playlistItemId ?? item, index]))
+})
 
 function shownPlaylistItemIndex(item) {
   return shownPlaylistItemIndexes.value.get(item.playlistItemId ?? item) ?? -1
