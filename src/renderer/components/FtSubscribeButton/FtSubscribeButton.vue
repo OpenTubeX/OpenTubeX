@@ -209,7 +209,10 @@
                 >
                   {{ $t('Subscription Groups.Groups') }}
                 </p>
-                <ul class="profileList">
+                <ul
+                  class="profileList"
+                  :class="{ withGroupIcons: subscriptionGroups.some(group => group.icon) }"
+                >
                   <li
                     v-for="group in subscriptionGroups"
                     :key="group.id"
@@ -220,6 +223,15 @@
                     @click.stop.prevent="toggleGroup(group)"
                     @keydown.space.stop.prevent="toggleGroup(group)"
                   >
+                    <span
+                      class="groupIcon"
+                      aria-hidden="true"
+                    >
+                      <FtIcon
+                        v-if="group.icon"
+                        :icon="['fas', group.icon]"
+                      />
+                    </span>
                     <p
                       class="profileName"
                       dir="auto"

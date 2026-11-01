@@ -2895,6 +2895,8 @@ Subscription Groups:
   Empty Group: Šioje grupėje nėra dabartinio profilio kanalų.
   Save Failed: Nepavyko išsaugoti grupės.
   Delete Failed: Nepavyko ištrinti grupės.
+  Group Icon: Grupės piktograma
+  No Icon: Be piktogramos
 Yattee Server:
   API Error (Click to copy): Yattee serverio klaida (spustelėkite, jei norite kopijuoti)
   Unsupported page: Šis puslapis nepasiekiamas naudojant Yattee serverį. Įjunkite „{fallbackSetting}“, kad jį įkeltumėte naudodami vietinį API.

@@ -2394,6 +2394,8 @@ Subscription Groups:
   Empty Group: Bu grupta geçerli profile ait kanal yok.
   Save Failed: Grup kaydedilemedi.
   Delete Failed: Grup silinemedi.
+  Group Icon: Grup simgesi
+  No Icon: Simge yok
 Yattee Server:
   API Error (Click to copy): Yattee Sunucusu Hatası (Kopyalamak için tıklayın)
   Unsupported page: Bu sayfa Yattee sunucusu ile kullanılamıyor. Yerel API ile yüklemek için “{fallbackSetting}” ayarını açın.

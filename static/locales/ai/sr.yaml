@@ -2475,6 +2475,8 @@ Subscription Groups:
   Empty Group: Ова група нема канале из тренутног профила.
   Save Failed: Није могуће сачувати групу.
   Delete Failed: Није могуће избрисати групу.
+  Group Icon: Икона групе
+  No Icon: Без иконе
 Yattee Server:
   API Error (Click to copy): Грешка Yattee сервера (Кликнути за копирање)
   Unsupported page: Ова страница није доступна са Yattee сервером. Укључите „{fallbackSetting}“ да бисте је учитали помоћу локалног API-ја.

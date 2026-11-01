@@ -55,6 +55,10 @@
     "ri": "arrow-go-back-line",
     "material": "back-to-tab-rounded"
   },
+  "ban": {
+    "ri": "forbid-line",
+    "material": "block-outline"
+  },
   "bars": {
     "ri": "menu-line",
     "material": "menu-rounded"

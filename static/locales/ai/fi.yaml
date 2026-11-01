@@ -2448,6 +2448,8 @@ Subscription Groups:
   Empty Group: Tässä ryhmässä ei ole nykyisen profiilin kanavia.
   Save Failed: Ryhmää ei voitu tallentaa.
   Delete Failed: Ryhmää ei voitu poistaa.
+  Group Icon: Ryhmän kuvake
+  No Icon: Ei kuvaketta
 Yattee Server:
   API Error (Click to copy): Yattee-palvelimen virhe (Kopioi napsauttamalla)
   Unsupported page: Tämä sivu ei ole käytettävissä Yattee-palvelimen kanssa. Ota käyttöön ”{fallbackSetting}”, niin sivu ladataan paikallisella API:lla.

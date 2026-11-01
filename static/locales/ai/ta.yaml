@@ -2451,6 +2451,8 @@ Subscription Groups:
   Empty Group: இந்தக் குழுவில் தற்போதைய சுயவிவரத்தின் சேனல்கள் எதுவும் இல்லை.
   Save Failed: குழுவைச் சேமிக்க முடியவில்லை.
   Delete Failed: குழுவை நீக்க முடியவில்லை.
+  Group Icon: குழு சின்னம்
+  No Icon: சின்னம் இல்லை
 Yattee Server:
   API Error (Click to copy): Yattee சேவையகப் பிழை (நகலெடுக்க சொடுக்கு செய்க)
   Unsupported page: இந்தப் பக்கம் Yattee சேவையகத்துடன் கிடைக்காது. உள்ளக பநிஇ மூலம் இதை ஏற்ற “{fallbackSetting}” என்பதை இயக்கவும்.

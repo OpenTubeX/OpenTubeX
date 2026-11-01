@@ -42,6 +42,27 @@
         {{ t('Profile.{number} selected', { number: selectedSubscribedCount }) }}
       </p>
     </template>
+    <div
+      class="iconPicker"
+      role="group"
+      :aria-label="t('Subscription Groups.Group Icon')"
+    >
+      <button
+        v-for="option in iconOptions"
+        :key="option.icon ?? ''"
+        type="button"
+        class="iconOption"
+        :aria-pressed="icon === option.icon"
+        :aria-label="option.label"
+        :title="option.label"
+        @click="icon = option.icon"
+      >
+        <FtIcon
+          :icon="['fas', option.icon ?? 'ban']"
+          aria-hidden="true"
+        />
+      </button>
+    </div>
     <p
       v-if="channels.length === 0"
       class="message"
@@ -117,6 +138,7 @@
 </template>
 
 <script setup>
+import { FtIcon } from '@opentubex/icons'
 import { computed, nextTick, onMounted, reactive, ref, useTemplateRef } from 'vue'
 import { useI18n } from 'vue-i18n'
 
@@ -131,6 +153,8 @@ import store from '../../store/index'
 
 import { useListPagination } from '../../composables/useListPagination'
 import { youtubeImageUrlToInvidious } from '../../helpers/api/invidious'
+import { SUBSCRIPTION_GROUP_ICONS } from '../../helpers/subscription-groups'
+import { getTabGroupIconLabels } from '../../helpers/tabGroupIconLabels'
 import { showToast } from '../../helpers/utils'
 
 const props = defineProps({
@@ -150,6 +174,17 @@ const title = computed(() => {
 })
 
 const name = ref(props.group?.name ?? '')
+/** @type {import('vue').Ref<string | null>} */
+const icon = ref(props.group?.icon ?? null)
+
+const iconOptions = computed(() => {
+  const labels = getTabGroupIconLabels(t)
+  return [
+    { icon: null, label: t('Subscription Groups.No Icon') },
+    ...SUBSCRIPTION_GROUP_ICONS.map(icon => ({ icon, label: labels[icon] }))
+  ]
+})
+
 const query = ref('')
 const saving = ref(false)
 const showDeletePrompt = ref(false)
@@ -227,15 +262,19 @@ async function save() {
   if (trimmedName === '' || saving.value) return
 
   saving.value = true
-  const channelIds = [...selected]
+  const group = {
+    name: trimmedName,
+    channelIds: [...selected],
+    ...(icon.value === null ? {} : { icon: icon.value })
+  }
   let saved
   try {
     if (props.group === null) {
-      const id = await store.dispatch('createSubscriptionGroup', { name: trimmedName, channelIds })
+      const id = await store.dispatch('createSubscriptionGroup', group)
       saved = id !== null
       if (saved) store.dispatch('selectSubscriptionGroup', id)
     } else {
-      saved = await store.dispatch('saveSubscriptionGroup', { ...props.group, name: trimmedName, channelIds })
+      saved = await store.dispatch('saveSubscriptionGroup', { id: props.group.id, ...group })
     }
   } finally {
     saving.value = false

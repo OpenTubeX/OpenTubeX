@@ -19,3 +19,53 @@
 .channelPicker {
   align-content: flex-start;
 }
+
+.iconPicker {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 4px;
+  margin-block-end: 12px;
+  padding-block-end: 12px;
+  border-block-end: 1px solid var(--divider-color);
+}
+
+.iconOption {
+  display: grid;
+  place-items: center;
+  block-size: 36px;
+  inline-size: 36px;
+  padding: 0;
+  border: 2px solid transparent;
+  border-radius: calc(8px * var(--ui-roundness));
+  background: transparent;
+  color: var(--primary-text-color);
+  font-size: 20px;
+  cursor: pointer;
+}
+
+/* Touch screens keep :hover on the last tapped icon. */
+@media (hover: hover) {
+  .iconOption:hover {
+    background: var(--side-nav-hover-color);
+  }
+}
+
+/* Keep a focus indicator when outlines are hidden. */
+.iconOption:focus-visible {
+  border-color: var(--primary-color);
+  background: var(--side-nav-hover-color);
+}
+
+.iconOption[aria-pressed='true'] {
+  border-color: var(--primary-color);
+  background: var(--selected-container-color);
+  color: var(--on-selected-container-color);
+}
+
+@media (any-pointer: coarse) {
+  .iconOption {
+    block-size: var(--phone-touch-target, 48px);
+    inline-size: var(--phone-touch-target, 48px);
+  }
+}

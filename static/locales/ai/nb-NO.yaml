@@ -2397,6 +2397,8 @@ Subscription Groups:
   Empty Group: Denne gruppen har ingen kanaler fra den gjeldende profilen.
   Save Failed: Kunne ikke lagre gruppen.
   Delete Failed: Kunne ikke slette gruppen.
+  Group Icon: Gruppeikon
+  No Icon: Ikke noe ikon
 Yattee Server:
   API Error (Click to copy): Yattee-tjenerfeil (Klikk her for å kopiere)
   Unsupported page: Denne siden er ikke tilgjengelig med Yattee-tjeneren. Slå på «{fallbackSetting}» for å laste den inn med det lokale API-et.

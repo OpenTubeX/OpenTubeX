@@ -2412,6 +2412,8 @@ Subscription Groups:
   Empty Group: Grup ini tidak memiliki kanal dari profil saat ini.
   Save Failed: Tidak dapat menyimpan grup.
   Delete Failed: Tidak dapat menghapus grup.
+  Group Icon: Ikon grup
+  No Icon: Tanpa ikon
 Yattee Server:
   API Error (Click to copy): Galat Server Yattee (Klik untuk menyalin)
   Unsupported page: Halaman ini tidak tersedia dengan server Yattee. Aktifkan “{fallbackSetting}” untuk memuatnya dengan API lokal.

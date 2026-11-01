@@ -2424,6 +2424,8 @@ Subscription Groups:
   Empty Group: Αυτή η ομάδα δεν περιέχει κανάλια από το τρέχον προφίλ.
   Save Failed: Δεν ήταν δυνατή η αποθήκευση της ομάδας.
   Delete Failed: Δεν ήταν δυνατή η διαγραφή της ομάδας.
+  Group Icon: Εικονίδιο ομάδας
+  No Icon: Χωρίς εικονίδιο
 Yattee Server:
   API Error (Click to copy): Σφάλμα διακομιστή Yattee (Κάντε κλικ για αντιγραφή)
   Unsupported page: Αυτή η σελίδα δεν είναι διαθέσιμη με τον διακομιστή Yattee. Ενεργοποιήστε τη ρύθμιση «{fallbackSetting}» για να τη φορτώσετε με το τοπικό API.

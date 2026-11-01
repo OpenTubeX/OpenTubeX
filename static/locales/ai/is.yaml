@@ -2410,6 +2410,8 @@ Subscription Groups:
   Empty Group: Þessi hópur inniheldur engar rásir úr núverandi notkunarsniði.
   Save Failed: Ekki tókst að vista hópinn.
   Delete Failed: Ekki tókst að eyða hópnum.
+  Group Icon: Hóptákn
+  No Icon: Ekkert tákn
 Yattee Server:
   API Error (Click to copy): Villa í Yattee-netþjóni (smella til að afrita)
   Unsupported page: Þessi síða er ekki tiltæk með Yattee-netþjóninum. Kveiktu á „{fallbackSetting}“ til að sækja hana með staðværa API-kerfisviðmótinu.

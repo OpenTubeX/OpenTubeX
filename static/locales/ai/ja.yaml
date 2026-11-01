@@ -2393,6 +2393,8 @@ Subscription Groups:
   Empty Group: このグループには、現在のプロファイルのチャンネルがありません。
   Save Failed: グループを保存できませんでした。
   Delete Failed: グループを削除できませんでした。
+  Group Icon: グループアイコン
+  No Icon: アイコンなし
 Yattee Server:
   API Error (Click to copy): Yattee Server エラー（クリックしてコピー）
   Unsupported page: このページは Yattee サーバーでは利用できません。内部 API で読み込むには「{fallbackSetting}」をオンにしてください。

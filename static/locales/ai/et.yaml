@@ -2396,6 +2396,8 @@ Subscription Groups:
   Empty Group: Selles rühmas pole praeguse profiili kanaleid.
   Save Failed: Rühma ei õnnestunud salvestada.
   Delete Failed: Rühma ei õnnestunud kustutada.
+  Group Icon: Rühma ikoon
+  No Icon: Ikoonita
 Yattee Server:
   API Error (Click to copy): Yattee serveri viga (kopeerimiseks klõpsi)
   Unsupported page: See leht pole Yattee serveriga saadaval. Lülita sisse „{fallbackSetting}“, et laadida see kohaliku API kaudu.

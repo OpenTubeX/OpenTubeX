@@ -3041,6 +3041,8 @@ Subscription Groups:
   Empty Group: Aquest grup no té cap canal del perfil actual.
   Save Failed: No s'ha pogut desar el grup.
   Delete Failed: No s'ha pogut suprimir el grup.
+  Group Icon: Icona del grup
+  No Icon: Sense icona
 Yattee Server:
   API Error (Click to copy): S'ha produït un error en el servidor Yattee (feu clic per copiar-lo)
   Unsupported page: Aquesta pàgina no està disponible amb el servidor Yattee. Activeu «{fallbackSetting}» per carregar-la amb l'API local.

@@ -2403,6 +2403,8 @@ Subscription Groups:
   Empty Group: Bu qrupda cari profilə aid kanal yoxdur.
   Save Failed: Qrupu yadda saxlamaq mümkün olmadı.
   Delete Failed: Qrupu silmək mümkün olmadı.
+  Group Icon: Qrup nişanı
+  No Icon: Nişan yoxdur
 Yattee Server:
   API Error (Click to copy): Yattee Server Xətası (Köçürmək üçün kliklə)
   Unsupported page: Bu səhifə Yattee serveri ilə əlçatan deyil. Onu yerli API ilə yükləmək üçün “{fallbackSetting}” seçimini aktiv edin.

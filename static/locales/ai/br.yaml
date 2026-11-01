@@ -2402,6 +2402,8 @@ Subscription Groups:
   Empty Group: N'eus chadenn ebet eus ar profil red er strollad-mañ.
   Save Failed: N'eus ket bet gallet enrollañ ar strollad.
   Delete Failed: N'eus ket bet gallet dilemel ar strollad.
+  Group Icon: Arlun ar strollad
+  No Icon: Arlun ebet
 Yattee Server:
   API Error (Click to copy): Fazi gant ar servijer Yattee (Klikit evit eilañ)
   Unsupported page: "N'eo ket hegerz ar bajenn-mañ gant ar servijer Yattee. Gweredekait «\_{fallbackSetting}\_» evit he c'hargañ gant an API lec'hel."
