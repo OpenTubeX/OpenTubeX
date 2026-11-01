@@ -1195,6 +1195,24 @@ test('loops a chapter from the chapters panel with A-B repeat', async ({ app, pa
   await loopOutro.click()
   await expect(loopOutro).toHaveAttribute('aria-pressed', 'true')
   await expect(endMarker).toHaveAttribute('aria-label', /^Adjust point B, currently 0:30(\.\d+)?$/)
+  await loopOutro.click()
+
+  // Until the media duration is known, a chapter end can't be clamped to it.
+  const setDurationKnown = known => video.evaluate((element, known) => {
+    if (known) {
+      delete element.duration
+    } else {
+      Object.defineProperty(element, 'duration', { configurable: true, get: () => Number.NaN })
+    }
+    element.dispatchEvent(new Event('durationchange'))
+  }, known)
+  await setDurationKnown(false)
+  await loopOutro.click()
+  await expect(loopOutro).toHaveAttribute('aria-pressed', 'false')
+  await expect(player.locator('.abRepeatMarker')).toHaveCount(0)
+  await setDurationKnown(true)
+  await loopOutro.click()
+  await expect(loopOutro).toHaveAttribute('aria-pressed', 'true')
 })
 
 test('keeps the B repeat marker visible and interactive at the end', async ({ app, page }) => {

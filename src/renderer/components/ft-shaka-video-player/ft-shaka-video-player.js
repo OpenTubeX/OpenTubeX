@@ -2787,13 +2787,14 @@ export default defineComponent({
      */
     function getChapterLoopRange(index) {
       const chapter = props.chapters[index]
-      if (!chapter) return null
+      // Without the media duration, the end can't be clamped to it.
+      if (!chapter || !Number.isFinite(abRepeatDuration.value)) return null
 
       const nextStart = props.chapters[index + 1]?.startSeconds
       let end = chapter.endSeconds > chapter.startSeconds ? chapter.endSeconds : (nextStart ?? abRepeatDuration.value)
       // The listed video length can exceed the media duration by a fraction of a second.
       end = Math.min(end, abRepeatDuration.value)
-      return Number.isFinite(end) && end > chapter.startSeconds ? { start: chapter.startSeconds, end } : null
+      return end > chapter.startSeconds ? { start: chapter.startSeconds, end } : null
     }
 
     /** The chapter that A-B repeat currently loops, -1 for none, or null when chapters can't be looped. */
