@@ -160,7 +160,7 @@
               :data="item"
               :playlist-id="playlistId"
               :playlist-type="infoSource"
-              :playlist-index="playlistInVideoSearchMode ? (shownPlaylistItemIndexes.get(item) ?? -1) : index"
+              :playlist-index="playlistInVideoSearchMode ? shownPlaylistItemIndex(item) : index"
               :playlist-item-id="item.playlistItemId"
               appearance="result"
               :always-show-add-to-playlist-button="true"
@@ -168,7 +168,7 @@
               :can-move-video-up="index > 0 && canMoveVideos"
               :can-move-video-down="index < shownPlaylistItems.length - 1 && canMoveVideos"
               :can-remove-from-playlist="true"
-              :video-index="playlistInVideoSearchMode ? (shownPlaylistItemIndexes.get(item) ?? -1) : index"
+              :video-index="playlistInVideoSearchMode ? shownPlaylistItemIndex(item) : index"
               :initial-visible-state="index < 10"
               :dragged-video="draggedVideo"
               :is-sort-order-custom="isSortOrderCustom"
@@ -846,8 +846,13 @@ const shownPlaylistItems = computed(() => {
   return playlistItems.value.filter((v) => !toBeDeletedPlaylistItemIds_.includes(v.playlistItemId))
 })
 
-// Search results keep their playlist position; YouTube playlists render every match
-const shownPlaylistItemIndexes = computed(() => new Map(shownPlaylistItems.value.map((item, index) => [item, index])))
+// Search results keep their playlist position. Duration sorting copies user playlist items,
+// so those are matched by their unique playlistItemId
+const shownPlaylistItemIndexes = computed(() => new Map(shownPlaylistItems.value.map((item, index) => [item.playlistItemId ?? item, index])))
+
+function shownPlaylistItemIndex(item) {
+  return shownPlaylistItemIndexes.value.get(item.playlistItemId ?? item) ?? -1
+}
 
 const shownPlaylistItemCount = computed(() => shownPlaylistItems.value)
 

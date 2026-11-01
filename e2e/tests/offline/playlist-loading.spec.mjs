@@ -551,6 +551,7 @@ test.describe('YouTube playlist search', () => {
 
     const items = playlistPage.locator('.playlistItem')
     await expect(items).toHaveCount(11)
+    await expect(items.first().locator('.videoIndex')).toHaveText('25')
     await expect(playlistPage.getByText('Playlist video 250', { exact: true })).toBeVisible()
     await expect(playlistPage.locator('.ft-auto-load-next-page-wrapper')).toHaveCount(0)
     expect(requestedPages).toEqual([2, 3])
@@ -577,5 +578,30 @@ test.describe('YouTube playlist search', () => {
 
     await search.fill('')
     await expect(playlistPage.getByText('Playlist video 1', { exact: true })).toBeVisible()
+  })
+})
+
+test.describe('user playlist search', () => {
+  test.use({
+    seed: {
+      settings: { playlistViewType: 'list' },
+      playlists: [{
+        _id: 'duration-sorted',
+        playlistName: 'Duration sorted',
+        sortOrder: 'video_duration_descending',
+        videos: [
+          { videoId: 'aaaaaaaaaaa', playlistItemId: 'item-a', title: 'Alpha clip', author: 'Channel', lengthSeconds: 10, type: 'video' },
+          { videoId: 'bbbbbbbbbbb', playlistItemId: 'item-b', title: 'Beta clip', author: 'Channel', lengthSeconds: 30, type: 'video' },
+          { videoId: 'ccccccccccc', playlistItemId: 'item-c', title: 'Gamma', author: 'Channel', lengthSeconds: 20, type: 'video' }
+        ]
+      }]
+    }
+  })
+
+  test('numbers duration-sorted search results by their playlist position', async ({ page }) => {
+    await openPlaylistTab(page, '/playlist/duration-sorted?playlistType=user&searchQueryText=clip')
+    const items = page.locator('.playlistPage .playlistItem')
+    await expect(items).toHaveCount(2)
+    await expect(items.locator('.videoIndex')).toHaveText(['2', '1'])
   })
 })
