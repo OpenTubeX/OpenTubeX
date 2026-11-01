@@ -64,6 +64,8 @@ Search Listing:
     Members Only: Samo za članove
     Possibly AI-generated: Možda generirano umjetnom inteligencijom
 Stats:
+  Left of daily limit: "Preostalo je {duration} od vašeg dnevnog ograničenja od {limit}"
+  Daily limit reached: "Dosegnuto je dnevno ograničenje od {limit}"
   Replace old device: "Zamijeni stari uređaj"
   Replacement explanation: "Spojite {device} s ovim uređajem samo ako oba unosa pripadaju istom fizičkom uređaju."
   Overlapping days: "Dani u obje povijesti: {count}"
@@ -1079,6 +1081,27 @@ Settings:
     Refresh Subscriptions While App Is Closed: "Osvježavaj pretplate dok je aplikacija zatvorena"
     Notify About New Uploads: Obavijesti o novom sadržaju
   Distraction Free Settings:
+    Digital Wellbeing:
+      Count Watch Time From: "Brojanje vremena gledanja s"
+      Break Reminder Action: "Kada je vrijeme za odmor"
+      Grayscale: "Sivi tonovi"
+      Off: "Isključeno"
+      Always: "Uvijek"
+      During Bedtime: "Tijekom vremena za spavanje"
+      After the Daily Limit: "Nakon dnevnog ograničenja"
+      Daily Watch Time Limit: "Dnevno ograničenje vremena gledanja"
+      Daily Shorts Limit: "Dnevno ograničenje Shorts videozapisa"
+      When a Limit Is Reached: "Kada se dosegne ograničenje"
+      Remind Me: "Podsjeti me"
+      Pause Playback: "Pauziraj reprodukciju"
+      Take a Break Reminder: "Podsjetnik za odmor"
+      Every: "Svakih {duration}"
+      Bedtime Reminder: "Podsjetnik za spavanje"
+      Bedtime Start: "Početak vremena za spavanje"
+      Bedtime End: "Kraj vremena za spavanje"
+      Wait Until the Video Ends: "Pričekaj do kraja videozapisa"
+      Silence Upload Notifications at Bedtime: "Utišaj obavijesti o novom sadržaju tijekom vremena za spavanje"
+      Stop Autoplay at Bedtime and After the Daily Limit: "Zaustavi automatsku reprodukciju tijekom vremena za spavanje i nakon dnevnog ograničenja"
     Hide Popularity Graph: "Sakrij grafikon popularnosti"
     Enable Block Lists: "Omogući popise blokiranih"
     AI Video Summaries: AI sažeci videozapisa
@@ -1090,6 +1113,7 @@ Settings:
     Hide Header Sync Indicator: Sakrij pokazatelj sinkronizacije u zaglavlju aplikacije
     Hide Repeat Stats: Sakrij statistiku ponavljanja
     Sections:
+      Digital Wellbeing: "Digitalna dobrobit"
       Visible While Paused: Vidljivo tijekom pauze u punom prozoru / preko cijelog zaslona
     Hide Channel Avatars: Sakrij avatare kanala
     Shorten View Counts: Skrati prikaz broja pregleda, komentara i oznaka „sviđa mi se” na komentarima
@@ -2109,6 +2133,13 @@ Tooltips:
     FFmpeg Executable Path: FFmpeg je potreban za spajanje odvojenih tokova videozapisa i zvuka te za pretvorbu zvuka. OpenTubeX prema zadanim postavkama pretpostavlja da se FFmpeg može pronaći putem varijable okruženja PATH. Ovdje po potrebi možete postaviti prilagođenu putanju.
     Use cookies for subtitles: "Koristi postavljene kolačiće za titlove i automatske prijevode. Uključuje se i opcijom „Uvijek koristi kolačiće”."
   Distraction Free Settings:
+    Count Watch Time From: "„Svi uređaji” broji svaki uređaj koji sinkronizira statistiku gledanja. „Ovaj uređaj” broji samo ono što gledate ovdje."
+    When a Limit Is Reached: "„Pauziraj reprodukciju” omogućuje dodavanje 15 minuta ili zanemarivanje ograničenja za danas. Uz lozinku postavki ograničenje možete povećati samo u Postavkama."
+    Grayscale: "Prikazuje cijelu aplikaciju, uključujući videozapise, u nijansama sive kako bi manje privlačila pažnju. „Tijekom vremena za spavanje” prati raspored podsjetnika za spavanje."
+    Daily Watch Time Limit: "Broji što ste danas gledali na svim uređajima koji sinkroniziraju statistiku gledanja, uključujući Shorts videozapise."
+    Daily Shorts Limit: "Broji Shorts videozapise koje ste danas gledali na ovom uređaju."
+    Take a Break Reminder: "Pauzira videozapis nakon ovoliko gledanja. Stanka od 10 ili više minuta ponovno pokreće brojanje."
+    Bedtime Reminder: "Pauzira videozapis i podsjeća vas da prestanete gledati između vremena početka i završetka."
     Shorten View Counts: Prikazuje skraćene brojeve pregleda, komentara i oznaka sviđanja komentara koje je YouTube već zaokružio, primjerice 14 tis. umjesto 14.000. Točni brojevi uvijek se prikazuju u cijelosti.
   Subscription Settings:
     Fetch Feed on Startup: Kada je omogućeno, OpenTubeX automatski dohvaća sažetak pretplata pri pokretanju i otvaranju novog prozora.
@@ -2468,3 +2499,17 @@ Yattee Server:
 Yattee Fallback Warning: Ovaj zahtjev zaobilazi postavljeni Yattee poslužitelj i povezuje se izravno s YouTubeom, otkrivajući vašu IP adresu.
 Update With Package Manager: 'Ažuriraj pomoću {packageManager}:'
 Update Command Copied: 'Naredba za ažuriranje kopirana'
+Digital Wellbeing:
+  Watch time limit almost reached: "Do dnevnog ograničenja vremena gledanja preostalo je {duration}"
+  Shorts limit almost reached: "Do dnevnog ograničenja Shorts videozapisa preostalo je {duration}"
+  Daily watch time limit reached: "Dosegnuto je dnevno ograničenje vremena gledanja"
+  Daily Shorts limit reached: "Dosegnuto je dnevno ograničenje Shorts videozapisa"
+  Watched today: "Danas ste gledali {duration}."
+  Shorts watched today: "Danas ste gledali Shorts videozapise {duration}."
+  15 More Minutes: "Još 15 minuta"
+  Ignore for Today: "Zanemari za danas"
+  Time to take a break: "Vrijeme je za odmor"
+  Watching for: "Gledate već {duration}."
+  Time for bed: "Vrijeme je za spavanje"
+  Bedtime started at: "Vaše vrijeme za spavanje počelo je u {time}."
+  Remind Me in 10 Minutes: "Podsjeti me za 10 minuta"

@@ -17,6 +17,7 @@ import {
 } from '../helpers/androidSubscriptionRefresh'
 import { configureUploadNotifications } from '../helpers/uploadNotifications'
 import { createUploadNotificationConfiguration } from '../../newUploadNotifications'
+import { parseTimeOfDay } from '../helpers/digitalWellbeing'
 import {
   AndroidSubscriptionRefreshPayloadError,
   createAndroidSubscriptionRefreshConfiguration,
@@ -215,6 +216,9 @@ export function useSubscriptionAutoRefresh({ dataReady, t }) {
       subscriptions: store.getters.getProfileList[0]?.subscriptions ?? [],
       hiddenFeedTypes: hiddenSubscriptionFeedTypes.value,
       showMembersOnly: hasConfiguredRestrictedPlaybackAuthentication(store.getters),
+      quietHours: store.getters.getBedtimeSilenceNotifications
+        ? { start: parseTimeOfDay(store.getters.getBedtimeStart), end: parseTimeOfDay(store.getters.getBedtimeEnd) }
+        : null,
       titles: {
         videos: t('Subscriptions.New video from {channel}', { channel: '{channel}' }),
         shorts: t('Subscriptions.New short from {channel}', { channel: '{channel}' }),

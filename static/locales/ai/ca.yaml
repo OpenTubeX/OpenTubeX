@@ -102,6 +102,8 @@ Search Filters:
     VR180: VR180
   Clear Filters: Neteja els filtres
 Stats:
+  Left of daily limit: "Queden {duration} del vostre límit diari de {limit}"
+  Daily limit reached: "S'ha arribat al límit diari de {limit}"
   Replace old device: "Substitueix el dispositiu antic"
   Replacement explanation: "Combina {device} amb aquest dispositiu només si ambdues entrades pertanyen al mateix dispositiu físic."
   Overlapping days: "Dies en tots dos historials: {count}"
@@ -1347,6 +1349,27 @@ Settings:
     To: A
     Confirm Before Unsubscribing: Confirma abans de donar-se de baixa
   Distraction Free Settings:
+    Digital Wellbeing:
+      Count Watch Time From: "Compta el temps de visualització de"
+      Break Reminder Action: "Quan sigui hora de fer una pausa"
+      Grayscale: "Escala de grisos"
+      Off: "Desactivat"
+      Always: "Sempre"
+      During Bedtime: "Durant l'hora d'anar a dormir"
+      After the Daily Limit: "Després del límit diari"
+      Daily Watch Time Limit: "Límit diari de temps de visualització"
+      Daily Shorts Limit: "Límit diari de vídeos curts"
+      When a Limit Is Reached: "Quan s'arriba a un límit"
+      Remind Me: "Recorda-m'ho"
+      Pause Playback: "Posa en pausa la reproducció"
+      Take a Break Reminder: "Recordatori per fer una pausa"
+      Every: "Cada {duration}"
+      Bedtime Reminder: "Recordatori de l'hora d'anar a dormir"
+      Bedtime Start: "Inici de l'hora d'anar a dormir"
+      Bedtime End: "Final de l'hora d'anar a dormir"
+      Wait Until the Video Ends: "Espera que acabi el vídeo"
+      Silence Upload Notifications at Bedtime: "Silencia les notificacions de pujades noves a l'hora d'anar a dormir"
+      Stop Autoplay at Bedtime and After the Daily Limit: "Atura la reproducció automàtica a l'hora d'anar a dormir i després del límit diari"
     Hide Popularity Graph: "Amaga el gràfic de popularitat"
     Enable Block Lists: "Activa les llistes de bloqueig"
     AI Video Summaries: Resums de vídeos amb IA
@@ -1358,6 +1381,7 @@ Settings:
     Hide Header Sync Indicator: Amaga l’indicador de sincronització de la capçalera de l’aplicació
     Hide Repeat Stats: Amaga les estadístiques de repetició
     Sections:
+      Digital Wellbeing: "Benestar digital"
       Side Bar: Barra lateral
       Subscriptions Page: Pàgina de subscripcions
       Channel Page: Pàgina del canal
@@ -2638,6 +2662,13 @@ Tooltips:
     FFmpeg Executable Path: FFmpeg és necessari per combinar fluxos de vídeo i àudio separats i per convertir àudio. De manera predeterminada, l'OpenTubeX suposa que es pot trobar FFmpeg mitjançant la variable d'entorn PATH. Si cal, podeu definir aquí un camí personalitzat.
     Use cookies for subtitles: "Utilitza les galetes configurades per als subtítols i les traduccions automàtiques. També s’activa amb «Utilitza sempre galetes»."
   Distraction Free Settings:
+    Count Watch Time From: "\"Tots els dispositius\" compta tots els dispositius que sincronitzen les estadístiques de visualització. \"Aquest dispositiu\" només compta el que mireu aquí."
+    When a Limit Is Reached: "\"Posa en pausa la reproducció\" us permet afegir 15 minuts o ignorar el límit per avui. Amb una contrasenya de la configuració, només podeu augmentar un límit a la Configuració."
+    Grayscale: "Mostra tota l'aplicació, inclosos els vídeos, en tons de gris perquè cridi menys l'atenció. \"Durant l'hora d'anar a dormir\" segueix l'horari del recordatori de l'hora d'anar a dormir."
+    Daily Watch Time Limit: "Compta el que heu mirat avui en tots els dispositius que sincronitzen les estadístiques de visualització, inclosos els vídeos curts."
+    Daily Shorts Limit: "Compta els vídeos curts que heu mirat avui en aquest dispositiu."
+    Take a Break Reminder: "Posa en pausa el vídeo després d'aquest temps de visualització. Una pausa de 10 minuts o més reinicia el recompte."
+    Bedtime Reminder: "Posa en pausa el vídeo i us recorda que deixeu de mirar vídeos entre l'hora d'inici i la de final."
     Shorten View Counts: Mostra en format abreujat els recomptes de visualitzacions, de comentaris i de m'agrades dels comentaris que YouTube ja ha arrodonit, p. ex. 14K en lloc de 14.000. Els recomptes exactes sempre es mostren sencers.
     Hide Channels: Introduïu un ID de canal per ocultar tots els seus vídeos i llistes de reproducció, així com el canal mateix, de la cerca, les tendències, els més populars i les recomanacions. L'ID introduït ha de coincidir completament i distingeix entre majúscules i minúscules.
     Hide Subscriptions Live: L'opció general "{appWideSetting}", de la secció "{subsection}" de "{settingsSection}", substitueix aquesta opció
@@ -3083,3 +3114,17 @@ Yattee Server:
 Yattee Fallback Warning: Aquesta sol·licitud omet el servidor Yattee que heu configurat i es connecta directament a YouTube, exposant la vostra adreça IP.
 Update With Package Manager: 'Actualitza amb {packageManager}:'
 Update Command Copied: 'S''ha copiat l''ordre d''actualització'
+Digital Wellbeing:
+  Watch time limit almost reached: "Queden {duration} per arribar al vostre límit diari de temps de visualització"
+  Shorts limit almost reached: "Queden {duration} per arribar al vostre límit diari de vídeos curts"
+  Daily watch time limit reached: "S'ha arribat al límit diari de temps de visualització"
+  Daily Shorts limit reached: "S'ha arribat al límit diari de vídeos curts"
+  Watched today: "Avui heu mirat {duration} de vídeos."
+  Shorts watched today: "Avui heu mirat {duration} de vídeos curts."
+  15 More Minutes: "15 minuts més"
+  Ignore for Today: "Ignora-ho per avui"
+  Time to take a break: "És hora de fer una pausa"
+  Watching for: "Fa {duration} que mireu vídeos."
+  Time for bed: "És hora d'anar a dormir"
+  Bedtime started at: "La vostra hora d'anar a dormir ha començat a les {time}."
+  Remind Me in 10 Minutes: "Recorda-m'ho d'aquí a 10 minuts"

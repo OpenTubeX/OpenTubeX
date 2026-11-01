@@ -101,6 +101,8 @@ Search Filters:
     360 Video: 360-stopinjski videoposnetek
   Clear Filters: Počisti filtre
 Stats:
+  Left of daily limit: "Še {duration} od vaše dnevne omejitve {limit}"
+  Daily limit reached: "Dnevna omejitev {limit} je dosežena"
   Replace old device: "Zamenjaj staro napravo"
   Replacement explanation: "Združite {device} s to napravo le, če oba vnosa pripadata isti fizični napravi."
   Overlapping days: "Dnevi v obeh zgodovinah: {count}"
@@ -1313,6 +1315,27 @@ Settings:
     To: Na
     Confirm Before Unsubscribing: Zahtevaj potrditev pred odjavo
   Distraction Free Settings:
+    Digital Wellbeing:
+      Count Watch Time From: "Štej čas gledanja"
+      Break Reminder Action: "Ko je čas za odmor"
+      Grayscale: "Odtenki sive"
+      Off: "Izklopljeno"
+      Always: "Vedno"
+      During Bedtime: "Med časom za spanje"
+      After the Daily Limit: "Po dnevni omejitvi"
+      Daily Watch Time Limit: "Dnevna omejitev časa gledanja"
+      Daily Shorts Limit: "Dnevna omejitev kratkih videoposnetkov"
+      When a Limit Is Reached: "Ko je omejitev dosežena"
+      Remind Me: "Opomni me"
+      Pause Playback: "Začasno ustavi predvajanje"
+      Take a Break Reminder: "Opomnik za odmor"
+      Every: "Vsakih {duration}"
+      Bedtime Reminder: "Opomnik za spanje"
+      Bedtime Start: "Začetek časa za spanje"
+      Bedtime End: "Konec časa za spanje"
+      Wait Until the Video Ends: "Počakaj do konca videoposnetka"
+      Silence Upload Notifications at Bedtime: "Utišaj obvestila o novi vsebini med časom za spanje"
+      Stop Autoplay at Bedtime and After the Daily Limit: "Ustavi samodejno predvajanje med časom za spanje in po dnevni omejitvi"
     Hide Popularity Graph: "Skrij graf priljubljenosti"
     Enable Block Lists: "Omogoči sezname blokiranih"
     AI Video Summaries: Povzetki videoposnetkov z UI
@@ -1324,6 +1347,7 @@ Settings:
     Hide Header Sync Indicator: Skrij kazalnik sinhronizacije v glavi aplikacije
     Hide Repeat Stats: Skrij statistiko ponavljanja
     Sections:
+      Digital Wellbeing: "Digitalno dobro počutje"
       Side Bar: Stranska vrstica
       Subscriptions Page: Stran z naročninami
       Channel Page: Stran kanala
@@ -2598,6 +2622,13 @@ Tooltips:
     FFmpeg Executable Path: FFmpeg je potreben za združevanje ločenih video- in zvočnih pretokov ter pretvarjanje zvoka. OpenTubeX privzeto predvideva, da je FFmpeg mogoče najti prek okoljske spremenljivke PATH. Po potrebi lahko tukaj nastavite pot po meri.
     Use cookies for subtitles: "Uporabi nastavljene piškotke za podnapise in samodejne prevode. To možnost omogoči tudi nastavitev »Vedno uporabi piškotke«."
   Distraction Free Settings:
+    Count Watch Time From: "Možnost »Vse naprave« šteje vse naprave, ki sinhronizirajo statistiko gledanja. »Ta naprava« šteje samo to, kar gledate tukaj."
+    When a Limit Is Reached: "Možnost »Začasno ustavi predvajanje« omogoča, da dodate 15 minut ali omejitev za danes prezrete. Z geslom za nastavitve lahko omejitev povečate samo v nastavitvah."
+    Grayscale: "Celotno aplikacijo, vključno z videoposnetki, prikaže v odtenkih sive, da manj pritegne pozornost. Možnost »Med časom za spanje« sledi urniku opomnika za spanje."
+    Daily Watch Time Limit: "Šteje, kar ste danes gledali v vseh napravah, ki sinhronizirajo statistiko gledanja, vključno s kratkimi videoposnetki."
+    Daily Shorts Limit: "Šteje kratke videoposnetke, ki ste jih danes gledali v tej napravi."
+    Take a Break Reminder: "Po tolikšnem času gledanja začasno ustavi videoposnetek. Premor, dolg 10 minut ali več, začne štetje znova."
+    Bedtime Reminder: "Med začetnim in končnim časom začasno ustavi videoposnetek in vas opomni, da prenehate gledati."
     Shorten View Counts: Prikaže število ogledov, komentarjev in všečkov komentarjev v skrajšani obliki, ki jo je YouTube že zaokrožil, npr. 14 tis. namesto 14.000. Natančno število je vedno prikazano v celoti.
     Hide Channels: Vnesite ID kanala, da skrijete vse njegove videoposnetke in sezname predvajanja ter sam kanal iz iskanja, priljubljenih in najbolj gledanih vsebin ter priporočil. Vneseni ID kanala se mora popolnoma ujemati in razlikuje med velikimi in malimi črkami.
     Hide Subscriptions Live: To nastavitev preglasi nastavitev »{appWideSetting}« za celotno aplikacijo v podrazdelku »{subsection}« razdelka »{settingsSection}«
@@ -3033,3 +3064,17 @@ Yattee Server:
 Yattee Fallback Warning: Ta zahteva zaobide nastavljeni strežnik Yattee in se poveže neposredno z YouTubom ter razkrije vaš naslov IP.
 Update With Package Manager: 'Posodobi z upravitljem {packageManager}:'
 Update Command Copied: 'Ukaz za posodobitev je kopiran'
+Digital Wellbeing:
+  Watch time limit almost reached: "Še {duration} do vaše dnevne omejitve časa gledanja"
+  Shorts limit almost reached: "Še {duration} do vaše dnevne omejitve kratkih videoposnetkov"
+  Daily watch time limit reached: "Dnevna omejitev časa gledanja je dosežena"
+  Daily Shorts limit reached: "Dnevna omejitev kratkih videoposnetkov je dosežena"
+  Watched today: "Danes ste gledali {duration}."
+  Shorts watched today: "Danes ste kratke videoposnetke gledali {duration}."
+  15 More Minutes: "Še 15 minut"
+  Ignore for Today: "Prezri za danes"
+  Time to take a break: "Čas je za odmor"
+  Watching for: "Gledate že {duration}."
+  Time for bed: "Čas je za spanje"
+  Bedtime started at: "Vaš čas za spanje se je začel ob {time}."
+  Remind Me in 10 Minutes: "Opomni me čez 10 minut"

@@ -194,10 +194,22 @@ export const SETTINGS_SEARCH_SOURCES = {
       'Hide Home',
       'Hide Popular Videos',
       'Hide Trending Videos',
-    ])
+      'Digital Wellbeing',
+    ]),
+    tab: 'distraction'
+  }, {
+    type: 'digital-wellbeing',
+    key: 'Settings.Distraction Free Settings.Digital Wellbeing',
+    tab: 'wellbeing'
+  }, {
+    type: 'digital-wellbeing-heading',
+    key: 'Settings.Distraction Free Settings.Sections',
+    include: new Set(['Digital Wellbeing']),
+    tab: 'wellbeing'
   }, {
     type: 'parental-control',
-    key: 'Settings.Parental Control Settings'
+    key: 'Settings.Parental Control Settings',
+    tab: 'parental'
   }],
   'add-ons': [{
     type: 'sponsor-block',
@@ -300,6 +312,24 @@ export const SETTINGS_SEARCH_SOURCES = {
 }
 
 export const SETTINGS_SEARCH_SELECT_GROUP_LABELS = {
+  // Leaves out select options such as Off and Always.
+  'digital-wellbeing': {
+    '': [
+      'Grayscale',
+      'Daily Watch Time Limit',
+      'Count Watch Time From',
+      'Daily Shorts Limit',
+      'When a Limit Is Reached',
+      'Take a Break Reminder',
+      'Break Reminder Action',
+      'Bedtime Reminder',
+      'Bedtime Start',
+      'Bedtime End',
+      'Wait Until the Video Ends',
+      'Silence Upload Notifications at Bedtime',
+      'Stop Autoplay at Bedtime and After the Daily Limit'
+    ]
+  },
   sync: {
     '': [
       'Sync Settings', 'Enable Sync', 'Server URL', 'Username', 'Privacy Passphrase',
@@ -415,6 +445,7 @@ export const SETTINGS_SEARCH_SELECT_GROUP_LABELS = {
 }
 
 export const SETTINGS_SEARCH_EXCLUDED_MESSAGE_PATHS = {
+  distraction: new Set(['Sections.Digital Wellbeing']),
   general: new Set(['System Default']),
   'context-menu-search': new Set(['Engine Name', 'Search URL']),
   player: new Set(['Lights Off', 'Skip Silence', 'Playback Speed Name', 'Use Automatic Playback Speed Name']),

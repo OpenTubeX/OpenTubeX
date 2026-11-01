@@ -64,6 +64,8 @@ Search Listing:
     Members Only: לחברים בלבד
     Possibly AI-generated: ייתכן שנוצר באמצעות AI
 Stats:
+  Left of daily limit: "נותרו {duration} מתוך המגבלה היומית של {limit}"
+  Daily limit reached: "הושגה המגבלה היומית של {limit}"
   Replace old device: "החלפת מכשיר ישן"
   Replacement explanation: "יש לשלב את {device} עם המכשיר הזה רק אם שתי הרשומות שייכות לאותו מכשיר פיזי."
   Overlapping days: "ימים בשתי ההיסטוריות: {count}"
@@ -1090,6 +1092,27 @@ Settings:
     Refresh Subscriptions While App Is Closed: "ריענון מינויים כשהיישום סגור"
     Notify About New Uploads: התראה על העלאות חדשות
   Distraction Free Settings:
+    Digital Wellbeing:
+      Count Watch Time From: "מקור ספירת זמן הצפייה"
+      Break Reminder Action: "כשמגיע הזמן להפסקה"
+      Grayscale: "גווני אפור"
+      Off: "כבוי"
+      Always: "תמיד"
+      During Bedtime: "בשעת השינה"
+      After the Daily Limit: "אחרי המגבלה היומית"
+      Daily Watch Time Limit: "מגבלת זמן צפייה יומית"
+      Daily Shorts Limit: "מגבלת Shorts יומית"
+      When a Limit Is Reached: "כשמגיעים למגבלה"
+      Remind Me: "תזכורת"
+      Pause Playback: "השהיית הניגון"
+      Take a Break Reminder: "תזכורת להפסקה"
+      Every: "כל {duration}"
+      Bedtime Reminder: "תזכורת לשעת השינה"
+      Bedtime Start: "תחילת שעת השינה"
+      Bedtime End: "סיום שעת השינה"
+      Wait Until the Video Ends: "המתנה לסיום הסרטון"
+      Silence Upload Notifications at Bedtime: "השתקת התראות על העלאות חדשות בשעת השינה"
+      Stop Autoplay at Bedtime and After the Daily Limit: "עצירת הניגון האוטומטי בשעת השינה ואחרי המגבלה היומית"
     Hide Popularity Graph: "הסתרת גרף הפופולריות"
     Enable Block Lists: "הפעלת רשימות חסימה"
     AI Video Summaries: סיכומי סרטונים מבינה מלאכותית
@@ -1101,6 +1124,7 @@ Settings:
     Hide Header Sync Indicator: הסתרת מחוון הסנכרון בכותרת היישום
     Hide Repeat Stats: הסתרת נתוני חזרה
     Sections:
+      Digital Wellbeing: "רווחה דיגיטלית"
       Visible While Paused: מוצג בזמן השהיה בחלון מלא או במסך מלא
     Hide Channel Avatars: הסתרת תמונות ערוצים
     Shorten View Counts: קיצור מספרי צפיות, תגובות ולייקים לתגובות
@@ -2131,6 +2155,13 @@ Tooltips:
     FFmpeg Executable Path: FFmpeg נדרש למיזוג זרמי וידאו ושמע נפרדים ולהמרת שמע. כברירת מחדל, OpenTubeX מניחה שאפשר למצוא את FFmpeg דרך משתנה הסביבה PATH. במידת הצורך אפשר להגדיר כאן נתיב מותאם אישית.
     Use cookies for subtitles: "שימוש בעוגיות שהוגדרו עבור כתוביות ותרגומים אוטומטיים. מופעל גם דרך „השתמש תמיד בעוגיות”."
   Distraction Free Settings:
+    Count Watch Time From: "„כל המכשירים” סופר כל מכשיר שמסנכרן סטטיסטיקות צפייה. „המכשיר הזה” סופר רק את מה שנצפה כאן."
+    When a Limit Is Reached: "„השהיית הניגון” מאפשרת להוסיף 15 דקות או להתעלם מהמגבלה להיום. כשמוגדרת סיסמה להגדרות, אפשר להגדיל מגבלה רק בהגדרות."
+    Grayscale: "מציג את כל היישום, כולל הסרטונים, בגווני אפור כדי שימשוך פחות תשומת לב. „בשעת השינה” פועל לפי לוח הזמנים של התזכורת לשעת השינה."
+    Daily Watch Time Limit: "סופר את מה שנצפה היום בכל המכשירים שמסנכרנים סטטיסטיקות צפייה, כולל Shorts."
+    Daily Shorts Limit: "סופר את סרטוני ה־Shorts שנצפו היום במכשיר זה."
+    Take a Break Reminder: "משהה את הסרטון אחרי זמן צפייה זה. הפסקה של 10 דקות או יותר מתחילה את הספירה מחדש."
+    Bedtime Reminder: "משהה את הסרטון ומזכיר להפסיק לצפות בין שעת ההתחלה לשעת הסיום."
     Shorten View Counts: מציג ספירות צפיות, תגובות ולייקים לתגובות ש-YouTube כבר עיגלה בצורה מקוצרת, למשל 14K במקום 14,000. ספירות מדויקות תמיד מוצגות במלואן.
   Subscription Settings:
     Fetch Feed on Startup: כשהאפשרות מופעלת, OpenTubeX תטען אוטומטית את פיד המינויים עם ההפעלה ובפתיחת חלון חדש.
@@ -2492,3 +2523,17 @@ Yattee Server:
 Yattee Fallback Warning: בקשה זו עוקפת את שרת Yattee שהגדרת ומתחברת ישירות ל־YouTube, תוך חשיפת כתובת ה־IP שלך.
 Update With Package Manager: 'עדכון באמצעות {packageManager}:'
 Update Command Copied: 'פקודת העדכון הועתקה'
+Digital Wellbeing:
+  Watch time limit almost reached: "נותרו {duration} עד למגבלת זמן הצפייה היומית"
+  Shorts limit almost reached: "נותרו {duration} עד למגבלת ה־Shorts היומית"
+  Daily watch time limit reached: "הושגה מגבלת זמן הצפייה היומית"
+  Daily Shorts limit reached: "הושגה מגבלת ה־Shorts היומית"
+  Watched today: "זמן הצפייה היום: {duration}."
+  Shorts watched today: "זמן הצפייה ב־Shorts היום: {duration}."
+  15 More Minutes: "עוד 15 דקות"
+  Ignore for Today: "התעלמות להיום"
+  Time to take a break: "הגיע הזמן לקחת הפסקה"
+  Watching for: "הצפייה נמשכת כבר {duration}."
+  Time for bed: "הגיע הזמן ללכת לישון"
+  Bedtime started at: "שעת השינה התחילה ב־{time}."
+  Remind Me in 10 Minutes: "להזכיר בעוד 10 דקות"

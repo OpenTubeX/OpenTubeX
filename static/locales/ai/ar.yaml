@@ -64,6 +64,8 @@ Search Listing:
     Members Only: الأعضاء فقط
     Possibly AI-generated: قد يكون مُنشأً بالذكاء الاصطناعي
 Stats:
+  Left of daily limit: "تبقى {duration} من حدك اليومي البالغ {limit}"
+  Daily limit reached: "تم بلوغ الحد اليومي البالغ {limit}"
   Replace old device: "استبدال الجهاز القديم"
   Replacement explanation: "ادمج {device} مع هذا الجهاز فقط إذا كان الإدخالان يخصان الجهاز الفعلي نفسه."
   Overlapping days: "الأيام الموجودة في السجلين: {count}"
@@ -1085,6 +1087,27 @@ Settings:
     Refresh Subscriptions While App Is Closed: "تحديث الاشتراكات أثناء إغلاق التطبيق"
     Notify About New Uploads: الإشعار بالمحتوى الجديد
   Distraction Free Settings:
+    Digital Wellbeing:
+      Count Watch Time From: "احتساب وقت المشاهدة من"
+      Break Reminder Action: "عندما يحين وقت الاستراحة"
+      Grayscale: "تدرج الرمادي"
+      Off: "إيقاف"
+      Always: "دائمًا"
+      During Bedtime: "أثناء وقت النوم"
+      After the Daily Limit: "بعد بلوغ الحد اليومي"
+      Daily Watch Time Limit: "الحد اليومي لوقت المشاهدة"
+      Daily Shorts Limit: "الحد اليومي لـ Shorts"
+      When a Limit Is Reached: "عند بلوغ الحد"
+      Remind Me: "ذكّرني"
+      Pause Playback: "إيقاف التشغيل مؤقتًا"
+      Take a Break Reminder: "تذكير بأخذ استراحة"
+      Every: "كل {duration}"
+      Bedtime Reminder: "تذكير بوقت النوم"
+      Bedtime Start: "بداية وقت النوم"
+      Bedtime End: "نهاية وقت النوم"
+      Wait Until the Video Ends: "الانتظار حتى ينتهي الفيديو"
+      Silence Upload Notifications at Bedtime: "كتم إشعارات المحتوى الجديد أثناء وقت النوم"
+      Stop Autoplay at Bedtime and After the Daily Limit: "إيقاف التشغيل التلقائي أثناء وقت النوم وبعد بلوغ الحد اليومي"
     Hide Popularity Graph: "إخفاء مخطط الشعبية"
     Enable Block Lists: "تفعيل قوائم الحظر"
     AI Video Summaries: ملخصات الفيديو بالذكاء الاصطناعي
@@ -1096,6 +1119,7 @@ Settings:
     Hide Header Sync Indicator: إخفاء مؤشر المزامنة في ترويسة التطبيق
     Hide Repeat Stats: إخفاء إحصاءات التكرار
     Sections:
+      Digital Wellbeing: "الرفاهية الرقمية"
       Visible While Paused: مرئي أثناء الإيقاف المؤقت في نافذة كاملة/شاشة كاملة
     Hide Channel Avatars: إخفاء الصور الرمزية للقناة
     Shorten View Counts: تقصير أعداد المشاهدات والتعليقات والإعجابات بالتعليقات
@@ -2109,6 +2133,13 @@ Tooltips:
     FFmpeg Executable Path: مطلوب FFmpeg لدمج تدفقات الفيديو والصوت المنفصلة ولتحويل الصوت. افتراضيًا، سيفترض OpenTubeX أنه يمكن العثور على FFmpeg عبر متغير البيئة PATH. إذا لزم الأمر، يمكن تعيين مسار مخصص هنا.
     Use cookies for subtitles: "استخدم ملفات تعريف الارتباط المُعدّة للترجمة والترجمة التلقائية. يُفعّل أيضًا عند تفعيل «استخدام ملفات تعريف الارتباط دائمًا»."
   Distraction Free Settings:
+    Count Watch Time From: "يحسب خيار \"جميع الأجهزة\" كل جهاز يزامن إحصائيات المشاهدة. ويحسب خيار \"هذا الجهاز\" ما تشاهده هنا فقط."
+    When a Limit Is Reached: "يتيح لك خيار \"إيقاف التشغيل مؤقتًا\" إضافة 15 دقيقة أو تجاهل الحد لهذا اليوم. عند تعيين كلمة مرور للإعدادات، لا يمكنك رفع الحد إلا من الإعدادات."
+    Grayscale: "يعرض التطبيق بالكامل، بما في ذلك مقاطع الفيديو، بتدرجات الرمادي ليجذب انتباهًا أقل. يتبع خيار \"أثناء وقت النوم\" جدول تذكير وقت النوم."
+    Daily Watch Time Limit: "يحسب ما شاهدته اليوم على جميع الأجهزة التي تزامن إحصائيات المشاهدة، بما في ذلك Shorts."
+    Daily Shorts Limit: "يحسب مقاطع Shorts التي شاهدتها اليوم على هذا الجهاز."
+    Take a Break Reminder: "يوقف الفيديو مؤقتًا بعد هذه المدة من المشاهدة. تؤدي استراحة مدتها 10 دقائق أو أكثر إلى بدء العد من جديد."
+    Bedtime Reminder: "يوقف الفيديو مؤقتًا ويذكّرك بالتوقف عن المشاهدة بين وقت البداية ووقت النهاية."
     Shorten View Counts: يعرض عدد المشاهدات والتعليقات والإعجابات بالتعليقات التي قام YouTube بتقريبها بالفعل في شكل مختصر، على سبيل المثال. 14 الف بدلاً من 14000. يتم عرض الأعداد الدقيقة دائمًا بالكامل.
   Subscription Settings:
     Fetch Feed on Startup: عند تمكينه، سيقوم OpenTubeX تلقائيًا بجلب موجز اشتراكك عند بدء التشغيل وعند فتح نافذة جديدة.
@@ -2468,3 +2499,17 @@ Yattee Server:
 Yattee Fallback Warning: يتجاوز هذا الطلب خادم Yattee الذي أعددته ويتصل مباشرةً بـ YouTube، مما يكشف عنوان IP الخاص بك.
 Update With Package Manager: 'التحديث باستخدام {packageManager}:'
 Update Command Copied: 'تم نسخ أمر التحديث'
+Digital Wellbeing:
+  Watch time limit almost reached: "تبقى {duration} من حدك اليومي لوقت المشاهدة"
+  Shorts limit almost reached: "تبقى {duration} من حدك اليومي لـ Shorts"
+  Daily watch time limit reached: "تم بلوغ الحد اليومي لوقت المشاهدة"
+  Daily Shorts limit reached: "تم بلوغ الحد اليومي لـ Shorts"
+  Watched today: "لقد شاهدت {duration} اليوم."
+  Shorts watched today: "لقد شاهدت {duration} من Shorts اليوم."
+  15 More Minutes: "15 دقيقة إضافية"
+  Ignore for Today: "تجاهل لهذا اليوم"
+  Time to take a break: "حان وقت أخذ استراحة"
+  Watching for: "أنت تشاهد منذ {duration}."
+  Time for bed: "حان وقت النوم"
+  Bedtime started at: "بدأ وقت نومك في {time}."
+  Remind Me in 10 Minutes: "ذكّرني بعد 10 دقائق"

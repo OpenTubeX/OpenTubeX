@@ -603,6 +603,27 @@ Settings:
     Enable RSS Feeds: Włącz kanały RSS dla innych platform
     Manage RSS Feeds: Zarządzaj kanałami RSS
   Distraction Free Settings:
+    Digital Wellbeing:
+      Count Watch Time From: "Licz czas oglądania"
+      Break Reminder Action: "Gdy nadejdzie czas na przerwę"
+      Grayscale: "Skala szarości"
+      Off: "Wyłączone"
+      Always: "Zawsze"
+      During Bedtime: "W porze snu"
+      After the Daily Limit: "Po osiągnięciu dziennego limitu"
+      Daily Watch Time Limit: "Dzienny limit czasu oglądania"
+      Daily Shorts Limit: "Dzienny limit filmów Short"
+      When a Limit Is Reached: "Po osiągnięciu limitu"
+      Remind Me: "Przypomnij mi"
+      Pause Playback: "Wstrzymaj odtwarzanie"
+      Take a Break Reminder: "Przypomnienie o przerwie"
+      Every: "Co {duration}"
+      Bedtime Reminder: "Przypomnienie o porze snu"
+      Bedtime Start: "Początek pory snu"
+      Bedtime End: "Koniec pory snu"
+      Wait Until the Video Ends: "Zaczekaj do końca filmu"
+      Silence Upload Notifications at Bedtime: "Wycisz powiadomienia o nowościach w porze snu"
+      Stop Autoplay at Bedtime and After the Daily Limit: "Zatrzymaj autoodtwarzanie w porze snu i po osiągnięciu dziennego limitu"
     Hide Popularity Graph: "Ukryj wykres popularności"
     Enable Block Lists: "Włącz listy blokowania"
     Hide End-Screen Recommendations: "Ukryj rekomendacje na ekranie końcowym"
@@ -615,6 +636,7 @@ Settings:
     Hide Header Sync Indicator: Ukryj wskaźnik synchronizacji w nagłówku aplikacji
     Hide Repeat Stats: Ukryj statystyki powtarzania
     Sections:
+      Digital Wellbeing: "Cyfrowa równowaga"
       Visible While Paused: Widoczne po wstrzymaniu w trybie pełnego okna lub pełnego ekranu
     Hide Channel Avatars: Ukrywaj awatary kanałów
     Shorten View Counts: Skracaj liczbę wyświetleń, komentarzy i polubień komentarzy
@@ -1308,6 +1330,13 @@ Tooltips:
     Always Use Cookies: "Używaj skonfigurowanych plików cookie do pobierania, napisów i za każdym razem, gdy yt-dlp pobiera informacje o strumieniach. Nie zmienia to metody pobierania strumienia na yt-dlp. Po wybraniu yt-dlp mogą być dostępne formaty przeznaczone tylko dla kont, w tym wyższa szybkość transmisji bitów YouTube Premium, jeśli konto ma do niej dostęp."
     Use cookies for subtitles: "Używaj skonfigurowanych plików cookie do napisów i tłumaczeń automatycznych. Włącza się także przez „Zawsze używaj ciasteczek”."
   Distraction Free Settings:
+    Count Watch Time From: "„Wszystkie urządzenia” liczy każde urządzenie, które synchronizuje statystyki oglądania. „To urządzenie” liczy tylko to, co oglądasz tutaj."
+    When a Limit Is Reached: "„Wstrzymaj odtwarzanie” pozwala dodać 15 minut lub zignorować limit na dzisiaj. Przy ustawionym haśle do ustawień limit można zwiększyć tylko w ustawieniach."
+    Grayscale: "Wyświetla całą aplikację, łącznie z filmami, w odcieniach szarości, aby mniej przyciągała uwagę. „W porze snu” działa według harmonogramu przypomnienia o porze snu."
+    Daily Watch Time Limit: "Liczy dzisiejszy czas oglądania na wszystkich urządzeniach, które synchronizują statystyki oglądania, łącznie z filmami Short."
+    Daily Shorts Limit: "Liczy filmy Short obejrzane dzisiaj na tym urządzeniu."
+    Take a Break Reminder: "Wstrzymuje film po takim czasie oglądania. Przerwa trwająca 10 minut lub dłużej rozpoczyna liczenie od nowa."
+    Bedtime Reminder: "Wstrzymuje film i przypomina o zakończeniu oglądania między godziną rozpoczęcia a godziną zakończenia."
     Shorten View Counts: Pokazuje liczbę wyświetleń, komentarzy i polubień komentarzy w skróconej postaci zaokrąglonej przez YouTube, na przykład 14 tys. zamiast 14 000. Dokładne wartości są zawsze wyświetlane w całości.
   Subscription Settings:
     Show Scheduled Live Streams / Premieres First: Umieszcza nadchodzące transmisje na żywo i premiery na górze kanału subskrypcji. Po wyłączeniu pozostają na pozycji zgodnej z datą ogłoszenia aż do rozpoczęcia. Po wyłączeniu odśwież kanał subskrypcji, aby pobrać daty ogłoszenia istniejących zaplanowanych pozycji.
@@ -1544,6 +1573,8 @@ Tray Icon:
   Follow App Theme: "Używaj motywu aplikacji"
 
 Stats:
+  Left of daily limit: "Pozostało {duration} z dziennego limitu {limit}"
+  Daily limit reached: "Osiągnięto dzienny limit {limit}"
   Replace old device: "Zastąp stare urządzenie"
   Replacement explanation: "Połącz {device} z tym urządzeniem tylko wtedy, gdy oba wpisy dotyczą tego samego fizycznego urządzenia."
   Overlapping days: "Dni w obu historiach: {count}"
@@ -1673,3 +1704,17 @@ Chapters:
   Loop Chapter: 'Zapętl rozdział: {chapter}'
   Looping Chapter: 'Zapętlanie rozdziału: {chapter}'
   Chapter Loop Stopped: 'Zatrzymano zapętlanie rozdziału'
+Digital Wellbeing:
+  Watch time limit almost reached: "Pozostało {duration} do dziennego limitu czasu oglądania"
+  Shorts limit almost reached: "Pozostało {duration} do dziennego limitu filmów Short"
+  Daily watch time limit reached: "Osiągnięto dzienny limit czasu oglądania"
+  Daily Shorts limit reached: "Osiągnięto dzienny limit filmów Short"
+  Watched today: "Dzisiejszy czas oglądania: {duration}."
+  Shorts watched today: "Dzisiejszy czas oglądania filmów Short: {duration}."
+  15 More Minutes: "Jeszcze 15 minut"
+  Ignore for Today: "Ignoruj dzisiaj"
+  Time to take a break: "Czas na przerwę"
+  Watching for: "Oglądasz już od {duration}."
+  Time for bed: "Czas iść spać"
+  Bedtime started at: "Twoja pora snu zaczęła się o {time}."
+  Remind Me in 10 Minutes: "Przypomnij mi za 10 minut"

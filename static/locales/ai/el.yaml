@@ -64,6 +64,8 @@ Search Listing:
     Members Only: Μόνο για μέλη
     Possibly AI-generated: Πιθανώς δημιουργημένο από AI
 Stats:
+  Left of daily limit: "Απομένουν {duration} από το ημερήσιο όριό σας των {limit}"
+  Daily limit reached: "Συμπληρώθηκε το ημερήσιο όριο των {limit}"
   Replace old device: "Αντικατάσταση παλιάς συσκευής"
   Replacement explanation: "Συνδυάστε το {device} με αυτή τη συσκευή μόνο αν και οι δύο καταχωρίσεις ανήκουν στην ίδια φυσική συσκευή."
   Overlapping days: "Ημέρες και στα δύο ιστορικά: {count}"
@@ -1079,6 +1081,27 @@ Settings:
     Refresh Subscriptions While App Is Closed: "Ανανέωση συνδρομών όταν η εφαρμογή είναι κλειστή"
     Notify About New Uploads: Ειδοποίηση για νέες μεταφορτώσεις
   Distraction Free Settings:
+    Digital Wellbeing:
+      Count Watch Time From: "Μέτρηση χρόνου παρακολούθησης από"
+      Break Reminder Action: "Όταν είναι ώρα για διάλειμμα"
+      Grayscale: "Κλίμακα του γκρι"
+      Off: "Ανενεργό"
+      Always: "Πάντα"
+      During Bedtime: "Την ώρα του ύπνου"
+      After the Daily Limit: "Μετά το ημερήσιο όριο"
+      Daily Watch Time Limit: "Ημερήσιο όριο χρόνου παρακολούθησης"
+      Daily Shorts Limit: "Ημερήσιο όριο Shorts"
+      When a Limit Is Reached: "Όταν συμπληρωθεί ένα όριο"
+      Remind Me: "Υπενθύμιση"
+      Pause Playback: "Παύση αναπαραγωγής"
+      Take a Break Reminder: "Υπενθύμιση για διάλειμμα"
+      Every: "Κάθε {duration}"
+      Bedtime Reminder: "Υπενθύμιση ώρας ύπνου"
+      Bedtime Start: "Έναρξη ώρας ύπνου"
+      Bedtime End: "Λήξη ώρας ύπνου"
+      Wait Until the Video Ends: "Αναμονή μέχρι το τέλος του βίντεο"
+      Silence Upload Notifications at Bedtime: "Σίγαση ειδοποιήσεων νέων μεταφορτώσεων την ώρα του ύπνου"
+      Stop Autoplay at Bedtime and After the Daily Limit: "Διακοπή αυτόματης αναπαραγωγής την ώρα του ύπνου και μετά το ημερήσιο όριο"
     Hide Popularity Graph: "Απόκρυψη γραφήματος δημοτικότητας"
     Enable Block Lists: "Ενεργοποίηση λιστών αποκλεισμού"
     AI Video Summaries: Συνόψεις βίντεο από ΤΝ
@@ -1090,6 +1113,7 @@ Settings:
     Hide Header Sync Indicator: Απόκρυψη ένδειξης συγχρονισμού στην κεφαλίδα της εφαρμογής
     Hide Repeat Stats: Απόκρυψη στατιστικών επανάληψης
     Sections:
+      Digital Wellbeing: "Ψηφιακή ευεξία"
       Visible While Paused: Ορατά κατά την παύση σε πλήρες παράθυρο / πλήρη οθόνη
     Hide Channel Avatars: Απόκρυψη εικόνων προφίλ καναλιών
     Shorten View Counts: Συντόμευση πλήθους προβολών, σχολίων και θετικών ψήφων σχολίων
@@ -2107,6 +2131,13 @@ Tooltips:
     FFmpeg Executable Path: Το FFmpeg απαιτείται για τη συγχώνευση ξεχωριστών ροών βίντεο και ήχου, καθώς και για τη μετατροπή ήχου. Από προεπιλογή, το OpenTubeX θεωρεί ότι το FFmpeg μπορεί να βρεθεί μέσω της μεταβλητής περιβάλλοντος PATH. Αν χρειάζεται, μπορείτε να ορίσετε εδώ μια προσαρμοσμένη διαδρομή.
     Use cookies for subtitles: "Χρήση των ρυθμισμένων cookies για υπότιτλους και αυτόματες μεταφράσεις. Ενεργοποιείται επίσης από το «Να χρησιμοποιούνται πάντα cookies»."
   Distraction Free Settings:
+    Count Watch Time From: "Η επιλογή «Όλες οι συσκευές» μετρά κάθε συσκευή που συγχρονίζει στατιστικά παρακολούθησης. Η επιλογή «Αυτή η συσκευή» μετρά μόνο ό,τι παρακολουθείτε εδώ."
+    When a Limit Is Reached: "Η επιλογή «Παύση αναπαραγωγής» σάς επιτρέπει να προσθέσετε 15 λεπτά ή να αγνοήσετε το όριο για σήμερα. Με κωδικό πρόσβασης ρυθμίσεων, μπορείτε να αυξήσετε ένα όριο μόνο από τις Ρυθμίσεις."
+    Grayscale: "Εμφανίζει όλη την εφαρμογή, μαζί με τα βίντεο, σε αποχρώσεις του γκρι, ώστε να τραβά λιγότερο την προσοχή. Η επιλογή «Την ώρα του ύπνου» ακολουθεί το πρόγραμμα της υπενθύμισης ώρας ύπνου."
+    Daily Watch Time Limit: "Μετρά ό,τι παρακολουθήσατε σήμερα σε όλες τις συσκευές που συγχρονίζουν στατιστικά παρακολούθησης, μαζί με τα Shorts."
+    Daily Shorts Limit: "Μετρά τα Shorts που παρακολουθήσατε σήμερα σε αυτή τη συσκευή."
+    Take a Break Reminder: "Θέτει το βίντεο σε παύση μετά από τόση παρακολούθηση. Ένα διάλειμμα 10 λεπτών ή περισσότερο ξεκινά ξανά τη μέτρηση."
+    Bedtime Reminder: "Θέτει το βίντεο σε παύση και σας υπενθυμίζει να σταματήσετε την παρακολούθηση μεταξύ της ώρας έναρξης και της ώρας λήξης."
     Shorten View Counts: Εμφανίζει σε σύντομη μορφή τα πλήθη προβολών, σχολίων και θετικών ψήφων σχολίων που έχει ήδη στρογγυλοποιήσει το YouTube, π.χ. 14K αντί για 14.000. Τα ακριβή πλήθη εμφανίζονται πάντα ολόκληρα.
   Subscription Settings:
     Fetch Feed on Startup: Όταν είναι ενεργοποιημένο, το OpenTubeX ανακτά αυτόματα τη ροή συνδρομών κατά την εκκίνηση και όταν ανοίγει νέο παράθυρο.
@@ -2466,3 +2497,17 @@ Yattee Server:
 Yattee Fallback Warning: Αυτό το αίτημα παρακάμπτει τον ρυθμισμένο διακομιστή Yattee και συνδέεται απευθείας στο YouTube, αποκαλύπτοντας τη διεύθυνση IP σας.
 Update With Package Manager: 'Ενημέρωση με {packageManager}:'
 Update Command Copied: 'Η εντολή ενημέρωσης αντιγράφηκε'
+Digital Wellbeing:
+  Watch time limit almost reached: "Απομένουν {duration} έως το ημερήσιο όριο χρόνου παρακολούθησης"
+  Shorts limit almost reached: "Απομένουν {duration} έως το ημερήσιο όριο Shorts"
+  Daily watch time limit reached: "Συμπληρώθηκε το ημερήσιο όριο χρόνου παρακολούθησης"
+  Daily Shorts limit reached: "Συμπληρώθηκε το ημερήσιο όριο Shorts"
+  Watched today: "Παρακολουθήσατε {duration} σήμερα."
+  Shorts watched today: "Παρακολουθήσατε Shorts για {duration} σήμερα."
+  15 More Minutes: "15 λεπτά ακόμα"
+  Ignore for Today: "Παράβλεψη για σήμερα"
+  Time to take a break: "Ώρα για διάλειμμα"
+  Watching for: "Παρακολουθείτε εδώ και {duration}."
+  Time for bed: "Ώρα για ύπνο"
+  Bedtime started at: "Η ώρα του ύπνου σας ξεκίνησε στις {time}."
+  Remind Me in 10 Minutes: "Υπενθύμιση σε 10 λεπτά"

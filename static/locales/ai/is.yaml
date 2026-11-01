@@ -64,6 +64,8 @@ Search Listing:
     Members Only: Aðeins fyrir meðlimi
     Possibly AI-generated: Hugsanlega gert með gervigreind
 Stats:
+  Left of daily limit: "{duration} eftir af daglegu hámarki þínu ({limit})"
+  Daily limit reached: "Daglegu hámarki náð: {limit}"
   Replace old device: "Skipta út gömlu tæki"
   Replacement explanation: "Sameinaðu {device} aðeins við þetta tæki ef báðar færslurnar tilheyra sama raunverulega tækinu."
   Overlapping days: "Dagar í báðum ferlum: {count}"
@@ -1076,6 +1078,27 @@ Settings:
     Refresh Subscriptions While App Is Closed: "Uppfæra áskriftir þegar forritið er lokað"
     Notify About New Uploads: Tilkynna um nýtt efni
   Distraction Free Settings:
+    Digital Wellbeing:
+      Count Watch Time From: "Telja áhorfstíma"
+      Break Reminder Action: "Þegar kominn er tími á hlé"
+      Grayscale: "Grátóna"
+      Off: "Slökkt"
+      Always: "Alltaf"
+      During Bedtime: "Á háttatíma"
+      After the Daily Limit: "Eftir daglegt hámark"
+      Daily Watch Time Limit: "Daglegt hámark áhorfstíma"
+      Daily Shorts Limit: "Daglegt hámark Shorts-myndbanda"
+      When a Limit Is Reached: "Þegar hámarki er náð"
+      Remind Me: "Minna mig á"
+      Pause Playback: "Gera hlé á spilun"
+      Take a Break Reminder: "Áminning um hlé"
+      Every: "Á {duration} fresti"
+      Bedtime Reminder: "Áminning um háttatíma"
+      Bedtime Start: "Upphaf háttatíma"
+      Bedtime End: "Lok háttatíma"
+      Wait Until the Video Ends: "Bíða þar til myndbandinu lýkur"
+      Silence Upload Notifications at Bedtime: "Þagga tilkynningar um nýtt efni á háttatíma"
+      Stop Autoplay at Bedtime and After the Daily Limit: "Stöðva sjálfvirka spilun á háttatíma og eftir daglegt hámark"
     Hide Popularity Graph: "Fela vinsældarit"
     Enable Block Lists: "Virkja blokkunarlista"
     AI Video Summaries: Myndbandsyfirlit gervigreindar
@@ -1087,6 +1110,7 @@ Settings:
     Hide Header Sync Indicator: Fela samstillingarvísi í haus forritsins
     Hide Repeat Stats: Fela tölfræði endurtekninga
     Sections:
+      Digital Wellbeing: "Stafræn vellíðan"
       Visible While Paused: Sýnilegt þegar gert er hlé í heilum glugga eða á öllum skjánum
     Hide Channel Avatars: Fela auðkennismyndir rása
     Shorten View Counts: Stytta tölur yfir áhorf, athugasemdir og líkar við athugasemdir
@@ -2094,6 +2118,13 @@ Tooltips:
     FFmpeg Executable Path: FFmpeg er nauðsynlegt til að sameina aðskilið mynd- og hljóðstreymi og til að umbreyta hljóði. Sjálfgefið gerir OpenTubeX ráð fyrir að FFmpeg finnist með PATH-umhverfisbreytunni. Hér má velja sérsniðna slóð ef þess þarf.
     Use cookies for subtitles: "Nota stilltar vafrakökur fyrir skjátexta og sjálfvirkar þýðingar. Virkjast einnig með „Nota alltaf vafrakökur“."
   Distraction Free Settings:
+    Count Watch Time From: "„Öll tæki“ telur öll tæki sem samstilla áhorfstölfræði. „Þetta tæki“ telur aðeins það sem þú horfir á hér."
+    When a Limit Is Reached: "„Gera hlé á spilun“ gerir þér kleift að bæta við 15 mínútum eða hunsa hámarkið í dag. Með lykilorði fyrir stillingar geturðu aðeins hækkað hámark í stillingunum."
+    Grayscale: "Sýnir allt forritið, þar á meðal myndbönd, í gráum tónum svo það dragi minni athygli að sér. „Á háttatíma“ fylgir tímaáætlun áminningar um háttatíma."
+    Daily Watch Time Limit: "Telur það sem þú hefur horft á í dag á öllum tækjum sem samstilla áhorfstölfræði, þar á meðal Shorts-myndbönd."
+    Daily Shorts Limit: "Telur Shorts-myndböndin sem þú hefur horft á í dag á þessu tæki."
+    Take a Break Reminder: "Gerir hlé á myndbandinu eftir svona langt áhorf. Hlé í 10 mínútur eða lengur byrjar talninguna upp á nýtt."
+    Bedtime Reminder: "Gerir hlé á myndbandinu og minnir þig á að hætta að horfa milli upphafs- og lokatíma."
     Shorten View Counts: Sýnir fjölda áhorfa, athugasemda og fjölda þeirra sem líka við athugasemdir á styttu formi ef YouTube hefur þegar námundað tölurnar, t.d. 14 þ. í stað 14.000. Nákvæmur fjöldi er alltaf sýndur fullskrifaður.
   Subscription Settings:
     Fetch Feed on Startup: Þegar þetta er virkt sækir OpenTubeX áskriftarstreymið sjálfkrafa við ræsingu og þegar nýr gluggi er opnaður.
@@ -2452,3 +2483,17 @@ Yattee Server:
 Yattee Fallback Warning: Þessi beiðni fer fram hjá Yattee-netþjóninum sem þú stilltir og tengist beint við YouTube, sem afhjúpar IP-töluna þína.
 Update With Package Manager: 'Uppfæra með {packageManager}:'
 Update Command Copied: 'Uppfærsluskipun afrituð'
+Digital Wellbeing:
+  Watch time limit almost reached: "{duration} eftir af daglegu hámarki áhorfstíma"
+  Shorts limit almost reached: "{duration} eftir af daglegu hámarki Shorts-myndbanda"
+  Daily watch time limit reached: "Daglegu hámarki áhorfstíma náð"
+  Daily Shorts limit reached: "Daglegu hámarki Shorts-myndbanda náð"
+  Watched today: "Þú hefur horft í {duration} í dag."
+  Shorts watched today: "Þú hefur horft á Shorts-myndbönd í {duration} í dag."
+  15 More Minutes: "15 mínútur í viðbót"
+  Ignore for Today: "Hunsa í dag"
+  Time to take a break: "Tími til að taka hlé"
+  Watching for: "Þú hefur horft í {duration}."
+  Time for bed: "Kominn háttatími"
+  Bedtime started at: "Háttatíminn þinn hófst kl. {time}."
+  Remind Me in 10 Minutes: "Minna mig á eftir 10 mínútur"

@@ -81,6 +81,8 @@ Search Filters:
     3 - 20 minutes: 3 تا 20 دقیقه
     '> 20 minutes': '> 20 دقیقه'
 Stats:
+  Left of daily limit: "{duration} از محدودیت روزانهٔ {limit} شما باقی مانده است"
+  Daily limit reached: "به محدودیت روزانهٔ {limit} رسیدید"
   Replace old device: "جایگزینی دستگاه قدیمی"
   Replacement explanation: "فقط زمانی {device} را با این دستگاه ترکیب کنید که هر دو ورودی متعلق به یک دستگاه فیزیکی باشند."
   Overlapping days: "روزهای موجود در هر دو سابقه: {count}"
@@ -1112,6 +1114,27 @@ Settings:
     Refresh Subscriptions While App Is Closed: "تازه‌سازی اشتراک‌ها هنگام بسته بودن برنامه"
     Notify About New Uploads: اعلان برای بارگذاری‌های جدید
   Distraction Free Settings:
+    Digital Wellbeing:
+      Count Watch Time From: "شمارش زمان تماشا از"
+      Break Reminder Action: "وقتی زمان استراحت است"
+      Grayscale: "حالت خاکستری"
+      Off: "خاموش"
+      Always: "همیشه"
+      During Bedtime: "در زمان خواب"
+      After the Daily Limit: "پس از رسیدن به محدودیت روزانه"
+      Daily Watch Time Limit: "محدودیت روزانهٔ زمان تماشا"
+      Daily Shorts Limit: "محدودیت روزانهٔ Shorts"
+      When a Limit Is Reached: "هنگام رسیدن به محدودیت"
+      Remind Me: "یادآوری شود"
+      Pause Playback: "مکث پخش"
+      Take a Break Reminder: "یادآور استراحت"
+      Every: "هر {duration}"
+      Bedtime Reminder: "یادآور زمان خواب"
+      Bedtime Start: "شروع زمان خواب"
+      Bedtime End: "پایان زمان خواب"
+      Wait Until the Video Ends: "صبر تا پایان ویدیو"
+      Silence Upload Notifications at Bedtime: "بی‌صدا کردن اعلان‌های بارگذاری‌های جدید در زمان خواب"
+      Stop Autoplay at Bedtime and After the Daily Limit: "توقف پخش خودکار در زمان خواب و پس از رسیدن به محدودیت روزانه"
     Hide Popularity Graph: "پنهان کردن نمودار محبوبیت"
     Enable Block Lists: "فعال‌سازی فهرست‌های مسدودسازی"
     AI Video Summaries: خلاصه‌های ویدیویی هوش مصنوعی
@@ -1123,6 +1146,7 @@ Settings:
     Hide Header Sync Indicator: پنهان کردن نشانگر همگام‌سازی در سربرگ برنامه
     Hide Repeat Stats: پنهان کردن آمار تکرار
     Sections:
+      Digital Wellbeing: "سلامت دیجیتال"
       Visible While Paused: نمایش هنگام توقف در پنجرهٔ کامل / تمام‌صفحه
     Hide Channel Avatars: پنهان‌کردن آواتار کانال‌ها
     Shorten View Counts: کوتاه‌کردن شمار بازدید، دیدگاه‌ها و پسند دیدگاه‌ها
@@ -2174,6 +2198,13 @@ Tooltips:
     FFmpeg Executable Path: برای ادغام جریان‌های جداگانه ویدیو و صدا و نیز تبدیل صدا، FFmpeg لازم است. OpenTubeX به‌طور پیش‌فرض فرض می‌کند FFmpeg از طریق متغیر محیطی PATH پیدا می‌شود. در صورت نیاز می‌توانید اینجا مسیری سفارشی تعیین کنید.
     Use cookies for subtitles: "از کوکی‌های پیکربندی‌شده برای زیرنویس‌ها و ترجمه‌های خودکار استفاده شود. گزینهٔ «همیشه از کوکی‌ها استفاده شود» نیز این قابلیت را فعال می‌کند."
   Distraction Free Settings:
+    Count Watch Time From: "«همه دستگاه‌ها» هر دستگاهی را که آمار تماشا را همگام‌سازی می‌کند می‌شمارد. «این دستگاه» فقط آنچه را اینجا تماشا می‌کنید می‌شمارد."
+    When a Limit Is Reached: "«مکث پخش» به شما امکان می‌دهد ۱۵ دقیقه اضافه کنید یا محدودیت را برای امروز نادیده بگیرید. با رمز عبور تنظیمات، فقط در تنظیمات می‌توانید محدودیت را افزایش دهید."
+    Grayscale: "کل برنامه، از جمله ویدیوها، را با سایه‌های خاکستری نمایش می‌دهد تا کمتر جلب توجه کند. «در زمان خواب» از زمان‌بندی یادآور زمان خواب پیروی می‌کند."
+    Daily Watch Time Limit: "آنچه را امروز در همهٔ دستگاه‌هایی که آمار تماشا را همگام‌سازی می‌کنند تماشا کرده‌اید، از جمله Shorts، می‌شمارد."
+    Daily Shorts Limit: "Shortsهایی را که امروز در این دستگاه تماشا کرده‌اید می‌شمارد."
+    Take a Break Reminder: "پس از این مدت تماشا، ویدیو را متوقف می‌کند. مکث ۱۰ دقیقه‌ای یا بیشتر، شمارش را از نو آغاز می‌کند."
+    Bedtime Reminder: "ویدیو را متوقف می‌کند و بین زمان شروع و پایان به شما یادآوری می‌کند که تماشا را متوقف کنید."
     Shorten View Counts: تعداد بازدید، دیدگاه‌ها و پسندهای نظرها را که YouTube از قبل گرد کرده، به‌شکل کوتاه نشان می‌دهد؛ مثلاً 14K به‌جای 14,000. تعداد دقیق همیشه کامل نمایش داده می‌شود.
   Subscription Settings:
     Fetch Feed on Startup: در صورت فعال بودن، OpenTubeX هنگام راه‌اندازی و بازشدن پنجره‌ای جدید، خوراک اشتراک‌های شما را خودکار دریافت می‌کند.
@@ -2526,3 +2557,17 @@ Yattee Server:
 Yattee Fallback Warning: این درخواست سرور Yattee پیکربندی‌شدهٔ شما را دور می‌زند و مستقیماً به YouTube وصل می‌شود و نشانی IP شما را آشکار می‌کند.
 Update With Package Manager: 'به‌روزرسانی با {packageManager}:'
 Update Command Copied: 'فرمان به‌روزرسانی کپی شد'
+Digital Wellbeing:
+  Watch time limit almost reached: "{duration} تا محدودیت روزانهٔ زمان تماشای شما باقی مانده است"
+  Shorts limit almost reached: "{duration} تا محدودیت روزانهٔ Shorts شما باقی مانده است"
+  Daily watch time limit reached: "به محدودیت روزانهٔ زمان تماشا رسیدید"
+  Daily Shorts limit reached: "به محدودیت روزانهٔ Shorts رسیدید"
+  Watched today: "امروز {duration} تماشا کرده‌اید."
+  Shorts watched today: "امروز {duration} Shorts تماشا کرده‌اید."
+  15 More Minutes: "۱۵ دقیقهٔ دیگر"
+  Ignore for Today: "نادیده گرفتن برای امروز"
+  Time to take a break: "وقت استراحت است"
+  Watching for: "{duration} است که در حال تماشا هستید."
+  Time for bed: "وقت خواب است"
+  Bedtime started at: "زمان خواب شما ساعت {time} شروع شد."
+  Remind Me in 10 Minutes: "۱۰ دقیقهٔ دیگر یادآوری شود"

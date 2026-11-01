@@ -64,6 +64,8 @@ Search Listing:
     Members Only: Berre for medlemmer
     Possibly AI-generated: Kanskje KI-generert
 Stats:
+  Left of daily limit: "{duration} att av den daglege grensa di på {limit}"
+  Daily limit reached: "Dagleg grense på {limit} er nådd"
   Replace old device: "Byt ut gammal eining"
   Replacement explanation: "Slå berre saman {device} med denne eininga dersom begge oppføringane høyrer til same fysiske eining."
   Overlapping days: "Dagar i begge historikkane: {count}"
@@ -1195,6 +1197,27 @@ Settings:
     To: til
     Confirm Before Unsubscribing: Stadfest før du avsluttar abonnement
   Distraction Free Settings:
+    Digital Wellbeing:
+      Count Watch Time From: "Tel sjåtid frå"
+      Break Reminder Action: "Når det er tid for pause"
+      Grayscale: "Gråtonar"
+      Off: "Av"
+      Always: "Alltid"
+      During Bedtime: "Ved leggjetid"
+      After the Daily Limit: "Etter den daglege grensa"
+      Daily Watch Time Limit: "Dagleg grense for sjåtid"
+      Daily Shorts Limit: "Dagleg grense for Shorts"
+      When a Limit Is Reached: "Når ei grense er nådd"
+      Remind Me: "Minn meg på det"
+      Pause Playback: "Set avspelinga på pause"
+      Take a Break Reminder: "Påminning om å ta pause"
+      Every: "Kvar {duration}"
+      Bedtime Reminder: "Påminning om leggjetid"
+      Bedtime Start: "Start på leggjetid"
+      Bedtime End: "Slutt på leggjetid"
+      Wait Until the Video Ends: "Vent til videoen er ferdig"
+      Silence Upload Notifications at Bedtime: "Demp varsel om nye opplastingar ved leggjetid"
+      Stop Autoplay at Bedtime and After the Daily Limit: "Stopp automatisk avspeling ved leggjetid og etter den daglege grensa"
     Hide Popularity Graph: "Gøym popularitetsgrafen"
     Enable Block Lists: "Slå på blokkeringslister"
     AI Video Summaries: KI-videosamandrag
@@ -1206,6 +1229,7 @@ Settings:
     Hide Header Sync Indicator: Gøym synkroniseringsindikatoren i apphovudet
     Hide Repeat Stats: Skjul gjentakingsstatistikk
     Sections:
+      Digital Wellbeing: "Digital velvære"
       Side Bar: Sidestolpe
       Subscriptions Page: Abonnementsside
       Channel Page: Kanalside
@@ -2391,6 +2415,13 @@ Tooltips:
     FFmpeg Executable Path: FFmpeg trengst for å slå saman åtskilde video- og lydstraumar og for lydkonvertering. OpenTubeX går som standard ut frå at FFmpeg kan finnast gjennom miljøvariabelen PATH. Du kan velje ein eigen sti her dersom det trengst.
     Use cookies for subtitles: "Bruk dei konfigurerte informasjonskapslane for undertekstar og automatiske omsetjingar. Vert òg aktivert av «Bruk alltid informasjonskapslar»."
   Distraction Free Settings:
+    Count Watch Time From: "«Alle einingar» tel alle einingar som synkroniserer sjåstatistikk. «Denne eininga» tel berre det du ser her."
+    When a Limit Is Reached: "«Set avspelinga på pause» lèt deg leggje til 15 minutt eller ignorere grensa for i dag. Med eit innstillingspassord kan du berre auke ei grense i innstillingane."
+    Grayscale: "Viser heile appen, inkludert videoar, i gråtonar, slik at han trekkjer mindre merksemd. «Ved leggjetid» følgjer tidsplanen til påminninga om leggjetid."
+    Daily Watch Time Limit: "Tel det du har sett i dag på alle einingar som synkroniserer sjåstatistikk, inkludert Shorts."
+    Daily Shorts Limit: "Tel Shorts du har sett på denne eininga i dag."
+    Take a Break Reminder: "Set videoen på pause etter så lang sjåtid. Ein pause på 10 minutt eller meir startar teljinga på nytt."
+    Bedtime Reminder: "Set videoen på pause og minner deg på å slutte å sjå mellom start- og sluttidspunktet."
     Shorten View Counts: Viser visingstal, kommentartal og tal på likarklikk for kommentarar i den avrunda kortforma frå YouTube, til dømes 14K i staden for 14,000. Nøyaktige tal vert alltid viste i full lengd.
     Hide Subscriptions Live: Denne innstillinga vert overstyrt av innstillinga "{appWideSetting}" for heile appen i underdelen "{subsection}" under "{settingsSection}"
     Hide Videos, Playlists and Channels Containing Text: Skriv inn eit ord, ein del av eit ord eller ei setning, utan skilnad på store og små bokstavar, for å gøyme alle videoar, spelelister og kanalar med ein originaltittel som inneheld teksten. Dette gjeld i heile OpenTubeX, bortsett frå Historikk, Dine spelelister og videoar i spelelister.
@@ -2830,3 +2861,17 @@ Yattee Server:
 Yattee Fallback Warning: Denne førespurnaden går utanom den konfigurerte Yattee-tenaren din og koplar direkte til YouTube, noko som avslører IP-adressa di.
 Update With Package Manager: 'Oppdater med {packageManager}:'
 Update Command Copied: 'Oppdateringskommandoen er kopiert'
+Digital Wellbeing:
+  Watch time limit almost reached: "{duration} att av den daglege sjåtidsgrensa di"
+  Shorts limit almost reached: "{duration} att av den daglege Shorts-grensa di"
+  Daily watch time limit reached: "Dagleg grense for sjåtid er nådd"
+  Daily Shorts limit reached: "Dagleg grense for Shorts er nådd"
+  Watched today: "Du har sett {duration} i dag."
+  Shorts watched today: "Du har sett {duration} med Shorts i dag."
+  15 More Minutes: "15 minutt til"
+  Ignore for Today: "Ignorer i dag"
+  Time to take a break: "På tide å ta ein pause"
+  Watching for: "Du har sett i {duration}."
+  Time for bed: "Det er leggjetid"
+  Bedtime started at: "Leggjetida di starta kl. {time}."
+  Remind Me in 10 Minutes: "Minn meg på det om 10 minutt"

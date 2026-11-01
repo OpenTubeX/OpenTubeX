@@ -64,6 +64,8 @@ Search Listing:
     Members Only: Csak tagoknak
     Possibly AI-generated: Lehet, hogy MI által generált
 Stats:
+  Left of daily limit: "Még {duration} van hátra a napi korlátjából ({limit})"
+  Daily limit reached: "Elérte a napi korlátot ({limit})"
   Replace old device: "Régi eszköz lecserélése"
   Replacement explanation: "Csak akkor egyesítsd a(z) {device} bejegyzést ezzel az eszközzel, ha mindkét bejegyzés ugyanahhoz a fizikai eszközhöz tartozik."
   Overlapping days: "Napok mindkét előzményben: {count}"
@@ -1074,6 +1076,27 @@ Settings:
     Refresh Subscriptions While App Is Closed: "Feliratkozások frissítése bezárt alkalmazásnál"
     Notify About New Uploads: Értesítés új feltöltésekről
   Distraction Free Settings:
+    Digital Wellbeing:
+      Count Watch Time From: "Nézési idő számításának forrása"
+      Break Reminder Action: "Amikor ideje szünetet tartani"
+      Grayscale: "Szürkeárnyalat"
+      Off: "Ki"
+      Always: "Mindig"
+      During Bedtime: "Lefekvési időben"
+      After the Daily Limit: "A napi korlát elérése után"
+      Daily Watch Time Limit: "Napi nézési időkorlát"
+      Daily Shorts Limit: "Napi Shorts-korlát"
+      When a Limit Is Reached: "Korlát elérésekor"
+      Remind Me: "Emlékeztetés"
+      Pause Playback: "Lejátszás szüneteltetése"
+      Take a Break Reminder: "Szünetemlékeztető"
+      Every: "{duration} időközönként"
+      Bedtime Reminder: "Lefekvési emlékeztető"
+      Bedtime Start: "Lefekvési idő kezdete"
+      Bedtime End: "Lefekvési idő vége"
+      Wait Until the Video Ends: "Várakozás a videó végéig"
+      Silence Upload Notifications at Bedtime: "Új feltöltésekről szóló értesítések némítása lefekvési időben"
+      Stop Autoplay at Bedtime and After the Daily Limit: "Automatikus lejátszás leállítása lefekvési időben és a napi korlát elérése után"
     Hide Popularity Graph: "Népszerűségi grafikon elrejtése"
     Enable Block Lists: "Tiltólisták engedélyezése"
     AI Video Summaries: MI-videóösszefoglalók
@@ -1085,6 +1108,7 @@ Settings:
     Hide Header Sync Indicator: Alkalmazásfejléc szinkronizálási jelzőjének elrejtése
     Hide Repeat Stats: Ismétlési statisztikák elrejtése
     Sections:
+      Digital Wellbeing: "Digitális jóllét"
       Visible While Paused: Szüneteltetéskor látható teljes ablakos vagy teljes képernyős módban
     Hide Channel Avatars: Csatornaavatarok elrejtése
     Shorten View Counts: Megtekintések, hozzászólások és hozzászóláskedvelések számának rövidítése
@@ -2080,6 +2104,13 @@ Tooltips:
     FFmpeg Executable Path: Az FFmpeg szükséges a különálló videó- és hangadatfolyamok egyesítéséhez, valamint a hangkonvertáláshoz. Az OpenTubeX alapértelmezés szerint azt feltételezi, hogy az FFmpeg megtalálható a PATH környezeti változó alapján. Szükség esetén itt egyéni elérési út adható meg.
     Use cookies for subtitles: "A beállított sütik használata a feliratokhoz és az automatikus fordításokhoz. A „Sütik használata mindig” beállítás is engedélyezi."
   Distraction Free Settings:
+    Count Watch Time From: "Az „Összes eszköz” minden olyan eszközt beszámít, amely szinkronizálja a nézési statisztikákat. Az „Ez az eszköz” csak az itt megnézett tartalmat számítja be."
+    When a Limit Is Reached: "A „Lejátszás szüneteltetése” lehetővé teszi, hogy 15 percet hozzáadjon, vagy mára figyelmen kívül hagyja a korlátot. Ha a beállítások jelszóval védettek, korlátot csak a Beállításokban emelhet."
+    Grayscale: "Az egész alkalmazást, a videókat is beleértve, szürkeárnyalatosan jeleníti meg, hogy kevésbé vonja el a figyelmet. A „Lefekvési időben” lehetőség a lefekvési emlékeztető ütemezését követi."
+    Daily Watch Time Limit: "Azt számolja, amit ma az összes, nézési statisztikákat szinkronizáló eszközön megnézett, a Shorts-videókat is beleértve."
+    Daily Shorts Limit: "Azokat a Shorts-videókat számolja, amelyeket ma ezen az eszközön nézett meg."
+    Take a Break Reminder: "Ennyi nézés után szünetelteti a videót. Egy legalább 10 perces szünet újraindítja a számlálást."
+    Bedtime Reminder: "Szünetelteti a videót, és a kezdési és befejezési idő között emlékezteti, hogy hagyja abba a nézést."
     Shorten View Counts: A YouTube által már kerekített megtekintés-, hozzászólás- és hozzászóláskedvelési számok rövidített megjelenítése, például 14 E a 14 000 helyett. A pontos számok mindig teljesen jelennek meg.
   Subscription Settings:
     Fetch Feed on Startup: Bekapcsolva az OpenTubeX automatikusan lekéri a feliratkozási hírfolyamot indításkor és új ablak megnyitásakor.
@@ -2436,3 +2467,17 @@ Yattee Server:
 Yattee Fallback Warning: Ez a kérés megkerüli a beállított Yattee-kiszolgálót, és közvetlenül a YouTube-hoz csatlakozik, felfedve az IP-címét.
 Update With Package Manager: 'Frissítés a(z) {packageManager} segítségével:'
 Update Command Copied: 'Frissítési parancs másolva'
+Digital Wellbeing:
+  Watch time limit almost reached: "Még {duration} van hátra a napi nézési időkorlátjából"
+  Shorts limit almost reached: "Még {duration} van hátra a napi Shorts-korlátjából"
+  Daily watch time limit reached: "Elérte a napi nézési időkorlátot"
+  Daily Shorts limit reached: "Elérte a napi Shorts-korlátot"
+  Watched today: "Ma ennyi ideig nézett videókat: {duration}."
+  Shorts watched today: "Ma ennyi ideig nézett Shorts-videókat: {duration}."
+  15 More Minutes: "Még 15 perc"
+  Ignore for Today: "Figyelmen kívül hagyás mára"
+  Time to take a break: "Ideje szünetet tartani"
+  Watching for: "Már {duration} óta néz videókat."
+  Time for bed: "Ideje lefeküdni"
+  Bedtime started at: "A lefekvési ideje ekkor kezdődött: {time}."
+  Remind Me in 10 Minutes: "Emlékeztetés 10 perc múlva"

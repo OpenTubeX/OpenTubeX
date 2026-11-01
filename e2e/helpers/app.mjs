@@ -777,7 +777,17 @@ const SETTINGS_CATEGORY_BY_LEGACY_SECTION = {
   proxy: 'advanced',
   'context-menu-search': 'general',
   storage: 'data',
-  experimental: 'advanced'
+  experimental: 'advanced',
+  wellbeing: 'focus'
+}
+
+// Sections shown as tabs of their category.
+const SETTINGS_TAB_BY_SECTION = {
+  data: 'data',
+  storage: 'storage',
+  distraction: 'distraction',
+  wellbeing: 'wellbeing',
+  'parental-control': 'parental'
 }
 
 /** Opens Settings and selects one category in the two-column modal layout. */
@@ -792,8 +802,8 @@ export async function goToSettingsSection(page, section) {
   await page.locator(`.settingsMenu [data-section="${category}"]`).click()
   const content = page.locator(`.settingsContent > [data-section="${category}"]`)
   await expect(content).toBeVisible()
-  if (category === 'data' && ['data', 'storage'].includes(section)) {
-    const tab = section === 'data' ? 'data' : 'storage'
+  const tab = SETTINGS_TAB_BY_SECTION[section]
+  if (tab) {
     const tabButton = page.locator(`.settingsWindow [data-settings-tab="${tab}"]`)
     await tabButton.click()
     await expect(tabButton).toHaveAttribute('aria-selected', 'true')

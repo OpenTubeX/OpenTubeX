@@ -1,4 +1,5 @@
 import { normalizeSubscriptionChannelSettings } from './renderer/helpers/subscription-channels.js'
+import { isWithinDailyWindow, minuteOfDay } from './renderer/helpers/digitalWellbeing.js'
 
 /**
  * Only channels with notifications turned on are included, limited to the
@@ -8,10 +9,11 @@ import { normalizeSubscriptionChannelSettings } from './renderer/helpers/subscri
  *   subscriptions: object[],
  *   hiddenFeedTypes?: string[],
  *   showMembersOnly: boolean,
- *   titles: Record<string, string>
- * }} input
+ *   titles: Record<string, string>,
+ *   quietHours?: { start: number, end: number } | null
+ * }} input quiet hours are minutes since midnight during which notifications are silent
  */
-export function createUploadNotificationConfiguration({ enabled, subscriptions, hiddenFeedTypes = [], showMembersOnly, titles }) {
+export function createUploadNotificationConfiguration({ enabled, subscriptions, hiddenFeedTypes = [], showMembersOnly, titles, quietHours = null }) {
   const channels = enabled
     ? Object.fromEntries(subscriptions.flatMap(channel => {
         if (typeof channel?.id !== 'string' || channel.id.length === 0) return []
@@ -26,7 +28,17 @@ export function createUploadNotificationConfiguration({ enabled, subscriptions, 
         }]]
       }))
     : {}
-  return Object.keys(channels).length === 0 ? { enabled: false } : { enabled: true, titles, channels }
+  if (Object.keys(channels).length === 0) return { enabled: false }
+  return { enabled: true, titles, channels, ...(quietHours ? { quietHours } : {}) }
+}
+
+/**
+ * Whether notifications should be silent. Mirrored by UploadNotifications.java.
+ * @param {{ start: number, end: number } | undefined} quietHours
+ * @param {Date} [date]
+ */
+export function isWithinQuietHours(quietHours, date = new Date()) {
+  return quietHours != null && isWithinDailyWindow(minuteOfDay(date), quietHours.start, quietHours.end)
 }
 
 const KNOWN_ID_LIMIT = 200

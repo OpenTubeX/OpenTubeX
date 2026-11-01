@@ -16,6 +16,7 @@ import utils from './modules/utils'
 import player from './modules/player'
 import tabs from './modules/tabs'
 import watchStats from './modules/watch-stats'
+import wellbeing from './modules/wellbeing'
 import watchQueue, { persistWatchQueue } from './modules/watch-queue'
 import syncServer from './modules/sync-server'
 import { getProfileSyncSignature } from '../helpers/profile-sync'
@@ -123,6 +124,7 @@ export default createStore({
     player,
     tabs,
     watchStats,
+    wellbeing,
     watchQueue,
     syncServer,
   },

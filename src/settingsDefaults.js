@@ -198,6 +198,24 @@ export function createDefaultSettings({ supportsLocalApi, isElectron }) {
     hideHeaderLogo: false,
     hideHeaderSyncIndicator: false,
     hideStartupSplash: false,
+    // Digital wellbeing. Limits and intervals are in minutes; 0 turns them off.
+    // 'off' | 'always' | 'bedtime' | 'limit'
+    grayscaleMode: 'off',
+    dailyWatchTimeLimit: 0,
+    // Devices whose watch time counts toward the daily limit: 'all' | 'local'
+    dailyWatchTimeLimitDevices: 'all',
+    dailyShortsLimit: 0,
+    // 'remind' | 'pause'
+    dailyLimitAction: 'pause',
+    breakReminderInterval: 0,
+    // 'remind' | 'pause'
+    breakReminderAction: 'pause',
+    bedtimeReminder: false,
+    bedtimeStart: '22:00',
+    bedtimeEnd: '06:00',
+    bedtimeWaitForVideoEnd: true,
+    bedtimeSilenceNotifications: false,
+    stopAutoplayAtBedtimeAndLimit: false,
     // Former navigation switches remain loadable so older settings can migrate.
     hideHome: false,
     // This also controls playlist actions outside navigation.

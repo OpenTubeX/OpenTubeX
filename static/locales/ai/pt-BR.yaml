@@ -33,6 +33,8 @@ Search Listing:
     Members Only: Apenas para membros
     Possibly AI-generated: Possivelmente gerado por IA
 Stats:
+  Left of daily limit: "Restam {duration} do seu limite diário de {limit}"
+  Daily limit reached: "Limite diário de {limit} atingido"
   Replace old device: "Substituir dispositivo antigo"
   Replacement explanation: "Combine {device} com este dispositivo apenas se ambas as entradas pertencerem ao mesmo dispositivo físico."
   Overlapping days: "Dias nos dois históricos: {count}"
@@ -1043,6 +1045,27 @@ Settings:
     Refresh Subscriptions While App Is Closed: "Atualizar inscrições com o aplicativo fechado"
     Notify About New Uploads: Notificar novos envios
   Distraction Free Settings:
+    Digital Wellbeing:
+      Count Watch Time From: "Contar tempo de visualização de"
+      Break Reminder Action: "Quando for hora de fazer uma pausa"
+      Grayscale: "Escala de cinza"
+      Off: "Desativado"
+      Always: "Sempre"
+      During Bedtime: "Na hora de dormir"
+      After the Daily Limit: "Após o limite diário"
+      Daily Watch Time Limit: "Limite diário de tempo de visualização"
+      Daily Shorts Limit: "Limite diário de Shorts"
+      When a Limit Is Reached: "Ao atingir um limite"
+      Remind Me: "Lembrar-me"
+      Pause Playback: "Pausar reprodução"
+      Take a Break Reminder: "Lembrete para fazer uma pausa"
+      Every: "A cada {duration}"
+      Bedtime Reminder: "Lembrete da hora de dormir"
+      Bedtime Start: "Início da hora de dormir"
+      Bedtime End: "Fim da hora de dormir"
+      Wait Until the Video Ends: "Aguardar o fim do vídeo"
+      Silence Upload Notifications at Bedtime: "Silenciar notificações de novos envios na hora de dormir"
+      Stop Autoplay at Bedtime and After the Daily Limit: "Parar a reprodução automática na hora de dormir e após o limite diário"
     Hide Popularity Graph: "Ocultar gráfico de popularidade"
     Enable Block Lists: "Ativar listas de bloqueio"
     AI Video Summaries: Resumos de vídeos por IA
@@ -1054,6 +1077,7 @@ Settings:
     Hide Header Sync Indicator: Ocultar indicador de sincronização no cabeçalho do aplicativo
     Hide Repeat Stats: Ocultar estatísticas de repetição
     Sections:
+      Digital Wellbeing: "Bem-estar digital"
       Visible While Paused: Visível durante a pausa em tela cheia ou tela cheia
     Hide Channel Avatars: Ocultar avatares dos canais
     Shorten View Counts: Abreviar contagens de visualizações, de comentários e de gostos nos comentários
@@ -2049,6 +2073,13 @@ Tooltips:
     FFmpeg Executable Path: O FFmpeg é necessário para combinar transmissões separadas de vídeo e áudio e para converter áudio. Por preconfiguração, o OpenTubeX assume que o FFmpeg pode ser encontrado através da variável de ambiente PATH. Se necessário, pode definir aqui um caminho personalizado.
     Use cookies for subtitles: "Use os cookies configurados para legendas e traduções automáticas. Também é ativado por \"Sempre usar cookies\"."
   Distraction Free Settings:
+    Count Watch Time From: "«Todos os dispositivos» conta todos os dispositivos que sincronizam estatísticas de visualização. «Este dispositivo» conta apenas o que você assiste aqui."
+    When a Limit Is Reached: "«Pausar reprodução» permite adicionar 15 minutos ou ignorar o limite por hoje. Com uma senha de configurações, você só pode aumentar um limite nas configurações."
+    Grayscale: "Mostra todo o aplicativo, incluindo os vídeos, em tons de cinza, para que chame menos atenção. «Na hora de dormir» segue a programação do lembrete da hora de dormir."
+    Daily Watch Time Limit: "Conta o que você assistiu hoje em todos os dispositivos que sincronizam estatísticas de visualização, incluindo Shorts."
+    Daily Shorts Limit: "Conta os Shorts que você assistiu hoje neste dispositivo."
+    Take a Break Reminder: "Pausa o vídeo após esse tempo de visualização. Uma pausa de 10 minutos ou mais reinicia a contagem."
+    Bedtime Reminder: "Pausa o vídeo e lembra você de parar de assistir entre o horário de início e o de término."
     Shorten View Counts: Mostra as contagens de visualizações, comentários e gostos nos comentários que o YouTube já arredondou num formato abreviado, por exemplo 14K em vez de 14,000. As contagens exatas são sempre mostradas por extenso.
   Subscription Settings:
     Fetch Feed on Startup: Quando esta opção está ativada, o OpenTubeX obtém automaticamente o feed de inscrições ao iniciar e ao abrir uma nova janela.
@@ -2397,3 +2428,17 @@ Yattee Server:
 Yattee Fallback Warning: Esta solicitação ignora o servidor Yattee configurado e se conecta diretamente ao YouTube, expondo seu endereço IP.
 Update With Package Manager: 'Atualizar com {packageManager}:'
 Update Command Copied: 'Comando de atualização copiado'
+Digital Wellbeing:
+  Watch time limit almost reached: "Restam {duration} para o seu limite diário de tempo de visualização"
+  Shorts limit almost reached: "Restam {duration} para o seu limite diário de Shorts"
+  Daily watch time limit reached: "Limite diário de tempo de visualização atingido"
+  Daily Shorts limit reached: "Limite diário de Shorts atingido"
+  Watched today: "Hoje você assistiu a vídeos por {duration}."
+  Shorts watched today: "Hoje você assistiu a Shorts por {duration}."
+  15 More Minutes: "Mais 15 minutos"
+  Ignore for Today: "Ignorar por hoje"
+  Time to take a break: "Hora de fazer uma pausa"
+  Watching for: "Você está assistindo há {duration}."
+  Time for bed: "Hora de dormir"
+  Bedtime started at: "Sua hora de dormir começou às {time}."
+  Remind Me in 10 Minutes: "Lembrar-me em 10 minutos"

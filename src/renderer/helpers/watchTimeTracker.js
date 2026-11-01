@@ -1,18 +1,8 @@
+import { localDateKey } from './digitalWellbeing.js'
+
 // Ticks further apart than this mean a suspended or heavily delayed timer, not playback.
 const MAX_TICK_GAP_MS = 5000
 const FLUSH_THRESHOLD_MS = 10000
-
-/**
- * @param {number} time
- */
-function localDateKey(time) {
-  const date = new Date(time)
-  return [
-    date.getFullYear(),
-    String(date.getMonth() + 1).padStart(2, '0'),
-    String(date.getDate()).padStart(2, '0'),
-  ].join('-')
-}
 
 /**
  * Accumulates played time per local day for the watch statistics.

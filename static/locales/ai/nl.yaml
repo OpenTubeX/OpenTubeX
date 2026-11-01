@@ -64,6 +64,8 @@ Search Listing:
     Members Only: Alleen voor leden
     Possibly AI-generated: Mogelijk door AI gegenereerd
 Stats:
+  Left of daily limit: "Nog {duration} over van je daglimiet van {limit}"
+  Daily limit reached: "Daglimiet van {limit} bereikt"
   Replace old device: "Oud apparaat vervangen"
   Replacement explanation: "Combineer {device} alleen met dit apparaat als beide vermeldingen bij hetzelfde fysieke apparaat horen."
   Overlapping days: "Dagen in beide geschiedenissen: {count}"
@@ -1090,6 +1092,27 @@ Settings:
     Refresh Subscriptions While App Is Closed: "Abonnementen vernieuwen terwijl de app gesloten is"
     Notify About New Uploads: Melden bij nieuwe uploads
   Distraction Free Settings:
+    Digital Wellbeing:
+      Count Watch Time From: "Kijktijd tellen van"
+      Break Reminder Action: "Als het tijd is voor een pauze"
+      Grayscale: "Grijstinten"
+      Off: "Uit"
+      Always: "Altijd"
+      During Bedtime: "Tijdens bedtijd"
+      After the Daily Limit: "Na de daglimiet"
+      Daily Watch Time Limit: "Daglimiet voor kijktijd"
+      Daily Shorts Limit: "Daglimiet voor Shorts"
+      When a Limit Is Reached: "Bij het bereiken van een limiet"
+      Remind Me: "Herinneren"
+      Pause Playback: "Afspelen pauzeren"
+      Take a Break Reminder: "Pauzeherinnering"
+      Every: "Om de {duration}"
+      Bedtime Reminder: "Bedtijdherinnering"
+      Bedtime Start: "Begin van bedtijd"
+      Bedtime End: "Einde van bedtijd"
+      Wait Until the Video Ends: "Wachten tot de video is afgelopen"
+      Silence Upload Notifications at Bedtime: "Uploadmeldingen dempen tijdens bedtijd"
+      Stop Autoplay at Bedtime and After the Daily Limit: "Automatisch afspelen stoppen tijdens bedtijd en na de daglimiet"
     Hide Popularity Graph: "Populariteitsgrafiek verbergen"
     Enable Block Lists: "Blokkeerlijsten inschakelen"
     AI Video Summaries: AI-videosamenvattingen
@@ -1101,6 +1124,7 @@ Settings:
     Hide Header Sync Indicator: Synchronisatie-indicator in de appkop verbergen
     Hide Repeat Stats: Herhaalstatistieken verbergen
     Sections:
+      Digital Wellbeing: "Digitaal welzijn"
       Visible While Paused: Zichtbaar wanneer gepauzeerd in volledig venster of volledig scherm
     Hide Channel Avatars: Kanaalavatars verbergen
     Shorten View Counts: Aantallen weergaven, reacties en vind-ik-leuks bij reacties inkorten
@@ -2140,6 +2164,13 @@ Tooltips:
     FFmpeg Executable Path: FFmpeg is vereist om afzonderlijke video- en audiostreams samen te voegen en audio te converteren. OpenTubeX gaat er standaard van uit dat FFmpeg via de omgevingsvariabele PATH kan worden gevonden. Je kunt hier zo nodig een aangepast pad instellen.
     Use cookies for subtitles: "Gebruik de ingestelde cookies voor ondertitels en automatische vertalingen. Wordt ook ingeschakeld door \"Altijd cookies gebruiken\"."
   Distraction Free Settings:
+    Count Watch Time From: "‘Alle apparaten’ telt elk apparaat dat kijkstatistieken synchroniseert. ‘Dit apparaat’ telt alleen wat je hier bekijkt."
+    When a Limit Is Reached: "Met ‘Afspelen pauzeren’ kun je 15 minuten toevoegen of de limiet voor vandaag negeren. Met een instellingenwachtwoord kun je een limiet alleen in de instellingen verhogen."
+    Grayscale: "Toont de hele app, inclusief video's, in grijstinten, zodat deze minder aandacht trekt. ‘Tijdens bedtijd’ volgt het schema van de bedtijdherinnering."
+    Daily Watch Time Limit: "Telt wat je vandaag hebt bekeken op alle apparaten die kijkstatistieken synchroniseren, inclusief Shorts."
+    Daily Shorts Limit: "Telt de Shorts die je vandaag op dit apparaat hebt bekeken."
+    Take a Break Reminder: "Pauzeert de video na zoveel kijktijd. Een pauze van 10 minuten of langer start de telling opnieuw."
+    Bedtime Reminder: "Pauzeert de video en herinnert je eraan om tussen de begin- en eindtijd te stoppen met kijken."
     Shorten View Counts: Toont aantallen weergaven, reacties en vind-ik-leuks bij reacties die YouTube al verkort heeft afgerond, bijvoorbeeld 14K in plaats van 14.000. Exacte aantallen worden altijd volledig weergegeven.
   Subscription Settings:
     Fetch Feed on Startup: Als dit is ingeschakeld, haalt OpenTubeX je abonnementsfeed automatisch op bij het opstarten en wanneer een nieuw venster wordt geopend.
@@ -2501,3 +2532,17 @@ Yattee Server:
 Yattee Fallback Warning: Dit verzoek omzeilt je ingestelde Yattee-server en maakt rechtstreeks verbinding met YouTube, waardoor je IP-adres wordt blootgesteld.
 Update With Package Manager: 'Bijwerken met {packageManager}:'
 Update Command Copied: 'Bijwerkopdracht gekopieerd'
+Digital Wellbeing:
+  Watch time limit almost reached: "Nog {duration} tot je daglimiet voor kijktijd"
+  Shorts limit almost reached: "Nog {duration} tot je daglimiet voor Shorts"
+  Daily watch time limit reached: "Daglimiet voor kijktijd bereikt"
+  Daily Shorts limit reached: "Daglimiet voor Shorts bereikt"
+  Watched today: "Je hebt vandaag {duration} gekeken."
+  Shorts watched today: "Je hebt vandaag {duration} Shorts gekeken."
+  15 More Minutes: "Nog 15 minuten"
+  Ignore for Today: "Vandaag negeren"
+  Time to take a break: "Tijd voor een pauze"
+  Watching for: "Je kijkt al {duration}."
+  Time for bed: "Het is bedtijd"
+  Bedtime started at: "Je bedtijd begon om {time}."
+  Remind Me in 10 Minutes: "Over 10 minuten herinneren"

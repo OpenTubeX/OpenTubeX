@@ -12,6 +12,7 @@ import java.io.File;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.StandardCopyOption;
+import java.time.LocalTime;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -31,6 +32,8 @@ final class UploadNotifications {
     private static final String CONFIGURATION_KEY = "configuration";
     private static final String STATE_FILE = "upload-notifications.json";
     private static final String TAG = "new-upload";
+    // Silent notifications share a group whose (absent) summary is the only member allowed to alert.
+    private static final String QUIET_GROUP = "quiet-new-uploads";
     private static final int KNOWN_ID_LIMIT = 200;
     private static final int NOTIFIED_ID_LIMIT = 1000;
     // Feeds can surface older entries, for example when a video becomes public.
@@ -110,13 +113,14 @@ final class UploadNotifications {
 
         JSONObject titles = configuration.optJSONObject("titles");
         String name = channel.optString("name");
+        boolean silent = isWithinQuietHours(configuration.optJSONObject("quietHours"), LocalTime.now());
         for (JSONObject upload : uploads) {
             // Ended streams in the live feed are announced like videos.
             String type = upload.optBoolean("live") ? "live" : feedType.equals("live") ? "videos" : feedType;
             String title = (titles == null ? "{channel}" : titles.optString(type, "{channel}"))
                 .replace("{channel}", name.isEmpty() ? channelId : name);
             try {
-                show(context, title, upload.optString("title"), url(feedType, upload.getString("id")));
+                show(context, title, upload.optString("title"), url(feedType, upload.getString("id")), silent);
             } catch (RuntimeException error) {
                 // One failed notification must not skip the others.
                 android.util.Log.w("OpenTubeXUploads", "Unable to show an upload notification", error);
@@ -315,6 +319,16 @@ final class UploadNotifications {
         return result.toString();
     }
 
+    /** Mirrors isWithinQuietHours in src/newUploadNotifications.js. */
+    static boolean isWithinQuietHours(JSONObject quietHours, LocalTime time) {
+        if (quietHours == null || !quietHours.has("start") || !quietHours.has("end")) return false;
+        int start = quietHours.optInt("start", -1);
+        int end = quietHours.optInt("end", -1);
+        if (start < 0 || end < 0 || start == end) return false;
+        int minute = time.getHour() * 60 + time.getMinute();
+        return start < end ? minute >= start && minute < end : minute >= start || minute < end;
+    }
+
     static String url(String feedType, String id) {
         String encoded = Uri.encode(id);
         if (feedType.equals("posts")) return "https://www.youtube.com/post/" + encoded;
@@ -322,7 +336,7 @@ final class UploadNotifications {
         return "https://www.youtube.com/watch?v=" + encoded;
     }
 
-    private static void show(Context context, String title, String body, String url) {
+    private static void show(Context context, String title, String body, String url, boolean silent) {
         OpenTubeXNotificationChannels.createAll(context);
         Notification.Builder builder = Build.VERSION.SDK_INT >= Build.VERSION_CODES.O
             ? new Notification.Builder(context, OpenTubeXNotificationChannels.NEW_UPLOADS_ID)
@@ -342,6 +356,7 @@ final class UploadNotifications {
             .setStyle(new Notification.BigTextStyle().bigText(body))
             .setContentIntent(contentIntent)
             .setAutoCancel(true);
+        if (silent) builder.setGroup(QUIET_GROUP).setGroupAlertBehavior(Notification.GROUP_ALERT_SUMMARY);
         context.getSystemService(NotificationManager.class).notify(TAG, url.hashCode(), builder.build());
     }
 

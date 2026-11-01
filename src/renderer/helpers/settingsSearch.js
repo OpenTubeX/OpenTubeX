@@ -313,6 +313,10 @@ function isSettingsSearchMessageVisible(sectionType, path, options) {
     ].includes(group)
   }
 
+  if (sectionType === 'digital-wellbeing' && group === 'Silence Upload Notifications at Bedtime') {
+    return usingElectron || (isCapacitor && !isIos)
+  }
+
   if (sectionType === 'distraction') {
     if (group === 'Hide Startup Splash') return usingElectron
     if (group === 'Show Added Items') {

@@ -64,6 +64,8 @@ Search Listing:
     Members Only: Bare for medlemmer
     Possibly AI-generated: Muligens KI-generert
 Stats:
+  Left of daily limit: "{duration} igjen av den daglige grensen din på {limit}"
+  Daily limit reached: "Daglig grense på {limit} er nådd"
   Replace old device: "Erstatt gammel enhet"
   Replacement explanation: "Slå bare sammen {device} med denne enheten hvis begge oppføringene tilhører samme fysiske enhet."
   Overlapping days: "Dager i begge historikkene: {count}"
@@ -1074,6 +1076,27 @@ Settings:
     Refresh Subscriptions While App Is Closed: "Oppdater abonnementer mens appen er lukket"
     Notify About New Uploads: Varsle om nye opplastinger
   Distraction Free Settings:
+    Digital Wellbeing:
+      Count Watch Time From: "Tell seertid fra"
+      Break Reminder Action: "Når det er tid for en pause"
+      Grayscale: "Gråtoner"
+      Off: "Av"
+      Always: "Alltid"
+      During Bedtime: "Ved leggetid"
+      After the Daily Limit: "Etter den daglige grensen"
+      Daily Watch Time Limit: "Daglig grense for seertid"
+      Daily Shorts Limit: "Daglig grense for Shorts"
+      When a Limit Is Reached: "Når en grense er nådd"
+      Remind Me: "Påminn meg"
+      Pause Playback: "Sett avspillingen på pause"
+      Take a Break Reminder: "Påminnelse om å ta en pause"
+      Every: "Hver {duration}"
+      Bedtime Reminder: "Påminnelse om leggetid"
+      Bedtime Start: "Start på leggetid"
+      Bedtime End: "Slutt på leggetid"
+      Wait Until the Video Ends: "Vent til videoen er ferdig"
+      Silence Upload Notifications at Bedtime: "Demp varsler om nye opplastinger ved leggetid"
+      Stop Autoplay at Bedtime and After the Daily Limit: "Stopp automatisk avspilling ved leggetid og etter den daglige grensen"
     Hide Popularity Graph: "Skjul popularitetsgraf"
     Enable Block Lists: "Aktiver blokkeringslister"
     AI Video Summaries: KI-videosammendrag
@@ -1085,6 +1108,7 @@ Settings:
     Hide Header Sync Indicator: Skjul synkroniseringsindikatoren i apphodet
     Hide Repeat Stats: Skjul gjentakelsesstatistikk
     Sections:
+      Digital Wellbeing: "Digital velvære"
       Visible While Paused: Synlig ved pause i fullt vindu / fullskjerm
     Hide Channel Avatars: Skjul kanalavatarer
     Shorten View Counts: Forkort antall visninger, kommentarer og likerklikk på kommentarer
@@ -2084,6 +2108,13 @@ Tooltips:
     FFmpeg Executable Path: FFmpeg kreves for å slå sammen separate video- og lydstrømmer og for lydkonvertering. OpenTubeX antar som standard at FFmpeg finnes via miljøvariabelen PATH. Du kan angi en egendefinert bane her ved behov.
     Use cookies for subtitles: "Bruk de konfigurerte informasjonskapslene for undertekster og automatiske oversettelser. Aktiveres også av «Bruk alltid informasjonskapsler»."
   Distraction Free Settings:
+    Count Watch Time From: "«Alle enheter» teller alle enheter som synkroniserer seerstatistikk. «Denne enheten» teller bare det du ser her."
+    When a Limit Is Reached: "«Sett avspillingen på pause» lar deg legge til 15 minutter eller ignorere grensen for i dag. Med et innstillingspassord kan du bare øke en grense i innstillingene."
+    Grayscale: "Viser hele appen, inkludert videoer, i gråtoner, slik at den trekker mindre oppmerksomhet. «Ved leggetid» følger tidsplanen for påminnelsen om leggetid."
+    Daily Watch Time Limit: "Teller det du har sett i dag på alle enheter som synkroniserer seerstatistikk, inkludert Shorts."
+    Daily Shorts Limit: "Teller Shorts du har sett på denne enheten i dag."
+    Take a Break Reminder: "Setter videoen på pause etter så lang seertid. En pause på 10 minutter eller mer starter tellingen på nytt."
+    Bedtime Reminder: "Setter videoen på pause og minner deg på å slutte å se mellom start- og sluttidspunktet."
     Shorten View Counts: Viser antall visninger, kommentarer og likerklikk på kommentarer i den forkortede formen YouTube allerede har avrundet til, for eksempel 14k i stedet for 14 000. Nøyaktige tall vises alltid i sin helhet.
   Subscription Settings:
     Fetch Feed on Startup: Når dette er slått på, henter OpenTubeX automatisk abonnementsstrømmen ved oppstart og når et nytt vindu åpnes.
@@ -2439,3 +2470,17 @@ Yattee Server:
 Yattee Fallback Warning: Denne forespørselen omgår den konfigurerte Yattee-tjeneren din og kobler direkte til YouTube, noe som avslører IP-adressen din.
 Update With Package Manager: 'Oppdater med {packageManager}:'
 Update Command Copied: 'Oppdateringskommandoen er kopiert'
+Digital Wellbeing:
+  Watch time limit almost reached: "{duration} igjen av den daglige seertidsgrensen din"
+  Shorts limit almost reached: "{duration} igjen av den daglige Shorts-grensen din"
+  Daily watch time limit reached: "Daglig grense for seertid er nådd"
+  Daily Shorts limit reached: "Daglig grense for Shorts er nådd"
+  Watched today: "Du har sett {duration} i dag."
+  Shorts watched today: "Du har sett {duration} med Shorts i dag."
+  15 More Minutes: "15 minutter til"
+  Ignore for Today: "Ignorer i dag"
+  Time to take a break: "På tide å ta en pause"
+  Watching for: "Du har sett i {duration}."
+  Time for bed: "Det er leggetid"
+  Bedtime started at: "Leggetiden din startet kl. {time}."
+  Remind Me in 10 Minutes: "Påminn meg om 10 minutter"

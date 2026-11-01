@@ -112,6 +112,11 @@ body {
   background-color: var(--selection-background-color);
 }
 
+/* Digital wellbeing. A filter on the root element keeps fixed positioning intact. */
+:root.grayscale {
+  filter: grayscale(1);
+}
+
 /* Use fallback corners only when the control does not define its own shape. */
 :where(:root:not(.hideOutlines) :focus-visible:not(:disabled)) {
   border-radius: calc(4px * var(--ui-roundness));

@@ -64,6 +64,8 @@ Search Listing:
     Members Only: Khusus anggota
     Possibly AI-generated: Mungkin dibuat oleh AI
 Stats:
+  Left of daily limit: "Tersisa {duration} dari batas harian Anda sebesar {limit}"
+  Daily limit reached: "Batas harian {limit} tercapai"
   Replace old device: "Ganti perangkat lama"
   Replacement explanation: "Gabungkan {device} dengan perangkat ini hanya jika kedua entri berasal dari perangkat fisik yang sama."
   Overlapping days: "Hari dalam kedua riwayat: {count}"
@@ -1077,6 +1079,27 @@ Settings:
     Refresh Subscriptions While App Is Closed: "Perbarui Langganan Saat Aplikasi Ditutup"
     Notify About New Uploads: Beri Notifikasi Unggahan Baru
   Distraction Free Settings:
+    Digital Wellbeing:
+      Count Watch Time From: "Hitung Waktu Tonton Dari"
+      Break Reminder Action: "Saat Waktunya Istirahat"
+      Grayscale: "Skala Abu-abu"
+      Off: "Mati"
+      Always: "Selalu"
+      During Bedtime: "Saat Waktu Tidur"
+      After the Daily Limit: "Setelah Batas Harian"
+      Daily Watch Time Limit: "Batas Waktu Tonton Harian"
+      Daily Shorts Limit: "Batas Shorts Harian"
+      When a Limit Is Reached: "Saat Batas Tercapai"
+      Remind Me: "Ingatkan Saya"
+      Pause Playback: "Jeda Pemutaran"
+      Take a Break Reminder: "Pengingat Istirahat"
+      Every: "Setiap {duration}"
+      Bedtime Reminder: "Pengingat Waktu Tidur"
+      Bedtime Start: "Mulai Waktu Tidur"
+      Bedtime End: "Akhir Waktu Tidur"
+      Wait Until the Video Ends: "Tunggu Hingga Video Selesai"
+      Silence Upload Notifications at Bedtime: "Senyapkan Notifikasi Unggahan Baru Saat Waktu Tidur"
+      Stop Autoplay at Bedtime and After the Daily Limit: "Hentikan Putar Otomatis Saat Waktu Tidur dan Setelah Batas Harian"
     Hide Popularity Graph: "Sembunyikan Grafik Popularitas"
     Enable Block Lists: "Aktifkan daftar blokir"
     AI Video Summaries: Ringkasan video buatan AI
@@ -1088,6 +1111,7 @@ Settings:
     Hide Header Sync Indicator: Sembunyikan indikator sinkronisasi di header aplikasi
     Hide Repeat Stats: Sembunyikan statistik pengulangan
     Sections:
+      Digital Wellbeing: "Kesejahteraan Digital"
       Visible While Paused: Terlihat Saat Dijeda dalam Jendela Penuh / Layar Penuh
     Hide Channel Avatars: Sembunyikan Avatar Saluran
     Shorten View Counts: Persingkat Jumlah Penayangan, Komentar dan Suka Komentar
@@ -2098,6 +2122,13 @@ Tooltips:
     FFmpeg Executable Path: FFmpeg diperlukan untuk menggabungkan stream video dan audio terpisah serta mengonversi audio. Secara bawaan, OpenTubeX menganggap FFmpeg dapat ditemukan melalui variabel lingkungan PATH. Jika perlu, tentukan jalur khusus di sini.
     Use cookies for subtitles: "Gunakan kuki yang dikonfigurasi untuk takarir dan terjemahan otomatis. Juga diaktifkan oleh \"Selalu Gunakan Kuki\"."
   Distraction Free Settings:
+    Count Watch Time From: "“Semua perangkat” menghitung setiap perangkat yang menyinkronkan statistik tontonan. “Perangkat ini” hanya menghitung apa yang Anda tonton di sini."
+    When a Limit Is Reached: "“Jeda Pemutaran” memungkinkan Anda menambah 15 menit atau mengabaikan batas untuk hari ini. Dengan sandi pengaturan, Anda hanya dapat menaikkan batas di Pengaturan."
+    Grayscale: "Menampilkan seluruh aplikasi, termasuk video, dalam nuansa abu-abu agar tidak terlalu menarik perhatian. “Saat Waktu Tidur” mengikuti jadwal pengingat waktu tidur."
+    Daily Watch Time Limit: "Menghitung apa yang Anda tonton hari ini di semua perangkat yang menyinkronkan statistik tontonan, termasuk Shorts."
+    Daily Shorts Limit: "Menghitung Shorts yang Anda tonton hari ini di perangkat ini."
+    Take a Break Reminder: "Menjeda video setelah ditonton selama ini. Jeda selama 10 menit atau lebih akan memulai hitungan dari awal."
+    Bedtime Reminder: "Menjeda video dan mengingatkan Anda untuk berhenti menonton antara waktu mulai dan waktu akhir."
     Shorten View Counts: Menampilkan jumlah penayangan, komentar dan suka komentar yang telah dibulatkan YouTube dalam bentuk singkat, misalnya 14 rb, bukan 14.000. Jumlah persis selalu ditampilkan penuh.
   Subscription Settings:
     Fetch Feed on Startup: Jika diaktifkan, OpenTubeX otomatis mengambil umpan langganan saat aplikasi dimulai dan ketika jendela baru dibuka.
@@ -2454,3 +2485,17 @@ Yattee Server:
 Yattee Fallback Warning: Permintaan ini melewati server Yattee yang Anda konfigurasi dan terhubung langsung ke YouTube, sehingga mengungkap alamat IP Anda.
 Update With Package Manager: 'Perbarui dengan {packageManager}:'
 Update Command Copied: 'Perintah pembaruan disalin'
+Digital Wellbeing:
+  Watch time limit almost reached: "Tersisa {duration} dari batas waktu tonton harian Anda"
+  Shorts limit almost reached: "Tersisa {duration} dari batas Shorts harian Anda"
+  Daily watch time limit reached: "Batas waktu tonton harian tercapai"
+  Daily Shorts limit reached: "Batas Shorts harian tercapai"
+  Watched today: "Anda telah menonton selama {duration} hari ini."
+  Shorts watched today: "Anda telah menonton Shorts selama {duration} hari ini."
+  15 More Minutes: "15 Menit Lagi"
+  Ignore for Today: "Abaikan untuk Hari Ini"
+  Time to take a break: "Waktunya istirahat"
+  Watching for: "Anda sudah menonton selama {duration}."
+  Time for bed: "Waktunya tidur"
+  Bedtime started at: "Waktu tidur Anda dimulai pukul {time}."
+  Remind Me in 10 Minutes: "Ingatkan Saya dalam 10 Menit"

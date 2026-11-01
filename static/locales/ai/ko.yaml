@@ -78,6 +78,8 @@ Search Filters:
     Popularity: 인기순
   Clear Filters: 필터 지우기
 Stats:
+  Left of daily limit: "일일 한도 {limit} 중 {duration} 남음"
+  Daily limit reached: "일일 한도 {limit}에 도달함"
   Replace old device: "이전 기기 교체"
   Replacement explanation: "두 항목이 동일한 실제 기기에 속하는 경우에만 {device}을(를) 이 기기와 합치세요."
   Overlapping days: "두 기록에 모두 있는 날짜 수: {count}"
@@ -1276,6 +1278,27 @@ Settings:
     To: 다음으로
     Confirm Before Unsubscribing: 구독 취소 전 확인
   Distraction Free Settings:
+    Digital Wellbeing:
+      Count Watch Time From: "시청 시간 계산 기준"
+      Break Reminder Action: "휴식할 시간이 되면"
+      Grayscale: "회색조"
+      Off: "끄기"
+      Always: "항상"
+      During Bedtime: "취침 시간 중"
+      After the Daily Limit: "일일 한도 도달 후"
+      Daily Watch Time Limit: "일일 시청 시간 한도"
+      Daily Shorts Limit: "일일 Shorts 한도"
+      When a Limit Is Reached: "한도에 도달하면"
+      Remind Me: "알림"
+      Pause Playback: "재생 일시 정지"
+      Take a Break Reminder: "휴식 알림"
+      Every: "{duration}마다"
+      Bedtime Reminder: "취침 시간 알림"
+      Bedtime Start: "취침 시작 시간"
+      Bedtime End: "취침 종료 시간"
+      Wait Until the Video Ends: "동영상이 끝날 때까지 기다리기"
+      Silence Upload Notifications at Bedtime: "취침 시간에 새 업로드 알림 무음"
+      Stop Autoplay at Bedtime and After the Daily Limit: "취침 시간 및 일일 한도 도달 후 자동 재생 중지"
     Hide Popularity Graph: "인기도 그래프 숨기기"
     Enable Block Lists: "차단 목록 활성화"
     AI Video Summaries: AI 동영상 요약
@@ -1287,6 +1310,7 @@ Settings:
     Hide Header Sync Indicator: 앱 헤더의 동기화 표시기 숨기기
     Hide Repeat Stats: 반복 통계 숨기기
     Sections:
+      Digital Wellbeing: "디지털 웰빙"
       Side Bar: 사이드바
       Subscriptions Page: 구독 페이지
       Channel Page: 채널 페이지
@@ -2467,6 +2491,13 @@ Tooltips:
     FFmpeg Executable Path: 별도의 동영상 및 오디오 스트림을 병합하고 오디오를 변환하려면 FFmpeg가 필요합니다. 기본적으로 OpenTubeX는 PATH 환경 변수에서 FFmpeg를 찾습니다. 필요하면 여기서 사용자 지정 경로를 설정할 수 있습니다.
     Use cookies for subtitles: "설정된 쿠키를 자막과 자동 번역에 사용합니다. \"항상 쿠키 사용\"으로도 활성화됩니다."
   Distraction Free Settings:
+    Count Watch Time From: "“모든 기기”는 시청 통계를 동기화하는 모든 기기를 계산합니다. “이 기기”는 여기에서 시청한 시간만 계산합니다."
+    When a Limit Is Reached: "“재생 일시 정지”를 사용하면 15분을 추가하거나 오늘은 한도를 무시할 수 있습니다. 설정 비밀번호가 있으면 한도는 설정에서만 늘릴 수 있습니다."
+    Grayscale: "동영상을 포함한 앱 전체를 회색조로 표시하여 주의를 덜 끌게 합니다. “취침 시간 중”은 취침 시간 알림 일정을 따릅니다."
+    Daily Watch Time Limit: "시청 통계를 동기화하는 모든 기기에서 오늘 시청한 시간을 Shorts를 포함하여 계산합니다."
+    Daily Shorts Limit: "이 기기에서 오늘 시청한 Shorts를 계산합니다."
+    Take a Break Reminder: "이 시간만큼 시청하면 동영상을 일시 정지합니다. 10분 이상 쉬면 처음부터 다시 계산합니다."
+    Bedtime Reminder: "시작 시간과 종료 시간 사이에 동영상을 일시 정지하고 시청을 그만하도록 알려 줍니다."
     Shorten View Counts: YouTube에서 이미 반올림해 줄여 표시한 조회수, 댓글 수와 댓글 좋아요 수를 표시합니다. 예를 들어 14,000 대신 14K로 표시합니다. 정확한 수치는 항상 전체 자릿수로 표시합니다.
     Hide Subscriptions Live: 이 설정은 "{settingsSection}"의 "{subsection}" 섹션에 있는 앱 전체 "{appWideSetting}" 설정으로 재정의됩니다
     Hide Videos, Playlists and Channels Containing Text: 단어, 단어 일부 또는 구문을 입력하면 원본 제목에 해당 텍스트가 포함된 모든 동영상, 재생목록 및 채널을 OpenTubeX 전체에서 숨깁니다. 대소문자를 구분하지 않습니다. 시청 기록, 내 재생목록 및 재생목록 안의 동영상은 제외됩니다.
@@ -2891,3 +2922,17 @@ Yattee Server:
 Yattee Fallback Warning: 이 요청은 설정한 Yattee 서버를 우회하여 YouTube에 직접 연결하므로 IP 주소가 노출됩니다.
 Update With Package Manager: '{packageManager}(으)로 업데이트:'
 Update Command Copied: '업데이트 명령을 복사했습니다'
+Digital Wellbeing:
+  Watch time limit almost reached: "일일 시청 시간 한도까지 {duration} 남음"
+  Shorts limit almost reached: "일일 Shorts 한도까지 {duration} 남음"
+  Daily watch time limit reached: "일일 시청 시간 한도에 도달함"
+  Daily Shorts limit reached: "일일 Shorts 한도에 도달함"
+  Watched today: "오늘 {duration} 동안 시청했습니다."
+  Shorts watched today: "오늘 Shorts를 {duration} 동안 시청했습니다."
+  15 More Minutes: "15분 더"
+  Ignore for Today: "오늘은 무시"
+  Time to take a break: "휴식할 시간입니다"
+  Watching for: "{duration} 동안 시청하고 있습니다."
+  Time for bed: "잠자리에 들 시간입니다"
+  Bedtime started at: "취침 시간이 {time}에 시작되었습니다."
+  Remind Me in 10 Minutes: "10분 후에 다시 알림"

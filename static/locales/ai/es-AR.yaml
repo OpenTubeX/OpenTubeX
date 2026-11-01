@@ -79,6 +79,8 @@ Search Filters:
     VR180: VR180
   Clear Filters: Limpiar Filtros
 Stats:
+  Left of daily limit: "Te quedan {duration} de tu límite diario de {limit}"
+  Daily limit reached: "Alcanzaste el límite diario de {limit}"
   Replace old device: "Reemplazar dispositivo antiguo"
   Replacement explanation: "Combina {device} con este dispositivo solo si ambas entradas corresponden al mismo dispositivo físico."
   Overlapping days: "Días en ambos historiales: {count}"
@@ -1162,6 +1164,27 @@ Settings:
     Refresh Subscriptions While App Is Closed: "Actualizar suscripciones con la aplicación cerrada"
     Notify About New Uploads: Notificar nuevas subidas
   Distraction Free Settings:
+    Digital Wellbeing:
+      Count Watch Time From: "Contar el tiempo de reproducción de"
+      Break Reminder Action: "Cuando sea hora de un descanso"
+      Grayscale: "Escala de grises"
+      Off: "Desactivado"
+      Always: "Siempre"
+      During Bedtime: "Durante la hora de dormir"
+      After the Daily Limit: "Después del límite diario"
+      Daily Watch Time Limit: "Límite diario de tiempo de reproducción"
+      Daily Shorts Limit: "Límite diario de Shorts"
+      When a Limit Is Reached: "Al alcanzar un límite"
+      Remind Me: "Recordarme"
+      Pause Playback: "Pausar la reproducción"
+      Take a Break Reminder: "Recordatorio para tomar un descanso"
+      Every: "Cada {duration}"
+      Bedtime Reminder: "Recordatorio de la hora de dormir"
+      Bedtime Start: "Inicio de la hora de dormir"
+      Bedtime End: "Fin de la hora de dormir"
+      Wait Until the Video Ends: "Esperar a que termine el video"
+      Silence Upload Notifications at Bedtime: "Silenciar las notificaciones de nuevas subidas a la hora de dormir"
+      Stop Autoplay at Bedtime and After the Daily Limit: "Detener la reproducción automática a la hora de dormir y después del límite diario"
     Hide Popularity Graph: "Ocultar gráfico de popularidad"
     Enable Block Lists: "Activar listas de bloqueo"
     AI Video Summaries: Resúmenes de vídeos con IA
@@ -1173,6 +1196,7 @@ Settings:
     Hide Header Sync Indicator: Ocultar el indicador de sincronización del encabezado de la aplicación
     Hide Repeat Stats: Ocultar estadísticas de repetición
     Sections:
+      Digital Wellbeing: "Bienestar digital"
       Visible While Paused: Visible al pausar en ventana completa o pantalla completa
     Hide Channel Avatars: Ocultar avatares de canales
     Shorten View Counts: Abreviar recuentos de visualizaciones, comentarios y «Me gusta» en comentarios
@@ -2546,6 +2570,13 @@ Tooltips:
     FFmpeg Executable Path: FFmpeg es necesario para combinar emisiones de video y audio separadas y para convertir audio. De forma predeterminada, OpenTubeX presupone que FFmpeg se puede encontrar mediante la variable de entorno PATH. Si hace falta, podés definir acá una ruta personalizada.
     Use cookies for subtitles: "Usá las cookies configuradas para los subtítulos y las traducciones automáticas. También se activa con «Usar siempre cookies»."
   Distraction Free Settings:
+    Count Watch Time From: "«Todos los dispositivos» cuenta cada dispositivo que sincroniza las estadísticas de reproducción. «Este dispositivo» cuenta solo lo que mirás acá."
+    When a Limit Is Reached: "«Pausar la reproducción» te permite sumar 15 minutos o ignorar el límite por hoy. Con una contraseña de configuración, solo podés aumentar un límite en Configuraciones."
+    Grayscale: "Muestra toda la app, incluidos los videos, en escala de grises para que llame menos la atención. «Durante la hora de dormir» sigue el horario del recordatorio de la hora de dormir."
+    Daily Watch Time Limit: "Cuenta lo que miraste hoy en todos los dispositivos que sincronizan las estadísticas de reproducción, incluidos los Shorts."
+    Daily Shorts Limit: "Cuenta los Shorts que miraste hoy en este dispositivo."
+    Take a Break Reminder: "Pausa el video después de este tiempo de reproducción. Una pausa de 10 minutos o más reinicia el conteo."
+    Bedtime Reminder: "Pausa el video y te recuerda que dejes de mirar entre la hora de inicio y la de fin."
     Shorten View Counts: Muestra de forma abreviada los recuentos de visualizaciones, comentarios y «Me gusta» en comentarios que YouTube ya ha redondeado, p. ej., 14K en lugar de 14.000. Los recuentos exactos siempre se muestran completos.
     Hide Channels: Ingresá un ID del canal para ocultar todos los videos, listas de reproducción y el propio canal para que no aparezcan en las búsquedas, tendencias, más populares y recomendados. El ID del canal introducido debe coincidir completamente y se debe distinguir entre mayúsculas y minúsculas.
     Hide Videos, Playlists and Channels Containing Text: Ingresá una palabra, fragmento de palabra o frase (sin distinguir mayúsculas de minúsculas) para ocultar todos los videos y listas de reproducción cuyos títulos originales la contengan en todo OpenTubeX, excluyendo únicamente Historial, Tus listas de reproducción y los videos dentro de las listas de reproducción.
@@ -2999,3 +3030,17 @@ Yattee Server:
 Yattee Fallback Warning: Esta solicitud omite el servidor de Yattee que configuraste y se conecta directamente a YouTube, exponiendo tu dirección IP.
 Update With Package Manager: 'Actualizar con {packageManager}:'
 Update Command Copied: 'Comando de actualización copiado'
+Digital Wellbeing:
+  Watch time limit almost reached: "Te quedan {duration} de tu límite diario de tiempo de reproducción"
+  Shorts limit almost reached: "Te quedan {duration} de tu límite diario de Shorts"
+  Daily watch time limit reached: "Alcanzaste el límite diario de tiempo de reproducción"
+  Daily Shorts limit reached: "Alcanzaste el límite diario de Shorts"
+  Watched today: "Hoy miraste {duration}."
+  Shorts watched today: "Hoy miraste {duration} de Shorts."
+  15 More Minutes: "15 minutos más"
+  Ignore for Today: "Ignorar por hoy"
+  Time to take a break: "Es hora de tomar un descanso"
+  Watching for: "Estás mirando desde hace {duration}."
+  Time for bed: "Es hora de ir a dormir"
+  Bedtime started at: "Tu hora de dormir empezó a las {time}."
+  Remind Me in 10 Minutes: "Recordarme en 10 minutos"

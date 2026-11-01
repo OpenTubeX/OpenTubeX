@@ -102,7 +102,7 @@
               @error="playerErrorHandler"
               @loaded="handleMediaLoaded"
               @legacy-format-selected="setCompanionFormat"
-              @play="playCompanionAudio"
+              @play="handlePlay"
               @playing="playCompanionAudio"
               @pause="handlePlaybackStopped"
               @waiting="handleBuffering"
@@ -455,14 +455,17 @@ let loadGeneration = 0
 const canRetryWithCookies = computed(() => errorMessage.value && !drmError.value && isExternalMediaUrl(mediaUrl.value) && !attemptUsedCookies.value &&
   hasConfiguredRestrictedPlaybackAuthentication(store.getters))
 let seekTimer = null
+// Digital wellbeing limits count playback even when watch statistics are off.
 const watchTimeTracker = createWatchTimeTracker(
-  () => store.getters.getRememberHistory && store.getters.getEnableWatchStats && !loading.value && player.value?.isPaused() === false,
-  (date, seconds) => store.dispatch('recordWatchTime', { date, seconds })
+  () => !loading.value && player.value?.isPaused() === false,
+  (date, seconds) => store.dispatch('recordPlaybackTime', { date, seconds, isShort: false })
 )
-watch(() => [store.getters.getRememberHistory, store.getters.getEnableWatchStats], ([remember, enabled]) => {
-  if (!remember || !enabled) watchTimeTracker.clear()
-})
 watch(() => store.getters.getWatchStatsResetVersion, () => watchTimeTracker.clear())
+// Buffered time follows the recording policy it was watched under.
+watch(() => [store.getters.getRememberHistory, store.getters.getEnableWatchStats], () => watchTimeTracker.clear())
+watch(() => store.getters.getWellbeingPauseRequest, request => {
+  if (request && !request.shortsOnly && player.value?.isPaused() === false) player.value.pause()
+})
 
 const hostname = computed(() => {
   try {
@@ -794,6 +797,17 @@ function handleCompanionAudioEnded() {
     audio.currentTime = 0
     playCompanionAudio()
   }
+}
+
+function handlePlay() {
+  const wellbeingBlock = store.getters.getWellbeingPlaybackBlock(false)
+  if (wellbeingBlock) {
+    player.value?.pause()
+    store.commit('showWellbeingPrompt', wellbeingBlock)
+    return
+  }
+  store.commit('markWellbeingPlay', Date.now())
+  playCompanionAudio()
 }
 
 function playCompanionAudio() {

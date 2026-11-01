@@ -103,6 +103,29 @@ export function watchSecondsForDevice(localDays, devices, currentDeviceId, selec
   return days
 }
 
+/** Whether watch statistics of other devices are synced and can be shown. */
+export function syncedWatchStatsAvailable(getters) {
+  const supported = getters.getSyncServerWatchStatsSupported
+  return Boolean(getters.getSyncServerEnabled &&
+    getters.getSyncServerToken &&
+    getters.getSyncServerPrivacyMode === 'enhanced' &&
+    supported !== false &&
+    (supported === true || getters.getSyncedWatchStats.length > 0) &&
+    getters.getSyncServerSyncWatchStats)
+}
+
+/**
+ * Watched seconds per day that count toward the daily watch time limit.
+ * @param {object} getters store getters
+ * @param {'all' | 'local'} devices
+ */
+export function limitWatchSecondsByDate(getters, devices) {
+  const localDays = getters.getWatchSecondsByDate
+  if (!syncedWatchStatsAvailable(getters)) return localDays
+  return watchSecondsForDevice(localDays, getters.getSyncedWatchStats, getters.getSyncServerDeviceId,
+    devices, getters.getSyncServerWatchStatsReset)
+}
+
 export function mergeWatchStats(remote, localRecords, deviceId, deviceName, platform, reset = null) {
   const days = Object.fromEntries(localRecords.map(({ date, seconds }) => [date, seconds]))
   reset = resolveWatchStatsReset(Array.isArray(remote) ? remote : [], deviceId, reset)

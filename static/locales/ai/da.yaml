@@ -66,6 +66,8 @@ Search Listing:
     Members Only: Kun for medlemmer
     Possibly AI-generated: Muligvis AI-genereret
 Stats:
+  Left of daily limit: "{duration} tilbage af din daglige grænse på {limit}"
+  Daily limit reached: "Daglig grænse på {limit} nået"
   Replace old device: "Erstat gammel enhed"
   Replacement explanation: "Kombiner kun {device} med denne enhed, hvis begge poster tilhører den samme fysiske enhed."
   Overlapping days: "Dage i begge historikker: {count}"
@@ -1101,6 +1103,27 @@ Settings:
     Notify About New Uploads: Giv besked om nye uploads
     Limit the number of videos displayed for each channel: Begræns antallet af viste videoer for hver kanal
   Distraction Free Settings:
+    Digital Wellbeing:
+      Count Watch Time From: "Tæl visningstid fra"
+      Break Reminder Action: "Når det er tid til at holde pause"
+      Grayscale: "Gråtoner"
+      Off: "Fra"
+      Always: "Altid"
+      During Bedtime: "Ved sengetid"
+      After the Daily Limit: "Efter den daglige grænse"
+      Daily Watch Time Limit: "Daglig grænse for visningstid"
+      Daily Shorts Limit: "Daglig grænse for Shorts"
+      When a Limit Is Reached: "Når en grænse er nået"
+      Remind Me: "Påmind mig"
+      Pause Playback: "Sæt afspilning på pause"
+      Take a Break Reminder: "Påmindelse om at holde pause"
+      Every: "Hver {duration}"
+      Bedtime Reminder: "Påmindelse om sengetid"
+      Bedtime Start: "Start på sengetid"
+      Bedtime End: "Slut på sengetid"
+      Wait Until the Video Ends: "Vent, til videoen er slut"
+      Silence Upload Notifications at Bedtime: "Slå notifikationer om nye uploads fra ved sengetid"
+      Stop Autoplay at Bedtime and After the Daily Limit: "Stop automatisk afspilning ved sengetid og efter den daglige grænse"
     Hide Popularity Graph: "Skjul popularitetsgraf"
     Enable Block Lists: "Aktivér blokeringslister"
     AI Video Summaries: AI-videoresuméer
@@ -1112,6 +1135,7 @@ Settings:
     Hide Header Sync Indicator: Skjul synkroniseringsindikatoren i appens topbjælke
     Hide Repeat Stats: Skjul gentagelsesstatistik
     Sections:
+      Digital Wellbeing: "Digital trivsel"
       Visible While Paused: Synligt ved pause i helt vindue eller fuld skærm
     Hide Channel Avatars: Skjul kanalavatarer
     Shorten View Counts: Forkort antal visninger, kommentarer og likes på kommentarer
@@ -2162,6 +2186,13 @@ Tooltips:
     FFmpeg Executable Path: FFmpeg kræves for at flette separate video- og lydstreams og konvertere lyd. OpenTubeX antager som standard, at FFmpeg kan findes via miljøvariablen PATH. Du kan om nødvendigt angive en brugerdefineret sti her.
     Use cookies for subtitles: "Brug de konfigurerede cookies til undertekster og automatiske oversættelser. Aktiveres også af \"Brug altid cookies\"."
   Distraction Free Settings:
+    Count Watch Time From: "\"Alle enheder\" tæller alle enheder, der synkroniserer visningsstatistik. \"Denne enhed\" tæller kun det, du ser her."
+    When a Limit Is Reached: "\"Sæt afspilning på pause\" lader dig tilføje 15 minutter eller ignorere grænsen for i dag. Med en adgangskode til indstillingerne kan du kun hæve en grænse under Indstillinger."
+    Grayscale: "Viser hele appen, også videoer, i gråtoner, så den tiltrækker mindre opmærksomhed. \"Ved sengetid\" følger tidsplanen for påmindelsen om sengetid."
+    Daily Watch Time Limit: "Tæller det, du har set i dag på alle enheder, der synkroniserer visningsstatistik, inklusive Shorts."
+    Daily Shorts Limit: "Tæller de Shorts, du har set på denne enhed i dag."
+    Take a Break Reminder: "Sætter videoen på pause efter så lang tids visning. En pause på 10 minutter eller mere starter optællingen forfra."
+    Bedtime Reminder: "Sætter videoen på pause og minder dig om at stoppe med at se mellem start- og sluttidspunktet."
     Shorten View Counts: Viser antal visninger, kommentarer og likes på kommentarer i den forkortede form, som YouTube allerede har afrundet, f.eks. 14 t. i stedet for 14.000. Nøjagtige tal vises altid fuldt ud.
     Hide Videos on Watch: Skjuler sete videoer fra fanerne Videoer, Shorts og Live på abonnements- og kanalsiderne. Dette påvirker ikke fanen Start på kanalsider
   Subscription Settings:
@@ -2526,3 +2557,17 @@ Yattee Server:
 Yattee Fallback Warning: Denne anmodning omgår din konfigurerede Yattee-server og opretter forbindelse direkte til YouTube, hvilket afslører din IP-adresse.
 Update With Package Manager: 'Opdater med {packageManager}:'
 Update Command Copied: 'Opdateringskommando kopieret'
+Digital Wellbeing:
+  Watch time limit almost reached: "{duration} tilbage af din daglige grænse for visningstid"
+  Shorts limit almost reached: "{duration} tilbage af din daglige grænse for Shorts"
+  Daily watch time limit reached: "Daglig grænse for visningstid nået"
+  Daily Shorts limit reached: "Daglig grænse for Shorts nået"
+  Watched today: "Du har set {duration} i dag."
+  Shorts watched today: "Du har set Shorts i {duration} i dag."
+  15 More Minutes: "15 minutter mere"
+  Ignore for Today: "Ignorer i dag"
+  Time to take a break: "Tid til en pause"
+  Watching for: "Du har set med i {duration}."
+  Time for bed: "Det er sengetid"
+  Bedtime started at: "Din sengetid begyndte kl. {time}."
+  Remind Me in 10 Minutes: "Påmind mig om 10 minutter"

@@ -64,6 +64,8 @@ Search Listing:
     Members Only: Numai pentru membri
     Possibly AI-generated: Posibil generat de IA
 Stats:
+  Left of daily limit: "Au mai rămas {duration} din limita zilnică de {limit}"
+  Daily limit reached: "Limita zilnică de {limit} a fost atinsă"
   Replace old device: "Înlocuiește dispozitivul vechi"
   Replacement explanation: "Combină {device} cu acest dispozitiv doar dacă ambele intrări aparțin aceluiași dispozitiv fizic."
   Overlapping days: "Zile în ambele istorice: {count}"
@@ -1079,6 +1081,27 @@ Settings:
     Refresh Subscriptions While App Is Closed: "Reîmprospătează abonamentele când aplicația este închisă"
     Notify About New Uploads: Notifică despre încărcări noi
   Distraction Free Settings:
+    Digital Wellbeing:
+      Count Watch Time From: "Numără timpul de vizionare de pe"
+      Break Reminder Action: "Când este timpul pentru o pauză"
+      Grayscale: "Tonuri de gri"
+      Off: "Dezactivat"
+      Always: "Întotdeauna"
+      During Bedtime: "La ora de culcare"
+      After the Daily Limit: "După limita zilnică"
+      Daily Watch Time Limit: "Limită zilnică de vizionare"
+      Daily Shorts Limit: "Limită zilnică pentru Shorts"
+      When a Limit Is Reached: "Când se atinge o limită"
+      Remind Me: "Amintește-mi"
+      Pause Playback: "Întrerupe redarea"
+      Take a Break Reminder: "Memento pentru pauză"
+      Every: "La fiecare {duration}"
+      Bedtime Reminder: "Memento pentru ora de culcare"
+      Bedtime Start: "Începutul orei de culcare"
+      Bedtime End: "Sfârșitul orei de culcare"
+      Wait Until the Video Ends: "Așteaptă sfârșitul videoclipului"
+      Silence Upload Notifications at Bedtime: "Silențiază notificările despre încărcări noi la ora de culcare"
+      Stop Autoplay at Bedtime and After the Daily Limit: "Oprește redarea automată la ora de culcare și după limita zilnică"
     Hide Popularity Graph: "Ascunde graficul de popularitate"
     Enable Block Lists: "Activează listele de blocare"
     AI Video Summaries: Rezumate video generate de IA
@@ -1090,6 +1113,7 @@ Settings:
     Hide Header Sync Indicator: Ascunde indicatorul de sincronizare din antetul aplicației
     Hide Repeat Stats: Ascunde statisticile de repetare
     Sections:
+      Digital Wellbeing: "Bunăstare digitală"
       Visible While Paused: Vizibile în pauză în fereastră completă / pe ecran complet
     Hide Channel Avatars: Ascunde avatarurile canalelor
     Shorten View Counts: Abreviază numărul de vizionări, comentarii și aprecieri ale comentariilor
@@ -2129,6 +2153,13 @@ Tooltips:
     FFmpeg Executable Path: FFmpeg este necesar pentru îmbinarea fluxurilor video și audio separate și pentru conversia audio. În mod implicit, OpenTubeX presupune că FFmpeg poate fi găsit prin variabila de mediu PATH. Dacă este necesar, puteți seta aici o cale personalizată.
     Use cookies for subtitles: "Folosește cookie-urile configurate pentru subtitrări și traduceri automate. Se activează și prin „Folosește întotdeauna cookie-uri”."
   Distraction Free Settings:
+    Count Watch Time From: "„Toate dispozitivele” numără fiecare dispozitiv care sincronizează statisticile de vizionare. „Acest dispozitiv” numără doar ce vizionați aici."
+    When a Limit Is Reached: "„Întrerupe redarea” vă permite să adăugați 15 minute sau să ignorați limita pentru azi. Cu o parolă pentru setări, puteți mări o limită doar în setări."
+    Grayscale: "Afișează întreaga aplicație, inclusiv videoclipurile, în tonuri de gri, ca să atragă mai puțin atenția. „La ora de culcare” urmează programul mementoului pentru ora de culcare."
+    Daily Watch Time Limit: "Numără ce ați vizionat astăzi pe toate dispozitivele care sincronizează statisticile de vizionare, inclusiv Shorts."
+    Daily Shorts Limit: "Numără videoclipurile Shorts vizionate astăzi pe acest dispozitiv."
+    Take a Break Reminder: "Întrerupe videoclipul după acest timp de vizionare. O pauză de 10 minute sau mai mult reîncepe numărătoarea."
+    Bedtime Reminder: "Întrerupe videoclipul și vă reamintește să nu mai vizionați între ora de început și cea de sfârșit."
     Shorten View Counts: Afișează în formă abreviată numărul de vizionări, de comentarii și de aprecieri ale comentariilor pe care YouTube le-a rotunjit deja, de exemplu 14 K în loc de 14.000. Valorile exacte sunt afișate întotdeauna integral.
   Subscription Settings:
     Fetch Feed on Startup: Când opțiunea este activată, OpenTubeX preia automat fluxul de abonamente la pornire și la deschiderea unei ferestre noi.
@@ -2488,3 +2519,17 @@ Yattee Server:
 Yattee Fallback Warning: Această cerere ocolește serverul Yattee configurat și se conectează direct la YouTube, expunându-vă adresa IP.
 Update With Package Manager: 'Actualizează cu {packageManager}:'
 Update Command Copied: 'Comanda de actualizare a fost copiată'
+Digital Wellbeing:
+  Watch time limit almost reached: "Au mai rămas {duration} până la limita zilnică de vizionare"
+  Shorts limit almost reached: "Au mai rămas {duration} până la limita zilnică pentru Shorts"
+  Daily watch time limit reached: "Limita zilnică de vizionare a fost atinsă"
+  Daily Shorts limit reached: "Limita zilnică pentru Shorts a fost atinsă"
+  Watched today: "Astăzi ați vizionat {duration}."
+  Shorts watched today: "Astăzi ați vizionat Shorts timp de {duration}."
+  15 More Minutes: "Încă 15 minute"
+  Ignore for Today: "Ignoră pentru azi"
+  Time to take a break: "E timpul pentru o pauză"
+  Watching for: "Vizionați de {duration}."
+  Time for bed: "E timpul pentru culcare"
+  Bedtime started at: "Ora de culcare a început la {time}."
+  Remind Me in 10 Minutes: "Amintește-mi peste 10 minute"

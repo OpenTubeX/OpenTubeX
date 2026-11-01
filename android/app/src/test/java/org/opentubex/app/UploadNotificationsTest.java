@@ -1,8 +1,10 @@
 package org.opentubex.app;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
+import java.time.LocalTime;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -231,5 +233,17 @@ public class UploadNotificationsTest {
         assertEquals("a b<c", UploadNotifications.htmlToText("<p>a</p> <<i>b</i><c"));
         String unclosed = "<".repeat(400_000);
         assertEquals(unclosed, UploadNotifications.htmlToText(unclosed));
+    }
+
+    @Test
+    public void quietHoursCanCrossMidnight() throws Exception {
+        JSONObject overnight = new JSONObject().put("start", 22 * 60).put("end", 6 * 60);
+        assertTrue(UploadNotifications.isWithinQuietHours(overnight, LocalTime.of(23, 30)));
+        assertTrue(UploadNotifications.isWithinQuietHours(overnight, LocalTime.of(5, 59)));
+        assertFalse(UploadNotifications.isWithinQuietHours(overnight, LocalTime.of(6, 0)));
+        assertFalse(UploadNotifications.isWithinQuietHours(overnight, LocalTime.of(12, 0)));
+        assertFalse(UploadNotifications.isWithinQuietHours(null, LocalTime.of(23, 30)));
+        JSONObject empty = new JSONObject().put("start", 60).put("end", 60);
+        assertFalse(UploadNotifications.isWithinQuietHours(empty, LocalTime.of(1, 0)));
     }
 }

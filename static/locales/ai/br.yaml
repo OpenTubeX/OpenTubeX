@@ -64,6 +64,8 @@ Search Listing:
     Members Only: "Evit an izili hepken"
     Possibly AI-generated: Krouet gant an IA marteze
 Stats:
+  Left of daily limit: "{duration} a chom eus ho pevenn bemdeziek a {limit}"
+  Daily limit reached: "Tizhet eo ar vevenn bemdeziek a {limit}"
   Replace old device: "Erlec'hiañ an trevnad kozh"
   Replacement explanation: "Kendeuzit {device} gant an trevnad-mañ nemet ma'z eo an daou enmoned eus an hevelep trevnad fizikel."
   Overlapping days: "Deizioù en daou istor: {count}"
@@ -1074,6 +1076,27 @@ Settings:
     Refresh Subscriptions While App Is Closed: "Freskañ ar c'houmanantoù pa vez serret an arload"
     Notify About New Uploads: Rebuadiñ diwar-benn an endalc'had nevez
   Distraction Free Settings:
+    Digital Wellbeing:
+      Count Watch Time From: "Kontañ an amzer sellet diwar"
+      Break Reminder Action: "Pa vez poent ober un ehan"
+      Grayscale: "Arlivioù louet"
+      Off: "Lazhet"
+      Always: "Atav"
+      During Bedtime: "Da vare kousket"
+      After the Daily Limit: "Goude ar vevenn bemdeziek"
+      Daily Watch Time Limit: "Bevenn bemdeziek an amzer sellet"
+      Daily Shorts Limit: "Bevenn bemdeziek ar Shorts"
+      When a Limit Is Reached: "Pa vez tizhet ur vevenn"
+      Remind Me: "Degas da soñj din"
+      Pause Playback: "Ehanañ al lenn"
+      Take a Break Reminder: "Kounadur evit ober un ehan"
+      Every: "Bep {duration}"
+      Bedtime Reminder: "Kounadur mare kousket"
+      Bedtime Start: "Deroù mare kousket"
+      Bedtime End: "Fin mare kousket"
+      Wait Until the Video Ends: "Gortoz fin ar video"
+      Silence Upload Notifications at Bedtime: "Mudañ ar rebuzadurioù a endalc'had nevez da vare kousket"
+      Stop Autoplay at Bedtime and After the Daily Limit: "Paouez al lenn emgefreek da vare kousket ha goude ar vevenn bemdeziek"
     Hide Popularity Graph: "Kuzhat ar graf poblegezh"
     Enable Block Lists: "Gweredekaat ar rolloù stankañ"
     AI Video Summaries: Diverradennoù video an IA
@@ -1085,6 +1108,7 @@ Settings:
     Hide Header Sync Indicator: Kuzhat meneger ar sinkronelaat e talbenn an arload
     Hide Repeat Stats: Kuzhat stadegoù an adlenn
     Sections:
+      Digital Wellbeing: "Yec'hed niverel"
       Visible While Paused: "Gwelus e-pad un ehan er prenestr leun pe er skramm leun"
     Hide Channel Avatars: "Kuzhat skeudennoù ar chadennoù"
     Shorten View Counts: "Berraat niver ar selladennoù, evezhiadennoù ha plijadennoù an evezhiadennoù"
@@ -2088,6 +2112,13 @@ Tooltips:
     FFmpeg Executable Path: "Rekis eo FFmpeg evit kendeuziñ gwazhioù video ha son distag hag evit amdreiñ ar son. Dre ziouer e soñj OpenTubeX e c'haller kavout FFmpeg dre argemmenn endro PATH. Gallout a reer lakaat un hent personelaet amañ ma vez ezhomm."
     Use cookies for subtitles: "Implijout an toupinoù kefluniet evit an istitloù hag an troidigezhioù emgefreek. Gweredekaet ivez gant « Implijout toupinoù atav »."
   Distraction Free Settings:
+    Count Watch Time From: "\"An holl drevnadoù\" a gont kement trevnad a goubred ar stadegoù sellout. \"An trevnad-mañ\" a gont ar pezh a sellit amañ hepken."
+    When a Limit Is Reached: "\"Ehanañ al lenn\" a laosk ac'hanoc'h da ouzhpennañ 15 munutenn pe da lezel ar vevenn a-gostez evit hiziv. Gant ur ger-tremen evit an arventennoù, ne c'hallit kreskiñ ur vevenn nemet en Arventennoù."
+    Grayscale: "Diskouez an arload a-bezh, ar videoioù en o zouez, en arlivioù louet, evit ma tenno nebeutoc'h an evezh. \"Da vare kousket\" a heul deiziataer ar c'hounadur mare kousket."
+    Daily Watch Time Limit: "Kontañ ar pezh ho peus sellet hiziv war an holl drevnadoù a goubred ar stadegoù sellout, ar Shorts en o zouez."
+    Daily Shorts Limit: "Kontañ ar Shorts ho peus sellet hiziv war an trevnad-mañ."
+    Take a Break Reminder: "Ehanañ ar video goude kement-se a amzer sellet. Un ehan a 10 munutenn pe muioc'h a adlañs ar c'hont."
+    Bedtime Reminder: "Ehanañ ar video ha degas da soñj deoc'h paouez da sellet etre an eur deroù hag an eur fin."
     Shorten View Counts: "Diskouez niver ar selladennoù, evezhiadennoù ha plijadennoù an evezhiadennoù er stumm berr rontaet dija gant YouTube, da skouer 14K e-lec'h 14 000. Diskouezet e vez an niver resis en e bezh bepred."
   Subscription Settings:
     Fetch Feed on Startup: "Pa vez gweredekaet e adtap OpenTubeX gwazh ho koumanantoù ent emgefreek el loc'hañ ha pa vez digoret ur prenestr nevez."
@@ -2444,3 +2475,17 @@ Yattee Server:
 Yattee Fallback Warning: An azgoulenn-mañ a dremen heb ho servijer Yattee kefluniet hag a gennask war-eeun ouzh YouTube, o tiskouez ho chomlec'h IP.
 Update With Package Manager: 'Hizivaat gant {packageManager}:'
 Update Command Copied: 'Eilet eo bet an urzhiad hizivaat'
+Digital Wellbeing:
+  Watch time limit almost reached: "{duration} a chom a-raok ho pevenn bemdeziek amzer sellet"
+  Shorts limit almost reached: "{duration} a chom a-raok ho pevenn bemdeziek Shorts"
+  Daily watch time limit reached: "Tizhet eo ar vevenn bemdeziek amzer sellet"
+  Daily Shorts limit reached: "Tizhet eo ar vevenn bemdeziek Shorts"
+  Watched today: "Sellet ho peus e-pad {duration} hiziv."
+  Shorts watched today: "Sellet ho peus ouzh Shorts e-pad {duration} hiziv."
+  15 More Minutes: "15 munutenn ouzhpenn"
+  Ignore for Today: "Leuskel a-gostez evit hiziv"
+  Time to take a break: "Poent eo ober un ehan"
+  Watching for: "Emaoc'h o sellet abaoe {duration}."
+  Time for bed: "Poent eo mont da gousket"
+  Bedtime started at: "Kroget eo ho mare kousket da {time}."
+  Remind Me in 10 Minutes: "Degas da soñj din a-benn 10 munutenn"

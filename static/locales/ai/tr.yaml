@@ -64,6 +64,8 @@ Search Listing:
     Members Only: Yalnızca üyelere özel
     Possibly AI-generated: Yapay zekâ ile üretilmiş olabilir
 Stats:
+  Left of daily limit: "{limit} günlük sınırınızdan {duration} kaldı"
+  Daily limit reached: "{limit} günlük sınıra ulaşıldı"
   Replace old device: "Eski cihazı değiştir"
   Replacement explanation: "{device} kaydını bu cihazla yalnızca her iki kayıt aynı fiziksel cihaza aitse birleştirin."
   Overlapping days: "Her iki geçmişteki günler: {count}"
@@ -1074,6 +1076,27 @@ Settings:
     Refresh Subscriptions While App Is Closed: "Uygulama Kapalıyken Abonelikleri Yenile"
     Notify About New Uploads: Yeni Yüklemeleri Bildir
   Distraction Free Settings:
+    Digital Wellbeing:
+      Count Watch Time From: "İzleme Süresi Kaynağı"
+      Break Reminder Action: "Mola Zamanı Geldiğinde"
+      Grayscale: "Gri Tonlama"
+      Off: "Kapalı"
+      Always: "Her Zaman"
+      During Bedtime: "Uyku Vaktinde"
+      After the Daily Limit: "Günlük Sınırdan Sonra"
+      Daily Watch Time Limit: "Günlük İzleme Süresi Sınırı"
+      Daily Shorts Limit: "Günlük Kısa Video Sınırı"
+      When a Limit Is Reached: "Bir Sınıra Ulaşıldığında"
+      Remind Me: "Bana Hatırlat"
+      Pause Playback: "Oynatmayı Duraklat"
+      Take a Break Reminder: "Mola Hatırlatıcısı"
+      Every: "Her {duration}"
+      Bedtime Reminder: "Uyku Vakti Hatırlatıcısı"
+      Bedtime Start: "Uyku Vakti Başlangıcı"
+      Bedtime End: "Uyku Vakti Bitişi"
+      Wait Until the Video Ends: "Videonun Bitmesini Bekle"
+      Silence Upload Notifications at Bedtime: "Uyku Vaktinde Yükleme Bildirimlerini Sessize Al"
+      Stop Autoplay at Bedtime and After the Daily Limit: "Uyku Vaktinde ve Günlük Sınırdan Sonra Otomatik Oynatmayı Durdur"
     Hide Popularity Graph: "Popülerlik Grafiğini Gizle"
     Enable Block Lists: "Engelleme listelerini etkinleştir"
     AI Video Summaries: Yapay zekâ video özetleri
@@ -1085,6 +1108,7 @@ Settings:
     Hide Header Sync Indicator: Uygulama başlığındaki eşitleme göstergesini gizle
     Hide Repeat Stats: Tekrar istatistiklerini gizle
     Sections:
+      Digital Wellbeing: "Dijital Denge"
       Visible While Paused: Tam Pencere / Tam Ekranda Duraklatıldığında Görünür
     Hide Channel Avatars: Kanal Avatarlarını Gizle
     Shorten View Counts: İzlenme, Yorum ve Yorum Beğeni Sayılarını Kısalt
@@ -2080,6 +2104,13 @@ Tooltips:
     FFmpeg Executable Path: Ayrı video ve ses akışlarını birleştirmek ve ses dönüştürmek için FFmpeg gereklidir. OpenTubeX varsayılan olarak FFmpeg'in PATH ortam değişkeni üzerinden bulunabildiğini varsayar. Gerekirse buradan özel bir yol ayarlayabilirsiniz.
     Use cookies for subtitles: "Altyazılar ve otomatik çeviriler için yapılandırılmış çerezleri kullan. \"Her zaman çerezleri kullan\" seçeneği de bunu etkinleştirir."
   Distraction Free Settings:
+    Count Watch Time From: "\"Tüm cihazlar\" seçeneği, izleme istatistiklerini eşitleyen her cihazı sayar. \"Bu cihaz\" yalnızca burada izlediklerinizi sayar."
+    When a Limit Is Reached: "\"Oynatmayı Duraklat\" seçeneği, 15 dakika eklemenize veya sınırı bugünlük yok saymanıza olanak tanır. Ayarlar parolası varsa bir sınırı yalnızca Ayarlar'dan artırabilirsiniz."
+    Grayscale: "Videolar dahil tüm uygulamayı gri tonlarında göstererek daha az dikkat çekmesini sağlar. \"Uyku Vaktinde\" seçeneği, uyku vakti hatırlatıcısının programını izler."
+    Daily Watch Time Limit: "İzleme istatistiklerini eşitleyen tüm cihazlarda bugün izlediklerinizi, kısa videolar dahil, sayar."
+    Daily Shorts Limit: "Bu cihazda bugün izlediğiniz kısa videoları sayar."
+    Take a Break Reminder: "Bu kadar izledikten sonra videoyu duraklatır. 10 dakika veya daha uzun bir ara, sayımı yeniden başlatır."
+    Bedtime Reminder: "Başlangıç ve bitiş saatleri arasında videoyu duraklatır ve izlemeyi bırakmanızı hatırlatır."
     Shorten View Counts: YouTube'un zaten yuvarlayarak kısalttığı izlenme, yorum ve yorum beğeni sayılarını gösterir, örneğin 14.000 yerine 14 B. Kesin sayılar her zaman tam gösterilir.
   Subscription Settings:
     Fetch Feed on Startup: Etkinleştirildiğinde OpenTubeX, başlangıçta ve yeni pencere açıldığında abonelik akışınızı otomatik olarak getirir.
@@ -2436,3 +2467,17 @@ Yattee Server:
 Yattee Fallback Warning: Bu istek, yapılandırdığınız Yattee sunucusunu atlayarak doğrudan YouTube'a bağlanır ve IP adresinizi açığa çıkarır.
 Update With Package Manager: '{packageManager} ile güncelle:'
 Update Command Copied: 'Güncelleme komutu kopyalandı'
+Digital Wellbeing:
+  Watch time limit almost reached: "Günlük izleme süresi sınırınıza {duration} kaldı"
+  Shorts limit almost reached: "Günlük kısa video sınırınıza {duration} kaldı"
+  Daily watch time limit reached: "Günlük izleme süresi sınırına ulaşıldı"
+  Daily Shorts limit reached: "Günlük kısa video sınırına ulaşıldı"
+  Watched today: "Bugün {duration} izlediniz."
+  Shorts watched today: "Bugün {duration} kısa video izlediniz."
+  15 More Minutes: "15 Dakika Daha"
+  Ignore for Today: "Bugünlük Yok Say"
+  Time to take a break: "Mola verme zamanı"
+  Watching for: "{duration} süredir izliyorsunuz."
+  Time for bed: "Uyku vakti geldi"
+  Bedtime started at: "Uyku vaktiniz saat {time} itibarıyla başladı."
+  Remind Me in 10 Minutes: "10 Dakika Sonra Hatırlat"

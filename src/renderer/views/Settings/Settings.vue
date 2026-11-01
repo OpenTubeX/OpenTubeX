@@ -266,7 +266,7 @@
             class="settingsContentPane"
           >
             <div
-              v-show="activeSettingsSection?.type === 'data'"
+              v-show="activeSectionTabs[activeSettingsSection?.type] !== undefined"
               :id="contentHeaderTargetId"
               ref="settingsContentHeaderRef"
               class="settingsContentHeader"
@@ -287,10 +287,10 @@
                 v-if="activeSettingsSection"
                 ref="activeSettingsSectionRef"
                 :key="activeSettingsSection.renderKey ?? activeSettingsSection.type"
-                :initial-tab="activeSettingsSection.type === 'data' ? activeDataStorageTab : undefined"
+                :initial-tab="activeSectionTabs[activeSettingsSection.type]"
                 class="section"
                 :data-section="activeSettingsSection.type"
-                @update:active-tab="setActiveDataStorageTab"
+                @update:active-tab="activeSectionTabs[activeSettingsSection.type] = $event"
               />
               <div
                 v-else-if="settingsSearchQuery !== ''"
@@ -499,11 +499,17 @@ const activeSection = ref(
   LEGACY_SETTINGS_SECTION_MAP[store.getters.getSettingsWindowSection] ??
   store.getters.getSettingsWindowSection
 )
-const activeDataStorageTab = ref(
-  store.getters.getSettingsWindowSection === 'storage'
-    ? 'storage'
-    : 'data'
-)
+// Legacy sections that are tabs of their category open on that tab.
+const LEGACY_SETTINGS_SECTION_TABS = {
+  storage: 'storage',
+  distraction: 'distraction',
+  'parental-control': 'parental'
+}
+const activeSectionTabs = ref({
+  data: 'data',
+  focus: 'distraction',
+  ...sectionTabFor(store.getters.getSettingsWindowSection)
+})
 const settingsSearchQuery = ref('')
 const settingsContentTransitionClass = ref('')
 const settingsMenuTransitionClass = ref('')
@@ -887,14 +893,15 @@ watch([
   if (!canNavigateSettings.value || request !== store.getters.getSettingsWindowSectionRequest || request === handledSectionRequest || props.searchTarget) return
   handledSectionRequest = request
   const { section } = request
-  if (section === 'storage') activeDataStorageTab.value = 'storage'
+  const sectionTab = sectionTabFor(section)
+  Object.assign(activeSectionTabs.value, sectionTab)
   const normalizedSection = LEGACY_SETTINGS_SECTION_MAP[section] ?? section
   if (settingsSectionComponents.value.some(candidate => candidate.type === normalizedSection)) {
     navigateToSection(normalizedSection)
   }
-  if (section === 'storage') {
+  if (sectionTab) {
     await nextTick()
-    await activeSettingsSectionRef.value?.activateTab('storage')
+    await activeSettingsSectionRef.value?.activateTab(LEGACY_SETTINGS_SECTION_TABS[section])
   }
 }, { immediate: true })
 watch([() => props.searchTarget, canNavigateSettings], async ([target, canNavigate]) => {
@@ -1134,7 +1141,7 @@ function navigateToSection(sectionType) {
       'settingsCompactSlideForward'
     )
     nextTick(() => {
-      const selectedTab = sectionType === 'data'
+      const selectedTab = activeSectionTabs.value[sectionType] !== undefined
         ? settingsContentHeaderRef.value?.querySelector('[role="tab"][aria-selected="true"]')
         : null
       const focusTarget = selectedTab ?? settingsContentRef.value
@@ -1143,8 +1150,10 @@ function navigateToSection(sectionType) {
   }
 }
 
-function setActiveDataStorageTab(tab) {
-  if (['data', 'storage'].includes(tab)) activeDataStorageTab.value = tab
+/** @returns {Record<string, string> | null} the category tab a legacy section opens */
+function sectionTabFor(section) {
+  const tab = LEGACY_SETTINGS_SECTION_TABS[section]
+  return tab ? { [LEGACY_SETTINGS_SECTION_MAP[section]]: tab } : null
 }
 
 /**

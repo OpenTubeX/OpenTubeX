@@ -64,6 +64,8 @@ Search Listing:
     Members Only: Pouze pro členy
     Possibly AI-generated: Možná vytvořeno AI
 Stats:
+  Left of daily limit: "Zbývá {duration} z vašeho denního limitu {limit}"
+  Daily limit reached: "Denní limit {limit} byl dosažen"
   Replace old device: "Nahradit staré zařízení"
   Replacement explanation: "Spojte {device} s tímto zařízením pouze tehdy, pokud oba záznamy patří stejnému fyzickému zařízení."
   Overlapping days: "Dny v obou historiích: {count}"
@@ -1074,6 +1076,27 @@ Settings:
     Refresh Subscriptions While App Is Closed: "Obnovovat odběry, když je aplikace zavřená"
     Notify About New Uploads: Oznamovat nový obsah
   Distraction Free Settings:
+    Digital Wellbeing:
+      Count Watch Time From: "Počítat dobu sledování z"
+      Break Reminder Action: "Když je čas na přestávku"
+      Grayscale: "Odstíny šedi"
+      Off: "Vypnuto"
+      Always: "Vždy"
+      During Bedtime: "V době spánku"
+      After the Daily Limit: "Po dosažení denního limitu"
+      Daily Watch Time Limit: "Denní limit doby sledování"
+      Daily Shorts Limit: "Denní limit Shorts"
+      When a Limit Is Reached: "Po dosažení limitu"
+      Remind Me: "Připomenout"
+      Pause Playback: "Pozastavit přehrávání"
+      Take a Break Reminder: "Připomínka přestávky"
+      Every: "Každých {duration}"
+      Bedtime Reminder: "Připomínka času spánku"
+      Bedtime Start: "Začátek času spánku"
+      Bedtime End: "Konec času spánku"
+      Wait Until the Video Ends: "Počkat na konec videa"
+      Silence Upload Notifications at Bedtime: "Ztlumit upozornění na nový obsah v době spánku"
+      Stop Autoplay at Bedtime and After the Daily Limit: "Zastavit automatické přehrávání v době spánku a po dosažení denního limitu"
     Hide Popularity Graph: "Skrýt graf popularity"
     Enable Block Lists: "Povolit seznamy blokovaných"
     AI Video Summaries: Shrnutí videí od AI
@@ -1085,6 +1108,7 @@ Settings:
     Hide Header Sync Indicator: Skrýt indikátor synchronizace v záhlaví aplikace
     Hide Repeat Stats: Skrýt statistiky opakování
     Sections:
+      Digital Wellbeing: "Digitální pohoda"
       Visible While Paused: Viditelné při pozastavení v režimu celého okna nebo celé obrazovky
     Hide Channel Avatars: Skrýt avatary kanálů
     Shorten View Counts: Zkracovat počty zhlédnutí, komentářů a hodnocení komentářů
@@ -2079,6 +2103,13 @@ Tooltips:
     FFmpeg Executable Path: FFmpeg je nutný ke slučování samostatných streamů obrazu a zvuku a k převodu zvuku. OpenTubeX ve výchozím nastavení předpokládá, že nástroj FFmpeg lze najít pomocí proměnné prostředí PATH. V případě potřeby zde můžete nastavit vlastní cestu.
     Use cookies for subtitles: "Používat nastavené cookies pro titulky a automatické překlady. Zapne se také volbou „Vždy používat cookies“."
   Distraction Free Settings:
+    Count Watch Time From: "„Všechna zařízení“ započítává každé zařízení, které synchronizuje statistiky sledování. „Toto zařízení“ započítává jen to, co sledujete zde."
+    When a Limit Is Reached: "„Pozastavit přehrávání“ umožňuje přidat 15 minut nebo limit pro dnešek ignorovat. S heslem nastavení lze limit zvýšit pouze v Nastavení."
+    Grayscale: "Zobrazí celou aplikaci včetně videí v odstínech šedi, aby méně přitahovala pozornost. Možnost „V době spánku“ se řídí rozvrhem připomínky času spánku."
+    Daily Watch Time Limit: "Započítává, co jste dnes sledovali na všech zařízeních, která synchronizují statistiky sledování, včetně Shorts."
+    Daily Shorts Limit: "Započítává Shorts, které jste dnes sledovali na tomto zařízení."
+    Take a Break Reminder: "Po této době sledování pozastaví video. Přestávka 10 minut nebo delší spustí počítání znovu."
+    Bedtime Reminder: "Pozastaví video a mezi časem začátku a konce vám připomene, abyste přestali sledovat."
     Shorten View Counts: Zobrazí počty zhlédnutí, komentářů a hodnocení komentářů, které YouTube již zaokrouhlil do zkrácené podoby, například 14K místo 14,000. Přesné počty se vždy zobrazují celé.
   Subscription Settings:
     Fetch Feed on Startup: Pokud je funkce zapnutá, OpenTubeX automaticky načte kanál odběrů při spuštění a při otevření nového okna.
@@ -2435,3 +2466,17 @@ Yattee Server:
 Yattee Fallback Warning: Tento požadavek obchází nastavený server Yattee a připojuje se přímo k YouTube, čímž odhaluje vaši IP adresu.
 Update With Package Manager: 'Aktualizovat pomocí {packageManager}:'
 Update Command Copied: 'Příkaz pro aktualizaci zkopírován'
+Digital Wellbeing:
+  Watch time limit almost reached: "Do denního limitu doby sledování zbývá {duration}"
+  Shorts limit almost reached: "Do denního limitu Shorts zbývá {duration}"
+  Daily watch time limit reached: "Denní limit doby sledování byl dosažen"
+  Daily Shorts limit reached: "Denní limit Shorts byl dosažen"
+  Watched today: "Dnes jste sledovali {duration}."
+  Shorts watched today: "Dnes jste sledovali Shorts {duration}."
+  15 More Minutes: "Ještě 15 minut"
+  Ignore for Today: "Pro dnešek ignorovat"
+  Time to take a break: "Čas na přestávku"
+  Watching for: "Sledujete už {duration}."
+  Time for bed: "Je čas jít spát"
+  Bedtime started at: "Váš čas spánku začal v {time}."
+  Remind Me in 10 Minutes: "Připomenout za 10 minut"

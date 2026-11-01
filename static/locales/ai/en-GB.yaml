@@ -63,6 +63,8 @@ Search Listing:
     Members Only: Members only
     Possibly AI-generated: Possibly AI-generated
 Stats:
+  Left of daily limit: "{duration} left of your {limit} daily limit"
+  Daily limit reached: "Daily limit of {limit} reached"
   Replace old device: "Replace old device"
   Replacement explanation: "Combine {device} with this device only if both entries belong to the same physical device."
   Overlapping days: "Days in both histories: {count}"
@@ -1061,6 +1063,29 @@ Settings:
     Refresh Subscriptions While App Is Closed: "Refresh Subscriptions While App Is Closed"
     Notify About New Uploads: Notify About New Uploads
   Distraction Free Settings:
+    Digital Wellbeing:
+      Count Watch Time From: "Count Watch Time From"
+      Break Reminder Action: "When It's Time for a Break"
+      Grayscale: "Greyscale"
+      Off: "Off"
+      Always: "Always"
+      During Bedtime: "During Bedtime"
+      After the Daily Limit: "After the Daily Limit"
+      Daily Watch Time Limit: "Daily Watch Time Limit"
+      Daily Shorts Limit: "Daily Shorts Limit"
+      When a Limit Is Reached: "When a Limit Is Reached"
+      Remind Me: "Remind Me"
+      Pause Playback: "Pause Playback"
+      Take a Break Reminder: "Take a Break Reminder"
+      Every: "Every {duration}"
+      Bedtime Reminder: "Bedtime Reminder"
+      Bedtime Start: "Bedtime Start"
+      Bedtime End: "Bedtime End"
+      Wait Until the Video Ends: "Wait Until the Video Ends"
+      Silence Upload Notifications at Bedtime: "Silence Upload Notifications at Bedtime"
+      Stop Autoplay at Bedtime and After the Daily Limit: "Stop Autoplay at Bedtime and After the Daily Limit"
+    Sections:
+      Digital Wellbeing: "Digital Wellbeing"
     Hide Popularity Graph: "Hide Popularity Graph"
     Enable Block Lists: "Enable block lists"
     AI Video Summaries: AI video summaries
@@ -2070,6 +2095,13 @@ Tooltips:
     FFmpeg Executable Path: FFmpeg is required for merging separate video and audio streams and for audio conversion. By default, OpenTubeX will assume that FFmpeg can be found via the PATH environment variable. If needed, a custom path can be set here.
     Use cookies for subtitles: "Use the configured cookies for subtitles and automatic translations. Also enabled by \"Always Use Cookies\"."
   Distraction Free Settings:
+    Count Watch Time From: "All devices counts every device that syncs watch statistics. This device counts only what you watch here."
+    When a Limit Is Reached: "Pause Playback lets you add 15 minutes or ignore the limit for today. With a settings password, you can only raise a limit in Settings."
+    Grayscale: "Shows the whole app, including videos, in shades of grey, so it draws less attention. During Bedtime follows the bedtime reminder's schedule."
+    Daily Watch Time Limit: "Counts what you watched today on all devices that sync watch statistics, including Shorts."
+    Daily Shorts Limit: "Counts the Shorts you watched on this device today."
+    Take a Break Reminder: "Pauses the video after this much watching. A pause of 10 minutes or more starts the count again."
+    Bedtime Reminder: "Pauses the video and reminds you to stop watching between the start and end time."
     Shorten View Counts: Shows view, comment and comment like counts that YouTube has already rounded in a shortened form, e.g. 14K instead of 14,000. Exact counts are always shown in full.
   Subscription Settings:
     Show New Content Feed: Shows a New tab containing subscription feed items that were not present during the previous fetch.
@@ -2426,3 +2458,17 @@ Yattee Server:
 Yattee Fallback Warning: This request bypasses your configured Yattee server and connects directly to YouTube, exposing your IP address.
 Update With Package Manager: 'Update with {packageManager}:'
 Update Command Copied: 'Update command copied'
+Digital Wellbeing:
+  Watch time limit almost reached: "{duration} left of your daily watch time limit"
+  Shorts limit almost reached: "{duration} left of your daily Shorts limit"
+  Daily watch time limit reached: "Daily watch time limit reached"
+  Daily Shorts limit reached: "Daily Shorts limit reached"
+  Watched today: "You've watched {duration} today."
+  Shorts watched today: "You've watched {duration} of Shorts today."
+  15 More Minutes: "15 More Minutes"
+  Ignore for Today: "Ignore for Today"
+  Time to take a break: "Time to take a break"
+  Watching for: "You've been watching for {duration}."
+  Time for bed: "It's time for bed"
+  Bedtime started at: "Your bedtime started at {time}."
+  Remind Me in 10 Minutes: "Remind Me in 10 Minutes"
