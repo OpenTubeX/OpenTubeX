@@ -52,6 +52,7 @@ export const SYNC_SETTING_LABELS = {
   enableBlockLists: 'Settings.Distraction Free Settings.Enable Block Lists',
   enableChannelSettings: 'Settings.Channel Settings.Enable Channel Playback Settings',
   checkForUpdates: 'Settings.General Settings.Check for Updates',
+  closeWindowWithLastTab: 'Settings.General Settings.Close Window With Last Tab',
   commentTranslationIgnoredLanguages: 'Settings.General Settings.Comment Translation.Never Translate',
   compactNavigationLabels: 'Settings.General Settings.Navigation.Compact Tab Labels',
   confirmCloseApp: 'Settings.General Settings.Confirmation Options.Closing App',

@@ -345,6 +345,7 @@ Settings:
       Network: verkko
       Disk: levytila
   General Settings:
+    Close Window With Last Tab: 'Sulje ikkuna, kun viimeinen välilehti suljetaan'
     Preferred Video Codec: Ensisijainen videokoodekki
     Always Use Backup Media Server: "Käytä aina varamediapalvelinta"
     Automatically switch stream extraction methods: "Vaihda suoratoiston poimintamenetelmiä automaattisesti"
@@ -2027,6 +2028,7 @@ Description:
   Music: Musiikki
 Tooltips:
   General Settings:
+    Close Window With Last Tab: 'Kun tämä on pois päältä, viimeisen välilehden sulkeminen avaa sen sijaan uuden välilehden, joten ikkuna pysyy auki, kunnes suljet sen.'
     Preferred Video Codec: |
       Automaattinen tila suosii koodekkeja, joita laitteesi voi purkaa laitteistolla.
       AV1: paras laatu pienimmällä datamäärällä, mutta kaikissa videoissa sitä ei ole. Ilman laitteistopurkua se voi kuluttaa akkua tai pudottaa ruutuja.

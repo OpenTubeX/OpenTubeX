@@ -350,6 +350,7 @@ Settings:
       Network: мрежа
       Disk: диск
   General Settings:
+    Close Window With Last Tab: 'Затвори прозор при затварању последње картице'
     Preferred Video Codec: Жељени видео кодек
     Always Use Backup Media Server: "Увек користи резервни медијски сервер"
     Automatically switch stream extraction methods: "Аутоматски мењај методе издвајања стримова"
@@ -2054,6 +2055,7 @@ Description:
   Music: Музика
 Tooltips:
   General Settings:
+    Close Window With Last Tab: 'Када је искључено, затварање последње картице уместо тога отвара нову картицу, па прозор остаје отворен док га не затворите.'
     Preferred Video Codec: |
       Аутоматски режим даје предност кодецима које ваш уређај може хардверски да декодира.
       AV1: најбољи квалитет уз најмање података, али га нема сваки видео. Без хардверског декодирања може да празни батерију или испушта кадрове.

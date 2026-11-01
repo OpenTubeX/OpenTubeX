@@ -340,6 +340,7 @@ Settings:
       Network: sieť
       Disk: disk
   General Settings:
+    Close Window With Last Tab: 'Zavrieť okno pri zatvorení poslednej karty'
     Preferred Video Codec: Preferovaný videokodek
     Always Use Backup Media Server: "Vždy používať záložný mediálny server"
     Automatically switch stream extraction methods: "Automaticky prepínať metódy extrakcie streamov"
@@ -1977,6 +1978,7 @@ Description:
   Music: Hudba
 Tooltips:
   General Settings:
+    Close Window With Last Tab: 'Keď je vypnuté, zatvorenie poslednej karty namiesto toho otvorí novú kartu, takže okno zostane otvorené, kým ho nezatvoríte.'
     Preferred Video Codec: |
       Automatický režim uprednostňuje kodeky, ktoré vaše zariadenie dokáže dekódovať hardvérovo.
       AV1: najlepšia kvalita pri najmenšej spotrebe dát, ale nemá ho každé video. Bez hardvérového dekódovania môže vybíjať batériu alebo vynechávať snímky.

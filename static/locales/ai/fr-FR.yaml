@@ -340,6 +340,7 @@ Settings:
       Network: le réseau
       Disk: le disque
   General Settings:
+    Close Window With Last Tab: 'Fermer la fenêtre à la fermeture du dernier onglet'
     Preferred Video Codec: Codec vidéo préféré
     Always Use Backup Media Server: "Toujours utiliser le serveur multimédia de secours"
     Automatically switch stream extraction methods: "Changer automatiquement de méthode d’extraction des flux"
@@ -1976,6 +1977,7 @@ Description:
   Music: Musique
 Tooltips:
   General Settings:
+    Close Window With Last Tab: 'Si désactivé, fermer le dernier onglet en ouvre un nouveau à la place, et la fenêtre reste ouverte jusqu’à ce que vous la fermiez.'
     Preferred Video Codec: |
       Le mode automatique privilégie les codecs que votre appareil peut décoder matériellement.
       AV1 : la meilleure qualité pour le moins de données, mais toutes les vidéos ne le proposent pas. Sans décodage matériel, il peut vider la batterie ou perdre des images.

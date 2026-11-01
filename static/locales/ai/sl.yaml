@@ -466,6 +466,7 @@ Settings:
       Disk: disk
   Return to Settings Menu: Nazaj v meni z nastavitvami
   General Settings:
+    Close Window With Last Tab: 'Zapri okno ob zaprtju zadnjega zavihka'
     Preferred Video Codec: Prednostni video kodek
     Always Use Backup Media Server: "Vedno uporabi rezervni predstavnostni strežnik"
     Automatically switch stream extraction methods: "Samodejno preklapljaj metode pridobivanja tokov"
@@ -2478,6 +2479,7 @@ Description:
   Music: Glasba
 Tooltips:
   General Settings:
+    Close Window With Last Tab: 'Ko je izklopljeno, zaprtje zadnjega zavihka namesto tega odpre nov zavihek, zato okno ostane odprto, dokler ga ne zaprete.'
     Preferred Video Codec: |
       Samodejni način daje prednost kodekom, ki jih vaša naprava lahko dekodira strojno.
       AV1: najboljša kakovost ob najmanjši porabi podatkov, vendar ga nima vsak videoposnetek. Brez strojnega dekodiranja lahko prazni baterijo ali izpušča sličice.

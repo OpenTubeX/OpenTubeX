@@ -345,6 +345,7 @@ Settings:
       Network: شبكة
       Disk: القرص
   General Settings:
+    Close Window With Last Tab: 'إغلاق النافذة عند إغلاق آخر علامة تبويب'
     Preferred Video Codec: ترميز الفيديو المفضل
     Always Use Backup Media Server: "استخدام خادم الوسائط الاحتياطي دائمًا"
     Automatically switch stream extraction methods: "تبديل طرق استخراج الدفق تلقائيًا"
@@ -2022,6 +2023,7 @@ Description:
   Music: الموسيقى
 Tooltips:
   General Settings:
+    Close Window With Last Tab: 'عند الإيقاف، يؤدي إغلاق آخر علامة تبويب إلى فتح علامة تبويب جديدة بدلًا من ذلك، فتبقى النافذة مفتوحة حتى تغلقها.'
     Preferred Video Codec: |
       يفضّل الوضع التلقائي الترميزات التي يستطيع جهازك فك ترميزها بالعتاد.
       AV1: أفضل جودة بأقل استهلاك للبيانات، لكنه غير متاح لكل الفيديوهات. دون فك ترميز بالعتاد قد يستنزف البطارية أو يُسقط إطارات.

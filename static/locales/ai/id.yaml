@@ -341,6 +341,7 @@ Settings:
       Network: jaringan
       Disk: disk
   General Settings:
+    Close Window With Last Tab: 'Tutup jendela saat menutup tab terakhir'
     Preferred Video Codec: Codec video pilihan
     Always Use Backup Media Server: "Selalu gunakan server media cadangan"
     Automatically switch stream extraction methods: "Ganti metode ekstraksi stream secara otomatis"
@@ -1996,6 +1997,7 @@ Description:
   Music: Musik
 Tooltips:
   General Settings:
+    Close Window With Last Tab: 'Jika dinonaktifkan, menutup tab terakhir akan membuka tab baru, sehingga jendela tetap terbuka sampai Anda menutupnya.'
     Preferred Video Codec: |
       Mode otomatis mengutamakan codec yang dapat didekode perangkat Anda secara hardware.
       AV1: kualitas terbaik dengan data paling sedikit, tetapi tidak semua video memilikinya. Tanpa dekode hardware, dapat menguras baterai atau melewatkan frame.

@@ -680,6 +680,7 @@ Settings:
     Always Use Backup Media Server: Always use backup media server
     Enable Search Suggestions: Enable Search Suggestions
     Open Deep Links In New Window: Open URLs Passed to OpenTubeX in a New Window
+    Close Window With Last Tab: Close window when closing the last tab
     Minimize to system tray: Minimize to system tray
     Remember Tab Navigation History: Remember Tab Navigation History
     Auto Load Next Page:
@@ -3104,6 +3105,8 @@ Tooltips:
       By default OpenTubeX will open the clicked link in your default browser.
     Open Deep Links In New Window: URLs passed to OpenTubeX, such as by redirect
       browser extensions or command line arguments, are opened in a new window.
+    Close Window With Last Tab: When off, closing the last tab opens a new tab instead,
+      so the window stays open until you close it.
     Remember Tab Navigation History: Each tab's back and forward navigation history
       is saved and restored when OpenTubeX restarts.
   Proxy Settings:

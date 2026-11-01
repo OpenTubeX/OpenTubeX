@@ -345,6 +345,7 @@ Settings:
       Network: רשת
       Disk: כונן
   General Settings:
+    Close Window With Last Tab: 'סגירת החלון בעת סגירת הלשונית האחרונה'
     Preferred Video Codec: מקודד וידאו מועדף
     Always Use Backup Media Server: "תמיד להשתמש בשרת המדיה החלופי"
     Automatically switch stream extraction methods: "החלפה אוטומטית בין שיטות חילוץ זרמים"
@@ -2029,6 +2030,7 @@ Description:
   Music: מוזיקה
 Tooltips:
   General Settings:
+    Close Window With Last Tab: 'כשהאפשרות כבויה, סגירת הלשונית האחרונה פותחת במקום זאת לשונית חדשה, כך שהחלון נשאר פתוח עד שתסגרו אותו.'
     Preferred Video Codec: |
       המצב האוטומטי מעדיף מקודדים שהמכשיר שלך יכול לפענח בחומרה.
       AV1: האיכות הטובה ביותר בפחות נתונים, אך לא לכל סרטון יש אותו. ללא פענוח בחומרה הוא עלול לרוקן את הסוללה או להשמיט פריימים.

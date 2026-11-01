@@ -157,6 +157,7 @@ function isSettingsSearchMessageVisible(sectionType, path, options) {
     }
     if ([
       'Open Deep Links In New Window',
+      'Close Window With Last Tab',
       'Confirm Before',
       'Confirmation Options',
       'Stream Extraction Method'

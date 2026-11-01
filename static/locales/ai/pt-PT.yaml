@@ -345,6 +345,7 @@ Settings:
       Network: rede
       Disk: disco
   General Settings:
+    Close Window With Last Tab: 'Fechar a janela ao fechar o último separador'
     Preferred Video Codec: Codec de vídeo preferido
     Always Use Backup Media Server: "Usar sempre o servidor multimédia de reserva"
     Automatically switch stream extraction methods: "Alternar automaticamente os métodos de extração de fluxos"
@@ -2018,6 +2019,7 @@ Description:
   Music: Música
 Tooltips:
   General Settings:
+    Close Window With Last Tab: 'Quando desativado, fechar o último separador abre um novo separador, pelo que a janela permanece aberta até a fechar.'
     Preferred Video Codec: |
       O modo automático prefere codecs que o seu dispositivo consegue descodificar por hardware.
       AV1: a melhor qualidade com o menor consumo de dados, mas nem todos os vídeos o têm. Sem descodificação por hardware, pode esgotar a bateria ou perder fotogramas.

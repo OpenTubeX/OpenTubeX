@@ -343,6 +343,7 @@ Settings:
       Network: nätverk
       Disk: diskutrymme
   General Settings:
+    Close Window With Last Tab: 'Stäng fönstret när den sista fliken stängs'
     Preferred Video Codec: Föredragen videokodek
     Always Use Backup Media Server: "Använd alltid reservmedieservern"
     Automatically switch stream extraction methods: "Byt automatiskt mellan metoder för strömutvinning"
@@ -2000,6 +2001,7 @@ Description:
   Music: Musik
 Tooltips:
   General Settings:
+    Close Window With Last Tab: 'När detta är av öppnar stängning av den sista fliken en ny flik i stället, så att fönstret förblir öppet tills du stänger det.'
     Preferred Video Codec: |
       Automatiskt föredrar kodekar som din enhet kan avkoda med hårdvara.
       AV1: bäst kvalitet för minst data, men alla videor har den inte. Utan hårdvaruavkodning kan den tömma batteriet eller tappa bildrutor.

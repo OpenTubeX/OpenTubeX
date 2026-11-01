@@ -3,7 +3,7 @@ import { sampleColors } from '../../helpers/colors.mjs'
 import { fulfillVisualFixture } from '../../helpers/visual-fixtures.mjs'
 import { mockPlayableWatchPage } from '../../helpers/watch.mjs'
 
-import { abortUnmockedRequest, test, expect, sel, goTo, goToSettingsSection, clickSearchCancel, setWindowSize } from '../../helpers/app.mjs'
+import { abortUnmockedRequest, test, expect, sel, goTo, goToSettingsSection, clickSearchCancel, openNewWindowFromTabBar, setWindowSize, waitForAppReady } from '../../helpers/app.mjs'
 import {
   encryptSyncServerDeviceInfo,
   randomSyncServerDeviceId,
@@ -2615,6 +2615,67 @@ test.describe('tab close focus set to the next tab', () => {
     await page.locator(sel.activeTab).locator('.closeButton').click()
     await expect(page.locator(sel.activeTab)).toHaveAttribute('data-tab-id', previousTabId)
     await expect(page.locator(`.tab[data-tab-id="${unloadedTab.id}"]`)).toHaveClass(/unloaded/)
+  })
+})
+
+test('closing the last tab of a window closes the window by default', async ({ app, page }) => {
+  const newWindow = await openNewWindowFromTabBar(app, page)
+  await waitForAppReady(newWindow)
+
+  const closed = newWindow.waitForEvent('close')
+  await newWindow.locator(sel.activeTab).locator('.closeButton').click()
+  await closed
+  await expect(page.locator(sel.tabs)).toHaveCount(1)
+})
+
+test.describe('closing the last tab with the window kept open', () => {
+  test.use({ seed: { settings: { closeWindowWithLastTab: false, confirmCloseApp: true } } })
+
+  test.beforeEach(async ({ app }) => {
+    await app.electronApp.evaluate(({ dialog }) => {
+      globalThis.lastTabCloseDialogs = []
+      dialog.showMessageBox = async (_window, options) => {
+        globalThis.lastTabCloseDialogs.push(options.message)
+        // Confirm, so a quit prompt would close the window and teardown can quit
+        return { response: 0 }
+      }
+    })
+  })
+
+  test('replaces the last tab with a new tab without asking to quit', async ({ app, page }) => {
+    await page.locator('.sideNav a[href="#/history"]:visible').first().click()
+    await expect(page).toHaveURL(/#\/history/)
+    const closedTabId = await page.locator(sel.activeTab).getAttribute('data-tab-id')
+
+    await page.locator(sel.activeTab).locator('.closeButton').click()
+    await expect(page.locator(sel.tabs)).toHaveCount(1)
+    await expect(page.locator(sel.activeTab)).not.toHaveAttribute('data-tab-id', closedTabId)
+    await expect(page.locator(sel.activeTab)).toContainText('Subscriptions')
+
+    // The menu accelerator closes the replacement the same way.
+    const replacementTabId = await page.locator(sel.activeTab).getAttribute('data-tab-id')
+    await page.keyboard.press('Control+w')
+    await expect(page.locator(sel.activeTab)).not.toHaveAttribute('data-tab-id', replacementTabId)
+    await expect(page.locator(sel.tabs)).toHaveCount(1)
+
+    expect(await app.electronApp.evaluate(() => globalThis.lastTabCloseDialogs)).toEqual([])
+    expect(page.isClosed()).toBe(false)
+
+    await page.keyboard.press('Control+Shift+t')
+    await expect(page.locator(sel.tabs)).toHaveCount(2)
+  })
+
+  test('replaces all selected tabs with a new tab', async ({ app, page }) => {
+    await page.locator(sel.newTabButton).click()
+    const tabs = page.locator(sel.tabs)
+    await expect(tabs).toHaveCount(2)
+    const closedTabIds = await tabs.evaluateAll(elements => elements.map(element => element.dataset.tabId))
+    await tabs.first().click({ modifiers: ['Control'] })
+
+    await page.keyboard.press('Control+w')
+    await expect(tabs).toHaveCount(1)
+    expect(closedTabIds).not.toContain(await tabs.first().getAttribute('data-tab-id'))
+    expect(await app.electronApp.evaluate(() => globalThis.lastTabCloseDialogs)).toEqual([])
   })
 })
 

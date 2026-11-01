@@ -158,6 +158,7 @@ Settings:
     Advanced Description: Dostawcy, aplikacje zewnętrzne i sieć
     Alternative providers: Dostawcy filmów i metadanych
   General Settings:
+    Close Window With Last Tab: 'Zamykaj okno po zamknięciu ostatniej karty'
     Preferred Video Codec: Preferowany kodek wideo
     Always Use Backup Media Server: "Zawsze używaj zapasowego serwera multimediów"
     Automatically switch stream extraction methods: "Automatycznie przełączaj metody wyodrębniania strumieni"
@@ -1236,6 +1237,7 @@ Description:
   Music: Muzyka
 Tooltips:
   General Settings:
+    Close Window With Last Tab: 'Gdy wyłączone, zamknięcie ostatniej karty otwiera zamiast tego nową kartę, więc okno pozostaje otwarte, dopóki go nie zamkniesz.'
     Preferred Video Codec: |
       Tryb automatyczny preferuje kodeki, które urządzenie może dekodować sprzętowo.
       AV1: najlepsza jakość przy najmniejszym zużyciu danych, ale nie każdy film go ma. Bez dekodowania sprzętowego może rozładowywać baterię lub gubić klatki.
