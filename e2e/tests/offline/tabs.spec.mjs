@@ -2650,6 +2650,75 @@ test.describe('fixed tab width', () => {
   })
 })
 
+/**
+ * Waits until the active tab lies inside the scrolled tab strip, which must
+ * overflow for the check to mean anything.
+ * @param {import('@playwright/test').Page} page
+ */
+async function expectActiveTabInView(page) {
+  await expect.poll(() => page.locator(sel.activeTab).evaluate(tab => {
+    const container = tab.closest('.tabsContainer')
+    const viewport = container.getBoundingClientRect()
+    const box = tab.getBoundingClientRect()
+    return {
+      overflows: container.scrollWidth > container.clientWidth + 1 || container.scrollHeight > container.clientHeight + 1,
+      inside: box.left >= viewport.left - 1 && box.right <= viewport.right + 1 &&
+        box.top >= viewport.top - 1 && box.bottom <= viewport.bottom + 1
+    }
+  })).toEqual({ overflows: true, inside: true })
+}
+
+for (const tabBarPosition of ['top', 'left']) {
+  test.describe(`overflowing tabs at ${tabBarPosition}`, () => {
+    test.use({ seed: { settings: { tabBarPosition, useFixedTabWidth: true, fixedTabWidth: 200 } } })
+
+    test('scroll the active tab into view on launch, keyboard switching, and new tabs', { tag: '@scale' }, async ({ app }) => {
+      let page = app.page
+      const lastTabId = await page.evaluate(async () => {
+        let tab
+        for (let index = 0; index < 40; index++) {
+          tab = await window.ftElectron.tabs.create({
+            route: '/history', title: `History ${index + 1}`, makeActive: false, lazyLoad: true
+          })
+        }
+        return tab.id
+      })
+      const firstTabId = await page.locator(sel.tabs).first().getAttribute('data-tab-id')
+
+      // Scroll by hand first, so the next state update echoes that position.
+      const container = page.locator('.tabsContainer')
+      await container.evaluate(element => element.scrollTo(200, 200))
+      await expect.poll(async () => {
+        const offset = await container.evaluate(element => element.scrollLeft)
+        const shared = await page.evaluate(async () => (await window.ftElectron.tabs.getState()).tabBarScrollPosition)
+        return offset > 0 && Math.abs(shared - offset) < 1
+      }).toBe(tabBarPosition === 'top')
+
+      // Ctrl+Shift+Tab wraps around from the first tab to the last one.
+      await page.keyboard.press('Control+Shift+Tab')
+      await expect(page.locator(sel.activeTab)).toHaveAttribute('data-tab-id', lastTabId)
+      await expectActiveTabInView(page)
+
+      await page.keyboard.press('Control+1')
+      await expect(page.locator(sel.activeTab)).toHaveAttribute('data-tab-id', firstTabId)
+      await expectActiveTabInView(page)
+
+      await page.locator(sel.newTabButton).click()
+      await expect(page.locator(sel.tabs)).toHaveCount(42)
+      const newTabId = await page.locator(sel.activeTab).getAttribute('data-tab-id')
+      await expect(page.locator(sel.tabs).last()).toHaveAttribute('data-tab-id', newTabId)
+      await expectActiveTabInView(page)
+
+      await page.evaluate(id => window.ftElectron.tabs.activate(id), lastTabId)
+      await expect(page.locator(sel.activeTab)).toHaveAttribute('data-tab-id', lastTabId)
+      await page.locator('.tabsContainer').evaluate(container => container.scrollTo(0, 0))
+      ;({ page } = await app.relaunch())
+      await expect(page.locator(sel.activeTab)).toHaveAttribute('data-tab-id', lastTabId)
+      await expectActiveTabInView(page)
+    })
+  })
+}
+
 test.describe('localized tab titles', () => {
   test.use({ seed: { settings: { currentLocale: 'de-DE' } } })
 
