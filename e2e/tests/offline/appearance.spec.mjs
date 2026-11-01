@@ -12,6 +12,7 @@ import {
   waitForAppReady,
   readDatastore,
 } from '../../helpers/app.mjs'
+import { sampleColors } from '../../helpers/colors.mjs'
 
 async function readSavedThemes (userDataDir) {
   const themeDirectory = path.join(userDataDir, 'themes')
@@ -1622,20 +1623,12 @@ test.describe('narrow layout top padding', () => {
 })
 
 // Sample the empty padding beside the settings content, away from text and controls.
-async function settingsBackgroundVariation(page) {
-  const screenshot = await page.locator('.settingsContent').screenshot({ animations: 'disabled' })
-  return page.evaluate(async base64 => {
-    const bytes = Uint8Array.from(atob(base64), character => character.charCodeAt(0))
-    const bitmap = await createImageBitmap(new Blob([bytes], { type: 'image/png' }))
-    const canvas = new OffscreenCanvas(bitmap.width, bitmap.height)
-    const context = canvas.getContext('2d')
-    context.drawImage(bitmap, 0, 0)
-    const samples = [0.1, 0.3, 0.5, 0.7, 0.9].map(fraction =>
-      [...context.getImageData(4, Math.floor(bitmap.height * fraction), 1, 1).data].slice(0, 3))
-    bitmap.close()
-    return Math.max(...[0, 1, 2].map(channel =>
-      Math.max(...samples.map(color => color[channel])) - Math.min(...samples.map(color => color[channel]))))
-  }, screenshot.toString('base64'))
+async function settingsBackgroundVariation(app) {
+  const content = app.page.locator('.settingsContent')
+  const samples = await sampleColors(app, content, () => content.evaluate(element =>
+    [0.1, 0.3, 0.5, 0.7, 0.9].map(fraction => [4, element.clientHeight * fraction])))
+  return Math.max(...[0, 1, 2].map(channel =>
+    Math.max(...samples.map(color => color[channel])) - Math.min(...samples.map(color => color[channel]))))
 }
 
 test.describe('Ocean themes', () => {
@@ -1668,10 +1661,10 @@ test.describe('Ocean themes', () => {
           .dispatch('updateUiScale', scale), scale)
         await expect.poll(() => app.electronApp.evaluate(({ BrowserWindow }) =>
           BrowserWindow.getAllWindows()[0].webContents.getZoomFactor())).toBe(scale / 100)
-        const variation = await settingsBackgroundVariation(page)
+        const variation = await settingsBackgroundVariation(app)
         expect(variation).toBeGreaterThanOrEqual(4)
         await page.locator('.settingsContent').evaluate(element => { element.scrollTop = element.scrollHeight })
-        expect(await settingsBackgroundVariation(page)).toBe(variation)
+        expect(await settingsBackgroundVariation(app)).toBe(variation)
         await page.locator('.settingsContent').evaluate(element => { element.scrollTop = 0 })
       }
       await page.evaluate(() => window.$store
@@ -1700,6 +1693,6 @@ test.describe('Ocean themes', () => {
     await expect(page.locator('body')).toHaveCSS('--primary-color', '#f44336')
     await expect(page.locator('.app')).toHaveCSS('background-image', 'none')
     await expect(page.locator('.settingsWindow')).toHaveCSS('background-image', 'none')
-    expect(await settingsBackgroundVariation(page)).toBe(0)
+    expect(await settingsBackgroundVariation(app)).toBe(0)
   })
 })
