@@ -105,14 +105,24 @@ const { t, locale } = useI18n()
 /** @type {import('vue').ComputedRef<import('../../../helpers/player/caption-settings').CaptionSettings>} */
 const captionSettings = computed(() => parseCaptionSettings(store.getters.getDefaultCaptionSettings))
 
+/** @typedef {{ setting: keyof typeof DEFAULT_CAPTION_SETTINGS, value: string | number | null }} CaptionPreview */
 /**
  * The option highlighted in an open list, shown on the sample before it is chosen.
- * @type {import('vue').ShallowRef<{ setting: keyof typeof DEFAULT_CAPTION_SETTINGS, value: string | number | null, saving?: boolean } | null>}
+ * @type {import('vue').ShallowRef<CaptionPreview | null>}
  */
 const preview = shallowRef(null)
-const previewedSettings = computed(() => preview.value === null
-  ? captionSettings.value
-  : { ...captionSettings.value, [preview.value.setting]: preview.value.value })
+/**
+ * The chosen option, shown until it is saved, as the list closes before that.
+ * @type {import('vue').ShallowRef<CaptionPreview | null>}
+ */
+const savingPreview = shallowRef(null)
+const previewedSettings = computed(() => {
+  const settings = { ...captionSettings.value }
+  for (const shown of [savingPreview.value, preview.value]) {
+    if (shown !== null) settings[shown.setting] = shown.value
+  }
+  return settings
+})
 const captionStyle = computed(() => getCaptionStyle(previewedSettings.value))
 const previewPosition = computed(() => {
   const [row, column] = previewedSettings.value.positionArea === 'DEFAULT'
@@ -259,16 +269,15 @@ const preferredCaptionSelectValue = computed(() => {
  * @param {string | number | null} value
  */
 async function updateCaptionSetting(setting, value) {
-  // The list closes before the setting is saved, so keep showing the chosen value until then.
-  const saving = { setting, value, saving: true }
-  preview.value = saving
+  const saving = { setting, value }
+  savingPreview.value = saving
   try {
     await store.dispatch('updateDefaultCaptionSettings', JSON.stringify({
       ...captionSettings.value,
       [setting]: value,
     }))
   } finally {
-    if (preview.value === saving) preview.value = null
+    if (savingPreview.value === saving) savingPreview.value = null
   }
 }
 
@@ -277,11 +286,7 @@ async function updateCaptionSetting(setting, value) {
  * @param {string | number | null | undefined} value `undefined` once the list closes
  */
 function previewCaptionSetting(setting, value) {
-  if (value !== undefined) {
-    preview.value = { setting, value }
-  } else if (!preview.value?.saving) {
-    preview.value = null
-  }
+  preview.value = value === undefined ? null : { setting, value }
 }
 
 /**

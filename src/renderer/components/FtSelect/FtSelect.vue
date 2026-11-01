@@ -489,7 +489,7 @@ watch(dropdownShown, (shown) => {
 
 // Lets the parent show the highlighted option before it is chosen, `null` once the list closes.
 // Opening highlights the current value, which needs no preview.
-watch([dropdownShown, activeIndex], ([shown, index], [wasShown]) => {
+watch([dropdownShown, activeIndex, () => props.selectValues[activeIndex.value]], ([shown, index], [wasShown]) => {
   if (shown && wasShown) emit('preview', props.selectValues[index] ?? null)
   else if (wasShown && !shown) emit('preview', null)
 })
