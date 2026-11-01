@@ -183,3 +183,25 @@ test('distraction free tabs stack their icons in narrow windows', { tag: '@scale
     expect(layout).toEqual({ iconAbove: true, fits: true })
   }
 })
+
+test('switching from the bottom of Distraction Free to a shorter tab leaves no empty space', { tag: '@scale' }, async ({ page }) => {
+  await page.evaluate(() => {
+    localStorage.setItem('opentubex-settings-window-bounds', JSON.stringify({ x: 20, y: 20, width: 900, height: 600 }))
+  })
+  await goToSettingsSection(page, 'focus')
+  const scroller = page.locator('.settingsContent')
+  const scrollbar = scroller.locator(':scope > .os-scrollbar-vertical')
+  await scroller.evaluate(element => { element.scrollTop = element.scrollHeight })
+  await expect.poll(() => scroller.evaluate(element => element.scrollTop)).toBeGreaterThan(0)
+  await expect(scrollbar).not.toHaveClass(/os-scrollbar-unusable/)
+
+  for (const tab of ['wellbeing', 'parental']) {
+    await page.locator(`.settingsWindow [data-settings-tab="${tab}"]`).click()
+    await expect.poll(() => scroller.evaluate(element => element.scrollTop)).toBe(0)
+    await expect.poll(() => scroller.evaluate(element => element.scrollHeight - element.clientHeight)).toBeLessThanOrEqual(1)
+    await expect(scrollbar).toHaveClass(/os-scrollbar-unusable/)
+    await page.locator('.settingsWindow [data-settings-tab="distraction"]').click()
+    await scroller.evaluate(element => { element.scrollTop = element.scrollHeight })
+    await expect.poll(() => scroller.evaluate(element => element.scrollTop)).toBeGreaterThan(0)
+  }
+})
