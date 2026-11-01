@@ -163,7 +163,7 @@
         </h3>
       </component>
 
-      <div class="playlistOptionsAndSearch">
+      <div class="playlistOptionsWrapper">
         <div class="playlistOptions">
           <template v-if="editMode">
             <FtButton
@@ -270,23 +270,6 @@
             </FtButton>
           </template>
         </div>
-        <div
-          v-if="searchVideoModeAllowed"
-          class="searchInputsRow"
-        >
-          <FtInput
-            ref="searchInput"
-            class="inputElement"
-            input-type="search"
-            :label="$t('User Playlists.SinglePlaylistView.Search for Videos')"
-            :icon="['fas', 'search']"
-            :placeholder="$t('Form Inputs.Search Text Hint')"
-            :show-action-button="false"
-            :value="query"
-            :maxlength="255"
-            @input="updateQueryDebounced"
-          />
-        </div>
       </div>
       <FtPrompt
         v-if="showDeletePlaylistPrompt"
@@ -341,6 +324,23 @@
         :title="title"
         :thumbnail="isUserPlaylist && thumbnailPreference !== 'hidden' ? defaultThumbnail : thumbnail"
         @close="showDownloadPrompt = false"
+      />
+    </div>
+    <div
+      v-if="searchVideoModeAllowed"
+      class="searchInputsRow"
+    >
+      <FtInput
+        ref="searchInput"
+        class="inputElement"
+        input-type="search"
+        :label="$t('User Playlists.SinglePlaylistView.Search for Videos')"
+        :icon="['fas', 'search']"
+        :placeholder="$t('Form Inputs.Search Text Hint')"
+        :show-action-button="false"
+        :value="query"
+        :maxlength="255"
+        @input="updateQueryDebounced"
       />
     </div>
   </div>

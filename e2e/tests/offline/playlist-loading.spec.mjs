@@ -514,3 +514,53 @@ test.describe('saved playlist thumbnails', () => {
     await expect.poll(() => thumbnail.evaluate(image => image.naturalWidth)).toBeGreaterThan(0)
   })
 })
+
+test.describe('YouTube playlist search', () => {
+  test.use({
+    seed: {
+      settings: {
+        backendPreference: 'invidious',
+        backendFallback: false,
+        enableSearchSuggestions: false,
+        defaultInvidiousInstance: 'https://invidious.test',
+        generalAutoLoadMorePaginatedItemsEnabled: false,
+        playlistViewType: 'list'
+      }
+    }
+  })
+
+  test('loads the remaining pages and filters every video', async ({ page, attachScreenshot }) => {
+    const requestedPages = []
+    await page.route(/\/api\/v1\/playlists\/search-test\?/, async (route) => {
+      const pageNumber = Number(new URL(route.request().url()).searchParams.get('page') ?? 1)
+      if (pageNumber > 1) requestedPages.push(pageNumber)
+      const videos = Array.from({ length: 100 }, (_, index) => playlistVideo((pageNumber - 1) * 100 + index))
+      await route.fulfill({ json: playlistResponse(videos, 300) })
+    })
+
+    await openPlaylistTab(page, '/playlist/search-test')
+    const playlistPage = page.locator('.playlistPage')
+    await expect(playlistPage.getByText('Playlist video 1', { exact: true })).toBeVisible()
+    expect(requestedPages).toEqual([])
+
+    const search = playlistPage.locator('.playlistInfo').getByRole('searchbox', { name: 'Search for Videos' })
+    await search.fill('video 25')
+    await expect(page).toHaveURL(/searchQueryText=video(%20|\+)25/)
+    // Replacing the route keeps the playlist's tab title
+    await expect(page.locator('.tab.active')).toHaveText('Pagination test playlist | Playlist channel')
+
+    const items = playlistPage.locator('.playlistItem')
+    await expect(items).toHaveCount(11)
+    await expect(playlistPage.getByText('Playlist video 250', { exact: true })).toBeVisible()
+    await expect(playlistPage.locator('.ft-auto-load-next-page-wrapper')).toHaveCount(0)
+    expect(requestedPages).toEqual([2, 3])
+    await attachScreenshot('youtube-playlist-search')
+
+    await search.fill('no such video')
+    await expect(playlistPage.getByText('There are no videos in this playlist that match your search', { exact: true })).toBeVisible()
+
+    await search.fill('')
+    await expect(playlistPage.getByText('Playlist video 1', { exact: true })).toBeVisible()
+    await expect(items).toHaveCount(300)
+  })
+})

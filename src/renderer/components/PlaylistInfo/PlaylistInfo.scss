@@ -82,16 +82,6 @@
   word-break: break-all;
 }
 
-.channelShareWrapper {
-  column-gap: 8px;
-  display: grid;
-  grid-template-columns: auto minmax(min-content, 1fr);
-}
-
-.channelShareWrapper > :only-child {
-  grid-column: 1 / -1;
-}
-
 .playlistOptions {
   display: flex;
   flex-wrap: wrap;
@@ -109,6 +99,19 @@
 }
 
 .base {
+  // The actions share the channel's line while they fit, otherwise they wrap
+  // below it and center across the full width like playlists without a channel
+  .channelShareWrapper {
+    align-items: center;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+
+  .playlistOptionsWrapper {
+    flex: auto;
+  }
+
   .inputElement {
     margin-inline: auto;
   }
@@ -169,7 +172,7 @@
     margin-block-start: 8px;
   }
 
-  .playlistOptionsAndSearch {
+  .playlistOptionsWrapper {
     display: flex;
     flex-direction: column;
     justify-content: space-between;
@@ -182,6 +185,7 @@
   }
 
   .channelShareWrapper {
+    display: grid;
     grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
     margin-block-start: 16px;
   }

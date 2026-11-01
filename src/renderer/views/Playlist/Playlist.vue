@@ -62,7 +62,7 @@
         :preload-available="playlistPreloadAvailable"
         :preload-pending="playlistPreloadPending"
         :preload-complete="playlistPreloadComplete"
-        :search-video-mode-allowed="isUserPlaylistRequested && shownVideoCount > 1"
+        :search-video-mode-allowed="shownVideoCount > 1"
         :search-query-text="searchQueryTextRequested"
         :theme="pageLayout === 'list' ? 'base' : 'top-bar'"
         class="playlistInfo"
@@ -101,7 +101,7 @@
         </button>
       </FtFlexBox>
       <template
-        v-if="(isUserPlaylistRequested ? shownPlaylistItems : visiblePlaylistItems).length > 0 || moreVideoDataAvailable"
+        v-if="availablePlaylistItems.length > 0 || moreVideoDataAvailable"
       >
         <FtSelect
           v-if="isUserPlaylistRequested && shownPlaylistItems.length > 1"
@@ -185,7 +185,7 @@
           </TransitionGroup>
         </AutoScrollWrapper>
         <FtFlexBox
-          v-else-if="playlistInVideoSearchMode"
+          v-else-if="playlistInVideoSearchMode && !moreVideoDataAvailable"
         >
           <p class="message">
             {{ t("User Playlists['Empty Search Message']") }}
@@ -209,7 +209,7 @@
           </div>
         </FtFlexBox>
         <FtAutoLoadNextPageWrapper
-          v-else-if="moreVideoDataAvailable && !isLoadingMore"
+          v-else-if="moreVideoDataAvailable && !isLoadingMore && !loadingPagesForSearch"
           @load-next-page="getNextPage"
         >
           <FtFlexBox>
@@ -223,7 +223,7 @@
           </FtFlexBox>
         </FtAutoLoadNextPageWrapper>
         <div
-          v-if="isLoadingMore"
+          v-if="isLoadingMore || loadingPagesForSearch"
           class="loadNextPageWrapper"
         >
           <FtLoader />
@@ -509,7 +509,7 @@ const selectedUserPlaylistVideoCount = computed(() => selectedUserPlaylistVideos
 
 const moreVideoDataAvailable = computed(() => {
   if (isUserPlaylistRequested.value) {
-    return userPlaylistVisibleLimit.value < sometimesFilteredUserPlaylistItems.value.length
+    return userPlaylistVisibleLimit.value < filteredPlaylistItems.value.length
   }
   if (infoSource.value === 'invidious') {
     return nextInvidiousPlaylistPage.value !== null
@@ -733,14 +733,19 @@ const quickBookmarkButtonEnabled = computed(() => {
   return selectedUserPlaylist.value?._id !== quickBookmarkPlaylistId.value
 })
 
-const sometimesFilteredUserPlaylistItems = computed(() => {
-  if (!isUserPlaylistRequested.value || processedVideoSearchQuery.value === '') {
-    return sortedPlaylistItems.value
-  }
+// User playlists keep their members-only videos, YouTube playlists follow the channel settings
+const availablePlaylistItems = computed(() => {
+  if (isUserPlaylistRequested.value) return sortedPlaylistItems.value
 
+  const membersOnlyChannelIds = store.getters.getMembersOnlyChannelIdSet
+  return sortedPlaylistItems.value.filter(video => !isVideoHiddenByPreferences(video, { membersOnlyChannelIds }))
+})
+
+const filteredPlaylistItems = computed(() => {
   const processedVideoSearchQuery_ = processedVideoSearchQuery.value
+  if (processedVideoSearchQuery_ === '') return availablePlaylistItems.value
 
-  return sortedPlaylistItems.value.filter((v) => {
+  return availablePlaylistItems.value.filter((v) => {
     return (typeof v.title === 'string' && v.title.toLowerCase().includes(processedVideoSearchQuery_)) ||
       (typeof v.author === 'string' && v.author.toLowerCase().includes(processedVideoSearchQuery_))
   })
@@ -760,17 +765,19 @@ const sortedPlaylistItems = computed(() => {
 })
 
 const visiblePlaylistItems = computed(() => {
-  if (!isUserPlaylistRequested.value) {
-    // User playlists keep their members-only videos, YouTube playlists follow the channel settings
-    const membersOnlyChannelIds = store.getters.getMembersOnlyChannelIdSet
-    return sortedPlaylistItems.value.filter(video => !isVideoHiddenByPreferences(video, { membersOnlyChannelIds }))
+  if (isUserPlaylistRequested.value && userPlaylistVisibleLimit.value < filteredPlaylistItems.value.length) {
+    return filteredPlaylistItems.value.slice(0, userPlaylistVisibleLimit.value)
   }
+  return filteredPlaylistItems.value
+})
 
-  if (userPlaylistVisibleLimit.value < sometimesFilteredUserPlaylistItems.value.length) {
-    return sometimesFilteredUserPlaylistItems.value.slice(0, userPlaylistVisibleLimit.value)
-  } else {
-    return sometimesFilteredUserPlaylistItems.value
-  }
+// The search only sees loaded videos, so YouTube playlists load their remaining pages while searching
+const loadingPagesForSearch = computed(() =>
+  playlistInVideoSearchMode.value && !isUserPlaylistRequested.value && moreVideoDataAvailable.value && nextPageError.value === ''
+)
+
+watch([loadingPagesForSearch, isLoadingMore, isLoading], () => {
+  if (loadingPagesForSearch.value && !isLoadingMore.value && !isLoading.value) getNextPage()
 })
 
 const sortOrderIcon = computed(() => getIconForSortPreference(sortOrder.value))
@@ -1093,7 +1100,7 @@ function parseUserPlaylist(playlist) {
 watch(playlistId, () => {
   resetState()
   // The search box and edit mode start fresh for the next playlist, so their state must too.
-  videoSearchQuery.value = isUserPlaylistRequested.value && searchQueryTextPresent.value ? searchQueryTextRequested.value : ''
+  videoSearchQuery.value = searchQueryTextPresent.value ? searchQueryTextRequested.value : ''
   playlistInEditMode.value = false
   getPlaylistInfoDebounce()
 })
@@ -1664,9 +1671,9 @@ function handleVideoSearchQueryChange(value) {
  * @param {string} query
  */
 async function saveStateInRouter(query) {
-  const routeQuery = {
-    playlistType: route.query.playlistType,
-  }
+  // Keep the other parameters, such as the linked thumbnail of YouTube playlists
+  const routeQuery = { ...route.query }
+  delete routeQuery.searchQueryText
 
   if (query !== '') {
     routeQuery.searchQueryText = query
@@ -1677,6 +1684,8 @@ async function saveStateInRouter(query) {
       path: `/playlist/${playlistId.value}`,
       query: routeQuery,
     })
+    // The tab title belongs to the replaced route
+    if (!isLoading.value) updatePageTitle()
   } catch (failure) {
     if (isNavigationFailure(failure, NavigationFailureType.duplicated)) {
       return
@@ -1686,7 +1695,7 @@ async function saveStateInRouter(query) {
   }
 }
 
-if (isUserPlaylistRequested.value && searchQueryTextPresent.value) {
+if (searchQueryTextPresent.value) {
   handleVideoSearchQueryChange(searchQueryTextRequested.value)
 }
 
@@ -1727,7 +1736,7 @@ function cachePlaylistForWatchTransition(to) {
         totalVideoCount: videoCount.value,
         channelName: channelName.value,
         channelId: channelId.value,
-        items: isUserPlaylistRequested.value ? sortedPlaylistItems.value : visiblePlaylistItems.value,
+        items: availablePlaylistItems.value,
         continuationData: continuationData.value
           ? extractLocalCacheablePlaylistContinuation(continuationData.value)
           : null,
