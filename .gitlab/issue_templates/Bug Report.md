@@ -147,8 +147,8 @@ Example:
 v0.37.0
 -->
 
-### Upload screenshots or videos
-<!-- If applicable, add screenshots or videos to help explain your problem. -->
+### Screenshots or videos
+<!-- If applicable, drag and drop or paste screenshots or videos here to help explain your problem. -->
 
 ### Diagnostic report
 <!--

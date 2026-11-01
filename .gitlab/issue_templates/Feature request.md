@@ -70,8 +70,8 @@ Example:
 Windows 11 version 24H2, macOS Sequoia 15.7, Ubuntu 24.04, Android 15, iOS 18.6, or iPadOS 18.6
 -->
 
-### Upload screenshots or videos
-<!-- If applicable, add screenshots or videos to help explain your request. -->
+### Screenshots or videos
+<!-- If applicable, drag and drop or paste screenshots or videos here to help explain your request. -->
 
 ### Additional Information
 <!-- Add any other context about the feature request here. -->
