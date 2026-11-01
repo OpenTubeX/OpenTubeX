@@ -195,7 +195,7 @@ Settings:
     Fallback to Non-Preferred Backend on Failure: 'غیر ترجیحی بیک اینڈ پر فال بیک ناکامی پر'
     Enable Search Suggestions: 'تلاش کی تجاویز کو فعال کریں'
     Default Landing Page: 'ڈیفالٹ لینڈنگ پیج'
-    Open Deep Links In New Window: فری ٹیوب کو دیے گئے یو آر ایل کو نئی ونڈو میں کھولیں
+    Open Deep Links In New Window: OpenTubeX کو دیے گئے یو آر ایل کو نئی ونڈو میں کھولیں
     Minimize to system tray: سسٹم ٹرے میں چھوٹا کریں
     Auto Load Next Page:
       Label: اگلا صفحہ خود بخود لوڈ کریں
@@ -238,7 +238,7 @@ Settings:
     Disable Smooth Scrolling: اسموتھ اسکرولنگ غیر فعال کریں
     UI Scale: انٹرفیس (UI) کا اسکیل
     Hide Side Bar Labels: سائیڈ بار کے لیبلز چھپائیں
-    Hide OpenTubeX Header Logo: فری ٹیوب ہیڈر لوگو چھپائیں
+    Hide OpenTubeX Header Logo: OpenTubeX ہیڈر لوگو چھپائیں
     Base Theme:
       Base Theme: بنیادی تھیم
       Black: کالا
@@ -433,7 +433,7 @@ Settings:
     Playlist File: پلے لسٹ فائل
     Search history file: سرچ ہسٹری فائل
     Export Subscriptions: سبسکرپشنز ایکسپورٹ کریں
-    Export OpenTubeX: فری ٹیوب ایکسپورٹ کریں
+    Export OpenTubeX: OpenTubeX ایکسپورٹ کریں
     Export YouTube: یوٹیوب ایکسپورٹ کریں
     Export NewPipe: نیو پائپ ایکسپورٹ کریں
     Import History: ہسٹری امپورٹ کریں
@@ -593,7 +593,7 @@ About:
   Downloads / Changelog: ڈاؤن لوڈز / تبدیلیوں کا ریکارڈ
   GitHub releases: گِٹ ہب ریلیز
   Help: مدد
-  OpenTubeX Wiki: فری ٹیوب وکی
+  OpenTubeX Wiki: OpenTubeX وکی
   FAQ: اکثر پوچھے گئے سوالات
   Discussions: بات چیت
   Report a problem: مسئلہ رپورٹ کریں
@@ -605,7 +605,7 @@ About:
   room rules: کمرے کے اصول
   Translate: ترجمہ کریں
   Credits: کریڈٹس
-  OpenTubeX is made possible by: 'فری ٹیوب ان لوگوں کی بدولت ممکن ہوا ہے'
+  OpenTubeX is made possible by: 'OpenTubeX ان لوگوں کی بدولت ممکن ہوا ہے'
   these people and projects: یہ لوگ اور پروجیکٹس
   Donate: عطیہ دیں
 Profile:
@@ -828,7 +828,7 @@ Tooltips:
     Preferred API Backend: 'اس بیک اینڈ کا انتخاب کریں جسے OpenTubeX ڈیٹا حاصل کرنے کے لیے استعمال کرتا ہے۔ دی لوکل API ایک بلٹ ان ایکسٹریکٹر ہے۔ ۔Invidious API کو ۔Invidious سرور کی ضرورت ہے۔ سے منسلک کرنے کے لئے.'
     Fallback to Non-Preferred Backend on Failure: 'جب آپ کے پسندیدہ API میں کوئی مسئلہ ہو، OpenTubeX خود بخود آپ کے غیر ترجیحی API کو فال بیک کے طور پر استعمال کرنے کی کوشش کرے گا۔ فعال ہونے پر طریقہ۔'
     Thumbnail Preference: 'OpenTubeX کے تمام تھمب نیلز کو اس سے بدل دیا جائے گا۔ پہلے سے طے شدہ تھمب نیل کے بجائے ویڈیو کا ایک فریم۔'
-    Invidious Instance: '۔Invidious Instance جس سے فری ٹیوب API کالز کے لیے جڑے گا۔'
+    Invidious Instance: '۔Invidious Instance جس سے OpenTubeX API کالز کے لیے جڑے گا۔'
     External Link Handling: |
       'جب کوئی لنک، جسے OpenTubeX میں نہیں کھولا جا سکتا، پر کلک کیا جاتا ہے تو پہلے سے طے شدہ طرز عمل کا انتخاب کریں۔
        بطور ڈیفالٹ OpenTubeX آپ کے ڈیفالٹ براؤزر میں کلک کردہ لنک کو کھول دے گا۔'
