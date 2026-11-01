@@ -50,3 +50,15 @@ test('preserves whole-second timestamps and string labels', () => {
     assert.equal(formatDurationAsTimestamp(duration), expected)
   }
 })
+
+test('shows days past 24 hours like the player', () => {
+  for (const [duration, expected] of [
+    [86399, '23:59:59'],
+    [86400, '1:00:00:00'],
+    [90061, '1:01:01:01'],
+    [86461, '1:00:01:01'],
+    [954061.5, '11:01:01:01'],
+  ]) {
+    assert.equal(formatDurationAsTimestamp(duration), expected)
+  }
+})
