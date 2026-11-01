@@ -71,10 +71,10 @@ const shortsStatus = computed(() => dailyLimitStatus(shortsSeconds.value, store.
 
 const bedtimeStart = computed(() => parseTimeOfDay(store.getters.getBedtimeStart))
 const bedtimeEnd = computed(() => parseTimeOfDay(store.getters.getBedtimeEnd))
-const bedtime = computed(() => store.getters.getBedtimeReminder &&
-  isWithinDailyWindow(minuteOfDay(new Date(now.value)), bedtimeStart.value, bedtimeEnd.value))
+// Bedtime grayscale, autoplay, and notifications follow the window; the reminder toggle only controls the prompt.
+const bedtime = computed(() => isWithinDailyWindow(minuteOfDay(new Date(now.value)), bedtimeStart.value, bedtimeEnd.value))
 const bedtimeNight = computed(() => bedtime.value ? bedtimeNightKey(new Date(now.value), bedtimeStart.value) : null)
-const bedtimeDue = computed(() => bedtime.value &&
+const bedtimeDue = computed(() => store.getters.getBedtimeReminder && bedtime.value &&
   wellbeing.value.bedtimeDismissedNight !== bedtimeNight.value &&
   now.value >= wellbeing.value.bedtimeSnoozedUntil)
 const bedtimeWaiting = computed(() => bedtimeDue.value && store.getters.getBedtimeWaitForVideoEnd && isPlaying.value)

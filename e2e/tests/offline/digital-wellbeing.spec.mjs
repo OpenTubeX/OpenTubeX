@@ -207,6 +207,40 @@ test.describe('watch statistics turned off', () => {
   })
 })
 
+test.describe('bedtime without the reminder', () => {
+  test.use({
+    seed: {
+      settings: {
+        ...playbackSettings,
+        grayscaleMode: 'bedtime',
+        stopAutoplayAtBedtimeAndLimit: true,
+        bedtimeReminder: false,
+        bedtimeStart: timeOfDay(-30),
+        bedtimeEnd: timeOfDay(60),
+      },
+    },
+  })
+
+  test('the bedtime window still turns the app gray', async ({ page }) => {
+    await expect(page.locator('html')).toHaveClass(/(^|\s)grayscale(\s|$)/)
+    await expect(page.getByRole('dialog', { name: 'It\'s time for bed' })).toHaveCount(0)
+  })
+
+  test('queued videos do not autoplay at bedtime', async ({ app, page }) => {
+    await mockPlayableWatchPage(app, page)
+    const video = await openMockedVideo(page)
+    await video.evaluate(element => element.pause())
+    await page.evaluate(() => {
+      window.$store.commit('addVideoToWatchQueue', { video: { videoId: '7JV7yHNQjm4', title: 'Queued video', lengthSeconds: 60 } })
+    })
+
+    const watch = await watchViewHandle(page)
+    await watch.evaluate(vm => vm.handleVideoEnded())
+    expect(await page.evaluate(() => window.$store.getters.getNextQueuedVideo?.videoId)).toBe('7JV7yHNQjm4')
+    expect(page.url()).toContain('jNQXAC9IVRw')
+  })
+})
+
 test.describe('starting during bedtime', () => {
   test.use({ seed: { settings: { animationSpeed: 0, bedtimeReminder: true, bedtimeStart: timeOfDay(-30), bedtimeEnd: timeOfDay(60) } } })
 

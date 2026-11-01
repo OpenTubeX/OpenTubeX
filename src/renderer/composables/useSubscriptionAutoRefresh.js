@@ -216,7 +216,7 @@ export function useSubscriptionAutoRefresh({ dataReady, t }) {
       subscriptions: store.getters.getProfileList[0]?.subscriptions ?? [],
       hiddenFeedTypes: hiddenSubscriptionFeedTypes.value,
       showMembersOnly: hasConfiguredRestrictedPlaybackAuthentication(store.getters),
-      quietHours: store.getters.getBedtimeReminder && store.getters.getBedtimeSilenceNotifications
+      quietHours: store.getters.getBedtimeSilenceNotifications
         ? { start: parseTimeOfDay(store.getters.getBedtimeStart), end: parseTimeOfDay(store.getters.getBedtimeEnd) }
         : null,
       titles: {

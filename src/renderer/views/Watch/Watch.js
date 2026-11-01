@@ -5423,13 +5423,16 @@ export default defineComponent({
       if (this.customShortsPlayerActive && this.isStandaloneShort) {
         return
       }
+      if (this.$store.getters.getWellbeingStopsAutoplay) {
+        return
+      }
       if (this.playNextQueuedVideo()) {
         return
       }
       if (this.isStandaloneShort) {
         return
       }
-      if (!this.autoplayEnabled || this.$store.getters.getWellbeingStopsAutoplay) {
+      if (!this.autoplayEnabled) {
         return
       }
 

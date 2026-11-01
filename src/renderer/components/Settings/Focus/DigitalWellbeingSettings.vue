@@ -108,7 +108,6 @@
           v-if="supportsUploadNotifications"
           :label="t('Settings.Distraction Free Settings.Digital Wellbeing.Silence Upload Notifications at Bedtime')"
           :compact="true"
-          :disabled="!bedtimeReminder"
           :default-value="store.getters.getBedtimeSilenceNotifications"
           setting-key="bedtimeSilenceNotifications"
           @change="store.dispatch('updateBedtimeSilenceNotifications', $event)"
@@ -130,7 +129,6 @@
         setting-key="bedtimeStart"
         :select-names="bedtimeTimeNames"
         :select-values="BEDTIME_TIMES"
-        :disabled="!bedtimeReminder"
         :icon="['fas', 'moon']"
         @change="store.dispatch('updateBedtimeStart', $event)"
       />
@@ -141,7 +139,6 @@
         setting-key="bedtimeEnd"
         :select-names="bedtimeTimeNames"
         :select-values="BEDTIME_TIMES"
-        :disabled="!bedtimeReminder"
         :icon="['fas', 'moon']"
         @change="store.dispatch('updateBedtimeEnd', $event)"
       />
