@@ -39,7 +39,21 @@
           :key="control.setting"
           class="captionControl"
         >
+          <FtSlider
+            v-if="control.slider"
+            :label="control.label"
+            :default-value="Math.round(control.slider.value * 100)"
+            setting-key="defaultCaptionSettings"
+            :is-changed="isCaptionSettingChanged(control.setting)"
+            :min-value="control.slider.min * 100"
+            :max-value="control.slider.max * 100"
+            :step="control.slider.step * 100"
+            value-extension="%"
+            @change="updateCaptionSetting(control.setting, $event / 100)"
+            @reset="resetCaptionSetting(control.setting)"
+          />
           <FtSelect
+            v-else
             :placeholder="control.label"
             :value="String(captionSettings[control.setting] ?? '')"
             setting-key="defaultCaptionSettings"
@@ -71,19 +85,23 @@ import { useI18n } from 'vue-i18n'
 import FtButton from '../../FtButton/FtButton.vue'
 import FtSelect from '../../FtSelect/FtSelect.vue'
 import FtSettingsSection from '../../FtSettingsSection/FtSettingsSection.vue'
+import FtSlider from '../../FtSlider/FtSlider.vue'
 import FtToggleSwitch from '../../FtToggleSwitch/FtToggleSwitch.vue'
 
 import {
   areCaptionSettingsDefault,
-  CAPTION_BACKGROUND_OPACITIES,
+  CAPTION_BACKGROUND_OPACITY_STEP,
   CAPTION_COLORS,
   CAPTION_EDGE_STYLES,
   CAPTION_FONT_FAMILIES,
   CAPTION_FONT_OPACITIES,
-  CAPTION_FONT_SCALE_FACTORS,
+  CAPTION_FONT_SCALE_FACTOR_STEP,
   CAPTION_POSITION_AREAS,
   DEFAULT_CAPTION_SETTINGS,
   getCaptionStyle,
+  getDefaultBackgroundOpacity,
+  MAX_CAPTION_FONT_SCALE_FACTOR,
+  MIN_CAPTION_FONT_SCALE_FACTOR,
   parseCaptionSettings,
 } from '../../../helpers/player/caption-settings'
 import {
@@ -162,8 +180,12 @@ const styleControls = computed(() => [
   {
     setting: 'fontScaleFactor',
     label: t('Settings.Player Settings.Caption Appearance.Font Size'),
-    icon: 'text-size',
-    options: CAPTION_FONT_SCALE_FACTORS.map(value => ({ value, name: `${value * 100}%` })),
+    slider: {
+      value: captionSettings.value.fontScaleFactor,
+      min: MIN_CAPTION_FONT_SCALE_FACTOR,
+      max: MAX_CAPTION_FONT_SCALE_FACTOR,
+      step: CAPTION_FONT_SCALE_FACTOR_STEP,
+    },
   },
   {
     setting: 'backgroundColor',
@@ -174,8 +196,13 @@ const styleControls = computed(() => [
   {
     setting: 'backgroundOpacity',
     label: t('Settings.Player Settings.Caption Appearance.Background Opacity'),
-    icon: 'opacity',
-    options: getOpacityOptions(CAPTION_BACKGROUND_OPACITIES, captionSettings.value.backgroundOpacity),
+    // Shows the opacity of the default background until it gets one of its own
+    slider: {
+      value: captionSettings.value.backgroundOpacity ?? getDefaultBackgroundOpacity(captionSettings.value.backgroundColor),
+      min: 0,
+      max: 1,
+      step: CAPTION_BACKGROUND_OPACITY_STEP,
+    },
   },
   {
     setting: 'characterEdgeStyle',

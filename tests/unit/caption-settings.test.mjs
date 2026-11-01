@@ -113,8 +113,10 @@ test('reads the settings saved before Shaka\'s style options', () => {
   assert.equal(parseCaptionSettings({ backgroundColor: '#3f51b5', backgroundOpacity: 0.8 }).backgroundOpacity, 0.8)
   assert.equal(parseCaptionSettings({ backgroundColor: '#000000', backgroundOpacity: 0.8 }).backgroundOpacity, null)
 
-  // A font size between Shaka's sizes snaps to the closest one
-  assert.equal(parseCaptionSettings({ fontScale: 1.3 }).fontScaleFactor, 1.25)
+  // Font sizes between the presets are kept, snapped to the 5% steps of the slider
+  assert.equal(parseCaptionSettings({ fontScale: 1.3 }).fontScaleFactor, 1.3)
+  assert.equal(parseCaptionSettings({ fontScaleFactor: 1.35 }).fontScaleFactor, 1.35)
+  assert.equal(parseCaptionSettings({ fontScaleFactor: 1.33 }).fontScaleFactor, 1.35)
   assert.equal(parseCaptionSettings({ fontScale: 10 }).fontScaleFactor, 4)
   assert.equal(parseCaptionSettings({ fontScale: 0 }).fontScaleFactor, 0.5)
 })

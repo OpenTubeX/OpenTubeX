@@ -117,6 +117,94 @@ test('saves a caption style picked from the Options of the captions menu', async
   await expect(player.locator('.shaka-caption-size-button')).toBeVisible()
 })
 
+test('picks caption font sizes between the presets with the slider of the captions menu', async ({ app, page }) => {
+  await mockPlayableWatchPage(app, page, { captionText: 'Sized caption' })
+  const video = await openMockedVideo(page)
+  await video.evaluate(element => element.pause())
+  const getFontScaleFactor = () => page.evaluate(() => JSON.parse(window.$store.getters.getDefaultCaptionSettings).fontScaleFactor)
+
+  const player = page.locator('.ftVideoPlayer')
+  await player.hover()
+  // Keep the controls shown, they can fade out before the clicks on slow machines
+  await player.locator('.shaka-controls-container').evaluate(element => element.setAttribute('casting', 'true'))
+  await player.getByRole('button', { name: 'More settings' }).click()
+  await openCaptionStyleMenu(player, '.shaka-caption-size-button')
+
+  const menu = player.locator('.ft-caption-font-sizes')
+  const value = menu.locator('.shaka-playback-rate-value')
+  await expect(value).toHaveText('100%')
+  await expect(menu.getByRole('menuitemradio', { name: '100%', exact: true })).toHaveAttribute('aria-checked', 'true')
+
+  // The step buttons keep the menu open
+  const increase = menu.getByRole('button', { name: '+', exact: true })
+  for (let step = 0; step < 6; step++) {
+    await increase.click()
+  }
+  await expect.poll(getFontScaleFactor).toBe(1.3)
+  await expect(value).toHaveText('130%')
+  await expect(menu.locator('.shaka-playback-rate-preset-btn[aria-checked="true"]')).toHaveCount(0)
+  await expect(player.locator('.shaka-caption-size-button .shaka-current-selection-span')).toHaveText('130%')
+
+  const slider = menu.getByRole('slider', { name: 'Font size' })
+  await slider.focus()
+  await slider.press('ArrowRight')
+  await expect.poll(getFontScaleFactor).toBe(1.35)
+  await expect(value).toHaveText('135%')
+
+  // Clicking the start of the slider applies the smallest size once the mouse is released
+  const { height } = await slider.boundingBox()
+  await slider.click({ position: { x: 1, y: height / 2 } })
+  await expect.poll(getFontScaleFactor).toBe(0.5)
+  await expect(value).toHaveText('50%')
+  await expect(menu.getByRole('button', { name: '−', exact: true })).toBeDisabled()
+
+  // Settings from elsewhere, such as another device, move the slider along
+  await page.evaluate(() => window.$store.dispatch('updateDefaultCaptionSettings', JSON.stringify({ fontScaleFactor: 4 })))
+  await expect(value).toHaveText('400%')
+  await expect(slider).toHaveValue('4')
+  await expect(increase).toBeDisabled()
+})
+
+test('picks caption background opacities with the slider of the captions menu', async ({ app, page }) => {
+  await mockPlayableWatchPage(app, page, { captionText: 'Faded caption' })
+  const video = await openMockedVideo(page)
+  await video.evaluate(element => element.pause())
+  const getBackgroundOpacity = () => page.evaluate(() => JSON.parse(window.$store.getters.getDefaultCaptionSettings).backgroundOpacity)
+
+  const player = page.locator('.ftVideoPlayer')
+  await player.hover()
+  // Keep the controls shown, they can fade out before the clicks on slow machines
+  await player.locator('.shaka-controls-container').evaluate(element => element.setAttribute('casting', 'true'))
+  await player.getByRole('button', { name: 'More settings' }).click()
+  await openCaptionStyleMenu(player, '.shaka-caption-background-opacity-button')
+
+  // The default black background shows its 80%
+  const menu = player.locator('.ft-caption-background-opacities')
+  const value = menu.locator('.shaka-playback-rate-value')
+  const slider = menu.getByRole('slider', { name: 'Background opacity' })
+  const defaultPreset = menu.getByRole('menuitemradio', { name: 'Default', exact: true })
+  await expect(value).toHaveText('Default')
+  await expect(slider).toHaveValue('0.8')
+  await expect(defaultPreset).toHaveAttribute('aria-checked', 'true')
+
+  await menu.getByRole('button', { name: '−', exact: true }).click()
+  await expect.poll(getBackgroundOpacity).toBe(0.75)
+  await expect(value).toHaveText('75%')
+  await expect(defaultPreset).toHaveAttribute('aria-checked', 'false')
+
+  await slider.focus()
+  await slider.press('ArrowLeft')
+  await expect.poll(getBackgroundOpacity).toBe(0.7)
+  await expect(value).toHaveText('70%')
+  await expect(player.locator('.shaka-caption-background-opacity-button .shaka-current-selection-span')).toHaveText('70%')
+
+  // Choosing a preset returns to the caption style
+  await defaultPreset.click()
+  await expect.poll(getBackgroundOpacity).toBeNull()
+  await expect(player.locator('.ft-caption-style-menu')).toBeVisible()
+  await expect(player.locator('.shaka-caption-background-opacity-button .shaka-current-selection-span')).toHaveText('Default')
+})
+
 test('applies UI roundness to the caption settings preview background', async ({ page, attachScreenshot }) => {
   await goTo(page, 'settings')
   await page.locator('.settingsMenu [data-section="playback"]').click()

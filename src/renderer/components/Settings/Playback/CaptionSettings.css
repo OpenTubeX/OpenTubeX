@@ -68,6 +68,12 @@
   backdrop-filter: var(--card-bg-blur, none);
 }
 
+.captionControl :deep(.pure-material-slider) {
+  inline-size: 100%;
+  margin: 0;
+  padding: 0;
+}
+
 .captionControl :deep(.select) {
   inline-size: 100%;
   margin-block: 0;
