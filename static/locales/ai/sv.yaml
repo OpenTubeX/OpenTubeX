@@ -468,6 +468,7 @@ Settings:
     Invalid Engine: Ange ett namn och en giltig HTTP- eller HTTPS-söknings-URL som innehåller %s.
     Engine Limit: Du kan lägga till högst {count} egna sökmotorer.
   Theme Settings:
+    Visible Search Suggestions: "Synliga sökförslag"
     Material Accent Color: "Material-accentfärg"
     Material Wallpaper Colors: "Bakgrundsbildens färger"
     Tab Loading Indicator:
@@ -2088,6 +2089,7 @@ Tooltips:
     Refresh Subscriptions While App Is Closed: "Uppdaterar flöden med dina valda inställningar. På datorn stannar OpenTubeX i systemfältet tills du avslutar. Android bestämmer när bakgrundsuppdateringar körs."
     Notify About New Uploads: Visar systemaviseringar på den här enheten för kanaler vars aviseringar du har aktiverat i deras prenumerationsinställningar. OpenTubeX söker efter nytt innehåll när prenumerationer uppdateras, så välj ett intervall för automatisk uppdatering. Om du vill få aviseringar medan appen är stängd aktiverar du även uppdatering medan appen är stängd.
   Theme Settings:
+    Visible Search Suggestions: "Anger hur många poster från sökhistoriken och förslag sökfältet visar innan listan behöver rullas. Listan sträcker sig aldrig förbi fönstrets nederkant."
     Thumbnail Size: "Skalar videominiatyrer i rutnät och listor. Rutnät med ett fast antal kolumner eller vytypen Full bredd fyller i stället varje rad, så där ändrar reglaget bara listminiatyrer och Shorts. I fönster i telefonstorlek är rutnätsminiatyrer begränsade till 100 %."
     Playlist Thumbnail Size: "Skalar videominiatyrer på spellistesidor. Rutnät med ett fast antal kolumner eller vytypen Full bredd fyller i stället varje rad, så där ändrar reglaget bara listminiatyrer och Shorts. I fönster i telefonstorlek är rutnätsminiatyrer begränsade till 100 %."
     Compact Settings Categories: "Döljer beskrivningar och minskar höjden på inställningskategorier."

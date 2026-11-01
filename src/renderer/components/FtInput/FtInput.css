@@ -514,6 +514,8 @@
 }
 
 .search .list {
+  --search-option-row-size: 2rem;
+
   max-block-size: min(50vh, 20rem);
   overflow-y: scroll;
 }
@@ -582,8 +584,12 @@
 }
 
 @media (any-pointer: coarse), (width <= 680px) {
+  .search .list {
+    --search-option-row-size: 48px;
+  }
+
   .search .list li {
-    min-block-size: 48px;
+    min-block-size: var(--search-option-row-size);
   }
 
   .search .acceptSuggestionButton,

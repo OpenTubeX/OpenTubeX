@@ -465,6 +465,7 @@ Settings:
     Invalid Engine: Saisissez un nom et une URL de recherche HTTP ou HTTPS valide contenant %s.
     Engine Limit: Vous pouvez ajouter jusqu’à {count} moteurs de recherche personnalisés.
   Theme Settings:
+    Visible Search Suggestions: "Suggestions de recherche visibles"
     Material Accent Color: "Couleur d’accent Material"
     Material Wallpaper Colors: "Couleurs du fond d’écran"
     Tab Loading Indicator:
@@ -2064,6 +2065,7 @@ Tooltips:
     Refresh Subscriptions While App Is Closed: "Actualise les flux avec les paramètres choisis. Sur ordinateur, OpenTubeX reste dans la zone de notification jusqu’à ce que vous le quittiez. Android détermine quand les actualisations en arrière-plan s’exécutent."
     Notify About New Uploads: Affiche des notifications système sur cet appareil pour les chaînes dont vous avez activé les notifications dans leurs paramètres d’abonnement. OpenTubeX recherche du nouveau contenu lors de l’actualisation des abonnements ; choisissez donc un intervalle d’actualisation automatique. Pour être notifié lorsque l’application est fermée, activez aussi l’actualisation quand l’application est fermée.
   Theme Settings:
+    Visible Search Suggestions: "Définit le nombre d’entrées de l’historique de recherche et de suggestions affichées par la barre de recherche avant que sa liste ne défile. La liste ne dépasse jamais le bas de la fenêtre."
     Thumbnail Size: "Redimensionne les miniatures des vidéos dans les grilles et les listes. Les grilles avec un nombre de colonnes fixe ou le type d’affichage Pleine largeur remplissent plutôt chaque ligne ; le curseur n’y modifie donc que les miniatures des listes et les Shorts. Dans les fenêtres de la taille d’un téléphone, les miniatures de la grille sont limitées à 100 %."
     Playlist Thumbnail Size: "Redimensionne les miniatures des vidéos sur les pages de playlists. Les grilles avec un nombre de colonnes fixe ou le type d’affichage Pleine largeur remplissent plutôt chaque ligne ; le curseur n’y modifie donc que les miniatures des listes et les Shorts. Dans les fenêtres de la taille d’un téléphone, les miniatures de la grille sont limitées à 100 %."
     Compact Settings Categories: "Masque les descriptions et réduit la hauteur des catégories de paramètres."

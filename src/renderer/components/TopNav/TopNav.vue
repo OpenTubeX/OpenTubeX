@@ -111,6 +111,7 @@
             :action-button-label="t('Search Bar.Search')"
             :data-list="activeDataList"
             :data-list-properties="activeDataListProperties"
+            :style="{ '--visible-search-suggestions': visibleSearchSuggestions }"
             show-data-when-empty
             @input="getSearchSuggestionsDebounce"
             @focus="getSearchSuggestionsDebounce(currentSearchText)"
@@ -412,6 +413,7 @@ const useWatchSideNavOverlay = computed(() => {
 })
 /** @type {import('vue').ComputedRef<boolean>} */
 const enableSearchSuggestions = computed(() => store.getters.getEnableSearchSuggestions)
+const visibleSearchSuggestions = computed(() => store.getters.getVisibleSearchSuggestions)
 /** @type {import('vue').ComputedRef<string>} */
 const expandCollapseSideBarLabel = computed(() => {
   return store.getters.getIsSideNavOpen ? t('Compact side navigation') : t('Expand side navigation')

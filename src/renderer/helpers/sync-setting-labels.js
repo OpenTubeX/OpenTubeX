@@ -387,6 +387,7 @@ export const SYNC_SETTING_LABELS = {
   videoPlaybackRateMouseScroll: 'Settings.Player Settings.Scroll Playback Rate Over Video Player',
   videoSkipMouseScroll: 'Settings.Player Settings.Skip by Scrolling Over Video Player',
   videoVolumeMouseScroll: 'Settings.Player Settings.Scroll Volume Over Video Player',
+  visibleSearchSuggestions: 'Settings.Theme Settings.Visible Search Suggestions',
   voiceOverTranslationLanguage: 'Settings.Player Settings.Voice-over Translation.Language',
   voiceOverTranslationOriginalVolume: 'Settings.Player Settings.Voice-over Translation.Original Volume',
   voiceOverTranslationPrepareInBackground: 'Settings.Player Settings.Voice-over Translation.Prepare in Background',

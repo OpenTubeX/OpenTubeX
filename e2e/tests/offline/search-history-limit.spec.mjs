@@ -80,6 +80,32 @@ test('shows every saved search in a scrollable list', async ({ page }) => {
   })
 })
 
+test('shows the configured number of search rows within the window', { tag: '@scale' }, async ({ app, page }) => {
+  await setWindowSize(app, page, { width: 1100, height: 1000 })
+  await page.locator(sel.searchInput).click()
+
+  const list = page.locator('.topNav .searchContainer .options .list')
+  await expect(list.locator('li')).toHaveCount(entries.length)
+  const visibleRows = () => list.evaluate(element => {
+    const style = getComputedStyle(element)
+    const rowsHeight = element.clientHeight - parseFloat(style.paddingTop) - parseFloat(style.paddingBottom)
+    return rowsHeight / element.querySelector('li').getBoundingClientRect().height
+  })
+
+  await expect.poll(visibleRows).toBeCloseTo(10, 1)
+  await page.evaluate(() => window.$store.dispatch('updateVisibleSearchSuggestions', 20))
+  await expect.poll(visibleRows).toBeCloseTo(20, 1)
+
+  // More rows than fit end the list above the bottom of the window.
+  await page.evaluate(() => window.$store.dispatch('updateVisibleSearchSuggestions', 50))
+  await setWindowSize(app, page, { width: 1000, height: 600 })
+  await expect.poll(() => list.evaluate(element => {
+    return window.innerHeight - element.getBoundingClientRect().bottom
+  })).toBeGreaterThan(0)
+  await expect.poll(() => list.evaluate(element => element.scrollHeight > element.clientHeight)).toBe(true)
+  expect(await visibleRows()).toBeGreaterThan(10)
+})
+
 test('removing a saved search resets the scrolled list to its rendered start', async ({ page }) => {
   await page.locator(sel.searchInput).click()
 
