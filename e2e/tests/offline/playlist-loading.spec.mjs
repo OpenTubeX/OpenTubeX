@@ -1,4 +1,4 @@
-import { test, expect, goTo, sel } from '../../helpers/app.mjs'
+import { test, expect, goTo, sel, updateInputWithoutScrolling } from '../../helpers/app.mjs'
 import { fulfillVisualFixture } from '../../helpers/visual-fixtures.mjs'
 
 test.use({
@@ -563,6 +563,35 @@ test.describe('YouTube playlist search', () => {
     await search.fill('')
     await expect(playlistPage.getByText('Playlist video 1', { exact: true })).toBeVisible()
     await expect(items).toHaveCount(300)
+  })
+
+  test('keeps a valid offset when searching from the end of the loaded page', { tag: '@scale' }, async ({ page }) => {
+    await page.route(/\/api\/v1\/playlists\/search-test\?/, async (route) => {
+      const pageNumber = Number(new URL(route.request().url()).searchParams.get('page') ?? 1)
+      const videos = Array.from({ length: 100 }, (_, index) => playlistVideo((pageNumber - 1) * 100 + index))
+      await route.fulfill({ json: playlistResponse(videos, 300) })
+    })
+
+    await openPlaylistTab(page, '/playlist/search-test')
+    const playlistPage = page.locator('.playlistPage')
+    const items = playlistPage.locator('.playlistItem')
+    await expect(items).toHaveCount(100)
+    await expect.poll(() => page.evaluate(() => {
+      window.scrollTo(0, document.documentElement.scrollHeight)
+      return window.scrollY > 0 && window.scrollY + window.innerHeight >= document.documentElement.scrollHeight - 1
+    })).toBe(true)
+
+    // Typing through fill() would scroll the field into view and leave the end
+    await updateInputWithoutScrolling(playlistPage.locator('.playlistInfo').getByRole('searchbox', { name: 'Search for Videos' }), 'video 25')
+    await expect(items).toHaveCount(11)
+    await expect.poll(() => page.evaluate(() => {
+      const last = [...document.querySelectorAll('.playlistPage .playlistItem')].at(-1)
+      const maximum = document.documentElement.scrollHeight - window.innerHeight
+      return {
+        offsetValid: window.scrollY <= Math.max(0, maximum) + 1,
+        noEmptySpace: window.scrollY === 0 || last.getBoundingClientRect().bottom >= window.innerHeight - last.offsetHeight,
+      }
+    })).toEqual({ offsetValid: true, noEmptySpace: true })
   })
 
   test('keeps a restored search editable on a playlist with one video', async ({ page }) => {
