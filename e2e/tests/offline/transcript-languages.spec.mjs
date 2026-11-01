@@ -1,6 +1,6 @@
 import { test, expect, expectScrollAtRenderedEnd, setWindowSize } from '../../helpers/app.mjs'
 import { openMockedVideo } from '../../helpers/player.mjs'
-import { mockPlayableWatchPage, watchViewHandle } from '../../helpers/watch.mjs'
+import { clickVideoAction, mockPlayableWatchPage, watchViewHandle } from '../../helpers/watch.mjs'
 
 test.use({ seed: { settings: { videoPlaybackEngine: 'built-in', ytDlpPlaybackEngineDefaultMigration: true } } })
 
@@ -41,7 +41,7 @@ test('transcript languages stay compact and scroll', { tag: '@scale' }, async ({
     await setWindowSize(app, page, size)
     // Responsive layout can remount the transcript into the phone panel.
     if (!await menu.count()) {
-      await page.getByRole('button', { name: 'Show transcript', exact: true }).click()
+      await clickVideoAction(page, 'Show transcript')
       await languageButton.click()
     }
     await expect.poll(() => menu.evaluate(element =>

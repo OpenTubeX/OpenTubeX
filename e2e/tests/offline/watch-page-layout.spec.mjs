@@ -741,6 +741,81 @@ for (const { defaultViewingMode, currentTheatreMode } of [
   })
 }
 
+test('watch toolbar settles at every card width when actions move to its More menu', { tag: '@scale' }, async ({ app, page }) => {
+  test.setTimeout(240000)
+  await page.evaluate(async () => {
+    await window.$store.dispatch('updateUseSponsorBlock', true)
+    await window.$store.dispatch('updateEnableDownloads', false)
+  })
+  await mockPlayableWatchPage(app, page, { captionTranslations: true })
+  await openMockedVideo(page)
+  await setWindowSize(app, page, { width: 1100, height: 850 })
+  // Sweep across the widths where the toolbar starts moving actions to its
+  // More menu. Each width has to settle instead of moving them back and forth.
+  const unsettledWidths = await page.locator(`${activeTab} .watchVideoInfo`).evaluate(async card => {
+    const toolbar = card.querySelector('.videoOptions')
+    const frames = count => new Promise(resolve => {
+      const step = () => (--count <= 0 ? resolve() : requestAnimationFrame(step))
+      requestAnimationFrame(step)
+    })
+    const unsettled = []
+    let overflowed = false
+    for (let width = 240; width <= 400; width++) {
+      card.style.inlineSize = `${width}px`
+      await frames(4)
+      let changes = 0
+      const observer = new MutationObserver(records => { changes += records.length })
+      observer.observe(toolbar, { childList: true, subtree: true, attributes: true, attributeFilter: ['class'] })
+      await frames(8)
+      observer.disconnect()
+      if (changes > 0) unsettled.push(width)
+      overflowed ||= toolbar.querySelector('.moreActions') !== null
+    }
+    return { unsettled, overflowed }
+  })
+  expect(unsettledWidths).toEqual({ unsettled: [], overflowed: true })
+})
+
+test('watch toolbar takes actions back from its More menu when another one goes away', { tag: '@scale' }, async ({ app, page }) => {
+  test.setTimeout(240000)
+  await page.evaluate(async () => {
+    await window.$store.dispatch('updateUseSponsorBlock', true)
+    await window.$store.dispatch('updateEnableDownloads', false)
+  })
+  await mockPlayableWatchPage(app, page)
+  await openMockedVideo(page)
+  await setWindowSize(app, page, { width: 1100, height: 850 })
+  // Hiding an action that sits in the More menu changes no rendered toolbar
+  // rows, yet the freed space may fit the actions left in the menu. Each width
+  // must already match what a fresh measurement gives.
+  const result = await page.locator(`${activeTab} .watchVideoInfo`).evaluate(async card => {
+    const toolbar = card.querySelector('.videoOptions')
+    const frames = count => new Promise(resolve => {
+      const step = () => (--count <= 0 ? resolve() : requestAnimationFrame(step))
+      requestAnimationFrame(step)
+    })
+    const layout = () => [...toolbar.querySelectorAll('button')].map(button => button.title || button.textContent.trim()).join('|')
+    const stale = []
+    let overflowed = false
+    for (let width = 240; width <= 400; width += 2) {
+      card.style.inlineSize = `${width}px`
+      await window.$store.dispatch('updateUseSponsorBlock', true)
+      await frames(4)
+      overflowed ||= toolbar.querySelector('.moreActions') !== null
+      await window.$store.dispatch('updateUseSponsorBlock', false)
+      await frames(4)
+      const afterHiding = layout()
+      card.style.inlineSize = `${width - 1}px`
+      await frames(4)
+      card.style.inlineSize = `${width}px`
+      await frames(4)
+      if (layout() !== afterHiding) stale.push(width)
+    }
+    return { stale, overflowed }
+  })
+  expect(result).toEqual({ stale: [], overflowed: true })
+})
+
 test('watch toolbar icons use the theme foreground', async ({ app, page, attachScreenshot }) => {
   await mockPlayableWatchPage(app, page)
   await openMockedVideo(page)

@@ -214,7 +214,7 @@
             <FtAddToPlaylistDropdown :video-data="addToPlaylistVideoData" />
           </FtIconButton>
           <FtIconButton
-            v-if="isQuickBookmarkEnabled && !hidePlaylistActions"
+            v-if="inToolbar('quickBookmark')"
             :title="quickBookmarkIconText"
             :icon="quickBookmarkIcon"
             class="quickBookmarkVideoIcon"
@@ -225,8 +225,8 @@
             @click="toggleQuickBookmarked"
           />
           <FtIconButton
-            v-if="canSaveWatchedProgress && watchedProgressSavingInSemiAutoMode"
-            :title="t('Video.Save Watched Progress')"
+            v-if="inToolbar('saveProgress')"
+            :title="toolbarActions.saveProgress.label"
             :icon="['fas', 'bars-progress']"
             theme="base-no-default"
             @click="saveWatchedProgressManually"
@@ -271,7 +271,7 @@
             </div>
           </FtIconButton>
           <FtIconButton
-            v-if="useSponsorBlock && !isUpcoming && !hideFullscreenDockActions"
+            v-if="inToolbar('sponsorBlock')"
             :title="sponsorBlockInfoTitle"
             :icon="['fas', 'shield-halved']"
             :class="{ toolbarActive: sponsorBlockPanelOpen }"
@@ -279,7 +279,7 @@
             @click="emit('toggle-sponsorblock-info')"
           />
           <FtIconButton
-            v-if="liveChatAvailable && !hideFullscreenDockActions"
+            v-if="inToolbar('liveChat')"
             :title="liveChatToggleTitle"
             :icon="['fas', 'message']"
             :class="{ toolbarActive: liveChatOpen }"
@@ -288,16 +288,16 @@
             @click="emit('toggle-live-chat')"
           />
           <FtIconButton
-            v-if="transcriptAvailable && !isLive && !isUpcoming && !hideFullscreenDockActions"
-            :title="transcriptOpen ? t('Video.Transcript.Hide') : t('Video.Transcript.Show')"
+            v-if="inToolbar('transcript')"
+            :title="toolbarActions.transcript.label"
             :icon="['fas', 'file-lines']"
             :class="{ toolbarActive: transcriptOpen }"
             theme="base-no-default"
             @click="emit('toggle-transcript')"
           />
           <FtIconButton
-            v-if="metadataHistory"
-            :title="t('Settings.Privacy Settings.Cache Video Metadata')"
+            v-if="inToolbar('metadataHistory')"
+            :title="toolbarActions.metadataHistory.label"
             :icon="['fas', 'clock-rotate-left']"
             theme="base-no-default"
             @click="showMetadataHistory = true"
@@ -305,15 +305,15 @@
         </span>
         <span class="videoOptionsMobileRow">
           <FtIconButton
-            v-if="!offline && USING_ELECTRON && externalPlayer !== ''"
-            :title="t('Video.External Player.OpenInTemplate', { externalPlayer })"
+            v-if="inToolbar('externalPlayer')"
+            :title="toolbarActions.externalPlayer.label"
             :icon="['fas', 'external-link-alt']"
             theme="base-no-default"
             @click="handleExternalPlayer"
           />
           <FtIconButton
-            v-if="!isUpcoming && (!offline || localPlaybackDownloads.length > 0)"
-            :title="t('Change Format.Change Media Formats')"
+            v-if="inToolbar('formats')"
+            :title="toolbarActions.formats.label"
             :icon="['fas', 'file-video']"
             theme="base-no-default"
             @click="openFormatPrompt"
@@ -340,6 +340,23 @@
               <span class="downloadLabel">{{ t('Downloads.Download') }}</span>
             </template>
           </FtButton>
+          <FtIconButton
+            v-if="overflowMenuOptions.length > 0"
+            class="moreActions"
+            :title="t('Video.More Options')"
+            :icon="['fas', 'ellipsis-h']"
+            theme="base-no-default"
+            dropdown-position-x="left"
+            :dropdown-portal="channelSettingDropdownPortal"
+            force-dropdown
+            mobile-sheet
+          >
+            <WatchVideoMoreActions
+              :title="t('Video.More Options')"
+              :actions="overflowMenuOptions"
+              @select="key => toolbarActions[key].run()"
+            />
+          </FtIconButton>
         </span>
       </div>
     </div>
@@ -376,7 +393,7 @@ import FtRetryImage from '../FtRetryImage.vue'
 import { ytDlp } from '../../helpers/ytDlp'
 import { supportsYtDlp } from '../../helpers/ytDlpCapabilities'
 import { FtIcon } from '@opentubex/icons'
-import { computed, onBeforeUnmount, onMounted, onUpdated, ref, useTemplateRef, watch } from 'vue'
+import { computed, onBeforeUnmount, onMounted, ref, useTemplateRef, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 
 import FtAddToPlaylistDropdown from '../FtAddToPlaylistDropdown/FtAddToPlaylistDropdown.vue'
@@ -390,6 +407,7 @@ import FtSubscribeButton from '../FtSubscribeButton/FtSubscribeButton.vue'
 import FtVerifiedBadge from '../FtVerifiedBadge/FtVerifiedBadge.vue'
 import WatchVideoFormatPrompt from '../WatchVideoFormatPrompt/WatchVideoFormatPrompt.vue'
 import WatchVideoMetadataHistory from '../WatchVideoMetadataHistory/WatchVideoMetadataHistory.vue'
+import WatchVideoMoreActions from '../WatchVideoMoreActions/WatchVideoMoreActions.vue'
 import WatchVideoLikes from '../WatchVideoLikes/WatchVideoLikes.vue'
 
 import store from '../../store'
@@ -666,27 +684,114 @@ const showMetadataHistory = ref(false)
 
 const videoButtons = useTemplateRef('videoButtons')
 const videoOptions = useTemplateRef('videoOptions')
-/** @type {import('vue').Ref<'full' | 'compact' | 'stacked'>} */
+/** @type {import('vue').Ref<'full' | 'even'>} */
 const optionsLayout = ref('full')
-let labeledDownloadWidth = 0
-let compactDownloadWidth = 0
+const overflowCount = ref(0)
 let optionsLayoutFrame = null
+// Moving the actions of a group to the More menu can remove the divider, so
+// the overflow keeps budgeting for it. Otherwise the freed space would bring
+// an action back, which brings the divider back too.
+let dividerWidth = 0
+
+// Smallest touch target of a button in the even layout
+const MIN_EVEN_BUTTON_SIZE = 44
 
 /**
- * Width of an action group on one line, including its divider. Stacked
- * toolbars let groups wrap, so their rendered width no longer reflects this.
+ * Actions without menus of their own, in toolbar order. They move to the More
+ * menu when the even layout cannot fit every button.
+ */
+const toolbarActions = computed(() => ({
+  quickBookmark: {
+    visible: isQuickBookmarkEnabled.value && !props.hidePlaylistActions,
+    label: quickBookmarkIconText.value,
+    icon: quickBookmarkIcon.value,
+    run: toggleQuickBookmarked
+  },
+  saveProgress: {
+    visible: props.canSaveWatchedProgress && watchedProgressSavingInSemiAutoMode.value,
+    label: t('Video.Save Watched Progress'),
+    icon: ['fas', 'bars-progress'],
+    run: saveWatchedProgressManually
+  },
+  sponsorBlock: {
+    visible: useSponsorBlock.value && !props.isUpcoming && !props.hideFullscreenDockActions,
+    label: sponsorBlockInfoTitle.value,
+    icon: ['fas', 'shield-halved'],
+    active: props.sponsorBlockPanelOpen,
+    run: () => emit('toggle-sponsorblock-info')
+  },
+  liveChat: {
+    visible: props.liveChatAvailable && !props.hideFullscreenDockActions,
+    label: liveChatToggleTitle.value,
+    icon: ['fas', 'message'],
+    active: props.liveChatOpen,
+    run: () => emit('toggle-live-chat')
+  },
+  transcript: {
+    visible: props.transcriptAvailable && !props.isLive && !props.isUpcoming && !props.hideFullscreenDockActions,
+    label: props.transcriptOpen ? t('Video.Transcript.Hide') : t('Video.Transcript.Show'),
+    icon: ['fas', 'file-lines'],
+    active: props.transcriptOpen,
+    run: () => emit('toggle-transcript')
+  },
+  metadataHistory: {
+    visible: !!props.metadataHistory,
+    label: t('Settings.Privacy Settings.Cache Video Metadata'),
+    icon: ['fas', 'clock-rotate-left'],
+    run: () => { showMetadataHistory.value = true }
+  },
+  externalPlayer: {
+    visible: !props.offline && USING_ELECTRON && externalPlayer.value !== '',
+    label: t('Video.External Player.OpenInTemplate', { externalPlayer: externalPlayer.value }),
+    icon: ['fas', 'external-link-alt'],
+    run: handleExternalPlayer
+  },
+  formats: {
+    visible: !props.isUpcoming && (!props.offline || props.localPlaybackDownloads.length > 0),
+    label: t('Change Format.Change Media Formats'),
+    icon: ['fas', 'file-video'],
+    run: openFormatPrompt
+  }
+}))
+
+// The order in which actions move to the More menu
+const OVERFLOW_ORDER = ['metadataHistory', 'saveProgress', 'externalPlayer', 'formats', 'sponsorBlock', 'transcript', 'liveChat', 'quickBookmark']
+
+const overflowedActions = computed(() => new Set(
+  OVERFLOW_ORDER.filter(key => toolbarActions.value[key].visible).slice(0, overflowCount.value)
+))
+
+/** @param {keyof typeof toolbarActions.value} key */
+function inToolbar(key) {
+  return toolbarActions.value[key].visible && !overflowedActions.value.has(key)
+}
+
+const overflowMenuOptions = computed(() => Object.entries(toolbarActions.value)
+  .filter(([key]) => overflowedActions.value.has(key))
+  .map(([key, action]) => ({ value: key, label: action.label, icon: action.icon, active: action.active })))
+
+/**
+ * Width of an action group on one line, including its divider.
  * @param {HTMLElement} group
  */
-function getUnwrappedGroupWidth(group) {
+function getGroupWidth(group) {
   const gap = parseFloat(getComputedStyle(group).columnGap) || 0
-  const items = [...group.children].filter(item => item.getClientRects().length > 0)
-  const divider = getComputedStyle(group, '::before')
-  const dividerWidth = divider.content === 'none'
-    ? 0
-    : parseFloat(divider.inlineSize) + getInlineMargins(divider) + gap
-
+  const items = getToolbarItems(group)
   return items.reduce((width, item) => width + item.getBoundingClientRect().width + getInlineMargins(getComputedStyle(item)), 0) +
-    gap * Math.max(items.length - 1, 0) + dividerWidth
+    gap * Math.max(items.length - 1, 0) + getDividerWidth(group)
+}
+
+/** @param {HTMLElement} group */
+function getDividerWidth(group) {
+  const divider = getComputedStyle(group, '::before')
+  return divider.content === 'none'
+    ? 0
+    : parseFloat(divider.inlineSize) + getInlineMargins(divider) + (parseFloat(getComputedStyle(group).columnGap) || 0)
+}
+
+/** @param {HTMLElement} group */
+function getToolbarItems(group) {
+  return [...group.children].filter(item => item.getClientRects().length > 0)
 }
 
 /**
@@ -697,38 +802,46 @@ function getInlineMargins(style) {
 }
 
 /**
- * Keeps the toolbar on one line, hiding the Download label first. When even
- * the icons do not fit, each group gets its own row. CSS cannot measure how
- * wide the toolbar would be in the other layouts.
+ * Keeps the labeled toolbar at its natural width when it fits on one line.
+ * Otherwise the buttons share the full width evenly, and when even that would
+ * make them smaller than a touch target, the actions without menus of their
+ * own move to the More menu. CSS cannot measure how wide the toolbar would be
+ * in the other layout, so the natural layout is measured within the same frame.
  */
 function updateOptionsLayout() {
   const row = videoButtons.value
   const toolbar = videoOptions.value
   if (!row || !toolbar || row.clientWidth === 0) { return }
 
-  const download = toolbar.querySelector('.downloadButton')
-  const downloadWidth = download?.getBoundingClientRect().width ?? 0
-  if (optionsLayout.value === 'compact') {
-    compactDownloadWidth = downloadWidth
-  } else {
-    labeledDownloadWidth = downloadWidth
-  }
-
+  toolbar.classList.add('measuring')
   const style = getComputedStyle(toolbar)
   const groups = [...toolbar.children].filter(group => group.getClientRects().length > 0)
-  const iconsWidth = groups.reduce((width, group) => width + getUnwrappedGroupWidth(group), 0) +
-    parseFloat(style.columnGap) * Math.max(groups.length - 1, 0) +
-    parseFloat(style.paddingInlineStart) + parseFloat(style.paddingInlineEnd) - downloadWidth
-  const availableWidth = row.clientWidth + 0.5
+  const items = groups.flatMap(getToolbarItems)
+  const toolbarPadding = parseFloat(style.paddingInlineStart) + parseFloat(style.paddingInlineEnd)
+  const gap = parseFloat(style.columnGap) || 0
+  const measuredDividersWidth = groups.reduce((width, group) => width + getDividerWidth(group), 0)
+  if (measuredDividersWidth > 0) dividerWidth = measuredDividersWidth
+  const dividersWidth = overflowCount.value > 0 ? dividerWidth : measuredDividersWidth
+  // The actions in the More menu would each add a button and a gap, and the
+  // divider if moving them removed it
+  const buttonWidth = toolbar.querySelector('.ftIconButton')?.getBoundingClientRect().width ?? 0
+  const hiddenWidth = overflowedActions.value.size * (buttonWidth + gap) + dividersWidth - measuredDividersWidth
+  const naturalWidth = groups.reduce((width, group) => width + getGroupWidth(group), 0) +
+    gap * Math.max(groups.length - 1, 0) + toolbarPadding + hiddenWidth
+  toolbar.classList.remove('measuring')
 
-  if (iconsWidth + labeledDownloadWidth <= availableWidth) {
+  const availableWidth = row.clientWidth + 0.5
+  if (naturalWidth <= availableWidth) {
     optionsLayout.value = 'full'
-  } else if (download && !compactDownloadWidth) {
-    // Measure the icon-only Download button before deciding on stacking
-    optionsLayout.value = 'compact'
-  } else {
-    optionsLayout.value = iconsWidth + compactDownloadWidth <= availableWidth ? 'compact' : 'stacked'
+    overflowCount.value = 0
+    return
   }
+
+  optionsLayout.value = 'even'
+  const buttonCount = items.length + overflowedActions.value.size
+  const capacity = Math.floor((availableWidth - toolbarPadding - dividersWidth + gap) / (MIN_EVEN_BUTTON_SIZE + gap))
+  // The More button takes one of the slots
+  overflowCount.value = buttonCount > capacity ? buttonCount - capacity + 1 : 0
 }
 
 function scheduleOptionsLayout() {
@@ -737,21 +850,23 @@ function scheduleOptionsLayout() {
 }
 
 const optionsResizeObserver = new ResizeObserver(scheduleOptionsLayout)
+// Also catches actions that child components such as the cast button add
+const optionsMutationObserver = new MutationObserver(scheduleOptionsLayout)
 
 onMounted(() => {
   optionsResizeObserver.observe(videoButtons.value)
   for (const group of videoOptions.value.children) {
     optionsResizeObserver.observe(group)
   }
+  optionsMutationObserver.observe(videoOptions.value, { childList: true, subtree: true })
+  // Hiding an action from the closed More menu changes no rendered toolbar rows
+  watch(() => OVERFLOW_ORDER.filter(key => toolbarActions.value[key].visible).join(), scheduleOptionsLayout)
   updateOptionsLayout()
 })
 
-// A wrapped group spans the card, so showing or hiding one of its actions may
-// not resize anything the observer watches
-onUpdated(scheduleOptionsLayout)
-
 onBeforeUnmount(() => {
   optionsResizeObserver.disconnect()
+  optionsMutationObserver.disconnect()
   cancelAnimationFrame(optionsLayoutFrame)
 })
 const enableDownloads = computed(() => store.getters.getEnableDownloads)

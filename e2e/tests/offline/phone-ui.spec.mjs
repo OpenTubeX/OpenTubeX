@@ -1,6 +1,6 @@
 import { expectScrollAtRenderedEnd, setWindowSize, test, expect } from '../../helpers/app.mjs'
 import { openMockedVideo } from '../../helpers/player.mjs'
-import { mockPlayableWatchPage, watchViewHandle } from '../../helpers/watch.mjs'
+import { clickVideoAction, mockPlayableWatchPage, watchViewHandle } from '../../helpers/watch.mjs'
 
 async function expectNoScrollbarOverflow(scroller) {
   await expect.poll(() => scroller.evaluate(element => {
@@ -8,6 +8,30 @@ async function expectNoScrollbarOverflow(scroller) {
     return element.scrollTop === 0 && scrollbar &&
       (!scrollbar.classList.contains('os-scrollbar-visible') || scrollbar.classList.contains('os-scrollbar-unusable'))
   })).toBe(true)
+}
+
+/** @param {import('@playwright/test').Locator} toolbar */
+function getToolbarLayout(toolbar) {
+  return toolbar.evaluate(element => {
+    const card = element.closest('.watchVideoInfo')
+    const cardBox = card.getBoundingClientRect()
+    const cardStyle = getComputedStyle(card)
+    const contentLeft = cardBox.left + parseFloat(cardStyle.paddingInlineStart)
+    const contentRight = cardBox.right - parseFloat(cardStyle.paddingInlineEnd)
+    const toolbarBox = element.getBoundingClientRect()
+    const buttons = [...element.querySelectorAll('.videoOptionsMobileRow > *')]
+      .filter(button => button.getClientRects().length > 0)
+      .map(button => button.getBoundingClientRect())
+    const widths = buttons.map(box => box.width)
+    return {
+      rows: new Set(buttons.map(box => Math.round(box.top))).size,
+      inside: toolbarBox.left >= contentLeft - 0.5 && toolbarBox.right <= contentRight + 0.5 &&
+        buttons.every(box => box.left >= toolbarBox.left - 0.5 && box.right <= toolbarBox.right + 0.5),
+      touchSized: buttons.every(box => box.width >= 43.5 && box.height >= 47.5),
+      spansCard: Math.abs(toolbarBox.width - (contentRight - contentLeft)) < 1,
+      equalWidths: Math.max(...widths) - Math.min(...widths) < 1
+    }
+  })
 }
 
 test.describe('phone UI', () => {
@@ -96,7 +120,7 @@ test.describe('phone UI', () => {
     await expect(page.locator('.profileTrigger')).toBeFocused()
   })
 
-  test('opens watch panels and offers tap queue reordering', { tag: '@scale' }, async ({ app, page }) => {
+  test('opens watch panels and offers tap queue reordering', { tag: '@scale' }, async ({ app, page, uiScale }) => {
     await mockPlayableWatchPage(app, page)
     await openMockedVideo(page)
     await page.evaluate(() => {
@@ -107,7 +131,8 @@ test.describe('phone UI', () => {
         })
       }
     })
-    await setWindowSize(app, page, { width: 360, height: 760 })
+    // Keep the CSS geometry of the queue sheet the same at every UI scale
+    await setWindowSize(app, page, { width: Math.round(360 * uiScale / 100), height: Math.round(760 * uiScale / 100) })
     await page.locator('.phoneQueueButton').click()
     const sheet = page.locator('dialog[open]')
     await expect(sheet.locator('.queueItem')).toHaveCount(12)
@@ -119,8 +144,15 @@ test.describe('phone UI', () => {
     const touch = await page.context().newCDPSession(page)
     const dragStart = await sheet.locator('.queueDragHandle').first().boundingBox()
     const targetBox = await sheet.locator('.queueItem').nth(2).boundingBox()
+    const releaseY = targetBox.y + targetBox.height * 0.75
+    // Near the scroller's edges the drag scrolls the list, and a slow release would overshoot
+    const scrollerBottom = await sheet.locator('.queueItems').evaluate(element => {
+      while (!/auto|scroll/.test(getComputedStyle(element).overflowY)) element = element.parentElement
+      return element.getBoundingClientRect().bottom
+    })
+    expect(releaseY).toBeLessThan(scrollerBottom - 40)
     await touch.send('Input.dispatchTouchEvent', { type: 'touchStart', touchPoints: [{ x: dragStart.x + 24, y: dragStart.y + 24 }] })
-    await touch.send('Input.dispatchTouchEvent', { type: 'touchMove', touchPoints: [{ x: dragStart.x + 24, y: targetBox.y + targetBox.height * 0.75 }] })
+    await touch.send('Input.dispatchTouchEvent', { type: 'touchMove', touchPoints: [{ x: dragStart.x + 24, y: releaseY }] })
     await touch.send('Input.dispatchTouchEvent', { type: 'touchEnd', touchPoints: [] })
     await expect(sheet.locator('.queueItem').nth(2)).toContainText('Queue item 0')
     for (let index = 0; index < 2; index++) {
@@ -153,7 +185,7 @@ test.describe('phone UI', () => {
     await expect(page.locator('dialog[open]')).toHaveCount(0)
   })
 
-  test('keeps the enlarged video actions inside the card on narrow phones', { tag: '@scale' }, async ({ app, page }) => {
+  test('keeps the video actions in one touch-sized row and moves the rest to a More menu on narrow phones', { tag: '@scale' }, async ({ app, page, attachScreenshot, uiScale }) => {
     await page.evaluate(async () => {
       await window.$store.dispatch('updateUseSponsorBlock', true)
       await window.$store.dispatch('updateQuickBookmarkTargetPlaylistId', 'phone-list-0')
@@ -161,22 +193,43 @@ test.describe('phone UI', () => {
     })
     await mockPlayableWatchPage(app, page, { captionTranslations: true })
     await openMockedVideo(page)
-    await setWindowSize(app, page, { width: 320, height: 760 })
+    await setWindowSize(app, page, { width: Math.round(360 * uiScale / 100), height: 760 })
     const toolbar = page.locator('.videoOptions')
-    await expect(toolbar).toHaveClass(/\bstacked\b/)
-    await expect.poll(() => toolbar.evaluate(element => {
-      const card = element.closest('.watchVideoInfo')
-      const cardBox = card.getBoundingClientRect()
-      const contentRight = cardBox.right - parseFloat(getComputedStyle(card).paddingInlineEnd)
-      return element.getBoundingClientRect().right <= contentRight + 0.5 &&
-        [...element.querySelectorAll('.iconButton, .downloadButton')].every(button => {
-          const box = button.getBoundingClientRect()
-          return box.width >= 47.5 && box.height >= 47.5 && box.right <= contentRight + 0.5
-        })
+    const more = toolbar.getByRole('button', { name: 'More options', exact: true })
+    const formats = toolbar.getByRole('button', { name: 'Change Media Formats', exact: true })
+    await toolbar.scrollIntoViewIfNeeded()
+    await expect(toolbar).toHaveClass(/\beven\b/)
+    await expect(more).toBeVisible()
+    await expect(formats).toHaveCount(0)
+    await expect.poll(() => getToolbarLayout(toolbar)).toMatchObject({ rows: 1, inside: true, touchSized: true })
+    await attachScreenshot('narrow phone video actions')
+
+    await more.click()
+    const sheet = page.locator('dialog[open]')
+    const option = sheet.getByRole('button', { name: 'Change Media Formats', exact: true })
+    await expect(option).toBeVisible()
+    // A sheet along the bottom edge with touch-sized rows
+    await expect.poll(() => sheet.evaluate(element => {
+      const box = element.getBoundingClientRect()
+      const rows = [...element.querySelectorAll('.moreAction')].map(row => row.getBoundingClientRect())
+      return Math.abs(box.bottom - window.innerHeight) < 1 && Math.abs(box.width - window.innerWidth) < 1 &&
+        rows.length > 0 && rows.every(row => row.height >= 47.5)
     })).toBe(true)
+    await attachScreenshot('video actions More sheet')
+    await option.click()
+    await expect(sheet).toHaveCount(0)
+    await expect(page.locator('.promptCard')).toBeVisible()
+    await page.locator('.prompt').click({ position: { x: 2, y: 2 } })
+    await expect(page.locator('.promptCard')).toHaveCount(0)
+
+    // Widening returns the moved actions to the toolbar
+    await setWindowSize(app, page, { width: Math.round(600 * uiScale / 100), height: 800 })
+    await expect(formats).toBeVisible()
+    await expect(more).toHaveCount(0)
+    await expect.poll(() => getToolbarLayout(toolbar)).toMatchObject({ rows: 1, inside: true })
   })
 
-  test('stacks the video action groups and wraps the metadata inline on phones', { tag: '@scale' }, async ({ app, page, attachScreenshot }) => {
+  test('scrolls the More actions sheet on short screens and clamps it when the screen grows', { tag: '@scale' }, async ({ app, page, uiScale }) => {
     await page.evaluate(async () => {
       await window.$store.dispatch('updateUseSponsorBlock', true)
       await window.$store.dispatch('updateQuickBookmarkTargetPlaylistId', 'phone-list-0')
@@ -184,17 +237,98 @@ test.describe('phone UI', () => {
     })
     await mockPlayableWatchPage(app, page, { captionTranslations: true })
     await openMockedVideo(page)
-    await setWindowSize(app, page, { width: 400, height: 860 })
+    await setWindowSize(app, page, { width: Math.round(360 * uiScale / 100), height: Math.round(781 * uiScale / 100) })
     const toolbar = page.locator('.videoOptions')
     await toolbar.scrollIntoViewIfNeeded()
-    await expect(toolbar).toHaveClass(/\bstacked\b/)
-    // Each group starts its own row, without a divider at its start
-    await expect.poll(() => toolbar.evaluate(element => {
-      const groups = [...element.children].filter(group => group.getClientRects().length > 0)
-      const groupTops = groups.map(group => Math.round(group.getBoundingClientRect().top))
-      return groups.length > 1 && new Set(groupTops).size === groups.length &&
-        groups.every(group => getComputedStyle(group, '::before').display === 'none')
+    await toolbar.getByRole('button', { name: 'More options', exact: true }).click()
+    const sheet = page.locator('dialog[open]')
+    const list = sheet.locator('.moreActionsList')
+    await expect(list).toBeVisible()
+    // Electron windows cannot get short enough, so shrink the visible viewport
+    // the sheet fits itself into, as the keyboard or split screen does
+    await page.evaluate(() => document.documentElement.style.setProperty('--phone-viewport-height', '240px'))
+    await expect(list.locator('.os-scrollbar-vertical')).toHaveCount(1)
+    await expect.poll(() => list.evaluate(element => element.scrollHeight > element.clientHeight)).toBe(true)
+    await list.evaluate(element => { element.scrollTop = element.scrollHeight })
+    await expectScrollAtRenderedEnd(list)
+    // The last action is fully reachable inside the sheet
+    expect(await list.evaluate(element => {
+      const last = element.querySelector('.moreAction:last-of-type').getBoundingClientRect()
+      const viewport = element.getBoundingClientRect()
+      return last.top >= viewport.top - 0.5 && last.bottom <= viewport.bottom + 0.5
     })).toBe(true)
+
+    // The viewport tracking restores the full height on the next resize
+    await page.evaluate(() => window.dispatchEvent(new Event('resize')))
+    await expectNoScrollbarOverflow(list)
+  })
+
+  for (const trigger of ['hidden actions', 'a wider toolbar']) {
+    test(`clamps the scrolled More actions sheet when ${trigger} leave it`, { tag: '@scale' }, async ({ app, page, uiScale }) => {
+      await page.evaluate(async () => {
+        await window.$store.dispatch('updateUseSponsorBlock', true)
+        await window.$store.dispatch('updateQuickBookmarkTargetPlaylistId', 'phone-list-0')
+        await window.$store.dispatch('updateShowDlnaCastButton', true)
+      })
+      await mockPlayableWatchPage(app, page, { captionTranslations: true })
+      await openMockedVideo(page)
+      await setWindowSize(app, page, { width: Math.round(360 * uiScale / 100), height: Math.round(781 * uiScale / 100) })
+      const toolbar = page.locator('.videoOptions')
+      await toolbar.scrollIntoViewIfNeeded()
+      await toolbar.getByRole('button', { name: 'More options', exact: true }).click()
+      const sheet = page.locator('dialog[open]')
+      const list = sheet.locator('.moreActionsList')
+      const actions = list.locator('.moreAction')
+      await expect(list).toBeVisible()
+      // Leave room for about two actions, as the keyboard or split screen does
+      await page.evaluate(() => document.documentElement.style.setProperty('--phone-viewport-height', '230px'))
+      await expect.poll(() => list.evaluate(element => element.scrollHeight - element.clientHeight)).toBeGreaterThan(40)
+      await list.evaluate(element => { element.scrollTop = element.scrollHeight })
+      await expectScrollAtRenderedEnd(list)
+      const actionCount = await actions.count()
+
+      if (trigger === 'hidden actions') {
+        await page.evaluate(async () => {
+          await window.$store.dispatch('updateUseSponsorBlock', false)
+          await window.$store.dispatch('updateQuickBookmarkTargetPlaylistId', '')
+        })
+      } else {
+        // Wider, but still a phone, so the sheet stays open
+        await page.evaluate(() => {
+          const viewport = document.documentElement.style
+          window.addEventListener('resize', () => viewport.setProperty('--phone-viewport-height', '230px'), { once: true, capture: true })
+        })
+        await setWindowSize(app, page, { width: Math.round(410 * uiScale / 100), height: Math.round(780 * uiScale / 100) })
+      }
+      await expect.poll(() => actions.count()).toBeLessThan(actionCount)
+      await expect(sheet).toBeVisible()
+      // The offset stays within the shorter list, without empty space below
+      // the last action, and the scrollbar matches the new range
+      await expect.poll(() => list.evaluate(element => {
+        const overflow = element.scrollHeight - element.clientHeight
+        const scrollbar = element.querySelector('.os-scrollbar-vertical')
+        const usable = scrollbar.classList.contains('os-scrollbar-visible') && !scrollbar.classList.contains('os-scrollbar-unusable')
+        const last = element.querySelector('.moreAction:last-of-type').getBoundingClientRect()
+        const viewportEnd = element.getBoundingClientRect().bottom - Number.parseFloat(getComputedStyle(element).paddingBottom)
+        return element.scrollTop <= Math.max(overflow, 0) + 1 &&
+          (overflow > 1 ? usable && last.bottom >= viewportEnd - 2 : !usable && element.scrollTop === 0)
+      })).toBe(true)
+    })
+  }
+
+  test('spreads the video actions evenly in one row and wraps the metadata inline on phones', { tag: '@scale' }, async ({ app, page, attachScreenshot, uiScale }) => {
+    await page.evaluate(async () => {
+      await window.$store.dispatch('updateUseSponsorBlock', true)
+      await window.$store.dispatch('updateQuickBookmarkTargetPlaylistId', 'phone-list-0')
+      await window.$store.dispatch('updateShowDlnaCastButton', true)
+    })
+    await mockPlayableWatchPage(app, page, { captionTranslations: true })
+    await openMockedVideo(page)
+    await setWindowSize(app, page, { width: Math.round(412 * uiScale / 100), height: 860 })
+    const toolbar = page.locator('.videoOptions')
+    await toolbar.scrollIntoViewIfNeeded()
+    await expect(toolbar).toHaveClass(/\beven\b/)
+    await expect.poll(() => getToolbarLayout(toolbar)).toMatchObject({ rows: 1, inside: true, touchSized: true, spansCard: true, equalWidths: true })
     // Short icon-labeled items share rows instead of taking one row each
     const metadataRows = await page.locator('.watchVideoInfo .datePublishedAndViewCount').evaluate(element => {
       const items = [...element.children]
@@ -203,19 +337,23 @@ test.describe('phone UI', () => {
     expect(metadataRows.items).toBeGreaterThan(2)
     expect(metadataRows.rows).toBeLessThan(metadataRows.items)
     await attachScreenshot('phone video info')
+
+    // The labeled toolbar returns once it fits
+    await setWindowSize(app, page, { width: Math.round(1200 * uiScale / 100), height: 900 })
+    await expect(toolbar).toHaveClass(/\bfull\b/)
+    await expect(toolbar.locator('.downloadLabel')).toBeVisible()
   })
 
   test('opens chapters and transcript as independent sheets', async ({ app, page }) => {
     await mockPlayableWatchPage(app, page, { captionTranslations: true })
     await openMockedVideo(page)
     await setWindowSize(app, page, { width: 360, height: 760 })
-    const actions = page.locator('.videoOptions')
     for (const [label, content] of [['Chapters', '.watchVideoChaptersPanel'], ['Transcript', '.transcriptCard']]) {
       if (label === 'Chapters') {
         await page.locator('.shaka-overflow-menu-button').click({ force: true })
         await page.locator('.phonePlayerOptions[open] .ft-chapters-button').click()
       } else {
-        await actions.getByRole('button', { name: new RegExp(label, 'i') }).click()
+        await clickVideoAction(page, new RegExp(label, 'i'))
       }
       const sheet = page.locator('dialog[open]')
       await expect(sheet.locator(content)).toBeVisible()
@@ -230,7 +368,7 @@ test.describe('phone UI', () => {
     await mockPlayableWatchPage(app, page, { captionTranslations: true })
     await openMockedVideo(page)
     await setWindowSize(app, page, { width: 375, height: 760 })
-    await page.locator('.videoOptions').getByRole('button', { name: /transcript/i }).click()
+    await clickVideoAction(page, /transcript/i)
     const languageButton = page.locator('.mobileSheetHeader').getByRole('button', { name: 'Transcript language', exact: true })
     await languageButton.click()
     const menu = page.locator('.transcriptLanguageMenu')
@@ -272,8 +410,7 @@ test.describe('phone UI', () => {
     await mockPlayableWatchPage(app, page, { captionTranslations: true })
     await openMockedVideo(page)
     await setWindowSize(app, page, { width: 360, height: 760 })
-    const trigger = page.locator('.videoOptions').getByRole('button', { name: /transcript/i })
-    await trigger.click()
+    await clickVideoAction(page, /transcript/i)
     const transcript = page.locator('dialog[open] .transcriptCard')
     await page.locator('.mobileSheetHeader').getByRole('button', { name: 'Search transcript', exact: true }).click()
     await expect(transcript.locator('.transcriptControls input')).toBeFocused()
@@ -281,7 +418,7 @@ test.describe('phone UI', () => {
     await page.locator('.mobileSheetHeader').getByRole('button', { name: 'Close', exact: true }).click()
     await expect(page.locator('dialog[open]')).toHaveCount(0)
     await expect(page.locator('.transcriptCard')).toHaveCount(0)
-    await trigger.click()
+    await clickVideoAction(page, /transcript/i)
     await expect(transcript).toBeVisible()
     await page.locator('.mobileSheetHeader').getByRole('button', { name: 'Search transcript', exact: true }).click()
     await expect(transcript.locator('.transcriptControls input')).toBeFocused()
@@ -310,8 +447,7 @@ test.describe('phone UI', () => {
       }
     })
     await setWindowSize(app, page, { width: 360, height: 760 })
-    const trigger = page.locator('.videoOptions').getByRole('button', { name: /Live Chat/i })
-    await trigger.click()
+    await clickVideoAction(page, /Live Chat/i)
     const chat = page.locator('dialog[open] .phoneLiveChat')
     await expect(chat).toBeVisible()
     await expect(chat).toBeInViewport()
@@ -361,7 +497,7 @@ test.describe('phone UI', () => {
     await expect(page.locator('dialog[open]')).toHaveCount(0)
     expect(await view.evaluate(view => view.liveChatOpen)).toBe(false)
     await expect(page.locator('.phoneLiveChat')).toHaveCount(0)
-    await trigger.click()
+    await clickVideoAction(page, /Live Chat/i)
     await expect(chat).toBeVisible()
     await expect(chat.locator('.chatMessage')).toHaveCount(0)
     await expect(chat.locator('.liveChatMessage')).toBeVisible()

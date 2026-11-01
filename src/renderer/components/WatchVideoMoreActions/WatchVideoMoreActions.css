@@ -1,0 +1,57 @@
+.moreActionsList {
+  min-inline-size: 220px;
+}
+
+.moreActionsContent {
+  display: flex;
+  flex-direction: column;
+}
+
+.mobileSheetEnabled .moreActionsList {
+  flex: 1 1 auto;
+  min-block-size: 0;
+  padding-block: 4px 12px;
+}
+
+.moreAction {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  min-block-size: 48px;
+  padding-block: 10px;
+  padding-inline: 12px;
+  border: 0;
+  border-radius: calc(8px * var(--ui-roundness));
+  background: transparent;
+  color: inherit;
+  font: inherit;
+  text-align: start;
+  cursor: pointer;
+}
+
+.mobileSheetEnabled .moreAction {
+  min-block-size: 56px;
+  padding-inline: 24px;
+  border-radius: 0;
+  font-size: 1rem;
+}
+
+.moreAction:is(:hover, :focus-visible) {
+  background: var(--side-nav-hover-color);
+  color: var(--side-nav-hover-text-color);
+}
+
+.moreAction > svg {
+  flex: none;
+  font-size: 20px;
+}
+
+.moreActionLabel {
+  flex: 1;
+  min-inline-size: 0;
+  overflow-wrap: anywhere;
+}
+
+.moreActionCheck {
+  color: var(--accent-color);
+}

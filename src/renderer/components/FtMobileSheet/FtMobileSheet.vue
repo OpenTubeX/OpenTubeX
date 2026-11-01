@@ -8,7 +8,7 @@
       v-bind="$attrs"
       ref="dialog"
       class="mobileSheet"
-      :class="{ dockedSheet: docked, compactSheet: compact && enabled, mobileSheetEnabled: enabled }"
+      :class="{ dockedSheet: docked, compactSheet: compact && enabled, bottomSheet: compact && bottom && enabled, mobileSheetEnabled: enabled }"
       :style="sheetStyle"
       :role="enabled ? null : 'presentation'"
       :aria-label="enabled ? title : null"
@@ -79,6 +79,8 @@ const props = defineProps({
   title: { type: String, required: true },
   back: { type: Boolean, default: false },
   compact: { type: Boolean, default: false },
+  // Places a compact sheet along the bottom edge, for short menus
+  bottom: { type: Boolean, default: false },
   belowPlayer: { type: Boolean, default: false },
   fullscreen: { type: Boolean, default: false },
   headerSelector: { type: String, default: '' }
