@@ -38,7 +38,7 @@ for (const playlistViewType of ['grid', 'list']) {
       },
     })
 
-    test('respects roundness and centers grid actions with and without a channel', async ({ page, attachScreenshot, uiScale }) => {
+    test('respects roundness and centers actions with and without a channel', async ({ page, attachScreenshot, uiScale }) => {
       await page.route('https://invidious.test/vi/**', route => fulfillVisualFixture(route, 'video-thumbnail'))
       await page.route('https://invidious.test/ggpht/**', route => fulfillVisualFixture(route, 'avatar'))
       await page.route(/\/api\/v1\/playlists\/panel-layout\?/, route => route.fulfill({
@@ -60,6 +60,12 @@ for (const playlistViewType of ['grid', 'list']) {
       await expect(page.locator(`.playlistPage.${playlistViewType}`)).toBeVisible()
       await expect(page.locator('.playlistChannel')).toBeVisible()
       const panel = page.locator('.playlistInfoContainer')
+      // The channel link must not narrow the search field to the actions' column
+      const widths = await panel.evaluate(element => ({
+        search: element.querySelector('.searchInputsRow').getBoundingClientRect().width,
+        row: element.querySelector('.channelShareWrapper').getBoundingClientRect().width,
+      }))
+      expect(Math.abs(widths.search - widths.row), 'search field should span the channel and actions row').toBeLessThanOrEqual(1)
 
       for (const pack of ['material', 'remix']) {
         await page.evaluate(value => window.$store.dispatch('updateIconPack', value), pack)
@@ -122,6 +128,26 @@ for (const playlistViewType of ['grid', 'list']) {
               })
               expect(geometry.centerDifference).toBeLessThanOrEqual(1)
               expect(geometry.separate).toBe(true)
+            }).toPass({ timeout: 2000 })
+          } else {
+            await expect(async () => {
+              const geometry = await panel.evaluate(element => {
+                const panel = element.getBoundingClientRect()
+                const buttons = [...element.querySelector('.playlistOptions').children].map(button => button.getBoundingClientRect())
+                const channel = element.querySelector('.playlistChannel').getBoundingClientRect()
+                const left = Math.min(...buttons.map(button => button.left))
+                const right = Math.max(...buttons.map(button => button.right))
+                return {
+                  wrapped: Math.min(...buttons.map(button => button.top)) >= channel.bottom - 1,
+                  sameLine: left >= channel.right - 1,
+                  singleRow: Math.max(...buttons.map(button => button.top)) - Math.min(...buttons.map(button => button.top)) <= 1,
+                  centerDifference: Math.abs((left + right) / 2 - panel.x - panel.width / 2),
+                }
+              })
+              // Actions share the channel's line only when they fit in one row there,
+              // otherwise they wrap below it and center like those of playlists without one
+              expect(geometry.wrapped || (geometry.sameLine && geometry.singleRow), 'actions should not wrap beside the channel').toBe(true)
+              if (geometry.wrapped) expect(geometry.centerDifference).toBeLessThanOrEqual(1)
             }).toPass({ timeout: 2000 })
           }
         }

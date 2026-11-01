@@ -1,4 +1,4 @@
-import { test, expect, goTo, sel } from '../../helpers/app.mjs'
+import { test, expect, goTo, sel, updateInputWithoutScrolling } from '../../helpers/app.mjs'
 import { fulfillVisualFixture } from '../../helpers/visual-fixtures.mjs'
 
 test.use({
@@ -512,5 +512,161 @@ test.describe('saved playlist thumbnails', () => {
       'https://i.ytimg.com/vi/saved-video/maxresdefault.jpg'
     )
     await expect.poll(() => thumbnail.evaluate(image => image.naturalWidth)).toBeGreaterThan(0)
+  })
+})
+
+test.describe('YouTube playlist search', () => {
+  test.use({
+    seed: {
+      settings: {
+        backendPreference: 'invidious',
+        backendFallback: false,
+        enableSearchSuggestions: false,
+        defaultInvidiousInstance: 'https://invidious.test',
+        generalAutoLoadMorePaginatedItemsEnabled: false,
+        playlistViewType: 'list'
+      }
+    }
+  })
+
+  test('loads the remaining pages and filters every video', async ({ page, attachScreenshot }) => {
+    const requestedPages = []
+    await page.route(/\/api\/v1\/playlists\/search-test\?/, async (route) => {
+      const pageNumber = Number(new URL(route.request().url()).searchParams.get('page') ?? 1)
+      if (pageNumber > 1) requestedPages.push(pageNumber)
+      const videos = Array.from({ length: 100 }, (_, index) => playlistVideo((pageNumber - 1) * 100 + index))
+      await route.fulfill({ json: playlistResponse(videos, 300) })
+    })
+
+    await openPlaylistTab(page, '/playlist/search-test')
+    const playlistPage = page.locator('.playlistPage')
+    await expect(playlistPage.getByText('Playlist video 1', { exact: true })).toBeVisible()
+    expect(requestedPages).toEqual([])
+
+    const search = playlistPage.locator('.playlistInfo').getByRole('searchbox', { name: 'Search for Videos' })
+    await search.fill('video 25')
+    await expect(page).toHaveURL(/searchQueryText=video(%20|\+)25/)
+    // Replacing the route keeps the playlist's tab title
+    await expect(page.locator('.tab.active')).toHaveText('Pagination test playlist | Playlist channel')
+
+    const items = playlistPage.locator('.playlistItem')
+    await expect(items).toHaveCount(11)
+    await expect(items.first().locator('.videoIndex')).toHaveText('25')
+    await expect(playlistPage.getByText('Playlist video 250', { exact: true })).toBeVisible()
+    await expect(playlistPage.locator('.ft-auto-load-next-page-wrapper')).toHaveCount(0)
+    expect(requestedPages).toEqual([2, 3])
+    await attachScreenshot('youtube-playlist-search')
+
+    await search.fill('no such video')
+    await expect(playlistPage.getByText('There are no videos in this playlist that match your search', { exact: true })).toBeVisible()
+
+    await search.fill('')
+    await expect(playlistPage.getByText('Playlist video 1', { exact: true })).toBeVisible()
+    await expect(items).toHaveCount(300)
+  })
+
+  test('keeps a valid offset when searching from the end of the loaded page', { tag: '@scale' }, async ({ page }) => {
+    await page.route(/\/api\/v1\/playlists\/search-test\?/, async (route) => {
+      const pageNumber = Number(new URL(route.request().url()).searchParams.get('page') ?? 1)
+      // Only the first 90 videos match, so searching removes the videos at the end of the
+      // loaded page without moving the content above them, which scroll anchoring would follow
+      const videos = Array.from({ length: 100 }, (_, index) => {
+        const video = playlistVideo((pageNumber - 1) * 100 + index)
+        return pageNumber === 1 && index < 90 ? { ...video, title: video.title.replace('Playlist', 'Marked') } : video
+      })
+      await route.fulfill({ json: playlistResponse(videos, 300) })
+    })
+
+    await openPlaylistTab(page, '/playlist/search-test')
+    const playlistPage = page.locator('.playlistPage')
+    const items = playlistPage.locator('.playlistItem')
+    await expect(items).toHaveCount(100)
+    // Placeholders grow as they mount, so the end only counts once the last row is real
+    await expect.poll(() => page.evaluate(() => {
+      window.scrollTo(0, document.documentElement.scrollHeight)
+      const last = [...document.querySelectorAll('.playlistPage .playlistItem')].at(-1)
+      return window.scrollY > 0 && !!last.querySelector('.ft-list-video') &&
+        window.scrollY + window.innerHeight >= document.documentElement.scrollHeight - 1
+    })).toBe(true)
+    const lastItemGap = () => page.evaluate(() =>
+      window.innerHeight - [...document.querySelectorAll('.playlistPage .playlistItem')].at(-1).getBoundingClientRect().bottom)
+    const gapAtEnd = await lastItemGap()
+
+    // Typing through fill() would scroll the field into view and leave the end
+    await updateInputWithoutScrolling(playlistPage.locator('.playlistInfo').getByRole('searchbox', { name: 'Search for Videos' }), 'Marked')
+    await expect(items).toHaveCount(90)
+    await expect(playlistPage.locator('.ft-auto-load-next-page-wrapper, .loadNextPageWrapper')).toHaveCount(0)
+    await expect.poll(() => page.evaluate(() => {
+      const maximum = document.documentElement.scrollHeight - window.innerHeight
+      return { atEnd: window.scrollY > 0, offsetValid: window.scrollY <= Math.max(0, maximum) + 1 }
+    })).toEqual({ atEnd: true, offsetValid: true })
+    // No more space is left below the last result than below the last video before searching
+    await expect.poll(lastItemGap).toBeLessThanOrEqual(gapAtEnd + 1)
+  })
+
+  test('numbers search results like the playlist when a members-only video is hidden', async ({ app, page }) => {
+    await app.electronApp.evaluate(({ ipcMain }) => {
+      globalThis.__externalLaunches = []
+      ipcMain.removeAllListeners('open-in-external-player')
+      ipcMain.on('open-in-external-player', (event, payload) => globalThis.__externalLaunches.push(payload.playlistIndex))
+    })
+    await page.evaluate(() => window.$store.dispatch('updateExternalPlayer', 'mpv'))
+    await page.route(/\/api\/v1\/playlists\/members-only\?/, route => route.fulfill({
+      json: playlistResponse([playlistVideo(0), { ...playlistVideo(1), isMembersOnly: true }, playlistVideo(2)])
+    }))
+
+    await openPlaylistTab(page, '/playlist/members-only')
+    const playlistPage = page.locator('.playlistPage')
+    const indexes = playlistPage.locator('.playlistItem .videoIndex')
+    await expect(indexes).toHaveText(['1', '2'])
+    const thirdVideo = playlistPage.locator('.playlistItem').filter({ hasText: 'Playlist video 3' })
+    await thirdVideo.locator('.externalPlayerIcon').click()
+
+    await playlistPage.locator('.playlistInfo').getByRole('searchbox', { name: 'Search for Videos' }).fill('video 3')
+    await expect(indexes).toHaveText(['2'])
+    await thirdVideo.locator('.externalPlayerIcon').click()
+
+    // The external player gets the whole playlist, so it counts the hidden video
+    await expect.poll(() => app.electronApp.evaluate(() => globalThis.__externalLaunches)).toEqual([2, 2])
+  })
+
+  test('keeps a restored search editable on a playlist with one video', async ({ page }) => {
+    await page.route(/\/api\/v1\/playlists\/single-video\?/, route => route.fulfill({
+      json: playlistResponse([playlistVideo(0)])
+    }))
+
+    await openPlaylistTab(page, '/playlist/single-video?searchQueryText=no%20match')
+    const playlistPage = page.locator('.playlistPage')
+    const search = playlistPage.locator('.playlistInfo').getByRole('searchbox', { name: 'Search for Videos' })
+    await expect(search).toHaveValue('no match')
+    await expect(playlistPage.getByText('There are no videos in this playlist that match your search', { exact: true })).toBeVisible()
+
+    await search.fill('')
+    await expect(playlistPage.getByText('Playlist video 1', { exact: true })).toBeVisible()
+  })
+})
+
+test.describe('user playlist search', () => {
+  test.use({
+    seed: {
+      settings: { playlistViewType: 'list' },
+      playlists: [{
+        _id: 'duration-sorted',
+        playlistName: 'Duration sorted',
+        sortOrder: 'video_duration_descending',
+        videos: [
+          { videoId: 'aaaaaaaaaaa', playlistItemId: 'item-a', title: 'Alpha clip', author: 'Channel', lengthSeconds: 10, type: 'video' },
+          { videoId: 'bbbbbbbbbbb', playlistItemId: 'item-b', title: 'Beta clip', author: 'Channel', lengthSeconds: 30, type: 'video' },
+          { videoId: 'ccccccccccc', playlistItemId: 'item-c', title: 'Gamma', author: 'Channel', lengthSeconds: 20, type: 'video' }
+        ]
+      }]
+    }
+  })
+
+  test('numbers duration-sorted search results by their playlist position', async ({ page }) => {
+    await openPlaylistTab(page, '/playlist/duration-sorted?playlistType=user&searchQueryText=clip')
+    const items = page.locator('.playlistPage .playlistItem')
+    await expect(items).toHaveCount(2)
+    await expect(items.locator('.videoIndex')).toHaveText(['2', '1'])
   })
 })
