@@ -263,6 +263,59 @@ test.describe('phone UI', () => {
     await expectNoScrollbarOverflow(list)
   })
 
+  for (const trigger of ['hidden actions', 'a wider toolbar']) {
+    test(`clamps the scrolled More actions sheet when ${trigger} leave it`, { tag: '@scale' }, async ({ app, page, uiScale }) => {
+      await page.evaluate(async () => {
+        await window.$store.dispatch('updateUseSponsorBlock', true)
+        await window.$store.dispatch('updateQuickBookmarkTargetPlaylistId', 'phone-list-0')
+        await window.$store.dispatch('updateShowDlnaCastButton', true)
+      })
+      await mockPlayableWatchPage(app, page, { captionTranslations: true })
+      await openMockedVideo(page)
+      await setWindowSize(app, page, { width: Math.round(360 * uiScale / 100), height: Math.round(781 * uiScale / 100) })
+      const toolbar = page.locator('.videoOptions')
+      await toolbar.scrollIntoViewIfNeeded()
+      await toolbar.getByRole('button', { name: 'More options', exact: true }).click()
+      const sheet = page.locator('dialog[open]')
+      const list = sheet.locator('.moreActionsList')
+      const actions = list.locator('.moreAction')
+      await expect(list).toBeVisible()
+      // Leave room for about two actions, as the keyboard or split screen does
+      await page.evaluate(() => document.documentElement.style.setProperty('--phone-viewport-height', '230px'))
+      await expect.poll(() => list.evaluate(element => element.scrollHeight - element.clientHeight)).toBeGreaterThan(40)
+      await list.evaluate(element => { element.scrollTop = element.scrollHeight })
+      await expectScrollAtRenderedEnd(list)
+      const actionCount = await actions.count()
+
+      if (trigger === 'hidden actions') {
+        await page.evaluate(async () => {
+          await window.$store.dispatch('updateUseSponsorBlock', false)
+          await window.$store.dispatch('updateQuickBookmarkTargetPlaylistId', '')
+        })
+      } else {
+        // Wider, but still a phone, so the sheet stays open
+        await page.evaluate(() => {
+          const viewport = document.documentElement.style
+          window.addEventListener('resize', () => viewport.setProperty('--phone-viewport-height', '230px'), { once: true, capture: true })
+        })
+        await setWindowSize(app, page, { width: Math.round(410 * uiScale / 100), height: Math.round(780 * uiScale / 100) })
+      }
+      await expect.poll(() => actions.count()).toBeLessThan(actionCount)
+      await expect(sheet).toBeVisible()
+      // The offset stays within the shorter list, without empty space below
+      // the last action, and the scrollbar matches the new range
+      await expect.poll(() => list.evaluate(element => {
+        const overflow = element.scrollHeight - element.clientHeight
+        const scrollbar = element.querySelector('.os-scrollbar-vertical')
+        const usable = scrollbar.classList.contains('os-scrollbar-visible') && !scrollbar.classList.contains('os-scrollbar-unusable')
+        const last = element.querySelector('.moreAction:last-of-type').getBoundingClientRect()
+        const viewportEnd = element.getBoundingClientRect().bottom - Number.parseFloat(getComputedStyle(element).paddingBottom)
+        return element.scrollTop <= Math.max(overflow, 0) + 1 &&
+          (overflow > 1 ? usable && last.bottom >= viewportEnd - 2 : !usable && element.scrollTop === 0)
+      })).toBe(true)
+    })
+  }
+
   test('spreads the video actions evenly in one row and wraps the metadata inline on phones', { tag: '@scale' }, async ({ app, page, attachScreenshot, uiScale }) => {
     await page.evaluate(async () => {
       await window.$store.dispatch('updateUseSponsorBlock', true)

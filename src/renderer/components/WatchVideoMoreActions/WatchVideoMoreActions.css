@@ -1,7 +1,10 @@
 .moreActionsList {
+  min-inline-size: 220px;
+}
+
+.moreActionsContent {
   display: flex;
   flex-direction: column;
-  min-inline-size: 220px;
 }
 
 .mobileSheetEnabled .moreActionsList {

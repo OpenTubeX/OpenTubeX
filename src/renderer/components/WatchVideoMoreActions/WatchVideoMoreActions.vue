@@ -9,39 +9,46 @@
     @closed="finish"
   >
     <div
+      ref="list"
       v-overlay-scrollbars="phoneLayout"
       class="moreActionsList"
     >
-      <button
-        v-for="action in actions"
-        :key="action.value"
-        type="button"
-        class="moreAction"
-        :aria-pressed="action.active ?? null"
-        @click="choose(action.value)"
+      <div
+        ref="content"
+        class="moreActionsContent"
       >
-        <FtIcon
-          :icon="action.icon"
-          aria-hidden="true"
-        />
-        <span class="moreActionLabel">{{ action.label }}</span>
-        <FtIcon
-          v-if="action.active"
-          class="moreActionCheck"
-          :icon="['fas', 'check']"
-          aria-hidden="true"
-        />
-      </button>
+        <button
+          v-for="action in actions"
+          :key="action.value"
+          type="button"
+          class="moreAction"
+          :aria-pressed="action.active ?? null"
+          @click="choose(action.value)"
+        >
+          <FtIcon
+            :icon="action.icon"
+            aria-hidden="true"
+          />
+          <span class="moreActionLabel">{{ action.label }}</span>
+          <FtIcon
+            v-if="action.active"
+            class="moreActionCheck"
+            :icon="['fas', 'check']"
+            aria-hidden="true"
+          />
+        </button>
+      </div>
     </div>
   </FtMobileSheet>
 </template>
 
 <script setup>
 import { FtIcon } from '@opentubex/icons'
-import { inject, ref } from 'vue'
+import { inject, onBeforeUnmount, onMounted, ref, useTemplateRef } from 'vue'
 
 import FtMobileSheet from '../FtMobileSheet/FtMobileSheet.vue'
 import { usePhoneLayout } from '../../composables/usePhoneLayout'
+import { clampOverlayScrollTop } from '../../helpers/overlayScrollbars'
 
 defineProps({
   title: { type: String, required: true },
@@ -55,6 +62,20 @@ const phoneLayout = usePhoneLayout()
 const closeIconDropdown = inject('closeIconDropdown', () => {})
 const sheetOpen = ref(true)
 let chosen = null
+
+const list = useTemplateRef('list')
+const content = useTemplateRef('content')
+// Actions leave the open sheet when they go away or fit into the toolbar again
+const listResizeObserver = new ResizeObserver(() => {
+  if (phoneLayout.value) clampOverlayScrollTop(list.value, content.value)
+})
+
+onMounted(() => {
+  listResizeObserver.observe(list.value)
+  listResizeObserver.observe(content.value)
+})
+
+onBeforeUnmount(() => listResizeObserver.disconnect())
 
 /** @param {string} value */
 function choose(value) {
