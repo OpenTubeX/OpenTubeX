@@ -1389,6 +1389,38 @@ test.describe('with seek history enabled', () => {
     }
   })
 
+  test('looping a chapter during playback records the position it left', async ({ app, page }) => {
+    await mockPlayableWatchPage(app, page)
+    const video = await openMockedVideo(page)
+    const player = page.locator(`${activeTab} .ftVideoPlayer`)
+    const view = await watchViewHandle(page)
+    await view.evaluate(async (view) => {
+      view.videoChapters = [
+        { title: 'Intro', timestamp: '0:00', startSeconds: 0, endSeconds: 25 },
+        { title: 'Outro', timestamp: '0:25', startSeconds: 25, endSeconds: 30 },
+      ]
+      view.showSidebarChapters = true
+      await view.$nextTick()
+    })
+    await view.dispose()
+    await video.evaluate(async (element) => {
+      element.currentTime = 2
+      // Stay well over the shortest recorded jump before the click.
+      element.playbackRate = 0.25
+      await element.play()
+    })
+
+    await page.locator('.watchVideoChaptersPanel').getByRole('button', { name: 'Loop chapter: Outro' }).click()
+    await expect.poll(() => video.evaluate(element => element.currentTime)).toBeGreaterThanOrEqual(25)
+
+    await player.hover()
+    await player.getByRole('button', { name: 'More settings' }).click({ force: true })
+    const seekHistoryButton = player.locator('.shaka-overflow-menu .seek-history-button')
+    await expect(seekHistoryButton).toBeVisible()
+    await seekHistoryButton.click()
+    await expect(player.locator('.seek-history-menu .seek-history-entry > span:first-child')).toHaveText([/^0:0\d · Intro$/])
+  })
+
   test('returns to the positions left by seeking through the seek history', async ({ app, page }) => {
     await mockPlayableWatchPage(app, page)
     const video = await openMockedVideo(page)

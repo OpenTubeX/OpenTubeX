@@ -2793,7 +2793,7 @@ export default defineComponent({
       let end = chapter.endSeconds > chapter.startSeconds ? chapter.endSeconds : (nextStart ?? abRepeatDuration.value)
       // The listed video length can exceed the media duration by a fraction of a second.
       end = Math.min(end, abRepeatDuration.value)
-      return Number.isFinite(end) ? { start: chapter.startSeconds, end } : null
+      return Number.isFinite(end) && end > chapter.startSeconds ? { start: chapter.startSeconds, end } : null
     }
 
     /** The chapter that A-B repeat currently loops, -1 for none, or null when chapters can't be looped. */
@@ -2819,12 +2819,15 @@ export default defineComponent({
       }
 
       const range = getChapterLoopRange(index)
-      if (loopedChapterIndex.value === null || !range || !setAbRepeatRange(range.start, range.end)) return
+      if (loopedChapterIndex.value === null || !range) return
 
+      // Jump before applying the range, which would otherwise move playback there
+      // as an automatic repeat that seek history skips.
       const currentTime = video.value?.currentTime
       if (!(currentTime >= range.start && currentTime < range.end)) {
         setCurrentTime(range.start, true)
       }
+      if (!setAbRepeatRange(range.start, range.end)) return
       showValueChange(t('Chapters.Looping Chapter', { chapter: props.chapters[index].title }), AB_REPEAT_VALUE_CHANGE_ICON)
     }
 
