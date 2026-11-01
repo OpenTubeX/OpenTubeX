@@ -134,6 +134,9 @@ test.describe('destructive sync', () => {
     await initialized
     await autoSync.press('Space')
     await expect(autoSync).toBeChecked()
+    // The checkbox changes before its asynchronous setting save completes.
+    // Reconnect must see automatic sync enabled in the store.
+    await expect.poll(() => page.evaluate(() => window.$store.getters.getSyncServerAutoSync)).toBe(true)
     await page.keyboard.press('Escape')
     await expect(page.locator('.settingsWindow')).toBeHidden()
     await reconnect(page)
