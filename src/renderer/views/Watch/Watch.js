@@ -5467,6 +5467,13 @@ export default defineComponent({
 
       const nextVideoInterval = this.defaultInterval
       this.playNextTimeout = setTimeout(() => {
+        // Bedtime or the daily limit can begin during the countdown.
+        const getters = this.$store.getters
+        if (getters.getWellbeingBedtimeWaiting || getters.getWellbeingStopsAutoplay) {
+          this.abortAutoplayCountdown(true)
+          if (getters.getWellbeingBedtimeWaiting) this.$store.commit('showWellbeingPrompt', 'bedtime')
+          return
+        }
         this.playNextVideoNow(false)
       }, nextVideoInterval * 1000)
 

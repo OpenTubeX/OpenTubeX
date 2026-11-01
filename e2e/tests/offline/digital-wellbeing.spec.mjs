@@ -1,6 +1,6 @@
 import { test, expect, goTo, goToSettingsSection } from '../../helpers/app.mjs'
 import { openMockedVideo } from '../../helpers/player.mjs'
-import { mockPlayableWatchPage } from '../../helpers/watch.mjs'
+import { mockPlayableWatchPage, watchViewHandle } from '../../helpers/watch.mjs'
 
 /**
  * @param {Date} date
@@ -73,6 +73,31 @@ test.describe('daily watch time limit', () => {
     })
     await expect(page.locator('.summaryCard').filter({ hasText: 'Today' }))
       .toContainText('45 min left of your 1 hr 30 min daily limit')
+  })
+})
+
+test.describe('autoplay countdown', () => {
+  test.use({
+    seed: {
+      settings: { ...playbackSettings, playNextVideo: true, defaultInterval: 3, dailyLimitAction: 'remind', stopAutoplayAtBedtimeAndLimit: true },
+      watchStats: watchedOneHour,
+    }
+  })
+
+  test('a limit reached during the countdown stops the next video', async ({ app, page }) => {
+    await mockPlayableWatchPage(app, page)
+    const video = await openMockedVideo(page)
+    await video.evaluate(element => element.pause())
+    const url = page.url()
+
+    const watch = await watchViewHandle(page)
+    await watch.evaluate(vm => vm.handleVideoEnded())
+    await expect.poll(() => watch.evaluate(vm => vm.autoplayCountdown != null)).toBe(true)
+    await page.evaluate(() => window.$store.dispatch('updateDailyWatchTimeLimit', 60))
+    await expect.poll(() => page.evaluate(() => window.$store.getters.getWellbeingStopsAutoplay)).toBe(true)
+
+    await expect.poll(() => watch.evaluate(vm => vm.autoplayCountdown == null), { timeout: 10_000 }).toBe(true)
+    expect(page.url()).toBe(url)
   })
 })
 
