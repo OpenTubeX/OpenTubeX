@@ -90,3 +90,42 @@
   inline-size: 32px;
   object-fit: cover;
 }
+
+.feedInput {
+  position: relative;
+}
+
+/* Runs along the inside of the field's bottom border, clear of its rounded corners */
+.addFeedProgress {
+  position: absolute;
+  inset-block-end: 1px;
+  inset-inline: calc(4px * var(--ui-roundness));
+  block-size: 2px;
+  overflow: hidden;
+  background-color: color-mix(in srgb, var(--primary-color) 25%, transparent);
+  pointer-events: none;
+}
+
+.addFeedProgress::before {
+  position: absolute;
+  inset-block: 0;
+  inline-size: 40%;
+  background-color: var(--primary-color);
+  content: '';
+  animation: add-feed-progress 1.2s ease-in-out infinite;
+}
+
+/* Without animations, a full bar still shows that the feed loads */
+:global(:root[data-reduced-motion='reduce']) .addFeedProgress::before {
+  inline-size: 100%;
+}
+
+@keyframes add-feed-progress {
+  from {
+    inset-inline-start: -40%;
+  }
+
+  to {
+    inset-inline-start: 100%;
+  }
+}

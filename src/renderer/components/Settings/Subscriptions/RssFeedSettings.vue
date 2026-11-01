@@ -43,18 +43,26 @@
           />
           {{ t('Subscriptions.RSS Feeds.Public RSSHub Instances') }}
         </a>
-        <FtInput
-          ref="feedInput"
-          :label="t('Subscriptions.RSS Feeds.Add Feed')"
-          :placeholder="t('Subscriptions.RSS Feeds.Feed URL')"
-          :icon="['fas', 'rss']"
-          :show-label="true"
-          :show-action-button="true"
-          :action-button-label="t('Subscriptions.RSS Feeds.Add Feed')"
-          :force-action-button-icon-name="['fas', 'plus']"
-          :disabled="isAdding"
-          @click="addFeed"
-        />
+        <div class="feedInput">
+          <FtInput
+            ref="feedInput"
+            :label="t('Subscriptions.RSS Feeds.Add Feed')"
+            :placeholder="t('Subscriptions.RSS Feeds.Feed URL')"
+            :icon="['fas', 'rss']"
+            :show-label="true"
+            :show-action-button="true"
+            :action-button-label="t('Subscriptions.RSS Feeds.Add Feed')"
+            :force-action-button-icon-name="['fas', 'plus']"
+            :disabled="isAdding"
+            @click="addFeed"
+          />
+          <div
+            v-if="isAdding"
+            class="addFeedProgress"
+            role="progressbar"
+            :aria-label="t('Subscriptions.RSS Feeds.Add Feed')"
+          />
+        </div>
       </div>
       <div
         ref="feedScroller"
