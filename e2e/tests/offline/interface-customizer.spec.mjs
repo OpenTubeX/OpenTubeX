@@ -218,6 +218,9 @@ test.describe('interface customizer', () => {
       return element.getBoundingClientRect().top >= element.closest('.previewPlayer').getBoundingClientRect().top &&
         grid.scrollHeight > grid.clientHeight + 1
     })).toBe(true)
+    // The always dark menu keeps the player's light scrollbar thumb, whatever the app theme.
+    await expect(menu.locator('.previewOverflowGrid > .os-scrollbar-vertical .os-scrollbar-handle'))
+      .toHaveCSS('background-color', 'rgba(255, 255, 255, 0.4)')
 
     // Without the grid, the player lists its entries in rows, with a chevron
     // for those that open a submenu.

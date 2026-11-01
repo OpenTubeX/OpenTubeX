@@ -289,6 +289,13 @@
   grid-template-columns: repeat(4, calc(94 * var(--u)));
 }
 
+/* Like the player's, the always dark menu can't take the app's scrollbar color. */
+.previewOverflowGrid > :deep(.os-scrollbar) {
+  --os-handle-bg: rgb(255 255 255 / 40%);
+  --os-handle-bg-hover: rgb(255 255 255 / 55%);
+  --os-handle-bg-active: rgb(255 255 255 / 70%);
+}
+
 .previewOverflowClose {
   display: none;
 }
@@ -457,7 +464,6 @@
      advertise the remaining tiles. Size it like the default 6px thumb, which
      fills its track. The track is a size container, so 100cqi is that thumb. */
   .previewOverflowGrid > :deep(.os-scrollbar) {
-    --os-handle-bg: rgb(255 255 255 / 40%);
     --os-handle-border-radius: calc(100cqi * var(--ui-roundness));
     --os-handle-perpendicular-size: 100%;
     --os-padding-axis: calc(2 * var(--p));
