@@ -160,7 +160,7 @@
               :data="item"
               :playlist-id="playlistId"
               :playlist-type="infoSource"
-              :playlist-index="playlistInVideoSearchMode ? shownPlaylistItemIndex(item) : index"
+              :playlist-index="playlistItemPositions.get(item) ?? index"
               :playlist-item-id="item.playlistItemId"
               appearance="result"
               :always-show-add-to-playlist-button="true"
@@ -857,6 +857,10 @@ const shownPlaylistItemIndexes = computed(() => {
 function shownPlaylistItemIndex(item) {
   return shownPlaylistItemIndexes.value.get(item.playlistItemId ?? item) ?? -1
 }
+
+// The external player loads the whole YouTube playlist, so its start counts hidden videos too.
+// User playlists open single videos, and their copied duration-sorted items fall back to the row
+const playlistItemPositions = computed(() => new Map(shownPlaylistItems.value.map((item, index) => [item, index])))
 
 const shownPlaylistItemCount = computed(() => shownPlaylistItems.value)
 

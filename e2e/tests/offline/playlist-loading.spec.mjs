@@ -604,7 +604,13 @@ test.describe('YouTube playlist search', () => {
     await expect.poll(lastItemGap).toBeLessThanOrEqual(gapAtEnd + 1)
   })
 
-  test('numbers search results like the playlist when a members-only video is hidden', async ({ page }) => {
+  test('numbers search results like the playlist when a members-only video is hidden', async ({ app, page }) => {
+    await app.electronApp.evaluate(({ ipcMain }) => {
+      globalThis.__externalLaunches = []
+      ipcMain.removeAllListeners('open-in-external-player')
+      ipcMain.on('open-in-external-player', (event, payload) => globalThis.__externalLaunches.push(payload.playlistIndex))
+    })
+    await page.evaluate(() => window.$store.dispatch('updateExternalPlayer', 'mpv'))
     await page.route(/\/api\/v1\/playlists\/members-only\?/, route => route.fulfill({
       json: playlistResponse([playlistVideo(0), { ...playlistVideo(1), isMembersOnly: true }, playlistVideo(2)])
     }))
@@ -613,9 +619,15 @@ test.describe('YouTube playlist search', () => {
     const playlistPage = page.locator('.playlistPage')
     const indexes = playlistPage.locator('.playlistItem .videoIndex')
     await expect(indexes).toHaveText(['1', '2'])
+    const thirdVideo = playlistPage.locator('.playlistItem').filter({ hasText: 'Playlist video 3' })
+    await thirdVideo.locator('.externalPlayerIcon').click()
 
     await playlistPage.locator('.playlistInfo').getByRole('searchbox', { name: 'Search for Videos' }).fill('video 3')
     await expect(indexes).toHaveText(['2'])
+    await thirdVideo.locator('.externalPlayerIcon').click()
+
+    // The external player gets the whole playlist, so it counts the hidden video
+    await expect.poll(() => app.electronApp.evaluate(() => globalThis.__externalLaunches)).toEqual([2, 2])
   })
 
   test('keeps a restored search editable on a playlist with one video', async ({ page }) => {
