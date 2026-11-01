@@ -11,7 +11,7 @@
             tabindex="-1"
           >
             <FtIcon
-              :icon="['fas', 'bookmark']"
+              :icon="['far', 'bookmark']"
               class="headingIcon"
             />
             {{ $t("User Playlists.Your Playlists") }}

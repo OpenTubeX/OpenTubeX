@@ -379,7 +379,7 @@
       >
         <HomeSectionHeading
           :title="sectionLabel(section.id)"
-          :icon="['fas', 'bookmark']"
+          :icon="['far', 'bookmark']"
           to="/userplaylists"
         />
         <HomeShelf

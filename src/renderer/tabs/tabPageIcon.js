@@ -4,7 +4,7 @@ const PAGE_ICONS = [
   [/^\/subscribedchannels(?:\/|$)/, ['fas', 'user-check']],
   [/^\/trending(?:\/|$)/, ['fas', 'fire']],
   [/^\/popular(?:\/|$)/, ['fas', 'users']],
-  [/^\/(?:userplaylists|playlist)(?:\/|$)/, ['fas', 'bookmark']],
+  [/^\/(?:userplaylists|playlist)(?:\/|$)/, ['far', 'bookmark']],
   [/^\/history(?:\/|$)/, ['fas', 'history']],
   [/^\/downloads(?:\/|$)/, ['fas', 'download']],
   [/^\/stats(?:\/|$)/, ['fas', 'chart-line']],

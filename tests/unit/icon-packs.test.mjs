@@ -8,6 +8,7 @@ import {
   normalizeFaIcon,
   resolveMappedIcon,
 } from '../../src/renderer/icons/iconMappingResolver.js'
+import { NAVIGATION_ITEM_DEFINITIONS } from '../../src/navigationItems.js'
 import { TAB_GROUP_ICONS } from '../../src/tabGroupIcons.js'
 import { PROFILE_ICONS } from '../../src/renderer/helpers/profileIcons.js'
 
@@ -164,5 +165,14 @@ test('the alias table only carries aliases the icon map can use', () => {
     assert.notEqual(alias, canonical, `identity alias ${alias} is dead weight`)
     assert.ok(canonical in mapping || alias in mapping,
       `alias ${alias} -> ${canonical} points at an icon no pack maps`)
+  }
+})
+
+test('navigation item icons resolve to outline glyphs', () => {
+  const filledBookmarks = new Set(['material-symbols:bookmark', 'ri:bookmark-fill'])
+  for (const { id, icon } of NAVIGATION_ITEM_DEFINITIONS) {
+    for (const pack of packs) {
+      assert.ok(!filledBookmarks.has(resolveIconifyId(icon, pack)), `${id} uses a filled ${pack} glyph`)
+    }
   }
 })
