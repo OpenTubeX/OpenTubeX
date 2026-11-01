@@ -1132,6 +1132,71 @@ test('repeats an A-B range and manages it from the player menu', async ({ app, p
   await expect(player.getByRole('button', { name: /^Clear A-B repeat range/ })).not.toBeVisible()
 })
 
+test('loops a chapter from the chapters panel with A-B repeat', async ({ app, page }) => {
+  await mockPlayableWatchPage(app, page)
+  const video = await openMockedVideo(page)
+  const player = page.locator('.ftVideoPlayer')
+  await video.evaluate((element) => {
+    element.pause()
+    element.currentTime = 5
+  })
+  const view = await watchViewHandle(page)
+  await view.evaluate(async (view) => {
+    view.videoChapters = [
+      { title: 'Intro', timestamp: '0:00', startSeconds: 0, endSeconds: 10 },
+      { title: 'Middle', timestamp: '0:10', startSeconds: 10, endSeconds: 20 },
+      // The listed video length can exceed the media duration.
+      { title: 'Outro', timestamp: '0:20', startSeconds: 20, endSeconds: 31 },
+    ]
+    view.showSidebarChapters = true
+    await view.$nextTick()
+  })
+  await view.dispose()
+
+  const panel = page.locator('.watchVideoChaptersPanel')
+  const loopMiddle = panel.getByRole('button', { name: 'Loop chapter: Middle' })
+  const loopOutro = panel.getByRole('button', { name: 'Loop chapter: Outro' })
+  await expect(loopMiddle).toHaveAttribute('aria-pressed', 'false')
+
+  await loopMiddle.click()
+  await expect(loopMiddle).toHaveAttribute('aria-pressed', 'true')
+  await expect(player.locator('.valueChangePopup')).toContainText('Looping chapter: Middle')
+  await expect.poll(() => video.evaluate(element => element.currentTime)).toBe(10)
+  await expect(player.locator('.abRepeatMarkerA')).toHaveAttribute('aria-label', 'Adjust point A, currently 0:10')
+  await expect(player.locator('.abRepeatMarkerB')).toHaveAttribute('aria-label', 'Adjust point B, currently 0:20')
+  await video.evaluate((element) => { element.currentTime = 25 })
+  await expect.poll(() => video.evaluate(element => element.currentTime)).toBe(10)
+
+  await loopOutro.click()
+  await expect(loopOutro).toHaveAttribute('aria-pressed', 'true')
+  await expect(loopMiddle).toHaveAttribute('aria-pressed', 'false')
+  const duration = await video.evaluate(element => element.duration)
+  expect(duration).toBeLessThan(31)
+  await expect.poll(() => video.evaluate(element => element.currentTime)).toBe(20)
+
+  // Moving a point turns the range into a custom one.
+  const endMarker = player.locator('.abRepeatMarkerB')
+  await endMarker.focus()
+  await endMarker.press('ArrowLeft')
+  await expect(loopOutro).toHaveAttribute('aria-pressed', 'false')
+  await expect(player.locator('.abRepeatMarker')).toHaveCount(2)
+
+  await loopOutro.click()
+  await expect(loopOutro).toHaveAttribute('aria-pressed', 'true')
+  await loopOutro.click()
+  await expect(loopOutro).toHaveAttribute('aria-pressed', 'false')
+  await expect(player.locator('.valueChangePopup')).toContainText('Stopped looping chapter')
+  await expect(player.locator('.abRepeatMarker')).toHaveCount(0)
+
+  await page.evaluate(() => window.$store.dispatch('updateDisableAbRepeat', true))
+  await expect(panel.locator('.loopChapter')).toHaveCount(0)
+  await page.evaluate(() => window.$store.dispatch('updateDisableAbRepeat', false))
+  await expect(panel.locator('.loopChapter')).toHaveCount(3)
+  await loopOutro.click()
+  await expect(loopOutro).toHaveAttribute('aria-pressed', 'true')
+  await expect(endMarker).toHaveAttribute('aria-label', /^Adjust point B, currently 0:30(\.\d+)?$/)
+})
+
 test('keeps the B repeat marker visible and interactive at the end', async ({ app, page }) => {
   await mockPlayableWatchPage(app, page)
   const video = await openMockedVideo(page)

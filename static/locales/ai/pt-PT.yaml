@@ -1981,6 +1981,9 @@ Chapters:
   Open Chapters: Abrir capítulos
   Close Chapters: Fechar capítulos
   Copy Timestamp Link: Copiar hiperligação em {timestamp}
+  Loop Chapter: 'Repetir capítulo: {chapter}'
+  Looping Chapter: 'A repetir o capítulo: {chapter}'
+  Chapter Loop Stopped: 'Repetição do capítulo interrompida'
 Comments:
   Image unavailable: "Imagem indisponível"
   Comment Count: 1 comentário | {count} comentários | {count} comentários

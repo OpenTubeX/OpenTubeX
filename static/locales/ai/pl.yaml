@@ -1644,3 +1644,7 @@ Yattee Server:
 Yattee Fallback Warning: To żądanie pomija skonfigurowany serwer Yattee i łączy się bezpośrednio z YouTube, ujawniając Twój adres IP.
 Update With Package Manager: 'Zaktualizuj za pomocą {packageManager}:'
 Update Command Copied: 'Skopiowano polecenie aktualizacji'
+Chapters:
+  Loop Chapter: 'Zapętl rozdział: {chapter}'
+  Looping Chapter: 'Zapętlanie rozdziału: {chapter}'
+  Chapter Loop Stopped: 'Zatrzymano zapętlanie rozdziału'

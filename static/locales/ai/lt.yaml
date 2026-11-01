@@ -2351,6 +2351,9 @@ Chapters:
   Open Chapters: Atverti skyrius
   Close Chapters: Uždaryti skyrius
   Copy Timestamp Link: Kopijuoti nuorodą ties {timestamp}
+  Loop Chapter: 'Kartoti skyrių: {chapter}'
+  Looping Chapter: 'Kartojamas skyrius: {chapter}'
+  Chapter Loop Stopped: 'Skyriaus kartojimas sustabdytas'
 Comments:
   Image unavailable: "Vaizdas nepasiekiamas"
   Comment Count: 1 komentaras | {count} komentarai | {count} komentarų

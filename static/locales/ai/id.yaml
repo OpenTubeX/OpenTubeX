@@ -1959,6 +1959,9 @@ Chapters:
   Open Chapters: Buka Bab
   Close Chapters: Tutup Bab
   Copy Timestamp Link: Salin tautan pada {timestamp}
+  Loop Chapter: 'Ulangi bab: {chapter}'
+  Looping Chapter: 'Mengulang bab: {chapter}'
+  Chapter Loop Stopped: 'Berhenti mengulang bab'
 Comments:
   Image unavailable: "Gambar tidak tersedia"
   Comment Count: '{count} Komentar'

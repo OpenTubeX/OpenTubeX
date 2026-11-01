@@ -328,6 +328,30 @@ export function useAbRepeat({
     return null
   }
 
+  /**
+   * Sets both points at once and turns the repeat on.
+   * @param {number} start
+   * @param {number} end
+   * @returns {boolean} Whether the range was applied
+   */
+  function setAbRepeatRange(start, end) {
+    if (disableAbRepeat.value || isLive.value || validateAbRepeatRange(start, end, abRepeatDuration.value) !== null) {
+      return false
+    }
+
+    abRepeatDragCleanup?.()
+    abRepeatStart.value = start
+    abRepeatEnd.value = end
+    abRepeatEnabled.value = true
+    if (video.value) {
+      video.value.loop = false
+    }
+
+    refreshAbRepeatMarkers()
+    scheduleAbRepeatBoundary()
+    return true
+  }
+
   /** @param {'start' | 'end'} point */
   function setCurrentAbRepeatBoundary(point) {
     const currentTime = video.value?.currentTime
@@ -449,6 +473,7 @@ export function useAbRepeat({
 
   return {
     abRepeatAvailable,
+    abRepeatDuration,
     abRepeatEnabled,
     abRepeatEnd,
     abRepeatStart,
@@ -462,6 +487,7 @@ export function useAbRepeat({
     refreshAbRepeatMarkers,
     resetAbRepeat,
     scheduleAbRepeatBoundary,
+    setAbRepeatRange,
     setCurrentAbRepeatBoundary,
     toggleAbRepeat,
     updateAbRepeatDuration,

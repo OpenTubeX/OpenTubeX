@@ -1940,6 +1940,9 @@ Chapters:
   Open Chapters: 打开章节
   Close Chapters: 关闭章节
   Copy Timestamp Link: 复制 {timestamp} 处的链接
+  Loop Chapter: '循环播放章节：{chapter}'
+  Looping Chapter: '正在循环播放章节：{chapter}'
+  Chapter Loop Stopped: '已停止循环播放章节'
 Comments:
   Image unavailable: "图片不可用"
   Comment Count: '{count} 条评论'

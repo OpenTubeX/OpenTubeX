@@ -2989,6 +2989,9 @@ Chapters:
   Open Chapters: Open Chapters
   Close Chapters: Close Chapters
   Copy Timestamp Link: Copy link at {timestamp}
+  Loop Chapter: 'Loop chapter: {chapter}'
+  Looping Chapter: 'Looping chapter: {chapter}'
+  Chapter Loop Stopped: 'Stopped looping chapter'
 
 Mini Player: Mini Player
 Comments:

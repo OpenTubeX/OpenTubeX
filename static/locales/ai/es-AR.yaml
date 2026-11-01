@@ -2364,6 +2364,9 @@ Chapters:
   Open Chapters: Abrir capítulos
   Close Chapters: Cerrar capítulos
   Copy Timestamp Link: Copiar enlace en {timestamp}
+  Loop Chapter: 'Repetir capítulo: {chapter}'
+  Looping Chapter: 'Repitiendo capítulo: {chapter}'
+  Chapter Loop Stopped: 'Se dejó de repetir el capítulo'
 Mini Player: Minirreproductor
 Comments:
   Image unavailable: "Imagen no disponible"

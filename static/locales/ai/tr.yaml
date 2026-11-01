@@ -1940,6 +1940,9 @@ Chapters:
   Open Chapters: Bölümleri Aç
   Close Chapters: Bölümleri Kapat
   Copy Timestamp Link: '{timestamp} konumundaki bağlantıyı kopyala'
+  Loop Chapter: 'Bölümü tekrarla: {chapter}'
+  Looping Chapter: 'Bölüm tekrarlanıyor: {chapter}'
+  Chapter Loop Stopped: 'Bölüm tekrarı durduruldu'
 Comments:
   Image unavailable: "Görüntü kullanılamıyor"
   Comment Count: 1 Yorum | {count} Yorum

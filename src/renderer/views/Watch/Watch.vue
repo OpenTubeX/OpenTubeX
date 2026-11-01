@@ -224,6 +224,7 @@
               @toggle-quick-bookmark="toggleCurrentVideoQuickBookmarked"
               @chapters-overlay-change="handleChaptersOverlayChange"
               @chapter-thumbnails-change="handleChapterThumbnailsChange"
+              @looped-chapter-change="videoLoopedChapterIndex = $event"
               @sponsorblock-info-change="handleSponsorBlockInfoChange"
               @toggle-shorts-metadata="toggleShortsMetadata"
               @open-phone-panel="openShortsPhonePanel"
@@ -1139,7 +1140,9 @@
               :chapter-thumbnails="videoChapterThumbnails"
               :current-chapter-index="videoCurrentChapterIndex"
               :fallback-thumbnail="thumbnail"
+              :looped-chapter-index="videoLoopedChapterIndex"
               @copy-timestamp="copyChapterTimestamp"
+              @loop-chapter="$refs.player?.toggleChapterLoop($event)"
               @timestamp-event="changeTimestamp"
             />
           </div>

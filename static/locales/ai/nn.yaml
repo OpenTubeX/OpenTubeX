@@ -2241,6 +2241,9 @@ Chapters:
   Open Chapters: Opna kapittel
   Close Chapters: Lukk kapittel
   Copy Timestamp Link: Kopier lenkja ved {timestamp}
+  Loop Chapter: 'Gjenta kapittel: {chapter}'
+  Looping Chapter: 'Gjentek kapittel: {chapter}'
+  Chapter Loop Stopped: 'Slutta å gjenta kapittel'
 Comments:
   Image unavailable: "Biletet er ikkje tilgjengeleg"
   Comment Count: 1 kommentar | {count} kommentarar

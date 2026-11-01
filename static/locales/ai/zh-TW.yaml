@@ -1943,6 +1943,9 @@ Chapters:
   Open Chapters: 開啟章節
   Close Chapters: 關閉章節
   Copy Timestamp Link: 複製從 {timestamp} 開始的連結
+  Loop Chapter: '循環播放章節：{chapter}'
+  Looping Chapter: '正在循環播放章節：{chapter}'
+  Chapter Loop Stopped: '已停止循環播放章節'
 Comments:
   Image unavailable: "圖片無法使用"
   Comment Count: '{count} 則留言'

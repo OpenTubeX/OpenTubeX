@@ -1940,6 +1940,9 @@ Chapters:
   Open Chapters: Apri capitoli
   Close Chapters: Chiudi capitoli
   Copy Timestamp Link: Copia link al punto {timestamp}
+  Loop Chapter: 'Ripeti capitolo: {chapter}'
+  Looping Chapter: 'Ripetizione del capitolo: {chapter}'
+  Chapter Loop Stopped: 'Ripetizione del capitolo interrotta'
 Comments:
   Image unavailable: "Immagine non disponibile"
   Comment Count: 1 commento | {count} commenti | {count} commenti

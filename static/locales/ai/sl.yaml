@@ -2430,6 +2430,9 @@ Chapters:
   Open Chapters: Odpri poglavja
   Close Chapters: Zapri poglavja
   Copy Timestamp Link: Kopiraj povezavo pri {timestamp}
+  Loop Chapter: 'Ponavljaj poglavje: {chapter}'
+  Looping Chapter: 'Poglavje se ponavlja: {chapter}'
+  Chapter Loop Stopped: 'Ponavljanje poglavja ustavljeno'
 Comments:
   Image unavailable: "Slika ni na voljo"
   Comment Count: 1 komentar | {count} komentarja | {count} komentarji | {count} komentarjev

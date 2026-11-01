@@ -1991,6 +1991,9 @@ Chapters:
   Open Chapters: פתיחת הפרקים
   Close Chapters: סגירת הפרקים
   Copy Timestamp Link: העתקת הקישור בנקודת הזמן {timestamp}
+  Loop Chapter: 'הפעלה חוזרת של הפרק: {chapter}'
+  Looping Chapter: 'הפרק מופעל בלולאה: {chapter}'
+  Chapter Loop Stopped: 'ההפעלה החוזרת של הפרק הופסקה'
 Comments:
   Image unavailable: "התמונה אינה זמינה"
   Comment Count: 1 תגובה | {count} תגובות | {count} תגובות

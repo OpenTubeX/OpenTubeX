@@ -1949,6 +1949,9 @@ Chapters:
   Open Chapters: "Digeriñ ar chabistroù"
   Close Chapters: "Serriñ ar chabistroù"
   Copy Timestamp Link: "Eilañ al liamm da {timestamp}"
+  Loop Chapter: 'Lenn ar chabistr en-dro: {chapter}'
+  Looping Chapter: 'O lenn ar chabistr en-dro: {chapter}'
+  Chapter Loop Stopped: 'Paouezet eo da lenn ar chabistr en-dro'
 Comments:
   Image unavailable: "Skeudenn n'eo ket hegerz"
   Comment Count: "1 evezhiadenn | {count} evezhiadenn | {count} evezhiadenn | {count} evezhiadenn | {count} evezhiadenn"

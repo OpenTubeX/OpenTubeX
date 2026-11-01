@@ -2000,6 +2000,9 @@ Chapters:
   Open Chapters: Hoofdstukken openen
   Close Chapters: Hoofdstukken sluiten
   Copy Timestamp Link: Link op {timestamp} kopiëren
+  Loop Chapter: 'Hoofdstuk herhalen: {chapter}'
+  Looping Chapter: 'Hoofdstuk wordt herhaald: {chapter}'
+  Chapter Loop Stopped: 'Herhalen van hoofdstuk gestopt'
 Comments:
   Image unavailable: "Afbeelding niet beschikbaar"
   Comment Count: 1 reactie | {count} reacties

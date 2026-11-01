@@ -115,6 +115,7 @@
               @dock-panel-change="handleDockPanelChange"
               @toggle-theatre-mode="toggleTheatreMode"
               @chapters-overlay-change="handleChaptersOverlayChange"
+              @looped-chapter-change="loopedChapterIndex = $event"
             />
             <!-- eslint-disable-next-line vuejs-accessibility/media-has-caption -->
             <audio
@@ -335,8 +336,10 @@
                 :chapters="chapters"
                 :current-chapter-index="currentChapterIndex"
                 :fallback-thumbnail="thumbnail"
+                :looped-chapter-index="loopedChapterIndex"
                 @timestamp-event="seekTo"
                 @copy-timestamp="copyChapterTimestamp"
+                @loop-chapter="player?.toggleChapterLoop($event)"
               />
             </FtCard>
           </FtPhonePanel>
@@ -596,6 +599,8 @@ const chapters = computed(() => (metadata.value.chapters ?? []).map(chapter => (
   ...chapter,
   timestamp: formatDurationAsTimestamp(Math.floor(chapter.startSeconds))
 })))
+/** @type {import('vue').Ref<number | null>} */
+const loopedChapterIndex = ref(null)
 const currentChapterIndex = computed(() => chapters.value.findLastIndex(chapter => currentTime.value >= chapter.startSeconds))
 const chaptersSrc = computed(() => chapters.value.some(chapter => chapter.endSeconds !== null)
   ? `data:text/vtt,${encodeURIComponent(buildChaptersVttFile(chapters.value.filter(chapter => chapter.endSeconds !== null)))}`
@@ -1408,12 +1413,16 @@ onBeforeUnmount(() => {
 }
 
 .externalMediaChapters :deep(.chapterSeek),
-.externalMediaChapters :deep(.copyTimestamp) {
+.externalMediaChapters :deep(.chapterAction) {
   color: inherit;
 }
 
-.externalMediaChapters :deep(.copyTimestamp:hover),
-.externalMediaChapters :deep(.copyTimestamp:focus-visible) {
+.externalMediaChapters :deep(.loopChapter.active) {
+  color: var(--accent-color);
+}
+
+.externalMediaChapters :deep(.chapterAction:hover),
+.externalMediaChapters :deep(.chapterAction:focus-visible) {
   background-color: var(--side-nav-hover-color);
 }
 

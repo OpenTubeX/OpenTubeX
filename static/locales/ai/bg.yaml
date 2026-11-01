@@ -1965,6 +1965,9 @@ Chapters:
   Open Chapters: Отваряне на главите
   Close Chapters: Затваряне на главите
   Copy Timestamp Link: Копиране на връзката при {timestamp}
+  Loop Chapter: 'Повтаряне на главата: {chapter}'
+  Looping Chapter: 'Главата се повтаря: {chapter}'
+  Chapter Loop Stopped: 'Повтарянето на главата е спряно'
 Comments:
   Image unavailable: "Изображението не е налично"
   Comment Count: 1 коментар | {count} коментара

@@ -2031,6 +2031,9 @@ Chapters:
   Open Chapters: باز کردن فصل‌ها
   Close Chapters: بستن فصل‌ها
   Copy Timestamp Link: کپی پیوند در {timestamp}
+  Loop Chapter: 'تکرار فصل: {chapter}'
+  Looping Chapter: 'در حال تکرار فصل: {chapter}'
+  Chapter Loop Stopped: 'تکرار فصل متوقف شد'
 Comments:
   Image unavailable: "تصویر در دسترس نیست"
   Comment Count: 1 دیدگاه | {count} دیدگاه

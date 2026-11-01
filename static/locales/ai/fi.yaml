@@ -1989,6 +1989,9 @@ Chapters:
   Open Chapters: Avaa luvut
   Close Chapters: Sulje luvut
   Copy Timestamp Link: Kopioi linkki kohdasta {timestamp}
+  Loop Chapter: 'Toista lukua jatkuvasti: {chapter}'
+  Looping Chapter: 'Lukua toistetaan: {chapter}'
+  Chapter Loop Stopped: 'Luvun toisto lopetettu'
 Comments:
   Image unavailable: "Kuva ei ole saatavilla"
   Comment Count: 1 kommentti | {count} kommenttia

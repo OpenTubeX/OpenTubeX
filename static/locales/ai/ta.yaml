@@ -2001,6 +2001,9 @@ Chapters:
   Open Chapters: அத்தியாயங்களைத் திற
   Close Chapters: அத்தியாயங்களை மூடு
   Copy Timestamp Link: '{timestamp}-இல் உள்ள இணைப்பை நகலெடு'
+  Loop Chapter: 'அத்தியாயத்தை மீண்டும் இயக்கு: {chapter}'
+  Looping Chapter: 'அத்தியாயம் மீண்டும் இயக்கப்படுகிறது: {chapter}'
+  Chapter Loop Stopped: 'அத்தியாயத்தை மீண்டும் இயக்குவது நிறுத்தப்பட்டது'
 Comments:
   Image unavailable: "படம் கிடைக்கவில்லை"
   Comment Count: 1 கருத்து | {count} கருத்துகள்

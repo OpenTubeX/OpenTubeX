@@ -2943,6 +2943,9 @@ Chapters:
   Open Chapters: Kapitel öffnen
   Close Chapters: Kapitel schließen
   Copy Timestamp Link: Link bei {timestamp} kopieren
+  Loop Chapter: 'Kapitel wiederholen: {chapter}'
+  Looping Chapter: 'Kapitel wird wiederholt: {chapter}'
+  Chapter Loop Stopped: 'Kapitelwiederholung beendet'
 Preferences: Einstellungen
 Ok: OK
 Hashtag:
