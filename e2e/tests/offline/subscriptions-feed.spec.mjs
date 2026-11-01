@@ -704,9 +704,20 @@ test.describe('subscriptions feed with upcoming premieres shown', () => {
     })
     expect(isRightmost).toBe(true)
 
+    await page.locator('body').evaluate(element => {
+      element.style.setProperty('--accent-color', '#123456')
+      element.style.setProperty('--text-with-accent-color', '#654321')
+    })
+    await expect(reminderButton).not.toHaveCSS('background-color', 'rgb(18, 52, 86)')
+
     await reminderButton.click()
-    await expect(upcomingPremiere.getByRole('button', { name: 'Notification on' }))
-      .toHaveAttribute('aria-pressed', 'true')
+    const activeReminderButton = upcomingPremiere.getByRole('button', { name: 'Notification on' })
+    await expect(activeReminderButton).toHaveAttribute('aria-pressed', 'true')
+
+    // A solid accent fill keeps the active state distinct from the inactive tonal fill.
+    await page.mouse.move(0, 0)
+    await expect(activeReminderButton).toHaveCSS('background-color', 'rgb(18, 52, 86)')
+    await expect(activeReminderButton).toHaveCSS('color', 'rgb(101, 67, 33)')
   })
 
   test('updates a reused upcoming card when refreshed premiere state changes', async ({ page }) => {
