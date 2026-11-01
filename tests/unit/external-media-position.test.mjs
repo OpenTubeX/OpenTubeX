@@ -57,12 +57,23 @@ test('restarts completed media and media sought back to the beginning', () => {
   saveExternalMediaPosition(url, 12, 30)
   assert.equal(getExternalMediaPosition(url, 13), null)
   for (const seconds of [28, 30, 0]) {
+    storage.clear()
     saveExternalMediaPosition(url, 12, 30)
     saveExternalMediaPosition(url, seconds, 30)
     assert.equal(getExternalMediaPosition(url, 30), null)
     assert.deepEqual(getExternalMediaProgress(url), seconds === 0 ? null : { watched: true, progress: 1 })
     assert.equal(storage.size, seconds === 0 ? 0 : 1)
   }
+})
+
+test('keeps finished media watched while it is replayed', () => {
+  saveExternalMediaPosition(url, 30, 30)
+  saveExternalMediaPosition(url, 12, 30)
+  assert.equal(getExternalMediaPosition(url, 30), 12)
+  assert.deepEqual(getExternalMediaProgress(url), { watched: true, progress: 1 })
+  saveExternalMediaPosition(url, 0, 30)
+  assert.equal(getExternalMediaPosition(url, 30), null)
+  assert.deepEqual(getExternalMediaProgress(url), { watched: true, progress: 1 })
 })
 
 test('reports the progress of partly watched media', () => {

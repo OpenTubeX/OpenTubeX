@@ -76,11 +76,17 @@ export function saveExternalMediaPosition(url, seconds, duration) {
   if (key === null || !Number.isFinite(seconds) || seconds < 0) return
   const hasDuration = Number.isFinite(duration) && duration > 0
   try {
+    // A finished video restarts, but lists still show it as watched, also while it's replayed
+    const watched = readPosition(key)?.watched === true
     if (hasDuration && seconds >= duration - 2) {
-      // A finished video restarts, but lists still show it as watched
       localStorage.setItem(key, JSON.stringify({ seconds: 0, watched: true, updatedAt: Date.now() }))
-    } else if (seconds > 0) {
-      localStorage.setItem(key, JSON.stringify({ seconds, ...(hasDuration ? { duration } : {}), updatedAt: Date.now() }))
+    } else if (seconds > 0 || watched) {
+      localStorage.setItem(key, JSON.stringify({
+        seconds,
+        ...(hasDuration ? { duration } : {}),
+        ...(watched ? { watched } : {}),
+        updatedAt: Date.now()
+      }))
     } else {
       localStorage.removeItem(key)
     }

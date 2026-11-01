@@ -112,6 +112,12 @@ function isSettingsSearchMessageVisible(sectionType, path, options) {
     return usingElectron || (isCapacitor && !isIos)
   }
 
+  // RSS feed items open through yt-dlp, and the manager needs the feature enabled
+  if (sectionType === 'subscription' && ['RSS Feeds', 'Enable RSS Feeds', 'Manage RSS Feeds'].includes(group)) {
+    return (usingElectron || isCapacitor) && !isLiteBuild &&
+      (group !== 'Manage RSS Feeds' || store.getters.getEnableRssFeeds === true)
+  }
+
   if (sectionType === 'player' && group === 'Screenshot') {
     if (item === 'Enable') return true
     if (!store.getters.getEnableScreenshot) return false

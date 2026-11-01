@@ -703,3 +703,22 @@ test('managed tool error messages never become settings search results', () => {
     assert.equal(labels.includes(message), false, message)
   }
 })
+
+test('settings search lists RSS feed settings only where their controls exist', () => {
+  for (const [usingElectron, enabled, searchable, manageable] of [
+    [true, false, true, false],
+    [true, true, true, true],
+    [false, true, false, false]
+  ]) {
+    const labels = [...createSettingsSearchIndex({
+      sections: [{ type: 'subscriptions', title: 'Subscriptions', description: '' }],
+      tm: path => getAtPath(locale, path),
+      store: { getters: { getEnableRssFeeds: enabled } },
+      usingElectron,
+    }).values()].flat().map(entry => entry.label)
+    for (const label of ['RSS Feeds', 'Enable RSS Feeds for Other Platforms']) {
+      assert.equal(labels.includes(label), searchable, `${label} ${usingElectron} ${enabled}`)
+    }
+    assert.equal(labels.includes('Manage RSS Feeds'), manageable, `Manage RSS Feeds ${usingElectron} ${enabled}`)
+  }
+})

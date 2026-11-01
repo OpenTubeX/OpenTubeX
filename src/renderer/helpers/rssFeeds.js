@@ -58,6 +58,20 @@ function childText(parent, names) {
 }
 
 /**
+ * Atom text constructs can contain HTML. Only the text of the inert parsed
+ * document is kept, so supplied markup never renders.
+ * @param {Element} parent
+ * @param {string[]} names
+ */
+function childPlainText(parent, names) {
+  const element = childElements(parent, names).find(child => child.textContent?.trim())
+  const text = element?.textContent?.trim() ?? ''
+  return element?.getAttribute('type') === 'html'
+    ? new DOMParser().parseFromString(text, 'text/html').body.textContent?.trim() ?? ''
+    : text
+}
+
+/**
  * @param {Element} item
  * @param {string} base
  */
@@ -192,7 +206,7 @@ export function parseRssFeed(source, feedUrl, baseUrl = feedUrl) {
   const channel = root.localName === 'feed' ? root : childElements(root, ['channel'])[0]
   if (!channel) throw new Error('Not an RSS or Atom feed')
 
-  const title = childText(channel, ['title']) || new URL(feedUrl).hostname
+  const title = childPlainText(channel, ['title']) || new URL(feedUrl).hostname
   const entries = root.localName === 'feed'
     ? childElements(root, ['entry'])
     : childElements(root.localName === 'RDF' ? root : channel, ['item'])
@@ -203,7 +217,7 @@ export function parseRssFeed(source, feedUrl, baseUrl = feedUrl) {
     return [{
       id: childText(entry, ['id', 'guid']) || url,
       url,
-      title: childText(entry, ['title']) || url,
+      title: childPlainText(entry, ['title']) || url,
       author: itemAuthor(entry) || title,
       thumbnail: itemThumbnail(entry, baseUrl),
       published: itemPublished(entry),

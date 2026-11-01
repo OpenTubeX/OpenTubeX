@@ -16,8 +16,8 @@ function savedExternalEntry(page, mediaUrl) {
 
 /** The resume position. Finished media is remembered as watched without one. */
 async function savedExternalPosition(page, mediaUrl) {
-  const entry = await savedExternalEntry(page, mediaUrl)
-  return entry?.watched ? null : entry?.seconds ?? null
+  const seconds = (await savedExternalEntry(page, mediaUrl))?.seconds
+  return seconds > 0 ? seconds : null
 }
 
 async function prepareTwitchYtDlp(app, page, mediaUrl, live, description = '', chapters = [], duration = 30, metadata = {}) {

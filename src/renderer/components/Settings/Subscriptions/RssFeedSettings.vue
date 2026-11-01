@@ -238,8 +238,11 @@ async function addFeed(text) {
     // Loading the feed first rejects addresses that aren't feeds and finds its title
     const result = await fetchRssFeed(url)
     const feed = { url, title: result.title }
+    // Cached before saving, so that the RSS tab doesn't reload every feed for the new one
     addLoadedRssFeed(feed, result)
-    await store.dispatch('updateFollowedRssFeeds', [...feeds.value, feed])
+    if (await store.dispatch('updateFollowedRssFeeds', [...feeds.value, feed]) === false) {
+      throw new Error('The feed could not be saved')
+    }
     feedInput.value?.clear()
     updateMissingRssFeedAvatars([[feed, result]])
   } catch {

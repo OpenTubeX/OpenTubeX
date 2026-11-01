@@ -57,7 +57,7 @@ const atomFeed = `<?xml version="1.0" encoding="UTF-8"?>
   <icon>${PEERTUBE_AVATAR}</icon>
   <entry>
     <id>urn:peertube:2</id>
-    <title>Atom video</title>
+    <title type="html">Atom &lt;b&gt;video&lt;/b&gt;</title>
     <link rel="alternate" href="/w/abc"/>
     <published>${new Date(now - 2 * 86400000).toISOString()}</published>
     <author><name>PeerTube creator</name></author>
@@ -382,6 +382,24 @@ test.describe('without followed feeds', () => {
     } finally {
       server.close()
     }
+  })
+
+  test('reports a feed that could not be saved', async ({ page }) => {
+    await mockFeeds(page)
+    const manager = await openFeedManager(page)
+    await page.evaluate(() => {
+      const store = window.$store
+      const dispatch = store.dispatch
+      store.dispatch = (type, payload) => type === 'updateFollowedRssFeeds'
+        ? Promise.resolve(false)
+        : dispatch.call(store, type, payload)
+    })
+    const input = manager.getByRole('textbox', { name: 'Add Feed' })
+    await input.fill(ATOM_URL)
+    await input.press('Enter')
+    await expect(page.getByText('The feed could not be loaded.', { exact: false })).toBeVisible()
+    await expect(input).toHaveValue(ATOM_URL)
+    await expect(manager.locator('.feedRow')).toHaveCount(0)
   })
 
   test('opens the feed manager from the empty tab', async ({ page }) => {
