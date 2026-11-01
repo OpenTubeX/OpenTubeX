@@ -44,10 +44,12 @@
             :value="String(captionSettings[control.setting] ?? '')"
             setting-key="defaultCaptionSettings"
             :is-changed="isCaptionSettingChanged(control.setting)"
-            :select-names="control.options.map(option => option.name)"
-            :select-values="control.options.map(option => String(option.value ?? ''))"
+            :select-names="control.names"
+            :select-values="control.values"
+            :option-colors="control.colors"
             :icon="['fas', control.icon]"
-            @change="updateCaptionSetting(control.setting, control.options.find(option => String(option.value ?? '') === $event).value)"
+            @change="updateCaptionSetting(control.setting, findOptionValue(control, $event))"
+            @preview="previewCaptionSetting(control.setting, $event === null ? undefined : findOptionValue(control, $event))"
             @reset="resetCaptionSetting(control.setting)"
           />
         </div>
@@ -65,7 +67,7 @@
 </template>
 
 <script setup>
-import { computed } from 'vue'
+import { computed, shallowRef } from 'vue'
 import { useI18n } from 'vue-i18n'
 
 import FtButton from '../../FtButton/FtButton.vue'
@@ -102,11 +104,20 @@ const { t, locale } = useI18n()
 
 /** @type {import('vue').ComputedRef<import('../../../helpers/player/caption-settings').CaptionSettings>} */
 const captionSettings = computed(() => parseCaptionSettings(store.getters.getDefaultCaptionSettings))
-const captionStyle = computed(() => getCaptionStyle(captionSettings.value))
+
+/**
+ * The option highlighted in an open list, shown on the sample before it is chosen.
+ * @type {import('vue').ShallowRef<{ setting: keyof typeof DEFAULT_CAPTION_SETTINGS, value: string | number | null, saving?: boolean } | null>}
+ */
+const preview = shallowRef(null)
+const previewedSettings = computed(() => preview.value === null
+  ? captionSettings.value
+  : { ...captionSettings.value, [preview.value.setting]: preview.value.value })
+const captionStyle = computed(() => getCaptionStyle(previewedSettings.value))
 const previewPosition = computed(() => {
-  const [row, column] = captionSettings.value.positionArea === 'DEFAULT'
+  const [row, column] = previewedSettings.value.positionArea === 'DEFAULT'
     ? ['BOTTOM', 'CENTER']
-    : captionSettings.value.positionArea.split('_')
+    : previewedSettings.value.positionArea.split('_')
   return [`captionRow-${row.toLowerCase()}`, `captionColumn-${(column ?? 'CENTER').toLowerCase()}`]
 })
 
@@ -132,14 +143,27 @@ function getOpacityOptions(opacities, opacity) {
 
 /**
  * Colors that aren't in the palette, which the settings offered before, stay selectable.
+ * The default color has no swatch of its own, so it gets an empty one.
  * @param {string} color
  */
 function getColorOptions(color) {
   const colors = Object.keys(CAPTION_COLORS)
   if (!colors.includes(color)) colors.push(color)
-  return colors.map(value => ({ value, name: getCaptionColorName(value, t) }))
+  return {
+    options: colors.map(value => ({ value, name: getCaptionColorName(value, t) })),
+    colors: colors.map(value => value === '' ? null : value),
+  }
 }
 
+/**
+ * @param {{ options: { value: string | number | null }[], values: string[] }} control
+ * @param {string} selectValue
+ */
+function findOptionValue(control, selectValue) {
+  return control.options[control.values.indexOf(selectValue)].value
+}
+
+// The lists are built once per change of the settings, as a select treats new lists as new options.
 const styleControls = computed(() => [
   {
     setting: 'fontFamily',
@@ -151,7 +175,7 @@ const styleControls = computed(() => [
     setting: 'fontColor',
     label: t('Settings.Player Settings.Caption Appearance.Text Color'),
     icon: 'text-color',
-    options: getColorOptions(captionSettings.value.fontColor),
+    ...getColorOptions(captionSettings.value.fontColor),
   },
   {
     setting: 'fontOpacity',
@@ -169,7 +193,7 @@ const styleControls = computed(() => [
     setting: 'backgroundColor',
     label: t('Settings.Player Settings.Caption Appearance.Background Color'),
     icon: 'fill-color',
-    options: getColorOptions(captionSettings.value.backgroundColor),
+    ...getColorOptions(captionSettings.value.backgroundColor),
   },
   {
     setting: 'backgroundOpacity',
@@ -189,7 +213,11 @@ const styleControls = computed(() => [
     icon: 'border-all',
     options: CAPTION_POSITION_AREAS.map(value => ({ value, name: getCaptionPositionName(value, t) })),
   },
-])
+].map(control => ({
+  ...control,
+  names: control.options.map(option => option.name),
+  values: control.options.map(option => String(option.value ?? '')),
+})))
 
 const enableCaptionTranslations = computed(() => store.getters.getEnableCaptionTranslations)
 const preferredCaptionLocale = computed(() => store.getters.getPreferredCaptionLocale)
@@ -230,11 +258,30 @@ const preferredCaptionSelectValue = computed(() => {
  * @param {keyof typeof DEFAULT_CAPTION_SETTINGS} setting
  * @param {string | number | null} value
  */
-function updateCaptionSetting(setting, value) {
-  store.dispatch('updateDefaultCaptionSettings', JSON.stringify({
-    ...captionSettings.value,
-    [setting]: value,
-  }))
+async function updateCaptionSetting(setting, value) {
+  // The list closes before the setting is saved, so keep showing the chosen value until then.
+  const saving = { setting, value, saving: true }
+  preview.value = saving
+  try {
+    await store.dispatch('updateDefaultCaptionSettings', JSON.stringify({
+      ...captionSettings.value,
+      [setting]: value,
+    }))
+  } finally {
+    if (preview.value === saving) preview.value = null
+  }
+}
+
+/**
+ * @param {keyof typeof DEFAULT_CAPTION_SETTINGS} setting
+ * @param {string | number | null | undefined} value `undefined` once the list closes
+ */
+function previewCaptionSetting(setting, value) {
+  if (value !== undefined) {
+    preview.value = { setting, value }
+  } else if (!preview.value?.saving) {
+    preview.value = null
+  }
 }
 
 /**
