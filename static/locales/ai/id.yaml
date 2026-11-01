@@ -830,6 +830,9 @@ Settings:
       Shorts: Shorts
       Screenshots: Tangkapan layar
     Enable FCast: "Aktifkan FCast"
+    Screenshot:
+      Legacy Formats: "Format lama"
+      Modern Formats: "Format modern"
   Channel Settings:
     Channel Settings: Pengaturan Saluran
     Channel Settings Description: Ingat pengaturan yang Anda pilih saat menonton untuk setiap saluran, lalu terapkan lagi saat Anda menonton video saluran tersebut berikutnya.

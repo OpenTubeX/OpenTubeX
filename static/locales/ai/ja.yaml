@@ -827,6 +827,9 @@ Settings:
       Shorts: ショート
       Screenshots: スクリーンショット
     Enable FCast: "FCastを有効にする"
+    Screenshot:
+      Legacy Formats: "従来の形式"
+      Modern Formats: "新しい形式"
   Channel Settings:
     Channel Settings: チャンネル設定
     Channel Settings Description: 視聴中に選んだ設定をチャンネルごとに記憶し、次回そのチャンネルの動画を見るときに再度適用します。

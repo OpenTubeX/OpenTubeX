@@ -832,6 +832,9 @@ Settings:
       Shorts: Shorts
       Screenshots: Екранни снимки
     Enable FCast: "Активиране на FCast"
+    Screenshot:
+      Legacy Formats: "Остарели формати"
+      Modern Formats: "Модерни формати"
   Channel Settings:
     Channel Settings: Настройки за каналите
     Channel Settings Description: Запомняне на избраните при гледане настройки поотделно за всеки канал, за да бъдат приложени отново следващия път, когато гледате негов видеоклип.

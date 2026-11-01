@@ -830,6 +830,9 @@ Settings:
       Shorts: Shorts
       Screenshots: Sgrinluniau
     Enable FCast: "Galluogi FCast"
+    Screenshot:
+      Legacy Formats: "Fformatau hŷn"
+      Modern Formats: "Fformatau modern"
   Channel Settings:
     Channel Settings: Gosodiadau sianeli
     Channel Settings Description: Cofiwch y gosodiadau a ddewiswch wrth wylio ar gyfer pob sianel ar wahân, fel eu bod yn cael eu gosod eto y tro nesaf y byddwch yn gwylio un o'i fideos.

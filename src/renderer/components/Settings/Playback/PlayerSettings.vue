@@ -616,6 +616,11 @@
           setting-key="screenshotFormat"
           :select-names="SCREENSHOT_FORMAT_NAMES"
           :select-values="SCREENSHOT_FORMAT_VALUES"
+          :option-groups="SCREENSHOT_FORMAT_GROUPS"
+          :option-group-labels="{
+            legacy: t('Settings.Player Settings.Screenshot.Legacy Formats'),
+            modern: t('Settings.Player Settings.Screenshot.Modern Formats')
+          }"
           :icon="['fas', 'file-image']"
           @change="handleUpdateScreenshotFormat"
         />
@@ -1912,14 +1917,15 @@ function updateEnableScreenshot(value) {
   store.dispatch('updateEnableScreenshot', value)
 }
 
-const SCREENSHOT_FORMAT_NAMES = ['PNG', 'JPEG', 'WebP']
-const SCREENSHOT_FORMAT_VALUES = ['png', 'jpeg', 'webp']
+const SCREENSHOT_FORMAT_NAMES = ['PNG', 'JPEG', 'WebP', 'JPEG XL']
+const SCREENSHOT_FORMAT_VALUES = ['png', 'jpeg', 'webp', 'jxl']
+const SCREENSHOT_FORMAT_GROUPS = ['legacy', 'legacy', 'modern', 'modern']
 
-/** @type {import('vue').ComputedRef<'png' | 'jpeg' | 'webp'>} */
+/** @type {import('vue').ComputedRef<'png' | 'jpeg' | 'webp' | 'jxl'>} */
 const screenshotFormat = computed(() => store.getters.getScreenshotFormat)
 
 /**
- * @param {'png' | 'jpeg' | 'webp'} format
+ * @param {'png' | 'jpeg' | 'webp' | 'jxl'} format
  */
 async function handleUpdateScreenshotFormat(format) {
   await store.dispatch('updateScreenshotFormat', format)

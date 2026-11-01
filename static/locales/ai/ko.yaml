@@ -991,6 +991,8 @@ Settings:
       Modes:
         Save To Folder: 폴더에 저장
         Clipboard: 클립보드에 복사
+      Legacy Formats: "기존 형식"
+      Modern Formats: "최신 형식"
     Rotate Wide Videos to Landscape in Fullscreen: '전체 화면에서 가로형 동영상을 가로 방향으로 회전'
     Swipe Up or Down to Enter or Exit Fullscreen: '위아래로 밀어 전체 화면 시작 또는 종료'
     Preload Upcoming Videos: "다음 동영상 미리 불러오기"

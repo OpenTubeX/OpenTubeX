@@ -824,6 +824,8 @@ Settings:
       Modes:
         Save To Folder: Opslaan in map
         Clipboard: Naar klembord kopiëren
+      Legacy Formats: "Oudere formaten"
+      Modern Formats: "Moderne formaten"
     Rotate Wide Videos to Landscape in Fullscreen: 'Brede video’s liggend draaien in volledig scherm'
     Swipe Up or Down to Enter or Exit Fullscreen: 'Veeg omhoog of omlaag om volledig scherm te openen of te sluiten'
     Preload Upcoming Videos: "Volgende video’s vooraf laden"

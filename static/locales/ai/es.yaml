@@ -789,6 +789,9 @@ Settings:
       Shorts: Shorts
       Screenshots: Capturas de pantalla
     Enable FCast: "Activar FCast"
+    Screenshot:
+      Legacy Formats: "Formatos antiguos"
+      Modern Formats: "Formatos modernos"
   Channel Settings:
     Channel Settings: Ajustes de canales
     Channel Settings Description: Recuerda por separado los ajustes que elijas al ver cada canal para volver a aplicarlos la próxima vez que veas uno de sus vídeos.

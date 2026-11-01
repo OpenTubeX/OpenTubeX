@@ -827,6 +827,9 @@ Settings:
       Shorts: Shorts
       Screenshots: Snímky obrazovky
     Enable FCast: "Povoliť FCast"
+    Screenshot:
+      Legacy Formats: "Staršie formáty"
+      Modern Formats: "Moderné formáty"
   Channel Settings:
     Channel Settings: Nastavenia kanálov
     Channel Settings Description: Nastavenia, ktoré vyberiete pri sledovaní, sa zapamätajú pre každý kanál samostatne a znova sa použijú pri ďalšom sledovaní jeho videa.

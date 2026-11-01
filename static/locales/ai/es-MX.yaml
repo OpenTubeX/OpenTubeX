@@ -930,6 +930,8 @@ Settings:
       Folder Label: Carpeta de capturas de pantalla
       Folder Button: Seleccione una carpeta
       File Name Label: Patrón de nombre de archivo
+      Legacy Formats: "Formatos antiguos"
+      Modern Formats: "Formatos modernos"
     Rotate Wide Videos to Landscape in Fullscreen: 'Girar videos anchos a horizontal en pantalla completa'
     Swipe Up or Down to Enter or Exit Fullscreen: 'Desliza hacia arriba o abajo para entrar o salir de pantalla completa'
     Preload Upcoming Videos: "Precargar próximos vídeos"

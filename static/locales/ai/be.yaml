@@ -846,6 +846,8 @@ Settings:
       Modes:
         Save To Folder: Захаваць у папку
         Clipboard: Скапіраваць у буфер абмену
+      Legacy Formats: "Састарэлыя фарматы"
+      Modern Formats: "Сучасныя фарматы"
     Rotate Wide Videos to Landscape in Fullscreen: 'Паварочваць шырокія відэа гарызантальна ў поўнаэкранным рэжыме'
     Swipe Up or Down to Enter or Exit Fullscreen: 'Правядзіце ўверх або ўніз, каб увайсці ў поўнаэкранны рэжым або выйсці з яго'
     Preload Upcoming Videos: "Папярэдне загружаць наступныя відэа"

@@ -846,6 +846,8 @@ Settings:
       Modes:
         Save To Folder: ذخیره در پوشه
         Clipboard: رونوشت در تخته‌گیره
+      Legacy Formats: "قالب‌های قدیمی"
+      Modern Formats: "قالب‌های جدید"
     Rotate Wide Videos to Landscape in Fullscreen: 'چرخاندن ویدیوهای عریض به حالت افقی در تمام‌صفحه'
     Swipe Up or Down to Enter or Exit Fullscreen: 'برای ورود به تمام‌صفحه یا خروج از آن، بالا یا پایین بکشید'
     Preload Upcoming Videos: "پیش‌بارگیری ویدیوهای بعدی"

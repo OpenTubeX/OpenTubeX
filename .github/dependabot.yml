@@ -43,6 +43,7 @@ updates:
       - dependency-name: "@iconify/utils"
       - dependency-name: "@iconify/vue"
       - dependency-name: "@jitl/quickjs-wasmfile-release-sync"
+      - dependency-name: "@jsquash/jxl"
       - dependency-name: "@lezer/html"
       - dependency-name: "@lezer/markdown"
       - dependency-name: "@material/material-color-utilities"

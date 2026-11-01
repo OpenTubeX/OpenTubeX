@@ -827,6 +827,9 @@ Settings:
       Shorts: Shorts
       Screenshots: Ekraanipildid
     Enable FCast: "Luba FCast"
+    Screenshot:
+      Legacy Formats: "Vanemad vormingud"
+      Modern Formats: "Kaasaegsed vormingud"
   Channel Settings:
     Channel Settings: Kanali seaded
     Channel Settings Description: Jäta iga kanali jaoks eraldi meelde vaatamise ajal valitud seaded, et need rakenduksid uuesti, kui vaatad järgmisel korral selle kanali videot.

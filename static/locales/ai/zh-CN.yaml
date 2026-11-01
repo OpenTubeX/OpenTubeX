@@ -827,6 +827,9 @@ Settings:
       Shorts: Shorts
       Screenshots: 截图
     Enable FCast: "启用 FCast"
+    Screenshot:
+      Legacy Formats: "传统格式"
+      Modern Formats: "现代格式"
   Channel Settings:
     Channel Settings: 频道设置
     Channel Settings Description: 分别记住观看各频道时选择的设置，以便下次观看该频道的视频时再次应用。

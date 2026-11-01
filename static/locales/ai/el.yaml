@@ -832,6 +832,9 @@ Settings:
       Shorts: Shorts
       Screenshots: Στιγμιότυπα οθόνης
     Enable FCast: "Ενεργοποίηση FCast"
+    Screenshot:
+      Legacy Formats: "Παλαιότερες μορφές"
+      Modern Formats: "Σύγχρονες μορφές"
   Channel Settings:
     Channel Settings: Ρυθμίσεις καναλιών
     Channel Settings Description: Απομνημόνευση των ρυθμίσεων που επιλέγετε κατά την παρακολούθηση, ξεχωριστά για κάθε κανάλι, ώστε να εφαρμόζονται ξανά την επόμενη φορά που θα παρακολουθήσετε κάποιο βίντεό του.

@@ -1027,6 +1027,8 @@ Settings:
         Ask Path: Vprašaj za mapo za shranjevanje
         Save To Folder: Shrani v mapo
         Clipboard: Kopiraj v odložišče
+      Legacy Formats: "Starejši formati"
+      Modern Formats: "Sodobni formati"
     Rotate Wide Videos to Landscape in Fullscreen: 'Zavrti široke videoposnetke ležeče v celozaslonskem načinu'
     Swipe Up or Down to Enter or Exit Fullscreen: 'Podrsajte navzgor ali navzdol za vstop v celozaslonski način ali izhod iz njega'
     Preload Upcoming Videos: "Prednaloži naslednje videoposnetke"

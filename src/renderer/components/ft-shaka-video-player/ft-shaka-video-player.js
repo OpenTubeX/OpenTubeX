@@ -201,6 +201,7 @@ import FtAddToPlaylistDropdown from '../FtAddToPlaylistDropdown/FtAddToPlaylistD
 import WatchVideoChapters from '../WatchVideoChapters/WatchVideoChapters.vue'
 import thumbnailPlaceholder from '../../assets/img/thumbnail_placeholder.svg'
 import { useRootClass } from '../../helpers/rootClasses'
+import { encodeJxl } from '../../helpers/jxl-encoder'
 
 /** @typedef {import('../../helpers/sponsorblock').SponsorBlockCategory} SponsorBlockCategory */
 /** @typedef {string | { path: string, viewBox: string }} ValueChangeIcon */
@@ -6421,8 +6422,9 @@ export default defineComponent({
       const canvas = document.createElement('canvas')
       canvas.width = width
       canvas.height = height
+      const context = canvas.getContext('2d')
       try {
-        canvas.getContext('2d').drawImage(video_, 0, 0)
+        context.drawImage(video_, 0, 0)
       } catch (error) {
         showToast({ message: t('Screenshot Error', { error: error.message }), icon: ['fas', 'circle-exclamation'] })
         return
@@ -6443,11 +6445,17 @@ export default defineComponent({
       }
 
       try {
-        /** @type {Blob} */
-        const blob = await new Promise((resolve) => canvas.toBlob(resolve, mimeType, imageQuality))
+        /**
+         * JPEG XL encoding takes seconds, so the save dialog calls this only
+         * after it has used the click's user activation.
+         * @returns {Promise<Blob>}
+         */
+        const encodeScreenshot = () => format === 'jxl'
+          ? encodeJxl(context.getImageData(0, 0, width, height), screenshotQuality.value)
+          : new Promise((resolve) => canvas.toBlob(resolve, mimeType, imageQuality))
 
         if (screenshotMode.value === 'clipboard') {
-          await copyToClipboard(blob, { messageOnSuccess: t('Screenshot Clipboard Success'), messageOnError: t('Screenshot Clipboard Error') })
+          await copyToClipboard(await encodeScreenshot(), { messageOnSuccess: t('Screenshot Clipboard Success'), messageOnError: t('Screenshot Clipboard Error') })
         } else if (screenshotMode.value === 'prompt_folder' || screenshotMode.value === 'default_folder') {
           let filename
           try {
@@ -6477,7 +6485,7 @@ export default defineComponent({
             }
             const saved = await writeFileWithPicker(
               filenameWithExtension,
-              blob,
+              encodeScreenshot,
               format.toUpperCase(),
               mimeType,
               `.${format}`,
@@ -6490,7 +6498,7 @@ export default defineComponent({
               showToast({ message: t('Screenshot Success'), icon: ['fas', 'file-image'] })
             }
           } else {
-            const arrayBuffer = await blob.arrayBuffer()
+            const arrayBuffer = await (await encodeScreenshot()).arrayBuffer()
 
             if (await window.ftElectron.writeToDefaultFolder(filenameWithExtension, arrayBuffer)) {
               showToast({ message: t('Screenshot Success'), icon: ['fas', 'file-image'] })

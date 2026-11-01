@@ -330,7 +330,7 @@ function displayActivityValue(entry) {
           .format(minutes === 30 ? minutes : minutes / 60)
       }
     }
-    if (entry.key === 'screenshotFormat') return { png: 'PNG', jpeg: 'JPEG', webp: 'WebP' }[entry.value] || entry.value
+    if (entry.key === 'screenshotFormat') return { png: 'PNG', jpeg: 'JPEG', webp: 'WebP', jxl: 'JPEG XL' }[entry.value] || entry.value
     if (entry.key === 'currentLocale' && entry.value) {
       return displayIntlName(entry.value, 'language')
     }

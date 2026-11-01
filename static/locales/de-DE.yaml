@@ -1042,6 +1042,8 @@ Settings:
     Screenshot:
       Enable: Screenshots aktivieren
       Format Label: Format von Screenshots
+      Legacy Formats: Ältere Formate
+      Modern Formats: Moderne Formate
       Quality Label: Qualität von Screenshots
       Modes:
         Ask Path: Nach dem Ordner zum Speichern fragen

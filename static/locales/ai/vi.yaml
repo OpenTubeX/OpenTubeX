@@ -838,6 +838,9 @@ Settings:
       Shorts: Shorts
       Screenshots: Ảnh chụp màn hình
     Enable FCast: "Bật FCast"
+    Screenshot:
+      Legacy Formats: "Định dạng cũ"
+      Modern Formats: "Định dạng hiện đại"
   Channel Settings:
     Channel Settings: Cài đặt kênh
     Channel Settings Description: Ghi nhớ riêng các cài đặt bạn chọn khi xem từng kênh để áp dụng lại vào lần sau khi bạn xem video của kênh đó.

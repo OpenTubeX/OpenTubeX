@@ -1012,6 +1012,8 @@ Settings:
       Modes:
         Save To Folder: Išsaugoti aplanke
         Clipboard: Kopijuoti į iškarpinę
+      Legacy Formats: "Senesni formatai"
+      Modern Formats: "Šiuolaikiniai formatai"
     Rotate Wide Videos to Landscape in Fullscreen: 'Pasukti plačius vaizdo įrašus gulsčiai visame ekrane'
     Swipe Up or Down to Enter or Exit Fullscreen: 'Braukite aukštyn arba žemyn, kad įjungtumėte arba išjungtumėte visą ekraną'
     Preload Upcoming Videos: "Iš anksto įkelti kitus vaizdo įrašus"
