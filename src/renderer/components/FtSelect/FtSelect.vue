@@ -209,6 +209,7 @@
               :lang="isLocaleSelector && selectValues[index] !== 'system' && selectValues[index] !== '' ? selectValues[index] : null"
               @mousedown.prevent
               @pointermove="activeIndex = index"
+              @focus="activeIndex = index"
               @click="selectOption(index)"
               @keydown.enter.space.prevent="selectOption(index)"
             >

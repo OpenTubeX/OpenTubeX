@@ -716,6 +716,22 @@ test.describe('settings', () => {
       .toBe('#ff0')
   })
 
+  test('previews the caption option focused with Tab in a phone picker', async ({ page }) => {
+    await page.setViewportSize({ width: 600, height: 700 })
+    const playback = await goToSettingsSection(page, 'playback')
+    const caption = playback.locator('.captionPreview span')
+    await playback.getByRole('combobox', { name: 'Text Color' }).click()
+    const list = page.getByRole('listbox', { name: 'Text Color' })
+    await expect(list).toHaveClass(/phonePicker/)
+    await expect(list).toBeFocused()
+
+    for (const option of ['Default', 'White', 'Yellow']) {
+      await page.keyboard.press('Tab')
+      await expect(list.getByRole('option', { name: option })).toBeFocused()
+    }
+    await expect(caption).toHaveCSS('color', 'rgb(255, 255, 0)')
+  })
+
   test('enables YouTube-style Shorts by default in player settings', async ({ page }) => {
     await goTo(page, 'settings')
     await page.locator('.settingsMenu [data-section="playback"]').click()
