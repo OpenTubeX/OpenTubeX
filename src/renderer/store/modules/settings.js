@@ -30,6 +30,7 @@ import { CUSTOM_THEMES_SYNC_KEY } from '../../../customTheme.js'
 import { normalizeQuickSettings } from '../../helpers/quickSettings.js'
 import { normalizeFullscreenActions } from '../../helpers/fullscreenActions.js'
 import { normalizeControlBarButtons } from '../../helpers/controlBarButtons.js'
+import { normalizeHiddenPlayerMenuControls, normalizePlayerMenuControls, withoutControlBarButtons } from '../../helpers/playerMenuControls.js'
 import { createOptimisticSettingUpdater, createSettingUpdateQueue } from '../../helpers/settingUpdateQueue.js'
 import { mergeSubscriptionSeenVideos } from '../../../subscriptionSeenVideos.js'
 import { mergeSubscriptionSeenPosts } from '../../../subscriptionSeenPosts.js'
@@ -41,6 +42,7 @@ import { setAlwaysUseGoogleVideoBackupServer } from '../../helpers/player/google
 export { NON_TRANSFERABLE_SETTINGS } from '../../../nonTransferableSettings.js'
 
 const CHANNEL_SETTINGS_SYNC_MIGRATION_SETTING = 'channelSettingsSyncMigration'
+const CONTROL_BAR_BUTTONS_MIGRATION_SETTING = 'controlBarButtonsMigration'
 const TUTORIAL_STATE_SETTING_IDS = new Set([
   LAST_USED_VERSION_SETTING_ID,
   TUTORIAL_AUDIENCE_SETTING_ID,
@@ -485,6 +487,11 @@ const customGetters = {
 
   getFullscreenActions: (state) => normalizeFullscreenActions(state.fullscreenActions),
   getControlBarButtons: (state) => normalizeControlBarButtons(state.controlBarButtons),
+  getPlayerMenuControls: (state) => normalizePlayerMenuControls(state.playerMenuControls),
+  getHiddenPlayerMenuControls: (state) => withoutControlBarButtons(
+    normalizeHiddenPlayerMenuControls(state.hiddenPlayerMenuControls),
+    normalizeControlBarButtons(state.controlBarButtons)
+  ),
   getQuickSettings: (state) => normalizeQuickSettings(state.quickSettings),
 
   getNavigationItems: (state) => normalizeNavigationItems(state.navigationItems),
@@ -684,6 +691,18 @@ const customActions = {
     state,
     'controlBarButtons',
     normalizeControlBarButtons(value)
+  ),
+  updatePlayerMenuControls: ({ commit, state }, value) => updateOrderedSetting(
+    commit,
+    state,
+    'playerMenuControls',
+    normalizePlayerMenuControls(value)
+  ),
+  updateHiddenPlayerMenuControls: ({ commit, state }, value) => updateOrderedSetting(
+    commit,
+    state,
+    'hiddenPlayerMenuControls',
+    normalizeHiddenPlayerMenuControls(value)
   ),
   updateQuickSettings: ({ commit, state }, value) => updateOrderedSetting(
     commit,
@@ -1095,6 +1114,22 @@ const customActions = {
 
       if (legacyAutoPipModeEntry && !hasScrollMiniSetting) {
         await dispatch('updateScrollMiniPlayerEnabled', legacyAutoPipModeEntry.value !== 'never')
+      }
+
+      // The chapters and screenshot buttons used to sit on the control bar
+      // before its customizable buttons, so saved control bars from before they
+      // were customizable keep them there.
+      if (!userSettings.some(entry => entry._id === CONTROL_BAR_BUTTONS_MIGRATION_SETTING)) {
+        try {
+          const savedButtons = userSettings.find(entry => entry._id === 'controlBarButtons')?.value
+          if (Array.isArray(savedButtons)) {
+            const added = ['chapters', 'screenshot'].filter(id => !savedButtons.includes(id))
+            if (added.length > 0) await dispatch('updateControlBarButtons', [...added, ...savedButtons])
+          }
+          await DBSettingHandlers.upsert(CONTROL_BAR_BUTTONS_MIGRATION_SETTING, true)
+        } catch (error) {
+          console.error('Failed to migrate the saved control bar buttons', error)
+        }
       }
 
       // Existing logged-in sync users keep sync enabled; everyone else starts off

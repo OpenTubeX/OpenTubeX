@@ -329,7 +329,11 @@ Settings:
   Control Bar:
     Title: "نوار کنترل"
     Customize: "سفارشی‌سازی نوار کنترل"
-    Add Button: "افزودن دکمه"
+    Hidden: "پنهان"
+    Empty: "کنترلی وجود ندارد"
+    Move to Control Bar: "انتقال {control} به نوار کنترل"
+    Move to Player Menu: "انتقال {control} به منوی پخش‌کننده"
+    Hide: "پنهان کردن {control}"
   Fullscreen Actions:
     Recommended Videos: "ویدیوهای پیشنهادی"
     Title: "اقدامات تمام‌صفحه"

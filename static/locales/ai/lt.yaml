@@ -420,7 +420,11 @@ Settings:
   Control Bar:
     Title: "Valdymo juosta"
     Customize: "Tinkinti valdymo juostą"
-    Add Button: "Pridėti mygtuką"
+    Hidden: "Paslėpti"
+    Empty: "Valdiklių nėra"
+    Move to Control Bar: "Perkelti „{control}“ į valdymo juostą"
+    Move to Player Menu: "Perkelti „{control}“ į grotuvo meniu"
+    Hide: "Slėpti „{control}“"
   Fullscreen Actions:
     Recommended Videos: "Rekomenduojami vaizdo įrašai"
     Title: "Viso ekrano veiksmai"

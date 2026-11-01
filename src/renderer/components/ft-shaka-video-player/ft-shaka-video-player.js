@@ -1,5 +1,5 @@
 import { setupPhoneOptionsMenu } from '../../helpers/player/phoneOptionsMenu'
-import { setupSubmenuScrolling } from '../../helpers/player/submenuScrolling'
+import { CONTROL_BAR_MENUS, setupSubmenuScrolling } from '../../helpers/player/submenuScrolling'
 import { chooseAndroidDirectory } from '../../helpers/androidStorage'
 import { isAppHidden, getAndroidAppActive, waitForAndroidAppState } from '../../helpers/appVisibility.js'
 import { playbackScreenWake } from '../../helpers/playbackScreenWake'
@@ -28,7 +28,7 @@ import { createPopularityPath, isMostReplayed } from '../../helpers/player/video
 import store from '../../store/index'
 import { usesInvidiousInstance } from '../../../apiBackends'
 import { getAvailableFullscreenActions } from '../../helpers/fullscreenActions'
-import { DEFAULT_CONTROL_BAR_BUTTONS, getRemovedControlBarButtons } from '../../helpers/controlBarButtons'
+import { DEFAULT_CONTROL_BAR_BUTTONS, getControlBarButtonDefinitions, getRemovedControlBarButtons } from '../../helpers/controlBarButtons'
 import { getSubtitleRequestUrl } from '../../helpers/player/subtitleCookies'
 import { enableTwitchTsVideoGap } from '../../helpers/player/twitchTsVideoGap'
 import LightsOffOverlay from './LightsOffOverlay.vue'
@@ -2959,13 +2959,16 @@ export default defineComponent({
         (props.isLiveDvrEnabled === true || props.manifestMimeType === 'application/x-mpegurl')
       const showPlaybackRateControls = (!isLive.value && !props.isLive) || liveDvrIsConfirmed
       const mobile = isCapacitorMobilePlayer()
+      // Shorts keep their own top controls, which rely on the default buttons.
+      const controlBarButtons = props.shortsPlayer ? DEFAULT_CONTROL_BAR_BUTTONS : store.getters.getControlBarButtons
       const controlPanelElements = [
         ...(!mobile ? ['ft_skip_previous', 'play_pause', 'ft_skip_next', 'mute', 'volume'] : []),
         'time_and_duration',
         'ft_playback_adjusted_time',
         // Chapters often arrive after the controls are built, so the button
         // hides itself while there are none instead of forcing a rebuild.
-        ...((!onlyUseOverFlowMenu.value || mobile) && !props.shortsPlayer ? ['ft_chapters'] : []),
+        // On the control bar, the button sits next to the time.
+        ...((!onlyUseOverFlowMenu.value || mobile) && !props.shortsPlayer && controlBarButtons.includes('chapters') ? ['ft_chapters'] : []),
         'ft_sponsorblock_highlight',
         'spacer'
       ]
@@ -2997,12 +3000,16 @@ export default defineComponent({
         displayInVrMode: useVrMode.value,
       }
 
-      /** @type {string[]} */
-      let elementList
       const pictureInPictureElement = process.env.IS_CAPACITOR && !process.env.IS_IOS
         ? 'ft_android_picture_in_picture'
         : 'picture_in_picture'
+      const qualityElement = props.format === 'legacy' ? 'ft_legacy_quality' : 'quality'
       const controlBarElements = {
+        quality: qualityElement,
+        audioTracks: 'ft_audio_tracks',
+        playbackRate: 'playback_rate',
+        loop: 'ft_loop',
+        screenshot: 'ft_screenshot',
         autoplay: 'ft_autoplay_toggle',
         captions: 'ft_caption_toggle',
         menu: 'overflow_menu',
@@ -3011,45 +3018,43 @@ export default defineComponent({
         fullWindow: 'ft_full_window',
         fullscreen: 'fullscreen',
       }
-      // Shorts keep their own top controls, which rely on the default buttons.
-      const controlBarButtons = props.shortsPlayer ? DEFAULT_CONTROL_BAR_BUTTONS : store.getters.getControlBarButtons
+      const hiddenMenuControls = new Set(store.getters.getHiddenPlayerMenuControls)
+      const menuElements = {
+        ...controlBarElements,
+        // The caption toggle on the control bar keeps the caption menu.
+        captions: 'captions',
+        sleepTimer: 'ft_sleep_timer',
+        seekHistory: 'ft_seek_history',
+        chapters: 'ft_chapters',
+        skipSilence: 'ft_skip_silence',
+        voiceOverTranslation: 'ft_voice_over_translation',
+        musicVisualizer: 'ft_music_visualizer',
+        musicMode: 'ft_music_mode',
+        ambientMode: 'ft_ambient_mode',
+        lightsOff: 'ft_lights_off',
+        videoZoom: 'ft_video_zoom',
+        volumeBoost: 'ft_volume_boost',
+        monoAudio: 'ft_mono_audio',
+        abRepeat: 'ft_ab_repeat',
+      }
+      /** @param {(id: string) => boolean} include */
+      const menuControls = include => store.getters.getPlayerMenuControls
+        .filter(id => !hiddenMenuControls.has(id) && include(id))
+        .map(id => menuElements[id])
 
       // Shorts always use their custom top controls and hide Shaka's standard
       // control panel. Keep every applicable action in the overflow menu even
       // when full-window mode makes the player wide enough for the desktop
       // control layout.
       if (onlyUseOverFlowMenu.value || props.shortsPlayer) {
-        // Keep related settings together before the one-click actions so the
-        // grid's reading and tab order remain predictable.
         uiConfig.overflowMenuButtons = [
           ...(props.shortsPlayer ? ['ft_shorts_video_info'] : []),
-          props.format === 'legacy' ? 'ft_legacy_quality' : 'quality',
-          ...(showPlaybackRateControls ? ['playback_rate'] : []),
-          'captions',
-          'ft_audio_tracks',
-          'ft_sleep_timer',
-          'ft_seek_history',
-          ...(!props.shortsPlayer ? ['ft_autoplay_toggle'] : []),
-          'ft_chapters',
-          'ft_skip_silence',
-          'ft_voice_over_translation',
-          'ft_music_visualizer',
-          'ft_music_mode',
-          'ft_ambient_mode',
-          'ft_lights_off',
-          'ft_video_zoom',
-          'ft_volume_boost',
-          'ft_mono_audio',
-          'ft_loop',
-          'ft_ab_repeat',
-          'ft_screenshot',
-          pictureInPictureElement,
-          ...(!process.env.IS_CAPACITOR ? ['ft_full_window'] : []),
+          ...menuControls(id => id !== 'theatreMode' &&
+            !(id === 'autoplay' && props.shortsPlayer) &&
+            !(id === 'fullWindow' && process.env.IS_CAPACITOR)),
           'recenter_vr',
           'toggle_stereoscopic',
         ]
-
-        elementList = uiConfig.overflowMenuButtons
 
         // The overflow menu above already holds the other buttons.
         const compactButtons = ['captions', 'menu', 'fullscreen', ...(mobile && !props.shortsPlayer ? ['pictureInPicture'] : [])]
@@ -3067,46 +3072,28 @@ export default defineComponent({
           'ft_sponsorblock_start',
           'ft_sponsorblock_cancel',
           'ft_sponsorblock_end',
-          'ft_screenshot',
-          ...controlBarButtons.map(id => controlBarElements[id])
+          ...controlBarButtons.filter(id => id !== 'chapters').map(id => controlBarElements[id])
         )
 
-        // Buttons removed from the control bar stay available in the overflow menu.
-        // The captions menu replaces the caption toggle; fullscreen has no menu entry.
+        // Buttons removed from the control bar join the overflow menu. The
+        // caption menu stays with the caption toggle.
+        const controlBarIds = new Set(getControlBarButtonDefinitions(false).map(({ id }) => id))
         const removedButtons = new Set(getRemovedControlBarButtons(controlBarButtons))
-
-        // Keep related settings together before the one-click actions.
         uiConfig.overflowMenuButtons.push(
-          'ft_audio_tracks',
-          'captions',
-          ...(showPlaybackRateControls ? ['playback_rate'] : []),
-          props.format === 'legacy' ? 'ft_legacy_quality' : 'quality',
-          'ft_sleep_timer',
-          ...(removedButtons.has('autoplay') ? ['ft_autoplay_toggle'] : []),
-          'ft_seek_history',
-          'ft_skip_silence',
-          'ft_voice_over_translation',
-          'ft_music_visualizer',
-          'ft_music_mode',
-          'ft_ambient_mode',
-          'ft_lights_off',
-          'ft_video_zoom',
-          'ft_volume_boost',
-          'ft_mono_audio',
-          'ft_loop',
-          'ft_ab_repeat',
-          ...['pictureInPicture', 'theatreMode', 'fullWindow']
-            .filter(id => removedButtons.has(id))
-            .map(id => controlBarElements[id]),
+          ...menuControls(id => id === 'captions' || !controlBarIds.has(id) || removedButtons.has(id)),
           'recenter_vr',
           'toggle_stereoscopic',
         )
+      }
 
-        elementList = uiConfig.controlPanelElements
+      if (!showPlaybackRateControls) {
+        removeFromArrayIfExists(uiConfig.controlPanelElements, 'playback_rate')
+        removeFromArrayIfExists(uiConfig.overflowMenuButtons, 'playback_rate')
       }
 
       if (!enableScreenshot.value || props.format === 'audio') {
-        removeFromArrayIfExists(elementList, 'ft_screenshot')
+        removeFromArrayIfExists(uiConfig.controlPanelElements, 'ft_screenshot')
+        removeFromArrayIfExists(uiConfig.overflowMenuButtons, 'ft_screenshot')
       }
 
       if (props.externalUrl) {
@@ -3177,6 +3164,7 @@ export default defineComponent({
       if (isLive.value) {
         removeFromArrayIfExists(uiConfig.overflowMenuButtons, 'loop')
         removeFromArrayIfExists(uiConfig.overflowMenuButtons, 'ft_loop')
+        removeFromArrayIfExists(uiConfig.controlPanelElements, 'ft_loop')
       }
 
       if (isLive.value || disableAbRepeat.value) {
@@ -4237,7 +4225,12 @@ export default defineComponent({
       }
 
       addOverlayScrollbars(menu)
-      cleanupSubmenuScrolling = setupSubmenuScrolling(menu, ui.getControls())
+      const cleanupOverflowSubmenus = setupSubmenuScrolling(menu, ui.getControls())
+      const cleanupControlBarMenus = setupSubmenuScrolling(controlsContainer, ui.getControls(), CONTROL_BAR_MENUS)
+      cleanupSubmenuScrolling = () => {
+        cleanupOverflowSubmenus()
+        cleanupControlBarMenus()
+      }
       cleanupPhoneOptionsMenu = setupPhoneOptionsMenu(menu, ui.getControls(), t)
 
       if (!usePlayerMenuGrid.value) {
@@ -8086,6 +8079,7 @@ export default defineComponent({
       registerOwnElement(shakaContextMenu, 'ft_copy_invidious_video_url_at_current_time', new CopyVideoUrlButtonFactory('invidious', true))
       registerOwnElement(shakaContextMenu, 'ft_loop', new LoopButtonFactory())
       registerOwnElement(shakaOverflowMenu, 'ft_loop', new LoopButtonFactory())
+      registerOwnElement(shakaControls, 'ft_loop', new LoopButtonFactory())
     }
 
     function registerScreenshotButton() {

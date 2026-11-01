@@ -104,14 +104,13 @@ test.describe('interface customizer', () => {
     await expect.poll(() => page.evaluate(() => window.$store.getters.getHideComments)).toBe(true)
   })
 
-  test('previews player controls, menu entries and paused visibility', async ({ page }) => {
+  test('previews player controls and paused visibility', async ({ page }) => {
     const customizer = await openInterfaceCustomizer(page, 'player')
     const preview = customizer.locator('.playerPreview')
     const toggle = label => customizer.locator('.playerAppearanceEditor label.switch-label').filter({ hasText: label })
 
-    await expect(preview.locator('[data-preview-control="screenshot"]')).toHaveCount(0)
-    await toggle('Enable screenshot').click()
-    await expect(preview.locator('[data-preview-control="screenshot"]')).toBeVisible()
+    // The controls tab edits the player menu, so this tab keeps it closed.
+    await expect(preview.locator('.previewOverflowMenu')).toHaveCount(0)
     await expect(preview.locator('.previewBigPlay')).toHaveCount(0)
     await toggle('Display Play Button In Video Player').click()
     // Like the player, the center button shows with the controls, not only while paused.
@@ -124,10 +123,6 @@ test.describe('interface customizer', () => {
     await expect(preview.locator('[data-preview-control="quickPlaybackSpeedBar"] .previewRate'))
       .toHaveText(['50%', 'Normal', 'Lecture', '2x'])
 
-    await expect(preview.locator('[data-preview-overflow-item="lightsOff"]')).toHaveCount(0)
-    await toggle('Show Lights Off Toggle').click()
-    await expect(preview.locator('[data-preview-overflow-item="lightsOff"]')).toBeVisible()
-
     await customizer.getByRole('tab', { name: 'Paused', exact: true }).click()
     await expect(preview.locator('.previewControls')).toBeVisible()
     await expect(preview.locator('.previewTitle')).toBeVisible()
@@ -137,11 +132,7 @@ test.describe('interface customizer', () => {
     await expect(preview.locator('.previewBigPlay')).toBeHidden()
     await expect(preview.locator('.previewTitle')).toBeHidden()
     await expect(preview.locator('.previewFullscreenActions')).toBeVisible()
-    await expect.poll(() => page.evaluate(() => [
-      window.$store.getters.getEnableScreenshot,
-      window.$store.getters.getShowLightsOffToggle,
-      window.$store.getters.getShowPlayerControlsWhenPaused,
-    ])).toEqual([true, true, false])
+    await expect.poll(() => page.evaluate(() => window.$store.getters.getShowPlayerControlsWhenPaused)).toBe(false)
   })
 
   test('offers only the preview modes each tab needs', async ({ page }) => {
@@ -150,11 +141,12 @@ test.describe('interface customizer', () => {
       elements.map(element => element.dataset.previewMode)
     ))
     await expect.poll(modes).toEqual(['window', 'fullscreen', 'paused'])
-    // The playing preview shows the player menu open.
-    await expect(customizer.locator('.previewOverflowMenu')).toBeVisible()
+    await expect(customizer.locator('.previewOverflowMenu')).toHaveCount(0)
     for (const tab of ['controlBar', 'fullscreenActions']) {
       await customizer.locator(`[data-settings-subpage-tab="${tab}"]`).click()
       await expect(customizer.locator('.previewModes')).toHaveCount(0)
+      // The controls tab shows the player menu open while playing.
+      if (tab === 'controlBar') await expect(customizer.locator('.previewOverflowMenu')).toBeVisible()
     }
     await expect(customizer.locator('.previewFullscreenActions')).toBeVisible()
   })
@@ -186,7 +178,7 @@ test.describe('interface customizer', () => {
     await expect.poll(async () => {
       const ids = await menuIds()
       return [...ids.slice(0, 2), ids[ids.indexOf('sleepTimer') + 1], ...ids.slice(-3)]
-    }).toEqual(['quality', 'playbackRate', 'autoplay', 'screenshot', 'pictureInPicture', 'fullWindow'])
+    }).toEqual(['audioTracks', 'captions', 'autoplay', 'screenshot', 'pictureInPicture', 'fullWindow'])
     await expect.poll(menuIds).not.toContain('theatreMode')
 
     await setWindowSize(app, page, { width: 1200, height: 800 })
@@ -221,37 +213,119 @@ test.describe('interface customizer', () => {
     const previewIds = () => preview.locator('.previewRightGroup [data-preview-control]').evaluateAll(elements => (
       elements.map(element => element.dataset.previewControl).filter(id => id !== 'screenshot')
     ))
-    const editorIds = () => customizer.locator('.selectedAction').evaluateAll(elements => (
-      elements.map(element => element.dataset.controlBarButtonId)
+    const sectionIds = section => customizer.locator(`[data-placement-section="${section}"] .placementItem`).evaluateAll(elements => (
+      elements.map(element => element.dataset.controlBarButtonId ?? element.dataset.playerMenuControlId ?? element.dataset.hiddenControlId)
     ))
     const menuIds = () => preview.locator('[data-preview-overflow-item]').evaluateAll(elements => (
       elements.map(element => element.dataset.previewOverflowItem)
     ))
     const row = id => customizer.locator(`[data-control-bar-button-id="${id}"]`)
 
-    await expect.poll(editorIds).toEqual(['autoplay', 'captions', 'menu', 'pictureInPicture', 'theatreMode', 'fullWindow', 'fullscreen'])
-    await expect.poll(previewIds).toEqual(await editorIds())
-    // The player menu holds every other control, so it cannot be removed.
-    await expect(row('menu').getByRole('button', { name: /^Remove / })).toBeDisabled()
+    await expect.poll(() => sectionIds('bar')).toEqual(['chapters', 'autoplay', 'captions', 'menu', 'pictureInPicture', 'theatreMode', 'fullWindow', 'fullscreen'])
+    // The chapters button sits next to the time instead.
+    await expect.poll(previewIds).toEqual((await sectionIds('bar')).slice(1))
+    await expect(preview.locator('[data-preview-chapters]')).toBeVisible()
+    // The player menu holds every other control, so it cannot leave the control bar.
+    await expect(row('menu').locator('[data-placement-action="lower"]')).toHaveCount(0)
 
     await row('fullscreen').getByRole('button', { name: /^Move .* up$/ }).click()
     for (const id of ['autoplay', 'pictureInPicture', 'theatreMode']) {
-      await row(id).getByRole('button', { name: /^Remove / }).click()
+      await row(id).getByRole('button', { name: /to the player menu$/ }).click()
     }
     await expect.poll(previewIds).toEqual(['captions', 'menu', 'fullscreen', 'fullWindow'])
 
+    // Removed buttons return to their place in the menu.
     await expect.poll(async () => {
       const ids = await menuIds()
       return [ids[ids.indexOf('sleepTimer') + 1], ...ids.slice(-2)]
     }).toEqual(['autoplay', 'pictureInPicture', 'theatreMode'])
+    await expect.poll(async () => (await sectionIds('menu')).filter(id => ['autoplay', 'pictureInPicture', 'theatreMode'].includes(id)))
+      .toEqual(['autoplay', 'pictureInPicture', 'theatreMode'])
 
-    await customizer.getByRole('button', { name: 'Add button', exact: true }).click()
-    const picker = customizer.getByRole('menu', { name: 'Add button', exact: true })
-    await picker.getByRole('menuitem', { name: 'Autoplay', exact: true }).click()
-    await picker.getByRole('menuitem').first().press('Escape')
+    await customizer.locator('[data-player-menu-control-id="autoplay"]').getByRole('button', { name: 'Move Autoplay to the control bar' }).click()
     await expect(preview.locator('[data-preview-overflow-item="autoplay"]')).toHaveCount(0)
     await expect.poll(() => page.evaluate(() => window.$store.getters.getControlBarButtons))
-      .toEqual(['captions', 'menu', 'fullscreen', 'fullWindow', 'autoplay'])
+      // The screenshot button keeps its place while screenshots are disabled.
+      .toEqual(['chapters', 'screenshot', 'captions', 'menu', 'fullscreen', 'fullWindow', 'autoplay'])
+
+    // Fullscreen has no menu entry, so it goes straight to the hidden controls and back.
+    await row('fullscreen').getByRole('button', { name: 'Hide Fullscreen' }).click()
+    await expect.poll(() => sectionIds('hidden')).toContain('fullscreen')
+    await customizer.locator('[data-hidden-control-id="fullscreen"]').getByRole('button', { name: 'Move Fullscreen to the control bar' }).click()
+    await expect.poll(() => sectionIds('bar')).toEqual(['chapters', 'captions', 'menu', 'fullWindow', 'autoplay', 'fullscreen'])
+
+    // Chapters leave the time for their place in the menu.
+    await row('chapters').getByRole('button', { name: 'Move Chapters to the player menu' }).click()
+    await expect(preview.locator('[data-preview-chapters]')).toHaveCount(0)
+    await expect(preview.locator('[data-preview-overflow-item="chapters"]')).toBeVisible()
+
+    await customizer.getByRole('button', { name: 'Reset to defaults' }).click()
+    await expect.poll(() => sectionIds('bar')).toEqual(['chapters', 'autoplay', 'captions', 'menu', 'pictureInPicture', 'theatreMode', 'fullWindow', 'fullscreen'])
+    await expect(customizer.getByRole('button', { name: 'Reset to defaults' })).toBeDisabled()
+  })
+
+  test('places each control on the control bar, in the player menu or nowhere', async ({ page }) => {
+    const customizer = await openInterfaceCustomizer(page, 'control bar')
+    const preview = customizer.locator('.playerPreview')
+    const previewItem = id => preview.locator(`[data-preview-overflow-item="${id}"]`)
+    const menuRow = id => customizer.locator(`[data-player-menu-control-id="${id}"]`)
+    const hiddenRow = id => customizer.locator(`[data-hidden-control-id="${id}"]`)
+    const menuIds = () => customizer.locator('[data-placement-section="menu"] .placementItem').evaluateAll(elements => (
+      elements.map(element => element.dataset.playerMenuControlId)
+    ))
+    const getter = name => page.evaluate(name => window.$store.getters[name], name)
+
+    // Controls with their own setting start hidden and switch it when they move.
+    await expect(previewItem('lightsOff')).toHaveCount(0)
+    await hiddenRow('lightsOff').getByRole('button', { name: 'Move Lights Off to the player menu' }).click()
+    await expect(previewItem('lightsOff')).toBeVisible()
+    await expect.poll(() => getter('getShowLightsOffToggle')).toBe(true)
+    await menuRow('abRepeat').getByRole('button', { name: /^Hide / }).click()
+    await expect(previewItem('abRepeat')).toHaveCount(0)
+    await expect.poll(() => getter('getDisableAbRepeat')).toBe(true)
+
+    await expect(previewItem('ambientMode')).toBeVisible()
+    await menuRow('ambientMode').getByRole('button', { name: 'Hide Ambient Mode' }).click()
+    await expect(previewItem('ambientMode')).toHaveCount(0)
+    await expect(hiddenRow('ambientMode')).toBeVisible()
+    await expect.poll(() => getter('getHiddenPlayerMenuControls')).toEqual(['ambientMode'])
+
+    // A hidden control returns to the menu before it can join the control bar.
+    await menuRow('quality').getByRole('button', { name: 'Hide Resolution' }).click()
+    await expect(previewItem('quality')).toHaveCount(0)
+    await hiddenRow('quality').getByRole('button', { name: 'Move Resolution to the player menu' }).click()
+    await menuRow('quality').getByRole('button', { name: 'Move Resolution to the control bar' }).click()
+    await expect(preview.locator('.previewRightGroup [data-preview-control="quality"]')).toBeVisible()
+    await expect(previewItem('quality')).toHaveCount(0)
+    await expect(menuRow('quality')).toHaveCount(0)
+    await expect.poll(() => getter('getHiddenPlayerMenuControls')).toEqual(['ambientMode'])
+    // A control that was hidden before it joined the control bar returns to the menu.
+    await page.evaluate(() => window.$store.dispatch('updateHiddenPlayerMenuControls', ['ambientMode', 'pictureInPicture']))
+    await customizer.locator('[data-control-bar-button-id="pictureInPicture"]').getByRole('button', { name: 'Move Picture in Picture to the player menu' }).click()
+    await expect(menuRow('pictureInPicture')).toBeVisible()
+    await expect.poll(() => getter('getHiddenPlayerMenuControls')).toEqual(['ambientMode'])
+
+    // Features that are turned off have no menu entry to place.
+    await expect(customizer.locator('[data-player-menu-control-id="voiceOverTranslation"], [data-hidden-control-id="voiceOverTranslation"]')).toHaveCount(0)
+    await page.evaluate(() => window.$store.dispatch('updateUseVoiceOverTranslation', true))
+    await expect(menuRow('voiceOverTranslation')).toBeVisible()
+    await page.evaluate(() => window.$store.dispatch('updateUseVoiceOverTranslation', false))
+    await expect(menuRow('voiceOverTranslation')).toHaveCount(0)
+
+    // Menu-only controls cannot join the control bar.
+    await expect(menuRow('sleepTimer').locator('[data-placement-action="higher"]')).toHaveCount(0)
+
+    // The menu order follows the editor, and the preview follows the menu order.
+    const before = await menuIds()
+    await menuRow('sleepTimer').getByRole('button', { name: /^Move .* up$/ }).click()
+    const sleepIndex = before.indexOf('sleepTimer')
+    const expected = before.slice()
+    expected.splice(sleepIndex - 1, 2, 'sleepTimer', before[sleepIndex - 1])
+    await expect.poll(menuIds).toEqual(expected)
+    // The caption menu stays with the caption toggle on the control bar.
+    await expect.poll(() => preview.locator('[data-preview-overflow-item]').evaluateAll(elements => (
+      elements.map(element => element.dataset.previewOverflowItem).filter(id => id !== 'captions')
+    ))).toEqual(expected.filter(id => ['audioTracks', 'playbackRate', 'sleepTimer', 'musicVisualizer', 'lightsOff', 'videoZoom', 'loop', 'pictureInPicture'].includes(id)))
   })
 
   test('opens the matching tab from settings search', async ({ page }) => {
@@ -337,10 +411,14 @@ test.describe('interface customizer', () => {
     })
     for (const size of [{ width: 1200, height: 800 }, { width: 420, height: 760 }]) {
       if (size.width !== 1200) await setWindowSize(app, page, size)
-      // The phone layout previews the player menu separately.
-      const modes = size.width === 1200 ? ['Playing', 'Fullscreen', 'Paused'] : ['Playing', 'Player menu', 'Fullscreen', 'Paused']
-      for (const mode of modes) {
-        await customizer.getByRole('tab', { name: mode, exact: true }).click()
+      // The controls tab shows the player menu, which the phone layout previews separately.
+      const modes = [
+        ['player', 'Playing'], ['player', 'Fullscreen'], ['player', 'Paused'],
+        ['controlBar', size.width === 1200 ? null : 'Playing'], ['controlBar', size.width === 1200 ? null : 'Player menu'],
+      ]
+      for (const [tab, mode] of modes) {
+        await customizer.locator(`[data-settings-subpage-tab="${tab}"]`).click()
+        if (mode) await customizer.getByRole('tab', { name: mode, exact: true }).click()
         await expect.poll(() => customizer.locator('.previewStage').evaluate(stage => {
           const bounds = stage.getBoundingClientRect()
           return [...stage.querySelectorAll('.previewPlayer, .previewOverflowMenu, .previewFullscreenActions, .previewButtonPanel')]
@@ -363,7 +441,7 @@ test.describe('interface customizer', () => {
 
   test('scales preview text with the player when the stage is wider', { tag: '@scale' }, async ({ app, page }) => {
     await setWindowSize(app, page, { width: 420, height: 760 })
-    const customizer = await openInterfaceCustomizer(page, 'player')
+    const customizer = await openInterfaceCustomizer(page, 'control bar')
     await customizer.getByRole('tab', { name: 'Player menu', exact: true }).click()
     // Font sizes in the player's 800px design units.
     const sizes = await customizer.locator('.previewStage').evaluate(stage => {
@@ -382,7 +460,7 @@ test.describe('interface customizer', () => {
   })
 
   test('shows the player menu preview over the whole player in the phone layout', { tag: '@scale' }, async ({ app, page }) => {
-    const customizer = await openInterfaceCustomizer(page, 'player')
+    const customizer = await openInterfaceCustomizer(page, 'control bar')
     const close = customizer.locator('.previewOverflowClose')
     const menuCoversPlayer = () => customizer.locator('.previewPlayer').evaluate(player => {
       const bounds = player.getBoundingClientRect()
@@ -408,7 +486,7 @@ test.describe('interface customizer', () => {
       for (const toggle of toggles) await window.$store.dispatch(`update${toggle}`, value)
     }, { toggles, value })
     await setWindowSize(app, page, { width: 360, height: 760 })
-    const customizer = await openInterfaceCustomizer(page, 'player')
+    const customizer = await openInterfaceCustomizer(page, 'control bar')
     await setToggles(true)
     await customizer.getByRole('tab', { name: 'Player menu', exact: true }).click()
     const grid = customizer.locator('.previewOverflowGrid')

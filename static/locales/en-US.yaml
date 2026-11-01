@@ -597,7 +597,11 @@ Settings:
   Control Bar:
     Title: "Control bar"
     Customize: "Customize control bar"
-    Add Button: "Add button"
+    Hidden: "Hidden"
+    Empty: "No controls"
+    Move to Control Bar: "Move {control} to the control bar"
+    Move to Player Menu: "Move {control} to the player menu"
+    Hide: "Hide {control}"
   Fullscreen Actions:
     Recommended Videos: "Recommended videos"
     Title: "Fullscreen actions"

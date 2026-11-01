@@ -305,7 +305,11 @@ Settings:
   Control Bar:
     Title: "Barrenn reoliñ"
     Customize: "Personelaat ar varrenn reoliñ"
-    Add Button: "Ouzhpennañ ur bouton"
+    Hidden: "Kuzhet"
+    Empty: "Reoliñ ebet"
+    Move to Control Bar: "Dilec'hiañ {control} d'ar varrenn reoliñ"
+    Move to Player Menu: "Dilec'hiañ {control} da lañser al lenner"
+    Hide: "Kuzhat {control}"
   Fullscreen Actions:
     Recommended Videos: "Videoioù erbedet"
     Title: "Oberoù skramm leun"

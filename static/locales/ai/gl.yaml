@@ -310,7 +310,11 @@ Settings:
   Control Bar:
     Title: "Barra de controis"
     Customize: "Personalizar a barra de controis"
-    Add Button: "Engadir botón"
+    Hidden: "Agochados"
+    Empty: "Non hai controis"
+    Move to Control Bar: "Mover {control} á barra de controis"
+    Move to Player Menu: "Mover {control} ao menú do reprodutor"
+    Hide: "Agochar {control}"
   Fullscreen Actions:
     Recommended Videos: "Vídeos recomendados"
     Title: "Accións de pantalla completa"

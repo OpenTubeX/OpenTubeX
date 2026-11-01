@@ -305,7 +305,11 @@ Settings:
   Control Bar:
     Title: "Vezérlősáv"
     Customize: "Vezérlősáv testreszabása"
-    Add Button: "Gomb hozzáadása"
+    Hidden: "Rejtett"
+    Empty: "Nincsenek vezérlők"
+    Move to Control Bar: "{control} áthelyezése a vezérlősávra"
+    Move to Player Menu: "{control} áthelyezése a lejátszó menübe"
+    Hide: "{control} elrejtése"
   Fullscreen Actions:
     Recommended Videos: "Ajánlott videók"
     Title: "Teljes képernyős műveletek"

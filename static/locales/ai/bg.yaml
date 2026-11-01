@@ -308,7 +308,11 @@ Settings:
   Control Bar:
     Title: "Лента за управление"
     Customize: "Персонализиране на лентата за управление"
-    Add Button: "Добавяне на бутон"
+    Hidden: "Скрити"
+    Empty: "Няма контроли"
+    Move to Control Bar: "Преместване на „{control}“ в лентата за управление"
+    Move to Player Menu: "Преместване на „{control}“ в менюто на плейъра"
+    Hide: "Скриване на „{control}“"
   Fullscreen Actions:
     Recommended Videos: "Препоръчани видеоклипове"
     Title: "Действия на цял екран"

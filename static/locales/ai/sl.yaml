@@ -430,7 +430,11 @@ Settings:
   Control Bar:
     Title: "Nadzorna vrstica"
     Customize: "Prilagodi nadzorno vrstico"
-    Add Button: "Dodaj gumb"
+    Hidden: "Skrito"
+    Empty: "Ni kontrolnikov"
+    Move to Control Bar: "Premakni {control} v nadzorno vrstico"
+    Move to Player Menu: "Premakni {control} v meni predvajalnika"
+    Hide: "Skrij {control}"
   Fullscreen Actions:
     Recommended Videos: "Priporočeni videoposnetki"
     Title: "Dejanja v celozaslonskem načinu"

@@ -107,6 +107,7 @@
             <PlayerPreview
               v-else
               :state="activePreviewMode"
+              :menu="activeTabId === 'controlBar'"
             />
           </div>
         </section>
@@ -120,15 +121,7 @@
             <NavigationCustomizer v-if="activeTabId === 'navigation'" />
             <QuickSettingsCustomizer v-else-if="activeTabId === 'quickSettings'" />
             <PlayerAppearanceEditor v-else-if="activeTabId === 'player'" />
-            <ActionListCustomizer
-              v-else-if="activeTabId === 'controlBar'"
-              :definitions="controlBarButtonDefinitions"
-              :items="store.getters.getControlBarButtons"
-              :default-items="DEFAULT_CONTROL_BAR_BUTTONS"
-              :update-items="items => store.dispatch('updateControlBarButtons', items)"
-              item-id-attribute="data-control-bar-button-id"
-              :add-label="t('Settings.Control Bar.Add Button')"
-            />
+            <ControlPlacementCustomizer v-else-if="activeTabId === 'controlBar'" />
             <ActionListCustomizer
               v-else
               :definitions="FULLSCREEN_ACTION_DEFINITIONS"
@@ -162,10 +155,10 @@ import NavigationCustomizer from '../../../NavigationCustomizer/NavigationCustom
 import QuickSettingsCustomizer from './QuickSettingsCustomizer.vue'
 import NavigationPreview from './NavigationPreview.vue'
 import PlayerAppearanceEditor from './PlayerAppearanceEditor.vue'
+import ControlPlacementCustomizer from './ControlPlacementCustomizer.vue'
 import PlayerPreview from './PlayerPreview.vue'
 
 import store from '../../../../store/index'
-import { getControlBarButtonDefinitions, DEFAULT_CONTROL_BAR_BUTTONS } from '../../../../helpers/controlBarButtons'
 import { DEFAULT_FULLSCREEN_ACTIONS, FULLSCREEN_ACTION_DEFINITIONS } from '../../../../helpers/fullscreenActions'
 import { clampOverlayScrollTop, restoreOverlayScrollTop } from '../../../../helpers/overlayScrollbars'
 import { usePhoneLayout } from '../../../../composables/usePhoneLayout'
@@ -174,7 +167,6 @@ const { t } = useI18n()
 const idPrefix = `interface-customizer-${useId().replaceAll(':', '')}`
 const open = ref(false)
 const activeTabId = ref('navigation')
-const controlBarButtonDefinitions = getControlBarButtonDefinitions()
 const usesPhoneLayout = usePhoneLayout()
 
 // The side navigation switches to the bottom bar at this width.
@@ -189,9 +181,10 @@ onMounted(() => mobileNavigationLayout.addEventListener('change', handleMobileNa
 onBeforeUnmount(() => mobileNavigationLayout.removeEventListener('change', handleMobileNavigationLayoutChange))
 
 const tabs = computed(() => {
-  // Outside the phone layout, the playing preview shows the player menu open.
+  const playingMode = { id: 'window', icon: ['fas', 'play'], label: t('Settings.Interface Customizer.Playing') }
+  // Outside the phone layout, the playing preview of the controls shows the player menu open.
   const playingModes = [
-    { id: 'window', icon: ['fas', 'play'], label: t('Settings.Interface Customizer.Playing') },
+    playingMode,
     ...(usesPhoneLayout.value ? [{ id: 'menu', icon: ['fas', 'gear'], label: t('Settings.Interface Customizer.Player Menu') }] : []),
   ]
   const fullscreenMode = { id: 'fullscreen', icon: ['fas', 'expand'], label: t('Settings.Interface Customizer.Fullscreen') }
@@ -221,7 +214,8 @@ const tabs = computed(() => {
       icon: ['fas', 'circle-play'],
       label: t('Settings.Interface Customizer.Player'),
       syncKey: null,
-      previewModes: [...playingModes, fullscreenMode, pausedMode],
+      // The controls tab edits the player menu, so this tab leaves it closed.
+      previewModes: [playingMode, fullscreenMode, pausedMode],
     },
     {
       id: 'controlBar',

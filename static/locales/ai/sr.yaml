@@ -315,7 +315,11 @@ Settings:
   Control Bar:
     Title: "Трака за контролу"
     Customize: "Прилагоди траку за контролу"
-    Add Button: "Додај дугме"
+    Hidden: "Скривено"
+    Empty: "Нема контрола"
+    Move to Control Bar: "Премести {control} на траку за контролу"
+    Move to Player Menu: "Премести {control} у мени плејера"
+    Hide: "Сакриј {control}"
   Fullscreen Actions:
     Recommended Videos: "Препоручени видео-снимци"
     Title: "Радње на целом екрану"

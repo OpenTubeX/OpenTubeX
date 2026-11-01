@@ -306,7 +306,11 @@ Settings:
   Control Bar:
     Title: "Γραμμή ελέγχου"
     Customize: "Προσαρμογή γραμμής ελέγχου"
-    Add Button: "Προσθήκη κουμπιού"
+    Hidden: "Κρυφά"
+    Empty: "Δεν υπάρχουν στοιχεία ελέγχου"
+    Move to Control Bar: "Μετακίνηση του {control} στη γραμμή ελέγχου"
+    Move to Player Menu: "Μετακίνηση του {control} στο μενού προγράμματος αναπαραγωγής"
+    Hide: "Απόκρυψη του {control}"
   Fullscreen Actions:
     Recommended Videos: "Προτεινόμενα βίντεο"
     Title: "Ενέργειες πλήρους οθόνης"

@@ -96,6 +96,11 @@
             </span>
           </template>
           <span class="previewPill previewTextPill">{{ PREVIEW_TIME }}</span>
+          <span
+            v-if="showChaptersPill"
+            class="previewPill previewTextPill previewChaptersPill"
+            data-preview-chapters
+          >{{ t('Chapters.Chapters') }}</span>
           <span class="previewSpacer" />
           <span
             v-if="quickPlaybackRates.length > 0"
@@ -110,13 +115,6 @@
             >{{ rate.label }}</span>
           </span>
           <span class="previewPill previewRightGroup">
-            <span
-              v-if="enableScreenshot && !compact"
-              class="previewIconButton"
-              data-preview-control="screenshot"
-            >
-              <PreviewIcon :path="PlayerIcons.PHOTO_CAMERA_FILLED" />
-            </span>
             <template
               v-for="button in controlBarButtons"
               :key="button.id"
@@ -163,10 +161,15 @@ const props = defineProps({
     type: String,
     default: 'window',
     validator: value => ['window', 'menu', 'fullscreen', 'paused'].includes(value)
+  },
+  /** Whether the playing preview shows the player menu. */
+  menu: {
+    type: Boolean,
+    default: false
   }
 })
 
-const { t } = useI18n()
+const { locale, t } = useI18n()
 const IS_CAPACITOR = !!process.env.IS_CAPACITOR
 const PREVIEW_TIME = '0:42 / 3:14'
 
@@ -180,7 +183,7 @@ const paused = computed(() => props.state === 'paused')
 // Like the player, narrow windows and phones use the compact controls, whose
 // menu covers the whole player, so only there it gets a preview state of its own.
 const compact = usePhoneLayout()
-const menuOpen = computed(() => props.state === 'menu' || (props.state === 'window' && !compact.value))
+const menuOpen = computed(() => props.state === 'menu' || (props.menu && props.state === 'window' && !compact.value))
 
 const showPlayerControlsWhenPaused = computed(() => store.getters.getShowPlayerControlsWhenPaused)
 const showVideoTitleWhenPaused = computed(() => store.getters.getShowVideoTitleWhenPaused)
@@ -210,6 +213,11 @@ const quickPlaybackRates = computed(() => {
 })
 
 const CONTROL_BAR_ICONS = {
+  quality: SHAKA_PREVIEW_ICONS.RESOLUTION,
+  audioTracks: PlayerIcons.RECORD_VOICE_OVER_FILLED,
+  playbackRate: SHAKA_PREVIEW_ICONS.PLAYBACK_RATE,
+  loop: SHAKA_PREVIEW_ICONS.LOOP,
+  screenshot: PlayerIcons.PHOTO_CAMERA_FILLED,
   autoplay: PlayerIcons.PAUSE_CIRCLE_FILLED,
   captions: SHAKA_PREVIEW_ICONS.CLOSED_CAPTIONS,
   menu: SHAKA_PREVIEW_ICONS.OPEN_OVERFLOW,
@@ -222,6 +230,9 @@ const CONTROL_BAR_ICONS = {
 const COMPACT_CONTROL_BAR_BUTTONS = ['captions', 'menu', 'fullscreen', ...(IS_CAPACITOR ? ['pictureInPicture'] : [])]
 
 const controlBarButtons = computed(() => store.getters.getControlBarButtons
+  // The screenshot button only shows while screenshots are enabled, and the
+  // chapters button sits next to the time.
+  .filter(id => (id !== 'screenshot' || enableScreenshot.value) && id !== 'chapters')
   // Like the player, fullscreen hides the theatre mode and full window buttons.
   .filter(id => compact.value
     ? COMPACT_CONTROL_BAR_BUTTONS.includes(id)
@@ -245,8 +256,9 @@ function controlBarMenuItem(id) {
 }
 
 // Buttons removed from the control bar move into the player menu
+const CONTROL_BAR_BUTTON_IDS = new Set(CONTROL_BAR_BUTTON_DEFINITIONS.map(({ id }) => id))
 const removedControlBarButtons = computed(() => (
-  getPreviewMenuControlBarButtons(store.getters.getControlBarButtons).map(controlBarMenuItem)
+  new Set(getPreviewMenuControlBarButtons(store.getters.getControlBarButtons))
 ))
 
 const fullscreenActions = computed(() => {
@@ -258,49 +270,55 @@ const fullscreenActions = computed(() => {
   }))
 })
 
-// Mirrors the overflow menu of a regular video with the current settings.
+// Like the player, the chapters button on the control bar sits next to the
+// time, which the compact desktop controls leave out.
+const showChaptersPill = computed(() => store.getters.getControlBarButtons.includes('chapters') && (!compact.value || IS_CAPACITOR))
+
+// The audio track of the example video is in the app's language.
+const audioTrackLanguage = computed(() => {
+  try {
+    return new Intl.DisplayNames([locale.value], { type: 'language' }).of(new Intl.Locale(locale.value).language) ?? ''
+  } catch {
+    return ''
+  }
+})
+
+// Mirrors the overflow menu of a video that has every control available, with the current settings.
 const overflowItems = computed(() => {
   const off = t('Settings.Interface Customizer.Off')
-  const playbackRate = { id: 'playbackRate', path: SHAKA_PREVIEW_ICONS.PLAYBACK_RATE, label: t('Settings.Player Settings.Playback Speed'), value: '1x' }
-  const quality = { id: 'quality', path: SHAKA_PREVIEW_ICONS.RESOLUTION, label: t('Settings.Interface Customizer.Resolution'), value: '1080p' }
-  const sleepTimer = { id: 'sleepTimer', path: PlayerIcons.TIMER_FILLED, label: t('Video.Player.Sleep Timer.Sleep Timer'), value: off }
-  const toggles = [
-    store.getters.getShowSkipSilenceButton && !process.env.IS_IOS && { id: 'skipSilence', path: PlayerIcons.SKIP_NEXT_FILLED, label: t('Settings.Player Settings.Skip Silence'), value: off },
-    store.getters.getShowMusicModeToggle && { id: 'musicMode', icon: ['fas', 'headphones'], label: t('Video.Player.Music Mode'), value: off },
-    { id: 'ambientMode', path: PlayerIcons.LIGHT_MODE_FILLED, label: t('Global.Ambient Mode'), value: off },
-    store.getters.getShowLightsOffToggle && { id: 'lightsOff', icon: ['fas', 'moon'], label: t('Settings.Player Settings.Lights Off'), value: off },
-    store.getters.getEnableVideoZoom && { id: 'zoom', path: PlayerIcons.ZOOM_IN_ROUNDED, viewBox: ZOOM_IN_ICON_VIEWBOX, label: t('Video.Player.Zoom.Zoom'), value: off },
-    store.getters.getShowVolumeBoostToggle && !process.env.IS_IOS && { id: 'volumeBoost', icon: ['fas', 'volume-high'], label: t('Video.Player.Volume Boost.Volume Boost'), value: off },
-    store.getters.getShowMonoAudioToggle && !process.env.IS_IOS && { id: 'monoAudio', icon: ['fas', 'speaker'], label: t('Settings.Player Settings.Mono Audio'), value: off },
-    { id: 'loop', path: SHAKA_PREVIEW_ICONS.LOOP, label: t('Settings.Interface Customizer.Loop'), value: off },
-    !store.getters.getDisableAbRepeat && { id: 'abRepeat', path: AB_REPEAT_PREVIEW_ICON.path, viewBox: AB_REPEAT_PREVIEW_ICON.viewBox, label: t('Video.Player.A-B Repeat.Set Repeat Start'), value: off },
-  ]
-  const seekHistory = store.getters.getEnableSeekHistory && { id: 'seekHistory', icon: ['fas', 'history'], label: t('Video.Player.Seek History.Seek History'), value: t('Video.Player.Seek History.Positions', { count: 2 }, 2) }
-
-  if (compact.value) {
-    return [
-      quality,
-      playbackRate,
-      sleepTimer,
-      seekHistory,
-      controlBarMenuItem('autoplay'),
-      ...toggles,
-      enableScreenshot.value && { id: 'screenshot', path: PlayerIcons.PHOTO_CAMERA_FILLED, label: t('Video.Player.Take Screenshot'), value: '' },
-      controlBarMenuItem('pictureInPicture'),
-      !IS_CAPACITOR && controlBarMenuItem('fullWindow'),
-    ].filter(Boolean)
+  const hidden = new Set(store.getters.getHiddenPlayerMenuControls)
+  const items = {
+    audioTracks: { path: PlayerIcons.RECORD_VOICE_OVER_FILLED, label: t('Video.Player.Audio Tracks'), value: audioTrackLanguage.value },
+    captions: { path: SHAKA_PREVIEW_ICONS.CLOSED_CAPTIONS_STYLE, label: t('Settings.Player Settings.Caption Appearance.Captions'), value: off },
+    chapters: { path: SHAKA_PREVIEW_ICONS.CHAPTER, label: t('Chapters.Chapters'), value: '' },
+    voiceOverTranslation: store.getters.getUseVoiceOverTranslation && { path: PlayerIcons.RECORD_VOICE_OVER_FILLED, label: t('Settings.Player Settings.Voice-over Translation.Title'), value: t('Video.Player.Voice-over Translation.Start') },
+    musicVisualizer: { path: PlayerIcons.INSERT_CHART_FILLED, label: t('Settings.Player Settings.Music Visualizer'), value: '' },
+    playbackRate: { path: SHAKA_PREVIEW_ICONS.PLAYBACK_RATE, label: t('Settings.Player Settings.Playback Speed'), value: '1x' },
+    quality: { path: SHAKA_PREVIEW_ICONS.RESOLUTION, label: t('Settings.Interface Customizer.Resolution'), value: '1080p' },
+    sleepTimer: { path: PlayerIcons.TIMER_FILLED, label: t('Video.Player.Sleep Timer.Sleep Timer'), value: off },
+    autoplay: controlBarMenuItem('autoplay'),
+    seekHistory: store.getters.getEnableSeekHistory && { icon: ['fas', 'history'], label: t('Video.Player.Seek History.Seek History'), value: t('Video.Player.Seek History.Positions', { count: 2 }, 2) },
+    skipSilence: store.getters.getShowSkipSilenceButton && !process.env.IS_IOS && { path: PlayerIcons.SKIP_NEXT_FILLED, label: t('Settings.Player Settings.Skip Silence'), value: off },
+    musicMode: store.getters.getShowMusicModeToggle && { icon: ['fas', 'headphones'], label: t('Video.Player.Music Mode'), value: off },
+    ambientMode: { path: PlayerIcons.LIGHT_MODE_FILLED, label: t('Global.Ambient Mode'), value: off },
+    lightsOff: store.getters.getShowLightsOffToggle && { icon: ['fas', 'moon'], label: t('Settings.Player Settings.Lights Off'), value: off },
+    videoZoom: store.getters.getEnableVideoZoom && { path: PlayerIcons.ZOOM_IN_ROUNDED, viewBox: ZOOM_IN_ICON_VIEWBOX, label: t('Video.Player.Zoom.Zoom'), value: off },
+    volumeBoost: store.getters.getShowVolumeBoostToggle && !process.env.IS_IOS && { icon: ['fas', 'volume-high'], label: t('Video.Player.Volume Boost.Volume Boost'), value: off },
+    monoAudio: store.getters.getShowMonoAudioToggle && !process.env.IS_IOS && { icon: ['fas', 'speaker'], label: t('Settings.Player Settings.Mono Audio'), value: off },
+    loop: { path: SHAKA_PREVIEW_ICONS.LOOP, label: t('Settings.Interface Customizer.Loop'), value: off },
+    abRepeat: !store.getters.getDisableAbRepeat && { path: AB_REPEAT_PREVIEW_ICON.path, viewBox: AB_REPEAT_PREVIEW_ICON.viewBox, label: t('Video.Player.A-B Repeat.Set Repeat Start'), value: off },
+    pictureInPicture: controlBarMenuItem('pictureInPicture'),
+    // Like the player, the compact menu has no theatre mode, and Capacitor no full window.
+    theatreMode: !compact.value && controlBarMenuItem('theatreMode'),
+    fullWindow: !IS_CAPACITOR && controlBarMenuItem('fullWindow'),
+    screenshot: enableScreenshot.value && { path: PlayerIcons.PHOTO_CAMERA_FILLED, label: t('Video.Player.Take Screenshot'), value: '' },
   }
-
-  const removed = removedControlBarButtons.value
-  return [
-    playbackRate,
-    quality,
-    sleepTimer,
-    ...removed.filter(item => item.id === 'autoplay'),
-    seekHistory,
-    ...toggles,
-    ...removed.filter(item => item.id !== 'autoplay'),
-  ].filter(Boolean)
+  return store.getters.getPlayerMenuControls
+    .filter(id => items[id] && !hidden.has(id) &&
+        // The full control bar keeps its buttons out of the menu, except for
+        // the caption toggle, which keeps the caption menu.
+        (compact.value || id === 'captions' || !CONTROL_BAR_BUTTON_IDS.has(id) || removedControlBarButtons.value.has(id)))
+    .map(id => ({ ...items[id], id }))
 })
 
 // The phone layout scrolls the tiles. Fewer tiles or a smaller player can leave

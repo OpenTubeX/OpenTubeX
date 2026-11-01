@@ -438,7 +438,11 @@ Settings:
   Control Bar:
     Title: "Barra de control"
     Customize: "Personalitza la barra de control"
-    Add Button: "Afegeix un botó"
+    Hidden: "Amagats"
+    Empty: "No hi ha cap control"
+    Move to Control Bar: "Mou {control} a la barra de control"
+    Move to Player Menu: "Mou {control} al menú del reproductor"
+    Hide: "Amaga {control}"
   Fullscreen Actions:
     Recommended Videos: "Vídeos recomanats"
     Title: "Accions de pantalla completa"

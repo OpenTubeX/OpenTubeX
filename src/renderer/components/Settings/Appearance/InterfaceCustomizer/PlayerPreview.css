@@ -183,6 +183,12 @@
   white-space: nowrap;
 }
 
+/* Like the player's chapters button, which opens the chapter list. */
+.previewChaptersPill::after {
+  content: '›';
+  margin-inline-start: 0.4em;
+}
+
 .previewSpacer {
   flex: 1 1 auto;
 }

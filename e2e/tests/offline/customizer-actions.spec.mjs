@@ -19,11 +19,11 @@ for (const { uiScale, width, iconPack, colorScheme } of [
       }
     })
 
-    for (const { subpage, tab, rowSelector } of [
+    for (const { subpage, tab, rowSelector, buttonCount = 3 } of [
       { subpage: 'quick-settings', tab: 'quick settings', rowSelector: '.selectedSetting' },
       { subpage: 'navigation', tab: 'navigation', rowSelector: '.selectedItem' },
       { subpage: 'fullscreen-actions', tab: 'fullscreen actions', rowSelector: '.selectedAction' },
-      { subpage: 'control-bar', tab: 'control bar', rowSelector: '.selectedAction' },
+      { subpage: 'control-bar', tab: 'control bar', rowSelector: '[data-placement-section="menu"] .placementItem', buttonCount: 4 },
     ]) {
       test(`keeps ${subpage} hover and focus backgrounds circular`, async ({ app, page }) => {
         await setWindowSize(app, page, { width, height: 800 })
@@ -32,7 +32,7 @@ for (const { uiScale, width, iconPack, colorScheme } of [
         await openInterfaceCustomizer(page, tab)
         const row = page.locator(rowSelector).nth(1)
         const buttons = row.locator('.iconButton')
-        await expect(buttons).toHaveCount(3)
+        await expect(buttons).toHaveCount(buttonCount)
         for (const button of await buttons.all()) {
           await button.hover()
           await expect.poll(() => button.evaluate(element => {

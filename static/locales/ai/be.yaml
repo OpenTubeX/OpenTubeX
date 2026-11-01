@@ -328,7 +328,11 @@ Settings:
   Control Bar:
     Title: "Панэль кіравання"
     Customize: "Наладзіць панэль кіравання"
-    Add Button: "Дадаць кнопку"
+    Hidden: "Схаваныя"
+    Empty: "Няма элементаў кіравання"
+    Move to Control Bar: "Перамясціць «{control}» на панэль кіравання"
+    Move to Player Menu: "Перамясціць «{control}» у меню прайгравальніка"
+    Hide: "Схаваць «{control}»"
   Fullscreen Actions:
     Recommended Videos: "Рэкамендаваныя відэа"
     Title: "Дзеянні ў поўнаэкранным рэжыме"

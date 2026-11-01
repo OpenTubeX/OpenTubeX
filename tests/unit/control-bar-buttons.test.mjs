@@ -16,9 +16,9 @@ const faIconMap = JSON.parse(readFileSync(new URL('../../src/renderer/icons/faIc
 
 test('defaults match the control bar of each platform', () => {
   assert.deepEqual(getDefaultControlBarButtons(false), [
-    'autoplay', 'captions', 'menu', 'pictureInPicture', 'theatreMode', 'fullWindow', 'fullscreen',
+    'chapters', 'screenshot', 'autoplay', 'captions', 'menu', 'pictureInPicture', 'theatreMode', 'fullWindow', 'fullscreen',
   ])
-  assert.deepEqual(getDefaultControlBarButtons(true), ['captions', 'pictureInPicture', 'menu', 'fullscreen'])
+  assert.deepEqual(getDefaultControlBarButtons(true), ['chapters', 'captions', 'pictureInPicture', 'menu', 'fullscreen'])
   for (const mobile of [false, true]) {
     assert.deepEqual(normalizeControlBarButtons(null, mobile), getDefaultControlBarButtons(mobile))
     assert.deepEqual(normalizeControlBarButtons({}, mobile), getDefaultControlBarButtons(mobile))
@@ -26,26 +26,29 @@ test('defaults match the control bar of each platform', () => {
 })
 
 test('mobile only offers the buttons of its compact control bar', () => {
-  assert.deepEqual(getControlBarButtonDefinitions(true).map(({ id }) => id), ['captions', 'menu', 'pictureInPicture', 'fullscreen'])
+  assert.deepEqual(getControlBarButtonDefinitions(true).map(({ id }) => id), ['chapters', 'captions', 'menu', 'pictureInPicture', 'fullscreen'])
   assert.deepEqual(getControlBarButtonDefinitions(false).map(({ id }) => id), CONTROL_BAR_BUTTON_DEFINITIONS.map(({ id }) => id))
   assert.deepEqual(normalizeControlBarButtons(['fullscreen', 'theatreMode', 'menu', 'autoplay'], true), ['fullscreen', 'menu'])
 })
 
 test('the player menu offers the buttons that are not on the full control bar', () => {
-  assert.deepEqual(getRemovedControlBarButtons(getDefaultControlBarButtons(false), false), [])
-  assert.deepEqual(getRemovedControlBarButtons(['captions', 'menu', 'fullscreen'], false), ['autoplay', 'pictureInPicture', 'theatreMode', 'fullWindow'])
+  const menuControls = ['quality', 'audioTracks', 'playbackRate', 'loop']
+  assert.deepEqual(getRemovedControlBarButtons(getDefaultControlBarButtons(false), false), menuControls)
+  assert.deepEqual(getRemovedControlBarButtons(['captions', 'menu', 'fullscreen'], false), ['chapters', ...menuControls, 'screenshot', 'autoplay', 'pictureInPicture', 'theatreMode', 'fullWindow'])
+  assert.deepEqual(getRemovedControlBarButtons(['quality', 'loop', ...getDefaultControlBarButtons(false)], false), ['audioTracks', 'playbackRate'])
   // Capacitor tablets and TVs use the full control bar with the compact buttons,
   // and have no full-window mode
-  assert.deepEqual(getRemovedControlBarButtons(getDefaultControlBarButtons(true), true), ['autoplay', 'theatreMode'])
+  assert.deepEqual(getRemovedControlBarButtons(getDefaultControlBarButtons(true), true), [...menuControls, 'screenshot', 'autoplay', 'theatreMode'])
 })
 
 test('the customizer previews the removed buttons that the player menu offers', () => {
+  const menuControls = ['quality', 'audioTracks', 'playbackRate', 'loop']
   // Desktop: every removed button except captions and fullscreen, as before
-  assert.deepEqual(getPreviewMenuControlBarButtons(['menu'], false), ['autoplay', 'pictureInPicture', 'theatreMode', 'fullWindow'])
-  assert.deepEqual(getPreviewMenuControlBarButtons(getDefaultControlBarButtons(false), false), [])
+  assert.deepEqual(getPreviewMenuControlBarButtons(['menu'], false), ['chapters', ...menuControls, 'screenshot', 'autoplay', 'pictureInPicture', 'theatreMode', 'fullWindow'])
+  assert.deepEqual(getPreviewMenuControlBarButtons(getDefaultControlBarButtons(false), false), menuControls)
   // Capacitor: autoplay is in the menu of phones and of wide players
-  assert.deepEqual(getPreviewMenuControlBarButtons(getDefaultControlBarButtons(true), true), ['autoplay'])
-  assert.deepEqual(getPreviewMenuControlBarButtons(['menu'], true), ['autoplay', 'pictureInPicture'])
+  assert.deepEqual(getPreviewMenuControlBarButtons(getDefaultControlBarButtons(true), true), [...menuControls, 'screenshot', 'autoplay'])
+  assert.deepEqual(getPreviewMenuControlBarButtons(['menu'], true), ['chapters', ...menuControls, 'screenshot', 'autoplay', 'pictureInPicture'])
 })
 
 test('keeps a custom order, discards invalid entries and always keeps the menu', () => {

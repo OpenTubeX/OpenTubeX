@@ -308,7 +308,11 @@ Settings:
   Control Bar:
     Title: "Upravljačka traka"
     Customize: "Prilagodi upravljačku traku"
-    Add Button: "Dodaj gumb"
+    Hidden: "Skriveno"
+    Empty: "Nema kontrola"
+    Move to Control Bar: "Premjesti {control} na upravljačku traku"
+    Move to Player Menu: "Premjesti {control} u izbornik playera"
+    Hide: "Sakrij {control}"
   Fullscreen Actions:
     Recommended Videos: "Preporučeni videozapisi"
     Title: "Radnje na cijelom zaslonu"

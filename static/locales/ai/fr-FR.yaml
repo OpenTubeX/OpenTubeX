@@ -305,7 +305,11 @@ Settings:
   Control Bar:
     Title: "Barre de commandes"
     Customize: "Personnaliser la barre de commandes"
-    Add Button: "Ajouter un bouton"
+    Hidden: "Masqués"
+    Empty: "Aucune commande"
+    Move to Control Bar: "Déplacer {control} vers la barre de commandes"
+    Move to Player Menu: "Déplacer {control} vers le menu du lecteur"
+    Hide: "Masquer {control}"
   Fullscreen Actions:
     Recommended Videos: "Vidéos recommandées"
     Title: "Actions en plein écran"

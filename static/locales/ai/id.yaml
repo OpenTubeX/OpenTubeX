@@ -306,7 +306,11 @@ Settings:
   Control Bar:
     Title: "Bilah kontrol"
     Customize: "Sesuaikan bilah kontrol"
-    Add Button: "Tambahkan tombol"
+    Hidden: "Disembunyikan"
+    Empty: "Tidak ada kontrol"
+    Move to Control Bar: "Pindahkan {control} ke bilah kontrol"
+    Move to Player Menu: "Pindahkan {control} ke menu pemutar"
+    Hide: "Sembunyikan {control}"
   Fullscreen Actions:
     Recommended Videos: "Video yang direkomendasikan"
     Title: "Tindakan layar penuh"

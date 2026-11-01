@@ -231,6 +231,8 @@ export const SYNC_SETTING_LABELS = {
   quickPlaybackSpeedBarOptions: 'Settings.Player Settings.Quick Playback Speed Bar Manager',
   fullscreenActions: 'Settings.Fullscreen Actions.Title',
   controlBarButtons: 'Settings.Control Bar.Title',
+  playerMenuControls: 'Settings.Interface Customizer.Player Menu',
+  hiddenPlayerMenuControls: 'Settings.Control Bar.Hidden',
   quickSettings: 'Settings.Quick Settings.Quick Settings',
   recommendationExploration: 'Home Page.Discovery',
   reducedMotion: 'Settings.General Settings.Reduced Motion.Reduced Motion',

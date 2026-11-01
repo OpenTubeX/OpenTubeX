@@ -400,7 +400,11 @@ Settings:
   Control Bar:
     Title: "Steuerleiste"
     Customize: "Steuerleiste anpassen"
-    Add Button: "Schaltfläche hinzufügen"
+    Hidden: "Ausgeblendet"
+    Empty: "Keine Steuerelemente"
+    Move to Control Bar: "{control} in die Steuerleiste verschieben"
+    Move to Player Menu: "{control} ins Player-Menü verschieben"
+    Hide: "{control} ausblenden"
   Fullscreen Actions:
     Recommended Videos: "Empfohlene Videos"
     Title: "Vollbildaktionen"

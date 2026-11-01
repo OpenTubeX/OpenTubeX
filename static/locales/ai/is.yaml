@@ -305,7 +305,11 @@ Settings:
   Control Bar:
     Title: "Stjórnstika"
     Customize: "Sérsníða stjórnstiku"
-    Add Button: "Bæta við hnappi"
+    Hidden: "Falið"
+    Empty: "Engar stýringar"
+    Move to Control Bar: "Færa {control} á stjórnstiku"
+    Move to Player Menu: "Færa {control} í valmynd spilara"
+    Hide: "Fela {control}"
   Fullscreen Actions:
     Recommended Videos: "Ráðlögð myndbönd"
     Title: "Aðgerðir á öllum skjánum"

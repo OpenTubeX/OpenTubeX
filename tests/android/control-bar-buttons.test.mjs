@@ -5,7 +5,7 @@ import { goTo } from '../../e2e/helpers/app.mjs'
 import { findWatchComponent } from '../../e2e/helpers/player.mjs'
 
 // Use a current debug APK on a locked emulator with its WebView forwarded.
-test('Android hides and reorders the compact control bar buttons', {
+test('Android places the compact controls on the control bar, in the player menu or nowhere', {
   skip: !process.env.ANDROID_CDP_URL,
 }, async () => {
   const browser = await chromium.connectOverCDP(process.env.ANDROID_CDP_URL, { noDefaults: true })
@@ -22,6 +22,8 @@ test('Android hides and reorders the compact control bar buttons', {
       }
       const saved = Object.fromEntries(Object.keys(values).map(key => [key, structuredClone(store.getters['get' + key])]))
       saved.ControlBarButtons = structuredClone(store.getters.getControlBarButtons)
+      saved.PlayerMenuControls = structuredClone(store.getters.getPlayerMenuControls)
+      saved.HiddenPlayerMenuControls = [...store.state.settings.hiddenPlayerMenuControls]
       for (const [key, value] of Object.entries(values)) store.commit('set' + key, value)
       window.__controlBarFetch = window.fetch
       window.fetch = (url, options) => String(url).startsWith('https://localhost/')
@@ -31,7 +33,11 @@ test('Android hides and reorders the compact control bar buttons', {
     })
     await page.evaluate(() => {
       const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
-      return store.dispatch('updateControlBarButtons', ['captions', 'pictureInPicture', 'menu', 'fullscreen'])
+      return Promise.all([
+        store.dispatch('updateControlBarButtons', ['chapters', 'captions', 'pictureInPicture', 'menu', 'fullscreen']),
+        store.dispatch('updatePlayerMenuControls', null),
+        store.dispatch('updateHiddenPlayerMenuControls', []),
+      ])
     })
 
     if (await page.locator('.settingsWindow').isVisible()) await page.locator('.settingsCloseButton').click()
@@ -40,15 +46,21 @@ test('Android hides and reorders the compact control bar buttons', {
     await page.locator('.settingsMenu [data-section="appearance"]').click()
     await page.getByRole('button', { name: 'Customize interface', exact: true }).click()
     await page.locator('[data-settings-subpage-tab="controlBar"]').click()
-    const rows = page.locator('.selectedAction')
-    const ids = () => rows.evaluateAll(elements => elements.map(element => element.dataset.controlBarButtonId))
-    // The mobile list only offers the buttons of the compact control bar.
-    await expect.poll(ids).toEqual(['captions', 'pictureInPicture', 'menu', 'fullscreen'])
-    await expect(page.getByRole('button', { name: 'Add button', exact: true })).toBeDisabled()
-    await page.getByRole('button', { name: 'Remove Captions', exact: true }).click()
-    await page.getByRole('button', { name: 'Remove Fullscreen', exact: true }).click()
+    const ids = section => page.locator(`[data-placement-section="${section}"] .placementItem`).evaluateAll(elements => (
+      elements.map(element => element.dataset.controlBarButtonId ?? element.dataset.playerMenuControlId ?? element.dataset.hiddenControlId)
+    ))
+    // The control bar only offers the buttons of the compact control bar.
+    await expect.poll(() => ids('bar')).toEqual(['chapters', 'captions', 'pictureInPicture', 'menu', 'fullscreen'])
+    // The phone menu starts with the playback settings, which stay in the menu.
+    await expect.poll(async () => (await ids('menu')).slice(0, 3)).toEqual(['quality', 'playbackRate', 'audioTracks'])
+    await expect(page.locator('[data-player-menu-control-id="quality"] [data-placement-action="higher"]')).toHaveCount(0)
+    await expect(page.locator('[data-player-menu-control-id="theatreMode"], [data-hidden-control-id="theatreMode"], [data-hidden-control-id="fullWindow"]')).toHaveCount(0)
+    await page.getByRole('button', { name: 'Move Captions to the player menu', exact: true }).click()
+    await page.getByRole('button', { name: 'Hide Fullscreen', exact: true }).click()
+    await page.getByRole('button', { name: 'Hide Ambient Mode', exact: true }).click()
     await page.getByRole('button', { name: 'Move Player menu up', exact: true }).click()
-    await expect.poll(ids).toEqual(['menu', 'pictureInPicture'])
+    await expect.poll(() => ids('bar')).toEqual(['chapters', 'menu', 'pictureInPicture'])
+    await expect.poll(async () => (await ids('hidden')).filter(id => id === 'ambientMode' || id === 'fullscreen')).toEqual(['ambientMode', 'fullscreen'])
     await page.locator('.settingsCloseButton').click()
 
     await page.evaluate(() => { location.hash = '#/watch/jNQXAC9IVRw' })
@@ -79,19 +91,23 @@ test('Android hides and reorders the compact control bar buttons', {
       .filter(className => className != null)))
       .toEqual(['shaka-overflow-menu-button', 'shaka-pip-button'])
 
-    // Captions stay available from the player menu.
+    // Captions moved into the player menu, and ambient mode is hidden from it.
     await player.locator('.shaka-controls-container').evaluate(element => element.setAttribute('shown', 'true'))
     await player.locator('.shaka-controls-button-panel > .shaka-overflow-menu-button').click()
     await expect(page.locator('.phonePlayerOptions[open] .shaka-caption-button')).toBeVisible()
+    await expect(page.locator('.phonePlayerOptions[open] .sleep-timer-button')).toBeVisible()
+    await expect(page.locator('.phonePlayerOptions[open] .ambient-mode-button')).toHaveCount(0)
   } finally {
     await page.evaluate(({ settings, originalRoute }) => {
       const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
       if (window.__controlBarFetch) window.fetch = window.__controlBarFetch
       delete window.__controlBarFetch
       if (settings) {
-        const { ControlBarButtons, ...values } = settings
+        const { ControlBarButtons, PlayerMenuControls, HiddenPlayerMenuControls, ...values } = settings
         for (const [key, value] of Object.entries(values)) store.commit('set' + key, value)
         store.dispatch('updateControlBarButtons', ControlBarButtons)
+        store.dispatch('updatePlayerMenuControls', PlayerMenuControls)
+        store.dispatch('updateHiddenPlayerMenuControls', HiddenPlayerMenuControls)
       }
       location.hash = originalRoute
     }, { settings, originalRoute }).catch(() => {})

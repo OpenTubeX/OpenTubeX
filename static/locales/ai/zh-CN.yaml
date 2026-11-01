@@ -305,7 +305,11 @@ Settings:
   Control Bar:
     Title: "控制栏"
     Customize: "自定义控制栏"
-    Add Button: "添加按钮"
+    Hidden: "已隐藏"
+    Empty: "没有控件"
+    Move to Control Bar: "将{control}移到控制栏"
+    Move to Player Menu: "将{control}移到播放器菜单"
+    Hide: "隐藏{control}"
   Fullscreen Actions:
     Recommended Videos: "推荐视频"
     Title: "全屏操作"

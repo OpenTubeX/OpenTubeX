@@ -492,7 +492,6 @@
 
 :deep(.shaka-controls-container:has(
   .shaka-overflow-menu:not(.shaka-hidden),
-  .shaka-settings-menu:not(.shaka-hidden),
   .shaka-sub-menu:not(.shaka-hidden)
 ) .shaka-overflow-menu-button > .shaka-ui-icon) {
   transform: rotate(35deg);

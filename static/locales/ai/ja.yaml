@@ -305,7 +305,11 @@ Settings:
   Control Bar:
     Title: "コントロールバー"
     Customize: "コントロールバーをカスタマイズ"
-    Add Button: "ボタンを追加"
+    Hidden: "非表示"
+    Empty: "コントロールはありません"
+    Move to Control Bar: "{control}をコントロールバーに移動"
+    Move to Player Menu: "{control}をプレーヤーメニューに移動"
+    Hide: "{control}を非表示"
   Fullscreen Actions:
     Recommended Videos: "おすすめ動画"
     Title: "全画面のアクション"
