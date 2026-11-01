@@ -6,7 +6,9 @@ const editors = [
   { name: 'quick settings within a category', tab: 'quick settings', row: '[data-section-id="appearance"] .selectedSetting', attribute: 'data-setting-id' },
   { name: 'navigation', tab: 'navigation', row: '.selectedItem', attribute: 'data-navigation-item-id' },
   { name: 'fullscreen actions', tab: 'fullscreen actions', row: '.selectedAction', attribute: 'data-fullscreen-action-id' },
-  { name: 'control bar buttons', tab: 'control bar', row: '.selectedAction', attribute: 'data-control-bar-button-id' },
+  // The chapters button keeps its place next to the time, so it has no drag handle.
+  { name: 'control bar buttons', tab: 'control bar', row: '[data-placement-section="bar"] .placementItem:not(.unordered)', attribute: 'data-control-bar-button-id' },
+  { name: 'player menu controls', tab: 'control bar', row: '[data-placement-section="menu"] .placementItem', attribute: 'data-player-menu-control-id' },
 ]
 
 /** Return visible geometry with a useful failure instead of a null dereference. */
