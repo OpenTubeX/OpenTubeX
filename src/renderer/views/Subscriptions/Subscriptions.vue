@@ -181,6 +181,34 @@
                     :data-label="$t('Global.New')"
                   ><span>{{ $t("Global.New") }}</span></span>
                 </div>
+                <!-- eslint-disable-next-line vuejs-accessibility/interactive-supports-focus -->
+                <div
+                  v-if="visibleTabs.includes('feeds')"
+                  ref="feedsTab"
+                  class="tab"
+                  role="tab"
+                  :aria-selected="selectedTab === 'feeds'"
+                  aria-controls="subscriptionsPanel"
+                  data-rss-feeds-tab
+                  :tabindex="currentTab === 'feeds' ? 0 : -1"
+                  :class="{ selectedTab: selectedTab === 'feeds' }"
+                  @click="changeTabFromPointer($event, 'feeds')"
+                  @keydown.space.enter.prevent="changeTab('feeds')"
+                  @keydown.left.right="switchTab($event, 'feeds')"
+                >
+                  <FtIcon
+                    :icon="['fas', 'rss']"
+                    class="subscriptionIcon"
+                  />
+                  <span
+                    class="tabLabel"
+                    :data-label="$t('Subscriptions.RSS Feeds.Tab')"
+                  ><span>{{ $t("Subscriptions.RSS Feeds.Tab") }}</span></span>
+                  <FtLoader
+                    v-if="rssFeedsRefreshing"
+                    class="tabLoadingIndicator"
+                  />
+                </div>
               </FtTabs>
             </div>
             <div
@@ -200,6 +228,16 @@
                 :size="20"
                 theme="base-no-default"
                 @click="toggleNewFeedView"
+              />
+              <FtIconButton
+                v-if="currentTab === 'feeds'"
+                class="headerViewToggle headerManageFeeds"
+                :title="$t('Settings.Subscription Settings.Manage RSS Feeds')"
+                :icon="['fas', 'edit']"
+                :padding="8"
+                :size="20"
+                theme="base-no-default"
+                @click="openRssFeedManager"
               />
               <FtSelect
                 v-if="currentTab === 'new'"
@@ -231,14 +269,16 @@
               <FtRefreshWidget
                 embedded
                 class="headerRefreshWidget subscriptionsHeaderRefreshWidget"
-                :disable-refresh="subscriptionFeedRefreshInProgress || currentTabPanel.isLoading || activeSubscriptionList.length === 0"
+                :disable-refresh="currentTab === 'feeds'
+                  ? currentTabPanel.isLoading || followedRssFeeds.length === 0
+                  : subscriptionFeedRefreshInProgress || currentTabPanel.isLoading || activeSubscriptionList.length === 0"
                 :last-refresh-timestamp="currentTabPanel.lastRefreshTimestamp"
                 :next-auto-refresh-timestamp="currentTabPanel.nextAutoRefreshTimestamp"
                 :next-auto-refresh-tooltip="currentTabPanel.nextAutoRefreshTooltip"
                 :next-auto-refresh-at="currentAutoRefresh.timestamp"
                 :auto-refresh-interval="currentAutoRefresh.interval"
                 :title="currentTabPanel.refreshTitle"
-                :refresh-in-progress="subscriptionFeedRefreshInProgress"
+                :refresh-in-progress="currentTab !== 'feeds' && subscriptionFeedRefreshInProgress"
                 @click="refreshCurrentTab"
                 @cancel="cancelRefresh"
               />
@@ -327,6 +367,13 @@
           role="tabpanel"
           :active-category="newFeedView === 'tabbed' ? currentNewFeedTab : null"
         />
+        <SubscriptionsFeeds
+          v-else-if="currentTab === 'feeds'"
+          id="subscriptionsPanel"
+          key="subscriptions-feeds"
+          ref="feedsPanel"
+          role="tabpanel"
+        />
       </KeepAlive>
       <p v-if="currentTab === null">
         {{ $t("Subscriptions.All Subscription Tabs Hidden", {
@@ -367,6 +414,7 @@ import SubscriptionsVideos from '../../components/SubscriptionsVideos.vue'
 import SubscriptionsLive from '../../components/SubscriptionsLive.vue'
 import SubscriptionsShorts from '../../components/SubscriptionsShorts.vue'
 import SubscriptionsPosts from '../../components/SubscriptionPosts/SubscriptionsPosts.vue'
+import SubscriptionsFeeds from '../../components/SubscriptionsFeeds/SubscriptionsFeeds.vue'
 
 import { getAnimationSpeedMultiplier } from '../../helpers/animationSpeed'
 import { isReducedMotionEnabled } from '../../helpers/reducedMotion'
@@ -386,6 +434,8 @@ import {
   refreshSubscriptionVideosFromRemote
 } from '../../helpers/subscriptions'
 import { getSubscriptionsForFeed } from '../../helpers/subscription-channels'
+import { openRssFeedManager, rssFeedsRefreshing } from '../../helpers/rssFeeds'
+import { supportsYtDlp } from '../../helpers/ytDlpCapabilities'
 
 const isElectron = process.env.IS_ELECTRON
 const usesLogicalTabs = process.env.IS_ELECTRON || process.env.IS_CAPACITOR
@@ -550,6 +600,10 @@ const showNewSubscriptionFeed = computed(() => {
   return store.getters.getShowNewSubscriptionFeed
 })
 
+// Items from other platforms open through yt-dlp
+const enableRssFeeds = computed(() => supportsYtDlp && store.getters.getEnableRssFeeds)
+const followedRssFeeds = computed(() => store.getters.getFollowedRssFeeds)
+
 const newFeedSortBy = computed(() => {
   const value = store.getters.getNewSubscriptionFeedSortBy
   return NEW_FEED_SORT_BY_VALUES.includes(value) ? value : 'newest'
@@ -609,7 +663,7 @@ const currentTabRefreshing = computed(() => {
   return refreshingFeedTab.value !== null && refreshingFeedTab.value === currentFeedTab
 })
 
-/** @type {import('vue').Ref<'videos' | 'shorts' | 'live' | 'community' | 'new' | null>} */
+/** @type {import('vue').Ref<'videos' | 'shorts' | 'live' | 'community' | 'new' | 'feeds' | null>} */
 const currentTab = ref('videos')
 const selectedTab = ref('videos')
 let tabChangeSequence = 0
@@ -619,9 +673,10 @@ const tabScrollPositions = {
   shorts: 0,
   live: 0,
   community: 0,
-  new: 0
+  new: 0,
+  feeds: 0
 }
-/** @type {'videos' | 'shorts' | 'live' | 'community' | 'new' | null} */
+/** @type {'videos' | 'shorts' | 'live' | 'community' | 'new' | 'feeds' | null} */
 let scrollPositionOwnerTab = currentTab.value
 let restoreScrollOnActivate = false
 
@@ -716,7 +771,7 @@ watch(currentTab, async (value) => {
 })
 
 const visibleTabs = computed(() => {
-  /** @type {('videos' | 'shorts' | 'live' | 'community' | 'new')[]} */
+  /** @type {('videos' | 'shorts' | 'live' | 'community' | 'new' | 'feeds')[]} */
   const tabs = []
 
   if (!hideSubscriptionsVideos.value) {
@@ -737,6 +792,10 @@ const visibleTabs = computed(() => {
 
   if (showNewSubscriptionFeed.value && tabs.length > 0) {
     tabs.push('new')
+  }
+
+  if (enableRssFeeds.value) {
+    tabs.push('feeds')
   }
 
   return tabs
@@ -806,7 +865,7 @@ watch(() => route.query.tab, value => {
 })
 
 /**
- * @param {'videos' | 'shorts' | 'live' | 'community' | 'new'} tab
+ * @param {'videos' | 'shorts' | 'live' | 'community' | 'new' | 'feeds'} tab
  */
 function changeTab(tab) {
   // First visible tab or no tab as fallback
@@ -855,7 +914,7 @@ function changeTab(tab) {
 
 /**
  * @param {MouseEvent} event
- * @param {'videos' | 'shorts' | 'live' | 'community' | 'new'} tab
+ * @param {'videos' | 'shorts' | 'live' | 'community' | 'new' | 'feeds'} tab
  */
 function changeTabFromPointer(event, tab) {
   changeTab(tab)
@@ -960,11 +1019,13 @@ const liveTab = useTemplateRef('liveTab')
 const shortsTab = useTemplateRef('shortsTab')
 const communityTab = useTemplateRef('communityTab')
 const newTab = useTemplateRef('newTab')
+const feedsTab = useTemplateRef('feedsTab')
 const videosPanel = useTemplateRef('videosPanel')
 const livePanel = useTemplateRef('livePanel')
 const shortsPanel = useTemplateRef('shortsPanel')
 const communityPanel = useTemplateRef('communityPanel')
 const newPanel = useTemplateRef('newPanel')
+const feedsPanel = useTemplateRef('feedsPanel')
 
 /**
  * @param {'videos' | 'shorts' | 'live' | 'posts'} tab
@@ -985,6 +1046,8 @@ const currentTabPanel = computed(() => {
       return communityPanel.value
     case 'new':
       return newPanel.value
+    case 'feeds':
+      return feedsPanel.value
     default:
       return null
   }
@@ -998,11 +1061,11 @@ const currentTabHasNewContent = computed(() => {
   return showNewSubscriptionFeedIndicators.value && currentTabPanel.value?.hasNewContent === true
 })
 
-/** @type {import('vue').Ref<'videos' | 'shorts' | 'live' | 'community' | 'new' | null>} */
+/** @type {import('vue').Ref<'videos' | 'shorts' | 'live' | 'community' | 'new' | 'feeds' | null>} */
 const markingSeenTab = ref(null)
 
 /**
- * @param {'videos' | 'shorts' | 'live' | 'community' | 'new'} tab
+ * @param {'videos' | 'shorts' | 'live' | 'community' | 'new' | 'feeds'} tab
  * @param {'videos' | 'shorts' | 'live' | 'posts'} [newFeedTab=currentNewFeedTab.value]
  */
 async function markAllAsSeen(tab, newFeedTab = currentNewFeedTab.value) {
@@ -1015,7 +1078,7 @@ async function markAllAsSeen(tab, newFeedTab = currentNewFeedTab.value) {
     const feedTabs = tab === 'new'
       ? newFeedView.value === 'tabbed'
         ? [newFeedTab]
-        : visibleTabs.value.filter(visibleTab => visibleTab !== 'new')
+        : visibleTabs.value.filter(visibleTab => visibleTab !== 'new' && visibleTab !== 'feeds')
       : [tab]
 
     const cacheFeedTabs = feedTabs.map(feedTab => feedTab === 'community' ? 'posts' : feedTab)
@@ -1131,7 +1194,7 @@ const currentAutoRefresh = computed(() => {
 
 /**
  * @param {KeyboardEvent} event
- * @param {'videos' | 'shorts' | 'live' | 'community' | 'new'} focusedTab
+ * @param {'videos' | 'shorts' | 'live' | 'community' | 'new' | 'feeds'} focusedTab
  * @param {boolean} moveFocus
  */
 function switchTab(event, focusedTab, moveFocus = true) {
@@ -1184,6 +1247,9 @@ function switchTab(event, focusedTab, moveFocus = true) {
         break
       case 'new':
         newTab.value?.focus()
+        break
+      case 'feeds':
+        feedsTab.value?.focus()
         break
     }
 

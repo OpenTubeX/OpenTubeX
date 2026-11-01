@@ -186,6 +186,21 @@ Subscriptions:
   Oldest First: Oudste eerst
   Posts:
     RSS Message: YouTube biedt geen RSS-feeds voor berichten. Schakel de instelling "{rssSetting}" uit om berichten te bekijken of schakel de instelling "{hideSetting}" in om dit tabblad te verbergen.
+  RSS Feeds:
+    Tab: RSS
+    Followed Feeds: Gevolgde RSS-feeds
+    Add Feed: Feed toevoegen
+    Feed URL: URL van RSS- of Atom-feed
+    Remove Feed: '{feed} verwijderen'
+    Invalid Feed URL: Voer een webadres in dat begint met http:// of https://.
+    Feed Already Followed: Je volgt deze feed al.
+    Feed Could Not Be Loaded: De feed kan niet worden geladen. Controleer of het adres naar een RSS- of Atom-feed verwijst.
+    Refresh Errors: 1 feed kan niet worden vernieuwd. | {count} feeds kunnen niet worden vernieuwd.
+    Description: Voeg een RSS- of Atom-feed toe om makers op andere platforms te volgen. {rssHub}-instanties bieden feeds voor veel sites, zoals Twitch.
+    Empty Items: Je feeds bevatten momenteel geen items.
+    No Feeds: Je volgt nog geen RSS-feeds.
+    Public RSSHub Instances: Openbare RSSHub-instanties
+    Retry Feed: '{feed} opnieuw proberen'
 Trending:
   Music: Muziek
   Load Error: Trending kan niet worden geladen.
@@ -1062,6 +1077,9 @@ Settings:
   Subscription Settings:
     Fetch Feed on Startup: Feed ophalen bij opstarten
     Show New Content Feed: Feed met nieuwe content tonen
+    RSS Feeds: RSS-feeds
+    Enable RSS Feeds: RSS-feeds voor andere platforms inschakelen
+    Manage RSS Feeds: RSS-feeds beheren
     Show New Content Indicators: Indicatoren voor nieuwe content tonen
     Show Scheduled Live Streams / Premieres First: Geplande livestreams en premières eerst tonen
     Auto Refresh Interval: Interval voor automatisch vernieuwen
@@ -2126,6 +2144,7 @@ Tooltips:
   Subscription Settings:
     Fetch Feed on Startup: Als dit is ingeschakeld, haalt OpenTubeX je abonnementsfeed automatisch op bij het opstarten en wanneer een nieuw venster wordt geopend.
     Show New Content Feed: Toont een tabblad Nieuw met items uit de abonnementsfeed die bij de vorige ophaalactie nog niet aanwezig waren.
+    Enable RSS Feeds: Toont een RSS-tabblad op de pagina Abonnementen met de items van RSS- of Atom-feeds, zodat je makers op andere platforms kunt volgen. De items worden geopend met yt-dlp.
     Show New Content Indicators: Toont een klein puntje naast items uit de abonnementsfeed die bij de vorige ophaalactie nog niet aanwezig waren.
     Show Scheduled Live Streams / Premieres First: Houdt aankomende livestreams en premières bovenaan de abonnementsfeed. Als dit is uitgeschakeld, blijven ze tot hun start op de positie van hun aankondiging staan. Vernieuw na het uitschakelen de abonnementsfeed eenmaal om de aankondigingsdatums van bestaande geplande items op te halen.
     Auto Refresh Interval: "Hoe vaak OpenTubeX je abonnementsfeed automatisch vernieuwt terwijl de app geopend is. Op Android vernieuwt een interval dat niet nul is de feed ook wanneer de app gesloten is."

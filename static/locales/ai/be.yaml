@@ -199,6 +199,21 @@ Subscriptions:
   Oldest First: Спачатку старэйшыя
   Posts:
     RSS Message: YouTube не дае RSS-стужак для допісаў. Адключыце наладу "{rssSetting}", каб праглядаць допісы, або ўключыце наладу "{hideSetting}", каб схаваць гэту ўкладку.
+  RSS Feeds:
+    Tab: RSS
+    Followed Feeds: Падпісаныя RSS-стужкі
+    Add Feed: Дадаць стужку
+    Feed URL: URL-адрас RSS- або Atom-стужкі
+    Remove Feed: Выдаліць {feed}
+    Invalid Feed URL: Увядзіце вэб-адрас, які пачынаецца з http:// або https://.
+    Feed Already Followed: Вы ўжо падпісаныя на гэту стужку.
+    Feed Could Not Be Loaded: Не ўдалося загрузіць стужку. Праверце, ці вядзе адрас на RSS- або Atom-стужку.
+    Refresh Errors: Не ўдалося абнавіць 1 стужку. | Не ўдалося абнавіць {count} стужкі. | Не ўдалося абнавіць {count} стужак.
+    Description: Дадайце RSS- або Atom-стужку, каб сачыць за аўтарамі на іншых платформах. Асобнікі {rssHub} даюць стужкі для многіх сайтаў, напрыклад Twitch.
+    Empty Items: У вашых стужках пакуль няма элементаў.
+    No Feeds: Вы пакуль не падпісаны ні на адну RSS-стужку.
+    Public RSSHub Instances: Публічныя асобнікі RSSHub
+    Retry Feed: Паўтарыць спробу для {feed}
 Trending:
   Music: Музыка
   Load Error: Не ўдалося загрузіць папулярнае.
@@ -1084,6 +1099,9 @@ Settings:
   Subscription Settings:
     Fetch Feed on Startup: Атрымліваць стужку пры запуску
     Show New Content Feed: Паказваць стужку новага змесціва
+    RSS Feeds: RSS-стужкі
+    Enable RSS Feeds: Уключыць RSS-стужкі для іншых платформ
+    Manage RSS Feeds: Кіраванне RSS-стужкамі
     Show New Content Indicators: Паказваць індыкатары новага змесціва
     Show Scheduled Live Streams / Premieres First: Спачатку паказваць запланаваныя жывыя трансляцыі і прэм'еры
     Auto Refresh Interval: Інтэрвал аўтаматычнага абнаўлення
@@ -2167,6 +2185,7 @@ Tooltips:
   Subscription Settings:
     Fetch Feed on Startup: Калі ўключана, OpenTubeX аўтаматычна атрымлівае стужку падпісак пры запуску і адкрыцці новага акна.
     Show New Content Feed: Паказвае ўкладку «Новае» з элементамі стужкі падпісак, якіх не было падчас папярэдняга атрымання.
+    Enable RSS Feeds: Паказвае ўкладку RSS на старонцы падпісак з элементамі RSS- або Atom-стужак, каб вы маглі сачыць за аўтарамі на іншых платформах. Яе элементы адкрываюцца праз yt-dlp.
     Show New Content Indicators: Паказвае маленькую кропку побач з элементамі стужкі падпісак, якіх не было падчас папярэдняга атрымання.
     Show Scheduled Live Streams / Premieres First: Трымае запланаваныя жывыя трансляцыі і прэм'еры ўверсе стужкі падпісак. Калі адключана, яны застаюцца на месцы абвяшчэння да пачатку. Пасля адключэння адзін раз абнавіце стужку падпісак, каб атрымаць даты абвяшчэння для наяўных запланаваных элементаў.
     Auto Refresh Interval: "Як часта OpenTubeX аўтаматычна абнаўляе стужку падпісак, пакуль праграма адкрытая. На Android ненулявы інтэрвал таксама абнаўляе стужку, калі праграма закрыта."

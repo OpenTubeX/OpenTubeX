@@ -1,0 +1,92 @@
+.rssFeedsHeader {
+  --input-bottom-spacing: 0;
+
+  display: grid;
+  flex: none;
+  gap: 16px;
+  padding-block: 0 20px;
+  padding-inline: 20px;
+}
+
+.rssFeedsHeader p {
+  margin: 0;
+}
+
+.rssFeedsHeader :deep(.ft-input-component) {
+  inline-size: 100%;
+  margin-block: 0;
+}
+
+.rssFeedsScroller {
+  flex: 1;
+  min-block-size: 0;
+  padding-inline: 20px;
+}
+
+.emptyState {
+  color: var(--tertiary-text-color);
+  margin: 0;
+  padding-block-end: 24px;
+}
+
+.feedList {
+  display: grid;
+  gap: 8px;
+  list-style: none;
+  margin: 0;
+  padding-block: 0 24px;
+  padding-inline: 0;
+}
+
+.feedRow {
+  align-items: center;
+  border: 1px solid var(--tertiary-text-color);
+  border-radius: calc(10px * var(--ui-roundness));
+  display: flex;
+  gap: 12px;
+  padding-block: 8px;
+  padding-inline: 16px 8px;
+}
+
+.feedIcon {
+  display: flex;
+  flex: none;
+  inline-size: 32px;
+  justify-content: center;
+}
+
+.feedRow.hasError .feedIcon {
+  color: var(--destructive-color);
+}
+
+.feedText {
+  display: grid;
+  flex: 1;
+  min-inline-size: 0;
+}
+
+.feedTitle,
+.feedUrl {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.feedUrl {
+  color: var(--tertiary-text-color);
+  font-size: 0.85em;
+}
+
+.instancesLink {
+  align-items: center;
+  display: inline-flex;
+  gap: 6px;
+  justify-self: start;
+}
+
+.feedAvatar {
+  block-size: 32px;
+  border-radius: 50%;
+  inline-size: 32px;
+  object-fit: cover;
+}

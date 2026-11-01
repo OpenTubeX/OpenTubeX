@@ -184,6 +184,21 @@ Subscriptions:
   Show Combined View: Dangos yr olwg gyfun
   Newest First: Mwyaf newydd yn gyntaf
   Oldest First: Hynaf yn gyntaf
+  RSS Feeds:
+    Tab: RSS
+    Followed Feeds: Ffrydiau RSS rydych chi'n eu dilyn
+    Add Feed: Ychwanegu Ffrwd
+    Feed URL: URL ffrwd RSS neu Atom
+    Remove Feed: Tynnu {feed}
+    Invalid Feed URL: Rhowch gyfeiriad gwe sy'n dechrau gyda http:// neu https://.
+    Feed Already Followed: Rydych chi eisoes yn dilyn y ffrwd hon.
+    Feed Could Not Be Loaded: Doedd dim modd llwytho'r ffrwd. Gwiriwch fod y cyfeiriad yn pwyntio at ffrwd RSS neu Atom.
+    Refresh Errors: Methwyd adnewyddu {count} o ffrydiau. | Methwyd adnewyddu 1 ffrwd. | Methwyd adnewyddu {count} ffrwd. | Methwyd adnewyddu {count} ffrwd. | Methwyd adnewyddu {count} ffrwd. | Methwyd adnewyddu {count} o ffrydiau.
+    Description: Ychwanegwch ffrwd RSS neu Atom i ddilyn crewyr o lwyfannau eraill. Mae enghreifftiau {rssHub} yn darparu ffrydiau ar gyfer llawer o wefannau, fel Twitch.
+    Empty Items: Does dim eitemau yn eich ffrydiau ar hyn o bryd.
+    No Feeds: Dydych chi ddim yn dilyn unrhyw ffrydiau RSS eto.
+    Public RSSHub Instances: Enghreifftiau RSSHub cyhoeddus
+    Retry Feed: Rhoi cynnig arall ar {feed}
 Trending:
   Music: Cerddoriaeth
   Load Error: Nid oedd modd llwytho Trendio.
@@ -1049,6 +1064,9 @@ Settings:
   Subscription Settings:
     Fetch Feed on Startup: Cyrchu'r ffrwd wrth gychwyn
     Show New Content Feed: Dangos y ffrwd cynnwys newydd
+    RSS Feeds: Ffrydiau RSS
+    Enable RSS Feeds: Galluogi Ffrydiau RSS ar gyfer Llwyfannau Eraill
+    Manage RSS Feeds: Rheoli Ffrydiau RSS
     Show New Content Indicators: Dangos dangosyddion cynnwys newydd
     Show Scheduled Live Streams / Premieres First: Dangos ffrydiau byw wedi'u hamserlennu / premières yn gyntaf
     Auto Refresh Interval: Cyfwng adnewyddu awtomatig
@@ -2095,6 +2113,7 @@ Tooltips:
   Subscription Settings:
     Fetch Feed on Startup: Pan fydd wedi'i alluogi, bydd OpenTubeX yn cyrchu eich ffrwd tanysgrifiadau'n awtomatig wrth gychwyn a phan agorir ffenestr newydd.
     Show New Content Feed: Mae'n dangos tab Newydd sy'n cynnwys eitemau o'r ffrwd tanysgrifiadau nad oeddent yn bresennol yn ystod y cyrchiad blaenorol.
+    Enable RSS Feeds: Mae'n dangos tab RSS ar y dudalen Tanysgrifiadau gydag eitemau ffrydiau RSS neu Atom, fel y gallwch ddilyn crewyr ar lwyfannau eraill. Mae ei eitemau'n agor gyda yt-dlp.
     Show New Content Indicators: Mae'n dangos dot bach wrth ymyl eitemau o'r ffrwd tanysgrifiadau nad oeddent yn bresennol yn ystod y cyrchiad blaenorol.
     Show Scheduled Live Streams / Premieres First: Mae'n cadw ffrydiau byw a premières sydd ar ddod ar frig y ffrwd tanysgrifiadau. Pan fydd wedi'i analluogi, maent yn aros yn safle eu cyhoeddiad nes iddynt ddechrau. Adnewyddwch y ffrwd tanysgrifiadau unwaith ar ôl analluogi'r dewis i gyrchu dyddiadau cyhoeddi cofnodion sydd eisoes wedi'u hamserlennu.
     Auto Refresh Interval: "Pa mor aml y mae OpenTubeX yn adnewyddu eich ffrwd tanysgrifiadau'n awtomatig tra bo'r ap ar agor. Ar Android, mae cyfwng nad yw’n sero hefyd yn adnewyddu’r ffrwd pan fydd yr ap ar gau."

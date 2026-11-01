@@ -69,6 +69,21 @@ Subscriptions:
   New Content Tabs: Karty nowych treści
   Show Tabbed View: Pokaż widok kart
   Show Combined View: Pokaż widok łączny
+  RSS Feeds:
+    Tab: RSS
+    Followed Feeds: Obserwowane kanały RSS
+    Add Feed: Dodaj kanał
+    Feed URL: Adres URL kanału RSS lub Atom
+    Remove Feed: Usuń {feed}
+    Invalid Feed URL: Wpisz adres internetowy zaczynający się od http:// lub https://.
+    Feed Already Followed: Już obserwujesz ten kanał.
+    Feed Could Not Be Loaded: Nie udało się wczytać kanału. Sprawdź, czy adres prowadzi do kanału RSS lub Atom.
+    Refresh Errors: Nie udało się odświeżyć 1 kanału. | Nie udało się odświeżyć {count} kanałów. | Nie udało się odświeżyć {count} kanałów.
+    Description: Dodaj kanał RSS lub Atom, aby obserwować twórców z innych platform. Instancje {rssHub} udostępniają kanały dla wielu serwisów, takich jak Twitch.
+    Empty Items: Twoje kanały nie mają obecnie żadnych elementów.
+    No Feeds: Nie obserwujesz jeszcze żadnych kanałów RSS.
+    Public RSSHub Instances: Publiczne instancje RSSHub
+    Retry Feed: Spróbuj ponownie wczytać {feed}
 Trending:
   Music: Muzyka
   Load Error: Nie udało się wczytać popularnych treści.
@@ -584,6 +599,9 @@ Settings:
     Show Scheduled Live Streams / Premieres First: Najpierw pokazuj zaplanowane transmisje na żywo i premiery
     Refresh Subscriptions While App Is Closed: "Odświeżaj subskrypcje, gdy aplikacja jest zamknięta"
     Notify About New Uploads: Powiadamiaj o nowościach
+    RSS Feeds: Kanały RSS
+    Enable RSS Feeds: Włącz kanały RSS dla innych platform
+    Manage RSS Feeds: Zarządzaj kanałami RSS
   Distraction Free Settings:
     Hide Popularity Graph: "Ukryj wykres popularności"
     Enable Block Lists: "Włącz listy blokowania"
@@ -1295,6 +1313,7 @@ Tooltips:
     Show Scheduled Live Streams / Premieres First: Umieszcza nadchodzące transmisje na żywo i premiery na górze kanału subskrypcji. Po wyłączeniu pozostają na pozycji zgodnej z datą ogłoszenia aż do rozpoczęcia. Po wyłączeniu odśwież kanał subskrypcji, aby pobrać daty ogłoszenia istniejących zaplanowanych pozycji.
     Refresh Subscriptions While App Is Closed: "Odświeża kanały zgodnie z wybranymi ustawieniami. Na komputerze OpenTubeX pozostaje w zasobniku systemowym do zamknięcia programu. Android określa czas odświeżania w tle."
     Notify About New Uploads: Wyświetla na tym urządzeniu powiadomienia systemowe dla kanałów, dla których włączono powiadomienia w ich ustawieniach subskrypcji. OpenTubeX sprawdza nowe treści podczas odświeżania subskrypcji, więc wybierz interwał odświeżania. Aby otrzymywać powiadomienia, gdy aplikacja jest zamknięta, włącz także odświeżanie, gdy aplikacja jest zamknięta.
+    Enable RSS Feeds: Pokazuje zakładkę RSS na stronie Subskrypcje z elementami kanałów RSS lub Atom, aby można było obserwować twórców z innych platform. Jej elementy otwierają się za pomocą yt-dlp.
   Theme Settings:
     Visible Search Suggestions: "Określa, ile wpisów historii wyszukiwania i sugestii pokazuje pasek wyszukiwania, zanim jego lista zacznie się przewijać. Lista nigdy nie wychodzi poza dolną krawędź okna."
     Thumbnail Size: "Skaluje miniatury filmów w siatkach i listach. Siatki ze stałą liczbą kolumn lub widok Pełna szerokość zamiast tego wypełniają każdy wiersz, więc tam suwak zmienia tylko miniatury list i Shorts. W oknach wielkości telefonu miniatury siatki są ograniczone do 100%."

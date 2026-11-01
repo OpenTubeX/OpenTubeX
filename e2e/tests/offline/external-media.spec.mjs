@@ -10,8 +10,14 @@ import { expectImagesLoaded, fulfillVisualFixture } from '../../helpers/visual-f
 import { IpcChannels } from '../../../src/constants.js'
 import { mapExternalPlaybackMetadata } from '../../../src/ytDlpMetadata.js'
 
+function savedExternalEntry(page, mediaUrl) {
+  return page.evaluate(url => JSON.parse(localStorage.getItem(`externalMediaPosition:${new URL(url).href}`) ?? 'null'), mediaUrl)
+}
+
+/** The resume position. Finished media is remembered as watched without one. */
 async function savedExternalPosition(page, mediaUrl) {
-  return page.evaluate(url => JSON.parse(localStorage.getItem(`externalMediaPosition:${new URL(url).href}`) ?? 'null')?.seconds ?? null, mediaUrl)
+  const seconds = (await savedExternalEntry(page, mediaUrl))?.seconds
+  return seconds > 0 ? seconds : null
 }
 
 async function prepareTwitchYtDlp(app, page, mediaUrl, live, description = '', chapters = [], duration = 30, metadata = {}) {
@@ -184,6 +190,8 @@ test('external media resets completed playback and clears positions with watch h
   await video.evaluate(element => { element.currentTime = element.duration - 0.1; return element.play() })
   await expect.poll(() => video.evaluate(element => element.ended)).toBe(true)
   await expect.poll(() => savedExternalPosition(page, mediaUrl)).toBeNull()
+  // Lists such as the RSS feed tab show finished media as watched
+  expect((await savedExternalEntry(page, mediaUrl))?.watched).toBe(true)
   await goTo(page, 'history')
   video = await open()
   await video.evaluate(element => element.pause())
@@ -192,7 +200,7 @@ test('external media resets completed playback and clears positions with watch h
   await expect.poll(() => savedExternalPosition(page, mediaUrl)).toBeCloseTo(12, 0)
   await goTo(page, 'history')
   await page.evaluate(() => window.$store.dispatch('removeAllHistory'))
-  expect(await savedExternalPosition(page, mediaUrl)).toBeNull()
+  expect(await savedExternalEntry(page, mediaUrl)).toBeNull()
   video = await open()
   await video.evaluate(element => element.pause())
   expect(await video.evaluate(element => element.currentTime)).toBeLessThan(2)

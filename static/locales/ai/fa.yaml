@@ -203,6 +203,21 @@ Subscriptions:
   Oldest First: قدیمی‌ترین ابتدا
   Posts:
     RSS Message: 'یوتیوب برای پست‌ها خوراک RSS ارائه نمی‌کند. برای دیدن پست‌ها تنظیم "{rssSetting}" را غیرفعال کنید یا برای پنهان‌کردن این زبانه تنظیم "{hideSetting}" را فعال کنید.'
+  RSS Feeds:
+    Tab: RSS
+    Followed Feeds: خوراک‌های RSS دنبال‌شده
+    Add Feed: افزودن خوراک
+    Feed URL: نشانی خوراک RSS یا Atom
+    Remove Feed: حذف {feed}
+    Invalid Feed URL: یک نشانی وب وارد کنید که با http:// یا https:// شروع شود.
+    Feed Already Followed: شما از قبل این خوراک را دنبال می‌کنید.
+    Feed Could Not Be Loaded: خوراک بارگیری نشد. بررسی کنید که نشانی به یک خوراک RSS یا Atom اشاره کند.
+    Refresh Errors: 1 خوراک تازه‌سازی نشد. | {count} خوراک تازه‌سازی نشد.
+    Description: برای دنبال کردن سازندگان از پلتفرم‌های دیگر، یک خوراک RSS یا Atom اضافه کنید. نمونه‌های {rssHub} برای بسیاری از سایت‌ها، مانند Twitch، خوراک ارائه می‌کنند.
+    Empty Items: خوراک‌های شما در حال حاضر هیچ موردی ندارند.
+    No Feeds: هنوز هیچ خوراک RSS را دنبال نمی‌کنید.
+    Public RSSHub Instances: نمونه‌های عمومی RSSHub
+    Retry Feed: تلاش دوباره برای {feed}
 Trending:
   Music: موسیقی
   Load Error: موارد پرطرف‌دار بارگذاری نشدند.
@@ -1084,6 +1099,9 @@ Settings:
   Subscription Settings:
     Fetch Feed on Startup: دریافت خوراک هنگام راه‌اندازی
     Show New Content Feed: نمایش خوراک محتوای جدید
+    RSS Feeds: خوراک‌های RSS
+    Enable RSS Feeds: فعال کردن خوراک‌های RSS برای پلتفرم‌های دیگر
+    Manage RSS Feeds: مدیریت خوراک‌های RSS
     Show New Content Indicators: نمایش نشانگرهای محتوای جدید
     Show Scheduled Live Streams / Premieres First: نمایش پخش‌های زندهٔ زمان‌بندی‌شده / نخستین نمایش‌ها در ابتدا
     Auto Refresh Interval: فاصلهٔ تازه‌سازی خودکار
@@ -2160,6 +2178,7 @@ Tooltips:
   Subscription Settings:
     Fetch Feed on Startup: در صورت فعال بودن، OpenTubeX هنگام راه‌اندازی و بازشدن پنجره‌ای جدید، خوراک اشتراک‌های شما را خودکار دریافت می‌کند.
     Show New Content Feed: زبانه «جدید» را نشان می‌دهد که حاوی مواردی از خوراک اشتراک‌هاست که هنگام دریافت قبلی وجود نداشتند.
+    Enable RSS Feeds: یک زبانه RSS با موارد خوراک‌های RSS یا Atom در صفحه اشتراک‌ها نشان می‌دهد تا بتوانید سازندگان در پلتفرم‌های دیگر را دنبال کنید. موارد آن با yt-dlp باز می‌شوند.
     Show New Content Indicators: کنار مواردی از خوراک اشتراک‌ها که هنگام دریافت قبلی وجود نداشتند، نقطه‌ای کوچک نشان می‌دهد.
     Show Scheduled Live Streams / Premieres First: پخش‌های زنده و نمایش‌های نخست آینده را بالای خوراک اشتراک‌ها نگه می‌دارد. در صورت غیرفعال بودن، تا زمان شروع در جایگاه اعلام اولیه خود می‌مانند. پس از غیرفعال‌کردن، خوراک اشتراک‌ها را یک‌بار تازه‌سازی کنید تا تاریخ اعلام موارد زمان‌بندی‌شده موجود دریافت شود.
     Auto Refresh Interval: "فاصله زمانی تازه‌سازی خودکار خوراک اشتراک‌ها توسط OpenTubeX در حالی که برنامه باز است. در اندروید، فاصلهٔ زمانی غیرصفر خوراک را هنگام بسته بودن برنامه نیز تازه می‌کند."

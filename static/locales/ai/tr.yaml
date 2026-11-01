@@ -184,6 +184,21 @@ Subscriptions:
   Show Combined View: Birleşik görünümü göster
   Newest First: Önce en yeniler
   Oldest First: Önce en eskiler
+  RSS Feeds:
+    Tab: RSS
+    Followed Feeds: Takip edilen RSS akışları
+    Add Feed: Akış Ekle
+    Feed URL: RSS veya Atom akışı URL'si
+    Remove Feed: '{feed} akışını kaldır'
+    Invalid Feed URL: http:// veya https:// ile başlayan bir web adresi girin.
+    Feed Already Followed: Bu akışı zaten takip ediyorsunuz.
+    Feed Could Not Be Loaded: Akış yüklenemedi. Adresin bir RSS veya Atom akışını gösterdiğini kontrol edin.
+    Refresh Errors: 1 akış yenilenemedi. | {count} akış yenilenemedi.
+    Description: Diğer platformlardaki içerik üreticilerini takip etmek için bir RSS veya Atom akışı ekleyin. {rssHub} örnekleri, Twitch gibi birçok site için akış sağlar.
+    Empty Items: Akışlarınızda şu anda hiç öğe yok.
+    No Feeds: Henüz hiçbir RSS akışını takip etmiyorsunuz.
+    Public RSSHub Instances: Herkese açık RSSHub örnekleri
+    Retry Feed: '{feed} akışını yeniden dene'
 Trending:
   Music: Müzik
   Load Error: Öne çıkanlar yüklenemedi.
@@ -1046,6 +1061,9 @@ Settings:
   Subscription Settings:
     Fetch Feed on Startup: Başlangıçta Akışı Getir
     Show New Content Feed: Yeni İçerik Akışını Göster
+    RSS Feeds: RSS Akışları
+    Enable RSS Feeds: Diğer Platformlar için RSS Akışlarını Etkinleştir
+    Manage RSS Feeds: RSS Akışlarını Yönet
     Show New Content Indicators: Yeni İçerik Göstergelerini Göster
     Show Scheduled Live Streams / Premieres First: Planlanmış Canlı Yayınları / İlk Gösterimleri Önce Göster
     Auto Refresh Interval: Otomatik Yenileme Aralığı
@@ -2066,6 +2084,7 @@ Tooltips:
   Subscription Settings:
     Fetch Feed on Startup: Etkinleştirildiğinde OpenTubeX, başlangıçta ve yeni pencere açıldığında abonelik akışınızı otomatik olarak getirir.
     Show New Content Feed: Önceki getirme sırasında bulunmayan abonelik akışı öğelerini içeren Yeni sekmesini gösterir.
+    Enable RSS Feeds: Abonelikler sayfasında RSS veya Atom akışlarının öğelerini içeren bir RSS sekmesi gösterir, böylece diğer platformlardaki içerik üreticilerini takip edebilirsiniz. Öğeleri yt-dlp ile açılır.
     Show New Content Indicators: Önceki getirme sırasında bulunmayan abonelik akışı öğelerinin yanında küçük bir nokta gösterir.
     Show Scheduled Live Streams / Premieres First: Yaklaşan canlı yayınları ve ilk gösterimleri abonelik akışının en üstünde tutar. Devre dışı bırakıldığında başlayana kadar duyuruldukları konumda kalırlar. Mevcut planlanmış kayıtların duyuru tarihlerini almak için devre dışı bıraktıktan sonra abonelik akışını bir kez yenileyin.
     Auto Refresh Interval: "Uygulama açıkken OpenTubeX'in abonelik akışınızı ne sıklıkla otomatik yenileyeceğini belirler. Android’de sıfırdan farklı bir aralık, uygulama kapalıyken de akışı yeniler."

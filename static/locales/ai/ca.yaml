@@ -230,6 +230,21 @@ Subscriptions:
   Oldest First: Més antics primer
   Posts:
     RSS Message: YouTube no proporciona canals RSS per a les publicacions. Desactiveu l'opció "{rssSetting}" per veure les publicacions o activeu l'opció "{hideSetting}" per ocultar aquesta pestanya.
+  RSS Feeds:
+    Tab: RSS
+    Followed Feeds: Canals RSS seguits
+    Add Feed: Afegeix un canal
+    Feed URL: URL del canal RSS o Atom
+    Remove Feed: Elimina {feed}
+    Invalid Feed URL: Introduïu una adreça web que comenci per http:// o https://.
+    Feed Already Followed: Ja seguiu aquest canal.
+    Feed Could Not Be Loaded: No s'ha pogut carregar el canal. Comproveu que l'adreça apunti a un canal RSS o Atom.
+    Refresh Errors: No s'ha pogut actualitzar 1 canal. | No s'han pogut actualitzar {count} canals. | No s'han pogut actualitzar {count} canals.
+    Description: Afegiu un canal RSS o Atom per seguir creadors d'altres plataformes. Les instàncies de {rssHub} ofereixen canals per a molts llocs, com ara Twitch.
+    Empty Items: Ara mateix els vostres canals no tenen cap element.
+    No Feeds: Encara no seguiu cap canal RSS.
+    Public RSSHub Instances: Instàncies públiques de RSSHub
+    Retry Feed: Torna a provar {feed}
 Channels:
   Load More Channels: "Carrega més canals"
   Count: S'ha trobat 1 canal. | S'han trobat {number} canals. | S'han trobat {number} canals.
@@ -1316,6 +1331,9 @@ Settings:
   Subscription Settings:
     Fetch Feed on Startup: Obtén el canal en iniciar
     Show New Content Feed: Mostra el canal de contingut nou
+    RSS Feeds: Canals RSS
+    Enable RSS Feeds: Activa els canals RSS per a altres plataformes
+    Manage RSS Feeds: Gestiona els canals RSS
     Show New Content Indicators: Mostra els indicadors de contingut nou
     Show Scheduled Live Streams / Premieres First: Mostra primer les emissions en directe i les estrenes programades
     Auto Refresh Interval: Interval d'actualització automàtica
@@ -2629,6 +2647,7 @@ Tooltips:
     Fetch Feeds from RSS: Si s'activa, l'OpenTubeX utilitza RSS en lloc del mètode predeterminat per obtenir el canal de subscripcions. RSS és més ràpid i evita els bloqueigs d'IP, però no proporciona algunes dades, com ara la durada dels vídeos, l'estat en directe o les publicacions
     Fetch Feed on Startup: Si s'activa, l'OpenTubeX obté automàticament el canal de subscripcions en iniciar-se i en obrir una finestra nova.
     Show New Content Feed: Mostra una pestanya Nou amb els elements del canal de subscripcions que no hi eren en l'obtenció anterior.
+    Enable RSS Feeds: Mostra una pestanya RSS a la pàgina de subscripcions amb els elements de canals RSS o Atom, perquè pugueu seguir creadors d'altres plataformes. Els seus elements s'obren amb yt-dlp.
     Show New Content Indicators: Mostra un punt petit al costat dels elements del canal de subscripcions que no hi eren en l'obtenció anterior.
     Show Scheduled Live Streams / Premieres First: Manté les properes emissions en directe i estrenes a dalt del canal de subscripcions. Si es desactiva, romanen a la posició de l'anunci fins que comencen. Després de desactivar-ho, actualitzeu el canal una vegada per obtenir les dates d'anunci de les entrades programades existents.
     Auto Refresh Interval: "Freqüència amb què l'OpenTubeX actualitza automàticament el canal de subscripcions mentre l'aplicació està oberta. A Android, un interval diferent de zero també actualitza el canal quan l’aplicació està tancada."

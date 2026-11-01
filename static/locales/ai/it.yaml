@@ -184,6 +184,21 @@ Subscriptions:
   Show Combined View: Mostra vista combinata
   Newest First: Prima i più recenti
   Oldest First: Prima i meno recenti
+  RSS Feeds:
+    Tab: RSS
+    Followed Feeds: Feed RSS seguiti
+    Add Feed: Aggiungi feed
+    Feed URL: URL del feed RSS o Atom
+    Remove Feed: Rimuovi {feed}
+    Invalid Feed URL: Inserisci un indirizzo web che inizi con http:// o https://.
+    Feed Already Followed: Segui già questo feed.
+    Feed Could Not Be Loaded: Impossibile caricare il feed. Verifica che l'indirizzo punti a un feed RSS o Atom.
+    Refresh Errors: Impossibile aggiornare 1 feed. | Impossibile aggiornare {count} feed. | Impossibile aggiornare {count} feed.
+    Description: Aggiungi un feed RSS o Atom per seguire creatori di altre piattaforme. Le istanze {rssHub} forniscono feed per molti siti, come Twitch.
+    Empty Items: Al momento i tuoi feed non contengono elementi.
+    No Feeds: Non segui ancora nessun feed RSS.
+    Public RSSHub Instances: Istanze RSSHub pubbliche
+    Retry Feed: Riprova {feed}
 Trending:
   Music: Musica
   Load Error: Impossibile caricare le tendenze.
@@ -1046,6 +1061,9 @@ Settings:
   Subscription Settings:
     Fetch Feed on Startup: Recupera feed all'avvio
     Show New Content Feed: Mostra feed dei nuovi contenuti
+    RSS Feeds: Feed RSS
+    Enable RSS Feeds: Abilita i feed RSS per altre piattaforme
+    Manage RSS Feeds: Gestisci i feed RSS
     Show New Content Indicators: Mostra indicatori dei nuovi contenuti
     Show Scheduled Live Streams / Premieres First: Mostra prima dirette programmate e première
     Auto Refresh Interval: Intervallo di aggiornamento automatico
@@ -2065,6 +2083,7 @@ Tooltips:
   Subscription Settings:
     Fetch Feed on Startup: Se abilitato, OpenTubeX recupera automaticamente il feed delle iscrizioni all'avvio e all'apertura di una nuova finestra.
     Show New Content Feed: Mostra una scheda Nuovi con gli elementi del feed delle iscrizioni assenti durante il recupero precedente.
+    Enable RSS Feeds: Mostra una scheda RSS nella pagina Iscrizioni con gli elementi di feed RSS o Atom, così puoi seguire creatori di altre piattaforme. I suoi elementi si aprono con yt-dlp.
     Show New Content Indicators: Mostra un puntino accanto agli elementi del feed delle iscrizioni assenti durante il recupero precedente.
     Show Scheduled Live Streams / Premieres First: Mantiene le prossime dirette e première all'inizio del feed delle iscrizioni. Se disabilitato, restano nella posizione dell'annuncio fino all'inizio. Dopo la disattivazione, aggiorna una volta il feed per recuperare le date degli annunci delle voci programmate esistenti.
     Auto Refresh Interval: "Frequenza con cui OpenTubeX aggiorna automaticamente il feed delle iscrizioni mentre l'app è aperta. Su Android, un intervallo diverso da zero aggiorna il feed anche quando l’app è chiusa."

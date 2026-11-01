@@ -187,6 +187,21 @@ Subscriptions:
   Oldest First: Älteste zuerst
   Posts:
     RSS Message: YouTube stellt keine RSS-Feeds für Beiträge bereit. Deaktiviere die Einstellung „{rssSetting}“, um Beiträge anzuzeigen, oder aktiviere die Einstellung „{hideSetting}“, um diesen Tab auszublenden.
+  RSS Feeds:
+    Tab: RSS
+    Followed Feeds: Abonnierte RSS-Feeds
+    Add Feed: Feed hinzufügen
+    Feed URL: URL des RSS- oder Atom-Feeds
+    Remove Feed: '{feed} entfernen'
+    Invalid Feed URL: Gib eine Webadresse ein, die mit http:// oder https:// beginnt.
+    Feed Already Followed: Du hast diesen Feed bereits abonniert.
+    Feed Could Not Be Loaded: Der Feed konnte nicht geladen werden. Prüfe, ob die Adresse auf einen RSS- oder Atom-Feed verweist.
+    Refresh Errors: 1 Feed konnte nicht aktualisiert werden. | {count} Feeds konnten nicht aktualisiert werden.
+    Description: Füge einen RSS- oder Atom-Feed hinzu, um Kanälen auf anderen Plattformen zu folgen. {rssHub}-Instanzen stellen Feeds für viele Websites bereit, zum Beispiel Twitch.
+    Empty Items: Deine Feeds enthalten derzeit keine Einträge.
+    No Feeds: Du hast noch keine RSS-Feeds abonniert.
+    Public RSSHub Instances: Öffentliche RSSHub-Instanzen
+    Retry Feed: '{feed} erneut laden'
 Trending:
   Trending: Trends
   Trending Tabs: Trends-Tabs
@@ -1111,6 +1126,9 @@ Settings:
     Fetch Feeds from RSS: Abos via RSS abrufen
     Fetch Feed on Startup: Feed beim Start abrufen
     Show New Content Feed: Feed mit neuen Inhalten anzeigen
+    RSS Feeds: RSS-Feeds
+    Enable RSS Feeds: RSS-Feeds für andere Plattformen aktivieren
+    Manage RSS Feeds: RSS-Feeds verwalten
     Show New Content Indicators: Markierungen für neue Inhalte anzeigen
     Show Scheduled Live Streams / Premieres First: Geplante Livestreams / Premieren zuerst anzeigen
     Confirm Before Unsubscribing: Unbeabsichtigtes Deabonnieren verhindern
@@ -2795,6 +2813,7 @@ Tooltips:
     Fetch Feeds from RSS: Wenn aktiviert, verwendet OpenTubeX RSS anstelle der Standardmethode, um deinen Abo-Feed abzurufen. RSS ist schneller und verhindert die IP-Sperren, liefert aber bestimmte Informationen wie Videodauer, den Live-Status oder Beiträge nicht
     Fetch Feed on Startup: Wenn aktiviert, ruft OpenTubeX deine Abos automatisch beim Start und beim Öffnen eines neuen Fensters ab.
     Show New Content Feed: Zeigt eine Registerkarte „Neu“ mit Abo-Feed-Einträgen an, die beim vorherigen Abruf noch nicht vorhanden waren.
+    Enable RSS Feeds: Zeigt auf der Abo-Seite einen RSS-Tab mit den Einträgen von RSS- oder Atom-Feeds an, damit du Kanälen auf anderen Plattformen folgen kannst. Seine Einträge werden mit yt-dlp geöffnet.
     Show New Content Indicators: Zeigt einen kleinen Punkt neben Abo-Feed-Einträgen an, die beim vorherigen Abruf noch nicht vorhanden waren.
     Show Scheduled Live Streams / Premieres First: Zeigt bevorstehende Livestreams und Premieren oben im Abo-Feed an. Wenn deaktiviert, bleiben sie bis zum Start an der Position ihrer Ankündigung. Aktualisiere den Abo-Feed nach dem Deaktivieren einmal, um die Ankündigungszeitpunkte bestehender geplanter Einträge abzurufen.
     Auto Refresh Interval: "Wie oft OpenTubeX automatisch deine Abos aktualisiert während die Anwendung geöffnet ist. Unter Android wird der Feed bei einem Intervall ungleich null auch aktualisiert, während die App geschlossen ist."

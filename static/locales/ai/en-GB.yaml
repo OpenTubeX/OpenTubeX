@@ -185,6 +185,21 @@ Subscriptions:
   Oldest First: Oldest first
   Posts:
     RSS Message: YouTube does not provide RSS feeds for posts. Disable the "{rssSetting}" setting to view posts or enable the "{hideSetting}" setting to hide this tab.
+  RSS Feeds:
+    Tab: RSS
+    Followed Feeds: Followed RSS feeds
+    Add Feed: Add feed
+    Feed URL: RSS or Atom feed URL
+    Remove Feed: Remove {feed}
+    Invalid Feed URL: Enter a web address that starts with http:// or https://.
+    Feed Already Followed: You already follow this feed.
+    Feed Could Not Be Loaded: The feed could not be loaded. Check that the address points to an RSS or Atom feed.
+    Refresh Errors: 1 feed could not be refreshed. | {count} feeds could not be refreshed.
+    Description: Add an RSS or Atom feed to follow creators from other platforms. {rssHub} instances provide feeds for many sites, such as Twitch.
+    Empty Items: Your feeds currently do not have any items.
+    No Feeds: You don't follow any RSS feeds yet.
+    Public RSSHub Instances: Public RSSHub instances
+    Retry Feed: Retry {feed}
 Trending:
   Music: Music
   Load Error: Trending could not be loaded.
@@ -1033,6 +1048,9 @@ Settings:
     Cleanup Failed: Storage cleanup failed
   Subscription Settings:
     Show New Content Feed: Show New Content Feed
+    RSS Feeds: RSS feeds
+    Enable RSS Feeds: Enable RSS feeds for other platforms
+    Manage RSS Feeds: Manage RSS feeds
     Show New Content Indicators: Show New Content Indicators
     Show Scheduled Live Streams / Premieres First: Show Scheduled Live Streams / Premieres First
     Auto Refresh Interval: Auto Refresh Interval
@@ -2055,6 +2073,7 @@ Tooltips:
     Shorten View Counts: Shows view, comment and comment like counts that YouTube has already rounded in a shortened form, e.g. 14K instead of 14,000. Exact counts are always shown in full.
   Subscription Settings:
     Show New Content Feed: Shows a New tab containing subscription feed items that were not present during the previous fetch.
+    Enable RSS Feeds: Shows an RSS tab on the Subscriptions page with the items of RSS or Atom feeds, so you can follow creators on other platforms. Its items open with yt-dlp.
     Show New Content Indicators: Shows a small dot beside subscription feed items that were not present during the previous fetch.
     Show Scheduled Live Streams / Premieres First: Keeps upcoming live streams and premieres at the top of the subscription feed. When disabled, they remain at their announcement position until they start. Refresh the subscription feed once after disabling to retrieve announcement dates for existing scheduled entries.
     Auto Refresh Interval: "How often OpenTubeX automatically refreshes your subscription feed while the app is open. On Android, a nonzero interval also refreshes it while the app is closed."

@@ -184,6 +184,21 @@ Subscriptions:
   Show Combined View: Birləşdirilmiş görünüşü göstər
   Newest First: Əvvəlcə ən yeni
   Oldest First: Əvvəlcə ən köhnə
+  RSS Feeds:
+    Tab: RSS
+    Followed Feeds: İzlənilən RSS axınları
+    Add Feed: Axın əlavə et
+    Feed URL: RSS və ya Atom axınının URL-i
+    Remove Feed: '{feed} axınını sil'
+    Invalid Feed URL: http:// və ya https:// ilə başlayan veb ünvan daxil edin.
+    Feed Already Followed: Bu axını artıq izləyirsiniz.
+    Feed Could Not Be Loaded: Axın yüklənə bilmədi. Ünvanın RSS və ya Atom axınına yönləndiyini yoxlayın.
+    Refresh Errors: 1 axın yenilənə bilmədi. | {count} axın yenilənə bilmədi.
+    Description: Digər platformalardakı müəllifləri izləmək üçün RSS və ya Atom axını əlavə edin. {rssHub} serverləri bir çox sayt, məsələn Twitch üçün axınlar təqdim edir.
+    Empty Items: Axınlarınızda hazırda heç bir element yoxdur.
+    No Feeds: Hələ heç bir RSS axınını izləmirsiniz.
+    Public RSSHub Instances: İctimai RSSHub serverləri
+    Retry Feed: '{feed} axınını yenidən sına'
 Channels:
   Load More Channels: Daha çox kanal yüklə
 Trending:
@@ -1048,6 +1063,9 @@ Settings:
   Subscription Settings:
     Fetch Feed on Startup: Başladıqda lenti al
     Show New Content Feed: Yeni məzmun lentini göstər
+    RSS Feeds: RSS Axınları
+    Enable RSS Feeds: Digər Platformalar üçün RSS Axınlarını Aktivləşdir
+    Manage RSS Feeds: RSS Axınlarını İdarə Et
     Show New Content Indicators: Yeni məzmun göstəricilərini göstər
     Show Scheduled Live Streams / Premieres First: Planlaşdırılmış canlı yayımları / premyeraları əvvəl göstər
     Auto Refresh Interval: Avtomatik yeniləmə aralığı
@@ -2078,6 +2096,7 @@ Tooltips:
   Subscription Settings:
     Fetch Feed on Startup: Aktivləşdirildikdə OpenTubeX başlanğıcda və yeni pəncərə açıldıqda abunəlik axınınızı avtomatik alır.
     Show New Content Feed: Əvvəlki alınma zamanı olmayan abunəlik axını elementlərini ehtiva edən Yeni səhifəsini göstərir.
+    Enable RSS Feeds: Abunəliklər səhifəsində RSS və ya Atom axınlarının elementlərini göstərən RSS panelini göstərir ki, digər platformalardakı müəllifləri izləyə biləsiniz. Onun elementləri yt-dlp ilə açılır.
     Show New Content Indicators: Əvvəlki alınma zamanı olmayan abunəlik axını elementlərinin yanında kiçik nöqtə göstərir.
     Show Scheduled Live Streams / Premieres First: Gələcək canlı yayımları və premyeraları abunəlik axınının yuxarısında saxlayır. Bağlandıqda, onlar başlayana qədər elan edildikləri mövqedə qalırlar. Mövcud planlaşdırılmış elementlərin elan tarixlərini almaq üçün bağladıqdan sonra abunəlik axınını bir dəfə yeniləyin.
     Auto Refresh Interval: Tətbiq açıq olduqda OpenTubeX-in abunəlik axınınızı hansı tezliklə avtomatik yeniləyəcəyi. Android-də sıfırdan fərqli aralıq tətbiq bağlı olduqda da axını yeniləyir.

@@ -184,6 +184,21 @@ Subscriptions:
   Show Combined View: Erakutsi ikuspegi bateratua
   Newest First: Berrienak lehenik
   Oldest First: Zaharrenak lehenik
+  RSS Feeds:
+    Tab: RSS
+    Followed Feeds: Jarraitutako RSS jarioak
+    Add Feed: Gehitu jarioa
+    Feed URL: RSS edo Atom jarioaren URLa
+    Remove Feed: Kendu {feed}
+    Invalid Feed URL: Idatzi http:// edo https:// aurrizkiarekin hasten den web-helbide bat.
+    Feed Already Followed: Dagoeneko jarraitzen duzu jario hau.
+    Feed Could Not Be Loaded: Ezin izan da jarioa kargatu. Egiaztatu helbideak RSS edo Atom jario bat adierazten duela.
+    Refresh Errors: Ezin izan da jario 1 freskatu. | Ezin izan dira {count} jario freskatu.
+    Description: Gehitu RSS edo Atom jario bat beste plataformetako sortzaileei jarraitzeko. {rssHub} instantziek webgune askotarako jarioak eskaintzen dituzte, Twitch adibidez.
+    Empty Items: Zure jarioek ez dute elementurik une honetan.
+    No Feeds: Oraindik ez duzu RSS jariorik jarraitzen.
+    Public RSSHub Instances: RSSHub instantzia publikoak
+    Retry Feed: Saiatu berriro {feed} kargatzen
 Trending:
   Music: Musika
   Load Error: Ezin izan dira joerak kargatu.
@@ -1046,6 +1061,9 @@ Settings:
   Subscription Settings:
     Fetch Feed on Startup: Eskuratu jarioa abioan
     Show New Content Feed: Erakutsi eduki berriaren jarioa
+    RSS Feeds: RSS jarioak
+    Enable RSS Feeds: Gaitu beste plataformetarako RSS jarioak
+    Manage RSS Feeds: Kudeatu RSS jarioak
     Show New Content Indicators: Erakutsi eduki berriaren adierazleak
     Show Scheduled Live Streams / Premieres First: Erakutsi programatutako zuzeneko emankizunak eta estreinaldiak lehenik
     Auto Refresh Interval: Freskatze automatikoaren tartea
@@ -2075,6 +2093,7 @@ Tooltips:
   Subscription Settings:
     Fetch Feed on Startup: Gaituta dagoenean, OpenTubeX aplikazioak harpidetza-jarioa automatikoki eskuratuko du abioan eta leiho berri bat irekitzean.
     Show New Content Feed: Berria fitxa erakusten du, aurreko eskuratzean ez zeuden harpidetza-jarioko elementuekin.
+    Enable RSS Feeds: RSS fitxa bat erakusten du Harpidetzak orrian RSS edo Atom jarioen elementuekin, beste plataformetako sortzaileei jarraitu ahal izateko. Bere elementuak yt-dlp-rekin irekitzen dira.
     Show New Content Indicators: Puntu txiki bat erakusten du aurreko eskuratzean ez zeuden harpidetza-jarioko elementuen ondoan.
     Show Scheduled Live Streams / Premieres First: Laster hasiko diren zuzeneko emankizunak eta estreinaldiak harpidetza-jarioaren goialdean mantentzen ditu. Desgaituta dagoenean, iragarpenaren kokapenean geratzen dira hasi arte. Desgaitu ondoren, freskatu behin harpidetza-jarioa lehendik programatutako elementuen iragarpen-datak eskuratzeko.
     Auto Refresh Interval: "OpenTubeX aplikazioak harpidetza-jarioa automatikoki freskatuko duen maiztasuna, aplikazioa irekita dagoen bitartean. Androiden, zero ez den tarte batek jarioa freskatzen du aplikazioa itxita dagoenean ere."

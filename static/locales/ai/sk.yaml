@@ -184,6 +184,21 @@ Subscriptions:
   Show Combined View: Zobraziť spolu
   Newest First: Najnovšie ako prvé
   Oldest First: Najstaršie ako prvé
+  RSS Feeds:
+    Tab: RSS
+    Followed Feeds: Sledované RSS kanály
+    Add Feed: Pridať kanál
+    Feed URL: URL kanála RSS alebo Atom
+    Remove Feed: Odstrániť {feed}
+    Invalid Feed URL: Zadajte webovú adresu, ktorá začína na http:// alebo https://.
+    Feed Already Followed: Tento kanál už sledujete.
+    Feed Could Not Be Loaded: Kanál sa nepodarilo načítať. Skontrolujte, či adresa odkazuje na kanál RSS alebo Atom.
+    Refresh Errors: 1 kanál sa nepodarilo obnoviť. | {count} kanály sa nepodarilo obnoviť. | {count} kanálov sa nepodarilo obnoviť.
+    Description: Pridajte kanál RSS alebo Atom a sledujte tvorcov z iných platforiem. Inštancie {rssHub} poskytujú kanály pre mnoho webov, napríklad Twitch.
+    Empty Items: Vaše kanály momentálne neobsahujú žiadne položky.
+    No Feeds: Zatiaľ nesledujete žiadne RSS kanály.
+    Public RSSHub Instances: Verejné inštancie RSSHub
+    Retry Feed: Skúsiť znova načítať {feed}
 Trending:
   Music: Hudba
   Load Error: Trendy sa nepodarilo načítať.
@@ -1046,6 +1061,9 @@ Settings:
   Subscription Settings:
     Fetch Feed on Startup: Načítať kanál pri spustení
     Show New Content Feed: Zobraziť kanál nového obsahu
+    RSS Feeds: RSS kanály
+    Enable RSS Feeds: Zapnúť RSS kanály pre iné platformy
+    Manage RSS Feeds: Spravovať RSS kanály
     Show New Content Indicators: Zobraziť ukazovatele nového obsahu
     Show Scheduled Live Streams / Premieres First: Najprv zobraziť naplánované živé prenosy a premiéry
     Auto Refresh Interval: Interval automatického obnovenia
@@ -2065,6 +2083,7 @@ Tooltips:
   Subscription Settings:
     Fetch Feed on Startup: Po zapnutí OpenTubeX automaticky načíta kanál odberov pri spustení a otvorení nového okna.
     Show New Content Feed: Zobrazí kartu Nové s položkami kanála odberov, ktoré pri predchádzajúcom načítaní neboli prítomné.
+    Enable RSS Feeds: Zobrazí na stránke Odbery kartu RSS s položkami kanálov RSS alebo Atom, aby ste mohli sledovať tvorcov z iných platforiem. Jej položky sa otvárajú pomocou yt-dlp.
     Show New Content Indicators: Vedľa položiek kanála odberov, ktoré pri predchádzajúcom načítaní neboli prítomné, zobrazí malú bodku.
     Show Scheduled Live Streams / Premieres First: Ponechá nadchádzajúce živé prenosy a premiéry v hornej časti kanála odberov. Po vypnutí zostanú až do začiatku na pozícii podľa oznámenia. Po vypnutí raz obnovte kanál odberov, aby sa načítali dátumy oznámenia existujúcich naplánovaných položiek.
     Auto Refresh Interval: "Určuje, ako často OpenTubeX automaticky obnoví kanál odberov, kým je aplikácia otvorená. V Androide nenulový interval obnovuje kanál aj vtedy, keď je aplikácia zatvorená."

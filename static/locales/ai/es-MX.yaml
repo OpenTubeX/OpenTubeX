@@ -199,6 +199,21 @@ Subscriptions:
   Oldest First: Más antiguo primero
   Posts:
     RSS Message: 'YouTube no proporciona fuentes RSS para publicaciones. Desactiva el ajuste "{rssSetting}" para ver las publicaciones o activa "{hideSetting}" para ocultar esta pestaña.'
+  RSS Feeds:
+    Tab: RSS
+    Followed Feeds: Fuentes RSS seguidas
+    Add Feed: Agregar fuente
+    Feed URL: URL de la fuente RSS o Atom
+    Remove Feed: Quitar {feed}
+    Invalid Feed URL: Ingresa una dirección web que comience con http:// o https://.
+    Feed Already Followed: Ya sigues esta fuente.
+    Feed Could Not Be Loaded: No se pudo cargar la fuente. Comprueba que la dirección apunte a una fuente RSS o Atom.
+    Refresh Errors: No se pudo actualizar 1 fuente. | No se pudieron actualizar {count} fuentes. | No se pudieron actualizar {count} fuentes.
+    Description: Agrega una fuente RSS o Atom para seguir a creadores de otras plataformas. Las instancias de {rssHub} ofrecen fuentes para muchos sitios, como Twitch.
+    Empty Items: Tus fuentes no tienen elementos por ahora.
+    No Feeds: Todavía no sigues ninguna fuente RSS.
+    Public RSSHub Instances: Instancias públicas de RSSHub
+    Retry Feed: Reintentar {feed}
 Trending:
   Music: Música
   Sports: Deportes
@@ -1175,6 +1190,9 @@ Settings:
   Subscription Settings:
     Fetch Feed on Startup: Obtener la fuente al iniciar
     Show New Content Feed: Mostrar la fuente de contenido nuevo
+    RSS Feeds: Fuentes RSS
+    Enable RSS Feeds: Activar fuentes RSS para otras plataformas
+    Manage RSS Feeds: Administrar fuentes RSS
     Show New Content Indicators: Mostrar indicadores de contenido nuevo
     Show Scheduled Live Streams / Premieres First: Mostrar primero emisiones en directo y estrenos programados
     Auto Refresh Interval: Intervalo de actualización automática
@@ -2427,6 +2445,7 @@ Tooltips:
   Subscription Settings:
     Fetch Feed on Startup: Al activarlo, OpenTubeX obtiene automáticamente la fuente de suscripciones al iniciarse y al abrir una ventana nueva.
     Show New Content Feed: Muestra una pestaña Nuevo con los elementos de la fuente de suscripciones que no estaban presentes en la obtención anterior.
+    Enable RSS Feeds: Muestra una pestaña RSS en la página de Suscripciones con los elementos de fuentes RSS o Atom, para que puedas seguir a creadores de otras plataformas. Sus elementos se abren con yt-dlp.
     Show New Content Indicators: Muestra un punto pequeño junto a los elementos de la fuente de suscripciones que no estaban presentes en la obtención anterior.
     Show Scheduled Live Streams / Premieres First: Mantiene las próximas emisiones en directo y los estrenos en la parte superior de la fuente de suscripciones. Si se desactiva, permanecen en la posición en la que se anunciaron hasta que empiezan. Actualiza una vez la fuente de suscripciones después de desactivarlo para obtener las fechas de anuncio de las entradas programadas existentes.
     Auto Refresh Interval: "Frecuencia con la que OpenTubeX actualiza automáticamente la fuente de suscripciones mientras la aplicación está abierta. En Android, un intervalo distinto de cero también actualiza el feed mientras la aplicación está cerrada."

@@ -186,6 +186,21 @@ Subscriptions:
   Oldest First: Äldsta först
   Posts:
     RSS Message: 'YouTube tillhandahåller inte RSS-flöden för inlägg. Inaktivera inställningen "{rssSetting}" för att visa inlägg eller aktivera inställningen "{hideSetting}" för att dölja den här fliken.'
+  RSS Feeds:
+    Tab: RSS
+    Followed Feeds: Följda RSS-flöden
+    Add Feed: Lägg till flöde
+    Feed URL: URL för RSS- eller Atom-flöde
+    Remove Feed: Ta bort {feed}
+    Invalid Feed URL: Ange en webbadress som börjar med http:// eller https://.
+    Feed Already Followed: Du följer redan det här flödet.
+    Feed Could Not Be Loaded: Flödet kunde inte läsas in. Kontrollera att adressen pekar på ett RSS- eller Atom-flöde.
+    Refresh Errors: 1 flöde kunde inte uppdateras. | {count} flöden kunde inte uppdateras.
+    Description: Lägg till ett RSS- eller Atom-flöde för att följa kreatörer från andra plattformar. {rssHub}-instanser tillhandahåller flöden för många webbplatser, till exempel Twitch.
+    Empty Items: Dina flöden har inga objekt just nu.
+    No Feeds: Du följer inga RSS-flöden ännu.
+    Public RSSHub Instances: Offentliga RSSHub-instanser
+    Retry Feed: Försök med {feed} igen
 Trending:
   Music: Musik
   Load Error: Trendande innehåll kunde inte läsas in.
@@ -1051,6 +1066,9 @@ Settings:
   Subscription Settings:
     Fetch Feed on Startup: Hämta flöde vid start
     Show New Content Feed: Visa flöde med nytt innehåll
+    RSS Feeds: RSS-flöden
+    Enable RSS Feeds: Aktivera RSS-flöden för andra plattformar
+    Manage RSS Feeds: Hantera RSS-flöden
     Show New Content Indicators: Visa indikatorer för nytt innehåll
     Show Scheduled Live Streams / Premieres First: Visa schemalagda liveströmmar och premiärer först
     Auto Refresh Interval: Intervall för automatisk uppdatering
@@ -2088,6 +2106,7 @@ Tooltips:
   Subscription Settings:
     Fetch Feed on Startup: När funktionen är aktiverad hämtar OpenTubeX automatiskt ditt prenumerationsflöde vid start och när ett nytt fönster öppnas.
     Show New Content Feed: Visar en flik med namnet Nytt som innehåller poster i prenumerationsflödet som inte fanns vid föregående hämtning.
+    Enable RSS Feeds: Visar en RSS-flik på sidan Prenumerationer med objekten från RSS- eller Atom-flöden, så att du kan följa kreatörer på andra plattformar. Dess objekt öppnas med yt-dlp.
     Show New Content Indicators: Visar en liten punkt bredvid poster i prenumerationsflödet som inte fanns vid föregående hämtning.
     Show Scheduled Live Streams / Premieres First: Behåller kommande liveströmmar och premiärer högst upp i prenumerationsflödet. När funktionen är inaktiverad ligger de kvar på platsen för tillkännagivandet tills de startar. Uppdatera prenumerationsflödet en gång efter inaktiveringen för att hämta tillkännagivandedatum för befintliga schemalagda poster.
     Auto Refresh Interval: "Hur ofta OpenTubeX automatiskt uppdaterar prenumerationsflödet medan appen är öppen. På Android uppdaterar ett intervall över noll även flödet när appen är stängd."

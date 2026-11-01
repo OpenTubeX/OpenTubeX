@@ -713,6 +713,8 @@ const customActions = {
   updateSubscribedChannelsCustomOrder: ({ commit, state }, value) => updateOrderedSetting(
     commit, state, 'subscribedChannelsCustomOrder', value
   ),
+  // Quick removals build on the previous one, so commit them before the save finishes.
+  updateFollowedRssFeeds: ({ commit, state }, value) => updateOrderedSetting(commit, state, 'followedRssFeeds', value),
   updatePinnedChannels: async ({ commit, state }, value) => {
     if (!await updateOrderedSetting(commit, state, 'pinnedChannels', value)) return false
     const pinnedIds = new Set(state.pinnedChannels.map(channel => channel.id))

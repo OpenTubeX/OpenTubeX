@@ -430,6 +430,8 @@ export function createDefaultSettings({ supportsLocalApi, isElectron }) {
     fetchSubscriptionsAutomatically: true,
     showScheduledLiveStreamsFirst: true,
     showNewSubscriptionFeed: true,
+    enableRssFeeds: false,
+    followedRssFeeds: [],
     showNewSubscriptionFeedIndicators: false,
     newSubscriptionFeedView: 'combined',
     newSubscriptionFeedSortBy: 'newest',

@@ -186,6 +186,21 @@ Subscriptions:
   Oldest First: Vanhimmat ensin
   Posts:
     RSS Message: 'YouTube ei tarjoa julkaisuille RSS-syötteitä. Poista "{rssSetting}" käytöstä nähdäksesi julkaisut tai ota "{hideSetting}" käyttöön piilottaaksesi tämän välilehden.'
+  RSS Feeds:
+    Tab: RSS
+    Followed Feeds: Seuratut RSS-syötteet
+    Add Feed: Lisää syöte
+    Feed URL: RSS- tai Atom-syötteen URL
+    Remove Feed: Poista {feed}
+    Invalid Feed URL: Anna verkko-osoite, joka alkaa http:// tai https://.
+    Feed Already Followed: Seuraat jo tätä syötettä.
+    Feed Could Not Be Loaded: Syötettä ei voitu ladata. Tarkista, että osoite osoittaa RSS- tai Atom-syötteeseen.
+    Refresh Errors: 1 syötettä ei voitu päivittää. | {count} syötettä ei voitu päivittää.
+    Description: Lisää RSS- tai Atom-syöte seurataksesi sisällöntuottajia muilla alustoilla. {rssHub}-instanssit tarjoavat syötteitä monille sivustoille, kuten Twitchille.
+    Empty Items: Syötteissäsi ei ole tällä hetkellä kohteita.
+    No Feeds: Et seuraa vielä yhtään RSS-syötettä.
+    Public RSSHub Instances: Julkiset RSSHub-instanssit
+    Retry Feed: Yritä ladata {feed} uudelleen
 Trending:
   Music: Musiikki
   Load Error: Nousussa olevia videoita ei voitu ladata.
@@ -1062,6 +1077,9 @@ Settings:
   Subscription Settings:
     Fetch Feed on Startup: Hae syöte käynnistettäessä
     Show New Content Feed: Näytä uuden sisällön syöte
+    RSS Feeds: RSS-syötteet
+    Enable RSS Feeds: Ota RSS-syötteet käyttöön muille alustoille
+    Manage RSS Feeds: Hallitse RSS-syötteitä
     Show New Content Indicators: Näytä uuden sisällön ilmaisimet
     Show Scheduled Live Streams / Premieres First: Näytä ajastetut suorat lähetykset ja ensi-illat ensin
     Auto Refresh Interval: Automaattisen päivityksen aikaväli
@@ -2115,6 +2133,7 @@ Tooltips:
   Subscription Settings:
     Fetch Feed on Startup: Kun asetus on käytössä, OpenTubeX hakee tilausnäkymän automaattisesti käynnistyessään ja uuden ikkunan avautuessa.
     Show New Content Feed: Näyttää Uudet-välilehden, joka sisältää tilausnäkymän kohteet, joita ei ollut edellisellä hakukerralla.
+    Enable RSS Feeds: Näyttää Tilaukset-sivulla RSS-välilehden, jossa on RSS- tai Atom-syötteiden kohteet, jotta voit seurata sisällöntuottajia muilla alustoilla. Sen kohteet avataan yt-dlp:llä.
     Show New Content Indicators: Näyttää pienen pisteen niiden tilausnäkymän kohteiden vieressä, joita ei ollut edellisellä hakukerralla.
     Show Scheduled Live Streams / Premieres First: Pitää tulevat suorat lähetykset ja ensi-illat tilausnäkymän alussa. Kun asetus on poistettu käytöstä, ne pysyvät ilmoitusajankohdan mukaisella paikallaan alkamiseensa asti. Päivitä tilausnäkymä kerran asetuksen poistamisen jälkeen, jotta olemassa olevien ajastettujen kohteiden ilmoituspäivät haetaan.
     Auto Refresh Interval: "Kuinka usein OpenTubeX päivittää tilausnäkymän automaattisesti sovelluksen ollessa avoinna. Androidissa nollasta poikkeava aikaväli päivittää syötteen myös sovelluksen ollessa suljettuna."

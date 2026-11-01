@@ -218,6 +218,21 @@ Subscriptions:
   Oldest First: Pirmiausia seniausi
   Posts:
     RSS Message: YouTube neteikia įrašų RSS kanalų. Išjunkite nustatymą „{rssSetting}“, kad matytumėte įrašus, arba įjunkite nustatymą „{hideSetting}“, kad paslėptumėte šį skirtuką.
+  RSS Feeds:
+    Tab: RSS
+    Followed Feeds: Stebimi RSS sklaidos kanalai
+    Add Feed: Pridėti sklaidos kanalą
+    Feed URL: RSS arba Atom sklaidos kanalo URL
+    Remove Feed: Pašalinti {feed}
+    Invalid Feed URL: Įveskite žiniatinklio adresą, prasidedantį http:// arba https://.
+    Feed Already Followed: Jūs jau stebite šį sklaidos kanalą.
+    Feed Could Not Be Loaded: Nepavyko įkelti sklaidos kanalo. Patikrinkite, ar adresas nurodo į RSS arba Atom sklaidos kanalą.
+    Refresh Errors: Nepavyko atnaujinti 1 sklaidos kanalo. | Nepavyko atnaujinti {count} sklaidos kanalų. | Nepavyko atnaujinti {count} sklaidos kanalų.
+    Description: Pridėkite RSS arba Atom sklaidos kanalą, kad galėtumėte stebėti kūrėjus kitose platformose. {rssHub} serveriai teikia sklaidos kanalus daugeliui svetainių, pavyzdžiui, Twitch.
+    Empty Items: Jūsų sklaidos kanaluose šiuo metu nėra jokių elementų.
+    No Feeds: Dar nestebite jokių RSS sklaidos kanalų.
+    Public RSSHub Instances: Vieši RSSHub serveriai
+    Retry Feed: Bandyti dar kartą įkelti {feed}
 Trending:
   Music: Muzika
   Load Error: Nepavyko įkelti tendencijų.
@@ -1265,6 +1280,9 @@ Settings:
   Subscription Settings:
     Fetch Feed on Startup: Paleidžiant gauti sklaidos kanalo duomenis
     Show New Content Feed: Rodyti naujo turinio sklaidos kanalą
+    RSS Feeds: RSS sklaidos kanalai
+    Enable RSS Feeds: Įjungti RSS sklaidos kanalus kitoms platformoms
+    Manage RSS Feeds: Tvarkyti RSS sklaidos kanalus
     Show New Content Indicators: Rodyti naujo turinio indikatorius
     Show Scheduled Live Streams / Premieres First: Pirmiausia rodyti suplanuotas tiesiogines transliacijas ir premjeras
     Auto Refresh Interval: Automatinio atnaujinimo intervalas
@@ -2494,6 +2512,7 @@ Tooltips:
   Subscription Settings:
     Fetch Feed on Startup: Įjungus OpenTubeX automatiškai gaus prenumeratų sklaidos kanalą paleidžiant programą ir atvėrus naują langą.
     Show New Content Feed: Rodo kortelę Nauja su prenumeratų sklaidos kanalo elementais, kurių nebuvo gaunant ankstesnį kartą.
+    Enable RSS Feeds: Prenumeratų puslapyje rodo RSS kortelę su RSS arba Atom sklaidos kanalų elementais, kad galėtumėte stebėti kūrėjus kitose platformose. Jos elementai atidaromi naudojant yt-dlp.
     Show New Content Indicators: Šalia prenumeratų sklaidos kanalo elementų, kurių nebuvo gaunant ankstesnį kartą, rodo mažą tašką.
     Show Scheduled Live Streams / Premieres First: Būsimas tiesiogines transliacijas ir premjeras rodo prenumeratų sklaidos kanalo viršuje. Išjungus iki pradžios jos lieka ten, kur buvo paskelbtos. Išjungę vieną kartą atnaujinkite prenumeratų sklaidos kanalą, kad gautumėte esamų suplanuotų elementų paskelbimo datas.
     Auto Refresh Interval: "Kaip dažnai OpenTubeX automatiškai atnaujina prenumeratų sklaidos kanalą, kol programa atverta. „Android“ sistemoje nenulinis intervalas atnaujina sklaidos kanalą ir tada, kai programa uždaryta."

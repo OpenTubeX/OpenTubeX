@@ -186,6 +186,21 @@ Subscriptions:
   Oldest First: Cũ nhất trước
   Posts:
     RSS Message: YouTube không cung cấp nguồn cấp RSS cho bài đăng. Tắt cài đặt "{rssSetting}" để xem bài đăng hoặc bật cài đặt "{hideSetting}" để ẩn thẻ này.
+  RSS Feeds:
+    Tab: RSS
+    Followed Feeds: Nguồn cấp RSS đang theo dõi
+    Add Feed: Thêm nguồn cấp
+    Feed URL: URL nguồn cấp RSS hoặc Atom
+    Remove Feed: Xóa {feed}
+    Invalid Feed URL: Nhập địa chỉ web bắt đầu bằng http:// hoặc https://.
+    Feed Already Followed: Bạn đã theo dõi nguồn cấp này.
+    Feed Could Not Be Loaded: Không thể tải nguồn cấp. Hãy kiểm tra xem địa chỉ có trỏ đến nguồn cấp RSS hoặc Atom không.
+    Refresh Errors: Không thể làm mới {count} nguồn cấp.
+    Description: Thêm nguồn cấp RSS hoặc Atom để theo dõi nhà sáng tạo từ các nền tảng khác. Các máy chủ {rssHub} cung cấp nguồn cấp cho nhiều trang web, chẳng hạn như Twitch.
+    Empty Items: Các nguồn cấp của bạn hiện không có mục nào.
+    No Feeds: Bạn chưa theo dõi nguồn cấp RSS nào.
+    Public RSSHub Instances: Các máy chủ RSSHub công khai
+    Retry Feed: Thử lại {feed}
 Trending:
   Music: Âm nhạc
   Load Error: Không thể tải nội dung thịnh hành.
@@ -1057,6 +1072,9 @@ Settings:
   Subscription Settings:
     Fetch Feed on Startup: Tải bảng tin khi khởi động
     Show New Content Feed: Hiện bảng tin nội dung mới
+    RSS Feeds: Nguồn cấp RSS
+    Enable RSS Feeds: Bật nguồn cấp RSS cho các nền tảng khác
+    Manage RSS Feeds: Quản lý nguồn cấp RSS
     Show New Content Indicators: Hiện chỉ báo nội dung mới
     Show Scheduled Live Streams / Premieres First: Hiện luồng trực tiếp / công chiếu đã lên lịch trước
     Auto Refresh Interval: Khoảng thời gian tự động làm mới
@@ -2107,6 +2125,7 @@ Tooltips:
   Subscription Settings:
     Fetch Feed on Startup: Khi bật, OpenTubeX sẽ tự động tải bảng tin đăng ký lúc khởi động và khi mở cửa sổ mới.
     Show New Content Feed: Hiện thẻ Mới chứa các mục trong bảng tin đăng ký chưa có ở lần tải trước.
+    Enable RSS Feeds: Hiện thẻ RSS trên trang Đăng ký với các mục từ nguồn cấp RSS hoặc Atom, để bạn có thể theo dõi nhà sáng tạo trên các nền tảng khác. Các mục của thẻ này được mở bằng yt-dlp.
     Show New Content Indicators: Hiện một chấm nhỏ bên cạnh các mục trong bảng tin đăng ký chưa có ở lần tải trước.
     Show Scheduled Live Streams / Premieres First: Giữ luồng trực tiếp và buổi công chiếu sắp tới ở đầu bảng tin đăng ký. Khi tắt, chúng vẫn ở vị trí thông báo cho đến khi bắt đầu. Hãy làm mới bảng tin đăng ký một lần sau khi tắt để lấy ngày thông báo cho các mục đã lên lịch hiện có.
     Auto Refresh Interval: "Tần suất OpenTubeX tự động làm mới bảng tin đăng ký khi ứng dụng đang mở. Trên Android, khoảng thời gian khác 0 cũng làm mới bảng tin khi ứng dụng đã đóng."

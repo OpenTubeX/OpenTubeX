@@ -184,6 +184,21 @@ Subscriptions:
   Show Combined View: Sýna sameinað
   Newest First: Nýjast fyrst
   Oldest First: Elst fyrst
+  RSS Feeds:
+    Tab: RSS
+    Followed Feeds: RSS-straumar sem þú fylgist með
+    Add Feed: Bæta við straumi
+    Feed URL: Slóð RSS- eða Atom-straums
+    Remove Feed: Fjarlægja {feed}
+    Invalid Feed URL: Sláðu inn vefslóð sem byrjar á http:// eða https://.
+    Feed Already Followed: Þú fylgist nú þegar með þessum straumi.
+    Feed Could Not Be Loaded: Ekki tókst að hlaða inn straumnum. Gakktu úr skugga um að slóðin vísi á RSS- eða Atom-straum.
+    Refresh Errors: Ekki tókst að uppfæra 1 straum. | Ekki tókst að uppfæra {count} strauma.
+    Description: Bættu við RSS- eða Atom-straumi til að fylgjast með höfundum á öðrum kerfum. {rssHub}-tilvik bjóða upp á strauma fyrir mörg vefsvæði, til dæmis Twitch.
+    Empty Items: Straumarnir þínir innihalda engin atriði eins og er.
+    No Feeds: Þú fylgist ekki með neinum RSS-straumum ennþá.
+    Public RSSHub Instances: Opinber RSSHub-tilvik
+    Retry Feed: Reyna {feed} aftur
 Trending:
   Music: Tónlist
   Load Error: Ekki tókst að hlaða vinsælu efni.
@@ -1048,6 +1063,9 @@ Settings:
   Subscription Settings:
     Fetch Feed on Startup: Sækja efnisstraum við ræsingu
     Show New Content Feed: Sýna straum með nýju efni
+    RSS Feeds: RSS-straumar
+    Enable RSS Feeds: Virkja RSS-strauma fyrir önnur kerfi
+    Manage RSS Feeds: Sýsla með RSS-strauma
     Show New Content Indicators: Sýna merki um nýtt efni
     Show Scheduled Live Streams / Premieres First: Sýna tímasettar beinar útsendingar og frumsýningar fyrst
     Auto Refresh Interval: Bil milli sjálfvirkra uppfærslna
@@ -2080,6 +2098,7 @@ Tooltips:
   Subscription Settings:
     Fetch Feed on Startup: Þegar þetta er virkt sækir OpenTubeX áskriftarstreymið sjálfkrafa við ræsingu og þegar nýr gluggi er opnaður.
     Show New Content Feed: Sýnir flipann Nýtt með færslum í áskriftarstreymi sem voru ekki til staðar þegar það var síðast sótt.
+    Enable RSS Feeds: Sýnir RSS-flipa á áskriftasíðunni með atriðum úr RSS- eða Atom-straumum, svo þú getir fylgst með höfundum á öðrum kerfum. Atriði hans eru opnuð með yt-dlp.
     Show New Content Indicators: Sýnir lítinn punkt við færslur í áskriftarstreymi sem voru ekki til staðar þegar það var síðast sótt.
     Show Scheduled Live Streams / Premieres First: Heldur væntanlegum beinum útsendingum og frumsýningum efst í áskriftarstreymi. Ef slökkt er á þessu haldast þær á upprunalegum stað í röðinni þar til þær hefjast. Endurnýjaðu áskriftarstreymið einu sinni eftir að slökkt er á þessu til að sækja tilkynningardagsetningar fyrir fyrirliggjandi tímasettar færslur.
     Auto Refresh Interval: "Hversu oft OpenTubeX endurnýjar áskriftarstreymið sjálfkrafa meðan forritið er opið. Í Android endurnýjar bil sem er ekki núll einnig veituna þegar appið er lokað."

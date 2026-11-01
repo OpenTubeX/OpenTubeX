@@ -157,6 +157,21 @@ Subscriptions:
   Show Combined View: Показывать общим списком
   Newest First: Сначала новые
   Oldest First: Сначала старые
+  RSS Feeds:
+    Tab: RSS
+    Followed Feeds: Отслеживаемые RSS-ленты
+    Add Feed: Добавить ленту
+    Feed URL: URL RSS- или Atom-ленты
+    Remove Feed: Удалить {feed}
+    Invalid Feed URL: Введите веб-адрес, начинающийся с http:// или https://.
+    Feed Already Followed: Вы уже отслеживаете эту ленту.
+    Feed Could Not Be Loaded: Не удалось загрузить ленту. Проверьте, что адрес ведёт на RSS- или Atom-ленту.
+    Refresh Errors: Не удалось обновить 1 ленту. | Не удалось обновить {count} ленты. | Не удалось обновить {count} лент.
+    Description: Добавьте RSS- или Atom-ленту, чтобы следить за авторами с других платформ. Экземпляры {rssHub} предоставляют ленты для многих сайтов, например Twitch.
+    Empty Items: В ваших лентах пока нет элементов.
+    No Feeds: Вы пока не отслеживаете ни одной RSS-ленты.
+    Public RSSHub Instances: Публичные экземпляры RSSHub
+    Retry Feed: Повторить попытку для {feed}
 Trending:
   Music: Музыка
   Load Error: Не удалось загрузить популярные видео.
@@ -1019,6 +1034,9 @@ Settings:
   Subscription Settings:
     Fetch Feed on Startup: Загружать ленту при запуске
     Show New Content Feed: Показывать ленту нового контента
+    RSS Feeds: RSS-ленты
+    Enable RSS Feeds: Включить RSS-ленты для других платформ
+    Manage RSS Feeds: Управление RSS-лентами
     Show New Content Indicators: Показывать индикаторы нового контента
     Show Scheduled Live Streams / Premieres First: Сначала показывать запланированные трансляции и премьеры
     Auto Refresh Interval: Интервал автообновления
@@ -2039,6 +2057,7 @@ Tooltips:
   Subscription Settings:
     Fetch Feed on Startup: Если включено, OpenTubeX автоматически получает ленту подписок при запуске и открытии нового окна.
     Show New Content Feed: Показывает вкладку «Новое» с элементами ленты подписок, которых не было при предыдущем получении.
+    Enable RSS Feeds: Показывает вкладку RSS на странице подписок с элементами RSS- или Atom-лент, чтобы вы могли следить за авторами на других платформах. Её элементы открываются через yt-dlp.
     Show New Content Indicators: Показывает небольшую точку рядом с элементами ленты подписок, которых не было при предыдущем получении.
     Show Scheduled Live Streams / Premieres First: Оставляет предстоящие прямые трансляции и премьеры в верхней части ленты подписок. Если отключено, до начала они остаются на месте первоначального объявления. После отключения один раз обновите ленту подписок, чтобы получить даты объявления для уже существующих запланированных записей.
     Auto Refresh Interval: "Как часто OpenTubeX автоматически обновляет ленту подписок, пока приложение открыто. На Android ненулевой интервал также обновляет ленту, когда приложение закрыто."

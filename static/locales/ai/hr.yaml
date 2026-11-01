@@ -186,6 +186,21 @@ Subscriptions:
   Oldest First: Najstarije prvo
   Posts:
     RSS Message: 'YouTube ne pruža RSS izvore za objave. Isključite postavku "{rssSetting}" za prikaz objava ili uključite postavku "{hideSetting}" kako biste sakrili ovu karticu.'
+  RSS Feeds:
+    Tab: RSS
+    Followed Feeds: Praćeni RSS izvori
+    Add Feed: Dodaj izvor
+    Feed URL: URL RSS ili Atom izvora
+    Remove Feed: Ukloni {feed}
+    Invalid Feed URL: Unesite web-adresu koja počinje s http:// ili https://.
+    Feed Already Followed: Već pratite ovaj izvor.
+    Feed Could Not Be Loaded: Izvor nije moguće učitati. Provjerite vodi li adresa na RSS ili Atom izvor.
+    Refresh Errors: 1 izvor nije moguće osvježiti. | {count} izvora nije moguće osvježiti. | {count} izvora nije moguće osvježiti.
+    Description: Dodajte RSS ili Atom izvor kako biste pratili autore s drugih platformi. {rssHub} instance pružaju izvore za mnoge web-stranice, primjerice Twitch.
+    Empty Items: Vaši izvori trenutačno nemaju nijednu stavku.
+    No Feeds: Još ne pratite nijedan RSS izvor.
+    Public RSSHub Instances: Javne RSSHub instance
+    Retry Feed: Pokušaj ponovno učitati {feed}
 Trending:
   Music: Glazba
   Load Error: Popularni sadržaj nije moguće učitati.
@@ -1051,6 +1066,9 @@ Settings:
   Subscription Settings:
     Fetch Feed on Startup: Dohvati sažetak sadržaja pri pokretanju
     Show New Content Feed: Prikaži sažetak novog sadržaja
+    RSS Feeds: RSS izvori
+    Enable RSS Feeds: Aktiviraj RSS izvore za druge platforme
+    Manage RSS Feeds: Upravljaj RSS izvorima
     Show New Content Indicators: Prikaži pokazatelje novog sadržaja
     Show Scheduled Live Streams / Premieres First: Najprije prikaži zakazane prijenose uživo / premijere
     Auto Refresh Interval: Razmak automatskog osvježavanja
@@ -2095,6 +2113,7 @@ Tooltips:
   Subscription Settings:
     Fetch Feed on Startup: Kada je omogućeno, OpenTubeX automatski dohvaća sažetak pretplata pri pokretanju i otvaranju novog prozora.
     Show New Content Feed: Prikazuje karticu Novo sa stavkama sažetka pretplata kojih nije bilo pri prethodnom dohvaćanju.
+    Enable RSS Feeds: Prikazuje karticu RSS na stranici Pretplate sa stavkama RSS ili Atom izvora kako biste mogli pratiti autore na drugim platformama. Njezine stavke otvaraju se pomoću yt-dlp-a.
     Show New Content Indicators: Prikazuje malu točku uz stavke sažetka pretplata kojih nije bilo pri prethodnom dohvaćanju.
     Show Scheduled Live Streams / Premieres First: Zadržava predstojeće prijenose uživo i premijere na vrhu sažetka pretplata. Kada je isključeno, ostaju na mjestu svoje najave sve do početka. Nakon isključivanja jednom osvježite sažetak pretplata kako biste dohvatili datume najave za postojeće zakazane stavke.
     Auto Refresh Interval: "Učestalost kojom OpenTubeX automatski osvježava sažetak pretplata dok je aplikacija otvorena. Na Androidu interval koji nije nula osvježava sažetak i dok je aplikacija zatvorena."

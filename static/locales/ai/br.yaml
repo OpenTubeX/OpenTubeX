@@ -184,6 +184,21 @@ Subscriptions:
   Show Combined View: "Diskouez asambles"
   Newest First: "Ar re nevesañ da gentañ"
   Oldest First: "Ar re goshañ da gentañ"
+  RSS Feeds:
+    Tab: RSS
+    Followed Feeds: Gwazhioù RSS heuliet
+    Add Feed: Ouzhpennañ ur gwazh
+    Feed URL: URL ar gwazh RSS pe Atom
+    Remove Feed: Dilemel {feed}
+    Invalid Feed URL: Enankit ur chomlec'h web a grog gant http:// pe https://.
+    Feed Already Followed: Heuliañ a rit ar gwazh-mañ dija.
+    Feed Could Not Be Loaded: N'eus ket bet gallet kargañ ar gwazh. Gwiriit e kas ar chomlec'h d'ur gwazh RSS pe Atom.
+    Refresh Errors: N'eus ket bet gallet adkargañ 1 gwazh. | N'eus ket bet gallet adkargañ {count} wazh. | N'eus ket bet gallet adkargañ {count} gwazh. | N'eus ket bet gallet adkargañ {count} a wazhioù. | N'eus ket bet gallet adkargañ {count} gwazh.
+    Description: Ouzhpennit ur gwazh RSS pe Atom evit heuliañ krouerien war savennoù all. An istañsoù {rssHub} a bourchas gwazhioù evit kalz lec'hiennoù, evel Twitch.
+    Empty Items: N'eus elfenn ebet en ho kwazhioù evit poent.
+    No Feeds: N'heuliit gwazh RSS ebet c'hoazh.
+    Public RSSHub Instances: Istañsoù RSSHub publik
+    Retry Feed: Klask en-dro {feed}
 Trending:
   Music: Sonerezh
   Load Error: "N'eus ket bet gallet kargañ ar re diouzh ar c'hiz."
@@ -1046,6 +1061,9 @@ Settings:
   Subscription Settings:
     Fetch Feed on Startup: "Adtapout ar gwazh el loc'hañ"
     Show New Content Feed: "Diskouez gwazh an endalc'had nevez"
+    RSS Feeds: Gwazhioù RSS
+    Enable RSS Feeds: Gweredekaat ar gwazhioù RSS evit savennoù all
+    Manage RSS Feeds: Merañ ar gwazhioù RSS
     Show New Content Indicators: "Diskouez merkerioù an endalc'had nevez"
     Show Scheduled Live Streams / Premieres First: "Diskouez ar skignadoù war-eeun hag ar c'hentañ skignadennoù rakluniet da gentañ"
     Auto Refresh Interval: "Etrevez adkargañ emgefreek"
@@ -2074,6 +2092,7 @@ Tooltips:
   Subscription Settings:
     Fetch Feed on Startup: "Pa vez gweredekaet e adtap OpenTubeX gwazh ho koumanantoù ent emgefreek el loc'hañ ha pa vez digoret ur prenestr nevez."
     Show New Content Feed: "Diskouez un ivinell Nevez gant elfennoù eus gwazh ar c'houmanantoù na oant ket aze en adtapout kent."
+    Enable RSS Feeds: Diskouez a ra un ivinell RSS war pajenn ar c'houmanantoù gant elfennoù gwazhioù RSS pe Atom, evit ma c'hallfec'h heuliañ krouerien war savennoù all. Digoret e vez e elfennoù gant yt-dlp.
     Show New Content Indicators: "Diskouez ur pik bihan e-kichen elfennoù eus gwazh ar c'houmanantoù na oant ket aze en adtapout kent."
     Show Scheduled Live Streams / Premieres First: "Derc'hel ar skignadoù war-eeun hag ar c'hentañ skignadennoù da zont e penn gwazh ar c'houmanantoù. Pa vez diweredekaet e chomont el lec'h ma oant bet embannet betek ma krogont. Adkargit gwazh ar c'houmanantoù ur wech goude diweredekaat evit adtapout deiziadoù embann an elfennoù rakluniet a zo anezho dija."
     Auto Refresh Interval: "Alies ma adkarg OpenTubeX gwazh ho koumanantoù ent emgefreek pa vez digor an arload. War Android, un etremez anvannel a freska ar gwazh ivez pa vez serret an arload."

@@ -184,6 +184,21 @@ Subscriptions:
   Show Combined View: 顯示合併檢視
   Newest First: 最新優先
   Oldest First: 最舊優先
+  RSS Feeds:
+    Tab: RSS
+    Followed Feeds: 已追蹤的 RSS 摘要
+    Add Feed: 新增摘要
+    Feed URL: RSS 或 Atom 摘要網址
+    Remove Feed: 移除 {feed}
+    Invalid Feed URL: 請輸入以 http:// 或 https:// 開頭的網址。
+    Feed Already Followed: 您已追蹤此摘要。
+    Feed Could Not Be Loaded: 無法載入摘要。請檢查網址是否指向 RSS 或 Atom 摘要。
+    Refresh Errors: '{count} 個摘要無法重新整理。'
+    Description: 新增 RSS 或 Atom 摘要，即可追蹤其他平台的創作者。{rssHub} 伺服器為許多網站（例如 Twitch）提供摘要。
+    Empty Items: 您的摘要目前沒有任何項目。
+    No Feeds: 您尚未追蹤任何 RSS 摘要。
+    Public RSSHub Instances: 公開 RSSHub 伺服器
+    Retry Feed: 重試 {feed}
 Trending:
   Music: 音樂
   Load Error: 無法載入熱門趨勢。
@@ -1046,6 +1061,9 @@ Settings:
   Subscription Settings:
     Fetch Feed on Startup: 啟動時擷取動態
     Show New Content Feed: 顯示新內容動態
+    RSS Feeds: RSS 摘要
+    Enable RSS Feeds: 為其他平台啟用 RSS 摘要
+    Manage RSS Feeds: 管理 RSS 摘要
     Show New Content Indicators: 顯示新內容指示標記
     Show Scheduled Live Streams / Premieres First: 優先顯示預定直播／首播
     Auto Refresh Interval: 自動重新整理間隔
@@ -2068,6 +2086,7 @@ Tooltips:
   Subscription Settings:
     Fetch Feed on Startup: 啟用後，OpenTubeX 會在啟動及開啟新視窗時自動擷取您的訂閱動態消息。
     Show New Content Feed: 顯示「新增」分頁，其中包含上次擷取時尚未出現的訂閱動態消息項目。
+    Enable RSS Feeds: 在訂閱頁面顯示 RSS 分頁，列出 RSS 或 Atom 摘要中的項目，讓您追蹤其他平台的創作者。其中的項目會使用 yt-dlp 開啟。
     Show New Content Indicators: 在上次擷取時尚未出現的訂閱動態消息項目旁顯示小圓點。
     Show Scheduled Live Streams / Premieres First: 將即將開始的直播與首播保留在訂閱動態消息頂端。停用後，這些項目會留在公告時的位置，直到開始為止。停用後請重新整理一次訂閱動態消息，以取得現有排程項目的公告日期。
     Auto Refresh Interval: "應用程式開啟時，OpenTubeX 自動重新整理訂閱動態消息的頻率。 在 Android 上，非零間隔也會在應用程式關閉時重新整理訂閱源。"

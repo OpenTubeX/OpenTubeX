@@ -184,6 +184,21 @@ Subscriptions:
   Show Combined View: Afișează vizualizarea combinată
   Newest First: Cele mai noi primele
   Oldest First: Cele mai vechi primele
+  RSS Feeds:
+    Tab: RSS
+    Followed Feeds: Fluxuri RSS urmărite
+    Add Feed: Adaugă flux
+    Feed URL: URL-ul fluxului RSS sau Atom
+    Remove Feed: Elimină {feed}
+    Invalid Feed URL: Introdu o adresă web care începe cu http:// sau https://.
+    Feed Already Followed: Urmărești deja acest flux.
+    Feed Could Not Be Loaded: Fluxul nu a putut fi încărcat. Verifică dacă adresa indică un flux RSS sau Atom.
+    Refresh Errors: 1 flux nu a putut fi reîmprospătat. | {count} fluxuri nu au putut fi reîmprospătate. | {count} de fluxuri nu au putut fi reîmprospătate.
+    Description: Adaugă un flux RSS sau Atom pentru a urmări creatori de pe alte platforme. Instanțele {rssHub} oferă fluxuri pentru multe site-uri, cum ar fi Twitch.
+    Empty Items: Fluxurile tale nu au momentan niciun element.
+    No Feeds: Încă nu urmărești niciun flux RSS.
+    Public RSSHub Instances: Instanțe RSSHub publice
+    Retry Feed: Reîncearcă {feed}
 Trending:
   Music: Muzică
   Load Error: Tendințele nu au putut fi încărcate.
@@ -1051,6 +1066,9 @@ Settings:
   Subscription Settings:
     Fetch Feed on Startup: Preia fluxul la pornire
     Show New Content Feed: Afișează fluxul de conținut nou
+    RSS Feeds: Fluxuri RSS
+    Enable RSS Feeds: Activați fluxurile RSS pentru alte platforme
+    Manage RSS Feeds: Gestionare fluxuri RSS
     Show New Content Indicators: Afișează indicatoarele de conținut nou
     Show Scheduled Live Streams / Premieres First: Afișează primele transmisiunile în direct și premierele programate
     Auto Refresh Interval: Interval de reîmprospătare automată
@@ -2115,6 +2133,7 @@ Tooltips:
   Subscription Settings:
     Fetch Feed on Startup: Când opțiunea este activată, OpenTubeX preia automat fluxul de abonamente la pornire și la deschiderea unei ferestre noi.
     Show New Content Feed: Afișează o filă Nou cu elementele din fluxul de abonamente care nu existau la preluarea anterioară.
+    Enable RSS Feeds: Afișează o filă RSS pe pagina Abonamente cu elementele fluxurilor RSS sau Atom, ca să poți urmări creatori de pe alte platforme. Elementele sale se deschid cu yt-dlp.
     Show New Content Indicators: Afișează un punct mic lângă elementele din fluxul de abonamente care nu existau la preluarea anterioară.
     Show Scheduled Live Streams / Premieres First: Păstrează viitoarele transmisiuni în direct și premiere în partea de sus a fluxului de abonamente. Când opțiunea este dezactivată, acestea rămân la poziția anunțului până când încep. Reîmprospătați o dată fluxul de abonamente după dezactivare pentru a prelua datele anunțurilor înregistrărilor programate existente.
     Auto Refresh Interval: "Frecvența cu care OpenTubeX reîmprospătează automat fluxul de abonamente cât timp aplicația este deschisă. Pe Android, un interval diferit de zero actualizează fluxul și când aplicația este închisă."

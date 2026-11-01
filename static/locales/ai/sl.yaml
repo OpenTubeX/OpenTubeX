@@ -227,6 +227,21 @@ Subscriptions:
   Oldest First: Najstarejše najprej
   Posts:
     RSS Message: YouTube ne zagotavlja virov RSS za objave. Izklopite nastavitev »{rssSetting}«, če želite videti objave, ali vklopite nastavitev »{hideSetting}«, če želite skriti ta zavihek.
+  RSS Feeds:
+    Tab: RSS
+    Followed Feeds: Spremljani viri RSS
+    Add Feed: Dodaj vir
+    Feed URL: URL vira RSS ali Atom
+    Remove Feed: Odstrani {feed}
+    Invalid Feed URL: Vnesite spletni naslov, ki se začne s http:// ali https://.
+    Feed Already Followed: Ta vir že spremljate.
+    Feed Could Not Be Loaded: Vira ni bilo mogoče naložiti. Preverite, ali naslov kaže na vir RSS ali Atom.
+    Refresh Errors: 1 vira ni bilo mogoče osvežiti. | {count} virov ni bilo mogoče osvežiti. | {count} virov ni bilo mogoče osvežiti. | {count} virov ni bilo mogoče osvežiti.
+    Description: Dodajte vir RSS ali Atom, če želite spremljati ustvarjalce z drugih platform. Primerki {rssHub} ponujajo vire za številna spletna mesta, na primer Twitch.
+    Empty Items: Vaši viri trenutno nimajo nobenih elementov.
+    No Feeds: Ne spremljate še nobenega vira RSS.
+    Public RSSHub Instances: Javni primerki RSSHub
+    Retry Feed: Poskusi znova naložiti {feed}
 Trending:
   Music: Glasba
   Trending Tabs: Zavihki priljubljene vsebine
@@ -1282,6 +1297,9 @@ Settings:
   Subscription Settings:
     Fetch Feed on Startup: Pridobi vir ob zagonu
     Show New Content Feed: Prikaži vir novih vsebin
+    RSS Feeds: Viri RSS
+    Enable RSS Feeds: Vklopi vire RSS za druge platforme
+    Manage RSS Feeds: Upravljaj z viri RSS
     Show New Content Indicators: Prikaži oznake novih vsebin
     Show Scheduled Live Streams / Premieres First: Najprej prikaži načrtovane prenose v živo/premiere
     Auto Refresh Interval: Interval samodejnega osveževanja
@@ -2588,6 +2606,7 @@ Tooltips:
   Subscription Settings:
     Fetch Feed on Startup: Ko je možnost omogočena, OpenTubeX samodejno pridobi vir naročnin ob zagonu in odprtju novega okna.
     Show New Content Feed: Prikaže zavihek Novo z elementi vira naročnin, ki ob prejšnjem pridobivanju še niso bili prisotni.
+    Enable RSS Feeds: Prikaže zavihek RSS na strani Naročnine z elementi virov RSS ali Atom, da lahko spremljate ustvarjalce na drugih platformah. Njegovi elementi se odprejo z yt-dlp.
     Show New Content Indicators: Ob elementih vira naročnin, ki ob prejšnjem pridobivanju še niso bili prisotni, prikaže majhno piko.
     Show Scheduled Live Streams / Premieres First: Prihajajoče prenose v živo in premiere obdrži na vrhu vira naročnin. Ko je možnost onemogočena, ostanejo do začetka na mestu svoje napovedi. Po izklopu enkrat osvežite vir naročnin, da pridobite datume napovedi za obstoječe načrtovane vnose.
     Auto Refresh Interval: "Kako pogosto OpenTubeX samodejno osveži vir naročnin, ko je aplikacija odprta. V Androidu interval, ki ni nič, osvežuje vir tudi, ko je aplikacija zaprta."

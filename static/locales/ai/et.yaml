@@ -184,6 +184,21 @@ Subscriptions:
   Show Combined View: Kuva koondvaade
   Newest First: Uuemad ees
   Oldest First: Vanemad ees
+  RSS Feeds:
+    Tab: RSS
+    Followed Feeds: Jälgitavad RSS-vood
+    Add Feed: Lisa voog
+    Feed URL: RSS- või Atom-voo URL
+    Remove Feed: Eemalda {feed}
+    Invalid Feed URL: Sisesta veebiaadress, mis algab http:// või https://.
+    Feed Already Followed: Sa juba jälgid seda voogu.
+    Feed Could Not Be Loaded: Voogu ei õnnestunud laadida. Kontrolli, kas aadress viitab RSS- või Atom-voole.
+    Refresh Errors: 1 voogu ei õnnestunud värskendada. | {count} voogu ei õnnestunud värskendada.
+    Description: Lisa RSS- või Atom-voog, et jälgida teiste platvormide sisuloojaid. {rssHub}i eksemplarid pakuvad vooge paljudele saitidele, näiteks Twitchile.
+    Empty Items: Sinu voogudes pole praegu ühtegi üksust.
+    No Feeds: Sa ei jälgi veel ühtegi RSS-voogu.
+    Public RSSHub Instances: Avalikud RSSHubi eksemplarid
+    Retry Feed: Proovi {feed} uuesti
 Trending:
   Music: Muusika
   Load Error: Trende ei saanud laadida.
@@ -1046,6 +1061,9 @@ Settings:
   Subscription Settings:
     Fetch Feed on Startup: Hangi voog käivitamisel
     Show New Content Feed: Kuva uue sisu voog
+    RSS Feeds: RSS-vood
+    Enable RSS Feeds: Kasuta RSS-vooge teiste platvormide jaoks
+    Manage RSS Feeds: Halda RSS-vooge
     Show New Content Indicators: Kuva uue sisu tähised
     Show Scheduled Live Streams / Premieres First: Kuva ajastatud otseülekanded ja esilinastused esimesena
     Auto Refresh Interval: Automaatse värskendamise intervall
@@ -2068,6 +2086,7 @@ Tooltips:
   Subscription Settings:
     Fetch Feed on Startup: Kui see on lubatud, hangib OpenTubeX tellimuste voo automaatselt käivitumisel ja uue akna avamisel.
     Show New Content Feed: Kuvab vahelehe Uus, mis sisaldab tellimuste voo üksusi, mida eelmise hankimise ajal polnud.
+    Enable RSS Feeds: Kuvab tellimuste lehel RSS-vahekaardi RSS- või Atom-voogude üksustega, et saaksid jälgida teiste platvormide sisuloojaid. Selle üksused avatakse yt-dlp abil.
     Show New Content Indicators: Kuvab väikese punkti nende tellimuste voo üksuste kõrval, mida eelmise hankimise ajal polnud.
     Show Scheduled Live Streams / Premieres First: Hoiab eelseisvad otseülekanded ja esilinastused tellimuste voo alguses. Kui see on välja lülitatud, jäävad need ülekande alguseni oma väljakuulutamise kohale. Olemasolevate ajastatud kirjete väljakuulutamise kuupäevade hankimiseks värskenda pärast väljalülitamist üks kord tellimuste voogu.
     Auto Refresh Interval: "Kui tihti OpenTubeX rakenduse töötamise ajal tellimuste voogu automaatselt värskendab. Androidis värskendab nullist erinev intervall voogu ka siis, kui rakendus on suletud."

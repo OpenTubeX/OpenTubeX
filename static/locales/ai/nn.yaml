@@ -184,6 +184,21 @@ Subscriptions:
   Show Combined View: Vis samla
   Newest First: Nyaste først
   Oldest First: Eldste først
+  RSS Feeds:
+    Tab: RSS
+    Followed Feeds: Fylgde RSS-straumar
+    Add Feed: Legg til straum
+    Feed URL: URL til RSS- eller Atom-straum
+    Remove Feed: Fjern {feed}
+    Invalid Feed URL: Skriv inn ei nettadresse som byrjar med http:// eller https://.
+    Feed Already Followed: Du følgjer allereie denne straumen.
+    Feed Could Not Be Loaded: Straumen kunne ikkje lastast inn. Kontroller at adressa peikar til ein RSS- eller Atom-straum.
+    Refresh Errors: 1 straum kunne ikkje oppdaterast. | {count} straumar kunne ikkje oppdaterast.
+    Description: Legg til ein RSS- eller Atom-straum for å følgje skaparar frå andre plattformer. {rssHub}-instansar tilbyr straumar for mange nettstader, til dømes Twitch.
+    Empty Items: Straumane dine har ingen element no.
+    No Feeds: Du fylgjer ingen RSS-straumar enno.
+    Public RSSHub Instances: Offentlege RSSHub-instansar
+    Retry Feed: Prøv {feed} på nytt
 Trending:
   Music: Musikk
   Load Error: Klarte ikkje å laste inn populært innhald.
@@ -1164,6 +1179,9 @@ Settings:
   Subscription Settings:
     Fetch Feed on Startup: Hent straumen ved oppstart
     Show New Content Feed: Vis straumen med nytt innhald
+    RSS Feeds: RSS-straumar
+    Enable RSS Feeds: Slå på RSS-straumar for andre plattformer
+    Manage RSS Feeds: Behandle RSS-straumar
     Show New Content Indicators: Vis merke for nytt innhald
     Show Scheduled Live Streams / Premieres First: Vis planlagde direktesendingar og premièrar først
     Auto Refresh Interval: Intervall for automatisk oppdatering
@@ -2380,6 +2398,7 @@ Tooltips:
   Subscription Settings:
     Fetch Feed on Startup: Når dette er slått på, hentar OpenTubeX automatisk abonnementsstraumen ved oppstart og når eit nytt vindauge vert opna.
     Show New Content Feed: Viser fana Ny med element frå abonnementsstraumen som ikkje fanst ved førre henting.
+    Enable RSS Feeds: Viser ei RSS-fane på Abonnement-sida med elementa frå RSS- eller Atom-straumar, slik at du kan følgje skaparar på andre plattformer. Elementa vert opna med yt-dlp.
     Show New Content Indicators: Viser ein liten prikk ved element i abonnementsstraumen som ikkje fanst ved førre henting.
     Show Scheduled Live Streams / Premieres First: Held komande direktesendingar og premierar øvst i abonnementsstraumen. Når dette er slått av, vert dei ståande der dei vart kunngjorde, fram til dei startar. Oppdater abonnementsstraumen éin gong etter at du slår av innstillinga, for å hente kunngjeringsdatoane til eksisterande planlagde element.
     Auto Refresh Interval: "Kor ofte OpenTubeX automatisk oppdaterer abonnementsstraumen medan appen er open. På Android oppdaterer eit intervall over null òg straumen medan appen er lukka."

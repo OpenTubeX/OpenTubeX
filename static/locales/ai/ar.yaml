@@ -186,6 +186,21 @@ Subscriptions:
   Oldest First: الأقدم أولاً
   Posts:
     RSS Message: لا يوفّر YouTube خلاصات RSS للمنشورات. عطّل إعداد "{rssSetting}" لعرض المنشورات أو فعّل إعداد "{hideSetting}" لإخفاء علامة التبويب هذه.
+  RSS Feeds:
+    Tab: RSS
+    Followed Feeds: خلاصات RSS المتابَعة
+    Add Feed: إضافة خلاصة
+    Feed URL: رابط خلاصة RSS أو Atom
+    Remove Feed: إزالة {feed}
+    Invalid Feed URL: أدخل عنوان ويب يبدأ بـ http:// أو https://.
+    Feed Already Followed: أنت تتابع هذه الخلاصة بالفعل.
+    Feed Could Not Be Loaded: تعذّر تحميل الخلاصة. تحقق من أن العنوان يشير إلى خلاصة RSS أو Atom.
+    Refresh Errors: تعذّر تحديث {count} خلاصة. | تعذّر تحديث خلاصة واحدة. | تعذّر تحديث خلاصتين ({count}). | تعذّر تحديث {count} خلاصات. | تعذّر تحديث {count} خلاصةً. | تعذّر تحديث {count} خلاصة.
+    Description: أضف خلاصة RSS أو Atom لمتابعة صنّاع المحتوى على منصات أخرى. توفّر مثيلات {rssHub} خلاصات لمواقع كثيرة، مثل Twitch.
+    Empty Items: لا تحتوي خلاصاتك حاليًا على أي عناصر.
+    No Feeds: لا تتابع أي خلاصات RSS حتى الآن.
+    Public RSSHub Instances: مثيلات RSSHub العامة
+    Retry Feed: أعد محاولة تحميل {feed}
 Trending:
   Music: موسيقى
   Load Error: تعذر تحميل العناصر الشائعة.
@@ -1057,6 +1072,9 @@ Settings:
   Subscription Settings:
     Fetch Feed on Startup: جلب التغذية عند بدء التشغيل
     Show New Content Feed: إظهار خلاصة المحتوى الجديد
+    RSS Feeds: خلاصات RSS
+    Enable RSS Feeds: تفعيل خلاصات RSS للمنصات الأخرى
+    Manage RSS Feeds: إدارة خلاصات RSS
     Show New Content Indicators: إظهار مؤشرات المحتوى الجديدة
     Show Scheduled Live Streams / Premieres First: عرض مجموعات البث المباشر / العروض الأولى المجدولة أولاً
     Auto Refresh Interval: الفاصل الزمني للتحديث التلقائي
@@ -2095,6 +2113,7 @@ Tooltips:
   Subscription Settings:
     Fetch Feed on Startup: عند تمكينه، سيقوم OpenTubeX تلقائيًا بجلب موجز اشتراكك عند بدء التشغيل وعند فتح نافذة جديدة.
     Show New Content Feed: تعرض علامة تبويب جديدة تحتوي على عناصر موجز الاشتراك التي لم تكن موجودة أثناء عملية الجلب السابقة.
+    Enable RSS Feeds: تعرض علامة تبويب RSS في صفحة الاشتراكات تحتوي على عناصر خلاصات RSS أو Atom، لتتمكن من متابعة صنّاع المحتوى على منصات أخرى. تُفتح عناصرها باستخدام yt-dlp.
     Show New Content Indicators: يُظهر نقطة صغيرة بجوار عناصر موجز الاشتراك التي لم تكن موجودة أثناء عملية الجلب السابقة.
     Show Scheduled Live Streams / Premieres First: يحتفظ بأحداث البث المباشر والعروض الأولى القادمة في الجزء العلوي من خلاصة الاشتراك. عند تعطيلها، تظل في موضع الإعلان الخاص بها حتى تبدأ. قم بتحديث موجز الاشتراك مرة واحدة بعد التعطيل لاسترداد تواريخ الإعلان للإدخالات المجدولة الموجودة.
     Auto Refresh Interval: "عدد المرات التي يقوم فيها OpenTubeX بتحديث موجز اشتراكك تلقائيًا أثناء فتح التطبيق. على أندرويد، يؤدي اختيار فاصل زمني غير صفري أيضًا إلى تحديث الخلاصة عندما يكون التطبيق مغلقًا."

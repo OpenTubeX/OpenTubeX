@@ -1,4 +1,16 @@
+import { shallowRef } from 'vue'
+
 const STORAGE_PREFIX = 'externalMediaPosition:'
+
+/** Changes whenever a position is saved, so lists can show the new progress. */
+export const externalMediaPositionVersion = shallowRef(0)
+
+if (typeof window !== 'undefined') {
+  // Other windows save positions too
+  window.addEventListener('storage', (event) => {
+    if (event.key === null || event.key.startsWith(STORAGE_PREFIX)) externalMediaPositionVersion.value++
+  })
+}
 
 function readPosition(key) {
   try {
@@ -44,15 +56,41 @@ export function getExternalMediaPosition(url, duration) {
   return position
 }
 
+/**
+ * How far the media was watched, for progress bars in lists.
+ * @param {string} url
+ * @returns {{ watched: boolean, progress: number } | null} progress from 0 to 1
+ */
+export function getExternalMediaProgress(url) {
+  // eslint-disable-next-line no-unused-expressions -- Tracks saved positions
+  externalMediaPositionVersion.value
+  const key = positionKey(url)
+  const position = key === null ? null : readPosition(key)
+  if (position === null) return null
+  if (position.watched === true) return { watched: true, progress: 1 }
+  return position.duration > 0 ? { watched: false, progress: Math.min(position.seconds / position.duration, 1) } : null
+}
+
 export function saveExternalMediaPosition(url, seconds, duration) {
   const key = positionKey(url)
   if (key === null || !Number.isFinite(seconds) || seconds < 0) return
+  const hasDuration = Number.isFinite(duration) && duration > 0
   try {
-    if (seconds > 0 && !(Number.isFinite(duration) && seconds >= duration - 2)) {
-      localStorage.setItem(key, JSON.stringify({ seconds, updatedAt: Date.now() }))
+    // A finished video restarts, but lists still show it as watched, also while it's replayed
+    const watched = readPosition(key)?.watched === true
+    if (hasDuration && seconds >= duration - 2) {
+      localStorage.setItem(key, JSON.stringify({ seconds: 0, watched: true, updatedAt: Date.now() }))
+    } else if (seconds > 0 || watched) {
+      localStorage.setItem(key, JSON.stringify({
+        seconds,
+        ...(hasDuration ? { duration } : {}),
+        ...(watched ? { watched } : {}),
+        updatedAt: Date.now()
+      }))
     } else {
       localStorage.removeItem(key)
     }
+    externalMediaPositionVersion.value++
   } catch (error) {
     console.error('Failed to save external media position:', error)
   }
@@ -60,8 +98,10 @@ export function saveExternalMediaPosition(url, seconds, duration) {
 
 export function removeExternalMediaPositionsBefore(cutoff) {
   removePositions(position => position === null || position.updatedAt < cutoff)
+  externalMediaPositionVersion.value++
 }
 
 export function clearExternalMediaPositions() {
   removePositions(() => true)
+  externalMediaPositionVersion.value++
 }

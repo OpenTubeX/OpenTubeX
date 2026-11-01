@@ -186,6 +186,21 @@ Subscriptions:
   Oldest First: הישנים תחילה
   Posts:
     RSS Message: 'YouTube לא מספק עדכוני RSS לפוסטים. השביתו את ההגדרה "{rssSetting}" כדי לראות פוסטים, או הפעילו את ההגדרה "{hideSetting}" כדי להסתיר את הכרטיסייה הזאת.'
+  RSS Feeds:
+    Tab: RSS
+    Followed Feeds: פידי RSS במעקב
+    Add Feed: הוספת פיד
+    Feed URL: כתובת פיד RSS או Atom
+    Remove Feed: הסרת {feed}
+    Invalid Feed URL: יש להזין כתובת אינטרנט שמתחילה ב־http:// או ב־https://.
+    Feed Already Followed: כבר עוקבים אחרי הפיד הזה.
+    Feed Could Not Be Loaded: לא ניתן היה לטעון את הפיד. כדאי לוודא שהכתובת מפנה לפיד RSS או Atom.
+    Refresh Errors: לא ניתן היה לרענן פיד אחד. | לא ניתן היה לרענן {count} פידים. | לא ניתן היה לרענן {count} פידים.
+    Description: אפשר להוסיף פיד RSS או Atom כדי לעקוב אחרי יוצרים מפלטפורמות אחרות. מופעי {rssHub} מספקים פידים לאתרים רבים, כמו Twitch.
+    Empty Items: אין כרגע פריטים בפידים שלך.
+    No Feeds: אין עדיין פידי RSS במעקב.
+    Public RSSHub Instances: מופעי RSSHub ציבוריים
+    Retry Feed: ניסיון חוזר עבור {feed}
 Trending:
   Music: מוזיקה
   Load Error: לא ניתן לטעון את התוכן החם.
@@ -1062,6 +1077,9 @@ Settings:
   Subscription Settings:
     Fetch Feed on Startup: טעינת העדכונים בעת ההפעלה
     Show New Content Feed: הצגת עדכוני תוכן חדש
+    RSS Feeds: פידי RSS
+    Enable RSS Feeds: הפעלת פידי RSS לפלטפורמות אחרות
+    Manage RSS Feeds: ניהול פידי RSS
     Show New Content Indicators: הצגת סימונים לתוכן חדש
     Show Scheduled Live Streams / Premieres First: הצגת שידורים חיים מתוזמנים ובכורות תחילה
     Auto Refresh Interval: מרווח ריענון אוטומטי
@@ -2117,6 +2135,7 @@ Tooltips:
   Subscription Settings:
     Fetch Feed on Startup: כשהאפשרות מופעלת, OpenTubeX תטען אוטומטית את פיד המינויים עם ההפעלה ובפתיחת חלון חדש.
     Show New Content Feed: מציג לשונית בשם חדש ובה פריטים מפיד המינויים שלא היו בטעינה הקודמת.
+    Enable RSS Feeds: מציג לשונית RSS בעמוד המינויים עם הפריטים של פידי RSS או Atom, כדי לאפשר מעקב אחרי יוצרים בפלטפורמות אחרות. הפריטים שלה נפתחים באמצעות yt-dlp.
     Show New Content Indicators: מציג נקודה קטנה לצד פריטים מפיד המינויים שלא היו בטעינה הקודמת.
     Show Scheduled Live Streams / Premieres First: משאיר שידורים חיים והקרנות בכורה עתידיים בראש פיד המינויים. כשהאפשרות מושבתת, הם נשארים במיקום ההכרזה עד שיתחילו. לאחר ההשבתה, רעננו את פיד המינויים פעם אחת כדי לאחזר את תאריכי ההכרזה של פריטים מתוזמנים קיימים.
     Auto Refresh Interval: "התדירות שבה OpenTubeX מרעננת אוטומטית את פיד המינויים כשהיישום פתוח. ב-Android, מרווח שאינו אפס מרענן את הפיד גם כשהיישום סגור."

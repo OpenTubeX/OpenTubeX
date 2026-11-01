@@ -184,6 +184,21 @@ Subscriptions:
   Show Combined View: まとめて表示
   Newest First: 新しい順
   Oldest First: 古い順
+  RSS Feeds:
+    Tab: RSS
+    Followed Feeds: フォロー中の RSS フィード
+    Add Feed: フィードを追加
+    Feed URL: RSS または Atom フィードの URL
+    Remove Feed: '{feed} を削除'
+    Invalid Feed URL: http:// または https:// で始まるウェブアドレスを入力してください。
+    Feed Already Followed: このフィードはすでにフォローしています。
+    Feed Could Not Be Loaded: フィードを読み込めませんでした。アドレスが RSS または Atom フィードを指しているか確認してください。
+    Refresh Errors: '{count} 件のフィードを更新できませんでした。'
+    Description: RSS または Atom フィードを追加すると、他のプラットフォームのクリエイターをフォローできます。{rssHub} インスタンスは Twitch など多くのサイトのフィードを提供しています。
+    Empty Items: 現在、フィードに項目はありません。
+    No Feeds: まだ RSS フィードをフォローしていません。
+    Public RSSHub Instances: 公開 RSSHub インスタンス
+    Retry Feed: '{feed} を再試行'
 Trending:
   Music: 音楽
   Load Error: トレンドを読み込めませんでした。
@@ -1046,6 +1061,9 @@ Settings:
   Subscription Settings:
     Fetch Feed on Startup: 起動時にフィードを取得
     Show New Content Feed: 新着コンテンツのフィードを表示
+    RSS Feeds: RSS フィード
+    Enable RSS Feeds: 他のプラットフォーム向け RSS フィードの有効化
+    Manage RSS Feeds: RSS フィードの管理
     Show New Content Indicators: 新着コンテンツのマークを表示
     Show Scheduled Live Streams / Premieres First: 予定されているライブ配信とプレミア公開を先頭に表示
     Auto Refresh Interval: 自動更新の間隔
@@ -2065,6 +2083,7 @@ Tooltips:
   Subscription Settings:
     Fetch Feed on Startup: 有効にすると、OpenTubeXの起動時と新しいウィンドウを開いたときに登録チャンネルのフィードを自動取得します。
     Show New Content Feed: 前回の取得時にはなかった登録チャンネルのフィード項目を「新着」タブに表示します。
+    Enable RSS Feeds: 登録チャンネルページに RSS または Atom フィードの項目を含む RSS タブを表示し、他のプラットフォームのクリエイターをフォローできるようにします。項目は yt-dlp で開きます。
     Show New Content Indicators: 前回の取得時にはなかった登録チャンネルのフィード項目の横に小さな点を表示します。
     Show Scheduled Live Streams / Premieres First: 予定されているライブ配信とプレミア公開を登録チャンネルのフィード上部に表示します。無効にすると、開始するまで告知時の位置に表示されます。無効にした後、一度フィードを更新すると、既存の予定項目の告知日を取得できます。
     Auto Refresh Interval: "アプリの起動中にOpenTubeXが登録チャンネルのフィードを自動更新する間隔です。 Android では、0 以外の間隔を選ぶと、アプリを閉じている間もフィードが更新されます。"

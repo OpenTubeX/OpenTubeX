@@ -184,6 +184,21 @@ Subscriptions:
   Show Combined View: 显示合并视图
   Newest First: 最新优先
   Oldest First: 最早优先
+  RSS Feeds:
+    Tab: RSS
+    Followed Feeds: 已关注的 RSS 订阅源
+    Add Feed: 添加订阅源
+    Feed URL: RSS 或 Atom 订阅源 URL
+    Remove Feed: 移除 {feed}
+    Invalid Feed URL: 请输入以 http:// 或 https:// 开头的网址。
+    Feed Already Followed: 你已关注此订阅源。
+    Feed Could Not Be Loaded: 无法加载该订阅源。请检查地址是否指向 RSS 或 Atom 订阅源。
+    Refresh Errors: '{count} 个订阅源无法刷新。'
+    Description: 添加 RSS 或 Atom 订阅源以关注其他平台的创作者。{rssHub} 实例为许多网站（例如 Twitch）提供订阅源。
+    Empty Items: 你的订阅源目前没有任何项目。
+    No Feeds: 你还没有关注任何 RSS 订阅源。
+    Public RSSHub Instances: 公共 RSSHub 实例
+    Retry Feed: 重试 {feed}
 Trending:
   Music: 音乐
   Load Error: 无法加载热门内容。
@@ -1046,6 +1061,9 @@ Settings:
   Subscription Settings:
     Fetch Feed on Startup: 启动时获取动态
     Show New Content Feed: 显示新内容动态
+    RSS Feeds: RSS 订阅源
+    Enable RSS Feeds: 为其他平台启用 RSS 订阅源
+    Manage RSS Feeds: 管理 RSS 订阅源
     Show New Content Indicators: 显示新内容标记
     Show Scheduled Live Streams / Premieres First: 优先显示已安排的直播和首映
     Auto Refresh Interval: 自动刷新间隔
@@ -2065,6 +2083,7 @@ Tooltips:
   Subscription Settings:
     Fetch Feed on Startup: 启用后，OpenTubeX 会在启动时和打开新窗口时自动获取订阅动态。
     Show New Content Feed: 显示“新内容”标签页，其中包含上次获取时尚未出现的订阅动态项目。
+    Enable RSS Feeds: 在订阅页面显示一个包含 RSS 或 Atom 订阅源项目的 RSS 标签页，方便你关注其他平台的创作者。这些项目使用 yt-dlp 打开。
     Show New Content Indicators: 在上次获取时尚未出现的订阅动态项目旁显示一个小圆点。
     Show Scheduled Live Streams / Premieres First: 将即将开始的直播和首映置于订阅动态顶部。禁用后，它们会保留在公告发布时的位置，直到开始。禁用后请刷新一次订阅动态，以获取现有预定项目的公告日期。
     Auto Refresh Interval: "OpenTubeX 在应用打开期间自动刷新订阅动态的频率。 在 Android 上，非零间隔还会在应用关闭时刷新订阅源。"

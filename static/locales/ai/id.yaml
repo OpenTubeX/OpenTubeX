@@ -184,6 +184,21 @@ Subscriptions:
   Show Combined View: Tampilkan tampilan gabungan
   Newest First: Terbaru dahulu
   Oldest First: Terlama dahulu
+  RSS Feeds:
+    Tab: RSS
+    Followed Feeds: Umpan RSS yang diikuti
+    Add Feed: Tambah Umpan
+    Feed URL: URL umpan RSS atau Atom
+    Remove Feed: Hapus {feed}
+    Invalid Feed URL: Masukkan alamat web yang diawali dengan http:// atau https://.
+    Feed Already Followed: Anda sudah mengikuti umpan ini.
+    Feed Could Not Be Loaded: Umpan tidak dapat dimuat. Periksa apakah alamat tersebut mengarah ke umpan RSS atau Atom.
+    Refresh Errors: '{count} umpan tidak dapat diperbarui.'
+    Description: Tambahkan umpan RSS atau Atom untuk mengikuti kreator dari platform lain. Instans {rssHub} menyediakan umpan untuk banyak situs, seperti Twitch.
+    Empty Items: Umpan Anda saat ini tidak memiliki item.
+    No Feeds: Anda belum mengikuti umpan RSS apa pun.
+    Public RSSHub Instances: Instans RSSHub publik
+    Retry Feed: Coba lagi {feed}
 Trending:
   Music: Musik
   Load Error: Trending tidak dapat dimuat.
@@ -1049,6 +1064,9 @@ Settings:
   Subscription Settings:
     Fetch Feed on Startup: Ambil Umpan Saat Aplikasi Dimulai
     Show New Content Feed: Tampilkan Umpan Konten Baru
+    RSS Feeds: Umpan RSS
+    Enable RSS Feeds: Aktifkan Umpan RSS untuk Platform Lain
+    Manage RSS Feeds: Kelola Umpan RSS
     Show New Content Indicators: Tampilkan Indikator Konten Baru
     Show Scheduled Live Streams / Premieres First: Tampilkan Siaran Langsung / Premiere Terjadwal Terlebih Dahulu
     Auto Refresh Interval: Interval Pembaruan Otomatis
@@ -2084,6 +2102,7 @@ Tooltips:
   Subscription Settings:
     Fetch Feed on Startup: Jika diaktifkan, OpenTubeX otomatis mengambil umpan langganan saat aplikasi dimulai dan ketika jendela baru dibuka.
     Show New Content Feed: Menampilkan tab Baru yang berisi item umpan langganan yang belum ada saat pengambilan sebelumnya.
+    Enable RSS Feeds: Menampilkan tab RSS di halaman Langganan berisi item dari umpan RSS atau Atom, sehingga Anda dapat mengikuti kreator di platform lain. Itemnya dibuka dengan yt-dlp.
     Show New Content Indicators: Menampilkan titik kecil di sebelah item umpan langganan yang belum ada saat pengambilan sebelumnya.
     Show Scheduled Live Streams / Premieres First: Mempertahankan siaran langsung dan premiere mendatang di bagian atas umpan langganan. Jika dinonaktifkan, item tetap pada posisi pengumuman hingga dimulai. Perbarui umpan langganan satu kali setelah menonaktifkannya untuk mengambil tanggal pengumuman entri terjadwal yang sudah ada.
     Auto Refresh Interval: "Frekuensi OpenTubeX memperbarui umpan langganan secara otomatis selama aplikasi terbuka. Di Android, interval bukan nol juga memperbarui feed saat aplikasi ditutup."

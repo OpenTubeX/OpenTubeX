@@ -184,6 +184,21 @@ Subscriptions:
   Show Combined View: Egyesített nézet
   Newest First: Legújabb elöl
   Oldest First: Legrégebbi elöl
+  RSS Feeds:
+    Tab: RSS
+    Followed Feeds: Követett RSS-hírcsatornák
+    Add Feed: Hírcsatorna hozzáadása
+    Feed URL: RSS- vagy Atom-hírcsatorna URL-címe
+    Remove Feed: '{feed} eltávolítása'
+    Invalid Feed URL: Adjon meg egy http:// vagy https:// kezdetű webcímet.
+    Feed Already Followed: Már követi ezt a hírcsatornát.
+    Feed Could Not Be Loaded: A hírcsatornát nem sikerült betölteni. Ellenőrizze, hogy a cím RSS- vagy Atom-hírcsatornára mutat-e.
+    Refresh Errors: 1 hírcsatornát nem sikerült frissíteni. | {count} hírcsatornát nem sikerült frissíteni.
+    Description: Adjon hozzá egy RSS- vagy Atom-hírcsatornát, hogy más platformok alkotóit kövesse. Az {rssHub}-példányok számos webhelyhez biztosítanak hírcsatornákat, például a Twitchhez.
+    Empty Items: A hírcsatornáiban jelenleg nincsenek elemek.
+    No Feeds: Még nem követ egyetlen RSS-hírcsatornát sem.
+    Public RSSHub Instances: Nyilvános RSSHub-példányok
+    Retry Feed: '{feed} újrapróbálása'
 Trending:
   Music: Zene
   Load Error: A felkapott tartalmak nem tölthetők be.
@@ -1046,6 +1061,9 @@ Settings:
   Subscription Settings:
     Fetch Feed on Startup: Hírfolyam lekérése indításkor
     Show New Content Feed: Új tartalmak hírfolyamának megjelenítése
+    RSS Feeds: RSS-hírcsatornák
+    Enable RSS Feeds: RSS-hírcsatornák engedélyezése más platformokhoz
+    Manage RSS Feeds: RSS-hírcsatornák kezelése
     Show New Content Indicators: Új tartalmak jelzőinek megjelenítése
     Show Scheduled Live Streams / Premieres First: Ütemezett élő közvetítések és premierek megjelenítése elsőként
     Auto Refresh Interval: Automatikus frissítés időköze
@@ -2066,6 +2084,7 @@ Tooltips:
   Subscription Settings:
     Fetch Feed on Startup: Bekapcsolva az OpenTubeX automatikusan lekéri a feliratkozási hírfolyamot indításkor és új ablak megnyitásakor.
     Show New Content Feed: Egy Új lap megjelenítése azokkal a feliratkozási hírfolyamelemekkel, amelyek az előző lekéréskor még nem szerepeltek.
+    Enable RSS Feeds: Egy RSS lapot jelenít meg a Feliratkozások oldalon RSS- vagy Atom-hírcsatornák elemeivel, így más platformok alkotóit is követheti. Elemei a yt-dlp segítségével nyílnak meg.
     Show New Content Indicators: Egy kis pont megjelenítése azok mellett a feliratkozási hírfolyamelemek mellett, amelyek az előző lekéréskor még nem szerepeltek.
     Show Scheduled Live Streams / Premieres First: A közelgő élő közvetítések és premierek a feliratkozási hírfolyam tetején maradnak. Kikapcsolva a kezdésükig a bejelentésük helyén maradnak. Kikapcsolás után frissítse egyszer a feliratkozási hírfolyamot a meglévő ütemezett bejegyzések bejelentési dátumának lekéréséhez.
     Auto Refresh Interval: "Milyen gyakran frissítse automatikusan az OpenTubeX a feliratkozási hírfolyamot, amíg az alkalmazás nyitva van. Androidon a nullától eltérő időköz akkor is frissíti a hírfolyamot, amikor az alkalmazás be van zárva."
