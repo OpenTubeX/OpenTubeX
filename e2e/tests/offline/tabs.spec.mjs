@@ -2728,9 +2728,35 @@ for (const tabBarPosition of ['top', 'left']) {
       await expectActiveTabInView(page)
       await page.mouse.up()
 
+      // Expanding a collapsed group reveals the active tab inside it.
+      const groupedTabIds = await page.evaluate(async () => {
+        const { tabs } = await window.ftElectron.tabs.getState()
+        const ids = tabs.slice(1, 21).map(tab => tab.id)
+        const group = await window.ftElectron.tabs.createGroup({ name: 'Grouped', color: 'green' })
+        await window.ftElectron.tabs.setGroup(ids, group.id)
+        await window.ftElectron.tabs.activate(ids.at(-1))
+        await window.$store.dispatch('updateTabGroup', { groupId: group.id, changes: { isCollapsed: true } })
+        return ids
+      })
+      const collapsedGroup = page.locator('.tabBar .collapsedTabGroup')
+      await expect(collapsedGroup).toHaveClass(/active/)
+      await container.evaluate(element => element.scrollTo(0, 0))
+      await collapsedGroup.click()
+      await expect(collapsedGroup).toHaveCount(0)
+      await expect(page.locator(sel.activeTab)).toHaveAttribute('data-tab-id', groupedTabIds.at(-1))
+      await expectActiveTabInView(page)
+
+      // Switching between horizontal and vertical tabs keeps the active tab visible.
       await page.evaluate(id => window.ftElectron.tabs.activate(id), lastTabId)
       await expect(page.locator(sel.activeTab)).toHaveAttribute('data-tab-id', lastTabId)
-      await page.locator('.tabsContainer').evaluate(container => container.scrollTo(0, 0))
+      await expectActiveTabInView(page)
+      for (const position of [tabBarPosition === 'top' ? 'left' : 'top', tabBarPosition]) {
+        await page.evaluate(position => window.$store.commit('setTabBarPosition', position), position)
+        await expect(page.locator('.app')).toHaveClass(position === 'top' ? /^(?!.*verticalTabs)/ : /verticalTabs/)
+        await expectActiveTabInView(page)
+      }
+
+      await container.evaluate(element => element.scrollTo(0, 0))
       ;({ page } = await app.relaunch())
       await expect(page.locator(sel.activeTab)).toHaveAttribute('data-tab-id', lastTabId)
       await expectActiveTabInView(page)

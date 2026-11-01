@@ -1414,19 +1414,19 @@ function handleScroll() {
 
 // Apply the scroll position from main process state broadcasts, which restore
 // it after a renderer reload. The main process only stores the offset this tab
-// bar reports, so skip the echo of the latest report: applied after the update
-// that carries it, it would undo a newer scroll, such as revealing the tab that
-// same update activates.
-let reportedTabBarScroll = null
+// bar reports, so once it has reported one, every broadcast echoes an earlier
+// report. Applied after the update that carries it, an echo would undo a newer
+// scroll, such as revealing the tab that same update activates.
+let hasReportedTabBarScroll = false
 
 /** @param {number} position */
 function reportTabBarScroll(position) {
-  reportedTabBarScroll = position
+  hasReportedTabBarScroll = true
   window.ftElectron.tabs.setTabBarScroll(position)
 }
 
 watch(tabBarScrollPosition, (newPosition) => {
-  if (newPosition == null || vertical.value || newPosition === reportedTabBarScroll) return
+  if (newPosition == null || vertical.value || hasReportedTabBarScroll) return
 
   nextTick(() => {
     const container = dropZoneRef.value
@@ -1462,9 +1462,13 @@ function clampTabsScroll() {
 }
 
 // Keep the active tab visible: the one a restored session starts with, once
-// the tabs first lay out, and every tab activated after that, such as from a
-// keyboard shortcut or a new tab opening at the end of the strip.
-const activeTabId = computed(() => store.getters.getActiveTabId)
+// the tabs first lay out, every tab activated after that, such as from a
+// keyboard shortcut or a new tab opening at the end of the strip, and the
+// active tab after its group collapses or expands or the bar changes
+// orientation.
+const activeStripItemId = computed(() => stripItems.value.find(item => (
+  item.type === 'tab' ? item.tab.isActive : item.isActive
+))?.id ?? null)
 let revealActiveTabPending = true
 
 function revealActiveTab() {
@@ -1479,7 +1483,7 @@ function revealActiveTab() {
   activeItem.scrollIntoView({ block: 'nearest', inline: 'nearest' })
 }
 
-watch(activeTabId, () => {
+watch(activeStripItemId, () => {
   revealActiveTabPending = true
   revealActiveTab()
 }, { flush: 'post' })
@@ -1492,7 +1496,11 @@ watch(stripItems, () => {
 watch(vertical, () => {
   cancelScrollAnimation()
   scrollTarget = null
-  nextTick(clampTabsScroll)
+  revealActiveTabPending = true
+  nextTick(() => {
+    clampTabsScroll()
+    revealActiveTab()
+  })
 })
 
 watch(tabs, (nextTabs) => {
