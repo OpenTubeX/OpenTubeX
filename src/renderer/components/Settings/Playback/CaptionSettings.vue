@@ -250,11 +250,14 @@ const styleControls = computed(() => [
     icon: 'border-all',
     options: CAPTION_POSITION_AREAS.map(value => ({ value, name: getCaptionPositionName(value, t) })),
   },
-].map(control => ({
-  ...control,
-  names: control.options.map(option => option.name),
-  values: control.options.map(option => String(option.value ?? '')),
-})))
+  // Sliders have no options to name.
+].map(control => control.slider
+  ? control
+  : {
+      ...control,
+      names: control.options.map(option => option.name),
+      values: control.options.map(option => String(option.value ?? '')),
+    }))
 
 const enableCaptionTranslations = computed(() => store.getters.getEnableCaptionTranslations)
 const preferredCaptionLocale = computed(() => store.getters.getPreferredCaptionLocale)
