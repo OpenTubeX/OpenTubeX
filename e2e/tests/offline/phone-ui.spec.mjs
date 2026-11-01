@@ -120,7 +120,7 @@ test.describe('phone UI', () => {
     await expect(page.locator('.profileTrigger')).toBeFocused()
   })
 
-  test('opens watch panels and offers tap queue reordering', { tag: '@scale' }, async ({ app, page }) => {
+  test('opens watch panels and offers tap queue reordering', { tag: '@scale' }, async ({ app, page, uiScale }) => {
     await mockPlayableWatchPage(app, page)
     await openMockedVideo(page)
     await page.evaluate(() => {
@@ -131,7 +131,8 @@ test.describe('phone UI', () => {
         })
       }
     })
-    await setWindowSize(app, page, { width: 360, height: 760 })
+    // Keep the CSS geometry of the queue sheet the same at every UI scale
+    await setWindowSize(app, page, { width: Math.round(360 * uiScale / 100), height: Math.round(760 * uiScale / 100) })
     await page.locator('.phoneQueueButton').click()
     const sheet = page.locator('dialog[open]')
     await expect(sheet.locator('.queueItem')).toHaveCount(12)
@@ -143,8 +144,15 @@ test.describe('phone UI', () => {
     const touch = await page.context().newCDPSession(page)
     const dragStart = await sheet.locator('.queueDragHandle').first().boundingBox()
     const targetBox = await sheet.locator('.queueItem').nth(2).boundingBox()
+    const releaseY = targetBox.y + targetBox.height * 0.75
+    // Near the scroller's edges the drag scrolls the list, and a slow release would overshoot
+    const scrollerBottom = await sheet.locator('.queueItems').evaluate(element => {
+      while (!/auto|scroll/.test(getComputedStyle(element).overflowY)) element = element.parentElement
+      return element.getBoundingClientRect().bottom
+    })
+    expect(releaseY).toBeLessThan(scrollerBottom - 40)
     await touch.send('Input.dispatchTouchEvent', { type: 'touchStart', touchPoints: [{ x: dragStart.x + 24, y: dragStart.y + 24 }] })
-    await touch.send('Input.dispatchTouchEvent', { type: 'touchMove', touchPoints: [{ x: dragStart.x + 24, y: targetBox.y + targetBox.height * 0.75 }] })
+    await touch.send('Input.dispatchTouchEvent', { type: 'touchMove', touchPoints: [{ x: dragStart.x + 24, y: releaseY }] })
     await touch.send('Input.dispatchTouchEvent', { type: 'touchEnd', touchPoints: [] })
     await expect(sheet.locator('.queueItem').nth(2)).toContainText('Queue item 0')
     for (let index = 0; index < 2; index++) {
