@@ -2815,6 +2815,9 @@ for (const tabBarPosition of ['top', 'left']) {
       await expect(page.locator(sel.activeTab)).toHaveAttribute('data-tab-id', firstTabId)
       await expectActiveTabInView(page)
       await page.mouse.up()
+      // A click on the strip commits a settling drop early, which moves the
+      // collapsed group below away from the pointer before the release.
+      await expect(page.locator('.tabBar .tab.settling')).toHaveCount(0)
 
       // Expanding a collapsed group reveals the active tab inside it.
       const groupedTabIds = await page.evaluate(async () => {
