@@ -1413,7 +1413,8 @@ function handleScroll() {
 }
 
 // Apply the scroll position from main process state broadcasts, which restore
-// it after a renderer reload. The main process only stores the offset this tab
+// it after a renderer reload, starting with the state present on mount, before
+// the active tab is revealed. The main process only stores the offset this tab
 // bar reports, so once it has reported one, every broadcast echoes an earlier
 // report. Applied after the update that carries it, an echo would undo a newer
 // scroll, such as revealing the tab that same update activates.
@@ -1439,7 +1440,7 @@ watch(tabBarScrollPosition, (newPosition) => {
       scrollTarget = newPosition
     }
   })
-})
+}, { immediate: true })
 
 function clampTabsScroll() {
   const container = dropZoneRef.value
@@ -1483,7 +1484,10 @@ function revealActiveTab() {
   activeItem.scrollIntoView({ block: 'nearest', inline: 'nearest' })
 }
 
-watch(activeStripItemId, () => {
+// Switching between tabs of a collapsed group keeps the same strip item.
+const activeTabId = computed(() => store.getters.getActiveTabId)
+
+watch([activeTabId, activeStripItemId], () => {
   revealActiveTabPending = true
   revealActiveTab()
 }, { flush: 'post' })

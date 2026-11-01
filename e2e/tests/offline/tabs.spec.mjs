@@ -2651,12 +2651,13 @@ test.describe('fixed tab width', () => {
 })
 
 /**
- * Waits until the active tab lies inside the scrolled tab strip, which must
- * overflow for the check to mean anything.
+ * Waits until the active tab, or the collapsed group that contains it, lies
+ * inside the scrolled tab strip, which must overflow for the check to mean
+ * anything.
  * @param {import('@playwright/test').Page} page
  */
 async function expectActiveTabInView(page) {
-  await expect.poll(() => page.locator(sel.activeTab).evaluate(tab => {
+  await expect.poll(() => page.locator('.tabBar .tabBarReorderItem.active').evaluate(tab => {
     const container = tab.closest('.tabsContainer')
     const viewport = container.getBoundingClientRect()
     const box = tab.getBoundingClientRect()
@@ -2674,6 +2675,8 @@ for (const tabBarPosition of ['top', 'left']) {
 
     test('scroll the active tab into view on launch, keyboard switching, and new tabs', { tag: '@scale' }, async ({ app }) => {
       let page = app.page
+      // Small enough for the strip to overflow even with a group collapsed.
+      await setWindowSize(app, page, { width: 1200, height: 500 })
       // The initial tab stays first, so Ctrl+1 switches back to it.
       const firstTabId = await page.locator(sel.activeTab).getAttribute('data-tab-id')
       const lastTabId = await page.evaluate(async () => {
@@ -2740,6 +2743,15 @@ for (const tabBarPosition of ['top', 'left']) {
       })
       const collapsedGroup = page.locator('.tabBar .collapsedTabGroup')
       await expect(collapsedGroup).toHaveClass(/active/)
+
+      // Switching to another tab of the collapsed group reveals the group.
+      await container.evaluate(element => element.scrollTo(element.scrollWidth, element.scrollHeight))
+      await page.evaluate(id => window.ftElectron.tabs.activate(id), groupedTabIds.at(-2))
+      await expect.poll(() => page.evaluate(async () => (await window.ftElectron.tabs.getState()).activeTabId))
+        .toBe(groupedTabIds.at(-2))
+      await expectActiveTabInView(page)
+      await page.evaluate(id => window.ftElectron.tabs.activate(id), groupedTabIds.at(-1))
+
       await container.evaluate(element => element.scrollTo(0, 0))
       await collapsedGroup.click()
       await expect(collapsedGroup).toHaveCount(0)
@@ -2756,7 +2768,28 @@ for (const tabBarPosition of ['top', 'left']) {
         await expectActiveTabInView(page)
       }
 
-      await container.evaluate(element => element.scrollTo(0, 0))
+      if (tabBarPosition === 'top') {
+        // A reloaded renderer restores the shared offset before it reveals
+        // the active tab, which is already visible there.
+        const middleTabId = await page.evaluate(async () => (await window.ftElectron.tabs.getState()).tabs[30].id)
+        await page.evaluate(id => window.ftElectron.tabs.activate(id), middleTabId)
+        await expect(page.locator(sel.activeTab)).toHaveAttribute('data-tab-id', middleTabId)
+        const centeredOffset = await page.locator(sel.activeTab).evaluate(tab => {
+          const strip = tab.closest('.tabsContainer')
+          strip.scrollLeft += tab.getBoundingClientRect().left - strip.getBoundingClientRect().left -
+            (strip.clientWidth - tab.offsetWidth) / 2
+          return strip.scrollLeft
+        })
+        await expect.poll(() => page.evaluate(async () => (await window.ftElectron.tabs.getState()).tabBarScrollPosition))
+          .toBeCloseTo(centeredOffset, 0)
+        await page.reload()
+        await expect(page.locator(sel.activeTab)).toHaveAttribute('data-tab-id', middleTabId)
+        await expect.poll(() => page.locator('.tabsContainer').evaluate(strip => strip.scrollLeft)).toBeCloseTo(centeredOffset, 0)
+        await page.evaluate(id => window.ftElectron.tabs.activate(id), lastTabId)
+        await expect(page.locator(sel.activeTab)).toHaveAttribute('data-tab-id', lastTabId)
+      }
+
+      await page.locator('.tabsContainer').evaluate(element => element.scrollTo(0, 0))
       ;({ page } = await app.relaunch())
       await expect(page.locator(sel.activeTab)).toHaveAttribute('data-tab-id', lastTabId)
       await expectActiveTabInView(page)
