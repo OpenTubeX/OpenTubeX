@@ -681,7 +681,6 @@ test.describe('settings', () => {
     const preview = playback.locator('.captionPreview')
     const caption = preview.locator('span')
     const textColor = playback.getByRole('combobox', { name: 'Text Color' })
-    await textColor.scrollIntoViewIfNeeded()
     const defaultColor = await caption.evaluate(element => getComputedStyle(element).color)
 
     await textColor.click()
