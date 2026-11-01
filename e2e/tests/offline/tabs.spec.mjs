@@ -2665,6 +2665,30 @@ test.describe('closing the last tab with the window kept open', () => {
     await expect(page.locator(sel.tabs)).toHaveCount(2)
   })
 
+  test('rapid closes leave exactly one active replacement tab', async ({ page }) => {
+    // Two closes of the same last tab, then a close of its replacement before
+    // the replacement has been presented, as when Ctrl+W auto-repeats.
+    const state = await page.evaluate(async () => {
+      const tabs = window.ftElectron.tabs
+      const [firstTab] = (await tabs.getState()).tabs
+      await Promise.all([tabs.close(firstTab.id), tabs.close(firstTab.id)])
+      const { activeTabId, tabs: tabsAfterDoubleClose } = await tabs.getState()
+      await tabs.close(activeTabId)
+      return {
+        firstTabId: firstTab.id,
+        closedReplacementId: activeTabId,
+        replacementCount: tabsAfterDoubleClose.filter(tab => tab.id !== firstTab.id).length
+      }
+    })
+
+    expect(state.replacementCount).toBe(1)
+    await expect(page.locator(sel.tabs)).toHaveCount(1)
+    const activeTab = page.locator(sel.activeTab)
+    await expect(activeTab).toHaveCount(1)
+    const activeTabId = await activeTab.getAttribute('data-tab-id')
+    expect([state.firstTabId, state.closedReplacementId]).not.toContain(activeTabId)
+  })
+
   test('replaces all selected tabs with a new tab', async ({ app, page }) => {
     await page.locator(sel.newTabButton).click()
     const tabs = page.locator(sel.tabs)

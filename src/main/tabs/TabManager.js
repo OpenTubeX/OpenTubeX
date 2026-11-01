@@ -1259,9 +1259,16 @@ export class TabManager {
     if (closingTabIds.length === 0) {
       return this.tabs.size > 0
     }
-    if (closingTabIds.length === this.tabs.size && !await getStoredCloseWindowWithLastTab()) {
-      // Keep the window open with a new tab in place of the closed ones
-      await this.createTabWithPreference({ makeActive: true })
+    // Tabs that an earlier close left waiting for their replacement to present
+    // are already gone for the user.
+    const closesEveryTab = () => Array.from(this.tabs.keys()).every(tabId => (
+      closingTabIds.includes(tabId) || this._deferredCloseTabIds.has(tabId)
+    ))
+    if (closesEveryTab() && !await getStoredCloseWindowWithLastTab()) {
+      const route = await TabManager.getStoredLandingRoute()
+      // Keep the window open with a new tab in place of the closed ones, unless
+      // a concurrent close already added one while this one waited.
+      if (closesEveryTab()) this.createTab({ route, makeActive: true })
     }
     if (closingTabIds.length === 1) {
       return this.closeTab(closingTabIds[0])
