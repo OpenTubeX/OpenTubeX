@@ -2450,6 +2450,8 @@ Subscription Groups:
   Empty Group: בקבוצה זו אין ערוצים מהפרופיל הנוכחי.
   Save Failed: לא ניתן לשמור את הקבוצה.
   Delete Failed: לא ניתן למחוק את הקבוצה.
+  Group Icon: סמל הקבוצה
+  No Icon: ללא סמל
 Yattee Server:
   API Error (Click to copy): בעיה בשרת Yattee (יש ללחוץ להעתקה)
   Unsupported page: עמוד זה אינו זמין עם שרת Yattee. יש להפעיל את „{fallbackSetting}” כדי לטעון אותו באמצעות ה־API המקומי.

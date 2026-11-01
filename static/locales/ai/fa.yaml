@@ -2484,6 +2484,8 @@ Subscription Groups:
   Empty Group: این گروه هیچ کانالی از نمایهٔ فعلی ندارد.
   Save Failed: گروه ذخیره نشد.
   Delete Failed: گروه حذف نشد.
+  Group Icon: نماد گروه
+  No Icon: بدون نماد
 Yattee Server:
   API Error (Click to copy): خطای سرور Yattee (برای کپی کلیک کنید)
   Unsupported page: این صفحه با سرور Yattee در دسترس نیست. برای بارگذاری آن با API محلی، «{fallbackSetting}» را روشن کنید.

@@ -2394,6 +2394,8 @@ Subscription Groups:
   Empty Group: Ebben a csoportban nincsenek csatornák a jelenlegi profilból.
   Save Failed: Nem sikerült menteni a csoportot.
   Delete Failed: Nem sikerült törölni a csoportot.
+  Group Icon: Csoportikon
+  No Icon: Nincs ikon
 Yattee Server:
   API Error (Click to copy): Yattee-kiszolgáló hiba (Kattintson a másoláshoz)
   Unsupported page: Ez az oldal nem érhető el a Yattee-kiszolgálóval. Kapcsolja be a(z) „{fallbackSetting}” beállítást, hogy a helyi API-val töltődjön be.

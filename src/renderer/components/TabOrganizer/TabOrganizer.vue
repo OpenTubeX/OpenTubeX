@@ -253,12 +253,12 @@
                       :aria-label="t('Tab Organizer.Group Icon')"
                     >
                       <button
-                        v-for="(icon, index) in groupIconValues"
+                        v-for="icon in TAB_GROUP_ICONS"
                         :key="icon"
                         type="button"
                         :aria-pressed="normalizeTabGroupIcon(section.icon) === icon"
-                        :aria-label="groupIconNames[index]"
-                        :title="groupIconNames[index]"
+                        :aria-label="groupIconLabels[icon]"
+                        :title="groupIconLabels[icon]"
                         @click="updateGroupIcon(section.id, icon)"
                       >
                         <FtIcon
@@ -692,6 +692,7 @@ import { TAB_GROUP_ICONS, normalizeTabGroupIcon } from '../../../tabGroupIcons'
 import { getTabAccentColor } from '../../constants/tabColors'
 import { clampOverlayScrollTop, restoreOverlayScrollTop } from '../../helpers/overlayScrollbars'
 import { formatDeviceSessionLabel, getSyncTabRoute, shouldShowOtherDeviceSessions } from '../../helpers/sync-sessions'
+import { getTabGroupIconLabels } from '../../helpers/tabGroupIconLabels'
 import { showToast } from '../../helpers/utils'
 import store from '../../store/index'
 import { getSyncedTabPreview as syncedTabPreview, getTabAvatarUrl, getTabPageIcon } from '../../tabs/tabPreview'
@@ -706,26 +707,7 @@ import FtSelect from '../FtSelect/FtSelect.vue'
 
 const emit = defineEmits(['close'])
 const { locale, t } = useI18n()
-const groupIconValues = TAB_GROUP_ICONS
-const groupIconNames = computed(() => [
-  t('Tab Organizer.Title'),
-  t('Tab Organizer.Icon Labels.Folder'),
-  t('Tab Organizer.Icon Labels.Bookmark'),
-  t('Tab Organizer.Icon Labels.Favorites'),
-  t('Tab Organizer.Icon Labels.Videos'),
-  t('Tab Organizer.Icon Labels.Gaming'),
-  t('Tab Organizer.Icon Labels.Research'),
-  t('Tab Organizer.Icon Labels.Art'),
-  t('Tab Organizer.Icon Labels.Travel'),
-  t('Tab Organizer.Icon Labels.Podcast'),
-  t('Tab Organizer.Icon Labels.Clock'),
-  t('Tab Organizer.Icon Labels.Puzzle Piece'),
-  t('Tab Organizer.Icon Labels.People'),
-  t('Tab Organizer.Icon Labels.Chart'),
-  t('Tab Organizer.Icon Labels.Calendar'),
-  t('Tab Organizer.Icon Labels.Images'),
-  t('Tab Organizer.Icon Labels.Music')
-])
+const groupIconLabels = computed(() => getTabGroupIconLabels(t))
 const titleId = `tab-organizer-title-${useId().replaceAll(':', '')}`
 const promptId = `tab-organizer-${useId().replaceAll(':', '')}`
 const syncedSessionIdPrefix = `tab-organizer-synced-session-${useId().replaceAll(':', '')}`

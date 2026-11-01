@@ -2446,6 +2446,8 @@ Subscription Groups:
   Empty Group: Acest grup nu conține canale din profilul curent.
   Save Failed: Grupul nu a putut fi salvat.
   Delete Failed: Grupul nu a putut fi șters.
+  Group Icon: Pictograma grupului
+  No Icon: Fără pictogramă
 Yattee Server:
   API Error (Click to copy): Eroare server Yattee (Faceți clic pentru a copia)
   Unsupported page: Această pagină nu este disponibilă cu serverul Yattee. Activați „{fallbackSetting}” pentru a o încărca prin API-ul local.

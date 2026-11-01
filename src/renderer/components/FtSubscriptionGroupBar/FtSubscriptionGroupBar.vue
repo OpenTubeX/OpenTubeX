@@ -20,6 +20,11 @@
         @click="selectGroup(tab.id)"
         @keydown.left.right.home.end="switchGroup($event, tab.id)"
       >
+        <FtIcon
+          v-if="tab.icon"
+          :icon="['fas', tab.icon]"
+          aria-hidden="true"
+        />
         <span
           class="groupName"
           dir="auto"
@@ -65,6 +70,7 @@
 </template>
 
 <script setup>
+import { FtIcon } from '@opentubex/icons'
 import { computed, nextTick, ref, shallowRef } from 'vue'
 import { useI18n } from 'vue-i18n'
 

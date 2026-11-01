@@ -2393,6 +2393,8 @@ Subscription Groups:
   Empty Group: 此分组中没有当前配置文件的频道。
   Save Failed: 无法保存分组。
   Delete Failed: 无法删除分组。
+  Group Icon: 分组图标
+  No Icon: 无图标
 Yattee Server:
   API Error (Click to copy): Yattee 服务器错误（点击复制）
   Unsupported page: 使用 Yattee 服务器时无法打开此页面。开启“{fallbackSetting}”即可通过本地 API 加载。

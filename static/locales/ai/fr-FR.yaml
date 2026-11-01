@@ -2392,6 +2392,8 @@ Subscription Groups:
   Empty Group: Ce groupe ne contient aucune chaîne du profil actuel.
   Save Failed: Impossible d’enregistrer le groupe.
   Delete Failed: Impossible de supprimer le groupe.
+  Group Icon: Icône du groupe
+  No Icon: Aucune icône
 Yattee Server:
   API Error (Click to copy): Erreur du serveur Yattee (Cliquez pour copier)
   Unsupported page: Cette page n’est pas disponible avec le serveur Yattee. Activez « {fallbackSetting} » pour la charger avec l’API locale.

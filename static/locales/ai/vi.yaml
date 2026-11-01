@@ -2438,6 +2438,8 @@ Subscription Groups:
   Empty Group: Nhóm này không có kênh nào trong hồ sơ hiện tại.
   Save Failed: Không thể lưu nhóm.
   Delete Failed: Không thể xóa nhóm.
+  Group Icon: Biểu tượng nhóm
+  No Icon: Không có biểu tượng
 Yattee Server:
   API Error (Click to copy): Lỗi máy chủ Yattee (Nhấn để copy)
   Unsupported page: Trang này không khả dụng với máy chủ Yattee. Hãy bật “{fallbackSetting}” để tải trang bằng API cục bộ.

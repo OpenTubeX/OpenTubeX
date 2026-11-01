@@ -303,6 +303,45 @@ test.describe('editing subscription groups', () => {
     await expect(channelNames(page)).toHaveText(['Alpha Channel', 'Beta Channel', 'Gamma Channel'])
   })
 
+  test('picks an icon for a group and removes it again', { tag: '@scale' }, async ({ page }) => {
+    await goTo(page, 'subscribedchannels')
+    const music = groups(page).getByRole('tab', { name: 'Music' })
+    await expect(music.locator('.ft-icon')).toHaveCount(0)
+    await music.click()
+
+    await page.getByRole('button', { name: 'Edit Group' }).click()
+    const editor = page.getByRole('dialog', { name: 'Edit Group' })
+    const icons = editor.getByRole('group', { name: 'Group icon' })
+    await expect(icons.getByRole('button', { name: 'No icon' })).toHaveAttribute('aria-pressed', 'true')
+    await icons.getByRole('button', { name: 'Music', exact: true }).click()
+    await expect(icons.getByRole('button', { name: 'Music', exact: true })).toHaveAttribute('aria-pressed', 'true')
+    await expect(icons.getByRole('button', { name: 'No icon' })).toHaveAttribute('aria-pressed', 'false')
+    await editor.getByRole('button', { name: 'Save' }).click()
+    await expect(editor).toBeHidden()
+
+    // The icon is decorative, so the tab keeps the group's name
+    await expect(music.locator('.ft-icon')).toHaveCount(1)
+    expect((await storedGroups(page)).find(group => group.id === 'music').icon).toBe('headphones')
+
+    // The subscribe button's group list aligns names when only some groups have an icon
+    await page.locator('.channel', { hasText: 'Alpha Channel' }).locator('.profileDropdownToggle').click()
+    const groupList = page.locator('.profileDropdown').getByRole('group', { name: 'Groups' })
+    await expect(groupList.getByRole('checkbox', { name: 'Music' }).locator('.groupIcon .ft-icon')).toHaveCount(1)
+    await expect(groupList.getByRole('checkbox', { name: 'Empty' }).locator('.groupIcon .ft-icon')).toHaveCount(0)
+    const nameStarts = await groupList.locator('.profileName').evaluateAll(names => {
+      return names.map(name => name.getBoundingClientRect().left)
+    })
+    expect(nameStarts[0]).toBeCloseTo(nameStarts[1], 1)
+
+    await page.getByRole('button', { name: 'Edit Group' }).click()
+    await expect(icons.getByRole('button', { name: 'Music', exact: true })).toHaveAttribute('aria-pressed', 'true')
+    await icons.getByRole('button', { name: 'No icon' }).click()
+    await editor.getByRole('button', { name: 'Save' }).click()
+    await expect(editor).toBeHidden()
+    await expect(music.locator('.ft-icon')).toHaveCount(0)
+    expect((await storedGroups(page)).find(group => group.id === 'music')).not.toHaveProperty('icon')
+  })
+
   test('keeps the editor open when the group cannot be deleted', async ({ page }) => {
     await page.evaluate(() => {
       window.$store._actions.updateSubscriptionGroups = [() => Promise.resolve(false)]

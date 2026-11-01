@@ -2441,6 +2441,8 @@ Subscription Groups:
   Empty Group: У цій групі немає каналів із поточного профілю.
   Save Failed: Не вдалося зберегти групу.
   Delete Failed: Не вдалося видалити групу.
+  Group Icon: Значок групи
+  No Icon: Без значка
 Yattee Server:
   API Error (Click to copy): Помилка сервера Yattee (натисніть, щоб скопіювати)
   Unsupported page: Ця сторінка недоступна із сервером Yattee. Увімкніть «{fallbackSetting}», щоб завантажити її через локальний API.

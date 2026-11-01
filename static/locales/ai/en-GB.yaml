@@ -2384,6 +2384,8 @@ Subscription Groups:
   Empty Group: This group has no channels in the current profile.
   Save Failed: The group could not be saved.
   Delete Failed: The group could not be deleted.
+  Group Icon: Group icon
+  No Icon: No icon
 Yattee Server:
   API Error (Click to copy): Yattee Server Error (Click to copy)
   Unsupported page: This page is not available with the Yattee server. Turn on ‘{fallbackSetting}’ to load it with the local API.

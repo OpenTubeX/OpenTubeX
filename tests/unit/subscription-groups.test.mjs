@@ -29,6 +29,20 @@ test('synced groups keep only well-formed entries and unique channel IDs', () =>
   ])
 })
 
+test('synced groups keep only icons that can be picked', () => {
+  assert.deepEqual(normalizeSubscriptionGroups([
+    { id: 'music', name: 'Music', channelIds: [], icon: 'headphones' },
+    { id: 'tabs', name: 'Tabs', channelIds: [], icon: 'layer-group' },
+    { id: 'unknown', name: 'Unknown', channelIds: [], icon: 'not-an-icon' },
+    { id: 'none', name: 'None', channelIds: [], icon: null },
+  ]), [
+    { id: 'music', name: 'Music', channelIds: [], icon: 'headphones' },
+    { id: 'tabs', name: 'Tabs', channelIds: [] },
+    { id: 'unknown', name: 'Unknown', channelIds: [] },
+    { id: 'none', name: 'None', channelIds: [] },
+  ])
+})
+
 test('groups are listed by name', () => {
   const groups = [
     { id: 'b', name: 'gaming', channelIds: [] },

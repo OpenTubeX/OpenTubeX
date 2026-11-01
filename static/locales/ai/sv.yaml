@@ -2419,6 +2419,8 @@ Subscription Groups:
   Empty Group: Den här gruppen har inga kanaler från den aktuella profilen.
   Save Failed: Det gick inte att spara gruppen.
   Delete Failed: Det gick inte att ta bort gruppen.
+  Group Icon: Gruppikon
+  No Icon: Ingen ikon
 Yattee Server:
   API Error (Click to copy): Fel i Yattee-servern (klicka för att kopiera)
   Unsupported page: Den här sidan är inte tillgänglig via Yattee-servern. Aktivera ”{fallbackSetting}” för att läsa in den med det lokala API:et.

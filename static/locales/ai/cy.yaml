@@ -2424,6 +2424,8 @@ Subscription Groups:
   Empty Group: Does dim sianeli o'r proffil presennol yn y grŵp hwn.
   Save Failed: Methu cadw'r grŵp.
   Delete Failed: Methu dileu'r grŵp.
+  Group Icon: Eicon grŵp
+  No Icon: Dim eicon
 Yattee Server:
   API Error (Click to copy): Gwall Gweinydd Yattee (Cliciwch i'w gopïo)
   Unsupported page: Nid yw'r dudalen hon ar gael gyda'r gweinydd Yattee. Trowch “{fallbackSetting}” ymlaen i'w llwytho gyda'r API lleol.

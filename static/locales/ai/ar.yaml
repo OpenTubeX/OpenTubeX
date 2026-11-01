@@ -2426,6 +2426,8 @@ Subscription Groups:
   Empty Group: لا تحتوي هذه المجموعة على أي قنوات من الملف الشخصي الحالي.
   Save Failed: تعذّر حفظ المجموعة.
   Delete Failed: تعذّر حذف المجموعة.
+  Group Icon: أيقونة المجموعة
+  No Icon: بلا أيقونة
 Yattee Server:
   API Error (Click to copy): خطأ خادم Yattee (انقر للنسخ)
   Unsupported page: هذه الصفحة غير متاحة مع خادم Yattee. فعّل «{fallbackSetting}» لتحميلها باستخدام الواجهة البرمجية المحلية.

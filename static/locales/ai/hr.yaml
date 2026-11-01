@@ -2426,6 +2426,8 @@ Subscription Groups:
   Empty Group: Ova grupa nema kanala iz trenutačnog profila.
   Save Failed: Nije moguće spremiti grupu.
   Delete Failed: Nije moguće izbrisati grupu.
+  Group Icon: Ikona grupe
+  No Icon: Bez ikone
 Yattee Server:
   API Error (Click to copy): Greška Yattee poslužitelja (pritisni za kopiranje)
   Unsupported page: Ova stranica nije dostupna s Yattee poslužiteljem. Uključite „{fallbackSetting}” kako biste je učitali lokalnim sučeljem.
