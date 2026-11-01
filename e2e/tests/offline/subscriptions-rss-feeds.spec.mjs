@@ -246,7 +246,8 @@ test.describe('with followed feeds', () => {
     for (let attempt = 0; attempt < 2; attempt++) {
       await header.getByRole('button', { name: 'Manage RSS Feeds' }).click()
       await expect(manager.getByRole('textbox', { name: 'Add Feed' })).toBeVisible()
-      await page.locator('.settingsCloseButton').click()
+      // Focus stays in the window, so Escape closes it
+      await page.keyboard.press('Escape')
       await expect(page.locator('.settingsWindow')).toBeHidden()
     }
 
