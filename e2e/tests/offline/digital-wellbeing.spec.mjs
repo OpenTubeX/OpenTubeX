@@ -79,7 +79,16 @@ test.describe('daily watch time limit', () => {
 test.describe('autoplay countdown', () => {
   test.use({
     seed: {
-      settings: { ...playbackSettings, playNextVideo: true, defaultInterval: 3, dailyLimitAction: 'remind', stopAutoplayAtBedtimeAndLimit: true },
+      settings: {
+        ...playbackSettings,
+        playNextVideo: true,
+        defaultInterval: 3,
+        dailyLimitAction: 'remind',
+        stopAutoplayAtBedtimeAndLimit: true,
+        // Keep the default 22:00 to 06:00 bedtime from stopping autoplay before the limit does.
+        bedtimeStart: timeOfDay(120),
+        bedtimeEnd: timeOfDay(180),
+      },
       watchStats: watchedOneHour,
     }
   })
