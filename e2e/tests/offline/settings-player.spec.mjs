@@ -685,6 +685,61 @@ test.describe('settings', () => {
     }
   })
 
+  test('shows caption color swatches and previews hovered caption options', async ({ page, attachScreenshot }) => {
+    const playback = await goToSettingsSection(page, 'playback')
+    const preview = playback.locator('.captionPreview')
+    const caption = preview.locator('span')
+    const textColor = playback.getByRole('combobox', { name: 'Text Color' })
+    const defaultColor = await caption.evaluate(element => getComputedStyle(element).color)
+
+    await textColor.click()
+    const list = page.getByRole('listbox', { name: 'Text Color' })
+    await expect(list.getByRole('option', { name: 'Default' }).locator('.optionColorDot')).toHaveClass(/empty/)
+    const yellow = list.getByRole('option', { name: 'Yellow' })
+    await expect(yellow.locator('.optionColorDot')).toHaveCSS('background-color', 'rgb(255, 255, 0)')
+
+    await yellow.hover()
+    await expect(caption).toHaveCSS('color', 'rgb(255, 255, 0)')
+    await attachScreenshot('hovered caption text color')
+    await list.getByRole('option', { name: 'Cyan' }).hover()
+    await expect(caption).toHaveCSS('color', 'rgb(0, 255, 255)')
+
+    // Closing the list without choosing an option restores the saved style.
+    await page.keyboard.press('Escape')
+    await expect(list).toBeHidden()
+    await expect(caption).toHaveCSS('color', defaultColor)
+
+    await playback.getByRole('combobox', { name: 'Position', exact: true }).click()
+    await page.getByRole('listbox', { name: 'Position', exact: true }).getByRole('option', { name: 'Top Left' }).hover()
+    await expect(preview).toHaveClass(/captionRow-top/)
+    await page.keyboard.press('Escape')
+    await expect(preview).toHaveClass(/captionRow-bottom/)
+
+    await textColor.click()
+    await list.getByRole('option', { name: 'Yellow' }).click()
+    await expect(list).toBeHidden()
+    await expect(textColor.locator('.optionColorDot')).toHaveCSS('background-color', 'rgb(255, 255, 0)')
+    await expect(caption).toHaveCSS('color', 'rgb(255, 255, 0)')
+    await expect.poll(() => page.evaluate(() => JSON.parse(window.$store.getters.getDefaultCaptionSettings).fontColor))
+      .toBe('#ff0')
+  })
+
+  test('previews the caption option focused with Tab in a phone picker', async ({ page }) => {
+    await page.setViewportSize({ width: 600, height: 700 })
+    const playback = await goToSettingsSection(page, 'playback')
+    const caption = playback.locator('.captionPreview span')
+    await playback.getByRole('combobox', { name: 'Text Color' }).click()
+    const list = page.getByRole('listbox', { name: 'Text Color' })
+    await expect(list).toHaveClass(/phonePicker/)
+    await expect(list).toBeFocused()
+
+    for (const option of ['Default', 'White', 'Yellow']) {
+      await page.keyboard.press('Tab')
+      await expect(list.getByRole('option', { name: option })).toBeFocused()
+    }
+    await expect(caption).toHaveCSS('color', 'rgb(255, 255, 0)')
+  })
+
   test('enables YouTube-style Shorts by default in player settings', async ({ page }) => {
     await goTo(page, 'settings')
     await page.locator('.settingsMenu [data-section="playback"]').click()

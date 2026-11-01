@@ -209,6 +209,7 @@
               :lang="isLocaleSelector && selectValues[index] !== 'system' && selectValues[index] !== '' ? selectValues[index] : null"
               @mousedown.prevent
               @pointermove="activeIndex = index"
+              @focus="activeIndex = index"
               @click="selectOption(index)"
               @keydown.enter.space.prevent="selectOption(index)"
             >
@@ -364,7 +365,7 @@ const props = defineProps({
   }
 })
 
-const emit = defineEmits(['change', 'open', 'reset'])
+const emit = defineEmits(['change', 'open', 'preview', 'reset'])
 
 const id = useId()
 const dropdownAnchor = `--select-${id}`
@@ -484,6 +485,13 @@ watch(dropdownShown, (shown) => {
     if (!phoneLayout.value) dropdownRendered.value = false
     removeDropdownListeners()
   }
+})
+
+// Lets the parent show the highlighted option before it is chosen, `null` once the list closes.
+// Opening highlights the current value, which needs no preview.
+watch([dropdownShown, activeIndex, () => props.selectValues[activeIndex.value]], ([shown, index], [wasShown]) => {
+  if (shown && wasShown) emit('preview', props.selectValues[index] ?? null)
+  else if (wasShown && !shown) emit('preview', null)
 })
 
 // Rows from a moved or extended window can be wider than the measured ones.
