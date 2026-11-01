@@ -1,4 +1,4 @@
-# Advisories without a fixed release. Each package is only used by build or lint tooling and never ships in OpenTubeX.
+# Advisories without a fixed release we can use. Each package is only used by build or lint tooling and never ships in OpenTubeX.
 
 [[IgnoredVulns]]
 id = "GHSA-vfj7-8cjw-p6xm"
@@ -11,3 +11,7 @@ reason = "http-cache-semantics: no fixed release; used by got in electron-builde
 [[IgnoredVulns]]
 id = "GHSA-hp3w-g68c-fv3c"
 reason = "sprintf-js: no fixed release; used for logging by global-agent in electron-builder's Electron download."
+
+[[IgnoredVulns]]
+id = "GHSA-g3hv-75wg-m249"
+reason = "minimatch: only fixed in 11, a breaking major that electron-builder, ESLint and their dependencies do not support yet. The bug needs optimizationLevel >= 2, which only glob sets, and glob now uses minimatch 11."
