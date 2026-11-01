@@ -236,7 +236,7 @@ function addNavigationCommands(commands, context) {
     ['channels', '/subscribedchannels', 'Channels.Channels', ['subscriptions', 'channel list'], ['fas', 'user-check']],
     ['trending', '/trending', 'Trending.Trending', ['discover'], ['fas', 'fire']],
     ['popular', '/popular', 'Most Popular', ['popular videos'], ['fas', 'users']],
-    ['playlists', '/userplaylists', 'Playlists', ['saved videos'], ['fas', 'bookmark']],
+    ['playlists', '/userplaylists', 'Playlists', ['saved videos'], ['far', 'bookmark']],
     ['history', '/history', 'History.History', ['watched videos'], ['fas', 'history']],
     ['stats', '/stats', 'Stats.Stats', ['watch statistics'], ['fas', 'chart-line']],
   ]
