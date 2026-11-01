@@ -2674,6 +2674,8 @@ for (const tabBarPosition of ['top', 'left']) {
 
     test('scroll the active tab into view on launch, keyboard switching, and new tabs', { tag: '@scale' }, async ({ app }) => {
       let page = app.page
+      // The initial tab stays first, so Ctrl+1 switches back to it.
+      const firstTabId = await page.locator(sel.activeTab).getAttribute('data-tab-id')
       const lastTabId = await page.evaluate(async () => {
         let tab
         for (let index = 0; index < 40; index++) {
@@ -2683,7 +2685,6 @@ for (const tabBarPosition of ['top', 'left']) {
         }
         return tab.id
       })
-      const firstTabId = await page.locator(sel.tabs).first().getAttribute('data-tab-id')
 
       // Scroll by hand first, so the next state update echoes that position.
       const container = page.locator('.tabsContainer')
@@ -2711,6 +2712,21 @@ for (const tabBarPosition of ['top', 'left']) {
       const newTabId = await page.locator(sel.activeTab).getAttribute('data-tab-id')
       await expect(page.locator(sel.tabs).last()).toHaveAttribute('data-tab-id', newTabId)
       await expectActiveTabInView(page)
+
+      // A tab switch while a tab is being dragged still reveals the new active tab.
+      const newTabBox = await page.locator(sel.activeTab).boundingBox()
+      await page.mouse.move(newTabBox.x + newTabBox.width / 2, newTabBox.y + newTabBox.height / 2)
+      await page.mouse.down()
+      await page.mouse.move(
+        newTabBox.x + newTabBox.width / 2 - (tabBarPosition === 'top' ? 20 : 0),
+        newTabBox.y + newTabBox.height / 2 - (tabBarPosition === 'top' ? 0 : 10),
+        { steps: 4 }
+      )
+      await expect(page.locator('.tabBar .tab.dragging')).toHaveCount(1)
+      await page.keyboard.press('Control+1')
+      await expect(page.locator(sel.activeTab)).toHaveAttribute('data-tab-id', firstTabId)
+      await expectActiveTabInView(page)
+      await page.mouse.up()
 
       await page.evaluate(id => window.ftElectron.tabs.activate(id), lastTabId)
       await expect(page.locator(sel.activeTab)).toHaveAttribute('data-tab-id', lastTabId)

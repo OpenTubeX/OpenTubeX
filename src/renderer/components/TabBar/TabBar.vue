@@ -1468,7 +1468,7 @@ const activeTabId = computed(() => store.getters.getActiveTabId)
 let revealActiveTabPending = true
 
 function revealActiveTab() {
-  if (!revealActiveTabPending || dragSession) return
+  if (!revealActiveTabPending) return
 
   const container = dropZoneRef.value
   const activeItem = tabsContentRef.value?.querySelector('.tabBarReorderItem.active')
