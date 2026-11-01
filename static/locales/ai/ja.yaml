@@ -340,6 +340,7 @@ Settings:
       Network: ネットワーク
       Disk: ディスク
   General Settings:
+    Close Window With Last Tab: '最後のタブを閉じたときにウィンドウを閉じる'
     Preferred Video Codec: 優先する動画コーデック
     Always Use Backup Media Server: "常にバックアップのメディアサーバーを使用"
     Automatically switch stream extraction methods: "ストリーム抽出方式を自動的に切り替える"
@@ -465,6 +466,7 @@ Settings:
     Invalid Engine: 名前と、%sを含む有効なHTTPまたはHTTPSの検索URLを入力してください。
     Engine Limit: カスタム検索エンジンは{count}件まで追加できます。
   Theme Settings:
+    Visible Search Suggestions: "表示する検索候補の数"
     Material Accent Color: "Material のアクセントカラー"
     Material Wallpaper Colors: "壁紙の色"
     Tab Loading Indicator:
@@ -1940,6 +1942,9 @@ Chapters:
   Open Chapters: チャプターを開く
   Close Chapters: チャプターを閉じる
   Copy Timestamp Link: '{timestamp}のリンクをコピー'
+  Loop Chapter: 'チャプターをループ: {chapter}'
+  Looping Chapter: 'チャプターをループ中: {chapter}'
+  Chapter Loop Stopped: 'チャプターのループを停止しました'
 Comments:
   Image unavailable: "画像は利用できません"
   Comment Count: '{count}件のコメント'
@@ -1977,6 +1982,7 @@ Description:
   Music: 音楽
 Tooltips:
   General Settings:
+    Close Window With Last Tab: 'オフにすると、最後のタブを閉じたときに代わりに新しいタブが開き、ウィンドウを閉じるまで開いたままになります。'
     Preferred Video Codec: |
       自動では、デバイスがハードウェアでデコードできるコーデックを優先します。
       AV1：最も少ないデータ量で最高の画質ですが、すべての動画で利用できるわけではありません。ハードウェアデコードがないと、バッテリーを消耗したりコマ落ちしたりすることがあります。
@@ -2065,6 +2071,7 @@ Tooltips:
     Refresh Subscriptions While App Is Closed: "選択した設定でフィードを更新します。デスクトップでは、終了するまでOpenTubeXがシステムトレイに常駐します。Androidでは、バックグラウンド更新の実行時刻をシステムが制御します。"
     Notify About New Uploads: 登録設定で通知をオンにしたチャンネルについて、このデバイスにシステム通知を表示します。OpenTubeXは登録チャンネルの更新時に新着コンテンツを確認するため、自動更新の間隔を選択してください。アプリを閉じている間も通知を受け取るには、アプリを閉じている間の更新も有効にしてください。
   Theme Settings:
+    Visible Search Suggestions: "検索バーがスクロールなしで表示する検索履歴と候補の数を設定します。リストがウィンドウの下端を超えることはありません。"
     Thumbnail Size: "グリッドとリストの動画サムネイルの大きさを変更します。列数を固定したグリッドや「全幅」表示では各行を埋めるため、そこではリストのサムネイルとショートだけが変わります。スマートフォンサイズのウィンドウでは、グリッドのサムネイルは 100% までに制限されます。"
     Playlist Thumbnail Size: "再生リストのページの動画サムネイルの大きさを変更します。列数を固定したグリッドや「全幅」表示では各行を埋めるため、そこではリストのサムネイルとショートだけが変わります。スマートフォンサイズのウィンドウでは、グリッドのサムネイルは 100% までに制限されます。"
     Compact Settings Categories: "説明を非表示にし、設定カテゴリの高さを縮小します。"
@@ -2393,6 +2400,8 @@ Subscription Groups:
   Empty Group: このグループには、現在のプロファイルのチャンネルがありません。
   Save Failed: グループを保存できませんでした。
   Delete Failed: グループを削除できませんでした。
+  Group Icon: グループアイコン
+  No Icon: アイコンなし
 Yattee Server:
   API Error (Click to copy): Yattee Server エラー（クリックしてコピー）
   Unsupported page: このページは Yattee サーバーでは利用できません。内部 API で読み込むには「{fallbackSetting}」をオンにしてください。

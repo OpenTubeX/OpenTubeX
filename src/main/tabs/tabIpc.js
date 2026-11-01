@@ -145,11 +145,11 @@ export async function setupTabsIPC(options = {}) {
   ipcMain.handle(IpcChannels.TABS_CLOSE, async (event, tabId) => {
     const manager = getManager(event)
     if (manager && typeof tabId === 'string') {
-      if (manager.tabs.size === 1 && !await confirmCloseWindow(manager.browserWindow)) {
+      if (await manager.closingTabsClosesWindow(1) && !await confirmCloseWindow(manager.browserWindow)) {
         return { hasRemainingTabs: true }
       }
 
-      const hasRemainingTabs = manager.closeTab(tabId)
+      const hasRemainingTabs = await manager.closeTabs([tabId])
       if (!hasRemainingTabs) {
         markWindowCloseConfirmed(manager.browserWindow)
         manager.browserWindow.close()
@@ -173,7 +173,7 @@ export async function setupTabsIPC(options = {}) {
     }
 
     if (
-      closingTabIds.length === manager.tabs.size &&
+      await manager.closingTabsClosesWindow(closingTabIds.length) &&
       !await confirmCloseWindow(manager.browserWindow)
     ) {
       return { hasRemainingTabs: true }
@@ -299,7 +299,7 @@ export async function setupTabsIPC(options = {}) {
       return { success: true, hasRemainingTabs: true }
     }
 
-    if (actionableTabIds.length === manager.tabs.size && !await confirmCloseWindow(manager.browserWindow)) {
+    if (await manager.closingTabsClosesWindow(actionableTabIds.length) && !await confirmCloseWindow(manager.browserWindow)) {
       return { success: false, hasRemainingTabs: true }
     }
     const hasRemainingTabs = await manager.closeTabs(actionableTabIds)

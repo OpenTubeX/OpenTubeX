@@ -1,3 +1,8 @@
+import { TAB_GROUP_ICONS } from '../../tabGroupIcons.js'
+
+// The tab group icons, except the default one that stands for the tab organizer
+export const SUBSCRIPTION_GROUP_ICONS = TAB_GROUP_ICONS.filter(icon => icon !== 'layer-group')
+
 export const SUBSCRIBED_CHANNELS_SORT_BY_OPTIONS = {
   NameAscending: 'name_ascending',
   NameDescending: 'name_descending',
@@ -9,6 +14,7 @@ export const SUBSCRIBED_CHANNELS_SORT_BY_OPTIONS = {
  * @property {string} id
  * @property {string} name
  * @property {string[]} channelIds
+ * @property {string} [icon] a SUBSCRIPTION_GROUP_ICONS value
  */
 
 /**
@@ -31,6 +37,7 @@ export function normalizeSubscriptionGroups(value) {
       id: group.id,
       name: group.name.trim(),
       channelIds: normalizeChannelIds(group.channelIds),
+      ...(SUBSCRIPTION_GROUP_ICONS.includes(group.icon) ? { icon: group.icon } : {}),
     })
   }
   return groups

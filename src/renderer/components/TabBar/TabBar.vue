@@ -1276,6 +1276,7 @@ onMounted(() => {
     if (typeof ResizeObserver === 'function') {
       resizeObserver = new ResizeObserver(() => {
         clampTabsScroll()
+        revealActiveTab()
       })
 
       if (tabsContentRef.value) {
@@ -1288,6 +1289,7 @@ onMounted(() => {
     }
 
     clampTabsScroll()
+    revealActiveTab()
   })
 })
 
@@ -1394,7 +1396,7 @@ function handleWheel(event) {
   scrollTarget = Math.max(min, Math.min(max, scrollTarget + delta))
 
   if (isElectron) {
-    window.ftElectron.tabs.setTabBarScroll(scrollTarget)
+    reportTabBarScroll(scrollTarget)
   }
 
   if (!scrollAnimationId) {
@@ -1405,15 +1407,27 @@ function handleWheel(event) {
 function handleScroll() {
   if (isElectron && !vertical.value && !scrollAnimationId) {
     scrollTarget = dropZoneRef.value.scrollLeft
-    window.ftElectron.tabs.setTabBarScroll(scrollTarget)
+    reportTabBarScroll(scrollTarget)
   }
   scheduleDragPositionUpdate()
 }
 
-// Apply scroll position received from main process state broadcasts.
-// This keeps all tab renderers' tab bars at the same scroll offset.
+// Apply the scroll position from main process state broadcasts, which restore
+// it after a renderer reload, starting with the state present on mount, before
+// the active tab is revealed. The main process only stores the offset this tab
+// bar reports, so once it has reported one, every broadcast echoes an earlier
+// report. Applied after the update that carries it, an echo would undo a newer
+// scroll, such as revealing the tab that same update activates.
+let hasReportedTabBarScroll = false
+
+/** @param {number} position */
+function reportTabBarScroll(position) {
+  hasReportedTabBarScroll = true
+  window.ftElectron.tabs.setTabBarScroll(position)
+}
+
 watch(tabBarScrollPosition, (newPosition) => {
-  if (newPosition == null || vertical.value) return
+  if (newPosition == null || vertical.value || hasReportedTabBarScroll) return
 
   nextTick(() => {
     const container = dropZoneRef.value
@@ -1426,7 +1440,7 @@ watch(tabBarScrollPosition, (newPosition) => {
       scrollTarget = newPosition
     }
   })
-})
+}, { immediate: true })
 
 function clampTabsScroll() {
   const container = dropZoneRef.value
@@ -1442,18 +1456,55 @@ function clampTabsScroll() {
       const clampedTarget = Math.max(min, Math.min(max, scrollTarget))
       if (scrollTarget !== clampedTarget) {
         scrollTarget = clampedTarget
-        if (isElectron) window.ftElectron.tabs.setTabBarScroll(scrollTarget)
+        if (isElectron) reportTabBarScroll(scrollTarget)
       }
     }
   }
 }
 
-watch(stripItems, clampTabsScroll, { flush: 'post' })
+// Keep the active tab visible: the one a restored session starts with, once
+// the tabs first lay out, every tab activated after that, such as from a
+// keyboard shortcut or a new tab opening at the end of the strip, and the
+// active tab after its group collapses or expands or the bar changes
+// orientation.
+const activeStripItemId = computed(() => stripItems.value.find(item => (
+  item.type === 'tab' ? item.tab.isActive : item.isActive
+))?.id ?? null)
+let revealActiveTabPending = true
+
+function revealActiveTab() {
+  if (!revealActiveTabPending) return
+
+  const container = dropZoneRef.value
+  const activeItem = tabsContentRef.value?.querySelector('.tabBarReorderItem.active')
+  if (!container?.clientWidth || !container.clientHeight || !activeItem) return
+
+  revealActiveTabPending = false
+  cancelScrollAnimation()
+  activeItem.scrollIntoView({ block: 'nearest', inline: 'nearest' })
+}
+
+// Switching between tabs of a collapsed group keeps the same strip item.
+const activeTabId = computed(() => store.getters.getActiveTabId)
+
+watch([activeTabId, activeStripItemId], () => {
+  revealActiveTabPending = true
+  revealActiveTab()
+}, { flush: 'post' })
+
+watch(stripItems, () => {
+  clampTabsScroll()
+  revealActiveTab()
+}, { flush: 'post' })
 
 watch(vertical, () => {
   cancelScrollAnimation()
   scrollTarget = null
-  nextTick(clampTabsScroll)
+  revealActiveTabPending = true
+  nextTick(() => {
+    clampTabsScroll()
+    revealActiveTab()
+  })
 })
 
 watch(tabs, (nextTabs) => {

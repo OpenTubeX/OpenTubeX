@@ -341,6 +341,7 @@ Settings:
       Network: jaringan
       Disk: disk
   General Settings:
+    Close Window With Last Tab: 'Tutup jendela saat menutup tab terakhir'
     Preferred Video Codec: Codec video pilihan
     Always Use Backup Media Server: "Selalu gunakan server media cadangan"
     Automatically switch stream extraction methods: "Ganti metode ekstraksi stream secara otomatis"
@@ -466,6 +467,7 @@ Settings:
     Invalid Engine: Masukkan nama dan URL pencarian HTTP atau HTTPS valid yang berisi %s.
     Engine Limit: Anda dapat menambahkan hingga {count} mesin pencari khusus.
   Theme Settings:
+    Visible Search Suggestions: "Saran pencarian yang terlihat"
     Material Accent Color: "Warna aksen Material"
     Material Wallpaper Colors: "Warna wallpaper"
     Tab Loading Indicator:
@@ -1959,6 +1961,9 @@ Chapters:
   Open Chapters: Buka Bab
   Close Chapters: Tutup Bab
   Copy Timestamp Link: Salin tautan pada {timestamp}
+  Loop Chapter: 'Ulangi bab: {chapter}'
+  Looping Chapter: 'Mengulang bab: {chapter}'
+  Chapter Loop Stopped: 'Berhenti mengulang bab'
 Comments:
   Image unavailable: "Gambar tidak tersedia"
   Comment Count: '{count} Komentar'
@@ -1996,6 +2001,7 @@ Description:
   Music: Musik
 Tooltips:
   General Settings:
+    Close Window With Last Tab: 'Jika dinonaktifkan, menutup tab terakhir akan membuka tab baru, sehingga jendela tetap terbuka sampai Anda menutupnya.'
     Preferred Video Codec: |
       Mode otomatis mengutamakan codec yang dapat didekode perangkat Anda secara hardware.
       AV1: kualitas terbaik dengan data paling sedikit, tetapi tidak semua video memilikinya. Tanpa dekode hardware, dapat menguras baterai atau melewatkan frame.
@@ -2084,6 +2090,7 @@ Tooltips:
     Refresh Subscriptions While App Is Closed: "Memperbarui feed sesuai setelan yang dipilih. Di desktop, OpenTubeX tetap di baki sistem sampai Anda keluar. Android menentukan waktu pembaruan latar belakang."
     Notify About New Uploads: Menampilkan notifikasi sistem di perangkat ini untuk channel yang notifikasinya Anda aktifkan di pengaturan langganannya. OpenTubeX memeriksa konten baru saat langganan diperbarui, jadi pilih interval pembaruan otomatis. Agar tetap mendapat notifikasi saat aplikasi ditutup, aktifkan juga pembaruan saat aplikasi ditutup.
   Theme Settings:
+    Visible Search Suggestions: "Menentukan berapa banyak entri riwayat pencarian dan saran yang ditampilkan bilah pencarian sebelum daftarnya perlu digulir. Daftar tidak pernah melewati bagian bawah jendela."
     Thumbnail Size: "Mengubah ukuran gambar mini video di kisi dan daftar. Kisi dengan jumlah kolom tetap atau jenis tampilan Lebar Penuh akan mengisi setiap baris, jadi di sana penggeser hanya mengubah gambar mini daftar dan Shorts. Di jendela seukuran ponsel, gambar mini kisi dibatasi hingga 100%."
     Playlist Thumbnail Size: "Mengubah ukuran gambar mini video di halaman daftar putar. Kisi dengan jumlah kolom tetap atau jenis tampilan Lebar Penuh akan mengisi setiap baris, jadi di sana penggeser hanya mengubah gambar mini daftar dan Shorts. Di jendela seukuran ponsel, gambar mini kisi dibatasi hingga 100%."
     Compact Settings Categories: "Menyembunyikan deskripsi dan mengurangi tinggi kategori pengaturan."
@@ -2412,6 +2419,8 @@ Subscription Groups:
   Empty Group: Grup ini tidak memiliki kanal dari profil saat ini.
   Save Failed: Tidak dapat menyimpan grup.
   Delete Failed: Tidak dapat menghapus grup.
+  Group Icon: Ikon grup
+  No Icon: Tanpa ikon
 Yattee Server:
   API Error (Click to copy): Galat Server Yattee (Klik untuk menyalin)
   Unsupported page: Halaman ini tidak tersedia dengan server Yattee. Aktifkan “{fallbackSetting}” untuk memuatnya dengan API lokal.

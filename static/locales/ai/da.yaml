@@ -351,6 +351,7 @@ Settings:
       Network: netværk
       Disk: diskplads
   General Settings:
+    Close Window With Last Tab: 'Luk vinduet, når den sidste fane lukkes'
     Preferred Video Codec: Foretrukket videocodec
     Always Use Backup Media Server: "Brug altid backup-medieserveren"
     Automatically switch stream extraction methods: "Skift automatisk mellem metoder til streamudtræk"
@@ -477,6 +478,7 @@ Settings:
     Invalid Engine: Angiv et navn og en gyldig HTTP- eller HTTPS-søge-URL, der indeholder %s.
     Engine Limit: Du kan tilføje op til {count} brugerdefinerede søgemaskiner.
   Theme Settings:
+    Visible Search Suggestions: "Synlige søgeforslag"
     Material Accent Color: "Material-accentfarve"
     Material Wallpaper Colors: "Farver fra baggrundsbilledet"
     Tab Loading Indicator:
@@ -2019,6 +2021,9 @@ Chapters:
   Open Chapters: Åbn kapitler
   Close Chapters: Luk kapitler
   Copy Timestamp Link: Kopiér link ved {timestamp}
+  Loop Chapter: 'Gentag kapitel: {chapter}'
+  Looping Chapter: 'Gentager kapitel: {chapter}'
+  Chapter Loop Stopped: 'Gentagelse af kapitel stoppet'
 Comments:
   Image unavailable: "Billedet er ikke tilgængeligt"
   Comment Count: 1 kommentar | {count} kommentarer
@@ -2060,6 +2065,7 @@ Description:
   Music: Musik
 Tooltips:
   General Settings:
+    Close Window With Last Tab: 'Når det er slået fra, åbner lukning af den sidste fane i stedet en ny fane, så vinduet forbliver åbent, indtil du lukker det.'
     Preferred Video Codec: |
       Automatisk foretrækker codecs, som din enhed kan afkode med hardware.
       AV1: den bedste kvalitet for mindst data, men ikke alle videoer har det. Uden hardwareafkodning kan det dræne batteriet eller tabe billeder.
@@ -2149,6 +2155,7 @@ Tooltips:
     Refresh Subscriptions While App Is Closed: "Opdaterer feeds med dine valgte indstillinger. På computeren forbliver OpenTubeX i systembakken, indtil du afslutter. Android styrer, hvornår baggrundsopdateringer kører."
     Notify About New Uploads: Viser systemmeddelelser på denne enhed for kanaler, hvor du har slået meddelelser til i deres abonnementsindstillinger. OpenTubeX søger efter nyt indhold, når abonnementer opdateres, så vælg et interval for automatisk opdatering. Hvis du vil have besked, mens appen er lukket, skal du også aktivere opdatering, mens appen er lukket.
   Theme Settings:
+    Visible Search Suggestions: "Angiver, hvor mange poster fra søgehistorikken og forslag søgefeltet viser, før dets liste skal rulles. Listen går aldrig ud over vinduets nederste kant."
     Thumbnail Size: "Skalerer videominiaturer i gitre og lister. Gitre med et fast antal kolonner eller visningstypen Fuld bredde udfylder i stedet hver række, så dér ændrer den kun listeminiaturer og Shorts. I vinduer på størrelse med en telefon er gitterminiaturer begrænset til 100 %."
     Playlist Thumbnail Size: "Skalerer videominiaturer på playlistesider. Gitre med et fast antal kolonner eller visningstypen Fuld bredde udfylder i stedet hver række, så dér ændrer den kun listeminiaturer og Shorts. I vinduer på størrelse med en telefon er gitterminiaturer begrænset til 100 %."
     Compact Settings Categories: "Skjuler beskrivelser og reducerer højden på indstillingskategorier."
@@ -2484,6 +2491,8 @@ Subscription Groups:
   Empty Group: Denne gruppe har ingen kanaler fra den aktuelle profil.
   Save Failed: Gruppen kunne ikke gemmes.
   Delete Failed: Gruppen kunne ikke slettes.
+  Group Icon: Gruppeikon
+  No Icon: Intet ikon
 Yattee Server:
   API Error (Click to copy): Yattee-serverfejl (Klik for at kopiere)
   Unsupported page: Denne side er ikke tilgængelig med Yattee-serveren. Slå »{fallbackSetting}« til for at indlæse den med den lokale API.

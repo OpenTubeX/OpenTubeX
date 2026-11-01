@@ -340,6 +340,7 @@ Settings:
       Network: le réseau
       Disk: le disque
   General Settings:
+    Close Window With Last Tab: 'Fermer la fenêtre à la fermeture du dernier onglet'
     Preferred Video Codec: Codec vidéo préféré
     Always Use Backup Media Server: "Toujours utiliser le serveur multimédia de secours"
     Automatically switch stream extraction methods: "Changer automatiquement de méthode d’extraction des flux"
@@ -465,6 +466,7 @@ Settings:
     Invalid Engine: Saisissez un nom et une URL de recherche HTTP ou HTTPS valide contenant %s.
     Engine Limit: Vous pouvez ajouter jusqu’à {count} moteurs de recherche personnalisés.
   Theme Settings:
+    Visible Search Suggestions: "Suggestions de recherche visibles"
     Material Accent Color: "Couleur d’accent Material"
     Material Wallpaper Colors: "Couleurs du fond d’écran"
     Tab Loading Indicator:
@@ -1939,6 +1941,9 @@ Chapters:
   Open Chapters: Ouvrir les chapitres
   Close Chapters: Fermer les chapitres
   Copy Timestamp Link: Copier le lien à {timestamp}
+  Loop Chapter: 'Lire le chapitre en boucle : {chapter}'
+  Looping Chapter: 'Lecture en boucle du chapitre : {chapter}'
+  Chapter Loop Stopped: 'Lecture en boucle du chapitre arrêtée'
 Comments:
   Image unavailable: "Image indisponible"
   Comment Count: 1 commentaire | {count} commentaires | {count} commentaires
@@ -1976,6 +1981,7 @@ Description:
   Music: Musique
 Tooltips:
   General Settings:
+    Close Window With Last Tab: 'Si désactivé, fermer le dernier onglet en ouvre un nouveau à la place, et la fenêtre reste ouverte jusqu’à ce que vous la fermiez.'
     Preferred Video Codec: |
       Le mode automatique privilégie les codecs que votre appareil peut décoder matériellement.
       AV1 : la meilleure qualité pour le moins de données, mais toutes les vidéos ne le proposent pas. Sans décodage matériel, il peut vider la batterie ou perdre des images.
@@ -2064,6 +2070,7 @@ Tooltips:
     Refresh Subscriptions While App Is Closed: "Actualise les flux avec les paramètres choisis. Sur ordinateur, OpenTubeX reste dans la zone de notification jusqu’à ce que vous le quittiez. Android détermine quand les actualisations en arrière-plan s’exécutent."
     Notify About New Uploads: Affiche des notifications système sur cet appareil pour les chaînes dont vous avez activé les notifications dans leurs paramètres d’abonnement. OpenTubeX recherche du nouveau contenu lors de l’actualisation des abonnements ; choisissez donc un intervalle d’actualisation automatique. Pour être notifié lorsque l’application est fermée, activez aussi l’actualisation quand l’application est fermée.
   Theme Settings:
+    Visible Search Suggestions: "Définit le nombre d’entrées de l’historique de recherche et de suggestions affichées par la barre de recherche avant que sa liste ne défile. La liste ne dépasse jamais le bas de la fenêtre."
     Thumbnail Size: "Redimensionne les miniatures des vidéos dans les grilles et les listes. Les grilles avec un nombre de colonnes fixe ou le type d’affichage Pleine largeur remplissent plutôt chaque ligne ; le curseur n’y modifie donc que les miniatures des listes et les Shorts. Dans les fenêtres de la taille d’un téléphone, les miniatures de la grille sont limitées à 100 %."
     Playlist Thumbnail Size: "Redimensionne les miniatures des vidéos sur les pages de playlists. Les grilles avec un nombre de colonnes fixe ou le type d’affichage Pleine largeur remplissent plutôt chaque ligne ; le curseur n’y modifie donc que les miniatures des listes et les Shorts. Dans les fenêtres de la taille d’un téléphone, les miniatures de la grille sont limitées à 100 %."
     Compact Settings Categories: "Masque les descriptions et réduit la hauteur des catégories de paramètres."
@@ -2392,6 +2399,8 @@ Subscription Groups:
   Empty Group: Ce groupe ne contient aucune chaîne du profil actuel.
   Save Failed: Impossible d’enregistrer le groupe.
   Delete Failed: Impossible de supprimer le groupe.
+  Group Icon: Icône du groupe
+  No Icon: Aucune icône
 Yattee Server:
   API Error (Click to copy): Erreur du serveur Yattee (Cliquez pour copier)
   Unsupported page: Cette page n’est pas disponible avec le serveur Yattee. Activez « {fallbackSetting} » pour la charger avec l’API locale.

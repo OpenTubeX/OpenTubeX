@@ -341,6 +341,7 @@ Settings:
       Network: rețea
       Disk: disc
   General Settings:
+    Close Window With Last Tab: 'Închide fereastra la închiderea ultimei file'
     Preferred Video Codec: Codec video preferat
     Always Use Backup Media Server: "Folosește mereu serverul media de rezervă"
     Automatically switch stream extraction methods: "Schimbă automat metodele de extragere a fluxurilor"
@@ -466,6 +467,7 @@ Settings:
     Invalid Engine: Introduceți un nume și o adresă URL de căutare HTTP sau HTTPS validă, care conține %s.
     Engine Limit: Puteți adăuga până la {count} motoare de căutare personalizate.
   Theme Settings:
+    Visible Search Suggestions: "Sugestii de căutare vizibile"
     Material Accent Color: "Culoare de accent Material"
     Material Wallpaper Colors: "Culorile imaginii de fundal"
     Tab Loading Indicator:
@@ -1986,6 +1988,9 @@ Chapters:
   Open Chapters: Deschide capitolele
   Close Chapters: Închide capitolele
   Copy Timestamp Link: Copiază linkul la {timestamp}
+  Loop Chapter: 'Repetă capitolul: {chapter}'
+  Looping Chapter: 'Se repetă capitolul: {chapter}'
+  Chapter Loop Stopped: 'Repetarea capitolului a fost oprită'
 Comments:
   Image unavailable: "Imagine indisponibilă"
   Comment Count: 1 comentariu | {count} comentarii | {count} de comentarii
@@ -2027,6 +2032,7 @@ Description:
   Music: Muzică
 Tooltips:
   General Settings:
+    Close Window With Last Tab: 'Când este dezactivat, închiderea ultimei file deschide în schimb o filă nouă, astfel încât fereastra rămâne deschisă până când o închideți.'
     Preferred Video Codec: |
       Modul automat preferă codecurile pe care dispozitivul le poate decoda hardware.
       AV1: cea mai bună calitate cu cele mai puține date, dar nu orice videoclip îl are. Fără decodare hardware, poate descărca bateria sau poate pierde cadre.
@@ -2115,6 +2121,7 @@ Tooltips:
     Refresh Subscriptions While App Is Closed: "Actualizează fluxurile cu setările alese. Pe desktop, OpenTubeX rămâne în zona de notificare până la ieșire. Android stabilește când rulează actualizările în fundal."
     Notify About New Uploads: Afișează notificări de sistem pe acest dispozitiv pentru canalele ale căror notificări le-ați activat în setările lor de abonament. OpenTubeX caută conținut nou când abonamentele se reîmprospătează, așa că alegeți un interval de reîmprospătare automată. Pentru a primi notificări când aplicația este închisă, activați și reîmprospătarea când aplicația este închisă.
   Theme Settings:
+    Visible Search Suggestions: "Stabilește câte intrări din istoricul căutărilor și sugestii afișează bara de căutare înainte ca lista ei să fie derulată. Lista nu depășește niciodată marginea de jos a ferestrei."
     Thumbnail Size: "Scalează miniaturile videoclipurilor în grile și liste. Grilele cu un număr fix de coloane sau tipul de vizualizare Lățime completă umplu în schimb fiecare rând, așa că acolo modifică doar miniaturile din liste și Shorts. În ferestrele de mărimea unui telefon, miniaturile din grilă sunt limitate la 100%."
     Playlist Thumbnail Size: "Scalează miniaturile videoclipurilor pe paginile playlisturilor. Grilele cu un număr fix de coloane sau tipul de vizualizare Lățime completă umplu în schimb fiecare rând, așa că acolo modifică doar miniaturile din liste și Shorts. În ferestrele de mărimea unui telefon, miniaturile din grilă sunt limitate la 100%."
     Compact Settings Categories: "Ascunde descrierile și reduce înălțimea categoriilor de setări."
@@ -2446,6 +2453,8 @@ Subscription Groups:
   Empty Group: Acest grup nu conține canale din profilul curent.
   Save Failed: Grupul nu a putut fi salvat.
   Delete Failed: Grupul nu a putut fi șters.
+  Group Icon: Pictograma grupului
+  No Icon: Fără pictogramă
 Yattee Server:
   API Error (Click to copy): Eroare server Yattee (Faceți clic pentru a copia)
   Unsupported page: Această pagină nu este disponibilă cu serverul Yattee. Activați „{fallbackSetting}” pentru a o încărca prin API-ul local.

@@ -340,6 +340,7 @@ Settings:
       Network: "ar rouedad"
       Disk: "ar bladenn"
   General Settings:
+    Close Window With Last Tab: 'Serriñ ar prenestr pa vez serret an ivinell ziwezhañ'
     Preferred Video Codec: Kodek video gwellañ karet
     Always Use Backup Media Server: "Implijout atav ar servijer media a-gein"
     Automatically switch stream extraction methods: "Cheñch hentennadoù eztennañ al lanvioù ent emgefre"
@@ -465,6 +466,7 @@ Settings:
     Invalid Engine: "Lakait un anv hag un URL enklask HTTP pe HTTPS talvoudek ennañ %s."
     Engine Limit: "Gallout a rit ouzhpennañ betek {count} keflusker enklask personelaet."
   Theme Settings:
+    Visible Search Suggestions: "Kinnigoù klask gwelus"
     Material Accent Color: "Liv pouez Material"
     Material Wallpaper Colors: "Livioù ar skeudenn drekleur"
     Tab Loading Indicator:
@@ -1949,6 +1951,9 @@ Chapters:
   Open Chapters: "Digeriñ ar chabistroù"
   Close Chapters: "Serriñ ar chabistroù"
   Copy Timestamp Link: "Eilañ al liamm da {timestamp}"
+  Loop Chapter: 'Lenn ar chabistr en-dro: {chapter}'
+  Looping Chapter: 'O lenn ar chabistr en-dro: {chapter}'
+  Chapter Loop Stopped: 'Paouezet eo da lenn ar chabistr en-dro'
 Comments:
   Image unavailable: "Skeudenn n'eo ket hegerz"
   Comment Count: "1 evezhiadenn | {count} evezhiadenn | {count} evezhiadenn | {count} evezhiadenn | {count} evezhiadenn"
@@ -1986,6 +1991,7 @@ Description:
   Music: Sonerezh
 Tooltips:
   General Settings:
+    Close Window With Last Tab: 'Pa vez lazhet, serriñ an ivinell ziwezhañ a zigor un ivinell nevez e-lec’h, ha chom a ra digor ar prenestr betek ma vo serret ganeoc’h.'
     Preferred Video Codec: |
       Ar mod emgefreek a ro lañs d'ar c'hodekoù a c'hall bezañ digodet gant periant ho trevnad.
       AV1: ar perzhded gwellañ gant an nebeutañ a roadennoù, met n'eo ket gant pep video. Hep digodañ dre beriant e c'hall goullonderiñ ar batiri pe kolliñ skeudennoù.
@@ -2074,6 +2080,7 @@ Tooltips:
     Refresh Subscriptions While App Is Closed: "Hizivaat a ra al lanvioù gant an arventennoù dibabet. War an urzhiataer e chom OpenTubeX e takad ar c'hemennoù betek kuitaat. Android a ziviz pegoulz e vez hizivaet en drekleur."
     Notify About New Uploads: Diskouez a ra rebuadoù reizhiad war an trevnad-mañ evit ar chadennoù ho peus gweredekaet o rebuadoù en o arventennoù koumanant. OpenTubeX a wir ha bez ez eus endalc'had nevez pa vez freskaet ar c'houmanantoù, setu dibabit un etrevez adkargañ emgefreek. Evit bezañ kelaouet pa vez serret an arload, gweredekait ivez ar freskañ pa vez serret an arload.
   Theme Settings:
+    Visible Search Suggestions: "Termeniñ a ra pet enmont eus ar roll-istor klask ha pet kinnig a ziskouez ar varrenn glask a-raok ma ranker dibunañ he roll. Ne ya morse ar roll en tu all da draoñ ar prenestr."
     Thumbnail Size: "Cheñch a ra ment ar skeudennigoù videoioù er gaelioù hag el listennoù. Ar gaelioù gant un niver a vannoù start pe gant ar gwel Led klok a leugn pep renk e-lec'h, neuze ne cheñch nemet skeudennigoù al listennoù hag ar Shorts eno. War ar prenestroù ment ur pellgomzer eo bevennet skeudennigoù ar gael da 100%."
     Playlist Thumbnail Size: "Cheñch a ra ment ar skeudennigoù videoioù war pajennoù ar rolloù-lenn. Ar gaelioù gant un niver a vannoù start pe gant ar gwel Led klok a leugn pep renk e-lec'h, neuze ne cheñch nemet skeudennigoù al listennoù hag ar Shorts eno. War ar prenestroù ment ur pellgomzer eo bevennet skeudennigoù ar gael da 100%."
     Compact Settings Categories: "Kuzhat a ra an deskrivadurioù ha bihanaat a ra uhelder rummadoù an arventennoù."
@@ -2402,6 +2409,8 @@ Subscription Groups:
   Empty Group: N'eus chadenn ebet eus ar profil red er strollad-mañ.
   Save Failed: N'eus ket bet gallet enrollañ ar strollad.
   Delete Failed: N'eus ket bet gallet dilemel ar strollad.
+  Group Icon: Arlun ar strollad
+  No Icon: Arlun ebet
 Yattee Server:
   API Error (Click to copy): Fazi gant ar servijer Yattee (Klikit evit eilañ)
   Unsupported page: "N'eo ket hegerz ar bajenn-mañ gant ar servijer Yattee. Gweredekait «\_{fallbackSetting}\_» evit he c'hargañ gant an API lec'hel."

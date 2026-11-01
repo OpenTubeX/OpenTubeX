@@ -104,7 +104,7 @@
   line-height: 1;
 }
 
-.copyTimestamp {
+.chapterAction {
   display: grid;
   flex: 0 0 48px;
   place-items: center;
@@ -116,9 +116,14 @@
   opacity: 0.9;
 }
 
-.copyTimestamp:hover,
-.copyTimestamp:focus-visible {
+.chapterAction:hover,
+.chapterAction:focus-visible {
   background-color: rgb(255 255 255 / 8%);
+  opacity: 1;
+}
+
+.loopChapter.active {
+  color: #55b6ff;
   opacity: 1;
 }
 

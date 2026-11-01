@@ -456,6 +456,7 @@ Settings:
       Disk: disko
   Return to Settings Menu: Grįžti į nustatymų meniu
   General Settings:
+    Close Window With Last Tab: 'Uždaryti langą uždarius paskutinį skirtuką'
     Preferred Video Codec: Pageidaujamas vaizdo kodekas
     Always Use Backup Media Server: "Visada naudoti atsarginį medijos serverį"
     Automatically switch stream extraction methods: "Automatiškai keisti srauto išgavimo metodus"
@@ -589,6 +590,7 @@ Settings:
     Invalid Engine: Įveskite pavadinimą ir tinkamą HTTP arba HTTPS paieškos URL su %s.
     Engine Limit: Galite pridėti iki {count} pasirinktinių paieškos sistemų.
   Theme Settings:
+    Visible Search Suggestions: "Matomi paieškos pasiūlymai"
     Material Accent Color: "Material akcento spalva"
     Material Wallpaper Colors: "Ekrano fono spalvos"
     Tab Loading Indicator:
@@ -2351,6 +2353,9 @@ Chapters:
   Open Chapters: Atverti skyrius
   Close Chapters: Uždaryti skyrius
   Copy Timestamp Link: Kopijuoti nuorodą ties {timestamp}
+  Loop Chapter: 'Kartoti skyrių: {chapter}'
+  Looping Chapter: 'Kartojamas skyrius: {chapter}'
+  Chapter Loop Stopped: 'Skyriaus kartojimas sustabdytas'
 Comments:
   Image unavailable: "Vaizdas nepasiekiamas"
   Comment Count: 1 komentaras | {count} komentarai | {count} komentarų
@@ -2398,6 +2403,7 @@ Description:
   Music: Muzika
 Tooltips:
   General Settings:
+    Close Window With Last Tab: 'Išjungus, uždarius paskutinį skirtuką vietoj to atidaromas naujas skirtukas, todėl langas lieka atidarytas, kol jį uždarysite.'
     Preferred Video Codec: |
       Automatinis režimas teikia pirmenybę kodekams, kuriuos jūsų įrenginys gali dekoduoti aparatiškai.
       AV1: geriausia kokybė su mažiausiu duomenų kiekiu, bet ne kiekvienas vaizdo įrašas jį turi. Be aparatinio dekodavimo gali eikvoti bateriją arba praleisti kadrus.
@@ -2494,6 +2500,7 @@ Tooltips:
     Refresh Subscriptions While App Is Closed: "Atnaujina srautus pagal pasirinktus nustatymus. Kompiuteryje OpenTubeX lieka sistemos dėkle, kol išeinate. Android nustato foninių atnaujinimų laiką."
     Notify About New Uploads: Šiame įrenginyje rodo sistemos pranešimus apie kanalus, kurių pranešimus įjungėte jų prenumeratos nustatymuose. OpenTubeX naujo turinio ieško atnaujindama prenumeratas, todėl pasirinkite automatinio atnaujinimo intervalą. Kad gautumėte pranešimus, kai programa uždaryta, taip pat įjunkite atnaujinimą, kai programa uždaryta.
   Theme Settings:
+    Visible Search Suggestions: "Nustato, kiek paieškos istorijos įrašų ir pasiūlymų paieškos juosta rodo, kol jos sąrašą reikia slinkti. Sąrašas niekada nesiekia toliau už lango apačią."
     Thumbnail Size: "Keičia vaizdo įrašų miniatiūrų dydį tinkleliuose ir sąrašuose. Tinkleliai su fiksuotu stulpelių skaičiumi arba Viso pločio rodiniu vietoj to užpildo kiekvieną eilutę, todėl ten keičiamos tik sąrašų miniatiūros ir Shorts. Telefono dydžio languose tinklelio miniatiūros ribojamos iki 100 %."
     Playlist Thumbnail Size: "Keičia vaizdo įrašų miniatiūrų dydį grojaraščių puslapiuose. Tinkleliai su fiksuotu stulpelių skaičiumi arba Viso pločio rodiniu vietoj to užpildo kiekvieną eilutę, todėl ten keičiamos tik sąrašų miniatiūros ir Shorts. Telefono dydžio languose tinklelio miniatiūros ribojamos iki 100 %."
     Compact Settings Categories: "Paslepia aprašymus ir sumažina nustatymų kategorijų aukštį."
@@ -2895,6 +2902,8 @@ Subscription Groups:
   Empty Group: Šioje grupėje nėra dabartinio profilio kanalų.
   Save Failed: Nepavyko išsaugoti grupės.
   Delete Failed: Nepavyko ištrinti grupės.
+  Group Icon: Grupės piktograma
+  No Icon: Be piktogramos
 Yattee Server:
   API Error (Click to copy): Yattee serverio klaida (spustelėkite, jei norite kopijuoti)
   Unsupported page: Šis puslapis nepasiekiamas naudojant Yattee serverį. Įjunkite „{fallbackSetting}“, kad jį įkeltumėte naudodami vietinį API.

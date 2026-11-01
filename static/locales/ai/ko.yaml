@@ -435,6 +435,7 @@ Settings:
       Disk: 디스크
   Return to Settings Menu: 설정 메뉴로 돌아가기
   General Settings:
+    Close Window With Last Tab: '마지막 탭을 닫으면 창 닫기'
     Preferred Video Codec: 선호하는 동영상 코덱
     Always Use Backup Media Server: "항상 백업 미디어 서버 사용"
     Automatically switch stream extraction methods: "스트림 추출 방식 자동 전환"
@@ -568,6 +569,7 @@ Settings:
     Invalid Engine: 이름과 %s을(를) 포함하는 올바른 HTTP 또는 HTTPS 검색 URL을 입력하세요.
     Engine Limit: 사용자 지정 검색 엔진은 최대 {count}개까지 추가할 수 있습니다.
   Theme Settings:
+    Visible Search Suggestions: "표시할 검색 추천 수"
     Material Accent Color: "Material 강조 색상"
     Material Wallpaper Colors: "배경화면 색상"
     Tab Loading Indicator:
@@ -2317,6 +2319,9 @@ Chapters:
   Open Chapters: 챕터 열기
   Close Chapters: 챕터 닫기
   Copy Timestamp Link: '{timestamp} 위치의 링크 복사'
+  Loop Chapter: '챕터 반복: {chapter}'
+  Looping Chapter: '챕터 반복 중: {chapter}'
+  Chapter Loop Stopped: '챕터 반복을 중지했습니다'
 Comments:
   Image unavailable: "이미지를 사용할 수 없습니다"
   Comment Count: '댓글 {count}개'
@@ -2362,6 +2367,7 @@ Description:
   Music: 음악
 Tooltips:
   General Settings:
+    Close Window With Last Tab: '끄면 마지막 탭을 닫을 때 대신 새 탭이 열리므로 창을 직접 닫을 때까지 창이 열려 있습니다.'
     Preferred Video Codec: |
       자동 모드는 기기에서 하드웨어로 디코딩할 수 있는 코덱을 우선합니다.
       AV1: 가장 적은 데이터로 최고의 화질을 제공하지만 모든 동영상에 있지는 않습니다. 하드웨어 디코딩이 없으면 배터리를 많이 소모하거나 프레임이 끊길 수 있습니다.
@@ -2456,6 +2462,7 @@ Tooltips:
     Refresh Subscriptions While App Is Closed: "선택한 설정으로 피드를 새로고침합니다. 데스크톱에서는 종료할 때까지 OpenTubeX가 시스템 트레이에 남습니다. Android는 백그라운드 새로고침 시간을 결정합니다."
     Notify About New Uploads: 구독 설정에서 알림을 켠 채널에 대해 이 기기에 시스템 알림을 표시합니다. OpenTubeX는 구독을 새로 고칠 때 새 콘텐츠를 확인하므로 자동 새로 고침 간격을 선택하세요. 앱이 닫혀 있을 때도 알림을 받으려면 앱이 닫혀 있을 때 새로 고침도 사용하도록 설정하세요.
   Theme Settings:
+    Visible Search Suggestions: "검색창 목록이 스크롤되기 전에 표시할 검색 기록 항목과 추천 검색어의 수를 설정합니다. 목록은 창 아래쪽 가장자리를 넘어가지 않습니다."
     Thumbnail Size: "그리드와 목록에서 동영상 썸네일 크기를 조정합니다. 열 수가 고정된 그리드나 전체 너비 보기 유형은 대신 각 행을 채우므로, 여기서는 목록 썸네일과 Shorts만 변경됩니다. 휴대전화 크기의 창에서는 그리드 썸네일이 100%로 제한됩니다."
     Playlist Thumbnail Size: "재생목록 페이지에서 동영상 썸네일 크기를 조정합니다. 열 수가 고정된 그리드나 전체 너비 보기 유형은 대신 각 행을 채우므로, 여기서는 목록 썸네일과 Shorts만 변경됩니다. 휴대전화 크기의 창에서는 그리드 썸네일이 100%로 제한됩니다."
     Compact Settings Categories: "설명을 숨기고 설정 카테고리의 높이를 줄입니다."
@@ -2849,6 +2856,8 @@ Subscription Groups:
   Empty Group: 이 그룹에는 현재 프로필의 채널이 없습니다.
   Save Failed: 그룹을 저장하지 못했습니다.
   Delete Failed: 그룹을 삭제하지 못했습니다.
+  Group Icon: 그룹 아이콘
+  No Icon: 아이콘 없음
 Yattee Server:
   API Error (Click to copy): Yattee 서버 오류(복사하려면 클릭)
   Unsupported page: 이 페이지는 Yattee 서버에서 사용할 수 없습니다. 로컬 API로 불러오려면 “{fallbackSetting}”을(를) 켜세요.

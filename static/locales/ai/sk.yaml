@@ -340,6 +340,7 @@ Settings:
       Network: sieť
       Disk: disk
   General Settings:
+    Close Window With Last Tab: 'Zavrieť okno pri zatvorení poslednej karty'
     Preferred Video Codec: Preferovaný videokodek
     Always Use Backup Media Server: "Vždy používať záložný mediálny server"
     Automatically switch stream extraction methods: "Automaticky prepínať metódy extrakcie streamov"
@@ -465,6 +466,7 @@ Settings:
     Invalid Engine: Zadajte názov a platnú adresu URL vyhľadávania cez HTTP alebo HTTPS, ktorá obsahuje %s.
     Engine Limit: Môžete pridať najviac {count} vlastných vyhľadávačov.
   Theme Settings:
+    Visible Search Suggestions: "Viditeľné návrhy vyhľadávania"
     Material Accent Color: "Farba zvýraznenia Material"
     Material Wallpaper Colors: "Farby tapety"
     Tab Loading Indicator:
@@ -1940,6 +1942,9 @@ Chapters:
   Open Chapters: Otvoriť kapitoly
   Close Chapters: Zavrieť kapitoly
   Copy Timestamp Link: Kopírovať odkaz na čas {timestamp}
+  Loop Chapter: 'Opakovať kapitolu: {chapter}'
+  Looping Chapter: 'Opakuje sa kapitola: {chapter}'
+  Chapter Loop Stopped: 'Opakovanie kapitoly zastavené'
 Comments:
   Image unavailable: "Obrázok nie je dostupný"
   Comment Count: 1 komentár | {count} komentáre | {count} komentárov
@@ -1977,6 +1982,7 @@ Description:
   Music: Hudba
 Tooltips:
   General Settings:
+    Close Window With Last Tab: 'Keď je vypnuté, zatvorenie poslednej karty namiesto toho otvorí novú kartu, takže okno zostane otvorené, kým ho nezatvoríte.'
     Preferred Video Codec: |
       Automatický režim uprednostňuje kodeky, ktoré vaše zariadenie dokáže dekódovať hardvérovo.
       AV1: najlepšia kvalita pri najmenšej spotrebe dát, ale nemá ho každé video. Bez hardvérového dekódovania môže vybíjať batériu alebo vynechávať snímky.
@@ -2065,6 +2071,7 @@ Tooltips:
     Refresh Subscriptions While App Is Closed: "Obnovuje kanály podľa zvolených nastavení. Na počítači zostáva OpenTubeX v oblasti oznámení až do ukončenia. Android určuje čas obnovovania na pozadí."
     Notify About New Uploads: Zobrazuje na tomto zariadení systémové oznámenia pre kanály, pri ktorých ste v nastaveniach odberu zapli oznámenia. OpenTubeX kontroluje nový obsah pri obnovení odberov, preto zvoľte interval automatického obnovenia. Ak chcete dostávať oznámenia aj pri zatvorenej aplikácii, zapnite aj obnovovanie pri zatvorenej aplikácii.
   Theme Settings:
+    Visible Search Suggestions: "Určuje, koľko položiek histórie vyhľadávania a návrhov zobrazí vyhľadávacie pole, kým sa jeho zoznam začne posúvať. Zoznam nikdy nepresiahne spodný okraj okna."
     Thumbnail Size: "Mení veľkosť miniatúr videí v mriežkach a zoznamoch. Mriežky s pevným počtom stĺpcov alebo zobrazenie Plná šírka namiesto toho vyplnia každý riadok, takže tam mení len miniatúry v zoznamoch a Shorts. V oknách veľkosti telefónu sú miniatúry v mriežke obmedzené na 100 %."
     Playlist Thumbnail Size: "Mení veľkosť miniatúr videí na stránkach playlistov. Mriežky s pevným počtom stĺpcov alebo zobrazenie Plná šírka namiesto toho vyplnia každý riadok, takže tam mení len miniatúry v zoznamoch a Shorts. V oknách veľkosti telefónu sú miniatúry v mriežke obmedzené na 100 %."
     Compact Settings Categories: "Skryje popisy a zmenší výšku kategórií nastavení."
@@ -2393,6 +2400,8 @@ Subscription Groups:
   Empty Group: Táto skupina neobsahuje žiadne kanály z aktuálneho profilu.
   Save Failed: Skupinu sa nepodarilo uložiť.
   Delete Failed: Skupinu sa nepodarilo vymazať.
+  Group Icon: Ikona skupiny
+  No Icon: Bez ikony
 Yattee Server:
   API Error (Click to copy): Chyba servera Yattee (kliknite pre kopírovanie)
   Unsupported page: Táto stránka nie je so serverom Yattee dostupná. Zapnite možnosť „{fallbackSetting}“, aby sa načítala pomocou lokálneho API.

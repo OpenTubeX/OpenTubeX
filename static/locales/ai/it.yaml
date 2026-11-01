@@ -340,6 +340,7 @@ Settings:
       Network: rete
       Disk: disco
   General Settings:
+    Close Window With Last Tab: 'Chiudi la finestra alla chiusura dell’ultima scheda'
     Preferred Video Codec: Codec video preferito
     Always Use Backup Media Server: "Usa sempre il server multimediale di riserva"
     Automatically switch stream extraction methods: "Cambia automaticamente i metodi di estrazione dei flussi"
@@ -465,6 +466,7 @@ Settings:
     Invalid Engine: Inserisci un nome e un URL di ricerca HTTP o HTTPS valido contenente %s.
     Engine Limit: Puoi aggiungere fino a {count} motori di ricerca personalizzati.
   Theme Settings:
+    Visible Search Suggestions: "Suggerimenti di ricerca visibili"
     Material Accent Color: "Colore di accento Material"
     Material Wallpaper Colors: "Colori dello sfondo"
     Tab Loading Indicator:
@@ -1940,6 +1942,9 @@ Chapters:
   Open Chapters: Apri capitoli
   Close Chapters: Chiudi capitoli
   Copy Timestamp Link: Copia link al punto {timestamp}
+  Loop Chapter: 'Ripeti capitolo: {chapter}'
+  Looping Chapter: 'Ripetizione del capitolo: {chapter}'
+  Chapter Loop Stopped: 'Ripetizione del capitolo interrotta'
 Comments:
   Image unavailable: "Immagine non disponibile"
   Comment Count: 1 commento | {count} commenti | {count} commenti
@@ -1977,6 +1982,7 @@ Description:
   Music: Musica
 Tooltips:
   General Settings:
+    Close Window With Last Tab: 'Se disattivato, chiudere l’ultima scheda ne apre una nuova e la finestra resta aperta finché non la chiudi.'
     Preferred Video Codec: |
       La modalità automatica preferisce i codec che il dispositivo può decodificare via hardware.
       AV1: la qualità migliore con il minor consumo di dati, ma non tutti i video lo offrono. Senza decodifica hardware può scaricare la batteria o perdere fotogrammi.
@@ -2065,6 +2071,7 @@ Tooltips:
     Refresh Subscriptions While App Is Closed: "Aggiorna i feed con le impostazioni scelte. Sul desktop, OpenTubeX rimane nell’area di notifica fino all’uscita. Android decide quando eseguire gli aggiornamenti in background."
     Notify About New Uploads: Mostra notifiche di sistema su questo dispositivo per i canali di cui hai attivato le notifiche nelle relative impostazioni di iscrizione. OpenTubeX cerca nuovi contenuti quando aggiorna le iscrizioni, quindi scegli un intervallo di aggiornamento automatico. Per ricevere notifiche anche quando l'app è chiusa, attiva anche l'aggiornamento quando l'app è chiusa.
   Theme Settings:
+    Visible Search Suggestions: "Imposta quante voci della cronologia di ricerca e quanti suggerimenti mostra la barra di ricerca prima che il suo elenco scorra. L’elenco non si estende mai oltre il bordo inferiore della finestra."
     Thumbnail Size: "Ridimensiona le miniature dei video in griglie ed elenchi. Le griglie con un numero fisso di colonne o il tipo di vista Larghezza piena riempiono invece ogni riga, quindi lì cambia solo le miniature degli elenchi e gli Shorts. Nelle finestre delle dimensioni di un telefono, le miniature della griglia sono limitate al 100%."
     Playlist Thumbnail Size: "Ridimensiona le miniature dei video nelle pagine delle playlist. Le griglie con un numero fisso di colonne o il tipo di vista Larghezza piena riempiono invece ogni riga, quindi lì cambia solo le miniature degli elenchi e gli Shorts. Nelle finestre delle dimensioni di un telefono, le miniature della griglia sono limitate al 100%."
     Compact Settings Categories: "Nasconde le descrizioni e riduce l’altezza delle categorie delle impostazioni."
@@ -2393,6 +2400,8 @@ Subscription Groups:
   Empty Group: Questo gruppo non contiene canali del profilo attuale.
   Save Failed: Impossibile salvare il gruppo.
   Delete Failed: Impossibile eliminare il gruppo.
+  Group Icon: Icona del gruppo
+  No Icon: Nessuna icona
 Yattee Server:
   API Error (Click to copy): Errore del server Yattee (fai clic per copiare)
   Unsupported page: Questa pagina non è disponibile con il server Yattee. Attiva «{fallbackSetting}» per caricarla con le API locali.

@@ -369,7 +369,7 @@ export function setupContextMenu(contextMenuOptions, { createWindow, confirmClos
       if (existingTabIds.length === 0) return
 
       const isLastWindow = BrowserWindow.getAllWindows().length === 1
-      const closesWindow = existingTabIds.length === manager.tabs.size
+      const closesWindow = await manager.closingTabsClosesWindow(existingTabIds.length)
       if (closesWindow && isLastWindow) {
         // The quit confirmation already covers this case
         if (!await confirmCloseApp(manager.browserWindow)) return

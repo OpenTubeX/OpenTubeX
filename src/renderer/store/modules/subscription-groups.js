@@ -62,14 +62,14 @@ const actions = {
   },
 
   /**
-   * @param {{ name: string, channelIds: string[] }} group
+   * @param {Omit<import('../../helpers/subscription-groups').SubscriptionGroup, 'id'>} group
    * @returns {Promise<string | null>} the new group's ID
    */
-  async createSubscriptionGroup({ dispatch, getters }, { name, channelIds }) {
+  async createSubscriptionGroup({ dispatch, getters }, group) {
     const id = crypto.randomUUID()
     const saved = await dispatch('updateSubscriptionGroups', [
       ...getters.getSubscriptionGroupList,
-      { id, name, channelIds },
+      { id, ...group },
     ])
     return saved ? id : null
   },

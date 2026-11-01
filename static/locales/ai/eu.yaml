@@ -340,6 +340,7 @@ Settings:
       Network: sarea
       Disk: diskoa
   General Settings:
+    Close Window With Last Tab: 'Itxi leihoa azken fitxa ixtean'
     Preferred Video Codec: Hobetsitako bideo-kodeka
     Always Use Backup Media Server: "Erabili beti babeskopia-multimedia zerbitzaria"
     Automatically switch stream extraction methods: "Aldatu automatikoki korronteak erauzteko metodoak"
@@ -465,6 +466,7 @@ Settings:
     Invalid Engine: Idatzi izen bat eta %s duen baliozko HTTP edo HTTPS bilaketa-URL bat.
     Engine Limit: Gehienez {count} bilaketa-motor pertsonalizatu gehi ditzakezu.
   Theme Settings:
+    Visible Search Suggestions: "Bilaketa-iradokizun ikusgaiak"
     Material Accent Color: "Material azentu-kolorea"
     Material Wallpaper Colors: "Horma-paperaren koloreak"
     Tab Loading Indicator:
@@ -1950,6 +1952,9 @@ Chapters:
   Open Chapters: Ireki kapituluak
   Close Chapters: Itxi kapituluak
   Copy Timestamp Link: Kopiatu {timestamp} uneko esteka
+  Loop Chapter: 'Errepikatu kapitulua: {chapter}'
+  Looping Chapter: 'Kapitulua errepikatzen: {chapter}'
+  Chapter Loop Stopped: 'Kapituluaren errepikapena gelditu da'
 Comments:
   Image unavailable: "Irudia ez dago erabilgarri"
   Comment Count: Iruzkin 1 | {count} iruzkin
@@ -1987,6 +1992,7 @@ Description:
   Music: Musika
 Tooltips:
   General Settings:
+    Close Window With Last Tab: 'Desaktibatuta dagoenean, azken fitxa itxiz gero fitxa berri bat irekitzen da, eta leihoak irekita jarraitzen du zuk itxi arte.'
     Preferred Video Codec: |
       Modu automatikoak zure gailuak hardware bidez deskodetu ditzakeen kodekak hobesten ditu.
       AV1: kalitaterik onena datu gutxienarekin, baina bideo guztiek ez dute. Hardware bidezko deskodetzerik gabe, bateria agortu edo fotogramak gal ditzake.
@@ -2075,6 +2081,7 @@ Tooltips:
     Refresh Subscriptions While App Is Closed: "Jarioak hautatutako ezarpenekin eguneratzen ditu. Ordenagailuan, OpenTubeX sistemaren erretiluan geratzen da irten arte. Android-ek atzeko planoko eguneratzeen unea kontrolatzen du."
     Notify About New Uploads: Gailu honetan sistemaren jakinarazpenak erakusten ditu harpidetza-ezarpenetan jakinarazpenak aktibatu dituzun kanaletarako. OpenTubeX-ek eduki berria bilatzen du harpidetzak freskatzean; beraz, aukeratu freskatze automatikoaren tarte bat. Aplikazioa itxita dagoenean jakinarazpenak jasotzeko, gaitu ere freskatzea aplikazioa itxita dagoenean.
   Theme Settings:
+    Visible Search Suggestions: "Bilaketa-barrak bere zerrenda korritu aurretik zenbat bilaketa-historiako sarrera eta iradokizun erakusten dituen zehazten du. Zerrenda ez da inoiz leihoaren behealdetik haratago hedatzen."
     Thumbnail Size: "Bideoen miniaturen tamaina aldatzen du sareta eta zerrendetan. Zutabe kopuru finkoa edo Zabalera osoa ikuspegia duten saretek errenkada bakoitza betetzen dute horren ordez, beraz han zerrendetako miniaturak eta Shorts-ak soilik aldatzen ditu. Telefono-tamainako leihoetan saretako miniaturak % 100era mugatzen dira."
     Playlist Thumbnail Size: "Bideoen miniaturen tamaina aldatzen du erreprodukzio-zerrenden orrietan. Zutabe kopuru finkoa edo Zabalera osoa ikuspegia duten saretek errenkada bakoitza betetzen dute horren ordez, beraz han zerrendetako miniaturak eta Shorts-ak soilik aldatzen ditu. Telefono-tamainako leihoetan saretako miniaturak % 100era mugatzen dira."
     Compact Settings Categories: "Deskribapenak ezkutatu eta ezarpen-kategorien altuera murrizten du."
@@ -2403,6 +2410,8 @@ Subscription Groups:
   Empty Group: Talde honek ez du uneko profileko kanalik.
   Save Failed: Ezin izan da taldea gorde.
   Delete Failed: Ezin izan da taldea ezabatu.
+  Group Icon: Taldearen ikonoa
+  No Icon: Ikonorik gabe
 Yattee Server:
   API Error (Click to copy): Yattee zerbitzariak huts egin du (klikatu kopiatzeko)
   Unsupported page: Orri hau ez dago erabilgarri Yattee zerbitzariarekin. Gaitu «{fallbackSetting}» tokiko APIarekin kargatzeko.

@@ -474,6 +474,7 @@ Settings:
       Disk: disc
   Return to Settings Menu: Torna al menú de configuració
   General Settings:
+    Close Window With Last Tab: 'Tanca la finestra en tancar l’última pestanya'
     Preferred Video Codec: Còdec de vídeo preferit
     Always Use Backup Media Server: "Utilitza sempre el servidor multimèdia de reserva"
     Automatically switch stream extraction methods: "Canvia automàticament els mètodes d’extracció de fluxos"
@@ -607,6 +608,7 @@ Settings:
     Invalid Engine: Introduïu un nom i un URL de cerca HTTP o HTTPS vàlid que contingui %s.
     Engine Limit: Podeu afegir fins a {count} motors de cerca personalitzats.
   Theme Settings:
+    Visible Search Suggestions: "Suggeriments de cerca visibles"
     Material Accent Color: "Color d’accent de Material"
     Material Wallpaper Colors: "Colors del fons de pantalla"
     Tab Loading Indicator:
@@ -2456,6 +2458,9 @@ Chapters:
   Open Chapters: Obre els capítols
   Close Chapters: Tanca els capítols
   Copy Timestamp Link: Copia l'enllaç a {timestamp}
+  Loop Chapter: 'Repeteix el capítol: {chapter}'
+  Looping Chapter: 'S''està repetint el capítol: {chapter}'
+  Chapter Loop Stopped: 'S''ha aturat la repetició del capítol'
 Mini Player: Minireproductor
 Comments:
   Image unavailable: "Imatge no disponible"
@@ -2516,6 +2521,7 @@ Description:
   Music: Música
 Tooltips:
   General Settings:
+    Close Window With Last Tab: 'Si està desactivat, en tancar l’última pestanya se n’obre una de nova i la finestra continua oberta fins que la tanquis.'
     Preferred Video Codec: |
       El mode automàtic prefereix els còdecs que el dispositiu pot descodificar per maquinari.
       AV1: la millor qualitat amb el mínim de dades, però no tots els vídeos el tenen. Sense descodificació per maquinari, pot esgotar la bateria o perdre fotogrames.
@@ -2629,6 +2635,7 @@ Tooltips:
     Refresh Subscriptions While App Is Closed: "Actualitza els canals amb la configuració seleccionada. A l’escriptori, OpenTubeX es manté a la safata del sistema fins que en sortiu. Android controla quan s’executen les actualitzacions en segon pla."
     Notify About New Uploads: Mostra notificacions del sistema en aquest dispositiu per als canals dels quals heu activat les notificacions a la seva configuració de subscripció. OpenTubeX cerca contingut nou quan s'actualitzen les subscripcions, així que trieu un interval d'actualització automàtica. Per rebre notificacions amb l'aplicació tancada, activeu també l'actualització amb l'aplicació tancada.
   Theme Settings:
+    Visible Search Suggestions: "Defineix quantes entrades de l’historial de cerca i suggeriments mostra la barra de cerca abans que la seva llista es desplaci. La llista mai no s’estén més enllà de la part inferior de la finestra."
     Thumbnail Size: "Canvia la mida de les miniatures dels vídeos a les quadrícules i llistes. Les quadrícules amb un nombre fix de columnes o el tipus de vista Amplada completa omplen cada fila, de manera que allà només canvia les miniatures de les llistes i els Shorts. A les finestres de mida de telèfon, les miniatures de la quadrícula es limiten al 100%."
     Playlist Thumbnail Size: "Canvia la mida de les miniatures dels vídeos a les pàgines de llistes de reproducció. Les quadrícules amb un nombre fix de columnes o el tipus de vista Amplada completa omplen cada fila, de manera que allà només canvia les miniatures de les llistes i els Shorts. A les finestres de mida de telèfon, les miniatures de la quadrícula es limiten al 100%."
     Compact Settings Categories: "Amaga les descripcions i redueix l’alçada de les categories de configuració."
@@ -3041,6 +3048,8 @@ Subscription Groups:
   Empty Group: Aquest grup no té cap canal del perfil actual.
   Save Failed: No s'ha pogut desar el grup.
   Delete Failed: No s'ha pogut suprimir el grup.
+  Group Icon: Icona del grup
+  No Icon: Sense icona
 Yattee Server:
   API Error (Click to copy): S'ha produït un error en el servidor Yattee (feu clic per copiar-lo)
   Unsupported page: Aquesta pàgina no està disponible amb el servidor Yattee. Activeu «{fallbackSetting}» per carregar-la amb l'API local.

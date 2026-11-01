@@ -343,6 +343,7 @@ Settings:
       Network: nätverk
       Disk: diskutrymme
   General Settings:
+    Close Window With Last Tab: 'Stäng fönstret när den sista fliken stängs'
     Preferred Video Codec: Föredragen videokodek
     Always Use Backup Media Server: "Använd alltid reservmedieservern"
     Automatically switch stream extraction methods: "Byt automatiskt mellan metoder för strömutvinning"
@@ -468,6 +469,7 @@ Settings:
     Invalid Engine: Ange ett namn och en giltig HTTP- eller HTTPS-söknings-URL som innehåller %s.
     Engine Limit: Du kan lägga till högst {count} egna sökmotorer.
   Theme Settings:
+    Visible Search Suggestions: "Synliga sökförslag"
     Material Accent Color: "Material-accentfärg"
     Material Wallpaper Colors: "Bakgrundsbildens färger"
     Tab Loading Indicator:
@@ -1962,6 +1964,9 @@ Chapters:
   Open Chapters: Öppna kapitel
   Close Chapters: Stäng kapitel
   Copy Timestamp Link: Kopiera länk vid {timestamp}
+  Loop Chapter: 'Upprepa kapitel: {chapter}'
+  Looping Chapter: 'Upprepar kapitel: {chapter}'
+  Chapter Loop Stopped: 'Slutade upprepa kapitel'
 Comments:
   Image unavailable: "Bilden är inte tillgänglig"
   Comment Count: 1 kommentar | {count} kommentarer
@@ -2000,6 +2005,7 @@ Description:
   Music: Musik
 Tooltips:
   General Settings:
+    Close Window With Last Tab: 'När detta är av öppnar stängning av den sista fliken en ny flik i stället, så att fönstret förblir öppet tills du stänger det.'
     Preferred Video Codec: |
       Automatiskt föredrar kodekar som din enhet kan avkoda med hårdvara.
       AV1: bäst kvalitet för minst data, men alla videor har den inte. Utan hårdvaruavkodning kan den tömma batteriet eller tappa bildrutor.
@@ -2088,6 +2094,7 @@ Tooltips:
     Refresh Subscriptions While App Is Closed: "Uppdaterar flöden med dina valda inställningar. På datorn stannar OpenTubeX i systemfältet tills du avslutar. Android bestämmer när bakgrundsuppdateringar körs."
     Notify About New Uploads: Visar systemaviseringar på den här enheten för kanaler vars aviseringar du har aktiverat i deras prenumerationsinställningar. OpenTubeX söker efter nytt innehåll när prenumerationer uppdateras, så välj ett intervall för automatisk uppdatering. Om du vill få aviseringar medan appen är stängd aktiverar du även uppdatering medan appen är stängd.
   Theme Settings:
+    Visible Search Suggestions: "Anger hur många poster från sökhistoriken och förslag sökfältet visar innan listan behöver rullas. Listan sträcker sig aldrig förbi fönstrets nederkant."
     Thumbnail Size: "Skalar videominiatyrer i rutnät och listor. Rutnät med ett fast antal kolumner eller vytypen Full bredd fyller i stället varje rad, så där ändrar reglaget bara listminiatyrer och Shorts. I fönster i telefonstorlek är rutnätsminiatyrer begränsade till 100 %."
     Playlist Thumbnail Size: "Skalar videominiatyrer på spellistesidor. Rutnät med ett fast antal kolumner eller vytypen Full bredd fyller i stället varje rad, så där ändrar reglaget bara listminiatyrer och Shorts. I fönster i telefonstorlek är rutnätsminiatyrer begränsade till 100 %."
     Compact Settings Categories: "Döljer beskrivningar och minskar höjden på inställningskategorier."
@@ -2419,6 +2426,8 @@ Subscription Groups:
   Empty Group: Den här gruppen har inga kanaler från den aktuella profilen.
   Save Failed: Det gick inte att spara gruppen.
   Delete Failed: Det gick inte att ta bort gruppen.
+  Group Icon: Gruppikon
+  No Icon: Ingen ikon
 Yattee Server:
   API Error (Click to copy): Fel i Yattee-servern (klicka för att kopiera)
   Unsupported page: Den här sidan är inte tillgänglig via Yattee-servern. Aktivera ”{fallbackSetting}” för att läsa in den med det lokala API:et.

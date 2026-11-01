@@ -466,6 +466,8 @@ export default defineComponent({
       sponsorBlockContributionStatsLoaded: false,
       sponsorBlockContributionStatsLoading: false,
       videoChapterThumbnails: [],
+      /** @type {number | null} */
+      videoLoopedChapterIndex: null,
       fullscreenMetadataOpen: false,
       shortsMetadataOpen: false,
       shortsCommentsOpen: false,

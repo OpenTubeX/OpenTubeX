@@ -340,6 +340,7 @@ Settings:
       Network: hálózat
       Disk: lemez
   General Settings:
+    Close Window With Last Tab: 'Ablak bezárása az utolsó lap bezárásakor'
     Preferred Video Codec: Előnyben részesített videokodek
     Always Use Backup Media Server: "Mindig a tartalék médiaszerver használata"
     Automatically switch stream extraction methods: "Adatfolyam-kinyerési módszerek automatikus váltása"
@@ -465,6 +466,7 @@ Settings:
     Invalid Engine: Adjon meg egy nevet és egy érvényes, %s elemet tartalmazó HTTP vagy HTTPS keresési URL-t.
     Engine Limit: Legfeljebb {count} egyéni keresőmotort adhat hozzá.
   Theme Settings:
+    Visible Search Suggestions: "Látható keresési javaslatok"
     Material Accent Color: "Material kiemelőszín"
     Material Wallpaper Colors: "Háttérkép színei"
     Tab Loading Indicator:
@@ -1940,6 +1942,9 @@ Chapters:
   Open Chapters: Fejezetek megnyitása
   Close Chapters: Fejezetek bezárása
   Copy Timestamp Link: Hivatkozás másolása a(z) {timestamp} időponttól
+  Loop Chapter: 'Fejezet ismétlése: {chapter}'
+  Looping Chapter: 'A fejezet ismétlődik: {chapter}'
+  Chapter Loop Stopped: 'A fejezet ismétlése leállítva'
 Comments:
   Image unavailable: "A kép nem érhető el"
   Comment Count: 1 hozzászólás | {count} hozzászólás
@@ -1978,6 +1983,7 @@ Description:
   Music: Zene
 Tooltips:
   General Settings:
+    Close Window With Last Tab: 'Kikapcsolva az utolsó lap bezárása helyette új lapot nyit, így az ablak nyitva marad, amíg be nem zárod.'
     Preferred Video Codec: |
       Az automatikus mód azokat a kodekeket részesíti előnyben, amelyeket az eszköz hardveresen tud dekódolni.
       AV1: a legjobb minőség a legkevesebb adatforgalommal, de nem minden videóhoz érhető el. Hardveres dekódolás nélkül merítheti az akkumulátort vagy képkockákat hagyhat ki.
@@ -2066,6 +2072,7 @@ Tooltips:
     Refresh Subscriptions While App Is Closed: "A kiválasztott beállításokkal frissíti a hírcsatornákat. Számítógépen az OpenTubeX kilépésig a rendszertálcán marad. Androidon a rendszer határozza meg a háttérfrissítések idejét."
     Notify About New Uploads: Rendszerértesítéseket jelenít meg ezen az eszközön azokról a csatornákról, amelyeknek a feliratkozási beállításaiban bekapcsolta az értesítéseket. Az OpenTubeX a feliratkozások frissítésekor keres új tartalmat, ezért válasszon automatikus frissítési időközt. Ha bezárt alkalmazásnál is értesítést szeretne kapni, kapcsolja be a bezárt alkalmazásnál történő frissítést is.
   Theme Settings:
+    Visible Search Suggestions: "Megadja, hány keresési előzményt és javaslatot jelenít meg a keresősáv, mielőtt a listáját görgetni kellene. A lista soha nem nyúlik túl az ablak alsó szélén."
     Thumbnail Size: "Átméretezi a videók bélyegképeit a rácsokban és listákban. A rögzített oszlopszámú vagy Teljes szélesség nézetű rácsok ehelyett kitöltik az összes sort, így ott csak a listák bélyegképeit és a Shorts videókat módosítja. Telefonméretű ablakokban a rács bélyegképei legfeljebb 100%-osak lehetnek."
     Playlist Thumbnail Size: "Átméretezi a videók bélyegképeit a lejátszási listák oldalain. A rögzített oszlopszámú vagy Teljes szélesség nézetű rácsok ehelyett kitöltik az összes sort, így ott csak a listák bélyegképeit és a Shorts videókat módosítja. Telefonméretű ablakokban a rács bélyegképei legfeljebb 100%-osak lehetnek."
     Compact Settings Categories: "Elrejti a leírásokat és csökkenti a beállításkategóriák magasságát."
@@ -2394,6 +2401,8 @@ Subscription Groups:
   Empty Group: Ebben a csoportban nincsenek csatornák a jelenlegi profilból.
   Save Failed: Nem sikerült menteni a csoportot.
   Delete Failed: Nem sikerült törölni a csoportot.
+  Group Icon: Csoportikon
+  No Icon: Nincs ikon
 Yattee Server:
   API Error (Click to copy): Yattee-kiszolgáló hiba (Kattintson a másoláshoz)
   Unsupported page: Ez az oldal nem érhető el a Yattee-kiszolgálóval. Kapcsolja be a(z) „{fallbackSetting}” beállítást, hogy a helyi API-val töltődjön be.

@@ -341,6 +341,7 @@ Settings:
       Network: rhwydwaith
       Disk: disg
   General Settings:
+    Close Window With Last Tab: 'Cau’r ffenestr wrth gau’r tab olaf'
     Preferred Video Codec: Codec fideo dewisol
     Always Use Backup Media Server: "Defnyddio'r gweinydd cyfryngau wrth gefn bob amser"
     Automatically switch stream extraction methods: "Newid dulliau echdynnu ffrydiau yn awtomatig"
@@ -466,6 +467,7 @@ Settings:
     Invalid Engine: Rhowch enw ac URL chwilio HTTP neu HTTPS dilys sy'n cynnwys %s.
     Engine Limit: Gallwch ychwanegu hyd at {count} o beiriannau chwilio personol.
   Theme Settings:
+    Visible Search Suggestions: "Awgrymiadau chwilio gweladwy"
     Material Accent Color: "Lliw acen Material"
     Material Wallpaper Colors: "Lliwiau papur wal"
     Tab Loading Indicator:
@@ -1969,6 +1971,9 @@ Chapters:
   Open Chapters: Agor penodau
   Close Chapters: Cau penodau
   Copy Timestamp Link: Copïo'r ddolen ar {timestamp}
+  Loop Chapter: 'Ailadrodd y bennod: {chapter}'
+  Looping Chapter: 'Yn ailadrodd y bennod: {chapter}'
+  Chapter Loop Stopped: 'Wedi stopio ailadrodd y bennod'
 Comments:
   Image unavailable: "Delwedd ddim ar gael"
   Comment Count: '{count} o sylwadau | 1 sylw | {count} sylw | {count} sylw | {count} sylw | {count} o sylwadau'
@@ -2007,6 +2012,7 @@ Description:
   Music: Cerddoriaeth
 Tooltips:
   General Settings:
+    Close Window With Last Tab: 'Pan fydd i ffwrdd, mae cau’r tab olaf yn agor tab newydd yn lle hynny, felly mae’r ffenestr yn aros ar agor nes i chi ei chau.'
     Preferred Video Codec: |
       Mae'r modd awtomatig yn ffafrio codecs y gall eich dyfais eu datgodio â chaledwedd.
       AV1: yr ansawdd gorau am y lleiaf o ddata, ond nid oes gan bob fideo ef. Heb ddatgodio caledwedd, gall ddraenio'r batri neu ollwng fframiau.
@@ -2095,6 +2101,7 @@ Tooltips:
     Refresh Subscriptions While App Is Closed: "Yn adnewyddu ffrydiau gan ddefnyddio eich gosodiadau. Ar y bwrdd gwaith, mae OpenTubeX yn aros yn hambwrdd y system nes i chi adael. Android sy’n rheoli pryd mae adnewyddu cefndirol yn digwydd."
     Notify About New Uploads: Yn dangos hysbysiadau system ar y ddyfais hon ar gyfer sianeli rydych wedi troi eu hysbysiadau ymlaen yn eu gosodiadau tanysgrifio. Mae OpenTubeX yn gwirio am gynnwys newydd pan fydd tanysgrifiadau'n cael eu hadnewyddu, felly dewiswch gyfwng adnewyddu awtomatig. I gael hysbysiadau pan fydd yr ap ar gau, galluogwch adnewyddu pan fydd yr ap ar gau hefyd.
   Theme Settings:
+    Visible Search Suggestions: "Yn gosod faint o gofnodion hanes chwilio ac awgrymiadau y mae’r bar chwilio’n eu dangos cyn i’w restr sgrolio. Nid yw’r rhestr byth yn ymestyn heibio gwaelod y ffenestr."
     Thumbnail Size: "Yn newid maint mân-luniau fideos mewn gridiau a rhestrau. Mae gridiau gyda nifer sefydlog o golofnau neu'r math gwedd Lled Llawn yn llenwi pob rhes yn lle hynny, felly yno dim ond mân-luniau rhestrau a Shorts y mae'n eu newid. Mewn ffenestri maint ffôn, mae mân-luniau'r grid wedi'u cyfyngu i 100%."
     Playlist Thumbnail Size: "Yn newid maint mân-luniau fideos ar dudalennau rhestri chwarae. Mae gridiau gyda nifer sefydlog o golofnau neu'r math gwedd Lled Llawn yn llenwi pob rhes yn lle hynny, felly yno dim ond mân-luniau rhestrau a Shorts y mae'n eu newid. Mewn ffenestri maint ffôn, mae mân-luniau'r grid wedi'u cyfyngu i 100%."
     Compact Settings Categories: "Yn cuddio disgrifiadau ac yn lleihau uchder categorïau gosodiadau."
@@ -2424,6 +2431,8 @@ Subscription Groups:
   Empty Group: Does dim sianeli o'r proffil presennol yn y grŵp hwn.
   Save Failed: Methu cadw'r grŵp.
   Delete Failed: Methu dileu'r grŵp.
+  Group Icon: Eicon grŵp
+  No Icon: Dim eicon
 Yattee Server:
   API Error (Click to copy): Gwall Gweinydd Yattee (Cliciwch i'w gopïo)
   Unsupported page: Nid yw'r dudalen hon ar gael gyda'r gweinydd Yattee. Trowch “{fallbackSetting}” ymlaen i'w llwytho gyda'r API lleol.

@@ -80,6 +80,57 @@ test('shows every saved search in a scrollable list', async ({ page }) => {
   })
 })
 
+test('shows the configured number of search rows within the window', { tag: '@scale' }, async ({ app, page }) => {
+  await setWindowSize(app, page, { width: 1100, height: 1000 })
+  await page.locator(sel.searchInput).click()
+
+  const list = page.locator('.topNav .searchContainer .options .list')
+  await expect(list.locator('li')).toHaveCount(entries.length)
+  const visibleRows = () => list.evaluate(element => {
+    const style = getComputedStyle(element)
+    const rowsHeight = element.clientHeight - parseFloat(style.paddingTop) - parseFloat(style.paddingBottom)
+    return rowsHeight / element.querySelector('li').getBoundingClientRect().height
+  })
+  const scrollToEnd = async () => {
+    await list.evaluate(element => { element.scrollTop = element.scrollHeight })
+    await expect.poll(() => list.evaluate(element => element.scrollTop)).toBeGreaterThan(0)
+  }
+  // A taller list shrinks the scroll range. The last row must still end at
+  // the list's padding, and the scrollbar must match the new range.
+  const expectValidScrollEnd = () => expect.poll(() => list.evaluate(element => {
+    const isOverflowing = element.scrollHeight - element.clientHeight > 1
+    const last = element.querySelector('li:last-of-type').getBoundingClientRect()
+    const contentEnd = element.getBoundingClientRect().bottom - parseFloat(getComputedStyle(element).paddingBottom)
+    return {
+      // Fractional UI scales can leave a subpixel offset at the scroll end.
+      endsAtPadding: Math.abs(contentEnd - last.bottom) <= 1,
+      scrollTopInRange: element.scrollTop <= element.scrollHeight - element.clientHeight + 1,
+      scrollbarMatchesRange: isOverflowing === !element.querySelector(':scope > .os-scrollbar-vertical')
+        .classList.contains('os-scrollbar-unusable'),
+    }
+  })).toEqual({ endsAtPadding: true, scrollTopInRange: true, scrollbarMatchesRange: true })
+
+  await expect.poll(visibleRows).toBeCloseTo(10, 1)
+  await scrollToEnd()
+  await page.evaluate(() => window.$store.dispatch('updateVisibleSearchSuggestions', 20))
+  await expect.poll(visibleRows).toBeCloseTo(20, 1)
+  await expectValidScrollEnd()
+
+  // More rows than fit end the list above the bottom of the window.
+  await page.evaluate(() => window.$store.dispatch('updateVisibleSearchSuggestions', 50))
+  await setWindowSize(app, page, { width: 1000, height: 600 })
+  await expect.poll(() => list.evaluate(element => {
+    return window.innerHeight - element.getBoundingClientRect().bottom
+  })).toBeGreaterThan(0)
+  await expect.poll(() => list.evaluate(element => element.scrollHeight > element.clientHeight)).toBe(true)
+  await expect.poll(visibleRows).toBeGreaterThan(10)
+
+  // A taller window gives the list more room.
+  await scrollToEnd()
+  await setWindowSize(app, page, { width: 1100, height: 1000 })
+  await expectValidScrollEnd()
+})
+
 test('removing a saved search resets the scrolled list to its rendered start', async ({ page }) => {
   await page.locator(sel.searchInput).click()
 

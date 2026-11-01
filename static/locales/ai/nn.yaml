@@ -354,6 +354,7 @@ Settings:
       Disk: disk
   Return to Settings Menu: Tilbake til innstillingsmenyen
   General Settings:
+    Close Window With Last Tab: 'Lukk vindauget når den siste fana vert lukka'
     Preferred Video Codec: Føretrekt videokodek
     Always Use Backup Media Server: "Bruk alltid reservemedietenaren"
     Automatically switch stream extraction methods: "Byt automatisk mellom metodar for straumuttrekk"
@@ -487,6 +488,7 @@ Settings:
     Invalid Engine: Skriv inn eit namn og ei gyldig HTTP- eller HTTPS-søkjeadresse som inneheld %s.
     Engine Limit: Du kan leggje til opptil {count} eigne søkjemotorar.
   Theme Settings:
+    Visible Search Suggestions: "Synlege søkjeforslag"
     Material Accent Color: "Material-aksentfarge"
     Material Wallpaper Colors: "Fargar frå bakgrunnsbiletet"
     Tab Loading Indicator:
@@ -2241,6 +2243,9 @@ Chapters:
   Open Chapters: Opna kapittel
   Close Chapters: Lukk kapittel
   Copy Timestamp Link: Kopier lenkja ved {timestamp}
+  Loop Chapter: 'Gjenta kapittel: {chapter}'
+  Looping Chapter: 'Gjentek kapittel: {chapter}'
+  Chapter Loop Stopped: 'Slutta å gjenta kapittel'
 Comments:
   Image unavailable: "Biletet er ikkje tilgjengeleg"
   Comment Count: 1 kommentar | {count} kommentarar
@@ -2286,6 +2291,7 @@ Description:
   Music: Musikk
 Tooltips:
   General Settings:
+    Close Window With Last Tab: 'Når dette er av, opnar lukking av den siste fana ei ny fane i staden, slik at vindauget held seg ope til du lukkar det.'
     Preferred Video Codec: |
       Automatisk føretrekkjer kodekar som eininga di kan dekode med maskinvare.
       AV1: best kvalitet for minst data, men ikkje alle videoar har han. Utan maskinvaredekoding kan han tappa batteriet eller mista bilete.
@@ -2380,6 +2386,7 @@ Tooltips:
     Refresh Subscriptions While App Is Closed: "Oppdaterer straumar med innstillingane du har valt. På datamaskina blir OpenTubeX i systemfeltet til du avsluttar. Android avgjer når bakgrunnsoppdateringar køyrer."
     Notify About New Uploads: Viser systemvarsel på denne eininga for kanalar du har slått på varsel for i abonnementinnstillingane deira. OpenTubeX ser etter nytt innhald når abonnement vert oppdaterte, så vel eit intervall for automatisk oppdatering. For å bli varsla medan appen er lukka, må du også slå på oppdatering medan appen er lukka.
   Theme Settings:
+    Visible Search Suggestions: "Set kor mange oppføringar frå søkjeloggen og forslag søkjefeltet viser før lista må rullast. Lista går aldri forbi nedkanten av vindauget."
     Thumbnail Size: "Skalerer videominiatyrbilete i rutenett og lister. Rutenett med eit fast tal kolonnar eller visingstypen Full breidd fyller i staden kvar rad, så der endrar han berre listeminiatyrbilete og Shorts. I vindauge på storleik med ein telefon er rutenettminiatyrbilete avgrensa til 100 %."
     Playlist Thumbnail Size: "Skalerer videominiatyrbilete på spelelistesider. Rutenett med eit fast tal kolonnar eller visingstypen Full breidd fyller i staden kvar rad, så der endrar han berre listeminiatyrbilete og Shorts. I vindauge på storleik med ein telefon er rutenettminiatyrbilete avgrensa til 100 %."
     Compact Settings Categories: "Gøymer skildringar og reduserer høgda på innstillingskategoriar."
@@ -2788,6 +2795,8 @@ Subscription Groups:
   Empty Group: Denne gruppa har ingen kanalar frå den gjeldande profilen.
   Save Failed: Klarte ikkje å lagre gruppa.
   Delete Failed: Klarte ikkje å fjerne gruppa.
+  Group Icon: Gruppeikon
+  No Icon: Ikkje noko ikon
 Yattee Server:
   API Error (Click to copy): Yattee-tenarfeil (Klikk her for å kopiere)
   Unsupported page: Denne sida er ikkje tilgjengeleg med Yattee-tenaren. Slå på «{fallbackSetting}» for å laste henne inn med det lokale API-et.

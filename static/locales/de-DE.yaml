@@ -531,6 +531,7 @@ Settings:
       Label: Nächste Seite automatisch laden
       Tooltip: Zusätzliche Seiten und Kommentare automatisch laden.
     Open Deep Links In New Window: An OpenTubeX übergebene URLs in einem neuen Fenster öffnen
+    Close Window With Last Tab: Fenster beim Schließen des letzten Tabs schließen
     Minimize to system tray: In die Systemleiste minimieren
     Remember Tab Navigation History: Tab-Navigationsverlauf merken
     Confirm Before Closing App: Bestätigen vor dem Beenden von OpenTubeX
@@ -746,6 +747,7 @@ Settings:
     UI Roundness: Rundung der Benutzeroberfläche
     Scrollbar Width: Scrollbar-Breite
     Scroll Speed: Scrollgeschwindigkeit
+    Visible Search Suggestions: Sichtbare Suchvorschläge
     Animation Speed: Animationsgeschwindigkeit
     Show Tab Icons: Tab-Symbole anzeigen
     Load Missing Tab Icons: Fehlende Tab-Symbole laden
@@ -2774,6 +2776,7 @@ Tooltips:
     Region for Trending: Die Trendregion erlaubt es dir auszuwählen, aus welchem Land die Trends angezeigt werden sollen.
     External Link Handling: "Wähle das Standardverhalten, wenn ein Link angeklickt wird, der nicht in OpenTubeX geöffnet werden kann.\nStandardmäßig wird OpenTubeX den angeklickten Link in deinem Standardbrowser öffnen.\n"
     Open Deep Links In New Window: URLs, die an OpenTubeX übergeben werden, z. B. durch Redirect-Browser-Erweiterungen oder Befehlszeilenargumente, werden in einem neuen Fenster geöffnet.
+    Close Window With Last Tab: Wenn deaktiviert, öffnet das Schließen des letzten Tabs stattdessen einen neuen Tab, sodass das Fenster geöffnet bleibt, bis du es schließt.
     Remember Tab Navigation History: Der Vor- und Zurück-Navigationsverlauf jedes Tabs wird gespeichert und beim Neustart von OpenTubeX wiederhergestellt.
     Avoid translation: |
       YouTubes automatische Übersetzung für Titel, Beschreibung und Kapitel eines Videos deaktivieren.
@@ -2892,6 +2895,7 @@ Tooltips:
       Hält die Scrollbars immer sichtbar. Wenn deaktiviert, werden sie kurz nach dem Ende der Mausbewegung
       ausgeblendet und bei der nächsten Bewegung wieder eingeblendet.
     Scroll Speed: Ändert die Scrollweite von Mausrad- und Touchpad-Gesten.
+    Visible Search Suggestions: Legt fest, wie viele Einträge aus dem Suchverlauf und Suchvorschläge die Suchleiste anzeigt, bevor ihre Liste scrollt. Die Liste reicht nie über den unteren Fensterrand hinaus.
     Use Fixed Tab Width: Gibt jedem Tab in der horizontalen Tableiste dieselbe Breite, statt sie an den Titel anzupassen.
     Use Custom Title Bar: Ersetzt die Titelleiste des Systems durch die Tableiste oder, wenn die Tabs nicht oben sind, durch die obere Navigation, um vertikalen Platz zu sparen. Die Fenstersteuerung erscheint in der Ecke dieser Leiste.
     Use Grid Player Menu: Ordnet das Einstellungsmenü des Videoplayers als Kachelraster statt als Liste an.
@@ -2934,6 +2938,8 @@ Subscription Groups:
   Empty Group: Diese Gruppe enthält keine Kanäle aus dem aktuellen Profil.
   Save Failed: Die Gruppe konnte nicht gespeichert werden.
   Delete Failed: Die Gruppe konnte nicht gelöscht werden.
+  Group Icon: Gruppensymbol
+  No Icon: Kein Symbol
 Clipboard:
   Copy failed: Kopieren in die Zwischenablage fehlgeschlagen
   Cannot access clipboard without a secure connection: Zugriff auf die Zwischenablage ist ohne sichere Verbindung nicht möglich
@@ -2943,6 +2949,9 @@ Chapters:
   Open Chapters: Kapitel öffnen
   Close Chapters: Kapitel schließen
   Copy Timestamp Link: Link bei {timestamp} kopieren
+  Loop Chapter: 'Kapitel wiederholen: {chapter}'
+  Looping Chapter: 'Kapitel wird wiederholt: {chapter}'
+  Chapter Loop Stopped: 'Kapitelwiederholung beendet'
 Preferences: Einstellungen
 Ok: OK
 Hashtag:

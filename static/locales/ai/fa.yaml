@@ -364,6 +364,7 @@ Settings:
       Network: شبکه
       Disk: دیسک
   General Settings:
+    Close Window With Last Tab: 'بستن پنجره هنگام بستن آخرین زبانه'
     Preferred Video Codec: کدک ویدیویی ترجیحی
     Always Use Backup Media Server: "همیشه از سرور رسانهٔ پشتیبان استفاده شود"
     Automatically switch stream extraction methods: "تغییر خودکار روش‌های استخراج جریان"
@@ -489,6 +490,7 @@ Settings:
     Invalid Engine: نام و یک نشانی معتبر جست‌وجوی HTTP یا HTTPS حاوی %s وارد کنید.
     Engine Limit: می‌توانید حداکثر {count} موتور جست‌وجوی سفارشی بیفزایید.
   Theme Settings:
+    Visible Search Suggestions: "پیشنهادهای جستجوی قابل‌مشاهده"
     Material Accent Color: "رنگ تأکیدی Material"
     Material Wallpaper Colors: "رنگ‌های کاغذدیواری"
     Tab Loading Indicator:
@@ -2031,6 +2033,9 @@ Chapters:
   Open Chapters: باز کردن فصل‌ها
   Close Chapters: بستن فصل‌ها
   Copy Timestamp Link: کپی پیوند در {timestamp}
+  Loop Chapter: 'تکرار فصل: {chapter}'
+  Looping Chapter: 'در حال تکرار فصل: {chapter}'
+  Chapter Loop Stopped: 'تکرار فصل متوقف شد'
 Comments:
   Image unavailable: "تصویر در دسترس نیست"
   Comment Count: 1 دیدگاه | {count} دیدگاه
@@ -2072,6 +2077,7 @@ Description:
   Music: موسیقی
 Tooltips:
   General Settings:
+    Close Window With Last Tab: 'وقتی خاموش باشد، بستن آخرین زبانه به‌جای آن یک زبانهٔ جدید باز می‌کند تا پنجره تا زمانی که آن را ببندید باز بماند.'
     Preferred Video Codec: |
       حالت خودکار کدک‌هایی را ترجیح می‌دهد که دستگاه شما می‌تواند به‌صورت سخت‌افزاری رمزگشایی کند.
       AV1: بهترین کیفیت با کمترین مصرف داده، اما همهٔ ویدیوها آن را ندارند. بدون رمزگشایی سخت‌افزاری ممکن است باتری را زود خالی کند یا فریم‌ها را از دست بدهد.
@@ -2160,6 +2166,7 @@ Tooltips:
     Refresh Subscriptions While App Is Closed: "خوراک‌ها را با تنظیمات انتخابی شما تازه می‌کند. در رایانه، OpenTubeX تا زمان خروج در سینی سیستم می‌ماند. Android زمان اجرای تازه‌سازی‌های پس‌زمینه را تعیین می‌کند."
     Notify About New Uploads: اعلان‌های سیستمی را در این دستگاه برای کانال‌هایی نمایش می‌دهد که اعلان‌هایشان را در تنظیمات اشتراک آن‌ها روشن کرده‌اید. OpenTubeX هنگام تازه‌سازی اشتراک‌ها محتوای جدید را بررسی می‌کند، پس یک فاصلهٔ تازه‌سازی خودکار انتخاب کنید. برای دریافت اعلان هنگام بسته بودن برنامه، تازه‌سازی هنگام بسته بودن برنامه را نیز فعال کنید.
   Theme Settings:
+    Visible Search Suggestions: "تعیین می‌کند نوار جستجو پیش از پیمایش فهرستش چند مورد از تاریخچهٔ جستجو و پیشنهادها را نشان دهد. فهرست هرگز از پایین پنجره فراتر نمی‌رود."
     Thumbnail Size: "اندازهٔ تصاویر کوچک ویدیوها را در شبکه‌ها و فهرست‌ها تغییر می‌دهد. شبکه‌هایی با تعداد ستون ثابت یا نوع نمای «تمام‌عرض» در عوض هر ردیف را پر می‌کنند، پس در آنجا فقط تصاویر کوچک فهرست‌ها و Shorts را تغییر می‌دهد. در پنجره‌هایی به اندازهٔ تلفن، تصاویر کوچک شبکه به ۱۰۰٪ محدود می‌شوند."
     Playlist Thumbnail Size: "اندازهٔ تصاویر کوچک ویدیوها را در صفحه‌های فهرست پخش تغییر می‌دهد. شبکه‌هایی با تعداد ستون ثابت یا نوع نمای «تمام‌عرض» در عوض هر ردیف را پر می‌کنند، پس در آنجا فقط تصاویر کوچک فهرست‌ها و Shorts را تغییر می‌دهد. در پنجره‌هایی به اندازهٔ تلفن، تصاویر کوچک شبکه به ۱۰۰٪ محدود می‌شوند."
     Compact Settings Categories: "توضیحات را پنهان می‌کند و ارتفاع دسته‌های تنظیمات را کاهش می‌دهد."
@@ -2484,6 +2491,8 @@ Subscription Groups:
   Empty Group: این گروه هیچ کانالی از نمایهٔ فعلی ندارد.
   Save Failed: گروه ذخیره نشد.
   Delete Failed: گروه حذف نشد.
+  Group Icon: نماد گروه
+  No Icon: بدون نماد
 Yattee Server:
   API Error (Click to copy): خطای سرور Yattee (برای کپی کلیک کنید)
   Unsupported page: این صفحه با سرور Yattee در دسترس نیست. برای بارگذاری آن با API محلی، «{fallbackSetting}» را روشن کنید.

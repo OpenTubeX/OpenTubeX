@@ -25,6 +25,7 @@ import { isTabActivatable } from './tabAvailability.js'
 import {
   DEFAULT_NEW_TAB_POSITION,
   getNewTabSkipSilence,
+  getStoredCloseWindowWithLastTab,
   getStoredLandingRoute,
   getStoredNewTabPosition,
   getStoredRememberTabNavigationHistory,
@@ -1238,6 +1239,14 @@ export class TabManager {
   }
 
   /**
+   * @param {number} count how many of the window's tabs are closing
+   * @returns {Promise<boolean>} whether closing them also closes the window
+   */
+  async closingTabsClosesWindow(count) {
+    return count >= this.tabs.size && await getStoredCloseWindowWithLastTab()
+  }
+
+  /**
    * Close several tabs at once. Activating the surviving replacement up front
    * keeps the tabs that are on their way out from being mounted just to be torn
    * down again, and the batching collapses the per-tab renderer updates and
@@ -1249,6 +1258,17 @@ export class TabManager {
     const closingTabIds = tabIds.filter(tabId => this.tabs.has(tabId))
     if (closingTabIds.length === 0) {
       return this.tabs.size > 0
+    }
+    // Tabs that an earlier close left waiting for their replacement to present
+    // are already gone for the user.
+    const closesEveryTab = () => Array.from(this.tabs.keys()).every(tabId => (
+      closingTabIds.includes(tabId) || this._deferredCloseTabIds.has(tabId)
+    ))
+    if (closesEveryTab() && !await getStoredCloseWindowWithLastTab()) {
+      const route = await TabManager.getStoredLandingRoute()
+      // Keep the window open with a new tab in place of the closed ones, unless
+      // a concurrent close already added one while this one waited.
+      if (closesEveryTab()) this.createTab({ route, makeActive: true })
     }
     if (closingTabIds.length === 1) {
       return this.closeTab(closingTabIds[0])

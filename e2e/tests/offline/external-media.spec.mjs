@@ -594,7 +594,7 @@ for (const withChat of [false, true]) {
     // Clicking a chapter while it moves can scroll the page and miss the button.
     await expect.poll(() => externalMedia.evaluate(element => element.getAnimations({ subtree: true })
       .filter(animation => animation.effect?.target?.matches('.externalMediaPlayer, .externalMediaInfo, .externalMediaSidebar')).length)).toBe(0)
-    await panel.getByRole('button', { name: /Main segment/ }).click()
+    await panel.getByRole('button', { name: /^Main segment/ }).click()
     await expect.poll(() => video.evaluate(element => element.currentTime)).toBeGreaterThanOrEqual(10)
     // A 960 CSS-pixel viewport stacks the chapters below the details.
     await setWindowSize(app, page, { width: Math.round(960 * uiScale / 100), height: 900 })
@@ -1943,7 +1943,7 @@ test('plays a non-YouTube URL and shows the available yt-dlp metadata', async ({
   await expect(player.locator('.ftVideoPlayer')).not.toHaveClass(/scrollMiniPlayer/)
   await expect(chaptersButton).toHaveAttribute('aria-label', 'Open Chapters')
   await chaptersButton.click({ force: true })
-  await externalMedia.locator('.externalMediaChapters').getByRole('button', { name: /Main segment/ }).click()
+  await externalMedia.locator('.externalMediaChapters').getByRole('button', { name: /^Main segment/ }).click()
   await expect.poll(() => player.locator('video.player').evaluate(video => video.currentTime)).toBeGreaterThanOrEqual(10)
   const seekBar = player.locator('.shaka-seek-bar-container')
   await page.evaluate(() => window.scrollTo({ top: 0, behavior: 'instant' }))

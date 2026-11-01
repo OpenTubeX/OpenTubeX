@@ -160,11 +160,11 @@ body:
       label: 'Last Known Working OpenTubeX Version (If Any)'
       description: What is the last version of OpenTubeX this worked in, if applicable?
       placeholder: v0.37.0
-  - type: upload
+  - type: textarea
     id: screenshots
     attributes:
-      label: Upload screenshots or videos
-      description: If applicable, add screenshots or videos to help explain your problem.
+      label: Screenshots or videos
+      description: If applicable, drag and drop or paste screenshots or videos here to help explain your problem.
     validations:
       required: false
   - type: textarea

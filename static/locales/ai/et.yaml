@@ -340,6 +340,7 @@ Settings:
       Network: võrgu
       Disk: ketta
   General Settings:
+    Close Window With Last Tab: 'Sulge aken viimase vahekaardi sulgemisel'
     Preferred Video Codec: Eelistatud videokoodek
     Always Use Backup Media Server: "Kasuta alati varumeediaserverit"
     Automatically switch stream extraction methods: "Vaheta voo eraldamise meetodeid automaatselt"
@@ -465,6 +466,7 @@ Settings:
     Invalid Engine: Sisestage nimi ja sobiv HTTP- või HTTPS-otsingu URL, mis sisaldab %s.
     Engine Limit: Saate lisada kuni {count} kohandatud otsingumootorit.
   Theme Settings:
+    Visible Search Suggestions: "Nähtavad otsingusoovitused"
     Material Accent Color: "Materiali aktsentvärv"
     Material Wallpaper Colors: "Taustapildi värvid"
     Tab Loading Indicator:
@@ -1942,6 +1944,9 @@ Chapters:
   Open Chapters: Ava peatükid
   Close Chapters: Sulge peatükid
   Copy Timestamp Link: Kopeeri link ajahetkele {timestamp}
+  Loop Chapter: 'Korda peatükki: {chapter}'
+  Looping Chapter: 'Peatükki korratakse: {chapter}'
+  Chapter Loop Stopped: 'Peatüki kordamine peatatud'
 Comments:
   Image unavailable: "Pilt pole saadaval"
   Comment Count: 1 kommentaar | {count} kommentaari
@@ -1980,6 +1985,7 @@ Description:
   Music: Muusika
 Tooltips:
   General Settings:
+    Close Window With Last Tab: 'Kui see on välja lülitatud, avab viimase vahekaardi sulgemine hoopis uue vahekaardi ja aken jääb avatuks, kuni selle sulgete.'
     Preferred Video Codec: |
       Automaatrežiim eelistab koodekeid, mida su seade saab riistvaraliselt dekodeerida.
       AV1: parim kvaliteet väikseima andmemahuga, kuid igal videol seda pole. Ilma riistvaralise dekodeerimiseta võib see akut tühjendada või kaadreid vahele jätta.
@@ -2068,6 +2074,7 @@ Tooltips:
     Refresh Subscriptions While App Is Closed: "Värskendab vooge valitud seadistustega. Arvutis jääb OpenTubeX süsteemisalve kuni väljumiseni. Android määrab taustavärskenduste aja."
     Notify About New Uploads: Kuvab selles seadmes süsteemiteavitusi kanalite kohta, mille teavitused oled nende tellimuse seadetes sisse lülitanud. OpenTubeX kontrollib uut sisu tellimuste värskendamisel, seega vali automaatse värskendamise intervall. Et saada teavitusi ka siis, kui rakendus on suletud, luba ka värskendamine suletud rakenduse korral.
   Theme Settings:
+    Visible Search Suggestions: "Määrab, mitu otsinguajaloo kirjet ja soovitust otsinguriba näitab, enne kui selle loendit tuleb kerida. Loend ei ulatu kunagi akna alumisest servast kaugemale."
     Thumbnail Size: "Muudab videote pisipiltide suurust ruudustikes ja loendites. Fikseeritud veergude arvuga või täislaiuse vaatega ruudustikud täidavad selle asemel iga rea, seega muudab see seal ainult loendite pisipilte ja Shortse. Telefonisuurustes akendes on ruudustiku pisipildid piiratud 100%-ga."
     Playlist Thumbnail Size: "Muudab videote pisipiltide suurust esitusloendite lehtedel. Fikseeritud veergude arvuga või täislaiuse vaatega ruudustikud täidavad selle asemel iga rea, seega muudab see seal ainult loendite pisipilte ja Shortse. Telefonisuurustes akendes on ruudustiku pisipildid piiratud 100%-ga."
     Compact Settings Categories: "Peidab kirjeldused ja vähendab seadete kategooriate kõrgust."
@@ -2396,6 +2403,8 @@ Subscription Groups:
   Empty Group: Selles rühmas pole praeguse profiili kanaleid.
   Save Failed: Rühma ei õnnestunud salvestada.
   Delete Failed: Rühma ei õnnestunud kustutada.
+  Group Icon: Rühma ikoon
+  No Icon: Ikoonita
 Yattee Server:
   API Error (Click to copy): Yattee serveri viga (kopeerimiseks klõpsi)
   Unsupported page: See leht pole Yattee serveriga saadaval. Lülita sisse „{fallbackSetting}“, et laadida see kohaliku API kaudu.

@@ -588,6 +588,9 @@ test('a connected router without internet pauses requests and recovers without a
 
 test('startup recognises WAN loss and later recovery without an OS network event', async ({ page }) => {
   let reachable = false
+  // Cut off every internet host, not only the check endpoint: a real reply
+  // during startup, such as the Invidious instance list, proves reachability.
+  await page.route(url => url.protocol === 'https:', route => reachable ? route.fallback() : route.abort('internetdisconnected'))
   await page.route(INTERNET_CHECK_URL, route => reachable ? route.fulfill({ status: 204 }) : route.abort('internetdisconnected'))
   await page.reload()
   const banner = page.locator('.connectionStatus')

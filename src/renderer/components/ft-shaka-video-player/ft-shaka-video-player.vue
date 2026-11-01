@@ -790,7 +790,9 @@
               :chapter-thumbnails="chapterThumbnails"
               :current-chapter-index="currentChapterIndex"
               :fallback-thumbnail="thumbnail"
+              :looped-chapter-index="loopedChapterIndex"
               @copy-timestamp="copyChapterTimestamp"
+              @loop-chapter="toggleChapterLoop"
               @timestamp-event="selectOverlayChapter"
             />
           </aside>

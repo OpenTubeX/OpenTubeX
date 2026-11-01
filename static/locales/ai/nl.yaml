@@ -345,6 +345,7 @@ Settings:
       Network: netwerk
       Disk: schijf
   General Settings:
+    Close Window With Last Tab: 'Venster sluiten bij het sluiten van het laatste tabblad'
     Preferred Video Codec: Voorkeursvideocodec
     Always Use Backup Media Server: "Altijd de back-upmediaserver gebruiken"
     Automatically switch stream extraction methods: "Automatisch wisselen van streamextractiemethode"
@@ -470,6 +471,7 @@ Settings:
     Invalid Engine: Voer een naam en een geldige HTTP- of HTTPS-zoek-URL met %s in.
     Engine Limit: Je kunt maximaal {count} aangepaste zoekmachines toevoegen.
   Theme Settings:
+    Visible Search Suggestions: "Zichtbare zoeksuggesties"
     Material Accent Color: "Material-accentkleur"
     Material Wallpaper Colors: "Kleuren van de achtergrondafbeelding"
     Tab Loading Indicator:
@@ -2000,6 +2002,9 @@ Chapters:
   Open Chapters: Hoofdstukken openen
   Close Chapters: Hoofdstukken sluiten
   Copy Timestamp Link: Link op {timestamp} kopiëren
+  Loop Chapter: 'Hoofdstuk herhalen: {chapter}'
+  Looping Chapter: 'Hoofdstuk wordt herhaald: {chapter}'
+  Chapter Loop Stopped: 'Herhalen van hoofdstuk gestopt'
 Comments:
   Image unavailable: "Afbeelding niet beschikbaar"
   Comment Count: 1 reactie | {count} reacties
@@ -2038,6 +2043,7 @@ Description:
   Music: Muziek
 Tooltips:
   General Settings:
+    Close Window With Last Tab: 'Indien uitgeschakeld, opent het sluiten van het laatste tabblad in plaats daarvan een nieuw tabblad, zodat het venster open blijft totdat je het sluit.'
     Preferred Video Codec: |
       Automatisch geeft de voorkeur aan codecs die je apparaat met hardware kan decoderen.
       AV1: de beste kwaliteit voor de minste data, maar niet elke video heeft het. Zonder hardwaredecodering kan het de batterij leegtrekken of beelden overslaan.
@@ -2126,6 +2132,7 @@ Tooltips:
     Refresh Subscriptions While App Is Closed: "Ververst feeds met je gekozen instellingen. Op de computer blijft OpenTubeX in het systeemvak totdat je afsluit. Android bepaalt wanneer verversingen op de achtergrond worden uitgevoerd."
     Notify About New Uploads: Toont systeemmeldingen op dit apparaat voor kanalen waarvan je de meldingen hebt ingeschakeld in hun abonnementsinstellingen. OpenTubeX controleert op nieuwe inhoud wanneer abonnementen worden vernieuwd, dus kies een interval voor automatisch vernieuwen. Om ook meldingen te krijgen terwijl de app gesloten is, schakel je ook vernieuwen terwijl de app gesloten is in.
   Theme Settings:
+    Visible Search Suggestions: "Bepaalt hoeveel items uit de zoekgeschiedenis en suggesties de zoekbalk toont voordat de lijst gaat scrollen. De lijst loopt nooit door voorbij de onderkant van het venster."
     Thumbnail Size: "Schaalt videominiaturen in rasters en lijsten. Rasters met een vast aantal kolommen of de weergave Volledige breedte vullen in plaats daarvan elke rij, dus daar verandert de schuifregelaar alleen lijstminiaturen en Shorts. In vensters ter grootte van een telefoon zijn rasterminiaturen beperkt tot 100%."
     Playlist Thumbnail Size: "Schaalt videominiaturen op afspeellijstpagina's. Rasters met een vast aantal kolommen of de weergave Volledige breedte vullen in plaats daarvan elke rij, dus daar verandert de schuifregelaar alleen lijstminiaturen en Shorts. In vensters ter grootte van een telefoon zijn rasterminiaturen beperkt tot 100%."
     Compact Settings Categories: "Verbergt beschrijvingen en verkleint de hoogte van instellingencategorieën."
@@ -2459,6 +2466,8 @@ Subscription Groups:
   Empty Group: Deze groep bevat geen kanalen uit het huidige profiel.
   Save Failed: De groep kon niet worden opgeslagen.
   Delete Failed: De groep kon niet worden verwijderd.
+  Group Icon: Groepspictogram
+  No Icon: Geen pictogram
 Yattee Server:
   API Error (Click to copy): Fout in Yattee-server (Klik om te kopiëren)
   Unsupported page: Deze pagina is niet beschikbaar met de Yattee-server. Schakel ‘{fallbackSetting}’ in om deze met de lokale API te laden.

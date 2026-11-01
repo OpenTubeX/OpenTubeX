@@ -345,6 +345,7 @@ Settings:
       Network: verkko
       Disk: levytila
   General Settings:
+    Close Window With Last Tab: 'Sulje ikkuna, kun viimeinen välilehti suljetaan'
     Preferred Video Codec: Ensisijainen videokoodekki
     Always Use Backup Media Server: "Käytä aina varamediapalvelinta"
     Automatically switch stream extraction methods: "Vaihda suoratoiston poimintamenetelmiä automaattisesti"
@@ -470,6 +471,7 @@ Settings:
     Invalid Engine: Anna nimi ja kelvollinen HTTP- tai HTTPS-hakuosoite, joka sisältää merkkijonon %s.
     Engine Limit: Voit lisätä enintään {count} mukautettua hakukonetta.
   Theme Settings:
+    Visible Search Suggestions: "Näkyvät hakuehdotukset"
     Material Accent Color: "Material-korostusväri"
     Material Wallpaper Colors: "Taustakuvan värit"
     Tab Loading Indicator:
@@ -1989,6 +1991,9 @@ Chapters:
   Open Chapters: Avaa luvut
   Close Chapters: Sulje luvut
   Copy Timestamp Link: Kopioi linkki kohdasta {timestamp}
+  Loop Chapter: 'Toista lukua jatkuvasti: {chapter}'
+  Looping Chapter: 'Lukua toistetaan: {chapter}'
+  Chapter Loop Stopped: 'Luvun toisto lopetettu'
 Comments:
   Image unavailable: "Kuva ei ole saatavilla"
   Comment Count: 1 kommentti | {count} kommenttia
@@ -2027,6 +2032,7 @@ Description:
   Music: Musiikki
 Tooltips:
   General Settings:
+    Close Window With Last Tab: 'Kun tämä on pois päältä, viimeisen välilehden sulkeminen avaa sen sijaan uuden välilehden, joten ikkuna pysyy auki, kunnes suljet sen.'
     Preferred Video Codec: |
       Automaattinen tila suosii koodekkeja, joita laitteesi voi purkaa laitteistolla.
       AV1: paras laatu pienimmällä datamäärällä, mutta kaikissa videoissa sitä ei ole. Ilman laitteistopurkua se voi kuluttaa akkua tai pudottaa ruutuja.
@@ -2115,6 +2121,7 @@ Tooltips:
     Refresh Subscriptions While App Is Closed: "Päivittää syötteet valitsemillasi asetuksilla. Tietokoneella OpenTubeX pysyy ilmoitusalueella lopettamiseen asti. Android päättää taustapäivitysten ajankohdan."
     Notify About New Uploads: Näyttää tällä laitteella järjestelmäilmoituksia kanavista, joiden ilmoitukset olet ottanut käyttöön niiden tilausasetuksissa. OpenTubeX tarkistaa uuden sisällön tilauksia päivitettäessä, joten valitse automaattisen päivityksen aikaväli. Jos haluat ilmoituksia myös sovelluksen ollessa suljettuna, ota käyttöön myös päivitys sovelluksen ollessa suljettuna.
   Theme Settings:
+    Visible Search Suggestions: "Määrittää, montako hakuhistorian merkintää ja ehdotusta hakupalkki näyttää ennen kuin sen luetteloa täytyy vierittää. Luettelo ei koskaan ulotu ikkunan alareunan yli."
     Thumbnail Size: "Muuttaa videoiden pikkukuvien kokoa ruudukoissa ja luetteloissa. Ruudukot, joissa on kiinteä sarakemäärä tai Koko leveys -näkymä, täyttävät sen sijaan jokaisen rivin, joten siellä se muuttaa vain luetteloiden pikkukuvia ja Shortseja. Puhelimen kokoisissa ikkunoissa ruudukon pikkukuvat rajoitetaan 100 %:iin."
     Playlist Thumbnail Size: "Muuttaa videoiden pikkukuvien kokoa soittolistasivuilla. Ruudukot, joissa on kiinteä sarakemäärä tai Koko leveys -näkymä, täyttävät sen sijaan jokaisen rivin, joten siellä se muuttaa vain luetteloiden pikkukuvia ja Shortseja. Puhelimen kokoisissa ikkunoissa ruudukon pikkukuvat rajoitetaan 100 %:iin."
     Compact Settings Categories: "Piilottaa kuvaukset ja pienentää asetuskategorioiden korkeutta."
@@ -2448,6 +2455,8 @@ Subscription Groups:
   Empty Group: Tässä ryhmässä ei ole nykyisen profiilin kanavia.
   Save Failed: Ryhmää ei voitu tallentaa.
   Delete Failed: Ryhmää ei voitu poistaa.
+  Group Icon: Ryhmän kuvake
+  No Icon: Ei kuvaketta
 Yattee Server:
   API Error (Click to copy): Yattee-palvelimen virhe (Kopioi napsauttamalla)
   Unsupported page: Tämä sivu ei ole käytettävissä Yattee-palvelimen kanssa. Ota käyttöön ”{fallbackSetting}”, niin sivu ladataan paikallisella API:lla.

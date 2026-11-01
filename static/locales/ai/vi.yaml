@@ -345,6 +345,7 @@ Settings:
       Network: mạng
       Disk: ổ đĩa
   General Settings:
+    Close Window With Last Tab: 'Đóng cửa sổ khi đóng thẻ cuối cùng'
     Preferred Video Codec: Codec video ưu tiên
     Always Use Backup Media Server: "Luôn dùng máy chủ phương tiện dự phòng"
     Automatically switch stream extraction methods: "Tự động chuyển đổi phương thức trích xuất luồng"
@@ -470,6 +471,7 @@ Settings:
     Invalid Engine: Nhập tên và URL tìm kiếm HTTP hoặc HTTPS hợp lệ có chứa %s.
     Engine Limit: Bạn có thể thêm tối đa {count} công cụ tìm kiếm tùy chỉnh.
   Theme Settings:
+    Visible Search Suggestions: "Số gợi ý tìm kiếm hiển thị"
     Material Accent Color: "Màu nhấn Material"
     Material Wallpaper Colors: "Màu hình nền"
     Tab Loading Indicator:
@@ -1981,6 +1983,9 @@ Chapters:
   Open Chapters: Mở chương
   Close Chapters: Đóng chương
   Copy Timestamp Link: Sao chép liên kết tại {timestamp}
+  Loop Chapter: 'Lặp lại chương: {chapter}'
+  Looping Chapter: 'Đang lặp lại chương: {chapter}'
+  Chapter Loop Stopped: 'Đã dừng lặp lại chương'
 Comments:
   Image unavailable: "Hình ảnh không khả dụng"
   Comment Count: '{count} bình luận'
@@ -2019,6 +2024,7 @@ Description:
   Music: Âm nhạc
 Tooltips:
   General Settings:
+    Close Window With Last Tab: 'Khi tắt, việc đóng thẻ cuối cùng sẽ mở một thẻ mới thay vào đó, nên cửa sổ vẫn mở cho đến khi bạn đóng nó.'
     Preferred Video Codec: |
       Chế độ tự động ưu tiên các codec mà thiết bị của bạn có thể giải mã bằng phần cứng.
       AV1: chất lượng tốt nhất với ít dữ liệu nhất, nhưng không phải video nào cũng có. Nếu không giải mã bằng phần cứng, nó có thể làm hao pin hoặc rớt khung hình.
@@ -2107,6 +2113,7 @@ Tooltips:
     Refresh Subscriptions While App Is Closed: "Làm mới nguồn cấp theo cài đặt đã chọn. Trên máy tính, OpenTubeX ở trong khay hệ thống cho đến khi bạn thoát. Android quyết định thời điểm làm mới trong nền."
     Notify About New Uploads: Hiện thông báo hệ thống trên thiết bị này cho các kênh mà bạn đã bật thông báo trong cài đặt đăng ký của kênh. OpenTubeX kiểm tra nội dung mới khi làm mới đăng ký, vì vậy hãy chọn khoảng thời gian tự động làm mới. Để nhận thông báo khi ứng dụng đã đóng, hãy bật thêm tùy chọn làm mới khi ứng dụng đã đóng.
   Theme Settings:
+    Visible Search Suggestions: "Đặt số mục lịch sử tìm kiếm và gợi ý mà thanh tìm kiếm hiển thị trước khi danh sách của nó phải cuộn. Danh sách không bao giờ vượt quá cạnh dưới của cửa sổ."
     Thumbnail Size: "Thay đổi kích thước hình thu nhỏ video trong lưới và danh sách. Lưới có số cột cố định hoặc kiểu xem Toàn chiều rộng sẽ lấp đầy từng hàng, nên ở đó thanh trượt chỉ thay đổi hình thu nhỏ trong danh sách và Shorts. Trong cửa sổ cỡ điện thoại, hình thu nhỏ dạng lưới bị giới hạn ở 100%."
     Playlist Thumbnail Size: "Thay đổi kích thước hình thu nhỏ video trên trang danh sách phát. Lưới có số cột cố định hoặc kiểu xem Toàn chiều rộng sẽ lấp đầy từng hàng, nên ở đó thanh trượt chỉ thay đổi hình thu nhỏ trong danh sách và Shorts. Trong cửa sổ cỡ điện thoại, hình thu nhỏ dạng lưới bị giới hạn ở 100%."
     Compact Settings Categories: "Ẩn mô tả và giảm chiều cao của danh mục cài đặt."
@@ -2438,6 +2445,8 @@ Subscription Groups:
   Empty Group: Nhóm này không có kênh nào trong hồ sơ hiện tại.
   Save Failed: Không thể lưu nhóm.
   Delete Failed: Không thể xóa nhóm.
+  Group Icon: Biểu tượng nhóm
+  No Icon: Không có biểu tượng
 Yattee Server:
   API Error (Click to copy): Lỗi máy chủ Yattee (Nhấn để copy)
   Unsupported page: Trang này không khả dụng với máy chủ Yattee. Hãy bật “{fallbackSetting}” để tải trang bằng API cục bộ.

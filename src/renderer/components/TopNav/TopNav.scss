@@ -297,6 +297,14 @@
   }
 }
 
+// Show the configured number of suggestion rows, but stay inside the window.
+.searchInput :deep(.list) {
+  max-block-size: min(
+    calc(var(--visible-search-suggestions) * var(--search-option-row-size)),
+    calc(100dvh - var(--top-nav-sticky-offset, 60px) - 20px)
+  );
+}
+
 
 .syncIndicator {
   flex-shrink: 0;

@@ -345,6 +345,7 @@ Settings:
       Network: شبكة
       Disk: القرص
   General Settings:
+    Close Window With Last Tab: 'إغلاق النافذة عند إغلاق آخر علامة تبويب'
     Preferred Video Codec: ترميز الفيديو المفضل
     Always Use Backup Media Server: "استخدام خادم الوسائط الاحتياطي دائمًا"
     Automatically switch stream extraction methods: "تبديل طرق استخراج الدفق تلقائيًا"
@@ -470,6 +471,7 @@ Settings:
     Invalid Engine: أدخل اسمًا وعنوان URL صالحًا للبحث HTTP أو HTTPS يحتوي على %s.
     Engine Limit: يمكنك إضافة ما يصل إلى {count} محرك بحث مخصص.
   Theme Settings:
+    Visible Search Suggestions: "اقتراحات البحث المرئية"
     Material Accent Color: "لون تمييز Material"
     Material Wallpaper Colors: "ألوان الخلفية"
     Tab Loading Indicator:
@@ -1984,6 +1986,9 @@ Chapters:
   Open Chapters: فتح الفصول
   Close Chapters: إغلاق الفصول
   Copy Timestamp Link: انسخ الرابط على {timestamp}
+  Loop Chapter: 'تكرار الفصل: {chapter}'
+  Looping Chapter: 'جارٍ تكرار الفصل: {chapter}'
+  Chapter Loop Stopped: 'تم إيقاف تكرار الفصل'
 Comments:
   Image unavailable: "الصورة غير متاحة"
   Comment Count: 'لا توجد تعليقات ({count}) | تعليق واحد | تعليقان ({count}) | {count} تعليقات | {count} تعليقًا | {count} تعليق'
@@ -2022,6 +2027,7 @@ Description:
   Music: الموسيقى
 Tooltips:
   General Settings:
+    Close Window With Last Tab: 'عند الإيقاف، يؤدي إغلاق آخر علامة تبويب إلى فتح علامة تبويب جديدة بدلًا من ذلك، فتبقى النافذة مفتوحة حتى تغلقها.'
     Preferred Video Codec: |
       يفضّل الوضع التلقائي الترميزات التي يستطيع جهازك فك ترميزها بالعتاد.
       AV1: أفضل جودة بأقل استهلاك للبيانات، لكنه غير متاح لكل الفيديوهات. دون فك ترميز بالعتاد قد يستنزف البطارية أو يُسقط إطارات.
@@ -2095,6 +2101,7 @@ Tooltips:
     Refresh Subscriptions While App Is Closed: "يحدّث الخلاصات وفق إعداداتك. على سطح المكتب، يبقى OpenTubeX في علبة النظام حتى تنهيه. يتحكم Android في توقيت التحديثات في الخلفية."
     Notify About New Uploads: يعرض إشعارات النظام على هذا الجهاز للقنوات التي فعّلت إشعاراتها في إعدادات اشتراكها. يتحقق OpenTubeX من وجود محتوى جديد عند تحديث الاشتراكات، لذا اختر فاصلًا زمنيًا للتحديث التلقائي. لتلقي الإشعارات أثناء إغلاق التطبيق، فعّل أيضًا تحديث الاشتراكات أثناء إغلاق التطبيق.
   Theme Settings:
+    Visible Search Suggestions: "يحدد عدد إدخالات سجل البحث والاقتراحات التي يعرضها شريط البحث قبل أن تحتاج قائمته إلى التمرير. لا تمتد القائمة أبدًا إلى ما بعد أسفل النافذة."
     Thumbnail Size: "يغيّر حجم الصور المصغرة للفيديوهات في الشبكات والقوائم. تملأ الشبكات ذات عدد الأعمدة الثابت أو نوع العرض «العرض الكامل» كل صف بدلاً من ذلك، لذا لا يغيّر هناك إلا الصور المصغرة في القوائم والمقاطع القصيرة. في النوافذ بحجم الهاتف تقتصر الصور المصغرة في الشبكة على 100%."
     Playlist Thumbnail Size: "يغيّر حجم الصور المصغرة للفيديوهات في صفحات قوائم التشغيل. تملأ الشبكات ذات عدد الأعمدة الثابت أو نوع العرض «العرض الكامل» كل صف بدلاً من ذلك، لذا لا يغيّر هناك إلا الصور المصغرة في القوائم والمقاطع القصيرة. في النوافذ بحجم الهاتف تقتصر الصور المصغرة في الشبكة على 100%."
     Compact Settings Categories: "يخفي الأوصاف ويقلل ارتفاع فئات الإعدادات."
@@ -2426,6 +2433,8 @@ Subscription Groups:
   Empty Group: لا تحتوي هذه المجموعة على أي قنوات من الملف الشخصي الحالي.
   Save Failed: تعذّر حفظ المجموعة.
   Delete Failed: تعذّر حذف المجموعة.
+  Group Icon: أيقونة المجموعة
+  No Icon: بلا أيقونة
 Yattee Server:
   API Error (Click to copy): خطأ خادم Yattee (انقر للنسخ)
   Unsupported page: هذه الصفحة غير متاحة مع خادم Yattee. فعّل «{fallbackSetting}» لتحميلها باستخدام الواجهة البرمجية المحلية.

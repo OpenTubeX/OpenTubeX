@@ -371,6 +371,7 @@ Settings:
       Network: red
       Disk: disco
   General Settings:
+    Close Window With Last Tab: 'Cerrar la ventana al cerrar la última pestaña'
     Preferred Video Codec: Códec de video preferido
     Always Use Backup Media Server: "Usar siempre el servidor multimedia de respaldo"
     Automatically switch stream extraction methods: "Cambiar automáticamente los métodos de extracción de transmisiones"
@@ -497,6 +498,7 @@ Settings:
     Invalid Engine: Introduce un nombre y una URL de búsqueda HTTP o HTTPS válida que contenga %s.
     Engine Limit: Puedes agregar hasta {count} motores de búsqueda personalizados.
   Theme Settings:
+    Visible Search Suggestions: "Sugerencias de búsqueda visibles"
     Material Accent Color: "Color de acento de Material"
     Material Wallpaper Colors: "Colores del fondo de pantalla"
     Tab Loading Indicator:
@@ -2285,6 +2287,9 @@ Chapters:
   Open Chapters: Abrir capítulos
   Close Chapters: Cerrar capítulos
   Copy Timestamp Link: Copiar enlace en {timestamp}
+  Loop Chapter: 'Repetir capítulo: {chapter}'
+  Looping Chapter: 'Repitiendo capítulo: {chapter}'
+  Chapter Loop Stopped: 'Se dejó de repetir el capítulo'
 Comments:
   Image unavailable: "Imagen no disponible"
   Comment Count: 1 comentario | {count} comentarios | {count} comentarios
@@ -2332,6 +2337,7 @@ Description:
   Music: Música
 Tooltips:
   General Settings:
+    Close Window With Last Tab: 'Si está desactivado, al cerrar la última pestaña se abre una nueva y la ventana permanece abierta hasta que la cierres.'
     Preferred Video Codec: |
       El modo automático prefiere los códecs que tu dispositivo puede decodificar por hardware.
       AV1: la mejor calidad con el menor consumo de datos, pero no todos los videos lo tienen. Sin decodificación por hardware, puede agotar la batería o perder cuadros.
@@ -2427,6 +2433,7 @@ Tooltips:
     Refresh Subscriptions While App Is Closed: "Actualiza las fuentes de suscripciones con los ajustes seleccionados. En el escritorio, OpenTubeX permanece en la bandeja del sistema hasta que salgas. Android controla cuándo se ejecutan las actualizaciones en segundo plano."
     Notify About New Uploads: Muestra notificaciones del sistema en este dispositivo para los canales cuyas notificaciones activaste en su configuración de suscripción. OpenTubeX busca contenido nuevo al actualizar las suscripciones, así que elige un intervalo de actualización automática. Para recibir notificaciones con la aplicación cerrada, activa también la actualización con la aplicación cerrada.
   Theme Settings:
+    Visible Search Suggestions: "Define cuántas entradas del historial de búsqueda y sugerencias muestra la barra de búsqueda antes de que su lista se desplace. La lista nunca se extiende más allá de la parte inferior de la ventana."
     Thumbnail Size: "Escala las miniaturas de los videos en cuadrículas y listas. Las cuadrículas con un número fijo de columnas o el tipo de vista Ancho completo llenan cada fila, así que ahí solo cambia las miniaturas de las listas y los Shorts. En ventanas del tamaño de un teléfono, las miniaturas de la cuadrícula se limitan al 100 %."
     Playlist Thumbnail Size: "Escala las miniaturas de los videos en las páginas de listas de reproducción. Las cuadrículas con un número fijo de columnas o el tipo de vista Ancho completo llenan cada fila, así que ahí solo cambia las miniaturas de las listas y los Shorts. En ventanas del tamaño de un teléfono, las miniaturas de la cuadrícula se limitan al 100 %."
     Compact Settings Categories: "Oculta las descripciones y reduce la altura de las categorías de ajustes."
@@ -2831,6 +2838,8 @@ Subscription Groups:
   Empty Group: Este grupo no tiene canales del perfil actual.
   Save Failed: No se pudo guardar el grupo.
   Delete Failed: No se pudo eliminar el grupo.
+  Group Icon: Icono del grupo
+  No Icon: Sin icono
 Yattee Server:
   API Error (Click to copy): Error del servidor de Yattee (Presione para copiar)
   Unsupported page: Esta página no está disponible con el servidor de Yattee. Activa «{fallbackSetting}» para cargarla con la API local.

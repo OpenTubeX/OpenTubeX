@@ -342,6 +342,7 @@ Settings:
       Network: şəbəkə
       Disk: disk
   General Settings:
+    Close Window With Last Tab: 'Son tab bağlananda pəncərəni bağla'
     Preferred Video Codec: Üstünlük verilən video kodeki
     Always Use Backup Media Server: "Həmişə ehtiyat media serverindən istifadə et"
     Automatically switch stream extraction methods: "Axın çıxarma üsullarını avtomatik dəyiş"
@@ -467,6 +468,7 @@ Settings:
     Invalid Engine: Ad və %s ehtiva edən düzgün HTTP və ya HTTPS axtarış URL-si daxil edin.
     Engine Limit: Ən çox {count} fərdi axtarış sistemi əlavə edə bilərsiniz.
   Theme Settings:
+    Visible Search Suggestions: "Görünən axtarış təklifləri"
     Material Accent Color: "Material vurğu rəngi"
     Material Wallpaper Colors: "Divar kağızı rəngləri"
     Tab Loading Indicator:
@@ -1952,6 +1954,9 @@ Chapters:
   Open Chapters: Bölümləri aç
   Close Chapters: Bölümləri bağla
   Copy Timestamp Link: "{timestamp} vaxtındakı linki köçür"
+  Loop Chapter: 'Fəsli təkrarla: {chapter}'
+  Looping Chapter: 'Fəsil təkrarlanır: {chapter}'
+  Chapter Loop Stopped: 'Fəslin təkrarı dayandırıldı'
 Comments:
   Image unavailable: "Şəkil mövcud deyil"
   Comment Count: 1 şərh | {count} şərh
@@ -1990,6 +1995,7 @@ Description:
   Music: Musiqi
 Tooltips:
   General Settings:
+    Close Window With Last Tab: 'Söndürüldükdə son tabı bağlamaq əvəzinə yeni tab açır, beləliklə pəncərə siz onu bağlayana qədər açıq qalır.'
     Preferred Video Codec: |
       Avtomatik rejim cihazınızın aparat səviyyəsində deşifrə edə bildiyi kodekləri üstün tutur.
       AV1: ən az data ilə ən yaxşı keyfiyyət, lakin hər videoda olmur. Aparat deşifrəsi olmadan batareyanı tez boşalda və ya kadr itirə bilər.
@@ -2078,6 +2084,7 @@ Tooltips:
     Refresh Subscriptions While App Is Closed: "Lentləri seçdiyiniz parametrlərlə yeniləyir. Masaüstündə OpenTubeX çıxana qədər sistem treyində qalır. Android arxa plan yeniləmələrinin vaxtını müəyyən edir."
     Notify About New Uploads: Abunəlik ayarlarında bildirişlərini aktiv etdiyiniz kanallar üçün bu cihazda sistem bildirişləri göstərir. OpenTubeX yeni məzmunu abunəliklər yeniləndikdə yoxlayır, buna görə avtomatik yeniləmə aralığı seçin. Tətbiq bağlı olarkən bildiriş almaq üçün tətbiq bağlı olarkən yeniləməni də aktiv edin.
   Theme Settings:
+    Visible Search Suggestions: "Axtarış panelinin siyahısı sürüşdürülməzdən əvvəl neçə axtarış tarixçəsi qeydi və təklif göstərdiyini müəyyən edir. Siyahı heç vaxt pəncərənin aşağı kənarından kənara çıxmır."
     Thumbnail Size: "Şəbəkələrdə və siyahılarda video miniatürlərinin ölçüsünü dəyişir. Sabit sütun sayı və ya Tam en görünüşü olan şəbəkələr əvəzində hər sətri doldurur, ona görə orada yalnız siyahı miniatürlərini və Shorts-u dəyişir. Telefon ölçülü pəncərələrdə şəbəkə miniatürləri 100% ilə məhdudlaşır."
     Playlist Thumbnail Size: "Pleylist səhifələrində video miniatürlərinin ölçüsünü dəyişir. Sabit sütun sayı və ya Tam en görünüşü olan şəbəkələr əvəzində hər sətri doldurur, ona görə orada yalnız siyahı miniatürlərini və Shorts-u dəyişir. Telefon ölçülü pəncərələrdə şəbəkə miniatürləri 100% ilə məhdudlaşır."
     Compact Settings Categories: "Təsvirləri gizlədir və ayar kateqoriyalarının hündürlüyünü azaldır."
@@ -2403,6 +2410,8 @@ Subscription Groups:
   Empty Group: Bu qrupda cari profilə aid kanal yoxdur.
   Save Failed: Qrupu yadda saxlamaq mümkün olmadı.
   Delete Failed: Qrupu silmək mümkün olmadı.
+  Group Icon: Qrup nişanı
+  No Icon: Nişan yoxdur
 Yattee Server:
   API Error (Click to copy): Yattee Server Xətası (Köçürmək üçün kliklə)
   Unsupported page: Bu səhifə Yattee serveri ilə əlçatan deyil. Onu yerli API ilə yükləmək üçün “{fallbackSetting}” seçimini aktiv edin.

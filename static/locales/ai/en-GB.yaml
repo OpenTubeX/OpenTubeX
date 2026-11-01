@@ -340,6 +340,7 @@ Settings:
       Network: network
       Disk: disk
   General Settings:
+    Close Window With Last Tab: 'Close window when closing the last tab'
     Preferred Video Codec: Preferred video codec
     Always Use Backup Media Server: "Always use backup media server"
     Automatically switch stream extraction methods: "Automatically switch stream extraction methods"
@@ -454,6 +455,7 @@ Settings:
     Invalid Engine: Enter a name and a valid HTTP or HTTPS search URL containing %s.
     Engine Limit: You can add up to {count} custom search engines.
   Theme Settings:
+    Visible Search Suggestions: "Visible Search Suggestions"
     Material Accent Color: "Material accent colour"
     Material Wallpaper Colors: "Wallpaper colours"
     Tab Loading Indicator:
@@ -1930,6 +1932,9 @@ Chapters:
   Open Chapters: Open Chapters
   Close Chapters: Close Chapters
   Copy Timestamp Link: Copy link at {timestamp}
+  Loop Chapter: 'Loop chapter: {chapter}'
+  Looping Chapter: 'Looping chapter: {chapter}'
+  Chapter Loop Stopped: 'Stopped looping chapter'
 Comments:
   Image unavailable: "Image unavailable"
   Comment Count: 1 Comment | {count} Comments
@@ -1968,6 +1973,7 @@ Description:
   Music: Music
 Tooltips:
   General Settings:
+    Close Window With Last Tab: 'When off, closing the last tab opens a new tab instead, so the window stays open until you close it.'
     Preferred Video Codec: |
       Auto prefers codecs that your device can decode in hardware.
       AV1: the best quality for the least data, but not every video has it. Without hardware decoding, it can drain the battery or drop frames.
@@ -2055,6 +2061,7 @@ Tooltips:
     Refresh Subscriptions While App Is Closed: "Refreshes feeds using your selected settings. On desktop, OpenTubeX stays in the system tray until you quit. Android controls when background refreshes run."
     Notify About New Uploads: Shows system notifications on this device for channels whose notifications you turned on in their subscription settings. OpenTubeX checks for new content when subscriptions refresh, so choose an auto refresh interval. To be notified while the app is closed, also enable refreshing while the app is closed.
   Theme Settings:
+    Visible Search Suggestions: "Sets how many search history entries and suggestions the search bar shows before its list scrolls. The list never extends past the bottom of the window."
     Thumbnail Size: "Scales video thumbnails in grids and lists. Grids with a fixed column count or the Full Width view type fill each row instead, so there it only changes list thumbnails and Shorts. Phone-sized windows limit grid thumbnails to 100%."
     Playlist Thumbnail Size: "Scales video thumbnails on playlist pages. Grids with a fixed column count or the Full Width view type fill each row instead, so there it only changes list thumbnails and Shorts. Phone-sized windows limit grid thumbnails to 100%."
     Compact Settings Categories: "Hides descriptions and reduces the height of settings categories."
@@ -2384,6 +2391,8 @@ Subscription Groups:
   Empty Group: This group has no channels in the current profile.
   Save Failed: The group could not be saved.
   Delete Failed: The group could not be deleted.
+  Group Icon: Group icon
+  No Icon: No icon
 Yattee Server:
   API Error (Click to copy): Yattee Server Error (Click to copy)
   Unsupported page: This page is not available with the Yattee server. Turn on ‘{fallbackSetting}’ to load it with the local API.

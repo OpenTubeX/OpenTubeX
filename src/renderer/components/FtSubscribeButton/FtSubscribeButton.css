@@ -367,6 +367,21 @@
   min-block-size: 40px;
 }
 
+/* Names stay aligned when only some groups have an icon. */
+.withGroupIcons .profile.groupOption {
+  grid-template-columns: 18px minmax(0, 1fr) 16px;
+}
+
+.groupIcon {
+  display: grid;
+  place-items: center;
+  font-size: 18px;
+}
+
+.profileList:not(.withGroupIcons) .groupIcon {
+  display: none;
+}
+
 @media (any-pointer: coarse) {
   .profile.groupOption {
     min-block-size: 48px;

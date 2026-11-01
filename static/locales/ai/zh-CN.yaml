@@ -340,6 +340,7 @@ Settings:
       Network: 网络
       Disk: 磁盘
   General Settings:
+    Close Window With Last Tab: '关闭最后一个标签页时关闭窗口'
     Preferred Video Codec: 首选视频编解码器
     Always Use Backup Media Server: "始终使用备用媒体服务器"
     Automatically switch stream extraction methods: "自动切换流提取方法"
@@ -465,6 +466,7 @@ Settings:
     Invalid Engine: 请输入名称以及包含 %s 的有效 HTTP 或 HTTPS 搜索 URL。
     Engine Limit: 最多可以添加 {count} 个自定义搜索引擎。
   Theme Settings:
+    Visible Search Suggestions: "可见搜索建议数"
     Material Accent Color: "Material 强调色"
     Material Wallpaper Colors: "壁纸颜色"
     Tab Loading Indicator:
@@ -1940,6 +1942,9 @@ Chapters:
   Open Chapters: 打开章节
   Close Chapters: 关闭章节
   Copy Timestamp Link: 复制 {timestamp} 处的链接
+  Loop Chapter: '循环播放章节：{chapter}'
+  Looping Chapter: '正在循环播放章节：{chapter}'
+  Chapter Loop Stopped: '已停止循环播放章节'
 Comments:
   Image unavailable: "图片不可用"
   Comment Count: '{count} 条评论'
@@ -1977,6 +1982,7 @@ Description:
   Music: 音乐
 Tooltips:
   General Settings:
+    Close Window With Last Tab: '关闭后，关闭最后一个标签页会改为打开一个新标签页，窗口会一直保持打开，直到你关闭它。'
     Preferred Video Codec: |
       自动模式优先使用设备可以硬件解码的编解码器。
       AV1：以最少的数据量提供最佳画质，但并非每个视频都有。没有硬件解码时，可能会耗电较快或掉帧。
@@ -2065,6 +2071,7 @@ Tooltips:
     Refresh Subscriptions While App Is Closed: "使用所选设置刷新订阅。在桌面端，OpenTubeX 会留在系统托盘中，直到您退出。Android 系统决定后台刷新的运行时间。"
     Notify About New Uploads: 在此设备上为你在订阅设置中开启了通知的频道显示系统通知。OpenTubeX 会在刷新订阅时检查新内容，因此请选择自动刷新间隔。若要在应用关闭时也收到通知，请同时启用应用关闭时刷新订阅。
   Theme Settings:
+    Visible Search Suggestions: "设置搜索栏在列表需要滚动之前显示的搜索历史记录和建议数量。列表绝不会超出窗口底部。"
     Thumbnail Size: "缩放网格和列表中的视频缩略图。列数固定的网格或“全宽”视图会改为填满每一行，因此在这些情况下只会改变列表缩略图和 Shorts。在手机大小的窗口中，网格缩略图最大为 100%。"
     Playlist Thumbnail Size: "缩放播放列表页面中的视频缩略图。列数固定的网格或“全宽”视图会改为填满每一行，因此在这些情况下只会改变列表缩略图和 Shorts。在手机大小的窗口中，网格缩略图最大为 100%。"
     Compact Settings Categories: "隐藏描述并减小设置类别的高度。"
@@ -2393,6 +2400,8 @@ Subscription Groups:
   Empty Group: 此分组中没有当前配置文件的频道。
   Save Failed: 无法保存分组。
   Delete Failed: 无法删除分组。
+  Group Icon: 分组图标
+  No Icon: 无图标
 Yattee Server:
   API Error (Click to copy): Yattee 服务器错误（点击复制）
   Unsupported page: 使用 Yattee 服务器时无法打开此页面。开启“{fallbackSetting}”即可通过本地 API 加载。

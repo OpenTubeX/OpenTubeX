@@ -258,12 +258,14 @@ test.describe('hotPink contrast', () => {
       const label = toggle.locator('..').locator('.switch-label')
       // The outline separates the white thumb from the light off track.
       // Locate its rendered edge, including fractional geometry at UI zoom.
+      // Quarter-pixel steps reach every device pixel the outline covers; whole
+      // CSS pixels are 1.25 device pixels apart at 125% and can skip one.
       const points = await label.evaluate((element, checked) => {
         const rect = element.getBoundingClientRect()
         const thumb = element.querySelector('.switch-thumb').getBoundingClientRect()
         const x = (checked ? thumb.left : thumb.right) - rect.left
         const y = thumb.top - rect.top + thumb.height / 2
-        return [-1.5, -0.5, 0.5, 1.5].map(offset => [x + offset, y])
+        return Array.from({ length: 13 }, (_, index) => [x - 1.5 + index / 4, y])
       }, checked)
       const edge = await sampleColors(app, label, points)
       const thumbRatio = Math.max(contrast.thumbRatio, ...edge.map(color => contrastRatio(color, contrast.track)))
