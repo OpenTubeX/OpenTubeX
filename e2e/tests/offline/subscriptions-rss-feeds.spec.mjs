@@ -354,6 +354,44 @@ test.describe('with followed feeds', () => {
     expect(await titles.allTextContents()).toEqual(['Newest VOD', 'Older VOD'])
   })
 
+  test('keeps the items of a feed that fails to refresh after a restart', async ({ page }) => {
+    await mockFeeds(page)
+    await goTo(page, 'subscriptions')
+    await page.locator('[data-rss-feeds-tab]').click()
+    const panel = page.locator('#subscriptionsPanel')
+    const titles = panel.locator('.ft-list-item .h3Title')
+    await expect(titles).toHaveText(['Newest VOD', 'Older VOD'])
+
+    await page.route(RSS_URL, route => route.fulfill({ status: 500, body: 'Server error' }))
+    await page.reload()
+    await goTo(page, 'subscriptions')
+    await page.locator('[data-rss-feeds-tab]').click()
+    await expect(panel.getByText('2 feeds could not be refreshed.')).toBeVisible()
+    await expect(titles).toHaveText(['Newest VOD', 'Older VOD'])
+  })
+
+  test('shows progress while a feed is added', async ({ page }) => {
+    await mockFeeds(page)
+    let release
+    const held = new Promise(resolve => { release = resolve })
+    await page.route(ATOM_URL, async route => {
+      await held
+      await route.fulfill({ contentType: 'application/atom+xml', body: atomFeed })
+    })
+    const manager = await openFeedManager(page)
+    const input = manager.getByRole('textbox', { name: 'Add Feed' })
+    const progress = manager.getByRole('progressbar', { name: 'Add Feed' })
+    await expect(progress).toHaveCount(0)
+    await input.fill(ATOM_URL)
+    await input.press('Enter')
+    await expect(progress).toBeVisible()
+    await expect(input).toBeDisabled()
+
+    release()
+    await expect(manager.locator('.feedRow')).toHaveCount(3)
+    await expect(progress).toHaveCount(0)
+  })
+
   test('keeps the feed manager button on the refresh row at phone widths', { tag: '@scale' }, async ({ app, page }) => {
     await mockFeeds(page)
     await goTo(page, 'subscriptions')
