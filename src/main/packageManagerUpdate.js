@@ -66,12 +66,18 @@ export async function getPackageManagerUpdate(appPath, {
   // user's configuration, so only profile installs get a command.
   const nixStorePath = appPath.match(/^\/nix\/store\/[^/]+/)?.[0]
   if (nixStorePath) {
-    try {
-      const manifest = JSON.parse(await readTextFile(path.join(home, '.nix-profile', 'manifest.json')))
-      const profileName = Object.entries(manifest.elements ?? {})
-        .find(([, element]) => element.storePaths?.includes(nixStorePath))?.[0]
-      if (profileName) return { packageManager: 'Nix', command: `nix profile upgrade ${profileName}` }
-    } catch {}
+    // use-xdg-base-directories moves the profile from ~/.nix-profile.
+    for (const profile of [
+      path.join(home, '.nix-profile'),
+      path.join(env.XDG_STATE_HOME || path.join(home, '.local', 'state'), 'nix', 'profile'),
+    ]) {
+      try {
+        const manifest = JSON.parse(await readTextFile(path.join(profile, 'manifest.json')))
+        const profileName = Object.entries(manifest.elements ?? {})
+          .find(([, element]) => element.storePaths?.includes(nixStorePath))?.[0]
+        if (profileName) return { packageManager: 'Nix', command: `nix profile upgrade ${profileName}` }
+      } catch {}
+    }
     return null
   }
 
@@ -104,7 +110,7 @@ export async function getPackageManagerUpdate(appPath, {
     const name = (await run('dpkg-query', ['-S', appPath])).split(':')[0].trim()
     const policy = await run('apt-cache', ['policy', name])
     return /opentubex\.org/.test(policy)
-      ? { packageManager: 'APT', command: `sudo apt update && sudo apt upgrade ${name}` }
+      ? { packageManager: 'APT', command: `sudo apt update && sudo apt install --only-upgrade ${name}` }
       : null
   } catch {}
 

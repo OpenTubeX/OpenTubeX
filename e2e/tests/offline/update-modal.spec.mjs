@@ -268,7 +268,7 @@ test('a single update shows its version once and renders the release notes', asy
 })
 
 test('package manager installs show the update command instead of the download link', async ({ app, page, attachScreenshot }) => {
-  const command = 'sudo apt update && sudo apt upgrade opentubex'
+  const command = 'sudo apt update && sudo apt install --only-upgrade opentubex'
   await app.electronApp.evaluate(({ clipboard, ipcMain }, command) => {
     clipboard.writeText('')
     ipcMain.removeHandler('get-package-manager-update')

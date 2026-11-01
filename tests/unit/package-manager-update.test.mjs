@@ -68,6 +68,17 @@ test('upgrades the Nix profile entry that contains OpenTubeX', async () => {
   assert.deepEqual(update, { packageManager: 'Nix', command: 'nix profile upgrade default' })
 })
 
+test('reads the Nix profile from the XDG state directory', async () => {
+  const storePath = '/nix/store/abc-opentubex-0.37.2'
+  const update = await getPackageManagerUpdate(`${storePath}/share/opentubex/resources/app.asar`, system({}, {
+    '/home/user/.local/state/nix/profile/manifest.json': JSON.stringify({
+      version: 3,
+      elements: { opentubex: { storePaths: [storePath] } },
+    }),
+  }))
+  assert.deepEqual(update, { packageManager: 'Nix', command: 'nix profile upgrade opentubex' })
+})
+
 test('keeps the website download for Nix installs outside the profile', async () => {
   const update = await getPackageManagerUpdate('/nix/store/abc-opentubex-0.37.2/share/opentubex/resources/app.asar', system({}))
   assert.equal(update, null)
@@ -91,7 +102,7 @@ test('upgrades APT installs from the OpenTubeX repository', async () => {
     'dpkg-query': `opentubex: ${APP_PATH}\n`,
     'apt-cache': 'opentubex:\n  Installed: 0.37.1\n  Version table:\n     0.37.2 500\n        500 https://apt.opentubex.org stable/main amd64 Packages\n',
   }))
-  assert.deepEqual(update, { packageManager: 'APT', command: 'sudo apt update && sudo apt upgrade opentubex' })
+  assert.deepEqual(update, { packageManager: 'APT', command: 'sudo apt update && sudo apt install --only-upgrade opentubex' })
 })
 
 test('keeps the website download for a manually installed .deb', async () => {
