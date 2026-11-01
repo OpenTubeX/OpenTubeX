@@ -1382,7 +1382,7 @@ Settings:
       Always: "Immer"
       During Bedtime: "Zur Schlafenszeit"
       After the Daily Limit: "Nach dem Tageslimit"
-      Daily Watch Time Limit: "Tägliches Wiedergabelimit"
+      Daily Watch Time Limit: "Tägliches Wiedergabezeitlimit"
       Daily Shorts Limit: "Tägliches Shorts-Limit"
       When a Limit Is Reached: "Bei erreichtem Limit"
       Remind Me: "Erinnern"
@@ -3297,7 +3297,7 @@ Tab Organizer:
   Drag Tab: Ziehen, um den Tab in eine Gruppe zu verschieben
 
 Stats:
-  Left of daily limit: "Noch {duration} von deinem Tageslimit von {limit}"
+  Left of daily limit: "Noch {duration} bis zu deinem Tageslimit von {limit}"
   Daily limit reached: "Tageslimit von {limit} erreicht"
   Replace old device: "Altes Gerät ersetzen"
   Replacement explanation: "Führe {device} nur mit diesem Gerät zusammen, wenn beide Einträge zum selben physischen Gerät gehören."
@@ -3662,9 +3662,9 @@ Invidious Fallback Warning: "Diese Anfrage umgeht deine konfigurierte Invidious-
 Yattee Fallback Warning: "Diese Anfrage umgeht deinen konfigurierten Yattee-Server und verbindet sich direkt mit YouTube. Dabei wird deine IP-Adresse offengelegt."
 Automatically unloaded to free memory: "Automatisch entladen, um Speicher freizugeben"
 Digital Wellbeing:
-  Watch time limit almost reached: "Noch {duration} bis zu deinem täglichen Wiedergabelimit"
+  Watch time limit almost reached: "Noch {duration} bis zu deinem täglichen Wiedergabezeitlimit"
   Shorts limit almost reached: "Noch {duration} bis zu deinem täglichen Shorts-Limit"
-  Daily watch time limit reached: "Tägliches Wiedergabelimit erreicht"
+  Daily watch time limit reached: "Tägliches Wiedergabezeitlimit erreicht"
   Daily Shorts limit reached: "Tägliches Shorts-Limit erreicht"
   Watched today: "Du hast heute {duration} angesehen."
   Shorts watched today: "Du hast heute {duration} Shorts angesehen."
