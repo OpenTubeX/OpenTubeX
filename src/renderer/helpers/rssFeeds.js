@@ -178,10 +178,11 @@ export function getRssHubCreator(feedUrl) {
 /**
  * Reads RSS 2.0, RSS 1.0 (RDF) and Atom feeds.
  * @param {string} source
- * @param {string} feedUrl
+ * @param {string} feedUrl the followed address, which identifies the feed's items
+ * @param {string} [baseUrl] the address after redirects, for relative links
  * @returns {{ title: string, items: RssFeedItem[], image: string | null, isRssHub: boolean }}
  */
-export function parseRssFeed(source, feedUrl) {
+export function parseRssFeed(source, feedUrl, baseUrl = feedUrl) {
   const document = new DOMParser().parseFromString(source, 'application/xml')
   const root = document.documentElement
   if (document.getElementsByTagName('parsererror').length > 0 || !['rss', 'RDF', 'feed'].includes(root.localName)) {
@@ -197,14 +198,14 @@ export function parseRssFeed(source, feedUrl) {
     : childElements(root.localName === 'RDF' ? root : channel, ['item'])
 
   const items = entries.flatMap(entry => {
-    const url = itemLink(entry, feedUrl)
+    const url = itemLink(entry, baseUrl)
     if (!url) return []
     return [{
       id: childText(entry, ['id', 'guid']) || url,
       url,
       title: childText(entry, ['title']) || url,
       author: itemAuthor(entry) || title,
-      thumbnail: itemThumbnail(entry, feedUrl),
+      thumbnail: itemThumbnail(entry, baseUrl),
       published: itemPublished(entry),
       feedUrl
     }]
@@ -213,7 +214,7 @@ export function parseRssFeed(source, feedUrl) {
   return {
     title,
     items: items.slice(0, MAX_ITEMS_PER_FEED),
-    image: feedImage(channel, feedUrl),
+    image: feedImage(channel, baseUrl),
     isRssHub: childText(channel, ['generator']).startsWith('RSSHub')
   }
 }
@@ -251,7 +252,7 @@ export async function fetchRssFeed(url, signal) {
     signal: signal ? AbortSignal.any([signal, AbortSignal.timeout(FETCH_TIMEOUT_MS)]) : AbortSignal.timeout(FETCH_TIMEOUT_MS)
   })
   if (!response.ok) throw new Error(`Feed returned HTTP ${response.status}`)
-  return parseRssFeed(await response.text(), url)
+  return parseRssFeed(await response.text(), url, response.url || url)
 }
 
 /** Fetched items stay in memory while the window is open. */
@@ -263,6 +264,8 @@ export const rssFeedsRefreshing = shallowRef(false)
 /** The feeds that the cached items belong to */
 let refreshedFeedUrls = new Set()
 let activeRefresh = null
+/** Feeds that were added or retried on their own during the active refresh */
+let loadedDuringRefresh = new Set()
 
 /**
  * Removed feeds are filtered out of the cached items, added ones need a refresh.
@@ -321,6 +324,7 @@ export function addLoadedRssFeed(feed, result) {
     rssFeedItems.value = [...rssFeedItems.value.filter(item => item.feedUrl !== feed.url), ...result.items]
       .sort(compareFeedItems)
     refreshedFeedUrls.add(feed.url)
+    loadedDuringRefresh.add(feed.url)
   }
   rssFeedErrors.value = rssFeedErrors.value.filter(url => url !== feed.url)
 }
@@ -341,17 +345,23 @@ export async function refreshRssFeeds(feeds) {
   activeRefresh?.abort()
   const controller = new AbortController()
   activeRefresh = controller
+  loadedDuringRefresh = new Set()
   rssFeedsRefreshing.value = true
 
   try {
     const results = await Promise.allSettled(feeds.map(feed => fetchRssFeed(feed.url, controller.signal)))
     if (controller.signal.aborted) return
 
-    rssFeedItems.value = results.flatMap(result => result.status === 'fulfilled' ? result.value.items : [])
-      .sort(compareFeedItems)
+    // Feeds added while this refresh ran aren't part of it, so keep their items
+    const refreshedUrls = new Set(feeds.map(feed => feed.url))
+    const addedUrls = [...loadedDuringRefresh].filter(url => !refreshedUrls.has(url))
+    rssFeedItems.value = [
+      ...rssFeedItems.value.filter(item => addedUrls.includes(item.feedUrl)),
+      ...results.flatMap(result => result.status === 'fulfilled' ? result.value.items : [])
+    ].sort(compareFeedItems)
     rssFeedErrors.value = feeds.filter((_, index) => results[index].status === 'rejected').map(feed => feed.url)
     rssFeedsLastRefresh.value = Date.now()
-    refreshedFeedUrls = new Set(feeds.map(feed => feed.url))
+    refreshedFeedUrls = new Set([...refreshedUrls, ...addedUrls])
     updateMissingRssFeedAvatars(feeds.flatMap((feed, index) => {
       const result = results[index]
       return result.status === 'fulfilled' ? [[feed, result.value]] : []

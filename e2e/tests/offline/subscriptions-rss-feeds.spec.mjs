@@ -1,3 +1,4 @@
+import { createServer } from 'node:http'
 import { fileURLToPath } from 'node:url'
 
 import {
@@ -231,6 +232,43 @@ test.describe('with followed feeds', () => {
     await expect(panel.getByText('1 feed could not be refreshed.')).toBeHidden()
   })
 
+  test('keeps a feed added while another refresh is running', async ({ page }) => {
+    await mockFeeds(page)
+    await goTo(page, 'subscriptions')
+    await page.locator('[data-rss-feeds-tab]').click()
+    const titles = page.locator('#subscriptionsPanel .ft-list-item .h3Title')
+    await expect(titles).toHaveText(['Newest VOD', 'Older VOD'])
+
+    // Hold the next refresh of the existing feed until the new feed is added
+    let release
+    const held = new Promise(resolve => { release = resolve })
+    let delivered = false
+    await page.route(RSS_URL, async route => {
+      await held
+      await route.fulfill({ contentType: 'application/rss+xml', body: rssFeed })
+      delivered = true
+    })
+    const header = page.locator('.subscriptionsHeader')
+    await header.getByRole('button', { name: /^Refresh RSS/ }).click()
+    await expect(page.locator('[data-rss-feeds-tab] .tabLoadingIndicator')).toBeVisible()
+
+    await header.getByRole('button', { name: 'Manage RSS Feeds' }).click()
+    const manager = page.locator('.settingsSubpageContent')
+    const input = manager.getByRole('textbox', { name: 'Add Feed' })
+    await input.fill(ATOM_URL)
+    await input.press('Enter')
+    await expect(manager.locator('.feedRow')).toHaveCount(3)
+    await page.locator('.settingsCloseButton').click()
+    await expect(titles).toHaveText(['Newest VOD', 'Atom video', 'Older VOD'])
+
+    release()
+    await expect.poll(() => delivered).toBe(true)
+    await expect(page.locator('[data-rss-feeds-tab] .tabLoadingIndicator')).toHaveCount(0)
+    // Let the finished refresh render before checking that it kept the new feed
+    await page.evaluate(() => new Promise(resolve => requestAnimationFrame(() => requestAnimationFrame(resolve))))
+    expect(await titles.allTextContents()).toEqual(['Newest VOD', 'Atom video', 'Older VOD'])
+  })
+
   test('keeps the feed manager button on the refresh row at phone widths', { tag: '@scale' }, async ({ app, page }) => {
     await mockFeeds(page)
     await goTo(page, 'subscriptions')
@@ -311,6 +349,40 @@ test.describe('with many followed feeds', () => {
 
 test.describe('without followed feeds', () => {
   test.use({ seed: { settings: { fetchSubscriptionsAutomatically: false, enableRssFeeds: true } } })
+
+  test('resolves relative links against the redirected feed address', async ({ page }) => {
+    // Playwright doesn't intercept redirected requests, so a local server answers both
+    const server = createServer((request, response) => {
+      if (request.url === '/short') {
+        response.writeHead(302, { location: '/channel/feed.xml' }).end()
+      } else {
+        response.writeHead(200, { 'content-type': 'application/rss+xml' }).end(`<?xml version="1.0"?>
+          <rss version="2.0"><channel><title>Redirected feed</title>
+          <item><title>Relative episode</title><link>episode/1</link><pubDate>${new Date(now).toUTCString()}</pubDate></item>
+          </channel></rss>`)
+      }
+    })
+    await new Promise(resolve => server.listen(0, '127.0.0.1', resolve))
+    const origin = `http://127.0.0.1:${server.address().port}`
+    try {
+      await page.route(/^https?:\/\//, abortUnmockedRequest)
+      await page.route(`${origin}/**`, route => route.continue())
+      const manager = await openFeedManager(page)
+      const input = manager.getByRole('textbox', { name: 'Add Feed' })
+      await input.fill(`${origin}/short`)
+      await input.press('Enter')
+      await expect(manager.locator('.feedRow')).toContainText('Redirected feed')
+      await page.locator('.settingsCloseButton').click()
+
+      await goTo(page, 'subscriptions')
+      await page.locator('[data-rss-feeds-tab]').click()
+      await page.locator('#subscriptionsPanel .h3Title', { hasText: 'Relative episode' }).click()
+      await expect.poll(() => page.evaluate(() => window.$router.currentRoute.value.query.url))
+        .toBe(`${origin}/channel/episode/1`)
+    } finally {
+      server.close()
+    }
+  })
 
   test('opens the feed manager from the empty tab', async ({ page }) => {
     await goTo(page, 'subscriptions')
