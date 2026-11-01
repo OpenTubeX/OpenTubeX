@@ -191,3 +191,56 @@ test('scrolls a menu opened from the control bar below its fixed header', { tag:
   await expect.poll(() => preset.evaluate(element => element.getBoundingClientRect().top))
     .toBeGreaterThanOrEqual(headerBounds.bottom - 0.5)
 })
+
+test('keeps a valid scroll range when a menu opened from the control bar shrinks', { tag: '@scale' }, async ({ app, page }) => {
+  const languages = Array.from({ length: 40 }, (_, index) => `l${String(index).padStart(2, '0')}`)
+  /** @param {string[]} trackLanguages */
+  const setAudioTracks = trackLanguages => player.evaluate((element, trackLanguages) => {
+    const shakaPlayer = element.ui.getControls().getPlayer()
+    const tracks = trackLanguages.map((language, index) => ({
+      id: index, active: index === 0, language, label: `${language} audio`, channelsCount: 2, spatialAudio: false, roles: [],
+    }))
+    shakaPlayer.getAudioTracks = () => tracks
+    shakaPlayer.dispatchEvent({ type: 'trackschanged' })
+  }, trackLanguages)
+  const expectValidScrollRange = () => expect.poll(() => menu.evaluate((element) => {
+    const range = element.scrollHeight - element.clientHeight
+    const last = element.querySelector(':scope > button:last-of-type').getBoundingClientRect()
+    const bottom = element.getBoundingClientRect().bottom - Number.parseFloat(getComputedStyle(element).paddingBottom)
+    const scrollbar = element.querySelector(':scope > .os-scrollbar-vertical')
+    const handle = scrollbar.querySelector('.os-scrollbar-handle').getBoundingClientRect()
+    const track = scrollbar.querySelector('.os-scrollbar-track').getBoundingClientRect()
+    const usable = !scrollbar.classList.contains('os-scrollbar-unusable')
+    return {
+      validOffset: element.scrollTop >= 0 && element.scrollTop <= range + 1,
+      noEmptySpace: range <= 0 || last.bottom >= bottom - 1,
+      scrollbarMatches: usable === (range > 1) && (!usable ||
+        Math.abs((handle.top - track.top) / (track.height - handle.height) - element.scrollTop / range) < 0.02),
+    }
+  })).toEqual({ validOffset: true, noEmptySpace: true, scrollbarMatches: true })
+
+  await setWindowSize(app, page, { width: 1000, height: 560 })
+  const player = await openPausedVideo({ app, page })
+  await page.evaluate(() => window.$store.dispatch('updateControlBarButtons', ['audioTracks', 'menu', 'fullscreen']))
+  await setAudioTracks(languages)
+  const button = player.locator('.shaka-controls-button-panel .audio-track-button')
+  await expect(button).toBeVisible()
+  await button.click()
+  const menu = player.locator('.shaka-controls-container > .shaka-settings-menu.audio-tracks')
+  await expect(menu.getByRole('menuitemradio')).toHaveCount(languages.length)
+
+  // Rebuilding the options into a shorter list leaves a valid scroll range.
+  await menu.evaluate(element => element.scrollTo({ top: element.scrollHeight }))
+  await expect.poll(() => menu.evaluate(element => element.scrollTop)).toBeGreaterThan(0)
+  await setAudioTracks(languages.slice(0, 8))
+  await expect(menu.getByRole('menuitemradio')).toHaveCount(8)
+  await expectValidScrollRange()
+
+  // So does a window size that gives the menu more room.
+  await setAudioTracks(languages)
+  await expect(menu.getByRole('menuitemradio')).toHaveCount(languages.length)
+  await menu.evaluate(element => element.scrollTo({ top: element.scrollHeight }))
+  await expect.poll(() => menu.evaluate(element => element.scrollTop)).toBeGreaterThan(0)
+  await setWindowSize(app, page, { width: 1260, height: 820 })
+  await expectValidScrollRange()
+})
