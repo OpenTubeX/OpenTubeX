@@ -182,13 +182,6 @@
   display: none;
 }
 
-/* Last resort when even the icon-only toolbar is wider than the card */
-.videoOptions.stacked {
-  flex-direction: column;
-  align-items: flex-start;
-  row-gap: 4px;
-}
-
 .videoOptionsMobileRow {
   display: flex;
   flex-shrink: 0;
@@ -200,14 +193,32 @@
   display: none;
 }
 
-/* Let a group that is wider than the card wrap its own buttons */
-.videoOptions.stacked .videoOptionsMobileRow {
-  flex-wrap: wrap;
-  max-inline-size: 100%;
+/*
+  When the labeled toolbar does not fit, it takes its own line and every button
+  gets an equal share of it. The groups step aside so that the buttons of both
+  share one row, and their divider becomes a toolbar item. The script moves
+  actions to the More menu to keep the buttons touch-sized, but the ones with
+  menus of their own may still have to shrink on very narrow screens. The
+  toolbar measures its natural layout while it has the measuring class.
+*/
+.videoOptions.even:not(.measuring) {
+  flex-basis: 100%;
 }
 
-/* Hidden instead of removed, so that the toolbar can still measure it */
-.videoOptions.stacked .videoOptionsMobileRow::before {
+.videoOptions.even:not(.measuring) .videoOptionsMobileRow {
+  display: contents;
+}
+
+.videoOptions.even:not(.measuring) .videoOptionsMobileRow > * {
+  flex: 1 1 0;
+}
+
+.videoOptions.even:not(.measuring) :deep(.iconButton) {
+  flex: 1;
+  min-inline-size: 0;
+}
+
+.videoOptions.measuring .moreActions {
   display: none;
 }
 
@@ -257,12 +268,19 @@
   padding-inline: 12px 14px;
 }
 
-.videoOptions.compact .downloadButton {
-  min-inline-size: 40px;
-  padding-inline: 9px;
+.videoOptions.even:not(.measuring) .downloadButton {
+  min-inline-size: 0;
+  margin-inline-start: 0;
+  padding-inline: 0;
+
+  /* Matches the icon size of the other buttons */
+  font-size: 20px;
+
+  /* Even a transparent border would make it wider than the other buttons */
+  border-width: 0;
 }
 
-.videoOptions.compact .downloadLabel {
+.videoOptions.even:not(.measuring) .downloadLabel {
   display: none;
 }
 
@@ -278,10 +296,6 @@
 
   .videoOptions .downloadButton {
     min-block-size: 48px;
-  }
-
-  .videoOptions.compact .downloadButton {
-    min-inline-size: 48px;
   }
 }
 

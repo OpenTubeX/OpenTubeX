@@ -10,6 +10,48 @@ async function expectNoScrollbarOverflow(scroller) {
   })).toBe(true)
 }
 
+/**
+ * Narrow toolbars move some video actions to their More menu.
+ * @param {import('@playwright/test').Page} page
+ * @param {RegExp} name
+ */
+async function clickVideoAction(page, name) {
+  const toolbar = page.locator('.videoOptions')
+  const button = toolbar.getByRole('button', { name })
+  const more = toolbar.getByRole('button', { name: 'More options', exact: true })
+  await expect(button.or(more).first()).toBeVisible()
+  if (await button.count() > 0) {
+    await button.click()
+  } else {
+    await more.click()
+    await page.locator('dialog[open]').getByRole('button', { name }).click()
+  }
+}
+
+/** @param {import('@playwright/test').Locator} toolbar */
+function getToolbarLayout(toolbar) {
+  return toolbar.evaluate(element => {
+    const card = element.closest('.watchVideoInfo')
+    const cardBox = card.getBoundingClientRect()
+    const cardStyle = getComputedStyle(card)
+    const contentLeft = cardBox.left + parseFloat(cardStyle.paddingInlineStart)
+    const contentRight = cardBox.right - parseFloat(cardStyle.paddingInlineEnd)
+    const toolbarBox = element.getBoundingClientRect()
+    const buttons = [...element.querySelectorAll('.videoOptionsMobileRow > *')]
+      .filter(button => button.getClientRects().length > 0)
+      .map(button => button.getBoundingClientRect())
+    const widths = buttons.map(box => box.width)
+    return {
+      rows: new Set(buttons.map(box => Math.round(box.top))).size,
+      inside: toolbarBox.left >= contentLeft - 0.5 && toolbarBox.right <= contentRight + 0.5 &&
+        buttons.every(box => box.left >= toolbarBox.left - 0.5 && box.right <= toolbarBox.right + 0.5),
+      touchSized: buttons.every(box => box.width >= 43.5 && box.height >= 47.5),
+      spansCard: Math.abs(toolbarBox.width - (contentRight - contentLeft)) < 1,
+      equalWidths: Math.max(...widths) - Math.min(...widths) < 1
+    }
+  })
+}
+
 test.describe('phone UI', () => {
   test.use({
     seed: {
@@ -153,7 +195,7 @@ test.describe('phone UI', () => {
     await expect(page.locator('dialog[open]')).toHaveCount(0)
   })
 
-  test('keeps the enlarged video actions inside the card on narrow phones', { tag: '@scale' }, async ({ app, page }) => {
+  test('keeps the video actions in one touch-sized row and moves the rest to a More menu on narrow phones', { tag: '@scale' }, async ({ app, page, attachScreenshot, uiScale }) => {
     await page.evaluate(async () => {
       await window.$store.dispatch('updateUseSponsorBlock', true)
       await window.$store.dispatch('updateQuickBookmarkTargetPlaylistId', 'phone-list-0')
@@ -161,22 +203,43 @@ test.describe('phone UI', () => {
     })
     await mockPlayableWatchPage(app, page, { captionTranslations: true })
     await openMockedVideo(page)
-    await setWindowSize(app, page, { width: 320, height: 760 })
+    await setWindowSize(app, page, { width: Math.round(360 * uiScale / 100), height: 760 })
     const toolbar = page.locator('.videoOptions')
-    await expect(toolbar).toHaveClass(/\bstacked\b/)
-    await expect.poll(() => toolbar.evaluate(element => {
-      const card = element.closest('.watchVideoInfo')
-      const cardBox = card.getBoundingClientRect()
-      const contentRight = cardBox.right - parseFloat(getComputedStyle(card).paddingInlineEnd)
-      return element.getBoundingClientRect().right <= contentRight + 0.5 &&
-        [...element.querySelectorAll('.iconButton, .downloadButton')].every(button => {
-          const box = button.getBoundingClientRect()
-          return box.width >= 47.5 && box.height >= 47.5 && box.right <= contentRight + 0.5
-        })
+    const more = toolbar.getByRole('button', { name: 'More options', exact: true })
+    const formats = toolbar.getByRole('button', { name: 'Change Media Formats', exact: true })
+    await toolbar.scrollIntoViewIfNeeded()
+    await expect(toolbar).toHaveClass(/\beven\b/)
+    await expect(more).toBeVisible()
+    await expect(formats).toHaveCount(0)
+    await expect.poll(() => getToolbarLayout(toolbar)).toMatchObject({ rows: 1, inside: true, touchSized: true })
+    await attachScreenshot('narrow phone video actions')
+
+    await more.click()
+    const sheet = page.locator('dialog[open]')
+    const option = sheet.getByRole('button', { name: 'Change Media Formats', exact: true })
+    await expect(option).toBeVisible()
+    // A sheet along the bottom edge with touch-sized rows
+    await expect.poll(() => sheet.evaluate(element => {
+      const box = element.getBoundingClientRect()
+      const rows = [...element.querySelectorAll('.moreAction')].map(row => row.getBoundingClientRect())
+      return Math.abs(box.bottom - window.innerHeight) < 1 && Math.abs(box.width - window.innerWidth) < 1 &&
+        rows.length > 0 && rows.every(row => row.height >= 47.5)
     })).toBe(true)
+    await attachScreenshot('video actions More sheet')
+    await option.click()
+    await expect(sheet).toHaveCount(0)
+    await expect(page.locator('.promptCard')).toBeVisible()
+    await page.locator('.prompt').click({ position: { x: 2, y: 2 } })
+    await expect(page.locator('.promptCard')).toHaveCount(0)
+
+    // Widening returns the moved actions to the toolbar
+    await setWindowSize(app, page, { width: Math.round(600 * uiScale / 100), height: 800 })
+    await expect(formats).toBeVisible()
+    await expect(more).toHaveCount(0)
+    await expect.poll(() => getToolbarLayout(toolbar)).toMatchObject({ rows: 1, inside: true })
   })
 
-  test('stacks the video action groups and wraps the metadata inline on phones', { tag: '@scale' }, async ({ app, page, attachScreenshot }) => {
+  test('spreads the video actions evenly in one row and wraps the metadata inline on phones', { tag: '@scale' }, async ({ app, page, attachScreenshot, uiScale }) => {
     await page.evaluate(async () => {
       await window.$store.dispatch('updateUseSponsorBlock', true)
       await window.$store.dispatch('updateQuickBookmarkTargetPlaylistId', 'phone-list-0')
@@ -184,17 +247,11 @@ test.describe('phone UI', () => {
     })
     await mockPlayableWatchPage(app, page, { captionTranslations: true })
     await openMockedVideo(page)
-    await setWindowSize(app, page, { width: 400, height: 860 })
+    await setWindowSize(app, page, { width: Math.round(412 * uiScale / 100), height: 860 })
     const toolbar = page.locator('.videoOptions')
     await toolbar.scrollIntoViewIfNeeded()
-    await expect(toolbar).toHaveClass(/\bstacked\b/)
-    // Each group starts its own row, without a divider at its start
-    await expect.poll(() => toolbar.evaluate(element => {
-      const groups = [...element.children].filter(group => group.getClientRects().length > 0)
-      const groupTops = groups.map(group => Math.round(group.getBoundingClientRect().top))
-      return groups.length > 1 && new Set(groupTops).size === groups.length &&
-        groups.every(group => getComputedStyle(group, '::before').display === 'none')
-    })).toBe(true)
+    await expect(toolbar).toHaveClass(/\beven\b/)
+    await expect.poll(() => getToolbarLayout(toolbar)).toMatchObject({ rows: 1, inside: true, touchSized: true, spansCard: true, equalWidths: true })
     // Short icon-labeled items share rows instead of taking one row each
     const metadataRows = await page.locator('.watchVideoInfo .datePublishedAndViewCount').evaluate(element => {
       const items = [...element.children]
@@ -203,19 +260,23 @@ test.describe('phone UI', () => {
     expect(metadataRows.items).toBeGreaterThan(2)
     expect(metadataRows.rows).toBeLessThan(metadataRows.items)
     await attachScreenshot('phone video info')
+
+    // The labeled toolbar returns once it fits
+    await setWindowSize(app, page, { width: Math.round(1200 * uiScale / 100), height: 900 })
+    await expect(toolbar).toHaveClass(/\bfull\b/)
+    await expect(toolbar.locator('.downloadLabel')).toBeVisible()
   })
 
   test('opens chapters and transcript as independent sheets', async ({ app, page }) => {
     await mockPlayableWatchPage(app, page, { captionTranslations: true })
     await openMockedVideo(page)
     await setWindowSize(app, page, { width: 360, height: 760 })
-    const actions = page.locator('.videoOptions')
     for (const [label, content] of [['Chapters', '.watchVideoChaptersPanel'], ['Transcript', '.transcriptCard']]) {
       if (label === 'Chapters') {
         await page.locator('.shaka-overflow-menu-button').click({ force: true })
         await page.locator('.phonePlayerOptions[open] .ft-chapters-button').click()
       } else {
-        await actions.getByRole('button', { name: new RegExp(label, 'i') }).click()
+        await clickVideoAction(page, new RegExp(label, 'i'))
       }
       const sheet = page.locator('dialog[open]')
       await expect(sheet.locator(content)).toBeVisible()
@@ -230,7 +291,7 @@ test.describe('phone UI', () => {
     await mockPlayableWatchPage(app, page, { captionTranslations: true })
     await openMockedVideo(page)
     await setWindowSize(app, page, { width: 375, height: 760 })
-    await page.locator('.videoOptions').getByRole('button', { name: /transcript/i }).click()
+    await clickVideoAction(page, /transcript/i)
     const languageButton = page.locator('.mobileSheetHeader').getByRole('button', { name: 'Transcript language', exact: true })
     await languageButton.click()
     const menu = page.locator('.transcriptLanguageMenu')
@@ -272,8 +333,7 @@ test.describe('phone UI', () => {
     await mockPlayableWatchPage(app, page, { captionTranslations: true })
     await openMockedVideo(page)
     await setWindowSize(app, page, { width: 360, height: 760 })
-    const trigger = page.locator('.videoOptions').getByRole('button', { name: /transcript/i })
-    await trigger.click()
+    await clickVideoAction(page, /transcript/i)
     const transcript = page.locator('dialog[open] .transcriptCard')
     await page.locator('.mobileSheetHeader').getByRole('button', { name: 'Search transcript', exact: true }).click()
     await expect(transcript.locator('.transcriptControls input')).toBeFocused()
@@ -281,7 +341,7 @@ test.describe('phone UI', () => {
     await page.locator('.mobileSheetHeader').getByRole('button', { name: 'Close', exact: true }).click()
     await expect(page.locator('dialog[open]')).toHaveCount(0)
     await expect(page.locator('.transcriptCard')).toHaveCount(0)
-    await trigger.click()
+    await clickVideoAction(page, /transcript/i)
     await expect(transcript).toBeVisible()
     await page.locator('.mobileSheetHeader').getByRole('button', { name: 'Search transcript', exact: true }).click()
     await expect(transcript.locator('.transcriptControls input')).toBeFocused()
@@ -310,8 +370,7 @@ test.describe('phone UI', () => {
       }
     })
     await setWindowSize(app, page, { width: 360, height: 760 })
-    const trigger = page.locator('.videoOptions').getByRole('button', { name: /Live Chat/i })
-    await trigger.click()
+    await clickVideoAction(page, /Live Chat/i)
     const chat = page.locator('dialog[open] .phoneLiveChat')
     await expect(chat).toBeVisible()
     await expect(chat).toBeInViewport()
@@ -361,7 +420,7 @@ test.describe('phone UI', () => {
     await expect(page.locator('dialog[open]')).toHaveCount(0)
     expect(await view.evaluate(view => view.liveChatOpen)).toBe(false)
     await expect(page.locator('.phoneLiveChat')).toHaveCount(0)
-    await trigger.click()
+    await clickVideoAction(page, /Live Chat/i)
     await expect(chat).toBeVisible()
     await expect(chat.locator('.chatMessage')).toHaveCount(0)
     await expect(chat.locator('.liveChatMessage')).toBeVisible()

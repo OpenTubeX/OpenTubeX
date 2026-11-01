@@ -39,6 +39,16 @@
   box-shadow: 0 12px 32px rgb(0 0 0 / 28%);
 }
 
+.mobileSheet[open].compactSheet.bottomSheet {
+  inset-block: auto calc(100dvh - var(--phone-viewport-top, 0px) - var(--phone-viewport-height, 100dvh));
+  inline-size: 100%;
+  max-inline-size: none;
+  margin: 0;
+  padding-block-end: var(--safe-area-inset-bottom, env(safe-area-inset-bottom, 0));
+  padding-inline: var(--safe-area-inset-left, env(safe-area-inset-left, 0)) var(--safe-area-inset-right, env(safe-area-inset-right, 0));
+  border-radius: calc(24px * var(--ui-roundness)) calc(24px * var(--ui-roundness)) 0 0;
+}
+
 .compactSheet::backdrop {
   background: rgb(0 0 0 / 55%);
 }
