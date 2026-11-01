@@ -2450,3 +2450,5 @@ Yattee Server:
     HTTPS required: Android chỉ có thể phát video từ các máy chủ Yattee sử dụng HTTPS.
     Streams unavailable: Không thể tải luồng của video này từ máy chủ Yattee. Hãy dùng “Kiểm tra kết nối” trong Cài đặt → Nâng cao để kiểm tra máy chủ.
 Yattee Fallback Warning: Yêu cầu này bỏ qua máy chủ Yattee bạn đã cấu hình và kết nối trực tiếp đến YouTube, làm lộ địa chỉ IP của bạn.
+Update With Package Manager: 'Cập nhật bằng {packageManager}:'
+Update Command Copied: 'Đã sao chép lệnh cập nhật'

@@ -2460,3 +2460,5 @@ Yattee Server:
     HTTPS required: Android voi toistaa videoita vain Yattee-palvelimilta, jotka käyttävät HTTPS:ää.
     Streams unavailable: Tämän videon striimejä ei voitu ladata Yattee-palvelimelta. Tarkista palvelin toiminnolla ”Testaa yhteys” kohdassa Asetukset → Lisäasetukset.
 Yattee Fallback Warning: Tämä pyyntö ohittaa määrittämäsi Yattee-palvelimen ja muodostaa yhteyden suoraan YouTubeen paljastaen IP-osoitteesi.
+Update With Package Manager: 'Päivitä käyttäen {packageManager}:'
+Update Command Copied: 'Päivityskomento kopioitu'

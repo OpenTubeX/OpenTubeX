@@ -2907,3 +2907,5 @@ Yattee Server:
     HTTPS required: Android gali leisti vaizdo įrašus tik iš Yattee serverių, kurie naudoja HTTPS.
     Streams unavailable: Nepavyko įkelti šio vaizdo įrašo srautų iš Yattee serverio. Patikrinkite serverį mygtuku „Tikrinti ryšį“ dalyje Nustatymai → Išplėstiniai.
 Yattee Fallback Warning: Ši užklausa apeina jūsų sukonfigūruotą Yattee serverį ir jungiasi tiesiogiai prie YouTube, atskleisdama jūsų IP adresą.
+Update With Package Manager: 'Atnaujinti naudojant {packageManager}:'
+Update Command Copied: 'Atnaujinimo komanda nukopijuota'

@@ -267,6 +267,26 @@ test('a single update shows its version once and renders the release notes', asy
   )
 })
 
+test('package manager installs show the update command instead of the download link', async ({ app, page, attachScreenshot }) => {
+  const command = 'sudo apt update && sudo apt upgrade opentubex'
+  await app.electronApp.evaluate(({ clipboard, ipcMain }, command) => {
+    clipboard.writeText('')
+    ipcMain.removeHandler('get-package-manager-update')
+    ipcMain.handle('get-package-manager-update', () => ({ packageManager: 'APT', command }))
+  }, command)
+  await showUpdatePrompt(page, [
+    release(`OpenTubeX ${newestUpdateVersion}`, `v${newestUpdateVersion}-beta`, NEWEST_NOTES)
+  ])
+
+  await expect(page.locator('.changeLogUpdateCommand')).toHaveText(`Update with APT: ${command}`)
+  await expect(page.getByRole('button', { name: 'Download From Site' })).toHaveCount(0)
+  await attachScreenshot('package manager update prompt')
+
+  await page.getByRole('button', { name: 'Copy', exact: true }).click()
+  await expect(page.locator('.toast', { hasText: 'Update command copied' })).toBeVisible()
+  await expect.poll(() => app.electronApp.evaluate(({ clipboard }) => clipboard.readText())).toBe(command)
+})
+
 test.describe('with external links enabled', () => {
   test.use({ seed: { settings: { externalLinkHandling: '' } } })
 

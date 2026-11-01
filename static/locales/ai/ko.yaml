@@ -2861,3 +2861,5 @@ Yattee Server:
     HTTPS required: Android에서는 HTTPS를 사용하는 Yattee 서버의 동영상만 재생할 수 있습니다.
     Streams unavailable: Yattee 서버에서 이 동영상의 스트림을 불러올 수 없습니다. 설정 → 고급의 “연결 테스트”로 서버를 확인하세요.
 Yattee Fallback Warning: 이 요청은 설정한 Yattee 서버를 우회하여 YouTube에 직접 연결하므로 IP 주소가 노출됩니다.
+Update With Package Manager: '{packageManager}(으)로 업데이트:'
+Update Command Copied: '업데이트 명령을 복사했습니다'

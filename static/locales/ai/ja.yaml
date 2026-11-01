@@ -2405,3 +2405,5 @@ Yattee Server:
     HTTPS required: Android では、HTTPS を使用する Yattee サーバーの動画しか再生できません。
     Streams unavailable: この動画のストリームを Yattee サーバーから読み込めませんでした。「設定」→「詳細設定」の「接続テスト」でサーバーを確認してください。
 Yattee Fallback Warning: このリクエストは設定した Yattee サーバーを経由せず、YouTube に直接接続するため、IP アドレスが公開されます。
+Update With Package Manager: '{packageManager} で更新:'
+Update Command Copied: '更新コマンドをコピーしました'

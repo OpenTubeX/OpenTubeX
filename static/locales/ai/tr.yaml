@@ -2406,3 +2406,5 @@ Yattee Server:
     HTTPS required: Android yalnızca HTTPS kullanan Yattee sunucularındaki videoları oynatabilir.
     Streams unavailable: Bu videonun akışları Yattee sunucusundan yüklenemedi. Sunucuyu denetlemek için Ayarlar → Gelişmiş bölümündeki “Bağlantıyı Test Et” düğmesini kullanın.
 Yattee Fallback Warning: Bu istek, yapılandırdığınız Yattee sunucusunu atlayarak doğrudan YouTube'a bağlanır ve IP adresinizi açığa çıkarır.
+Update With Package Manager: '{packageManager} ile güncelle:'
+Update Command Copied: 'Güncelleme komutu kopyalandı'

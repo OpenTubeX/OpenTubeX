@@ -2424,3 +2424,5 @@ Yattee Server:
     HTTPS required: Android hanya dapat memutar video dari server Yattee yang menggunakan HTTPS.
     Streams unavailable: Tidak dapat memuat stream video ini dari server Yattee. Gunakan “Uji Koneksi” di Pengaturan → Lanjutan untuk memeriksa server.
 Yattee Fallback Warning: Permintaan ini melewati server Yattee yang Anda konfigurasi dan terhubung langsung ke YouTube, sehingga mengungkap alamat IP Anda.
+Update With Package Manager: 'Perbarui dengan {packageManager}:'
+Update Command Copied: 'Perintah pembaruan disalin'

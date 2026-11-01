@@ -2462,3 +2462,5 @@ Yattee Server:
     HTTPS required: Android יכול להפעיל רק סרטונים משרתי Yattee שמשתמשים ב־HTTPS.
     Streams unavailable: לא ניתן לטעון את הזרמים של הסרטון הזה משרת Yattee. יש להשתמש ב„בדיקת החיבור” בהגדרות → מתקדם כדי לבדוק את השרת.
 Yattee Fallback Warning: בקשה זו עוקפת את שרת Yattee שהגדרת ומתחברת ישירות ל־YouTube, תוך חשיפת כתובת ה־IP שלך.
+Update With Package Manager: 'עדכון באמצעות {packageManager}:'
+Update Command Copied: 'פקודת העדכון הועתקה'

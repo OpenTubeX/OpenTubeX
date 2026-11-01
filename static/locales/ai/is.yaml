@@ -2422,3 +2422,5 @@ Yattee Server:
     HTTPS required: Android getur aðeins spilað myndskeið frá Yattee-netþjónum sem nota HTTPS.
     Streams unavailable: Ekki tókst að hlaða streymum þessa myndskeiðs frá Yattee-netþjóninum. Notaðu „Prófa tengingu“ í Stillingar → Ítarlegt til að athuga netþjóninn.
 Yattee Fallback Warning: Þessi beiðni fer fram hjá Yattee-netþjóninum sem þú stilltir og tengist beint við YouTube, sem afhjúpar IP-töluna þína.
+Update With Package Manager: 'Uppfæra með {packageManager}:'
+Update Command Copied: 'Uppfærsluskipun afrituð'

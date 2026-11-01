@@ -2405,3 +2405,5 @@ Yattee Server:
     HTTPS required: Android 只能播放来自使用 HTTPS 的 Yattee 服务器的视频。
     Streams unavailable: 无法从 Yattee 服务器加载此视频的流。请使用“设置”→“高级”中的“测试连接”检查服务器。
 Yattee Fallback Warning: 此请求绕过了你配置的 Yattee 服务器，直接连接到 YouTube，从而暴露你的 IP 地址。
+Update With Package Manager: '使用 {packageManager} 更新：'
+Update Command Copied: '已复制更新命令'

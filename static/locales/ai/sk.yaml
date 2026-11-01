@@ -2405,3 +2405,5 @@ Yattee Server:
     HTTPS required: Android dokáže prehrávať videá iba zo serverov Yattee, ktoré používajú HTTPS.
     Streams unavailable: Streamy tohto videa sa nepodarilo načítať zo servera Yattee. Server skontrolujte pomocou „Testovať pripojenie“ v časti Nastavenia → Rozšírené.
 Yattee Fallback Warning: Táto požiadavka obchádza nastavený server Yattee a pripája sa priamo k YouTube, čím odhaľuje vašu IP adresu.
+Update With Package Manager: 'Aktualizovať pomocou {packageManager}:'
+Update Command Copied: 'Príkaz na aktualizáciu bol skopírovaný'

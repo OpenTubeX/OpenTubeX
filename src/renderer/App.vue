@@ -152,8 +152,22 @@
           class="changeLogContent"
         />
       </div>
+      <p
+        v-if="packageManagerUpdate"
+        class="changeLogUpdateCommand"
+      >
+        {{ t('Update With Package Manager', { packageManager: packageManagerUpdate.packageManager }) }}
+        <code dir="ltr">{{ packageManagerUpdate.command }}</code>
+      </p>
       <FtFlexBox>
         <FtButton
+          v-if="packageManagerUpdate"
+          :label="t('Copy')"
+          :icon="['fas', 'copy']"
+          @click="copyPackageManagerUpdateCommand"
+        />
+        <FtButton
+          v-else
           :label="t('Download From Site')"
           :icon="['fas', 'download']"
           @click="openDownloadsPage"
@@ -2285,6 +2299,8 @@ updateThumbnailListSize()
 const showReleaseNotes = ref(false)
 const changeLogTitle = ref('')
 const updateChangelog = ref('')
+/** @type {import('vue').Ref<{ packageManager: string, command: string } | null>} */
+const packageManagerUpdate = ref(null)
 useScrollClamp(useTemplateRef('changeLogScroller'), useTemplateRef('changeLogContent'))
 const DISMISSED_UPDATE_VERSION_STORAGE_KEY = 'opentubex-dismissed-update-version'
 /** @type {{ tagName: string, versionNumber: string } | null} */
@@ -2372,7 +2388,11 @@ async function checkForNewUpdates() {
       // Shorten pull request links to #1234
       .replaceAll(/https:\/\/github\.com\/OpenTubeX\/OpenTubeX\/pull\/(\d+)/g, '[#$1]($&)')
 
-    const releaseNotesMarkdown = await getReleaseNotesMarkdown()
+    const [releaseNotesMarkdown, packageManager] = await Promise.all([
+      getReleaseNotesMarkdown(),
+      window.ftElectron?.getPackageManagerUpdate() ?? null
+    ])
+    packageManagerUpdate.value = packageManager
     updateChangelog.value = releaseNotesMarkdown.parse(changelog)
     changeLogTitle.value = t('Update to {version}', { version: release.name ?? tagName })
     availableUpdate = { tagName, versionNumber }
@@ -2385,6 +2405,10 @@ async function checkForNewUpdates() {
 function closeReleaseNotes() {
   showReleaseNotes.value = false
   showAvailableUpdateToast()
+}
+
+function copyPackageManagerUpdateCommand() {
+  copyToClipboard(packageManagerUpdate.value.command, { messageOnSuccess: t('Update Command Copied') })
 }
 
 function openDownloadsPage() {

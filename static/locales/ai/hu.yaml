@@ -2406,3 +2406,5 @@ Yattee Server:
     HTTPS required: Az Android csak HTTPS-t használó Yattee-kiszolgálókról tud videókat lejátszani.
     Streams unavailable: A videó streamjeit nem sikerült betölteni a Yattee-kiszolgálóról. Ellenőrizze a kiszolgálót a Beállítások → Speciális menü „Kapcsolat tesztelése” gombjával.
 Yattee Fallback Warning: Ez a kérés megkerüli a beállított Yattee-kiszolgálót, és közvetlenül a YouTube-hoz csatlakozik, felfedve az IP-címét.
+Update With Package Manager: 'Frissítés a(z) {packageManager} segítségével:'
+Update Command Copied: 'Frissítési parancs másolva'

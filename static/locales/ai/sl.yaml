@@ -3003,3 +3003,5 @@ Yattee Server:
     HTTPS required: Android lahko predvaja videoposnetke samo s strežnikov Yattee, ki uporabljajo HTTPS.
     Streams unavailable: Pretokov tega videoposnetka ni bilo mogoče naložiti s strežnika Yattee. Strežnik preverite z »Preizkusi povezavo« v razdelku Nastavitve → Napredno.
 Yattee Fallback Warning: Ta zahteva zaobide nastavljeni strežnik Yattee in se poveže neposredno z YouTubom ter razkrije vaš naslov IP.
+Update With Package Manager: 'Posodobi z upravitljem {packageManager}:'
+Update Command Copied: 'Ukaz za posodobitev je kopiran'
