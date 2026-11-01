@@ -859,6 +859,8 @@ onMounted(() => {
     optionsResizeObserver.observe(group)
   }
   optionsMutationObserver.observe(videoOptions.value, { childList: true, subtree: true })
+  // Hiding an action from the closed More menu changes no rendered toolbar rows
+  watch(() => OVERFLOW_ORDER.filter(key => toolbarActions.value[key].visible).join(), scheduleOptionsLayout)
   updateOptionsLayout()
 })
 
