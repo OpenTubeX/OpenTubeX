@@ -1124,7 +1124,10 @@ const customActions = {
           const savedButtons = userSettings.find(entry => entry._id === 'controlBarButtons')?.value
           if (Array.isArray(savedButtons)) {
             const added = ['chapters', 'screenshot'].filter(id => !savedButtons.includes(id))
-            if (added.length > 0) await dispatch('updateControlBarButtons', [...added, ...savedButtons])
+            // A failed save leaves the marker unset, so the next launch retries.
+            if (added.length > 0 && !await dispatch('updateControlBarButtons', [...added, ...savedButtons])) {
+              throw new Error('The control bar buttons were not saved')
+            }
           }
           await DBSettingHandlers.upsert(CONTROL_BAR_BUTTONS_MIGRATION_SETTING, true)
         } catch (error) {
