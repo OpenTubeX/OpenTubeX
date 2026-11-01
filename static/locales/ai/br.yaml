@@ -2414,3 +2414,5 @@ Yattee Server:
     HTTPS required: Ne c'hall Android lenn videoioù nemet eus servijerioù Yattee a implij HTTPS.
     Streams unavailable: N'haller ket kargañ froudoù ar video-mañ eus ar servijer Yattee. Implijit « Amprouiñ ar c'hennask » en Arventennoù → Araokaet evit gwiriañ ar servijer.
 Yattee Fallback Warning: An azgoulenn-mañ a dremen heb ho servijer Yattee kefluniet hag a gennask war-eeun ouzh YouTube, o tiskouez ho chomlec'h IP.
+Update With Package Manager: 'Hizivaat gant {packageManager}:'
+Update Command Copied: 'Eilet eo bet an urzhiad hizivaat'

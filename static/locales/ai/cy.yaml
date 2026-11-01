@@ -2436,3 +2436,5 @@ Yattee Server:
     HTTPS required: Dim ond fideos o weinyddion Yattee sy'n defnyddio HTTPS y gall Android eu chwarae.
     Streams unavailable: Methu llwytho ffrydiau'r fideo hwn o'r gweinydd Yattee. Defnyddiwch “Profi'r Cysylltiad” yn Gosodiadau → Uwch i wirio'r gweinydd.
 Yattee Fallback Warning: Mae'r cais hwn yn osgoi'r gweinydd Yattee rydych wedi'i ffurfweddu ac yn cysylltu'n uniongyrchol â YouTube, gan ddatgelu eich cyfeiriad IP.
+Update With Package Manager: 'Diweddaru gyda {packageManager}:'
+Update Command Copied: 'Wedi copïo''r gorchymyn diweddaru'

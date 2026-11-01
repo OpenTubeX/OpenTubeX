@@ -563,6 +563,22 @@
   overflow-wrap: break-word;
 }
 
+.changeLogUpdateCommand {
+  padding-inline: 16px;
+  margin-block: 0 16px;
+  overflow-wrap: anywhere;
+}
+
+.changeLogUpdateCommand code {
+  display: block;
+  margin-block-start: 8px;
+  padding-block: 8px;
+  padding-inline: 12px;
+  background-color: var(--secondary-card-bg-color);
+  border-radius: calc(6px * var(--ui-roundness));
+  user-select: all;
+}
+
 .changeLogContent {
   /* Include the first and last Markdown block margins in scroll clamping. */
   display: flow-root;

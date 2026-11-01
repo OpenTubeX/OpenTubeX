@@ -2404,3 +2404,5 @@ Yattee Server:
     HTTPS required: Android ne peut lire que les vidéos provenant de serveurs Yattee qui utilisent HTTPS.
     Streams unavailable: Impossible de charger les flux de cette vidéo depuis le serveur Yattee. Utilisez « Tester la connexion » dans Paramètres → Avancé pour vérifier le serveur.
 Yattee Fallback Warning: Cette requête contourne votre serveur Yattee configuré et se connecte directement à YouTube, exposant votre adresse IP.
+Update With Package Manager: 'Mettre à jour avec {packageManager} :'
+Update Command Copied: 'Commande de mise à jour copiée'

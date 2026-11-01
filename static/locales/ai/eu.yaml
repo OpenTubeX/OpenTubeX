@@ -2415,3 +2415,5 @@ Yattee Server:
     HTTPS required: Android-ek HTTPS erabiltzen duten Yattee zerbitzarietako bideoak soilik erreproduzi ditzake.
     Streams unavailable: Ezin izan dira bideo honen jarioak Yattee zerbitzaritik kargatu. Erabili «Probatu konexioa» Ezarpenak → Aurreratua atalean zerbitzaria egiaztatzeko.
 Yattee Fallback Warning: Eskaera honek konfiguratutako Yattee zerbitzaria saihesten du eta zuzenean YouTubera konektatzen da, zure IP helbidea agerian utziz.
+Update With Package Manager: 'Eguneratu {packageManager} erabiliz:'
+Update Command Copied: 'Eguneratze-komandoa kopiatu da'

@@ -2458,3 +2458,5 @@ Yattee Server:
     HTTPS required: Android poate reda videoclipuri doar de pe servere Yattee care folosesc HTTPS.
     Streams unavailable: Fluxurile acestui videoclip nu au putut fi încărcate de pe serverul Yattee. Folosiți „Testați conexiunea” în Setări → Avansat pentru a verifica serverul.
 Yattee Fallback Warning: Această cerere ocolește serverul Yattee configurat și se conectează direct la YouTube, expunându-vă adresa IP.
+Update With Package Manager: 'Actualizează cu {packageManager}:'
+Update Command Copied: 'Comanda de actualizare a fost copiată'

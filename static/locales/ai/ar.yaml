@@ -2438,3 +2438,5 @@ Yattee Server:
     HTTPS required: لا يمكن لنظام Android تشغيل الفيديوهات إلا من خوادم Yattee التي تستخدم HTTPS.
     Streams unavailable: تعذّر تحميل بثوث هذا الفيديو من خادم Yattee. استخدم «اختبار الاتصال» في الإعدادات → متقدم للتحقق من الخادم.
 Yattee Fallback Warning: يتجاوز هذا الطلب خادم Yattee الذي أعددته ويتصل مباشرةً بـ YouTube، مما يكشف عنوان IP الخاص بك.
+Update With Package Manager: 'التحديث باستخدام {packageManager}:'
+Update Command Copied: 'تم نسخ أمر التحديث'

@@ -222,6 +222,14 @@ export default {
   },
 
   /**
+   * The package manager that installed OpenTubeX and its update command.
+   * @returns {Promise<{ packageManager: string, command: string } | null>}
+   */
+  getPackageManagerUpdate: () => {
+    return ipcRenderer.invoke(IpcChannels.GET_PACKAGE_MANAGER_UPDATE)
+  },
+
+  /**
    * @param {{ time: number, level: string, message: string }} entry
    */
   addDiagnosticLogEntry: (entry) => {

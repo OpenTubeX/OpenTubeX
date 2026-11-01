@@ -2438,3 +2438,5 @@ Yattee Server:
     HTTPS required: Android može reproducirati videa samo s Yattee poslužitelja koji koriste HTTPS.
     Streams unavailable: Streamove ovog videozapisa nije moguće učitati s Yattee poslužitelja. Provjerite poslužitelj pomoću „Testiraj vezu” u odjeljku Postavke → Napredno.
 Yattee Fallback Warning: Ovaj zahtjev zaobilazi postavljeni Yattee poslužitelj i povezuje se izravno s YouTubeom, otkrivajući vašu IP adresu.
+Update With Package Manager: 'Ažuriraj pomoću {packageManager}:'
+Update Command Copied: 'Naredba za ažuriranje kopirana'

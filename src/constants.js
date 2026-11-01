@@ -7,6 +7,7 @@ const IpcChannels = {
   DISABLE_PROXY: 'disable-proxy',
   GET_DEVICE_NAME: 'get-device-name',
   GET_DEVICE_INFO: 'get-device-info',
+  GET_PACKAGE_MANAGER_UPDATE: 'get-package-manager-update',
   GET_SYSTEM_LOCALE: 'get-system-locale',
   GET_SYSTEM_FONTS: 'get-system-fonts',
   SHARE_LINK: 'share-link',

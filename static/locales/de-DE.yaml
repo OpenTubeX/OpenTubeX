@@ -2741,6 +2741,8 @@ Profile:
   Go To Profile Manager: Zum Profil Manager wechseln
 The playlist has been reversed: Die Playlist wurde umgedreht
 Download From Site: Von der Website herunterladen
+Update With Package Manager: 'Mit {packageManager} aktualisieren:'
+Update Command Copied: Aktualisierungsbefehl kopiert
 Version {versionNumber} is now available.: Version {versionNumber} ist jetzt verfügbar.
 See changes and update: Änderungen ansehen und aktualisieren
 Dismiss: Ausblenden

@@ -7,6 +7,7 @@ import { IpcChannels } from '../constants'
 import { normalizeSystemAccentColor } from '../materialTheme.js'
 import { handleTrusted, sendToAppWindows } from './ipc'
 import { getLinuxDistributionInfo } from './linuxDistribution'
+import { getPackageManagerUpdate } from './packageManagerUpdate'
 
 /** @returns {string | null} */
 export function getSystemAccentColor() {
@@ -18,11 +19,19 @@ export function getSystemAccentColor() {
 }
 
 /**
- * Answers questions about the device for sync device names, diagnostics and
- * font and accent color settings, and tells windows when the accent color changes.
+ * Answers questions about the device for sync device names, diagnostics,
+ * update prompts and font and accent color settings, and tells windows when
+ * the accent color changes.
  */
 export function setupSystemInfoIpc() {
   handleTrusted(IpcChannels.GET_DEVICE_NAME, () => hostname())
+
+  /** @type {Promise<import('./packageManagerUpdate').PackageManagerUpdate | null> | null} */
+  let packageManagerUpdate = null
+  handleTrusted(IpcChannels.GET_PACKAGE_MANAGER_UPDATE, () => {
+    packageManagerUpdate ??= getPackageManagerUpdate(app.getAppPath())
+    return packageManagerUpdate
+  }, null)
 
   handleTrusted(IpcChannels.GET_DEVICE_INFO, async () => {
     const linuxDistribution = process.platform === 'linux'

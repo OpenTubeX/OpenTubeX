@@ -2496,3 +2496,5 @@ Yattee Server:
     HTTPS required: Android kan kun afspille videoer fra Yattee-servere, der bruger HTTPS.
     Streams unavailable: Streams til denne video kunne ikke indlæses fra Yattee-serveren. Brug »Test forbindelse« under Indstillinger → Avanceret for at kontrollere serveren.
 Yattee Fallback Warning: Denne anmodning omgår din konfigurerede Yattee-server og opretter forbindelse direkte til YouTube, hvilket afslører din IP-adresse.
+Update With Package Manager: 'Opdater med {packageManager}:'
+Update Command Copied: 'Opdateringskommando kopieret'
