@@ -8,6 +8,14 @@ updates:
       - "PR: waiting for review"
       - "PR: dependencies"
     open-pull-requests-limit: 15
+    groups:
+      # Capacitor releases these packages together, so update them in one PR.
+      "capacitor":
+        patterns:
+          - "@capacitor/android"
+          - "@capacitor/cli"
+          - "@capacitor/core"
+          - "@capacitor/ios"
     allow:
       - dependency-name: "@capacitor-community/keep-awake"
       - dependency-name: "@capacitor-community/screen-brightness"
