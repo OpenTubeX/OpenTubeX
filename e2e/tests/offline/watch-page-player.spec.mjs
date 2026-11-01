@@ -1134,6 +1134,33 @@ test('repeats an A-B range and manages it from the player menu', async ({ app, p
   await expect(player.getByRole('button', { name: /^Clear A-B repeat range/ })).not.toBeVisible()
 })
 
+test('keeps the loop menu entry for an A-B range while the A-B repeat entry is hidden', async ({ app, page }) => {
+  await mockPlayableWatchPage(app, page)
+  await page.evaluate(() => window.$store.dispatch('updateHiddenPlayerMenuControls', ['abRepeat']))
+  const video = await openMockedVideo(page)
+  const player = page.locator('.ftVideoPlayer')
+  await video.evaluate((element) => {
+    element.pause()
+    element.currentTime = 2
+  })
+
+  await player.hover()
+  await page.keyboard.press('Shift+A')
+  await video.evaluate((element) => { element.currentTime = 4 })
+  await page.keyboard.press('Shift+B')
+  await expect(player.locator('.abRepeatRange')).toHaveCount(1)
+
+  await player.hover()
+  await player.getByRole('button', { name: 'More settings' }).click({ force: true })
+  const overflowMenu = player.locator('.shaka-overflow-menu:not(.shaka-hidden)')
+  await expect(overflowMenu.locator('.ab-repeat-button')).toHaveCount(0)
+  const loopAction = overflowMenu.locator('.loop-button')
+  await expect(loopAction).toBeVisible()
+  await expect(loopAction).toHaveAttribute('aria-pressed', 'true')
+  await loopAction.click()
+  await expect(loopAction).toHaveAttribute('aria-pressed', 'false')
+})
+
 test('loops a chapter from the chapters panel with A-B repeat', async ({ app, page }) => {
   await mockPlayableWatchPage(app, page)
   const video = await openMockedVideo(page)

@@ -7952,7 +7952,10 @@ export default defineComponent({
         removeLoopButtonContext?.()
         removeLoopButtonContext = setLoopButtonContext(controls, {
           isEnabled: () => Boolean(video.value?.loop || abRepeatEnabled.value),
-          isVisible: location => location !== 'overflow' || !abRepeatAvailable.value,
+          // The A-B repeat entry replaces the loop entry in the menu while a
+          // range exists, unless it is hidden.
+          isVisible: location => location !== 'overflow' || !abRepeatAvailable.value ||
+            store.getters.getHiddenPlayerMenuControls.includes('abRepeat'),
           subscribe: callback => watch([abRepeatAvailable, abRepeatEnabled], callback),
           toggle: () => {
             if (abRepeatAvailable.value) {
