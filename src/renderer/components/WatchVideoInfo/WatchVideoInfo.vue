@@ -325,21 +325,6 @@
             :playlist-id="playlistId"
             theme="base-no-default"
           />
-          <FtButton
-            v-if="!offline && supportsYtDlp && enableDownloads && !isUpcoming"
-            class="downloadButton"
-            :title="t('Downloads.Download Video')"
-            :aria-label="t('Downloads.Download Video')"
-            :icon="['fas', 'download']"
-            theme="secondary"
-            variant="filled"
-            shape="square"
-            @click="emit('open-download')"
-          >
-            <template #label>
-              <span class="downloadLabel">{{ t('Downloads.Download') }}</span>
-            </template>
-          </FtButton>
           <FtIconButton
             v-if="overflowMenuOptions.length > 0"
             class="moreActions"
@@ -357,6 +342,21 @@
               @select="key => toolbarActions[key].run()"
             />
           </FtIconButton>
+          <FtButton
+            v-if="!offline && supportsYtDlp && enableDownloads && !isUpcoming"
+            class="downloadButton"
+            :title="t('Downloads.Download Video')"
+            :aria-label="t('Downloads.Download Video')"
+            :icon="['fas', 'download']"
+            theme="secondary"
+            variant="filled"
+            shape="square"
+            @click="emit('open-download')"
+          >
+            <template #label>
+              <span class="downloadLabel">{{ t('Downloads.Download') }}</span>
+            </template>
+          </FtButton>
         </span>
       </div>
     </div>

@@ -201,6 +201,8 @@ test.describe('phone UI', () => {
     await expect(toolbar).toHaveClass(/\beven\b/)
     await expect(more).toBeVisible()
     await expect(formats).toHaveCount(0)
+    // Download stays at the far end, after the More button
+    await expect(toolbar.locator('.videoOptionsMobileRow > :last-child').last()).toHaveAccessibleName('Download Video')
     await expect.poll(() => getToolbarLayout(toolbar)).toMatchObject({ rows: 1, inside: true, touchSized: true })
     await attachScreenshot('narrow phone video actions')
 
