@@ -19,7 +19,7 @@ assert.ok(serial, 'Pass the serial of an emulator or device that no one else is 
 const APP_ID = 'org.opentubex.app.dev'
 const APK = fileURLToPath(new URL('../android/app/build/outputs/apk/debug/app-debug.apk', import.meta.url))
 const DESTINATION = fileURLToPath(new URL('../docs/screenshots', import.meta.url))
-// F-Droid and IzzyOnDroid read store screenshots from the fastlane metadata.
+// F-Droid reads store screenshots from the fastlane metadata.
 const FASTLANE_DESTINATION = fileURLToPath(new URL('../fastlane/metadata/android/en-US/images/phoneScreenshots', import.meta.url))
 const SIZE = '1080x2340'
 const DENSITY = '420'

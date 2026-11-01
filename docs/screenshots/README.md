@@ -112,7 +112,7 @@ attempt's captures and a failure screenshot.
 
 The command also copies the dark captures to
 `fastlane/metadata/android/en-US/images/phoneScreenshots/` as `1.png` to
-`3.png`. F-Droid and IzzyOnDroid show those in their app listings. The
+`3.png`. F-Droid shows those in its app listing. The
 [OpenTubeX F-Droid repository](https://github.com/OpenTubeX/fdroid) downloads
 them from `development` each time it publishes. Pushing new images publishes a
 nightly, which triggers that.
