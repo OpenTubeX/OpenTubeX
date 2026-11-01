@@ -563,4 +563,19 @@ test.describe('YouTube playlist search', () => {
     await expect(playlistPage.getByText('Playlist video 1', { exact: true })).toBeVisible()
     await expect(items).toHaveCount(300)
   })
+
+  test('keeps a restored search editable on a playlist with one video', async ({ page }) => {
+    await page.route(/\/api\/v1\/playlists\/single-video\?/, route => route.fulfill({
+      json: playlistResponse([playlistVideo(0)])
+    }))
+
+    await openPlaylistTab(page, '/playlist/single-video?searchQueryText=no%20match')
+    const playlistPage = page.locator('.playlistPage')
+    const search = playlistPage.locator('.playlistInfo').getByRole('searchbox', { name: 'Search for Videos' })
+    await expect(search).toHaveValue('no match')
+    await expect(playlistPage.getByText('There are no videos in this playlist that match your search', { exact: true })).toBeVisible()
+
+    await search.fill('')
+    await expect(playlistPage.getByText('Playlist video 1', { exact: true })).toBeVisible()
+  })
 })

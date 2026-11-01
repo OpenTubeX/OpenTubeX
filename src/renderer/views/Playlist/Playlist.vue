@@ -62,7 +62,7 @@
         :preload-available="playlistPreloadAvailable"
         :preload-pending="playlistPreloadPending"
         :preload-complete="playlistPreloadComplete"
-        :search-video-mode-allowed="shownVideoCount > 1"
+        :search-video-mode-allowed="shownVideoCount > 1 || playlistInVideoSearchMode"
         :search-query-text="searchQueryTextRequested"
         :theme="pageLayout === 'list' ? 'base' : 'top-bar'"
         class="playlistInfo"
@@ -160,7 +160,7 @@
               :data="item"
               :playlist-id="playlistId"
               :playlist-type="infoSource"
-              :playlist-index="playlistInVideoSearchMode ? shownPlaylistItems.findIndex(i => i === item) : index"
+              :playlist-index="playlistInVideoSearchMode ? (shownPlaylistItemIndexes.get(item) ?? -1) : index"
               :playlist-item-id="item.playlistItemId"
               appearance="result"
               :always-show-add-to-playlist-button="true"
@@ -168,7 +168,7 @@
               :can-move-video-up="index > 0 && canMoveVideos"
               :can-move-video-down="index < shownPlaylistItems.length - 1 && canMoveVideos"
               :can-remove-from-playlist="true"
-              :video-index="playlistInVideoSearchMode ? shownPlaylistItems.findIndex(i => i === item) : index"
+              :video-index="playlistInVideoSearchMode ? (shownPlaylistItemIndexes.get(item) ?? -1) : index"
               :initial-visible-state="index < 10"
               :dragged-video="draggedVideo"
               :is-sort-order-custom="isSortOrderCustom"
@@ -845,6 +845,9 @@ const shownPlaylistItems = computed(() => {
   const toBeDeletedPlaylistItemIds_ = toBeDeletedPlaylistItemIds.value
   return playlistItems.value.filter((v) => !toBeDeletedPlaylistItemIds_.includes(v.playlistItemId))
 })
+
+// Search results keep their playlist position; YouTube playlists render every match
+const shownPlaylistItemIndexes = computed(() => new Map(shownPlaylistItems.value.map((item, index) => [item, index])))
 
 const shownPlaylistItemCount = computed(() => shownPlaylistItems.value)
 
