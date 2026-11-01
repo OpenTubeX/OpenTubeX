@@ -144,13 +144,14 @@ test('the chapters button sits next to the time on the control bar and joins the
   assert.ok(compact.overflowMenuButtons.includes('ft_chapters'))
 })
 
-test('the compact controls of phones keep their control bar buttons out of the menu', () => {
+test('the compact controls of phones keep the chapters out of the menu', () => {
   const config = controls({ mobile: true, overflow: true, controlBarButtons: ['chapters', 'captions', 'pictureInPicture', 'menu', 'fullscreen'] })
   assert.ok(config.controlPanelElements.includes('ft_chapters'))
-  assert.ok(config.controlPanelElements.includes('picture_in_picture'))
   assert.equal(config.overflowMenuButtons.includes('ft_chapters'), false)
-  assert.equal(config.overflowMenuButtons.includes('picture_in_picture'), false)
-  // The caption toggle keeps the caption menu.
+  // A narrow phone control bar hides its picture in picture and caption
+  // buttons, so the menu keeps both.
+  assert.ok(config.controlPanelElements.includes('picture_in_picture'))
+  assert.ok(config.overflowMenuButtons.includes('picture_in_picture'))
   assert.ok(config.overflowMenuButtons.includes('captions'))
 
   const removed = controls({ mobile: true, overflow: true, controlBarButtons: ['captions', 'menu', 'fullscreen'] })

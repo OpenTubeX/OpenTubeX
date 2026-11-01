@@ -317,9 +317,9 @@ const overflowItems = computed(() => {
     .filter(id => items[id] && !hidden.has(id) &&
         // The full control bar keeps its buttons out of the menu, except for
         // the caption toggle, which keeps the caption menu. The compact
-        // controls of phones keep picture in picture and the chapters.
+        // controls of phones keep the chapters next to the time.
         (compact.value
-          ? !(IS_CAPACITOR && (id === 'pictureInPicture' || id === 'chapters') && store.getters.getControlBarButtons.includes(id))
+          ? !(IS_CAPACITOR && id === 'chapters' && store.getters.getControlBarButtons.includes(id))
           : id === 'captions' || !CONTROL_BAR_BUTTON_IDS.has(id) || removedControlBarButtons.value.has(id)))
     .map(id => ({ ...items[id], id }))
 })

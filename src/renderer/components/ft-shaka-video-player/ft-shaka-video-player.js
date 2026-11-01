@@ -3049,13 +3049,14 @@ export default defineComponent({
       if (onlyUseOverFlowMenu.value || props.shortsPlayer) {
         // The overflow menu holds the other buttons.
         const compactButtons = ['captions', 'menu', 'fullscreen', ...(mobile && !props.shortsPlayer ? ['pictureInPicture'] : [])]
-        // The compact controls of phones also keep the chapters next to the
-        // time. The caption toggle keeps the caption menu.
-        const onCompactBar = id => id !== 'captions' && controlBarButtons.includes(id) &&
-          (compactButtons.includes(id) || (id === 'chapters' && mobile && !props.shortsPlayer))
+        // The compact controls of phones keep the chapters next to the time,
+        // so the menu leaves them out. A narrow phone control bar hides its
+        // picture in picture and caption buttons (`useAdaptiveControlPanelLayout`),
+        // so the menu keeps those.
+        const chaptersNextToTime = mobile && !props.shortsPlayer && controlBarButtons.includes('chapters')
         uiConfig.overflowMenuButtons = [
           ...(props.shortsPlayer ? ['ft_shorts_video_info'] : []),
-          ...menuControls(id => id !== 'theatreMode' && !onCompactBar(id) &&
+          ...menuControls(id => id !== 'theatreMode' && !(id === 'chapters' && chaptersNextToTime) &&
             !(id === 'autoplay' && props.shortsPlayer) &&
             !(id === 'fullWindow' && process.env.IS_CAPACITOR)),
           'recenter_vr',

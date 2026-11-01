@@ -97,8 +97,6 @@ test('Android places the compact controls on the control bar, in the player menu
     await expect(page.locator('.phonePlayerOptions[open] .shaka-caption-button')).toBeVisible()
     await expect(page.locator('.phonePlayerOptions[open] .sleep-timer-button')).toBeVisible()
     await expect(page.locator('.phonePlayerOptions[open] .ambient-mode-button')).toHaveCount(0)
-    // Picture in picture stays on the control bar instead of also joining the menu.
-    await expect(page.locator('.phonePlayerOptions[open] .shaka-pip-button')).toHaveCount(0)
   } finally {
     await page.evaluate(({ settings, originalRoute }) => {
       const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
