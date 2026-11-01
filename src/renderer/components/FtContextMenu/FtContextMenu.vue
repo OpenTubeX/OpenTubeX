@@ -200,6 +200,7 @@ import { getChannelLinkDetails, getChannelLinkMenuItems } from '../../helpers/ch
 import { clampOverlayScrollTop, restoreOverlayScrollTop } from '../../helpers/overlayScrollbars'
 import FtContextMenuItemIcon from './FtContextMenuItemIcon.vue'
 import { getTabDeviceMenuItem } from '../../helpers/tab-device-menu'
+import { collapseSeparators } from '../../helpers/menuSeparators'
 
 const { t } = useI18n()
 const IS_CAPACITOR = !!process.env.IS_CAPACITOR
@@ -264,9 +265,7 @@ const videoQuickActions = computed(() => localItems.value
 const quickActions = computed(() => tabColorMenu.value ? tabQuickActions.value : videoQuickActions.value)
 const menuRows = computed(() => {
   const rows = displayedItems.value.filter(item => item !== tabColorMenu.value && !quickActions.value.includes(item))
-  return rows.filter((item, index) => item.type !== 'separator' || (
-    index > 0 && index < rows.length - 1 && rows[index - 1].type !== 'separator'
-  ))
+  return collapseSeparators(rows)
 })
 
 function updateFullscreenTarget() {

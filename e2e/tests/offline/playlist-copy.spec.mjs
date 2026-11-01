@@ -119,6 +119,15 @@ test('forks a complete saved playlist and refreshes its editable local snapshot 
   await page.screenshot({ path: test.info().outputPath('playlist-copy-mobile.png') })
 })
 
+test('the More menu of a remote playlist has no separator after its only group', async ({ page }) => {
+  await page.route(/\/api\/v1\/playlists\/fork-source\?/, route => route.fulfill({ json: response([video(0)], 1) }))
+  await openPlaylist(page)
+  await expect(await openPlaylistMenuItem(page, 'Copy Playlist')).toBeVisible()
+  const menu = page.getByRole('menu')
+  await expect(menu.getByRole('menuitem')).toHaveCount(1)
+  await expect(menu.getByRole('separator')).toHaveCount(0)
+})
+
 test('a failed copy leaves no partial prompt and can be retried', async ({ page }) => {
   let fail = true
   await page.route(/\/api\/v1\/playlists\/fork-source\?/, route => {
