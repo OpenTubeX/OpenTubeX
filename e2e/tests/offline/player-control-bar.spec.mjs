@@ -164,6 +164,7 @@ test('scrolls a menu opened from the control bar below its fixed header', async 
   await page.evaluate(async () => {
     // Enough speeds that the menu has to scroll.
     await window.$store.dispatch('updateMaxVideoPlaybackRate', 10)
+    await window.$store.dispatch('updateVideoPlaybackRateInterval', 0.05)
     await window.$store.dispatch('updateControlBarButtons', ['playbackRate', 'menu', 'fullscreen'])
   })
   await player.locator('.shaka-controls-button-panel .shaka-playbackrate-button').click()
@@ -183,5 +184,10 @@ test('scrolls a menu opened from the control bar below its fixed header', async 
   expect(await header.evaluate(element => getComputedStyle(element).backgroundColor)).toBe('rgb(28, 28, 28)')
   expect(await menu.evaluate(element => element.getBoundingClientRect().top)).toBeCloseTo(headerBounds.top, 0)
   await expect.poll(() => menu.locator(':scope > .os-scrollbar-vertical .os-scrollbar-track').evaluate(element => element.getBoundingClientRect().top))
+    .toBeGreaterThanOrEqual(headerBounds.bottom - 0.5)
+  // An option scrolled into view, like the chosen one when the menu opens, stops below the header.
+  const preset = menu.locator('.shaka-playback-rate-preset-btn').nth(100)
+  await preset.evaluate(element => element.scrollIntoView({ block: 'nearest', container: 'nearest' }))
+  await expect.poll(() => preset.evaluate(element => element.getBoundingClientRect().top))
     .toBeGreaterThanOrEqual(headerBounds.bottom - 0.5)
 })

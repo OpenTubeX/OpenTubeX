@@ -644,13 +644,15 @@
 
 /*
   Menus opened from the control bar scroll by themselves, as Shaka positions
-  them, so their header sticks to the top above the options. It is opaque and
-  the scrollbar starts below it, so neither passes behind it.
+  them and adds their options to them directly, so their header sticks to the
+  top above the options. It is opaque, the scrollbar starts below it, and
+  options scrolled into view, such as the chosen or focused one, stop below it.
 */
 :deep(.shaka-controls-container > .ft-scrolling-submenu) {
   --ft-bar-menu-header-size: 39px;
 
   padding-block-start: 0;
+  scroll-padding-block-start: var(--ft-bar-menu-header-size);
 }
 
 :deep(.shaka-controls-container > .ft-scrolling-submenu > .shaka-back-to-overflow-button) {
