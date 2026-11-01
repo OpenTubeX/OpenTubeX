@@ -568,10 +568,11 @@ test.describe('YouTube playlist search', () => {
   test('keeps a valid offset when searching from the end of the loaded page', { tag: '@scale' }, async ({ page }) => {
     await page.route(/\/api\/v1\/playlists\/search-test\?/, async (route) => {
       const pageNumber = Number(new URL(route.request().url()).searchParams.get('page') ?? 1)
-      // Every other video matches, so the results of each page still overflow the window
+      // Only the first 90 videos match, so searching removes the videos at the end of the
+      // loaded page without moving the content above them, which scroll anchoring would follow
       const videos = Array.from({ length: 100 }, (_, index) => {
         const video = playlistVideo((pageNumber - 1) * 100 + index)
-        return index % 2 === 0 ? { ...video, title: video.title.replace('Playlist', 'Marked') } : video
+        return pageNumber === 1 && index < 90 ? { ...video, title: video.title.replace('Playlist', 'Marked') } : video
       })
       await route.fulfill({ json: playlistResponse(videos, 300) })
     })
@@ -580,9 +581,12 @@ test.describe('YouTube playlist search', () => {
     const playlistPage = page.locator('.playlistPage')
     const items = playlistPage.locator('.playlistItem')
     await expect(items).toHaveCount(100)
+    // Placeholders grow as they mount, so the end only counts once the last row is real
     await expect.poll(() => page.evaluate(() => {
       window.scrollTo(0, document.documentElement.scrollHeight)
-      return window.scrollY > 0 && window.scrollY + window.innerHeight >= document.documentElement.scrollHeight - 1
+      const last = [...document.querySelectorAll('.playlistPage .playlistItem')].at(-1)
+      return window.scrollY > 0 && !!last.querySelector('.ft-list-video') &&
+        window.scrollY + window.innerHeight >= document.documentElement.scrollHeight - 1
     })).toBe(true)
     const lastItemGap = () => page.evaluate(() =>
       window.innerHeight - [...document.querySelectorAll('.playlistPage .playlistItem')].at(-1).getBoundingClientRect().bottom)
@@ -590,13 +594,28 @@ test.describe('YouTube playlist search', () => {
 
     // Typing through fill() would scroll the field into view and leave the end
     await updateInputWithoutScrolling(playlistPage.locator('.playlistInfo').getByRole('searchbox', { name: 'Search for Videos' }), 'Marked')
-    await expect(items).toHaveCount(150)
+    await expect(items).toHaveCount(90)
+    await expect(playlistPage.locator('.ft-auto-load-next-page-wrapper, .loadNextPageWrapper')).toHaveCount(0)
     await expect.poll(() => page.evaluate(() => {
       const maximum = document.documentElement.scrollHeight - window.innerHeight
       return { atEnd: window.scrollY > 0, offsetValid: window.scrollY <= Math.max(0, maximum) + 1 }
     })).toEqual({ atEnd: true, offsetValid: true })
     // No more space is left below the last result than below the last video before searching
     await expect.poll(lastItemGap).toBeLessThanOrEqual(gapAtEnd + 1)
+  })
+
+  test('numbers search results like the playlist when a members-only video is hidden', async ({ page }) => {
+    await page.route(/\/api\/v1\/playlists\/members-only\?/, route => route.fulfill({
+      json: playlistResponse([playlistVideo(0), { ...playlistVideo(1), isMembersOnly: true }, playlistVideo(2)])
+    }))
+
+    await openPlaylistTab(page, '/playlist/members-only')
+    const playlistPage = page.locator('.playlistPage')
+    const indexes = playlistPage.locator('.playlistItem .videoIndex')
+    await expect(indexes).toHaveText(['1', '2'])
+
+    await playlistPage.locator('.playlistInfo').getByRole('searchbox', { name: 'Search for Videos' }).fill('video 3')
+    await expect(indexes).toHaveText(['2'])
   })
 
   test('keeps a restored search editable on a playlist with one video', async ({ page }) => {
