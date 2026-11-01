@@ -117,6 +117,27 @@ test.describe('break and bedtime reminders', () => {
   })
 })
 
+test.describe('watch statistics turned off', () => {
+  test.use({ seed: { settings: { ...playbackSettings, enableWatchStats: false } } })
+
+  test('time watched before statistics turn on stays unrecorded', async ({ app, page }) => {
+    await mockPlayableWatchPage(app, page)
+    const video = await openMockedVideo(page)
+    await expect.poll(() => video.evaluate(element => element.currentTime), { timeout: 10_000 }).toBeGreaterThan(4)
+
+    await page.evaluate(() => window.$store.dispatch('updateEnableWatchStats', true))
+    const enabledAt = await video.evaluate(element => element.currentTime)
+    await expect.poll(() => video.evaluate(element => element.currentTime), { timeout: 10_000 }).toBeGreaterThan(enabledAt + 2)
+    await video.evaluate(element => element.pause())
+    const publicSeconds = await video.evaluate(element => element.currentTime) - enabledAt
+
+    // Pausing flushes the buffer, which must not include the private seconds before statistics turned on.
+    const recorded = () => page.evaluate(date => window.$store.getters.getWatchSecondsByDate[date] ?? 0, today)
+    await expect.poll(recorded).toBeGreaterThan(1)
+    expect(await recorded()).toBeLessThan(publicSeconds + 1)
+  })
+})
+
 test.describe('starting during bedtime', () => {
   test.use({ seed: { settings: { animationSpeed: 0, bedtimeReminder: true, bedtimeStart: timeOfDay(-30), bedtimeEnd: timeOfDay(60) } } })
 

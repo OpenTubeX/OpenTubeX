@@ -1479,6 +1479,14 @@ export default defineComponent({
     watchStatsResetVersion() {
       this.watchTimeTracker.clear()
     },
+    // Buffered time follows the recording policy it was watched under, so
+    // private playback never reaches the statistics after they turn on.
+    rememberHistory() {
+      this.watchTimeTracker.clear()
+    },
+    '$store.getters.getEnableWatchStats'() {
+      this.watchTimeTracker.clear()
+    },
     wellbeingPauseRequest(request) {
       if (request && (!request.shortsOnly || this.isShort) && !this.isPlaybackPaused()) {
         this.$refs.player?.pause()
