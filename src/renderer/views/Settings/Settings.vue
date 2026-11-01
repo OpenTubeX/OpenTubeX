@@ -903,6 +903,13 @@ watch([
     await nextTick()
     await activeSettingsSectionRef.value?.activateTab(LEGACY_SETTINGS_SECTION_TABS[section])
   }
+  if (request.subpage) {
+    await nextTick()
+    settingsContentRef.value?.querySelector(`[data-settings-subpage="${request.subpage}"]`)?.click()
+    // The subpage replaces the focused search field, so keep focus in the window for Escape
+    await nextTick()
+    settingsWindowRef.value?.focus({ preventScroll: true })
+  }
 }, { immediate: true })
 watch([() => props.searchTarget, canNavigateSettings], async ([target, canNavigate]) => {
   if (!target || !canNavigate) return

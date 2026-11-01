@@ -233,6 +233,32 @@ test.describe('with followed feeds', () => {
     await expect(panel.getByText('1 feed could not be refreshed.')).toBeHidden()
   })
 
+  test('opens the feed manager from the RSS tab after settings were opened before', async ({ page }) => {
+    await mockFeeds(page)
+    const section = await goToSettingsSection(page, 'subscriptions')
+    const manager = page.locator('.settingsSubpageContent')
+    await page.locator('.settingsCloseButton').click()
+    await expect(page.locator('.settingsWindow')).toBeHidden()
+
+    await goTo(page, 'subscriptions')
+    await page.locator('[data-rss-feeds-tab]').click()
+    const header = page.locator('.subscriptionsHeader')
+    for (let attempt = 0; attempt < 2; attempt++) {
+      await header.getByRole('button', { name: 'Manage RSS Feeds' }).click()
+      await expect(manager.getByRole('textbox', { name: 'Add Feed' })).toBeVisible()
+      // Focus stays in the window, so Escape closes it
+      await page.keyboard.press('Escape')
+      await expect(page.locator('.settingsWindow')).toBeHidden()
+    }
+
+    // The settings button still opens the manager afterwards
+    await goTo(page, 'settings')
+    await page.locator('.settingsWindow').getByRole('banner').getByRole('button', { name: 'Subscriptions' }).click()
+    await expect(manager).toHaveCount(0)
+    await section.getByRole('button', { name: 'Manage RSS Feeds' }).click()
+    await expect(manager.getByRole('textbox', { name: 'Add Feed' })).toBeVisible()
+  })
+
   test('keeps a feed added while another refresh is running', async ({ page }) => {
     await mockFeeds(page)
     await goTo(page, 'subscriptions')
@@ -326,6 +352,65 @@ test.describe('with followed feeds', () => {
     await expect(panel.getByText('2 feeds could not be refreshed.')).toBeVisible()
     expect(failed).toBe(true)
     expect(await titles.allTextContents()).toEqual(['Newest VOD', 'Older VOD'])
+  })
+
+  test('keeps the items of a feed that fails to refresh after a restart', async ({ page }) => {
+    await mockFeeds(page)
+    await goTo(page, 'subscriptions')
+    await page.locator('[data-rss-feeds-tab]').click()
+    const panel = page.locator('#subscriptionsPanel')
+    const titles = panel.locator('.ft-list-item .h3Title')
+    await expect(titles).toHaveText(['Newest VOD', 'Older VOD'])
+
+    await page.route(RSS_URL, route => route.fulfill({ status: 500, body: 'Server error' }))
+    await page.reload()
+    await goTo(page, 'subscriptions')
+    await page.locator('[data-rss-feeds-tab]').click()
+    await expect(panel.getByText('2 feeds could not be refreshed.')).toBeVisible()
+    await expect(titles).toHaveText(['Newest VOD', 'Older VOD'])
+  })
+
+  test('keeps the items of a feed added before the RSS tab was opened after a restart', async ({ page }) => {
+    await mockFeeds(page)
+    const manager = await openFeedManager(page)
+    const input = manager.getByRole('textbox', { name: 'Add Feed' })
+    await input.fill(ATOM_URL)
+    await input.press('Enter')
+    await expect(manager.locator('.feedRow')).toHaveCount(3)
+
+    await page.route(ATOM_URL, route => route.fulfill({ status: 500, body: 'Server error' }))
+    await page.reload()
+    await goTo(page, 'subscriptions')
+    await page.locator('[data-rss-feeds-tab]').click()
+    const panel = page.locator('#subscriptionsPanel')
+    await expect(panel.getByText('2 feeds could not be refreshed.')).toBeVisible()
+    await expect(panel.locator('.ft-list-item .h3Title', { hasText: 'Atom video' })).toBeVisible()
+  })
+
+  test('shows progress while a feed is added', { tag: '@scale' }, async ({ page }) => {
+    await mockFeeds(page)
+    let release
+    const held = new Promise(resolve => { release = resolve })
+    await page.route(ATOM_URL, async route => {
+      await held
+      await route.fulfill({ contentType: 'application/atom+xml', body: atomFeed })
+    })
+    const manager = await openFeedManager(page)
+    const input = manager.getByRole('textbox', { name: 'Add Feed' })
+    const progress = manager.getByRole('progressbar', { name: 'Add Feed' })
+    await expect(progress).toHaveCount(0)
+    await input.fill(ATOM_URL)
+    await input.press('Enter')
+    await expect(progress).toBeVisible()
+    await expect(input).toBeDisabled()
+    // Without animations, the bar fills the track instead of stopping partway
+    await page.evaluate(() => { document.documentElement.dataset.reducedMotion = 'reduce' })
+    await expect.poll(() => progress.evaluate(bar => getComputedStyle(bar, '::before').width === getComputedStyle(bar).width))
+      .toBe(true)
+
+    release()
+    await expect(manager.locator('.feedRow')).toHaveCount(3)
+    await expect(progress).toHaveCount(0)
   })
 
   test('keeps the feed manager button on the refresh row at phone widths', { tag: '@scale' }, async ({ app, page }) => {
@@ -492,6 +577,29 @@ test.describe('without followed feeds', () => {
     await expect(panel.getByText("You don't follow any RSS feeds yet.")).toBeVisible()
     await panel.getByRole('button', { name: 'Manage RSS Feeds' }).click()
     await expect(page.locator('.settingsSubpageContent').getByRole('textbox', { name: 'Add Feed' })).toBeVisible()
+  })
+})
+
+test.describe('with subscription groups', () => {
+  test.use({
+    seed: {
+      settings: {
+        fetchSubscriptionsAutomatically: false,
+        enableRssFeeds: true,
+        followedRssFeeds: [RSS_FEED],
+        subscriptionGroups: [{ id: 'music', name: 'Music', channelIds: [] }]
+      }
+    }
+  })
+
+  test('hides the groups, which only filter channels, on the RSS tab', async ({ page }) => {
+    await mockFeeds(page)
+    await goTo(page, 'subscriptions')
+    const groups = page.getByRole('tablist', { name: 'Groups' })
+    await expect(groups).toBeVisible()
+    await page.locator('[data-rss-feeds-tab]').click()
+    await expect(page.locator('#subscriptionsPanel .ft-list-item')).toHaveCount(2)
+    await expect(groups).toHaveCount(0)
   })
 })
 

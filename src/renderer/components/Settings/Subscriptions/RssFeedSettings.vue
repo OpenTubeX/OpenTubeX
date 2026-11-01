@@ -14,6 +14,7 @@
       <FtButton
         :label="t('Settings.Subscription Settings.Manage RSS Feeds')"
         :icon="['fas', 'rss']"
+        data-settings-subpage="rss-feeds"
         @click="showManager = true"
       />
     </FtFlexBox>
@@ -42,18 +43,26 @@
           />
           {{ t('Subscriptions.RSS Feeds.Public RSSHub Instances') }}
         </a>
-        <FtInput
-          ref="feedInput"
-          :label="t('Subscriptions.RSS Feeds.Add Feed')"
-          :placeholder="t('Subscriptions.RSS Feeds.Feed URL')"
-          :icon="['fas', 'rss']"
-          :show-label="true"
-          :show-action-button="true"
-          :action-button-label="t('Subscriptions.RSS Feeds.Add Feed')"
-          :force-action-button-icon-name="['fas', 'plus']"
-          :disabled="isAdding"
-          @click="addFeed"
-        />
+        <div class="feedInput">
+          <FtInput
+            ref="feedInput"
+            :label="t('Subscriptions.RSS Feeds.Add Feed')"
+            :placeholder="t('Subscriptions.RSS Feeds.Feed URL')"
+            :icon="['fas', 'rss']"
+            :show-label="true"
+            :show-action-button="true"
+            :action-button-label="t('Subscriptions.RSS Feeds.Add Feed')"
+            :force-action-button-icon-name="['fas', 'plus']"
+            :disabled="isAdding"
+            @click="addFeed"
+          />
+          <div
+            v-if="isAdding"
+            class="addFeedProgress"
+            role="progressbar"
+            :aria-label="t('Subscriptions.RSS Feeds.Add Feed')"
+          />
+        </div>
       </div>
       <div
         ref="feedScroller"
@@ -128,7 +137,7 @@
 </template>
 
 <script setup>
-import { computed, nextTick, onBeforeUnmount, onMounted, ref, shallowRef, useTemplateRef, watch } from 'vue'
+import { computed, nextTick, onBeforeUnmount, ref, shallowRef, useTemplateRef, watch } from 'vue'
 import { Translation, useI18n } from 'vue-i18n'
 import { FtIcon } from '@opentubex/icons'
 
@@ -149,7 +158,6 @@ import {
   normalizeHttpUrl,
   retryRssFeed,
   rssFeedErrors,
-  rssFeedManagerRequested,
   updateMissingRssFeedAvatars
 } from '../../../helpers/rssFeeds'
 import { showToast } from '../../../helpers/utils'
@@ -173,16 +181,6 @@ const feedContent = useTemplateRef('feedContent')
 
 watch(enableRssFeeds, enabled => {
   if (!enabled) showManager.value = false
-})
-
-// The RSS tab opens the manager directly. The subpage needs the mounted settings window.
-onMounted(() => {
-  watch(rssFeedManagerRequested, async (requested) => {
-    if (!requested) return
-    rssFeedManagerRequested.value = false
-    await nextTick()
-    showManager.value = true
-  }, { immediate: true })
 })
 
 // Removing feeds shortens the list, which can leave the viewport past its end

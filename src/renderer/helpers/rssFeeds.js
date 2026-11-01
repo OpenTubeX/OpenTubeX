@@ -280,8 +280,35 @@ export async function fetchRssFeed(url, signal) {
   return parseRssFeed(await response.text(), url, response.url || url)
 }
 
-/** Fetched items stay in memory while the window is open. */
-export const rssFeedItems = shallowRef(/** @type {RssFeedItem[]} */ ([]))
+const ITEMS_STORAGE_KEY = 'rssFeedItems'
+
+/**
+ * The last loaded items, so that they show right away after a restart and
+ * stay when their feed fails to refresh.
+ * @returns {RssFeedItem[]}
+ */
+function loadStoredItems() {
+  try {
+    const items = JSON.parse(localStorage.getItem(ITEMS_STORAGE_KEY) ?? '[]')
+    return Array.isArray(items) ? items : []
+  } catch {
+    return []
+  }
+}
+
+/**
+ * @param {RssFeedItem[]} items
+ */
+function setRssFeedItems(items) {
+  rssFeedItems.value = items
+  try {
+    localStorage.setItem(ITEMS_STORAGE_KEY, JSON.stringify(items))
+  } catch (error) {
+    console.error('Failed to cache the RSS feed items', error)
+  }
+}
+
+export const rssFeedItems = shallowRef(loadStoredItems())
 /** URLs of the feeds that failed in the last refresh */
 export const rssFeedErrors = shallowRef(/** @type {string[]} */ ([]))
 export const rssFeedsLastRefresh = shallowRef(/** @type {number | null} */ (null))
@@ -345,12 +372,10 @@ export async function updateMissingRssFeedAvatars(results) {
  * @param {{ items: RssFeedItem[], image: string | null, isRssHub: boolean }} result
  */
 export function addLoadedRssFeed(feed, result) {
-  if (rssFeedsLastRefresh.value !== null) {
-    rssFeedItems.value = [...rssFeedItems.value.filter(item => item.feedUrl !== feed.url), ...result.items]
-      .sort(compareFeedItems)
-    refreshedFeedUrls.add(feed.url)
-    loadedDuringRefresh.add(feed.url)
-  }
+  setRssFeedItems([...rssFeedItems.value.filter(item => item.feedUrl !== feed.url), ...result.items]
+    .sort(compareFeedItems))
+  refreshedFeedUrls.add(feed.url)
+  loadedDuringRefresh.add(feed.url)
   rssFeedErrors.value = rssFeedErrors.value.filter(url => url !== feed.url)
 }
 
@@ -382,12 +407,12 @@ export async function refreshRssFeeds(feeds) {
     const loadedUrls = loadedDuringRefresh
     const failedUrls = new Set(feeds.filter((feed, index) => results[index].status === 'rejected' && !loadedUrls.has(feed.url))
       .map(feed => feed.url))
-    rssFeedItems.value = [
+    setRssFeedItems([
       ...rssFeedItems.value.filter(item => loadedUrls.has(item.feedUrl) || failedUrls.has(item.feedUrl)),
       ...results.flatMap((result, index) => (
         result.status === 'fulfilled' && !loadedUrls.has(feeds[index].url) ? result.value.items : []
       ))
-    ].sort(compareFeedItems)
+    ].sort(compareFeedItems))
     rssFeedErrors.value = [...failedUrls]
     rssFeedsLastRefresh.value = Date.now()
     refreshedFeedUrls = new Set([...feeds.map(feed => feed.url), ...loadedUrls])
@@ -403,11 +428,7 @@ export async function refreshRssFeeds(feeds) {
   }
 }
 
-/** Opens the feed manager once the settings show the RSS feed section */
-export const rssFeedManagerRequested = shallowRef(false)
-
 export function openRssFeedManager() {
-  rssFeedManagerRequested.value = true
-  store.commit('setSettingsWindowSection', 'subscriptions')
+  store.commit('setSettingsWindowSection', { section: 'subscriptions', subpage: 'rss-feeds' })
   store.dispatch('showSettingsWindow')
 }
