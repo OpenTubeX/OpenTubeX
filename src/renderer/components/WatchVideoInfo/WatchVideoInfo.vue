@@ -817,14 +817,17 @@ function updateOptionsLayout() {
   const style = getComputedStyle(toolbar)
   const groups = [...toolbar.children].filter(group => group.getClientRects().length > 0)
   const items = groups.flatMap(getToolbarItems)
-  const hiddenWidth = overflowedActions.value.size * (toolbar.querySelector('.ftIconButton')?.getBoundingClientRect().width ?? 0)
   const toolbarPadding = parseFloat(style.paddingInlineStart) + parseFloat(style.paddingInlineEnd)
   const gap = parseFloat(style.columnGap) || 0
-  const naturalWidth = groups.reduce((width, group) => width + getGroupWidth(group), 0) +
-    gap * Math.max(groups.length - 1, 0) + toolbarPadding + hiddenWidth
   const measuredDividersWidth = groups.reduce((width, group) => width + getDividerWidth(group), 0)
   if (measuredDividersWidth > 0) dividerWidth = measuredDividersWidth
   const dividersWidth = overflowCount.value > 0 ? dividerWidth : measuredDividersWidth
+  // The actions in the More menu would each add a button and a gap, and the
+  // divider if moving them removed it
+  const buttonWidth = toolbar.querySelector('.ftIconButton')?.getBoundingClientRect().width ?? 0
+  const hiddenWidth = overflowedActions.value.size * (buttonWidth + gap) + dividersWidth - measuredDividersWidth
+  const naturalWidth = groups.reduce((width, group) => width + getGroupWidth(group), 0) +
+    gap * Math.max(groups.length - 1, 0) + toolbarPadding + hiddenWidth
   toolbar.classList.remove('measuring')
 
   const availableWidth = row.clientWidth + 0.5
