@@ -158,7 +158,7 @@ test.describe('saved control bar from before the chapters and screenshot buttons
   })
 })
 
-test('scrolls a menu opened from the control bar below its fixed header', async ({ app, page }) => {
+test('scrolls a menu opened from the control bar below its fixed header', { tag: '@scale' }, async ({ app, page }) => {
   await setWindowSize(app, page, { width: 1000, height: 560 })
   const player = await openPausedVideo({ app, page })
   await page.evaluate(async () => {
