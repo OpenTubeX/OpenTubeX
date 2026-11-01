@@ -806,6 +806,7 @@ function handlePlay() {
     store.commit('showWellbeingPrompt', wellbeingBlock)
     return
   }
+  store.commit('markWellbeingPlay', Date.now())
   playCompanionAudio()
 }
 

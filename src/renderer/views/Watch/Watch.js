@@ -4890,6 +4890,7 @@ export default defineComponent({
         this.$store.commit('showWellbeingPrompt', wellbeingBlock)
         return
       }
+      this.$store.commit('markWellbeingPlay', Date.now())
       this.waitingForPlaylistContinuation = false
       this.$refs.watchVideoPlaylist?.resetUnavailableSkipChain()
       // Resuming consumes the recovery pause, so later format switches or

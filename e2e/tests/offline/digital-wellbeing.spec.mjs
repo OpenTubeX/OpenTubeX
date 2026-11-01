@@ -144,6 +144,22 @@ test.describe('break and bedtime reminders', () => {
     await expect(prompt).toBeHidden()
   })
 
+  test('a video that just started counts as playing for the bedtime wait', async ({ app, page }) => {
+    await mockPlayableWatchPage(app, page)
+    await openMockedVideo(page)
+    // Before the first watch time flush, only the play event shows that playback is active.
+    expect(await page.evaluate(() => window.$store.getters.getWellbeing.lastPlaybackAt)).toBe(0)
+    await page.evaluate(([start, end]) => {
+      const store = window.$store
+      store.dispatch('updateBedtimeStart', start)
+      store.dispatch('updateBedtimeEnd', end)
+      store.dispatch('updateBedtimeReminder', true)
+    }, [timeOfDay(-30), timeOfDay(60)])
+
+    await expect.poll(() => page.evaluate(() => window.$store.getters.getWellbeingBedtimeWaiting)).toBe(true)
+    await expect(page.getByRole('dialog', { name: 'It\'s time for bed' })).toHaveCount(0)
+  })
+
   test('the bedtime reminder waits for the video to end', async ({ app, page }) => {
     await mockPlayableWatchPage(app, page)
     const video = await openMockedVideo(page)

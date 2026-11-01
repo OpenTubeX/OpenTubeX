@@ -46,6 +46,8 @@ const state = {
   // Played seconds since the last break reminder or a long pause.
   sessionSeconds: 0,
   lastPlaybackAt: 0,
+  // Playback reports time only every few seconds, so starting it marks playback as active right away.
+  lastPlayAt: 0,
   /** @type {{ id: number, shortsOnly: boolean } | null} */
   pauseRequest: null,
   /** @type {WellbeingPrompt | null} */
@@ -185,6 +187,10 @@ const mutations = {
 
   snoozeWellbeingBedtime(state, until) {
     state.bedtimeSnoozedUntil = until
+  },
+
+  markWellbeingPlay(state, now) {
+    state.lastPlayAt = now
   },
 
   resetWellbeingSession(state) {
