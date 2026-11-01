@@ -59,6 +59,7 @@ const atomFeed = `<?xml version="1.0" encoding="UTF-8"?>
     <id>urn:peertube:2</id>
     <title type="html">Atom &lt;b&gt;video&lt;/b&gt;</title>
     <link rel="alternate" href="/w/abc"/>
+    <updated>${new Date(now).toISOString()}</updated>
     <published>${new Date(now - 2 * 86400000).toISOString()}</published>
     <author><name>PeerTube creator</name></author>
     <media:thumbnail url="https://rss.example.test/thumb-2.jpg"/>
@@ -306,6 +307,25 @@ test.describe('with followed feeds', () => {
     await page.evaluate(() => new Promise(resolve => requestAnimationFrame(() => requestAnimationFrame(resolve))))
     expect(await titles.allTextContents()).toEqual(['Newest VOD', 'Repaired item', 'Older VOD'])
     await expect(panel.getByText('1 feed could not be refreshed.')).toHaveCount(0)
+  })
+
+  test('keeps the previous items of a feed that fails to refresh', async ({ page }) => {
+    await mockFeeds(page)
+    await goTo(page, 'subscriptions')
+    await page.locator('[data-rss-feeds-tab]').click()
+    const panel = page.locator('#subscriptionsPanel')
+    const titles = panel.locator('.ft-list-item .h3Title')
+    await expect(titles).toHaveText(['Newest VOD', 'Older VOD'])
+
+    let failed = false
+    await page.route(RSS_URL, async route => {
+      await route.fulfill({ status: 500, body: 'Server error' })
+      failed = true
+    })
+    await page.locator('.subscriptionsHeader').getByRole('button', { name: /^Refresh RSS/ }).click()
+    await expect(panel.getByText('2 feeds could not be refreshed.')).toBeVisible()
+    expect(failed).toBe(true)
+    expect(await titles.allTextContents()).toEqual(['Newest VOD', 'Older VOD'])
   })
 
   test('keeps the feed manager button on the refresh row at phone widths', { tag: '@scale' }, async ({ app, page }) => {

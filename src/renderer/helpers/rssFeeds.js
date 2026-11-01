@@ -146,8 +146,12 @@ function itemAuthor(item) {
  * @param {Element} item
  */
 function itemPublished(item) {
-  const published = Date.parse(childText(item, ['published', 'pubDate', 'date', 'updated', 'issued']))
-  return Number.isNaN(published) ? null : published
+  // Publication dates win over update dates, whatever their order in the feed
+  for (const name of ['published', 'pubDate', 'issued', 'date', 'updated']) {
+    const published = Date.parse(childText(item, [name]))
+    if (!Number.isNaN(published)) return published
+  }
+  return null
 }
 
 /**
@@ -373,16 +377,18 @@ export async function refreshRssFeeds(feeds) {
     const results = await Promise.allSettled(feeds.map(feed => fetchRssFeed(feed.url, controller.signal)))
     if (controller.signal.aborted) return
 
-    // Feeds added or retried while this refresh ran keep their own, newer result
+    // Feeds added or retried while this refresh ran keep their own, newer result,
+    // and feeds that fail keep their previous items
     const loadedUrls = loadedDuringRefresh
+    const failedUrls = new Set(feeds.filter((feed, index) => results[index].status === 'rejected' && !loadedUrls.has(feed.url))
+      .map(feed => feed.url))
     rssFeedItems.value = [
-      ...rssFeedItems.value.filter(item => loadedUrls.has(item.feedUrl)),
+      ...rssFeedItems.value.filter(item => loadedUrls.has(item.feedUrl) || failedUrls.has(item.feedUrl)),
       ...results.flatMap((result, index) => (
         result.status === 'fulfilled' && !loadedUrls.has(feeds[index].url) ? result.value.items : []
       ))
     ].sort(compareFeedItems)
-    rssFeedErrors.value = feeds.filter((feed, index) => results[index].status === 'rejected' && !loadedUrls.has(feed.url))
-      .map(feed => feed.url)
+    rssFeedErrors.value = [...failedUrls]
     rssFeedsLastRefresh.value = Date.now()
     refreshedFeedUrls = new Set([...feeds.map(feed => feed.url), ...loadedUrls])
     updateMissingRssFeedAvatars(feeds.flatMap((feed, index) => {
