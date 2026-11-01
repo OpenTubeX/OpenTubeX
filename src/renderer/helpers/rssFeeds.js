@@ -372,12 +372,10 @@ export async function updateMissingRssFeedAvatars(results) {
  * @param {{ items: RssFeedItem[], image: string | null, isRssHub: boolean }} result
  */
 export function addLoadedRssFeed(feed, result) {
-  if (rssFeedsLastRefresh.value !== null) {
-    setRssFeedItems([...rssFeedItems.value.filter(item => item.feedUrl !== feed.url), ...result.items]
-      .sort(compareFeedItems))
-    refreshedFeedUrls.add(feed.url)
-    loadedDuringRefresh.add(feed.url)
-  }
+  setRssFeedItems([...rssFeedItems.value.filter(item => item.feedUrl !== feed.url), ...result.items]
+    .sort(compareFeedItems))
+  refreshedFeedUrls.add(feed.url)
+  loadedDuringRefresh.add(feed.url)
   rssFeedErrors.value = rssFeedErrors.value.filter(url => url !== feed.url)
 }
 

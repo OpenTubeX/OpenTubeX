@@ -370,6 +370,23 @@ test.describe('with followed feeds', () => {
     await expect(titles).toHaveText(['Newest VOD', 'Older VOD'])
   })
 
+  test('keeps the items of a feed added before the RSS tab was opened after a restart', async ({ page }) => {
+    await mockFeeds(page)
+    const manager = await openFeedManager(page)
+    const input = manager.getByRole('textbox', { name: 'Add Feed' })
+    await input.fill(ATOM_URL)
+    await input.press('Enter')
+    await expect(manager.locator('.feedRow')).toHaveCount(3)
+
+    await page.route(ATOM_URL, route => route.fulfill({ status: 500, body: 'Server error' }))
+    await page.reload()
+    await goTo(page, 'subscriptions')
+    await page.locator('[data-rss-feeds-tab]').click()
+    const panel = page.locator('#subscriptionsPanel')
+    await expect(panel.getByText('2 feeds could not be refreshed.')).toBeVisible()
+    await expect(panel.locator('.ft-list-item .h3Title', { hasText: 'Atom video' })).toBeVisible()
+  })
+
   test('shows progress while a feed is added', { tag: '@scale' }, async ({ page }) => {
     await mockFeeds(page)
     let release
