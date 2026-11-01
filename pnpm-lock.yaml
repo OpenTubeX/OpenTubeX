@@ -171,7 +171,7 @@ overrides:
 
 patchedDependencies:
   '@capacitor-community/screen-brightness@8.0.0': 92c0cd00ac50c22d0829cec4df0b63151dcb5e718a194e4ae8f015d271570ea8
-  '@capacitor/android@8.6.0': 796ade31693afbf786903e5472f424e505531dd1f76106498a3511a91d1ef445
+  '@capacitor/android': 796ade31693afbf786903e5472f424e505531dd1f76106498a3511a91d1ef445
   '@capacitor/barcode-scanner@3.1.2': b4c45d0161b7a4f0e708d232e3d2067f01a39f1ffb5497b5c3c7f4df318c50f3
   '@capacitor/share@8.0.3': 61a10a5a91f7c78b0670870fd26034ee015a175f24f79c0f9890ce03050a8adb
   '@capawesome/capacitor-app-shortcuts@8.0.2': 2581c86d60ce7892c0b3136523994591d24ee7313bbc5fc9b4ad1c710719c70a
