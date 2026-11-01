@@ -5,10 +5,13 @@
     :title="title"
     compact
     bottom
-    @close="sheetOpen = false"
+    @close="close"
     @closed="finish"
   >
-    <div class="moreActionsList">
+    <div
+      v-overlay-scrollbars="phoneLayout"
+      class="moreActionsList"
+    >
       <button
         v-for="action in actions"
         :key="action.value"
@@ -63,6 +66,15 @@ function choose(value) {
   } else {
     closeIconDropdown()
     emit('select', value)
+  }
+}
+
+function close() {
+  if (phoneLayout.value) {
+    sheetOpen.value = false
+  } else {
+    // The sheet is only a wrapper inside the dropdown, so it never closes itself
+    closeIconDropdown()
   }
 }
 

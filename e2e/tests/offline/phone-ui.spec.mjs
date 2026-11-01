@@ -239,6 +239,40 @@ test.describe('phone UI', () => {
     await expect.poll(() => getToolbarLayout(toolbar)).toMatchObject({ rows: 1, inside: true })
   })
 
+  test('scrolls the More actions sheet on short screens and clamps it when the screen grows', { tag: '@scale' }, async ({ app, page, uiScale }) => {
+    await page.evaluate(async () => {
+      await window.$store.dispatch('updateUseSponsorBlock', true)
+      await window.$store.dispatch('updateQuickBookmarkTargetPlaylistId', 'phone-list-0')
+      await window.$store.dispatch('updateShowDlnaCastButton', true)
+    })
+    await mockPlayableWatchPage(app, page, { captionTranslations: true })
+    await openMockedVideo(page)
+    await setWindowSize(app, page, { width: Math.round(360 * uiScale / 100), height: Math.round(781 * uiScale / 100) })
+    const toolbar = page.locator('.videoOptions')
+    await toolbar.scrollIntoViewIfNeeded()
+    await toolbar.getByRole('button', { name: 'More options', exact: true }).click()
+    const sheet = page.locator('dialog[open]')
+    const list = sheet.locator('.moreActionsList')
+    await expect(list).toBeVisible()
+    // Electron windows cannot get short enough, so shrink the visible viewport
+    // the sheet fits itself into, as the keyboard or split screen does
+    await page.evaluate(() => document.documentElement.style.setProperty('--phone-viewport-height', '240px'))
+    await expect(list.locator('.os-scrollbar-vertical')).toHaveCount(1)
+    await expect.poll(() => list.evaluate(element => element.scrollHeight > element.clientHeight)).toBe(true)
+    await list.evaluate(element => { element.scrollTop = element.scrollHeight })
+    await expectScrollAtRenderedEnd(list)
+    // The last action is fully reachable inside the sheet
+    expect(await list.evaluate(element => {
+      const last = element.querySelector('.moreAction:last-of-type').getBoundingClientRect()
+      const viewport = element.getBoundingClientRect()
+      return last.top >= viewport.top - 0.5 && last.bottom <= viewport.bottom + 0.5
+    })).toBe(true)
+
+    // The viewport tracking restores the full height on the next resize
+    await page.evaluate(() => window.dispatchEvent(new Event('resize')))
+    await expectNoScrollbarOverflow(list)
+  })
+
   test('spreads the video actions evenly in one row and wraps the metadata inline on phones', { tag: '@scale' }, async ({ app, page, attachScreenshot, uiScale }) => {
     await page.evaluate(async () => {
       await window.$store.dispatch('updateUseSponsorBlock', true)

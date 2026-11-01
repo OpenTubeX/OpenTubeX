@@ -5,6 +5,8 @@
 }
 
 .mobileSheetEnabled .moreActionsList {
+  flex: 1 1 auto;
+  min-block-size: 0;
   padding-block: 4px 12px;
 }
 

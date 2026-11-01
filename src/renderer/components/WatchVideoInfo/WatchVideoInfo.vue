@@ -688,6 +688,10 @@ const videoOptions = useTemplateRef('videoOptions')
 const optionsLayout = ref('full')
 const overflowCount = ref(0)
 let optionsLayoutFrame = null
+// Moving the actions of a group to the More menu can remove the divider, so
+// the overflow keeps budgeting for it. Otherwise the freed space would bring
+// an action back, which brings the divider back too.
+let dividerWidth = 0
 
 // Smallest touch target of a button in the even layout
 const MIN_EVEN_BUTTON_SIZE = 44
@@ -818,7 +822,9 @@ function updateOptionsLayout() {
   const gap = parseFloat(style.columnGap) || 0
   const naturalWidth = groups.reduce((width, group) => width + getGroupWidth(group), 0) +
     gap * Math.max(groups.length - 1, 0) + toolbarPadding + hiddenWidth
-  const dividersWidth = groups.reduce((width, group) => width + getDividerWidth(group), 0)
+  const measuredDividersWidth = groups.reduce((width, group) => width + getDividerWidth(group), 0)
+  if (measuredDividersWidth > 0) dividerWidth = measuredDividersWidth
+  const dividersWidth = overflowCount.value > 0 ? dividerWidth : measuredDividersWidth
   toolbar.classList.remove('measuring')
 
   const availableWidth = row.clientWidth + 0.5
