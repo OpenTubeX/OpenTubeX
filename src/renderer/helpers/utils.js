@@ -771,35 +771,19 @@ export function formatDurationAsTimestamp(lengthSeconds) {
   // Media durations can include milliseconds; timestamps display whole seconds.
   lengthSeconds = Math.floor(lengthSeconds)
 
-  if (lengthSeconds === 0) {
-    return '0:00'
+  // Match the player, which shows days past 24 hours (d:hh:mm:ss).
+  const parts = [
+    Math.floor(lengthSeconds / 86400),
+    Math.floor(lengthSeconds / 3600) % 24,
+    Math.floor(lengthSeconds / 60) % 60,
+    lengthSeconds % 60
+  ]
+  // Drop leading zero units but always keep minutes and seconds.
+  while (parts.length > 2 && parts[0] === 0) {
+    parts.shift()
   }
 
-  let hours = 0
-
-  if (lengthSeconds >= 3600) {
-    hours = Math.floor(lengthSeconds / 3600)
-    lengthSeconds = lengthSeconds - hours * 3600
-  }
-
-  let minutes = Math.floor(lengthSeconds / 60)
-  if (minutes < 10 && hours > 0) {
-    minutes = '0' + minutes
-  }
-
-  let seconds = lengthSeconds - minutes * 60
-  if (seconds < 10) {
-    seconds = '0' + seconds
-  }
-
-  let timestamp
-  if (hours > 0) {
-    timestamp = hours + ':' + minutes + ':' + seconds
-  } else {
-    timestamp = minutes + ':' + seconds
-  }
-
-  return timestamp
+  return parts.map((part, index) => index === 0 ? part : String(part).padStart(2, '0')).join(':')
 }
 
 /**
