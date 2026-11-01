@@ -188,6 +188,54 @@ test.describe('interface customizer', () => {
     await expect.poll(previewIds).toEqual(['quickPlaybackSpeedBar', 'screenshot', 'autoplay', 'captions', 'menu', 'pictureInPicture', 'theatreMode', 'fullWindow', 'fullscreen'])
   })
 
+  test('lays out the player menu preview like the player menu', { tag: '@scale' }, async ({ app, page }) => {
+    await setWindowSize(app, page, { width: 1200, height: 800 })
+    const customizer = await openInterfaceCustomizer(page, 'control bar')
+    const menu = customizer.locator('.previewOverflowMenu')
+    const items = menu.locator('.previewOverflowItem')
+    await expect(menu).toBeVisible()
+
+    // Like the player's tiles, every tile in a row is as tall, with its content
+    // centered, whether or not it shows a value.
+    await expect.poll(() => items.evaluateAll(tiles => tiles.map(tile => {
+      const bounds = tile.getBoundingClientRect()
+      const content = [...tile.children].map(child => child.getBoundingClientRect()).filter(rect => rect.height > 0)
+      const top = Math.min(...content.map(rect => rect.top))
+      const bottom = Math.max(...content.map(rect => rect.bottom))
+      return Math.abs((top - bounds.top) - (bounds.bottom - bottom)) < 1
+    }))).not.toContain(false)
+    await expect.poll(() => items.evaluateAll(tiles => new Set(tiles.map(tile => Math.round(tile.getBoundingClientRect().height))).size)).toBe(1)
+
+    // A full menu stays inside the player and scrolls the rows that don't fit.
+    await page.evaluate(async () => {
+      for (const toggle of ['ShowSkipSilenceButton', 'ShowMusicModeToggle', 'ShowLightsOffToggle', 'ShowVolumeBoostToggle', 'ShowMonoAudioToggle', 'EnableScreenshot']) {
+        await window.$store.dispatch(`update${toggle}`, true)
+      }
+      await window.$store.dispatch('updateControlBarButtons', ['menu', 'fullscreen'])
+    })
+    await expect.poll(() => menu.evaluate(element => {
+      const grid = element.querySelector('.previewOverflowGrid')
+      return element.getBoundingClientRect().top >= element.closest('.previewPlayer').getBoundingClientRect().top &&
+        grid.scrollHeight > grid.clientHeight + 1
+    })).toBe(true)
+
+    // Without the grid, the player lists its entries in rows, with a chevron
+    // for those that open a submenu.
+    await page.evaluate(() => window.$store.dispatch('updateUsePlayerMenuGrid', false))
+    await expect(menu).toHaveClass(/\blist\b/)
+    await expect.poll(() => items.evaluateAll(rows => rows.every((row, index) => {
+      const bounds = row.getBoundingClientRect()
+      const icon = row.firstElementChild.getBoundingClientRect()
+      const label = row.querySelector('.previewOverflowLabel').getBoundingClientRect()
+      const previous = rows[index - 1]?.getBoundingClientRect()
+      return label.left > icon.right && Math.abs(label.top + label.height / 2 - (bounds.top + bounds.height / 2)) < 1 &&
+        (!previous || Math.abs(bounds.left - previous.left) < 0.5)
+    }))).toBe(true)
+    const chevron = item => menu.locator(`[data-preview-overflow-item="${item}"]`).evaluate(row => getComputedStyle(row, '::after').content)
+    expect(await chevron('volumeBoost')).not.toBe('none')
+    expect(await chevron('loop')).toBe('none')
+  })
+
   test('previews the fullscreen action order', async ({ page }) => {
     const customizer = await openInterfaceCustomizer(page, 'fullscreen actions')
     const actions = customizer.locator('.previewFullscreenActions [data-preview-fullscreen-action]')
