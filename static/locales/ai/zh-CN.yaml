@@ -1077,6 +1077,8 @@ Settings:
     Notify About New Uploads: 新上传通知
   Distraction Free Settings:
     Digital Wellbeing:
+      Count Watch Time From: "观看时长统计范围"
+      Break Reminder Action: "到休息时间时"
       Grayscale: "灰度"
       Off: "关闭"
       Always: "始终"
@@ -2101,6 +2103,8 @@ Tooltips:
     FFmpeg Executable Path: 合并独立的视频流和音频流以及转换音频需要 FFmpeg。默认情况下，OpenTubeX 假定可通过 PATH 环境变量找到 FFmpeg。如有需要，可在此设置自定义路径。
     Use cookies for subtitles: "使用已配置的 Cookie 获取字幕和自动翻译。启用“始终使用 Cookie”也会开启此功能。"
   Distraction Free Settings:
+    Count Watch Time From: "“所有设备”统计每台同步观看统计的设备。“此设备”只统计你在这里观看的内容。"
+    When a Limit Is Reached: "“暂停播放”可让你再看 15 分钟或今天忽略限额。如果设有设置密码，只能在设置中提高限额。"
     Grayscale: "以灰度显示整个应用（包括视频），减少对注意力的吸引。“就寝时间内”选项遵循就寝提醒的时间安排。"
     Daily Watch Time Limit: "统计你今天在所有同步观看统计的设备上观看的内容，包括 Shorts。"
     Daily Shorts Limit: "统计你今天在此设备上观看的 Shorts。"

@@ -1077,6 +1077,8 @@ Settings:
     Notify About New Uploads: Notifica nuovi caricamenti
   Distraction Free Settings:
     Digital Wellbeing:
+      Count Watch Time From: "Conta il tempo di visione da"
+      Break Reminder Action: "Quando è ora di fare una pausa"
       Grayscale: "Scala di grigi"
       Off: "Disattivato"
       Always: "Sempre"
@@ -2101,6 +2103,8 @@ Tooltips:
     FFmpeg Executable Path: FFmpeg è necessario per unire flussi video e audio separati e per convertire l'audio. Per impostazione predefinita, OpenTubeX presume che FFmpeg sia disponibile tramite la variabile d'ambiente PATH. Se necessario, puoi impostare qui un percorso personalizzato.
     Use cookies for subtitles: "Usa i cookie configurati per i sottotitoli e le traduzioni automatiche. Si attiva anche con \"Usa sempre i cookie\"."
   Distraction Free Settings:
+    Count Watch Time From: "«Tutti i dispositivi» conta ogni dispositivo che sincronizza le statistiche di visione. «Questo dispositivo» conta solo ciò che guardi qui."
+    When a Limit Is Reached: "«Metti in pausa la riproduzione» ti permette di aggiungere 15 minuti o di ignorare il limite per oggi. Con una password per le impostazioni, puoi aumentare un limite solo nelle Impostazioni."
     Grayscale: "Mostra l'intera app, video compresi, in scala di grigi, così attira meno l'attenzione. «All'ora di dormire» segue la pianificazione del promemoria ora di dormire."
     Daily Watch Time Limit: "Conta ciò che hai guardato oggi su tutti i dispositivi che sincronizzano le statistiche di visione, Shorts compresi."
     Daily Shorts Limit: "Conta gli Shorts che hai guardato oggi su questo dispositivo."

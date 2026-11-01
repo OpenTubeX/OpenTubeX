@@ -1279,6 +1279,8 @@ Settings:
     Confirm Before Unsubscribing: 구독 취소 전 확인
   Distraction Free Settings:
     Digital Wellbeing:
+      Count Watch Time From: "시청 시간 계산 기준"
+      Break Reminder Action: "휴식할 시간이 되면"
       Grayscale: "회색조"
       Off: "끄기"
       Always: "항상"
@@ -2489,6 +2491,8 @@ Tooltips:
     FFmpeg Executable Path: 별도의 동영상 및 오디오 스트림을 병합하고 오디오를 변환하려면 FFmpeg가 필요합니다. 기본적으로 OpenTubeX는 PATH 환경 변수에서 FFmpeg를 찾습니다. 필요하면 여기서 사용자 지정 경로를 설정할 수 있습니다.
     Use cookies for subtitles: "설정된 쿠키를 자막과 자동 번역에 사용합니다. \"항상 쿠키 사용\"으로도 활성화됩니다."
   Distraction Free Settings:
+    Count Watch Time From: "“모든 기기”는 시청 통계를 동기화하는 모든 기기를 계산합니다. “이 기기”는 여기에서 시청한 시간만 계산합니다."
+    When a Limit Is Reached: "“재생 일시 정지”를 사용하면 15분을 추가하거나 오늘은 한도를 무시할 수 있습니다. 설정 비밀번호가 있으면 한도는 설정에서만 늘릴 수 있습니다."
     Grayscale: "동영상을 포함한 앱 전체를 회색조로 표시하여 주의를 덜 끌게 합니다. “취침 시간 중”은 취침 시간 알림 일정을 따릅니다."
     Daily Watch Time Limit: "시청 통계를 동기화하는 모든 기기에서 오늘 시청한 시간을 Shorts를 포함하여 계산합니다."
     Daily Shorts Limit: "이 기기에서 오늘 시청한 Shorts를 계산합니다."

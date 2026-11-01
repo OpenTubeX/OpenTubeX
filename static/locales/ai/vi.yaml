@@ -1088,6 +1088,8 @@ Settings:
     Notify About New Uploads: Thông báo nội dung mới tải lên
   Distraction Free Settings:
     Digital Wellbeing:
+      Count Watch Time From: "Tính thời gian xem từ"
+      Break Reminder Action: "Khi đến lúc nghỉ giải lao"
       Grayscale: "Thang độ xám"
       Off: "Tắt"
       Always: "Luôn luôn"
@@ -2143,6 +2145,8 @@ Tooltips:
     FFmpeg Executable Path: Cần FFmpeg để ghép luồng video và âm thanh riêng biệt cũng như chuyển đổi âm thanh. Theo mặc định, OpenTubeX giả định có thể tìm thấy FFmpeg qua biến môi trường PATH. Bạn có thể đặt đường dẫn tùy chỉnh tại đây nếu cần.
     Use cookies for subtitles: "Dùng cookie đã cấu hình cho phụ đề và bản dịch tự động. Cũng được bật bởi \"Luôn dùng cookie\"."
   Distraction Free Settings:
+    Count Watch Time From: "\"Tất cả thiết bị\" tính mọi thiết bị đồng bộ thống kê xem. \"Thiết bị này\" chỉ tính những gì bạn xem tại đây."
+    When a Limit Is Reached: "\"Tạm dừng phát\" cho phép bạn thêm 15 phút hoặc bỏ qua giới hạn trong hôm nay. Khi có mật khẩu cài đặt, bạn chỉ có thể tăng giới hạn trong Cài đặt."
     Grayscale: "Hiển thị toàn bộ ứng dụng, kể cả video, bằng các sắc xám để ít thu hút sự chú ý hơn. \"Trong giờ đi ngủ\" tuân theo lịch của lời nhắc giờ đi ngủ."
     Daily Watch Time Limit: "Tính những gì bạn đã xem hôm nay trên mọi thiết bị đồng bộ thống kê xem, kể cả Shorts."
     Daily Shorts Limit: "Tính các Shorts bạn đã xem hôm nay trên thiết bị này."

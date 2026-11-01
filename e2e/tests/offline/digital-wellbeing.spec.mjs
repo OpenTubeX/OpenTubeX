@@ -101,6 +101,34 @@ test.describe('autoplay countdown', () => {
   })
 })
 
+test.describe('reminder only actions', () => {
+  test.use({ seed: { settings: { ...playbackSettings, breakReminderInterval: 15, breakReminderAction: 'remind' } } })
+
+  test('a break reminder can remind without pausing', async ({ app, page }) => {
+    await mockPlayableWatchPage(app, page)
+    const video = await openMockedVideo(page)
+
+    await commit(page, 'addWellbeingPlayback', { date: today, seconds: 15 * 60, isShort: false, recorded: true, now: Date.now() })
+    await expect(page.locator('.toast', { hasText: 'Time to take a break' })).toBeVisible()
+    await expect(page.getByRole('dialog', { name: 'Time to take a break' })).toHaveCount(0)
+    expect(await video.evaluate(element => element.paused)).toBe(false)
+  })
+})
+
+test.describe('daily limit with a settings password', () => {
+  test.use({ seed: { settings: { ...playbackSettings, dailyWatchTimeLimit: 60, settingsPassword: 'hash' }, watchStats: watchedOneHour } })
+
+  test('only the password-protected settings can raise the limit', async ({ app, page }) => {
+    await mockPlayableWatchPage(app, page)
+    await page.locator('.searchInput input').fill('https://www.youtube.com/watch?v=jNQXAC9IVRw')
+    await page.locator('.searchInput input').press('Enter')
+
+    const prompt = page.getByRole('dialog', { name: 'Daily watch time limit reached' })
+    await expect(prompt).toBeVisible({ timeout: 30_000 })
+    await expect(prompt.getByRole('button')).toHaveText(['Ok'])
+  })
+})
+
 test.describe('break and bedtime reminders', () => {
   test.use({ seed: { settings: { ...playbackSettings, breakReminderInterval: 15 } } })
 
@@ -251,8 +279,13 @@ test('switching from the bottom of Distraction Free to a shorter tab leaves no e
   for (const tab of ['wellbeing', 'parental']) {
     await page.locator(`.settingsWindow [data-settings-tab="${tab}"]`).click()
     await expect.poll(() => scroller.evaluate(element => element.scrollTop)).toBe(0)
-    await expect.poll(() => scroller.evaluate(element => element.scrollHeight - element.clientHeight)).toBeLessThanOrEqual(1)
-    await expect(scrollbar).toHaveClass(/os-scrollbar-unusable/)
+    // The scrollbar must match the shorter range, whether or not the tab still overflows.
+    const overflows = await scroller.evaluate(element => element.scrollHeight - element.clientHeight > 1)
+    if (overflows) {
+      await expect(scrollbar).not.toHaveClass(/os-scrollbar-unusable/)
+    } else {
+      await expect(scrollbar).toHaveClass(/os-scrollbar-unusable/)
+    }
     await page.locator('.settingsWindow [data-settings-tab="distraction"]').click()
     await scroller.evaluate(element => { element.scrollTop = element.scrollHeight })
     await expect.poll(() => scroller.evaluate(element => element.scrollTop)).toBeGreaterThan(0)

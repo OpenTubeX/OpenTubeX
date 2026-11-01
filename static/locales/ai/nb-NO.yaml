@@ -1077,6 +1077,8 @@ Settings:
     Notify About New Uploads: Varsle om nye opplastinger
   Distraction Free Settings:
     Digital Wellbeing:
+      Count Watch Time From: "Tell seertid fra"
+      Break Reminder Action: "Når det er tid for en pause"
       Grayscale: "Gråtoner"
       Off: "Av"
       Always: "Alltid"
@@ -2106,6 +2108,8 @@ Tooltips:
     FFmpeg Executable Path: FFmpeg kreves for å slå sammen separate video- og lydstrømmer og for lydkonvertering. OpenTubeX antar som standard at FFmpeg finnes via miljøvariabelen PATH. Du kan angi en egendefinert bane her ved behov.
     Use cookies for subtitles: "Bruk de konfigurerte informasjonskapslene for undertekster og automatiske oversettelser. Aktiveres også av «Bruk alltid informasjonskapsler»."
   Distraction Free Settings:
+    Count Watch Time From: "«Alle enheter» teller alle enheter som synkroniserer seerstatistikk. «Denne enheten» teller bare det du ser her."
+    When a Limit Is Reached: "«Sett avspillingen på pause» lar deg legge til 15 minutter eller ignorere grensen for i dag. Med et innstillingspassord kan du bare øke en grense i innstillingene."
     Grayscale: "Viser hele appen, inkludert videoer, i gråtoner, slik at den trekker mindre oppmerksomhet. «Ved leggetid» følger tidsplanen for påminnelsen om leggetid."
     Daily Watch Time Limit: "Teller det du har sett i dag på alle enheter som synkroniserer seerstatistikk, inkludert Shorts."
     Daily Shorts Limit: "Teller Shorts du har sett på denne enheten i dag."

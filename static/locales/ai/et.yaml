@@ -1077,6 +1077,8 @@ Settings:
     Notify About New Uploads: Teavita uutest üleslaadimistest
   Distraction Free Settings:
     Digital Wellbeing:
+      Count Watch Time From: "Vaatamisaja arvestamise allikas"
+      Break Reminder Action: "Kui on pausi aeg"
       Grayscale: "Halltoonid"
       Off: "Väljas"
       Always: "Alati"
@@ -2104,6 +2106,8 @@ Tooltips:
     FFmpeg Executable Path: FFmpeg on vajalik eraldi video- ja helivoogude ühendamiseks ning heli teisendamiseks. Vaikimisi eeldab OpenTubeX, et FFmpeg leitakse keskkonnamuutuja PATH kaudu. Vajaduse korral saab siin määrata kohandatud asukoha.
     Use cookies for subtitles: "Kasuta seadistatud küpsiseid subtiitrite ja automaattõlgete jaoks. Selle lubab ka „Kasuta alati küpsiseid“."
   Distraction Free Settings:
+    Count Watch Time From: "„Kõik seadmed“ arvestab iga seadet, mis sünkroonib vaatamisstatistikat. „See seade“ arvestab ainult seda, mida sa siin vaatad."
+    When a Limit Is Reached: "„Peata esitus“ võimaldab lisada 15 minutit või jätta limiidi tänaseks tähelepanuta. Seadistuste salasõna korral saad limiiti tõsta ainult seadistustes."
     Grayscale: "Kuvab kogu rakenduse koos videotega halltoonides, et see tõmbaks vähem tähelepanu. „Magamaminekuajal“ järgib magamamineku meeldetuletuse ajakava."
     Daily Watch Time Limit: "Loeb kokku, mida oled täna vaadanud kõigis seadmetes, mis sünkroonivad vaatamisstatistikat, sealhulgas Shorts-videod."
     Daily Shorts Limit: "Loeb kokku Shorts-videod, mida oled täna selles seadmes vaadanud."

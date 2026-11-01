@@ -249,3 +249,25 @@ test('retrying an accepted pending reset preserves watching since its upload', (
   assert.deepEqual(retried[0].reset, accepted[0].reset)
   assert.deepEqual(watchSecondsForDevice({}, retried, 'observer', 'pixel'), { [day]: 10 })
 })
+
+test('the daily limit counts all synced devices or only this one', () => {
+  const { limitWatchSecondsByDate } = createHelpers({}, async () => ({ platform: 'linux' }))
+  const getters = {
+    getWatchSecondsByDate: { '2026-09-22': 60 },
+    getSyncedWatchStats: [
+      { deviceId: 'local', deviceName: 'Desktop', platform: 'linux', days: { '2026-09-22': 60 } },
+      { deviceId: 'phone', deviceName: 'Phone', platform: 'android', days: { '2026-09-22': 30 } },
+    ],
+    getSyncServerDeviceId: 'local',
+    getSyncServerWatchStatsReset: null,
+    getSyncServerEnabled: true,
+    getSyncServerToken: 'token',
+    getSyncServerPrivacyMode: 'enhanced',
+    getSyncServerWatchStatsSupported: true,
+    getSyncServerSyncWatchStats: true,
+  }
+  assert.equal(limitWatchSecondsByDate(getters, 'all')['2026-09-22'], 90)
+  assert.equal(limitWatchSecondsByDate(getters, 'local')['2026-09-22'], 60)
+  // Without synced statistics, only this device's time exists.
+  assert.equal(limitWatchSecondsByDate({ ...getters, getSyncServerEnabled: false }, 'all')['2026-09-22'], 60)
+})

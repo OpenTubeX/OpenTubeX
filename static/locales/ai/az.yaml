@@ -1079,6 +1079,8 @@ Settings:
     Notify About New Uploads: Yeni yükləmələr barədə bildiriş göndər
   Distraction Free Settings:
     Digital Wellbeing:
+      Count Watch Time From: "Baxış Vaxtı Sayılan Cihazlar"
+      Break Reminder Action: "Fasilə Vaxtı Gələndə"
       Grayscale: "Boz Tonlar"
       Off: "Qapalı"
       Always: "Həmişə"
@@ -2114,6 +2116,8 @@ Tooltips:
     FFmpeg Executable Path: Ayrı video və səs axınlarını birləşdirmək və səs çevirməsi üçün FFmpeg tələb olunur. İlkin olaraq OpenTubeX FFmpeg-in PATH mühit dəyişəni vasitəsilə tapıla biləcəyini qəbul edir. Lazım gələrsə, burada xüsusi yol təyin etmək olar.
     Use cookies for subtitles: Titr və avtomatik tərcümələr üçün təyin edilmiş kukiləri istifadə et. "Həmişə kukilərdən istifadə et" seçimi də bunu aktivləşdirir.
   Distraction Free Settings:
+    Count Watch Time From: "\"Bütün cihazlar\" baxış statistikasını sinxronlaşdıran hər cihazı sayır. \"Bu cihaz\" yalnız burada baxdıqlarınızı sayır."
+    When a Limit Is Reached: "\"Oxutmaya Fasilə Ver\" 15 dəqiqə əlavə etməyə və ya bu gün üçün limiti nəzərə almamağa imkan verir. Tənzimləmələr parolu ilə limiti yalnız Tənzimləmələrdə artıra bilərsiniz."
     Grayscale: "Videolar daxil olmaqla bütün tətbiqi boz tonlarda göstərir ki, daha az diqqət çəksin. \"Yatma Vaxtı Ərzində\" seçimi yatma vaxtı xatırlatmasının cədvəlinə əməl edir."
     Daily Watch Time Limit: "Baxış statistikasını sinxronlaşdıran bütün cihazlarda bu gün baxdıqlarınızı, Shorts daxil olmaqla, sayır."
     Daily Shorts Limit: "Bu gün bu cihazda baxdığınız Shorts videolarını sayır."

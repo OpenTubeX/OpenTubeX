@@ -28,6 +28,18 @@
       />
       <FtSelect
         size-to-content
+        :placeholder="t('Settings.Distraction Free Settings.Digital Wellbeing.Count Watch Time From')"
+        :value="store.getters.getDailyWatchTimeLimitDevices"
+        setting-key="dailyWatchTimeLimitDevices"
+        :select-names="[t('Stats.All devices'), t('Settings.Sync Settings.This Device')]"
+        :select-values="LIMIT_DEVICES"
+        :disabled="store.getters.getDailyWatchTimeLimit === 0"
+        :tooltip="t('Tooltips.Distraction Free Settings.Count Watch Time From')"
+        :icon="['fas', 'devices']"
+        @change="store.dispatch('updateDailyWatchTimeLimitDevices', $event)"
+      />
+      <FtSelect
+        size-to-content
         :placeholder="t('Settings.Distraction Free Settings.Digital Wellbeing.Daily Shorts Limit')"
         :value="String(store.getters.getDailyShortsLimit)"
         setting-key="dailyShortsLimit"
@@ -45,6 +57,7 @@
         :select-names="dailyLimitActionNames"
         :select-values="DAILY_LIMIT_ACTIONS"
         :disabled="store.getters.getDailyWatchTimeLimit === 0 && store.getters.getDailyShortsLimit === 0"
+        :tooltip="t('Tooltips.Distraction Free Settings.When a Limit Is Reached')"
         :icon="['fas', 'pause']"
         @change="store.dispatch('updateDailyLimitAction', $event)"
       />
@@ -58,6 +71,17 @@
         :tooltip="t('Tooltips.Distraction Free Settings.Take a Break Reminder')"
         :icon="['fas', 'clock']"
         @change="store.dispatch('updateBreakReminderInterval', Number($event))"
+      />
+      <FtSelect
+        size-to-content
+        :placeholder="t('Settings.Distraction Free Settings.Digital Wellbeing.Break Reminder Action')"
+        :value="store.getters.getBreakReminderAction"
+        setting-key="breakReminderAction"
+        :select-names="dailyLimitActionNames"
+        :select-values="DAILY_LIMIT_ACTIONS"
+        :disabled="store.getters.getBreakReminderInterval === 0"
+        :icon="['fas', 'pause']"
+        @change="store.dispatch('updateBreakReminderAction', $event)"
       />
     </FtFlexBox>
     <div class="switchColumnGrid">
@@ -149,6 +173,7 @@ const { locale, t } = useI18n()
 
 const GRAYSCALE_MODES = ['off', 'always', 'bedtime', 'limit']
 const DAILY_LIMIT_ACTIONS = ['remind', 'pause']
+const LIMIT_DEVICES = ['all', 'local']
 const BEDTIME_TIMES = Array.from({ length: 48 }, (_, index) =>
   `${String(Math.floor(index / 2)).padStart(2, '0')}:${index % 2 === 0 ? '00' : '30'}`)
 

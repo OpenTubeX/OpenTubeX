@@ -1077,6 +1077,8 @@ Settings:
     Notify About New Uploads: 新着アップロードを通知
   Distraction Free Settings:
     Digital Wellbeing:
+      Count Watch Time From: "視聴時間のカウント対象"
+      Break Reminder Action: "休憩の時間になったとき"
       Grayscale: "グレースケール"
       Off: "オフ"
       Always: "常に"
@@ -2101,6 +2103,8 @@ Tooltips:
     FFmpeg Executable Path: FFmpegは、分離された動画と音声ストリームの結合や音声変換に必要です。既定では、PATH環境変数からFFmpegが見つかるものとみなします。必要に応じて、ここでカスタムパスを指定できます。
     Use cookies for subtitles: "設定した Cookie を字幕と自動翻訳に使用します。「常に Cookie を使用」でも有効になります。"
   Distraction Free Settings:
+    Count Watch Time From: "「すべてのデバイス」は、視聴統計を同期しているすべてのデバイスをカウントします。「このデバイス」は、ここで視聴した分だけをカウントします。"
+    When a Limit Is Reached: "「再生を一時停止」では、15分追加するか、今日は上限を無視できます。設定のパスワードを設定している場合、上限を引き上げられるのは設定画面だけです。"
     Grayscale: "動画を含むアプリ全体をグレースケールで表示し、注意を引きにくくします。「就寝時間中」は就寝時間リマインダーのスケジュールに従います。"
     Daily Watch Time Limit: "視聴統計を同期しているすべてのデバイスで今日視聴した時間を、ショート動画も含めてカウントします。"
     Daily Shorts Limit: "このデバイスで今日視聴したショート動画をカウントします。"

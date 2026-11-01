@@ -1077,6 +1077,8 @@ Settings:
     Notify About New Uploads: Rebuadiñ diwar-benn an endalc'had nevez
   Distraction Free Settings:
     Digital Wellbeing:
+      Count Watch Time From: "Kontañ an amzer sellet diwar"
+      Break Reminder Action: "Pa vez poent ober un ehan"
       Grayscale: "Arlivioù louet"
       Off: "Lazhet"
       Always: "Atav"
@@ -2110,6 +2112,8 @@ Tooltips:
     FFmpeg Executable Path: "Rekis eo FFmpeg evit kendeuziñ gwazhioù video ha son distag hag evit amdreiñ ar son. Dre ziouer e soñj OpenTubeX e c'haller kavout FFmpeg dre argemmenn endro PATH. Gallout a reer lakaat un hent personelaet amañ ma vez ezhomm."
     Use cookies for subtitles: "Implijout an toupinoù kefluniet evit an istitloù hag an troidigezhioù emgefreek. Gweredekaet ivez gant « Implijout toupinoù atav »."
   Distraction Free Settings:
+    Count Watch Time From: "\"An holl drevnadoù\" a gont kement trevnad a goubred ar stadegoù sellout. \"An trevnad-mañ\" a gont ar pezh a sellit amañ hepken."
+    When a Limit Is Reached: "\"Ehanañ al lenn\" a laosk ac'hanoc'h da ouzhpennañ 15 munutenn pe da lezel ar vevenn a-gostez evit hiziv. Gant ur ger-tremen evit an arventennoù, ne c'hallit kreskiñ ur vevenn nemet en Arventennoù."
     Grayscale: "Diskouez an arload a-bezh, ar videoioù en o zouez, en arlivioù louet, evit ma tenno nebeutoc'h an evezh. \"Da vare kousket\" a heul deiziataer ar c'hounadur mare kousket."
     Daily Watch Time Limit: "Kontañ ar pezh ho peus sellet hiziv war an holl drevnadoù a goubred ar stadegoù sellout, ar Shorts en o zouez."
     Daily Shorts Limit: "Kontañ ar Shorts ho peus sellet hiziv war an trevnad-mañ."

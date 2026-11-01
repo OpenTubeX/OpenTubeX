@@ -611,8 +611,9 @@ function startOfDay(date) {
 const todayHint = computed(() => {
   const limitMinutes = store.getters.getDailyWatchTimeLimit
   const { extraSeconds, ignored, unrecordedSeconds } = store.getters.getWellbeing.day
-  // The limit counts all devices, so other selections would not match it.
-  if (limitMinutes === 0 || ignored.watch || (syncStatsVisible.value && selectedDevice.value !== 'all')) {
+  // Other device selections would not match the devices the limit counts.
+  const limitDevices = store.getters.getDailyWatchTimeLimitDevices
+  if (limitMinutes === 0 || ignored.watch || (syncStatsVisible.value && selectedDevice.value !== limitDevices)) {
     return t('Stats.So far today')
   }
   // Match the playback limit, which also counts time the statistics did not record.

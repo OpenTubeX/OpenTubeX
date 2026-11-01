@@ -420,6 +420,8 @@ test('distraction free search results open the tab of their setting', () => {
   assert.equal(tabOf('Digital Wellbeing'), 'wellbeing')
   assert.equal(tabOf('Daily Watch Time Limit'), 'wellbeing')
   assert.equal(tabOf('Silence Upload Notifications at Bedtime'), 'wellbeing')
+  assert.equal(tabOf('Count Watch Time From'), 'wellbeing')
+  assert.equal(tabOf("When It's Time for a Break"), 'wellbeing')
   assert.equal(tabOf('Hide Unsubscribe Button'), 'parental')
   assert.equal(values.filter(match => match.label === 'Digital Wellbeing').length, 1)
   // Select options are not settings of their own.

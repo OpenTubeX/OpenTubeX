@@ -202,10 +202,14 @@ export function createDefaultSettings({ supportsLocalApi, isElectron }) {
     // 'off' | 'always' | 'bedtime' | 'limit'
     grayscaleMode: 'off',
     dailyWatchTimeLimit: 0,
+    // Devices whose watch time counts toward the daily limit: 'all' | 'local'
+    dailyWatchTimeLimitDevices: 'all',
     dailyShortsLimit: 0,
     // 'remind' | 'pause'
     dailyLimitAction: 'pause',
     breakReminderInterval: 0,
+    // 'remind' | 'pause'
+    breakReminderAction: 'pause',
     bedtimeReminder: false,
     bedtimeStart: '22:00',
     bedtimeEnd: '06:00',

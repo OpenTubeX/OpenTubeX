@@ -1077,6 +1077,8 @@ Settings:
     Notify About New Uploads: Jakinarazi igoera berriak
   Distraction Free Settings:
     Digital Wellbeing:
+      Count Watch Time From: "Ikusteko denbora zenbatzeko iturria"
+      Break Reminder Action: "Atsedenaldia hartzeko ordua denean"
       Grayscale: "Gris-eskala"
       Off: "Desaktibatuta"
       Always: "Beti"
@@ -2111,6 +2113,8 @@ Tooltips:
     FFmpeg Executable Path: FFmpeg beharrezkoa da bideo- eta audio-korronte bereiziak bateratzeko eta audioa bihurtzeko. Modu lehenetsian, OpenTubeX aplikazioak FFmpeg PATH ingurune-aldagaiaren bidez aurki daitekeela joko du. Behar izanez gero, bide-izen pertsonalizatu bat ezar daiteke hemen.
     Use cookies for subtitles: "Erabili konfiguratutako cookieak azpitituluetarako eta itzulpen automatikoetarako. «Erabili beti cookieak» aukerak ere gaitzen du."
   Distraction Free Settings:
+    Count Watch Time From: "«Gailu guztiak» aukerak ikustaldi-estatistikak sinkronizatzen dituen gailu oro zenbatzen du. «Gailu hau» aukerak hemen ikusten duzuna soilik zenbatzen du."
+    When a Limit Is Reached: "«Pausatu erreprodukzioa» aukerarekin 15 minutu gehi ditzakezu edo gaurko muga ez ikusi egin. Ezarpenen pasahitz batekin, muga Ezarpenetan bakarrik igo dezakezu."
     Grayscale: "Aplikazio osoa, bideoak barne, gris-tonuetan erakusten du, arreta gutxiago erakar dezan. «Lotara joateko orduan» aukerak lotara joateko gogorarazpenaren ordutegia jarraitzen du."
     Daily Watch Time Limit: "Gaur ikusi duzuna zenbatzen du ikustaldi-estatistikak sinkronizatzen dituzten gailu guztietan, Shorts bideoak barne."
     Daily Shorts Limit: "Gaur gailu honetan ikusi dituzun Shorts bideoak zenbatzen ditu."

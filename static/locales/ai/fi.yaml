@@ -1093,6 +1093,8 @@ Settings:
     Notify About New Uploads: Ilmoita uusista latauksista
   Distraction Free Settings:
     Digital Wellbeing:
+      Count Watch Time From: "Katseluaika lasketaan"
+      Break Reminder Action: "Kun on tauon aika"
       Grayscale: "Harmaasävy"
       Off: "Pois"
       Always: "Aina"
@@ -2151,6 +2153,8 @@ Tooltips:
     FFmpeg Executable Path: FFmpeg tarvitaan erillisten video- ja äänivirtojen yhdistämiseen sekä äänen muuntamiseen. OpenTubeX olettaa oletusarvoisesti, että FFmpeg löytyy PATH-ympäristömuuttujan avulla. Tarvittaessa voit määrittää oman polun tässä.
     Use cookies for subtitles: "Käytä määritettyjä evästeitä tekstityksiin ja automaattisiin käännöksiin. Myös ”Käytä aina evästeitä” ottaa tämän käyttöön."
   Distraction Free Settings:
+    Count Watch Time From: "”Kaikki laitteet” laskee jokaisen laitteen, joka synkronoi katselutilastot. ”Tämä laite” laskee vain sen, mitä katsot täällä."
+    When a Limit Is Reached: "”Keskeytä toisto” antaa lisätä 15 minuuttia tai ohittaa rajan tältä päivältä. Kun asetuksilla on salasana, voit nostaa rajaa vain asetuksissa."
     Grayscale: "Näyttää koko sovelluksen videoineen harmaasävyinä, jotta se vie vähemmän huomiota. ”Nukkumaanmenoaikana” noudattaa nukkumaanmenomuistutuksen aikataulua."
     Daily Watch Time Limit: "Laskee, mitä olet katsonut tänään kaikilla laitteilla, jotka synkronoivat katselutilastot, Shorts-videot mukaan lukien."
     Daily Shorts Limit: "Laskee Shorts-videot, jotka olet katsonut tänään tällä laitteella."

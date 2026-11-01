@@ -1377,6 +1377,8 @@ Settings:
     Setting object has insufficient data, skipping item: Das Objekt enthält unzureichende Daten, Element wird übersprungen
   Distraction Free Settings:
     Digital Wellbeing:
+      Count Watch Time From: "Wiedergabezeit zählen von"
+      Break Reminder Action: "Wenn es Zeit für eine Pause ist"
       Grayscale: "Graustufen"
       Off: "Aus"
       Always: "Immer"
@@ -2914,6 +2916,8 @@ Tooltips:
     Replace HTTP Cache: Deaktiviert den festplattenbasierten HTTP-Cache von Electron und aktiviert einen benutzerdefinierten In-Memory-Image-Cache. Dies führt zu einer erhöhten RAM-Auslastung.
     Disable Hardware Acceleration: Deaktiviert die GPU-Hardwarebeschleunigung. Dies kann Grafikprobleme beheben, führt jedoch wahrscheinlich zu einer geringeren Leistung.
   Distraction Free Settings:
+    Count Watch Time From: "„Alle Geräte“ zählt jedes Gerät, das Wiedergabestatistiken synchronisiert. „Dieses Gerät“ zählt nur, was du hier ansiehst."
+    When a Limit Is Reached: "„Wiedergabe pausieren“ bietet 15 Minuten mehr oder das Ignorieren des Limits für heute an. Mit einem Einstellungspasswort lässt sich ein Limit nur in den Einstellungen erhöhen."
     Grayscale: "Zeigt die ganze App einschließlich Videos in Graustufen an, damit sie weniger Aufmerksamkeit auf sich zieht. „Zur Schlafenszeit“ folgt dem Zeitplan der Schlafenszeit-Erinnerung."
     Daily Watch Time Limit: "Zählt, was du heute auf allen Geräten angesehen hast, die Wiedergabestatistiken synchronisieren, einschließlich Shorts."
     Daily Shorts Limit: "Zählt die Shorts, die du heute auf diesem Gerät angesehen hast."

@@ -1635,6 +1635,8 @@ Settings:
     Confirm Before Unsubscribing: Confirm Before Unsubscribing
   Distraction Free Settings:
     Digital Wellbeing:
+      Count Watch Time From: "Count Watch Time From"
+      Break Reminder Action: "When It's Time for a Break"
       Grayscale: "Grayscale"
       Off: "Off"
       Always: "Always"
@@ -3232,6 +3234,8 @@ Tooltips:
       via the PATH environment variable. If needed, a custom path can be set here.
     Use cookies for subtitles: "Use the configured cookies for subtitles and automatic translations. Also enabled by \"Always Use Cookies\"."
   Distraction Free Settings:
+    Count Watch Time From: "All devices counts every device that syncs watch statistics. This device counts only what you watch here."
+    When a Limit Is Reached: "Pause Playback lets you add 15 minutes or ignore the limit for today. With a settings password, you can only raise a limit in Settings."
     Grayscale: "Shows the whole app, including videos, in shades of gray, so it draws less attention. During Bedtime follows the bedtime reminder's schedule."
     Daily Watch Time Limit: "Counts what you watched today on all devices that sync watch statistics, including Shorts."
     Daily Shorts Limit: "Counts the Shorts you watched on this device today."

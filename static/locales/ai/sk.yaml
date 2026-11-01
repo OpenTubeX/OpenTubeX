@@ -1077,6 +1077,8 @@ Settings:
     Notify About New Uploads: Oznamovať nový obsah
   Distraction Free Settings:
     Digital Wellbeing:
+      Count Watch Time From: "Započítavať čas sledovania"
+      Break Reminder Action: "Keď je čas na prestávku"
       Grayscale: "Odtiene sivej"
       Off: "Vypnuté"
       Always: "Vždy"
@@ -2101,6 +2103,8 @@ Tooltips:
     FFmpeg Executable Path: FFmpeg je potrebný na spájanie samostatných obrazových a zvukových streamov a na prevod zvuku. OpenTubeX predvolene predpokladá, že FFmpeg možno nájsť cez premennú prostredia PATH. V prípade potreby tu môžete nastaviť vlastnú cestu.
     Use cookies for subtitles: "Používať nastavené cookies pre titulky a automatické preklady. Zapne sa aj voľbou „Vždy používať cookies“."
   Distraction Free Settings:
+    Count Watch Time From: "Možnosť „Všetky zariadenia“ započítava každé zariadenie, ktoré synchronizuje štatistiky sledovania. „Toto zariadenie“ započítava iba to, čo sledujete tu."
+    When a Limit Is Reached: "Možnosť „Pozastaviť prehrávanie“ umožňuje pridať 15 minút alebo limit pre dnešok ignorovať. S heslom nastavení môžete limit zvýšiť iba v nastaveniach."
     Grayscale: "Zobrazí celú aplikáciu vrátane videí v odtieňoch sivej, aby menej pútala pozornosť. Možnosť „Počas času spánku“ sa riadi plánom pripomenutia času spánku."
     Daily Watch Time Limit: "Započítava, čo ste dnes sledovali na všetkých zariadeniach, ktoré synchronizujú štatistiky sledovania, vrátane krátkych videí."
     Daily Shorts Limit: "Započítava krátke videá, ktoré ste dnes sledovali na tomto zariadení."

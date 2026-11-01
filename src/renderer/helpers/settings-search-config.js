@@ -317,9 +317,11 @@ export const SETTINGS_SEARCH_SELECT_GROUP_LABELS = {
     '': [
       'Grayscale',
       'Daily Watch Time Limit',
+      'Count Watch Time From',
       'Daily Shorts Limit',
       'When a Limit Is Reached',
       'Take a Break Reminder',
+      'Break Reminder Action',
       'Bedtime Reminder',
       'Bedtime Start',
       'Bedtime End',

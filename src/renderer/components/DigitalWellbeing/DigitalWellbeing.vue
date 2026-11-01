@@ -20,7 +20,7 @@ import FtPrompt from '../FtPrompt/FtPrompt.vue'
 import store from '../../store/index'
 import { showToast } from '../../helpers/utils'
 import { formatTime } from '../../helpers/dateFormat'
-import { syncedWatchStatsAvailable, watchSecondsForDevice } from '../../helpers/sync-watch-stats'
+import { limitWatchSecondsByDate } from '../../helpers/sync-watch-stats'
 import {
   BEDTIME_SNOOZE_MS,
   LIMIT_EXTENSION_SECONDS,
@@ -55,13 +55,9 @@ watch(() => store.getters.getWatchStatsResetVersion, () => store.dispatch('clear
 
 const isPlaying = computed(() => now.value - wellbeing.value.lastPlaybackAt < PLAYBACK_ACTIVE_MS)
 
-/** Today's watch time on all synced devices, including time the statistics did not record. */
+/** Today's watch time on the counted devices, including time the statistics did not record. */
 const watchSeconds = computed(() => {
-  const localDays = store.getters.getWatchSecondsByDate
-  const days = syncedWatchStatsAvailable(store.getters)
-    ? watchSecondsForDevice(localDays, store.getters.getSyncedWatchStats, store.getters.getSyncServerDeviceId,
-        'all', store.getters.getSyncServerWatchStatsReset)
-    : localDays
+  const days = limitWatchSecondsByDate(store.getters, store.getters.getDailyWatchTimeLimitDevices)
   return (days[wellbeing.value.day.date] ?? 0) + wellbeing.value.day.unrecordedSeconds
 })
 const shortsSeconds = computed(() => wellbeing.value.day.shortsSeconds)
@@ -135,9 +131,13 @@ const breakDue = computed(() => {
 })
 watch(() => breakDue.value && prompt.value === null, due => {
   if (!due) return
+  store.commit('resetWellbeingSession')
+  if (store.getters.getBreakReminderAction === 'remind') {
+    showToast({ message: t('Digital Wellbeing.Time to take a break'), icon: ['fas', 'clock'] })
+    return
+  }
   store.commit('requestWellbeingPause')
   store.commit('showWellbeingPrompt', 'break')
-  store.commit('resetWellbeingSession')
 })
 
 // Immediate, so starting the app during bedtime reminds right away.
@@ -174,11 +174,14 @@ const promptContent = computed(() => {
         message: prompt.value === 'watch'
           ? t('Digital Wellbeing.Watched today', { duration: formatSeconds(watchSeconds.value) })
           : t('Digital Wellbeing.Shorts watched today', { duration: formatSeconds(shortsSeconds.value) }),
-        options: [
-          ok,
-          { label: t('Digital Wellbeing.15 More Minutes'), value: 'extend', icon: ['fas', 'plus'] },
-          { label: t('Digital Wellbeing.Ignore for Today'), value: 'ignore', icon: ['fas', 'eye-slash'] },
-        ],
+        // With a settings password, only the password-protected settings can raise a limit.
+        options: store.getters.getSettingsPassword
+          ? [ok]
+          : [
+              ok,
+              { label: t('Digital Wellbeing.15 More Minutes'), value: 'extend', icon: ['fas', 'plus'] },
+              { label: t('Digital Wellbeing.Ignore for Today'), value: 'ignore', icon: ['fas', 'eye-slash'] },
+            ],
       }
     case 'break':
       return {
