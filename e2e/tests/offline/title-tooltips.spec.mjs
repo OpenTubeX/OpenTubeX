@@ -46,6 +46,26 @@ test.describe('title tooltips', () => {
     await expect(button).toHaveAttribute('title', 'Expand side navigation')
   })
 
+  test('stay centered below the element while the pointer moves over it @scale', async ({ page }) => {
+    const navOption = page.locator('.sideNav .navOption[href="#/userplaylists"]:visible')
+    const tooltip = page.locator('.ftTitleTooltip')
+    const box = await navOption.boundingBox()
+    // Wider than an icon button, so it used to move the tooltip along with the pointer
+    expect(box.width).toBeGreaterThan(64)
+
+    await page.mouse.move(box.x + 4, box.y + box.height / 2)
+    await expect(tooltip).toBeVisible()
+    const before = await tooltip.boundingBox()
+    expect(before.y).toBeGreaterThan(box.y + box.height)
+    // The side navigation touches the window edge, so the tooltip keeps an 8px margin
+    const centeredLeft = Math.max(box.x + box.width / 2 - before.width / 2, 8)
+    expect(Math.abs(before.x - centeredLeft)).toBeLessThanOrEqual(1)
+
+    await page.mouse.move(box.x + box.width - 4, box.y + box.height / 2, { steps: 5 })
+    await page.evaluate(() => new Promise(resolve => requestAnimationFrame(() => requestAnimationFrame(resolve))))
+    expect(await tooltip.boundingBox()).toEqual(before)
+  })
+
   test('follow title changes and restore the title on click', async ({ page }) => {
     const button = page.locator(menuButton)
     const tooltip = page.locator('.ftTitleTooltip')
@@ -112,10 +132,13 @@ test.describe('title tooltips', () => {
     await page.locator('#titleTooltipOuter').hover({ position: { x: 150, y: 80 } })
     await expect(tooltip).toHaveText('Outer title')
 
-    // On a large element the tooltip follows the pointer
+    // On a large element the tooltip opens below the pointer and stays there
     const before = await tooltip.boundingBox()
-    await page.mouse.move(300 + 110, 300 + 80)
-    await expect.poll(async () => (await tooltip.boundingBox()).x).toBeCloseTo(before.x - 40, 0)
+    expect(Math.abs(before.x + before.width / 2 - (300 + 150))).toBeLessThanOrEqual(1)
+    expect(before.y).toBeGreaterThan(300 + 80)
+    await page.mouse.move(300 + 110, 300 + 60, { steps: 5 })
+    await page.evaluate(() => new Promise(resolve => requestAnimationFrame(() => requestAnimationFrame(resolve))))
+    expect(await tooltip.boundingBox()).toEqual(before)
 
     await page.locator('#titleTooltipInner').hover()
     await expect(tooltip).toBeHidden()

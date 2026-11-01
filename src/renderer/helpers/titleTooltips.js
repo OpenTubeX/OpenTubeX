@@ -5,7 +5,9 @@
 const SHOW_DELAY_MS = 500
 // Moving straight to another titled element shows its tooltip without delay
 const WARM_PERIOD_MS = 300
-const COMPACT_ANCHOR_PX = 64
+// Tooltips center on anchors up to this size and open at the pointer on larger ones
+const COMPACT_HEIGHT_PX = 64
+const COMPACT_WIDTH_PX = 320
 const ANCHOR_GAP_PX = 6
 const CURSOR_GAP_PX = 18
 const VIEWPORT_MARGIN_PX = 8
@@ -25,9 +27,10 @@ let ariaAttribute = null
 // After a press, scroll or key press the tooltip stays hidden until the pointer leaves
 let suppressed = false
 let showTimer = 0
-let positionFrame = 0
 let warmUntil = 0
 const pointer = { x: 0, y: 0 }
+// Where the pointer was when the tooltip opened, so it stays put while the pointer moves
+const origin = { x: 0, y: 0 }
 
 export function installTitleTooltips() {
   tooltip = document.createElement('div')
@@ -77,13 +80,6 @@ function handlePointerMove(event) {
   // Keep the native tooltip hidden while the pointer moves on after a press
   if (suppressed && !stripped && anchor?.hasAttribute('title')) {
     stripTitle()
-  }
-  // Tooltips on large anchors follow the pointer
-  if (positionFrame === 0 && tooltip.matches(':popover-open')) {
-    positionFrame = requestAnimationFrame(() => {
-      positionFrame = 0
-      if (tooltip.matches(':popover-open')) position()
-    })
   }
 }
 
@@ -216,6 +212,8 @@ function show() {
   if (!anchor?.isConnected || !stripped || !title.trim()) return
 
   tooltip.textContent = title
+  origin.x = pointer.x
+  origin.y = pointer.y
   // Reopen to move above dialogs and fullscreen elements shown since the last time
   if (tooltip.matches(':popover-open')) tooltip.hidePopover()
   tooltip.showPopover()
@@ -229,20 +227,20 @@ function hide() {
 }
 
 /**
- * Place the tooltip below small anchors and below the pointer on large ones,
- * flipping it above when there is no room.
+ * Center the tooltip below small anchors and place it below the pointer on
+ * large ones, flipping it above when there is no room.
  */
 function position() {
   const rect = anchor.getBoundingClientRect()
   const width = tooltip.offsetWidth
   const height = tooltip.offsetHeight
-  const compact = rect.height <= COMPACT_ANCHOR_PX
-  const centerX = rect.width <= COMPACT_ANCHOR_PX ? rect.left + rect.width / 2 : pointer.x
+  const compact = rect.width <= COMPACT_WIDTH_PX && rect.height <= COMPACT_HEIGHT_PX
+  const centerX = compact ? rect.left + rect.width / 2 : origin.x
   const maxTop = window.innerHeight - height - VIEWPORT_MARGIN_PX
 
-  let top = compact ? rect.bottom + ANCHOR_GAP_PX : pointer.y + CURSOR_GAP_PX
+  let top = compact ? rect.bottom + ANCHOR_GAP_PX : origin.y + CURSOR_GAP_PX
   if (top > maxTop) {
-    top = (compact ? rect.top - ANCHOR_GAP_PX : pointer.y - ANCHOR_GAP_PX) - height
+    top = (compact ? rect.top - ANCHOR_GAP_PX : origin.y - ANCHOR_GAP_PX) - height
   }
   const left = Math.min(Math.max(centerX - width / 2, VIEWPORT_MARGIN_PX), window.innerWidth - width - VIEWPORT_MARGIN_PX)
 
