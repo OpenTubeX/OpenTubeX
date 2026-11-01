@@ -2650,6 +2650,153 @@ test.describe('fixed tab width', () => {
   })
 })
 
+/**
+ * Waits until the active tab, or the collapsed group that contains it, lies
+ * inside the scrolled tab strip, which must overflow for the check to mean
+ * anything.
+ * @param {import('@playwright/test').Page} page
+ */
+async function expectActiveTabInView(page) {
+  await expect.poll(() => page.locator('.tabBar .tabBarReorderItem.active').evaluate(tab => {
+    const container = tab.closest('.tabsContainer')
+    const viewport = container.getBoundingClientRect()
+    const box = tab.getBoundingClientRect()
+    return {
+      overflows: container.scrollWidth > container.clientWidth + 1 || container.scrollHeight > container.clientHeight + 1,
+      inside: box.left >= viewport.left - 1 && box.right <= viewport.right + 1 &&
+        box.top >= viewport.top - 1 && box.bottom <= viewport.bottom + 1
+    }
+  })).toEqual({ overflows: true, inside: true })
+}
+
+for (const tabBarPosition of ['top', 'left']) {
+  test.describe(`overflowing tabs at ${tabBarPosition}`, () => {
+    test.use({ seed: { settings: { tabBarPosition, useFixedTabWidth: true, fixedTabWidth: 200 } } })
+
+    test('scroll the active tab into view on launch, keyboard switching, and new tabs', { tag: '@scale' }, async ({ app }) => {
+      let page = app.page
+      // Small enough for the strip to overflow even with a group collapsed.
+      await setWindowSize(app, page, { width: 1200, height: 500 })
+      // The initial tab stays first, so Ctrl+1 switches back to it.
+      const firstTabId = await page.locator(sel.activeTab).getAttribute('data-tab-id')
+      const lastTabId = await page.evaluate(async () => {
+        let tab
+        for (let index = 0; index < 40; index++) {
+          tab = await window.ftElectron.tabs.create({
+            route: '/history', title: `History ${index + 1}`, makeActive: false, lazyLoad: true
+          })
+        }
+        return tab.id
+      })
+
+      // Scroll by hand first, so the next state update echoes that position.
+      const container = page.locator('.tabsContainer')
+      await container.evaluate(element => element.scrollTo(200, 200))
+      await expect.poll(async () => {
+        const offset = await container.evaluate(element => element.scrollLeft || element.scrollTop)
+        if (offset <= 0) return false
+        // Only the horizontal bar shares its offset with the main process.
+        if (tabBarPosition !== 'top') return true
+        const shared = await page.evaluate(async () => (await window.ftElectron.tabs.getState()).tabBarScrollPosition)
+        return Math.abs(shared - offset) < 1
+      }).toBe(true)
+
+      // Ctrl+Shift+Tab wraps around from the first tab to the last one.
+      await page.keyboard.press('Control+Shift+Tab')
+      await expect(page.locator(sel.activeTab)).toHaveAttribute('data-tab-id', lastTabId)
+      await expectActiveTabInView(page)
+
+      await page.keyboard.press('Control+1')
+      await expect(page.locator(sel.activeTab)).toHaveAttribute('data-tab-id', firstTabId)
+      await expectActiveTabInView(page)
+
+      await page.locator(sel.newTabButton).click()
+      await expect(page.locator(sel.tabs)).toHaveCount(42)
+      const newTabId = await page.locator(sel.activeTab).getAttribute('data-tab-id')
+      await expect(page.locator(sel.tabs).last()).toHaveAttribute('data-tab-id', newTabId)
+      await expectActiveTabInView(page)
+
+      // A tab switch while a tab is being dragged still reveals the new active tab.
+      const newTabBox = await page.locator(sel.activeTab).boundingBox()
+      await page.mouse.move(newTabBox.x + newTabBox.width / 2, newTabBox.y + newTabBox.height / 2)
+      await page.mouse.down()
+      await page.mouse.move(
+        newTabBox.x + newTabBox.width / 2 - (tabBarPosition === 'top' ? 20 : 0),
+        newTabBox.y + newTabBox.height / 2 - (tabBarPosition === 'top' ? 0 : 10),
+        { steps: 4 }
+      )
+      await expect(page.locator('.tabBar .tab.dragging')).toHaveCount(1)
+      await page.keyboard.press('Control+1')
+      await expect(page.locator(sel.activeTab)).toHaveAttribute('data-tab-id', firstTabId)
+      await expectActiveTabInView(page)
+      await page.mouse.up()
+
+      // Expanding a collapsed group reveals the active tab inside it.
+      const groupedTabIds = await page.evaluate(async () => {
+        const { tabs } = await window.ftElectron.tabs.getState()
+        const ids = tabs.slice(1, 21).map(tab => tab.id)
+        const group = await window.ftElectron.tabs.createGroup({ name: 'Grouped', color: 'green' })
+        await window.ftElectron.tabs.setGroup(ids, group.id)
+        await window.ftElectron.tabs.activate(ids.at(-1))
+        await window.$store.dispatch('updateTabGroup', { groupId: group.id, changes: { isCollapsed: true } })
+        return ids
+      })
+      const collapsedGroup = page.locator('.tabBar .collapsedTabGroup')
+      await expect(collapsedGroup).toHaveClass(/active/)
+
+      // Switching to another tab of the collapsed group reveals the group.
+      await container.evaluate(element => element.scrollTo(element.scrollWidth, element.scrollHeight))
+      await page.evaluate(id => window.ftElectron.tabs.activate(id), groupedTabIds.at(-2))
+      await expect.poll(() => page.evaluate(async () => (await window.ftElectron.tabs.getState()).activeTabId))
+        .toBe(groupedTabIds.at(-2))
+      await expectActiveTabInView(page)
+      await page.evaluate(id => window.ftElectron.tabs.activate(id), groupedTabIds.at(-1))
+
+      await container.evaluate(element => element.scrollTo(0, 0))
+      await collapsedGroup.click()
+      await expect(collapsedGroup).toHaveCount(0)
+      await expect(page.locator(sel.activeTab)).toHaveAttribute('data-tab-id', groupedTabIds.at(-1))
+      await expectActiveTabInView(page)
+
+      // Switching between horizontal and vertical tabs keeps the active tab visible.
+      await page.evaluate(id => window.ftElectron.tabs.activate(id), lastTabId)
+      await expect(page.locator(sel.activeTab)).toHaveAttribute('data-tab-id', lastTabId)
+      await expectActiveTabInView(page)
+      for (const position of [tabBarPosition === 'top' ? 'left' : 'top', tabBarPosition]) {
+        await page.evaluate(position => window.$store.commit('setTabBarPosition', position), position)
+        await expect(page.locator('.app')).toHaveClass(position === 'top' ? /^(?!.*verticalTabs)/ : /verticalTabs/)
+        await expectActiveTabInView(page)
+      }
+
+      if (tabBarPosition === 'top') {
+        // A reloaded renderer restores the shared offset before it reveals
+        // the active tab, which is already visible there.
+        const middleTabId = await page.evaluate(async () => (await window.ftElectron.tabs.getState()).tabs[30].id)
+        await page.evaluate(id => window.ftElectron.tabs.activate(id), middleTabId)
+        await expect(page.locator(sel.activeTab)).toHaveAttribute('data-tab-id', middleTabId)
+        const centeredOffset = await page.locator(sel.activeTab).evaluate(tab => {
+          const strip = tab.closest('.tabsContainer')
+          strip.scrollLeft += tab.getBoundingClientRect().left - strip.getBoundingClientRect().left -
+            (strip.clientWidth - tab.offsetWidth) / 2
+          return strip.scrollLeft
+        })
+        await expect.poll(() => page.evaluate(async () => (await window.ftElectron.tabs.getState()).tabBarScrollPosition))
+          .toBeCloseTo(centeredOffset, 0)
+        await page.reload()
+        await expect(page.locator(sel.activeTab)).toHaveAttribute('data-tab-id', middleTabId)
+        await expect.poll(() => page.locator('.tabsContainer').evaluate(strip => strip.scrollLeft)).toBeCloseTo(centeredOffset, 0)
+        await page.evaluate(id => window.ftElectron.tabs.activate(id), lastTabId)
+        await expect(page.locator(sel.activeTab)).toHaveAttribute('data-tab-id', lastTabId)
+      }
+
+      await page.locator('.tabsContainer').evaluate(element => element.scrollTo(0, 0))
+      ;({ page } = await app.relaunch())
+      await expect(page.locator(sel.activeTab)).toHaveAttribute('data-tab-id', lastTabId)
+      await expectActiveTabInView(page)
+    })
+  })
+}
+
 test.describe('localized tab titles', () => {
   test.use({ seed: { settings: { currentLocale: 'de-DE' } } })
 
