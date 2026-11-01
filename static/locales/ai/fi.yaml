@@ -334,23 +334,24 @@ Settings:
     Profile Selector Hint: Voit vaihtaa profiilia myös napsauttamalla profiilikuvaketta hiiren kakkospainikkeella
     Profile Selector Touch Hint: Voit vaihtaa profiilia myös painamalla profiilikuvaketta pitkään
   Categories:
-    General Description: Kieli, käynnistys, välilehdet ja sovelluksen toiminta
+    General Description: Kieli, käynnistys, välilehdet ja kääntäminen
     Appearance: Ulkoasu
-    Appearance Description: Teema, asettelu ja pikkukuvat
+    Appearance Description: Teema, asettelu, navigointi ja videoluettelot
     Content appearance: Videoluettelot ja pikkukuvat
     Layout: Asettelu
-    Playback Description: Soitin, tekstitykset ja kanavakohtaiset asetukset
-    Subscriptions Description: Syötteiden päivitys- ja näyttöasetukset
-    Downloads Description: Kansiot, mallit ja automaattiset säännöt
-    Distraction Free Description: Piilota sisältöä ja aseta katselurajoituksia
+    Playback Description: Soittimen oletukset, tekstitykset ja kanavakohtaiset asetukset
+    Subscriptions Description: Syötteiden päivitys, ilmoitukset uusista videoista ja RSS-syötteet
+    Downloads Description: Latauskansio, mallit ja automaattiset lataukset
+    Focus: Keskittyminen
+    Focus Description: Piilotettu sisältö, katselurajat, muistutukset ja perheasetukset
     Add-ons: Lisäosat
-    Add-ons Description: SponsorBlock, DeArrow, ei-tykkäysten määrät ja puhekäännös
-    Privacy Description: Katselun yksityisyys ja käyttöoikeudet
+    Add-ons Description: SponsorBlock, DeArrow, ei-tykkäysten määrät, AiSList ja puhekäännös
+    Privacy Description: Historia, hakuehdotukset, linkit ja sovelluksen salasana
     Online activity: Verkkotoiminta
-    Data And Storage Description: Tuonti, vienti, levytilan käyttö ja siivous
-    Sync Description: Pidä asetukset ja tiedot samoina kaikilla laitteilla
+    Data And Storage Description: Varmuuskopiot, tuonti ja vienti, levyn käyttö ja siivous
+    Sync Description: Synkronointipalvelimen tili, laitteiden yhdistäminen ja synkronoidut tiedot
     Advanced: Lisäasetukset
-    Advanced Description: Palveluntarjoajat, ulkoiset sovellukset ja verkko
+    Advanced Description: Taustapalvelut, puskurointi, ulkoiset työkalut, välityspalvelin ja vianmääritys
     Alternative providers: Video- ja metatietojen palveluntarjoajat
   Highlight Changed Settings: Korosta oletuksista poikkeavat asetukset
   Reset Setting to Default: Palauta tämä asetus oletusarvoon

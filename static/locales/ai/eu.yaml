@@ -329,23 +329,24 @@ Settings:
     Profile Selector Hint: Profil batetik bestera aldatzeko, eskuineko klik ere egin dezakezu profilaren ikonoan
     Profile Selector Touch Hint: Profil batetik bestera aldatzeko, profilaren ikonoa sakatuta ere eduki dezakezu
   Categories:
-    General Description: Hizkuntza, abioa, fitxak eta aplikazioaren portaera
+    General Description: Hizkuntza, abioa, fitxak eta itzulpena
     Appearance: Itxura
-    Appearance Description: Gaia, diseinua eta koadro txikiak
+    Appearance Description: Gaia, diseinua, nabigazioa eta bideo-zerrendak
     Content appearance: Bideo-zerrendak eta koadro txikiak
     Layout: Diseinua
-    Playback Description: Erreproduzigailua, azpitituluak eta kanalen hobespenak
-    Subscriptions Description: Jarioak freskatzeko eta bistaratzeko aukerak
-    Downloads Description: Karpetak, txantiloiak eta arau automatikoak
-    Distraction Free Description: Ezkutatu edukia eta ezarri ikusteko mugak
+    Playback Description: Erreproduzigailuaren balio lehenetsiak, azpitituluak eta kanal bakoitzeko ezarpenak
+    Subscriptions Description: Jarioen freskatzea, bideo berrien jakinarazpenak eta RSS jarioak
+    Downloads Description: Deskargen karpeta, txantiloiak eta deskarga automatikoak
+    Focus: Kontzentrazioa
+    Focus Description: Ezkutatutako edukia, ikusteko mugak, gogorarazpenak eta gurasoen kontrola
     Add-ons: Gehigarriak
-    Add-ons Description: SponsorBlock, DeArrow, atsegin ezak eta ahots bidezko itzulpena
-    Privacy Description: Ikusteko pribatutasuna eta sarbide-kontrolak
+    Add-ons Description: SponsorBlock, DeArrow, atsegin ezak, AiSList eta ahots bidezko itzulpena
+    Privacy Description: Historia, bilaketa-iradokizunak, estekak eta aplikazioaren pasahitza
     Online activity: Lineako jarduera
-    Data And Storage Description: Inportazioa, esportazioa, diskoaren erabilera eta garbiketa
-    Sync Description: Mantendu ezarpenak eta datuak sinkronizatuta gailuen artean
+    Data And Storage Description: Babeskopiak, inportazioa eta esportazioa, diskoaren erabilera eta garbiketa
+    Sync Description: Sinkronizazio-zerbitzariko kontua, gailuen parekatzea eta sinkronizatutako datuak
     Advanced: Aurreratua
-    Advanced Description: Hornitzaileak, kanpoko aplikazioak eta sarea
+    Advanced Description: Backendak, bufferra, kanpoko tresnak, proxya eta diagnostikoa
     Alternative providers: Bideoen eta metadatuen hornitzaileak
   Highlight Changed Settings: Nabarmendu lehenetsitako balioetatik aldatutako ezarpenak
   Reset Setting to Default: Berrezarri ezarpen honen balio lehenetsia

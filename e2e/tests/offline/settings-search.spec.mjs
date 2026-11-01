@@ -248,8 +248,8 @@ test.describe('settings search highlights', () => {
     await goTo(page, 'settings')
     const search = page.getByRole('searchbox', { name: 'Search settings' })
 
-    await search.fill('Feed refresh and display options')
-    await page.getByRole('button', { name: 'Feed refresh and display options', exact: true }).click()
+    await search.fill('Feed refresh, upload notifications, and RSS feeds')
+    await page.getByRole('button', { name: 'Feed refresh, upload notifications, and RSS feeds', exact: true }).click()
 
     const sectionHighlight = page.locator('.section.settingsSearchTarget')
     await expect(sectionHighlight).toHaveAttribute('data-section', 'subscriptions')

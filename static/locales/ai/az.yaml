@@ -331,23 +331,24 @@ Settings:
     Profile Selector Hint: Profilləri dəyişmək üçün profil nişanına sağ klikləyə də bilərsiniz
     Profile Selector Touch Hint: Profilləri dəyişmək üçün profil nişanına basıb saxlaya da bilərsiniz
   Categories:
-    General Description: Dil, başlanğıc, vərəqlər və tətbiqin davranışı
+    General Description: Dil, başlanğıc, tablar və tərcümə
     Appearance: Görünüş
-    Appearance Description: Mövzu, düzülüş və miniatürlər
+    Appearance Description: Tema, tərtibat, naviqasiya və video siyahıları
     Content appearance: Video siyahıları və miniatürlər
     Layout: Düzülüş
-    Playback Description: Oynadıcı, titrlər və kanal seçimləri
-    Subscriptions Description: Lent yeniləməsi və görünüş seçimləri
-    Downloads Description: Qovluqlar, şablonlar və avtomatik qaydalar
-    Distraction Free Description: Məzmunu gizlədin və baxış limitləri təyin edin
+    Playback Description: Oynadıcının defolt ayarları, titrlər və kanal üzrə ayarlar
+    Subscriptions Description: Lent yeniləməsi, yeni video bildirişləri və RSS lentləri
+    Downloads Description: Endirmə qovluğu, şablonlar və avtomatik endirmələr
+    Focus: Fokus
+    Focus Description: Gizlədilmiş məzmun, baxış limitləri, xatırlatmalar və valideyn nəzarəti
     Add-ons: Əlavələr
-    Add-ons Description: SponsorBlock, DeArrow, bəyənməmələr və səsli tərcümə
-    Privacy Description: Baxış məxfiliyi və giriş nəzarəti
+    Add-ons Description: SponsorBlock, DeArrow, bəyənməmələr, AiSList və səsli tərcümə
+    Privacy Description: Tarixçə, axtarış təklifləri, keçidlər və tətbiq parolu
     Online activity: Onlayn fəaliyyət
-    Data And Storage Description: İdxal, ixrac, disk istifadəsi və təmizləmə
-    Sync Description: Tənzimləmələri və məlumatları cihazlar arasında sinxron saxlayın
+    Data And Storage Description: Ehtiyat nüsxələr, idxal və ixrac, disk istifadəsi və təmizləmə
+    Sync Description: Sinxronizasiya serveri hesabı, cihazların qoşulması və sinxronlaşdırılan məlumatlar
     Advanced: Qabaqcıl
-    Advanced Description: Təminatçılar, xarici tətbiqlər və şəbəkə
+    Advanced Description: Backend-lər, buferləmə, xarici alətlər, proksi və diaqnostika
     Alternative providers: Video və metaməlumat təminatçıları
   Highlight Changed Settings: İlkin dəyərlərindən dəyişdirilmiş tənzimləmələri vurğula
   Reset Setting to Default: Bu tənzimləməni ilkin dəyərinə qaytar

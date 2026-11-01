@@ -638,9 +638,9 @@ const settingsComponentsData = computed(() => [
     : []),
   {
     type: 'focus',
-    title: t('Settings.Distraction Free Settings.Distraction Free Settings'),
-    description: t('Settings.Categories.Distraction Free Description'),
-    icon: ['fas', 'eye-slash'],
+    title: t('Settings.Categories.Focus'),
+    description: t('Settings.Categories.Focus Description'),
+    icon: ['fas', 'bullseye'],
     component: FocusSection
   },
   {

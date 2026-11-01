@@ -330,23 +330,24 @@ Settings:
     Profile Selector Hint: Μπορείτε επίσης να κάνετε δεξί κλικ στο εικονίδιο προφίλ για να αλλάξετε προφίλ
     Profile Selector Touch Hint: Μπορείτε επίσης να πατήσετε παρατεταμένα το εικονίδιο προφίλ για να αλλάξετε προφίλ
   Categories:
-    General Description: Γλώσσα, εκκίνηση, καρτέλες και συμπεριφορά εφαρμογής
+    General Description: Γλώσσα, εκκίνηση, καρτέλες και μετάφραση
     Appearance: Εμφάνιση
-    Appearance Description: Θέμα, διάταξη και μικρογραφίες
+    Appearance Description: Θέμα, διάταξη, πλοήγηση και λίστες βίντεο
     Content appearance: Λίστες βίντεο και μικρογραφίες
     Layout: Διάταξη
-    Playback Description: Πρόγραμμα αναπαραγωγής, υπότιτλοι και προτιμήσεις καναλιών
-    Subscriptions Description: Επιλογές ανανέωσης και εμφάνισης ροών
-    Downloads Description: Φάκελοι, πρότυπα και αυτόματοι κανόνες
-    Distraction Free Description: Απόκρυψη περιεχομένου και όρια προβολής
+    Playback Description: Προεπιλογές προγράμματος αναπαραγωγής, υπότιτλοι και ρυθμίσεις ανά κανάλι
+    Subscriptions Description: Ανανέωση ροών, ειδοποιήσεις νέων βίντεο και ροές RSS
+    Downloads Description: Φάκελος λήψεων, πρότυπα και αυτόματες λήψεις
+    Focus: Εστίαση
+    Focus Description: Κρυφό περιεχόμενο, όρια προβολής, υπενθυμίσεις και γονικός έλεγχος
     Add-ons: Πρόσθετα
-    Add-ons Description: SponsorBlock, DeArrow, αρνητικές ψήφοι και μετάφραση εκφώνησης
-    Privacy Description: Απόρρητο προβολής και έλεγχοι πρόσβασης
+    Add-ons Description: SponsorBlock, DeArrow, αρνητικές ψήφοι, AiSList και μετάφραση εκφώνησης
+    Privacy Description: Ιστορικό, προτάσεις αναζήτησης, σύνδεσμοι και κωδικός πρόσβασης εφαρμογής
     Online activity: Δραστηριότητα στο διαδίκτυο
-    Data And Storage Description: Εισαγωγή, εξαγωγή, χρήση δίσκου και εκκαθάριση
-    Sync Description: Συγχρονισμός ρυθμίσεων και δεδομένων μεταξύ συσκευών
+    Data And Storage Description: Αντίγραφα ασφαλείας, εισαγωγή και εξαγωγή, χρήση δίσκου και εκκαθάριση
+    Sync Description: Λογαριασμός διακομιστή συγχρονισμού, σύζευξη συσκευών και συγχρονισμένα δεδομένα
     Advanced: Για προχωρημένους
-    Advanced Description: Πάροχοι, εξωτερικές εφαρμογές και δίκτυο
+    Advanced Description: Υπηρεσίες υποστήριξης, προσωρινή αποθήκευση, εξωτερικά εργαλεία, διακομιστής μεσολάβησης και διαγνωστικά
     Alternative providers: Πάροχοι βίντεο και μεταδεδομένων
   Highlight Changed Settings: Επισήμανση ρυθμίσεων που διαφέρουν από τις προεπιλεγμένες
   Reset Setting to Default: Επαναφορά αυτής της ρύθμισης στην προεπιλεγμένη τιμή

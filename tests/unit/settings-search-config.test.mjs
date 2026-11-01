@@ -382,8 +382,8 @@ test('settings search results retain their source tab', () => {
   const values = createSettingsSearchIndex({
     sections: [{
       type: 'data',
-      title: locale.Settings.Categories.Data,
-      description: locale.Settings.Categories['Data Description'],
+      title: locale.Settings['Data Settings']['Data And Storage'],
+      description: locale.Settings.Categories['Data And Storage Description'],
     }],
     tm: path => getAtPath(locale, path),
     store,
@@ -405,7 +405,7 @@ test('settings search results retain their source tab', () => {
 test('distraction free search results open the tab of their setting', () => {
   const store = { getters: new Proxy({}, { get: () => false }) }
   const values = createSettingsSearchIndex({
-    sections: [{ type: 'focus', title: 'Distraction Free', description: '' }],
+    sections: [{ type: 'focus', title: 'Focus', description: '' }],
     tm: path => getAtPath(locale, path),
     store,
     usingElectron: true,
@@ -431,8 +431,8 @@ test('distraction free search results open the tab of their setting', () => {
 test('persistent playback cache search results follow desktop visibility', () => {
   const sections = [{
     type: 'data',
-    title: locale.Settings.Categories.Data,
-    description: locale.Settings.Categories['Data Description'],
+    title: locale.Settings['Data Settings']['Data And Storage'],
+    description: locale.Settings.Categories['Data And Storage Description'],
   }]
   const options = {
     sections,

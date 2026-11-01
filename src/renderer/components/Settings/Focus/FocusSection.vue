@@ -8,7 +8,7 @@
         class="focusTabs"
         variant="segmented"
         role="tablist"
-        :aria-label="t('Settings.Distraction Free Settings.Distraction Free Settings')"
+        :aria-label="t('Settings.Categories.Focus')"
       >
         <button
           v-for="(tab, index) in tabs"

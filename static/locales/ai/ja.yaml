@@ -329,23 +329,24 @@ Settings:
     Profile Selector Hint: プロフィールアイコンを右クリックしてプロフィールを切り替えることもできます
     Profile Selector Touch Hint: プロフィールアイコンを長押ししてプロフィールを切り替えることもできます
   Categories:
-    General Description: 言語、起動、タブ、アプリの動作
+    General Description: 言語、起動、タブ、翻訳
     Appearance: 外観
-    Appearance Description: テーマ、レイアウト、サムネイル
+    Appearance Description: テーマ、レイアウト、ナビゲーション、動画リスト
     Content appearance: 動画一覧とサムネイル
     Layout: レイアウト
-    Playback Description: プレーヤー、字幕、チャンネル設定
-    Subscriptions Description: フィードの更新と表示オプション
-    Downloads Description: フォルダー、テンプレート、自動処理ルール
-    Distraction Free Description: コンテンツの非表示と視聴制限
+    Playback Description: プレーヤーの既定値、字幕、チャンネルごとの設定
+    Subscriptions Description: フィードの更新、新着動画の通知、RSS フィード
+    Downloads Description: ダウンロード先フォルダー、テンプレート、自動ダウンロード
+    Focus: 集中
+    Focus Description: 非表示のコンテンツ、視聴制限、リマインダー、保護者による制限
     Add-ons: アドオン
-    Add-ons Description: SponsorBlock、DeArrow、低評価、吹き替え翻訳
-    Privacy Description: 視聴時のプライバシーとアクセス制御
+    Add-ons Description: SponsorBlock、DeArrow、低評価、AiSList、吹き替え翻訳
+    Privacy Description: 履歴、検索候補、リンク、アプリのパスワード
     Online activity: オンラインでの動作
-    Data And Storage Description: インポート、エクスポート、ディスク使用量、クリーンアップ
-    Sync Description: デバイス間で設定とデータを同期
+    Data And Storage Description: バックアップ、インポートとエクスポート、ディスク使用量、クリーンアップ
+    Sync Description: 同期サーバーのアカウント、デバイスのペアリング、同期されたデータ
     Advanced: 詳細設定
-    Advanced Description: プロバイダー、外部アプリ、ネットワーク
+    Advanced Description: バックエンド、バッファリング、外部ツール、プロキシ、診断
     Alternative providers: 動画とメタデータのプロバイダー
   Highlight Changed Settings: 既定値から変更した設定を強調表示
   Reset Setting to Default: この設定を既定値に戻す

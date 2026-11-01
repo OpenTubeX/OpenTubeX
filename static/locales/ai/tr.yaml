@@ -329,23 +329,24 @@ Settings:
     Profile Selector Hint: Profil değiştirmek için profil simgesine sağ tıklayabilirsiniz
     Profile Selector Touch Hint: Profil değiştirmek için profil simgesine uzun da basabilirsiniz
   Categories:
-    General Description: Dil, başlangıç, sekmeler ve uygulama davranışı
+    General Description: Dil, başlangıç, sekmeler ve çeviri
     Appearance: Görünüm
-    Appearance Description: Tema, düzen ve küçük resimler
+    Appearance Description: Tema, düzen, gezinme ve video listeleri
     Content appearance: Video listeleri ve küçük resimler
     Layout: Düzen
-    Playback Description: Oynatıcı, alt yazılar ve kanal tercihleri
-    Subscriptions Description: Akış yenileme ve görüntüleme seçenekleri
-    Downloads Description: Klasörler, şablonlar ve otomatik kurallar
-    Distraction Free Description: İçeriği gizleyin ve izleme sınırları belirleyin
+    Playback Description: Oynatıcı varsayılanları, alt yazılar ve kanal bazında ayarlar
+    Subscriptions Description: Akış yenileme, yeni video bildirimleri ve RSS akışları
+    Downloads Description: İndirme klasörü, şablonlar ve otomatik indirmeler
+    Focus: Odak
+    Focus Description: Gizlenen içerik, izleme sınırları, hatırlatıcılar ve ebeveyn denetimi
     Add-ons: Eklentiler
-    Add-ons Description: SponsorBlock, DeArrow, beğenmeme sayıları ve seslendirme çevirisi
-    Privacy Description: İzleme gizliliği ve erişim denetimleri
+    Add-ons Description: SponsorBlock, DeArrow, beğenmeme sayıları, AiSList ve seslendirme çevirisi
+    Privacy Description: Geçmiş, arama önerileri, bağlantılar ve uygulama parolası
     Online activity: Çevrim içi etkinlik
-    Data And Storage Description: İçe ve dışa aktarma, disk kullanımı ve temizleme
-    Sync Description: Ayarları ve verileri cihazlar arasında eşitlenmiş tutun
+    Data And Storage Description: Yedekler, içe ve dışa aktarma, disk kullanımı ve temizlik
+    Sync Description: Eşitleme sunucusu hesabı, cihaz eşleştirme ve eşitlenen veriler
     Advanced: Gelişmiş
-    Advanced Description: Sağlayıcılar, harici uygulamalar ve ağ
+    Advanced Description: Arka uçlar, arabelleğe alma, harici araçlar, vekil sunucu ve tanılama
     Alternative providers: Video ve meta veri sağlayıcıları
   Highlight Changed Settings: Varsayılanlardan farklı ayarları vurgula
   Reset Setting to Default: Bu ayarı varsayılanına sıfırla

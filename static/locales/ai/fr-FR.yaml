@@ -329,23 +329,24 @@ Settings:
     Profile Selector Hint: Vous pouvez aussi faire un clic droit sur l’icône du profil pour changer de profil
     Profile Selector Touch Hint: Vous pouvez aussi appuyer longuement sur l’icône du profil pour changer de profil
   Categories:
-    General Description: Langue, démarrage, onglets et comportement de l’application
+    General Description: Langue, démarrage, onglets et traduction
     Appearance: Apparence
-    Appearance Description: Thème, disposition et miniatures
+    Appearance Description: Thème, disposition, navigation et listes de vidéos
     Content appearance: Listes de vidéos et miniatures
     Layout: Disposition
-    Playback Description: Lecteur, sous-titres et préférences par chaîne
-    Subscriptions Description: Actualisation des flux et options d’affichage
-    Downloads Description: Dossiers, modèles et règles automatiques
-    Distraction Free Description: Masquer du contenu et définir des limites de visionnage
+    Playback Description: Réglages par défaut du lecteur, sous-titres et paramètres par chaîne
+    Subscriptions Description: Actualisation des flux, notifications de nouvelles vidéos et flux RSS
+    Downloads Description: Dossier de téléchargement, modèles et téléchargements automatiques
+    Focus: Concentration
+    Focus Description: Contenu masqué, limites de visionnage, rappels et contrôle parental
     Add-ons: Extensions
-    Add-ons Description: SponsorBlock, DeArrow, avis négatifs et traduction vocale
-    Privacy Description: Confidentialité du visionnage et contrôles d’accès
+    Add-ons Description: SponsorBlock, DeArrow, avis négatifs, AiSList et traduction vocale
+    Privacy Description: Historique, suggestions de recherche, liens et mot de passe de l’application
     Online activity: Activité en ligne
-    Data And Storage Description: Importation, exportation, utilisation du disque et nettoyage
-    Sync Description: Synchroniser les paramètres et les données entre les appareils
+    Data And Storage Description: Sauvegardes, importation et exportation, utilisation du disque et nettoyage
+    Sync Description: Compte du serveur de synchronisation, association d’appareils et données synchronisées
     Advanced: Avancé
-    Advanced Description: Fournisseurs, applications externes et réseau
+    Advanced Description: Back-ends, mise en mémoire tampon, outils externes, proxy et diagnostics
     Alternative providers: Fournisseurs de vidéos et de métadonnées
   Highlight Changed Settings: Mettre en évidence les paramètres différents des valeurs par défaut
   Reset Setting to Default: Rétablir la valeur par défaut de ce paramètre

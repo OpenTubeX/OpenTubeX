@@ -332,23 +332,24 @@ Settings:
     Profile Selector Hint: Можете също да щракнете с десния бутон върху иконата на профила, за да смените профила
     Profile Selector Touch Hint: Можете също да докоснете и задържите иконата на профила, за да смените профила
   Categories:
-    General Description: Език, стартиране, раздели и поведение на приложението
+    General Description: Език, стартиране, раздели и превод
     Appearance: Външен вид
-    Appearance Description: Тема, оформление и миниатюри
+    Appearance Description: Тема, оформление, навигация и списъци с видеоклипове
     Content appearance: Списъци с видеоклипове и миниатюри
     Layout: Оформление
-    Playback Description: Плейър, субтитри и предпочитания за каналите
-    Subscriptions Description: Обновяване на емисиите и опции за показване
-    Downloads Description: Папки, шаблони и автоматични правила
-    Distraction Free Description: Скриване на съдържание и задаване на ограничения за гледане
+    Playback Description: Настройки по подразбиране на плейъра, субтитри и настройки за всеки канал
+    Subscriptions Description: Обновяване на емисиите, известия за нови видеоклипове и RSS емисии
+    Downloads Description: Папка за изтегляне, шаблони и автоматични изтегляния
+    Focus: Фокус
+    Focus Description: Скрито съдържание, ограничения за гледане, напомняния и родителски контрол
     Add-ons: Добавки
-    Add-ons Description: SponsorBlock, DeArrow, оценки „Не ми харесва“ и гласов превод
-    Privacy Description: Поверителност при гледане и управление на достъпа
+    Add-ons Description: SponsorBlock, DeArrow, оценки „Не ми харесва“, AiSList и гласов превод
+    Privacy Description: История, предложения при търсене, връзки и парола за приложението
     Online activity: Дейност онлайн
-    Data And Storage Description: Импортиране, експортиране, използване на диска и почистване
-    Sync Description: Синхронизиране на настройките и данните между устройствата
+    Data And Storage Description: Резервни копия, импортиране и експортиране, използване на диска и почистване
+    Sync Description: Профил в сървъра за синхронизиране, сдвояване на устройства и синхронизирани данни
     Advanced: Разширени
-    Advanced Description: Доставчици, външни приложения и мрежа
+    Advanced Description: Бекенди, буфериране, външни инструменти, прокси и диагностика
     Alternative providers: Доставчици на видеоклипове и метаданни
   Highlight Changed Settings: Откроявай настройките, променени спрямо стандартните
   Reset Setting to Default: Възстанови стандартната стойност на тази настройка

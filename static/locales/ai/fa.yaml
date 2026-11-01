@@ -353,23 +353,24 @@ Settings:
     Profile Selector Hint: برای تعویض نمایه می‌توانید روی نماد نمایه نیز راست‌کلیک کنید
     Profile Selector Touch Hint: برای تعویض نمایه می‌توانید نماد نمایه را لمس کرده و نگه دارید
   Categories:
-    General Description: زبان، راه‌اندازی، زبانه‌ها و رفتار برنامه
+    General Description: زبان، راه‌اندازی، زبانه‌ها و ترجمه
     Appearance: ظاهر
-    Appearance Description: پوسته، چیدمان و تصاویر بندانگشتی
+    Appearance Description: پوسته، چیدمان، پیمایش و فهرست‌های ویدیو
     Content appearance: فهرست ویدیوها و تصاویر بندانگشتی
     Layout: چیدمان
-    Playback Description: پخش‌کننده، زیرنویس‌ها و ترجیحات کانال
-    Subscriptions Description: تازه‌سازی خوراک و گزینه‌های نمایش
-    Downloads Description: پوشه‌ها، الگوها و قواعد خودکار
-    Distraction Free Description: پنهان کردن محتوا و تعیین محدودیت تماشا
+    Playback Description: پیش‌فرض‌های پخش‌کننده، زیرنویس‌ها و تنظیمات هر کانال
+    Subscriptions Description: تازه‌سازی خوراک‌ها، اعلان ویدیوهای جدید و خوراک‌های RSS
+    Downloads Description: پوشه بارگیری، الگوها و بارگیری‌های خودکار
+    Focus: تمرکز
+    Focus Description: محتوای پنهان، محدودیت‌های تماشا، یادآورها و کنترل والدین
     Add-ons: افزونه‌ها
-    Add-ons Description: SponsorBlock، DeArrow، نپسندیدن‌ها و ترجمه صوتی
-    Privacy Description: حریم خصوصی تماشا و کنترل‌های دسترسی
+    Add-ons Description: SponsorBlock، DeArrow، نپسندیدن‌ها، AiSList و ترجمه صوتی
+    Privacy Description: تاریخچه، پیشنهادهای جست‌وجو، پیوندها و گذرواژه برنامه
     Online activity: فعالیت آنلاین
-    Data And Storage Description: درون‌ریزی، برون‌ریزی، مصرف فضای دیسک و پاک‌سازی
-    Sync Description: همگام نگه داشتن تنظیمات و داده‌ها میان دستگاه‌ها
+    Data And Storage Description: پشتیبان‌ها، درون‌ریزی و برون‌بری، مصرف دیسک و پاک‌سازی
+    Sync Description: حساب سرور همگام‌سازی، جفت‌سازی دستگاه‌ها و داده‌های همگام‌شده
     Advanced: پیشرفته
-    Advanced Description: ارائه‌دهندگان، برنامه‌های بیرونی و شبکه
+    Advanced Description: پشتیبان‌های سمت سرور، بافر، ابزارهای خارجی، پراکسی و عیب‌یابی
     Alternative providers: ارائه‌دهندگان ویدیو و فراداده
   Highlight Changed Settings: برجسته کردن تنظیمات تغییرکرده نسبت به پیش‌فرض‌ها
   Reset Setting to Default: بازنشانی این تنظیم به مقدار پیش‌فرض

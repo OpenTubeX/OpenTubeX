@@ -329,23 +329,24 @@ Settings:
     Profile Selector Hint: A profilok között a profilikonra jobb gombbal kattintva is válthat
     Profile Selector Touch Hint: A profilok között a profilikon hosszú megnyomásával is válthat
   Categories:
-    General Description: Nyelv, indítás, lapok és az alkalmazás működése
+    General Description: Nyelv, indítás, lapok és fordítás
     Appearance: Megjelenés
-    Appearance Description: Téma, elrendezés és bélyegképek
+    Appearance Description: Téma, elrendezés, navigáció és videólisták
     Content appearance: Videólisták és bélyegképek
     Layout: Elrendezés
-    Playback Description: Lejátszó, feliratok és csatornabeállítások
-    Subscriptions Description: Hírfolyam-frissítési és megjelenítési beállítások
-    Downloads Description: Mappák, sablonok és automatikus szabályok
-    Distraction Free Description: Tartalmak elrejtése és megtekintési korlátok beállítása
+    Playback Description: Lejátszó alapértelmezései, feliratok és csatornánkénti beállítások
+    Subscriptions Description: Hírfolyam-frissítés, értesítések új videókról és RSS-hírcsatornák
+    Downloads Description: Letöltési mappa, sablonok és automatikus letöltések
+    Focus: Fókusz
+    Focus Description: Elrejtett tartalom, nézési korlátok, emlékeztetők és szülői felügyelet
     Add-ons: Kiegészítők
-    Add-ons Description: SponsorBlock, DeArrow, negatív értékelések és hangalámondás fordítása
-    Privacy Description: Megtekintési adatvédelem és hozzáférés-szabályozás
+    Add-ons Description: SponsorBlock, DeArrow, negatív értékelések, AiSList és hangalámondás fordítása
+    Privacy Description: Előzmények, keresési javaslatok, hivatkozások és alkalmazásjelszó
     Online activity: Internetes tevékenység
-    Data And Storage Description: Importálás, exportálás, lemezhasználat és tisztítás
-    Sync Description: A beállítások és adatok szinkronizálása az eszközök között
+    Data And Storage Description: Biztonsági mentések, importálás és exportálás, lemezhasználat és tisztítás
+    Sync Description: Szinkronizálási szerverfiók, eszközpárosítás és szinkronizált adatok
     Advanced: Speciális
-    Advanced Description: Szolgáltatók, külső alkalmazások és hálózat
+    Advanced Description: Háttérszolgáltatások, pufferelés, külső eszközök, proxy és diagnosztika
     Alternative providers: Videó- és metaadat-szolgáltatók
   Highlight Changed Settings: Az alapértéktől eltérő beállítások kiemelése
   Reset Setting to Default: A beállítás alapértékének visszaállítása

@@ -329,23 +329,24 @@ Settings:
     Profile Selector Hint: Profiili vahetamiseks võib profiiliikoonil ka paremklõpsata
     Profile Selector Touch Hint: Profiili vahetamiseks võib profiiliikoonile ka pikalt vajutada
   Categories:
-    General Description: Keel, käivitamine, vahekaardid ja rakenduse käitumine
+    General Description: Keel, käivitamine, vahekaardid ja tõlkimine
     Appearance: Välimus
-    Appearance Description: Teema, paigutus ja pisipildid
+    Appearance Description: Teema, paigutus, navigeerimine ja videoloendid
     Content appearance: Videoloendid ja pisipildid
     Layout: Paigutus
-    Playback Description: Pleier, subtiitrid ja kanalite eelistused
-    Subscriptions Description: Voogude värskendamise ja kuvamise valikud
-    Downloads Description: Kaustad, mallid ja automaatreeglid
-    Distraction Free Description: Sisu peitmine ja vaatamispiirangute määramine
+    Playback Description: Pleieri vaikeseaded, subtiitrid ja kanalipõhised seaded
+    Subscriptions Description: Voogude värskendamine, uute videote teavitused ja RSS-vood
+    Downloads Description: Allalaadimiskaust, mallid ja automaatsed allalaadimised
+    Focus: Keskendumine
+    Focus Description: Peidetud sisu, vaatamispiirangud, meeldetuletused ja vanemlik järelevalve
     Add-ons: Lisad
-    Add-ons Description: SponsorBlock, DeArrow, mittemeeldimised ja pealelugemise tõlge
-    Privacy Description: Vaatamise privaatsus ja juurdepääsu juhtelemendid
+    Add-ons Description: SponsorBlock, DeArrow, mittemeeldimised, AiSList ja pealelugemise tõlge
+    Privacy Description: Ajalugu, otsingusoovitused, lingid ja rakenduse parool
     Online activity: Võrgutegevus
-    Data And Storage Description: Import, eksport, kettakasutus ja puhastamine
-    Sync Description: Seadete ja andmete sünkroonimine seadmete vahel
+    Data And Storage Description: Varukoopiad, import ja eksport, kettakasutus ja puhastamine
+    Sync Description: Sünkroonimisserveri konto, seadmete sidumine ja sünkroonitud andmed
     Advanced: Täpsemad seaded
-    Advanced Description: Teenusepakkujad, välised rakendused ja võrk
+    Advanced Description: Taustateenused, puhverdamine, välised tööriistad, puhverserver ja diagnostika
     Alternative providers: Video- ja metaandmete pakkujad
   Highlight Changed Settings: Tõsta esile vaikeseadetest erinevad seaded
   Reset Setting to Default: Lähtesta see seade vaikeväärtusele

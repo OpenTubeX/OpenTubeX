@@ -334,23 +334,24 @@ Settings:
     Profile Selector Hint: Também pode clicar com o botão direito no ícone de perfil para mudar de perfil
     Profile Selector Touch Hint: Também pode manter premido o ícone de perfil para mudar de perfil
   Categories:
-    General Description: Idioma, arranque, separadores e comportamento da aplicação
+    General Description: Idioma, arranque, separadores e tradução
     Appearance: Aspeto
-    Appearance Description: Tema, disposição e miniaturas
+    Appearance Description: Tema, esquema, navegação e listas de vídeos
     Content appearance: Listas de vídeos e miniaturas
     Layout: Disposição
-    Playback Description: Leitor, legendas e preferências dos canais
-    Subscriptions Description: Atualização do feed e opções de apresentação
-    Downloads Description: Pastas, modelos e regras automáticas
-    Distraction Free Description: Ocultar conteúdo e definir limites de visualização
+    Playback Description: Predefinições do leitor, legendas e definições por canal
+    Subscriptions Description: Atualização dos feeds, notificações de novos vídeos e feeds RSS
+    Downloads Description: Pasta de transferências, modelos e transferências automáticas
+    Focus: Foco
+    Focus Description: Conteúdo oculto, limites de visualização, lembretes e controlo parental
     Add-ons: Extensões
-    Add-ons Description: SponsorBlock, DeArrow, «não gosto» e tradução de voz
-    Privacy Description: Privacidade de visualização e controlos de acesso
+    Add-ons Description: SponsorBlock, DeArrow, «não gosto», AiSList e tradução de voz
+    Privacy Description: Histórico, sugestões de pesquisa, ligações e palavra-passe da aplicação
     Online activity: Atividade online
-    Data And Storage Description: Importação, exportação, utilização do disco e limpeza
-    Sync Description: Manter as definições e os dados sincronizados entre dispositivos
+    Data And Storage Description: Cópias de segurança, importação e exportação, utilização do disco e limpeza
+    Sync Description: Conta do servidor de sincronização, emparelhamento de dispositivos e dados sincronizados
     Advanced: Avançadas
-    Advanced Description: Fornecedores, aplicações externas e rede
+    Advanced Description: Back-ends, memória intermédia, ferramentas externas, proxy e diagnóstico
     Alternative providers: Fornecedores de vídeo e metadados
   Highlight Changed Settings: Destacar definições diferentes dos valores predefinidos
   Reset Setting to Default: Repor o valor predefinido desta definição

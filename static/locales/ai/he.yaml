@@ -334,23 +334,24 @@ Settings:
     Profile Selector Hint: אפשר גם ללחוץ לחיצה ימנית על סמל הפרופיל כדי לעבור בין פרופילים
     Profile Selector Touch Hint: אפשר גם ללחוץ לחיצה ארוכה על סמל הפרופיל כדי לעבור בין פרופילים
   Categories:
-    General Description: שפה, הפעלה, כרטיסיות והתנהגות היישום
+    General Description: שפה, הפעלה, לשוניות ותרגום
     Appearance: מראה
-    Appearance Description: ערכת נושא, פריסה ותמונות ממוזערות
+    Appearance Description: ערכת נושא, פריסה, ניווט ורשימות סרטונים
     Content appearance: רשימות סרטונים ותמונות ממוזערות
     Layout: פריסה
-    Playback Description: נגן, כתוביות והעדפות ערוצים
-    Subscriptions Description: אפשרויות רענון ותצוגה של העדכונים
-    Downloads Description: תיקיות, תבניות וכללים אוטומטיים
-    Distraction Free Description: הסתרת תוכן והגדרת מגבלות צפייה
+    Playback Description: ברירות מחדל של הנגן, כתוביות והגדרות לכל ערוץ
+    Subscriptions Description: רענון העדכונים, התראות על סרטונים חדשים והזנות RSS
+    Downloads Description: תיקיית הורדות, תבניות והורדות אוטומטיות
+    Focus: מיקוד
+    Focus Description: תוכן מוסתר, מגבלות צפייה, תזכורות ובקרת הורים
     Add-ons: תוספים
-    Add-ons Description: SponsorBlock, DeArrow, דירוגים שליליים ותרגום קריינות
-    Privacy Description: פרטיות הצפייה ובקרת הגישה
+    Add-ons Description: SponsorBlock, DeArrow, דירוגים שליליים, AiSList ותרגום קריינות
+    Privacy Description: היסטוריה, הצעות חיפוש, קישורים וסיסמת היישום
     Online activity: פעילות מקוונת
-    Data And Storage Description: ייבוא, ייצוא, ניצול שטח בכונן וניקוי
-    Sync Description: סנכרון ההגדרות והנתונים בין מכשירים
+    Data And Storage Description: גיבויים, ייבוא וייצוא, שימוש בדיסק וניקוי
+    Sync Description: חשבון שרת הסנכרון, צימוד מכשירים ונתונים מסונכרנים
     Advanced: מתקדם
-    Advanced Description: ספקים, יישומים חיצוניים ורשת
+    Advanced Description: שירותי צד שרת, אגירה, כלים חיצוניים, מתווך ואבחון
     Alternative providers: ספקי סרטונים ומטא־נתונים
   Highlight Changed Settings: הדגשת הגדרות ששונו מברירת המחדל
   Reset Setting to Default: איפוס ההגדרה לברירת המחדל

@@ -334,23 +334,24 @@ Settings:
     Profile Selector Hint: Щоб перемкнути профіль, також можна клацнути правою кнопкою миші піктограму профілю
     Profile Selector Touch Hint: Щоб перемкнути профіль, також можна натиснути й утримувати піктограму профілю
   Categories:
-    General Description: Мова, запуск, вкладки й поведінка програми
+    General Description: Мова, запуск, вкладки й переклад
     Appearance: Вигляд
-    Appearance Description: Тема, компонування й мініатюри
+    Appearance Description: Тема, макет, навігація та списки відео
     Content appearance: Списки відео й мініатюри
     Layout: Компонування
-    Playback Description: Програвач, субтитри й налаштування каналів
-    Subscriptions Description: Оновлення стрічок і параметри показу
-    Downloads Description: Папки, шаблони й правила автоматизації
-    Distraction Free Description: Приховування вмісту й обмеження перегляду
+    Playback Description: Типові налаштування програвача, субтитри й налаштування для кожного каналу
+    Subscriptions Description: Оновлення стрічок, сповіщення про нові відео та RSS-стрічки
+    Downloads Description: Тека завантажень, шаблони й автоматичні завантаження
+    Focus: Фокус
+    Focus Description: Прихований вміст, обмеження перегляду, нагадування й батьківський контроль
     Add-ons: Додатки
-    Add-ons Description: SponsorBlock, DeArrow, позначки «Не подобається» й закадровий переклад
-    Privacy Description: Конфіденційність перегляду й керування доступом
+    Add-ons Description: SponsorBlock, DeArrow, позначки «Не подобається», AiSList і закадровий переклад
+    Privacy Description: Історія, пошукові підказки, посилання й пароль застосунку
     Online activity: Дії в мережі
-    Data And Storage Description: Імпорт, експорт, використання диска й очищення
-    Sync Description: Синхронізація налаштувань і даних між пристроями
+    Data And Storage Description: Резервні копії, імпорт та експорт, використання диска й очищення
+    Sync Description: Обліковий запис сервера синхронізації, з'єднання пристроїв і синхронізовані дані
     Advanced: Додатково
-    Advanced Description: Постачальники, зовнішні програми й мережа
+    Advanced Description: Бекенди, буферизація, зовнішні інструменти, проксі й діагностика
     Alternative providers: Постачальники відео й метаданих
   Highlight Changed Settings: Виділяти налаштування, змінені відносно типових
   Reset Setting to Default: Відновити типове значення цього налаштування

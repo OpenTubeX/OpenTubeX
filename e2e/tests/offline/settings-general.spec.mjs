@@ -144,25 +144,31 @@ test.describe('settings', () => {
     const subscriptions = page.locator('.settingsMenu [data-section="subscriptions"]')
     await expect(subscriptions.locator('.titleText')).toHaveText('Subscriptions')
     await expect(subscriptions.locator('.titleDescription'))
-      .toHaveText('Feed refresh and display options')
+      .toHaveText('Feed refresh, upload notifications, and RSS feeds')
 
     const playback = page.locator('.settingsMenu [data-section="playback"]')
     await expect(playback.locator('.titleDescription'))
-      .toHaveText('Player, captions, and channel preferences')
+      .toHaveText('Player defaults, captions, and per-channel settings')
 
     const downloads = page.locator('.settingsMenu [data-section="download"]')
     await expect(downloads.locator('.titleText')).toHaveText('Downloads')
     await expect(downloads.locator('.titleDescription'))
-      .toHaveText('Folders, templates, and automatic rules')
+      .toHaveText('Download folder, templates, and automatic downloads')
+
+    const focus = page.locator('.settingsMenu [data-section="focus"]')
+    await expect(focus.locator('.titleText')).toHaveText('Focus')
+    await expect(focus.locator('.titleDescription'))
+      .toHaveText('Hidden content, watch limits, reminders, and parental controls')
+    await expect(focus.locator('.titleIcon')).toHaveAttribute('data-icon', 'bullseye')
 
     const privacy = page.locator('.settingsMenu [data-section="privacy"]')
     await expect(privacy.locator('.titleDescription'))
-      .toHaveText('Viewing privacy and access controls')
+      .toHaveText('History, search suggestions, links, and app password')
 
     const data = page.locator('.settingsMenu [data-section="data"]')
     await expect(data.locator('.titleText')).toHaveText('Data & Storage')
     await expect(data.locator('.titleDescription'))
-      .toHaveText('Import, export, disk usage, and cleanup')
+      .toHaveText('Backups, import and export, disk usage, and cleanup')
     await expect(data.locator('.titleIcon')).toHaveAttribute('data-icon', 'box-archive')
   })
 

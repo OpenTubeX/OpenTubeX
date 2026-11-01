@@ -339,23 +339,24 @@ Settings:
     Profile Selector Hint: Профил можете променити и десним кликом на икону профила
     Profile Selector Touch Hint: Профил можете променити и дугим притиском на икону профила
   Categories:
-    General Description: Језик, покретање, картице и понашање апликације
+    General Description: Језик, покретање, картице и превод
     Appearance: Изглед
-    Appearance Description: Тема, распоред и сличице
+    Appearance Description: Тема, распоред, навигација и листе видео-снимака
     Content appearance: Листе видео-снимака и сличице
     Layout: Распоред
-    Playback Description: Плејер, титлови и подешавања канала
-    Subscriptions Description: Освежавање извора и опције приказа
-    Downloads Description: Фасцикле, шаблони и аутоматска правила
-    Distraction Free Description: Сакривање садржаја и ограничења гледања
+    Playback Description: Подразумевана подешавања плејера, титлови и подешавања по каналу
+    Subscriptions Description: Освежавање извора, обавештења о новим видео-снимцима и RSS извори
+    Downloads Description: Фасцикла за преузимања, шаблони и аутоматска преузимања
+    Focus: Фокус
+    Focus Description: Скривени садржај, ограничења гледања, подсетници и родитељска контрола
     Add-ons: Додаци
-    Add-ons Description: SponsorBlock, DeArrow, оцене „не свиђа ми се“ и гласовни превод
-    Privacy Description: Приватност гледања и контроле приступа
+    Add-ons Description: SponsorBlock, DeArrow, оцене „не свиђа ми се“, AiSList и гласовни превод
+    Privacy Description: Историја, предлози претраге, везе и лозинка апликације
     Online activity: Активност на мрежи
-    Data And Storage Description: Увоз, извоз, заузеће диска и чишћење
-    Sync Description: Синхронизација подешавања и података на свим уређајима
+    Data And Storage Description: Резервне копије, увоз и извоз, заузеће диска и чишћење
+    Sync Description: Налог сервера за синхронизацију, упаривање уређаја и синхронизовани подаци
     Advanced: Напредно
-    Advanced Description: Добављачи, спољне апликације и мрежа
+    Advanced Description: Позадински сервиси, баферовање, спољни алати, прокси и дијагностика
     Alternative providers: Добављачи видео-снимака и метаподатака
   Highlight Changed Settings: Истакни подешавања која се разликују од подразумеваних
   Reset Setting to Default: Врати ово подешавање на подразумевано
