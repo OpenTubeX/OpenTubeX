@@ -182,7 +182,7 @@
 </template>
 
 <script setup>
-import { computed, inject, nextTick, onBeforeUnmount, ref, useTemplateRef, watch } from 'vue'
+import { computed, inject, nextTick, onBeforeUnmount, ref, shallowRef, useTemplateRef, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { FtIcon } from '@opentubex/icons'
 import FtCard from '../../components/ft-card/ft-card.vue'
@@ -210,7 +210,8 @@ const showLiveChatTimestamps = computed(() => store.getters.getShowLiveChatTimes
 const timeFormat = computed(() => store.getters.getTimeFormat)
 const emit = defineEmits(['close'])
 const errorMessage = ref('')
-const messages = ref([])
+// Messages never change, so only the list itself needs to be reactive.
+const messages = shallowRef([])
 const settingsMenuOpen = ref(false)
 
 /**
@@ -241,6 +242,7 @@ let fetchedUntil = 0
 let fetching = false
 let exhausted = false
 let stayAtEnd = true
+const MAX_MESSAGES = 1000
 
 function formatMessageTime(message) {
   return props.target.type === 'replay'
@@ -259,7 +261,22 @@ function addMessages(incoming) {
       return true
     })
   }
-  messages.value = [...messages.value, ...added].slice(-1000)
+  messages.value = [...messages.value, ...added].slice(-MAX_MESSAGES)
+}
+
+// Busy channels send many messages per frame, so the list grows once per frame.
+let pendingLiveMessages = []
+let liveMessageFrame = null
+function queueLiveMessage(message) {
+  pendingLiveMessages.push(message)
+  // Frames stop while the window is hidden, so drop what the list would drop.
+  if (pendingLiveMessages.length > 2 * MAX_MESSAGES) pendingLiveMessages = pendingLiveMessages.slice(-MAX_MESSAGES)
+  liveMessageFrame ??= requestAnimationFrame(() => {
+    liveMessageFrame = null
+    const batch = pendingLiveMessages
+    pendingLiveMessages = []
+    addMessages(batch)
+  })
 }
 
 function handleScroll() {
@@ -338,7 +355,7 @@ function connect() {
     for (const line of event.data.split('\r\n')) {
       if (line.startsWith('PING ')) connection.send(`PONG ${line.slice(5)}\r\n`)
       const message = parseTwitchIrcMessage(line)
-      if (message) addMessages([message])
+      if (message) queueLiveMessage(message)
     }
   })
   connection.addEventListener('close', () => {
@@ -430,6 +447,7 @@ onBeforeUnmount(() => {
   stopped = true
   replayGeneration++
   if (retryTimer) clearTimeout(retryTimer)
+  if (liveMessageFrame !== null) cancelAnimationFrame(liveMessageFrame)
   socket?.close()
 })
 </script>
