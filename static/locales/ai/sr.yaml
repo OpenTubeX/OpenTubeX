@@ -199,11 +199,24 @@ Subscriptions:
     Invalid Feed URL: Унесите веб-адресу која почиње са http:// или https://.
     Feed Already Followed: Већ пратите овај фид.
     Feed Could Not Be Loaded: Фид није могуће учитати. Проверите да ли адреса води до RSS или Atom фида.
+    Feed Requires Browser Check: Овај сајт захтева проверу прегледача коју OpenTubeX не може да заврши. Пробајте другу адресу или другу RSSHub инстанцу за овај фид.
     Refresh Errors: 1 фид није могуће освежити. | {count} фида није могуће освежити. | {count} фидова није могуће освежити.
     Description: Додајте RSS или Atom фид да бисте пратили ауторе са других платформи. {rssHub} инстанце пружају фидове за многе сајтове, као што је Twitch.
     Empty Items: Ваши фидови тренутно немају ниједну ставку.
     No Feeds: Још увек не пратите ниједан RSS фид.
-    Public RSSHub Instances: Јавне RSSHub инстанце
+    RSSHub:
+      Browse: Прегледај RSSHub
+      Title: Додај фид са RSSHub-а
+      Description: Изаберите RSSHub инстанцу, услугу и шта желите да пратите. Адреса фида се прави аутоматски.
+      Instance: RSSHub инстанца
+      Service: Услуга
+      Search Services: Претражи услуге
+      Loading Services: Учитавање услуга…
+      Services Could Not Be Loaded: Ова инстанца није вратила своје услуге. Проверите адресу или изаберите другу инстанцу.
+      Feed Type: Врста фида
+      Requires Configuration: Овом фиду је потребно додатно подешавање на инстанци, па можда неће радити на јавним инстанцама.
+      Optional Parameter: '{parameter} (опционо)'
+      Not Set: Није подешено
     Retry Feed: Покушај поново да учиташ {feed}
 Trending:
   Music: Музика

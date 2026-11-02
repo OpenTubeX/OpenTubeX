@@ -210,11 +210,24 @@ Subscriptions:
     Invalid Feed URL: Увядзіце вэб-адрас, які пачынаецца з http:// або https://.
     Feed Already Followed: Вы ўжо падпісаныя на гэту стужку.
     Feed Could Not Be Loaded: Не ўдалося загрузіць стужку. Праверце, ці вядзе адрас на RSS- або Atom-стужку.
+    Feed Requires Browser Check: Гэты сайт патрабуе праверкі браўзера, якую OpenTubeX не можа прайсці. Паспрабуйце іншы адрас або іншы асобнік RSSHub для гэтай стужкі.
     Refresh Errors: Не ўдалося абнавіць 1 стужку. | Не ўдалося абнавіць {count} стужкі. | Не ўдалося абнавіць {count} стужак.
     Description: Дадайце RSS- або Atom-стужку, каб сачыць за аўтарамі на іншых платформах. Асобнікі {rssHub} даюць стужкі для многіх сайтаў, напрыклад Twitch.
     Empty Items: У вашых стужках пакуль няма элементаў.
     No Feeds: Вы пакуль не падпісаны ні на адну RSS-стужку.
-    Public RSSHub Instances: Публічныя асобнікі RSSHub
+    RSSHub:
+      Browse: Агляд RSSHub
+      Title: Дадаць стужку з RSSHub
+      Description: Выберыце асобнік RSSHub, сэрвіс і за чым сачыць. Адрас стужкі будзе складзены аўтаматычна.
+      Instance: Асобнік RSSHub
+      Service: Сэрвіс
+      Search Services: Пошук сэрвісаў
+      Loading Services: Загрузка сэрвісаў…
+      Services Could Not Be Loaded: Гэты асобнік не вярнуў свае сэрвісы. Праверце адрас або выберыце іншы асобнік.
+      Feed Type: Тып стужкі
+      Requires Configuration: Гэтай стужцы патрэбна дадатковая наладка на асобніку, таму на публічных асобніках яна можа не працаваць.
+      Optional Parameter: '{parameter} (неабавязкова)'
+      Not Set: Не зададзена
     Retry Feed: Паўтарыць спробу для {feed}
 Trending:
   Music: Музыка

@@ -195,11 +195,24 @@ Subscriptions:
     Invalid Feed URL: Masukkan alamat web yang diawali dengan http:// atau https://.
     Feed Already Followed: Anda sudah mengikuti umpan ini.
     Feed Could Not Be Loaded: Umpan tidak dapat dimuat. Periksa apakah alamat tersebut mengarah ke umpan RSS atau Atom.
+    Feed Requires Browser Check: Situs ini memerlukan pemeriksaan browser yang tidak dapat diselesaikan OpenTubeX. Coba alamat lain atau instans RSSHub lain untuk feed ini.
     Refresh Errors: '{count} umpan tidak dapat diperbarui.'
     Description: Tambahkan umpan RSS atau Atom untuk mengikuti kreator dari platform lain. Instans {rssHub} menyediakan umpan untuk banyak situs, seperti Twitch.
     Empty Items: Umpan Anda saat ini tidak memiliki item.
     No Feeds: Anda belum mengikuti umpan RSS apa pun.
-    Public RSSHub Instances: Instans RSSHub publik
+    RSSHub:
+      Browse: Jelajahi RSSHub
+      Title: Tambahkan feed dari RSSHub
+      Description: Pilih instans RSSHub, layanan, dan apa yang ingin diikuti. Alamat feed dibuat untuk Anda.
+      Instance: Instans RSSHub
+      Service: Layanan
+      Search Services: Cari layanan
+      Loading Services: Memuat layanan…
+      Services Could Not Be Loaded: Instans ini tidak mengembalikan layanannya. Periksa alamatnya atau pilih instans lain.
+      Feed Type: Jenis feed
+      Requires Configuration: Feed ini memerlukan penyiapan tambahan di instans, jadi mungkin tidak berfungsi di instans publik.
+      Optional Parameter: '{parameter} (opsional)'
+      Not Set: Tidak diatur
     Retry Feed: Coba lagi {feed}
 Trending:
   Music: Musik

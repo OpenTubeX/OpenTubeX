@@ -195,11 +195,24 @@ Subscriptions:
     Invalid Feed URL: 请输入以 http:// 或 https:// 开头的网址。
     Feed Already Followed: 你已关注此订阅源。
     Feed Could Not Be Loaded: 无法加载该订阅源。请检查地址是否指向 RSS 或 Atom 订阅源。
+    Feed Requires Browser Check: 此网站要求进行浏览器验证，OpenTubeX 无法完成。请为此订阅源尝试其他地址或其他 RSSHub 实例。
     Refresh Errors: '{count} 个订阅源无法刷新。'
     Description: 添加 RSS 或 Atom 订阅源以关注其他平台的创作者。{rssHub} 实例为许多网站（例如 Twitch）提供订阅源。
     Empty Items: 你的订阅源目前没有任何项目。
     No Feeds: 你还没有关注任何 RSS 订阅源。
-    Public RSSHub Instances: 公共 RSSHub 实例
+    RSSHub:
+      Browse: 浏览 RSSHub
+      Title: 从 RSSHub 添加订阅源
+      Description: 选择一个 RSSHub 实例、服务以及要关注的对象，订阅源地址会自动生成。
+      Instance: RSSHub 实例
+      Service: 服务
+      Search Services: 搜索服务
+      Loading Services: 正在加载服务…
+      Services Could Not Be Loaded: 此实例没有返回服务列表。请检查地址或选择其他实例。
+      Feed Type: 订阅源类型
+      Requires Configuration: 此订阅源需要在实例上进行额外配置，因此在公共实例上可能无法使用。
+      Optional Parameter: '{parameter}（可选）'
+      Not Set: 未设置
     Retry Feed: 重试 {feed}
 Trending:
   Music: 音乐

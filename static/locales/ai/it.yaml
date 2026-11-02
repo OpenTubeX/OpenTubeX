@@ -195,11 +195,24 @@ Subscriptions:
     Invalid Feed URL: Inserisci un indirizzo web che inizi con http:// o https://.
     Feed Already Followed: Segui già questo feed.
     Feed Could Not Be Loaded: Impossibile caricare il feed. Verifica che l'indirizzo punti a un feed RSS o Atom.
+    Feed Requires Browser Check: Questo sito richiede una verifica del browser che OpenTubeX non può completare. Prova un altro indirizzo o un’altra istanza RSSHub per questo feed.
     Refresh Errors: Impossibile aggiornare 1 feed. | Impossibile aggiornare {count} feed. | Impossibile aggiornare {count} feed.
     Description: Aggiungi un feed RSS o Atom per seguire creatori di altre piattaforme. Le istanze {rssHub} forniscono feed per molti siti, come Twitch.
     Empty Items: Al momento i tuoi feed non contengono elementi.
     No Feeds: Non segui ancora nessun feed RSS.
-    Public RSSHub Instances: Istanze RSSHub pubbliche
+    RSSHub:
+      Browse: Sfoglia RSSHub
+      Title: Aggiungi un feed da RSSHub
+      Description: Scegli un’istanza RSSHub, un servizio e cosa seguire. L’indirizzo del feed viene creato per te.
+      Instance: Istanza RSSHub
+      Service: Servizio
+      Search Services: Cerca servizi
+      Loading Services: Caricamento dei servizi…
+      Services Could Not Be Loaded: Questa istanza non ha restituito i suoi servizi. Controlla l’indirizzo o scegli un’altra istanza.
+      Feed Type: Tipo di feed
+      Requires Configuration: Questo feed richiede una configurazione aggiuntiva sull’istanza, quindi potrebbe non funzionare sulle istanze pubbliche.
+      Optional Parameter: '{parameter} (facoltativo)'
+      Not Set: Non impostato
     Retry Feed: Riprova {feed}
 Trending:
   Music: Musica

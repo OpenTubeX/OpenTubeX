@@ -196,11 +196,24 @@ Subscriptions:
     Invalid Feed URL: Gib eine Webadresse ein, die mit http:// oder https:// beginnt.
     Feed Already Followed: Du hast diesen Feed bereits abonniert.
     Feed Could Not Be Loaded: Der Feed konnte nicht geladen werden. Prüfe, ob die Adresse auf einen RSS- oder Atom-Feed verweist.
+    Feed Requires Browser Check: Diese Website verlangt eine Browserprüfung, die OpenTubeX nicht durchführen kann. Versuche eine andere Adresse oder RSSHub-Instanz für diesen Feed.
     Refresh Errors: 1 Feed konnte nicht aktualisiert werden. | {count} Feeds konnten nicht aktualisiert werden.
     Description: Füge einen RSS- oder Atom-Feed hinzu, um Kanälen auf anderen Plattformen zu folgen. {rssHub}-Instanzen stellen Feeds für viele Websites bereit, zum Beispiel Twitch.
     Empty Items: Deine Feeds enthalten derzeit keine Einträge.
     No Feeds: Du hast noch keine RSS-Feeds abonniert.
-    Public RSSHub Instances: Öffentliche RSSHub-Instanzen
+    RSSHub:
+      Browse: RSSHub durchsuchen
+      Title: Feed von RSSHub hinzufügen
+      Description: Wähle eine RSSHub-Instanz, einen Dienst und wem du folgen möchtest. Die Feed-Adresse wird automatisch erstellt.
+      Instance: RSSHub-Instanz
+      Service: Dienst
+      Search Services: Dienste durchsuchen
+      Loading Services: Dienste werden geladen …
+      Services Could Not Be Loaded: Diese Instanz hat ihre Dienste nicht geliefert. Prüfe die Adresse oder wähle eine andere Instanz.
+      Feed Type: Feed-Art
+      Requires Configuration: Dieser Feed muss auf der Instanz zusätzlich eingerichtet werden und funktioniert daher auf öffentlichen Instanzen eventuell nicht.
+      Optional Parameter: '{parameter} (optional)'
+      Not Set: Nicht festgelegt
     Retry Feed: '{feed} erneut laden'
 Trending:
   Trending: Trends

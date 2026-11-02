@@ -78,6 +78,43 @@ const brokenFeed = `<?xml version="1.0" encoding="UTF-8"?>
   </channel>
 </rss>`
 
+const RSSHUB_NAMESPACES = {
+  twitch: {
+    name: 'Twitch',
+    url: 'www.twitch.tv',
+    routes: {
+      '/live/:login': {
+        path: '/live/:login',
+        name: 'Live',
+        example: '/twitch/live/riotgames',
+        parameters: { login: 'Twitch username' }
+      },
+      '/video/:login/:filter?': {
+        path: '/video/:login/:filter?',
+        name: 'Channel Video',
+        example: '/twitch/video/riotgames/highlights',
+        parameters: {
+          login: 'Twitch username',
+          filter: {
+            description: 'Video type, Default to all',
+            options: [{ value: 'archive', label: 'Archive' }, { value: 'all', label: 'All' }],
+            default: 'all'
+          }
+        }
+      }
+    }
+  },
+  art: {
+    name: 'Art',
+    url: 'art.com.tw',
+    routes: { '/new': { path: '/new', name: 'New works' } }
+  },
+  peertube: {
+    name: 'PeerTube',
+    routes: { '/channel/:id': { path: '/channel/:id', name: 'Channel', parameters: { id: 'Channel ID' } } }
+  }
+}
+
 /**
  * @param {import('@playwright/test').Page} page
  */
@@ -168,8 +205,7 @@ test.describe('with followed feeds', () => {
     await expect(rows).toHaveCount(2)
     await expect(rows.first()).toContainText(RSS_URL)
     await expect(rows.first().locator('img.feedAvatar')).toHaveAttribute('src', TWITCH_AVATAR)
-    await expect(manager.getByRole('link', { name: 'Public RSSHub instances' }))
-      .toHaveAttribute('href', 'https://docs.rsshub.app/guide/instances')
+    await expect(manager.getByRole('button', { name: 'Browse RSSHub' })).toBeVisible()
     // The tab has already refreshed the feeds in this window
     await expect(manager.locator('.feedRow.hasError')).toContainText('Broken feed')
 
@@ -201,6 +237,80 @@ test.describe('with followed feeds', () => {
     await expect(page.locator('.settingsWindow')).toBeHidden()
     await expect(titles).toHaveText(['Newest VOD', 'Atom video', 'Older VOD'])
     await expect(page.getByText('1 feed could not be refreshed.')).toBeHidden()
+  })
+
+  test('adds a feed by picking an RSSHub instance, service and creator', async ({ page }) => {
+    await mockFeeds(page)
+    const otherUrl = 'https://rss.example.test/twitch/video/Other'
+    const requests = []
+    await page.route('https://raw.githubusercontent.com/RSSNext/rsshub-docs/**', route => route.fulfill({
+      body: `const instances = [
+  { url: 'https://down.example.test', location: '🇩🇪', maintainer: 'Down' },
+  { url: 'https://rss.example.test/', location: '🇺🇸' },
+];`
+    }))
+    await page.route('https://down.example.test/**', route => route.fulfill({ status: 502, body: 'Bad gateway' }))
+    await page.route(/^https:\/\/rss\.example\.test\/(api\/namespace|twitch\/video\/Other)/, route => {
+      const url = route.request().url()
+      requests.push(url)
+      if (url === otherUrl) {
+        return route.fulfill({ contentType: 'application/rss+xml', body: rssFeed.replace("Streamer's Twitch videos", "Other's Twitch videos") })
+      }
+      return route.fulfill({ json: RSSHUB_NAMESPACES })
+    })
+
+    const manager = await openFeedManager(page)
+    await manager.getByRole('button', { name: 'Browse RSSHub' }).click()
+    const dialog = page.getByRole('dialog', { name: 'Add a feed from RSSHub' })
+    const service = dialog.getByRole('textbox', { name: 'Service' })
+    await expect(service).toBeDisabled()
+
+    const instance = dialog.getByRole('textbox', { name: 'RSSHub instance' })
+    await instance.click()
+    const instanceOptions = dialog.locator('.instanceInput .list li')
+    await expect(instanceOptions).toHaveText(['down.example.test 🇩🇪', 'rss.example.test 🇺🇸'])
+    await instanceOptions.first().click()
+    await expect(dialog.getByRole('alert')).toContainText('This instance did not return its services.')
+    await expect(service).toBeDisabled()
+
+    // A custom host works without a scheme
+    await instance.fill('rss.example.test')
+    await instance.press('Enter')
+    await expect(dialog.getByRole('alert')).toHaveCount(0)
+    await expect(service).toBeEnabled()
+    expect(await page.evaluate(() => window.$store.getters.getRssHubInstance)).toBe('https://rss.example.test')
+
+    await service.fill('tw')
+    // Name matches come before matches in the address
+    const serviceOptions = dialog.locator('.serviceInput .list li')
+    await expect(serviceOptions).toHaveText(['Twitch (www.twitch.tv)', 'Art (art.com.tw)'])
+    await serviceOptions.first().click()
+    await expect(service).toHaveValue('Twitch (www.twitch.tv)')
+
+    const feedType = dialog.getByRole('combobox', { name: 'Feed type' })
+    await expect(feedType).toContainText('Live')
+    await feedType.click()
+    await page.getByRole('option', { name: 'Channel Video' }).click()
+    await expect(dialog.getByRole('combobox', { name: 'filter (optional)' })).toContainText('All')
+
+    const add = dialog.getByRole('button', { name: 'Add Feed' })
+    await expect(add).toBeDisabled()
+    const login = dialog.getByRole('textbox', { name: 'login' })
+    await expect(login).toHaveAttribute('placeholder', 'e.g. riotgames')
+    await login.fill('Other')
+    // The default filter is left out of the address
+    await expect(dialog.locator('.feedUrlPreview')).toHaveText(otherUrl)
+    await add.click()
+
+    await expect(dialog).toHaveCount(0)
+    await expect(manager.locator('.feedRow').last()).toContainText("Other's Twitch videos")
+    expect(await page.evaluate(() => window.$store.getters.getFollowedRssFeeds.at(-1).url)).toBe(otherUrl)
+    expect(requests).toEqual(['https://rss.example.test/api/namespace', otherUrl])
+
+    // The instance is remembered
+    await manager.getByRole('button', { name: 'Browse RSSHub' }).click()
+    await expect(dialog.getByRole('textbox', { name: 'RSSHub instance' })).toHaveValue('https://rss.example.test')
+    await expect(dialog.getByRole('textbox', { name: 'Service' })).toBeEnabled()
   })
 
   test('retries a failed feed from the feed manager', async ({ page }) => {
@@ -543,6 +653,23 @@ test.describe('without followed feeds', () => {
     await input.press('Enter')
     await expect(page.getByText('The feed could not be loaded.', { exact: false })).toBeVisible()
     await expect(input).toHaveValue(ATOM_URL)
+    await expect(manager.locator('.feedRow')).toHaveCount(0)
+  })
+
+  test('explains that a site asks for a browser check', async ({ page }) => {
+    await page.route(/^https?:\/\//, abortUnmockedRequest)
+    // Cloudflare answers clients it wants to verify with a challenge page
+    await page.route('https://protected.example.test/feed.xml', route => route.fulfill({
+      status: 403,
+      headers: { 'cf-mitigated': 'challenge', 'content-type': 'text/html; charset=UTF-8' },
+      body: '<!DOCTYPE html><html><head><title>Just a moment...</title></head><body><script>window._cf_chl_opt = {}</script></body></html>'
+    }))
+    const manager = await openFeedManager(page)
+    const input = manager.getByRole('textbox', { name: 'Add Feed' })
+    await input.fill('https://protected.example.test/feed.xml')
+    await input.press('Enter')
+    await expect(page.getByText('This site requires a browser check', { exact: false })).toBeVisible()
+    await expect(page.getByText('The feed could not be loaded.', { exact: false })).toHaveCount(0)
     await expect(manager.locator('.feedRow')).toHaveCount(0)
   })
 

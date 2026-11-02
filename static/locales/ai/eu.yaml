@@ -195,11 +195,24 @@ Subscriptions:
     Invalid Feed URL: Idatzi http:// edo https:// aurrizkiarekin hasten den web-helbide bat.
     Feed Already Followed: Dagoeneko jarraitzen duzu jario hau.
     Feed Could Not Be Loaded: Ezin izan da jarioa kargatu. Egiaztatu helbideak RSS edo Atom jario bat adierazten duela.
+    Feed Requires Browser Check: Gune honek OpenTubeX-ek egin ezin duen arakatzaile-egiaztapen bat eskatzen du. Saiatu beste helbide edo RSSHub instantzia batekin jario honetarako.
     Refresh Errors: Ezin izan da jario 1 freskatu. | Ezin izan dira {count} jario freskatu.
     Description: Gehitu RSS edo Atom jario bat beste plataformetako sortzaileei jarraitzeko. {rssHub} instantziek webgune askotarako jarioak eskaintzen dituzte, Twitch adibidez.
     Empty Items: Zure jarioek ez dute elementurik une honetan.
     No Feeds: Oraindik ez duzu RSS jariorik jarraitzen.
-    Public RSSHub Instances: RSSHub instantzia publikoak
+    RSSHub:
+      Browse: Arakatu RSSHub
+      Title: Gehitu RSSHub-eko jario bat
+      Description: Aukeratu RSSHub instantzia bat, zerbitzu bat eta zer jarraitu. Jarioaren helbidea automatikoki sortzen da.
+      Instance: RSSHub instantzia
+      Service: Zerbitzua
+      Search Services: Bilatu zerbitzuak
+      Loading Services: Zerbitzuak kargatzen…
+      Services Could Not Be Loaded: Instantzia honek ez ditu bere zerbitzuak itzuli. Egiaztatu helbidea edo aukeratu beste instantzia bat.
+      Feed Type: Jario mota
+      Requires Configuration: Jario honek konfigurazio gehigarria behar du instantzian, beraz baliteke instantzia publikoetan ez ibiltzea.
+      Optional Parameter: '{parameter} (aukerakoa)'
+      Not Set: Ezarri gabe
     Retry Feed: Saiatu berriro {feed} kargatzen
 Trending:
   Music: Musika

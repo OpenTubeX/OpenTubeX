@@ -455,6 +455,7 @@ export function createDefaultSettings({ supportsLocalApi, isElectron }) {
     showNewSubscriptionFeed: true,
     enableRssFeeds: false,
     followedRssFeeds: [],
+    rssHubInstance: '',
     showNewSubscriptionFeedIndicators: false,
     newSubscriptionFeedView: 'combined',
     newSubscriptionFeedSortBy: 'newest',

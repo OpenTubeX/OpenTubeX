@@ -197,11 +197,24 @@ Subscriptions:
     Invalid Feed URL: Въведете уеб адрес, който започва с http:// или https://.
     Feed Already Followed: Вече следвате тази емисия.
     Feed Could Not Be Loaded: Емисията не можа да бъде заредена. Проверете дали адресът сочи към RSS или Atom емисия.
+    Feed Requires Browser Check: Този сайт изисква проверка на браузъра, която OpenTubeX не може да премине. Опитайте друг адрес или друга инстанция на RSSHub за тази емисия.
     Refresh Errors: 1 емисия не можа да бъде обновена. | {count} емисии не можаха да бъдат обновени.
     Description: Добавете RSS или Atom емисия, за да следвате автори от други платформи. Инстанциите на {rssHub} предоставят емисии за много сайтове, например Twitch.
     Empty Items: Вашите емисии в момента нямат елементи.
     No Feeds: Все още не следвате нито една RSS емисия.
-    Public RSSHub Instances: Публични инстанции на RSSHub
+    RSSHub:
+      Browse: Разглеждане на RSSHub
+      Title: Добавяне на емисия от RSSHub
+      Description: Изберете инстанция на RSSHub, услуга и какво да следвате. Адресът на емисията се създава автоматично.
+      Instance: Инстанция на RSSHub
+      Service: Услуга
+      Search Services: Търсене на услуги
+      Loading Services: Зареждане на услугите…
+      Services Could Not Be Loaded: Тази инстанция не върна услугите си. Проверете адреса или изберете друга инстанция.
+      Feed Type: Вид емисия
+      Requires Configuration: Тази емисия изисква допълнителна настройка на инстанцията и може да не работи на публични инстанции.
+      Optional Parameter: '{parameter} (по избор)'
+      Not Set: Не е зададено
     Retry Feed: Повторен опит за {feed}
 Trending:
   Music: Музика

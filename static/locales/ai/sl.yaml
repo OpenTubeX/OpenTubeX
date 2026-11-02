@@ -238,11 +238,24 @@ Subscriptions:
     Invalid Feed URL: Vnesite spletni naslov, ki se začne s http:// ali https://.
     Feed Already Followed: Ta vir že spremljate.
     Feed Could Not Be Loaded: Vira ni bilo mogoče naložiti. Preverite, ali naslov kaže na vir RSS ali Atom.
+    Feed Requires Browser Check: To spletno mesto zahteva preverjanje brskalnika, ki ga OpenTubeX ne more opraviti. Za ta vir poskusite drug naslov ali drug primerek RSSHub.
     Refresh Errors: 1 vira ni bilo mogoče osvežiti. | {count} virov ni bilo mogoče osvežiti. | {count} virov ni bilo mogoče osvežiti. | {count} virov ni bilo mogoče osvežiti.
     Description: Dodajte vir RSS ali Atom, če želite spremljati ustvarjalce z drugih platform. Primerki {rssHub} ponujajo vire za številna spletna mesta, na primer Twitch.
     Empty Items: Vaši viri trenutno nimajo nobenih elementov.
     No Feeds: Ne spremljate še nobenega vira RSS.
-    Public RSSHub Instances: Javni primerki RSSHub
+    RSSHub:
+      Browse: Brskaj po RSSHub
+      Title: Dodaj vir iz RSSHub
+      Description: Izberite primerek RSSHub, storitev in kaj želite spremljati. Naslov vira se ustvari samodejno.
+      Instance: Primerek RSSHub
+      Service: Storitev
+      Search Services: Iskanje storitev
+      Loading Services: Nalaganje storitev …
+      Services Could Not Be Loaded: Ta primerek ni vrnil svojih storitev. Preverite naslov ali izberite drug primerek.
+      Feed Type: Vrsta vira
+      Requires Configuration: Ta vir potrebuje dodatne nastavitve na primerku, zato morda ne bo deloval na javnih primerkih.
+      Optional Parameter: '{parameter} (izbirno)'
+      Not Set: Ni nastavljeno
     Retry Feed: Poskusi znova naložiti {feed}
 Trending:
   Music: Glasba

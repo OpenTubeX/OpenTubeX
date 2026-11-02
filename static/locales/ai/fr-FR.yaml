@@ -195,11 +195,24 @@ Subscriptions:
     Invalid Feed URL: Saisissez une adresse web commençant par http:// ou https://.
     Feed Already Followed: Vous suivez déjà ce flux.
     Feed Could Not Be Loaded: Le flux n’a pas pu être chargé. Vérifiez que l’adresse pointe vers un flux RSS ou Atom.
+    Feed Requires Browser Check: Ce site exige une vérification du navigateur qu’OpenTubeX ne peut pas effectuer. Essayez une autre adresse ou une autre instance RSSHub pour ce flux.
     Refresh Errors: 1 flux n’a pas pu être actualisé. | {count} flux n’ont pas pu être actualisés. | {count} flux n’ont pas pu être actualisés.
     Description: Ajoutez un flux RSS ou Atom pour suivre des créateurs d’autres plateformes. Les instances {rssHub} fournissent des flux pour de nombreux sites, comme Twitch.
     Empty Items: Vos flux ne contiennent actuellement aucun élément.
     No Feeds: Vous ne suivez encore aucun flux RSS.
-    Public RSSHub Instances: Instances RSSHub publiques
+    RSSHub:
+      Browse: Parcourir RSSHub
+      Title: Ajouter un flux depuis RSSHub
+      Description: Choisissez une instance RSSHub, un service et ce que vous voulez suivre. L’adresse du flux est créée pour vous.
+      Instance: Instance RSSHub
+      Service: Service
+      Search Services: Rechercher des services
+      Loading Services: Chargement des services…
+      Services Could Not Be Loaded: Cette instance n’a pas renvoyé ses services. Vérifiez l’adresse ou choisissez une autre instance.
+      Feed Type: Type de flux
+      Requires Configuration: Ce flux nécessite une configuration supplémentaire sur l’instance et risque de ne pas fonctionner sur les instances publiques.
+      Optional Parameter: '{parameter} (facultatif)'
+      Not Set: Non défini
     Retry Feed: Réessayer {feed}
 Trending:
   Music: Musique

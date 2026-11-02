@@ -238,11 +238,24 @@ Subscriptions:
     Invalid Feed URL: Voer ’n webadres in wat met http:// of https:// begin.
     Feed Already Followed: U volg reeds hierdie voer.
     Feed Could Not Be Loaded: Die voer kon nie gelaai word nie. Maak seker dat die adres na ’n RSS- of Atom-voer wys.
+    Feed Requires Browser Check: Hierdie webwerf vereis ’n blaaierkontrole wat OpenTubeX nie kan voltooi nie. Probeer ’n ander adres of RSSHub-instansie vir hierdie voer.
     Refresh Errors: 1 voer kon nie verfris word nie. | {count} voere kon nie verfris word nie.
     Description: Voeg ’n RSS- of Atom-voer by om skeppers van ander platforms te volg. {rssHub}-instansies verskaf voere vir baie werwe, soos Twitch.
     Empty Items: U voere het tans geen items nie.
     No Feeds: U volg nog geen RSS-voere nie.
-    Public RSSHub Instances: Openbare RSSHub-instansies
+    RSSHub:
+      Browse: Blaai deur RSSHub
+      Title: Voeg ’n voer van RSSHub by
+      Description: Kies ’n RSSHub-instansie, ’n diens en wat om te volg. Die voeradres word vir jou opgestel.
+      Instance: RSSHub-instansie
+      Service: Diens
+      Search Services: Soek dienste
+      Loading Services: Laai tans dienste…
+      Services Could Not Be Loaded: Hierdie instansie het nie sy dienste teruggestuur nie. Gaan die adres na of kies ’n ander instansie.
+      Feed Type: Voertipe
+      Requires Configuration: Hierdie voer het ekstra opstelling op die instansie nodig en werk dalk nie op openbare instansies nie.
+      Optional Parameter: '{parameter} (opsioneel)'
+      Not Set: Nie gestel nie
     Retry Feed: Probeer {feed} weer
 Channels:
   Load More Channels: Laai meer kanale

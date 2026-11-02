@@ -33,16 +33,12 @@
             <a :href="RSSHUB_URL">{{ RSSHUB_NAME }}</a>
           </template>
         </Translation>
-        <a
-          class="instancesLink"
-          :href="RSSHUB_INSTANCES_URL"
-        >
-          <FtIcon
-            :icon="['fas', 'external-link-alt']"
-            aria-hidden="true"
-          />
-          {{ t('Subscriptions.RSS Feeds.Public RSSHub Instances') }}
-        </a>
+        <FtButton
+          class="rssHubButton"
+          :label="t('Subscriptions.RSS Feeds.RSSHub.Browse')"
+          :icon="['fas', 'magnifying-glass']"
+          @click="showRssHubPrompt = true"
+        />
         <div class="feedInput">
           <FtInput
             ref="feedInput"
@@ -54,7 +50,7 @@
             :action-button-label="t('Subscriptions.RSS Feeds.Add Feed')"
             :force-action-button-icon-name="['fas', 'plus']"
             :disabled="isAdding"
-            @click="addFeed"
+            @click="addFeedFromInput"
           />
           <div
             v-if="isAdding"
@@ -133,6 +129,12 @@
         </div>
       </div>
     </FtSettingsSubpage>
+    <RssHubFeedPrompt
+      v-if="showManager && showRssHubPrompt"
+      :busy="isAdding"
+      @add="addFeedFromRssHub"
+      @close="showRssHubPrompt = false"
+    />
   </FtSettingsSection>
 </template>
 
@@ -149,6 +151,7 @@ import FtRetryImage from '../../FtRetryImage.vue'
 import FtSettingsSection from '../../FtSettingsSection/FtSettingsSection.vue'
 import FtSettingsSubpage from '../../FtSettingsSubpage/FtSettingsSubpage.vue'
 import FtToggleSwitch from '../../FtToggleSwitch/FtToggleSwitch.vue'
+import RssHubFeedPrompt from './RssHubFeedPrompt.vue'
 
 import store from '../../../store/index'
 import { clampOverlayScrollTop } from '../../../helpers/overlayScrollbars'
@@ -157,6 +160,7 @@ import {
   fetchRssFeed,
   normalizeHttpUrl,
   retryRssFeed,
+  RssFeedBrowserCheckError,
   rssFeedErrors,
   updateMissingRssFeedAvatars
 } from '../../../helpers/rssFeeds'
@@ -164,7 +168,6 @@ import { showToast } from '../../../helpers/utils'
 
 const RSSHUB_NAME = 'RSSHub'
 const RSSHUB_URL = 'https://github.com/DIYgod/RSSHub'
-const RSSHUB_INSTANCES_URL = 'https://docs.rsshub.app/guide/instances'
 
 const { t } = useI18n()
 
@@ -174,6 +177,7 @@ const feeds = computed(() => store.getters.getFollowedRssFeeds)
 const errorFeedUrls = computed(() => new Set(rssFeedErrors.value))
 
 const showManager = ref(false)
+const showRssHubPrompt = ref(false)
 const isAdding = ref(false)
 const feedInput = useTemplateRef('feedInput')
 const feedScroller = useTemplateRef('feedScroller')
@@ -218,17 +222,32 @@ function stopObservingContent() {
 /**
  * @param {string} text
  */
+async function addFeedFromInput(text) {
+  if (await addFeed(text)) feedInput.value?.clear()
+}
+
+/**
+ * @param {string} url
+ */
+async function addFeedFromRssHub(url) {
+  if (await addFeed(url)) showRssHubPrompt.value = false
+}
+
+/**
+ * @param {string} text
+ * @returns {Promise<boolean>} whether the feed is followed now
+ */
 async function addFeed(text) {
-  if (isAdding.value) return
+  if (isAdding.value) return false
 
   const url = normalizeHttpUrl(text)
   if (url === null) {
     showToast({ message: t('Subscriptions.RSS Feeds.Invalid Feed URL'), icon: ['fas', 'circle-exclamation'] })
-    return
+    return false
   }
   if (feeds.value.some(feed => feed.url === url)) {
     showToast({ message: t('Subscriptions.RSS Feeds.Feed Already Followed'), icon: ['fas', 'circle-exclamation'] })
-    return
+    return false
   }
 
   isAdding.value = true
@@ -241,13 +260,24 @@ async function addFeed(text) {
     if (await store.dispatch('updateFollowedRssFeeds', [...feeds.value, feed]) === false) {
       throw new Error('The feed could not be saved')
     }
-    feedInput.value?.clear()
     updateMissingRssFeedAvatars([[feed, result]])
-  } catch {
-    showToast({ message: t('Subscriptions.RSS Feeds.Feed Could Not Be Loaded'), icon: ['fas', 'circle-exclamation'] })
+    return true
+  } catch (error) {
+    showFeedError(error)
+    return false
   } finally {
     isAdding.value = false
   }
+}
+
+/**
+ * @param {unknown} error
+ */
+function showFeedError(error) {
+  const message = error instanceof RssFeedBrowserCheckError
+    ? t('Subscriptions.RSS Feeds.Feed Requires Browser Check')
+    : t('Subscriptions.RSS Feeds.Feed Could Not Be Loaded')
+  showToast({ message, icon: ['fas', 'circle-exclamation'] })
 }
 
 const retryingFeedUrls = shallowRef(new Set())
@@ -259,8 +289,8 @@ async function retryFeed(feed) {
   retryingFeedUrls.value = new Set([...retryingFeedUrls.value, feed.url])
   try {
     await retryRssFeed(feed)
-  } catch {
-    showToast({ message: t('Subscriptions.RSS Feeds.Feed Could Not Be Loaded'), icon: ['fas', 'circle-exclamation'] })
+  } catch (error) {
+    showFeedError(error)
   } finally {
     retryingFeedUrls.value = new Set([...retryingFeedUrls.value].filter(url => url !== feed.url))
   }

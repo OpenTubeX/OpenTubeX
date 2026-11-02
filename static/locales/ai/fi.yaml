@@ -197,11 +197,24 @@ Subscriptions:
     Invalid Feed URL: Anna verkko-osoite, joka alkaa http:// tai https://.
     Feed Already Followed: Seuraat jo tätä syötettä.
     Feed Could Not Be Loaded: Syötettä ei voitu ladata. Tarkista, että osoite osoittaa RSS- tai Atom-syötteeseen.
+    Feed Requires Browser Check: Tämä sivusto vaatii selaintarkistuksen, jota OpenTubeX ei pysty suorittamaan. Kokeile tälle syötteelle toista osoitetta tai RSSHub-instanssia.
     Refresh Errors: 1 syötettä ei voitu päivittää. | {count} syötettä ei voitu päivittää.
     Description: Lisää RSS- tai Atom-syöte seurataksesi sisällöntuottajia muilla alustoilla. {rssHub}-instanssit tarjoavat syötteitä monille sivustoille, kuten Twitchille.
     Empty Items: Syötteissäsi ei ole tällä hetkellä kohteita.
     No Feeds: Et seuraa vielä yhtään RSS-syötettä.
-    Public RSSHub Instances: Julkiset RSSHub-instanssit
+    RSSHub:
+      Browse: Selaa RSSHubia
+      Title: Lisää syöte RSSHubista
+      Description: Valitse RSSHub-instanssi, palvelu ja mitä haluat seurata. Syötteen osoite muodostetaan puolestasi.
+      Instance: RSSHub-instanssi
+      Service: Palvelu
+      Search Services: Hae palveluita
+      Loading Services: Ladataan palveluita…
+      Services Could Not Be Loaded: Tämä instanssi ei palauttanut palveluitaan. Tarkista osoite tai valitse toinen instanssi.
+      Feed Type: Syötteen tyyppi
+      Requires Configuration: Tämä syöte vaatii instanssilla lisäasetuksia, joten se ei ehkä toimi julkisilla instansseilla.
+      Optional Parameter: '{parameter} (valinnainen)'
+      Not Set: Ei asetettu
     Retry Feed: Yritä ladata {feed} uudelleen
 Trending:
   Music: Musiikki

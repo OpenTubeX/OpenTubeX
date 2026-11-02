@@ -197,11 +197,24 @@ Subscriptions:
     Invalid Feed URL: יש להזין כתובת אינטרנט שמתחילה ב־http:// או ב־https://.
     Feed Already Followed: כבר עוקבים אחרי הפיד הזה.
     Feed Could Not Be Loaded: לא ניתן היה לטעון את הפיד. כדאי לוודא שהכתובת מפנה לפיד RSS או Atom.
+    Feed Requires Browser Check: האתר הזה דורש בדיקת דפדפן ש־OpenTubeX לא יכול להשלים. נסו כתובת אחרת או מופע RSSHub אחר עבור ההזנה הזו.
     Refresh Errors: לא ניתן היה לרענן פיד אחד. | לא ניתן היה לרענן {count} פידים. | לא ניתן היה לרענן {count} פידים.
     Description: אפשר להוסיף פיד RSS או Atom כדי לעקוב אחרי יוצרים מפלטפורמות אחרות. מופעי {rssHub} מספקים פידים לאתרים רבים, כמו Twitch.
     Empty Items: אין כרגע פריטים בפידים שלך.
     No Feeds: אין עדיין פידי RSS במעקב.
-    Public RSSHub Instances: מופעי RSSHub ציבוריים
+    RSSHub:
+      Browse: עיון ב־RSSHub
+      Title: הוספת הזנה מ־RSSHub
+      Description: בחרו מופע RSSHub, שירות ואחרי מה לעקוב. כתובת ההזנה תיבנה עבורכם.
+      Instance: מופע RSSHub
+      Service: שירות
+      Search Services: חיפוש שירותים
+      Loading Services: השירותים נטענים…
+      Services Could Not Be Loaded: המופע הזה לא החזיר את השירותים שלו. בדקו את הכתובת או בחרו מופע אחר.
+      Feed Type: סוג ההזנה
+      Requires Configuration: ההזנה הזו דורשת הגדרה נוספת במופע, ולכן ייתכן שלא תעבוד במופעים ציבוריים.
+      Optional Parameter: '{parameter} (רשות)'
+      Not Set: לא מוגדר
     Retry Feed: ניסיון חוזר עבור {feed}
 Trending:
   Music: מוזיקה

@@ -195,11 +195,24 @@ Subscriptions:
     Invalid Feed URL: Adjon meg egy http:// vagy https:// kezdetű webcímet.
     Feed Already Followed: Már követi ezt a hírcsatornát.
     Feed Could Not Be Loaded: A hírcsatornát nem sikerült betölteni. Ellenőrizze, hogy a cím RSS- vagy Atom-hírcsatornára mutat-e.
+    Feed Requires Browser Check: Ez a webhely böngészőellenőrzést kér, amelyet az OpenTubeX nem tud teljesíteni. Próbáljon másik címet vagy másik RSSHub-példányt ehhez a hírcsatornához.
     Refresh Errors: 1 hírcsatornát nem sikerült frissíteni. | {count} hírcsatornát nem sikerült frissíteni.
     Description: Adjon hozzá egy RSS- vagy Atom-hírcsatornát, hogy más platformok alkotóit kövesse. Az {rssHub}-példányok számos webhelyhez biztosítanak hírcsatornákat, például a Twitchhez.
     Empty Items: A hírcsatornáiban jelenleg nincsenek elemek.
     No Feeds: Még nem követ egyetlen RSS-hírcsatornát sem.
-    Public RSSHub Instances: Nyilvános RSSHub-példányok
+    RSSHub:
+      Browse: RSSHub böngészése
+      Title: Hírcsatorna hozzáadása RSSHubról
+      Description: Válasszon egy RSSHub-példányt, egy szolgáltatást és azt, amit követni szeretne. A hírcsatorna címe automatikusan elkészül.
+      Instance: RSSHub-példány
+      Service: Szolgáltatás
+      Search Services: Szolgáltatások keresése
+      Loading Services: Szolgáltatások betöltése…
+      Services Could Not Be Loaded: Ez a példány nem adta vissza a szolgáltatásait. Ellenőrizze a címet, vagy válasszon másik példányt.
+      Feed Type: Hírcsatorna típusa
+      Requires Configuration: Ehhez a hírcsatornához további beállítás kell a példányon, ezért nyilvános példányokon lehet, hogy nem működik.
+      Optional Parameter: '{parameter} (nem kötelező)'
+      Not Set: Nincs beállítva
     Retry Feed: '{feed} újrapróbálása'
 Trending:
   Music: Zene

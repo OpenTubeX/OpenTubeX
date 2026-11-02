@@ -197,11 +197,24 @@ Subscriptions:
     Invalid Feed URL: Unesite web-adresu koja počinje s http:// ili https://.
     Feed Already Followed: Već pratite ovaj izvor.
     Feed Could Not Be Loaded: Izvor nije moguće učitati. Provjerite vodi li adresa na RSS ili Atom izvor.
+    Feed Requires Browser Check: Ova stranica traži provjeru preglednika koju OpenTubeX ne može dovršiti. Pokušajte drugu adresu ili drugu RSSHub instancu za ovaj feed.
     Refresh Errors: 1 izvor nije moguće osvježiti. | {count} izvora nije moguće osvježiti. | {count} izvora nije moguće osvježiti.
     Description: Dodajte RSS ili Atom izvor kako biste pratili autore s drugih platformi. {rssHub} instance pružaju izvore za mnoge web-stranice, primjerice Twitch.
     Empty Items: Vaši izvori trenutačno nemaju nijednu stavku.
     No Feeds: Još ne pratite nijedan RSS izvor.
-    Public RSSHub Instances: Javne RSSHub instance
+    RSSHub:
+      Browse: Pregledaj RSSHub
+      Title: Dodaj feed s RSSHuba
+      Description: Odaberite RSSHub instancu, uslugu i što želite pratiti. Adresa feeda stvara se automatski.
+      Instance: RSSHub instanca
+      Service: Usluga
+      Search Services: Pretraži usluge
+      Loading Services: Učitavanje usluga…
+      Services Could Not Be Loaded: Ova instanca nije vratila svoje usluge. Provjerite adresu ili odaberite drugu instancu.
+      Feed Type: Vrsta feeda
+      Requires Configuration: Ovaj feed treba dodatno postavljanje na instanci pa možda neće raditi na javnim instancama.
+      Optional Parameter: '{parameter} (neobavezno)'
+      Not Set: Nije postavljeno
     Retry Feed: Pokušaj ponovno učitati {feed}
 Trending:
   Music: Glazba

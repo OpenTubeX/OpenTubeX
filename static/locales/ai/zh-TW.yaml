@@ -195,11 +195,24 @@ Subscriptions:
     Invalid Feed URL: 請輸入以 http:// 或 https:// 開頭的網址。
     Feed Already Followed: 您已追蹤此摘要。
     Feed Could Not Be Loaded: 無法載入摘要。請檢查網址是否指向 RSS 或 Atom 摘要。
+    Feed Requires Browser Check: 此網站要求進行瀏覽器驗證，OpenTubeX 無法完成。請為此訂閱源嘗試其他網址或其他 RSSHub 伺服器。
     Refresh Errors: '{count} 個摘要無法重新整理。'
     Description: 新增 RSS 或 Atom 摘要，即可追蹤其他平台的創作者。{rssHub} 伺服器為許多網站（例如 Twitch）提供摘要。
     Empty Items: 您的摘要目前沒有任何項目。
     No Feeds: 您尚未追蹤任何 RSS 摘要。
-    Public RSSHub Instances: 公開 RSSHub 伺服器
+    RSSHub:
+      Browse: 瀏覽 RSSHub
+      Title: 從 RSSHub 新增訂閱源
+      Description: 選擇一個 RSSHub 伺服器、服務以及要追蹤的對象，訂閱源網址會自動產生。
+      Instance: RSSHub 伺服器
+      Service: 服務
+      Search Services: 搜尋服務
+      Loading Services: 正在載入服務…
+      Services Could Not Be Loaded: 此伺服器沒有傳回服務清單。請檢查網址或選擇其他伺服器。
+      Feed Type: 訂閱源類型
+      Requires Configuration: 此訂閱源需要在伺服器上額外設定，因此在公開伺服器上可能無法使用。
+      Optional Parameter: '{parameter}（選用）'
+      Not Set: 未設定
     Retry Feed: 重試 {feed}
 Trending:
   Music: 音樂

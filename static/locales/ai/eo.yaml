@@ -215,11 +215,24 @@ Subscriptions:
     Invalid Feed URL: Enigu retadreson, kiu komenciĝas per http:// aŭ https://.
     Feed Already Followed: Vi jam sekvas ĉi tiun fluon.
     Feed Could Not Be Loaded: Ne eblis ŝargi la fluon. Kontrolu, ke la adreso montras al RSS- aŭ Atom-fluo.
+    Feed Requires Browser Check: Ĉi tiu retejo postulas retumilan kontrolon, kiun OpenTubeX ne povas plenumi. Provu alian adreson aŭ alian RSSHub-servilon por ĉi tiu fluo.
     Refresh Errors: 1 fluo ne povis esti aktualigita. | {count} fluoj ne povis esti aktualigitaj.
     Description: Aldonu RSS- aŭ Atom-fluon por sekvi kreantojn de aliaj platformoj. Serviloj de {rssHub} provizas fluojn por multaj retejoj, ekzemple Twitch.
     Empty Items: Viaj fluoj nuntempe havas neniun eron.
     No Feeds: Vi ankoraŭ ne sekvas iun ajn RSS-fluon.
-    Public RSSHub Instances: Publikaj RSSHub-serviloj
+    RSSHub:
+      Browse: Foliumi RSSHub
+      Title: Aldoni fluon el RSSHub
+      Description: Elektu RSSHub-servilon, servon kaj kion sekvi. La adreso de la fluo estas kreata por vi.
+      Instance: RSSHub-servilo
+      Service: Servo
+      Search Services: Serĉi servojn
+      Loading Services: Ŝargante servojn…
+      Services Could Not Be Loaded: Ĉi tiu servilo ne redonis siajn servojn. Kontrolu la adreson aŭ elektu alian servilon.
+      Feed Type: Speco de fluo
+      Requires Configuration: Ĉi tiu fluo bezonas aldonan agordon ĉe la servilo, do ĝi eble ne funkcias ĉe publikaj serviloj.
+      Optional Parameter: '{parameter} (nedeviga)'
+      Not Set: Ne agordita
     Retry Feed: Reprovi {feed}
 Channels:
   Load More Channels: Ŝargi pli da kanaloj

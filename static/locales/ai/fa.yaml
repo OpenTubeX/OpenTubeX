@@ -214,11 +214,24 @@ Subscriptions:
     Invalid Feed URL: یک نشانی وب وارد کنید که با http:// یا https:// شروع شود.
     Feed Already Followed: شما از قبل این خوراک را دنبال می‌کنید.
     Feed Could Not Be Loaded: خوراک بارگیری نشد. بررسی کنید که نشانی به یک خوراک RSS یا Atom اشاره کند.
+    Feed Requires Browser Check: این سایت به بررسی مرورگر نیاز دارد که OpenTubeX نمی‌تواند آن را انجام دهد. برای این خوراک نشانی یا نمونهٔ RSSHub دیگری را امتحان کنید.
     Refresh Errors: 1 خوراک تازه‌سازی نشد. | {count} خوراک تازه‌سازی نشد.
     Description: برای دنبال کردن سازندگان از پلتفرم‌های دیگر، یک خوراک RSS یا Atom اضافه کنید. نمونه‌های {rssHub} برای بسیاری از سایت‌ها، مانند Twitch، خوراک ارائه می‌کنند.
     Empty Items: خوراک‌های شما در حال حاضر هیچ موردی ندارند.
     No Feeds: هنوز هیچ خوراک RSS را دنبال نمی‌کنید.
-    Public RSSHub Instances: نمونه‌های عمومی RSSHub
+    RSSHub:
+      Browse: مرور RSSHub
+      Title: افزودن خوراک از RSSHub
+      Description: یک نمونهٔ RSSHub، یک سرویس و آنچه می‌خواهید دنبال کنید را انتخاب کنید. نشانی خوراک خودکار ساخته می‌شود.
+      Instance: نمونهٔ RSSHub
+      Service: سرویس
+      Search Services: جست‌وجوی سرویس‌ها
+      Loading Services: در حال بارگیری سرویس‌ها…
+      Services Could Not Be Loaded: این نمونه سرویس‌هایش را برنگرداند. نشانی را بررسی کنید یا نمونهٔ دیگری انتخاب کنید.
+      Feed Type: نوع خوراک
+      Requires Configuration: این خوراک به پیکربندی بیشتری روی نمونه نیاز دارد، پس ممکن است روی نمونه‌های عمومی کار نکند.
+      Optional Parameter: '{parameter} (اختیاری)'
+      Not Set: تنظیم نشده
     Retry Feed: تلاش دوباره برای {feed}
 Trending:
   Music: موسیقی

@@ -1,6 +1,7 @@
 import { shallowRef } from 'vue'
 
 import store from '../store/index'
+import { appFetch } from './rssHub'
 import { resolveYtDlpCreatorAvatarUrl } from '../../main/ytDlpCreatorAvatar'
 
 const FETCH_TIMEOUT_MS = 15_000
@@ -253,17 +254,16 @@ function compareFeedItems(a, b) {
   return (b.published ?? -Infinity) - (a.published ?? -Infinity)
 }
 
+/** The site only lets browsers through after a check, such as a Cloudflare challenge */
+export class RssFeedBrowserCheckError extends Error {}
+
 /**
- * @param {string} url
- * @param {RequestInit} options
+ * @param {Response} response
  */
-async function appFetch(url, options) {
-  if (process.env.IS_CAPACITOR) {
-    const { capacitorHttpFetch } = await import('./api/capacitor-http')
-    // Self-hosted feeds don't always use HTTPS
-    return await capacitorHttpFetch(url, { ...options, allowHttp: true })
-  }
-  return await fetch(url, options)
+async function isBrowserCheck(response) {
+  if (response.headers.get('cf-mitigated') === 'challenge') return true
+  if (!response.headers.get('content-type')?.includes('text/html')) return false
+  return /challenges\.cloudflare\.com|_cf_chl_opt|<title>Just a moment\.\.\.<\/title>/i.test(await response.text())
 }
 
 /**
@@ -276,7 +276,10 @@ export async function fetchRssFeed(url, signal) {
     referrerPolicy: 'no-referrer',
     signal: signal ? AbortSignal.any([signal, AbortSignal.timeout(FETCH_TIMEOUT_MS)]) : AbortSignal.timeout(FETCH_TIMEOUT_MS)
   })
-  if (!response.ok) throw new Error(`Feed returned HTTP ${response.status}`)
+  if (!response.ok) {
+    if (await isBrowserCheck(response)) throw new RssFeedBrowserCheckError(`Feed requires a browser check (HTTP ${response.status})`)
+    throw new Error(`Feed returned HTTP ${response.status}`)
+  }
   return parseRssFeed(await response.text(), url, response.url || url)
 }
 

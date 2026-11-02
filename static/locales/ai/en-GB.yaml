@@ -196,11 +196,24 @@ Subscriptions:
     Invalid Feed URL: Enter a web address that starts with http:// or https://.
     Feed Already Followed: You already follow this feed.
     Feed Could Not Be Loaded: The feed could not be loaded. Check that the address points to an RSS or Atom feed.
+    Feed Requires Browser Check: This site requires a browser check, which OpenTubeX can't complete. Try another address or RSSHub instance for this feed.
     Refresh Errors: 1 feed could not be refreshed. | {count} feeds could not be refreshed.
     Description: Add an RSS or Atom feed to follow creators from other platforms. {rssHub} instances provide feeds for many sites, such as Twitch.
     Empty Items: Your feeds currently do not have any items.
     No Feeds: You don't follow any RSS feeds yet.
-    Public RSSHub Instances: Public RSSHub instances
+    RSSHub:
+      Browse: Browse RSSHub
+      Title: Add a feed from RSSHub
+      Description: Pick an RSSHub instance, a service and what to follow. The feed address is built for you.
+      Instance: RSSHub instance
+      Service: Service
+      Search Services: Search services
+      Loading Services: Loading services…
+      Services Could Not Be Loaded: This instance did not return its services. Check the address or choose another instance.
+      Feed Type: Feed type
+      Requires Configuration: This feed needs extra setup on the instance, so it might not work on public instances.
+      Optional Parameter: '{parameter} (optional)'
+      Not Set: Not set
     Retry Feed: Retry {feed}
 Trending:
   Music: Music

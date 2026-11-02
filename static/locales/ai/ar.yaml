@@ -197,11 +197,24 @@ Subscriptions:
     Invalid Feed URL: أدخل عنوان ويب يبدأ بـ http:// أو https://.
     Feed Already Followed: أنت تتابع هذه الخلاصة بالفعل.
     Feed Could Not Be Loaded: تعذّر تحميل الخلاصة. تحقق من أن العنوان يشير إلى خلاصة RSS أو Atom.
+    Feed Requires Browser Check: يتطلب هذا الموقع تحققًا من المتصفح لا يستطيع OpenTubeX إكماله. جرّب عنوانًا آخر أو مثيل RSSHub آخر لهذا الموجز.
     Refresh Errors: تعذّر تحديث {count} خلاصة. | تعذّر تحديث خلاصة واحدة. | تعذّر تحديث خلاصتين ({count}). | تعذّر تحديث {count} خلاصات. | تعذّر تحديث {count} خلاصةً. | تعذّر تحديث {count} خلاصة.
     Description: أضف خلاصة RSS أو Atom لمتابعة صنّاع المحتوى على منصات أخرى. توفّر مثيلات {rssHub} خلاصات لمواقع كثيرة، مثل Twitch.
     Empty Items: لا تحتوي خلاصاتك حاليًا على أي عناصر.
     No Feeds: لا تتابع أي خلاصات RSS حتى الآن.
-    Public RSSHub Instances: مثيلات RSSHub العامة
+    RSSHub:
+      Browse: تصفح RSSHub
+      Title: إضافة موجز من RSSHub
+      Description: اختر مثيل RSSHub وخدمة وما تريد متابعته. سيُنشأ عنوان الموجز تلقائيًا.
+      Instance: مثيل RSSHub
+      Service: الخدمة
+      Search Services: البحث في الخدمات
+      Loading Services: جارٍ تحميل الخدمات…
+      Services Could Not Be Loaded: لم يُرجع هذا المثيل خدماته. تحقق من العنوان أو اختر مثيلًا آخر.
+      Feed Type: نوع الموجز
+      Requires Configuration: يحتاج هذا الموجز إلى إعداد إضافي على المثيل، لذا قد لا يعمل على المثيلات العامة.
+      Optional Parameter: '{parameter} (اختياري)'
+      Not Set: غير محدد
     Retry Feed: أعد محاولة تحميل {feed}
 Trending:
   Music: موسيقى
