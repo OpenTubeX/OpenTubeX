@@ -169,12 +169,14 @@ public class SubscriptionRefreshPlugin extends Plugin {
     }
 
     @PluginMethod
-    public synchronized void endBatch(PluginCall call) {
-        batchActive = false;
-        if (waitingForNextFeed) {
-            waitingForNextFeed = false;
-            awaitUploadChecks();
-            SubscriptionRefreshWorker.finish(getContext(), rendererToken);
+    public void endBatch(PluginCall call) {
+        awaitUploadChecks();
+        synchronized (this) {
+            batchActive = false;
+            if (waitingForNextFeed) {
+                waitingForNextFeed = false;
+                SubscriptionRefreshWorker.finish(getContext(), rendererToken);
+            }
         }
         call.resolve();
     }
@@ -311,17 +313,19 @@ public class SubscriptionRefreshPlugin extends Plugin {
     }
 
     @PluginMethod
-    public synchronized void finish(PluginCall call) {
+    public void finish(PluginCall call) {
         String token = call.getString("token");
         if (token == null) {
             call.reject("A token is required");
             return;
         }
-        if (batchActive && token.equals(rendererToken) && SubscriptionRefreshWorker.isRendererActive(token)) {
-            waitingForNextFeed = true;
-        } else {
-            awaitUploadChecks();
-            SubscriptionRefreshWorker.finish(getContext(), token);
+        awaitUploadChecks();
+        synchronized (this) {
+            if (batchActive && token.equals(rendererToken) && SubscriptionRefreshWorker.isRendererActive(token)) {
+                waitingForNextFeed = true;
+            } else {
+                SubscriptionRefreshWorker.finish(getContext(), token);
+            }
         }
         call.resolve();
     }
@@ -329,6 +333,8 @@ public class SubscriptionRefreshPlugin extends Plugin {
     /**
      * Upload checks run after the refresh reports its feeds. Let queued ones show their
      * notifications before the refresh releases its foreground service and the process.
+     * Callers wait without holding the plugin's lock, which lifecycle callbacks on the
+     * main thread also take.
      */
     private static void awaitUploadChecks() {
         try {
