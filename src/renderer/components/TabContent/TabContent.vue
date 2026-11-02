@@ -480,7 +480,7 @@ function cancelLoaderSettle() {
   }
 }
 
-:global(:root[data-reduced-motion='reduce']) .pageSwipeSettling {
+:root[data-reduced-motion='reduce'] .pageSwipeSettling {
   transition-duration: 0ms;
 }
 </style>

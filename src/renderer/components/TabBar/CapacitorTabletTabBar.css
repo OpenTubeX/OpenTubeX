@@ -208,7 +208,7 @@
   display: flex;
 }
 
-:global(:root[data-reduced-motion='reduce']) .capacitorTabletTab {
+:root[data-reduced-motion='reduce'] .capacitorTabletTab {
   transition: none;
 }
 

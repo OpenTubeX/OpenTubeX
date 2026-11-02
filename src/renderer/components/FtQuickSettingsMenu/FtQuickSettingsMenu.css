@@ -3,11 +3,11 @@
   position: relative;
 }
 
-:global(.app.topTabs) .quickSettings {
+.app.topTabs .quickSettings {
   --quick-settings-viewport-offset: var(--top-tab-bar-height);
 }
 
-:global(.app.bottomTabs) .quickSettings {
+.app.bottomTabs .quickSettings {
   --quick-settings-viewport-offset: var(--bottom-tab-bar-height);
 }
 
@@ -214,8 +214,8 @@
   transform: translateY(-5px) scale(0.98);
 }
 
-:global(:root[data-reduced-motion='reduce']) .quick-settings-menu-enter-active,
-:global(:root[data-reduced-motion='reduce']) .quick-settings-menu-leave-active {
+:root[data-reduced-motion='reduce'] .quick-settings-menu-enter-active,
+:root[data-reduced-motion='reduce'] .quick-settings-menu-leave-active {
   transition: none;
 }
 

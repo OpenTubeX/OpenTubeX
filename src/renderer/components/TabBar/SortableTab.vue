@@ -569,7 +569,7 @@ watch(tabAvatarUrl, (avatarUrl) => {
   }
 }
 
-:global(:root[data-reduced-motion='reduce']) .tabLoadingLine :deep(.embeddedProgressPath) {
+:root[data-reduced-motion='reduce'] .tabLoadingLine :deep(.embeddedProgressPath) {
   animation: none;
   stroke-dasharray: var(--embedded-progress-path-length) var(--embedded-progress-gap-length) !important;
 }

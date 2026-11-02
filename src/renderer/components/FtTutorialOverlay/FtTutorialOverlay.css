@@ -173,7 +173,7 @@
   }
 }
 
-:global(:root[data-reduced-motion='reduce']) .tutorialHighlight,
-:global(:root[data-reduced-motion='reduce']) .tutorialProgress span {
+:root[data-reduced-motion='reduce'] .tutorialHighlight,
+:root[data-reduced-motion='reduce'] .tutorialProgress span {
   transition: none;
 }

@@ -125,7 +125,7 @@
   }
 }
 
-:global(.app.bottomTabs) .routerView {
+.app.bottomTabs .routerView {
   --playlist-bottom-inset: var(--bottom-tab-bar-height);
 }
 

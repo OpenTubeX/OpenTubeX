@@ -14,7 +14,7 @@
   z-index: 10002;
 }
 
-:global(body.playerFullWindow) .commandPaletteBackdrop {
+.playerFullWindow .commandPaletteBackdrop {
   z-index: 1002;
 }
 
@@ -242,8 +242,8 @@ kbd {
   }
 }
 
-:global(:root[data-reduced-motion='reduce']) .commandPaletteBackdrop,
-:global(:root[data-reduced-motion='reduce']) .commandPalette {
+:root[data-reduced-motion='reduce'] .commandPaletteBackdrop,
+:root[data-reduced-motion='reduce'] .commandPalette {
   animation: none;
 }
 
