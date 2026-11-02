@@ -29,6 +29,8 @@ for (const metadataOnly of [false, true]) {
       tabRoute: { params: { id: 'video' } },
       backendPreference: 'invidious', backendFallback: true,
       isCurrentVideoLoad: () => true,
+      scheduleDownloadedPlaybackFallback() {},
+      settleDownloadedPlaybackFallback: () => false,
       t: key => key,
       getVideoInformationLocal: async () => events.push('local'),
     }
@@ -57,6 +59,8 @@ test('a Yattee server watch fallback names the Yattee server in its warning', as
     tabRoute: { params: { id: 'video' } },
     backendPreference: 'yattee', backendFallback: true,
     isCurrentVideoLoad: () => true,
+    scheduleDownloadedPlaybackFallback() {},
+    settleDownloadedPlaybackFallback: () => false,
     t: key => key,
     getVideoInformationLocal: async () => events.push('local'),
   }

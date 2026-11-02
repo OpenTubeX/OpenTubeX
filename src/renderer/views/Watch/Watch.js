@@ -188,6 +188,9 @@ const STREAM_RECOVERY_NOTICE_SETTLE_SECONDS = 10
 // fallback runs and the video settles on something that plays.
 const MAX_SABR_ERROR_RECOVERIES_PER_VIDEO = 8
 const ANDROID_HTTP_ERROR_RETRY_DELAY_MS = 750
+// Network recovery retries unreachable YouTube metadata indefinitely while the
+// internet check succeeds, so a completed download stops waiting for it.
+const DOWNLOADED_PLAYBACK_METADATA_TIMEOUT_MS = 3000
 let nextSabrSchemeId = 0
 const UNAVAILABLE_VIDEO_THUMBNAILS = {
   light: 'https://www.youtube.com/img/desktop/unavailable/unavailable_video.png',
@@ -1595,6 +1598,7 @@ export default defineComponent({
     this.releaseAmbientModeClass?.()
     this.releaseAmbientModeClass = null
     connectionEvents.removeEventListener('change', this.handleDownloadConnectionChange)
+    clearTimeout(this.downloadedPlaybackFallbackTimer)
     this.shortsNavigation.removeListeners()
     window.removeEventListener('resize', this.updateShortsViewportHeight)
     window.removeEventListener('resize', this.updateTheatreLayoutAvailability)
@@ -2749,6 +2753,26 @@ export default defineComponent({
       return true
     },
 
+    /**
+     * Plays a completed download when its metadata is late. The pending request
+     * then only fills in the metadata, as after reconnecting.
+     */
+    scheduleDownloadedPlaybackFallback: function (loadGeneration, videoId) {
+      clearTimeout(this.downloadedPlaybackFallbackTimer)
+      if (!Number.isInteger(Number(this.tabRoute.query.downloadId))) return
+      this.downloadedPlaybackFallbackTimer = setTimeout(() => {
+        if (this.isCurrentVideoLoad(loadGeneration, videoId) && this.isLoading && !this.localFilePlayback) {
+          this.finishDownloadedPlaybackWithoutMetadata()
+        }
+      }, DOWNLOADED_PLAYBACK_METADATA_TIMEOUT_MS)
+    },
+
+    /** Returns whether the download already plays without this load's metadata. */
+    settleDownloadedPlaybackFallback: function () {
+      clearTimeout(this.downloadedPlaybackFallbackTimer)
+      return this.downloadedPlaybackWithoutMetadata
+    },
+
     onMountedDependOnLocalStateLoading() {
       // Prevent running twice
       if (this.onMountedRun) { return }
@@ -3193,6 +3217,7 @@ export default defineComponent({
         // Keep the metadata request queued for reconnect instead of abandoning
         // the watch page with its loading skeleton still visible.
       }
+      if (!metadataOnly) this.scheduleDownloadedPlaybackFallback(loadGeneration, videoId)
 
       let backendFailed = false
       try {
@@ -3210,6 +3235,7 @@ export default defineComponent({
                 (!process.env.IS_CAPACITOR || !this.isYtDlpPlaybackRequested())
             })
         if (!this.isCurrentVideoLoad(loadGeneration, videoId)) { return }
+        metadataOnly ||= this.settleDownloadedPlaybackFallback()
 
         const {
           info: result,
@@ -3920,6 +3946,7 @@ export default defineComponent({
       } catch (err) {
         backendFailed = true
         if (!this.isCurrentVideoLoad(loadGeneration, videoId)) { return }
+        metadataOnly ||= this.settleDownloadedPlaybackFallback()
 
         let handledError = err
         if (err.isIpBlock) {
@@ -3976,6 +4003,7 @@ export default defineComponent({
         if (metadataOnly || this.finishDownloadedPlaybackWithoutMetadata()) return
         // The shared network queue resumes this request when connectivity returns.
       }
+      if (!metadataOnly) this.scheduleDownloadedPlaybackFallback(loadGeneration, videoId)
 
       // Also used as the fallback of the local API, which always falls back to Invidious
       const isYattee = this.backendPreference === 'yattee'
@@ -3989,6 +4017,7 @@ export default defineComponent({
         : invidiousGetVideoInformation(videoId))
         .then(async result => {
           if (!this.isCurrentVideoLoad(loadGeneration, videoId)) { return }
+          metadataOnly ||= this.settleDownloadedPlaybackFallback()
 
           if (result.error) {
             throw new Error(result.error)
@@ -4266,6 +4295,7 @@ export default defineComponent({
         .catch(async err => {
           backendFailed = true
           if (!this.isCurrentVideoLoad(loadGeneration, videoId)) { return }
+          metadataOnly ||= this.settleDownloadedPlaybackFallback()
           const canFallback = process.env.SUPPORTS_LOCAL_API && usesInvidiousApi(this.backendPreference) && this.backendFallback
           if (canFallback) showInvidiousFallbackToast(this.backendPreference)
           if (metadataOnly) {

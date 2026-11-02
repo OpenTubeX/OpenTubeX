@@ -73,6 +73,8 @@ async function loadMetadata(info, avoidTranslation = 'disabled', options = {}) {
     updateShortsPlayerState() {}, updateShortThumbnail() {}, updateTitle() { completed = true },
     runIpBlockRecoveryScriptAndReload: async () => false,
     finishDownloadedPlaybackWithoutMetadata: () => false,
+    scheduleDownloadedPlaybackFallback() {},
+    settleDownloadedPlaybackFallback: () => false,
     getUnavailableVideoThumbnail: () => '',
     hideVideoLikesAndDislikes: options.hideVideoLikesAndDislikes ?? true,
     backendPreference: 'local',

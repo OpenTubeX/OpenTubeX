@@ -1,7 +1,7 @@
 import path from 'node:path'
 
-import { test, expect, goTo, repoRoot, setWindowSize, waitForAppReady } from '../../helpers/app.mjs'
-import { watchViewHandle } from '../../helpers/watch.mjs'
+import { test, expect, abortUnmockedRequest, goTo, repoRoot, setWindowSize, waitForAppReady } from '../../helpers/app.mjs'
+import { mockPlayableWatchPage, watchViewHandle } from '../../helpers/watch.mjs'
 
 const downloadSource = (id, videoId, filePath) => `downloadmedia://file/${id}/${videoId}?path=${encodeURIComponent(filePath)}`
 const mediaPath = path.join(repoRoot, 'e2e/fixtures/media/demo.webm')
@@ -47,6 +47,48 @@ for (const restart of [false, true]) {
     await expect(page.locator('.videoPlayerPlaceholder.ft-shimmer')).toHaveCount(0)
   })
 }
+
+test.describe('download with unreachable YouTube', () => {
+  test.use({
+    seed: {
+      settings: { landingPage: 'history', enableDownloads: true },
+      downloads: [{
+        id: 1,
+        videoId: 'jNQXAC9IVRw',
+        title: 'Offline download',
+        status: 'completed',
+        mode: 'video',
+        destination: mediaPath,
+        destinations: [mediaPath],
+        files: [{ videoId: 'jNQXAC9IVRw', path: mediaPath, extension: 'webm' }],
+      }],
+    },
+  })
+
+  test('plays the file while the metadata request keeps retrying', async ({ app, page }) => {
+    // The internet check succeeds, so only network recovery retries YouTube.
+    await page.route(/^https?:\/\//, abortUnmockedRequest)
+    await goTo(page, 'downloads')
+    await page.getByRole('button', { name: 'Play download', exact: true }).click()
+    const video = page.locator('video').first()
+    await expect(video).toHaveJSProperty('currentSrc', downloadSource(1, 'jNQXAC9IVRw', mediaPath))
+    await expect.poll(() => video.evaluate(element => element.readyState)).toBeGreaterThanOrEqual(2)
+    await video.evaluate(element => element.play())
+    await expect.poll(() => video.evaluate(element => element.currentTime)).toBeGreaterThan(0)
+    await expect(page.locator('.videoTitle:visible')).toHaveText('Offline download')
+    await expect(page.locator('.connectionStatus')).toBeHidden()
+
+    // The retried request fills in the metadata without reloading the file.
+    const watchView = await watchViewHandle(page)
+    const sourceKey = await watchView.evaluate(view => view.playbackSourceKey)
+    await mockPlayableWatchPage(app, page)
+    // Network recovery retries at once on a network change, not after its backoff.
+    await page.evaluate(() => window.dispatchEvent(new Event('online')))
+    await expect(page.locator('.videoTitle:visible')).toHaveText('Me at the zoo')
+    expect(await watchView.evaluate(view => view.playbackSourceKey)).toBe(sourceKey)
+    await expect(video).toHaveJSProperty('currentSrc', downloadSource(1, 'jNQXAC9IVRw', mediaPath))
+  })
+})
 
 for (const mobile of [false, true]) {
   test.describe(`download watch queue at ${mobile ? 'phone' : 'desktop'} width`, () => {

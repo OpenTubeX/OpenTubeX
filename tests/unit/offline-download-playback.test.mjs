@@ -87,6 +87,8 @@ for (const backend of ['Local', 'Invidious']) {
       tabRoute: { params: { id: 'downloaded1' } },
       finishDownloadedPlaybackWithoutMetadata() { localLoads++; this.isLoading = false; this.localFilePlayback = true; return true },
       isCurrentVideoLoad(generation) { return generation === this.videoLoadGeneration },
+      scheduleDownloadedPlaybackFallback() {},
+      settleDownloadedPlaybackFallback: () => false,
     }
     watch[`getVideoInformation${backend}`]()
     await started
@@ -102,6 +104,65 @@ for (const backend of ['Local', 'Invidious']) {
     assert.equal(localLoads, 1)
     watch.handleDownloadConnectionChange({ detail: 'offline' })
     assert.equal(localLoads, 1, 'connection updates do not restart an already playing file')
+  })
+}
+
+for (const backend of ['Local', 'Invidious']) {
+  test(`${backend} plays the download while online metadata keeps retrying`, async () => {
+    let rejectMetadata
+    let metadataStarted
+    const started = new Promise(resolve => { metadataStarted = resolve })
+    const pendingMetadata = () => { metadataStarted(); return new Promise((resolve, reject) => { rejectMetadata = reject }) }
+    const timers = new Map()
+    const methods = runInNewContext(`({
+      ${method('getVideoInformationLocal', 'getVideoInformationInvidious')}
+      ${method('getVideoInformationInvidious', 'async runIpBlockRecoveryScriptAndReload()')}
+      ${method('scheduleDownloadedPlaybackFallback', 'onMountedDependOnLocalStateLoading()')}
+    })`, {
+      DOWNLOADED_PLAYBACK_METADATA_TIMEOUT_MS: 3000,
+      setTimeout: (callback, delay) => { const id = timers.size + 1; timers.set(id, { callback, delay }); return id },
+      clearTimeout: id => timers.delete(id),
+      getConnectionState: () => 'online',
+      initializeNetworkRecovery: () => ({ ready: Promise.resolve(true) }),
+      getLocalVideoInfo: pendingMetadata,
+      invidiousGetVideoInformation: pendingMetadata,
+      process: { env: { SUPPORTS_LOCAL_API: true } },
+      usesInvidiousApi: () => backend === 'Invidious',
+      console: { error() {} },
+    })
+    let localLoads = 0
+    const watch = {
+      ...methods,
+      firstLoad: true,
+      isLoading: true,
+      videoLoadGeneration: 1,
+      tabRoute: { params: { id: 'downloaded1' }, query: { downloadId: '1' } },
+      backendPreference: backend.toLowerCase(),
+      customShortsPlayerActive: false,
+      finishDownloadedPlaybackWithoutMetadata() {
+        localLoads++
+        this.isLoading = false
+        this.localFilePlayback = true
+        this.downloadedPlaybackWithoutMetadata = true
+        return true
+      },
+      isCurrentVideoLoad(generation) { return generation === this.videoLoadGeneration },
+      runIpBlockRecoveryScriptAndReload: async () => false,
+      getRestrictedPlaybackErrorType: () => null,
+    }
+    const load = watch[`getVideoInformation${backend}`](1)
+    await started
+    assert.deepEqual([...timers.values()].map(timer => timer.delay), [3000])
+    assert.equal(localLoads, 0, 'metadata that arrives in time keeps its normal load')
+    for (const { callback } of timers.values()) callback()
+    assert.equal(localLoads, 1)
+    assert.equal(watch.isLoading, false)
+    assert.equal(watch.videoLoadGeneration, 1, 'the pending request can still fill in the metadata')
+    rejectMetadata(new Error('Video unavailable'))
+    await load
+    assert.equal(localLoads, 1, 'a late metadata failure must not reload the playing file')
+    assert.equal(watch.errorMessage, undefined)
+    assert.equal(timers.size, 0)
   })
 }
 
