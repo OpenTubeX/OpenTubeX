@@ -3,6 +3,15 @@ import { LocalNotifications } from '@capacitor/local-notifications'
 const STORAGE_KEY = 'opentubex-capacitor-live-reminders'
 const CHANNEL_ID = 'live-reminders'
 const listeners = new Set()
+// Reminder changes await native calls between reading and writing storage, so
+// they run one at a time to keep concurrent changes from overwriting each other.
+let pendingChange = Promise.resolve()
+
+function queueChange(change) {
+  const result = pendingChange.then(change)
+  pendingChange = result.catch(() => {})
+  return result
+}
 
 export const supportsLiveReminders = Boolean(process.env.IS_ELECTRON || process.env.IS_CAPACITOR)
 
@@ -55,6 +64,18 @@ async function requestNotificationPermission() {
   return status.display === 'granted'
 }
 
+// Runs inside a queued change, so changes that cancel first don't wait on themselves.
+async function cancelCapacitorReminder(videoId) {
+  const records = readCapacitorReminders()
+  const record = records.find(item => item.videoId === videoId)
+  if (record) {
+    await LocalNotifications.cancel({ notifications: [{ id: record.notificationId }] })
+  }
+  writeCapacitorReminders(readCapacitorReminders().filter(item => item.videoId !== videoId))
+  emitUpdated(videoId, false)
+  return record !== undefined
+}
+
 const capacitorLiveReminder = {
   async get(videoId) {
     const records = readCapacitorReminders()
@@ -69,13 +90,13 @@ const capacitorLiveReminder = {
     return records
   },
 
-  async schedule(reminder) {
+  schedule: reminder => queueChange(async () => {
     // The premiere may have started before the reminder was toggled or while the
     // permission prompt was open, and a past start cannot be scheduled. A reminder
     // being rescheduled would otherwise still fire at its old time.
     const started = async () => {
       if (reminder.startTimestamp > Date.now()) return false
-      await capacitorLiveReminder.cancel(reminder.videoId)
+      await cancelCapacitorReminder(reminder.videoId)
       return true
     }
     if (await started() || !await requestNotificationPermission() || await started()) return false
@@ -101,23 +122,15 @@ const capacitorLiveReminder = {
 
     const record = { ...reminder, notificationId }
     writeCapacitorReminders([
-      ...records.filter(item => item.videoId !== reminder.videoId),
+      // Reread to keep the removal of reminders delivered in the meantime.
+      ...readCapacitorReminders().filter(item => item.videoId !== reminder.videoId),
       record,
     ])
     emitUpdated(reminder.videoId, true)
     return true
-  },
+  }),
 
-  async cancel(videoId) {
-    const records = readCapacitorReminders()
-    const record = records.find(item => item.videoId === videoId)
-    if (record) {
-      await LocalNotifications.cancel({ notifications: [{ id: record.notificationId }] })
-    }
-    writeCapacitorReminders(records.filter(item => item.videoId !== videoId))
-    emitUpdated(videoId, false)
-    return record !== undefined
-  },
+  cancel: videoId => queueChange(() => cancelCapacitorReminder(videoId)),
 
   onUpdated(listener) {
     listeners.add(listener)
