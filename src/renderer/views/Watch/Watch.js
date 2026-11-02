@@ -1887,7 +1887,7 @@ export default defineComponent({
             message: scheduled
               ? this.t('Video.Notification enabled')
               : this.t('Video.Notification unavailable'),
-            icon: ['fas', 'calendar-days']
+            icon: scheduled ? ['fas', 'calendar-days'] : ['fas', 'circle-exclamation']
           })
         }
       } catch (error) {
@@ -1895,7 +1895,7 @@ export default defineComponent({
         if (videoId === this.videoId) {
           this.showTabToast({
             message: this.t('Video.Notification unavailable'),
-            icon: ['fas', 'calendar-days']
+            icon: ['fas', 'circle-exclamation']
           })
         }
       } finally {

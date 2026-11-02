@@ -859,7 +859,7 @@ export default defineComponent({
       getPlaybackRate: () => video.value?.playbackRate ?? 1,
       isPaused: () => video.value?.paused ?? true,
       isSeeking: () => video.value?.seeking ?? false,
-      onExpired: () => showToast({ message: t('Video.Player.Sleep Timer.Timer ended'), icon: ['fas', 'clock'] }),
+      onExpired: () => showToast({ message: t('Video.Player.Sleep Timer.Timer ended'), icon: ['fas', 'clock'], important: true }),
       pausePlayback: () => video.value?.pause(),
       seekTo: seconds => { if (video.value) setCurrentTime(seconds) },
       tabId,

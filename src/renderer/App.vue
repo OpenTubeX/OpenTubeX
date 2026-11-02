@@ -1869,7 +1869,7 @@ onMounted(async () => {
                 await store.dispatch('setSyncServerAutoSync', true)
                 dismissNotice()
               } catch (error) {
-                showToast({ message: error.message })
+                showToast({ message: error.message, icon: ['fas', 'circle-exclamation'] })
               } finally {
                 release()
               }
