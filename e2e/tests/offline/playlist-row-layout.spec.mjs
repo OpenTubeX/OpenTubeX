@@ -139,8 +139,9 @@ for (const [uiScale, userPlaylistSortOrder] of [[100, 'date_added_descending'], 
         await thumbnail.evaluate(element => {
           const label = element.querySelector('.videoDuration').cloneNode(false)
           label.className = 'sponsorBlockVideoLabel'
-          label.append(document.createElement('span'))
-          label.firstChild.textContent = 'Self-Promotion'
+          const text = document.createElement('span')
+          text.textContent = 'Self-Promotion'
+          label.append(element.querySelector('.ft-icon').cloneNode(true), text)
           element.append(label)
         })
         // A long localized Watched label must not cover the index badge.
@@ -165,6 +166,9 @@ for (const [uiScale, userPlaylistSortOrder] of [[100, 'date_added_descending'], 
               continue
             }
             await page.locator('.sortSelect').hover()
+            // Narrow thumbnails keep only the SponsorBlock icon.
+            await expect(thumbnail.locator('.sponsorBlockVideoLabel .ft-icon')).toBeVisible()
+            await expect(thumbnail.locator('.sponsorBlockVideoLabel > span:last-child')).toBeHidden()
             // The labels share the small desktop thumbnail without covering each other.
             await expect.poll(() => thumbnail.evaluate(element => {
               const rects = [...element.querySelectorAll('.playlistIndexBadge, .videoDuration, .videoWatched, .sponsorBlockVideoLabel')]

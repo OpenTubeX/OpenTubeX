@@ -218,7 +218,7 @@
 
   // Below this width the label reaches the duration's row, so keep only its icon.
   @container playlist-thumbnail (width < 140px) {
-    :deep(.ft-list-item.list .sponsorBlockVideoLabel span) {
+    :deep(.ft-list-item.list .sponsorBlockVideoLabel > span:last-child) {
       display: none;
     }
   }
