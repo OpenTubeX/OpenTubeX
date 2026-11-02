@@ -118,6 +118,8 @@
           type="button"
           class="collaboratorSummary"
           @click="showCollaboratorsPrompt = true"
+          @mousedown.middle.prevent
+          @auxclick.middle.prevent="showCollaboratorsPrompt = true"
         >
           <span class="collaboratorSummaryThumbnails">
             <span

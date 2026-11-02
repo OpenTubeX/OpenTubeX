@@ -919,17 +919,26 @@ export function createLocalFeedParsers(shouldHideMembersOnly) {
 
         const imageEndpoint = lockupView.metadata?.image?.renderer_context?.command_context?.on_tap
         const imageAuthorId = imageEndpoint?.payload?.browseId
-        const author = authorPart?.text ?? channelName ??
+        const collaborators = parseLocalCollaboratorItems(
+          imageEndpoint?.command?.inline_content?.custom_content?.items
+            ?.filter(item => item.renderer_context?.command_context?.on_tap?.metadata?.page_type === 'WEB_PAGE_TYPE_CHANNEL')
+        )
+        let author = authorPart?.text ?? channelName ??
           metadataParts.find(part => part.avatar_stack?.text?.text)?.avatar_stack.text.text
+
+        // Recommendations split a collaboration byline into the primary channel
+        // and a localized "and <channel>" or "and N more" part
+        const firstRowParts = metadataRows[0]?.metadata_parts
+        const collaboratorsText = firstRowParts?.[1]?.text?.text?.trim()
+        if (collaborators.length > 1 && collaboratorsText && authorMetadataPart === firstRowParts[0]) {
+          author = `${author.trim()} ${collaboratorsText}`
+        }
+
         const authorEndpoint = authorPart?.endpoint?.payload?.browseId ? authorPart.endpoint : imageAuthorId ? imageEndpoint : undefined
         const authorId = authorEndpoint?.payload.browseId ?? channelId
         // Read the handle from the same endpoint as the ID so they always describe the same channel
         const authorHandle = getChannelHandleFromEndpoint(authorEndpoint)
         const hasCollaborators = authorPart?.endpoint == null && isCollaborativeVideoAuthor(author)
-        const collaborators = parseLocalCollaboratorItems(
-          imageEndpoint?.command?.inline_content?.custom_content?.items
-            ?.filter(item => item.renderer_context?.command_context?.on_tap?.metadata?.page_type === 'WEB_PAGE_TYPE_CHANNEL')
-        )
 
         return {
           type: 'video',

@@ -282,6 +282,8 @@
             dir="auto"
             :disabled="isFetchingCollaborators"
             @click.stop.prevent="openChannelByline"
+            @mousedown.middle.prevent
+            @auxclick.middle.stop.prevent="openChannelByline"
           >
             <FtChannelAvatarStack
               v-if="showChannelAvatar"
@@ -2214,7 +2216,13 @@ function openInExternalPlayer() {
   }
 }
 
-async function openChannelByline() {
+/**
+ * Opens the collaborators prompt for collaboration videos, or the single
+ * channel otherwise. A middle click opens that channel in a background tab
+ * like the regular channel link.
+ * @param {MouseEvent} event
+ */
+async function openChannelByline(event) {
   if (disableChannelLinks.value || isFetchingCollaborators.value) {
     return
   }
@@ -2240,7 +2248,16 @@ async function openChannelByline() {
     if (channelCollaborators.value.length > 1) {
       showCollaboratorsPrompt.value = true
     } else if (channelCollaborators.value.length === 1) {
-      openInternalPath({ path: `/channel/${channelCollaborators.value[0].id}` })
+      const { id: collaboratorId, name } = channelCollaborators.value[0]
+      const isMiddleClick = event?.type === 'auxclick'
+      openInternalPath({
+        path: `/channel/${collaboratorId}`,
+        title: name,
+        doCreateNewWindow: isMiddleClick && event.shiftKey,
+        doCreateNewTab: isMiddleClick && !event.shiftKey,
+        makeActive: !isMiddleClick,
+        lazyLoad: isUnloadedBackgroundTabClick(event)
+      })
     }
   } catch (error) {
     if (id.value === videoId) {
