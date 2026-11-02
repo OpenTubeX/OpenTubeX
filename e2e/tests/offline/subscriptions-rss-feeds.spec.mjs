@@ -711,6 +711,22 @@ test.describe('with new items', () => {
       .filter(item => item.isNew).map(item => item.title))).toEqual(['Second new VOD'])
   })
 
+  test('marks the first item of a feed that was empty as new', async ({ page }) => {
+    await mockFeeds(page)
+    // A live stream feed only has an item while the stream is live
+    const emptyFeed = rssFeed.replace(/<item>[\s\S]*<\/item>/, '')
+    await page.route(RSS_URL, route => route.fulfill({ contentType: 'application/rss+xml', body: emptyFeed }))
+    await goTo(page, 'subscriptions')
+    await page.locator('[data-rss-feeds-tab]').click()
+    const panel = page.locator('#subscriptionsPanel')
+    await expect(panel.getByText('Your feeds currently do not have any items.')).toBeVisible()
+
+    await page.route(RSS_URL, route => route.fulfill({ contentType: 'application/rss+xml', body: rssFeed }))
+    await page.locator('.subscriptionsHeader').getByRole('button', { name: /^Refresh RSS/ }).click()
+    await expect(panel.locator('.ft-list-item .h3Title')).toHaveText(['Newest VOD', 'Older VOD'])
+    await expect(panel.locator('.newContentDot')).toHaveCount(2)
+  })
+
   test('lists new items in the New feed', async ({ page }) => {
     await loadNewItems(page)
     const panel = page.locator('#subscriptionsPanel')

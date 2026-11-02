@@ -271,7 +271,8 @@
                 class="headerRefreshWidget subscriptionsHeaderRefreshWidget"
                 :disable-refresh="currentTab === 'feeds' || currentNewFeedRssTab
                   ? currentTabPanel.isLoading || followedRssFeeds.length === 0
-                  : subscriptionFeedRefreshInProgress || currentTabPanel.isLoading || activeSubscriptionList.length === 0"
+                  : subscriptionFeedRefreshInProgress || currentTabPanel.isLoading ||
+                    (activeSubscriptionList.length === 0 && !combinedNewFeedRefreshesRssFeeds)"
                 :last-refresh-timestamp="currentTabPanel.lastRefreshTimestamp"
                 :next-auto-refresh-timestamp="currentTabPanel.nextAutoRefreshTimestamp"
                 :next-auto-refresh-tooltip="currentTabPanel.nextAutoRefreshTooltip"
@@ -832,6 +833,11 @@ const visibleNewFeedTabs = computed(() => {
 const storedNewFeedTab = localStorage.getItem(currentNewFeedTabStorageKey)
 /** @type {import('vue').Ref<'videos' | 'shorts' | 'live' | 'posts' | 'feeds'>} */
 const currentNewFeedTab = ref(storedNewFeedTab ?? 'videos')
+/** The combined New feed also refreshes the RSS feeds */
+const combinedNewFeedRefreshesRssFeeds = computed(() => {
+  return currentTab.value === 'new' && newFeedView.value === 'combined' && enableRssFeeds.value &&
+    followedRssFeeds.value.length > 0
+})
 /** Whether the New feed shows only the items of the RSS feeds */
 const currentNewFeedRssTab = computed(() => {
   return currentTab.value === 'new' && newFeedView.value === 'tabbed' && currentNewFeedTab.value === 'feeds'

@@ -395,7 +395,7 @@ const hasNewContentByCategory = computed(() => ({
 }))
 
 function refreshNewContent() {
-  if (props.activeCategory !== 'feeds') {
+  if (props.activeCategory !== 'feeds' && activeSubscriptions.value.length > 0) {
     refresh()
   }
   if ((props.activeCategory === 'feeds' || showCombinedView.value) && rssFeeds.value.length > 0) {
