@@ -175,9 +175,9 @@ Isolated Chromium checks run in one separate job, so only that runner installs
 Chromium. The offline command and dispatch selection include offline and
 performance Electron tests and browser checks.
 
-Packed-app tests always run in full on `development`: Playwright's
-import-based `--only-changed` selection cannot associate them with source or
-CSS changes. On PRs, the network project, which talks to YouTube, is limited to
+On `development`, the offline project at 100% UI scale runs in full:
+Playwright's import-based `--only-changed` selection cannot associate its tests
+with source or CSS changes. On PRs, the network project, which talks to YouTube, is limited to
 changed tests and passes without running any when none are affected. Network
 tests use the fixture fallback on retry. The `repeat` shards run changed
 offline tests five times without retries, so a PR cannot add a flaky test; they
