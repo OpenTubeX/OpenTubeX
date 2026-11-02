@@ -331,7 +331,7 @@
   }
 }
 
-:root.limitTitlesToTwoLines .queueVideoTitle {
+:root.limitTitlesToTwoLines .externalQueueVideo:not(:focus-visible) .queueVideoTitle {
   display: -webkit-box;
   overflow: hidden;
   -webkit-box-orient: vertical;
