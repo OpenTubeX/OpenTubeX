@@ -230,7 +230,7 @@
             :playlist-reverse="reversePlaylist"
             :playlist-shuffle="shuffleEnabled"
             :playlist-loop="loopEnabled"
-            :show-index="false"
+            :video-index="reversePlaylist ? playlistItems.length - index - 1 : index"
             :is-current-video="currentVideoIndexZeroBased === index"
             :can-move-video-up="index > 0 && canMoveVideos"
             :can-move-video-down="index < playlistItems.length - 1 && canMoveVideos"

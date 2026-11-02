@@ -149,6 +149,15 @@
   column-gap: 8px;
   align-items: center;
 
+  // The index moved into the thumbnail, so only the reorder handle needs a column.
+  &:not(.draggable) {
+    grid-template-columns: minmax(0, 1fr);
+
+    :deep(.videoIndexArea) {
+      display: none;
+    }
+  }
+
   :deep(.ft-list-item.list) {
     align-items: center;
   }
@@ -164,6 +173,22 @@
   :deep(.ft-list-item.list .videoThumbnail) {
     margin-block: 0;
     margin-inline-end: 12px;
+    // The index badge and the duration get their own columns, so a long Watched
+    // or SponsorBlock label cannot cover them.
+    grid-template-columns: max-content minmax(0, 1fr) minmax(0, max-content);
+    container: playlist-thumbnail / inline-size;
+
+    > * {
+      grid-column: 1 / -1;
+    }
+
+    .playlistIndexBadge {
+      grid-column: 1;
+    }
+
+    .videoDuration {
+      grid-column: 3;
+    }
   }
 
   :deep(.ft-list-item.list .thumbnailImage),
@@ -175,6 +200,78 @@
   :deep(.ft-list-item.list .thumbnailImage) {
     aspect-ratio: 16 / 9;
     object-fit: cover;
+  }
+
+  // The index badge takes the top-left corner, as in the watch page playlist.
+  :deep(.ft-list-item.list .videoThumbnail .videoWatched) {
+    grid-column: 2 / -1;
+    place-self: start end;
+    min-inline-size: 0;
+    box-sizing: border-box;
+    max-inline-size: calc(100% - 4px);
+    font-size: 12px;
+    margin-block-start: 4px;
+    margin-inline-end: 4px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  // As in the watch page playlist, the label sits beside the duration so it
+  // fits inside the smallest thumbnails.
+  :deep(.ft-list-item.list .videoThumbnail .sponsorBlockVideoLabel) {
+    grid-column: 1 / 3;
+    place-self: end start;
+    box-sizing: border-box;
+    min-inline-size: 0;
+    max-inline-size: calc(100% - 8px);
+    margin: 4px;
+    // Clip rather than cover the duration when even the icon does not fit.
+    overflow: hidden;
+
+    > span:last-child {
+      min-inline-size: 0;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    > .ft-icon {
+      flex-shrink: 0;
+    }
+  }
+
+  // Without hover, the external player button stays visible in the bottom-left
+  // corner, so it shares the badge's column and the label follows it.
+  @media not (hover: hover) {
+    :deep(.ft-list-item.list .videoThumbnail .externalPlayerIcon) {
+      grid-column: 1;
+    }
+
+    :deep(.ft-list-item.list .videoThumbnail:has(.externalPlayerIcon) .sponsorBlockVideoLabel) {
+      grid-column: 2;
+    }
+
+    // Tighten the icon-only label so it still fits beside an hours-long duration.
+    @container playlist-thumbnail (width < 140px) {
+      :deep(.ft-list-item.list .videoThumbnail:has(.externalPlayerIcon) .sponsorBlockVideoLabel) {
+        margin-inline: 2px;
+        padding-inline: 3px;
+      }
+    }
+  }
+
+  // Below this width only a few letters fit beside the duration, so keep only the
+  // icon and leave the text to screen readers.
+  @container playlist-thumbnail (width < 140px) {
+    :deep(.ft-list-item.list .sponsorBlockVideoLabel > span:last-child) {
+      position: absolute;
+      overflow: hidden;
+      clip-path: inset(50%);
+      block-size: 1px;
+      inline-size: 1px;
+      white-space: nowrap;
+    }
   }
 
   // Small thumbnails fit two rows of desktop actions without changing their size.
@@ -203,10 +300,27 @@
       }
 
       // Show controls in place of passive badges during interaction.
+      .playlistIndexBadge,
       .videoWatched,
       .sponsorBlockVideoLabel,
       .videoDuration {
         visibility: hidden;
+      }
+    }
+  }
+
+  // The external player button also appears on hover, so it replaces the labels
+  // even when it is the only thumbnail action.
+  @media (hover: hover) {
+    :deep(.ft-list-item.list:has(.externalPlayerIcon)) {
+      &:hover,
+      &:has(:focus-visible) {
+        .playlistIndexBadge,
+        .videoWatched,
+        .sponsorBlockVideoLabel,
+        .videoDuration {
+          visibility: hidden;
+        }
       }
     }
   }

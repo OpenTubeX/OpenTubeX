@@ -54,7 +54,6 @@
 
 .draggable:not(.draggable:only-child) .grabBar {
   display: revert;
-  order: 2;
 }
 
 .videoIndexIcon {
