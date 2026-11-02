@@ -373,7 +373,8 @@ if (windowed) {
       if (isVisible && shell.value && !windowItem) startWindowing(shell.value)
     }, { flush: 'post' })
   }
-  watch(() => [props.data, props.layout, props.appearance], () => windowItem?.refresh(), { flush: 'post' })
+  // Two-line titles change row heights without a resize that remeasures shells.
+  watch(() => [props.data, props.layout, props.appearance, store.getters.getLimitTitlesToTwoLines], () => windowItem?.refresh(), { flush: 'post' })
   onBeforeUnmount(() => windowItem?.dispose())
 }
 

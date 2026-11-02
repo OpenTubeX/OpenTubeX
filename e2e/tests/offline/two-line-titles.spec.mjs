@@ -254,3 +254,119 @@ test.describe('enabling two-line titles while scrolled to the end', { tag: '@sca
     await expectValidScrollRange(panel, ':scope > .playlistItem')
   })
 })
+
+const MANY_VIDEOS = Array.from({ length: 50 }, (_, index) => ({
+  ...PLAYLIST_VIDEOS[1],
+  videoId: index === 0 ? 'jNQXAC9IVRw' : `windowvid${String(index).padStart(2, '0')}`,
+  title: `Video ${String(index + 1).padStart(2, '0')}: ${LONG_TITLE}`,
+  timeAdded: Date.now() + index,
+  playlistItemId: `window-item-${index}`
+}))
+
+/**
+ * Scrolls to the end in steps, so the rows on the way mount and are then
+ * replaced by measured shells.
+ * @param {import('@playwright/test').Locator} scroller
+ */
+async function scrollThrough(scroller) {
+  await scroller.evaluate(async element => {
+    const scrollElement = element === document.body ? document.documentElement : element
+    const viewport = element === document.body ? window.innerHeight : element.clientHeight
+    while (scrollElement.scrollTop < scrollElement.scrollHeight - scrollElement.clientHeight - 1) {
+      scrollElement.scrollTop += viewport / 2
+      for (let frame = 0; frame < 3; frame++) await new Promise(resolve => requestAnimationFrame(resolve))
+    }
+  })
+}
+
+/**
+ * Counts rows replaced by shells that keep their measured height.
+ * @param {import('@playwright/test').Locator} container
+ * @param {string} rowSelector
+ */
+function shellCount(container, rowSelector) {
+  return container.evaluate((element, rowSelector) =>
+    [...element.querySelectorAll(rowSelector)].filter(row => row.style.blockSize !== '').length, rowSelector)
+}
+
+/**
+ * Rows scrolled far away are replaced by shells that keep their measured
+ * height. After the titles change height, no shell may keep the old height.
+ * @param {import('@playwright/test').Locator} container
+ * @param {string} rowSelector
+ */
+async function expectShellsMatchRows(container, rowSelector) {
+  await expect.poll(() => container.evaluate((element, rowSelector) => {
+    const rows = [...element.querySelectorAll(rowSelector)]
+    const rowHeight = Math.max(...rows.filter(row => row.querySelector('.ft-list-video')).map(row => row.getBoundingClientRect().height))
+    return rows.filter(row => row.style.blockSize !== '')
+      .filter(shell => shell.getBoundingClientRect().height > rowHeight + 1).length
+  }, rowSelector)).toBe(0)
+}
+
+/**
+ * The rows that were in view at the end stay in view instead of jumping away.
+ * @param {import('@playwright/test').Locator} scroller
+ */
+async function expectAtEnd(scroller) {
+  await expect.poll(() => scroller.evaluate(element => {
+    const scrollElement = element === document.body ? document.documentElement : element
+    return (scrollElement.scrollHeight - scrollElement.clientHeight - scrollElement.scrollTop) * devicePixelRatio
+  })).toBeLessThanOrEqual(2)
+}
+
+test.describe('toggling two-line titles with windowed rows', { tag: '@scale' }, () => {
+  test.describe.configure({ timeout: 120_000 })
+  test.use({
+    seed: {
+      settings: {
+        currentLocale: 'en-US',
+        limitTitlesToTwoLines: false,
+        listType: 'list',
+        animationSpeed: 0,
+        userPlaylistSortOrder: 'custom',
+        videoPlaybackEngine: 'built-in',
+        ytDlpPlaybackEngineDefaultMigration: true
+      },
+      history: MANY_VIDEOS.slice(1).map((video, index) => historyEntry(video.videoId, video.title, Date.now() - index * 1000)),
+      playlists: [{
+        _id: 'window-playlist',
+        playlistName: 'Windowed title playlist',
+        protected: false,
+        description: '',
+        videos: MANY_VIDEOS,
+        createdAt: Date.now(),
+        lastUpdatedAt: Date.now()
+      }]
+    }
+  })
+
+  test('remeasures rows that were scrolled out of the page and the playlist panel', async ({ app, page }) => {
+    const enable = value => page.evaluate(value => window.$store.dispatch('updateLimitTitlesToTwoLines', value), value)
+
+    await goTo(page, 'history')
+    await expect(page.getByRole('heading', { name: MANY_VIDEOS[1].title, exact: true })).toBeVisible()
+    const body = page.locator('body')
+    await scrollThrough(body)
+    await expect.poll(() => shellCount(body, '[data-feed-item-key]')).toBeGreaterThan(0)
+    await enable(true)
+    await expectShellsMatchRows(body, '[data-feed-item-key]')
+    await expectValidScrollRange(body, '[data-feed-item-key]')
+    await expectAtEnd(body)
+
+    await enable(false)
+    await mockPlayableWatchPage(app, page)
+    await goTo(page, 'userplaylists')
+    await page.getByText('Windowed title playlist', { exact: true }).click()
+    await page.getByRole('heading', { name: MANY_VIDEOS[0].title, exact: true }).click()
+    await waitForPlayback(page)
+    const panel = page.locator('.watchVideoPlaylist .playlistItemsWrapper').filter({ visible: true })
+    await expect(panel.locator(':scope > .playlistItem')).toHaveCount(MANY_VIDEOS.length)
+    await scrollThrough(panel)
+    await expect.poll(() => shellCount(panel, ':scope > .playlistItem')).toBeGreaterThan(0)
+    await enable(true)
+    await expectShellsMatchRows(panel, ':scope > .playlistItem')
+    await expectValidScrollRange(panel, ':scope > .playlistItem')
+    await expectAtEnd(panel)
+  })
+})
