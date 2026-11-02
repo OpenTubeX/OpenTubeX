@@ -576,6 +576,57 @@ test.describe('with followed feeds', () => {
     await expect(items.nth(1).locator('.watchedProgressBar')).toBeVisible()
     await expect(items.nth(1)).not.toHaveClass(/watched/)
   })
+
+  test('marks items as watched, copies their link, and downloads them from the context menu', async ({ app, page }) => {
+    const newestUrl = 'https://www.twitch.tv/videos/3'
+    const olderUrl = 'https://www.twitch.tv/videos/1'
+    await mockFeeds(page)
+    await page.evaluate((url) => {
+      localStorage.setItem(`externalMediaPosition:${url}`, JSON.stringify({ seconds: 30, duration: 120, updatedAt: Date.now() }))
+    }, olderUrl)
+    await goTo(page, 'subscriptions')
+    await page.locator('[data-rss-feeds-tab]').click()
+    const items = page.locator('#subscriptionsPanel .ft-list-item')
+    const [newest, older] = [items.first(), items.nth(1)]
+    await expect(items).toHaveCount(2)
+    const menu = page.locator('.contextMenu')
+    const position = url => page.evaluate(url => JSON.parse(localStorage.getItem(`externalMediaPosition:${url}`)), url)
+    const openMenu = item => item.locator('.title').click({ button: 'right' })
+
+    // Without a saved position, marking it as watched already starts it over next time
+    await openMenu(newest)
+    await expect(menu.getByRole('menuitem', { name: 'Mark As Fully Watched' })).toHaveCount(0)
+    await menu.getByRole('menuitem', { name: 'Mark As Watched' }).click()
+    await expect(newest).toHaveClass(/watched/)
+    await expect(newest.locator('.videoWatched')).toHaveText('Watched')
+    expect(await position(newestUrl)).toEqual({ seconds: 0, watched: true, updatedAt: expect.any(Number) })
+
+    await openMenu(newest)
+    await menu.getByRole('menuitem', { name: 'Unmark As Watched' }).click()
+    await expect(newest).not.toHaveClass(/watched/)
+    expect(await position(newestUrl)).toBeNull()
+
+    // Marking it as watched keeps where it resumes, marking it as fully watched starts it over
+    await openMenu(older)
+    await menu.getByRole('menuitem', { name: 'Mark As Watched' }).click()
+    await expect(older).toHaveClass(/watched/)
+    expect(await position(olderUrl)).toEqual({ seconds: 30, duration: 120, watched: true, updatedAt: expect.any(Number) })
+    await openMenu(older)
+    await menu.getByRole('menuitem', { name: 'Mark As Fully Watched' }).click()
+    await expect.poll(() => position(olderUrl)).toEqual({ seconds: 0, watched: true, updatedAt: expect.any(Number) })
+    await expect(older).toHaveClass(/watched/)
+
+    await openMenu(older)
+    await menu.getByRole('menuitem', { name: 'Copy Link' }).click()
+    await expect.poll(() => app.electronApp.evaluate(({ clipboard }) => clipboard.readText())).toBe(olderUrl)
+
+    // The options button opens the same menu
+    await page.evaluate(() => window.$store.dispatch('updateShowVideoMenuButton', true))
+    await older.hover()
+    await older.getByRole('button', { name: 'More Options' }).click()
+    await menu.getByRole('menuitem', { name: 'Download Video' }).click()
+    await expect(page.getByRole('dialog', { name: 'Older VOD' })).toBeVisible()
+  })
 })
 
 test.describe('with many followed feeds', () => {

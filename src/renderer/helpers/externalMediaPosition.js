@@ -59,7 +59,8 @@ export function getExternalMediaPosition(url, duration) {
 /**
  * How far the media was watched, for progress bars in lists.
  * @param {string} url
- * @returns {{ watched: boolean, progress: number } | null} progress from 0 to 1
+ * @returns {{ watched: boolean, progress: number, seconds: number } | null} progress from 0 to 1,
+ * seconds where playback resumes
  */
 export function getExternalMediaProgress(url) {
   // eslint-disable-next-line no-unused-expressions -- Tracks saved positions
@@ -67,33 +68,60 @@ export function getExternalMediaProgress(url) {
   const key = positionKey(url)
   const position = key === null ? null : readPosition(key)
   if (position === null) return null
-  if (position.watched === true) return { watched: true, progress: 1 }
-  return position.duration > 0 ? { watched: false, progress: Math.min(position.seconds / position.duration, 1) } : null
+  const { seconds } = position
+  if (position.watched === true) return { watched: true, progress: 1, seconds }
+  return { watched: false, progress: position.duration > 0 ? Math.min(seconds / position.duration, 1) : 0, seconds }
+}
+
+/**
+ * @param {string} key
+ * @param {object | null} position removes the saved position when null
+ */
+function writePosition(key, position) {
+  try {
+    if (position === null) {
+      localStorage.removeItem(key)
+    } else {
+      localStorage.setItem(key, JSON.stringify({ ...position, updatedAt: Date.now() }))
+    }
+    externalMediaPositionVersion.value++
+  } catch (error) {
+    console.error('Failed to save external media position:', error)
+  }
 }
 
 export function saveExternalMediaPosition(url, seconds, duration) {
   const key = positionKey(url)
   if (key === null || !Number.isFinite(seconds) || seconds < 0) return
   const hasDuration = Number.isFinite(duration) && duration > 0
-  try {
-    // A finished video restarts, but lists still show it as watched, also while it's replayed
-    const watched = readPosition(key)?.watched === true
-    if (hasDuration && seconds >= duration - 2) {
-      localStorage.setItem(key, JSON.stringify({ seconds: 0, watched: true, updatedAt: Date.now() }))
-    } else if (seconds > 0 || watched) {
-      localStorage.setItem(key, JSON.stringify({
-        seconds,
-        ...(hasDuration ? { duration } : {}),
-        ...(watched ? { watched } : {}),
-        updatedAt: Date.now()
-      }))
-    } else {
-      localStorage.removeItem(key)
-    }
-    externalMediaPositionVersion.value++
-  } catch (error) {
-    console.error('Failed to save external media position:', error)
+  // A finished video restarts, but lists still show it as watched, also while it's replayed
+  const watched = readPosition(key)?.watched === true
+  if (hasDuration && seconds >= duration - 2) {
+    writePosition(key, { seconds: 0, watched: true })
+  } else if (seconds > 0 || watched) {
+    writePosition(key, { seconds, ...(hasDuration ? { duration } : {}), ...(watched ? { watched } : {}) })
+  } else {
+    writePosition(key, null)
   }
+}
+
+/**
+ * @param {string} url
+ * @param {boolean} [fully] also restarts playback from the beginning, as if it had played to the end
+ */
+export function markExternalMediaWatched(url, fully = false) {
+  const key = positionKey(url)
+  if (key === null) return
+  const { updatedAt, ...position } = (fully ? null : readPosition(key)) ?? { seconds: 0 }
+  writePosition(key, { ...position, watched: true })
+}
+
+/** Keeps where the media was left, so it still resumes there. */
+export function unmarkExternalMediaWatched(url) {
+  const key = positionKey(url)
+  if (key === null) return
+  const { updatedAt, watched, ...position } = readPosition(key) ?? { seconds: 0 }
+  writePosition(key, position.seconds > 0 ? position : null)
 }
 
 export function removeExternalMediaPositionsBefore(cutoff) {

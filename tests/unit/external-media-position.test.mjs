@@ -4,8 +4,10 @@ import {
   clearExternalMediaPositions,
   getExternalMediaPosition,
   getExternalMediaProgress,
+  markExternalMediaWatched,
   removeExternalMediaPositionsBefore,
   saveExternalMediaPosition,
+  unmarkExternalMediaWatched,
 } from '../../src/renderer/helpers/externalMediaPosition.js'
 
 const url = 'https://videos.example.test/episode/1'
@@ -61,7 +63,7 @@ test('restarts completed media and media sought back to the beginning', () => {
     saveExternalMediaPosition(url, 12, 30)
     saveExternalMediaPosition(url, seconds, 30)
     assert.equal(getExternalMediaPosition(url, 30), null)
-    assert.deepEqual(getExternalMediaProgress(url), seconds === 0 ? null : { watched: true, progress: 1 })
+    assert.deepEqual(getExternalMediaProgress(url), seconds === 0 ? null : { watched: true, progress: 1, seconds: 0 })
     assert.equal(storage.size, seconds === 0 ? 0 : 1)
   }
 })
@@ -70,22 +72,44 @@ test('keeps finished media watched while it is replayed', () => {
   saveExternalMediaPosition(url, 30, 30)
   saveExternalMediaPosition(url, 12, 30)
   assert.equal(getExternalMediaPosition(url, 30), 12)
-  assert.deepEqual(getExternalMediaProgress(url), { watched: true, progress: 1 })
+  assert.deepEqual(getExternalMediaProgress(url), { watched: true, progress: 1, seconds: 12 })
   saveExternalMediaPosition(url, 0, 30)
   assert.equal(getExternalMediaPosition(url, 30), null)
-  assert.deepEqual(getExternalMediaProgress(url), { watched: true, progress: 1 })
+  assert.deepEqual(getExternalMediaProgress(url), { watched: true, progress: 1, seconds: 0 })
 })
 
 test('reports the progress of partly watched media', () => {
   saveExternalMediaPosition(url, 12, 30)
-  assert.deepEqual(getExternalMediaProgress(url), { watched: false, progress: 0.4 })
+  assert.deepEqual(getExternalMediaProgress(url), { watched: false, progress: 0.4, seconds: 12 })
   // Live streams and positions saved before durations were stored have no progress
   saveExternalMediaPosition(url, 12, Infinity)
-  assert.equal(getExternalMediaProgress(url), null)
+  assert.deepEqual(getExternalMediaProgress(url), { watched: false, progress: 0, seconds: 12 })
   assert.equal(getExternalMediaPosition(url, null), 12)
   storage.set(`externalMediaPosition:${url}`, '{"seconds":12,"updatedAt":1000}')
-  assert.equal(getExternalMediaProgress(url), null)
+  assert.deepEqual(getExternalMediaProgress(url), { watched: false, progress: 0, seconds: 12 })
   assert.equal(getExternalMediaProgress('invalid'), null)
+})
+
+test('marks media as watched where it resumes, or as fully watched from the beginning', () => {
+  markExternalMediaWatched(url)
+  assert.deepEqual(getExternalMediaProgress(url), { watched: true, progress: 1, seconds: 0 })
+  unmarkExternalMediaWatched(url)
+  assert.equal(storage.size, 0)
+
+  saveExternalMediaPosition(url, 12, 30)
+  markExternalMediaWatched(url)
+  assert.equal(getExternalMediaPosition(url, 30), 12)
+  assert.deepEqual(getExternalMediaProgress(url), { watched: true, progress: 1, seconds: 12 })
+  unmarkExternalMediaWatched(url)
+  assert.deepEqual(getExternalMediaProgress(url), { watched: false, progress: 0.4, seconds: 12 })
+
+  markExternalMediaWatched(url, true)
+  assert.equal(getExternalMediaPosition(url, 30), null)
+  assert.deepEqual(getExternalMediaProgress(url), { watched: true, progress: 1, seconds: 0 })
+
+  markExternalMediaWatched('invalid')
+  unmarkExternalMediaWatched('invalid')
+  assert.equal(storage.size, 1)
 })
 
 test('ignores invalid positions and unsupported URLs', () => {
