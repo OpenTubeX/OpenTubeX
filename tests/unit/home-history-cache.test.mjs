@@ -153,7 +153,11 @@ test('loading history with retention deletes only when the loaded entries contai
   const calls = []
   const store = fixture({
     find: async () => records,
-    deleteOlderThan: async cutoff => { calls.push(cutoff); return ['expired'] },
+    deleteOlderThan: async cutoff => {
+      calls.push(cutoff)
+      records = records.filter(record => record.videoId !== 'expired')
+      return ['expired']
+    },
   }, { getHistoryRetentionDays: () => 30 })
 
   await store.dispatch('grabHistory')
@@ -164,4 +168,22 @@ test('loading history with retention deletes only when the loaded entries contai
   assert.deepEqual(calls, [70 * day])
   assert.deepEqual(toRaw(store.state.history.historyCacheSorted).map(entry => entry.videoId), ['recent', 'playing'])
   assert.deepEqual(Object.keys(store.state.history.historyCacheById), ['recent', 'playing'])
+})
+
+test('loading history drops an expired entry that another window deleted meanwhile', async t => {
+  const day = 24 * 60 * 60 * 1000
+  t.mock.method(Date, 'now', () => 100 * day)
+  let records = [{ ...video('recent'), timeWatched: 99 * day }, { ...video('expired'), timeWatched: 60 * day }]
+  const store = fixture({
+    find: async () => records,
+    // The other window's cleanup ran between this window's read and its own
+    deleteOlderThan: async () => {
+      records = records.filter(record => record.videoId !== 'expired')
+      return []
+    },
+  }, { getHistoryRetentionDays: () => 30 })
+
+  await store.dispatch('grabHistory')
+  assert.deepEqual(toRaw(store.state.history.historyCacheSorted).map(entry => entry.videoId), ['recent'])
+  assert.deepEqual(Object.keys(store.state.history.historyCacheById), ['recent'])
 })
