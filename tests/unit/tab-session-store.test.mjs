@@ -1,62 +1,68 @@
 import assert from 'node:assert/strict'
+import { readFile } from 'node:fs/promises'
 import { registerHooks } from 'node:module'
 import test from 'node:test'
+import vm from 'node:vm'
+import { createDesktopDatastore } from '../../src/datastores/sqliteNode.js'
+
+const source = await readFile(new URL('../../src/datastores/handlers/base.js', import.meta.url), 'utf8')
+const db = { tabSession: createDesktopDatastore(':memory:') }
+globalThis.tabSessionHandlers = vm.runInNewContext(
+  source.slice(source.indexOf('class TabSession {'), source.indexOf('\nlet profilesLoadPromise')) + '\nTabSession',
+  { db }
+)
 
 const hooks = registerHooks({
   resolve(specifier, context, nextResolve) {
     if (specifier.endsWith('/datastores/handlers/base.js')) {
-      return { shortCircuit: true, url: 'data:text/javascript,' + encodeURIComponent(`
-        export const tabSession = {
-          docs: new Map(),
-          failingIds: new Set(),
-          async loadAll() {
-            return Array.from(this.docs, ([sessionId, value]) => ({ sessionId, ...value }))
-          },
-          async save(id, data) {
-            if (this.failingIds.has(id)) throw new Error('disk full')
-            this.docs.set(id, structuredClone(data))
-          },
-          async clear(id) { this.docs.delete(id) },
-          async clearAll() { this.docs.clear() }
-        };
-      `) }
+      return { shortCircuit: true, url: 'data:text/javascript,export const tabSession = globalThis.tabSessionHandlers' }
     }
     return nextResolve(specifier, context)
   }
 })
-const { tabSession } = await import('../../src/datastores/handlers/base.js')
-const { replaceAllTabSessions } = await import('../../src/main/tabs/TabSessionStore.js')
+const { loadAllTabSessions, replaceAllTabSessions } = await import('../../src/main/tabs/TabSessionStore.js')
 hooks.deregister()
+test.after(() => db.tabSession.driver.close())
 
 const tabs = url => [{ id: 'tab', url, title: url }]
 
-function reset(t, failingIds = []) {
-  tabSession.docs = new Map([
-    ['old-a', { activeTabId: 'tab', tabs: tabs('https://example.com/a') }],
-    ['old-b', { activeTabId: 'tab', tabs: tabs('https://example.com/b') }],
+async function reset(t) {
+  await db.tabSession.removeAsync({}, { multi: true })
+  await db.tabSession.insertAsync([
+    { _id: 'old-a', value: { activeTabId: 'tab', tabs: tabs('https://example.com/a') } },
+    { _id: 'old-b', value: { activeTabId: 'tab', tabs: tabs('https://example.com/b') } },
   ])
-  tabSession.failingIds = new Set(failingIds)
   t.mock.method(console, 'error', () => {})
 }
 
+const savedUrls = async () => Object.fromEntries((await loadAllTabSessions())
+  .map(session => [session.sessionId, session.tabs[0].url]))
+
 test('replaceAllTabSessions saves the new sessions and drops sessions that are not part of them', async (t) => {
-  reset(t)
+  await reset(t)
 
   assert.equal(await replaceAllTabSessions([
     { sessionId: 'old-a', activeTabId: 'tab', tabs: tabs('https://example.com/synced-a') },
     { sessionId: 'new', activeTabId: 'tab', tabs: tabs('https://example.com/new') },
   ]), true)
 
-  assert.deepEqual(Array.from(tabSession.docs.keys()).sort(), ['new', 'old-a'])
-  assert.equal(tabSession.docs.get('old-a').tabs[0].url, 'https://example.com/synced-a')
+  assert.deepEqual(await savedUrls(), {
+    new: 'https://example.com/new',
+    'old-a': 'https://example.com/synced-a',
+  })
 })
 
-test('replaceAllTabSessions reports a failed write and keeps the saved sessions', async (t) => {
-  reset(t, ['new'])
+test('replaceAllTabSessions reports a failed write and keeps every saved session', async (t) => {
+  await reset(t)
 
   assert.equal(await replaceAllTabSessions([
-    { sessionId: 'new', activeTabId: 'tab', tabs: tabs('https://example.com/new') },
+    { sessionId: 'old-a', activeTabId: 'tab', tabs: tabs('https://example.com/synced-a') },
+    // The datastore rejects field names with a dot
+    { sessionId: 'new', activeTabId: 'tab', tabs: [{ ...tabs('https://example.com/new')[0], 'invalid.field': true }] },
   ]), false)
 
-  assert.deepEqual(Array.from(tabSession.docs.keys()).sort(), ['old-a', 'old-b'])
+  assert.deepEqual(await savedUrls(), {
+    'old-a': 'https://example.com/a',
+    'old-b': 'https://example.com/b',
+  })
 })

@@ -1391,6 +1391,11 @@ class TabSession {
     return db.tabSession.removeAsync({ _id: sessionId })
   }
 
+  /** Replaces every session in one transaction, so a failed write keeps the saved ones. */
+  static replaceAll(sessions) {
+    return db.tabSession.replaceAllAsync(sessions.map(({ sessionId, ...value }) => ({ _id: sessionId, value })))
+  }
+
   static async clearAll() {
     return db.tabSession.removeAsync({}, { multi: true })
   }
