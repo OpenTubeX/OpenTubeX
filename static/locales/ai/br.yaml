@@ -365,6 +365,7 @@ Settings:
       Network: "ar rouedad"
       Disk: "ar bladenn"
   General Settings:
+    Limit Titles to Two Lines: "Bevenniñ an titloù da zaou linenn"
     Close Window With Last Tab: 'Serriñ ar prenestr pa vez serret an ivinell ziwezhañ'
     Preferred Video Codec: Kodek video gwellañ karet
     Always Use Backup Media Server: "Implijout atav ar servijer media a-gein"
@@ -2044,6 +2045,7 @@ Description:
   Music: Sonerezh
 Tooltips:
   General Settings:
+    Limit Titles to Two Lines: "Berraat a ra titloù ar videoioù hag al listennoù lenn er rolloù hag er c'hrilhoù da zaou linenn gant ur poentoù kendalc'h, evit kartennoù unvanoc'h. Lakait al logodenn war un titl evit e welet en e bezh."
     Close Window With Last Tab: 'Pa vez lazhet, serriñ an ivinell ziwezhañ a zigor un ivinell nevez e-lec’h, ha chom a ra digor ar prenestr betek ma vo serret ganeoc’h.'
     Preferred Video Codec: |
       Ar mod emgefreek a ro lañs d'ar c'hodekoù a c'hall bezañ digodet gant periant ho trevnad.

@@ -368,6 +368,7 @@ Settings:
       Network: nätverk
       Disk: diskutrymme
   General Settings:
+    Limit Titles to Two Lines: "Begränsa titlar till två rader"
     Close Window With Last Tab: 'Stäng fönstret när den sista fliken stängs'
     Preferred Video Codec: Föredragen videokodek
     Always Use Backup Media Server: "Använd alltid reservmedieservern"
@@ -2060,6 +2061,7 @@ Description:
   Music: Musik
 Tooltips:
   General Settings:
+    Limit Titles to Two Lines: "Kortar video- och spellisttitlar i listor och rutnät till två rader med en ellips, för mer enhetliga kort. Håll pekaren över en titel för att se hela."
     Close Window With Last Tab: 'När detta är av öppnar stängning av den sista fliken en ny flik i stället, så att fönstret förblir öppet tills du stänger det.'
     Preferred Video Codec: |
       Automatiskt föredrar kodekar som din enhet kan avkoda med hårdvara.

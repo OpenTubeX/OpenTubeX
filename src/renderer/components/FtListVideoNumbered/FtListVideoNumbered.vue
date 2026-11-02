@@ -299,6 +299,8 @@ if (windowed) {
         !!element.querySelector('[aria-expanded="true"], [role="dialog"]'),
     })
   }, { flush: 'post' })
+  // Two-line titles change row heights without a resize that remeasures shells.
+  watch(() => store.getters.getLimitTitlesToTwoLines, () => windowItem?.remeasure(), { flush: 'post' })
   onBeforeUnmount(() => windowItem?.dispose())
 }
 
@@ -316,6 +318,19 @@ async function onFirstVisible() {
     : null
   const aboveViewport = placeholderBounds != null &&
     placeholderBounds.bottom <= scroller.getBoundingClientRect().top
+  // Rows that mount together, such as after a title setting change, share one
+  // adjustment from the offset before any of them grew or shrank. Adding each
+  // change to the current offset would count a shrink twice once the browser
+  // has already clamped the offset to the shorter range.
+  let batch = null
+  if (aboveViewport) {
+    batch = mountBatches.get(scroller)
+    if (!batch) {
+      batch = { scrollTop: scroller.scrollTop, growth: 0, pending: 0 }
+      mountBatches.set(scroller, batch)
+    }
+    batch.pending++
+  }
 
   visible.value = true
 
@@ -324,10 +339,13 @@ async function onFirstVisible() {
     stopWatchingInitialVisibleState = null
   }
 
-  if (aboveViewport) {
+  if (batch) {
     await nextTick()
-    const growth = element.getBoundingClientRect().height - placeholderBounds.height
-    if (growth !== 0) restoreOverlayScrollTop(scroller, scroller.scrollTop + growth)
+    batch.growth += element.getBoundingClientRect().height - placeholderBounds.height
+    if (--batch.pending === 0) {
+      mountBatches.delete(scroller)
+      if (batch.growth !== 0) restoreOverlayScrollTop(scroller, batch.scrollTop + batch.growth)
+    }
   }
 }
 
@@ -389,6 +407,12 @@ const videoData = {
 function removeFromPlaylist(videoId, playlistItemId) {
   emit('remove-from-playlist', videoId, playlistItemId)
 }
+</script>
+
+<script>
+// Shared by every row, so rows that mount together adjust their list once.
+/** @type {WeakMap<HTMLElement, { scrollTop: number, growth: number, pending: number }>} */
+const mountBatches = new WeakMap()
 </script>
 
 <style scoped src="./FtListVideoNumbered.css" />

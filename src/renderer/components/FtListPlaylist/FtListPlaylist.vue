@@ -56,6 +56,7 @@
       <RouterLink
         class="title"
         :to="playlistPageLinkTo"
+        :title="store.getters.getLimitTitlesToTwoLines ? playlistMetadata.title : null"
       >
         <h3
           class="h3Title"

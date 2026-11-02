@@ -370,6 +370,7 @@ Settings:
       Network: רשת
       Disk: כונן
   General Settings:
+    Limit Titles to Two Lines: "הגבלת כותרות לשתי שורות"
     Close Window With Last Tab: 'סגירת החלון בעת סגירת הלשונית האחרונה'
     Preferred Video Codec: מקודד וידאו מועדף
     Always Use Backup Media Server: "תמיד להשתמש בשרת המדיה החלופי"
@@ -2088,6 +2089,7 @@ Description:
   Music: מוזיקה
 Tooltips:
   General Settings:
+    Limit Titles to Two Lines: "מקצר כותרות של סרטונים ורשימות השמעה ברשימות וברשתות לשתי שורות עם שלוש נקודות, לכרטיסים אחידים יותר. העבירו את הסמן מעל כותרת כדי לראות אותה במלואה."
     Close Window With Last Tab: 'כשהאפשרות כבויה, סגירת הלשונית האחרונה פותחת במקום זאת לשונית חדשה, כך שהחלון נשאר פתוח עד שתסגרו אותו.'
     Preferred Video Codec: |
       המצב האוטומטי מעדיף מקודדים שהמכשיר שלך יכול לפענח בחומרה.

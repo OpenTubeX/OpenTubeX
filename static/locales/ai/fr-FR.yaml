@@ -365,6 +365,7 @@ Settings:
       Network: le réseau
       Disk: le disque
   General Settings:
+    Limit Titles to Two Lines: "Limiter les titres à deux lignes"
     Close Window With Last Tab: 'Fermer la fenêtre à la fermeture du dernier onglet'
     Preferred Video Codec: Codec vidéo préféré
     Always Use Backup Media Server: "Toujours utiliser le serveur multimédia de secours"
@@ -2036,6 +2037,7 @@ Description:
   Music: Musique
 Tooltips:
   General Settings:
+    Limit Titles to Two Lines: "Raccourcit les titres des vidéos et des playlists dans les listes et les grilles à deux lignes avec des points de suspension, pour des cartes plus uniformes. Survolez un titre pour le voir en entier."
     Close Window With Last Tab: 'Si désactivé, fermer le dernier onglet en ouvre un nouveau à la place, et la fenêtre reste ouverte jusqu’à ce que vous la fermiez.'
     Preferred Video Codec: |
       Le mode automatique privilégie les codecs que votre appareil peut décoder matériellement.

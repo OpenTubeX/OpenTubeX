@@ -367,6 +367,7 @@ Settings:
       Network: şəbəkə
       Disk: disk
   General Settings:
+    Limit Titles to Two Lines: "Başlıqları iki sətirlə məhdudlaşdır"
     Close Window With Last Tab: 'Son tab bağlananda pəncərəni bağla'
     Preferred Video Codec: Üstünlük verilən video kodeki
     Always Use Backup Media Server: "Həmişə ehtiyat media serverindən istifadə et"
@@ -2048,6 +2049,7 @@ Description:
   Music: Musiqi
 Tooltips:
   General Settings:
+    Limit Titles to Two Lines: "Siyahı və şəbəkələrdəki video və pleylist başlıqlarını üç nöqtə ilə iki sətrə qədər qısaldır ki, kartlar daha vahid görünsün. Başlığın tam mətnini görmək üçün kursoru onun üzərinə gətirin."
     Close Window With Last Tab: 'Söndürüldükdə son tabı bağlamaq əvəzinə yeni tab açır, beləliklə pəncərə siz onu bağlayana qədər açıq qalır.'
     Preferred Video Codec: |
       Avtomatik rejim cihazınızın aparat səviyyəsində deşifrə edə bildiyi kodekləri üstün tutur.

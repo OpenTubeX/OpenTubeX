@@ -30,6 +30,7 @@ const GENERAL_EVERYDAY_KEYS = new Set([
 const GENERAL_APPEARANCE_KEYS = new Set([
   'Data Saver Thumbnails',
   'Grid Columns',
+  'Limit Titles to Two Lines',
   'Mobile Layout',
   'Navigation',
   'Playlist View Type',

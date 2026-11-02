@@ -389,6 +389,7 @@ Settings:
       Network: شبکه
       Disk: دیسک
   General Settings:
+    Limit Titles to Two Lines: "محدود کردن عنوان‌ها به دو خط"
     Close Window With Last Tab: 'بستن پنجره هنگام بستن آخرین زبانه'
     Preferred Video Codec: کدک ویدیویی ترجیحی
     Always Use Backup Media Server: "همیشه از سرور رسانهٔ پشتیبان استفاده شود"
@@ -2131,6 +2132,7 @@ Description:
   Music: موسیقی
 Tooltips:
   General Settings:
+    Limit Titles to Two Lines: "عنوان ویدیوها و فهرست‌های پخش را در فهرست‌ها و شبکه‌ها با سه‌نقطه به دو خط کوتاه می‌کند تا کارت‌ها یکدست‌تر باشند. برای دیدن عنوان کامل، نشانگر را روی آن نگه دارید."
     Close Window With Last Tab: 'وقتی خاموش باشد، بستن آخرین زبانه به‌جای آن یک زبانهٔ جدید باز می‌کند تا پنجره تا زمانی که آن را ببندید باز بماند.'
     Preferred Video Codec: |
       حالت خودکار کدک‌هایی را ترجیح می‌دهد که دستگاه شما می‌تواند به‌صورت سخت‌افزاری رمزگشایی کند.

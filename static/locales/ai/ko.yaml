@@ -460,6 +460,7 @@ Settings:
       Disk: 디스크
   Return to Settings Menu: 설정 메뉴로 돌아가기
   General Settings:
+    Limit Titles to Two Lines: "제목을 두 줄로 제한"
     Close Window With Last Tab: '마지막 탭을 닫으면 창 닫기'
     Preferred Video Codec: 선호하는 동영상 코덱
     Always Use Backup Media Server: "항상 백업 미디어 서버 사용"
@@ -2421,6 +2422,7 @@ Description:
   Music: 음악
 Tooltips:
   General Settings:
+    Limit Titles to Two Lines: "목록과 그리드의 동영상 및 재생목록 제목을 말줄임표와 함께 두 줄로 줄여 카드를 더 균일하게 보이게 합니다. 제목 위에 마우스를 올리면 전체 제목을 볼 수 있습니다."
     Close Window With Last Tab: '끄면 마지막 탭을 닫을 때 대신 새 탭이 열리므로 창을 직접 닫을 때까지 창이 열려 있습니다.'
     Preferred Video Codec: |
       자동 모드는 기기에서 하드웨어로 디코딩할 수 있는 코덱을 우선합니다.

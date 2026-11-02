@@ -481,6 +481,7 @@ Settings:
       Disk: disko
   Return to Settings Menu: Grįžti į nustatymų meniu
   General Settings:
+    Limit Titles to Two Lines: "Riboti pavadinimus iki dviejų eilučių"
     Close Window With Last Tab: 'Uždaryti langą uždarius paskutinį skirtuką'
     Preferred Video Codec: Pageidaujamas vaizdo kodekas
     Always Use Backup Media Server: "Visada naudoti atsarginį medijos serverį"
@@ -2457,6 +2458,7 @@ Description:
   Music: Muzika
 Tooltips:
   General Settings:
+    Limit Titles to Two Lines: "Sąrašuose ir tinkleliuose sutrumpina vaizdo įrašų ir grojaraščių pavadinimus iki dviejų eilučių su daugtaškiu, kad kortelės būtų vienodesnės. Užveskite žymeklį ant pavadinimo, kad pamatytumėte visą."
     Close Window With Last Tab: 'Išjungus, uždarius paskutinį skirtuką vietoj to atidaromas naujas skirtukas, todėl langas lieka atidarytas, kol jį uždarysite.'
     Preferred Video Codec: |
       Automatinis režimas teikia pirmenybę kodekams, kuriuos jūsų įrenginys gali dekoduoti aparatiškai.

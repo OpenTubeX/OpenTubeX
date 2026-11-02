@@ -365,6 +365,7 @@ Settings:
       Network: hálózat
       Disk: lemez
   General Settings:
+    Limit Titles to Two Lines: "Címek korlátozása két sorra"
     Close Window With Last Tab: 'Ablak bezárása az utolsó lap bezárásakor'
     Preferred Video Codec: Előnyben részesített videokodek
     Always Use Backup Media Server: "Mindig a tartalék médiaszerver használata"
@@ -2036,6 +2037,7 @@ Description:
   Music: Zene
 Tooltips:
   General Settings:
+    Limit Titles to Two Lines: "A listákban és rácsokban két sorra rövidíti a videók és lejátszási listák címét három ponttal, hogy a kártyák egységesebbek legyenek. A teljes címet a kurzort fölé víve láthatja."
     Close Window With Last Tab: 'Kikapcsolva az utolsó lap bezárása helyette új lapot nyit, így az ablak nyitva marad, amíg be nem zárod.'
     Preferred Video Codec: |
       Az automatikus mód azokat a kodekeket részesíti előnyben, amelyeket az eszköz hardveresen tud dekódolni.

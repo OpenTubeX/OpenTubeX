@@ -330,3 +330,11 @@
     grid-template-columns: minmax(0, 1fr);
   }
 }
+
+:root.limitTitlesToTwoLines .externalQueueVideo:not(:focus-visible) .queueVideoTitle {
+  display: -webkit-box;
+  overflow: hidden;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+  line-clamp: 2;
+}

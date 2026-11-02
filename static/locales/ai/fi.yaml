@@ -370,6 +370,7 @@ Settings:
       Network: verkko
       Disk: levytila
   General Settings:
+    Limit Titles to Two Lines: "Rajoita otsikot kahteen riviin"
     Close Window With Last Tab: 'Sulje ikkuna, kun viimeinen välilehti suljetaan'
     Preferred Video Codec: Ensisijainen videokoodekki
     Always Use Backup Media Server: "Käytä aina varamediapalvelinta"
@@ -2086,6 +2087,7 @@ Description:
   Music: Musiikki
 Tooltips:
   General Settings:
+    Limit Titles to Two Lines: "Lyhentää videoiden ja soittolistojen otsikot luetteloissa ja ruudukoissa kahteen riviin kolmella pisteellä, jotta kortit ovat yhtenäisempiä. Näet koko otsikon viemällä osoittimen sen päälle."
     Close Window With Last Tab: 'Kun tämä on pois päältä, viimeisen välilehden sulkeminen avaa sen sijaan uuden välilehden, joten ikkuna pysyy auki, kunnes suljet sen.'
     Preferred Video Codec: |
       Automaattinen tila suosii koodekkeja, joita laitteesi voi purkaa laitteistolla.

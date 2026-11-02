@@ -356,6 +356,7 @@ export function createDefaultSettings({ supportsLocalApi, isElectron }) {
     },
     thumbnailPreference: '',
     thumbnailDataSaver: false,
+    limitTitlesToTwoLines: true,
     showThumbnailPreviews: true,
     showVideoMenuButton: false,
     thumbnailSize: DEFAULT_THUMBNAIL_SIZE,

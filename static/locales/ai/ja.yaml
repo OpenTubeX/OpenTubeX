@@ -365,6 +365,7 @@ Settings:
       Network: ネットワーク
       Disk: ディスク
   General Settings:
+    Limit Titles to Two Lines: "タイトルを2行までにする"
     Close Window With Last Tab: '最後のタブを閉じたときにウィンドウを閉じる'
     Preferred Video Codec: 優先する動画コーデック
     Always Use Backup Media Server: "常にバックアップのメディアサーバーを使用"
@@ -2035,6 +2036,7 @@ Description:
   Music: 音楽
 Tooltips:
   General Settings:
+    Limit Titles to Two Lines: "リストやグリッドの動画と再生リストのタイトルを省略記号付きで2行までに短縮し、カードの見た目をそろえます。タイトルにカーソルを合わせると全文が表示されます。"
     Close Window With Last Tab: 'オフにすると、最後のタブを閉じたときに代わりに新しいタブが開き、ウィンドウを閉じるまで開いたままになります。'
     Preferred Video Codec: |
       自動では、デバイスがハードウェアでデコードできるコーデックを優先します。

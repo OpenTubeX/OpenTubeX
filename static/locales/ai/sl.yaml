@@ -491,6 +491,7 @@ Settings:
       Disk: disk
   Return to Settings Menu: Nazaj v meni z nastavitvami
   General Settings:
+    Limit Titles to Two Lines: "Omeji naslove na dve vrstici"
     Close Window With Last Tab: 'Zapri okno ob zaprtju zadnjega zavihka'
     Preferred Video Codec: Prednostni video kodek
     Always Use Backup Media Server: "Vedno uporabi rezervni predstavnostni strežnik"
@@ -2537,6 +2538,7 @@ Description:
   Music: Glasba
 Tooltips:
   General Settings:
+    Limit Titles to Two Lines: "Skrajša naslove videoposnetkov in seznamov predvajanja na seznamih in v mrežah na dve vrstici s tropičjem, za enotnejše kartice. Premaknite kazalec nad naslov, da ga vidite v celoti."
     Close Window With Last Tab: 'Ko je izklopljeno, zaprtje zadnjega zavihka namesto tega odpre nov zavihek, zato okno ostane odprto, dokler ga ne zaprete.'
     Preferred Video Codec: |
       Samodejni način daje prednost kodekom, ki jih vaša naprava lahko dekodira strojno.

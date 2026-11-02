@@ -368,6 +368,7 @@ Settings:
       Network: mreže
       Disk: diska
   General Settings:
+    Limit Titles to Two Lines: "Ograniči naslove na dva retka"
     Close Window With Last Tab: 'Zatvori prozor pri zatvaranju posljednje kartice'
     Preferred Video Codec: Preferirani videokodek
     Always Use Backup Media Server: "Uvijek koristi pričuvni medijski poslužitelj"
@@ -2067,6 +2068,7 @@ Description:
   Music: Glazba
 Tooltips:
   General Settings:
+    Limit Titles to Two Lines: "Skraćuje naslove videozapisa i popisa za reprodukciju u popisima i rešetkama na dva retka s trotočjem, za ujednačenije kartice. Zadržite pokazivač iznad naslova da biste ga vidjeli u cijelosti."
     Close Window With Last Tab: 'Kada je isključeno, zatvaranje posljednje kartice umjesto toga otvara novu karticu, pa prozor ostaje otvoren dok ga ne zatvorite.'
     Preferred Video Codec: |
       Automatski način daje prednost kodecima koje vaš uređaj može hardverski dekodirati.
