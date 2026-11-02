@@ -1231,7 +1231,7 @@ test('the overflow menu can turn the zoom off again', async ({ app, page, attach
   await watchComponent.dispose()
 })
 
-test('grid menu tiles that open a submenu have a folded corner', async ({ app, page, attachScreenshot }) => {
+test('grid menu tiles that open a submenu have a folded corner', { tag: '@scale' }, async ({ app, page, attachScreenshot }) => {
   await openDemoVideo({ app, page })
 
   const player = page.locator(`${activeTab} .ftVideoPlayer`)
