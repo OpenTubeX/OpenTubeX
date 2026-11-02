@@ -345,6 +345,10 @@ test.describe('new subscriptions feed', () => {
       await page.waitForFunction(({ width, uiScale }) => {
         return Math.abs(window.innerWidth - width * 100 / uiScale) <= 2
       }, { width, uiScale })
+      // The predicate runs in the frame that first sees the new width, before
+      // that frame's resize observers re-measure the single-row header. Wait
+      // for the next frame so measurements see the layout that was painted.
+      await page.evaluate(() => new Promise(resolve => requestAnimationFrame(() => requestAnimationFrame(resolve))))
 
       await expect.poll(() => tabs.evaluateAll(elements => {
         const tops = elements.map(element => element.getBoundingClientRect().top)
