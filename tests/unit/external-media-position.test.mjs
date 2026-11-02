@@ -215,8 +215,11 @@ test('syncing drops positions older than history retention on both sides', async
 
 test('syncing fails without uploading when saved positions cannot be read', async () => {
   saveExternalMediaPosition(url, 12, 30)
-  mock.method(localStorage, 'key', () => { throw new Error('storage unavailable') })
-  const client = syncClient([])
-  await assert.rejects(syncExternalMediaPositions(client, { [url]: 1000 }, 0), /storage unavailable/)
-  assert.equal(client.uploaded, null)
+  for (const method of ['key', 'getItem']) {
+    mock.method(localStorage, method, () => { throw new Error('storage unavailable') })
+    const client = syncClient([])
+    await assert.rejects(syncExternalMediaPositions(client, { [url]: 1000 }, 0), /storage unavailable/, method)
+    assert.equal(client.uploaded, null)
+    mock.restoreAll()
+  }
 })

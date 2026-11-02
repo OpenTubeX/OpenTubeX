@@ -13,12 +13,20 @@ if (typeof window !== 'undefined') {
   })
 }
 
-function readPosition(key) {
+function parsePosition(value) {
   try {
-    const position = JSON.parse(localStorage.getItem(key) ?? 'null')
+    const position = JSON.parse(value ?? 'null')
     return Number.isFinite(position?.seconds) && position.seconds >= 0 && Number.isFinite(position?.updatedAt)
       ? position
       : null
+  } catch {
+    return null
+  }
+}
+
+function readPosition(key) {
+  try {
+    return parsePosition(localStorage.getItem(key))
   } catch {
     return null
   }
@@ -143,7 +151,7 @@ function readSavedPositions() {
     const key = localStorage.key(index)
     if (!key?.startsWith(STORAGE_PREFIX)) continue
     const url = key.slice(STORAGE_PREFIX.length)
-    const position = readPosition(key)
+    const position = parsePosition(localStorage.getItem(key))
     if (position !== null && positionKey(url) === key) positions.set(url, { url, ...toSyncedPosition(position) })
   }
   return positions
