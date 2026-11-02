@@ -109,6 +109,12 @@ const RSSHUB_NAMESPACES = {
     url: 'art.com.tw',
     routes: { '/new': { path: '/new', name: 'New works' } }
   },
+  // Another service for the same site
+  twitchmirror: {
+    name: 'Twitch',
+    url: 'www.twitch.tv',
+    routes: { '/clips/:login': { path: '/clips/:login', name: 'Clips', parameters: { login: 'Twitch username' } } }
+  },
   peertube: {
     name: 'PeerTube',
     routes: { '/channel/:id': { path: '/channel/:id', name: 'Channel', parameters: { id: 'Channel ID' } } }
@@ -278,14 +284,18 @@ test.describe('with followed feeds', () => {
     await instance.press('Enter')
     await expect(dialog.getByRole('alert')).toHaveCount(0)
     await expect(service).toBeEnabled()
-    expect(await page.evaluate(() => window.$store.getters.getRssHubInstance)).toBe('https://rss.example.test')
+    await expect.poll(() => page.evaluate(() => window.$store.getters.getRssHubInstance)).toBe('https://rss.example.test')
 
     await service.fill('tw')
     // Name matches come before matches in the address
     const serviceOptions = dialog.locator('.serviceInput .list li')
-    await expect(serviceOptions).toHaveText(['Twitch (www.twitch.tv)', 'Art (art.com.tw)'])
+    await expect(serviceOptions).toHaveText(['Twitch (www.twitch.tv) · twitch', 'Twitch (www.twitch.tv) · twitchmirror', 'Art (art.com.tw)'])
+    // Services with the same name stay apart
+    await serviceOptions.nth(1).click()
+    await expect(dialog.getByRole('combobox', { name: 'Feed type' })).toContainText('Clips')
+    await service.fill('tw')
     await serviceOptions.first().click()
-    await expect(service).toHaveValue('Twitch (www.twitch.tv)')
+    await expect(service).toHaveValue('Twitch (www.twitch.tv) · twitch')
 
     const feedType = dialog.getByRole('combobox', { name: 'Feed type' })
     await expect(feedType).toContainText('Live')

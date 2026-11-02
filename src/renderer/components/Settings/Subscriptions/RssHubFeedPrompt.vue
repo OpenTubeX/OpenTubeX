@@ -209,11 +209,18 @@ onMounted(async () => {
   }
 })
 
+// Some services share a name and site, so their ID tells them apart
+const serviceLabelsById = computed(() => {
+  const labels = services.value.map(item => item.url ? `${item.name} (${item.url})` : item.name)
+  return new Map(services.value.map((item, index) => [item.id,
+    labels.indexOf(labels[index]) === labels.lastIndexOf(labels[index]) ? labels[index] : `${labels[index]} · ${item.id}`]))
+})
+
 /**
  * @param {import('../../../helpers/rssHub').RssHubService} item
  */
 function serviceLabel(item) {
-  return item.url ? `${item.name} (${item.url})` : item.name
+  return serviceLabelsById.value.get(item.id) ?? item.name
 }
 
 let servicesGeneration = 0
