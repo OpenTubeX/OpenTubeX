@@ -9,7 +9,7 @@ const args = process.argv
 
 let buildRequests
 const platform = process.platform
-await prepareCastSender('dist', platform, { arm32: 'arm', arm64: 'arm64' }[args[2]] ?? 'x64')
+await prepareCastSender('dist', platform, args[2] === 'arm64' ? 'arm64' : 'x64')
 
 if (platform === 'darwin') {
   let arch = Arch.x64
@@ -46,10 +46,6 @@ if (platform === 'darwin') {
 
   if (args[2] === 'arm64') {
     arch = Arch.arm64
-  }
-
-  if (args[2] === 'arm32') {
-    arch = Arch.armv7l
   }
 
   buildRequests = [{

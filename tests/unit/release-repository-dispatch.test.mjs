@@ -14,7 +14,7 @@ async function fixture (t, tag) {
   const stable = version.endsWith('-beta')
   const base = `https://github.com/OpenTubeX/OpenTubeX/releases/download/${tag}/`
   const names = [
-    ...['amd64', 'arm64', 'armv7l'].map(arch => `opentubex_${version.replace('-beta', '_beta')}_${arch}.deb`),
+    ...['amd64', 'arm64'].map(arch => `opentubex_${version.replace('-beta', '_beta')}_${arch}.deb`),
     ...['amd64', 'arm64'].map(arch => `opentubex-${version}.${arch}.rpm`),
     ...['x64', 'arm64'].flatMap(arch => [
       `opentubex-${version}-linux-${arch}-portable.zip`,

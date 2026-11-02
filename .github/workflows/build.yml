@@ -83,7 +83,6 @@ jobs:
         node-version: [24.x]
         runtime:
           - linux-x64
-          - linux-armv7l
           - linux-arm64
           - win-x64
           - win-arm64
@@ -91,9 +90,6 @@ jobs:
           - osx-arm64
         include:
         - runtime: linux-x64
-          os: ubuntu-latest
-
-        - runtime: linux-armv7l
           os: ubuntu-latest
 
         - runtime: linux-arm64
@@ -207,11 +203,6 @@ jobs:
       shell: bash
       run: pnpm run build
 
-    - name: Build ARMv7l with Node.js ${{ matrix.node-version}}
-      if: startsWith(matrix.os, 'ubuntu') && startsWith(matrix.runtime, 'linux-armv7l')
-      shell: bash
-      run: pnpm run build:arm32
-
     - name: Build ARM64 with Node.js ${{ matrix.node-version}}
       if: contains(matrix.runtime, 'arm64')
       shell: bash
@@ -254,20 +245,6 @@ jobs:
         name: opentubex-${{ steps.versionNumber.outputs.version }}-linux-x64-portable.7z
         path: build/opentubex-${{ steps.versionNumber.outputs.version }}.7z
 
-    - name: Upload Linux .zip ARMv7l Artifact
-      uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
-      if: startsWith(matrix.os, 'ubuntu') && startsWith(matrix.runtime, 'linux-armv7l')
-      with:
-        name: opentubex-${{ steps.versionNumber.outputs.version }}-linux-armv7l-portable.zip
-        path: build/opentubex-${{ steps.versionNumber.outputs.version }}-armv7l.zip
-
-    - name: Upload Linux .7z ARMv7l Artifact
-      uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
-      if: startsWith(matrix.os, 'ubuntu') && startsWith(matrix.runtime, 'linux-armv7l')
-      with:
-        name: opentubex-${{ steps.versionNumber.outputs.version }}-linux-armv7l-portable.7z
-        path: build/opentubex-${{ steps.versionNumber.outputs.version }}-armv7l.7z
-
     - name: Upload Linux .zip ARM64 Artifact
       uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
       if: startsWith(matrix.os, 'ubuntu') && startsWith(matrix.runtime, 'linux-arm64')
@@ -289,13 +266,6 @@ jobs:
         name: opentubex_${{ steps.versionNumber.outputs.version }}_amd64.deb
         path: build/opentubex_${{ steps.versionNumber.outputs.version }}_amd64.deb
 
-    - name: Upload .deb ARMv7l Artifact
-      uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
-      if: startsWith(matrix.os, 'ubuntu') && startsWith(matrix.runtime, 'linux-armv7l')
-      with:
-        name: opentubex_${{ steps.versionNumber.outputs.version }}_armv7l.deb
-        path: build/opentubex_${{ steps.versionNumber.outputs.version }}_armv7l.deb
-
     - name: Upload .deb ARM64 Artifact
       uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
       if: startsWith(matrix.os, 'ubuntu') && startsWith(matrix.runtime, 'linux-arm64')
@@ -310,13 +280,6 @@ jobs:
         name: opentubex-${{ steps.versionNumber.outputs.version }}-amd64.AppImage
         path: build/opentubex-${{ steps.versionNumber.outputs.version }}-amd64.AppImage
 
-    - name: Upload AppImage ARMv7l Artifact
-      uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
-      if: startsWith(matrix.os, 'ubuntu') && startsWith(matrix.runtime, 'linux-armv7l')
-      with:
-        name: opentubex-${{ steps.versionNumber.outputs.version }}-armv7l.AppImage
-        path: build/OpenTubeX-${{ steps.versionNumber.outputs.version }}-armv7l.AppImage
-
     - name: Upload AppImage ARM64 Artifact
       uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
       if: startsWith(matrix.os, 'ubuntu') && startsWith(matrix.runtime, 'linux-arm64')
@@ -330,8 +293,6 @@ jobs:
       with:
         name: opentubex-${{ steps.versionNumber.outputs.version }}.amd64.rpm
         path: build/opentubex-${{ steps.versionNumber.outputs.version }}.x86_64.rpm
-
-    # rpm are not built for armv7l
 
     - name: Upload .rpm ARM64 Artifact
       uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
@@ -730,7 +691,7 @@ jobs:
         include:
           - repository: apt
             pattern: '[.]deb$'
-            count: 3
+            count: 2
           - repository: rpm
             pattern: '[.](amd64|arm64)[.]rpm$'
             count: 2

@@ -1,8 +1,7 @@
 name: Update AppImage tools
 
-# Dependabot cannot track the AppImage tools that release.yml downloads or the
-# Anylinux build image that build.yml and release.yml run, so this opens a PR when
-# AppImage/appimagetool or AppImage/type2-runtime tags a new release or the image changes.
+# Dependabot cannot track the Anylinux build image that build.yml and release.yml
+# run, so this opens a PR when the image changes.
 # Editing a workflow needs UPSTREAM_SYNC_TOKEN's Workflows write access.
 on:
   schedule:
@@ -33,43 +32,11 @@ jobs:
           ref: development
           persist-credentials: false
 
-      - name: Update pinned versions and checksums
+      - name: Update the pinned image digest
         id: update
         run: |
           set -euo pipefail
           file=.github/workflows/release.yml
-
-          digest() {
-            gh api "repos/$1/releases/tags/$2" \
-              --jq ".assets[] | select(.name == \"$3\") | .digest // empty | ltrimstr(\"sha256:\")"
-          }
-
-          update() {
-            local repo=$1 current latest pair asset name hash
-            shift
-            current=$(grep -oP "github\.com/$repo/releases/download/\K[^/]+" "$file" | head -1)
-            # Skip the rolling "continuous" and "old" tags.
-            latest=$(gh api --paginate "repos/$repo/releases?per_page=100" \
-              --jq '.[] | select(.prerelease | not) | .tag_name | select(test("^[0-9]"))' | sort -V | tail -n 1)
-            if [[ -z "$latest" || "$(printf '%s\n' "$current" "$latest" | sort -V | tail -n 1)" == "$current" ]]; then
-              return
-            fi
-            # Each argument is "<release asset>:<downloaded file name>".
-            for pair in "$@"; do
-              asset=${pair%%:*} name=${pair#*:}
-              hash=$(digest "$repo" "$latest" "$asset")
-              if [[ -z "$hash" ]] || ! grep -qE "^ +[0-9a-f]{64}  $name\$" "$file"; then
-                echo "::error::Cannot update $asset from $repo $current to $latest."
-                exit 1
-              fi
-              sed -i -E "s/^( +)[0-9a-f]{64}  $name\$/\1$hash  $name/" "$file"
-            done
-            sed -i "s|$repo/releases/download/$current/|$repo/releases/download/$latest/|g" "$file"
-            echo "- [$repo $latest](https://github.com/$repo/releases/tag/$latest) (from $current)" >> "$RUNNER_TEMP/changes.md"
-          }
-
-          update AppImage/appimagetool appimagetool-x86_64.AppImage:appimagetool.AppImage
-          update AppImage/type2-runtime runtime-x86_64:runtime runtime-armhf:runtime-armhf
 
           image=ghcr.io/pkgforge-dev/archlinux:latest
           images=(.github/workflows/build.yml "$file")
@@ -119,11 +86,11 @@ jobs:
           commit-message: "ci(release): update AppImage tools"
           title: "ci(release): update AppImage tools"
           body: |
-            Updates the pinned AppImage tools in `release.yml` (ARMv7l) and the Anylinux build image in `build.yml` and `release.yml`:
+            Updates the Anylinux build image in `build.yml` and `release.yml`:
 
             ${{ steps.update.outputs.changes }}
 
-            The tool checksums come from the digests GitHub records for the release assets, and the image digest from its registry manifest.
+            The image digest comes from its registry manifest.
 
             ## Release note
             - [x] No release note needed

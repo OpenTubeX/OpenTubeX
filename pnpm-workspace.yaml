@@ -16,7 +16,6 @@ overrides:
 
 minimumReleaseAgeExclude:
   - "youtubei.js"
-  - electron@43.8.3
   - eslint-plugin-jsdoc@65.3.12
   - postcss@8.5.31
   - serialize-javascript@7.1.4
