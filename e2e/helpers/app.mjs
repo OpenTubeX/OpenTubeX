@@ -33,9 +33,12 @@ const BASE_SETTINGS = {
 
 /** Blocks unmocked services while keeping the fixture's internet check reachable. */
 export function abortUnmockedRequest(route) {
-  return route.request().url() === INTERNET_CHECK_URL
-    ? route.fulfill({ status: 204 })
-    : route.abort()
+  const url = route.request().url()
+  if (url === INTERNET_CHECK_URL) return route.fulfill({ status: 204 })
+  // Every watch page asks oEmbed for a title. An abort would count as a lost
+  // connection and hold the mocked YouTube API behind network recovery.
+  if (url.startsWith('https://www.youtube.com/oembed?')) return route.fulfill({ status: 404, contentType: 'application/json', body: '{}' })
+  return route.abort()
 }
 
 /**

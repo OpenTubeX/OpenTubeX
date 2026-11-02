@@ -3,6 +3,7 @@ import WatchVideoSummary from '../../components/WatchVideoSummary/WatchVideoSumm
 import FtPhonePanel from '../../components/FtPhonePanel/FtPhonePanel.vue'
 import PhoneCommentsButton from '../../components/PhoneCommentsButton/PhoneCommentsButton.vue'
 import { usePhoneLayout } from '../../composables/usePhoneLayout'
+import { isVerticalTabBarPosition } from '../../constants/tabBarPosition'
 import { holdRootClass } from '../../helpers/rootClasses'
 import { connectionEvents, initializeNetworkRecovery, getConnectionState } from '../../helpers/networkRecovery'
 import { ytDlp } from '../../helpers/ytDlp'
@@ -843,7 +844,9 @@ export default defineComponent({
       return this.isShort && !this.watchingPlaylist
     },
     shortsPlayerWidth: function () {
-      const playerHeight = Math.max(0, this.shortsViewportHeight - 156)
+      // Page chrome above and below the player, 32px of it the horizontal tab bar
+      const chromeHeight = this.isElectron && isVerticalTabBarPosition(this.$store.getters.getTabBarPosition) ? 124 : 156
+      const playerHeight = Math.max(0, this.shortsViewportHeight - chromeHeight)
       return Math.min(600, playerHeight * (this.videoAspectRatio ?? 9 / 16))
     },
     shortsPlayerHeight: function () {
