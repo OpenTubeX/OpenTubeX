@@ -1073,10 +1073,24 @@ test('app windows cannot navigate their document to another origin', t => {
 })
 
 test('repeated query parameters are collected without copying the accumulated values', () => {
-  const count = 20_000
-  const start = performance.now()
-  const route = getRouteFromUrl(`app://bundle/index.html#/search/test?${'q=x&'.repeat(count)}`)
+  const count = 2_000
+  // Rebuilding the array per occurrence copies about count² / 2 values. Count
+  // the copied values, since a time limit also fails on a busy machine.
+  let copied = 0
+  const methods = ['concat', 'slice', Symbol.iterator]
+  const originals = methods.map(method => Array.prototype[method])
+  methods.forEach((method, index) => {
+    Array.prototype[method] = function (...args) {
+      copied += this.length
+      return originals[index].apply(this, args)
+    }
+  })
+  let route
+  try {
+    route = getRouteFromUrl(`app://bundle/index.html#/search/test?${'q=x&'.repeat(count)}`)
+  } finally {
+    methods.forEach((method, index) => { Array.prototype[method] = originals[index] })
+  }
   assert.equal(route.query.q.length, count)
-  // Rebuilding the array per occurrence takes seconds at this size.
-  assert.ok(performance.now() - start < 500)
+  assert.ok(copied < 10 * count, `${copied} values copied`)
 })
