@@ -427,6 +427,8 @@ Settings:
     Add Action: "작업 추가"
     Empty: "선택된 전체 화면 작업 없음"
     Quick Bookmark: "빠른 북마크"
+    Availability Hint: "작업은 해당하는 동영상에서만 표시됩니다."
+    Disabled: "(사용 안 함)"
   Quick Settings:
     Quick Settings: 빠른 설정
     Customize Quick Settings: 빠른 설정 맞춤설정

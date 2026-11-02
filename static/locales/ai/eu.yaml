@@ -333,6 +333,8 @@ Settings:
     Add Action: "Gehitu ekintza"
     Empty: "Ez da pantaila osoko ekintzarik hautatu"
     Quick Bookmark: "Laster-marka azkarra"
+    Availability Hint: "Ekintzak aplikagarriak diren bideoetan soilik agertzen dira."
+    Disabled: "(desgaituta)"
   Quick Settings:
     Quick Settings: Ezarpen azkarrak
     Customize Quick Settings: Pertsonalizatu ezarpen azkarrak

@@ -334,6 +334,8 @@ Settings:
     Add Action: "Ychwanegu gweithred"
     Empty: "Dim gweithredoedd sgrin lawn wedi’u dewis"
     Quick Bookmark: "Nod tudalen cyflym"
+    Availability Hint: "Dim ond ar fideos lle maen nhw’n berthnasol y mae gweithredoedd yn ymddangos."
+    Disabled: "(analluogwyd)"
   Quick Settings:
     Quick Settings: Gosodiadau cyflym
     Customize Quick Settings: Addasu gosodiadau cyflym

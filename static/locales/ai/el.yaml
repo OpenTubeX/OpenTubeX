@@ -334,6 +334,8 @@ Settings:
     Add Action: "Προσθήκη ενέργειας"
     Empty: "Δεν επιλέχθηκαν ενέργειες πλήρους οθόνης"
     Quick Bookmark: "Γρήγορος σελιδοδείκτης"
+    Availability Hint: "Οι ενέργειες εμφανίζονται μόνο στα βίντεο όπου ισχύουν."
+    Disabled: "(απενεργοποιημένο)"
   Quick Settings:
     Quick Settings: Γρήγορες ρυθμίσεις
     Customize Quick Settings: Προσαρμογή γρήγορων ρυθμίσεων

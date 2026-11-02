@@ -334,6 +334,8 @@ Settings:
     Add Action: "Adaugă acțiune"
     Empty: "Nu sunt selectate acțiuni pe ecran complet"
     Quick Bookmark: "Marcaj rapid"
+    Availability Hint: "Acțiunile apar doar la videoclipurile cărora li se aplică."
+    Disabled: "(dezactivată)"
   Quick Settings:
     Quick Settings: Setări rapide
     Customize Quick Settings: Personalizează setările rapide

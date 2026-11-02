@@ -428,6 +428,8 @@ Settings:
     Add Action: "Aktion hinzufügen"
     Empty: "Keine Vollbildaktionen ausgewählt"
     Quick Bookmark: "Schnell-Lesezeichen"
+    Availability Hint: "Aktionen werden nur bei Videos angezeigt, für die sie verfügbar sind."
+    Disabled: "(deaktiviert)"
   # On Settings Page
   Settings: Einstellungen
   Categories:

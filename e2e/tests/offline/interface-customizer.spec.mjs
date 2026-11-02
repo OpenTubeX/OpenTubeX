@@ -109,7 +109,10 @@ test.describe('interface customizer', () => {
     const preview = customizer.locator('.playerPreview')
     const toggle = label => customizer.locator('.playerAppearanceEditor label.switch-label').filter({ hasText: label })
 
-    // The controls tab edits the player menu, so this tab keeps it closed.
+    // The player tab previews the fullscreen player, without the player menu,
+    // which the controls tab edits.
+    await expect(preview).toHaveClass(/fullscreen/)
+    await expect(preview).not.toHaveClass(/paused/)
     await expect(preview.locator('.previewOverflowMenu')).toHaveCount(0)
     await expect(preview.locator('.previewBigPlay')).toHaveCount(0)
     await toggle('Display Play Button In Video Player').click()
@@ -140,7 +143,7 @@ test.describe('interface customizer', () => {
     const modes = () => customizer.locator('.previewModes [role="tab"]').evaluateAll(elements => (
       elements.map(element => element.dataset.previewMode)
     ))
-    await expect.poll(modes).toEqual(['window', 'fullscreen', 'paused'])
+    await expect.poll(modes).toEqual(['fullscreen', 'paused'])
     await expect(customizer.locator('.previewOverflowMenu')).toHaveCount(0)
     for (const tab of ['controlBar', 'fullscreenActions']) {
       await customizer.locator(`[data-settings-subpage-tab="${tab}"]`).click()
@@ -243,8 +246,9 @@ test.describe('interface customizer', () => {
     const customizer = await openInterfaceCustomizer(page, 'fullscreen actions')
     const actions = customizer.locator('.previewFullscreenActions [data-preview-fullscreen-action]')
     const previewIds = () => actions.evaluateAll(elements => elements.map(element => element.dataset.previewFullscreenAction))
+    // Like the player, the preview leaves out the actions that settings turn off.
     const editorIds = () => customizer.locator('.selectedAction').evaluateAll(elements => (
-      elements.map(element => element.dataset.fullscreenActionId)
+      elements.filter(element => !element.querySelector('.disabledLabel')).map(element => element.dataset.fullscreenActionId)
     ))
 
     await expect.poll(async () => JSON.stringify(await previewIds()) === JSON.stringify(await editorIds()), { message: 'the preview matches the editor order' }).toBe(true)
@@ -256,6 +260,23 @@ test.describe('interface customizer', () => {
       await expect(rows).toHaveCount(remaining - 1)
     }
     await expect(customizer.locator('.previewFullscreenActions')).toHaveCount(0)
+  })
+
+  test('marks fullscreen actions that settings turn off and leaves them out of the preview', async ({ page }) => {
+    const customizer = await openInterfaceCustomizer(page, 'fullscreen actions')
+    await expect(customizer.getByText('Actions only appear on videos they apply to.')).toBeVisible()
+    const shareRow = customizer.locator('[data-fullscreen-action-id="share"]')
+    const sharePreview = customizer.locator('[data-preview-fullscreen-action="share"]')
+    await expect(shareRow.locator('.disabledLabel')).toHaveCount(0)
+    await expect(sharePreview).toBeVisible()
+
+    await page.evaluate(() => window.$store.dispatch('updateHideSharingActions', true))
+    await expect(shareRow.locator('.disabledLabel')).toHaveText('(disabled)')
+    await expect(sharePreview).toHaveCount(0)
+
+    await page.evaluate(() => window.$store.dispatch('updateHideSharingActions', false))
+    await expect(shareRow.locator('.disabledLabel')).toHaveCount(0)
+    await expect(sharePreview).toBeVisible()
   })
 
   test('previews the control bar order and moves removed buttons into the player menu', async ({ page }) => {
@@ -481,7 +502,7 @@ test.describe('interface customizer', () => {
       if (size.width !== 1200) await setWindowSize(app, page, size)
       // The controls tab shows the player menu, which the phone layout previews separately.
       const modes = [
-        ['player', 'Playing'], ['player', 'Fullscreen'], ['player', 'Paused'],
+        ['player', 'Playing'], ['player', 'Paused'],
         ['controlBar', size.width === 1200 ? null : 'Playing'], ['controlBar', size.width === 1200 ? null : 'Player menu'],
       ]
       for (const [tab, mode] of modes) {

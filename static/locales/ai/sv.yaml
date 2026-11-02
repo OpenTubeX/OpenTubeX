@@ -336,6 +336,8 @@ Settings:
     Add Action: "Lägg till åtgärd"
     Empty: "Inga fullskärmsåtgärder valda"
     Quick Bookmark: "Snabbbokmärke"
+    Availability Hint: "Åtgärder visas bara på videor där de är tillämpliga."
+    Disabled: "(inaktiverad)"
   Quick Settings:
     Quick Settings: Snabbinställningar
     Customize Quick Settings: Anpassa snabbinställningar

@@ -302,6 +302,8 @@ Settings:
     Add Action: "Adicionar ação"
     Empty: "Nenhuma ação de tela cheia selecionada"
     Quick Bookmark: "Favorito rápido"
+    Availability Hint: "As ações só aparecem nos vídeos aos quais se aplicam."
+    Disabled: "(desativada)"
   Quick Settings:
     Quick Settings: Configurações rápidas
     Customize Quick Settings: Personalizar configurações rápidas

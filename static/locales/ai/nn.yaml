@@ -346,6 +346,8 @@ Settings:
     Add Action: "Legg til handling"
     Empty: "Ingen fullskjermhandlingar valde"
     Quick Bookmark: "Snøggbokmerke"
+    Availability Hint: "Handlingar blir berre viste på videoar der dei er relevante."
+    Disabled: "(deaktivert)"
   Quick Settings:
     Quick Settings: Snøgginnstillingar
     Customize Quick Settings: Tilpass snøgginnstillingar

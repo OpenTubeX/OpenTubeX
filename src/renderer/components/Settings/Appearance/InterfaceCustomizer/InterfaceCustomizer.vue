@@ -122,16 +122,22 @@
             <QuickSettingsCustomizer v-else-if="activeTabId === 'quickSettings'" />
             <PlayerAppearanceEditor v-else-if="activeTabId === 'player'" />
             <ControlPlacementCustomizer v-else-if="activeTabId === 'controlBar'" />
-            <ActionListCustomizer
-              v-else
-              :definitions="FULLSCREEN_ACTION_DEFINITIONS"
-              :items="store.getters.getFullscreenActions"
-              :default-items="DEFAULT_FULLSCREEN_ACTIONS"
-              :update-items="items => store.dispatch('updateFullscreenActions', items)"
-              item-id-attribute="data-fullscreen-action-id"
-              :add-label="t('Settings.Fullscreen Actions.Add Action')"
-              :empty-label="t('Settings.Fullscreen Actions.Empty')"
-            />
+            <template v-else>
+              <p class="customizerHint">
+                {{ t('Settings.Fullscreen Actions.Availability Hint') }}
+              </p>
+              <ActionListCustomizer
+                :definitions="FULLSCREEN_ACTION_DEFINITIONS"
+                :items="store.getters.getFullscreenActions"
+                :default-items="DEFAULT_FULLSCREEN_ACTIONS"
+                :update-items="items => store.dispatch('updateFullscreenActions', items)"
+                item-id-attribute="data-fullscreen-action-id"
+                :add-label="t('Settings.Fullscreen Actions.Add Action')"
+                :empty-label="t('Settings.Fullscreen Actions.Empty')"
+                :disabled-items="disabledFullscreenActions"
+                :disabled-label="t('Settings.Fullscreen Actions.Disabled')"
+              />
+            </template>
           </div>
         </div>
       </div>
@@ -159,7 +165,8 @@ import ControlPlacementCustomizer from './ControlPlacementCustomizer.vue'
 import PlayerPreview from './PlayerPreview.vue'
 
 import store from '../../../../store/index'
-import { DEFAULT_FULLSCREEN_ACTIONS, FULLSCREEN_ACTION_DEFINITIONS } from '../../../../helpers/fullscreenActions'
+import { DEFAULT_FULLSCREEN_ACTIONS, FULLSCREEN_ACTION_DEFINITIONS, getDisabledFullscreenActions } from '../../../../helpers/fullscreenActions'
+import { supportsYtDlp } from '../../../../helpers/ytDlpCapabilities'
 import { clampOverlayScrollTop, restoreOverlayScrollTop } from '../../../../helpers/overlayScrollbars'
 import { usePhoneLayout } from '../../../../composables/usePhoneLayout'
 
@@ -179,6 +186,8 @@ function handleMobileNavigationLayoutChange(event) {
 
 onMounted(() => mobileNavigationLayout.addEventListener('change', handleMobileNavigationLayoutChange))
 onBeforeUnmount(() => mobileNavigationLayout.removeEventListener('change', handleMobileNavigationLayoutChange))
+
+const disabledFullscreenActions = computed(() => [...getDisabledFullscreenActions(store.getters, supportsYtDlp)])
 
 const tabs = computed(() => {
   const playingMode = { id: 'window', icon: ['fas', 'play'], label: t('Settings.Interface Customizer.Playing') }
@@ -214,8 +223,10 @@ const tabs = computed(() => {
       icon: ['fas', 'circle-play'],
       label: t('Settings.Interface Customizer.Player'),
       syncKey: null,
-      // The controls tab edits the player menu, so this tab leaves it closed.
-      previewModes: [playingMode, fullscreenMode, pausedMode],
+      // The fullscreen player shows every element these settings affect, and the
+      // paused settings only apply while it's paused. The controls tab edits the
+      // player menu, so this tab leaves it closed.
+      previewModes: [{ ...playingMode, id: 'fullscreen' }, pausedMode],
     },
     {
       id: 'controlBar',

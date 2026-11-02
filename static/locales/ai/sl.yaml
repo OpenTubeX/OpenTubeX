@@ -458,6 +458,8 @@ Settings:
     Add Action: "Dodaj dejanje"
     Empty: "Ni izbranih dejanj v celozaslonskem načinu"
     Quick Bookmark: "Hiter zaznamek"
+    Availability Hint: "Dejanja so prikazana le pri videoposnetkih, za katere veljajo."
+    Disabled: "(onemogočeno)"
   Quick Settings:
     Quick Settings: Hitre nastavitve
     Customize Quick Settings: Prilagodi hitre nastavitve

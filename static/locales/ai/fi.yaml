@@ -338,6 +338,8 @@ Settings:
     Add Action: "Lisää toiminto"
     Empty: "Koko näytön toimintoja ei ole valittu"
     Quick Bookmark: "Pikakirjanmerkki"
+    Availability Hint: "Toiminnot näkyvät vain videoissa, joihin ne soveltuvat."
+    Disabled: "(poistettu käytöstä)"
   Quick Settings:
     Quick Settings: Pika-asetukset
     Customize Quick Settings: Mukauta pika-asetuksia

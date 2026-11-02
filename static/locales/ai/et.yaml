@@ -333,6 +333,8 @@ Settings:
     Add Action: "Lisa toiming"
     Empty: "Täisekraani toiminguid pole valitud"
     Quick Bookmark: "Kiirjärjehoidja"
+    Availability Hint: "Toimingud kuvatakse ainult videotel, mille puhul need on saadaval."
+    Disabled: "(keelatud)"
   Quick Settings:
     Quick Settings: Kiirseaded
     Customize Quick Settings: Kiirseadete kohandamine

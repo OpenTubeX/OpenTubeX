@@ -336,6 +336,8 @@ Settings:
     Add Action: "Dodaj radnju"
     Empty: "Nisu odabrane radnje na cijelom zaslonu"
     Quick Bookmark: "Brza oznaka"
+    Availability Hint: "Radnje se prikazuju samo na videozapisima na koje se odnose."
+    Disabled: "(onemogućeno)"
   Quick Settings:
     Quick Settings: Brze postavke
     Customize Quick Settings: Prilagodi brze postavke

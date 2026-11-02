@@ -343,6 +343,8 @@ Settings:
     Add Action: "Додај радњу"
     Empty: "Нису изабране радње на целом екрану"
     Quick Bookmark: "Брзи обележивач"
+    Availability Hint: "Радње се приказују само на видео-снимцима на које се односе."
+    Disabled: "(онемогућено)"
   Quick Settings:
     Quick Settings: Брза подешавања
     Customize Quick Settings: Прилагоди брза подешавања

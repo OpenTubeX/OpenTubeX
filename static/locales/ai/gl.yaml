@@ -338,6 +338,8 @@ Settings:
     Add Action: "Engadir acción"
     Empty: "Non se seleccionaron accións de pantalla completa"
     Quick Bookmark: "Marcador rápido"
+    Availability Hint: "As accións só aparecen nos vídeos nos que se poden usar."
+    Disabled: "(desactivada)"
   Quick Settings:
     Quick Settings: Configuración rápida
     Customize Quick Settings: Personalizar a configuración rápida
