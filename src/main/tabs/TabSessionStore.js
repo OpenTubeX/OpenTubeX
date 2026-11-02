@@ -86,12 +86,23 @@ export async function clearAllTabSessions() {
 /**
  * Replace every persisted session with a synced, device-independent snapshot.
  * Window bounds and preview cache references are intentionally local-only.
+ * Sessions are written before stale ones are removed, so a failed write keeps
+ * the previously saved sessions.
  * @param {PersistedTabSession[]} sessions
- * @returns {Promise<void>}
+ * @returns {Promise<boolean>} whether every session was written
  */
 export async function replaceAllTabSessions(sessions) {
-  await clearAllTabSessions()
-  await Promise.all(sessions.map(({ sessionId, ...session }) => (
-    saveTabSession(sessionId, session)
-  )))
+  try {
+    await Promise.all(sessions.map(({ sessionId, ...session }) => (
+      baseHandlers.tabSession.save(sessionId, session)
+    )))
+    const sessionIds = new Set(sessions.map(session => session.sessionId))
+    const stale = (await baseHandlers.tabSession.loadAll())
+      .filter(session => !sessionIds.has(session.sessionId))
+    await Promise.all(stale.map(session => baseHandlers.tabSession.clear(session.sessionId)))
+    return true
+  } catch (err) {
+    console.error('Failed to replace tab sessions:', err)
+    return false
+  }
 }
