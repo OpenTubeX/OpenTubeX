@@ -253,7 +253,7 @@ function openLinkExternally(event, url) {
 
   event.preventDefault()
   event.stopPropagation()
-  handleExternalLink(url)
+  handleExternalLink(url, { background: event.type === 'auxclick' })
 }
 
 const formattedViews = computed(() => formatNumber(props.views))

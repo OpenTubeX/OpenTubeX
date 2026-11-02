@@ -3746,6 +3746,7 @@ function handleNumberInputPointer(event) {
 }
 
 const lastExternalLinkToBeOpened = ref('')
+let lastExternalLinkInBackground = false
 const showExternalLinkOpeningPrompt = ref(false)
 const EXTERNAL_LINK_OPENING_PROMPT_VALUES = ['yes', 'no']
 
@@ -3768,7 +3769,7 @@ function handleExternalLinkOpeningPromptAnswer(option) {
     // if `lastExternalLinkToBeOpened` is empty
 
     // Open links externally
-    openExternalLink(lastExternalLinkToBeOpened.value)
+    openExternalLink(lastExternalLinkToBeOpened.value, { background: lastExternalLinkInBackground })
   }
 }
 
@@ -3972,8 +3973,10 @@ function handleAuxClick(event) {
 
 /**
  * @param {string} href
+ * @param {object} [options]
+ * @param {boolean} [options.background] keep the app in front of the browser, as for middle-clicks
  */
-function handleExternalLink(href) {
+function handleExternalLink(href, { background = false } = {}) {
   const action = resolveExternalLinkAction(externalLinkHandling.value)
   if (action === 'disabled') {
     showToast({
@@ -3982,9 +3985,10 @@ function handleExternalLink(href) {
     })
   } else if (action === 'prompt') {
     lastExternalLinkToBeOpened.value = href
+    lastExternalLinkInBackground = background
     showExternalLinkOpeningPrompt.value = true
   } else {
-    openExternalLink(href)
+    openExternalLink(href, { background })
   }
 }
 
@@ -4021,7 +4025,7 @@ function handleLinkClick(event, link) {
       lazyLoad: isUnloadedBackgroundTabClick(event)
     })
   } else {
-    handleExternalLink(href)
+    handleExternalLink(href, { background: isMiddleClick })
   }
 }
 

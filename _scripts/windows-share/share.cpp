@@ -82,12 +82,29 @@ static napi_value Close(napi_env env, napi_callback_info info) {
     return nullptr;
 }
 
+// Lets the foreground app keep the foreground while it opens a link in the
+// background. Windows releases the lock early on user input.
+static napi_value LockForeground(napi_env env, napi_callback_info info) {
+    size_t count = 1;
+    napi_value arg;
+    bool locked = false;
+    napi_get_cb_info(env, info, &count, &arg, nullptr, nullptr);
+    if (count != 1 || napi_get_value_bool(env, arg, &locked) != napi_ok) {
+        napi_throw_type_error(env, nullptr, "Expected a boolean");
+        return nullptr;
+    }
+    napi_value result;
+    napi_get_boolean(env, LockSetForegroundWindow(locked ? LSFW_LOCK : LSFW_UNLOCK), &result);
+    return result;
+}
+
 NAPI_MODULE_INIT() {
     const napi_property_descriptor methods[] = {
         {"share", nullptr, Share, nullptr, nullptr, nullptr, napi_default, nullptr},
-        {"close", nullptr, Close, nullptr, nullptr, nullptr, napi_default, nullptr}
+        {"close", nullptr, Close, nullptr, nullptr, nullptr, napi_default, nullptr},
+        {"lockForeground", nullptr, LockForeground, nullptr, nullptr, nullptr, napi_default, nullptr}
     };
-    napi_define_properties(env, exports, 2, methods);
+    napi_define_properties(env, exports, 3, methods);
     napi_add_env_cleanup_hook(env, [](void*) { requests.clear(); }, nullptr);
     return exports;
 }

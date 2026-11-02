@@ -138,6 +138,8 @@ export default {
   },
   setTrayIcon: image => ipcRenderer.invoke(IpcChannels.SET_TRAY_ICON, image),
   shareLink: url => ipcRenderer.invoke(IpcChannels.SHARE_LINK, url),
+  /** @param {string} url */
+  openExternalLinkInBackground: url => ipcRenderer.invoke(IpcChannels.OPEN_EXTERNAL_LINK_IN_BACKGROUND, url),
   startupSplashReady: () => ipcRenderer.send(IpcChannels.STARTUP_SPLASH_READY),
   startupAppearance: {
     background: process.argv.find(argument => argument.startsWith('--startup-background='))?.slice('--startup-background='.length),

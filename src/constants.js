@@ -11,6 +11,7 @@ const IpcChannels = {
   GET_SYSTEM_LOCALE: 'get-system-locale',
   GET_SYSTEM_FONTS: 'get-system-fonts',
   SHARE_LINK: 'share-link',
+  OPEN_EXTERNAL_LINK_IN_BACKGROUND: 'open-external-link-in-background',
   READ_CLIPBOARD: 'read-clipboard',
   GET_NAVIGATION_HISTORY: 'get-navigation-history',
   IS_WAYLAND_PLATFORM: 'is-wayland-platform',

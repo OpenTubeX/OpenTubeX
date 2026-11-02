@@ -425,10 +425,17 @@ export function showApiErrorToast(message, error, show = showToast) {
 /**
  * Opens a link in the default web browser or a new tab in the web builds
  * @param {string} url the URL to open
+ * @param {object} [options]
+ * @param {boolean} [options.background] keep the app in front of the browser (desktop middle-click)
  */
-export async function openExternalLink(url) {
+export async function openExternalLink(url, { background = false } = {}) {
   if (process.env.IS_CAPACITOR) {
     await Browser.open({ url })
+    return
+  }
+
+  if (process.env.IS_ELECTRON && background) {
+    await window.ftElectron.openExternalLinkInBackground(url)
     return
   }
 
