@@ -374,7 +374,7 @@ test.describe('manual comment loading', () => {
     await ownerReplyThreadElement.dispose()
   })
 
-  test('activates the view, hide, and load more buttons with Space without toggling playback', async ({ app, page }) => {
+  test('activates the view, hide, and load more buttons with the keyboard without toggling playback', async ({ app, page }) => {
     await mockPlayableWatchPage(app, page)
     await openMockedVideo(page)
     const video = await waitForPlayback(page)
@@ -385,7 +385,7 @@ test.describe('manual comment loading', () => {
     await expect(page.locator('.commentsTitle')).toBeVisible()
     await page.locator('.commentTitleAction').press('Space')
     await expect(comments).toHaveCount(0)
-    await viewComments.press('Space')
+    await viewComments.press('Enter')
     await expect(comments.first()).toBeVisible()
 
     const loadMoreRequest = page.waitForRequest(request => /\/youtubei\/v1\/next/.test(request.url()) && !!request.postDataJSON()?.continuation)

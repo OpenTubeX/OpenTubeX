@@ -103,12 +103,12 @@
         <FtButton
           class="commentTitleAction"
           type="button"
-          variant="outlined"
+          variant="text"
           size="extra-small"
           :icon="['fas', 'eye-slash']"
           :label="$t('Comments.Hide Comments')"
           @click="showComments = false"
-          @keydown.space.stop
+          @keydown.space.enter.stop
           @keyup.space.stop
         />
       </h3>
@@ -192,7 +192,7 @@
         :icon="['fas', 'comment']"
         :label="$t('Comments.Click to View Comments')"
         @click="getCommentData"
-        @keydown.space.stop
+        @keydown.space.enter.stop
         @keyup.space.stop
       />
       <FtButton
@@ -203,7 +203,7 @@
         :icon="['fas', 'comment']"
         :label="$t('Comments.Click to View Comments')"
         @click="showComments = true"
-        @keydown.space.stop
+        @keydown.space.enter.stop
         @keyup.space.stop
       />
       <div
@@ -601,7 +601,7 @@
         :icon="['fas', 'arrow-down']"
         :label="$t('Comments.Load More Comments')"
         @click="getMoreComments"
-        @keydown.space.stop
+        @keydown.space.enter.stop
         @keyup.space.stop
       />
       <FtLoader
