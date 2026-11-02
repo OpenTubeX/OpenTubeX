@@ -27,35 +27,21 @@ test.describe('watch page', () => {
     const descriptionText = description.locator('.description')
     const tags = description.locator('.videoTags')
     const expandControl = description.locator(':scope > .descriptionStatus')
-    const copyButton = description.locator('.descriptionCopyButton')
-    const controlsOverlap = async () => expandControl.evaluate((element, copyButtonElement) => {
-      const expandRect = element.getBoundingClientRect()
-      const copyRect = copyButtonElement.getBoundingClientRect()
-      return (
-        expandRect.top < copyRect.bottom &&
-        expandRect.bottom > copyRect.top &&
-        expandRect.left < copyRect.right &&
-        expandRect.right > copyRect.left
-      )
-    }, await copyButton.elementHandle())
-
-    // Force the absolute controls together despite the collapsed card's reserved footer.
-    await description.evaluate(element => { element.style.height = '0px' })
-    await expect(expandControl).toHaveClass(/avoidCopyButton/)
-    expect(await controlsOverlap()).toBe(false)
-
-    await description.evaluate(element => { element.style.height = '160px' })
-    await expect(expandControl).not.toHaveClass(/avoidCopyButton/)
-    await expect(expandControl).toHaveCSS('inset-inline-end', '16px')
-
-    await description.evaluate(element => {
-      element.dir = 'rtl'
-      element.style.height = '0px'
+    const footerLayout = () => expandControl.evaluate(element => {
+      const card = element.parentElement.getBoundingClientRect()
+      const scroll = element.parentElement.querySelector('.descriptionScroll').getBoundingClientRect()
+      const footer = element.getBoundingClientRect()
+      return {
+        belowContent: footer.top >= scroll.bottom - 1,
+        spansCard: Math.abs(footer.left - card.left) <= 1 && Math.abs(footer.right - card.right) <= 1,
+        atCardBottom: Math.abs(footer.bottom - card.bottom) <= 1,
+      }
     })
-    await expect(expandControl).toHaveClass(/avoidCopyButton/)
-    expect(await controlsOverlap()).toBe(false)
+    const footerAtEdges = { belowContent: true, spansCard: true, atCardBottom: true }
 
-    await description.evaluate(element => { element.style.height = '' })
+    await expect(expandControl).toHaveAccessibleName('Show more')
+    await expect(expandControl).toHaveAttribute('aria-expanded', 'false')
+    expect(await footerLayout()).toEqual(footerAtEdges)
 
     await expandControl.click()
     await expect(tags.locator('.videoTagLink')).toHaveText(['first tag', 'second tag'])
@@ -69,22 +55,11 @@ test.describe('watch page', () => {
     expect(await descriptionScroll.evaluate(element => getComputedStyle(element).maskImage))
       .toContain('linear-gradient')
     await expect(descriptionScroll).not.toHaveClass(/descriptionFadeTop/)
-    const collapseControl = description.locator('.descriptionScroll > .descriptionStatus')
-    await expect(collapseControl).toBeVisible()
-    await expect(collapseControl).toHaveCSS('position', 'sticky')
-    const collapseControlStyles = await collapseControl.evaluate(element => {
-      const style = getComputedStyle(element)
-      const fadeStyle = getComputedStyle(element, '::before')
-      return {
-        fadeMask: fadeStyle.maskImage,
-        fadeHeight: Number.parseFloat(fadeStyle.height),
-        fontSize: Number.parseFloat(style.fontSize),
-        marginBlockStart: Number.parseFloat(style.marginBlockStart)
-      }
-    })
-    expect(collapseControlStyles.fadeMask).toContain('linear-gradient')
-    expect(collapseControlStyles.fadeHeight).toBeGreaterThan(0)
-    expect(collapseControlStyles.marginBlockStart).toBeGreaterThan(collapseControlStyles.fontSize)
+    // The same footer collapses the card again, so keyboard focus stays on it.
+    await expect(expandControl).toBeFocused()
+    await expect(expandControl).toHaveAccessibleName('Show less')
+    await expect(expandControl).toHaveAttribute('aria-expanded', 'true')
+    expect(await footerLayout()).toEqual(footerAtEdges)
     const maxScrollTop = await descriptionScroll.evaluate(element =>
       element.scrollHeight - element.clientHeight
     )
@@ -97,11 +72,11 @@ test.describe('watch page', () => {
     await expect.poll(() => descriptionScroll.evaluate(element =>
       element.scrollTop < element.scrollHeight - element.clientHeight
     )).toBe(true)
-    await expect.poll(() => collapseControl.evaluate(element => {
-      const controlBottom = element.getBoundingClientRect().bottom
-      const scrollBottom = element.parentElement.getBoundingClientRect().bottom
-      return Math.abs(controlBottom - scrollBottom) <= 1
-    })).toBe(true)
+    expect(await footerLayout()).toEqual(footerAtEdges)
+    await expandControl.press('Enter')
+    await expect(description).toHaveClass(/short/)
+    await expect(expandControl).toBeFocused()
+    await expect(expandControl).toHaveAttribute('aria-expanded', 'false')
 
     await description.locator('.descriptionCopyButton button').click()
     await expect(page.locator('.toast', { hasText: 'Description copied to clipboard' })).toBeVisible()
@@ -197,7 +172,7 @@ test.describe('watch page', () => {
         await expect(card).not.toHaveClass(/short/)
         await expect(card.locator('.videoTagLink')).toHaveText(['first tag', 'second tag'])
         await expect(card.locator('.gameTitle')).toHaveText('Grand Theft Auto VI')
-        await card.locator('.descriptionScroll > .descriptionStatus').click()
+        await card.locator(':scope > .descriptionStatus').click()
         await expect(card).toHaveClass(/short/)
         await expect(card.locator('.videoTagLink')).toHaveText(['first tag', 'second tag'])
         await expect(card.locator('.gameTitle')).toHaveText('Grand Theft Auto VI')
@@ -230,19 +205,19 @@ test.describe('watch page', () => {
       await expect(card).toHaveClass(/short/)
       const layout = await card.evaluate(element => {
         const scroll = element.querySelector('.descriptionScroll')
-        const line = document.createElement('span')
-        line.style.position = 'absolute'
-        line.style.height = '1lh'
-        scroll.append(line)
-        const lineHeight = line.getBoundingClientRect().height
-        line.remove()
+        const contentEnd = element.querySelector('.descriptionContentEnd').getBoundingClientRect()
+        const scrollBottom = scroll.getBoundingClientRect().bottom
+        const footer = element.querySelector(':scope > .descriptionStatus').getBoundingClientRect()
         return {
-          footerHeight: element.getBoundingClientRect().bottom -
-            element.querySelector('.descriptionContentEnd').getBoundingClientRect().top,
-          lineHeight,
+          // Short content stays clear of the 16px bottom fade.
+          fadeReserve: scrollBottom - contentEnd.top,
+          footerGap: footer.top - scrollBottom,
+          footerBottomGap: element.getBoundingClientRect().bottom - footer.bottom,
         }
       })
-      expect(layout.footerHeight).toBeCloseTo(16 + layout.lineHeight, 0)
+      expect(layout.fadeReserve).toBeCloseTo(16, 0)
+      expect(layout.footerGap).toBeCloseTo(12, 0)
+      expect(layout.footerBottomGap).toBeCloseTo(0, 0)
     }
     await page.evaluate(() => window.ftElectron.setZoomFactor(1))
     await watchComponent.dispose()
@@ -304,8 +279,7 @@ test.describe('watch page', () => {
       await page.evaluate(value => window.ftElectron.setZoomFactor(value), scale)
       await expect(card).toContainClass('short')
       const layout = await scroller.evaluate(element => {
-        const cardElement = element.closest('.videoDescription')
-        const card = cardElement.getBoundingClientRect()
+        const card = element.closest('.videoDescription').getBoundingClientRect()
         const viewport = element.getBoundingClientRect()
         const more = element.parentElement.querySelector(':scope > .descriptionStatus').getBoundingClientRect()
         const line = document.createElement('span')
@@ -314,27 +288,17 @@ test.describe('watch page', () => {
         element.append(line)
         const lineHeight = line.getBoundingClientRect().height
         line.remove()
-        const description = element.querySelector('.description')
-        element.style.maxBlockSize = '4lh'
-        description.style.maxBlockSize = '4lh'
-        cardElement.style.paddingBlockEnd = 'calc(16px + 1lh)'
-        const previousCardHeight = cardElement.getBoundingClientRect().height
-        element.style.removeProperty('max-block-size')
-        description.style.removeProperty('max-block-size')
-        cardElement.style.removeProperty('padding-block-end')
         return {
-          bottomGap: card.bottom - viewport.bottom,
-          moreOverlapsContent: more.top < viewport.bottom,
+          footerGap: more.top - viewport.bottom,
+          footerBottomGap: card.bottom - more.bottom,
           mask: getComputedStyle(element).maskImage,
           visibleLines: viewport.height / lineHeight,
-          heightDifference: card.height - previousCardHeight,
         }
       })
       expect(layout.visibleLines).toBeCloseTo(5, 1)
-      expect(layout.heightDifference).toBeCloseTo(0, 0)
-      expect(layout.bottomGap).toBeGreaterThanOrEqual(0)
-      expect(layout.bottomGap).toBeLessThanOrEqual(24)
-      expect(layout.moreOverlapsContent).toBe(true)
+      // The footer sits below the faded text instead of covering it.
+      expect(layout.footerGap).toBeCloseTo(12, 0)
+      expect(layout.footerBottomGap).toBeCloseTo(0, 0)
       expect(layout.mask).toMatch(
         /^linear-gradient\((?:to bottom, )?rgb\(0, 0, 0\) calc\(100% - 16px\), (?:transparent|rgba\(0, 0, 0, 0\))\)$/
       )
@@ -364,7 +328,7 @@ test.describe('watch page', () => {
     await expect(card).toHaveClass(/short/)
     await card.locator(':scope > .descriptionStatus').click()
     await expect(card.locator('.license')).toHaveText('Creative Commons Attribution license (reuse allowed)')
-    await card.locator('.descriptionScroll > .descriptionStatus').click()
+    await card.locator(':scope > .descriptionStatus').click()
     await expect(card).toHaveClass(/short/)
     await expect(card.locator('.license')).toHaveText('Creative Commons Attribution license (reuse allowed)')
     await watchComponent.dispose()
@@ -423,7 +387,7 @@ test.describe('watch page', () => {
     const scroller = card.locator('.descriptionScroll')
 
     for (const metadata of [
-      { videoTags: Array.from({ length: 80 }, (_, index) => `tag-${index}`), videoGames: [], license: null },
+      { videoTags: Array.from({ length: 120 }, (_, index) => `tag-${index}`), videoGames: [], license: null },
       { videoTags: [], videoGames: Array.from({ length: 40 }, (_, index) => ({ title: `Game ${index}` })), license: null },
       { videoTags: [], videoGames: [], license: 'Creative Commons license '.repeat(100) },
     ]) {
@@ -446,7 +410,7 @@ test.describe('watch page', () => {
       await scroller.evaluate(element => { element.scrollTop = element.scrollHeight })
       await expect.poll(() => scroller.evaluate(element => element.scrollTop)).toBeGreaterThan(0)
 
-      await card.locator('.descriptionScroll > .descriptionStatus').click()
+      await card.locator(':scope > .descriptionStatus').click()
       await expect(card).toHaveClass(/short/)
       await expect.poll(() => scroller.evaluate(element => element.scrollTop)).toBe(0)
 

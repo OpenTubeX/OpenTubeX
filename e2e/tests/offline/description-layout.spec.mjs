@@ -92,8 +92,8 @@ test.describe('description layout', () => {
       }
       await view.evaluate((component, metadata) => { Object.assign(component, metadata) }, structuredClone(metadata))
       await expect(card).not.toHaveClass(/short/)
-      await expect(card.locator('.descriptionScroll > .descriptionStatus')).toBeVisible()
-      await card.locator('.descriptionScroll > .descriptionStatus').click()
+      await expect(card.locator(':scope > .descriptionStatus')).toBeVisible()
+      await card.locator(':scope > .descriptionStatus').click()
       await expect(card).toHaveClass(/short/)
 
       // Metadata must also render when it is the card's only content.
@@ -105,7 +105,7 @@ test.describe('description layout', () => {
       const position = await card.evaluate(element => ({ x: element.clientWidth - 80, y: 30 }))
       await card.click({ position })
       await expect(card).not.toHaveClass(/short/)
-      await card.locator('.descriptionScroll > .descriptionStatus').click()
+      await card.locator(':scope > .descriptionStatus').click()
       await expect(card).toHaveClass(/short/)
       if (selector === '.videoTagLink' && uiScale === 100) {
         await card.evaluate(element => element.scrollIntoView({ block: 'end' }))
@@ -158,7 +158,7 @@ test.describe('description layout', () => {
     await card.locator(':scope > .descriptionStatus').focus()
     await page.keyboard.press('Enter')
     await expect(card).not.toHaveClass(/short/)
-    await card.locator('.descriptionScroll > .descriptionStatus').click()
+    await card.locator(':scope > .descriptionStatus').click()
     await expect(card).toHaveClass(/short/)
 
     await card.locator('.description').click({ position: { x: 10, y: 10 } })
@@ -203,7 +203,7 @@ test.describe('description layout', () => {
     await mockUnplayableWatchPage(app, page)
     await goTo(page, 'history')
     // Invidious options widen the share menu and hiding Download moves it to the card edge,
-    // so the menu reaches the description's copy and "...more" controls.
+    // so the menu reaches the description's copy and "Show more" controls.
     await page.evaluate(async () => {
       await window.$store.dispatch('updateBackendFallback', true)
       await window.$store.dispatch('updateEnableDownloads', false)
