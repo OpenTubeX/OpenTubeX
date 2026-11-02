@@ -51,7 +51,7 @@ for (const restart of [false, true]) {
 test.describe('download with unreachable YouTube', () => {
   test.use({
     seed: {
-      settings: { landingPage: 'history', enableDownloads: true },
+      settings: { landingPage: 'history', enableDownloads: true, enableSubtitlesByDefault: true },
       downloads: [{
         id: 1,
         videoId: 'jNQXAC9IVRw',
@@ -89,8 +89,10 @@ test.describe('download with unreachable YouTube', () => {
     await expect(page.locator('.videoTitle:visible')).toHaveText('Me at the zoo')
     expect(await watchView.evaluate(view => view.playbackSourceKey)).toBe(sourceKey)
     await expect(video).toHaveJSProperty('currentSrc', downloadSource(1, 'jNQXAC9IVRw', mediaPath))
-    // The late metadata also brings the captions to the playing file.
+    // The late metadata also brings the captions to the playing file, and
+    // turns them on as the default subtitles setting asks.
     await expect.poll(textTrackCount).toBeGreaterThan(0)
+    await expect.poll(() => video.evaluate(element => element.ui.getControls().getPlayer().getTextTracks().some(track => track.active))).toBe(true)
   })
 })
 

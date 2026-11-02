@@ -10087,10 +10087,22 @@ export default defineComponent({
     let videoCaptionsGeneration = 0
 
     // A download can start playing before its metadata, which brings the captions.
-    watch(() => props.captions, (captions, previous) => {
+    watch(() => props.captions, async (captions, previous) => {
       if (previous.length > 0 || captions.length === 0 || !player || videoCaptionsGeneration !== loadGeneration || isLive.value) return
       if (process.env.SUPPORTS_LOCAL_API && props.format !== 'legacy' && props.manifestMimeType === MANIFEST_TYPE_SABR) return
-      for (const caption of captions) addVideoCaption(caption)
+      const loadedPlayer = player
+      const generation = loadGeneration
+      await Promise.all(captions.map(addVideoCaption))
+      if (player !== loadedPlayer || !hasLoaded.value || generation !== loadGeneration) return
+
+      // Apply the subtitle default the load had no captions for, unless a track was chosen meanwhile.
+      const textTracks = player.getTextTracks()
+      if (enableSubtitlesInitially && !textTracks.some(track => track.active)) {
+        const textTrack = findMatchingTextTrack(textTracks, getCaptionToEnable()) ?? textTracks[0]
+        if (textTrack) player.selectTextTrack(textTrack, false)
+      }
+      syncShortsCaptionsEnabled()
+      emit('subtitles-state-updated', player.getTextTracks().some(track => track.active))
     })
 
     async function handleLoaded() {
