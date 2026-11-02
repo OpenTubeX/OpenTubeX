@@ -3010,7 +3010,12 @@ function runApp() {
         }
 
         case DBActions.GENERAL.FIND:
-          return await baseHandlers.history.find()
+          // Strings cross IPC and the context bridge far faster than records.
+          return await baseHandlers.history._findSerialized()
+
+        case DBActions.HISTORY.REMOVE_DUPLICATES:
+          await baseHandlers.history.find()
+          return null
 
         case DBActions.GENERAL.UPSERT:
           await baseHandlers.history.upsert(data)
