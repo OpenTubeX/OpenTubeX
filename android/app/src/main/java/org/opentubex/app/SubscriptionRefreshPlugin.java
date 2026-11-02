@@ -111,7 +111,10 @@ public class SubscriptionRefreshPlugin extends Plugin {
         // The renderer cannot finish its refresh once its WebView is destroyed.
         // Only release work acquired by this plugin, leaving scheduled work alone.
         if (rendererToken != null) {
-            SubscriptionRefreshWorker.finish(getContext(), rendererToken);
+            // Behind pending upload checks, like a finished refresh.
+            Context context = getContext();
+            String token = rendererToken;
+            UPLOADS.execute(() -> SubscriptionRefreshWorker.finish(context, token));
             rendererToken = null;
         }
         if (cancellationReceiver != null) {
