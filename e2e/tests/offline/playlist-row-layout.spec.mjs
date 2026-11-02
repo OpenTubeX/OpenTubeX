@@ -160,6 +160,15 @@ for (const [uiScale, userPlaylistSortOrder] of [[100, 'date_added_descending'], 
             { width: 375, height: 812, mobile: true }
           ]) {
             await setWindowSize(app, page, { width, height })
+            // Each label fits inside the 16:9 image instead of making the thumbnail taller.
+            await expect.poll(() => thumbnail.evaluate(element => {
+              const imageHeight = element.getBoundingClientRect().width * 9 / 16
+              return Math.max(...[...element.querySelectorAll('.playlistIndexBadge, .videoDuration, .videoWatched, .sponsorBlockVideoLabel')]
+                .map(badge => {
+                  const style = getComputedStyle(badge)
+                  return badge.getBoundingClientRect().height + Number.parseFloat(style.marginBlockStart) + Number.parseFloat(style.marginBlockEnd)
+                })) - imageHeight
+            })).toBeLessThanOrEqual(1)
             if (mobile) {
               await expect(actions).toHaveClass(/mobileThumbnailActions/)
               await expect(actions).toBeHidden()
