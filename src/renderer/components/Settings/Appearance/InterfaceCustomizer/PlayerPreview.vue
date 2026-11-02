@@ -33,6 +33,7 @@
       <div
         v-if="menuOpen"
         class="previewOverflowMenu"
+        :class="{ list: !usePlayerMenuGrid }"
       >
         <span class="previewOverflowClose">
           <PreviewIcon :path="SHAKA_PREVIEW_ICONS.CLOSE" />
@@ -46,6 +47,7 @@
             v-for="item in overflowItems"
             :key="item.id"
             class="previewOverflowItem"
+            :class="{ submenu: SUBMENU_CONTROLS.has(item.id) }"
             :data-preview-overflow-item="item.id"
           >
             <PreviewIcon
@@ -60,7 +62,10 @@
               aria-hidden="true"
             />
             <span class="previewOverflowLabel">{{ item.label }}</span>
-            <span class="previewOverflowValue">{{ item.value }}</span>
+            <span
+              v-if="item.value"
+              class="previewOverflowValue"
+            >{{ item.value }}</span>
           </span>
         </div>
       </div>
@@ -185,6 +190,7 @@ const paused = computed(() => props.state === 'paused')
 const compact = usePhoneLayout()
 const menuOpen = computed(() => props.state === 'menu' || (props.menu && props.state === 'window' && !compact.value))
 
+const usePlayerMenuGrid = computed(() => store.getters.getUsePlayerMenuGrid)
 const showPlayerControlsWhenPaused = computed(() => store.getters.getShowPlayerControlsWhenPaused)
 const showVideoTitleWhenPaused = computed(() => store.getters.getShowVideoTitleWhenPaused)
 const showFullscreenActionsWhenPaused = computed(() => store.getters.getShowFullscreenActionsWhenPaused)
@@ -282,6 +288,9 @@ const audioTrackLanguage = computed(() => {
     return ''
   }
 })
+
+// The entries that open a submenu, which the list layout marks with a chevron.
+const SUBMENU_CONTROLS = new Set(['audioTracks', 'captions', 'playbackRate', 'quality', 'sleepTimer', 'seekHistory', 'videoZoom', 'volumeBoost'])
 
 // Mirrors the overflow menu of a video that has every control available, with the current settings.
 const overflowItems = computed(() => {

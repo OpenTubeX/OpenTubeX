@@ -188,6 +188,57 @@ test.describe('interface customizer', () => {
     await expect.poll(previewIds).toEqual(['quickPlaybackSpeedBar', 'screenshot', 'autoplay', 'captions', 'menu', 'pictureInPicture', 'theatreMode', 'fullWindow', 'fullscreen'])
   })
 
+  test('lays out the player menu preview like the player menu', { tag: '@scale' }, async ({ app, page }) => {
+    await setWindowSize(app, page, { width: 1200, height: 800 })
+    const customizer = await openInterfaceCustomizer(page, 'control bar')
+    const menu = customizer.locator('.previewOverflowMenu')
+    const items = menu.locator('.previewOverflowItem')
+    await expect(menu).toBeVisible()
+
+    // Like the player's tiles, every tile in a row is as tall, with its content
+    // centered, whether or not it shows a value.
+    await expect.poll(() => items.evaluateAll(tiles => tiles.map(tile => {
+      const bounds = tile.getBoundingClientRect()
+      const content = [...tile.children].map(child => child.getBoundingClientRect()).filter(rect => rect.height > 0)
+      const top = Math.min(...content.map(rect => rect.top))
+      const bottom = Math.max(...content.map(rect => rect.bottom))
+      return Math.abs((top - bounds.top) - (bounds.bottom - bottom)) < 1
+    }))).not.toContain(false)
+    await expect.poll(() => items.evaluateAll(tiles => new Set(tiles.map(tile => Math.round(tile.getBoundingClientRect().height))).size)).toBe(1)
+
+    // A full menu stays inside the player and scrolls the rows that don't fit.
+    await page.evaluate(async () => {
+      for (const toggle of ['ShowSkipSilenceButton', 'ShowMusicModeToggle', 'ShowLightsOffToggle', 'ShowVolumeBoostToggle', 'ShowMonoAudioToggle', 'EnableScreenshot']) {
+        await window.$store.dispatch(`update${toggle}`, true)
+      }
+      await window.$store.dispatch('updateControlBarButtons', ['menu', 'fullscreen'])
+    })
+    await expect.poll(() => menu.evaluate(element => {
+      const grid = element.querySelector('.previewOverflowGrid')
+      return element.getBoundingClientRect().top >= element.closest('.previewPlayer').getBoundingClientRect().top &&
+        grid.scrollHeight > grid.clientHeight + 1
+    })).toBe(true)
+    // The always dark menu keeps the player's light scrollbar thumb, whatever the app theme.
+    await expect(menu.locator('.previewOverflowGrid > .os-scrollbar-vertical .os-scrollbar-handle'))
+      .toHaveCSS('background-color', 'rgba(255, 255, 255, 0.4)')
+
+    // Without the grid, the player lists its entries in rows, with a chevron
+    // for those that open a submenu.
+    await page.evaluate(() => window.$store.dispatch('updateUsePlayerMenuGrid', false))
+    await expect(menu).toHaveClass(/\blist\b/)
+    await expect.poll(() => items.evaluateAll(rows => rows.every((row, index) => {
+      const bounds = row.getBoundingClientRect()
+      const icon = row.firstElementChild.getBoundingClientRect()
+      const label = row.querySelector('.previewOverflowLabel').getBoundingClientRect()
+      const previous = rows[index - 1]?.getBoundingClientRect()
+      return label.left > icon.right && Math.abs(label.top + label.height / 2 - (bounds.top + bounds.height / 2)) < 1 &&
+        (!previous || Math.abs(bounds.left - previous.left) < 0.5)
+    }))).toBe(true)
+    const chevron = item => menu.locator(`[data-preview-overflow-item="${item}"]`).evaluate(row => getComputedStyle(row, '::after').content)
+    expect(await chevron('volumeBoost')).not.toBe('none')
+    expect(await chevron('loop')).toBe('none')
+  })
+
   test('previews the fullscreen action order', async ({ page }) => {
     const customizer = await openInterfaceCustomizer(page, 'fullscreen actions')
     const actions = customizer.locator('.previewFullscreenActions [data-preview-fullscreen-action]')
@@ -480,46 +531,70 @@ test.describe('interface customizer', () => {
     ))).toBe(4)
   })
 
-  test('scrolls the phone player menu preview and clamps it when its range shrinks', { tag: '@scale' }, async ({ app, page }) => {
-    const toggles = ['ShowSkipSilenceButton', 'ShowMusicModeToggle', 'ShowLightsOffToggle', 'ShowVolumeBoostToggle', 'ShowMonoAudioToggle']
-    const setToggles = value => page.evaluate(async ({ toggles, value }) => {
-      for (const toggle of toggles) await window.$store.dispatch(`update${toggle}`, value)
-    }, { toggles, value })
-    await setWindowSize(app, page, { width: 360, height: 760 })
-    const customizer = await openInterfaceCustomizer(page, 'control bar')
-    await setToggles(true)
-    await customizer.getByRole('tab', { name: 'Player menu', exact: true }).click()
-    const grid = customizer.locator('.previewOverflowGrid')
-    const expectScrollbarToMatchRange = () => expect.poll(() => grid.evaluate(element => {
-      const scrollbar = element.querySelector(':scope > .os-scrollbar-vertical')
-      if (element.scrollHeight - element.clientHeight <= 1) {
-        return !scrollbar.classList.contains('os-scrollbar-visible') || scrollbar.classList.contains('os-scrollbar-unusable')
+  // The desktop sizes stay above the phone layout's 600px at every UI scale.
+  const scrollingMenuLayouts = [
+    { name: 'phone grid', size: { width: 360, height: 760 }, resized: { width: 380, height: 640 }, grid: true },
+    { name: 'phone list', size: { width: 360, height: 760 }, resized: { width: 380, height: 640 }, grid: false },
+    { name: 'desktop grid', size: { width: 1200, height: 800 }, resized: { width: 1050, height: 780 }, grid: true },
+    { name: 'desktop list', size: { width: 1200, height: 800 }, resized: { width: 1050, height: 780 }, grid: false },
+  ]
+  for (const layout of scrollingMenuLayouts) {
+    test(`scrolls the ${layout.name} player menu preview and clamps it when its range shrinks`, { tag: '@scale' }, async ({ app, page }) => {
+      const phone = layout.name.startsWith('phone')
+      const toggles = ['ShowSkipSilenceButton', 'ShowMusicModeToggle', 'ShowLightsOffToggle', 'ShowVolumeBoostToggle', 'ShowMonoAudioToggle']
+      const setToggles = value => page.evaluate(async ({ toggles, value }) => {
+        for (const toggle of toggles) await window.$store.dispatch(`update${toggle}`, value)
+      }, { toggles, value })
+      await setWindowSize(app, page, layout.size)
+      await page.evaluate(async (grid) => {
+        await window.$store.dispatch('updateUsePlayerMenuGrid', grid)
+        // The full control bar keeps most entries out of the menu.
+        await window.$store.dispatch('updateControlBarButtons', ['menu', 'fullscreen'])
+      }, layout.grid)
+      const customizer = await openInterfaceCustomizer(page, 'control bar')
+      await setToggles(true)
+      if (phone) await customizer.getByRole('tab', { name: 'Player menu', exact: true }).click()
+      const grid = customizer.locator('.previewOverflowGrid')
+      // The phone menu keeps its scrollbar visible, the desktop one hides it while idle.
+      const expectScrollbarToMatchRange = () => expect.poll(() => grid.evaluate((element, phone) => {
+        const scrollbar = element.querySelector(':scope > .os-scrollbar-vertical')
+        if (element.scrollHeight - element.clientHeight <= 1) {
+          return !scrollbar.classList.contains('os-scrollbar-visible') || scrollbar.classList.contains('os-scrollbar-unusable')
+        }
+        const track = scrollbar.querySelector('.os-scrollbar-track').getBoundingClientRect()
+        const handle = scrollbar.querySelector('.os-scrollbar-handle').getBoundingClientRect()
+        return (!phone || getComputedStyle(scrollbar).visibility === 'visible') && handle.height >= 1 &&
+          Math.abs(handle.bottom - track.bottom) <= 2
+      }, phone)).toBe(true)
+      const scrollToEnd = async () => {
+        await grid.evaluate(element => { element.scrollTop = element.scrollHeight })
+        await expectScrollAtRenderedEnd(grid)
+        await expectScrollbarToMatchRange()
       }
-      const track = scrollbar.querySelector('.os-scrollbar-track').getBoundingClientRect()
-      const handle = scrollbar.querySelector('.os-scrollbar-handle').getBoundingClientRect()
-      return getComputedStyle(scrollbar).visibility === 'visible' && handle.width >= 1 &&
-        Math.abs(handle.bottom - track.bottom) <= 2
-    })).toBe(true)
-    const scrollToEnd = async () => {
-      await grid.evaluate(element => { element.scrollTop = element.scrollHeight })
+
+      // Like the player's menu, the entries that don't fit scroll into view.
+      await expect.poll(() => grid.evaluate(element => element.scrollHeight - element.clientHeight)).toBeGreaterThan(1)
+      await scrollToEnd()
+
+      await setToggles(false)
       await expectScrollAtRenderedEnd(grid)
       await expectScrollbarToMatchRange()
-    }
 
-    // Like the player's phone menu, the tiles that don't fit scroll into view.
-    await expect.poll(() => grid.evaluate(element => element.scrollHeight - element.clientHeight)).toBeGreaterThan(1)
-    await scrollToEnd()
+      await setToggles(true)
+      await scrollToEnd()
+      await setWindowSize(app, page, layout.resized)
+      await expectScrollAtRenderedEnd(grid)
+      await expectScrollbarToMatchRange()
 
-    await setToggles(false)
-    await expectScrollAtRenderedEnd(grid)
-    await expectScrollbarToMatchRange()
-
-    await setToggles(true)
-    await scrollToEnd()
-    await setWindowSize(app, page, { width: 380, height: 640 })
-    await expectScrollAtRenderedEnd(grid)
-    await expectScrollbarToMatchRange()
-  })
+      // The tiles take less room than the rows of the list.
+      if (!layout.grid) {
+        await scrollToEnd()
+        await page.evaluate(() => window.$store.dispatch('updateUsePlayerMenuGrid', true))
+        await expectScrollAtRenderedEnd(grid)
+        await expectScrollbarToMatchRange()
+      }
+    })
+  }
 })
 
 test.describe('interface customizer with Invidious', () => {
