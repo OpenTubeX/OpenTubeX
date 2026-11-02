@@ -233,7 +233,6 @@
 .mobileLinkQuickActionGroups {
   display: grid;
   grid-template-columns: minmax(0, 1fr);
-  flex-shrink: 0;
   gap: 8px;
   padding-block: 4px 16px;
   border-block-end: 1px solid var(--border-color);
@@ -304,11 +303,7 @@
 
 /* Labels stay on one line unless the row is too narrow, then wrap instead of truncating. */
 .mobileLinkQuickActionLabel {
-  display: -webkit-box;
   max-inline-size: 100%;
-  overflow: hidden;
-  -webkit-box-orient: vertical;
-  -webkit-line-clamp: 2;
   font-size: 14px;
   font-weight: 500;
   line-height: 20px;

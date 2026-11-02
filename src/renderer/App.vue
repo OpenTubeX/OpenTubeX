@@ -303,44 +303,6 @@
               >{{ mobileContextMenuTitle }}</strong>
             </div>
             <div
-              v-if="mobileContextQuickActionGroups.length"
-              class="mobileLinkQuickActionGroups"
-            >
-              <div
-                v-for="group in mobileContextQuickActionGroups"
-                :key="group.className"
-                class="mobileLinkQuickActions"
-                :class="group.className"
-              >
-                <div
-                  v-for="(row, rowIndex) in group.rows"
-                  :key="rowIndex"
-                  class="mobileLinkQuickActionRow"
-                >
-                  <button
-                    v-for="action in row"
-                    :key="action.label"
-                    type="button"
-                    :role="action.pressed === undefined ? 'menuitem' : 'menuitemcheckbox'"
-                    :aria-label="action.label"
-                    :aria-checked="action.pressed"
-                    :disabled="action.enabled === false"
-                    @click="runMobileContextAction(action)"
-                  >
-                    <FtIcon
-                      class="mobileLinkQuickActionIcon"
-                      :icon="action.icon"
-                      aria-hidden="true"
-                    />
-                    <span
-                      class="mobileLinkQuickActionLabel"
-                      aria-hidden="true"
-                    >{{ action.shortLabel ?? action.label }}</span>
-                  </button>
-                </div>
-              </div>
-            </div>
-            <div
               ref="mobileLinkActionsScrollRef"
               v-overlay-scrollbars
               class="mobileLinkActionsScroll"
@@ -349,6 +311,44 @@
                 ref="mobileLinkActionsContentRef"
                 class="mobileLinkActionsContent"
               >
+                <div
+                  v-if="mobileContextQuickActionGroups.length"
+                  class="mobileLinkQuickActionGroups"
+                >
+                  <div
+                    v-for="group in mobileContextQuickActionGroups"
+                    :key="group.className"
+                    class="mobileLinkQuickActions"
+                    :class="group.className"
+                  >
+                    <div
+                      v-for="(row, rowIndex) in group.rows"
+                      :key="rowIndex"
+                      class="mobileLinkQuickActionRow"
+                    >
+                      <button
+                        v-for="action in row"
+                        :key="action.label"
+                        type="button"
+                        :role="action.pressed === undefined ? 'menuitem' : 'menuitemcheckbox'"
+                        :aria-label="action.label"
+                        :aria-checked="action.pressed"
+                        :disabled="action.enabled === false"
+                        @click="runMobileContextAction(action)"
+                      >
+                        <FtIcon
+                          class="mobileLinkQuickActionIcon"
+                          :icon="action.icon"
+                          aria-hidden="true"
+                        />
+                        <span
+                          class="mobileLinkQuickActionLabel"
+                          aria-hidden="true"
+                        >{{ action.shortLabel ?? action.label }}</span>
+                      </button>
+                    </div>
+                  </div>
+                </div>
                 <template
                   v-for="(action, index) in mobileContextMenuRows"
                   :key="action.label ?? index"

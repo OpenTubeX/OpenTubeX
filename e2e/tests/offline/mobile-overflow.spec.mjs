@@ -48,7 +48,8 @@ test.describe('mobile overflow', { tag: '@scale' }, () => {
           const buttonBounds = button.getBoundingClientRect()
           const label = button.querySelector('.mobileLinkQuickActionLabel')
           return buttonBounds.left >= bounds.left && buttonBounds.right <= bounds.right &&
-              label.scrollWidth <= label.clientWidth + 1
+              label.scrollWidth <= label.clientWidth + 1 &&
+              label.getBoundingClientRect().bottom <= buttonBounds.bottom + 1
         }))
       })).toBe(true)
       await page.keyboard.press('Escape')
