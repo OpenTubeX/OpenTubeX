@@ -13,6 +13,8 @@ async function fetchOriginalTitle(fetchUrl, videoId) {
   try {
     const video = `https://www.youtube.com/watch?v=${encodeURIComponent(videoId)}`
     const response = await fetchUrl(`https://www.youtube.com/oembed?url=${encodeURIComponent(video)}`, {
+      // Without cookies, YouTube cannot link the lookups to the user.
+      credentials: 'omit',
       signal: AbortSignal.timeout(ORIGINAL_TITLE_TIMEOUT_MS)
     })
     if (!response.ok) return null
@@ -92,20 +94,26 @@ export function createUploadNotifier({ file, show, fetch: fetchUrl = fetch }) {
      * @param {{ channelId: string, feedType: string, entries: ReturnType<typeof import('../newUploadNotifications.js').normalizeUploadEntries> }} value
      */
     observe({ channelId, feedType, entries }) {
-      return run(async () => {
+      const configuredChannel = () => {
         const channel = configuration?.enabled === true ? configuration.channels?.[channelId] : null
-        if (!channel?.feedTypes?.includes(feedType)) return null
+        return channel?.feedTypes?.includes(feedType) ? channel : null
+      }
+      return run(async () => {
+        const channel = configuredChannel()
+        if (!channel) return []
 
         const uploads = takeVisibleUploads(await load(), channelId, feedType, entries, channel.membersOnly === true)
         await save()
-        return { uploads, channel, configuration }
-      }).then(async result => {
-        if (!result || result.uploads.length === 0) return
-        const { uploads, channel, configuration } = result
+        return uploads
+      }).then(async uploads => {
+        if (uploads.length === 0) return
         // Looked up outside the queue, so slow requests do not hold up other feeds.
-        const bodies = configuration.originalTitles === true && feedType !== 'posts'
+        const bodies = configuration?.originalTitles === true && feedType !== 'posts'
           ? await Promise.all(uploads.map(async upload => await fetchOriginalTitle(fetchUrl, upload.id) ?? upload.title))
           : uploads.map(upload => upload.title)
+        // Notifications may have been turned off during the lookup.
+        const channel = configuredChannel()
+        if (!channel) return
 
         const silent = isWithinQuietHours(configuration.quietHours)
         uploads.forEach((upload, index) => {

@@ -221,8 +221,9 @@ test('the desktop notifier shows original video titles when untranslated text is
     const notifier = createUploadNotifier({
       file: path.join(directory, 'state.json'),
       show: notification => shown.push(notification),
-      fetch: async url => {
+      fetch: async (url, init) => {
         const videoId = new URL(new URL(url).searchParams.get('url')).searchParams.get('v')
+        assert.equal(init.credentials, 'omit')
         requested.push(videoId)
         if (videoId === 'missing') return new Response('Not Found', { status: 404 })
         return Response.json({ title: `Original ${videoId}` })
@@ -245,6 +246,39 @@ test('the desktop notifier shows original video titles when untranslated text is
 
     assert.deepEqual(shown.map(notification => notification.body), ['Title missing', 'Original b', 'Title q', 'Title c'])
     assert.deepEqual(requested, ['missing', 'b'])
+  } finally {
+    await rm(directory, { recursive: true, force: true })
+  }
+})
+
+test('the desktop notifier drops notifications turned off during the original title lookup', async () => {
+  const directory = await mkdtemp(path.join(tmpdir(), 'upload-notifications-'))
+  try {
+    const shown = []
+    let requested
+    const lookup = new Promise(resolve => { requested = resolve })
+    let respond
+    const notifier = createUploadNotifier({
+      file: path.join(directory, 'state.json'),
+      show: notification => shown.push(notification),
+      fetch: () => {
+        requested()
+        return new Promise(resolve => { respond = resolve })
+      }
+    })
+    await notifier.configure({
+      enabled: true,
+      originalTitles: true,
+      titles: { videos: '{channel}' },
+      channels: { UC1: { name: 'One', feedTypes: ['videos'], membersOnly: false } }
+    })
+    await notifier.observe({ channelId: 'UC1', feedType: 'videos', entries: [entry('a')] })
+    const observed = notifier.observe({ channelId: 'UC1', feedType: 'videos', entries: [entry('b', Date.now()), entry('a')] })
+    await lookup
+    await notifier.configure({ enabled: false })
+    respond(Response.json({ title: 'Original b' }))
+    await observed
+    assert.deepEqual(shown, [])
   } finally {
     await rm(directory, { recursive: true, force: true })
   }

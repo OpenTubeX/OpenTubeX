@@ -98,37 +98,37 @@ final class UploadNotifications {
     }
 
     static void observe(Context context, String channelId, String feedType, JSONArray entries) throws Exception {
-        String saved = preferences(context).getString(CONFIGURATION_KEY, null);
-        JSONObject configuration = saved == null ? new JSONObject() : new JSONObject(saved);
-        if (!configuration.optBoolean("enabled")) return;
-        JSONObject channels = configuration.optJSONObject("channels");
-        JSONObject channel = channels == null ? null : channels.optJSONObject(channelId);
-        if (channel == null || !contains(channel.optJSONArray("feedTypes"), feedType)) return;
-
         List<JSONObject> available = new ArrayList<>();
         for (int i = 0; i < entries.length(); i++) {
             JSONObject entry = entries.optJSONObject(i);
             if (entry != null) available.add(entry);
         }
 
-        List<JSONObject> uploads = takeAndSave(context, channelId, feedType, available, channel.optBoolean("membersOnly"));
+        List<JSONObject> uploads = takeAndSave(context, channelId, feedType, available);
+        if (uploads.isEmpty()) return;
 
+        boolean originalTitles = configuration(context).optBoolean("originalTitles") && !feedType.equals("posts");
+        List<String> bodies = new ArrayList<>();
+        for (JSONObject upload : uploads) {
+            String original = originalTitles ? fetchOriginalTitle(upload.getString("id")) : null;
+            bodies.add(original != null ? original : upload.optString("title"));
+        }
+
+        // Notifications may have been turned off during the lookup.
+        JSONObject configuration = configuration(context);
+        JSONObject channel = configuredChannel(configuration, channelId, feedType);
+        if (channel == null) return;
         JSONObject titles = configuration.optJSONObject("titles");
         String name = channel.optString("name");
-        boolean originalTitles = configuration.optBoolean("originalTitles") && !feedType.equals("posts");
         boolean silent = isWithinQuietHours(configuration.optJSONObject("quietHours"), LocalTime.now());
-        for (JSONObject upload : uploads) {
+        for (int i = 0; i < uploads.size(); i++) {
+            JSONObject upload = uploads.get(i);
             // Ended streams in the live feed are announced like videos.
             String type = upload.optBoolean("live") ? "live" : feedType.equals("live") ? "videos" : feedType;
             String title = (titles == null ? "{channel}" : titles.optString(type, "{channel}"))
                 .replace("{channel}", name.isEmpty() ? channelId : name);
-            String body = upload.optString("title");
-            if (originalTitles) {
-                String original = fetchOriginalTitle(upload.getString("id"));
-                if (original != null) body = original;
-            }
             try {
-                show(context, title, body, url(feedType, upload.getString("id")), silent);
+                show(context, title, bodies.get(i), url(feedType, upload.getString("id")), silent);
             } catch (RuntimeException error) {
                 // One failed notification must not skip the others.
                 android.util.Log.w("OpenTubeXUploads", "Unable to show an upload notification", error);
@@ -136,19 +136,38 @@ final class UploadNotifications {
         }
     }
 
-    /** Only the state update is synchronized, so title lookups do not hold up other feeds. */
+    /**
+     * Only the state update is synchronized, like configure, so title lookups do not
+     * hold up other feeds and a disabled configuration cannot recreate the state.
+     */
     private static synchronized List<JSONObject> takeAndSave(Context context, String channelId, String feedType,
-        List<JSONObject> available, boolean showMembersOnly) throws Exception {
+        List<JSONObject> available) throws Exception {
+        JSONObject channel = configuredChannel(configuration(context), channelId, feedType);
+        if (channel == null) return new ArrayList<>();
         JSONObject state = readState(context);
         List<JSONObject> uploads = takeVisibleUploads(state, channelId, feedType, available,
-            showMembersOnly, System.currentTimeMillis());
+            channel.optBoolean("membersOnly"), System.currentTimeMillis());
         writeState(context, state);
         return uploads;
+    }
+
+    private static JSONObject configuration(Context context) throws Exception {
+        String saved = preferences(context).getString(CONFIGURATION_KEY, null);
+        return saved == null ? new JSONObject() : new JSONObject(saved);
+    }
+
+    private static JSONObject configuredChannel(JSONObject configuration, String channelId, String feedType) {
+        if (!configuration.optBoolean("enabled")) return null;
+        JSONObject channels = configuration.optJSONObject("channels");
+        JSONObject channel = channels == null ? null : channels.optJSONObject(channelId);
+        return channel != null && contains(channel.optJSONArray("feedTypes"), feedType) ? channel : null;
     }
 
     /** Feeds can carry YouTube's auto-translated titles; oEmbed returns the original one. */
     private static String fetchOriginalTitle(String videoId) {
         HttpURLConnection connection = null;
+        // Timeouts apply per connect and read, so the whole lookup also has a deadline.
+        long deadline = System.nanoTime() + ORIGINAL_TITLE_TIMEOUT_MILLIS * 1_000_000L;
         try {
             String video = "https://www.youtube.com/watch?v=" + Uri.encode(videoId);
             connection = (HttpURLConnection) new URL("https://www.youtube.com/oembed?url=" + Uri.encode(video)).openConnection();
@@ -158,7 +177,10 @@ final class UploadNotifications {
             ByteArrayOutputStream output = new ByteArrayOutputStream();
             try (InputStream input = connection.getInputStream()) {
                 byte[] buffer = new byte[8192];
-                for (int count; (count = input.read(buffer)) >= 0;) output.write(buffer, 0, count);
+                for (int count; (count = input.read(buffer)) >= 0;) {
+                    if (System.nanoTime() > deadline) return null;
+                    output.write(buffer, 0, count);
+                }
             }
             String title = new JSONObject(output.toString(StandardCharsets.UTF_8.name())).optString("title");
             return title.isEmpty() ? null : title;
