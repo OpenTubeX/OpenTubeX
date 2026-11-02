@@ -180,3 +180,33 @@ test('entries keep web thumbnails, and uploads get theirs from the configured te
   assert.equal(getUploadThumbnailUrl(configuration, 'posts', 'abc'), undefined)
   assert.equal(getUploadThumbnailUrl({}, 'videos', 'abc'), undefined)
 })
+
+test('a slow first read of the desktop history cannot undo a notification added meanwhile', async () => {
+  const fsPromises = (await import('node:fs/promises')).default
+  const { syncBuiltinESMExports } = await import('node:module')
+  const directory = await mkdtemp(path.join(tmpdir(), 'notification-history-'))
+  const original = fsPromises.readFile
+  let delayed = false
+  fsPromises.readFile = async (...args) => {
+    const text = await original(...args)
+    if (!delayed) {
+      delayed = true
+      await new Promise(resolve => setTimeout(resolve, 50))
+    }
+    return text
+  }
+  syncBuiltinESMExports()
+  try {
+    const file = path.join(directory, 'history.json')
+    await writeFile(file, '[]')
+    const history = createNotificationHistory({ file, onChange: () => {} })
+    const listing = history.list()
+    await history.add({ kind: 'video', title: 'Upload', body: 'Video', path: '/watch/def' })
+    await listing
+    assert.deepEqual((await history.list()).map(entry => entry.title), ['Upload'])
+  } finally {
+    fsPromises.readFile = original
+    syncBuiltinESMExports()
+    await rm(directory, { recursive: true, force: true })
+  }
+})

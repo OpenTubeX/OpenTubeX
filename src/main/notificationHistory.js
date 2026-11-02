@@ -12,16 +12,19 @@ export function createNotificationHistory({ file, onChange }) {
   /** @type {import('../notificationHistory.js').NotificationHistoryEntry[] | null} */
   let entries = null
   let pending = Promise.resolve()
+  /** @type {Promise<void> | null} */
+  let loaded = null
 
-  async function load() {
-    if (entries) return entries
-    try {
-      entries = normalizeNotificationHistory(JSON.parse(await readFile(file, 'utf8')))
-    } catch (error) {
-      if (error.code !== 'ENOENT') console.error('Failed to read the notification history', error)
-      entries = []
-    }
-    return entries
+  // Every caller shares the first read, so a slow one cannot replace newer entries.
+  function load() {
+    loaded ??= readFile(file, 'utf8')
+      .then(text => normalizeNotificationHistory(JSON.parse(text)))
+      .catch(error => {
+        if (error.code !== 'ENOENT') console.error('Failed to read the notification history', error)
+        return []
+      })
+      .then(value => { entries = value })
+    return loaded.then(() => /** @type {import('../notificationHistory.js').NotificationHistoryEntry[]} */ (entries))
   }
 
   /**
