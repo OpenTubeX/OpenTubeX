@@ -1274,12 +1274,19 @@ const videoMenuOptions = computed(() => {
   return normalizedOptions
 })
 
-function getLiveReminderPayload() {
+async function getLiveReminderPayload() {
+  const videoId = id.value
+  const startTimestamp = premiereTimestamp.value
+  let videoTitle = title.value
+  // The original title may still be loading, or have failed to load, for the shown title.
+  if (store.getters.getAvoidTranslation === 'entire_app') {
+    videoTitle = await getOembedTitle(videoId) ?? videoTitle
+  }
   return {
-    videoId: id.value,
-    startTimestamp: premiereTimestamp.value,
+    videoId,
+    startTimestamp,
     notificationTitle: t('Video.Scheduled video starting'),
-    notificationBody: t('Video.Live notification body', { videoTitle: title.value })
+    notificationBody: t('Video.Live notification body', { videoTitle })
   }
 }
 
@@ -1304,7 +1311,7 @@ async function syncLiveReminder() {
     }
 
     if (reminder && reminder.startTimestamp !== startTimestamp) {
-      liveReminderActive.value = await liveReminder.schedule(getLiveReminderPayload())
+      liveReminderActive.value = await liveReminder.schedule(await getLiveReminderPayload())
     } else {
       liveReminderActive.value = reminder !== null
     }
@@ -1329,7 +1336,7 @@ async function toggleLiveReminder() {
         icon: ['fas', 'calendar-days']
       })
     } else {
-      const scheduled = await liveReminder.schedule(getLiveReminderPayload())
+      const scheduled = await liveReminder.schedule(await getLiveReminderPayload())
       if (videoId !== id.value) return
       liveReminderActive.value = scheduled
       showToast({

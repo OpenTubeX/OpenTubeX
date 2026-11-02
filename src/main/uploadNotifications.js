@@ -1,12 +1,39 @@
 import { readFile, rm, writeFile, rename } from 'node:fs/promises'
 import { createUploadNotificationState, forgetUnconfiguredFeeds, getUploadUrl, isWithinQuietHours, takeVisibleUploads } from '../newUploadNotifications.js'
 
+const ORIGINAL_TITLE_TIMEOUT_MS = 5000
+
+/**
+ * Feeds can carry YouTube's auto-translated titles; oEmbed returns the original one.
+ * @param {typeof fetch} fetchUrl
+ * @param {string} videoId
+ * @returns {Promise<string | null>}
+ */
+async function fetchOriginalTitle(fetchUrl, videoId) {
+  try {
+    const video = `https://www.youtube.com/watch?v=${encodeURIComponent(videoId)}`
+    const response = await fetchUrl(`https://www.youtube.com/oembed?url=${encodeURIComponent(video)}`, {
+      signal: AbortSignal.timeout(ORIGINAL_TITLE_TIMEOUT_MS)
+    })
+    if (!response.ok) return null
+    const { title } = await response.json()
+    return typeof title === 'string' && title.length > 0 ? title : null
+  } catch {
+    // Keep the feed title when the video is unavailable or the request fails.
+    return null
+  }
+}
+
 /**
  * Single desktop source of truth for new-upload notifications, shared by
  * foreground refreshes and the background refresh process.
- * @param {{ file: string, show: (notification: { title: string, body: string, url: string, silent: boolean }) => void }} options
+ * @param {{
+ *   file: string,
+ *   show: (notification: { title: string, body: string, url: string, silent: boolean }) => void,
+ *   fetch?: typeof fetch
+ * }} options
  */
-export function createUploadNotifier({ file, show }) {
+export function createUploadNotifier({ file, show, fetch: fetchUrl = fetch }) {
   let configuration = null
   let state = null
   let pending = Promise.resolve()
@@ -67,19 +94,27 @@ export function createUploadNotifier({ file, show }) {
     observe({ channelId, feedType, entries }) {
       return run(async () => {
         const channel = configuration?.enabled === true ? configuration.channels?.[channelId] : null
-        if (!channel?.feedTypes?.includes(feedType)) return
+        if (!channel?.feedTypes?.includes(feedType)) return null
 
         const uploads = takeVisibleUploads(await load(), channelId, feedType, entries, channel.membersOnly === true)
         await save()
+        return { uploads, channel, configuration }
+      }).then(async result => {
+        if (!result || result.uploads.length === 0) return
+        const { uploads, channel, configuration } = result
+        // Looked up outside the queue, so slow requests do not hold up other feeds.
+        const bodies = configuration.originalTitles === true && feedType !== 'posts'
+          ? await Promise.all(uploads.map(async upload => await fetchOriginalTitle(fetchUrl, upload.id) ?? upload.title))
+          : uploads.map(upload => upload.title)
 
         const silent = isWithinQuietHours(configuration.quietHours)
-        for (const upload of uploads) {
+        uploads.forEach((upload, index) => {
           // Ended streams in the live feed are announced like videos.
           const type = upload.live ? 'live' : feedType === 'live' ? 'videos' : feedType
           try {
             show({
               title: (configuration.titles?.[type] ?? '{channel}').replaceAll('{channel}', channel.name || channelId),
-              body: upload.title,
+              body: bodies[index],
               url: getUploadUrl(feedType, upload.id),
               silent
             })
@@ -87,7 +122,7 @@ export function createUploadNotifier({ file, show }) {
             // One failed notification must not skip the others.
             console.error('Failed to show an upload notification', error)
           }
-        }
+        })
       })
     }
   }

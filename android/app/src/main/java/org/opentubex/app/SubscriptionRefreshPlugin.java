@@ -17,6 +17,8 @@ import com.getcapacitor.annotation.CapacitorPlugin;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.UUID;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 import java.util.function.Consumer;
 
 import androidx.core.content.ContextCompat;
@@ -24,6 +26,8 @@ import org.json.JSONException;
 
 @CapacitorPlugin(name = "SubscriptionRefresh")
 public class SubscriptionRefreshPlugin extends Plugin {
+    // Original title lookups use the network, so they must not block other plugin calls.
+    private static final ExecutorService UPLOADS = Executors.newSingleThreadExecutor();
     private BroadcastReceiver cancellationReceiver;
     private Consumer<Boolean> rendererActiveListener;
     private volatile String rendererToken;
@@ -206,12 +210,15 @@ public class SubscriptionRefreshPlugin extends Plugin {
             call.reject("A channel feed is required");
             return;
         }
-        try {
-            UploadNotifications.observe(getContext(), channelId, feedType, entries);
-            call.resolve();
-        } catch (Exception error) {
-            call.reject("Unable to check for new uploads", error);
-        }
+        Context context = getContext();
+        UPLOADS.execute(() -> {
+            try {
+                UploadNotifications.observe(context, channelId, feedType, entries);
+                call.resolve();
+            } catch (Exception error) {
+                call.reject("Unable to check for new uploads", error);
+            }
+        });
     }
 
     @PluginMethod

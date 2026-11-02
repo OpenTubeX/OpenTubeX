@@ -804,6 +804,37 @@ test.describe('subscriptions feed with upcoming premieres shown', () => {
   })
 })
 
+test.describe('subscriptions feed preferring untranslated text in the entire app', () => {
+  test.use({
+    seed: {
+      ...seed,
+      settings: { ...seed.settings, hideUpcomingPremieres: false, avoidTranslation: 'entire_app' }
+    }
+  })
+
+  test('a reminder uses the original title before the card shows it', async ({ app }) => {
+    await app.electronApp.evaluate(({ Notification }) => {
+      Notification.isSupported = () => true
+    })
+    const page = app.page
+    // The card's lookup fails, so it keeps the feed title; the reminder's lookup succeeds.
+    let originalTitleAvailable = false
+    await page.route(/\/oembed\?.*aaaaaaaaaa3/, route => originalTitleAvailable
+      ? route.fulfill({ contentType: 'application/json', body: JSON.stringify({ title: 'Original premiere title' }) })
+      : route.abort())
+    await goTo(page, 'subscriptions')
+
+    const upcomingPremiere = page.locator('.ft-list-video').filter({ hasText: 'Upcoming premiere video' })
+    await expect(upcomingPremiere.locator('.title')).toHaveText('Upcoming premiere video')
+    originalTitleAvailable = true
+    await upcomingPremiere.getByRole('button', { name: 'Notify me' }).click()
+    await expect(upcomingPremiere.getByRole('button', { name: 'Notification on' })).toHaveAttribute('aria-pressed', 'true')
+
+    const reminder = await page.evaluate(() => window.ftElectron.liveReminder.get('aaaaaaaaaa3'))
+    expect(reminder.notificationBody).toBe('Original premiere title is starting now')
+  })
+})
+
 test.describe('scheduled live streams in the Live tab', () => {
   const liveStream = (videoId, title, published, extra = {}) => feedVideo(videoId, title, CHANNEL_A, published, {
     isNewInSubscriptionFeed: false,

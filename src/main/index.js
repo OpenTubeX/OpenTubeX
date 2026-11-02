@@ -594,7 +594,9 @@ function runApp() {
   const userDataPath = app.getPath('userData')
   const uploadNotifier = createUploadNotifier({
     file: path.join(userDataPath, 'upload-notifications.json'),
-    show: showUrlNotification
+    show: showUrlNotification,
+    // Uses the session's proxy settings, like the background refresh requests.
+    fetch: (input, init) => net.fetch(input, init)
   })
   const backgroundSubscriptions = createSubscriptionBackgroundService(userDataPath, {
     onUploads: value => uploadNotifier.observe(value).catch(() => {})

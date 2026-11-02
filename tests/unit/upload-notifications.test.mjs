@@ -213,6 +213,43 @@ test('members-only uploads seen while hidden stay known once they become visible
   }
 })
 
+test('the desktop notifier shows original video titles when untranslated text is preferred', async () => {
+  const directory = await mkdtemp(path.join(tmpdir(), 'upload-notifications-'))
+  try {
+    const shown = []
+    const requested = []
+    const notifier = createUploadNotifier({
+      file: path.join(directory, 'state.json'),
+      show: notification => shown.push(notification),
+      fetch: async url => {
+        const videoId = new URL(new URL(url).searchParams.get('url')).searchParams.get('v')
+        requested.push(videoId)
+        if (videoId === 'missing') return new Response('Not Found', { status: 404 })
+        return Response.json({ title: `Original ${videoId}` })
+      }
+    })
+    const configure = originalTitles => notifier.configure(createUploadNotificationConfiguration({
+      enabled: true,
+      subscriptions: [{ id: 'UC1', name: 'One', feedTypes: ['videos', 'posts'], notificationFeedTypes: ['videos', 'posts'] }],
+      showMembersOnly: false,
+      titles: { videos: '{channel}', posts: '{channel}' },
+      originalTitles
+    }))
+    await configure(true)
+    await notifier.observe({ channelId: 'UC1', feedType: 'videos', entries: [entry('a')] })
+    await notifier.observe({ channelId: 'UC1', feedType: 'posts', entries: [entry('p')] })
+    await notifier.observe({ channelId: 'UC1', feedType: 'videos', entries: [entry('missing', Date.now()), entry('b', Date.now()), entry('a')] })
+    await notifier.observe({ channelId: 'UC1', feedType: 'posts', entries: [entry('q', Date.now()), entry('p')] })
+    await configure(false)
+    await notifier.observe({ channelId: 'UC1', feedType: 'videos', entries: [entry('c', Date.now()), entry('missing', Date.now()), entry('b', Date.now()), entry('a')] })
+
+    assert.deepEqual(shown.map(notification => notification.body), ['Title missing', 'Original b', 'Title q', 'Title c'])
+    assert.deepEqual(requested, ['missing', 'b'])
+  } finally {
+    await rm(directory, { recursive: true, force: true })
+  }
+})
+
 test('post text decodes named and numeric entities', () => {
   const [post] = normalizeUploadEntries([{ postId: 'p', postText: 'a&nbsp;b &#39;c&#x27; &AMP; &unknown; &#99999999;' }])
   assert.equal(post.title, "a\u00A0b 'c' & &unknown; &#99999999;")

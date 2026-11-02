@@ -219,6 +219,7 @@ export function useSubscriptionAutoRefresh({ dataReady, t }) {
       quietHours: store.getters.getBedtimeSilenceNotifications
         ? { start: parseTimeOfDay(store.getters.getBedtimeStart), end: parseTimeOfDay(store.getters.getBedtimeEnd) }
         : null,
+      originalTitles: store.getters.getAvoidTranslation === 'entire_app',
       titles: {
         videos: t('Subscriptions.New video from {channel}', { channel: '{channel}' }),
         shorts: t('Subscriptions.New short from {channel}', { channel: '{channel}' }),
