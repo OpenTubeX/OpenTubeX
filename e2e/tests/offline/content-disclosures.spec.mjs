@@ -79,7 +79,7 @@ test.describe('content disclosures', { tag: '@scale' }, () => {
       await expect(card.locator('.contentDisclosureHeader')).toHaveText(autoDubbed.label)
       await expect(card.locator('.contentDisclosureBody')).toHaveText(autoDubbed.description)
       await card.locator('.descriptionScroll').evaluate(element => { element.scrollTop = element.scrollHeight })
-      await card.locator('.descriptionScroll > .descriptionStatus').click()
+      await card.locator(':scope > .descriptionStatus').click()
       await expect(card).toHaveClass(/short/)
       await expect(card.locator('.contentDisclosureTitle')).toHaveText('How this was made')
       await expect.poll(() => card.locator('.descriptionScroll').evaluate(element => element.scrollTop)).toBe(0)

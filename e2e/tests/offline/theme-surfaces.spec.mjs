@@ -24,8 +24,7 @@ async function expectDescriptionBackground(app, region, points) {
     const actual = await sampleColors(app, region, points)
     const style = await app.page.addStyleTag({
       content: `
-        .videoDescription .descriptionStatus,
-        .videoDescription .descriptionStatus::before { background: transparent !important; }
+        .videoDescription .descriptionStatus { visibility: hidden !important; }
       `
     })
     try {
@@ -34,7 +33,7 @@ async function expectDescriptionBackground(app, region, points) {
     } finally {
       await style.evaluate(element => element.remove())
     }
-  }, { message: 'Description overlay must match the card at the same pixels' }).toBeLessThanOrEqual(2)
+  }, { message: 'Description footer must match the card at the same pixels' }).toBeLessThanOrEqual(2)
 }
 
 async function attachThemeScreenshot(app, testInfo, name) {
@@ -149,28 +148,20 @@ for (const [theme, scale] of [['openTubeXLight', 100], ['openTubeXDark', 125]]) 
       await page.locator('.ftVideoPlayer video').evaluate(video => video.pause())
       const card = page.locator('.videoDescription')
       await expect(card.locator('.description')).toContainText('A short description line.')
-      const expand = card.locator(':scope > .descriptionStatus')
-      for (const direction of ['ltr', 'rtl']) {
-        await card.evaluate((element, direction) => { element.dir = direction }, direction)
-        const width = await expand.evaluate(element => element.getBoundingClientRect().width)
-        // The fixture text leaves the fade and control padding clear.
-        const points = direction === 'ltr'
-          ? [[-36, 1], [-10, 1], [width / 2, 1], [width + 5, 1]]
-          : [[-5, 1], [width / 2, 1], [width + 10, 1], [width + 36, 1]]
-        await expectDescriptionBackground(app, expand, points)
+      const footer = card.locator(':scope > .descriptionStatus')
+      for (const expanded of [false, true]) {
+        if (expanded) await footer.click()
+        await expect(footer).toHaveAttribute('aria-expanded', String(expanded))
+        await footer.scrollIntoViewIfNeeded()
+        const { width, height } = await footer.evaluate(element => {
+          const { width, height } = element.getBoundingClientRect()
+          return { width, height }
+        })
+        // Empty space on both sides of the centered label, clear of the divider.
+        await expectDescriptionBackground(app, footer, [
+          [12, height / 2], [width / 4, height / 2], [width * 3 / 4, height / 2], [width - 12, height / 2]
+        ])
       }
-      await card.evaluate(element => { element.dir = 'ltr' })
-      await expand.click()
-      const footer = card.locator('.descriptionStatus')
-      await footer.scrollIntoViewIfNeeded()
-      const { width, height } = await footer.evaluate(element => {
-        const { width, height } = element.getBoundingClientRect()
-        return { width, height }
-      })
-      // Empty space next to Show less, through its fade and into card padding.
-      await expectDescriptionBackground(app, footer, [
-        [width - 60, -26], [width - 60, -12], [width - 60, height / 2], [width - 60, height + 5]
-      ])
       await attachThemeScreenshot(app, testInfo, `${theme} description footer at ${scale}%`)
     })
 

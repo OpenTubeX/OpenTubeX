@@ -12,27 +12,12 @@
   >
     <FtIconButton
       v-if="shownDescription.length > 0 && !previewOnly"
-      ref="descriptionCopyButton"
       class="descriptionCopyButton"
       :title="t('Description.Copy Description')"
       :icon="['fas', 'copy']"
       theme="base"
       @click="copyDescription"
     />
-    <span
-      v-if="previewOnly || (showControls && !isExpanded && !alwaysExpanded)"
-      ref="expandDescriptionControl"
-      :class="{
-        descriptionStatus: true,
-        avoidCopyButton: copyButtonOverlapsExpandControl
-      }"
-      role="button"
-      tabindex="0"
-      @click="expandDescription"
-      @keydown.enter.space.prevent="expandDescription"
-    >
-      {{ $t("Description.Expand Description") }}
-    </span>
     <div
       ref="descriptionScroll"
       v-overlay-scrollbars="!alwaysExpanded"
@@ -194,21 +179,26 @@
         </ul>
       </div>
       <span
-        v-if="showControls && isExpanded && !alwaysExpanded"
-        class="descriptionStatus"
-        role="button"
-        tabindex="0"
-        @click="collapseDescription"
-        @keydown.enter.space.prevent="collapseDescription"
-      >
-        {{ $t("Description.Collapse Description") }}
-      </span>
-      <span
         ref="descriptionContentEnd"
         class="descriptionContentEnd"
         aria-hidden="true"
       />
     </div>
+    <button
+      v-if="previewOnly || (showControls && !alwaysExpanded)"
+      type="button"
+      class="descriptionStatus"
+      :aria-expanded="previewOnly ? undefined : isExpanded"
+      @click="isExpanded ? collapseDescription() : expandDescription()"
+      @keydown.space.stop
+      @keyup.space.stop
+    >
+      <span>{{ isExpanded ? t('Description.Collapse Description') : t('Description.Expand Description') }}</span>
+      <FtIcon
+        :icon="['fas', isExpanded ? 'angle-up' : 'angle-down']"
+        aria-hidden="true"
+      />
+    </button>
   </FtCard>
 </template>
 
@@ -217,6 +207,7 @@ import FtRetryImage from '../FtRetryImage.vue'
 import { onBeforeUnmount, onMounted, ref, computed, nextTick, useTemplateRef, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 import FtCard from '../ft-card/ft-card.vue'
+import { FtIcon } from '@opentubex/icons'
 import FtIconButton from '../FtIconButton/FtIconButton.vue'
 import FtTimestampCatcher from '../FtTimestampCatcher.vue'
 
@@ -272,13 +263,10 @@ const descriptionScroll = useTemplateRef('descriptionScroll')
 const descriptionContentEnd = useTemplateRef('descriptionContentEnd')
 const descriptionContainer = useTemplateRef('descriptionContainer')
 const descriptionCard = useTemplateRef('descriptionCard')
-const descriptionCopyButton = useTemplateRef('descriptionCopyButton')
-const expandDescriptionControl = useTemplateRef('expandDescriptionControl')
 const showFullDescription = ref(false)
 const showControls = ref(false)
 let userWantsExpandedDescription = false
 const descriptionFadeTop = ref(false)
-const copyButtonOverlapsExpandControl = ref(false)
 const isExpanded = computed(() => !props.previewOnly && (props.alwaysExpanded || showFullDescription.value))
 
 const descriptionContent = computed(() => {
@@ -428,34 +416,11 @@ function measureDescription() {
   nextTick(updateDescriptionLayout)
 }
 
-function updateExpandControlPosition() {
-  const copyButtonElement = descriptionCopyButton.value?.$el
-  const expandControlElement = expandDescriptionControl.value
-
-  if (!copyButtonElement || !expandControlElement) {
-    copyButtonOverlapsExpandControl.value = false
-    return
-  }
-
-  const copyButtonRect = copyButtonElement.getBoundingClientRect()
-  const expandControlRect = expandControlElement.getBoundingClientRect()
-  const collisionOffset = copyButtonOverlapsExpandControl.value
-    ? (getComputedStyle(expandControlElement).direction === 'rtl' ? -40 : 40)
-    : 0
-  copyButtonOverlapsExpandControl.value = (
-    expandControlRect.top < copyButtonRect.bottom &&
-    expandControlRect.bottom > copyButtonRect.top &&
-    expandControlRect.left + collisionOffset < copyButtonRect.right &&
-    expandControlRect.right + collisionOffset > copyButtonRect.left
-  )
-}
-
 function updateDescriptionLayout() {
   if (isExpanded.value && descriptionScroll.value && descriptionContentEnd.value) {
     clampOverlayScrollTop(descriptionScroll.value, descriptionContentEnd.value)
   }
   updateDescriptionFadeState()
-  updateExpandControlPosition()
 }
 
 let descriptionResizeObserver = null

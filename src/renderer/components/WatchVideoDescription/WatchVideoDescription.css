@@ -82,69 +82,47 @@
   inset-inline-end: 8px;
 }
 
-.descriptionStatus {
-  margin: 0;
-  text-decoration: underline;
-  cursor: pointer;
-  color: var(--title-color);
-}
-
 .videoDescription.short {
   cursor: pointer;
 }
 
-.descriptionStatus,
-.descriptionStatus::before {
-  /* Match the card at the same viewport position, including its theme gradient. */
-  background-color: var(--card-bg-color);
-  background-image: var(--card-bg-image);
-  background-attachment: fixed;
+/* Full-width footer that toggles the description, like an expandable card. */
+.descriptionStatus {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  min-block-size: 40px;
+  margin-block: 12px -16px;
+  margin-inline: -16px;
+  padding-block: 8px;
+  padding-inline: 16px;
+  border: 0;
+  border-block-start: 1px solid var(--divider-color);
+  border-end-start-radius: inherit;
+  border-end-end-radius: inherit;
+  background-color: transparent;
+  color: var(--secondary-text-color);
+  font-family: var(--app-font-family);
+  font-size: 14px;
+  font-weight: 500;
+  line-height: 20px;
+  cursor: pointer;
+  transition: background-color 150ms ease, color 150ms ease;
 }
 
-.videoDescription.short .descriptionStatus {
-  position: absolute;
-  z-index: 1;
-  inset-block-end: 8px;
-  padding-block: 2px;
-  inset-inline-end: 16px;
-  backdrop-filter: var(--card-bg-blur, none);
-  text-decoration: none;
+.descriptionStatus:is(:hover, :focus-visible) {
+  background-color: color-mix(in srgb, var(--primary-text-color) 8%, transparent);
+  color: var(--primary-text-color);
 }
 
-.videoDescription.short .descriptionStatus.avoidCopyButton {
-  inset-inline-end: 56px;
+.descriptionStatus:active {
+  background-color: color-mix(in srgb, var(--primary-text-color) 12%, transparent);
 }
 
-.videoDescription.short .descriptionStatus::before {
-  position: absolute;
-  inset-block: 0;
-  inset-inline-end: 100%;
-  inline-size: 40px;
-  mask-image: linear-gradient(90deg, transparent, #000);
-  content: '';
-}
-
-.videoDescription:not(.short) .descriptionStatus {
-  display: block;
-  position: sticky;
-  z-index: 1;
-  inset-block-end: 0;
-  margin-block-start: 1.5em;
-  backdrop-filter: var(--card-bg-blur, none);
-}
-
-.videoDescription:not(.short) .descriptionStatus::before {
-  position: absolute;
-  inset-block-end: 100%;
-  inset-inline: 0;
-  block-size: 1.5em;
-  mask-image: linear-gradient(transparent, #000);
-  pointer-events: none;
-  content: '';
-}
-
-.videoDescription.short .descriptionStatus:dir(rtl)::before {
-  mask-image: linear-gradient(270deg, transparent, #000);
+.descriptionStatus:focus-visible {
+  outline: 2px solid var(--primary-text-color);
+  outline-offset: -3px;
 }
 
 .videoDescription.short .description {
@@ -164,8 +142,8 @@
 }
 
 .videoDescription.short .descriptionContentEnd {
-  /* Reserve the old footer space inside the faded viewport for short content. */
-  block-size: 1lh;
+  /* Keep short content clear of the bottom fade. */
+  block-size: 16px;
 }
 
 .license {

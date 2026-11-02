@@ -967,7 +967,7 @@ test('keeps the tablet main-card top gutter compact on narrow layouts', async ({
   await expect(pageRoute).toHaveCSS('margin-block-start', '18px')
 })
 
-test('collapsed description paints the More control above its text', async ({ page }) => {
+test('collapsed description footer stays clickable below its faded text', async ({ page }) => {
   await page.addStyleTag({
     path: path.join(
       repoRoot,
@@ -976,7 +976,7 @@ test('collapsed description paints the More control above its text', async ({ pa
   })
   await page.evaluate(() => {
     const card = document.createElement('div')
-    const more = document.createElement('span')
+    const more = document.createElement('button')
     const scroll = document.createElement('div')
     const description = document.createElement('div')
 
@@ -988,7 +988,7 @@ test('collapsed description paints the More control above its text', async ({ pa
     card.style.width = '300px'
     card.style.zIndex = '10000'
     more.className = 'descriptionStatus'
-    more.textContent = 'More'
+    more.textContent = 'Show more'
     scroll.className = 'descriptionScroll'
     description.className = 'description'
     description.textContent = Array.from(
@@ -997,7 +997,7 @@ test('collapsed description paints the More control above its text', async ({ pa
     ).join(' ')
 
     scroll.append(description)
-    card.append(more, scroll)
+    card.append(scroll, more)
     document.body.append(card)
   })
 

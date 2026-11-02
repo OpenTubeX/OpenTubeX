@@ -118,7 +118,7 @@ test('description preview exposes links and a separate expansion control', async
   await setWindowSize(app, page, { width: 480, height: 800 })
   const preview = page.locator('.phoneDescriptionPreview')
   await expect(preview.locator('.description')).not.toHaveAttribute('role', 'button')
-  await preview.getByRole('button', { name: '...more', exact: true }).press('Enter')
+  await preview.getByRole('button', { name: 'Show more', exact: true }).press('Enter')
   await expect(page.locator('.mobileSheet[open]')).toContainText('Description')
 })
 
@@ -155,7 +155,7 @@ test('description preview preserves its five-line height on phones', async ({ ap
       })
       expect(await scroller.evaluate(element => element.getBoundingClientRect().height))
         .toBeCloseTo(5 * lineHeight, 0)
-      await preview.getByRole('button', { name: '...more', exact: true }).click()
+      await preview.getByRole('button', { name: 'Show more', exact: true }).click()
       const sheet = page.locator('.mobileSheet[open]')
       await expect(sheet.locator('.description')).toHaveText(description)
       await sheet.getByRole('button', { name: 'Close', exact: true }).click()
@@ -213,18 +213,19 @@ test('description preview shows metadata without description text', async ({ app
       const scroll = element.querySelector('.descriptionScroll').getBoundingClientRect()
       const more = element.querySelector(':scope > .descriptionStatus').getBoundingClientRect()
       return {
-        overlapsPreview: more.top < scroll.bottom,
+        belowPreview: more.top >= scroll.bottom - 1,
         bottomGap: card.bottom - more.bottom,
+        leftGap: more.left - card.left,
         rightGap: card.right - more.right,
       }
     })
-    expect(morePosition.overlapsPreview, JSON.stringify(morePosition)).toBe(true)
-    expect(morePosition.bottomGap).toBeGreaterThanOrEqual(0)
-    expect(morePosition.bottomGap).toBeLessThanOrEqual(20)
-    expect(morePosition.rightGap).toBeLessThanOrEqual(20)
+    expect(morePosition.belowPreview, JSON.stringify(morePosition)).toBe(true)
+    expect(morePosition.bottomGap).toBeCloseTo(0, 0)
+    expect(morePosition.leftGap).toBeCloseTo(0, 0)
+    expect(morePosition.rightGap).toBeCloseTo(0, 0)
   }
 
-  await preview.getByRole('button', { name: '...more', exact: true }).click()
+  await preview.getByRole('button', { name: 'Show more', exact: true }).click()
   await expect(page.locator('.mobileSheet[open]')).toContainText('Example game')
 })
 
