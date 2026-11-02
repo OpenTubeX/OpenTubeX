@@ -14,16 +14,26 @@ from yt_dlp.postprocessor.common import PostProcessor
 class _QuietLogger:
     def __init__(self):
         self.last_error = ''
-        self.warnings = []
 
     def debug(self, _message):
         pass
 
-    def warning(self, message):
-        self.warnings.append(f'WARNING: {message}')
+    def warning(self, _message):
+        pass
 
     def error(self, message):
         self.last_error = message
+
+
+class _ExtractionLogger(_QuietLogger):
+    """Keeps warnings, which explain missing formats, for the renderer."""
+
+    def __init__(self):
+        super().__init__()
+        self.warnings = []
+
+    def warning(self, message):
+        self.warnings.append(f'WARNING: {message}')
 
 
 # Like Android's YtDlpArguments, only media options cross the bridge. yt-dlp
@@ -76,7 +86,7 @@ def _option(args, name, default=None):
 def _extract(request):
     args = request['args']
     url = args[-1]
-    logger = _QuietLogger()
+    logger = _ExtractionLogger()
     options = {
         'ignoreconfig': True,
         'noplaylist': '--flat-playlist' not in args,
