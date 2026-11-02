@@ -439,3 +439,23 @@ for (const deletion of ['deleteAll', 'deleteMultipleChannels']) {
     assert.deepEqual(await Cache.find(), [])
   })
 }
+
+for (const profilesLoaded of [false, true]) {
+  test(`loading the cache ${profilesLoaded ? 'removes' : 'keeps'} unsubscribed channels when profiles ${profilesLoaded ? 'loaded' : 'failed to load'}`, async () => {
+    const entry = { _id: 'channel', videos: [{ videoId: 'video' }], videosTimestamp: new Date(1000) }
+    const context = vm.createContext({
+      console: { error() {} }, toRaw, ...seenData, ...feedState, applySubscriptionSeenVideosToCache, applySubscriptionSeenPostsToCache,
+      DBSubscriptionCacheHandlers: { find: async () => [entry] },
+    })
+    vm.runInContext(moduleSource, context)
+    const dispatched = []
+    await context.cacheModule.actions.grabAllSubscriptions({
+      commit() {},
+      dispatch: (...args) => dispatched.push(args),
+      // A failed profile load leaves only the default main profile, without subscriptions.
+      rootState: { profiles: { profilesLoaded } },
+      rootGetters: { getSubscribedChannelIdSet: new Set() },
+    })
+    assert.deepEqual(structuredClone(dispatched), profilesLoaded ? [['clearSubscriptionsCacheForManyChannels', ['channel']]] : [])
+  })
+}
