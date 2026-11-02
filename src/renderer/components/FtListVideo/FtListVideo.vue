@@ -1335,7 +1335,7 @@ async function toggleLiveReminder() {
   if (liveReminderLoading.value || !canToggleLiveReminder.value) return
 
   const videoId = id.value
-  // Invalidates a pending sync, so it cannot reschedule a cancelled reminder.
+  // Invalidates a pending sync, so it cannot reschedule a canceled reminder.
   liveReminderLoadGeneration++
   liveReminderLoading.value = true
   try {
