@@ -143,18 +143,23 @@ export function clearExternalMediaPositions() {
   externalMediaPositionVersion.value++
 }
 
-/** @returns {Map<string, { url: string, seconds: number, duration?: number, watched?: true, updatedAt: number }>} */
+/**
+ * Unlike reading one position, this throws: a missing position would be synced as removed.
+ * @returns {{ positions: Map<string, { url: string, seconds: number, duration?: number, watched?: true, updatedAt: number }>, unreadable: string[] }}
+ */
 function readSavedPositions() {
-  // Unlike reading one position, this throws: a missing position would be synced as removed.
   const positions = new Map()
+  const unreadable = []
   for (let index = 0; index < localStorage.length; index++) {
     const key = localStorage.key(index)
     if (!key?.startsWith(STORAGE_PREFIX)) continue
     const url = key.slice(STORAGE_PREFIX.length)
+    if (positionKey(url) !== key) continue
     const position = parsePosition(localStorage.getItem(key))
-    if (position !== null && positionKey(url) === key) positions.set(url, { url, ...toSyncedPosition(position) })
+    if (position === null) unreadable.push(url)
+    else positions.set(url, { url, ...toSyncedPosition(position) })
   }
-  return positions
+  return { positions, unreadable }
 }
 
 function toSyncedPosition({ seconds, duration, watched, updatedAt }) {
@@ -217,9 +222,11 @@ export function mergeExternalMediaPositions(local, remote, previous, cutoff) {
  *   again with `retryBaseline`, which also holds the downloaded positions saved locally.
  */
 export async function syncExternalMediaPositions(client, baseline, retentionDays) {
-  const local = readSavedPositions()
   const remote = parseSyncedPositions(await client.getExternalMediaPositions())
-  const previous = baseline && typeof baseline === 'object' && !Array.isArray(baseline) ? baseline : {}
+  const { positions: local, unreadable } = readSavedPositions()
+  const previous = { ...(baseline && typeof baseline === 'object' && !Array.isArray(baseline) ? baseline : {}) }
+  // A damaged saved value is not a removal. The synced position replaces it.
+  for (const url of unreadable) delete previous[url]
   const merged = mergeExternalMediaPositions(local, remote, previous, getRetentionCutoff(retentionDays))
   let changed = false
   try {

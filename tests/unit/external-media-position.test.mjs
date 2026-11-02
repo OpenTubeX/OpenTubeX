@@ -213,6 +213,28 @@ test('syncing drops positions older than history retention on both sides', async
   assert.deepEqual(client.uploaded.map(entry => entry.url), [url, `${url}?recent=1`])
 })
 
+test('syncing replaces a damaged saved position instead of removing it everywhere', async () => {
+  storage.set(`externalMediaPosition:${url}`, '{not json')
+  const client = syncClient([{ url, seconds: 12, duration: 30, updatedAt: 1000 }])
+  await syncExternalMediaPositions(client, { [url]: 1000 }, 0)
+  assert.equal(getExternalMediaPosition(url, 30), 12)
+  assert.deepEqual(client.uploaded.map(entry => entry.url), [url])
+})
+
+test('syncing keeps a position saved while the synced positions load', async () => {
+  mock.method(Date, 'now', () => 1000)
+  saveExternalMediaPosition(url, 12, 30)
+  const client = syncClient([])
+  client.getExternalMediaPositions = async () => {
+    mock.method(Date, 'now', () => 2000)
+    saveExternalMediaPosition(url, 20, 30)
+    return []
+  }
+  await syncExternalMediaPositions(client, {}, 0)
+  assert.equal(getExternalMediaPosition(url, 30), 20)
+  assert.deepEqual(client.uploaded.map(entry => entry.seconds), [20])
+})
+
 test('syncing fails without uploading when saved positions cannot be read', async () => {
   saveExternalMediaPosition(url, 12, 30)
   for (const method of ['key', 'getItem']) {
