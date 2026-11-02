@@ -791,10 +791,11 @@ export function clampOverlayScrollTop(element, contentElement = null) {
  * @param {HTMLElement | null} contentElement
  */
 export function clampOverlayScrollLeft(element, contentElement = null) {
-  const maximumScrollLeft = Math.max(
-    0,
-    (contentElement?.scrollWidth ?? element.scrollWidth) - element.clientWidth
-  )
+  // scrollWidth stops at the padding box, but the content's borders are rendered too.
+  const contentWidth = contentElement === null
+    ? element.scrollWidth
+    : contentElement.scrollWidth + contentElement.offsetWidth - contentElement.clientWidth
+  const maximumScrollLeft = Math.max(0, contentWidth - element.clientWidth)
   const rtl = getComputedStyle(element).direction === 'rtl'
   const isOutOfBounds = rtl
     ? element.scrollLeft < -maximumScrollLeft - SCROLL_BOUNDARY_TOLERANCE

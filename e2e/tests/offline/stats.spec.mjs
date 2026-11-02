@@ -341,6 +341,15 @@ test.describe('synced watch stats', () => {
     await picker.evaluate(element => { element.scrollLeft = element.scrollWidth })
     await expect(picker).toHaveClass(/fadeLeft/)
     await expect(picker).not.toHaveClass(/fadeRight/)
+    // The indicator settling clamps the offset to the track's rendered end,
+    // which includes the track's border.
+    const remaining = await picker.evaluate(async element => {
+      element.querySelector('.deviceSegmentIndicator').dispatchEvent(new Event('transitionend'))
+      await new Promise(resolve => requestAnimationFrame(() => requestAnimationFrame(resolve)))
+      return element.scrollWidth - element.clientWidth - element.scrollLeft
+    })
+    expect(remaining).toBeLessThanOrEqual(1)
+    await expect(picker).not.toHaveClass(/fadeRight/)
 
     // Expanding the viewport must remove both the stale offset and fades.
     await app.electronApp.evaluate(({ BrowserWindow }) => {
