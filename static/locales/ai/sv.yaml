@@ -2552,7 +2552,7 @@ Digital Wellbeing:
   Remind Me in 10 Minutes: "Påminn mig om 10 minuter"
 Notification Center:
   Notifications: "Aviseringar"
-  Notifications With Unread: "Aviseringar ({count} olästa)"
+  Notifications With Unread: "Aviseringar (olästa: {count})"
   Mark as Read: "Markera som läst"
   Mark All as Read: "Markera alla som lästa"
   Clear All: "Rensa alla"

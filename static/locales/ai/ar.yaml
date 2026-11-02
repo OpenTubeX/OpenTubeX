@@ -2559,7 +2559,7 @@ Digital Wellbeing:
   Remind Me in 10 Minutes: "ذكّرني بعد 10 دقائق"
 Notification Center:
   Notifications: "الإشعارات"
-  Notifications With Unread: "الإشعارات ({count} غير مقروءة)"
+  Notifications With Unread: "الإشعارات (غير المقروءة: {count})"
   Mark as Read: "وضع علامة كمقروء"
   Mark All as Read: "وضع علامة على الكل كمقروء"
   Clear All: "مسح الكل"

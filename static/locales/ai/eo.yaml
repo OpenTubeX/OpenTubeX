@@ -2525,7 +2525,7 @@ Digital Wellbeing:
   Remind Me in 10 Minutes: Memorigi min post 10 minutoj
 Notification Center:
   Notifications: "Sciigoj"
-  Notifications With Unread: "Sciigoj ({count} nelegitaj)"
+  Notifications With Unread: "Sciigoj (nelegitaj: {count})"
   Mark as Read: "Marki kiel legitan"
   Mark All as Read: "Marki ĉiujn kiel legitajn"
   Clear All: "Forigi ĉiujn"

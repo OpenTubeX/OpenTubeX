@@ -2346,7 +2346,7 @@ Tooltips:
       Begin met ’n leë sessie slaan die gestoorde oortjies oor en maak ’n nuwe venster oop.
     Close Window With Last Tab: Wanneer af, maak die sluiting van die laaste oortjie eerder ’n nuwe oortjie oop, sodat die venster oop bly totdat u dit sluit.
     Remember Tab Navigation History: Elke oortjie se terug- en vorentoe-navigasiegeskiedenis word gestoor en herstel wanneer OpenTubeX herbegin.
-    Notifications: Kies hoe OpenTubeX jou van regstreekse uitsendings, nuwe oplaaie en outomatiese aflaaie in kennis stel. Met Stelsel en in die app verskyn kennisgewings in OpenTubeX terwyl jy dit gebruik, anders as stelselkennisgewings, en die klok hou hulle. Af versteek ook die kennisgewingopsies.
+    Notifications: Kies hoe OpenTubeX jou van regstreekse uitsendings, nuwe oplaaie en outomatiese aflaaie in kennis stel. Met Stelsel en in die app verskyn kennisgewings in OpenTubeX terwyl jy dit gebruik, andersins as stelselkennisgewings, en die klok hou hulle. Af versteek ook die kennisgewingopsies.
   Proxy Settings:
     IP Block Recovery Script Path: Pad na skriplêer wat uitgevoer word wanneer ’n IP-blokkering bespeur word. OpenTubeX wag totdat dit klaar is en herlaai dan die video. As terugval geaktiveer is, loop dit slegs wanneer terugval ook misluk.
   Player Settings:

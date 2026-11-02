@@ -2528,7 +2528,7 @@ Digital Wellbeing:
   Remind Me in 10 Minutes: "Påminn meg om 10 minutter"
 Notification Center:
   Notifications: "Varsler"
-  Notifications With Unread: "Varsler ({count} uleste)"
+  Notifications With Unread: "Varsler (uleste: {count})"
   Mark as Read: "Merk som lest"
   Mark All as Read: "Merk alle som lest"
   Clear All: "Fjern alle"

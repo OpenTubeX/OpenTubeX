@@ -2524,7 +2524,7 @@ Digital Wellbeing:
   Remind Me in 10 Minutes: "Ricordamelo tra 10 minuti"
 Notification Center:
   Notifications: "Notifiche"
-  Notifications With Unread: "Notifiche ({count} non lette)"
+  Notifications With Unread: "Notifiche (non lette: {count})"
   Mark as Read: "Segna come letta"
   Mark All as Read: "Segna tutte come lette"
   Clear All: "Cancella tutto"

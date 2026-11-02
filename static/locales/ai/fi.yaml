@@ -2580,7 +2580,7 @@ Digital Wellbeing:
   Remind Me in 10 Minutes: "Muistuta 10 minuutin kuluttua"
 Notification Center:
   Notifications: "Ilmoitukset"
-  Notifications With Unread: "Ilmoitukset ({count} lukematonta)"
+  Notifications With Unread: "Ilmoitukset (lukemattomia: {count})"
   Mark as Read: "Merkitse luetuksi"
   Mark All as Read: "Merkitse kaikki luetuiksi"
   Clear All: "Tyhjennä kaikki"

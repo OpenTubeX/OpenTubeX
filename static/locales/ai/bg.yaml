@@ -2555,7 +2555,7 @@ Digital Wellbeing:
   Remind Me in 10 Minutes: "Напомни ми след 10 минути"
 Notification Center:
   Notifications: "Известия"
-  Notifications With Unread: "Известия ({count} непрочетени)"
+  Notifications With Unread: "Известия (непрочетени: {count})"
   Mark as Read: "Отбелязване като прочетено"
   Mark All as Read: "Отбелязване на всички като прочетени"
   Clear All: "Изчистване на всички"

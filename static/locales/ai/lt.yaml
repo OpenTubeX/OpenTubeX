@@ -3026,7 +3026,7 @@ Digital Wellbeing:
   Remind Me in 10 Minutes: "Priminti po 10 minučių"
 Notification Center:
   Notifications: "Pranešimai"
-  Notifications With Unread: "Pranešimai ({count} neperskaityti)"
+  Notifications With Unread: "Pranešimai (neperskaityti: {count})"
   Mark as Read: "Pažymėti kaip perskaitytą"
   Mark All as Read: "Pažymėti viską kaip perskaitytą"
   Clear All: "Išvalyti viską"

@@ -2533,7 +2533,7 @@ Digital Wellbeing:
   Remind Me in 10 Minutes: "Degas da soñj din a-benn 10 munutenn"
 Notification Center:
   Notifications: "Kemennoù"
-  Notifications With Unread: "Kemennoù ({count} n’int ket bet lennet)"
+  Notifications With Unread: "Kemennoù (n’int ket bet lennet: {count})"
   Mark as Read: "Merkañ evel lennet"
   Mark All as Read: "Merkañ pep tra evel lennet"
   Clear All: "Skarzhañ pep tra"

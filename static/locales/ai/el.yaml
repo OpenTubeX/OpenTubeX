@@ -2557,7 +2557,7 @@ Digital Wellbeing:
   Remind Me in 10 Minutes: "Υπενθύμιση σε 10 λεπτά"
 Notification Center:
   Notifications: "Ειδοποιήσεις"
-  Notifications With Unread: "Ειδοποιήσεις ({count} μη αναγνωσμένες)"
+  Notifications With Unread: "Ειδοποιήσεις (μη αναγνωσμένες: {count})"
   Mark as Read: "Σήμανση ως αναγνωσμένο"
   Mark All as Read: "Σήμανση όλων ως αναγνωσμένων"
   Clear All: "Απαλοιφή όλων"

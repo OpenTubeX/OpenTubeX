@@ -2582,7 +2582,7 @@ Digital Wellbeing:
   Remind Me in 10 Minutes: "להזכיר בעוד 10 דקות"
 Notification Center:
   Notifications: "התראות"
-  Notifications With Unread: "התראות ({count} שלא נקראו)"
+  Notifications With Unread: "התראות (שלא נקראו: {count})"
   Mark as Read: "סימון כנקרא"
   Mark All as Read: "סימון הכול כנקרא"
   Clear All: "ניקוי הכול"

@@ -2579,7 +2579,7 @@ Digital Wellbeing:
   Remind Me in 10 Minutes: "Amintește-mi peste 10 minute"
 Notification Center:
   Notifications: "Notificări"
-  Notifications With Unread: "Notificări ({count} necitite)"
+  Notifications With Unread: "Notificări (necitite: {count})"
   Mark as Read: "Marchează ca citită"
   Mark All as Read: "Marchează toate ca citite"
   Clear All: "Șterge tot"

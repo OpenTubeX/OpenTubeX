@@ -2589,7 +2589,7 @@ Digital Wellbeing:
   Remind Me in 10 Minutes: مجھے 10 منٹ میں یاد دلائیں
 Notification Center:
   Notifications: "اطلاعات"
-  Notifications With Unread: "اطلاعات ({count} غیر پڑھی ہوئی)"
+  Notifications With Unread: "اطلاعات (غیر پڑھی ہوئی: {count})"
   Mark as Read: "پڑھا ہوا نشان زد کریں"
   Mark All as Read: "سب کو پڑھا ہوا نشان زد کریں"
   Clear All: "سب صاف کریں"

@@ -2557,7 +2557,7 @@ Digital Wellbeing:
   Remind Me in 10 Minutes: "Atgoffa Fi Ymhen 10 Munud"
 Notification Center:
   Notifications: "Hysbysiadau"
-  Notifications With Unread: "Hysbysiadau ({count} heb eu darllen)"
+  Notifications With Unread: "Hysbysiadau (heb eu darllen: {count})"
   Mark as Read: "Marcio fel wedi’i ddarllen"
   Mark All as Read: "Marcio’r cyfan fel wedi’i ddarllen"
   Clear All: "Clirio’r cyfan"

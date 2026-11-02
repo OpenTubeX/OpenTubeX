@@ -2559,7 +2559,7 @@ Digital Wellbeing:
   Remind Me in 10 Minutes: "Podsjeti me za 10 minuta"
 Notification Center:
   Notifications: "Obavijesti"
-  Notifications With Unread: "Obavijesti ({count} nepročitanih)"
+  Notifications With Unread: "Obavijesti (nepročitane: {count})"
   Mark as Read: "Označi kao pročitano"
   Mark All as Read: "Označi sve kao pročitano"
   Clear All: "Izbriši sve"

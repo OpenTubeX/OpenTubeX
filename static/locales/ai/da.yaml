@@ -2616,7 +2616,7 @@ Digital Wellbeing:
   Remind Me in 10 Minutes: "Påmind mig om 10 minutter"
 Notification Center:
   Notifications: "Notifikationer"
-  Notifications With Unread: "Notifikationer ({count} ulæste)"
+  Notifications With Unread: "Notifikationer (ulæste: {count})"
   Mark as Read: "Markér som læst"
   Mark All as Read: "Markér alle som læst"
   Clear All: "Ryd alle"

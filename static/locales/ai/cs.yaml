@@ -2526,7 +2526,7 @@ Digital Wellbeing:
   Remind Me in 10 Minutes: "Připomenout za 10 minut"
 Notification Center:
   Notifications: "Oznámení"
-  Notifications With Unread: "Oznámení ({count} nepřečtených)"
+  Notifications With Unread: "Oznámení (nepřečtená: {count})"
   Mark as Read: "Označit jako přečtené"
   Mark All as Read: "Označit vše jako přečtené"
   Clear All: "Vymazat vše"
