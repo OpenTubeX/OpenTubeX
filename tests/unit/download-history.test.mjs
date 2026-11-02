@@ -15,14 +15,14 @@ const trashableFile = join(userData, 'trashable.mp4')
 await writeFile(lockedFile, '')
 await writeFile(trashableFile, '')
 
-const oldCompletedRecords = Array.from({ length: 50 }, (_, index) => ({
+const oldCompletedRecords = Array.from({ length: 200 }, (_, index) => ({
   id: index + 1, title: `Completed ${index + 1}`, status: 'completed', destination: join(userData, `${index + 1}.mp4`),
 }))
-const failedRecords = Array.from({ length: 200 }, (_, index) => ({
-  id: index + 51, title: `Failed ${index + 51}`, status: 'failed',
+const failedRecords = Array.from({ length: 202 }, (_, index) => ({
+  id: index + 201, title: `Failed ${index + 201}`, status: 'failed',
 }))
 const multiFileRecord = {
-  id: 251, title: 'Two files', status: 'completed', destinations: [trashableFile, lockedFile],
+  id: 403, title: 'Two files', status: 'completed', destinations: [trashableFile, lockedFile],
 }
 await writeFile(join(userData, 'downloads.json'), JSON.stringify([...oldCompletedRecords, ...failedRecords, multiFileRecord]))
 
@@ -56,25 +56,27 @@ const [downloads] = await importWithStubs([sourceUrl('src/main/ytDlpDownloads.js
 const event = { senderFrame: { url: 'app://bundle/index.html' }, sender: { isFocused: () => true } }
 
 test('keeps a download whose files could not all be moved to the trash', async () => {
-  assert.equal(await downloads.handleYtDlpRemoveDownload(event, 251), false)
+  assert.equal(await downloads.handleYtDlpRemoveDownload(event, 403), false)
 
   assert.equal(existsSync(trashableFile), false)
   assert.equal(existsSync(lockedFile), true)
-  const record = (await downloads.handleYtDlpListDownloads(event)).find(record => record.id === 251)
+  const record = (await downloads.handleYtDlpListDownloads(event)).find(record => record.id === 403)
   assert.equal(record?.availability, 'partial')
   assert.deepEqual(broadcasts, [])
 })
 
-test('trims only failed, canceled, and skipped records from the saved history', async () => {
-  await downloads.handleYtDlpClearDownloads(event, [250])
+test('trims only the oldest failed, canceled, and skipped records from the saved history', async () => {
+  await downloads.handleYtDlpClearDownloads(event, [402])
   await downloads.flushYtDlpDownloadRecords()
 
   const saved = JSON.parse(await readFile(join(userData, 'downloads.json'), 'utf8'))
-  assert.equal(saved.length, 200)
   assert.deepEqual(
     saved.filter(record => record.status === 'completed').map(record => record.id),
-    [...oldCompletedRecords.map(record => record.id), 251]
+    [...oldCompletedRecords.map(record => record.id), 403]
   )
-  // The oldest failed records make room
-  assert.equal(saved.find(record => record.status === 'failed').id, 101)
+  // Recent failures stay retryable however many downloads completed
+  assert.deepEqual(
+    saved.filter(record => record.status === 'failed').map(record => record.id),
+    failedRecords.slice(1, -1).map(record => record.id)
+  )
 })
