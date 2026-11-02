@@ -1,4 +1,5 @@
 import { shallowRef } from 'vue'
+import { getRetentionCutoff } from '../../history.js'
 
 const STORAGE_PREFIX = 'externalMediaPosition:'
 
@@ -132,4 +133,102 @@ export function removeExternalMediaPositionsBefore(cutoff) {
 export function clearExternalMediaPositions() {
   removePositions(() => true)
   externalMediaPositionVersion.value++
+}
+
+/** @returns {Map<string, { url: string, seconds: number, duration?: number, watched?: true, updatedAt: number }>} */
+function readSavedPositions() {
+  // Unlike reading one position, this throws: a missing position would be synced as removed.
+  const positions = new Map()
+  for (let index = 0; index < localStorage.length; index++) {
+    const key = localStorage.key(index)
+    if (!key?.startsWith(STORAGE_PREFIX)) continue
+    const url = key.slice(STORAGE_PREFIX.length)
+    const position = readPosition(key)
+    if (position !== null && positionKey(url) === key) positions.set(url, { url, ...toSyncedPosition(position) })
+  }
+  return positions
+}
+
+function toSyncedPosition({ seconds, duration, watched, updatedAt }) {
+  return {
+    seconds,
+    ...(Number.isFinite(duration) && duration > 0 ? { duration } : {}),
+    ...(watched === true ? { watched } : {}),
+    updatedAt,
+  }
+}
+
+function parseSyncedPositions(entries) {
+  const positions = new Map()
+  for (const entry of Array.isArray(entries) ? entries : []) {
+    if (typeof entry?.url !== 'string' || positionKey(entry.url) !== STORAGE_PREFIX + entry.url ||
+        !Number.isFinite(entry.seconds) || entry.seconds < 0 || !Number.isFinite(entry.updatedAt)) continue
+    const position = { url: entry.url, ...toSyncedPosition(entry) }
+    const current = positions.get(entry.url)
+    if (!current || position.updatedAt > current.updatedAt) positions.set(entry.url, position)
+  }
+  return positions
+}
+
+/**
+ * Merges local and synced positions by URL. The newest save wins, and the
+ * previous sync's timestamps tell a deletion apart from a position the other
+ * side has not seen yet.
+ * @param {Map<string, { updatedAt: number }>} local
+ * @param {Map<string, { updatedAt: number }>} remote
+ * @param {Record<string, number>} previous URL to `updatedAt` after the previous sync
+ * @param {number | null} cutoff Positions saved before this are dropped
+ */
+export function mergeExternalMediaPositions(local, remote, previous, cutoff) {
+  const merged = new Map()
+  for (const url of new Set([...local.keys(), ...remote.keys()])) {
+    const localPosition = local.get(url)
+    const remotePosition = remote.get(url)
+    const synced = Object.hasOwn(previous, url) ? previous[url] : null
+    let position
+    if (localPosition && remotePosition) {
+      position = remotePosition.updatedAt > localPosition.updatedAt ? remotePosition : localPosition
+    } else {
+      position = localPosition ?? remotePosition
+      // The other side removed a position it had synced, unless it was saved again since.
+      if (synced !== null && position.updatedAt <= synced) continue
+    }
+    if (cutoff !== null && position.updatedAt < cutoff) continue
+    merged.set(url, position)
+  }
+  return merged
+}
+
+/**
+ * Syncs positions with the `externalMediaPositions` collection.
+ * @param {{ getExternalMediaPositions: () => Promise<unknown>, putExternalMediaPositions: (entries: object[]) => Promise<void> }} client
+ * @param {unknown} baseline URL to `updatedAt` of the positions both sides had synced
+ * @param {unknown} retentionDays The history retention setting
+ * @returns {Promise<{ synced: Record<string, number>, retryBaseline: Record<string, number> }>}
+ *   `synced` is the baseline for the next sync. If the upload conflicts, merge
+ *   again with `retryBaseline`, which also holds the downloaded positions saved locally.
+ */
+export async function syncExternalMediaPositions(client, baseline, retentionDays) {
+  const local = readSavedPositions()
+  const remote = parseSyncedPositions(await client.getExternalMediaPositions())
+  const previous = baseline && typeof baseline === 'object' && !Array.isArray(baseline) ? baseline : {}
+  const merged = mergeExternalMediaPositions(local, remote, previous, getRetentionCutoff(retentionDays))
+  let changed = false
+  try {
+    for (const url of local.keys()) {
+      if (merged.has(url)) continue
+      localStorage.removeItem(STORAGE_PREFIX + url)
+      changed = true
+    }
+    for (const [url, position] of merged) {
+      if (local.get(url) === position) continue
+      localStorage.setItem(STORAGE_PREFIX + url, JSON.stringify(toSyncedPosition(position)))
+      changed = true
+    }
+  } finally {
+    if (changed) externalMediaPositionVersion.value++
+  }
+  await client.putExternalMediaPositions([...merged.values()])
+  const timestamps = positions => Object.fromEntries([...positions].map(([url, position]) => [url, position.updatedAt]))
+  return { synced: timestamps(merged), retryBaseline: { ...previous, ...timestamps(remote) } }
 }
