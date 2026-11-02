@@ -309,6 +309,22 @@
     }
   }
 
+  // The external player button also appears on hover, so it replaces the labels
+  // even when it is the only thumbnail action.
+  @media (hover: hover) {
+    :deep(.ft-list-item.list:has(.externalPlayerIcon)) {
+      &:hover,
+      &:has(:focus-visible) {
+        .playlistIndexBadge,
+        .videoWatched,
+        .sponsorBlockVideoLabel,
+        .videoDuration {
+          visibility: hidden;
+        }
+      }
+    }
+  }
+
   :deep(.ft-list-item .info) {
     block-size: auto;
 

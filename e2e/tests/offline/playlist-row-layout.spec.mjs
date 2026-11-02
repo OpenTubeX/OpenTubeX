@@ -247,13 +247,6 @@ for (const [uiScale, userPlaylistSortOrder] of [[100, 'date_added_descending'], 
         }
         await setWindowSize(app, page, { width: 1440, height: 950 })
         await expect(actions).not.toHaveClass(/mobileThumbnailActions/)
-        // Non-user playlists can render this same toolbar with no enabled actions.
-        await actions.evaluate(element => element.replaceChildren())
-        await thumbnail.hover()
-        for (const badge of await badges.all()) await expect(badge).toBeVisible()
-        await page.locator('.playlistItem .ft-list-video').nth(1).locator('.title').focus()
-        for (const badge of await badges.all()) await expect(badge).toBeVisible()
-
         // Without hover, the external player button stays visible beside the labels.
         await page.locator('.profileTrigger').focus()
         const cdp = await page.context().newCDPSession(page)
@@ -274,6 +267,20 @@ for (const [uiScale, userPlaylistSortOrder] of [[100, 'date_added_descending'], 
           await cdp.send('Emulation.setTouchEmulationEnabled', { enabled: false })
           await cdp.detach()
         }
+
+        await setWindowSize(app, page, { width: 1440, height: 950 })
+        // Non-user playlists can render this same toolbar with no enabled actions.
+        await actions.evaluate(element => element.replaceChildren())
+        // The external player button is then the only action, and it still replaces the labels.
+        await thumbnail.hover()
+        await expect(thumbnail.locator('.externalPlayerIcon')).toHaveCSS('opacity', '1')
+        for (const badge of await badges.all()) await expect(badge).toBeHidden()
+        // Without any thumbnail action, the labels stay.
+        await thumbnail.locator('.externalPlayerIcon').evaluate(button => button.remove())
+        await thumbnail.hover()
+        for (const badge of await badges.all()) await expect(badge).toBeVisible()
+        await page.locator('.playlistItem .ft-list-video').nth(1).locator('.title').focus()
+        for (const badge of await badges.all()) await expect(badge).toBeVisible()
       })
     }
   })
