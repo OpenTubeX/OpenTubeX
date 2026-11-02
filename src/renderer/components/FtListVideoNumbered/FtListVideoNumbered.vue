@@ -295,7 +295,7 @@ if (windowed) {
     })
   }, { flush: 'post' })
   // Two-line titles change row heights without a resize that remeasures shells.
-  watch(() => store.getters.getLimitTitlesToTwoLines, () => windowItem?.refresh(), { flush: 'post' })
+  watch(() => store.getters.getLimitTitlesToTwoLines, () => windowItem?.remeasure(), { flush: 'post' })
   onBeforeUnmount(() => windowItem?.dispose())
 }
 

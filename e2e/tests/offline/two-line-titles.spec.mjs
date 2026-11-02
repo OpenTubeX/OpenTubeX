@@ -364,7 +364,34 @@ test.describe('toggling two-line titles with windowed rows', { tag: '@scale' }, 
     await expect(panel.locator(':scope > .playlistItem')).toHaveCount(MANY_VIDEOS.length)
     await scrollThrough(panel)
     await expect.poll(() => shellCount(panel, ':scope > .playlistItem')).toBeGreaterThan(0)
-    await enable(true)
+    // Shells are remeasured a few at a time instead of all mounting at once.
+    const mountsPerFrame = await panel.evaluate(async element => {
+      const counts = [0]
+      const isCard = node => node instanceof Element && (node.matches('.ft-list-video') || node.querySelector('.ft-list-video') !== null)
+      const observer = new MutationObserver(records => {
+        for (const record of records) {
+          for (const node of record.addedNodes) {
+            if (isCard(node)) counts[counts.length - 1]++
+          }
+        }
+      })
+      observer.observe(element, { childList: true, subtree: true })
+      await window.$store.dispatch('updateLimitTitlesToTwoLines', true)
+      for (let frame = 0; frame < 30; frame++) {
+        await new Promise(resolve => requestAnimationFrame(resolve))
+        observer.takeRecords().forEach(record => record.addedNodes.forEach(node => {
+          if (isCard(node)) counts[counts.length - 1]++
+        }))
+        counts.push(0)
+      }
+      observer.disconnect()
+      return counts
+    })
+    // Two distant rows per frame, plus the few rows that enter the overscan
+    // as the rows above them shrink. Remounting every shell at once put 45
+    // cards into one frame.
+    expect(Math.max(...mountsPerFrame), JSON.stringify(mountsPerFrame)).toBeLessThanOrEqual(6)
+    expect(mountsPerFrame.filter(count => count > 0).length, JSON.stringify(mountsPerFrame)).toBeGreaterThanOrEqual(10)
     await expectShellsMatchRows(panel, ':scope > .playlistItem')
     await expectValidScrollRange(panel, ':scope > .playlistItem')
     await expectAtEnd(panel)

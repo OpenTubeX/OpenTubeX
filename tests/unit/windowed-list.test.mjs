@@ -86,6 +86,63 @@ test('remeasures distant cards in bounded batches after their width changes', ()
   windowing.disconnect()
 })
 
+test('remeasures restyled shells in bounded batches and leaves hidden rows waiting', () => {
+  let intersect, resize
+  const frames = []
+  const windowing = createListWindow({
+    IntersectionObserver: class { constructor(fn) { intersect = fn } observe() {} unobserve() {} disconnect() {} },
+    ResizeObserver: class { constructor(fn) { resize = fn } observe() {} unobserve() {} disconnect() {} },
+    requestAnimationFrame(fn) { frames.push(fn); return frames.length },
+    cancelAnimationFrame() {},
+  })
+  const runFrame = () => { for (const callback of frames.splice(0)) callback() }
+
+  let rowHeight = 100
+  let mounts = 0
+  const mounted = new Map()
+  const shellHeights = new Map()
+  const handles = []
+  // A long playlist, such as the watch-page panel with hundreds of rows.
+  const elements = Array.from({ length: 300 }, () => {
+    const element = { getBoundingClientRect: () => ({ height: rowHeight }) }
+    mounted.set(element, true)
+    handles.push(windowing.observe(element, {
+      mount() { mounts++; mounted.set(element, true) },
+      unmount(height) { mounted.set(element, false); shellHeights.set(element, height) },
+      isMounted: () => mounted.get(element),
+      isProtected: () => false,
+    }))
+    return element
+  })
+  resize(elements.map(target => ({ target, contentRect: { width: 300, height: rowHeight } })))
+  intersect(elements.map(target => ({ target, isIntersecting: false })))
+  runFrame()
+  assert.equal([...mounted.values()].filter(Boolean).length, 0)
+
+  // A setting such as two-line titles restyles every row without a resize.
+  // The last row is hidden, as in a collapsed playlist.
+  rowHeight = 60
+  const hidden = elements.at(-1)
+  resize([{ target: hidden, contentRect: { width: 0, height: 0 } }])
+  for (const handle of handles) handle.remeasure()
+  assert.equal(mounts, 0, 'restyling must not remount the whole list synchronously')
+  let frameCount = 0
+  while (frames.length > 0 && frameCount < 1000) {
+    const before = mounts
+    runFrame()
+    frameCount++
+    assert.ok(mounts - before <= 2, 'each frame should remeasure only a few distant rows')
+  }
+  assert.equal(mounts, elements.length - 1, 'the hidden row waits until it can be measured')
+  assert.equal(mounted.get(hidden), false)
+  assert.ok(elements.slice(0, -1).every(element => shellHeights.get(element) === 60 && !mounted.get(element)))
+
+  resize([{ target: hidden, contentRect: { width: 300, height: 60 } }])
+  while (frames.length > 0) runFrame()
+  assert.equal(shellHeights.get(hidden), 60)
+  windowing.disconnect()
+})
+
 test('keeps remeasuring shells when the list hides during a remeasure', () => {
   let intersect, resize
   const frames = []
