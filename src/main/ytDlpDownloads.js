@@ -137,6 +137,7 @@ let powerSourcePollTimer = null
 const activeDownloads = new Map()
 /** @type {Map<number, YtDlpDownloadStatus>} */
 const downloadRecords = new Map()
+const MAX_SAVED_DOWNLOAD_RECORDS = 200
 /** @type {Map<number, (permitted: boolean) => void>} */
 const queuedDownloadWaiters = new Map()
 const individuallyResumedDownloadIds = new Set()
@@ -310,12 +311,19 @@ function saveDownloadRecords() {
         .map(record => ['preparing', 'downloading', 'processing', 'pausing'].includes(record.status)
           ? { ...record, status: record.status === 'pausing' ? 'paused' : 'queued', speed: null, eta: null }
           : record)
-        .slice(-200)
+      // Completed and unfinished downloads stay listed and playable; only the
+      // oldest records without a file make room
+      let excessRecords = records.length - MAX_SAVED_DOWNLOAD_RECORDS
+      const savedRecords = records.filter(record => {
+        if (excessRecords <= 0 || !['failed', 'cancelled', 'skipped'].includes(record.status)) return true
+        excessRecords--
+        return false
+      })
       // Write atomically so a crash mid-write cannot wipe the download history
       // and reset the id counter.
       const path = getDownloadRecordsPath()
       const temporaryPath = `${path}.tmp`
-      await writeFile(temporaryPath, JSON.stringify(records), 'utf8')
+      await writeFile(temporaryPath, JSON.stringify(savedRecords), 'utf8')
       await rename(temporaryPath, path)
     })
   return downloadRecordsSaveQueue
@@ -1256,17 +1264,16 @@ export async function handleYtDlpRemoveDownload(event, id) {
     return false
   }
 
-  let trashed = false
   for (const destination of destinations) {
     if (!existsSync(destination)) continue
     try {
       await moveToTrash(destination)
-      trashed = true
     } catch (error) {
       console.warn('Could not move download to trash', destination, error)
     }
   }
-  if (!trashed) return false
+  // Keep the record while any of its files remain
+  if (destinations.some(existsSync)) return false
 
   downloadRecords.delete(id)
   await saveDownloadRecords()

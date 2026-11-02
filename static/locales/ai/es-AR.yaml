@@ -2929,6 +2929,7 @@ Downloads:
     Subtitles Format: Subtítulos - {format}
   Waiting for Unmetered Network: "Esperando una red sin medición"
   Waiting for Charging: "Esperando un cargador"
+  Remove File Failed: No se pudo eliminar el archivo descargado.
 Channels:
   Load More Channels: "Cargar más canales"
 Search Bar:

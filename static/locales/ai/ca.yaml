@@ -3018,6 +3018,7 @@ Downloads:
     Subtitles Format: Subtítols - {format}
   Waiting for Unmetered Network: "S'està esperant una xarxa sense límit de dades"
   Waiting for Charging: "S'està esperant un carregador"
+  Remove File Failed: No s’ha pogut eliminar el fitxer baixat.
 Theme Discovery:
   Discover Themes: "Descobreix temes"
   Refresh: "Actualitza"

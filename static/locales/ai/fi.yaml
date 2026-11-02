@@ -2413,6 +2413,7 @@ Downloads:
     Subtitles Format: Tekstitykset - {format}
   Waiting for Unmetered Network: "Odotetaan rajoittamatonta verkkoa"
   Waiting for Charging: "Odotetaan laturia"
+  Remove File Failed: Ladattua tiedostoa ei voitu poistaa.
 Channels:
   Load More Channels: "Lataa lisää kanavia"
 Search Bar:

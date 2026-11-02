@@ -2358,6 +2358,7 @@ Downloads:
     Subtitles Format: 字幕 - {format}
   Waiting for Unmetered Network: "従量制ではないネットワークを待機中"
   Waiting for Charging: "充電器の接続を待機中"
+  Remove File Failed: ダウンロードしたファイルを削除できませんでした。
 Channels:
   Load More Channels: "チャンネルをさらに読み込む"
 Theme Discovery:

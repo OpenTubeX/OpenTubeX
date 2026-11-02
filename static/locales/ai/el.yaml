@@ -2392,6 +2392,7 @@ Downloads:
     Subtitles Format: Υπότιτλοι - {format}
   Waiting for Unmetered Network: "Αναμονή για δίκτυο χωρίς χρέωση δεδομένων"
   Waiting for Charging: "Αναμονή για φορτιστή"
+  Remove File Failed: Δεν ήταν δυνατή η αφαίρεση του ληφθέντος αρχείου.
 Channels:
   Load More Channels: "Φόρτωση περισσότερων καναλιών"
 Search Bar:

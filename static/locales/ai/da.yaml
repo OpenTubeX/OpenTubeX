@@ -2449,6 +2449,7 @@ Downloads:
     Subtitles Format: Undertekster - {format}
   Waiting for Unmetered Network: "Venter på et netværk uden datamåling"
   Waiting for Charging: "Venter på en oplader"
+  Remove File Failed: Den downloadede fil kunne ikke fjernes.
 Channels:
   Load More Channels: "Indlæs flere kanaler"
 Search Bar:

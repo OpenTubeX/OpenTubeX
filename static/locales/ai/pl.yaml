@@ -1528,6 +1528,7 @@ Downloads:
     Subtitles Format: Napisy - {format}
   Waiting for Unmetered Network: "Oczekiwanie na sieć bez pomiaru użycia danych"
   Waiting for Charging: "Oczekiwanie na ładowarkę"
+  Remove File Failed: Nie można usunąć pobranego pliku.
 Playlist:
   Playlist Already Preloaded: "Wszystkie filmy z playlisty są już wstępnie wczytane"
   Playlist Preload Progress: "Wstępne wczytywanie filmów: {completed} z {requested}"

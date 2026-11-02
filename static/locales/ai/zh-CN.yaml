@@ -2358,6 +2358,7 @@ Downloads:
     Subtitles Format: 字幕 - {format}
   Waiting for Unmetered Network: "正在等待不按流量计费的网络"
   Waiting for Charging: "正在等待充电器"
+  Remove File Failed: 无法删除已下载的文件。
 Channels:
   Load More Channels: "加载更多频道"
 Theme Discovery:

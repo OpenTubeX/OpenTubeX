@@ -3497,6 +3497,7 @@ Downloads:
   Remove File Confirmation: Heruntergeladene Datei entfernen?
   Remove File Warning: Dadurch wird „{title}“ in den Papierkorb deines Geräts verschoben.
   File Not Found: Die heruntergeladene Datei wurde nicht gefunden.
+  Remove File Failed: Die heruntergeladene Datei konnte nicht entfernt werden.
   Download Missing: Download nicht verfügbar
   Files Missing: >-
     Die heruntergeladene Datei ist im Dateisystem nicht mehr verfügbar. | Die heruntergeladenen Dateien sind im

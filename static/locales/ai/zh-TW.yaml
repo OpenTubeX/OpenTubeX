@@ -2361,6 +2361,7 @@ Downloads:
     Subtitles Format: 字幕 - {format}
   Waiting for Unmetered Network: "正在等待非計量付費網路"
   Waiting for Charging: "正在等待充電器"
+  Remove File Failed: 無法移除已下載的檔案。
 Channels:
   Load More Channels: "載入更多頻道"
 Theme Discovery:

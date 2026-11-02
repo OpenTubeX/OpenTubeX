@@ -2328,6 +2328,7 @@ Downloads:
     Subtitles Format: Legendas - {format}
   Waiting for Unmetered Network: "Aguardando uma rede não limitada"
   Waiting for Charging: "Aguardando um carregador"
+  Remove File Failed: Não foi possível remover o arquivo baixado.
 Channels:
   Load More Channels: "Carregar mais canais"
 Theme Discovery:

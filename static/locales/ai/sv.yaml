@@ -2385,6 +2385,7 @@ Downloads:
     Subtitles Format: Undertexter - {format}
   Waiting for Unmetered Network: "Väntar på ett obegränsat nätverk"
   Waiting for Charging: "Väntar på en laddare"
+  Remove File Failed: Det gick inte att ta bort den nedladdade filen.
 Channels:
   Load More Channels: "Läs in fler kanaler"
 Search Bar:

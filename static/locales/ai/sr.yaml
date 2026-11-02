@@ -2440,6 +2440,7 @@ Downloads:
     Subtitles Format: Титлови - {format}
   Waiting for Unmetered Network: "Чека се мрежа без ограничења података"
   Waiting for Charging: "Чека се пуњач"
+  Remove File Failed: Није могуће уклонити преузету датотеку.
 Channels:
   Load More Channels: "Учитај још канала"
 Search Bar:

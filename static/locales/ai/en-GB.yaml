@@ -2353,6 +2353,7 @@ Downloads:
     Subtitles Format: Subtitles - {format}
   Waiting for Unmetered Network: "Waiting for an unmetered network"
   Waiting for Charging: "Waiting for a charger"
+  Remove File Failed: Could not remove the downloaded file.
 Search Bar:
   Use Suggestion: Use suggestion
   Open Search Container: Open Search Container

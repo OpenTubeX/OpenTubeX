@@ -2822,6 +2822,7 @@ Downloads:
     Subtitles Format: 자막 - {format}
   Waiting for Unmetered Network: "종량제가 아닌 네트워크를 기다리는 중"
   Waiting for Charging: "충전기를 기다리는 중"
+  Remove File Failed: 다운로드한 파일을 제거할 수 없습니다.
 Channels:
   Load More Channels: "채널 더 불러오기"
 Search Bar:

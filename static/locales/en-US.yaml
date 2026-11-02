@@ -3549,6 +3549,7 @@ Downloads:
   Remove File Confirmation: Remove downloaded file?
   Remove File Warning: 'This will move "{title}" to your device trash.'
   File Not Found: The downloaded file could not be found.
+  Remove File Failed: Could not remove the downloaded file.
   Download Missing: Download unavailable
   Files Missing: The downloaded file is no longer available on the filesystem. | The downloaded files are no longer available on the filesystem.
   Files Available: '{available} of {total} downloaded files are available.'
