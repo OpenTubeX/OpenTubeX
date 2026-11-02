@@ -1784,17 +1784,23 @@ onMounted(async () => {
     await store.dispatch('setRandomCurrentInvidiousInstance')
   }
 
-  // Refresh the bundled list only when a random instance will serve API requests
-  const { backendPreference, backendFallback } = store.state.settings
-  if (defaultInvidiousInstance.value === '' && (backendPreference === 'invidious' || (backendPreference === 'local' && backendFallback))) {
-    const startupInvidiousInstance = store.getters.getCurrentInvidiousInstance
+  // Refresh the bundled list once a random instance serves API requests,
+  // including when a settings change makes it do so
+  let invidiousInstancesRefreshed = false
+  watch(() => {
+    const { backendPreference, backendFallback } = store.state.settings
+    return defaultInvidiousInstance.value === '' && (backendPreference === 'invidious' || (backendPreference === 'local' && backendFallback))
+  }, (usesRandomInstance) => {
+    if (!usesRandomInstance || invidiousInstancesRefreshed) return
+    invidiousInstancesRefreshed = true
+    const previousInvidiousInstance = store.getters.getCurrentInvidiousInstance
     store.dispatch('fetchInvidiousInstances').then(() => {
       // Keep an instance chosen while the list was loading
-      if (defaultInvidiousInstance.value === '' && store.getters.getCurrentInvidiousInstance === startupInvidiousInstance) {
+      if (defaultInvidiousInstance.value === '' && store.getters.getCurrentInvidiousInstance === previousInvidiousInstance) {
         store.dispatch('setRandomCurrentInvidiousInstance')
       }
     })
-  }
+  }, { immediate: true })
 
   profilesReady.then(async (hasExistingProfiles) => {
     const hasExistingInstallation = tutorialState.hasExistingSettings === true || hasExistingProfiles === true
