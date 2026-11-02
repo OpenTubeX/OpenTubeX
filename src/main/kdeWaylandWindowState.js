@@ -330,11 +330,14 @@ const reportActiveWindow = activeWindow => {
 reportActiveWindow(workspace.activeWindow)
 workspace.windowActivated.connect(reportActiveWindow)
 const watchMinimized = window => {
-  window.minimizedChanged.connect(() => {
+  const reportMinimized = () => {
     ${report}, "ReportWindowMinimized", window.internalId.toString(), window.minimized)
-  })
+  }
+  window.minimizedChanged.connect(reportMinimized)
+  return reportMinimized
 }
-workspace.windowList().forEach(watchMinimized)
+// A reload after a D-Bus reconnect misses changes made while no script ran
+workspace.windowList().forEach(window => watchMinimized(window)())
 workspace.windowAdded.connect(watchMinimized)
 `
       await writeFile(scriptPath, script, 'utf8')

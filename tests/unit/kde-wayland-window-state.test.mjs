@@ -3,6 +3,7 @@ import dbus from 'dbus-native'
 import { EventEmitter } from 'node:events'
 import { readFile } from 'node:fs/promises'
 import test from 'node:test'
+import vm from 'node:vm'
 
 import {
   createKdeWaylandWindowStateBackend,
@@ -182,6 +183,17 @@ test('starts the KWin reporter despite a reused script ID and reloads it after r
   stopMinimizedWatch()
   reportInterface.ReportWindowMinimized('window', false)
   assert.deepEqual(minimizedReports, [['window', true]])
+
+  // The reloaded script reports current states, so a restore while no script
+  // ran is not missed
+  const calls = []
+  const signal = () => ({ connect: () => {} })
+  const restoredWindow = { internalId: 'window', minimized: false, minimizedChanged: signal() }
+  vm.runInNewContext(scripts[1], {
+    callDBus: (...args) => calls.push(args.slice(3)),
+    workspace: { activeWindow: null, windowActivated: signal(), windowAdded: signal(), windowList: () => [restoredWindow] },
+  })
+  assert.deepEqual(calls.filter(([method]) => method === 'ReportWindowMinimized'), [['ReportWindowMinimized', 'window', false]])
   await backend.close()
   assert.equal(bus.listenerCount('reconnected'), 0)
 })
