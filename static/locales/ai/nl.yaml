@@ -197,11 +197,24 @@ Subscriptions:
     Invalid Feed URL: Voer een webadres in dat begint met http:// of https://.
     Feed Already Followed: Je volgt deze feed al.
     Feed Could Not Be Loaded: De feed kan niet worden geladen. Controleer of het adres naar een RSS- of Atom-feed verwijst.
+    Feed Requires Browser Check: Deze site vraagt om een browsercontrole die OpenTubeX niet kan voltooien. Probeer een ander adres of een andere RSSHub-instantie voor deze feed.
     Refresh Errors: 1 feed kan niet worden vernieuwd. | {count} feeds kunnen niet worden vernieuwd.
     Description: Voeg een RSS- of Atom-feed toe om makers op andere platforms te volgen. {rssHub}-instanties bieden feeds voor veel sites, zoals Twitch.
     Empty Items: Je feeds bevatten momenteel geen items.
     No Feeds: Je volgt nog geen RSS-feeds.
-    Public RSSHub Instances: Openbare RSSHub-instanties
+    RSSHub:
+      Browse: RSSHub doorbladeren
+      Title: Feed toevoegen vanuit RSSHub
+      Description: Kies een RSSHub-instantie, een dienst en wat je wilt volgen. Het feedadres wordt voor je gemaakt.
+      Instance: RSSHub-instantie
+      Service: Dienst
+      Search Services: Diensten zoeken
+      Loading Services: Diensten laden…
+      Services Could Not Be Loaded: Deze instantie heeft haar diensten niet teruggegeven. Controleer het adres of kies een andere instantie.
+      Feed Type: Feedtype
+      Requires Configuration: Deze feed heeft extra instellingen op de instantie nodig en werkt mogelijk niet op openbare instanties.
+      Optional Parameter: '{parameter} (optioneel)'
+      Not Set: Niet ingesteld
     Retry Feed: '{feed} opnieuw proberen'
 Trending:
   Music: Muziek

@@ -246,6 +246,7 @@ export const SYNC_SETTING_LABELS = {
   monoAudio: 'Settings.Player Settings.Mono Audio',
   returnYouTubeDislikesUrl: 'Settings.Return YouTube Dislike Settings.Return YouTube Dislike Url',
   rotateFullscreenToLandscape: 'Settings.Player Settings.Rotate Wide Videos to Landscape in Fullscreen',
+  rssHubInstance: 'Subscriptions.RSS Feeds.RSSHub.Instance',
   saveVideoHistoryWithLastViewedPlaylist: 'Settings.Privacy Settings.Save Watched Videos With Last Viewed Playlist',
   screenshotFilenamePattern: 'Settings.Player Settings.Screenshot.File Name Label',
   screenshotFormat: 'Settings.Player Settings.Screenshot.Format Label',

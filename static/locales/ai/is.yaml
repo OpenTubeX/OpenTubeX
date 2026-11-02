@@ -195,11 +195,24 @@ Subscriptions:
     Invalid Feed URL: Sláðu inn vefslóð sem byrjar á http:// eða https://.
     Feed Already Followed: Þú fylgist nú þegar með þessum straumi.
     Feed Could Not Be Loaded: Ekki tókst að hlaða inn straumnum. Gakktu úr skugga um að slóðin vísi á RSS- eða Atom-straum.
+    Feed Requires Browser Check: Þessi vefur krefst vafraathugunar sem OpenTubeX getur ekki lokið. Prófaðu aðra slóð eða annað RSSHub-tilvik fyrir þetta streymi.
     Refresh Errors: Ekki tókst að uppfæra 1 straum. | Ekki tókst að uppfæra {count} strauma.
     Description: Bættu við RSS- eða Atom-straumi til að fylgjast með höfundum á öðrum kerfum. {rssHub}-tilvik bjóða upp á strauma fyrir mörg vefsvæði, til dæmis Twitch.
     Empty Items: Straumarnir þínir innihalda engin atriði eins og er.
     No Feeds: Þú fylgist ekki með neinum RSS-straumum ennþá.
-    Public RSSHub Instances: Opinber RSSHub-tilvik
+    RSSHub:
+      Browse: Skoða RSSHub
+      Title: Bæta við streymi frá RSSHub
+      Description: Veldu RSSHub-tilvik, þjónustu og hverju á að fylgja. Slóð streymisins er búin til fyrir þig.
+      Instance: RSSHub-tilvik
+      Service: Þjónusta
+      Search Services: Leita í þjónustum
+      Loading Services: Hleð inn þjónustum…
+      Services Could Not Be Loaded: Þetta tilvik skilaði ekki þjónustum sínum. Athugaðu slóðina eða veldu annað tilvik.
+      Feed Type: Tegund streymis
+      Requires Configuration: Þetta streymi þarf viðbótaruppsetningu á tilvikinu og virkar því hugsanlega ekki á opinberum tilvikum.
+      Optional Parameter: '{parameter} (valfrjálst)'
+      Not Set: Ekki stillt
     Retry Feed: Reyna {feed} aftur
 Trending:
   Music: Tónlist

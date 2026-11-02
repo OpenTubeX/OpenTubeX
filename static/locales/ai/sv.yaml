@@ -197,11 +197,24 @@ Subscriptions:
     Invalid Feed URL: Ange en webbadress som börjar med http:// eller https://.
     Feed Already Followed: Du följer redan det här flödet.
     Feed Could Not Be Loaded: Flödet kunde inte läsas in. Kontrollera att adressen pekar på ett RSS- eller Atom-flöde.
+    Feed Requires Browser Check: Den här webbplatsen kräver en webbläsarkontroll som OpenTubeX inte kan slutföra. Prova en annan adress eller RSSHub-instans för det här flödet.
     Refresh Errors: 1 flöde kunde inte uppdateras. | {count} flöden kunde inte uppdateras.
     Description: Lägg till ett RSS- eller Atom-flöde för att följa kreatörer från andra plattformar. {rssHub}-instanser tillhandahåller flöden för många webbplatser, till exempel Twitch.
     Empty Items: Dina flöden har inga objekt just nu.
     No Feeds: Du följer inga RSS-flöden ännu.
-    Public RSSHub Instances: Offentliga RSSHub-instanser
+    RSSHub:
+      Browse: Bläddra i RSSHub
+      Title: Lägg till ett flöde från RSSHub
+      Description: Välj en RSSHub-instans, en tjänst och vad du vill följa. Flödesadressen skapas åt dig.
+      Instance: RSSHub-instans
+      Service: Tjänst
+      Search Services: Sök tjänster
+      Loading Services: Läser in tjänster…
+      Services Could Not Be Loaded: Den här instansen returnerade inte sina tjänster. Kontrollera adressen eller välj en annan instans.
+      Feed Type: Flödestyp
+      Requires Configuration: Det här flödet kräver extra inställningar på instansen och fungerar kanske inte på offentliga instanser.
+      Optional Parameter: '{parameter} (valfritt)'
+      Not Set: Inte angivet
     Retry Feed: Försök med {feed} igen
 Trending:
   Music: Musik

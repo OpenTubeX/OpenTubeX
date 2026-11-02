@@ -195,11 +195,24 @@ Subscriptions:
     Invalid Feed URL: http:// または https:// で始まるウェブアドレスを入力してください。
     Feed Already Followed: このフィードはすでにフォローしています。
     Feed Could Not Be Loaded: フィードを読み込めませんでした。アドレスが RSS または Atom フィードを指しているか確認してください。
+    Feed Requires Browser Check: このサイトはブラウザーの確認を求めていますが、OpenTubeX では完了できません。このフィードには別のアドレスか別の RSSHub インスタンスをお試しください。
     Refresh Errors: '{count} 件のフィードを更新できませんでした。'
     Description: RSS または Atom フィードを追加すると、他のプラットフォームのクリエイターをフォローできます。{rssHub} インスタンスは Twitch など多くのサイトのフィードを提供しています。
     Empty Items: 現在、フィードに項目はありません。
     No Feeds: まだ RSS フィードをフォローしていません。
-    Public RSSHub Instances: 公開 RSSHub インスタンス
+    RSSHub:
+      Browse: RSSHub を参照
+      Title: RSSHub からフィードを追加
+      Description: RSSHub インスタンス、サービス、フォローする対象を選んでください。フィードのアドレスは自動で作成されます。
+      Instance: RSSHub インスタンス
+      Service: サービス
+      Search Services: サービスを検索
+      Loading Services: サービスを読み込み中…
+      Services Could Not Be Loaded: このインスタンスからサービス一覧を取得できませんでした。アドレスを確認するか、別のインスタンスを選んでください。
+      Feed Type: フィードの種類
+      Requires Configuration: このフィードはインスタンス側で追加の設定が必要なため、公開インスタンスでは動作しない場合があります。
+      Optional Parameter: '{parameter}（任意）'
+      Not Set: 未設定
     Retry Feed: '{feed} を再試行'
 Trending:
   Music: 音楽

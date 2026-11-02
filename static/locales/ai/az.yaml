@@ -195,11 +195,24 @@ Subscriptions:
     Invalid Feed URL: http:// və ya https:// ilə başlayan veb ünvan daxil edin.
     Feed Already Followed: Bu axını artıq izləyirsiniz.
     Feed Could Not Be Loaded: Axın yüklənə bilmədi. Ünvanın RSS və ya Atom axınına yönləndiyini yoxlayın.
+    Feed Requires Browser Check: Bu sayt OpenTubeX-in tamamlaya bilmədiyi brauzer yoxlaması tələb edir. Bu lent üçün başqa ünvan və ya RSSHub serveri sınayın.
     Refresh Errors: 1 axın yenilənə bilmədi. | {count} axın yenilənə bilmədi.
     Description: Digər platformalardakı müəllifləri izləmək üçün RSS və ya Atom axını əlavə edin. {rssHub} serverləri bir çox sayt, məsələn Twitch üçün axınlar təqdim edir.
     Empty Items: Axınlarınızda hazırda heç bir element yoxdur.
     No Feeds: Hələ heç bir RSS axınını izləmirsiniz.
-    Public RSSHub Instances: İctimai RSSHub serverləri
+    RSSHub:
+      Browse: RSSHub-a bax
+      Title: RSSHub-dan lent əlavə et
+      Description: RSSHub serveri, xidmət və nəyi izləyəcəyinizi seçin. Lent ünvanı sizin üçün yaradılır.
+      Instance: RSSHub serveri
+      Service: Xidmət
+      Search Services: Xidmətlərdə axtar
+      Loading Services: Xidmətlər yüklənir…
+      Services Could Not Be Loaded: Bu server xidmətlərini qaytarmadı. Ünvanı yoxlayın və ya başqa server seçin.
+      Feed Type: Lent növü
+      Requires Configuration: Bu lent serverdə əlavə quraşdırma tələb edir, ona görə ictimai serverlərdə işləməyə bilər.
+      Optional Parameter: '{parameter} (istəyə bağlı)'
+      Not Set: Təyin edilməyib
     Retry Feed: '{feed} axınını yenidən sına'
 Channels:
   Load More Channels: Daha çox kanal yüklə

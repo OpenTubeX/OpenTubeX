@@ -226,11 +226,24 @@ Subscriptions:
     Invalid Feed URL: ایسا ویب ایڈریس درج کریں جو http:// یا https:// سے شروع ہو۔
     Feed Already Followed: آپ پہلے ہی یہ فیڈ فالو کر رہے ہیں۔
     Feed Could Not Be Loaded: فیڈ لوڈ نہیں ہو سکی۔ چیک کریں کہ ایڈریس کسی RSS یا Atom فیڈ کی طرف اشارہ کرتا ہے۔
+    Feed Requires Browser Check: اس سائٹ کو براؤزر کی جانچ درکار ہے جو OpenTubeX مکمل نہیں کر سکتا۔ اس فیڈ کے لیے کوئی اور پتہ یا RSSHub انسٹنس آزمائیں۔
     Refresh Errors: 1 فیڈ ریفریش نہیں ہو سکی۔ | {count} فیڈز ریفریش نہیں ہو سکیں۔
     Description: دوسرے پلیٹ فارمز کے تخلیق کاروں کو فالو کرنے کے لیے کوئی RSS یا Atom فیڈ شامل کریں۔ {rssHub} انسٹنسز بہت سی سائٹس کے لیے فیڈز فراہم کرتے ہیں، جیسے Twitch۔
     Empty Items: آپ کی فیڈز میں فی الحال کوئی آئٹم نہیں ہے۔
     No Feeds: آپ ابھی کوئی RSS فیڈ فالو نہیں کرتے۔
-    Public RSSHub Instances: عوامی RSSHub انسٹنسز
+    RSSHub:
+      Browse: RSSHub براؤز کریں
+      Title: RSSHub سے فیڈ شامل کریں
+      Description: RSSHub انسٹنس، سروس اور جسے فالو کرنا ہے منتخب کریں۔ فیڈ کا پتہ آپ کے لیے بنا دیا جاتا ہے۔
+      Instance: RSSHub انسٹنس
+      Service: سروس
+      Search Services: سروسز تلاش کریں
+      Loading Services: سروسز لوڈ ہو رہی ہیں…
+      Services Could Not Be Loaded: اس انسٹنس نے اپنی سروسز واپس نہیں کیں۔ پتہ چیک کریں یا کوئی اور انسٹنس منتخب کریں۔
+      Feed Type: فیڈ کی قسم
+      Requires Configuration: اس فیڈ کو انسٹنس پر اضافی سیٹ اپ درکار ہے، اس لیے یہ عوامی انسٹنسز پر کام نہ کرے۔
+      Optional Parameter: '{parameter} (اختیاری)'
+      Not Set: سیٹ نہیں
     Retry Feed: '{feed} دوبارہ آزمائیں'
 Channels:
   Load More Channels: مزید چینلز لوڈ کریں

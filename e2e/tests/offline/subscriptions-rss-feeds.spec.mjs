@@ -78,6 +78,49 @@ const brokenFeed = `<?xml version="1.0" encoding="UTF-8"?>
   </channel>
 </rss>`
 
+const RSSHUB_NAMESPACES = {
+  twitch: {
+    name: 'Twitch',
+    url: 'www.twitch.tv',
+    routes: {
+      '/live/:login': {
+        path: '/live/:login',
+        name: 'Live',
+        example: '/twitch/live/riotgames',
+        parameters: { login: 'Twitch username' }
+      },
+      '/video/:login/:filter?': {
+        path: '/video/:login/:filter?',
+        name: 'Channel Video',
+        example: '/twitch/video/riotgames/highlights',
+        parameters: {
+          login: 'Twitch username',
+          filter: {
+            description: 'Video type, Default to all',
+            options: [{ value: 'archive', label: 'Archive' }, { value: 'all', label: 'All' }],
+            default: 'all'
+          }
+        }
+      }
+    }
+  },
+  art: {
+    name: 'Art',
+    url: 'art.com.tw',
+    routes: { '/new': { path: '/new', name: 'New works' } }
+  },
+  // Another service for the same site
+  twitchmirror: {
+    name: 'Twitch',
+    url: 'www.twitch.tv',
+    routes: { '/clips/:login': { path: '/clips/:login', name: 'Clips', parameters: { login: 'Twitch username' } } }
+  },
+  peertube: {
+    name: 'PeerTube',
+    routes: { '/channel/:id': { path: '/channel/:id', name: 'Channel', parameters: { id: 'Channel ID' } } }
+  }
+}
+
 /**
  * @param {import('@playwright/test').Page} page
  */
@@ -168,8 +211,7 @@ test.describe('with followed feeds', () => {
     await expect(rows).toHaveCount(2)
     await expect(rows.first()).toContainText(RSS_URL)
     await expect(rows.first().locator('img.feedAvatar')).toHaveAttribute('src', TWITCH_AVATAR)
-    await expect(manager.getByRole('link', { name: 'Public RSSHub instances' }))
-      .toHaveAttribute('href', 'https://docs.rsshub.app/guide/instances')
+    await expect(manager.getByRole('button', { name: 'Browse RSSHub' })).toBeVisible()
     // The tab has already refreshed the feeds in this window
     await expect(manager.locator('.feedRow.hasError')).toContainText('Broken feed')
 
@@ -201,6 +243,84 @@ test.describe('with followed feeds', () => {
     await expect(page.locator('.settingsWindow')).toBeHidden()
     await expect(titles).toHaveText(['Newest VOD', 'Atom video', 'Older VOD'])
     await expect(page.getByText('1 feed could not be refreshed.')).toBeHidden()
+  })
+
+  test('adds a feed by picking an RSSHub instance, service and creator', async ({ page }) => {
+    await mockFeeds(page)
+    const otherUrl = 'https://rss.example.test/twitch/video/Other'
+    const requests = []
+    await page.route('https://raw.githubusercontent.com/RSSNext/rsshub-docs/**', route => route.fulfill({
+      body: `const instances = [
+  { url: 'https://down.example.test', location: '🇩🇪', maintainer: 'Down' },
+  { url: 'https://rss.example.test/', location: '🇺🇸' },
+];`
+    }))
+    await page.route('https://down.example.test/**', route => route.fulfill({ status: 502, body: 'Bad gateway' }))
+    await page.route(/^https:\/\/rss\.example\.test\/(api\/namespace|twitch\/video\/Other)/, route => {
+      const url = route.request().url()
+      requests.push(url)
+      if (url === otherUrl) {
+        return route.fulfill({ contentType: 'application/rss+xml', body: rssFeed.replace("Streamer's Twitch videos", "Other's Twitch videos") })
+      }
+      return route.fulfill({ json: RSSHUB_NAMESPACES })
+    })
+
+    const manager = await openFeedManager(page)
+    await manager.getByRole('button', { name: 'Browse RSSHub' }).click()
+    const dialog = page.getByRole('dialog', { name: 'Add a feed from RSSHub' })
+    const service = dialog.getByRole('textbox', { name: 'Service' })
+    await expect(service).toBeDisabled()
+
+    const instance = dialog.getByRole('textbox', { name: 'RSSHub instance' })
+    await instance.click()
+    const instanceOptions = dialog.locator('.instanceInput .list li')
+    await expect(instanceOptions).toHaveText(['down.example.test 🇩🇪', 'rss.example.test 🇺🇸'])
+    await instanceOptions.first().click()
+    await expect(dialog.getByRole('alert')).toContainText('This instance did not return its services.')
+    await expect(service).toBeDisabled()
+
+    // A custom host works without a scheme
+    await instance.fill('rss.example.test')
+    await instance.press('Enter')
+    await expect(dialog.getByRole('alert')).toHaveCount(0)
+    await expect(service).toBeEnabled()
+    await expect.poll(() => page.evaluate(() => window.$store.getters.getRssHubInstance)).toBe('https://rss.example.test')
+
+    await service.fill('tw')
+    // Name matches come before matches in the address
+    const serviceOptions = dialog.locator('.serviceInput .list li')
+    await expect(serviceOptions).toHaveText(['Twitch (www.twitch.tv) · twitch', 'Twitch (www.twitch.tv) · twitchmirror', 'Art (art.com.tw)'])
+    // Services with the same name stay apart
+    await serviceOptions.nth(1).click()
+    await expect(dialog.getByRole('combobox', { name: 'Feed type' })).toContainText('Clips')
+    await service.fill('tw')
+    await serviceOptions.first().click()
+    await expect(service).toHaveValue('Twitch (www.twitch.tv) · twitch')
+
+    const feedType = dialog.getByRole('combobox', { name: 'Feed type' })
+    await expect(feedType).toContainText('Live')
+    await feedType.click()
+    await page.getByRole('option', { name: 'Channel Video' }).click()
+    await expect(dialog.getByRole('combobox', { name: 'filter (optional)' })).toContainText('All')
+
+    const add = dialog.getByRole('button', { name: 'Add Feed' })
+    await expect(add).toBeDisabled()
+    const login = dialog.getByRole('textbox', { name: 'login' })
+    await expect(login).toHaveAttribute('placeholder', 'e.g. riotgames')
+    await login.fill('Other')
+    // The default filter is left out of the address
+    await expect(dialog.locator('.feedUrlPreview')).toHaveText(otherUrl)
+    await add.click()
+
+    await expect(dialog).toHaveCount(0)
+    await expect(manager.locator('.feedRow').last()).toContainText("Other's Twitch videos")
+    expect(await page.evaluate(() => window.$store.getters.getFollowedRssFeeds.at(-1).url)).toBe(otherUrl)
+    expect(requests).toEqual(['https://rss.example.test/api/namespace', otherUrl])
+
+    // The instance is remembered
+    await manager.getByRole('button', { name: 'Browse RSSHub' }).click()
+    await expect(dialog.getByRole('textbox', { name: 'RSSHub instance' })).toHaveValue('https://rss.example.test')
+    await expect(dialog.getByRole('textbox', { name: 'Service' })).toBeEnabled()
   })
 
   test('retries a failed feed from the feed manager', async ({ page }) => {
@@ -543,6 +663,132 @@ test.describe('without followed feeds', () => {
     await input.press('Enter')
     await expect(page.getByText('The feed could not be loaded.', { exact: false })).toBeVisible()
     await expect(input).toHaveValue(ATOM_URL)
+    await expect(manager.locator('.feedRow')).toHaveCount(0)
+  })
+
+  test('keeps the newer RSSHub instance when a closed dialog finishes loading', async ({ page }) => {
+    await page.route(/^https?:\/\//, abortUnmockedRequest)
+    await page.route('https://raw.githubusercontent.com/RSSNext/rsshub-docs/**', route => route.fulfill({ body: '' }))
+    let release
+    const held = new Promise(resolve => { release = resolve })
+    let slowDelivered = false
+    await page.route('https://slow.example.test/api/namespace', async route => {
+      await held
+      await route.fulfill({ json: RSSHUB_NAMESPACES })
+      slowDelivered = true
+    })
+    await page.route('https://rss.example.test/api/namespace', route => route.fulfill({ json: RSSHUB_NAMESPACES }))
+    const savedInstance = () => page.evaluate(() => window.$store.getters.getRssHubInstance)
+
+    const manager = await openFeedManager(page)
+    const browse = manager.getByRole('button', { name: 'Browse RSSHub' })
+    const dialog = page.getByRole('dialog', { name: 'Add a feed from RSSHub' })
+    const instance = dialog.getByRole('textbox', { name: 'RSSHub instance' })
+    await browse.click()
+    await instance.fill('slow.example.test')
+    await instance.press('Enter')
+    const service = dialog.getByRole('textbox', { name: 'Service' })
+    await expect(service).toHaveAttribute('placeholder', 'Loading services…')
+    // Clearing the instance stops waiting for its services
+    await instance.fill('')
+    await instance.press('Enter')
+    await expect(service).toHaveAttribute('placeholder', 'Search services')
+    await instance.fill('slow.example.test')
+    await instance.press('Enter')
+    await dialog.getByRole('button', { name: 'Close' }).click()
+    await expect(dialog).toHaveCount(0)
+
+    await browse.click()
+    await instance.fill('rss.example.test')
+    await instance.press('Enter')
+    await expect(service).toBeEnabled()
+    await expect.poll(savedInstance).toBe('https://rss.example.test')
+
+    release()
+    await expect.poll(() => slowDelivered).toBe(true)
+    // Give the late response time to be read and parsed before checking that it changed nothing
+    await page.evaluate(() => new Promise(resolve => setTimeout(resolve, 500)))
+    expect(await savedInstance()).toBe('https://rss.example.test')
+  })
+
+  test('keeps the RSSHub dialog scrolled within its content when it shrinks', { tag: '@scale' }, async ({ app, page }) => {
+    await page.route(/^https?:\/\//, abortUnmockedRequest)
+    await page.route('https://raw.githubusercontent.com/RSSNext/rsshub-docs/**', route => route.fulfill({ body: '' }))
+    const parameters = Object.fromEntries(['a', 'b', 'c', 'd', 'e', 'f'].map(name => [name, `Parameter ${name}`]))
+    const namespaces = Object.fromEntries(Array.from({ length: 30 }, (_, index) => [`service${index}`, {
+      name: `Service ${String(index).padStart(2, '0')}`,
+      routes: { '/many/:a/:b?/:c?/:d?/:e?/:f?': { name: 'Many fields', parameters } }
+    }]))
+    await page.route('https://rss.example.test/api/namespace', route => route.fulfill({ json: namespaces }))
+    await setWindowSize(app, page, { width: 900, height: 560 })
+
+    const manager = await openFeedManager(page)
+    await manager.getByRole('button', { name: 'Browse RSSHub' }).click()
+    const dialog = page.getByRole('dialog', { name: 'Add a feed from RSSHub' })
+    const instance = dialog.getByRole('textbox', { name: 'RSSHub instance' })
+    await instance.fill('rss.example.test')
+    await instance.press('Enter')
+    const service = dialog.getByRole('textbox', { name: 'Service' })
+    await expect(service).toBeEnabled()
+
+    // Filtering the scrolled suggestions
+    await service.click()
+    const list = dialog.locator('.serviceInput .list')
+    const listScrollbar = list.locator(':scope > .os-scrollbar-vertical')
+    await expect(list.locator('li')).toHaveCount(30)
+    await expect(listScrollbar).not.toHaveClass(/os-scrollbar-unusable/)
+    await list.evaluate(element => { element.scrollTop = element.scrollHeight })
+    await expect.poll(() => list.evaluate(element => element.scrollTop)).toBeGreaterThan(0)
+    await service.fill('Service 29')
+    await expect(list.locator('li')).toHaveCount(1)
+    await expectScrollAtRenderedEnd(list)
+    await expect(listScrollbar).toHaveClass(/os-scrollbar-unusable/)
+
+    // Removing the route fields of the scrolled dialog
+    await list.locator('li').click()
+    const content = page.locator('.promptContentScroller')
+    const contentScrollbar = content.locator(':scope > .os-scrollbar-vertical')
+    await expect(dialog.getByRole('textbox', { name: 'f (optional)' })).toHaveCount(1)
+    await expect(contentScrollbar).not.toHaveClass(/os-scrollbar-unusable/)
+    await content.evaluate(element => { element.scrollTop = element.scrollHeight })
+    await expect.poll(() => content.evaluate(element => element.scrollTop)).toBeGreaterThan(0)
+    // Editing the service name without scrolling to the field starts a new search
+    await service.evaluate(element => element.focus({ preventScroll: true }))
+    await page.keyboard.press('ControlOrMeta+a')
+    await page.keyboard.type('none')
+    await expect(dialog.getByRole('textbox', { name: 'f (optional)' })).toHaveCount(0)
+    await expectScrollAtRenderedEnd(content)
+    await expect(contentScrollbar).toHaveClass(/os-scrollbar-unusable/)
+
+    // Enlarging the window
+    await service.fill('Service 29')
+    await list.locator('li').click()
+    await expect(contentScrollbar).not.toHaveClass(/os-scrollbar-unusable/)
+    await content.evaluate(element => { element.scrollTop = element.scrollHeight })
+    await expect.poll(() => content.evaluate(element => element.scrollTop)).toBeGreaterThan(0)
+    const before = await content.evaluate(element => element.scrollTop)
+    await setWindowSize(app, page, { width: 1000, height: 1100 })
+    await expectScrollAtRenderedEnd(content)
+    expect(await content.evaluate(element => element.scrollTop)).toBeLessThan(before)
+    // Larger UI scales can still overflow, so the scrollbar follows the new range
+    await expect.poll(() => content.evaluate(element => (element.scrollHeight - element.clientHeight < 1) ===
+      element.querySelector(':scope > .os-scrollbar-vertical').classList.contains('os-scrollbar-unusable'))).toBe(true)
+  })
+
+  test('explains that a site asks for a browser check', async ({ page }) => {
+    await page.route(/^https?:\/\//, abortUnmockedRequest)
+    // Cloudflare answers clients it wants to verify with a challenge page
+    await page.route('https://protected.example.test/feed.xml', route => route.fulfill({
+      status: 403,
+      headers: { 'cf-mitigated': 'challenge', 'content-type': 'text/html; charset=UTF-8' },
+      body: '<!DOCTYPE html><html><head><title>Just a moment...</title></head><body><script>window._cf_chl_opt = {}</script></body></html>'
+    }))
+    const manager = await openFeedManager(page)
+    const input = manager.getByRole('textbox', { name: 'Add Feed' })
+    await input.fill('https://protected.example.test/feed.xml')
+    await input.press('Enter')
+    await expect(page.getByText('This site requires a browser check', { exact: false })).toBeVisible()
+    await expect(page.getByText('The feed could not be loaded.', { exact: false })).toHaveCount(0)
     await expect(manager.locator('.feedRow')).toHaveCount(0)
   })
 

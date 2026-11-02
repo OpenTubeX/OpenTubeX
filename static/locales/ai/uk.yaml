@@ -197,11 +197,24 @@ Subscriptions:
     Invalid Feed URL: Введіть вебадресу, що починається з http:// або https://.
     Feed Already Followed: Ви вже стежите за цією стрічкою.
     Feed Could Not Be Loaded: Не вдалося завантажити стрічку. Перевірте, чи адреса веде на RSS- або Atom-стрічку.
+    Feed Requires Browser Check: Цей сайт вимагає перевірки браузера, яку OpenTubeX не може пройти. Спробуйте іншу адресу або інший сервер RSSHub для цієї стрічки.
     Refresh Errors: Не вдалося оновити 1 стрічку. | Не вдалося оновити {count} стрічки. | Не вдалося оновити {count} стрічок.
     Description: Додайте RSS- або Atom-стрічку, щоб стежити за авторами з інших платформ. Сервери {rssHub} надають стрічки для багатьох сайтів, наприклад Twitch.
     Empty Items: У ваших стрічках поки немає елементів.
     No Feeds: Ви ще не відстежуєте жодної RSS-стрічки.
-    Public RSSHub Instances: Публічні сервери RSSHub
+    RSSHub:
+      Browse: Огляд RSSHub
+      Title: Додати стрічку з RSSHub
+      Description: Виберіть сервер RSSHub, сервіс і те, за чим стежити. Адресу стрічки буде складено автоматично.
+      Instance: Сервер RSSHub
+      Service: Сервіс
+      Search Services: Пошук сервісів
+      Loading Services: Завантаження сервісів…
+      Services Could Not Be Loaded: Цей сервер не повернув свої сервіси. Перевірте адресу або виберіть інший сервер.
+      Feed Type: Тип стрічки
+      Requires Configuration: Ця стрічка потребує додаткового налаштування на сервері, тому на публічних серверах може не працювати.
+      Optional Parameter: '{parameter} (необов’язково)'
+      Not Set: Не задано
     Retry Feed: Повторити спробу для {feed}
 Trending:
   Music: Музика

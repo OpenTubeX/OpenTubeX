@@ -229,11 +229,24 @@ Subscriptions:
     Invalid Feed URL: Įveskite žiniatinklio adresą, prasidedantį http:// arba https://.
     Feed Already Followed: Jūs jau stebite šį sklaidos kanalą.
     Feed Could Not Be Loaded: Nepavyko įkelti sklaidos kanalo. Patikrinkite, ar adresas nurodo į RSS arba Atom sklaidos kanalą.
+    Feed Requires Browser Check: Ši svetainė reikalauja naršyklės patikros, kurios OpenTubeX negali atlikti. Šiam srautui išbandykite kitą adresą arba kitą RSSHub serverį.
     Refresh Errors: Nepavyko atnaujinti 1 sklaidos kanalo. | Nepavyko atnaujinti {count} sklaidos kanalų. | Nepavyko atnaujinti {count} sklaidos kanalų.
     Description: Pridėkite RSS arba Atom sklaidos kanalą, kad galėtumėte stebėti kūrėjus kitose platformose. {rssHub} serveriai teikia sklaidos kanalus daugeliui svetainių, pavyzdžiui, Twitch.
     Empty Items: Jūsų sklaidos kanaluose šiuo metu nėra jokių elementų.
     No Feeds: Dar nestebite jokių RSS sklaidos kanalų.
-    Public RSSHub Instances: Vieši RSSHub serveriai
+    RSSHub:
+      Browse: Naršyti RSSHub
+      Title: Pridėti srautą iš RSSHub
+      Description: Pasirinkite RSSHub serverį, paslaugą ir ką sekti. Srauto adresas sudaromas automatiškai.
+      Instance: RSSHub serveris
+      Service: Paslauga
+      Search Services: Ieškoti paslaugų
+      Loading Services: Įkeliamos paslaugos…
+      Services Could Not Be Loaded: Šis serveris negrąžino savo paslaugų. Patikrinkite adresą arba pasirinkite kitą serverį.
+      Feed Type: Srauto tipas
+      Requires Configuration: Šiam srautui reikia papildomos sąrankos serveryje, todėl viešuose serveriuose jis gali neveikti.
+      Optional Parameter: '{parameter} (neprivaloma)'
+      Not Set: Nenustatyta
     Retry Feed: Bandyti dar kartą įkelti {feed}
 Trending:
   Music: Muzika

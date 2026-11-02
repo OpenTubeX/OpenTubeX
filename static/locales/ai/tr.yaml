@@ -195,11 +195,24 @@ Subscriptions:
     Invalid Feed URL: http:// veya https:// ile başlayan bir web adresi girin.
     Feed Already Followed: Bu akışı zaten takip ediyorsunuz.
     Feed Could Not Be Loaded: Akış yüklenemedi. Adresin bir RSS veya Atom akışını gösterdiğini kontrol edin.
+    Feed Requires Browser Check: Bu site, OpenTubeX’in tamamlayamadığı bir tarayıcı doğrulaması istiyor. Bu akış için başka bir adres veya RSSHub örneği deneyin.
     Refresh Errors: 1 akış yenilenemedi. | {count} akış yenilenemedi.
     Description: Diğer platformlardaki içerik üreticilerini takip etmek için bir RSS veya Atom akışı ekleyin. {rssHub} örnekleri, Twitch gibi birçok site için akış sağlar.
     Empty Items: Akışlarınızda şu anda hiç öğe yok.
     No Feeds: Henüz hiçbir RSS akışını takip etmiyorsunuz.
-    Public RSSHub Instances: Herkese açık RSSHub örnekleri
+    RSSHub:
+      Browse: RSSHub’a göz at
+      Title: RSSHub’dan akış ekle
+      Description: Bir RSSHub örneği, bir hizmet ve neyi takip edeceğinizi seçin. Akış adresi sizin için oluşturulur.
+      Instance: RSSHub örneği
+      Service: Hizmet
+      Search Services: Hizmetlerde ara
+      Loading Services: Hizmetler yükleniyor…
+      Services Could Not Be Loaded: Bu örnek hizmetlerini döndürmedi. Adresi kontrol edin veya başka bir örnek seçin.
+      Feed Type: Akış türü
+      Requires Configuration: Bu akış örnekte ek kurulum gerektirir, bu nedenle herkese açık örneklerde çalışmayabilir.
+      Optional Parameter: '{parameter} (isteğe bağlı)'
+      Not Set: Ayarlanmadı
     Retry Feed: '{feed} akışını yeniden dene'
 Trending:
   Music: Müzik

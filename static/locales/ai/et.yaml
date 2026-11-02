@@ -195,11 +195,24 @@ Subscriptions:
     Invalid Feed URL: Sisesta veebiaadress, mis algab http:// või https://.
     Feed Already Followed: Sa juba jälgid seda voogu.
     Feed Could Not Be Loaded: Voogu ei õnnestunud laadida. Kontrolli, kas aadress viitab RSS- või Atom-voole.
+    Feed Requires Browser Check: See sait nõuab brauseri kontrolli, mida OpenTubeX ei suuda läbida. Proovi selle voo jaoks teist aadressi või RSSHubi eksemplari.
     Refresh Errors: 1 voogu ei õnnestunud värskendada. | {count} voogu ei õnnestunud värskendada.
     Description: Lisa RSS- või Atom-voog, et jälgida teiste platvormide sisuloojaid. {rssHub}i eksemplarid pakuvad vooge paljudele saitidele, näiteks Twitchile.
     Empty Items: Sinu voogudes pole praegu ühtegi üksust.
     No Feeds: Sa ei jälgi veel ühtegi RSS-voogu.
-    Public RSSHub Instances: Avalikud RSSHubi eksemplarid
+    RSSHub:
+      Browse: Sirvi RSSHubi
+      Title: Lisa voog RSSHubist
+      Description: Vali RSSHubi eksemplar, teenus ja see, mida jälgida. Voo aadress koostatakse sinu eest.
+      Instance: RSSHubi eksemplar
+      Service: Teenus
+      Search Services: Otsi teenuseid
+      Loading Services: Teenuste laadimine…
+      Services Could Not Be Loaded: See eksemplar ei tagastanud oma teenuseid. Kontrolli aadressi või vali teine eksemplar.
+      Feed Type: Voo tüüp
+      Requires Configuration: See voog vajab eksemplaril lisaseadistust, seega ei pruugi see avalikel eksemplaridel töötada.
+      Optional Parameter: '{parameter} (valikuline)'
+      Not Set: Määramata
     Retry Feed: Proovi {feed} uuesti
 Trending:
   Music: Muusika

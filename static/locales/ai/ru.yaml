@@ -168,11 +168,24 @@ Subscriptions:
     Invalid Feed URL: Введите веб-адрес, начинающийся с http:// или https://.
     Feed Already Followed: Вы уже отслеживаете эту ленту.
     Feed Could Not Be Loaded: Не удалось загрузить ленту. Проверьте, что адрес ведёт на RSS- или Atom-ленту.
+    Feed Requires Browser Check: Этот сайт требует проверки браузера, которую OpenTubeX не может пройти. Попробуйте другой адрес или другой экземпляр RSSHub для этой ленты.
     Refresh Errors: Не удалось обновить 1 ленту. | Не удалось обновить {count} ленты. | Не удалось обновить {count} лент.
     Description: Добавьте RSS- или Atom-ленту, чтобы следить за авторами с других платформ. Экземпляры {rssHub} предоставляют ленты для многих сайтов, например Twitch.
     Empty Items: В ваших лентах пока нет элементов.
     No Feeds: Вы пока не отслеживаете ни одной RSS-ленты.
-    Public RSSHub Instances: Публичные экземпляры RSSHub
+    RSSHub:
+      Browse: Обзор RSSHub
+      Title: Добавить ленту из RSSHub
+      Description: Выберите экземпляр RSSHub, сервис и то, за чем следить. Адрес ленты будет составлен автоматически.
+      Instance: Экземпляр RSSHub
+      Service: Сервис
+      Search Services: Поиск сервисов
+      Loading Services: Загрузка сервисов…
+      Services Could Not Be Loaded: Этот экземпляр не вернул список сервисов. Проверьте адрес или выберите другой экземпляр.
+      Feed Type: Тип ленты
+      Requires Configuration: Этой ленте нужна дополнительная настройка на экземпляре, поэтому на публичных экземплярах она может не работать.
+      Optional Parameter: '{parameter} (необязательно)'
+      Not Set: Не задано
     Retry Feed: Повторить попытку для {feed}
 Trending:
   Music: Музыка

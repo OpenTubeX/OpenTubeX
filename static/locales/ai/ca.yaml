@@ -241,11 +241,24 @@ Subscriptions:
     Invalid Feed URL: Introduïu una adreça web que comenci per http:// o https://.
     Feed Already Followed: Ja seguiu aquest canal.
     Feed Could Not Be Loaded: No s'ha pogut carregar el canal. Comproveu que l'adreça apunti a un canal RSS o Atom.
+    Feed Requires Browser Check: Aquest lloc demana una verificació del navegador que OpenTubeX no pot completar. Proveu una altra adreça o una altra instància de RSSHub per a aquest canal.
     Refresh Errors: No s'ha pogut actualitzar 1 canal. | No s'han pogut actualitzar {count} canals. | No s'han pogut actualitzar {count} canals.
     Description: Afegiu un canal RSS o Atom per seguir creadors d'altres plataformes. Les instàncies de {rssHub} ofereixen canals per a molts llocs, com ara Twitch.
     Empty Items: Ara mateix els vostres canals no tenen cap element.
     No Feeds: Encara no seguiu cap canal RSS.
-    Public RSSHub Instances: Instàncies públiques de RSSHub
+    RSSHub:
+      Browse: Explora RSSHub
+      Title: Afegeix un canal de RSSHub
+      Description: Trieu una instància de RSSHub, un servei i què voleu seguir. L’adreça del canal es crea automàticament.
+      Instance: Instància de RSSHub
+      Service: Servei
+      Search Services: Cerca serveis
+      Loading Services: S’estan carregant els serveis…
+      Services Could Not Be Loaded: Aquesta instància no ha retornat els seus serveis. Comproveu l’adreça o trieu una altra instància.
+      Feed Type: Tipus de canal
+      Requires Configuration: Aquest canal necessita configuració addicional a la instància, així que potser no funciona en instàncies públiques.
+      Optional Parameter: '{parameter} (opcional)'
+      Not Set: Sense definir
     Retry Feed: Torna a provar {feed}
 Channels:
   Load More Channels: "Carrega més canals"

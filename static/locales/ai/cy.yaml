@@ -195,11 +195,24 @@ Subscriptions:
     Invalid Feed URL: Rhowch gyfeiriad gwe sy'n dechrau gyda http:// neu https://.
     Feed Already Followed: Rydych chi eisoes yn dilyn y ffrwd hon.
     Feed Could Not Be Loaded: Doedd dim modd llwytho'r ffrwd. Gwiriwch fod y cyfeiriad yn pwyntio at ffrwd RSS neu Atom.
+    Feed Requires Browser Check: Mae’r wefan hon yn gofyn am wiriad porwr na all OpenTubeX ei gwblhau. Rhowch gynnig ar gyfeiriad arall neu enghraifft RSSHub arall ar gyfer y ffrwd hon.
     Refresh Errors: Methwyd adnewyddu {count} o ffrydiau. | Methwyd adnewyddu 1 ffrwd. | Methwyd adnewyddu {count} ffrwd. | Methwyd adnewyddu {count} ffrwd. | Methwyd adnewyddu {count} ffrwd. | Methwyd adnewyddu {count} o ffrydiau.
     Description: Ychwanegwch ffrwd RSS neu Atom i ddilyn crewyr o lwyfannau eraill. Mae enghreifftiau {rssHub} yn darparu ffrydiau ar gyfer llawer o wefannau, fel Twitch.
     Empty Items: Does dim eitemau yn eich ffrydiau ar hyn o bryd.
     No Feeds: Dydych chi ddim yn dilyn unrhyw ffrydiau RSS eto.
-    Public RSSHub Instances: Enghreifftiau RSSHub cyhoeddus
+    RSSHub:
+      Browse: Pori RSSHub
+      Title: Ychwanegu ffrwd o RSSHub
+      Description: Dewiswch enghraifft RSSHub, gwasanaeth a beth i’w ddilyn. Mae cyfeiriad y ffrwd yn cael ei greu i chi.
+      Instance: Enghraifft RSSHub
+      Service: Gwasanaeth
+      Search Services: Chwilio gwasanaethau
+      Loading Services: Wrthi’n llwytho gwasanaethau…
+      Services Could Not Be Loaded: Ni ddychwelodd yr enghraifft hon ei gwasanaethau. Gwiriwch y cyfeiriad neu dewiswch enghraifft arall.
+      Feed Type: Math o ffrwd
+      Requires Configuration: Mae angen gosod ychwanegol ar yr enghraifft ar gyfer y ffrwd hon, felly efallai na fydd yn gweithio ar enghreifftiau cyhoeddus.
+      Optional Parameter: '{parameter} (dewisol)'
+      Not Set: Heb ei osod
     Retry Feed: Rhoi cynnig arall ar {feed}
 Trending:
   Music: Cerddoriaeth

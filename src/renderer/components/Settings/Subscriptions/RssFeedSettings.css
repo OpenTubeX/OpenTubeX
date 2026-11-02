@@ -77,11 +77,9 @@
   font-size: 0.85em;
 }
 
-.instancesLink {
-  align-items: center;
-  display: inline-flex;
-  gap: 6px;
+.rssHubButton {
   justify-self: start;
+  margin: 0;
 }
 
 .feedAvatar {

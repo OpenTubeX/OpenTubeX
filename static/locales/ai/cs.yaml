@@ -195,11 +195,24 @@ Subscriptions:
     Invalid Feed URL: Zadejte webovou adresu začínající http:// nebo https://.
     Feed Already Followed: Tento kanál již sledujete.
     Feed Could Not Be Loaded: Kanál se nepodařilo načíst. Zkontrolujte, zda adresa odkazuje na kanál RSS nebo Atom.
+    Feed Requires Browser Check: Tento web vyžaduje ověření prohlížeče, které OpenTubeX nedokáže dokončit. Zkuste pro tento kanál jinou adresu nebo jinou instanci RSSHub.
     Refresh Errors: 1 kanál se nepodařilo obnovit. | {count} kanály se nepodařilo obnovit. | {count} kanálů se nepodařilo obnovit.
     Description: Přidejte kanál RSS nebo Atom a sledujte tvůrce z jiných platforem. Instance {rssHub} poskytují kanály pro mnoho webů, například Twitch.
     Empty Items: Vaše kanály zatím neobsahují žádné položky.
     No Feeds: Zatím nesledujete žádné RSS kanály.
-    Public RSSHub Instances: Veřejné instance RSSHub
+    RSSHub:
+      Browse: Procházet RSSHub
+      Title: Přidat kanál z RSSHub
+      Description: Vyberte instanci RSSHub, službu a co chcete sledovat. Adresa kanálu se sestaví automaticky.
+      Instance: Instance RSSHub
+      Service: Služba
+      Search Services: Hledat služby
+      Loading Services: Načítání služeb…
+      Services Could Not Be Loaded: Tato instance nevrátila své služby. Zkontrolujte adresu nebo vyberte jinou instanci.
+      Feed Type: Typ kanálu
+      Requires Configuration: Tento kanál vyžaduje na instanci další nastavení, takže na veřejných instancích nemusí fungovat.
+      Optional Parameter: '{parameter} (volitelné)'
+      Not Set: Nenastaveno
     Retry Feed: Zkusit znovu načíst {feed}
 Trending:
   Music: Hudba

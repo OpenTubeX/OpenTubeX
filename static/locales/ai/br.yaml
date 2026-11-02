@@ -195,11 +195,24 @@ Subscriptions:
     Invalid Feed URL: Enankit ur chomlec'h web a grog gant http:// pe https://.
     Feed Already Followed: Heuliañ a rit ar gwazh-mañ dija.
     Feed Could Not Be Loaded: N'eus ket bet gallet kargañ ar gwazh. Gwiriit e kas ar chomlec'h d'ur gwazh RSS pe Atom.
+    Feed Requires Browser Check: Ul gwiriadur merdeer a c’houlenn al lec’hienn-mañ ha n’hall ket OpenTubeX e seveniñ. Klaskit ur chomlec’h all pe un istañs RSSHub all evit al lanvad-mañ.
     Refresh Errors: N'eus ket bet gallet adkargañ 1 gwazh. | N'eus ket bet gallet adkargañ {count} wazh. | N'eus ket bet gallet adkargañ {count} gwazh. | N'eus ket bet gallet adkargañ {count} a wazhioù. | N'eus ket bet gallet adkargañ {count} gwazh.
     Description: Ouzhpennit ur gwazh RSS pe Atom evit heuliañ krouerien war savennoù all. An istañsoù {rssHub} a bourchas gwazhioù evit kalz lec'hiennoù, evel Twitch.
     Empty Items: N'eus elfenn ebet en ho kwazhioù evit poent.
     No Feeds: N'heuliit gwazh RSS ebet c'hoazh.
-    Public RSSHub Instances: Istañsoù RSSHub publik
+    RSSHub:
+      Browse: Furchal RSSHub
+      Title: Ouzhpennañ ul lanvad eus RSSHub
+      Description: Dibabit un istañs RSSHub, ur servij hag ar pezh da heuliañ. Savet e vez chomlec’h al lanvad evidoc’h.
+      Instance: Istañs RSSHub
+      Service: Servij
+      Search Services: Klask servijoù
+      Loading Services: O kargañ ar servijoù…
+      Services Could Not Be Loaded: N’en deus ket kaset an istañs-mañ e servijoù. Gwiriit ar chomlec’h pe dibabit un istañs all.
+      Feed Type: Seurt lanvad
+      Requires Configuration: Ret eo kefluniañ muioc’h an istañs evit al lanvad-mañ, marteze ne zay ket en-dro war an istañsoù publik.
+      Optional Parameter: '{parameter} (diret)'
+      Not Set: Nann-termenet
     Retry Feed: Klask en-dro {feed}
 Trending:
   Music: Sonerezh

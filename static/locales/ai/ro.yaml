@@ -195,11 +195,24 @@ Subscriptions:
     Invalid Feed URL: Introdu o adresă web care începe cu http:// sau https://.
     Feed Already Followed: Urmărești deja acest flux.
     Feed Could Not Be Loaded: Fluxul nu a putut fi încărcat. Verifică dacă adresa indică un flux RSS sau Atom.
+    Feed Requires Browser Check: Acest site cere o verificare a browserului pe care OpenTubeX nu o poate finaliza. Încearcă altă adresă sau altă instanță RSSHub pentru acest flux.
     Refresh Errors: 1 flux nu a putut fi reîmprospătat. | {count} fluxuri nu au putut fi reîmprospătate. | {count} de fluxuri nu au putut fi reîmprospătate.
     Description: Adaugă un flux RSS sau Atom pentru a urmări creatori de pe alte platforme. Instanțele {rssHub} oferă fluxuri pentru multe site-uri, cum ar fi Twitch.
     Empty Items: Fluxurile tale nu au momentan niciun element.
     No Feeds: Încă nu urmărești niciun flux RSS.
-    Public RSSHub Instances: Instanțe RSSHub publice
+    RSSHub:
+      Browse: Răsfoiește RSSHub
+      Title: Adaugă un flux din RSSHub
+      Description: Alege o instanță RSSHub, un serviciu și ce vrei să urmărești. Adresa fluxului este creată automat.
+      Instance: Instanță RSSHub
+      Service: Serviciu
+      Search Services: Caută servicii
+      Loading Services: Se încarcă serviciile…
+      Services Could Not Be Loaded: Această instanță nu și-a returnat serviciile. Verifică adresa sau alege altă instanță.
+      Feed Type: Tip de flux
+      Requires Configuration: Acest flux necesită configurare suplimentară pe instanță, așa că s-ar putea să nu funcționeze pe instanțele publice.
+      Optional Parameter: '{parameter} (opțional)'
+      Not Set: Nesetat
     Retry Feed: Reîncearcă {feed}
 Trending:
   Music: Muzică

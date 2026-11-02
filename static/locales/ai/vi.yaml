@@ -197,11 +197,24 @@ Subscriptions:
     Invalid Feed URL: Nhập địa chỉ web bắt đầu bằng http:// hoặc https://.
     Feed Already Followed: Bạn đã theo dõi nguồn cấp này.
     Feed Could Not Be Loaded: Không thể tải nguồn cấp. Hãy kiểm tra xem địa chỉ có trỏ đến nguồn cấp RSS hoặc Atom không.
+    Feed Requires Browser Check: Trang này yêu cầu kiểm tra trình duyệt mà OpenTubeX không thể hoàn tất. Hãy thử địa chỉ khác hoặc máy chủ RSSHub khác cho nguồn cấp này.
     Refresh Errors: Không thể làm mới {count} nguồn cấp.
     Description: Thêm nguồn cấp RSS hoặc Atom để theo dõi nhà sáng tạo từ các nền tảng khác. Các máy chủ {rssHub} cung cấp nguồn cấp cho nhiều trang web, chẳng hạn như Twitch.
     Empty Items: Các nguồn cấp của bạn hiện không có mục nào.
     No Feeds: Bạn chưa theo dõi nguồn cấp RSS nào.
-    Public RSSHub Instances: Các máy chủ RSSHub công khai
+    RSSHub:
+      Browse: Duyệt RSSHub
+      Title: Thêm nguồn cấp từ RSSHub
+      Description: Chọn một máy chủ RSSHub, một dịch vụ và đối tượng muốn theo dõi. Địa chỉ nguồn cấp sẽ được tạo tự động.
+      Instance: Máy chủ RSSHub
+      Service: Dịch vụ
+      Search Services: Tìm dịch vụ
+      Loading Services: Đang tải dịch vụ…
+      Services Could Not Be Loaded: Máy chủ này không trả về danh sách dịch vụ. Hãy kiểm tra địa chỉ hoặc chọn máy chủ khác.
+      Feed Type: Loại nguồn cấp
+      Requires Configuration: Nguồn cấp này cần thiết lập thêm trên máy chủ nên có thể không hoạt động trên máy chủ công khai.
+      Optional Parameter: '{parameter} (không bắt buộc)'
+      Not Set: Chưa đặt
     Retry Feed: Thử lại {feed}
 Trending:
   Music: Âm nhạc

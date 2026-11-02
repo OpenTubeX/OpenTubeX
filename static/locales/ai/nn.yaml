@@ -195,11 +195,24 @@ Subscriptions:
     Invalid Feed URL: Skriv inn ei nettadresse som byrjar med http:// eller https://.
     Feed Already Followed: Du følgjer allereie denne straumen.
     Feed Could Not Be Loaded: Straumen kunne ikkje lastast inn. Kontroller at adressa peikar til ein RSS- eller Atom-straum.
+    Feed Requires Browser Check: Denne nettstaden krev ein nettlesarsjekk som OpenTubeX ikkje kan fullføre. Prøv ei anna adresse eller ein annan RSSHub-instans for denne straumen.
     Refresh Errors: 1 straum kunne ikkje oppdaterast. | {count} straumar kunne ikkje oppdaterast.
     Description: Legg til ein RSS- eller Atom-straum for å følgje skaparar frå andre plattformer. {rssHub}-instansar tilbyr straumar for mange nettstader, til dømes Twitch.
     Empty Items: Straumane dine har ingen element no.
     No Feeds: Du fylgjer ingen RSS-straumar enno.
-    Public RSSHub Instances: Offentlege RSSHub-instansar
+    RSSHub:
+      Browse: Bla gjennom RSSHub
+      Title: Legg til ein straum frå RSSHub
+      Description: Vel ein RSSHub-instans, ei teneste og kva du vil følgje. Straumadressa vert laga for deg.
+      Instance: RSSHub-instans
+      Service: Teneste
+      Search Services: Søk i tenester
+      Loading Services: Lastar inn tenester …
+      Services Could Not Be Loaded: Denne instansen returnerte ikkje tenestene sine. Sjekk adressa eller vel ein annan instans.
+      Feed Type: Straumtype
+      Requires Configuration: Denne straumen krev ekstra oppsett på instansen og fungerer kanskje ikkje på offentlege instansar.
+      Optional Parameter: '{parameter} (valfritt)'
+      Not Set: Ikkje sett
     Retry Feed: Prøv {feed} på nytt
 Trending:
   Music: Musikk
