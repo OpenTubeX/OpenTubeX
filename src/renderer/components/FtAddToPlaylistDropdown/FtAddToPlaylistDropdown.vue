@@ -197,7 +197,7 @@ async function togglePlaylist(playlist) {
         ? t('Video.Video has been removed from {playlistName}', { playlistName })
         : t('Video.There was a problem removing the video from {playlistName}', { playlistName }),
       image: videoThumbnail.value,
-      icon: ['fas', 'trash'],
+      icon: removed ? ['fas', 'trash'] : ['fas', 'circle-exclamation'],
     })
   } else {
     // Concurrent activations are collapsed by the store, so a rapid second
@@ -213,7 +213,7 @@ async function togglePlaylist(playlist) {
         ? t('Video.Video has been saved to {playlistName}', { playlistName })
         : t('Video.There was a problem saving the video to {playlistName}', { playlistName }),
       image: videoThumbnail.value,
-      icon: ['fas', 'bookmark'],
+      icon: saved ? ['fas', 'bookmark'] : ['fas', 'circle-exclamation'],
     })
   }
 }

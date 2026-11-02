@@ -2068,7 +2068,7 @@ export default defineComponent({
             ? this.$t('Video.Video has been removed from {playlistName}', { playlistName })
             : this.$t('Video.There was a problem removing the video from {playlistName}', { playlistName }),
           image: this.toastThumbnail,
-          icon: ['fas', 'trash'],
+          icon: removed ? ['fas', 'trash'] : ['fas', 'circle-exclamation'],
         })
         return
       }
@@ -2082,7 +2082,7 @@ export default defineComponent({
           ? this.$t('Video.Video has been saved to {playlistName}', { playlistName })
           : this.$t('Video.There was a problem saving the video to {playlistName}', { playlistName }),
         image: this.toastThumbnail,
-        icon: ['fas', 'bookmark'],
+        icon: saved ? ['fas', 'bookmark'] : ['fas', 'circle-exclamation'],
       })
     },
     handleChaptersOverlayChange(open) {
