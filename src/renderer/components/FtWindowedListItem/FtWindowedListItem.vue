@@ -57,8 +57,7 @@ if (windowed) {
   watch(() => props.frozen, frozen => {
     if (frozen || !mountWhenThawed) return
     mountWhenThawed = false
-    // Mounts the row, then releases it again if it scrolled away meanwhile.
-    windowItem?.refresh()
+    windowItem?.mountIfNear()
   })
 }
 </script>
