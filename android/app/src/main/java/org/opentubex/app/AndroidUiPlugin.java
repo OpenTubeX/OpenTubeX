@@ -34,6 +34,7 @@ public class AndroidUiPlugin extends Plugin {
     private PictureInPictureSurface pictureInPictureSurface;
     private Rect pictureInPictureSourceRect;
     private JSObject pictureInPictureLayout;
+    private boolean alwaysShowScrollbars;
     private boolean pictureInPictureScrollbarsHidden;
     private boolean fullscreenScrollbarsHidden;
     private boolean pageScrollbarsHidden;
@@ -129,11 +130,26 @@ public class AndroidUiPlugin extends Plugin {
         boolean enabled = Boolean.TRUE.equals(call.getBoolean("enabled", false));
         getActivity().runOnUiThread(() -> {
             android.webkit.WebView view = getBridge().getWebView();
+            alwaysShowScrollbars = enabled;
             view.setScrollbarFadingEnabled(!enabled);
+            view.removeCallbacks(keepScrollbarsShown);
+            if (enabled) {
+                // Disabling fading does not cancel a fade the view already scheduled, and once that
+                // fade ends nothing shows the bars again. View.awakenScrollBars schedules it at most
+                // this far ahead.
+                view.postDelayed(keepScrollbarsShown, Math.max(750, view.getScrollBarDefaultDelayBeforeFade() * 4));
+            }
             view.invalidate();
             call.resolve();
         });
     }
+
+    private final Runnable keepScrollbarsShown = () -> {
+        if (!alwaysShowScrollbars) return;
+        android.webkit.WebView view = getBridge().getWebView();
+        view.setScrollbarFadingEnabled(false);
+        view.invalidate();
+    };
 
     @PluginMethod
     public void prepareFullscreenRotation(PluginCall call) {
