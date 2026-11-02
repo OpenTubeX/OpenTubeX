@@ -818,6 +818,17 @@ class Profiles {
    * @param {(profile: object) => object[] | null} update
    * @returns {Promise<{profileIds: string[], success: boolean}>}
    */
+  /** Saves `subscriptions` only while the saved ones still equal `previous`, returning the updated profile or null */
+  static async updateSubscriptionsIfUnchanged(profileId, subscriptions, previous) {
+    const snapshot = JSON.stringify(previous)
+    const { affectedDocuments } = await db.profiles.updateAsync(
+      { _id: profileId, $where() { return JSON.stringify(this.subscriptions) === snapshot } },
+      { $set: { subscriptions } },
+      { returnUpdatedDocs: true }
+    )
+    return affectedDocuments ?? null
+  }
+
   static async updateSubscriptions(profiles, update) {
     const updatedProfileIds = []
     try {

@@ -3292,6 +3292,14 @@ function runApp() {
           return result
         }
 
+        case DBActions.PROFILES.UPDATE_SUBSCRIPTIONS_IF_UNCHANGED: {
+          const profile = await baseHandlers.profiles.updateSubscriptionsIfUnchanged(data.profileId, data.subscriptions, data.previous)
+          if (profile !== null) {
+            syncOtherWindows(IpcChannels.SYNC_PROFILES, event, { event: SyncEvents.GENERAL.UPSERT, data: profile })
+          }
+          return profile
+        }
+
         case DBActions.GENERAL.DELETE:
           await baseHandlers.profiles.delete(data)
           syncOtherWindows(

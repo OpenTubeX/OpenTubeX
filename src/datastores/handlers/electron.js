@@ -225,6 +225,10 @@ class Profiles {
     return dbProfiles(DBActions.PROFILES.UPDATE_SUBSCRIPTION_DETAILS, channels)
   }
 
+  static updateSubscriptionsIfUnchanged(profileId, subscriptions, previous) {
+    return dbProfiles(DBActions.PROFILES.UPDATE_SUBSCRIPTIONS_IF_UNCHANGED, { profileId, subscriptions, previous })
+  }
+
   static delete(id) {
     return dbProfiles(DBActions.GENERAL.DELETE, id)
   }

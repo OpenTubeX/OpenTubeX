@@ -749,7 +749,17 @@ function isSameLocalPlaylist(playlist, metadata, videos) {
 }
 
 export async function syncSubscriptions(client, store, previousIds = [], options = {}) {
-  const profiles = store.state.profiles.profileList
+  // Subscriptions edited here or in another window while the server responds
+  // would be overwritten, so merge again from the changed subscriptions.
+  for (let attempt = 0; attempt < 3; attempt++) {
+    const mergedIds = await mergeSubscriptions(client, store, previousIds, options)
+    if (mergedIds !== null) return mergedIds
+  }
+  throw new Error('Subscriptions changed during sync. Try again.')
+}
+
+async function mergeSubscriptions(client, store, previousIds, options) {
+  const profiles = deepCopy(store.state.profiles.profileList)
   const mainProfile = profiles.find(profile => profile._id === MAIN_PROFILE_ID) ?? profiles[0]
   const localSubscriptions = mainProfile.subscriptions.map(channel => ({
     ...channel,
@@ -785,13 +795,17 @@ export async function syncSubscriptions(client, store, previousIds = [], options
   const mergedIdSet = new Set(mergedIds)
 
   for (const profile of profiles) {
-    const updatedProfile = deepCopy(profile)
-    updatedProfile.subscriptions = profile._id === mainProfile._id
+    const subscriptions = profile._id === mainProfile._id
       ? mergedSubscriptions
-      : updatedProfile.subscriptions.filter(channel => mergedIdSet.has(channel.id))
+      : profile.subscriptions.filter(channel => mergedIdSet.has(channel.id))
 
-    if (!metadataEquals(profile.subscriptions, updatedProfile.subscriptions)) {
-      await store.dispatch('updateProfile', updatedProfile)
+    if (!metadataEquals(profile.subscriptions, subscriptions)) {
+      const saved = await store.dispatch('updateProfileSubscriptionsFromSync', {
+        profileId: profile._id,
+        subscriptions,
+        previous: profile.subscriptions,
+      })
+      if (!saved) return null
     }
   }
 
