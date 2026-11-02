@@ -265,7 +265,7 @@
   },
   "file-video": {
     "ri": "file-video-line",
-    "material": "video-file-outline"
+    "material": "video-file-hollow"
   },
   "film": {
     "ri": "film-line",
@@ -572,7 +572,7 @@
   },
   "floppy-disk": {
     "ri": "save-line",
-    "material": "save-outline"
+    "material": "save-hollow"
   },
   "scissors": {
     "ri": "scissors-cut-line",
