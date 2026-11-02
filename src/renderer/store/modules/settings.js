@@ -558,7 +558,11 @@ const customGetters = {
       }
     }
     return transferableSettings
-  }
+  },
+
+  getDefaultPlayback(state) {
+    return Math.round((state.defaultPlayback + Number.EPSILON) * 100) / 100
+  },
 }
 
 const customMutations = {

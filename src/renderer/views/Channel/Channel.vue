@@ -1193,8 +1193,10 @@ async function getChannelInfoInvidious() {
     // some channels only have a few tabs
     // here are all possible values: home, videos, shorts, streams, playlists, community, channels, about
 
+    const tabs = ['about', ...response.tabs]
+
     channelTabs.value = SUPPORTED_CHANNEL_TABS.filter(tab => {
-      return response.tabs.includes(tab) && tab !== 'home'
+      return tabs.includes(tab) && tab !== 'home'
     })
 
     currentTab.value = currentOrFirstTab(route.params.currentTab)

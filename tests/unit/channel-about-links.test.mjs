@@ -37,3 +37,14 @@ test('channel About links support the full metadata response', () => {
     { title: 'Community', url: 'https://example.org/community', iconUrl: 'https://encrypted-tbn2.gstatic.com/favicon-tbn?q=community' },
   ])
 })
+
+test('channel About links accept redirect destinations without a scheme', () => {
+  const about = { metadata: { links: [
+    link('Shop', 'https://www.youtube.com/redirect?event=channel_description&q=example.org%2Fshop'),
+    link('Relative', 'https://www.youtube.com/redirect?event=channel_description&q=%2Fshop'),
+  ] } }
+
+  assert.deepEqual(getChannelAboutLinks(about), [
+    { title: 'Shop', url: 'https://example.org/shop', iconUrl: null },
+  ])
+})

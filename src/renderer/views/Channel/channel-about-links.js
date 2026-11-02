@@ -1,3 +1,6 @@
+// YouTube redirects can point to a bare domain, such as `example.org/shop`
+const SCHEMELESS_DOMAIN_URL_PATTERN = /^(?:\/\/)?[^./?#:@\s]+(?:\.[^./?#:@\s]+)+(?::\d+)?(?:[/?#]|$)/
+
 function externalUrl(endpoint) {
   const rawUrl = endpoint?.toURL()
   if (!rawUrl) return null
@@ -5,7 +8,8 @@ function externalUrl(endpoint) {
   try {
     let url = new URL(rawUrl)
     if (['youtube.com', 'www.youtube.com'].includes(url.hostname) && url.pathname === '/redirect') {
-      url = new URL(url.searchParams.get('q'))
+      const target = url.searchParams.get('q')
+      url = new URL(SCHEMELESS_DOMAIN_URL_PATTERN.test(target) ? `https://${target.replace(/^\/\//, '')}` : target)
     }
 
     return ['http:', 'https:'].includes(url.protocol) ? url.href : null
