@@ -15,8 +15,11 @@ async function expectStableKeyboardShape(page, control) {
   await control.blur()
   const before = await control.evaluate(shape)
   await control.focus()
-  await page.keyboard.press('Tab')
+  // Step back and Tab into the control. Tabbing past it would cross the end of
+  // the document when the control is the last focusable element, and a toast
+  // appearing there in between would take the Shift+Tab return instead.
   await page.keyboard.press('Shift+Tab')
+  await page.keyboard.press('Tab')
   await expect(control).toBeFocused()
   expect(await control.evaluate(element => element.matches(':focus-visible'))).toBe(true)
   expect(await control.evaluate(shape)).toEqual(before)
