@@ -2,6 +2,7 @@ import assert from 'node:assert/strict'
 import test from 'node:test'
 import { strToU8, unzipSync, zipSync } from 'fflate'
 
+import { MAIN_PROFILE_ID } from '../../src/constants.js'
 import { BACKUP_SECTIONS, createUnifiedBackup, mergeBackupHistoryRecord, mergeBackupPlaylist, mergeBackupProfile, mergeBackupWatchStatsAdjustment, mergeBackupWatchStatsRecord, readUnifiedBackup, validateBackupWatchStats } from '../../src/renderer/helpers/unifiedBackup.js'
 
 const data = {
@@ -67,6 +68,15 @@ test('rejects malformed records before restoring data', async () => {
     ...data,
     profiles: [{ _id: 'broken', name: 'Broken', subscriptions: [null] }],
   })), /Invalid backup profiles/)
+  // Only the main profile may lack a name; sorting reads every other name.
+  await assert.rejects(readUnifiedBackup(createUnifiedBackup({
+    ...data,
+    profiles: [{ _id: 'unnamed', name: null, subscriptions: [] }],
+  })), /Invalid backup profiles/)
+  await readUnifiedBackup(createUnifiedBackup({
+    ...data,
+    profiles: [{ _id: MAIN_PROFILE_ID, name: null, subscriptions: [] }],
+  }))
   await assert.rejects(readUnifiedBackup(createUnifiedBackup({
     ...data,
     playlists: [{ _id: 'broken', playlistName: 'Broken', videos: [null] }],
