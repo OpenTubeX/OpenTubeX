@@ -94,6 +94,7 @@
           class="queueItem"
           :initially-visible="index < INITIALLY_VISIBLE_ROWS"
           :keep-mounted="draggedItemId === String(item.queueItemId)"
+          :frozen="draggedItemId !== null"
           :data-queue-item-id="String(item.queueItemId)"
           :class="{ dragging: draggedItemId === String(item.queueItemId) }"
           :style="rowStyle(String(item.queueItemId))"

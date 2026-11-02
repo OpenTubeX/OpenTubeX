@@ -27,18 +27,21 @@ test.use({
   }
 })
 
-async function openLongQueue(app, page) {
+async function openLongQueue(app, page, { longTitles = false } = {}) {
   await setWindowSize(app, page, { width: 1500, height: 1100 })
   await page.evaluate(() => window.$store.dispatch('updateHideRecommendedVideos', true))
   await goTo(page, 'history')
-  await page.evaluate(length => window.$store.commit('addVideosToWatchQueue', {
+  await page.evaluate(({ length, longTitles }) => window.$store.commit('addVideosToWatchQueue', {
     videos: Array.from({ length }, (_, index) => ({
       videoId: `queue${String(index).padStart(6, '0')}`,
-      title: `Queued video ${index + 1}`,
+      // Titles that wrap make rows taller than the estimate for unmounted rows.
+      title: longTitles && index > 20
+        ? `Queued video ${index + 1} with a title long enough to wrap onto several lines in the narrow queue sidebar`
+        : `Queued video ${index + 1}`,
       author: 'Queue Test Channel',
       lengthSeconds: 60,
     }))
-  }), QUEUE_LENGTH)
+  }), { length: QUEUE_LENGTH, longTitles })
   await page.locator('a.title').filter({ hasText: /Current video/ }).click()
   const scroller = page.locator('.watchQueue .queueItems')
   await expect(scroller.locator('.queueItem')).toHaveCount(QUEUE_LENGTH)
@@ -119,4 +122,32 @@ test('keeps a focused queue row mounted while it scrolls away', async ({ app, pa
   // Releasing distant rows retries a protected row later, so give it the time.
   await expect(scroller.locator('.queueItem').nth(20).locator('.ft-list-video')).toHaveCount(0)
   await expect(first.getByRole('button', { name: 'Reorder Queued video 1' })).toBeFocused()
+})
+
+test('a drag that scrolls through the queue keeps going as rows come into view', async ({ app, page }) => {
+  const scroller = await openLongQueue(app, page, { longTitles: true })
+  // Fonts, UI scale and dock widths make real rows differ from the estimate
+  // that rows which never mounted use, so they resize when they mount.
+  await page.addStyleTag({ content: '.queueItem.windowedListShell:not([style*="block-size"]) { block-size: 60px }' })
+  const firstId = await page.evaluate(() => window.$store.getters.getWatchQueue[0].queueItemId)
+  const handle = scroller.locator('.queueItem').first().locator('.queueDragHandle')
+  const handleBox = await handle.boundingBox()
+  const scrollerBox = await scroller.boundingBox()
+
+  await page.mouse.move(handleBox.x + handleBox.width / 2, handleBox.y + handleBox.height / 2)
+  await page.mouse.down()
+  const bottomX = handleBox.x + handleBox.width / 2
+  const bottomY = scrollerBox.y + scrollerBox.height - 4
+  await page.mouse.move(bottomX, bottomY, { steps: 8 })
+  await expect(scroller.locator('.queueItem.dragging')).toHaveCount(1)
+  // Holding the pointer at the edge scrolls the queue past rows that never mounted.
+  await expect.poll(async () => {
+    await page.mouse.move(bottomX, bottomY + (Math.random() < 0.5 ? -1 : 0))
+    return scroller.evaluate(element => element.scrollTop)
+  }, { timeout: 30_000 }).toBeGreaterThan(scrollerBox.height * 3)
+  await expect(scroller.locator('.queueItem.dragging')).toHaveCount(1)
+  await page.mouse.up()
+
+  await expect.poll(() => page.evaluate(id => window.$store.getters.getWatchQueue.findIndex(item => item.queueItemId === id), firstId))
+    .toBeGreaterThan(10)
 })

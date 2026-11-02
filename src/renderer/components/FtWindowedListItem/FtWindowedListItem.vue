@@ -24,6 +24,9 @@ const props = defineProps({
   // Mounts the row and keeps it, for example while it is dragged or holds
   // the element the list scrolls to.
   keepMounted: { type: Boolean, default: false },
+  // Holds every row as it is, for example while another row is dragged,
+  // because a row that mounts or unmounts changes the measured layout.
+  frozen: { type: Boolean, default: false },
 })
 
 const windowed = process.env.IS_CAPACITOR || process.env.IS_ELECTRON
@@ -33,19 +36,29 @@ const row = useTemplateRef('row')
 
 if (windowed) {
   let windowItem = null
+  let mountWhenThawed = false
   watch(row, element => {
     windowItem?.dispose()
     windowItem = null
     if (!element) return
     windowItem = observeNestedWindowedListItem(element, {
-      mount: () => { visible.value = true },
+      mount: () => {
+        if (props.frozen) mountWhenThawed = true
+        else visible.value = true
+      },
       unmount: height => { shellHeight.value = height; visible.value = false },
       isMounted: () => visible.value,
-      isProtected: () => props.keepMounted || element.contains(document.activeElement) ||
+      isProtected: () => props.keepMounted || props.frozen || element.contains(document.activeElement) ||
         !!element.querySelector('[aria-expanded="true"], [role="dialog"]'),
     })
   }, { flush: 'post' })
   onBeforeUnmount(() => windowItem?.dispose())
   watch(() => props.keepMounted, keep => { if (keep) visible.value = true })
+  watch(() => props.frozen, frozen => {
+    if (frozen || !mountWhenThawed) return
+    mountWhenThawed = false
+    // Mounts the row, then releases it again if it scrolled away meanwhile.
+    windowItem?.refresh()
+  })
 }
 </script>
