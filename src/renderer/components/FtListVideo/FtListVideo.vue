@@ -1281,8 +1281,10 @@ async function getLiveReminderPayload() {
   let videoTitle = title.value
   // The original title may still be loading, or have failed to load, for the shown title.
   // Requests wait out network outages, so fall back to the shown title instead of
-  // holding the reminder back.
-  if (store.getters.getAvoidTranslation === 'entire_app') {
+  // holding the reminder back. Close to the start, a lookup could outlast the
+  // premiere, and a reminder for a past start cannot be scheduled.
+  if (store.getters.getAvoidTranslation === 'entire_app' &&
+    premiereTimestamp.value - Date.now() > LIVE_REMINDER_TITLE_TIMEOUT_MS) {
     const timeout = new Promise(resolve => setTimeout(resolve, LIVE_REMINDER_TITLE_TIMEOUT_MS, null))
     videoTitle = await Promise.race([getOembedTitle(videoId), timeout]) ?? videoTitle
     if (videoId !== id.value) return null
@@ -1370,9 +1372,9 @@ async function toggleLiveReminder() {
       })
     }
   } finally {
-    if (videoId === id.value) {
-      liveReminderLoading.value = false
-    }
+    // The flag belongs to the card, which may show another video by now. The
+    // guard above keeps toggles from overlapping, so no newer toggle is running.
+    liveReminderLoading.value = false
   }
 }
 
