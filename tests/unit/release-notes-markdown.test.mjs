@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict'
 import test from 'node:test'
 
-import { createReleaseNotesMarkdown } from '../../src/renderer/helpers/releaseNotesMarkdown.js'
+import { createReleaseNotesMarkdown, resolvePictureColorScheme } from '../../src/renderer/helpers/releaseNotesMarkdown.js'
 
 const markdown = createReleaseNotesMarkdown()
 const COMMIT_HASH = '3904e64f503cde6be8793606a04ad69c5d57cef0'
@@ -43,4 +43,27 @@ test('shortens issue links and references', () => {
     markdown.parse('Fixed in [x](https://github.com/freetubeapp/freetube/issues/499)'),
     /<a href="https:\/\/github\.com\/freetubeapp\/freetube\/issues\/499">freetubeapp#499<\/a>/
   )
+})
+
+test('replaces pictures with an img showing the source for the app color scheme', () => {
+  const html = markdown.parse([
+    '- A change. (#1)',
+    '  <picture>',
+    '    <source media="(prefers-color-scheme: dark)" srcset="https://example.com/dark">',
+    '    <source media="(prefers-color-scheme: light)" srcset="https://example.com/light">',
+    '    <img src="https://example.com/dark" alt="Settings > Screenshot" width="844">',
+    '  </picture>'
+  ].join('\n'))
+
+  for (const colorScheme of /** @type {const} */ (['dark', 'light'])) {
+    const resolved = resolvePictureColorScheme(html, colorScheme)
+    assert.doesNotMatch(resolved, /<picture|<source/)
+    assert.match(resolved, new RegExp(`<img src="https://example\\.com/${colorScheme}" alt="Settings > Screenshot" width="844">`))
+  }
+})
+
+test('keeps the img fallback of pictures without a source for the app color scheme', () => {
+  const html = '<picture><source media="(min-width: 800px)" srcset="https://example.com/wide"><img src="https://example.com/fallback" alt=""></picture>'
+
+  assert.equal(resolvePictureColorScheme(html, 'light'), '<img src="https://example.com/fallback" alt="">')
 })

@@ -1,6 +1,6 @@
 import { readFileSync } from 'node:fs'
 
-import { test, expect, goTo, waitForAppReady, setWindowSize, expectScrollAtRenderedEnd } from '../../helpers/app.mjs'
+import { test, expect, goTo, goToSettingsSection, waitForAppReady, setWindowSize, expectScrollAtRenderedEnd } from '../../helpers/app.mjs'
 
 const RELEASES_URL = /^https:\/\/api\.github\.com\/repos\/OpenTubeX\/OpenTubeX\/releases/
 const COMMIT_HASH = '3904e64f503cde6be8793606a04ad69c5d57cef0'
@@ -349,6 +349,43 @@ test('release notes for other platforms are hidden', async ({ page }) => {
     'Desktop: Desktop improvement. (#3)'
   ])
   await expect(page.locator('.changeLogText img')).toHaveCount(0)
+})
+
+test.describe('release-note screenshots with dark and light variants', () => {
+  test.use({ seed: { settings: { baseTheme: 'dark' } } })
+
+  test('show the variant for the app theme when the prompt opens', async ({ page }) => {
+    // Serve the screenshots, because a failed image is replaced with its alt text.
+    await page.route('https://github.com/user-attachments/assets/*', route => route.fulfill({
+      contentType: 'image/svg+xml',
+      body: '<svg xmlns="http://www.w3.org/2000/svg" width="16" height="9"/>'
+    }))
+    await page.emulateMedia({ colorScheme: 'dark' })
+    const notification = await showUpdateNotification(page, [
+      release(`OpenTubeX ${newestUpdateVersion}`, `v${newestUpdateVersion}-beta`, [
+        '- Screenshot improvement. (#1)',
+        '  <picture>',
+        '    <source media="(prefers-color-scheme: dark)" srcset="https://github.com/user-attachments/assets/dark">',
+        '    <source media="(prefers-color-scheme: light)" srcset="https://github.com/user-attachments/assets/light">',
+        '    <img src="https://github.com/user-attachments/assets/dark" alt="Screenshot" width="844">',
+        '  </picture>'
+      ].join('\n'))
+    ])
+
+    // Switch to a light app theme after the update check, while the OS stays dark.
+    await goToSettingsSection(page, 'theme')
+    const baseTheme = page.getByRole('combobox', { name: 'Base Theme' })
+    await baseTheme.click()
+    await page.locator(`#${await baseTheme.getAttribute('aria-controls')}`)
+      .getByRole('option', { name: 'Light', exact: true }).click()
+    await expect(page.locator('body')).toHaveClass(/\blight\b/)
+    await page.locator('.settingsCloseButton').click()
+    await notification.getByRole('button', { name: 'See changes and update' }).click()
+
+    const screenshot = page.locator('.changeLogText li').getByAltText('Screenshot')
+    await expect(screenshot).toHaveAttribute('src', 'https://github.com/user-attachments/assets/light')
+    await expect.poll(() => screenshot.evaluate(image => image.naturalWidth)).toBeGreaterThan(0)
+  })
 })
 
 test('changelog images preserve their aspect ratio at phone and desktop widths', { tag: '@scale' }, async ({ page, uiScale }) => {

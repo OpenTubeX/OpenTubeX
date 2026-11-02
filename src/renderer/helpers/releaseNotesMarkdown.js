@@ -128,3 +128,26 @@ export function createReleaseNotesMarkdown({ extensions = [], renderLink = rende
     }
   })
 }
+
+const PICTURE = /<picture\b[^>]*>([\s\S]*?)<\/picture>/gi
+// Quoted attribute values, such as alt text, can contain >.
+const TAG_ATTRIBUTES = String.raw`(?:[^>"']|"[^"]*"|'[^']*')*>`
+
+/**
+ * Replaces each picture element with its img, showing the source for the
+ * app's color scheme. Picture sources follow the OS color scheme instead,
+ * which can differ from the app theme.
+ *
+ * @param {string} html
+ * @param {'dark' | 'light'} colorScheme
+ * @returns {string}
+ */
+export function resolvePictureColorScheme(html, colorScheme) {
+  return html.replaceAll(PICTURE, (picture, content) => {
+    const img = new RegExp(`<img\\b${TAG_ATTRIBUTES}`, 'i').exec(content)?.[0] ?? ''
+    const source = content.match(new RegExp(`<source\\b${TAG_ATTRIBUTES}`, 'gi'))
+      ?.find(tag => new RegExp(`\\bmedia=(["'])\\(prefers-color-scheme:\\s*${colorScheme}\\)\\1`, 'i').test(tag))
+    const url = source && /\bsrcset=(["'])\s*(\S+?)[\s,"']/i.exec(source)?.[2]
+    return url ? img.replace(/\bsrc=(["']).*?\1/i, `src="${url}"`) : img
+  })
+}

@@ -2315,17 +2315,12 @@ useScrollClamp(useTemplateRef('changeLogScroller'), useTemplateRef('changeLogCon
 const DISMISSED_UPDATE_VERSION_STORAGE_KEY = 'opentubex-dismissed-update-version'
 /** @type {{ tagName: string, versionNumber: string } | null} */
 let availableUpdate = null
-let releaseNotesMarkdownPromise = null
+/** @type {() => string} */
+let renderUpdateChangelog = () => ''
 // Release notes can be labeled for some platforms, so the prompt hides notes for others.
 const releaseNotePlatform = process.env.IS_ELECTRON
   ? { darwin: 'macos', linux: 'linux', win32: 'windows' }[process.platform] ?? null
   : process.env.IS_CAPACITOR ? (process.env.IS_IOS ? 'ios' : 'android') : null
-
-function getReleaseNotesMarkdown() {
-  releaseNotesMarkdownPromise ??= import('./helpers/releaseNotesMarkdown')
-    .then(({ createReleaseNotesMarkdown }) => createReleaseNotesMarkdown())
-  return releaseNotesMarkdownPromise
-}
 
 /** @type {import('vue').ComputedRef<boolean>} */
 const checkForUpdates = computed(() => store.getters.getCheckForUpdates)
@@ -2364,6 +2359,7 @@ function showAvailableUpdateToast() {
         icon: ['fas', 'file-lines'],
         primary: true,
         action: () => {
+          updateChangelog.value = renderUpdateChangelog()
           showReleaseNotes.value = true
         }
       }
@@ -2398,12 +2394,18 @@ async function checkForNewUpdates() {
       // Shorten pull request links to #1234
       .replaceAll(/https:\/\/github\.com\/OpenTubeX\/OpenTubeX\/pull\/(\d+)/g, '[#$1]($&)')
 
-    const [releaseNotesMarkdown, packageManager] = await Promise.all([
-      getReleaseNotesMarkdown(),
+    const [{ createReleaseNotesMarkdown, resolvePictureColorScheme }, packageManager] = await Promise.all([
+      import('./helpers/releaseNotesMarkdown'),
       window.ftElectron?.getPackageManagerUpdate() ?? null
     ])
     packageManagerUpdate.value = packageManager
-    updateChangelog.value = releaseNotesMarkdown.parse(changelog)
+    const changelogHtml = createReleaseNotesMarkdown().parse(changelog)
+    // Pick screenshots for the app theme when the prompt opens, because the
+    // theme can change after this check. The OS color scheme can differ from it.
+    renderUpdateChangelog = () => {
+      const isDark = getComputedStyle(document.body).getPropertyValue('--native-color-scheme').trim() === 'dark'
+      return resolvePictureColorScheme(changelogHtml, isDark ? 'dark' : 'light')
+    }
     changeLogTitle.value = t('Update to {version}', { version: release.name ?? tagName })
     availableUpdate = { tagName, versionNumber }
     showAvailableUpdateToast()
