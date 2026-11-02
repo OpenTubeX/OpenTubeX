@@ -171,7 +171,6 @@ export const SYNC_SETTING_LABELS = {
   hideUnsubscribeButton: 'Settings.Parental Control Settings.Hide Unsubscribe Button',
   hideUpcomingPremieres: 'Settings.Distraction Free Settings.Hide Upcoming Premieres',
   hideUploader: 'Settings.Parental Control Settings.Hide Uploader on Watch page',
-  hideVideoDescription: 'Settings.Distraction Free Settings.Hide Video Description',
   hideVideoLikesAndDislikes: 'Settings.Distraction Free Settings.Hide Video Likes And Dislikes',
   hideVideoViews: 'Settings.Distraction Free Settings.Hide Video Views',
   hideWatchedSubs: 'Settings.Distraction Free Settings.Hide Videos on Watch',
@@ -402,6 +401,7 @@ export const SYNC_SETTING_LABELS = {
     'Playlists',
     'Playlist.Sort By.Custom'
   ],
+  videoDescriptionMode: 'Settings.Distraction Free Settings.Video Descriptions',
   videoIpBlockScriptPath: 'Settings.Proxy Settings.IP Block Recovery Script Path',
   videoPlaybackEngine: 'Settings.General Settings.Stream Extraction Method.Stream Extraction Method',
   videoPlaybackRateInterval: 'Settings.Player Settings.Video Playback Rate Interval',
@@ -543,6 +543,7 @@ export const SYNC_SETTING_VALUE_LABELS = {
     video_duration_descending: 'Playlist.Sort By.VideoDurationDescending',
     custom: 'Playlist.Sort By.Custom',
   },
+  videoDescriptionMode: { hide: 'Settings.Distraction Free Settings.Hide', collapsed: 'Settings.Distraction Free Settings.Collapsed', expanded: 'Settings.Distraction Free Settings.Expanded' },
   videoPlaybackEngine: { 'yt-dlp': `${general}Stream Extraction Method.yt-dlp`, 'built-in': `${general}Stream Extraction Method.Built-in` },
   voiceOverTranslationLanguage: { en: `${player}Voice-over Translation.English`, ru: `${player}Voice-over Translation.Russian`, kk: `${player}Voice-over Translation.Kazakh` },
   watchedProgressSavingMode: { auto: `${privacy}Watched Progress Saving Mode.Modes.Auto`, 'semi-auto': `${privacy}Watched Progress Saving Mode.Modes.Semi-auto`, never: `${privacy}Watched Progress Saving Mode.Modes.Never` },

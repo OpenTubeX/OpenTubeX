@@ -25,7 +25,7 @@ test('restored Android Watch tabs retain comment previews and both panel entry p
     saved = await page.evaluate(async () => {
       const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
       const values = { StartupBehavior: 'loadLastActiveTab', VideoPlaybackEngine: 'built-in', AutoplayVideos: false,
-        UseSponsorBlock: false, UseReturnYouTubeDislikes: false, HideComments: false, HideVideoDescription: false,
+        UseSponsorBlock: false, UseReturnYouTubeDislikes: false, HideComments: false, VideoDescriptionMode: 'collapsed',
         GeneralAutoLoadMorePaginatedItemsEnabled: true, FullscreenActions: ['comments'],
         PlayingInterfaceHideDelay: 30, RotateFullscreenToLandscape: false }
       const settings = Object.fromEntries(Object.keys(values).map(key => [key, JSON.parse(JSON.stringify(store.getters['get' + key]))]))

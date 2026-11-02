@@ -250,6 +250,8 @@ const props = defineProps({
     default: () => [],
   },
   previewOnly: { type: Boolean, default: false },
+  /** Starts expanded, while still letting the user collapse it. */
+  expanded: { type: Boolean, default: false },
   alwaysExpanded: {
     type: Boolean,
     default: false,
@@ -263,9 +265,9 @@ const descriptionScroll = useTemplateRef('descriptionScroll')
 const descriptionContentEnd = useTemplateRef('descriptionContentEnd')
 const descriptionContainer = useTemplateRef('descriptionContainer')
 const descriptionCard = useTemplateRef('descriptionCard')
-const showFullDescription = ref(false)
+const showFullDescription = ref(props.expanded)
 const showControls = ref(false)
-let userWantsExpandedDescription = false
+let userWantsExpandedDescription = props.expanded
 const descriptionFadeTop = ref(false)
 const isExpanded = computed(() => !props.previewOnly && (props.alwaysExpanded || showFullDescription.value))
 
@@ -457,6 +459,14 @@ watch([shownDescription, () => props.tags, () => props.games, () => props.musicT
   measureDescription()
   updateDescriptionLayout()
 }, { deep: true })
+
+watch(() => props.expanded, (expanded) => {
+  // The card is not rendered without description content or metadata.
+  if (!expanded && descriptionScroll.value) restoreOverlayScrollTop(descriptionScroll.value, 0)
+  userWantsExpandedDescription = expanded
+  // Short descriptions stay fully shown; unmeasured ones apply the choice when measured.
+  if (showControls.value) showFullDescription.value = expanded
+})
 
 watch(() => props.alwaysExpanded, (alwaysExpanded, wasAlwaysExpanded) => {
   if (!alwaysExpanded && wasAlwaysExpanded) {

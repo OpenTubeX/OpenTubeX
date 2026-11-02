@@ -1264,6 +1264,7 @@ Settings:
     Hide: Ocultar
     Collapsed: Contraídos
     Expanded: Expandidos
+    Video Descriptions: Descripciones de los videos
     Playing Interface Hide Delay: Retraso para ocultar la interfaz durante la reproducción
     Hide Startup Splash: Ocultar pantalla de inicio
     Hide Header Sync Indicator: Ocultar el indicador de sincronización del encabezado de la aplicación
@@ -1279,7 +1280,6 @@ Settings:
     Hide Channel Avatars: Ocultar avatares de canales
     Shorten View Counts: Abreviar recuentos de visualizaciones, comentarios y «Me gusta» en comentarios
     Hide Live Chat Replay: Ocultar repetición del chat en directo
-    Hide Video Description: Ocultar la descripción del video
     Hide Comments: Ocultar comentarios
     Hide Profile Pictures in Comments: Ocultar fotos de perfil en comentarios
     Display Titles Without Excessive Capitalisation: Mostrar títulos sin mayúsculas ni signos de puntuación excesivos

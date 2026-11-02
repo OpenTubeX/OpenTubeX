@@ -398,6 +398,50 @@ test('resets saved Quick Settings that still match the former defaults', async (
   assert.deepEqual(migrateLegacySettings({ quickSettings: customized }), { quickSettings: customized })
 })
 
+test('migrates the stored Hide Video Description switch to the Video descriptions select', async () => {
+  for (const [initial, expected] of [
+    [
+      [
+        { _id: 'hideVideoDescription', value: true },
+        { _id: 'quickSettings', value: ['hideComments', 'hideVideoDescription'] },
+        { _id: 'syncServerSettingsExcluded', value: ['hideVideoDescription'] },
+      ],
+      {
+        videoDescriptionMode: 'hide',
+        quickSettings: ['hideComments', 'videoDescriptionMode'],
+        syncServerSettingsExcluded: ['videoDescriptionMode'],
+      },
+    ],
+    [[{ _id: 'hideVideoDescription', value: false }], {}],
+    [
+      [{ _id: 'hideVideoDescription', value: true }, { _id: 'videoDescriptionMode', value: 'expanded' }],
+      { videoDescriptionMode: 'expanded' },
+    ],
+  ]) {
+    const settings = new Datastore()
+    await settings.insertAsync(initial)
+
+    await migrateStoredSettings(settings)
+    await migrateStoredSettings(settings)
+
+    const stored = Object.fromEntries((await settings.findAsync({})).map(({ _id, value }) => [_id, value]))
+    assert.deepEqual(stored, expected)
+  }
+})
+
+test('migrates an imported Hide Video Description switch to the Video descriptions select', () => {
+  assert.deepEqual(migrateLegacySettings({ hideVideoDescription: true }), { videoDescriptionMode: 'hide' })
+  assert.deepEqual(migrateLegacySettings({ hideVideoDescription: false }), { videoDescriptionMode: 'collapsed' })
+  assert.deepEqual(
+    migrateLegacySettings({ hideVideoDescription: true, videoDescriptionMode: 'expanded' }),
+    { videoDescriptionMode: 'expanded' }
+  )
+  assert.deepEqual(
+    migrateLegacySettings({ quickSettings: ['hideVideoDescription', 'videoDescriptionMode', 'hideComments'] }),
+    { quickSettings: ['videoDescriptionMode', 'hideComments'] }
+  )
+})
+
 const controlBarMigrationStart = settingsSource.indexOf('      // The chapters and screenshot buttons used to sit')
 const controlBarMigrationEnd = settingsSource.indexOf('      // Existing logged-in sync users', controlBarMigrationStart)
 

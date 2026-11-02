@@ -1,6 +1,7 @@
 import { areJsonValuesEqual } from './jsonValues.js'
 import { resolveBaseTheme, resolveSystemTheme } from '../../appearanceSettings.js'
 import { CUSTOM_THEMES_SYNC_KEY, customThemeIdFromValue, normalizeCustomThemes } from '../../customTheme.js'
+import { migrateVideoDescriptionSettingId } from '../../datastores/settingsMigrations.js'
 
 export function areSyncSettingValuesEqual(key, left, right) {
   if (key === CUSTOM_THEMES_SYNC_KEY) {
@@ -21,6 +22,28 @@ export function resolveMergedThemeEntry(entry, themes, previousThemes, now) {
     value = resolveSystemTheme(value, entry.key === 'systemLightTheme' ? 'light' : 'dark', themes)
   }
   return value === entry.value ? entry : { ...entry, value, updatedAt: Math.max(now, entry.updatedAt) }
+}
+
+/**
+ * Older app versions sync Hide Video Description instead of the Video
+ * descriptions select. Until a device syncs the select, read it from that entry,
+ * so new and upgraded devices keep the account's choice. Pinned Quick Settings
+ * follow the new id. Applies to server entries and the last synced snapshot.
+ * @param {Record<string, { key: string, value: unknown, updatedAt: number }>} remote
+ */
+export function migrateLegacySyncedSettings(remote) {
+  const migrated = { ...remote }
+  const legacy = remote.hideVideoDescription
+  if (legacy && !remote.videoDescriptionMode) {
+    migrated.videoDescriptionMode = {
+      ...legacy, key: 'videoDescriptionMode', value: legacy.value === true ? 'hide' : 'collapsed',
+    }
+  }
+  const quickSettings = remote.quickSettings
+  if (Array.isArray(quickSettings?.value) && quickSettings.value.includes('hideVideoDescription')) {
+    migrated.quickSettings = { ...quickSettings, value: migrateVideoDescriptionSettingId(quickSettings.value) }
+  }
+  return migrated
 }
 
 export function mergeSettingEntry({ key, value, old, remoteEntry, localUpdatedAt, now }) {

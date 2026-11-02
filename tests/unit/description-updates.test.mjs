@@ -19,7 +19,7 @@ async function flushDescriptionUpdates() {
 }
 
 function descriptionComponent({ laidOut = false } = {}) {
-  const props = reactive({ description: '', descriptionHtml: '', tags: [], games: [], musicTracks: [], license: null, contentDisclosures: [], previewOnly: false, alwaysExpanded: false })
+  const props = reactive({ description: '', descriptionHtml: '', tags: [], games: [], musicTracks: [], license: null, contentDisclosures: [], previewOnly: false, expanded: false, alwaysExpanded: false })
   const htmlTextFixtures = new Map([
     ['', ''],
     ['<p>Restored HTML description</p>', 'Restored HTML description'],

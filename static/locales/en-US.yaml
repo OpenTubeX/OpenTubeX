@@ -1688,6 +1688,7 @@ Settings:
     Hide: Hide
     Collapsed: Collapsed
     Expanded: Expanded
+    Video Descriptions: Video descriptions
     Playing Interface Hide Delay: Playing Interface Hide Delay
     Hide Startup Splash: Hide Startup Splash
     Hide Header Sync Indicator: Hide Header Sync Indicator
@@ -1715,7 +1716,6 @@ Settings:
     Hide Live Chat: Hide Live Chat
     Hide Live Chat Replay: Hide Live Chat Replay
     Hide Active Subscriptions: Hide Active Subscriptions
-    Hide Video Description: Hide Video Description
     Hide Comments: Hide Comments
     Hide Profile Pictures in Comments: Hide Profile Pictures in Comments
     Display Titles Without Excessive Capitalisation: Display Titles Without Excessive Capitalisation And Punctuation

@@ -360,17 +360,19 @@
           :placeholder="t('Settings.Distraction Free Settings.AI Video Summaries')"
           :value="aiVideoSummaryMode"
           setting-key="aiVideoSummaryMode"
-          :select-names="aiVideoSummaryModeNames"
-          :select-values="AI_VIDEO_SUMMARY_MODES"
+          :select-names="visibilityModeNames"
+          :select-values="VISIBILITY_MODES"
           :show-icon="false"
           @change="store.dispatch('updateAiVideoSummaryMode', $event)"
         />
-        <FtToggleSwitch
-          :label="t('Settings.Distraction Free Settings.Hide Video Description')"
-          :compact="true"
-          :default-value="hideVideoDescription"
-          setting-key="hideVideoDescription"
-          @change="updateHideVideoDescription"
+        <FtSelect
+          :placeholder="t('Settings.Distraction Free Settings.Video Descriptions')"
+          :value="videoDescriptionMode"
+          setting-key="videoDescriptionMode"
+          :select-names="visibilityModeNames"
+          :select-values="VISIBILITY_MODES"
+          :show-icon="false"
+          @change="store.dispatch('updateVideoDescriptionMode', $event)"
         />
         <FtToggleSwitch
           :label="t('Settings.Distraction Free Settings.Hide Comment Likes')"
@@ -457,7 +459,7 @@ import { checkYoutubeChannelId, findChannelTagInfo } from '../../../helpers/chan
 const { t } = useI18n()
 const isElectron = process.env.IS_ELECTRON
 const isCapacitor = process.env.IS_CAPACITOR
-const AI_VIDEO_SUMMARY_MODES = ['hide', 'collapsed', 'expanded']
+const VISIBILITY_MODES = ['hide', 'collapsed', 'expanded']
 
 const channelHiderDisabled = ref(false)
 
@@ -595,21 +597,14 @@ function updateHideLiveChatReplay(value) {
 
 /** @type {import('vue').ComputedRef<string>} */
 const aiVideoSummaryMode = computed(() => store.getters.getAiVideoSummaryMode)
-const aiVideoSummaryModeNames = computed(() => [
+const visibilityModeNames = computed(() => [
   t('Settings.Distraction Free Settings.Hide'),
   t('Settings.Distraction Free Settings.Collapsed'),
   t('Settings.Distraction Free Settings.Expanded'),
 ])
 
-/** @type {import('vue').ComputedRef<boolean>} */
-const hideVideoDescription = computed(() => store.getters.getHideVideoDescription)
-
-/**
- * @param {boolean} value
- */
-function updateHideVideoDescription(value) {
-  store.dispatch('updateHideVideoDescription', value)
-}
+/** @type {import('vue').ComputedRef<string>} */
+const videoDescriptionMode = computed(() => store.getters.getVideoDescriptionMode)
 
 /** @type {import('vue').ComputedRef<boolean>} */
 const hideComments = computed(() => store.getters.getHideComments)

@@ -191,7 +191,7 @@ export function createDefaultSettings({ supportsLocalApi, isElectron }) {
     enableBlockLists: true,
     showAddedChannelsHidden: true,
     showAddedForbiddenTitles: true,
-    hideVideoDescription: false,
+    videoDescriptionMode: 'collapsed',
     aiVideoSummaryMode: 'collapsed',
     hideLiveChat: false,
     hideLiveChatReplay: false,

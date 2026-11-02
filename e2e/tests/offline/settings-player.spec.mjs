@@ -873,6 +873,30 @@ test.describe('live chat replay visibility migration', () => {
   })
 })
 
+test.describe('video description visibility migration', () => {
+  test.use({ seed: { settings: { hideVideoDescription: true } } })
+
+  test('turns Hide Video Description into the Video descriptions select', async ({ app, page }, testInfo) => {
+    const focus = await goToSettingsSection(page, 'focus')
+    const descriptionMode = focus.getByRole('combobox', { name: 'Video descriptions' })
+    await expect(descriptionMode).toHaveText('Hide')
+    await expect(focus.getByRole('checkbox', { name: 'Hide Video Description' })).toHaveCount(0)
+
+    await descriptionMode.click()
+    await page.getByRole('option', { name: 'Expanded', exact: true }).click()
+    await expect(descriptionMode).toHaveText('Expanded')
+    await descriptionMode.scrollIntoViewIfNeeded()
+    await page.screenshot({ path: testInfo.outputPath('video-descriptions-setting.png') })
+    await expect.poll(() => (
+      latestSettings(readDatastore(app.userDataDir, 'settings')).videoDescriptionMode
+    )).toBe('expanded')
+
+    const { page: relaunchedPage } = await app.relaunch()
+    const relaunchedFocus = await goToSettingsSection(relaunchedPage, 'focus')
+    await expect(relaunchedFocus.getByRole('combobox', { name: 'Video descriptions' })).toHaveText('Expanded')
+  })
+})
+
 test.describe('SponsorBlock highlight settings', () => {
   test.use({
     seed: {

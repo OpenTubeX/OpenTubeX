@@ -1430,6 +1430,7 @@ Settings:
     Hide: Ausblenden
     Collapsed: Eingeklappt
     Expanded: Ausgeklappt
+    Video Descriptions: Videobeschreibungen
     Playing Interface Hide Delay: Verzögerung zum Ausblenden der Oberfläche bei Wiedergabe
     Hide Startup Splash: Startbildschirm ausblenden
     Hide Header Sync Indicator: Synchronisierungsanzeige in der App-Kopfzeile ausblenden
@@ -1448,7 +1449,6 @@ Settings:
     Hide Active Subscriptions: Aktive Abos ausblenden
     Hide Playlists: Playlists ausblenden
     Hide Comments: Kommentare ausblenden
-    Hide Video Description: Videobeschreibung ausblenden
     Hide Live Streams: Livestreams ausblenden
     Hide Sharing Actions: Aktionen zum Teilen ausblenden
     Hide Videos on Watch: Bereits angesehene Videos ausblenden

@@ -764,7 +764,7 @@
               class="watchVideo"
             />
             <watch-video-description
-              v-if="shortsMetadataOpen && !isLoading && !hideVideoDescription"
+              v-if="shortsMetadataOpen && !isLoading && videoDescriptionMode !== 'hide'"
               :description="videoDescription"
               :description-html="videoDescriptionHtml"
               :tags="videoTags"
@@ -1002,7 +1002,7 @@
           @open="openPhonePanel('comments')"
         />
         <watch-video-description
-          v-if="phonePanelsEnabled && !isLoading && !hideVideoDescription"
+          v-if="phonePanelsEnabled && !isLoading && videoDescriptionMode !== 'hide'"
           :description="videoDescription"
           :description-html="videoDescriptionHtml"
           :tags="videoTags"
@@ -1022,7 +1022,7 @@
           @close="mobilePanel = null"
         >
           <watch-video-description
-            v-if="!isLoading && !hideVideoDescription && (!customShortsPlayerActive || fullscreenMetadataOpen)"
+            v-if="!isLoading && videoDescriptionMode !== 'hide' && (!customShortsPlayerActive || fullscreenMetadataOpen)"
             :description="videoDescription"
             :description-html="videoDescriptionHtml"
             :tags="videoTags"
@@ -1031,6 +1031,7 @@
             :games="videoGames"
             :music-tracks="videoMusicTracks"
             :always-expanded="fullscreenMetadataOpen || phonePanelsEnabled"
+            :expanded="videoDescriptionMode === 'expanded'"
             class="watchVideo"
             :class="{ theatreWatchVideo: useTheatreMode }"
             @timestamp-event="changeTimestamp"

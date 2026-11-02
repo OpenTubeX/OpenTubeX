@@ -39,6 +39,17 @@ export function isFormerDefaultQuickSettings(value) {
     value.every((id, index) => id === FORMER_DEFAULT_QUICK_SETTINGS[index])
 }
 
+/**
+ * Replaces the former Hide Video Description switch in lists of setting ids,
+ * such as Quick Settings, with the Video Descriptions select.
+ * @param {unknown} ids
+ */
+export function migrateVideoDescriptionSettingId(ids) {
+  return Array.isArray(ids)
+    ? [...new Set(ids.map(id => id === 'hideVideoDescription' ? 'videoDescriptionMode' : id))]
+    : ids
+}
+
 /** Apply the stored setting migrations shared by manual and scheduled backups. */
 export async function migrateStoredSettings(datastore) {
   const save = (key, value) => datastore.updateAsync({ _id: key }, { _id: key, value }, { upsert: true })
@@ -48,6 +59,7 @@ export async function migrateStoredSettings(datastore) {
       $in: [
         'currentLocale', 'externalPlayerCustomArgs', 'defaultTheatreMode', 'saveWatchedProgress',
         'watchedProgressSavingMode', 'screenshotAskPath', 'quickSettings',
+        'hideVideoDescription', 'videoDescriptionMode', 'syncServerSettingsExcluded',
         ...FORMER_CHANNEL_SETTING_SWITCHES.flat(),
       ]
     }
@@ -117,6 +129,21 @@ export async function migrateStoredSettings(datastore) {
       await save(autoUpdateKey, false)
     }
     await datastore.removeAsync({ _id: rememberKey })
+  }
+
+  // Hide Video Description became the Video Descriptions select, collapsed by default.
+  const hideVideoDescription = stored.get('hideVideoDescription')
+  if (hideVideoDescription) {
+    if (hideVideoDescription.value === true && !stored.has('videoDescriptionMode')) {
+      await save('videoDescriptionMode', 'hide')
+    }
+    await datastore.removeAsync({ _id: 'hideVideoDescription' })
+  }
+  for (const key of ['quickSettings', 'syncServerSettingsExcluded']) {
+    const ids = stored.get(key)?.value
+    if (Array.isArray(ids) && ids.includes('hideVideoDescription')) {
+      await save(key, migrateVideoDescriptionSettingId(ids))
+    }
   }
 
   if (isFormerDefaultQuickSettings(stored.get('quickSettings')?.value)) {
