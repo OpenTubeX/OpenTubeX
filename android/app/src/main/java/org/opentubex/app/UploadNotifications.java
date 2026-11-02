@@ -108,36 +108,30 @@ final class UploadNotifications {
         if (uploads.isEmpty()) return;
 
         boolean originalTitles = configuration(context).optBoolean("originalTitles") && !feedType.equals("posts");
-        List<String> bodies = new ArrayList<>();
         for (JSONObject upload : uploads) {
             String original = originalTitles ? fetchOriginalTitle(upload.getString("id")) : null;
-            bodies.add(original != null ? original : upload.optString("title"));
+            showUpload(context, channelId, feedType, upload, original != null ? original : upload.optString("title"));
         }
-
-        showUploads(context, channelId, feedType, uploads, bodies);
     }
 
     /** Holds the monitor shared with configure, so notifications turned off during the lookup stay off. */
-    private static synchronized void showUploads(Context context, String channelId, String feedType,
-        List<JSONObject> uploads, List<String> bodies) throws Exception {
+    private static synchronized void showUpload(Context context, String channelId, String feedType,
+        JSONObject upload, String body) throws Exception {
         JSONObject configuration = configuration(context);
         JSONObject channel = configuredChannel(configuration, channelId, feedType);
         if (channel == null) return;
         JSONObject titles = configuration.optJSONObject("titles");
         String name = channel.optString("name");
+        // Ended streams in the live feed are announced like videos.
+        String type = upload.optBoolean("live") ? "live" : feedType.equals("live") ? "videos" : feedType;
+        String title = (titles == null ? "{channel}" : titles.optString(type, "{channel}"))
+            .replace("{channel}", name.isEmpty() ? channelId : name);
         boolean silent = isWithinQuietHours(configuration.optJSONObject("quietHours"), LocalTime.now());
-        for (int i = 0; i < uploads.size(); i++) {
-            JSONObject upload = uploads.get(i);
-            // Ended streams in the live feed are announced like videos.
-            String type = upload.optBoolean("live") ? "live" : feedType.equals("live") ? "videos" : feedType;
-            String title = (titles == null ? "{channel}" : titles.optString(type, "{channel}"))
-                .replace("{channel}", name.isEmpty() ? channelId : name);
-            try {
-                show(context, title, bodies.get(i), url(feedType, upload.getString("id")), silent);
-            } catch (RuntimeException error) {
-                // One failed notification must not skip the others.
-                android.util.Log.w("OpenTubeXUploads", "Unable to show an upload notification", error);
-            }
+        try {
+            show(context, title, body, url(feedType, upload.getString("id")), silent);
+        } catch (RuntimeException error) {
+            // One failed notification must not skip the others.
+            android.util.Log.w("OpenTubeXUploads", "Unable to show an upload notification", error);
         }
     }
 

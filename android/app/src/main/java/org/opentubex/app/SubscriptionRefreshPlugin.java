@@ -169,14 +169,12 @@ public class SubscriptionRefreshPlugin extends Plugin {
     }
 
     @PluginMethod
-    public void endBatch(PluginCall call) {
-        awaitUploadChecks();
-        synchronized (this) {
-            batchActive = false;
-            if (waitingForNextFeed) {
-                waitingForNextFeed = false;
-                SubscriptionRefreshWorker.finish(getContext(), rendererToken);
-            }
+    public synchronized void endBatch(PluginCall call) {
+        batchActive = false;
+        if (waitingForNextFeed) {
+            waitingForNextFeed = false;
+            finishAfterUploadChecks(call, rendererToken);
+            return;
         }
         call.resolve();
     }
@@ -313,36 +311,34 @@ public class SubscriptionRefreshPlugin extends Plugin {
     }
 
     @PluginMethod
-    public void finish(PluginCall call) {
+    public synchronized void finish(PluginCall call) {
         String token = call.getString("token");
         if (token == null) {
             call.reject("A token is required");
             return;
         }
-        awaitUploadChecks();
-        synchronized (this) {
-            if (batchActive && token.equals(rendererToken) && SubscriptionRefreshWorker.isRendererActive(token)) {
-                waitingForNextFeed = true;
-            } else {
-                SubscriptionRefreshWorker.finish(getContext(), token);
-            }
+        if (batchActive && token.equals(rendererToken) && SubscriptionRefreshWorker.isRendererActive(token)) {
+            waitingForNextFeed = true;
+            call.resolve();
+        } else {
+            finishAfterUploadChecks(call, token);
         }
-        call.resolve();
     }
 
     /**
-     * Upload checks run after the refresh reports its feeds. Let queued ones show their
-     * notifications before the refresh releases its foreground service and the process.
-     * Callers wait without holding the plugin's lock, which lifecycle callbacks on the
-     * main thread also take.
+     * Upload checks run after the refresh reports its feeds. Queue the release of the
+     * foreground service behind them, so their notifications are shown before the process
+     * can be stopped, without blocking other plugin calls or the main thread meanwhile.
      */
-    private static void awaitUploadChecks() {
-        try {
-            UPLOADS.submit(() -> {}).get();
-        } catch (InterruptedException error) {
-            Thread.currentThread().interrupt();
-        } catch (java.util.concurrent.ExecutionException error) {
-            // The empty task cannot fail.
-        }
+    private void finishAfterUploadChecks(PluginCall call, String token) {
+        Context context = getContext();
+        UPLOADS.execute(() -> {
+            try {
+                SubscriptionRefreshWorker.finish(context, token);
+                call.resolve();
+            } catch (RuntimeException error) {
+                call.reject("Unable to finish the subscription refresh", error);
+            }
+        });
     }
 }
