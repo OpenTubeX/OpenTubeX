@@ -263,7 +263,9 @@
   align-items: center;
   justify-content: center;
   gap: 2px;
-  min-inline-size: 48px;
+
+  /* Touch-sized, but a row of four still fits very narrow sheets at large UI scales. */
+  min-inline-size: min(48px, calc((100% - 6px) / 4));
   min-block-size: 56px;
   padding-block: 8px;
   padding-inline: 4px;

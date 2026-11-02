@@ -57,7 +57,7 @@ test.describe('mobile overflow', { tag: '@scale' }, () => {
     }
   })
 
-  test('a long quick bookmark name does not squeeze neighboring quick actions', async ({ page }) => {
+  test('a long quick bookmark name does not squeeze neighboring quick actions', async ({ page, uiScale }) => {
     await goTo(page, 'history')
     await page.setViewportSize({ width: 320, height: 812 })
     await page.evaluate(name => {
@@ -81,6 +81,9 @@ test.describe('mobile overflow', { tag: '@scale' }, () => {
       return bounds.width >= 47.99 && bounds.right <= innerWidth + 1 &&
         label.left >= bounds.left - 1 && label.right <= bounds.right + 1 && label.bottom <= bounds.bottom + 1
     }))).toBe(true)
+    // A 340px window at 300% UI scale leaves about 113 CSS pixels for the row.
+    await page.setViewportSize({ width: Math.ceil(145 * uiScale / 100), height: 812 })
+    await expect.poll(() => buttons.evaluateAll(elements => elements.every(element => element.getBoundingClientRect().right <= innerWidth + 1))).toBe(true)
     await page.keyboard.press('Escape')
   })
 
