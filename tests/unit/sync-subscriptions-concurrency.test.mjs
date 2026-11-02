@@ -118,3 +118,46 @@ test('subscription sync gives up after repeated concurrent changes', async () =>
   await assert.rejects(sync.syncSubscriptions(client, store, []), /Subscriptions changed during sync/)
   assert.equal(calls, 3)
 })
+
+const remoteChannel = id => ({ id, name: `Channel ${id}`, avatar: DEFAULT_CHANNEL_AVATAR, verified: false })
+
+test('a subscription sync retry keeps an unsubscribe made after the first attempt uploaded the channel', async () => {
+  const { store, client, remote, mainIds } = await fixture([channel('X'), channel('A')])
+  remote.set('X', remoteChannel('X'))
+  remote.set('B', remoteChannel('B'))
+  const subscribeBulk = client.subscribeBulk
+  let removed = false
+  client.subscribeBulk = async channels => {
+    await subscribeBulk(channels)
+    if (!removed) {
+      removed = true
+      await store.dispatch('removeChannelFromProfiles', { channelId: 'A', profileIds: [MAIN_PROFILE_ID] })
+    }
+  }
+
+  const synced = await sync.syncSubscriptions(client, store, ['X'])
+
+  assert.deepEqual([...synced].sort(), ['B', 'X'])
+  assert.deepEqual([...remote.keys()].sort(), ['B', 'X'])
+  assert.deepEqual(mainIds().sort(), ['B', 'X'])
+})
+
+test('a subscription sync retry keeps a resubscribe made after the first attempt removed the channel remotely', async () => {
+  const { store, client, remote, mainIds } = await fixture([channel('C')])
+  for (const id of ['A', 'B', 'C']) remote.set(id, remoteChannel(id))
+  const unsubscribe = client.unsubscribe
+  let resubscribed = false
+  client.unsubscribe = async id => {
+    await unsubscribe(id)
+    if (!resubscribed) {
+      resubscribed = true
+      await store.dispatch('addChannelToProfiles', { channel: channel('A'), profileIds: [MAIN_PROFILE_ID] })
+    }
+  }
+
+  const synced = await sync.syncSubscriptions(client, store, ['A', 'C'])
+
+  assert.deepEqual([...synced].sort(), ['A', 'B', 'C'])
+  assert.deepEqual([...remote.keys()].sort(), ['A', 'B', 'C'])
+  assert.deepEqual(mainIds().sort(), ['A', 'B', 'C'])
+})

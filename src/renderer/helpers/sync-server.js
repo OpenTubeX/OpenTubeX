@@ -751,9 +751,14 @@ function isSameLocalPlaylist(playlist, metadata, videos) {
 export async function syncSubscriptions(client, store, previousIds = [], options = {}) {
   // Subscriptions edited here or in another window while the server responds
   // would be overwritten, so merge again from the changed subscriptions.
+  let baseline = previousIds
   for (let attempt = 0; attempt < 3; attempt++) {
-    const mergedIds = await mergeSubscriptions(client, store, previousIds, options)
-    if (mergedIds !== null) return mergedIds
+    const result = await mergeSubscriptions(client, store, baseline, options)
+    if (result.mergedIds) return result.mergedIds
+    // The attempt already changed the server, so a retry counts those changes
+    // as synced. Otherwise an edit made meanwhile would look like a change from
+    // another device and be undone.
+    baseline = result.baseline
   }
   throw new Error('Subscriptions changed during sync. Try again.')
 }
@@ -774,14 +779,12 @@ async function mergeSubscriptions(client, store, previousIds, options) {
     getItemName: id => localById.get(id)?.name || remoteById.get(id)?.name,
   })
 
-  for (const id of remoteById.keys()) {
-    if (!mergedIds.has(id)) {
-      await client.unsubscribe(id)
-    }
+  const removedIds = new Set(Array.from(remoteById.keys()).filter(id => !mergedIds.has(id)))
+  for (const id of removedIds) {
+    await client.unsubscribe(id)
   }
-  const subscriptionsToAdd = Array.from(mergedIds)
-    .filter(id => !remoteById.has(id))
-    .map(id => channelToRemote(localById.get(id)))
+  const addedIds = Array.from(mergedIds).filter(id => !remoteById.has(id))
+  const subscriptionsToAdd = addedIds.map(id => channelToRemote(localById.get(id)))
   await uploadInChunks(
     subscriptionsToAdd,
     await client.supportsBulkSync(),
@@ -805,11 +808,13 @@ async function mergeSubscriptions(client, store, previousIds, options) {
         subscriptions,
         previous: profile.subscriptions,
       })
-      if (!saved) return null
+      if (!saved) {
+        return { baseline: [...new Set([...previousIds, ...addedIds])].filter(id => !removedIds.has(id)) }
+      }
     }
   }
 
-  return Array.from(mergedIds)
+  return { mergedIds: Array.from(mergedIds) }
 }
 
 export async function syncPlaylistBookmarks(client, store, previousIds = [], options = {}) {
