@@ -268,8 +268,6 @@ export async function launchApp(userDataDir, extraArgs = [], options = {}, windo
   await context.route(INTERNET_CHECK_URL, route => route.fulfill({ status: 204 }))
   // Covers reloads and later windows. The first document may already exist.
   await context.addInitScript(installRendererAccessors)
-  electronApp.windows().forEach(recoverCollectedEvaluations)
-  electronApp.on('window', recoverCollectedEvaluations)
   await notifyPhase('electronConnected')
 
   let page
@@ -316,7 +314,7 @@ export async function launchApp(userDataDir, extraArgs = [], options = {}, windo
 
   // Safety guard: if the userData override ever stops working, abort
   // instead of silently running tests against the user's real profile.
-  const actualUserData = await evaluateMainProcess(electronApp, ({ app }) => app.getPath('userData'))
+  const actualUserData = await electronApp.evaluate(({ app }) => app.getPath('userData'))
   if (actualUserData !== userDataDir) {
     await electronApp.close().catch(() => {})
     throw new Error(
@@ -393,101 +391,6 @@ export function getViewport(page) {
     width: document.documentElement.clientWidth,
     height: window.innerHeight
   }))
-}
-
-/**
- * Evaluates an idempotent function in the Electron main process.
- *
- * DevTools tracks the evaluation result only weakly until a microtask settles
- * it, and the main process runs microtasks late. A garbage collection in that
- * window, likely during startup, fails the call with "Resulting promise was
- * garbage collected" even though the function ran, so those calls are retried.
- *
- * @param {import('@playwright/test').ElectronApplication} electronApp
- * @param {Function} fn
- * @param {unknown} [arg]
- */
-export async function evaluateMainProcess(electronApp, fn, arg) {
-  for (let attempt = 1; ; attempt++) {
-    try {
-      return await electronApp.evaluate(fn, arg)
-    } catch (error) {
-      if (attempt === 3 || !error.message.includes(COLLECTED_RESULT_ERROR)) throw error
-    }
-  }
-}
-
-const COLLECTED_RESULT_ERROR = 'Resulting promise was garbage collected'
-
-/**
- * Makes `page.evaluate()` and `evaluate()` on handles from
- * `page.evaluateHandle()` survive a garbage collection that drops their result.
- *
- * Until V8 holds on to evaluation promises (https://crbug.com/536271637),
- * DevTools tracks the promise of an async evaluation only weakly. A collection
- * after the promise settles but before DevTools reads it fails the call with
- * "Resulting promise was garbage collected" even though the function ran.
- * Retrying would repeat side effects such as store dispatches, so the page
- * keeps async results until the next call and the error path reads them back.
- *
- * @param {import('@playwright/test').Page} page
- */
-function recoverCollectedEvaluations(page) {
-  const evaluate = page.evaluate.bind(page)
-  const evaluateHandle = page.evaluateHandle.bind(page)
-  let lastId = 0
-  let finishedIds = []
-  const evaluateAndRecover = async (pageFunction, arg, handle) => {
-    const id = ++lastId
-    const releasedIds = finishedIds
-    finishedIds = []
-    try {
-      return await evaluate(evaluateAndKeepResult, { id, releasedIds, source: String(pageFunction), arg, handle })
-    } catch (error) {
-      if (!error.message.includes(COLLECTED_RESULT_ERROR)) throw error
-      const kept = await evaluate(takeKeptResult, id)
-      if (!kept) throw error
-      return kept.value
-    } finally {
-      finishedIds.push(id)
-    }
-  }
-  page.evaluate = (pageFunction, arg) => typeof pageFunction === 'function'
-    ? evaluateAndRecover(pageFunction, arg)
-    : evaluate(pageFunction, arg)
-  // Tests call component methods that return promises through handles such as
-  // watchViewHandle(). Pass the handle along so the page unwraps it.
-  page.evaluateHandle = async (pageFunction, arg) => {
-    const handle = await evaluateHandle(pageFunction, arg)
-    const evaluateOnHandle = handle.evaluate.bind(handle)
-    handle.evaluate = (handleFunction, handleArg) => typeof handleFunction === 'function'
-      ? evaluateAndRecover(handleFunction, handleArg, { value: handle })
-      : evaluateOnHandle(handleFunction, handleArg)
-    return handle
-  }
-}
-
-/** Runs in the page; see recoverCollectedEvaluations. */
-function evaluateAndKeepResult({ id, releasedIds, source, arg, handle }) {
-  const results = (globalThis.__e2eEvaluationResults ??= new Map())
-  for (const releasedId of releasedIds) results.delete(releasedId)
-  // eslint-disable-next-line no-eval -- runs the serialized page function like Playwright does
-  const pageFunction = globalThis.eval(`(${source})`)
-  const result = handle ? pageFunction(handle.value, arg) : pageFunction(arg)
-  if (typeof result?.then !== 'function') return result
-  return Promise.resolve(result).then((value) => {
-    results.set(id, value)
-    return value
-  })
-}
-
-/** Runs in the page and returns a result kept by evaluateAndKeepResult. */
-function takeKeptResult(id) {
-  const results = globalThis.__e2eEvaluationResults
-  if (!results?.has(id)) return null
-  const value = results.get(id)
-  results.delete(id)
-  return { value }
 }
 
 /**

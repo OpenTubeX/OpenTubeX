@@ -115,8 +115,10 @@ export function findWatchComponent() {
  *
  * @param {import('@playwright/test').Page} page
  * @param {string} [videoId]
+ * @param {{ waitForPlayback?: boolean }} [options] skip the wait when something
+ * holds back playback, such as a native caption track that is still loading
  */
-export async function openMockedVideo(page, videoId = 'jNQXAC9IVRw') {
+export async function openMockedVideo(page, videoId = 'jNQXAC9IVRw', { waitForPlayback: wait = true } = {}) {
   const player = page.locator(`${activeTab} .ftVideoPlayer`)
   // Switching videos keeps the previous player mounted and playing until its
   // replacement mounts, so wait for it to leave before waiting for playback.
@@ -135,7 +137,7 @@ export async function openMockedVideo(page, videoId = 'jNQXAC9IVRw') {
   }
   await expect(player).toBeVisible({ timeout: 30_000 })
 
-  return waitForPlayback(page)
+  return wait ? waitForPlayback(page) : page.locator(`${activeTab} video`)
 }
 
 /**

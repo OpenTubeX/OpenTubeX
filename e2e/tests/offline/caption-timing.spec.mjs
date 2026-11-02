@@ -462,14 +462,15 @@ test.describe('native caption timing', () => {
       })
     })
     try {
-      const video = await openMockedVideo(page)
+      // A loading native track holds back playback, so pause before it loads.
+      const video = await openMockedVideo(page, undefined, { waitForPlayback: false })
+      await expect.poll(() => video.evaluate(element => Array.from(element.querySelectorAll('track'))
+        .some(track => track.readyState === HTMLTrackElement.LOADING))).toBe(true)
       await video.evaluate(element => {
         element.pause()
         element.currentTime = 4
       })
       await expect.poll(() => video.evaluate(element => element.seeking)).toBe(false)
-      await expect.poll(() => video.evaluate(element => Array.from(element.querySelectorAll('track'))
-        .some(track => track.readyState === HTMLTrackElement.LOADING))).toBe(true)
       const player = page.locator('.ftVideoPlayer')
       const caption = player.locator('.shaka-text-container [translate="no"]')
       await expect(caption).toHaveCount(0)
