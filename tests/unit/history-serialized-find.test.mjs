@@ -71,17 +71,21 @@ async function electronHistory(t) {
     HISTORY_WATCHED_STATUS_MIGRATION_ID: 'historyWatchedStatusMigrated',
   }).History
   const requests = []
+  let beforeRemovingDuplicates = null
   // Mirrors the main process's history handler, including the copy across IPC.
   const handle = async (action) => {
     requests.push(action)
     if (action === DBActions.GENERAL.FIND) return structuredClone(await main._findSerialized())
-    if (action === DBActions.HISTORY.REMOVE_DUPLICATES) return void await main.find()
+    if (action === DBActions.HISTORY.REMOVE_DUPLICATES) {
+      await beforeRemovingDuplicates?.()
+      return structuredClone(await main.find())
+    }
     throw new Error(`Unexpected action ${action}`)
   }
   const context = vm.createContext({ DBActions, newestUniqueHistoryRecords, runBackgroundJob: () => {}, window: { ftElectron: { dbHistory: handle } } })
   vm.runInContext(electron.replace(/^import .+\n/gm, '').replace(/export \{[\s\S]*?\}\n/g, '')
     .replace('export const recommendations', 'const recommendations') + '\nglobalThis.history = History', context)
-  return { db, main, renderer: context.history, requests }
+  return { db, main, renderer: context.history, requests, setBeforeRemovingDuplicates: callback => { beforeRemovingDuplicates = callback } }
 }
 
 test('Electron windows load history from stored text exactly as the main process would build it', async t => {
@@ -109,4 +113,18 @@ test('Electron windows have the main process remove duplicate history records', 
   assert.deepEqual(requests, [DBActions.GENERAL.FIND, DBActions.HISTORY.REMOVE_DUPLICATES])
   const stored = await db.history.findAsync({ videoId: 'video' })
   assert.deepEqual(stored.map(record => record._id), [records[0]._id])
+})
+
+test('Electron windows keep the records the main process selected when removing duplicates', async t => {
+  const { db, renderer, setBeforeRemovingDuplicates } = await electronHistory(t)
+  const [older] = await db.history.insertAsync([
+    { videoId: 'video', timeWatched: 1 }, { videoId: 'video', timeWatched: 3 },
+  ])
+  // A write between the two requests makes the older record the newest one.
+  setBeforeRemovingDuplicates(() => db.history.updateAsync({ _id: older._id }, { $set: { timeWatched: 5 } }))
+
+  const records = await renderer.find()
+  const stored = await db.history.findAsync({ videoId: 'video' })
+  assert.deepEqual(stored.map(record => record._id), [older._id])
+  assert.deepEqual(records.map(record => [record._id, record.timeWatched]), [[older._id, 5]])
 })

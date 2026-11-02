@@ -3014,8 +3014,7 @@ function runApp() {
           return await baseHandlers.history._findSerialized()
 
         case DBActions.HISTORY.REMOVE_DUPLICATES:
-          await baseHandlers.history.find()
-          return null
+          return await baseHandlers.history.find()
 
         case DBActions.GENERAL.UPSERT:
           await baseHandlers.history.upsert(data)

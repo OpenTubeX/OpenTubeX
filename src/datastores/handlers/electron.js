@@ -92,7 +92,9 @@ class History {
     // and the context bridge far faster than the records' object graph.
     const stored = await dbHistory(DBActions.GENERAL.FIND)
     const { records, duplicateIds } = newestUniqueHistoryRecords(stored.map(record => JSON.parse(record)))
-    if (duplicateIds.length > 0) await dbHistory(DBActions.HISTORY.REMOVE_DUPLICATES)
+    // The main process selects and removes duplicates in one queued step. Its
+    // records replace these, which a write in between could have outdated.
+    if (duplicateIds.length > 0) return dbHistory(DBActions.HISTORY.REMOVE_DUPLICATES)
     return records
   }
 
