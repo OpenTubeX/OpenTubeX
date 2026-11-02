@@ -171,7 +171,7 @@ final class UploadNotifications {
     /** Feeds can carry YouTube's auto-translated titles; oEmbed returns the original one. */
     private static String fetchOriginalTitle(String videoId) {
         HttpURLConnection connection = null;
-        // Timeouts apply per connect and read, so the whole lookup also has a deadline.
+        // Timeouts apply per connect and read, so a body that keeps streaming also has a deadline.
         long deadline = System.nanoTime() + ORIGINAL_TITLE_TIMEOUT_MILLIS * 1_000_000L;
         try {
             String video = "https://www.youtube.com/watch?v=" + Uri.encode(videoId);
