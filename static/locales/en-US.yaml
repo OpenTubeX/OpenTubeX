@@ -625,6 +625,8 @@ Settings:
     Add Action: "Add action"
     Empty: "No fullscreen actions selected"
     Quick Bookmark: "Quick bookmark"
+    Availability Hint: "Actions only appear on videos they apply to."
+    Disabled: "(disabled)"
   # On Settings Page
   Settings: Settings
   Quick Settings:

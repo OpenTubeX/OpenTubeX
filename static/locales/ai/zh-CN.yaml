@@ -333,6 +333,8 @@ Settings:
     Add Action: "添加操作"
     Empty: "未选择全屏操作"
     Quick Bookmark: "快速书签"
+    Availability Hint: "操作仅在适用的视频上显示。"
+    Disabled: "（已停用）"
   Quick Settings:
     Quick Settings: 快速设置
     Customize Quick Settings: 自定义快速设置

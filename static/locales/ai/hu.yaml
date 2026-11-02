@@ -333,6 +333,8 @@ Settings:
     Add Action: "Művelet hozzáadása"
     Empty: "Nincsenek kiválasztva teljes képernyős műveletek"
     Quick Bookmark: "Gyors könyvjelző"
+    Availability Hint: "A műveletek csak azoknál a videóknál jelennek meg, amelyekre vonatkoznak."
+    Disabled: "(letiltva)"
   Quick Settings:
     Quick Settings: Gyorsbeállítások
     Customize Quick Settings: Gyorsbeállítások testreszabása

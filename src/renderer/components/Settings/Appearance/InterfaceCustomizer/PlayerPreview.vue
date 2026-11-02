@@ -157,7 +157,8 @@ import { PlayerIcons, ZOOM_IN_ICON_VIEWBOX } from '../../../../../constants'
 import { CONTROL_BAR_BUTTON_DEFINITIONS, getPreviewMenuControlBarButtons } from '../../../../helpers/controlBarButtons'
 import { clampOverlayScrollTop } from '../../../../helpers/overlayScrollbars'
 import { usePhoneLayout } from '../../../../composables/usePhoneLayout'
-import { FULLSCREEN_ACTION_DEFINITIONS } from '../../../../helpers/fullscreenActions'
+import { FULLSCREEN_ACTION_DEFINITIONS, getDisabledFullscreenActions } from '../../../../helpers/fullscreenActions'
+import { supportsYtDlp } from '../../../../helpers/ytDlpCapabilities'
 import { getQuickPlaybackRateLabel } from '../../../../helpers/player/quickPlaybackRateLabel'
 import { AB_REPEAT_PREVIEW_ICON, SHAKA_PREVIEW_ICONS } from './playerPreviewIcons'
 
@@ -269,7 +270,9 @@ const removedControlBarButtons = computed(() => (
 
 const fullscreenActions = computed(() => {
   const definitions = new Map(FULLSCREEN_ACTION_DEFINITIONS.map(action => [action.id, action]))
-  return store.getters.getFullscreenActions.map(id => ({
+  // Like the player, leave out the actions that settings turn off.
+  const disabled = getDisabledFullscreenActions(store.getters, supportsYtDlp)
+  return store.getters.getFullscreenActions.filter(id => !disabled.has(id)).map(id => ({
     ...definitions.get(id),
     // eslint-disable-next-line @intlify/vue-i18n/no-dynamic-keys
     label: t(definitions.get(id).labelKey),

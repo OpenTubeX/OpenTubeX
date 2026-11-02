@@ -333,6 +333,8 @@ Settings:
     Add Action: "Eylem ekle"
     Empty: "Tam ekran eylemi seçilmedi"
     Quick Bookmark: "Hızlı yer imi"
+    Availability Hint: "Eylemler yalnızca geçerli oldukları videolarda görünür."
+    Disabled: "(devre dışı)"
   Quick Settings:
     Quick Settings: Hızlı ayarlar
     Customize Quick Settings: Hızlı ayarları özelleştir

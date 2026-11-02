@@ -356,6 +356,8 @@ Settings:
     Add Action: "Дадаць дзеянне"
     Empty: "Поўнаэкранныя дзеянні не выбраны"
     Quick Bookmark: "Хуткая закладка"
+    Availability Hint: "Дзеянні з’яўляюцца толькі на відэа, да якіх яны дастасавальныя."
+    Disabled: "(адключана)"
   Quick Settings:
     Quick Settings: Хуткія налады
     Customize Quick Settings: Наладзіць хуткія налады

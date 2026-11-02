@@ -7,6 +7,7 @@ import {
   DEFAULT_FULLSCREEN_ACTIONS,
   FULLSCREEN_ACTION_DEFINITIONS,
   getAvailableFullscreenActions,
+  getDisabledFullscreenActions,
   normalizeFullscreenActions,
 } from '../../src/renderer/helpers/fullscreenActions.js'
 
@@ -30,6 +31,35 @@ test('unavailable actions leave no gaps and return in the selected order', () =>
   assert.deepEqual(getAvailableFullscreenActions(selected, { liveChat: true, share: true }), ['liveChat', 'share'])
   assert.deepEqual(getAvailableFullscreenActions(selected, {}), [])
   assert.deepEqual(selected, ['liveChat', 'share', 'comments', 'transcript'])
+})
+
+test('settings that turn an action off everywhere disable it', () => {
+  const enabled = {
+    getHideLiveChat: false,
+    getHideLiveChatReplay: false,
+    getHideComments: false,
+    getUseSponsorBlock: true,
+    getHideSharingActions: false,
+    getHidePlaylists: false,
+    getQuickBookmarkPlaylist: { _id: 'bookmarks' },
+    getEnableDownloads: true,
+    getHideRecommendedVideos: false,
+  }
+  assert.deepEqual([...getDisabledFullscreenActions(enabled, true)], [])
+  assert.deepEqual([...getDisabledFullscreenActions(enabled, false)], ['download'])
+  // Live chat stays available while either live chat or its replay is shown.
+  assert.deepEqual([...getDisabledFullscreenActions({ ...enabled, getHideLiveChat: true }, true)], [])
+  assert.deepEqual([...getDisabledFullscreenActions({
+    getHideLiveChat: true,
+    getHideLiveChatReplay: true,
+    getHideComments: true,
+    getUseSponsorBlock: false,
+    getHideSharingActions: true,
+    getHidePlaylists: true,
+    getQuickBookmarkPlaylist: null,
+    getEnableDownloads: false,
+    getHideRecommendedVideos: true,
+  }, true)], ['liveChat', 'comments', 'sponsorBlock', 'share', 'addToPlaylist', 'quickBookmark', 'download', 'recommendations'])
 })
 
 test('every fullscreen action has an icon and English and German labels', () => {

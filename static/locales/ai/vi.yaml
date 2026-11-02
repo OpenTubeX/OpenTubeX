@@ -338,6 +338,8 @@ Settings:
     Add Action: "Thêm thao tác"
     Empty: "Chưa chọn thao tác toàn màn hình nào"
     Quick Bookmark: "Dấu trang nhanh"
+    Availability Hint: "Các thao tác chỉ xuất hiện trên những video áp dụng được."
+    Disabled: "(đã tắt)"
   Quick Settings:
     Quick Settings: Cài đặt nhanh
     Customize Quick Settings: Tùy chỉnh cài đặt nhanh

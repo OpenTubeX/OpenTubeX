@@ -448,6 +448,8 @@ Settings:
     Add Action: "Pridėti veiksmą"
     Empty: "Nepasirinkti jokie viso ekrano veiksmai"
     Quick Bookmark: "Sparčioji žymelė"
+    Availability Hint: "Veiksmai rodomi tik tuose vaizdo įrašuose, kuriems jie taikomi."
+    Disabled: "(išjungta)"
   Quick Settings:
     Quick Settings: Spartieji nustatymai
     Customize Quick Settings: Tinkinti sparčiuosius nustatymus

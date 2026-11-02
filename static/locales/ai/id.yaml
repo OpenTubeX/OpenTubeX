@@ -334,6 +334,8 @@ Settings:
     Add Action: "Tambahkan tindakan"
     Empty: "Tidak ada tindakan layar penuh yang dipilih"
     Quick Bookmark: "Markah cepat"
+    Availability Hint: "Tindakan hanya muncul pada video yang mendukungnya."
+    Disabled: "(nonaktif)"
   Quick Settings:
     Quick Settings: Pengaturan cepat
     Customize Quick Settings: Sesuaikan pengaturan cepat

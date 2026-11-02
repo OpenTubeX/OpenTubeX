@@ -306,6 +306,8 @@ Settings:
     Add Action: "Добавить действие"
     Empty: "Полноэкранные действия не выбраны"
     Quick Bookmark: "Быстрая закладка"
+    Availability Hint: "Действия отображаются только для видео, к которым они применимы."
+    Disabled: "(отключено)"
   Quick Settings:
     Quick Settings: Быстрые настройки
     Customize Quick Settings: Настроить быстрые настройки

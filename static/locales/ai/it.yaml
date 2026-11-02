@@ -333,6 +333,8 @@ Settings:
     Add Action: "Aggiungi azione"
     Empty: "Nessuna azione a schermo intero selezionata"
     Quick Bookmark: "Segnalibro rapido"
+    Availability Hint: "Le azioni compaiono solo nei video a cui si applicano."
+    Disabled: "(disattivata)"
   Quick Settings:
     Quick Settings: Impostazioni rapide
     Customize Quick Settings: Personalizza impostazioni rapide

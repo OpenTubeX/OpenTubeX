@@ -357,6 +357,8 @@ Settings:
     Add Action: "افزودن اقدام"
     Empty: "هیچ اقدام تمام‌صفحه‌ای انتخاب نشده است"
     Quick Bookmark: "نشانک سریع"
+    Availability Hint: "کنش‌ها فقط در ویدیوهایی نشان داده می‌شوند که برایشان کاربرد دارند."
+    Disabled: "(غیرفعال)"
   Quick Settings:
     Quick Settings: تنظیمات سریع
     Customize Quick Settings: سفارشی‌سازی تنظیمات سریع

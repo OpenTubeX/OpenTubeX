@@ -333,6 +333,8 @@ Settings:
     Add Action: "Přidat akci"
     Empty: "Nejsou vybrány žádné akce na celé obrazovce"
     Quick Bookmark: "Rychlá záložka"
+    Availability Hint: "Akce se zobrazují jen u videí, pro která jsou k dispozici."
+    Disabled: "(vypnuto)"
   Quick Settings:
     Quick Settings: Rychlé nastavení
     Customize Quick Settings: Přizpůsobit rychlé nastavení

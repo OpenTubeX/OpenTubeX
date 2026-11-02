@@ -338,6 +338,8 @@ Settings:
     Add Action: "הוספת פעולה"
     Empty: "לא נבחרו פעולות במסך מלא"
     Quick Bookmark: "סימנייה מהירה"
+    Availability Hint: "פעולות מופיעות רק בסרטונים שהן רלוונטיות עבורם."
+    Disabled: "(מושבת)"
   Quick Settings:
     Quick Settings: הגדרות מהירות
     Customize Quick Settings: התאמה אישית של ההגדרות המהירות

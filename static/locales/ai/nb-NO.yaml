@@ -333,6 +333,8 @@ Settings:
     Add Action: "Legg til handling"
     Empty: "Ingen fullskjermhandlinger valgt"
     Quick Bookmark: "Hurtigbokmerke"
+    Availability Hint: "Handlinger vises bare på videoer der de er relevante."
+    Disabled: "(deaktivert)"
   Quick Settings:
     Quick Settings: Hurtiginnstillinger
     Customize Quick Settings: Tilpass hurtiginnstillinger

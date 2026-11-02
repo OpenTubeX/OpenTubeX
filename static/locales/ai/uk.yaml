@@ -338,6 +338,8 @@ Settings:
     Add Action: "Додати дію"
     Empty: "Повноекранні дії не вибрано"
     Quick Bookmark: "Швидка закладка"
+    Availability Hint: "Дії з’являються лише для відео, до яких вони застосовні."
+    Disabled: "(вимкнено)"
   Quick Settings:
     Quick Settings: Швидкі налаштування
     Customize Quick Settings: Налаштувати швидкі налаштування

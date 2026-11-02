@@ -100,7 +100,13 @@
         :icon="item.icon"
         aria-hidden="true"
       />
-      <span>{{ item.label }}</span>
+      <span class="selectedActionLabel">
+        <bdi>{{ item.label }}</bdi>
+        <span
+          v-if="disabledItems.includes(item.id)"
+          class="disabledLabel"
+        >{{ disabledLabel }}</span>
+      </span>
       <div class="itemActions">
         <FtIconButton
           class="itemAction"
@@ -189,6 +195,15 @@ const props = defineProps({
     required: true
   },
   emptyLabel: {
+    type: String,
+    default: ''
+  },
+  /** IDs of selected items that settings turn off, which are marked with `disabledLabel`. */
+  disabledItems: {
+    type: Array,
+    default: () => []
+  },
+  disabledLabel: {
     type: String,
     default: ''
   }
@@ -489,6 +504,11 @@ function resetItems() {
   display: flex;
   inline-size: 20px;
   justify-content: center;
+}
+
+.disabledLabel {
+  color: var(--secondary-text-color);
+  margin-inline-start: 0.5ch;
 }
 
 .itemActions {

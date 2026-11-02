@@ -92,6 +92,14 @@
   flex-direction: column;
 }
 
+.customizerHint {
+  color: var(--secondary-text-color);
+  margin-block: 0 16px;
+  margin-inline: auto;
+  max-inline-size: 720px;
+  text-align: center;
+}
+
 @container (width <= 760px) {
   .customizerPanel {
     grid-template:

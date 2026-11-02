@@ -333,6 +333,8 @@ Settings:
     Add Action: "Bæta við aðgerð"
     Empty: "Engar aðgerðir á öllum skjánum valdar"
     Quick Bookmark: "Flýtibókamerki"
+    Availability Hint: "Aðgerðir birtast aðeins á myndskeiðum sem þær eiga við."
+    Disabled: "(óvirkt)"
   Quick Settings:
     Quick Settings: Flýtistillingar
     Customize Quick Settings: Sérsníða flýtistillingar

@@ -335,6 +335,8 @@ Settings:
     Add Action: "Əməliyyat əlavə et"
     Empty: "Tam ekran əməliyyatı seçilməyib"
     Quick Bookmark: "Sürətli əlfəcin"
+    Availability Hint: "Əməliyyatlar yalnız aid olduqları videolarda görünür."
+    Disabled: "(deaktiv)"
   Quick Settings:
     Quick Settings: Cəld tənzimləmələr
     Customize Quick Settings: Cəld tənzimləmələri fərdiləşdir

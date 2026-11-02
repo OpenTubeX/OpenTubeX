@@ -338,6 +338,8 @@ Settings:
     Add Action: "إضافة إجراء"
     Empty: "لم يتم تحديد إجراءات ملء الشاشة"
     Quick Bookmark: "إشارة مرجعية سريعة"
+    Availability Hint: "تظهر الإجراءات فقط في الفيديوهات التي تنطبق عليها."
+    Disabled: "(معطّل)"
   Quick Settings:
     Quick Settings: إعدادات سريعة
     Customize Quick Settings: تخصيص الإعدادات السريعة

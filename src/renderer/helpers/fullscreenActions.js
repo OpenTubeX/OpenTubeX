@@ -25,3 +25,22 @@ export function normalizeFullscreenActions(value) {
 export function getAvailableFullscreenActions(value, availability) {
   return normalizeFullscreenActions(value).filter(id => availability[id])
 }
+
+/**
+ * The actions that settings turn off on every video, which the player never shows.
+ * @param {Record<string, unknown>} getters The store's getters.
+ * @param {boolean} downloadsSupported Whether this build can download videos.
+ */
+export function getDisabledFullscreenActions(getters, downloadsSupported) {
+  const disabled = {
+    liveChat: getters.getHideLiveChat && getters.getHideLiveChatReplay,
+    comments: getters.getHideComments,
+    sponsorBlock: !getters.getUseSponsorBlock,
+    share: getters.getHideSharingActions,
+    addToPlaylist: getters.getHidePlaylists,
+    quickBookmark: getters.getQuickBookmarkPlaylist == null,
+    download: !downloadsSupported || !getters.getEnableDownloads,
+    recommendations: getters.getHideRecommendedVideos,
+  }
+  return new Set(FULLSCREEN_ACTION_DEFINITIONS.map(({ id }) => id).filter(id => disabled[id]))
+}

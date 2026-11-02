@@ -336,6 +336,8 @@ Settings:
     Add Action: "Добавяне на действие"
     Empty: "Няма избрани действия на цял екран"
     Quick Bookmark: "Бърза отметка"
+    Availability Hint: "Действията се показват само при видеоклиповете, за които са приложими."
+    Disabled: "(изключено)"
   Quick Settings:
     Quick Settings: Бързи настройки
     Customize Quick Settings: Персонализиране на бързите настройки

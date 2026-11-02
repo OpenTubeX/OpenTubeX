@@ -169,6 +169,8 @@ Settings:
     Add Action: "Dodaj działanie"
     Empty: "Nie wybrano działań na pełnym ekranie"
     Quick Bookmark: "Szybka zakładka"
+    Availability Hint: "Akcje pojawiają się tylko w filmach, których dotyczą."
+    Disabled: "(wyłączone)"
   Quick Settings:
     Customize Quick Settings: Dostosuj szybkie ustawienia
     Add Setting: Dodaj ustawienie

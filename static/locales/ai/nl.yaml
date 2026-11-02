@@ -338,6 +338,8 @@ Settings:
     Add Action: "Actie toevoegen"
     Empty: "Geen acties op volledig scherm geselecteerd"
     Quick Bookmark: "Snelle bladwijzer"
+    Availability Hint: "Acties verschijnen alleen bij video’s waarop ze van toepassing zijn."
+    Disabled: "(uitgeschakeld)"
   Quick Settings:
     Quick Settings: Snelle instellingen
     Customize Quick Settings: Snelle instellingen aanpassen
