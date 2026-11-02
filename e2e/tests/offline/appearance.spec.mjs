@@ -1631,6 +1631,19 @@ async function settingsBackgroundVariation(app) {
     Math.max(...samples.map(color => color[channel])) - Math.min(...samples.map(color => color[channel]))))
 }
 
+// The first captures after a zoom or scroll change can show an unsettled frame
+// under load, so wait for two matching readings.
+async function stableSettingsBackgroundVariation(app) {
+  let previous
+  await expect.poll(async () => {
+    const variation = await settingsBackgroundVariation(app)
+    const settled = variation === previous
+    previous = variation
+    return settled
+  }).toBe(true)
+  return previous
+}
+
 test.describe('Ocean themes', () => {
   test('selects, persists, and follows the system with the Ocean palettes', async ({ app, page, attachScreenshot }) => {
     await goToSettingsSection(page, 'theme')
@@ -1661,10 +1674,10 @@ test.describe('Ocean themes', () => {
           .dispatch('updateUiScale', scale), scale)
         await expect.poll(() => app.electronApp.evaluate(({ BrowserWindow }) =>
           BrowserWindow.getAllWindows()[0].webContents.getZoomFactor())).toBe(scale / 100)
-        const variation = await settingsBackgroundVariation(app)
+        const variation = await stableSettingsBackgroundVariation(app)
         expect(variation).toBeGreaterThanOrEqual(4)
         await page.locator('.settingsContent').evaluate(element => { element.scrollTop = element.scrollHeight })
-        expect(await settingsBackgroundVariation(app)).toBe(variation)
+        expect(await stableSettingsBackgroundVariation(app)).toBe(variation)
         await page.locator('.settingsContent').evaluate(element => { element.scrollTop = 0 })
       }
       await page.evaluate(() => window.$store
