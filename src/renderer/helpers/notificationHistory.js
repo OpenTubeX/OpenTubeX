@@ -25,6 +25,14 @@ export const NOTIFICATION_KIND_ICONS = {
 }
 
 /**
+ * Whether notifications may show thumbnails. Toasts and system notifications
+ * cannot blur images, so blurred thumbnails leave them out too.
+ */
+function notificationThumbnailsAllowed() {
+  return store.getters.getThumbnailPreference !== 'hidden' && !store.getters.getBlurThumbnails
+}
+
+/**
  * The thumbnail for a notification about a video, following the thumbnail
  * settings. Some videos lack the default maximum resolution image, so this
  * uses the medium one, which is large enough for notifications.
@@ -32,6 +40,7 @@ export const NOTIFICATION_KIND_ICONS = {
  * @returns {string | null}
  */
 export function getNotificationThumbnailUrl(videoId) {
+  if (!notificationThumbnailsAllowed()) return null
   const url = getVideoThumbnailUrl(videoId, store.getters.getBackendPreference,
     store.getters.getCurrentInvidiousInstanceUrl, store.getters.getThumbnailPreference)
   return url?.replace(/\/maxresdefault\.jpg$/, '/mqdefault.jpg') ?? null
@@ -64,7 +73,8 @@ export function showInAppNotification(entry) {
   showToast({
     message: i18n.global.t('Display Label', { label: entry.title, value: entry.body }),
     icon: NOTIFICATION_KIND_ICONS[entry.kind],
-    image: entry.thumbnail ?? null,
+    // The entry may predate hiding or blurring thumbnails.
+    image: notificationThumbnailsAllowed() ? entry.thumbnail ?? null : null,
     // Notifications the user turned on stay when only important ones are shown.
     important: true,
     action: () => openNotificationEntry(entry)

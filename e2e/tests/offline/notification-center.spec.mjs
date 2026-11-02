@@ -272,6 +272,30 @@ test.describe('with hidden thumbnails', () => {
   })
 })
 
+test.describe('with blurred thumbnails', () => {
+  test.use({
+    seed: {
+      settings: { currentLocale: 'en-US', fetchSubscriptionsAutomatically: false, blurThumbnails: true },
+      profiles: [{
+        _id: 'allChannels',
+        name: 'All Channels',
+        bgColor: '#000000',
+        textColor: '#FFFFFF',
+        subscriptions: [{ id: CHANNEL_ID, name: 'Alpha Channel', thumbnail: '', notificationFeedTypes: ['videos'] }]
+      }]
+    }
+  })
+
+  test('notifications leave out thumbnails, which toasts and the system cannot blur', async ({ app, page }) => {
+    await mockSystemNotifications(app, { foreground: true })
+    const [upload] = await announceUploads(page, ['a'])
+    expect((await page.evaluate(() => window.ftElectron.notificationHistory.list()))[0]).not.toHaveProperty('thumbnail')
+    const toast = page.locator('.toast', { hasText: `Upload ${upload}` })
+    await expect(toast).toBeVisible()
+    await expect(toast.locator('.image')).toHaveCount(0)
+  })
+})
+
 test.describe('with system notifications only', () => {
   test.use({
     seed: {
