@@ -58,6 +58,7 @@
         />
       </p>
       <FtListVideo
+        ref="listVideo"
         :data="data"
         :playlist-id="playlistId"
         :playlist-type="playlistType"
@@ -71,7 +72,7 @@
         :appearance="appearance"
         :always-show-add-to-playlist-button="alwaysShowAddToPlaylistButton"
         :quick-bookmark-button-enabled="quickBookmarkButtonEnabled"
-        :hide-playlist-thumbnail-actions="showPlaylistItemMenu"
+        :playlist-row-menu="showPlaylistItemMenu"
         :can-move-video-up="canMoveVideoUp"
         :can-move-video-down="canMoveVideoDown"
         :can-remove-from-playlist="canRemoveFromPlaylist"
@@ -230,7 +231,11 @@ const inUserPlaylist = props.playlistType === 'user'
 const showPlaylistItemMenu = computed(() => inUserPlaylist && props.appearance === 'watchPlaylistItem')
 const touchLayout = usePhoneLayout('(width <= 600px), (pointer: coarse)')
 const playlistItemMenuButton = useTemplateRef('playlistItemMenuButton')
+const listVideo = useTemplateRef('listVideo')
 const playlistItemMenuItems = computed(() => [
+  ...(store.getters.getHidePlaylists
+    ? []
+    : [{ label: t('User Playlists.Add to Playlist'), icon: ['fac', 'playlist-add'], enabled: true, run: () => listVideo.value.openAddToPlaylistPrompt() }]),
   { label: t('User Playlists.Move Video Up'), icon: ['fas', 'arrow-up'], enabled: props.canMoveVideoUp, run: () => moveVideoUp(props.data.videoId, props.playlistItemId) },
   { label: t('User Playlists.Move Video Down'), icon: ['fas', 'arrow-down'], enabled: props.canMoveVideoDown, run: () => moveVideoDown(props.data.videoId, props.playlistItemId) },
   { label: t('User Playlists.Remove from Playlist'), icon: ['fas', 'trash'], enabled: props.canRemoveFromPlaylist, run: () => removeFromPlaylist(props.data.videoId, props.playlistItemId) },

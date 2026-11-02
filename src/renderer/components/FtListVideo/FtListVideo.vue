@@ -177,7 +177,7 @@
             @click="handleExtraThumbnailAction"
           />
           <FtIconButton
-            v-if="showPlaylists"
+            v-if="showPlaylists && !showQuickRemoveButton"
             :title="t('User Playlists.Add to Playlist')"
             :icon="isInAnyPlaylist ? ['fac', 'playlist-check'] : ['fac', 'playlist-add']"
             class="addToPlaylistIcon"
@@ -207,7 +207,7 @@
             @click="toggleQuickBookmarked"
           />
           <FtIconButton
-            v-if="!hidePlaylistThumbnailActions && inUserPlaylist && canMoveVideoUp"
+            v-if="!playlistRowMenu && inUserPlaylist && canMoveVideoUp"
             :title="t('User Playlists.Move Video Up')"
             :icon="verticalMoveControls ? ['fas', 'arrow-up'] : ['fas', 'arrow-left']"
             class="upArrowIcon"
@@ -216,7 +216,7 @@
             @click="moveVideoUp"
           />
           <FtIconButton
-            v-if="!hidePlaylistThumbnailActions && inUserPlaylist && canMoveVideoDown"
+            v-if="!playlistRowMenu && inUserPlaylist && canMoveVideoDown"
             :title="t('User Playlists.Move Video Down')"
             :icon="verticalMoveControls ? ['fas', 'arrow-down'] : ['fas', 'arrow-right']"
             class="downArrowIcon"
@@ -225,7 +225,7 @@
             @click="moveVideoDown"
           />
           <FtIconButton
-            v-if="!hidePlaylistThumbnailActions && inUserPlaylist && canRemoveFromPlaylist"
+            v-if="inUserPlaylist && canRemoveFromPlaylist"
             :title="t('User Playlists.Remove from Playlist')"
             :icon="['fas', 'trash']"
             class="trashIcon"
@@ -641,7 +641,8 @@ const props = defineProps({
     type: Boolean,
     default: true,
   },
-  hidePlaylistThumbnailActions: {
+  // The row reorders through its own menu, so the thumbnail keeps only removal.
+  playlistRowMenu: {
     type: Boolean,
     default: false,
   },
@@ -955,6 +956,9 @@ const { channelThumbnails } = useResultChannelAvatar(
 )
 
 const showPlaylists = computed(() => !store.getters.getHidePlaylists)
+// One-tap removal takes the place of Add to Playlist, which moves to the row menu,
+// so the thumbnail shortcuts keep fitting (#2342).
+const showQuickRemoveButton = computed(() => props.playlistRowMenu && inUserPlaylist.value && props.canRemoveFromPlaylist)
 const useSponsorBlock = computed(() => store.getters.getUseSponsorBlock)
 
 const sponsorBlockFullVideoIcon = computed(() => {
@@ -2435,6 +2439,12 @@ function removeFromHistory() {
     icon: ['fas', 'trash'],
   })
 }
+
+function openAddToPlaylistPrompt() {
+  store.dispatch('showAddToPlaylistPromptForManyVideos', { videos: [addToPlaylistVideoData.value] })
+}
+
+defineExpose({ openAddToPlaylistPrompt })
 
 // Descriptions are omitted from saved playlist entries.
 const addToPlaylistVideoData = computed(() => ({

@@ -99,7 +99,7 @@ test('playing playlist shows thumbnail numbers and retains reorder controls', { 
   await watch.dispose()
 })
 
-test('playlist row menu moves and removes videos while thumbnail shortcuts stay contained', { tag: '@scale' }, async ({ app, page, attachScreenshot }) => {
+test('playlist row menu adds, moves and removes videos while thumbnail shortcuts stay contained', { tag: '@scale' }, async ({ app, page, attachScreenshot }) => {
   await openPlaylist(app, page)
   const item = page.locator('.watchVideoPlaylist .playlistItem').nth(1)
   const expectContainedActions = async () => {
@@ -123,11 +123,16 @@ test('playlist row menu moves and removes videos while thumbnail shortcuts stay 
   })
   await expect(item.locator('.extraThumbnailActionIcon')).toBeVisible()
   await expect(item.locator('.playlistIcons button')).toHaveCount(3)
+  await expect(item.locator('.trashIcon')).toBeVisible()
   await expectContainedActions()
-  await item.locator('.addToPlaylistIcon button').click()
-  await expect(page.locator('.addToPlaylistDropdown')).toBeVisible()
-  await page.keyboard.press('Escape')
-  await expect(item.locator('.upArrowIcon, .downArrowIcon, .trashIcon')).toHaveCount(0)
+  // One-tap removal takes the place of Add to Playlist, which moves to the row menu.
+  await expect(item.locator('.addToPlaylistIcon, .upArrowIcon, .downArrowIcon')).toHaveCount(0)
+  await item.locator('.playlistItemMenu button').click()
+  await page.getByRole('menuitem', { name: /^Add to playlist$/i }).click()
+  const prompt = page.getByRole('dialog', { name: 'Select a playlist to add your video to', exact: true })
+  await expect(prompt.locator('.videoSummaryTitle')).toHaveText('Playlist video 2')
+  await prompt.getByRole('button', { name: 'Cancel', exact: true }).click()
+  await expect(prompt).toHaveCount(0)
   await expect.poll(() => item.evaluate(element => {
     const menu = element.querySelector('.playlistItemMenu').getBoundingClientRect()
     const info = element.querySelector('.info').getBoundingClientRect()
@@ -153,6 +158,81 @@ test('playlist row menu moves and removes videos while thumbnail shortcuts stay 
   await expect(page.getByRole('menuitem', { name: /^Remove from playlist$/i })).toBeVisible()
   await expect(page.locator('.contextMenu')).toHaveCSS('opacity', '1')
   await attachScreenshot('playlist row actions menu')
+})
+
+test('playlist thumbnails remove videos with one click or tap, and phones from the long-press menu', { tag: '@scale' }, async ({ app, page, attachScreenshot, uiScale }) => {
+  await openPlaylist(app, page)
+  // Ending the 30-second demo would advance the playlist and rebuild its rows.
+  await page.locator('.ftVideoPlayer video').evaluate(video => video.pause())
+  const storedTitles = () => page.evaluate(() => window.$store.getters.getPlaylist('layout-playlist').videos.map(video => video.title))
+  const rowOf = (scope, title) => scope.locator('.playlistItem').filter({ has: page.getByRole('heading', { name: title, exact: true }) })
+  const removeButton = row => row.locator('.videoThumbnail').getByRole('button', { name: 'Remove from playlist', exact: true })
+  const expectContained = row => expect.poll(() => row.evaluate(element => {
+    const image = [...element.querySelectorAll('.thumbnailImage')]
+      .find(image => getComputedStyle(image).visibility !== 'hidden').getBoundingClientRect()
+    const button = element.querySelector('.trashIcon button').getBoundingClientRect()
+    return button.width > 0 && button.left >= image.left - 0.5 && button.right <= image.right + 0.5 &&
+      button.top >= image.top - 0.5 && button.bottom <= image.bottom + 0.5
+  })).toBe(true)
+  const panel = page.locator('.watchVideoPlaylist').filter({ visible: true })
+
+  await rowOf(panel, 'Playlist video 2').hover()
+  await panel.screenshot({ path: test.info().outputPath('playlist-quick-remove-hover.png') })
+  await removeButton(rowOf(panel, 'Playlist video 2')).click()
+  await expect(rowOf(panel, 'Playlist video 2')).toHaveCount(0)
+  await expect.poll(storedTitles).not.toContain('Playlist video 2')
+  await expect(page.locator('.contextMenu')).toHaveCount(0)
+
+  const session = await page.context().newCDPSession(page)
+  await session.send('Emulation.setTouchEmulationEnabled', { enabled: true, maxTouchPoints: 5 })
+  await expect.poll(() => page.evaluate(() => matchMedia('(hover: none)').matches)).toBe(true)
+  const touchPoint = async locator => {
+    await expect(locator).toBeVisible()
+    const bounds = await locator.boundingBox()
+    const point = { x: bounds.x + bounds.width / 2, y: bounds.y + bounds.height / 2, id: 0 }
+    // Nothing, such as the toast from the previous removal, may cover the target.
+    expect(await locator.evaluate((element, { x, y }) => element.contains(document.elementFromPoint(x, y)), point)).toBe(true)
+    return point
+  }
+  const tap = async locator => {
+    const point = await touchPoint(locator)
+    await session.send('Input.dispatchTouchEvent', { type: 'touchStart', touchPoints: [point] })
+    await session.send('Input.dispatchTouchEvent', { type: 'touchEnd', touchPoints: [] })
+  }
+  await page.mouse.move(0, 0)
+  const touchRemove = removeButton(rowOf(panel, 'Playlist video 3'))
+  await expect.poll(() => touchRemove.evaluate(element => Number(getComputedStyle(element.closest('.playlistIcons')).opacity))).toBeGreaterThan(0)
+  await expectContained(rowOf(panel, 'Playlist video 3'))
+  await tap(touchRemove)
+  await expect.poll(storedTitles).not.toContain('Playlist video 3')
+
+  // Phones keep every thumbnail action in the long-press menu instead (#1465).
+  await setWindowSize(app, page, { width: 480, height: 800 })
+  await page.setViewportSize({ width: Math.round(480 * uiScale / 100), height: Math.round(800 * uiScale / 100) })
+  await page.locator('.phonePlaylistButton').click()
+  const sheet = page.locator('.dockedSheet[open]')
+  await sheet.evaluate(element => Promise.all(element.getAnimations().map(animation => animation.finished)))
+  const phoneRow = rowOf(sheet, 'Playlist video 4')
+  await expect(phoneRow.locator('.videoThumbnail')).toBeVisible()
+  await expect(phoneRow.locator('.playlistIcons button').filter({ visible: true })).toHaveCount(0)
+  const menu = page.locator('.mobileLinkActions')
+  const holdPoint = await touchPoint(phoneRow.locator('.thumbnailLink'))
+  await session.send('Input.dispatchTouchEvent', { type: 'touchStart', touchPoints: [holdPoint] })
+  await expect(menu).toBeVisible()
+  await session.send('Input.dispatchTouchEvent', { type: 'touchEnd', touchPoints: [] })
+  await expect(menu).toHaveAttribute('aria-label', 'Playlist video 4')
+  await expect(menu.getByRole('menuitem', { name: 'Add to playlist', exact: true })).toBeVisible()
+  const menuRemove = menu.getByRole('menuitem', { name: 'Remove from playlist', exact: true })
+  await expect(menuRemove).toBeVisible()
+  await menu.evaluate(element => Promise.all(element.getAnimations().map(animation => animation.finished)))
+  await page.screenshot({ path: test.info().outputPath('playlist-remove-phone-long-press.png') })
+  await attachScreenshot('phone playlist long-press removal')
+  await tap(menuRemove)
+  await expect(menu).toHaveCount(0)
+  await expect(phoneRow).toHaveCount(0)
+  await expect.poll(storedTitles).not.toContain('Playlist video 4')
+  await expect.poll(async () => (await storedTitles()).length).toBe(videos.length - 3)
+  await session.detach()
 })
 
 test('playlist preview batches pointer measurements', { tag: '@scale' }, async ({ app, page }) => {
@@ -389,11 +469,13 @@ test('playlist saves retain available view counts across restart', async ({ app,
   const rows = page.locator('.watchVideoPlaylist .playlistItem')
   await rows.nth(1).hover()
   await rows.nth(1).locator('.quickBookmarkVideoIcon button').click()
-  await rows.nth(2).hover()
-  await rows.nth(2).locator('.addToPlaylistIcon button').click()
-  await page.getByRole('option').filter({ hasText: 'Saved counts' }).click()
+  await rows.nth(2).locator('.playlistItemMenu button').click()
+  await page.getByRole('menuitem', { name: /^Add to playlist$/i }).click()
+  const prompt = page.getByRole('dialog', { name: 'Select a playlist to add your video to', exact: true })
+  await prompt.locator('.ft-playlist-selector', { hasText: 'Saved counts' }).click()
+  await prompt.getByRole('button', { name: 'Save', exact: true }).click()
   await expect.poll(() => page.evaluate(() => window.$store.getters.getPlaylist('saved-counts').videos.map(video => video.viewCount))).toEqual([12345, 12345])
-  await page.keyboard.press('Escape')
+  await expect(prompt).toHaveCount(0)
   for (const index of [9, 10, 11]) {
     await rows.nth(index).hover()
     await rows.nth(index).locator('.quickBookmarkVideoIcon button').click()
