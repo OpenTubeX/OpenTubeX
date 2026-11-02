@@ -66,7 +66,6 @@ jobs:
         runtime:
           - android
           - linux-x64
-          - linux-armv7l
           - linux-arm64
           - win-x64
           - win-arm64
@@ -79,10 +78,6 @@ jobs:
         - runtime: linux-x64
           os: ubuntu-latest
           appimage-arch: amd64
-
-        - runtime: linux-armv7l
-          os: ubuntu-latest
-          appimage-arch: armv7l
 
         - runtime: linux-arm64
           os: ubuntu-24.04-arm
@@ -213,21 +208,6 @@ jobs:
           sleep 10
         done
 
-    - name: Build ARMv7l with Node.js ${{ matrix.node-version}}
-      if: startsWith(matrix.os, 'ubuntu') && startsWith(matrix.runtime, 'linux-armv7l')
-      shell: bash
-      run: |
-        for attempt in {1..5}; do
-          if pnpm run build:arm32; then
-            exit 0
-          fi
-          if (( attempt == 5 )); then
-            exit 1
-          fi
-          echo "Build attempt $attempt failed; retrying in 10 seconds."
-          sleep 10
-        done
-
     - name: Build ARM64 with Node.js ${{ matrix.node-version}}
       if: contains(matrix.runtime, 'arm64')
       shell: bash
@@ -283,37 +263,6 @@ jobs:
         docker run --rm -v "$PWD":/work -w /work -e UPINFO ghcr.io/pkgforge-dev/archlinux:latest@sha256:7fe9b87037ed2e1028b007f4196b746632be2b1ea22593fcda57ca5b810e5af0 \
           sh _scripts/package-anylinux-appimage.sh "build/opentubex_${VERSION}_amd64.deb"
 
-    - name: Download pinned AppImage tools
-      if: startsWith(matrix.os, 'ubuntu') && startsWith(matrix.runtime, 'linux-armv7l')
-      shell: bash
-      working-directory: build
-      run: |
-        set -euo pipefail
-        wget -q "https://github.com/AppImage/appimagetool/releases/download/1.9.1/appimagetool-x86_64.AppImage" -O appimagetool.AppImage
-        wget -q "https://github.com/AppImage/type2-runtime/releases/download/20251108/runtime-x86_64" -O runtime
-        wget -q "https://github.com/AppImage/type2-runtime/releases/download/20251108/runtime-armhf" -O runtime-armhf
-        sha256sum --check --strict - <<'EOF'
-        ed4ce84f0d9caff66f50bcca6ff6f35aae54ce8135408b3fa33abfc3cb384eb0  appimagetool.AppImage
-        2fca8b443c92510f1483a883f60061ad09b46b978b2631c807cd873a47ec260d  runtime
-        e9060d37577b8a29914ec12d8740add24e19ff29012fb1fa0f60daf62db0688d  runtime-armhf
-        EOF
-        chmod +x appimagetool.AppImage runtime
-
-    - name: Convert ARMv7l AppImage to static runtime and add update information
-      if: startsWith(matrix.os, 'ubuntu') && startsWith(matrix.runtime, 'linux-armv7l')
-      shell: bash
-      env:
-        VERSION: ${{ steps.getPackageInfo.outputs.version }}
-      run: |
-        cd build
-        appimage="OpenTubeX-${VERSION}-armv7l.AppImage"
-        chmod +x ./"$appimage"
-        update_information='gh-releases-zsync|OpenTubeX|OpenTubeX|latest-all|opentubex-*-armv7l.AppImage.zsync'
-        TARGET_APPIMAGE="$appimage" ./runtime --appimage-extract && rm -f ./"$appimage"
-        ARCH=armhf ./appimagetool.AppImage --comp zstd --mksquashfs-opt -Xcompression-level --mksquashfs-opt 20 \
-          --runtime-file ./runtime-armhf -u "$update_information" -n ./squashfs-root ./"$appimage"
-        rm -rf ./squashfs-root ./appimagetool.AppImage ./runtime ./runtime-armhf
-
     - name: Convert ARM64 AppImage to Anylinux AppImage
       if: startsWith(matrix.os, 'ubuntu') && startsWith(matrix.runtime, 'linux-arm64')
       shell: bash
@@ -363,18 +312,6 @@ jobs:
               "release-assets/opentubex-${VERSION}-beta.amd64.rpm"
             cp "build/opentubex-${VERSION}.pacman" \
               "release-assets/opentubex-${VERSION}-beta-amd64.pacman"
-            ;;
-          linux-armv7l)
-            cp "build/opentubex-${VERSION}-armv7l.zip" \
-              "release-assets/opentubex-${VERSION}-beta-linux-armv7l-portable.zip"
-            cp "build/opentubex-${VERSION}-armv7l.7z" \
-              "release-assets/opentubex-${VERSION}-beta-linux-armv7l-portable.7z"
-            cp "build/opentubex_${VERSION}_armv7l.deb" \
-              "release-assets/opentubex_${VERSION}_beta_armv7l.deb"
-            cp "build/OpenTubeX-${VERSION}-armv7l.AppImage" \
-              "release-assets/opentubex-${VERSION}-beta-armv7l.AppImage"
-            cp "build/OpenTubeX-${VERSION}-armv7l.AppImage.zsync" \
-              "release-assets/opentubex-${VERSION}-beta-armv7l.AppImage.zsync"
             ;;
           linux-arm64)
             cp "build/opentubex-${VERSION}-arm64.zip" \
@@ -744,7 +681,7 @@ jobs:
         GH_TOKEN: ${{ github.token }}
         RELEASE_ID: ${{ inputs.releaseId }}
       shell: bash
-      run: bash _scripts/wait-for-release-assets.sh "$RELEASE_ID" '[.]deb$' 3
+      run: bash _scripts/wait-for-release-assets.sh "$RELEASE_ID" '[.]deb$' 2
 
     - name: Trigger APT repository workflow
       env:

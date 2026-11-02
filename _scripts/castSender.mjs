@@ -9,12 +9,12 @@ const root = fileURLToPath(new URL('../', import.meta.url))
 
 export async function prepareCastSender(output = 'dist', platform = process.platform, arch = process.arch) {
   const goPlatform = { linux: 'linux', darwin: 'darwin', win32: 'windows' }[platform]
-  const goArch = { x64: 'amd64', arm64: 'arm64', arm: 'arm', armv7l: 'arm' }[arch]
+  const goArch = { x64: 'amd64', arm64: 'arm64' }[arch]
   if (!goPlatform || !goArch) throw new Error(`Unsupported Cast sender platform: ${platform}/${arch}`)
   const directory = resolve(root, output)
   const options = {
     cwd: resolve(root, '_scripts/cast-sender'),
-    env: { ...process.env, CGO_ENABLED: '0', GOOS: goPlatform, GOARCH: goArch, GOARM: '7' },
+    env: { ...process.env, CGO_ENABLED: '0', GOOS: goPlatform, GOARCH: goArch },
     timeout: 180_000
   }
   await mkdir(directory, { recursive: true })

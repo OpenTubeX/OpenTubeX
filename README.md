@@ -3,7 +3,7 @@
 </p>
 
 OpenTubeX is an open-source, highly customizable, privacy-focused YouTube client.
-It is available for Windows 10 and later, macOS 12 and later, and Linux. Android builds and experimental iOS/iPadOS builds are also available.
+It is available for Windows 10 and later, macOS 13 and later, and Linux. Android builds and experimental iOS/iPadOS builds are also available.
 
 It originated as a fork of [FreeTube](https://github.com/FreeTubeApp/FreeTube)
 and is independently developed and supported. It is not affiliated with,
@@ -191,7 +191,7 @@ RedirectTube, doesn’t automatically open YouTube links in OpenTubeX (although 
 </p>
 
 > [!NOTE]
-> OpenTubeX supports Windows 10 and later, macOS 12 and above, various Linux distributions, Android 8.0 and later, and experimental iOS/iPadOS 17.4 and later. Features differ between platforms.
+> OpenTubeX supports Windows 10 and later, macOS 13 and above, various Linux distributions, Android 8.0 and later, and experimental iOS/iPadOS 17.4 and later. Features differ between platforms.
 
 > [!CAUTION]
 > Only download OpenTubeX from the official sources listed here. Third-party download sites repackage our builds and often host outdated versions. One of them, YasDL, is on [FMHY's unsafe sites list](https://fmhy.net/unsafe) for uploading software with malware. To check a file from GitHub Releases, compare its SHA-256 checksum with the digest GitHub shows next to it on the release page.

@@ -3,7 +3,7 @@ import { createFileWatchQueue } from './watchQueue.js'
 import {
   app, BrowserWindow, dialog, Menu, ipcMain,
   powerSaveBlocker, screen, session,
-  nativeTheme, net, protocol, clipboard,
+  nativeTheme, net, protocol, clipboard, ClipboardItem,
   shell, Tray, Notification, ShareMenu, nativeImage
 } from 'electron'
 import './applicationDataBootstrap'
@@ -417,14 +417,19 @@ function runApp() {
         }
       }
 
-      const copy = (url) => {
+      const copy = async (url) => {
         if (parameters.linkText) {
-          clipboard.write({
-            bookmark: parameters.linkText,
-            text: url
-          })
+          await clipboard.write([
+            new ClipboardItem({
+              'text/plain': url,
+              'electron application/bookmark': {
+                title: parameters.linkText,
+                url,
+              },
+            })
+          ])
         } else {
-          clipboard.writeText(url)
+          await clipboard.writeText(url)
         }
       }
 
