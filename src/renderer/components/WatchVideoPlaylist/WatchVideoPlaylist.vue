@@ -97,7 +97,7 @@
             :class="{ isCollapsed: playlistCollapsed }"
           >
             <label for="playlistProgressBar">
-              {{ currentVideoIndexOneBased }} / {{ playlistVideoCount }}
+              {{ currentPlaylistPosition }} / {{ playlistVideoCount }}
             </label>
 
             <!-- eslint-disable vuejs-accessibility/mouse-events-have-key-events, vuejs-accessibility/click-events-have-key-events -->
@@ -116,7 +116,7 @@
               >
                 <div
                   class="playlistProgressBarFill"
-                  :style="{ width: (currentVideoIndexOneBased / playlistVideoCount) * 100 + '%' }"
+                  :style="{ width: (currentPlaylistPosition / playlistVideoCount) * 100 + '%' }"
                 />
                 <div
                   v-if="showProgressBarPreview"
@@ -480,6 +480,10 @@ const currentVideoIndexZeroBased = computed(() => {
 
 const currentVideoIndexOneBased = computed(() => currentVideoIndexZeroBased.value + 1)
 
+// Reversed playlists add later pages at the start, so videos still unloaded come before the loaded ones.
+const currentPlaylistPosition = computed(() => currentVideoIndexOneBased.value +
+  (reversePlaylist.value ? playlistVideoCount.value - playlistItems.value.length : 0))
+
 const currentVideo = computed(() => playlistItems.value[currentVideoIndexZeroBased.value])
 
 // Later pages load only when needed, so count them towards the progress.
@@ -601,7 +605,7 @@ const previewStyle = computed(() => ({
 }))
 
 const previewVideoTitle = computed(() => {
-  const index = previewVideoIndex.value - 1
+  const index = playlistArrayIndex(previewVideoIndex.value - 1)
 
   if (index >= 0 && index < playlistItems.value.length) {
     return playlistItems.value[index].title || 'Unknown Title'
@@ -610,7 +614,7 @@ const previewVideoTitle = computed(() => {
 })
 
 const previewVideoThumbnail = computed(() => {
-  const index = previewVideoIndex.value - 1
+  const index = playlistArrayIndex(previewVideoIndex.value - 1)
 
   if (index >= 0 && index < playlistItems.value.length) {
     const videoId = playlistItems.value[index].videoId

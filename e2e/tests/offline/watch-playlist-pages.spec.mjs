@@ -126,6 +126,8 @@ test('the progress bar of a reversed playlist shows the video it selects while p
   })
   await panel.getByRole('button', { name: 'Reverse Playlist', exact: true }).click()
   await expect(panel.locator('.playlistItem')).toHaveCount(100)
+  // The first video is the last of the reversed playlist, even before its later pages load.
+  await expect(panel.locator('.playlistIndex label')).toHaveText(`${VIDEO_COUNT} / ${VIDEO_COUNT}`)
 
   const bar = panel.locator('.playlistProgressBar')
   const box = await bar.boundingBox()
