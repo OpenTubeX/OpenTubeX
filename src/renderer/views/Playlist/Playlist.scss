@@ -175,6 +175,7 @@
     margin-inline-end: 12px;
     // Give the index badge its own column so a long Watched label cannot cover it.
     grid-template-columns: max-content minmax(0, 1fr);
+    container: playlist-thumbnail / inline-size;
 
     > * {
       grid-column: 1 / -1;
@@ -213,6 +214,13 @@
 
   :deep(.ft-list-item.list .sponsorBlockVideoLabel) {
     margin-block-start: 28px;
+  }
+
+  // Below this width the label reaches the duration's row, so keep only its icon.
+  @container playlist-thumbnail (width < 140px) {
+    :deep(.ft-list-item.list .sponsorBlockVideoLabel span) {
+      display: none;
+    }
   }
 
   // Small thumbnails fit two rows of desktop actions without changing their size.

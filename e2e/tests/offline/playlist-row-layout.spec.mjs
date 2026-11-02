@@ -139,7 +139,8 @@ for (const [uiScale, userPlaylistSortOrder] of [[100, 'date_added_descending'], 
         await thumbnail.evaluate(element => {
           const label = element.querySelector('.videoDuration').cloneNode(false)
           label.className = 'sponsorBlockVideoLabel'
-          label.textContent = 'Self-Promotion'
+          label.append(document.createElement('span'))
+          label.firstChild.textContent = 'Self-Promotion'
           element.append(label)
         })
         // A long localized Watched label must not cover the index badge.
@@ -158,20 +159,19 @@ for (const [uiScale, userPlaylistSortOrder] of [[100, 'date_added_descending'], 
             { width: 375, height: 812, mobile: true }
           ]) {
             await setWindowSize(app, page, { width, height })
-            await page.locator('.sortSelect').hover()
-            // The index badge shares the thumbnail with the other labels without covering them.
-            await expect.poll(() => thumbnail.evaluate(element => {
-              const index = element.querySelector('.playlistIndexBadge').getBoundingClientRect()
-              return [...element.querySelectorAll('.videoDuration, .videoWatched, .sponsorBlockVideoLabel')]
-                .map(badge => badge.getBoundingClientRect())
-                .every(badge => index.right <= badge.left + 0.5 || index.bottom <= badge.top + 0.5)
-            })).toBe(true)
             if (mobile) {
               await expect(actions).toHaveClass(/mobileThumbnailActions/)
               await expect(actions).toBeHidden()
               continue
             }
             await page.locator('.sortSelect').hover()
+            // The labels share the small desktop thumbnail without covering each other.
+            await expect.poll(() => thumbnail.evaluate(element => {
+              const rects = [...element.querySelectorAll('.playlistIndexBadge, .videoDuration, .videoWatched, .sponsorBlockVideoLabel')]
+                .map(badge => badge.getBoundingClientRect())
+              return rects.every((a, i) => rects.slice(i + 1).every(b =>
+                a.right <= b.left + 0.5 || b.right <= a.left + 0.5 || a.bottom <= b.top + 0.5 || b.bottom <= a.top + 0.5))
+            })).toBe(true)
             for (const badge of await badges.all()) await expect(badge).toBeVisible()
             await expect(actions).toHaveCSS('opacity', '0')
             await thumbnail.hover()
