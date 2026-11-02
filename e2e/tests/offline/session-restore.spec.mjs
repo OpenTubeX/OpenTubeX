@@ -1,6 +1,6 @@
 import { createServer } from 'node:http'
 
-import { test, expect, sel, goTo, readDatastore } from '../../helpers/app.mjs'
+import { test, expect, sel, goTo, readDatastore, INTERNET_CHECK_URL } from '../../helpers/app.mjs'
 import { mockPlayableWatchPage, mockUnplayableWatchPage, watchViewHandle } from '../../helpers/watch.mjs'
 
 const SUBSCRIPTIONS_TAB_ID = 'e2e-subscriptions-tab'
@@ -469,7 +469,17 @@ test.describe('subscriptions refresh with restored watch tabs', () => {
           activeTabId: SUBSCRIPTIONS_TAB_ID
         }
       }]
-    }
+    },
+    // The restored Watch tabs load as soon as the app starts. Reject their
+    // fake IDs offline, like YouTube does. An aborted request would count as a
+    // lost connection and keep the tabs loading until the network recovers.
+    // eslint-disable-next-line no-empty-pattern -- Playwright requires a fixture object
+    onPhase: async ({}, use) => use(async (phase, _page, electronApp) => {
+      if (phase !== 'electronConnected') return
+      await electronApp.context().route(/^https?:\/\//, route => route.request().url() === INTERNET_CHECK_URL
+        ? route.fallback()
+        : route.fulfill({ status: 404, body: '' }))
+    })
   })
 
   test('keeps loaded watch tabs idle while subscriptions refreshes', async ({ page }) => {
