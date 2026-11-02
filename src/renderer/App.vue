@@ -1784,13 +1784,17 @@ onMounted(async () => {
     await store.dispatch('setRandomCurrentInvidiousInstance')
   }
 
-  const startupInvidiousInstance = store.getters.getCurrentInvidiousInstance
-  store.dispatch('fetchInvidiousInstances').then(() => {
-    // Keep an instance chosen while the list was loading
-    if (defaultInvidiousInstance.value === '' && store.getters.getCurrentInvidiousInstance === startupInvidiousInstance) {
-      store.dispatch('setRandomCurrentInvidiousInstance')
-    }
-  })
+  // Refresh the bundled list only when a random instance will serve API requests
+  const { backendPreference, backendFallback } = store.state.settings
+  if (defaultInvidiousInstance.value === '' && (backendPreference === 'invidious' || (backendPreference === 'local' && backendFallback))) {
+    const startupInvidiousInstance = store.getters.getCurrentInvidiousInstance
+    store.dispatch('fetchInvidiousInstances').then(() => {
+      // Keep an instance chosen while the list was loading
+      if (defaultInvidiousInstance.value === '' && store.getters.getCurrentInvidiousInstance === startupInvidiousInstance) {
+        store.dispatch('setRandomCurrentInvidiousInstance')
+      }
+    })
+  }
 
   profilesReady.then(async (hasExistingProfiles) => {
     const hasExistingInstallation = tutorialState.hasExistingSettings === true || hasExistingProfiles === true
