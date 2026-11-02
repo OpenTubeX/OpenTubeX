@@ -483,7 +483,7 @@ const currentVideoIndexOneBased = computed(() => currentVideoIndexZeroBased.valu
 const currentVideo = computed(() => playlistItems.value[currentVideoIndexZeroBased.value])
 
 // Later pages load only when needed, so count them towards the progress.
-const playlistVideoCount = computed(() => canLoadMorePlaylistVideos.value
+const playlistVideoCount = computed(() => canLoadMorePlaylistVideos.value && Number.isFinite(playlistTotalVideoCount.value)
   ? Math.max(playlistItems.value.length, playlistTotalVideoCount.value)
   : playlistItems.value.length)
 
