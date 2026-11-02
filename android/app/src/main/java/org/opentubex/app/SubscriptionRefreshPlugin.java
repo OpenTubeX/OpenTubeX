@@ -173,6 +173,7 @@ public class SubscriptionRefreshPlugin extends Plugin {
         batchActive = false;
         if (waitingForNextFeed) {
             waitingForNextFeed = false;
+            awaitUploadChecks();
             SubscriptionRefreshWorker.finish(getContext(), rendererToken);
         }
         call.resolve();
@@ -319,8 +320,23 @@ public class SubscriptionRefreshPlugin extends Plugin {
         if (batchActive && token.equals(rendererToken) && SubscriptionRefreshWorker.isRendererActive(token)) {
             waitingForNextFeed = true;
         } else {
+            awaitUploadChecks();
             SubscriptionRefreshWorker.finish(getContext(), token);
         }
         call.resolve();
+    }
+
+    /**
+     * Upload checks run after the refresh reports its feeds. Let queued ones show their
+     * notifications before the refresh releases its foreground service and the process.
+     */
+    private static void awaitUploadChecks() {
+        try {
+            UPLOADS.submit(() -> {}).get();
+        } catch (InterruptedException error) {
+            Thread.currentThread().interrupt();
+        } catch (java.util.concurrent.ExecutionException error) {
+            // The empty task cannot fail.
+        }
     }
 }
