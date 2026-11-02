@@ -2,7 +2,7 @@
 category: improvement
 ---
 
-A bell in the top bar keeps your live stream reminders, new uploads, and automatic downloads. While you use OpenTubeX, they appear in the app instead of as system notifications. A new setting in General switches notifications to system only or off.
+A bell in the top bar keeps your live stream reminders, new uploads, and automatic downloads, which appear in the app instead of as system notifications while you use OpenTubeX. A new setting in General switches notifications to system only or off.
 
 <picture>
   <source media="(prefers-color-scheme: dark)" srcset="https://github.com/user-attachments/assets/f20f4ab1-5296-4db8-a930-05ca1d41242e">
