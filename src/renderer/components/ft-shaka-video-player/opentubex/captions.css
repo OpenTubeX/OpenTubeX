@@ -104,7 +104,7 @@
   flex-direction: column;
   justify-content: flex-end;
 
-  /* Shaka's caption region */
+  /* Shaka's caption region, until the caption area has been measured */
   padding: 5%;
   line-height: 1.4;
   white-space: pre-line;
