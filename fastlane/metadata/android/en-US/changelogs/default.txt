@@ -1,7 +1,7 @@
-Improvements
-• The update prompt and store listings now leave out changes that only affect other platforms.
-• Android, Desktop: Mono Audio plays both audio channels in both ears, for videos whose sound only comes out of one side of your headphones. Turn it on in Player settings, or enable Show Mono Audio Toggle to switch it from the player menu.
+Highlights
+• Focus settings have a new Digital Wellbeing tab with a grayscale mode, daily watch time and Shorts limits, break reminders, and a bedtime reminder that can silence upload notifications.
 
-Fixed bugs
-• Ending a SponsorBlock segment at the end of a video no longer fills in an end time past the video's length.
+More improvements
+• The Playlists icon in the navigation, tabs, and page headings is now outlined to match the other navigation icons.
+• Subscription groups can now have an icon, shown beside the group's name in the group tabs and the subscribe button's group list.
 …and more
