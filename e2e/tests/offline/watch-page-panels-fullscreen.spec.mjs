@@ -927,7 +927,8 @@ test.describe('fullscreen playlist dock', () => {
 
     const item = page.locator('.watchVideoPlaylist .playlistItem').first()
     await item.locator('.videoThumbnail').hover()
-    await expect(item.locator('.trashIcon')).toHaveCount(0)
+    await expect(item.locator('.videoThumbnail').getByRole('button', { name: /^Remove from/ })).toHaveCount(1)
+    await expect(item.locator('.trashIcon')).toBeVisible()
     await item.locator('.playlistItemMenu button').click()
     await expect(page.getByRole('menuitem', { name: 'Remove from playlist', exact: true })).toHaveCount(1)
     await expect(item.locator('.quickBookmarkVideoIcon')).toHaveCount(0)
@@ -1075,7 +1076,14 @@ test.describe('fullscreen playlist dock', () => {
     )
     expect(sponsorBlockBox.x + sponsorBlockBox.width).toBeLessThanOrEqual(durationBox.x)
 
-    const addToPlaylist = item.locator('.addToPlaylistIcon .iconButton')
+    // User playlist rows trade this button for one-tap removal, so use the queue's.
+    await expect(item.locator('.addToPlaylistIcon')).toHaveCount(0)
+    await page.evaluate(() => window.$store.commit('addVideoToWatchQueue', {
+      video: { videoId: 'queued00001', title: 'Queued video', author: 'Queue channel', lengthSeconds: 60 }
+    }))
+    const queueItem = page.locator('.watchQueue .queueItem').first()
+    await queueItem.locator('.videoThumbnail').hover()
+    const addToPlaylist = queueItem.locator('.addToPlaylistIcon .iconButton')
     await addToPlaylist.click()
     const dropdown = page.locator('.app > .dropdownLayer > .iconDropdown.portal')
     await expect(dropdown).toBeVisible()
