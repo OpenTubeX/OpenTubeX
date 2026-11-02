@@ -110,6 +110,7 @@ async function loadAppNetwork(t, fetch, nativeRequest, options = {}, localNetwor
     process: { env: { IS_IOS: false, IS_CAPACITOR: !!localNetworkAccess } },
     ensureAndroidLocalNetworkAccess: localNetworkAccess,
     classifyRequestFailure, createAbortError, waitForRequest, CapacitorHttp: { request: nativeRequest },
+    registerPlugin: () => ({ request: nativeRequest, abort: async () => {} }), crypto: globalThis.crypto,
     AbortController, AbortSignal, DOMException, EventTarget, CustomEvent, Request, Response, Headers, URL, URLSearchParams, setTimeout, clearTimeout,
   })
   for (const file of ['networkRecovery.js', 'api/capacitor-http.js']) {
