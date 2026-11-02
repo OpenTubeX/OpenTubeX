@@ -114,7 +114,12 @@ final class UploadNotifications {
             bodies.add(original != null ? original : upload.optString("title"));
         }
 
-        // Notifications may have been turned off during the lookup.
+        showUploads(context, channelId, feedType, uploads, bodies);
+    }
+
+    /** Holds the monitor shared with configure, so notifications turned off during the lookup stay off. */
+    private static synchronized void showUploads(Context context, String channelId, String feedType,
+        List<JSONObject> uploads, List<String> bodies) throws Exception {
         JSONObject configuration = configuration(context);
         JSONObject channel = configuredChannel(configuration, channelId, feedType);
         if (channel == null) return;

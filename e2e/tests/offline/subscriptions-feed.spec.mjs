@@ -830,7 +830,7 @@ test.describe('subscriptions feed preferring untranslated text in the entire app
     })
     const page = app.page
     await goTo(page, 'subscriptions')
-    const upcomingPremiere = page.locator('.ft-list-video').filter({ has: page.locator('a[href*="aaaaaaaaaa3"]') }).first()
+    const upcomingPremiere = page.locator('.ft-list-video').filter({ has: page.locator('a[href*="aaaaaaaaaa3"]') })
     await expect(upcomingPremiere.getByText('Upcoming premiere video', { exact: true })).toBeVisible()
     await upcomingPremiere.getByRole('button', { name: 'Notify me', exact: true }).click()
     if (release) releaseOriginalTitle()
