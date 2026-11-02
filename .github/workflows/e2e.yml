@@ -1,11 +1,14 @@
 name: E2E Tests
 
 on:
-  # Pull requests run quick checks. The merge queue runs the offline suite
-  # before each merge, and the nightly run covers everything.
+  # Pull requests run quick checks. Each push to development runs the offline
+  # suite, and the nightly run covers everything.
   pull_request:
     branches: [ master, development, '**-RC' ]
-  merge_group:
+  push:
+    branches: [ development ]
+    # Translation-only pushes, like Weblate merges, skip E2E as their PRs do.
+    paths-ignore: [ 'static/locales/**' ]
   schedule:
     # Nightly full suite, including network tests against the real YouTube servers
     - cron: '30 3 * * *'
@@ -26,48 +29,17 @@ on:
 
 permissions: {}
 
+# A newer PR push cancels the older run. Pushes to development finish their
+# run, and only the latest waiting push runs next, so one run can cover several
+# merges.
 concurrency:
-  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
-  cancel-in-progress: true
+  group: ${{ github.workflow }}-${{ github.event_name }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
 
 jobs:
-  # Merge groups that only change translations, like Weblate updates, skip
-  # E2E tests as their PRs do. The group's diff, not its branch, shows this.
-  changes:
-    name: Check for translation-only changes
-    if: ${{ github.event_name == 'merge_group' }}
-    runs-on: ubuntu-slim
-
-    outputs:
-      translations-only: ${{ steps.diff.outputs.translations-only }}
-
-    permissions:
-      contents: read
-
-    steps:
-    - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
-      with:
-        persist-credentials: false
-
-    - name: Compare with the base branch
-      id: diff
-      env:
-        BASE_SHA: ${{ github.event.merge_group.base_sha }}
-      run: |
-        git fetch --no-tags --depth=1 origin "$BASE_SHA"
-        files="$(git diff --name-only "$BASE_SHA" HEAD)"
-        if grep -qv '^static/locales/' <<< "$files"; then
-          echo 'translations-only=false' >> "$GITHUB_OUTPUT"
-        else
-          echo 'translations-only=true' >> "$GITHUB_OUTPUT"
-        fi
-      shell: bash
-
   prepare-e2e:
     name: Prepare E2E tests
-    needs: changes
-    # Run when the change check is skipped (not a merge group) or fails.
-    if: ${{ !cancelled() && needs.changes.outputs.translations-only != 'true' && (github.event_name != 'pull_request' || github.head_ref != 'weblate-translations') }}
+    if: ${{ github.event_name != 'pull_request' || github.head_ref != 'weblate-translations' }}
     runs-on: ubuntu-latest
 
     outputs:
@@ -183,8 +155,7 @@ jobs:
 
   e2e-shard:
     name: e2e (${{ matrix.project }} ${{ matrix.shard }}/${{ matrix.shardTotal }})
-    # The skipped change check outside merge groups would skip this job too.
-    if: ${{ !cancelled() && needs.prepare-e2e.result == 'success' }}
+    if: ${{ github.event_name != 'pull_request' || github.head_ref != 'weblate-translations' }}
     needs: prepare-e2e
     runs-on: ubuntu-latest
     strategy:
@@ -326,8 +297,8 @@ jobs:
 
   # Keep a stable required-check name while the test suite runs as a matrix.
   e2e:
-    if: ${{ always() && needs.changes.outputs.translations-only != 'true' && (github.event_name != 'pull_request' || github.head_ref != 'weblate-translations') }}
-    needs: [changes, e2e-shard]
+    if: ${{ always() && (github.event_name != 'pull_request' || github.head_ref != 'weblate-translations') }}
+    needs: e2e-shard
     runs-on: ubuntu-latest
     steps:
     - name: Check E2E shards

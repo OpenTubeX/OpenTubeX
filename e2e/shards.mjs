@@ -14,12 +14,12 @@ export const REPEAT_LIMIT = 100
 /**
  * Pick the projects each CI event runs.
  * - Pull requests: browser checks, changed network tests and repeated changed offline tests.
- * - Merge queue: the offline suite at 100% UI scale and browser checks.
+ * - Pushes to development: the offline suite at 100% UI scale and browser checks.
  * - Nightly, release and manual runs: every project, or the selected one.
  */
 function selectGroups(event, selectedProject) {
   if (event === 'pull_request') return { browser: SHARD_GROUPS.browser, network: SHARD_GROUPS.network }
-  if (event === 'merge_group') return { offline: ['offline'], browser: SHARD_GROUPS.browser }
+  if (event === 'push') return { offline: ['offline'], browser: SHARD_GROUPS.browser }
   const groups = selectedProject === 'all'
     ? ['offline', 'performance', 'browser', 'network']
     : selectedProject === 'offline'
