@@ -855,6 +855,7 @@ function savePosition() {
   // Pausing or disposing an unchanged tab must not overwrite another tab's progress.
   if (seconds === lastSavedPosition) return
   saveExternalMediaPosition(mediaUrl.value, seconds, duration)
+  store.dispatch('scheduleSyncServer', 'history')
   lastSavedPosition = seconds
   lastPositionSave = Date.now()
 }

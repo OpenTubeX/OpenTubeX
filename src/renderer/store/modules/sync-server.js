@@ -51,6 +51,7 @@ import {
 import { createSyncScheduler } from '../../helpers/sync-server-scheduler'
 import { isSettingSyncEnabled } from './settings'
 import { syncSubscriptionSeenVideos, syncSubscriptionSeenPosts } from '../../helpers/subscription-seen-videos'
+import { syncExternalMediaPositions } from '../../helpers/externalMediaPosition'
 import { containsWatchStatsDevice, mergeWatchStats, replaceWatchStatsDevice, persistUploadedWatchStatsReset, syncWatchStats, watchStatsDeviceDays } from '../../helpers/sync-watch-stats'
 import { areJsonValuesEqual } from '../../helpers/jsonValues'
 import { DBSettingHandlers, DBWatchStatsHandlers } from '../../../datastores/handlers/index'
@@ -305,6 +306,7 @@ async function runSync(context, { allowDataLoss = false, notifyDataLoss = true, 
   collectionCache.use(cacheIdentity)
   const previous = parseSnapshot(settings.syncServerSnapshot)
   const next = { ...previous }
+  let externalMediaBaseline = previous.externalMediaPositions
   const historyAccount = [settings.syncServerUrl, settings.syncServerToken,
     settings.syncServerPrivacyMode, settings.syncServerPrivacyKey, settings.syncServerPrivacySalt]
   const result = {}
@@ -403,7 +405,7 @@ async function runSync(context, { allowDataLoss = false, notifyDataLoss = true, 
 
   async function runStage(stage, callback) {
     assertSyncStillActive()
-    const progressStage = ['seenVideos', 'seenPosts'].includes(stage) ? 'history' : stage
+    const progressStage = ['seenVideos', 'seenPosts', 'externalMediaPositions'].includes(stage) ? 'history' : stage
     if (progressStarted) {
       commit('setSyncServerProgress', {
         stage: progressStage,
@@ -442,6 +444,16 @@ async function runSync(context, { allowDataLoss = false, notifyDataLoss = true, 
       case 'seenPosts':
         result.seenPosts = await syncSubscriptionSeenPosts(targetClient, store)
         break
+      case 'externalMediaPositions': {
+        const { synced, retryBaseline } = await syncExternalMediaPositions(
+          targetClient, externalMediaBaseline, rootGetters.getHistoryRetentionDays
+        )
+        // A conflict retry must not mistake downloaded positions for new local ones.
+        externalMediaBaseline = retryBaseline
+        next.externalMediaPositions = synced
+        result.externalMediaPositions = Object.keys(synced).length
+        break
+      }
       case 'subscriptions':
         next.subscriptions = await syncSubscriptions(
           targetClient,
@@ -574,7 +586,7 @@ async function runSync(context, { allowDataLoss = false, notifyDataLoss = true, 
       requiredCapabilities: [
         ...(stages.includes('watchStats') ? ['watch_stats'] : []),
         ...(stages.includes('liveReminders') ? ['live_reminders'] : []),
-        ...(encrypted && settings.syncServerSyncHistory ? ['seen_videos', 'seen_posts'] : []),
+        ...(encrypted && settings.syncServerSyncHistory ? ['seen_videos', 'seen_posts', 'external_media_positions'] : []),
       ],
     })
     const watchStatsSupported = encrypted && capabilities.watch_stats === 1
@@ -603,6 +615,9 @@ async function runSync(context, { allowDataLoss = false, notifyDataLoss = true, 
       }
       if (settings.syncServerSyncHistory && capabilities.seen_posts === 1) {
         stages.splice(stages.indexOf('history') + 1, 0, 'seenPosts')
+      }
+      if (settings.syncServerSyncHistory && capabilities.external_media_positions === 1) {
+        stages.splice(stages.indexOf('history') + 1, 0, 'externalMediaPositions')
       }
       if (!settings.syncServerPrivacyKey) {
         throw new Error('Reconnect and enter your privacy passphrase to enable enhanced privacy')

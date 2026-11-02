@@ -5,6 +5,22 @@ import {
 
 export { DEFAULT_WATCHED_PERCENTAGE_THRESHOLD, WATCHED_MAX_REMAINING_SECONDS }
 
+const MILLISECONDS_PER_DAY = 24 * 60 * 60 * 1000
+
+/**
+ * The oldest timestamp history retention keeps.
+ * @param {unknown} days
+ * @returns {number | null} null when history is kept forever
+ */
+export function getRetentionCutoff(days) {
+  const parsedDays = Number(days)
+  if (!Number.isInteger(parsedDays) || parsedDays < 1) {
+    return null
+  }
+
+  return Date.now() - parsedDays * MILLISECONDS_PER_DAY
+}
+
 /**
  * @param {object | undefined} historyEntry
  * @returns {boolean}

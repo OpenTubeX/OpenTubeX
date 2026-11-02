@@ -4,19 +4,9 @@ import { DBHistoryHandlers } from '../../../datastores/handlers/index'
 import { clearExternalMediaPositions, removeExternalMediaPositionsBefore } from '../../helpers/externalMediaPosition'
 import {
   canMarkHistoryEntryAsWatched,
+  getRetentionCutoff,
   migrateLegacyHistoryRecord,
 } from '../../helpers/history'
-
-const MILLISECONDS_PER_DAY = 24 * 60 * 60 * 1000
-
-function getRetentionCutoff(days) {
-  const parsedDays = Number(days)
-  if (!Number.isInteger(parsedDays) || parsedDays < 1) {
-    return null
-  }
-
-  return Date.now() - parsedDays * MILLISECONDS_PER_DAY
-}
 
 const continueWatchingCache = new WeakMap()
 // Progress and last-viewed playlist saves keep every record's identity, channel
