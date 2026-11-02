@@ -1231,6 +1231,54 @@ test('the overflow menu can turn the zoom off again', async ({ app, page, attach
   await watchComponent.dispose()
 })
 
+test('grid menu tiles that open a submenu have a folded corner', async ({ app, page, attachScreenshot }) => {
+  await openDemoVideo({ app, page })
+
+  const player = page.locator(`${activeTab} .ftVideoPlayer`)
+  await player.hover()
+  await player.getByRole('button', { name: 'More settings' }).click()
+  const overflowMenu = player.locator('.shaka-overflow-menu')
+  await expect(overflowMenu).toHaveClass(/ft-menu-grid/)
+
+  const readCorners = () => overflowMenu.locator(':scope > button:not(.shaka-hidden)').evaluateAll((buttons) => {
+    return buttons.map((button) => {
+      const label = button.querySelector(':scope > .shaka-overflow-button-label')
+      const corner = getComputedStyle(label ?? button, '::after')
+      return {
+        name: button.ariaLabel ?? label?.textContent,
+        opensSubmenu: button.getAttribute('aria-haspopup') === 'true',
+        hasCorner: label !== null && corner.content !== 'none' && corner.clipPath !== 'none',
+        position: getComputedStyle(button).position,
+        bottom: corner.bottom,
+        clipPath: corner.clipPath,
+        left: corner.left,
+        right: corner.right,
+      }
+    })
+  })
+
+  const tiles = await readCorners()
+  expect(tiles.some(tile => tile.opensSubmenu)).toBe(true)
+  expect(tiles.some(tile => !tile.opensSubmenu)).toBe(true)
+  for (const tile of tiles) {
+    expect(tile.hasCorner, tile.name).toBe(tile.opensSubmenu)
+  }
+  const submenuTiles = tiles.filter(tile => tile.opensSubmenu)
+  for (const tile of submenuTiles) {
+    expect(tile, tile.name).toMatchObject({ position: 'relative', bottom: '0px', right: '0px' })
+  }
+  await attachScreenshot('grid menu with folded corners')
+
+  // The corner follows the reading direction.
+  await page.evaluate(() => { document.body.dir = 'rtl' })
+  const rtlTiles = (await readCorners()).filter(tile => tile.opensSubmenu)
+  for (const [index, tile] of rtlTiles.entries()) {
+    expect(tile.left, tile.name).toBe('0px')
+    expect(tile.clipPath, tile.name).not.toBe(submenuTiles[index].clipPath)
+  }
+  await attachScreenshot('grid menu with folded corners, right to left')
+})
+
 test('volume boost amplifies the audio within its tab', async ({ app, page, attachScreenshot }) => {
   // The demo media is silent, so record the audio graph and multiply the gains
   // between each player's media element and the output.
@@ -1657,22 +1705,6 @@ test('video zoom can be disabled', async ({ app, page }) => {
   })
   await expect(video).toHaveCSS('transform', 'matrix(1.25, 0, 0, 1.25, 0, 0)')
   await watchComponent.dispose()
-})
-
-test('grid menu tiles leave out the submenu chevron', async ({ app, page }) => {
-  await openDemoVideo({ app, page })
-  const player = page.locator(`${activeTab} .ftVideoPlayer`)
-  await player.hover()
-  await player.getByRole('button', { name: 'More settings' }).click()
-
-  const overflowMenu = player.locator('.shaka-overflow-menu')
-  await expect(overflowMenu).toHaveClass(/ft-menu-grid/)
-  await expect(overflowMenu).toBeVisible()
-  const chevrons = await overflowMenu.locator(':scope > button > .shaka-overflow-button-label-inline').evaluateAll(labels => labels
-    .filter(label => label.checkVisibility())
-    .map(label => getComputedStyle(label, '::after').content))
-  expect(chevrons.length).toBeGreaterThan(0)
-  expect(new Set(chevrons)).toEqual(new Set(['none']))
 })
 
 test('keeps the context menu open when the pointer leaves a playing video', async ({ app, page, attachScreenshot }) => {
