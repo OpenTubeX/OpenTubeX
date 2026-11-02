@@ -15,15 +15,23 @@ test('Android draws no native horizontal page scrollbar for sub-pixel overflow',
   let settings
   try {
     await page.locator('.profileTrigger').waitFor()
+    // Android keeps fading its scrollbars if a fade is already scheduled when
+    // persistent scrollbars turn on, and never shows them again. Let fades
+    // from earlier scrolling finish, enable persistent scrollbars for the
+    // device captures below, and let the setting land before rescaling, which
+    // scrolls the page.
+    await new Promise(resolve => setTimeout(resolve, 1500))
     settings = await page.evaluate(() => {
       const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
-      // Persistent scrollbars keep Android's native page scrollbars drawn, so
-      // the check needs no timing around their fade.
-      const values = { AlwaysShowScrollbars: true, UiScale: 95 }
-      const saved = Object.fromEntries(Object.keys(values).map(key => [key, structuredClone(store.getters['get' + key])]))
-      for (const [key, value] of Object.entries(values)) store.commit('set' + key, value)
-      location.hash = '#/history'
+      const keys = ['AlwaysShowScrollbars', 'UiScale']
+      const saved = Object.fromEntries(keys.map(key => [key, structuredClone(store.getters['get' + key])]))
+      store.commit('setAlwaysShowScrollbars', true)
       return saved
+    })
+    await new Promise(resolve => setTimeout(resolve, 1500))
+    await page.evaluate(() => {
+      document.querySelector('#app').__vue_app__.config.globalProperties.$store.commit('setUiScale', 95)
+      location.hash = '#/history'
     })
     await expect.poll(() => page.evaluate(() => document.querySelector('meta[name="viewport"]').content))
       .toContain('initial-scale=0.9')
@@ -50,8 +58,7 @@ test('Android draws no native horizontal page scrollbar for sub-pixel overflow',
     assert.ok(backdrop.overflow <= 1, 'The overflow stays below a whole CSS pixel')
 
     const nativeScrollbars = async () => {
-      // Each scroll wakes the native scrollbars in case Android drew a frame
-      // before the persistent scrollbar setting arrived.
+      // Each scroll wakes the native scrollbars in case they faded.
       await page.evaluate(() => new Promise(resolve => {
         scrollTo(0, scrollY < 150 ? 200 : 100)
         requestAnimationFrame(() => requestAnimationFrame(resolve))
@@ -92,20 +99,22 @@ test('Android draws no native horizontal page scrollbar for sub-pixel overflow',
           if (column[i] > 40 && column[i] < 230 && Math.abs(column[i] - column[i + 1]) < 3 &&
             Math.abs(column[i] - column[i + 2]) < 3) vertical++
         }
-        return { backdrop: top < canvas.height, horizontal, vertical }
+        return { backdrop: top < canvas.height, rows, horizontal, vertical }
       }, { png, height: backdrop.height })
     }
 
-    // Wait until Android draws its persistent vertical page scrollbar. Its
-    // horizontal scroll range can update a few frames later, so keep checking
-    // for a while: a horizontal scrollbar tints whole backdrop rows.
-    await expect.poll(async () => {
-      const { backdrop, vertical } = await nativeScrollbars()
-      return backdrop && vertical > 20
-    }, { message: 'Android draws the vertical page scrollbar above the backdrop', timeout: 15000 }).toBe(true)
+    // Only a capture that shows the vertical scrollbar and the backdrop proves
+    // anything, so wait for one before each check. The horizontal scroll range
+    // can update a few frames later, so keep checking for a while: a
+    // horizontal scrollbar tints whole backdrop rows.
     for (let check = 0; check < 6; check++) {
+      let scrollbars
+      await expect.poll(async () => {
+        scrollbars = await nativeScrollbars()
+        return scrollbars.backdrop && scrollbars.rows > 0 && scrollbars.vertical > 20
+      }, { message: 'Android draws the vertical page scrollbar above the backdrop', timeout: 15000 }).toBe(true)
+      assert.equal(scrollbars.horizontal, 0, 'No native horizontal page scrollbar')
       await new Promise(resolve => setTimeout(resolve, 250))
-      assert.equal((await nativeScrollbars()).horizontal, 0, 'No native horizontal page scrollbar')
     }
   } finally {
     await page.evaluate(({ settings, originalRoute }) => {
