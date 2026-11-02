@@ -1191,8 +1191,8 @@ export default defineComponent({
     aiVideoSummaryMode: function () {
       return this.$store.getters.getAiVideoSummaryMode
     },
-    hideVideoDescription: function () {
-      return this.$store.getters.getHideVideoDescription
+    videoDescriptionMode: function () {
+      return this.$store.getters.getVideoDescriptionMode
     },
     showFamilyFriendlyOnly: function () {
       return this.$store.getters.getShowFamilyFriendlyOnly

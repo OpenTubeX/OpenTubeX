@@ -93,6 +93,47 @@ test.describe('watch page', () => {
     await watchComponent.dispose()
   })
 
+  test('follows the Video descriptions setting', async ({ app, page }, testInfo) => {
+    await mockPlayableWatchPage(app, page)
+    await openMockedVideo(page)
+
+    const component = await page.evaluateHandle(findWatchComponent)
+    const setMode = mode => component.evaluate(async (component, mode) => {
+      await component.proxy.$store.dispatch('updateVideoDescriptionMode', mode)
+      await component.proxy.$nextTick()
+    }, mode)
+    await component.evaluate(async component => {
+      const view = component.proxy
+      view.videoDescription = Array(30).fill('Long description').join('\n')
+      view.videoDescriptionHtml = ''
+      await view.$nextTick()
+    })
+
+    const description = page.locator(`${activeTab} .videoDescription`)
+    const expandControl = description.locator(':scope > .descriptionStatus')
+    await expect(expandControl).toHaveAttribute('aria-expanded', 'false')
+
+    await setMode('expanded')
+    await expect(expandControl).toHaveAttribute('aria-expanded', 'true')
+    await expect(description).not.toHaveClass(/short/)
+    await description.screenshot({ path: testInfo.outputPath('expanded-description.png') })
+    // Expanded descriptions can still be collapsed.
+    await expandControl.click()
+    await expect(expandControl).toHaveAttribute('aria-expanded', 'false')
+
+    await setMode('hide')
+    await expect(description).toHaveCount(0)
+
+    // A description shown with the setting already expanded starts expanded.
+    await setMode('expanded')
+    await expect(expandControl).toHaveAttribute('aria-expanded', 'true')
+
+    await setMode('collapsed')
+    await expect(expandControl).toHaveAttribute('aria-expanded', 'false')
+    await expect(description).toHaveClass(/short/)
+    await component.dispose()
+  })
+
   test('clamps the Shorts panel when an AI summary collapses, changes, or is hidden', async ({ app, page }) => {
     await mockPlayableWatchPage(app, page)
     await openMockedVideo(page)

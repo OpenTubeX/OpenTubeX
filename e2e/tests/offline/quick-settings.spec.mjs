@@ -1067,13 +1067,13 @@ const EXPANDED_QUICK_SETTINGS = [
   ['useQuickPlaybackSpeedBar', 'Playback'],
   ['musicVisualizer', 'Playback'],
   ['aiVideoSummaryMode', 'Content'],
+  ['videoDescriptionMode', 'Content'],
   ['hideWatchedSubs', 'Content'],
   ['hideVideoViews', 'Content'],
   ['hideVideoLikesAndDislikes', 'Content'],
   ['hideChannelAvatars', 'Content'],
   ['hideLiveStreams', 'Content'],
   ['hideUpcomingPremieres', 'Content'],
-  ['hideVideoDescription', 'Content'],
   ['hideChapters', 'Content'],
   ['showDistractionFreeTitles', 'Content'],
   ['useAiSlopList', 'Content'],
@@ -1126,6 +1126,7 @@ test.describe('expanded quick settings catalog', () => {
     await expect(page.locator('html')).toHaveAttribute('data-reduced-motion', 'reduce')
     await choose('toastPosition', 'Toast Position', 'Top right')
     await choose('aiVideoSummaryMode', 'AI video summaries', 'Expanded')
+    await choose('videoDescriptionMode', 'Video descriptions', 'Hide')
     await choose('secColor', 'Secondary Color Theme', 'Green')
     await menu.locator('[data-setting-id="secColor"]').scrollIntoViewIfNeeded()
     await attachScreenshot('new appearance and playback controls')
@@ -1136,6 +1137,7 @@ test.describe('expanded quick settings catalog', () => {
       reducedMotion: 'on',
       toastPosition: 'top-right',
       aiVideoSummaryMode: 'expanded',
+      videoDescriptionMode: 'hide',
       secColor: 'Green',
     }
     await expect.poll(() => {

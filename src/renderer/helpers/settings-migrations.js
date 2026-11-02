@@ -1,7 +1,11 @@
 import { navigationItemsFromLegacySettings } from '../../navigationItems.js'
 import { DEFAULT_QUICK_SETTINGS } from './quickSettings.js'
 
-import { FORMER_CHANNEL_SETTING_SWITCHES, isFormerDefaultQuickSettings } from '../../datastores/settingsMigrations.js'
+import {
+  FORMER_CHANNEL_SETTING_SWITCHES,
+  isFormerDefaultQuickSettings,
+  migrateVideoDescriptionSettingId,
+} from '../../datastores/settingsMigrations.js'
 
 export function migrateSyncServerUrl(value) {
   if (typeof value !== 'string') return value
@@ -122,6 +126,15 @@ export function migrateLegacySettings(settings) {
     delete migratedSettings.hideAiVideoSummaries
   }
 
+  if (Object.hasOwn(migratedSettings, 'hideVideoDescription')) {
+    if (!Object.hasOwn(migratedSettings, 'videoDescriptionMode')) {
+      migratedSettings.videoDescriptionMode = migratedSettings.hideVideoDescription === true
+        ? 'hide'
+        : 'collapsed'
+    }
+    delete migratedSettings.hideVideoDescription
+  }
+
   // Saved channel settings are always applied now. Automatic saving only ran
   // while its former switch was on, so it stays off for switches that were off.
   for (const [rememberKey, autoUpdateKey] of FORMER_CHANNEL_SETTING_SWITCHES) {
@@ -134,6 +147,8 @@ export function migrateLegacySettings(settings) {
 
   if (isFormerDefaultQuickSettings(migratedSettings.quickSettings)) {
     migratedSettings.quickSettings = [...DEFAULT_QUICK_SETTINGS]
+  } else if (Object.hasOwn(migratedSettings, 'quickSettings')) {
+    migratedSettings.quickSettings = migrateVideoDescriptionSettingId(migratedSettings.quickSettings)
   }
 
   return migratedSettings

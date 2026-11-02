@@ -1405,6 +1405,7 @@ Settings:
     Hide: Amaga
     Collapsed: Replegats
     Expanded: Desplegats
+    Video Descriptions: Descripcions dels vídeos
     Playing Interface Hide Delay: Retard per amagar la interfície durant la reproducció
     Hide Startup Splash: Amaga la pantalla d’inici
     Hide Header Sync Indicator: Amaga l’indicador de sincronització de la capçalera de l’aplicació
@@ -1421,7 +1422,6 @@ Settings:
     Shorten View Counts: Abreuja els recomptes de visualitzacions, de comentaris i de m'agrades dels comentaris
     Hide Home: Oculta l'inici
     Hide Live Chat Replay: Oculta la repetició del xat en directe
-    Hide Video Description: Oculta la descripció del vídeo
     Hide Comments: Oculta els comentaris
     Hide Profile Pictures in Comments: Oculta les imatges de perfil als comentaris
     Display Titles Without Excessive Capitalisation: Mostra els títols sense majúscules ni puntuació excessives
