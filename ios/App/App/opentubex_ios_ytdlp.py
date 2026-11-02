@@ -25,6 +25,17 @@ class _QuietLogger:
         self.last_error = message
 
 
+class _ExtractionLogger(_QuietLogger):
+    """Keeps warnings, which explain missing formats, for the renderer."""
+
+    def __init__(self):
+        super().__init__()
+        self.warnings = []
+
+    def warning(self, message):
+        self.warnings.append(f'WARNING: {message}')
+
+
 # Like Android's YtDlpArguments, only media options cross the bridge. yt-dlp
 # also accepts abbreviations and options that write files outside staging.
 # iOS also accepts -x and --concat-playlist, which its staging export supports.
@@ -75,6 +86,7 @@ def _option(args, name, default=None):
 def _extract(request):
     args = request['args']
     url = args[-1]
+    logger = _ExtractionLogger()
     options = {
         'ignoreconfig': True,
         'noplaylist': '--flat-playlist' not in args,
@@ -90,7 +102,7 @@ def _extract(request):
         'subtitlesformat': _option(args, '--sub-format', 'vtt'),
         'quiet': True,
         'no_warnings': True,
-        'logger': _QuietLogger(),
+        'logger': logger,
     }
     if _option(args, '--format'):
         options['format'] = _option(args, '--format')
@@ -119,7 +131,8 @@ def _extract(request):
             info['storyboard'] = {key: storyboard.get(key) for key in (
                 'protocol', 'width', 'height', 'fps', 'rows', 'columns',
                 'fragments', 'http_headers')}
-    return {'stdout': json.dumps(info, ensure_ascii=False), 'incomplete': False}
+    return {'stdout': json.dumps(info, ensure_ascii=False),
+            'stderr': '\n'.join(logger.warnings), 'incomplete': False}
 
 
 def _download(request):

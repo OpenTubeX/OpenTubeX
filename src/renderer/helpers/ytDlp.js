@@ -59,8 +59,8 @@ async function extract(args, useAuthentication = false, externalMedia = false, p
     ? store.getters.getYtDlpPlaybackCookiesPath
     : ''
   if (useAuthentication && !cookies) throw new Error('yt-dlp playback authentication is not configured')
-  const { stdout, incomplete } = await native.extract({ args, cookies, externalMedia, detectTimeoutWarnings, ...(timeoutMs === undefined ? {} : { timeoutMs }) })
-  const info = parse(stdout)
+  const { stdout, stderr, incomplete } = await native.extract({ args, cookies, externalMedia, detectTimeoutWarnings, ...(timeoutMs === undefined ? {} : { timeoutMs }) })
+  const info = detectTimeoutWarnings ? parse(stdout, stderr ?? '') : parse(stdout)
   if (detectTimeoutWarnings) info.incomplete = incomplete === true
   return info
 }
@@ -236,6 +236,7 @@ const capacitor = {
       return {
         version: binaries.ytDlp.version,
         incomplete: info.incomplete === true,
+        noFormatsReason: toNonEmptyString(info.noFormatsReason),
         title: toNonEmptyString(info.title),
         description: toNonEmptyString(info.description),
         uploader: toNonEmptyString(info.uploader),

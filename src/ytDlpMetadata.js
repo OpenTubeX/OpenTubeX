@@ -109,10 +109,26 @@ export function parseYtDlpPlaybackInfo(stdout, stderr = '') {
   if (timeoutWarnings.some(warning => !/\bRetrying \(\d+\/\d+\)/i.test(warning))) {
     media.incomplete = true
   }
+  const noFormatsReason = getNoFormatsReason(stderr)
+  if (noFormatsReason) media.noFormatsReason = noFormatsReason
   const storyboard = [media, ...additional]
     .find(info => info?.storyboard?.protocol === 'mhtml')?.storyboard
   if (storyboard) media.storyboard = storyboard
   return media
+}
+
+/**
+ * --ignore-no-formats-error turns an extractor's explanation for missing
+ * formats, such as "There is no video in this post", into a warning. yt-dlp
+ * follows it with its own unprefixed warning; extractor warnings carry their name.
+ * @param {string} stderr
+ */
+function getNoFormatsReason(stderr) {
+  const lines = stderr.split(/\r?\n/).map(line => line.trim())
+  const end = lines.findIndex(line => /^WARNING: (?:No video formats found!|This video is DRM protected)$/.test(line))
+  if (end === -1) return null
+  if (lines[end].endsWith('DRM protected')) return lines[end].slice('WARNING: '.length)
+  return lines.slice(0, end).findLast(line => /^WARNING: \[[^\]]+\] /.test(line))?.slice('WARNING: '.length) ?? null
 }
 
 /**

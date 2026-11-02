@@ -47,6 +47,20 @@ test('accepts metadata after a yt-dlp timeout that was retried successfully', ()
   assert.deepEqual(parseYtDlpPlaybackInfo(`${JSON.stringify(complete)}\n`, stderr), complete)
 })
 
+test('keeps the extractor reason for missing formats', () => {
+  const media = { title: 'Post', formats: [] }
+  const stderr = [
+    'WARNING: [Instagram] abc123: No CSRF token set by Instagram API',
+    'WARNING: [Instagram] There is no video in this post',
+    'WARNING: No video formats found!',
+    'WARNING: Requested format is not available'
+  ].join('\n')
+
+  assert.deepEqual(parseYtDlpPlaybackInfo(`${JSON.stringify(media)}\n`, stderr), { ...media, noFormatsReason: '[Instagram] There is no video in this post' })
+  assert.equal(parseYtDlpPlaybackInfo(`${JSON.stringify(media)}\n`, 'WARNING: This video is DRM protected').noFormatsReason, 'This video is DRM protected')
+  assert.equal(parseYtDlpPlaybackInfo(`${JSON.stringify(media)}\n`, 'WARNING: No video formats found!').noFormatsReason, undefined)
+})
+
 test('builds seekbar thumbnails from the highest-resolution yt-dlp storyboard', () => {
   const formats = [
     {

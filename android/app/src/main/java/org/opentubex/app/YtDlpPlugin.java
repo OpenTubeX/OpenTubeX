@@ -20,7 +20,6 @@ import java.util.*;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeoutException;
-import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.Consumer;
 
 @CapacitorPlugin(name = "YtDlp")
@@ -165,11 +164,10 @@ public final class YtDlpPlugin extends Plugin {
                 }
                 args.add("--simulate");
                 boolean detectTimeoutWarnings = call.getBoolean("detectTimeoutWarnings", false);
-                AtomicBoolean incomplete = new AtomicBoolean();
+                YtDlpRuntime.ErrorOutput errors = new YtDlpRuntime.ErrorOutput();
                 String stdout = deadline == 0
-                    ? YtDlpRuntime.extract(getContext(), args, detectTimeoutWarnings ? incomplete : null)
-                    : YtDlpRuntime.extractBeforeDeadline(() -> YtDlpRuntime.execute(getContext(), args, null, null,
-                        detectTimeoutWarnings ? incomplete : null), deadline);
+                    ? YtDlpRuntime.extract(getContext(), args, errors)
+                    : YtDlpRuntime.extractBeforeDeadline(() -> YtDlpRuntime.execute(getContext(), args, null, null, errors), deadline);
                 if (externalMedia) {
                     File cookieFile = temporaryCookies == null ? new File(cookies) : temporaryCookies;
                     String extractedCookies;
@@ -202,7 +200,8 @@ public final class YtDlpPlugin extends Plugin {
                     }
                     ExternalStreamRequestRegistry.shared().register(requests, extractedCookies);
                 }
-                return new JSONObject().put("stdout", stdout).put("incomplete", incomplete.get());
+                return new JSONObject().put("stdout", stdout).put("stderr", errors.message())
+                    .put("incomplete", detectTimeoutWarnings && errors.timedOut);
             } finally {
                 if (temporaryCookies != null) temporaryCookies.delete();
             }

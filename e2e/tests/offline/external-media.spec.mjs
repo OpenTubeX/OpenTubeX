@@ -2579,6 +2579,30 @@ test('shows a recoverable extraction error in the player area', async ({ app, pa
   await expect(state).toContainText('HTTP Error 503: Service Unavailable')
 })
 
+test('shows the extractor reason when external media has no formats', async ({ app, page }, testInfo) => {
+  test.skip(process.platform === 'win32', 'The fake yt-dlp executable uses a POSIX shell')
+
+  const executable = path.join(app.userDataDir, 'external-media-no-formats.sh')
+  await writeFile(executable, [
+    '#!/bin/sh',
+    'if [ "$1" = "--version" ]; then printf "%s\\n" "2026.09.01"; exit; fi',
+    'printf "%s\\n" "WARNING: [Instagram] example: No CSRF token set by Instagram API" "WARNING: [Instagram] There is no video in this post" "WARNING: No video formats found!" "WARNING: Requested format is not available" >&2',
+    `printf '%s\\n' '${JSON.stringify({ title: 'Example post', formats: [] })}'`
+  ].join('\n'))
+  await chmod(executable, 0o755)
+  await page.evaluate(async (ytDlpPath) => {
+    const store = window.$store
+    await store.dispatch('updateYtDlpSource', 'system')
+    await store.dispatch('updateYtDlpPath', ytDlpPath)
+  }, executable)
+
+  await page.locator(sel.searchInput).fill('https://www.instagram.com/p/example/')
+  await page.locator(sel.searchInput).press('Enter')
+  const diagnostic = page.locator(`${activeTab} .externalMediaError .externalMediaDiagnostic`)
+  await expect(diagnostic).toHaveText('[Instagram] There is no video in this post')
+  await page.locator(`${activeTab} .externalMediaError`).screenshot({ path: testInfo.outputPath('external-media-no-formats.png') })
+})
+
 test('plays a progressive external format when yt-dlp omits codec fields', async ({ app, page }) => {
   test.skip(process.platform === 'win32', 'The fake yt-dlp executable uses a POSIX shell')
 
