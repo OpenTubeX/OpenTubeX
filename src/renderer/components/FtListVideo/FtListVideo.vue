@@ -2218,8 +2218,10 @@ function openInExternalPlayer() {
 
 /**
  * Opens the collaborators prompt for collaboration videos, or the single
- * channel otherwise. A middle click opens that channel in a background tab
- * like the regular channel link.
+ * channel otherwise. In Electron, a middle click opens that channel in a
+ * background tab like the regular channel link. Elsewhere a new tab can't be
+ * opened reliably after the lookup, so a middle click shows the prompt instead
+ * of navigating the current tab.
  * @param {MouseEvent} event
  */
 async function openChannelByline(event) {
@@ -2244,12 +2246,12 @@ async function openChannelByline(event) {
     }
 
     channelCollaborators.value = collaborators
+    const isMiddleClick = event?.type === 'auxclick'
 
-    if (channelCollaborators.value.length > 1) {
+    if (channelCollaborators.value.length > 1 || (channelCollaborators.value.length === 1 && isMiddleClick && !process.env.IS_ELECTRON)) {
       showCollaboratorsPrompt.value = true
     } else if (channelCollaborators.value.length === 1) {
       const { id: collaboratorId, name } = channelCollaborators.value[0]
-      const isMiddleClick = event?.type === 'auxclick'
       openInternalPath({
         path: `/channel/${collaboratorId}`,
         title: name,
