@@ -325,19 +325,20 @@ const mutations = {
   },
 
   removeFromHistoryCacheById(state, videoId) {
-    for (let i = 0; i < state.historyCacheSorted.length; i++) {
-      if (state.historyCacheSorted[i].videoId === videoId) {
-        state.historyCacheSorted.splice(i, 1)
-        break
-      }
+    // Like upsertToHistoryCache, edit the raw array and publish it once.
+    const history = toRaw(state.historyCacheSorted)
+    const i = history.findIndex(record => record.videoId === videoId)
+    if (i !== -1) {
+      state.historyCacheSorted = history.slice(0, i).concat(history.slice(i + 1))
     }
 
     delete state.historyCacheById[videoId]
   },
 
   removeMultipleFromHistoryCache(state, videoIds) {
+    // Filtering through the proxy would store reactive proxies in the raw array.
     const videoIdSet = new Set(videoIds)
-    state.historyCacheSorted = state.historyCacheSorted.filter(record => !videoIdSet.has(record.videoId))
+    state.historyCacheSorted = toRaw(state.historyCacheSorted).filter(record => !videoIdSet.has(record.videoId))
 
     for (const videoId of videoIds) {
       delete state.historyCacheById[videoId]

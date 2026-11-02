@@ -2,7 +2,7 @@ import assert from 'node:assert/strict'
 import { readFileSync } from 'node:fs'
 import test from 'node:test'
 import vm from 'node:vm'
-import { computed, effectScope, nextTick, ref, watch } from 'vue'
+import { computed, effectScope, isProxy, nextTick, ref, toRaw, watch } from 'vue'
 import { createStore } from 'vuex'
 import * as videoCounts from '../../src/renderer/helpers/playlist-video-counts.js'
 import { playlistKey, sortUserPlaylists, USER_PLAYLISTS_SORT_BY_OPTIONS } from '../../src/renderer/helpers/playlists.js'
@@ -18,7 +18,7 @@ function withoutImports(code) {
 function playlistStore(playlists) {
   const module = vm.runInNewContext(
     withoutImports(source('store/modules/playlists.js')).replace('export default', 'const module =') + '\nmodule',
-    { ...videoCounts }
+    { ...videoCounts, toRaw }
   )
   module.state.targetId = 'favorites'
   module.getters.getQuickBookmarkTargetPlaylistId = state => state.targetId
@@ -190,4 +190,31 @@ test('bulk playlist deletion updates membership and preserves protected and unse
   assert.deepEqual(Array.from(store.state.playlists, playlist => playlist._id), ['keep', 'protected'])
   assert.equal(store.getters.getPlaylistVideoCounts.get('shared'), 2)
   assert.equal(store.getters.getPlaylistVideoCounts.has('gone'), false)
+})
+
+test('playlist edits publish plain video lists without rewriting the previous ones', () => {
+  const videos = Array.from({ length: 1000 }, (_, index) => ({ videoId: `video-${index}`, playlistItemId: `item-${index}` }))
+  const store = playlistStore([{ _id: 'favorites', videos }, { _id: 'other', videos: [] }])
+  const rawPlaylists = () => toRaw(store.state.playlists)
+  const rawVideos = () => toRaw(rawPlaylists()[0].videos)
+  const assertPlain = () => {
+    assert.equal(rawPlaylists().filter(isProxy).length, 0)
+    assert.equal(rawVideos().filter(isProxy).length, 0)
+  }
+
+  store.commit('addVideo', { _id: 'favorites', addVideosToTop: true, videoData: { videoId: 'top', playlistItemId: 'top' }, lastUpdatedAt: 1 })
+  // Unshifting through the proxy would have rewritten every index of this list.
+  assert.equal(videos.length, 1000)
+  assert.equal(videos[0].videoId, 'video-0')
+  assert.equal(rawVideos()[0].videoId, 'top')
+  assertPlain()
+  store.commit('addVideos', { _id: 'favorites', videos: [{ videoId: 'bottom', playlistItemId: 'bottom' }], lastUpdatedAt: 2 })
+  assert.equal(rawVideos().at(-1).videoId, 'bottom')
+  assertPlain()
+  store.commit('removeVideo', { _id: 'favorites', playlistItemId: 'item-0', lastUpdatedAt: 3 })
+  assert.equal(rawVideos().length, 1001)
+  assertPlain()
+  store.commit('removePlaylists', ['other'])
+  assert.deepEqual(rawPlaylists().map(playlist => playlist._id), ['favorites'])
+  assertPlain()
 })

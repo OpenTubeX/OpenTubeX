@@ -2,7 +2,7 @@ import assert from 'node:assert/strict'
 import { readFile } from 'node:fs/promises'
 import test from 'node:test'
 import { compileFunction } from 'node:vm'
-import { toRaw } from 'vue'
+import { isProxy, toRaw } from 'vue'
 import { createStore } from 'vuex'
 import { getContinueWatchingCandidates } from '../../src/renderer/helpers/homeSections.js'
 import { canMarkHistoryEntryAsWatched } from '../../src/history.js'
@@ -94,4 +94,24 @@ test('a newer watch time for the newest entry updates it in place', () => {
   assert.deepEqual(sorted.map(entry => [entry.videoId, entry.timeWatched]), [['newest', 2000], ['older', 1000]])
   store.commit('upsertToHistoryCache', { ...entries[1], timeWatched: 3000 })
   assert.deepEqual(toRaw(store.state.history.historyCacheSorted).map(entry => entry.videoId), ['older', 'newest'])
+})
+
+test('removals publish a plain history list without rewriting the previous one', () => {
+  const store = fixture()
+  const entries = Array.from({ length: 1000 }, (_, index) => video(`video-${index}`))
+  store.commit('setHistoryCacheSorted', entries)
+  store.commit('setHistoryCacheById', Object.fromEntries(entries.map(entry => [entry.videoId, entry])))
+  const sorted = () => toRaw(store.state.history.historyCacheSorted)
+
+  store.commit('removeFromHistoryCacheById', 'video-0')
+  // Splicing through the proxy would have shifted every remaining index.
+  assert.equal(entries.length, 1000)
+  assert.equal(sorted().length, 999)
+  assert.equal(sorted()[0].videoId, 'video-1')
+  assert.equal(store.state.history.historyCacheById['video-0'], undefined)
+
+  store.commit('removeMultipleFromHistoryCache', ['video-1', 'video-999'])
+  assert.deepEqual([sorted().length, sorted()[0].videoId, sorted().at(-1).videoId], [997, 'video-2', 'video-998'])
+  assert.equal(sorted().filter(isProxy).length, 0)
+  assert.equal(store.state.history.historyCacheById['video-999'], undefined)
 })

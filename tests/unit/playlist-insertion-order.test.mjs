@@ -7,10 +7,11 @@ import { SqliteDatastore } from '../../src/datastores/sqlite.js'
 import { createNodeSqliteDriver } from '../../src/datastores/sqliteNode.js'
 import { DBActions, IpcChannels, PlaylistVideoAddResult, SyncEvents } from '../../src/constants.js'
 import { incrementPlaylistVideoCounts } from '../../src/renderer/helpers/playlist-video-counts.js'
+import { toRaw } from 'vue'
 
 const source = await readFile(new URL('../../src/datastores/handlers/base.js', import.meta.url), 'utf8')
 const storeSource = await readFile(new URL('../../src/renderer/store/modules/playlists.js', import.meta.url), 'utf8')
-const mutations = vm.runInNewContext(storeSource.slice(storeSource.indexOf('const mutations ='), storeSource.indexOf('\nexport default')) + '\nmutations', { incrementPlaylistVideoCounts })
+const mutations = vm.runInNewContext(storeSource.slice(storeSource.indexOf('const mutations ='), storeSource.indexOf('\nexport default')) + '\nmutations', { incrementPlaylistVideoCounts, toRaw })
 const componentSource = await readFile(new URL('../../src/renderer/components/PlaylistInfo/PlaylistInfo.vue', import.meta.url), 'utf8')
 const refreshSource = componentSource.slice(componentSource.indexOf('async function addMissingVideos()'), componentSource.indexOf('async function savePlaylistInfo()'))
 const mainSource = await readFile(new URL('../../src/main/index.js', import.meta.url), 'utf8')

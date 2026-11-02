@@ -1,3 +1,4 @@
+import { toRaw } from 'vue'
 import { applyPlaylistRepairUpdate } from '../../../playlistRepair'
 import { PlaylistVideoAddResult } from '../../../constants'
 import { DBPlaylistHandlers } from '../../../datastores/handlers/index'
@@ -580,7 +581,8 @@ function dropPlaylistVideos(state, playlist, matches) {
   const removed = []
   const kept = []
 
-  for (const video of playlist.videos) {
+  // Iterating the proxy would store reactive proxies in the new raw array.
+  for (const video of toRaw(playlist.videos)) {
     (matches(video) ? removed : kept).push(video)
   }
 
@@ -628,7 +630,8 @@ const mutations = {
     const playlist = state.playlists.find(playlist => playlist._id === payload._id)
     if (playlist) {
       if (payload.addVideosToTop === true) {
-        playlist.videos.unshift(payload.videoData)
+        // Unshifting through the proxy would trigger every index it shifts.
+        playlist.videos = [payload.videoData, ...toRaw(playlist.videos)]
       } else {
         playlist.videos.push(payload.videoData)
       }
@@ -640,9 +643,10 @@ const mutations = {
   addVideos(state, payload) {
     const playlist = state.playlists.find(playlist => playlist._id === payload._id)
     if (playlist) {
+      const videos = toRaw(playlist.videos)
       playlist.videos = payload.addVideosToTop === true
-        ? payload.videos.concat(playlist.videos)
-        : playlist.videos.concat(payload.videos)
+        ? payload.videos.concat(videos)
+        : videos.concat(payload.videos)
       playlist.lastUpdatedAt = payload.lastUpdatedAt
       incrementPlaylistVideoCounts(state.playlistVideoCounts, payload.videos)
     }
@@ -699,7 +703,7 @@ const mutations = {
       }
     }
 
-    state.playlists = state.playlists.filter(isKept)
+    state.playlists = toRaw(state.playlists).filter(isKept)
   },
 
   setAllPlaylists(state, payload) {
