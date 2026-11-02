@@ -1038,6 +1038,34 @@ class Playlists {
     throw new Error(`Unable to add videos to playlist ${_id}: repeated concurrent changes`)
   }
 
+  /**
+   * Puts the given entries into the given order, in the positions they hold
+   * now. Entries added since the order was taken keep their positions, and
+   * removed ones stay removed.
+   * @param {string} _id
+   * @param {number} lastUpdatedAt
+   * @param {string[]} playlistItemIds
+   * @returns {Promise<object[] | null>} the saved videos, or null when the playlist is gone
+   */
+  static async reorderVideos(_id, lastUpdatedAt, playlistItemIds) {
+    const order = new Map(playlistItemIds.map((id, index) => [id, index]))
+    // Retry if another window changes the playlist between reading and saving it.
+    for (let attempt = 0; attempt < 5; attempt++) {
+      const playlist = await db.playlists.findOneAsync({ _id })
+      if (!playlist) return null
+      const moved = playlist.videos.filter(video => order.has(video.playlistItemId))
+        .sort((a, b) => order.get(a.playlistItemId) - order.get(b.playlistItemId))
+      let next = 0
+      const videos = playlist.videos.map(video => order.has(video.playlistItemId) ? moved[next++] : video)
+      const { numAffected } = await db.playlists.updateAsync(
+        { _id, $where() { return Playlists._sameVideoEntries(this.videos, playlist.videos) } },
+        { $set: { videos, lastUpdatedAt } }
+      )
+      if (numAffected > 0) return videos
+    }
+    throw new Error(`Unable to reorder playlist ${_id}: repeated concurrent changes`)
+  }
+
   static delete(_id) {
     return db.playlists.removeAsync({ _id, protected: { $ne: true } })
   }

@@ -1098,6 +1098,42 @@ test.describe('custom playlist order', () => {
     })
   }
 
+  test('a drag keeps a video added to the playlist during the drag', async ({ app, page }) => {
+    await dispatchStoreAction(page, 'updatePlaylistViewType', 'list')
+    await goTo(page, 'userplaylists')
+    await page.getByText('Large custom playlist').click()
+    const titles = page.locator('.playlistItemsCard [data-playlist-drag-item] .h3Title')
+    await expect(titles.first()).toHaveText('Custom playlist video 1')
+
+    await page.evaluate(async () => {
+      const row = index => document.querySelectorAll('.playlistItemsCard [data-playlist-drag-item]')[index]
+      const dataTransfer = new DataTransfer()
+      const fire = (element, type) => element.dispatchEvent(new DragEvent(type, { bubbles: true, cancelable: true, dataTransfer }))
+      const source = row(0)
+      fire(source, 'dragstart')
+      await new Promise(resolve => requestAnimationFrame(() => requestAnimationFrame(resolve)))
+      fire(row(1), 'dragenter')
+      // Another window adds a video while the drag is still in progress
+      await window.$store.dispatch('addVideo', {
+        _id: 'large-custom-playlist',
+        videoData: { videoId: 'addedduring', title: 'Added during the drag', author: 'Test Channel', authorId: 'UC-test-channel-id', lengthSeconds: 60 }
+      })
+      fire(source, 'dragend')
+    })
+
+    await expect(titles.first()).toHaveText('Custom playlist video 2')
+    const expected = ['Custom playlist video 2', 'Custom playlist video 1', 'Custom playlist video 3']
+    await expect.poll(() => page.evaluate(() => {
+      const { videos } = window.$store.getters.getPlaylist('large-custom-playlist')
+      return [videos.length, ...videos.slice(0, 3).map(video => video.title), videos.at(-1).title]
+    })).toEqual([102, ...expected, 'Added during the drag'])
+    await expect.poll(async () => {
+      const { videos } = readDatastore(app.userDataDir, 'playlists').trim().split('\n').map(line => JSON.parse(line))
+        .find(playlist => playlist._id === 'large-custom-playlist')
+      return [videos.length, ...videos.slice(0, 3).map(video => video.title), videos.at(-1).title]
+    }).toEqual([102, ...expected, 'Added during the drag'])
+  })
+
   test('touch honors a fast final destination before release', async ({ page }) => {
     await page.setViewportSize({ width: 430, height: 1000 })
     await dispatchStoreAction(page, 'updatePlaylistViewType', 'list')

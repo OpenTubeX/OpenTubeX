@@ -261,6 +261,10 @@ class Playlists {
     })
   }
 
+  static reorderVideos(_id, lastUpdatedAt, playlistItemIds) {
+    return dbPlaylists(DBActions.PLAYLISTS.REORDER_VIDEOS, { _id, lastUpdatedAt, playlistItemIds })
+  }
+
   static upsertVideoByPlaylistId(_id, lastUpdatedAt, videoData) {
     return dbPlaylists(
       DBActions.PLAYLISTS.UPSERT_VIDEO,

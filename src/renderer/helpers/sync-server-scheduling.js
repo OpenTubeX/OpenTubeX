@@ -50,6 +50,7 @@ export const SYNC_ACTION_REASONS = new Map([
   ['batchUpdateChannelSettings', 'settings'],
   ['updatePlaylist', 'playlists'],
   ['updatePlaylistSortOrder', 'playlists'],
+  ['reorderPlaylistVideos', 'playlists'],
   ['savePlaylistBookmark', 'playlists'],
   ['updateProfile', 'profilesOrSubscriptions'],
   ['updateWatchProgress', 'history'],

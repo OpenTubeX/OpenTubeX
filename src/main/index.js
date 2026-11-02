@@ -3348,6 +3348,14 @@ function runApp() {
           return saved
         }
 
+        case DBActions.PLAYLISTS.REORDER_VIDEOS: {
+          const videos = await baseHandlers.playlists.reorderVideos(data._id, data.lastUpdatedAt, data.playlistItemIds)
+          if (videos) {
+            syncOtherWindows(IpcChannels.SYNC_PLAYLISTS, event, { event: SyncEvents.GENERAL.UPSERT, data: { _id: data._id, lastUpdatedAt: data.lastUpdatedAt, videos } })
+          }
+          return videos
+        }
+
         case DBActions.PLAYLISTS.UPSERT_IF_UNCHANGED: {
           const saved = await baseHandlers.playlists.upsertIfUnchanged(data.playlist, data.previous)
           if (saved) {

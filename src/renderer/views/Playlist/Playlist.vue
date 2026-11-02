@@ -1504,19 +1504,15 @@ function setDraggedVideo(video) {
 
 async function onDragVideoEnd() {
   if (tempShownPlaylistItems.value != null) {
-    // Save on drag end ONLY
-    const playlist = {
-      playlistName: playlistTitle.value,
-      protected: selectedUserPlaylist.value.protected,
-      description: playlistDescription.value,
-      // Save whatever is shown
-      videos: deepCopy(tempShownPlaylistItems.value),
-      _id: playlistId.value
-    }
-
+    // Save on drag end ONLY. Apply the shown order to the saved entries, so
+    // videos another window added or removed during the drag stay that way.
     try {
-      await store.dispatch('updatePlaylist', playlist)
-      playlistItems.value = tempShownPlaylistItems.value
+      const saved = await store.dispatch('reorderPlaylistVideos', {
+        _id: playlistId.value,
+        playlistItemIds: tempShownPlaylistItems.value.map(video => video.playlistItemId),
+      })
+      if (!saved) throw new Error('Could not update playlist')
+      playlistItems.value = selectedUserPlaylist.value.videos
     } catch (e) {
       showToast({
         message: t('User Playlists.SinglePlaylistView.Toast["There was an issue with updating this playlist."]'),

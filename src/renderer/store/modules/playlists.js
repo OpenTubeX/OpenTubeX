@@ -256,6 +256,19 @@ const actions = {
     return true
   },
 
+  /**
+   * Saves a new order of the given entries. Entries added or removed by
+   * another window meanwhile are kept as they are.
+   * @returns {Promise<boolean>} whether the playlist still existed
+   */
+  async reorderPlaylistVideos({ commit }, { _id, playlistItemIds }) {
+    const lastUpdatedAt = Date.now()
+    const videos = await DBPlaylistHandlers.reorderVideos(_id, lastUpdatedAt, playlistItemIds)
+    if (videos === null) return false
+    commit('upsertPlaylistToList', { _id, lastUpdatedAt, videos })
+    return true
+  },
+
   async updatePlaylistLastPlayedAt({ commit }, playlist) {
     // This action does NOT update `lastUpdatedAt` on purpose
     // Only `lastPlayedAt` should be updated

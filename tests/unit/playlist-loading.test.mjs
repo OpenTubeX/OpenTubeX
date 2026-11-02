@@ -169,3 +169,22 @@ test('loading repairs a playlist stored without videos', async () => {
   assert.deepEqual(Array.from(module.state.playlists.find(item => item._id === 'partial').videos), [])
   assert.deepEqual(Array.from((await db.playlists.findOneAsync({ _id: 'partial' })).videos), [])
 })
+
+test('reordering keeps entries another window added or removed meanwhile', async () => {
+  const video = id => ({ videoId: id, playlistItemId: `item-${id}`, timeAdded: 1, type: 'video' })
+  const { db, handlers } = await fixture([{ ...playlist('custom', 'Custom'), videos: ['a', 'b', 'c', 'd'].map(video) }])
+  // The drag started from a, b, c, d. Meanwhile b was removed and e added.
+  await db.playlists.updateAsync({ _id: 'custom' }, { $pull: { videos: { playlistItemId: 'item-b' } } })
+  await db.playlists.updateAsync({ _id: 'custom' }, { $push: { videos: video('e') } })
+
+  const saved = await handlers.reorderVideos('custom', 5, ['item-c', 'item-a', 'item-b', 'item-d'])
+  const expected = ['c', 'a', 'd', 'e']
+  assert.deepEqual(Array.from(saved, item => item.videoId), expected)
+  const stored = await db.playlists.findOneAsync({ _id: 'custom' })
+  assert.deepEqual(Array.from(stored.videos, item => item.videoId), expected)
+  assert.equal(stored.lastUpdatedAt, 5)
+
+  await db.playlists.removeAsync({ _id: 'custom' })
+  assert.equal(await handlers.reorderVideos('custom', 6, ['item-a']), null)
+  assert.equal(await db.playlists.findOneAsync({ _id: 'custom' }), null)
+})
