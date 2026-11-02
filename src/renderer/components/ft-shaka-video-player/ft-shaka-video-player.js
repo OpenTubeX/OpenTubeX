@@ -10083,12 +10083,13 @@ export default defineComponent({
     // Shaka can emit loaded again on the same player (format switch) while an
     // earlier handleLoaded still waits for its caption tracks.
     let loadGeneration = 0
-    // The load whose own captions were already added to the player
-    let videoCaptionsGeneration = 0
+    // The load whose own captions were already added to the player. Before
+    // the first load, handleLoaded() adds the latest captions itself.
+    let videoCaptionsGeneration = -1
 
     // A download can start playing before its metadata, which brings the captions.
     watch(() => props.captions, async (captions, previous) => {
-      if (previous.length > 0 || captions.length === 0 || !player || videoCaptionsGeneration !== loadGeneration || isLive.value) return
+      if (previous.length > 0 || captions.length === 0 || !player || !hasLoaded.value || videoCaptionsGeneration !== loadGeneration || isLive.value) return
       if (process.env.SUPPORTS_LOCAL_API && props.format !== 'legacy' && props.manifestMimeType === MANIFEST_TYPE_SABR) return
       const loadedPlayer = player
       const generation = loadGeneration
