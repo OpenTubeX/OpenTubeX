@@ -577,6 +577,12 @@ export default defineComponent({
       type: Boolean,
       default: false
     },
+    // Whether the page can show a transcript of the captions, which it reads
+    // only in some caption formats.
+    transcriptAvailable: {
+      type: Boolean,
+      default: true
+    },
     sponsorBlockInfoOpen: {
       type: Boolean,
       default: false
@@ -1088,7 +1094,7 @@ export default defineComponent({
       liveChat: props.liveChatAvailable,
       comments: props.commentsAvailable,
       sponsorBlock: useSponsorBlock.value && !props.isUpcoming,
-      transcript: props.captions.length > 0 && !isLive.value && !props.isUpcoming,
+      transcript: props.transcriptAvailable && props.captions.length > 0 && !isLive.value && !props.isUpcoming,
       share: showFullscreenShareAction.value,
       addToPlaylist: showFullscreenPlaylistAction.value && props.playlistVideoData != null,
       quickBookmark: props.quickBookmarkEnabled,

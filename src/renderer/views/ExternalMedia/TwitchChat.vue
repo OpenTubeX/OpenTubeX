@@ -17,7 +17,7 @@
       </h3>
       <div
         class="liveChatDockActions"
-        @keydown.esc.stop.prevent="settingsMenuOpen = false"
+        @keydown.esc="closeSettingsMenu"
       >
         <button
           type="button"
@@ -53,50 +53,55 @@
       </div>
     </header>
     <div class="twitchChatInner relative">
-      <header
+      <!-- A phone sheet shows the header in its own title bar, like the watch page's chat. -->
+      <Teleport
         v-if="!fullscreenOverlay"
-        class="titleContainer"
+        :to="phonePanelHeader || 'body'"
+        :disabled="!phonePanelHeader"
       >
-        <h4 class="title">
-          {{ title }}
-        </h4>
-        <div
-          class="liveChatActions"
-          @keydown.esc.stop.prevent="settingsMenuOpen = false"
-        >
-          <button
-            type="button"
-            class="liveChatActionButton"
-            :class="{ active: settingsMenuOpen }"
-            :aria-label="t('Video.Live Chat Settings')"
-            :title="t('Video.Live Chat Settings')"
-            :aria-expanded="String(settingsMenuOpen)"
-            @click="settingsMenuOpen = !settingsMenuOpen"
-          >
-            <FtIcon :icon="['fas', 'sliders-h']" />
-          </button>
-          <button
-            type="button"
-            class="liveChatActionButton"
-            :aria-label="closeTitle"
-            :title="closeTitle"
-            @click="emit('close')"
-          >
-            <FtIcon :icon="['fas', 'xmark']" />
-          </button>
+        <header class="titleContainer">
+          <h4 class="title">
+            {{ title }}
+          </h4>
           <div
-            v-if="settingsMenuOpen"
-            class="liveChatSettingsMenu"
+            class="liveChatActions"
+            @keydown.esc="closeSettingsMenu"
           >
-            <FtToggleSwitch
-              :label="t('Video.Show Live Chat Timestamps')"
-              :default-value="showLiveChatTimestamps"
-              :compact="true"
-              @change="store.dispatch('updateShowLiveChatTimestamps', $event)"
-            />
+            <button
+              type="button"
+              class="liveChatActionButton"
+              :class="{ active: settingsMenuOpen }"
+              :aria-label="t('Video.Live Chat Settings')"
+              :title="t('Video.Live Chat Settings')"
+              :aria-expanded="String(settingsMenuOpen)"
+              @click="settingsMenuOpen = !settingsMenuOpen"
+            >
+              <FtIcon :icon="['fas', 'sliders-h']" />
+            </button>
+            <button
+              v-if="!phonePanelHeader"
+              type="button"
+              class="liveChatActionButton"
+              :aria-label="closeTitle"
+              :title="closeTitle"
+              @click="emit('close')"
+            >
+              <FtIcon :icon="['fas', 'xmark']" />
+            </button>
+            <div
+              v-if="settingsMenuOpen"
+              class="liveChatSettingsMenu"
+            >
+              <FtToggleSwitch
+                :label="t('Video.Show Live Chat Timestamps')"
+                :default-value="showLiveChatTimestamps"
+                :compact="true"
+                @change="store.dispatch('updateShowLiveChatTimestamps', $event)"
+              />
+            </div>
           </div>
-        </div>
-      </header>
+        </header>
+      </Teleport>
       <div
         v-if="errorMessage"
         class="messageContainer hasError"
@@ -177,7 +182,7 @@
 </template>
 
 <script setup>
-import { computed, nextTick, onBeforeUnmount, ref, useTemplateRef, watch } from 'vue'
+import { computed, inject, nextTick, onBeforeUnmount, ref, useTemplateRef, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { FtIcon } from '@opentubex/icons'
 import FtCard from '../../components/ft-card/ft-card.vue'
@@ -189,6 +194,7 @@ import store from '../../store/index'
 import { parseTwitchIrcMessage, parseTwitchReplayPage } from './twitchChat'
 import { getTwitchReplayPage } from './twitchChatReplay'
 
+const phonePanelHeader = inject('phonePanelHeader', null)
 const props = defineProps({
   target: { type: Object, required: true },
   fullscreenOverlay: { type: Boolean, default: false },
@@ -206,6 +212,18 @@ const emit = defineEmits(['close'])
 const errorMessage = ref('')
 const messages = ref([])
 const settingsMenuOpen = ref(false)
+
+/**
+ * Escape closes an open settings menu without also closing the sheet or
+ * leaving fullscreen. Otherwise it keeps its usual meaning.
+ * @param {KeyboardEvent} event
+ */
+function closeSettingsMenu(event) {
+  if (!settingsMenuOpen.value) return
+  event.stopPropagation()
+  event.preventDefault()
+  settingsMenuOpen.value = false
+}
 const showScrollToBottom = ref(false)
 const scrollport = useTemplateRef('scrollport')
 const visibleMessages = computed(() => {

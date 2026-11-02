@@ -309,7 +309,7 @@ test.describe('phone surface corners', { tag: '@scale' }, () => {
     }, executable)
     await mockCapacitorPhoneLayout(page)
     await navigate(page, `external-media?url=${encodeURIComponent('https://videos.example.test/video')}`)
-    const player = page.locator('.externalMediaPlayer .ftVideoPlayer:visible')
+    const player = page.locator('.videoPlayer .ftVideoPlayer:visible')
     for (const [width, height] of [[375, 812], [640, 390]]) {
       await page.setViewportSize({ width: Math.round(width * uiScale / 100), height: Math.round(height * uiScale / 100) })
       if (width === 375) {

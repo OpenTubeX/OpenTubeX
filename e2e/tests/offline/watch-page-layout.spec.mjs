@@ -469,6 +469,33 @@ test.describe('watch sidebar panels without recommendations', () => {
   })
 })
 
+test('an interrupted theater mode toggle continues from the drawn layout', { tag: '@scale' }, async ({ app, page }) => {
+  await mockPlayableWatchPage(app, page)
+  await setWindowSize(app, page, { width: 1800, height: 1000 })
+  await page.evaluate(() => { document.documentElement.dataset.reducedMotion = 'no-preference' })
+  const video = await openMockedVideo(page)
+  await video.evaluate(element => element.pause())
+  const player = page.locator(`${activeTab} .videoPlayer`)
+  await expect(player.locator('.theatre-button')).toBeAttached()
+
+  const jump = await player.evaluate(async element => {
+    const button = element.querySelector('.theatre-button')
+    button.click()
+    await new Promise(resolve => setTimeout(resolve, 120))
+    const before = element.getBoundingClientRect()
+    button.click()
+    await new Promise(resolve => requestAnimationFrame(resolve))
+    const after = element.getBoundingClientRect()
+    return Math.max(
+      Math.abs(after.x - before.x),
+      Math.abs(after.y - before.y),
+      Math.abs(after.width - before.width),
+      Math.abs(after.height - before.height)
+    )
+  })
+  expect(jump).toBeLessThan(60)
+})
+
 test('chapters stay centered through layout changes until manually scrolled', { tag: '@scale' }, async ({ app, page }) => {
   await mockPlayableWatchPage(app, page)
   const video = await openMockedVideo(page)

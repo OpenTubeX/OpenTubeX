@@ -17,11 +17,9 @@ test('transcript cues carry their formatted timestamp from parsing', () => {
     .join('\n')
   const parseTranscript = vm.runInNewContext(`${functions}\nparseTranscript`, {
     formatDurationAsTimestamp: seconds => `t${seconds}`,
-    document: {
-      createElement: () => ({
-        // The cues below are plain text, so the markup is the text.
-        set innerHTML(value) { this.textContent = value },
-      }),
+    DOMParser: class {
+      // The cues below are plain text, so the markup is the text.
+      parseFromString(markup) { return { body: { textContent: markup } } }
     },
   })
 

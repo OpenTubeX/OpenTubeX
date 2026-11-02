@@ -18,7 +18,7 @@
         <div
           class="transcriptHeaderActions"
           @focusout="handleHeaderActionsFocusout"
-          @keydown.esc.stop.prevent="languageMenuOpen = false"
+          @keydown.esc="closeLanguageMenu"
         >
           <button
             type="button"
@@ -209,6 +209,18 @@ const { t } = useI18n()
 
 const selectedCaptionIndex = ref(String(props.preferredCaptionIndex))
 const languageMenuOpen = ref(false)
+
+/**
+ * Escape closes an open language menu without also closing the sheet or
+ * leaving fullscreen. Otherwise it keeps its usual meaning.
+ * @param {KeyboardEvent} event
+ */
+function closeLanguageMenu(event) {
+  if (!languageMenuOpen.value) return
+  event.stopPropagation()
+  event.preventDefault()
+  languageMenuOpen.value = false
+}
 const languageMenu = useTemplateRef('languageMenu')
 const languageList = useTemplateRef('languageList')
 const searchOpen = ref(false)
@@ -552,10 +564,11 @@ function parseTimestamp(timestamp) {
 }
 
 function cleanCaptionText(text) {
-  const element = document.createElement('div')
-  element.innerHTML = text
+  // Captions can come from any site. An inert document neither loads images
+  // nor runs handlers from markup in the cue text.
+  const element = new DOMParser().parseFromString(text
     .replaceAll(/<(?:\d+:)?\d{2}:\d{2}[.,]\d{3}>/g, '')
-    .replaceAll(/<br\s*\/?>/gi, '\n')
+    .replaceAll(/<br\s*\/?>/gi, '\n'), 'text/html').body
   return element.textContent.replaceAll(/\s*\n\s*/g, ' ').replaceAll(/\s+/g, ' ').trim()
 }
 </script>

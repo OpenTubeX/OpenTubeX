@@ -427,6 +427,23 @@ test.describe('phone UI', () => {
     await expect(transcript.locator('.transcriptControls input')).toHaveValue('')
   })
 
+  test('Escape closes the transcript language menu before the transcript sheet', async ({ app, page }) => {
+    await page.evaluate(() => window.$store.dispatch('updatePreferredCaptionLocale', 'de'))
+    await mockPlayableWatchPage(app, page, { captionTranslations: true })
+    await openMockedVideo(page)
+    await setWindowSize(app, page, { width: 360, height: 760 })
+    await clickVideoAction(page, /transcript/i)
+    await expect(page.locator('dialog[open] .transcriptCard')).toBeVisible()
+    const languageButton = page.locator('.mobileSheetHeader').getByRole('button', { name: 'Transcript language', exact: true })
+    await languageButton.click()
+    await expect(page.locator('.transcriptLanguageMenu')).toBeVisible()
+    await languageButton.press('Escape')
+    await expect(page.locator('.transcriptLanguageMenu')).toHaveCount(0)
+    await expect(page.locator('dialog[open] .transcriptCard')).toBeVisible()
+    await languageButton.press('Escape')
+    await expect(page.locator('dialog[open]')).toHaveCount(0)
+  })
+
   test('opens live chat in a sheet and clears its panel state when dismissed', { tag: '@scale' }, async ({ app, page }) => {
     await mockPlayableWatchPage(app, page)
     await openMockedVideo(page)
@@ -495,7 +512,14 @@ test.describe('phone UI', () => {
       return element.scrollTop
     })
     expect(scrollTop).toBeCloseTo(180, 0)
-    await page.locator('.mobileSheetHeader').getByRole('button', { name: 'Close', exact: true }).click()
+    // Escape closes the chat settings first, then the sheet.
+    const settings = page.locator('dialog[open] .phonePanelHeaderContent').getByRole('button', { name: 'Live Chat Settings' })
+    await settings.click()
+    await expect(page.locator('dialog[open] .liveChatSettingsMenu')).toBeVisible()
+    await settings.press('Escape')
+    await expect(page.locator('dialog[open] .liveChatSettingsMenu')).toHaveCount(0)
+    await expect(chat).toBeVisible()
+    await settings.press('Escape')
     await expect(page.locator('dialog[open]')).toHaveCount(0)
     expect(await view.evaluate(view => view.liveChatOpen)).toBe(false)
     await expect(page.locator('.phoneLiveChat')).toHaveCount(0)

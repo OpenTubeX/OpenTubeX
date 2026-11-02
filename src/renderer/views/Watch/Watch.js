@@ -27,7 +27,9 @@ import WatchVideoInfo from '../../components/WatchVideoInfo/WatchVideoInfo.vue'
 import WatchVideoDescription from '../../components/WatchVideoDescription/WatchVideoDescription.vue'
 import WatchVideoInfoPanels from '../../components/WatchVideoInfoPanels/WatchVideoInfoPanels.vue'
 import WatchVideoTranscript from '../../components/WatchVideoTranscript/WatchVideoTranscript.vue'
-import WatchVideoChapters from '../../components/WatchVideoChapters/WatchVideoChapters.vue'
+import WatchVideoChaptersPanel from '../../components/WatchVideoChaptersPanel/WatchVideoChaptersPanel.vue'
+import WatchSidebarPanel from '../../components/WatchSidebarPanel/WatchSidebarPanel.vue'
+import WatchVideoInfoSkeleton from '../../components/WatchVideoInfoSkeleton/WatchVideoInfoSkeleton.vue'
 import WatchVideoSponsorBlock from '../../components/WatchVideoSponsorBlock/WatchVideoSponsorBlock.vue'
 import CommentSection from '../../components/CommentSection/CommentSection.vue'
 import WatchVideoLiveChat from '../../components/WatchVideoLiveChat/WatchVideoLiveChat.vue'
@@ -46,8 +48,7 @@ import FtPaidPromotionBadge from '../../components/FtPaidPromotionBadge/FtPaidPr
 import FtLoader from '../../components/FtLoader/FtLoader.vue'
 import FtButton from '../../components/FtButton/FtButton.vue'
 import { calculateColorLuminance } from '../../helpers/colors'
-import { applyAnimationSpeed } from '../../helpers/animationSpeed'
-import { isReducedMotionEnabled } from '../../helpers/reducedMotion'
+import { createTheatreModeAnimator, isTheatreLayoutAvailable } from '../../helpers/watchLayout'
 import { createShortsFeedNavigation } from './shortsFeedNavigation'
 import { clampOverlayScrollTop, isOverlayScrollTopOutOfBounds, restoreOverlayScrollTop } from '../../helpers/overlayScrollbars'
 import { hasReachedWatchedThreshold, isHistoryEntryWatched } from '../../helpers/history'
@@ -166,8 +167,6 @@ import { createWatchTimeTracker } from '../../helpers/watchTimeTracker'
  * }} SabrData
  */
 
-const THEATRE_MODE_ANIMATION_DURATION = 400
-const RESPONSIVE_THEATRE_MODE_MAX_WIDTH = 1350
 const MAX_TIMEOUT_DELAY = 2_147_483_647
 // A SABR session can go stale more than once during a long video, so the
 // refetch budget is per incident rather than per video: it refills once the
@@ -209,7 +208,9 @@ export default defineComponent({
     WatchVideoInfoPanels,
     WatchVideoSummary,
     'watch-video-transcript': WatchVideoTranscript,
-    'watch-video-chapters': WatchVideoChapters,
+    WatchVideoChaptersPanel,
+    WatchSidebarPanel,
+    WatchVideoInfoSkeleton,
     'watch-video-sponsor-block': WatchVideoSponsorBlock,
     CommentSection,
     'watch-video-live-chat': WatchVideoLiveChat,
@@ -300,7 +301,7 @@ export default defineComponent({
       // A newly mounted watch tab falls back to the configured default instead.
       loadingTheatreMode: null,
       applyDefaultTheatreModeAfterLoad: false,
-      theatreLayoutAvailable: window.innerWidth > RESPONSIVE_THEATRE_MODE_MAX_WIDTH,
+      theatreLayoutAvailable: isTheatreLayoutAvailable(),
       videoPlayerLoaded: false,
       /** @type {boolean|null} */
       isFamilyFriendly: null,
@@ -1524,7 +1525,7 @@ export default defineComponent({
       (date, seconds) => this.$store.dispatch('recordPlaybackTime', { date, seconds, isShort: this.watchTimeIsShort })
     )
     retainIosMediaSources(() => this.legacyFormats.map(format => format.url))
-    this.theatreModeAnimations = []
+    this.theatreModeAnimator = createTheatreModeAnimator()
     this.shortsNavigation = createShortsFeedNavigation({
       isActive: () => this.subscriptionShortsFeedActive,
       getFeed: () => this.subscriptionShortsFeed,
@@ -1597,7 +1598,7 @@ export default defineComponent({
     this.shortsNavigation.removeListeners()
     window.removeEventListener('resize', this.updateShortsViewportHeight)
     window.removeEventListener('resize', this.updateTheatreLayoutAvailability)
-    this.theatreModeAnimations.forEach(animation => animation.cancel())
+    this.theatreModeAnimator.cancel()
     this.clearLiveReminderStartTimer()
     this.removeLiveReminderUpdatedListener?.()
     this.removeLiveReminderUpdatedListener = null
@@ -1908,7 +1909,7 @@ export default defineComponent({
       }
     },
     updateTheatreLayoutAvailability() {
-      this.theatreLayoutAvailable = window.innerWidth > RESPONSIVE_THEATRE_MODE_MAX_WIDTH
+      this.theatreLayoutAvailable = isTheatreLayoutAvailable()
     },
     updateShortsViewportHeight() {
       this.shortsNavigation.resetSwipe()
@@ -2251,12 +2252,6 @@ export default defineComponent({
         })
       })
     },
-    handleSidebarPanelBeforeLeave() {
-      this.sidebarPanelLeaving = true
-    },
-    handleSidebarPanelAfterLeave() {
-      this.sidebarPanelLeaving = false
-    },
     closeFullscreenPlaylist() {
       if (this.mobilePanel === 'playlist') this.mobilePanel = null
       this.$refs.player?.closeFullscreenPlaylist()
@@ -2286,54 +2281,10 @@ export default defineComponent({
     copyChapterTimestamp(startSeconds) {
       this.$refs.player?.copyChapterTimestamp(startSeconds)
     },
-    async toggleTheatreMode() {
+    toggleTheatreMode() {
       this.theatreModeToggledManually = true
-      const layout = this.$refs.videoLayout
-      const elements = [
-        layout.querySelector('.videoPlayer'),
-        layout.querySelector('.infoArea'),
-        layout.querySelector('.sidebarArea'),
-        layout.querySelector('.commentsArea')
-      ].filter(element => element !== null)
-
-      this.theatreModeAnimations.forEach(animation => animation.cancel())
-      this.theatreModeAnimations = []
-
-      if (isReducedMotionEnabled()) {
+      return this.theatreModeAnimator.animate(this.$refs.videoLayout, () => {
         this.useTheatreMode = !this.useTheatreMode
-        return
-      }
-
-      const previousRects = elements.map(element => element.getBoundingClientRect())
-      this.useTheatreMode = !this.useTheatreMode
-      await this.$nextTick()
-
-      this.theatreModeAnimations = elements.map((element, index) => {
-        const previousRect = previousRects[index]
-        const nextRect = element.getBoundingClientRect()
-        const translateX = previousRect.left - nextRect.left
-        const translateY = previousRect.top - nextRect.top
-        const isVideoPlayer = element.classList.contains('videoPlayer')
-        const scaleX = isVideoPlayer ? previousRect.width / nextRect.width : 1
-        const scaleY = isVideoPlayer ? previousRect.height / nextRect.height : 1
-        const animation = applyAnimationSpeed(element.animate([
-          {
-            transform: `translate(${translateX}px, ${translateY}px) scale(${scaleX}, ${scaleY})`,
-            transformOrigin: 'top left'
-          },
-          {
-            transform: 'none',
-            transformOrigin: 'top left'
-          }
-        ], {
-          duration: THEATRE_MODE_ANIMATION_DURATION,
-          easing: 'cubic-bezier(0.4, 0, 0.2, 1)'
-        }))
-
-        animation.addEventListener('finish', () => {
-          this.theatreModeAnimations = this.theatreModeAnimations.filter(item => item !== animation)
-        })
-        return animation
       })
     },
 

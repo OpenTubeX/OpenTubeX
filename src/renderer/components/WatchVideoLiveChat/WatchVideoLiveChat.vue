@@ -17,7 +17,7 @@
       <div
         ref="liveChatActionsRef"
         class="liveChatDockActions"
-        @keydown.esc.stop.prevent="settingsMenuOpen = false"
+        @keydown.esc="closeSettingsMenu"
       >
         <button
           type="button"
@@ -92,7 +92,7 @@
         <div
           ref="liveChatActionsRef"
           class="liveChatActions"
-          @keydown.esc.stop.prevent="settingsMenuOpen = false"
+          @keydown.esc="closeSettingsMenu"
         >
           <button
             type="button"
@@ -579,6 +579,18 @@ const errorMessage = ref('')
 const showSuperChat = ref(false)
 const showScrollToBottom = ref(false)
 const settingsMenuOpen = ref(false)
+
+/**
+ * Escape closes an open settings menu without also closing the sheet or
+ * leaving fullscreen. Otherwise it keeps its usual meaning.
+ * @param {KeyboardEvent} event
+ */
+function closeSettingsMenu(event) {
+  if (!settingsMenuOpen.value) return
+  event.stopPropagation()
+  event.preventDefault()
+  settingsMenuOpen.value = false
+}
 const liveChatActionsRef = useTemplateRef('liveChatActionsRef')
 const comments = shallowReactive([])
 const superChatComments = shallowReactive([])

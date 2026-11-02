@@ -2,144 +2,161 @@
   <main class="externalMedia">
     <div
       v-if="loading || errorMessage"
-      class="externalMediaLayout"
+      class="videoLayout"
       :class="{ useTheatreMode, noSidebar: !hasSidebar }"
     >
-      <div class="externalMediaVideo">
-        <div
-          v-if="loading"
-          class="externalMediaState externalMediaLoading"
-          data-tab-loading-indicator
-          role="status"
-        >
-          <div class="externalMediaStateContent">
-            <FtLoader
-              class="externalMediaSpinner"
-              :tab-loading-indicator="false"
-            />
-            <p>{{ t('Video.Fetching Streams') }}</p>
-            <span
-              v-if="hostname"
-              class="externalMediaOrigin"
-            >{{ hostname }}</span>
+      <div class="videoArea">
+        <div class="videoAreaMargin">
+          <div
+            v-if="loading"
+            class="externalMediaState externalMediaLoading"
+            data-tab-loading-indicator
+            role="status"
+          >
+            <div class="externalMediaStateContent">
+              <FtLoader
+                class="externalMediaSpinner"
+                :tab-loading-indicator="false"
+              />
+              <p>{{ t('Video.Fetching Streams') }}</p>
+              <span
+                v-if="hostname"
+                class="externalMediaOrigin"
+              >{{ hostname }}</span>
+            </div>
+          </div>
+          <div
+            v-else
+            class="externalMediaState externalMediaError"
+            role="alert"
+          >
+            <div class="externalMediaStateContent">
+              <FtIcon
+                :icon="['fas', 'exclamation-circle']"
+                class="externalMediaErrorIcon"
+                aria-hidden="true"
+              />
+              <h1>{{ info?.title || hostname || mediaUrl || t('Change Format.Stream Source') }}</h1>
+              <span
+                v-if="info?.title && hostname"
+                class="externalMediaOrigin"
+              >{{ hostname }}</span>
+              <p class="externalMediaDiagnostic">
+                {{ errorMessage }}
+              </p>
+              <FtButton
+                v-if="isExternalMediaUrl(mediaUrl)"
+                class="externalMediaRetry"
+                :label="t('User Playlists.SinglePlaylistView.Retry')"
+                :icon="['fas', 'sync']"
+                @click="loadMedia(route.query.url)"
+              />
+              <FtButton
+                v-if="canRetryWithCookies"
+                class="externalMediaRetry"
+                :label="t('Video.Try With Configured Cookies')"
+                :icon="['fas', 'cookie']"
+                @click="loadMedia(mediaUrl, true)"
+              />
+            </div>
           </div>
         </div>
-        <div
-          v-else
-          class="externalMediaState externalMediaError"
-          role="alert"
-        >
-          <div class="externalMediaStateContent">
-            <FtIcon
-              :icon="['fas', 'exclamation-circle']"
-              class="externalMediaErrorIcon"
-              aria-hidden="true"
-            />
-            <h1>{{ info?.title || hostname || mediaUrl || t('Change Format.Stream Source') }}</h1>
-            <span
-              v-if="info?.title && hostname"
-              class="externalMediaOrigin"
-            >{{ hostname }}</span>
-            <p class="externalMediaDiagnostic">
-              {{ errorMessage }}
-            </p>
-            <FtButton
-              v-if="isExternalMediaUrl(mediaUrl)"
-              class="externalMediaRetry"
-              :label="t('User Playlists.SinglePlaylistView.Retry')"
-              :icon="['fas', 'sync']"
-              @click="loadMedia(route.query.url)"
-            />
-            <FtButton
-              v-if="canRetryWithCookies"
-              class="externalMediaRetry"
-              :label="t('Video.Try With Configured Cookies')"
-              :icon="['fas', 'cookie']"
-              @click="loadMedia(mediaUrl, true)"
-            />
-          </div>
-        </div>
+      </div>
+      <div
+        v-if="loading"
+        class="infoArea"
+      >
+        <WatchVideoInfoSkeleton class="watchVideo" />
       </div>
     </div>
 
     <template v-else-if="info">
       <div
         ref="videoLayout"
-        class="externalMediaLayout"
-        :class="{ ambientModeActive, useTheatreMode, noSidebar: !hasSidebar }"
+        class="videoLayout"
+        :class="{ ambientModeActive, useTheatreMode, noSidebar: !hasSidebar && !sidebarPanelLeaving }"
       >
-        <div class="externalMediaVideo">
-          <template v-if="source">
-            <FtShakaVideoPlayer
-              ref="player"
-              :key="loadGeneration"
-              class="externalMediaPlayer"
-              :manifest-src="source.manifestSrc"
-              :manifest-mime-type="source.manifestMimeType"
-              :twitch-sub-only-vod="source.twitchSubOnlyVod === true"
-              :legacy-formats="source.legacyFormats"
-              :format="source.manifestSrc ? (source.audioOnly ? 'audio' : 'dash') : 'legacy'"
-              :captions="source.captions"
-              :caption-translations="source.captionTranslations"
-              :title="info.title ?? ''"
-              :artist="musicPlayerArtist"
-              :channel-name="creatorName"
-              :channel-thumbnail="creatorAvatarUrl"
-              :thumbnail="thumbnail"
-              :is-live="source.isLive"
-              :start-time="source.separateAudioUrl ? null : startTime"
-              :current-playback-rate="defaultPlaybackRate"
-              :storyboard-src="source.storyboardSrc"
-              :chapters="chapters"
-              :current-chapter-index="currentChapterIndex"
-              :chapters-src="chaptersSrc"
-              :sidebar-chapters-open="showChapters"
-              :external-url="mediaUrl"
-              :live-chat-available="chatAvailable"
-              :theatre-possible="theatreTogglePossible"
-              :use-theatre-mode="useTheatreMode"
-              playback-engine="yt-dlp"
-              @error="playerErrorHandler"
-              @loaded="handleMediaLoaded"
-              @legacy-format-selected="setCompanionFormat"
-              @play="handlePlay"
-              @playing="playCompanionAudio"
-              @pause="handlePlaybackStopped"
-              @waiting="handleBuffering"
-              @ended="handlePlaybackStopped"
-              @volume-updated="setCompanionVolume"
-              @playback-rate-updated="setCompanionPlaybackRate"
-              @timeupdate="updateCurrentTime"
-              @seeking="handleSeeking"
-              @seeked="handleSeeked"
-              @dock-panel-change="handleDockPanelChange"
-              @toggle-theatre-mode="toggleTheatreMode"
-              @chapters-overlay-change="handleChaptersOverlayChange"
-              @looped-chapter-change="loopedChapterIndex = $event"
-            />
-            <!-- eslint-disable-next-line vuejs-accessibility/media-has-caption -->
-            <audio
-              v-if="source.separateAudioUrl"
-              ref="companionAudio"
-              class="externalMediaCompanionAudio"
-              :src="source.separateAudioUrl"
-              preload="auto"
-              hidden
-              aria-hidden="true"
-              @loadedmetadata="handleMediaLoaded"
-              @ended="handleCompanionAudioEnded"
-            />
-          </template>
-          <div
-            v-else
-            class="externalMediaState"
-            role="status"
-          >
-            {{ t('Video.Upcoming') }}
+        <div class="videoArea">
+          <div class="videoAreaMargin">
+            <template v-if="source">
+              <FtShakaVideoPlayer
+                ref="player"
+                :key="loadGeneration"
+                class="videoPlayer"
+                :manifest-src="source.manifestSrc"
+                :manifest-mime-type="source.manifestMimeType"
+                :twitch-sub-only-vod="source.twitchSubOnlyVod === true"
+                :legacy-formats="source.legacyFormats"
+                :format="source.manifestSrc ? (source.audioOnly ? 'audio' : 'dash') : 'legacy'"
+                :captions="source.captions"
+                :caption-translations="source.captionTranslations"
+                :title="info.title ?? ''"
+                :artist="musicPlayerArtist"
+                :channel-name="creatorName"
+                :channel-thumbnail="creatorAvatarUrl"
+                :thumbnail="thumbnail"
+                :is-live="source.isLive"
+                :start-time="source.separateAudioUrl ? null : startTime"
+                :current-playback-rate="currentPlaybackRate"
+                :storyboard-src="source.storyboardSrc"
+                :chapters="chapters"
+                :current-chapter-index="currentChapterIndex"
+                :chapters-src="chaptersSrc"
+                :auto-open-chapters="autoOpenChapters"
+                :sidebar-chapters-open="showChapters"
+                :transcript-open="transcriptShown"
+                :transcript-available="transcriptAvailable"
+                :download-available="downloadAvailable"
+                :external-url="mediaUrl"
+                :live-chat-available="chatAvailable"
+                :theatre-possible="theatreTogglePossible"
+                :use-theatre-mode="useTheatreMode"
+                playback-engine="yt-dlp"
+                @error="playerErrorHandler"
+                @loaded="handleMediaLoaded"
+                @legacy-format-selected="setCompanionFormat"
+                @play="handlePlay"
+                @playing="playCompanionAudio"
+                @pause="handlePlaybackStopped"
+                @waiting="handleBuffering"
+                @ended="handlePlaybackStopped"
+                @volume-updated="setCompanionVolume"
+                @playback-rate-updated="updatePlaybackRate"
+                @timeupdate="updateCurrentTime"
+                @seeking="handleSeeking"
+                @seeked="handleSeeked"
+                @dock-panel-change="handleDockPanelChange"
+                @toggle-theatre-mode="toggleTheatreMode"
+                @chapters-overlay-change="handleChaptersOverlayChange"
+                @chapter-thumbnails-change="chapterThumbnails = $event"
+                @looped-chapter-change="loopedChapterIndex = $event"
+                @toggle-transcript="toggleTranscript"
+                @open-download="showDownloadPrompt = true"
+              />
+              <!-- eslint-disable-next-line vuejs-accessibility/media-has-caption -->
+              <audio
+                v-if="source.separateAudioUrl"
+                ref="companionAudio"
+                class="externalMediaCompanionAudio"
+                :src="source.separateAudioUrl"
+                preload="auto"
+                hidden
+                aria-hidden="true"
+                @loadedmetadata="handleMediaLoaded"
+                @ended="handleCompanionAudioEnded"
+              />
+            </template>
+            <div
+              v-else
+              class="externalMediaState"
+              role="status"
+            >
+              {{ t('Video.Upcoming') }}
+            </div>
           </div>
         </div>
-        <div class="externalMediaInfo">
-          <FtCard class="externalMediaDetails">
+        <div class="infoArea">
+          <FtCard class="watchVideo externalMediaDetails">
             <div class="externalMediaHeading">
               <h1
                 class="videoTitle"
@@ -248,40 +265,61 @@
                 target="_blank"
                 rel="noopener noreferrer"
               >{{ hostname }}</a>
-              <div class="externalMediaActions">
-                <FtIconButton
-                  v-if="chatAvailable"
-                  :title="chatToggleTitle"
-                  :icon="['fas', 'message']"
-                  :class="{ toolbarActive: chatOpen }"
-                  theme="base-no-default"
-                  :aria-pressed="chatOpen"
-                  @click="toggleChat"
-                />
-                <FtShareButton
-                  v-if="!hideSharingActions"
-                  id=""
-                  :external-url="mediaUrl"
-                  theme="base-no-default"
-                />
-                <FtButton
-                  v-if="enableDownloads && source && !source.twitchSubOnlyVod"
-                  class="downloadButton"
-                  :title="t('Downloads.Download Video')"
-                  :aria-label="t('Downloads.Download Video')"
-                  :label="t('Downloads.Download')"
-                  :icon="['fas', 'download']"
-                  theme="secondary"
-                  variant="filled"
-                  shape="square"
-                  @click="showDownloadPrompt = true"
-                />
-              </div>
+              <WatchVideoToolbar
+                :actions="toolbarActions"
+                :overflow-order="TOOLBAR_OVERFLOW_ORDER"
+              >
+                <template #primary="{ inToolbar }">
+                  <FtIconButton
+                    v-if="inToolbar('liveChat')"
+                    :title="toolbarActions.liveChat.label"
+                    :icon="['fas', 'message']"
+                    :class="{ toolbarActive: toolbarActions.liveChat.active }"
+                    theme="base-no-default"
+                    :aria-pressed="toolbarActions.liveChat.active"
+                    @click="toggleChat"
+                  />
+                  <FtIconButton
+                    v-if="inToolbar('transcript')"
+                    :title="toolbarActions.transcript.label"
+                    :icon="['fas', 'file-lines']"
+                    :class="{ toolbarActive: toolbarActions.transcript.active }"
+                    theme="base-no-default"
+                    :aria-pressed="toolbarActions.transcript.active"
+                    @click="toggleTranscript"
+                  />
+                </template>
+                <template #secondary>
+                  <FtShareButton
+                    v-if="!hideSharingActions"
+                    id=""
+                    :external-url="mediaUrl"
+                    theme="base-no-default"
+                  />
+                </template>
+                <template #trailing>
+                  <FtButton
+                    v-if="downloadAvailable"
+                    class="downloadButton"
+                    :title="t('Downloads.Download Video')"
+                    :aria-label="t('Downloads.Download Video')"
+                    :icon="['fas', 'download']"
+                    theme="secondary"
+                    variant="filled"
+                    shape="square"
+                    @click="showDownloadPrompt = true"
+                  >
+                    <template #label>
+                      <span class="downloadLabel">{{ t('Downloads.Download') }}</span>
+                    </template>
+                  </FtButton>
+                </template>
+              </WatchVideoToolbar>
             </div>
           </FtCard>
           <FtCard
             v-if="metadataRows.length"
-            class="externalMediaExtra"
+            class="watchVideo externalMediaExtra"
           >
             <h2>{{ t('Video.Metadata') }}</h2>
             <dl>
@@ -297,59 +335,90 @@
             </dl>
           </FtCard>
           <WatchVideoDescription
-            v-if="info.description || metadata.tags.length || metadata.license"
-            class="externalMediaDescription"
+            v-if="phonePanelsEnabled && hasDescription"
             :description="info.description"
             :tags="metadata.tags"
             :license="metadata.license"
-            @timestamp-event="seekTo"
+            preview-only
+            class="watchVideo phoneDescriptionPreview"
+            @expand="mobilePanel = 'description'"
           />
-        </div>
-        <aside
-          v-if="hasSidebar"
-          class="externalMediaSidebar"
-        >
           <FtPhonePanel
-            :enabled="phoneLayout && !fullscreenLiveChatOpen"
-            :open="chaptersPanelOpen"
-            :title="t('Chapters.Chapters')"
-            fill
-            @close="showChapters = false"
+            :enabled="phonePanelsEnabled"
+            :open="mobilePanel === 'description'"
+            class="phoneDescriptionPanel"
+            :title="t('Description.Title')"
+            @close="mobilePanel = null"
           >
-            <FtCard
-              v-if="chaptersPanelOpen"
-              class="externalMediaChapters watchVideoChaptersPanel"
-            >
-              <div class="chaptersPanelHeader">
-                <h2>{{ t('Chapters.Chapters') }}</h2>
-                <button
-                  type="button"
-                  class="chaptersPanelClose"
-                  :aria-label="t('Chapters.Close Chapters')"
-                  :title="t('Chapters.Close Chapters')"
-                  @click="showChapters = false"
-                >
-                  <FtIcon :icon="['fas', 'xmark']" />
-                </button>
-              </div>
-              <WatchVideoChapters
-                :chapters="chapters"
-                :current-chapter-index="currentChapterIndex"
-                :fallback-thumbnail="thumbnail"
-                :looped-chapter-index="loopedChapterIndex"
-                @timestamp-event="seekTo"
-                @copy-timestamp="copyChapterTimestamp"
-                @loop-chapter="player?.toggleChapterLoop($event)"
-              />
-            </FtCard>
+            <WatchVideoDescription
+              v-if="hasDescription"
+              class="watchVideo externalMediaDescription"
+              :description="info.description"
+              :tags="metadata.tags"
+              :license="metadata.license"
+              :always-expanded="phonePanelsEnabled"
+              @timestamp-event="seekTo"
+            />
           </FtPhonePanel>
-          <Teleport
-            :to="fullscreenLiveChatTarget || 'body'"
-            :disabled="!fullscreenLiveChatOpen"
+        </div>
+        <aside class="sidebarArea">
+          <WatchSidebarPanel
+            :phone-enabled="phonePanelsEnabled"
+            :phone-open="chaptersPanelOpen"
+            :title="t('Chapters.Chapters')"
+            transition="chapters-panel"
+            @close="showChapters = false"
+            @leaving="setSidebarPanelLeaving"
+          >
+            <WatchVideoChaptersPanel
+              v-if="chaptersPanelOpen"
+              class="watchVideoSideBar"
+              :title="t('Chapters.Chapters')"
+              :chapters="chapters"
+              :chapter-thumbnails="chapterThumbnails"
+              :current-chapter-index="currentChapterIndex"
+              :fallback-thumbnail="thumbnail"
+              :looped-chapter-index="loopedChapterIndex"
+              @close="showChapters = false"
+              @timestamp-event="seekTo"
+              @copy-timestamp="copyChapterTimestamp"
+              @loop-chapter="player?.toggleChapterLoop($event)"
+            />
+          </WatchSidebarPanel>
+          <WatchSidebarPanel
+            :dock-target="fullscreenTranscriptOpen ? fullscreenTranscriptTarget : null"
+            :phone-enabled="phonePanelsEnabled"
+            :phone-open="mobilePanel === 'transcript'"
+            :title="t('Video.Transcript.Title')"
+            custom-header
+            @close="reason => closeSidebarPanel(reason, fullscreenTranscriptOpen, closeTranscript)"
+            @leaving="setSidebarPanelLeaving"
+          >
+            <WatchVideoTranscript
+              v-if="transcriptPanelOpen"
+              :captions="transcriptCaptions"
+              :current-time="currentTime"
+              :preferred-caption-index="preferredTranscriptCaptionIndex"
+              :video-title="info.title ?? ''"
+              :fullscreen-overlay="fullscreenTranscriptOpen"
+              class="watchVideoSideBar watchVideoTranscript"
+              @close="closeTranscript"
+              @timestamp-event="playTranscriptSegment"
+            />
+          </WatchSidebarPanel>
+          <WatchSidebarPanel
+            :dock-target="fullscreenLiveChatOpen ? fullscreenLiveChatTarget : null"
+            :phone-enabled="phonePanelsEnabled"
+            :phone-open="mobilePanel === 'chat'"
+            :title="twitchChatTarget?.type === 'replay' ? t('Video.Live Chat Replay') : t('Video.Live Chat')"
+            custom-header
+            @close="reason => closeSidebarPanel(reason, fullscreenLiveChatOpen, closeChat)"
+            @leaving="setSidebarPanelLeaving"
           >
             <TwitchChat
               v-if="chatAvailable && chatOpen"
               :key="`${twitchChatTarget.type}:${twitchChatTarget.id}`"
+              class="watchVideoSideBar phoneLiveChat"
               :target="twitchChatTarget"
               :current-time="currentTime"
               :seek-count="seekCount"
@@ -357,7 +426,7 @@
               :fullscreen-overlay="fullscreenLiveChatOpen"
               @close="closeChat"
             />
-          </Teleport>
+          </WatchSidebarPanel>
         </aside>
       </div>
     </template>
@@ -373,7 +442,7 @@
 </template>
 
 <script setup>
-import { computed, nextTick, onBeforeUnmount, onMounted, provide, ref, shallowRef, useTemplateRef, watch } from 'vue'
+import { computed, onBeforeUnmount, onMounted, provide, ref, shallowRef, useTemplateRef, watch } from 'vue'
 import { useRoute } from 'vue-router'
 import { useI18n } from 'vue-i18n'
 import { FtIcon } from '@opentubex/icons'
@@ -383,19 +452,24 @@ import FtCard from '../../components/ft-card/ft-card.vue'
 import FtInlineMetadata from '../../components/FtInlineMetadata/FtInlineMetadata.vue'
 import FtIconButton from '../../components/FtIconButton/FtIconButton.vue'
 import FtLoader from '../../components/FtLoader/FtLoader.vue'
-import FtPhonePanel from '../../components/FtPhonePanel/FtPhonePanel.vue'
 import FtRetryImage from '../../components/FtRetryImage.vue'
 import FtShareButton from '../../components/FtShareButton/FtShareButton.vue'
 import FtShakaVideoPlayer from '../../components/ft-shaka-video-player/ft-shaka-video-player.vue'
 import WatchVideoDescription from '../../components/WatchVideoDescription/WatchVideoDescription.vue'
-import WatchVideoChapters from '../../components/WatchVideoChapters/WatchVideoChapters.vue'
+import WatchVideoChaptersPanel from '../../components/WatchVideoChaptersPanel/WatchVideoChaptersPanel.vue'
 import WatchVideoDownloadPrompt from '../../components/WatchVideoDownloadPrompt/WatchVideoDownloadPrompt.vue'
 import WatchVideoLikes from '../../components/WatchVideoLikes/WatchVideoLikes.vue'
+import WatchVideoTranscript from '../../components/WatchVideoTranscript/WatchVideoTranscript.vue'
+import WatchSidebarPanel from '../../components/WatchSidebarPanel/WatchSidebarPanel.vue'
+import WatchVideoToolbar from '../../components/WatchVideoToolbar/WatchVideoToolbar.vue'
+import WatchVideoInfoSkeleton from '../../components/WatchVideoInfoSkeleton/WatchVideoInfoSkeleton.vue'
+import FtPhonePanel from '../../components/FtPhonePanel/FtPhonePanel.vue'
 import TwitchChat from './TwitchChat.vue'
 import { getTwitchChatTarget } from './twitchChat'
 import { getExternalYtDlpPlaybackSource, releaseTwitchVodRegistration } from '../../helpers/player/ytDlpPlayback'
-import { applyAnimationSpeed } from '../../helpers/animationSpeed'
-import { isReducedMotionEnabled } from '../../helpers/reducedMotion'
+import { createTheatreModeAnimator, isTheatreLayoutAvailable } from '../../helpers/watchLayout'
+import { useRootClass } from '../../helpers/rootClasses'
+import { getPreferredCaption } from '../../../captionLanguages'
 import { usePhoneLayout } from '../../composables/usePhoneLayout'
 import { hasConfiguredRestrictedPlaybackAuthentication } from '../../helpers/restricted-playback'
 import { buildChaptersVttFile, formatDurationAsTimestamp, formatViewCount, getRelativeTimeFromDate } from '../../helpers/utils'
@@ -439,7 +513,10 @@ const showChapters = ref(false)
 const showDownloadPrompt = ref(false)
 const enableDownloads = computed(() => store.getters.getEnableDownloads)
 const defaultPlaybackRate = computed(() => store.getters.getDefaultPlayback)
+const currentPlaybackRate = ref(defaultPlaybackRate.value)
 const ambientModeActive = computed(() => store.getters.getAmbientMode && source.value && !source.value.audioOnly)
+// Ambient light extends past the layout, so the app clips its overflow.
+useRootClass('appAmbientMode', () => Boolean(ambientModeActive.value))
 const attemptUsedCookies = ref(false)
 const drmError = ref(false)
 const seekCount = ref(0)
@@ -447,10 +524,16 @@ const seeking = ref(false)
 const chatOpen = ref(true)
 const useTheatreMode = ref(false)
 let theatreModeToggledManually = false
-let theatreModeAnimations = []
-const windowWidth = ref(window.innerWidth)
+const theatreModeAnimator = createTheatreModeAnimator()
+const theatreLayoutAvailable = ref(isTheatreLayoutAvailable())
+const showTranscript = ref(false)
 const fullscreenLiveChatOpen = ref(false)
 const fullscreenLiveChatTarget = shallowRef(null)
+const fullscreenTranscriptOpen = ref(false)
+const fullscreenTranscriptTarget = shallowRef(null)
+const sidebarPanelLeaving = ref(false)
+// Like on the watch page, phones show the panels as sheets over the page.
+const phonePanelsEnabled = computed(() => phoneLayout.value && !fullscreenLiveChatOpen.value && !fullscreenTranscriptOpen.value)
 let loadGeneration = 0
 const canRetryWithCookies = computed(() => errorMessage.value && !drmError.value && isExternalMediaUrl(mediaUrl.value) && !attemptUsedCookies.value &&
   hasConfiguredRestrictedPlaybackAuthentication(store.getters))
@@ -484,8 +567,29 @@ const chatAvailable = computed(() => twitchChatTarget.value && !(twitchChatTarge
   ? store.getters.getHideLiveChatReplay
   : store.getters.getHideLiveChat))
 const chaptersPanelOpen = computed(() => Boolean(source.value && chapters.value.length && showChapters.value))
-const hasSidebar = computed(() => Boolean(chatAvailable.value && chatOpen.value) || chaptersPanelOpen.value)
-const theatreTogglePossible = computed(() => windowWidth.value > 1350 && hasSidebar.value)
+// The transcript reads WebVTT and SRT, while other sites may only offer TTML.
+const transcriptCaptions = computed(() => source.value?.captions.filter(caption => caption.mimeType !== 'application/ttml+xml') ?? [])
+const transcriptAvailable = computed(() => transcriptCaptions.value.length > 0 && !source.value.isLive)
+const transcriptPanelOpen = computed(() => transcriptAvailable.value && showTranscript.value)
+const preferredTranscriptCaptionIndex = computed(() => {
+  const captions = transcriptCaptions.value
+  const caption = getPreferredCaption(captions, store.getters.getPreferredCaptionLocale || locale.value, store.getters.getEnableCaptionTranslations)
+  return caption ? captions.indexOf(caption) : 0
+})
+const sidebarPanelsOpen = computed(() => Boolean(chatAvailable.value && chatOpen.value) || chaptersPanelOpen.value || transcriptPanelOpen.value)
+// Phones show the panels as sheets instead.
+const hasSidebar = computed(() => !phonePanelsEnabled.value && sidebarPanelsOpen.value)
+// Keep the sidebar column while its last panel animates out. This has to run
+// before the render that removes the panel, which is too late for its
+// before-leave hook.
+watch(sidebarPanelsOpen, (open, wasOpen) => {
+  if (wasOpen && !open && !phonePanelsEnabled.value) sidebarPanelLeaving.value = true
+}, { flush: 'sync' })
+/** @param {boolean} leaving */
+function setSidebarPanelLeaving(leaving) {
+  sidebarPanelLeaving.value = leaving && !phonePanelsEnabled.value
+}
+const theatreTogglePossible = computed(() => theatreLayoutAvailable.value && hasSidebar.value)
 // Like on the watch page, with theatre as the default, the first panel opened
 // on media without a sidebar appears below the video instead of beside it,
 // unless the user has chosen a layout.
@@ -498,68 +602,105 @@ function handleChaptersOverlayChange(open) {
   showChapters.value = open
 }
 
-async function toggleTheatreMode() {
+function toggleTheatreMode() {
   theatreModeToggledManually = true
-  const elements = Array.from(videoLayout.value?.querySelectorAll('.externalMediaPlayer, .externalMediaInfo, .externalMediaSidebar') ?? [])
-  const reducedMotion = isReducedMotionEnabled()
-  const previousRects = reducedMotion ? [] : elements.map(element => element.getBoundingClientRect())
-  theatreModeAnimations.forEach(animation => animation.cancel())
-  theatreModeAnimations = []
-
-  if (reducedMotion) {
+  return theatreModeAnimator.animate(videoLayout.value, () => {
     useTheatreMode.value = !useTheatreMode.value
-    return
-  }
-
-  useTheatreMode.value = !useTheatreMode.value
-  await nextTick()
-
-  theatreModeAnimations = elements.map((element, index) => {
-    const previousRect = previousRects[index]
-    const nextRect = element.getBoundingClientRect()
-    const isPlayer = element.classList.contains('externalMediaPlayer')
-    const scaleX = isPlayer ? previousRect.width / nextRect.width : 1
-    const scaleY = isPlayer ? previousRect.height / nextRect.height : 1
-    const animation = applyAnimationSpeed(element.animate([
-      {
-        transform: `translate(${previousRect.left - nextRect.left}px, ${previousRect.top - nextRect.top}px) scale(${scaleX}, ${scaleY})`,
-        transformOrigin: 'top left'
-      },
-      { transform: 'none', transformOrigin: 'top left' }
-    ], {
-      duration: 400,
-      easing: 'cubic-bezier(0.4, 0, 0.2, 1)'
-    }))
-    animation.addEventListener('finish', () => {
-      theatreModeAnimations = theatreModeAnimations.filter(item => item !== animation)
-    })
-    return animation
   })
 }
-const chatToggleTitle = computed(() => twitchChatTarget.value?.type === 'replay'
-  ? chatOpen.value ? t('Video.Close Live Chat Replay') : t('Video.Show Live Chat Replay')
-  : chatOpen.value ? t('Video.Close Live Chat') : t('Video.Show Live Chat'))
+
+function toggleTranscript() {
+  if (transcriptShown.value) {
+    closeTranscript()
+    return
+  }
+  showTranscript.value = true
+  if (phonePanelsEnabled.value) mobilePanel.value = 'transcript'
+}
+
+function closeTranscript() {
+  if (mobilePanel.value === 'transcript') mobilePanel.value = null
+  showTranscript.value = false
+  player.value?.dismissFullscreenTranscript()
+}
+
+function playTranscriptSegment(seconds) {
+  if (!player.value?.hasLoaded) return
+  seekTo(seconds)
+  if (player.value.isPaused()) player.value.play()
+}
+
+// Like on the watch page, phone sheets only open on request, not when the
+// layout switches to phone with a panel open.
+/** @type {import('vue').Ref<'chat' | 'transcript' | 'description' | null>} */
+const mobilePanel = ref(null)
+const chatShown = computed(() => phonePanelsEnabled.value ? mobilePanel.value === 'chat' : chatOpen.value)
+const transcriptShown = computed(() => phonePanelsEnabled.value ? mobilePanel.value === 'transcript' : showTranscript.value)
+const hasDescription = computed(() => Boolean(info.value?.description || metadata.value.tags?.length || metadata.value.license))
+
+// The order in which actions move to the More menu
+const TOOLBAR_OVERFLOW_ORDER = ['transcript', 'liveChat']
+const toolbarActions = computed(() => ({
+  liveChat: {
+    visible: Boolean(chatAvailable.value),
+    label: twitchChatTarget.value?.type === 'replay'
+      ? chatShown.value ? t('Video.Close Live Chat Replay') : t('Video.Show Live Chat Replay')
+      : chatShown.value ? t('Video.Close Live Chat') : t('Video.Show Live Chat'),
+    icon: ['fas', 'message'],
+    active: chatShown.value,
+    run: toggleChat
+  },
+  transcript: {
+    visible: transcriptAvailable.value,
+    label: transcriptShown.value ? t('Video.Transcript.Hide') : t('Video.Transcript.Show'),
+    icon: ['fas', 'file-lines'],
+    active: transcriptShown.value,
+    run: toggleTranscript
+  }
+}))
+
+/**
+ * Docking a panel disables its phone sheet, which reports that as a
+ * presentation close. That only moves the panel into the dock, unlike
+ * closing the sheet or pressing Escape in the dock.
+ * @param {string | undefined} reason
+ * @param {boolean} docked
+ * @param {() => void} close
+ */
+function closeSidebarPanel(reason, docked, close) {
+  if (reason === 'presentation' && docked) mobilePanel.value = null
+  else close()
+}
 
 function closeChat() {
+  if (mobilePanel.value === 'chat') mobilePanel.value = null
   chatOpen.value = false
   player.value?.closeFullscreenLiveChat()
 }
 
 function toggleChat() {
-  if (chatOpen.value) closeChat()
-  else chatOpen.value = true
+  if (chatShown.value) {
+    closeChat()
+    return
+  }
+  chatOpen.value = true
+  if (phonePanelsEnabled.value) mobilePanel.value = 'chat'
 }
 
-/** External media has no other docked panels. */
+/** The player only offers the live chat and transcript docks for external media. */
 function handleDockPanelChange({ panel, open, target }) {
-  if (panel !== 'liveChat') return
-  fullscreenLiveChatTarget.value = open ? target : null
-  fullscreenLiveChatOpen.value = open && target !== null
-  if (fullscreenLiveChatOpen.value) chatOpen.value = true
+  if (panel === 'transcript') {
+    fullscreenTranscriptTarget.value = open ? target : null
+    fullscreenTranscriptOpen.value = open && target !== null
+  } else if (panel === 'liveChat') {
+    fullscreenLiveChatTarget.value = open ? target : null
+    fullscreenLiveChatOpen.value = open && target !== null
+    if (fullscreenLiveChatOpen.value) chatOpen.value = true
+  }
 }
 
-function updateWindowWidth() {
-  windowWidth.value = window.innerWidth
+function updateTheatreLayoutAvailability() {
+  theatreLayoutAvailable.value = isTheatreLayoutAvailable()
 }
 
 function handleSeeking(time) {
@@ -585,7 +726,7 @@ function handleSeeked(time) {
 }
 
 onMounted(() => {
-  window.addEventListener('resize', updateWindowWidth)
+  window.addEventListener('resize', updateTheatreLayoutAvailability)
   window.addEventListener('beforeunload', savePositionOnExit)
 })
 function safeWebUrl(value) {
@@ -604,6 +745,9 @@ const chapters = computed(() => (metadata.value.chapters ?? []).map(chapter => (
 })))
 /** @type {import('vue').Ref<number | null>} */
 const loopedChapterIndex = ref(null)
+const chapterThumbnails = shallowRef([])
+const autoOpenChapters = computed(() => !process.env.IS_CAPACITOR && store.getters.getAutoOpenChapters)
+const downloadAvailable = computed(() => enableDownloads.value && Boolean(source.value) && !source.value.twitchSubOnlyVod)
 const currentChapterIndex = computed(() => chapters.value.findLastIndex(chapter => currentTime.value >= chapter.startSeconds))
 const chaptersSrc = computed(() => chapters.value.some(chapter => chapter.endSeconds !== null)
   ? `data:text/vtt,${encodeURIComponent(buildChaptersVttFile(chapters.value.filter(chapter => chapter.endSeconds !== null)))}`
@@ -735,7 +879,7 @@ function syncCompanionAudio(time, tolerance = 0.5) {
 }
 
 function getCompanionVideo() {
-  return videoLayout.value?.querySelector('.externalMediaPlayer video')
+  return videoLayout.value?.querySelector('.videoPlayer video')
 }
 
 function getPositionMedia() {
@@ -835,7 +979,9 @@ function pauseCompanionVideo() { getCompanionVideo()?.pause() }
 function setCompanionVolume(volume) {
   if (companionAudio.value) companionAudio.value.volume = volume
 }
-function setCompanionPlaybackRate(rate) {
+function updatePlaybackRate(rate) {
+  // Retrying remounts the player, which must keep the chosen speed.
+  currentPlaybackRate.value = rate
   if (companionAudio.value) companionAudio.value.playbackRate = rate
 }
 function updateCurrentTime(seconds) {
@@ -887,6 +1033,7 @@ async function loadMedia(url, useCookies = store.getters.getYtDlpPlaybackAlwaysU
   showDownloadPrompt.value = false
   if (seekTimer !== null) clearTimeout(seekTimer)
   seekTimer = null
+  if (url !== mediaUrl.value) currentPlaybackRate.value = defaultPlaybackRate.value
   const generation = ++loadGeneration
   companionAudioNeeded.value = false
   playerErrorHandler.value = error => {
@@ -905,6 +1052,9 @@ async function loadMedia(url, useCookies = store.getters.getYtDlpPlaybackAlwaysU
   lastSavedPosition = 0
   hasBeenPresented = isTabPresented?.value ?? true
   showChapters.value = false
+  showTranscript.value = false
+  mobilePanel.value = null
+  chapterThumbnails.value = []
   seekCount.value = 0
   seeking.value = false
   chatOpen.value = true
@@ -912,6 +1062,10 @@ async function loadMedia(url, useCookies = store.getters.getYtDlpPlaybackAlwaysU
   theatreModeToggledManually = false
   fullscreenLiveChatOpen.value = false
   fullscreenLiveChatTarget.value = null
+  fullscreenTranscriptOpen.value = false
+  fullscreenTranscriptTarget.value = null
+  // The panels unmount with the layout, without a leave transition.
+  sidebarPanelLeaving.value = false
   setTabTitle(hostname.value || 'Watch')
 
   if (!isExternalMediaUrl(url)) {
@@ -948,7 +1102,7 @@ async function loadMedia(url, useCookies = store.getters.getYtDlpPlaybackAlwaysU
 }
 
 watch(() => route.query.url, url => loadMedia(url), { immediate: true })
-watch(enableDownloads, enabled => { if (!enabled) showDownloadPrompt.value = false })
+watch(downloadAvailable, available => { if (!available) showDownloadPrompt.value = false })
 useTabLifecycle({
   beforeNavigate: savePositionOnExit,
   deactivate: savePositionOnExit,
@@ -957,490 +1111,12 @@ useTabLifecycle({
 onBeforeUnmount(() => {
   savePositionOnExit()
   releaseTwitchVodRegistration(source.value)
-  theatreModeAnimations.forEach(animation => animation.cancel())
+  theatreModeAnimator.cancel()
   loadGeneration++
   if (seekTimer !== null) clearTimeout(seekTimer)
-  window.removeEventListener('resize', updateWindowWidth)
+  window.removeEventListener('resize', updateTheatreLayoutAvailability)
   window.removeEventListener('beforeunload', savePositionOnExit)
 })
 </script>
 
-<style scoped>
-.externalMedia {
-  margin-inline: auto;
-  padding-block-end: 24px;
-}
-
-.externalMediaLayout {
-  align-items: start;
-  display: grid;
-  grid-template:
-    'video video sidebar' 0fr
-    'info info sidebar' auto / minmax(0, 1fr) minmax(0, 1fr) minmax(380px, 1fr);
-}
-
-.externalMediaVideo {
-  grid-area: video;
-  margin-block-end: 16px;
-  min-inline-size: 0;
-}
-
-.externalMediaPlayer,
-.externalMediaState {
-  inline-size: 100%;
-  max-inline-size: calc(80vh * 1.78);
-  min-inline-size: 0;
-  margin-inline: auto;
-}
-
-.externalMediaInfo {
-  display: grid;
-  gap: 16px;
-  grid-area: info;
-  min-inline-size: 0;
-  position: relative;
-  z-index: 2;
-}
-
-.externalMediaSidebar {
-  grid-area: sidebar;
-  min-inline-size: 0;
-  position: relative;
-  z-index: 2;
-}
-
-.externalMediaLayout.ambientModeActive :is(.externalMediaDetails, .externalMediaChapters),
-.externalMediaLayout.ambientModeActive .externalMediaSidebar :deep(.twitchChat) {
-  background-color: color-mix(in srgb, var(--card-bg-color) 78%, transparent);
-}
-
-.externalMediaSidebar :deep(.twitchChat),
-.externalMediaSidebar .externalMediaChapters {
-  margin-block: 0 16px;
-  margin-inline: 8px;
-}
-
-@media (width > 1350px) {
-  .externalMediaLayout:not(.useTheatreMode, .noSidebar) .externalMediaVideo {
-    margin-inline: 8px;
-  }
-}
-
-@media (width <= 1350px) {
-  .externalMediaLayout {
-    grid-template:
-      'video video video' auto
-      'info info sidebar' auto / minmax(0, 1fr) minmax(0, 1fr) minmax(380px, 1fr);
-  }
-}
-
-@container route (width >= 1051px) {
-  .externalMediaLayout.useTheatreMode {
-    grid-template:
-      'video video video' auto
-      'info info sidebar' auto / minmax(0, 1fr) minmax(0, 1fr) minmax(380px, 1fr);
-  }
-}
-
-@container route (width <= 1050px) {
-  .externalMediaLayout {
-    row-gap: 16px;
-    grid-template:
-      'video' auto
-      'info' auto
-      'sidebar' auto / minmax(0, 1fr);
-  }
-
-  .externalMediaVideo {
-    margin-block-end: 0;
-  }
-}
-
-.externalMediaLayout.noSidebar {
-  grid-template:
-    'video' auto
-    'info' auto / minmax(0, 1fr);
-}
-
-.externalMediaState {
-  aspect-ratio: 16 / 9;
-  background-color: var(--card-bg-color);
-  border: 1px solid var(--divider-color);
-  border-radius: calc(8px * var(--ui-roundness));
-  box-sizing: border-box;
-  display: grid;
-  min-block-size: 0;
-  padding: 32px;
-  place-items: center;
-}
-
-.externalMediaStateContent {
-  align-items: center;
-  display: flex;
-  flex-direction: column;
-  gap: 16px;
-  inline-size: 100%;
-  max-inline-size: 640px;
-  min-inline-size: 0;
-  text-align: center;
-}
-
-.externalMediaLoading {
-  container: external-media-loading / inline-size;
-}
-
-.externalMediaState.externalMediaLoading {
-  padding: 8px;
-}
-
-.externalMediaSpinner {
-  block-size: 40px;
-  inline-size: 40px;
-}
-
-.externalMediaSpinner :deep(.spinner) {
-  margin: 0;
-}
-
-.externalMediaLoading .externalMediaStateContent {
-  background-color: var(--bg-color);
-  border: 1px solid var(--divider-color);
-  border-radius: calc(8px * var(--ui-roundness));
-  box-sizing: border-box;
-  max-inline-size: 440px;
-  padding: 24px;
-}
-
-.externalMediaLoading .externalMediaStateContent > p {
-  font-size: 1.125rem;
-  font-weight: 600;
-}
-
-@container external-media-loading (width <= 440px) {
-  .externalMediaLoading .externalMediaStateContent {
-    gap: 4px;
-    padding: 8px;
-  }
-
-  .externalMediaSpinner {
-    block-size: 24px;
-    inline-size: 24px;
-  }
-
-  .externalMediaLoading .externalMediaStateContent > p {
-    font-size: 1rem;
-  }
-}
-
-.externalMediaStateContent > p,
-.externalMediaStateContent > h1 {
-  margin: 0;
-}
-
-.externalMediaStateContent > h1 {
-  font-size: 1.5rem;
-}
-
-.externalMediaOrigin {
-  color: var(--secondary-text-color);
-  overflow-wrap: anywhere;
-}
-
-.externalMediaErrorIcon {
-  color: var(--primary-color);
-  font-size: 48px;
-}
-
-.externalMediaDiagnostic {
-  background-color: var(--bg-color);
-  border-radius: calc(4px * var(--ui-roundness));
-  box-sizing: border-box;
-  color: var(--secondary-text-color);
-  inline-size: 100%;
-  line-height: 1.5;
-  overflow-wrap: anywhere;
-  padding: 16px;
-  text-align: center;
-}
-
-.externalMediaRetry {
-  min-block-size: 44px;
-}
-
-@media (height <= 500px) and (width > 680px) {
-  .externalMediaError {
-    padding: 16px;
-  }
-
-  .externalMediaError .externalMediaStateContent {
-    gap: 8px;
-  }
-}
-
-@media only screen and (width <= 680px) {
-  .externalMediaState {
-    padding: 20px;
-  }
-
-  .externalMediaError {
-    aspect-ratio: auto;
-  }
-}
-
-.externalMediaDetails {
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
-  margin-block-start: 0;
-  padding: 16px;
-}
-
-.externalMediaDetails .videoTitle {
-  font-size: 22px;
-  font-weight: normal;
-  line-height: 1.3;
-  margin: 0;
-  overflow-wrap: anywhere;
-}
-
-.externalMediaHeading {
-  align-items: flex-start;
-  display: flex;
-  gap: 12px;
-  justify-content: space-between;
-}
-
-.externalMediaBadges {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 4px;
-}
-
-.externalMediaBadge {
-  background-color: var(--secondary-card-bg-color);
-  border-radius: calc(5px * var(--ui-roundness));
-  font-size: 13px;
-  font-weight: 500;
-  padding-block: 2px;
-  padding-inline: 5px;
-}
-
-.externalMediaMetrics {
-  color: var(--tertiary-text-color);
-  font-size: 14px;
-}
-
-.externalMediaMetricsRow {
-  align-items: center;
-  color: var(--tertiary-text-color);
-  display: flex;
-  flex-wrap: wrap;
-  font-size: 14px;
-  gap: 10px;
-  justify-content: space-between;
-}
-
-.externalMediaMetricsRow .externalMediaMetrics {
-  flex: 1 1 240px;
-}
-
-.externalMediaMetricsRow .publishedTimeAgo,
-.externalMediaMetricsRow .videoViews {
-  white-space: nowrap;
-}
-
-@media screen and (width <= 460px) {
-  .externalMediaMetricsRow .externalMediaMetrics {
-    align-items: flex-start;
-    flex-direction: column;
-  }
-}
-
-.externalMediaCreator {
-  align-items: center;
-  display: flex;
-  flex-wrap: wrap;
-  gap: 4px 16px;
-}
-
-.externalMediaActions {
-  align-items: center;
-  display: flex;
-  flex: 0 0 auto;
-  gap: 2px;
-  margin-inline-start: auto;
-  padding: 5px;
-  border-radius: calc(16px * var(--ui-roundness));
-  background-color: var(--secondary-card-bg-color);
-  backdrop-filter: var(--secondary-card-bg-blur, none);
-  box-shadow: 0 1px 3px rgb(0 0 0 / 30%);
-}
-
-.externalMediaActions:empty {
-  display: none;
-}
-
-.externalMediaActions :deep(.iconButton) {
-  position: relative;
-  border-radius: calc(11px * var(--ui-roundness));
-  color: var(--tertiary-text-color);
-}
-
-.externalMediaActions :deep(.iconButton:not(.disabled):is(:hover, :focus-visible, .pressed)) {
-  color: var(--primary-text-color);
-}
-
-.externalMediaActions .toolbarActive :deep(.iconButton),
-.externalMediaActions .toolbarActive :deep(.iconButton:not(.disabled):is(:hover, :focus-visible, .pressed)) {
-  color: var(--accent-color);
-}
-
-.externalMediaActions .toolbarActive :deep(.iconButton)::after {
-  content: '';
-  position: absolute;
-  inset-block-end: 4px;
-  inset-inline-start: calc(50% - 2px);
-  inline-size: 4px;
-  block-size: 4px;
-  border-radius: 50%;
-  background-color: currentcolor;
-}
-
-.externalMediaActions .downloadButton {
-  min-block-size: 40px;
-  margin: 0;
-  margin-inline-start: 4px;
-  padding-inline: 12px 14px;
-}
-
-.externalMediaCreatorProfile {
-  align-items: center;
-  color: inherit;
-  display: inline-flex;
-  font-weight: 600;
-  gap: 10px;
-  text-decoration: none;
-}
-
-.externalMediaCreatorProfile[href]:hover {
-  text-decoration: underline;
-}
-
-.externalMediaCreatorAvatar {
-  block-size: 40px;
-  border-radius: 50%;
-  inline-size: 40px;
-  object-fit: cover;
-}
-
-.externalMediaSiteLink {
-  color: var(--secondary-text-color);
-  overflow-wrap: anywhere;
-}
-
-.externalMediaExtra,
-.externalMediaChapters {
-  padding: 16px;
-}
-
-.externalMediaExtra h2 {
-  font-size: 1.1rem;
-  margin-block: 0 12px;
-}
-
-.externalMediaExtra dl {
-  display: grid;
-  gap: 8px 24px;
-  grid-template-columns: repeat(auto-fit, minmax(min(100%, 260px), 1fr));
-  margin: 0;
-}
-
-.externalMediaExtra dl > div {
-  min-inline-size: 0;
-}
-
-.externalMediaExtra dt {
-  color: var(--secondary-text-color);
-  font-size: 14px;
-}
-
-.externalMediaExtra dd {
-  margin: 0;
-  overflow-wrap: anywhere;
-}
-
-.externalMediaChapters {
-  display: flex;
-  flex-direction: column;
-}
-
-.chaptersPanelHeader {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  margin-block-end: 12px;
-}
-
-.chaptersPanelHeader h2 {
-  font-size: 1.1rem;
-  margin: 0;
-}
-
-.chaptersPanelClose {
-  display: grid;
-  place-items: center;
-  inline-size: 36px;
-  block-size: 36px;
-  border: 0;
-  border-radius: 50%;
-  background-color: transparent;
-  color: inherit;
-  cursor: pointer;
-  font-size: 18px;
-}
-
-.chaptersPanelClose:hover,
-.chaptersPanelClose:focus-visible {
-  background-color: var(--side-nav-hover-color);
-}
-
-.externalMediaChapters :deep(.chaptersWrapper) {
-  max-block-size: 480px;
-  --scrollbar-color: inherit;
-  --scrollbar-color-hover: inherit;
-}
-
-.externalMediaChapters :deep(.chapter) {
-  border-block-end: 1px solid var(--side-nav-hover-color);
-  background-color: transparent;
-}
-
-.externalMediaChapters :deep(.chapter:hover),
-.externalMediaChapters :deep(.chapter:focus-within) {
-  background-color: color-mix(in srgb, var(--side-nav-hover-color) 60%, transparent);
-}
-
-.externalMediaChapters :deep(.chapter.current),
-.externalMediaChapters :deep(.chapter.current:hover),
-.externalMediaChapters :deep(.chapter.current:focus-within) {
-  background-color: var(--side-nav-hover-color);
-}
-
-.externalMediaChapters :deep(.chapterSeek),
-.externalMediaChapters :deep(.chapterAction) {
-  color: inherit;
-}
-
-.externalMediaChapters :deep(.loopChapter.active) {
-  color: var(--accent-color);
-}
-
-.externalMediaChapters :deep(.chapterAction:hover),
-.externalMediaChapters :deep(.chapterAction:focus-visible) {
-  background-color: var(--side-nav-hover-color);
-}
-
-.externalMediaChapters :deep(.chapterThumbnail) {
-  background-color: var(--secondary-card-bg-color);
-}
-</style>
+<style scoped src="./ExternalMedia.scss" lang="scss" />

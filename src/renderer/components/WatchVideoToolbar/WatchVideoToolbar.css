@@ -1,0 +1,144 @@
+.videoOptions {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  padding: 5px;
+  border-radius: calc(16px * var(--ui-roundness));
+  background-color: var(--secondary-card-bg-color);
+  backdrop-filter: var(--secondary-card-bg-blur, none);
+  box-shadow: 0 1px 3px rgb(0 0 0 / 30%);
+}
+
+/*
+  Blurred theme cards give the card and the toolbar backdrop filters, which
+  make them stacking contexts. Lift both while a dropdown is open, or the cards
+  below would paint over it. The card does the same.
+*/
+.videoOptions:has(.iconDropdown) {
+  position: relative;
+  z-index: 1;
+}
+
+.videoOptions:not(:has(> .videoOptionsMobileRow:not(:empty))) {
+  display: none;
+}
+
+.videoOptionsMobileRow {
+  display: flex;
+  flex-shrink: 0;
+  align-items: center;
+  gap: 2px;
+}
+
+.videoOptionsMobileRow:empty {
+  display: none;
+}
+
+/*
+  When the labeled toolbar does not fit, it takes its own line and every button
+  gets an equal share of it. The groups step aside so that the buttons of both
+  share one row, and their divider becomes a toolbar item. The script moves
+  actions to the More menu to keep the buttons touch-sized, but the ones with
+  menus of their own may still have to shrink on very narrow screens. The
+  toolbar measures its natural layout while it has the measuring class.
+*/
+.videoOptions.even:not(.measuring) {
+  flex-basis: 100%;
+}
+
+.videoOptions.even:not(.measuring) .videoOptionsMobileRow {
+  display: contents;
+}
+
+.videoOptions.even:not(.measuring) .videoOptionsMobileRow > :deep(*) {
+  flex: 1 1 0;
+}
+
+.videoOptions.even:not(.measuring) :deep(.iconButton) {
+  flex: 1;
+  min-inline-size: 0;
+}
+
+.videoOptions.measuring .moreActions {
+  display: none;
+}
+
+.videoOptionsMobileRow:not(:empty) + .videoOptionsMobileRow:not(:empty)::before {
+  content: '';
+  inline-size: 1px;
+  block-size: 22px;
+  margin-inline: 5px;
+  background-color: var(--scrollbar-color);
+}
+
+.videoOptions :deep(.iconButton) {
+  position: relative;
+  border-radius: calc(11px * var(--ui-roundness));
+  color: var(--primary-text-color);
+}
+
+.videoOptions :deep(.iconButton:not(.disabled):is(:hover, :focus-visible, .pressed)) {
+  color: var(--primary-text-color);
+}
+
+.videoOptions :deep(.iconButton.favorite),
+.videoOptions :deep(.iconButton.favorite:not(.disabled):is(:hover, :focus-visible, .pressed)) {
+  color: var(--favorite-icon-color);
+}
+
+.videoOptions :deep(.toolbarActive .iconButton),
+.videoOptions :deep(.toolbarActive .iconButton:not(.disabled):is(:hover, :focus-visible, .pressed)) {
+  color: var(--accent-color);
+}
+
+.videoOptions :deep(.toolbarActive .iconButton::after) {
+  content: '';
+  position: absolute;
+  inset-block-end: 4px;
+  inset-inline-start: calc(50% - 2px);
+  inline-size: 4px;
+  block-size: 4px;
+  border-radius: 50%;
+  background-color: currentcolor;
+}
+
+.videoOptions :deep(.downloadButton) {
+  min-block-size: 40px;
+  margin: 0;
+  margin-inline-start: 4px;
+  padding-inline: 12px 14px;
+}
+
+.videoOptions.even:not(.measuring) :deep(.downloadButton) {
+  min-inline-size: 0;
+  margin-inline-start: 0;
+  padding-inline: 0;
+
+  /* Matches the icon size of the other buttons */
+  font-size: 20px;
+
+  /* Even a transparent border would make it wider than the other buttons */
+  border-width: 0;
+}
+
+.videoOptions.even:not(.measuring) :deep(.downloadLabel) {
+  display: none;
+}
+
+@media (pointer: coarse), (width <= 680px) {
+  .videoOptions :deep(.iconButton) {
+    min-inline-size: 48px;
+    min-block-size: 48px;
+  }
+
+  .videoOptions :deep(.downloadButton) {
+    min-block-size: 48px;
+  }
+}
+
+
+@media screen and (width <= 380px) {
+  .videoOptionsMobileRow :deep(.iconDropdown) {
+    inset-inline: 0 auto;
+  }
+}

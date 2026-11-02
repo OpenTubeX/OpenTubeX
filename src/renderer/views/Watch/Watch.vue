@@ -839,17 +839,10 @@
       v-if="(isFamilyFriendly !== false || !showFamilyFriendlyOnly)"
       class="infoArea"
     >
-      <div
+      <WatchVideoInfoSkeleton
         v-if="isLoading"
-        class="watchVideo infoSkeleton"
-        aria-hidden="true"
-      >
-        <div class="skeletonLine skeletonTitle ft-shimmer" />
-        <div class="skeletonInfoRow">
-          <div class="skeletonAvatar ft-shimmer" />
-          <div class="skeletonLine skeletonChannel ft-shimmer" />
-        </div>
-      </div>
+        class="watchVideo"
+      />
       <Teleport
         :to="fullscreenMetadataTarget || 'body'"
         :disabled="!fullscreenMetadataOpen"
@@ -1104,167 +1097,113 @@
           </div>
         </div>
       </div>
-      <FtPhonePanel
-        :enabled="phonePanelsEnabled || shortsPhonePanelsEnabled"
-        :open="mobilePanel === 'chapters'"
-        fill
+      <WatchSidebarPanel
+        :phone-enabled="phonePanelsEnabled || shortsPhonePanelsEnabled"
+        :phone-open="mobilePanel === 'chapters'"
         :title="videoChaptersKind === 'keyMoments' ? $t('Chapters.Key Moments') : $t('Chapters.Chapters')"
+        transition="chapters-panel"
         @close="closeSidebarChapters"
+        @leaving="sidebarPanelLeaving = $event"
       >
-        <transition
-          name="chapters-panel"
-          @before-leave="handleSidebarPanelBeforeLeave"
-          @after-leave="handleSidebarPanelAfterLeave"
-          @leave-cancelled="handleSidebarPanelAfterLeave"
-        >
-          <div
-            v-if="showSidebarChapters && !isLoading && videoChapters.length > 0"
-            class="watchVideoSideBar watchVideoChaptersPanel"
-          >
-            <div class="chaptersPanelHeader">
-              <h3 class="chaptersPanelTitle">
-                {{ videoChaptersKind === 'keyMoments' ? $t('Chapters.Key Moments') : $t('Chapters.Chapters') }}
-              </h3>
-              <button
-                type="button"
-                class="chaptersPanelClose"
-                :aria-label="$t('Chapters.Close Chapters')"
-                :title="$t('Chapters.Close Chapters')"
-                @click="closeSidebarChapters"
-              >
-                <ft-icon :icon="['fas', 'xmark']" />
-              </button>
-            </div>
-            <watch-video-chapters
-              :chapters="videoChapters"
-              :chapter-thumbnails="videoChapterThumbnails"
-              :current-chapter-index="videoCurrentChapterIndex"
-              :fallback-thumbnail="thumbnail"
-              :looped-chapter-index="videoLoopedChapterIndex"
-              @copy-timestamp="copyChapterTimestamp"
-              @loop-chapter="$refs.player?.toggleChapterLoop($event)"
-              @timestamp-event="changeTimestamp"
-            />
-          </div>
-        </transition>
-      </FtPhonePanel>
-      <Teleport
-        :to="fullscreenSponsorBlockTarget || 'body'"
-        :disabled="!fullscreenSponsorBlockOpen || shortsPhonePanelsEnabled"
+        <WatchVideoChaptersPanel
+          v-if="showSidebarChapters && !isLoading && videoChapters.length > 0"
+          class="watchVideoSideBar"
+          :title="videoChaptersKind === 'keyMoments' ? $t('Chapters.Key Moments') : $t('Chapters.Chapters')"
+          :chapters="videoChapters"
+          :chapter-thumbnails="videoChapterThumbnails"
+          :current-chapter-index="videoCurrentChapterIndex"
+          :fallback-thumbnail="thumbnail"
+          :looped-chapter-index="videoLoopedChapterIndex"
+          @close="closeSidebarChapters"
+          @copy-timestamp="copyChapterTimestamp"
+          @loop-chapter="$refs.player?.toggleChapterLoop($event)"
+          @timestamp-event="changeTimestamp"
+        />
+      </WatchSidebarPanel>
+      <WatchSidebarPanel
+        :dock-target="fullscreenSponsorBlockOpen && !shortsPhonePanelsEnabled ? fullscreenSponsorBlockTarget : null"
+        :phone-enabled="(phonePanelsEnabled && !fullscreenSponsorBlockOpen) || shortsPhonePanelsEnabled"
+        :phone-open="mobilePanel === 'sponsorBlock'"
+        :title="$t('Settings.SponsorBlock Settings.SponsorBlock Settings')"
+        custom-header
+        @close="fullscreenSponsorBlockOpen ? mobilePanel = null : closeSidebarSponsorBlock()"
+        @leaving="sidebarPanelLeaving = $event"
       >
-        <FtPhonePanel
-          :enabled="(phonePanelsEnabled && !fullscreenSponsorBlockOpen) || shortsPhonePanelsEnabled"
-          :open="mobilePanel === 'sponsorBlock'"
-          :title="$t('Settings.SponsorBlock Settings.SponsorBlock Settings')"
-          fill
-          custom-header
-          @close="fullscreenSponsorBlockOpen ? mobilePanel = null : closeSidebarSponsorBlock()"
-        >
-          <transition
-            name="sidebar-panel"
-            @before-leave="handleSidebarPanelBeforeLeave"
-            @after-leave="handleSidebarPanelAfterLeave"
-            @leave-cancelled="handleSidebarPanelAfterLeave"
-          >
-            <watch-video-sponsor-block
-              v-if="showSidebarSponsorBlock && !isLoading && (!customShortsPlayerActive || fullscreenSponsorBlockOpen || shortsPhonePanelsEnabled)"
-              class="watchVideoSideBar watchVideoSponsorBlock"
-              :offline="isOffline"
-              :loading="sponsorBlockInfoLoading"
-              :pending-uuid="sponsorBlockInfoPendingUuid"
-              :segments="sponsorBlockInfoSegments"
-              :submission-enabled="sponsorBlockInfoSubmissionEnabled"
-              :contribution-stats="sponsorBlockContributionStats"
-              :contribution-stats-error="sponsorBlockContributionStatsError"
-              :contribution-stats-loaded="sponsorBlockContributionStatsLoaded"
-              :contribution-stats-loading="sponsorBlockContributionStatsLoading"
-              :auto-skip-disabled="sponsorBlockAutoSkipTemporarilyDisabled"
-              :channel-whitelisted="isSponsorBlockChannelWhitelisted"
-              :can-whitelist-channel="Boolean(channelId)"
-              :current-time="liveChatCurrentTime"
-              @close="closeSidebarSponsorBlock"
-              @refresh="refreshSponsorBlockInfo"
-              @skip="skipSponsorBlockInfoSegment"
-              @auto-skip-change="handleSponsorBlockAutoSkipToggle"
-              @channel-whitelist-change="handleSponsorBlockChannelWhitelistToggle"
-              @vote="voteOnSponsorBlockInfoSegment"
-              @category-vote="changeSponsorBlockInfoSegmentCategory"
-              @copy-and-downvote="copyAndDownvoteSponsorBlockInfoSegment"
-            />
-          </transition>
-        </FtPhonePanel>
-      </Teleport>
-      <Teleport
-        :to="fullscreenTranscriptTarget || 'body'"
-        :disabled="!fullscreenTranscriptOpen || shortsPhonePanelsEnabled"
+        <watch-video-sponsor-block
+          v-if="showSidebarSponsorBlock && !isLoading && (!customShortsPlayerActive || fullscreenSponsorBlockOpen || shortsPhonePanelsEnabled)"
+          class="watchVideoSideBar watchVideoSponsorBlock"
+          :offline="isOffline"
+          :loading="sponsorBlockInfoLoading"
+          :pending-uuid="sponsorBlockInfoPendingUuid"
+          :segments="sponsorBlockInfoSegments"
+          :submission-enabled="sponsorBlockInfoSubmissionEnabled"
+          :contribution-stats="sponsorBlockContributionStats"
+          :contribution-stats-error="sponsorBlockContributionStatsError"
+          :contribution-stats-loaded="sponsorBlockContributionStatsLoaded"
+          :contribution-stats-loading="sponsorBlockContributionStatsLoading"
+          :auto-skip-disabled="sponsorBlockAutoSkipTemporarilyDisabled"
+          :channel-whitelisted="isSponsorBlockChannelWhitelisted"
+          :can-whitelist-channel="Boolean(channelId)"
+          :current-time="liveChatCurrentTime"
+          @close="closeSidebarSponsorBlock"
+          @refresh="refreshSponsorBlockInfo"
+          @skip="skipSponsorBlockInfoSegment"
+          @auto-skip-change="handleSponsorBlockAutoSkipToggle"
+          @channel-whitelist-change="handleSponsorBlockChannelWhitelistToggle"
+          @vote="voteOnSponsorBlockInfoSegment"
+          @category-vote="changeSponsorBlockInfoSegmentCategory"
+          @copy-and-downvote="copyAndDownvoteSponsorBlockInfoSegment"
+        />
+      </WatchSidebarPanel>
+      <WatchSidebarPanel
+        :dock-target="fullscreenTranscriptOpen && !shortsPhonePanelsEnabled ? fullscreenTranscriptTarget : null"
+        :phone-enabled="phonePanelsEnabled || shortsPhonePanelsEnabled"
+        :phone-open="mobilePanel === 'transcript'"
+        :title="$t('Video.Transcript.Title')"
+        custom-header
+        @close="closeTranscript"
+        @leaving="sidebarPanelLeaving = $event"
       >
-        <FtPhonePanel
-          :enabled="phonePanelsEnabled || shortsPhonePanelsEnabled"
-          :open="mobilePanel === 'transcript'"
-          custom-header
-          :title="$t('Video.Transcript.Title')"
-          fill
+        <watch-video-transcript
+          v-if="(showTranscript || (isOffline && transcriptLoaded)) && transcriptAvailable && !isLoading && !isLive && !isUpcoming && (!customShortsPlayerActive || fullscreenTranscriptOpen || shortsPhonePanelsEnabled)"
+          v-show="showTranscript"
+          :captions="captions"
+          :offline="isOffline"
+          :current-time="showTranscript ? currentTime : liveChatCurrentTime"
+          :preferred-caption-index="preferredTranscriptCaptionIndex"
+          :video-title="videoTitle"
+          :fullscreen-overlay="fullscreenTranscriptOpen"
+          class="watchVideoSideBar watchVideoTranscript"
+          @loaded="transcriptLoaded = $event"
           @close="closeTranscript"
-        >
-          <transition
-            name="sidebar-panel"
-            @before-leave="handleSidebarPanelBeforeLeave"
-            @after-leave="handleSidebarPanelAfterLeave"
-            @leave-cancelled="handleSidebarPanelAfterLeave"
-          >
-            <watch-video-transcript
-              v-if="(showTranscript || (isOffline && transcriptLoaded)) && transcriptAvailable && !isLoading && !isLive && !isUpcoming && (!customShortsPlayerActive || fullscreenTranscriptOpen || shortsPhonePanelsEnabled)"
-              v-show="showTranscript"
-              :captions="captions"
-              :offline="isOffline"
-              :current-time="showTranscript ? currentTime : liveChatCurrentTime"
-              :preferred-caption-index="preferredTranscriptCaptionIndex"
-              :video-title="videoTitle"
-              :fullscreen-overlay="fullscreenTranscriptOpen"
-              class="watchVideoSideBar watchVideoTranscript"
-              @loaded="transcriptLoaded = $event"
-              @close="closeTranscript"
-              @timestamp-event="playTranscriptSegment"
-            />
-          </transition>
-        </FtPhonePanel>
-      </Teleport>
-      <Teleport
-        :to="fullscreenLiveChatTarget || 'body'"
-        :disabled="!fullscreenLiveChatOpen || shortsPhonePanelsEnabled"
+          @timestamp-event="playTranscriptSegment"
+        />
+      </WatchSidebarPanel>
+      <WatchSidebarPanel
+        :dock-target="fullscreenLiveChatOpen && !shortsPhonePanelsEnabled ? fullscreenLiveChatTarget : null"
+        :phone-enabled="phonePanelsEnabled || shortsPhonePanelsEnabled"
+        :phone-open="mobilePanel === 'chat'"
+        :title="liveChatIsReplay ? $t('Video.Live Chat Replay') : $t('Video.Live Chat')"
+        custom-header
+        @close="closeLiveChat"
+        @leaving="sidebarPanelLeaving = $event"
       >
-        <FtPhonePanel
-          :enabled="phonePanelsEnabled || shortsPhonePanelsEnabled"
-          :open="mobilePanel === 'chat'"
-          custom-header
-          :title="liveChatIsReplay ? $t('Video.Live Chat Replay') : $t('Video.Live Chat')"
-          fill
+        <watch-video-live-chat
+          v-if="!isLoading && (showLiveChat || (isOffline && liveChatLoaded))"
+          v-show="showLiveChat"
+          :offline="isOffline"
+          :live-chat="liveChat"
+          :video-id="videoId"
+          :channel-id="channelId"
+          :current-time="liveChatCurrentTime"
+          :seek-request="liveChatSeekRequest"
+          :fullscreen-overlay="fullscreenLiveChatOpen"
+          class="watchVideoSideBar watchVideoPlaylist phoneLiveChat"
+          :class="{ theatrePlaylist: useTheatreMode }"
+          @loaded="liveChatLoaded = $event"
           @close="closeLiveChat"
-        >
-          <transition
-            name="sidebar-panel"
-            @before-leave="handleSidebarPanelBeforeLeave"
-            @after-leave="handleSidebarPanelAfterLeave"
-            @leave-cancelled="handleSidebarPanelAfterLeave"
-          >
-            <watch-video-live-chat
-              v-if="!isLoading && (showLiveChat || (isOffline && liveChatLoaded))"
-              v-show="showLiveChat"
-              :offline="isOffline"
-              :live-chat="liveChat"
-              :video-id="videoId"
-              :channel-id="channelId"
-              :current-time="liveChatCurrentTime"
-              :seek-request="liveChatSeekRequest"
-              :fullscreen-overlay="fullscreenLiveChatOpen"
-              class="watchVideoSideBar watchVideoPlaylist phoneLiveChat"
-              :class="{ theatrePlaylist: useTheatreMode }"
-              @loaded="liveChatLoaded = $event"
-              @close="closeLiveChat"
-            />
-          </transition>
-        </FtPhonePanel>
-      </Teleport>
+        />
+      </WatchSidebarPanel>
       <Teleport
         :to="fullscreenQueueTarget || 'body'"
         :disabled="!fullscreenQueueOpen"

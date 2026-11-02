@@ -93,7 +93,9 @@ function resumeReadingPosition() {
 
 function handleClosed() {
   panelRendered.value = false
-  if (props.open) emit('close')
+  // The sheet closed without being dismissed, for example because it was
+  // disabled. Pages can tell this from a user closing the panel.
+  if (props.open) emit('close', 'presentation')
 }
 </script>
 
