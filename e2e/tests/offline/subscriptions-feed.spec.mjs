@@ -804,6 +804,51 @@ test.describe('subscriptions feed with upcoming premieres shown', () => {
   })
 })
 
+test.describe('subscriptions feed preferring untranslated text in the entire app', () => {
+  /** Resolves the held original-title lookup of the upcoming premiere. */
+  let releaseOriginalTitle
+  test.use({
+    seed: {
+      ...seed,
+      settings: { ...seed.settings, hideUpcomingPremieres: false, avoidTranslation: 'entire_app' }
+    },
+    // Held from launch, so the card keeps showing the feed title until the test releases it.
+    // eslint-disable-next-line no-empty-pattern -- Playwright requires a fixture object
+    onPhase: async ({}, use) => use(async (phase, _page, electronApp) => {
+      if (phase !== 'electronConnected') return
+      const released = new Promise(resolve => { releaseOriginalTitle = resolve })
+      await electronApp.context().route(/\/oembed\?.*aaaaaaaaaa3/, async route => {
+        await released
+        await route.fulfill({ json: { title: 'Original premiere title' } })
+      })
+    })
+  })
+
+  const setReminder = async (app, release) => {
+    await app.electronApp.evaluate(({ Notification }) => {
+      Notification.isSupported = () => true
+    })
+    const page = app.page
+    await goTo(page, 'subscriptions')
+    const upcomingPremiere = page.locator('.ft-list-video').filter({ has: page.locator('a[href*="aaaaaaaaaa3"]') })
+    await expect(upcomingPremiere.getByText('Upcoming premiere video', { exact: true })).toBeVisible()
+    await upcomingPremiere.getByRole('button', { name: 'Notify me', exact: true }).click()
+    if (release) releaseOriginalTitle()
+    await expect(upcomingPremiere.getByRole('button', { name: 'Notification on', exact: true })).toHaveAttribute('aria-pressed', 'true')
+    return page.evaluate(() => window.ftElectron.liveReminder.get('aaaaaaaaaa3'))
+  }
+
+  test('a reminder uses the original title before the card shows it', async ({ app }) => {
+    const reminder = await setReminder(app, true)
+    expect(reminder.notificationBody).toBe('Original premiere title is starting now')
+  })
+
+  test('a reminder falls back to the shown title when the original title does not load', async ({ app }) => {
+    const reminder = await setReminder(app, false)
+    expect(reminder.notificationBody).toBe('Upcoming premiere video is starting now')
+  })
+})
+
 test.describe('scheduled live streams in the Live tab', () => {
   const liveStream = (videoId, title, published, extra = {}) => feedVideo(videoId, title, CHANNEL_A, published, {
     isNewInSubscriptionFeed: false,

@@ -593,7 +593,9 @@ function runApp() {
   const userDataPath = app.getPath('userData')
   const uploadNotifier = createUploadNotifier({
     file: path.join(userDataPath, 'upload-notifications.json'),
-    show: showUrlNotification
+    show: showUrlNotification,
+    // Uses the session's proxy settings, like the background refresh requests.
+    fetch: (input, init) => net.fetch(input, init)
   })
   const backgroundSubscriptions = createSubscriptionBackgroundService(userDataPath, {
     onUploads: value => uploadNotifier.observe(value).catch(() => {})
@@ -3744,6 +3746,9 @@ function runApp() {
         updateWatchQueue({}),
         baseHandlers.compactAllDatastores(),
         shutdownYtDlpDownloads(),
+        // Uploads are saved as notified before an original title lookup, so a
+        // quit during the lookup would otherwise lose their alerts.
+        uploadNotifier.settle(),
         session.defaultSession.clearCache(),
         session.defaultSession.clearStorageData({
           storages: [

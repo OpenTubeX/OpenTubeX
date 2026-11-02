@@ -213,6 +213,120 @@ test('members-only uploads seen while hidden stay known once they become visible
   }
 })
 
+test('the desktop notifier shows original video titles when untranslated text is preferred', async () => {
+  const directory = await mkdtemp(path.join(tmpdir(), 'upload-notifications-'))
+  try {
+    const shown = []
+    const requested = []
+    const notifier = createUploadNotifier({
+      file: path.join(directory, 'state.json'),
+      show: notification => shown.push(notification),
+      fetch: async (url, init) => {
+        const videoId = new URL(new URL(url).searchParams.get('url')).searchParams.get('v')
+        assert.equal(init.credentials, 'omit')
+        requested.push(videoId)
+        if (videoId === 'missing') return new Response('Not Found', { status: 404 })
+        return Response.json({ title: `Original ${videoId}` })
+      }
+    })
+    const configure = originalTitles => notifier.configure(createUploadNotificationConfiguration({
+      enabled: true,
+      subscriptions: [{ id: 'UC1', name: 'One', feedTypes: ['videos', 'posts'], notificationFeedTypes: ['videos', 'posts'] }],
+      showMembersOnly: false,
+      titles: { videos: '{channel}', posts: '{channel}' },
+      originalTitles
+    }))
+    await configure(true)
+    await notifier.observe({ channelId: 'UC1', feedType: 'videos', entries: [entry('a')] })
+    await notifier.observe({ channelId: 'UC1', feedType: 'posts', entries: [entry('p')] })
+    await notifier.observe({ channelId: 'UC1', feedType: 'videos', entries: [entry('missing', Date.now()), entry('b', Date.now()), entry('a')] })
+    await notifier.observe({ channelId: 'UC1', feedType: 'posts', entries: [entry('q', Date.now()), entry('p')] })
+    await configure(false)
+    await notifier.observe({ channelId: 'UC1', feedType: 'videos', entries: [entry('c', Date.now()), entry('missing', Date.now()), entry('b', Date.now()), entry('a')] })
+
+    assert.deepEqual(shown.map(notification => notification.body), ['Title missing', 'Original b', 'Title q', 'Title c'])
+    assert.deepEqual(requested, ['missing', 'b'])
+  } finally {
+    await rm(directory, { recursive: true, force: true })
+  }
+})
+
+test('the desktop notifier drops notifications turned off during the original title lookup', async () => {
+  const directory = await mkdtemp(path.join(tmpdir(), 'upload-notifications-'))
+  try {
+    const shown = []
+    let requested
+    const lookup = new Promise(resolve => { requested = resolve })
+    let respond
+    const notifier = createUploadNotifier({
+      file: path.join(directory, 'state.json'),
+      show: notification => shown.push(notification),
+      fetch: () => {
+        requested()
+        return new Promise(resolve => { respond = resolve })
+      }
+    })
+    await notifier.configure({
+      enabled: true,
+      originalTitles: true,
+      titles: { videos: '{channel}' },
+      channels: { UC1: { name: 'One', feedTypes: ['videos'], membersOnly: false } }
+    })
+    await notifier.observe({ channelId: 'UC1', feedType: 'videos', entries: [entry('a')] })
+    const observed = notifier.observe({ channelId: 'UC1', feedType: 'videos', entries: [entry('b', Date.now()), entry('a')] })
+    await lookup
+    await notifier.configure({ enabled: false })
+    respond(Response.json({ title: 'Original b' }))
+    await observed
+    assert.deepEqual(shown, [])
+  } finally {
+    await rm(directory, { recursive: true, force: true })
+  }
+})
+
+test('the desktop notifier settles once alerts waiting for an original title are shown', async () => {
+  const directory = await mkdtemp(path.join(tmpdir(), 'upload-notifications-'))
+  try {
+    const shown = []
+    const responders = []
+    let requested
+    const nextLookup = () => new Promise(resolve => { requested = resolve })
+    let lookup = nextLookup()
+    const notifier = createUploadNotifier({
+      file: path.join(directory, 'state.json'),
+      show: notification => shown.push(notification.body),
+      fetch: url => new Promise(resolve => {
+        responders.push(() => resolve(Response.json({ title: `Original ${new URL(new URL(url).searchParams.get('url')).searchParams.get('v')}` })))
+        requested()
+      })
+    })
+    await notifier.configure({
+      enabled: true,
+      originalTitles: true,
+      titles: { videos: '{channel}' },
+      channels: { UC1: { name: 'One', feedTypes: ['videos'], membersOnly: false } }
+    })
+    await notifier.observe({ channelId: 'UC1', feedType: 'videos', entries: [entry('a')] })
+    notifier.observe({ channelId: 'UC1', feedType: 'videos', entries: [entry('b', Date.now()), entry('a')] })
+    await lookup
+    // The upload is already saved as notified, so quitting now must wait for its alert.
+    let settled = false
+    const settling = notifier.settle().then(() => { settled = true })
+    // An alert that starts while settling is waited for too.
+    lookup = nextLookup()
+    notifier.observe({ channelId: 'UC1', feedType: 'videos', entries: [entry('c', Date.now()), entry('b', Date.now()), entry('a')] })
+    await lookup
+    responders.shift()()
+    await new Promise(resolve => setImmediate(resolve))
+    assert.equal(settled, false)
+    responders.shift()()
+    await settling
+    assert.deepEqual(shown, ['Original b', 'Original c'])
+  } finally {
+    await rm(directory, { recursive: true, force: true })
+  }
+})
+
 test('post text decodes named and numeric entities', () => {
   const [post] = normalizeUploadEntries([{ postId: 'p', postText: 'a&nbsp;b &#39;c&#x27; &AMP; &unknown; &#99999999;' }])
   assert.equal(post.title, "a\u00A0b 'c' & &unknown; &#99999999;")

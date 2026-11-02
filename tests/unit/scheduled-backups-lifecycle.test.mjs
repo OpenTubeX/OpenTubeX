@@ -29,6 +29,7 @@ function lifecycle(platform) {
     updateWatchQueue: async () => {},
     baseHandlers: { compactAllDatastores: async () => {} },
     shutdownYtDlpDownloads: async () => {},
+    uploadNotifier: { settle: async () => {} },
     session: { defaultSession: { clearCache: async () => {}, clearStorageData: async () => {} } },
   })
   vm.runInContext(`let resourcesCleanUpDone = false; let resourcesCleanUpPromise = null; ${events}\n${handleQuit}\n${cleanup}`, context)

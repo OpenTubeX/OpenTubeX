@@ -17,6 +17,8 @@ import com.getcapacitor.annotation.CapacitorPlugin;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.UUID;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 import java.util.function.Consumer;
 
 import androidx.core.content.ContextCompat;
@@ -24,6 +26,8 @@ import org.json.JSONException;
 
 @CapacitorPlugin(name = "SubscriptionRefresh")
 public class SubscriptionRefreshPlugin extends Plugin {
+    // Original title lookups use the network, so they must not block other plugin calls.
+    private static final ExecutorService UPLOADS = Executors.newSingleThreadExecutor();
     private BroadcastReceiver cancellationReceiver;
     private Consumer<Boolean> rendererActiveListener;
     private volatile String rendererToken;
@@ -107,7 +111,10 @@ public class SubscriptionRefreshPlugin extends Plugin {
         // The renderer cannot finish its refresh once its WebView is destroyed.
         // Only release work acquired by this plugin, leaving scheduled work alone.
         if (rendererToken != null) {
-            SubscriptionRefreshWorker.finish(getContext(), rendererToken);
+            // Behind pending upload checks, like a finished refresh.
+            Context context = getContext();
+            String token = rendererToken;
+            UPLOADS.execute(() -> SubscriptionRefreshWorker.finish(context, token));
             rendererToken = null;
         }
         if (cancellationReceiver != null) {
@@ -169,7 +176,8 @@ public class SubscriptionRefreshPlugin extends Plugin {
         batchActive = false;
         if (waitingForNextFeed) {
             waitingForNextFeed = false;
-            SubscriptionRefreshWorker.finish(getContext(), rendererToken);
+            finishAfterUploadChecks(call, rendererToken);
+            return;
         }
         call.resolve();
     }
@@ -206,12 +214,15 @@ public class SubscriptionRefreshPlugin extends Plugin {
             call.reject("A channel feed is required");
             return;
         }
-        try {
-            UploadNotifications.observe(getContext(), channelId, feedType, entries);
-            call.resolve();
-        } catch (Exception error) {
-            call.reject("Unable to check for new uploads", error);
-        }
+        Context context = getContext();
+        UPLOADS.execute(() -> {
+            try {
+                UploadNotifications.observe(context, channelId, feedType, entries);
+                call.resolve();
+            } catch (Exception error) {
+                call.reject("Unable to check for new uploads", error);
+            }
+        });
     }
 
     @PluginMethod
@@ -311,9 +322,26 @@ public class SubscriptionRefreshPlugin extends Plugin {
         }
         if (batchActive && token.equals(rendererToken) && SubscriptionRefreshWorker.isRendererActive(token)) {
             waitingForNextFeed = true;
+            call.resolve();
         } else {
-            SubscriptionRefreshWorker.finish(getContext(), token);
+            finishAfterUploadChecks(call, token);
         }
-        call.resolve();
+    }
+
+    /**
+     * Upload checks run after the refresh reports its feeds. Queue the release of the
+     * foreground service behind them, so their notifications are shown before the process
+     * can be stopped, without blocking other plugin calls or the main thread meanwhile.
+     */
+    private void finishAfterUploadChecks(PluginCall call, String token) {
+        Context context = getContext();
+        UPLOADS.execute(() -> {
+            try {
+                SubscriptionRefreshWorker.finish(context, token);
+                call.resolve();
+            } catch (RuntimeException error) {
+                call.reject("Unable to finish the subscription refresh", error);
+            }
+        });
     }
 }

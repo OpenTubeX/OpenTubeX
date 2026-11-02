@@ -10,10 +10,12 @@ import { isWithinDailyWindow, minuteOfDay } from './renderer/helpers/digitalWell
  *   hiddenFeedTypes?: string[],
  *   showMembersOnly: boolean,
  *   titles: Record<string, string>,
- *   quietHours?: { start: number, end: number } | null
- * }} input quiet hours are minutes since midnight during which notifications are silent
+ *   quietHours?: { start: number, end: number } | null,
+ *   originalTitles?: boolean
+ * }} input quiet hours are minutes since midnight during which notifications are silent;
+ * original titles replace YouTube's auto-translated video titles
  */
-export function createUploadNotificationConfiguration({ enabled, subscriptions, hiddenFeedTypes = [], showMembersOnly, titles, quietHours = null }) {
+export function createUploadNotificationConfiguration({ enabled, subscriptions, hiddenFeedTypes = [], showMembersOnly, titles, quietHours = null, originalTitles = false }) {
   const channels = enabled
     ? Object.fromEntries(subscriptions.flatMap(channel => {
         if (typeof channel?.id !== 'string' || channel.id.length === 0) return []
@@ -29,7 +31,7 @@ export function createUploadNotificationConfiguration({ enabled, subscriptions, 
       }))
     : {}
   if (Object.keys(channels).length === 0) return { enabled: false }
-  return { enabled: true, titles, channels, ...(quietHours ? { quietHours } : {}) }
+  return { enabled: true, titles, channels, ...(quietHours ? { quietHours } : {}), ...(originalTitles ? { originalTitles } : {}) }
 }
 
 /**

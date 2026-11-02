@@ -784,6 +784,7 @@ const isWatched = computed(() => isHistoryEntryWatched(historyEntry.value))
 const premiereTimestamp = computed(() => getUpcomingPremiereTimestamp(props.data))
 const premiereNow = ref(Date.now())
 const MAX_TIMEOUT_DELAY = 2_147_483_647
+const LIVE_REMINDER_TITLE_TIMEOUT_MS = 5000
 let premiereStartTimer = null
 
 const canToggleLiveReminder = computed(() => (
@@ -1281,12 +1282,25 @@ const videoMenuOptions = computed(() => {
   return normalizedOptions
 })
 
-function getLiveReminderPayload() {
+/** Callers check that the card still shows the video before scheduling the payload. */
+async function getLiveReminderPayload() {
+  const videoId = id.value
+  let videoTitle = title.value
+  // The original title may still be loading, or have failed to load, for the shown title.
+  // Requests wait out network outages, so fall back to the shown title instead of
+  // holding the reminder back. Close to the start, a lookup could outlast the
+  // premiere, and a reminder for a past start cannot be scheduled.
+  if (store.getters.getAvoidTranslation === 'entire_app' &&
+    premiereTimestamp.value - Date.now() > LIVE_REMINDER_TITLE_TIMEOUT_MS) {
+    const timeout = new Promise(resolve => setTimeout(resolve, LIVE_REMINDER_TITLE_TIMEOUT_MS, null))
+    videoTitle = await Promise.race([getOembedTitle(videoId), timeout]) ?? videoTitle
+  }
   return {
-    videoId: id.value,
+    videoId,
+    // Read after the lookup, so a premiere time that changed meanwhile is scheduled.
     startTimestamp: premiereTimestamp.value,
     notificationTitle: t('Video.Scheduled video starting'),
-    notificationBody: t('Video.Live notification body', { videoTitle: title.value })
+    notificationBody: t('Video.Live notification body', { videoTitle })
   }
 }
 
@@ -1311,7 +1325,14 @@ async function syncLiveReminder() {
     }
 
     if (reminder && reminder.startTimestamp !== startTimestamp) {
-      liveReminderActive.value = await liveReminder.schedule(getLiveReminderPayload())
+      const payload = await getLiveReminderPayload()
+      // A toggle or newer sync during the title lookup takes over.
+      if (
+        generation !== liveReminderLoadGeneration ||
+        videoId !== id.value ||
+        payload.startTimestamp !== startTimestamp
+      ) return
+      liveReminderActive.value = await liveReminder.schedule(payload)
     } else {
       liveReminderActive.value = reminder !== null
     }
@@ -1324,6 +1345,8 @@ async function toggleLiveReminder() {
   if (liveReminderLoading.value || !canToggleLiveReminder.value) return
 
   const videoId = id.value
+  // Invalidates a pending sync, so it cannot reschedule a canceled reminder.
+  liveReminderLoadGeneration++
   liveReminderLoading.value = true
   try {
     if (liveReminderActive.value) {
@@ -1336,7 +1359,9 @@ async function toggleLiveReminder() {
         icon: ['fas', 'calendar-days']
       })
     } else {
-      const scheduled = await liveReminder.schedule(getLiveReminderPayload())
+      const payload = await getLiveReminderPayload()
+      if (videoId !== id.value) return
+      const scheduled = await liveReminder.schedule(payload)
       if (videoId !== id.value) return
       liveReminderActive.value = scheduled
       showToast({
@@ -1357,9 +1382,9 @@ async function toggleLiveReminder() {
       })
     }
   } finally {
-    if (videoId === id.value) {
-      liveReminderLoading.value = false
-    }
+    // The flag belongs to the card, which may show another video by now. The
+    // guard above keeps toggles from overlapping, so no newer toggle is running.
+    liveReminderLoading.value = false
   }
 }
 

@@ -8,7 +8,11 @@ import android.content.Intent;
 import android.net.Uri;
 import android.os.Build;
 
+import java.io.ByteArrayOutputStream;
 import java.io.File;
+import java.io.InputStream;
+import java.net.HttpURLConnection;
+import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.StandardCopyOption;
@@ -38,6 +42,7 @@ final class UploadNotifications {
     private static final int NOTIFIED_ID_LIMIT = 1000;
     // Feeds can surface older entries, for example when a video becomes public.
     private static final long MAXIMUM_AGE_MILLIS = 7L * 86_400_000L;
+    private static final int ORIGINAL_TITLE_TIMEOUT_MILLIS = 5_000;
 
     private UploadNotifications() {}
 
@@ -92,39 +97,97 @@ final class UploadNotifications {
         }
     }
 
-    static synchronized void observe(Context context, String channelId, String feedType, JSONArray entries) throws Exception {
-        String saved = preferences(context).getString(CONFIGURATION_KEY, null);
-        JSONObject configuration = saved == null ? new JSONObject() : new JSONObject(saved);
-        if (!configuration.optBoolean("enabled")) return;
-        JSONObject channels = configuration.optJSONObject("channels");
-        JSONObject channel = channels == null ? null : channels.optJSONObject(channelId);
-        if (channel == null || !contains(channel.optJSONArray("feedTypes"), feedType)) return;
-
+    static void observe(Context context, String channelId, String feedType, JSONArray entries) throws Exception {
         List<JSONObject> available = new ArrayList<>();
         for (int i = 0; i < entries.length(); i++) {
             JSONObject entry = entries.optJSONObject(i);
             if (entry != null) available.add(entry);
         }
 
+        List<JSONObject> uploads = takeAndSave(context, channelId, feedType, available);
+        if (uploads.isEmpty()) return;
+
+        boolean originalTitles = configuration(context).optBoolean("originalTitles") && !feedType.equals("posts");
+        for (JSONObject upload : uploads) {
+            String original = originalTitles ? fetchOriginalTitle(upload.getString("id")) : null;
+            showUpload(context, channelId, feedType, upload, original != null ? original : upload.optString("title"));
+        }
+    }
+
+    /** Holds the monitor shared with configure, so notifications turned off during the lookup stay off. */
+    private static synchronized void showUpload(Context context, String channelId, String feedType,
+        JSONObject upload, String body) throws Exception {
+        JSONObject configuration = configuration(context);
+        JSONObject channel = configuredChannel(configuration, channelId, feedType);
+        if (channel == null) return;
+        JSONObject titles = configuration.optJSONObject("titles");
+        String name = channel.optString("name");
+        // Ended streams in the live feed are announced like videos.
+        String type = upload.optBoolean("live") ? "live" : feedType.equals("live") ? "videos" : feedType;
+        String title = (titles == null ? "{channel}" : titles.optString(type, "{channel}"))
+            .replace("{channel}", name.isEmpty() ? channelId : name);
+        boolean silent = isWithinQuietHours(configuration.optJSONObject("quietHours"), LocalTime.now());
+        try {
+            show(context, title, body, url(feedType, upload.getString("id")), silent);
+        } catch (RuntimeException error) {
+            // One failed notification must not skip the others.
+            android.util.Log.w("OpenTubeXUploads", "Unable to show an upload notification", error);
+        }
+    }
+
+    /**
+     * Only the state update is synchronized, like configure, so title lookups do not
+     * hold up other feeds and a disabled configuration cannot recreate the state.
+     */
+    private static synchronized List<JSONObject> takeAndSave(Context context, String channelId, String feedType,
+        List<JSONObject> available) throws Exception {
+        JSONObject channel = configuredChannel(configuration(context), channelId, feedType);
+        if (channel == null) return new ArrayList<>();
         JSONObject state = readState(context);
         List<JSONObject> uploads = takeVisibleUploads(state, channelId, feedType, available,
             channel.optBoolean("membersOnly"), System.currentTimeMillis());
         writeState(context, state);
+        return uploads;
+    }
 
-        JSONObject titles = configuration.optJSONObject("titles");
-        String name = channel.optString("name");
-        boolean silent = isWithinQuietHours(configuration.optJSONObject("quietHours"), LocalTime.now());
-        for (JSONObject upload : uploads) {
-            // Ended streams in the live feed are announced like videos.
-            String type = upload.optBoolean("live") ? "live" : feedType.equals("live") ? "videos" : feedType;
-            String title = (titles == null ? "{channel}" : titles.optString(type, "{channel}"))
-                .replace("{channel}", name.isEmpty() ? channelId : name);
-            try {
-                show(context, title, upload.optString("title"), url(feedType, upload.getString("id")), silent);
-            } catch (RuntimeException error) {
-                // One failed notification must not skip the others.
-                android.util.Log.w("OpenTubeXUploads", "Unable to show an upload notification", error);
+    private static JSONObject configuration(Context context) throws Exception {
+        String saved = preferences(context).getString(CONFIGURATION_KEY, null);
+        return saved == null ? new JSONObject() : new JSONObject(saved);
+    }
+
+    private static JSONObject configuredChannel(JSONObject configuration, String channelId, String feedType) {
+        if (!configuration.optBoolean("enabled")) return null;
+        JSONObject channels = configuration.optJSONObject("channels");
+        JSONObject channel = channels == null ? null : channels.optJSONObject(channelId);
+        return channel != null && contains(channel.optJSONArray("feedTypes"), feedType) ? channel : null;
+    }
+
+    /** Feeds can carry YouTube's auto-translated titles; oEmbed returns the original one. */
+    private static String fetchOriginalTitle(String videoId) {
+        HttpURLConnection connection = null;
+        // Timeouts apply per connect and read, so a body that keeps streaming also has a deadline.
+        long deadline = System.nanoTime() + ORIGINAL_TITLE_TIMEOUT_MILLIS * 1_000_000L;
+        try {
+            String video = "https://www.youtube.com/watch?v=" + Uri.encode(videoId);
+            connection = (HttpURLConnection) new URL("https://www.youtube.com/oembed?url=" + Uri.encode(video)).openConnection();
+            connection.setConnectTimeout(ORIGINAL_TITLE_TIMEOUT_MILLIS);
+            connection.setReadTimeout(ORIGINAL_TITLE_TIMEOUT_MILLIS);
+            if (connection.getResponseCode() != HttpURLConnection.HTTP_OK) return null;
+            ByteArrayOutputStream output = new ByteArrayOutputStream();
+            try (InputStream input = connection.getInputStream()) {
+                byte[] buffer = new byte[8192];
+                for (int count; (count = input.read(buffer)) >= 0;) {
+                    if (System.nanoTime() > deadline) return null;
+                    output.write(buffer, 0, count);
+                }
             }
+            String title = new JSONObject(output.toString(StandardCharsets.UTF_8.name())).optString("title");
+            return title.isEmpty() ? null : title;
+        } catch (Exception error) {
+            // Keep the feed title when the video is unavailable or the request fails.
+            return null;
+        } finally {
+            if (connection != null) connection.disconnect();
         }
     }
 
