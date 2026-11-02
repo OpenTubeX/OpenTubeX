@@ -244,6 +244,9 @@ User Playlists:
   Restore Default Thumbnail: "Standaardminiatuur herstellen"
   AddVideoPrompt:
     And N more videos: 'en nog {count} video | en nog {count} video’s'
+  Move Up: Omhoog
+  Move Down: Omlaag
+  Remove: Verwijderen
 History:
   From Date: 'Van'
   To Date: 'Tot'
@@ -1987,6 +1990,7 @@ Context Menu:
   Search With: Zoeken met {engine}
   Search With Multiple: Zoeken met...
   Selection Too Long: Selectie is te lang om te zoeken (> {count} tekens)
+  Background Tab: Achtergrondtabblad
 Tab Organizer:
   Tab History: "Tabgeschiedenis"
   Current Page: "Huidige pagina"

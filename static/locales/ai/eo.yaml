@@ -276,6 +276,9 @@ User Playlists:
     And N more videos: kaj {count} plia videaĵo | kaj {count} pliaj videaĵoj
   Playlist Thumbnail: Bildeto de ludlisto
   Restore Default Thumbnail: Restarigi defaŭltan bildeton
+  Move Up: Supren
+  Move Down: Malsupren
+  Remove: Forigi
 History:
   From Date: De
   To Date: Ĝis
@@ -1975,6 +1978,7 @@ Context Menu:
   Search With: Serĉi per {engine}
   Search With Multiple: Serĉi per...
   Selection Too Long: La elekto estas tro longa por serĉi (> {count} signoj)
+  Background Tab: Fona langeto
 Tab Organizer:
   Tab History: Langeta historio
   Current Page: Aktuala paĝo

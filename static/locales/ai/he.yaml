@@ -244,6 +244,9 @@ User Playlists:
   Restore Default Thumbnail: "החזרת התמונה הממוזערת לברירת המחדל"
   AddVideoPrompt:
     And N more videos: 'ועוד {count} סרטון | ועוד {count} סרטונים | ועוד {count} סרטונים'
+  Move Up: העלאה
+  Move Down: הורדה
+  Remove: הסרה
 History:
   From Date: 'מתאריך'
   To Date: 'עד תאריך'
@@ -1978,6 +1981,7 @@ Context Menu:
   Search With: חיפוש באמצעות {engine}
   Search With Multiple: חיפוש באמצעות...
   Selection Too Long: הטקסט שנבחר ארוך מדי לחיפוש (מעל {count} תווים)
+  Background Tab: לשונית ברקע
 Tab Organizer:
   Tab History: "היסטוריית הלשונית"
   Current Page: "העמוד הנוכחי"

@@ -249,6 +249,9 @@ User Playlists:
       There was an issue with creating the playlist.: Det oppstod eit problem då spelelista skulle opprettast.
   Playlist Thumbnail: "Miniatyrbilete for spelelista"
   Restore Default Thumbnail: "Gjenopprett standard miniatyrbilete"
+  Move Up: Flytt opp
+  Move Down: Flytt ned
+  Remove: Fjern
 History:
   From Date: 'Frå'
   To Date: 'Til'
@@ -2227,6 +2230,7 @@ Context Menu:
   Search With: Søk med {engine}
   Search With Multiple: Søk med …
   Selection Too Long: Utvalet er for langt til å søkje etter (> {count} teikn)
+  Background Tab: Bakgrunnsfane
 Tab Organizer:
   Tab History: "Fanelogg"
   Current Page: "Gjeldande side"

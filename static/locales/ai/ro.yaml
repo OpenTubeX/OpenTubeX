@@ -240,6 +240,9 @@ User Playlists:
   Restore Default Thumbnail: "Restabilește miniatura implicită"
   AddVideoPrompt:
     And N more videos: 'și încă {count} videoclip | și încă {count} videoclipuri | și încă {count} de videoclipuri'
+  Move Up: Sus
+  Move Down: Jos
+  Remove: Eliminați
 History:
   From Date: 'De la'
   To Date: 'Până la'
@@ -1974,6 +1977,7 @@ Context Menu:
   Search With: Caută cu {engine}
   Search With Multiple: Caută cu...
   Selection Too Long: Selecția este prea lungă pentru căutare (> {count} caractere)
+  Background Tab: Filă în fundal
 Tab Organizer:
   Tab History: "Istoricul filei"
   Current Page: "Pagina curentă"

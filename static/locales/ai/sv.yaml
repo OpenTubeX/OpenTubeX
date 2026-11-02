@@ -242,6 +242,9 @@ User Playlists:
   Restore Default Thumbnail: "Återställ standardminiatyrbild"
   AddVideoPrompt:
     And N more videos: 'och {count} video till | och {count} videor till'
+  Move Up: Flytta upp
+  Move Down: Flytta ned
+  Remove: Ta bort
 History:
   From Date: 'Från'
   To Date: 'Till'
@@ -1950,6 +1953,7 @@ Context Menu:
   Search With: Sök med {engine}
   Search With Multiple: Sök med…
   Selection Too Long: Markeringen är för lång för en sökning (> {count} tecken)
+  Background Tab: Bakgrundsflik
 Tab Organizer:
   Tab History: "Flikhistorik"
   Current Page: "Aktuell sida"

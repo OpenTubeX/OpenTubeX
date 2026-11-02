@@ -290,6 +290,9 @@ User Playlists:
     And N more videos: اور {count} مزید ویڈیو | اور {count} مزید ویڈیوز
   Playlist Thumbnail: پلے لسٹ تھمب نیل
   Restore Default Thumbnail: ڈیفالٹ تھمب نیل بحال کریں
+  Move Up: اوپر
+  Move Down: نیچے
+  Remove: ہٹائیں
 History:
   From Date: سے
   To Date: تک
@@ -2034,6 +2037,7 @@ Context Menu:
   Search With: '{engine} کے ساتھ تلاش کریں'
   Search With Multiple: اس کے ساتھ تلاش کریں...
   Selection Too Long: انتخاب تلاش کے لیے بہت طویل ہے (> {count} حروف)
+  Background Tab: پس منظر ٹیب
 Tab Organizer:
   Tab History: ٹیب ہسٹری
   Current Page: موجودہ صفحہ

@@ -240,6 +240,9 @@ User Playlists:
   Restore Default Thumbnail: "Adfer y mân-lun diofyn"
   AddVideoPrompt:
     And N more videos: 'a {count} fideo arall | a {count} fideo arall | a {count} fideo arall | a {count} fideo arall | a {count} fideo arall | a {count} fideo arall'
+  Move Up: I fyny
+  Move Down: I lawr
+  Remove: Dileu
 History:
   From Date: 'O'
   To Date: 'Hyd at'
@@ -1957,6 +1960,7 @@ Context Menu:
   Search With: Chwilio gyda {engine}
   Search With Multiple: Chwilio gyda...
   Selection Too Long: Mae'r dewis yn rhy hir i'w chwilio (> {count} nod)
+  Background Tab: Tab cefndir
 Tab Organizer:
   Tab History: "Hanes y tab"
   Current Page: "Tudalen gyfredol"

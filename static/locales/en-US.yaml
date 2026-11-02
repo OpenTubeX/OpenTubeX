@@ -417,9 +417,12 @@ User Playlists:
 
   Move Video Up: Move Video Up
   Move Video Down: Move Video Down
+  Move Up: Move Up
+  Move Down: Move Down
   Move Video to the Top: Move Video to the Top
   Move Video to the Bottom: Move Video to the Bottom
   Remove from Playlist: Remove from Playlist
+  Remove: Remove
 
   Playlist Name: Playlist Name
   Playlist Description: Playlist Description
@@ -2913,6 +2916,7 @@ Clipboard:
 Context Menu:
   Opened in a Background Tab: "Opened in a background tab"
   Open in a Background Tab: "Open in a Background Tab"
+  Background Tab: Background Tab
   Select Tab: Select Tab
   Close Tabs Before: Close Tabs Before
   Close Tabs After: Close Tabs After

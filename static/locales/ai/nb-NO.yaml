@@ -239,6 +239,9 @@ User Playlists:
   Restore Default Thumbnail: "Gjenopprett standard miniatyrbilde"
   AddVideoPrompt:
     And N more videos: 'og {count} video til | og {count} videoer til'
+  Move Up: Flytt opp
+  Move Down: Flytt ned
+  Remove: Fjern
 History:
   From Date: 'Fra'
   To Date: 'Til'
@@ -1931,6 +1934,7 @@ Context Menu:
   Search With: Søk med {engine}
   Search With Multiple: Søk med...
   Selection Too Long: Den merkede teksten er for lang for søk (> {count} tegn)
+  Background Tab: Bakgrunnsfane
 Tab Organizer:
   Tab History: "Fanehistorikk"
   Current Page: "Gjeldende side"

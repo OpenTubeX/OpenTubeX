@@ -244,6 +244,9 @@ User Playlists:
   Restore Default Thumbnail: "Restaurar a miniatura predeterminada"
   AddVideoPrompt:
     And N more videos: 'e {count} vídeo máis | e {count} vídeos máis'
+  Move Up: Subir
+  Move Down: Baixar
+  Remove: Eliminar
 History:
   From Date: 'Desde'
   To Date: 'Ata'
@@ -1981,6 +1984,7 @@ Context Menu:
   Search With: Buscar con {engine}
   Search With Multiple: Buscar con…
   Selection Too Long: A selección é demasiado longa para a busca (> {count} caracteres)
+  Background Tab: Lapela en segundo plano
 Tab Organizer:
   Tab History: "Historial da lapela"
   Current Page: "Páxina actual"

@@ -172,6 +172,7 @@ const playlistMenuItems = computed(() => {
   const items = store.getters.getTabsEnabled
     ? [{
         label: t('Context Menu.Open in a New Tab'),
+        shortLabel: t('New Tab'),
         icon: ['fas', 'arrow-up-right-from-square'],
         quickAction: true,
         run: () => openInternalPath({ ...playlistPageLinkTo.value, title: titleForDisplay.value, doCreateNewTab: true, makeActive: true })
@@ -180,6 +181,7 @@ const playlistMenuItems = computed(() => {
   if (process.env.IS_ELECTRON) {
     items.push({
       label: t('Context Menu.Open in a New Window'),
+      shortLabel: t('New Window'),
       icon: ['fas', 'external-link-alt'],
       quickAction: true,
       run: () => openInternalPath({ ...playlistPageLinkTo.value, title: titleForDisplay.value, doCreateNewWindow: true, makeActive: true })

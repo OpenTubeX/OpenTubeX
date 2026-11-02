@@ -239,6 +239,9 @@ User Playlists:
   Restore Default Thumbnail: "恢复默认缩略图"
   AddVideoPrompt:
     And N more videos: '以及另外 {count} 个视频'
+  Move Up: 上移
+  Move Down: 下移
+  Remove: 删除
 History:
   From Date: '开始日期'
   To Date: '结束日期'
@@ -1926,6 +1929,7 @@ Context Menu:
   Search With: 使用 {engine} 搜索
   Search With Multiple: 搜索方式…
   Selection Too Long: 所选内容过长，无法搜索（超过 {count} 个字符）
+  Background Tab: 后台标签页
 Tab Organizer:
   Tab History: "标签页历史记录"
   Current Page: "当前页面"

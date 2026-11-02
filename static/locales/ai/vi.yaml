@@ -244,6 +244,9 @@ User Playlists:
   Restore Default Thumbnail: "Khôi phục ảnh thu nhỏ mặc định"
   AddVideoPrompt:
     And N more videos: 'và {count} video khác'
+  Move Up: Lên
+  Move Down: Xuống
+  Remove: Xóa
 History:
   From Date: 'Từ'
   To Date: 'Đến'
@@ -1969,6 +1972,7 @@ Context Menu:
   Search With: Tìm bằng {engine}
   Search With Multiple: Tìm bằng...
   Selection Too Long: Phần đã chọn quá dài để tìm kiếm (> {count} ký tự)
+  Background Tab: Thẻ nền
 Tab Organizer:
   Tab History: "Lịch sử thẻ"
   Current Page: "Trang hiện tại"

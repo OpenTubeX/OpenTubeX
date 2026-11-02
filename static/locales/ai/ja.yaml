@@ -239,6 +239,9 @@ User Playlists:
   Restore Default Thumbnail: "既定のサムネイルに戻す"
   AddVideoPrompt:
     And N more videos: 'ほか {count} 本の動画'
+  Move Up: 上へ
+  Move Down: 下へ
+  Remove: 削除
 History:
   From Date: '開始日'
   To Date: '終了日'
@@ -1926,6 +1929,7 @@ Context Menu:
   Search With: '{engine}で検索'
   Search With Multiple: 検索サービスを選択…
   Selection Too Long: 選択範囲が検索には長すぎます（{count}文字超）
+  Background Tab: バックグラウンドタブ
 Tab Organizer:
   Tab History: "タブの履歴"
   Current Page: "現在のページ"

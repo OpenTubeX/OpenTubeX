@@ -27,7 +27,7 @@ test.describe('mobile overflow', { tag: '@scale' }, () => {
     }
   })
 
-  test('long mobile menu titles wrap without widening quick actions', async ({ page }) => {
+  test('long mobile menu titles wrap without widening or truncating quick actions', async ({ page }) => {
     await goTo(page, 'history')
     for (const viewport of [{ width: 320, height: 812 }, { width: 461, height: 1026 }, { width: 812, height: 375 }]) {
       await page.setViewportSize(viewport)
@@ -40,18 +40,51 @@ test.describe('mobile overflow', { tag: '@scale' }, () => {
       await expect.poll(() => menu.evaluate(element => {
         const bounds = element.getBoundingClientRect()
         const heading = element.querySelector('strong')
-        const rows = [...element.querySelectorAll('.mobileLinkQuickActions')].map(row =>
-          [...row.querySelectorAll('button')].map(button => button.getBoundingClientRect()))
+        const rows = [...element.querySelectorAll('.mobileLinkQuickActions')].map(row => [...row.querySelectorAll('button')])
         return bounds.left >= 0 && bounds.right <= innerWidth + 1 &&
           heading.scrollWidth <= heading.clientWidth + 1 &&
           heading.clientHeight > parseFloat(getComputedStyle(heading).fontSize) * 2 &&
-          rows.length === 2 && rows.every(buttons => buttons.length >= 2 &&
-            buttons.every(button => button.left >= bounds.left && button.right <= bounds.right &&
-              Math.abs(button.width - buttons[0].width) < 1))
+          rows.length === 2 && rows.every(buttons => buttons.length >= 2 && buttons.every(button => {
+          const buttonBounds = button.getBoundingClientRect()
+          const label = button.querySelector('.mobileLinkQuickActionLabel')
+          return buttonBounds.left >= bounds.left && buttonBounds.right <= bounds.right &&
+              label.scrollWidth <= label.clientWidth + 1 &&
+              label.getBoundingClientRect().bottom <= buttonBounds.bottom + 1
+        }))
       })).toBe(true)
       await page.keyboard.press('Escape')
       await expect(menu).toHaveCount(0)
     }
+  })
+
+  test('a long quick bookmark name does not squeeze neighboring quick actions', async ({ page, uiScale }) => {
+    await goTo(page, 'history')
+    await page.setViewportSize({ width: 320, height: 812 })
+    await page.evaluate(name => {
+      const icon = ['fas', 'clone']
+      document.querySelector('#app').__vue_app__._container._vnode.component.provides.openMobileContextActions({
+        title: 'Video',
+        actions: [],
+        thumbnailActions: [
+          { label: 'Open in a Background Tab', shortLabel: 'Background Tab', icon, run() {} },
+          { label: 'Add to Playlist', shortLabel: 'Save', icon, run() {} },
+          { label: `Add to ${name}`, shortLabel: name, icon, pressed: false, run() {} },
+          { label: 'Remove from Playlist', shortLabel: 'Remove', icon, run() {} }
+        ]
+      })
+    }, 'Long playlist name '.repeat(14))
+    const buttons = page.locator('.mobileThumbnailActionRow button')
+    await expect(buttons).toHaveCount(4)
+    await expect.poll(() => buttons.evaluateAll(elements => elements.every(element => {
+      const bounds = element.getBoundingClientRect()
+      const label = element.querySelector('.mobileLinkQuickActionLabel').getBoundingClientRect()
+      return bounds.width >= 47.99 && bounds.right <= innerWidth + 1 &&
+        label.left >= bounds.left - 1 && label.right <= bounds.right + 1 && label.bottom <= bounds.bottom + 1
+    }))).toBe(true)
+    // A 340px window at 300% UI scale leaves about 113 CSS pixels for the row.
+    await page.setViewportSize({ width: Math.ceil(145 * uiScale / 100), height: 812 })
+    await expect.poll(() => buttons.evaluateAll(elements => elements.every(element => element.getBoundingClientRect().right <= innerWidth + 1))).toBe(true)
+    await page.keyboard.press('Escape')
   })
 
   test('channel cards contain subscription controls and show two columns on the Pixel', async ({ page, uiScale }) => {

@@ -249,6 +249,9 @@ User Playlists:
     And N more videos: 'и још {count} видео-снимак | и још {count} видео-снимка | и још {count} видео-снимака'
   Playlist Thumbnail: "Сличица плејлисте"
   Restore Default Thumbnail: "Врати подразумевану сличицу"
+  Move Up: Нагоре
+  Move Down: Надоле
+  Remove: Уклони
 History:
   From Date: 'Од'
   To Date: 'До'
@@ -2000,6 +2003,7 @@ Context Menu:
   Search With: Претражи помоћу {engine}
   Search With Multiple: Претражи помоћу…
   Selection Too Long: Избор је предугачак за претрагу (> {count} знакова)
+  Background Tab: Картица у позадини
 Tab Organizer:
   Tab History: "Историја картице"
   Current Page: "Тренутна страница"

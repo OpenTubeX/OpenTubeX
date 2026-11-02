@@ -239,6 +239,9 @@ User Playlists:
   Restore Default Thumbnail: "Varsayılan küçük resmi geri yükle"
   AddVideoPrompt:
     And N more videos: 've {count} video daha | ve {count} video daha'
+  Move Up: Yukarı taşı
+  Move Down: Aşağı taşı
+  Remove: Kaldır
 History:
   From Date: 'Başlangıç'
   To Date: 'Bitiş'
@@ -1926,6 +1929,7 @@ Context Menu:
   Search With: '{engine} ile ara'
   Search With Multiple: Şununla ara...
   Selection Too Long: Seçim arama için çok uzun (> {count} karakter)
+  Background Tab: Arka plan sekmesi
 Tab Organizer:
   Tab History: "Sekme geçmişi"
   Current Page: "Geçerli sayfa"

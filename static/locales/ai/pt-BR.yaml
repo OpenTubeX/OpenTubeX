@@ -208,6 +208,9 @@ User Playlists:
   Restore Default Thumbnail: "Restaurar miniatura padrão"
   AddVideoPrompt:
     And N more videos: 'e mais {count} vídeo | e mais {count} de vídeos | e mais {count} vídeos'
+  Move Up: Para cima
+  Move Down: Para baixo
+  Remove: Remover
 History:
   From Date: 'De'
   To Date: 'Até'
@@ -1896,6 +1899,7 @@ Context Menu:
   Search With: Pesquisar com {engine}
   Search With Multiple: Pesquisar com...
   Selection Too Long: A seleção é demasiado longa para pesquisar (> {count} caracteres)
+  Background Tab: Aba em segundo plano
 Tab Organizer:
   Tab History: "Histórico da aba"
   Current Page: "Página atual"

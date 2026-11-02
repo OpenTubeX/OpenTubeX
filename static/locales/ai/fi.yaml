@@ -244,6 +244,9 @@ User Playlists:
   Restore Default Thumbnail: "Palauta oletuspikkukuva"
   AddVideoPrompt:
     And N more videos: 'ja {count} muu video | ja {count} muuta videota'
+  Move Up: Ylös
+  Move Down: Alas
+  Remove: Poista
 History:
   From Date: 'Alkaen'
   To Date: 'Asti'
@@ -1976,6 +1979,7 @@ Context Menu:
   Search With: Hae hakukoneella {engine}
   Search With Multiple: Hae hakukoneella...
   Selection Too Long: Valinta on liian pitkä haettavaksi (> {count} merkkiä)
+  Background Tab: Taustavälilehti
 Tab Organizer:
   Tab History: "Välilehden historia"
   Current Page: "Nykyinen sivu"

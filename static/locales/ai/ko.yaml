@@ -330,6 +330,9 @@ User Playlists:
       There was an issue with creating the playlist.: 재생목록을 만드는 중 문제가 발생했습니다.
   Playlist Thumbnail: "재생목록 썸네일"
   Restore Default Thumbnail: "기본 썸네일 복원"
+  Move Up: 위로
+  Move Down: 아래로
+  Remove: 제거
 History:
   From Date: '시작일'
   To Date: '종료일'
@@ -2303,6 +2306,7 @@ Context Menu:
   Search With: '{engine}(으)로 검색'
   Search With Multiple: 검색 엔진 선택...
   Selection Too Long: 선택한 텍스트가 너무 길어 검색할 수 없습니다. {count}자 이하여야 합니다
+  Background Tab: 백그라운드 탭
 Tab Organizer:
   Tab History: "탭 기록"
   Current Page: "현재 페이지"

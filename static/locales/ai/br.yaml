@@ -239,6 +239,9 @@ User Playlists:
   Restore Default Thumbnail: "Adlakaat ar skeudennig dre ziouer"
   AddVideoPrompt:
     And N more videos: 'ha {count} video all | ha {count} video all | ha {count} video all | ha {count} video all | ha {count} video all'
+  Move Up: Uheloc'h
+  Move Down: Izeloc'h
+  Remove: Tennañ
 History:
   From Date: 'Adalek'
   To Date: 'Betek'
@@ -1935,6 +1938,7 @@ Context Menu:
   Search With: "Klask gant {engine}"
   Search With Multiple: "Klask gant…"
   Selection Too Long: "Re hir eo an diuzadenn evit klask (> {count} arouezenn)"
+  Background Tab: Ivinell en drekleur
 Tab Organizer:
   Tab History: "Istor an ivinell"
   Current Page: "Pajenn vremanel"

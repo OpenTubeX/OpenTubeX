@@ -239,6 +239,9 @@ User Playlists:
   Restore Default Thumbnail: "還原預設縮圖"
   AddVideoPrompt:
     And N more videos: '以及另外 {count} 部影片'
+  Move Up: 上移
+  Move Down: 下移
+  Remove: 移除
 History:
   From Date: '開始日期'
   To Date: '結束日期'
@@ -1929,6 +1932,7 @@ Context Menu:
   Search With: 使用 {engine} 搜尋
   Search With Multiple: 搜尋工具...
   Selection Too Long: 選取內容過長，無法搜尋（> {count} 個字元）
+  Background Tab: 背景分頁
 Tab Organizer:
   Tab History: "分頁歷史紀錄"
   Current Page: "目前頁面"

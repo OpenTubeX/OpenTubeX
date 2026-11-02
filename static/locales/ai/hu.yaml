@@ -239,6 +239,9 @@ User Playlists:
   Restore Default Thumbnail: "Alapértelmezett bélyegkép visszaállítása"
   AddVideoPrompt:
     And N more videos: 'és még {count} videó | és még {count} videó'
+  Move Up: Fel
+  Move Down: Le
+  Remove: Eltávolítás
 History:
   From Date: 'Kezdő dátum'
   To Date: 'Záró dátum'
@@ -1926,6 +1929,7 @@ Context Menu:
   Search With: Keresés a(z) {engine} használatával
   Search With Multiple: Keresés ezzel...
   Selection Too Long: A kijelölt szöveg túl hosszú a kereséshez (> {count} karakter)
+  Background Tab: Háttérlap
 Tab Organizer:
   Tab History: "Lap előzményei"
   Current Page: "Jelenlegi oldal"

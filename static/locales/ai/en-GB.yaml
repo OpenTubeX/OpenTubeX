@@ -241,6 +241,9 @@ User Playlists:
   Restore Default Thumbnail: "Restore default thumbnail"
   AddVideoPrompt:
     And N more videos: 'and {count} more video | and {count} more videos'
+  Move Up: Move up
+  Move Down: Move down
+  Remove: Remove
 History:
   From Date: 'From'
   To Date: 'To'
@@ -1919,6 +1922,7 @@ Context Menu:
   Search With: Search with {engine}
   Search With Multiple: Search with...
   Selection Too Long: Selection is too long for search (> {count} characters)
+  Background Tab: Background tab
 Tab Organizer:
   Tab History: "Tab history"
   Current Page: "Current page"
