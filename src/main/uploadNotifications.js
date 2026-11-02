@@ -140,8 +140,9 @@ export function createUploadNotifier({ file, show, fetch: fetchUrl = fetch }) {
       return alert
     },
     /** Resolves once every pending alert is shown or dropped. */
-    settle() {
-      return Promise.allSettled(alerts)
+    async settle() {
+      // Alerts can start while earlier ones are pending.
+      while (alerts.size > 0) await Promise.allSettled(alerts)
     }
   }
 }

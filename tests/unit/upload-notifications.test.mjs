@@ -288,16 +288,17 @@ test('the desktop notifier settles once alerts waiting for an original title are
   const directory = await mkdtemp(path.join(tmpdir(), 'upload-notifications-'))
   try {
     const shown = []
+    const responders = []
     let requested
-    const lookup = new Promise(resolve => { requested = resolve })
-    let respond
+    const nextLookup = () => new Promise(resolve => { requested = resolve })
+    let lookup = nextLookup()
     const notifier = createUploadNotifier({
       file: path.join(directory, 'state.json'),
       show: notification => shown.push(notification.body),
-      fetch: () => {
+      fetch: url => new Promise(resolve => {
+        responders.push(() => resolve(Response.json({ title: `Original ${new URL(new URL(url).searchParams.get('url')).searchParams.get('v')}` })))
         requested()
-        return new Promise(resolve => { respond = resolve })
-      }
+      })
     })
     await notifier.configure({
       enabled: true,
@@ -311,11 +312,16 @@ test('the desktop notifier settles once alerts waiting for an original title are
     // The upload is already saved as notified, so quitting now must wait for its alert.
     let settled = false
     const settling = notifier.settle().then(() => { settled = true })
+    // An alert that starts while settling is waited for too.
+    lookup = nextLookup()
+    notifier.observe({ channelId: 'UC1', feedType: 'videos', entries: [entry('c', Date.now()), entry('b', Date.now()), entry('a')] })
+    await lookup
+    responders.shift()()
     await new Promise(resolve => setImmediate(resolve))
     assert.equal(settled, false)
-    respond(Response.json({ title: 'Original b' }))
+    responders.shift()()
     await settling
-    assert.deepEqual(shown, ['Original b'])
+    assert.deepEqual(shown, ['Original b', 'Original c'])
   } finally {
     await rm(directory, { recursive: true, force: true })
   }
