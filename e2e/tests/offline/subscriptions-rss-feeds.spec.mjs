@@ -738,6 +738,21 @@ test.describe('with new items', () => {
     // Everything in the New feed is new, so the items don't need dots
     await expect(section.locator('.newContentDot')).toHaveCount(0)
 
+    // Its refresh also refreshes the RSS feeds, and waits for them
+    let release
+    const held = new Promise(resolve => { release = resolve })
+    await page.route(RSS_URL, async (route) => {
+      await held
+      await route.fulfill({ contentType: 'application/rss+xml', body: updatedRssFeed })
+    })
+    const refresh = page.locator('.subscriptionsHeader').getByRole('button', { name: /^Refresh / })
+    await refresh.click()
+    await expect(page.locator('[data-rss-feeds-tab] .tabLoadingIndicator')).toBeVisible()
+    await expect(refresh).toHaveAttribute('aria-disabled', 'true')
+    release()
+    await expect(page.locator('[data-rss-feeds-tab] .tabLoadingIndicator')).toHaveCount(0)
+    await expect(refresh).toHaveAttribute('aria-disabled', 'false')
+
     // As does the tabbed view
     await page.locator('.subscriptionsHeader').getByRole('button', { name: 'Show Tabbed View' }).click()
     const rssTab = page.locator('[data-new-feed-rss-tab]')

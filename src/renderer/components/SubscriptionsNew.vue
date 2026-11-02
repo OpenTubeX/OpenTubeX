@@ -371,7 +371,8 @@ const isLoading = computed(() => {
     return rssFeedsRefreshing.value
   }
 
-  return !store.getters.getSubscriptionCacheReady || isRefreshing.value
+  return !store.getters.getSubscriptionCacheReady || isRefreshing.value ||
+    (showCombinedView.value && rssFeedsRefreshing.value)
 })
 
 const hasNewContent = computed(() => {
