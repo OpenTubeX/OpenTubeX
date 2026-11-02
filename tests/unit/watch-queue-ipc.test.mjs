@@ -46,6 +46,17 @@ test('unchanged queue replies are not broadcast again', async () => {
   assert.equal(window.messages.length, 1)
 })
 
+test('the window that changed the queue gets the snapshot only as its reply', async () => {
+  const sender = windowFixture()
+  const other = windowFixture()
+  windows = [sender, other]
+  const snapshot = { revision: 1, items: [] }
+  setupWatchQueueIpc(async () => snapshot)
+  assert.equal(await ipcMain.invoke(IpcChannels.WATCH_QUEUE_UPDATE, ipcEvent(undefined, sender.webContents), { type: 'clearWatchQueue' }), snapshot)
+  assert.deepEqual(sender.messages, [])
+  assert.deepEqual(other.messages, [[IpcChannels.WATCH_QUEUE_UPDATED, snapshot]])
+})
+
 test('rejects other senders and reports failed updates', async () => {
   let updates = 0
   setupWatchQueueIpc(async () => {
