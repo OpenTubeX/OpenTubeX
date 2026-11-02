@@ -192,6 +192,7 @@ export async function createUserDataDir(seed = {}) {
  * @param {string} [options.appRoot] repository root containing dist-e2e
  * @param {string} [options.executablePath] Electron executable to launch
  * @param {Record<string, string>} [options.env] additional environment variables
+ * @param {(message: import('@playwright/test').ConsoleMessage) => void} [options.onConsole] receives every console message, from the connection on
  * @param {(phase: 'electronConnected'|'windowCreated'|'routeCommitted'|'interactive', page?: import('@playwright/test').Page, electronApp?: import('@playwright/test').ElectronApplication) => void|Promise<void>} [options.onPhase]
  * @param {number} [windowRetry] internal first-window retry count
  */
@@ -257,6 +258,7 @@ export async function launchApp(userDataDir, extraArgs = [], options = {}, windo
   // Thrown values other than errors, such as events, have an empty stack.
   const recordStartupError = error => startupErrors.push(error.error().stack || error.error().message)
   context.on('weberror', recordStartupError)
+  if (options.onConsole) context.on('console', options.onConsole)
 
   const notifyPhase = async (phase, page) => {
     try {
@@ -632,20 +634,16 @@ export const test = base.extend({
       }
 
       // Static scroll containers misplace their overlay scrollbars, which
-      // overlayScrollbars.js reports without breaking any assertion. Listen
-      // from the connection on, as containers report once, also while mounting.
+      // overlayScrollbars.js reports once, also while mounting, without
+      // breaking any assertion.
       const scrollbarErrors = []
       const launchOptions = {
         appRoot,
-        onPhase: async (phase, phasePage, launched) => {
-          if (phase === 'electronConnected') {
-            launched.context().on('console', message => {
-              if (message.type() === 'error' && message.text().startsWith(UNPOSITIONED_VIEWPORT_ERROR)) {
-                scrollbarErrors.push(message.text())
-              }
-            })
+        onPhase,
+        onConsole: message => {
+          if (message.type() === 'error' && message.text().startsWith(UNPOSITIONED_VIEWPORT_ERROR)) {
+            scrollbarErrors.push(message.text())
           }
-          await onPhase?.(phase, phasePage, launched)
         }
       }
 
