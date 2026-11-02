@@ -10083,6 +10083,15 @@ export default defineComponent({
     // Shaka can emit loaded again on the same player (format switch) while an
     // earlier handleLoaded still waits for its caption tracks.
     let loadGeneration = 0
+    // The load whose own captions were already added to the player
+    let videoCaptionsGeneration = 0
+
+    // A download can start playing before its metadata, which brings the captions.
+    watch(() => props.captions, (captions, previous) => {
+      if (previous.length > 0 || captions.length === 0 || !player || videoCaptionsGeneration !== loadGeneration || isLive.value) return
+      if (process.env.SUPPORTS_LOCAL_API && props.format !== 'legacy' && props.manifestMimeType === MANIFEST_TYPE_SABR) return
+      for (const caption of captions) addVideoCaption(caption)
+    })
 
     async function handleLoaded() {
       const loadedPlayer = player
@@ -10132,51 +10141,10 @@ export default defineComponent({
       // the thumbnails, chapters and subtitles in its manifest.
       if (!isLive.value && (!process.env.SUPPORTS_LOCAL_API || props.format === 'legacy' || props.manifestMimeType !== MANIFEST_TYPE_SABR)) {
         const promises = []
+        videoCaptionsGeneration = generation
 
         for (const caption of props.captions) {
-          if (props.format === 'legacy') {
-            const url = new URL(caption.url)
-
-            if (url.hostname.endsWith('.youtube.com') && url.pathname === '/api/timedtext' &&
-              url.searchParams.get('caps') === 'asr' && url.searchParams.get('kind') === 'asr' && url.searchParams.get('fmt') === 'vtt') {
-              promises.push((async () => {
-                try {
-                  const response = await fetch(await getSubtitleRequestUrl(caption.url, store.getters))
-                  let text = await response.text()
-
-                  // position:0% for LTR text and position:100% for RTL text
-                  text = text.replaceAll(/ align:start position:(?:10)?0%$/gm, '')
-
-                  const url = `data:${caption.mimeType};charset=utf-8,${encodeURIComponent(text)}`
-
-                  await player.addTextTrackAsync(
-                    url,
-                    caption.language,
-                    'captions',
-                    caption.mimeType,
-                    undefined, // codec, only needed if the captions are inside a container (e.g. mp4)
-                    caption.label
-                  )
-                } catch (error) {
-                  if (error instanceof shaka.util.Error) {
-                    handleError(error, 'addTextTrackAsync', caption)
-                  } else {
-                    console.error(error)
-                  }
-                }
-              })())
-            } else {
-              promises.push(
-                addCaptionTrack(caption)
-                  .catch(error => handleError(error, 'addTextTrackAsync', caption))
-              )
-            }
-          } else {
-            promises.push(
-              addCaptionTrack(caption)
-                .catch(error => handleError(error, 'addTextTrackAsync', caption))
-            )
-          }
+          promises.push(addVideoCaption(caption))
         }
 
         if (!isLive.value && props.storyboardSrc) {
@@ -10243,6 +10211,48 @@ export default defineComponent({
       if (props.resumePlaybackAfterSabrReload || suppressInitialAutoplay) {
         emit('resume-playback-after-sabr-reload-done')
       }
+    }
+
+    /**
+     * Adds one of the video's captions to the player.
+     * @param {{ url: string, label: string, language: string, mimeType: string }} caption
+     */
+    function addVideoCaption(caption) {
+      if (props.format === 'legacy') {
+        const url = new URL(caption.url)
+
+        if (url.hostname.endsWith('.youtube.com') && url.pathname === '/api/timedtext' &&
+          url.searchParams.get('caps') === 'asr' && url.searchParams.get('kind') === 'asr' && url.searchParams.get('fmt') === 'vtt') {
+          return (async () => {
+            try {
+              const response = await fetch(await getSubtitleRequestUrl(caption.url, store.getters))
+              let text = await response.text()
+
+              // position:0% for LTR text and position:100% for RTL text
+              text = text.replaceAll(/ align:start position:(?:10)?0%$/gm, '')
+
+              const url = `data:${caption.mimeType};charset=utf-8,${encodeURIComponent(text)}`
+
+              await player.addTextTrackAsync(
+                url,
+                caption.language,
+                'captions',
+                caption.mimeType,
+                undefined, // codec, only needed if the captions are inside a container (e.g. mp4)
+                caption.label
+              )
+            } catch (error) {
+              if (error instanceof shaka.util.Error) {
+                handleError(error, 'addTextTrackAsync', caption)
+              } else {
+                console.error(error)
+              }
+            }
+          })()
+        }
+      }
+      return addCaptionTrack(caption)
+        .catch(error => handleError(error, 'addTextTrackAsync', caption))
     }
 
     async function unloadForFormatSwitch() {

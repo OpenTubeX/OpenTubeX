@@ -77,16 +77,20 @@ test.describe('download with unreachable YouTube', () => {
     await expect.poll(() => video.evaluate(element => element.currentTime)).toBeGreaterThan(0)
     await expect(page.locator('.videoTitle:visible')).toHaveText('Offline download')
     await expect(page.locator('.connectionStatus')).toBeHidden()
+    const textTrackCount = () => video.evaluate(element => element.ui?.getControls()?.getPlayer()?.getTextTracks().length ?? 0)
+    expect(await textTrackCount()).toBe(0)
 
     // The retried request fills in the metadata without reloading the file.
     const watchView = await watchViewHandle(page)
     const sourceKey = await watchView.evaluate(view => view.playbackSourceKey)
-    await mockPlayableWatchPage(app, page)
+    await mockPlayableWatchPage(app, page, { captionVideoIds: ['jNQXAC9IVRw'] })
     // Network recovery retries at once on a network change, not after its backoff.
     await page.evaluate(() => window.dispatchEvent(new Event('online')))
     await expect(page.locator('.videoTitle:visible')).toHaveText('Me at the zoo')
     expect(await watchView.evaluate(view => view.playbackSourceKey)).toBe(sourceKey)
     await expect(video).toHaveJSProperty('currentSrc', downloadSource(1, 'jNQXAC9IVRw', mediaPath))
+    // The late metadata also brings the captions to the playing file.
+    await expect.poll(textTrackCount).toBeGreaterThan(0)
   })
 })
 

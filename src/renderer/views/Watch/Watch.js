@@ -4682,7 +4682,7 @@ export default defineComponent({
     addToHistory: function (watchProgress, isWatched = isHistoryEntryWatched(this.historyEntry)) {
       const now = Date.now()
       // Local playback can start before channel metadata is available.
-      const metadata = this.localFilePlayback && !this.channelId && this.historyEntry
+      const metadata = this.localFilePlayback && (this.downloadedPlaybackWithoutMetadata || !this.channelId) && this.historyEntry
         ? this.historyEntry
         : {
             title: this.videoTitle,

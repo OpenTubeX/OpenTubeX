@@ -190,6 +190,26 @@ test('metadata that arrives after a download started playing is cached', () => {
   }
 })
 
+test('history keeps its stored metadata while a download plays without metadata', () => {
+  const saved = []
+  const methods = runInNewContext(`({ ${method('addToHistory', 'keepHistoryEntryAlive(')} })`, { Date })
+  const watch = {
+    ...methods,
+    localFilePlayback: true,
+    downloadedPlaybackWithoutMetadata: true,
+    // The fallback takes the channel from the history entry.
+    channelId: 'channel',
+    videoTitle: 'Offline download',
+    videoDescription: '',
+    videoViewCount: null,
+    historyEntry: { videoId: 'downloaded1', title: 'Stored title', authorId: 'channel', description: 'Stored description', viewCount: 42 },
+    videoId: 'downloaded1',
+    updateHistory: record => saved.push(record),
+  }
+  watch.addToHistory(10, false)
+  assert.deepEqual([saved[0].title, saved[0].description, saved[0].viewCount], ['Stored title', 'Stored description', 42])
+})
+
 for (const entry of ['applyDownloadedPlaybackSource', 'finishDownloadedPlaybackWithoutMetadata']) {
   test(`${entry} falls back to the filename when stored download titles are empty`, () => {
     const methods = runInNewContext(`({
