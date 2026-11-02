@@ -1625,16 +1625,8 @@ test.describe('narrow layout top padding', () => {
 // Sample the empty padding beside the settings content, away from text and controls.
 async function settingsBackgroundVariation(app) {
   const content = app.page.locator('.settingsContent')
-  // The first capture after a UI scale change can still show the previous frame.
-  let samples
-  let previous
-  await expect.poll(async () => {
-    samples = await sampleColors(app, content, () => content.evaluate(element =>
-      [0.1, 0.3, 0.5, 0.7, 0.9].map(fraction => [4, element.clientHeight * fraction])))
-    const settled = JSON.stringify(samples) === previous
-    previous = JSON.stringify(samples)
-    return settled
-  }).toBe(true)
+  const samples = await sampleColors(app, content, () => content.evaluate(element =>
+    [0.1, 0.3, 0.5, 0.7, 0.9].map(fraction => [4, element.clientHeight * fraction])))
   return Math.max(...[0, 1, 2].map(channel =>
     Math.max(...samples.map(color => color[channel])) - Math.min(...samples.map(color => color[channel]))))
 }
