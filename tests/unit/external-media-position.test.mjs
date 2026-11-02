@@ -253,6 +253,18 @@ test('syncing carries marking media as watched and unmarking it to other devices
   assert.equal(getExternalMediaProgress(url), null)
 })
 
+test('a save after syncing a position from a clock ahead of this one still syncs as the newest', async () => {
+  mock.method(Date, 'now', () => 1000)
+  const client = syncClient([{ url, seconds: 5, duration: 30, updatedAt: 5000 }])
+  const { synced } = await syncExternalMediaPositions(client, {}, 0)
+  saveExternalMediaPosition(url, 12, 30)
+  // Another device removed the position, but this device saved again since.
+  const next = syncClient([])
+  await syncExternalMediaPositions(next, synced, 0)
+  assert.equal(getExternalMediaPosition(url, 30), 12)
+  assert.deepEqual(next.uploaded, [{ url, seconds: 12, duration: 30, updatedAt: 5001 }])
+})
+
 test('syncing fails without uploading when saved positions cannot be read', async () => {
   saveExternalMediaPosition(url, 12, 30)
   for (const method of ['key', 'getItem']) {

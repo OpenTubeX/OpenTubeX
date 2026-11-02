@@ -91,7 +91,9 @@ function writePosition(key, position) {
     if (position === null) {
       localStorage.removeItem(key)
     } else {
-      localStorage.setItem(key, JSON.stringify({ ...position, updatedAt: Date.now() }))
+      // A save must win over the position it replaces, even one synced from a device whose clock runs ahead.
+      const updatedAt = Math.max(Date.now(), (readPosition(key)?.updatedAt ?? -1) + 1)
+      localStorage.setItem(key, JSON.stringify({ ...position, updatedAt }))
     }
     externalMediaPositionVersion.value++
   } catch (error) {
