@@ -90,6 +90,15 @@ const actions = {
   }
 }
 
+/** @param {string} value */
+function decodeCredential(value) {
+  try {
+    return decodeURIComponent(value)
+  } catch {
+    return value
+  }
+}
+
 const mutations = {
   setCurrentInvidiousInstance(state, value) {
     state.currentInvidiousInstance = value
@@ -102,7 +111,8 @@ const mutations = {
     let authorization = null
 
     if (url && (url.username.length > 0 || url.password.length > 0)) {
-      authorization = `Basic ${base64EncodeUtf8(`${url.username}:${url.password}`)}`
+      // URL percent-encodes credentials, but servers compare the raw values
+      authorization = `Basic ${base64EncodeUtf8(`${decodeCredential(url.username)}:${decodeCredential(url.password)}`)}`
     }
 
     state.currentInvidiousInstanceAuthorization = authorization
