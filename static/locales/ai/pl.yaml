@@ -158,23 +158,24 @@ Settings:
     Add Setting: Dodaj ustawienie
     Profile Selector Touch Hint: Możesz również przytrzymać ikonę profilu, aby przełączać profile
   Categories:
-    General Description: Język, uruchamianie, karty i działanie aplikacji
+    General Description: Język, uruchamianie, karty i tłumaczenie
     Appearance: Wygląd
-    Appearance Description: Motyw, układ i miniatury
+    Appearance Description: Motyw, układ, nawigacja i listy filmów
     Content appearance: Wygląd list filmów i miniatur
     Layout: Układ
-    Playback Description: Odtwarzacz, napisy i ustawienia kanałów
-    Subscriptions Description: Odświeżanie i wyświetlanie kanału subskrypcji
-    Downloads Description: Foldery, szablony i reguły automatyczne
-    Distraction Free Description: Ukrywanie treści i limity oglądania
+    Playback Description: Domyślne ustawienia odtwarzacza, napisy i ustawienia dla poszczególnych kanałów
+    Subscriptions Description: Odświeżanie kanałów, powiadomienia o nowych filmach i kanały RSS
+    Downloads Description: Folder pobierania, szablony i automatyczne pobieranie
+    Focus: Skupienie
+    Focus Description: Ukryte treści, limity oglądania, przypomnienia i kontrola rodzicielska
     Add-ons: Dodatki
-    Add-ons Description: SponsorBlock, DeArrow, oceny negatywne i tłumaczenie lektorskie
-    Privacy Description: Prywatność oglądania i kontrola dostępu
+    Add-ons Description: SponsorBlock, DeArrow, oceny negatywne, AiSList i tłumaczenie lektorskie
+    Privacy Description: Historia, podpowiedzi wyszukiwania, linki i hasło aplikacji
     Online activity: Aktywność online
-    Data And Storage Description: Import, eksport, użycie dysku i czyszczenie
-    Sync Description: Synchronizacja ustawień i danych między urządzeniami
+    Data And Storage Description: Kopie zapasowe, import i eksport, użycie dysku i czyszczenie
+    Sync Description: Konto serwera synchronizacji, parowanie urządzeń i synchronizowane dane
     Advanced: Zaawansowane
-    Advanced Description: Dostawcy, aplikacje zewnętrzne i sieć
+    Advanced Description: Backendy, buforowanie, narzędzia zewnętrzne, proxy i diagnostyka
     Alternative providers: Dostawcy filmów i metadanych
   General Settings:
     Close Window With Last Tab: 'Zamykaj okno po zamknięciu ostatniej karty'

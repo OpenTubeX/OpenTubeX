@@ -334,23 +334,24 @@ Settings:
     Profile Selector Hint: يمكنك أيضًا النقر بزر الماوس الأيمن فوق رمز الملف الشخصي لتبديل الملفات الشخصية
     Profile Selector Touch Hint: يمكنك أيضًا النقر مع الاستمرار على رمز الملف الشخصي لتبديل الملفات الشخصية
   Categories:
-    General Description: اللغة وبدء التشغيل وعلامات التبويب وسلوك التطبيق
+    General Description: اللغة وبدء التشغيل وعلامات التبويب والترجمة
     Appearance: مظهر
-    Appearance Description: الموضوع والتخطيط والصور المصغرة
+    Appearance Description: السمة والتخطيط والتنقل وقوائم الفيديو
     Content appearance: قوائم الفيديو والصور المصغرة
     Layout: تَخطِيط
-    Playback Description: المشغل والتسميات التوضيحية وتفضيلات القناة
-    Subscriptions Description: 'تحديث الخلاصات وخيارات العرض'
-    Downloads Description: المجلدات والقوالب والقواعد التلقائية
-    Distraction Free Description: إخفاء المحتوى وتعيين حدود العرض
+    Playback Description: إعدادات المشغل الافتراضية والتسميات التوضيحية وإعدادات كل قناة
+    Subscriptions Description: تحديث الخلاصات وإشعارات المقاطع الجديدة وخلاصات RSS
+    Downloads Description: مجلد التنزيل والقوالب والتنزيلات التلقائية
+    Focus: التركيز
+    Focus Description: المحتوى المخفي وحدود المشاهدة والتذكيرات والرقابة الأبوية
     Add-ons: الإضافات
-    Add-ons Description: SponsorBlock، وDeArrow، وعدم الإعجاب، والترجمة الصوتية
-    Privacy Description: عرض الخصوصية وعناصر التحكم في الوصول
+    Add-ons Description: SponsorBlock، وDeArrow، وعدم الإعجاب، وAiSList، والترجمة الصوتية
+    Privacy Description: السجل واقتراحات البحث والروابط وكلمة مرور التطبيق
     Online activity: 'النشاط على الإنترنت'
-    Data And Storage Description: الاستيراد والتصدير واستخدام القرص والتنظيف
-    Sync Description: حافظ على مزامنة الإعدادات والبيانات عبر الأجهزة
+    Data And Storage Description: النسخ الاحتياطية والاستيراد والتصدير واستخدام القرص والتنظيف
+    Sync Description: حساب خادم المزامنة وإقران الأجهزة والبيانات المتزامنة
     Advanced: متقدم
-    Advanced Description: مقدمو الخدمة والتطبيقات الخارجية والشبكة
+    Advanced Description: الواجهات الخلفية والتخزين المؤقت والأدوات الخارجية والوكيل والتشخيص
     Alternative providers: موفري الفيديو والبيانات الوصفية
   Highlight Changed Settings: تم تغيير إعدادات التمييز عن الإعدادات الافتراضية
   Reset Setting to Default: قم بإعادة ضبط هذا الإعداد إلى وضعه الافتراضي

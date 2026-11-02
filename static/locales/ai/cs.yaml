@@ -329,23 +329,24 @@ Settings:
     Profile Selector Hint: Profil můžete přepnout také kliknutím pravým tlačítkem na ikonu profilu
     Profile Selector Touch Hint: Profil můžete přepnout také podržením prstu na ikoně profilu
   Categories:
-    General Description: Jazyk, spuštění, karty a chování aplikace
+    General Description: Jazyk, spuštění, karty a překlad
     Appearance: Vzhled
-    Appearance Description: Motiv, rozvržení a náhledy
+    Appearance Description: Motiv, rozložení, navigace a seznamy videí
     Content appearance: Seznamy videí a náhledy
     Layout: Rozvržení
-    Playback Description: Přehrávač, titulky a předvolby kanálů
-    Subscriptions Description: Obnovování kanálu a možnosti zobrazení
-    Downloads Description: Složky, šablony a automatická pravidla
-    Distraction Free Description: Skrytí obsahu a omezení sledování
+    Playback Description: Výchozí nastavení přehrávače, titulky a nastavení pro jednotlivé kanály
+    Subscriptions Description: Obnovování kanálů, oznámení o nových videích a kanály RSS
+    Downloads Description: Složka pro stahování, šablony a automatické stahování
+    Focus: Soustředění
+    Focus Description: Skrytý obsah, limity sledování, připomenutí a rodičovská kontrola
     Add-ons: Doplňky
-    Add-ons Description: SponsorBlock, DeArrow, hodnocení Nelíbí se mi a překlad dabingu
-    Privacy Description: Soukromí při sledování a řízení přístupu
+    Add-ons Description: SponsorBlock, DeArrow, hodnocení Nelíbí se mi, AiSList a překlad dabingu
+    Privacy Description: Historie, návrhy vyhledávání, odkazy a heslo aplikace
     Online activity: Aktivita na internetu
-    Data And Storage Description: Import, export, využití disku a čištění
-    Sync Description: Synchronizace nastavení a dat mezi zařízeními
+    Data And Storage Description: Zálohy, import a export, využití disku a čištění
+    Sync Description: Účet synchronizačního serveru, párování zařízení a synchronizovaná data
     Advanced: Pokročilé
-    Advanced Description: Poskytovatelé, externí aplikace a síť
+    Advanced Description: Backendy, vyrovnávací paměť, externí nástroje, proxy a diagnostika
     Alternative providers: Poskytovatelé videí a metadat
   Highlight Changed Settings: Zvýraznit nastavení změněná oproti výchozím hodnotám
   Reset Setting to Default: Obnovit výchozí hodnotu tohoto nastavení

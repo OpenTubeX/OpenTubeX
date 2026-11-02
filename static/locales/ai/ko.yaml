@@ -423,23 +423,24 @@ Settings:
     Profile Selector Hint: 프로필 아이콘을 마우스 오른쪽 버튼으로 클릭해도 프로필을 전환할 수 있습니다
     Profile Selector Touch Hint: 프로필 아이콘을 길게 눌러도 프로필을 전환할 수 있습니다
   Categories:
-    General Description: 언어, 시작, 탭 및 앱 동작
+    General Description: 언어, 시작, 탭 및 번역
     Appearance: 모양
-    Appearance Description: 테마, 레이아웃 및 썸네일
+    Appearance Description: 테마, 레이아웃, 탐색 및 동영상 목록
     Content appearance: 동영상 목록 및 썸네일
     Layout: 레이아웃
-    Playback Description: 플레이어, 자막 및 채널 설정
-    Subscriptions Description: 피드 새로 고침 및 표시 옵션
-    Downloads Description: 폴더, 템플릿 및 자동 규칙
-    Distraction Free Description: 콘텐츠 숨기기 및 시청 제한 설정
+    Playback Description: 플레이어 기본값, 자막 및 채널별 설정
+    Subscriptions Description: 피드 새로 고침, 새 동영상 알림 및 RSS 피드
+    Downloads Description: 다운로드 폴더, 템플릿 및 자동 다운로드
+    Focus: 집중
+    Focus Description: 숨긴 콘텐츠, 시청 제한, 알림 및 자녀 보호
     Add-ons: 부가 기능
-    Add-ons Description: SponsorBlock, DeArrow, 싫어요 및 음성 번역
-    Privacy Description: 시청 개인 정보 및 접근 제어
+    Add-ons Description: SponsorBlock, DeArrow, 싫어요, AiSList 및 음성 번역
+    Privacy Description: 기록, 검색 제안, 링크 및 앱 비밀번호
     Online activity: 온라인 활동
-    Data And Storage Description: 가져오기, 내보내기, 디스크 사용량 및 정리
-    Sync Description: 여러 기기의 설정과 데이터를 동기화
+    Data And Storage Description: 백업, 가져오기 및 내보내기, 디스크 사용량 및 정리
+    Sync Description: 동기화 서버 계정, 기기 페어링 및 동기화된 데이터
     Advanced: 고급
-    Advanced Description: 제공자, 외부 앱 및 네트워크
+    Advanced Description: 백엔드, 버퍼링, 외부 도구, 프록시 및 진단
     Alternative providers: 동영상 및 메타데이터 제공자
   Highlight Changed Settings: 기본값에서 변경된 설정 강조
   Reset Setting to Default: 이 설정을 기본값으로 초기화

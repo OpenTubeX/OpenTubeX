@@ -329,23 +329,24 @@ Settings:
     Profile Selector Hint: 也可以右键单击配置文件图标来切换配置文件
     Profile Selector Touch Hint: 也可以长按配置文件图标来切换配置文件
   Categories:
-    General Description: 语言、启动、标签页和应用行为
+    General Description: 语言、启动、标签页和翻译
     Appearance: 外观
-    Appearance Description: 主题、布局和缩略图
+    Appearance Description: 主题、布局、导航和视频列表
     Content appearance: 视频列表和缩略图
     Layout: 布局
-    Playback Description: 播放器、字幕和频道偏好设置
-    Subscriptions Description: 订阅源刷新和显示选项
-    Downloads Description: 文件夹、模板和自动规则
-    Distraction Free Description: 隐藏内容并设置观看限制
+    Playback Description: 播放器默认设置、字幕和按频道设置
+    Subscriptions Description: 订阅源刷新、新视频通知和 RSS 订阅源
+    Downloads Description: 下载文件夹、模板和自动下载
+    Focus: 专注
+    Focus Description: 隐藏的内容、观看限制、提醒和家长控制
     Add-ons: 扩展功能
-    Add-ons Description: SponsorBlock、DeArrow、点踩和配音翻译
-    Privacy Description: 观看隐私和访问控制
+    Add-ons Description: SponsorBlock、DeArrow、点踩、AiSList 和配音翻译
+    Privacy Description: 历史记录、搜索建议、链接和应用密码
     Online activity: 在线活动
-    Data And Storage Description: 导入、导出、磁盘使用情况和清理
-    Sync Description: 在不同设备间同步设置和数据
+    Data And Storage Description: 备份、导入和导出、磁盘占用和清理
+    Sync Description: 同步服务器账户、设备配对和已同步数据
     Advanced: 高级
-    Advanced Description: 提供方、外部应用和网络
+    Advanced Description: 后端、缓冲、外部工具、代理和诊断
     Alternative providers: 视频和元数据提供方
   Highlight Changed Settings: 突出显示与默认值不同的设置
   Reset Setting to Default: 将此设置恢复为默认值

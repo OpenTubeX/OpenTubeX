@@ -329,23 +329,24 @@ Settings:
     Profile Selector Hint: 您也可以在個人檔案圖示上按一下滑鼠右鍵來切換個人檔案
     Profile Selector Touch Hint: 您也可以長按個人檔案圖示來切換個人檔案
   Categories:
-    General Description: 語言、啟動、分頁與應用程式行為
+    General Description: 語言、啟動、分頁與翻譯
     Appearance: 外觀
-    Appearance Description: 佈景主題、版面配置與縮圖
+    Appearance Description: 主題、版面配置、導覽與影片清單
     Content appearance: 影片清單與縮圖
     Layout: 版面配置
-    Playback Description: 播放器、字幕與頻道偏好設定
-    Subscriptions Description: 動態消息重新整理與顯示選項
-    Downloads Description: 資料夾、範本與自動化規則
-    Distraction Free Description: 隱藏內容並設定觀看限制
+    Playback Description: 播放器預設值、字幕與各頻道設定
+    Subscriptions Description: 動態消息重新整理、新影片通知與 RSS 訂閱源
+    Downloads Description: 下載資料夾、範本與自動下載
+    Focus: 專注
+    Focus Description: 隱藏的內容、觀看限制、提醒與家長控制
     Add-ons: 附加元件
-    Add-ons Description: SponsorBlock、DeArrow、倒讚數與配音翻譯
-    Privacy Description: 觀看隱私與存取控制
+    Add-ons Description: SponsorBlock、DeArrow、倒讚數、AiSList 與配音翻譯
+    Privacy Description: 歷史記錄、搜尋建議、連結與應用程式密碼
     Online activity: 線上活動
-    Data And Storage Description: 匯入、匯出、磁碟使用量與清理
-    Sync Description: 讓設定與資料在各裝置間保持同步
+    Data And Storage Description: 備份、匯入與匯出、磁碟使用量與清理
+    Sync Description: 同步伺服器帳戶、裝置配對與已同步的資料
     Advanced: 進階
-    Advanced Description: 提供者、外部應用程式與網路
+    Advanced Description: 後端、緩衝、外部工具、Proxy 與診斷
     Alternative providers: 影片與中繼資料提供者
   Highlight Changed Settings: 標示與預設值不同的設定
   Reset Setting to Default: 將此設定重設為預設值

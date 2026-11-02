@@ -330,23 +330,24 @@ Settings:
     Profile Selector Hint: Puteți schimba profilul și făcând clic dreapta pe pictograma profilului
     Profile Selector Touch Hint: Puteți schimba profilul și apăsând lung pe pictograma profilului
   Categories:
-    General Description: Limbă, pornire, file și comportamentul aplicației
+    General Description: Limbă, pornire, file și traducere
     Appearance: Aspect
-    Appearance Description: Temă, aranjament și miniaturi
+    Appearance Description: Temă, aspect, navigare și liste de videoclipuri
     Content appearance: Liste de videoclipuri și miniaturi
     Layout: Aranjament
-    Playback Description: Player, subtitrări și preferințe pentru canale
-    Subscriptions Description: Opțiuni de reîmprospătare și afișare a fluxului
-    Downloads Description: Foldere, șabloane și reguli automate
-    Distraction Free Description: Ascundeți conținutul și stabiliți limite de vizionare
+    Playback Description: Setări implicite ale playerului, subtitrări și setări pentru fiecare canal
+    Subscriptions Description: Reîmprospătarea fluxurilor, notificări despre videoclipuri noi și fluxuri RSS
+    Downloads Description: Dosar de descărcare, șabloane și descărcări automate
+    Focus: Concentrare
+    Focus Description: Conținut ascuns, limite de vizionare, mementouri și control parental
     Add-ons: Suplimente
-    Add-ons Description: SponsorBlock, DeArrow, aprecieri negative și traducere vocală
-    Privacy Description: Confidențialitatea vizionării și controlul accesului
+    Add-ons Description: SponsorBlock, DeArrow, aprecieri negative, AiSList și traducere vocală
+    Privacy Description: Istoric, sugestii de căutare, linkuri și parola aplicației
     Online activity: Activitate online
-    Data And Storage Description: Import, export, spațiu pe disc și curățare
-    Sync Description: Sincronizați setările și datele între dispozitive
+    Data And Storage Description: Copii de rezervă, import și export, utilizarea discului și curățare
+    Sync Description: Cont pe serverul de sincronizare, asocierea dispozitivelor și date sincronizate
     Advanced: Avansat
-    Advanced Description: Furnizori, aplicații externe și rețea
+    Advanced Description: Backenduri, memorie tampon, instrumente externe, proxy și diagnosticare
     Alternative providers: Furnizori de videoclipuri și metadate
   Highlight Changed Settings: Evidențiază setările diferite de valorile implicite
   Reset Setting to Default: Resetează această setare la valoarea implicită

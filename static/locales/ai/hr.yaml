@@ -332,23 +332,24 @@ Settings:
     Profile Selector Hint: Profil možete promijeniti i desnim klikom na ikonu profila
     Profile Selector Touch Hint: Profil možete promijeniti i dugim pritiskom na ikonu profila
   Categories:
-    General Description: Jezik, pokretanje, kartice i ponašanje aplikacije
+    General Description: Jezik, pokretanje, kartice i prijevod
     Appearance: Izgled
-    Appearance Description: Tema, raspored i minijature
+    Appearance Description: Tema, raspored, navigacija i popisi videozapisa
     Content appearance: Popisi videozapisa i minijature
     Layout: Raspored
-    Playback Description: Reproduktor, titlovi i postavke kanala
-    Subscriptions Description: Osvježavanje izvora i mogućnosti prikaza
-    Downloads Description: Mape, predlošci i automatska pravila
-    Distraction Free Description: Skrivanje sadržaja i postavljanje ograničenja gledanja
+    Playback Description: Zadane postavke reproduktora, titlovi i postavke po kanalu
+    Subscriptions Description: Osvježavanje izvora, obavijesti o novim videozapisima i RSS izvori
+    Downloads Description: Mapa za preuzimanja, predlošci i automatska preuzimanja
+    Focus: Fokus
+    Focus Description: Skriveni sadržaj, ograničenja gledanja, podsjetnici i roditeljski nadzor
     Add-ons: Dodaci
-    Add-ons Description: SponsorBlock, DeArrow, negativne ocjene i glasovni prijevod
-    Privacy Description: Privatnost gledanja i kontrola pristupa
+    Add-ons Description: SponsorBlock, DeArrow, negativne ocjene, AiSList i glasovni prijevod
+    Privacy Description: Povijest, prijedlozi pretraživanja, poveznice i lozinka aplikacije
     Online activity: Aktivnost na internetu
-    Data And Storage Description: Uvoz, izvoz, zauzeće diska i čišćenje
-    Sync Description: Sinkronizacija postavki i podataka na svim uređajima
+    Data And Storage Description: Sigurnosne kopije, uvoz i izvoz, zauzeće diska i čišćenje
+    Sync Description: Račun poslužitelja za sinkronizaciju, uparivanje uređaja i sinkronizirani podaci
     Advanced: Napredno
-    Advanced Description: Pružatelji usluga, vanjske aplikacije i mreža
+    Advanced Description: Pozadinski servisi, međuspremnik, vanjski alati, proxy i dijagnostika
     Alternative providers: Pružatelji videozapisa i metapodataka
   Highlight Changed Settings: Istakni postavke koje se razlikuju od zadanih
   Reset Setting to Default: Vrati ovu postavku na zadanu vrijednost

@@ -415,23 +415,24 @@ Settings:
   # On Settings Page
   Settings: Einstellungen
   Categories:
-    General Description: Sprache, Start, Tabs und App-Verhalten
+    General Description: Sprache, Start, Tabs und Übersetzung
     Appearance: Darstellung
-    Appearance Description: Design, Layout und Vorschaubilder
+    Appearance Description: Design, Layout, Navigation und Videolisten
     Content appearance: Videolisten und Vorschaubilder
     Layout: Layout
-    Playback Description: Player, Untertitel und Kanaleinstellungen
-    Subscriptions Description: Feed-Aktualisierung und Anzeigeoptionen
-    Downloads Description: Ordner, Vorlagen und automatische Regeln
-    Distraction Free Description: Inhalte ausblenden und die Anzeige begrenzen
+    Playback Description: Player-Standards, Untertitel und Einstellungen pro Kanal
+    Subscriptions Description: Feed-Aktualisierung, Benachrichtigungen zu neuen Videos und RSS-Feeds
+    Downloads Description: Download-Ordner, Vorlagen und automatische Downloads
+    Focus: Fokus
+    Focus Description: Ausgeblendete Inhalte, Wiedergabelimits, Erinnerungen und Kindersicherung
     Add-ons: Erweiterungen
-    Add-ons Description: SponsorBlock, DeArrow, Dislikes und Voice-over-Übersetzung
-    Privacy Description: Datenschutz beim Ansehen und Zugriffskontrollen
+    Add-ons Description: SponsorBlock, DeArrow, Dislikes, AiSList und Voice-over-Übersetzung
+    Privacy Description: Verlauf, Suchvorschläge, Links und App-Passwort
     Online activity: Onlineaktivität
-    Data And Storage Description: Import, Export, Speicherbelegung und Bereinigung
-    Sync Description: Einstellungen und Daten geräteübergreifend synchronisieren
+    Data And Storage Description: Sicherungen, Import und Export, Speicherbelegung und Bereinigung
+    Sync Description: Synchronisierungskonto, Gerätekopplung und synchronisierte Daten
     Advanced: Erweitert
-    Advanced Description: Anbieter, externe Anwendungen und Netzwerk
+    Advanced Description: Backends, Pufferung, externe Tools, Proxy und Diagnose
     Alternative providers: Video- und Metadatenanbieter
   General Settings:
     Preferred Video Codec: Bevorzugter Videocodec

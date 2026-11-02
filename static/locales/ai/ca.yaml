@@ -462,23 +462,24 @@ Settings:
     Profile Selector Hint: També podeu fer clic dret a la icona del perfil per canviar de perfil
     Profile Selector Touch Hint: També podeu mantenir premuda la icona del perfil per canviar de perfil
   Categories:
-    General Description: Llengua, inici, pestanyes i comportament de l'aplicació
+    General Description: Idioma, inici, pestanyes i traducció
     Appearance: Aparança
-    Appearance Description: Tema, disposició i miniatures
+    Appearance Description: Tema, disposició, navegació i llistes de vídeos
     Content appearance: Llistes de vídeos i miniatures
     Layout: Disposició
-    Playback Description: Reproductor, subtítols i preferències dels canals
-    Subscriptions Description: Opcions d'actualització i visualització dels canals
-    Downloads Description: Carpetes, plantilles i regles automàtiques
-    Distraction Free Description: Ocultació de contingut i límits de visualització
+    Playback Description: Valors predeterminats del reproductor, subtítols i configuració per canal
+    Subscriptions Description: Actualització dels canals, notificacions de vídeos nous i canals RSS
+    Downloads Description: Carpeta de baixades, plantilles i baixades automàtiques
+    Focus: Concentració
+    Focus Description: Contingut amagat, límits de visualització, recordatoris i control parental
     Add-ons: Complements
-    Add-ons Description: SponsorBlock, DeArrow, no m'agrada i traducció de veu en off
-    Privacy Description: Privadesa de visualització i controls d'accés
+    Add-ons Description: SponsorBlock, DeArrow, no m'agrada, AiSList i traducció de veu en off
+    Privacy Description: Historial, suggeriments de cerca, enllaços i contrasenya de l'aplicació
     Online activity: Activitat en línia
-    Data And Storage Description: Importació, exportació, ús del disc i neteja
-    Sync Description: Manté la configuració i les dades sincronitzades entre dispositius
+    Data And Storage Description: Còpies de seguretat, importació i exportació, ús del disc i neteja
+    Sync Description: Compte del servidor de sincronització, vinculació de dispositius i dades sincronitzades
     Advanced: Avançat
-    Advanced Description: Proveïdors, aplicacions externes i xarxa
+    Advanced Description: Backends, memòria intermèdia, eines externes, servidor intermediari i diagnòstic
     Alternative providers: Proveïdors de vídeo i metadades
   Highlight Changed Settings: Ressalta la configuració diferent dels valors predeterminats
   Reset Setting to Default: Restableix el valor predeterminat d'aquesta opció

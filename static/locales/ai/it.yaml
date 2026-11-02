@@ -329,23 +329,24 @@ Settings:
     Profile Selector Hint: Puoi anche fare clic destro sull'icona del profilo per cambiare profilo
     Profile Selector Touch Hint: Puoi anche tenere premuta l'icona del profilo per cambiare profilo
   Categories:
-    General Description: Lingua, avvio, schede e comportamento dell'app
+    General Description: Lingua, avvio, schede e traduzione
     Appearance: Aspetto
-    Appearance Description: Tema, disposizione e miniature
+    Appearance Description: Tema, layout, navigazione ed elenchi di video
     Content appearance: Elenchi di video e miniature
     Layout: Disposizione
-    Playback Description: Lettore, sottotitoli e preferenze dei canali
-    Subscriptions Description: Aggiornamento dei feed e opzioni di visualizzazione
-    Downloads Description: Cartelle, modelli e regole automatiche
-    Distraction Free Description: Nascondi contenuti e imposta limiti di visione
+    Playback Description: Impostazioni predefinite del lettore, sottotitoli e impostazioni per canale
+    Subscriptions Description: Aggiornamento dei feed, notifiche dei nuovi video e feed RSS
+    Downloads Description: Cartella dei download, modelli e download automatici
+    Focus: Concentrazione
+    Focus Description: Contenuti nascosti, limiti di visione, promemoria e controllo genitori
     Add-ons: Componenti aggiuntivi
-    Add-ons Description: SponsorBlock, DeArrow, Non mi piace e traduzione vocale
-    Privacy Description: Privacy di visione e controlli di accesso
+    Add-ons Description: SponsorBlock, DeArrow, Non mi piace, AiSList e traduzione vocale
+    Privacy Description: Cronologia, suggerimenti di ricerca, link e password dell'app
     Online activity: Attività online
-    Data And Storage Description: Importazione, esportazione, spazio su disco e pulizia
-    Sync Description: Sincronizza impostazioni e dati tra dispositivi
+    Data And Storage Description: Backup, importazione ed esportazione, uso del disco e pulizia
+    Sync Description: Account del server di sincronizzazione, associazione dei dispositivi e dati sincronizzati
     Advanced: Avanzate
-    Advanced Description: Fornitori, app esterne e rete
+    Advanced Description: Backend, buffering, strumenti esterni, proxy e diagnostica
     Alternative providers: Fornitori di video e metadati
   Highlight Changed Settings: Evidenzia impostazioni modificate rispetto ai valori predefiniti
   Reset Setting to Default: Ripristina il valore predefinito di questa impostazione

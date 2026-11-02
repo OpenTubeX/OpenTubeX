@@ -87,6 +87,10 @@
     "ri": "megaphone-line",
     "material": "campaign-outline"
   },
+  "bullseye": {
+    "ri": "focus-2-line",
+    "material": "target-rounded"
+  },
   "calendar-days": {
     "ri": "calendar-line",
     "material": "calendar-month-outline"

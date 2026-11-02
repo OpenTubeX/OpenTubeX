@@ -330,23 +330,24 @@ Settings:
     Profile Selector Hint: Gallwch hefyd dde-glicio eicon y proffil i newid proffil
     Profile Selector Touch Hint: Gallwch hefyd dapio a dal eicon y proffil i newid proffil
   Categories:
-    General Description: Iaith, cychwyn, tabiau ac ymddygiad yr ap
+    General Description: Iaith, cychwyn, tabiau a chyfieithu
     Appearance: Golwg
-    Appearance Description: Thema, cynllun a mân-luniau
+    Appearance Description: Thema, cynllun, llywio a rhestrau fideos
     Content appearance: Rhestrau fideos a mân-luniau
     Layout: Cynllun
-    Playback Description: Chwaraewr, capsiynau a dewisiadau sianeli
-    Subscriptions Description: Dewisiadau adnewyddu a dangos ffrydiau
-    Downloads Description: Ffolderi, templedi a rheolau awtomatig
-    Distraction Free Description: Cuddio cynnwys a gosod terfynau gwylio
+    Playback Description: Rhagosodiadau'r chwaraewr, capsiynau a gosodiadau fesul sianel
+    Subscriptions Description: Adnewyddu ffrydiau, hysbysiadau fideos newydd a ffrydiau RSS
+    Downloads Description: Ffolder llwytho i lawr, templedi a llwytho i lawr awtomatig
+    Focus: Ffocws
+    Focus Description: Cynnwys cudd, terfynau gwylio, nodiadau atgoffa a rheolaeth rhieni
     Add-ons: Ychwanegion
-    Add-ons Description: SponsorBlock, DeArrow, casbwyntiau a chyfieithu troslais
-    Privacy Description: Preifatrwydd gwylio a rheolaethau mynediad
+    Add-ons Description: SponsorBlock, DeArrow, casbwyntiau, AiSList a chyfieithu troslais
+    Privacy Description: Hanes, awgrymiadau chwilio, dolenni a chyfrinair yr ap
     Online activity: Gweithgarwch ar-lein
-    Data And Storage Description: Mewnforio, allforio, defnydd disg a glanhau
-    Sync Description: Cadw gosodiadau a data wedi'u cysoni ar draws dyfeisiau
+    Data And Storage Description: Copïau wrth gefn, mewnforio ac allforio, defnydd disg a glanhau
+    Sync Description: Cyfrif gweinydd cysoni, paru dyfeisiau a data wedi'i gysoni
     Advanced: Uwch
-    Advanced Description: Darparwyr, apiau allanol a rhwydwaith
+    Advanced Description: Cefnlenni, byffro, offer allanol, dirprwy a diagnosteg
     Alternative providers: Darparwyr fideo a metadata
   Highlight Changed Settings: Amlygu gosodiadau sydd wedi newid o'r rhagosodiadau
   Reset Setting to Default: Ailosod y gosodiad hwn i'w ragosodiad

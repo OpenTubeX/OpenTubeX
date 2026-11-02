@@ -302,23 +302,24 @@ Settings:
     Profile Selector Hint: Чтобы сменить профиль, можно также нажать правой кнопкой мыши на значок профиля
     Profile Selector Touch Hint: Чтобы сменить профиль, можно также нажать и удерживать значок профиля
   Categories:
-    General Description: Язык, запуск, вкладки и поведение приложения
+    General Description: Язык, запуск, вкладки и перевод
     Appearance: Внешний вид
-    Appearance Description: Тема, макет и миниатюры
+    Appearance Description: Тема, макет, навигация и списки видео
     Content appearance: Списки видео и миниатюры
     Layout: Макет
-    Playback Description: Проигрыватель, субтитры и настройки каналов
-    Subscriptions Description: Обновление и отображение лент
-    Downloads Description: Папки, шаблоны и автоматические правила
-    Distraction Free Description: Скрытие материалов и ограничения просмотра
+    Playback Description: Параметры проигрывателя по умолчанию, субтитры и настройки для каждого канала
+    Subscriptions Description: Обновление лент, уведомления о новых видео и RSS-ленты
+    Downloads Description: Папка загрузок, шаблоны и автоматические загрузки
+    Focus: Фокус
+    Focus Description: Скрытый контент, ограничения просмотра, напоминания и родительский контроль
     Add-ons: Дополнения
-    Add-ons Description: SponsorBlock, DeArrow, отметки «Не нравится» и закадровый перевод
-    Privacy Description: Конфиденциальность просмотра и контроль доступа
+    Add-ons Description: SponsorBlock, DeArrow, отметки «Не нравится», AiSList и закадровый перевод
+    Privacy Description: История, поисковые подсказки, ссылки и пароль приложения
     Online activity: Сетевая активность
-    Data And Storage Description: Импорт, экспорт, место на диске и очистка
-    Sync Description: Синхронизация настроек и данных между устройствами
+    Data And Storage Description: Резервные копии, импорт и экспорт, использование диска и очистка
+    Sync Description: Учётная запись сервера синхронизации, сопряжение устройств и синхронизируемые данные
     Advanced: Дополнительно
-    Advanced Description: Поставщики, внешние приложения и сеть
+    Advanced Description: Бэкенды, буферизация, внешние инструменты, прокси и диагностика
     Alternative providers: Поставщики видео и метаданных
   Highlight Changed Settings: Выделять настройки, отличающиеся от стандартных
   Reset Setting to Default: Восстановить стандартное значение

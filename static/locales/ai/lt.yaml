@@ -444,23 +444,24 @@ Settings:
     Profile Selector Hint: Profilį taip pat galite perjungti dešiniuoju pelės mygtuku spustelėję profilio piktogramą
     Profile Selector Touch Hint: Profilį taip pat galite perjungti ilgai paspaudę profilio piktogramą
   Categories:
-    General Description: Kalba, paleidimas, kortelės ir programos veikimas
+    General Description: Kalba, paleidimas, kortelės ir vertimas
     Appearance: Išvaizda
-    Appearance Description: Apipavidalinimas, išdėstymas ir miniatiūros
+    Appearance Description: Tema, išdėstymas, naršymas ir vaizdo įrašų sąrašai
     Content appearance: Vaizdo įrašų sąrašai ir miniatiūros
     Layout: Išdėstymas
-    Playback Description: Leistuvas, subtitrai ir kanalų nuostatos
-    Subscriptions Description: Kanalų atnaujinimo ir rodymo parinktys
-    Downloads Description: Aplankai, šablonai ir automatinės taisyklės
-    Distraction Free Description: Turinio slėpimas ir peržiūros apribojimai
+    Playback Description: Leistuvo numatytosios nuostatos, subtitrai ir kiekvieno kanalo nustatymai
+    Subscriptions Description: Kanalų atnaujinimas, pranešimai apie naujus vaizdo įrašus ir RSS kanalai
+    Downloads Description: Atsisiuntimų aplankas, šablonai ir automatiniai atsisiuntimai
+    Focus: Susikaupimas
+    Focus Description: Paslėptas turinys, žiūrėjimo apribojimai, priminimai ir tėvų kontrolė
     Add-ons: Priedai
-    Add-ons Description: SponsorBlock, DeArrow, „Nepatinka“ įvertinimai ir įgarsintas vertimas
-    Privacy Description: Peržiūros privatumas ir prieigos valdymas
+    Add-ons Description: SponsorBlock, DeArrow, „Nepatinka“ įvertinimai, AiSList ir įgarsintas vertimas
+    Privacy Description: Istorija, paieškos pasiūlymai, nuorodos ir programos slaptažodis
     Online activity: Veikla internete
-    Data And Storage Description: Importavimas, eksportavimas, disko naudojimas ir valymas
-    Sync Description: Nustatymų ir duomenų sinchronizavimas įrenginiuose
+    Data And Storage Description: Atsarginės kopijos, importavimas ir eksportavimas, disko naudojimas ir valymas
+    Sync Description: Sinchronizavimo serverio paskyra, įrenginių susiejimas ir sinchronizuoti duomenys
     Advanced: Išplėstiniai
-    Advanced Description: Teikėjai, išorinės programos ir tinklas
+    Advanced Description: Vidinės sistemos, buferizavimas, išoriniai įrankiai, tarpinis serveris ir diagnostika
     Alternative providers: Vaizdo įrašų ir metaduomenų teikėjai
   Highlight Changed Settings: Paryškinti nuo numatytųjų pakeistus nustatymus
   Reset Setting to Default: Atkurti numatytąją šio nustatymo reikšmę

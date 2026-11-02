@@ -352,23 +352,24 @@ Settings:
     Profile Selector Hint: Пераключыць профіль можна таксама правай кнопкай мышы па значку профілю
     Profile Selector Touch Hint: Пераключыць профіль можна таксама доўгім націскам на значок профілю
   Categories:
-    General Description: Мова, запуск, укладкі і паводзіны праграмы
+    General Description: Мова, запуск, укладкі і пераклад
     Appearance: Выгляд
-    Appearance Description: Тэма, кампаноўка і мініяцюры
+    Appearance Description: Тэма, макет, навігацыя і спісы відэа
     Content appearance: Спісы відэа і мініяцюры
     Layout: Кампаноўка
-    Playback Description: Прайгравальнік, субцітры і налады каналаў
-    Subscriptions Description: Абнаўленне стужкі і параметры паказу
-    Downloads Description: Папкі, шаблоны і аўтаматычныя правілы
-    Distraction Free Description: Схаванне змесціва і абмежаванні прагляду
+    Playback Description: Прадвызначаныя налады прайгравальніка, субцітры і налады для кожнага канала
+    Subscriptions Description: Абнаўленне стужак, апавяшчэнні пра новыя відэа і RSS-стужкі
+    Downloads Description: Папка спампоўвання, шаблоны і аўтаматычныя спампоўванні
+    Focus: Фокус
+    Focus Description: Схаваны змест, абмежаванні прагляду, напаміны і бацькоўскі кантроль
     Add-ons: Дадаткі
-    Add-ons Description: SponsorBlock, DeArrow, адзнакі «Не падабаецца» і закадравы пераклад
-    Privacy Description: Прыватнасць прагляду і кіраванне доступам
+    Add-ons Description: SponsorBlock, DeArrow, адзнакі «Не падабаецца», AiSList і закадравы пераклад
+    Privacy Description: Гісторыя, падказкі пошуку, спасылкі і пароль праграмы
     Online activity: Сеткавая актыўнасць
-    Data And Storage Description: Імпарт, экспарт, выкарыстанне дыска і ачыстка
-    Sync Description: Сінхранізацыя налад і даных паміж прыладамі
+    Data And Storage Description: Рэзервовыя копіі, імпарт і экспарт, выкарыстанне дыска і ачыстка
+    Sync Description: Уліковы запіс сервера сінхранізацыі, спалучэнне прылад і сінхранізаваныя даныя
     Advanced: Пашыраныя
-    Advanced Description: Пастаўшчыкі, вонкавыя праграмы і сетка
+    Advanced Description: Бэкенды, буферызацыя, знешнія інструменты, проксі і дыягностыка
     Alternative providers: Пастаўшчыкі відэа і метаданых
   Highlight Changed Settings: Вылучаць налады, змененыя адносна прадвызначаных
   Reset Setting to Default: Вярнуць прадвызначанае значэнне гэтай налады

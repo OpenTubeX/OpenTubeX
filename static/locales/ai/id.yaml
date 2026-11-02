@@ -330,23 +330,24 @@ Settings:
     Profile Selector Hint: Anda juga dapat mengeklik kanan ikon profil untuk berganti profil
     Profile Selector Touch Hint: Anda juga dapat mengetuk lama ikon profil untuk berganti profil
   Categories:
-    General Description: Bahasa, proses mulai, tab, dan perilaku aplikasi
+    General Description: Bahasa, saat mulai, tab, dan terjemahan
     Appearance: Tampilan
-    Appearance Description: Tema, tata letak, dan gambar mini
+    Appearance Description: Tema, tata letak, navigasi, dan daftar video
     Content appearance: Daftar video dan gambar mini
     Layout: Tata letak
-    Playback Description: Pemutar, takarir, dan preferensi saluran
-    Subscriptions Description: Opsi pembaruan dan tampilan umpan
-    Downloads Description: Folder, templat, dan aturan otomatis
-    Distraction Free Description: Sembunyikan konten dan tetapkan batas menonton
+    Playback Description: Bawaan pemutar, takarir, dan pengaturan per saluran
+    Subscriptions Description: Pembaruan umpan, notifikasi video baru, dan umpan RSS
+    Downloads Description: Folder unduhan, templat, dan unduhan otomatis
+    Focus: Fokus
+    Focus Description: Konten tersembunyi, batas menonton, pengingat, dan kontrol orang tua
     Add-ons: Pengaya
-    Add-ons Description: SponsorBlock, DeArrow, jumlah tidak suka, dan terjemahan sulih suara
-    Privacy Description: Privasi menonton dan kontrol akses
+    Add-ons Description: SponsorBlock, DeArrow, jumlah tidak suka, AiSList, dan terjemahan sulih suara
+    Privacy Description: Riwayat, saran pencarian, tautan, dan kata sandi aplikasi
     Online activity: Aktivitas daring
-    Data And Storage Description: Impor, ekspor, penggunaan disk, dan pembersihan
-    Sync Description: Selaraskan pengaturan dan data antarperangkat
+    Data And Storage Description: Cadangan, impor dan ekspor, penggunaan disk, dan pembersihan
+    Sync Description: Akun server sinkronisasi, pemasangan perangkat, dan data yang disinkronkan
     Advanced: Lanjutan
-    Advanced Description: Penyedia, aplikasi eksternal, dan jaringan
+    Advanced Description: Backend, buffering, alat eksternal, proksi, dan diagnostik
     Alternative providers: Penyedia video dan metadata
   Highlight Changed Settings: Sorot pengaturan yang berbeda dari nilai bawaan
   Reset Setting to Default: Atur ulang pengaturan ini ke nilai bawaan

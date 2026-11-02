@@ -342,23 +342,24 @@ Settings:
     Profile Selector Hint: Du kan òg høgreklikke på profilikonet for å byte profil
     Profile Selector Touch Hint: Du kan òg trykke lenge på profilikonet for å byte profil
   Categories:
-    General Description: Språk, oppstart, faner og appåtferd
+    General Description: Språk, oppstart, faner og omsetjing
     Appearance: Utsjånad
-    Appearance Description: Tema, oppsett og miniatyrbilete
+    Appearance Description: Tema, oppsett, navigasjon og videolister
     Content appearance: Videolister og miniatyrbilete
     Layout: Oppsett
-    Playback Description: Avspelar, undertekstar og kanalval
-    Subscriptions Description: Oppdatering og vising av straumar
-    Downloads Description: Mapper, malar og automatiske reglar
-    Distraction Free Description: Gøym innhald og set grenser for sjåtid
+    Playback Description: Standardinnstillingar for avspelaren, undertekstar og innstillingar per kanal
+    Subscriptions Description: Oppdatering av straumar, varsel om nye videoar og RSS-straumar
+    Downloads Description: Nedlastingsmappe, malar og automatiske nedlastingar
+    Focus: Fokus
+    Focus Description: Skjult innhald, visingsgrenser, påminningar og foreldrekontroll
     Add-ons: Tillegg
-    Add-ons Description: SponsorBlock, DeArrow, mislikingar og taleomsetjing
-    Privacy Description: Personvern ved vising og tilgangskontroll
+    Add-ons Description: SponsorBlock, DeArrow, mislikingar, AiSList og taleomsetjing
+    Privacy Description: Historikk, søkjeforslag, lenkjer og app-passord
     Online activity: Nettaktivitet
-    Data And Storage Description: Import, eksport, diskbruk og opprydding
-    Sync Description: Hald innstillingar og data synkroniserte mellom einingar
+    Data And Storage Description: Tryggingskopiar, import og eksport, diskbruk og opprydding
+    Sync Description: Synkroniseringstenarkonto, samankopling av einingar og synkroniserte data
     Advanced: Avansert
-    Advanced Description: Tilbydarar, eksterne appar og nettverk
+    Advanced Description: Bakgrunnstenester, bufring, eksterne verktøy, mellomtenar og diagnostikk
     Alternative providers: Tilbydarar av video og metadata
   Highlight Changed Settings: Framhev innstillingar som er endra frå standardverdiane
   Reset Setting to Default: Still denne innstillinga tilbake til standardverdien

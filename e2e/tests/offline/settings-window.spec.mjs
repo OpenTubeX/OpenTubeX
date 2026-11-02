@@ -1399,7 +1399,8 @@ test.describe('localized compact settings breadcrumb', () => {
         height: 520
       }))
     })
-    await goToSettingsSection(page, 'focus')
+    // Synchronisierung is the longest German category label.
+    await goToSettingsSection(page, 'sync')
 
     const breadcrumb = page.locator('.settingsBreadcrumb')
     const root = breadcrumb.locator('.settingsBreadcrumbRoot')
@@ -1408,7 +1409,7 @@ test.describe('localized compact settings breadcrumb', () => {
     await expect(page.locator('.settingsPage')).toHaveClass(/compactSettings/)
     await expect(root).toBeHidden()
     await expect(breadcrumb.locator('.settingsBreadcrumbSeparator').first()).toBeHidden()
-    await expect(category.locator('.settingsBreadcrumbText')).toHaveText('Ablenkungsfreier Modus')
+    await expect(category.locator('.settingsBreadcrumbText')).toHaveText('Synchronisierung')
     await expect.poll(() => category.locator('.settingsBreadcrumbText').evaluate(element => (
       element.scrollWidth <= element.clientWidth + 1
     ))).toBe(true)

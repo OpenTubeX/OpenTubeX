@@ -334,23 +334,24 @@ Settings:
     Profile Selector Hint: Bạn cũng có thể nhấp chuột phải vào biểu tượng hồ sơ để chuyển hồ sơ
     Profile Selector Touch Hint: Bạn cũng có thể nhấn giữ biểu tượng hồ sơ để chuyển hồ sơ
   Categories:
-    General Description: Ngôn ngữ, khởi động, thẻ và hoạt động của ứng dụng
+    General Description: Ngôn ngữ, khởi động, thẻ và bản dịch
     Appearance: Giao diện
-    Appearance Description: Chủ đề, bố cục và hình thu nhỏ
+    Appearance Description: Chủ đề, bố cục, điều hướng và danh sách video
     Content appearance: Danh sách video và hình thu nhỏ
     Layout: Bố cục
-    Playback Description: Trình phát, phụ đề và tùy chọn kênh
-    Subscriptions Description: Tùy chọn làm mới và hiển thị bảng tin
-    Downloads Description: Thư mục, mẫu và quy tắc tự động
-    Distraction Free Description: Ẩn nội dung và đặt giới hạn xem
+    Playback Description: Mặc định của trình phát, phụ đề và cài đặt theo từng kênh
+    Subscriptions Description: Làm mới bảng tin, thông báo video mới và nguồn cấp RSS
+    Downloads Description: Thư mục tải xuống, mẫu và tải xuống tự động
+    Focus: Tập trung
+    Focus Description: Nội dung bị ẩn, giới hạn xem, lời nhắc và kiểm soát của phụ huynh
     Add-ons: Tiện ích bổ sung
-    Add-ons Description: SponsorBlock, DeArrow, lượt không thích và bản dịch lồng tiếng
-    Privacy Description: Quyền riêng tư khi xem và kiểm soát truy cập
+    Add-ons Description: SponsorBlock, DeArrow, lượt không thích, AiSList và bản dịch lồng tiếng
+    Privacy Description: Lịch sử, gợi ý tìm kiếm, liên kết và mật khẩu ứng dụng
     Online activity: Hoạt động trực tuyến
-    Data And Storage Description: Nhập, xuất, dung lượng đĩa và dọn dẹp
-    Sync Description: Đồng bộ cài đặt và dữ liệu giữa các thiết bị
+    Data And Storage Description: Bản sao lưu, nhập và xuất, dung lượng ổ đĩa và dọn dẹp
+    Sync Description: Tài khoản máy chủ đồng bộ, ghép nối thiết bị và dữ liệu được đồng bộ
     Advanced: Nâng cao
-    Advanced Description: Nhà cung cấp, ứng dụng bên ngoài và mạng
+    Advanced Description: Phần phụ trợ, bộ đệm, công cụ bên ngoài, proxy và chẩn đoán
     Alternative providers: Nhà cung cấp video và siêu dữ liệu
   Highlight Changed Settings: Đánh dấu cài đặt khác mặc định
   Reset Setting to Default: Đặt lại cài đặt này về mặc định

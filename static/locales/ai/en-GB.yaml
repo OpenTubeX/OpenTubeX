@@ -331,23 +331,24 @@ Settings:
     Profile Selector Hint: You can also right-click the profile icon to switch profiles
     Profile Selector Touch Hint: You can also tap and hold the profile icon to switch profiles
   Categories:
-    General Description: Language, startup, tabs, and app behaviour
+    General Description: Language, startup, tabs, and translation
     Appearance: Appearance
-    Appearance Description: Theme, layout, and thumbnails
+    Appearance Description: Theme, layout, navigation, and video lists
     Content appearance: Video lists and thumbnails
     Layout: Layout
-    Playback Description: Player, captions, and channel preferences
-    Subscriptions Description: Feed refresh and display options
-    Downloads Description: Folders, templates, and automatic rules
-    Distraction Free Description: Hide content and set viewing limits
+    Playback Description: Player defaults, captions, and per-channel settings
+    Subscriptions Description: Feed refresh, upload notifications, and RSS feeds
+    Downloads Description: Download folder, templates, and automatic downloads
+    Focus: Focus
+    Focus Description: Hidden content, watch limits, reminders, and parental controls
     Add-ons: Add-ons
-    Add-ons Description: SponsorBlock, DeArrow, dislikes, and voice-over translation
-    Privacy Description: Viewing privacy and access controls
+    Add-ons Description: SponsorBlock, DeArrow, dislikes, AiSList, and voice-over translation
+    Privacy Description: History, search suggestions, links, and app password
     Online activity: Online activity
-    Data And Storage Description: Import, export, disk usage, and cleanup
-    Sync Description: Keep settings and data in sync across devices
+    Data And Storage Description: Backups, import and export, disk usage, and cleanup
+    Sync Description: Sync server account, device pairing, and synced data
     Advanced: Advanced
-    Advanced Description: Providers, external apps, and network
+    Advanced Description: Backends, buffering, external tools, proxy, and diagnostics
     Alternative providers: Video and metadata providers
   Performance Impact:
     Show Performance Impact: Show performance impact indicators

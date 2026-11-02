@@ -332,23 +332,24 @@ Settings:
     Profile Selector Hint: Du kan även högerklicka på profilikonen för att byta profil
     Profile Selector Touch Hint: Du kan även trycka länge på profilikonen för att byta profil
   Categories:
-    General Description: Språk, start, flikar och appbeteende
+    General Description: Språk, uppstart, flikar och översättning
     Appearance: Utseende
-    Appearance Description: Tema, layout och miniatyrbilder
+    Appearance Description: Tema, layout, navigering och videolistor
     Content appearance: Videolistor och miniatyrbilder
     Layout: Layout
-    Playback Description: Spelare, undertexter och kanalinställningar
-    Subscriptions Description: Uppdatering och visning av flöden
-    Downloads Description: Mappar, mallar och automatiska regler
-    Distraction Free Description: Dölj innehåll och ange visningsgränser
+    Playback Description: Standardinställningar för spelaren, undertexter och inställningar per kanal
+    Subscriptions Description: Uppdatering av flöden, aviseringar om nya videor och RSS-flöden
+    Downloads Description: Nedladdningsmapp, mallar och automatiska nedladdningar
+    Focus: Fokus
+    Focus Description: Dolt innehåll, tittargränser, påminnelser och föräldrakontroll
     Add-ons: Tillägg
-    Add-ons Description: SponsorBlock, DeArrow, ogillanden och dubbningsöversättning
-    Privacy Description: Integritet vid visning och åtkomstkontroller
+    Add-ons Description: SponsorBlock, DeArrow, ogillanden, AiSList och dubbningsöversättning
+    Privacy Description: Historik, sökförslag, länkar och appens lösenord
     Online activity: Onlineaktivitet
-    Data And Storage Description: Import, export, diskutrymme och rensning
-    Sync Description: Synkronisera inställningar och data mellan enheter
+    Data And Storage Description: Säkerhetskopior, import och export, diskanvändning och rensning
+    Sync Description: Konto på synkroniseringsservern, parkoppling av enheter och synkroniserade data
     Advanced: Avancerat
-    Advanced Description: Leverantörer, externa appar och nätverk
+    Advanced Description: Serverdelar, buffring, externa verktyg, proxy och diagnostik
     Alternative providers: Leverantörer av video och metadata
   Highlight Changed Settings: Markera inställningar som skiljer sig från standardvärdena
   Reset Setting to Default: Återställ inställningen till standardvärdet

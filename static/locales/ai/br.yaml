@@ -329,23 +329,24 @@ Settings:
     Profile Selector Hint: "Gallout a rit ivez klikañ a-zehou war arlun ar profil evit cheñch profil"
     Profile Selector Touch Hint: Gallout a rit ivez pouezañ hir war arlun ar profil evit cheñch profil
   Categories:
-    General Description: "Yezh, loc'hañ, ivinelloù hag emzalc'h an arload"
+    General Description: Yezh, loc'hañ, ivinelloù ha troidigezh
     Appearance: "Neuz"
-    Appearance Description: "Neuz, aozadur ha skeudennig"
+    Appearance Description: Neuz, pajennaozañ, merdeiñ ha rolloù videoioù
     Content appearance: "Rolloù videoioù ha skeudennigoù"
     Layout: "Aozadur"
-    Playback Description: "Lenner, istitloù ha gwellvezioù ar chadennoù"
-    Subscriptions Description: "Dibarzhioù adkargañ ha skrammañ ar gwazhioù"
-    Downloads Description: "Teuliadoù, patromoù ha reolennoù emgefreek"
-    Distraction Free Description: "Kuzhat endalc'had ha lakaat bevennoù sellout"
+    Playback Description: Arventennoù dre ziouer al lenner, istitloù hag arventennoù evit pep chadenn
+    Subscriptions Description: Adkargañ ar gwazhioù, kemennoù videoioù nevez ha gwazhioù RSS
+    Downloads Description: Teuliad pellgargañ, patromoù ha pellgargadurioù emgefreek
+    Focus: Fokus
+    Focus Description: Endalc'had kuzhet, bevennoù sellout, degasoù-soñj ha kontroll ar gerent
     Add-ons: "Askouezhioù"
-    Add-ons Description: "SponsorBlock, DeArrow, displijadennoù ha treiñ ar vouezh"
-    Privacy Description: "Prevezded ar sellout ha reoliñ an haeziñ"
+    Add-ons Description: SponsorBlock, DeArrow, displijadennoù, AiSList ha treiñ ar vouezh
+    Privacy Description: Roll-istor, kinnigoù klask, liammoù ha ger-tremen an arload
     Online activity: "Obererezh enlinenn"
-    Data And Storage Description: "Enporzhiañ, ezporzhiañ, implij ar bladenn ha naetaat"
-    Sync Description: "Derc'hel an arventennoù hag ar roadennoù goubredet etre an trevnadoù"
+    Data And Storage Description: Gwaredoù, enporzhiañ hag ezporzhiañ, implij ar gantenn ha naetaat
+    Sync Description: Kont ar servijer goubredañ, koublañ an trevnadoù ha roadennoù goubredet
     Advanced: "Araokaet"
-    Advanced Description: "Pourvezerien, arloadoù diavaez ha rouedad"
+    Advanced Description: Backendoù, skurzer, ostilhoù diavaez, proksi ha diagnostik
     Alternative providers: "Pourvezerien videoioù ha metaroadennoù"
   Highlight Changed Settings: "Usskediñ an arventennoù disheñvel diouzh ar re dre ziouer"
   Reset Setting to Default: "Adlakaat an arventenn-mañ d'he gwerzh dre ziouer"

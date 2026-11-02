@@ -454,23 +454,24 @@ Settings:
     Profile Selector Hint: Profil lahko zamenjate tudi z desnim klikom ikone profila
     Profile Selector Touch Hint: Profil lahko zamenjate tudi z dolgim pritiskom ikone profila
   Categories:
-    General Description: Jezik, zagon, zavihki in delovanje programa
+    General Description: Jezik, zagon, zavihki in prevajanje
     Appearance: Videz
-    Appearance Description: Tema, postavitev in sličice
+    Appearance Description: Tema, postavitev, navigacija in seznami videoposnetkov
     Content appearance: Seznami videoposnetkov in sličice
     Layout: Postavitev
-    Playback Description: Predvajalnik, podnapisi in nastavitve kanalov
-    Subscriptions Description: Osveževanje virov in možnosti prikaza
-    Downloads Description: Mape, predloge in samodejna pravila
-    Distraction Free Description: Skrivanje vsebine in omejitve gledanja
+    Playback Description: Privzete nastavitve predvajalnika, podnapisi in nastavitve za posamezne kanale
+    Subscriptions Description: Osveževanje virov, obvestila o novih videoposnetkih in viri RSS
+    Downloads Description: Mapa za prenose, predloge in samodejni prenosi
+    Focus: Osredotočenost
+    Focus Description: Skrita vsebina, omejitve gledanja, opomniki in starševski nadzor
     Add-ons: Dodatki
-    Add-ons Description: SponsorBlock, DeArrow, oznake »ni mi všeč« in glasovni prevod
-    Privacy Description: Zasebnost ogledov in nadzor dostopa
+    Add-ons Description: SponsorBlock, DeArrow, oznake »ni mi všeč«, AiSList in glasovni prevod
+    Privacy Description: Zgodovina, predlogi iskanja, povezave in geslo aplikacije
     Online activity: Dejavnost v spletu
-    Data And Storage Description: Uvoz, izvoz, poraba prostora na disku in čiščenje
-    Sync Description: Sinhronizacija nastavitev in podatkov med napravami
+    Data And Storage Description: Varnostne kopije, uvoz in izvoz, poraba diska in čiščenje
+    Sync Description: Račun strežnika za sinhronizacijo, seznanjanje naprav in sinhronizirani podatki
     Advanced: Napredno
-    Advanced Description: Ponudniki, zunanji programi in omrežje
+    Advanced Description: Zaledja, medpomnjenje, zunanja orodja, posredniški strežnik in diagnostika
     Alternative providers: Ponudniki videoposnetkov in metapodatkov
   Highlight Changed Settings: Označi nastavitve, ki se razlikujejo od privzetih
   Reset Setting to Default: Ponastavi to nastavitev na privzeto vrednost

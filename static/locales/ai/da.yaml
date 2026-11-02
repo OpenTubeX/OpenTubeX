@@ -340,23 +340,24 @@ Settings:
     Profile Selector Hint: Du kan også højreklikke på profilikonet for at skifte profil
     Profile Selector Touch Hint: Du kan også trykke længe på profilikonet for at skifte profil
   Categories:
-    General Description: Sprog, opstart, faner og appadfærd
+    General Description: Sprog, opstart, faner og oversættelse
     Appearance: Udseende
-    Appearance Description: Tema, layout og miniaturebilleder
+    Appearance Description: Tema, layout, navigation og videolister
     Content appearance: Videolister og miniaturebilleder
     Layout: Layout
-    Playback Description: Afspiller, undertekster og kanalindstillinger
-    Subscriptions Description: Opdatering og visning af feeds
-    Downloads Description: Mapper, skabeloner og automatiske regler
-    Distraction Free Description: Skjul indhold, og angiv visningsgrænser
+    Playback Description: Standardindstillinger for afspiller, undertekster og indstillinger pr. kanal
+    Subscriptions Description: Opdatering af feeds, notifikationer om nye videoer og RSS-feeds
+    Downloads Description: Downloadmappe, skabeloner og automatiske downloads
+    Focus: Fokus
+    Focus Description: Skjult indhold, visningsgrænser, påmindelser og forældrekontrol
     Add-ons: Tilføjelser
-    Add-ons Description: SponsorBlock, DeArrow, dislikes og voiceoveroversættelse
-    Privacy Description: Privatliv under visning og adgangskontrol
+    Add-ons Description: SponsorBlock, DeArrow, dislikes, AiSList og voiceoveroversættelse
+    Privacy Description: Historik, søgeforslag, links og appadgangskode
     Online activity: Onlineaktivitet
-    Data And Storage Description: Import, eksport, diskforbrug og oprydning
-    Sync Description: Hold indstillinger og data synkroniseret på tværs af enheder
+    Data And Storage Description: Sikkerhedskopier, import og eksport, diskforbrug og oprydning
+    Sync Description: Synkroniseringsserverkonto, parring af enheder og synkroniserede data
     Advanced: Avanceret
-    Advanced Description: Udbydere, eksterne apps og netværk
+    Advanced Description: Backends, buffering, eksterne værktøjer, proxy og diagnosticering
     Alternative providers: Udbydere af video og metadata
   Highlight Changed Settings: Fremhæv indstillinger, der afviger fra standarden
   Reset Setting to Default: Nulstil denne indstilling til standardværdien

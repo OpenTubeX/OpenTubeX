@@ -329,23 +329,24 @@ Settings:
     Profile Selector Hint: Þú getur einnig hægrismellt á tákn notandasniðsins til að skipta um snið
     Profile Selector Touch Hint: Þú getur einnig haldið fingri á tákni notandasniðsins til að skipta um snið
   Categories:
-    General Description: Tungumál, ræsing, flipar og hegðun forrits
+    General Description: Tungumál, ræsing, flipar og þýðingar
     Appearance: Útlit
-    Appearance Description: Þema, framsetning og smámyndir
+    Appearance Description: Þema, framsetning, leiðsögn og myndskeiðalistar
     Content appearance: Myndbandalistar og smámyndir
     Layout: Framsetning
-    Playback Description: Spilari, skjátextar og kjörstillingar rása
-    Subscriptions Description: Endurnýjun strauma og birtingarvalkostir
-    Downloads Description: Möppur, sniðmát og sjálfvirkar reglur
-    Distraction Free Description: Fela efni og setja áhorfstakmörk
+    Playback Description: Sjálfgefnar stillingar spilara, skjátextar og stillingar fyrir hverja rás
+    Subscriptions Description: Endurnýjun strauma, tilkynningar um ný myndskeið og RSS-straumar
+    Downloads Description: Niðurhalsmappa, sniðmát og sjálfvirkt niðurhal
+    Focus: Einbeiting
+    Focus Description: Falið efni, áhorfstakmörk, áminningar og foreldrastýringar
     Add-ons: Viðbætur
-    Add-ons Description: SponsorBlock, DeArrow, fjöldi sem líkar ekki við og þýðingar með talsetningu
-    Privacy Description: Persónuvernd við áhorf og aðgangsstýringar
+    Add-ons Description: SponsorBlock, DeArrow, fjöldi sem líkar ekki við, AiSList og þýðingar með talsetningu
+    Privacy Description: Ferill, leitartillögur, tenglar og lykilorð forrits
     Online activity: Virkni á netinu
-    Data And Storage Description: Innflutningur, útflutningur, disknotkun og hreinsun
-    Sync Description: Samstilla stillingar og gögn milli tækja
+    Data And Storage Description: Öryggisafrit, inn- og útflutningur, diskanotkun og hreinsun
+    Sync Description: Aðgangur að samstillingarþjóni, pörun tækja og samstillt gögn
     Advanced: Ítarlegt
-    Advanced Description: Veitur, ytri forrit og netkerfi
+    Advanced Description: Bakendar, biðminni, ytri verkfæri, milliþjónn og greining
     Alternative providers: Veitur myndbanda og lýsigagna
   Highlight Changed Settings: Auðkenna stillingar sem víkja frá sjálfgefnum gildum
   Reset Setting to Default: Endurstilla á sjálfgefið gildi

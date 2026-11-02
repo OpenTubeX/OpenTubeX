@@ -329,23 +329,24 @@ Settings:
     Profile Selector Hint: Du kan også høyreklikke på profilikonet for å bytte profil
     Profile Selector Touch Hint: Du kan også trykke lenge på profilikonet for å bytte profil
   Categories:
-    General Description: Språk, oppstart, faner og hvordan appen fungerer
+    General Description: Språk, oppstart, faner og oversettelse
     Appearance: Utseende
-    Appearance Description: Tema, oppsett og miniatyrbilder
+    Appearance Description: Tema, oppsett, navigasjon og videolister
     Content appearance: Videolister og miniatyrbilder
     Layout: Oppsett
-    Playback Description: Avspiller, undertekster og kanalinnstillinger
-    Subscriptions Description: Oppdatering av innholdsstrømmer og visningsalternativer
-    Downloads Description: Mapper, maler og automatiske regler
-    Distraction Free Description: Skjul innhold og angi grenser for seertid
+    Playback Description: Standardinnstillinger for avspiller, undertekster og innstillinger per kanal
+    Subscriptions Description: Oppdatering av innholdsstrømmer, varsler om nye videoer og RSS-strømmer
+    Downloads Description: Nedlastingsmappe, maler og automatiske nedlastinger
+    Focus: Fokus
+    Focus Description: Skjult innhold, visningsgrenser, påminnelser og foreldrekontroll
     Add-ons: Tillegg
-    Add-ons Description: SponsorBlock, DeArrow, mislikinger og oversettelse av tale
-    Privacy Description: Personvern ved visning og tilgangskontroll
+    Add-ons Description: SponsorBlock, DeArrow, mislikinger, AiSList og oversettelse av tale
+    Privacy Description: Historikk, søkeforslag, lenker og app-passord
     Online activity: Nettaktivitet
-    Data And Storage Description: Import, eksport, diskbruk og opprydding
-    Sync Description: Hold innstillinger og data synkronisert på tvers av enheter
+    Data And Storage Description: Sikkerhetskopier, import og eksport, diskbruk og opprydding
+    Sync Description: Synkroniseringsserverkonto, sammenkobling av enheter og synkroniserte data
     Advanced: Avansert
-    Advanced Description: Tilbydere, eksterne apper og nettverk
+    Advanced Description: Bakgrunnstjenester, bufring, eksterne verktøy, mellomtjener og diagnostikk
     Alternative providers: Tilbydere av video og metadata
   Highlight Changed Settings: Fremhev innstillinger som avviker fra standardverdiene
   Reset Setting to Default: Tilbakestill denne innstillingen til standardverdien
