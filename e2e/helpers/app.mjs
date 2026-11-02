@@ -557,6 +557,8 @@ function recordAppDiagnostics(testInfo, recordTrace) {
   }
 }
 
+const UNPOSITIONED_VIEWPORT_ERROR = 'Overlay scrollbars need a positioned scroll container'
+
 export const test = base.extend({
   // Each worker's private X server picks a free display.
   // eslint-disable-next-line no-empty-pattern -- Playwright requires a fixture object
@@ -629,7 +631,25 @@ export const test = base.extend({
         }
       }
 
-      const { electronApp, page } = await launchApp(userDataDir, launchArgs, { appRoot, onPhase })
+      // Static scroll containers misplace their overlay scrollbars, which
+      // overlayScrollbars.js reports without breaking any assertion. Listen
+      // from the connection on, as containers report once, also while mounting.
+      const scrollbarErrors = []
+      const launchOptions = {
+        appRoot,
+        onPhase: async (phase, phasePage, launched) => {
+          if (phase === 'electronConnected') {
+            launched.context().on('console', message => {
+              if (message.type() === 'error' && message.text().startsWith(UNPOSITIONED_VIEWPORT_ERROR)) {
+                scrollbarErrors.push(message.text())
+              }
+            })
+          }
+          await onPhase?.(phase, phasePage, launched)
+        }
+      }
+
+      const { electronApp, page } = await launchApp(userDataDir, launchArgs, launchOptions)
 
       /** Runs an optional checkpoint with the exited process before launching again. */
       const relaunch = async (beforeLaunch) => {
@@ -642,7 +662,7 @@ export const test = base.extend({
         await appHandle.electronApp.close()
         await exited
         await beforeLaunch?.(oldProcess)
-        const next = await launchApp(userDataDir, launchArgs, { appRoot, onPhase })
+        const next = await launchApp(userDataDir, launchArgs, launchOptions)
         appHandle.electronApp = next.electronApp
         appHandle.page = next.page
         return next
@@ -658,6 +678,7 @@ export const test = base.extend({
       }
 
       await use(appHandle)
+      expect(scrollbarErrors, 'Overlay scrollbar containers must not be static').toEqual([])
     } finally {
       const failed = testInfo.status !== testInfo.expectedStatus
       if (appHandle && failed) {

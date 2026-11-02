@@ -826,6 +826,38 @@ test.describe('without followed feeds', () => {
       element.querySelector(':scope > .os-scrollbar-vertical').classList.contains('os-scrollbar-unusable'))).toBe(true)
   })
 
+  test('keeps the scrollbar of the RSSHub instance suggestions on the list', { tag: '@scale' }, async ({ page }) => {
+    await page.route(/^https?:\/\//, abortUnmockedRequest)
+    const instances = Array.from({ length: 30 }, (_, index) => `{ url: 'https://rss${index}.example.test', location: '🇩🇪' },`)
+    await page.route('https://raw.githubusercontent.com/RSSNext/rsshub-docs/**', route => route.fulfill({
+      body: `const instances = [${instances.join('\n')}];`
+    }))
+
+    const manager = await openFeedManager(page)
+    await manager.getByRole('button', { name: 'Browse RSSHub' }).click()
+    const dialog = page.getByRole('dialog', { name: 'Add a feed from RSSHub' })
+    await dialog.getByRole('textbox', { name: 'RSSHub instance' }).click()
+    const list = dialog.locator('.instanceInput .list')
+    await expect(list.locator('li')).toHaveCount(30)
+
+    // The bar spans the list instead of an ancestor reaching over the input
+    const scrollbar = list.locator(':scope > .os-scrollbar-vertical')
+    const listBox = await list.boundingBox()
+    const scrollbarBox = await scrollbar.boundingBox()
+    expect(Math.abs(scrollbarBox.y - listBox.y)).toBeLessThan(1)
+    expect(Math.abs(scrollbarBox.height - listBox.height)).toBeLessThan(1)
+
+    // Dragging the handle scrolls the suggestions
+    await list.hover()
+    const handle = await scrollbar.locator('.os-scrollbar-handle').boundingBox()
+    await page.mouse.move(handle.x + handle.width / 2, handle.y + handle.height / 2)
+    await page.mouse.down()
+    await page.mouse.move(handle.x + handle.width / 2, handle.y + handle.height / 2 + 60)
+    await expect.poll(() => list.evaluate(element => element.scrollTop)).toBeGreaterThan(0)
+    await page.mouse.up()
+    await expect(list.locator('li')).toHaveCount(30)
+  })
+
   test('explains that a site asks for a browser check', async ({ page }) => {
     await page.route(/^https?:\/\//, abortUnmockedRequest)
     // Cloudflare answers clients it wants to verify with a challenge page
