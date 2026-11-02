@@ -1354,7 +1354,8 @@ async function toggleLiveReminder() {
     } else {
       const payload = await getLiveReminderPayload()
       if (videoId !== id.value) return
-      const scheduled = await liveReminder.schedule(payload)
+      // premiereNow only updates when the start timer fires, so the premiere may have started.
+      const scheduled = payload.startTimestamp > Date.now() && await liveReminder.schedule(payload)
       if (videoId !== id.value) return
       liveReminderActive.value = scheduled
       showToast({
