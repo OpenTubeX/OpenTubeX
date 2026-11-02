@@ -151,6 +151,16 @@ for (const [uiScale, userPlaylistSortOrder] of [[100, 'date_added_descending'], 
         // A long localized Watched label must not cover the index badge.
         await thumbnail.locator('.videoWatched').evaluate(label => { label.textContent = 'Παρακολουθήθηκε' })
         const badges = thumbnail.locator('.playlistIndexBadge, .videoDuration, .videoWatched, .sponsorBlockVideoLabel')
+        const visibleOverlays = () => thumbnail.evaluate(element => {
+          const rects = [...element.querySelectorAll('.playlistIndexBadge, .videoDuration, .videoWatched, .sponsorBlockVideoLabel, .externalPlayerIcon')]
+            .filter(overlay => overlay.checkVisibility({ opacityProperty: true, visibilityProperty: true }))
+            .map(overlay => overlay.getBoundingClientRect())
+          return {
+            count: rects.length,
+            apart: rects.every((a, i) => rects.slice(i + 1).every(b =>
+              a.right <= b.left + 0.5 || b.right <= a.left + 0.5 || a.bottom <= b.top + 0.5 || b.bottom <= a.top + 0.5))
+          }
+        })
         await expect(badges).toHaveCount(4)
         const actions = thumbnail.locator('.playlistIcons')
         const buttons = actions.locator('button')
@@ -173,15 +183,10 @@ for (const [uiScale, userPlaylistSortOrder] of [[100, 'date_added_descending'], 
                   return badge.getBoundingClientRect().height + Number.parseFloat(style.marginBlockStart) + Number.parseFloat(style.marginBlockEnd)
                 })) - imageHeight
             })).toBeLessThanOrEqual(1)
-            // The labels and the external player button share the small thumbnail without
-            // covering each other. The phone-sized thumbnail is narrower than the labels.
+            // The labels share the small thumbnail without covering each other. The external
+            // player button only shows on hover here. The phone-sized thumbnail is narrower than the labels.
             if (width > 375) {
-              await expect.poll(() => thumbnail.evaluate(element => {
-                const rects = [...element.querySelectorAll('.playlistIndexBadge, .videoDuration, .videoWatched, .sponsorBlockVideoLabel, .externalPlayerIcon')]
-                  .map(badge => badge.getBoundingClientRect())
-                return rects.length === 5 && rects.every((a, i) => rects.slice(i + 1).every(b =>
-                  a.right <= b.left + 0.5 || b.right <= a.left + 0.5 || a.bottom <= b.top + 0.5 || b.bottom <= a.top + 0.5))
-              })).toBe(true)
+              await expect.poll(visibleOverlays).toEqual({ count: 4, apart: true })
             }
             if (mobile) {
               await expect(actions).toHaveClass(/mobileThumbnailActions/)
@@ -191,8 +196,11 @@ for (const [uiScale, userPlaylistSortOrder] of [[100, 'date_added_descending'], 
             await page.locator('.sortSelect').hover()
             // Narrow thumbnails keep only the SponsorBlock icon.
             await expect(thumbnail.locator('.sponsorBlockVideoLabel .ft-icon')).toBeVisible()
+            // The external player button only shows on hover, so the label keeps the corner.
+            await expect.poll(() => thumbnail.evaluate(element => element.querySelector('.sponsorBlockVideoLabel').getBoundingClientRect().left -
+              element.getBoundingClientRect().left)).toBeCloseTo(4, 0)
             // The label clips what does not fit beside its neighbors, but the icon always fits.
-            expect(await thumbnail.locator('.sponsorBlockVideoLabel').evaluate(label => {
+            await expect.poll(() => thumbnail.locator('.sponsorBlockVideoLabel').evaluate(label => {
               const icon = label.querySelector('.ft-icon').getBoundingClientRect()
               const bounds = label.getBoundingClientRect()
               return icon.left >= bounds.left - 0.5 && icon.right <= bounds.right + 0.5
@@ -244,6 +252,19 @@ for (const [uiScale, userPlaylistSortOrder] of [[100, 'date_added_descending'], 
         for (const badge of await badges.all()) await expect(badge).toBeVisible()
         await page.locator('.playlistItem .ft-list-video').nth(1).locator('.title').focus()
         for (const badge of await badges.all()) await expect(badge).toBeVisible()
+
+        // Without hover, the external player button stays visible beside the labels.
+        await page.locator('.profileTrigger').focus()
+        const cdp = await page.context().newCDPSession(page)
+        try {
+          await cdp.send('Emulation.setTouchEmulationEnabled', { enabled: true })
+          await expect.poll(visibleOverlays).toEqual({ count: 5, apart: true })
+          await setWindowSize(app, page, { width: 812, height: 375 })
+          await expect.poll(visibleOverlays).toEqual({ count: 5, apart: true })
+        } finally {
+          await cdp.send('Emulation.setTouchEmulationEnabled', { enabled: false })
+          await cdp.detach()
+        }
       })
     }
   })

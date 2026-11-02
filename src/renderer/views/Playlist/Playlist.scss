@@ -173,8 +173,8 @@
   :deep(.ft-list-item.list .videoThumbnail) {
     margin-block: 0;
     margin-inline-end: 12px;
-    // The index badge, the external player button, and the duration get their own
-    // columns, so a long Watched or SponsorBlock label cannot cover them.
+    // The index badge and the duration get their own columns, so a long Watched
+    // or SponsorBlock label cannot cover them.
     grid-template-columns: max-content minmax(0, 1fr) minmax(0, max-content);
     container: playlist-thumbnail / inline-size;
 
@@ -182,8 +182,7 @@
       grid-column: 1 / -1;
     }
 
-    .playlistIndexBadge,
-    .externalPlayerIcon {
+    .playlistIndexBadge {
       grid-column: 1;
     }
 
@@ -242,9 +241,16 @@
     }
   }
 
-  // The external player button takes the bottom-left corner, so the label follows it.
-  :deep(.ft-list-item.list .videoThumbnail:has(.externalPlayerIcon) .sponsorBlockVideoLabel) {
-    grid-column: 2;
+  // Without hover, the external player button stays visible in the bottom-left
+  // corner, so it shares the badge's column and the label follows it.
+  @media not (hover: hover) {
+    :deep(.ft-list-item.list .videoThumbnail .externalPlayerIcon) {
+      grid-column: 1;
+    }
+
+    :deep(.ft-list-item.list .videoThumbnail:has(.externalPlayerIcon) .sponsorBlockVideoLabel) {
+      grid-column: 2;
+    }
   }
 
   // Below this width only a few letters fit beside the duration, so keep only the
