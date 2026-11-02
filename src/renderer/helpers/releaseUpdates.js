@@ -5,8 +5,9 @@ const NOTE_ITEM = /^(?:[-*+]|\d+[.)]) /m
 
 /**
  * Fetches pages of releases by following GitHub's next-page links, until a page
- * reaches releases that are not newer than the installed build. GitHub lists
- * releases newest first, so later pages cannot contain updates.
+ * reaches a release of the installed channel that is not newer than the
+ * installed build. GitHub lists a stable release ahead of the nightlies built
+ * on its version, so only releases of the same channel are in version order.
  *
  * @param {string} initialUrl
  * @param {typeof fetch} fetchPage
@@ -29,7 +30,7 @@ export async function fetchReleasePages(initialUrl, fetchPage, installedVersion)
     releases.push(...page)
     const reachedInstalled = installed === null || page.some((release) => {
       const version = parseVersion(release.tag_name ?? '')
-      return version !== null && compareVersionParts(version.parts, installed.parts) <= 0
+      return version?.channel === installed.channel && compareVersionParts(version.parts, installed.parts) <= 0
     })
     if (reachedInstalled) {
       break

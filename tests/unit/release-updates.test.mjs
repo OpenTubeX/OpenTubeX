@@ -206,6 +206,34 @@ test('stops paging once a page reaches releases that are not newer than the inst
   assert.deepEqual(requestedUrls, [pageUrl(1)])
 })
 
+test('keeps paging past a stable release listed ahead of newer nightlies', async () => {
+  // GitHub's order for these releases, which lists each stable release ahead
+  // of the nightlies built on its version
+  const pageUrl = page => `https://api.github.com/releases?per_page=3&page=${page}`
+  const pages = [
+    ['v0.37.3-beta', 'v0.37.2-nightly-2633', 'v0.37.2-beta'],
+    ['v0.37.2-nightly-2600', 'v0.37.1-beta'],
+    ['v0.37.1-nightly-2559']
+  ].map(tags => tags.map(tag_name => ({ prerelease: tag_name.includes('nightly'), tag_name })))
+  const requestedUrls = []
+  const releases = await fetchReleasePages(pageUrl(1), async (url) => {
+    requestedUrls.push(url)
+    const page = Number(new URL(url).searchParams.get('page'))
+    return {
+      ok: true,
+      status: 200,
+      headers: { get: () => page < pages.length ? `<${pageUrl(page + 1)}>; rel="next"` : null },
+      json: async () => pages[page - 1]
+    }
+  }, '0.37.2-nightly-2590')
+
+  assert.deepEqual(requestedUrls, [pageUrl(1), pageUrl(2), pageUrl(3)])
+  assert.deepEqual(
+    findUpdateReleases(releases, '0.37.2-nightly-2590').map(release => release.tag_name),
+    ['v0.37.3-beta', 'v0.37.2-nightly-2633', 'v0.37.2-nightly-2600']
+  )
+})
+
 test('installed and older releases are excluded from skipped releases', () => {
   const installedRelease = {
     prerelease: false,
