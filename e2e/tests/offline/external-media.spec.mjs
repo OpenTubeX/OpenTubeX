@@ -730,6 +730,35 @@ test('external media captions open a transcript in the sidebar and the full wind
   await expect(actions.getByRole('button', { name: 'Show transcript' })).toHaveAttribute('aria-pressed', 'false')
 })
 
+test('an open phone transcript sheet moves into the full window dock', async ({ app, page }) => {
+  test.skip(process.platform === 'win32', 'The fake yt-dlp executable uses a POSIX shell')
+  const captionUrl = 'https://captions.example.test/en.vtt'
+  await page.route(`${captionUrl}*`, route => route.fulfill({
+    status: 200,
+    contentType: 'text/vtt',
+    body: 'WEBVTT\n\n00:00:00.000 --> 00:00:30.000\nDocked caption line\n'
+  }))
+  const mediaUrl = 'https://vimeo.com/123456789'
+  await prepareTwitchYtDlp(app, page, mediaUrl, false, '', [], 30, {
+    requested_subtitles: { en: { ext: 'vtt', url: captionUrl } },
+    subtitles: { en: [{ ext: 'vtt', url: captionUrl }] }
+  })
+  await page.locator(sel.searchInput).fill(mediaUrl)
+  await page.locator(sel.searchInput).press('Enter')
+  await (await waitForPlayback(page)).evaluate(element => element.pause())
+  // A short landscape window uses the phone sheets and side docks.
+  await page.setViewportSize({ width: 960, height: 540 })
+  const externalMedia = page.locator(`${activeTab} .externalMedia`)
+  await externalMedia.getByRole('button', { name: 'Show transcript' }).click()
+  await expect(page.locator('dialog[open] .transcriptCard')).toContainText('Docked caption line')
+
+  // Docking hides the sheet, which must not close the transcript it moves into the dock.
+  await externalMedia.locator('.videoPlayer .ftVideoPlayer').evaluate(element => element.dispatchEvent(new KeyboardEvent('keydown', { key: 's', bubbles: true })))
+  await externalMedia.locator('.fullscreenTranscriptToggle').evaluate(element => element.click())
+  await expect(externalMedia.locator('.fullscreenTranscriptTarget .transcriptCard')).toContainText('Docked caption line')
+  await expect(page.locator('dialog[open]')).toHaveCount(0)
+})
+
 test('external media with only TTML captions offers no transcript', async ({ app, page }) => {
   test.skip(process.platform === 'win32', 'The fake yt-dlp executable uses a POSIX shell')
   const captionUrl = 'https://captions.example.test/en.ttml'

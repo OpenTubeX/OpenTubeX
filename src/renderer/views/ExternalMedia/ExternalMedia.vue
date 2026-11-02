@@ -391,7 +391,7 @@
             :phone-open="mobilePanel === 'transcript'"
             :title="t('Video.Transcript.Title')"
             custom-header
-            @close="closeTranscript"
+            @close="fullscreenTranscriptOpen ? mobilePanel = null : closeTranscript()"
             @leaving="setSidebarPanelLeaving"
           >
             <WatchVideoTranscript
@@ -412,7 +412,7 @@
             :phone-open="mobilePanel === 'chat'"
             :title="twitchChatTarget?.type === 'replay' ? t('Video.Live Chat Replay') : t('Video.Live Chat')"
             custom-header
-            @close="closeChat"
+            @close="fullscreenLiveChatOpen ? mobilePanel = null : closeChat()"
             @leaving="setSidebarPanelLeaving"
           >
             <TwitchChat
