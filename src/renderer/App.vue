@@ -742,6 +742,7 @@ import { installRoutePreloadIntent } from './helpers/routePreloadIntent'
 import { getTabsKeptLoaded } from './tabs/TabResidency'
 import { initializeCapacitorPullToRefresh } from './helpers/capacitorPullToRefresh'
 import { getWebViewHeapStatistics, startMemoryPressureMonitor } from './helpers/memoryPressure'
+import { collapseSeparators } from './helpers/menuSeparators'
 
 const SettingsWindow = defineAsyncComponent(() => import('./views/Settings/Settings.vue'))
 const FtPlaylistAddVideoPrompt = defineAsyncComponent(() => import('./components/FtPlaylistAddVideoPrompt/FtPlaylistAddVideoPrompt.vue'))
@@ -1157,9 +1158,7 @@ const mobileContextThumbnailActions = computed(() => mobileContextMenuStack.valu
   : [])
 const mobileContextMenuRows = computed(() => {
   const rows = mobileContextMenuItems.value.filter(action => !action.quickAction)
-  return rows.filter((action, index) => action.type !== 'separator' || (
-    index > 0 && index < rows.length - 1 && rows[index - 1].type !== 'separator'
-  ))
+  return collapseSeparators(rows)
 })
 const mobileContextMenuTitle = computed(() => mobileContextMenuStack.value.at(-1).label)
 provide('openMobileContextActions', async (menu) => {
