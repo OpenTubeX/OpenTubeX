@@ -51,3 +51,29 @@ test('Capacitor reminders reject a premiere that starts while the permission pro
   assert.deepEqual(scheduled, [])
   assert.equal(await liveReminder.get('premiere'), null)
 })
+
+test('Capacitor reminders cancel the previous reminder when a reschedule has already started', async () => {
+  const cancelled = []
+  const prompt = Promise.withResolvers()
+  let permission = { display: 'granted' }
+  const liveReminder = await loadCapacitorReminder({
+    checkPermissions: async () => permission,
+    requestPermissions: () => prompt.promise,
+    cancel: async ({ notifications }) => cancelled.push(...notifications.map(notification => notification.id)),
+    schedule: async () => {},
+  })
+  assert.equal(await liveReminder.schedule(reminder(Date.now() + 60_000)), true)
+  const { notificationId } = await liveReminder.get('premiere')
+  cancelled.length = 0
+
+  // The premiere moved earlier and starts while the permission prompt is open.
+  permission = { display: 'prompt' }
+  const startTimestamp = Date.now() + 50
+  const result = liveReminder.schedule(reminder(startTimestamp))
+  await new Promise(resolve => setTimeout(resolve, startTimestamp - Date.now() + 10))
+  prompt.resolve({ display: 'granted' })
+
+  assert.equal(await result, false)
+  assert.deepEqual(cancelled, [notificationId])
+  assert.equal(await liveReminder.get('premiere'), null)
+})

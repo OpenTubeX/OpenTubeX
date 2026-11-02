@@ -73,7 +73,11 @@ const capacitorLiveReminder = {
     if (!await requestNotificationPermission()) return false
     // The premiere may have started before the reminder was toggled or while the
     // permission prompt was open, and a past start cannot be scheduled.
-    if (!(reminder.startTimestamp > Date.now())) return false
+    if (!(reminder.startTimestamp > Date.now())) {
+      // A reminder being rescheduled would otherwise still fire at its old time.
+      await capacitorLiveReminder.cancel(reminder.videoId)
+      return false
+    }
 
     const records = readCapacitorReminders()
     const notificationId = notificationIdForVideo(reminder.videoId, records)
