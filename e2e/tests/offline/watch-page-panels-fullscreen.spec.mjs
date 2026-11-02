@@ -829,10 +829,10 @@ test.describe('fullscreen captions', () => {
     }
   })
 
-  test('keeps the configured caption size in fullscreen', async ({ app }) => {
+  test('scales the caption containers with the player in fullscreen', async ({ app }) => {
     const { page } = app
     await mockPlayableWatchPage(app, page)
-    await openMockedVideo(page)
+    const video = await openMockedVideo(page)
 
     const player = page.locator('.ftVideoPlayer')
     await player.evaluate(element => {
@@ -849,31 +849,28 @@ test.describe('fullscreen captions', () => {
       '.shaka-text-container, .shaka-speech-to-text-container'
     )
     await expect(captionContainers).toHaveCount(2)
-    const windowedFontSizes = await captionContainers.evaluateAll(elements => {
-      return elements.map(element => getComputedStyle(element).fontSize)
-    })
-    // Shaka scales the cues by the configured size, the containers have the size it scales
-    expect(windowedFontSizes).toEqual(['20px', '20px'])
-
-    // The player is only a few hundred pixels tall here, so the captions scale down with it.
-    await setWindowWidth(app, 400)
-    await expect.poll(async () => captionContainers.evaluateAll(elements => {
-      return elements.map(element => getComputedStyle(element).fontSize)
-    })).not.toEqual(windowedFontSizes)
-
-    const narrowFontSizes = await captionContainers.evaluateAll(elements => {
+    const getFontSizes = () => captionContainers.evaluateAll(elements => {
       return elements.map(element => Number.parseFloat(getComputedStyle(element).fontSize))
     })
-    for (const fontSize of narrowFontSizes) {
-      expect(fontSize).toBeGreaterThan(20 * 0.45)
-      expect(fontSize).toBeLessThan(20 * 0.75)
+    const getPlayerHeight = () => video.evaluate(element => element.clientHeight)
+    // Shaka scales the cues by the configured size, the containers have the size it scales: 20px at a player height of 540px
+    const expectShareOfPlayer = async () => {
+      const [fontSizes, playerHeight] = await Promise.all([getFontSizes(), getPlayerHeight()])
+      return fontSizes.map(fontSize => Math.abs(fontSize / playerHeight - 20 / 540) < 0.0005)
     }
+    await expect.poll(expectShareOfPlayer).toEqual([true, true])
+    const windowedFontSizes = await getFontSizes()
 
-    // Fullscreen makes the player tall again, so the configured size comes back.
+    // The player is only a couple of hundred pixels tall here, so the captions shrink down to their legible minimum.
+    await setWindowWidth(app, 400)
+    await expect.poll(getFontSizes).toEqual([10, 10])
+
+    // Fullscreen grows the captions with the player.
     await setPlayerFullscreen(page, true)
-    await expect.poll(async () => captionContainers.evaluateAll(elements => {
-      return elements.map(element => getComputedStyle(element).fontSize)
-    })).toEqual(windowedFontSizes)
+    await expect.poll(expectShareOfPlayer).toEqual([true, true])
+    for (const [index, fontSize] of (await getFontSizes()).entries()) {
+      expect(fontSize).toBeGreaterThan(windowedFontSizes[index])
+    }
   })
 })
 

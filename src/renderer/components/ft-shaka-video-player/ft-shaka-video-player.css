@@ -480,8 +480,8 @@
 
 @media only screen and (width <=400px) {
   /*
-    Captions don't need a rule here: --caption-player-scale already shrinks them
-    for the small player that a narrow window results in.
+    Captions don't need a rule here: --caption-font-size already scales them
+    with the small player that a narrow window results in.
   */
   .sponsorBlockSubmissionWrapper {
     inset-inline: 8px;
