@@ -5,15 +5,18 @@ import { compileFunction } from 'node:vm'
 import { isProxy, toRaw } from 'vue'
 import { createStore } from 'vuex'
 import { getContinueWatchingCandidates } from '../../src/renderer/helpers/homeSections.js'
-import { canMarkHistoryEntryAsWatched } from '../../src/history.js'
+import { canMarkHistoryEntryAsWatched, getRetentionCutoff } from '../../src/history.js'
 
 const source = (await readFile(new URL('../../src/renderer/store/modules/history.js', import.meta.url), 'utf8'))
   .replace(/^import[\s\S]*? from ['"][^'"]+['"]\n/gm, '')
   .replace('export default ', 'return ')
 
-function fixture() {
-  const history = compileFunction(source, ['getContinueWatchingCandidates', 'canMarkHistoryEntryAsWatched', 'toRaw'])(getContinueWatchingCandidates, canMarkHistoryEntryAsWatched, toRaw)
-  return createStore({ modules: { history } })
+function fixture(DBHistoryHandlers = {}, rootGetters = {}) {
+  const dependencies = {
+    getContinueWatchingCandidates, canMarkHistoryEntryAsWatched, getRetentionCutoff, toRaw, DBHistoryHandlers, removeExternalMediaPositionsBefore: () => {},
+  }
+  const history = compileFunction(source, Object.keys(dependencies))(...Object.values(dependencies))
+  return createStore({ modules: { history }, getters: rootGetters })
 }
 
 const video = (videoId, watchProgress = 10) => ({ videoId, watchProgress, lengthSeconds: 100, timeWatched: 1000 })
@@ -114,4 +117,51 @@ test('removals publish a plain history list without rewriting the previous one',
   assert.deepEqual([sorted().length, sorted()[0].videoId, sorted().at(-1).videoId], [997, 'video-2', 'video-998'])
   assert.equal(sorted().filter(isProxy).length, 0)
   assert.equal(store.state.history.historyCacheById['video-999'], undefined)
+})
+
+test('retention cleanup reads the datastore and changes the cache only when entries expired', async t => {
+  const day = 24 * 60 * 60 * 1000
+  t.mock.method(Date, 'now', () => 100 * day)
+  const calls = []
+  let deleted = []
+  const store = fixture({ deleteOlderThan: async cutoff => { calls.push(cutoff); return deleted } })
+  const entries = [{ ...video('recent'), timeWatched: 99 * day }, { videoId: 'progress-only', watchProgress: 5 }]
+  store.commit('setHistoryCacheSorted', entries)
+  store.commit('setHistoryCacheById', Object.fromEntries(entries.map(entry => [entry.videoId, entry])))
+  const revision = () => store.state.history.historyRevision
+  const before = revision()
+
+  assert.equal(await store.dispatch('removeHistoryOlderThan', 30), 0)
+  assert.deepEqual([calls.length, revision()], [0, before])
+
+  // An expired entry that is still playing in another window is kept.
+  store.commit('upsertToHistoryCache', { ...video('expired'), timeWatched: 60 * day })
+  const afterInsert = revision()
+  assert.equal(await store.dispatch('removeHistoryOlderThan', 30), 0)
+  assert.deepEqual([calls, revision()], [[70 * day], afterInsert])
+
+  deleted = ['expired']
+  assert.equal(await store.dispatch('removeHistoryOlderThan', 30), 1)
+  assert.equal(calls.length, 2)
+  assert.deepEqual(toRaw(store.state.history.historyCacheSorted).map(entry => entry.videoId), ['recent', 'progress-only'])
+})
+
+test('loading history with retention deletes only when the loaded entries contain expired ones', async t => {
+  const day = 24 * 60 * 60 * 1000
+  t.mock.method(Date, 'now', () => 100 * day)
+  let records = [{ ...video('recent'), timeWatched: 99 * day }]
+  const calls = []
+  const store = fixture({
+    find: async () => records,
+    deleteOlderThan: async cutoff => { calls.push(cutoff); return ['expired'] },
+  }, { getHistoryRetentionDays: () => 30 })
+
+  await store.dispatch('grabHistory')
+  assert.deepEqual([calls.length, toRaw(store.state.history.historyCacheSorted).length], [0, 1])
+
+  records = [...records, { ...video('expired'), timeWatched: 60 * day }, { ...video('playing'), timeWatched: 60 * day }]
+  await store.dispatch('grabHistory')
+  assert.deepEqual(calls, [70 * day])
+  assert.deepEqual(toRaw(store.state.history.historyCacheSorted).map(entry => entry.videoId), ['recent', 'playing'])
+  assert.deepEqual(Object.keys(store.state.history.historyCacheById), ['recent', 'playing'])
 })
