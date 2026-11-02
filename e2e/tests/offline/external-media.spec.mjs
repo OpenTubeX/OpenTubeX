@@ -673,7 +673,9 @@ test('external media captions open a transcript in the sidebar and the full wind
   await page.route(`${captionUrl}*`, route => route.fulfill({
     status: 200,
     contentType: 'text/vtt',
-    body: 'WEBVTT\n\n00:00:00.000 --> 00:00:05.000\nFirst caption line\n\n00:00:05.000 --> 00:00:30.000\nSecond caption line\n'
+    // The last cue tries to run script through markup in the caption text.
+    body: 'WEBVTT\n\n00:00:00.000 --> 00:00:05.000\nFirst caption line\n\n00:00:05.000 --> 00:00:29.000\nSecond caption line\n\n' +
+      '00:00:29.000 --> 00:00:30.000\n<img src="data:," onerror="window.transcriptCueScript = true">Last caption line\n'
   }))
   await prepareTwitchYtDlp(app, page, mediaUrl, false, '', [], 30, {
     requested_subtitles: { en: { ext: 'vtt', url: captionUrl } },
@@ -690,7 +692,10 @@ test('external media captions open a transcript in the sidebar and the full wind
   await expect(layout).toHaveClass(/noSidebar/)
 
   await actions.getByRole('button', { name: 'Show transcript' }).click()
-  await expect(transcript).toContainText('Second caption line')
+  await expect(transcript).toContainText('Last caption line')
+  // Caption markup is parsed inertly, so its image neither loads nor runs its handler.
+  await page.evaluate(() => new Promise(resolve => setTimeout(resolve, 500)))
+  expect(await page.evaluate(() => window.transcriptCueScript)).toBeUndefined()
   await expect(layout).not.toHaveClass(/noSidebar/)
   await transcript.getByText('Second caption line').click()
   await expect.poll(() => video.evaluate(element => element.currentTime)).toBeGreaterThanOrEqual(5)
@@ -723,6 +728,32 @@ test('external media captions open a transcript in the sidebar and the full wind
   await dockedTranscript.getByRole('button', { name: 'Close transcript' }).click()
   await expect(externalMedia.locator('.transcriptCard')).toHaveCount(0)
   await expect(actions.getByRole('button', { name: 'Show transcript' })).toHaveAttribute('aria-pressed', 'false')
+})
+
+test('external media with only TTML captions offers no transcript', async ({ app, page }) => {
+  test.skip(process.platform === 'win32', 'The fake yt-dlp executable uses a POSIX shell')
+  const captionUrl = 'https://captions.example.test/en.ttml'
+  await page.route(`${captionUrl}*`, route => route.fulfill({
+    status: 200,
+    contentType: 'application/ttml+xml',
+    body: '<tt xmlns="http://www.w3.org/ns/ttml"><body><div><p begin="00:00:00.000" end="00:00:30.000">Only caption</p></div></body></tt>'
+  }))
+  const mediaUrl = 'https://vimeo.com/123456789'
+  await prepareTwitchYtDlp(app, page, mediaUrl, false, '', [], 30, {
+    requested_subtitles: { en: { ext: 'ttml', url: captionUrl } },
+    subtitles: { en: [{ ext: 'ttml', url: captionUrl }] }
+  })
+  await page.locator(sel.searchInput).fill(mediaUrl)
+  await page.locator(sel.searchInput).press('Enter')
+  await (await waitForPlayback(page)).evaluate(element => element.pause())
+  const externalMedia = page.locator(`${activeTab} .externalMedia`)
+  await expect(externalMedia.locator('.externalMediaDetails')).toBeVisible()
+  await expect(externalMedia.getByRole('button', { name: 'Show transcript' })).toHaveCount(0)
+  // The transcript reads WebVTT and SRT only, so the player must not offer an empty dock.
+  await externalMedia.locator('.videoPlayer .ftVideoPlayer').click({ position: { x: 20, y: 20 } })
+  await page.keyboard.press('s')
+  await expect(externalMedia.locator('.fullscreenActions')).toBeAttached()
+  await expect(externalMedia.locator('.fullscreenTranscriptToggle')).toHaveCount(0)
 })
 
 test('external chapters use a phone sheet and keep valid scrolling after resizing', async ({ app, page, attachScreenshot }) => {

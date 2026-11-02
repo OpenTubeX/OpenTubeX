@@ -6,7 +6,7 @@ import { isReducedMotionEnabled } from './reducedMotion'
 // (scss-partials/_watch-layout.scss).
 
 export const THEATRE_MODE_ANIMATION_DURATION = 400
-// Matches the player's theatre button breakpoint.
+// Matches the player's theater button breakpoint.
 export const RESPONSIVE_THEATRE_MODE_MAX_WIDTH = 1350
 
 const ANIMATED_AREAS = ['.videoPlayer', '.infoArea', '.sidebarArea', '.commentsArea']
@@ -16,7 +16,7 @@ export function isTheatreLayoutAvailable() {
 }
 
 /**
- * Animates the layout areas from their previous positions after a theatre
+ * Animates the layout areas from their previous positions after a theater
  * mode change. Starting a new change cancels the previous animation.
  */
 export function createTheatreModeAnimator() {

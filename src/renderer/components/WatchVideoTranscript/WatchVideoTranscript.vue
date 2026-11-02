@@ -564,10 +564,11 @@ function parseTimestamp(timestamp) {
 }
 
 function cleanCaptionText(text) {
-  const element = document.createElement('div')
-  element.innerHTML = text
+  // Captions can come from any site. An inert document neither loads images
+  // nor runs handlers from markup in the cue text.
+  const element = new DOMParser().parseFromString(text
     .replaceAll(/<(?:\d+:)?\d{2}:\d{2}[.,]\d{3}>/g, '')
-    .replaceAll(/<br\s*\/?>/gi, '\n')
+    .replaceAll(/<br\s*\/?>/gi, '\n'), 'text/html').body
   return element.textContent.replaceAll(/\s*\n\s*/g, ' ').replaceAll(/\s+/g, ' ').trim()
 }
 </script>

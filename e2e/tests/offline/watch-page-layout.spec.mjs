@@ -469,7 +469,7 @@ test.describe('watch sidebar panels without recommendations', () => {
   })
 })
 
-test('an interrupted theatre mode toggle continues from the drawn layout', { tag: '@scale' }, async ({ app, page }) => {
+test('an interrupted theater mode toggle continues from the drawn layout', { tag: '@scale' }, async ({ app, page }) => {
   await mockPlayableWatchPage(app, page)
   await setWindowSize(app, page, { width: 1800, height: 1000 })
   await page.evaluate(() => { document.documentElement.dataset.reducedMotion = 'no-preference' })

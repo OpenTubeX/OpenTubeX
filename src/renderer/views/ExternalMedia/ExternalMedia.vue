@@ -105,6 +105,7 @@
                 :auto-open-chapters="autoOpenChapters"
                 :sidebar-chapters-open="showChapters"
                 :transcript-open="transcriptShown"
+                :transcript-available="transcriptAvailable"
                 :download-available="downloadAvailable"
                 :external-url="mediaUrl"
                 :live-chat-available="chatAvailable"
