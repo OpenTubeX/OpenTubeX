@@ -854,8 +854,9 @@ const shownPlaylistItemIndexes = computed(() => {
   return new Map(items.map((item, index) => [item.playlistItemId ?? item, index]))
 })
 
+// Items without a position show no thumbnail number.
 function shownPlaylistItemIndex(item) {
-  return shownPlaylistItemIndexes.value.get(item.playlistItemId ?? item) ?? -1
+  return shownPlaylistItemIndexes.value.get(item.playlistItemId ?? item) ?? null
 }
 
 // The external player loads the whole YouTube playlist, so its start counts hidden videos too.
