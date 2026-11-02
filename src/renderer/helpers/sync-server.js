@@ -40,7 +40,12 @@ import { createSyncServerRequestHeaders } from './sync-server-request'
 import { isValidPlaylistBookmark, playlistBookmarkForSync } from './playlist-bookmarks'
 import { getOtherDeviceSessions, getRevokedSyncSessionLogins, mergeSyncSessions } from './sync-sessions'
 import { isValidSyncServerDeviceId } from './sync-server-sessions'
-import { areSyncSettingValuesEqual, mergeSettingEntry, resolveMergedThemeEntry } from './sync-settings-conflict'
+import {
+  areSyncSettingValuesEqual,
+  mergeSettingEntry,
+  migrateLegacyRemoteSettings,
+  resolveMergedThemeEntry,
+} from './sync-settings-conflict'
 import { getCapacitorTabService } from '../tabs/CapacitorTabService'
 import { capacitorHttpFetch } from './api/capacitor-http'
 import { delegateRequests } from './networkRecovery'
@@ -1399,7 +1404,7 @@ export async function syncSessions(client, store, previous = null, { accountClie
 
 export async function syncSettings(client, store, previous = {}) {
   const remoteEntries = await client.getSettings()
-  const remote = Object.fromEntries(remoteEntries.map(entry => [entry.key, entry]))
+  const remote = migrateLegacyRemoteSettings(Object.fromEntries(remoteEntries.map(entry => [entry.key, entry])))
   // Keep the server's entry order even when devices sync different keys.
   // Reordering unchanged settings would create revisions that wake each other.
   const merged = { ...remote }

@@ -461,7 +461,8 @@ watch([shownDescription, () => props.tags, () => props.games, () => props.musicT
 }, { deep: true })
 
 watch(() => props.expanded, (expanded) => {
-  if (!expanded) restoreOverlayScrollTop(descriptionScroll.value, 0)
+  // The card is not rendered without description content or metadata.
+  if (!expanded && descriptionScroll.value) restoreOverlayScrollTop(descriptionScroll.value, 0)
   userWantsExpandedDescription = expanded
   // Short descriptions stay fully shown; unmeasured ones apply the choice when measured.
   if (showControls.value) showFullDescription.value = expanded

@@ -23,6 +23,21 @@ export function resolveMergedThemeEntry(entry, themes, previousThemes, now) {
   return value === entry.value ? entry : { ...entry, value, updatedAt: Math.max(now, entry.updatedAt) }
 }
 
+/**
+ * Older app versions sync Hide Video Description instead of the Video
+ * descriptions select. Until a device syncs the select, read it from that entry,
+ * so new and upgraded devices keep the account's choice.
+ * @param {Record<string, { key: string, value: unknown, updatedAt: number }>} remote
+ */
+export function migrateLegacyRemoteSettings(remote) {
+  const legacy = remote.hideVideoDescription
+  if (!legacy || remote.videoDescriptionMode) return remote
+  return {
+    ...remote,
+    videoDescriptionMode: { ...legacy, key: 'videoDescriptionMode', value: legacy.value === true ? 'hide' : 'collapsed' },
+  }
+}
+
 export function mergeSettingEntry({ key, value, old, remoteEntry, localUpdatedAt, now }) {
   const localChanged = old !== undefined && !areSyncSettingValuesEqual(key, value, old.value)
 

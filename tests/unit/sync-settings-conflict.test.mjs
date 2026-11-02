@@ -6,7 +6,7 @@ import {
   commitCustomThemesEdit,
   repairSystemThemeSettings,
 } from '../../src/renderer/helpers/customThemeSync.js'
-import { mergeSettingEntry, resolveMergedThemeEntry } from '../../src/renderer/helpers/sync-settings-conflict.js'
+import { mergeSettingEntry, migrateLegacyRemoteSettings, resolveMergedThemeEntry } from '../../src/renderer/helpers/sync-settings-conflict.js'
 
 test('theme sync does not echo colors filled in while loading a received theme', () => {
   const theme = structuredClone({ ...DEFAULT_CUSTOM_THEME, id: 'discussion-1196', name: 'D3SOX' })
@@ -240,4 +240,20 @@ test('deleting the selected custom theme restores its base and accent colors bef
     ['updateBaseTheme', 'dark'],
     ['setCustomThemes', []],
   ])
+})
+
+test('devices read the Video descriptions select from the Hide Video Description entry of older versions', () => {
+  const key = 'videoDescriptionMode'
+  const legacy = { key: 'hideVideoDescription', value: true, updatedAt: 10 }
+  const remote = migrateLegacyRemoteSettings({ hideVideoDescription: legacy })
+
+  // A new device adopts the account's choice instead of uploading its default.
+  assert.deepEqual(mergeSettingEntry({ key, value: 'collapsed', remoteEntry: remote[key], now: 100 }),
+    { key, value: 'hide', updatedAt: 10 })
+  // An upgraded device keeps the choice it migrated locally.
+  assert.equal(mergeSettingEntry({ key, value: 'hide', remoteEntry: remote[key], now: 100 }).value, 'hide')
+
+  assert.equal(migrateLegacyRemoteSettings({ hideVideoDescription: { ...legacy, value: false } })[key].value, 'collapsed')
+  const current = { key, value: 'expanded', updatedAt: 5 }
+  assert.equal(migrateLegacyRemoteSettings({ hideVideoDescription: legacy, [key]: current })[key], current)
 })
