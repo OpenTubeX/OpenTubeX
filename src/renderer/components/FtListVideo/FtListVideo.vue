@@ -1337,7 +1337,7 @@ async function toggleLiveReminder() {
           ? t('Video.Notification enabled')
           : t('Video.Notification unavailable'),
         image: toastThumbnail.value,
-        icon: ['fas', 'calendar-days']
+        icon: scheduled ? ['fas', 'calendar-days'] : ['fas', 'circle-exclamation']
       })
     }
   } catch (error) {
@@ -1346,7 +1346,7 @@ async function toggleLiveReminder() {
       showToast({
         message: t('Video.Notification unavailable'),
         image: toastThumbnail.value,
-        icon: ['fas', 'calendar-days']
+        icon: ['fas', 'circle-exclamation']
       })
     }
   } finally {
@@ -2534,7 +2534,7 @@ async function addToQuickBookmarkPlaylist() {
       ? t('Video.Video has been saved to {playlistName}', { playlistName })
       : t('Video.There was a problem saving the video to {playlistName}', { playlistName }),
     image: toastThumbnail.value,
-    icon: ['fas', 'bookmark'],
+    icon: saved ? ['fas', 'bookmark'] : ['fas', 'circle-exclamation'],
   })
 }
 
@@ -2552,7 +2552,7 @@ async function removeFromQuickBookmarkPlaylist() {
       ? t('Video.Video has been removed from {playlistName}', { playlistName })
       : t('Video.There was a problem removing the video from {playlistName}', { playlistName }),
     image: toastThumbnail.value,
-    icon: ['fas', 'trash'],
+    icon: removed ? ['fas', 'trash'] : ['fas', 'circle-exclamation'],
   })
 }
 

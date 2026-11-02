@@ -496,6 +496,7 @@ Settings:
     Invalid Engine: Anna nimi ja kelvollinen HTTP- tai HTTPS-hakuosoite, joka sisältää merkkijonon %s.
     Engine Limit: Voit lisätä enintään {count} mukautettua hakukonetta.
   Theme Settings:
+    Only Show Important Notifications: Näytä vain tärkeät ilmoitukset
     Visible Search Suggestions: "Näkyvät hakuehdotukset"
     Material Accent Color: "Material-korostusväri"
     Material Wallpaper Colors: "Taustakuvan värit"
@@ -2182,6 +2183,7 @@ Tooltips:
     Refresh Subscriptions While App Is Closed: "Päivittää syötteet valitsemillasi asetuksilla. Tietokoneella OpenTubeX pysyy ilmoitusalueella lopettamiseen asti. Android päättää taustapäivitysten ajankohdan."
     Notify About New Uploads: Näyttää tällä laitteella järjestelmäilmoituksia kanavista, joiden ilmoitukset olet ottanut käyttöön niiden tilausasetuksissa. OpenTubeX tarkistaa uuden sisällön tilauksia päivitettäessä, joten valitse automaattisen päivityksen aikaväli. Jos haluat ilmoituksia myös sovelluksen ollessa suljettuna, ota käyttöön myös päivitys sovelluksen ollessa suljettuna.
   Theme Settings:
+    Only Show Important Notifications: Piilottaa sovelluksen sisäiset ilmoitukset, jotka vain vahvistavat toiminnon tai kertovat tilasta. Virheet, varoitukset, asettamasi muistutukset ja toimintoa tarjoavat ilmoitukset, kuten Kumoa, näytetään edelleen. Taustatoimintojen edistyminen, kuten tilausten päivitys, näytetään ilmoituksen sijaan yleisessä edistymispalkissa. Järjestelmäilmoituksiin tämä ei vaikuta.
     Visible Search Suggestions: "Määrittää, montako hakuhistorian merkintää ja ehdotusta hakupalkki näyttää ennen kuin sen luetteloa täytyy vierittää. Luettelo ei koskaan ulotu ikkunan alareunan yli."
     Thumbnail Size: "Muuttaa videoiden pikkukuvien kokoa ruudukoissa ja luetteloissa. Ruudukot, joissa on kiinteä sarakemäärä tai Koko leveys -näkymä, täyttävät sen sijaan jokaisen rivin, joten siellä se muuttaa vain luetteloiden pikkukuvia ja Shortseja. Puhelimen kokoisissa ikkunoissa ruudukon pikkukuvat rajoitetaan 100 %:iin."
     Playlist Thumbnail Size: "Muuttaa videoiden pikkukuvien kokoa soittolistasivuilla. Ruudukot, joissa on kiinteä sarakemäärä tai Koko leveys -näkymä, täyttävät sen sijaan jokaisen rivin, joten siellä se muuttaa vain luetteloiden pikkukuvia ja Shortseja. Puhelimen kokoisissa ikkunoissa ruudukon pikkukuvat rajoitetaan 100 %:iin."

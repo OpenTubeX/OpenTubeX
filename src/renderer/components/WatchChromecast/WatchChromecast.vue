@@ -143,7 +143,7 @@ function reportError(error) {
   }[error?.code] ?? reason
   showToast({
     message: reason ? t('Video.Player.Google Cast.Error With Details', { error: reason }) : t('Video.Player.Google Cast.Error'),
-    icon: ['fas', 'cast']
+    icon: ['fas', 'circle-exclamation']
   })
 }
 

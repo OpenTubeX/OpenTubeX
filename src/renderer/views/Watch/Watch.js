@@ -1887,7 +1887,7 @@ export default defineComponent({
             message: scheduled
               ? this.t('Video.Notification enabled')
               : this.t('Video.Notification unavailable'),
-            icon: ['fas', 'calendar-days']
+            icon: scheduled ? ['fas', 'calendar-days'] : ['fas', 'circle-exclamation']
           })
         }
       } catch (error) {
@@ -1895,7 +1895,7 @@ export default defineComponent({
         if (videoId === this.videoId) {
           this.showTabToast({
             message: this.t('Video.Notification unavailable'),
-            icon: ['fas', 'calendar-days']
+            icon: ['fas', 'circle-exclamation']
           })
         }
       } finally {
@@ -2068,7 +2068,7 @@ export default defineComponent({
             ? this.$t('Video.Video has been removed from {playlistName}', { playlistName })
             : this.$t('Video.There was a problem removing the video from {playlistName}', { playlistName }),
           image: this.toastThumbnail,
-          icon: ['fas', 'trash'],
+          icon: removed ? ['fas', 'trash'] : ['fas', 'circle-exclamation'],
         })
         return
       }
@@ -2082,7 +2082,7 @@ export default defineComponent({
           ? this.$t('Video.Video has been saved to {playlistName}', { playlistName })
           : this.$t('Video.There was a problem saving the video to {playlistName}', { playlistName }),
         image: this.toastThumbnail,
-        icon: ['fas', 'bookmark'],
+        icon: saved ? ['fas', 'bookmark'] : ['fas', 'circle-exclamation'],
       })
     },
     handleChaptersOverlayChange(open) {
@@ -5445,6 +5445,7 @@ export default defineComponent({
             }),
           time: 3_600_000,
           icon: ['fas', 'clock'],
+          important: true,
         })
         this.resetAutoplayInterruptionTimeout()
         return

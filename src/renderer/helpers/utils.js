@@ -231,6 +231,8 @@ export const ERROR_TOAST_ICON = ['fas', 'circle-exclamation']
  * @property {string} [image] optional image URL (e.g. a video thumbnail) shown alongside the message
  * @property {[string, string]} [icon] optional semantic icon (e.g. `['fas', 'trash']`) shown
  *   alongside the message, ignored when an image is given
+ * @property {boolean} [important] keeps the toast when only important notifications are allowed,
+ *   for reminders the user set up. Errors, warnings, and toasts with actions are kept regardless
  */
 
 /**
@@ -254,11 +256,12 @@ export function showToast(message, time = null, action = null, abortSignal = nul
   let verticalButtons = false
   let dismissible = true
   let dismissOnAction = true
+  let important = false
 
   // Allow calling with a single options object while staying backwards compatible
   // with the positional (message, time, action, abortSignal) signature
   if (message !== null && typeof message === 'object') {
-    ({ message, time = null, action = null, abortSignal = null, image = null, icon = null, buttons = [], buttonAction = null, verticalButtons = false, dismissible = true, dismissOnAction = true } = message)
+    ({ message, time = null, action = null, abortSignal = null, image = null, icon = null, buttons = [], buttonAction = null, verticalButtons = false, dismissible = true, dismissOnAction = true, important = false } = message)
   }
 
   // Sometimes caller just pass user setting based value in and it can be zero
@@ -279,6 +282,7 @@ export function showToast(message, time = null, action = null, abortSignal = nul
     verticalButtons,
     dismissible,
     dismissOnAction,
+    important,
     /** @type {ToastControl | null} */
     control: null,
   }
@@ -889,7 +893,7 @@ export function showExternalPlayerUnsupportedActionToast(externalPlayer, action)
   const message = i18n.global.t('Video.External Player.UnsupportedActionTemplate', {
     externalPlayer, action: actionString
   })
-  showToast(message)
+  showToast({ message, icon: ['fas', 'triangle-exclamation'] })
 }
 
 export function getVideoParamsFromUrl(url) {

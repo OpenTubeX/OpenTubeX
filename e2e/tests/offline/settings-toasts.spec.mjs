@@ -182,6 +182,50 @@ test.describe('settings', () => {
     await expect(holder.locator('.toast', { hasText: 'Test toast' })).toBeVisible()
   })
 
+  test('only shows important notifications when enabled', async ({ page }) => {
+    await goTo(page, 'settings')
+    await page.locator('.settingsMenu [data-section="appearance"]').click()
+
+    const appearanceSection = page.locator('[data-section="appearance"]')
+    const importantToggle = appearanceSection.getByRole('checkbox', { name: 'Only show important notifications' })
+    const importantLabel = appearanceSection.locator('.switch-label', { hasText: 'Only show important notifications' })
+    const progressToggle = appearanceSection.getByRole('checkbox', { name: 'Show progress as notification' })
+    await expect(importantToggle).not.toBeChecked()
+    await expect(progressToggle).toBeEnabled()
+    await expect(progressToggle).toBeChecked()
+
+    await importantLabel.click()
+    await expect(importantToggle).toBeChecked()
+    // Progress moves to the progress bar, so the toggle shows the effective state
+    await expect(progressToggle).toBeDisabled()
+    await expect(progressToggle).not.toBeChecked()
+
+    const holder = page.locator('.toast-holder')
+    await page.evaluate(() => {
+      window.ftElectron.showToastOnAllTabs('Routine toast', 10000, ['fas', 'check'])
+      window.ftElectron.showToastOnAllTabs('Error toast', 10000, ['fas', 'circle-exclamation'])
+      window.ftElectron.showToastOnAllTabs('Warning toast', 10000, ['fas', 'triangle-exclamation'])
+      window.ftElectron.showToastOnAllTabs('Action toast', 10000, null, 'open-sync-settings')
+    })
+    await expect(holder.locator('.toast', { hasText: 'Action toast' })).toBeVisible()
+    await expect(holder.locator('.toast', { hasText: 'Error toast' })).toBeVisible()
+    await expect(holder.locator('.toast', { hasText: 'Warning toast' })).toBeVisible()
+    await expect(holder.locator('.toast', { hasText: 'Routine toast' })).toHaveCount(0)
+
+    // Testing the toast position must work regardless
+    await appearanceSection.getByRole('button', { name: 'Test toast' }).click()
+    await expect(holder.locator('.toast', { hasText: 'Test toast' })).toBeVisible()
+
+    await importantLabel.click()
+    await expect(importantToggle).not.toBeChecked()
+    await expect(progressToggle).toBeEnabled()
+    await expect(progressToggle).toBeChecked()
+    await page.evaluate(() => {
+      window.ftElectron.showToastOnAllTabs('Routine toast again', 10000, ['fas', 'check'])
+    })
+    await expect(holder.locator('.toast', { hasText: 'Routine toast again' })).toBeVisible()
+  })
+
   test('honors the configured toast position on Android phones', async ({ app, page }) => {
     const phoneSafeArea = { top: 24, bottom: 16 }
     const layoutTolerance = 0.05

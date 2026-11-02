@@ -594,6 +594,7 @@ Settings:
     Invalid Engine: 이름과 %s을(를) 포함하는 올바른 HTTP 또는 HTTPS 검색 URL을 입력하세요.
     Engine Limit: 사용자 지정 검색 엔진은 최대 {count}개까지 추가할 수 있습니다.
   Theme Settings:
+    Only Show Important Notifications: 중요한 알림만 표시
     Visible Search Suggestions: "표시할 검색 추천 수"
     Material Accent Color: "Material 강조 색상"
     Material Wallpaper Colors: "배경화면 색상"
@@ -2523,6 +2524,7 @@ Tooltips:
     Refresh Subscriptions While App Is Closed: "선택한 설정으로 피드를 새로고침합니다. 데스크톱에서는 종료할 때까지 OpenTubeX가 시스템 트레이에 남습니다. Android는 백그라운드 새로고침 시간을 결정합니다."
     Notify About New Uploads: 구독 설정에서 알림을 켠 채널에 대해 이 기기에 시스템 알림을 표시합니다. OpenTubeX는 구독을 새로 고칠 때 새 콘텐츠를 확인하므로 자동 새로 고침 간격을 선택하세요. 앱이 닫혀 있을 때도 알림을 받으려면 앱이 닫혀 있을 때 새로 고침도 사용하도록 설정하세요.
   Theme Settings:
+    Only Show Important Notifications: 작업을 확인하거나 상태만 알려 주는 앱 내 알림을 숨깁니다. 오류, 경고, 직접 설정한 알림, 그리고 실행취소처럼 작업을 제공하는 알림은 계속 표시됩니다. 구독 새로 고침과 같은 백그라운드 작업의 진행 상황은 알림 대신 전역 진행 표시줄에 표시됩니다. 시스템 알림에는 영향을 주지 않습니다.
     Visible Search Suggestions: "검색창 목록이 스크롤되기 전에 표시할 검색 기록 항목과 추천 검색어의 수를 설정합니다. 목록은 창 아래쪽 가장자리를 넘어가지 않습니다."
     Thumbnail Size: "그리드와 목록에서 동영상 썸네일 크기를 조정합니다. 열 수가 고정된 그리드나 전체 너비 보기 유형은 대신 각 행을 채우므로, 여기서는 목록 썸네일과 Shorts만 변경됩니다. 휴대전화 크기의 창에서는 그리드 썸네일이 100%로 제한됩니다."
     Playlist Thumbnail Size: "재생목록 페이지에서 동영상 썸네일 크기를 조정합니다. 열 수가 고정된 그리드나 전체 너비 보기 유형은 대신 각 행을 채우므로, 여기서는 목록 썸네일과 Shorts만 변경됩니다. 휴대전화 크기의 창에서는 그리드 썸네일이 100%로 제한됩니다."

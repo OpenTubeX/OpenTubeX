@@ -527,6 +527,7 @@ Settings:
     Invalid Engine: Enigu nomon kaj validan HTTP- aŭ HTTPS-serĉan URL, kiu enhavas %s.
     Engine Limit: Vi povas aldoni ĝis {count} laŭmendajn serĉilojn.
   Theme Settings:
+    Only Show Important Notifications: Montri nur gravajn sciigojn
     Material Accent Color: Material-akcenta koloro
     Material Wallpaper Colors: Koloroj de ekranfono
     Tab Loading Indicator:
@@ -2180,6 +2181,7 @@ Tooltips:
     Refresh Subscriptions While App Is Closed: Aktualigas fluojn laŭ viaj elektitaj agordoj. Ĉe labortablo, OpenTubeX restas en la taskopleto ĝis vi eliras. Android regas kiam fonaj aktualigoj ruliĝas.
     Notify About New Uploads: Montras sistemajn sciigojn en ĉi tiu aparato por kanaloj, kies sciigojn vi ŝaltis en iliaj abonaj agordoj. OpenTubeX kontrolas novan enhavon kiam abonoj aktualiĝas, do elektu intervalon de aŭtomata aktualigo. Por esti sciigita dum la aplikaĵo estas fermita, ankaŭ ŝaltu aktualigadon dum la aplikaĵo estas fermita.
   Theme Settings:
+    Only Show Important Notifications: Kaŝas sciigojn en la aplikaĵo, kiuj nur konfirmas agon aŭ raportas staton. Eraroj, avertoj, memorigoj, kiujn vi agordis, kaj sciigoj, kiuj proponas agon, ekzemple Malfari, ankoraŭ aperas. Fona progreso, ekzemple aktualigo de abonoj, montriĝas en la ĝenerala progresbreto anstataŭ kiel sciigo. Sistemaj sciigoj ne estas tuŝitaj.
     Thumbnail Size: Skalas bildetojn de videaĵoj en kradoj kaj listoj. Kradoj kun fiksa nombro de kolumnoj aŭ la aranĝo "Plena larĝo" anstataŭe plenigas ĉiun vicon, do tie ĝi ŝanĝas nur listajn bildetojn kaj videaĵetojn. Telefongrandaj fenestroj limigas kradajn bildetojn al 100%.
     Playlist Thumbnail Size: Skalas bildetojn de videaĵoj sur ludlistaj paĝoj. Kradoj kun fiksa nombro de kolumnoj aŭ la aranĝo "Plena larĝo" anstataŭe plenigas ĉiun vicon, do tie ĝi ŝanĝas nur listajn bildetojn kaj videaĵetojn. Telefongrandaj fenestroj limigas kradajn bildetojn al 100%.
     Show Progress as Notification: Montras daŭran sciigon kun tuja progreso por fonaj operacioj, ekzemple aktualigoj de abonoj kaj elŝutoj de administrataj iloj, anstataŭ uzi la ĝeneralan progresbreton.

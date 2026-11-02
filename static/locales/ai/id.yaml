@@ -492,6 +492,7 @@ Settings:
     Invalid Engine: Masukkan nama dan URL pencarian HTTP atau HTTPS valid yang berisi %s.
     Engine Limit: Anda dapat menambahkan hingga {count} mesin pencari khusus.
   Theme Settings:
+    Only Show Important Notifications: Hanya tampilkan notifikasi penting
     Visible Search Suggestions: "Saran pencarian yang terlihat"
     Material Accent Color: "Warna aksen Material"
     Material Wallpaper Colors: "Warna wallpaper"
@@ -2152,6 +2153,7 @@ Tooltips:
     Refresh Subscriptions While App Is Closed: "Memperbarui feed sesuai setelan yang dipilih. Di desktop, OpenTubeX tetap di baki sistem sampai Anda keluar. Android menentukan waktu pembaruan latar belakang."
     Notify About New Uploads: Menampilkan notifikasi sistem di perangkat ini untuk channel yang notifikasinya Anda aktifkan di pengaturan langganannya. OpenTubeX memeriksa konten baru saat langganan diperbarui, jadi pilih interval pembaruan otomatis. Agar tetap mendapat notifikasi saat aplikasi ditutup, aktifkan juga pembaruan saat aplikasi ditutup.
   Theme Settings:
+    Only Show Important Notifications: Menyembunyikan notifikasi dalam aplikasi yang hanya mengonfirmasi tindakan atau melaporkan status. Kesalahan, peringatan, pengingat yang Anda atur, dan notifikasi yang menawarkan tindakan, seperti Urungkan, tetap muncul. Progres operasi latar belakang, seperti penyegaran langganan, ditampilkan di bilah progres global, bukan sebagai notifikasi. Notifikasi sistem tidak terpengaruh.
     Visible Search Suggestions: "Menentukan berapa banyak entri riwayat pencarian dan saran yang ditampilkan bilah pencarian sebelum daftarnya perlu digulir. Daftar tidak pernah melewati bagian bawah jendela."
     Thumbnail Size: "Mengubah ukuran gambar mini video di kisi dan daftar. Kisi dengan jumlah kolom tetap atau jenis tampilan Lebar Penuh akan mengisi setiap baris, jadi di sana penggeser hanya mengubah gambar mini daftar dan Shorts. Di jendela seukuran ponsel, gambar mini kisi dibatasi hingga 100%."
     Playlist Thumbnail Size: "Mengubah ukuran gambar mini video di halaman daftar putar. Kisi dengan jumlah kolom tetap atau jenis tampilan Lebar Penuh akan mengisi setiap baris, jadi di sana penggeser hanya mengubah gambar mini daftar dan Shorts. Di jendela seukuran ponsel, gambar mini kisi dibatasi hingga 100%."

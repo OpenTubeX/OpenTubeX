@@ -113,11 +113,12 @@ function handleLimitStatus(kind, status, previous) {
         ? t('Digital Wellbeing.Watch time limit almost reached', { duration: warningDuration })
         : t('Digital Wellbeing.Shorts limit almost reached', { duration: warningDuration }),
       icon: ['fas', 'clock'],
+      important: true,
     })
   } else if (status === 'reached' && previous !== undefined) {
     // Starting the app over a limit only blocks the next playback.
     if (store.getters.getDailyLimitAction === 'remind') {
-      showToast({ message: limitTitle(kind), icon: ['fas', 'clock'] })
+      showToast({ message: limitTitle(kind), icon: ['fas', 'clock'], important: true })
     } else if (isPlaying.value) {
       store.commit('requestWellbeingPause', { shortsOnly: kind === 'shorts' })
       store.commit('showWellbeingPrompt', kind)
@@ -135,7 +136,7 @@ watch(() => breakDue.value && prompt.value === null, due => {
   if (!due) return
   store.commit('resetWellbeingSession')
   if (store.getters.getBreakReminderAction === 'remind') {
-    showToast({ message: t('Digital Wellbeing.Time to take a break'), icon: ['fas', 'clock'] })
+    showToast({ message: t('Digital Wellbeing.Time to take a break'), icon: ['fas', 'clock'], important: true })
     return
   }
   store.commit('requestWellbeingPause')

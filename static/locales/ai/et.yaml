@@ -491,6 +491,7 @@ Settings:
     Invalid Engine: Sisestage nimi ja sobiv HTTP- või HTTPS-otsingu URL, mis sisaldab %s.
     Engine Limit: Saate lisada kuni {count} kohandatud otsingumootorit.
   Theme Settings:
+    Only Show Important Notifications: Kuva ainult olulised teavitused
     Visible Search Suggestions: "Nähtavad otsingusoovitused"
     Material Accent Color: "Materiali aktsentvärv"
     Material Wallpaper Colors: "Taustapildi värvid"
@@ -2136,6 +2137,7 @@ Tooltips:
     Refresh Subscriptions While App Is Closed: "Värskendab vooge valitud seadistustega. Arvutis jääb OpenTubeX süsteemisalve kuni väljumiseni. Android määrab taustavärskenduste aja."
     Notify About New Uploads: Kuvab selles seadmes süsteemiteavitusi kanalite kohta, mille teavitused oled nende tellimuse seadetes sisse lülitanud. OpenTubeX kontrollib uut sisu tellimuste värskendamisel, seega vali automaatse värskendamise intervall. Et saada teavitusi ka siis, kui rakendus on suletud, luba ka värskendamine suletud rakenduse korral.
   Theme Settings:
+    Only Show Important Notifications: Peidab rakendusesisesed teavitused, mis ainult kinnitavad toimingut või teatavad olekust. Vead, hoiatused, teie seadistatud meeldetuletused ja toimingut pakkuvad teavitused, nagu Võta tagasi, kuvatakse endiselt. Taustatoimingute edenemine, näiteks tellimuste värskendamine, kuvatakse teavituse asemel üldisel edenemisribal. Süsteemiteavitusi see ei mõjuta.
     Visible Search Suggestions: "Määrab, mitu otsinguajaloo kirjet ja soovitust otsinguriba näitab, enne kui selle loendit tuleb kerida. Loend ei ulatu kunagi akna alumisest servast kaugemale."
     Thumbnail Size: "Muudab videote pisipiltide suurust ruudustikes ja loendites. Fikseeritud veergude arvuga või täislaiuse vaatega ruudustikud täidavad selle asemel iga rea, seega muudab see seal ainult loendite pisipilte ja Shortse. Telefonisuurustes akendes on ruudustiku pisipildid piiratud 100%-ga."
     Playlist Thumbnail Size: "Muudab videote pisipiltide suurust esitusloendite lehtedel. Fikseeritud veergude arvuga või täislaiuse vaatega ruudustikud täidavad selle asemel iga rea, seega muudab see seal ainult loendite pisipilte ja Shortse. Telefonisuurustes akendes on ruudustiku pisipildid piiratud 100%-ga."

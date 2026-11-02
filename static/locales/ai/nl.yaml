@@ -496,6 +496,7 @@ Settings:
     Invalid Engine: Voer een naam en een geldige HTTP- of HTTPS-zoek-URL met %s in.
     Engine Limit: Je kunt maximaal {count} aangepaste zoekmachines toevoegen.
   Theme Settings:
+    Only Show Important Notifications: Alleen belangrijke meldingen tonen
     Visible Search Suggestions: "Zichtbare zoeksuggesties"
     Material Accent Color: "Material-accentkleur"
     Material Wallpaper Colors: "Kleuren van de achtergrondafbeelding"
@@ -2193,6 +2194,7 @@ Tooltips:
     Refresh Subscriptions While App Is Closed: "Ververst feeds met je gekozen instellingen. Op de computer blijft OpenTubeX in het systeemvak totdat je afsluit. Android bepaalt wanneer verversingen op de achtergrond worden uitgevoerd."
     Notify About New Uploads: Toont systeemmeldingen op dit apparaat voor kanalen waarvan je de meldingen hebt ingeschakeld in hun abonnementsinstellingen. OpenTubeX controleert op nieuwe inhoud wanneer abonnementen worden vernieuwd, dus kies een interval voor automatisch vernieuwen. Om ook meldingen te krijgen terwijl de app gesloten is, schakel je ook vernieuwen terwijl de app gesloten is in.
   Theme Settings:
+    Only Show Important Notifications: Verbergt meldingen in de app die alleen een actie bevestigen of een status melden. Fouten, waarschuwingen, herinneringen die je hebt ingesteld en meldingen met een actie, zoals Ongedaan maken, worden nog steeds getoond. De voortgang van achtergrondtaken, zoals het vernieuwen van abonnementen, wordt in de algemene voortgangsbalk getoond in plaats van in een melding. Systeemmeldingen worden niet beïnvloed.
     Visible Search Suggestions: "Bepaalt hoeveel items uit de zoekgeschiedenis en suggesties de zoekbalk toont voordat de lijst gaat scrollen. De lijst loopt nooit door voorbij de onderkant van het venster."
     Thumbnail Size: "Schaalt videominiaturen in rasters en lijsten. Rasters met een vast aantal kolommen of de weergave Volledige breedte vullen in plaats daarvan elke rij, dus daar verandert de schuifregelaar alleen lijstminiaturen en Shorts. In vensters ter grootte van een telefoon zijn rasterminiaturen beperkt tot 100%."
     Playlist Thumbnail Size: "Schaalt videominiaturen op afspeellijstpagina's. Rasters met een vast aantal kolommen of de weergave Volledige breedte vullen in plaats daarvan elke rij, dus daar verandert de schuifregelaar alleen lijstminiaturen en Shorts. In vensters ter grootte van een telefoon zijn rasterminiaturen beperkt tot 100%."

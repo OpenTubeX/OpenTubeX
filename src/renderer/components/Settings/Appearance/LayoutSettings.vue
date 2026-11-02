@@ -161,12 +161,21 @@
         @change="requestRestart('customTitleBar', $event)"
       />
       <FtToggleSwitch
+        :label="$t('Settings.Theme Settings.Only Show Important Notifications')"
+        :tooltip="$t('Tooltips.Theme Settings.Only Show Important Notifications')"
+        compact
+        :default-value="onlyShowImportantToasts"
+        setting-key="onlyShowImportantToasts"
+        @change="store.dispatch('updateOnlyShowImportantToasts', $event)"
+      />
+      <FtToggleSwitch
         v-if="!IS_CAPACITOR"
         :label="$t('Settings.Theme Settings.Show Progress as Notification')"
         :tooltip="$t('Tooltips.Theme Settings.Show Progress as Notification')"
         compact
-        :default-value="showProgressBarToast"
+        :default-value="store.getters.getEffectiveShowProgressBarToast"
         setting-key="showProgressBarToast"
+        :disabled="onlyShowImportantToasts"
         @change="updateShowProgressBarToast"
       />
     </div>
@@ -489,7 +498,7 @@ function updateUsePlayerMenuGrid(value) {
 }
 
 /** @type {import('vue').ComputedRef<boolean>} */
-const showProgressBarToast = computed(() => store.getters.getShowProgressBarToast)
+const onlyShowImportantToasts = computed(() => store.getters.getOnlyShowImportantToasts)
 
 /**
  * @param {boolean} value

@@ -491,6 +491,7 @@ Settings:
     Invalid Engine: Skriv inn et navn og en gyldig HTTP- eller HTTPS-søke-URL som inneholder %s.
     Engine Limit: Du kan legge til opptil {count} egendefinerte søkemotorer.
   Theme Settings:
+    Only Show Important Notifications: Vis bare viktige varsler
     Visible Search Suggestions: "Synlige søkeforslag"
     Material Accent Color: "Material-aksentfarge"
     Material Wallpaper Colors: "Farger fra bakgrunnsbildet"
@@ -2136,6 +2137,7 @@ Tooltips:
     Refresh Subscriptions While App Is Closed: "Oppdaterer strømmer med innstillingene du har valgt. På datamaskinen blir OpenTubeX i systemstatusfeltet til du avslutter. Android bestemmer når bakgrunnsoppdateringer kjøres."
     Notify About New Uploads: Viser systemvarsler på denne enheten for kanaler du har slått på varsler for i abonnementsinnstillingene deres. OpenTubeX ser etter nytt innhold når abonnementer oppdateres, så velg et intervall for automatisk oppdatering. For å bli varslet mens appen er lukket, må du også slå på oppdatering mens appen er lukket.
   Theme Settings:
+    Only Show Important Notifications: Skjuler varsler i appen som bare bekrefter en handling eller melder en status. Feil, advarsler, påminnelser du har satt opp, og varsler som tilbyr en handling, som Angre, vises fortsatt. Fremdrift for bakgrunnsoperasjoner, som oppdatering av abonnementer, vises i den globale fremdriftslinjen i stedet for som et varsel. Systemvarsler påvirkes ikke.
     Visible Search Suggestions: "Angir hvor mange oppføringer fra søkeloggen og forslag søkefeltet viser før listen må rulles. Listen går aldri forbi nederkanten av vinduet."
     Thumbnail Size: "Skalerer videominiatyrbilder i rutenett og lister. Rutenett med et fast antall kolonner eller visningstypen Full bredde fyller i stedet hver rad, så der endrer den bare listeminiatyrbilder og Shorts. I vinduer på størrelse med en telefon er rutenettminiatyrbilder begrenset til 100 %."
     Playlist Thumbnail Size: "Skalerer videominiatyrbilder på spillelistesider. Rutenett med et fast antall kolonner eller visningstypen Full bredde fyller i stedet hver rad, så der endrer den bare listeminiatyrbilder og Shorts. I vinduer på størrelse med en telefon er rutenettminiatyrbilder begrenset til 100 %."

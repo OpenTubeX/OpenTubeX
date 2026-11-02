@@ -363,6 +363,7 @@ export function createDefaultSettings({ supportsLocalApi, isElectron }) {
     uiRoundness: 100,
     animationSpeed: 100,
     showToastTimeoutIndicator: true,
+    onlyShowImportantToasts: false,
     usePlayerMenuGrid: true,
     useFrostedGlassPlayerUi: true,
     toastPosition: 'bottom-left',

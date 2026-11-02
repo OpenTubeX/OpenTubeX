@@ -102,7 +102,7 @@ async function refreshDevices() {
     if (!disposed) {
       showToast({
         message: error?.code === 'LOCAL_ACCESS_DENIED' ? error.message : t('Video.Player.DLNA.Error'),
-        icon: ['fas', 'cast']
+        icon: ['fas', 'circle-exclamation']
       })
     }
   } finally {
@@ -172,7 +172,7 @@ async function handleChoice(choice) {
   } catch (error) {
     if (!disposed) {
       console.error('DLNA casting failed', error)
-      showToast({ message: t('Video.Player.DLNA.Error'), icon: ['fas', 'cast'] })
+      showToast({ message: t('Video.Player.DLNA.Error'), icon: ['fas', 'circle-exclamation'] })
     }
   } finally {
     busy.value = false
@@ -214,7 +214,7 @@ const failureCheck = setInterval(async () => {
     if (!disposed) {
       await stopCasting(false).catch(console.error)
       console.error('DLNA stream failed', error)
-      showToast({ message: t('Video.Player.DLNA.Error'), icon: ['fas', 'cast'] })
+      showToast({ message: t('Video.Player.DLNA.Error'), icon: ['fas', 'circle-exclamation'] })
       if (wasPlaying) {
         try { await props.getPlayer()?.play?.() } catch (error) { console.error(error) }
       }

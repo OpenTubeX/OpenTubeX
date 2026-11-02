@@ -657,6 +657,7 @@ Settings:
     Invalid Engine: Voer ’n naam en ’n geldige HTTP- of HTTPS-soek-URL in wat %s bevat.
     Engine Limit: U kan tot {count} pasgemaakte soekenjins byvoeg.
   Theme Settings:
+    Only Show Important Notifications: Wys slegs belangrike kennisgewings
     Material Accent Color: Material-aksentkleur
     Material Wallpaper Colors: Muurpapierkleure
     Tab Loading Indicator:
@@ -2383,6 +2384,7 @@ Tooltips:
     Refresh Subscriptions While App Is Closed: Verfris voere met u gekose instellings. Op rekenaars bly OpenTubeX in die stelselbak totdat u dit verlaat. Android beheer wanneer agtergrondverfrissings loop.
     Notify About New Uploads: Wys stelselkennisgewings op hierdie toestel vir kanale waarvoor u kennisgewings in hul intekeninginstellings aangeskakel het. OpenTubeX kyk vir nuwe inhoud wanneer intekeninge verfris, dus kies ’n outomatiese verfrissingsinterval. Om in kennis gestel te word terwyl die toep gesluit is, aktiveer ook verfrissing terwyl die toep gesluit is.
   Theme Settings:
+    Only Show Important Notifications: Versteek kennisgewings in die app wat slegs 'n aksie bevestig of 'n status meld. Foute, waarskuwings, herinneringe wat jy opgestel het en kennisgewings met 'n aksie, soos Ontdoen, verskyn steeds. Agtergrondvordering, soos die verfris van intekeninge, word in die globale vorderingsbalk gewys in plaas van as 'n kennisgewing. Stelselkennisgewings word nie geraak nie.
     Thumbnail Size: Skaal videoduimnaels in roosters en lyste. Roosters met ’n vaste aantal kolomme of die aansigtipe Volle breedte vul eerder elke ry, dus verander dit daar slegs lysduimnaels en kortvideo’s. Vensters van foongrootte beperk roosterduimnaels tot 100%.
     Playlist Thumbnail Size: Skaal videoduimnaels op afspeellysblaaie. Roosters met ’n vaste aantal kolomme of die aansigtipe Volle breedte vul eerder elke ry, dus verander dit daar slegs lysduimnaels en kortvideo’s. Vensters van foongrootte beperk roosterduimnaels tot 100%.
     Show Progress as Notification: Wys ’n blywende kennisgewing met regstreekse voortgang vir agtergrondbewerkings, soos intekeningverfrissings en aflaaie van bestuurde gereedskap, in plaas van die globale vorderingsbalk.
