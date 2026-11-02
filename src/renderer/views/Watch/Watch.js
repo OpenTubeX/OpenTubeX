@@ -1417,7 +1417,8 @@ export default defineComponent({
         if (process.env.IS_ELECTRON && this.isUpcoming && this.playabilityStatus !== 'OK') {
           window.ftElectron?.tabs?.setPlaybackState('paused', this.tabId)
         }
-        this.updateVideoMetadataCache()
+        // A download playing without metadata would cache an empty description.
+        if (!this.downloadedPlaybackWithoutMetadata) this.updateVideoMetadataCache()
 
         if (!this.transcriptAvailable && this.showTranscript) {
           this.closeTranscript()
@@ -2759,12 +2760,21 @@ export default defineComponent({
      */
     scheduleDownloadedPlaybackFallback: function (loadGeneration, videoId) {
       clearTimeout(this.downloadedPlaybackFallbackTimer)
-      if (!Number.isInteger(Number(this.tabRoute.query.downloadId))) return
+      // Without metadata it's unknown whether the video is family friendly.
+      if (this.showFamilyFriendlyOnly || !Number.isInteger(Number(this.tabRoute.query.downloadId))) return
       this.downloadedPlaybackFallbackTimer = setTimeout(() => {
         if (this.isCurrentVideoLoad(loadGeneration, videoId) && this.isLoading && !this.localFilePlayback) {
           this.finishDownloadedPlaybackWithoutMetadata()
         }
       }, DOWNLOADED_PLAYBACK_METADATA_TIMEOUT_MS)
+    },
+
+    finishMetadataLoad: function () {
+      const playedWithoutMetadata = this.downloadedPlaybackWithoutMetadata
+      this.isLoading = false
+      this.downloadedPlaybackWithoutMetadata = false
+      // The page had already finished loading, so the isLoading watcher won't cache it.
+      if (playedWithoutMetadata) this.updateVideoMetadataCache()
     },
 
     /** Returns whether the download already plays without this load's metadata. */
@@ -3940,8 +3950,7 @@ export default defineComponent({
         if (this.isShort) {
           this.loadLocalShortLinkedVideo(this.videoId)
         }
-        this.isLoading = false
-        this.downloadedPlaybackWithoutMetadata = false
+        this.finishMetadataLoad()
         this.updateTitle()
       } catch (err) {
         backendFailed = true
@@ -4289,8 +4298,7 @@ export default defineComponent({
           this.updateShortThumbnail()
           this.updateTitle()
 
-          this.isLoading = false
-          this.downloadedPlaybackWithoutMetadata = false
+          this.finishMetadataLoad()
         })
         .catch(async err => {
           backendFailed = true

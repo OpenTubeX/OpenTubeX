@@ -166,6 +166,30 @@ for (const backend of ['Local', 'Invidious']) {
   })
 }
 
+test('a download waits for its metadata while only family friendly videos are allowed', () => {
+  const timers = []
+  const methods = runInNewContext(`({ ${method('scheduleDownloadedPlaybackFallback', 'onMountedDependOnLocalStateLoading()')} })`, {
+    DOWNLOADED_PLAYBACK_METADATA_TIMEOUT_MS: 3000,
+    setTimeout: callback => timers.push(callback),
+    clearTimeout() {},
+  })
+  for (const showFamilyFriendlyOnly of [true, false]) {
+    const watch = { ...methods, showFamilyFriendlyOnly, tabRoute: { query: { downloadId: '1' } } }
+    watch.scheduleDownloadedPlaybackFallback(1, 'downloaded1')
+  }
+  assert.equal(timers.length, 1, 'only the unrestricted page plays the download before its metadata')
+})
+
+test('metadata that arrives after a download started playing is cached', () => {
+  const methods = runInNewContext(`({ ${method('finishMetadataLoad', 'settleDownloadedPlaybackFallback')} })`)
+  for (const [downloadedPlaybackWithoutMetadata, isLoading, expected] of [[true, false, 1], [false, true, 0]]) {
+    let cached = 0
+    const watch = { ...methods, downloadedPlaybackWithoutMetadata, isLoading, updateVideoMetadataCache() { cached++ } }
+    watch.finishMetadataLoad()
+    assert.deepEqual([cached, watch.isLoading, watch.downloadedPlaybackWithoutMetadata], [expected, false, false])
+  }
+})
+
 for (const entry of ['applyDownloadedPlaybackSource', 'finishDownloadedPlaybackWithoutMetadata']) {
   test(`${entry} falls back to the filename when stored download titles are empty`, () => {
     const methods = runInNewContext(`({

@@ -75,6 +75,7 @@ async function loadMetadata(info, avoidTranslation = 'disabled', options = {}) {
     finishDownloadedPlaybackWithoutMetadata: () => false,
     scheduleDownloadedPlaybackFallback() {},
     settleDownloadedPlaybackFallback: () => false,
+    finishMetadataLoad() { this.isLoading = false; this.downloadedPlaybackWithoutMetadata = false },
     getUnavailableVideoThumbnail: () => '',
     hideVideoLikesAndDislikes: options.hideVideoLikesAndDislikes ?? true,
     backendPreference: 'local',
