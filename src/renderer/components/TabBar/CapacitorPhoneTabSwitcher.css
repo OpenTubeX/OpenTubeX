@@ -556,12 +556,12 @@
   opacity: 0;
 }
 
-:global(:root[data-reduced-motion='reduce']) .capacitor-tabs-dialog-enter-active,
-:global(:root[data-reduced-motion='reduce']) .capacitor-tabs-dialog-leave-active {
+:root[data-reduced-motion='reduce'] .capacitor-tabs-dialog-enter-active,
+:root[data-reduced-motion='reduce'] .capacitor-tabs-dialog-leave-active {
   transition: none;
 }
 
-:global(:root[data-reduced-motion='reduce']) .capacitorPhoneTabRow {
+:root[data-reduced-motion='reduce'] .capacitorPhoneTabRow {
   transition: none;
 }
 

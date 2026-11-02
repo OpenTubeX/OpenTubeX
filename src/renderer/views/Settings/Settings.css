@@ -75,8 +75,8 @@
   }
 }
 
-:global(:root[data-reduced-motion='reduce']) .settingsWindow.settings-window-enter-active,
-:global(:root[data-reduced-motion='reduce']) .settingsWindow.settings-window-leave-active {
+:root[data-reduced-motion='reduce'] .settingsWindow.settings-window-enter-active,
+:root[data-reduced-motion='reduce'] .settingsWindow.settings-window-leave-active {
   animation: none;
   transition: none;
 }
@@ -572,10 +572,10 @@
   }
 }
 
-:global(:root[data-reduced-motion='reduce']) .settingsSectionSlideForward,
-:global(:root[data-reduced-motion='reduce']) .settingsSectionSlideBackward,
-:global(:root[data-reduced-motion='reduce']) .settingsCompactSlideForward,
-:global(:root[data-reduced-motion='reduce']) .settingsCompactSlideBackward {
+:root[data-reduced-motion='reduce'] .settingsSectionSlideForward,
+:root[data-reduced-motion='reduce'] .settingsSectionSlideBackward,
+:root[data-reduced-motion='reduce'] .settingsCompactSlideForward,
+:root[data-reduced-motion='reduce'] .settingsCompactSlideBackward {
   animation: none;
 }
 

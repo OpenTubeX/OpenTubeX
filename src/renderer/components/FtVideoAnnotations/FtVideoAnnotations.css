@@ -223,6 +223,6 @@
   -webkit-line-clamp: 7;
 }
 
-:global(.scrollMiniPlayer) .videoAnnotations {
+.scrollMiniPlayer .videoAnnotations {
   display: none;
 }

@@ -327,10 +327,6 @@
 
     --shorts-player-height: calc(100dvh - 156px);
 
-    @at-root :global(.app.verticalTabs) & {
-      --shorts-player-height: calc(100dvh - 124px);
-    }
-
     .infoArea,
     .commentsArea,
     .sidebarArea {

@@ -134,8 +134,8 @@
   transform: translateY(-4px);
 }
 
-:global([data-reduced-motion='reduce']) .phoneCommentDot,
-:global([data-reduced-motion='reduce']) .commentPreview-enter-active,
-:global([data-reduced-motion='reduce']) .commentPreview-leave-active {
+[data-reduced-motion='reduce'] .phoneCommentDot,
+[data-reduced-motion='reduce'] .commentPreview-enter-active,
+[data-reduced-motion='reduce'] .commentPreview-leave-active {
   transition: none;
 }

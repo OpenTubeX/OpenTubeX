@@ -794,7 +794,7 @@
   }
 }
 
-:global(:root[data-reduced-motion='reduce']) .tabOrganizerBackdrop,
-:global(:root[data-reduced-motion='reduce']) .tabOrganizer {
+:root[data-reduced-motion='reduce'] .tabOrganizerBackdrop,
+:root[data-reduced-motion='reduce'] .tabOrganizer {
   animation: none;
 }

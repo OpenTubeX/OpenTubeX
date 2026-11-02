@@ -51,7 +51,7 @@
   inline-size: clamp(48px, 12.5%, var(--center-play-button-max-size, 80px));
 }
 
-:global(.capacitorTabs) .ftVideoPlayer {
+.capacitorTabs .ftVideoPlayer {
   --center-play-button-max-size: 64px;
 }
 

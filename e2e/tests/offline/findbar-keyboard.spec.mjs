@@ -13,6 +13,17 @@ test('Enter and Shift+Enter navigate one find bar match at a time', async ({ pag
   await expect(findbarInput).toBeFocused()
   await expect(page.locator('.app')).not.toHaveClass(/hideOutlines/)
   await expect(findbarInput).not.toHaveCSS('box-shadow', 'none')
+  const primaryTextColor = await findbarInput.evaluate((input) => {
+    const probe = document.createElement('span')
+    probe.style.color = 'var(--primary-text-color)'
+    input.after(probe)
+    const color = getComputedStyle(probe).color
+    probe.remove()
+    return color
+  })
+  await expect(findbarInput).toHaveCSS('border-color', primaryTextColor)
+  // The focus ring belongs to the input; it must not leak onto the document root.
+  await expect(page.locator('html')).toHaveCSS('box-shadow', 'none')
   await findbarInput.click()
   await expect(page.locator('.app')).toHaveClass(/hideOutlines/)
   await expect(findbarInput).toHaveCSS('box-shadow', 'none')
