@@ -1,4 +1,6 @@
 .twitchChat {
+  --sidebar-panel-max-block-size: 500px;
+
   block-size: 500px;
   display: flex;
   flex-direction: column;

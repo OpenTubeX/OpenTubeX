@@ -106,10 +106,7 @@
         :dislike-count="useReturnYoutubeDislikes ? dislikeCount : null"
       />
     </div>
-    <div
-      ref="videoButtons"
-      class="videoButtons"
-    >
+    <div class="videoButtons">
       <div
         class="profileRow"
       >
@@ -198,12 +195,12 @@
           @close="showCollaboratorsPrompt = false"
         />
       </div>
-      <div
-        ref="videoOptions"
-        class="videoOptions"
-        :class="optionsLayout"
+      <WatchVideoToolbar
+        :actions="toolbarActions"
+        :overflow-order="OVERFLOW_ORDER"
+        :dropdown-portal="channelSettingDropdownPortal"
       >
-        <span class="videoOptionsMobileRow">
+        <template #primary="{ inToolbar }">
           <slot name="cast-action" />
           <FtIconButton
             v-if="showPlaylists && !isUpcoming && !hidePlaylistActions"
@@ -304,8 +301,8 @@
             theme="base-no-default"
             @click="showMetadataHistory = true"
           />
-        </span>
-        <span class="videoOptionsMobileRow">
+        </template>
+        <template #secondary="{ inToolbar }">
           <FtIconButton
             v-if="inToolbar('externalPlayer')"
             :title="toolbarActions.externalPlayer.label"
@@ -327,23 +324,8 @@
             :playlist-id="playlistId"
             theme="base-no-default"
           />
-          <FtIconButton
-            v-if="overflowMenuOptions.length > 0"
-            class="moreActions"
-            :title="t('Video.More Options')"
-            :icon="['fas', 'ellipsis-h']"
-            theme="base-no-default"
-            dropdown-position-x="left"
-            :dropdown-portal="channelSettingDropdownPortal"
-            force-dropdown
-            mobile-sheet
-          >
-            <WatchVideoMoreActions
-              :title="t('Video.More Options')"
-              :actions="overflowMenuOptions"
-              @select="key => toolbarActions[key].run()"
-            />
-          </FtIconButton>
+        </template>
+        <template #trailing>
           <FtButton
             v-if="!offline && supportsYtDlp && enableDownloads && !isUpcoming"
             class="downloadButton"
@@ -359,8 +341,8 @@
               <span class="downloadLabel">{{ t('Downloads.Download') }}</span>
             </template>
           </FtButton>
-        </span>
-      </div>
+        </template>
+      </WatchVideoToolbar>
     </div>
     <WatchVideoFormatPrompt
       v-if="showFormatPrompt"
@@ -395,7 +377,7 @@ import FtRetryImage from '../FtRetryImage.vue'
 import { ytDlp } from '../../helpers/ytDlp'
 import { supportsYtDlp } from '../../helpers/ytDlpCapabilities'
 import { FtIcon } from '@opentubex/icons'
-import { computed, onBeforeUnmount, onMounted, ref, useTemplateRef, watch } from 'vue'
+import { computed, ref, useTemplateRef, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 
 import FtAddToPlaylistDropdown from '../FtAddToPlaylistDropdown/FtAddToPlaylistDropdown.vue'
@@ -409,7 +391,7 @@ import FtSubscribeButton from '../FtSubscribeButton/FtSubscribeButton.vue'
 import FtVerifiedBadge from '../FtVerifiedBadge/FtVerifiedBadge.vue'
 import WatchVideoFormatPrompt from '../WatchVideoFormatPrompt/WatchVideoFormatPrompt.vue'
 import WatchVideoMetadataHistory from '../WatchVideoMetadataHistory/WatchVideoMetadataHistory.vue'
-import WatchVideoMoreActions from '../WatchVideoMoreActions/WatchVideoMoreActions.vue'
+import WatchVideoToolbar from '../WatchVideoToolbar/WatchVideoToolbar.vue'
 import WatchVideoLikes from '../WatchVideoLikes/WatchVideoLikes.vue'
 
 import store from '../../store'
@@ -684,20 +666,6 @@ const showCollaboratorsPrompt = ref(false)
 const showFormatPrompt = ref(false)
 const showMetadataHistory = ref(false)
 
-const videoButtons = useTemplateRef('videoButtons')
-const videoOptions = useTemplateRef('videoOptions')
-/** @type {import('vue').Ref<'full' | 'even'>} */
-const optionsLayout = ref('full')
-const overflowCount = ref(0)
-let optionsLayoutFrame = null
-// Moving the actions of a group to the More menu can remove the divider, so
-// the overflow keeps budgeting for it. Otherwise the freed space would bring
-// an action back, which brings the divider back too.
-let dividerWidth = 0
-
-// Smallest touch target of a button in the even layout
-const MIN_EVEN_BUTTON_SIZE = 44
-
 /**
  * Actions without menus of their own, in toolbar order. They move to the More
  * menu when the even layout cannot fit every button.
@@ -759,118 +727,6 @@ const toolbarActions = computed(() => ({
 // The order in which actions move to the More menu
 const OVERFLOW_ORDER = ['metadataHistory', 'saveProgress', 'externalPlayer', 'formats', 'sponsorBlock', 'transcript', 'liveChat', 'quickBookmark']
 
-const overflowedActions = computed(() => new Set(
-  OVERFLOW_ORDER.filter(key => toolbarActions.value[key].visible).slice(0, overflowCount.value)
-))
-
-/** @param {keyof typeof toolbarActions.value} key */
-function inToolbar(key) {
-  return toolbarActions.value[key].visible && !overflowedActions.value.has(key)
-}
-
-const overflowMenuOptions = computed(() => Object.entries(toolbarActions.value)
-  .filter(([key]) => overflowedActions.value.has(key))
-  .map(([key, action]) => ({ value: key, label: action.label, icon: action.icon, active: action.active })))
-
-/**
- * Width of an action group on one line, including its divider.
- * @param {HTMLElement} group
- */
-function getGroupWidth(group) {
-  const gap = parseFloat(getComputedStyle(group).columnGap) || 0
-  const items = getToolbarItems(group)
-  return items.reduce((width, item) => width + item.getBoundingClientRect().width + getInlineMargins(getComputedStyle(item)), 0) +
-    gap * Math.max(items.length - 1, 0) + getDividerWidth(group)
-}
-
-/** @param {HTMLElement} group */
-function getDividerWidth(group) {
-  const divider = getComputedStyle(group, '::before')
-  return divider.content === 'none'
-    ? 0
-    : parseFloat(divider.inlineSize) + getInlineMargins(divider) + (parseFloat(getComputedStyle(group).columnGap) || 0)
-}
-
-/** @param {HTMLElement} group */
-function getToolbarItems(group) {
-  return [...group.children].filter(item => item.getClientRects().length > 0)
-}
-
-/**
- * @param {CSSStyleDeclaration} style
- */
-function getInlineMargins(style) {
-  return parseFloat(style.marginInlineStart) + parseFloat(style.marginInlineEnd)
-}
-
-/**
- * Keeps the labeled toolbar at its natural width when it fits on one line.
- * Otherwise the buttons share the full width evenly, and when even that would
- * make them smaller than a touch target, the actions without menus of their
- * own move to the More menu. CSS cannot measure how wide the toolbar would be
- * in the other layout, so the natural layout is measured within the same frame.
- */
-function updateOptionsLayout() {
-  const row = videoButtons.value
-  const toolbar = videoOptions.value
-  if (!row || !toolbar || row.clientWidth === 0) { return }
-
-  toolbar.classList.add('measuring')
-  const style = getComputedStyle(toolbar)
-  const groups = [...toolbar.children].filter(group => group.getClientRects().length > 0)
-  const items = groups.flatMap(getToolbarItems)
-  const toolbarPadding = parseFloat(style.paddingInlineStart) + parseFloat(style.paddingInlineEnd)
-  const gap = parseFloat(style.columnGap) || 0
-  const measuredDividersWidth = groups.reduce((width, group) => width + getDividerWidth(group), 0)
-  if (measuredDividersWidth > 0) dividerWidth = measuredDividersWidth
-  const dividersWidth = overflowCount.value > 0 ? dividerWidth : measuredDividersWidth
-  // The actions in the More menu would each add a button and a gap, and the
-  // divider if moving them removed it
-  const buttonWidth = toolbar.querySelector('.ftIconButton')?.getBoundingClientRect().width ?? 0
-  const hiddenWidth = overflowedActions.value.size * (buttonWidth + gap) + dividersWidth - measuredDividersWidth
-  const naturalWidth = groups.reduce((width, group) => width + getGroupWidth(group), 0) +
-    gap * Math.max(groups.length - 1, 0) + toolbarPadding + hiddenWidth
-  toolbar.classList.remove('measuring')
-
-  const availableWidth = row.clientWidth + 0.5
-  if (naturalWidth <= availableWidth) {
-    optionsLayout.value = 'full'
-    overflowCount.value = 0
-    return
-  }
-
-  optionsLayout.value = 'even'
-  const buttonCount = items.length + overflowedActions.value.size
-  const capacity = Math.floor((availableWidth - toolbarPadding - dividersWidth + gap) / (MIN_EVEN_BUTTON_SIZE + gap))
-  // The More button takes one of the slots
-  overflowCount.value = buttonCount > capacity ? buttonCount - capacity + 1 : 0
-}
-
-function scheduleOptionsLayout() {
-  cancelAnimationFrame(optionsLayoutFrame)
-  optionsLayoutFrame = requestAnimationFrame(updateOptionsLayout)
-}
-
-const optionsResizeObserver = new ResizeObserver(scheduleOptionsLayout)
-// Also catches actions that child components such as the cast button add
-const optionsMutationObserver = new MutationObserver(scheduleOptionsLayout)
-
-onMounted(() => {
-  optionsResizeObserver.observe(videoButtons.value)
-  for (const group of videoOptions.value.children) {
-    optionsResizeObserver.observe(group)
-  }
-  optionsMutationObserver.observe(videoOptions.value, { childList: true, subtree: true })
-  // Hiding an action from the closed More menu changes no rendered toolbar rows
-  watch(() => OVERFLOW_ORDER.filter(key => toolbarActions.value[key].visible).join(), scheduleOptionsLayout)
-  updateOptionsLayout()
-})
-
-onBeforeUnmount(() => {
-  optionsResizeObserver.disconnect()
-  optionsMutationObserver.disconnect()
-  cancelAnimationFrame(optionsLayoutFrame)
-})
 const enableDownloads = computed(() => store.getters.getEnableDownloads)
 
 const liveChatToggleTitle = computed(() => {

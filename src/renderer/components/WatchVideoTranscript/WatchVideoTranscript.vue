@@ -18,7 +18,7 @@
         <div
           class="transcriptHeaderActions"
           @focusout="handleHeaderActionsFocusout"
-          @keydown.esc.stop.prevent="languageMenuOpen = false"
+          @keydown.esc="closeLanguageMenu"
         >
           <button
             type="button"
@@ -209,6 +209,18 @@ const { t } = useI18n()
 
 const selectedCaptionIndex = ref(String(props.preferredCaptionIndex))
 const languageMenuOpen = ref(false)
+
+/**
+ * Escape closes an open language menu without also closing the sheet or
+ * leaving fullscreen. Otherwise it keeps its usual meaning.
+ * @param {KeyboardEvent} event
+ */
+function closeLanguageMenu(event) {
+  if (!languageMenuOpen.value) return
+  event.stopPropagation()
+  event.preventDefault()
+  languageMenuOpen.value = false
+}
 const languageMenu = useTemplateRef('languageMenu')
 const languageList = useTemplateRef('languageList')
 const searchOpen = ref(false)

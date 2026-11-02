@@ -1,0 +1,167 @@
+// The mixins are included inside the pages' .videoLayout rules.
+/* stylelint-disable nesting-selector-no-missing-scoping-root */
+
+// Layout shared by the watch and external media pages. Both pages use the
+// same area classes (.videoLayout, .videoArea, .infoArea, .sidebarArea,
+// .commentsArea), card classes (.watchVideo, .watchVideoSideBar) and
+// helpers/watchLayout.js for the theatre mode animation.
+
+@mixin dual-column-template {
+  grid-template: 'video video sidebar' 0fr 'info info sidebar' auto 'comments comments sidebar' 1fr / 1fr 1fr 1fr;
+}
+
+@mixin theatre-mode-template {
+  grid-template: 'video video video' auto 'info info sidebar' auto 'comments comments sidebar' 1fr / 1fr 1fr 1fr;
+}
+
+@mixin single-column-template {
+  grid-template: 'video' auto 'info' auto 'sidebar' auto 'comments' auto / minmax(0, 1fr);
+}
+
+// Include at the start of the page's .videoLayout rule.
+@mixin watch-layout-areas {
+  @include dual-column-template;
+
+  align-items: start;
+  display: grid;
+
+  .videoArea {
+    grid-area: video;
+
+    .videoAreaMargin {
+      margin-block: 0 16px;
+      margin-inline: 0;
+    }
+
+    .videoPlayer {
+      grid-column: 1;
+      margin-block: 0;
+      margin-inline: auto;
+      max-inline-size: calc(80vh * 1.78);
+      position: relative;
+    }
+  }
+
+  .watchVideo {
+    grid-column: 1;
+    margin-block: 0 16px;
+    margin-inline: 0;
+  }
+
+  .infoArea {
+    grid-area: info;
+    position: relative;
+    z-index: 2;
+
+    // Raise the area above its sibling cards while an icon button dropdown
+    // (e.g. add to playlist) is open, so the dropdown isn't painted underneath them
+    &:has(.iconDropdown) {
+      z-index: 3;
+    }
+  }
+
+  .commentsArea {
+    grid-area: comments;
+    position: relative;
+    z-index: 2;
+  }
+
+  .sidebarArea {
+    grid-area: sidebar;
+    position: relative;
+    z-index: 2;
+
+    &:has(.iconDropdown) {
+      z-index: 3;
+    }
+
+    @container route (width >= 1051px) {
+      min-inline-size: 380px;
+    }
+
+    @at-root .noSidebar#{&} {
+      grid-area: auto;
+    }
+  }
+
+  .watchVideoSideBar,
+  .theatrePlaylist {
+    margin-block: 0 16px;
+    margin-inline: 8px;
+  }
+
+  // Sidebar panels collapse while opening and closing, so the cards below
+  // shift smoothly (components/WatchSidebarPanel). The chapters list is
+  // capped at 480px; 540px also covers its header.
+  .chapters-panel-enter-active,
+  .chapters-panel-leave-active,
+  .sidebar-panel-enter-active,
+  .sidebar-panel-leave-active {
+    overflow: hidden;
+    transition: opacity 250ms ease, max-block-size 250ms ease, margin-block-end 250ms ease;
+  }
+
+  .chapters-panel-enter-from,
+  .chapters-panel-leave-to,
+  .sidebar-panel-enter-from,
+  .sidebar-panel-leave-to {
+    max-block-size: 0;
+    margin-block-end: 0;
+    opacity: 0;
+  }
+
+  .chapters-panel-enter-to,
+  .chapters-panel-leave-from {
+    max-block-size: 540px;
+    opacity: 1;
+  }
+
+  .sidebar-panel-enter-to,
+  .sidebar-panel-leave-from {
+    max-block-size: var(--sidebar-panel-max-block-size, 700px);
+    opacity: 1;
+  }
+}
+
+// Include at the end of the page's .videoLayout rule, so the responsive
+// templates override page-specific ones.
+@mixin watch-layout-responsive {
+  @media (width > 1350px) {
+    @container route (width >= 1051px) {
+      &:not(.useTheatreMode, .noSidebar, .shortsPlayerActive) {
+        .videoAreaMargin,
+        .watchVideo {
+          margin-inline: 8px;
+        }
+      }
+    }
+  }
+
+  // Match the player control's viewport breakpoint so theatre mode never has
+  // a visible button while the responsive layout already forces the same grid.
+  @media (width <= 1350px) {
+    @include theatre-mode-template;
+  }
+
+  @container route (width >= 1051px) {
+    &.useTheatreMode {
+      @include theatre-mode-template;
+    }
+  }
+
+  @container route (width <= 1050px) {
+    @include single-column-template;
+  }
+
+  // must come after the theatre-mode media queries so an absent sidebar
+  // always collapses the layout to a single full-width column
+  &.noSidebar {
+    @include single-column-template;
+  }
+
+  @container route (width >= 1051px) {
+    .infoArea {
+      scroll-margin-block-start: 76px;
+    }
+  }
+}

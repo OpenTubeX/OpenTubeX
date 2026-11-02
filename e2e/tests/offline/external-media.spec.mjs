@@ -279,7 +279,7 @@ for (const seekBeforeMetadata of [false, true]) {
       await expect.poll(() => audio.evaluate(element => element.currentTime)).toBeGreaterThan(0)
       await video.evaluate(element => element.pause())
     }
-    const video = page.locator(`${activeTab} .externalMediaPlayer video`)
+    const video = page.locator(`${activeTab} .videoPlayer video`)
     const audio = page.locator(`${activeTab} .externalMediaCompanionAudio`)
     if (seekBeforeMetadata) {
       await page.evaluate(url => localStorage.setItem(`externalMediaPosition:${url}`, JSON.stringify({ seconds: 3, updatedAt: Date.now() })), mediaUrl)
@@ -397,7 +397,7 @@ test('external media keeps background pause and completion positions after switc
   await page.locator(sel.searchInput).fill(mediaUrl)
   await page.locator(sel.searchInput).press('Enter')
   await waitForPlayback(page)
-  const video = page.locator('.externalMediaPlayer video')
+  const video = page.locator('.videoPlayer video')
   await expect.poll(() => video.evaluate(element => element.currentTime)).toBeGreaterThan(3)
   await video.evaluate(element => element.requestPictureInPicture())
   await page.locator(sel.newTabButton).click()
@@ -418,7 +418,7 @@ test('external media does not overwrite saved positions from a never-presented t
     localStorage.setItem(`externalMediaPosition:${url}`, JSON.stringify({ seconds: 12, updatedAt: Date.now() }))
     await window.ftElectron.tabs.create({ route: '/external-media', query: { url }, makeActive: false })
   }, mediaUrl)
-  const video = page.locator('.externalMediaPlayer video')
+  const video = page.locator('.videoPlayer video')
   await expect.poll(() => video.evaluate(element => element.readyState)).toBeGreaterThanOrEqual(2)
   await video.evaluate(element => { element.pause(); element.currentTime = 18 })
   await expect.poll(() => video.evaluate(element => element.seeking)).toBe(false)
@@ -444,7 +444,7 @@ for (const newerPosition of [18, 0]) {
     const expected = newerPosition || null
     await expect.poll(() => savedExternalPosition(page, mediaUrl)).toBe(expected)
     await page.evaluate(id => window.ftElectron.tabs.close(id), olderTabId)
-    await expect(page.locator('.externalMediaPlayer video')).toHaveCount(1)
+    await expect(page.locator('.videoPlayer video')).toHaveCount(1)
     expect(await savedExternalPosition(page, mediaUrl)).toBe(expected)
   })
 }
@@ -460,7 +460,7 @@ test('external media honors the hide sidebar on watch pages setting', { tag: '@s
   })
   await page.locator(sel.searchInput).fill(mediaUrl)
   await page.locator(sel.searchInput).press('Enter')
-  await expect(page.locator(`${activeTab} .externalMediaPlayer`)).toBeVisible()
+  await expect(page.locator(`${activeTab} .videoPlayer`)).toBeVisible()
 
   const sideNav = page.locator('.sideNav')
   await expect(sideNav).not.toBeInViewport()
@@ -502,12 +502,12 @@ for (const withChat of [false, true]) {
     await page.locator(sel.searchInput).press('Enter')
     await waitForPlayback(page)
     const externalMedia = page.locator(`${activeTab} .externalMedia`)
-    const player = externalMedia.locator('.externalMediaPlayer')
-    const layout = externalMedia.locator('.externalMediaLayout')
+    const player = externalMedia.locator('.videoPlayer')
+    const layout = externalMedia.locator('.videoLayout')
     await expect(layout).toHaveClass(withChat ? /useTheatreMode/ : /noSidebar/)
     await player.hover()
     await player.locator('.shaka-controls-button-panel .ft-chapters-button').click()
-    await expect(externalMedia.locator('.externalMediaSidebar .externalMediaChapters')).toBeVisible()
+    await expect(externalMedia.locator('.sidebarArea .watchVideoChaptersPanel')).toBeVisible()
 
     // Like on the watch page, the first panel opened without a sidebar
     // appears below the video
@@ -541,9 +541,9 @@ for (const withChat of [false, true]) {
     const video = await waitForPlayback(page)
     await video.evaluate(element => element.pause())
     const externalMedia = page.locator(`${activeTab} .externalMedia`)
-    const player = externalMedia.locator('.externalMediaPlayer')
+    const player = externalMedia.locator('.videoPlayer')
     const chaptersButton = player.locator('.shaka-controls-button-panel .ft-chapters-button')
-    const panel = externalMedia.locator('.externalMediaSidebar .externalMediaChapters')
+    const panel = externalMedia.locator('.sidebarArea .watchVideoChaptersPanel')
     await player.hover()
     await chaptersButton.click()
     await expect(panel).toBeVisible()
@@ -601,21 +601,129 @@ for (const withChat of [false, true]) {
     // Leaving theatre mode slides the sidebar back up from below the viewport.
     // Clicking a chapter while it moves can scroll the page and miss the button.
     await expect.poll(() => externalMedia.evaluate(element => element.getAnimations({ subtree: true })
-      .filter(animation => animation.effect?.target?.matches('.externalMediaPlayer, .externalMediaInfo, .externalMediaSidebar')).length)).toBe(0)
+      .filter(animation => animation.effect?.target?.matches('.videoPlayer, .infoArea, .sidebarArea')).length)).toBe(0)
     await panel.getByRole('button', { name: /^Main segment/ }).click()
     await expect.poll(() => video.evaluate(element => element.currentTime)).toBeGreaterThanOrEqual(10)
     // A 960 CSS-pixel viewport stacks the chapters below the details.
     await setWindowSize(app, page, { width: Math.round(960 * uiScale / 100), height: 900 })
     await expect.poll(async () => {
-      const detailsBox = await externalMedia.locator('.externalMediaInfo').boundingBox()
+      const detailsBox = await externalMedia.locator('.infoArea').boundingBox()
       const panelBox = await panel.boundingBox()
       return panelBox.y >= detailsBox.y + detailsBox.height - 2
     }).toBe(true)
     await panel.getByRole('button', { name: 'Close Chapters' }).click()
     await expect(panel).toHaveCount(0)
-    if (!withChat) await expect(externalMedia.locator('.externalMediaLayout')).toHaveClass(/noSidebar/)
+    if (!withChat) await expect(externalMedia.locator('.videoLayout')).toHaveClass(/noSidebar/)
   })
 }
+
+test('external sidebar panels animate open and closed like on the watch page', { tag: '@scale' }, async ({ app, page }) => {
+  test.skip(process.platform === 'win32', 'The fake yt-dlp executable uses a POSIX shell')
+  await setWindowSize(app, page, { width: 1800, height: 1000 })
+  await page.evaluate(() => { document.documentElement.dataset.reducedMotion = 'no-preference' })
+  const mediaUrl = 'https://vimeo.com/123456789'
+  await prepareTwitchYtDlp(app, page, mediaUrl, false, '', [
+    { start_time: 0, end_time: 10, title: 'Introduction' },
+    { start_time: 10, end_time: 30, title: 'Main segment' }
+  ])
+  await page.locator(sel.searchInput).fill(mediaUrl)
+  await page.locator(sel.searchInput).press('Enter')
+  await (await waitForPlayback(page)).evaluate(element => element.pause())
+  const externalMedia = page.locator(`${activeTab} .externalMedia`)
+  const layout = externalMedia.locator('.videoLayout')
+  const panel = externalMedia.locator('.sidebarArea .watchVideoChaptersPanel')
+  await expect(layout).toHaveClass(/noSidebar/)
+
+  // Read the transition state in the same renderer task as the click: the
+  // transition only lasts 250ms, which a loaded runner can exceed between calls.
+  const entering = await externalMedia.evaluate(async element => {
+    element.querySelector('.ft-chapters-button').click()
+    await new Promise(resolve => requestAnimationFrame(resolve))
+    return element.querySelector('.watchVideoChaptersPanel')?.classList.contains('chapters-panel-enter-active')
+  })
+  expect(entering).toBe(true)
+  await expect(panel).not.toHaveClass(/chapters-panel-enter-active/)
+  await expect(layout).not.toHaveClass(/noSidebar/)
+
+  const leaving = await externalMedia.evaluate(async element => {
+    const panelElement = element.querySelector('.watchVideoChaptersPanel')
+    panelElement.querySelector('.chaptersPanelClose').click()
+    await new Promise(resolve => requestAnimationFrame(resolve))
+    return {
+      leaveActive: panelElement.isConnected && panelElement.classList.contains('chapters-panel-leave-active'),
+      noSidebar: element.querySelector('.videoLayout').classList.contains('noSidebar'),
+      panelLeft: panelElement.getBoundingClientRect().left,
+      infoRight: element.querySelector('.infoArea').getBoundingClientRect().right
+    }
+  })
+  expect(leaving.leaveActive).toBe(true)
+  // The sidebar column stays while the panel collapses, so the player and
+  // details only widen once it has gone.
+  expect(leaving.noSidebar).toBe(false)
+  expect(leaving.panelLeft).toBeGreaterThanOrEqual(leaving.infoRight - 1)
+  await expect(panel).toHaveCount(0)
+  await expect(layout).toHaveClass(/noSidebar/)
+})
+
+test('external media captions open a transcript in the sidebar and the full window dock', async ({ app, page }) => {
+  test.skip(process.platform === 'win32', 'The fake yt-dlp executable uses a POSIX shell')
+  await setWindowSize(app, page, { width: 1800, height: 1000 })
+  const mediaUrl = 'https://vimeo.com/123456789'
+  const captionUrl = 'https://captions.example.test/en.vtt'
+  await page.route(`${captionUrl}*`, route => route.fulfill({
+    status: 200,
+    contentType: 'text/vtt',
+    body: 'WEBVTT\n\n00:00:00.000 --> 00:00:05.000\nFirst caption line\n\n00:00:05.000 --> 00:00:30.000\nSecond caption line\n'
+  }))
+  await prepareTwitchYtDlp(app, page, mediaUrl, false, '', [], 30, {
+    requested_subtitles: { en: { ext: 'vtt', url: captionUrl } },
+    subtitles: { en: [{ ext: 'vtt', url: captionUrl }] }
+  })
+  await page.locator(sel.searchInput).fill(mediaUrl)
+  await page.locator(sel.searchInput).press('Enter')
+  const video = await waitForPlayback(page)
+  await video.evaluate(element => element.pause())
+  const externalMedia = page.locator(`${activeTab} .externalMedia`)
+  const layout = externalMedia.locator('.videoLayout')
+  const actions = externalMedia.locator('.externalMediaDetails .videoOptions')
+  const transcript = externalMedia.locator('.sidebarArea .transcriptCard')
+  await expect(layout).toHaveClass(/noSidebar/)
+
+  await actions.getByRole('button', { name: 'Show transcript' }).click()
+  await expect(transcript).toContainText('Second caption line')
+  await expect(layout).not.toHaveClass(/noSidebar/)
+  await transcript.getByText('Second caption line').click()
+  await expect.poll(() => video.evaluate(element => element.currentTime)).toBeGreaterThanOrEqual(5)
+  await video.evaluate(element => element.pause())
+  await actions.getByRole('button', { name: 'Hide transcript' }).click()
+  await expect(transcript).toHaveCount(0)
+  await expect(layout).toHaveClass(/noSidebar/)
+
+  // Like on the watch page, a phone layout keeps the open transcript in a
+  // closed sheet until it is requested.
+  await actions.getByRole('button', { name: 'Show transcript' }).click()
+  await expect(transcript).toBeVisible()
+  await page.setViewportSize({ width: 375, height: 667 })
+  const transcriptSheet = page.locator('dialog[open]').filter({ has: page.locator('.transcriptCard') })
+  await expect(externalMedia.locator('.transcriptCard')).toBeHidden()
+  await expect(transcriptSheet).toHaveCount(0)
+  await actions.getByRole('button', { name: 'Show transcript' }).click()
+  await expect(transcriptSheet).toContainText('Second caption line')
+  await page.keyboard.press('Escape')
+  await expect(transcriptSheet).toHaveCount(0)
+  await page.setViewportSize({ width: 1800, height: 1000 })
+  await expect(transcript).toHaveCount(0)
+
+  // The player offers its transcript action for any media with captions.
+  await externalMedia.locator('.videoPlayer .ftVideoPlayer').click({ position: { x: 20, y: 20 } })
+  await page.keyboard.press('s')
+  await externalMedia.locator('.fullscreenTranscriptToggle').click()
+  const dockedTranscript = externalMedia.locator('.fullscreenTranscriptTarget .transcriptCard')
+  await expect(dockedTranscript).toContainText('First caption line')
+  await dockedTranscript.getByRole('button', { name: 'Close transcript' }).click()
+  await expect(externalMedia.locator('.transcriptCard')).toHaveCount(0)
+  await expect(actions.getByRole('button', { name: 'Show transcript' })).toHaveAttribute('aria-pressed', 'false')
+})
 
 test('external chapters use a phone sheet and keep valid scrolling after resizing', async ({ app, page, attachScreenshot }) => {
   test.skip(process.platform === 'win32', 'The fake yt-dlp executable uses a POSIX shell')
@@ -628,13 +736,13 @@ test('external chapters use a phone sheet and keep valid scrolling after resizin
   const video = await waitForPlayback(page)
   await video.evaluate(element => element.pause())
   await setWindowSize(app, page, { width: 375, height: 850 })
-  const player = page.locator(`${activeTab} .externalMediaPlayer`)
+  const player = page.locator(`${activeTab} .videoPlayer`)
   await player.hover()
   await player.locator('.shaka-overflow-menu-button').click()
   await player.locator('.phonePlayerOptions[open] .ft-chapters-button').click()
-  const sheet = page.locator('dialog[open]').filter({ has: page.locator('.externalMediaChapters') })
+  const sheet = page.locator('dialog[open]').filter({ has: page.locator('.watchVideoChaptersPanel') })
   await expect(sheet).toBeVisible()
-  const scroller = page.locator('.externalMediaChapters .chaptersWrapper')
+  const scroller = page.locator('.watchVideoChaptersPanel .chaptersWrapper')
   const scrollMaximum = () => scroller.evaluate(element => Math.max(0, element.scrollHeight - element.clientHeight))
   const expectValidScroll = async () => {
     await expect.poll(() => scroller.evaluate(element => {
@@ -674,10 +782,10 @@ test('external chapters use a phone sheet and keep valid scrolling after resizin
   await setWindowSize(app, page, { width: 1800, height: 1000 })
   await expect(sheet).toHaveCount(0)
   // Leaving phone mode closes the sheet, as on the YouTube watch page.
-  await expect(page.locator('.externalMediaChapters')).toHaveCount(0)
+  await expect(page.locator('.watchVideoChaptersPanel')).toHaveCount(0)
   await player.hover()
   await player.locator('.shaka-controls-button-panel .ft-chapters-button').click()
-  const panel = page.locator(`${activeTab} .externalMediaSidebar .externalMediaChapters`)
+  const panel = page.locator(`${activeTab} .sidebarArea .watchVideoChaptersPanel`)
   await expect(panel).toBeVisible()
   await expect.poll(scrollMaximum).not.toBe(phoneMaximum)
   await expectValidScroll()
@@ -687,7 +795,7 @@ test('external chapters use a phone sheet and keep valid scrolling after resizin
   await expectValidScroll()
   await sheet.locator('.mobileSheetHeader').getByRole('button', { name: 'Close', exact: true }).click()
   await expect(sheet).toHaveCount(0)
-  await expect(page.locator(`${activeTab} .externalMediaLayout`)).toHaveClass(/noSidebar/)
+  await expect(page.locator(`${activeTab} .videoLayout`)).toHaveClass(/noSidebar/)
 })
 
 test('external ambient mode stays behind metadata and chat like the watch page', { tag: '@scale' }, async ({ app, page, attachScreenshot, uiScale }) => {
@@ -705,7 +813,7 @@ test('external ambient mode stays behind metadata and chat like the watch page',
 
   const externalMedia = page.locator(`${activeTab} .externalMedia`)
   await externalMedia.locator('.shaka-controls-button-panel .ft-chapters-button').click()
-  await expect(externalMedia.locator('.externalMediaChapters')).toBeVisible()
+  await expect(externalMedia.locator('.watchVideoChaptersPanel')).toBeVisible()
   const canvas = externalMedia.locator('.ambientLayoutCanvas')
   await expect(canvas).toBeVisible()
   await expect.poll(() => canvas.evaluate(element =>
@@ -718,7 +826,7 @@ test('external ambient mode stays behind metadata and chat like the watch page',
     // Include the decorative canvases in hit testing to inspect their actual
     // paint order relative to the title, without relying on specific z-index values.
     await expect.poll(() => title.evaluate(element => {
-      const canvases = [...element.closest('.externalMediaLayout').querySelectorAll('.ambientCanvas, .ambientLayoutCanvas')]
+      const canvases = [...element.closest('.videoLayout').querySelectorAll('.ambientCanvas, .ambientLayoutCanvas')]
       const bounds = element.getBoundingClientRect()
       canvases.forEach(canvas => { canvas.style.pointerEvents = 'auto' })
       try {
@@ -733,7 +841,7 @@ test('external ambient mode stays behind metadata and chat like the watch page',
       }
     }), { timeout: 5000 }).toEqual({ overlapsGlow: true, textAboveGlow: true })
 
-    for (const selector of ['.externalMediaDetails', '.externalMediaChapters', ...(chatOpen ? ['.twitchChat'] : [])]) {
+    for (const selector of ['.externalMediaDetails', '.watchVideoChaptersPanel', ...(chatOpen ? ['.twitchChat'] : [])]) {
       await expect.poll(() => externalMedia.locator(selector).evaluate(element => {
         const probe = document.createElement('div')
         probe.style.backgroundColor = 'color-mix(in srgb, var(--card-bg-color) 78%, transparent)'
@@ -751,7 +859,7 @@ test('external ambient mode stays behind metadata and chat like the watch page',
 
   await page.evaluate(() => window.$store.dispatch('updateAmbientMode', false))
   await expect(canvas).toBeHidden()
-  await expect(externalMedia.locator('.externalMediaLayout')).not.toHaveClass(/ambientModeActive/)
+  await expect(externalMedia.locator('.videoLayout')).not.toHaveClass(/ambientModeActive/)
   await expect.poll(() => externalMedia.locator('.externalMediaDetails').evaluate(element => {
     const probe = document.createElement('div')
     probe.style.backgroundColor = 'var(--card-bg-color)'
@@ -776,7 +884,7 @@ test('external media can stop at the end of its current chapter', async ({ app, 
   const video = await waitForPlayback(page)
   await video.evaluate(element => element.pause())
 
-  const player = page.locator(`${activeTab} .externalMediaPlayer`)
+  const player = page.locator(`${activeTab} .videoPlayer`)
   await player.locator('.shaka-overflow-menu-button').click()
   await player.locator('.sleep-timer-button').click()
   await player.locator('.sleep-timer-menu').getByRole('button', { name: 'End of current chapter' }).click()
@@ -893,9 +1001,18 @@ test('offers download options for external media with the watch page button styl
   for (const colorScheme of ['dark', 'light']) {
     await page.emulateMedia({ colorScheme })
     await expect(page.locator('body')).toHaveClass(new RegExp(`\\b${colorScheme}\\b`))
-    await expect.poll(() => buttonAppearance(downloadButton)).toEqual(watchAppearance[colorScheme])
+    // The shared toolbar makes its buttons touch-sized on phones. Whether it
+    // fits with its labels depends on its number of actions, so only the
+    // colors and corners are compared with the watch page there.
+    const { background, color, borderRadius } = watchAppearance[colorScheme]
+    await expect.poll(async () => {
+      const { width, fontSize, ...appearance } = await buttonAppearance(downloadButton)
+      return appearance
+    }).toEqual({ background, color, height: '48px', borderRadius })
   }
-  await downloadButton.click()
+  // On phones the watch page's video keeps playing in a mini player over the
+  // lower half of the page, which covers the wrapped toolbar.
+  await downloadButton.press('Enter')
   await expect(page.getByRole('dialog', { name: 'A Twitch broadcast' })).toBeVisible()
 })
 
@@ -933,7 +1050,7 @@ for (const thumbnail of ['https://static-cdn.jtvnw.net/cf_vods/thumbnail.svg', n
     expect(await mediaSession()).toEqual(externalMediaSession)
 
     // Its media actions must keep controlling the external media too.
-    const video = page.locator(`${activeTab} .externalMediaPlayer video`)
+    const video = page.locator(`${activeTab} .videoPlayer video`)
     await expect.poll(() => video.evaluate(element => element.paused)).toBe(false)
     await app.electronApp.evaluate(({ BrowserWindow }, channel) => {
       BrowserWindow.getAllWindows()[0].webContents.send(channel, 'pause')
@@ -942,7 +1059,7 @@ for (const thumbnail of ['https://static-cdn.jtvnw.net/cf_vods/thumbnail.svg', n
   })
 }
 
-test('external media cards are separated on phone layouts', { tag: '@scale' }, async ({ app, page }) => {
+test('external media uses phone sheets for chat and the description', { tag: '@scale' }, async ({ app, page, attachScreenshot }) => {
   test.skip(process.platform === 'win32', 'The fake yt-dlp executable uses a POSIX shell')
   const mediaUrl = 'https://www.twitch.tv/videos/123456789'
   await prepareTwitchYtDlp(app, page, mediaUrl, false, 'A Twitch broadcast description')
@@ -952,14 +1069,36 @@ test('external media cards are separated on phone layouts', { tag: '@scale' }, a
   await expect(externalMedia.locator('.externalMediaDescription')).toBeVisible()
   await expect(externalMedia.locator('.twitchChat')).toBeVisible()
 
+  // Like on the watch page, phones show a description preview and keep the
+  // chat in a sheet until it is opened.
   await page.setViewportSize({ width: 375, height: 667 })
-  const cards = ['.externalMediaDetails', '.externalMediaDescription', '.twitchChat']
-  for (const [index, selector] of cards.entries()) {
-    if (index === 0) continue
-    const previous = await externalMedia.locator(cards[index - 1]).boundingBox()
-    const current = await externalMedia.locator(selector).boundingBox()
-    expect(current.y - previous.y - previous.height).toBeGreaterThanOrEqual(12)
-  }
+  const preview = externalMedia.locator('.phoneDescriptionPreview')
+  await expect(preview).toBeVisible()
+  await expect(externalMedia.locator('.twitchChat')).toBeHidden()
+  const detailsBox = await externalMedia.locator('.externalMediaDetails').boundingBox()
+  const previewBox = await preview.boundingBox()
+  expect(previewBox.y - detailsBox.y - detailsBox.height).toBeGreaterThanOrEqual(12)
+
+  // A page too short to scroll keeps the mobile navigation over its last
+  // card, so use the keyboard like the watch page's phone description test.
+  await preview.getByRole('button', { name: 'Show more', exact: true }).press('Enter')
+  const descriptionSheet = page.locator('dialog[open]').filter({ has: page.locator('.externalMediaDescription') })
+  await expect(descriptionSheet).toContainText('A Twitch broadcast description')
+  await page.keyboard.press('Escape')
+  await expect(descriptionSheet).toHaveCount(0)
+
+  const chatToggle = externalMedia.getByRole('button', { name: 'Show Live Chat Replay' })
+  await expect(chatToggle).toHaveAttribute('aria-pressed', 'false')
+  await chatToggle.click()
+  const chatSheet = page.locator('dialog[open]').filter({ has: page.locator('.twitchChat') })
+  await expect(chatSheet).toBeVisible()
+  // The sheet's title bar takes the chat header and its close button.
+  await expect(chatSheet.locator('.phonePanelHeaderContent .titleContainer')).toContainText('Live Chat Replay')
+  await expect(chatSheet.locator('.twitchChat').getByRole('button', { name: 'Close Live Chat Replay' })).toHaveCount(0)
+  await attachScreenshot('External chat phone sheet')
+  await page.keyboard.press('Escape')
+  await expect(chatSheet).toHaveCount(0)
+  await expect(externalMedia.getByRole('button', { name: 'Show Live Chat Replay' })).toHaveAttribute('aria-pressed', 'false')
 })
 
 test('Twitch replay uses the watch chat toggle and side panel', async ({ app, page, attachScreenshot }) => {
@@ -972,11 +1111,11 @@ test('Twitch replay uses the watch chat toggle and side panel', async ({ app, pa
   await page.locator(sel.searchInput).fill(mediaUrl)
   await page.locator(sel.searchInput).press('Enter')
   const externalMedia = page.locator(`${activeTab} .externalMedia`)
-  expect(await externalMedia.locator('.externalMediaPlayer video').evaluate(video => video.ui.getConfiguration().overflowMenuButtons)).toContain('playback_rate')
+  expect(await externalMedia.locator('.videoPlayer video').evaluate(video => video.ui.getConfiguration().overflowMenuButtons)).toContain('playback_rate')
   const toggle = externalMedia.locator('.externalMediaDetails').getByRole('button', { name: 'Close Live Chat Replay' })
   await expect(toggle).toHaveAttribute('aria-pressed', 'true')
   await expect(externalMedia.locator('.twitchChat')).toBeVisible()
-  const playerBox = await externalMedia.locator('.externalMediaPlayer').boundingBox()
+  const playerBox = await externalMedia.locator('.videoPlayer').boundingBox()
   const chatBox = await externalMedia.locator('.twitchChat').boundingBox()
   const infoBox = await externalMedia.locator('.externalMediaDetails').boundingBox()
   const viewportWidth = await page.evaluate(() => innerWidth)
@@ -991,7 +1130,7 @@ test('Twitch replay uses the watch chat toggle and side panel', async ({ app, pa
   // The whole panel should remain in view at both desktop UI scales.
   expect(chatBox.y + chatBox.height).toBeLessThanOrEqual(await page.evaluate(() => innerHeight))
   await page.evaluate(() => window.ftElectron.setZoomFactor(1.25))
-  const scaledPlayerBox = await externalMedia.locator('.externalMediaPlayer').boundingBox()
+  const scaledPlayerBox = await externalMedia.locator('.videoPlayer').boundingBox()
   const scaledChatBox = await externalMedia.locator('.twitchChat').boundingBox()
   const scaledInfoBox = await externalMedia.locator('.externalMediaDetails').boundingBox()
   const scaledViewportWidth = await page.evaluate(() => innerWidth)
@@ -1002,20 +1141,20 @@ test('Twitch replay uses the watch chat toggle and side panel', async ({ app, pa
   await page.evaluate(() => window.ftElectron.setZoomFactor(1))
   await attachScreenshot('Twitch chat normal layout')
 
-  await externalMedia.locator('.externalMediaPlayer').hover()
-  await externalMedia.locator('.externalMediaPlayer .theatre-button').click()
-  await externalMedia.locator('.externalMediaPlayer').evaluate(element => Promise.all(element.getAnimations().map(animation => animation.finished)))
-  const theatrePlayerBox = await externalMedia.locator('.externalMediaPlayer').boundingBox()
+  await externalMedia.locator('.videoPlayer').hover()
+  await externalMedia.locator('.videoPlayer .theatre-button').click()
+  await externalMedia.locator('.videoPlayer').evaluate(element => Promise.all(element.getAnimations().map(animation => animation.finished)))
+  const theatrePlayerBox = await externalMedia.locator('.videoPlayer').boundingBox()
   const theatreChatBox = await externalMedia.locator('.twitchChat').boundingBox()
   expect(theatrePlayerBox.width).toBeGreaterThan(playerBox.width)
   expect(theatreChatBox.y).toBeGreaterThan(theatrePlayerBox.y + theatrePlayerBox.height - 5)
   await attachScreenshot('Twitch chat theatre layout')
-  await externalMedia.locator('.externalMediaPlayer .theatre-button').click()
-  await externalMedia.locator('.externalMediaPlayer').evaluate(element => Promise.all(element.getAnimations().map(animation => animation.finished)))
+  await externalMedia.locator('.videoPlayer .theatre-button').click()
+  await externalMedia.locator('.videoPlayer').evaluate(element => Promise.all(element.getAnimations().map(animation => animation.finished)))
 
   await toggle.click()
   await expect(externalMedia.locator('.twitchChat')).toHaveCount(0)
-  const closedPlayerBox = await externalMedia.locator('.externalMediaPlayer').boundingBox()
+  const closedPlayerBox = await externalMedia.locator('.videoPlayer').boundingBox()
   expect(Math.abs(closedPlayerBox.width - theatrePlayerBox.width)).toBeLessThan(2)
   const closedToggle = externalMedia.locator('.externalMediaDetails').getByRole('button', { name: 'Show Live Chat Replay' })
   await expect(closedToggle).toHaveAttribute('aria-pressed', 'false')
@@ -1026,7 +1165,7 @@ test('Twitch replay uses the watch chat toggle and side panel', async ({ app, pa
   await expect(closedToggle).toHaveAttribute('aria-pressed', 'false')
 
   await closedToggle.click()
-  await externalMedia.locator('.externalMediaPlayer .ftVideoPlayer').click({ position: { x: 20, y: 20 } })
+  await externalMedia.locator('.videoPlayer .ftVideoPlayer').click({ position: { x: 20, y: 20 } })
   await page.keyboard.press('s')
   const fullscreenChatToggle = externalMedia.locator('.fullscreenLiveChatToggle')
   await fullscreenChatToggle.click()
@@ -1045,7 +1184,7 @@ test('returns Twitch replay chat to the sidebar after opening a tab from fullscr
   await page.locator(sel.searchInput).press('Enter')
   const externalMedia = page.locator(`${activeTab} .externalMedia`)
   const player = externalMedia.locator('.ftVideoPlayer')
-  await expect(externalMedia.locator('.externalMediaSidebar .twitchChat')).toBeVisible()
+  await expect(externalMedia.locator('.sidebarArea .twitchChat')).toBeVisible()
 
   await player.click({ position: { x: 20, y: 20 } })
   await page.keyboard.press('f')
@@ -1059,7 +1198,7 @@ test('returns Twitch replay chat to the sidebar after opening a tab from fullscr
 
   await expect.poll(() => page.evaluate(() => document.fullscreenElement !== null)).toBe(false)
   await expect(player.locator('.fullscreenLiveChatOverlay')).toBeHidden()
-  await expect(externalMedia.locator('.externalMediaSidebar .twitchChat')).toBeVisible()
+  await expect(externalMedia.locator('.sidebarArea .twitchChat')).toBeVisible()
 
   await page.keyboard.press('f')
   await expect.poll(() => page.evaluate(() => document.fullscreenElement !== null)).toBe(true)
@@ -1136,9 +1275,9 @@ https://vod.example.test/720p60/segment-unmuted.mp4
   await expect.poll(async () => {
     const diagnostic = page.locator(`${activeTab} .externalMediaDiagnostic`)
     if (await diagnostic.count()) return await diagnostic.textContent()
-    return await page.locator(`${activeTab} .externalMediaPlayer video`).evaluate(video => video.currentTime > 0.2 ? 'playing' : 'pending')
+    return await page.locator(`${activeTab} .videoPlayer video`).evaluate(video => video.currentTime > 0.2 ? 'playing' : 'pending')
   }, { timeout: 10_000 }).toBe('playing')
-  const player = page.locator(`${activeTab} .externalMediaPlayer`)
+  const player = page.locator(`${activeTab} .videoPlayer`)
   await player.locator('video').evaluate(video => video.pause())
   await player.hover()
   await player.locator('.shaka-seek-bar-container').hover({ position: { x: 120, y: 4 } })
@@ -1159,7 +1298,7 @@ test('Twitch livestream omits playback speed from player options', async ({ app,
   await page.locator(sel.searchInput).fill(mediaUrl)
   await page.locator(sel.searchInput).press('Enter')
 
-  const player = page.locator(`${activeTab} .externalMediaPlayer`)
+  const player = page.locator(`${activeTab} .videoPlayer`)
   await expect(player.locator('.shaka-overflow-menu-button')).toBeVisible()
   expect(await player.locator('video').evaluate(video => video.ui.getConfiguration().overflowMenuButtons)).not.toContain('playback_rate')
   expect(await player.locator('video').evaluate(video => video.ui.getConfiguration().controlPanelElements)).not.toContain('ft_quick_playback_rate_bar')
@@ -1175,7 +1314,7 @@ test('external media starts at the default playback speed', async ({ app, page }
   await page.locator(sel.searchInput).fill(mediaUrl)
   await page.locator(sel.searchInput).press('Enter')
 
-  const video = page.locator(`${activeTab} .externalMediaPlayer video`)
+  const video = page.locator(`${activeTab} .videoPlayer video`)
   await waitForPlayback(page)
   await expect.poll(() => video.evaluate(element => element.playbackRate)).toBe(1.5)
 })
@@ -1274,7 +1413,7 @@ test.describe('Twitch theater mode at 125% UI scale', () => {
     await page.locator(sel.searchInput).fill(mediaUrl)
     await page.locator(sel.searchInput).press('Enter')
 
-    const player = page.locator(`${activeTab} .externalMediaPlayer`)
+    const player = page.locator(`${activeTab} .videoPlayer`)
     const theaterButton = player.locator('.theatre-button')
     await expect(theaterButton).toBeVisible()
     // Playing media hides idle controls, and a hidden button cannot take the
@@ -1293,7 +1432,7 @@ test.describe('Twitch theater mode at 125% UI scale', () => {
     })
     for (const enabled of [true, false]) {
       await theaterButton.press('Enter')
-      await expect(page.locator(`${activeTab} .externalMediaLayout`)).toHaveClass(enabled ? /useTheatreMode/ : /^(?!.*useTheatreMode)/)
+      await expect(page.locator(`${activeTab} .videoLayout`)).toHaveClass(enabled ? /useTheatreMode/ : /^(?!.*useTheatreMode)/)
       expect(await player.evaluate(element => element.scaleAnimations.splice(0)
         .some(animation => animation.effect.getComputedTiming().duration > 0))).toBe(true)
       await player.evaluate(element => Promise.all(element.getAnimations().map(animation => animation.finished)))
@@ -1354,13 +1493,13 @@ test('Twitch replay retries a failed page and refreshes once after seeking settl
   await expect(page.locator(`${activeTab} .twitchChat`).getByText('Recovered chat')).toBeVisible({ timeout: 10_000 })
   expect(await app.electronApp.evaluate(() => globalThis.twitchReplayRequests)).toBe(2)
 
-  await page.locator(`${activeTab} .externalMediaPlayer video`).evaluate(video => {
+  await page.locator(`${activeTab} .videoPlayer video`).evaluate(video => {
     for (let index = 0; index < 3; index++) video.dispatchEvent(new Event('seeking'))
   })
   // No refetch may start while seeking.
   await page.waitForTimeout(300)
   expect(await app.electronApp.evaluate(() => globalThis.twitchReplayRequests)).toBe(2)
-  await page.locator(`${activeTab} .externalMediaPlayer video`).evaluate(video => {
+  await page.locator(`${activeTab} .videoPlayer video`).evaluate(video => {
     for (let index = 0; index < 3; index++) video.dispatchEvent(new Event('seeked'))
   })
   await expect.poll(() => app.electronApp.evaluate(() => globalThis.twitchReplayRequests)).toBe(3)
@@ -1444,7 +1583,7 @@ test('Twitch replay waits for a seek to settle before fetching from the new posi
 
   await page.locator(sel.searchInput).fill(mediaUrl)
   await page.locator(sel.searchInput).press('Enter')
-  const video = page.locator(`${activeTab} .externalMediaPlayer video`)
+  const video = page.locator(`${activeTab} .videoPlayer video`)
   await video.evaluate(element => element.pause())
   await expect.poll(() => app.electronApp.evaluate(() => globalThis.twitchReplayPositions.length)).toBe(1)
 
@@ -1496,7 +1635,7 @@ test('Twitch replay continues past a page with no usable messages', async ({ app
 
   await page.locator(sel.searchInput).fill(mediaUrl)
   await page.locator(sel.searchInput).press('Enter')
-  await page.locator(`${activeTab} .externalMediaPlayer video`).evaluate(video => video.pause())
+  await page.locator(`${activeTab} .videoPlayer video`).evaluate(video => video.pause())
   await expect(page.locator(`${activeTab} .twitchChat`).getByText('Chat after empty page')).toBeVisible()
 })
 
@@ -1586,7 +1725,7 @@ test('Twitch live chat scrolls like the YouTube chat panel', async ({ app, page,
   await expect(scroller.locator(':scope > .os-scrollbar-vertical')).toHaveClass(/os-scrollbar-visible/)
   await page.evaluate(() => window.ftElectron.setZoomFactor(1))
 
-  const externalPlayer = page.locator(`${activeTab} .externalMediaPlayer .ftVideoPlayer`)
+  const externalPlayer = page.locator(`${activeTab} .videoPlayer .ftVideoPlayer`)
   await externalPlayer.click({ position: { x: 20, y: 20 } })
   await page.keyboard.press('s')
   await expect(externalPlayer).toHaveClass(/\bfullWindow\b/)
@@ -1928,7 +2067,7 @@ test('plays a non-YouTube URL and shows the available yt-dlp metadata', async ({
   await expect(page.locator(`${activeTab} .externalMediaExtra`)).toContainText('Release date')
   await waitForPlayback(page)
   const externalMedia = page.locator(`${activeTab} .externalMedia`)
-  const player = externalMedia.locator('.externalMediaPlayer')
+  const player = externalMedia.locator('.videoPlayer')
   await player.hover()
   await player.locator('video.player').evaluate(video => video.pause())
   await player.locator('.shaka-seek-bar-container').hover({ position: { x: 120, y: 4 } })
@@ -1938,20 +2077,20 @@ test('plays a non-YouTube URL and shows the available yt-dlp metadata', async ({
     video.dispatchEvent(new Event('timeupdate'))
   })
   const chaptersButton = player.locator('.shaka-controls-button-panel .ft-chapters-button')
-  await expect(externalMedia.locator('.externalMediaChapters')).toHaveCount(0)
+  await expect(externalMedia.locator('.watchVideoChaptersPanel')).toHaveCount(0)
   await expect(chaptersButton).toHaveAttribute('aria-label', 'Open Chapters')
   await expect(chaptersButton.locator('.ft-chapters-current-title')).toHaveText('Chapters')
   await chaptersButton.click({ force: true })
-  await expect(externalMedia.locator('.externalMediaChapters')).toContainText('Main segment')
-  await expect(externalMedia.locator('.externalMediaChapters [aria-current="true"]')).toHaveCount(0)
+  await expect(externalMedia.locator('.watchVideoChaptersPanel')).toContainText('Main segment')
+  await expect(externalMedia.locator('.watchVideoChaptersPanel [aria-current="true"]')).toHaveCount(0)
   await expect(chaptersButton).toHaveAttribute('aria-label', 'Close Chapters')
-  await externalMedia.locator('.externalMediaChapters').getByRole('button', { name: 'Close Chapters' }).click()
-  await expect(externalMedia.locator('.externalMediaChapters')).toHaveCount(0)
+  await externalMedia.locator('.watchVideoChaptersPanel').getByRole('button', { name: 'Close Chapters' }).click()
+  await expect(externalMedia.locator('.watchVideoChaptersPanel')).toHaveCount(0)
   await page.evaluate(() => window.scrollTo({ top: 0, behavior: 'instant' }))
   await expect(player.locator('.ftVideoPlayer')).not.toHaveClass(/scrollMiniPlayer/)
   await expect(chaptersButton).toHaveAttribute('aria-label', 'Open Chapters')
   await chaptersButton.click({ force: true })
-  await externalMedia.locator('.externalMediaChapters').getByRole('button', { name: /^Main segment/ }).click()
+  await externalMedia.locator('.watchVideoChaptersPanel').getByRole('button', { name: /^Main segment/ }).click()
   await expect.poll(() => player.locator('video.player').evaluate(video => video.currentTime)).toBeGreaterThanOrEqual(10)
   const seekBar = player.locator('.shaka-seek-bar-container')
   await page.evaluate(() => window.scrollTo({ top: 0, behavior: 'instant' }))
@@ -1960,16 +2099,16 @@ test('plays a non-YouTube URL and shows the available yt-dlp metadata', async ({
   await seekBar.hover({ position: { x: Math.floor((await seekBar.boundingBox()).width * 0.8), y: 4 } })
   await expect(player.locator('.ft-chapter-preview')).toHaveText('Main segment')
   await expect(player.locator('.ft-chapter-preview')).toBeVisible()
-  await externalMedia.locator('.externalMediaChapters').getByRole('button', { name: 'Copy link at 0:10' }).click()
+  await externalMedia.locator('.watchVideoChaptersPanel').getByRole('button', { name: 'Copy link at 0:10' }).click()
   await expect.poll(() => app.electronApp.evaluate(({ clipboard }) => clipboard.readText())).toBe(`${mediaUrl}?t=10`)
-  await externalMedia.locator('.externalMediaChapters').getByRole('button', { name: 'Close Chapters' }).click()
+  await externalMedia.locator('.watchVideoChaptersPanel').getByRole('button', { name: 'Close Chapters' }).click()
   await expect(player.locator('.fullscreenSponsorBlockToggle, .ft-shaka-sponsorblock-button')).toHaveCount(0)
   await expect(player.locator('.playerFullscreenTitleOverlay')).not.toHaveAttribute('role', 'button')
   await expect(player.locator('.theatre-button')).toBeHidden()
-  const playerBox = await player.boundingBox()
+  // The player widens once the closing chapters panel has collapsed.
   const mediaBox = await externalMedia.boundingBox()
   const expectedYouTubeWidth = Math.min(mediaBox.width, await page.evaluate(() => window.innerHeight * 0.8 * 1.78))
-  expect(Math.abs(playerBox.width - expectedYouTubeWidth)).toBeLessThan(2)
+  await expect.poll(async () => Math.abs((await player.boundingBox()).width - expectedYouTubeWidth)).toBeLessThan(2)
   const shareButton = externalMedia.getByRole('button', { name: 'Share Video' }).first()
   await shareButton.click()
   await expect(externalMedia.getByRole('button', { name: 'Copy Link', exact: true })).toBeVisible()
@@ -1984,7 +2123,7 @@ test('plays a non-YouTube URL and shows the available yt-dlp metadata', async ({
     await page.emulateMedia({ colorScheme: theme })
     await expect(page.locator('body')).toHaveClass(new RegExp(`\\b${theme}\\b`))
     await externalMedia.evaluate(element => element.scrollIntoView({ block: 'start' }))
-    const playerBounds = await page.locator(`${activeTab} .externalMediaPlayer video.player`).boundingBox()
+    const playerBounds = await page.locator(`${activeTab} .videoPlayer video.player`).boundingBox()
     const descriptionBounds = await page.locator(`${activeTab} .externalMediaDescription`).boundingBox()
     const topNavBounds = await page.locator('.topNav').boundingBox()
     const top = Math.max(playerBounds.y, topNavBounds.y + topNavBounds.height)
@@ -2049,7 +2188,7 @@ test('plays a non-YouTube URL and shows the available yt-dlp metadata', async ({
     return store.getters.getTabById(store.getters.getActiveTabId)?.avatarUrl
   })).toBeNull()
   await waitForPlayback(page)
-  await page.locator(`${activeTab} .externalMediaPlayer video.player`).evaluate(video => video.pause())
+  await page.locator(`${activeTab} .videoPlayer video.player`).evaluate(video => video.pause())
   await expect(page.locator(`${sel.activeTab} .tabAvatar, ${sel.activeTab} .tabPageIcon`)).toBeVisible()
 })
 
@@ -2145,7 +2284,7 @@ test('shows an upcoming external stream before formats are available', async ({ 
   const description = page.locator(`${activeTab} .externalMediaDescription`)
   await description.getByRole('button', { name: 'Show more' }).click()
   await expect(description).toContainText('Creative Commons')
-  await expect(page.locator(`${activeTab} .externalMediaPlayer`)).toHaveCount(0)
+  await expect(page.locator(`${activeTab} .videoPlayer`)).toHaveCount(0)
 })
 
 for (const layout of [
@@ -2208,7 +2347,7 @@ for (const layout of [
     }
 
     await waitForPlayback(page)
-    const player = page.locator(`${activeTab} .externalMediaPlayer`)
+    const player = page.locator(`${activeTab} .videoPlayer`)
     const bounds = await player.boundingBox()
     for (const dimension of ['width', 'height']) {
       expect.soft(Math.abs(loadingBounds[dimension] - bounds[dimension]), `${dimension}: loading ${loadingBounds[dimension]}, player ${bounds[dimension]}`).toBeLessThan(2)
@@ -2243,7 +2382,7 @@ for (const size of [
       externalMetadata: mapExternalPlaybackMetadata({})
     })
     await expect(loading).toHaveCount(0)
-    const upcoming = page.locator(`${activeTab} .externalMediaVideo .externalMediaState`)
+    const upcoming = page.locator(`${activeTab} .videoArea .externalMediaState`)
     await expect(upcoming).toHaveText('Upcoming')
     const upcomingBounds = await upcoming.boundingBox()
     for (const dimension of ['x', 'y', 'width', 'height']) {
@@ -2401,7 +2540,7 @@ test('plays a progressive external format when yt-dlp omits codec fields', async
 
   await page.locator(sel.searchInput).fill(mediaUrl)
   await page.locator(sel.searchInput).press('Enter')
-  await expect(page.locator(`${activeTab} .externalMediaPlayer`)).toBeVisible({ timeout: 3000 })
+  await expect(page.locator(`${activeTab} .videoPlayer`)).toBeVisible({ timeout: 3000 })
   await waitForPlayback(page)
 })
 
@@ -2439,7 +2578,7 @@ for (const [name, mediaUrl, format] of [
 
     await page.locator(sel.searchInput).fill(mediaUrl)
     await page.locator(sel.searchInput).press('Enter')
-    await expect(page.locator(`${activeTab} .externalMediaPlayer`)).toBeVisible({ timeout: 20000 })
+    await expect(page.locator(`${activeTab} .videoPlayer`)).toBeVisible({ timeout: 20000 })
     await waitForPlayback(page)
   })
 }
@@ -2914,7 +3053,7 @@ for (const [label, creatorMetadata, artist, avatar] of [
     await page.locator(sel.searchInput).fill(mediaUrl)
     await page.locator(sel.searchInput).press('Enter')
     await waitForPlayback(page)
-    const player = page.locator(`${activeTab} .externalMediaPlayer`)
+    const player = page.locator(`${activeTab} .videoPlayer`)
     await expect(player.locator('video')).toHaveClass(/audioOnly/)
     const surface = player.locator('.musicAudioSurface')
     await expect(surface.locator('.musicAudioTitle')).toHaveText('Example Track')
@@ -2959,7 +3098,7 @@ test('does not show an audio-only player when a video site blocks its video stre
   await page.locator(sel.searchInput).fill('https://www.tiktok.com/@example/video/123')
   await page.locator(sel.searchInput).press('Enter')
   await expect(page.locator(`${activeTab} .externalMediaError`)).toBeVisible()
-  await expect(page.locator(`${activeTab} .externalMediaPlayer`)).toHaveCount(0)
+  await expect(page.locator(`${activeTab} .videoPlayer`)).toHaveCount(0)
 })
 
 test('plays an audio-only HLS stream from external media', async ({ app, page }) => {
@@ -3013,12 +3152,12 @@ ${segmentUrl}
   await expect.poll(async () => {
     const diagnostic = page.locator(`${activeTab} .externalMediaDiagnostic`)
     if (await diagnostic.count()) return await diagnostic.textContent()
-    const video = page.locator(`${activeTab} .externalMediaPlayer video`)
+    const video = page.locator(`${activeTab} .videoPlayer video`)
     return await video.count() && await video.evaluate(element => element.currentTime > 0)
       ? 'playing'
       : 'pending'
   }, { timeout: 20000 }).toBe('playing')
-  await expect(page.locator(`${activeTab} .externalMediaLayout`)).not.toHaveClass(/ambientModeActive/)
+  await expect(page.locator(`${activeTab} .videoLayout`)).not.toHaveClass(/ambientModeActive/)
   await expect(page.locator(`${activeTab} .ambientLayoutCanvas`)).toBeHidden()
 })
 
@@ -3053,7 +3192,7 @@ test('plays both streams when an external clip has separate audio and codec-free
 
   await page.locator(sel.searchInput).fill('https://coub.com/view/example')
   await page.locator(sel.searchInput).press('Enter')
-  const video = page.locator(`${activeTab} .externalMediaPlayer video`)
+  const video = page.locator(`${activeTab} .videoPlayer video`)
   const audio = page.locator(`${activeTab} .externalMediaCompanionAudio`)
   await expect.poll(() => video.evaluate(element => element.videoWidth).catch(() => 0), { timeout: 20000 }).toBeGreaterThan(0)
   await expect.poll(() => audio.evaluate(element => element.currentTime > 0 && !element.paused).catch(() => false), { timeout: 20000 }).toBe(true)
@@ -3154,7 +3293,7 @@ test('uses companion audio only for a selected video-only legacy format', async 
 
   await page.locator(sel.searchInput).fill('https://coub.com/view/mixed')
   await page.locator(sel.searchInput).press('Enter')
-  const player = page.locator(`${activeTab} .externalMediaPlayer`)
+  const player = page.locator(`${activeTab} .videoPlayer`)
   const video = player.locator('video')
   const audio = page.locator(`${activeTab} .externalMediaCompanionAudio`)
   const selectedQuality = player.locator('.legacy-quality-button').first()
@@ -3239,11 +3378,11 @@ ${segmentUrl}
     await page.locator(sel.searchInput).fill('https://www.dailymotion.com/video/example')
     await page.locator(sel.searchInput).press('Enter')
     await variantRequested
-    await expect(page.locator(`${activeTab} .externalMediaPlayer video`)).not.toHaveClass(/audioOnly/)
+    await expect(page.locator(`${activeTab} .videoPlayer video`)).not.toHaveClass(/audioOnly/)
     await expect.poll(async () => {
       const diagnostic = page.locator(`${activeTab} .externalMediaDiagnostic`)
       if (await diagnostic.count()) return await diagnostic.textContent()
-      const player = page.locator(`${activeTab} .externalMediaPlayer`)
+      const player = page.locator(`${activeTab} .videoPlayer`)
       const playbackTime = await player.count()
         ? await player.evaluate(el => el.querySelector('video')?.currentTime ?? 0)
         : 0
