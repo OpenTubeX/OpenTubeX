@@ -25,7 +25,7 @@ Requests such as "implement issue #X" authorize local changes, not a PR. Open a 
   2. Find the root cause, fix it, and verify with the same command.
   3. Push the fix directly to `origin/development` as above, then delete the entry's line from the issue. It comes back if the test flakes again.
 - On PRs, the `repeat` E2E shards run changed offline tests five times without retries. If one fails, the PR's own test is flaky. Fix it in the PR; do not rerun the job until it passes.
-- PRs do not run the full offline E2E suite; it runs after each push to `development`. Run the affected offline tests locally before merging. When a `development` run fails, find the merge that broke it and fix it on `development` as described above.
+- PRs do not run the full offline E2E suite; it runs after each push to `development`. Run the affected offline tests locally before merging. After merging a PR, watch the E2E Tests run for its merge commit (`gh run list --workflow e2e.yml --event push`); a run can cover several merges. When it fails, find the merge that broke it and fix it on `development` as described above.
 - For bugfixes, demonstrate the failure first, add a regression test where practical, and verify the fix. Verify new features with checks appropriate to the affected code. If automated verification is impractical, explain why and report the evidence used, unless the user waived verification.
 - When changing sync-server collections or capabilities, search tests for and update every expectation for collection lists, upload counts, and capabilities, including capability-dependent cases in `e2e/tests/network/sync-server.spec.mjs`, and run the affected E2E test against a local server with the new capability.
 
