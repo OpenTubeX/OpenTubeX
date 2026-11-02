@@ -2,11 +2,15 @@ package org.opentubex.app;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 
 import com.getcapacitor.JSObject;
 import com.getcapacitor.PluginCall;
+import com.getcapacitor.plugin.util.HttpRequestHandler;
 
 import java.io.IOException;
+import java.io.OutputStream;
+import java.nio.charset.StandardCharsets;
 import java.net.InetAddress;
 import java.net.Proxy;
 import java.net.ProxySelector;
@@ -98,6 +102,48 @@ public class AndroidHttpPluginTest {
             ProxySelector.setDefault(original);
             for (Socket socket : accepted) socket.close();
             abort(plugin);
+        }
+    }
+
+    @Test
+    public void abortBeforeTheConnectionIsAttachedFailsTheRequest() throws Exception {
+        List<Socket> accepted = new CopyOnWriteArrayList<>();
+        try (ServerSocket server = new ServerSocket(0, 50, InetAddress.getByName("127.0.0.1"))) {
+            Thread acceptor = new Thread(() -> {
+                try {
+                    while (true) {
+                        Socket socket = server.accept();
+                        accepted.add(socket);
+                        OutputStream output = socket.getOutputStream();
+                        output.write("HTTP/1.1 200 OK\r\nContent-Length: 2\r\nConnection: close\r\n\r\nok"
+                            .getBytes(StandardCharsets.US_ASCII));
+                        output.flush();
+                    }
+                } catch (IOException closed) {
+                    // The test finished
+                }
+            });
+            acceptor.start();
+
+            JSObject data = new JSObject();
+            data.put("url", "http://127.0.0.1:" + server.getLocalPort() + "/youtubei/v1/browse");
+            data.put("method", "GET");
+            data.put("headers", new JSObject().put("User-Agent", "test"));
+            AndroidHttpPlugin.RequestOptions options = new AndroidHttpPlugin.RequestOptions(data);
+            // The abort arrives after the worker checked for one, before
+            // HttpRequestHandler attaches the connection it then opens.
+            options.abort();
+            PluginCall request = new PluginCall(null, null, PluginCall.CALLBACK_ID_DANGLING, null, options);
+
+            try {
+                HttpRequestHandler.request(request, null, null);
+                fail("Aborted request completed");
+            } catch (RuntimeException expected) {
+                // Rejected before connecting
+            }
+            assertEquals("Aborted request connected", 0, accepted.size());
+        } finally {
+            for (Socket socket : accepted) socket.close();
         }
     }
 

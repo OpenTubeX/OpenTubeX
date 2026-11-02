@@ -12,6 +12,7 @@ import org.json.JSONException;
 
 import java.io.InterruptedIOException;
 import java.util.Map;
+import java.util.concurrent.CancellationException;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -85,7 +86,7 @@ public class AndroidHttpPlugin extends Plugin {
 
     /**
      * Request options that close the connection HttpRequestHandler attaches
-     * to them, whether the request was aborted before or after it opened.
+     * to them once aborted, and fail requests aborted before the attachment.
      */
     static final class RequestOptions extends JSObject {
         private boolean aborted;
@@ -105,8 +106,10 @@ public class AndroidHttpPlugin extends Plugin {
         }
 
         synchronized void attach(Runnable disconnect) {
+            // Disconnecting before the connection opens does nothing, so fail
+            // the request before HttpRequestHandler connects it.
+            if (aborted) throw new CancellationException("Request aborted");
             this.disconnect = disconnect;
-            if (aborted) disconnect.run();
         }
 
         synchronized void abort() {
