@@ -3747,6 +3747,9 @@ function runApp() {
         updateWatchQueue({}),
         baseHandlers.compactAllDatastores(),
         shutdownYtDlpDownloads(),
+        // Uploads are saved as notified before an original title lookup, so a
+        // quit during the lookup would otherwise lose their alerts.
+        uploadNotifier.settle(),
         session.defaultSession.clearCache(),
         session.defaultSession.clearStorageData({
           storages: [

@@ -284,6 +284,43 @@ test('the desktop notifier drops notifications turned off during the original ti
   }
 })
 
+test('the desktop notifier settles once alerts waiting for an original title are shown', async () => {
+  const directory = await mkdtemp(path.join(tmpdir(), 'upload-notifications-'))
+  try {
+    const shown = []
+    let requested
+    const lookup = new Promise(resolve => { requested = resolve })
+    let respond
+    const notifier = createUploadNotifier({
+      file: path.join(directory, 'state.json'),
+      show: notification => shown.push(notification.body),
+      fetch: () => {
+        requested()
+        return new Promise(resolve => { respond = resolve })
+      }
+    })
+    await notifier.configure({
+      enabled: true,
+      originalTitles: true,
+      titles: { videos: '{channel}' },
+      channels: { UC1: { name: 'One', feedTypes: ['videos'], membersOnly: false } }
+    })
+    await notifier.observe({ channelId: 'UC1', feedType: 'videos', entries: [entry('a')] })
+    notifier.observe({ channelId: 'UC1', feedType: 'videos', entries: [entry('b', Date.now()), entry('a')] })
+    await lookup
+    // The upload is already saved as notified, so quitting now must wait for its alert.
+    let settled = false
+    const settling = notifier.settle().then(() => { settled = true })
+    await new Promise(resolve => setImmediate(resolve))
+    assert.equal(settled, false)
+    respond(Response.json({ title: 'Original b' }))
+    await settling
+    assert.deepEqual(shown, ['Original b'])
+  } finally {
+    await rm(directory, { recursive: true, force: true })
+  }
+})
+
 test('post text decodes named and numeric entities', () => {
   const [post] = normalizeUploadEntries([{ postId: 'p', postText: 'a&nbsp;b &#39;c&#x27; &AMP; &unknown; &#99999999;' }])
   assert.equal(post.title, "a\u00A0b 'c' & &unknown; &#99999999;")

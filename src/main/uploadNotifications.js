@@ -39,6 +39,8 @@ export function createUploadNotifier({ file, show, fetch: fetchUrl = fetch }) {
   let configuration = null
   let state = null
   let pending = Promise.resolve()
+  // Alerts for uploads already saved as notified, which shutdown waits for.
+  const alerts = new Set()
 
   function run(operation) {
     const result = pending.then(operation)
@@ -98,7 +100,7 @@ export function createUploadNotifier({ file, show, fetch: fetchUrl = fetch }) {
         const channel = configuration?.enabled === true ? configuration.channels?.[channelId] : null
         return channel?.feedTypes?.includes(feedType) ? channel : null
       }
-      return run(async () => {
+      const alert = run(async () => {
         const channel = configuredChannel()
         if (!channel) return []
 
@@ -132,6 +134,14 @@ export function createUploadNotifier({ file, show, fetch: fetchUrl = fetch }) {
           }
         })
       })
+      alerts.add(alert)
+      const forget = () => alerts.delete(alert)
+      alert.then(forget, forget)
+      return alert
+    },
+    /** Resolves once every pending alert is shown or dropped. */
+    settle() {
+      return Promise.allSettled(alerts)
     }
   }
 }
