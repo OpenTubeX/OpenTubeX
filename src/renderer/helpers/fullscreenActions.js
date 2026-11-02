@@ -7,7 +7,7 @@ export const FULLSCREEN_ACTION_DEFINITIONS = Object.freeze([
   { id: 'transcript', labelKey: 'Video.Transcript.Title', icon: ['fas', 'file-lines'] },
   { id: 'share', labelKey: 'Share.Share Video', icon: ['fas', 'share-alt'] },
   { id: 'addToPlaylist', labelKey: 'User Playlists.Add to Playlist', icon: ['fac', 'playlist-add'] },
-  { id: 'quickBookmark', labelKey: 'Settings.Fullscreen Actions.Quick Bookmark', icon: ['fas', 'bookmark'] },
+  { id: 'quickBookmark', labelKey: 'Settings.Fullscreen Actions.Quick Bookmark', icon: ['far', 'bookmark'] },
   { id: 'download', labelKey: 'Downloads.Download Video', icon: ['fas', 'download'], defaultEnabled: false },
   { id: 'recommendations', labelKey: 'Settings.Fullscreen Actions.Recommended Videos', icon: ['fas', 'circle-play'], defaultEnabled: false },
 ])

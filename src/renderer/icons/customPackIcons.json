@@ -22,5 +22,11 @@
   },
   "material-symbols:shield-half-outline": {
     "body": "<path fill=\"currentColor\" d=\"M12 22q-3.475-.875-5.738-3.988T4 11.1V5l8-3l8 3v6.1q0 3.8-2.262 6.913T12 22m0-2.1q2.6-.825 4.3-3.3t1.7-5.5V6.375l-6-2.25l-6 2.25V11.1q0 3.025 1.7 5.5t4.3 3.3M11.15 4.35v15.2h1.7V4.35z\"/>"
+  },
+  "material-symbols:save-hollow": {
+    "body": "<path fill=\"currentColor\" fill-rule=\"evenodd\" d=\"M21 7v12q0 .825-.587 1.413T19 21H5q-.825 0-1.412-.587T3 19V5q0-.825.588-1.412T5 3h12zm-2 .85L16.15 5H5v14h14zM7 5v5h8V5h-2v3H9V5zM12 12a3 3 0 1 0 0 6a3 3 0 1 0 0-6m0 2a1 1 0 1 1 0 2a1 1 0 1 1 0-2\"/>"
+  },
+  "material-symbols:video-file-hollow": {
+    "body": "<path fill=\"currentColor\" fill-rule=\"evenodd\" d=\"M6 22q-.825 0-1.412-.587T4 20V4q0-.825.588-1.412T6 2h8l6 6v12q0 .825-.587 1.413T18 22zm7-13V4H6v16h12V9zM8.5 10.5L16.25 14.75L8.5 19zM10 16.467L13.13 14.75L10 13.033z\"/>"
   }
 }

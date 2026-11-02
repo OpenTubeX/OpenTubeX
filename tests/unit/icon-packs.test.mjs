@@ -9,6 +9,7 @@ import {
   resolveMappedIcon,
 } from '../../src/renderer/icons/iconMappingResolver.js'
 import { NAVIGATION_ITEM_DEFINITIONS } from '../../src/navigationItems.js'
+import { FULLSCREEN_ACTION_DEFINITIONS } from '../../src/renderer/helpers/fullscreenActions.js'
 import { TAB_GROUP_ICONS } from '../../src/tabGroupIcons.js'
 import { PROFILE_ICONS } from '../../src/renderer/helpers/profileIcons.js'
 
@@ -168,9 +169,9 @@ test('the alias table only carries aliases the icon map can use', () => {
   }
 })
 
-test('navigation item icons resolve to outline glyphs', () => {
+test('navigation item and fullscreen action icons resolve to outline glyphs', () => {
   const filledBookmarks = new Set(['material-symbols:bookmark', 'ri:bookmark-fill'])
-  for (const { id, icon } of NAVIGATION_ITEM_DEFINITIONS) {
+  for (const { id, icon } of [...NAVIGATION_ITEM_DEFINITIONS, ...FULLSCREEN_ACTION_DEFINITIONS]) {
     for (const pack of packs) {
       assert.ok(!filledBookmarks.has(resolveIconifyId(icon, pack)), `${id} uses a filled ${pack} glyph`)
     }

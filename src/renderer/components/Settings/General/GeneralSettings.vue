@@ -606,7 +606,7 @@ function getThumbnailSwipeIcon(action) {
     addToPlaylist: ['fac', 'playlist-add'],
     history: ['fas', 'eye'],
     markAsFullySeen: ['fas', 'flag-checkered'],
-    quickBookmark: ['fas', 'bookmark'],
+    quickBookmark: ['far', 'bookmark'],
     addToQueue: ['fas', 'add-to-queue'],
     playNext: ['fas', 'play-next'],
     copyYoutube: ['fas', 'link'],

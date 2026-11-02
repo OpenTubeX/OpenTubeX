@@ -629,7 +629,7 @@ export default defineComponent({
     },
     quickBookmarkIcon: {
       type: [Array, Object],
-      default: () => ['fas', 'bookmark']
+      default: () => ['far', 'bookmark']
     },
     paidPromotion: {
       type: Boolean,
