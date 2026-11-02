@@ -1944,13 +1944,10 @@ async function importPlaylistDatabase(data) {
 
     importedCount++
 
-    const existingPlaylist = allPlaylists.value.find((playlist) => {
-      if (playlistObject._id != null && playlist._id === playlistObject._id) {
-        return true
-      }
-
-      return playlist.playlistName === playlistObject.playlistName
-    })
+    // An exact ID match wins over an earlier playlist with the same name
+    const existingPlaylist = (playlistObject._id != null &&
+      allPlaylists.value.find(playlist => playlist._id === playlistObject._id)) ||
+      allPlaylists.value.find(playlist => playlist.playlistName === playlistObject.playlistName)
 
     if (existingPlaylist === undefined) {
       newPlaylists.push(playlistObject)

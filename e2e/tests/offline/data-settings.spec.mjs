@@ -245,3 +245,39 @@ test('imports the members-only flag from exported watch history', async ({ page 
     return store.getters.getHistoryCacheById.member00001?.isMembersOnly
   })).toBe(true)
 })
+
+test.describe('playlist import with duplicate names', () => {
+  const playlist = (_id, videoId) => ({
+    _id,
+    playlistName: 'Music',
+    description: _id,
+    videos: [{ videoId, title: videoId, lengthSeconds: 60, timeAdded: 1, playlistItemId: videoId }]
+  })
+
+  test.use({ seed: { playlists: [playlist('music-a', 'aaaaaaaaaaa'), playlist('music-b', 'bbbbbbbbbbb')] } })
+
+  test('merges into the playlist with the same ID instead of the first namesake', async ({ page }) => {
+    const dataSection = await goToSettingsSection(page, 'data')
+    const imported = { ...playlist('music-b', 'ccccccccccc'), description: 'Imported description' }
+    await page.evaluate((contents) => {
+      Object.defineProperty(window, 'showOpenFilePicker', {
+        configurable: true,
+        value: async () => [{
+          getFile: async () => new File([contents], 'opentubex-playlists.db', { type: 'application/x-freetube-db' })
+        }]
+      })
+    }, `${JSON.stringify(imported)}\n`)
+
+    await dataSection.getByRole('button', { name: 'Import playlists', exact: true }).click()
+
+    await expect(page.locator('.toast', { hasText: 'All playlists has been successfully imported' })).toBeVisible()
+    await expect.poll(() => page.evaluate(() => window.$store.getters.getAllPlaylists
+      .filter(({ _id }) => _id.startsWith('music-'))
+      .map(({ _id, description, videos }) => ({ _id, description, videoIds: videos.map(({ videoId }) => videoId) }))
+      .sort((a, b) => a._id.localeCompare(b._id))))
+      .toEqual([
+        { _id: 'music-a', description: 'music-a', videoIds: ['aaaaaaaaaaa'] },
+        { _id: 'music-b', description: 'Imported description', videoIds: ['bbbbbbbbbbb', 'ccccccccccc'] }
+      ])
+  })
+})
