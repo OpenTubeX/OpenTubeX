@@ -752,12 +752,20 @@ test.describe('long watch playlist', () => {
         (Number.parseFloat(getComputedStyle(last).marginBlockEnd) || 0)
     })).toBeLessThan(2)
 
-    // Stale shells would change the range once the rows near the top mount again.
-    const range = () => list.evaluate(element => element.scrollHeight)
-    const settled = await range()
+    // Stale shells would change height once the rows near the top mount again.
+    // A slow renderer can scroll away before some top rows ever mount; those
+    // keep the placeholder estimate and grow when they mount, so only compare
+    // rows that were measured shells.
+    const shells = await list.evaluate(element => [...element.querySelectorAll(':scope > .playlistItem')]
+      .map((row, index) => ({ index, height: !row.querySelector('.ft-list-video') && Number.parseFloat(row.style.blockSize) }))
+      .filter(shell => shell.height > 0))
     await list.evaluate(element => { element.scrollTop = 0 })
     await expect(list.locator(':scope > .playlistItem').first().locator('.ft-list-video')).toBeVisible()
-    await expect.poll(async () => Math.abs(await range() - settled)).toBeLessThanOrEqual(1)
+    await expect.poll(() => list.evaluate((element, shells) => {
+      const rows = element.querySelectorAll(':scope > .playlistItem')
+      const mounted = shells.filter(shell => rows[shell.index].querySelector('.ft-list-video'))
+      return mounted.length > 0 && mounted.every(shell => Math.abs(rows[shell.index].getBoundingClientRect().height - shell.height) <= 1)
+    }, shells)).toBe(true)
     await setPlayerFullscreen(page, false)
   })
 })
