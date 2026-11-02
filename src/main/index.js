@@ -442,23 +442,17 @@ function runApp() {
         {
           label: contextMenuLabel('Copy Link'),
           visible: visible && !isInAppUrl,
-          click: () => {
-            copy(parameters.linkURL)
-          }
+          click: () => copy(parameters.linkURL)
         },
         {
           label: contextMenuLabel('Copy YouTube Link'),
           visible: visible && isInAppUrl,
-          click: () => {
-            copy(transformOpenTubeXRouteUrl(urlParts[1], true))
-          }
+          click: () => copy(transformOpenTubeXRouteUrl(urlParts[1], true))
         },
         {
           label: contextMenuLabel('Copy Invidious Link'),
           visible: visible && isInAppUrl && usesInvidiousInstance(backendPreference, backendFallback),
-          click: () => {
-            copy(transformOpenTubeXRouteUrl(urlParts[1], false))
-          }
+          click: () => copy(transformOpenTubeXRouteUrl(urlParts[1], false))
         },
         // Only show search in new tab/window for
         // Static text or link
