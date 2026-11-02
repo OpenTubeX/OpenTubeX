@@ -1670,6 +1670,8 @@ function handleProgressBarClick(event) {
 
   if (targetArrayIndex >= 0 && targetArrayIndex < playlistItems.value.length) {
     pendingProgressBarIndex = null
+    // Stop loading towards an unloaded video chosen before.
+    requestedPlaylistVideoCount.value = 0
     scrollToProgressBarTarget(targetArrayIndex)
   } else {
     // Load the pages up to the chosen video, then show it.
