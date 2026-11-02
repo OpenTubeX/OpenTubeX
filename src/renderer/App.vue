@@ -331,8 +331,7 @@
                         :key="action.label"
                         type="button"
                         :role="action.pressed === undefined ? 'menuitem' : 'menuitemcheckbox'"
-                        :aria-label="quickActionLabelIncludesShortLabel(action) ? action.label : undefined"
-                        :title="quickActionLabelIncludesShortLabel(action) ? undefined : action.label"
+                        :aria-label="quickActionAccessibleName(action)"
                         :aria-checked="action.pressed"
                         :disabled="action.enabled === false"
                         @click="runMobileContextAction(action)"
@@ -1151,9 +1150,11 @@ const mobileContextQuickActions = computed(() => mobileContextMenuItems.value.fi
 const mobileContextThumbnailActions = computed(() => mobileContextMenuStack.value.length === 1
   ? unref(mobileContextActions.value?.thumbnailActions) ?? []
   : [])
-// The accessible name must contain the visible label so voice control can target it.
-function quickActionLabelIncludesShortLabel(action) {
+// The accessible name keeps the full action and must contain the visible label so voice control can target it.
+function quickActionAccessibleName(action) {
   return !action.shortLabel || action.label.toLocaleLowerCase().includes(action.shortLabel.toLocaleLowerCase())
+    ? action.label
+    : `${action.shortLabel}, ${action.label}`
 }
 const MOBILE_QUICK_ACTION_COLUMNS = 4
 function balanceQuickActionRows(actions) {
