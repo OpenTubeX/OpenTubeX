@@ -263,7 +263,7 @@
   align-items: center;
   justify-content: center;
   gap: 2px;
-  min-inline-size: 0;
+  min-inline-size: 48px;
   min-block-size: 56px;
   padding-block: 8px;
   padding-inline: 4px;
@@ -301,13 +301,18 @@
   font-size: 20px;
 }
 
-/* Labels stay on one line unless the row is too narrow, then wrap instead of truncating. */
+/* Labels stay on one line unless the row is too narrow or the label is long, such as a
+   long quick bookmark playlist name; the width cap keeps it from squeezing its neighbors. */
 .mobileLinkQuickActionLabel {
-  max-inline-size: 100%;
+  display: -webkit-box;
+  max-inline-size: 12em;
+  overflow: hidden;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 3;
   font-size: 14px;
   font-weight: 500;
   line-height: 20px;
-  overflow-wrap: break-word;
+  overflow-wrap: anywhere;
   text-wrap: balance;
 }
 

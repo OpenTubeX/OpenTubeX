@@ -141,8 +141,10 @@ test.describe('mobile search and settings', { tag: '@scale' }, () => {
     await session.send('Input.dispatchTouchEvent', { type: 'touchEnd', touchPoints: [] })
     await expect(actions.getByRole('menuitemcheckbox', { name: 'Remove from Favorites', checked: true })).toBeVisible()
 
-    await expect(actions.getByRole('menuitem', { name: /^Add to Playlist$/i })).toBeVisible()
-    await actions.getByRole('menuitem', { name: /^Add to Playlist$/i }).click()
+    const save = actions.getByRole('menuitem', { name: 'Save', exact: true })
+    await expect(save).toBeVisible()
+    await expect(save).toHaveAccessibleDescription('Add to Playlist')
+    await save.click()
     await expect(page.locator('.mobileLinkActions')).toHaveCount(0)
     await expect(page.locator('.mobileSheet[open] .playlistSearch')).toBeVisible()
     await page.keyboard.press('Escape')

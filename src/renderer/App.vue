@@ -331,7 +331,8 @@
                         :key="action.label"
                         type="button"
                         :role="action.pressed === undefined ? 'menuitem' : 'menuitemcheckbox'"
-                        :aria-label="action.label"
+                        :aria-label="quickActionLabelIncludesShortLabel(action) ? action.label : undefined"
+                        :title="quickActionLabelIncludesShortLabel(action) ? undefined : action.label"
                         :aria-checked="action.pressed"
                         :disabled="action.enabled === false"
                         @click="runMobileContextAction(action)"
@@ -341,10 +342,7 @@
                           :icon="action.icon"
                           aria-hidden="true"
                         />
-                        <span
-                          class="mobileLinkQuickActionLabel"
-                          aria-hidden="true"
-                        >{{ action.shortLabel ?? action.label }}</span>
+                        <span class="mobileLinkQuickActionLabel">{{ action.shortLabel ?? action.label }}</span>
                       </button>
                     </div>
                   </div>
@@ -1153,6 +1151,10 @@ const mobileContextQuickActions = computed(() => mobileContextMenuItems.value.fi
 const mobileContextThumbnailActions = computed(() => mobileContextMenuStack.value.length === 1
   ? unref(mobileContextActions.value?.thumbnailActions) ?? []
   : [])
+// The accessible name must contain the visible label so voice control can target it.
+function quickActionLabelIncludesShortLabel(action) {
+  return !action.shortLabel || action.label.toLocaleLowerCase().includes(action.shortLabel.toLocaleLowerCase())
+}
 const MOBILE_QUICK_ACTION_COLUMNS = 4
 function balanceQuickActionRows(actions) {
   const columns = Math.ceil(actions.length / Math.ceil(actions.length / MOBILE_QUICK_ACTION_COLUMNS))

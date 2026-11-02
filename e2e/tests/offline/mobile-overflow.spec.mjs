@@ -57,6 +57,33 @@ test.describe('mobile overflow', { tag: '@scale' }, () => {
     }
   })
 
+  test('a long quick bookmark name does not squeeze neighboring quick actions', async ({ page }) => {
+    await goTo(page, 'history')
+    await page.setViewportSize({ width: 320, height: 812 })
+    await page.evaluate(name => {
+      const icon = ['fas', 'clone']
+      document.querySelector('#app').__vue_app__._container._vnode.component.provides.openMobileContextActions({
+        title: 'Video',
+        actions: [],
+        thumbnailActions: [
+          { label: 'Open in a Background Tab', shortLabel: 'Background Tab', icon, run() {} },
+          { label: 'Add to Playlist', shortLabel: 'Save', icon, run() {} },
+          { label: `Add to ${name}`, shortLabel: name, icon, pressed: false, run() {} },
+          { label: 'Remove from Playlist', shortLabel: 'Remove', icon, run() {} }
+        ]
+      })
+    }, 'Long playlist name '.repeat(14))
+    const buttons = page.locator('.mobileThumbnailActionRow button')
+    await expect(buttons).toHaveCount(4)
+    await expect.poll(() => buttons.evaluateAll(elements => elements.every(element => {
+      const bounds = element.getBoundingClientRect()
+      const label = element.querySelector('.mobileLinkQuickActionLabel').getBoundingClientRect()
+      return bounds.width >= 47.99 && bounds.right <= innerWidth + 1 &&
+        label.left >= bounds.left - 1 && label.right <= bounds.right + 1 && label.bottom <= bounds.bottom + 1
+    }))).toBe(true)
+    await page.keyboard.press('Escape')
+  })
+
   test('channel cards contain subscription controls and show two columns on the Pixel', async ({ page, uiScale }) => {
     await goTo(page, 'subscribedchannels')
     await expect(page.locator('.channels .channel')).toHaveCount(channels.length)
