@@ -261,6 +261,25 @@ export function withNetworkRecovery(input, init, task, options = {}) {
     .then(confirm)
 }
 
+let networkRecoveryBypasses = 0
+
+/**
+ * Sends the `window.fetch` calls that `callback` makes synchronously straight
+ * to the network, for clients with their own retries, deadlines and reconnect
+ * handling, such as Shaka Player.
+ * @template T
+ * @param {() => T} callback
+ * @returns {T}
+ */
+export function withoutNetworkRecovery(callback) {
+  networkRecoveryBypasses++
+  try {
+    return callback()
+  } finally {
+    networkRecoveryBypasses--
+  }
+}
+
 export function installNetworkFetch({ corsDisabled = false, checkInternet = false, internetChecksEnabled = true } = {}) {
   const fetch = window.fetch.bind(window)
   const probe = createInternetProbe(fetch)
@@ -281,7 +300,7 @@ export function installNetworkFetch({ corsDisabled = false, checkInternet = fals
       : undefined,
     internetChecksEnabled
   })
-  window.fetch = async (input, init) => withNetworkRecovery(input, init, async signal => {
+  const recoveringFetch = async (input, init) => withNetworkRecovery(input, init, async signal => {
     if (signal && appRecovery.ownsDeadline(signal)) return fetch(input instanceof Request ? input.clone() : input, init)
     // A fetch can stall while the OS still reports online. Bound the wait for
     // response headers; media response bodies keep their streaming behavior.
@@ -306,4 +325,5 @@ export function installNetworkFetch({ corsDisabled = false, checkInternet = fals
       return networkError
     }
   })
+  window.fetch = async (input, init) => networkRecoveryBypasses > 0 ? fetch(input, init) : recoveringFetch(input, init)
 }
