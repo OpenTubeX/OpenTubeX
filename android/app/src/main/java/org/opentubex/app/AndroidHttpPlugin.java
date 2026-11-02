@@ -25,7 +25,7 @@ import java.util.concurrent.RejectedExecutionException;
  */
 @CapacitorPlugin(name = "AndroidHttp")
 public class AndroidHttpPlugin extends Plugin {
-    // Set by HttpRequestHandler while its connection is open.
+    // Set by HttpRequestHandler before it opens its connection (see patches/@capacitor__android.patch).
     private static final String ACTIVE_CONNECTION = "activeCapacitorHttpUrlConnection";
 
     private final Map<String, RequestOptions> activeRequests = new ConcurrentHashMap<>();

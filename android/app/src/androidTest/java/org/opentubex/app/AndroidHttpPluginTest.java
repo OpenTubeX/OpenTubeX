@@ -46,9 +46,8 @@ public class AndroidHttpPluginTest {
             });
             acceptor.start();
 
-            // Connecting asks the proxy selector for a route before Capacitor
-            // publishes the connection, so holding it there places the abort
-            // before the connection exists.
+            // Connecting asks the proxy selector for a route, so holding it
+            // there places the abort before the connection opens.
             CountDownLatch connecting = new CountDownLatch(1);
             CountDownLatch aborted = new CountDownLatch(1);
             ProxySelector.setDefault(new ProxySelector() {
@@ -93,7 +92,16 @@ public class AndroidHttpPluginTest {
             });
 
             assertTrue("Request never connected", connecting.await(5, TimeUnit.SECONDS));
-            abort(plugin);
+            // OkHttp asks for the route while holding the connection pool
+            // that disconnecting needs, so abort from another thread and
+            // release the route once the abort waits for it.
+            Thread aborting = new Thread(() -> abort(plugin));
+            aborting.start();
+            long deadline = System.nanoTime() + TimeUnit.SECONDS.toNanos(5);
+            while (aborting.getState() != Thread.State.BLOCKED && aborting.getState() != Thread.State.TERMINATED) {
+                assertTrue("Abort never reached the connection", System.nanoTime() < deadline);
+                Thread.yield();
+            }
             aborted.countDown();
 
             assertTrue("Aborted request kept waiting for its response", finished.await(5, TimeUnit.SECONDS));
@@ -144,6 +152,61 @@ public class AndroidHttpPluginTest {
             assertEquals("Aborted request connected", 0, accepted.size());
         } finally {
             for (Socket socket : accepted) socket.close();
+        }
+    }
+
+    @Test
+    public void abortDuringTheRequestBodyConnectionClosesIt() throws Exception {
+        AndroidHttpPlugin plugin = new AndroidHttpPlugin();
+        List<Socket> accepted = new CopyOnWriteArrayList<>();
+        CountDownLatch handshaking = new CountDownLatch(1);
+        try (ServerSocket server = new ServerSocket(0, 50, InetAddress.getByName("127.0.0.1"))) {
+            // Accept the connection and never answer its TLS handshake, which
+            // Capacitor runs while opening the stream for the request body.
+            Thread acceptor = new Thread(() -> {
+                try {
+                    while (true) {
+                        accepted.add(server.accept());
+                        handshaking.countDown();
+                    }
+                } catch (IOException closed) {
+                    // The test finished
+                }
+            });
+            acceptor.start();
+
+            JSObject options = new JSObject();
+            options.put("requestId", "pending-connect");
+            options.put("url", "https://127.0.0.1:" + server.getLocalPort() + "/youtubei/v1/browse");
+            options.put("method", "POST");
+            options.put("headers", new JSObject().put("User-Agent", "test").put("Content-Type", "application/json"));
+            options.put("data", "{}");
+            options.put("connectTimeout", TIMEOUT_MS);
+            options.put("readTimeout", TIMEOUT_MS);
+            CountDownLatch finished = new CountDownLatch(1);
+            AtomicReference<String> outcome = new AtomicReference<>();
+            plugin.request(new PluginCall(null, "AndroidHttp", "1", "request", options) {
+                @Override
+                public void resolve(JSObject data) {
+                    outcome.set("resolved");
+                    finished.countDown();
+                }
+
+                @Override
+                public void reject(String msg, String code, Exception ex) {
+                    outcome.set("rejected");
+                    finished.countDown();
+                }
+            });
+
+            assertTrue("Request never connected", handshaking.await(5, TimeUnit.SECONDS));
+            abort(plugin);
+
+            assertTrue("Aborted request kept waiting for its handshake", finished.await(5, TimeUnit.SECONDS));
+            assertEquals("rejected", outcome.get());
+        } finally {
+            for (Socket socket : accepted) socket.close();
+            abort(plugin);
         }
     }
 
