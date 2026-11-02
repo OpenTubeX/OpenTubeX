@@ -23,7 +23,7 @@ test('switches a production-profile-sized cached feed without repeating expensiv
     }
   })
   try {
-    // The paired performance comparison gates the switch timings.
+    // `pnpm run test:performance` compares the switch timings between builds.
     await runLargeSubscriptionsBenchmark(page)
     // Repeating the switch must not sort the whole feed again.
     expect(await page.evaluate(() => window.__switchFeedSorts)).toBeLessThanOrEqual(1)

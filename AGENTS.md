@@ -34,7 +34,7 @@ Requests such as "implement issue #X" authorize local changes, not a PR. Open a 
 - For filtered runs, invoke Playwright directly, for example `pnpm exec playwright test -c e2e/playwright.config.mjs e2e/tests/network/channel.spec.mjs --project=network --grep "test name"`. Never use `pnpm run test:e2e -- ...`; the extra `--` breaks argument parsing and can launch the full suite.
 - On a user's graphical desktop, keep test windows out of their session. On Linux with Xvfb installed, each worker starts a private display automatically; do not set `E2E_XVFB=0`. Otherwise install Xvfb or use another private X server. Not needed in CI or headless environments.
 - Tag offline tests that assert geometry, scrolling, measurements, positioning, reflow, or animation boundaries with `@scale` instead of looping over scales; the `offline-95` and `offline-125` projects rerun them, and the `uiScale` fixture holds the current value.
-- Put performance checks in `*-performance.spec.mjs` files or tag them `@performance`. Prefer deterministic work counts over wall-clock budgets; the paired performance comparison covers timing.
+- Put performance checks in `*-performance.spec.mjs` files or tag them `@performance`. Prefer deterministic work counts over wall-clock budgets. The performance project runs nightly, not on PRs; compare timings between builds with `pnpm run test:performance` when a change targets performance.
 
 ### Android
 

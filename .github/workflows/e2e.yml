@@ -1,8 +1,11 @@
 name: E2E Tests
 
 on:
+  # Pull requests run quick checks. The merge queue runs the offline suite
+  # before each merge, and the nightly run covers everything.
   pull_request:
     branches: [ master, development, '**-RC' ]
+  merge_group:
   schedule:
     # Nightly full suite, including network tests against the real YouTube servers
     - cron: '30 3 * * *'
@@ -28,9 +31,43 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
+  # Merge groups that only change translations, like Weblate updates, skip
+  # E2E tests as their PRs do. The group's diff, not its branch, shows this.
+  changes:
+    name: Check for translation-only changes
+    if: ${{ github.event_name == 'merge_group' }}
+    runs-on: ubuntu-slim
+
+    outputs:
+      translations-only: ${{ steps.diff.outputs.translations-only }}
+
+    permissions:
+      contents: read
+
+    steps:
+    - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      with:
+        persist-credentials: false
+
+    - name: Compare with the base branch
+      id: diff
+      env:
+        BASE_SHA: ${{ github.event.merge_group.base_sha }}
+      run: |
+        git fetch --no-tags --depth=1 origin "$BASE_SHA"
+        files="$(git diff --name-only "$BASE_SHA" HEAD)"
+        if grep -qv '^static/locales/' <<< "$files"; then
+          echo 'translations-only=false' >> "$GITHUB_OUTPUT"
+        else
+          echo 'translations-only=true' >> "$GITHUB_OUTPUT"
+        fi
+      shell: bash
+
   prepare-e2e:
     name: Prepare E2E tests
-    if: ${{ github.event_name != 'pull_request' || github.head_ref != 'weblate-translations' }}
+    needs: changes
+    # Run when the change check is skipped (not a merge group) or fails.
+    if: ${{ !cancelled() && needs.changes.outputs.translations-only != 'true' && (github.event_name != 'pull_request' || github.head_ref != 'weblate-translations') }}
     runs-on: ubuntu-latest
 
     outputs:
@@ -86,6 +123,7 @@ jobs:
     - name: Create E2E shard matrix
       id: shards
       env:
+        EVENT: ${{ github.event_name }}
         SELECTED_PROJECT: ${{ github.event_name == 'workflow_dispatch' && inputs.project || 'all' }}
         PR_BASE_REF: ${{ github.event_name == 'pull_request' && github.base_ref || '' }}
       run: |
@@ -105,9 +143,9 @@ jobs:
         import { countRepeatTests, createShardMatrix, REPEAT_EACH, REPEAT_LIMIT } from './e2e/shards.mjs'
 
         const [full, changed] = process.argv.slice(2).map(file => JSON.parse(readFileSync(file, 'utf8')))
-        const isPullRequest = !!process.env.PR_BASE_REF
-        console.log(`matrix=${JSON.stringify(createShardMatrix(full, changed, process.env.SELECTED_PROJECT, isPullRequest))}`)
-        const repeatCount = isPullRequest ? countRepeatTests(changed) : 0
+        const { EVENT: event, SELECTED_PROJECT: selectedProject } = process.env
+        console.log(`matrix=${JSON.stringify(createShardMatrix(full, changed, { event, selectedProject }))}`)
+        const repeatCount = event === 'pull_request' ? countRepeatTests(changed) : 0
         if (repeatCount > REPEAT_LIMIT) {
           appendFileSync(process.env.GITHUB_STEP_SUMMARY, `This PR changes ${repeatCount} offline E2E tests, more than the ${REPEAT_LIMIT} that are repeated ${REPEAT_EACH} times to catch flaky tests.\n`)
         }
@@ -145,7 +183,8 @@ jobs:
 
   e2e-shard:
     name: e2e (${{ matrix.project }} ${{ matrix.shard }}/${{ matrix.shardTotal }})
-    if: ${{ github.event_name != 'pull_request' || github.head_ref != 'weblate-translations' }}
+    # The skipped change check outside merge groups would skip this job too.
+    if: ${{ !cancelled() && needs.prepare-e2e.result == 'success' }}
     needs: prepare-e2e
     runs-on: ubuntu-latest
     strategy:
@@ -236,9 +275,8 @@ jobs:
 
     # The network project talks to the real YouTube servers on the first
     # attempt and automatically falls back to recorded fixtures on retry.
-    # PRs run every packed-app test, but only changed network tests. The
-    # repeat shards rerun changed offline tests without retries, so a new
-    # flaky test fails its PR.
+    # PRs run only changed network tests. The repeat shards rerun changed
+    # offline tests without retries, so a new flaky test fails its PR.
     - name: Run E2E tests
       env:
         PROJECTS: ${{ matrix.projects }}
@@ -288,8 +326,8 @@ jobs:
 
   # Keep a stable required-check name while the test suite runs as a matrix.
   e2e:
-    if: ${{ always() && (github.event_name != 'pull_request' || github.head_ref != 'weblate-translations') }}
-    needs: e2e-shard
+    if: ${{ always() && needs.changes.outputs.translations-only != 'true' && (github.event_name != 'pull_request' || github.head_ref != 'weblate-translations') }}
+    needs: [changes, e2e-shard]
     runs-on: ubuntu-latest
     steps:
     - name: Check E2E shards
