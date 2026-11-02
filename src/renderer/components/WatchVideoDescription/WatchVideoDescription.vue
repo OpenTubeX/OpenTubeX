@@ -190,6 +190,8 @@
       class="descriptionStatus"
       :aria-expanded="previewOnly ? undefined : isExpanded"
       @click="isExpanded ? collapseDescription() : expandDescription()"
+      @keydown.space.stop
+      @keyup.space.stop
     >
       <span>{{ isExpanded ? t('Description.Collapse Description') : t('Description.Expand Description') }}</span>
       <FtIcon

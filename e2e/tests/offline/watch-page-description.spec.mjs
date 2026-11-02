@@ -77,6 +77,15 @@ test.describe('watch page', () => {
     await expect(description).toHaveClass(/short/)
     await expect(expandControl).toBeFocused()
     await expect(expandControl).toHaveAttribute('aria-expanded', 'false')
+    // Space activates the footer instead of the player's play/pause shortcut.
+    const video = page.locator(`${activeTab} video`)
+    const paused = await video.evaluate(element => element.paused)
+    await expandControl.press('Space')
+    await expect(expandControl).toHaveAttribute('aria-expanded', 'true')
+    expect(await video.evaluate(element => element.paused)).toBe(paused)
+    await expandControl.press('Space')
+    await expect(expandControl).toHaveAttribute('aria-expanded', 'false')
+    expect(await video.evaluate(element => element.paused)).toBe(paused)
 
     await description.locator('.descriptionCopyButton button').click()
     await expect(page.locator('.toast', { hasText: 'Description copied to clipboard' })).toBeVisible()
