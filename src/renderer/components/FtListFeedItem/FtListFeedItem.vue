@@ -173,6 +173,7 @@ function setWatched(watched, fully = false) {
   } else {
     unmarkExternalMediaWatched(props.data.url)
   }
+  store.dispatch('scheduleSyncServer', 'history')
   showToast({
     message: watched ? t('Video.Video has been marked as watched') : t('Video.Video has been unmarked as watched'),
     image: props.data.thumbnail || null,

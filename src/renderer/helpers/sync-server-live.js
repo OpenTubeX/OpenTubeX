@@ -241,7 +241,7 @@ function subscriptionPreferences(value) {
 }
 
 export function createSyncActivity(collection, before, after, deviceId, deviceName, subscriptions = []) {
-  if (['history', 'seenVideos', 'seenPosts', 'sessions', 'sessionsV2'].includes(collection)) return null
+  if (['history', 'seenVideos', 'seenPosts', 'externalMediaPositions', 'sessions', 'sessionsV2'].includes(collection)) return null
   const changes = []
   const channelNames = new Map(subscriptions.map(channel => [channel.id, activityText(channel.name)]))
   if (collection === 'settings') {
