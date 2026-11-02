@@ -1084,3 +1084,19 @@ test('restoring a Short from the tab mini player keeps the page from overflowing
   expect(samples.filter(sample => sample.animating).length).toBeGreaterThan(2)
   expect(Math.max(...samples.map(sample => sample.overflow))).toBe(0)
 })
+
+test('the Shorts player uses the height vertical tabs free up', { tag: '@scale' }, async ({ app, page }) => {
+  await mockPlayableWatchPage(app, page)
+  await page.locator(sel.searchInput).fill('https://www.youtube.com/shorts/jNQXAC9IVRw')
+  await page.locator(sel.searchInput).press('Enter')
+  await waitForPlayback(page)
+  const player = page.locator('.ftVideoPlayer')
+  await expect(player).toHaveClass(/shortsPlayer/)
+  const spaceBelowPlayer = () => player.evaluate(element => innerHeight - element.getBoundingClientRect().bottom)
+
+  const withTopTabs = await spaceBelowPlayer()
+  await page.evaluate(() => window.$store.commit('setTabBarPosition', 'left'))
+  await expect(page.locator('.app')).toHaveClass(/verticalTabs/)
+  // Without the horizontal tab bar, the player grows instead of leaving a gap below it.
+  await expect.poll(async () => Math.abs(await spaceBelowPlayer() - withTopTabs)).toBeLessThanOrEqual(1)
+})
