@@ -438,6 +438,30 @@ test('array edits write only the members they add, remove or move', async (t) =>
   assert.deepEqual(await saved(), [...expected, video('last')])
 })
 
+test('reads skip members unless the query, projection or sort uses them', async (t) => {
+  const driver = createNodeSqliteDriver(':memory:')
+  t.after(() => driver.close())
+  let memberReads = 0
+  const store = new SqliteDatastore({
+    childField: 'videos',
+    driver: { ...driver, execute (statements, transaction) { memberReads += statements.filter(([sql]) => sql.includes('FROM children')).length; return driver.execute(statements, transaction) } },
+  })
+  const videos = [video('a'), video('b')]
+  await store.insertAsync({ _id: 'p', playlistName: 'P', videos })
+  const reads = async read => {
+    memberReads = 0
+    const result = await read()
+    return [result, memberReads]
+  }
+
+  assert.deepEqual(await reads(() => store.findOneAsync({ _id: 'p' }, { videos: 0 })), [{ _id: 'p', playlistName: 'P' }, 0])
+  assert.deepEqual(await reads(() => store.findOneAsync({ _id: 'p' }, { playlistName: 1 })), [{ _id: 'p', playlistName: 'P' }, 0])
+  assert.deepEqual(await reads(() => store.findOneAsync({ _id: 'p' }, { videos: 1 })), [{ _id: 'p', videos }, 1])
+  assert.deepEqual(await reads(() => store.findOneAsync({ _id: 'p' })), [{ _id: 'p', playlistName: 'P', videos }, 1])
+  assert.deepEqual(await reads(() => store.findAsync({ 'videos.videoId': 'b' }, { playlistName: 1 })), [[{ _id: 'p', playlistName: 'P' }], 1])
+  assert.deepEqual(await reads(() => store.findMembersAsync('p', 'videoId', ['b', 'missing'])), [[video('b')], 1])
+})
+
 test('operations through an asynchronous driver run one at a time', async (t) => {
   const store = new SqliteDatastore({ driver: slowDriver(createNodeSqliteDriver(':memory:')), childField: 'videos' })
   t.after(() => store.driver.close())

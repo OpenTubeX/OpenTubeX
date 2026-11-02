@@ -87,6 +87,13 @@ function isAppend(update, field) {
   return !references(others, field)
 }
 
+/** True when `projection` keeps `field`, following NeDB's projection rules. */
+function projects(projection = {}, field) {
+  const keys = Object.keys(projection).filter(key => key !== '_id')
+  if (keys.length === 0) return true
+  return projection[keys[0]] === 1 ? projection[field] === 1 : !Object.hasOwn(projection, field)
+}
+
 function isModifierUpdate(update) {
   return Object.keys(update).some(key => key.startsWith('$'))
 }
@@ -477,10 +484,44 @@ export class SqliteDatastore {
     return matches
   }
 
-  // Used by NeDB's Cursor
-  async _getCandidatesAsync(query) {
+  async _getCandidatesAsync(query, withChildren) {
     if (this.dropped) return []
-    return (await this._candidates(query, Boolean(this.childField))).map(candidate => candidate.doc)
+    return (await this._candidates(query, withChildren)).map(candidate => candidate.doc)
+  }
+
+  /**
+   * A NeDB cursor that loads the members of `childField` only when its query,
+   * projection or sort uses them, so reading playlist metadata skips the videos.
+   */
+  _cursor(query, execFn) {
+    const field = this.childField
+    const cursor = new Cursor({
+      executor: this.executor,
+      _getCandidatesAsync: query => this._getCandidatesAsync(query, Boolean(field) && (
+        projects(cursor._projection, field) || references(query, field) || references(cursor._sort, field)
+      )),
+    }, query, execFn)
+    return cursor
+  }
+
+  /**
+   * Members of `childField` in the document `id` whose `field` has one of
+   * `values`, read without the other members.
+   * @param {unknown} id
+   * @param {string} field
+   * @param {unknown[]} values
+   * @returns {Promise<object[]>}
+   */
+  findMembersAsync(id, field, values) {
+    return this._exclusive(async () => {
+      if (!FIELD_NAME.test(field)) throw new Error(`Unsupported member field: ${field}`)
+      if (this.dropped) return []
+      const rows = await this._query(
+        `SELECT data FROM children WHERE parent = ? AND json_extract(data, '$.${field}') IN (SELECT value FROM json_each(?))`,
+        [keyOf(id), JSON.stringify(values)]
+      )
+      return rows.map(([data]) => deserialize(data))
+    }, 'read')
   }
 
   /**
@@ -569,7 +610,7 @@ export class SqliteDatastore {
   }
 
   find(query = {}, projection = {}) {
-    return new Cursor(this, query).projection(projection)
+    return this._cursor(query).projection(projection)
   }
 
   findAsync(query = {}, projection = {}) {
@@ -577,7 +618,7 @@ export class SqliteDatastore {
   }
 
   findOneAsync(query = {}, projection = {}) {
-    return new Cursor(this, query, docs => docs.length === 1 ? docs[0] : null).projection(projection).limit(1)
+    return this._cursor(query, docs => docs.length === 1 ? docs[0] : null).projection(projection).limit(1)
   }
 
   async countAsync(query = {}) {

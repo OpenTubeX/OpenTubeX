@@ -989,11 +989,15 @@ class Playlists {
   static async _insertVideos(_id, lastUpdatedAt, videos, deduplicate) {
     // Retry if another window changes the playlist between reading and saving it.
     for (let attempt = 0; attempt < 5; attempt++) {
-      const playlist = await db.playlists.findOneAsync({ _id })
+      // Appending needs neither the stored entries nor more than the matching
+      // ones for the duplicate check. Prepending rewrites them all.
+      let playlist = await db.playlists.findOneAsync({ _id }, { videos: 0 })
+      if (playlist?.addVideosToTop === true) playlist = await db.playlists.findOneAsync({ _id })
       if (!playlist) return { status: PlaylistVideoAddResult.PLAYLIST_MISSING }
       let inserted = videos
       if (deduplicate) {
-        const present = new Set(playlist.videos.map(video => video.videoId))
+        const stored = playlist.videos ?? await db.playlists.findMembersAsync(_id, 'videoId', [...new Set(videos.map(video => video.videoId))])
+        const present = new Set(stored.map(video => video.videoId))
         inserted = videos.filter(video => {
           if (present.has(video.videoId)) return false
           present.add(video.videoId)
