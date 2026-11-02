@@ -3,4 +3,4 @@ category: improvement
 platforms: [linux]
 ---
 
-Minimized windows on KDE Plasma Wayland no longer check the window state every second and notice being restored almost instantly.
+Restoring a minimized window on KDE Plasma Wayland now ends automatic picture-in-picture almost instantly instead of up to a second later.
