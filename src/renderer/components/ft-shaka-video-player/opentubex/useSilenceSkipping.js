@@ -373,6 +373,10 @@ export function useSilenceSkipping({ enabled, isLive, video, setCurrentTime }) {
       if (error?.name !== 'AbortError' && error?.name !== 'NotAllowedError') {
         console.warn('Unable to start look-ahead audio analysis for silence skipping', error)
       }
+      // A pause interrupted the start, but playback may have resumed while it was pending.
+      if (error?.name === 'AbortError' && isPlaybackRunning()) {
+        queueMicrotask(ensureAnalysisPlayback)
+      }
     } finally {
       analysisPlayPending = false
     }
@@ -457,6 +461,11 @@ export function useSilenceSkipping({ enabled, isLive, video, setCurrentTime }) {
       sampleBuffers.push(new Float32Array(analyser.fftSize))
     }
     analysisSink.connect(analysisAudioContext.destination)
+
+    // Playback may have paused while the graph was being set up.
+    if (!isPlaybackRunning()) {
+      analysisAudioContext.suspend().catch(() => {})
+    }
   }
 
   function destroyAnalysisPipeline() {

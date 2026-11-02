@@ -251,3 +251,18 @@ test('allows evicted analysis segments to be queued again after a backward seek'
   assert.deepEqual([...analysisSegments.keys()], ['init', 'current'])
   assert.deepEqual(appendQueue, [retainedSegment])
 })
+
+test('suspends an analysis graph that finishes starting after playback paused', async t => {
+  const video = Object.assign(new EventTarget(), { paused: false, ended: false, muted: false, volume: 1, seeking: false, currentTime: 0 })
+  const f = analysisFixture(t, { standard: true, video })
+  f.response(undefined, [9])
+  f.response({ startTime: 0, endTime: 5 }, [1])
+  const [audio] = f.audioElements
+  audio.buffered = { length: 1, start: () => 0, end: () => 10 }
+
+  video.paused = true
+  video.dispatchEvent(new Event('pause'))
+  await f.openSource()
+  assert.equal(audio.paused, true)
+  assert.equal(f.contexts[0].state, 'suspended')
+})
