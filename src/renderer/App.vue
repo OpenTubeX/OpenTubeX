@@ -2372,10 +2372,11 @@ async function checkForNewUpdates() {
     return
   }
 
-  const releasesUrl = 'https://api.github.com/repos/OpenTubeX/OpenTubeX/releases?per_page=100'
+  // Each release lists dozens of assets, so fetch small pages and stop at the installed release
+  const releasesUrl = 'https://api.github.com/repos/OpenTubeX/OpenTubeX/releases?per_page=5'
 
   try {
-    const availableReleases = await fetchReleasePages(releasesUrl, fetch)
+    const availableReleases = await fetchReleasePages(releasesUrl, fetch, packageDetails.version)
     const releases = findUpdateReleases(availableReleases, packageDetails.version)
     if (releases.length === 0) {
       return

@@ -168,13 +168,42 @@ test('updates from later release pages are included', async () => {
       },
       json: async () => page.releases
     }
-  })
+  }, '0.29.0')
 
   assert.deepEqual(requestedUrls, [firstPageUrl, secondPageUrl])
   assert.deepEqual(
     findUpdateReleases(releases, '0.29.0'),
     [patchRelease, stableRelease]
   )
+})
+
+test('stops paging once a page reaches releases that are not newer than the installed build', async () => {
+  const pageUrl = page => `https://api.github.com/releases?per_page=10&page=${page}`
+  const pages = [
+    [{ prerelease: false, tag_name: 'v0.31.0-beta' }, { prerelease: true, tag_name: 'v0.30.1-nightly-350' }],
+    [{ prerelease: false, tag_name: 'v0.30.1-beta' }, { prerelease: false, tag_name: 'v0.29.0-beta' }],
+    [{ prerelease: false, tag_name: 'v0.28.0-beta' }]
+  ]
+  const requestedUrls = []
+  const fetchPage = async (url) => {
+    requestedUrls.push(url)
+    const page = Number(new URL(url).searchParams.get('page'))
+    return {
+      ok: true,
+      status: 200,
+      headers: { get: () => page < pages.length ? `<${pageUrl(page + 1)}>; rel="next"` : null },
+      json: async () => pages[page - 1]
+    }
+  }
+
+  const releases = await fetchReleasePages(pageUrl(1), fetchPage, '0.29.0')
+  assert.deepEqual(requestedUrls, [pageUrl(1), pageUrl(2)])
+  assert.deepEqual(findUpdateReleases(releases, '0.29.0').map(release => release.tag_name), ['v0.31.0-beta', 'v0.30.1-beta'])
+
+  // Nightly releases older than the installed one also end the search
+  requestedUrls.length = 0
+  await fetchReleasePages(pageUrl(1), fetchPage, '0.30.1-nightly-400')
+  assert.deepEqual(requestedUrls, [pageUrl(1)])
 })
 
 test('installed and older releases are excluded from skipped releases', () => {
