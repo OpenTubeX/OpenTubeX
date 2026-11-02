@@ -1,6 +1,6 @@
 import { readFileSync } from 'node:fs'
 
-import { test, expect, goTo, waitForAppReady, setWindowSize, expectScrollAtRenderedEnd } from '../../helpers/app.mjs'
+import { test, expect, goTo, goToSettingsSection, waitForAppReady, setWindowSize, expectScrollAtRenderedEnd } from '../../helpers/app.mjs'
 
 const RELEASES_URL = /^https:\/\/api\.github\.com\/repos\/OpenTubeX\/OpenTubeX\/releases/
 const COMMIT_HASH = '3904e64f503cde6be8793606a04ad69c5d57cef0'
@@ -352,11 +352,11 @@ test('release notes for other platforms are hidden', async ({ page }) => {
 })
 
 test.describe('release-note screenshots with dark and light variants', () => {
-  test.use({ seed: { settings: { baseTheme: 'light' } } })
+  test.use({ seed: { settings: { baseTheme: 'dark' } } })
 
-  test('show the variant for the app theme instead of the OS color scheme', async ({ page }) => {
+  test('show the variant for the app theme when the prompt opens', async ({ page }) => {
     await page.emulateMedia({ colorScheme: 'dark' })
-    await showUpdatePrompt(page, [
+    const notification = await showUpdateNotification(page, [
       release(`OpenTubeX ${newestUpdateVersion}`, `v${newestUpdateVersion}-beta`, [
         '- Screenshot improvement. (#1)',
         '  <picture>',
@@ -366,6 +366,16 @@ test.describe('release-note screenshots with dark and light variants', () => {
         '  </picture>'
       ].join('\n'))
     ])
+
+    // Switch to a light app theme after the update check, while the OS stays dark.
+    await goToSettingsSection(page, 'theme')
+    const baseTheme = page.getByRole('combobox', { name: 'Base Theme' })
+    await baseTheme.click()
+    await page.locator(`#${await baseTheme.getAttribute('aria-controls')}`)
+      .getByRole('option', { name: 'Light', exact: true }).click()
+    await expect(page.locator('body')).toHaveClass(/\blight\b/)
+    await page.locator('.settingsCloseButton').click()
+    await notification.getByRole('button', { name: 'See changes and update' }).click()
 
     await expect(page.locator('.changeLogText li').getByAltText('Screenshot')).toHaveAttribute('src', 'https://github.com/user-attachments/assets/light')
   })
