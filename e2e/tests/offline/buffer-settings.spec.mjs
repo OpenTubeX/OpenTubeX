@@ -132,22 +132,26 @@ test.describe('downloaded files', () => {
       settings: { enableDownloads: true, bufferAhead: 600, bufferBehind: 300, bufferBeforePlaying: 3 },
       downloads: [{
         id: 1,
-        videoId: 'offline0001',
+        videoId: 'jNQXAC9IVRw',
         title: 'Offline download',
         status: 'completed',
         mode: 'video',
         destination: mediaPath,
         destinations: [mediaPath],
-        files: [{ videoId: 'offline0001', path: mediaPath, extension: 'webm' }],
+        files: [{ videoId: 'jNQXAC9IVRw', path: mediaPath, extension: 'webm' }],
       }],
     },
   })
 
   // Long downloads only have about 2 seconds loaded ahead, so waiting for more stalled them for good (#2532)
-  test('play without waiting for the rebuffering goal', async ({ page }) => {
+  test('play without waiting for the rebuffering goal', async ({ app, page }) => {
+    // Serve the online metadata without the network, which took longer than the assertion timeout
+    await mockPlayableWatchPage(app, page)
     await goTo(page, 'downloads')
     await page.getByRole('button', { name: 'Play download', exact: true }).click()
-    await expect(page.locator(`${activeTab} video`)).toHaveJSProperty('readyState', 4)
+    const video = page.locator(`${activeTab} video`)
+    await expect(video).toHaveJSProperty('readyState', 4)
+    await expect(video).toHaveJSProperty('currentSrc', `downloadmedia://file/1/jNQXAC9IVRw?path=${encodeURIComponent(mediaPath)}`)
 
     expect(await readPlayerBuffering(page)).toEqual({ bufferingGoal: 600, bufferBehind: 300, rebufferingGoal: 0.02 })
 
