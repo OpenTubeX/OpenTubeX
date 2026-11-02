@@ -221,7 +221,7 @@ test('playlist thumbnails remove videos with one click or tap, and phones from t
   await expect(menu).toBeVisible()
   await session.send('Input.dispatchTouchEvent', { type: 'touchEnd', touchPoints: [] })
   await expect(menu).toHaveAttribute('aria-label', 'Playlist video 4')
-  await expect(menu.getByRole('menuitem', { name: 'Add to playlist', exact: true })).toBeVisible()
+  await expect(menu.getByRole('menuitem', { name: 'Save, Add to playlist', exact: true })).toBeVisible()
   const menuRemove = menu.getByRole('menuitem', { name: 'Remove from playlist', exact: true })
   await expect(menuRemove).toBeVisible()
   await menu.evaluate(element => Promise.all(element.getAnimations().map(animation => animation.finished)))
