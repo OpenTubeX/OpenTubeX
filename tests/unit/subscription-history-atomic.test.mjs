@@ -32,12 +32,23 @@ for (const marks of [[], [{ videoId: 'video', seenAt: 1000, unseenAt: 1000 }]]) 
     let entered
     const blocked = new Promise(resolve => { release = resolve })
     const started = new Promise(resolve => { entered = resolve })
-    db.history.updateAsync = async (query, update, options) => {
-      if (update.isWatched === true) {
+    const delay = async updates => {
+      if (updates.some(({ update }) => update.isWatched === true)) {
         entered()
         await blocked
       }
+    }
+    db.history.updateAsync = async (query, update, options) => {
+      await delay([{ update }])
       return original(query, update, options)
+    }
+    // SQLite writes them in batches
+    const originalMany = db.history.updateManyAsync?.bind(db.history)
+    if (originalMany) {
+      db.history.updateManyAsync = async updates => {
+        await delay(updates)
+        return originalMany(updates)
+      }
     }
     const watched = History.updateSubscriptionState({ records: [{
       videoId: 'video', isWatched: true, watchProgress: 42, timeWatched: 1,
@@ -176,14 +187,10 @@ test('metadata repair preserves watch state and does not recreate deleted histor
 test('metadata repair returns partial success when an individual database write fails', async () => {
   const { db, History, errors } = await fixture()
   await db.history.insertAsync([{ videoId: 'second' }, { videoId: 'third' }])
-  const update = db.history.updateAsync.bind(db.history)
-  db.history.updateAsync = (query, ...args) => {
-    if (query.videoId === 'second') throw new Error('Disk write failed')
-    return update(query, ...args)
-  }
   const result = await History.updateSubscriptionState({ metadata: [
     { videoId: 'video', lengthSeconds: 120 },
-    { videoId: 'second', lengthSeconds: 120 },
+    // A value the datastore rejects
+    { videoId: 'second', lengthSeconds: { $invalid: 120 } },
     { videoId: 'third', lengthSeconds: 120 },
   ] })
   assert.deepEqual(Array.from(result.records, record => record.videoId), ['video', 'third'])
@@ -229,6 +236,16 @@ test('failed repair acknowledgement leaves its marker for retry and clears the r
     if (query.videoId === 'second') throw new Error('Acknowledgement write failed')
     return update(query, ...args)
   }
+  // SQLite writes them in batches and reports each update's failure
+  const updateMany = db.history.updateManyAsync?.bind(db.history)
+  if (updateMany) {
+    db.history.updateManyAsync = async updates => {
+      const failed = updates.findIndex(({ query }) => query.videoId === 'second')
+      const results = await updateMany(updates.filter((_, index) => index !== failed))
+      results.splice(failed, 0, { error: new Error('Acknowledgement write failed') })
+      return results
+    }
+  }
   const result = await History.updateSubscriptionState({ acknowledgedRepairs: repairs })
   assert.deepEqual(Array.from(result.records, record => record.videoId), ['video', 'third'])
   assert.equal(result.failedCount, 1)
@@ -240,6 +257,7 @@ test('failed repair acknowledgement leaves its marker for retry and clears the r
     assert.equal(saved.lengthSeconds, 120)
   }
   db.history.updateAsync = update
+  if (updateMany) db.history.updateManyAsync = updateMany
   const retried = await History.updateSubscriptionState({ acknowledgedRepairs: repairs })
   assert.deepEqual(Array.from(retried.records, record => record.videoId), ['second'])
   assert.equal((await db.history.findOneAsync({ videoId: 'second' })).pendingDurationRepair, undefined)

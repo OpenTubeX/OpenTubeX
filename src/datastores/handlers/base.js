@@ -155,6 +155,45 @@ function historyReplacement(record) {
   return fields
 }
 
+// Bounds each transaction and, on mobile, each bridge message.
+const HISTORY_UPDATE_BATCH_SIZE = 100
+
+/**
+ * Applies history updates in batches, each committed in one transaction.
+ * @param {{ query: object, update: object, options?: object }[]} updates
+ * @returns {Promise<({ numAffected: number, affectedDocuments: unknown } | { error: Error })[]>}
+ *   each update's result, or its error, which is also every update's in a batch that could not be saved
+ */
+async function updateHistoryRecords(updates) {
+  const results = []
+  for (let index = 0; index < updates.length; index += HISTORY_UPDATE_BATCH_SIZE) {
+    const batch = updates.slice(index, index + HISTORY_UPDATE_BATCH_SIZE)
+    try {
+      if (typeof db.history.updateManyAsync === 'function') {
+        results.push(...await db.history.updateManyAsync(batch))
+      } else {
+        // NeDB, used by unit tests, cannot batch them.
+        for (const { query, update, options } of batch) {
+          try {
+            results.push(await db.history.updateAsync(query, update, options))
+          } catch (error) {
+            results.push({ error })
+          }
+        }
+      }
+    } catch (error) {
+      results.push(...batch.map(() => ({ error })))
+    }
+  }
+  return results
+}
+
+/** Throws the first failed update's error. */
+function throwHistoryUpdateError(results) {
+  const failed = results.find(result => result.error)
+  if (failed) throw failed.error
+}
+
 class History {
   static migrationPromise = null
 
@@ -185,41 +224,29 @@ class History {
   static updateSubscriptionState({ records = [], unseenVideo, metadata, acknowledgedRepairs }) {
     return Settings.runSeenStateUpdate(async () => {
       const updatedRecords = []
-      if (acknowledgedRepairs) {
-        let failedCount = 0
-        for (const repair of acknowledgedRepairs) {
+      if (acknowledgedRepairs || metadata) {
+        const updates = acknowledgedRepairs
           // Only clear the repair that reached the server. Another repair or
           // deletion while an upload was pending must remain untouched.
-          try {
-            const { affectedDocuments } = await db.history.updateAsync(
-              { videoId: repair.videoId, lengthSeconds: repair.lengthSeconds, pendingDurationRepair: repair.pendingDurationRepair },
-              { $unset: { pendingDurationRepair: true } },
-              { returnUpdatedDocs: true }
-            )
-            if (affectedDocuments) updatedRecords.push(affectedDocuments)
-          } catch (error) {
-            console.error(error)
-            failedCount++
-          }
-        }
-        return { records: updatedRecords, seenVideos: null, failedCount }
-      }
-      if (metadata) {
+          ? acknowledgedRepairs.map(repair => ({
+              query: { videoId: repair.videoId, lengthSeconds: repair.lengthSeconds, pendingDurationRepair: repair.pendingDurationRepair },
+              update: { $unset: { pendingDurationRepair: true } },
+            }))
+          : metadata.flatMap(patch => {
+              const fields = {}
+              for (const key of ['title', 'author', 'authorId', 'description', 'published', 'lengthSeconds', 'isLive', 'liveNow', 'isUpcoming', 'pendingDurationRepair']) {
+                if (patch[key] !== undefined) fields[key] = patch[key]
+              }
+              return Object.keys(fields).length === 0 ? [] : [{ query: { videoId: patch.videoId }, update: { $set: fields } }]
+            })
         let failedCount = 0
-        for (const patch of metadata) {
-          const fields = {}
-          for (const key of ['title', 'author', 'authorId', 'description', 'published', 'lengthSeconds', 'isLive', 'liveNow', 'isUpcoming', 'pendingDurationRepair']) {
-            if (patch[key] !== undefined) fields[key] = patch[key]
-          }
-          if (Object.keys(fields).length === 0) continue
-          try {
-            const { affectedDocuments } = await db.history.updateAsync(
-              { videoId: patch.videoId }, { $set: fields }, { returnUpdatedDocs: true }
-            )
-            if (affectedDocuments) updatedRecords.push(affectedDocuments)
-          } catch (error) {
+        const results = await updateHistoryRecords(updates.map(update => ({ ...update, options: { returnUpdatedDocs: true } })))
+        for (const { error, affectedDocuments } of results) {
+          if (error) {
             console.error(error)
             failedCount++
+          } else if (affectedDocuments) {
+            updatedRecords.push(affectedDocuments)
           }
         }
         return { records: updatedRecords, seenVideos: null, failedCount }
@@ -232,14 +259,12 @@ class History {
         )
         if (affectedDocuments) updatedRecords.push(affectedDocuments)
       } else {
-        for (const record of records) {
+        const results = await updateHistoryRecords(records.map(record => {
           const migratedRecord = historyReplacement(record)
-          const { affectedDocuments } = await db.history.updateAsync(
-            { videoId: migratedRecord.videoId }, migratedRecord,
-            { upsert: true, returnUpdatedDocs: true }
-          )
-          updatedRecords.push(affectedDocuments)
-        }
+          return { query: { videoId: migratedRecord.videoId }, update: migratedRecord, options: { upsert: true, returnUpdatedDocs: true } }
+        }))
+        throwHistoryUpdateError(results)
+        updatedRecords.push(...results.map(result => result.affectedDocuments))
       }
 
       let seenVideos = null
@@ -320,9 +345,9 @@ class History {
       ...updates,
       ...insertions.filter(record => stored.has(record.videoId) && !skipped.has(record.videoId)),
     ].map(historyReplacement)
-    for (const record of migratedUpdates) {
-      await db.history.updateAsync({ videoId: record.videoId }, record, { upsert: true })
-    }
+    throwHistoryUpdateError(await updateHistoryRecords(migratedUpdates.map(record => ({
+      query: { videoId: record.videoId }, update: record, options: { upsert: true },
+    }))))
     if (migratedInsertions.length > 0) {
       await db.history.insertAsync(migratedInsertions)
     }
@@ -353,29 +378,20 @@ class History {
     }
 
     const records = await db.history.findAsync({ isWatched: { $exists: false } })
-    const batchSize = 250
+    throwHistoryUpdateError(await updateHistoryRecords(records.map(record => {
+      const migratedRecord = migrateLegacyHistoryRecord(record)
+      const updates = { isWatched: migratedRecord.isWatched }
 
-    for (let i = 0; i < records.length; i += batchSize) {
-      const batch = records.slice(i, i + batchSize)
+      if (migratedRecord.watchProgress !== record.watchProgress) {
+        updates.watchProgress = migratedRecord.watchProgress
+      }
 
-      await Promise.all(batch.map(record => {
-        const migratedRecord = migrateLegacyHistoryRecord(record)
-        const updates = { isWatched: migratedRecord.isWatched }
+      if (migratedRecord.isLive !== record.isLive) {
+        updates.isLive = migratedRecord.isLive
+      }
 
-        if (migratedRecord.watchProgress !== record.watchProgress) {
-          updates.watchProgress = migratedRecord.watchProgress
-        }
-
-        if (migratedRecord.isLive !== record.isLive) {
-          updates.isLive = migratedRecord.isLive
-        }
-
-        return db.history.updateAsync(
-          { _id: record._id },
-          { $set: updates }
-        )
-      }))
-    }
+      return { query: { _id: record._id }, update: { $set: updates } }
+    })))
 
     if (records.length > 0) {
       await db.history.compactDatafileAsync()
