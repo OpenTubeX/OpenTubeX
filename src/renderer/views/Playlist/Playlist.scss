@@ -216,10 +216,16 @@
     margin-block-start: 28px;
   }
 
-  // Below this width the label reaches the duration's row, so keep only its icon.
+  // Below this width the label reaches the duration's row, so keep only its icon
+  // and leave the text to screen readers.
   @container playlist-thumbnail (width < 140px) {
     :deep(.ft-list-item.list .sponsorBlockVideoLabel > span:last-child) {
-      display: none;
+      position: absolute;
+      overflow: hidden;
+      clip-path: inset(50%);
+      block-size: 1px;
+      inline-size: 1px;
+      white-space: nowrap;
     }
   }
 

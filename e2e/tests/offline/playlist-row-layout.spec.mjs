@@ -168,7 +168,9 @@ for (const [uiScale, userPlaylistSortOrder] of [[100, 'date_added_descending'], 
             await page.locator('.sortSelect').hover()
             // Narrow thumbnails keep only the SponsorBlock icon.
             await expect(thumbnail.locator('.sponsorBlockVideoLabel .ft-icon')).toBeVisible()
-            await expect(thumbnail.locator('.sponsorBlockVideoLabel > span:last-child')).toBeHidden()
+            const sponsorBlockText = thumbnail.locator('.sponsorBlockVideoLabel > span:last-child')
+            await expect.poll(() => sponsorBlockText.evaluate(text => text.getBoundingClientRect().width)).toBeLessThanOrEqual(1)
+            await expect(thumbnail.locator('.sponsorBlockVideoLabel')).toMatchAriaSnapshot('- text: Self-Promotion')
             // The labels share the small desktop thumbnail without covering each other.
             await expect.poll(() => thumbnail.evaluate(element => {
               const rects = [...element.querySelectorAll('.playlistIndexBadge, .videoDuration, .videoWatched, .sponsorBlockVideoLabel')]
