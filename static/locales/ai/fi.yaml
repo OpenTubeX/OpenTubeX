@@ -496,6 +496,7 @@ Settings:
     Visible Search Suggestions: "Näkyvät hakuehdotukset"
     Material Accent Color: "Material-korostusväri"
     Material Wallpaper Colors: "Taustakuvan värit"
+    Material System Accent Color: "Järjestelmän korostusväri"
     Tab Loading Indicator:
       Tab Loading Indicator: Välilehden latausilmaisin
       Bar: Palkki

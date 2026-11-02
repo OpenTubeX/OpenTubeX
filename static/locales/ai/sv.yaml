@@ -494,6 +494,7 @@ Settings:
     Visible Search Suggestions: "Synliga sökförslag"
     Material Accent Color: "Material-accentfärg"
     Material Wallpaper Colors: "Bakgrundsbildens färger"
+    Material System Accent Color: "Systemets accentfärg"
     Tab Loading Indicator:
       Tab Loading Indicator: Indikator för flikinläsning
       Bar: Stapel

@@ -828,6 +828,7 @@ Settings:
   Theme Settings:
     Material Accent Color: "Material accent color"
     Material Wallpaper Colors: "Wallpaper colors"
+    Material System Accent Color: "System accent color"
     Tab Loading Indicator:
       Tab Loading Indicator: Tab Loading Style
       Bar: Bar

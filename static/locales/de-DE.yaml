@@ -597,6 +597,7 @@ Settings:
   Theme Settings:
     Material Accent Color: "Material-Akzentfarbe"
     Material Wallpaper Colors: "Farben des Hintergrundbilds"
+    Material System Accent Color: "Systemakzentfarbe"
     Tab Loading Indicator:
       Tab Loading Indicator: Tab-Ladeanzeige
       Bar: Balken

@@ -656,6 +656,7 @@ Settings:
   Theme Settings:
     Material Accent Color: Material-aksentkleur
     Material Wallpaper Colors: Muurpapierkleure
+    Material System Accent Color: "Stelselaksentkleur"
     Tab Loading Indicator:
       Tab Loading Indicator: Laaistyl van oortjies
       Bar: Balk

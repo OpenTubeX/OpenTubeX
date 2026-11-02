@@ -491,6 +491,7 @@ Settings:
     Visible Search Suggestions: "Nähtavad otsingusoovitused"
     Material Accent Color: "Materiali aktsentvärv"
     Material Wallpaper Colors: "Taustapildi värvid"
+    Material System Accent Color: "Süsteemi rõhuvärv"
     Tab Loading Indicator:
       Tab Loading Indicator: Vahekaardi laadimisnäidik
       Bar: Riba

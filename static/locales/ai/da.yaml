@@ -503,6 +503,7 @@ Settings:
     Visible Search Suggestions: "Synlige søgeforslag"
     Material Accent Color: "Material-accentfarve"
     Material Wallpaper Colors: "Farver fra baggrundsbilledet"
+    Material System Accent Color: "Systemets accentfarve"
     Tab Loading Indicator:
       Tab Loading Indicator: Indikator for faneindlæsning
       Bar: Bjælke

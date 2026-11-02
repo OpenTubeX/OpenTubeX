@@ -464,6 +464,7 @@ Settings:
     Visible Search Suggestions: "Видимые подсказки поиска"
     Material Accent Color: "Акцентный цвет Material"
     Material Wallpaper Colors: "Цвета обоев"
+    Material System Accent Color: "Системный цвет акцента"
     Tab Loading Indicator:
       Tab Loading Indicator: Индикатор загрузки вкладки
       Bar: Полоса

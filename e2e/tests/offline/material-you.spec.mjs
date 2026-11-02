@@ -336,6 +336,43 @@ test('a synced system seed follows desktop accents and survives a canceled custo
   await expect(page.locator('body')).toHaveCSS('--primary-color', materialColorScheme(materialSeedPalette('#006a6a'), false).primary)
 })
 
+/** Mocks the accent color Electron reports, which follows the host desktop otherwise. */
+function setDesktopAccent(app, color) {
+  return app.electronApp.evaluate(({ systemPreferences }, color) => {
+    systemPreferences.getAccentColor = () => color
+    systemPreferences.emit('accent-color-changed', {}, color)
+  }, color)
+}
+
+test('a desktop accent color adds a system swatch that follows it', async ({ app, page }, testInfo) => {
+  await page.emulateMedia({ colorScheme: 'light' })
+  const section = await goToSettingsSection(page, 'theme')
+  const systemSwatch = section.locator('.materialColorSwatches').getByRole('button', { name: 'System accent color', exact: true })
+  // Without an accent, as on desktops that set none
+  await setDesktopAccent(app, '')
+  await expect(systemSwatch).toHaveCount(0)
+
+  for (const [nativeColor, seed] of [['#895AA2FF', '#895aa2'], ['006A6AFF', '#006a6a']]) {
+    await setDesktopAccent(app, nativeColor)
+    const primary = materialColorScheme(materialSeedPalette(seed), false).primary
+    await expect(systemSwatch).toHaveCSS('--swatch-primary', primary)
+    if (seed === '#895aa2') {
+      await systemSwatch.click()
+      await expect(systemSwatch).toHaveAttribute('aria-pressed', 'true')
+      await expect(section.locator('.materialColorHeader code')).toHaveText('System accent color')
+      await expect.poll(() => page.evaluate(() => window.$store.getters.getMaterialSeedColor)).toBe('system')
+      await section.locator('.materialColorSettings').scrollIntoViewIfNeeded()
+      const path = testInfo.outputPath('desktop-system-accent-swatch.png')
+      await section.locator('.materialColorSettings').screenshot({ path })
+      await testInfo.attach('Desktop system accent swatch', { path, contentType: 'image/png' })
+    }
+    await expect(page.locator('body')).toHaveCSS('--primary-color', primary)
+  }
+
+  await setDesktopAccent(app, '')
+  await expect(systemSwatch).toHaveCount(0)
+})
+
 test('seed picker persists colors, system preferences select Material variants, and ordinary themes clear the palette', async ({ page }) => {
   const section = await goToSettingsSection(page, 'theme')
   await section.getByRole('button', { name: 'Material accent color' }).click()
@@ -389,6 +426,8 @@ test('Material seed picker fits narrow portrait and landscape layouts', async ({
 })
 
 test('Material preset swatches preview palettes and persist the selected seed', async ({ app, page }) => {
+  // The host desktop's accent would add a system swatch
+  await setDesktopAccent(app, '')
   const section = await goToSettingsSection(page, 'theme')
   const swatches = section.locator('.materialColorSwatches > button')
   await expect(swatches).toHaveCount(8)

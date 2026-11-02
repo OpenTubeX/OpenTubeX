@@ -256,6 +256,7 @@ Settings:
     Use Custom Title Bar: Użyj niestandardowego paska tytułu
     Material Accent Color: "Kolor akcentu Material"
     Material Wallpaper Colors: "Kolory tapety"
+    Material System Accent Color: "Systemowy kolor akcentu"
     Tab Loading Indicator:
       Tab Loading Indicator: Wskaźnik ładowania karty
       Bar: Pasek
