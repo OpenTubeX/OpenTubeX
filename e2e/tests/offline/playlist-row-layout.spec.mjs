@@ -79,12 +79,12 @@ for (const [uiScale, userPlaylistSortOrder] of [[100, 'date_added_descending'], 
               const thumbnail = element.querySelector('.videoThumbnail')
               const info = element.querySelector('.infoLine')
               const numberedRow = element.closest('.playlistItem').getBoundingClientRect()
-              const indexParts = [...element.closest('.playlistItem').querySelectorAll('.videoIndex, .grabBar')]
-                .filter(part => part.getClientRects().length > 0)
-                .map(part => part.getBoundingClientRect())
-              const indexCenter = (Math.min(...indexParts.map(part => part.top)) + Math.max(...indexParts.map(part => part.bottom))) / 2
+              const grabBar = element.closest('.playlistItem').querySelector('.grabBar')
+              const grabBarRect = grabBar?.getClientRects().length > 0 ? grabBar.getBoundingClientRect() : null
               const thumbnailRect = thumbnail.getBoundingClientRect()
               const thumbnailCenter = thumbnailRect.top + thumbnailRect.height / 2
+              const badge = thumbnail.querySelector('.playlistIndexBadge').getBoundingClientRect()
+              const watched = thumbnail.querySelector('.videoWatched')?.getBoundingClientRect()
               const contentCenter = (title.getBoundingClientRect().top + info.getBoundingClientRect().bottom) / 2
               const style = getComputedStyle(title)
               return {
@@ -95,7 +95,10 @@ for (const [uiScale, userPlaylistSortOrder] of [[100, 'date_added_descending'], 
                 metadataFontSize: parseFloat(getComputedStyle(info).fontSize),
                 overflow: Math.max(element.getBoundingClientRect().right, title.getBoundingClientRect().right, info.getBoundingClientRect().right) - document.documentElement.clientWidth,
                 thumbnailRatio: thumbnail.getBoundingClientRect().width / thumbnail.getBoundingClientRect().height,
-                indexCenterDifference: Math.abs(indexCenter - thumbnailCenter),
+                indexAreaShown: element.closest('.playlistItem').querySelector('.videoIndexArea').getClientRects().length > 0,
+                grabBarCenterDifference: grabBarRect ? Math.abs(grabBarRect.top + grabBarRect.height / 2 - thumbnailCenter) : null,
+                badgeOffset: Math.max(Math.abs(badge.left - thumbnailRect.left - 4), Math.abs(badge.top - thumbnailRect.top - 4)),
+                badgeClearsWatched: !watched || badge.right <= watched.left,
                 rowCenterDifference: Math.abs(thumbnailCenter - numberedRow.top - numberedRow.height / 2)
               }
             })
@@ -105,7 +108,11 @@ for (const [uiScale, userPlaylistSortOrder] of [[100, 'date_added_descending'], 
             expect(geometry.metadataFontSize).toBeLessThan(geometry.fontSize)
             expect(geometry.overflow).toBeLessThanOrEqual(1)
             expect(geometry.thumbnailRatio).toBeCloseTo(16 / 9, 1)
-            expect(geometry.indexCenterDifference).toBeLessThanOrEqual(2)
+            // Without a reorder handle, the thumbnail takes the empty handle column.
+            expect(geometry.indexAreaShown).toBe(userPlaylistSortOrder === 'custom')
+            if (userPlaylistSortOrder === 'custom') expect(geometry.grabBarCenterDifference).toBeLessThanOrEqual(1)
+            expect(geometry.badgeOffset).toBeLessThanOrEqual(1)
+            expect(geometry.badgeClearsWatched).toBe(true)
             expect(geometry.rowCenterDifference).toBeLessThanOrEqual(1)
           }).toPass({ timeout: 15_000 })
         }
@@ -135,8 +142,10 @@ for (const [uiScale, userPlaylistSortOrder] of [[100, 'date_added_descending'], 
           label.textContent = 'Self-Promotion'
           element.append(label)
         })
-        const badges = thumbnail.locator('.videoDuration, .videoWatched, .sponsorBlockVideoLabel')
-        await expect(badges).toHaveCount(3)
+        // A long localized Watched label must not cover the index badge.
+        await thumbnail.locator('.videoWatched').evaluate(label => { label.textContent = 'Παρακολουθήθηκε' })
+        const badges = thumbnail.locator('.playlistIndexBadge, .videoDuration, .videoWatched, .sponsorBlockVideoLabel')
+        await expect(badges).toHaveCount(4)
         const actions = thumbnail.locator('.playlistIcons')
         const buttons = actions.locator('button')
         for (const theme of ['dark', 'light']) {
@@ -149,6 +158,14 @@ for (const [uiScale, userPlaylistSortOrder] of [[100, 'date_added_descending'], 
             { width: 375, height: 812, mobile: true }
           ]) {
             await setWindowSize(app, page, { width, height })
+            await page.locator('.sortSelect').hover()
+            // The index badge shares the thumbnail with the other labels without covering them.
+            await expect.poll(() => thumbnail.evaluate(element => {
+              const index = element.querySelector('.playlistIndexBadge').getBoundingClientRect()
+              return [...element.querySelectorAll('.videoDuration, .videoWatched, .sponsorBlockVideoLabel')]
+                .map(badge => badge.getBoundingClientRect())
+                .every(badge => index.right <= badge.left + 0.5 || index.bottom <= badge.top + 0.5)
+            })).toBe(true)
             if (mobile) {
               await expect(actions).toHaveClass(/mobileThumbnailActions/)
               await expect(actions).toBeHidden()

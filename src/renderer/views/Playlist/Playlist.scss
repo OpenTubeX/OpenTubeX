@@ -149,6 +149,15 @@
   column-gap: 8px;
   align-items: center;
 
+  // The index moved into the thumbnail, so only the reorder handle needs a column.
+  &:not(.draggable) {
+    grid-template-columns: minmax(0, 1fr);
+
+    :deep(.videoIndexArea) {
+      display: none;
+    }
+  }
+
   :deep(.ft-list-item.list) {
     align-items: center;
   }
@@ -164,6 +173,16 @@
   :deep(.ft-list-item.list .videoThumbnail) {
     margin-block: 0;
     margin-inline-end: 12px;
+    // Give the index badge its own column so a long Watched label cannot cover it.
+    grid-template-columns: max-content minmax(0, 1fr);
+
+    > * {
+      grid-column: 1 / -1;
+    }
+
+    .playlistIndexBadge {
+      grid-column: 1;
+    }
   }
 
   :deep(.ft-list-item.list .thumbnailImage),
@@ -175,6 +194,25 @@
   :deep(.ft-list-item.list .thumbnailImage) {
     aspect-ratio: 16 / 9;
     object-fit: cover;
+  }
+
+  // The index badge takes the top-left corner, as in the watch page playlist.
+  :deep(.ft-list-item.list .videoThumbnail .videoWatched) {
+    grid-column: 2;
+    place-self: start end;
+    min-inline-size: 0;
+    box-sizing: border-box;
+    max-inline-size: calc(100% - 4px);
+    font-size: 12px;
+    margin-block-start: 4px;
+    margin-inline-end: 4px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  :deep(.ft-list-item.list .sponsorBlockVideoLabel) {
+    margin-block-start: 28px;
   }
 
   // Small thumbnails fit two rows of desktop actions without changing their size.
@@ -203,6 +241,7 @@
       }
 
       // Show controls in place of passive badges during interaction.
+      .playlistIndexBadge,
       .videoWatched,
       .sponsorBlockVideoLabel,
       .videoDuration {

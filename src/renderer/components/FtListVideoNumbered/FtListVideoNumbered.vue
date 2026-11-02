@@ -34,22 +34,11 @@
           :icon="['fas', 'play']"
         />
 
-        <template
-          v-else
-        >
-          <FtIcon
-            v-if="canBecomeDraggable"
-            class="grabBar"
-            :icon="['fas', 'bars']"
-          />
-
-          <span
-            v-if="showIndex"
-            class="videoIndex"
-          >
-            {{ videoIndex + 1 }}
-          </span>
-        </template>
+        <FtIcon
+          v-else-if="canBecomeDraggable"
+          class="grabBar"
+          :icon="['fas', 'bars']"
+        />
         <FtIcon
           v-if="downloadAvailable"
           class="downloadAvailableIcon"
@@ -63,6 +52,7 @@
         :playlist-id="playlistId"
         :playlist-type="playlistType"
         :playlist-index="playlistIndex"
+        :thumbnail-index="videoIndex"
         :playlist-reverse="playlistReverse"
         :playlist-shuffle="playlistShuffle"
         :playlist-loop="playlistLoop"
@@ -192,11 +182,7 @@ const props = defineProps({
   },
   videoIndex: {
     type: Number,
-    default: -1
-  },
-  showIndex: {
-    type: Boolean,
-    default: true
+    default: null
   },
   isCurrentVideo: {
     type: Boolean,

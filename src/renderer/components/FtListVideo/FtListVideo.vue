@@ -105,10 +105,10 @@
           />
         </RouterLink>
         <div
-          v-if="showPlaylistIndex"
+          v-if="thumbnailIndex !== null"
           class="playlistIndexBadge"
         >
-          {{ playlistIndex + 1 }}
+          {{ thumbnailIndex + 1 }}
         </div>
         <div
           v-if="isLive || isUpcoming || isStation || localDownloadId !== undefined || (displayDuration !== '' && displayDuration !== '0:00')"
@@ -605,6 +605,10 @@ const props = defineProps({
     default: ''
   },
   playlistIndex: {
+    type: Number,
+    default: null
+  },
+  thumbnailIndex: {
     type: Number,
     default: null
   },
@@ -1885,8 +1889,6 @@ const displayTitle = computed(() => {
 
 // Clamped titles show their full text on hover.
 const fullTitleTooltip = computed(() => store.getters.getLimitTitlesToTwoLines ? displayTitle.value : null)
-
-const showPlaylistIndex = computed(() => props.appearance === 'watchPlaylistItem' && props.playlistIndex !== null)
 
 const displayDuration = computed(() => {
   if (useDeArrowTitles.value && (duration.value === '' || duration.value === '0:00') && deArrowCache.value?.videoDuration) {

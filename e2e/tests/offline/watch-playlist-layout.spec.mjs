@@ -78,7 +78,6 @@ test('playing playlist shows thumbnail numbers and retains reorder controls', { 
   const watch = await openPlaylist(app, page)
   const panel = page.locator('.watchVideoPlaylist').filter({ visible: true })
   await expect(panel.locator('.playlistIndex label')).toHaveText('1 / 12')
-  await expect(panel.locator('.videoIndex')).toHaveCount(0)
   await expect(panel.locator('.videoIndexIcon')).toBeVisible()
   const secondRow = panel.locator('.playlistItem').nth(1)
   await expect(secondRow.locator('.grabBar')).toBeVisible()

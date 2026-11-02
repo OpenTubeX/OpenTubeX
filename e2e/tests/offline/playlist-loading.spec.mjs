@@ -95,7 +95,7 @@ test('loads an Invidious Mix response from the playlist endpoint', async ({ page
   const watchPlaylist = page.locator('.watchVideoPlaylist')
   await expect(watchPlaylist.locator('.playlistItem')).toHaveCount(2)
   await expect(watchPlaylist.locator('.playlistIndex label')).toHaveText('1 / 2')
-  await expect(watchPlaylist.locator('.videoIndex')).toHaveCount(0)
+  await expect(watchPlaylist.locator('.playlistIndexBadge')).toHaveText(['1', '2'])
   await expect(watchPlaylist.locator('.videoIndexIcon')).toHaveCount(1)
 })
 
@@ -551,7 +551,7 @@ test.describe('YouTube playlist search', () => {
 
     const items = playlistPage.locator('.playlistItem')
     await expect(items).toHaveCount(11)
-    await expect(items.first().locator('.videoIndex')).toHaveText('25')
+    await expect(items.first().locator('.playlistIndexBadge')).toHaveText('25')
     await expect(playlistPage.getByText('Playlist video 250', { exact: true })).toBeVisible()
     await expect(playlistPage.locator('.ft-auto-load-next-page-wrapper')).toHaveCount(0)
     expect(requestedPages).toEqual([2, 3])
@@ -617,7 +617,7 @@ test.describe('YouTube playlist search', () => {
 
     await openPlaylistTab(page, '/playlist/members-only')
     const playlistPage = page.locator('.playlistPage')
-    const indexes = playlistPage.locator('.playlistItem .videoIndex')
+    const indexes = playlistPage.locator('.playlistItem .playlistIndexBadge')
     await expect(indexes).toHaveText(['1', '2'])
     const thirdVideo = playlistPage.locator('.playlistItem').filter({ hasText: 'Playlist video 3' })
     await thirdVideo.locator('.externalPlayerIcon').click()
@@ -667,6 +667,6 @@ test.describe('user playlist search', () => {
     await openPlaylistTab(page, '/playlist/duration-sorted?playlistType=user&searchQueryText=clip')
     const items = page.locator('.playlistPage .playlistItem')
     await expect(items).toHaveCount(2)
-    await expect(items.locator('.videoIndex')).toHaveText(['2', '1'])
+    await expect(items.locator('.playlistIndexBadge')).toHaveText(['2', '1'])
   })
 })
