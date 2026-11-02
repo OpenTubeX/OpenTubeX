@@ -112,8 +112,10 @@ body {
   background-color: var(--selection-background-color);
 }
 
-/* Digital wellbeing. A filter on the root element keeps fixed positioning intact. */
-:root.grayscale {
+/* Digital wellbeing. A filter on the root element keeps fixed positioning intact.
+   Top-layer elements render outside the root element, so they need their own filter. */
+:root.grayscale,
+:root.grayscale :is(:fullscreen, :modal, :popover-open) {
   filter: grayscale(1);
 }
 

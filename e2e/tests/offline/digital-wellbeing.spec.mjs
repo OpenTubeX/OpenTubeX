@@ -1,5 +1,6 @@
 import { test, expect, goTo, goToSettingsSection } from '../../helpers/app.mjs'
 import { openMockedVideo } from '../../helpers/player.mjs'
+import { sampleColors } from '../../helpers/colors.mjs'
 import { mockPlayableWatchPage, watchViewHandle } from '../../helpers/watch.mjs'
 
 /**
@@ -278,6 +279,25 @@ test.describe('grayscale', () => {
     await page.getByRole('option', { name: 'Off' }).click()
     await expect(root).not.toHaveClass(/(^|\s)grayscale(\s|$)/)
   })
+
+  // Top-layer elements render outside the root element, so its filter does not reach them.
+  for (const layer of ['fullscreen', 'modal', 'popover']) {
+    test(`a ${layer} element turns grayscale too`, async ({ app, page }) => {
+      await page.evaluate(async layer => {
+        const element = document.createElement(layer === 'modal' ? 'dialog' : 'div')
+        element.className = 'grayscaleProbe'
+        element.style.cssText = 'background: rgb(255, 0, 0); width: 200px; height: 200px; padding: 0; border: 0'
+        if (layer === 'popover') element.popover = 'manual'
+        document.body.append(element)
+        if (layer === 'fullscreen') await element.requestFullscreen()
+        else if (layer === 'modal') element.showModal()
+        else element.showPopover()
+      }, layer)
+
+      const [[red, green, blue]] = await sampleColors(app, page.locator('.grayscaleProbe'), [[20, 20]])
+      expect(Math.max(red, green, blue) - Math.min(red, green, blue)).toBeLessThanOrEqual(2)
+    })
+  }
 })
 
 test.describe('distraction free tabs', () => {
