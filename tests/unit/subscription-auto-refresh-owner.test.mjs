@@ -85,10 +85,13 @@ for (const [name, lose] of [
     setBackground = async () => {}
 
     lose(owner)
+    const updatesBefore = visibilityUpdates
     leaveForeground()
 
     assert.equal(await acquiring, false)
     assert.equal(refresh.isSubscriptionAutoRefreshInProgress(), false)
+    // Acquiring left the background, and no refresh will restore it
+    assert.equal(visibilityUpdates, updatesBefore + 1)
     assert.equal(await acquire(owner), true)
     await release(owner)
   })

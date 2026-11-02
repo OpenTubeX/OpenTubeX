@@ -117,7 +117,11 @@ export function setupSubscriptionAutoRefreshIpc({ backgroundSubscriptions, updat
     }
 
     await backgroundSubscriptions.setBackground(false)
-    if (!canAcquire() || isSubscriptionAutoRefreshInProgress()) return false
+    if (!canAcquire() || isSubscriptionAutoRefreshInProgress()) {
+      // No release restores the background work of a refresh that never started
+      updateBackgroundSubscriptionVisibility()
+      return false
+    }
     const owner = event.sender
     subscriptionAutoRefreshOwner = {
       webContents: owner,
