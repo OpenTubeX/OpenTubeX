@@ -82,6 +82,21 @@ export function showInAppNotification(entry) {
 }
 
 let collecting = null
+let collectAgain = false
+
+async function collectOnce() {
+  collectFiredCapacitorReminders()
+  const additions = (await takeAndroidUploadNotifications()).flatMap(({ feedType, id, live, title, body, createdAt, inApp, thumbnail }) => {
+    const target = getUploadTarget(feedType, id, live === true)
+    return target && typeof title === 'string' && typeof body === 'string' && Number.isFinite(createdAt)
+      ? [{ title, body, createdAt, ...target, thumbnail, inApp: inApp === true }]
+      : []
+  })
+  const inApp = new Set(additions.filter(addition => addition.inApp).map(({ path, createdAt }) => `${path} ${createdAt}`))
+  for (const entry of capacitorNotificationHistory.add(additions)) {
+    if (inApp.has(`${entry.path} ${entry.createdAt}`)) showInAppNotification(entry)
+  }
+}
 
 /**
  * Adds the notifications the mobile system showed without the app, such as
@@ -90,18 +105,16 @@ let collecting = null
  */
 export function collectNotificationHistory() {
   if (!process.env.IS_CAPACITOR) return Promise.resolve()
-  collecting ??= (async () => {
-    collectFiredCapacitorReminders()
-    const additions = (await takeAndroidUploadNotifications()).flatMap(({ feedType, id, live, title, body, createdAt, inApp, thumbnail }) => {
-      const target = getUploadTarget(feedType, id, live === true)
-      return target && typeof title === 'string' && typeof body === 'string' && Number.isFinite(createdAt)
-        ? [{ title, body, createdAt, ...target, thumbnail, inApp: inApp === true }]
-        : []
-    })
-    const inApp = new Set(additions.filter(addition => addition.inApp).map(({ path, createdAt }) => `${path} ${createdAt}`))
-    for (const entry of capacitorNotificationHistory.add(additions)) {
-      if (inApp.has(`${entry.path} ${entry.createdAt}`)) showInAppNotification(entry)
-    }
+  if (collecting) {
+    // Android may have queued more since the running pass took its queue.
+    collectAgain = true
+    return collecting
+  }
+  collecting = (async () => {
+    do {
+      collectAgain = false
+      await collectOnce()
+    } while (collectAgain)
   })()
     .catch(error => console.error('Failed to collect shown notifications', error))
     .finally(() => { collecting = null })

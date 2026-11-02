@@ -1,0 +1,40 @@
+import assert from 'node:assert/strict'
+import test from 'node:test'
+import { importWithStubs, sourceUrl } from '../helpers/module-stubs.mjs'
+
+process.env.IS_CAPACITOR = 'true'
+
+const queues = []
+const added = []
+let gate = null
+const [{ collectNotificationHistory }] = await importWithStubs([sourceUrl('src/renderer/helpers/notificationHistory.js')], {
+  [sourceUrl('src/renderer/helpers/androidSubscriptionRefresh.js')]: {
+    takeAndroidUploadNotifications: async () => {
+      const notifications = queues.shift() ?? []
+      await gate?.promise
+      return notifications
+    }
+  },
+  [sourceUrl('src/renderer/helpers/capacitorNotificationHistory.js')]: {
+    capacitorNotificationHistory: { add: additions => { added.push(...additions); return [] } }
+  },
+  [sourceUrl('src/renderer/helpers/liveReminders.js')]: { collectFiredCapacitorReminders: () => {} },
+  [sourceUrl('src/renderer/helpers/utils.js')]: { getVideoThumbnailUrl: () => null, openInternalPath: () => {}, showToast: () => {} },
+  [sourceUrl('src/renderer/i18n/index.js')]: { default: { global: { t: key => key } } },
+  [sourceUrl('src/renderer/store/index.js')]: { default: { getters: {}, dispatch: () => {} } }
+})
+
+const upload = id => ({ feedType: 'videos', id, live: false, title: 'New video', body: id, createdAt: 1, inApp: true })
+
+test('a collection requested while one runs also takes what Android queued meanwhile', async () => {
+  queues.push([upload('first')])
+  gate = Promise.withResolvers()
+  const running = collectNotificationHistory()
+  // The running pass already took the queue when Android adds the next upload.
+  await Promise.resolve()
+  queues.push([upload('second')])
+  const requested = collectNotificationHistory()
+  gate.resolve()
+  await Promise.all([running, requested])
+  assert.deepEqual(added.map(addition => addition.body), ['first', 'second'])
+})
