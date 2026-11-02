@@ -514,6 +514,7 @@ Settings:
     Visible Search Suggestions: "اقتراحات البحث المرئية"
     Material Accent Color: "لون تمييز Material"
     Material Wallpaper Colors: "ألوان الخلفية"
+    Material System Accent Color: "لون التمييز للنظام"
     Tab Loading Indicator:
       Tab Loading Indicator: مؤشر تحميل علامة التبويب
       Bar: شريط

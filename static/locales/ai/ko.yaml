@@ -612,6 +612,7 @@ Settings:
     Visible Search Suggestions: "표시할 검색 추천 수"
     Material Accent Color: "Material 강조 색상"
     Material Wallpaper Colors: "배경화면 색상"
+    Material System Accent Color: "시스템 강조 색상"
     Tab Loading Indicator:
       Tab Loading Indicator: 탭 로딩 표시
       Bar: 막대

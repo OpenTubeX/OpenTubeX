@@ -6,15 +6,15 @@
   >
     <div class="materialColorHeader">
       <span>{{ t('Settings.Theme Settings.Material Accent Color') }}</span>
-      <code>{{ systemSelected ? t('Settings.Theme Settings.Material Wallpaper Colors') : modelValue }}</code>
+      <code>{{ systemSelected ? systemLabel : modelValue }}</code>
     </div>
     <div class="materialColorSwatches">
       <button
         v-if="systemScheme"
         type="button"
         class="materialColorSwatch"
-        :aria-label="t('Settings.Theme Settings.Material Wallpaper Colors')"
-        :title="t('Settings.Theme Settings.Material Wallpaper Colors')"
+        :aria-label="systemLabel"
+        :title="systemLabel"
         :aria-pressed="systemSelected"
         :style="swatchStyle(systemScheme)"
         @click="emit('update:modelValue', MATERIAL_SYSTEM_SEED)"
@@ -24,7 +24,7 @@
           aria-hidden="true"
         >
           <FtIcon
-            :icon="['fas', 'wallpaper']"
+            :icon="['fas', androidDynamicColors.supported ? 'wallpaper' : 'display']"
             class="materialSwatchCheck"
             aria-hidden="true"
           />
@@ -88,7 +88,7 @@ import { computed, onBeforeUnmount, ref } from 'vue'
 import FtColorPicker from '../../FtColorPicker/FtColorPicker.vue'
 import FtIcon from '../../FtIcon/FtIcon.vue'
 import { MATERIAL_SEED_PRESETS, MATERIAL_SYSTEM_SEED, materialColorScheme, materialSeedPalette } from '../../../../materialTheme.js'
-import { androidDynamicColors, getMaterialPalette } from '../../../helpers/dynamicColors.js'
+import { androidDynamicColors, desktopSystemAccentColor, getMaterialPalette } from '../../../helpers/dynamicColors.js'
 
 const { t, tm } = useI18n()
 const colorNames = computed(() => tm('Settings.Theme Settings.Main Color Theme'))
@@ -100,9 +100,13 @@ const presets = MATERIAL_SEED_PRESETS.map(preset => ({
 const props = defineProps({ modelValue: { type: String, required: true } })
 const emit = defineEmits(['update:modelValue'])
 
-const systemScheme = computed(() => androidDynamicColors.value.supported
-  ? materialColorScheme(androidDynamicColors.value.palette, false)
+// Android offers its wallpaper palette, desktops their accent color.
+const systemScheme = computed(() => androidDynamicColors.value.supported || desktopSystemAccentColor.value
+  ? materialColorScheme(getMaterialPalette(MATERIAL_SYSTEM_SEED), false)
   : null)
+const systemLabel = computed(() => androidDynamicColors.value.supported
+  ? t('Settings.Theme Settings.Material Wallpaper Colors')
+  : t('Settings.Theme Settings.Material System Accent Color'))
 const systemSelected = computed(() => props.modelValue === MATERIAL_SYSTEM_SEED)
 const draftColor = ref(null)
 const customColor = computed(() => draftColor.value ?? (systemSelected.value

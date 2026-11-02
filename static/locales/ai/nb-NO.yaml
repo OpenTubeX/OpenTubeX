@@ -509,6 +509,7 @@ Settings:
     Visible Search Suggestions: "Synlige søkeforslag"
     Material Accent Color: "Material-aksentfarge"
     Material Wallpaper Colors: "Farger fra bakgrunnsbildet"
+    Material System Accent Color: "Systemets aksentfarge"
     Tab Loading Indicator:
       Tab Loading Indicator: Indikator for fanelasting
       Bar: Linje

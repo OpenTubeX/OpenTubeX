@@ -509,6 +509,7 @@ Settings:
     Visible Search Suggestions: "表示する検索候補の数"
     Material Accent Color: "Material のアクセントカラー"
     Material Wallpaper Colors: "壁紙の色"
+    Material System Accent Color: "システムのアクセントカラー"
     Tab Loading Indicator:
       Tab Loading Indicator: タブの読み込み表示
       Bar: バー

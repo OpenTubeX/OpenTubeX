@@ -509,6 +509,7 @@ Settings:
     Visible Search Suggestions: "Viditelné návrhy vyhledávání"
     Material Accent Color: "Barva zvýraznění Material"
     Material Wallpaper Colors: "Barvy tapety"
+    Material System Accent Color: "Systémová barva zvýraznění"
     Tab Loading Indicator:
       Tab Loading Indicator: Indikátor načítání karty
       Bar: Pruh

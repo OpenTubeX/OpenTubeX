@@ -509,6 +509,7 @@ Settings:
     Visible Search Suggestions: "Suggestions de recherche visibles"
     Material Accent Color: "Couleur d’accent Material"
     Material Wallpaper Colors: "Couleurs du fond d’écran"
+    Material System Accent Color: "Couleur d'accentuation du système"
     Tab Loading Indicator:
       Tab Loading Indicator: Indicateur de chargement des onglets
       Bar: Barre

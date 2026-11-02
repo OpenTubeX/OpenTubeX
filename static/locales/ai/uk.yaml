@@ -514,6 +514,7 @@ Settings:
     Visible Search Suggestions: "Видимі підказки пошуку"
     Material Accent Color: "Акцентний колір Material"
     Material Wallpaper Colors: "Кольори шпалер"
+    Material System Accent Color: "Системний колір акценту"
     Tab Loading Indicator:
       Tab Loading Indicator: Індикатор завантаження вкладки
       Bar: Смуга

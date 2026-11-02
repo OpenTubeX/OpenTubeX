@@ -509,6 +509,7 @@ Settings:
     Visible Search Suggestions: "Görünür arama önerileri"
     Material Accent Color: "Material vurgu rengi"
     Material Wallpaper Colors: "Duvar kağıdı renkleri"
+    Material System Accent Color: "Sistem vurgu rengi"
     Tab Loading Indicator:
       Tab Loading Indicator: Sekme yükleme göstergesi
       Bar: Çubuk

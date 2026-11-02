@@ -509,6 +509,7 @@ Settings:
     Visible Search Suggestions: "可见搜索建议数"
     Material Accent Color: "Material 强调色"
     Material Wallpaper Colors: "壁纸颜色"
+    Material System Accent Color: "系统强调色"
     Tab Loading Indicator:
       Tab Loading Indicator: 标签页加载指示器
       Bar: 进度条
