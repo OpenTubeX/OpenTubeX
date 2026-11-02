@@ -17,7 +17,7 @@ import Datastore from '@seald-io/nedb'
 
 import { encryptLegacyDocument } from '../helpers/encrypt-legacy-sync-document.mjs'
 import { CUSTOM_THEMES_SYNC_KEY, DEFAULT_CUSTOM_THEME, normalizeCustomThemes } from '../../src/customTheme.js'
-import { areSyncSettingValuesEqual, mergeSettingEntry, migrateLegacyRemoteSettings, resolveMergedThemeEntry } from '../../src/renderer/helpers/sync-settings-conflict.js'
+import { areSyncSettingValuesEqual, mergeSettingEntry, migrateLegacySyncedSettings, resolveMergedThemeEntry } from '../../src/renderer/helpers/sync-settings-conflict.js'
 
 import * as errors from '../../src/renderer/helpers/sync-server-errors.js'
 import * as privacy from '../../src/renderer/helpers/sync-server-privacy.js'
@@ -146,7 +146,7 @@ function fixture (overrides = {}, { encrypted = false, respond, connectionState 
     normalizeCustomThemes,
     areSyncSettingValuesEqual,
     mergeSettingEntry,
-    migrateLegacyRemoteSettings,
+    migrateLegacySyncedSettings,
     resolveMergedThemeEntry,
     getSyncableSettingKeys: () => syncableSettingKeys,
     isSettingSyncEnabled: (settings, key) => !settings.syncServerSettingsExcluded?.includes(key),

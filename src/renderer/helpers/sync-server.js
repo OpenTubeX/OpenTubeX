@@ -43,7 +43,7 @@ import { isValidSyncServerDeviceId } from './sync-server-sessions'
 import {
   areSyncSettingValuesEqual,
   mergeSettingEntry,
-  migrateLegacyRemoteSettings,
+  migrateLegacySyncedSettings,
   resolveMergedThemeEntry,
 } from './sync-settings-conflict'
 import { getCapacitorTabService } from '../tabs/CapacitorTabService'
@@ -1402,9 +1402,11 @@ export async function syncSessions(client, store, previous = null, { accountClie
   return merged
 }
 
-export async function syncSettings(client, store, previous = {}) {
+export async function syncSettings(client, store, previousSnapshot = {}) {
   const remoteEntries = await client.getSettings()
-  const remote = migrateLegacyRemoteSettings(Object.fromEntries(remoteEntries.map(entry => [entry.key, entry])))
+  // Migrate the last synced snapshot too, so local edits made before the first sync keep their edit time.
+  const previous = migrateLegacySyncedSettings(previousSnapshot)
+  const remote = migrateLegacySyncedSettings(Object.fromEntries(remoteEntries.map(entry => [entry.key, entry])))
   // Keep the server's entry order even when devices sync different keys.
   // Reordering unchanged settings would create revisions that wake each other.
   const merged = { ...remote }
