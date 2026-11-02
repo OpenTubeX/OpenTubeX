@@ -1901,6 +1901,8 @@ Video:
   How this was made: Como se fixo
   Save Queue to Playlist: "Gardar a cola nunha lista de reprodución"
   Live Chat is currently not supported with the Yattee server. A direct connection to YouTube is required.: O chat en directo non é compatible actualmente co servidor Yattee. Precísase dunha conexión directa con YouTube.
+  External Player:
+    LaunchFailedTemplate: Non se puido iniciar {externalPlayer}. Comproba que está instalado ou define a ruta do executable na configuración do reprodutor externo.
 Playlist:
   Playlist Already Preloaded: "Todos os vídeos da lista xa están precargados"
   Playlist Preload Progress: "Precargando vídeos: {completed} de {requested}"

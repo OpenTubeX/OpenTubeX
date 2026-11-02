@@ -1850,6 +1850,8 @@ Video:
       unlisted: "未公開"
   Save Queue to Playlist: "將佇列儲存至播放清單"
   Live Chat is currently not supported with the Yattee server. A direct connection to YouTube is required.: 使用 Yattee 伺服器時目前不支援直播聊天室。需要直接連線至 YouTube。
+  External Player:
+    LaunchFailedTemplate: 無法啟動 {externalPlayer}。請確認它已安裝，或在外部播放器設定中設定其執行檔路徑。
 Playlist:
   Playlist Already Preloaded: "播放清單中的所有影片均已預載"
   Playlist Preload Progress: "正在預載影片：{completed}/{requested}"

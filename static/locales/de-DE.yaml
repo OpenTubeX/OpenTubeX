@@ -2219,6 +2219,7 @@ Video:
       opening playlists: Playlists öffnen
     UnsupportedActionTemplate: '{externalPlayer} unterstützt nicht: {action}'
     OpeningTemplate: '{videoOrPlaylist} wird in {externalPlayer} geöffnet ...'
+    LaunchFailedTemplate: '{externalPlayer} konnte nicht gestartet werden. Stelle sicher, dass er installiert ist, oder lege den Pfad zur ausführbaren Datei in den Einstellungen für externe Video-Player fest.'
     playlist: Playlist
     video: Video
   Premiere: Premiere

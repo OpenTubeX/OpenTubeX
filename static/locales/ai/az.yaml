@@ -1859,6 +1859,8 @@ Video:
       unlisted: "Siyahıda olmayan"
   Save Queue to Playlist: "Növbəni pleylistdə saxla"
   Live Chat is currently not supported with the Yattee server. A direct connection to YouTube is required.: Canlı Söhbət hazırda Yattee serveri ilə dəstəklənmir. YouTube-a birbaşa bağlantı tələb olunur.
+  External Player:
+    LaunchFailedTemplate: "{externalPlayer} başladıla bilmədi. Onun quraşdırıldığını yoxlayın və ya xarici pleyer ayarlarında icra faylının yolunu təyin edin."
 Playlist:
   Close Playlist: Pleylisti bağla
   Preload Playlist: Bütün videoları öncədən yüklə

@@ -2055,6 +2055,7 @@ Video:
       reversing playlists: invertir llistes de reproducció
       shuffling playlists: barrejar llistes de reproducció
       looping playlists: reproduir llistes de reproducció en bucle
+    LaunchFailedTemplate: No s’ha pogut iniciar {externalPlayer}. Comproveu que està instal·lat o definiu el camí de l’executable a la configuració del reproductor extern.
   Player:
     Playing in Picture-in-Picture: S'està reproduint en mode d'imatge sobre imatge
     Stream Recovery:

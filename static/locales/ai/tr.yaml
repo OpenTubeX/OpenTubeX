@@ -1847,6 +1847,8 @@ Video:
       unlisted: "Listelenmemiş"
   Save Queue to Playlist: "Kuyruğu Oynatma Listesine Kaydet"
   Live Chat is currently not supported with the Yattee server. A direct connection to YouTube is required.: Canlı Sohbet şu anda Yattee sunucusu ile desteklenmemektedir. YouTube ile doğrudan bağlantı gerekli.
+  External Player:
+    LaunchFailedTemplate: "{externalPlayer} başlatılamadı. Yüklü olduğunu kontrol edin veya harici oynatıcı ayarlarında yürütülebilir dosyanın yolunu belirtin."
 Playlist:
   Playlist Already Preloaded: "Oynatma listesindeki tüm videolar zaten önceden yüklendi"
   Playlist Preload Progress: "Videolar önceden yükleniyor: {completed}/{requested}"

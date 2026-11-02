@@ -1893,6 +1893,8 @@ Video:
   How this was made: Cum a fost creat
   Save Queue to Playlist: "Salvează coada într-o listă de redare"
   Live Chat is currently not supported with the Yattee server. A direct connection to YouTube is required.: Chatul în direct nu este acceptat în prezent cu serverul Yattee. Este necesară o conexiune directă la YouTube.
+  External Player:
+    LaunchFailedTemplate: "{externalPlayer} nu a putut fi pornit. Verifică dacă este instalat sau setează calea executabilului în setările playerului extern."
 Playlist:
   Playlist Already Preloaded: "Toate videoclipurile din lista de redare sunt deja preîncărcate"
   Playlist Preload Progress: "Se preîncarcă videoclipurile: {completed} din {requested}"

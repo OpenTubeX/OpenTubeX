@@ -1937,6 +1937,8 @@ Video:
   How this was made: این چگونه ساخته شده است
   Save Queue to Playlist: "ذخیرهٔ صف در فهرست پخش"
   Live Chat is currently not supported with the Yattee server. A direct connection to YouTube is required.: گفتگوی زنده در حال حاضر با سرور Yattee پشتیبانی نمی‌شود. اتصال مستقیم به YouTube مورد نیاز است.
+  External Player:
+    LaunchFailedTemplate: اجرای {externalPlayer} ممکن نشد. مطمئن شوید نصب شده است، یا مسیر فایل اجرایی آن را در تنظیمات پخش‌کنندهٔ خارجی تعیین کنید.
 Playlist:
   Playlist Already Preloaded: "همه ویدیوهای فهرست پخش از قبل پیش‌بارگذاری شده‌اند"
   Playlist Preload Progress: "در حال پیش‌بارگذاری ویدیوها: {completed} از {requested}"

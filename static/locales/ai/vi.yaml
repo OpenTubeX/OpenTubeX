@@ -1889,6 +1889,8 @@ Video:
   How this was made: Nội dung này được tạo ra như thế nào
   Save Queue to Playlist: "Lưu hàng đợi vào danh sách phát"
   Live Chat is currently not supported with the Yattee server. A direct connection to YouTube is required.: Chat trực tiếp hiện không được hỗ trợ với máy chủ Yattee. Cần có kết nối trực tiếp đến YouTube.
+  External Player:
+    LaunchFailedTemplate: Không thể khởi động {externalPlayer}. Hãy kiểm tra xem ứng dụng đã được cài đặt chưa, hoặc đặt đường dẫn tệp thực thi trong cài đặt trình phát bên ngoài.
 Playlist:
   Playlist Already Preloaded: "Tất cả video trong danh sách phát đã được tải trước"
   Playlist Preload Progress: "Đang tải trước video: {completed}/{requested}"

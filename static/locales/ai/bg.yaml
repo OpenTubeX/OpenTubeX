@@ -1873,6 +1873,8 @@ Video:
   How this was made: Как е създадено това
   Save Queue to Playlist: "Запазване на опашката в плейлист"
   Live Chat is currently not supported with the Yattee server. A direct connection to YouTube is required.: Чатът на живо засега не се поддържа от сървъра Yattee. Изисква се директна връзка с YouTube.
+  External Player:
+    LaunchFailedTemplate: "{externalPlayer} не може да бъде стартиран. Уверете се, че е инсталиран, или задайте пътя до изпълнимия файл в настройките на външния плейър."
 Playlist:
   Playlist Already Preloaded: "Всички видеоклипове в плейлиста вече са предварително заредени"
   Playlist Preload Progress: "Предварително зареждане на видеоклипове: {completed} от {requested}"

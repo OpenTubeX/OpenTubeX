@@ -1868,6 +1868,8 @@ Video:
   How this was made: Bagaimana ini dibuat
   Save Queue to Playlist: "Simpan Antrean ke Daftar Putar"
   Live Chat is currently not supported with the Yattee server. A direct connection to YouTube is required.: Obrolan Langsung belum didukung dengan server Yattee. Koneksi langsung dengan YouTube dibutuhkan.
+  External Player:
+    LaunchFailedTemplate: Tidak dapat memulai {externalPlayer}. Pastikan aplikasi tersebut terpasang, atau atur jalur file eksekusinya di pengaturan pemutar eksternal.
 Playlist:
   Playlist Already Preloaded: "Semua video dalam daftar putar sudah dimuat sebelumnya"
   Playlist Preload Progress: "Memuat video terlebih dahulu: {completed} dari {requested}"

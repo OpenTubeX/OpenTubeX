@@ -1847,6 +1847,8 @@ Video:
       unlisted: "Non elencato"
   Save Queue to Playlist: "Salva coda in una playlist"
   Live Chat is currently not supported with the Yattee server. A direct connection to YouTube is required.: La chat dal vivo non è attualmente supportata con il server Yattee. È necessaria una connessione diretta a YouTube.
+  External Player:
+    LaunchFailedTemplate: Impossibile avviare {externalPlayer}. Verifica che sia installato oppure imposta il percorso dell’eseguibile nelle impostazioni del lettore esterno.
 Playlist:
   Playlist Already Preloaded: "Tutti i video della playlist sono già precaricati"
   Playlist Preload Progress: "Precaricamento video: {completed} di {requested}"

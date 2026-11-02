@@ -2098,6 +2098,8 @@ Video:
     Unavailable videos are hidden: 1 onbeskikbare video is versteek | {count} onbeskikbare video’s is versteek
   How this was made: Hoe dit gemaak is
   Info panel source: 'Bron: {source}'
+  External Player:
+    LaunchFailedTemplate: Kon nie {externalPlayer} begin nie. Maak seker dat dit geïnstalleer is, of stel die pad na die uitvoerbare lêer in die instellings vir die eksterne speler.
 Playlist:
   Close Playlist: Sluit afspeellys
   Add Playlist to Queue: Voeg afspeellys by tou

@@ -1856,6 +1856,8 @@ Video:
       unlisted: "Anlistennet"
   Save Queue to Playlist: "Enrollañ al lost en ur roll-videoioù"
   Live Chat is currently not supported with the Yattee server. A direct connection to YouTube is required.: N'eo ket skoret ar flapañ war-eeun gant ar servijer Yattee evit poent. Ret eo bezañ kennasket war-eeun ouzh YouTube.
+  External Player:
+    LaunchFailedTemplate: N’eus ket bet gallet loc’hañ {externalPlayer}. Gwiriit eo staliet, pe termenit hent ar restr seveniñ e arventennoù al lenner diavaez.
 Playlist:
   Playlist Already Preloaded: "Karget eo bet holl videoioù ar roll-lenn en a-raok"
   Playlist Preload Progress: "O kargañ videoioù en a-raok: {completed} diwar {requested}"

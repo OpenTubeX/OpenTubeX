@@ -2572,6 +2572,7 @@ Video:
     video: video
     playlist: playlist
     OpeningTemplate: Opening {videoOrPlaylist} in {externalPlayer}...
+    LaunchFailedTemplate: Could not start {externalPlayer}. Make sure it is installed, or set its executable path in the external player settings.
     UnsupportedActionTemplate: '{externalPlayer} does not support: {action}'
     Unsupported Actions:
       starting video at offset: starting video at offset

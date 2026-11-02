@@ -1892,6 +1892,8 @@ Video:
   How this was made: كيف تم صنع هذا
   Save Queue to Playlist: "حفظ قائمة الانتظار في قائمة تشغيل"
   Live Chat is currently not supported with the Yattee server. A direct connection to YouTube is required.: المحادثة المباشرة غير مدعومة حالياً مع خادم Yattee. يلزم الاتصال المباشر بـ YouTube.
+  External Player:
+    LaunchFailedTemplate: تعذّر تشغيل {externalPlayer}. تأكد من تثبيته، أو حدّد مسار الملف التنفيذي في إعدادات المشغّل الخارجي.
 Playlist:
   Playlist Already Preloaded: "تم تحميل جميع فيديوهات قائمة التشغيل مسبقًا بالفعل"
   Playlist Preload Progress: "جارٍ تحميل الفيديوهات مسبقًا: {completed} من {requested}"

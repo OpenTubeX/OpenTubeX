@@ -1892,6 +1892,8 @@ Video:
   How this was made: Як це було створено
   Save Queue to Playlist: "Зберегти чергу в список відтворення"
   Live Chat is currently not supported with the Yattee server. A direct connection to YouTube is required.: Чат в режимі реального часу наразі не підтримується сервером Yattee. Потрібне пряме з’єднання з YouTube.
+  External Player:
+    LaunchFailedTemplate: Не вдалося запустити {externalPlayer}. Переконайтеся, що його встановлено, або вкажіть шлях до виконуваного файлу в налаштуваннях зовнішнього програвача.
 Playlist:
   Playlist Already Preloaded: "Усі відео з плейлиста вже попередньо завантажені"
   Playlist Preload Progress: "Попереднє завантаження відео: {completed} з {requested}"

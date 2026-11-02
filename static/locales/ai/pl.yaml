@@ -1182,6 +1182,8 @@ Video:
       unlisted: "Niepubliczny"
   Save Queue to Playlist: "Zapisz kolejkę na playliście"
   Live Chat is currently not supported with the Yattee server. A direct connection to YouTube is required.: Czat na żywo nie jest obecnie obsługiwany przez serwer Yattee. Konieczne jest połączenie bezpośrednie z YouTube.
+  External Player:
+    LaunchFailedTemplate: Nie można uruchomić {externalPlayer}. Sprawdź, czy jest zainstalowany, lub ustaw ścieżkę do pliku wykonywalnego w ustawieniach zewnętrznego odtwarzacza.
 Change Format:
   yt-dlp Error Template: "yt-dlp nie mógł dostarczyć strumieni: {error}"
   Local Video File: Lokalny plik filmu

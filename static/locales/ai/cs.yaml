@@ -1849,6 +1849,8 @@ Video:
       unlisted: "Neveřejné"
   Save Queue to Playlist: "Uložit frontu do playlistu"
   Live Chat is currently not supported with the Yattee server. A direct connection to YouTube is required.: Živý chat momentálně není podporován se serverem Yattee. Je vyžadováno přímé připojení k YouTube.
+  External Player:
+    LaunchFailedTemplate: "{externalPlayer} se nepodařilo spustit. Ověřte, že je nainstalován, nebo nastavte cestu ke spustitelnému souboru v nastavení externího přehrávače."
 Playlist:
   Playlist Already Preloaded: "Všechna videa v playlistu jsou již přednačtena"
   Playlist Preload Progress: "Přednačítání videí: {completed} z {requested}"

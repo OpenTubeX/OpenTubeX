@@ -1896,6 +1896,8 @@ Video:
   How this was made: Miten tämä tehtiin
   Save Queue to Playlist: "Tallenna jono soittolistalle"
   Live Chat is currently not supported with the Yattee server. A direct connection to YouTube is required.: Live-keskustelua ei tällä hetkellä tueta Yattee-palvelimen kanssa. Suora yhteys YouTubeen vaaditaan.
+  External Player:
+    LaunchFailedTemplate: Kohdetta {externalPlayer} ei voitu käynnistää. Varmista, että se on asennettu, tai määritä suoritettavan tiedoston polku ulkoisen soittimen asetuksissa.
 Playlist:
   Playlist Already Preloaded: "Kaikki soittolistan videot on jo esiladattu"
   Playlist Preload Progress: "Esiladataan videoita: {completed}/{requested}"

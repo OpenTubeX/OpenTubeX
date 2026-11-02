@@ -1847,6 +1847,8 @@ Video:
       unlisted: "限定公開"
   Save Queue to Playlist: "キューを再生リストに保存"
   Live Chat is currently not supported with the Yattee server. A direct connection to YouTube is required.: 現在、ライブチャットは Yattee サーバーでは未対応です。直接 YouTube への接続が必要です。
+  External Player:
+    LaunchFailedTemplate: "{externalPlayer} を起動できませんでした。インストールされていることを確認するか、外部プレーヤーの設定で実行ファイルのパスを指定してください。"
 Playlist:
   Playlist Already Preloaded: "プレイリストのすべての動画は先読み済みです"
   Playlist Preload Progress: "動画を先読み中: {requested} 本中 {completed} 本"

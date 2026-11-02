@@ -2034,6 +2034,7 @@ Video:
       reversing playlists: obračanje vrstnega reda seznamov predvajanja
       shuffling playlists: naključno predvajanje seznamov predvajanja
       looping playlists: ponavljanje seznamov predvajanja
+    LaunchFailedTemplate: "{externalPlayer} ni bilo mogoče zagnati. Preverite, ali je nameščen, ali pa nastavite pot do izvršljive datoteke v nastavitvah zunanjega predvajalnika."
   Player:
     Playing in Picture-in-Picture: Predvaja se v načinu slika v sliki
     Stream Recovery:
