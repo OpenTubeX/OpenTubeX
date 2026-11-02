@@ -45,8 +45,8 @@ test('PR shards repeat changed offline tests unless a shared change selects too 
   expect(createShardMatrix(full, report({ offline: 3 })).include.some(shard => shard.project === 'repeat')).toBe(false)
 })
 
-test('merge queue shards run the offline suite at 100% UI scale and browser checks', () => {
-  const { include } = createShardMatrix(full, full, { event: 'merge_group' })
+test('development push shards run the offline suite at 100% UI scale and browser checks', () => {
+  const { include } = createShardMatrix(full, full, { event: 'push' })
   expect(shardCounts(include)).toEqual({ offline: 16, browser: 1 })
   expect(include[0]).toEqual({ project: 'offline', projects: 'offline', shard: 1, shardTotal: 16 })
 })

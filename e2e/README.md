@@ -157,13 +157,14 @@ E2E_USE_FIXTURES=1 pnpm run test:e2e:network
 `.github/workflows/e2e.yml`:
 
 - **Pull requests** → browser tests, changed network tests, and changed offline tests repeated without retries.
-- **Merge queue** → offline tests at 100% UI scale and browser tests, skipped when a merge group only changes `static/locales/`, as Weblate PRs do.
+- **Pushes to `development`** → offline tests at 100% UI scale and browser tests, skipped when a push only changes `static/locales/`, as Weblate PRs do.
 - **Nightly** → full offline, scaled, performance, browser, and network suites.
 - **Manual dispatch** → all suites by default, or an individual suite.
 
-The merge queue runs the offline suite once per merge, on the result of
-merging into the base branch, instead of on every push. A PR that fails there
-leaves the queue; fix it and queue it again.
+The offline suite runs after merging instead of on every PR push. A run on
+`development` always finishes, and only the latest push waiting behind it runs
+next, so one run can cover several merges. When it fails, find the merge that
+broke it and fix it on `development`.
 
 The offline and scaled projects share up to 16 CI shards, and the performance
 project has its own shards. The cap keeps a full run within GitHub's 20
@@ -174,9 +175,9 @@ Isolated Chromium checks run in one separate job, so only that runner installs
 Chromium. The offline command and dispatch selection include offline and
 performance Electron tests and browser checks.
 
-Packed-app tests always run in full in the merge queue: Playwright's
-import-based `--only-changed` selection cannot associate them with source or
-CSS changes. On PRs, the network project, which talks to YouTube, is limited to
+On `development`, the offline project at 100% UI scale runs in full:
+Playwright's import-based `--only-changed` selection cannot associate its tests
+with source or CSS changes. On PRs, the network project, which talks to YouTube, is limited to
 changed tests and passes without running any when none are affected. Network
 tests use the fixture fallback on retry. The `repeat` shards run changed
 offline tests five times without retries, so a PR cannot add a flaky test; they
@@ -184,7 +185,7 @@ are skipped when a shared change selects more than 100 tests. Run the performanc
 `pnpm exec playwright test -c e2e/playwright.config.mjs --project=performance`.
 
 The browser job also runs `tests/android/mobile-performance.test.mjs`
-(`pnpm run test:mobile-performance`) on every PR and in the merge queue. These source-level storage and list checks use `node:test` with
+(`pnpm run test:mobile-performance`) on every PR and push to `development`. These source-level storage and list checks use `node:test` with
 headless Chromium and are not discovered by the normal unit-test glob or
 Playwright. They do not replace native Android emulator testing.
 

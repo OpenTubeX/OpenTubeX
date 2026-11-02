@@ -3,7 +3,6 @@ name: Linter
 on:
   pull_request:
     branches: [ master, development, '**-RC' ]
-  merge_group:
 
 cache-mode: none
 permissions: {}
