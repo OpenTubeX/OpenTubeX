@@ -404,7 +404,7 @@
               :label="t('Delete')"
               :icon="['fas', 'trash']"
               theme="destructive"
-              :disabled="historyCleanupDays === null"
+              :disabled="historyCleanupPeriod !== 'all' && historyCleanupDays === null"
               @click="deleteOldHistory"
             />
             <FtButton
@@ -534,13 +534,14 @@ const markAllPromptNames = computed(() => [
   t('Cancel')
 ])
 
-const HISTORY_CLEANUP_PERIOD_VALUES = ['1', '7', '30', '90', '365', 'custom']
+const HISTORY_CLEANUP_PERIOD_VALUES = ['1', '7', '30', '90', '365', 'all', 'custom']
 const historyCleanupPeriodNames = computed(() => [
   t('History.1 Day'),
   t('History.1 Week'),
   t('History.1 Month'),
   t('History.3 Months'),
   t('History.1 Year'),
+  t('History.All Time'),
   t('History.Custom')
 ])
 
@@ -558,6 +559,13 @@ function closeHistoryCleanupPrompt() {
 }
 
 async function deleteOldHistory() {
+  if (historyCleanupPeriod.value === 'all') {
+    await store.dispatch('removeAllHistory')
+    closeHistoryCleanupPrompt()
+    showToast({ message: t('Settings.Privacy Settings.Watch history has been cleared'), icon: ['fas', 'trash'] })
+    return
+  }
+
   const days = historyCleanupDays.value
   if (days === null) { return }
 

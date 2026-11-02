@@ -951,6 +951,25 @@ test.describe('history cleanup', () => {
     }).toBe(false)
   })
 
+  test('deletes all entries when all time is selected', async ({ app, page }) => {
+    await goTo(page, 'history')
+    await expect(page.getByText('Recent video')).toBeVisible()
+
+    await page.getByRole('button', { name: 'Delete Old History' }).click()
+    await page.locator('.cleanupPromptContent select').selectOption('all')
+    await page.getByRole('button', { name: 'Delete', exact: true }).click()
+
+    await expect(page.getByText('Watch history has been cleared')).toBeVisible()
+    await expect(page.getByText('Recent video')).toBeHidden()
+    await expect(page.getByText('Old video')).toBeHidden()
+
+    await expect.poll(async () => {
+      const contents = readDatastore(app.userDataDir, 'history')
+      const records = contents.trim().split('\n').filter(Boolean).map((line) => JSON.parse(line))
+      return records.some(record => ['rrrrrrrrrrr', 'ooooooooooo'].includes(record._id))
+    }).toBe(false)
+  })
+
   test('selects a history cutoff from the modal dropdown', async ({ page }) => {
     await goTo(page, 'history')
     await page.getByRole('button', { name: 'Delete Old History' }).click()
