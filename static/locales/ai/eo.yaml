@@ -365,24 +365,24 @@ Settings:
     Profile Selector Hint: Vi ankaŭ povas dekstre alklaki la profilan piktogramon por ŝanĝi profilon
     Profile Selector Touch Hint: Vi ankaŭ povas longe tuŝi la profilan piktogramon por ŝanĝi profilon
   Categories:
-    General Description: Lingvo, startigo, langetoj kaj konduto de la aplikaĵo
+    General Description: Lingvo, startigo, langetoj kaj tradukado
     Appearance: Aspekto
-    Appearance Description: Etoso, aranĝo kaj bildetoj
+    Appearance Description: Etoso, aranĝo, navigado kaj videaĵlistoj
     Content appearance: Videaĵlistoj kaj bildetoj
     Layout: Aranĝo
-    Playback Description: Ludilo, apudskribo kaj kanalaj preferoj
-    Subscriptions Description: Aktualigo de fluoj kaj montraj opcioj
-    Downloads Description: Dosierujoj, ŝablonoj kaj aŭtomataj reguloj
+    Playback Description: Defaŭltaj agordoj de la ludilo, apudskribo kaj agordoj por ĉiu kanalo
+    Subscriptions Description: Aktualigo de fluoj, sciigoj pri novaj videaĵoj kaj RSS-fluoj
+    Downloads Description: Elŝuta dosierujo, ŝablonoj kaj aŭtomataj elŝutoj
     Focus: Fokuso
     Focus Description: Kaŝita enhavo, spektolimoj, memorigiloj kaj gepatra kontrolo
     Add-ons: Aldonaĵoj
-    Add-ons Description: SponsorBlock, DeArrow, malŝatoj kaj voĉa traduko
-    Privacy Description: Spekta privateco kaj alirkontroloj
+    Add-ons Description: SponsorBlock, DeArrow, malŝatoj, AiSList kaj voĉa traduko
+    Privacy Description: Historio, serĉaj sugestoj, ligiloj kaj pasvorto de la aplikaĵo
     Online activity: Reta agado
-    Data And Storage Description: Enporto, elporto, diskuzo kaj purigado
-    Sync Description: Sinkronigi agordojn kaj datumojn inter aparatoj
+    Data And Storage Description: Savkopioj, enporto kaj elporto, diskuzo kaj purigado
+    Sync Description: Konto ĉe la sinkroniga servilo, parigo de aparatoj kaj sinkronigitaj datumoj
     Advanced: Altnivela
-    Advanced Description: Provizantoj, eksteraj aplikaĵoj kaj reto
+    Advanced Description: Internaj API-oj, bufrado, eksteraj iloj, prokurilo kaj diagnozo
     Alternative providers: Provizantoj de videaĵoj kaj metadatumoj
   Highlight Changed Settings: Emfazi agordojn ŝanĝitajn de la defaŭltoj
   Reset Setting to Default: Restarigi ĉi tiun agordon al ĝia defaŭlto

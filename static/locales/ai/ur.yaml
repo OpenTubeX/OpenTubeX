@@ -379,24 +379,24 @@ Settings:
     Profile Selector Hint: پروفائل تبدیل کرنے کے لیے آپ پروفائل آئیکن پر رائٹ کلک بھی کر سکتے ہیں
     Profile Selector Touch Hint: پروفائل تبدیل کرنے کے لیے آپ پروفائل آئیکن کو دبا کر بھی رکھ سکتے ہیں
   Categories:
-    General Description: زبان، آغاز، ٹیبز اور ایپ کا طرز عمل
+    General Description: زبان، آغاز، ٹیبز اور ترجمہ
     Appearance: ظاہری شکل
-    Appearance Description: تھیم، لے آؤٹ اور تھمب نیلز
+    Appearance Description: تھیم، لے آؤٹ، نیویگیشن اور ویڈیو فہرستیں
     Content appearance: ویڈیو فہرستیں اور تھمب نیلز
     Layout: لے آؤٹ
-    Playback Description: پلیئر، کیپشنز اور چینل کی ترجیحات
-    Subscriptions Description: فیڈ ریفریش اور ڈسپلے کے اختیارات
-    Downloads Description: فولڈرز، ٹیمپلیٹس اور خودکار اصول
+    Playback Description: پلیئر کی ڈیفالٹ سیٹنگز، کیپشنز اور ہر چینل کی سیٹنگز
+    Subscriptions Description: فیڈ ریفریش، نئی ویڈیوز کی اطلاعات اور RSS فیڈز
+    Downloads Description: ڈاؤن لوڈ فولڈر، ٹیمپلیٹس اور خودکار ڈاؤن لوڈز
     Focus: توجہ
     Focus Description: پوشیدہ مواد، دیکھنے کی حدیں، یاد دہانیاں اور والدین کا کنٹرول
     Add-ons: ایڈ آنز
-    Add-ons Description: SponsorBlock، DeArrow، ناپسندیدگیاں اور وائس اوور ترجمہ
-    Privacy Description: دیکھنے کی رازداری اور رسائی کے کنٹرولز
+    Add-ons Description: SponsorBlock، DeArrow، ناپسندیدگیاں، AiSList اور وائس اوور ترجمہ
+    Privacy Description: ہسٹری، تلاش کی تجاویز، لنکس اور ایپ کا پاس ورڈ
     Online activity: آن لائن سرگرمی
-    Data And Storage Description: امپورٹ، ایکسپورٹ، ڈسک کا استعمال اور صفائی
-    Sync Description: سیٹنگز اور ڈیٹا کو تمام ڈیوائسز پر ہم آہنگ رکھیں
+    Data And Storage Description: بیک اپس، امپورٹ اور ایکسپورٹ، ڈسک کا استعمال اور صفائی
+    Sync Description: سنک سرور اکاؤنٹ، ڈیوائس جوڑنا اور سنک شدہ ڈیٹا
     Advanced: ایڈوانسڈ
-    Advanced Description: فراہم کنندگان، بیرونی ایپس اور نیٹ ورک
+    Advanced Description: بیک اینڈز، بفرنگ، بیرونی ٹولز، پراکسی اور تشخیص
     Alternative providers: ویڈیو اور میٹا ڈیٹا فراہم کنندگان
   Highlight Changed Settings: ڈیفالٹ سے تبدیل شدہ سیٹنگز کو نمایاں کریں
   Reset Setting to Default: اس سیٹنگ کو ڈیفالٹ پر ری سیٹ کریں

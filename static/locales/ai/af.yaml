@@ -490,24 +490,24 @@ Settings:
     Profile Selector Hint: U kan ook regs op die profielikoon klik om profiele te wissel
     Profile Selector Touch Hint: U kan ook die profielikoon druk en hou om profiele te wissel
   Categories:
-    General Description: Taal, opstart, oortjies en toepgedrag
+    General Description: Taal, opstart, oortjies en vertaling
     Appearance: Voorkoms
-    Appearance Description: Tema, uitleg en duimnaels
+    Appearance Description: Tema, uitleg, navigasie en videolyste
     Content appearance: Videolyste en duimnaels
     Layout: Uitleg
-    Playback Description: Speler, onderskrifte en kanaalvoorkeure
-    Subscriptions Description: Voerverfrissing en vertoonopsies
-    Downloads Description: Vouers, sjablone en outomatiese reëls
+    Playback Description: Speler-verstekke, onderskrifte en instellings per kanaal
+    Subscriptions Description: Voerverfrissing, kennisgewings oor nuwe video’s en RSS-voere
+    Downloads Description: Aflaaivouer, sjablone en outomatiese aflaaie
     Focus: Fokus
     Focus Description: Versteekte inhoud, kyklimiete, herinneringe en ouerbeheer
     Add-ons: Byvoegings
-    Add-ons Description: SponsorBlock, DeArrow, afkeure en stemoorvertaling
-    Privacy Description: Kykprivaatheid en toegangsbeheer
+    Add-ons Description: SponsorBlock, DeArrow, afkeure, AiSList en stemoorvertaling
+    Privacy Description: Geskiedenis, soekvoorstelle, skakels en toepwagwoord
     Online activity: Aanlynaktiwiteit
-    Data And Storage Description: Invoer, uitvoer, skyfgebruik en opruiming
-    Sync Description: Hou instellings en data gesinkroniseer oor toestelle heen
+    Data And Storage Description: Rugsteune, invoer en uitvoer, skyfgebruik en opruiming
+    Sync Description: Sinkroniseerbedienerrekening, toestelkoppeling en gesinkroniseerde data
     Advanced: Gevorderd
-    Advanced Description: Verskaffers, eksterne toepe en netwerk
+    Advanced Description: Agterente, buffering, eksterne gereedskap, instaanbediener en diagnostiek
     Alternative providers: Video- en metadataverskaffers
   Highlight Changed Settings: Merk instellings uit wat van die verstek verander is
   Reset Setting to Default: Stel hierdie instelling terug na die verstek
