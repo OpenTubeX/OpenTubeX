@@ -1103,10 +1103,9 @@ class SearchHistory {
     return resolvedEntry
   }
 
-  static async overwrite(records) {
-    await db.searchHistory.removeAsync({}, { multi: true })
-
-    await db.searchHistory.insertAsync(records)
+  static overwrite(records) {
+    // One transaction, so a failed import keeps the saved history
+    return db.searchHistory.replaceAllAsync(records)
   }
 
   static delete(_id) {
