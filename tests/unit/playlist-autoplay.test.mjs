@@ -2,7 +2,7 @@ import assert from 'node:assert/strict'
 import { readFileSync } from 'node:fs'
 import test from 'node:test'
 import vm from 'node:vm'
-import { computed, nextTick, reactive, ref, shallowRef, watch as observe } from 'vue'
+import { computed, nextTick, reactive, ref, shallowRef, triggerRef, watch as observe } from 'vue'
 import { usesInvidiousApi } from '../../src/apiBackends.js'
 
 const playlistSource = readFileSync(new URL('../../src/renderer/components/WatchVideoPlaylist/WatchVideoPlaylist.vue', import.meta.url), 'utf8')
@@ -26,7 +26,7 @@ function harness({ laterPageError = null, backend = 'local' } = {}) {
   const isLoading = ref(false)
   const errors = []
   const toasts = []
-  const continuationChecks = []
+  let laterPageRequests = 0
   const router = { push() {} }
   let finishContinuation
   let failContinuation
@@ -34,7 +34,9 @@ function harness({ laterPageError = null, backend = 'local' } = {}) {
   const context = {
     playlistLoadGeneration: 0,
     props, randomizedPlaylistItems, shuffleEnabled, loopEnabled, isUserPlaylist: ref(false),
-    isFetchingPlaylistContinuation, hasUnloadedPlaylistVideos, computed, watch: observe,
+    isFetchingPlaylistContinuation, hasUnloadedPlaylistVideos, computed, watch: observe, nextTick, triggerRef,
+    playlistContinuationFailed: ref(false), playlistPanelNearEnd: ref(false), requestedPlaylistVideoCount: ref(0),
+    reversePlaylist: ref(false), updatePlaylistPanelNearEnd() {},
     isLoading, playlistItems, getPlaylistInfoRun: false,
     playlistTitle: ref(''), playlistTotalVideoCount: ref(0), channelName: ref(''), channelId: ref(''),
     store: { commit() {} }, playlistCacheTabId: 'android-tab', navigationDownloadId: () => undefined,
@@ -44,16 +46,16 @@ function harness({ laterPageError = null, backend = 'local' } = {}) {
     getLocalCachedFeedContinuation: () => continuation,
     parseLocalPlaylistVideos: videos => videos,
     parseVisibleLocalPlaylistVideos: videos => videos,
-    untilEndOfLocalPlayList: async (page, callback, options) => {
-      callback(page)
-      continuationChecks.push(options.shouldContinue())
+    getLocalPlaylistContinuation: async () => {
+      laterPageRequests++
       if (laterPageError) throw laterPageError
+      return null
     },
     expectedAutoSkipItem: null, router, showToast: toast => toasts.push(toast),
     showApiErrorToast: (_message, error) => errors.push(error), t: key => key,
     console: { error: error => errors.push(error) },
   }
-  const load = vm.runInNewContext(`${extractSourceBetweenMarkers(playlistSource, 'function appendLocalPlaylistPage(', '\nasync function getPlaylistInformationLocal(')}\nloadCachedPlaylistInformation`, context)
+  const load = vm.runInNewContext(`${extractSourceBetweenMarkers(playlistSource, 'function appendPlaylistVideos(', '\nasync function getPlaylistInformationLocal(')}\nloadCachedPlaylistInformation`, context)
   const shuffle = vm.runInNewContext(`${extractSourceBetweenMarkers(playlistSource, 'function shuffleItems(', '\nconst playlistItemsWrapper =')}\nshufflePlaylistItems`, context)
   const state = vm.runInNewContext(`${extractSourceBetweenMarkers(playlistSource, 'const currentVideoIndexZeroBased =', '\nwatch(')}\n;({ nextVideo, upcomingVideos, playlistUnavailableVideoCount, isWaitingForNextVideo })`, context)
 
@@ -84,7 +86,8 @@ function harness({ laterPageError = null, backend = 'local' } = {}) {
   context.emit = (_name, videos) => watch.handleUpcomingPlaylistVideosChange(videos)
   return {
     observeUpcoming: t => t.after(vm.runInNewContext(extractSourceBetweenMarkers(playlistSource, '\nwatch(', '\nconst playlistPageLinkTo'), context)),
-    toasts, continuationChecks,
+    toasts,
+    get laterPageRequests() { return laterPageRequests },
     notifyUpcoming: () => watch.handleUpcomingPlaylistVideosChange(state.upcomingVideos.value),
     cancelAutoplay: () => cancel.call(watch, true),
     replayVideo: () => replay.call(watch),
@@ -123,7 +126,7 @@ test('a later continuation failure preserves pages already loaded for autoplay',
   const failure = new Error('Later page failed')
   const state = harness({ laterPageError: failure })
   const loading = state.load()
-  state.finishContinuation({ items: [{ videoId: 'third' }] })
+  state.finishContinuation({ items: [{ videoId: 'third' }], has_continuation: true })
   await loading
   state.endVideo()
   assert.equal(state.watch.autoplayCountdown?.video.videoId, 'second')
@@ -277,7 +280,7 @@ test('a cached continuation stops requesting pages after navigating to a differe
   const state = harness()
   const loading = state.load()
   state.changePlaylist('different-playlist')
-  state.finishContinuation({ items: [{ videoId: 'third' }] })
+  state.finishContinuation({ items: [{ videoId: 'third' }], has_continuation: true })
   await loading
-  assert.deepEqual(state.continuationChecks, [false])
+  assert.equal(state.laterPageRequests, 0)
 })
