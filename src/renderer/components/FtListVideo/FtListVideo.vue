@@ -1275,7 +1275,7 @@ const videoMenuOptions = computed(() => {
   return normalizedOptions
 })
 
-/** Resolves to null when the card shows another video once the title is known. */
+/** Callers check that the card still shows the video before scheduling the payload. */
 async function getLiveReminderPayload() {
   const videoId = id.value
   let videoTitle = title.value
@@ -1287,7 +1287,6 @@ async function getLiveReminderPayload() {
     premiereTimestamp.value - Date.now() > LIVE_REMINDER_TITLE_TIMEOUT_MS) {
     const timeout = new Promise(resolve => setTimeout(resolve, LIVE_REMINDER_TITLE_TIMEOUT_MS, null))
     videoTitle = await Promise.race([getOembedTitle(videoId), timeout]) ?? videoTitle
-    if (videoId !== id.value) return null
   }
   return {
     videoId,
@@ -1321,7 +1320,11 @@ async function syncLiveReminder() {
     if (reminder && reminder.startTimestamp !== startTimestamp) {
       const payload = await getLiveReminderPayload()
       // A toggle or newer sync during the title lookup takes over.
-      if (generation !== liveReminderLoadGeneration || payload?.startTimestamp !== startTimestamp) return
+      if (
+        generation !== liveReminderLoadGeneration ||
+        videoId !== id.value ||
+        payload.startTimestamp !== startTimestamp
+      ) return
       liveReminderActive.value = await liveReminder.schedule(payload)
     } else {
       liveReminderActive.value = reminder !== null
@@ -1350,7 +1353,7 @@ async function toggleLiveReminder() {
       })
     } else {
       const payload = await getLiveReminderPayload()
-      if (!payload) return
+      if (videoId !== id.value) return
       const scheduled = await liveReminder.schedule(payload)
       if (videoId !== id.value) return
       liveReminderActive.value = scheduled
