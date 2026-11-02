@@ -303,7 +303,7 @@ async function getExternalYtDlpPlaybackSourceFromYtDlp(url, useAuthentication) {
 
   throw new Error(info.formats.length > 0
     ? 'yt-dlp returned formats, but their stream URLs could not be accessed by the player'
-    : 'yt-dlp did not return any playable formats')
+    : info.noFormatsReason ?? 'yt-dlp did not return any playable formats')
 }
 
 export async function getExternalYtDlpPlaybackSource(url, useAuthentication = false) {

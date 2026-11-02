@@ -14,7 +14,6 @@ import java.nio.file.Files;
 import java.nio.file.StandardCopyOption;
 import java.util.*;
 import java.util.concurrent.*;
-import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 import java.util.function.Consumer;
@@ -133,7 +132,7 @@ final class YtDlpRuntime {
         return execute(context, args, id, progress, null);
     }
 
-    static String execute(Context context, List<String> args, String id, Consumer<String> progress, AtomicBoolean incomplete) throws Exception {
+    static String execute(Context context, List<String> args, String id, Consumer<String> progress, ErrorOutput diagnostics) throws Exception {
         initialize(context);
         INSTALL_LOCK.readLock().lockInterruptibly();
         RunningProcess running = null;
@@ -159,7 +158,7 @@ final class YtDlpRuntime {
             RunningProcess current = running;
             if (id != null) PROCESSES.put(id, current);
             StringBuilder output = new StringBuilder();
-            ErrorOutput errors = new ErrorOutput();
+            ErrorOutput errors = diagnostics == null ? new ErrorOutput() : diagnostics;
             FutureTask<Void> stdout = new FutureTask<>(() -> {
                 try (BufferedReader reader = new BufferedReader(new InputStreamReader(current.process.getInputStream(), StandardCharsets.UTF_8))) {
                     String first = reader.readLine();
@@ -196,7 +195,6 @@ final class YtDlpRuntime {
             stderr.get();
             stdout.get();
             if (exit != 0) throw new IOException(errors.message());
-            if (incomplete != null) incomplete.set(errors.timedOut);
             completed = true;
             return output.toString();
         } finally {
@@ -212,8 +210,8 @@ final class YtDlpRuntime {
         return extract(context, args, null);
     }
 
-    static String extract(Context context, List<String> args, AtomicBoolean incomplete) throws Exception {
-        return extract(() -> execute(context, args, null, null, incomplete), 60, TimeUnit.SECONDS);
+    static String extract(Context context, List<String> args, ErrorOutput diagnostics) throws Exception {
+        return extract(() -> execute(context, args, null, null, diagnostics), 60, TimeUnit.SECONDS);
     }
 
     static boolean hasTimedOutWarning(String stderr) {

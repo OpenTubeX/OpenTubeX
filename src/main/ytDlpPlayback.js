@@ -82,6 +82,7 @@ const execFileAsync = promisify(execFile)
  * @property {YtDlpPlaybackCaption[]} captionTranslations
  * @property {YtDlpPlaybackFormat[]} formats
  * @property {boolean} incomplete whether a final timeout warning may have omitted formats
+ * @property {string | null} noFormatsReason the extractor's explanation when it found no formats
  */
 
 /**
@@ -344,6 +345,7 @@ export async function handleYtDlpGetPlaybackInfo(
   return {
     version,
     incomplete: info.incomplete === true,
+    noFormatsReason: toNonEmptyString(info.noFormatsReason),
     title: toNonEmptyString(info.title),
     description: toNonEmptyString(info.description),
     uploader: toNonEmptyString(info.uploader),

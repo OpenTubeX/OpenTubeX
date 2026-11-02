@@ -14,12 +14,13 @@ from yt_dlp.postprocessor.common import PostProcessor
 class _QuietLogger:
     def __init__(self):
         self.last_error = ''
+        self.warnings = []
 
     def debug(self, _message):
         pass
 
-    def warning(self, _message):
-        pass
+    def warning(self, message):
+        self.warnings.append(f'WARNING: {message}')
 
     def error(self, message):
         self.last_error = message
@@ -75,6 +76,7 @@ def _option(args, name, default=None):
 def _extract(request):
     args = request['args']
     url = args[-1]
+    logger = _QuietLogger()
     options = {
         'ignoreconfig': True,
         'noplaylist': '--flat-playlist' not in args,
@@ -90,7 +92,7 @@ def _extract(request):
         'subtitlesformat': _option(args, '--sub-format', 'vtt'),
         'quiet': True,
         'no_warnings': True,
-        'logger': _QuietLogger(),
+        'logger': logger,
     }
     if _option(args, '--format'):
         options['format'] = _option(args, '--format')
@@ -119,7 +121,8 @@ def _extract(request):
             info['storyboard'] = {key: storyboard.get(key) for key in (
                 'protocol', 'width', 'height', 'fps', 'rows', 'columns',
                 'fragments', 'http_headers')}
-    return {'stdout': json.dumps(info, ensure_ascii=False), 'incomplete': False}
+    return {'stdout': json.dumps(info, ensure_ascii=False),
+            'stderr': '\n'.join(logger.warnings), 'incomplete': False}
 
 
 def _download(request):

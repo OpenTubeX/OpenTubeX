@@ -174,6 +174,18 @@ print(context.cert_store_stats()['x509_ca'])
         self.assertTrue(FakeYoutubeDL.last_options['writesubtitles'])
         self.assertTrue(FakeYoutubeDL.last_options['writeautomaticsub'])
 
+    def test_extract_returns_warnings_as_stderr(self):
+        class NoFormatsYoutubeDL(FakeYoutubeDL):
+            def extract_info(self, _url, download=False):
+                self.report_warning('[Instagram] There is no video in this post')
+                self.report_warning('No video formats found!')
+                return {'title': 'Post', 'formats': []}
+
+        with patch.object(bridge.yt_dlp, 'YoutubeDL', NoFormatsYoutubeDL):
+            result = bridge._extract({'args': ['--ignore-no-formats-error', 'https://example.org/post']})
+        self.assertEqual(result['stderr'], 'WARNING: [Instagram] There is no video in this post\n'
+                                           'WARNING: No video formats found!')
+
     @patch.object(bridge.yt_dlp, 'YoutubeDL', FakeYoutubeDL)
     def test_extract_splits_requested_subtitle_languages(self):
         bridge._extract({'args': ['--sub-langs', 'en, de, ,fr', 'https://example.org/video']})
