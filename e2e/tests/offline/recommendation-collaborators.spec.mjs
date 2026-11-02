@@ -15,9 +15,6 @@ test.use({ seed: { settings: { videoPlaybackEngine: 'built-in', ytDlpPlaybackEng
  */
 async function openWatchPageWithRecommendation(app, page, recommendation, secondaryInfo = null) {
   await mockPlayableWatchPage(app, page)
-  // An aborted request counts as a lost connection, which would hold the
-  // collaborator lookup in the network-recovery queue
-  await page.route('https://www.youtube.com/oembed**', route => route.fulfill({ status: 404, body: '' }))
   await page.route('**/youtubei/v1/next**', (route) => {
     const isRecommendationLookup = route.request().postDataJSON()?.videoId === recommendation.contentId
     return route.fulfill({

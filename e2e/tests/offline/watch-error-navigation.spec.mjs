@@ -56,12 +56,6 @@ async function mockBlockedVideo({
   await page.route(/^https?:\/\//, async (route, request) => {
     const url = request.url()
 
-    if (url.startsWith('https://www.youtube.com/oembed?')) {
-      // No fallback title is available. A transport abort would put subsequent
-      // YouTube requests into network recovery instead of testing the IP block.
-      return route.fulfill({ status: 404, contentType: 'application/json', body: '{}' })
-    }
-
     if (url === 'https://www.youtube.com/iframe_api') {
       return route.fulfill({ status: 200, contentType: 'text/javascript', body: 'player\\/test-player\\/' })
     }
