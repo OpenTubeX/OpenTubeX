@@ -231,12 +231,6 @@
   background-color: var(--side-nav-hover-color);
 }
 
-.getCommentsTitle,
-.commentsTitle,
-.getMoreComments {
-  margin: 0;
-}
-
 .commentAutoLoadSentinel {
   min-block-size: 1px;
 }
@@ -245,12 +239,12 @@
   min-block-size: 64px;
 }
 
-.getCommentsTitle {
-  padding-block: 8px;
-  text-align: center;
-  text-decoration: underline;
-  cursor: pointer;
-  color: var(--title-color);
+.btn:is(.getCommentsTitle, .getMoreComments) {
+  max-inline-size: 100%;
+  inline-size: fit-content;
+  margin-block: 8px;
+  margin-inline: auto;
+  white-space: normal;
 }
 
 .noCommentMsg {
@@ -297,8 +291,12 @@
 }
 
 .commentsTitle {
-  padding-block: 1em;
-  display: inline-block;
+  margin: 0;
+  padding-block: 12px;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 4px 12px;
   flex: 0 0 auto;
   max-inline-size: 100%;
 }
@@ -511,12 +509,8 @@
   outline-offset: 2px;
 }
 
-.commentTitleAction {
-  font-size: 13px;
-  text-decoration: underline;
-  cursor: pointer;
-  color: var(--title-color);
-  margin-inline-start: 5px;
+.btn.commentTitleAction {
+  margin: 0;
 }
 
 .commentThumbnail {
@@ -814,14 +808,6 @@
 
 .commentReplyOwnerSeparator {
   font-weight: normal;
-}
-
-.getMoreComments {
-  padding-block-end: 1em;
-  text-align: center;
-  text-decoration: underline;
-  cursor: pointer;
-  color: var(--title-color);
 }
 
 .commentThread:has(> .commentThreadLineToggle:enabled:is(:hover, :focus-visible))::before,

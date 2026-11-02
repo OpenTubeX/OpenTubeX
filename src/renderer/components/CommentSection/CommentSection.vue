@@ -100,16 +100,17 @@
         class="commentsTitle"
       >
         <span>{{ commentsTitle }}</span>
-        <span
+        <FtButton
           class="commentTitleAction"
-          role="button"
-          tabindex="0"
+          type="button"
+          variant="outlined"
+          size="extra-small"
+          :icon="['fas', 'eye-slash']"
+          :label="$t('Comments.Hide Comments')"
           @click="showComments = false"
-          @keydown.space.prevent="showComments = false"
-          @keydown.enter.prevent="showComments = false"
-        >
-          {{ $t("Comments.Hide Comments") }}
-        </span>
+          @keydown.space.stop
+          @keyup.space.stop
+        />
       </h3>
       <div
         class="commentHeaderActions"
@@ -183,28 +184,28 @@
       class="commentsContentWrapper"
       @scroll.passive="rememberFullscreenScroll"
     >
-      <h4
+      <FtButton
         v-if="canPerformInitialCommentLoading"
         class="getCommentsTitle"
-        role="button"
-        tabindex="0"
+        type="button"
+        variant="tonal"
+        :icon="['fas', 'comment']"
+        :label="$t('Comments.Click to View Comments')"
         @click="getCommentData"
-        @keydown.space.prevent="getCommentData"
-        @keydown.enter.prevent="getCommentData"
-      >
-        {{ $t("Comments.Click to View Comments") }}
-      </h4>
-      <h4
+        @keydown.space.stop
+        @keyup.space.stop
+      />
+      <FtButton
         v-if="commentEntries.length > 0 && !isLoading && !showComments"
         class="getCommentsTitle"
-        role="button"
-        tabindex="0"
+        type="button"
+        variant="tonal"
+        :icon="['fas', 'comment']"
+        :label="$t('Comments.Click to View Comments')"
         @click="showComments = true"
-        @keydown.space.prevent="showComments = true"
-        @keydown.enter.prevent="showComments = true"
-      >
-        {{ $t("Comments.Click to View Comments") }}
-      </h4>
+        @keydown.space.stop
+        @keyup.space.stop
+      />
       <div
         v-if="commentEntries.length > 0 && showComments"
         ref="commentsList"
@@ -592,17 +593,17 @@
         v-if="shouldShowAutoLoadMoreCommentsSpinner"
         :label="$t('Comments.Load More Comments')"
       />
-      <h4
+      <FtButton
         v-else-if="shouldShowManualLoadMoreComments"
         class="getMoreComments"
-        role="button"
-        tabindex="0"
+        type="button"
+        variant="tonal"
+        :icon="['fas', 'arrow-down']"
+        :label="$t('Comments.Load More Comments')"
         @click="getMoreComments"
-        @keydown.space.prevent="getMoreComments"
-        @keydown.enter.prevent="getMoreComments"
-      >
-        {{ $t("Comments.Load More Comments") }}
-      </h4>
+        @keydown.space.stop
+        @keyup.space.stop
+      />
       <FtLoader
         v-if="isLoading"
         :tab-loading-indicator="false"
@@ -628,6 +629,7 @@ import { inject, computed, nextTick, onBeforeUnmount, ref, shallowRef, toRaw, us
 import { useI18n } from 'vue-i18n'
 import { ObserveVisibility as vObserveVisibility } from 'vue-observe-visibility'
 
+import FtButton from '../FtButton/FtButton.vue'
 import FtCard from '../ft-card/ft-card.vue'
 import CommentFilterMenu from './CommentFilterMenu.vue'
 import CommentReply from './CommentReply.vue'
