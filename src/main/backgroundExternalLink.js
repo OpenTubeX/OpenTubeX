@@ -1,5 +1,19 @@
-// Covers a cold browser start; user input releases the lock earlier.
+// Covers a cold browser start. Windows also lifts the lock when the user
+// presses Alt or activates another window.
 const FOREGROUND_LOCK_MS = 5000
+
+let lockedNative = null
+let unlockTimeout = null
+
+/**
+ * Lets the browser take the foreground again, for links opened normally
+ * while a background link still holds the lock.
+ */
+export function releaseForegroundLock() {
+  clearTimeout(unlockTimeout)
+  lockedNative?.lockForeground(false)
+  lockedNative = null
+}
 
 /**
  * Creates a function that opens a URL in the default browser while the app
@@ -16,16 +30,15 @@ const FOREGROUND_LOCK_MS = 5000
  * @param {() => { lockForeground: (locked: boolean) => boolean }} options.loadWindowsNative
  */
 export function createBackgroundExternalLinkOpener({ platform, openExternal, loadWindowsNative }) {
-  let unlockTimeout = null
-
   /** @param {string} url */
   return async url => {
     if (platform === 'win32') {
       try {
         const native = loadWindowsNative()
         native.lockForeground(true)
+        lockedNative = native
         clearTimeout(unlockTimeout)
-        unlockTimeout = setTimeout(() => native.lockForeground(false), FOREGROUND_LOCK_MS)
+        unlockTimeout = setTimeout(releaseForegroundLock, FOREGROUND_LOCK_MS)
       } catch (error) {
         // Still open the link, even if the browser then comes to the front.
         console.error('Failed to lock the foreground window:', error)

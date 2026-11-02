@@ -49,6 +49,7 @@ import {
   stripOneTimeTimestampFromUrl
 } from './tabRoutes.js'
 import { isExternalBrowserUrl, isOpenTubeXUrl } from '../utils.js'
+import { releaseForegroundLock } from '../backgroundExternalLink.js'
 
 /** @type {Map<number, TabManager>} windowId -> TabManager */
 const tabManagers = new Map()
@@ -449,6 +450,7 @@ export class TabManager {
             console.error('Failed to open window.open URL in a new tab:', error)
           })
         } else if (isExternalBrowserUrl(parsedUrl)) {
+          releaseForegroundLock()
           shell.openExternal(details.url)
         }
       }
