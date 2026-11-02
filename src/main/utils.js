@@ -103,6 +103,14 @@ export function buildProxyUrl({ protocol, hostname, port, username, password }) 
 }
 
 /**
+ * Whether a link may be handed to the system's default handler.
+ * @param {URL} url
+ */
+export function isExternalBrowserUrl(url) {
+  return ['http:', 'https:', 'mailto:', 'tel:'].includes(url.protocol)
+}
+
+/**
  * @param {string | URL} url
  */
 export function isOpenTubeXUrl(url) {

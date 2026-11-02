@@ -46,7 +46,8 @@ import { applyTwitchPlaylistOrigin } from '../twitchPlaylistOrigin'
 import { isYtDlpStoryboardUrl, getYtDlpExternalStreamCookieHeader, getYtDlpExternalStreamHeaders, refreshYtDlpDownloadQueue, restoreYtDlpDownloadQueue, shutdownYtDlpDownloads } from './ytDlp'
 import { applyYtDlpPlaybackCacheSettings } from './ytDlpPlaybackCache'
 import { generatePoToken } from './poTokenGenerator'
-import { buildProxyUrl, DEFAULT_PROXY_SETTINGS, isOpenTubeXUrl } from './utils'
+import { buildProxyUrl, DEFAULT_PROXY_SETTINGS, isExternalBrowserUrl, isOpenTubeXUrl } from './utils'
+import { createBackgroundExternalLinkOpener } from './backgroundExternalLink'
 import { isInvidiousInstanceUrl } from './invidiousAuthorization'
 import { normalizeYatteeServerUrl, usesInvidiousApi, usesInvidiousInstance } from '../apiBackends'
 import { RendererCors } from './rendererCors'
@@ -2292,6 +2293,25 @@ function runApp() {
     ShareMenu,
     loadWindowsShare: () => loadWindowsShare(__dirname, process.env.NODE_ENV === 'development')
   }))
+
+  const openExternalInBackground = createBackgroundExternalLinkOpener({
+    platform: process.platform,
+    openExternal: (url, options) => shell.openExternal(url, options),
+    loadWindowsNative: () => loadWindowsShare(__dirname, process.env.NODE_ENV === 'development')
+  })
+
+  ipcMain.handle(IpcChannels.OPEN_EXTERNAL_LINK_IN_BACKGROUND, async (event, url) => {
+    const parsedUrl = typeof url === 'string' ? URL.parse(url) : null
+    if (event.senderFrame !== event.sender.mainFrame || !isOpenTubeXUrl(event.senderFrame.url) ||
+      parsedUrl === null || !isExternalBrowserUrl(parsedUrl)) {
+      return
+    }
+    try {
+      await openExternalInBackground(url)
+    } catch (error) {
+      console.error('Failed to open external link in the background:', error)
+    }
+  })
 
   ipcMain.on(IpcChannels.APP_READY, (event) => {
     openPendingUrlForReadyWebContents(event)

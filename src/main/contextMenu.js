@@ -9,6 +9,7 @@ import {
   getFaviconUrl,
   parseSearchEngines
 } from '../searchEngines'
+import { releaseForegroundLock } from './backgroundExternalLink'
 import { fetchFaviconDataUrl, resolveFaviconUrl } from './favicon'
 import {
   isSubscriptionAutoRefreshInProgress,
@@ -745,6 +746,7 @@ export function setupContextMenu(contextMenuOptions, { createWindow, confirmClos
       faviconSource: engine.url,
       click: async () => {
         try {
+          releaseForegroundLock()
           await shell.openExternal(buildSearchUrl(engine.url, selectionText))
         } catch (error) {
           console.error(`Failed to search with ${engine.name}:`, error)
