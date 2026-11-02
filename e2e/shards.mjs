@@ -12,21 +12,31 @@ export const REPEAT_EACH = 5
 export const REPEAT_LIMIT = 100
 
 /**
- * Plan shards from the tests that will actually run in each group. Only the
- * network group, which talks to YouTube, uses the changed-test report on PRs.
- * With `repeatChanged`, a `repeat` group reruns changed offline tests.
+ * Pick the projects each CI event runs.
+ * - Pull requests: browser checks, changed network tests and repeated changed offline tests.
+ * - Merge queue: the offline suite at 100% UI scale and browser checks.
+ * - Nightly, release and manual runs: every project, or the selected one.
  */
-export function createShardMatrix(fullReport, changedReport = fullReport, selectedProject = 'all', repeatChanged = false) {
-  const fullCounts = countTests(fullReport)
-  const changedCounts = countTests(changedReport)
+function selectGroups(event, selectedProject) {
+  if (event === 'pull_request') return { browser: SHARD_GROUPS.browser, network: SHARD_GROUPS.network }
+  if (event === 'merge_group') return { offline: ['offline'], browser: SHARD_GROUPS.browser }
   const groups = selectedProject === 'all'
     ? ['offline', 'performance', 'browser', 'network']
     : selectedProject === 'offline'
       ? ['offline', 'performance', 'browser']
       : [selectedProject]
+  return Object.fromEntries(groups.map(group => [group, SHARD_GROUPS[group]]))
+}
 
-  const include = groups.flatMap(group => {
-    const projects = SHARD_GROUPS[group]
+/**
+ * Plan shards from the tests that will actually run in each group. Only the
+ * network group, which talks to YouTube, uses the changed-test report.
+ */
+export function createShardMatrix(fullReport, changedReport = fullReport, { event = 'schedule', selectedProject = 'all' } = {}) {
+  const fullCounts = countTests(fullReport)
+  const changedCounts = countTests(changedReport)
+
+  const include = Object.entries(selectGroups(event, selectedProject)).flatMap(([group, projects]) => {
     for (const project of projects) {
       if (!fullCounts[project]) throw new Error(`No tests found for project ${project}`)
     }
@@ -42,7 +52,7 @@ export function createShardMatrix(fullReport, changedReport = fullReport, select
     return Array.from({ length: shardTotal }, (_, index) => ({ ...entry, shard: index + 1, shardTotal }))
   })
   const repeatCount = countRepeatTests(changedReport)
-  if (repeatChanged && repeatCount > 0 && repeatCount <= REPEAT_LIMIT) {
+  if (event === 'pull_request' && repeatCount > 0 && repeatCount <= REPEAT_LIMIT) {
     const shardTotal = Math.ceil(repeatCount * REPEAT_EACH / 100)
     const entry = { project: 'repeat', projects: SHARD_GROUPS.offline.join(' '), repeatEach: REPEAT_EACH }
     include.push(...Array.from({ length: shardTotal }, (_, index) => ({ ...entry, shard: index + 1, shardTotal })))

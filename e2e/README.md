@@ -78,9 +78,9 @@ Include the scaled projects when running such a test by itself:
 
 Performance checks measure work (layout, style and render counts), resource
 retention or responsiveness under CPU throttling. Prefer deterministic counts
-over single-run wall-clock budgets: shared runners make those noisy, and the
-paired comparison below already gates the main timings. The project runs with
-one worker and without tracing.
+over single-run wall-clock budgets: shared runners make those noisy. Use the
+paired comparison below for timings. The project runs with one worker and
+without tracing.
 
 ## Playing a video without YouTube
 
@@ -156,9 +156,14 @@ E2E_USE_FIXTURES=1 pnpm run test:e2e:network
 
 `.github/workflows/e2e.yml`:
 
-- **Pull requests** → every offline, scaled, performance and browser test, plus changed network tests.
-- **Nightly** → full offline, performance, browser, and network suites.
+- **Pull requests** → browser tests, changed network tests, and changed offline tests repeated without retries.
+- **Merge queue** → offline tests at 100% UI scale and browser tests, skipped when a merge group only changes `static/locales/`, as Weblate PRs do.
+- **Nightly** → full offline, scaled, performance, browser, and network suites.
 - **Manual dispatch** → all suites by default, or an individual suite.
+
+The merge queue runs the offline suite once per merge, on the result of
+merging into the base branch, instead of on every push. A PR that fails there
+leaves the queue; fix it and queue it again.
 
 The offline and scaled projects share up to 16 CI shards, and the performance
 project has its own shards. The cap keeps a full run within GitHub's 20
@@ -169,17 +174,17 @@ Isolated Chromium checks run in one separate job, so only that runner installs
 Chromium. The offline command and dispatch selection include offline and
 performance Electron tests and browser checks.
 
-Packed-app tests always run in full on PRs: Playwright's import-based
-`--only-changed` selection cannot associate them with source or CSS changes.
-Only the network project, which talks to YouTube, is limited to changed tests
-and passes without running any when none are affected. Network tests use the
-fixture fallback on retry. The `repeat` shards also run changed offline tests
-five times without retries, so a PR cannot add a flaky test; they are skipped
-when a shared change selects more than 100 tests. Run the performance project locally with
+Packed-app tests always run in full in the merge queue: Playwright's
+import-based `--only-changed` selection cannot associate them with source or
+CSS changes. On PRs, the network project, which talks to YouTube, is limited to
+changed tests and passes without running any when none are affected. Network
+tests use the fixture fallback on retry. The `repeat` shards run changed
+offline tests five times without retries, so a PR cannot add a flaky test; they
+are skipped when a shared change selects more than 100 tests. Run the performance project locally with
 `pnpm exec playwright test -c e2e/playwright.config.mjs --project=performance`.
 
 The browser job also runs `tests/android/mobile-performance.test.mjs`
-(`pnpm run test:mobile-performance`) on every PR. These source-level storage and list checks use `node:test` with
+(`pnpm run test:mobile-performance`) on every PR and in the merge queue. These source-level storage and list checks use `node:test` with
 headless Chromium and are not discovered by the normal unit-test glob or
 Playwright. They do not replace native Android emulator testing.
 
@@ -192,12 +197,11 @@ The paired comparison does not retry.
 
 ## Performance comparison
 
-The pull-request performance workflow builds the base and candidate commits,
-then measures startup, large cached subscriptions, navigation, scrolling, opening a hovered video, and local playback
+`pnpm run test:performance` runs locally, not in CI. It takes two checkouts
+with packed `dist-e2e` builds, a base and a candidate, and measures startup, large cached subscriptions, navigation, scrolling, opening a hovered video, and local playback
 against both builds on one runner. It alternates between builds, discards two warm-ups per build, and
-compares the median of seven samples. A single pull-request comment and the
-Actions summary show the comparison, and the raw samples are uploaded as
-`performance-results.json`.
+compares the median of seven samples. `--summary` writes a Markdown table and
+`--output` the raw samples.
 
 An absolute gate fails when the base median is below the limit, the candidate's
 lower quartile reaches the limit, and the median increase exceeds the configured
@@ -208,9 +212,7 @@ material slowdown when every adjacent base/candidate pair exceeds both the
 relative and minimum-delta budgets, with at least seven pairs. Overlapping
 distributions with inconsistent changes still pass. Elapsed metrics
 allow 15%, longest-frame metrics 20%, scrolling renderer work 25%, renderer heap growth 50%, and packed code
-size 5%. Each metric's minimum delta lives in `e2e/performance/report.mjs`. A
-trusted follow-up workflow updates the comment so pull requests from forks
-never receive a write-capable token.
+size 5%. Each metric's minimum delta lives in `e2e/performance/report.mjs`.
 
 Scrolling measures elapsed time for 60 frames to detect sustained slower frame
 delivery, plus renderer CPU work using CDP `TaskDuration`, since extra
@@ -219,7 +221,7 @@ measures five open/play/close tab cycles after a warm-up cycle and forced render
 garbage collection. Heap metrics cover JavaScript memory, excluding native and GPU
 memory. Packed code size includes JavaScript and CSS in nested output directories.
 Measurements are validated before comparison; enforcing runs require at least
-seven samples. Dependabot PRs also run the comparison. Passing medians above an
+seven samples. Passing medians above an
 absolute limit are marked above budget so existing slow baselines remain visible.
 Unmocked YouTube services return controlled HTTP errors, so unrelated requests
 cannot put mocked playback into the shared network-recovery backoff queue.

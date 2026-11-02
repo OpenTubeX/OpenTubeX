@@ -27,14 +27,14 @@ function shardCounts(include) {
   return Object.fromEntries(include.map(shard => [shard.project, shard.shardTotal]))
 }
 
-test('PR shards run every packed-app test but only changed network tests', () => {
-  const { include } = createShardMatrix(full, report({ offline: 3, network: 2 }))
-  expect(shardCounts(include)).toEqual({ offline: 16, performance: 3, browser: 1, network: 1 })
-  expect(createShardMatrix(full, report({ offline: 3 })).include.some(shard => shard.project === 'network')).toBe(false)
+test('PR shards run browser checks and only changed network tests', () => {
+  const pr = changed => shardCounts(createShardMatrix(full, report(changed), { event: 'pull_request' }).include)
+  expect(pr({ network: 2 })).toEqual({ browser: 1, network: 1 })
+  expect(pr({})).toEqual({ browser: 1 })
 })
 
 test('PR shards repeat changed offline tests unless a shared change selects too many', () => {
-  const repeat = changed => createShardMatrix(full, report(changed), 'all', true).include
+  const repeat = changed => createShardMatrix(full, report(changed), { event: 'pull_request' }).include
     .filter(shard => shard.project === 'repeat')
   expect(repeat({ offline: 10, 'offline-95': 2, 'offline-125': 2, network: 2 })).toEqual([
     { project: 'repeat', projects: 'offline offline-95 offline-125', repeatEach: REPEAT_EACH, shard: 1, shardTotal: 1 }
@@ -45,16 +45,22 @@ test('PR shards repeat changed offline tests unless a shared change selects too 
   expect(createShardMatrix(full, report({ offline: 3 })).include.some(shard => shard.project === 'repeat')).toBe(false)
 })
 
-test('offline shards also run the scaled projects', () => {
-  const offline = createShardMatrix(full).include.filter(shard => shard.project === 'offline')
-  expect(offline).toHaveLength(16)
-  expect(offline[0]).toEqual({ project: 'offline', projects: 'offline offline-95 offline-125', shard: 1, shardTotal: 16 })
+test('merge queue shards run the offline suite at 100% UI scale and browser checks', () => {
+  const { include } = createShardMatrix(full, full, { event: 'merge_group' })
+  expect(shardCounts(include)).toEqual({ offline: 16, browser: 1 })
+  expect(include[0]).toEqual({ project: 'offline', projects: 'offline', shard: 1, shardTotal: 16 })
+})
+
+test('nightly shards run every project, and offline shards include the scaled projects', () => {
+  const { include } = createShardMatrix(full)
+  expect(shardCounts(include)).toEqual({ offline: 16, performance: 3, browser: 1, network: 1 })
+  expect(include[0]).toEqual({ project: 'offline', projects: 'offline offline-95 offline-125', shard: 1, shardTotal: 16 })
 })
 
 test('offline dispatch includes performance and browser but excludes network tests', () => {
-  const { include } = createShardMatrix(full, full, 'offline')
+  const { include } = createShardMatrix(full, full, { event: 'workflow_dispatch', selectedProject: 'offline' })
   expect([...new Set(include.map(shard => shard.project))]).toEqual(['offline', 'performance', 'browser'])
-  expect(createShardMatrix(full, full, 'network')).toEqual({
+  expect(createShardMatrix(full, full, { event: 'workflow_dispatch', selectedProject: 'network' })).toEqual({
     include: [
       { project: 'network', projects: 'network', shard: 1, shardTotal: 1 }
     ]
