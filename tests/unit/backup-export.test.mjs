@@ -57,7 +57,8 @@ function loadExport({ cancel = false, sections = ['settings', 'profiles', 'playl
     DBSearchHistoryHandlers: { find: read },
     DBWatchStatsHandlers: { find: read, getHistoricalAdjustment: read },
     deepCopy: value => value,
-    createUnifiedBackup: data => {
+    runBackgroundJob: async (operation, data) => {
+      assert.equal(operation, 'createUnifiedBackup')
       if (fail) throw new Error('Backup archive is too large')
       events.push(Object.keys(data))
       return 'archive bytes'

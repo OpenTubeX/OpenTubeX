@@ -1,5 +1,6 @@
 import { mergeHistory, applyRemoteHistoryChanges, updateHistorySnapshot } from './sync-history-merge.js'
 import * as privacy from './sync-server-privacy-crypto.js'
+import { createUnifiedBackup, readUnifiedBackup } from './unifiedBackup.js'
 
 export async function executeBackgroundJob(operation, input) {
   switch (operation) {
@@ -14,6 +15,8 @@ export async function executeBackgroundJob(operation, input) {
     case 'encryptSyncDocument': return privacy.encryptSyncDocument(input.data, input.exportedKey, input.salt, input.options)
     case 'decryptSyncDocument': return privacy.decryptSyncDocument(input.payload, input.exportedKey)
     case 'decryptLegacySyncDocument': return privacy.decryptLegacySyncDocument(input.payload, input.exportedKey)
+    case 'createUnifiedBackup': return createUnifiedBackup(input)
+    case 'readUnifiedBackup': return readUnifiedBackup(input)
     case 'stringify': return JSON.stringify(input.value)
     case 'clone': return structuredClone(input.value)
     default: throw new Error('Unknown background operation')
