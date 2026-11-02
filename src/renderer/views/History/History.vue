@@ -560,7 +560,10 @@ function closeHistoryCleanupPrompt() {
 
 async function deleteOldHistory() {
   if (historyCleanupPeriod.value === 'all') {
-    await store.dispatch('removeAllHistory')
+    if (!await store.dispatch('removeAllHistory')) {
+      showToast({ message: t('Settings.Storage Settings.Cleanup Failed'), icon: ['fas', 'circle-exclamation'] })
+      return
+    }
     closeHistoryCleanupPrompt()
     showToast({ message: t('Settings.Privacy Settings.Watch history has been cleared'), icon: ['fas', 'trash'] })
     return

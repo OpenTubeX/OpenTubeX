@@ -970,6 +970,22 @@ test.describe('history cleanup', () => {
     }).toBe(false)
   })
 
+  test('reports a failure when deleting all entries fails', async ({ page }) => {
+    await goTo(page, 'history')
+    await expect(page.getByText('Recent video')).toBeVisible()
+    await page.evaluate(() => {
+      window.$store._actions.removeAllHistory = [() => Promise.resolve(false)]
+    })
+
+    await page.getByRole('button', { name: 'Delete Old History' }).click()
+    await page.locator('.cleanupPromptContent select').selectOption('all')
+    await page.getByRole('button', { name: 'Delete', exact: true }).click()
+
+    await expect(page.getByText('Storage cleanup failed')).toBeVisible()
+    await expect(page.getByText('Watch history has been cleared')).toBeHidden()
+    await expect(page.getByRole('dialog')).toBeVisible()
+  })
+
   test('selects a history cutoff from the modal dropdown', async ({ page }) => {
     await goTo(page, 'history')
     await page.getByRole('button', { name: 'Delete Old History' }).click()
