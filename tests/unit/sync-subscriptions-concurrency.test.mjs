@@ -161,3 +161,24 @@ test('a subscription sync retry keeps a resubscribe made after the first attempt
   assert.deepEqual([...remote.keys()].sort(), ['A', 'B', 'C'])
   assert.deepEqual(mainIds().sort(), ['A', 'B', 'C'])
 })
+
+test('a subscription sync retry keeps a resubscribe to a channel both sides had removed', async () => {
+  const { store, client, remote, mainIds } = await fixture([channel('C')])
+  for (const id of ['B', 'C']) remote.set(id, remoteChannel(id))
+  const getSubscriptions = client.getSubscriptions
+  let resubscribed = false
+  client.getSubscriptions = async () => {
+    const subscriptions = await getSubscriptions()
+    if (!resubscribed) {
+      resubscribed = true
+      await store.dispatch('addChannelToProfiles', { channel: channel('A'), profileIds: [MAIN_PROFILE_ID] })
+    }
+    return subscriptions
+  }
+
+  const synced = await sync.syncSubscriptions(client, store, ['A', 'C'])
+
+  assert.deepEqual([...synced].sort(), ['A', 'B', 'C'])
+  assert.deepEqual([...remote.keys()].sort(), ['A', 'B', 'C'])
+  assert.deepEqual(mainIds().sort(), ['A', 'B', 'C'])
+})
