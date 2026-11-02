@@ -355,6 +355,11 @@ test.describe('release-note screenshots with dark and light variants', () => {
   test.use({ seed: { settings: { baseTheme: 'dark' } } })
 
   test('show the variant for the app theme when the prompt opens', async ({ page }) => {
+    // Serve the screenshots, because a failed image is replaced with its alt text.
+    await page.route('https://github.com/user-attachments/assets/*', route => route.fulfill({
+      contentType: 'image/svg+xml',
+      body: '<svg xmlns="http://www.w3.org/2000/svg" width="16" height="9"/>'
+    }))
     await page.emulateMedia({ colorScheme: 'dark' })
     const notification = await showUpdateNotification(page, [
       release(`OpenTubeX ${newestUpdateVersion}`, `v${newestUpdateVersion}-beta`, [
@@ -377,7 +382,9 @@ test.describe('release-note screenshots with dark and light variants', () => {
     await page.locator('.settingsCloseButton').click()
     await notification.getByRole('button', { name: 'See changes and update' }).click()
 
-    await expect(page.locator('.changeLogText li').getByAltText('Screenshot')).toHaveAttribute('src', 'https://github.com/user-attachments/assets/light')
+    const screenshot = page.locator('.changeLogText li').getByAltText('Screenshot')
+    await expect(screenshot).toHaveAttribute('src', 'https://github.com/user-attachments/assets/light')
+    await expect.poll(() => screenshot.evaluate(image => image.naturalWidth)).toBeGreaterThan(0)
   })
 })
 
