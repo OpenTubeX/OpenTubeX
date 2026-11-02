@@ -382,6 +382,11 @@ const mutations = {
     if (i !== -1) {
       state.profileList.splice(i, 1)
     }
+    // Other windows and server sync delete profiles too, so every deletion
+    // keeps the active profile valid here.
+    if (state.activeProfile === profileId) {
+      state.activeProfile = MAIN_PROFILE_ID
+    }
   }
 }
 
