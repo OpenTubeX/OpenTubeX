@@ -675,8 +675,13 @@ test('external media captions open a transcript in the sidebar and the full wind
     contentType: 'text/vtt',
     // The last cue tries to run script through markup in the caption text.
     body: 'WEBVTT\n\n00:00:00.000 --> 00:00:05.000\nFirst caption line\n\n00:00:05.000 --> 00:00:29.000\nSecond caption line\n\n' +
-      '00:00:29.000 --> 00:00:30.000\n<img src="data:," onerror="window.transcriptCueScript = true">Last caption line\n'
+      '00:00:29.000 --> 00:00:30.000\n<img src="https://tracker.example.test/cue.png" onerror="window.transcriptCueScript = true">Last caption line\n'
   }))
+  const cueImageRequests = []
+  await page.route('https://tracker.example.test/**', route => {
+    cueImageRequests.push(route.request().url())
+    return route.fulfill({ status: 404 })
+  })
   await prepareTwitchYtDlp(app, page, mediaUrl, false, '', [], 30, {
     requested_subtitles: { en: { ext: 'vtt', url: captionUrl } },
     subtitles: { en: [{ ext: 'vtt', url: captionUrl }] }
@@ -696,6 +701,7 @@ test('external media captions open a transcript in the sidebar and the full wind
   // Caption markup is parsed inertly, so its image neither loads nor runs its handler.
   await page.evaluate(() => new Promise(resolve => setTimeout(resolve, 500)))
   expect(await page.evaluate(() => window.transcriptCueScript)).toBeUndefined()
+  expect(cueImageRequests).toEqual([])
   await expect(layout).not.toHaveClass(/noSidebar/)
   await transcript.getByText('Second caption line').click()
   await expect.poll(() => video.evaluate(element => element.currentTime)).toBeGreaterThanOrEqual(5)
