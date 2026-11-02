@@ -488,6 +488,7 @@ Settings:
     Invalid Engine: 請輸入名稱，以及包含 %s 的有效 HTTP 或 HTTPS 搜尋 URL。
     Engine Limit: 最多可新增 {count} 個自訂搜尋引擎。
   Theme Settings:
+    Only Show Important Notifications: 僅顯示重要通知
     Visible Search Suggestions: "可見搜尋建議數"
     Material Accent Color: "Material 強調色"
     Material Wallpaper Colors: "桌布顏色"
@@ -2130,6 +2131,7 @@ Tooltips:
     Refresh Subscriptions While App Is Closed: "使用所選設定重新整理訂閱。在桌面版，OpenTubeX 會留在系統匣中，直到您結束程式。Android 系統決定背景重新整理的執行時間。"
     Notify About New Uploads: 在此裝置上為你在訂閱設定中開啟了通知的頻道顯示系統通知。OpenTubeX 會在重新整理訂閱時檢查新內容，因此請選擇自動重新整理間隔。若要在應用程式關閉時也收到通知，請同時啟用應用程式關閉時重新整理訂閱。
   Theme Settings:
+    Only Show Important Notifications: 隱藏僅用於確認操作或回報狀態的應用程式內通知。錯誤、警告、你設定的提醒，以及提供操作（例如復原）的通知仍會顯示。背景作業（例如重新整理訂閱）的進度會顯示在全域進度列中，而不是通知中。系統通知不受影響。
     Visible Search Suggestions: "設定搜尋列在清單需要捲動之前顯示的搜尋紀錄和建議數量。清單絕不會超出視窗底部。"
     Thumbnail Size: "縮放網格和清單中的影片縮圖。欄數固定的網格或「全寬」檢視會改為填滿每一列，因此在這些情況下只會改變清單縮圖和 Shorts。在手機大小的視窗中，網格縮圖最大為 100%。"
     Playlist Thumbnail Size: "縮放播放清單頁面中的影片縮圖。欄數固定的網格或「全寬」檢視會改為填滿每一列，因此在這些情況下只會改變清單縮圖和 Shorts。在手機大小的視窗中，網格縮圖最大為 100%。"

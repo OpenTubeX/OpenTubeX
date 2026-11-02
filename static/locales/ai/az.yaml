@@ -490,6 +490,7 @@ Settings:
     Invalid Engine: Ad və %s ehtiva edən düzgün HTTP və ya HTTPS axtarış URL-si daxil edin.
     Engine Limit: Ən çox {count} fərdi axtarış sistemi əlavə edə bilərsiniz.
   Theme Settings:
+    Only Show Important Notifications: Yalnız vacib bildirişləri göstər
     Visible Search Suggestions: "Görünən axtarış təklifləri"
     Material Accent Color: "Material vurğu rəngi"
     Material Wallpaper Colors: "Divar kağızı rəngləri"
@@ -2140,6 +2141,7 @@ Tooltips:
     Refresh Subscriptions While App Is Closed: "Lentləri seçdiyiniz parametrlərlə yeniləyir. Masaüstündə OpenTubeX çıxana qədər sistem treyində qalır. Android arxa plan yeniləmələrinin vaxtını müəyyən edir."
     Notify About New Uploads: Abunəlik ayarlarında bildirişlərini aktiv etdiyiniz kanallar üçün bu cihazda sistem bildirişləri göstərir. OpenTubeX yeni məzmunu abunəliklər yeniləndikdə yoxlayır, buna görə avtomatik yeniləmə aralığı seçin. Tətbiq bağlı olarkən bildiriş almaq üçün tətbiq bağlı olarkən yeniləməni də aktiv edin.
   Theme Settings:
+    Only Show Important Notifications: Yalnız əməliyyatı təsdiqləyən və ya vəziyyət bildirən tətbiqdaxili bildirişləri gizlədir. Xətalar, xəbərdarlıqlar, qurduğunuz xatırlatmalar və Geri al kimi əməliyyat təklif edən bildirişlər yenə də görünür. Abunəliklərin yenilənməsi kimi arxa fon əməliyyatlarının gedişatı bildiriş əvəzinə ümumi irəliləyiş zolağında göstərilir. Sistem bildirişlərinə təsir etmir.
     Visible Search Suggestions: "Axtarış panelinin siyahısı sürüşdürülməzdən əvvəl neçə axtarış tarixçəsi qeydi və təklif göstərdiyini müəyyən edir. Siyahı heç vaxt pəncərənin aşağı kənarından kənara çıxmır."
     Thumbnail Size: "Şəbəkələrdə və siyahılarda video miniatürlərinin ölçüsünü dəyişir. Sabit sütun sayı və ya Tam en görünüşü olan şəbəkələr əvəzində hər sətri doldurur, ona görə orada yalnız siyahı miniatürlərini və Shorts-u dəyişir. Telefon ölçülü pəncərələrdə şəbəkə miniatürləri 100% ilə məhdudlaşır."
     Playlist Thumbnail Size: "Pleylist səhifələrində video miniatürlərinin ölçüsünü dəyişir. Sabit sütun sayı və ya Tam en görünüşü olan şəbəkələr əvəzində hər sətri doldurur, ona görə orada yalnız siyahı miniatürlərini və Shorts-u dəyişir. Telefon ölçülü pəncərələrdə şəbəkə miniatürləri 100% ilə məhdudlaşır."

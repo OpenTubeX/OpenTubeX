@@ -25,6 +25,7 @@ export const DEVICE_LOCAL_SETTING_KEYS = new Set([
   'mobileFullscreenBrightness',
   'mobileLeftSwipeAction',
   'mobileRightSwipeAction',
+  'onlyShowImportantToasts',
   'playerMenuControls',
   'rememberTabNavigationHistory',
   'rememberVolume',

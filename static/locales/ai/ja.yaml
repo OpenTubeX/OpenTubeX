@@ -488,6 +488,7 @@ Settings:
     Invalid Engine: 名前と、%sを含む有効なHTTPまたはHTTPSの検索URLを入力してください。
     Engine Limit: カスタム検索エンジンは{count}件まで追加できます。
   Theme Settings:
+    Only Show Important Notifications: 重要な通知のみ表示
     Visible Search Suggestions: "表示する検索候補の数"
     Material Accent Color: "Material のアクセントカラー"
     Material Wallpaper Colors: "壁紙の色"
@@ -2127,6 +2128,7 @@ Tooltips:
     Refresh Subscriptions While App Is Closed: "選択した設定でフィードを更新します。デスクトップでは、終了するまでOpenTubeXがシステムトレイに常駐します。Androidでは、バックグラウンド更新の実行時刻をシステムが制御します。"
     Notify About New Uploads: 登録設定で通知をオンにしたチャンネルについて、このデバイスにシステム通知を表示します。OpenTubeXは登録チャンネルの更新時に新着コンテンツを確認するため、自動更新の間隔を選択してください。アプリを閉じている間も通知を受け取るには、アプリを閉じている間の更新も有効にしてください。
   Theme Settings:
+    Only Show Important Notifications: 操作の確認や状態を伝えるだけのアプリ内通知を非表示にします。エラー、警告、設定したリマインダー、および「元に戻す」などの操作を含む通知は引き続き表示されます。登録チャンネルの更新などのバックグラウンド処理の進捗は、通知ではなく全体の進捗バーに表示されます。システム通知には影響しません。
     Visible Search Suggestions: "検索バーがスクロールなしで表示する検索履歴と候補の数を設定します。リストがウィンドウの下端を超えることはありません。"
     Thumbnail Size: "グリッドとリストの動画サムネイルの大きさを変更します。列数を固定したグリッドや「全幅」表示では各行を埋めるため、そこではリストのサムネイルとショートだけが変わります。スマートフォンサイズのウィンドウでは、グリッドのサムネイルは 100% までに制限されます。"
     Playlist Thumbnail Size: "再生リストのページの動画サムネイルの大きさを変更します。列数を固定したグリッドや「全幅」表示では各行を埋めるため、そこではリストのサムネイルとショートだけが変わります。スマートフォンサイズのウィンドウでは、グリッドのサムネイルは 100% までに制限されます。"

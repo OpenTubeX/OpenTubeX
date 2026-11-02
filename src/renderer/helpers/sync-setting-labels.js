@@ -206,6 +206,7 @@ export const SYNC_SETTING_LABELS = {
     'Settings.General Settings.Video View Type.Video View Type'
   ],
   newTabPosition: 'Settings.General Settings.New Tab Position.New Tab Position',
+  onlyShowImportantToasts: 'Settings.Theme Settings.Only Show Important Notifications',
   onlyShowLatestFromChannel: 'Settings.Subscription Settings.Limit the number of videos displayed for each channel',
   onlyShowLatestFromChannelNumber: 'Settings.Subscription Settings.To',
   openDeepLinksInNewWindow: 'Settings.General Settings.Open Deep Links In New Window',

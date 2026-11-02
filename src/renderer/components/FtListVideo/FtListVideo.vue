@@ -1333,7 +1333,7 @@ async function toggleLiveReminder() {
           ? t('Video.Notification enabled')
           : t('Video.Notification unavailable'),
         image: toastThumbnail.value,
-        icon: ['fas', 'calendar-days']
+        icon: scheduled ? ['fas', 'calendar-days'] : ['fas', 'circle-exclamation']
       })
     }
   } catch (error) {
@@ -1342,7 +1342,7 @@ async function toggleLiveReminder() {
       showToast({
         message: t('Video.Notification unavailable'),
         image: toastThumbnail.value,
-        icon: ['fas', 'calendar-days']
+        icon: ['fas', 'circle-exclamation']
       })
     }
   } finally {

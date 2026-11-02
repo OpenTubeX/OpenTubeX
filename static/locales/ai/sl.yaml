@@ -622,6 +622,7 @@ Settings:
     Invalid Engine: Vnesite ime in veljaven iskalni URL HTTP ali HTTPS, ki vsebuje %s.
     Engine Limit: Dodate lahko največ {count} iskalnikov po meri.
   Theme Settings:
+    Only Show Important Notifications: Prikaži samo pomembna obvestila
     Visible Search Suggestions: "Vidni predlogi iskanja"
     Material Accent Color: "Poudarjena barva Material"
     Material Wallpaper Colors: "Barve slike ozadja"
@@ -2651,6 +2652,7 @@ Tooltips:
     Refresh Subscriptions While App Is Closed: "Osvežuje vire z izbranimi nastavitvami. Na računalniku OpenTubeX ostane v sistemski vrstici do izhoda. Android določa čas osveževanja v ozadju."
     Notify About New Uploads: Prikazuje sistemska obvestila v tej napravi za kanale, ki ste jim obvestila vklopili v njihovih nastavitvah naročnine. OpenTubeX preveri novo vsebino ob osvežitvi naročnin, zato izberite interval samodejnega osveževanja. Če želite prejemati obvestila tudi, ko je aplikacija zaprta, vklopite še osveževanje, ko je aplikacija zaprta.
   Theme Settings:
+    Only Show Important Notifications: Skrije obvestila v aplikaciji, ki le potrdijo dejanje ali sporočijo stanje. Napake, opozorila, opomniki, ki ste jih nastavili, in obvestila, ki ponujajo dejanje, na primer Razveljavi, se še vedno prikažejo. Napredek opravil v ozadju, na primer osveževanja naročnin, je namesto v obvestilu prikazan v splošni vrstici napredka. Sistemska obvestila niso prizadeta.
     Visible Search Suggestions: "Določa, koliko vnosov zgodovine iskanja in predlogov prikaže iskalna vrstica, preden se njen seznam začne pomikati. Seznam nikoli ne sega čez spodnji rob okna."
     Thumbnail Size: "Spremeni velikost sličic videoposnetkov v mrežah in seznamih. Mreže s fiksnim številom stolpcev ali pogled Polna širina namesto tega zapolnijo vsako vrstico, zato tam spremeni le sličice seznamov in Shorts. V oknih velikosti telefona so sličice mreže omejene na 100 %."
     Playlist Thumbnail Size: "Spremeni velikost sličic videoposnetkov na straneh seznamov predvajanja. Mreže s fiksnim številom stolpcev ali pogled Polna širina namesto tega zapolnijo vsako vrstico, zato tam spremeni le sličice seznamov in Shorts. V oknih velikosti telefona so sličice mreže omejene na 100 %."

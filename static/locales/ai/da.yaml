@@ -500,6 +500,7 @@ Settings:
     Invalid Engine: Angiv et navn og en gyldig HTTP- eller HTTPS-søge-URL, der indeholder %s.
     Engine Limit: Du kan tilføje op til {count} brugerdefinerede søgemaskiner.
   Theme Settings:
+    Only Show Important Notifications: Vis kun vigtige notifikationer
     Visible Search Suggestions: "Synlige søgeforslag"
     Material Accent Color: "Material-accentfarve"
     Material Wallpaper Colors: "Farver fra baggrundsbilledet"
@@ -2212,6 +2213,7 @@ Tooltips:
     Refresh Subscriptions While App Is Closed: "Opdaterer feeds med dine valgte indstillinger. På computeren forbliver OpenTubeX i systembakken, indtil du afslutter. Android styrer, hvornår baggrundsopdateringer kører."
     Notify About New Uploads: Viser systemmeddelelser på denne enhed for kanaler, hvor du har slået meddelelser til i deres abonnementsindstillinger. OpenTubeX søger efter nyt indhold, når abonnementer opdateres, så vælg et interval for automatisk opdatering. Hvis du vil have besked, mens appen er lukket, skal du også aktivere opdatering, mens appen er lukket.
   Theme Settings:
+    Only Show Important Notifications: Skjuler notifikationer i appen, der kun bekræfter en handling eller oplyser en status. Fejl, advarsler, påmindelser, du har oprettet, og notifikationer med en handling, såsom Fortryd, vises stadig. Fremskridt for baggrundshandlinger, såsom opdatering af abonnementer, vises i den globale statuslinje i stedet for som en notifikation. Systemnotifikationer påvirkes ikke.
     Visible Search Suggestions: "Angiver, hvor mange poster fra søgehistorikken og forslag søgefeltet viser, før dets liste skal rulles. Listen går aldrig ud over vinduets nederste kant."
     Thumbnail Size: "Skalerer videominiaturer i gitre og lister. Gitre med et fast antal kolonner eller visningstypen Fuld bredde udfylder i stedet hver række, så dér ændrer den kun listeminiaturer og Shorts. I vinduer på størrelse med en telefon er gitterminiaturer begrænset til 100 %."
     Playlist Thumbnail Size: "Skalerer videominiaturer på playlistesider. Gitre med et fast antal kolonner eller visningstypen Fuld bredde udfylder i stedet hver række, så dér ændrer den kun listeminiaturer og Shorts. I vinduer på størrelse med en telefon er gitterminiaturer begrænset til 100 %."

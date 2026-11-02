@@ -488,6 +488,7 @@ Settings:
     Invalid Engine: "Lakait un anv hag un URL enklask HTTP pe HTTPS talvoudek ennañ %s."
     Engine Limit: "Gallout a rit ouzhpennañ betek {count} keflusker enklask personelaet."
   Theme Settings:
+    Only Show Important Notifications: Diskouez ar c'hemennoù pouezus hepken
     Visible Search Suggestions: "Kinnigoù klask gwelus"
     Material Accent Color: "Liv pouez Material"
     Material Wallpaper Colors: "Livioù ar skeudenn drekleur"
@@ -2136,6 +2137,7 @@ Tooltips:
     Refresh Subscriptions While App Is Closed: "Hizivaat a ra al lanvioù gant an arventennoù dibabet. War an urzhiataer e chom OpenTubeX e takad ar c'hemennoù betek kuitaat. Android a ziviz pegoulz e vez hizivaet en drekleur."
     Notify About New Uploads: Diskouez a ra rebuadoù reizhiad war an trevnad-mañ evit ar chadennoù ho peus gweredekaet o rebuadoù en o arventennoù koumanant. OpenTubeX a wir ha bez ez eus endalc'had nevez pa vez freskaet ar c'houmanantoù, setu dibabit un etrevez adkargañ emgefreek. Evit bezañ kelaouet pa vez serret an arload, gweredekait ivez ar freskañ pa vez serret an arload.
   Theme Settings:
+    Only Show Important Notifications: Kuzhat a ra ar c'hemennoù en arload na reont nemet kadarnaat un ober pe reiñ ur stad. Diskouezet e vez c'hoazh ar fazioù, ar c'hemennoù-diwall, an degasoù-koun ho peus kefluniet hag ar c'hemennoù a ginnig un ober, evel Dizober. Diskouezet e vez araokadur an oberoù en drekleur, evel freskaat ar c'houmanantoù, er varrenn araokadur hollek e-lec'h en ur c'hemenn. Ar c'hemennoù reizhiad n'int ket tizhet.
     Visible Search Suggestions: "Termeniñ a ra pet enmont eus ar roll-istor klask ha pet kinnig a ziskouez ar varrenn glask a-raok ma ranker dibunañ he roll. Ne ya morse ar roll en tu all da draoñ ar prenestr."
     Thumbnail Size: "Cheñch a ra ment ar skeudennigoù videoioù er gaelioù hag el listennoù. Ar gaelioù gant un niver a vannoù start pe gant ar gwel Led klok a leugn pep renk e-lec'h, neuze ne cheñch nemet skeudennigoù al listennoù hag ar Shorts eno. War ar prenestroù ment ur pellgomzer eo bevennet skeudennigoù ar gael da 100%."
     Playlist Thumbnail Size: "Cheñch a ra ment ar skeudennigoù videoioù war pajennoù ar rolloù-lenn. Ar gaelioù gant un niver a vannoù start pe gant ar gwel Led klok a leugn pep renk e-lec'h, neuze ne cheñch nemet skeudennigoù al listennoù hag ar Shorts eno. War ar prenestroù ment ur pellgomzer eo bevennet skeudennigoù ar gael da 100%."

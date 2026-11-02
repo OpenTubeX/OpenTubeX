@@ -788,6 +788,7 @@ Settings:
     Show Toast Timeout Indicator: Ablaufanzeige für Benachrichtigungen anzeigen
     Use Grid Player Menu: Rasterförmiges Wiedergabemenü verwenden
     Frosted Glass Player UI: "Player-Oberfläche mit Milchglaseffekt"
+    Only Show Important Notifications: Nur wichtige Benachrichtigungen anzeigen
     Show Progress as Notification: Fortschritt als Benachrichtigung anzeigen
     Operation in Progress: Vorgang läuft
     Toast Position:
@@ -2946,6 +2947,11 @@ Tooltips:
     Show Progress as Notification: >-
       Zeigt bei Hintergrundvorgängen wie dem Aktualisieren von Abos und Downloads verwalteter Werkzeuge eine dauerhafte
       Benachrichtigung mit dem aktuellen Fortschritt anstelle des globalen Fortschrittsbalkens an.
+    Only Show Important Notifications: >-
+      Blendet In-App-Benachrichtigungen aus, die nur eine Aktion bestätigen oder einen Status melden. Fehler,
+      Warnungen, eingerichtete Erinnerungen und Benachrichtigungen mit einer Aktion wie „Rückgängig“ werden weiterhin
+      angezeigt. Der Fortschritt von Hintergrundvorgängen wie dem Aktualisieren von Abos erscheint im globalen
+      Fortschrittsbalken statt als Benachrichtigung. Systembenachrichtigungen sind nicht betroffen.
     Always Show Scrollbars: >-
       Hält die Scrollbars immer sichtbar. Wenn deaktiviert, werden sie kurz nach dem Ende der Mausbewegung
       ausgeblendet und bei der nächsten Bewegung wieder eingeblendet.

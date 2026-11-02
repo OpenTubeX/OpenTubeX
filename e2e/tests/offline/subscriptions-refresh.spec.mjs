@@ -569,6 +569,32 @@ test.describe('subscription refresh bottom progress', () => {
   })
 })
 
+test.describe('subscription refresh with only important notifications', () => {
+  test.use({
+    seed: {
+      settings: {
+        ...commonSettings,
+        showProgressBarToast: true,
+        onlyShowImportantToasts: true
+      },
+      profiles: [profileWith(2)],
+      subscriptionCache: [cachedChannel(0), cachedChannel(1)]
+    }
+  })
+
+  test('shows progress in the global progress bar instead of a notification', async ({ page }) => {
+    await routeFeeds(page, () => 8_000)
+    await goTo(page, 'subscriptions')
+
+    await page.getByRole('button', { name: /Refresh Videos/ }).click()
+    const progressBar = page.locator('.app > .progressBar')
+    await expect(progressBar).toBeVisible()
+    await expect(page.getByTestId('subscription-refresh-toast')).toHaveCount(0)
+    await expect(page.locator('.toast-holder .toast')).toHaveCount(0)
+    await expect(progressBar).toHaveCount(0, { timeout: 30_000 })
+  })
+})
+
 test.describe('subscription feed state during refresh', () => {
   test.use({
     seed: {

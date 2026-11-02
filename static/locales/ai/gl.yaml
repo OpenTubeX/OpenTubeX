@@ -493,6 +493,7 @@ Settings:
     Invalid Engine: Introduce un nome e unha URL de busca HTTP ou HTTPS válida que conteña %s.
     Engine Limit: Podes engadir ata {count} motores de busca personalizados.
   Theme Settings:
+    Only Show Important Notifications: Mostrar só as notificacións importantes
     Visible Search Suggestions: "Suxestións de busca visibles"
     Material Accent Color: "Cor de acento de Material"
     Material Wallpaper Colors: "Cores do fondo de pantalla"
@@ -2183,6 +2184,7 @@ Tooltips:
     Refresh Subscriptions While App Is Closed: "Actualiza as fontes coa configuración seleccionada. No escritorio, OpenTubeX permanece na bandexa do sistema ata saír. Android controla cando se executan as actualizacións en segundo plano."
     Notify About New Uploads: Amosa notificacións do sistema neste dispositivo para as canles cuxas notificacións activaches na súa configuración de subscrición. OpenTubeX busca contido novo ao actualizar as subscricións, así que escolle un intervalo de actualización automática. Para recibir notificacións coa aplicación pechada, activa tamén a actualización coa aplicación pechada.
   Theme Settings:
+    Only Show Important Notifications: Oculta as notificacións da aplicación que só confirman unha acción ou informan dun estado. Os erros, os avisos, os recordatorios que configuraches e as notificacións que ofrecen unha acción, como Desfacer, seguen aparecendo. O progreso das operacións en segundo plano, como a actualización das subscricións, móstrase na barra de progreso global en lugar dunha notificación. As notificacións do sistema non se ven afectadas.
     Visible Search Suggestions: "Define cantas entradas do historial de busca e suxestións mostra a barra de busca antes de que a súa lista se desprace. A lista nunca se estende máis alá da parte inferior da xanela."
     Thumbnail Size: "Escala as miniaturas dos vídeos en grellas e listas. As grellas cun número fixo de columnas ou o tipo de vista Ancho completo enchen cada fila, así que alí só cambia as miniaturas das listas e os Shorts. Nas xanelas do tamaño dun teléfono, as miniaturas da grella limítanse ao 100 %."
     Playlist Thumbnail Size: "Escala as miniaturas dos vídeos nas páxinas de listas de reprodución. As grellas cun número fixo de columnas ou o tipo de vista Ancho completo enchen cada fila, así que alí só cambia as miniaturas das listas e os Shorts. Nas xanelas do tamaño dun teléfono, as miniaturas da grella limítanse ao 100 %."

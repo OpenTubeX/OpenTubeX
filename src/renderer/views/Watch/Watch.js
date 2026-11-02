@@ -5445,6 +5445,7 @@ export default defineComponent({
             }),
           time: 3_600_000,
           icon: ['fas', 'clock'],
+          important: true,
         })
         this.resetAutoplayInterruptionTimeout()
         return

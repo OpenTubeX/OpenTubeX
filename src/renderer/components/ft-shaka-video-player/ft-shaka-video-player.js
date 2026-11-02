@@ -3554,7 +3554,7 @@ export default defineComponent({
       },
       onError(error) {
         console.error('Mobile player adjustment failed', error)
-        showToast(t('Settings.Player Settings.Swipe Gestures.Unavailable'))
+        showToast({ message: t('Settings.Player Settings.Swipe Gestures.Unavailable'), icon: ['fas', 'circle-exclamation'] })
       },
     })
 

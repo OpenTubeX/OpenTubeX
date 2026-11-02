@@ -533,6 +533,11 @@ const customGetters = {
     return new Set(getters.getChannelsHiddenParsed.map((ch) => ch.name))
   },
 
+  /** Only showing important notifications moves progress to the progress bar */
+  getEffectiveShowProgressBarToast: (state) => {
+    return state.showProgressBarToast && !state.onlyShowImportantToasts
+  },
+
   getActiveChannelsHidden: (state, getters) => {
     return state.enableBlockLists ? getters.getChannelsHiddenParsed : []
   },

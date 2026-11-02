@@ -271,7 +271,7 @@ async function loadSystemFonts() {
     })
     .catch(error => {
       console.error('Failed to load system fonts', error)
-      showToast(t('Settings.Theme Settings.Font.Unable to Load'))
+      showToast({ message: t('Settings.Theme Settings.Font.Unable to Load'), icon: ['fas', 'circle-exclamation'] })
     })
 
   await systemFontsPromise
@@ -378,7 +378,8 @@ async function showTestToast() {
   await toastPositionUpdatePromise
   showToast({
     message: t('Settings.Theme Settings.Toast Position.Test Toast'),
-    icon: ['fas', 'message']
+    icon: ['fas', 'message'],
+    important: true
   })
 }
 

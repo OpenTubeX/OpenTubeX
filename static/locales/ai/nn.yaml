@@ -510,6 +510,7 @@ Settings:
     Invalid Engine: Skriv inn eit namn og ei gyldig HTTP- eller HTTPS-søkjeadresse som inneheld %s.
     Engine Limit: Du kan leggje til opptil {count} eigne søkjemotorar.
   Theme Settings:
+    Only Show Important Notifications: Vis berre viktige varsel
     Visible Search Suggestions: "Synlege søkjeforslag"
     Material Accent Color: "Material-aksentfarge"
     Material Wallpaper Colors: "Fargar frå bakgrunnsbiletet"
@@ -2443,6 +2444,7 @@ Tooltips:
     Refresh Subscriptions While App Is Closed: "Oppdaterer straumar med innstillingane du har valt. På datamaskina blir OpenTubeX i systemfeltet til du avsluttar. Android avgjer når bakgrunnsoppdateringar køyrer."
     Notify About New Uploads: Viser systemvarsel på denne eininga for kanalar du har slått på varsel for i abonnementinnstillingane deira. OpenTubeX ser etter nytt innhald når abonnement vert oppdaterte, så vel eit intervall for automatisk oppdatering. For å bli varsla medan appen er lukka, må du også slå på oppdatering medan appen er lukka.
   Theme Settings:
+    Only Show Important Notifications: Gøymer varsel i appen som berre stadfestar ei handling eller melder ein status. Feil, åtvaringar, påminningar du har sett opp, og varsel som tilbyr ei handling, som Angre, blir framleis viste. Framdrift for bakgrunnsoperasjonar, som oppdatering av abonnement, blir vist i den globale framdriftslinja i staden for som eit varsel. Systemvarsel blir ikkje påverka.
     Visible Search Suggestions: "Set kor mange oppføringar frå søkjeloggen og forslag søkjefeltet viser før lista må rullast. Lista går aldri forbi nedkanten av vindauget."
     Thumbnail Size: "Skalerer videominiatyrbilete i rutenett og lister. Rutenett med eit fast tal kolonnar eller visingstypen Full breidd fyller i staden kvar rad, så der endrar han berre listeminiatyrbilete og Shorts. I vindauge på storleik med ein telefon er rutenettminiatyrbilete avgrensa til 100 %."
     Playlist Thumbnail Size: "Skalerer videominiatyrbilete på spelelistesider. Rutenett med eit fast tal kolonnar eller visingstypen Full breidd fyller i staden kvar rad, så der endrar han berre listeminiatyrbilete og Shorts. I vindauge på storleik med ein telefon er rutenettminiatyrbilete avgrensa til 100 %."

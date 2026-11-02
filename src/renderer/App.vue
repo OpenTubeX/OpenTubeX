@@ -1086,10 +1086,10 @@ const localProgressBarVisible = computed(() => store.getters.getShowProgressBar)
 /** @type {import('vue').ComputedRef<boolean>} */
 const subscriptionRefreshInProgress = computed(() => store.getters.getSubscriptionFeedRefreshInProgress)
 const progressUsesToast = computed(() => {
-  return shouldUseProgressToast(store.getters.getShowProgressBarToast)
+  return shouldUseProgressToast(store.getters.getEffectiveShowProgressBarToast)
 })
 const showProgressStartToast = computed(() => {
-  return shouldShowProgressStartToast(store.getters.getShowProgressBarToast)
+  return shouldShowProgressStartToast(store.getters.getEffectiveShowProgressBarToast)
 })
 
 const showProgressBar = computed(() => {

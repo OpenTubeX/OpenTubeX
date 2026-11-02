@@ -491,6 +491,7 @@ Settings:
     Invalid Engine: Ange ett namn och en giltig HTTP- eller HTTPS-söknings-URL som innehåller %s.
     Engine Limit: Du kan lägga till högst {count} egna sökmotorer.
   Theme Settings:
+    Only Show Important Notifications: Visa endast viktiga aviseringar
     Visible Search Suggestions: "Synliga sökförslag"
     Material Accent Color: "Material-accentfärg"
     Material Wallpaper Colors: "Bakgrundsbildens färger"
@@ -2152,6 +2153,7 @@ Tooltips:
     Refresh Subscriptions While App Is Closed: "Uppdaterar flöden med dina valda inställningar. På datorn stannar OpenTubeX i systemfältet tills du avslutar. Android bestämmer när bakgrundsuppdateringar körs."
     Notify About New Uploads: Visar systemaviseringar på den här enheten för kanaler vars aviseringar du har aktiverat i deras prenumerationsinställningar. OpenTubeX söker efter nytt innehåll när prenumerationer uppdateras, så välj ett intervall för automatisk uppdatering. Om du vill få aviseringar medan appen är stängd aktiverar du även uppdatering medan appen är stängd.
   Theme Settings:
+    Only Show Important Notifications: Döljer aviseringar i appen som bara bekräftar en åtgärd eller rapporterar en status. Fel, varningar, påminnelser som du har ställt in och aviseringar som erbjuder en åtgärd, till exempel Ångra, visas fortfarande. Förloppet för bakgrundsåtgärder, till exempel uppdatering av prenumerationer, visas i den globala förloppsindikatorn i stället för som en avisering. Systemaviseringar påverkas inte.
     Visible Search Suggestions: "Anger hur många poster från sökhistoriken och förslag sökfältet visar innan listan behöver rullas. Listan sträcker sig aldrig förbi fönstrets nederkant."
     Thumbnail Size: "Skalar videominiatyrer i rutnät och listor. Rutnät med ett fast antal kolumner eller vytypen Full bredd fyller i stället varje rad, så där ändrar reglaget bara listminiatyrer och Shorts. I fönster i telefonstorlek är rutnätsminiatyrer begränsade till 100 %."
     Playlist Thumbnail Size: "Skalar videominiatyrer på spellistesidor. Rutnät med ett fast antal kolumner eller vytypen Full bredd fyller i stället varje rad, så där ändrar reglaget bara listminiatyrer och Shorts. I fönster i telefonstorlek är rutnätsminiatyrer begränsade till 100 %."

@@ -78,6 +78,7 @@ import { useI18n } from 'vue-i18n'
 import { Toaster, toast as sonner } from 'vue-sonner'
 import { normalizeToastPosition } from '../../constants/toastPosition'
 import { shouldUseProgressToast } from '../../helpers/progressPresentation'
+import { isImportantToast } from '../../helpers/toastImportance'
 import { showToast, ToastEventBus } from '../../helpers/utils'
 import store from '../../store'
 import FtEmbeddedProgress from '../FtEmbeddedProgress/FtEmbeddedProgress.vue'
@@ -272,7 +273,7 @@ const showProgressToast = computed(() => {
   // toast would sit on top of the fullscreen player. Hide it until fullscreen
   // is left, as progress updates aren't urgent enough to interrupt playback.
   return fullscreenTarget.value === null &&
-    shouldUseProgressToast(store.getters.getShowProgressBarToast) &&
+    shouldUseProgressToast(store.getters.getEffectiveShowProgressBarToast) &&
     (store.getters.getShowProgressBar ||
       store.getters.getSubscriptionFeedRefreshInProgress)
 })
@@ -439,9 +440,13 @@ function stopProgressToastPointerTracking() {
 }
 
 /**
- * @param {CustomEvent<{ message: string | (({elapsedMs: number, remainingMs: number}) => string), time: number | null, action: Function | null, abortSignal: AbortSignal | null, image: string | null, icon: [string, string] | null, buttons: { label: string, action?: Function, primary?: boolean, icon?: [string, string] }[], buttonAction: 'open-sync-settings' | null, verticalButtons: boolean, dismissible: boolean, dismissOnAction?: boolean, control: import('../../helpers/utils').ToastControl | null }>} event
+ * @param {CustomEvent<{ message: string | (({elapsedMs: number, remainingMs: number}) => string), time: number | null, action: Function | null, abortSignal: AbortSignal | null, image: string | null, icon: [string, string] | null, buttons: { label: string, action?: Function, primary?: boolean, icon?: [string, string] }[], buttonAction: 'open-sync-settings' | null, verticalButtons: boolean, dismissible: boolean, dismissOnAction?: boolean, important?: boolean, control: import('../../helpers/utils').ToastControl | null }>} event
  */
 function open(event) {
+  if (store.getters.getOnlyShowImportantToasts && !isImportantToast(event.detail)) {
+    return
+  }
+
   let { message, time, action, abortSignal, image, icon, buttons, buttonAction, verticalButtons, dismissible, dismissOnAction } = event.detail
   if (buttonAction === 'open-sync-settings') {
     buttons = [{

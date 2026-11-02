@@ -477,6 +477,7 @@ Settings:
     Invalid Engine: Enter a name and a valid HTTP or HTTPS search URL containing %s.
     Engine Limit: You can add up to {count} custom search engines.
   Theme Settings:
+    Only Show Important Notifications: Only show important notifications
     Visible Search Suggestions: "Visible Search Suggestions"
     Material Accent Color: "Material accent colour"
     Material Wallpaper Colors: "Wallpaper colours"
@@ -2120,6 +2121,7 @@ Tooltips:
     Refresh Subscriptions While App Is Closed: "Refreshes feeds using your selected settings. On desktop, OpenTubeX stays in the system tray until you quit. Android controls when background refreshes run."
     Notify About New Uploads: Shows system notifications on this device for channels whose notifications you turned on in their subscription settings. OpenTubeX checks for new content when subscriptions refresh, so choose an auto refresh interval. To be notified while the app is closed, also enable refreshing while the app is closed.
   Theme Settings:
+    Only Show Important Notifications: Hides in-app notifications that only confirm an action or report a status. Errors, warnings, reminders you set up, and notifications that offer an action, such as Undo, still appear. Background progress, such as subscription refreshes, shows in the global progress bar instead of a notification. System notifications are not affected.
     Visible Search Suggestions: "Sets how many search history entries and suggestions the search bar shows before its list scrolls. The list never extends past the bottom of the window."
     Thumbnail Size: "Scales video thumbnails in grids and lists. Grids with a fixed column count or the Full Width view type fill each row instead, so there it only changes list thumbnails and Shorts. Phone-sized windows limit grid thumbnails to 100%."
     Playlist Thumbnail Size: "Scales video thumbnails on playlist pages. Grids with a fixed column count or the Full Width view type fill each row instead, so there it only changes list thumbnails and Shorts. Phone-sized windows limit grid thumbnails to 100%."

@@ -1442,7 +1442,7 @@ function moveVideoToTheTop(videoId, playlistItemId) {
     store.dispatch('updatePlaylist', playlist)
     playlistItems.value = playlistItems_
   } catch (e) {
-    showToast(t('User Playlists.SinglePlaylistView.Toast["There was an issue with updating this playlist."]'))
+    showToast({ message: t('User Playlists.SinglePlaylistView.Toast["There was an issue with updating this playlist."]'), icon: ['fas', 'circle-exclamation'] })
     console.error(e)
   }
 }
@@ -1483,7 +1483,7 @@ function moveVideoToTheBottom(videoId, playlistItemId) {
     store.dispatch('updatePlaylist', playlist)
     playlistItems.value = playlistItems_
   } catch (e) {
-    showToast(t('User Playlists.SinglePlaylistView.Toast["There was an issue with updating this playlist."]'))
+    showToast({ message: t('User Playlists.SinglePlaylistView.Toast["There was an issue with updating this playlist."]'), icon: ['fas', 'circle-exclamation'] })
     console.error(e)
   }
 }

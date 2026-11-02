@@ -493,6 +493,7 @@ Settings:
     Invalid Engine: Nhập tên và URL tìm kiếm HTTP hoặc HTTPS hợp lệ có chứa %s.
     Engine Limit: Bạn có thể thêm tối đa {count} công cụ tìm kiếm tùy chỉnh.
   Theme Settings:
+    Only Show Important Notifications: Chỉ hiển thị thông báo quan trọng
     Visible Search Suggestions: "Số gợi ý tìm kiếm hiển thị"
     Material Accent Color: "Màu nhấn Material"
     Material Wallpaper Colors: "Màu hình nền"
@@ -2171,6 +2172,7 @@ Tooltips:
     Refresh Subscriptions While App Is Closed: "Làm mới nguồn cấp theo cài đặt đã chọn. Trên máy tính, OpenTubeX ở trong khay hệ thống cho đến khi bạn thoát. Android quyết định thời điểm làm mới trong nền."
     Notify About New Uploads: Hiện thông báo hệ thống trên thiết bị này cho các kênh mà bạn đã bật thông báo trong cài đặt đăng ký của kênh. OpenTubeX kiểm tra nội dung mới khi làm mới đăng ký, vì vậy hãy chọn khoảng thời gian tự động làm mới. Để nhận thông báo khi ứng dụng đã đóng, hãy bật thêm tùy chọn làm mới khi ứng dụng đã đóng.
   Theme Settings:
+    Only Show Important Notifications: Ẩn các thông báo trong ứng dụng chỉ xác nhận một thao tác hoặc báo cáo trạng thái. Lỗi, cảnh báo, lời nhắc bạn đã thiết lập và các thông báo có thao tác, chẳng hạn như Hoàn tác, vẫn hiển thị. Tiến trình của các thao tác chạy nền, chẳng hạn như làm mới kênh đăng ký, được hiển thị trên thanh tiến trình chung thay vì trong thông báo. Thông báo hệ thống không bị ảnh hưởng.
     Visible Search Suggestions: "Đặt số mục lịch sử tìm kiếm và gợi ý mà thanh tìm kiếm hiển thị trước khi danh sách của nó phải cuộn. Danh sách không bao giờ vượt quá cạnh dưới của cửa sổ."
     Thumbnail Size: "Thay đổi kích thước hình thu nhỏ video trong lưới và danh sách. Lưới có số cột cố định hoặc kiểu xem Toàn chiều rộng sẽ lấp đầy từng hàng, nên ở đó thanh trượt chỉ thay đổi hình thu nhỏ trong danh sách và Shorts. Trong cửa sổ cỡ điện thoại, hình thu nhỏ dạng lưới bị giới hạn ở 100%."
     Playlist Thumbnail Size: "Thay đổi kích thước hình thu nhỏ video trên trang danh sách phát. Lưới có số cột cố định hoặc kiểu xem Toàn chiều rộng sẽ lấp đầy từng hàng, nên ở đó thanh trượt chỉ thay đổi hình thu nhỏ trong danh sách và Shorts. Trong cửa sổ cỡ điện thoại, hình thu nhỏ dạng lưới bị giới hạn ở 100%."

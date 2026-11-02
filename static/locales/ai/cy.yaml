@@ -489,6 +489,7 @@ Settings:
     Invalid Engine: Rhowch enw ac URL chwilio HTTP neu HTTPS dilys sy'n cynnwys %s.
     Engine Limit: Gallwch ychwanegu hyd at {count} o beiriannau chwilio personol.
   Theme Settings:
+    Only Show Important Notifications: Dangos hysbysiadau pwysig yn unig
     Visible Search Suggestions: "Awgrymiadau chwilio gweladwy"
     Material Accent Color: "Lliw acen Material"
     Material Wallpaper Colors: "Lliwiau papur wal"
@@ -2159,6 +2160,7 @@ Tooltips:
     Refresh Subscriptions While App Is Closed: "Yn adnewyddu ffrydiau gan ddefnyddio eich gosodiadau. Ar y bwrdd gwaith, mae OpenTubeX yn aros yn hambwrdd y system nes i chi adael. Android sy’n rheoli pryd mae adnewyddu cefndirol yn digwydd."
     Notify About New Uploads: Yn dangos hysbysiadau system ar y ddyfais hon ar gyfer sianeli rydych wedi troi eu hysbysiadau ymlaen yn eu gosodiadau tanysgrifio. Mae OpenTubeX yn gwirio am gynnwys newydd pan fydd tanysgrifiadau'n cael eu hadnewyddu, felly dewiswch gyfwng adnewyddu awtomatig. I gael hysbysiadau pan fydd yr ap ar gau, galluogwch adnewyddu pan fydd yr ap ar gau hefyd.
   Theme Settings:
+    Only Show Important Notifications: Yn cuddio hysbysiadau yn yr ap sydd ond yn cadarnhau gweithred neu'n adrodd statws. Mae gwallau, rhybuddion, nodiadau atgoffa rydych wedi'u gosod, a hysbysiadau sy'n cynnig gweithred, fel Dadwneud, yn dal i ymddangos. Mae cynnydd yn y cefndir, fel adnewyddu tanysgrifiadau, yn cael ei ddangos yn y bar cynnydd cyffredinol yn lle hysbysiad. Nid yw hysbysiadau'r system yn cael eu heffeithio.
     Visible Search Suggestions: "Yn gosod faint o gofnodion hanes chwilio ac awgrymiadau y mae’r bar chwilio’n eu dangos cyn i’w restr sgrolio. Nid yw’r rhestr byth yn ymestyn heibio gwaelod y ffenestr."
     Thumbnail Size: "Yn newid maint mân-luniau fideos mewn gridiau a rhestrau. Mae gridiau gyda nifer sefydlog o golofnau neu'r math gwedd Lled Llawn yn llenwi pob rhes yn lle hynny, felly yno dim ond mân-luniau rhestrau a Shorts y mae'n eu newid. Mewn ffenestri maint ffôn, mae mân-luniau'r grid wedi'u cyfyngu i 100%."
     Playlist Thumbnail Size: "Yn newid maint mân-luniau fideos ar dudalennau rhestri chwarae. Mae gridiau gyda nifer sefydlog o golofnau neu'r math gwedd Lled Llawn yn llenwi pob rhes yn lle hynny, felly yno dim ond mân-luniau rhestrau a Shorts y mae'n eu newid. Mewn ffenestri maint ffôn, mae mân-luniau'r grid wedi'u cyfyngu i 100%."

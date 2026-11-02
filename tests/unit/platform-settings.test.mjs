@@ -34,6 +34,7 @@ test('platform-specific settings stay local to every device', () => {
     'mobileFullscreenBrightness',
     'mobileLeftSwipeAction',
     'mobileRightSwipeAction',
+    'onlyShowImportantToasts',
     'playerMenuControls',
     'rememberTabNavigationHistory',
     'rememberVolume',

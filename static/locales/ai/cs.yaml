@@ -488,6 +488,7 @@ Settings:
     Invalid Engine: Zadejte název a platnou adresu URL vyhledávání s protokolem HTTP nebo HTTPS, která obsahuje %s.
     Engine Limit: Můžete přidat až {count} vlastních vyhledávačů.
   Theme Settings:
+    Only Show Important Notifications: Zobrazovat pouze důležitá oznámení
     Visible Search Suggestions: "Viditelné návrhy vyhledávání"
     Material Accent Color: "Barva zvýraznění Material"
     Material Wallpaper Colors: "Barvy tapety"
@@ -2129,6 +2130,7 @@ Tooltips:
     Refresh Subscriptions While App Is Closed: "Aktualizuje kanály podle zvoleného nastavení. Na počítači zůstává OpenTubeX v oznamovací oblasti až do ukončení. Android určuje čas aktualizací na pozadí."
     Notify About New Uploads: Zobrazuje na tomto zařízení systémová oznámení pro kanály, u kterých jste v nastavení odběru zapnuli oznámení. OpenTubeX kontroluje nový obsah při obnovení odběrů, proto zvolte interval automatického obnovení. Chcete-li dostávat oznámení i při zavřené aplikaci, zapněte také obnovování při zavřené aplikaci.
   Theme Settings:
+    Only Show Important Notifications: Skryje oznámení v aplikaci, která pouze potvrzují akci nebo hlásí stav. Chyby, varování, nastavená připomenutí a oznámení s akcí, například Zpět, se zobrazují i nadále. Průběh operací na pozadí, například obnovování odběrů, se místo oznámení zobrazuje v globálním ukazateli průběhu. Systémová oznámení nejsou ovlivněna.
     Visible Search Suggestions: "Určuje, kolik položek historie vyhledávání a návrhů zobrazí vyhledávací pole, než se jeho seznam začne posouvat. Seznam nikdy nepřesáhne spodní okraj okna."
     Thumbnail Size: "Mění velikost miniatur videí v mřížkách a seznamech. Mřížky s pevným počtem sloupců nebo zobrazení Plná šířka místo toho vyplní každý řádek, takže tam mění jen miniatury v seznamech a Shorts. V oknech velikosti telefonu jsou miniatury v mřížce omezeny na 100 %."
     Playlist Thumbnail Size: "Mění velikost miniatur videí na stránkách playlistů. Mřížky s pevným počtem sloupců nebo zobrazení Plná šířka místo toho vyplní každý řádek, takže tam mění jen miniatury v seznamech a Shorts. V oknech velikosti telefonu jsou miniatury v mřížce omezeny na 100 %."

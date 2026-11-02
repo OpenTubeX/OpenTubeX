@@ -488,6 +488,7 @@ Settings:
     Invalid Engine: Sláðu inn heiti og gilda HTTP- eða HTTPS-leitarslóð sem inniheldur %s.
     Engine Limit: Þú getur bætt við allt að {count} sérsniðnum leitarvélum.
   Theme Settings:
+    Only Show Important Notifications: Sýna aðeins mikilvægar tilkynningar
     Visible Search Suggestions: "Sýnilegar leitartillögur"
     Material Accent Color: "Material-áherslulitur"
     Material Wallpaper Colors: "Litir veggfóðurs"
@@ -2144,6 +2145,7 @@ Tooltips:
     Refresh Subscriptions While App Is Closed: "Endurnýjar efnisveitur með völdum stillingum. Á tölvu helst OpenTubeX í kerfisbakkanum þar til þú hættir. Android stjórnar því hvenær bakgrunnsuppfærslur fara fram."
     Notify About New Uploads: Birtir kerfistilkynningar á þessu tæki fyrir rásir sem þú hefur kveikt á tilkynningum fyrir í áskriftarstillingum þeirra. OpenTubeX athugar hvort nýtt efni sé komið þegar áskriftir eru uppfærðar, svo veldu bil milli sjálfvirkra uppfærslna. Til að fá tilkynningar þegar forritið er lokað skaltu einnig virkja uppfærslu þegar forritið er lokað.
   Theme Settings:
+    Only Show Important Notifications: Felur tilkynningar í forritinu sem aðeins staðfesta aðgerð eða greina frá stöðu. Villur, viðvaranir, áminningar sem þú hefur sett upp og tilkynningar sem bjóða upp á aðgerð, eins og Afturkalla, birtast áfram. Framvinda bakgrunnsaðgerða, eins og uppfærsla áskrifta, birtist á almennu framvindustikunni í stað tilkynningar. Kerfistilkynningar verða ekki fyrir áhrifum.
     Visible Search Suggestions: "Stillir hversu margar færslur úr leitarferli og tillögur leitarstikan sýnir áður en fletta þarf listanum. Listinn nær aldrei út fyrir neðri brún gluggans."
     Thumbnail Size: "Breytir stærð smámynda myndskeiða í hnitanetum og listum. Hnitanet með föstum dálkafjölda eða yfirlitsgerðinni Full breidd fylla þess í stað hverja röð, svo þar breytir það aðeins smámyndum í listum og Shorts. Í gluggum á stærð við síma takmarkast smámyndir hnitanets við 100%."
     Playlist Thumbnail Size: "Breytir stærð smámynda myndskeiða á síðum spilunarlista. Hnitanet með föstum dálkafjölda eða yfirlitsgerðinni Full breidd fylla þess í stað hverja röð, svo þar breytir það aðeins smámyndum í listum og Shorts. Í gluggum á stærð við síma takmarkast smámyndir hnitanets við 100%."

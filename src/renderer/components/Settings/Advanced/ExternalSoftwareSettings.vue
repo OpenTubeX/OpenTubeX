@@ -828,7 +828,7 @@ async function createYouTubeSession() {
       await store.dispatch('updateYtDlpDownloadUseCookies', true)
     }
   } catch {
-    showToast({ message: t('Settings.External Software Settings.YouTube session failed') })
+    showToast({ message: t('Settings.External Software Settings.YouTube session failed'), icon: ['fas', 'circle-exclamation'] })
   } finally {
     creatingSession.value = false
   }
