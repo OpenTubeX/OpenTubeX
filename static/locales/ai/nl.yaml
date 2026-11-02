@@ -367,6 +367,7 @@ Settings:
       Network: netwerk
       Disk: schijf
   General Settings:
+    Limit Titles to Two Lines: "Titels beperken tot twee regels"
     Close Window With Last Tab: 'Venster sluiten bij het sluiten van het laatste tabblad'
     Preferred Video Codec: Voorkeursvideocodec
     Always Use Backup Media Server: "Altijd de back-upmediaserver gebruiken"
@@ -2092,6 +2093,7 @@ Description:
   Music: Muziek
 Tooltips:
   General Settings:
+    Limit Titles to Two Lines: "Kort titels van video's en afspeellijsten in lijsten en rasters in tot twee regels met een beletselteken, voor gelijkmatigere kaarten. Beweeg de muis over een titel om deze volledig te zien."
     Close Window With Last Tab: 'Indien uitgeschakeld, opent het sluiten van het laatste tabblad in plaats daarvan een nieuw tabblad, zodat het venster open blijft totdat je het sluit.'
     Preferred Video Codec: |
       Automatisch geeft de voorkeur aan codecs die je apparaat met hardware kan decoderen.

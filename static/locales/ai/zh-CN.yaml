@@ -362,6 +362,7 @@ Settings:
       Network: 网络
       Disk: 磁盘
   General Settings:
+    Limit Titles to Two Lines: "标题最多显示两行"
     Close Window With Last Tab: '关闭最后一个标签页时关闭窗口'
     Preferred Video Codec: 首选视频编解码器
     Always Use Backup Media Server: "始终使用备用媒体服务器"
@@ -2030,6 +2031,7 @@ Description:
   Music: 音乐
 Tooltips:
   General Settings:
+    Limit Titles to Two Lines: "将列表和网格中的视频与播放列表标题缩短为最多两行并以省略号结尾，使卡片更整齐。将指针悬停在标题上可查看完整标题。"
     Close Window With Last Tab: '关闭后，关闭最后一个标签页会改为打开一个新标签页，窗口会一直保持打开，直到你关闭它。'
     Preferred Video Codec: |
       自动模式优先使用设备可以硬件解码的编解码器。

@@ -185,6 +185,7 @@ export const SYNC_SETTING_LABELS = {
   keyboardShortcuts: 'KeyboardShortcutPrompt.Keyboard Shortcuts',
   landingPage: 'Settings.General Settings.Default Landing Page',
   listType: 'Settings.General Settings.Video View Type.Video View Type',
+  limitTitlesToTwoLines: 'Settings.General Settings.Limit Titles to Two Lines',
   liveChatFilter: 'Video.Chat Filter',
   loopShorts: 'Settings.Player Settings.Loop Shorts',
   mainColor: 'Settings.Theme Settings.Main Color Theme.Main Color Theme',

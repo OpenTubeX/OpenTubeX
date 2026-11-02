@@ -362,6 +362,7 @@ Settings:
       Network: sarea
       Disk: diskoa
   General Settings:
+    Limit Titles to Two Lines: "Mugatu izenburuak bi lerrora"
     Close Window With Last Tab: 'Itxi leihoa azken fitxa ixtean'
     Preferred Video Codec: Hobetsitako bideo-kodeka
     Always Use Backup Media Server: "Erabili beti babeskopia-multimedia zerbitzaria"
@@ -2040,6 +2041,7 @@ Description:
   Music: Musika
 Tooltips:
   General Settings:
+    Limit Titles to Two Lines: "Zerrenda eta saretetako bideo eta erreprodukzio-zerrenden izenburuak bi lerrora laburtzen ditu eten-puntuekin, txartelak uniformeagoak izan daitezen. Pasatu kurtsorea izenburu baten gainetik osorik ikusteko."
     Close Window With Last Tab: 'Desaktibatuta dagoenean, azken fitxa itxiz gero fitxa berri bat irekitzen da, eta leihoak irekita jarraitzen du zuk itxi arte.'
     Preferred Video Codec: |
       Modu automatikoak zure gailuak hardware bidez deskodetu ditzakeen kodekak hobesten ditu.

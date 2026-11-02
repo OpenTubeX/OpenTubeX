@@ -362,6 +362,7 @@ Settings:
       Network: ağ
       Disk: disk
   General Settings:
+    Limit Titles to Two Lines: "Başlıkları iki satırla sınırla"
     Close Window With Last Tab: 'Son sekme kapatılınca pencereyi kapat'
     Preferred Video Codec: Tercih edilen video codec'i
     Always Use Backup Media Server: "Her zaman yedek medya sunucusunu kullan"
@@ -2031,6 +2032,7 @@ Description:
   Music: Müzik
 Tooltips:
   General Settings:
+    Limit Titles to Two Lines: "Listelerde ve ızgaralarda video ve oynatma listesi başlıklarını üç nokta ile iki satıra kısaltır, böylece kartlar daha düzenli görünür. Başlığın tamamını görmek için imleci üzerine getirin."
     Close Window With Last Tab: 'Kapalıyken son sekmeyi kapatmak bunun yerine yeni bir sekme açar; böylece pencere siz kapatana kadar açık kalır.'
     Preferred Video Codec: |
       Otomatik mod, cihazınızın donanımla çözebildiği kodekleri tercih eder.

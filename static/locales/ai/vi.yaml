@@ -367,6 +367,7 @@ Settings:
       Network: mạng
       Disk: ổ đĩa
   General Settings:
+    Limit Titles to Two Lines: "Giới hạn tiêu đề trong hai dòng"
     Close Window With Last Tab: 'Đóng cửa sổ khi đóng thẻ cuối cùng'
     Preferred Video Codec: Codec video ưu tiên
     Always Use Backup Media Server: "Luôn dùng máy chủ phương tiện dự phòng"
@@ -2074,6 +2075,7 @@ Description:
   Music: Âm nhạc
 Tooltips:
   General Settings:
+    Limit Titles to Two Lines: "Rút gọn tiêu đề video và danh sách phát trong danh sách và lưới còn hai dòng kèm dấu chấm lửng, để các thẻ đồng đều hơn. Di chuột lên tiêu đề để xem đầy đủ."
     Close Window With Last Tab: 'Khi tắt, việc đóng thẻ cuối cùng sẽ mở một thẻ mới thay vào đó, nên cửa sổ vẫn mở cho đến khi bạn đóng nó.'
     Preferred Video Codec: |
       Chế độ tự động ưu tiên các codec mà thiết bị của bạn có thể giải mã bằng phần cứng.

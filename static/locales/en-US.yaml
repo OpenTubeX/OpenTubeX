@@ -666,6 +666,7 @@ Settings:
       Right: Swipe right on thumbnails
       Description: Swipe a video thumbnail horizontally and release to perform the selected action.
     Data Saver Thumbnails: "Data saver thumbnails"
+    Limit Titles to Two Lines: Limit titles to two lines
     Use tray icon: "Use tray icon"
     Close to system tray: "Close to system tray"
     Tray required for background refresh: "The tray icon is required while background subscription refresh is enabled."
@@ -3120,6 +3121,7 @@ Tooltips:
     Proxy Videos Through Yattee Server: "Relays video and audio streams through the server. Leave this on unless the server shares your internet connection, because YouTube only serves streams to the address that requested them. Thumbnails always load directly from YouTube."
     Enable Tabs: "Keeps the current page open. Other tabs are kept until the app restarts; enable tabs again to restore them."
     Data Saver Thumbnails: "Use lower-resolution thumbnails to reduce data usage."
+    Limit Titles to Two Lines: Shortens video and playlist titles in lists and grids to two lines with an ellipsis, for more uniform cards. Hover over a title to see it in full.
     Use AI Translation Completions: Fill gaps in human translations with AI-generated text. Human translations always take priority.
     Update Relative Timestamps: Updates relative timestamps throughout the app while a page remains open. When disabled, they update only after reloading or revisiting the page.
     Automatically switch stream extraction methods: Try yt-dlp if built-in playback fails, or built-in playback if yt-dlp fails.

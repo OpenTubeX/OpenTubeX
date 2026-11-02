@@ -1949,7 +1949,7 @@ onBeforeUnmount(() => {
   capacitorTabService?.dispose()
   removeCapacitorTabPreviews?.()
   removeCapacitorTabAvatars?.()
-  document.documentElement.classList.remove('hideOutlines')
+  document.documentElement.classList.remove('hideOutlines', 'limitTitlesToTwoLines')
   removeGamepadNavigation()
   removeCustomThemeListener()
   cancelUtilityRoutePreload()
@@ -2423,6 +2423,11 @@ const outlinesHidden = computed(() => store.getters.getOutlinesHidden)
 
 watch(outlinesHidden, hidden => {
   document.documentElement.classList.toggle('hideOutlines', hidden)
+}, { flush: 'sync', immediate: true })
+
+// On <html>, like hideOutlines, so every list in the document matches.
+watch(() => store.getters.getLimitTitlesToTwoLines, limit => {
+  document.documentElement.classList.toggle('limitTitlesToTwoLines', limit)
 }, { flush: 'sync', immediate: true })
 
 const phoneLayout = usePhoneLayout()

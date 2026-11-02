@@ -525,6 +525,7 @@ Settings:
   Return to Settings Menu: Keer terug na instellingskieslys
   The app needs to restart for changes to take effect. Restart and apply change?: Die toep moet herbegin vir die veranderinge om in werking te tree. Herbegin en pas die verandering toe?
   General Settings:
+    Limit Titles to Two Lines: "Beperk titels tot twee reëls"
     Preferred Video Codec: Voorkeur-videokodek
     Enable Tabs: Aktiveer oortjies
     Thumbnail Swipe Gestures:
@@ -2282,6 +2283,7 @@ Description:
   Music: Musiek
 Tooltips:
   General Settings:
+    Limit Titles to Two Lines: "Kort video- en snitlystitels in lyste en roosters tot twee reëls met 'n ellips in, vir meer eenvormige kaarte. Hou die muis oor 'n titel om dit volledig te sien."
     Preferred Video Codec: |
       Outomaties verkies kodeks wat u toestel in hardeware kan dekodeer.
       AV1: die beste kwaliteit vir die minste data, maar nie elke video het dit nie. Sonder hardeware-dekodering kan dit die battery uitput of rame laat val.

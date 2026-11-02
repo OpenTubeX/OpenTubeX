@@ -26,6 +26,14 @@
         :tooltip="t('Tooltips.General Settings.Data Saver Thumbnails')"
         @change="store.dispatch('updateThumbnailDataSaver', $event)"
       />
+      <FtToggleSwitch
+        :label="t('Settings.General Settings.Limit Titles to Two Lines')"
+        :default-value="limitTitlesToTwoLines"
+        setting-key="limitTitlesToTwoLines"
+        compact
+        :tooltip="t('Tooltips.General Settings.Limit Titles to Two Lines')"
+        @change="store.dispatch('updateLimitTitlesToTwoLines', $event)"
+      />
     </div>
     <div class="switchGrid generalSelectGrid">
       <FtSelect
@@ -218,6 +226,7 @@ const showVideoMenuButton = computed(() => store.getters.getShowVideoMenuButton)
 const showThumbnailPreviews = computed(() => store.getters.getShowThumbnailPreviews)
 
 const thumbnailDataSaver = computed(() => store.getters.getThumbnailDataSaver)
+const limitTitlesToTwoLines = computed(() => store.getters.getLimitTitlesToTwoLines)
 
 /**
  * @param {boolean} value

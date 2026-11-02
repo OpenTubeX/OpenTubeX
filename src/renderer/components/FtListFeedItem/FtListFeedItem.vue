@@ -47,6 +47,7 @@
       <RouterLink
         class="title"
         :to="to"
+        :title="store.getters.getLimitTitlesToTwoLines ? data.title : null"
       >
         <h3
           class="h3Title"

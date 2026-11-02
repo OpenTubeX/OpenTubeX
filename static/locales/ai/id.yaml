@@ -363,6 +363,7 @@ Settings:
       Network: jaringan
       Disk: disk
   General Settings:
+    Limit Titles to Two Lines: "Batasi judul menjadi dua baris"
     Close Window With Last Tab: 'Tutup jendela saat menutup tab terakhir'
     Preferred Video Codec: Codec video pilihan
     Always Use Backup Media Server: "Selalu gunakan server media cadangan"
@@ -2051,6 +2052,7 @@ Description:
   Music: Musik
 Tooltips:
   General Settings:
+    Limit Titles to Two Lines: "Memendekkan judul video dan playlist di daftar dan kisi menjadi dua baris dengan elipsis, agar kartu lebih seragam. Arahkan kursor ke judul untuk melihatnya secara lengkap."
     Close Window With Last Tab: 'Jika dinonaktifkan, menutup tab terakhir akan membuka tab baru, sehingga jendela tetap terbuka sampai Anda menutupnya.'
     Preferred Video Codec: |
       Mode otomatis mengutamakan codec yang dapat didekode perangkat Anda secara hardware.

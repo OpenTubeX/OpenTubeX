@@ -641,3 +641,13 @@ $grid-mode-grab-bar-padding: 1em;
   font-size: inherit;
   font-weight: inherit;
 }
+
+// The optional Limit Titles to Two Lines setting.
+// The 1.3 line height leaves room for descenders inside the clamped box.
+:root.limitTitlesToTwoLines .ft-list-video .h3Title {
+  display: -webkit-box;
+  overflow: hidden;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+  line-clamp: 2;
+}

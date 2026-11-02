@@ -362,6 +362,7 @@ Settings:
       Network: võrgu
       Disk: ketta
   General Settings:
+    Limit Titles to Two Lines: "Piira pealkirjad kahe reaga"
     Close Window With Last Tab: 'Sulge aken viimase vahekaardi sulgemisel'
     Preferred Video Codec: Eelistatud videokoodek
     Always Use Backup Media Server: "Kasuta alati varumeediaserverit"
@@ -2035,6 +2036,7 @@ Description:
   Music: Muusika
 Tooltips:
   General Settings:
+    Limit Titles to Two Lines: "Lühendab loendites ja ruudustikes videote ja esitusloendite pealkirjad kolmikpunktiga kahele reale, et kaardid oleksid ühtlasemad. Täispealkirja nägemiseks hoia kursorit pealkirja kohal."
     Close Window With Last Tab: 'Kui see on välja lülitatud, avab viimase vahekaardi sulgemine hoopis uue vahekaardi ja aken jääb avatuks, kuni selle sulgete.'
     Preferred Video Codec: |
       Automaatrežiim eelistab koodekeid, mida su seade saab riistvaraliselt dekodeerida.

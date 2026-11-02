@@ -362,6 +362,7 @@ Settings:
       Network: sítě
       Disk: disku
   General Settings:
+    Limit Titles to Two Lines: "Omezit názvy na dva řádky"
     Close Window With Last Tab: 'Zavřít okno při zavření poslední karty'
     Preferred Video Codec: Preferovaný videokodek
     Always Use Backup Media Server: "Vždy používat záložní mediální server"
@@ -2032,6 +2033,7 @@ Description:
   Music: Hudba
 Tooltips:
   General Settings:
+    Limit Titles to Two Lines: "Zkracuje názvy videí a playlistů v seznamech a mřížkách na dva řádky s výpustkou, aby karty působily jednotněji. Celý název zobrazíte najetím kurzorem."
     Close Window With Last Tab: 'Když je vypnuto, zavření poslední karty místo toho otevře novou kartu, takže okno zůstane otevřené, dokud ho nezavřete.'
     Preferred Video Codec: |
       Automatický režim upřednostňuje kodeky, které vaše zařízení umí dekódovat hardwarově.

@@ -263,6 +263,7 @@
         <RouterLink
           class="title"
           :to="watchVideoRouterLink"
+          :title="fullTitleTooltip"
           @click.capture="handleWatchPageLinkClick"
           @auxclick="handleWatchPageLinkClick"
         >
@@ -1862,6 +1863,9 @@ const displayTitle = computed(() => {
     return title_
   }
 })
+
+// Clamped titles show their full text on hover.
+const fullTitleTooltip = computed(() => store.getters.getLimitTitlesToTwoLines ? displayTitle.value : null)
 
 const showPlaylistIndex = computed(() => props.appearance === 'watchPlaylistItem' && props.playlistIndex !== null)
 

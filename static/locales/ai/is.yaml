@@ -362,6 +362,7 @@ Settings:
       Network: nets
       Disk: disks
   General Settings:
+    Limit Titles to Two Lines: "Takmarka titla við tvær línur"
     Close Window With Last Tab: 'Loka glugga þegar síðasta flipanum er lokað'
     Preferred Video Codec: Valinn myndmerkjakóði
     Always Use Backup Media Server: "Nota alltaf vara-miðlaþjón"
@@ -2047,6 +2048,7 @@ Description:
   Music: Tónlist
 Tooltips:
   General Settings:
+    Limit Titles to Two Lines: "Styttir titla myndskeiða og spilunarlista í listum og reitum í tvær línur með úrfellingarmerki, svo spjöldin verði samræmdari. Haltu bendlinum yfir titli til að sjá hann allan."
     Close Window With Last Tab: 'Þegar slökkt er á þessu opnar lokun síðasta flipans nýjan flipa í staðinn, svo glugginn helst opinn þar til þú lokar honum.'
     Preferred Video Codec: |
       Sjálfvirk stilling tekur fram kóðara sem tækið þitt getur afkóðað með vélbúnaði.
