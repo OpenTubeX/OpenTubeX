@@ -151,6 +151,11 @@ for (const [uiScale, userPlaylistSortOrder] of [[100, 'date_added_descending'], 
         // A long localized Watched label must not cover the index badge.
         await thumbnail.locator('.videoWatched').evaluate(label => { label.textContent = 'Παρακολουθήθηκε' })
         const badges = thumbnail.locator('.playlistIndexBadge, .videoDuration, .videoWatched, .sponsorBlockVideoLabel')
+        const sponsorBlockIconFits = () => thumbnail.locator('.sponsorBlockVideoLabel').evaluate(label => {
+          const icon = label.querySelector('.ft-icon').getBoundingClientRect()
+          const bounds = label.getBoundingClientRect()
+          return icon.left >= bounds.left - 0.5 && icon.right <= bounds.right + 0.5
+        })
         const visibleOverlays = () => thumbnail.evaluate(element => {
           const rects = [...element.querySelectorAll('.playlistIndexBadge, .videoDuration, .videoWatched, .sponsorBlockVideoLabel, .externalPlayerIcon')]
             .filter(overlay => overlay.checkVisibility({ opacityProperty: true, visibilityProperty: true }))
@@ -200,11 +205,7 @@ for (const [uiScale, userPlaylistSortOrder] of [[100, 'date_added_descending'], 
             await expect.poll(() => thumbnail.evaluate(element => element.querySelector('.sponsorBlockVideoLabel').getBoundingClientRect().left -
               element.getBoundingClientRect().left)).toBeCloseTo(4, 0)
             // The label clips what does not fit beside its neighbors, but the icon always fits.
-            await expect.poll(() => thumbnail.locator('.sponsorBlockVideoLabel').evaluate(label => {
-              const icon = label.querySelector('.ft-icon').getBoundingClientRect()
-              const bounds = label.getBoundingClientRect()
-              return icon.left >= bounds.left - 0.5 && icon.right <= bounds.right + 0.5
-            })).toBe(true)
+            await expect.poll(sponsorBlockIconFits).toBe(true)
             const sponsorBlockText = thumbnail.locator('.sponsorBlockVideoLabel > span:last-child')
             await expect.poll(() => sponsorBlockText.evaluate(text => text.getBoundingClientRect().width)).toBeLessThanOrEqual(1)
             await expect(thumbnail.locator('.sponsorBlockVideoLabel')).toMatchAriaSnapshot('- text: Self-Promotion')
@@ -258,9 +259,17 @@ for (const [uiScale, userPlaylistSortOrder] of [[100, 'date_added_descending'], 
         const cdp = await page.context().newCDPSession(page)
         try {
           await cdp.send('Emulation.setTouchEmulationEnabled', { enabled: true })
-          await expect.poll(visibleOverlays).toEqual({ count: 5, apart: true })
+          // The SponsorBlock icon also fits beside an hours-long duration.
+          for (const duration of ['12:34', '1:23:45']) {
+            await thumbnail.locator('.videoDuration').evaluate((element, text) => { element.textContent = text }, duration)
+            await expect.poll(visibleOverlays).toEqual({ count: 5, apart: true })
+            await expect.poll(sponsorBlockIconFits).toBe(true)
+          }
+          // Narrower thumbnails clip the label beside an hours-long duration instead of covering it.
+          await thumbnail.locator('.videoDuration').evaluate(element => { element.textContent = '12:34' })
           await setWindowSize(app, page, { width: 812, height: 375 })
           await expect.poll(visibleOverlays).toEqual({ count: 5, apart: true })
+          await expect.poll(sponsorBlockIconFits).toBe(true)
         } finally {
           await cdp.send('Emulation.setTouchEmulationEnabled', { enabled: false })
           await cdp.detach()
