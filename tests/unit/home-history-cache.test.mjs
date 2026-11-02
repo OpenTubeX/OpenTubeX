@@ -187,3 +187,20 @@ test('loading history drops an expired entry that another window deleted meanwhi
   assert.deepEqual(toRaw(store.state.history.historyCacheSorted).map(entry => entry.videoId), ['recent'])
   assert.deepEqual(Object.keys(store.state.history.historyCacheById), ['recent'])
 })
+
+test('loading history keeps an entry another window added during the retention cleanup', async t => {
+  const day = 24 * 60 * 60 * 1000
+  t.mock.method(Date, 'now', () => 100 * day)
+  let stored = [{ ...video('expired'), timeWatched: 60 * day }]
+  const store = fixture({
+    find: async () => stored,
+    deleteOlderThan: async () => {
+      // Another window saves a new entry while this cleanup runs.
+      stored = [{ ...video('added'), timeWatched: 99 * day }]
+      return ['expired']
+    },
+  }, { getHistoryRetentionDays: () => 30 })
+
+  await store.dispatch('grabHistory')
+  assert.deepEqual(toRaw(store.state.history.historyCacheSorted).map(entry => entry.videoId), ['added'])
+})

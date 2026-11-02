@@ -78,11 +78,10 @@ const actions = {
       let results = await DBHistoryHandlers.find()
       if (cutoff !== null) {
         if (hasExpiredHistory(results, cutoff)) {
-          const deletedIds = new Set(await DBHistoryHandlers.deleteOlderThan(cutoff))
-          // Another window may have deleted an expired entry since, or kept it
-          // while playing it, so read again when one was not deleted here.
-          const remaining = results.filter(record => !deletedIds.has(record.videoId))
-          results = hasExpiredHistory(remaining, cutoff) ? await DBHistoryHandlers.find() : remaining
+          await DBHistoryHandlers.deleteOlderThan(cutoff)
+          // Other windows may have changed history during the cleanup, and the
+          // main process keeps expired entries they are playing.
+          results = await DBHistoryHandlers.find()
         }
         removeExternalMediaPositionsBefore(cutoff)
       }
