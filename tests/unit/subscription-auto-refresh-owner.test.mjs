@@ -25,8 +25,9 @@ const [refresh, { IpcChannels }] = await importWithStubs(
   }
 )
 
+let setBackground = async () => {}
 refresh.setupSubscriptionAutoRefreshIpc({
-  backgroundSubscriptions: { setBackground: async () => {} },
+  backgroundSubscriptions: { setBackground: background => setBackground(background) },
   updateBackgroundSubscriptionVisibility: () => visibilityUpdates++,
 })
 
@@ -68,6 +69,28 @@ for (const [name, lose] of [
     assert.equal(visibilityUpdates, updatesBefore + 1)
     assert.equal(await acquire(other), true)
     await release(other)
+  })
+}
+
+for (const [name, lose] of [
+  ['reloads', webContents => webContents.emit('did-start-navigation', {}, 'app://bundle/index.html', false, true)],
+  ['crashes', webContents => webContents.emit('render-process-gone', {}, { reason: 'crashed', exitCode: 1 })],
+]) {
+  test(`a renderer that ${name} while acquiring a refresh does not own it`, async () => {
+    const owner = createWindow()
+    let leaveForeground
+    setBackground = () => new Promise(resolve => { leaveForeground = resolve })
+    const acquiring = acquire(owner)
+    await new Promise(resolve => setImmediate(resolve))
+    setBackground = async () => {}
+
+    lose(owner)
+    leaveForeground()
+
+    assert.equal(await acquiring, false)
+    assert.equal(refresh.isSubscriptionAutoRefreshInProgress(), false)
+    assert.equal(await acquire(owner), true)
+    await release(owner)
   })
 }
 

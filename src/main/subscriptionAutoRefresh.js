@@ -8,8 +8,11 @@ import { isOpenTubeXUrl } from './utils'
 /** @type {{ webContents: import('electron').WebContents, tabId: string } | null} */
 let subscriptionAutoRefreshOwner = null
 let subscriptionAutoRefreshProgress = 0
-/** @type {WeakSet<import('electron').WebContents>} */
-const trackedWebContents = new WeakSet()
+/**
+ * Main-frame navigations and crashes of each tracked WebContents
+ * @type {WeakMap<import('electron').WebContents, number>}
+ */
+const rendererGenerations = new WeakMap()
 
 export function isSubscriptionAutoRefreshInProgress() {
   return subscriptionAutoRefreshOwner !== null && !subscriptionAutoRefreshOwner.webContents.isDestroyed()
@@ -64,10 +67,11 @@ export function setupSubscriptionAutoRefreshIpc({ backgroundSubscriptions, updat
   // A renderer that reloads or crashes never releases its refresh, and a
   // reload keeps the same WebContents
   /** @param {import('electron').WebContents} webContents */
-  const trackOwnerLifecycle = (webContents) => {
-    if (trackedWebContents.has(webContents)) return
-    trackedWebContents.add(webContents)
+  const trackRendererLifecycle = (webContents) => {
+    if (rendererGenerations.has(webContents)) return
+    rendererGenerations.set(webContents, 0)
     const release = () => {
+      rendererGenerations.set(webContents, rendererGenerations.get(webContents) + 1)
       if (releaseOwner(webContents)) updateBackgroundSubscriptionVisibility()
     }
     webContents.on('did-start-navigation', (_event, url, isInPlace, isMainFrame) => {
@@ -79,9 +83,13 @@ export function setupSubscriptionAutoRefreshIpc({ backgroundSubscriptions, updat
   }
 
   ipcMain.handle(IpcChannels.SUBSCRIPTION_AUTO_REFRESH_ACQUIRE, async (event, tabId, feedTab) => {
+    // The renderer that asked can reload or crash while this waits
+    trackRendererLifecycle(event.sender)
+    const generation = rendererGenerations.get(event.sender)
     const canAcquire = () => {
       const manager = TabManager.getFromWebContents(event.sender)
       return manager != null &&
+        rendererGenerations.get(event.sender) === generation &&
         typeof tabId === 'string' &&
         manager.activeTabId === tabId &&
         !event.sender.isDestroyed() &&
@@ -117,7 +125,6 @@ export function setupSubscriptionAutoRefreshIpc({ backgroundSubscriptions, updat
       feedTab: typeof feedTab === 'string' ? feedTab : null
     }
     subscriptionAutoRefreshProgress = 0
-    trackOwnerLifecycle(owner)
     broadcastSubscriptionAutoRefreshState()
     return true
   })
