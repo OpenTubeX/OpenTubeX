@@ -170,7 +170,7 @@ test('syncing keeps the newest position of each URL from either device', async (
   ])
   const { synced: baseline } = await syncExternalMediaPositions(client, {}, 0)
   assert.equal(getExternalMediaPosition(url, 30), 12)
-  assert.deepEqual(getExternalMediaProgress(other), { watched: true, progress: 1 })
+  assert.deepEqual(getExternalMediaProgress(other), { watched: true, progress: 1, seconds: 0 })
   assert.equal(getExternalMediaPosition(remoteOnly, 30), 7)
   assert.deepEqual(baseline, { [url]: 2000, [other]: 3000, [remoteOnly]: 1500 })
   assert.deepEqual(client.uploaded, [
@@ -233,6 +233,24 @@ test('syncing keeps a position saved while the synced positions load', async () 
   await syncExternalMediaPositions(client, {}, 0)
   assert.equal(getExternalMediaPosition(url, 30), 20)
   assert.deepEqual(client.uploaded.map(entry => entry.seconds), [20])
+})
+
+test('syncing carries marking media as watched and unmarking it to other devices', async () => {
+  mock.method(Date, 'now', () => 1000)
+  saveExternalMediaPosition(url, 5, 30)
+  mock.method(Date, 'now', () => 2000)
+  markExternalMediaWatched(url)
+  let client = syncClient([{ url, seconds: 5, duration: 30, updatedAt: 1000 }])
+  const { synced } = await syncExternalMediaPositions(client, { [url]: 1000 }, 0)
+  assert.deepEqual(client.uploaded, [{ url, seconds: 5, duration: 30, watched: true, updatedAt: 2000 }])
+  mock.method(Date, 'now', () => 3000)
+  storage.clear()
+  markExternalMediaWatched(url, true)
+  unmarkExternalMediaWatched(url)
+  client = syncClient(client.uploaded)
+  await syncExternalMediaPositions(client, synced, 0)
+  assert.deepEqual(client.uploaded, [])
+  assert.equal(getExternalMediaProgress(url), null)
 })
 
 test('syncing fails without uploading when saved positions cannot be read', async () => {
