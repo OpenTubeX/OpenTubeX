@@ -227,6 +227,11 @@ function isLocalHostname(hostname) {
   return host === 'localhost' || /\.(localhost|local|lan|home\.arpa)$/.test(host)
 }
 
+// A captive portal can answer plain HTTP, but not HTTPS with a valid certificate.
+function confirmsInternetReachability(url) {
+  return url.protocol === 'https:' && !isLocalHostname(url.hostname)
+}
+
 /** Use the same queue for native HTTP and WebView requests. */
 export function withNetworkRecovery(input, init, task, options = {}) {
   if (typeof window === 'undefined') return task(init?.signal)
@@ -238,8 +243,7 @@ export function withNetworkRecovery(input, init, task, options = {}) {
   } catch (error) {
     return Promise.reject(error)
   }
-  // A captive portal can answer plain HTTP, but not HTTPS with a valid certificate.
-  const confirmsInternet = url.protocol === 'https:' && !isLocalHostname(url.hostname)
+  const confirmsInternet = confirmsInternetReachability(url)
   const confirm = response => {
     if (confirmsInternet) appRecovery?.confirmInternetReachable()
     return response
@@ -325,5 +329,15 @@ export function installNetworkFetch({ corsDisabled = false, checkInternet = fals
       return networkError
     }
   })
-  window.fetch = async (input, init) => networkRecoveryBypasses > 0 ? fetch(input, init) : recoveringFetch(input, init)
+  window.fetch = async (input, init) => {
+    if (networkRecoveryBypasses === 0) return recoveringFetch(input, init)
+    const response = await fetch(input, init)
+    // Bypassed requests still show that the internet is reachable.
+    try {
+      if (confirmsInternetReachability(new URL(input instanceof Request ? input.url : input.toString(), location.href))) {
+        appRecovery?.confirmInternetReachable()
+      }
+    } catch {}
+    return response
+  }
 }

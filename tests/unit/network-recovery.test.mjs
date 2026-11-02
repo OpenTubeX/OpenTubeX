@@ -306,6 +306,24 @@ test('a client with its own recovery reaches an origin that is waiting to retry 
   assert.equal(inits.has('https://invidious.example/later.m3u8'), false, 'later requests use the queue again')
 })
 
+test('a bypassed HTTPS response confirms reachability while the internet check is blocked', async t => {
+  t.mock.timers.enable({ apis: ['setTimeout'] })
+  const app = await loadAppNetwork(t, async input => {
+    if (input === INTERNET_CHECK_URL || String(input).startsWith('https://service.example/')) {
+      throw new TypeError('Failed to fetch')
+    }
+    return new Response('segment')
+  }, undefined, { checkInternet: true, corsDisabled: true })
+  app.window.fetch('https://service.example/data').catch(() => {})
+  await flush()
+  assert.equal(app.recovery.state, 'offline')
+
+  const response = await app.withoutNetworkRecovery(() => app.window.fetch('https://media.example/segment'))
+  assert.equal(await response.text(), 'segment')
+  await flush()
+  assert.notEqual(app.recovery.state, 'offline')
+})
+
 test('delegated subscription transport retains browser CORS classification', async t => {
   const app = await loadAppNetwork(t, async () => { throw new TypeError('Failed to fetch') }, undefined)
   const controller = new AbortController()
