@@ -148,12 +148,15 @@ export async function openMockedVideo(page, videoId = 'jNQXAC9IVRw', { waitForPl
 export async function waitForPlayback(page) {
   const video = page.locator(`${activeTab} video`)
 
+  // A restored watch position moves currentTime before autoplay starts, so
+  // also wait for media to have played. Pausing the element directly before
+  // that leaves the player's autoplay pending.
   await expect
     .poll(
-      () => video.evaluate((element) => element.currentTime).catch(() => 0),
+      () => video.evaluate((element) => element.currentTime > 0 && element.played.length > 0).catch(() => false),
       { timeout: 60_000, message: 'waiting for playback to start' }
     )
-    .toBeGreaterThan(0)
+    .toBe(true)
 
   return video
 }
