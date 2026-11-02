@@ -73,6 +73,11 @@ test('rejects malformed records before restoring data', async () => {
     ...data,
     profiles: [{ _id: 'unnamed', name: null, subscriptions: [] }],
   })), /Invalid backup profiles/)
+  // The profile editor doesn't allow an empty name either.
+  await assert.rejects(readUnifiedBackup(createUnifiedBackup({
+    ...data,
+    profiles: [{ _id: 'empty', name: '', subscriptions: [] }],
+  })), /Invalid backup profiles/)
   await readUnifiedBackup(createUnifiedBackup({
     ...data,
     profiles: [{ _id: MAIN_PROFILE_ID, name: null, subscriptions: [] }],
