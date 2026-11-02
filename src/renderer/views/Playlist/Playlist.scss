@@ -173,8 +173,8 @@
   :deep(.ft-list-item.list .videoThumbnail) {
     margin-block: 0;
     margin-inline-end: 12px;
-    // The index badge and the duration get their own columns, so a long Watched
-    // or SponsorBlock label cannot cover them.
+    // The index badge, the external player button, and the duration get their own
+    // columns, so a long Watched or SponsorBlock label cannot cover them.
     grid-template-columns: max-content minmax(0, 1fr) minmax(0, max-content);
     container: playlist-thumbnail / inline-size;
 
@@ -182,7 +182,8 @@
       grid-column: 1 / -1;
     }
 
-    .playlistIndexBadge {
+    .playlistIndexBadge,
+    .externalPlayerIcon {
       grid-column: 1;
     }
 
@@ -226,6 +227,8 @@
     min-inline-size: 0;
     max-inline-size: calc(100% - 8px);
     margin: 4px;
+    // Clip rather than cover the duration when even the icon does not fit.
+    overflow: hidden;
 
     > span:last-child {
       min-inline-size: 0;
@@ -237,6 +240,11 @@
     > .ft-icon {
       flex-shrink: 0;
     }
+  }
+
+  // The external player button takes the bottom-left corner, so the label follows it.
+  :deep(.ft-list-item.list .videoThumbnail:has(.externalPlayerIcon) .sponsorBlockVideoLabel) {
+    grid-column: 2;
   }
 
   // Below this width only a few letters fit beside the duration, so keep only the

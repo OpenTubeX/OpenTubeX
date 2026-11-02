@@ -137,7 +137,11 @@ for (const [uiScale, userPlaylistSortOrder] of [[100, 'date_added_descending'], 
         await expect(thumbnail.locator('.videoWatched')).toBeVisible()
         // Reuse the scoped badge fixture pattern from the watch-playlist tests.
         await thumbnail.evaluate(element => {
-          const label = element.querySelector('.videoDuration').cloneNode(false)
+          // Upcoming videos have no SponsorBlock segments, so show a regular duration.
+          const duration = element.querySelector('.videoDuration')
+          duration.classList.remove('upcoming')
+          duration.textContent = '12:34'
+          const label = duration.cloneNode(false)
           label.className = 'sponsorBlockVideoLabel'
           const text = document.createElement('span')
           text.textContent = 'Self-Promotion'
@@ -169,6 +173,16 @@ for (const [uiScale, userPlaylistSortOrder] of [[100, 'date_added_descending'], 
                   return badge.getBoundingClientRect().height + Number.parseFloat(style.marginBlockStart) + Number.parseFloat(style.marginBlockEnd)
                 })) - imageHeight
             })).toBeLessThanOrEqual(1)
+            // The labels and the external player button share the small thumbnail without
+            // covering each other. The phone-sized thumbnail is narrower than the labels.
+            if (width > 375) {
+              await expect.poll(() => thumbnail.evaluate(element => {
+                const rects = [...element.querySelectorAll('.playlistIndexBadge, .videoDuration, .videoWatched, .sponsorBlockVideoLabel, .externalPlayerIcon')]
+                  .map(badge => badge.getBoundingClientRect())
+                return rects.length === 5 && rects.every((a, i) => rects.slice(i + 1).every(b =>
+                  a.right <= b.left + 0.5 || b.right <= a.left + 0.5 || a.bottom <= b.top + 0.5 || b.bottom <= a.top + 0.5))
+              })).toBe(true)
+            }
             if (mobile) {
               await expect(actions).toHaveClass(/mobileThumbnailActions/)
               await expect(actions).toBeHidden()
@@ -177,16 +191,15 @@ for (const [uiScale, userPlaylistSortOrder] of [[100, 'date_added_descending'], 
             await page.locator('.sortSelect').hover()
             // Narrow thumbnails keep only the SponsorBlock icon.
             await expect(thumbnail.locator('.sponsorBlockVideoLabel .ft-icon')).toBeVisible()
+            // The label clips what does not fit beside its neighbors, but the icon always fits.
+            expect(await thumbnail.locator('.sponsorBlockVideoLabel').evaluate(label => {
+              const icon = label.querySelector('.ft-icon').getBoundingClientRect()
+              const bounds = label.getBoundingClientRect()
+              return icon.left >= bounds.left - 0.5 && icon.right <= bounds.right + 0.5
+            })).toBe(true)
             const sponsorBlockText = thumbnail.locator('.sponsorBlockVideoLabel > span:last-child')
             await expect.poll(() => sponsorBlockText.evaluate(text => text.getBoundingClientRect().width)).toBeLessThanOrEqual(1)
             await expect(thumbnail.locator('.sponsorBlockVideoLabel')).toMatchAriaSnapshot('- text: Self-Promotion')
-            // The labels share the small desktop thumbnail without covering each other.
-            await expect.poll(() => thumbnail.evaluate(element => {
-              const rects = [...element.querySelectorAll('.playlistIndexBadge, .videoDuration, .videoWatched, .sponsorBlockVideoLabel')]
-                .map(badge => badge.getBoundingClientRect())
-              return rects.every((a, i) => rects.slice(i + 1).every(b =>
-                a.right <= b.left + 0.5 || b.right <= a.left + 0.5 || a.bottom <= b.top + 0.5 || b.bottom <= a.top + 0.5))
-            })).toBe(true)
             for (const badge of await badges.all()) await expect(badge).toBeVisible()
             await expect(actions).toHaveCSS('opacity', '0')
             await thumbnail.hover()
