@@ -66,14 +66,13 @@ export const CAPTION_FONT_SCALE_FACTOR_STEP = 0.05
 export const CAPTION_FONT_SCALE_FACTORS = Object.freeze([0.5, 0.75, 1, 1.25, 1.5, 1.75, 2, 2.5, 3, 3.5, 4])
 
 /**
- * Player height from which on captions get their full configured size (a 16:9 player at 711px wide).
- * Deliberately smaller than a regular watch page player, so only players that are actually small
- * scale their captions down.
+ * Player height at which captions get Shaka's font size (a 16:9 player at 960px wide). Captions
+ * scale with the player from there, so a 1080p fullscreen player shows them twice as large.
  */
-const REFERENCE_PLAYER_HEIGHT = 400
+const REFERENCE_PLAYER_HEIGHT = 540
 
 /** Keeps captions legible in tiny players, where a purely proportional size would be unreadable. */
-const MIN_CAPTION_PLAYER_SCALE = 0.45
+const MIN_CAPTION_PLAYER_SCALE = 0.5
 
 /** Share of the player height a single line of captions may take up at most. */
 const MAX_CAPTION_FONT_SIZE_RATIO = 0.1
@@ -266,9 +265,8 @@ export function getSecondaryCaptionPosition(positionArea) {
 }
 
 /**
- * Captions are sized in pixels, so without this they stay just as big when the player shrinks
- * (e.g. the scroll mini player), where they would cover the entire video.
- * Only ever scales down, so that regular and fullscreen players keep their configured size.
+ * Captions are sized in pixels, so they are scaled with the player to cover the same share of the
+ * video in every player size, from the scroll mini player to fullscreen.
  * @param {number} playerHeight height of the player in CSS pixels
  * @returns {number}
  */
@@ -277,7 +275,7 @@ export function getCaptionPlayerScale(playerHeight) {
     return 1
   }
 
-  return Math.min(1, Math.max(MIN_CAPTION_PLAYER_SCALE, playerHeight / REFERENCE_PLAYER_HEIGHT))
+  return Math.max(MIN_CAPTION_PLAYER_SCALE, playerHeight / REFERENCE_PLAYER_HEIGHT)
 }
 
 /**

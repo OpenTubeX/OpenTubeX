@@ -98,6 +98,43 @@ test('scales every word of word-timed captions by the font size once', { tag: '@
   await attachScreenshot('word-timed captions at 200% font size')
 })
 
+test('sizes captions relative to the player in fullscreen and full window', { tag: '@scale' }, async ({ app, page, attachScreenshot }) => {
+  await mockPlayableWatchPage(app, page, { captionText: 'Sized with the player' })
+  const video = await openMockedVideo(page)
+  await video.evaluate(element => element.pause())
+  await page.evaluate(() => window.$store.dispatch('updateDefaultCaptionSettings', JSON.stringify({ fontScaleFactor: 1.35 })))
+
+  const player = page.locator('.ftVideoPlayer')
+  const caption = player.locator('.shaka-text-container [translate="no"]')
+  await expect(caption).toBeVisible()
+  const measure = () => player.evaluate(element => ({
+    fontSize: parseFloat(getComputedStyle(element.querySelector('.shaka-text-container [translate="no"]')).fontSize),
+    playerHeight: element.querySelector('video').clientHeight,
+  }))
+  const shareOfPlayer = async () => {
+    const { fontSize, playerHeight } = await measure()
+    return fontSize / playerHeight
+  }
+
+  // 135% of Shaka's 20px at a player height of 540px
+  await expect.poll(shareOfPlayer).toBeCloseTo(27 / 540, 3)
+  const windowedHeight = (await measure()).playerHeight
+
+  await setPlayerFullscreen(page, true)
+  await expect.poll(async () => (await measure()).playerHeight).toBeGreaterThan(windowedHeight)
+  await expect.poll(shareOfPlayer).toBeCloseTo(27 / 540, 3)
+  await attachScreenshot('captions at 135% in fullscreen')
+  await setPlayerFullscreen(page, false)
+
+  await page.locator('body').press('s')
+  await expect(player).toHaveClass(/fullWindow/)
+  await expect.poll(async () => (await measure()).playerHeight).toBeGreaterThan(windowedHeight)
+  await expect.poll(shareOfPlayer).toBeCloseTo(27 / 540, 3)
+  await page.locator('body').press('s')
+  await expect(player).not.toHaveClass(/fullWindow/)
+  await expect.poll(shareOfPlayer).toBeCloseTo(27 / 540, 3)
+})
+
 test('saves a caption style picked from the Options of the captions menu', async ({ app, page }) => {
   await mockPlayableWatchPage(app, page, { captionCueSettings: 'align:start position:0%' })
   const video = await openMockedVideo(page)

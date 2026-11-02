@@ -58,10 +58,13 @@ export function useSecondaryCaptions({
 
     secondaryCaptionsBoxObserver ??= new ResizeObserver(() => {
       if (!observedTextContainer) return
+      const { offsetTop, offsetLeft, offsetWidth, offsetHeight } = observedTextContainer
       secondaryCaptionsBox.value = {
-        inset: `${observedTextContainer.offsetTop}px auto auto ${observedTextContainer.offsetLeft}px`,
-        inlineSize: `${observedTextContainer.offsetWidth}px`,
-        blockSize: `${observedTextContainer.offsetHeight}px`,
+        inset: `${offsetTop}px auto auto ${offsetLeft}px`,
+        inlineSize: `${offsetWidth}px`,
+        blockSize: `${offsetHeight}px`,
+        // Shaka's caption region, 5% of the area's height and width, which a padding in % can't express
+        padding: `${offsetHeight * 0.05}px ${offsetWidth * 0.05}px`,
       }
     })
     secondaryCaptionsBoxObserver.disconnect()

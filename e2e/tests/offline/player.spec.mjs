@@ -2996,7 +2996,8 @@ test.describe('scroll mini player', () => {
       return Number.parseFloat(getComputedStyle(element).fontSize)
     })
     const inlineFontSize = await getFontSize()
-    expect(inlineFontSize).toBe(20)
+    // 20px at a player height of 540px
+    expect(inlineFontSize).toBeCloseTo(20 * await video.evaluate(element => element.clientHeight) / 540, 1)
 
     await scrollBelowPlayer(player)
     await expect(player).toHaveClass(/scrollMiniPlayer/)

@@ -10,23 +10,21 @@ import {
   parseCaptionSettings,
 } from '../../src/renderer/helpers/player/caption-settings.js'
 
-test('keeps captions at their configured size in regular and fullscreen players', () => {
-  // regular watch page player
-  assert.equal(getCaptionPlayerScale(562), 1)
+test('scales captions with the player, so they cover the same share of it in every size', () => {
+  // a 960x540 player shows Shaka's size
+  assert.equal(getCaptionPlayerScale(540), 1)
 
-  // fullscreen must not blow the captions up
-  assert.equal(getCaptionPlayerScale(1080), 1)
+  // a larger watch page player and fullscreen grow them in proportion
+  assert.equal(getCaptionPlayerScale(720), 720 / 540)
+  assert.equal(getCaptionPlayerScale(1080), 2)
+
+  // the scroll mini player (360x202 by default) shrinks them
+  assert.equal(getCaptionPlayerScale(270), 0.5)
 })
 
-test('shrinks captions in small players', () => {
-  // half the reference height means half sized captions
-  assert.equal(getCaptionPlayerScale(200), 0.5)
-
-  // the scroll mini player (360x202 by default)
-  assert.equal(getCaptionPlayerScale(202), 0.505)
-
-  // the smallest possible mini player is below the floor, which keeps captions legible
-  assert.equal(getCaptionPlayerScale(135), 0.45)
+test('keeps captions legible in tiny players', () => {
+  assert.equal(getCaptionPlayerScale(202), 0.5)
+  assert.equal(getCaptionPlayerScale(135), 0.5)
 })
 
 test('falls back to the configured size when the player has not been measured yet', () => {
@@ -35,15 +33,20 @@ test('falls back to the configured size when the player has not been measured ye
   assert.equal(getCaptionPlayerScale(undefined), 1)
 })
 
-test('caps the scaled font size at a share of the player height', () => {
-  // a regular player has room for the configured size, even at the maximum
-  assert.equal(getCaptionPlayerVariables(562, 1)['--caption-font-size'], '20px')
-  assert.equal(getCaptionPlayerVariables(562, 2)['--caption-font-size'], '20px')
-  assert.equal(getCaptionPlayerVariables(562, 4)['--caption-font-size'], '14px')
+test('sizes captions relative to the player', () => {
+  assert.equal(getCaptionPlayerVariables(540, 1)['--caption-font-size'], '20px')
+  assert.equal(getCaptionPlayerVariables(1080, 1)['--caption-font-size'], '40px')
+  assert.equal(getCaptionPlayerVariables(1080, 1.35)['--caption-font-size'], '40px')
+})
 
-  // 400% would be 40px in a mini player that is only 202px tall, so it is limited to 20px
+test('caps the scaled font size at a share of the player height', () => {
+  // 400% would take up 15% of the player per line, so it is limited to 10%
+  assert.equal(getCaptionPlayerVariables(540, 4)['--caption-font-size'], '13.5px')
+  assert.equal(getCaptionPlayerVariables(1080, 4)['--caption-font-size'], '27px')
+
+  // in the mini player, the floor that keeps the default size legible makes 400% too large as well
   assert.equal(getCaptionPlayerVariables(202, 4)['--caption-font-size'], '5px')
-  assert.equal(getCaptionPlayerVariables(202, 1)['--caption-font-size'], '10.1px')
+  assert.equal(getCaptionPlayerVariables(202, 1)['--caption-font-size'], '10px')
 })
 
 test('leaves the font size uncapped until the player has been measured', () => {
