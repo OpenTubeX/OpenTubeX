@@ -2,7 +2,7 @@
 category: improvement
 ---
 
-Collaborations in Up Next now name every collaborating channel, and middle-clicking their channel names shows the collaborators instead of doing nothing.
+With the Local API, Up Next now shows when a video is a collaboration between several channels. Middle-clicking a collaboration's channel names now lists the collaborators instead of doing nothing.
 
 <picture>
   <source media="(prefers-color-scheme: dark)" srcset="https://github.com/user-attachments/assets/35668dd7-f8ce-4c4a-ae4b-841be4f23b14">
