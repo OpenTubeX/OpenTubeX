@@ -437,11 +437,17 @@
 .liveChatComments {
   --live-chat-fade-size: 16px;
 
-  /* Overlay scrollbars float over the inline-end edge; keep that strip unmasked. */
-  --live-chat-scrollbar-reserve: 14px;
+  /* Overlay scrollbars float over the inline-end edge; keep that strip unmasked
+     and free of messages, which would not fade there. */
+  --live-chat-scrollbar-reserve: var(--scrollbar-track-width);
 
-  inline-size: 100%;
+  /* Move the strip into the card padding, as far as it reaches, so messages
+     keep their width. */
+  --live-chat-scrollbar-bleed: min(var(--live-chat-scrollbar-reserve), 12px);
+
+  inline-size: calc(100% + var(--live-chat-scrollbar-bleed));
   min-inline-size: 0;
+  margin-inline-end: calc(-1 * var(--live-chat-scrollbar-bleed));
   overflow: hidden auto;
   overscroll-behavior: contain;
 
@@ -480,6 +486,7 @@
 
 .liveChatCommentList {
   display: flow-root;
+  padding-inline-end: var(--live-chat-scrollbar-reserve);
 }
 
 .live-chat-message-enter-active {
