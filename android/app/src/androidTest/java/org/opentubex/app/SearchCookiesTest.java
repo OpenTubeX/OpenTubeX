@@ -60,7 +60,7 @@ public class SearchCookiesTest {
                     window.__searchCookieRequests = [];
                     window.__searchCookieEmpty = false;
                     Capacitor.nativePromise = function(plugin, method, options, ...rest) {
-                        if (plugin === 'CapacitorHttp' && method === 'request' && options.url.includes('/youtubei/v1/search')) {
+                        if (plugin === 'AndroidHttp' && method === 'request' && options.url.includes('/youtubei/v1/search')) {
                             window.__searchCookieParams = JSON.parse(options.data).params;
                             return Promise.resolve({ status: 200, headers: {}, url: options.url, data: {
                                 contents: { twoColumnSearchResultsRenderer: { primaryContents: { sectionListRenderer: {

@@ -114,7 +114,7 @@ public class PlaylistAutoplayTest {
                     });
                     window.__playlistNativePromise = window.Capacitor.nativePromise;
                     window.Capacitor.nativePromise = function(plugin, method, options, ...rest) {
-                        if (plugin === 'CapacitorHttp' && method === 'request') {
+                        if ((plugin === 'CapacitorHttp' || plugin === 'AndroidHttp') && method === 'request') {
                             if (String(options.data).includes('autoplay-continuation')) {
                                 window.__playlistContinuationRequested = true;
                                 if (FAIL_CONTINUATION && !AT_BOUNDARY) return Promise.resolve({ status: 500, headers: {},
