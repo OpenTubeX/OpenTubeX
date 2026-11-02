@@ -282,6 +282,8 @@
             dir="auto"
             :disabled="isFetchingCollaborators"
             @click.stop.prevent="openChannelByline"
+            @mousedown.middle.prevent
+            @auxclick.middle.stop.prevent="openChannelByline"
           >
             <FtChannelAvatarStack
               v-if="showChannelAvatar"
@@ -2231,7 +2233,15 @@ function openInExternalPlayer() {
   }
 }
 
-async function openChannelByline() {
+/**
+ * Opens the collaborators prompt for collaboration videos, or the single
+ * channel otherwise. In Electron, a middle click opens that channel in a
+ * background tab like the regular channel link. Elsewhere a new tab can't be
+ * opened reliably after the lookup, so a middle click shows the prompt instead
+ * of navigating the current tab.
+ * @param {MouseEvent} event
+ */
+async function openChannelByline(event) {
   if (disableChannelLinks.value || isFetchingCollaborators.value) {
     return
   }
@@ -2253,11 +2263,20 @@ async function openChannelByline() {
     }
 
     channelCollaborators.value = collaborators
+    const isMiddleClick = event?.type === 'auxclick'
 
-    if (channelCollaborators.value.length > 1) {
+    if (channelCollaborators.value.length > 1 || (channelCollaborators.value.length === 1 && isMiddleClick && !process.env.IS_ELECTRON)) {
       showCollaboratorsPrompt.value = true
     } else if (channelCollaborators.value.length === 1) {
-      openInternalPath({ path: `/channel/${channelCollaborators.value[0].id}` })
+      const { id: collaboratorId, name } = channelCollaborators.value[0]
+      openInternalPath({
+        path: `/channel/${collaboratorId}`,
+        title: name,
+        doCreateNewWindow: isMiddleClick && event.shiftKey,
+        doCreateNewTab: isMiddleClick && !event.shiftKey,
+        makeActive: !isMiddleClick,
+        lazyLoad: isUnloadedBackgroundTabClick(event)
+      })
     }
   } catch (error) {
     if (id.value === videoId) {
