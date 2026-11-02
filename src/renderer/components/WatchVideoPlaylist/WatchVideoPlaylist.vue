@@ -1666,22 +1666,33 @@ function handleProgressBarClick(event) {
   const clickPercentage = clickX / progressBarWidth
 
   const targetVideoIndex = Math.max(1, Math.min(playlistVideoCount.value, Math.ceil(clickPercentage * playlistVideoCount.value)))
-  const targetArrayIndex = targetVideoIndex - 1
+  const targetArrayIndex = playlistArrayIndex(targetVideoIndex - 1)
 
-  if (targetArrayIndex < playlistItems.value.length) {
+  if (targetArrayIndex >= 0 && targetArrayIndex < playlistItems.value.length) {
     pendingProgressBarIndex = null
     scrollToProgressBarTarget(targetArrayIndex)
   } else {
     // Load the pages up to the chosen video, then show it.
-    pendingProgressBarIndex = targetArrayIndex
+    pendingProgressBarIndex = targetVideoIndex - 1
     requestedPlaylistVideoCount.value = targetVideoIndex
   }
 }
 
+/**
+ * The index in the loaded videos of a position in the whole playlist. Reversed
+ * playlists add later pages at the start, so their loaded videos fill its end.
+ * @param {number} position
+ */
+function playlistArrayIndex(position) {
+  return reversePlaylist.value ? position - (playlistVideoCount.value - playlistItems.value.length) : position
+}
+
 watch([() => playlistItems.value.length, canLoadMorePlaylistVideos], ([length, canLoadMore]) => {
-  if (pendingProgressBarIndex === null || (length <= pendingProgressBarIndex && canLoadMore)) return
+  if (pendingProgressBarIndex === null) return
+  const arrayIndex = playlistArrayIndex(pendingProgressBarIndex)
+  if ((arrayIndex < 0 || arrayIndex >= length) && canLoadMore) return
   // Hidden or unavailable videos can leave the playlist shorter than its total.
-  const index = Math.min(pendingProgressBarIndex, length - 1)
+  const index = Math.max(0, Math.min(arrayIndex, length - 1))
   pendingProgressBarIndex = null
   scrollToProgressBarTarget(index)
 }, { flush: 'post' })
