@@ -238,6 +238,7 @@ async function loadServices() {
   serviceText.value = ''
   servicesError.value = false
   if (url === null) {
+    servicesLoading.value = false
     servicesError.value = instanceText.value.trim() !== ''
     return
   }
