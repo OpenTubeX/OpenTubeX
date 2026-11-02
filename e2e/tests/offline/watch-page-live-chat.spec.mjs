@@ -74,7 +74,7 @@ test.describe('watch page', () => {
     await expect(page.locator(`${activeTab} .ftVideoPlayer`)).toBeVisible()
   })
 
-  test('shows the donor handle in live chat and the expanded donation', async ({ app, page, attachScreenshot }) => {
+  test('shows the donor handle in live chat and the expanded donation', { tag: '@scale' }, async ({ app, page, attachScreenshot }) => {
     await mockPlayableWatchPage(app, page)
     await openMockedVideo(page)
     const view = await watchViewHandle(page)
@@ -122,6 +122,14 @@ test.describe('watch page', () => {
     await expect(author).toBeVisible()
     await expect(author).toHaveText('@donor')
     await expect(author).toHaveAttribute('href', '#/channel/donor-channel')
+
+    // The fade mask leaves the scrollbar's strip solid, so messages must end before it.
+    const scroller = chat.locator('.liveChatComments')
+    const card = scroller.locator('.comment.superChatMessage')
+    const cardBox = await card.boundingBox()
+    const scrollbarBox = await scroller.locator(':scope > .os-scrollbar-vertical').boundingBox()
+    expect(cardBox.x + cardBox.width).toBeLessThanOrEqual(scrollbarBox.x + 0.5)
+
     await chat.locator('.superChatComments .superChat').click()
     const expanded = chat.locator('.openedSuperChat')
     await expect(expanded.locator('.channelName')).toBeVisible()
