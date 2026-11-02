@@ -172,6 +172,16 @@ test('starts the KWin reporter despite a reused script ID and reloads it after r
   assert.doesNotMatch(scripts[1], /":1\.10"/)
   assert.deepEqual(activeWindows, [{ uuid: 'window', skipTaskbar: false, resourceClass: 'electron' }])
   watch.stop()
+
+  // KWin reports minimize changes instead of being polled
+  assert.match(scripts[1], /minimizedChanged\.connect/)
+  assert.match(scripts[1], /workspace\.windowAdded\.connect/)
+  const minimizedReports = []
+  const stopMinimizedWatch = backend.watchWindowMinimized((uuid, minimized) => minimizedReports.push([uuid, minimized]))
+  reportInterface.ReportWindowMinimized('window', true)
+  stopMinimizedWatch()
+  reportInterface.ReportWindowMinimized('window', false)
+  assert.deepEqual(minimizedReports, [['window', true]])
   await backend.close()
   assert.equal(bus.listenerCount('reconnected'), 0)
 })
@@ -385,7 +395,6 @@ test('preserves the window identity across title updates during detection', asyn
         setWindowTitle(targetWindow().caption)
       },
       detectionDelay: 0,
-      pollInterval: 60000,
       onMinimizedState: state => {
         states.push(state)
         stop()
@@ -407,6 +416,53 @@ test('preserves the window identity across title updates during detection', asyn
   await detected
 
   assert.deepEqual(states, [true])
+})
+
+test('forwards a restore that KWin reports without polling or focus', async t => {
+  const browserWindow = new EventEmitter()
+  browserWindow.getBounds = () => targetWindow().bounds
+  browserWindow.getTitle = () => targetWindow().caption
+  browserWindow.isFocused = () => false
+  let minimizedListener = null
+  let windowQueries = 0
+  const backend = Promise.resolve({
+    queryWindow: async () => {
+      windowQueries++
+      return windowInfo({ minimized: true })
+    },
+    queryWindows: async () => [windowInfo({ minimized: true })],
+    watchActiveWindow: () => ({ activeWindow: null, stop: () => {} }),
+    watchWindowMinimized: listener => {
+      minimizedListener = listener
+      return () => {
+        if (minimizedListener === listener) minimizedListener = null
+      }
+    },
+  })
+  const states = []
+  const stop = monitorKdeWaylandWindowState({
+    browserWindow,
+    backend,
+    detectionDelay: 0,
+    onMinimizedState: state => states.push(state),
+  })
+  t.after(stop)
+  await new Promise(resolve => setTimeout(resolve, 10))
+
+  browserWindow.emit('blur')
+  await new Promise(resolve => setTimeout(resolve, 20))
+  assert.deepEqual(states, [true])
+  // One check covers a restore that happened before the watch started
+  assert.equal(windowQueries, 1)
+
+  minimizedListener('other', false)
+  await new Promise(resolve => setTimeout(resolve, 1_100))
+  assert.deepEqual(states, [true])
+  assert.equal(windowQueries, 1)
+
+  minimizedListener('window', false)
+  assert.deepEqual(states, [true, false])
+  assert.equal(minimizedListener, null)
 })
 
 function windowInfo (overrides = {}) {
