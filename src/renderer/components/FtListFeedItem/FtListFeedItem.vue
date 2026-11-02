@@ -15,6 +15,8 @@
         tabindex="-1"
         :to="to"
         :aria-label="data.title"
+        @click="markAsSeen"
+        @auxclick.middle="markAsSeen"
       >
         <FtRetryImage
           v-if="data.thumbnail"
@@ -54,12 +56,14 @@
         class="title"
         :to="to"
         :title="store.getters.getLimitTitlesToTwoLines ? data.title : null"
+        @click="markAsSeen"
+        @auxclick.middle="markAsSeen"
       >
         <h3
           class="h3Title"
           dir="auto"
         >
-          {{ data.title }}
+          <FtNewContentDot v-if="showNewIndicator" />{{ data.title }}
         </h3>
       </RouterLink>
       <div class="infoLine">
@@ -114,6 +118,7 @@ import FtChannelAvatar from '../FtChannelAvatar/FtChannelAvatar.vue'
 import FtEmbeddedProgress from '../FtEmbeddedProgress/FtEmbeddedProgress.vue'
 import FtIconButton from '../FtIconButton/FtIconButton.vue'
 import FtInlineMetadata from '../FtInlineMetadata/FtInlineMetadata.vue'
+import FtNewContentDot from '../FtNewContentDot/FtNewContentDot.vue'
 import FtRetryImage from '../FtRetryImage.vue'
 import WatchVideoDownloadPrompt from '../WatchVideoDownloadPrompt/WatchVideoDownloadPrompt.vue'
 
@@ -127,6 +132,7 @@ import {
   unmarkExternalMediaWatched
 } from '../../helpers/externalMediaPosition'
 import { lightHaptic } from '../../helpers/mobileHaptics'
+import { markRssFeedItemsAsSeen } from '../../helpers/rssFeeds'
 import { copyToClipboard, getRelativeTimeFromDate, showToast } from '../../helpers/utils'
 import { supportsYtDlp } from '../../helpers/ytDlpCapabilities'
 
@@ -144,6 +150,11 @@ const props = defineProps({
   avatar: {
     type: String,
     default: null
+  },
+  /** The New feed only lists new items, so they don't need a dot */
+  inNewFeed: {
+    type: Boolean,
+    default: false
   }
 })
 
@@ -161,6 +172,14 @@ const publishedText = computed(() => props.data.published === null
   ? ''
   : getRelativeTimeFromDate(props.data.published, false, true, now.value))
 
+const showNewIndicator = computed(() => store.getters.getShowNewSubscriptionFeedIndicators &&
+  props.data.isNew === true && !props.inNewFeed && !position.value?.watched)
+const showMarkAsSeen = computed(() => props.data.isNew === true && (props.inNewFeed || showNewIndicator.value))
+
+function markAsSeen() {
+  if (props.data.isNew === true) markRssFeedItemsAsSeen([props.data])
+}
+
 const showDownloadPrompt = ref(false)
 const canDownload = computed(() => supportsYtDlp && store.getters.getEnableDownloads)
 watch(canDownload, (enabled) => {
@@ -170,6 +189,7 @@ watch(canDownload, (enabled) => {
 function setWatched(watched, fully = false) {
   if (watched) {
     markExternalMediaWatched(props.data.url, fully)
+    markAsSeen()
   } else {
     unmarkExternalMediaWatched(props.data.url)
   }
@@ -194,6 +214,13 @@ const menuItems = computed(() => {
       label: t('Video.Mark As Fully Watched'),
       icon: ['fas', 'flag-checkered'],
       run: () => setWatched(true, true)
+    })
+  }
+  if (showMarkAsSeen.value) {
+    items.push({
+      label: t('Subscriptions.Mark As Seen'),
+      icon: ['fas', 'check'],
+      run: markAsSeen
     })
   }
   if (canDownload.value) {

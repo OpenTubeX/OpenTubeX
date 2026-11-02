@@ -43,7 +43,7 @@
 </template>
 
 <script setup>
-import { computed, watch } from 'vue'
+import { computed } from 'vue'
 import { useI18n } from 'vue-i18n'
 
 import FtAutoGrid from '../FtAutoGrid/FtAutoGrid.vue'
@@ -52,32 +52,29 @@ import FtListFeedItem from '../FtListFeedItem/FtListFeedItem.vue'
 import FtSkeletonGrid from '../FtSkeletonGrid/FtSkeletonGrid.vue'
 
 import store from '../../store/index'
+import { useFollowedRssFeedItems } from '../../composables/useFollowedRssFeedItems'
 import { useKeepAliveEffectScope } from '../../composables/useKeepAliveEffectScope'
 import { useRelativeTimeClock } from '../../composables/useRelativeTimeClock'
+import { formatShortDateTime } from '../../helpers/dateFormat'
 import {
+  getRssFeedItemKey,
+  getRssFeedsAutoRefreshInterval,
   openRssFeedManager,
   refreshRssFeeds,
-  rssFeedCacheCovers,
   rssFeedErrors,
-  rssFeedItems,
   rssFeedsLastRefresh,
+  rssFeedsNextAutoRefresh,
   rssFeedsRefreshing
 } from '../../helpers/rssFeeds'
-import { getRelativeTimeFromDate } from '../../helpers/utils'
+import { getCachedRelativeTimeFormat, getRelativeTimeFromDate } from '../../helpers/utils'
 
-const { t } = useI18n()
+const { locale, t } = useI18n()
 useKeepAliveEffectScope()
 
 const now = useRelativeTimeClock()
 
-/** @type {import('vue').ComputedRef<import('../../helpers/rssFeeds').RssFeed[]>} */
-const feeds = computed(() => store.getters.getFollowedRssFeeds)
-const feedUrls = computed(() => new Set(feeds.value.map(feed => feed.url)))
-const feedAvatars = computed(() => new Map(feeds.value.map(feed => [feed.url, feed.avatar ?? null])))
-
-// Removed feeds disappear right away, without waiting for the next refresh
-const items = computed(() => rssFeedItems.value.filter(item => feedUrls.value.has(item.feedUrl)))
-const itemKeys = computed(() => items.value.map(item => `${item.feedUrl}\n${item.id}`))
+const { feeds, feedUrls, feedAvatars, items } = useFollowedRssFeedItems()
+const itemKeys = computed(() => items.value.map(getRssFeedItemKey))
 const errorFeedUrls = computed(() => rssFeedErrors.value.filter(url => feedUrls.value.has(url)))
 const isLoading = computed(() => rssFeedsRefreshing.value)
 
@@ -88,12 +85,21 @@ const lastRefreshTimestamp = computed(() => rssFeedsLastRefresh.value === null
   ? ''
   : getRelativeTimeFromDate(rssFeedsLastRefresh.value, true, true, now.value))
 
-// Loads on first open and after feeds were added in the settings
-watch(feeds, (value) => {
-  if (value.length > 0 && !rssFeedCacheCovers(value)) {
-    refresh()
-  }
-}, { immediate: true })
+const nextAutoRefresh = computed(() => getRssFeedsAutoRefreshInterval() > 0 ? rssFeedsNextAutoRefresh.value : null)
+
+const nextAutoRefreshTimestamp = computed(() => nextAutoRefresh.value === null
+  ? ''
+  : formatShortDateTime(nextAutoRefresh.value, locale.value, store.getters.getDateFormat, store.getters.getTimeFormat))
+
+const nextAutoRefreshTooltip = computed(() => {
+  if (nextAutoRefresh.value === null) return ''
+  const remainingMinutes = Math.round((nextAutoRefresh.value - now.value) / 60000)
+  return Math.abs(remainingMinutes) < 60
+    ? getCachedRelativeTimeFormat(locale.value, 'auto').format(remainingMinutes, 'minute')
+    : getCachedRelativeTimeFormat(locale.value, 'auto').format(Math.round(remainingMinutes / 60), 'hour')
+})
+
+const hasNewContent = computed(() => items.value.some(item => item.isNew === true))
 
 function refresh() {
   return refreshRssFeeds(feeds.value)
@@ -103,10 +109,10 @@ defineExpose({
   refresh,
   isLoading,
   lastRefreshTimestamp,
-  nextAutoRefreshTimestamp: '',
-  nextAutoRefreshTooltip: '',
+  nextAutoRefreshTimestamp,
+  nextAutoRefreshTooltip,
   refreshTitle: computed(() => t('Subscriptions.RSS Feeds.Tab')),
-  hasNewContent: false
+  hasNewContent
 })
 </script>
 

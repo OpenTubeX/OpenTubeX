@@ -1290,6 +1290,7 @@ Settings:
     Posts Auto Refresh Interval: Interval vir outomatiese verfrissing van plasings
     Refresh Subscriptions While App Is Closed: Verfris intekeninge terwyl die toep gesluit is
     Notify About New Uploads: Stel in kennis oor nuwe oplaaie
+    RSS Feeds Auto Refresh Interval: Interval vir outomatiese verfrissing van RSS-voere
   Distraction Free Settings:
     Digital Wellbeing:
       Count Watch Time From: Tel kyktyd vanaf
@@ -2403,6 +2404,7 @@ Tooltips:
     Auto Refresh Interval: Hoe gereeld OpenTubeX u intekeningvoer outomaties verfris terwyl die toep oop is. Op Android verfris ’n interval wat nie nul is nie dit ook terwyl die toep gesluit is.
     Refresh Subscriptions While App Is Closed: Verfris voere met u gekose instellings. Op rekenaars bly OpenTubeX in die stelselbak totdat u dit verlaat. Android beheer wanneer agtergrondverfrissings loop.
     Notify About New Uploads: Wys stelselkennisgewings op hierdie toestel vir kanale waarvoor u kennisgewings in hul intekeninginstellings aangeskakel het. OpenTubeX kyk vir nuwe inhoud wanneer intekeninge verfris, dus kies ’n outomatiese verfrissingsinterval. Om in kennis gestel te word terwyl die toep gesluit is, aktiveer ook verfrissing terwyl die toep gesluit is.
+    RSS Feeds Auto Refresh Interval: Hoe gereeld OpenTubeX jou RSS-voere outomaties verfris terwyl die toep oop is.
   Theme Settings:
     Only Show Important Notifications: Versteek kennisgewings in die app wat slegs 'n aksie bevestig of 'n status meld. Foute, waarskuwings, herinneringe wat jy opgestel het en kennisgewings met 'n aksie, soos Ontdoen, verskyn steeds. Agtergrondvordering, soos die verfris van intekeninge, word in die globale vorderingsbalk gewys in plaas van as 'n kennisgewing. Stelselkennisgewings word nie geraak nie.
     Thumbnail Size: Skaal videoduimnaels in roosters en lyste. Roosters met ’n vaste aantal kolomme of die aansigtipe Volle breedte vul eerder elke ry, dus verander dit daar slegs lysduimnaels en kortvideo’s. Vensters van foongrootte beperk roosterduimnaels tot 100%.

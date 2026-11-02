@@ -629,6 +629,151 @@ test.describe('with followed feeds', () => {
   })
 })
 
+test.describe('with new items', () => {
+  test.use({
+    seed: {
+      settings: {
+        fetchSubscriptionsAutomatically: false,
+        enableRssFeeds: true,
+        followedRssFeeds: [RSS_FEED],
+        showNewSubscriptionFeedIndicators: true
+      }
+    }
+  })
+
+  // Two items that the first load didn't have
+  const updatedRssFeed = rssFeed.replace('<item>', `<item>
+      <title>Brand new VOD</title>
+      <link>https://www.twitch.tv/videos/4</link>
+      <pubDate>${new Date(now - 60000).toUTCString()}</pubDate>
+      <guid isPermaLink="false">vod-4</guid>
+    </item>
+    <item>
+      <title>Second new VOD</title>
+      <link>https://www.twitch.tv/videos/5</link>
+      <pubDate>${new Date(now - 120000).toUTCString()}</pubDate>
+      <guid isPermaLink="false">vod-5</guid>
+    </item>
+    <item>`)
+
+  /**
+   * @param {import('@playwright/test').Page} page
+   */
+  async function loadNewItems(page) {
+    await mockFeeds(page)
+    await goTo(page, 'subscriptions')
+    await page.locator('[data-rss-feeds-tab]').click()
+    const panel = page.locator('#subscriptionsPanel')
+    await expect(panel.locator('.ft-list-item .h3Title')).toHaveText(['Newest VOD', 'Older VOD'])
+    // The first load of a feed has nothing to compare to
+    await expect(panel.locator('.newContentDot')).toHaveCount(0)
+
+    await page.route(RSS_URL, route => route.fulfill({ contentType: 'application/rss+xml', body: updatedRssFeed }))
+    await page.locator('.subscriptionsHeader').getByRole('button', { name: /^Refresh RSS/ }).click()
+    await expect(panel.locator('.ft-list-item .h3Title'))
+      .toHaveText(['Brand new VOD', 'Second new VOD', 'Newest VOD', 'Older VOD'])
+  }
+
+  test('marks items from later refreshes as new until they are seen', async ({ page }) => {
+    await loadNewItems(page)
+    const panel = page.locator('#subscriptionsPanel')
+    const newItems = panel.locator('.ft-list-item').filter({ has: page.locator('.newContentDot') })
+    await expect(newItems.locator('.h3Title')).toHaveText(['Brand new VOD', 'Second new VOD'])
+
+    // The context menu marks a single item as seen
+    await newItems.nth(1).locator('.title').click({ button: 'right' })
+    await page.locator('.contextMenu').getByRole('menuitem', { name: 'Mark As Seen' }).click()
+    await expect(newItems.locator('.h3Title')).toHaveText(['Brand new VOD'])
+
+    // Another refresh keeps both the new and the seen state
+    await page.locator('.subscriptionsHeader').getByRole('button', { name: /^Refresh RSS/ }).click()
+    await expect(page.locator('[data-rss-feeds-tab] .tabLoadingIndicator')).toHaveCount(0)
+    await expect(newItems.locator('.h3Title')).toHaveText(['Brand new VOD'])
+
+    // So does a restart
+    await page.reload()
+    await goTo(page, 'subscriptions')
+    await page.locator('[data-rss-feeds-tab]').click()
+    await expect(newItems.locator('.h3Title')).toHaveText(['Brand new VOD'])
+
+    await page.getByRole('button', { name: 'Mark all as seen' }).click()
+    await expect(newItems).toHaveCount(0)
+    await expect(page.getByRole('button', { name: 'Mark all as seen' })).toHaveCount(0)
+    await expect(panel.locator('.ft-list-item')).toHaveCount(4)
+  })
+
+  test('marks an item as seen when it is opened', async ({ page }) => {
+    await loadNewItems(page)
+    const panel = page.locator('#subscriptionsPanel')
+    await panel.locator('.ft-list-item .h3Title', { hasText: 'Brand new VOD' }).click()
+    await expect.poll(() => page.evaluate(() => window.$router.currentRoute.value.path)).toBe('/external-media')
+    expect(await page.evaluate(() => JSON.parse(localStorage.getItem('rssFeedItems'))
+      .filter(item => item.isNew).map(item => item.title))).toEqual(['Second new VOD'])
+  })
+
+  test('lists new items in the New feed', async ({ page }) => {
+    await loadNewItems(page)
+    const panel = page.locator('#subscriptionsPanel')
+    await page.locator('[data-subscription-feed-tab="all"]').click()
+
+    // The combined view has a section for them
+    const section = panel.locator('section', { has: page.getByRole('heading', { name: 'RSS' }) })
+    await expect(section.locator('.ft-list-item .h3Title')).toHaveText(['Brand new VOD', 'Second new VOD'])
+    // Everything in the New feed is new, so the items don't need dots
+    await expect(section.locator('.newContentDot')).toHaveCount(0)
+
+    // As does the tabbed view
+    await page.locator('.subscriptionsHeader').getByRole('button', { name: 'Show Tabbed View' }).click()
+    const rssTab = page.locator('[data-new-feed-rss-tab]')
+    await expect(rssTab.locator('.newFeedTabDot')).toBeVisible()
+    await rssTab.click()
+    await expect(rssTab).toHaveAttribute('aria-selected', 'true')
+    await expect(panel.locator('.ft-list-item .h3Title')).toHaveText(['Brand new VOD', 'Second new VOD'])
+
+    // The sort order applies to them too
+    await page.evaluate(() => window.$store.dispatch('updateNewSubscriptionFeedSortBy', 'oldest'))
+    await expect(panel.locator('.ft-list-item .h3Title')).toHaveText(['Second new VOD', 'Brand new VOD'])
+
+    await page.getByRole('button', { name: 'Mark all as seen' }).click()
+    await expect(panel.getByText('There is no new content.')).toBeVisible()
+    await expect(rssTab.locator('.newFeedTabDot')).toHaveCount(0)
+
+    await page.locator('[data-rss-feeds-tab]').click()
+    await expect(page.locator('#subscriptionsPanel .ft-list-item')).toHaveCount(4)
+    await expect(page.locator('#subscriptionsPanel .newContentDot')).toHaveCount(0)
+  })
+
+  test('refreshes the feeds on their auto refresh interval', async ({ page }) => {
+    await mockFeeds(page)
+    await page.evaluate(() => window.$store.dispatch('updateRssFeedsAutoRefreshInterval', '1800000'))
+    await goTo(page, 'subscriptions')
+    await page.locator('[data-rss-feeds-tab]').click()
+    const panel = page.locator('#subscriptionsPanel')
+    await expect(panel.locator('.ft-list-item .h3Title')).toHaveText(['Newest VOD', 'Older VOD'])
+
+    const header = page.locator('.subscriptionsHeader')
+    const nextRefresh = () => page.evaluate(() => Number(localStorage.getItem('rssFeedsNextAutoRefresh')))
+    const scheduled = await nextRefresh()
+    expect(scheduled - Date.now()).toBeGreaterThan(29 * 60000)
+    await expect(header.locator('.nextAutoRefreshTimestamp')).toBeVisible()
+    await expect(header.locator('.nextAutoRefreshCountdown')).toBeVisible()
+
+    // Another window reaches the deadline
+    await page.route(RSS_URL, route => route.fulfill({ contentType: 'application/rss+xml', body: updatedRssFeed }))
+    await page.evaluate(() => {
+      localStorage.setItem('rssFeedsNextAutoRefresh', String(Date.now() - 1000))
+      window.dispatchEvent(new StorageEvent('storage', { key: 'rssFeedsNextAutoRefresh' }))
+    })
+    await expect(panel.locator('.ft-list-item .h3Title'))
+      .toHaveText(['Brand new VOD', 'Second new VOD', 'Newest VOD', 'Older VOD'])
+    await expect.poll(nextRefresh).toBeGreaterThan(Date.now() + 29 * 60000)
+
+    // Turning it off stops the refreshes
+    await page.evaluate(() => window.$store.dispatch('updateRssFeedsAutoRefreshInterval', '0'))
+    await expect.poll(nextRefresh).toBe(0)
+  })
+})
+
 test.describe('with many followed feeds', () => {
   const feeds = Array.from({ length: 30 }, (_, index) => ({
     url: `https://rss.example.test/feed-${index}.xml`,

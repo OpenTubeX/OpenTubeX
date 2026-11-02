@@ -18,6 +18,20 @@
         @click="showManager = true"
       />
     </FtFlexBox>
+    <FtFlexBox v-if="enableRssFeeds">
+      <div class="autoRefreshInterval">
+        <FtSelect
+          :placeholder="t('Settings.Subscription Settings.RSS Feeds Auto Refresh Interval')"
+          :value="autoRefreshInterval"
+          setting-key="rssFeedsAutoRefreshInterval"
+          :select-names="autoRefreshIntervalNames"
+          :select-values="AUTO_REFRESH_INTERVAL_VALUES"
+          :tooltip="t('Tooltips.Subscription Settings.RSS Feeds Auto Refresh Interval')"
+          :icon="['fas', 'clock']"
+          @change="value => store.dispatch('updateRssFeedsAutoRefreshInterval', value)"
+        />
+      </div>
+    </FtFlexBox>
     <FtSettingsSubpage
       :open="showManager"
       :title="t('Settings.Subscription Settings.RSS Feeds')"
@@ -148,6 +162,7 @@ import FtFlexBox from '../../ft-flex-box/ft-flex-box.vue'
 import FtIconButton from '../../FtIconButton/FtIconButton.vue'
 import FtInput from '../../FtInput/FtInput.vue'
 import FtRetryImage from '../../FtRetryImage.vue'
+import FtSelect from '../../FtSelect/FtSelect.vue'
 import FtSettingsSection from '../../FtSettingsSection/FtSettingsSection.vue'
 import FtSettingsSubpage from '../../FtSettingsSubpage/FtSettingsSubpage.vue'
 import FtToggleSwitch from '../../FtToggleSwitch/FtToggleSwitch.vue'
@@ -172,6 +187,18 @@ const RSSHUB_URL = 'https://github.com/DIYgod/RSSHub'
 const { t } = useI18n()
 
 const enableRssFeeds = computed(() => store.getters.getEnableRssFeeds)
+
+const AUTO_REFRESH_INTERVAL_VALUES = ['0', '1800000', '3600000', '7200000', '14400000', '21600000', '28800000']
+const autoRefreshIntervalNames = computed(() => [
+  t('Settings.General Settings.Avoid translation.Disabled'),
+  '30 min',
+  '1 h',
+  '2 h',
+  '4 h',
+  '6 h',
+  '8 h'
+])
+const autoRefreshInterval = computed(() => store.getters.getRssFeedsAutoRefreshInterval)
 /** @type {import('vue').ComputedRef<import('../../../helpers/rssFeeds').RssFeed[]>} */
 const feeds = computed(() => store.getters.getFollowedRssFeeds)
 const errorFeedUrls = computed(() => new Set(rssFeedErrors.value))

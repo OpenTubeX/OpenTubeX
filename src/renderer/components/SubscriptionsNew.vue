@@ -1,6 +1,35 @@
 <template>
+  <div
+    v-if="activeCategory === 'feeds'"
+    v-bind="$attrs"
+    ref="rssFeed"
+    class="newFeed"
+  >
+    <FtSkeletonGrid v-if="rssFeedsRefreshing && newRssItems.length === 0" />
+    <FtFlexBox v-else-if="clearingVisibleContent || newRssItems.length === 0">
+      <p class="message">
+        {{ t('Subscriptions.No New Content') }}
+      </p>
+    </FtFlexBox>
+    <FtAutoGrid
+      v-if="!clearingVisibleContent"
+      :grid="rssLayout === 'grid'"
+      :item-count="newRssItems.length"
+      :item-keys="newRssItemKeys"
+    >
+      <FtListFeedItem
+        v-for="(item, index) in newRssItems"
+        :key="newRssItemKeys[index]"
+        :data-feed-item-key="newRssItemKeys[index]"
+        :data="item"
+        :layout="rssLayout"
+        :avatar="rssFeedAvatars.get(item.feedUrl)"
+        in-new-feed
+      />
+    </FtAutoGrid>
+  </div>
   <SubscriptionsTabUi
-    v-if="!clearingVisibleContent"
+    v-else-if="!clearingVisibleContent"
     ref="feed"
     v-bind="$attrs"
     class="newFeed"
@@ -11,12 +40,12 @@
     :error-channels="errorChannels"
     :attempted-fetch="attemptedFetch"
     :only-show-new="true"
-    :has-additional-content="showCombinedView && hasAdditionalContent"
+    :has-additional-content="showCombinedView && (hasAdditionalContent || newRssItems.length > 0)"
     :is-community="activeCategory === 'posts'"
     :youtube-style-shorts="activeCategory === 'shorts' && useCustomShortsPlayer"
     :track-global-refresh="false"
     stable-item-keys
-    @refresh="refresh"
+    @refresh="refreshNewContent"
   >
     <template #before-list="{ hasVisibleContent }">
       <h3 v-if="showCombinedView && hasVisibleContent">
@@ -73,6 +102,29 @@
         />
       </section>
     </Transition>
+    <Transition name="new-feed-section">
+      <section
+        v-if="showCombinedView && newRssItems.length > 0"
+        class="mediaSection"
+      >
+        <h3>{{ $t('Subscriptions.RSS Feeds.Tab') }}</h3>
+        <FtAutoGrid
+          :grid="rssLayout === 'grid'"
+          :item-count="newRssItems.length"
+          :item-keys="newRssItemKeys"
+        >
+          <FtListFeedItem
+            v-for="(item, index) in newRssItems"
+            :key="newRssItemKeys[index]"
+            :data-feed-item-key="newRssItemKeys[index]"
+            :data="item"
+            :layout="rssLayout"
+            :avatar="rssFeedAvatars.get(item.feedUrl)"
+            in-new-feed
+          />
+        </FtAutoGrid>
+      </section>
+    </Transition>
   </SubscriptionsTabUi>
   <SubscriptionsTabUi
     v-else
@@ -81,7 +133,7 @@
     :error-channels="errorChannels"
     :only-show-new="true"
     :track-global-refresh="false"
-    @refresh="refresh"
+    @refresh="refreshNewContent"
   />
   <FtPrompt
     v-if="showRefreshWarning"
@@ -98,12 +150,17 @@
 import { computed, nextTick, onBeforeUnmount, onDeactivated, ref, shallowRef, toRaw, useTemplateRef, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 
+import FtAutoGrid from './FtAutoGrid/FtAutoGrid.vue'
 import FtElementList from './FtElementList/FtElementList.vue'
+import FtFlexBox from './ft-flex-box/ft-flex-box.vue'
+import FtListFeedItem from './FtListFeedItem/FtListFeedItem.vue'
 import FtPrompt from './FtPrompt/FtPrompt.vue'
+import FtSkeletonGrid from './FtSkeletonGrid/FtSkeletonGrid.vue'
 import SubscriptionsTabUi from './SubscriptionsTabUi/SubscriptionsTabUi.vue'
 
 import store from '../store/index'
 
+import { useFollowedRssFeedItems } from '../composables/useFollowedRssFeedItems'
 import { useKeepAliveEffectScope } from '../composables/useKeepAliveEffectScope'
 import { useSubscriptionChannelUpdates } from '../composables/useSubscriptionChannelUpdates'
 import { useRefreshAllSubscriptionFeeds } from '../composables/useRefreshAllSubscriptionFeeds'
@@ -112,6 +169,9 @@ import { hasConfiguredRestrictedPlaybackAuthentication } from '../helpers/restri
 import { MAX_INCREMENTAL_SUBSCRIPTION_FEED_ENTRIES } from '../helpers/subscription-channels'
 import { applyAnimationSpeed } from '../helpers/animationSpeed'
 import { isReducedMotionEnabled } from '../helpers/reducedMotion'
+import { getExternalMediaProgress } from '../helpers/externalMediaPosition'
+import { getRssFeedItemKey, refreshRssFeeds, rssFeedsRefreshing } from '../helpers/rssFeeds'
+import { supportsYtDlp } from '../helpers/ytDlpCapabilities'
 
 defineOptions({ inheritAttrs: false })
 
@@ -119,13 +179,14 @@ const props = defineProps({
   activeCategory: {
     type: String,
     default: null,
-    validator: value => value === null || ['videos', 'shorts', 'live', 'posts'].includes(value)
+    validator: value => value === null || ['videos', 'shorts', 'live', 'posts', 'feeds'].includes(value)
   }
 })
 
 const { t } = useI18n()
 const isElectron = process.env.IS_ELECTRON
 const feed = useTemplateRef('feed')
+const rssFeed = useTemplateRef('rssFeed')
 const clearingVisibleContent = ref(false)
 let removalAnimation = null
 
@@ -142,7 +203,7 @@ onBeforeUnmount(cancelRemovalAnimation)
 /** @param {() => Promise<unknown>} markSeen */
 async function markAllAsSeen(markSeen) {
   try {
-    const element = feed.value?.$el
+    const element = props.activeCategory === 'feeds' ? rssFeed.value : feed.value?.$el
     if (element && !isReducedMotionEnabled()) {
       const animation = applyAnimationSpeed(element.animate([
         { opacity: 1, transform: 'translateY(0)' },
@@ -290,32 +351,61 @@ const displayedEntries = computed(() => {
   }
 })
 
+// Items from other platforms open through yt-dlp
+const enableRssFeeds = computed(() => supportsYtDlp && store.getters.getEnableRssFeeds)
+const { feeds: rssFeeds, feedAvatars: rssFeedAvatars, items: rssItems } = useFollowedRssFeedItems(() => enableRssFeeds.value)
+const newRssItems = computed(() => {
+  const items = rssItems.value.filter(item => item.isNew === true && !getExternalMediaProgress(item.url)?.watched)
+  return sortBy.value === 'oldest' ? items.toReversed() : items
+})
+const newRssItemKeys = computed(() => newRssItems.value.map(getRssFeedItemKey))
+// Full width is a single-column grid, so its items render as grid cards.
+const rssLayout = computed(() => store.getters.getListType === 'list' ? 'list' : 'grid')
+
 const hasAdditionalContent = computed(() => {
   return newShorts.value.length > 0 || newLive.value.length > 0 || newPosts.value.length > 0
 })
 
 const isLoading = computed(() => {
+  if (props.activeCategory === 'feeds') {
+    return rssFeedsRefreshing.value
+  }
+
   return !store.getters.getSubscriptionCacheReady || isRefreshing.value
 })
 
 const hasNewContent = computed(() => {
+  if (props.activeCategory === 'feeds') {
+    return newRssItems.value.length > 0
+  }
+
   if (!showCombinedView.value) {
     return displayedEntries.value.length > 0
   }
 
-  return newVideos.value.length > 0 || hasAdditionalContent.value
+  return newVideos.value.length > 0 || hasAdditionalContent.value || newRssItems.value.length > 0
 })
 
 const hasNewContentByCategory = computed(() => ({
   videos: newVideos.value.length > 0,
   shorts: newShorts.value.length > 0,
   live: newLive.value.length > 0,
-  posts: newPosts.value.length > 0
+  posts: newPosts.value.length > 0,
+  feeds: newRssItems.value.length > 0
 }))
+
+function refreshNewContent() {
+  if (props.activeCategory !== 'feeds') {
+    refresh()
+  }
+  if ((props.activeCategory === 'feeds' || showCombinedView.value) && rssFeeds.value.length > 0) {
+    refreshRssFeeds(rssFeeds.value)
+  }
+}
 
 defineExpose({
   markAllAsSeen,
-  refresh,
+  refresh: refreshNewContent,
   isLoading,
   lastRefreshTimestamp: '',
   nextAutoRefreshTimestamp: '',
@@ -327,6 +417,11 @@ defineExpose({
 </script>
 
 <style scoped>
+.message {
+  margin-block: 16px 0;
+  color: var(--tertiary-text-color);
+}
+
 .mediaSection,
 .postsSection {
   margin-block-start: 8px;

@@ -1105,6 +1105,7 @@ Settings:
     Posts Auto Refresh Interval: "Etrevez adkargañ emgefreek ar pennadoù"
     Refresh Subscriptions While App Is Closed: "Freskañ ar c'houmanantoù pa vez serret an arload"
     Notify About New Uploads: Rebuadiñ diwar-benn an endalc'had nevez
+    RSS Feeds Auto Refresh Interval: Etrevez adkargañ emgefreek ar gwazhioù RSS
   Distraction Free Settings:
     Digital Wellbeing:
       Count Watch Time From: "Kontañ an amzer sellet diwar"
@@ -2160,6 +2161,7 @@ Tooltips:
     Auto Refresh Interval: "Alies ma adkarg OpenTubeX gwazh ho koumanantoù ent emgefreek pa vez digor an arload. War Android, un etremez anvannel a freska ar gwazh ivez pa vez serret an arload."
     Refresh Subscriptions While App Is Closed: "Hizivaat a ra al lanvioù gant an arventennoù dibabet. War an urzhiataer e chom OpenTubeX e takad ar c'hemennoù betek kuitaat. Android a ziviz pegoulz e vez hizivaet en drekleur."
     Notify About New Uploads: Diskouez a ra rebuadoù reizhiad war an trevnad-mañ evit ar chadennoù ho peus gweredekaet o rebuadoù en o arventennoù koumanant. OpenTubeX a wir ha bez ez eus endalc'had nevez pa vez freskaet ar c'houmanantoù, setu dibabit un etrevez adkargañ emgefreek. Evit bezañ kelaouet pa vez serret an arload, gweredekait ivez ar freskañ pa vez serret an arload.
+    RSS Feeds Auto Refresh Interval: Pegen alies e vez adkarget ho kwazhioù RSS ent emgefreek gant OpenTubeX e-pad ma vez digor an arload.
   Theme Settings:
     Only Show Important Notifications: Kuzhat a ra ar c'hemennoù en arload na reont nemet kadarnaat un ober pe reiñ ur stad. Diskouezet e vez c'hoazh ar fazioù, ar c'hemennoù-diwall, an degasoù-koun ho peus kefluniet hag ar c'hemennoù a ginnig un ober, evel Dizober. Diskouezet e vez araokadur an oberoù en drekleur, evel freskaat ar c'houmanantoù, er varrenn araokadur hollek e-lec'h en ur c'hemenn. Ar c'hemennoù reizhiad n'int ket tizhet.
     Visible Search Suggestions: "Termeniñ a ra pet enmont eus ar roll-istor klask ha pet kinnig a ziskouez ar varrenn glask a-raok ma ranker dibunañ he roll. Ne ya morse ar roll en tu all da draoñ ar prenestr."

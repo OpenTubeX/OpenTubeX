@@ -1225,6 +1225,7 @@ Settings:
     Limit the number of videos displayed for each channel: Avgrens talet på videoar som blir viste for kvar kanal
     To: til
     Confirm Before Unsubscribing: Stadfest før du avsluttar abonnement
+    RSS Feeds Auto Refresh Interval: Intervall for automatisk oppdatering av RSS-straumar
   Distraction Free Settings:
     Digital Wellbeing:
       Count Watch Time From: "Tel sjåtid frå"
@@ -2467,6 +2468,7 @@ Tooltips:
     Auto Refresh Interval: "Kor ofte OpenTubeX automatisk oppdaterer abonnementsstraumen medan appen er open. På Android oppdaterer eit intervall over null òg straumen medan appen er lukka."
     Refresh Subscriptions While App Is Closed: "Oppdaterer straumar med innstillingane du har valt. På datamaskina blir OpenTubeX i systemfeltet til du avsluttar. Android avgjer når bakgrunnsoppdateringar køyrer."
     Notify About New Uploads: Viser systemvarsel på denne eininga for kanalar du har slått på varsel for i abonnementinnstillingane deira. OpenTubeX ser etter nytt innhald når abonnement vert oppdaterte, så vel eit intervall for automatisk oppdatering. For å bli varsla medan appen er lukka, må du også slå på oppdatering medan appen er lukka.
+    RSS Feeds Auto Refresh Interval: Kor ofte OpenTubeX automatisk oppdaterer RSS-straumane dine medan appen er open.
   Theme Settings:
     Only Show Important Notifications: Gøymer varsel i appen som berre stadfestar ei handling eller melder ein status. Feil, åtvaringar, påminningar du har sett opp, og varsel som tilbyr ei handling, som Angre, blir framleis viste. Framdrift for bakgrunnsoperasjonar, som oppdatering av abonnement, blir vist i den globale framdriftslinja i staden for som eit varsel. Systemvarsel blir ikkje påverka.
     Visible Search Suggestions: "Set kor mange oppføringar frå søkjeloggen og forslag søkjefeltet viser før lista må rullast. Lista går aldri forbi nedkanten av vindauget."

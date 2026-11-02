@@ -1120,6 +1120,7 @@ Settings:
     Posts Auto Refresh Interval: Interval voor automatisch vernieuwen van berichten
     Refresh Subscriptions While App Is Closed: "Abonnementen vernieuwen terwijl de app gesloten is"
     Notify About New Uploads: Melden bij nieuwe uploads
+    RSS Feeds Auto Refresh Interval: Interval voor automatisch vernieuwen van RSS-feeds
   Distraction Free Settings:
     Digital Wellbeing:
       Count Watch Time From: "Kijktijd tellen van"
@@ -2213,6 +2214,7 @@ Tooltips:
     Auto Refresh Interval: "Hoe vaak OpenTubeX je abonnementsfeed automatisch vernieuwt terwijl de app geopend is. Op Android vernieuwt een interval dat niet nul is de feed ook wanneer de app gesloten is."
     Refresh Subscriptions While App Is Closed: "Ververst feeds met je gekozen instellingen. Op de computer blijft OpenTubeX in het systeemvak totdat je afsluit. Android bepaalt wanneer verversingen op de achtergrond worden uitgevoerd."
     Notify About New Uploads: Toont systeemmeldingen op dit apparaat voor kanalen waarvan je de meldingen hebt ingeschakeld in hun abonnementsinstellingen. OpenTubeX controleert op nieuwe inhoud wanneer abonnementen worden vernieuwd, dus kies een interval voor automatisch vernieuwen. Om ook meldingen te krijgen terwijl de app gesloten is, schakel je ook vernieuwen terwijl de app gesloten is in.
+    RSS Feeds Auto Refresh Interval: Hoe vaak OpenTubeX je RSS-feeds automatisch vernieuwt terwijl de app geopend is.
   Theme Settings:
     Only Show Important Notifications: Verbergt meldingen in de app die alleen een actie bevestigen of een status melden. Fouten, waarschuwingen, herinneringen die je hebt ingesteld en meldingen met een actie, zoals Ongedaan maken, worden nog steeds getoond. De voortgang van achtergrondtaken, zoals het vernieuwen van abonnementen, wordt in de algemene voortgangsbalk getoond in plaats van in een melding. Systeemmeldingen worden niet beïnvloed.
     Visible Search Suggestions: "Bepaalt hoeveel items uit de zoekgeschiedenis en suggesties de zoekbalk toont voordat de lijst gaat scrollen. De lijst loopt nooit door voorbij de onderkant van het venster."

@@ -40,6 +40,7 @@ const SETTING_PERFORMANCE_IMPACTS = new Map([
   ['subscriptionShortsAutoRefreshInterval', { level: 'moderate', resources: ['Network'] }],
   ['subscriptionLiveAutoRefreshInterval', { level: 'moderate', resources: ['Network'] }],
   ['subscriptionPostsAutoRefreshInterval', { level: 'moderate', resources: ['Network'] }],
+  ['rssFeedsAutoRefreshInterval', { level: 'moderate', resources: ['Network'] }],
   // higher resolutions cost bandwidth and are more work to decode
   ['defaultQuality', { level: 'moderate', resources: ['Network', 'CPU'] }],
   // segments are downloaded ahead of playback and kept around until they are needed

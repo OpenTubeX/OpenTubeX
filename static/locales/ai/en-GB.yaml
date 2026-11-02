@@ -1092,6 +1092,7 @@ Settings:
     Posts Auto Refresh Interval: Posts Auto Refresh Interval
     Refresh Subscriptions While App Is Closed: "Refresh Subscriptions While App Is Closed"
     Notify About New Uploads: Notify About New Uploads
+    RSS Feeds Auto Refresh Interval: RSS Feeds Auto Refresh Interval
   Distraction Free Settings:
     Digital Wellbeing:
       Count Watch Time From: "Count Watch Time From"
@@ -2144,6 +2145,7 @@ Tooltips:
     Auto Refresh Interval: "How often OpenTubeX automatically refreshes your subscription feed while the app is open. On Android, a nonzero interval also refreshes it while the app is closed."
     Refresh Subscriptions While App Is Closed: "Refreshes feeds using your selected settings. On desktop, OpenTubeX stays in the system tray until you quit. Android controls when background refreshes run."
     Notify About New Uploads: Shows system notifications on this device for channels whose notifications you turned on in their subscription settings. OpenTubeX checks for new content when subscriptions refresh, so choose an auto refresh interval. To be notified while the app is closed, also enable refreshing while the app is closed.
+    RSS Feeds Auto Refresh Interval: How often OpenTubeX automatically refreshes your RSS feeds while the app is open.
   Theme Settings:
     Only Show Important Notifications: Hides in-app notifications that only confirm an action or report a status. Errors, warnings, reminders you set up, and notifications that offer an action, such as Undo, still appear. Background progress, such as subscription refreshes, shows in the global progress bar instead of a notification. System notifications are not affected.
     Visible Search Suggestions: "Sets how many search history entries and suggestions the search bar shows before its list scrolls. The list never extends past the bottom of the window."

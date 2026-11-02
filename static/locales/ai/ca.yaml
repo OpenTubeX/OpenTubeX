@@ -1377,6 +1377,7 @@ Settings:
     Limit the number of videos displayed for each channel: Limita el nombre de vídeos mostrats per canal
     To: A
     Confirm Before Unsubscribing: Confirma abans de donar-se de baixa
+    RSS Feeds Auto Refresh Interval: Interval d'actualització automàtica dels canals RSS
   Distraction Free Settings:
     Digital Wellbeing:
       Count Watch Time From: "Compta el temps de visualització de"
@@ -2715,6 +2716,7 @@ Tooltips:
     Auto Refresh Interval: "Freqüència amb què l'OpenTubeX actualitza automàticament el canal de subscripcions mentre l'aplicació està oberta. A Android, un interval diferent de zero també actualitza el canal quan l’aplicació està tancada."
     Refresh Subscriptions While App Is Closed: "Actualitza els canals amb la configuració seleccionada. A l’escriptori, OpenTubeX es manté a la safata del sistema fins que en sortiu. Android controla quan s’executen les actualitzacions en segon pla."
     Notify About New Uploads: Mostra notificacions del sistema en aquest dispositiu per als canals dels quals heu activat les notificacions a la seva configuració de subscripció. OpenTubeX cerca contingut nou quan s'actualitzen les subscripcions, així que trieu un interval d'actualització automàtica. Per rebre notificacions amb l'aplicació tancada, activeu també l'actualització amb l'aplicació tancada.
+    RSS Feeds Auto Refresh Interval: Amb quina freqüència OpenTubeX actualitza automàticament els vostres canals RSS mentre l'aplicació és oberta.
   Theme Settings:
     Only Show Important Notifications: Amaga les notificacions de l'aplicació que només confirmen una acció o informen d'un estat. Els errors, els avisos, els recordatoris que heu configurat i les notificacions que ofereixen una acció, com ara Desfés, continuen apareixent. El progrés de les operacions en segon pla, com ara l'actualització de les subscripcions, es mostra a la barra de progrés global en lloc d'una notificació. Les notificacions del sistema no es veuen afectades.
     Visible Search Suggestions: "Defineix quantes entrades de l’historial de cerca i suggeriments mostra la barra de cerca abans que la seva llista es desplaci. La llista mai no s’estén més enllà de la part inferior de la finestra."
