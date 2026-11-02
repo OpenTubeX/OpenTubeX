@@ -13,7 +13,7 @@
         :title="iconLabels[icon]"
         @click="emit('update:modelValue', icon)"
       >
-        <FtIcon :icon="['fas', icon]" />
+        <FtIcon :icon="['far', icon]" />
       </button>
     </div>
     <div

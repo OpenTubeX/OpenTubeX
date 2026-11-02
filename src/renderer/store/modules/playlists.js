@@ -162,7 +162,7 @@ const getters = {
   },
   getQuickBookmarkIcon(state, getters) {
     const icon = getQuickBookmarkIconValue(getters.getQuickBookmarkPlaylist)
-    return typeof icon === 'string' ? ['fas', icon] : icon
+    return typeof icon === 'string' ? ['far', icon] : icon
   }
 }
 

@@ -2212,6 +2212,23 @@ test.describe('list video actions', () => {
     })
   })
 
+  test.describe('default quick bookmark icon', () => {
+    test.use({
+      seed: {
+        ...SEED,
+        playlists: SEED.playlists.map(playlist => playlist._id === 'favorites' ? { ...playlist, quickBookmarkIcon: 'bookmark' } : playlist)
+      }
+    })
+
+    test('quick bookmark button uses the outlined bookmark', async ({ page }) => {
+      await goTo(page, 'history')
+
+      const video = page.locator('.ft-list-video').first()
+      await video.hover()
+      await expect(video.locator('.quickBookmarkVideoIcon [data-prefix="far"][data-icon="bookmark"]')).toBeVisible()
+    })
+  })
+
   test('the options dropdown toggles watched status separately from removing history', async ({ app, page }) => {
     await goTo(page, 'history')
 

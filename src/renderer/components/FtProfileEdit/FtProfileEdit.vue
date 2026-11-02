@@ -198,7 +198,7 @@
                   <FtButton
                     :label="$t('Profile.Make Default Profile')"
                     :disabled="defaultProfile === profileId"
-                    :icon="['fas', 'bookmark']"
+                    :icon="['far', 'bookmark']"
                     @click="setDefaultProfile"
                   />
                   <FtButton

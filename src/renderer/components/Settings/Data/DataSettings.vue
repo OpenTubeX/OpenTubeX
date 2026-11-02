@@ -658,7 +658,7 @@ async function importSelectedTakeoutData() {
       showToast({ message: `${t('Settings.Data Settings.Unable to read file')}: ${path ?? error}`, icon: ['fas', 'circle-exclamation'] })
     })
     if (importedPlaylists && !failedPlaylists) {
-      showToast({ message: t('Settings.Data Settings.All playlists has been successfully imported'), icon: ['fas', 'bookmark'] })
+      showToast({ message: t('Settings.Data Settings.All playlists has been successfully imported'), icon: ['far', 'bookmark'] })
     }
     closeTakeoutImport()
   } catch (error) {
@@ -1804,7 +1804,7 @@ async function importTakeoutPlaylistFiles(files) {
     reportError(error, files.map(file => file.name).join(', '))
   }
   if (imported && !failed) {
-    showToast({ message: t('Settings.Data Settings.All playlists has been successfully imported'), icon: ['fas', 'bookmark'] })
+    showToast({ message: t('Settings.Data Settings.All playlists has been successfully imported'), icon: ['far', 'bookmark'] })
   }
 }
 
@@ -2039,7 +2039,7 @@ async function importPlaylistDatabase(data) {
 
   showToast({
     message: t('Settings.Data Settings.All playlists has been successfully imported'),
-    icon: ['fas', 'bookmark'],
+    icon: ['far', 'bookmark'],
   })
 }
 

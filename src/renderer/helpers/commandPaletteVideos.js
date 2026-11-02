@@ -40,7 +40,7 @@ export function * iterateLocalVideoCommands(context) {
   }
   for (const playlist of playlists) {
     for (const video of playlist.videos) {
-      const command = entry(video, `${sources.playlists}: ${playlist.playlistName}`, ['fas', 'bookmark'], () => playLibraryVideo(video, videoRoute(video, {
+      const command = entry(video, `${sources.playlists}: ${playlist.playlistName}`, ['far', 'bookmark'], () => playLibraryVideo(video, videoRoute(video, {
         playlistId: playlist._id,
         playlistType: 'user',
         ...(video.playlistItemId ? { playlistItemId: video.playlistItemId } : {}),
