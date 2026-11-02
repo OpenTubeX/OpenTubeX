@@ -169,10 +169,38 @@
   text-align: center;
 }
 
-/* The chevron of the submenu entries doesn't fit into a tile. */
-:deep(.shaka-overflow-menu.ft-menu-grid > button > .shaka-overflow-button-label::after),
-:deep(.shaka-menu-group.ft-menu-grid > button:not(.shaka-back-to-overflow-button) > .shaka-overflow-button-label::after) {
-  content: none;
+/*
+  The chevron that marks entries opening a submenu doesn't fit into a tile, so
+  it becomes a folded corner instead. The corner grows with the tile's radius,
+  which would otherwise cut most of it off.
+*/
+:deep(.shaka-overflow-menu.ft-menu-grid > button:has(> .shaka-overflow-button-label-inline)),
+:deep(.shaka-menu-group.ft-menu-grid > button:not(.shaka-back-to-overflow-button):has(> .shaka-overflow-button-label-inline)) {
+  position: relative;
+}
+
+:deep(.shaka-overflow-menu.ft-menu-grid > button > .shaka-overflow-button-label-inline),
+:deep(.shaka-menu-group.ft-menu-grid > button:not(.shaka-back-to-overflow-button) > .shaka-overflow-button-label-inline) {
+  position: static;
+}
+
+:deep(.shaka-overflow-menu.ft-menu-grid > button > .shaka-overflow-button-label-inline::after),
+:deep(.shaka-menu-group.ft-menu-grid > button:not(.shaka-back-to-overflow-button) > .shaka-overflow-button-label-inline::after) {
+  inset: auto;
+  inset-block-end: 0;
+  inset-inline-end: 0;
+  inline-size: calc(6px + 6px * var(--ui-roundness));
+  block-size: calc(6px + 6px * var(--ui-roundness));
+  border-end-end-radius: calc(10px * var(--ui-roundness));
+  background-color: rgb(255 255 255 / 38%);
+  transform: none;
+  mask: none;
+  clip-path: polygon(100% 0, 100% 100%, 0 100%);
+}
+
+:deep(.shaka-overflow-menu.ft-menu-grid > button > .shaka-overflow-button-label-inline:dir(rtl)::after),
+:deep(.shaka-menu-group.ft-menu-grid > button:not(.shaka-back-to-overflow-button) > .shaka-overflow-button-label-inline:dir(rtl)::after) {
+  clip-path: polygon(0 0, 100% 100%, 0 100%);
 }
 
 /* Names that don't fit into a tile get cut off. */
