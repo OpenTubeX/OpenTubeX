@@ -9,7 +9,7 @@
       :title="title"
       :custom-header="customHeader"
       fill
-      @close="emit('close')"
+      @close="emit('close', $event)"
     >
       <!-- The page's layout styles define the transition classes. -->
       <Transition

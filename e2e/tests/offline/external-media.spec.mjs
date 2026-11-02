@@ -757,6 +757,9 @@ test('an open phone transcript sheet moves into the full window dock', async ({ 
   await externalMedia.locator('.fullscreenTranscriptToggle').evaluate(element => element.click())
   await expect(externalMedia.locator('.fullscreenTranscriptTarget .transcriptCard')).toContainText('Docked caption line')
   await expect(page.locator('dialog[open]')).toHaveCount(0)
+  // Escape inside the dock still closes the transcript.
+  await externalMedia.locator('.fullscreenTranscriptTarget .transcriptCard').getByRole('button', { name: 'Search transcript' }).press('Escape')
+  await expect(externalMedia.locator('.transcriptCard')).toHaveCount(0)
 })
 
 test('external media with only TTML captions offers no transcript', async ({ app, page }) => {

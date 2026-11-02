@@ -391,7 +391,7 @@
             :phone-open="mobilePanel === 'transcript'"
             :title="t('Video.Transcript.Title')"
             custom-header
-            @close="fullscreenTranscriptOpen ? mobilePanel = null : closeTranscript()"
+            @close="reason => closeSidebarPanel(reason, fullscreenTranscriptOpen, closeTranscript)"
             @leaving="setSidebarPanelLeaving"
           >
             <WatchVideoTranscript
@@ -412,7 +412,7 @@
             :phone-open="mobilePanel === 'chat'"
             :title="twitchChatTarget?.type === 'replay' ? t('Video.Live Chat Replay') : t('Video.Live Chat')"
             custom-header
-            @close="fullscreenLiveChatOpen ? mobilePanel = null : closeChat()"
+            @close="reason => closeSidebarPanel(reason, fullscreenLiveChatOpen, closeChat)"
             @leaving="setSidebarPanelLeaving"
           >
             <TwitchChat
@@ -658,6 +658,19 @@ const toolbarActions = computed(() => ({
     run: toggleTranscript
   }
 }))
+
+/**
+ * Docking a panel disables its phone sheet, which reports that as a
+ * presentation close. That only moves the panel into the dock, unlike
+ * closing the sheet or pressing Escape in the dock.
+ * @param {string | undefined} reason
+ * @param {boolean} docked
+ * @param {() => void} close
+ */
+function closeSidebarPanel(reason, docked, close) {
+  if (reason === 'presentation' && docked) mobilePanel.value = null
+  else close()
+}
 
 function closeChat() {
   if (mobilePanel.value === 'chat') mobilePanel.value = null
