@@ -281,3 +281,41 @@ test.describe('playlist import with duplicate names', () => {
       ])
   })
 })
+
+test.describe('playlist import into a renamed playlist', () => {
+  const playlist = (_id, playlistName, videoId) => ({
+    _id,
+    playlistName,
+    description: _id,
+    videos: [{ videoId, title: videoId, lengthSeconds: 60, timeAdded: 1, playlistItemId: videoId }]
+  })
+
+  test.use({ seed: { playlists: [playlist('rock', 'Rock', 'aaaaaaaaaaa'), playlist('jazz', 'Jazz', 'bbbbbbbbbbb')] } })
+
+  test('keeps the videos of every record that merges into the same playlist', async ({ page }) => {
+    const dataSection = await goToSettingsSection(page, 'data')
+    // One record matches `jazz` by ID, the other matches it by name
+    const contents = [playlist('jazz', 'Rock', 'ccccccccccc'), playlist('other', 'Jazz', 'ddddddddddd')]
+      .map(record => JSON.stringify(record)).join('\n') + '\n'
+    await page.evaluate((contents) => {
+      Object.defineProperty(window, 'showOpenFilePicker', {
+        configurable: true,
+        value: async () => [{
+          getFile: async () => new File([contents], 'opentubex-playlists.db', { type: 'application/x-freetube-db' })
+        }]
+      })
+    }, contents)
+
+    await dataSection.getByRole('button', { name: 'Import playlists', exact: true }).click()
+
+    await expect(page.locator('.toast', { hasText: 'All playlists has been successfully imported' })).toBeVisible()
+    await expect.poll(() => page.evaluate(() => window.$store.getters.getAllPlaylists
+      .filter(({ _id }) => _id === 'rock' || _id === 'jazz')
+      .map(({ _id, videos }) => ({ _id, videoIds: videos.map(({ videoId }) => videoId) }))
+      .sort((a, b) => a._id.localeCompare(b._id))))
+      .toEqual([
+        { _id: 'jazz', videoIds: ['bbbbbbbbbbb', 'ccccccccccc', 'ddddddddddd'] },
+        { _id: 'rock', videoIds: ['aaaaaaaaaaa'] }
+      ])
+  })
+})

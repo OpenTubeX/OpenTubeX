@@ -1879,8 +1879,10 @@ async function importPlaylistDatabase(data) {
   ]
 
   const newPlaylists = []
-  // Later picked files must see these writes
-  const updates = []
+  // Later picked files must see these writes. One update per existing
+  // playlist, so records merged into the same playlist build on each other.
+  /** @type {Map<string, object>} */
+  const updates = new Map()
   let importedCount = 0
 
   for (const playlistData of playlists) {
@@ -1950,14 +1952,16 @@ async function importPlaylistDatabase(data) {
     importedCount++
 
     // An exact ID match wins over an earlier playlist with the same name
-    const existingPlaylist = (playlistObject._id != null &&
+    const targetPlaylist = (playlistObject._id != null &&
       allPlaylists.value.find(playlist => playlist._id === playlistObject._id)) ||
       allPlaylists.value.find(playlist => playlist.playlistName === playlistObject.playlistName)
 
-    if (existingPlaylist === undefined) {
+    if (targetPlaylist === undefined) {
       newPlaylists.push(playlistObject)
       return
     }
+
+    const existingPlaylist = { ...targetPlaylist, ...updates.get(targetPlaylist._id) }
 
     /** @type {Set<string> | undefined} */
     let existingVideoIdSet
@@ -2016,7 +2020,8 @@ async function importPlaylistDatabase(data) {
       ? playlistVideos.slice(existingPlaylist.videos.length).concat(playlistVideos.slice(0, existingPlaylist.videos.length))
       : playlistVideos
     // Update playlist's `lastUpdatedAt` & other attributes
-    updates.push(store.dispatch('updatePlaylist', {
+    updates.set(existingPlaylist._id, {
+      ...updates.get(existingPlaylist._id),
       _id: existingPlaylist._id,
       // Only these attributes would be updated (besides videos)
       playlistName: playlistObject.playlistName,
@@ -2026,10 +2031,10 @@ async function importPlaylistDatabase(data) {
       ...(Object.hasOwn(playlistObject, 'shuffleByDefault') ? { shuffleByDefault: playlistObject.shuffleByDefault } : {}),
       ...(Object.hasOwn(playlistObject, 'sortOrder') ? { sortOrder: playlistObject.sortOrder } : {}),
       videos: orderedVideos
-    }))
+    })
   })
 
-  await Promise.all(updates)
+  await Promise.all(Array.from(updates.values(), playlist => store.dispatch('updatePlaylist', playlist)))
 
   if (importedCount === 0) {
     return
