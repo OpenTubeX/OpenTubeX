@@ -531,46 +531,70 @@ test.describe('interface customizer', () => {
     ))).toBe(4)
   })
 
-  test('scrolls the phone player menu preview and clamps it when its range shrinks', { tag: '@scale' }, async ({ app, page }) => {
-    const toggles = ['ShowSkipSilenceButton', 'ShowMusicModeToggle', 'ShowLightsOffToggle', 'ShowVolumeBoostToggle', 'ShowMonoAudioToggle']
-    const setToggles = value => page.evaluate(async ({ toggles, value }) => {
-      for (const toggle of toggles) await window.$store.dispatch(`update${toggle}`, value)
-    }, { toggles, value })
-    await setWindowSize(app, page, { width: 360, height: 760 })
-    const customizer = await openInterfaceCustomizer(page, 'control bar')
-    await setToggles(true)
-    await customizer.getByRole('tab', { name: 'Player menu', exact: true }).click()
-    const grid = customizer.locator('.previewOverflowGrid')
-    const expectScrollbarToMatchRange = () => expect.poll(() => grid.evaluate(element => {
-      const scrollbar = element.querySelector(':scope > .os-scrollbar-vertical')
-      if (element.scrollHeight - element.clientHeight <= 1) {
-        return !scrollbar.classList.contains('os-scrollbar-visible') || scrollbar.classList.contains('os-scrollbar-unusable')
+  // The desktop sizes stay above the phone layout's 600px at every UI scale.
+  const scrollingMenuLayouts = [
+    { name: 'phone grid', size: { width: 360, height: 760 }, resized: { width: 380, height: 640 }, grid: true },
+    { name: 'phone list', size: { width: 360, height: 760 }, resized: { width: 380, height: 640 }, grid: false },
+    { name: 'desktop grid', size: { width: 1200, height: 800 }, resized: { width: 1050, height: 780 }, grid: true },
+    { name: 'desktop list', size: { width: 1200, height: 800 }, resized: { width: 1050, height: 780 }, grid: false },
+  ]
+  for (const layout of scrollingMenuLayouts) {
+    test(`scrolls the ${layout.name} player menu preview and clamps it when its range shrinks`, { tag: '@scale' }, async ({ app, page }) => {
+      const phone = layout.name.startsWith('phone')
+      const toggles = ['ShowSkipSilenceButton', 'ShowMusicModeToggle', 'ShowLightsOffToggle', 'ShowVolumeBoostToggle', 'ShowMonoAudioToggle']
+      const setToggles = value => page.evaluate(async ({ toggles, value }) => {
+        for (const toggle of toggles) await window.$store.dispatch(`update${toggle}`, value)
+      }, { toggles, value })
+      await setWindowSize(app, page, layout.size)
+      await page.evaluate(async (grid) => {
+        await window.$store.dispatch('updateUsePlayerMenuGrid', grid)
+        // The full control bar keeps most entries out of the menu.
+        await window.$store.dispatch('updateControlBarButtons', ['menu', 'fullscreen'])
+      }, layout.grid)
+      const customizer = await openInterfaceCustomizer(page, 'control bar')
+      await setToggles(true)
+      if (phone) await customizer.getByRole('tab', { name: 'Player menu', exact: true }).click()
+      const grid = customizer.locator('.previewOverflowGrid')
+      // The phone menu keeps its scrollbar visible, the desktop one hides it while idle.
+      const expectScrollbarToMatchRange = () => expect.poll(() => grid.evaluate((element, phone) => {
+        const scrollbar = element.querySelector(':scope > .os-scrollbar-vertical')
+        if (element.scrollHeight - element.clientHeight <= 1) {
+          return !scrollbar.classList.contains('os-scrollbar-visible') || scrollbar.classList.contains('os-scrollbar-unusable')
+        }
+        const track = scrollbar.querySelector('.os-scrollbar-track').getBoundingClientRect()
+        const handle = scrollbar.querySelector('.os-scrollbar-handle').getBoundingClientRect()
+        return (!phone || getComputedStyle(scrollbar).visibility === 'visible') && handle.height >= 1 &&
+          Math.abs(handle.bottom - track.bottom) <= 2
+      }, phone)).toBe(true)
+      const scrollToEnd = async () => {
+        await grid.evaluate(element => { element.scrollTop = element.scrollHeight })
+        await expectScrollAtRenderedEnd(grid)
+        await expectScrollbarToMatchRange()
       }
-      const track = scrollbar.querySelector('.os-scrollbar-track').getBoundingClientRect()
-      const handle = scrollbar.querySelector('.os-scrollbar-handle').getBoundingClientRect()
-      return getComputedStyle(scrollbar).visibility === 'visible' && handle.width >= 1 &&
-        Math.abs(handle.bottom - track.bottom) <= 2
-    })).toBe(true)
-    const scrollToEnd = async () => {
-      await grid.evaluate(element => { element.scrollTop = element.scrollHeight })
+
+      // Like the player's menu, the entries that don't fit scroll into view.
+      await expect.poll(() => grid.evaluate(element => element.scrollHeight - element.clientHeight)).toBeGreaterThan(1)
+      await scrollToEnd()
+
+      await setToggles(false)
       await expectScrollAtRenderedEnd(grid)
       await expectScrollbarToMatchRange()
-    }
 
-    // Like the player's phone menu, the tiles that don't fit scroll into view.
-    await expect.poll(() => grid.evaluate(element => element.scrollHeight - element.clientHeight)).toBeGreaterThan(1)
-    await scrollToEnd()
+      await setToggles(true)
+      await scrollToEnd()
+      await setWindowSize(app, page, layout.resized)
+      await expectScrollAtRenderedEnd(grid)
+      await expectScrollbarToMatchRange()
 
-    await setToggles(false)
-    await expectScrollAtRenderedEnd(grid)
-    await expectScrollbarToMatchRange()
-
-    await setToggles(true)
-    await scrollToEnd()
-    await setWindowSize(app, page, { width: 380, height: 640 })
-    await expectScrollAtRenderedEnd(grid)
-    await expectScrollbarToMatchRange()
-  })
+      // The tiles take less room than the rows of the list.
+      if (!layout.grid) {
+        await scrollToEnd()
+        await page.evaluate(() => window.$store.dispatch('updateUsePlayerMenuGrid', true))
+        await expectScrollAtRenderedEnd(grid)
+        await expectScrollbarToMatchRange()
+      }
+    })
+  }
 })
 
 test.describe('interface customizer with Invidious', () => {
