@@ -800,6 +800,7 @@ async function mergeSubscriptions(client, store, previousIds, options) {
   })
   const mergedIdSet = new Set(mergedIds)
 
+  let mainProfileSaved = false
   for (const profile of profiles) {
     const subscriptions = profile._id === mainProfile._id
       ? mergedSubscriptions
@@ -812,9 +813,11 @@ async function mergeSubscriptions(client, store, previousIds, options) {
         previous: profile.subscriptions,
       })
       if (!saved) {
-        return { baseline: Array.from(localById.keys()) }
+        // Once the main profile holds the merge, both sides agree on it.
+        return { baseline: Array.from(mainProfileSaved ? mergedIds : localById.keys()) }
       }
     }
+    if (profile._id === mainProfile._id) mainProfileSaved = true
   }
 
   return { mergedIds: Array.from(mergedIds) }

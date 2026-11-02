@@ -23,11 +23,11 @@ vm.runInContext(withoutImports(syncSource)
 const channel = id => ({ id, name: `Channel ${id}`, thumbnail: `https://yt3.googleusercontent.com/${id}` })
 
 // Runs the real profile store module on the real profile datastore handlers.
-async function fixture(subscriptions) {
+async function fixture(subscriptions, secondSubscriptions = []) {
   const db = { profiles: new Datastore({ inMemoryOnly: true }) }
   await db.profiles.insertAsync([
     { _id: MAIN_PROFILE_ID, name: 'All Channels', subscriptions },
-    { _id: 'second', name: 'Second', subscriptions: [] },
+    { _id: 'second', name: 'Second', subscriptions: secondSubscriptions },
   ])
   const globals = { MAIN_PROFILE_ID, THEME_BG_COLOR: '#000000', THEME_TEXT_COLOR: '#ffffff', DEFAULT_PROFILE_ICON: { type: 'icon' }, console }
   const DBProfileHandlers = vm.runInNewContext(
@@ -174,6 +174,26 @@ test('a subscription sync retry keeps a resubscribe to a channel both sides had 
       await store.dispatch('addChannelToProfiles', { channel: channel('A'), profileIds: [MAIN_PROFILE_ID] })
     }
     return subscriptions
+  }
+
+  const synced = await sync.syncSubscriptions(client, store, ['A', 'C'])
+
+  assert.deepEqual([...synced].sort(), ['A', 'B', 'C'])
+  assert.deepEqual([...remote.keys()].sort(), ['A', 'B', 'C'])
+  assert.deepEqual(mainIds().sort(), ['A', 'B', 'C'])
+})
+
+test('a subscription sync retry keeps a resubscribe made after the main profile saved the merge', async () => {
+  const { store, client, remote, mainIds } = await fixture([channel('A'), channel('C')], [channel('C')])
+  for (const id of ['A', 'B']) remote.set(id, remoteChannel(id))
+  const dispatch = store.dispatch
+  let resubscribed = false
+  store.dispatch = async (type, payload) => {
+    if (type === 'updateProfileSubscriptionsFromSync' && payload.profileId === 'second' && !resubscribed) {
+      resubscribed = true
+      await dispatch('addChannelToProfiles', { channel: channel('C'), profileIds: [MAIN_PROFILE_ID, 'second'] })
+    }
+    return dispatch(type, payload)
   }
 
   const synced = await sync.syncSubscriptions(client, store, ['A', 'C'])
