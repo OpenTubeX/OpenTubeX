@@ -104,14 +104,25 @@ function isPaused() {
   return localStorage.getItem(PAUSED_STORAGE_KEY) === 'true'
 }
 
+let modeChange = Promise.resolve()
+
 /**
  * Applies the notification mode to the reminders the system schedules. Turning
  * notifications off pauses them; turning them on again schedules them again.
  * @param {import('../../main/notificationHistory').NotificationMode} mode
  */
-export async function applyCapacitorNotificationMode(mode) {
+export function applyCapacitorNotificationMode(mode) {
   notificationMode = mode
-  if (!process.env.IS_CAPACITOR) return
+  if (!process.env.IS_CAPACITOR) return Promise.resolve()
+  // One change at a time, so turning notifications off waits for a resume to
+  // finish scheduling and then cancels everything it scheduled.
+  modeChange = modeChange.then(() => applyPausedState(mode))
+    .catch(error => console.error('Failed to apply the notification mode', error))
+  return modeChange
+}
+
+/** @param {import('../../main/notificationHistory').NotificationMode} mode */
+async function applyPausedState(mode) {
   const paused = mode === 'off'
   if (paused !== isPaused()) {
     localStorage.setItem(PAUSED_STORAGE_KEY, String(paused))

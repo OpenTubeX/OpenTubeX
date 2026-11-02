@@ -9,14 +9,14 @@ async function loadCapacitorReminder(notifications) {
   const source = await readFile(new URL('../../src/renderer/helpers/liveReminders.js', import.meta.url), 'utf8')
   const storage = new Map()
   const clock = { now: START }
-  const liveReminder = vm.runInNewContext(`${source.replace(/^import .*$/gm, '').replaceAll('export ', '')}
-    liveReminder`, {
+  const { liveReminder, applyCapacitorNotificationMode } = vm.runInNewContext(`${source.replace(/^import .*$/gm, '').replaceAll('export ', '')}
+    ({ liveReminder, applyCapacitorNotificationMode })`, {
     process: { env: { IS_CAPACITOR: true } },
     LocalNotifications: notifications,
     localStorage: { getItem: key => storage.get(key) ?? null, setItem: (key, value) => storage.set(key, value) },
     Date: class extends Date { static now() { return clock.now } },
   })
-  return { liveReminder, clock }
+  return { liveReminder, applyCapacitorNotificationMode, clock }
 }
 
 function reminder(startTimestamp) {
@@ -92,4 +92,31 @@ test('Capacitor reminders cancel the previous reminder when a reschedule has alr
   assert.equal(await result, false)
   assert.deepEqual(cancelled, [notificationId])
   assert.equal(await liveReminder.get('premiere'), null)
+})
+
+test('turning notifications off while they resume leaves no reminder scheduled', async () => {
+  const scheduled = new Map()
+  let blocked = null
+  const { liveReminder, applyCapacitorNotificationMode } = await loadCapacitorReminder({
+    checkPermissions: async () => ({ display: 'granted' }),
+    cancel: async ({ notifications }) => { for (const { id } of notifications) scheduled.delete(id) },
+    getPending: async () => ({ notifications: [...scheduled.keys()].map(id => ({ id })) }),
+    schedule: async ({ notifications }) => {
+      await blocked?.promise
+      for (const notification of notifications) scheduled.set(notification.id, notification)
+    },
+  })
+  for (const videoId of ['first', 'second']) {
+    assert.equal(await liveReminder.schedule({ ...reminder(START + 60_000), videoId }), true)
+  }
+  await applyCapacitorNotificationMode('off')
+  assert.equal(scheduled.size, 0)
+
+  // Off arrives while turning notifications on again still waits on the system.
+  blocked = Promise.withResolvers()
+  const resuming = applyCapacitorNotificationMode('both')
+  const pausing = applyCapacitorNotificationMode('off')
+  blocked.resolve()
+  await Promise.all([resuming, pausing])
+  assert.equal(scheduled.size, 0)
 })
