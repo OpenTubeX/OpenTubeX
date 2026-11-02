@@ -324,6 +324,23 @@ test('a bypassed HTTPS response confirms reachability while the internet check i
   assert.notEqual(app.recovery.state, 'offline')
 })
 
+test('a failed bypassed request checks whether the internet is still reachable', async t => {
+  t.mock.timers.enable({ apis: ['setTimeout'] })
+  let reachable = true
+  const app = await loadAppNetwork(t, async input => {
+    if (!reachable) throw new TypeError('Failed to fetch')
+    return new Response(input === INTERNET_CHECK_URL ? null : 'segment', { status: input === INTERNET_CHECK_URL ? 204 : 200 })
+  }, undefined, { checkInternet: true, corsDisabled: true })
+  await flush()
+  assert.equal(app.recovery.state, 'online')
+
+  reachable = false
+  const error = await app.withoutNetworkRecovery(() => app.window.fetch('https://media.example/segment')).catch(error => error)
+  assert.equal(error.name, 'TypeError')
+  await flush()
+  assert.equal(app.recovery.state, 'offline')
+})
+
 test('delegated subscription transport retains browser CORS classification', async t => {
   const app = await loadAppNetwork(t, async () => { throw new TypeError('Failed to fetch') }, undefined)
   const controller = new AbortController()

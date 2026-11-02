@@ -331,7 +331,14 @@ export function installNetworkFetch({ corsDisabled = false, checkInternet = fals
   })
   window.fetch = async (input, init) => {
     if (networkRecoveryBypasses === 0) return recoveringFetch(input, init)
-    const response = await fetch(input, init)
+    let response
+    try {
+      response = await fetch(input, init)
+    } catch (error) {
+      // The caller retries on its own, but an outage must still be noticed.
+      if (classifyRequestFailure(error) === 'network') appRecovery?.checkConnection().catch(() => {})
+      throw error
+    }
     // Bypassed requests still show that the internet is reachable.
     try {
       if (confirmsInternetReachability(new URL(input instanceof Request ? input.url : input.toString(), location.href))) {
