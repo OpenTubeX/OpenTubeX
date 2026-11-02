@@ -687,13 +687,21 @@ test.describe('without followed feeds', () => {
     await browse.click()
     await instance.fill('slow.example.test')
     await instance.press('Enter')
+    const service = dialog.getByRole('textbox', { name: 'Service' })
+    await expect(service).toHaveAttribute('placeholder', 'Loading services…')
+    // Clearing the instance stops waiting for its services
+    await instance.fill('')
+    await instance.press('Enter')
+    await expect(service).toHaveAttribute('placeholder', 'Search services')
+    await instance.fill('slow.example.test')
+    await instance.press('Enter')
     await dialog.getByRole('button', { name: 'Close' }).click()
     await expect(dialog).toHaveCount(0)
 
     await browse.click()
     await instance.fill('rss.example.test')
     await instance.press('Enter')
-    await expect(dialog.getByRole('textbox', { name: 'Service' })).toBeEnabled()
+    await expect(service).toBeEnabled()
     await expect.poll(savedInstance).toBe('https://rss.example.test')
 
     release()
