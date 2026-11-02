@@ -272,6 +272,9 @@ User Playlists:
     And N more videos: 'y {count} video más | y {count} de videos más | y {count} videos más'
   Playlist Thumbnail: "Miniatura de la lista de reproducción"
   Restore Default Thumbnail: "Restaurar miniatura predeterminada"
+  Move Up: Subir
+  Move Down: Bajar
+  Remove: Eliminar
 History:
   From Date: 'Desde'
   To Date: 'Hasta'
@@ -2270,6 +2273,7 @@ Context Menu:
   Search With: Buscar con {engine}
   Search With Multiple: Buscar con...
   Selection Too Long: La selección es demasiado larga para buscarla (> {count} caracteres)
+  Background Tab: Pestaña en segundo plano
 Tab Organizer:
   Tab History: "Historial de la pestaña"
   Current Page: "Página actual"

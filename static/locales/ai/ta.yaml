@@ -252,6 +252,9 @@ User Playlists:
   Restore Default Thumbnail: "இயல்புநிலை சிறுபடத்தை மீட்டமை"
   AddVideoPrompt:
     And N more videos: 'மேலும் {count} காணொளி | மேலும் {count} காணொளிகள்'
+  Move Up: மேலே
+  Move Down: கீழே
+  Remove: அகற்று
 History:
   From Date: 'தொடக்க தேதி'
   To Date: 'முடிவு தேதி'
@@ -1988,6 +1991,7 @@ Context Menu:
   Search With: '{engine} மூலம் தேடு'
   Search With Multiple: இதன் மூலம் தேடு...
   Selection Too Long: தேடுவதற்குத் தேர்வு மிக நீளமாக உள்ளது (> {count} எழுத்துகள்)
+  Background Tab: பின்னணித் தாவல்
 Tab Organizer:
   Tab History: "தாவல் வரலாறு"
   Current Page: "தற்போதைய பக்கம்"

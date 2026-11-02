@@ -16,6 +16,7 @@ test('mobile thumbnail actions retain availability, state, and handlers', () => 
     extraThumbnailActionButton: ref(null), showPlaylists: ref(true),
     isInAnyPlaylist: ref(false), isQuickBookmarkEnabled: ref(true), props: reactive({ quickBookmarkButtonEnabled: true, canMoveVideoUp: false, canMoveVideoDown: false, canRemoveFromPlaylist: false }),
     quickBookmarkIconText: ref('Bookmark'), quickBookmarkIcon: ref(['far', 'bookmark']),
+    quickBookmarkPlaylist: ref({ playlistName: 'Favorites' }),
     isInQuickBookmarkPlaylist: ref(false), inUserPlaylist: ref(false),
     verticalMoveControls: ref(true),
     canToggleLiveReminder: ref(false), liveReminderActive: ref(false), liveReminderLoading: ref(false),
@@ -28,6 +29,7 @@ test('mobile thumbnail actions retain availability, state, and handlers', () => 
   vm.runInNewContext(source.slice(start, end) + '\nglobalThis.actions = mobileThumbnailActions', context)
   assert.equal(context.actions.value.length, 3)
   assert.equal(context.actions.value[0].label, 'Context Menu.Open in a Background Tab')
+  assert.deepEqual(Array.from(context.actions.value, action => action.shortLabel), ['Context Menu.Background Tab', 'User Playlists.Save', 'Favorites'])
   context.actions.value.forEach(action => action.run())
   assert.equal(context.mobilePlaylistPickerOpen.value, true)
   assert.deepEqual(calls, ['openBackgroundTab', 'bookmark'])

@@ -303,45 +303,42 @@
               >{{ mobileContextMenuTitle }}</strong>
             </div>
             <div
-              v-if="mobileContextQuickActions.length"
-              class="mobileLinkQuickActions"
+              v-if="mobileContextQuickActionGroups.length"
+              class="mobileLinkQuickActionGroups"
             >
-              <button
-                v-for="action in mobileContextQuickActions"
-                :key="action.label"
-                type="button"
-                role="menuitem"
-                :title="action.label"
-                :aria-label="action.label"
-                :disabled="action.enabled === false"
-                @click="runMobileContextAction(action)"
+              <div
+                v-for="group in mobileContextQuickActionGroups"
+                :key="group.className"
+                class="mobileLinkQuickActions"
+                :class="group.className"
               >
-                <FtIcon
-                  :icon="action.icon"
-                  aria-hidden="true"
-                />
-              </button>
-            </div>
-            <div
-              v-if="mobileContextThumbnailActions.length"
-              class="mobileLinkQuickActions mobileThumbnailActionRow"
-            >
-              <button
-                v-for="action in mobileContextThumbnailActions"
-                :key="action.label"
-                type="button"
-                :role="action.pressed === undefined ? 'menuitem' : 'menuitemcheckbox'"
-                :title="action.label"
-                :aria-label="action.label"
-                :aria-checked="action.pressed"
-                :disabled="action.enabled === false"
-                @click="runMobileContextAction(action)"
-              >
-                <FtIcon
-                  :icon="action.icon"
-                  aria-hidden="true"
-                />
-              </button>
+                <div
+                  v-for="(row, rowIndex) in group.rows"
+                  :key="rowIndex"
+                  class="mobileLinkQuickActionRow"
+                >
+                  <button
+                    v-for="action in row"
+                    :key="action.label"
+                    type="button"
+                    :role="action.pressed === undefined ? 'menuitem' : 'menuitemcheckbox'"
+                    :aria-label="action.label"
+                    :aria-checked="action.pressed"
+                    :disabled="action.enabled === false"
+                    @click="runMobileContextAction(action)"
+                  >
+                    <FtIcon
+                      class="mobileLinkQuickActionIcon"
+                      :icon="action.icon"
+                      aria-hidden="true"
+                    />
+                    <span
+                      class="mobileLinkQuickActionLabel"
+                      aria-hidden="true"
+                    >{{ action.shortLabel ?? action.label }}</span>
+                  </button>
+                </div>
+              </div>
             </div>
             <div
               ref="mobileLinkActionsScrollRef"
@@ -1156,6 +1153,15 @@ const mobileContextQuickActions = computed(() => mobileContextMenuItems.value.fi
 const mobileContextThumbnailActions = computed(() => mobileContextMenuStack.value.length === 1
   ? unref(mobileContextActions.value?.thumbnailActions) ?? []
   : [])
+const MOBILE_QUICK_ACTION_COLUMNS = 4
+function balanceQuickActionRows(actions) {
+  const columns = Math.ceil(actions.length / Math.ceil(actions.length / MOBILE_QUICK_ACTION_COLUMNS))
+  return Array.from({ length: Math.ceil(actions.length / columns) }, (_, row) => actions.slice(row * columns, (row + 1) * columns))
+}
+const mobileContextQuickActionGroups = computed(() => [
+  { className: 'mobileLinkShortcutRow', actions: mobileContextQuickActions.value },
+  { className: 'mobileThumbnailActionRow', actions: mobileContextThumbnailActions.value }
+].filter(group => group.actions.length).map(group => ({ className: group.className, rows: balanceQuickActionRows(group.actions) })))
 const mobileContextMenuRows = computed(() => {
   const rows = mobileContextMenuItems.value.filter(action => !action.quickAction)
   return collapseSeparators(rows)

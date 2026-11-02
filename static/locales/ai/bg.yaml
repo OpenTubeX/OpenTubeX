@@ -242,6 +242,9 @@ User Playlists:
   Restore Default Thumbnail: "Възстановяване на стандартната миниатюра"
   AddVideoPrompt:
     And N more videos: 'и още {count} видеоклип | и още {count} видеоклипа'
+  Move Up: Нагоре
+  Move Down: Надолу
+  Remove: Премахни
 History:
   From Date: 'От'
   To Date: 'До'
@@ -1953,6 +1956,7 @@ Context Menu:
   Search With: Търсене с {engine}
   Search With Multiple: Търсене с...
   Selection Too Long: Избраният текст е твърде дълъг за търсене (> {count} знака)
+  Background Tab: Фонов раздел
 Tab Organizer:
   Tab History: "История на раздела"
   Current Page: "Текуща страница"

@@ -3180,6 +3180,11 @@ a:visited {
     --button-foreground: var(--md-sys-color-primary);
   }
 
+  .mobileLinkQuickActions {
+    --quick-action-container: var(--md-sys-color-secondary-container);
+    --quick-action-foreground: var(--md-sys-color-on-secondary-container);
+  }
+
 
 
   /* Off switches are identified by their outline; the track stays tonal. */

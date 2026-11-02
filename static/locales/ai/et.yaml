@@ -239,6 +239,9 @@ User Playlists:
   Restore Default Thumbnail: "Taasta vaikimisi pisipilt"
   AddVideoPrompt:
     And N more videos: 'ja veel {count} video | ja veel {count} videot'
+  Move Up: Üles
+  Move Down: Alla
+  Remove: Eemalda
 History:
   From Date: 'Alates'
   To Date: 'Kuni'
@@ -1930,6 +1933,7 @@ Context Menu:
   Search With: Otsi otsingumootoriga {engine}
   Search With Multiple: Otsi otsingumootoriga...
   Selection Too Long: Valik on otsimiseks liiga pikk (> {count} märki)
+  Background Tab: Taustal vaheleht
 Tab Organizer:
   Tab History: "Vahekaardi ajalugu"
   Current Page: "Praegune leht"

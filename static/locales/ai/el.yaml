@@ -240,6 +240,9 @@ User Playlists:
   Restore Default Thumbnail: "Επαναφορά προεπιλεγμένης μικρογραφίας"
   AddVideoPrompt:
     And N more videos: 'και {count} ακόμη βίντεο | και {count} ακόμη βίντεο'
+  Move Up: Πάνω
+  Move Down: Κάτω
+  Remove: Αφαίρεση
 History:
   From Date: 'Από'
   To Date: 'Έως'
@@ -1955,6 +1958,7 @@ Context Menu:
   Search With: Αναζήτηση με {engine}
   Search With Multiple: Αναζήτηση με...
   Selection Too Long: Η επιλογή είναι πολύ μεγάλη για αναζήτηση (> {count} χαρακτήρες)
+  Background Tab: Καρτέλα παρασκηνίου
 Tab Organizer:
   Tab History: "Ιστορικό καρτέλας"
   Current Page: "Τρέχουσα σελίδα"

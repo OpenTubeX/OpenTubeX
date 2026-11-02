@@ -263,6 +263,9 @@ User Playlists:
     And N more videos: 'و {count} ویدیوی دیگر | و {count} ویدیوی دیگر'
   Playlist Thumbnail: "تصویر بندانگشتی فهرست پخش"
   Restore Default Thumbnail: "بازیابی تصویر بندانگشتی پیش‌فرض"
+  Move Up: بالا
+  Move Down: پایین
+  Remove: پاک کردن
 History:
   From Date: 'از'
   To Date: 'تا'
@@ -2018,6 +2021,7 @@ Context Menu:
   Search With: جست‌وجو با {engine}
   Search With Multiple: جست‌وجو با...
   Selection Too Long: متن انتخاب‌شده برای جست‌وجو بیش از حد بلند است (> {count} نویسه)
+  Background Tab: زبانه پس‌زمینه
 Tab Organizer:
   Tab History: "تاریخچهٔ زبانه"
   Current Page: "صفحهٔ کنونی"

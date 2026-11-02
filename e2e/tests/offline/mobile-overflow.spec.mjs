@@ -27,7 +27,7 @@ test.describe('mobile overflow', { tag: '@scale' }, () => {
     }
   })
 
-  test('long mobile menu titles wrap without widening quick actions', async ({ page }) => {
+  test('long mobile menu titles wrap without widening or truncating quick actions', async ({ page }) => {
     await goTo(page, 'history')
     for (const viewport of [{ width: 320, height: 812 }, { width: 461, height: 1026 }, { width: 812, height: 375 }]) {
       await page.setViewportSize(viewport)
@@ -40,14 +40,16 @@ test.describe('mobile overflow', { tag: '@scale' }, () => {
       await expect.poll(() => menu.evaluate(element => {
         const bounds = element.getBoundingClientRect()
         const heading = element.querySelector('strong')
-        const rows = [...element.querySelectorAll('.mobileLinkQuickActions')].map(row =>
-          [...row.querySelectorAll('button')].map(button => button.getBoundingClientRect()))
+        const rows = [...element.querySelectorAll('.mobileLinkQuickActions')].map(row => [...row.querySelectorAll('button')])
         return bounds.left >= 0 && bounds.right <= innerWidth + 1 &&
           heading.scrollWidth <= heading.clientWidth + 1 &&
           heading.clientHeight > parseFloat(getComputedStyle(heading).fontSize) * 2 &&
-          rows.length === 2 && rows.every(buttons => buttons.length >= 2 &&
-            buttons.every(button => button.left >= bounds.left && button.right <= bounds.right &&
-              Math.abs(button.width - buttons[0].width) < 1))
+          rows.length === 2 && rows.every(buttons => buttons.length >= 2 && buttons.every(button => {
+          const buttonBounds = button.getBoundingClientRect()
+          const label = button.querySelector('.mobileLinkQuickActionLabel')
+          return buttonBounds.left >= bounds.left && buttonBounds.right <= bounds.right &&
+              label.scrollWidth <= label.clientWidth + 1
+        }))
       })).toBe(true)
       await page.keyboard.press('Escape')
       await expect(menu).toHaveCount(0)

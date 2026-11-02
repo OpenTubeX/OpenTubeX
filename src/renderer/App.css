@@ -226,27 +226,94 @@
   inline-size: 100%;
 }
 
-.mobileLinkQuickActions {
+.mobileLinkActions button:is(:active, :focus-visible) {
+  background-color: var(--side-nav-hover-color);
+}
+
+.mobileLinkQuickActionGroups {
   display: grid;
-  grid-auto-flow: column;
-  grid-auto-columns: minmax(0, 1fr);
+  grid-template-columns: minmax(0, 1fr);
   flex-shrink: 0;
   gap: 8px;
-  padding-block: 4px 12px;
+  padding-block: 4px 16px;
   border-block-end: 1px solid var(--border-color);
   margin-block-end: 4px;
 }
 
-.mobileLinkQuickActions button {
+/* Material 3 connected button groups: tonal buttons with rounded outer ends. */
+.mobileLinkQuickActions {
+  --quick-action-container: color-mix(in srgb, var(--primary-color) 16%, var(--card-bg-color));
+  --quick-action-foreground: var(--primary-text-color);
+  --quick-action-outer-radius: calc(28px * var(--ui-roundness));
+  --quick-action-inner-radius: calc(8px * var(--ui-roundness));
+
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 8px;
+}
+
+.mobileLinkQuickActionRow {
   display: flex;
+  gap: 2px;
+}
+
+.mobileLinkActions .mobileLinkQuickActionRow > button {
+  display: flex;
+  flex: 1 1 auto;
+  flex-direction: column;
   align-items: center;
   justify-content: center;
-  background-color: var(--side-nav-hover-color);
+  gap: 2px;
+  min-inline-size: 0;
+  min-block-size: 56px;
+  padding-block: 8px;
+  padding-inline: 4px;
+  color: var(--quick-action-foreground);
+  background-color: var(--quick-action-container);
+  border-radius: var(--quick-action-inner-radius);
+  transition: background-color 150ms ease;
+}
+
+.mobileLinkQuickActionRow > button:first-child {
+  border-start-start-radius: var(--quick-action-outer-radius);
+  border-end-start-radius: var(--quick-action-outer-radius);
+}
+
+.mobileLinkQuickActionRow > button:last-child {
+  border-start-end-radius: var(--quick-action-outer-radius);
+  border-end-end-radius: var(--quick-action-outer-radius);
+}
+
+.mobileLinkQuickActionRow > button[aria-checked='true'] {
+  --quick-action-container: var(--selected-container-color);
+  --quick-action-foreground: var(--on-selected-container-color);
+}
+
+.mobileLinkActions .mobileLinkQuickActionRow > button:not(:disabled):hover {
+  background-color: color-mix(in srgb, var(--quick-action-foreground) 8%, var(--quick-action-container));
+}
+
+.mobileLinkActions .mobileLinkQuickActionRow > button:not(:disabled):active {
+  background-color: color-mix(in srgb, var(--quick-action-foreground) 12%, var(--quick-action-container));
+}
+
+.mobileLinkQuickActionIcon {
+  flex-shrink: 0;
   font-size: 20px;
 }
 
-.mobileLinkActions button:is(:active, :focus-visible) {
-  background-color: var(--side-nav-hover-color);
+/* Labels stay on one line unless the row is too narrow, then wrap instead of truncating. */
+.mobileLinkQuickActionLabel {
+  display: -webkit-box;
+  max-inline-size: 100%;
+  overflow: hidden;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+  font-size: 14px;
+  font-weight: 500;
+  line-height: 20px;
+  overflow-wrap: break-word;
+  text-wrap: balance;
 }
 
 .mobileLinkActionsSeparator {
@@ -1096,17 +1163,6 @@
 .app.capacitorTabs :deep(.ftVideoPlayer[data-inline-mini-drag] .shaka-controls-container) {
   opacity: 0;
   pointer-events: none;
-}
-
-.mobileThumbnailActionRow {
-  grid-auto-flow: row;
-  grid-template-columns: repeat(auto-fit, minmax(48px, 1fr));
-}
-
-.mobileThumbnailActionRow button[aria-checked='true'] {
-  color: var(--accent-color);
-  background-color: color-mix(in srgb, var(--accent-color) 16%, var(--card-bg-color));
-  box-shadow: inset 0 0 0 2px currentcolor;
 }
 
 

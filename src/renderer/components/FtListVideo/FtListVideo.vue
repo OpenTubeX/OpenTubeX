@@ -1370,13 +1370,21 @@ function getInvidiousChannelUrl() {
   return `${currentInvidiousInstanceUrl.value}/channel/${channelId.value}`
 }
 
+const quickActionShortLabels = computed(() => ({
+  openNewTab: t('New Tab'),
+  openNewWindow: t('New Window'),
+  playNext: t('Video.Play Next'),
+  addToQueue: t('Video.Queue')
+}))
+
 const videoContextMenuItems = computed(() => {
   const items = videoMenuOptions.value.map(option => option.type === 'divider'
     ? { type: 'separator' }
     : {
         label: option.label,
         actionId: option.value,
-        quickAction: ['openNewTab', 'openNewWindow', 'playNext', 'addToQueue'].includes(option.value),
+        quickAction: option.value in quickActionShortLabels.value,
+        shortLabel: quickActionShortLabels.value[option.value],
         icon: option.icon,
         enabled: !option.disabled,
         run: () => handleOptionsClick(option.value)
@@ -1448,6 +1456,7 @@ const mobileThumbnailActions = computed(() => {
   if ((process.env.IS_ELECTRON || process.env.IS_CAPACITOR) && store.getters.getTabsEnabled) {
     actions.push({
       label: t('Context Menu.Open in a Background Tab'),
+      shortLabel: t('Context Menu.Background Tab'),
       icon: ['fas', 'clone'],
       run: () => handleOptionsClick('openBackgroundTab')
     })
@@ -1455,6 +1464,7 @@ const mobileThumbnailActions = computed(() => {
   if (showPlaylists.value) {
     actions.push({
       label: t('User Playlists.Add to Playlist'),
+      shortLabel: t('User Playlists.Save'),
       actionId: 'addToPlaylist',
       icon: isInAnyPlaylist.value ? ['fac', 'playlist-check'] : ['fac', 'playlist-add'],
       run: () => { mobilePlaylistPickerOpen.value = true }
@@ -1463,6 +1473,7 @@ const mobileThumbnailActions = computed(() => {
   if (isQuickBookmarkEnabled.value && props.quickBookmarkButtonEnabled) {
     actions.push({
       label: quickBookmarkIconText.value,
+      shortLabel: quickBookmarkPlaylist.value.playlistName,
       actionId: 'quickBookmark',
       icon: quickBookmarkIcon.value,
       pressed: isInQuickBookmarkPlaylist.value,
@@ -1472,6 +1483,7 @@ const mobileThumbnailActions = computed(() => {
   if (inUserPlaylist.value && props.canMoveVideoUp) {
     actions.push({
       label: t('User Playlists.Move Video Up'),
+      shortLabel: t('User Playlists.Move Up'),
       icon: verticalMoveControls.value ? ['fas', 'arrow-up'] : ['fas', 'arrow-left'],
       run: moveVideoUp
     })
@@ -1479,12 +1491,13 @@ const mobileThumbnailActions = computed(() => {
   if (inUserPlaylist.value && props.canMoveVideoDown) {
     actions.push({
       label: t('User Playlists.Move Video Down'),
+      shortLabel: t('User Playlists.Move Down'),
       icon: verticalMoveControls.value ? ['fas', 'arrow-down'] : ['fas', 'arrow-right'],
       run: moveVideoDown
     })
   }
   if (inUserPlaylist.value && props.canRemoveFromPlaylist) {
-    actions.push({ label: t('User Playlists.Remove from Playlist'), actionId: 'removeFromPlaylist', icon: ['fas', 'trash'], run: removeFromPlaylist })
+    actions.push({ label: t('User Playlists.Remove from Playlist'), shortLabel: t('User Playlists.Remove'), actionId: 'removeFromPlaylist', icon: ['fas', 'trash'], run: removeFromPlaylist })
   }
   if (canToggleLiveReminder.value) {
     actions.push({

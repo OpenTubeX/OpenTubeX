@@ -114,6 +114,9 @@ User Playlists:
   Restore Default Thumbnail: "Przywróć domyślną miniaturę"
   AddVideoPrompt:
     And N more videos: 'i {count} inny film | i {count} inne filmy | i {count} innych filmów'
+  Move Up: Wyżej
+  Move Down: Niżej
+  Remove: Usuń
 Settings:
   Diagnostics:
     Diagnostics: Diagnostyka
@@ -1193,6 +1196,7 @@ Context Menu:
   Search With: Wyszukaj za pomocą {engine}
   Search With Multiple: Wyszukaj za pomocą...
   Unload Tabs Failed: "Nie udało się zwolnić wybranych kart z pamięci."
+  Background Tab: Karta w tle
 Tab Organizer:
   Tab History: "Historia karty"
   Current Page: "Bieżąca strona"

@@ -242,6 +242,9 @@ User Playlists:
   Restore Default Thumbnail: "Vrati zadanu sličicu"
   AddVideoPrompt:
     And N more videos: 'i još {count} videozapis | i još {count} videozapisa | i još {count} videozapisa'
+  Move Up: Gore
+  Move Down: Dolje
+  Remove: Ukloni
 History:
   From Date: 'Od'
   To Date: 'Do'
@@ -1957,6 +1960,7 @@ Context Menu:
   Search With: Pretraži s pomoću tražilice {engine}
   Search With Multiple: Pretraži s pomoću…
   Selection Too Long: Odabir je predug za pretraživanje (> {count} znakova)
+  Background Tab: Kartica u pozadini
 Tab Organizer:
   Tab History: "Povijest kartice"
   Current Page: "Trenutna stranica"

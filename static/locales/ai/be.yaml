@@ -260,6 +260,9 @@ User Playlists:
     And N more videos: 'і яшчэ {count} відэа | і яшчэ {count} відэа | і яшчэ {count} відэа'
   Playlist Thumbnail: "Мініяцюра плэйліста"
   Restore Default Thumbnail: "Аднавіць стандартную мініяцюру"
+  Move Up: Уверх
+  Move Down: Уніз
+  Remove: Выдаліць
 History:
   From Date: 'Ад'
   To Date: 'Да'
@@ -2024,6 +2027,7 @@ Context Menu:
   Search With: Шукаць праз {engine}
   Search With Multiple: Шукаць праз...
   Selection Too Long: Вылучаны тэкст задоўгі для пошуку (> {count} знакаў)
+  Background Tab: Фонавая ўкладка
 Tab Organizer:
   Tab History: "Гісторыя ўкладкі"
   Current Page: "Бягучая старонка"

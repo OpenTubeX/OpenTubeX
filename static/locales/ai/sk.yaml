@@ -239,6 +239,9 @@ User Playlists:
   Restore Default Thumbnail: "Obnoviť predvolenú miniatúru"
   AddVideoPrompt:
     And N more videos: 'a {count} ďalšie video | a {count} ďalšie videá | a {count} ďalších videí'
+  Move Up: Nahor
+  Move Down: Nadol
+  Remove: Odstrániť
 History:
   From Date: 'Od'
   To Date: 'Do'
@@ -1928,6 +1931,7 @@ Context Menu:
   Search With: Vyhľadať cez {engine}
   Search With Multiple: Vyhľadať cez…
   Selection Too Long: Označený text je príliš dlhý na vyhľadanie (> {count} znakov)
+  Background Tab: Karta na pozadí
 Tab Organizer:
   Tab History: "História karty"
   Current Page: "Aktuálna stránka"

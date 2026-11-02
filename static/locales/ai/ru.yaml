@@ -212,6 +212,9 @@ User Playlists:
   Restore Default Thumbnail: "Восстановить миниатюру по умолчанию"
   AddVideoPrompt:
     And N more videos: 'и ещё {count} видео | и ещё {count} видео | и ещё {count} видео'
+  Move Up: Вверх
+  Move Down: Вниз
+  Remove: Удалить
 History:
   From Date: 'С'
   To Date: 'По'
@@ -1902,6 +1905,7 @@ Context Menu:
   Search With: Искать с помощью {engine}
   Search With Multiple: Искать с помощью...
   Selection Too Long: Выделенный текст слишком длинный для поиска (> {count} символов)
+  Background Tab: Фоновая вкладка
 Tab Organizer:
   Tab History: "История вкладки"
   Current Page: "Текущая страница"

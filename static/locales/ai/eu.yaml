@@ -239,6 +239,9 @@ User Playlists:
   Restore Default Thumbnail: "Leheneratu miniatura lehenetsia"
   AddVideoPrompt:
     And N more videos: 'eta beste bideo {count} | eta beste {count} bideo'
+  Move Up: Gora
+  Move Down: Behera
+  Remove: Kendu
 History:
   From Date: 'Hasiera'
   To Date: 'Amaiera'
@@ -1936,6 +1939,7 @@ Context Menu:
   Search With: Bilatu {engine} erabiliz
   Search With Multiple: Bilatu honekin...
   Selection Too Long: Hautapena luzeegia da bilatzeko (> {count} karaktere)
+  Background Tab: Atzeko planoko fitxa
 Tab Organizer:
   Tab History: "Fitxaren historia"
   Current Page: "Uneko orria"

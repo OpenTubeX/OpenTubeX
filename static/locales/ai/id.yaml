@@ -240,6 +240,9 @@ User Playlists:
   Restore Default Thumbnail: "Pulihkan gambar mini bawaan"
   AddVideoPrompt:
     And N more videos: 'dan {count} video lainnya'
+  Move Up: Ke atas
+  Move Down: Ke bawah
+  Remove: Hapus
 History:
   From Date: 'Dari'
   To Date: 'Sampai'
@@ -1947,6 +1950,7 @@ Context Menu:
   Search With: Cari dengan {engine}
   Search With Multiple: Cari dengan...
   Selection Too Long: Pilihan terlalu panjang untuk dicari (> {count} karakter)
+  Background Tab: Tab latar belakang
 Tab Organizer:
   Tab History: "Riwayat tab"
   Current Page: "Halaman saat ini"

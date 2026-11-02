@@ -365,6 +365,9 @@ User Playlists:
       There was an issue with creating the playlist.: Pri ustvarjanju seznama predvajanja je prišlo do težave.
   Playlist Thumbnail: "Sličica seznama predvajanja"
   Restore Default Thumbnail: "Obnovi privzeto sličico"
+  Move Up: Navzgor
+  Move Down: Navzdol
+  Remove: Odstrani
 History:
   From Date: 'Od'
   To Date: 'Do'
@@ -2416,6 +2419,7 @@ Context Menu:
   Search With: Poišči z iskalnikom {engine}
   Search With Multiple: Poišči z …
   Selection Too Long: Izbrano besedilo je predolgo za iskanje (> {count} znakov)
+  Background Tab: Zavihek v ozadju
 Tab Organizer:
   Tab History: "Zgodovina zavihka"
   Current Page: "Trenutna stran"

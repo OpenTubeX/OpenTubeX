@@ -241,6 +241,9 @@ User Playlists:
   Restore Default Thumbnail: "Standart miniatürü bərpa et"
   AddVideoPrompt:
     And N more videos: 'və daha {count} video | və daha {count} video'
+  Move Up: Yuxarı köçür
+  Move Down: Aşağı köçür
+  Remove: Sil
 History:
   From Date: 'Başlanğıc'
   To Date: 'Son'
@@ -1938,6 +1941,7 @@ Context Menu:
   Search With: "{engine} ilə axtar"
   Search With Multiple: Bununla axtar...
   Selection Too Long: Seçim axtarış üçün çox uzundur (> {count} simvol)
+  Background Tab: Arxa plan tabı
 Tab Organizer:
   Tab History: "Vərəqçə tarixçəsi"
   Current Page: "Cari səhifə"

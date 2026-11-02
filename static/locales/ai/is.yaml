@@ -239,6 +239,9 @@ User Playlists:
   Restore Default Thumbnail: "Endurheimta sjálfgefna smámynd"
   AddVideoPrompt:
     And N more videos: 'og {count} myndskeið til viðbótar | og {count} myndskeið til viðbótar'
+  Move Up: Upp
+  Move Down: Niður
+  Remove: Fjarlægja
 History:
   From Date: 'Frá'
   To Date: 'Til'
@@ -1943,6 +1946,7 @@ Context Menu:
   Search With: Leita með {engine}
   Search With Multiple: Leita með...
   Selection Too Long: Valið er of langt fyrir leit (> {count} stafir)
+  Background Tab: Bakgrunnsflipi
 Tab Organizer:
   Tab History: "Ferill flipa"
   Current Page: "Núverandi síða"

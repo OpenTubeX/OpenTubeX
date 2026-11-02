@@ -393,6 +393,9 @@ User Playlists:
       There was an issue with creating the playlist.: Daar was ’n probleem met die skep van die afspeellys.
   Playlist Thumbnail: Afspeellysduimnael
   Restore Default Thumbnail: Herstel versteksduimnael
+  Move Up: Skuif op
+  Move Down: Skuif af
+  Remove: Verwyder
 History:
   From Date: Van
   To Date: Tot
@@ -2178,6 +2181,7 @@ Context Menu:
   Search With: Soek met {engine}
   Search With Multiple: Soek met...
   Selection Too Long: Seleksie is te lank vir soektog (> {count} karakters)
+  Background Tab: Agtergrondoortjie
 Tab Organizer:
   Tab History: Oortjiegeskiedenis
   Current Page: Huidige blad
