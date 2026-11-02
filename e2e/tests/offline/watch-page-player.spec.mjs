@@ -7,6 +7,7 @@ import {
   expect
 } from '../../helpers/app.mjs'
 import { activeTab, findWatchComponent, openMockedVideo, waitForPlayback } from '../../helpers/player.mjs'
+import { mockCapacitorPhoneLayout } from '../../helpers/mobile.mjs'
 import { mockPlayableWatchPage, watchViewHandle } from '../../helpers/watch.mjs'
 import { POST_LIVE_AUDIO_URL, routePostLiveMedia } from '../../helpers/media.mjs'
 import { WATCH_PAGE_SEED, mockMusicMediaType } from '../../helpers/watch-page.mjs'
@@ -1665,4 +1666,57 @@ test('mobile skip buttons flank the centered play button', async ({ app, page })
   })).toBeCloseTo(playCenter, 1)
 
   await view.dispose()
+})
+
+test('mobile skip buttons switch videos when tapped', async ({ app, page }) => {
+  // Shaka only listens for touches on touch screens, and its controls
+  // container cancels the click of a tap that reaches it.
+  const session = await page.context().newCDPSession(page)
+  await session.send('Emulation.setTouchEmulationEnabled', { enabled: true, maxTouchPoints: 5 })
+  await mockPlayableWatchPage(app, page)
+  await openMockedVideo(page)
+  await setWindowSize(app, page, { width: 450, height: 850 })
+  await mockCapacitorPhoneLayout(page)
+
+  const view = await watchViewHandle(page)
+  await view.evaluate(async component => {
+    component.$store.commit('addPlaylist', {
+      _id: 'ft-playlist--mobile-skip-tap-test',
+      playlistName: 'Mobile skip tap test',
+      videos: [
+        { videoId: 'dQw4w9WgXcQ', playlistItemId: 'first', title: 'First' },
+        { videoId: 'jNQXAC9IVRw', playlistItemId: 'middle', title: 'Middle' },
+        { videoId: '9bZkp7q19f0', playlistItemId: 'last', title: 'Last' },
+      ]
+    })
+    await component.$store.dispatch('updateUserPlaylistSortOrder', 'custom')
+    await component.tabRouter.push({
+      path: '/watch/jNQXAC9IVRw',
+      query: { playlistId: 'ft-playlist--mobile-skip-tap-test', playlistType: 'user', playlistItemId: 'middle' }
+    })
+  })
+
+  const player = page.locator(`${activeTab} .ftVideoPlayer`)
+  const controls = player.locator('.shaka-controls-container')
+  const tap = async (button) => {
+    // A paused video keeps the controls, and with them the buttons, tappable.
+    await player.locator('video').evaluate(video => video.pause())
+    await expect(controls).toHaveAttribute('shown', 'true')
+    const bounds = await button.boundingBox()
+    const point = { x: bounds.x + bounds.width / 2, y: bounds.y + bounds.height / 2, id: 0 }
+    await session.send('Input.dispatchTouchEvent', { type: 'touchStart', touchPoints: [point] })
+    await session.send('Input.dispatchTouchEvent', { type: 'touchEnd', touchPoints: [] })
+  }
+
+  await expect.poll(() => view.evaluate(component => component.canSkipToPreviousVideo && component.canSkipToNextVideo)).toBe(true)
+  await waitForPlayback(page)
+  await tap(player.locator('.shaka-big-buttons-container > .skip-next-button'))
+  await expect(page).toHaveURL(/#\/watch\/9bZkp7q19f0\?.*playlistItemId=last/)
+
+  await expect.poll(() => view.evaluate(component => component.canSkipToPreviousVideo)).toBe(true)
+  await tap(player.locator('.shaka-big-buttons-container > .skip-previous-button'))
+  await expect(page).toHaveURL(/#\/watch\/jNQXAC9IVRw\?.*playlistItemId=middle/)
+
+  await view.dispose()
+  await session.detach()
 })
