@@ -34,9 +34,9 @@ test('keeps a custom order and adds missing controls after their default neighbo
   assert.deepEqual([...order].sort(), getDefaultPlayerMenuControls(false).sort())
 })
 
-test('hides only known controls without a setting of their own', () => {
+test('hides only known controls, including ones with a setting of their own', () => {
   assert.deepEqual(normalizeHiddenPlayerMenuControls(null), [])
-  assert.deepEqual(normalizeHiddenPlayerMenuControls(['ambientMode', 'unknown', 'lightsOff', 'ambientMode', 'sleepTimer']), ['ambientMode', 'sleepTimer'])
+  assert.deepEqual(normalizeHiddenPlayerMenuControls(['ambientMode', 'unknown', 'lightsOff', 'ambientMode', 'sleepTimer']), ['ambientMode', 'lightsOff', 'sleepTimer'])
 })
 
 test('controls on the control bar are never hidden', () => {

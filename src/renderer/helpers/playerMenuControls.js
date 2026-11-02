@@ -1,6 +1,6 @@
-// Controls of the player menu. Controls with a setting key keep their own
-// setting for whether the menu shows them, which also turns the feature on or
-// off. Control bar buttons that are not on the control bar join the menu.
+// Controls of the player menu. Controls with a setting key only exist while
+// that setting turns their feature on. Control bar buttons that are not on the
+// control bar join the menu.
 export const PLAYER_MENU_CONTROL_DEFINITIONS = Object.freeze([
   { id: 'audioTracks', labelKey: 'Video.Player.Audio Tracks', icon: ['fas', 'podcast'] },
   { id: 'captions', labelKey: 'Settings.Player Settings.Caption Appearance.Captions', icon: ['fas', 'closed-captioning'] },
@@ -72,12 +72,12 @@ export function normalizePlayerMenuControls(value, mobile = IS_MOBILE) {
 }
 
 /**
- * Removes unknown and duplicate controls and the ones that have their own setting.
+ * Removes unknown and duplicate controls.
  * @param {unknown} value
  */
 export function normalizeHiddenPlayerMenuControls(value) {
   if (!Array.isArray(value)) return []
-  const ids = new Set(PLAYER_MENU_CONTROL_DEFINITIONS.filter(control => !control.settingKey).map(({ id }) => id))
+  const ids = new Set(PLAYER_MENU_CONTROL_DEFINITIONS.map(({ id }) => id))
   return [...new Set(value.filter(id => ids.has(id)))]
 }
 

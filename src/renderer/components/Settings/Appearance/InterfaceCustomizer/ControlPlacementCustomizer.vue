@@ -133,8 +133,7 @@ const { t } = useI18n()
 
 const barDefinitions = new Map(getControlBarButtonDefinitions().map(control => [control.id, control]))
 const menuDefinitions = new Map(getPlayerMenuControlDefinitions().map(control => [control.id, control]))
-const settingKeys = [...menuDefinitions.values()].map(control => control.settingKey).filter(Boolean)
-const placementKeys = ['controlBarButtons', 'playerMenuControls', 'hiddenPlayerMenuControls', ...settingKeys]
+const placementKeys = ['controlBarButtons', 'playerMenuControls', 'hiddenPlayerMenuControls']
 
 const barButtons = computed(() => store.getters.getControlBarButtons)
 const menuOrder = computed(() => store.getters.getPlayerMenuControls)
@@ -144,8 +143,7 @@ const hiddenControls = computed(() => normalizeHiddenPlayerMenuControls(store.st
 
 /** @param {string} id */
 function isShownInMenu(id) {
-  const { settingKey, inverted } = menuDefinitions.get(id)
-  return settingKey ? store.state.settings[settingKey] !== !!inverted : !hiddenControls.value.includes(id)
+  return !hiddenControls.value.includes(id)
 }
 
 /**
@@ -169,24 +167,27 @@ function createItem(id, placement) {
 }
 
 /**
- * A control whose own setting turns it off is hidden, even on the control bar.
- * @param {string} id
- */
-function isOnBar(id) {
-  return barButtons.value.includes(id) && (!menuDefinitions.get(id)?.settingKey || isShownInMenu(id))
-}
-
-/**
- * Voice-over translation only has a menu entry while it is turned on.
+ * The editor only places controls. Controls of features that are turned off
+ * in the player settings have nothing to place, so they are left out.
  * @param {string} id
  */
 function isAvailable(id) {
-  return menuDefinitions.has(id) && (id !== 'voiceOverTranslation' || store.getters.getUseVoiceOverTranslation)
+  const definition = menuDefinitions.get(id)
+  if (definition?.settingKey) return store.state.settings[definition.settingKey] !== !!definition.inverted
+  return id !== 'voiceOverTranslation' || store.getters.getUseVoiceOverTranslation
 }
 
-const menuControls = computed(() => menuOrder.value.filter(id => (
-  isAvailable(id) && !isOnBar(id) && isShownInMenu(id)
-)))
+/** @param {string} id */
+function isOnBar(id) {
+  return barButtons.value.includes(id) && isAvailable(id)
+}
+
+/** @param {string} id */
+function isInMenu(id) {
+  return menuDefinitions.has(id) && isAvailable(id) && !barButtons.value.includes(id)
+}
+
+const menuControls = computed(() => menuOrder.value.filter(id => isInMenu(id) && isShownInMenu(id)))
 
 const reorderStatus = ref('')
 
@@ -256,7 +257,7 @@ const sections = computed(() => {
       lists: [{
         id: 'unordered',
         items: [
-          ...menuOrder.value.filter(id => isAvailable(id) && !isOnBar(id) && !isShownInMenu(id)),
+          ...menuOrder.value.filter(id => isInMenu(id) && !isShownInMenu(id)),
           ...[...barDefinitions.keys()].filter(id => !menuDefinitions.has(id) && !barButtons.value.includes(id)),
         ].map(id => createItem(id, 'hidden')),
         reorder: null,
@@ -270,10 +271,6 @@ const sections = computed(() => {
  * @param {boolean} shown
  */
 function setShownInMenu(id, shown) {
-  const { settingKey, inverted } = menuDefinitions.get(id)
-  if (settingKey) {
-    return store.dispatch(`update${settingKey[0].toUpperCase()}${settingKey.slice(1)}`, shown !== !!inverted)
-  }
   const hidden = hiddenControls.value.filter(hiddenId => hiddenId !== id)
   return store.dispatch('updateHiddenPlayerMenuControls', shown ? hidden : [...hidden, id])
 }

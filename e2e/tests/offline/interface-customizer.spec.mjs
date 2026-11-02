@@ -326,20 +326,25 @@ test.describe('interface customizer', () => {
     ))
     const getter = name => page.evaluate(name => window.$store.getters[name], name)
 
-    // Controls with their own setting start hidden and switch it when they move.
-    await expect(previewItem('lightsOff')).toHaveCount(0)
-    await hiddenRow('lightsOff').getByRole('button', { name: 'Move Lights Off to the player menu' }).click()
+    // Controls of features turned off in the player settings are left out, and
+    // placing a control never turns its feature on or off.
+    const anyRow = id => customizer.locator(`[data-control-bar-button-id="${id}"], [data-player-menu-control-id="${id}"], [data-hidden-control-id="${id}"]`)
+    await expect(anyRow('lightsOff')).toHaveCount(0)
+    await expect(anyRow('screenshot')).toHaveCount(0)
+    await page.evaluate(() => window.$store.dispatch('updateShowLightsOffToggle', true))
+    await expect(menuRow('lightsOff')).toBeVisible()
     await expect(previewItem('lightsOff')).toBeVisible()
-    await expect.poll(() => getter('getShowLightsOffToggle')).toBe(true)
     await menuRow('abRepeat').getByRole('button', { name: /^Hide / }).click()
     await expect(previewItem('abRepeat')).toHaveCount(0)
-    await expect.poll(() => getter('getDisableAbRepeat')).toBe(true)
+    await expect(hiddenRow('abRepeat')).toBeVisible()
+    await expect.poll(() => getter('getHiddenPlayerMenuControls')).toEqual(['abRepeat'])
+    expect(await getter('getDisableAbRepeat')).toBe(false)
 
     await expect(previewItem('ambientMode')).toBeVisible()
     await menuRow('ambientMode').getByRole('button', { name: 'Hide Ambient Mode' }).click()
     await expect(previewItem('ambientMode')).toHaveCount(0)
     await expect(hiddenRow('ambientMode')).toBeVisible()
-    await expect.poll(() => getter('getHiddenPlayerMenuControls')).toEqual(['ambientMode'])
+    await expect.poll(() => getter('getHiddenPlayerMenuControls')).toEqual(['abRepeat', 'ambientMode'])
 
     // A hidden control returns to the menu before it can join the control bar.
     await menuRow('quality').getByRole('button', { name: 'Hide Resolution' }).click()
@@ -349,12 +354,12 @@ test.describe('interface customizer', () => {
     await expect(preview.locator('.previewRightGroup [data-preview-control="quality"]')).toBeVisible()
     await expect(previewItem('quality')).toHaveCount(0)
     await expect(menuRow('quality')).toHaveCount(0)
-    await expect.poll(() => getter('getHiddenPlayerMenuControls')).toEqual(['ambientMode'])
+    await expect.poll(() => getter('getHiddenPlayerMenuControls')).toEqual(['abRepeat', 'ambientMode'])
     // A control that was hidden before it joined the control bar returns to the menu.
-    await page.evaluate(() => window.$store.dispatch('updateHiddenPlayerMenuControls', ['ambientMode', 'pictureInPicture']))
+    await page.evaluate(() => window.$store.dispatch('updateHiddenPlayerMenuControls', ['abRepeat', 'ambientMode', 'pictureInPicture']))
     await customizer.locator('[data-control-bar-button-id="pictureInPicture"]').getByRole('button', { name: 'Move Picture in Picture to the player menu' }).click()
     await expect(menuRow('pictureInPicture')).toBeVisible()
-    await expect.poll(() => getter('getHiddenPlayerMenuControls')).toEqual(['ambientMode'])
+    await expect.poll(() => getter('getHiddenPlayerMenuControls')).toEqual(['abRepeat', 'ambientMode'])
 
     // Features that are turned off have no menu entry to place.
     await expect(customizer.locator('[data-player-menu-control-id="voiceOverTranslation"], [data-hidden-control-id="voiceOverTranslation"]')).toHaveCount(0)
@@ -377,6 +382,18 @@ test.describe('interface customizer', () => {
     await expect.poll(() => preview.locator('[data-preview-overflow-item]').evaluateAll(elements => (
       elements.map(element => element.dataset.previewOverflowItem).filter(id => id !== 'captions')
     ))).toEqual(expected.filter(id => ['audioTracks', 'playbackRate', 'sleepTimer', 'musicVisualizer', 'lightsOff', 'videoZoom', 'loop', 'pictureInPicture'].includes(id)))
+
+    // Resetting restores the placement but leaves the features' own settings alone.
+    await customizer.getByRole('button', { name: 'Reset to defaults' }).click()
+    await expect(customizer.getByRole('button', { name: 'Reset to defaults' })).toBeDisabled()
+    await expect.poll(() => getter('getHiddenPlayerMenuControls')).toEqual([])
+    for (const id of ['ambientMode', 'quality', 'lightsOff', 'abRepeat']) await expect(menuRow(id)).toBeVisible()
+    expect(await getter('getShowLightsOffToggle')).toBe(true)
+
+    // Turning a feature off removes its control without moving it.
+    await page.evaluate(() => window.$store.dispatch('updateDisableAbRepeat', true))
+    await expect(anyRow('abRepeat')).toHaveCount(0)
+    expect(await getter('getHiddenPlayerMenuControls')).toEqual([])
   })
 
   test('opens the matching tab from settings search', async ({ page }) => {
