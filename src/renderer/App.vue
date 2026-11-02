@@ -2306,16 +2306,24 @@ useScrollClamp(useTemplateRef('changeLogScroller'), useTemplateRef('changeLogCon
 const DISMISSED_UPDATE_VERSION_STORAGE_KEY = 'opentubex-dismissed-update-version'
 /** @type {{ tagName: string, versionNumber: string } | null} */
 let availableUpdate = null
-let releaseNotesMarkdownPromise = null
+/** @type {Promise<(markdown: string) => string> | null} */
+let releaseNotesRendererPromise = null
 // Release notes can be labeled for some platforms, so the prompt hides notes for others.
 const releaseNotePlatform = process.env.IS_ELECTRON
   ? { darwin: 'macos', linux: 'linux', win32: 'windows' }[process.platform] ?? null
   : process.env.IS_CAPACITOR ? (process.env.IS_IOS ? 'ios' : 'android') : null
 
-function getReleaseNotesMarkdown() {
-  releaseNotesMarkdownPromise ??= import('./helpers/releaseNotesMarkdown')
-    .then(({ createReleaseNotesMarkdown }) => createReleaseNotesMarkdown())
-  return releaseNotesMarkdownPromise
+function getReleaseNotesRenderer() {
+  releaseNotesRendererPromise ??= import('./helpers/releaseNotesMarkdown')
+    .then(({ createReleaseNotesMarkdown, resolvePictureColorScheme }) => {
+      const markdown = createReleaseNotesMarkdown()
+      return (source) => {
+        // Show screenshots for the app theme, which may differ from the OS one.
+        const isDark = getComputedStyle(document.body).getPropertyValue('--native-color-scheme').trim() === 'dark'
+        return resolvePictureColorScheme(markdown.parse(source), isDark ? 'dark' : 'light')
+      }
+    })
+  return releaseNotesRendererPromise
 }
 
 /** @type {import('vue').ComputedRef<boolean>} */
@@ -2389,12 +2397,12 @@ async function checkForNewUpdates() {
       // Shorten pull request links to #1234
       .replaceAll(/https:\/\/github\.com\/OpenTubeX\/OpenTubeX\/pull\/(\d+)/g, '[#$1]($&)')
 
-    const [releaseNotesMarkdown, packageManager] = await Promise.all([
-      getReleaseNotesMarkdown(),
+    const [renderReleaseNotes, packageManager] = await Promise.all([
+      getReleaseNotesRenderer(),
       window.ftElectron?.getPackageManagerUpdate() ?? null
     ])
     packageManagerUpdate.value = packageManager
-    updateChangelog.value = releaseNotesMarkdown.parse(changelog)
+    updateChangelog.value = renderReleaseNotes(changelog)
     changeLogTitle.value = t('Update to {version}', { version: release.name ?? tagName })
     availableUpdate = { tagName, versionNumber }
     showAvailableUpdateToast()

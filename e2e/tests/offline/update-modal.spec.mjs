@@ -351,6 +351,26 @@ test('release notes for other platforms are hidden', async ({ page }) => {
   await expect(page.locator('.changeLogText img')).toHaveCount(0)
 })
 
+test.describe('release-note screenshots with dark and light variants', () => {
+  test.use({ seed: { settings: { baseTheme: 'light' } } })
+
+  test('show the variant for the app theme instead of the OS color scheme', async ({ page }) => {
+    await page.emulateMedia({ colorScheme: 'dark' })
+    await showUpdatePrompt(page, [
+      release(`OpenTubeX ${newestUpdateVersion}`, `v${newestUpdateVersion}-beta`, [
+        '- Screenshot improvement. (#1)',
+        '  <picture>',
+        '    <source media="(prefers-color-scheme: dark)" srcset="https://github.com/user-attachments/assets/dark">',
+        '    <source media="(prefers-color-scheme: light)" srcset="https://github.com/user-attachments/assets/light">',
+        '    <img src="https://github.com/user-attachments/assets/dark" alt="Screenshot" width="844">',
+        '  </picture>'
+      ].join('\n'))
+    ])
+
+    await expect(page.locator('.changeLogText li').getByAltText('Screenshot')).toHaveAttribute('src', 'https://github.com/user-attachments/assets/light')
+  })
+})
+
 test('changelog images preserve their aspect ratio at phone and desktop widths', { tag: '@scale' }, async ({ page, uiScale }) => {
   const imageUrl = 'https://example.com/release-screenshot.svg'
   await page.route(imageUrl, route => route.fulfill({
