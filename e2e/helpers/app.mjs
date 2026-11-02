@@ -289,6 +289,13 @@ export async function launchApp(userDataDir, extraArgs = [], options = {}, windo
     expect(startupErrors, 'Renderer errors during startup').toEqual([])
     return launchApp(userDataDir, extraArgs, options, windowRetry + 1)
   }
+  // Slows the renderer down like a busy CI runner, to reproduce timing flakes
+  // locally: E2E_CPU_THROTTLE=4 runs it at a quarter of its speed.
+  const cpuThrottleRate = Number(process.env.E2E_CPU_THROTTLE)
+  if (cpuThrottleRate > 1) {
+    const session = await context.newCDPSession(page)
+    await session.send('Emulation.setCPUThrottlingRate', { rate: cpuThrottleRate })
+  }
   await notifyPhase('windowCreated', page)
 
   // Fail fast if dist-e2e contains a development build (it would load the
@@ -485,6 +492,71 @@ function usesPrivateDisplay() {
     (process.env.PATH ?? '').split(path.delimiter).some(directory => directory && existsSync(path.join(directory, 'Xvfb')))
 }
 
+/**
+ * Playwright's test trace only records API calls for Electron. This records
+ * the app's own trace (DOM snapshots, console and network) and the main
+ * process output, and attaches them to failed tests. A screencast would slow
+ * the tests down by more than half.
+ *
+ * @param {import('@playwright/test').TestInfo} testInfo
+ * @param {boolean} recordTrace
+ */
+function recordAppDiagnostics(testInfo, recordTrace) {
+  /** @type {import('@playwright/test').ElectronApplication | undefined} */
+  let electronApp
+  /** @type {string[]} */
+  const tracePaths = []
+  /** @type {Buffer[]} */
+  const output = []
+
+  const stopTracing = async (tracePath) => {
+    if (!recordTrace || !electronApp) return
+    const app = electronApp
+    electronApp = undefined
+    try {
+      await app.context().tracing.stop(tracePath ? { path: tracePath } : {})
+      if (tracePath) tracePaths.push(tracePath)
+    } catch {
+      // The app may already have exited.
+    }
+  }
+
+  return {
+    /** @param {import('@playwright/test').ElectronApplication} app */
+    async start(app) {
+      electronApp = app
+      const child = app.process()
+      for (const stream of [child.stdout, child.stderr]) {
+        stream?.on('data', chunk => output.push(chunk))
+      }
+      if (recordTrace) {
+        await app.context().tracing.start({ snapshots: true, screenshots: false, title: testInfo.title })
+      }
+    },
+    /** Keeps the trace of an app that is about to be relaunched. */
+    save() {
+      return stopTracing(testInfo.outputPath(`app-trace-${tracePaths.length + 1}.zip`))
+    },
+    /** @param {boolean} failed */
+    async finish(failed) {
+      await stopTracing(failed ? testInfo.outputPath(`app-trace-${tracePaths.length + 1}.zip`) : undefined)
+      if (!failed) {
+        await Promise.all(tracePaths.map(tracePath => rm(tracePath, { force: true })))
+        return
+      }
+      // The HTML report opens attachments named "trace" in the trace viewer.
+      for (const tracePath of tracePaths) {
+        // Attaching copies the file into the report's attachments.
+        await testInfo.attach('trace', { path: tracePath, contentType: 'application/zip' })
+        await rm(tracePath, { force: true })
+      }
+      if (output.length > 0) {
+        await testInfo.attach('main process output', { body: Buffer.concat(output), contentType: 'text/plain' })
+      }
+    }
+  }
+}
+
 export const test = base.extend({
   // Each worker's private X server picks a free display.
   // eslint-disable-next-line no-empty-pattern -- Playwright requires a fixture object
@@ -520,11 +592,17 @@ export const test = base.extend({
   /** Runs at each startup phase, e.g. to mock requests the app sends while starting. */
   onPhase: [undefined, { option: true }],
 
-  app: async ({ seed, uiScale, launchArgs, showTutorial, localeOverrides, onPhase }, use, testInfo) => {
+  app: async ({ seed, uiScale, launchArgs, showTutorial, localeOverrides, onPhase: testOnPhase, trace }, use, testInfo) => {
     const userDataDir = await createUserDataDir(uiScale === 100
       ? seed
       : { ...seed, settings: { uiScale, ...seed.settings } })
     const hasLocaleOverrides = Object.keys(localeOverrides).length > 0
+    const diagnostics = recordAppDiagnostics(testInfo, (typeof trace === 'string' ? trace : trace.mode) !== 'off')
+    /** @type {typeof testOnPhase} */
+    const onPhase = async (phase, page, electronApp) => {
+      if (phase === 'electronConnected') await diagnostics.start(electronApp)
+      await testOnPhase?.(phase, page, electronApp)
+    }
     let appRoot
     let appHandle
     try {
@@ -560,6 +638,7 @@ export const test = base.extend({
         // immediately exits again.
         const oldProcess = appHandle.electronApp.process()
         const exited = new Promise((resolve) => oldProcess.once('exit', resolve))
+        await diagnostics.save()
         await appHandle.electronApp.close()
         await exited
         await beforeLaunch?.(oldProcess)
@@ -580,10 +659,12 @@ export const test = base.extend({
 
       await use(appHandle)
     } finally {
+      const failed = testInfo.status !== testInfo.expectedStatus
+      if (appHandle && failed) {
+        await attachScreenshot(testInfo, appHandle.page, 'failure')
+      }
+      await diagnostics.finish(failed)
       if (appHandle) {
-        if (testInfo.status !== testInfo.expectedStatus) {
-          await attachScreenshot(testInfo, appHandle.page, 'failure')
-        }
         await appHandle.electronApp.close().catch(() => {})
       }
       await rm(userDataDir, { recursive: true, force: true })

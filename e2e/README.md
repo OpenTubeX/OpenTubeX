@@ -24,6 +24,10 @@ Xvfb display, so test windows stay hidden and parallel workers cannot move
 each other's cursor or steal focus. Set `E2E_XVFB=0` to use the current
 display instead, or `E2E_XVFB=1` to fail when Xvfb is missing.
 
+To reproduce timing flakes that only happen on slower CI runners, set
+`E2E_CPU_THROTTLE` to slow the app's renderer down by that factor, e.g.
+`E2E_CPU_THROTTLE=4`. Raise `--timeout` along with it.
+
 Without Xvfb per worker (or on a headless machine) prefix with
 `xvfb-run --auto-servernum --server-args='-screen 0 1920x1080x24'`.
 The screen size matters: xvfb's default 640x480 puts the app into its
@@ -190,6 +194,9 @@ headless Chromium and are not discovered by the normal unit-test glob or
 Playwright. They do not replace native Android emulator testing.
 
 The Playwright HTML report and functional-test traces are uploaded as artifacts.
+For Electron, Playwright's own trace only lists API calls, so a failed test
+also attaches the app's trace, with DOM snapshots, console messages and
+network requests, and the main process output.
 The performance project disables tracing to avoid distorting measurements.
 On CI, Playwright retries each failed test once. A test that passes only on
 retry does not fail the run: it gets a warning annotation and an entry in the
