@@ -500,6 +500,11 @@ Settings:
         Invalid credentials: Máy chủ đã từ chối tên người dùng hoặc mật khẩu.
         Rate limited: Máy chủ đang chặn đăng nhập do có quá nhiều lần thử không thành công. Vui lòng thử lại sau.
         Server error: Máy chủ trả về lỗi (HTTP {status}).
+    Notifications:
+      Notifications: Thông báo
+      System and In-App: Hệ thống và trong ứng dụng
+      System Only: Chỉ hệ thống
+      Off: Tắt
   Context Menu Search Settings:
     Context Menu Search Settings: Tìm kiếm trong menu ngữ cảnh
     Description: Chọn công cụ tìm kiếm xuất hiện khi bạn nhấp chuột phải vào văn bản đã chọn. Kết quả tìm kiếm sẽ mở trong trình duyệt mặc định.
@@ -2133,6 +2138,7 @@ Tooltips:
     Remember Tab Navigation History: Lịch sử điều hướng tới và lui của từng thẻ sẽ được lưu và khôi phục khi OpenTubeX khởi động lại.
     Yattee Server: Máy chủ yattee-server mà OpenTubeX dùng để tải video, kênh, danh sách phát và kết quả tìm kiếm. Tên người dùng và mật khẩu chỉ được lưu trên thiết bị này.
     Proxy Videos Through Yattee Server: Chuyển tiếp luồng video và âm thanh qua máy chủ. Hãy giữ tùy chọn này bật, trừ khi máy chủ dùng chung kết nối Internet với bạn, vì YouTube chỉ cung cấp luồng cho địa chỉ đã yêu cầu chúng. Ảnh xem trước luôn được tải trực tiếp từ YouTube.
+    Notifications: Chọn cách OpenTubeX thông báo cho bạn về phát trực tiếp, video mới và tải xuống tự động. Với Hệ thống và trong ứng dụng, thông báo xuất hiện trong OpenTubeX khi bạn đang dùng và dưới dạng thông báo hệ thống trong trường hợp khác, và chuông sẽ lưu giữ chúng. Tắt cũng ẩn các tùy chọn thông báo.
   Proxy Settings:
     IP Block Recovery Script Path: Đường dẫn tệp tập lệnh sẽ chạy khi phát hiện bị chặn IP. OpenTubeX chờ tập lệnh chạy xong rồi tải lại video. Nếu bật phương án dự phòng, tập lệnh chỉ chạy khi phương án đó cũng thất bại.
   Player Settings:
@@ -2563,3 +2569,11 @@ Digital Wellbeing:
   Time for bed: "Đã đến giờ đi ngủ"
   Bedtime started at: "Giờ đi ngủ của bạn đã bắt đầu lúc {time}."
   Remind Me in 10 Minutes: "Nhắc tôi sau 10 phút"
+Notification Center:
+  Notifications: "Thông báo"
+  Notifications With Unread: "Thông báo ({count} chưa đọc)"
+  Mark as Read: "Đánh dấu đã đọc"
+  Mark All as Read: "Đánh dấu tất cả đã đọc"
+  Clear All: "Xóa tất cả"
+  Empty: "Chưa có thông báo nào"
+  Empty Hint: "Lời nhắc phát trực tiếp và video mới từ các kênh đã bật thông báo sẽ xuất hiện ở đây."

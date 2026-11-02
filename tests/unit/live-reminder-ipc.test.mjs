@@ -13,7 +13,7 @@ const calls = []
 setupLiveReminderIpc({
   get: videoId => { calls.push(['get', videoId]); return { videoId } },
   list: () => { calls.push(['list']); return ['reminder'] },
-  schedule: reminder => { calls.push(['schedule', reminder.videoId]); return true },
+  schedule: reminder => { calls.push(['schedule', reminder.videoId, Object.keys(reminder)]); return true },
   cancel: videoId => { calls.push(['cancel', videoId]); return true },
 })
 
@@ -27,6 +27,7 @@ test.beforeEach(() => {
 
 test('accepts only complete reminders for future streams', () => {
   assert.equal(isValidLiveReminder(reminder, now), true)
+  assert.equal(isValidLiveReminder({ ...reminder, thumbnail: 'https://i.ytimg.com/vi/dQw4w9WgXcQ/mqdefault.jpg' }, now), true)
   for (const invalid of [
     null,
     { ...reminder, videoId: 'short' },
@@ -37,6 +38,8 @@ test('accepts only complete reminders for future streams', () => {
     { ...reminder, notificationTitle: 'x'.repeat(201) },
     { ...reminder, notificationBody: 'x'.repeat(501) },
     { ...reminder, notificationBody: 42 },
+    { ...reminder, thumbnail: 'file:///etc/passwd' },
+    { ...reminder, thumbnail: 42 },
   ]) {
     assert.equal(isValidLiveReminder(invalid, now), false, JSON.stringify(invalid))
   }
@@ -46,9 +49,11 @@ test('forwards valid requests from OpenTubeX pages', async () => {
   const future = { ...reminder, startTimestamp: Date.now() + 60_000 }
   assert.deepEqual(await ipcMain.invoke(IpcChannels.LIVE_REMINDER_GET, ipcEvent(), reminder.videoId), { videoId: reminder.videoId })
   assert.deepEqual(await ipcMain.invoke(IpcChannels.LIVE_REMINDER_LIST, ipcEvent()), ['reminder'])
-  assert.equal(await ipcMain.invoke(IpcChannels.LIVE_REMINDER_SCHEDULE, ipcEvent(), future), true)
+  // The store saves reminders as they are, so it receives only the known fields.
+  assert.equal(await ipcMain.invoke(IpcChannels.LIVE_REMINDER_SCHEDULE, ipcEvent(), { ...future, thumbnail: 'https://i.ytimg.com/vi/x/mqdefault.jpg', extra: 'ignored' }), true)
   assert.equal(await ipcMain.invoke(IpcChannels.LIVE_REMINDER_CANCEL, ipcEvent(), reminder.videoId), true)
   assert.deepEqual(calls.map(([method]) => method), ['get', 'list', 'schedule', 'cancel'])
+  assert.deepEqual(calls[2][2], ['videoId', 'startTimestamp', 'notificationTitle', 'notificationBody', 'thumbnail'])
 })
 
 test('ignores other senders and invalid video IDs', async () => {

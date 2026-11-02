@@ -968,6 +968,37 @@ export default {
     }
   },
 
+  notificationHistory: {
+    /** @returns {Promise<import('../notificationHistory').NotificationHistoryEntry[]>} */
+    list: () => ipcRenderer.invoke(IpcChannels.NOTIFICATION_HISTORY_LIST),
+
+    /** @param {string} [id] Omit to mark every entry read. */
+    markRead: (id) => ipcRenderer.invoke(IpcChannels.NOTIFICATION_HISTORY_MARK_READ, id),
+
+    clear: () => ipcRenderer.invoke(IpcChannels.NOTIFICATION_HISTORY_CLEAR),
+
+    /**
+     * @param {(entries: import('../notificationHistory').NotificationHistoryEntry[]) => void} handler
+     * @returns {() => void}
+     */
+    onUpdated: (handler) => {
+      const listener = (_event, entries) => handler(entries)
+      ipcRenderer.on(IpcChannels.NOTIFICATION_HISTORY_UPDATED, listener)
+      return () => ipcRenderer.removeListener(IpcChannels.NOTIFICATION_HISTORY_UPDATED, listener)
+    },
+
+    /**
+     * Notifications that arrive while this window is focused, shown in the app instead of the system.
+     * @param {(entry: import('../notificationHistory').NotificationHistoryEntry) => void} handler
+     * @returns {() => void}
+     */
+    onShowInApp: (handler) => {
+      const listener = (_event, entry) => handler(entry)
+      ipcRenderer.on(IpcChannels.NOTIFICATION_SHOW_IN_APP, listener)
+      return () => ipcRenderer.removeListener(IpcChannels.NOTIFICATION_SHOW_IN_APP, listener)
+    }
+  },
+
   videoMetadataCache: {
     /**
      * @param {{ videoId: string, title: string, description: string, thumbnailUrl: string, observedAt: number }} metadata

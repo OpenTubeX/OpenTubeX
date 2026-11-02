@@ -500,6 +500,11 @@ Settings:
         Invalid credentials: Palvelin hylkäsi käyttäjänimen tai salasanan.
         Rate limited: Palvelin estää kirjautumiset liian monen epäonnistuneen yrityksen vuoksi. Yritä myöhemmin uudelleen.
         Server error: Palvelin palautti virheen (HTTP {status}).
+    Notifications:
+      Notifications: Ilmoitukset
+      System and In-App: Järjestelmä ja sovelluksessa
+      System Only: Vain järjestelmä
+      Off: Pois
   Context Menu Search Settings:
     Context Menu Search Settings: Pikavalikon haku
     Description: Valitse hakukoneet, jotka näkyvät, kun napsautat valittua tekstiä hiiren kakkospainikkeella. Haut avautuvat oletusselaimessasi.
@@ -2140,6 +2145,7 @@ Tooltips:
     Remember Tab Navigation History: Kunkin välilehden taakse- ja eteenpäin siirtymisen historia tallennetaan ja palautetaan, kun OpenTubeX käynnistyy uudelleen.
     Yattee Server: yattee-server-instanssi, josta OpenTubeX lataa videot, kanavat, soittolistat ja hakutulokset. Käyttäjänimi ja salasana tallennetaan vain tälle laitteelle.
     Proxy Videos Through Yattee Server: Välittää video- ja äänivirrat palvelimen kautta. Pidä tämä päällä, ellei palvelin käytä samaa internetyhteyttä kuin sinä, sillä YouTube toimittaa mediavirrat vain osoitteeseen, joka pyysi niitä. Pikkukuvat ladataan aina suoraan YouTubesta.
+    Notifications: Valitse, miten OpenTubeX ilmoittaa suoratoistoista, uusista latauksista ja automaattisista latauksista. Asetuksella Järjestelmä ja sovelluksessa ilmoitukset näkyvät OpenTubeXissa, kun käytät sitä, ja muuten järjestelmäilmoituksina, ja kello säilyttää ne. Pois piilottaa myös ilmoitusasetukset.
   Proxy Settings:
     IP Block Recovery Script Path: Komentosarjatiedosto, joka suoritetaan IP-eston havaitsemisen jälkeen. OpenTubeX odottaa suorituksen päättymistä ja lataa sitten videon uudelleen. Jos varamenetelmä on käytössä, komentosarja suoritetaan vain, jos myös varamenetelmä epäonnistuu.
   Player Settings:
@@ -2572,3 +2578,11 @@ Digital Wellbeing:
   Time for bed: "On aika mennä nukkumaan"
   Bedtime started at: "Nukkumaanmenoaikasi alkoi klo {time}."
   Remind Me in 10 Minutes: "Muistuta 10 minuutin kuluttua"
+Notification Center:
+  Notifications: "Ilmoitukset"
+  Notifications With Unread: "Ilmoitukset ({count} lukematonta)"
+  Mark as Read: "Merkitse luetuksi"
+  Mark All as Read: "Merkitse kaikki luetuiksi"
+  Clear All: "Tyhjennä kaikki"
+  Empty: "Ei vielä ilmoituksia"
+  Empty Hint: "Suoratoistojen muistutukset ja uudet lataukset kanavilta, joiden ilmoitukset ovat päällä, näkyvät täällä."

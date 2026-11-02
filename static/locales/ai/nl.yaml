@@ -500,6 +500,11 @@ Settings:
         Invalid credentials: De server heeft de gebruikersnaam of het wachtwoord geweigerd.
         Rate limited: De server blokkeert aanmeldingen na te veel mislukte pogingen. Probeer het later opnieuw.
         Server error: De server gaf een fout terug (HTTP {status}).
+    Notifications:
+      Notifications: Meldingen
+      System and In-App: Systeem en in de app
+      System Only: Alleen systeem
+      Off: Uit
   Context Menu Search Settings:
     Context Menu Search Settings: Zoeken via contextmenu
     Description: Kies welke zoekmachines verschijnen wanneer je met de rechtermuisknop op geselecteerde tekst klikt. Zoekopdrachten worden in je standaardbrowser geopend.
@@ -2151,6 +2156,7 @@ Tooltips:
     Remember Tab Navigation History: De navigatiegeschiedenis voor vooruit en achteruit van elk tabblad wordt opgeslagen en hersteld wanneer OpenTubeX opnieuw wordt gestart.
     Yattee Server: De yattee-server-instantie waarvan OpenTubeX video's, kanalen, afspeellijsten en zoekresultaten laadt. De gebruikersnaam en het wachtwoord worden alleen op dit apparaat opgeslagen.
     Proxy Videos Through Yattee Server: Stuurt video- en audiostreams door via de server. Laat dit aan, tenzij de server je internetverbinding deelt, want YouTube levert streams alleen aan het adres dat ze heeft opgevraagd. Miniaturen worden altijd rechtstreeks van YouTube geladen.
+    Notifications: Kies hoe OpenTubeX je op de hoogte brengt van livestreams, nieuwe uploads en automatische downloads. Met Systeem en in de app verschijnen meldingen in OpenTubeX terwijl je het gebruikt en anders als systeemmeldingen, en de bel bewaart ze. Uit verbergt ook de meldingsopties.
   Proxy Settings:
     IP Block Recovery Script Path: Pad naar het scriptbestand dat wordt uitgevoerd wanneer een IP-blokkade wordt gedetecteerd. OpenTubeX wacht tot het klaar is en laadt daarna de video opnieuw. Als terugvallen is ingeschakeld, wordt het alleen uitgevoerd wanneer ook dat mislukt.
   Player Settings:
@@ -2583,3 +2589,11 @@ Digital Wellbeing:
   Time for bed: "Het is bedtijd"
   Bedtime started at: "Je bedtijd begon om {time}."
   Remind Me in 10 Minutes: "Over 10 minuten herinneren"
+Notification Center:
+  Notifications: "Meldingen"
+  Notifications With Unread: "Meldingen ({count} ongelezen)"
+  Mark as Read: "Markeren als gelezen"
+  Mark All as Read: "Alles markeren als gelezen"
+  Clear All: "Alles wissen"
+  Empty: "Nog geen meldingen"
+  Empty Hint: "Herinneringen aan livestreams en nieuwe uploads van kanalen met ingeschakelde meldingen verschijnen hier."

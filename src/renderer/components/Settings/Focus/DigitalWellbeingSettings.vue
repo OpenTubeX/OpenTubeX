@@ -105,7 +105,7 @@
       </div>
       <div class="switchColumn">
         <FtToggleSwitch
-          v-if="supportsUploadNotifications"
+          v-if="uploadNotificationsAvailable"
           :label="t('Settings.Distraction Free Settings.Digital Wellbeing.Silence Upload Notifications at Bedtime')"
           :compact="true"
           :default-value="store.getters.getBedtimeSilenceNotifications"
@@ -158,13 +158,16 @@ import FtFlexBox from '../../ft-flex-box/ft-flex-box.vue'
 import store from '../../../store/index'
 
 import { formatTime } from '../../../helpers/dateFormat'
-import { supportsUploadNotifications } from '../../../helpers/uploadNotifications'
+import { supportsUploadNotifications as uploadNotificationsSupported } from '../../../helpers/uploadNotifications'
 import {
+
   BREAK_INTERVAL_MINUTES,
   DAILY_LIMIT_MINUTES,
   SHORTS_LIMIT_MINUTES,
   formatWholeMinutes,
 } from '../../../helpers/digitalWellbeing'
+
+const uploadNotificationsAvailable = computed(() => uploadNotificationsSupported && store.getters.getNotificationMode !== 'off')
 
 const { locale, t } = useI18n()
 

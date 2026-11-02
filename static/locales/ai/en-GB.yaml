@@ -484,6 +484,11 @@ Settings:
         Invalid credentials: The server rejected the username or password.
         Rate limited: The server is blocking sign-ins after too many failed attempts. Try again later.
         Server error: The server returned an error (HTTP {status}).
+    Notifications:
+      Notifications: Notifications
+      System and In-App: System and in-app
+      System Only: System only
+      Off: Off
   Context Menu Search Settings:
     Context Menu Search Settings: Context Menu Search
     Description: Choose which search engines appear when you right-click selected text. Searches open in your default browser.
@@ -2083,6 +2088,7 @@ Tooltips:
     Remember Tab Navigation History: Each tab's back and forward navigation history is saved and restored when OpenTubeX restarts.
     Yattee Server: The yattee-server instance that OpenTubeX loads videos, channels, playlists and search results from. The username and password are only stored on this device.
     Proxy Videos Through Yattee Server: Relays video and audio streams through the server. Leave this on unless the server shares your internet connection, because YouTube only serves streams to the address that requested them. Thumbnails always load directly from YouTube.
+    Notifications: Choose how OpenTubeX notifies you about live streams, new uploads, and automatic downloads. With System and in-app, notifications appear inside OpenTubeX while you use it and as system notifications otherwise, and the bell keeps them. Off also hides the notification options.
   Proxy Settings:
     IP Block Recovery Script Path: Script file path to run when an IP block is detected. OpenTubeX waits for it to finish, then reloads the video. If fallback is enabled, it runs only when fallback also fails.
   Player Settings:
@@ -2510,3 +2516,11 @@ Digital Wellbeing:
   Time for bed: "It's time for bed"
   Bedtime started at: "Your bedtime started at {time}."
   Remind Me in 10 Minutes: "Remind Me in 10 Minutes"
+Notification Center:
+  Notifications: "Notifications"
+  Notifications With Unread: "Notifications ({count} unread)"
+  Mark as Read: "Mark as read"
+  Mark All as Read: "Mark all as read"
+  Clear All: "Clear all"
+  Empty: "No notifications yet"
+  Empty Hint: "Live stream reminders and new uploads from channels with notifications turned on will show up here."

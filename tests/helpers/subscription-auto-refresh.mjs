@@ -114,6 +114,7 @@ export async function loadSubscriptionAutoRefresh(env) {
       updateAndroidSubscriptionRefresh: call('updateAndroid'),
     },
     [sourceUrl('src/renderer/helpers/uploadNotifications.js')]: { configureUploadNotifications: async () => {} },
+    [sourceUrl('src/renderer/helpers/notificationHistory.js')]: { getNotificationThumbnailUrl: () => null },
     [sourceUrl('src/renderer/helpers/androidSubscriptionRefreshData.js')]: {
       ...refreshData,
       // The configuration reads every subscription setting; these tests don't configure it.

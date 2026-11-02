@@ -495,6 +495,11 @@ Settings:
         Invalid credentials: サーバーがユーザー名またはパスワードを拒否しました。
         Rate limited: ログインの失敗回数が多すぎるため、サーバーがログインをブロックしています。しばらくしてから再試行してください。
         Server error: サーバーがエラーを返しました（HTTP {status}）。
+    Notifications:
+      Notifications: 通知
+      System and In-App: システムとアプリ内
+      System Only: システムのみ
+      Off: オフ
   Context Menu Search Settings:
     Context Menu Search Settings: コンテキストメニュー検索
     Description: 選択したテキストを右クリックしたときに表示する検索エンジンを選択します。検索結果は既定のブラウザーで開きます。
@@ -2089,6 +2094,7 @@ Tooltips:
     Remember Tab Navigation History: 各タブの「戻る」と「進む」の履歴を保存し、OpenTubeXの再起動時に復元します。
     Yattee Server: OpenTubeX が動画、チャンネル、再生リスト、検索結果を読み込む yattee-server インスタンスです。ユーザー名とパスワードはこのデバイスにのみ保存されます。
     Proxy Videos Through Yattee Server: 動画と音声のストリームをサーバー経由で中継します。YouTube はリクエスト元のアドレスにのみストリームを提供するため、サーバーとインターネット接続を共有している場合を除き、オンのままにしてください。サムネイルは常に YouTube から直接読み込まれます。
+    Notifications: ライブ配信、新しいアップロード、自動ダウンロードを OpenTubeX がどのように通知するかを選択します。「システムとアプリ内」では、OpenTubeX を使用中はアプリ内に、それ以外はシステム通知として表示され、ベルに保存されます。「オフ」では通知の設定項目も非表示になります。
   Proxy Settings:
     IP Block Recovery Script Path: IPブロックを検出したときに実行するスクリプトファイルのパスです。OpenTubeXは処理の完了を待ってから動画を再読み込みします。フォールバックが有効な場合は、フォールバックにも失敗したときだけ実行します。
   Player Settings:
@@ -2516,3 +2522,11 @@ Digital Wellbeing:
   Time for bed: "そろそろ寝る時間です"
   Bedtime started at: "就寝時間は{time}に始まりました。"
   Remind Me in 10 Minutes: "10分後にリマインド"
+Notification Center:
+  Notifications: "通知"
+  Notifications With Unread: "通知（未読 {count} 件）"
+  Mark as Read: "既読にする"
+  Mark All as Read: "すべて既読にする"
+  Clear All: "すべて消去"
+  Empty: "まだ通知はありません"
+  Empty Hint: "ライブ配信のリマインダーと、通知をオンにしたチャンネルの新しいアップロードがここに表示されます。"

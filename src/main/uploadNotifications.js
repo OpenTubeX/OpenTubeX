@@ -1,5 +1,6 @@
 import { readFile, rm, writeFile, rename } from 'node:fs/promises'
-import { createUploadNotificationState, forgetUnconfiguredFeeds, getUploadUrl, isWithinQuietHours, takeVisibleUploads } from '../newUploadNotifications.js'
+import { getUploadTarget } from '../notificationHistory.js'
+import { getUploadThumbnailUrl, createUploadNotificationState, forgetUnconfiguredFeeds, getUploadUrl, isWithinQuietHours, takeVisibleUploads } from '../newUploadNotifications.js'
 
 const ORIGINAL_TITLE_TIMEOUT_MS = 5000
 
@@ -31,7 +32,7 @@ async function fetchOriginalTitle(fetchUrl, videoId) {
  * foreground refreshes and the background refresh process.
  * @param {{
  *   file: string,
- *   show: (notification: { title: string, body: string, url: string, silent: boolean }) => void,
+ *   show: (notification: { title: string, body: string, url: string, silent: boolean, target: import('../notificationHistory.js').NotificationHistoryTarget | null, thumbnail: string | undefined }) => void,
  *   fetch?: typeof fetch
  * }} options
  */
@@ -126,7 +127,9 @@ export function createUploadNotifier({ file, show, fetch: fetchUrl = fetch }) {
               title: (configuration.titles?.[type] ?? '{channel}').replaceAll('{channel}', channel.name || channelId),
               body: bodies[index],
               url: getUploadUrl(feedType, upload.id),
-              silent
+              silent,
+              target: getUploadTarget(feedType, upload.id, upload.live),
+              thumbnail: getUploadThumbnailUrl(configuration, feedType, upload.id)
             })
           } catch (error) {
             // One failed notification must not skip the others.

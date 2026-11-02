@@ -598,6 +598,11 @@ Settings:
         Invalid credentials: 서버가 사용자 이름 또는 비밀번호를 거부했습니다.
         Rate limited: 로그인 실패 횟수가 너무 많아 서버가 로그인을 차단하고 있습니다. 나중에 다시 시도하세요.
         Server error: 서버에서 오류를 반환했습니다(HTTP {status}).
+    Notifications:
+      Notifications: 알림
+      System and In-App: 시스템 및 앱 내
+      System Only: 시스템만
+      Off: 끔
   Context Menu Search Settings:
     Context Menu Search Settings: 상황에 맞는 메뉴 검색
     Description: 선택한 텍스트를 마우스 오른쪽 버튼으로 클릭할 때 표시할 검색 엔진을 선택하세요. 검색 결과는 기본 브라우저에서 열립니다.
@@ -2475,6 +2480,7 @@ Tooltips:
     Remember Tab Navigation History: 각 탭의 뒤로 및 앞으로 탐색 기록을 저장하고 OpenTubeX를 다시 시작할 때 복원합니다.
     Yattee Server: OpenTubeX가 동영상, 채널, 재생 목록, 검색 결과를 불러오는 yattee-server 인스턴스입니다. 사용자 이름과 비밀번호는 이 기기에만 저장됩니다.
     Proxy Videos Through Yattee Server: 동영상 및 오디오 스트림을 서버를 통해 중계합니다. YouTube는 스트림을 요청한 주소에만 제공하므로, 서버가 사용자의 인터넷 연결을 공유하는 경우가 아니면 켜 두세요. 썸네일은 항상 YouTube에서 직접 불러옵니다.
+    Notifications: OpenTubeX가 실시간 스트리밍, 새 업로드, 자동 다운로드를 알리는 방식을 선택합니다. 시스템 및 앱 내를 선택하면 OpenTubeX를 사용하는 동안에는 앱 안에, 그 외에는 시스템 알림으로 표시되고 벨에 보관됩니다. 끔을 선택하면 알림 옵션도 숨겨집니다.
   Proxy Settings:
     IP Block Recovery Script Path: IP 차단이 감지될 때 실행할 스크립트 파일 경로입니다. OpenTubeX는 실행이 끝날 때까지 기다린 후 동영상을 다시 불러옵니다. 대체 사용이 활성화된 경우 대체 방식도 실패했을 때만 실행합니다.
   Player Settings:
@@ -2972,3 +2978,11 @@ Digital Wellbeing:
   Time for bed: "잠자리에 들 시간입니다"
   Bedtime started at: "취침 시간이 {time}에 시작되었습니다."
   Remind Me in 10 Minutes: "10분 후에 다시 알림"
+Notification Center:
+  Notifications: "알림"
+  Notifications With Unread: "알림(읽지 않음 {count}개)"
+  Mark as Read: "읽음으로 표시"
+  Mark All as Read: "모두 읽음으로 표시"
+  Clear All: "모두 지우기"
+  Empty: "아직 알림이 없습니다"
+  Empty Hint: "실시간 스트리밍 알림과 알림을 켠 채널의 새 업로드가 여기에 표시됩니다."

@@ -585,7 +585,7 @@ const sectionLayout = computed(() => normalizeHomeSectionLayout(store.getters.ge
 const supportedSectionIds = computed(() => new Set(sectionLayout.value
   .map(section => section.id)
   .filter(id => supportsYtDlp || id !== 'recentDownloads')
-  .filter(id => supportsLiveReminders || id !== 'reminders')))
+  .filter(id => (supportsLiveReminders && store.getters.getNotificationMode !== 'off') || id !== 'reminders')))
 const configurableSections = computed(() => (
   sectionLayout.value.filter(section => supportedSectionIds.value.has(section.id))
 ))

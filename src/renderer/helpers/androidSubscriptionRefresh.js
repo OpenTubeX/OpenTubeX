@@ -82,6 +82,16 @@ export function observeAndroidUploads(value) {
   return SubscriptionRefresh.observeUploads(value)
 }
 
+/**
+ * Takes the upload notifications Android has shown since the last call.
+ * @returns {Promise<{ feedType: string, id: string, live: boolean, title: string, body: string, createdAt: number }[]>}
+ */
+export async function takeAndroidUploadNotifications() {
+  if (!SubscriptionRefresh) return []
+  const { notifications } = await SubscriptionRefresh.takeShownNotifications()
+  return Array.isArray(notifications) ? notifications : []
+}
+
 export async function isAndroidSubscriptionRefreshActive() {
   if (!SubscriptionRefresh) return false
   const { active } = await SubscriptionRefresh.isActive()

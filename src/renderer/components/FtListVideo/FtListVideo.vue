@@ -574,6 +574,7 @@ import { getLocalVideoChannels } from '../../helpers/api/local.js'
 import { isOnAiSlopList } from '../../helpers/aiSlopList.js'
 import { isHistoryEntryWatched } from '../../helpers/history.js'
 import { liveReminder, supportsLiveReminders } from '../../helpers/liveReminders'
+import { withThumbnail } from '../../helpers/notificationHistory'
 import { getUpcomingPremiereTimestamp } from '../../helpers/subscription-entries.js'
 import { isThumbnailPreviewImageUsable } from '../../helpers/thumbnailPreview.js'
 import { deArrowData, deArrowThumbnail, getSponsorBlockVideoLabel } from '../../helpers/sponsorblock.js'
@@ -796,6 +797,7 @@ let premiereStartTimer = null
 
 const canToggleLiveReminder = computed(() => (
   supportsLiveReminders &&
+  store.getters.getNotificationMode !== 'off' &&
   premiereTimestamp.value != null &&
   premiereTimestamp.value > premiereNow.value
 ))
@@ -1307,7 +1309,8 @@ async function getLiveReminderPayload() {
     // Read after the lookup, so a premiere time that changed meanwhile is scheduled.
     startTimestamp: premiereTimestamp.value,
     notificationTitle: t('Video.Scheduled video starting'),
-    notificationBody: t('Video.Live notification body', { videoTitle })
+    notificationBody: t('Video.Live notification body', { videoTitle }),
+    ...withThumbnail(id.value)
   }
 }
 

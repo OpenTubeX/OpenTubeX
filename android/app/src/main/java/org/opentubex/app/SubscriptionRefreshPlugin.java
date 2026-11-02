@@ -206,6 +206,17 @@ public class SubscriptionRefreshPlugin extends Plugin {
     }
 
     @PluginMethod
+    public void takeShownNotifications(PluginCall call) {
+        try {
+            JSObject response = new JSObject();
+            response.put("notifications", UploadNotifications.takeShown(getContext()));
+            call.resolve(response);
+        } catch (Exception error) {
+            call.reject("Unable to read shown notifications", error);
+        }
+    }
+
+    @PluginMethod
     public void observeUploads(PluginCall call) {
         String channelId = call.getString("channelId");
         String feedType = call.getString("feedType");

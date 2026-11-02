@@ -25,6 +25,7 @@ test('platform-specific settings stay local to every device', () => {
     'enableMobileTabs',
     'enablePullToRefresh',
     'enableUploadNotifications',
+    'notificationMode',
     'fullscreenRotationIgnoresSystemLock',
     'hiddenPlayerMenuControls',
     'hideToTrayOnClose',

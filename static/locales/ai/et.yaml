@@ -495,6 +495,11 @@ Settings:
         Invalid credentials: Server lükkas kasutajanime või salasõna tagasi.
         Rate limited: Liiga paljude ebaõnnestunud katsete tõttu blokeerib server sisselogimised. Proovi hiljem uuesti.
         Server error: Server tagastas vea (HTTP {status}).
+    Notifications:
+      Notifications: Teavitused
+      System and In-App: Süsteem ja rakenduses
+      System Only: Ainult süsteem
+      Off: Väljas
   Context Menu Search Settings:
     Context Menu Search Settings: Kontekstimenüü otsing
     Description: Valige otsingumootorid, mis kuvatakse valitud tekstil paremklõpsamisel. Otsingud avanevad vaikebrauseris.
@@ -2094,6 +2099,7 @@ Tooltips:
     Remember Tab Navigation History: Iga vahelehe edasi- ja tagasiliikumise ajalugu salvestatakse ning taastatakse OpenTubeX-i taaskäivitamisel.
     Yattee Server: Server, millel töötab yattee-server ja kust OpenTubeX laadib videoid, kanaleid, esitusloendeid ja otsingutulemusi. Kasutajanimi ja salasõna salvestatakse ainult selles seadmes.
     Proxy Videos Through Yattee Server: Edastab video- ja helivood serveri kaudu. Jäta see sisse lülitatuks, kui server just ei kasuta sinuga sama internetiühendust, sest YouTube edastab vooge ainult aadressile, mis neid küsis. Pisipildid laaditakse alati otse YouTube'ist.
+    Notifications: Vali, kuidas OpenTubeX sind otseülekannetest, uutest üleslaadimistest ja automaatsetest allalaadimistest teavitab. Valikuga Süsteem ja rakenduses ilmuvad teavitused OpenTubeXis selle kasutamise ajal, muidu süsteemiteavitustena, ja kell hoiab neid alles. Väljas peidab ka teavituste valikud.
   Proxy Settings:
     IP Block Recovery Script Path: Skriptifaili asukoht, mida kasutatakse IP-blokeeringu tuvastamisel. OpenTubeX ootab skripti lõppemist ja laadib seejärel video uuesti. Kui varumeetod on lubatud, käivitatakse skript ainult siis, kui ka varumeetod nurjub.
   Player Settings:
@@ -2521,3 +2527,11 @@ Digital Wellbeing:
   Time for bed: "On aeg magama minna"
   Bedtime started at: "Sinu magamaminekuaeg algas kell {time}."
   Remind Me in 10 Minutes: "Tuleta meelde 10 minuti pärast"
+Notification Center:
+  Notifications: "Teavitused"
+  Notifications With Unread: "Teavitused ({count} lugemata)"
+  Mark as Read: "Märgi loetuks"
+  Mark All as Read: "Märgi kõik loetuks"
+  Clear All: "Tühjenda kõik"
+  Empty: "Teavitusi veel pole"
+  Empty Hint: "Siia ilmuvad otseülekannete meeldetuletused ja uued üleslaadimised kanalitelt, mille teavitused on sisse lülitatud."

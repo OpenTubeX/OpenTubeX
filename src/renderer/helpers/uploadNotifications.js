@@ -1,6 +1,7 @@
 import store from '../store/index'
 import { normalizeUploadEntries } from '../../newUploadNotifications'
 import { configureAndroidUploadNotifications, observeAndroidUploads } from './androidSubscriptionRefresh'
+import { collectNotificationHistory } from './notificationHistory'
 
 /** The desktop main process or the Android background worker shows the notifications. */
 export const supportsUploadNotifications = !!(process.env.IS_ELECTRON || (process.env.IS_CAPACITOR && !process.env.IS_IOS))
@@ -45,6 +46,6 @@ export function reportSubscriptionUploads(channelId, feedType, entries) {
   const value = { channelId, feedType, entries: normalizeUploadEntries(entries) }
   const request = process.env.IS_ELECTRON
     ? window.ftElectron.subscriptionAutoRefresh.observeUploads(value)
-    : observeAndroidUploads(value)
+    : observeAndroidUploads(value).then(collectNotificationHistory)
   request.catch(error => console.error('Failed to check for new uploads', error))
 }

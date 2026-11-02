@@ -637,6 +637,11 @@ Settings:
         Invalid credentials: El servidor ha rebutjat el nom d'usuari o la contrasenya.
         Rate limited: El servidor bloqueja els inicis de sessió després de massa intents fallits. Torneu-ho a provar més tard.
         Server error: El servidor ha retornat un error (HTTP {status}).
+    Notifications:
+      Notifications: Notificacions
+      System and In-App: Sistema i a l’aplicació
+      System Only: Només sistema
+      Off: Desactivades
   Context Menu Search Settings:
     Context Menu Search Settings: Cerca al menú contextual
     Description: Trieu quins motors de cerca apareixen en fer clic dret al text seleccionat. Les cerques s'obren al navegador predeterminat.
@@ -2636,6 +2641,7 @@ Tooltips:
     Remember Tab Navigation History: L'historial de navegació enrere i endavant de cada pestanya es desa i es restaura en reiniciar l'OpenTubeX.
     Yattee Server: La instància de yattee-server des de la qual l'OpenTubeX carrega vídeos, canals, llistes de reproducció i resultats de cerca. El nom d'usuari i la contrasenya només es desen en aquest dispositiu.
     Proxy Videos Through Yattee Server: Retransmet els fluxos de vídeo i àudio a través del servidor. Deixeu-ho activat tret que el servidor comparteixi la vostra connexió a Internet, perquè YouTube només serveix els fluxos a l'adreça que els ha sol·licitat. Les miniatures sempre es carreguen directament de YouTube.
+    Notifications: Trieu com us avisa OpenTubeX dels directes, els vídeos nous i les baixades automàtiques. Amb Sistema i a l’aplicació, les notificacions apareixen dins d’OpenTubeX mentre l’utilitzeu i com a notificacions del sistema en cas contrari, i la campana les conserva. Desactivades també amaga les opcions de notificació.
   Proxy Settings:
     IP Block Recovery Script Path: Camí de l'script que s'executa quan es detecta un bloqueig d'IP. L'OpenTubeX espera que acabi i després torna a carregar el vídeo. Si l'alternativa està activada, només s'executa quan també falla.
   Player Settings:
@@ -3163,3 +3169,11 @@ Digital Wellbeing:
   Time for bed: "És hora d'anar a dormir"
   Bedtime started at: "La vostra hora d'anar a dormir ha començat a les {time}."
   Remind Me in 10 Minutes: "Recorda-m'ho d'aquí a 10 minuts"
+Notification Center:
+  Notifications: "Notificacions"
+  Notifications With Unread: "Notificacions ({count} sense llegir)"
+  Mark as Read: "Marca com a llegida"
+  Mark All as Read: "Marca-ho tot com a llegit"
+  Clear All: "Esborra-ho tot"
+  Empty: "Encara no hi ha notificacions"
+  Empty Hint: "Aquí apareixeran els recordatoris de directes i els vídeos nous dels canals amb les notificacions activades."

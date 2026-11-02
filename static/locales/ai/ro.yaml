@@ -496,6 +496,11 @@ Settings:
         Invalid credentials: Serverul a respins numele de utilizator sau parola.
         Rate limited: Serverul blochează autentificările după prea multe încercări eșuate. Încercați din nou mai târziu.
         Server error: Serverul a returnat o eroare (HTTP {status}).
+    Notifications:
+      Notifications: Notificări
+      System and In-App: Sistem și în aplicație
+      System Only: Doar sistem
+      Off: Dezactivate
   Context Menu Search Settings:
     Context Menu Search Settings: Căutare din meniul contextual
     Description: Alegeți motoarele de căutare care apar când faceți clic dreapta pe textul selectat. Căutările se deschid în browserul implicit.
@@ -2141,6 +2146,7 @@ Tooltips:
     Remember Tab Navigation History: Istoricul navigării înapoi și înainte al fiecărei file este salvat și restaurat la repornirea OpenTubeX.
     Yattee Server: Instanța yattee-server din care OpenTubeX încarcă videoclipuri, canale, liste de redare și rezultate ale căutării. Numele de utilizator și parola sunt stocate doar pe acest dispozitiv.
     Proxy Videos Through Yattee Server: Transmite fluxurile video și audio prin server. Lăsați opțiunea activată, cu excepția cazului în care serverul folosește aceeași conexiune la internet ca dvs., deoarece YouTube livrează fluxurile doar adresei care le-a solicitat. Miniaturile se încarcă întotdeauna direct de pe YouTube.
+    Notifications: Alege cum te anunță OpenTubeX despre transmisiunile live, încărcările noi și descărcările automate. Cu Sistem și în aplicație, notificările apar în OpenTubeX cât timp îl folosești, iar altfel ca notificări de sistem, iar clopoțelul le păstrează. Dezactivate ascunde și opțiunile de notificare.
   Proxy Settings:
     IP Block Recovery Script Path: Calea fișierului script care se rulează când este detectată blocarea IP-ului. OpenTubeX așteaptă finalizarea acestuia, apoi reîncarcă videoclipul. Dacă este activată sursa de rezervă, scriptul rulează numai când și aceasta eșuează.
   Player Settings:
@@ -2571,3 +2577,11 @@ Digital Wellbeing:
   Time for bed: "E timpul pentru culcare"
   Bedtime started at: "Ora de culcare a început la {time}."
   Remind Me in 10 Minutes: "Amintește-mi peste 10 minute"
+Notification Center:
+  Notifications: "Notificări"
+  Notifications With Unread: "Notificări ({count} necitite)"
+  Mark as Read: "Marchează ca citită"
+  Mark All as Read: "Marchează toate ca citite"
+  Clear All: "Șterge tot"
+  Empty: "Încă nu există notificări"
+  Empty Hint: "Aici vor apărea mementourile pentru transmisiunile live și încărcările noi de pe canalele cu notificări activate."

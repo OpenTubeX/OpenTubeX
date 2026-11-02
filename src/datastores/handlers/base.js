@@ -132,7 +132,8 @@ class Settings {
           'useTrayIcon',
           'hideToTrayOnClose',
           'hideToTrayOnMinimize',
-          'iconPack'
+          'iconPack',
+          'notificationMode'
         ]
       }
     })

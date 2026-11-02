@@ -495,6 +495,11 @@ Settings:
         Invalid credentials: 服务器拒绝了用户名或密码。
         Rate limited: 由于失败尝试次数过多，服务器正在阻止登录。请稍后重试。
         Server error: 服务器返回了错误（HTTP {status}）。
+    Notifications:
+      Notifications: 通知
+      System and In-App: 系统和应用内
+      System Only: 仅系统
+      Off: 关闭
   Context Menu Search Settings:
     Context Menu Search Settings: 右键菜单搜索
     Description: 选择右键单击所选文本时显示的搜索引擎。搜索结果会在默认浏览器中打开。
@@ -2089,6 +2094,7 @@ Tooltips:
     Remember Tab Navigation History: 保存每个标签页的前进和后退导航历史，并在 OpenTubeX 重新启动时恢复。
     Yattee Server: OpenTubeX 用于加载视频、频道、播放列表和搜索结果的 yattee-server 实例。用户名和密码仅保存在此设备上。
     Proxy Videos Through Yattee Server: 通过服务器中转视频和音频流。除非服务器与你使用同一个互联网连接，否则请保持开启，因为 YouTube 只向请求流的地址提供流。缩略图始终直接从 YouTube 加载。
+    Notifications: 选择 OpenTubeX 如何通知你直播、新上传内容和自动下载。选择“系统和应用内”时，使用 OpenTubeX 期间通知显示在应用内，其他时候显示为系统通知，并保存在铃铛中。“关闭”还会隐藏通知选项。
   Proxy Settings:
     IP Block Recovery Script Path: 检测到 IP 被封锁时要运行的脚本文件路径。OpenTubeX 会等待脚本运行完毕，然后重新加载视频。如果启用了备用方案，则仅在备用方案也失败时运行脚本。
   Player Settings:
@@ -2516,3 +2522,11 @@ Digital Wellbeing:
   Time for bed: "该睡觉了"
   Bedtime started at: "你的就寝时间已于 {time} 开始。"
   Remind Me in 10 Minutes: "10 分钟后提醒我"
+Notification Center:
+  Notifications: "通知"
+  Notifications With Unread: "通知（{count} 条未读）"
+  Mark as Read: "标记为已读"
+  Mark All as Read: "全部标记为已读"
+  Clear All: "全部清除"
+  Empty: "暂无通知"
+  Empty Hint: "直播提醒以及已开启通知的频道的新上传内容会显示在这里。"

@@ -186,6 +186,7 @@
             :icon="minimizedSettingsWindowIcon"
           />
         </button>
+        <FtNotificationCenter v-if="supportsNotificationHistory && store.getters.getNotificationMode === 'both'" />
         <button
           v-if="showDownloadsButton && !headerShortcutsOverflow"
           type="button"
@@ -273,6 +274,7 @@ import { useRoute, useRouter } from 'vue-router'
 import FtInput from '../FtInput/FtInput.vue'
 import FtIconButton from '../FtIconButton/FtIconButton.vue'
 import FtQuickSettingsMenu from '../FtQuickSettingsMenu/FtQuickSettingsMenu.vue'
+import FtNotificationCenter from '../FtNotificationCenter/FtNotificationCenter.vue'
 import CapacitorPhoneTabSwitcher from '../TabBar/CapacitorPhoneTabSwitcher.vue'
 
 import store from '../../store/index'
@@ -290,6 +292,7 @@ import { shouldOpenExternalMediaUrl } from '../../helpers/externalMediaUrl'
 import { supportsYtDlp } from '../../helpers/ytDlpCapabilities'
 import { usePhoneLayout } from '../../composables/usePhoneLayout'
 import { usesCapacitorTabletLayout } from '../../helpers/capacitorLayout'
+import { supportsNotificationHistory } from '../../helpers/notificationHistory'
 
 const { t } = useI18n()
 const syncing = computed(() => store.getters.getSyncServerStatus === 'syncing')

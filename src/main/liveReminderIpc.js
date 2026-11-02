@@ -4,6 +4,7 @@ import { Notification } from 'electron'
 import { IpcChannels } from '../constants'
 import { handleTrusted } from './ipc'
 import { supportsNativeNotifications } from './nativeNotifications'
+import { isThumbnailUrl } from '../notificationHistory'
 
 /**
  * @typedef {object} LiveReminderRequest
@@ -11,6 +12,7 @@ import { supportsNativeNotifications } from './nativeNotifications'
  * @property {number} startTimestamp
  * @property {string} notificationTitle
  * @property {string} notificationBody
+ * @property {string} [thumbnail]
  */
 
 /** @param {unknown} videoId @returns {videoId is string} */
@@ -37,7 +39,17 @@ export function isValidLiveReminder(reminder, now = Date.now()) {
     Number.isFinite(reminder.startTimestamp) &&
     reminder.startTimestamp > now &&
     isNotificationText(reminder.notificationTitle, 200) &&
-    isNotificationText(reminder.notificationBody, 500)
+    isNotificationText(reminder.notificationBody, 500) &&
+    (reminder.thumbnail === undefined || isThumbnailUrl(reminder.thumbnail))
+}
+
+/**
+ * Keeps only the known fields, which the reminder store saves as they are.
+ * @param {LiveReminderRequest} reminder
+ * @returns {LiveReminderRequest}
+ */
+function toLiveReminder({ videoId, startTimestamp, notificationTitle, notificationBody, thumbnail }) {
+  return { videoId, startTimestamp, notificationTitle, notificationBody, ...(thumbnail ? { thumbnail } : {}) }
 }
 
 /**
@@ -55,7 +67,7 @@ export function setupLiveReminderIpc(liveReminderManager) {
     canNotify() ? liveReminderManager.list() : [], [])
 
   handleTrusted(IpcChannels.LIVE_REMINDER_SCHEDULE, (_event, reminder) =>
-    canNotify() && isValidLiveReminder(reminder) ? liveReminderManager.schedule(reminder) : false, false)
+    canNotify() && isValidLiveReminder(reminder) ? liveReminderManager.schedule(toLiveReminder(reminder)) : false, false)
 
   handleTrusted(IpcChannels.LIVE_REMINDER_CANCEL, (_event, videoId) =>
     isValidVideoId(videoId) ? liveReminderManager.cancel(videoId) : false, false)

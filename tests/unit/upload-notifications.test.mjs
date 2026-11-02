@@ -122,6 +122,7 @@ test('the desktop notifier persists state and shows localized notifications', as
     const restarted = createUploadNotifier({ file, show: notification => shown.push(notification) })
     await restarted.configure({
       enabled: true,
+      thumbnailUrl: 'https://i.ytimg.com/vi/{id}/mqdefault.jpg',
       titles: { videos: 'New video from {channel}', live: '{channel} is live' },
       channels: { UC1: { name: 'One', feedTypes: ['videos'], membersOnly: false } }
     })
@@ -131,8 +132,8 @@ test('the desktop notifier persists state and shows localized notifications', as
       entries: [entry('m', NOW, { membersOnly: true }), entry('l', Date.now(), { live: true }), entry('b', Date.now()), entry('a')]
     })
     assert.deepEqual(shown, [
-      { title: 'One is live', body: 'Title l', url: 'https://www.youtube.com/watch?v=l', silent: false },
-      { title: 'New video from One', body: 'Title b', url: 'https://www.youtube.com/watch?v=b', silent: false }
+      { title: 'One is live', body: 'Title l', url: 'https://www.youtube.com/watch?v=l', silent: false, target: { kind: 'live', path: '/watch/l' }, thumbnail: 'https://i.ytimg.com/vi/l/mqdefault.jpg' },
+      { title: 'New video from One', body: 'Title b', url: 'https://www.youtube.com/watch?v=b', silent: false, target: { kind: 'video', path: '/watch/b' }, thumbnail: 'https://i.ytimg.com/vi/b/mqdefault.jpg' }
     ])
 
     await restarted.configure({ enabled: false })

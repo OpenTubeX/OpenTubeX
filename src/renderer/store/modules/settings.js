@@ -12,6 +12,7 @@ import { getTabNavigationService } from '../../tabs/TabNavigationService'
 import { getSystemLocale, showToast } from '../../helpers/utils'
 import { normalizeTabBarPosition } from '../../constants/tabBarPosition'
 import { setReducedMotionPreference } from '../../helpers/reducedMotion'
+import { applyCapacitorNotificationMode } from '../../helpers/liveReminders'
 import { setAnimationSpeed } from '../../helpers/animationSpeed'
 import { normalizeYouTubeCaptionLanguageCode } from '../../helpers/player/youtubeCaptionLanguages'
 import { clearSeekHistories } from '../../helpers/player/seekHistory'
@@ -266,6 +267,8 @@ const sideEffectHandlers = {
   reducedMotion: (store, value) => {
     setReducedMotionPreference(value)
   },
+
+  notificationMode: (_store, value) => applyCapacitorNotificationMode(value),
 
   animationSpeed: (_store, value) => {
     setAnimationSpeed(value)

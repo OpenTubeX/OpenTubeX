@@ -31,12 +31,47 @@ final class AndroidMediaArtwork implements AutoCloseable {
     static final long MAX_ARTWORK_DECODED_BYTES = MAX_ARTWORK_PIXELS * 4L;
     private final ArtworkRequestQueue requests = new ArtworkRequestQueue();
     private final Executor delivery;
-    private final OkHttpClient client = new OkHttpClient.Builder()
-        .dns(publicDns(Dns.SYSTEM))
-        .proxyAuthenticator(AndroidProxy.proxyAuthenticator())
-        .followRedirects(false).followSslRedirects(false)
-        .connectTimeout(5, TimeUnit.SECONDS).readTimeout(5, TimeUnit.SECONDS)
-        .callTimeout(10, TimeUnit.SECONDS).build();
+    private final OkHttpClient client = newClient();
+    private static OkHttpClient blockingClient;
+
+    private static OkHttpClient newClient() {
+        return new OkHttpClient.Builder()
+            .dns(publicDns(Dns.SYSTEM))
+            .proxyAuthenticator(AndroidProxy.proxyAuthenticator())
+            .followRedirects(false).followSslRedirects(false)
+            .connectTimeout(5, TimeUnit.SECONDS).readTimeout(5, TimeUnit.SECONDS)
+            .callTimeout(10, TimeUnit.SECONDS).build();
+    }
+
+    /** Loads artwork on the calling thread with the same limits, or returns null. */
+    static Bitmap loadBlocking(String source) {
+        OkHttpClient client;
+        synchronized (AndroidMediaArtwork.class) {
+            if (blockingClient == null) blockingClient = newClient();
+            client = blockingClient;
+        }
+        try {
+            URL url = new URL(source);
+            for (int redirects = 0; redirects <= MAX_ARTWORK_REDIRECTS; redirects++) {
+                if (!isSafeArtworkUrl(url)) return null;
+                try (Response response = client.newCall(new Request.Builder().url(url).build()).execute()) {
+                    if (isRedirectStatus(response.code())) {
+                        String location = response.header("Location");
+                        if (location == null) return null;
+                        url = new URL(url, location);
+                        continue;
+                    }
+                    ResponseBody body = response.body();
+                    if (!response.isSuccessful() || body == null) return null;
+                    byte[] encoded = readArtworkBytes(body.byteStream(), body.contentLength());
+                    return encoded == null ? null : decodeArtwork(encoded);
+                }
+            }
+        } catch (Exception ignored) {
+            // A missing image must not stop the notification.
+        }
+        return null;
+    }
 
     AndroidMediaArtwork(Executor delivery) { this.delivery = delivery; }
 

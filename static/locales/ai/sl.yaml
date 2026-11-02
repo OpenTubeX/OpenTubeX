@@ -629,6 +629,11 @@ Settings:
         Invalid credentials: Strežnik je zavrnil uporabniško ime ali geslo.
         Rate limited: Strežnik po preveč neuspešnih poskusih blokira prijave. Poskusite znova pozneje.
         Server error: Strežnik je vrnil napako (HTTP {status}).
+    Notifications:
+      Notifications: Obvestila
+      System and In-App: Sistem in v aplikaciji
+      System Only: Samo sistem
+      Off: Izklopljeno
   Context Menu Search Settings:
     Context Menu Search Settings: Iskanje v kontekstnem meniju
     Description: Izberite iskalnike, ki se prikažejo, ko z desno tipko miške kliknete izbrano besedilo. Iskanja se odprejo v privzetem brskalniku.
@@ -2598,6 +2603,7 @@ Tooltips:
     Remember Tab Navigation History: Zgodovina pomikanja nazaj in naprej se za vsak zavihek shrani ter obnovi ob ponovnem zagonu aplikacije OpenTubeX.
     Yattee Server: Primerek yattee-server, iz katerega OpenTubeX nalaga videoposnetke, kanale, sezname predvajanja in rezultate iskanja. Uporabniško ime in geslo sta shranjena samo v tej napravi.
     Proxy Videos Through Yattee Server: Video in zvočne tokove posreduje prek strežnika. To možnost pustite vklopljeno, razen če strežnik uporablja isto internetno povezavo kot vi, saj YouTube tokove pošilja samo naslovu, ki jih je zahteval. Sličice se vedno naložijo neposredno z YouTuba.
+    Notifications: Izberite, kako vas OpenTubeX obvešča o prenosih v živo, novih posnetkih in samodejnih prenosih. Z možnostjo Sistem in v aplikaciji so obvestila prikazana v OpenTubeX, ko ga uporabljate, sicer kot sistemska obvestila, zvonec pa jih hrani. Izklopljeno skrije tudi možnosti obvestil.
   Proxy Settings:
     IP Block Recovery Script Path: Pot do skriptne datoteke, ki se zažene ob zaznani blokadi naslova IP. OpenTubeX počaka, da se izvajanje konča, nato znova naloži videoposnetek. Če je omogočen nadomestni način, se skript zažene le, kadar tudi ta ne uspe.
   Player Settings:
@@ -3114,3 +3120,11 @@ Digital Wellbeing:
   Time for bed: "Čas je za spanje"
   Bedtime started at: "Vaš čas za spanje se je začel ob {time}."
   Remind Me in 10 Minutes: "Opomni me čez 10 minut"
+Notification Center:
+  Notifications: "Obvestila"
+  Notifications With Unread: "Obvestila (neprebrana: {count})"
+  Mark as Read: "Označi kot prebrano"
+  Mark All as Read: "Označi vse kot prebrano"
+  Clear All: "Počisti vse"
+  Empty: "Še ni obvestil"
+  Empty Hint: "Tukaj bodo prikazani opomniki za prenose v živo in novi posnetki kanalov z vklopljenimi obvestili."

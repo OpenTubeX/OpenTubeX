@@ -495,6 +495,11 @@ Settings:
         Invalid credentials: Sunucu kullanıcı adını veya parolayı reddetti.
         Rate limited: Sunucu, çok fazla başarısız denemenin ardından oturum açmayı engelliyor. Daha sonra tekrar deneyin.
         Server error: Sunucu bir hata döndürdü (HTTP {status}).
+    Notifications:
+      Notifications: Bildirimler
+      System and In-App: Sistem ve uygulama içi
+      System Only: Yalnızca sistem
+      Off: Kapalı
   Context Menu Search Settings:
     Context Menu Search Settings: Bağlam Menüsü Araması
     Description: Seçili metne sağ tıkladığınızda görünecek arama motorlarını seçin. Aramalar varsayılan tarayıcınızda açılır.
@@ -2090,6 +2095,7 @@ Tooltips:
     Remember Tab Navigation History: Her sekmenin geri ve ileri gezinme geçmişi kaydedilir ve OpenTubeX yeniden başlatıldığında geri yüklenir.
     Yattee Server: OpenTubeX'un videoları, kanalları, oynatma listelerini ve arama sonuçlarını yüklediği yattee-server örneği. Kullanıcı adı ve parola yalnızca bu cihazda saklanır.
     Proxy Videos Through Yattee Server: Video ve ses akışlarını sunucu üzerinden aktarır. Sunucu sizinle aynı internet bağlantısını kullanmıyorsa bunu açık bırakın, çünkü YouTube akışları yalnızca onları isteyen adrese sunar. Önizleme görselleri her zaman doğrudan YouTube'dan yüklenir.
+    Notifications: OpenTubeX’in sizi canlı yayınlar, yeni yüklemeler ve otomatik indirmeler hakkında nasıl bilgilendireceğini seçin. Sistem ve uygulama içi seçeneğinde bildirimler OpenTubeX’i kullanırken uygulamanın içinde, aksi hâlde sistem bildirimi olarak görünür ve zil onları saklar. Kapalı, bildirim seçeneklerini de gizler.
   Proxy Settings:
     IP Block Recovery Script Path: IP engeli algılandığında çalıştırılacak betik dosyasının yolu. OpenTubeX betiğin tamamlanmasını bekler ve videoyu yeniden yükler. Yedek arka uç etkinse yalnızca yedek arka uç da başarısız olduğunda çalışır.
   Player Settings:
@@ -2517,3 +2523,11 @@ Digital Wellbeing:
   Time for bed: "Uyku vakti geldi"
   Bedtime started at: "Uyku vaktiniz saat {time} itibarıyla başladı."
   Remind Me in 10 Minutes: "10 Dakika Sonra Hatırlat"
+Notification Center:
+  Notifications: "Bildirimler"
+  Notifications With Unread: "Bildirimler ({count} okunmamış)"
+  Mark as Read: "Okundu olarak işaretle"
+  Mark All as Read: "Tümünü okundu olarak işaretle"
+  Clear All: "Tümünü temizle"
+  Empty: "Henüz bildirim yok"
+  Empty Hint: "Canlı yayın hatırlatıcıları ve bildirimleri açık kanalların yeni yüklemeleri burada görünür."

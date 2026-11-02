@@ -495,6 +495,11 @@ Settings:
         Invalid credentials: Nac'het en deus ar servijer an anv implijer pe ar ger-tremen.
         Rate limited: Stankañ a ra ar servijer ar c'hennaskadennoù goude re a daolioù-esae c'hwitet. Klaskit en-dro diwezhatoc'h.
         Server error: Distroet en deus ar servijer ur fazi (HTTP {status}).
+    Notifications:
+      Notifications: Kemennoù
+      System and In-App: Reizhiad hag en arload
+      System Only: Reizhiad hepken
+      Off: Diweredekaet
   Context Menu Search Settings:
     Context Menu Search Settings: "Klask diwar ar roll lañser"
     Description: "Dibabit ar c'hefluskerioù enklask a vo diskouezet pa glikot a-zehou war destenn diuzet. Digoret e vo an enklaskoù en ho merdeer dre ziouer."
@@ -2098,6 +2103,7 @@ Tooltips:
     Remember Tab Navigation History: "Enrollet ha graet e vez assav eus istor merdeiñ war-raok ha war-gil pep ivinell pa vez adloc'het OpenTubeX."
     Yattee Server: An istañs yattee-server a vez implijet gant OpenTubeX evit kargañ videoioù, chadennoù, rolloù videoioù ha disoc'hoù klask. Ne vez enrollet an anv implijer hag ar ger-tremen nemet war an trevnad-mañ.
     Proxy Videos Through Yattee Server: Treuzkas a ra ar gwazhioù video ha son dre ar servijer. Lezit an dra-se gweredekaet nemet ma implij ar servijer an hevelep kennask internet ha c'hwi, rak YouTube ne gas ar gwazhioù nemet d'ar chomlec'h en deus o goulennet. Ar skeudennoùigoù a vez karget war-eeun diouzh YouTube bepred.
+    Notifications: Dibabit penaos e kas OpenTubeX kemennoù deoc’h diwar-benn ar c’hwitelladennoù war-eeun, ar pellgasadennoù nevez hag ar pellgargadennoù emgefreek. Gant Reizhiad hag en arload e teu ar c’hemennoù war wel en OpenTubeX e-pad ma implijit anezhañ, ha evel kemennoù reizhiad en un doare all, hag ar c’hloc’h a vir anezho. Diweredekaet a guzh ivez dibarzhioù ar c’hemennoù.
   Proxy Settings:
     IP Block Recovery Script Path: "Hent ar restr skript da erounit pa vez dinoet ur stankadur IP. Gortoz a ra OpenTubeX ma vo echu, hag adkargañ a ra ar video. Ma vez gweredekaet an diskoulm erlec'hiañ ne vez erounit ar skript nemet pa c'hwit an diskoulm-se ivez."
   Player Settings:
@@ -2525,3 +2531,11 @@ Digital Wellbeing:
   Time for bed: "Poent eo mont da gousket"
   Bedtime started at: "Kroget eo ho mare kousket da {time}."
   Remind Me in 10 Minutes: "Degas da soñj din a-benn 10 munutenn"
+Notification Center:
+  Notifications: "Kemennoù"
+  Notifications With Unread: "Kemennoù ({count} n’int ket bet lennet)"
+  Mark as Read: "Merkañ evel lennet"
+  Mark All as Read: "Merkañ pep tra evel lennet"
+  Clear All: "Skarzhañ pep tra"
+  Empty: "Kemenn ebet evit c’hoazh"
+  Empty Hint: "An dalc’hoù-soñj evit ar c’hwitelladennoù war-eeun hag ar pellgasadennoù nevez eus ar chadennoù gant kemennoù gweredekaet a zeuio war wel amañ."

@@ -53,6 +53,7 @@ import { createShortsFeedNavigation } from './shortsFeedNavigation'
 import { clampOverlayScrollTop, isOverlayScrollTopOutOfBounds, restoreOverlayScrollTop } from '../../helpers/overlayScrollbars'
 import { hasReachedWatchedThreshold, isHistoryEntryWatched } from '../../helpers/history'
 import { liveReminder, supportsLiveReminders } from '../../helpers/liveReminders'
+import { withThumbnail } from '../../helpers/notificationHistory'
 import { DOWNLOADED_MEDIA_MIME_TYPES } from '../../../constants'
 import { isOnAiSlopList } from '../../helpers/aiSlopList'
 import { isVideoHiddenByPreferences } from '../../helpers/subscriptions'
@@ -697,6 +698,7 @@ export default defineComponent({
     },
     canToggleLiveReminder: function () {
       return this.supportsLiveReminders &&
+        this.$store.getters.getNotificationMode !== 'off' &&
         this.premiereDate instanceof Date &&
         this.premiereDate.getTime() > this.liveReminderNow
     },
@@ -1845,7 +1847,8 @@ export default defineComponent({
         videoId: this.videoId,
         startTimestamp: this.premiereDate.getTime(),
         notificationTitle: this.t('Video.Scheduled video starting'),
-        notificationBody: this.t('Video.Live notification body', { videoTitle: this.videoTitle })
+        notificationBody: this.t('Video.Live notification body', { videoTitle: this.videoTitle }),
+        ...withThumbnail(this.videoId)
       }
     },
     async syncLiveReminder(loadGeneration, videoId) {

@@ -517,6 +517,11 @@ Settings:
         Invalid credentials: Tenaren avviste brukarnamnet eller passordet.
         Rate limited: Tenaren blokkerer innloggingar etter for mange mislukka forsøk. Prøv igjen seinare.
         Server error: Tenaren returnerte ein feil (HTTP {status}).
+    Notifications:
+      Notifications: Varsel
+      System and In-App: System og i appen
+      System Only: Berre system
+      Off: Av
   Context Menu Search Settings:
     Context Menu Search Settings: Søk i høgreklikkmenyen
     Description: Vel kva søkjemotorar som skal visast når du høgreklikkar på merkt tekst. Søka blir opna i standardnettlesaren din.
@@ -2399,6 +2404,7 @@ Tooltips:
     Remember Tab Navigation History: Historikken for fram- og tilbakenavigering i kvar fane vert lagra og gjenoppretta når OpenTubeX startar på nytt.
     Yattee Server: Førekomsten av yattee-server som OpenTubeX lastar inn videoar, kanalar, spelelistar og søkeresultat frå. Brukarnamnet og passordet blir berre lagra på denne eininga.
     Proxy Videos Through Yattee Server: Sender video- og lydstraumar vidare gjennom tenaren. La dette vere på med mindre tenaren deler internettilkoplinga di, fordi YouTube berre leverer straumar til adressa som bad om dei. Miniatyrbilete blir alltid lasta direkte frå YouTube.
+    Notifications: Vel korleis OpenTubeX varslar deg om direktesendingar, nye opplastingar og automatiske nedlastingar. Med System og i appen blir varsel viste i OpenTubeX medan du brukar det, og elles som systemvarsel, og bjella tek vare på dei. Av gøymer òg varselvala.
   Proxy Settings:
     IP Block Recovery Script Path: Filstien til skriptet som skal køyrast når ei IP-sperre vert oppdaga. OpenTubeX ventar til det er ferdig og lastar deretter inn videoen på nytt. Dersom reserveløysinga er slått på, køyrer skriptet berre når ho òg slår feil.
   Player Settings:
@@ -2911,3 +2917,11 @@ Digital Wellbeing:
   Time for bed: "Det er leggjetid"
   Bedtime started at: "Leggjetida di starta kl. {time}."
   Remind Me in 10 Minutes: "Minn meg på det om 10 minutt"
+Notification Center:
+  Notifications: "Varsel"
+  Notifications With Unread: "Varsel ({count} ulesne)"
+  Mark as Read: "Merk som lese"
+  Mark All as Read: "Merk alle som lese"
+  Clear All: "Fjern alle"
+  Empty: "Ingen varsel enno"
+  Empty Hint: "Påminningar om direktesendingar og nye opplastingar frå kanalar med varsel slått på blir viste her."
