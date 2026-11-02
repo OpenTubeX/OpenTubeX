@@ -840,6 +840,16 @@ class Playlists {
     return db.playlists.updateAsync({ _id: playlist._id }, { $set: playlist }, { upsert: true })
   }
 
+  /**
+   * Unlike `upsert`, this never recreates a playlist that was deleted, which
+   * a partial update would leave without its videos.
+   * @returns {Promise<boolean>} whether the playlist still existed
+   */
+  static async update(playlist) {
+    const { numAffected } = await db.playlists.updateAsync({ _id: playlist._id }, { $set: playlist })
+    return numAffected > 0
+  }
+
   /** Unlike `upsert`, this never recreates a playlist that was deleted */
   static async updateSortOrder(_id, sortOrder) {
     const { numAffected } = await db.playlists.updateAsync({ _id }, { $set: { sortOrder } }, { upsert: false })
@@ -1068,11 +1078,7 @@ class Playlists {
   }
 
   static deleteAllVideosByPlaylistId(_id) {
-    return db.playlists.updateAsync(
-      { _id },
-      { $set: { videos: [] } },
-      { upsert: true }
-    )
+    return db.playlists.updateAsync({ _id }, { $set: { videos: [] } })
   }
 
   static deleteMultiple(ids) {

@@ -3339,6 +3339,15 @@ function runApp() {
           )
           return null
 
+        case DBActions.PLAYLISTS.UPDATE: {
+          if (typeof data === 'string') data = JSON.parse(data)
+          const saved = await baseHandlers.playlists.update(data)
+          if (saved) {
+            syncOtherWindows(IpcChannels.SYNC_PLAYLISTS, event, { event: SyncEvents.GENERAL.UPSERT, data })
+          }
+          return saved
+        }
+
         case DBActions.PLAYLISTS.UPSERT_IF_UNCHANGED: {
           const saved = await baseHandlers.playlists.upsertIfUnchanged(data.playlist, data.previous)
           if (saved) {

@@ -236,7 +236,8 @@ const actions = {
     playlist.lastUpdatedAt = Date.now()
 
     try {
-      await DBPlaylistHandlers.upsert(playlist)
+      // Another window may have deleted the playlist, which must stay deleted
+      if (!await DBPlaylistHandlers.update(playlist)) return false
       commit('upsertPlaylistToList', playlist)
       return true
     } catch (errMessage) {
@@ -261,8 +262,7 @@ const actions = {
     playlist.lastPlayedAt = Date.now()
 
     try {
-      await DBPlaylistHandlers.upsert(playlist)
-      commit('upsertPlaylistToList', playlist)
+      if (await DBPlaylistHandlers.update(playlist)) commit('upsertPlaylistToList', playlist)
     } catch (errMessage) {
       console.error(errMessage)
     }
@@ -404,6 +404,11 @@ const actions = {
             playlist.lastUpdatedAt = dateNow
             anythingUpdated = true
           }
+          // Older versions could recreate a deleted playlist without videos
+          if (!Array.isArray(playlist.videos)) {
+            playlist.videos = []
+            anythingUpdated = true
+          }
           playlist.videos.forEach((v) => {
             // Ensure all videos has `timeAdded` property
             if (v.timeAdded == null) {
@@ -435,7 +440,7 @@ const actions = {
           })
           // Save updated playlist object
           if (anythingUpdated) {
-            repairs.push(DBPlaylistHandlers.upsert(playlist))
+            repairs.push(DBPlaylistHandlers.update(playlist))
           }
         })
         // A failed repair write must be logged, not left as an unhandled rejection.
@@ -450,7 +455,7 @@ const actions = {
           if (playlist != null && playlist.protected !== defaultPlaylist.protected) {
             playlist.protected = defaultPlaylist.protected
             try {
-              await DBPlaylistHandlers.upsert(playlist)
+              await DBPlaylistHandlers.update(playlist)
             } catch (errMessage) {
               console.error(errMessage)
             }

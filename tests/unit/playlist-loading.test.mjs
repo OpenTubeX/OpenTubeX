@@ -24,7 +24,7 @@ async function fixture(records, { settingsDelay = false, settingsError = null } 
   const errors = []
   // Observe detached writes too, so the test reports their errors as assertions.
   const pending = []
-  for (const method of ['create', 'upsert', 'delete']) {
+  for (const method of ['create', 'upsert', 'update', 'delete']) {
     const original = DBPlaylistHandlers[method].bind(DBPlaylistHandlers)
     DBPlaylistHandlers[method] = (...args) => {
       const result = original(...args).catch(error => { errors.push(error) })
@@ -129,7 +129,7 @@ test('a failed protection repair does not hide loaded playlists', async () => {
   const records = [playlist('watchLater', 'Watch Later', true), playlist('custom', 'My playlist')]
   const { module, errors, handlers, load } = await fixture(records)
   const failure = new Error('Storage temporarily unavailable')
-  handlers.upsert = async () => { throw failure }
+  handlers.update = async () => { throw failure }
 
   await load()
 
@@ -148,4 +148,24 @@ test('bulk playlist deletion removes every requested editable record and preserv
   assert.deepEqual(await db.playlists.findAsync({}).sort({ _id: 1 }), [protectedPlaylist, retained])
   assert.equal(await handlers.deleteMultiple(['first', 'second']), 0)
   assert.deepEqual(await db.playlists.findAsync({}).sort({ _id: 1 }), [protectedPlaylist, retained])
+})
+
+test('metadata and last-played updates never recreate a playlist deleted in another window', async () => {
+  const { db, dispatch, module, load } = await fixture([playlist('custom', 'Custom')])
+  await load()
+  await db.playlists.removeAsync({ _id: 'custom' })
+
+  assert.equal(await dispatch('updatePlaylist', { _id: 'custom', playlistName: 'Renamed' }), false)
+  await dispatch('updatePlaylistLastPlayedAt', { _id: 'custom' })
+
+  assert.equal(await db.playlists.findOneAsync({ _id: 'custom' }), null)
+  assert.equal(module.state.playlists.find(item => item._id === 'custom').playlistName, 'Custom')
+})
+
+test('loading repairs a playlist stored without videos', async () => {
+  const { db, errors, module, load } = await fixture([playlist('custom', 'Custom'), { _id: 'partial', lastPlayedAt: 5 }])
+  await load()
+  assert.deepEqual(errors, [])
+  assert.deepEqual(Array.from(module.state.playlists.find(item => item._id === 'partial').videos), [])
+  assert.deepEqual(Array.from((await db.playlists.findOneAsync({ _id: 'partial' })).videos), [])
 })

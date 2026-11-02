@@ -520,8 +520,13 @@ async function importUnifiedBackup() {
       const currentPlaylists = new Map((await DBPlaylistHandlers.find()).map(playlist => [playlist._id, playlist]))
       for (const playlist of data.playlists) {
         await normalizeImportedPlaylistThumbnail(playlist)
-        const merged = mergeBackupPlaylist(currentPlaylists.get(playlist._id), playlist)
-        if (await store.dispatch('updatePlaylist', merged) !== true) throw new Error('Could not restore playlist')
+        const current = currentPlaylists.get(playlist._id)
+        const merged = mergeBackupPlaylist(current, playlist)
+        if (current === undefined) {
+          await store.dispatch('importPlaylist', { ...merged, lastUpdatedAt: Date.now() })
+        } else if (await store.dispatch('updatePlaylist', merged) !== true) {
+          throw new Error('Could not restore playlist')
+        }
         currentPlaylists.set(playlist._id, merged)
       }
     }

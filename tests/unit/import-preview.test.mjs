@@ -138,7 +138,7 @@ test('duplicate backup identities accumulate subscriptions and videos promised b
     DBProfileHandlers: { find: async () => [], upsert: async record => profiles.set(record._id, record) },
     DBPlaylistHandlers: { find: async () => [] },
     mergeBackupProfile, mergeBackupPlaylist, normalizeImportedPlaylistThumbnail: async () => {},
-    store: { dispatch: async (action, record) => { if (action === 'updatePlaylist') playlists.set(record._id, record); return true } },
+    store: { dispatch: async (action, record) => { if (action === 'updatePlaylist' || action === 'importPlaylist') playlists.set(record._id, record); return true } },
     compactAllDatastores: async () => true, closeBackupImport() {}, showToast() {}, t: key => key,
   })
   vm.runInContext(componentSection('async function importUnifiedBackup()', 'const showTakeoutImport'), context)
