@@ -2616,7 +2616,10 @@ test.describe('scroll mini player', () => {
       const player = page.locator('.ftVideoPlayer')
       await page.locator('.tabBar .newTabButton').click()
       await expect(player).toHaveClass(/scrollMiniPlayer/)
-      await player.locator('.scrollMiniPlayPause').click()
+      // During playback the mini player hides its play/pause button after a
+      // few seconds, and a click on the hidden button only reveals the
+      // controls. Pause the media directly; pausing reveals the button.
+      await player.locator('video').evaluate(video => video.pause())
       await expect.poll(() => player.locator('video').evaluate(video => video.paused)).toBe(true)
       await expect(player.locator('.shortsTopControls')).toBeHidden()
       await expect(player).toHaveCSS('overflow', 'clip')
