@@ -126,7 +126,7 @@
 </template>
 
 <script setup>
-import { computed, nextTick, onMounted, ref, shallowRef, useTemplateRef } from 'vue'
+import { computed, nextTick, onBeforeUnmount, onMounted, ref, shallowRef, useTemplateRef } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { FtIcon } from '@opentubex/icons'
 
@@ -224,6 +224,8 @@ function serviceLabel(item) {
 }
 
 let servicesGeneration = 0
+// A request that finishes after the dialog closed must not save its instance
+onBeforeUnmount(() => { servicesGeneration += 1 })
 
 async function loadServices() {
   const url = normalizeRssHubInstance(instanceText.value)

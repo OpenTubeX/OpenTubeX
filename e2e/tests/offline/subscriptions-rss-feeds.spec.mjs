@@ -666,6 +666,107 @@ test.describe('without followed feeds', () => {
     await expect(manager.locator('.feedRow')).toHaveCount(0)
   })
 
+  test('keeps the newer RSSHub instance when a closed dialog finishes loading', async ({ page }) => {
+    await page.route(/^https?:\/\//, abortUnmockedRequest)
+    await page.route('https://raw.githubusercontent.com/RSSNext/rsshub-docs/**', route => route.fulfill({ body: '' }))
+    let release
+    const held = new Promise(resolve => { release = resolve })
+    let slowDelivered = false
+    await page.route('https://slow.example.test/api/namespace', async route => {
+      await held
+      await route.fulfill({ json: RSSHUB_NAMESPACES })
+      slowDelivered = true
+    })
+    await page.route('https://rss.example.test/api/namespace', route => route.fulfill({ json: RSSHUB_NAMESPACES }))
+    const savedInstance = () => page.evaluate(() => window.$store.getters.getRssHubInstance)
+
+    const manager = await openFeedManager(page)
+    const browse = manager.getByRole('button', { name: 'Browse RSSHub' })
+    const dialog = page.getByRole('dialog', { name: 'Add a feed from RSSHub' })
+    const instance = dialog.getByRole('textbox', { name: 'RSSHub instance' })
+    await browse.click()
+    await instance.fill('slow.example.test')
+    await instance.press('Enter')
+    await dialog.getByRole('button', { name: 'Close' }).click()
+    await expect(dialog).toHaveCount(0)
+
+    await browse.click()
+    await instance.fill('rss.example.test')
+    await instance.press('Enter')
+    await expect(dialog.getByRole('textbox', { name: 'Service' })).toBeEnabled()
+    await expect.poll(savedInstance).toBe('https://rss.example.test')
+
+    release()
+    await expect.poll(() => slowDelivered).toBe(true)
+    // Give the late response time to be read and parsed before checking that it changed nothing
+    await page.evaluate(() => new Promise(resolve => setTimeout(resolve, 500)))
+    expect(await savedInstance()).toBe('https://rss.example.test')
+  })
+
+  test('keeps the RSSHub dialog scrolled within its content when it shrinks', { tag: '@scale' }, async ({ app, page }) => {
+    await page.route(/^https?:\/\//, abortUnmockedRequest)
+    await page.route('https://raw.githubusercontent.com/RSSNext/rsshub-docs/**', route => route.fulfill({ body: '' }))
+    const parameters = Object.fromEntries(['a', 'b', 'c', 'd', 'e', 'f'].map(name => [name, `Parameter ${name}`]))
+    const namespaces = Object.fromEntries(Array.from({ length: 30 }, (_, index) => [`service${index}`, {
+      name: `Service ${String(index).padStart(2, '0')}`,
+      routes: { '/many/:a/:b?/:c?/:d?/:e?/:f?': { name: 'Many fields', parameters } }
+    }]))
+    await page.route('https://rss.example.test/api/namespace', route => route.fulfill({ json: namespaces }))
+    await setWindowSize(app, page, { width: 900, height: 560 })
+
+    const manager = await openFeedManager(page)
+    await manager.getByRole('button', { name: 'Browse RSSHub' }).click()
+    const dialog = page.getByRole('dialog', { name: 'Add a feed from RSSHub' })
+    const instance = dialog.getByRole('textbox', { name: 'RSSHub instance' })
+    await instance.fill('rss.example.test')
+    await instance.press('Enter')
+    const service = dialog.getByRole('textbox', { name: 'Service' })
+    await expect(service).toBeEnabled()
+
+    // Filtering the scrolled suggestions
+    await service.click()
+    const list = dialog.locator('.serviceInput .list')
+    const listScrollbar = list.locator(':scope > .os-scrollbar-vertical')
+    await expect(list.locator('li')).toHaveCount(30)
+    await expect(listScrollbar).not.toHaveClass(/os-scrollbar-unusable/)
+    await list.evaluate(element => { element.scrollTop = element.scrollHeight })
+    await expect.poll(() => list.evaluate(element => element.scrollTop)).toBeGreaterThan(0)
+    await service.fill('Service 29')
+    await expect(list.locator('li')).toHaveCount(1)
+    await expectScrollAtRenderedEnd(list)
+    await expect(listScrollbar).toHaveClass(/os-scrollbar-unusable/)
+
+    // Removing the route fields of the scrolled dialog
+    await list.locator('li').click()
+    const content = page.locator('.promptContentScroller')
+    const contentScrollbar = content.locator(':scope > .os-scrollbar-vertical')
+    await expect(dialog.getByRole('textbox', { name: 'f (optional)' })).toHaveCount(1)
+    await expect(contentScrollbar).not.toHaveClass(/os-scrollbar-unusable/)
+    await content.evaluate(element => { element.scrollTop = element.scrollHeight })
+    await expect.poll(() => content.evaluate(element => element.scrollTop)).toBeGreaterThan(0)
+    // Editing the service name without scrolling to the field starts a new search
+    await service.evaluate(element => element.focus({ preventScroll: true }))
+    await page.keyboard.press('ControlOrMeta+a')
+    await page.keyboard.type('none')
+    await expect(dialog.getByRole('textbox', { name: 'f (optional)' })).toHaveCount(0)
+    await expectScrollAtRenderedEnd(content)
+    await expect(contentScrollbar).toHaveClass(/os-scrollbar-unusable/)
+
+    // Enlarging the window
+    await service.fill('Service 29')
+    await list.locator('li').click()
+    await expect(contentScrollbar).not.toHaveClass(/os-scrollbar-unusable/)
+    await content.evaluate(element => { element.scrollTop = element.scrollHeight })
+    await expect.poll(() => content.evaluate(element => element.scrollTop)).toBeGreaterThan(0)
+    const before = await content.evaluate(element => element.scrollTop)
+    await setWindowSize(app, page, { width: 1000, height: 1100 })
+    await expectScrollAtRenderedEnd(content)
+    expect(await content.evaluate(element => element.scrollTop)).toBeLessThan(before)
+    // Larger UI scales can still overflow, so the scrollbar follows the new range
+    await expect.poll(() => content.evaluate(element => (element.scrollHeight - element.clientHeight < 1) ===
+      element.querySelector(':scope > .os-scrollbar-vertical').classList.contains('os-scrollbar-unusable'))).toBe(true)
+  })
+
   test('explains that a site asks for a browser check', async ({ page }) => {
     await page.route(/^https?:\/\//, abortUnmockedRequest)
     // Cloudflare answers clients it wants to verify with a challenge page
