@@ -87,10 +87,13 @@
         class="queueItemsContent"
         :data-skip-move="draggedItemId !== null ? '' : null"
       >
-        <li
+        <FtWindowedListItem
           v-for="(item, index) in items"
           :key="item.queueItemId"
+          tag="li"
           class="queueItem"
+          :initially-visible="index < INITIALLY_VISIBLE_ROWS"
+          :keep-mounted="draggedItemId === String(item.queueItemId)"
           :data-queue-item-id="String(item.queueItemId)"
           :class="{ dragging: draggedItemId === String(item.queueItemId) }"
           :style="rowStyle(String(item.queueItemId))"
@@ -158,7 +161,7 @@
             :padding="queueItemMenuPadding"
             @click="openQueueItemMenu(item.queueItemId)"
           />
-        </li>
+        </FtWindowedListItem>
       </TransitionGroup>
     </div>
     <p
@@ -184,6 +187,7 @@ import FtCard from '../ft-card/ft-card.vue'
 import FtIconButton from '../FtIconButton/FtIconButton.vue'
 import FtListVideo from '../FtListVideo/FtListVideo.vue'
 import FtRetryImage from '../FtRetryImage.vue'
+import FtWindowedListItem from '../FtWindowedListItem/FtWindowedListItem.vue'
 import store from '../../store/index'
 import { restoreOverlayScrollTop } from '../../helpers/overlayScrollbars'
 import { openButtonMenu } from '../../helpers/buttonMenu'
@@ -194,6 +198,9 @@ const emit = defineEmits(['pause-player', 'close'])
 const { t, locale } = useI18n()
 
 const items = computed(() => store.getters.getWatchQueue)
+// Whole playlists can be queued, so only rows near the viewport mount their
+// cards. The first ones mount right away to fill the list as it opens.
+const INITIALLY_VISIBLE_ROWS = 10
 const queueItems = useTemplateRef('queueItems')
 const queueContent = useTemplateRef('queueContent')
 const contentElement = computed(() => queueContent.value?.$el ?? null)
