@@ -1,5 +1,5 @@
 import { test, expect, goToSettingsSection, setPlayerFullscreen } from '../../helpers/app.mjs'
-import { findWatchComponent, openMockedVideo, openCaptionLanguages } from '../../helpers/player.mjs'
+import { findWatchComponent, openMockedVideo, openCaptionLanguages, openPlayerOptions } from '../../helpers/player.mjs'
 import { mockPlayableWatchPage } from '../../helpers/watch.mjs'
 
 test.use({
@@ -257,7 +257,7 @@ test('changing fonts remeasures paused controls and clipped menu labels without 
     await setFont(wide.font)
     await expect(panel).toHaveClass(/ft-controls-compact-chapters/)
 
-    await panel.locator('.shaka-overflow-menu-button').click()
+    await openPlayerOptions(player)
     const menuLabel = player.locator('.shaka-overflow-menu .shaka-playbackrate-button .shaka-overflow-button-label > span:not(.shaka-current-selection-span)').first()
     const labelText = (await menuLabel.textContent()).trim()
     const labelWidths = []
@@ -313,7 +313,7 @@ test('portrait mobile controls keep captions and PiP in settings when the row is
     await expect(panel.locator('.shaka-pip-button')).toBeHidden()
     await expect(panel.locator('.shaka-fullscreen-button')).toBeVisible()
     await expect.poll(() => panel.locator('.shaka-spacer').evaluate(element => element.getBoundingClientRect().width)).toBeLessThan(1)
-    await panel.locator('.shaka-overflow-menu-button').click()
+    await openPlayerOptions(player)
     const menu = player.locator('.shaka-overflow-menu')
     await expect(menu.getByRole('button', { name: 'Captions' })).toBeVisible()
     await expect(menu.locator('.shaka-pip-button')).toBeVisible()
@@ -366,7 +366,7 @@ test('Layout setting restores classic player controls and switches the active pl
   }
   await expect.poll(() => player.locator('.shaka-controls-button-panel > .ft-chapters-button').evaluate(element => getComputedStyle(element, '::before').backgroundColor)).toBe('rgba(0, 0, 0, 0.16)')
   await expect(player.locator('.shaka-scrim-container')).toHaveCSS('background-image', /linear-gradient/)
-  await player.locator('.shaka-overflow-menu-button').click()
+  await openPlayerOptions(player)
   const menu = player.locator('.shaka-overflow-menu:not(.shaka-hidden)')
   await expect(menu).toHaveCSS('backdrop-filter', 'none')
   await expect(menu).toHaveCSS('background-color', 'rgba(28, 28, 28, 0.9)')

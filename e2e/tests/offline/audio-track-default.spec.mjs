@@ -1,5 +1,5 @@
 import { test, expect, sel } from '../../helpers/app.mjs'
-import { activeTab, findWatchComponent } from '../../helpers/player.mjs'
+import { activeTab, findWatchComponent, openPlayerOptions } from '../../helpers/player.mjs'
 import { mockPlayableWatchPage } from '../../helpers/watch.mjs'
 import { POST_LIVE_AUDIO_URL, POST_LIVE_VIDEO_URL, routePostLiveMedia } from '../../helpers/media.mjs'
 
@@ -75,7 +75,7 @@ ${media}
         return shakaPlayer?.getVariantTracks().find(track => track.active)?.language
       })).toBe('en-US')
 
-      await player.locator('.shaka-overflow-menu-button').click()
+      await openPlayerOptions(player)
       await player.locator('.shaka-overflow-menu').getByRole('button', { name: 'Audio Tracks' }).click()
       await player.locator('.audio-tracks').getByRole('menuitemradio', { name: 'العربية - dubbed-auto' }).click()
       await expect.poll(() => player.evaluate(element => (

@@ -1,5 +1,5 @@
 import { test, expect, setPlayerFullscreen, setWindowSize } from '../../helpers/app.mjs'
-import { activeTab, openMockedVideo } from '../../helpers/player.mjs'
+import { activeTab, openMockedVideo, openPlayerOptions } from '../../helpers/player.mjs'
 import { mockPlayableWatchPage } from '../../helpers/watch.mjs'
 
 test.use({ seed: { settings: { videoPlaybackEngine: 'built-in', ytDlpPlaybackEngineDefaultMigration: true } } })
@@ -54,7 +54,7 @@ test('reorders the control bar and moves removed buttons into the player menu', 
     .map(element => element.className))).toEqual([expect.stringContaining('shaka-overflow-menu-button')])
   await setPlayerFullscreen(page, false)
 
-  await player.getByRole('button', { name: 'More settings' }).click()
+  await openPlayerOptions(player)
   const menu = player.locator('.shaka-overflow-menu')
   await expect(menu).toBeVisible()
   const moved = initial.filter(id => !selected.includes(id))
@@ -109,7 +109,7 @@ test('puts player menu controls on the control bar', async ({ app, page }) => {
     .evaluateAll(elements => elements.map(element => element.ariaLabel)))
     .toEqual(['Resolution', 'Playback speed', 'Loop the current video', 'More settings'])
 
-  await player.getByRole('button', { name: 'More settings' }).click()
+  await openPlayerOptions(player)
   const menu = player.locator('.shaka-overflow-menu')
   await expect(menu).toBeVisible()
   await expect(menu.locator('.legacy-quality-button, .shaka-playbackrate-button, .loop-button')).toHaveCount(0)
@@ -131,7 +131,7 @@ test('hides player menu controls', async ({ app, page }) => {
     await window.$store.dispatch('updateControlBarButtons', ['captions', 'menu', 'fullscreen'])
     await window.$store.dispatch('updateHiddenPlayerMenuControls', ['sleepTimer', 'ambientMode', 'playbackRate', 'theatreMode'])
   })
-  await player.getByRole('button', { name: 'More settings' }).click()
+  await openPlayerOptions(player)
   const menu = player.locator('.shaka-overflow-menu')
   await expect(menu).toBeVisible()
   await expect(menu.locator('.legacy-quality-button')).toBeVisible()

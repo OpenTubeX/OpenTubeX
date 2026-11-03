@@ -1,5 +1,5 @@
 import { test, expect } from '../../helpers/app.mjs'
-import { openMockedVideo, openCaptionLanguages, settleMenuZoom } from '../../helpers/player.mjs'
+import { openMockedVideo, openCaptionLanguages, settleMenuZoom, openPlayerOptions } from '../../helpers/player.mjs'
 import { mockPlayableWatchPage } from '../../helpers/watch.mjs'
 
 /**
@@ -39,7 +39,7 @@ for (const usePlayerMenuGrid of [true, false]) {
       await player.hover()
       // Keep the controls shown, they can fade out before the clicks on slow machines
       await player.locator('.shaka-controls-container').evaluate(element => element.setAttribute('casting', 'true'))
-      await player.getByRole('button', { name: 'More settings' }).click()
+      await openPlayerOptions(player)
       const overflowMenu = player.locator('.shaka-overflow-menu')
 
       /**

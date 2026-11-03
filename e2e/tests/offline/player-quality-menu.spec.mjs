@@ -1,5 +1,5 @@
 import { test, expect, setWindowSize } from '../../helpers/app.mjs'
-import { activeTab, openMockedVideo } from '../../helpers/player.mjs'
+import { activeTab, openMockedVideo, openPlayerOptions } from '../../helpers/player.mjs'
 import { mockPlayableWatchPage } from '../../helpers/watch.mjs'
 import { POST_LIVE_VIDEO_URL, routePostLiveMedia } from '../../helpers/media.mjs'
 
@@ -132,7 +132,7 @@ for (const usePlayerMenuGrid of [true, false]) {
       const menu = player.locator('.shaka-resolutions')
       const codecs = menu.locator('.ft-quality-codecs')
       await player.hover()
-      await player.locator('.shaka-overflow-menu-button').click()
+      await openPlayerOptions(player)
       await player.locator('.shaka-resolution-button').click()
       await codecs.getByRole('button', { name: 'DVH1' }).click()
       await expect(menu.locator('.explicit-resolution > span')).toHaveText(['2160p Dolby Vision'])
@@ -173,7 +173,7 @@ for (const usePlayerMenuGrid of [true, false]) {
       const tiles = menu.locator('.explicit-resolution')
       const openMenu = async () => {
         await player.hover()
-        await player.locator('.shaka-overflow-menu-button').click()
+        await openPlayerOptions(player)
         await player.locator('.shaka-resolution-button').click()
         await expect(menu).toBeVisible()
       }
@@ -332,7 +332,7 @@ test.describe('grid submenu headers', { tag: '@scale' }, () => {
     }
 
     await player.hover()
-    await player.locator('.shaka-overflow-menu-button').click()
+    await openPlayerOptions(player)
     await player.locator('.shaka-playbackrate-button').click()
     const speeds = player.locator('.shaka-playback-rates')
     await expect(speeds).toBeVisible()
@@ -422,7 +422,7 @@ test.describe('quality codecs from the manifest', () => {
     await openAdaptiveVideo(app, page, ['av01.0.00M.08', 'vp09.00.10.08', 'avc1.42c00d'])
     const player = page.locator(`${activeTab} .ftVideoPlayer`)
     await player.hover()
-    await player.locator('.shaka-overflow-menu-button').click()
+    await openPlayerOptions(player)
     await player.locator('.shaka-resolution-button').click()
     const codecs = player.locator('.shaka-resolutions .ft-quality-codecs')
     await expect(codecs.getByRole('button')).toHaveText(['AV1', 'VP9', 'H.264'])
@@ -436,7 +436,7 @@ test.describe('quality codecs from the manifest', () => {
     await openAdaptiveVideo(app, page, [['avc1.42c00d', '1280x720', '720p'], ['avc1.42c00d', '640x360', '360p']])
     const player = page.locator(`${activeTab} .ftVideoPlayer`)
     await player.hover()
-    await player.locator('.shaka-overflow-menu-button').click()
+    await openPlayerOptions(player)
     await player.locator('.shaka-resolution-button').click()
     const menu = player.locator('.shaka-resolutions')
     await expect(menu.locator('.explicit-resolution > span')).toHaveText(['720p', '360p'])
@@ -455,7 +455,7 @@ test.describe('quality codecs from the manifest', () => {
       shakaPlayer.dispatchEvent({ type: 'trackschanged' })
     })
     await player.hover()
-    await player.locator('.shaka-overflow-menu-button').click()
+    await openPlayerOptions(player)
     await player.locator('.shaka-resolution-button').click()
     await expect(player.locator('.shaka-resolutions .explicit-resolution > span')).toHaveText(['1080p'])
   })

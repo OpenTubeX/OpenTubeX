@@ -1,5 +1,5 @@
 import { sel, setWindowSize, test, expect } from '../../helpers/app.mjs'
-import { activeTab, findWatchComponent, openMockedVideo, waitForPlayback } from '../../helpers/player.mjs'
+import { activeTab, findWatchComponent, openMockedVideo, waitForPlayback, openPlayerOptions } from '../../helpers/player.mjs'
 import { mockPlayableWatchPage, watchViewHandle } from '../../helpers/watch.mjs'
 import { DEMO_MEDIA_URL } from '../../helpers/media.mjs'
 import { WATCH_PAGE_SEED, mockMusicMediaType } from '../../helpers/watch-page.mjs'
@@ -82,7 +82,7 @@ test.describe('desktop quick playback speed bar', () => {
         }, { once: true })
       })
       await player.locator('.shaka-controls-container').evaluate(element => element.setAttribute('shown', 'true'))
-      await player.getByRole('button', { name: 'More settings', exact: true }).click()
+      await openPlayerOptions(player)
       await player.locator('.legacy-quality-button').click()
       await player.locator('.legacy-qualities').getByRole('menuitemradio', { name: '240p', exact: true }).click()
       expect(await view.evaluate(view => view.$refs.player.hasLoaded)).toBe(true)
@@ -91,7 +91,7 @@ test.describe('desktop quick playback speed bar', () => {
       if (control === 'quick bar') {
         await bar.locator('[data-rate="1.5"]').click()
       } else {
-        await player.getByRole('button', { name: 'More settings', exact: true }).click()
+        await openPlayerOptions(player)
         await player.locator('.shaka-playbackrate-button').click()
         await player.locator('.shaka-playback-rates .shaka-playback-rate-preset-btn[data-rate="1.5"]').click()
       }
@@ -170,11 +170,11 @@ test.describe('desktop quick playback speed bar', () => {
           if (control === 'normal-rate menu') await bar.locator('[data-rate="1.5"]').click()
           const selectedRate = control === 'normal-rate menu' ? 1 : 1.5
           const player = page.locator(`${activeTab} .ftVideoPlayer`)
-          await player.getByRole('button', { name: 'More settings', exact: true }).click()
+          await openPlayerOptions(player)
           await player.locator('.shaka-playbackrate-button').click()
           const menu = player.locator('.shaka-playback-rates')
           await menu.locator(`.shaka-playback-rate-preset-btn[data-rate="${selectedRate}"]`).click()
-          await player.getByRole('button', { name: 'More settings', exact: true }).click()
+          await openPlayerOptions(player)
           await player.locator('.shaka-playbackrate-button').click()
           await expect(menu.locator(`.shaka-playback-rate-preset-btn[data-rate="${selectedRate}"]`)).toHaveAttribute('aria-checked', 'true')
           await menu.locator('.shaka-back-to-overflow-button').click()

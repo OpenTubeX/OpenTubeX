@@ -1,5 +1,6 @@
 import { test, expect, goTo, goToSettingsSection, sel, setWindowSize, openInterfaceCustomizer } from '../../helpers/app.mjs'
 import { mockPlayableWatchPage, watchHistoryEntry, watchViewHandle } from '../../helpers/watch.mjs'
+import { openPlayerOptions } from '../../helpers/player.mjs'
 
 const musicModeSeed = {
   settings: {
@@ -57,7 +58,7 @@ test('player toggles music mode without rewinding or changing saved defaults', a
   const watch = await watchViewHandle(page)
   await watch.evaluate(view => view.$store.dispatch('updateChannelPlaybackSpeeds', JSON.stringify({ [view.channelId]: 2.5 })))
   await page.locator('.ftVideoPlayer').hover()
-  await page.locator('.shaka-overflow-menu-button').click()
+  await openPlayerOptions(page)
   const button = page.locator('.music-mode-button')
   await expect(button).toHaveAccessibleName('Music Mode')
   await expect(button).toHaveAttribute('aria-pressed', 'false')
@@ -296,7 +297,7 @@ test.describe('music mode visibility setting', () => {
     await page.locator('a.title').filter({ hasText: watchHistoryEntry.title }).first().click()
     await expectPlayback(page, 0, 1)
     await page.locator('.ftVideoPlayer').hover()
-    await page.locator('.shaka-overflow-menu-button').click()
+    await openPlayerOptions(page)
     await expect(page.locator('.music-mode-button')).toBeVisible()
     const watch = await watchViewHandle(page)
     await watch.evaluate(view => view.$store.dispatch('updateShowMusicModeToggle', false))
@@ -310,7 +311,7 @@ test.describe('music mode visibility setting', () => {
     await expect(page.locator('[data-setting-id="musicMode"]')).toHaveCount(0)
     await page.locator('.profileTrigger').click()
     await page.locator('.ftVideoPlayer').hover()
-    await page.locator('.shaka-overflow-menu-button').click()
+    await openPlayerOptions(page)
     await expect(page.locator('.music-mode-button')).toBeVisible()
     await expect(page.locator('.music-mode-button')).toHaveAttribute('aria-pressed', 'true')
     const restarted = await app.relaunch()

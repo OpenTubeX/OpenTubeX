@@ -1,5 +1,5 @@
 import { test, expect } from '../../helpers/app.mjs'
-import { openMockedVideo, openCaptionLanguages } from '../../helpers/player.mjs'
+import { openMockedVideo, openCaptionLanguages, openPlayerOptions } from '../../helpers/player.mjs'
 import { mockPlayableWatchPage } from '../../helpers/watch.mjs'
 
 const SEED = {
@@ -41,7 +41,7 @@ async function openCaptionsMenu(page) {
   await player.hover()
   // Keep the controls shown, they can fade out before the click on slow machines
   await player.locator('.shaka-controls-container').evaluate(element => element.setAttribute('casting', 'true'))
-  await player.getByRole('button', { name: 'More settings' }).click()
+  await openPlayerOptions(player)
   await openCaptionLanguages(player)
   const captionsMenu = player.locator('.shaka-text-languages')
   await expect(captionsMenu).toBeVisible()

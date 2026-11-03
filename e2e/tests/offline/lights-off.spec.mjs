@@ -1,18 +1,7 @@
 import { readFileSync } from 'node:fs'
 import { test, expect, setWindowSize } from '../../helpers/app.mjs'
-import { activeTab, openMockedVideo, settleMenuZoom } from '../../helpers/player.mjs'
+import { activeTab, openMockedVideo, openPlayerOptions } from '../../helpers/player.mjs'
 import { mockPlayableWatchPage } from '../../helpers/watch.mjs'
-
-/**
- * Opens the player options and waits for them to grow in. A click on an entry
- * that is still moving retries, and Playwright's third attempt scrolls the
- * entry to the middle of the window, which moves the player under the top bar.
- * @param {import('@playwright/test').Locator} player
- */
-async function openOptions(player) {
-  await player.locator('.shaka-overflow-menu-button').click()
-  await settleMenuZoom(player)
-}
 
 test.describe('lights off', { tag: '@scale' }, () => {
   test.use({
@@ -39,7 +28,7 @@ test.describe('lights off', { tag: '@scale' }, () => {
     }, value)
     await setAvailable(true)
     await player.hover()
-    await openOptions(player)
+    await openPlayerOptions(player)
     const toggle = player.locator('.lights-off-button')
     await expect(toggle).toHaveAttribute('aria-pressed', 'false')
     await toggle.click()
@@ -141,7 +130,7 @@ test.describe('lights off', { tag: '@scale' }, () => {
     await setAvailable(true)
     await expect(overlay).toBeVisible()
     await player.hover()
-    await openOptions(player)
+    await openPlayerOptions(player)
     await expect(player.locator('.lights-off-button')).toHaveAttribute('aria-pressed', 'true')
     await player.locator('.lights-off-button').click()
     await expect(overlay).toHaveCount(0)
@@ -167,7 +156,7 @@ test.describe('lights off', { tag: '@scale' }, () => {
       .dispatch('updateShowLightsOffToggle', true))
     const player = page.locator(`${activeTab} .ftVideoPlayer`)
     await player.hover()
-    await openOptions(player)
+    await openPlayerOptions(player)
     await player.locator('.lights-off-button').click()
     await expect(page.locator('.lightsOffOverlay')).toBeVisible()
     for (let transition = 0; transition < 2; transition++) {

@@ -1,5 +1,5 @@
 import { goTo, setPlayerFullscreen, test, expect } from '../../helpers/app.mjs'
-import { openCaptionStyleMenu, openMockedVideo } from '../../helpers/player.mjs'
+import { openCaptionStyleMenu, openMockedVideo, openPlayerOptions } from '../../helpers/player.mjs'
 import { mockPlayableWatchPage } from '../../helpers/watch.mjs'
 
 test.use({
@@ -144,7 +144,7 @@ test('saves a caption style picked from the Options of the captions menu', async
   await player.hover()
   // Keep the controls shown, they can fade out before the clicks on slow machines
   await player.locator('.shaka-controls-container').evaluate(element => element.setAttribute('casting', 'true'))
-  await player.getByRole('button', { name: 'More settings' }).click()
+  await openPlayerOptions(player)
   await openCaptionStyleMenu(player, '.shaka-caption-size-button')
   await player.locator('.shaka-overflow-menu').getByRole('menuitemradio', { name: '150%', exact: true }).click()
 
@@ -164,7 +164,7 @@ test('picks caption font sizes between the presets with the slider of the captio
   await player.hover()
   // Keep the controls shown, they can fade out before the clicks on slow machines
   await player.locator('.shaka-controls-container').evaluate(element => element.setAttribute('casting', 'true'))
-  await player.getByRole('button', { name: 'More settings' }).click()
+  await openPlayerOptions(player)
   await openCaptionStyleMenu(player, '.shaka-caption-size-button')
 
   const menu = player.locator('.ft-caption-font-sizes')
@@ -212,7 +212,7 @@ test('picks caption background opacities with the slider of the captions menu', 
   await player.hover()
   // Keep the controls shown, they can fade out before the clicks on slow machines
   await player.locator('.shaka-controls-container').evaluate(element => element.setAttribute('casting', 'true'))
-  await player.getByRole('button', { name: 'More settings' }).click()
+  await openPlayerOptions(player)
   await openCaptionStyleMenu(player, '.shaka-caption-background-opacity-button')
 
   // The default black background shows its 80%

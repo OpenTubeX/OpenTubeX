@@ -3,7 +3,7 @@ import { createServer } from 'node:http'
 import path from 'node:path'
 
 import { expect, goTo, repoRoot, sel, setWindowSize, test } from '../../helpers/app.mjs'
-import { activeTab, openMockedVideo, waitForPlayback } from '../../helpers/player.mjs'
+import { activeTab, openMockedVideo, waitForPlayback, openPlayerOptions } from '../../helpers/player.mjs'
 import { mockPlayableWatchPage } from '../../helpers/watch.mjs'
 import { DEMO_MEDIA_PATH, DEMO_MEDIA_URL, routeDemoMedia } from '../../helpers/media.mjs'
 import { expectImagesLoaded, fulfillVisualFixture } from '../../helpers/visual-fixtures.mjs'
@@ -807,7 +807,7 @@ test('external chapters use a phone sheet and keep valid scrolling after resizin
   await setWindowSize(app, page, { width: 375, height: 850 })
   const player = page.locator(`${activeTab} .videoPlayer`)
   await player.hover()
-  await player.locator('.shaka-overflow-menu-button').click()
+  await openPlayerOptions(player)
   await player.locator('.phonePlayerOptions[open] .ft-chapters-button').click()
   const sheet = page.locator('dialog[open]').filter({ has: page.locator('.watchVideoChaptersPanel') })
   await expect(sheet).toBeVisible()
@@ -954,7 +954,7 @@ test('external media can stop at the end of its current chapter', async ({ app, 
   await video.evaluate(element => element.pause())
 
   const player = page.locator(`${activeTab} .videoPlayer`)
-  await player.locator('.shaka-overflow-menu-button').click()
+  await openPlayerOptions(player)
   await player.locator('.sleep-timer-button').click()
   await player.locator('.sleep-timer-menu').getByRole('button', { name: 'End of current chapter' }).click()
   await video.evaluate(element => element.play())

@@ -1,5 +1,5 @@
 import { test, expect, sel } from '../../helpers/app.mjs'
-import { activeTab } from '../../helpers/player.mjs'
+import { activeTab, openPlayerOptions } from '../../helpers/player.mjs'
 import { mockPlayableWatchPage, watchViewHandle } from '../../helpers/watch.mjs'
 import { POST_LIVE_VIDEO_URL, routePostLiveMedia } from '../../helpers/media.mjs'
 
@@ -51,7 +51,7 @@ for (const premiere of [false, true]) {
     await expect(bar).toBeVisible()
     await bar.locator('[data-rate="1.5"]').click()
     await expect.poll(() => video.evaluate(element => element.playbackRate)).toBe(1.5)
-    await player.getByRole('button', { name: 'More settings', exact: true }).click()
+    await openPlayerOptions(player)
     await expect(player.locator('.shaka-playbackrate-button')).toBeVisible()
     await attachScreenshot('DVR playback speed controls')
     await player.locator('.shaka-playbackrate-button').click()

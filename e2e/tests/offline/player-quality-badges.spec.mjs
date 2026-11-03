@@ -1,5 +1,5 @@
 import { test, expect, setWindowSize } from '../../helpers/app.mjs'
-import { activeTab, openMockedVideo } from '../../helpers/player.mjs'
+import { activeTab, openMockedVideo, openPlayerOptions } from '../../helpers/player.mjs'
 import { mockPlayableWatchPage } from '../../helpers/watch.mjs'
 
 /**
@@ -62,7 +62,7 @@ test.describe('resolution badges', { tag: '@scale' }, () => {
     for (const width of [1280, 450]) {
       await setWindowSize(app, page, { width, height: width === 450 ? 700 : 800 })
       await player.hover()
-      await player.getByRole('button', { name: 'More settings' }).click()
+      await openPlayerOptions(player)
       await page.locator('.shaka-overflow-menu .legacy-quality-button').click()
       const menu = page.locator('.legacy-qualities')
       await expect(menu).toBeVisible()
@@ -119,7 +119,7 @@ test.describe('resolution badges', { tag: '@scale' }, () => {
     await player.locator('.shaka-controls-container').evaluate(element => element.setAttribute('casting', 'true'))
     await setWindowSize(app, page, { width: 1280, height: 800 })
     await player.hover()
-    await player.getByRole('button', { name: 'More settings' }).click()
+    await openPlayerOptions(player)
     await page.locator('.shaka-overflow-menu .legacy-quality-button').click()
     const menu = page.locator('.legacy-qualities')
     await expect(menu).toBeVisible()

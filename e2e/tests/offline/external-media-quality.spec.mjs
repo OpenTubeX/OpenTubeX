@@ -2,7 +2,7 @@ import { readFile } from 'node:fs/promises'
 import path from 'node:path'
 
 import { expect, repoRoot, sel, test } from '../../helpers/app.mjs'
-import { activeTab } from '../../helpers/player.mjs'
+import { activeTab, openPlayerOptions } from '../../helpers/player.mjs'
 import { mapExternalPlaybackMetadata } from '../../../src/ytDlpMetadata.js'
 
 for (const quality of ['1080', '480', 'auto']) {
@@ -76,7 +76,7 @@ ${segmentUrl}
 
       if (quality === '1080') {
         await player.hover()
-        await player.locator('.shaka-overflow-menu-button').click()
+        await openPlayerOptions(player)
         await player.locator('.shaka-overflow-menu').getByRole('button', { name: 'Resolution' }).click()
         await player.locator('.shaka-resolutions').screenshot({ path: testInfo.outputPath('default-quality-1080.png') })
       }

@@ -1,5 +1,5 @@
 import { test, expect } from '../../helpers/app.mjs'
-import { activeTab, openMockedVideo, settleMenuZoom } from '../../helpers/player.mjs'
+import { activeTab, openMockedVideo, openPlayerOptions } from '../../helpers/player.mjs'
 import { mockPlayableWatchPage } from '../../helpers/watch.mjs'
 import { WATCH_PAGE_SEED } from '../../helpers/watch-page.mjs'
 
@@ -25,7 +25,7 @@ function isHighlighted(tile) {
  */
 async function openOverflowMenuWith(player, tile) {
   await player.locator('.shaka-controls-container').evaluate(element => element.setAttribute('shown', 'true'))
-  await player.getByRole('button', { name: 'More settings', exact: true }).click()
+  await openPlayerOptions(player)
   await expect(tile).toBeVisible()
   // Keep the pointer off the tile, whose hover background would mask the highlight.
   await player.hover({ position: { x: 5, y: 5 } })
@@ -45,7 +45,7 @@ test('playback speed presets offer every interval step up to the maximum', async
   const presets = player.locator('.shaka-playback-rates .shaka-playback-rate-preset-btn')
   const openPlaybackRateMenu = async () => {
     await player.locator('.shaka-controls-container').evaluate(element => element.setAttribute('shown', 'true'))
-    await player.getByRole('button', { name: 'More settings', exact: true }).click()
+    await openPlayerOptions(player)
     await player.locator('.shaka-playbackrate-button').click()
   }
   const presetRates = () => presets.evaluateAll(buttons => buttons.map(button => Number(button.dataset.rate)))
@@ -170,8 +170,6 @@ test('the options menu grows in and fades out, but closes at once from a submenu
 
   await openOverflowMenuWith(player, tile)
   expect(await takeMotion()).toEqual(['open'])
-  // Closed before it has grown at all, it is already as small as it shrinks to.
-  await settleMenuZoom(player)
 
   // Fading out, the menu stays displayed until it has faded.
   expect(await player.evaluate((element) => {
@@ -194,7 +192,6 @@ test('the options menu grows in and fades out, but closes at once from a submenu
   // Hidden again, it fades the next time.
   await afterFrames()
   await openOverflowMenuWith(player, tile)
-  await settleMenuZoom(player)
   await closePlayerMenus(player)
   await expect(menu).toBeHidden()
   expect(await takeMotion()).toEqual(['open', 'close'])

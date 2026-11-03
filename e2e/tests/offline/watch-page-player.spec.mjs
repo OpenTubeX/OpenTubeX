@@ -6,7 +6,7 @@ import {
   test,
   expect
 } from '../../helpers/app.mjs'
-import { activeTab, findWatchComponent, openMockedVideo, waitForPlayback } from '../../helpers/player.mjs'
+import { activeTab, findWatchComponent, openMockedVideo, waitForPlayback, openPlayerOptions } from '../../helpers/player.mjs'
 import { mockCapacitorPhoneLayout } from '../../helpers/mobile.mjs'
 import { mockPlayableWatchPage, watchViewHandle } from '../../helpers/watch.mjs'
 import { POST_LIVE_AUDIO_URL, routePostLiveMedia } from '../../helpers/media.mjs'
@@ -841,7 +841,7 @@ test('updates boolean settings from the player options', async ({ app, page }) =
 
   const player = page.locator(`${activeTab} .ftVideoPlayer`)
   await player.locator('.shaka-controls-container').evaluate(element => element.setAttribute('casting', 'true'))
-  await player.getByRole('button', { name: 'More settings' }).click()
+  await openPlayerOptions(player)
   const ambientMode = player.getByRole('button', { name: 'Ambient Mode', exact: true })
   const skipSilence = player.getByRole('button', { name: 'Skip Silence', exact: true })
 
@@ -1260,7 +1260,7 @@ test('keeps the B repeat marker visible and interactive at the end', async ({ ap
     })
   })
   await player.hover()
-  await player.getByRole('button', { name: 'More settings' }).click()
+  await openPlayerOptions(player)
   await player.getByRole('button', { name: /^Set repeat start/ }).click()
   await video.evaluate(async (element) => {
     element.currentTime = element.duration - 0.1
@@ -1268,7 +1268,7 @@ test('keeps the B repeat marker visible and interactive at the end', async ({ ap
   })
   await expect.poll(() => video.evaluate(element => element.ended)).toBe(true)
   await player.hover()
-  await player.getByRole('button', { name: 'More settings' }).click()
+  await openPlayerOptions(player)
   await player.getByRole('button', { name: /^Set repeat end/ }).click()
 
   for (const zoom of [1, 1.25]) {

@@ -1,5 +1,5 @@
 import { expect, goTo, goToSettingsSection, test } from '../../helpers/app.mjs'
-import { openMockedVideo } from '../../helpers/player.mjs'
+import { openMockedVideo, openPlayerOptions } from '../../helpers/player.mjs'
 import { mockPlayableWatchPage } from '../../helpers/watch.mjs'
 
 const PLAYER_SEED = {
@@ -436,7 +436,7 @@ test('backs out of the player menu without leaving the video', async ({ app, pag
   const pageUrl = page.url()
   const player = page.locator('.tabContent[aria-hidden="false"] .ftVideoPlayer')
   await player.hover()
-  await player.getByRole('button', { name: 'More settings' }).click()
+  await openPlayerOptions(player)
   const overflowMenu = player.locator('.shaka-overflow-menu')
   await expect(overflowMenu).toBeVisible()
 

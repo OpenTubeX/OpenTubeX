@@ -1,5 +1,5 @@
 import { test, expect } from '../../helpers/app.mjs'
-import { findWatchComponent, openMockedVideo, waitForPlayback, openCaptionLanguages } from '../../helpers/player.mjs'
+import { findWatchComponent, openMockedVideo, waitForPlayback, openCaptionLanguages, openPlayerOptions } from '../../helpers/player.mjs'
 import { fulfillVisualFixture } from '../../helpers/visual-fixtures.mjs'
 import { mockPlayableWatchPage } from '../../helpers/watch.mjs'
 
@@ -65,7 +65,7 @@ for (const usePlayerMenuGrid of [true, false]) {
         })
         await expect.poll(() => video.evaluate(element => element.ui.getControls().getPlayer().getTextTracks().some(track => track.active))).toBe(true)
         await page.locator('.ftVideoPlayer').hover()
-        await page.locator('.shaka-overflow-menu-button').click()
+        await openPlayerOptions(page)
         await expect(page.locator('.shaka-caption-button')).toHaveAttribute('aria-pressed', 'true')
         await openCaptionLanguages(page.locator('.ftVideoPlayer'))
         await page.locator('.shaka-turn-captions-off-button').click()
@@ -115,7 +115,7 @@ for (const usePlayerMenuGrid of [true, false]) {
         }
         // New controls remain interactive after releasing the previous layout.
         await page.locator('.ftVideoPlayer').hover()
-        await page.locator('.shaka-overflow-menu-button').click()
+        await openPlayerOptions(page)
         await expect(page.locator('.shaka-overflow-menu')).toBeVisible()
         await openCaptionLanguages(page.locator('.ftVideoPlayer'))
         await expect(page.locator('.shaka-text-languages')).toBeVisible()

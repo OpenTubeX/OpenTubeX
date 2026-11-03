@@ -1,5 +1,5 @@
 import { sel, test, expect } from '../../helpers/app.mjs'
-import { activeTab, openMockedVideo, waitForPlayback } from '../../helpers/player.mjs'
+import { activeTab, openMockedVideo, waitForPlayback, openPlayerOptions } from '../../helpers/player.mjs'
 import { mockPlayableWatchPage } from '../../helpers/watch.mjs'
 import { DEMO_MEDIA_URL, demoPlayerResponse } from '../../helpers/media.mjs'
 import { WATCH_PAGE_SEED } from '../../helpers/watch-page.mjs'
@@ -41,7 +41,7 @@ async function selectLowerResolution(page, duringLoad) {
   })
 
   await player.locator('.shaka-controls-container').evaluate(element => element.setAttribute('shown', 'true'))
-  await player.getByRole('button', { name: 'More settings', exact: true }).click()
+  await openPlayerOptions(player)
   await player.locator('.legacy-quality-button').click()
   await player.locator('.legacy-qualities').getByRole('menuitemradio', { name: '240p', exact: true }).click()
   await duringLoad?.()

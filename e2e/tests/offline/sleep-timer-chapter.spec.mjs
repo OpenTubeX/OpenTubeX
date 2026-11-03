@@ -1,5 +1,5 @@
 import { test, expect } from '../../helpers/app.mjs'
-import { openMockedVideo } from '../../helpers/player.mjs'
+import { openMockedVideo, openPlayerOptions } from '../../helpers/player.mjs'
 import { mockPlayableWatchPage, watchViewHandle } from '../../helpers/watch.mjs'
 
 test.use({ seed: { settings: { animationSpeed: 0, videoPlaybackEngine: 'built-in', ytDlpPlaybackEngineDefaultMigration: true } } })
@@ -14,7 +14,7 @@ test('sleep timer offers the current chapter and stops before the next one', asy
   const chapterEnd = await video.evaluate(element => element.currentTime + 3)
   const chapterOption = page.locator('.sleep-timer-menu button').filter({ hasText: 'End of current chapter' })
 
-  await page.locator('.shaka-overflow-menu-button').click()
+  await openPlayerOptions(page)
   await page.locator('.sleep-timer-button').click()
   await expect(chapterOption).toHaveClass(/shaka-hidden/)
   // Late chapters no longer rebuild the controls, so close the menu before reopening it.
@@ -27,7 +27,7 @@ test('sleep timer offers the current chapter and stops before the next one', asy
       { title: 'Next', startSeconds: endSeconds, endSeconds: 30, source: 'description' },
     ]
   }, chapterEnd)
-  await page.locator('.shaka-overflow-menu-button').click()
+  await openPlayerOptions(page)
   await page.locator('.sleep-timer-button').click()
   await expect(chapterOption).toBeVisible()
   await chapterOption.click()
@@ -50,7 +50,7 @@ test('sleep timer clamps its scrolled menu when the chapter option disappears', 
       { title: 'Second', startSeconds: 15, endSeconds: 30 },
     ]
   })
-  await page.locator('.shaka-overflow-menu-button').click()
+  await openPlayerOptions(page)
   await page.locator('.sleep-timer-button').click()
 
   const menu = page.locator('.ftVideoPlayer .shaka-overflow-menu')

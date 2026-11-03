@@ -235,8 +235,19 @@ export async function openCaptionLanguages(player) {
 }
 
 /**
+ * Opens the player options and waits for them to grow in. Playwright retries a
+ * click on an entry that is still moving, and its third attempt scrolls the
+ * entry to the middle of the window, which can move the player under the top bar.
+ * @param {import('@playwright/test').Locator | import('@playwright/test').Page} player
+ */
+export async function openPlayerOptions(player) {
+  await player.locator('.shaka-overflow-menu-button').click()
+  await settleMenuZoom(player)
+}
+
+/**
  * Waits for the overflow menu to open, or to zoom between its views, which scales its boxes.
- * @param {import('@playwright/test').Locator} player
+ * @param {import('@playwright/test').Locator | import('@playwright/test').Page} player
  */
 export async function settleMenuZoom(player) {
   await player.locator('.shaka-overflow-menu').evaluate(menu => Promise.all(menu.getAnimations({ subtree: true })

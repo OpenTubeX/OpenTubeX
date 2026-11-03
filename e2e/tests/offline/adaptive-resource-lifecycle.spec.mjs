@@ -1,5 +1,5 @@
 import { test, expect } from '../../helpers/app.mjs'
-import { openMockedVideo } from '../../helpers/player.mjs'
+import { openMockedVideo, openPlayerOptions } from '../../helpers/player.mjs'
 import { mockPlayableWatchPage } from '../../helpers/watch.mjs'
 import { POST_LIVE_AUDIO_URL, POST_LIVE_VIDEO_URL, routePostLiveMedia } from '../../helpers/media.mjs'
 
@@ -92,7 +92,7 @@ ${media}
             expect.soft(retained).toBe(0)
           }
           await player.hover()
-          await player.locator('.shaka-overflow-menu-button').click()
+          await openPlayerOptions(player)
           await player.locator('.shaka-resolution-button').click()
           await player.locator('.shaka-resolutions .explicit-resolution').first().click()
           await expect.poll(() => player.evaluate(element => element.ui.getControls().getPlayer().getConfiguration().abr.enabled)).toBe(false)

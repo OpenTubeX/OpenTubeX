@@ -1,5 +1,5 @@
 import { test, expect, setWindowSize } from '../../helpers/app.mjs'
-import { activeTab, openMockedVideo, openCaptionLanguages } from '../../helpers/player.mjs'
+import { activeTab, openMockedVideo, openCaptionLanguages, openPlayerOptions } from '../../helpers/player.mjs'
 import { mockPlayableWatchPage } from '../../helpers/watch.mjs'
 import { WATCH_PAGE_SEED } from '../../helpers/watch-page.mjs'
 
@@ -16,7 +16,7 @@ async function openOverflowMenu(page) {
   const player = page.locator(`${activeTab} .ftVideoPlayer`)
   await player.locator('.shaka-controls-container').evaluate(element => element.setAttribute('casting', 'true'))
   await player.hover({ position: { x: 5, y: 5 } })
-  await player.getByRole('button', { name: 'More settings', exact: true }).click()
+  await openPlayerOptions(player)
   return player
 }
 

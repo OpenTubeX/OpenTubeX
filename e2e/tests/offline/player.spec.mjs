@@ -1,7 +1,7 @@
 import { readFileSync } from 'node:fs'
 import { createRequire } from 'node:module'
 import { goTo, sel, setPlayerFullscreen, setWindowSize, test, expect } from '../../helpers/app.mjs'
-import { activeTab, expectDockedToBottomRight, findWatchComponent, openMockedVideo, waitForPlayback, openCaptionLanguages } from '../../helpers/player.mjs'
+import { activeTab, expectDockedToBottomRight, findWatchComponent, openMockedVideo, waitForPlayback, openCaptionLanguages, openPlayerOptions } from '../../helpers/player.mjs'
 import { mockPlayableWatchPage, watchViewHandle } from '../../helpers/watch.mjs'
 
 // These used to live in the network suite, where they only ran when YouTube
@@ -1236,7 +1236,7 @@ test('grid menu tiles that open a submenu have a folded corner', { tag: '@scale'
 
   const player = page.locator(`${activeTab} .ftVideoPlayer`)
   await player.hover()
-  await player.getByRole('button', { name: 'More settings' }).click()
+  await openPlayerOptions(player)
   const overflowMenu = player.locator('.shaka-overflow-menu')
   await expect(overflowMenu).toHaveClass(/ft-menu-grid/)
 
@@ -1308,7 +1308,7 @@ test('volume boost amplifies the audio within its tab', async ({ app, page, atta
   await openDemoVideo({ app, page })
   const player = page.locator(`${activeTab} .ftVideoPlayer`)
   await player.hover()
-  await player.getByRole('button', { name: 'More settings' }).click()
+  await openPlayerOptions(player)
   const boostButton = player.locator('.shaka-overflow-menu .volume-boost-button')
   // Volume boost is opt-in.
   await expect(player.locator('.shaka-overflow-menu')).toBeVisible()
@@ -1317,7 +1317,7 @@ test('volume boost amplifies the audio within its tab', async ({ app, page, atta
   // Rebuilding the controls closes the menu.
   await expect(player.locator('.shaka-overflow-menu')).toBeHidden()
   await player.hover()
-  await player.getByRole('button', { name: 'More settings' }).click()
+  await openPlayerOptions(player)
   await expect(boostButton).toContainText('Off')
   // The player only routes its audio through Web Audio once it is boosted.
   expect(await sourceCount()).toBe(0)
@@ -1356,7 +1356,7 @@ test('volume boost amplifies the audio within its tab', async ({ app, page, atta
   const nextPlayer = page.locator(`${activeTab} .ftVideoPlayer`)
   await openMockedVideo(page)
   await nextPlayer.hover()
-  await nextPlayer.getByRole('button', { name: 'More settings' }).click()
+  await openPlayerOptions(nextPlayer)
   await expect(nextPlayer.locator('.volume-boost-button')).toContainText('Off')
   expect(await sourceCount()).toBe(2)
 
@@ -1368,7 +1368,7 @@ test('volume boost amplifies the audio within its tab', async ({ app, page, atta
   // Showing it again does not resume the earlier boost.
   await page.evaluate(() => window.$store.dispatch('updateShowVolumeBoostToggle', true))
   await nextPlayer.hover()
-  await nextPlayer.getByRole('button', { name: 'More settings' }).click()
+  await openPlayerOptions(nextPlayer)
   await expect(nextPlayer.locator('.volume-boost-button')).toContainText('Off')
   await expect.poll(() => outputGain(1)).toBe(1)
 })
@@ -1412,7 +1412,7 @@ test('mono audio plays every channel in both ears', async ({ app, page, attachSc
   await openDemoVideo({ app, page })
   const player = page.locator(`${activeTab} .ftVideoPlayer`)
   await player.hover()
-  await player.getByRole('button', { name: 'More settings' }).click()
+  await openPlayerOptions(player)
   const monoButton = player.locator('.shaka-overflow-menu .mono-audio-button')
   // The mono audio toggle is opt-in.
   await expect(player.locator('.shaka-overflow-menu')).toBeVisible()
@@ -1421,7 +1421,7 @@ test('mono audio plays every channel in both ears', async ({ app, page, attachSc
   // Rebuilding the controls closes the menu.
   await expect(player.locator('.shaka-overflow-menu')).toBeHidden()
   await player.hover()
-  await player.getByRole('button', { name: 'More settings' }).click()
+  await openPlayerOptions(player)
   await expect(monoButton).toHaveAttribute('aria-pressed', 'false')
   // The player only routes its audio through Web Audio once mono is on.
   expect(await leftOnlyOutput()).toBeNull()
@@ -1438,7 +1438,7 @@ test('mono audio plays every channel in both ears', async ({ app, page, attachSc
   await expect.poll(leftOnlyOutput).toEqual([0.5, 0.5])
 
   await player.hover()
-  await player.getByRole('button', { name: 'More settings' }).click()
+  await openPlayerOptions(player)
   await monoButton.click()
   await expect(monoButton).toHaveAttribute('aria-pressed', 'false')
   await expect.poll(leftOnlyOutput).toEqual([1, 0])
@@ -1469,7 +1469,7 @@ test.describe('mobile player menus', { tag: '@scale' }, () => {
     const centerButton = player.locator('.shaka-big-buttons-container .shaka-play-button')
     await player.hover()
     await expect(centerButton).toBeVisible()
-    await player.getByRole('button', { name: 'More settings' }).click()
+    await openPlayerOptions(player)
     const menu = player.locator('.shaka-overflow-menu')
     await attachScreenshot('mobile options menu above center play button')
     await expectOverlayAbovePlayer(centerButton, menu)
@@ -1497,7 +1497,7 @@ test('mobile fullscreen keeps menus and SponsorBlock notices above the action do
   await player.hover()
   await expect(actions).toBeVisible()
 
-  await player.getByRole('button', { name: 'More settings' }).click()
+  await openPlayerOptions(player)
   await player.locator('.shaka-overflow-menu').getByRole('button', { name: 'Zoom' }).click()
   await expect(player.locator('.video-zoom-menu')).toBeVisible()
   await expect(actions).toHaveCSS('opacity', '0')
@@ -1527,7 +1527,7 @@ async function expectEllipsizedPlayerMenuLabelTitles({ app, page }) {
 
   const player = page.locator(`${activeTab} .ftVideoPlayer`)
   await player.hover()
-  await player.getByRole('button', { name: 'More settings' }).click()
+  await openPlayerOptions(player)
 
   const overflowMenu = player.locator('.shaka-overflow-menu')
   const zoomButton = overflowMenu.getByRole('button', { name: 'Zoom' })
@@ -1691,7 +1691,7 @@ test('video zoom can be disabled', async ({ app, page }) => {
 
   const player = page.locator(`${activeTab} .ftVideoPlayer`)
   await player.hover()
-  await player.getByRole('button', { name: 'More settings' }).click()
+  await openPlayerOptions(player)
   await expect(player.locator('.shaka-overflow-menu').getByRole('button', { name: 'Zoom' }))
     .toHaveCount(0)
 
