@@ -134,7 +134,11 @@
 
 .videoDescription.short .description:empty {
   min-block-size: 0;
-  margin-block: 0;
+}
+
+/* Without text, the empty paragraph's top margin spaces the first metadata section from the card edge. */
+.description:empty + * {
+  margin-block-start: 0;
 }
 
 .descriptionContentEnd {
@@ -149,7 +153,9 @@
 .license {
   /* bdi is inline by default, block keeps the margins now that it isn't a flex item */
   display: block;
-  margin-block: 1em;
+
+  /* The sections after it bring their own top margins. */
+  margin-block: 1em 0;
 }
 
 .videoTags {

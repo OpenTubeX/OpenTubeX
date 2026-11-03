@@ -1,6 +1,6 @@
 <template>
   <FtCard
-    v-if="shownDescription.length > 0 || tags.length > 0 || games.length > 0 || musicTracks.length > 0 || license || (contentDisclosures?.length ?? 0) > 0"
+    v-if="shownDescription.length > 0 || hasMetadata"
     ref="descriptionCard"
     :class="{
       videoDescription: true,
@@ -368,22 +368,32 @@ const searchSettings = computed(() => store.getters.getSearchSettings(tabId))
 
 let hasMeasured = false
 
+const hasMetadata = computed(() => props.tags.length > 0 || props.games.length > 0 || props.musicTracks.length > 0 || Boolean(props.license) || (props.contentDisclosures?.length ?? 0) > 0)
+
 /**
  * Returns true when description content does not overflow description container
  * Useful for hiding description expansion/contraction controls
  */
 function isShortDescription() {
-  // Text dimensions cannot account for the metadata sections below the description.
-  if (props.tags.length > 0 || props.games.length > 0 || props.musicTracks.length > 0 || props.license || (props.contentDisclosures?.length ?? 0) > 0) {
-    return false
-  }
-
   const descriptionElem = descriptionContainer.value?.$el
   if (!descriptionElem) { return false }
 
   // Preserve the original four-line expansion threshold with the taller preview.
   const collapsedHeight = 4 * Number.parseFloat(getComputedStyle(descriptionElem).lineHeight)
-  return descriptionElem.scrollHeight <= collapsedHeight + 1
+  if (!hasMetadata.value) {
+    return descriptionElem.scrollHeight <= collapsedHeight + 1
+  }
+
+  // Metadata sections render below the text, so measure every rendered block up to the content end.
+  let top = Infinity
+  let bottom = -Infinity
+  for (let element = descriptionElem; element && element !== descriptionContentEnd.value; element = element.nextElementSibling) {
+    const bounds = element.getBoundingClientRect()
+    if (bounds.height === 0) { continue }
+    top = Math.min(top, bounds.top)
+    bottom = Math.max(bottom, bounds.bottom)
+  }
+  return bottom - top <= collapsedHeight + 1
 }
 
 // To verify whether or not the description is too short for displaying
@@ -399,10 +409,9 @@ function measureDescription() {
   }
 
   const descriptionElem = descriptionContainer.value?.$el
-  const hasMetadata = props.tags.length > 0 || props.games.length > 0 || props.musicTracks.length > 0 || Boolean(props.license) || (props.contentDisclosures?.length ?? 0) > 0
   if (!descriptionElem || (
     descriptionElem.clientHeight === 0 && descriptionElem.scrollHeight === 0 &&
-    (!hasMetadata || !descriptionCard.value?.$el?.clientHeight)
+    (!hasMetadata.value || !descriptionCard.value?.$el?.clientHeight)
   )) {
     return
   }

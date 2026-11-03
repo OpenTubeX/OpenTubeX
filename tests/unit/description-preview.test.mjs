@@ -18,24 +18,52 @@ const expandedExpression = script.slice(expandedDeclaration.init.start, expanded
 const measureFunction = script.slice(measureDeclaration.start, measureDeclaration.end)
 const shortDeclaration = statements.find(statement => statement.type === 'FunctionDeclaration' && statement.id.name === 'isShortDescription')
 const shortFunction = script.slice(shortDeclaration.start, shortDeclaration.end)
+const metadataDeclaration = statements
+  .filter(statement => statement.type === 'VariableDeclaration')
+  .find(statement => statement.declarations[0].id.name === 'hasMetadata')
+const metadataStatement = script.slice(metadataDeclaration.start, metadataDeclaration.end)
 
-function measure({ alwaysExpanded = false, short = true, tags = [], games = [], musicTracks = [], license = null, contentDisclosures = [], description = 'Sie haben Post\nDer Klassiker von AOL' } = {}) {
+// Lays out the text above one metadata block of the given height, followed by the content end marker.
+function descriptionLayout({ description, short, metadataHeight, hasMetadata }) {
+  const contentEnd = {}
+  // Without metadata, the card only renders with text.
+  const textHeight = description === '' && hasMetadata ? 0 : (short ? 16 : 240)
+  const metadata = {
+    getBoundingClientRect: () => ({ top: textHeight, bottom: textHeight + metadataHeight, height: metadataHeight }),
+    nextElementSibling: contentEnd,
+  }
+  return {
+    contentEnd,
+    description: {
+      clientHeight: textHeight,
+      scrollHeight: textHeight,
+      getBoundingClientRect: () => ({ top: 0, bottom: textHeight, height: textHeight }),
+      nextElementSibling: metadata,
+    },
+  }
+}
+
+function measure({ alwaysExpanded = false, short = true, tags = [], games = [], musicTracks = [], license = null, contentDisclosures = [], description = 'Sie haben Post\nDer Klassiker von AOL', metadataHeight = 200 } = {}) {
+  const hasMetadata = tags.length > 0 || games.length > 0 || musicTracks.length > 0 || Boolean(license) || contentDisclosures.length > 0
+  const layout = descriptionLayout({ description, short, metadataHeight, hasMetadata })
   const context = vm.createContext({
     props: { alwaysExpanded, tags, games, musicTracks, license, contentDisclosures },
-    computed: getter => getter(),
+    computed: getter => ({ value: getter() }),
     shownDescription: description,
     showFullDescription: { value: false },
     showControls: { value: false },
     userWantsExpandedDescription: false,
     hasMeasured: false,
-    descriptionContainer: { value: { $el: { clientHeight: 48, scrollHeight: short ? 48 : 240 } } },
+    descriptionContainer: { value: { $el: layout.description } },
+    descriptionContentEnd: { value: layout.contentEnd },
+    descriptionCard: { value: { $el: { clientHeight: 300 } } },
     getComputedStyle: () => ({ lineHeight: '16px' }),
     nextTick() {},
     updateDescriptionLayout() {},
   })
-  vm.runInContext(`${shortFunction}\n${measureFunction}\nmeasureDescription()`, context)
+  vm.runInContext(`${metadataStatement}\n${shortFunction}\n${measureFunction}\nmeasureDescription()`, context)
   return {
-    expanded: vm.runInContext(expandedExpression, context),
+    expanded: vm.runInContext(expandedExpression, context).value,
     measured: context.hasMeasured,
     showFullDescription: context.showFullDescription.value,
     showControls: context.showControls.value,
@@ -60,5 +88,16 @@ for (const metadata of [{ tags: ['video tag'] }, { games: [{ title: 'Grand Theft
         expanded: false, measured: true, showFullDescription: false, showControls: true,
       })
     }
+  })
+
+  test(`description controls stay hidden when ${Object.keys(metadata)[0]} fits the four-line threshold`, () => {
+    // 16px lines put the threshold at 64px.
+    assert.deepEqual(measure({ ...metadata, description: '', metadataHeight: 64 }), {
+      expanded: true, measured: true, showFullDescription: true, showControls: false,
+    })
+    assert.deepEqual(measure({ ...metadata, description: 'Short description', metadataHeight: 48 }), {
+      expanded: true, measured: true, showFullDescription: true, showControls: false,
+    })
+    assert.equal(measure({ ...metadata, description: '', metadataHeight: 66 }).showControls, true)
   })
 }
