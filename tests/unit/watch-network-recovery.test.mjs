@@ -47,6 +47,8 @@ for (const backend of ['local', 'invidious']) {
           this.isLoading = false
           return true
         },
+        scheduleDownloadedPlaybackFallback() {},
+        settleDownloadedPlaybackFallback: () => false,
         runIpBlockRecoveryScriptAndReload: async () => false,
         getRestrictedPlaybackErrorType: () => null,
         getUnavailableVideoThumbnail: () => 'unavailable.png',

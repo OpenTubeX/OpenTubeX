@@ -87,6 +87,8 @@ for (const backend of ['Local', 'Invidious']) {
       tabRoute: { params: { id: 'downloaded1' } },
       finishDownloadedPlaybackWithoutMetadata() { localLoads++; this.isLoading = false; this.localFilePlayback = true; return true },
       isCurrentVideoLoad(generation) { return generation === this.videoLoadGeneration },
+      scheduleDownloadedPlaybackFallback() {},
+      settleDownloadedPlaybackFallback: () => false,
     }
     watch[`getVideoInformation${backend}`]()
     await started
@@ -104,6 +106,132 @@ for (const backend of ['Local', 'Invidious']) {
     assert.equal(localLoads, 1, 'connection updates do not restart an already playing file')
   })
 }
+
+for (const backend of ['Local', 'Invidious']) {
+  test(`${backend} plays the download while online metadata keeps retrying`, async () => {
+    let rejectMetadata
+    let metadataStarted
+    const started = new Promise(resolve => { metadataStarted = resolve })
+    const pendingMetadata = () => { metadataStarted(); return new Promise((resolve, reject) => { rejectMetadata = reject }) }
+    const timers = new Map()
+    const methods = runInNewContext(`({
+      ${method('getVideoInformationLocal', 'getVideoInformationInvidious')}
+      ${method('getVideoInformationInvidious', 'async runIpBlockRecoveryScriptAndReload()')}
+      ${method('scheduleDownloadedPlaybackFallback', 'onMountedDependOnLocalStateLoading()')}
+    })`, {
+      DOWNLOADED_PLAYBACK_METADATA_TIMEOUT_MS: 3000,
+      setTimeout: (callback, delay) => { const id = timers.size + 1; timers.set(id, { callback, delay }); return id },
+      clearTimeout: id => timers.delete(id),
+      getConnectionState: () => 'online',
+      initializeNetworkRecovery: () => ({ ready: Promise.resolve(true) }),
+      getLocalVideoInfo: pendingMetadata,
+      invidiousGetVideoInformation: pendingMetadata,
+      process: { env: { SUPPORTS_LOCAL_API: true } },
+      usesInvidiousApi: () => backend === 'Invidious',
+      console: { error() {} },
+    })
+    let localLoads = 0
+    const watch = {
+      ...methods,
+      firstLoad: true,
+      isLoading: true,
+      videoLoadGeneration: 1,
+      tabRoute: { params: { id: 'downloaded1' }, query: { downloadId: '1' } },
+      backendPreference: backend.toLowerCase(),
+      customShortsPlayerActive: false,
+      finishDownloadedPlaybackWithoutMetadata() {
+        localLoads++
+        this.isLoading = false
+        this.localFilePlayback = true
+        this.downloadedPlaybackWithoutMetadata = true
+        return true
+      },
+      isCurrentVideoLoad(generation) { return generation === this.videoLoadGeneration },
+      runIpBlockRecoveryScriptAndReload: async () => false,
+      getRestrictedPlaybackErrorType: () => null,
+    }
+    const load = watch[`getVideoInformation${backend}`](1)
+    await started
+    assert.deepEqual([...timers.values()].map(timer => timer.delay), [3000])
+    assert.equal(localLoads, 0, 'metadata that arrives in time keeps its normal load')
+    for (const { callback } of timers.values()) callback()
+    assert.equal(localLoads, 1)
+    assert.equal(watch.isLoading, false)
+    assert.equal(watch.videoLoadGeneration, 1, 'the pending request can still fill in the metadata')
+    rejectMetadata(new Error('Video unavailable'))
+    await load
+    assert.equal(localLoads, 1, 'a late metadata failure must not reload the playing file')
+    assert.equal(watch.errorMessage, undefined)
+    assert.equal(timers.size, 0)
+  })
+}
+
+test('a download waits for its metadata while only family friendly videos are allowed', () => {
+  const timers = []
+  const methods = runInNewContext(`({ ${method('scheduleDownloadedPlaybackFallback', 'onMountedDependOnLocalStateLoading()')} })`, {
+    DOWNLOADED_PLAYBACK_METADATA_TIMEOUT_MS: 3000,
+    setTimeout: callback => timers.push(callback),
+    clearTimeout() {},
+  })
+  for (const showFamilyFriendlyOnly of [true, false]) {
+    const watch = { ...methods, showFamilyFriendlyOnly, tabRoute: { query: { downloadId: '1' } } }
+    watch.scheduleDownloadedPlaybackFallback(1, 'downloaded1')
+  }
+  assert.equal(timers.length, 1, 'only the unrestricted page plays the download before its metadata')
+})
+
+test('a download keeps waiting when family friendly mode is turned on during the timeout', () => {
+  let fallback
+  let played = false
+  const methods = runInNewContext(`({ ${method('scheduleDownloadedPlaybackFallback', 'onMountedDependOnLocalStateLoading()')} })`, {
+    DOWNLOADED_PLAYBACK_METADATA_TIMEOUT_MS: 3000,
+    setTimeout: callback => { fallback = callback },
+    clearTimeout() {},
+  })
+  const watch = {
+    ...methods,
+    showFamilyFriendlyOnly: false,
+    isLoading: true,
+    localFilePlayback: false,
+    tabRoute: { query: { downloadId: '1' } },
+    isCurrentVideoLoad: () => true,
+    finishDownloadedPlaybackWithoutMetadata() { played = true },
+  }
+  watch.scheduleDownloadedPlaybackFallback(1, 'downloaded1')
+  watch.showFamilyFriendlyOnly = true
+  fallback()
+  assert.equal(played, false)
+})
+
+test('metadata that arrives after a download started playing is cached', () => {
+  const methods = runInNewContext(`({ ${method('finishMetadataLoad', 'settleDownloadedPlaybackFallback')} })`)
+  for (const [downloadedPlaybackWithoutMetadata, isLoading, expected] of [[true, false, 1], [false, true, 0]]) {
+    let cached = 0
+    const watch = { ...methods, downloadedPlaybackWithoutMetadata, isLoading, updateVideoMetadataCache() { cached++ } }
+    watch.finishMetadataLoad()
+    assert.deepEqual([cached, watch.isLoading, watch.downloadedPlaybackWithoutMetadata], [expected, false, false])
+  }
+})
+
+test('history keeps its stored metadata while a download plays without metadata', () => {
+  const saved = []
+  const methods = runInNewContext(`({ ${method('addToHistory', 'keepHistoryEntryAlive(')} })`, { Date })
+  const watch = {
+    ...methods,
+    localFilePlayback: true,
+    downloadedPlaybackWithoutMetadata: true,
+    // The fallback takes the channel from the history entry.
+    channelId: 'channel',
+    videoTitle: 'Offline download',
+    videoDescription: '',
+    videoViewCount: null,
+    historyEntry: { videoId: 'downloaded1', title: 'Stored title', authorId: 'channel', description: 'Stored description', viewCount: 42 },
+    videoId: 'downloaded1',
+    updateHistory: record => saved.push(record),
+  }
+  watch.addToHistory(10, false)
+  assert.deepEqual([saved[0].title, saved[0].description, saved[0].viewCount], ['Stored title', 'Stored description', 42])
+})
 
 for (const entry of ['applyDownloadedPlaybackSource', 'finishDownloadedPlaybackWithoutMetadata']) {
   test(`${entry} falls back to the filename when stored download titles are empty`, () => {

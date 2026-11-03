@@ -188,6 +188,9 @@ const STREAM_RECOVERY_NOTICE_SETTLE_SECONDS = 10
 // fallback runs and the video settles on something that plays.
 const MAX_SABR_ERROR_RECOVERIES_PER_VIDEO = 8
 const ANDROID_HTTP_ERROR_RETRY_DELAY_MS = 750
+// Network recovery retries unreachable YouTube metadata indefinitely while the
+// internet check succeeds, so a completed download stops waiting for it.
+const DOWNLOADED_PLAYBACK_METADATA_TIMEOUT_MS = 3000
 let nextSabrSchemeId = 0
 const UNAVAILABLE_VIDEO_THUMBNAILS = {
   light: 'https://www.youtube.com/img/desktop/unavailable/unavailable_video.png',
@@ -351,6 +354,7 @@ export default defineComponent({
       liveReminderLoading: false,
       liveReminderNow: Date.now(),
       liveReminderStartTimer: null,
+      downloadedPlaybackFallbackTimer: null,
       removeLiveReminderUpdatedListener: null,
       removeVideoMetadataCacheClearedListener: null,
       /** @type {'dash' | 'audio' | 'legacy'} */
@@ -1414,7 +1418,8 @@ export default defineComponent({
         if (process.env.IS_ELECTRON && this.isUpcoming && this.playabilityStatus !== 'OK') {
           window.ftElectron?.tabs?.setPlaybackState('paused', this.tabId)
         }
-        this.updateVideoMetadataCache()
+        // A download playing without metadata would cache an empty description.
+        if (!this.downloadedPlaybackWithoutMetadata) this.updateVideoMetadataCache()
 
         if (!this.transcriptAvailable && this.showTranscript) {
           this.closeTranscript()
@@ -1595,6 +1600,7 @@ export default defineComponent({
     this.releaseAmbientModeClass?.()
     this.releaseAmbientModeClass = null
     connectionEvents.removeEventListener('change', this.handleDownloadConnectionChange)
+    clearTimeout(this.downloadedPlaybackFallbackTimer)
     this.shortsNavigation.removeListeners()
     window.removeEventListener('resize', this.updateShortsViewportHeight)
     window.removeEventListener('resize', this.updateTheatreLayoutAvailability)
@@ -2749,6 +2755,35 @@ export default defineComponent({
       return true
     },
 
+    /**
+     * Plays a completed download when its metadata is late. The pending request
+     * then only fills in the metadata, as after reconnecting.
+     */
+    scheduleDownloadedPlaybackFallback: function (loadGeneration, videoId) {
+      clearTimeout(this.downloadedPlaybackFallbackTimer)
+      // Without metadata it's unknown whether the video is family friendly.
+      if (this.showFamilyFriendlyOnly || !Number.isInteger(Number(this.tabRoute.query.downloadId))) return
+      this.downloadedPlaybackFallbackTimer = setTimeout(() => {
+        if (this.isCurrentVideoLoad(loadGeneration, videoId) && this.isLoading && !this.localFilePlayback && !this.showFamilyFriendlyOnly) {
+          this.finishDownloadedPlaybackWithoutMetadata()
+        }
+      }, DOWNLOADED_PLAYBACK_METADATA_TIMEOUT_MS)
+    },
+
+    finishMetadataLoad: function () {
+      const playedWithoutMetadata = this.downloadedPlaybackWithoutMetadata
+      this.isLoading = false
+      this.downloadedPlaybackWithoutMetadata = false
+      // The page had already finished loading, so the isLoading watcher won't cache it.
+      if (playedWithoutMetadata) this.updateVideoMetadataCache()
+    },
+
+    /** Returns whether the download already plays without this load's metadata. */
+    settleDownloadedPlaybackFallback: function () {
+      clearTimeout(this.downloadedPlaybackFallbackTimer)
+      return this.downloadedPlaybackWithoutMetadata
+    },
+
     onMountedDependOnLocalStateLoading() {
       // Prevent running twice
       if (this.onMountedRun) { return }
@@ -3193,6 +3228,7 @@ export default defineComponent({
         // Keep the metadata request queued for reconnect instead of abandoning
         // the watch page with its loading skeleton still visible.
       }
+      if (!metadataOnly) this.scheduleDownloadedPlaybackFallback(loadGeneration, videoId)
 
       let backendFailed = false
       try {
@@ -3210,6 +3246,7 @@ export default defineComponent({
                 (!process.env.IS_CAPACITOR || !this.isYtDlpPlaybackRequested())
             })
         if (!this.isCurrentVideoLoad(loadGeneration, videoId)) { return }
+        metadataOnly ||= this.settleDownloadedPlaybackFallback()
 
         const {
           info: result,
@@ -3914,12 +3951,12 @@ export default defineComponent({
         if (this.isShort) {
           this.loadLocalShortLinkedVideo(this.videoId)
         }
-        this.isLoading = false
-        this.downloadedPlaybackWithoutMetadata = false
+        this.finishMetadataLoad()
         this.updateTitle()
       } catch (err) {
         backendFailed = true
         if (!this.isCurrentVideoLoad(loadGeneration, videoId)) { return }
+        metadataOnly ||= this.settleDownloadedPlaybackFallback()
 
         let handledError = err
         if (err.isIpBlock) {
@@ -3976,6 +4013,7 @@ export default defineComponent({
         if (metadataOnly || this.finishDownloadedPlaybackWithoutMetadata()) return
         // The shared network queue resumes this request when connectivity returns.
       }
+      if (!metadataOnly) this.scheduleDownloadedPlaybackFallback(loadGeneration, videoId)
 
       // Also used as the fallback of the local API, which always falls back to Invidious
       const isYattee = this.backendPreference === 'yattee'
@@ -3989,6 +4027,7 @@ export default defineComponent({
         : invidiousGetVideoInformation(videoId))
         .then(async result => {
           if (!this.isCurrentVideoLoad(loadGeneration, videoId)) { return }
+          metadataOnly ||= this.settleDownloadedPlaybackFallback()
 
           if (result.error) {
             throw new Error(result.error)
@@ -4260,12 +4299,12 @@ export default defineComponent({
           this.updateShortThumbnail()
           this.updateTitle()
 
-          this.isLoading = false
-          this.downloadedPlaybackWithoutMetadata = false
+          this.finishMetadataLoad()
         })
         .catch(async err => {
           backendFailed = true
           if (!this.isCurrentVideoLoad(loadGeneration, videoId)) { return }
+          metadataOnly ||= this.settleDownloadedPlaybackFallback()
           const canFallback = process.env.SUPPORTS_LOCAL_API && usesInvidiousApi(this.backendPreference) && this.backendFallback
           if (canFallback) showInvidiousFallbackToast(this.backendPreference)
           if (metadataOnly) {
@@ -4644,7 +4683,7 @@ export default defineComponent({
     addToHistory: function (watchProgress, isWatched = isHistoryEntryWatched(this.historyEntry)) {
       const now = Date.now()
       // Local playback can start before channel metadata is available.
-      const metadata = this.localFilePlayback && !this.channelId && this.historyEntry
+      const metadata = this.localFilePlayback && (this.downloadedPlaybackWithoutMetadata || !this.channelId) && this.historyEntry
         ? this.historyEntry
         : {
             title: this.videoTitle,

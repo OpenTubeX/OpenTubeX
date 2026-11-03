@@ -35,6 +35,7 @@ function createLoad () {
     hasMultipleAudioTracks: ref(false),
     togglePlaybackRate: null,
     restoreCaptionIndex: null,
+    mountedWithoutCaptions: false,
     suppressInitialAutoplay: false,
     props: { shortsPlayer: false, format: 'dash', captions: [{ url: 'https://example.com/en.vtt' }], chapters: [], storyboardSrc: null },
     player,
