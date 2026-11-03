@@ -2,4 +2,4 @@
 category: fix
 ---
 
-Labels and icons on buttons and selected controls are now easier to read with main colors such as Light Blue, Red, Green, and several Solarized, Everforest, and Dracula colors.
+Labels and icons on buttons, selected controls, and accent-colored highlights are now easier to read with main and secondary colors such as Light Blue, Red, Green, and several Solarized, Gruvbox, Everforest, and Dracula colors.

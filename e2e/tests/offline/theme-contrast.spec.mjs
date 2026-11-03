@@ -380,8 +380,8 @@ test.describe('bright main color toggle contrast', () => {
   })
 })
 
-// The main color picker offers every color in this list.
-const MAIN_COLORS = [
+// The main and secondary color pickers offer every color in this list.
+const THEME_COLORS = [
   ...readFileSync(path.join(repoRoot, 'src/renderer/helpers/colors.js'), 'utf8').matchAll(/\bname: '(\w+)'/g)
 ].map(([, name]) => name).concat(CATPPUCCIN_MACCHIATO_COLORS.map(({ name }) => name))
 
@@ -403,7 +403,7 @@ test.describe('main color text contrast', () => {
     await page.mouse.move(0, 0)
     await page.evaluate(() => document.activeElement?.blur())
 
-    expect(MAIN_COLORS.length).toBeGreaterThan(90)
+    expect(THEME_COLORS.length).toBeGreaterThan(90)
     const targets = { button: await button.elementHandle(), toggle: await toggle.elementHandle() }
     for (const baseTheme of ['light', 'dark']) {
       await page.evaluate(theme => window.$store.dispatch('updateBaseTheme', theme), baseTheme)
@@ -431,8 +431,54 @@ test.describe('main color text contrast', () => {
         })
         probe.remove()
         return results
-      }, { names: MAIN_COLORS, ...targets })
+      }, { names: THEME_COLORS, ...targets })
       // Each class applies its own primary color.
+      expect(new Set(results.map(({ palette }) => `${palette.background}`)).size).toBeGreaterThan(90)
+      for (const { name, ...colors } of results) {
+        for (const [label, { foreground, background }] of Object.entries(colors)) {
+          expect.soft(contrastRatio(foreground, background), `${baseTheme} ${name} ${label} ${JSON.stringify({ foreground, background })}`)
+            .toBeGreaterThanOrEqual(4.5)
+        }
+      }
+    }
+  })
+})
+
+test.describe('secondary color text contrast', () => {
+  test.use({ seed: { settings: { currentLocale: 'en-US', useProxy: true } } })
+
+  test('text on every secondary color stays readable on accent-filled surfaces', async ({ page }) => {
+    const advanced = await goToSettingsSection(page, 'proxy')
+    // The proxy warning is filled with the accent color.
+    const warning = advanced.locator('.proxy-warning')
+    await expect(warning).toBeVisible()
+
+    expect(THEME_COLORS.length).toBeGreaterThan(90)
+    for (const baseTheme of ['light', 'dark']) {
+      await page.evaluate(theme => window.$store.dispatch('updateBaseTheme', theme), baseTheme)
+      await expect(page.locator('body')).toHaveClass(new RegExp(`\\b${baseTheme}\\b`))
+      // Swap the class the app applies for the secondary color setting directly;
+      // saving the setting for every color exceeds the test timeout.
+      const results = await warning.evaluate((warning, names) => {
+        const rgb = color => color.match(/[\d.]+/g).slice(0, 3).map(Number)
+        const probe = document.createElement('span')
+        probe.style.color = 'var(--text-with-accent-color)'
+        probe.style.backgroundColor = 'var(--accent-color)'
+        document.body.append(probe)
+        const measure = element => {
+          const style = getComputedStyle(element)
+          return { foreground: rgb(style.color), background: rgb(style.backgroundColor) }
+        }
+        const results = names.map(name => {
+          const { classList } = document.body
+          classList.remove(...[...classList].filter(className => /^sec[A-Z]/.test(className)))
+          classList.add(`sec${name}`)
+          return { name, palette: measure(probe), 'proxy warning': measure(warning) }
+        })
+        probe.remove()
+        return results
+      }, THEME_COLORS)
+      // Each class applies its own accent color.
       expect(new Set(results.map(({ palette }) => `${palette.background}`)).size).toBeGreaterThan(90)
       for (const { name, ...colors } of results) {
         for (const [label, { foreground, background }] of Object.entries(colors)) {

@@ -1564,21 +1564,21 @@ it can be safely elided. This looks quite pleasant on this theme. */
 
 /*************** SECONDARY THEME COLOR DEFINTIONS ***************/
 
-/* dark secondary theme colors */
-.secRed,
-.secPink,
+/* Text on each secondary color keeps at least 4.5:1 contrast. */
 .secPurple,
 .secDeepPurple,
-.secIndigo,
+.secIndigo {
+  --text-with-accent-color: #fff;
+}
+
+/* secondary theme colors too light for white text */
+.secRed,
+.secPink,
 .secBlue,
 .secLightBlue,
 .secCyan,
 .secTeal,
-.secGreen {
-  --text-with-accent-color: #fff;
-}
-
-/* light secondary theme colors */
+.secGreen,
 .secLightGreen,
 .secLime,
 .secYellow,
@@ -1872,14 +1872,11 @@ it can be safely elided. This looks quite pleasant on this theme. */
 .secDraculaCyan,
 .secDraculaGreen,
 .secDraculaOrange,
+.secDraculaPink,
+.secDraculaPurple,
 .secDraculaRed,
 .secDraculaYellow {
   --text-with-accent-color: #212121;
-}
-
-.secDraculaPink,
-.secDraculaPurple {
-  --text-with-accent-color: #f8f8f2;
 }
 
 .secDraculaCyan {
@@ -1939,7 +1936,6 @@ it can be safely elided. This looks quite pleasant on this theme. */
   --accent-color-visited: #c1c870;
 }
 
-.secSolarizedYellow,
 .secSolarizedOrange,
 .secSolarizedRed,
 .secSolarizedMagenta,
@@ -1948,6 +1944,7 @@ it can be safely elided. This looks quite pleasant on this theme. */
   --text-with-accent-color: #fdf6e3;
 }
 
+.secSolarizedYellow,
 .secSolarizedBlue,
 .secSolarizedCyan {
   --text-with-accent-color: #000;
@@ -2034,6 +2031,7 @@ it can be safely elided. This looks quite pleasant on this theme. */
 }
 
 .secGruvboxDarkYellow {
+  --text-with-accent-color: #3c3836;
   --accent-color-rgb: 215 153 33;
   --accent-color-hover: #f0b839;
   --accent-color-active: #f0b839;
@@ -2106,23 +2104,19 @@ it can be safely elided. This looks quite pleasant on this theme. */
   --accent-color-visited: #d65d0e;
 }
 
+.secGruvboxDarkGreen,
+.secGruvboxDarkAqua {
+  --text-with-accent-color: #1d2021;
+}
+
+/* These accents are too dark for #1d2021 and too light for #fbf1c7. */
+.secGruvboxDarkOrange,
+.secGruvboxDarkBlue,
+.secGruvboxDarkPurple,
 .secGruvboxLightOrange,
-.secGruvboxLightRed,
 .secGruvboxLightBlue,
 .secGruvboxLightPurple {
-  --text-with-accent-color: #fbf1c7;
-}
-
-.secGruvboxDarkGreen,
-.secGruvboxDarkYellow,
-.secGruvboxDarkAqua,
-.secGruvboxDarkOrange {
-  --text-with-accent-color: #3c3836;
-}
-
-.secGruvboxDarkBlue,
-.secGruvboxDarkPurple {
-  --text-with-accent-color: #1d2021;
+  --text-with-accent-color: #000;
 }
 
 .secCatppuccinFrappeRosewater,
