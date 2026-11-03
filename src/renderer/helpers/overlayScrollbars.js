@@ -32,6 +32,8 @@ const SCROLL_LINKED = typeof ScrollTimeline !== 'undefined'
 // not content a bar could scroll to.
 const SCROLL_BOUNDARY_TOLERANCE = 1
 const CLICK_SCROLL_DISTANCE = 0.9
+// E2E tests fail on this error, see e2e/helpers/app.mjs.
+const UNPOSITIONED_VIEWPORT_ERROR = 'Overlay scrollbars need a positioned scroll container, use position: relative instead of static'
 const CLIPPED_OVERFLOW = new Set(['hidden', 'clip'])
 const ANIMATION_END_EVENTS = ['transitionend', 'transitioncancel', 'animationend', 'animationcancel']
 // Transitions of these, such as hover effects, cannot change a scroll range.
@@ -155,6 +157,7 @@ function create(element) {
   const scrollbars = [horizontal, vertical]
   const clickScroll = !process.env.IS_CAPACITOR && element.matches('[data-scrollbar-click-scroll]')
   let updateFrame = null
+  let reportedStatic = false
 
   /** @type {Instance} */
   const instance = {
@@ -196,6 +199,12 @@ function create(element) {
     }
 
     const style = getComputedStyle(scrollElement)
+    // The bars are positioned against their container. A static one hands
+    // them to an ancestor, which draws them beside the content they scroll.
+    if (!isPage && !reportedStatic && style.position === 'static') {
+      reportedStatic = true
+      console.error(`${UNPOSITIONED_VIEWPORT_ERROR}: ${element.localName}.${[...element.classList].join('.')}`)
+    }
     const rtl = (isPage ? getComputedStyle(document.body) : style).direction === 'rtl'
     const sizes = {
       x: { scroll: scrollElement.scrollWidth, client: scrollElement.clientWidth },

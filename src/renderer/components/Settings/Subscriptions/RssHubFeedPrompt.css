@@ -14,9 +14,10 @@
   margin-block: 0;
 }
 
-/* The prompt scrolls its content, which would clip floating suggestions */
+/* The prompt scrolls its content, which would clip floating suggestions.
+   Staying positioned keeps the list's overlay scrollbars anchored to it. */
 .rssHubForm :deep(.list) {
-  position: static;
+  position: relative;
   max-block-size: min(40vh, 16rem);
 }
 

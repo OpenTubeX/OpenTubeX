@@ -192,6 +192,7 @@ export async function createUserDataDir(seed = {}) {
  * @param {string} [options.appRoot] repository root containing dist-e2e
  * @param {string} [options.executablePath] Electron executable to launch
  * @param {Record<string, string>} [options.env] additional environment variables
+ * @param {(message: import('@playwright/test').ConsoleMessage) => void} [options.onConsole] receives every console message, from the connection on
  * @param {(phase: 'electronConnected'|'windowCreated'|'routeCommitted'|'interactive', page?: import('@playwright/test').Page, electronApp?: import('@playwright/test').ElectronApplication) => void|Promise<void>} [options.onPhase]
  * @param {number} [windowRetry] internal first-window retry count
  */
@@ -257,6 +258,7 @@ export async function launchApp(userDataDir, extraArgs = [], options = {}, windo
   // Thrown values other than errors, such as events, have an empty stack.
   const recordStartupError = error => startupErrors.push(error.error().stack || error.error().message)
   context.on('weberror', recordStartupError)
+  if (options.onConsole) context.on('console', options.onConsole)
 
   const notifyPhase = async (phase, page) => {
     try {
@@ -557,6 +559,8 @@ function recordAppDiagnostics(testInfo, recordTrace) {
   }
 }
 
+const UNPOSITIONED_VIEWPORT_ERROR = 'Overlay scrollbars need a positioned scroll container'
+
 export const test = base.extend({
   // Each worker's private X server picks a free display.
   // eslint-disable-next-line no-empty-pattern -- Playwright requires a fixture object
@@ -629,7 +633,21 @@ export const test = base.extend({
         }
       }
 
-      const { electronApp, page } = await launchApp(userDataDir, launchArgs, { appRoot, onPhase })
+      // Static scroll containers misplace their overlay scrollbars, which
+      // overlayScrollbars.js reports once, also while mounting, without
+      // breaking any assertion.
+      const scrollbarErrors = []
+      const launchOptions = {
+        appRoot,
+        onPhase,
+        onConsole: message => {
+          if (message.type() === 'error' && message.text().startsWith(UNPOSITIONED_VIEWPORT_ERROR)) {
+            scrollbarErrors.push(message.text())
+          }
+        }
+      }
+
+      const { electronApp, page } = await launchApp(userDataDir, launchArgs, launchOptions)
 
       /** Runs an optional checkpoint with the exited process before launching again. */
       const relaunch = async (beforeLaunch) => {
@@ -642,7 +660,7 @@ export const test = base.extend({
         await appHandle.electronApp.close()
         await exited
         await beforeLaunch?.(oldProcess)
-        const next = await launchApp(userDataDir, launchArgs, { appRoot, onPhase })
+        const next = await launchApp(userDataDir, launchArgs, launchOptions)
         appHandle.electronApp = next.electronApp
         appHandle.page = next.page
         return next
@@ -658,6 +676,7 @@ export const test = base.extend({
       }
 
       await use(appHandle)
+      expect.soft(scrollbarErrors, 'Overlay scrollbar containers must not be static').toEqual([])
     } finally {
       const failed = testInfo.status !== testInfo.expectedStatus
       if (appHandle && failed) {
