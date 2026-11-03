@@ -2689,9 +2689,10 @@ a:visited {
   --border-color: rgb(255 255 255 / 12%);
   --primary-shadow-color: rgb(0 0 0 / 24%);
 
-  /* Accents stay light enough to read on the dark surfaces. The primary
-     color also colors selected labels, so filled controls use dark text. */
-  --accent-color: rgb(from oklch(from var(--signal-accent-color) max(l, 0.7) c h) clamp(0, r, 255) clamp(0, g, 255) clamp(0, b, 255));
+  /* Accents stay light enough to read on the dark surfaces and their own
+     20% tints, and capped chroma keeps them in gamut. The primary color
+     also colors selected labels, so filled controls use dark text. */
+  --accent-color: rgb(from oklch(from var(--signal-accent-color) max(l, 0.74) min(c, 0.2) h) clamp(0, r, 255) clamp(0, g, 255) clamp(0, b, 255));
   --primary-color: var(--accent-color);
   --primary-color-hover: var(--accent-color-hover);
   --primary-color-active: var(--accent-color-active);

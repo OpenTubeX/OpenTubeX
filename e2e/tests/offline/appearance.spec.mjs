@@ -1673,7 +1673,7 @@ test.describe('Signal themes', () => {
     await goToSettingsSection(page, 'theme')
     for (const [mode, background, accent] of [
       ['Light', 'rgb(246, 245, 244)', [186, 12, 6]],
-      ['Dark', 'rgb(17, 17, 17)', [255, 88, 70]],
+      ['Dark', 'rgb(17, 17, 17)', [255, 110, 91]],
     ]) {
       await page.getByRole('combobox', { name: /^Base theme/i }).click()
       await page.getByRole('option', { name: `Signal ${mode}`, exact: true }).click()
@@ -1758,7 +1758,7 @@ test.describe('Signal themes', () => {
     await expect.poll(() => latestSettings(readDatastore(app.userDataDir, 'settings')).signalAccentColor).toBe('system')
 
     // Clamped lightness keeps text-sized accents readable for any choice.
-    for (const [theme, color] of [['openTubeXLight', '#ffff00'], ['openTubeXLight', '#00ffff'], ['openTubeXDark', '#000080'], ['openTubeXDark', '#000000']]) {
+    for (const [theme, color] of [['openTubeXLight', '#ffff00'], ['openTubeXLight', '#00ffff'], ['openTubeXDark', '#000080'], ['openTubeXDark', '#0000ff'], ['openTubeXDark', '#000000']]) {
       await page.evaluate(async ([theme, color]) => {
         await window.$store.dispatch('updateBaseTheme', theme)
         await window.$store.dispatch('updateSignalAccentColor', color)
@@ -1771,13 +1771,18 @@ test.describe('Signal themes', () => {
       // The primary color is both a fill and the text color of selected items.
       expect(contrastRatio(primary, onPrimary), `${theme} ${color} filled control text`).toBeGreaterThanOrEqual(4.5)
       expect(contrastRatio(primary, background), `${theme} ${color} selected label`).toBeGreaterThanOrEqual(4.5)
+      if (theme === 'openTubeXDark') {
+        // Selected tabs draw the label over a 20% tint of the same color.
+        const tint = await resolvedColor(page, 'color-mix(in srgb, var(--primary-color) 20%, var(--card-bg-color))')
+        expect(contrastRatio(primary, tint), `${theme} ${color} selected tab`).toBeGreaterThanOrEqual(4.5)
+      }
     }
 
     await page.evaluate(() => window.$store.dispatch('updateBaseTheme', 'dark'))
     await expect(picker).toHaveCount(0)
     await expect(page.locator('body')).toHaveCSS('--signal-accent', '')
 
-    // Custom themes copy the derived colors, whose near-zero channels can use exponents.
+    // Custom themes copy the derived colors as hex.
     await page.evaluate(async () => {
       await window.$store.dispatch('updateBaseTheme', 'openTubeXDark')
       await window.$store.dispatch('updateSignalAccentColor', '#ffff00')
@@ -1787,7 +1792,7 @@ test.describe('Signal themes', () => {
     const editorColor = label => page.locator('.customThemeEditor .ftColorPicker')
       .filter({ has: page.getByText(label, { exact: true }) }).locator('code')
     await expect(editorColor('Page background')).toHaveText('#111111')
-    await expect(editorColor('Logo icon')).toHaveText('#ffff00')
+    await expect(editorColor('Logo icon')).toHaveText('#feff34')
     await expect(editorColor('Selected text background')).toHaveText(/^#(?!000000)[\da-f]{6}$/)
   })
 })
