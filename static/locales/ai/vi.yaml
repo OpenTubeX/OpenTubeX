@@ -1116,6 +1116,7 @@ Settings:
     Posts Auto Refresh Interval: Khoảng tự động làm mới bài đăng
     Refresh Subscriptions While App Is Closed: "Làm mới đăng ký khi ứng dụng đã đóng"
     Notify About New Uploads: Thông báo nội dung mới tải lên
+    RSS Feeds Auto Refresh Interval: Khoảng tự động làm mới nguồn cấp RSS
   Distraction Free Settings:
     Digital Wellbeing:
       Count Watch Time From: "Tính thời gian xem từ"
@@ -2195,6 +2196,7 @@ Tooltips:
     Auto Refresh Interval: "Tần suất OpenTubeX tự động làm mới bảng tin đăng ký khi ứng dụng đang mở. Trên Android, khoảng thời gian khác 0 cũng làm mới bảng tin khi ứng dụng đã đóng."
     Refresh Subscriptions While App Is Closed: "Làm mới nguồn cấp theo cài đặt đã chọn. Trên máy tính, OpenTubeX ở trong khay hệ thống cho đến khi bạn thoát. Android quyết định thời điểm làm mới trong nền."
     Notify About New Uploads: Hiện thông báo hệ thống trên thiết bị này cho các kênh mà bạn đã bật thông báo trong cài đặt đăng ký của kênh. OpenTubeX kiểm tra nội dung mới khi làm mới đăng ký, vì vậy hãy chọn khoảng thời gian tự động làm mới. Để nhận thông báo khi ứng dụng đã đóng, hãy bật thêm tùy chọn làm mới khi ứng dụng đã đóng.
+    RSS Feeds Auto Refresh Interval: Tần suất OpenTubeX tự động làm mới các nguồn cấp RSS của bạn khi ứng dụng đang mở.
   Theme Settings:
     Only Show Important Notifications: Ẩn các thông báo trong ứng dụng chỉ xác nhận một thao tác hoặc báo cáo trạng thái. Lỗi, cảnh báo, lời nhắc bạn đã thiết lập và các thông báo có thao tác, chẳng hạn như Hoàn tác, vẫn hiển thị. Tiến trình của các thao tác chạy nền, chẳng hạn như làm mới kênh đăng ký, được hiển thị trên thanh tiến trình chung thay vì trong thông báo. Thông báo hệ thống không bị ảnh hưởng.
     Visible Search Suggestions: "Đặt số mục lịch sử tìm kiếm và gợi ý mà thanh tìm kiếm hiển thị trước khi danh sách của nó phải cuộn. Danh sách không bao giờ vượt quá cạnh dưới của cửa sổ."

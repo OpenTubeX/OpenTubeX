@@ -1105,6 +1105,7 @@ Settings:
     Posts Auto Refresh Interval: 帖子自动刷新间隔
     Refresh Subscriptions While App Is Closed: "应用关闭时刷新订阅"
     Notify About New Uploads: 新上传通知
+    RSS Feeds Auto Refresh Interval: RSS 订阅源自动刷新间隔
   Distraction Free Settings:
     Digital Wellbeing:
       Count Watch Time From: "观看时长统计范围"
@@ -2151,6 +2152,7 @@ Tooltips:
     Auto Refresh Interval: "OpenTubeX 在应用打开期间自动刷新订阅动态的频率。 在 Android 上，非零间隔还会在应用关闭时刷新订阅源。"
     Refresh Subscriptions While App Is Closed: "使用所选设置刷新订阅。在桌面端，OpenTubeX 会留在系统托盘中，直到您退出。Android 系统决定后台刷新的运行时间。"
     Notify About New Uploads: 在此设备上为你在订阅设置中开启了通知的频道显示系统通知。OpenTubeX 会在刷新订阅时检查新内容，因此请选择自动刷新间隔。若要在应用关闭时也收到通知，请同时启用应用关闭时刷新订阅。
+    RSS Feeds Auto Refresh Interval: 应用打开时 OpenTubeX 自动刷新 RSS 订阅源的频率。
   Theme Settings:
     Only Show Important Notifications: 隐藏仅用于确认操作或报告状态的应用内通知。错误、警告、你设置的提醒以及提供操作（如撤销）的通知仍会显示。后台操作（如刷新订阅）的进度会显示在全局进度条中，而不是通知中。系统通知不受影响。
     Visible Search Suggestions: "设置搜索栏在列表需要滚动之前显示的搜索历史记录和建议数量。列表绝不会超出窗口底部。"

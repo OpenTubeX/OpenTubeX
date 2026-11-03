@@ -1120,6 +1120,7 @@ Settings:
     Posts Auto Refresh Interval: מרווח ריענון אוטומטי של פוסטים
     Refresh Subscriptions While App Is Closed: "ריענון מינויים כשהיישום סגור"
     Notify About New Uploads: התראה על העלאות חדשות
+    RSS Feeds Auto Refresh Interval: מרווח ריענון אוטומטי של פידי RSS
   Distraction Free Settings:
     Digital Wellbeing:
       Count Watch Time From: "מקור ספירת זמן הצפייה"
@@ -2204,6 +2205,7 @@ Tooltips:
     Auto Refresh Interval: "התדירות שבה OpenTubeX מרעננת אוטומטית את פיד המינויים כשהיישום פתוח. ב-Android, מרווח שאינו אפס מרענן את הפיד גם כשהיישום סגור."
     Refresh Subscriptions While App Is Closed: "מרענן את העדכונים בהתאם להגדרות שבחרת. במחשב, OpenTubeX נשאר במגש המערכת עד ליציאה. Android קובע מתי יבוצעו רענונים ברקע."
     Notify About New Uploads: מציג התראות מערכת במכשיר זה עבור ערוצים שהפעלת את ההתראות שלהם בהגדרות המינוי שלהם. OpenTubeX בודק אם יש תוכן חדש בעת רענון המינויים, לכן יש לבחור מרווח ריענון אוטומטי. כדי לקבל התראות כשהיישום סגור, יש להפעיל גם ריענון כשהיישום סגור.
+    RSS Feeds Auto Refresh Interval: באיזו תדירות OpenTubeX מרענן אוטומטית את פידי ה-RSS שלך כשהיישום פתוח.
   Theme Settings:
     Only Show Important Notifications: מסתיר התראות בתוך היישום שרק מאשרות פעולה או מדווחות על מצב. שגיאות, אזהרות, תזכורות שהגדרת והתראות שמציעות פעולה, כמו הסגה, ממשיכות להופיע. התקדמות פעולות ברקע, כמו רענון המינויים, מוצגת בסרגל ההתקדמות הכללי במקום כהתראה. התראות המערכת אינן מושפעות.
     Visible Search Suggestions: "קובע כמה רשומות מהיסטוריית החיפוש והצעות סרגל החיפוש מציג לפני שיש לגלול את הרשימה שלו. הרשימה לעולם אינה חורגת מתחתית החלון."

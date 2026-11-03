@@ -1105,6 +1105,7 @@ Settings:
     Posts Auto Refresh Interval: Interval automatického obnovení příspěvků
     Refresh Subscriptions While App Is Closed: "Obnovovat odběry, když je aplikace zavřená"
     Notify About New Uploads: Oznamovat nový obsah
+    RSS Feeds Auto Refresh Interval: Interval automatického obnovení RSS kanálů
   Distraction Free Settings:
     Digital Wellbeing:
       Count Watch Time From: "Počítat dobu sledování z"
@@ -2153,6 +2154,7 @@ Tooltips:
     Auto Refresh Interval: "Určuje, jak často OpenTubeX automaticky obnovuje kanál odběrů, když je aplikace otevřená. V Androidu nenulový interval obnovuje kanál také tehdy, když je aplikace zavřená."
     Refresh Subscriptions While App Is Closed: "Aktualizuje kanály podle zvoleného nastavení. Na počítači zůstává OpenTubeX v oznamovací oblasti až do ukončení. Android určuje čas aktualizací na pozadí."
     Notify About New Uploads: Zobrazuje na tomto zařízení systémová oznámení pro kanály, u kterých jste v nastavení odběru zapnuli oznámení. OpenTubeX kontroluje nový obsah při obnovení odběrů, proto zvolte interval automatického obnovení. Chcete-li dostávat oznámení i při zavřené aplikaci, zapněte také obnovování při zavřené aplikaci.
+    RSS Feeds Auto Refresh Interval: Jak často OpenTubeX automaticky obnovuje vaše RSS kanály, když je aplikace otevřená.
   Theme Settings:
     Only Show Important Notifications: Skryje oznámení v aplikaci, která pouze potvrzují akci nebo hlásí stav. Chyby, varování, nastavená připomenutí a oznámení s akcí, například Zpět, se zobrazují i nadále. Průběh operací na pozadí, například obnovování odběrů, se místo oznámení zobrazuje v globálním ukazateli průběhu. Systémová oznámení nejsou ovlivněna.
     Visible Search Suggestions: "Určuje, kolik položek historie vyhledávání a návrhů zobrazí vyhledávací pole, než se jeho seznam začne posouvat. Seznam nikdy nepřesáhne spodní okraj okna."

@@ -1107,6 +1107,7 @@ Settings:
     Posts Auto Refresh Interval: Paylaşımların avtomatik yenilənmə aralığı
     Refresh Subscriptions While App Is Closed: Tətbiq bağlı olarkən abunəlikləri yenilə
     Notify About New Uploads: Yeni yükləmələr barədə bildiriş göndər
+    RSS Feeds Auto Refresh Interval: RSS axınlarının avtomatik yenilənmə aralığı
   Distraction Free Settings:
     Digital Wellbeing:
       Count Watch Time From: "Baxış Vaxtı Sayılan Cihazlar"
@@ -2164,6 +2165,7 @@ Tooltips:
     Auto Refresh Interval: Tətbiq açıq olduqda OpenTubeX-in abunəlik axınınızı hansı tezliklə avtomatik yeniləyəcəyi. Android-də sıfırdan fərqli aralıq tətbiq bağlı olduqda da axını yeniləyir.
     Refresh Subscriptions While App Is Closed: "Lentləri seçdiyiniz parametrlərlə yeniləyir. Masaüstündə OpenTubeX çıxana qədər sistem treyində qalır. Android arxa plan yeniləmələrinin vaxtını müəyyən edir."
     Notify About New Uploads: Abunəlik ayarlarında bildirişlərini aktiv etdiyiniz kanallar üçün bu cihazda sistem bildirişləri göstərir. OpenTubeX yeni məzmunu abunəliklər yeniləndikdə yoxlayır, buna görə avtomatik yeniləmə aralığı seçin. Tətbiq bağlı olarkən bildiriş almaq üçün tətbiq bağlı olarkən yeniləməni də aktiv edin.
+    RSS Feeds Auto Refresh Interval: Tətbiq açıq olarkən OpenTubeX-in RSS axınlarınızı nə qədər tez-tez avtomatik yenilədiyi.
   Theme Settings:
     Only Show Important Notifications: Yalnız əməliyyatı təsdiqləyən və ya vəziyyət bildirən tətbiqdaxili bildirişləri gizlədir. Xətalar, xəbərdarlıqlar, qurduğunuz xatırlatmalar və Geri al kimi əməliyyat təklif edən bildirişlər yenə də görünür. Abunəliklərin yenilənməsi kimi arxa fon əməliyyatlarının gedişatı bildiriş əvəzinə ümumi irəliləyiş zolağında göstərilir. Sistem bildirişlərinə təsir etmir.
     Visible Search Suggestions: "Axtarış panelinin siyahısı sürüşdürülməzdən əvvəl neçə axtarış tarixçəsi qeydi və təklif göstərdiyini müəyyən edir. Siyahı heç vaxt pəncərənin aşağı kənarından kənara çıxmır."

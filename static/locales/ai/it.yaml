@@ -1105,6 +1105,7 @@ Settings:
     Posts Auto Refresh Interval: Intervallo di aggiornamento automatico dei post
     Refresh Subscriptions While App Is Closed: "Aggiorna le iscrizioni quando l'app è chiusa"
     Notify About New Uploads: Notifica nuovi caricamenti
+    RSS Feeds Auto Refresh Interval: Intervallo di aggiornamento automatico dei feed RSS
   Distraction Free Settings:
     Digital Wellbeing:
       Count Watch Time From: "Conta il tempo di visione da"
@@ -2151,6 +2152,7 @@ Tooltips:
     Auto Refresh Interval: "Frequenza con cui OpenTubeX aggiorna automaticamente il feed delle iscrizioni mentre l'app è aperta. Su Android, un intervallo diverso da zero aggiorna il feed anche quando l’app è chiusa."
     Refresh Subscriptions While App Is Closed: "Aggiorna i feed con le impostazioni scelte. Sul desktop, OpenTubeX rimane nell’area di notifica fino all’uscita. Android decide quando eseguire gli aggiornamenti in background."
     Notify About New Uploads: Mostra notifiche di sistema su questo dispositivo per i canali di cui hai attivato le notifiche nelle relative impostazioni di iscrizione. OpenTubeX cerca nuovi contenuti quando aggiorna le iscrizioni, quindi scegli un intervallo di aggiornamento automatico. Per ricevere notifiche anche quando l'app è chiusa, attiva anche l'aggiornamento quando l'app è chiusa.
+    RSS Feeds Auto Refresh Interval: Ogni quanto OpenTubeX aggiorna automaticamente i tuoi feed RSS mentre l'app è aperta.
   Theme Settings:
     Only Show Important Notifications: Nasconde le notifiche nell'app che si limitano a confermare un'azione o a segnalare uno stato. Errori, avvisi, promemoria che hai impostato e notifiche che offrono un'azione, come Rifai, continuano a essere mostrati. L'avanzamento delle operazioni in background, come l'aggiornamento delle iscrizioni, viene mostrato nella barra di avanzamento globale anziché in una notifica. Le notifiche di sistema non sono interessate.
     Visible Search Suggestions: "Imposta quante voci della cronologia di ricerca e quanti suggerimenti mostra la barra di ricerca prima che il suo elenco scorra. L’elenco non si estende mai oltre il bordo inferiore della finestra."

@@ -322,7 +322,8 @@ function displayActivityValue(entry) {
         .format(new Date(Date.UTC(2023, 0, Number(entry.value) + 1)))
     }
     if (['subscriptionFeedAutoRefreshInterval', 'subscriptionShortsAutoRefreshInterval',
-      'subscriptionLiveAutoRefreshInterval', 'subscriptionPostsAutoRefreshInterval'].includes(entry.key)) {
+      'subscriptionLiveAutoRefreshInterval', 'subscriptionPostsAutoRefreshInterval',
+      'rssFeedsAutoRefreshInterval'].includes(entry.key)) {
       if (entry.value === '0') return t('Settings.General Settings.Avoid translation.Disabled')
       const minutes = Number(entry.value) / 60000
       if ([30, 60, 120, 240, 360, 480].includes(minutes)) {

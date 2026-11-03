@@ -1141,6 +1141,7 @@ Settings:
     Posts Auto Refresh Interval: Intervalo de aŭtomata aktualigo de afiŝoj
     Refresh Subscriptions While App Is Closed: Aktualigi abonojn dum la aplikaĵo estas fermita
     Notify About New Uploads: Sciigi pri novaj alŝutoj
+    RSS Feeds Auto Refresh Interval: Intervalo de aŭtomata aktualigo de RSS-fluoj
   Distraction Free Settings:
     Digital Wellbeing:
       Count Watch Time From: Kalkuli spekttempon de
@@ -2200,6 +2201,7 @@ Tooltips:
     Auto Refresh Interval: Kiom ofte OpenTubeX aŭtomate aktualigas vian abonfluon dum la aplikaĵo estas malfermita. Ĉe Android, nenula intervalo ankaŭ aktualigas ĝin dum la aplikaĵo estas fermita.
     Refresh Subscriptions While App Is Closed: Aktualigas fluojn laŭ viaj elektitaj agordoj. Ĉe labortablo, OpenTubeX restas en la taskopleto ĝis vi eliras. Android regas kiam fonaj aktualigoj ruliĝas.
     Notify About New Uploads: Montras sistemajn sciigojn en ĉi tiu aparato por kanaloj, kies sciigojn vi ŝaltis en iliaj abonaj agordoj. OpenTubeX kontrolas novan enhavon kiam abonoj aktualiĝas, do elektu intervalon de aŭtomata aktualigo. Por esti sciigita dum la aplikaĵo estas fermita, ankaŭ ŝaltu aktualigadon dum la aplikaĵo estas fermita.
+    RSS Feeds Auto Refresh Interval: Kiom ofte OpenTubeX aŭtomate aktualigas viajn RSS-fluojn dum la aplikaĵo estas malfermita.
   Theme Settings:
     Only Show Important Notifications: Kaŝas sciigojn en la aplikaĵo, kiuj nur konfirmas agon aŭ raportas staton. Eraroj, avertoj, memorigoj, kiujn vi agordis, kaj sciigoj, kiuj proponas agon, ekzemple Malfari, ankoraŭ aperas. Fona progreso, ekzemple aktualigo de abonoj, montriĝas en la ĝenerala progresbreto anstataŭ kiel sciigo. Sistemaj sciigoj ne estas tuŝitaj.
     Thumbnail Size: Skalas bildetojn de videaĵoj en kradoj kaj listoj. Kradoj kun fiksa nombro de kolumnoj aŭ la aranĝo "Plena larĝo" anstataŭe plenigas ĉiun vicon, do tie ĝi ŝanĝas nur listajn bildetojn kaj videaĵetojn. Telefongrandaj fenestroj limigas kradajn bildetojn al 100%.

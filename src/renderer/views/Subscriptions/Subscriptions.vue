@@ -230,7 +230,7 @@
                 @click="toggleNewFeedView"
               />
               <FtIconButton
-                v-if="currentTab === 'feeds'"
+                v-if="currentTab === 'feeds' || currentNewFeedRssTab"
                 class="headerViewToggle headerManageFeeds"
                 :title="$t('Settings.Subscription Settings.Manage RSS Feeds')"
                 :icon="['fas', 'edit']"
@@ -269,16 +269,17 @@
               <FtRefreshWidget
                 embedded
                 class="headerRefreshWidget subscriptionsHeaderRefreshWidget"
-                :disable-refresh="currentTab === 'feeds'
+                :disable-refresh="currentTab === 'feeds' || currentNewFeedRssTab
                   ? currentTabPanel.isLoading || followedRssFeeds.length === 0
-                  : subscriptionFeedRefreshInProgress || currentTabPanel.isLoading || activeSubscriptionList.length === 0"
+                  : subscriptionFeedRefreshInProgress || currentTabPanel.isLoading ||
+                    (activeSubscriptionList.length === 0 && !combinedNewFeedRefreshesRssFeeds)"
                 :last-refresh-timestamp="currentTabPanel.lastRefreshTimestamp"
                 :next-auto-refresh-timestamp="currentTabPanel.nextAutoRefreshTimestamp"
                 :next-auto-refresh-tooltip="currentTabPanel.nextAutoRefreshTooltip"
                 :next-auto-refresh-at="currentAutoRefresh.timestamp"
                 :auto-refresh-interval="currentAutoRefresh.interval"
                 :title="currentTabPanel.refreshTitle"
-                :refresh-in-progress="currentTab !== 'feeds' && subscriptionFeedRefreshInProgress"
+                :refresh-in-progress="currentTab !== 'feeds' && !currentNewFeedRssTab && subscriptionFeedRefreshInProgress"
                 @click="refreshCurrentTab"
                 @cancel="cancelRefresh"
               />
@@ -302,7 +303,8 @@
             role="tab"
             :aria-selected="currentNewFeedTab === tab.id"
             aria-controls="subscriptionsPanel"
-            :data-new-feed-tab="tab.id"
+            :data-new-feed-tab="tab.id === 'feeds' ? null : tab.id"
+            :data-new-feed-rss-tab="tab.id === 'feeds' ? '' : null"
             :data-has-new-content="newFeedTabHasNewContent(tab.id)"
             :tabindex="currentNewFeedTab === tab.id ? 0 : -1"
             @click="changeNewFeedTab(tab.id)"
@@ -324,7 +326,7 @@
           </button>
         </FtTabs>
         <FtSubscriptionGroupBar
-          v-if="hasSubscriptionGroups && currentTab !== 'feeds'"
+          v-if="hasSubscriptionGroups && currentTab !== 'feeds' && !currentNewFeedRssTab"
           ref="subscriptionGroupsRef"
           class="subscriptionGroups"
           panel-id="subscriptionsPanel"
@@ -434,7 +436,14 @@ import {
   refreshSubscriptionVideosFromRemote
 } from '../../helpers/subscriptions'
 import { getSubscriptionsForFeed } from '../../helpers/subscription-channels'
-import { openRssFeedManager, rssFeedsRefreshing } from '../../helpers/rssFeeds'
+import {
+  getRssFeedsAutoRefreshInterval,
+  markRssFeedItemsAsSeen,
+  openRssFeedManager,
+  rssFeedItems,
+  rssFeedsNextAutoRefresh,
+  rssFeedsRefreshing
+} from '../../helpers/rssFeeds'
 import { supportsYtDlp } from '../../helpers/ytDlpCapabilities'
 
 const isElectron = process.env.IS_ELECTRON
@@ -653,6 +662,10 @@ const refreshingFeedTab = computed(() => {
 })
 
 const currentTabRefreshing = computed(() => {
+  if (currentTab.value === 'feeds' || currentNewFeedRssTab.value) {
+    return rssFeedsRefreshing.value
+  }
+
   if (currentTab.value === 'new') {
     return newFeedView.value === 'tabbed'
       ? refreshingFeedTab.value === currentNewFeedTab.value
@@ -805,7 +818,8 @@ const newFeedTabDefinitions = computed(() => [
   { id: 'videos', icon: ['fa', 'video'], label: t('Global.Videos') },
   { id: 'shorts', icon: ['fa', 'clapperboard'], label: t('Global.Shorts') },
   { id: 'live', icon: ['fa', 'tower-broadcast'], label: t('Global.Live') },
-  { id: 'posts', icon: ['fa', 'message'], label: t('Global.Posts') }
+  { id: 'posts', icon: ['fa', 'message'], label: t('Global.Posts') },
+  { id: 'feeds', icon: ['fas', 'rss'], label: t('Subscriptions.RSS Feeds.Tab') }
 ])
 
 const visibleNewFeedTabs = computed(() => {
@@ -817,8 +831,17 @@ const visibleNewFeedTabs = computed(() => {
 })
 
 const storedNewFeedTab = localStorage.getItem(currentNewFeedTabStorageKey)
-/** @type {import('vue').Ref<'videos' | 'shorts' | 'live' | 'posts'>} */
+/** @type {import('vue').Ref<'videos' | 'shorts' | 'live' | 'posts' | 'feeds'>} */
 const currentNewFeedTab = ref(storedNewFeedTab ?? 'videos')
+/** The combined New feed also refreshes the RSS feeds */
+const combinedNewFeedRefreshesRssFeeds = computed(() => {
+  return currentTab.value === 'new' && newFeedView.value === 'combined' && enableRssFeeds.value &&
+    followedRssFeeds.value.length > 0
+})
+/** Whether the New feed shows only the items of the RSS feeds */
+const currentNewFeedRssTab = computed(() => {
+  return currentTab.value === 'new' && newFeedView.value === 'tabbed' && currentNewFeedTab.value === 'feeds'
+})
 /** @type {Map<string, HTMLElement>} */
 const newFeedTabRefs = new Map()
 
@@ -925,7 +948,7 @@ function changeTabFromPointer(event, tab) {
 }
 
 /**
- * @param {'videos' | 'shorts' | 'live' | 'posts'} tab
+ * @param {'videos' | 'shorts' | 'live' | 'posts' | 'feeds'} tab
  */
 function changeNewFeedTab(tab) {
   if (
@@ -941,7 +964,7 @@ function changeNewFeedTab(tab) {
 
 /**
  * @param {KeyboardEvent} event
- * @param {'videos' | 'shorts' | 'live' | 'posts'} focusedTab
+ * @param {'videos' | 'shorts' | 'live' | 'posts' | 'feeds'} focusedTab
  */
 function switchNewFeedTab(event, focusedTab) {
   if (event.altKey) {
@@ -974,7 +997,7 @@ function switchNewFeedTab(event, focusedTab) {
 }
 
 /**
- * @param {'videos' | 'shorts' | 'live' | 'posts'} tab
+ * @param {'videos' | 'shorts' | 'live' | 'posts' | 'feeds'} tab
  * @param {Element | import('vue').ComponentPublicInstance | null} element
  */
 function setNewFeedTabRef(tab, element) {
@@ -1028,7 +1051,7 @@ const newPanel = useTemplateRef('newPanel')
 const feedsPanel = useTemplateRef('feedsPanel')
 
 /**
- * @param {'videos' | 'shorts' | 'live' | 'posts'} tab
+ * @param {'videos' | 'shorts' | 'live' | 'posts' | 'feeds'} tab
  */
 function newFeedTabHasNewContent(tab) {
   return newPanel.value?.hasNewContentByCategory?.[tab] === true
@@ -1066,7 +1089,7 @@ const markingSeenTab = ref(null)
 
 /**
  * @param {'videos' | 'shorts' | 'live' | 'community' | 'new' | 'feeds'} tab
- * @param {'videos' | 'shorts' | 'live' | 'posts'} [newFeedTab=currentNewFeedTab.value]
+ * @param {'videos' | 'shorts' | 'live' | 'posts' | 'feeds'} [newFeedTab=currentNewFeedTab.value]
  */
 async function markAllAsSeen(tab, newFeedTab = currentNewFeedTab.value) {
   if (markingSeenTab.value !== null) {
@@ -1078,10 +1101,12 @@ async function markAllAsSeen(tab, newFeedTab = currentNewFeedTab.value) {
     const feedTabs = tab === 'new'
       ? newFeedView.value === 'tabbed'
         ? [newFeedTab]
-        : visibleTabs.value.filter(visibleTab => visibleTab !== 'new' && visibleTab !== 'feeds')
+        : visibleTabs.value.filter(visibleTab => visibleTab !== 'new')
       : [tab]
+    const marksRssFeeds = feedTabs.includes('feeds')
 
-    const cacheFeedTabs = feedTabs.map(feedTab => feedTab === 'community' ? 'posts' : feedTab)
+    const cacheFeedTabs = feedTabs.filter(feedTab => feedTab !== 'feeds')
+      .map(feedTab => feedTab === 'community' ? 'posts' : feedTab)
     const channelIdsByTab = Object.fromEntries(cacheFeedTabs.map(feedTab => [
       feedTab,
       getSubscriptionsForFeed(activeSubscriptions.value, feedTab).map(channel => channel.id)
@@ -1106,11 +1131,17 @@ async function markAllAsSeen(tab, newFeedTab = currentNewFeedTab.value) {
       })
     ]))
 
-    const markSeen = () => store.dispatch('markSubscriptionEntriesAsSeen', {
-      tabs: cacheFeedTabs,
-      channelIdsByTab,
-      entriesByTab
-    })
+    const rssItems = marksRssFeeds ? rssFeedItems.value.filter(item => item.isNew === true) : []
+    const markSeen = async () => {
+      markRssFeedItemsAsSeen(rssItems)
+      if (cacheFeedTabs.length > 0) {
+        await store.dispatch('markSubscriptionEntriesAsSeen', {
+          tabs: cacheFeedTabs,
+          channelIdsByTab,
+          entriesByTab
+        })
+      }
+    }
     const markedNewFeedView = newFeedView.value
     const isVisibleNewFeed = () => isMounted && tab === 'new' && currentTab.value === 'new' &&
       (!usesLogicalTabs || isTabPresented?.value === true) &&
@@ -1181,6 +1212,10 @@ const currentAutoRefresh = computed(() => {
     case 'community':
       timestamp = store.getters.getSubscriptionPostsNextAutoRefreshTimestamp
       interval = store.getters.getSubscriptionPostsAutoRefreshInterval
+      break
+    case 'feeds':
+      timestamp = rssFeedsNextAutoRefresh.value
+      interval = getRssFeedsAutoRefreshInterval()
       break
     default:
       return { timestamp: 0, interval: 0 }
@@ -1513,6 +1548,7 @@ watch([
   headerFitsOneRow,
   newFeedView,
   visibleNewFeedTabs,
+  currentNewFeedRssTab,
   () => store.getters.getSubscriptionGroupList
 ], () => {
   const restoreFocus = headerRowRef.value?.querySelector('.markAllSeenButton') === document.activeElement

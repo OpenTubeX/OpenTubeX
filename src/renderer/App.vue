@@ -699,6 +699,7 @@ import {
 } from './helpers/androidMediaSession'
 import { classifyRequestFailure } from './helpers/api/requestDiagnostics'
 import { useSubscriptionAutoRefresh } from './composables/useSubscriptionAutoRefresh'
+import { useRssFeedAutoRefresh } from './composables/useRssFeedAutoRefresh'
 import { translateWindowTitle } from './helpers/strings'
 import { formatTabTitle } from './tabs/tabTitle'
 import { normalizeScrollbarThumbWidth } from './constants/scrollbar'
@@ -1943,6 +1944,7 @@ onMounted(async () => {
     removeOpenTabOrganizerListener = window.ftElectron.tabs.onOpenOrganizer(openTabOrganizer)
   }
   subscriptionAutoRefresh.start()
+  rssFeedAutoRefresh.start()
 })
 
 onBeforeUnmount(() => {
@@ -1970,6 +1972,7 @@ onBeforeUnmount(() => {
   }
   cancelWatchSideNavTransitionReset()
   subscriptionAutoRefresh.stop()
+  rssFeedAutoRefresh.stop()
   clearInterval(historyCleanupTimer)
   store.dispatch('stopSyncServerAutoSync')
   document.removeEventListener('keydown', handleKeyboardShortcuts)
@@ -2094,6 +2097,7 @@ function scheduleHistoryCleanup(days) {
 }
 
 const subscriptionAutoRefresh = useSubscriptionAutoRefresh({ dataReady, t })
+const rssFeedAutoRefresh = useRssFeedAutoRefresh(dataReady)
 
 /** @type {import('vue').ComputedRef<string>} */
 const baseTheme = computed(() => store.getters.getBaseTheme)

@@ -1120,6 +1120,7 @@ Settings:
     Posts Auto Refresh Interval: Julkaisujen automaattisen päivityksen aikaväli
     Refresh Subscriptions While App Is Closed: "Päivitä tilaukset sovelluksen ollessa suljettuna"
     Notify About New Uploads: Ilmoita uusista latauksista
+    RSS Feeds Auto Refresh Interval: RSS-syötteiden automaattisen päivityksen aikaväli
   Distraction Free Settings:
     Digital Wellbeing:
       Count Watch Time From: "Katseluaika lasketaan"
@@ -2202,6 +2203,7 @@ Tooltips:
     Auto Refresh Interval: "Kuinka usein OpenTubeX päivittää tilausnäkymän automaattisesti sovelluksen ollessa avoinna. Androidissa nollasta poikkeava aikaväli päivittää syötteen myös sovelluksen ollessa suljettuna."
     Refresh Subscriptions While App Is Closed: "Päivittää syötteet valitsemillasi asetuksilla. Tietokoneella OpenTubeX pysyy ilmoitusalueella lopettamiseen asti. Android päättää taustapäivitysten ajankohdan."
     Notify About New Uploads: Näyttää tällä laitteella järjestelmäilmoituksia kanavista, joiden ilmoitukset olet ottanut käyttöön niiden tilausasetuksissa. OpenTubeX tarkistaa uuden sisällön tilauksia päivitettäessä, joten valitse automaattisen päivityksen aikaväli. Jos haluat ilmoituksia myös sovelluksen ollessa suljettuna, ota käyttöön myös päivitys sovelluksen ollessa suljettuna.
+    RSS Feeds Auto Refresh Interval: Kuinka usein OpenTubeX päivittää RSS-syötteesi automaattisesti, kun sovellus on auki.
   Theme Settings:
     Only Show Important Notifications: Piilottaa sovelluksen sisäiset ilmoitukset, jotka vain vahvistavat toiminnon tai kertovat tilasta. Virheet, varoitukset, asettamasi muistutukset ja toimintoa tarjoavat ilmoitukset, kuten Kumoa, näytetään edelleen. Taustatoimintojen edistyminen, kuten tilausten päivitys, näytetään ilmoituksen sijaan yleisessä edistymispalkissa. Järjestelmäilmoituksiin tämä ei vaikuta.
     Visible Search Suggestions: "Määrittää, montako hakuhistorian merkintää ja ehdotusta hakupalkki näyttää ennen kuin sen luetteloa täytyy vierittää. Luettelo ei koskaan ulotu ikkunan alareunan yli."

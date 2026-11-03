@@ -1105,6 +1105,7 @@ Settings:
     Posts Auto Refresh Interval: Bejegyzések automatikus frissítésének időköze
     Refresh Subscriptions While App Is Closed: "Feliratkozások frissítése bezárt alkalmazásnál"
     Notify About New Uploads: Értesítés új feltöltésekről
+    RSS Feeds Auto Refresh Interval: RSS-hírcsatornák automatikus frissítésének időköze
   Distraction Free Settings:
     Digital Wellbeing:
       Count Watch Time From: "Nézési idő számításának forrása"
@@ -2152,6 +2153,7 @@ Tooltips:
     Auto Refresh Interval: "Milyen gyakran frissítse automatikusan az OpenTubeX a feliratkozási hírfolyamot, amíg az alkalmazás nyitva van. Androidon a nullától eltérő időköz akkor is frissíti a hírfolyamot, amikor az alkalmazás be van zárva."
     Refresh Subscriptions While App Is Closed: "A kiválasztott beállításokkal frissíti a hírcsatornákat. Számítógépen az OpenTubeX kilépésig a rendszertálcán marad. Androidon a rendszer határozza meg a háttérfrissítések idejét."
     Notify About New Uploads: Rendszerértesítéseket jelenít meg ezen az eszközön azokról a csatornákról, amelyeknek a feliratkozási beállításaiban bekapcsolta az értesítéseket. Az OpenTubeX a feliratkozások frissítésekor keres új tartalmat, ezért válasszon automatikus frissítési időközt. Ha bezárt alkalmazásnál is értesítést szeretne kapni, kapcsolja be a bezárt alkalmazásnál történő frissítést is.
+    RSS Feeds Auto Refresh Interval: Milyen gyakran frissíti automatikusan az OpenTubeX az RSS-hírcsatornáidat, amíg az alkalmazás nyitva van.
   Theme Settings:
     Only Show Important Notifications: Elrejti azokat az alkalmazáson belüli értesítéseket, amelyek csak egy műveletet erősítenek meg vagy állapotot jeleznek. A hibák, figyelmeztetések, az Ön által beállított emlékeztetők és a műveletet kínáló értesítések, például a Visszavonás, továbbra is megjelennek. A háttérfolyamatok, például a feliratkozások frissítésének állapota értesítés helyett a globális folyamatjelző sávon jelenik meg. A rendszerértesítéseket nem érinti.
     Visible Search Suggestions: "Megadja, hány keresési előzményt és javaslatot jelenít meg a keresősáv, mielőtt a listáját görgetni kellene. A lista soha nem nyúlik túl az ablak alsó szélén."

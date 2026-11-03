@@ -1306,6 +1306,7 @@ Settings:
     Limit the number of videos displayed for each channel: 채널별 표시 동영상 수 제한
     To: 다음으로
     Confirm Before Unsubscribing: 구독 취소 전 확인
+    RSS Feeds Auto Refresh Interval: RSS 피드 자동 새로 고침 간격
   Distraction Free Settings:
     Digital Wellbeing:
       Count Watch Time From: "시청 시간 계산 기준"
@@ -2543,6 +2544,7 @@ Tooltips:
     Auto Refresh Interval: "앱이 열려 있는 동안 OpenTubeX에서 구독 피드를 자동으로 새로 고칠 간격입니다. Android에서는 0이 아닌 간격을 선택하면 앱이 닫혀 있을 때도 피드를 새로 고칩니다."
     Refresh Subscriptions While App Is Closed: "선택한 설정으로 피드를 새로고침합니다. 데스크톱에서는 종료할 때까지 OpenTubeX가 시스템 트레이에 남습니다. Android는 백그라운드 새로고침 시간을 결정합니다."
     Notify About New Uploads: 구독 설정에서 알림을 켠 채널에 대해 이 기기에 시스템 알림을 표시합니다. OpenTubeX는 구독을 새로 고칠 때 새 콘텐츠를 확인하므로 자동 새로 고침 간격을 선택하세요. 앱이 닫혀 있을 때도 알림을 받으려면 앱이 닫혀 있을 때 새로 고침도 사용하도록 설정하세요.
+    RSS Feeds Auto Refresh Interval: 앱이 열려 있는 동안 OpenTubeX가 RSS 피드를 자동으로 새로 고치는 빈도입니다.
   Theme Settings:
     Only Show Important Notifications: 작업을 확인하거나 상태만 알려 주는 앱 내 알림을 숨깁니다. 오류, 경고, 직접 설정한 알림, 그리고 실행취소처럼 작업을 제공하는 알림은 계속 표시됩니다. 구독 새로 고침과 같은 백그라운드 작업의 진행 상황은 알림 대신 전역 진행 표시줄에 표시됩니다. 시스템 알림에는 영향을 주지 않습니다.
     Visible Search Suggestions: "검색창 목록이 스크롤되기 전에 표시할 검색 기록 항목과 추천 검색어의 수를 설정합니다. 목록은 창 아래쪽 가장자리를 넘어가지 않습니다."

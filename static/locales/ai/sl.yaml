@@ -1343,6 +1343,7 @@ Settings:
     Limit the number of videos displayed for each channel: Omeji število prikazanih videoposnetkov za posamezen kanal
     To: Na
     Confirm Before Unsubscribing: Zahtevaj potrditev pred odjavo
+    RSS Feeds Auto Refresh Interval: Interval samodejnega osveževanja virov RSS
   Distraction Free Settings:
     Digital Wellbeing:
       Count Watch Time From: "Štej čas gledanja"
@@ -2675,6 +2676,7 @@ Tooltips:
     Auto Refresh Interval: "Kako pogosto OpenTubeX samodejno osveži vir naročnin, ko je aplikacija odprta. V Androidu interval, ki ni nič, osvežuje vir tudi, ko je aplikacija zaprta."
     Refresh Subscriptions While App Is Closed: "Osvežuje vire z izbranimi nastavitvami. Na računalniku OpenTubeX ostane v sistemski vrstici do izhoda. Android določa čas osveževanja v ozadju."
     Notify About New Uploads: Prikazuje sistemska obvestila v tej napravi za kanale, ki ste jim obvestila vklopili v njihovih nastavitvah naročnine. OpenTubeX preveri novo vsebino ob osvežitvi naročnin, zato izberite interval samodejnega osveževanja. Če želite prejemati obvestila tudi, ko je aplikacija zaprta, vklopite še osveževanje, ko je aplikacija zaprta.
+    RSS Feeds Auto Refresh Interval: Kako pogosto OpenTubeX samodejno osveži vaše vire RSS, ko je aplikacija odprta.
   Theme Settings:
     Only Show Important Notifications: Skrije obvestila v aplikaciji, ki le potrdijo dejanje ali sporočijo stanje. Napake, opozorila, opomniki, ki ste jih nastavili, in obvestila, ki ponujajo dejanje, na primer Razveljavi, se še vedno prikažejo. Napredek opravil v ozadju, na primer osveževanja naročnin, je namesto v obvestilu prikazan v splošni vrstici napredka. Sistemska obvestila niso prizadeta.
     Visible Search Suggestions: "Določa, koliko vnosov zgodovine iskanja in predlogov prikaže iskalna vrstica, preden se njen seznam začne pomikati. Seznam nikoli ne sega čez spodnji rob okna."

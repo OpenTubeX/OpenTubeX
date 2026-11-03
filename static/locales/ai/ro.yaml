@@ -1110,6 +1110,7 @@ Settings:
     Posts Auto Refresh Interval: Interval de reîmprospătare automată a postărilor
     Refresh Subscriptions While App Is Closed: "Reîmprospătează abonamentele când aplicația este închisă"
     Notify About New Uploads: Notifică despre încărcări noi
+    RSS Feeds Auto Refresh Interval: Interval de reîmprospătare automată a fluxurilor RSS
   Distraction Free Settings:
     Digital Wellbeing:
       Count Watch Time From: "Numără timpul de vizionare de pe"
@@ -2203,6 +2204,7 @@ Tooltips:
     Auto Refresh Interval: "Frecvența cu care OpenTubeX reîmprospătează automat fluxul de abonamente cât timp aplicația este deschisă. Pe Android, un interval diferit de zero actualizează fluxul și când aplicația este închisă."
     Refresh Subscriptions While App Is Closed: "Actualizează fluxurile cu setările alese. Pe desktop, OpenTubeX rămâne în zona de notificare până la ieșire. Android stabilește când rulează actualizările în fundal."
     Notify About New Uploads: Afișează notificări de sistem pe acest dispozitiv pentru canalele ale căror notificări le-ați activat în setările lor de abonament. OpenTubeX caută conținut nou când abonamentele se reîmprospătează, așa că alegeți un interval de reîmprospătare automată. Pentru a primi notificări când aplicația este închisă, activați și reîmprospătarea când aplicația este închisă.
+    RSS Feeds Auto Refresh Interval: Cât de des reîmprospătează OpenTubeX automat fluxurile RSS cât timp aplicația este deschisă.
   Theme Settings:
     Only Show Important Notifications: Ascunde notificările din aplicație care doar confirmă o acțiune sau raportează o stare. Erorile, avertismentele, mementourile pe care le-ați configurat și notificările care oferă o acțiune, precum Anulare, apar în continuare. Progresul operațiunilor din fundal, precum reîmprospătarea abonamentelor, este afișat în bara de progres globală în loc de o notificare. Notificările sistemului nu sunt afectate.
     Visible Search Suggestions: "Stabilește câte intrări din istoricul căutărilor și sugestii afișează bara de căutare înainte ca lista ei să fie derulată. Lista nu depășește niciodată marginea de jos a ferestrei."

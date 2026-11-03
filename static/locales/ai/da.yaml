@@ -1131,6 +1131,7 @@ Settings:
     Refresh Subscriptions While App Is Closed: "Opdater abonnementer, mens appen er lukket"
     Notify About New Uploads: Giv besked om nye uploads
     Limit the number of videos displayed for each channel: Begræns antallet af viste videoer for hver kanal
+    RSS Feeds Auto Refresh Interval: Interval for automatisk opdatering af RSS-feeds
   Distraction Free Settings:
     Digital Wellbeing:
       Count Watch Time From: "Tæl visningstid fra"
@@ -2236,6 +2237,7 @@ Tooltips:
     Auto Refresh Interval: "Hvor ofte OpenTubeX automatisk opdaterer dit abonnementsfeed, mens appen er åben. På Android opdaterer et interval over nul også feedet, mens appen er lukket."
     Refresh Subscriptions While App Is Closed: "Opdaterer feeds med dine valgte indstillinger. På computeren forbliver OpenTubeX i systembakken, indtil du afslutter. Android styrer, hvornår baggrundsopdateringer kører."
     Notify About New Uploads: Viser systemmeddelelser på denne enhed for kanaler, hvor du har slået meddelelser til i deres abonnementsindstillinger. OpenTubeX søger efter nyt indhold, når abonnementer opdateres, så vælg et interval for automatisk opdatering. Hvis du vil have besked, mens appen er lukket, skal du også aktivere opdatering, mens appen er lukket.
+    RSS Feeds Auto Refresh Interval: Hvor ofte OpenTubeX automatisk opdaterer dine RSS-feeds, mens appen er åben.
   Theme Settings:
     Only Show Important Notifications: Skjuler notifikationer i appen, der kun bekræfter en handling eller oplyser en status. Fejl, advarsler, påmindelser, du har oprettet, og notifikationer med en handling, såsom Fortryd, vises stadig. Fremskridt for baggrundshandlinger, såsom opdatering af abonnementer, vises i den globale statuslinje i stedet for som en notifikation. Systemnotifikationer påvirkes ikke.
     Visible Search Suggestions: "Angiver, hvor mange poster fra søgehistorikken og forslag søgefeltet viser, før dets liste skal rulles. Listen går aldrig ud over vinduets nederste kant."

@@ -1116,6 +1116,7 @@ Settings:
     Posts Auto Refresh Interval: Intervalo de actualización automática das publicacións
     Refresh Subscriptions While App Is Closed: "Actualizar as subscricións coa aplicación pechada"
     Notify About New Uploads: Notificar novas subidas
+    RSS Feeds Auto Refresh Interval: Intervalo de actualización automática das fontes RSS
   Distraction Free Settings:
     Digital Wellbeing:
       Count Watch Time From: "Contar o tempo de visualización de"
@@ -2207,6 +2208,7 @@ Tooltips:
     Auto Refresh Interval: "Frecuencia coa que OpenTubeX actualiza automaticamente a fonte das subscricións mentres a aplicación está aberta. En Android, un intervalo distinto de cero tamén actualiza a fonte mentres a aplicación está pechada."
     Refresh Subscriptions While App Is Closed: "Actualiza as fontes coa configuración seleccionada. No escritorio, OpenTubeX permanece na bandexa do sistema ata saír. Android controla cando se executan as actualizacións en segundo plano."
     Notify About New Uploads: Amosa notificacións do sistema neste dispositivo para as canles cuxas notificacións activaches na súa configuración de subscrición. OpenTubeX busca contido novo ao actualizar as subscricións, así que escolle un intervalo de actualización automática. Para recibir notificacións coa aplicación pechada, activa tamén a actualización coa aplicación pechada.
+    RSS Feeds Auto Refresh Interval: Con que frecuencia OpenTubeX actualiza automaticamente as túas fontes RSS mentres a aplicación está aberta.
   Theme Settings:
     Only Show Important Notifications: Oculta as notificacións da aplicación que só confirman unha acción ou informan dun estado. Os erros, os avisos, os recordatorios que configuraches e as notificacións que ofrecen unha acción, como Desfacer, seguen aparecendo. O progreso das operacións en segundo plano, como a actualización das subscricións, móstrase na barra de progreso global en lugar dunha notificación. As notificacións do sistema non se ven afectadas.
     Visible Search Suggestions: "Define cantas entradas do historial de busca e suxestións mostra a barra de busca antes de que a súa lista se desprace. A lista nunca se estende máis alá da parte inferior da xanela."

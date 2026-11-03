@@ -1105,6 +1105,7 @@ Settings:
     Posts Auto Refresh Interval: Intervall for automatisk oppdatering av innlegg
     Refresh Subscriptions While App Is Closed: "Oppdater abonnementer mens appen er lukket"
     Notify About New Uploads: Varsle om nye opplastinger
+    RSS Feeds Auto Refresh Interval: Intervall for automatisk oppdatering av RSS-strømmer
   Distraction Free Settings:
     Digital Wellbeing:
       Count Watch Time From: "Tell seertid fra"
@@ -2156,6 +2157,7 @@ Tooltips:
     Auto Refresh Interval: "Hvor ofte OpenTubeX automatisk oppdaterer abonnementsstrømmen mens appen er åpen. På Android oppdaterer et intervall over null også strømmen mens appen er lukket."
     Refresh Subscriptions While App Is Closed: "Oppdaterer strømmer med innstillingene du har valgt. På datamaskinen blir OpenTubeX i systemstatusfeltet til du avslutter. Android bestemmer når bakgrunnsoppdateringer kjøres."
     Notify About New Uploads: Viser systemvarsler på denne enheten for kanaler du har slått på varsler for i abonnementsinnstillingene deres. OpenTubeX ser etter nytt innhold når abonnementer oppdateres, så velg et intervall for automatisk oppdatering. For å bli varslet mens appen er lukket, må du også slå på oppdatering mens appen er lukket.
+    RSS Feeds Auto Refresh Interval: Hvor ofte OpenTubeX automatisk oppdaterer RSS-strømmene dine mens appen er åpen.
   Theme Settings:
     Only Show Important Notifications: Skjuler varsler i appen som bare bekrefter en handling eller melder en status. Feil, advarsler, påminnelser du har satt opp, og varsler som tilbyr en handling, som Angre, vises fortsatt. Fremdrift for bakgrunnsoperasjoner, som oppdatering av abonnementer, vises i den globale fremdriftslinjen i stedet for som et varsel. Systemvarsler påvirkes ikke.
     Visible Search Suggestions: "Angir hvor mange oppføringer fra søkeloggen og forslag søkefeltet viser før listen må rulles. Listen går aldri forbi nederkanten av vinduet."
