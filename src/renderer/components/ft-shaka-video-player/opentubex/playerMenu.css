@@ -707,21 +707,43 @@
 /*
   Moving between the menu and its submenus zooms the new view into place
   (`setupMenuTransitions`): a submenu rises from slightly smaller, and going
-  back, the entries settle from slightly larger. Each part zooms by itself, as
-  a transform on the submenu would become the containing block of its fixed
-  header.
+  back, the menu settles from slightly larger. The whole menu zooms, as it
+  already has a layer of its own. Zooming each entry instead gives every entry
+  Shaka has just shown a new layer, which a busy renderer takes frames to draw.
+  The opening animations stay listed, so that they don't run again once the
+  zoom has ended.
 */
-:deep([data-ft-menu-transition='in'] > .shaka-sub-menu > :not(.os-scrollbar)) {
+/* stylelint-disable selector-max-compound-selectors -- Telling the phone layout apart takes a compound of its own. */
+:deep(.shaka-overflow-menu:not(.phonePlayerOptions > *, .shaka-hidden):is([data-ft-menu-transition='in'], :has([data-ft-menu-transition='in']))) {
   animation:
     ft-menu-fade-in 150ms ease-out,
+    ft-menu-open 200ms cubic-bezier(0.2, 0, 0, 1),
     ft-menu-zoom-in 300ms cubic-bezier(0.2, 0, 0, 1);
 }
 
-:deep([data-ft-menu-transition='out'] > :not(.shaka-sub-menu, .os-scrollbar)) {
+:deep(.shaka-overflow-menu:not(.phonePlayerOptions > *, .shaka-hidden):is([data-ft-menu-transition='out'], :has([data-ft-menu-transition='out']))) {
   animation:
     ft-menu-fade-in 150ms ease-out,
+    ft-menu-open 200ms cubic-bezier(0.2, 0, 0, 1),
     ft-menu-zoom-out 300ms cubic-bezier(0.2, 0, 0, 1);
 }
+
+/*
+  On phones, the entries zoom by themselves, as a scale on the menu would
+  become the containing block of the header action fixed to the dialog.
+*/
+:deep(.phonePlayerOptions [data-ft-menu-transition='in'] > .shaka-sub-menu > :not(.os-scrollbar)) {
+  animation:
+    ft-menu-fade-in 150ms ease-out,
+    ft-menu-zoom-in-entries 300ms cubic-bezier(0.2, 0, 0, 1);
+}
+
+:deep(.phonePlayerOptions [data-ft-menu-transition='out'] > :not(.shaka-sub-menu, .os-scrollbar)) {
+  animation:
+    ft-menu-fade-in 150ms ease-out,
+    ft-menu-zoom-out-entries 300ms cubic-bezier(0.2, 0, 0, 1);
+}
+/* stylelint-enable selector-max-compound-selectors */
 
 @keyframes ft-menu-fade-in {
   from {
@@ -731,11 +753,23 @@
 
 @keyframes ft-menu-zoom-in {
   from {
-    scale: 0.9;
+    scale: 0.96;
   }
 }
 
 @keyframes ft-menu-zoom-out {
+  from {
+    scale: 1.04;
+  }
+}
+
+@keyframes ft-menu-zoom-in-entries {
+  from {
+    scale: 0.9;
+  }
+}
+
+@keyframes ft-menu-zoom-out-entries {
   from {
     scale: 1.08;
   }
@@ -745,7 +779,8 @@
   The menu grows in above its button when it opens, and fades out when it
   closes, keeping its bottom edge and the side Shaka anchors it to still.
   Closing keeps it displayed until it has faded, except from a submenu
-  (`setupMenuTransitions`). It stays on a layer of its own, as it is while
+  (`setupMenuTransitions`). The fade is short, as it keeps the menu on
+  screen for about a frame more, which a busy renderer is slow to draw. It stays on a layer of its own, as it is while
   it scales, so that its icons don't snap a pixel aside once it has grown in.
 */
 :deep(.shaka-overflow-menu:not(.phonePlayerOptions > *)) {
@@ -768,9 +803,9 @@
   opacity: 0;
   scale: 0.95;
   transition:
-    opacity 150ms ease-in,
-    scale 150ms ease-in,
-    display 150ms allow-discrete;
+    opacity 80ms ease-in,
+    scale 80ms ease-in,
+    display 80ms allow-discrete;
 }
 
 @keyframes ft-menu-open {

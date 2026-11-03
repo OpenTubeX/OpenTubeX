@@ -1,12 +1,12 @@
 /**
  * The overflow menu fades in and out, and moving between it and its submenus
  * zooms the new view into place (`playerMenu.css`). Shaka hides the old view
- * before its listeners run, so only the new one animates.
+ * before its listeners run, so only the new one shows while the menu zooms.
  *
  * The zooms only run while the parent of the new view is marked, so that
- * options Shaka rebuilds later, and the entries shown when the menu opens,
- * appear without them. A marker under which nothing zooms, such as with
- * reduced motion, expires at once.
+ * the menu doesn't zoom when it opens or Shaka rebuilds its options later.
+ * A marker under which nothing zooms, such as with reduced motion, expires
+ * at once.
  *
  * @param {HTMLElement} menu the overflow menu
  * @param {EventTarget} controls
@@ -15,7 +15,8 @@
 export function setupMenuTransitions(menu, controls) {
   /**
    * Shaka switches the views after sending its events, so the zoom is looked
-   * for once it has.
+   * for once it has, anywhere in the menu, as the menu zooms itself for the
+   * views of its menu groups.
    *
    * @param {HTMLElement} container
    * @param {'in' | 'out'} zoom
@@ -25,7 +26,7 @@ export function setupMenuTransitions(menu, controls) {
     queueMicrotask(() => {
       if (
         container.dataset.ftMenuTransition === zoom &&
-        !container.getAnimations({ subtree: true }).some(animation => (
+        !menu.getAnimations({ subtree: true }).some(animation => (
           animation instanceof CSSAnimation && animation.animationName.startsWith(`ft-menu-zoom-${zoom}`)
         ))
       ) {
@@ -84,15 +85,23 @@ export function setupMenuTransitions(menu, controls) {
 
   /**
    * Only the zoom of the current marker clears it, as going back before the
-   * submenu has zoomed in cancels that zoom under the new marker.
+   * submenu has zoomed in cancels that zoom under the new marker. The menu
+   * zooms itself for the views of the menu groups in it too, which may have
+   * been marked while it zoomed, while on phones the entries of the marked
+   * view zoom.
    *
    * @param {AnimationEvent} event
    */
   function onAnimationEnd({ animationName, target }) {
     const zoom = animationName.match(/^ft-menu-zoom-(in|out)\b/)?.[1]
-    const parent = zoom && target instanceof HTMLElement ? target.closest('[data-ft-menu-transition]') : null
-    if (parent instanceof HTMLElement && parent.dataset.ftMenuTransition === zoom) {
-      delete parent.dataset.ftMenuTransition
+    if (!zoom || !(target instanceof HTMLElement)) return
+    const parents = target === menu
+      ? [menu, ...menu.querySelectorAll('[data-ft-menu-transition]')]
+      : [target.closest('[data-ft-menu-transition]')]
+    for (const parent of parents) {
+      if (parent instanceof HTMLElement && parent.dataset.ftMenuTransition === zoom) {
+        delete parent.dataset.ftMenuTransition
+      }
     }
   }
 
