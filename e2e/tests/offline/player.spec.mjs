@@ -1,7 +1,7 @@
 import { readFileSync } from 'node:fs'
 import { createRequire } from 'node:module'
 import { goTo, sel, setPlayerFullscreen, setWindowSize, test, expect } from '../../helpers/app.mjs'
-import { activeTab, expectDockedToBottomRight, findWatchComponent, openMockedVideo, waitForPlayback, openCaptionLanguages, openPlayerOptions } from '../../helpers/player.mjs'
+import { activeTab, expectDockedToBottomRight, findWatchComponent, openMockedVideo, waitForPlayback, openCaptionLanguages, openPlayerOptions, settleMenuZoom } from '../../helpers/player.mjs'
 import { mockPlayableWatchPage, watchViewHandle } from '../../helpers/watch.mjs'
 
 // These used to live in the network suite, where they only ran when YouTube
@@ -1189,12 +1189,15 @@ test('the overflow menu can turn the zoom off again', async ({ app, page, attach
   })
   expect(statusTypography[0]).toEqual(statusTypography[1])
   expect(statusTypography[0]).toMatchObject({ fontSize: '10px', opacity: '0.75' })
+  // The menu grows in when it opens, and zooms as a whole between its views.
+  await settleMenuZoom(player)
   const overflowMenuHeight = (await overflowMenu.boundingBox()).height
 
   await overflowMenu.getByRole('button', { name: 'Zoom' }).click()
   const zoomMenu = player.locator('.video-zoom-menu')
   await expect(zoomMenu).toHaveClass(/ft-menu-grid/)
   await expect(zoomMenu).toHaveCSS('flex-wrap', 'wrap')
+  await settleMenuZoom(player)
   expect((await overflowMenu.boundingBox()).height).toBe(overflowMenuHeight)
   const zoomHeader = zoomMenu.locator('.shaka-back-to-overflow-button')
   const zoomHeaderTitle = zoomHeader.getByText('Zoom')
