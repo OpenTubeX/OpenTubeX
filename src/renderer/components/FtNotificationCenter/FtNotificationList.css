@@ -7,7 +7,7 @@
 .notificationRow {
   display: flex;
   align-items: flex-start;
-  border-radius: calc(8px * var(--ui-roundness));
+  border-radius: var(--shape-corner-medium);
 }
 
 .notificationRow.unread {
@@ -90,7 +90,7 @@
   inline-size: 112px;
   aspect-ratio: 16 / 9;
   overflow: hidden;
-  border-radius: calc(6px * var(--ui-roundness));
+  border-radius: var(--shape-corner-small);
   background-color: var(--side-nav-color);
 }
 
@@ -120,7 +120,7 @@
   inset-block-end: 4px;
   inset-inline-end: 4px;
   padding: 3px;
-  border-radius: calc(4px * var(--ui-roundness));
+  border-radius: var(--shape-corner-extra-small);
   background-color: rgb(0 0 0 / 70%);
   color: #fff;
   font-size: 11px;
