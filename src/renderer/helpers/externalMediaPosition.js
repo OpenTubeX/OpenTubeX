@@ -85,15 +85,16 @@ export function getExternalMediaProgress(url) {
 /**
  * @param {string} key
  * @param {object | null} position removes the saved position when null
+ * @param {number} [updatedAt] when the position changed
  */
-function writePosition(key, position) {
+function writePosition(key, position, updatedAt = Date.now()) {
   try {
     if (position === null) {
       localStorage.removeItem(key)
     } else {
       // A save must win over the position it replaces, even one synced from a device whose clock runs ahead.
-      const updatedAt = Math.max(Date.now(), (readPosition(key)?.updatedAt ?? -1) + 1)
-      localStorage.setItem(key, JSON.stringify({ ...position, updatedAt }))
+      const savedAt = Math.max(updatedAt, (readPosition(key)?.updatedAt ?? -1) + 1)
+      localStorage.setItem(key, JSON.stringify({ ...position, updatedAt: savedAt }))
     }
     externalMediaPositionVersion.value++
   } catch (error) {
@@ -127,23 +128,30 @@ export function markExternalMediaWatched(url, fully = false) {
   writePosition(key, { ...position, watched: true })
 }
 
-/** Keeps where the media was left, so it still resumes there. */
-export function unmarkExternalMediaWatched(url) {
+/**
+ * Keeps where the media was left, so it still resumes there.
+ * @param {string} url
+ * @param {number} [updatedAt]
+ */
+export function unmarkExternalMediaWatched(url, updatedAt = Date.now()) {
   const key = positionKey(url)
   if (key === null) return
-  const { updatedAt, watched, ...position } = readPosition(key) ?? { seconds: 0 }
-  writePosition(key, position.seconds > 0 ? position : null)
+  const { updatedAt: savedAt, watched, ...position } = readPosition(key) ?? { seconds: 0 }
+  writePosition(key, position.seconds > 0 ? position : null, updatedAt)
 }
 
 /**
- * Unmarks media that was marked as watched before the timestamp, keeping where it was left.
+ * Unmarks media that was marked as watched before the timestamp, keeping where
+ * it was left. The position takes the timestamp, so that changes from other
+ * devices after it still win when they sync later. A removed position already
+ * loses to them.
  * @param {string} url
  * @param {number} timestamp
  */
 export function unmarkExternalMediaWatchedBefore(url, timestamp) {
   const key = positionKey(url)
   const position = key === null ? null : readPosition(key)
-  if (position?.watched === true && position.updatedAt < timestamp) unmarkExternalMediaWatched(url)
+  if (position?.watched === true && position.updatedAt < timestamp) unmarkExternalMediaWatched(url, timestamp)
 }
 
 export function removeExternalMediaPositionsBefore(cutoff) {

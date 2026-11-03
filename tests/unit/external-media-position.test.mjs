@@ -9,6 +9,7 @@ import {
   saveExternalMediaPosition,
   syncExternalMediaPositions,
   unmarkExternalMediaWatched,
+  unmarkExternalMediaWatchedBefore,
 } from '../../src/renderer/helpers/externalMediaPosition.js'
 
 const url = 'https://videos.example.test/episode/1'
@@ -251,6 +252,31 @@ test('syncing carries marking media as watched and unmarking it to other devices
   await syncExternalMediaPositions(client, synced, 0)
   assert.deepEqual(client.uploaded, [])
   assert.equal(getExternalMediaProgress(url), null)
+})
+
+test('unmarking media watched before a later change keeps the time of that change', async () => {
+  const watchedFromStart = `${url}?start=1`
+  mock.method(Date, 'now', () => 1000)
+  saveExternalMediaPosition(url, 12, 30)
+  markExternalMediaWatched(url)
+  markExternalMediaWatched(watchedFromStart, true)
+  const { synced } = await syncExternalMediaPositions(syncClient([]), {}, 0)
+  // An unseen mark at 2000 syncs at 4000, after another device watched both at 3000
+  mock.method(Date, 'now', () => 4000)
+  unmarkExternalMediaWatchedBefore(url, 2000)
+  unmarkExternalMediaWatchedBefore(watchedFromStart, 2000)
+  assert.deepEqual(JSON.parse(storage.get(`externalMediaPosition:${url}`)), { seconds: 12, duration: 30, updatedAt: 2000 })
+  assert.equal(getExternalMediaProgress(watchedFromStart), null)
+  unmarkExternalMediaWatchedBefore(url, 2000)
+  assert.equal(JSON.parse(storage.get(`externalMediaPosition:${url}`)).updatedAt, 2000)
+
+  const client = syncClient([
+    { url, seconds: 12, duration: 30, watched: true, updatedAt: 3000 },
+    { url: watchedFromStart, seconds: 0, watched: true, updatedAt: 3000 },
+  ])
+  await syncExternalMediaPositions(client, synced, 0)
+  assert.deepEqual(getExternalMediaProgress(url), { watched: true, progress: 1, seconds: 12 })
+  assert.deepEqual(getExternalMediaProgress(watchedFromStart), { watched: true, progress: 1, seconds: 0 })
 })
 
 test('a save after syncing a position from a clock ahead of this one still syncs as the newest', async () => {
