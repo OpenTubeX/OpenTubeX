@@ -68,6 +68,8 @@ const props = defineProps({
   contentDisclosures: { type: Array, default: () => [] },
   panelOpen: { type: Boolean, default: false }
 })
+const EXCERPT_LENGTH = 300
+
 const emit = defineEmits(['open'])
 const { t } = useI18n()
 const id = useId()
@@ -78,7 +80,9 @@ const excerpt = computed(() => {
   // Template contents stay inert while extracting text from remote HTML.
   const template = document.createElement('template')
   template.innerHTML = props.descriptionHtml || props.description || ''
-  return (template.content.textContent ?? '').replaceAll(/\s+/g, ' ').trim()
+  const text = (template.content.textContent ?? '').replaceAll(/\s+/g, ' ').trim()
+  // Longer than two lines on any phone, but keeps the button's accessible description short.
+  return Array.from(text).slice(0, EXCERPT_LENGTH).join('')
 })
 
 const chips = computed(() => [

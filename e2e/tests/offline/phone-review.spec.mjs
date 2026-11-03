@@ -197,6 +197,10 @@ test('description preview summarizes metadata as chips', async ({ app, page }) =
   await watch.evaluate(vm => { vm.videoDescription = 'Press <Ctrl>'; vm.videoDescriptionHtml = 'Press &lt;Ctrl&gt;' })
   await expect(preview.locator('.phoneDescriptionExcerpt')).toHaveText('Press <Ctrl>')
 
+  // Long descriptions keep a short accessible description; the sheet has the full text.
+  await watch.evaluate(vm => { vm.videoDescriptionHtml = ''; vm.videoDescription = 'word '.repeat(200) })
+  await expect.poll(() => preview.locator('.phoneDescriptionExcerpt').evaluate(element => element.textContent.length)).toBeLessThanOrEqual(300)
+
   // Metadata alone still offers the description sheet, even without any description value.
   await watch.evaluate(vm => { vm.videoDescription = null; vm.videoDescriptionHtml = ''; vm.videoMusicTracks = []; vm.videoTags = []; vm.contentDisclosures = [] })
   await expect(preview.locator('.phoneDescriptionExcerpt')).toHaveCount(0)
