@@ -1,5 +1,6 @@
 import { setupPhoneOptionsMenu } from '../../helpers/player/phoneOptionsMenu'
 import { CONTROL_BAR_MENUS, setupSubmenuScrolling } from '../../helpers/player/submenuScrolling'
+import { setupMenuTransitions } from '../../helpers/player/menuTransitions'
 import { chooseAndroidDirectory } from '../../helpers/androidStorage'
 import { isAppHidden, getAndroidAppActive, waitForAndroidAppState } from '../../helpers/appVisibility.js'
 import { playbackScreenWake } from '../../helpers/playbackScreenWake'
@@ -4241,9 +4242,11 @@ export default defineComponent({
       addOverlayScrollbars(menu)
       const cleanupOverflowSubmenus = setupSubmenuScrolling(menu, ui.getControls())
       const cleanupControlBarMenus = setupSubmenuScrolling(controlsContainer, ui.getControls(), CONTROL_BAR_MENUS)
+      const cleanupMenuTransitions = setupMenuTransitions(menu, ui.getControls())
       cleanupSubmenuScrolling = () => {
         cleanupOverflowSubmenus()
         cleanupControlBarMenus()
+        cleanupMenuTransitions()
       }
       cleanupPhoneOptionsMenu = setupPhoneOptionsMenu(menu, ui.getControls(), t)
 
@@ -4266,14 +4269,15 @@ export default defineComponent({
       // Opening a submenu replaces the tiles, which would otherwise resize the
       // popup around them. Remember how tall the menu is while its own tiles are
       // shown, so that a shorter submenu only leaves empty space below itself.
-      overflowMenuResizeObserver = new ResizeObserver(() => {
+      // Its border box, unlike its bounding box, isn't scaled while it opens.
+      overflowMenuResizeObserver = new ResizeObserver((entries) => {
         scheduleOverflowMenuLabelTitles(menu)
 
         if (menu.querySelector(':scope > .shaka-sub-menu:not(.shaka-hidden)')) {
           return
         }
 
-        overflowMenuIdleHeight = menu.getBoundingClientRect().height
+        overflowMenuIdleHeight = entries.at(-1).borderBoxSize[0].blockSize
       })
       overflowMenuResizeObserver.observe(menu)
 

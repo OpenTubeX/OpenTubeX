@@ -4,6 +4,7 @@ import {
   removeOverlayScrollbars,
   restoreOverlayScrollTop,
 } from '../overlayScrollbars'
+import { measureWithoutMenuZoom } from './menuTransitions'
 
 // Including the submenus of menu groups, such as the caption style.
 // The caption submenus scroll their options in a part of their own.
@@ -67,8 +68,10 @@ export function setupSubmenuScrolling(menu, controls, selector = SCROLLING_SUBME
       openFrame = null
       for (const submenu of submenus.filter(isOpenScroller)) {
         restoreOverlayScrollTop(submenu, 0)
-        submenu.querySelector('.shaka-chosen-item')?.closest('button')
-          ?.scrollIntoView({ block: 'nearest', container: 'nearest' })
+        measureWithoutMenuZoom(submenu, () => {
+          submenu.querySelector('.shaka-chosen-item')?.closest('button')
+            ?.scrollIntoView({ block: 'nearest', container: 'nearest' })
+        })
       }
     })
   }
