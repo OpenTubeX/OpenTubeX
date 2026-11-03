@@ -407,6 +407,10 @@ test('changelog images preserve their aspect ratio at phone and desktop widths',
   const images = page.locator('.changeLogText img')
   await expect(images).toHaveCount(4)
   await images.evaluateAll(elements => Promise.all(elements.map(image => image.decode())))
+  // The prompt springs slightly past its full size as it opens, which scales the images with it.
+  await page.locator('.changeLogText').evaluate(text => Promise.all(
+    text.closest('.promptCard').getAnimations().map(animation => animation.finished.catch(() => {}))
+  ))
 
   for (const viewport of [{ width: 375, height: 800 }, { width: 800, height: 375 }, { width: 1280, height: 900 }]) {
     await page.setViewportSize(viewport)
