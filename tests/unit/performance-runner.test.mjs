@@ -99,11 +99,11 @@ test('PR shard commands run packed-app projects in full and only changed network
     /* eslint-enable no-template-curly-in-string */
     assert.equal(step.env.PROJECTS, '${{ matrix.projects }}') // eslint-disable-line no-template-curly-in-string
     const args = execFileSync('bash', ['-c', `function xvfb-run() { printf '%s\\n' "$@"; }\n${script}`], {
-      encoding: 'utf8', env: { ...process.env, GITHUB_BASE_REF: 'development', PROJECTS: projects }
+      encoding: 'utf8', env: { ...process.env, PROJECTS: projects }
     }).trim().split('\n')
     for (const name of projects.split(' ')) assert.ok(args.includes(`--project=${name}`))
     assert.ok(args.includes('--shard=1/2'))
-    assert.equal(args.includes('--only-changed=origin/development'), project === 'network')
+    assert.equal(args.includes('--only-changed=HEAD^1'), project === 'network')
     assert.equal(args.includes('--pass-with-no-tests'), project === 'network')
   }
 })
