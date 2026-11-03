@@ -12,6 +12,7 @@ import {
   readDatastore,
 } from '../../helpers/app.mjs'
 import { DEMO_MEDIA_LENGTH, DEMO_MEDIA_PATH } from '../../helpers/media.mjs'
+import { fulfillVisualFixture } from '../../helpers/visual-fixtures.mjs'
 import { DBActions, PlaylistVideoAddResult } from '../../../src/constants.js'
 
 function historyEntry(videoId, title) {
@@ -1723,6 +1724,9 @@ test('exposes download progress to assistive technology', async ({ page }) => {
 })
 
 test('asks for confirmation before removing a downloaded file', async ({ page }) => {
+  // The row upgrades its thumbnail to full resolution and steps down when that
+  // fails to load, as YouTube's would for this fake ID.
+  await page.route('https://i.ytimg.com/**', route => fulfillVisualFixture(route, 'video-thumbnail'))
   await goTo(page, 'downloads')
   await page.evaluate(() => {
     const store = window.$store
