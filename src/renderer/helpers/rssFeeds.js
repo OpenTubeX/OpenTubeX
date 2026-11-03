@@ -493,10 +493,15 @@ onRssFeedSeenItemsSynced((marks) => {
 
 /**
  * Removed feeds are filtered out of the cached items, added ones need a refresh.
+ * Before the first refresh in a window, the items cached by earlier sessions
+ * cover the feeds that loaded before, unless feeds are fetched on startup.
  * @param {RssFeed[]} feeds
  */
 export function rssFeedCacheCovers(feeds) {
-  return rssFeedsLastRefresh.value !== null && feeds.every(feed => refreshedFeedUrls.has(feed.url))
+  const coveredUrls = rssFeedsLastRefresh.value !== null
+    ? refreshedFeedUrls
+    : store.getters.getFetchSubscriptionsAutomatically ? new Set() : loadedFeedUrls
+  return feeds.every(feed => coveredUrls.has(feed.url))
 }
 
 /**

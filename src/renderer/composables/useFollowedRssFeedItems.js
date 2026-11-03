@@ -4,8 +4,9 @@ import store from '../store/index'
 import { refreshRssFeeds, rssFeedCacheCovers, rssFeedItems } from '../helpers/rssFeeds'
 
 /**
- * The cached items of the followed RSS feeds. They load on first use and after
- * feeds were added in the settings.
+ * The cached items of the followed RSS feeds. They load on first use, unless
+ * fetching on startup is disabled and they are cached, and after feeds were
+ * added in the settings.
  * @param {() => boolean} [enabled]
  */
 export function useFollowedRssFeedItems(enabled = () => true) {
