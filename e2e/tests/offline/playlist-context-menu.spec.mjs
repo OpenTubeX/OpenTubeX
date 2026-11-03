@@ -53,6 +53,8 @@ test('playlist menu buttons open the context menu sheet on phones', async ({ app
   await expect(page.getByRole('menu', { name: 'Context menu', exact: true })).toHaveCount(0)
   await page.keyboard.press('Escape')
   await expect(sheet).toHaveCount(0)
+  // Dismissing the sheet returns focus to the button that opened it.
+  await expect(card.getByRole('button', { name: /More options/i })).toBeFocused()
 
   await card.locator('.title').click()
   await page.locator('.playlistOptions').filter({ visible: true }).getByRole('button', { name: 'More', exact: true }).click()

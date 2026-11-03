@@ -394,18 +394,35 @@ const muteLabel = computed(() => remoteSession.value?.control.status.muted
 
 const seekDraft = ref(null)
 const volumeDraft = ref(null)
-async function seek() {
-  const value = seekDraft.value
-  if (value === null) return
-  await remoteSession.value?.control.control('seek', value)
-  seekDraft.value = null
+
+/**
+ * Sends a slider's value, or keeps it until a pending receiver command finishes.
+ * @param {'seek' | 'volume'} action
+ * @param {import('vue').Ref<number | null>} draft
+ */
+const sendingDrafts = { seek: null, volume: null }
+async function sendDraft(action, draft) {
+  const control = remoteSession.value?.control
+  const value = draft.value
+  if (!control || value === null || control.busy || sendingDrafts[action] === value) return
+  sendingDrafts[action] = value
+  await control.control(action, value)
+  sendingDrafts[action] = null
+  // A newer value from a drag during the command is still pending.
+  if (draft.value === value) draft.value = null
 }
-async function setVolume() {
-  const value = volumeDraft.value
-  if (value === null) return
-  await remoteSession.value?.control.control('volume', value)
-  volumeDraft.value = null
-}
+
+// The template unwraps refs, so it calls these instead of sendDraft.
+const seek = () => sendDraft('seek', seekDraft)
+const setVolume = () => sendDraft('volume', volumeDraft)
+watch(() => remoteSession.value?.control.busy, busy => {
+  if (busy !== false) return
+  seek()
+  setVolume()
+})
+watch(() => remoteSession.value === null, ended => {
+  if (ended) seekDraft.value = volumeDraft.value = null
+})
 
 /** @param {'google' | 'fcast' | 'dlna'} protocol */
 function mobileOptions(protocol) {

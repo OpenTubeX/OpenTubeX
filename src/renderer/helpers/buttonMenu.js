@@ -23,11 +23,12 @@ export function openMobileContextMenu(menu) {
  * @param {string} title The bottom sheet's heading
  */
 export function openButtonMenu(button, items, title) {
+  // Either menu returns focus to the button when it closes.
+  button.focus({ preventScroll: true })
   if (usesMobileContextSheet()) {
     openMobileContextMenu({ title, actions: items })
     return
   }
-  button.focus({ preventScroll: true })
   const bounds = button.getBoundingClientRect()
   window.dispatchEvent(new CustomEvent('opentubex:context-menu', {
     detail: { x: document.body.dir === 'rtl' ? bounds.right : bounds.left, y: bounds.bottom, items, touchFriendly: true }

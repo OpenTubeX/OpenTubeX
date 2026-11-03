@@ -1179,7 +1179,11 @@ const mobileContextMenuRows = computed(() => {
   return collapseSeparators(rows)
 })
 const mobileContextMenuTitle = computed(() => mobileContextMenuStack.value.at(-1).label)
+// The button that opened the sheet gets focus back when it closes.
+let mobileContextTrigger = null
+let mobileContextReturnFocus = null
 async function openMobileContextActions(menu) {
+  if (!mobileContextActions.value) mobileContextTrigger = document.activeElement
   mobileContextMenuPath.value = []
   mobileContextLink.value = null
   mobileContextActions.value = menu
@@ -1256,6 +1260,14 @@ function releaseMobileContextSheet() {
   store.commit('removeOpenPrompt', mobileLinkActionsPromptId)
   unlockBodyScroll()
   mobileLinkActionsLocked = false
+  const trigger = mobileContextReturnFocus
+  mobileContextReturnFocus = null
+  // The app stays inert until the prompt is removed. Skip it when an action already moved focus, like into a dialog.
+  nextTick(() => {
+    if (trigger instanceof HTMLElement && trigger.isConnected && (!document.activeElement || document.activeElement === document.body)) {
+      trigger.focus({ preventScroll: true })
+    }
+  })
 }
 const tabOrganizerOpen = ref(false)
 const showAndroidExitPrompt = ref(false)
@@ -3918,6 +3930,8 @@ function closeOwnedMobileContextMenu(event) {
 watch(() => route.fullPath, closeMobileLinkActions)
 
 function closeMobileLinkActions() {
+  mobileContextReturnFocus = mobileContextTrigger ?? mobileContextReturnFocus
+  mobileContextTrigger = null
   mobileContextMenuPath.value = []
   mobileContextLink.value = null
   mobileContextActions.value = null

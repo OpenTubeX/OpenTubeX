@@ -446,6 +446,37 @@ test('casts the current video, controls the receiver and returns to its remote p
   expect(await app.electronApp.evaluate(() => globalThis.castTest.stops)).toEqual(['session-id'])
 })
 
+test('a slider change during a pending receiver command is sent once the command finishes', async ({ app, page }) => {
+  await openCastVideo(app, page)
+  await choice(page, 'Test TV')
+  await expect(page.locator('.chromecastControl > button')).toHaveAttribute('aria-pressed', 'true')
+  // Hold the next receiver command until the test releases it.
+  await app.electronApp.evaluate(({ ipcMain }) => {
+    const handler = ipcMain._invokeHandlers.get('cast-control')
+    ipcMain.removeHandler('cast-control')
+    ipcMain.handle('cast-control', async (...args) => {
+      if (!globalThis.castTest.releasedHold) {
+        await new Promise(resolve => { globalThis.castTest.releaseControl = resolve })
+        globalThis.castTest.releasedHold = true
+      }
+      return handler(...args)
+    })
+  })
+  await page.locator('.chromecastControl > button').click()
+  await castMenu(page).getByRole('slider', { name: 'Playback position', exact: true }).fill('20')
+  await expect.poll(() => app.electronApp.evaluate(() => typeof globalThis.castTest.releaseControl)).toBe('function')
+  // Busy sliders stay draggable; Playwright's fill() refuses aria-disabled controls.
+  await castMenu(page).getByRole('slider', { name: 'Volume', exact: true }).evaluate(slider => {
+    slider.value = '0.3'
+    slider.dispatchEvent(new Event('input', { bubbles: true }))
+    slider.dispatchEvent(new Event('change', { bubbles: true }))
+  })
+  await app.electronApp.evaluate(() => globalThis.castTest.releaseControl())
+  await expect.poll(() => app.electronApp.evaluate(() => globalThis.castTest.controls.map(({ action, value }) => [action, value])))
+    .toEqual([['seek', 20], ['volume', 0.3]])
+  await expect(castMenu(page).getByRole('slider', { name: 'Volume', exact: true })).toHaveValue('0.3')
+})
+
 for (const paused of [false, true]) {
   test(`Cast preserves the selected speed on a ${paused ? 'paused' : 'playing'} handoff and return`, async ({ app, page }) => {
     const watch = await openCastVideo(app, page)

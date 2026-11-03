@@ -117,6 +117,9 @@ test.describe('subscribed channels', () => {
     for (const direction of ['ltr', 'rtl']) {
       await page.evaluate(value => { document.body.dir = value }, direction)
       await alpha.locator('.profileDropdownToggle').click()
+      // The opening transition scales the popover, which moves its edge until it ends.
+      await expect(dropdown).toHaveClass(/profileDropdownPositioned/)
+      await dropdown.evaluate(element => Promise.all(element.getAnimations().map(animation => animation.finished)))
 
       const [triggerBox, dropdownBox] = await Promise.all([
         alpha.locator('.buttonList').boundingBox(),

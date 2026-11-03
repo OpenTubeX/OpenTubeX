@@ -444,8 +444,28 @@
 
 @media (any-pointer: coarse), (width <= 680px) {
   .preferenceChip,
-  .dailyVideoLimit {
+  .dailyVideoLimitOption {
     min-block-size: 40px;
+  }
+
+  /* Touch-sized stepper buttons need their own row. */
+  .dailyVideoLimit {
+    flex-wrap: wrap;
+  }
+
+  .dailyVideoLimitStepper {
+    flex: 1 0 100%;
+    border-block-start: 1px solid var(--border-color);
+    border-inline-start: 0;
+  }
+
+  .dailyVideoLimitStepper button {
+    min-block-size: 44px;
+    min-inline-size: 44px;
+  }
+
+  .dailyVideoLimitStepper .dailyVideoLimitCount {
+    flex: 1;
   }
 }
 
