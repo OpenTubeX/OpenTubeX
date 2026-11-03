@@ -229,6 +229,11 @@ async function attest(videoId, context, initialAttestationData, ytConfig, proxyU
       }
     })
 
+    // Electron's isFocused() dereferences the native view, which an offscreen
+    // view outside a window lacks, so the main process segfaults. Every menu
+    // accelerator asks all web contents whether they're focused.
+    webContentsView.webContents.isFocused = () => false
+
     webContentsView.webContents.setWindowOpenHandler(() => ({ action: 'deny' }))
 
     webContentsView.webContents.setAudioMuted(true)
