@@ -1001,7 +1001,7 @@
           class="watchVideo"
           @open="openPhonePanel('comments')"
         />
-        <watch-video-description
+        <PhoneDescriptionButton
           v-if="phonePanelsEnabled && !isLoading && videoDescriptionMode !== 'hide'"
           :description="videoDescription"
           :description-html="videoDescriptionHtml"
@@ -1010,9 +1010,9 @@
           :content-disclosures="contentDisclosures"
           :games="videoGames"
           :music-tracks="videoMusicTracks"
-          preview-only
+          :panel-open="mobilePanel === 'description'"
           class="watchVideo phoneDescriptionPreview"
-          @expand="openPhonePanel('description')"
+          @open="openPhonePanel('description')"
         />
         <FtPhonePanel
           :enabled="phonePanelsEnabled"

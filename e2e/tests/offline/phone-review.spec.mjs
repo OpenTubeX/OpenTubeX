@@ -112,17 +112,21 @@ test('reopens a watch sheet after switching fullscreen', async ({ app, page }) =
   await expect(sheet).toHaveClass(/dockedSheet/)
 })
 
-test('description preview exposes links and a separate expansion control', async ({ app, page }) => {
+test('description preview opens the description sheet as one button', async ({ app, page }) => {
   await mockPlayableWatchPage(app, page)
   await openMockedVideo(page)
   await setWindowSize(app, page, { width: 480, height: 800 })
   const preview = page.locator('.phoneDescriptionPreview')
-  await expect(preview.locator('.description')).not.toHaveAttribute('role', 'button')
-  await preview.getByRole('button', { name: 'Show more', exact: true }).press('Enter')
+  await expect(preview).toHaveRole('button')
+  await expect(preview).toHaveAccessibleName('Description')
+  await expect(preview).toHaveAttribute('aria-expanded', 'false')
+  await expect(preview.locator('a, button')).toHaveCount(0)
+  await preview.press('Enter')
   await expect(page.locator('.mobileSheet[open]')).toContainText('Description')
+  await expect(preview).toHaveAttribute('aria-expanded', 'true')
 })
 
-test('description preview preserves its five-line height on phones', async ({ app, page }) => {
+test('description preview clamps its excerpt to two lines on phones', { tag: '@scale' }, async ({ app, page, uiScale }) => {
   await mockPlayableWatchPage(app, page)
   await openMockedVideo(page)
   const watch = await watchViewHandle(page)
@@ -137,95 +141,63 @@ test('description preview preserves its five-line height on phones', async ({ ap
   }, description)
 
   const preview = page.locator('.phoneDescriptionPreview')
+  const excerpt = preview.locator('.phoneDescriptionExcerpt')
   await setWindowSize(app, page, { width: 375, height: 800 })
-  for (const scale of [1, 1.25]) {
-    await page.evaluate(value => window.ftElectron.setZoomFactor(value), scale)
-    for (const width of [375, 480]) {
-      await page.setViewportSize({ width, height: 800 })
-      await expect(preview).toContainClass('short')
-      const scroller = preview.locator('.descriptionScroll')
-      const lineHeight = await scroller.evaluate(element => {
-        const line = document.createElement('span')
-        line.style.position = 'absolute'
-        line.style.height = '1lh'
-        element.append(line)
-        const height = line.getBoundingClientRect().height
-        line.remove()
-        return height
-      })
-      expect(await scroller.evaluate(element => element.getBoundingClientRect().height))
-        .toBeCloseTo(5 * lineHeight, 0)
-      await preview.getByRole('button', { name: 'Show more', exact: true }).click()
-      const sheet = page.locator('.mobileSheet[open]')
-      await expect(sheet.locator('.description')).toHaveText(description)
-      await sheet.getByRole('button', { name: 'Close', exact: true }).click()
-      await expect(sheet).toHaveCount(0)
-      await expect(preview).toContainClass('short')
-    }
+  for (const width of [375, 480]) {
+    await page.setViewportSize({ width: Math.round(width * uiScale / 100), height: Math.round(800 * uiScale / 100) })
+    await expect(excerpt).toContainText(description.replaceAll('\n', ' '))
+    await expect(preview.locator('.phoneDescriptionChip')).toHaveCount(0)
+    const { height, lineHeight, overflows } = await excerpt.evaluate(element => ({
+      height: element.getBoundingClientRect().height,
+      lineHeight: Number.parseFloat(getComputedStyle(element).lineHeight),
+      overflows: element.scrollHeight > element.clientHeight
+    }))
+    expect(height / lineHeight).toBeCloseTo(2, 1)
+    expect(overflows).toBe(true)
+    await preview.click()
+    const sheet = page.locator('.mobileSheet[open]')
+    await expect(sheet.locator('.description')).toHaveText(description)
+    await sheet.getByRole('button', { name: 'Close', exact: true }).click()
+    await expect(sheet).toHaveCount(0)
   }
 })
 
-test('description preview shows metadata without description text', async ({ app, page }) => {
+test('description preview summarizes metadata as chips', async ({ app, page }) => {
   await mockPlayableWatchPage(app, page)
   await openMockedVideo(page)
   await setWindowSize(app, page, { width: 480, height: 800 })
   const watch = await watchViewHandle(page)
   const preview = page.locator('.phoneDescriptionPreview')
-  for (const metadata of [
-    { videoTags: ['metadata-tag', ...Array.from({ length: 20 }, (_, index) => `tag-${index}`)], videoGames: [] },
-    { videoTags: [], videoGames: [{ title: 'Example game', subtitle: '2026' }] },
-  ]) {
-    await watch.evaluate(async (vm, metadata) => {
-      vm.isLoading = true
-      await vm.$nextTick()
-      vm.videoDescription = ''
-      vm.videoDescriptionHtml = ''
-      vm.videoTags = metadata.videoTags
-      vm.videoGames = metadata.videoGames
-      vm.isLoading = false
-      await vm.$nextTick()
-    }, metadata)
+  const disclosure = { label: 'Altered or synthetic content', description: 'Edited', attribution: '' }
+  await watch.evaluate(async (vm, disclosure) => {
+    vm.videoDescription = ''
+    vm.videoDescriptionHtml = '<p>Remote <a href="https://example.com">HTML</a> description</p>'
+    vm.videoTags = Array.from({ length: 12 }, (_, index) => `tag-${index}`)
+    vm.videoGames = [{ title: 'Example game', subtitle: '2026' }]
+    vm.videoMusicTracks = [{ title: 'Track one' }, { title: 'Track two' }]
+    vm.contentDisclosures = [disclosure, disclosure]
+    vm.license = null
+    await vm.$nextTick()
+  }, disclosure)
 
-    const heading = preview.locator(metadata.videoTags.length ? '.videoTags strong' : '.gamesHeading')
-    await expect(heading).toBeVisible()
-    expect(await heading.evaluate(element => {
-      const headingTop = element.getBoundingClientRect().top
-      const viewport = element.closest('.descriptionScroll').getBoundingClientRect()
-      return headingTop >= viewport.top - 1 && headingTop < viewport.bottom
-    })).toBe(true)
-    const firstItem = preview.locator(metadata.videoTags.length ? '.videoTagLink' : '.gameTitle').first()
-    const itemBounds = await firstItem.evaluate(element => {
-      const item = element.getBoundingClientRect()
-      const viewport = element.closest('.descriptionScroll').getBoundingClientRect()
-      return {
-        top: item.top - viewport.top,
-        bottom: item.bottom - viewport.top,
-        height: viewport.height,
-      }
-    })
-    expect(itemBounds.top, metadata.videoTags.length ? 'first tag' : 'game title').toBeGreaterThanOrEqual(-1)
-    expect(itemBounds.bottom, JSON.stringify(itemBounds))
-      .toBeLessThanOrEqual(itemBounds.height + 2)
-    expect(await preview.locator('.descriptionScroll').evaluate(element => element.clientHeight))
-      .toBeLessThan(150)
-    const morePosition = await preview.evaluate(element => {
-      const card = element.getBoundingClientRect()
-      const scroll = element.querySelector('.descriptionScroll').getBoundingClientRect()
-      const more = element.querySelector(':scope > .descriptionStatus').getBoundingClientRect()
-      return {
-        belowPreview: more.top >= scroll.bottom - 1,
-        bottomGap: card.bottom - more.bottom,
-        leftGap: more.left - card.left,
-        rightGap: card.right - more.right,
-      }
-    })
-    expect(morePosition.belowPreview, JSON.stringify(morePosition)).toBe(true)
-    expect(morePosition.bottomGap).toBeCloseTo(0, 0)
-    expect(morePosition.leftGap).toBeCloseTo(0, 0)
-    expect(morePosition.rightGap).toBeCloseTo(0, 0)
-  }
+  await expect(preview.locator('.phoneDescriptionExcerpt')).toHaveText('Remote HTML description')
+  await expect(preview.locator('.phoneDescriptionChip')).toHaveText([
+    disclosure.label,
+    'Music2',
+    'Games1',
+    'Video Tags12',
+  ])
+  await expect(preview).toHaveAccessibleDescription(`Remote HTML description ${disclosure.label} Music 2 Games 1 Video Tags 12`)
 
-  await preview.getByRole('button', { name: 'Show more', exact: true }).click()
+  // Local API descriptions are formatted text runs, so they contain markup too.
+  await watch.evaluate(vm => { vm.videoDescription = '<b>Music &amp; games</b> by <a href="https://www.youtube.com/channel/UC1">Channel</a>' })
+  await expect(preview.locator('.phoneDescriptionExcerpt')).toHaveText('Music & games by Channel')
+
+  // Metadata alone still offers the description sheet.
+  await watch.evaluate(vm => { vm.videoDescription = ''; vm.videoDescriptionHtml = ''; vm.videoMusicTracks = []; vm.videoTags = []; vm.contentDisclosures = [] })
+  await expect(preview.locator('.phoneDescriptionExcerpt')).toHaveCount(0)
+  await expect(preview.locator('.phoneDescriptionChip')).toHaveText(['Games1'])
+  await preview.click()
   await expect(page.locator('.mobileSheet[open]')).toContainText('Example game')
 })
 

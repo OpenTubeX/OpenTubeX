@@ -334,14 +334,14 @@
               </div>
             </dl>
           </FtCard>
-          <WatchVideoDescription
+          <PhoneDescriptionButton
             v-if="phonePanelsEnabled && hasDescription"
             :description="info.description"
             :tags="metadata.tags"
             :license="metadata.license"
-            preview-only
+            :panel-open="mobilePanel === 'description'"
             class="watchVideo phoneDescriptionPreview"
-            @expand="mobilePanel = 'description'"
+            @open="mobilePanel = 'description'"
           />
           <FtPhonePanel
             :enabled="phonePanelsEnabled"
@@ -456,6 +456,7 @@ import FtRetryImage from '../../components/FtRetryImage.vue'
 import FtShareButton from '../../components/FtShareButton/FtShareButton.vue'
 import FtShakaVideoPlayer from '../../components/ft-shaka-video-player/ft-shaka-video-player.vue'
 import WatchVideoDescription from '../../components/WatchVideoDescription/WatchVideoDescription.vue'
+import PhoneDescriptionButton from '../../components/PhoneDescriptionButton/PhoneDescriptionButton.vue'
 import WatchVideoChaptersPanel from '../../components/WatchVideoChaptersPanel/WatchVideoChaptersPanel.vue'
 import WatchVideoDownloadPrompt from '../../components/WatchVideoDownloadPrompt/WatchVideoDownloadPrompt.vue'
 import WatchVideoLikes from '../../components/WatchVideoLikes/WatchVideoLikes.vue'

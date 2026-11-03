@@ -1,0 +1,97 @@
+<template>
+  <button
+    v-if="excerpt || chips.length > 0 || license"
+    type="button"
+    class="phonePanelButton phoneDescriptionButton"
+    aria-haspopup="dialog"
+    :aria-expanded="panelOpen"
+    :aria-label="t('Description.Title')"
+    :aria-describedby="describedBy"
+    @click="emit('open')"
+  >
+    <span class="phoneDescriptionContent">
+      <span class="phoneDescriptionHeading">
+        <FtIcon
+          :icon="['fas', 'file-lines']"
+          aria-hidden="true"
+        />
+        <span class="phoneDescriptionTitle">{{ t('Description.Title') }}</span>
+        <FtIcon
+          :icon="['fas', 'angle-down']"
+          aria-hidden="true"
+        />
+      </span>
+      <span
+        v-if="excerpt"
+        :id="`${id}-excerpt`"
+        class="phoneDescriptionExcerpt"
+        dir="auto"
+      >{{ excerpt }}</span>
+      <span
+        v-if="chips.length > 0"
+        :id="`${id}-chips`"
+        class="phoneDescriptionChips"
+      >
+        <span
+          v-for="chip in chips"
+          :key="chip.key"
+          class="phoneDescriptionChip"
+        >
+          <FtIcon
+            :icon="['fas', chip.icon]"
+            aria-hidden="true"
+          />
+          <bdi>{{ chip.label }}</bdi>
+          <span
+            v-if="chip.count"
+            class="phoneDescriptionChipCount"
+          >{{ formatNumber(chip.count) }}</span>
+        </span>
+      </span>
+    </span>
+  </button>
+</template>
+
+<script setup>
+import { computed, useId } from 'vue'
+import { useI18n } from 'vue-i18n'
+import { FtIcon } from '@opentubex/icons'
+import { formatNumber } from '../../helpers/utils'
+
+const props = defineProps({
+  description: { type: String, default: '' },
+  descriptionHtml: { type: String, default: '' },
+  tags: { type: Array, default: () => [] },
+  license: { type: String, default: null },
+  games: { type: Array, default: () => [] },
+  musicTracks: { type: Array, default: () => [] },
+  contentDisclosures: { type: Array, default: () => [] },
+  panelOpen: { type: Boolean, default: false }
+})
+const emit = defineEmits(['open'])
+const { t } = useI18n()
+const id = useId()
+
+const excerpt = computed(() => {
+  // Both props can hold markup, e.g. formatted text runs from the local API.
+  // Template contents stay inert while extracting text from remote HTML.
+  const template = document.createElement('template')
+  template.innerHTML = props.description.trim() ? props.description : props.descriptionHtml
+  return (template.content.textContent ?? '').replaceAll(/\s+/g, ' ').trim()
+})
+
+const chips = computed(() => [
+  ...[...new Set((props.contentDisclosures ?? []).map(item => item.label).filter(Boolean))]
+    .map(label => ({ key: `disclosure-${label}`, icon: 'circle-info', label })),
+  props.musicTracks.length > 0 && { key: 'music', icon: 'music', label: t('Description.Music'), count: props.musicTracks.length },
+  props.games.length > 0 && { key: 'games', icon: 'gamepad', label: t('Description.Games'), count: props.games.length },
+  props.tags.length > 0 && { key: 'tags', icon: 'hashtag', label: t('Description.Video Tags'), count: props.tags.length },
+].filter(Boolean))
+
+const describedBy = computed(() => [
+  excerpt.value && `${id}-excerpt`,
+  chips.value.length > 0 && `${id}-chips`
+].filter(Boolean).join(' ') || null)
+</script>
+
+<style scoped src="./PhoneDescriptionButton.css" />

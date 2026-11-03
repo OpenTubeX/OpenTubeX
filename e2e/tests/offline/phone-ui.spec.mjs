@@ -179,7 +179,7 @@ test.describe('phone UI', () => {
     await expectNoScrollbarOverflow(sheet.locator('.queueItems'))
     await sheet.locator('.mobileSheetHeader').getByRole('button', { name: 'Close', exact: true }).click()
     await expect(sheet).toHaveCount(0)
-    await page.locator('.phoneDescriptionPreview .description').click({ position: { x: 5, y: 5 } })
+    await page.locator('.phoneDescriptionPreview').click()
     await expect(page.locator('dialog[open]')).toContainText('Description')
     await page.locator('dialog[open]').press('Escape')
     await expect(page.locator('dialog[open]')).toHaveCount(0)

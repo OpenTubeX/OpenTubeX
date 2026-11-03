@@ -393,13 +393,11 @@ test('portrait playlist opens below the video and clamps after resize and remova
   await setWindowSize(app, page, { width: 480, height: 800 })
   await page.setViewportSize({ width: Math.round(480 * uiScale / 100), height: Math.round(800 * uiScale / 100) })
   await watch.evaluate(vm => { vm.videoDescription = 'Description line\n'.repeat(30); vm.videoDescriptionHtml = '' })
-  const preview = page.locator('.phoneDescriptionPreview')
-  await expect(preview).toHaveClass(/short/)
-  const descriptionScroll = preview.locator('.descriptionScroll')
-  await expect.poll(() => preview.locator('.description').evaluate(el =>
+  const excerpt = page.locator('.phoneDescriptionExcerpt')
+  await expect.poll(() => excerpt.evaluate(el =>
     el.getBoundingClientRect().height / Number.parseFloat(getComputedStyle(el).lineHeight)
-  )).toBeCloseTo(5, 1)
-  expect(await descriptionScroll.evaluate(el => el.scrollHeight > el.clientHeight)).toBe(true)
+  )).toBeCloseTo(2, 1)
+  expect(await excerpt.evaluate(el => el.scrollHeight > el.clientHeight)).toBe(true)
   await expect(page.locator('.watchVideoPlaylist')).toBeHidden()
   await page.locator('.phonePlaylistButton').click()
   const sheet = page.locator('.dockedSheet[open]')
