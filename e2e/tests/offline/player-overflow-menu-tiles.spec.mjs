@@ -197,6 +197,47 @@ test('the options menu grows in and fades out, but closes at once from a submenu
   expect(await takeMotion()).toEqual(['open', 'close'])
 })
 
+test('a view switch with reduced motion leaves no zoom for later', async ({ app, page }) => {
+  await mockPlayableWatchPage(app, page)
+  await openMockedVideo(page)
+  const player = page.locator(`${activeTab} .ftVideoPlayer`)
+  const menu = player.locator('.shaka-overflow-menu')
+  const tile = menu.locator(':scope > .shaka-playbackrate-button')
+  const submenu = menu.locator(':scope > .shaka-playback-rates')
+  const setReducedMotion = value => page.evaluate(value => window.$store.dispatch('updateReducedMotion', value), value)
+
+  await menu.evaluate((element) => {
+    window.__menuZooms = []
+    element.addEventListener('animationstart', ({ animationName, target }) => {
+      if (animationName.startsWith('ft-menu-zoom')) {
+        window.__menuZooms.push(target.parentElement.classList.contains('shaka-playback-rates') ? 'submenu' : 'menu')
+      }
+    })
+  })
+  const takeZooms = () => page.evaluate(() => window.__menuZooms.splice(0))
+  const afterFrames = () => page.evaluate(() => new Promise(resolve => requestAnimationFrame(() => requestAnimationFrame(resolve))))
+
+  await setReducedMotion('on')
+  await openOverflowMenuWith(player, tile)
+  await tile.click()
+  await expect(submenu).toBeVisible()
+  await submenu.locator('.shaka-back-to-overflow-button').click()
+  await expect(tile).toBeVisible()
+  await closePlayerMenus(player)
+  await expect(menu).toBeHidden()
+  expect(await takeZooms()).toEqual([])
+
+  await setReducedMotion('off')
+  await openOverflowMenuWith(player, tile)
+  await afterFrames()
+  expect(await takeZooms()).toEqual([])
+
+  // The next switch zooms as usual.
+  await tile.click()
+  await expect(submenu).toBeVisible()
+  await expect.poll(takeZooms).toContain('submenu')
+})
+
 test('playback speed tile is highlighted exactly while the speed is not 1x', async ({ app, page }) => {
   await mockPlayableWatchPage(app, page)
   const video = await openMockedVideo(page)

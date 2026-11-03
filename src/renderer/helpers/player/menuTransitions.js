@@ -5,17 +5,39 @@
  *
  * The zooms only run while the parent of the new view is marked, so that
  * options Shaka rebuilds later, and the entries shown when the menu opens,
- * appear without them.
+ * appear without them. A marker under which nothing zooms, such as with
+ * reduced motion, expires at once.
  *
  * @param {HTMLElement} menu the overflow menu
  * @param {EventTarget} controls
  * @returns {() => void} cleanup
  */
 export function setupMenuTransitions(menu, controls) {
+  /**
+   * Shaka switches the views after sending its events, so the zoom is looked
+   * for once it has.
+   *
+   * @param {HTMLElement} container
+   * @param {'in' | 'out'} zoom
+   */
+  function mark(container, zoom) {
+    container.dataset.ftMenuTransition = zoom
+    queueMicrotask(() => {
+      if (
+        container.dataset.ftMenuTransition === zoom &&
+        !container.getAnimations({ subtree: true }).some(animation => (
+          animation instanceof CSSAnimation && animation.animationName.startsWith(`ft-menu-zoom-${zoom}`)
+        ))
+      ) {
+        delete container.dataset.ftMenuTransition
+      }
+    })
+  }
+
   /** @param {Event & { container?: unknown }} event */
   function onSubmenuOpen({ container }) {
     if (container instanceof HTMLElement && menu.contains(container)) {
-      container.dataset.ftMenuTransition = 'in'
+      mark(container, 'in')
     }
   }
 
@@ -33,7 +55,7 @@ export function setupMenuTransitions(menu, controls) {
       return
     }
     if (!menu.classList.contains('shaka-hidden') && menu.checkVisibility()) {
-      container.dataset.ftMenuTransition = 'out'
+      mark(container, 'out')
     }
   }
 
