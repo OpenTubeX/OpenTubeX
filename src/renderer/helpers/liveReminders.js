@@ -216,7 +216,8 @@ async function showReminderInApp({ id, title, body, extra }) {
     return
   }
   // The system shows reminders the app no longer can, and the bell keeps the entry.
-  if (!showsRemindersInApp()) {
+  // Without an entry the app has nothing to show, so the system notification stays.
+  if (!entry || !showsRemindersInApp()) {
     handledAlarms.delete(id)
     return
   }
@@ -224,7 +225,7 @@ async function showReminderInApp({ id, title, body, extra }) {
     .catch(error => console.error('Failed to cancel a reminder shown in the app', error))
   emitUpdated(extra.videoId, false)
   if (showsRemindersInApp()) {
-    if (entry) showForegroundReminder(entry)
+    showForegroundReminder(entry)
   } else if (notificationMode !== 'off') {
     // The app left the screen while the alarm was cancelled, so the system shows it after all.
     handledAlarms.delete(id)

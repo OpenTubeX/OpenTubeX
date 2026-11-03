@@ -414,3 +414,13 @@ test('a reminder synced while turning notifications off failed waits for them to
   await applyCapacitorNotificationMode('both')
   assert.deepEqual([...scheduled.values()].map(notification => notification.extra.videoId).sort(), ['first', 'second'])
 })
+
+test('a reminder without a title keeps its system notification instead of disappearing', async () => {
+  const { timers, calls, shown, storage } = await loadArmedReminder()
+  storage.set('opentubex-capacitor-live-reminders', JSON.stringify([
+    { videoId: 'premiere00a', startTimestamp: START + 60_000, notificationId: 7 }
+  ]))
+  await timers[0]()
+  assert.deepEqual(calls, [])
+  assert.deepEqual(shown, [])
+})
