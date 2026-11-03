@@ -1155,7 +1155,7 @@ test('the overflow menu can turn the zoom off again', async ({ app, page, attach
   await player.hover()
   const moreOptions = player.getByRole('button', { name: 'More settings' })
   await expect(moreOptions).toBeVisible()
-  await moreOptions.click()
+  await openPlayerOptions(player)
 
   const overflowMenu = player.locator('.shaka-overflow-menu')
   await expect(overflowMenu).toHaveClass(/ft-menu-grid/)
@@ -1217,7 +1217,7 @@ test('the overflow menu can turn the zoom off again', async ({ app, page, attach
   await player.evaluate(element => { element.style.width = '600px' })
   const autoplaySwitch = overflowMenu.locator('.autoplay-toggle > .ft-autoplay-switch')
   await player.hover()
-  await moreOptions.click()
+  await openPlayerOptions(player)
   await expect(autoplaySwitch).toBeVisible()
   await expect(autoplaySwitch).toHaveCSS('margin-right', '0px')
 
@@ -1227,7 +1227,7 @@ test('the overflow menu can turn the zoom off again', async ({ app, page, attach
     await component.proxy.$nextTick()
   })
   await player.hover()
-  await moreOptions.click()
+  await openPlayerOptions(player)
   await expect(overflowMenu).not.toHaveClass(/ft-menu-grid/)
   await expect(overflowMenu.locator(':scope > .os-scrollbar-vertical')).toHaveCount(1)
   await expect(autoplaySwitch).toHaveCSS('margin-right', '14px')
@@ -1578,8 +1578,7 @@ test('auto-translates captions into an arbitrary language', async ({ app, page, 
 
   const player = page.locator(`${activeTab} .ftVideoPlayer`)
   await player.hover()
-  const moreOptions = player.getByRole('button', { name: 'More settings' })
-  await moreOptions.click()
+  await openPlayerOptions(player)
 
   const overflowMenu = player.locator('.shaka-overflow-menu')
   await openCaptionLanguages(player)
@@ -1632,7 +1631,7 @@ test('auto-translates captions into an arbitrary language', async ({ app, page, 
   })
   await page.keyboard.press('Escape')
   await player.hover()
-  await moreOptions.click()
+  await openPlayerOptions(player)
   await openCaptionLanguages(player)
   await player.locator('.shaka-text-languages').getByRole('button', { name: 'Auto-translate' }).click()
   await expect(translations).not.toHaveClass(/ft-menu-grid/)
@@ -1665,7 +1664,7 @@ test('auto-translates captions into an arbitrary language', async ({ app, page, 
   const nextVideoId = 'aqz-KE-bpKQ'
   await openMockedVideo(page, nextVideoId)
   await player.hover()
-  await moreOptions.click()
+  await openPlayerOptions(player)
   await openCaptionLanguages(player)
   await player.locator('.shaka-text-languages').getByRole('button', { name: 'Auto-translate' }).click()
   const nextVideoTranslationRequest = page.waitForRequest(request => {

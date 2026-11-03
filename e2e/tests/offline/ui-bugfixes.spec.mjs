@@ -4,7 +4,7 @@ import path from 'node:path'
 
 import { test, expect, goTo, repoRoot, setWindowSize } from '../../helpers/app.mjs'
 import { expectTabHighlightAligned } from '../../helpers/tabs.mjs'
-import { findWatchComponent, openMockedVideo } from '../../helpers/player.mjs'
+import { findWatchComponent, openMockedVideo, openPlayerOptions } from '../../helpers/player.mjs'
 import { mockPlayableWatchPage } from '../../helpers/watch.mjs'
 import { readScopedStyles } from '../../../tests/helpers/component-styles.mjs'
 import {
@@ -1303,7 +1303,7 @@ test('keeps Android player notices and end cards clear of visible controls', asy
 
   const moreOptions = player.getByRole('button', { name: 'More settings' })
   const overflowMenu = player.locator('.shaka-overflow-menu')
-  await moreOptions.click()
+  await openPlayerOptions(player)
   const zoomMenuButton = overflowMenu.getByRole('button', { name: 'Zoom' })
   await expect(controls).toHaveCSS('z-index', '9')
   await endCard.evaluate((element) => {
@@ -1397,7 +1397,7 @@ test('keeps Android player notices and end cards clear of visible controls', asy
   await controls.evaluate(element => element.setAttribute('shown', 'true'))
   await expect(controls).toHaveCSS('z-index', '1')
   await expect(bottomControls).toHaveCSS('z-index', '1')
-  await moreOptions.click()
+  await openPlayerOptions(player)
   await overflowMenu.getByRole('button', { name: 'Zoom' }).click()
   await expect(player).toHaveAttribute('data-submenu-opened', 'true')
   await expect(actionDock).toHaveCSS('opacity', '1')

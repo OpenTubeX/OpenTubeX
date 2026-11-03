@@ -2,7 +2,7 @@ import { readFile } from 'node:fs/promises'
 import path from 'node:path'
 
 import { repoRoot, sel, setWindowSize, test, expect } from '../../helpers/app.mjs'
-import { activeTab, openMockedVideo, waitForPlayback, openCaptionLanguages } from '../../helpers/player.mjs'
+import { activeTab, openMockedVideo, waitForPlayback, openCaptionLanguages, openPlayerOptions } from '../../helpers/player.mjs'
 import { mockPlayableWatchPage, watchViewHandle } from '../../helpers/watch.mjs'
 import {
   DEMO_MEDIA_URL,
@@ -295,8 +295,7 @@ test('shows the restricted playback setup hint and loads yt-dlp subtitles after 
   })).toContainEqual({ language: 'en', label: 'English (auto-generated)' })
 
   await player.hover()
-  const moreOptions = player.getByRole('button', { name: 'More settings' })
-  await moreOptions.click()
+  await openPlayerOptions(player)
   await openCaptionLanguages(player)
   await expect(player).toBeVisible()
   await expect(player.locator('.dlnaCastControl')).toHaveCount(0)

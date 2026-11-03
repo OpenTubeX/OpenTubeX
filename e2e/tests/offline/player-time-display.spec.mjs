@@ -191,7 +191,7 @@ test('player controls, overlays, tooltips and captions follow the app font in bo
         expect(await button.evaluate(element => getComputedStyle(element, '::after').fontFamily)).toBe(appFont)
       }
       const settingsButton = player.locator('.shaka-overflow-menu-button')
-      await settingsButton.click()
+      await openPlayerOptions(player)
       const playbackRate = player.locator('.shaka-overflow-menu .shaka-playbackrate-button')
       await playbackRate.hover()
       expect(await playbackRate.evaluate(element => getComputedStyle(element, '::after').fontFamily)).toBe(appFont)
