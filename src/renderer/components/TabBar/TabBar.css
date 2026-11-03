@@ -83,7 +83,7 @@
   padding-inline: 10px;
   padding-block: 0;
   border: 1px solid transparent;
-  border-radius: calc(16px * var(--ui-roundness));
+  border-radius: var(--shape-corner-large);
   background-color: color-mix(in srgb, var(--tab-group-color) 18%, var(--inactive-tab-color));
   color: var(--tab-group-color);
   cursor: pointer;
@@ -114,7 +114,7 @@
 
 .collapsedTabGroup.bottom {
   border-block-end: 1px solid transparent;
-  border-radius: calc(16px * var(--ui-roundness));
+  border-radius: var(--shape-corner-large);
 }
 
 .collapsedTabGroup.vertical {
@@ -123,7 +123,7 @@
   min-inline-size: 0;
   max-inline-size: none;
   border-block-end: 1px solid transparent;
-  border-radius: calc(16px * var(--ui-roundness));
+  border-radius: var(--shape-corner-large);
 }
 
 .collapsedTabGroup.bottom.active,
@@ -156,9 +156,14 @@
   border: 0;
   cursor: pointer;
   padding: 6px;
-  border-radius: calc(16px * var(--ui-roundness));
+
+  /* Half of the 24px button, so the press morph starts moving at once. */
+  border-radius: calc(12px * var(--ui-roundness));
   color: var(--secondary-text-color);
-  transition: background-color 0.15s ease, color 0.15s ease;
+  transition:
+    background-color var(--motion-fast-effects),
+    color var(--motion-fast-effects),
+    border-radius var(--motion-fast-spatial);
   flex-shrink: 0;
   -webkit-app-region: no-drag;
 }
@@ -167,6 +172,11 @@
 .tabOrganizerButton:hover {
   background-color: var(--side-nav-hover-color);
   color: var(--primary-text-color);
+}
+
+.newTabButton:active,
+.tabOrganizerButton:active {
+  border-radius: var(--shape-corner-small);
 }
 
 .newTabIcon {

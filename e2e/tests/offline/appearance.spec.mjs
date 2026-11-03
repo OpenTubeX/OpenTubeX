@@ -1131,11 +1131,15 @@ test.describe('custom theme editor', () => {
     await setEditorColor('Text and icons on destructive actions', '#fedcba')
 
     const saveAndApplyButton = page.getByRole('button', { name: 'Save and apply' })
+    const resetButton = page.getByRole('button', { name: 'Reset to base theme' })
     await page.keyboard.press('Tab')
+    // Reset is a secondary action and Save and apply the primary one.
+    await resetButton.focus()
+    await expect(resetButton).toHaveCSS('background-color', 'rgb(52, 86, 120)')
     await saveAndApplyButton.focus()
-    await expect(saveAndApplyButton).toHaveCSS('background-color', 'rgb(52, 86, 120)')
+    await expect(saveAndApplyButton).toHaveCSS('background-color', 'rgb(18, 52, 86)')
     await page.keyboard.down('Space')
-    await expect(saveAndApplyButton).toHaveCSS('background-color', 'rgb(69, 103, 137)')
+    await expect(saveAndApplyButton).toHaveCSS('background-color', 'rgb(35, 69, 103)')
     await page.keyboard.up('Space')
     await expect.poll(async () => {
       const themes = await readSavedThemes(app.userDataDir)
@@ -1463,7 +1467,7 @@ test.describe('UI roundness', () => {
     await roundnessSlider.fill('150')
     await expect(page.locator('body')).toHaveCSS('--ui-roundness', '1.5')
     await expect.poll(toggleTrackRadius).toBe('18px')
-    await expect(page.locator('.sectionBody').first()).toHaveCSS('border-radius', '12px')
+    await expect(page.locator('.sectionBody').first()).toHaveCSS('border-radius', '30px')
     await attachScreenshot('settings at 150% roundness')
 
     ;({ page } = await app.relaunch())
@@ -1493,8 +1497,8 @@ test.describe('rounded feed page headers', () => {
 
     for (const { route, header } of pages) {
       await goTo(page, route)
-      await expect(page.locator(header)).toHaveCSS('border-top-left-radius', '16px')
-      await expect(page.locator(header)).toHaveCSS('border-top-right-radius', '16px')
+      await expect(page.locator(header)).toHaveCSS('border-top-left-radius', '24px')
+      await expect(page.locator(header)).toHaveCSS('border-top-right-radius', '24px')
       await attachScreenshot(`${route} header`)
     }
   })

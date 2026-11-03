@@ -400,7 +400,7 @@ test('narrow channel errors retain internal padding', { tag: '@scale' }, async (
 })
 
 test('crossfades the active channel line at the configured animation speed', async ({ page }) => {
-  for (const [speed, tabId, duration] of [[100, 'aboutTab', 140], [200, 'videosTab', 70], [50, 'shortsTab', 280]]) {
+  for (const [speed, tabId, duration] of [[100, 'aboutTab', 250], [200, 'videosTab', 125], [50, 'shortsTab', 500]]) {
     await page.evaluate(value => {
       return window.$store.dispatch('updateAnimationSpeed', value)
     }, speed)
@@ -408,7 +408,7 @@ test('crossfades the active channel line at the configured animation speed', asy
     const animation = await selectTabWithHighlightAnimation(page.locator(`#${tabId}`))
     expect(animation).not.toBeNull()
     expect(animation.duration / animation.playbackRate).toBeCloseTo(duration, 0)
-    await expectTabHighlightStyle(page.locator(indicatorSelector), 'transitionProperty', 'opacity')
+    await expectTabHighlightStyle(page.locator(indicatorSelector), 'transitionProperty', 'opacity, scale')
     await expectAligned(page)
     await expect.poll(() => page.locator(indicatorSelector).evaluate(tabHighlightAnimations)).toEqual([])
   }
@@ -712,7 +712,7 @@ test.describe(() => {
       expect(await page.locator('.channelDetails:visible [role="tab"]').evaluateAll(tabs => tabs.some(tab =>
         tab.getAnimations({ subtree: true }).some(animation => animation instanceof CSSTransition && animation.transitionProperty === 'opacity' && animation.effect.target === tab && animation.effect.pseudoElement === '::before')
       ))).toBe(false)
-      expect(await selectTabWithHighlightAnimation(page.locator('#aboutTab'), key)).toEqual({ property: 'opacity', playbackRate: 0.25, duration: 140 })
+      expect(await selectTabWithHighlightAnimation(page.locator('#aboutTab'), key)).toEqual({ property: 'opacity', playbackRate: 0.25, duration: 250 })
       await expectAligned(page)
     }
 

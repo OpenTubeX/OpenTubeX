@@ -57,20 +57,20 @@
   inline-size: max-content;
   box-sizing: border-box;
   padding: 4px;
-  border: 1px solid color-mix(in srgb, var(--border-color) 35%, transparent);
-  border-radius: calc(12px * var(--ui-roundness));
-  background-color: color-mix(in srgb, var(--primary-text-color) 5%, var(--card-bg-color));
+  border-radius: calc(24px * var(--ui-roundness));
+  background-color: var(--secondary-card-bg-color);
 }
 
+/* The indicator moves without overshoot: it sits inside the scroll viewport,
+   where an overshoot would briefly widen the scroll range. */
 .deviceSegmentIndicator {
   position: absolute;
   inset-block: 4px;
   inset-inline-start: 4px;
   inline-size: 0;
-  border-radius: calc(9px * var(--ui-roundness));
-  background-color: var(--card-bg-color);
-  box-shadow: 0 1px 6px rgb(0 0 0 / 15%);
-  transition: inset-inline-start 180ms ease, inline-size 180ms ease;
+  border-radius: calc(20px * var(--ui-roundness));
+  background-color: var(--selected-container-color);
+  transition: inset-inline-start var(--motion-default-effects), inline-size var(--motion-default-effects);
 }
 
 .deviceSegment {
@@ -80,12 +80,21 @@
   padding-block: 10px;
   padding-inline: 16px;
   border: 0;
-  border-radius: calc(9px * var(--ui-roundness));
+  border-radius: calc(20px * var(--ui-roundness));
   background: transparent;
   color: var(--secondary-text-color);
   font: inherit;
   white-space: nowrap;
   cursor: pointer;
+  transition: background-color var(--motion-fast-effects), border-radius var(--motion-fast-spatial), color var(--motion-fast-effects);
+}
+
+.deviceSegment[aria-pressed='false']:hover {
+  background-color: color-mix(in srgb, var(--primary-text-color) 8%, transparent);
+}
+
+.deviceSegment[aria-pressed='false']:active {
+  border-radius: var(--shape-corner-medium);
 }
 
 .deviceSegmentIcon {
@@ -93,7 +102,7 @@
 }
 
 .deviceSegment[aria-pressed='true'] {
-  color: var(--primary-text-color);
+  color: var(--on-selected-container-color);
   font-weight: 600;
 }
 
@@ -117,27 +126,18 @@
 
 .summaryCard,
 .chartCard {
-  border: 1px solid color-mix(in srgb, var(--border-color) 18%, transparent);
-  border-radius: calc(18px * var(--ui-roundness));
-  background-color: var(--card-bg-color);
+  border-radius: var(--shape-corner-large-increased);
+  background-color: var(--secondary-card-bg-color);
   backdrop-filter: var(--card-bg-blur, none);
-  box-shadow: 0 8px 30px rgb(0 0 0 / 7%);
 }
 
+/* Tonal primary containers set the key numbers apart from the charts. */
 .summaryCard {
   position: relative;
   overflow: hidden;
   padding-block: 20px;
   padding-inline: 20px;
-}
-
-.summaryCard::before {
-  content: '';
-  position: absolute;
-  inset-block: 0;
-  inset-inline-start: 0;
-  inline-size: 4px;
-  background-color: var(--primary-color);
+  background-color: color-mix(in srgb, var(--primary-color) 16%, var(--card-bg-color));
 }
 
 .summaryLabel,
@@ -157,6 +157,8 @@
   display: block;
   margin-block: 10px 5px;
   font-size: clamp(1.35rem, 2.3vw, 2rem);
+  font-weight: 700;
+  letter-spacing: -0.01em;
   line-height: 1;
 }
 
@@ -185,15 +187,17 @@
 
 .chartHeading h2 {
   margin-block: 4px 0;
-  font-size: 1.25rem;
+  font-size: 1.375rem;
+  font-weight: 650;
+  letter-spacing: -0.01em;
 }
 
 .chartScale {
   padding-block: 7px;
   padding-inline: 10px;
-  border-radius: calc(999px * var(--ui-roundness));
+  border-radius: var(--shape-corner-small);
   color: var(--tertiary-text-color);
-  background-color: color-mix(in srgb, var(--primary-color) 9%, transparent);
+  background-color: color-mix(in srgb, var(--primary-color) 16%, var(--secondary-card-bg-color));
   font-size: 0.75rem;
 }
 
@@ -261,7 +265,7 @@
   padding-block: 7px;
   padding-inline: 10px;
   border: 1px solid color-mix(in srgb, var(--primary-text-color) 20%, transparent);
-  border-radius: calc(9px * var(--ui-roundness));
+  border-radius: var(--shape-corner-small);
   color: var(--card-bg-color);
   background-color: color-mix(in srgb, var(--primary-text-color) 94%, transparent);
   box-shadow: 0 6px 18px rgb(0 0 0 / 24%);
@@ -272,7 +276,7 @@
   pointer-events: none;
   text-align: start;
   transform: translate(calc(-50% * var(--horizontal-directionality-coefficient)), 4px);
-  transition: opacity 100ms ease, transform 100ms ease, visibility 100ms;
+  transition: opacity var(--motion-fast-effects), transform var(--motion-fast-spatial), visibility var(--motion-fast-effects);
   visibility: hidden;
   white-space: nowrap;
 }
@@ -342,7 +346,7 @@
 }
 
 .barTarget:focus-visible {
-  border-radius: calc(8px * var(--ui-roundness));
+  border-radius: var(--shape-corner-small);
   box-shadow: 0 0 0 2px var(--primary-color);
   outline: none;
 }
@@ -354,16 +358,16 @@
   min-block-size: 0;
   align-items: flex-end;
   overflow: hidden;
-  border-radius: calc(8px * var(--ui-roundness));
+  border-radius: var(--shape-corner-small);
   background-color: color-mix(in srgb, var(--subtle-surface-color) 8%, transparent);
 }
 
 .bar {
   inline-size: 100%;
   block-size: var(--bar-height);
-  border-radius: calc(8px * var(--ui-roundness));
+  border-radius: var(--shape-corner-small);
   background: linear-gradient(to top, var(--primary-color), color-mix(in srgb, var(--primary-color) 55%, rgb(255 255 255)));
-  transition: block-size 300ms ease;
+  transition: block-size var(--motion-slow-effects);
 }
 
 .barTarget .chartTooltip {
@@ -396,6 +400,9 @@
   place-items: center;
   margin: 0;
   color: var(--tertiary-text-color);
+  font-size: 1.125rem;
+  font-weight: 600;
+  letter-spacing: -0.01em;
   text-align: center;
 }
 
@@ -473,7 +480,7 @@
 
   .summaryCard,
   .chartCard {
-    border-radius: calc(14px * var(--ui-roundness));
+    border-radius: var(--shape-corner-large);
     padding-block: 16px;
     padding-inline: 16px;
   }

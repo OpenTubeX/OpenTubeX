@@ -159,6 +159,23 @@ let openingSequence = 0
 let presentationSuspended = false
 let backAnimation = null
 
+/**
+ * Reads a spring motion token from themes.css as Web Animations timing. WebViews
+ * without linear() easing support keep the given fallback.
+ * @param {string} token
+ * @param {number} fallbackDuration
+ * @param {string} fallbackEasing
+ * @returns {{ duration: number, easing: string }}
+ */
+function motionTiming(token, fallbackDuration, fallbackEasing) {
+  if (isReducedMotionEnabled()) return { duration: 0, easing: 'linear' }
+  const [, duration, easing] = getComputedStyle(document.body).getPropertyValue(token).trim().match(/^([\d.]+)ms\s+(.+)$/) ?? []
+  if (duration === undefined || !CSS.supports('transition-timing-function', easing)) {
+    return { duration: fallbackDuration, easing: fallbackEasing }
+  }
+  return { duration: Number(duration), easing }
+}
+
 function cancelBackGesture() {
   backAnimation?.cancel()
   backAnimation = null
@@ -272,10 +289,11 @@ watch([dialog, () => props.enabled, () => props.open, docked, fullscreenElement,
       measurePlayer()
       element.show()
       if (!presentationSuspended) {
+        // Docked sheets sit on the bottom edge, so an overshoot would open a gap below them.
         animation = applyAnimationSpeed(element.animate([
           { transform: 'translateY(100%)' },
           { transform: 'translateY(0)' }
-        ], { duration: matchMedia('(prefers-reduced-motion: reduce)').matches ? 0 : 220, easing: 'ease-out' }))
+        ], motionTiming('--motion-slow-effects', 220, 'ease-out')))
       }
       resize = new ResizeObserver(measurePlayer)
       if (player) resize.observe(player)
@@ -288,7 +306,7 @@ watch([dialog, () => props.enabled, () => props.open, docked, fullscreenElement,
       animation = applyAnimationSpeed(element.animate([
         { transform: 'translateY(24px)', opacity: 0 },
         { transform: 'translateY(0)', opacity: 1 }
-      ], { duration: matchMedia('(prefers-reduced-motion: reduce)').matches ? 0 : 220, easing: 'ease-out' }))
+      ], motionTiming('--motion-slow-spatial', 220, 'ease-out')))
     }
     lockBodyScroll()
     locked = true
@@ -306,7 +324,7 @@ watch([dialog, () => props.enabled, () => props.open, docked, fullscreenElement,
       animation = applyAnimationSpeed(element.animate([
         { transform: getComputedStyle(element).transform, opacity: getComputedStyle(element).opacity },
         { transform: docked.value ? 'translateY(100%)' : 'translateY(24px)', opacity: docked.value ? 1 : 0 }
-      ], { duration: matchMedia('(prefers-reduced-motion: reduce)').matches ? 0 : 180, easing: 'ease-in', fill: 'forwards' }))
+      ], { ...motionTiming('--motion-default-effects', 180, 'ease-in'), fill: 'forwards' }))
       try { await animation.finished } catch { return }
       if (!closing) return
     }
@@ -386,7 +404,7 @@ function endDrag(event) {
     animation = applyAnimationSpeed(element.animate([
       { top: `${before.top}px`, height: `${before.height}px`, transform: 'translateY(0)' },
       { top: `${after.top}px`, height: `${after.height}px`, transform: 'translateY(0)' }
-    ], { duration: matchMedia('(prefers-reduced-motion: reduce)').matches ? 0 : 180, easing: 'ease-out' }))
+    ], motionTiming('--motion-default-effects', 180, 'ease-out')))
   })
 }
 function clearDrag() {

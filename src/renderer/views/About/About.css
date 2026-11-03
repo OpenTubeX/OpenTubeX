@@ -17,6 +17,8 @@
 .version {
   text-align: center;
   font-size: 2em;
+  font-weight: 700;
+  letter-spacing: -0.01em;
   line-height: 1;
 }
 
@@ -56,9 +58,8 @@
 
 .chunk {
   align-items: start;
-  background-color: var(--bg-color);
-  border-radius: calc(8px * var(--ui-roundness));
-  box-shadow: 0 1px 4px -1px rgb(0 0 0 / 50%);
+  background-color: var(--secondary-card-bg-color);
+  border-radius: var(--shape-corner-large);
   display: grid;
   gap: 6px 14px;
   grid-template: 'icon title' auto 'icon content' 1fr / auto 1fr;
@@ -69,8 +70,17 @@
   overflow-wrap: anywhere;
 }
 
+/* Tonal icon circle */
 .icon {
-  font-size: 24px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  inline-size: 40px;
+  block-size: 40px;
+  border-radius: 50%;
+  background-color: color-mix(in srgb, var(--primary-color) 16%, var(--card-bg-color));
+  color: var(--primary-color);
+  font-size: 20px;
   grid-area: icon;
 }
 

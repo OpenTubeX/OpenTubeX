@@ -3,6 +3,10 @@ h2,
   text-align: center;
 }
 
+h2 {
+  letter-spacing: -0.01em;
+}
+
 .selectionActions {
   justify-content: center;
   gap: 12px;

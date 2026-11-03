@@ -133,7 +133,7 @@ async function run(action) {
   max-block-size: min(360px, 60vh);
   overflow-y: auto;
   padding: 8px;
-  border-radius: calc(8px * var(--ui-roundness));
+  border-radius: var(--shape-corner-large);
   background-color: var(--card-bg-color);
   box-shadow: 0 4px 16px var(--primary-shadow-color);
 }
@@ -151,11 +151,12 @@ button {
   min-block-size: 48px;
   padding-inline: 8px;
   border: 0;
-  border-radius: calc(8px * var(--ui-roundness));
+  border-radius: var(--shape-corner-small);
   color: var(--primary-text-color);
   background-color: transparent;
   font: inherit;
   cursor: pointer;
+  transition: background-color var(--motion-fast-effects), border-radius var(--motion-fast-spatial);
 }
 
 button:not(:disabled):is(:hover, :active, :focus-visible) {
@@ -165,5 +166,9 @@ button:not(:disabled):is(:hover, :active, :focus-visible) {
 button:disabled {
   opacity: 0.45;
   cursor: default;
+}
+
+button:not(:disabled):active {
+  border-radius: var(--shape-corner-extra-small);
 }
 </style>

@@ -75,7 +75,7 @@
   align-items: center;
   backdrop-filter: var(--secondary-card-bg-blur, none);
   background-color: var(--secondary-card-bg-color);
-  border-radius: calc(2px * var(--ui-roundness));
+  border-radius: var(--shape-corner-extra-small);
   display: inline-flex;
   font-size: 10px;
   font-weight: 500;

@@ -78,11 +78,11 @@
   font-family: inherit;
   line-height: 20px;
   color: var(--primary-text-color);
-  border-radius: calc(4px * var(--ui-roundness)) calc(4px * var(--ui-roundness)) 0 0;
+  border-radius: var(--shape-corner-extra-small) var(--shape-corner-extra-small) 0 0;
   background-color: var(--search-bar-color);
   box-shadow: inset 0 0 0 1px var(--input-border-color, transparent);
   backdrop-filter: var(--search-bar-blur, none);
-  transition: border-color 150ms ease, background-color 150ms ease;
+  transition: border-color var(--motion-fast-effects), background-color var(--motion-fast-effects);
 }
 
 .ft-input-component:not(.floatingLabel, .search) .ft-input:not(.multiline) {
@@ -112,7 +112,7 @@
 
 .ft-input-component:not(.search, .outlined) .ft-input:focus {
   border-block-end-color: var(--primary-color);
-  border-radius: calc(4px * var(--ui-roundness)) calc(4px * var(--ui-roundness)) 0 0;
+  border-radius: var(--shape-corner-extra-small) var(--shape-corner-extra-small) 0 0;
 
   /* Material Web uses a 3px focus indicator. Paint the extra thickness inward
      so the value and label do not move when focus changes. */
@@ -156,7 +156,10 @@
   color: var(--secondary-text-color);
   transform: translateY(-50%);
   transform-origin: left top;
-  transition: inset-block-start 150ms ease, transform 150ms ease, color 150ms ease;
+  transition:
+    inset-block-start var(--motion-fast-spatial),
+    transform var(--motion-fast-spatial),
+    color var(--motion-fast-effects);
 }
 
 .floatingLabel .selectLabel:dir(rtl) {
@@ -223,7 +226,7 @@
 
 .ft-input-component.outlined .ft-input {
   border: 1px solid var(--secondary-text-color);
-  border-radius: calc(4px * var(--ui-roundness));
+  border-radius: var(--shape-corner-extra-small);
   background-color: transparent;
 }
 
@@ -262,10 +265,10 @@
   margin: 0;
   padding: 0;
   border: 1px solid var(--secondary-text-color);
-  border-radius: calc(4px * var(--ui-roundness));
+  border-radius: var(--shape-corner-extra-small);
   text-align: start;
   pointer-events: none;
-  transition: border-color 150ms ease;
+  transition: border-color var(--motion-fast-effects);
 }
 
 .outlined .inputLegend {
@@ -359,7 +362,7 @@
   display: block;
   block-size: 45px;
   border: 0;
-  border-radius: calc(24px * var(--ui-roundness));
+  border-radius: var(--shape-corner-extra-large);
 
   /* Keep themed text selection close to the glyphs while the padding centers
      the line and compensates for taller fallback fonts. */
@@ -402,11 +405,14 @@
 
   /* this should look disabled by default */
   opacity: 0.5;
+  transition: background-color var(--motion-fast-effects), border-radius var(--motion-fast-spatial);
 }
 
 @media (prefers-reduced-motion: reduce) {
   .ft-input,
-  .floatingLabel .selectLabel {
+  .floatingLabel .selectLabel,
+  .outlined .inputOutline,
+  .inputAction {
     transition: none;
   }
 }
@@ -484,13 +490,12 @@
 .inputAction.enabled:hover {
   background-color: var(--side-nav-hover-color);
   color: var(--side-nav-hover-text-color);
-  transition: background 0.2s ease-in;
 }
 
 .inputAction.enabled:active {
+  border-radius: var(--shape-corner-medium);
   background-color: var(--side-nav-active-color);
   color: var(--side-nav-active-text-color);
-  transition: background 0.2s ease-in;
 }
 
 .list {
@@ -502,7 +507,7 @@
   padding-block: 5px;
   padding-inline: 0;
   z-index: 10;
-  border-radius: 0 0 calc(5px * var(--ui-roundness)) calc(5px * var(--ui-roundness));
+  border-radius: 0 0 var(--shape-corner-large) var(--shape-corner-large);
   overflow-wrap: break-word;
   box-shadow: 0 0 10px var(--dropdown-item-hover-color);
   background-color: var(--search-bar-color);

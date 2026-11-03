@@ -1,7 +1,7 @@
 .iconDropdown.recommendationOptionsPopover {
   inline-size: min(360px, calc(100vw - 16px));
   border: 1px solid var(--border-color);
-  border-radius: calc(12px * var(--ui-roundness));
+  border-radius: var(--shape-corner-large);
   background: var(--card-bg-color);
   color: var(--primary-text-color);
   box-shadow: 0 8px 24px rgb(0 0 0 / 20%);
@@ -32,9 +32,8 @@
   grid-template-columns: repeat(3, minmax(0, 1fr));
   gap: 4px;
   padding: 4px;
-  border: 1px solid var(--border-color);
-  border-radius: calc(10px * var(--ui-roundness));
-  background: var(--side-nav-color);
+  border-radius: var(--shape-corner-large);
+  background: var(--secondary-card-bg-color);
 }
 
 .recommendationDiscoveryChoice {
@@ -64,10 +63,15 @@
   min-block-size: 56px;
   padding-block: 6px;
   padding-inline: 4px;
-  border-radius: calc(6px * var(--ui-roundness));
+  border-radius: var(--shape-corner-medium);
   overflow-wrap: anywhere;
   text-align: center;
   pointer-events: none;
+  transition: background-color var(--motion-fast-effects), color var(--motion-fast-effects), border-radius var(--motion-fast-spatial);
+}
+
+.recommendationDiscoveryChoice:active > span {
+  border-radius: var(--shape-corner-small);
 }
 
 .recommendationDiscoveryChoice .ft-icon {
@@ -98,10 +102,9 @@
 }
 
 .recommendationDiscoveryChoice input:checked + span {
-  background: var(--primary-color);
-  color: var(--text-with-main-color);
+  background: var(--selected-container-color);
+  color: var(--on-selected-container-color);
   font-weight: 600;
-  box-shadow: 0 1px 3px rgb(0 0 0 / 15%);
 }
 
 .recommendationDiscoveryChoice input:focus-visible + span {
@@ -124,7 +127,7 @@
   min-block-size: 44px;
   padding: 10px;
   border: 0;
-  border-radius: calc(6px * var(--ui-roundness));
+  border-radius: var(--shape-corner-medium);
   background: transparent;
   color: inherit;
   font: inherit;

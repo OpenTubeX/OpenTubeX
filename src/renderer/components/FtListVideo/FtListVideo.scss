@@ -66,7 +66,7 @@
 .sponsorBlockVideoLabel {
   align-items: center;
   background-color: rgb(24 24 24 / 90%);
-  border-radius: calc(5px * var(--ui-roundness));
+  border-radius: var(--shape-corner-small);
   color: #fff;
   display: flex;
   font-size: 12px;
@@ -136,7 +136,7 @@
   background-color: var(--secondary-card-bg-color);
   backdrop-filter: var(--secondary-card-bg-blur, none);
   font-size: 10px;
-  border-radius: calc(2px * var(--ui-roundness));
+  border-radius: var(--shape-corner-extra-small);
   display: inline-block;
   font-weight: 500;
   white-space-collapse: collapse;
@@ -167,7 +167,7 @@
   padding: 10px;
   font-size: 16px;
   line-height: 0;
-  transition: background 0.15s ease-out;
+  transition: background-color var(--motion-fast-effects), border-radius var(--motion-fast-spatial);
   background-color: transparent;
   color: var(--primary-color);
   border-color: transparent;
@@ -180,6 +180,7 @@
 
     &:active {
       background-color: var(--side-nav-active-color);
+      border-radius: var(--shape-corner-medium);
     }
 
     &.alwaysVisible {

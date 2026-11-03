@@ -9,13 +9,14 @@
   --button-container: var(--button-base);
   --button-foreground: var(--button-on-base);
   --button-border: transparent;
+  --button-padding-inline: 16px;
 
   font-family: var(--app-font-family);
   min-inline-size: 64px;
   font-size: 14px;
   line-height: 20px;
   padding-block: 8px;
-  padding-inline: 16px;
+  padding-inline: var(--button-padding-inline);
   min-block-size: var(--button-height);
   block-size: fit-content;
   box-sizing: border-box;
@@ -24,7 +25,12 @@
   justify-content: center;
   text-align: center;
   text-decoration: none;
-  transition: background-color 150ms ease, border-color 150ms ease, box-shadow 150ms ease, border-radius 150ms ease;
+  transition:
+    background-color var(--motion-default-effects),
+    border-color var(--motion-default-effects),
+    box-shadow var(--motion-default-effects),
+    border-radius var(--motion-fast-spatial),
+    padding-inline var(--motion-fast-spatial);
   border-radius: var(--button-radius);
   white-space: nowrap;
   font-weight: 500;
@@ -86,7 +92,7 @@
 
 .btn.shape-square,
 .btn.shape-round.selected {
-  --button-radius: calc(12px * var(--ui-roundness));
+  --button-radius: var(--shape-corner-medium);
 }
 
 .btn.shape-square.selected {
@@ -104,7 +110,7 @@
 }
 
 .btn:not(:disabled):active {
-  --button-radius: calc(8px * var(--ui-roundness));
+  --button-radius: var(--shape-corner-small);
 
   background-color: color-mix(in srgb, var(--button-foreground) 12%, var(--button-container));
 }
@@ -126,22 +132,22 @@
 
 .btn.size-extra-small {
   --button-height: 32px;
+  --button-padding-inline: 12px;
 
   padding-block: 4px;
-  padding-inline: 12px;
 }
 
 .btn.size-medium {
   --button-height: 56px;
+  --button-padding-inline: 24px;
 
-  padding-inline: 24px;
   font-size: 16px;
 }
 
 .btn.size-large {
   --button-height: 96px;
+  --button-padding-inline: 48px;
 
-  padding-inline: 48px;
   font-size: 24px;
   line-height: 32px;
   gap: 12px;
@@ -149,8 +155,8 @@
 
 .btn.size-extra-large {
   --button-height: 136px;
+  --button-padding-inline: 64px;
 
-  padding-inline: 64px;
   font-size: 32px;
   line-height: 40px;
   gap: 16px;
@@ -176,7 +182,7 @@
   background-position: 50%;
   transform: scale(10, 10);
   opacity: 0;
-  transition: transform 0.5s, opacity 1s;
+  transition: transform var(--motion-slow-effects), opacity var(--motion-slow-effects);
 }
 
 .ripple:not(:disabled):active::after {

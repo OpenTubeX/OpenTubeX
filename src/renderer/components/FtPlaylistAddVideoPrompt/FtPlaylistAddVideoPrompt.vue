@@ -127,13 +127,14 @@
     </div>
     <template #footer>
       <div class="actions-container">
-        <FtFlexBox>
+        <FtButtonGroup>
           <FtButton
             :label="t('User Playlists.Create New Playlist')"
             :icon="['fas', 'playlist-add']"
             @click="openCreatePlaylistPrompt"
           />
           <FtButton
+            theme="primary"
             :label="t('User Playlists.AddVideoPrompt.Save')"
             :icon="['fas', 'floppy-disk']"
             :disabled="saving"
@@ -146,7 +147,7 @@
             :background-color="null"
             @click="hide"
           />
-        </FtFlexBox>
+        </FtButtonGroup>
       </div>
     </template>
   </FtPrompt>
@@ -156,6 +157,7 @@
 import { computed, nextTick, onBeforeUnmount, onMounted, ref, useId, useTemplateRef, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 
+import FtButtonGroup from '../FtButtonGroup/FtButtonGroup.vue'
 import FtFlexBox from '../ft-flex-box/ft-flex-box.vue'
 import FtPrompt from '../FtPrompt/FtPrompt.vue'
 import FtButton from '../FtButton/FtButton.vue'

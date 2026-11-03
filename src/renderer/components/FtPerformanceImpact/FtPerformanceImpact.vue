@@ -93,7 +93,7 @@ const title = computed(() => props.compact ? fullText.value : description.value)
   align-items: center;
   background-color: color-mix(in srgb, var(--impact-color) 12%, transparent);
   border: 1px solid color-mix(in srgb, var(--impact-color) 35%, transparent);
-  border-radius: calc(10px * var(--ui-roundness));
+  border-radius: var(--shape-corner-medium);
   box-sizing: border-box;
   color: color-mix(in srgb, var(--impact-color) 70%, var(--primary-text-color));
   cursor: help;

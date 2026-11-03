@@ -109,6 +109,7 @@
       />
       <FtFlexBox class="cropActions">
         <FtButton
+          theme="primary"
           :label="t('Profile.Apply Crop')"
           :icon="['fas', 'scissors']"
           @click="applyCrop"
@@ -116,6 +117,8 @@
         <FtButton
           :label="t('Cancel')"
           :icon="['fas', 'xmark']"
+          :text-color="null"
+          :background-color="null"
           @click="cancelCrop"
         />
       </FtFlexBox>
@@ -403,7 +406,7 @@ function closeCropEditor() {
   background: var(--card-bg-color);
   backdrop-filter: var(--card-bg-blur, none);
   border: 2px solid transparent;
-  border-radius: calc(6px * var(--ui-roundness));
+  border-radius: var(--shape-corner-medium);
   color: var(--primary-text-color);
   cursor: pointer;
   display: flex;
@@ -412,6 +415,10 @@ function closeCropEditor() {
   inline-size: 40px;
   justify-content: center;
   padding: 0;
+  transition:
+    background-color var(--motion-fast-effects),
+    border-color var(--motion-fast-effects),
+    border-radius var(--motion-fast-spatial);
 }
 
 .emojiOption {
@@ -420,7 +427,11 @@ function closeCropEditor() {
 
 .iconOption:hover,
 .iconOption:focus-visible {
-  background: var(--side-nav-hover-color);
+  background: color-mix(in srgb, var(--primary-color) 16%, var(--card-bg-color));
+}
+
+.iconOption:active {
+  border-radius: var(--shape-corner-small);
 }
 
 .iconOption.selected {

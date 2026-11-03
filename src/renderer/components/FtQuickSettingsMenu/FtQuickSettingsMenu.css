@@ -58,7 +58,8 @@
   grid-auto-columns: 44px;
   grid-auto-flow: column;
   grid-template-columns: minmax(0, 1fr);
-  padding-inline-end: 8px;
+  padding-block: 4px;
+  padding-inline: 8px;
 }
 
 .profileSummary {
@@ -72,8 +73,8 @@
   gap: 12px;
   grid-template-columns: 40px 1fr 12px;
   inline-size: 100%;
-  padding-block: 10px;
-  padding-inline: 20px 12px;
+  padding-block: 6px;
+  padding-inline: 12px;
   text-align: start;
 }
 
@@ -89,6 +90,7 @@
   display: inline-flex;
   inline-size: 36px;
   justify-content: center;
+  transition: background-color var(--motion-fast-effects), border-radius var(--motion-fast-spatial);
 }
 
 .profileAvatar {
@@ -132,6 +134,8 @@
 
 .profilePanelHeader h2 {
   font-size: 18px;
+  font-weight: 700;
+  letter-spacing: -0.01em;
   margin: 0;
   text-align: center;
 }
@@ -147,10 +151,12 @@
   block-size: 36px;
   inline-size: 36px;
   justify-content: center;
+  transition: background-color var(--motion-fast-effects), border-radius var(--motion-fast-spatial);
 }
 
 .profileList {
   padding-block: 4px;
+  padding-inline: 8px;
 }
 
 .profileOption {
@@ -166,12 +172,26 @@
   inline-size: 100%;
   min-block-size: 54px;
   padding-block: 7px;
-  padding-inline: 20px;
+  padding-inline: 12px;
   text-align: start;
 }
 
 .activeProfileIcon {
   color: var(--accent-color);
+}
+
+.profileOption[aria-selected='true'],
+.profileOption[aria-selected='true']:is(:hover, :focus-visible) {
+  color: var(--on-selected-container-color);
+  background-color: var(--selected-container-color);
+}
+
+.profileOption[aria-selected='true'] .activeProfileIcon {
+  color: inherit;
+}
+
+.ft-card.quickSettingsMenu {
+  border-radius: var(--shape-corner-large);
 }
 
 .quickSettingsMenu {
@@ -201,17 +221,22 @@
   overscroll-behavior: contain;
 }
 
-.quick-settings-menu-enter-active,
+.quick-settings-menu-enter-active {
+  transition:
+    opacity var(--motion-default-effects),
+    transform var(--motion-default-spatial);
+}
+
 .quick-settings-menu-leave-active {
   transition:
-    opacity 140ms ease,
-    transform 160ms cubic-bezier(0.2, 0.8, 0.2, 1);
+    opacity var(--motion-fast-effects),
+    transform var(--motion-fast-effects);
 }
 
 .quick-settings-menu-enter-from,
 .quick-settings-menu-leave-to {
   opacity: 0;
-  transform: translateY(-5px) scale(0.98);
+  transform: translateY(-8px) scale(0.92);
 }
 
 :root[data-reduced-motion='reduce'] .quick-settings-menu-enter-active,
@@ -401,6 +426,7 @@
 .menuLinks {
   border-block-start: 1px solid var(--divider-color);
   padding-block: 4px;
+  padding-inline: 8px;
 }
 
 .menuLinks button {
@@ -416,8 +442,16 @@
   inline-size: 100%;
   min-block-size: 40px;
   padding-block: 6px;
-  padding-inline: 20px;
+  padding-inline: 12px;
   text-align: start;
+}
+
+/* Menu rows are rounded items inset from the card edge, like M3 menus. */
+.profileSummary,
+.profileOption,
+.menuLinks button {
+  border-radius: var(--shape-corner-medium);
+  transition: background-color var(--motion-fast-effects), border-radius var(--motion-fast-spatial);
 }
 
 .profileSummary:hover,
@@ -430,8 +464,19 @@
 .profilePanelHeader button:focus-visible,
 .menuLinks button:hover,
 .menuLinks button:focus-visible {
-  background-color: var(--side-nav-hover-color);
-  color: var(--side-nav-hover-text-color);
+  background-color: color-mix(in srgb, var(--primary-color) 16%, var(--card-bg-color));
+  color: var(--primary-text-color);
+}
+
+.profileSummary:active,
+.profileOption:active,
+.menuLinks button:active {
+  border-radius: var(--shape-corner-extra-small);
+}
+
+.quickSettingsShortcut:active,
+.profilePanelHeader button:active {
+  border-radius: var(--shape-corner-medium);
 }
 
 .linkArrow {

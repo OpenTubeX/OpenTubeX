@@ -28,8 +28,8 @@
   padding-inline: 16px;
   color: var(--primary-text-color);
   background-color: var(--card-bg-color);
-  border-start-start-radius: calc(28px * var(--ui-roundness));
-  border-start-end-radius: calc(28px * var(--ui-roundness));
+  border-start-start-radius: var(--shape-corner-extra-large);
+  border-start-end-radius: var(--shape-corner-extra-large);
   user-select: none;
   -webkit-tap-highlight-color: transparent;
 }
@@ -58,9 +58,10 @@
   color: inherit;
   background-color: transparent;
   border: 0;
-  border-radius: calc(12px * var(--ui-roundness));
+  border-radius: var(--shape-corner-medium);
   font: inherit;
   text-align: start;
+  transition: background-color var(--motion-fast-effects), border-radius var(--motion-fast-spatial);
 }
 
 .capacitorTabActions button:is(:active, :focus-visible) {
@@ -82,6 +83,10 @@
 
 .capacitorTabActions button:disabled:is(:hover, :active, :focus-visible) {
   background-color: transparent;
+}
+
+.capacitorTabActions button:not(:disabled):active {
+  border-radius: var(--shape-corner-small);
 }
 
 .capacitorTabActions .dangerAction {

@@ -25,12 +25,20 @@
   padding-block: 8px;
   padding-inline: 10px;
   border: 0;
-  border-radius: calc(6px * var(--ui-roundness));
+
+  /* A pill for single-line items; taller items with descriptions keep a
+     large rounded rectangle. */
+  border-radius: var(--shape-corner-extra-large);
   color: var(--tertiary-text-color);
   background: transparent;
   font: inherit;
   text-align: start;
   cursor: pointer;
+  transition: border-radius var(--motion-fast-spatial);
+}
+
+.title:active {
+  border-radius: var(--shape-corner-medium);
 }
 
 .title:hover,

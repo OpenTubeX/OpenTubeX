@@ -33,7 +33,7 @@
 
 .channelSelectionToolbar {
   border: 1px solid var(--border-color);
-  border-radius: calc(6px * var(--ui-roundness));
+  border-radius: var(--shape-corner-medium);
   padding: 12px;
 }
 
@@ -117,7 +117,7 @@
 
 .channelSettings {
   border: 1px solid var(--border-color);
-  border-radius: calc(4px * var(--ui-roundness));
+  border-radius: var(--shape-corner-large);
   container-type: inline-size;
   display: grid;
   gap: 12px;
@@ -154,7 +154,7 @@
 .channelSelectionOption::before {
   block-size: 18px;
   border: 2px solid var(--primary-text-color);
-  border-radius: calc(3px * var(--ui-roundness));
+  border-radius: var(--shape-corner-extra-small);
   box-sizing: border-box;
   content: '';
   inline-size: 18px;
@@ -238,7 +238,7 @@
   align-items: center;
   background-color: transparent;
   border: 1px solid var(--border-color);
-  border-radius: calc(6px * var(--ui-roundness));
+  border-radius: var(--shape-corner-small);
   color: var(--secondary-text-color);
   cursor: pointer;
   display: grid;
@@ -250,6 +250,11 @@
   padding-block: 7px;
   padding-inline: 8px;
   text-align: start;
+  transition:
+    color var(--motion-fast-effects),
+    background-color var(--motion-fast-effects),
+    border-color var(--motion-fast-effects),
+    border-radius var(--motion-fast-spatial);
 }
 
 .feedTypeOption:is(:hover, :focus-visible) {
@@ -263,8 +268,13 @@
 }
 
 .feedTypeOption.enabled {
-  border-color: color-mix(in srgb, var(--primary-color) 55%, var(--border-color));
-  color: var(--primary-text-color);
+  border-color: transparent;
+  color: var(--on-selected-container-color);
+  background-color: var(--selected-container-color);
+}
+
+.feedTypeOption.enabled:is(:hover, :focus-visible):not(:disabled) {
+  background-color: var(--selected-container-hover-color);
 }
 
 .feedTypeOption.mixed {
@@ -279,6 +289,10 @@
   opacity: 0.5;
 }
 
+.feedTypeOption:active:not(:disabled) {
+  border-radius: var(--shape-corner-extra-small);
+}
+
 .feedTypeOption > span {
   min-inline-size: 0;
   overflow-wrap: anywhere;
@@ -286,6 +300,10 @@
 
 .feedTypeCheck {
   color: var(--primary-color);
+}
+
+.feedTypeOption.enabled .feedTypeCheck {
+  color: inherit;
 }
 
 .feedTypeMixedIndicator {

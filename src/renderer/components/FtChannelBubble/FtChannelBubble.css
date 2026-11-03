@@ -11,14 +11,26 @@
   overflow: hidden;
   color: inherit;
   text-decoration: none;
-  border-radius: calc(8px * var(--ui-roundness));
-  transition: background 0.2s ease-out;
+  border-radius: var(--shape-corner-large);
+  transition: background-color var(--motion-default-effects), color var(--motion-default-effects);
+}
+
+/* The radius only transitions under the pointer, so UI Roundness changes stay
+   instant. */
+.bubblePadding:is(:hover, :active) {
+  transition:
+    background-color var(--motion-default-effects),
+    color var(--motion-default-effects),
+    border-radius var(--motion-fast-spatial);
 }
 
 .bubblePadding:hover {
   background-color: var(--side-nav-hover-color);
   color: var(--side-nav-hover-text-color);
-  transition: background 0.2s ease-in;
+}
+
+.bubblePadding:active {
+  border-radius: var(--shape-corner-medium);
 }
 
 .bubble {
@@ -59,4 +71,9 @@
   text-align: center;
   text-overflow: ellipsis;
   inline-size: 100%;
+}
+
+.bubblePadding[aria-checked='true'] {
+  background-color: var(--selected-container-color);
+  color: var(--on-selected-container-color);
 }

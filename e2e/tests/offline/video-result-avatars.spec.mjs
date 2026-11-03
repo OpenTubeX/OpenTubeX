@@ -78,7 +78,7 @@ test.describe('Invidious search video avatars', () => {
       const bounds = await link.boundingBox()
       await page.mouse.move(bounds.x + bounds.width / 2, bounds.y + bounds.height / 2)
       await page.mouse.down()
-      await expect(link).toHaveCSS('border-top-left-radius', `${5 * roundness}px`)
+      await expect(link).toHaveCSS('border-top-left-radius', `${4 * roundness}px`)
       await page.mouse.up()
     }
   })

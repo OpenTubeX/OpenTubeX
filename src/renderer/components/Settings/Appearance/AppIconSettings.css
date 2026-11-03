@@ -11,7 +11,7 @@
 .appIconPreset {
   align-items: center;
   border: 2px solid var(--secondary-card-bg-color);
-  border-radius: calc(12px * var(--ui-roundness));
+  border-radius: var(--shape-corner-medium);
   cursor: pointer;
   display: flex;
   flex-direction: column;
@@ -19,10 +19,15 @@
   padding-block: 12px;
   padding-inline: 8px;
   text-align: center;
+  transition:
+    background-color var(--motion-fast-effects),
+    border-color var(--motion-fast-effects),
+    border-radius var(--motion-fast-spatial);
 }
 
 .appIconPreset:has(:checked) {
   border-color: var(--primary-color);
+  background: color-mix(in srgb, var(--primary-color) 16%, var(--card-bg-color));
 }
 
 .appIconPreset:has(:focus-visible) {
@@ -37,6 +42,14 @@
 .appIconPreset:has(:disabled) {
   cursor: wait;
   opacity: 0.6;
+}
+
+.appIconPreset:has(:checked):hover {
+  background: color-mix(in srgb, var(--primary-color) 26%, var(--card-bg-color));
+}
+
+.appIconPreset:active:not(:has(:disabled)) {
+  border-radius: var(--shape-corner-small);
 }
 
 .appIconPreset input {

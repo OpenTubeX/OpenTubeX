@@ -89,11 +89,11 @@
   padding-block: var(--form-control-value-padding);
   padding-inline-start: 1rem;
   font-size: 16px;
-  border-radius: calc(4px * var(--ui-roundness)) calc(4px * var(--ui-roundness)) 0 0;
+  border-radius: var(--shape-corner-extra-small) var(--shape-corner-extra-small) 0 0;
   border: 0;
   border-block-end: 1px solid var(--secondary-text-color);
   text-align: start;
-  transition: border-color 150ms ease, background-color 150ms ease;
+  transition: border-color var(--motion-fast-effects), background-color var(--motion-fast-effects);
 }
 
 .nativeSelect {
@@ -199,7 +199,7 @@
   background-color: var(--select-menu-surface);
   backdrop-filter: var(--card-bg-blur, none);
   border: 0;
-  border-radius: calc(4px * var(--ui-roundness));
+  border-radius: var(--shape-corner-large);
   box-shadow: 0 2px 6px 2px rgb(0 0 0 / 15%), 0 1px 2px rgb(0 0 0 / 30%);
 }
 
@@ -209,12 +209,12 @@
 }
 
 .select-dropdown-enter-active {
-  transition: opacity 120ms ease;
+  transition: opacity var(--motion-fast-effects);
 }
 
 .select-dropdown-leave-active {
   pointer-events: none;
-  transition: opacity 120ms ease;
+  transition: opacity var(--motion-fast-effects);
 }
 
 .select-dropdown-enter-from,
@@ -235,12 +235,19 @@
   white-space: normal;
 }
 
+/* Inset state and selection layers give the options rounded shapes inside
+   the menu. */
 .selectOption::before {
+  --select-option-selected-color: color-mix(in srgb, var(--primary-color) 20%, var(--select-menu-surface));
+
   content: '';
   position: absolute;
-  inset: 0;
+  inset-block: 0;
+  inset-inline: 4px;
+  border-radius: var(--shape-corner-medium);
   background-color: transparent;
   z-index: -1;
+  transition: background-color var(--motion-fast-effects);
 }
 
 .selectOption.active:not(.selected) {
@@ -258,7 +265,14 @@
 
 .selectOption.selected {
   position: relative;
-  background-color: color-mix(in srgb, var(--primary-color) 20%, var(--select-menu-surface));
+}
+
+.selectOption.selected::before {
+  background-color: var(--select-option-selected-color);
+}
+
+.selectOption.selected:is(:active, :focus-visible)::before {
+  background-color: color-mix(in srgb, var(--primary-text-color) 12%, var(--select-option-selected-color));
 }
 
 .iconSelect {
@@ -272,7 +286,7 @@
   padding: 0;
   pointer-events: none;
   color: var(--tertiary-text-color);
-  transition: transform 120ms ease;
+  transition: transform var(--motion-default-spatial);
 }
 
 .iconSelect.ft-icon,
@@ -327,7 +341,7 @@
   max-inline-size: calc(100% - 56px - var(--select-indicator-space));
   font-size: 12px;
   line-height: 14px;
-  transition: color 150ms ease;
+  transition: color var(--motion-fast-effects);
   color: var(--tertiary-text-color);
 }
 
@@ -388,7 +402,7 @@
 
 .select.outlined .select-text {
   border: 1px solid transparent;
-  border-radius: calc(4px * var(--ui-roundness));
+  border-radius: var(--shape-corner-extra-small);
   background-color: transparent;
   box-shadow: none;
   padding-block: 2px;
@@ -410,9 +424,9 @@
   margin: 0;
   padding: 0;
   border: 1px solid var(--secondary-text-color);
-  border-radius: calc(4px * var(--ui-roundness));
+  border-radius: var(--shape-corner-extra-small);
   pointer-events: none;
-  transition: border-color 150ms ease;
+  transition: border-color var(--motion-fast-effects);
 }
 
 .select.contentSized .selectOutline {
@@ -505,7 +519,7 @@
   position: absolute;
   background: var(--primary-color);
   transform: scaleX(0);
-  transition: transform 0.2s ease;
+  transition: transform var(--motion-fast-effects);
 }
 
 .select-bar::before {
@@ -558,6 +572,7 @@
   .select-dropdown-leave-active,
   .select-text,
   .selectOutline,
+  .selectOption::before,
   .select-bar::before,
   .select-bar::after,
   .iconSelect {
@@ -604,7 +619,7 @@
   display: none;
 }
 
-.phonePicker .selectOption.selected {
+.phonePicker .selectOption.selected:not(:active, :focus-visible)::before {
   background-color: transparent;
 }
 

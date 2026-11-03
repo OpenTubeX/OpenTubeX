@@ -1,0 +1,33 @@
+/* Material 3 Expressive standard button group: a pressed button widens while
+   its neighbors narrow. Margins offset every padding change, so the buttons
+   keep their layout boxes and a press never reflows or wraps the row. */
+.buttonGroup {
+  align-items: center;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  justify-content: center;
+  margin-block: 5px;
+}
+
+.buttonGroup > :deep(.btn) {
+  margin: 0;
+  transition:
+    background-color var(--motion-default-effects),
+    border-color var(--motion-default-effects),
+    box-shadow var(--motion-default-effects),
+    border-radius var(--motion-fast-spatial),
+    padding-inline var(--motion-fast-spatial),
+    margin-inline var(--motion-fast-spatial);
+}
+
+.buttonGroup > :deep(.btn:not(:disabled):active) {
+  margin-inline: -4px;
+  padding-inline: calc(var(--button-padding-inline) + 4px);
+}
+
+.buttonGroup > :deep(.btn:has(+ .btn:not(:disabled):active)),
+.buttonGroup > :deep(.btn:not(:disabled):active + .btn) {
+  margin-inline: 2px;
+  padding-inline: calc(var(--button-padding-inline) - 2px);
+}

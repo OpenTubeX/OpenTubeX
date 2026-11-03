@@ -691,7 +691,7 @@ onBeforeUnmount(() => {
   gap: 10px;
   min-block-size: 46px;
   border: 0;
-  border-radius: calc(8px * var(--ui-roundness));
+  border-radius: var(--shape-corner-small);
   padding: 6px 10px;
   color: var(--primary-text-color);
   background: var(--card-bg-color);
@@ -699,6 +699,12 @@ onBeforeUnmount(() => {
   font: inherit;
   text-align: start;
   cursor: pointer;
+  transition: border-radius var(--motion-fast-spatial);
+}
+
+/* :where() lets callers that reshape the trigger also own its press shape. */
+.colorFieldTrigger:where(:active:not(:disabled)) {
+  border-radius: var(--shape-corner-extra-small);
 }
 
 .colorFieldTrigger code {
@@ -725,7 +731,7 @@ onBeforeUnmount(() => {
   block-size: 32px;
   overflow: hidden;
   border: 0;
-  border-radius: calc(4px * var(--ui-roundness));
+  border-radius: var(--shape-corner-extra-small);
 }
 
 .swatchColor {
@@ -755,7 +761,7 @@ onBeforeUnmount(() => {
   grid-template-columns: minmax(0, 1fr);
   gap: 12px;
   border: 1px solid var(--border-color);
-  border-radius: calc(10px * var(--ui-roundness));
+  border-radius: var(--shape-corner-large);
   padding: 14px;
   color: var(--primary-text-color);
   background: var(--card-bg-color);
@@ -796,7 +802,7 @@ onBeforeUnmount(() => {
   inline-size: 32px;
   block-size: 32px;
   border: 0;
-  border-radius: calc(5px * var(--ui-roundness));
+  border-radius: var(--shape-corner-extra-small);
   padding: 0;
   color: var(--primary-text-color);
   background: transparent;
@@ -816,7 +822,7 @@ onBeforeUnmount(() => {
 .saturationValue {
   position: relative;
   block-size: 150px;
-  border-radius: calc(6px * var(--ui-roundness));
+  border-radius: var(--shape-corner-small);
   cursor: crosshair;
   touch-action: none;
   background-image:
@@ -872,7 +878,7 @@ onBeforeUnmount(() => {
 
 .hueSlider::-webkit-slider-runnable-track {
   block-size: 10px;
-  border-radius: calc(999px * var(--ui-roundness));
+  border-radius: var(--shape-corner-full);
   background: linear-gradient(to right, #f00, #ff0, #0f0, #0ff, #00f, #f0f, #f00);
 }
 
@@ -885,7 +891,7 @@ onBeforeUnmount(() => {
 
 .blurSlider::-webkit-slider-runnable-track {
   block-size: 10px;
-  border-radius: calc(999px * var(--ui-roundness));
+  border-radius: var(--shape-corner-full);
   background: var(--subtle-surface-color);
 }
 
@@ -893,7 +899,7 @@ onBeforeUnmount(() => {
   grid-column: 1 / -1;
   position: relative;
   block-size: 10px;
-  border-radius: calc(999px * var(--ui-roundness));
+  border-radius: var(--shape-corner-full);
 }
 
 .alphaSliderBackground::after {
@@ -955,7 +961,7 @@ onBeforeUnmount(() => {
   box-sizing: border-box;
   min-block-size: 34px;
   border: 1px solid var(--border-color);
-  border-radius: calc(5px * var(--ui-roundness));
+  border-radius: var(--shape-corner-extra-small);
   color: var(--primary-text-color);
   background: var(--search-bar-color);
   backdrop-filter: var(--search-bar-blur, none);
@@ -1012,7 +1018,7 @@ onBeforeUnmount(() => {
   justify-content: center;
   gap: 8px;
   border: 1px solid var(--border-color);
-  border-radius: calc(5px * var(--ui-roundness));
+  border-radius: var(--shape-corner-extra-small);
   color: var(--primary-text-color);
   background: var(--search-bar-color);
   backdrop-filter: var(--search-bar-blur, none);
@@ -1034,7 +1040,7 @@ onBeforeUnmount(() => {
   max-block-size: 220px;
   overflow-y: auto;
   border: 1px solid var(--border-color);
-  border-radius: calc(6px * var(--ui-roundness));
+  border-radius: var(--shape-corner-small);
   padding: 4px;
   background: var(--side-nav-color);
   box-shadow: 0 8px 24px rgb(0 0 0 / 40%);
@@ -1057,7 +1063,7 @@ onBeforeUnmount(() => {
   align-items: center;
   gap: 8px;
   border: 0;
-  border-radius: calc(4px * var(--ui-roundness));
+  border-radius: var(--shape-corner-extra-small);
   padding: 6px;
   color: var(--primary-text-color);
   background: transparent;
@@ -1088,7 +1094,7 @@ onBeforeUnmount(() => {
   block-size: 22px;
   overflow: hidden;
   border: 0;
-  border-radius: calc(4px * var(--ui-roundness));
+  border-radius: var(--shape-corner-extra-small);
 }
 
 .sourceSwatch > span {

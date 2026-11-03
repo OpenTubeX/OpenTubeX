@@ -41,18 +41,17 @@
   font-size: 20px;
   line-height: 1em;
   padding: 10px;
-  transition: background 0.2s ease-out;
+  transition: background-color var(--motion-fast-effects), border-radius var(--motion-fast-spatial);
 
   &:hover {
     background-color: var(--side-nav-hover-color);
     color: var(--side-nav-hover-text-color);
-    transition: background 0.2s ease-in;
   }
 
   &:active {
+    border-radius: var(--shape-corner-medium);
     background-color: var(--side-nav-active-color);
     color: var(--side-nav-active-text-color);
-    transition: background 0.2s ease-in;
   }
 }
 

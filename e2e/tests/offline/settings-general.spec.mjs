@@ -440,6 +440,8 @@ test.describe('settings', () => {
       }))
     })
     await goTo(page, 'settings')
+    // The window springs past its final scale while it opens.
+    await expect(page.locator('.settingsWindow')).not.toHaveClass(/settings-window-enter-active/)
 
     const measurements = await page.locator('.generalSelectGrid').evaluate(element => {
       const gridBounds = element.getBoundingClientRect()

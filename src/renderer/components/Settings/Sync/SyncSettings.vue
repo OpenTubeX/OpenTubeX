@@ -236,7 +236,7 @@
         >
           {{ t('Settings.Sync Settings.Settings not supported') }}
         </p>
-        <FtFlexBox class="actions">
+        <FtButtonGroup class="actions">
           <SyncPairing
             :connected="connected"
             :supported="pairingSupported"
@@ -251,6 +251,8 @@
           <FtButton
             :label="t('Settings.Sync Settings.Sync Now')"
             :icon="['fas', 'sync']"
+            background-color="var(--primary-color)"
+            text-color="var(--text-with-main-color)"
             :disabled="busy"
             @click="syncNow"
           />
@@ -270,11 +272,12 @@
           <FtButton
             :label="t('Settings.Sync Settings.Delete Account')"
             theme="destructive"
+            variant="tonal"
             :icon="['fas', 'trash']"
             :disabled="busy || accountActionBusy"
             @click="showDeleteAccountPrompt = true"
           />
-        </FtFlexBox>
+        </FtButtonGroup>
         <SyncActivity v-if="store.getters.getSyncServerLiveSupported" />
         <SyncAccountManagement
           v-if="accountSessionsSupported"
@@ -288,7 +291,7 @@
           @password-login-changed="passwordLogin = $event"
         />
       </template>
-      <FtFlexBox
+      <FtButtonGroup
         v-else-if="!busy"
         class="actions"
       >
@@ -304,6 +307,8 @@
         <FtButton
           :label="t('Settings.Sync Settings.Log In')"
           :icon="['fas', 'right-to-bracket']"
+          background-color="var(--primary-color)"
+          text-color="var(--text-with-main-color)"
           :disabled="authenticationActionsDisabled"
           @click="authenticate('login')"
         />
@@ -313,7 +318,7 @@
           :disabled="authenticationActionsDisabled"
           @click="authenticate('register')"
         />
-      </FtFlexBox>
+      </FtButtonGroup>
       <FtPrompt
         v-if="showSharedTabsPrompt"
         :label="t('Settings.Sync Settings.Use Shared Tabs')"
@@ -498,6 +503,7 @@ import { computed, onBeforeUnmount, ref, useTemplateRef, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 
 import FtButton from '../../FtButton/FtButton.vue'
+import FtButtonGroup from '../../FtButtonGroup/FtButtonGroup.vue'
 import FtFlexBox from '../../ft-flex-box/ft-flex-box.vue'
 import FtInput from '../../FtInput/FtInput.vue'
 import FtLoader from '../../FtLoader/FtLoader.vue'

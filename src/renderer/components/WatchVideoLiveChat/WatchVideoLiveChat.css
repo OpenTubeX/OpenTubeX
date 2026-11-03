@@ -39,7 +39,7 @@
 .liveChatSkeletonAuthor,
 .liveChatSkeletonText {
   block-size: 10px;
-  border-radius: calc(4px * var(--ui-roundness));
+  border-radius: var(--shape-corner-extra-small);
 }
 
 .liveChatSkeletonAuthor {
@@ -154,6 +154,11 @@
   font-size: 18px;
   line-height: 1;
   text-decoration: none;
+  transition: background-color var(--motion-fast-effects), border-radius var(--motion-fast-spatial);
+}
+
+.liveChatDockAction:active {
+  border-radius: var(--shape-corner-medium);
 }
 
 .liveChatDockAction:is(:hover, :focus-visible) {
@@ -244,8 +249,15 @@
   gap: 6px;
   cursor: pointer;
   background-color: var(--primary-color);
-  border-radius: calc(200px * var(--ui-roundness));
+
+  /* Half the chip's height rather than full, so the press morph is smooth. */
+  border-radius: calc(15px * var(--ui-roundness));
   vertical-align: middle;
+  transition: border-radius var(--motion-fast-spatial);
+}
+
+.superChat:active {
+  border-radius: var(--shape-corner-small);
 }
 
 .superChatContent {
@@ -257,7 +269,7 @@
 .channelThumbnail {
   inline-size: 25px;
   block-size: 25px;
-  border-radius: 200px;
+  border-radius: 50%;
 }
 
 .channelName {
@@ -320,14 +332,14 @@
   padding-block-end: 28px;
 
   /* Match .fullscreenLiveChatOverlay */
-  border-radius: calc(12px * var(--ui-roundness));
+  border-radius: var(--shape-corner-medium);
 }
 
 /* Reach the FtCard bottom padding so the scrim is not clipped short. */
 .card:not(.fullscreenChat) .openedSuperChat {
   margin-block-end: -16px;
   padding-block-end: 28px;
-  border-radius: calc(8px * var(--ui-roundness));
+  border-radius: var(--shape-corner-small);
 }
 
 .superChatMessage {
@@ -337,7 +349,7 @@
   margin-inline: 5%;
   overflow: hidden;
   background-color: var(--primary-color);
-  border-radius: calc(5px * var(--ui-roundness));
+  border-radius: var(--shape-corner-small);
   position: relative;
 }
 
@@ -357,7 +369,8 @@
   padding-block: 8px;
   padding-inline: 10px;
   background-color: var(--primary-color-hover);
-  border-radius: calc(5px * var(--ui-roundness)) calc(5px * var(--ui-roundness)) 0 0;
+  border-start-start-radius: var(--shape-corner-small);
+  border-start-end-radius: var(--shape-corner-small);
 }
 
 .openedSuperChat .superChatMessage {
@@ -489,8 +502,9 @@
   padding-inline-end: var(--live-chat-scrollbar-reserve);
 }
 
+/* Stays within SCROLL_TO_LIVE_HOLD_MS in WatchVideoLiveChat.vue. */
 .live-chat-message-enter-active {
-  transition: opacity 180ms ease-out, transform 180ms ease-out;
+  transition: opacity var(--motion-fast-effects), transform var(--motion-fast-effects);
 }
 
 .live-chat-message-enter-from {
@@ -542,7 +556,7 @@
   padding-block: 1px;
   padding-inline-start: 5px;
   background-color: var(--primary-color);
-  border-radius: calc(2px * var(--ui-roundness));
+  border-radius: var(--shape-corner-extra-small);
   color: var(--text-with-main-color);
 }
 
@@ -559,15 +573,18 @@
   inset-inline-start: 45%;
   inset-block-end: 20px;
   cursor: pointer;
-  border-radius: calc(200px * var(--ui-roundness));
+  border-radius: 50%;
   text-align: center;
-  transition: background 0.2s ease-out;
+  transition: background-color var(--motion-fast-effects), border-radius var(--motion-fast-spatial);
 }
 
 .scrollToBottom:hover,
 .scrollToBottom:focus {
   background-color: var(--accent-color-light);
-  transition: background 0.2s ease-in;
+}
+
+.scrollToBottom:active {
+  border-radius: var(--shape-corner-medium);
 }
 
 .icon {
@@ -599,7 +616,7 @@
   color: var(--primary-text-color);
   cursor: pointer;
   font-size: 20px;
-  transition: background 0.2s ease-out;
+  transition: background-color var(--motion-fast-effects), border-radius var(--motion-fast-spatial);
 }
 
 .liveChatActionButton:hover,
@@ -607,13 +624,12 @@
 .liveChatActionButton.active {
   background-color: var(--side-nav-hover-color);
   color: var(--side-nav-hover-text-color);
-  transition: background 0.2s ease-in;
 }
 
 .liveChatActionButton:active {
+  border-radius: var(--shape-corner-medium);
   background-color: var(--side-nav-active-color);
   color: var(--side-nav-active-text-color);
-  transition: background 0.2s ease-in;
 }
 
 .liveChatActionButton svg {
@@ -639,7 +655,7 @@
   color: var(--primary-text-color);
   background-color: var(--side-nav-color);
   border: 1px solid var(--side-nav-hover-color);
-  border-radius: calc(10px * var(--ui-roundness));
+  border-radius: var(--shape-corner-large);
   box-shadow: 0 6px 20px rgb(0 0 0 / 35%);
 }
 

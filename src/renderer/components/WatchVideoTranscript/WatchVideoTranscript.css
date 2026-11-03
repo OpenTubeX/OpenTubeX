@@ -27,6 +27,7 @@
   margin: 0;
   min-inline-size: 0;
   overflow-wrap: anywhere;
+  letter-spacing: -0.01em;
 }
 
 .transcriptActions {
@@ -54,6 +55,7 @@
   border-radius: 50%;
   cursor: pointer;
   font-size: 20px;
+  transition: background-color var(--motion-fast-effects), border-radius var(--motion-fast-spatial);
 }
 
 .transcriptHeaderAction:hover,
@@ -71,6 +73,10 @@
   background-color: var(--selected-container-hover-color);
 }
 
+.transcriptHeaderAction:not(:disabled):active {
+  border-radius: var(--shape-corner-medium);
+}
+
 .transcriptLanguageMenu {
   position: absolute;
   z-index: 4;
@@ -84,7 +90,7 @@
   color: var(--primary-text-color);
   background-color: var(--side-nav-color);
   border: 1px solid var(--side-nav-hover-color);
-  border-radius: calc(10px * var(--ui-roundness));
+  border-radius: var(--shape-corner-large);
   box-shadow: 0 6px 20px rgb(0 0 0 / 35%);
 }
 
@@ -103,14 +109,23 @@
   text-align: start;
   background: transparent;
   border: 0;
-  border-radius: calc(8px * var(--ui-roundness));
+  border-radius: var(--shape-corner-medium);
   cursor: pointer;
+  transition: background-color var(--motion-fast-effects);
 }
 
 .transcriptLanguageMenu button:hover,
-.transcriptLanguageMenu button:focus-visible,
-.transcriptLanguageMenu .selected {
+.transcriptLanguageMenu button:focus-visible {
   background-color: var(--side-nav-hover-color);
+}
+
+.transcriptLanguageMenu .selected {
+  background-color: var(--selected-container-color);
+  color: var(--on-selected-container-color);
+}
+
+.transcriptLanguageMenu .selected:is(:hover, :focus-visible) {
+  background-color: var(--selected-container-hover-color);
 }
 
 .transcriptControls {
@@ -174,9 +189,15 @@
   mask-position: 100% 0, 0 0;
 }
 
-/* Chunks that never mounted estimate one line per segment; released chunks keep their measured height. */
+/* Chunks that never mounted estimate one line per segment, plus the 2px gap
+   between segments; released chunks keep their measured height. */
 .transcriptChunk.windowedListShell {
-  block-size: calc(var(--transcript-chunk-rows) * (20px + 1.4em));
+  block-size: calc(var(--transcript-chunk-rows) * (22px + 1.4em));
+}
+
+/* Segments form one segmented list across chunks: large outer corners, tight inner ones. */
+.transcriptChunk [role='listitem'] {
+  margin-block-start: 2px;
 }
 
 .transcriptSegment {
@@ -187,13 +208,14 @@
   padding-block: 10px;
   padding-inline: 12px;
   border: 0;
-  border-radius: calc(5px * var(--ui-roundness));
-  background: transparent;
+  border-radius: var(--shape-corner-extra-small);
+  background-color: color-mix(in srgb, var(--primary-text-color) 6%, transparent);
   color: var(--primary-text-color);
   cursor: pointer;
   font: inherit;
   line-height: 1.4;
   text-align: start;
+  transition: background-color var(--motion-default-effects), color var(--motion-default-effects);
 }
 
 .transcriptSegment:hover,
@@ -203,8 +225,27 @@
 }
 
 .transcriptSegment.active {
-  background-color: var(--accent-color);
-  color: var(--text-with-accent-color);
+  background-color: var(--selected-container-color);
+  color: var(--on-selected-container-color);
+}
+
+.transcriptSegment.active:is(:hover, :focus-visible) {
+  background-color: var(--selected-container-hover-color);
+}
+
+/* The first segment of the list has no gap or neighbor above it. */
+.transcriptChunk:first-child > [role='listitem']:first-child {
+  margin-block-start: 0;
+}
+
+.transcriptChunk:first-child > [role='listitem']:first-child > .transcriptSegment {
+  border-start-start-radius: var(--shape-corner-large-increased);
+  border-start-end-radius: var(--shape-corner-large-increased);
+}
+
+.transcriptChunk:last-child > [role='listitem']:last-child > .transcriptSegment {
+  border-end-start-radius: var(--shape-corner-large-increased);
+  border-end-end-radius: var(--shape-corner-large-increased);
 }
 
 .transcriptTimestamp {

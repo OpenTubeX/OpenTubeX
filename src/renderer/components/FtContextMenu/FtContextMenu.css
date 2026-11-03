@@ -7,7 +7,7 @@
   color: var(--primary-text-color);
   background-color: color-mix(in srgb, var(--card-bg-color) 96%, var(--bg-color));
   border: 1px solid color-mix(in srgb, var(--border-color) 55%, transparent);
-  border-radius: calc(8px * var(--ui-roundness));
+  border-radius: var(--shape-corner-large);
   box-shadow: 0 12px 32px rgb(0 0 0 / 34%);
 }
 
@@ -25,9 +25,11 @@
   overscroll-behavior: contain;
 }
 
+/* Only a fade: a transform would make the menu the containing block of its
+   fixed-position fly-outs and clip them to the scrollport while it runs. */
 .context-menu-enter-active,
 .context-menu-leave-active {
-  transition: opacity 120ms ease;
+  transition: opacity var(--motion-fast-effects);
 }
 
 .context-menu-enter-from,
@@ -47,10 +49,11 @@
   color: inherit;
   background: transparent;
   border: 0;
-  border-radius: calc(5px * var(--ui-roundness));
+  border-radius: var(--shape-corner-medium);
   font: inherit;
   text-align: start;
   cursor: default;
+  transition: background-color var(--motion-fast-effects), border-radius var(--motion-fast-spatial);
 }
 
 .compactTabMenu,
@@ -132,7 +135,8 @@
 }
 
 .colorButton[aria-checked='true'] {
-  background-color: var(--side-nav-hover-color);
+  color: var(--on-selected-container-color);
+  background-color: var(--selected-container-color);
 }
 
 /* Labels wrap instead of being clipped, so translations are never cut off */
@@ -245,7 +249,7 @@
   pointer-events: none;
   transform: translateX(var(--submenu-translate, -4px)) scale(0.98);
   transform-origin: top left;
-  transition: opacity 100ms ease, transform 100ms ease, visibility 0s linear 100ms;
+  transition: opacity var(--motion-fast-effects), transform var(--motion-fast-spatial), visibility 0s linear 150ms;
 }
 
 .submenu::before {
@@ -294,17 +298,22 @@
   transition-delay: 0s;
 }
 
+/* Keyboard focus matches hover; the outline marks the focused item. */
 .menuItem:focus-visible {
-  color: var(--text-with-main-color);
-  background-color: var(--primary-color);
+  color: var(--primary-text-color);
+  background-color: color-mix(in srgb, var(--primary-color) 16%, var(--card-bg-color));
   outline: 2px solid var(--primary-text-color);
   outline-offset: -2px;
 }
 
+.menuItem:not(:disabled):active {
+  border-radius: var(--shape-corner-extra-small);
+}
+
 .menuItem:not(:disabled):hover,
 .submenuContainer:hover > .menuItem:not(:disabled) {
-  color: var(--text-with-main-color);
-  background-color: var(--primary-color);
+  color: var(--primary-text-color);
+  background-color: color-mix(in srgb, var(--primary-color) 16%, var(--card-bg-color));
 }
 
 @media (prefers-reduced-motion: reduce) {

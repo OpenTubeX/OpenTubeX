@@ -13,7 +13,7 @@
 .tabOrganizer {
   background: var(--card-bg-color);
   border: 1px solid var(--divider-color);
-  border-radius: calc(12px * var(--ui-roundness));
+  border-radius: var(--shape-corner-extra-large);
   box-shadow: 0 20px 70px rgb(0 0 0 / 38%);
   color: var(--primary-text-color);
   display: flex;
@@ -34,7 +34,9 @@
 }
 
 .tabOrganizerHeader h2 {
-  font-size: 20px;
+  font-size: 22px;
+  font-weight: 700;
+  letter-spacing: -0.01em;
   margin: 0;
 }
 
@@ -56,7 +58,7 @@
 .tabOrganizer button,
 .tabOrganizer input {
   border: 1px solid var(--divider-color);
-  border-radius: calc(7px * var(--ui-roundness));
+  border-radius: var(--shape-corner-small);
   color: inherit;
   font: inherit;
 }
@@ -67,6 +69,10 @@
   min-block-size: 34px;
   padding-block: 6px;
   padding-inline: 10px;
+  transition:
+    background-color var(--motion-fast-effects),
+    border-color var(--motion-fast-effects),
+    border-radius var(--motion-fast-spatial);
 }
 
 .tabOrganizerSearch {
@@ -145,7 +151,7 @@
   background: var(--card-bg-color);
   block-size: 34px;
   border: 1px solid var(--divider-color);
-  border-radius: calc(7px * var(--ui-roundness));
+  border-radius: var(--shape-corner-small);
   font-size: 13px;
   min-block-size: 34px;
   padding-inline-start: 9px;
@@ -192,8 +198,8 @@
 }
 
 .tabGroup {
-  border-radius: calc(8px * var(--ui-roundness));
-  transition: background-color 120ms ease, outline-color 120ms ease;
+  border-radius: var(--shape-corner-small);
+  transition: background-color var(--motion-fast-effects), outline-color var(--motion-fast-effects);
 }
 
 .tabGroupHeader,
@@ -271,7 +277,7 @@
 .groupAppearancePicker {
   background: var(--card-bg-color);
   border: 1px solid var(--divider-color);
-  border-radius: calc(8px * var(--ui-roundness));
+  border-radius: var(--shape-corner-large);
   box-shadow: 0 8px 24px rgb(0 0 0 / 30%);
   box-sizing: border-box;
   display: grid;
@@ -333,7 +339,7 @@
   color: var(--secondary-text-color);
   font-size: 11px;
   opacity: 0;
-  transition: opacity 120ms ease;
+  transition: opacity var(--motion-fast-effects);
 }
 
 .groupNameButton:hover .ft-icon,
@@ -398,13 +404,14 @@
 .tabOrganizerRow {
   align-items: center;
   border: 1px solid transparent;
-  border-radius: calc(8px * var(--ui-roundness));
+  border-radius: var(--shape-corner-small);
   display: grid;
   gap: 10px;
   grid-template-columns: 24px 34px 24px minmax(0, 1fr) auto 36px;
   min-block-size: 54px;
   padding-block: 4px;
   padding-inline: 8px;
+  transition: background-color var(--motion-fast-effects), border-color var(--motion-fast-effects);
 }
 
 .tabIcon {
@@ -521,7 +528,7 @@
 .tabIndicators span {
   background: var(--side-nav-color);
   border: 1px solid var(--divider-color);
-  border-radius: calc(999px * var(--ui-roundness));
+  border-radius: var(--shape-corner-full);
   color: var(--secondary-text-color);
   font-size: 10px;
   padding-block: 2px;
@@ -603,7 +610,7 @@
 .syncedSessionCard {
   background: color-mix(in srgb, var(--side-nav-color) 72%, transparent);
   border: 1px solid var(--divider-color);
-  border-radius: calc(10px * var(--ui-roundness));
+  border-radius: var(--shape-corner-large);
   min-inline-size: 0;
   padding-block: 10px;
   padding-inline: 10px;
@@ -633,7 +640,7 @@
 .syncedSessionIcon {
   align-items: center;
   background: color-mix(in srgb, var(--accent-color) 14%, transparent);
-  border-radius: calc(7px * var(--ui-roundness));
+  border-radius: 50%;
   color: var(--accent-color);
   display: flex;
   flex: 0 0 32px;
@@ -726,6 +733,10 @@
 
 .tabOrganizer button:hover:not(:disabled) {
   border-color: var(--accent-color);
+}
+
+.tabOrganizer button:not(:disabled):active {
+  border-radius: var(--shape-corner-extra-small);
 }
 
 .tabIdentity:hover:not(:disabled) {

@@ -1,12 +1,34 @@
 .buttonList {
+  /* Filled until subscribed, then tonal like FtButton's tonal variant. */
+  --subscribe-container: var(--primary-color);
+  --subscribe-on-container: var(--text-with-main-color);
+  --subscribe-hover: var(--primary-color-hover);
+  --subscribe-active: var(--primary-color-active);
+  --subscribe-divider: var(--primary-color-active);
+  --subscribe-radius: calc(20px * var(--ui-roundness));
+
   margin: 5px;
-  border-radius: calc(20px * var(--ui-roundness));
+  border-radius: var(--subscribe-radius);
   block-size: fit-content;
   display: flex;
   flex-wrap: nowrap;
 
   /* addresses odd clipping behavior when adjusting window size */
-  background-color: var(--primary-color);
+  background-color: var(--subscribe-container);
+  transition: background-color var(--motion-default-effects), border-radius var(--motion-fast-spatial);
+}
+
+.buttonList.subscribed {
+  --subscribe-container: color-mix(in srgb, var(--primary-color) 16%, var(--card-bg-color));
+  --subscribe-on-container: var(--primary-text-color);
+  --subscribe-hover: color-mix(in srgb, var(--primary-text-color) 8%, var(--subscribe-container));
+  --subscribe-active: color-mix(in srgb, var(--primary-text-color) 12%, var(--subscribe-container));
+  --subscribe-divider: color-mix(in srgb, var(--primary-color) 32%, var(--card-bg-color));
+}
+
+/* Pressing any segment morphs the whole group's outer corners. */
+.buttonList:has(> :is(.subscribeButton, .notificationBell, .profileDropdownToggle):not(:disabled):active) {
+  --subscribe-radius: var(--shape-corner-medium);
 }
 
 .ftSubscribeButton {
@@ -21,24 +43,17 @@
 }
 
 .subscribeButton.justToggled {
-  animation: subscribe-pop 350ms cubic-bezier(0.34, 1.56, 0.64, 1);
+  animation: subscribe-pop var(--motion-fast-spatial);
 }
 
 .subscribeButton.justToggled :deep(svg) {
-  animation: subscribe-check-pop 350ms cubic-bezier(0.34, 1.56, 0.64, 1);
+  animation: subscribe-check-pop var(--motion-fast-spatial);
 }
 
+/* The spring easing provides the overshoot. */
 @keyframes subscribe-pop {
-  0% {
-    transform: scale(0.96);
-  }
-
-  55% {
-    transform: scale(1.03);
-  }
-
-  100% {
-    transform: scale(1);
+  from {
+    transform: scale(0.9);
   }
 }
 
@@ -48,9 +63,12 @@
   }
 }
 
-.profile-dropdown-enter-active,
+.profile-dropdown-enter-active {
+  transition: opacity var(--motion-default-effects), transform var(--motion-default-spatial);
+}
+
 .profile-dropdown-leave-active {
-  transition: opacity 150ms ease, transform 150ms ease;
+  transition: opacity var(--motion-fast-effects), transform var(--motion-fast-effects);
 }
 
 .profile-dropdown-enter-from,
@@ -67,10 +85,20 @@
 .subscribeButton,
 .notificationBell,
 .profileDropdownToggle {
-  border-radius: calc(20px * var(--ui-roundness));
   align-self: center;
   margin-block: 0;
   margin-inline: 0;
+}
+
+/* Outrank FtButton's own radius and press morph. */
+.buttonList > .subscribeButton,
+.buttonList > .subscribeButton:not(:disabled):active {
+  --button-radius: var(--subscribe-radius);
+}
+
+.notificationBell,
+.profileDropdownToggle {
+  border-radius: var(--subscribe-radius);
 }
 
 .profileDropdownToggle {
@@ -85,17 +113,21 @@
 
 .notificationBell,
 .profileDropdownToggleButton {
-  background-color: var(--primary-color);
-  border: 1px solid var(--primary-color);
-  color: var(--text-with-main-color);
+  background-color: var(--subscribe-container);
+  border: 1px solid var(--subscribe-container);
+  color: var(--subscribe-on-container);
   cursor: pointer;
   font: 500 0.9rem var(--app-font-family);
-  transition: background-color 0.3s, border-color 0.3s;
+  transition:
+    background-color var(--motion-default-effects),
+    border-color var(--motion-default-effects),
+    color var(--motion-default-effects),
+    border-radius var(--motion-fast-spatial);
 }
 
 .notificationBell {
   align-items: center;
-  border-inline-end: 2px solid var(--primary-color-active);
+  border-inline-end: 2px solid var(--subscribe-divider);
   border-radius: 0;
   display: inline-flex;
   font-size: 18px;
@@ -107,14 +139,14 @@
 
 .notificationBell:is(:hover, :focus-visible),
 .profileDropdownToggleButton:is(:hover, :focus-visible) {
-  background-color: var(--primary-color-hover);
-  border-color: var(--primary-color-hover);
+  background-color: var(--subscribe-hover);
+  border-color: var(--subscribe-hover);
 }
 
 .notificationBell:active,
 .profileDropdownToggleButton:active {
-  background-color: var(--primary-color-active);
-  border-color: var(--primary-color-active);
+  background-color: var(--subscribe-active);
+  border-color: var(--subscribe-active);
 }
 
 .profileDropdownToggleButton::before {
@@ -125,7 +157,7 @@
   border-block-end: 2px solid currentcolor;
   display: inline-block;
   transform: translateY(-2px) rotate(45deg);
-  transition: transform 150ms ease;
+  transition: transform var(--motion-default-spatial);
 }
 
 .profileDropdownToggleButton.dropdownOpened::before {
@@ -135,7 +167,7 @@
 .subscribeButton.hasProfileDropdownToggle {
   min-inline-size: 100px;
   padding-inline: 5px;
-  border-inline-end: 2px solid var(--primary-color-active) !important;
+  border-inline-end: 2px solid var(--subscribe-divider) !important;
   border-start-end-radius: 0;
   border-end-end-radius: 0;
   box-sizing: border-box;
@@ -152,11 +184,8 @@
 }
 
 @media (any-pointer: coarse), (width <= 680px) {
-  .subscribeButton,
-  .buttonList,
-  .notificationBell,
-  .profileDropdownToggle {
-    border-radius: calc(24px * var(--ui-roundness));
+  .buttonList:not(:has(> :is(.subscribeButton, .notificationBell, .profileDropdownToggle):not(:disabled):active)) {
+    --subscribe-radius: calc(24px * var(--ui-roundness));
   }
 
   .notificationBell,
@@ -181,7 +210,7 @@
   backdrop-filter: var(--card-bg-blur, none);
   background-color: color-mix(in srgb, var(--card-bg-color) 96%, var(--bg-color));
   border: 1px solid color-mix(in srgb, var(--border-color) 55%, transparent);
-  border-radius: calc(8px * var(--ui-roundness));
+  border-radius: var(--shape-corner-large);
   box-shadow: 0 12px 32px rgb(0 0 0 / 34%);
   box-sizing: border-box;
   color: var(--primary-text-color);
@@ -244,7 +273,7 @@
   align-items: center;
   background: transparent;
   border: 0;
-  border-radius: calc(6px * var(--ui-roundness));
+  border-radius: var(--shape-corner-medium);
   color: inherit;
   cursor: pointer;
   display: grid;
@@ -344,7 +373,7 @@
 .profile {
   align-items: center;
   background: transparent;
-  border-radius: calc(6px * var(--ui-roundness));
+  border-radius: var(--shape-corner-medium);
   cursor: pointer;
   display: grid;
   gap: 10px;
@@ -352,13 +381,12 @@
   min-block-size: 46px;
   padding-block: 7px;
   padding-inline: 8px;
-  transition: background 0.2s ease-out;
+  transition: background-color var(--motion-fast-effects);
 }
 
 .profile:is(:hover, :focus-visible) {
   background-color: var(--side-nav-hover-color);
   color: var(--side-nav-hover-text-color);
-  transition: background 0.2s ease-in;
 }
 
 .profile.groupOption {
@@ -417,5 +445,10 @@
   .profile-dropdown-enter-active,
   .profile-dropdown-leave-active {
     transition: none;
+  }
+
+  .subscribeButton.justToggled,
+  .subscribeButton.justToggled :deep(svg) {
+    animation: none;
   }
 }

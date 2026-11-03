@@ -455,7 +455,7 @@ function cancelLoaderSettle() {
 
 .pageSwipePlaceholder :deep(.capacitorTabPreview) {
   max-inline-size: 320px;
-  border-radius: calc(12px * var(--ui-roundness));
+  border-radius: var(--shape-corner-medium);
 }
 
 .pageSwipeFrom {

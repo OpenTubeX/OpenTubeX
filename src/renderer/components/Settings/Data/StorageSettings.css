@@ -80,7 +80,7 @@
 
 .storageDonutTooltip {
   background: color-mix(in srgb, var(--primary-text-color) 88%, var(--card-bg-color));
-  border-radius: calc(6px * var(--ui-roundness));
+  border-radius: var(--shape-corner-small);
   box-sizing: border-box;
   color: var(--card-bg-color);
   display: grid;
@@ -142,7 +142,7 @@
 .storageLegendMarker {
   block-size: 12px;
   border: 1px solid color-mix(in srgb, var(--primary-text-color) 32%, transparent);
-  border-radius: calc(3px * var(--ui-roundness));
+  border-radius: var(--shape-corner-extra-small);
   inline-size: 12px;
 }
 

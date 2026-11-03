@@ -3,14 +3,14 @@
 }
 
 .playlistThumbnail {
-  border-radius: calc(8px * var(--ui-roundness));
+  border-radius: var(--shape-corner-small);
   overflow: hidden;
 }
 
 .playlistThumbnail img,
 .playlistThumbnail .retryImagePlaceholder {
   aspect-ratio: 16 / 9;
-  border-radius: calc(8px * var(--ui-roundness));
+  border-radius: var(--shape-corner-small);
   display: block;
   inline-size: 100%;
   object-fit: cover;
@@ -35,6 +35,8 @@
 
 .playlistTitle {
   margin-block-end: 0.1em;
+  font-weight: 700;
+  letter-spacing: -0.01em;
 
   /* Prevents overflow for long values */
   overflow-wrap: anywhere;
@@ -70,7 +72,7 @@
 }
 
 .channelThumbnail {
-  border-radius: 200px;
+  border-radius: 50%;
   float: inline-start;
   inline-size: 40px;
   block-size: 40px;
@@ -82,12 +84,14 @@
   word-break: break-all;
 }
 
-.playlistOptions {
+// FtButtonGroup root; the extra class outranks its centered default.
+.playlistInfo .playlistOptions {
   display: flex;
   flex-wrap: wrap;
   align-items: center;
   gap: 8px;
   justify-content: flex-end;
+  margin-block: 0;
 
   .actionButton {
     margin: 0;

@@ -18,7 +18,7 @@
       :aria-label="t('User Playlists.Choose Image')"
       @change="selectImage"
     >
-    <FtFlexBox class="thumbnailActions">
+    <FtButtonGroup>
       <FtButton
         :label="t('User Playlists.Choose Image')"
         :icon="['fas', 'file-image']"
@@ -32,7 +32,7 @@
         :disabled="loading"
         @click="emit('update:modelValue', '')"
       />
-    </FtFlexBox>
+    </FtButtonGroup>
   </fieldset>
 </template>
 
@@ -40,7 +40,7 @@
 import { computed, onBeforeUnmount, ref, useTemplateRef } from 'vue'
 import { useI18n } from 'vue-i18n'
 import FtButton from './FtButton/FtButton.vue'
-import FtFlexBox from './ft-flex-box/ft-flex-box.vue'
+import FtButtonGroup from './FtButtonGroup/FtButtonGroup.vue'
 import FtRetryImage from './FtRetryImage.vue'
 import { showToast } from '../helpers/utils'
 import { normalizePlaylistThumbnail } from '../helpers/playlist-thumbnails'
@@ -108,23 +108,18 @@ async function selectImage(event) {
 
 .thumbnailPreview {
   aspect-ratio: 16 / 9;
-  border-radius: calc(8px * var(--ui-roundness));
+  border-radius: var(--shape-corner-medium);
   inline-size: 240px;
   max-inline-size: 100%;
   object-fit: cover;
 }
 
 .thumbnailPreview.blur {
-  clip-path: inset(0 round calc(8px * var(--ui-roundness)));
+  clip-path: inset(0 round var(--shape-corner-medium));
   filter: blur(20px);
 }
 
 .imageInput {
   display: none;
-}
-
-.thumbnailActions {
-  gap: 8px;
-  justify-content: center;
 }
 </style>

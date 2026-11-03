@@ -53,6 +53,8 @@ defineProps({
 
 h3 {
   margin-block: 0 1em;
+  font-weight: 700;
+  letter-spacing: -0.01em;
 }
 
 .previewGrid {
@@ -67,8 +69,7 @@ h3 {
   min-inline-size: 0;
   box-sizing: border-box;
   padding: 1em;
-  border: 1px solid var(--divider-color);
-  border-radius: calc(8px * var(--ui-roundness));
+  border-radius: var(--shape-corner-large);
   background: var(--secondary-card-bg-color);
 }
 

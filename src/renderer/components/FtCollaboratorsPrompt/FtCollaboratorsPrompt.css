@@ -3,16 +3,19 @@
 }
 
 .collaboratorsTitle {
-  font-size: 20px;
+  font-size: 22px;
+  font-weight: 700;
+  letter-spacing: -0.01em;
   margin-block: 0 12px;
   margin-inline: 0;
   text-align: start;
 }
 
+/* Collaborators form one segmented group: large outer corners, tight inner ones. */
 .collaboratorsList {
   display: flex;
   flex-direction: column;
-  gap: 12px;
+  gap: 2px;
   min-inline-size: min(420px, 80vw);
 }
 
@@ -21,6 +24,20 @@
   align-items: center;
   gap: 16px;
   justify-content: space-between;
+  padding-block: 10px;
+  padding-inline: 12px;
+  background-color: var(--secondary-card-bg-color);
+  border-radius: var(--shape-corner-extra-small);
+}
+
+.collaboratorRow:first-child {
+  border-start-start-radius: var(--shape-corner-large-increased);
+  border-start-end-radius: var(--shape-corner-large-increased);
+}
+
+.collaboratorRow:last-child {
+  border-end-start-radius: var(--shape-corner-large-increased);
+  border-end-end-radius: var(--shape-corner-large-increased);
 }
 
 .collaboratorLink {

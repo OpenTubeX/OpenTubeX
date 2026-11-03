@@ -1,6 +1,8 @@
 .vote-count {
   padding-block-end: 6px;
   font-size: smaller;
+  font-variant-numeric: tabular-nums;
+  font-weight: 600;
 }
 
 .empty-circle {
@@ -30,20 +32,26 @@
   margin-inline-start: 10px;
 }
 
+/* Choices are tonal bars. The transparent border keeps the box size of the
+   former outline, and the correct answer recolors it. */
 .option {
   display: flex;
   align-items: center;
   padding-block: 5px;
-  border-radius: calc(5px * var(--ui-roundness));
-  border-style: solid;
-  border-width: 1px;
+  border: 1px solid transparent;
+  border-radius: var(--shape-corner-medium);
   padding-inline-start: 10px;
   margin-block-end: 10px;
+  background-color: color-mix(in srgb, var(--primary-color) 16%, var(--secondary-card-bg-color));
+  transition:
+    background-color var(--motion-default-effects),
+    border-color var(--motion-default-effects);
 }
 
 .option > .pollImage {
   margin-inline-start: 10px;
   block-size: 125px;
+  border-radius: var(--shape-corner-small);
 }
 
 .pollImage.retryImagePlaceholder {
@@ -69,9 +77,22 @@
 .reveal-answer {
   justify-content: center;
   cursor: pointer;
+  font-weight: 500;
+}
+
+/* The radius only transitions under the pointer, so UI Roundness changes stay
+   instant. */
+.reveal-answer:is(:hover, :active) {
+  transition:
+    background-color var(--motion-fast-effects),
+    border-radius var(--motion-fast-spatial);
 }
 
 .reveal-answer:hover,
 .reveal-answer:focus {
-  background-color: var(--side-nav-hover-color);
+  background-color: color-mix(in srgb, var(--primary-color) 26%, var(--secondary-card-bg-color));
+}
+
+.reveal-answer:active {
+  border-radius: var(--shape-corner-small);
 }

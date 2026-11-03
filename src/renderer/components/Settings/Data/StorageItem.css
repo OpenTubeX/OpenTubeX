@@ -1,7 +1,7 @@
 .storageItem {
   background: color-mix(in srgb, var(--side-nav-hover-color) 55%, transparent);
   border: 1px solid var(--side-nav-hover-color);
-  border-radius: calc(6px * var(--ui-roundness));
+  border-radius: var(--shape-corner-large);
   display: flex;
   flex-direction: column;
   min-inline-size: 0;

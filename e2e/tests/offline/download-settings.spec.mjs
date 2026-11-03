@@ -402,7 +402,7 @@ test.describe('download settings', () => {
       await page.evaluate(value => {
         window.$store.commit('setUiRoundness', value)
       }, roundness)
-      await expect(manager.locator('.channelRule').first()).toHaveCSS('border-radius', `${10 * roundness / 100}px`)
+      await expect(manager.locator('.channelRule').first()).toHaveCSS('border-radius', `${16 * roundness / 100}px`)
     }
     const search = manager.getByRole('searchbox', { name: 'Search channels' })
     const scroller = manager.locator('.automaticDownloadsScroller')

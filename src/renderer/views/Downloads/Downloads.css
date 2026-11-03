@@ -96,13 +96,33 @@
   text-align: center;
 }
 
+/* Rows of a section form one segmented group: large outer corners, tight
+   inner ones. */
 .downloadRow {
-  background: var(--side-nav-color);
-  border-radius: calc(8px * var(--ui-roundness));
+  background: var(--secondary-card-bg-color);
+  border-radius: var(--shape-corner-extra-small);
   gap: 20px;
   justify-content: space-between;
-  margin-block: 10px;
+  margin-block: 0;
   padding: 16px;
+}
+
+.videoSwipeFrame + .videoSwipeFrame {
+  margin-block-start: 2px;
+}
+
+:not(.videoSwipeFrame) + .videoSwipeFrame {
+  margin-block-start: 10px;
+}
+
+.videoSwipeFrame:last-child > .downloadRow {
+  border-end-start-radius: var(--shape-corner-large-increased);
+  border-end-end-radius: var(--shape-corner-large-increased);
+}
+
+:not(.videoSwipeFrame) + .videoSwipeFrame > .downloadRow {
+  border-start-start-radius: var(--shape-corner-large-increased);
+  border-start-end-radius: var(--shape-corner-large-increased);
 }
 
 .downloadMain {
@@ -113,7 +133,7 @@
 
 .downloadThumbnail {
   aspect-ratio: 16 / 9;
-  border-radius: calc(6px * var(--ui-roundness));
+  border-radius: var(--shape-corner-medium);
   flex: none;
   inline-size: 144px;
   object-fit: cover;
@@ -121,7 +141,6 @@
 
 .compact.downloadRow {
   gap: 12px;
-  margin-block: 8px;
   padding: 12px;
 }
 
@@ -203,9 +222,9 @@
 }
 
 .progressTrack {
-  background: #9e9e9e;
+  background: color-mix(in srgb, var(--accent-color) 24%, var(--secondary-card-bg-color));
   block-size: 7px;
-  border-radius: calc(4px * var(--ui-roundness));
+  border-radius: var(--shape-corner-extra-small);
   margin-block: 10px;
   overflow: hidden;
 }
@@ -215,7 +234,7 @@
   block-size: 100%;
   inline-size: 100%;
   transform-origin: left;
-  transition: transform 0.3s ease;
+  transition: transform var(--motion-default-effects);
 }
 
 .progressFill:dir(rtl) {
@@ -239,8 +258,23 @@
   text-align: center;
 }
 
-.emptyDownloads > svg {
+/* Tonal icon circle */
+.emptyDownloads > .ft-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  inline-size: 1em;
+  block-size: 1em;
+  padding: 0.5em;
+  border-radius: 50%;
+  background-color: color-mix(in srgb, var(--primary-color) 16%, var(--card-bg-color));
+  color: var(--primary-color);
   font-size: 3rem;
+}
+
+.emptyDownloads > h2,
+.downloadSection h2 {
+  letter-spacing: -0.01em;
 }
 
 @keyframes download-pulse {

@@ -41,8 +41,14 @@
   block-size: 18px;
   border: 2px solid var(--secondary-text-color);
   border-radius: calc(2px * var(--ui-roundness));
-  transform: translateY(-50%);
-  transition: background-color 150ms ease, border-color 150ms ease, box-shadow 150ms ease;
+
+  /* Separate translate keeps the press scale centered on the box. */
+  translate: 0 -50%;
+  transition:
+    background-color var(--motion-fast-effects),
+    border-color var(--motion-fast-effects),
+    box-shadow var(--motion-fast-effects),
+    scale var(--motion-fast-spatial);
 }
 
 .pure-checkbox input + label::after {
@@ -55,8 +61,9 @@
   inset-inline-start: 9px;
   inline-size: 9px;
   block-size: 4px;
-  transform: translate(var(--checkbox-mark-offset), -65%) rotate(-45deg) scale(0);
-  transition: transform 150ms ease;
+  translate: var(--checkbox-mark-offset) -65%;
+  transform: rotate(-45deg) scale(0);
+  transition: transform var(--motion-fast-spatial), translate var(--motion-fast-spatial), scale var(--motion-fast-spatial);
 }
 
 .pure-checkbox input:is(:checked, :indeterminate) + label::before {
@@ -65,14 +72,15 @@
 }
 
 .pure-checkbox input:checked + label::after {
-  transform: translate(var(--checkbox-mark-offset), -65%) rotate(-45deg) scale(1);
+  transform: rotate(-45deg) scale(1);
 }
 
 .pure-checkbox input:indeterminate + label::after {
   border-width: 0 0 2px;
   block-size: 0;
   inline-size: 10px;
-  transform: translate(var(--checkbox-mark-offset), -50%);
+  translate: var(--checkbox-mark-offset) -50%;
+  transform: none;
 }
 
 .checkboxStateLayer {
@@ -85,8 +93,22 @@
   transform: translate(var(--checkbox-mark-offset), -50%);
   background-color: transparent;
   pointer-events: none;
-  transition: background-color 150ms ease;
+  transition: background-color var(--motion-fast-effects);
   z-index: -1;
+}
+
+/* Pressing shrinks the box and its mark together. */
+.checkbox:not(:disabled) + label:active::before,
+.checkbox:not(:disabled) + label:active::after {
+  scale: 0.85;
+}
+
+.checkbox:not(:disabled) + label:active .checkboxStateLayer {
+  background-color: color-mix(in srgb, var(--primary-text-color) 12%, transparent);
+}
+
+.checkbox:is(:checked, :indeterminate):not(:disabled) + label:active .checkboxStateLayer {
+  background-color: color-mix(in srgb, var(--primary-color) 20%, transparent);
 }
 
 .checkbox:not(:disabled) + label:hover .checkboxStateLayer,
@@ -102,7 +124,7 @@
 .pure-checkbox input:focus-visible + label {
   outline: 2px solid var(--primary-color);
   outline-offset: -2px;
-  border-radius: calc(4px * var(--ui-roundness));
+  border-radius: var(--shape-corner-extra-small);
 }
 
 .pure-checkbox input:disabled + label {

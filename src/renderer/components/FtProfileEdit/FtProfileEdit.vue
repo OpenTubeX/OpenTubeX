@@ -177,6 +177,7 @@
                   v-if="isNew"
                 >
                   <FtButton
+                    theme="primary"
                     :label="$t('Profile.Create Profile')"
                     :icon="['fas', 'user-plus']"
                     @click="saveProfile"
@@ -184,6 +185,8 @@
                   <FtButton
                     :label="$t('Cancel')"
                     :icon="['fas', 'xmark']"
+                    :text-color="null"
+                    :background-color="null"
                     @click="emit('cancel-creation')"
                   />
                 </template>
@@ -191,6 +194,7 @@
                   v-else
                 >
                   <FtButton
+                    theme="primary"
                     :label="$t('Profile.Update Profile')"
                     :icon="['fas', 'user-check']"
                     @click="saveProfile"
@@ -205,6 +209,7 @@
                     v-if="!isMainProfile"
                     :label="$t('Profile.Delete Profile')"
                     theme="destructive"
+                    variant="tonal"
                     :icon="['fas', 'trash']"
                     @click="showDeletePrompt = true"
                   />
@@ -246,6 +251,7 @@
         />
         <FtFlexBox class="cropActions">
           <FtButton
+            theme="primary"
             :label="$t('Profile.Apply Crop')"
             :icon="['fas', 'scissors']"
             @click="applyCrop"
@@ -253,6 +259,8 @@
           <FtButton
             :label="$t('Cancel')"
             :icon="['fas', 'xmark']"
+            :text-color="null"
+            :background-color="null"
             @click="cancelCrop"
           />
         </FtFlexBox>

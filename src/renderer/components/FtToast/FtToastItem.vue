@@ -116,7 +116,8 @@ const slot = useTemplateRef('slot')
 const showTimeoutIndicator = computed(() => {
   return store.getters.getShowToastTimeoutIndicator && Number.isFinite(props.toast.duration)
 })
-const toastProgressRadius = computed(() => 12 * store.getters.getUiRoundness / 100)
+// Matches --shape-corner-large on the toast.
+const toastProgressRadius = computed(() => 16 * store.getters.getUiRoundness / 100)
 const toastProgressLineWidth = computed(() => Math.min(4, Math.max(2, 2 * store.getters.getUiRoundness / 100)))
 
 function close() {

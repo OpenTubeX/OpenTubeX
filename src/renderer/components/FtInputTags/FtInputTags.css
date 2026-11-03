@@ -3,7 +3,7 @@
   position: relative;
   background-color: var(--bg-color);
   padding: 20px;
-  border-radius: calc(5px * var(--ui-roundness));
+  border-radius: var(--shape-corner-large);
   display: block;
   inline-size: 60%;
 }
@@ -33,7 +33,7 @@
   background-color: var(--card-bg-color);
   backdrop-filter: var(--card-bg-blur, none);
   margin: 5px;
-  border-radius: calc(5px * var(--ui-roundness));
+  border-radius: var(--shape-corner-small);
   display: flex;
   float: inline-start;
 }

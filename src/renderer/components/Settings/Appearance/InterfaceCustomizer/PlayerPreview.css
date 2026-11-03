@@ -21,7 +21,7 @@
 
   aspect-ratio: var(--preview-aspect-ratio);
   background-color: #000;
-  border-radius: calc(12px * var(--ui-roundness));
+  border-radius: var(--shape-corner-medium);
   color: #fff;
   container-type: inline-size;
   inline-size: min(100cqi, 100cqb * var(--preview-aspect-ratio));
@@ -209,7 +209,7 @@
   background: rgb(0 0 0 / 22%);
   block-size: calc(26 * var(--u));
   border: 1px solid rgb(255 255 255 / 18%);
-  border-radius: calc(999px * var(--ui-roundness));
+  border-radius: var(--shape-corner-full);
   box-sizing: border-box;
   color: rgb(255 255 255 / 92%);
   display: flex;

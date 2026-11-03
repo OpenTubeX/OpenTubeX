@@ -164,14 +164,14 @@
       </component>
 
       <div class="playlistOptionsWrapper">
-        <div class="playlistOptions">
+        <FtButtonGroup class="playlistOptions">
           <template v-if="editMode">
             <FtButton
               class="actionButton"
               :label="t('User Playlists.Save Changes')"
               :icon="['fas', 'save']"
               :disabled="playlistPersistenceDisabled"
-              theme="secondary"
+              theme="primary"
               variant="filled"
               @click="savePlaylistInfo"
             />
@@ -269,7 +269,7 @@
               {{ t('More') }}
             </FtButton>
           </template>
-        </div>
+        </FtButtonGroup>
       </div>
       <FtPrompt
         v-if="showDeletePlaylistPrompt"
@@ -355,6 +355,7 @@ import { useRouter } from 'vue-router'
 import { FtIcon } from '@opentubex/icons'
 
 import FtButton from '../FtButton/FtButton.vue'
+import FtButtonGroup from '../FtButtonGroup/FtButtonGroup.vue'
 import FtFlexBox from '../ft-flex-box/ft-flex-box.vue'
 import FtInput from '../FtInput/FtInput.vue'
 import FtPrompt from '../FtPrompt/FtPrompt.vue'

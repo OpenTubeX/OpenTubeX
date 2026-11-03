@@ -161,14 +161,20 @@ async function apply() {
   display: grid;
   gap: 8px;
   padding: 16px;
-  border-radius: calc(12px * var(--ui-roundness));
+  border-radius: var(--shape-corner-large);
   background: var(--secondary-card-bg-color);
   overflow-wrap: anywhere;
 }
 
+.repairResult {
+  background: color-mix(in srgb, var(--primary-color) 16%, var(--card-bg-color));
+}
+
 .repairTotals strong,
 .repairResult strong {
-  font-size: 1.3rem;
+  font-size: 1.375rem;
+  font-weight: 700;
+  letter-spacing: -0.01em;
 }
 
 .overlapChoices {
@@ -189,14 +195,20 @@ async function apply() {
   align-items: start;
   gap: 12px;
   padding: 14px;
-  border: 1px solid var(--primary-text-color);
-  border-radius: calc(10px * var(--ui-roundness));
+  border: 1px solid transparent;
+  border-radius: var(--shape-corner-large);
+  background: var(--secondary-card-bg-color);
   cursor: pointer;
+  transition: background-color var(--motion-default-effects), border-color var(--motion-default-effects), border-radius var(--motion-fast-spatial);
+}
+
+.overlapChoices label:active {
+  border-radius: var(--shape-corner-medium);
 }
 
 .overlapChoices label:has(:checked) {
   border-color: var(--primary-color);
-  background: var(--secondary-card-bg-color);
+  background: color-mix(in srgb, var(--primary-color) 16%, var(--card-bg-color));
 }
 
 .overlapChoices input {

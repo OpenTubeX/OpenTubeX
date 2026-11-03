@@ -93,7 +93,7 @@ onBeforeUnmount(() => { requestId++ })
   aspect-ratio: 16 / 9;
   inline-size: 100%;
   overflow: hidden;
-  border-radius: calc(5px * var(--ui-roundness));
+  border-radius: var(--shape-corner-extra-small);
   background-color: var(--secondary-card-bg-color);
   backdrop-filter: var(--secondary-card-bg-blur, none);
 }

@@ -439,7 +439,9 @@ function isSegmentPassed(segment) {
   color: var(--primary-text-color);
   background-color: var(--card-bg-color);
   backdrop-filter: var(--card-bg-blur, none);
-  border-radius: calc(12px * var(--ui-roundness));
+
+  /* Matches the other sidebar cards (ft-card). */
+  border-radius: var(--shape-corner-medium);
   box-shadow: 0 1px 2px rgb(0 0 0 / 10%);
 }
 
@@ -465,6 +467,7 @@ function isSegmentPassed(segment) {
 .sponsorBlockHeading h3 {
   margin: 0;
   font-size: 18px;
+  letter-spacing: -0.01em;
 }
 
 .sponsorBlockShield {
@@ -485,6 +488,7 @@ function isSegmentPassed(segment) {
   border-radius: 50%;
   cursor: pointer;
   font-size: 16px;
+  transition: background-color var(--motion-fast-effects), border-radius var(--motion-fast-spatial);
 }
 
 .sponsorBlockHeaderActions button:disabled {
@@ -495,6 +499,10 @@ function isSegmentPassed(segment) {
 .sponsorBlockHeaderActions button:hover:not(:disabled),
 .sponsorBlockHeaderActions button:focus-visible:not(:disabled) {
   background-color: var(--side-nav-hover-color);
+}
+
+.sponsorBlockHeaderActions button:active:not(:disabled) {
+  border-radius: var(--shape-corner-medium);
 }
 
 .sponsorBlockSubtitle {
@@ -526,7 +534,7 @@ function isSegmentPassed(segment) {
   padding-inline: 10px;
   background-color: var(--secondary-card-bg-color);
   backdrop-filter: var(--secondary-card-bg-blur, none);
-  border-radius: calc(6px * var(--ui-roundness));
+  border-radius: var(--shape-corner-large);
 }
 
 .sponsorBlockContributionStats h4 {
@@ -574,28 +582,47 @@ function isSegmentPassed(segment) {
   align-self: center;
   min-inline-size: 0;
   margin: 0;
-  font-size: 16px;
+  font-size: 18px;
   font-variant-numeric: tabular-nums;
   font-weight: 700;
+  letter-spacing: -0.01em;
   overflow-wrap: anywhere;
 }
 
+/* Segments form one segmented list: large outer corners, tight inner ones. */
 .sponsorBlockSegments {
+  display: grid;
+  gap: 2px;
   padding-block: 4px 10px;
   padding-inline: 8px;
 }
 
 .sponsorBlockSegment {
-  border-radius: calc(6px * var(--ui-roundness));
+  background-color: color-mix(in srgb, var(--primary-text-color) 6%, transparent);
+  border-radius: var(--shape-corner-extra-small);
+  transition: background-color var(--motion-default-effects), opacity var(--motion-default-effects);
+}
+
+.sponsorBlockSegment:first-child {
+  border-start-start-radius: var(--shape-corner-large-increased);
+  border-start-end-radius: var(--shape-corner-large-increased);
+}
+
+.sponsorBlockSegment:last-child {
+  border-end-start-radius: var(--shape-corner-large-increased);
+  border-end-end-radius: var(--shape-corner-large-increased);
 }
 
 .sponsorBlockSegment:has(.sponsorBlockEditActions) {
   padding-block-end: 8px;
 }
 
-.sponsorBlockSegment:hover,
-.sponsorBlockSegment.selected {
+.sponsorBlockSegment:hover {
   background-color: var(--side-nav-hover-color);
+}
+
+.sponsorBlockSegment.selected {
+  background-color: color-mix(in srgb, var(--primary-color) 24%, var(--card-bg-color));
 }
 
 .sponsorBlockSegment.passed {
@@ -683,8 +710,9 @@ function isSegmentPassed(segment) {
   background-color: var(--secondary-card-bg-color);
   backdrop-filter: var(--secondary-card-bg-blur, none);
   border: 0;
-  border-radius: calc(6px * var(--ui-roundness));
+  border-radius: var(--shape-corner-small);
   cursor: pointer;
+  transition: background-color var(--motion-fast-effects), color var(--motion-fast-effects), border-radius var(--motion-fast-spatial);
 }
 
 .sponsorBlockVoteButton:disabled {
@@ -706,6 +734,10 @@ function isSegmentPassed(segment) {
 .sponsorBlockVoteButton.active:hover:not(:disabled),
 .sponsorBlockVoteButton.active:focus-visible:not(:disabled) {
   background-color: color-mix(in srgb, var(--accent-color) 50%, var(--card-bg-color));
+}
+
+.sponsorBlockVoteButton:active:not(:disabled) {
+  border-radius: var(--shape-corner-extra-small);
 }
 
 .sponsorBlockSkipButton {
@@ -786,12 +818,15 @@ function isSegmentPassed(segment) {
   background-color: var(--secondary-card-bg-color);
   backdrop-filter: var(--secondary-card-bg-blur, none);
   border: 1px solid transparent;
-  border-radius: calc(10px * var(--ui-roundness));
+  border-radius: var(--shape-corner-medium);
   cursor: pointer;
   font-size: 13px;
   font-weight: 600;
   text-align: start;
-  transition: background-color 160ms ease, border-color 160ms ease;
+  transition:
+    background-color var(--motion-fast-effects),
+    border-color var(--motion-fast-effects),
+    border-radius var(--motion-fast-spatial);
 }
 
 .sponsorBlockWhitelistButton:hover:not(:disabled),
@@ -814,6 +849,10 @@ function isSegmentPassed(segment) {
   opacity: 0.5;
 }
 
+.sponsorBlockWhitelistButton:active:not(:disabled) {
+  border-radius: var(--shape-corner-small);
+}
+
 .sponsorBlockWhitelistBadge {
   flex: 0 0 auto;
   display: grid;
@@ -823,9 +862,9 @@ function isSegmentPassed(segment) {
   color: var(--secondary-text-color);
   background-color: var(--card-bg-color);
   backdrop-filter: var(--card-bg-blur, none);
-  border-radius: calc(8px * var(--ui-roundness));
+  border-radius: var(--shape-corner-small);
   font-size: 13px;
-  transition: background-color 160ms ease, color 160ms ease;
+  transition: background-color var(--motion-fast-effects), color var(--motion-fast-effects);
 }
 
 .sponsorBlockWhitelistButton.active .sponsorBlockWhitelistBadge {
@@ -860,8 +899,8 @@ function isSegmentPassed(segment) {
   background-color: var(--secondary-card-bg-color);
   backdrop-filter: var(--secondary-card-bg-blur, none);
   border: 1px solid var(--side-nav-hover-color);
-  border-radius: calc(999px * var(--ui-roundness));
-  transition: background-color 160ms ease, border-color 160ms ease;
+  border-radius: var(--shape-corner-full);
+  transition: background-color var(--motion-fast-effects), border-color var(--motion-fast-effects);
 }
 
 .sponsorBlockToggleThumb {
@@ -877,7 +916,7 @@ function isSegmentPassed(segment) {
   border-radius: 50%;
   box-shadow: 0 1px 3px rgb(0 0 0 / 35%);
   font-size: 8px;
-  transition: transform 160ms ease;
+  transition: transform var(--motion-fast-spatial);
 }
 
 .sponsorBlockToggleInput:checked + .sponsorBlockToggleTrack {

@@ -423,7 +423,7 @@ test.describe('profile channel thumbnails', () => {
     await page.getByRole('tab', { name: 'Manage profile subscriptions', exact: true }).click()
 
     const channel = page.locator('#subscriptionsPanel').getByRole('link', { name: 'Deleted Channel' })
-    await expect(channel).toHaveCSS('border-radius', '16px')
+    await expect(channel).toHaveCSS('border-radius', '32px')
     await expect(channel.locator('img.bubble')).toHaveCount(0)
     const fallbackAvatar = channel.locator('.bubble:not(img)')
     await expect(fallbackAvatar).toBeVisible()

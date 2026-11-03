@@ -153,7 +153,11 @@ for (const settings of [
 
       const quickActions = menu.locator('.tabQuickActions button')
       await quickActions.first().hover()
-      const hoverBackground = await quickActions.first().evaluate(element => getComputedStyle(element).backgroundColor)
+      // Sample the settled hover color, not a frame of its fade.
+      const hoverBackground = await quickActions.first().evaluate(async element => {
+        await Promise.all(element.getAnimations().map(animation => animation.finished))
+        return getComputedStyle(element).backgroundColor
+      })
       expect(hoverBackground).not.toBe('rgba(0, 0, 0, 0)')
       await quickActions.last().hover()
       await expect(quickActions.last()).toHaveCSS('background-color', hoverBackground, { timeout: 1000 })

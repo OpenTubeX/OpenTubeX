@@ -62,6 +62,7 @@
   min-inline-size: 0;
   margin: 0;
   font-size: 18px;
+  letter-spacing: -0.01em;
 }
 
 .fullscreenCommentActions {
@@ -105,6 +106,7 @@
   border-radius: 50%;
   cursor: pointer;
   font-size: 18px;
+  transition: background-color var(--motion-fast-effects), border-radius var(--motion-fast-spatial);
 }
 
 .fullscreenCommentAction:disabled {
@@ -123,6 +125,10 @@
 
 .fullscreenCommentAction:where(:enabled).active:is(:hover, :focus-visible) {
   background-color: rgb(255 255 255 / 42%);
+}
+
+.fullscreenCommentAction:where(:enabled):active {
+  border-radius: var(--shape-corner-medium);
 }
 
 .commentCreatorFilterAvatar {
@@ -154,7 +160,7 @@
   color: var(--primary-text-color);
   background-color: color-mix(in srgb, var(--card-bg-color) 96%, var(--bg-color));
   border: 1px solid color-mix(in srgb, var(--border-color) 55%, transparent);
-  border-radius: calc(10px * var(--ui-roundness));
+  border-radius: var(--shape-corner-large);
   box-shadow: 0 8px 24px rgb(0 0 0 / 28%);
 }
 
@@ -171,8 +177,9 @@
   text-align: start;
   background: transparent;
   border: 0;
-  border-radius: calc(8px * var(--ui-roundness));
+  border-radius: var(--shape-corner-medium);
   cursor: pointer;
+  transition: background-color var(--motion-fast-effects);
 }
 
 .commentFilterMenu :where(button:hover, button:focus-visible) {
@@ -206,7 +213,7 @@
   padding: 6px;
   background-color: rgb(12 12 12 / 62%);
   border: 1px solid rgb(255 255 255 / 10%);
-  border-radius: calc(10px * var(--ui-roundness));
+  border-radius: var(--shape-corner-large);
   box-shadow: 0 6px 20px rgb(0 0 0 / 35%);
   backdrop-filter: blur(14px) saturate(1.05);
 }
@@ -221,8 +228,9 @@
   text-align: start;
   background: transparent;
   border: 0;
-  border-radius: calc(8px * var(--ui-roundness));
+  border-radius: var(--shape-corner-medium);
   cursor: pointer;
+  transition: background-color var(--motion-fast-effects);
 }
 
 .fullscreenSortMenu button:hover,
@@ -293,6 +301,7 @@
 .commentsTitle {
   margin: 0;
   padding-block: 12px;
+  letter-spacing: -0.01em;
   display: flex;
   flex-wrap: wrap;
   align-items: center;
@@ -343,6 +352,7 @@
   border-radius: 50%;
   cursor: pointer;
   font-size: 12px;
+  transition: background-color var(--motion-fast-effects), border-radius var(--motion-fast-spatial);
 }
 
 .commentHeaderIconAction:hover,
@@ -358,6 +368,10 @@
 
 .commentHeaderIconAction.active:is(:hover, :focus-visible) {
   background-color: var(--selected-container-hover-color);
+}
+
+.commentHeaderIconAction:active {
+  border-radius: var(--shape-corner-medium);
 }
 
 .commentHeaderIconActionAligned {
@@ -453,7 +467,7 @@
   padding-inline: 5px;
   color: var(--primary-text-color);
   background-color: var(--side-nav-hover-color);
-  border-radius: calc(2px * var(--ui-roundness));
+  border-radius: var(--shape-corner-extra-small);
   font-size: 11px;
   font-weight: normal;
   line-height: 16px;
@@ -517,7 +531,7 @@
   float: inline-start;
   inline-size: 60px;
   block-size: 60px;
-  border-radius: 200px;
+  border-radius: 50%;
 }
 
 .commentThumbnailHidden {
@@ -546,7 +560,7 @@
   background-color: var(--secondary-card-bg-color);
   backdrop-filter: var(--secondary-card-bg-blur, none);
   border: 1px solid var(--tertiary-text-color);
-  border-radius: calc(10px * var(--ui-roundness));
+  border-radius: var(--shape-corner-full);
   padding-block: 2px;
   padding-inline: 10px;
 }
@@ -586,12 +600,15 @@
   color: var(--title-color);
   background-color: transparent;
   border: 0;
+
+  /* Half the minimum height rather than full, so the press morph is smooth. */
   border-radius: calc(16px * var(--ui-roundness));
   cursor: pointer;
   font: inherit;
   font-size: 12px;
   font-weight: 600;
   text-align: start;
+  transition: background-color var(--motion-fast-effects), border-radius var(--motion-fast-spatial);
 }
 
 .commentTranslationButton:hover,
@@ -608,6 +625,10 @@
 .commentTranslationButton:disabled:hover {
   color: var(--title-color);
   background-color: transparent;
+}
+
+.commentTranslationButton:not(:disabled):active {
+  border-radius: var(--shape-corner-medium);
 }
 
 /* stylelint-disable liberty/use-logical-spec */
@@ -664,6 +685,7 @@
   cursor: pointer;
   line-height: 1;
   vertical-align: middle;
+  transition: background-color var(--motion-fast-effects), border-radius var(--motion-fast-spatial);
 }
 
 .commentCopyLink:hover,
@@ -675,13 +697,18 @@
   background-color: var(--side-nav-hover-color);
 }
 
+.commentCopyLink:active,
+.commentPinButton:active {
+  border-radius: var(--shape-corner-small);
+}
+
 .commentPersonalPin {
   display: table;
   padding-block: 2px;
   padding-inline: 5px;
   color: var(--primary-text-color);
   background-color: color-mix(in srgb, var(--side-nav-hover-color) 45%, transparent);
-  border-radius: calc(4px * var(--ui-roundness));
+  border-radius: var(--shape-corner-extra-small);
 }
 
 .commentAuthor mark,
@@ -689,7 +716,7 @@
   padding-inline: 1px;
   color: var(--text-with-accent-color);
   background-color: var(--accent-color);
-  border-radius: calc(2px * var(--ui-roundness));
+  border-radius: var(--shape-corner-extra-small);
 }
 
 .commentHeartBadge {
@@ -729,9 +756,12 @@
   z-index: 2;
 }
 
+/* A tonal surface groups the replies under their comment. */
 .commentReplies {
   clear: both;
   margin-inline-start: 30px;
+  background-color: color-mix(in srgb, var(--primary-color) 8%, transparent);
+  border-radius: var(--shape-corner-large);
 }
 
 .commentReplyContinuation {
@@ -749,7 +779,7 @@
   block-size: 26px;
   border-block-end: 1px solid var(--comment-parent-thread-line-color, var(--comment-thread-line-color));
   border-inline-start: 1px solid var(--comment-parent-thread-line-color, var(--comment-thread-line-color));
-  border-end-start-radius: calc(12px * var(--ui-roundness));
+  border-end-start-radius: var(--shape-corner-medium);
   pointer-events: none;
 }
 
@@ -772,11 +802,14 @@
   color: var(--title-color);
   background-color: transparent;
   border: 0;
+
+  /* Half the minimum height rather than full, so the press morph is smooth. */
   border-radius: calc(20px * var(--ui-roundness));
   cursor: pointer;
   font: inherit;
   font-size: 14px;
   font-weight: 600;
+  transition: background-color var(--motion-fast-effects), border-radius var(--motion-fast-spatial);
 }
 
 .commentReplyContinuationButton:hover,
@@ -792,6 +825,10 @@
 .commentReplyContinuationButton:disabled:hover {
   color: var(--title-color);
   background-color: transparent;
+}
+
+.commentReplyContinuationButton:not(:disabled):active {
+  border-radius: var(--shape-corner-medium);
 }
 
 .commentReplyToggleLabel {

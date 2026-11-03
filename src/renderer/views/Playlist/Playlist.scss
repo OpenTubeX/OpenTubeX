@@ -25,12 +25,16 @@
   color: var(--primary-text-color);
   font-size: 1em;
   line-height: 0;
-  transition: background 0.2s ease-in;
+  transition: background-color var(--motion-fast-effects), border-radius var(--motion-fast-spatial);
 }
 
 .alertButton:hover {
   background-color: var(--card-bg-color);
   cursor: pointer;
+}
+
+.alertButton:active {
+  border-radius: var(--shape-corner-medium);
 }
 
 .playlistItemsCard {
@@ -42,7 +46,7 @@
 
 .playlistInfoContainer {
   box-sizing: border-box;
-  border-radius: calc(12px * var(--ui-roundness));
+  border-radius: var(--shape-corner-medium);
 
   /* This is needed to make prompt always above video entries. Value being too high would block search suggestions */
   z-index: 1;
@@ -469,6 +473,13 @@
 
 .message {
   color: var(--tertiary-text-color);
+}
+
+// Emphasize empty states, not error details.
+.message:not(.errorStateContent > .message) {
+  font-size: 1.125rem;
+  font-weight: 600;
+  letter-spacing: -0.01em;
 }
 
 .playlistErrorState {

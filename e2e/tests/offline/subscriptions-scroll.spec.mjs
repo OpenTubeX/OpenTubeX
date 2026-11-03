@@ -339,10 +339,10 @@ test('landscape phone header hides and requires a longer upward scroll', { tag: 
 
   const header = page.locator('.subscriptionsHeader')
   const headerBottom = () => header.evaluate(element => element.getBoundingClientRect().bottom)
-  await expect(header).toHaveCSS('transition-duration', '0.28s')
+  await expect(header).toHaveCSS('transition-duration', '0.25s')
   await scrollFeedTo(page, 600)
   await expect.poll(headerBottom).toBeLessThanOrEqual(0)
-  await expect(header).toHaveCSS('transition-duration', '0.22s')
+  await expect(header).toHaveCSS('transition-duration', '0.15s')
   await scrollFeedTo(page, 580)
   await expect.poll(headerBottom).toBeLessThanOrEqual(0)
   await scrollFeedTo(page, 540)

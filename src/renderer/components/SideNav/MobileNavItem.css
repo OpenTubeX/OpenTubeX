@@ -12,7 +12,7 @@
     block-size: var(--mobile-nav-content-height);
     padding-block: 4px;
     padding-inline: 0;
-    border-radius: calc(20px * var(--ui-roundness));
+    border-radius: var(--shape-corner-large-increased);
     color: var(--primary-text-color);
     background: transparent;
     isolation: isolate;
@@ -38,21 +38,32 @@
     inset-block-start: 4px;
     inline-size: min(64px, 100%);
     block-size: 32px;
-    border-radius: calc(20px * var(--ui-roundness));
+
+    /* Half of the indicator height, so the press morph starts moving at once. */
+    border-radius: calc(16px * var(--ui-roundness));
     background-color: var(--side-nav-hover-color);
     opacity: 0;
     transform: scaleX(0.6);
-    transition: transform 350ms cubic-bezier(0.2, 1.4, 0.4, 1), opacity 150ms ease;
+    transition:
+      transform var(--motion-fast-spatial),
+      border-radius var(--motion-fast-spatial),
+      opacity var(--motion-fast-effects),
+      background-color var(--motion-default-effects);
   }
 
-  .sideNav .mobileNavItem.router-link-active {
-    color: var(--primary-color);
+  .sideNav .mobileNavItem.router-link-active,
+  .sideNav .mobileNavItem.router-link-active:is(:hover, :active, :focus-visible) {
+    color: var(--on-selected-container-color);
   }
 
   .sideNav .mobileNavItem.router-link-active::before {
-    background-color: color-mix(in srgb, var(--primary-color) 20%, transparent);
+    background-color: var(--selected-container-color);
     opacity: 1;
     transform: scaleX(1);
+  }
+
+  .sideNav .mobileNavItem.router-link-active:is(:hover, :focus-visible)::before {
+    background-color: color-mix(in srgb, var(--on-selected-container-color) 8%, var(--selected-container-color));
   }
 
   .sideNav .mobileNavItem:hover::before,
@@ -65,7 +76,7 @@
   .sideNav .mobileNavItem:active::before {
     opacity: 1;
     transform: scaleX(0.88);
-    transition-duration: 100ms;
+    border-radius: var(--shape-corner-medium);
   }
 
   .sideNav .mobileNavItem .thumbnailContainer {

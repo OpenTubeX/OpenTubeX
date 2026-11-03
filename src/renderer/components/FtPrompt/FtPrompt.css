@@ -1,5 +1,5 @@
 .prompt {
-  animation: prompt-backdrop-enter 150ms ease-out;
+  animation: prompt-backdrop-enter var(--motion-default-effects);
   position: fixed;
   inset-block-start: 0;
   inset-inline-start: 0;
@@ -21,13 +21,22 @@
 }
 
 .promptCard {
-  animation: prompt-card-enter 150ms ease-out;
+  animation: prompt-card-enter var(--motion-default-spatial);
 
   /* Keep the gradient anchored to the card when the entry transform ends. */
   background-attachment: scroll;
   overflow-y: auto;
   max-block-size: 95%;
   box-shadow: 0 12px 40px rgb(0 0 0 / 38%);
+}
+
+.ft-card.promptCard {
+  border-radius: var(--shape-corner-extra-large);
+}
+
+.promptCard > :deep(h2) {
+  font-weight: 700;
+  letter-spacing: -0.01em;
 }
 
 .promptCard.fixedLayout {
@@ -59,7 +68,7 @@
 @keyframes prompt-card-enter {
   from {
     opacity: 0;
-    transform: scale(0.97) translateY(6px);
+    transform: scale(0.9) translateY(16px);
   }
 }
 

@@ -522,7 +522,7 @@ test.describe('new subscriptions feed', () => {
     const shortsTab = newContentTabs.locator('[data-new-feed-tab="shorts"]')
     await shortsTab.click()
     await expect(shortsTab).toHaveAttribute('aria-selected', 'true')
-    await expectTabHighlightStyle(selectedTab, 'transitionProperty', 'opacity')
+    await expectTabHighlightStyle(selectedTab, 'transitionProperty', 'opacity, scale')
     await expect(page.getByText('New short', { exact: true })).toBeVisible()
     await expect(page.getByText('New video', { exact: true })).toHaveCount(0)
 

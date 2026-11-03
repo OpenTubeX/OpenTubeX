@@ -111,14 +111,16 @@ for (const [theme, scale] of [['openTubeXLight', 100], ['openTubeXDark', 125]]) 
         const animation = element.getAnimations().find(animation => animation.animationName?.startsWith('prompt-card-enter'))
         if (!animation) throw new Error('Missing prompt opening animation')
         // Sample just before the transform is removed, with effectively
-        // identical geometry and opacity to the settled dialog.
-        animation.currentTime = animation.effect.getComputedTiming().duration - 0.001
+        // identical geometry and opacity to the settled dialog. The spring
+        // easing reaches its end value exactly in its final microseconds.
+        animation.currentTime = animation.effect.getComputedTiming().duration - 5
         element.closest('.prompt').getAnimations().forEach(animation => animation.finish())
       })
       await expect(dialog).not.toHaveCSS('transform', 'none')
       const points = await dialog.evaluate(element => {
         const { width, height } = element.getBoundingClientRect()
-        return [[4, 16], [width / 2, 4], [width - 4, height / 2], [4, height - 16]]
+        // Clear of the extra-large corner arcs, whose antialiasing shifts with the transform.
+        return [[4, 32], [width / 2, 4], [width - 4, height / 2], [4, height - 32]]
       })
       const opening = await sampleColors(app, dialog, points, { finishAnimations: false })
       const settled = await sampleColors(app, dialog, points)

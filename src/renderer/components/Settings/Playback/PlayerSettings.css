@@ -118,7 +118,7 @@
   gap: 1rem;
   padding: 1rem;
   border: 1px solid var(--border-color);
-  border-radius: calc(4px * var(--ui-roundness));
+  border-radius: var(--shape-corner-medium);
 }
 
 .channelSpeedInfo {
@@ -179,7 +179,7 @@
   gap: 0.75rem;
   padding: 0.75rem;
   border: 1px solid var(--border-color);
-  border-radius: calc(4px * var(--ui-roundness));
+  border-radius: var(--shape-corner-medium);
   background-color: var(--card-bg-color);
   backdrop-filter: var(--card-bg-blur, none);
   transition: transform 0.18s ease, opacity 0.18s ease;
@@ -236,7 +236,7 @@
   inline-size: 40px;
   block-size: 40px;
   border: 0;
-  border-radius: calc(4px * var(--ui-roundness));
+  border-radius: var(--shape-corner-extra-small);
   background: transparent;
   color: var(--tertiary-text-color);
   cursor: grab;

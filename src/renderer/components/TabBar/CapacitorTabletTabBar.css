@@ -52,7 +52,7 @@
   background-color: transparent;
   border-radius: calc(24px * var(--ui-roundness));
   overflow: clip;
-  transition: background-color 150ms ease, transform 160ms ease;
+  transition: background-color var(--motion-fast-effects), transform 160ms ease;
 }
 
 .capacitorTabletTab.dragging,
@@ -83,7 +83,7 @@
   inset-block-end: 0;
   inset-inline: 16px;
   block-size: 3px;
-  border-radius: calc(3px * var(--ui-roundness));
+  border-radius: var(--shape-corner-full);
   background-color: var(--primary-text-color);
   pointer-events: none;
 }
@@ -116,7 +116,10 @@
   flex: 0 0 48px;
   inline-size: 48px;
   font-size: 16px;
+
+  /* Half of the 48px target, so the press morph starts moving at once. */
   border-radius: calc(24px * var(--ui-roundness));
+  transition: border-radius var(--motion-fast-spatial);
 }
 
 .capacitorTabletTabClose :deep(.ft-icon),
@@ -130,6 +133,11 @@
 
 .capacitorTabletNewTab {
   align-self: stretch;
+}
+
+.capacitorTabletTabClose:active,
+.capacitorTabletNewTab:active {
+  border-radius: var(--shape-corner-medium);
 }
 
 .capacitorTabletTab:has(.capacitorTabletTabTarget:is(:hover, :active)),

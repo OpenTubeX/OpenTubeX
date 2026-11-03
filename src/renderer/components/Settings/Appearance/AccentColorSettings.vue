@@ -198,7 +198,7 @@ function swatchStyle(scheme) {
   margin-inline: auto;
   margin-block: 12px 8px;
   padding: 24px;
-  border-radius: calc(24px * var(--ui-roundness));
+  border-radius: var(--shape-corner-extra-large);
   background: var(--md-sys-color-primary-container, var(--card-bg-color));
   color: var(--md-sys-color-on-primary-container, var(--primary-text-color));
 }
@@ -236,10 +236,20 @@ function swatchStyle(scheme) {
   border-radius: 50%;
   background: transparent;
   cursor: pointer;
+  transition:
+    border-color var(--motion-fast-effects),
+    border-radius var(--motion-fast-spatial);
 }
 
+/* Selected swatches settle into a rounded square; presses squish further. */
 .accentColorSwatch[aria-pressed='true'] {
   border-color: var(--primary-color);
+  border-radius: var(--shape-corner-large);
+}
+
+.accentColorSwatch:active,
+.accentCustomSwatch :deep(.colorFieldTrigger:active) {
+  border-radius: var(--shape-corner-medium);
 }
 
 .accentColorSwatch:focus-visible,
@@ -259,12 +269,24 @@ function swatchStyle(scheme) {
   inline-size: 100%;
   block-size: 100%;
   border-radius: 50%;
+  transition:
+    box-shadow var(--motion-fast-effects),
+    border-radius var(--motion-fast-spatial);
   background: conic-gradient(
     var(--swatch-primary-container) 0deg 90deg,
     var(--swatch-tertiary-container) 90deg 180deg,
     var(--swatch-primary) 180deg 270deg,
     var(--swatch-secondary-container) 270deg 360deg
   );
+}
+
+/* The palette sits 6px inside the swatch, so it follows with smaller corners. */
+.accentColorSwatch[aria-pressed='true'] .accentSwatchPalette {
+  border-radius: var(--shape-corner-medium);
+}
+
+.accentColorSwatch:active .accentSwatchPalette {
+  border-radius: var(--shape-corner-small);
 }
 
 .accentSwatchCheck {
@@ -280,7 +302,8 @@ function swatchStyle(scheme) {
 .accentCustomSwatch :deep(.colorFieldTrigger) {
   grid-template-columns: 1fr;
   min-block-size: 48px;
-  border-radius: calc(14px * var(--ui-roundness));
+  border-radius: var(--shape-corner-large);
+  transition: border-radius var(--motion-fast-spatial);
 }
 
 .accentCustomColor {
@@ -290,7 +313,14 @@ function swatchStyle(scheme) {
   inline-size: 100%;
   block-size: 100%;
   border: 1px solid var(--md-sys-color-on-primary-container, var(--primary-text-color));
-  border-radius: calc(8px * var(--ui-roundness));
+  border-radius: var(--shape-corner-small);
+  transition:
+    box-shadow var(--motion-fast-effects),
+    border-radius var(--motion-fast-spatial);
+}
+
+.accentCustomSwatch :deep(.colorFieldTrigger:active) .materialCustomColor {
+  border-radius: var(--shape-corner-extra-small);
 }
 
 .accentSwatchEdit {

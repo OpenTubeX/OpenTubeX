@@ -865,7 +865,7 @@ async function chooseBrowserProfilePath() {
 }
 
 .externalSoftwareTool {
-  border-radius: calc(6px * var(--ui-roundness));
+  border-radius: var(--shape-corner-large);
   box-sizing: border-box;
   display: flex;
   flex-direction: column;
@@ -1019,7 +1019,7 @@ async function chooseBrowserProfilePath() {
 .binaryProgressBarTrack {
   background-color: #9e9e9e;
   block-size: 8px;
-  border-radius: calc(4px * var(--ui-roundness));
+  border-radius: var(--shape-corner-extra-small);
   margin-block: 10px;
   margin-inline: auto;
   max-inline-size: 500px;
@@ -1029,8 +1029,8 @@ async function chooseBrowserProfilePath() {
 .binaryProgressBarFill {
   background-color: var(--accent-color);
   block-size: 100%;
-  border-radius: calc(4px * var(--ui-roundness));
-  transition: inline-size 0.3s ease;
+  border-radius: var(--shape-corner-extra-small);
+  transition: inline-size var(--motion-slow-effects);
 }
 
 .binaryProgressBarFill.indeterminate {

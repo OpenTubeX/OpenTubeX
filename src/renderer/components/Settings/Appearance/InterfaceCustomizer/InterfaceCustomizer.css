@@ -71,7 +71,7 @@
   background-color: var(--card-bg-color);
   block-size: 100%;
   border: 1px solid var(--divider-color);
-  border-radius: calc(12px * var(--ui-roundness));
+  border-radius: var(--shape-corner-medium);
   box-sizing: border-box;
   overflow: hidden;
   padding: 8px;

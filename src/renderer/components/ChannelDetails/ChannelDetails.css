@@ -1,7 +1,7 @@
 .bannerContainer {
   position: relative;
   overflow: hidden;
-  border-radius: calc(8px * var(--ui-roundness)) calc(8px * var(--ui-roundness)) 0 0;
+  border-radius: var(--shape-corner-large) var(--shape-corner-large) 0 0;
   block-size: 13vw;
   min-block-size: 110px;
   max-block-size: 32vh;
@@ -33,7 +33,7 @@
   background-image: var(--card-bg-image);
   background-attachment: fixed;
   backdrop-filter: var(--card-bg-blur, none);
-  border-radius: 0 0 calc(8px * var(--ui-roundness)) calc(8px * var(--ui-roundness));
+  border-radius: 0 0 var(--shape-corner-large) var(--shape-corner-large);
   padding-block: var(--channel-header-gap);
   padding-inline: 16px;
 }
@@ -49,7 +49,7 @@
 .thumbnail {
   inline-size: 100px;
   block-size: 100px;
-  border-radius: 200px;
+  border-radius: 50%;
   object-fit: cover;
 }
 
@@ -64,9 +64,10 @@
 }
 
 .name {
-  font-weight: bold;
+  font-weight: 700;
   inline-size: 100%;
-  font-size: 25px;
+  font-size: 28px;
+  letter-spacing: -0.01em;
 }
 
 .subCount {

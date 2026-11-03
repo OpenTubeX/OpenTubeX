@@ -270,8 +270,8 @@ test.describe('community post images', () => {
       }
     })
 
-    // uiRoundness 200 → --ui-roundness: 2 → 8px * 2 = 16px
-    expect(multiMetrics.borderRadius).toBe('16px')
+    // uiRoundness 200 → --ui-roundness: 2 → --shape-corner-medium 12px * 2 = 24px
+    expect(multiMetrics.borderRadius).toBe('24px')
     expect(multiMetrics.displayRatio).toBeCloseTo(multiMetrics.naturalRatio, 2)
     expect(multiMetrics.naturalRatio).toBeCloseTo(1, 2)
     expect(singleMetrics.displayRatio).toBeCloseTo(singleMetrics.naturalRatio, 2)

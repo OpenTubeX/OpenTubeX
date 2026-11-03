@@ -10,6 +10,8 @@
 
 .sponsorTitle {
   font-size: x-large;
+  font-weight: 600;
+  letter-spacing: -0.01em;
   min-block-size: 2lh;
   overflow-wrap: anywhere;
 }

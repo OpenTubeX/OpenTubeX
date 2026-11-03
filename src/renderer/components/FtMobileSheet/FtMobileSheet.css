@@ -35,7 +35,7 @@
   margin: auto;
   padding-block: 0;
   padding-inline: 0;
-  border-radius: calc(24px * var(--ui-roundness));
+  border-radius: var(--shape-corner-extra-large);
   box-shadow: 0 12px 32px rgb(0 0 0 / 28%);
 }
 
@@ -46,7 +46,7 @@
   margin: 0;
   padding-block-end: var(--safe-area-inset-bottom, env(safe-area-inset-bottom, 0));
   padding-inline: var(--safe-area-inset-left, env(safe-area-inset-left, 0)) var(--safe-area-inset-right, env(safe-area-inset-right, 0));
-  border-radius: calc(24px * var(--ui-roundness)) calc(24px * var(--ui-roundness)) 0 0;
+  border-radius: var(--shape-corner-extra-large) var(--shape-corner-extra-large) 0 0;
 }
 
 .compactSheet::backdrop {
@@ -83,7 +83,8 @@
 
 .compactSheet .mobileSheetHeader h2 {
   font-size: 1.25rem;
-  font-weight: 500;
+  font-weight: 600;
+  letter-spacing: -0.01em;
 }
 
 .mobileSheetHeader > :deep(button) {
@@ -99,16 +100,22 @@
   padding: 0;
   line-height: 1;
   border-radius: 50%;
+  transition: background-color var(--motion-fast-effects), border-radius var(--motion-fast-spatial);
 }
 
 .mobileSheetHeader > :deep(button:is(:hover, :active)) {
   background: var(--side-nav-hover-color);
 }
 
+.mobileSheetHeader > :deep(button:active) {
+  border-radius: var(--shape-corner-medium);
+}
+
 .mobileSheet[open].dockedSheet {
   z-index: 8;
   padding-block-start: 0;
-  border-radius: calc(16px * var(--ui-roundness)) calc(16px * var(--ui-roundness)) 0 0;
+  border-start-start-radius: var(--shape-corner-extra-large);
+  border-start-end-radius: var(--shape-corner-extra-large);
   box-shadow: 0 -4px 20px rgb(0 0 0 / 18%);
 }
 
@@ -133,7 +140,7 @@
   block-size: 4px;
   inset-block-start: 5px;
   inset-inline-start: calc(50% - 16px);
-  border-radius: calc(2px * var(--ui-roundness));
+  border-radius: var(--shape-corner-full);
   background: var(--secondary-text-color);
   opacity: 0.5;
 }

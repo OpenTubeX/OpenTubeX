@@ -292,7 +292,7 @@ watch(tabAvatarUrl, (avatarUrl) => {
   --tab-background-color: var(--tab-surface-color, var(--inactive-tab-color));
 
   background-color: var(--tab-background-color);
-  border-radius: calc(16px * var(--ui-roundness));
+  border-radius: var(--shape-corner-large);
   cursor: pointer;
   block-size: 30px;
 
@@ -319,12 +319,12 @@ watch(tabAvatarUrl, (avatarUrl) => {
   inline-size: calc(100% - 1px);
   min-inline-size: 0;
   max-inline-size: none;
-  border-radius: calc(16px * var(--ui-roundness));
+  border-radius: var(--shape-corner-large);
   border-block-end: 1px solid transparent;
 }
 
 .tab.bottom {
-  border-radius: calc(16px * var(--ui-roundness));
+  border-radius: var(--shape-corner-large);
   border-block-end: 1px solid transparent;
 }
 
@@ -501,10 +501,10 @@ watch(tabAvatarUrl, (avatarUrl) => {
   border: 0;
   cursor: pointer;
   padding: 2px;
-  border-radius: calc(12px * var(--ui-roundness));
+  border-radius: var(--shape-corner-medium);
   color: var(--tertiary-text-color);
   opacity: 0;
-  transition: opacity 0.15s ease, background-color 0.15s ease, color 0.15s ease;
+  transition: opacity var(--motion-fast-effects), background-color var(--motion-fast-effects), color var(--motion-fast-effects);
   flex-shrink: 0;
 }
 

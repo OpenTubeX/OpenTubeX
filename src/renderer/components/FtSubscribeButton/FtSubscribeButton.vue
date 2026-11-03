@@ -7,6 +7,7 @@
     <div
       ref="buttonList"
       class="buttonList"
+      :class="{ subscribed: isSubscribed }"
       :style="{ anchorName: profileDropdownAnchor }"
     >
       <FtButton
@@ -19,8 +20,8 @@
           dropdownOpened: isProfileDropdownOpen,
           justToggled: justToggled
         }"
-        background-color="var(--primary-color)"
-        text-color="var(--text-with-main-color)"
+        theme="primary"
+        :variant="isSubscribed ? 'tonal' : 'filled'"
         @click="handleSubscription(activeProfile)"
       />
       <FtPrompt

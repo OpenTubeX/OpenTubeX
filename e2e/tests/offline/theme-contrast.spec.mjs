@@ -330,7 +330,9 @@ test.describe('hotPink contrast', () => {
     const button = page.getByRole('button', { name: 'Show performance impact indicators', exact: true })
     if (await button.getAttribute('aria-pressed') === 'true') await button.click()
     await button.hover()
-    const colors = await button.evaluate(element => {
+    const colors = await button.evaluate(async element => {
+      // Sample the settled hover colors, not a frame of their fade.
+      await Promise.all(element.getAnimations().map(animation => animation.finished))
       const style = getComputedStyle(element)
       const rgb = color => color.match(/[\d.]+/g).slice(0, 3).map(Number)
       return { foreground: rgb(style.color), background: rgb(style.backgroundColor) }

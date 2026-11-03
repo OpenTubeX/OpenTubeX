@@ -12,7 +12,7 @@
   padding-block: 12px;
   padding-inline: 5%;
   margin-block-end: 1rem;
-  border-radius: calc(5px * var(--ui-roundness));
+  border-radius: var(--shape-corner-medium);
   background: linear-gradient(135deg, #576574, #222f3e);
   line-height: 1.4;
   overflow: hidden;
@@ -20,7 +20,7 @@
 
 .captionPreview span {
   max-inline-size: 100%;
-  border-radius: calc(4px * var(--ui-roundness));
+  border-radius: var(--shape-corner-extra-small);
   box-decoration-break: clone;
 }
 
@@ -63,7 +63,7 @@
   min-block-size: var(--form-control-height);
   padding-block: 0;
   padding-inline: 0.75rem;
-  border-radius: calc(5px * var(--ui-roundness));
+  border-radius: var(--shape-corner-extra-small);
   background-color: var(--card-bg-color);
   backdrop-filter: var(--card-bg-blur, none);
 }

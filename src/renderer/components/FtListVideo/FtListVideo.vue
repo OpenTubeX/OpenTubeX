@@ -1087,7 +1087,8 @@ const progressPercentage = computed(() => {
   return Math.min(percentage, 100)
 })
 
-const thumbnailProgressRadius = computed(() => 8 * store.getters.getUiRoundness / 100)
+// Matches --shape-corner-medium on .thumbnailLink.
+const thumbnailProgressRadius = computed(() => 12 * store.getters.getUiRoundness / 100)
 
 /** @type {import('vue').ComputedRef<any[]>} */
 const hiddenChannels = computed(() => store.getters.getChannelsHiddenParsed)

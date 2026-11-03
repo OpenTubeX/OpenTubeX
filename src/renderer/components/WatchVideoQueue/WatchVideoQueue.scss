@@ -15,8 +15,13 @@
   flex: 1;
 }
 
+/* Rows form one segmented list: large outer corners, tight inner ones. The
+   reorder composable paints each row with --reorder-row-color. */
 .queueItemsContent {
-  margin: 0;
+  display: grid;
+  gap: 2px;
+  margin-block: 12px 0;
+  margin-inline: 0;
   padding: 0;
   list-style: none;
 }
@@ -24,6 +29,7 @@
 .queueTitle {
   margin: 0;
   font-size: 18px;
+  letter-spacing: -0.01em;
 }
 
 .queueCount {
@@ -64,12 +70,30 @@
 }
 
 .queueItem {
+  --reorder-row-color: color-mix(in srgb, var(--primary-text-color) 6%, var(--card-bg-color));
+
   display: grid;
   grid-template-columns: 30px minmax(0, 1fr) auto;
   align-items: center;
   gap: 8px;
   padding-block: 8px;
-  border-block-end: 1px solid var(--side-nav-hover-color);
+  padding-inline: 4px;
+  border-radius: var(--shape-corner-extra-small);
+}
+
+.queueItem:first-child {
+  border-start-start-radius: var(--shape-corner-large-increased);
+  border-start-end-radius: var(--shape-corner-large-increased);
+}
+
+.queueItem:last-child {
+  border-end-start-radius: var(--shape-corner-large-increased);
+  border-end-end-radius: var(--shape-corner-large-increased);
+}
+
+/* A dragged row lifts out of the group with fully rounded corners. */
+.queueItem.dragging {
+  border-radius: var(--shape-corner-large-increased);
 }
 
 /* Rows that never mounted estimate a default row; released rows keep their measured height. */
@@ -78,7 +102,7 @@
 }
 
 .queueItem-move {
-  transition: transform 200ms ease;
+  transition: transform var(--motion-default-effects);
 }
 
 .queueDragHandle {
@@ -94,6 +118,7 @@
   color: var(--secondary-text-color);
   cursor: grab;
   font: inherit;
+  transition: background-color var(--motion-fast-effects), border-radius var(--motion-fast-spatial);
 
   &:hover,
   &:focus-visible {
@@ -102,6 +127,7 @@
   }
 
   &:active {
+    border-radius: var(--shape-corner-medium);
     cursor: grabbing;
   }
 }
@@ -135,7 +161,7 @@
 .queueThumbnail {
   aspect-ratio: 16 / 9;
   block-size: 75px;
-  border-radius: calc(8px * var(--ui-roundness));
+  border-radius: var(--shape-corner-small);
   object-fit: cover;
 }
 
@@ -202,7 +228,7 @@
     min-inline-size: 36px;
     min-block-size: 36px;
     padding: 6px;
-    border-radius: 6px;
+    border-radius: var(--shape-corner-small);
     color: inherit;
     font-size: 13px;
     white-space: nowrap;

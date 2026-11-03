@@ -4,13 +4,16 @@
   padding-block: 10px 30px;
   padding-inline: 10px;
   cursor: pointer;
-  border-radius: calc(8px * var(--ui-roundness));
-  transition: background 0.2s ease-out;
+  border-radius: var(--shape-corner-small);
+  transition: background-color var(--motion-fast-effects), border-radius var(--motion-fast-spatial);
 }
 
 .bubblePadding:hover {
   background-color: color-mix(in srgb, var(--side-nav-hover-color) 30%, transparent);
-  transition: background 0.2s ease-in;
+}
+
+.bubblePadding:active {
+  border-radius: var(--shape-corner-extra-small);
 }
 
 .bubble {

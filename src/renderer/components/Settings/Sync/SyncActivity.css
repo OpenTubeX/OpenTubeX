@@ -1,9 +1,7 @@
 .syncActivity {
   container-type: inline-size;
   background-color: var(--secondary-card-bg-color);
-  border: 1px solid var(--divider-color);
-  border-radius: calc(12px * var(--ui-roundness));
-  box-shadow: 0 8px 24px rgb(0 0 0 / 14%);
+  border-radius: var(--shape-corner-extra-large);
   box-sizing: border-box;
   margin-block-start: 1.25rem;
   margin-inline: auto;
@@ -16,7 +14,7 @@
   display: grid;
   gap: 0.5rem;
   grid-template-columns: minmax(0, 1fr) auto auto;
-  margin-block-end: 1rem;
+  margin-block-end: 1.25rem;
 }
 
 .activityClear {
@@ -66,24 +64,52 @@
   padding-inline-end: calc(var(--scrollbar-track-width) + 0.5rem);
 }
 
+/* Entries form one segmented group: large outer corners, tight inner ones. */
 .activityList {
   display: grid;
-  gap: 0.75rem;
+  gap: 2px;
   list-style: none;
   margin: 0;
   padding: 0;
 }
 
-.activityList li,
-.activityDisclosure {
+.activityList li {
+  align-items: center;
   background-color: var(--card-bg-color);
-  border: 1px solid var(--divider-color);
-  border-radius: calc(10px * var(--ui-roundness));
-  box-shadow: 0 1px 3px rgb(0 0 0 / 16%);
+  border-radius: var(--shape-corner-extra-small);
+  display: grid;
+  gap: 0.125rem 1rem;
+  grid-template-columns: auto minmax(0, 1fr);
+  padding-block: 0.875rem;
+  padding-inline: 1rem 1.25rem;
 }
 
-.activityList li {
-  padding: 1rem;
+.activityList li:first-child {
+  border-start-start-radius: var(--shape-corner-large-increased);
+  border-start-end-radius: var(--shape-corner-large-increased);
+}
+
+.activityList li:last-child {
+  border-end-start-radius: var(--shape-corner-large-increased);
+  border-end-end-radius: var(--shape-corner-large-increased);
+}
+
+.activityList li:focus-visible {
+  outline: 2px solid var(--primary-color);
+  outline-offset: -2px;
+}
+
+.activityEntryIcon {
+  align-items: center;
+  background-color: color-mix(in srgb, var(--primary-color) 16%, var(--card-bg-color));
+  block-size: 2.5rem;
+  border-radius: 50%;
+  color: var(--primary-color);
+  display: inline-flex;
+  font-size: 1.125rem;
+  grid-row: span 2;
+  inline-size: 2.5rem;
+  justify-content: center;
 }
 
 .activityPreview {
@@ -94,25 +120,33 @@
   mask-image: none;
 }
 
+/* The radius is half the minimum height rather than full, so the press morph
+   is smooth. */
 .activityDisclosure {
   align-items: center;
+  background-color: color-mix(in srgb, var(--primary-color) 16%, var(--card-bg-color));
+  border: 0;
+  border-radius: calc(22px * var(--ui-roundness));
   box-sizing: border-box;
   color: var(--primary-text-color);
   cursor: pointer;
   display: flex;
   font: inherit;
   font-weight: 500;
-  gap: 0.75rem;
-  inline-size: 100%;
-  justify-content: center;
+  gap: 0.5rem;
+  margin-inline: auto;
   min-block-size: 44px;
-  padding-block: 0.75rem;
-  padding-inline: 1rem;
+  padding-block: 0.625rem;
+  padding-inline: 1.5rem 1.25rem;
+  transition: background-color var(--motion-default-effects), border-radius var(--motion-fast-spatial);
 }
 
-.activityDisclosure:is(:hover, :active) {
-  background-color: var(--side-nav-hover-color);
-  color: var(--side-nav-hover-text-color);
+.activityDisclosure:hover {
+  background-color: color-mix(in srgb, var(--primary-color) 26%, var(--card-bg-color));
+}
+
+.activityDisclosure:active {
+  border-radius: var(--shape-corner-medium);
 }
 
 .activityDisclosure:focus-visible {
@@ -120,21 +154,30 @@
   outline-offset: 2px;
 }
 
+.activityDisclosure :deep(.ft-icon) {
+  transition: transform var(--motion-default-spatial);
+}
+
+.activityDisclosure[aria-expanded='true'] :deep(.ft-icon) {
+  transform: rotate(180deg);
+}
+
 .activityList p {
-  margin-block: 0 0.25rem;
-  margin-inline: 0;
+  line-height: 1.4;
+  margin: 0;
   overflow-wrap: anywhere;
 }
 
 .activityList time {
   color: var(--secondary-text-color);
-  font-size: 0.875rem;
+  font-size: 0.8125rem;
 }
 
 .activityHeader h3 {
   position: relative;
   overflow: hidden;
   font-size: 1.25rem;
+  font-weight: 600;
   margin: 0;
 }
 
@@ -144,6 +187,7 @@
   color: var(--primary-color);
   cursor: pointer;
   font: inherit;
+  font-weight: 600;
   padding: 0;
   text-align: start;
   text-decoration: underline;
@@ -172,31 +216,49 @@
   min-inline-size: 0;
 }
 
+/* Expressive cookie shape; it spins while activity loads. */
 .activityIcon {
+  position: relative;
   align-items: center;
-  background-color: color-mix(in srgb, var(--primary-color) 14%, transparent);
   block-size: 2.75rem;
-  border-radius: calc(10px * var(--ui-roundness));
-  color: var(--primary-color);
+  color: var(--text-with-main-color);
   display: inline-flex;
   flex-shrink: 0;
-  font-size: 1.35rem;
+  font-size: 1.25rem;
   inline-size: 2.75rem;
+  isolation: isolate;
   justify-content: center;
 }
 
+.activityIcon::before {
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  background-color: var(--primary-color);
+  clip-path: var(--shape-cookie-9);
+  content: '';
+}
+
+.activityIconBusy::before {
+  animation: activity-icon-spin 1.6s linear infinite;
+}
+
+@keyframes activity-icon-spin {
+  to {
+    transform: rotate(1turn);
+  }
+}
+
 .activityAction :deep(.iconButton) {
-  background-color: color-mix(in srgb, var(--card-bg-color) 82%, var(--primary-text-color));
-  border: 1px solid var(--divider-color);
-  border-radius: calc(9px * var(--ui-roundness));
   box-sizing: border-box;
   min-block-size: 44px;
   min-inline-size: 44px;
 }
 
-.activityAction :deep(.iconButton:not(.disabled):is(:hover, :focus-visible, :active)) {
-  background-color: var(--side-nav-hover-color);
-  color: var(--side-nav-hover-text-color);
+@media (prefers-reduced-motion: reduce) {
+  .activityIconBusy::before {
+    animation: none;
+  }
 }
 
 @media only screen and (width <= 480px) {

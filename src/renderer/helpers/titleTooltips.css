@@ -7,7 +7,7 @@
   padding-block: 5px;
   padding-inline: 8px;
   border: 1px solid var(--border-color);
-  border-radius: calc(6px * var(--ui-roundness));
+  border-radius: var(--shape-corner-small);
   background-color: var(--card-bg-color);
   backdrop-filter: var(--card-bg-blur, none);
   box-shadow: 0 4px 14px rgb(0 0 0 / 24%);
@@ -19,7 +19,7 @@
   pointer-events: none;
   white-space: pre-line;
   opacity: 1;
-  transition: opacity 0.12s ease;
+  transition: opacity var(--motion-fast-effects);
 }
 
 @starting-style {

@@ -1,5 +1,7 @@
 .message {
   padding-block: 10px;
+  font-weight: 700;
+  letter-spacing: -0.01em;
 }
 
 .frown {
@@ -13,6 +15,7 @@
   color: var(--primary-text-color);
   background-color: var(--card-bg-color);
   backdrop-filter: var(--card-bg-blur, none);
+  border-radius: var(--shape-corner-large);
   padding-inline: 0;
   text-align: center;
   inline-size: 100%;

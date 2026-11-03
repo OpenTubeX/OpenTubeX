@@ -260,8 +260,8 @@ test.describe('playlist spacing and corners', { tag: '@scale' }, () => {
             for (const roundness of [100, 0, 50, 200]) {
               await updateSetting(page, 'updateUiRoundness', roundness)
               const count = thumbnail.locator('.videoCountContainer')
-              await expect(count).toHaveCSS('border-start-end-radius', `${8 * roundness / 100}px`, { timeout: 1000 })
-              await expect(count).toHaveCSS('border-end-end-radius', `${8 * roundness / 100}px`, { timeout: 1000 })
+              await expect(count).toHaveCSS('border-start-end-radius', `${12 * roundness / 100}px`, { timeout: 1000 })
+              await expect(count).toHaveCSS('border-end-end-radius', `${12 * roundness / 100}px`, { timeout: 1000 })
               // Keep painted-corner probes clear of Chromium's pixel-sized hit area.
               if (roundness === 50) continue
               await count.scrollIntoViewIfNeeded()

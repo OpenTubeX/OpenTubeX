@@ -412,7 +412,7 @@ function displayNumber(value) {
 .channelRule {
   padding: 16px;
   border: 1px solid var(--tertiary-text-color);
-  border-radius: calc(10px * var(--ui-roundness));
+  border-radius: var(--shape-corner-large);
 }
 
 .channelRuleHeader {
