@@ -438,6 +438,10 @@ test.describe('level and toggle tiles', () => {
     await openOverflowMenuWith(player, tiles.theatre)
     await tiles.theatre.click()
     await closePlayerMenus(player)
+    // Theatre mode resizes the player. Clicking its controls while they move
+    // retries, and Playwright's third attempt scrolls them under the tab bar.
+    await expect.poll(() => player.evaluate(element => document.getAnimations()
+      .some(animation => animation.playState === 'running' && animation.effect?.target?.contains(element)))).toBe(false)
     expect(await highlightedTiles()).toEqual({ zoom: true, boost: true, theatre: true })
 
     await page.locator('body').press('Shift+Z')
