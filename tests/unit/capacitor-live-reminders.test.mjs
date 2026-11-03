@@ -327,3 +327,62 @@ test('rescheduling a reminder keeps its old foreground timer from cancelling the
   assert.deepEqual(shown, [])
   assert.equal((await loaded.liveReminder.get('premiere00a')).startTimestamp, START + 600_000)
 })
+
+async function loadArmedReminder(nativeCancel = async () => {}) {
+  const calls = []
+  const timers = []
+  const cleared = new Set()
+  const document = { visibilityState: 'visible', addEventListener() {}, removeEventListener() {} }
+  const loaded = await loadCapacitorReminder({
+    checkPermissions: async () => ({ display: 'granted' }),
+    addListener: async () => ({ remove() {} }),
+    getAll: async () => ({ notifications: [{ id: 7, title: 'Starting', body: 'Premiere', schedule: { at: new Date(START + 60_000).toISOString() }, extra: { videoId: 'premiere00a' } }] }),
+    cancel: async ({ notifications }) => {
+      calls.push(['cancel', notifications[0].id])
+      await nativeCancel()
+    },
+    schedule: async ({ notifications }) => { calls.push(['schedule', notifications[0].id]) },
+  }, {
+    document,
+    setTimeout: callback => { timers.push(callback); return timers.length },
+    clearTimeout: id => { cleared.add(id) },
+    capacitorNotificationHistory: { add: entries => entries.map((entry, index) => ({ ...entry, id: String(index) })), list: async () => [] },
+  })
+  loaded.storage.set('opentubex-capacitor-live-reminders', JSON.stringify([
+    { videoId: 'premiere00a', startTimestamp: START + 60_000, notificationId: 7, notificationTitle: 'Starting', notificationBody: 'Premiere' }
+  ]))
+  const shown = []
+  await loaded.initializeCapacitorLiveReminderActions(() => {}, entry => shown.push(entry))
+  await new Promise(resolve => setImmediate(resolve))
+  assert.equal(timers.length, 1)
+  return { ...loaded, calls, timers, cleared, document, shown }
+}
+
+test('a reminder cancelled as its foreground timer comes due stays hidden', async () => {
+  let blocked = Promise.withResolvers()
+  const { liveReminder, timers, cleared, shown } = await loadArmedReminder(() => blocked?.promise)
+  const cancelling = liveReminder.cancel('premiere00a')
+  await new Promise(resolve => setImmediate(resolve))
+  // The timer comes due while the system cancels the alarm.
+  if (!cleared.has(1)) {
+    const firing = timers[0]()
+    blocked.resolve()
+    blocked = null
+    await firing
+  }
+  blocked?.resolve()
+  assert.equal(await cancelling, true)
+  assert.deepEqual(shown, [])
+})
+
+test('a reminder shows no toast once the app left the screen while the system cancelled it', async () => {
+  let blocked = null
+  const { timers, document, shown } = await loadArmedReminder(() => blocked?.promise)
+  blocked = Promise.withResolvers()
+  const firing = timers[0]()
+  await new Promise(resolve => setImmediate(resolve))
+  document.visibilityState = 'hidden'
+  blocked.resolve()
+  await firing
+  assert.deepEqual(shown, [])
+})

@@ -191,10 +191,20 @@ async function armForegroundReminders() {
   }
 }
 
+/** @param {number} id */
+function clearForegroundTimer(id) {
+  clearTimeout(foregroundTimers.get(id))
+  foregroundTimers.delete(id)
+}
+
+function showsRemindersInApp() {
+  return showForegroundReminder !== null && notificationMode === 'both' && isAppVisible()
+}
+
 /** @param {import('@capacitor/local-notifications').LocalNotificationSchema} notification */
 async function showReminderInApp({ id, title, body, extra }) {
   foregroundTimers.delete(id)
-  if (!showForegroundReminder || notificationMode !== 'both' || !isAppVisible() || handledAlarms.has(id)) return
+  if (!showsRemindersInApp() || handledAlarms.has(id)) return
   handledAlarms.add(id)
   let entry
   try {
@@ -205,10 +215,15 @@ async function showReminderInApp({ id, title, body, extra }) {
     console.error('Failed to record a reminder shown in the app', error)
     return
   }
+  // The system shows reminders the app no longer can, and the bell keeps the entry.
+  if (!showsRemindersInApp()) {
+    handledAlarms.delete(id)
+    return
+  }
   await LocalNotifications.cancel({ notifications: [{ id }] })
     .catch(error => console.error('Failed to cancel a reminder shown in the app', error))
   emitUpdated(extra.videoId, false)
-  if (entry) showForegroundReminder(entry)
+  if (entry && showsRemindersInApp()) showForegroundReminder(entry)
 }
 
 /**
@@ -253,10 +268,7 @@ async function scheduleReminder(reminder) {
   // A reschedule keeps the alarm ID, so the timer for the old time must not show
   // the reminder and cancel the new alarm. Changes arm the timers again.
   const existing = readStoredReminders().find(item => item.videoId === reminder.videoId)
-  if (existing) {
-    clearTimeout(foregroundTimers.get(existing.notificationId))
-    foregroundTimers.delete(existing.notificationId)
-  }
+  if (existing) clearForegroundTimer(existing.notificationId)
   // The premiere may have started before the reminder was toggled or while the
   // permission prompt was open, and a past start cannot be scheduled. A reminder
   // being rescheduled would otherwise still fire at its old time.
@@ -297,6 +309,8 @@ async function cancelReminder(videoId) {
   // Includes due reminders, since queued work can delay this past the start and the system may not have delivered it yet.
   const record = readStoredReminders().find(item => item.videoId === videoId)
   if (record) {
+    // Before waiting, so the timer cannot show the reminder being cancelled.
+    clearForegroundTimer(record.notificationId)
     await LocalNotifications.cancel({ notifications: [{ id: record.notificationId }] })
   }
   writeCapacitorReminders(readCapacitorReminders().filter(item => item.videoId !== videoId))
