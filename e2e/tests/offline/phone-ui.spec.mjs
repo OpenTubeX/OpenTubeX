@@ -122,7 +122,9 @@ test.describe('phone UI', () => {
 
   test('opens watch panels and offers tap queue reordering', { tag: '@scale' }, async ({ app, page, uiScale }) => {
     await mockPlayableWatchPage(app, page)
-    await openMockedVideo(page)
+    const video = await openMockedVideo(page)
+    // The short mocked video would end on a slow machine and play the first queued video, removing it from the queue
+    await video.evaluate(element => element.pause())
     await page.evaluate(() => {
       const store = window.$store
       for (let i = 0; i < 12; i++) {
