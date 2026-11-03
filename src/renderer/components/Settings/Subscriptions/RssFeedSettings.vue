@@ -51,6 +51,7 @@
           class="rssHubButton"
           :label="t('Subscriptions.RSS Feeds.RSSHub.Browse')"
           :icon="['fas', 'magnifying-glass']"
+          :disabled="isAdding"
           @click="showRssHubPrompt = true"
         />
         <div class="feedInput">
@@ -145,7 +146,6 @@
     </FtSettingsSubpage>
     <RssHubFeedPrompt
       v-if="showManager && showRssHubPrompt"
-      :busy="isAdding"
       @add="addFeedFromRssHub"
       @close="showRssHubPrompt = false"
     />
@@ -254,10 +254,17 @@ async function addFeedFromInput(text) {
 }
 
 /**
+ * Closes the dialog right away and adds the feed through the URL box, which shows the progress
+ * and keeps the address for another try if it fails
  * @param {string} url
  */
 async function addFeedFromRssHub(url) {
-  if (await addFeed(url)) showRssHubPrompt.value = false
+  showRssHubPrompt.value = false
+  feedInput.value?.setText(url)
+  await addFeedFromInput(url)
+  // The dialog couldn't return focus to the Browse button, which is disabled while the feed loads
+  await nextTick()
+  if (document.activeElement === document.body) feedInput.value?.focus()
 }
 
 /**

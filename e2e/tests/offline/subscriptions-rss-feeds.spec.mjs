@@ -252,6 +252,8 @@ test.describe('with followed feeds', () => {
     await mockFeeds(page)
     const otherUrl = 'https://rss.example.test/twitch/video/Other'
     const requests = []
+    let release
+    const held = new Promise(resolve => { release = resolve })
     await page.route('https://raw.githubusercontent.com/RSSNext/rsshub-docs/**', route => route.fulfill({
       body: `const instances = [
   { url: 'https://down.example.test', location: '🇩🇪', maintainer: 'Down' },
@@ -263,7 +265,7 @@ test.describe('with followed feeds', () => {
       const url = route.request().url()
       requests.push(url)
       if (url === otherUrl) {
-        return route.fulfill({ contentType: 'application/rss+xml', body: rssFeed.replace("Streamer's Twitch videos", "Other's Twitch videos") })
+        return held.then(() => route.fulfill({ contentType: 'application/rss+xml', body: rssFeed.replace("Streamer's Twitch videos", "Other's Twitch videos") }))
       }
       return route.fulfill({ json: RSSHUB_NAMESPACES })
     })
@@ -315,8 +317,17 @@ test.describe('with followed feeds', () => {
     await expect(dialog.locator('.feedUrlPreview')).toHaveText(otherUrl)
     await add.click()
 
+    // The dialog closes without waiting for the feed, which loads from the feed URL box
     await expect(dialog).toHaveCount(0)
+    const input = manager.getByRole('textbox', { name: 'Add Feed' })
+    await expect(input).toHaveValue(otherUrl)
+    await expect(input).toBeDisabled()
+    await expect(manager.getByRole('progressbar', { name: 'Add Feed' })).toBeVisible()
+    await expect(manager.getByRole('button', { name: 'Browse RSSHub' })).toBeDisabled()
+
+    release()
     await expect(manager.locator('.feedRow').last()).toContainText("Other's Twitch videos")
+    await expect(input).toHaveValue('')
     expect(await page.evaluate(() => window.$store.getters.getFollowedRssFeeds.at(-1).url)).toBe(otherUrl)
     expect(requests).toEqual(['https://rss.example.test/api/namespace', otherUrl])
 
@@ -1649,6 +1660,34 @@ test.describe('without followed feeds', () => {
     await input.press('Enter')
     await expect(page.getByText('The feed could not be loaded.', { exact: false })).toBeVisible()
     await expect(input).toHaveValue(ATOM_URL)
+    await expect(manager.locator('.feedRow')).toHaveCount(0)
+  })
+
+  test('keeps an RSSHub feed that could not be loaded in the focused feed URL box', async ({ page }) => {
+    const feedUrl = 'https://rss.example.test/peertube/channel/missing'
+    await page.route(/^https?:\/\//, abortUnmockedRequest)
+    await page.route('https://raw.githubusercontent.com/RSSNext/rsshub-docs/**', route => route.fulfill({ body: '' }))
+    await page.route('https://rss.example.test/**', route => route.request().url() === feedUrl
+      ? route.fulfill({ status: 500, body: 'Server error' })
+      : route.fulfill({ json: RSSHUB_NAMESPACES }))
+
+    const manager = await openFeedManager(page)
+    await manager.getByRole('button', { name: 'Browse RSSHub' }).click()
+    const dialog = page.getByRole('dialog', { name: 'Add a feed from RSSHub' })
+    const instance = dialog.getByRole('textbox', { name: 'RSSHub instance' })
+    await instance.fill('rss.example.test')
+    await instance.press('Enter')
+    await dialog.getByRole('textbox', { name: 'Service' }).fill('PeerTube')
+    await dialog.locator('.serviceInput .list li').first().click()
+    await dialog.getByRole('textbox', { name: 'id' }).fill('missing')
+    await dialog.getByRole('button', { name: 'Add Feed' }).click()
+
+    await expect(dialog).toHaveCount(0)
+    await expect(page.getByText('The feed could not be loaded.', { exact: false })).toBeVisible()
+    const input = manager.getByRole('textbox', { name: 'Add Feed' })
+    await expect(input).toHaveValue(feedUrl)
+    // Focus can't return to the Browse button, which was disabled when the dialog closed
+    await expect(input).toBeFocused()
     await expect(manager.locator('.feedRow')).toHaveCount(0)
   })
 

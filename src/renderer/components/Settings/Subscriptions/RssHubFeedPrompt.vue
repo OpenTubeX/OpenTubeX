@@ -3,7 +3,6 @@
     autosize
     fixed-layout
     :label="t('Subscriptions.RSS Feeds.RSSHub.Title')"
-    :busy="busy"
     @click="emit('close')"
   >
     <div class="rssHubForm">
@@ -110,7 +109,7 @@
           theme="primary"
           :label="t('Subscriptions.RSS Feeds.Add Feed')"
           :icon="['fas', 'plus']"
-          :disabled="!feed.url || busy"
+          :disabled="!feed.url"
           @click="addFeed"
         />
         <FtButton
@@ -143,13 +142,6 @@ import {
   fetchRssHubServices,
   normalizeRssHubInstance
 } from '../../../helpers/rssHub'
-
-defineProps({
-  busy: {
-    type: Boolean,
-    default: false
-  }
-})
 
 const emit = defineEmits(['add', 'close'])
 
