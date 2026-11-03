@@ -314,6 +314,7 @@
 // Phone search occupies the header's own row, including in native landscape.
 .phoneLayout {
   .profiles > .navButton,
+  .profiles > .notificationCenter :deep(.iconButton),
   .profiles :deep(.profileTrigger) {
     box-sizing: border-box;
     flex: 0 0 48px;

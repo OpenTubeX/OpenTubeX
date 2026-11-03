@@ -106,7 +106,7 @@
               />
             </button>
           </div>
-          <template v-if="supportsUploadNotifications">
+          <template v-if="uploadNotificationsAvailable">
             <div class="bulkNotificationSetting">
               <FtToggleSwitch
                 :label="t('Channel.Notify about new uploads')"
@@ -288,7 +288,7 @@
               </div>
             </div>
             <div
-              v-if="supportsUploadNotifications"
+              v-if="uploadNotificationsAvailable"
               class="notificationSettings"
             >
               <FtToggleSwitch
@@ -396,11 +396,12 @@ import FtSettingsSubpage from '../../FtSettingsSubpage/FtSettingsSubpage.vue'
 import FtToggleSwitch from '../../FtToggleSwitch/FtToggleSwitch.vue'
 
 import store from '../../../store/index'
-import { supportsUploadNotifications } from '../../../helpers/uploadNotifications'
+import { supportsUploadNotifications as uploadNotificationsSupported } from '../../../helpers/uploadNotifications'
 import { showToast } from '../../../helpers/utils'
 import { clampOverlayScrollTop } from '../../../helpers/overlayScrollbars'
 import { hasConfiguredRestrictedPlaybackAuthentication } from '../../../helpers/restricted-playback'
 import {
+
   formatSubscriptionDailyVideoLimit,
   getSubscriptionDailyVideoLimitOptions,
   getSubscriptionFeedTypeOptions,
@@ -410,6 +411,8 @@ import {
   parseSubscriptionDailyVideoLimit,
   SUBSCRIPTION_FEED_TYPES
 } from '../../../helpers/subscription-channels'
+
+const uploadNotificationsAvailable = computed(() => uploadNotificationsSupported && store.getters.getNotificationMode !== 'off')
 
 const { locale, t } = useI18n()
 const id = useId()

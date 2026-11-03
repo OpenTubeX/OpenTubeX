@@ -499,6 +499,11 @@ Settings:
         Invalid credentials: رفض الخادم اسم المستخدم أو كلمة المرور.
         Rate limited: يحظر الخادم تسجيل الدخول بعد محاولات فاشلة كثيرة. حاول مرة أخرى لاحقًا.
         Server error: أعاد الخادم خطأً (HTTP {status}).
+    Notifications:
+      Notifications: "الإشعارات"
+      System and In-App: "النظام وداخل التطبيق"
+      System Only: "النظام فقط"
+      Off: "إيقاف"
   Context Menu Search Settings:
     Context Menu Search Settings: البحث في قائمة السياق
     Description: اختر محركات البحث التي تظهر عند النقر بزر الماوس الأيمن فوق النص المحدد. عمليات البحث مفتوحة في المتصفح الافتراضي الخاص بك.
@@ -2128,6 +2133,7 @@ Tooltips:
     Remember Tab Navigation History: يتم حفظ سجل التنقل ذهابًا وإيابًا لكل علامة تبويب واستعادته عند إعادة تشغيل OpenTubeX.
     Yattee Server: مثيل yattee-server الذي يحمّل منه OpenTubeX الفيديوهات والقنوات وقوائم التشغيل ونتائج البحث. يُخزَّن اسم المستخدم وكلمة المرور على هذا الجهاز فقط.
     Proxy Videos Through Yattee Server: يمرّر تدفقات الفيديو والصوت عبر الخادم. أبقِ هذا الخيار مفعّلًا ما لم يكن الخادم يستخدم اتصالك بالإنترنت نفسه، لأن YouTube لا يقدّم التدفقات إلا للعنوان الذي طلبها. تُحمَّل الصور المصغّرة دائمًا مباشرةً من YouTube.
+    Notifications: "اختر كيف يُعلمك OpenTubeX بالبث المباشر والفيديوهات الجديدة والتنزيلات التلقائية. مع خيار النظام وداخل التطبيق، تظهر الإشعارات داخل OpenTubeX أثناء استخدامه وكإشعارات نظام في غير ذلك، ويحتفظ بها الجرس. يُخفي خيار الإيقاف أيضًا خيارات الإشعارات."
   Proxy Settings:
     IP Block Recovery Script Path: مسار ملف البرنامج النصي الذي سيتم تشغيله عند اكتشاف حظر IP. ينتظر OpenTubeX انتهاء الفيديو، ثم يعيد تحميله. إذا تم تمكين الإجراء الاحتياطي، فسيتم تشغيله فقط عند فشل الإجراء الاحتياطي أيضًا.
   Player Settings:
@@ -2555,3 +2561,11 @@ Digital Wellbeing:
   Time for bed: "حان وقت النوم"
   Bedtime started at: "بدأ وقت نومك في {time}."
   Remind Me in 10 Minutes: "ذكّرني بعد 10 دقائق"
+Notification Center:
+  Notifications: "الإشعارات"
+  Notifications With Unread: "الإشعارات (غير المقروءة: {count})"
+  Mark as Read: "وضع علامة كمقروء"
+  Mark All as Read: "وضع علامة على الكل كمقروء"
+  Clear All: "مسح الكل"
+  Empty: "لا توجد إشعارات بعد"
+  Empty Hint: "ستظهر هنا تذكيرات البث المباشر والفيديوهات الجديدة من القنوات التي فعّلت إشعاراتها."

@@ -271,6 +271,11 @@ Settings:
         Invalid credentials: Serwer odrzucił nazwę użytkownika lub hasło.
         Rate limited: Serwer blokuje logowanie po zbyt wielu nieudanych próbach. Spróbuj ponownie później.
         Server error: Serwer zwrócił błąd (HTTP {status}).
+    Notifications:
+      Notifications: Powiadomienia
+      System and In-App: Systemowe i w aplikacji
+      System Only: Tylko systemowe
+      Off: Wyłączone
   Theme Settings:
     Only Show Important Notifications: Pokazuj tylko ważne powiadomienia
     Visible Search Suggestions: "Widoczne sugestie wyszukiwania"
@@ -1338,6 +1343,7 @@ Tooltips:
     Show Thumbnail Previews: Pokazuje animowany podgląd po najechaniu na miniaturę filmu.
     Yattee Server: Instancja yattee-server, z której OpenTubeX wczytuje filmy, kanały, playlisty i wyniki wyszukiwania. Nazwa użytkownika i hasło są przechowywane wyłącznie na tym urządzeniu.
     Proxy Videos Through Yattee Server: Przesyła strumienie wideo i audio przez serwer. Pozostaw tę opcję włączoną, chyba że serwer korzysta z tego samego połączenia internetowego co Ty, ponieważ YouTube udostępnia strumienie tylko adresowi, który o nie poprosił. Miniatury są zawsze wczytywane bezpośrednio z YouTube.
+    Notifications: Wybierz, jak OpenTubeX powiadamia o transmisjach na żywo, nowych filmach i automatycznych pobraniach. Przy opcji Systemowe i w aplikacji powiadomienia pojawiają się w OpenTubeX podczas korzystania z niego, a w przeciwnym razie jako powiadomienia systemowe, a dzwonek je przechowuje. Wyłączone ukrywa też opcje powiadomień.
   Player Settings:
     Mono Audio: 'Odtwarza lewy i prawy kanał dźwięku w obu uszach. Użyj, gdy dźwięk filmu dochodzi tylko z jednej strony słuchawek.'
     Pause on Stream Recovery: "Gdy strumień wideo zawiedzie, a odtwarzacz załaduje go ponownie lub przełączy się na inny format lub silnik, odtwarzanie zostanie wstrzymane, a błąd pozostanie u góry odtwarzacza, dopóki go nie zamkniesz. Po wyłączeniu odtwarzanie jest kontynuowane, a błąd pojawia się na chwilę jako powiadomienie."
@@ -1761,3 +1767,11 @@ Digital Wellbeing:
   Time for bed: "Czas iść spać"
   Bedtime started at: "Twoja pora snu zaczęła się o {time}."
   Remind Me in 10 Minutes: "Przypomnij mi za 10 minut"
+Notification Center:
+  Notifications: "Powiadomienia"
+  Notifications With Unread: "Powiadomienia (nieprzeczytane: {count})"
+  Mark as Read: "Oznacz jako przeczytane"
+  Mark All as Read: "Oznacz wszystkie jako przeczytane"
+  Clear All: "Wyczyść wszystko"
+  Empty: "Brak powiadomień"
+  Empty Hint: "Tutaj pojawią się przypomnienia o transmisjach na żywo i nowe filmy z kanałów z włączonymi powiadomieniami."

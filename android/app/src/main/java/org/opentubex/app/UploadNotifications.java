@@ -5,8 +5,11 @@ import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
+import android.graphics.Bitmap;
+import android.graphics.drawable.Icon;
 import android.net.Uri;
 import android.os.Build;
+import android.service.notification.StatusBarNotification;
 
 import java.io.ByteArrayOutputStream;
 import java.io.File;
@@ -23,6 +26,9 @@ import java.util.Iterator;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.concurrent.LinkedBlockingQueue;
+import java.util.concurrent.ThreadPoolExecutor;
+import java.util.concurrent.TimeUnit;
 
 import org.json.JSONArray;
 import org.json.JSONObject;
@@ -35,6 +41,12 @@ final class UploadNotifications {
     private static final String PREFERENCES = "upload-notifications";
     private static final String CONFIGURATION_KEY = "configuration";
     private static final String STATE_FILE = "upload-notifications.json";
+    private static final String SHOWN_FILE = "shown-upload-notifications.json";
+    static final String ACTION_QUEUED = "org.opentubex.app.action.UPLOAD_NOTIFICATIONS_QUEUED";
+    // Matches the in-app notification history limit.
+    private static final int SHOWN_LIMIT = 100;
+    // Loads notification thumbnails one at a time; the thread ends when idle.
+    private static final ThreadPoolExecutor THUMBNAILS = new ThreadPoolExecutor(0, 1, 30, TimeUnit.SECONDS, new LinkedBlockingQueue<>());
     private static final String TAG = "new-upload";
     // Silent notifications share a group whose (absent) summary is the only member allowed to alert.
     private static final String QUIET_GROUP = "quiet-new-uploads";
@@ -127,12 +139,71 @@ final class UploadNotifications {
         String title = (titles == null ? "{channel}" : titles.optString(type, "{channel}"))
             .replace("{channel}", name.isEmpty() ? channelId : name);
         boolean silent = isWithinQuietHours(configuration.optJSONObject("quietHours"), LocalTime.now());
+        // With both, the app keeps a history and shows notifications itself while visible.
+        boolean history = "both".equals(configuration.optString("mode", "both"));
+        boolean inApp = history && AppVisibility.isVisible();
+        String thumbnail = thumbnailUrl(configuration, feedType, upload.getString("id"));
+        if (history) {
+            try {
+                recordShown(shownFile(context), new JSONArray().put(new JSONObject()
+                    .put("feedType", feedType)
+                    .put("id", upload.getString("id"))
+                    .put("live", upload.optBoolean("live"))
+                    .put("title", title)
+                    .put("body", body)
+                    .put("createdAt", System.currentTimeMillis())
+                    .put("inApp", inApp)
+                    .putOpt("thumbnail", thumbnail)));
+            } catch (Exception error) {
+                android.util.Log.w("OpenTubeXUploads", "Unable to record a shown upload notification", error);
+                // The app has nothing to collect, so the system shows it instead.
+                inApp = false;
+            }
+        }
+        if (inApp) {
+            // The visible app shows it, also when a background refresh finds it.
+            context.sendBroadcast(new Intent(ACTION_QUEUED).setPackage(context.getPackageName()));
+            return;
+        }
         try {
-            show(context, title, body, url(feedType, upload.getString("id")), silent);
+            show(context, title, body, url(feedType, upload.getString("id")), silent, thumbnail);
         } catch (RuntimeException error) {
             // One failed notification must not skip the others.
             android.util.Log.w("OpenTubeXUploads", "Unable to show an upload notification", error);
         }
+    }
+
+    /** Queues notifications until the app adds them to its notification history. */
+    static void recordShown(File file, JSONArray notifications) throws Exception {
+        JSONArray queued = readArray(file);
+        for (int i = 0; i < notifications.length(); i++) queued.put(notifications.get(i));
+        JSONArray kept = new JSONArray();
+        for (int i = Math.max(0, queued.length() - SHOWN_LIMIT); i < queued.length(); i++) kept.put(queued.get(i));
+        writeAtomically(file, kept.toString());
+    }
+
+    /** Returns the notifications shown since the last call, oldest first. */
+    static synchronized JSONArray takeShown(Context context) throws Exception {
+        return takeShown(shownFile(context));
+    }
+
+    static JSONArray takeShown(File file) throws Exception {
+        JSONArray queued = readArray(file);
+        Files.deleteIfExists(file.toPath());
+        return queued;
+    }
+
+    private static JSONArray readArray(File file) throws java.io.IOException {
+        if (!file.exists()) return new JSONArray();
+        try {
+            return new JSONArray(new String(Files.readAllBytes(file.toPath()), StandardCharsets.UTF_8));
+        } catch (org.json.JSONException invalid) {
+            return new JSONArray();
+        }
+    }
+
+    private static File shownFile(Context context) {
+        return new File(context.getFilesDir(), SHOWN_FILE);
     }
 
     /**
@@ -399,7 +470,7 @@ final class UploadNotifications {
         return "https://www.youtube.com/watch?v=" + encoded;
     }
 
-    private static void show(Context context, String title, String body, String url, boolean silent) {
+    private static void show(Context context, String title, String body, String url, boolean silent, String thumbnail) {
         OpenTubeXNotificationChannels.createAll(context);
         Notification.Builder builder = Build.VERSION.SDK_INT >= Build.VERSION_CODES.O
             ? new Notification.Builder(context, OpenTubeXNotificationChannels.NEW_UPLOADS_ID)
@@ -420,7 +491,47 @@ final class UploadNotifications {
             .setContentIntent(contentIntent)
             .setAutoCancel(true);
         if (silent) builder.setGroup(QUIET_GROUP).setGroupAlertBehavior(Notification.GROUP_ALERT_SUMMARY);
-        context.getSystemService(NotificationManager.class).notify(TAG, url.hashCode(), builder.build());
+        NotificationManager manager = context.getSystemService(NotificationManager.class);
+        manager.notify(TAG, url.hashCode(), builder.build());
+        if (thumbnail == null) return;
+        // Show the notification right away and add the thumbnail once it loads.
+        THUMBNAILS.execute(() -> {
+            Bitmap image = AndroidMediaArtwork.loadBlocking(thumbnail);
+            if (image == null) {
+                // Proxies can fail a connection now and then; retry once shortly after.
+                try {
+                    Thread.sleep(2000);
+                } catch (InterruptedException interrupted) {
+                    Thread.currentThread().interrupt();
+                    return;
+                }
+                image = AndroidMediaArtwork.loadBlocking(thumbnail);
+            }
+            if (image == null || !isActive(manager, url.hashCode())) return;
+            builder.setLargeIcon(image)
+                .setStyle(new Notification.BigPictureStyle().bigPicture(image).bigLargeIcon((Icon) null).setSummaryText(body))
+                .setOnlyAlertOnce(true);
+            try {
+                manager.notify(TAG, url.hashCode(), builder.build());
+            } catch (RuntimeException error) {
+                android.util.Log.w("OpenTubeXUploads", "Unable to add a thumbnail to an upload notification", error);
+            }
+        });
+    }
+
+    /** Whether a notification is still shown, so adding its thumbnail does not bring back a dismissed one. */
+    private static boolean isActive(NotificationManager manager, int id) {
+        for (StatusBarNotification notification : manager.getActiveNotifications()) {
+            if (notification.getId() == id && TAG.equals(notification.getTag())) return true;
+        }
+        return false;
+    }
+
+    static String thumbnailUrl(JSONObject configuration, String feedType, String id) {
+        String template = configuration.optString("thumbnailUrl", "");
+        if (feedType.equals("posts") || !template.contains("{id}")) return null;
+        String url = template.replace("{id}", Uri.encode(id));
+        return url.startsWith("https://") || url.startsWith("http://") ? url : null;
     }
 
     private static boolean contains(JSONArray values, String value) {
@@ -451,9 +562,12 @@ final class UploadNotifications {
     }
 
     private static void writeState(Context context, JSONObject state) throws Exception {
-        File file = stateFile(context);
+        writeAtomically(stateFile(context), state.toString());
+    }
+
+    private static void writeAtomically(File file, String text) throws Exception {
         File temporary = new File(file.getPath() + ".tmp");
-        Files.write(temporary.toPath(), state.toString().getBytes(StandardCharsets.UTF_8));
+        Files.write(temporary.toPath(), text.getBytes(StandardCharsets.UTF_8));
         Files.move(temporary.toPath(), file.toPath(), StandardCopyOption.REPLACE_EXISTING, StandardCopyOption.ATOMIC_MOVE);
     }
 

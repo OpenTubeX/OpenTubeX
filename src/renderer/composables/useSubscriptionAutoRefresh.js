@@ -16,6 +16,7 @@ import {
   updateAndroidSubscriptionRefresh
 } from '../helpers/androidSubscriptionRefresh'
 import { configureUploadNotifications } from '../helpers/uploadNotifications'
+import { getNotificationThumbnailUrl } from '../helpers/notificationHistory'
 import { createUploadNotificationConfiguration } from '../../newUploadNotifications'
 import { parseTimeOfDay } from '../helpers/digitalWellbeing'
 import {
@@ -212,7 +213,9 @@ export function useSubscriptionAutoRefresh({ dataReady, t }) {
     if (process.env.IS_IOS || (!isCapacitor && !isElectron) || !dataReady.value) return null
 
     return createUploadNotificationConfiguration({
-      enabled: store.getters.getEnableUploadNotifications,
+      enabled: store.getters.getEnableUploadNotifications && store.getters.getNotificationMode !== 'off',
+      mode: store.getters.getNotificationMode,
+      thumbnailUrl: getNotificationThumbnailUrl('{id}'),
       subscriptions: store.getters.getProfileList[0]?.subscriptions ?? [],
       hiddenFeedTypes: hiddenSubscriptionFeedTypes.value,
       showMembersOnly: hasConfiguredRestrictedPlaybackAuthentication(store.getters),

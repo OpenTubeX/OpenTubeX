@@ -11,9 +11,13 @@ import java.util.List;
 
 import org.json.JSONArray;
 import org.json.JSONObject;
+import org.junit.Rule;
 import org.junit.Test;
+import org.junit.rules.TemporaryFolder;
 
 public class UploadNotificationsTest {
+    @Rule public TemporaryFolder temporary = new TemporaryFolder();
+
     private static final long NOW = 1_800_000_000_000L;
     private static final long HOUR = 3_600_000L;
 
@@ -245,5 +249,24 @@ public class UploadNotificationsTest {
         assertFalse(UploadNotifications.isWithinQuietHours(null, LocalTime.of(23, 30)));
         JSONObject empty = new JSONObject().put("start", 60).put("end", 60);
         assertFalse(UploadNotifications.isWithinQuietHours(empty, LocalTime.of(1, 0)));
+    }
+
+    @Test
+    public void queuesShownNotificationsUntilTakenKeepingTheNewest() throws Exception {
+        java.io.File file = new java.io.File(temporary.getRoot(), "shown.json");
+        assertEquals(0, UploadNotifications.takeShown(file).length());
+
+        JSONArray first = new JSONArray();
+        for (int i = 0; i < 60; i++) first.put(new JSONObject().put("id", "a" + i));
+        UploadNotifications.recordShown(file, first);
+        JSONArray second = new JSONArray();
+        for (int i = 0; i < 60; i++) second.put(new JSONObject().put("id", "b" + i));
+        UploadNotifications.recordShown(file, second);
+
+        JSONArray taken = UploadNotifications.takeShown(file);
+        assertEquals(100, taken.length());
+        assertEquals("a20", taken.getJSONObject(0).getString("id"));
+        assertEquals("b59", taken.getJSONObject(99).getString("id"));
+        assertEquals(0, UploadNotifications.takeShown(file).length());
     }
 }

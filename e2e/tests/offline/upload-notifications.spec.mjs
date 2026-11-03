@@ -175,10 +175,15 @@ test.describe('with a channel notification turned on', () => {
   })
 
   test('refresh results notify only about new uploads of turned-on channels and types', async ({ app, page }) => {
-    await app.electronApp.evaluate(({ Notification }) => {
+    await app.electronApp.evaluate(({ BrowserWindow, Notification, net }) => {
       globalThis.shownUploadNotifications = []
+      // Thumbnails fail right away instead of delaying system notifications.
+      const fetch = net.fetch
+      net.fetch = (url, ...options) => String(url).includes('/vi/') ? Promise.reject(new Error('No thumbnails offline')) : fetch(url, ...options)
       // CI has no notification server.
       Notification.isSupported = () => true
+      // The system shows notifications while the app is not in use.
+      BrowserWindow.getFocusedWindow = () => null
       Notification.prototype.show = function () {
         globalThis.shownUploadNotifications.push({ title: this.title, body: this.body })
       }
@@ -207,7 +212,8 @@ test.describe('with a channel notification turned on', () => {
     await observe(CHANNEL_ID, 'posts', ['p2', 'p1'])
     await observe(OTHER_CHANNEL_ID, 'videos', ['x1'])
     await observe(OTHER_CHANNEL_ID, 'videos', ['x2', 'x1'])
-    expect(await shown()).toStrictEqual([
+    // System notifications wait briefly for their thumbnails.
+    await expect.poll(shown).toStrictEqual([
       { title: 'New video from Alpha Channel', body: `Upload probe${attempt}` },
       { title: 'New video from Alpha Channel', body: 'Upload b' }
     ])

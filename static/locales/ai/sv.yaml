@@ -497,6 +497,11 @@ Settings:
         Invalid credentials: Servern avvisade användarnamnet eller lösenordet.
         Rate limited: Servern blockerar inloggningar efter för många misslyckade försök. Försök igen senare.
         Server error: Servern returnerade ett fel (HTTP {status}).
+    Notifications:
+      Notifications: Aviseringar
+      System and In-App: System och i appen
+      System Only: Endast system
+      Off: Av
   Context Menu Search Settings:
     Context Menu Search Settings: Sökning från snabbmenyn
     Description: Välj vilka sökmotorer som visas när du högerklickar på markerad text. Sökningar öppnas i din standardwebbläsare.
@@ -2117,6 +2122,7 @@ Tooltips:
     Remember Tab Navigation History: Varje fliks bakåt- och framåthistorik sparas och återställs när OpenTubeX startas om.
     Yattee Server: Den yattee-server-instans som OpenTubeX hämtar videor, kanaler, spellistor och sökresultat från. Användarnamnet och lösenordet lagras bara på den här enheten.
     Proxy Videos Through Yattee Server: Skickar video- och ljudströmmar via servern. Låt detta vara aktiverat om inte servern använder samma internetanslutning som du, eftersom YouTube bara levererar strömmar till den adress som begärde dem. Miniatyrbilder läses alltid in direkt från YouTube.
+    Notifications: Välj hur OpenTubeX meddelar dig om livesändningar, nya uppladdningar och automatiska nedladdningar. Med System och i appen visas aviseringar i OpenTubeX medan du använder det och annars som systemaviseringar, och klockan sparar dem. Av döljer även aviseringsalternativen.
   Proxy Settings:
     IP Block Recovery Script Path: Sökväg till skriptfilen som ska köras när en IP-blockering identifieras. OpenTubeX väntar tills skriptet är klart och läser sedan in videon igen. Om reservmetoden är aktiverad körs skriptet först när även den misslyckas.
   Player Settings:
@@ -2548,3 +2554,11 @@ Digital Wellbeing:
   Time for bed: "Dags att gå och lägga sig"
   Bedtime started at: "Din läggdags började kl. {time}."
   Remind Me in 10 Minutes: "Påminn mig om 10 minuter"
+Notification Center:
+  Notifications: "Aviseringar"
+  Notifications With Unread: "Aviseringar (olästa: {count})"
+  Mark as Read: "Markera som läst"
+  Mark All as Read: "Markera alla som lästa"
+  Clear All: "Rensa alla"
+  Empty: "Inga aviseringar ännu"
+  Empty Hint: "Påminnelser om livesändningar och nya uppladdningar från kanaler med aviseringar påslagna visas här."

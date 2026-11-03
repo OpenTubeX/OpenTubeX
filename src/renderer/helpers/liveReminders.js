@@ -1,38 +1,69 @@
 import { LocalNotifications } from '@capacitor/local-notifications'
+import { getLiveReminderTarget } from '../../notificationHistory.js'
+import { capacitorNotificationHistory } from './capacitorNotificationHistory.js'
 
 const STORAGE_KEY = 'opentubex-capacitor-live-reminders'
+// Whether the system schedule is paused because notifications are off.
+const PAUSED_STORAGE_KEY = 'opentubex-capacitor-live-reminders-paused'
 const CHANNEL_ID = 'live-reminders'
 const listeners = new Set()
-// Reminder changes await native calls between reading and writing storage, so
-// they run one at a time to keep concurrent changes from overwriting each other.
-let pendingChange = Promise.resolve()
-
-function queueChange(change) {
-  const result = pendingChange.then(change)
-  pendingChange = result.catch(() => {})
-  return result
-}
+/** @type {import('../../main/notificationHistory').NotificationMode} */
+let notificationMode = 'both'
 
 export const supportsLiveReminders = Boolean(process.env.IS_ELECTRON || process.env.IS_CAPACITOR)
 
-function readCapacitorReminders() {
+/** Every stored reminder, including those that are due. */
+function readStoredReminders() {
+  let records
   try {
-    const records = JSON.parse(localStorage.getItem(STORAGE_KEY) ?? '[]')
-    return Array.isArray(records)
-      ? records.filter(record => (
-          typeof record?.videoId === 'string' &&
-          Number.isInteger(record.notificationId) &&
-          Number.isFinite(record.startTimestamp) &&
-          record.startTimestamp > Date.now()
-        ))
-      : []
+    records = JSON.parse(localStorage.getItem(STORAGE_KEY) ?? '[]')
   } catch {
     return []
   }
+  return Array.isArray(records)
+    ? records.filter(record => (
+        typeof record?.videoId === 'string' &&
+        Number.isInteger(record.notificationId) &&
+        Number.isFinite(record.startTimestamp)
+      ))
+    : []
+}
+
+/**
+ * Returns the reminders that have yet to fire. The system shows the others
+ * without the app, so they move to the notification history here.
+ */
+function readCapacitorReminders() {
+  const valid = readStoredReminders()
+  const now = Date.now()
+  const pending = valid.filter(record => record.startTimestamp > now)
+  if (pending.length < valid.length) {
+    recordFiredReminders(valid.filter(record => record.startTimestamp <= now))
+    writeCapacitorReminders(pending)
+  }
+  return pending
 }
 
 function writeCapacitorReminders(records) {
   localStorage.setItem(STORAGE_KEY, JSON.stringify(records))
+}
+
+function recordFiredReminders(records) {
+  if (notificationMode !== 'both') return []
+  return capacitorNotificationHistory.add(records
+    .filter(record => typeof record.notificationTitle === 'string' && typeof record.notificationBody === 'string')
+    .map(record => ({
+      title: record.notificationTitle,
+      body: record.notificationBody,
+      thumbnail: record.thumbnail,
+      createdAt: record.startTimestamp,
+      ...getLiveReminderTarget(record.videoId)
+    })))
+}
+
+/** Moves the reminders the system has shown since the app last checked to the notification history. */
+export function collectFiredCapacitorReminders() {
+  if (process.env.IS_CAPACITOR) readCapacitorReminders()
 }
 
 function notificationIdForVideo(videoId, records) {
@@ -50,6 +81,188 @@ function notificationIdForVideo(videoId, records) {
   return id
 }
 
+async function scheduleSystemReminder(record) {
+  await LocalNotifications.cancel({ notifications: [{ id: record.notificationId }] })
+  await LocalNotifications.schedule({
+    notifications: [{
+      id: record.notificationId,
+      title: record.notificationTitle,
+      body: record.notificationBody,
+      channelId: CHANNEL_ID,
+      isExactNotification: false,
+      foreground: true,
+      schedule: {
+        at: new Date(record.startTimestamp),
+        allowWhileIdle: true,
+      },
+      extra: { videoId: record.videoId },
+    }]
+  })
+}
+
+function isPaused() {
+  return localStorage.getItem(PAUSED_STORAGE_KEY) === 'true'
+}
+
+let modeChange = Promise.resolve()
+
+/**
+ * Applies the notification mode to the reminders the system schedules. Turning
+ * notifications off pauses them; turning them on again schedules them again.
+ * @param {import('../../main/notificationHistory').NotificationMode} mode
+ */
+export function applyCapacitorNotificationMode(mode) {
+  notificationMode = mode
+  if (!process.env.IS_CAPACITOR) return Promise.resolve()
+  // One change at a time, so turning notifications off waits for a resume to
+  // finish scheduling and then cancels everything it scheduled.
+  modeChange = modeChange.then(() => applyPausedState(mode))
+    .catch(error => console.error('Failed to apply the notification mode', error))
+  return modeChange
+}
+
+/** @param {import('../../main/notificationHistory').NotificationMode} mode */
+async function applyPausedState(mode) {
+  const paused = mode === 'off'
+  // Off always cancels, since a resume that failed partway can leave alarms scheduled.
+  if (paused || isPaused()) {
+    const stored = readStoredReminders()
+    // Reminders that expired while paused never fired, so they leave without a history entry.
+    const pending = stored.filter(record => record.startTimestamp > Date.now())
+    writeCapacitorReminders(pending)
+    try {
+      if (paused) {
+        // Reminders are the only scheduled notifications. Cancelling every pending one also
+        // covers alarms that are overdue but undelivered, whose records may be gone.
+        const { notifications } = await LocalNotifications.getPending()
+        if (notifications.length > 0) await LocalNotifications.cancel({ notifications: notifications.map(({ id }) => ({ id })) })
+      } else if (pending.length > 0 && (await LocalNotifications.checkPermissions()).display === 'granted') {
+        for (const record of pending) await scheduleSystemReminder(record)
+      }
+      // Saved only once the system accepted the change, so a failed one is tried again.
+      localStorage.setItem(PAUSED_STORAGE_KEY, String(paused))
+    } catch (error) {
+      console.error('Failed to update the live reminder schedule', error)
+    }
+  }
+  armForegroundReminders()
+}
+
+// While the app is visible with notifications in the app, it shows reminders
+// itself shortly before the system would, and cancels the system's.
+// Generous, since a busy page runs its timers late.
+const FOREGROUND_LEAD_MS = 3000
+const MAX_TIMER_DELAY_MS = 2_147_483_647
+const foregroundTimers = new Map()
+/** @type {((entry: import('../../notificationHistory').NotificationHistoryEntry) => void) | null} */
+let showForegroundReminder = null
+
+function isAppVisible() {
+  return document.visibilityState === 'visible'
+}
+
+let armGeneration = 0
+// Alarms already shown, so the timer and a late system delivery show each only once.
+// Scheduling a reminder again clears its ID.
+const handledAlarms = new Set()
+
+// Follows the system's scheduled alarms. Once an alarm's time passed, the
+// plugin cannot tell whether it was delivered, so the received handler covers
+// alarms the system delivers late.
+async function armForegroundReminders() {
+  const generation = ++armGeneration
+  for (const timer of foregroundTimers.values()) clearTimeout(timer)
+  foregroundTimers.clear()
+  if (!showForegroundReminder || notificationMode !== 'both' || !isAppVisible()) return
+  let pending
+  try {
+    ({ notifications: pending } = await LocalNotifications.getAll({ state: 'SCHEDULED' }))
+  } catch (error) {
+    console.error('Failed to read scheduled reminders', error)
+    return
+  }
+  if (generation !== armGeneration) return
+  for (const notification of pending) {
+    const at = new Date(notification.schedule?.at ?? Number.NaN).getTime()
+    if (typeof notification.extra?.videoId !== 'string' || !Number.isFinite(at) || handledAlarms.has(notification.id)) continue
+    const delay = at - Date.now() - FOREGROUND_LEAD_MS
+    if (delay > MAX_TIMER_DELAY_MS) continue
+    foregroundTimers.set(notification.id, setTimeout(() => showReminderInApp(notification), Math.max(0, delay)))
+  }
+}
+
+/** @param {number} id */
+function clearForegroundTimer(id) {
+  clearTimeout(foregroundTimers.get(id))
+  foregroundTimers.delete(id)
+}
+
+function showsRemindersInApp() {
+  return showForegroundReminder !== null && notificationMode === 'both' && isAppVisible()
+}
+
+/** @param {import('@capacitor/local-notifications').LocalNotificationSchema} notification */
+async function showReminderInApp({ id, title, body, extra }) {
+  foregroundTimers.delete(id)
+  if (!showsRemindersInApp() || handledAlarms.has(id)) return
+  handledAlarms.add(id)
+  let entry
+  try {
+    entry = await takeFiredReminderEntry(extra.videoId, Date.now(), { title, body })
+  } catch (error) {
+    // Without an entry, the system notification is the only way to show the reminder.
+    handledAlarms.delete(id)
+    console.error('Failed to record a reminder shown in the app', error)
+    return
+  }
+  // The system shows reminders the app no longer can, and the bell keeps the entry.
+  // Without an entry the app has nothing to show, so the system notification stays.
+  if (!entry || !showsRemindersInApp()) {
+    handledAlarms.delete(id)
+    return
+  }
+  await LocalNotifications.cancel({ notifications: [{ id }] })
+    .catch(error => console.error('Failed to cancel a reminder shown in the app', error))
+  emitUpdated(extra.videoId, false)
+  if (showsRemindersInApp()) {
+    showForegroundReminder(entry)
+  } else if (notificationMode !== 'off') {
+    // The app left the screen while the alarm was cancelled, so the system shows it after all.
+    handledAlarms.delete(id)
+    await scheduleSystemReminder({
+      notificationId: id,
+      notificationTitle: title,
+      notificationBody: body,
+      startTimestamp: Date.now() + 1000,
+      videoId: extra.videoId,
+    }).catch(error => console.error('Failed to show a reminder the app could not', error))
+  }
+}
+
+/**
+ * Moves a reminder the app shows itself to the history. Reading the reminders
+ * after they are due may have moved it already, so that entry is reused.
+ * @param {string} videoId
+ * @param {number} due
+ * @param {{ title?: string, body?: string }} [notification] the system notification, for reminders without a record
+ */
+async function takeFiredReminderEntry(videoId, due, notification = {}) {
+  const stored = readStoredReminders()
+  const record = stored.find(item => item.videoId === videoId)
+  if (record) {
+    // Recorded first, so a failed history write keeps the reminder.
+    const [entry] = recordFiredReminders([{ ...record, startTimestamp: Math.min(record.startTimestamp, due) }])
+    writeCapacitorReminders(stored.filter(item => item !== record))
+    return entry
+  }
+  if (notificationMode !== 'both') return undefined
+  const target = getLiveReminderTarget(videoId)
+  const existing = (await capacitorNotificationHistory.list())
+    .find(item => item.kind === 'live-reminder' && item.path === target.path)
+  if (existing || typeof notification.title !== 'string' || typeof notification.body !== 'string') return existing
+  return capacitorNotificationHistory.add([{ title: notification.title, body: notification.body, createdAt: due, ...target }])[0]
+}
+
 function emitUpdated(videoId, scheduled) {
   for (const listener of listeners) listener(videoId, scheduled)
 }
@@ -64,11 +277,55 @@ async function requestNotificationPermission() {
   return status.display === 'granted'
 }
 
-// Runs inside a queued change, so changes that cancel first don't wait on themselves.
-async function cancelCapacitorReminder(videoId) {
+async function scheduleReminder(reminder) {
+  // A reschedule keeps the alarm ID, so the timer for the old time must not show
+  // the reminder and cancel the new alarm. Changes arm the timers again.
+  const existing = readStoredReminders().find(item => item.videoId === reminder.videoId)
+  if (existing) clearForegroundTimer(existing.notificationId)
+  // The premiere may have started before the reminder was toggled or while the
+  // permission prompt was open, and a past start cannot be scheduled. A reminder
+  // being rescheduled would otherwise still fire at its old time.
+  const started = async () => {
+    if (reminder.startTimestamp > Date.now()) return false
+    await cancelReminder(reminder.videoId)
+    return true
+  }
+  // Synced reminders are kept while notifications are off, and scheduled once they are on again.
+  // Off pauses them even when cancelling the earlier alarms failed and left the pause unsaved.
+  const paused = isPaused() || notificationMode === 'off'
+  if (await started() || (!paused && !await requestNotificationPermission()) || await started()) return false
+
   const records = readCapacitorReminders()
-  const record = records.find(item => item.videoId === videoId)
+  const record = { ...reminder, notificationId: notificationIdForVideo(reminder.videoId, records) }
+  handledAlarms.delete(record.notificationId)
+  if (!paused) await scheduleSystemReminder(record)
+  else localStorage.setItem(PAUSED_STORAGE_KEY, 'true')
+  // Read again, since the app may have shown another reminder meanwhile and removed its record.
+  writeCapacitorReminders([
+    ...readStoredReminders().filter(item => item.videoId !== reminder.videoId),
+    record,
+  ])
+  emitUpdated(reminder.videoId, true)
+  return true
+}
+
+/**
+ * @template T
+ * @param {() => Promise<T>} task
+ */
+function afterModeChange(task) {
+  const result = modeChange.then(task)
+  modeChange = result.then(() => {}, () => {})
+  return result
+}
+
+/** @param {string} videoId */
+async function cancelReminder(videoId) {
+  // Includes due reminders, since queued work can delay this past the start and the system may not have delivered it yet.
+  const record = readStoredReminders().find(item => item.videoId === videoId)
   if (record) {
+    // Before waiting, so the timer cannot show the reminder being cancelled.
+    clearForegroundTimer(record.notificationId)
     await LocalNotifications.cancel({ notifications: [{ id: record.notificationId }] })
   }
   writeCapacitorReminders(readCapacitorReminders().filter(item => item.videoId !== videoId))
@@ -90,48 +347,17 @@ const capacitorLiveReminder = {
     return records
   },
 
-  schedule: reminder => queueChange(async () => {
-    // The premiere may have started before the reminder was toggled or while the
-    // permission prompt was open, and a past start cannot be scheduled. A reminder
-    // being rescheduled would otherwise still fire at its old time.
-    const started = async () => {
-      if (reminder.startTimestamp > Date.now()) return false
-      await cancelCapacitorReminder(reminder.videoId)
-      return true
-    }
-    if (await started() || !await requestNotificationPermission() || await started()) return false
-
-    const records = readCapacitorReminders()
-    const notificationId = notificationIdForVideo(reminder.videoId, records)
-    await LocalNotifications.cancel({ notifications: [{ id: notificationId }] })
-    await LocalNotifications.schedule({
-      notifications: [{
-        id: notificationId,
-        title: reminder.notificationTitle,
-        body: reminder.notificationBody,
-        channelId: CHANNEL_ID,
-        isExactNotification: false,
-        foreground: true,
-        schedule: {
-          at: new Date(reminder.startTimestamp),
-          allowWhileIdle: true,
-        },
-        extra: { videoId: reminder.videoId },
-      }]
-    })
-
-    const record = { ...reminder, notificationId }
-    writeCapacitorReminders([
-      // Reread to keep the removal of reminders delivered in the meantime.
-      ...readCapacitorReminders().filter(item => item.videoId !== reminder.videoId),
-      record,
-    ])
-    emitUpdated(reminder.videoId, true)
-    return true
-  }),
-
-  cancel: videoId => queueChange(() => cancelCapacitorReminder(videoId)),
-
+  /**
+   * Runs between mode changes, so turning notifications off also cancels a
+   * reminder that was being scheduled meanwhile.
+   */
+  schedule(reminder) {
+    return afterModeChange(() => scheduleReminder(reminder))
+  },
+  /** Runs between mode changes, so a resume cannot schedule the reminder again. */
+  cancel(videoId) {
+    return afterModeChange(() => cancelReminder(videoId))
+  },
   onUpdated(listener) {
     listeners.add(listener)
     return () => listeners.delete(listener)
@@ -150,7 +376,12 @@ export const liveReminder = process.env.IS_ELECTRON
   ? window.ftElectron.liveReminder
   : process.env.IS_CAPACITOR ? capacitorLiveReminder : unavailableLiveReminder
 
-export async function initializeCapacitorLiveReminderActions(openVideo) {
+/**
+ * @param {(videoId: string) => void} openVideo
+ * @param {(entry: import('../../notificationHistory').NotificationHistoryEntry) => void} showInApp
+ *   shows a reminder that arrives while the app is in use
+ */
+export async function initializeCapacitorLiveReminderActions(openVideo, showInApp) {
   if (!process.env.IS_CAPACITOR) return () => {}
 
   const actionHandle = await LocalNotifications.addListener(
@@ -162,17 +393,62 @@ export async function initializeCapacitorLiveReminderActions(openVideo) {
   )
   const receivedHandle = await LocalNotifications.addListener(
     'localNotificationReceived',
-    ({ extra }) => {
+    async ({ id, extra }) => {
       const videoId = extra?.videoId
       if (typeof videoId !== 'string') return
-      const records = readCapacitorReminders()
-      writeCapacitorReminders(records.filter(item => item.videoId !== videoId))
+      const due = Date.now()
+      if (notificationMode === 'system' || (notificationMode === 'both' && !isAppVisible())) {
+        // The system notification stays, including for deliveries Android
+        // reports while the app is in the background.
+        readCapacitorReminders()
+        emitUpdated(videoId, false)
+        return
+      }
+      // The app is in use, so it shows the reminder instead of the system.
+      const removeDelivered = () => LocalNotifications.removeDeliveredNotifications({ notifications: [{ id, title: '', body: '' }] })
+        .catch(error => console.error('Failed to remove a delivered reminder', error))
+      if (handledAlarms.has(id)) {
+        await removeDelivered()
+        return
+      }
+      handledAlarms.add(id)
+      let entry
+      try {
+        entry = await takeFiredReminderEntry(videoId, due)
+      } catch (error) {
+        // Keep the system notification when the app cannot record the reminder.
+        handledAlarms.delete(id)
+        console.error('Failed to record a delivered reminder', error)
+        return
+      }
+      // Without an entry to show in the app, the system notification stays.
+      if (notificationMode === 'both' && !entry) {
+        handledAlarms.delete(id)
+        emitUpdated(videoId, false)
+        return
+      }
+      await removeDelivered()
+      try {
+        readCapacitorReminders()
+      } catch (error) {
+        console.error('Failed to collect fired reminders', error)
+      }
       emitUpdated(videoId, false)
+      if (entry && notificationMode === 'both') showInApp(entry)
     }
   )
+
+  showForegroundReminder = showInApp
+  const removeUpdateListener = capacitorLiveReminder.onUpdated(armForegroundReminders)
+  document.addEventListener('visibilitychange', armForegroundReminders)
+  armForegroundReminders()
 
   return () => {
     actionHandle.remove()
     receivedHandle.remove()
+    removeUpdateListener()
+    document.removeEventListener('visibilitychange', armForegroundReminders)
+    showForegroundReminder = null
+    armForegroundReminders()
   }
 }

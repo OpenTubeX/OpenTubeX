@@ -494,6 +494,11 @@ Settings:
         Invalid credentials: Il server ha rifiutato il nome utente o la password.
         Rate limited: Il server blocca gli accessi dopo troppi tentativi non riusciti. Riprova più tardi.
         Server error: Il server ha restituito un errore (HTTP {status}).
+    Notifications:
+      Notifications: Notifiche
+      System and In-App: Sistema e nell’app
+      System Only: Solo sistema
+      Off: Disattivate
   Context Menu Search Settings:
     Context Menu Search Settings: Ricerca dal menu contestuale
     Description: Scegli quali motori di ricerca mostrare quando fai clic destro sul testo selezionato. Le ricerche si aprono nel browser predefinito.
@@ -2092,6 +2097,7 @@ Tooltips:
     Remember Tab Navigation History: La cronologia di navigazione avanti e indietro di ogni scheda viene salvata e ripristinata al riavvio di OpenTubeX.
     Yattee Server: L’istanza di yattee-server da cui OpenTubeX carica video, canali, playlist e risultati di ricerca. Il nome utente e la password vengono salvati solo su questo dispositivo.
     Proxy Videos Through Yattee Server: Inoltra i flussi video e audio tramite il server. Lascia questa opzione attiva, a meno che il server non condivida la tua connessione a Internet, perché YouTube fornisce i flussi solo all’indirizzo che li ha richiesti. Le miniature vengono sempre caricate direttamente da YouTube.
+    Notifications: Scegli come OpenTubeX ti avvisa di dirette, nuovi caricamenti e download automatici. Con Sistema e nell’app, le notifiche compaiono in OpenTubeX mentre lo usi e altrimenti come notifiche di sistema, e la campanella le conserva. Disattivate nasconde anche le opzioni di notifica.
   Proxy Settings:
     IP Block Recovery Script Path: Percorso del file di script da eseguire quando viene rilevato un blocco IP. OpenTubeX ne attende il completamento, quindi ricarica il video. Se è abilitato il metodo di riserva, lo script viene eseguito solo quando anche questo non riesce.
   Player Settings:
@@ -2520,3 +2526,11 @@ Digital Wellbeing:
   Time for bed: "È ora di andare a letto"
   Bedtime started at: "La tua ora di dormire è iniziata alle {time}."
   Remind Me in 10 Minutes: "Ricordamelo tra 10 minuti"
+Notification Center:
+  Notifications: "Notifiche"
+  Notifications With Unread: "Notifiche (non lette: {count})"
+  Mark as Read: "Segna come letta"
+  Mark All as Read: "Segna tutte come lette"
+  Clear All: "Cancella tutto"
+  Empty: "Ancora nessuna notifica"
+  Empty Hint: "Qui compariranno i promemoria delle dirette e i nuovi caricamenti dei canali con le notifiche attive."

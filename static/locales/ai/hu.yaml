@@ -494,6 +494,11 @@ Settings:
         Invalid credentials: A kiszolgáló elutasította a felhasználónevet vagy a jelszót.
         Rate limited: A kiszolgáló túl sok sikertelen próbálkozás miatt blokkolja a bejelentkezéseket. Próbálja újra később.
         Server error: A kiszolgáló hibát adott vissza (HTTP {status}).
+    Notifications:
+      Notifications: Értesítések
+      System and In-App: Rendszer és alkalmazáson belül
+      System Only: Csak rendszer
+      Off: Ki
   Context Menu Search Settings:
     Context Menu Search Settings: Keresés a helyi menüből
     Description: Válassza ki, mely keresőmotorok jelenjenek meg a kijelölt szövegre jobb gombbal kattintva. A keresések az alapértelmezett böngészőben nyílnak meg.
@@ -2093,6 +2098,7 @@ Tooltips:
     Remember Tab Navigation History: Az egyes lapok vissza- és előrelépési előzményeinek mentése, majd visszaállítása az OpenTubeX újraindításakor.
     Yattee Server: Az a yattee-server-példány, amelyről az OpenTubeX a videókat, csatornákat, lejátszási listákat és keresési találatokat tölti be. A felhasználónév és a jelszó csak ezen az eszközön tárolódik.
     Proxy Videos Through Yattee Server: A videó- és hangadatfolyamokat a kiszolgálón keresztül továbbítja. Hagyja bekapcsolva, kivéve ha a kiszolgáló ugyanazt az internetkapcsolatot használja, mint Ön, mert a YouTube csak annak a címnek küldi az adatfolyamokat, amely kérte őket. A bélyegképek mindig közvetlenül a YouTube-ról töltődnek be.
+    Notifications: Válaszd ki, hogyan értesítsen az OpenTubeX élő közvetítésekről, új feltöltésekről és automatikus letöltésekről. A Rendszer és alkalmazáson belül beállításnál az értesítések használat közben az OpenTubeX-ben jelennek meg, egyébként rendszerértesítésként, és a csengő megőrzi őket. A Ki az értesítési beállításokat is elrejti.
   Proxy Settings:
     IP Block Recovery Script Path: Az IP-cím letiltásának észlelésekor futtatandó parancsfájl elérési útja. Az OpenTubeX megvárja a befejezését, majd újratölti a videót. Ha a tartalék módszer engedélyezett, csak akkor fut le, ha az is sikertelen.
   Player Settings:
@@ -2521,3 +2527,11 @@ Digital Wellbeing:
   Time for bed: "Ideje lefeküdni"
   Bedtime started at: "A lefekvési ideje ekkor kezdődött: {time}."
   Remind Me in 10 Minutes: "Emlékeztetés 10 perc múlva"
+Notification Center:
+  Notifications: "Értesítések"
+  Notifications With Unread: "Értesítések ({count} olvasatlan)"
+  Mark as Read: "Megjelölés olvasottként"
+  Mark All as Read: "Összes megjelölése olvasottként"
+  Clear All: "Összes törlése"
+  Empty: "Még nincsenek értesítések"
+  Empty Hint: "Itt jelennek meg az élő közvetítések emlékeztetői és a bekapcsolt értesítésű csatornák új feltöltései."

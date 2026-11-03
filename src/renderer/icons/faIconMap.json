@@ -115,6 +115,10 @@
     "ri": "check-line",
     "material": "check-rounded"
   },
+  "check-double": {
+    "ri": "check-double-line",
+    "material": "done-all-rounded"
+  },
   "chevron-right": {
     "ri": "arrow-right-s-fill",
     "material": "chevron-right-rounded"

@@ -618,6 +618,11 @@ Settings:
         Invalid credentials: Serveris atmetė naudotojo vardą arba slaptažodį.
         Rate limited: Serveris blokuoja prisijungimus po per daug nesėkmingų bandymų. Bandykite vėliau.
         Server error: Serveris grąžino klaidą (HTTP {status}).
+    Notifications:
+      Notifications: Pranešimai
+      System and In-App: Sistemos ir programoje
+      System Only: Tik sistemos
+      Off: Išjungta
   Context Menu Search Settings:
     Context Menu Search Settings: Paieška kontekstiniame meniu
     Description: Pasirinkite paieškos sistemas, rodomas spustelėjus pažymėtą tekstą dešiniuoju pelės mygtuku. Paieškos rezultatai atveriami numatytojoje naršyklėje.
@@ -2514,6 +2519,7 @@ Tooltips:
     Remember Tab Navigation History: Kiekvienos kortelės naršymo pirmyn ir atgal istorija išsaugoma ir atkuriama iš naujo paleidus OpenTubeX.
     Yattee Server: Tai yattee-server egzempliorius, iš kurio OpenTubeX įkelia vaizdo įrašus, kanalus, grojaraščius ir paieškos rezultatus. Naudotojo vardas ir slaptažodis saugomi tik šiame įrenginyje.
     Proxy Videos Through Yattee Server: Perduoda vaizdo ir garso srautus per serverį. Palikite įjungtą, nebent serveris naudoja tą patį interneto ryšį kaip jūs, nes YouTube srautus teikia tik tam adresui, iš kurio jų buvo užklausta. Miniatiūros visada įkeliamos tiesiai iš YouTube.
+    Notifications: Pasirinkite, kaip OpenTubeX praneš apie tiesiogines transliacijas, naujus įkėlimus ir automatinius atsisiuntimus. Pasirinkus Sistemos ir programoje, pranešimai rodomi OpenTubeX, kol juo naudojatės, kitu atveju – kaip sistemos pranešimai, o varpelis juos išsaugo. Išjungta taip pat paslepia pranešimų parinktis.
   Proxy Settings:
     IP Block Recovery Script Path: Scenarijaus failo, paleidžiamo aptikus IP blokavimą, kelias. OpenTubeX laukia, kol jis bus baigtas, tada iš naujo įkelia vaizdo įrašą. Jei įjungtas atsarginis būdas, scenarijus paleidžiamas tik tada, kai nepavyksta ir atsarginis būdas.
   Player Settings:
@@ -3022,3 +3028,11 @@ Digital Wellbeing:
   Time for bed: "Laikas eiti miegoti"
   Bedtime started at: "Jūsų miego laikas prasidėjo {time}."
   Remind Me in 10 Minutes: "Priminti po 10 minučių"
+Notification Center:
+  Notifications: "Pranešimai"
+  Notifications With Unread: "Pranešimai (neperskaityti: {count})"
+  Mark as Read: "Pažymėti kaip perskaitytą"
+  Mark All as Read: "Pažymėti viską kaip perskaitytą"
+  Clear All: "Išvalyti viską"
+  Empty: "Pranešimų dar nėra"
+  Empty Hint: "Čia bus rodomi tiesioginių transliacijų priminimai ir nauji įkėlimai iš kanalų su įjungtais pranešimais."

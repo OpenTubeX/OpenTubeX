@@ -660,6 +660,11 @@ Settings:
         Invalid credentials: Die bediener het die gebruikersnaam of wagwoord verwerp.
         Rate limited: Die bediener blokkeer aanmeldings na te veel mislukte pogings. Probeer later weer.
         Server error: Die bediener het ’n fout teruggestuur (HTTP {status}).
+    Notifications:
+      Notifications: Kennisgewings
+      System and In-App: Stelsel en in die app
+      System Only: Slegs stelsel
+      Off: Af
   Context Menu Search Settings:
     Context Menu Search Settings: Kontekskieslys-soektog
     Description: Kies watter soekenjins verskyn wanneer u regs op geselekteerde teks klik. Soektogte word in u verstekblaaier oopgemaak.
@@ -2344,6 +2349,7 @@ Tooltips:
       Begin met ’n leë sessie slaan die gestoorde oortjies oor en maak ’n nuwe venster oop.
     Close Window With Last Tab: Wanneer af, maak die sluiting van die laaste oortjie eerder ’n nuwe oortjie oop, sodat die venster oop bly totdat u dit sluit.
     Remember Tab Navigation History: Elke oortjie se terug- en vorentoe-navigasiegeskiedenis word gestoor en herstel wanneer OpenTubeX herbegin.
+    Notifications: Kies hoe OpenTubeX jou van regstreekse uitsendings, nuwe oplaaie en outomatiese aflaaie in kennis stel. Met Stelsel en in die app verskyn kennisgewings in OpenTubeX terwyl jy dit gebruik, andersins as stelselkennisgewings, en die klok hou hulle. Af versteek ook die kennisgewingopsies.
   Proxy Settings:
     IP Block Recovery Script Path: Pad na skriplêer wat uitgevoer word wanneer ’n IP-blokkering bespeur word. OpenTubeX wag totdat dit klaar is en herlaai dan die video. As terugval geaktiveer is, loop dit slegs wanneer terugval ook misluk.
   Player Settings:
@@ -2728,3 +2734,11 @@ Digital Wellbeing:
   Time for bed: Dis slaaptyd
   Bedtime started at: U slaaptyd het om {time} begin.
   Remind Me in 10 Minutes: Herinner my oor 10 minute
+Notification Center:
+  Notifications: "Kennisgewings"
+  Notifications With Unread: "Kennisgewings ({count} ongelees)"
+  Mark as Read: "Merk as gelees"
+  Mark All as Read: "Merk alles as gelees"
+  Clear All: "Vee alles uit"
+  Empty: "Nog geen kennisgewings nie"
+  Empty Hint: "Herinneringe vir regstreekse uitsendings en nuwe oplaaie van kanale met kennisgewings aan sal hier verskyn."

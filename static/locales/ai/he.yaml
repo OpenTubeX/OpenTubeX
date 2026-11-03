@@ -499,6 +499,11 @@ Settings:
         Invalid credentials: השרת דחה את שם המשתמש או את הסיסמה.
         Rate limited: השרת חוסם כניסות לאחר יותר מדי ניסיונות כושלים. יש לנסות שוב מאוחר יותר.
         Server error: השרת החזיר שגיאה (HTTP {status}).
+    Notifications:
+      Notifications: התראות
+      System and In-App: מערכת ובתוך האפליקציה
+      System Only: מערכת בלבד
+      Off: כבויות
   Context Menu Search Settings:
     Context Menu Search Settings: חיפוש מתפריט ההקשר
     Description: יש לבחור אילו מנועי חיפוש יופיעו בלחיצה ימנית על טקסט מסומן. החיפושים ייפתחו בדפדפן ברירת המחדל.
@@ -2145,6 +2150,7 @@ Tooltips:
     Remember Tab Navigation History: היסטוריית הניווט קדימה ואחורה של כל כרטיסייה נשמרת ומשוחזרת בעת הפעלה מחדש של OpenTubeX.
     Yattee Server: עותק yattee-server שממנו OpenTubeX טוען סרטונים, ערוצים, רשימות נגינה ותוצאות חיפוש. שם המשתמש והסיסמה נשמרים במכשיר זה בלבד.
     Proxy Videos Through Yattee Server: מעביר את סטרימי הווידאו והשמע דרך השרת. מומלץ להשאיר אפשרות זו פעילה, אלא אם השרת חולק את חיבור האינטרנט שלך, כי YouTube מגיש סטרימים רק לכתובת שביקשה אותם. תמונות ממוזערות נטענות תמיד ישירות מ־YouTube.
+    Notifications: בחירה איך OpenTubeX יודיע לך על שידורים חיים, העלאות חדשות והורדות אוטומטיות. באפשרות מערכת ובתוך האפליקציה, ההתראות מופיעות בתוך OpenTubeX בזמן השימוש בו, ואחרת כהתראות מערכת, והפעמון שומר אותן. כבויות מסתיר גם את אפשרויות ההתראות.
   Proxy Settings:
     IP Block Recovery Script Path: נתיב לקובץ סקריפט שיופעל כשמזוהה חסימה של כתובת IP. OpenTubeX ממתין לסיום הסקריפט ואז טוען מחדש את הסרטון. אם החלופה מופעלת, הסקריפט יופעל רק אם גם החלופה נכשלת.
   Player Settings:
@@ -2578,3 +2584,11 @@ Digital Wellbeing:
   Time for bed: "הגיע הזמן ללכת לישון"
   Bedtime started at: "שעת השינה התחילה ב־{time}."
   Remind Me in 10 Minutes: "להזכיר בעוד 10 דקות"
+Notification Center:
+  Notifications: "התראות"
+  Notifications With Unread: "התראות (שלא נקראו: {count})"
+  Mark as Read: "סימון כנקרא"
+  Mark All as Read: "סימון הכול כנקרא"
+  Clear All: "ניקוי הכול"
+  Empty: "אין עדיין התראות"
+  Empty Hint: "תזכורות לשידורים חיים והעלאות חדשות מערוצים שההתראות שלהם מופעלות יופיעו כאן."

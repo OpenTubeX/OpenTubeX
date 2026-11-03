@@ -139,16 +139,17 @@ test('phone logo uses available space', { tag: '@scale' }, async ({ app, page, u
     store.commit('setMoveSettingsToAppHeader', true)
   })
   const header = page.locator('.topNav')
-  for (const width of [450, 430, 414, 390, 375, 360, ...(zoom === 1.25 ? [320] : []), 430]) {
+  // The notification bell always stays, so the shortcuts move to the menu on the narrowest phones.
+  for (const width of [500, 478, 450, 414, 390, 375, ...(zoom === 1.25 ? [320] : []), 478]) {
     await resizeToCssWidth(app, page, width, 850, zoom)
-    if (width >= 430) {
+    if (width >= 478) {
       await expect(header.locator('.logoText')).toBeVisible()
       await expect.poll(() => header.locator('.logoText').evaluate(text => text.getBoundingClientRect().width)).toBeGreaterThanOrEqual(100)
     } else {
       await expect(header.locator('.logoText')).toBeHidden()
     }
-    await expect(header.locator('.downloadsButton')).toBeVisible()
-    await expect(header.locator('.settingsButton')).toBeVisible()
+    await expect(header.locator('.notificationCenter')).toBeVisible()
+    await expect(header.locator('.downloadsButton, .settingsButton')).toHaveCount(width >= 375 ? 2 : 0)
     await expect.poll(() => header.evaluate(element => {
       const logo = element.querySelector('.logo').getBoundingClientRect()
       const actions = element.querySelector('.profiles').getBoundingClientRect()
@@ -159,7 +160,7 @@ test('phone logo uses available space', { tag: '@scale' }, async ({ app, page, u
     }
   }
   // Removing an action should restore the name without a window resize.
-  await resizeToCssWidth(app, page, 375, null, zoom)
+  await resizeToCssWidth(app, page, 450, null, zoom)
   await expect(header.locator('.logoText')).toBeHidden()
   await page.evaluate(() => window.$store.commit('setMoveDownloadsToAppHeader', false))
   await expect(header.locator('.logoText')).toBeVisible()
@@ -171,9 +172,9 @@ test('phone logo uses available space', { tag: '@scale' }, async ({ app, page, u
       store.commit('setMoveDownloadsToAppHeader', false)
       store.commit('setMoveSettingsToAppHeader', false)
     })
-    for (const width of [300, 302, 304, 306, 320]) {
+    for (const width of [300, 302, 304, 306, 320, 380]) {
       await resizeToCssWidth(app, page, width, null, zoom)
-      if (width === 320) await expect(header.locator('.logoText')).toBeVisible()
+      if (width === 380) await expect(header.locator('.logoText')).toBeVisible()
       await expect.poll(() => header.evaluate(element => {
         const logo = element.querySelector('.logo').getBoundingClientRect()
         return element.querySelector('.profiles').getBoundingClientRect().left - logo.right
@@ -198,7 +199,7 @@ test('phone header actions have equal spacing', { tag: '@scale' }, async ({ app,
       // desktop resize render can remove a manually applied layout class.
       if (width === 850) header.classList.add('phoneLayout')
       const element = header.querySelector('.profiles')
-      const buttons = [...element.querySelectorAll(':scope > button, .capacitorPhoneTabSwitcherButton, .profileTrigger')]
+      const buttons = [...element.querySelectorAll(':scope > button, :scope > .notificationCenter .iconButton, .capacitorPhoneTabSwitcherButton, .profileTrigger')]
         .map(button => button.getBoundingClientRect()).filter(rect => rect.width > 0 && rect.height > 0)
       const distances = buttons.slice(1).map((rect, index) => rect.left + rect.width / 2 - buttons[index].left - buttons[index].width / 2)
       return Math.max(...distances) - Math.min(...distances)
@@ -269,13 +270,13 @@ test('phone header reserves section gaps at the shortcut cutoff', { tag: '@scale
     // gaps are present. Action margins are part of the measured header budget.
     document.querySelector('.topNav .quickSettings').style.marginInlineStart = '52px'
   })
-  for (const width of [380, 383, 384, 390, 380]) {
+  for (const width of [428, 435, 436, 442, 428]) {
     await resizeToCssWidth(app, page, width, 850, zoom)
     await expect.poll(() => page.locator('.pinnedSearchTrigger').evaluate(element => element.getBoundingClientRect().width), {
       message: `pinned search retains its 48px target at ${width}px`
     }).toBeGreaterThanOrEqual(48)
     const shortcuts = page.locator('.topNav .downloadsButton, .topNav .settingsButton')
-    await expect(shortcuts).toHaveCount(width < 384 ? 0 : 2)
+    await expect(shortcuts).toHaveCount(width < 436 ? 0 : 2)
   }
 })
 
@@ -402,7 +403,8 @@ for (const width of [375, 450, 480]) {
   }
 }
 test('phone header keeps the brand and replaces its row with balanced search', { tag: '@scale' }, async ({ app, page }) => {
-  await setWindowSize(app, page, { width: 390, height: 850 })
+  // Wide enough at every UI scale for the brand beside the actions, including the notification bell.
+  await setWindowSize(app, page, { width: 480, height: 850 })
   await enablePhoneHeader(page)
   const header = page.locator('.topNav')
   await expect(header.locator('.navBackButton')).toBeHidden()

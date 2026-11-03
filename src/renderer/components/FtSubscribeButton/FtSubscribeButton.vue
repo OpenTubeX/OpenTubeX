@@ -413,7 +413,7 @@ const isSubscriptionOptionsEnabled = computed(() => {
 })
 
 const isNotificationBellEnabled = computed(() => (
-  supportsUploadNotifications && isSubscriptionOptionsEnabled.value
+  supportsUploadNotifications && store.getters.getNotificationMode !== 'off' && isSubscriptionOptionsEnabled.value
 ))
 
 const isProfileDropdownOpen = ref(false)

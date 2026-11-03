@@ -530,6 +530,11 @@ Settings:
         Invalid credentials: La servilo rifuzis la uzantnomon aŭ pasvorton.
         Rate limited: La servilo blokas ensalutojn post tro multaj malsukcesaj provoj. Provu denove poste.
         Server error: La servilo redonis eraron (HTTP {status}).
+    Notifications:
+      Notifications: Sciigoj
+      System and In-App: Sistemo kaj en la aplikaĵo
+      System Only: Nur sistemo
+      Off: Malŝaltitaj
   Context Menu Search Settings:
     Context Menu Search Settings: Serĉo per kunteksta menuo
     Description: Elektu, kiuj serĉiloj aperas kiam vi dekstre alklakas elektitan tekston. Serĉoj malfermiĝas en via defaŭlta retumilo.
@@ -2141,6 +2146,7 @@ Tooltips:
       Komenci kun malplena seanco preterlasas la konservitajn langetojn kaj malfermas novan fenestron.
     Close Window With Last Tab: Kiam malŝaltita, fermi la lastan langeton anstataŭe malfermas novan langeton, do la fenestro restas malfermita ĝis vi fermas ĝin.
     Remember Tab Navigation History: La reena kaj antaŭena navigada historio de ĉiu langeto estas konservata kaj restarigata kiam OpenTubeX restartas.
+    Notifications: Elektu kiel OpenTubeX sciigas vin pri rektaj elsendoj, novaj alŝutoj kaj aŭtomataj elŝutoj. Kun Sistemo kaj en la aplikaĵo, sciigoj aperas en OpenTubeX dum vi uzas ĝin kaj alie kiel sistemaj sciigoj, kaj la sonorilo konservas ilin. Malŝaltitaj ankaŭ kaŝas la sciigajn agordojn.
   Proxy Settings:
     IP Block Recovery Script Path: Vojo al skriptodosiero rulota kiam IP-bloko estas detektita. OpenTubeX atendas ĝis ĝi finiĝas, poste reŝargas la videaĵon. Se retropaŝo estas ŝaltita, ĝi ruliĝas nur kiam ankaŭ la retropaŝo malsukcesas.
   Player Settings:
@@ -2521,3 +2527,11 @@ Digital Wellbeing:
   Time for bed: Estas tempo enlitiĝi
   Bedtime started at: Via dormotempo komenciĝis je {time}.
   Remind Me in 10 Minutes: Memorigi min post 10 minutoj
+Notification Center:
+  Notifications: "Sciigoj"
+  Notifications With Unread: "Sciigoj (nelegitaj: {count})"
+  Mark as Read: "Marki kiel legitan"
+  Mark All as Read: "Marki ĉiujn kiel legitajn"
+  Clear All: "Forigi ĉiujn"
+  Empty: "Ankoraŭ neniuj sciigoj"
+  Empty Hint: "Memorigoj pri rektaj elsendoj kaj novaj alŝutoj de kanaloj kun ŝaltitaj sciigoj aperos ĉi tie."

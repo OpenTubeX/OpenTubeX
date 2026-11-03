@@ -494,6 +494,11 @@ Settings:
         Invalid credentials: Server odmietol používateľské meno alebo heslo.
         Rate limited: Server po príliš mnohých neúspešných pokusoch blokuje prihlásenie. Skúste to znova neskôr.
         Server error: Server vrátil chybu (HTTP {status}).
+    Notifications:
+      Notifications: Upozornenia
+      System and In-App: Systém a v aplikácii
+      System Only: Iba systém
+      Off: Vypnuté
   Context Menu Search Settings:
     Context Menu Search Settings: Hľadanie v kontextovej ponuke
     Description: Vyberte vyhľadávače, ktoré sa zobrazia po kliknutí pravým tlačidlom na označený text. Výsledky hľadania sa otvoria v predvolenom prehliadači.
@@ -2094,6 +2099,7 @@ Tooltips:
     Remember Tab Navigation History: História prechádzania späť a dopredu sa pre každú kartu uloží a obnoví po opätovnom spustení OpenTubeX.
     Yattee Server: Inštancia yattee-server, z ktorej OpenTubeX načítava videá, kanály, playlisty a výsledky vyhľadávania. Používateľské meno a heslo sa ukladajú iba v tomto zariadení.
     Proxy Videos Through Yattee Server: Smeruje video a zvukové streamy cez server. Nechajte túto možnosť zapnutú, pokiaľ server nepoužíva rovnaké internetové pripojenie ako vy, pretože YouTube poskytuje streamy iba adrese, ktorá si ich vyžiadala. Náhľady sa vždy načítavajú priamo z YouTube.
+    Notifications: Vyberte, ako vás OpenTubeX upozorňuje na živé prenosy, nové videá a automatické sťahovania. Pri možnosti Systém a v aplikácii sa upozornenia zobrazujú v OpenTubeX, keď ho používate, inak ako systémové upozornenia, a zvonček ich uchováva. Vypnuté skryje aj možnosti upozornení.
   Proxy Settings:
     IP Block Recovery Script Path: Cesta k súboru skriptu, ktorý sa spustí po zistení zablokovania IP adresy. OpenTubeX počká na jeho dokončenie a potom znova načíta video. Ak je zapnutý záložný backend, skript sa spustí až po jeho zlyhaní.
   Player Settings:
@@ -2522,3 +2528,11 @@ Digital Wellbeing:
   Time for bed: "Je čas ísť spať"
   Bedtime started at: "Váš čas spánku začal o {time}."
   Remind Me in 10 Minutes: "Pripomenúť o 10 minút"
+Notification Center:
+  Notifications: "Upozornenia"
+  Notifications With Unread: "Upozornenia (neprečítané: {count})"
+  Mark as Read: "Označiť ako prečítané"
+  Mark All as Read: "Označiť všetko ako prečítané"
+  Clear All: "Vymazať všetko"
+  Empty: "Zatiaľ žiadne upozornenia"
+  Empty Hint: "Tu sa zobrazia pripomienky živých prenosov a nové videá z kanálov so zapnutými upozorneniami."

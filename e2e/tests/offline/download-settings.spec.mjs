@@ -498,8 +498,10 @@ test.describe('automatic download authorization', () => {
     const argumentsFile = path.join(app.userDataDir, 'automatic-yt-dlp-arguments.txt')
     const metadataLookupsFile = path.join(app.userDataDir, 'automatic-yt-dlp-metadata-lookups.txt')
     const releaseDownloadFile = path.join(app.userDataDir, 'release-automatic-download')
-    await app.electronApp.evaluate(({ Notification }) => {
+    await app.electronApp.evaluate(({ BrowserWindow, Notification }) => {
       Notification.isSupported = () => true
+      // The system shows notifications while the app is not in use.
+      BrowserWindow.getFocusedWindow = () => null
       globalThis.automaticDownloadNotifications = []
       Notification.prototype.show = function () {
         globalThis.automaticDownloadNotifications.push(this)

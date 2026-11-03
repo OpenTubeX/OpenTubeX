@@ -499,6 +499,11 @@ Settings:
         Invalid credentials: O servidor recusou o nome de utilizador ou a palavra-passe.
         Rate limited: O servidor está a bloquear inícios de sessão após demasiadas tentativas falhadas. Tente novamente mais tarde.
         Server error: O servidor devolveu um erro (HTTP {status}).
+    Notifications:
+      Notifications: Notificações
+      System and In-App: Sistema e na aplicação
+      System Only: Apenas sistema
+      Off: Desativadas
   Context Menu Search Settings:
     Context Menu Search Settings: Pesquisa no menu de contexto
     Description: Escolha os motores de pesquisa apresentados ao clicar com o botão direito em texto selecionado. As pesquisas são abertas no navegador predefinido.
@@ -2135,6 +2140,7 @@ Tooltips:
     Remember Tab Navigation History: O histórico de navegação para trás e para a frente de cada separador é guardado e restaurado quando o OpenTubeX reinicia.
     Yattee Server: A instância do yattee-server a partir da qual o OpenTubeX carrega vídeos, canais, listas de reprodução e resultados de pesquisa. O nome de utilizador e a palavra-passe só são guardados neste dispositivo.
     Proxy Videos Through Yattee Server: Encaminha os fluxos de vídeo e áudio através do servidor. Mantenha esta opção ativada, a menos que o servidor partilhe a sua ligação à Internet, pois o YouTube só envia os fluxos para o endereço que os pediu. As miniaturas são sempre carregadas diretamente do YouTube.
+    Notifications: Escolha como o OpenTubeX o avisa sobre transmissões em direto, novos carregamentos e transferências automáticas. Com Sistema e na aplicação, as notificações aparecem no OpenTubeX enquanto o utiliza e, caso contrário, como notificações do sistema, e o sino guarda-as. Desativadas também oculta as opções de notificação.
   Proxy Settings:
     IP Block Recovery Script Path: Caminho do ficheiro de script a executar quando é detetado um bloqueio de IP. O OpenTubeX aguarda que termine e depois recarrega o vídeo. Se o método alternativo estiver ativado, o script só é executado quando esse método também falha.
   Player Settings:
@@ -2566,3 +2572,11 @@ Digital Wellbeing:
   Time for bed: "Está na hora de dormir"
   Bedtime started at: "A sua hora de dormir começou às {time}."
   Remind Me in 10 Minutes: "Lembrar-me daqui a 10 minutos"
+Notification Center:
+  Notifications: "Notificações"
+  Notifications With Unread: "Notificações (por ler: {count})"
+  Mark as Read: "Marcar como lida"
+  Mark All as Read: "Marcar todas como lidas"
+  Clear All: "Limpar tudo"
+  Empty: "Ainda não há notificações"
+  Empty Hint: "Os lembretes de transmissões em direto e os novos carregamentos dos canais com notificações ativadas vão aparecer aqui."

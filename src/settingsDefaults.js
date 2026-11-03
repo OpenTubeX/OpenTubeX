@@ -468,6 +468,7 @@ export function createDefaultSettings({ supportsLocalApi, isElectron }) {
     rssFeedsAutoRefreshInterval: '0',
     enableClosedAppSubscriptionRefresh: !isElectron,
     enableUploadNotifications: true,
+    notificationMode: 'both',
     showProgressBarToast: true,
     settingsPassword: '',
     useDeArrowTitles: false,

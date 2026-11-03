@@ -87,6 +87,7 @@ export const SYNC_SETTING_LABELS = {
   secondaryCaptionLocale: 'Video.Player.Secondary Captions',
   enableClosedAppSubscriptionRefresh: 'Settings.Subscription Settings.Refresh Subscriptions While App Is Closed',
   enableUploadNotifications: 'Settings.Subscription Settings.Notify About New Uploads',
+  notificationMode: 'Settings.General Settings.Notifications.Notifications',
   enableCommentTranslations: 'Settings.General Settings.Comment Translation.Enable',
   enableDownloads: 'Settings.Download Settings.Enable Downloads',
   enableHomeRecommendations: 'Home Page.Enable recommendations',
@@ -502,6 +503,7 @@ export const SYNC_SETTING_VALUE_LABELS = {
   newTabPosition: { end: `${general}New Tab Position.At the end`, afterCurrent: `${general}New Tab Position.After current tab`, afterCurrentInOrder: `${general}New Tab Position.After current tab in opened order` },
   playlistGridColumns: { 0: `${general}Grid Columns.Auto` },
   playlistViewType: { grid: `${general}Video View Type.Grid`, fullWidth: `${general}Video View Type.Full Width`, list: `${general}Video View Type.List` },
+  notificationMode: { both: `${general}Notifications.System and In-App`, system: `${general}Notifications.System Only`, off: `${general}Notifications.Off` },
   reducedMotion: { system: `${general}Reduced Motion.System`, on: `${general}Reduced Motion.Force On`, off: `${general}Reduced Motion.Force Off` },
   screenshotMode: { prompt_folder: `${player}Screenshot.Modes.Ask Path`, default_folder: `${player}Screenshot.Modes.Save To Folder`, clipboard: `${player}Screenshot.Modes.Clipboard` },
   startupBehavior: {

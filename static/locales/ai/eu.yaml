@@ -494,6 +494,11 @@ Settings:
         Invalid credentials: Zerbitzariak erabiltzaile-izena edo pasahitza baztertu du.
         Rate limited: Zerbitzaria saio-hasierak blokeatzen ari da, huts egindako saiakera gehiegi egon direlako. Saiatu berriro geroago.
         Server error: Zerbitzariak errore bat itzuli du (HTTP {status}).
+    Notifications:
+      Notifications: Jakinarazpenak
+      System and In-App: Sistema eta aplikazioan
+      System Only: Sistema soilik
+      Off: Desaktibatuta
   Context Menu Search Settings:
     Context Menu Search Settings: Laster-menuko bilaketa
     Description: Aukeratu hautatutako testuan eskuineko klik egitean agertuko diren bilaketa-motorrak. Bilaketak arakatzaile lehenetsian irekiko dira.
@@ -2102,6 +2107,7 @@ Tooltips:
     Remember Tab Navigation History: Fitxa bakoitzaren atzerako eta aurrerako nabigazio-historia gorde eta leheneratzen da OpenTubeX berrabiaraztean.
     Yattee Server: OpenTubeXk bideoak, kanalak, erreprodukzio-zerrendak eta bilaketa-emaitzak kargatzeko erabiltzen duen yattee-server instantzia. Erabiltzaile-izena eta pasahitza gailu honetan soilik gordetzen dira.
     Proxy Videos Through Yattee Server: Bideo- eta audio-jarioak zerbitzariaren bidez igortzen ditu. Utzi gaituta, zerbitzariak zure Interneteko konexioa partekatzen ez badu behintzat, YouTubek jarioak eskatu dituen helbideari soilik bidaltzen baitizkio. Miniaturak beti YouTubetik zuzenean kargatzen dira.
+    Notifications: Aukeratu OpenTubeX-ek nola jakinarazten dizkizun zuzeneko emanaldiak, igoera berriak eta deskarga automatikoak. Sistema eta aplikazioan aukerarekin, jakinarazpenak OpenTubeX-en agertzen dira erabiltzen duzun bitartean, eta bestela sistemaren jakinarazpen gisa, eta kanpaiak gordetzen ditu. Desaktibatuta aukerak jakinarazpenen aukerak ere ezkutatzen ditu.
   Proxy Settings:
     IP Block Recovery Script Path: IP blokeoa hautematean exekutatuko den script-fitxategiaren bide-izena. OpenTubeX aplikazioak amaitu arte itxaroten du eta gero bideoa berriro kargatzen du. Ordezko motorra gaituta badago, hark ere huts egiten duenean soilik exekutatzen da.
   Player Settings:
@@ -2530,3 +2536,11 @@ Digital Wellbeing:
   Time for bed: "Lotara joateko ordua da"
   Bedtime started at: "Zure lotara joateko ordua ordu honetan hasi da: {time}."
   Remind Me in 10 Minutes: "Gogorarazi 10 minutu barru"
+Notification Center:
+  Notifications: "Jakinarazpenak"
+  Notifications With Unread: "Jakinarazpenak ({count} irakurri gabe)"
+  Mark as Read: "Markatu irakurritako gisa"
+  Mark All as Read: "Markatu guztiak irakurritako gisa"
+  Clear All: "Garbitu guztiak"
+  Empty: "Oraindik ez dago jakinarazpenik"
+  Empty Hint: "Zuzeneko emanaldien gogorarazpenak eta jakinarazpenak aktibatuta dituzten kanalen igoera berriak hemen agertuko dira."

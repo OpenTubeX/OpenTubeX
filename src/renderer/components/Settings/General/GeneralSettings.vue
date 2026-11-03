@@ -242,6 +242,18 @@
         @change="updateReducedMotion"
       />
       <FtSelect
+        v-if="USING_ELECTRON || IS_CAPACITOR"
+        size-to-content
+        :placeholder="t('Settings.General Settings.Notifications.Notifications')"
+        :value="store.getters.getNotificationMode"
+        setting-key="notificationMode"
+        :select-names="notificationModeNames"
+        :select-values="NOTIFICATION_MODE_VALUES"
+        :tooltip="t('Tooltips.General Settings.Notifications')"
+        :icon="['fas', 'bell']"
+        @change="store.dispatch('updateNotificationMode', $event)"
+      />
+      <FtSelect
         v-if="SUPPORTS_LOCAL_API && (backendPreference === 'local' || backendFallback)"
         size-to-content
         :placeholder="t('Settings.General Settings.Avoid translation.Avoid translation')"
@@ -684,6 +696,14 @@ function updateTimeFormat(value) {
 function updateUseAITranslationCompletions(value) {
   store.dispatch('updateUseAITranslationCompletions', value)
 }
+
+const NOTIFICATION_MODE_VALUES = ['both', 'system', 'off']
+
+const notificationModeNames = computed(() => [
+  t('Settings.General Settings.Notifications.System and In-App'),
+  t('Settings.General Settings.Notifications.System Only'),
+  t('Settings.General Settings.Notifications.Off')
+])
 
 const REDUCED_MOTION_VALUES = ['system', 'on', 'off']
 

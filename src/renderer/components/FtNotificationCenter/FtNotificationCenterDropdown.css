@@ -1,0 +1,14 @@
+.iconDropdown.notificationCenterDropdown {
+  inline-size: min(380px, calc(100vw - 16px));
+  border: 1px solid var(--border-color);
+  border-radius: calc(12px * var(--ui-roundness));
+  background: var(--card-bg-color);
+  color: var(--primary-text-color);
+  font-size: 14px;
+  text-align: start;
+  user-select: text;
+}
+
+.iconDropdown.notificationCenterDropdown .iconDropdownContent {
+  max-block-size: min(480px, calc(100dvh - 120px));
+}

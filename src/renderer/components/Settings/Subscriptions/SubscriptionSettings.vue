@@ -64,7 +64,7 @@
           />
         </div>
         <FtToggleSwitch
-          v-if="(IS_CAPACITOR && !IS_IOS) || IS_ELECTRON"
+          v-if="((IS_CAPACITOR && !IS_IOS) || IS_ELECTRON) && store.getters.getNotificationMode !== 'off'"
           :label="$t('Settings.Subscription Settings.Notify About New Uploads')"
           :default-value="enableUploadNotifications"
           setting-key="enableUploadNotifications"

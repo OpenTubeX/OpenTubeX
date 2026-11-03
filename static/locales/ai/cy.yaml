@@ -495,6 +495,11 @@ Settings:
         Invalid credentials: Gwrthododd y gweinydd yr enw defnyddiwr neu'r cyfrinair.
         Rate limited: Mae'r gweinydd yn rhwystro mewngofnodi ar ôl gormod o ymdrechion aflwyddiannus. Rhowch gynnig arall arni nes ymlaen.
         Server error: Dychwelodd y gweinydd wall (HTTP {status}).
+    Notifications:
+      Notifications: Hysbysiadau
+      System and In-App: System ac yn yr ap
+      System Only: System yn unig
+      Off: I ffwrdd
   Context Menu Search Settings:
     Context Menu Search Settings: Chwilio o'r ddewislen cyd-destun
     Description: Dewiswch pa beiriannau chwilio sy'n ymddangos pan fyddwch yn de-glicio testun a ddewiswyd. Mae chwiliadau'n agor yn eich porwr rhagosodedig.
@@ -2124,6 +2129,7 @@ Tooltips:
     Remember Tab Navigation History: Caiff hanes llywio yn ôl ac ymlaen pob tab ei gadw a'i adfer pan fydd OpenTubeX yn ailgychwyn.
     Yattee Server: Yr enghraifft yattee-server y mae OpenTubeX yn llwytho fideos, sianeli, rhestrau chwarae a chanlyniadau chwilio ohoni. Dim ond ar y ddyfais hon y caiff yr enw defnyddiwr a'r cyfrinair eu storio.
     Proxy Videos Through Yattee Server: Yn trosglwyddo ffrydiau fideo a sain drwy'r gweinydd. Gadewch hwn ymlaen oni bai bod y gweinydd yn rhannu eich cysylltiad rhyngrwyd, oherwydd dim ond i'r cyfeiriad a ofynnodd amdanynt y mae YouTube yn gweini ffrydiau. Mae lluniau bach bob amser yn llwytho'n uniongyrchol o YouTube.
+    Notifications: Dewiswch sut mae OpenTubeX yn eich hysbysu am ffrydiau byw, lanlwythiadau newydd a lawrlwythiadau awtomatig. Gyda System ac yn yr ap, mae hysbysiadau’n ymddangos yn OpenTubeX tra byddwch yn ei ddefnyddio ac fel hysbysiadau system fel arall, ac mae’r gloch yn eu cadw. Mae I ffwrdd hefyd yn cuddio’r dewisiadau hysbysu.
   Proxy Settings:
     IP Block Recovery Script Path: Llwybr y ffeil sgript i'w rhedeg pan ganfyddir rhwystr IP. Mae OpenTubeX yn aros iddi orffen, yna'n ail-lwytho'r fideo. Os yw'r darparwr wrth gefn wedi'i alluogi, dim ond pan fydd y darparwr hwnnw hefyd yn methu y bydd y sgript yn rhedeg.
   Player Settings:
@@ -2553,3 +2559,11 @@ Digital Wellbeing:
   Time for bed: "Mae'n amser gwely"
   Bedtime started at: "Dechreuodd eich amser gwely am {time}."
   Remind Me in 10 Minutes: "Atgoffa Fi Ymhen 10 Munud"
+Notification Center:
+  Notifications: "Hysbysiadau"
+  Notifications With Unread: "Hysbysiadau (heb eu darllen: {count})"
+  Mark as Read: "Marcio fel wedi’i ddarllen"
+  Mark All as Read: "Marcio’r cyfan fel wedi’i ddarllen"
+  Clear All: "Clirio’r cyfan"
+  Empty: "Dim hysbysiadau eto"
+  Empty Hint: "Bydd nodiadau atgoffa ffrydiau byw a lanlwythiadau newydd gan sianeli gyda hysbysiadau ymlaen yn ymddangos yma."

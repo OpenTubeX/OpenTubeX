@@ -832,6 +832,11 @@ Settings:
       Open Link: Open Link
       Ask Before Opening Link: Ask Before Opening Link
       No Action: No Action
+    Notifications:
+      Notifications: Notifications
+      System and In-App: System and in-app
+      System Only: System only
+      Off: Off
   Context Menu Search Settings:
     Context Menu Search Settings: Context Menu Search
     Description: Choose which search engines appear when you right-click selected text. Searches open in your default browser.
@@ -3192,6 +3197,7 @@ Tooltips:
       so the window stays open until you close it.
     Remember Tab Navigation History: Each tab's back and forward navigation history
       is saved and restored when OpenTubeX restarts.
+    Notifications: Choose how OpenTubeX notifies you about live streams, new uploads, and automatic downloads. With System and in-app, notifications appear inside OpenTubeX while you use it and as system notifications otherwise, and the bell keeps them. Off also hides the notification options.
   Proxy Settings:
     IP Block Recovery Script Path: Script file path to run when an IP block is detected. OpenTubeX waits for it to finish, then reloads the video. If fallback is enabled, it runs only when fallback also fails.
   Player Settings:
@@ -3367,6 +3373,14 @@ Hashtag:
   Hashtag: Hashtag
   This hashtag does not currently have any videos: This hashtag does not currently
       have any videos
+Notification Center:
+  Notifications: Notifications
+  Notifications With Unread: Notifications ({count} unread)
+  Mark as Read: Mark as read
+  Mark All as Read: Mark all as read
+  Clear All: Clear all
+  Empty: No notifications yet
+  Empty Hint: Live stream reminders and new uploads from channels with notifications turned on will show up here.
 Moments Ago: moments ago
 Yes: Yes
 No: No

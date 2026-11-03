@@ -463,6 +463,11 @@ Settings:
         Invalid credentials: O servidor recusou o nome de usuário ou a senha.
         Rate limited: O servidor está bloqueando logins após muitas tentativas malsucedidas. Tente novamente mais tarde.
         Server error: O servidor retornou um erro (HTTP {status}).
+    Notifications:
+      Notifications: Notificações
+      System and In-App: Sistema e no app
+      System Only: Somente sistema
+      Off: Desativadas
   Context Menu Search Settings:
     Context Menu Search Settings: Pesquisa no menu de contexto
     Description: Escolha os motores de pesquisa apresentados ao clicar com o botão direito em texto selecionado. As pesquisas são abertas no navegador padrão.
@@ -2062,6 +2067,7 @@ Tooltips:
     Remember Tab Navigation History: O histórico de navegação para trás e para a frente de cada guia é salvo e restaurado quando o OpenTubeX reinicia.
     Yattee Server: A instância do yattee-server da qual o OpenTubeX carrega vídeos, canais, playlists e resultados de pesquisa. O nome de usuário e a senha ficam armazenados apenas neste dispositivo.
     Proxy Videos Through Yattee Server: Retransmite os streams de vídeo e áudio pelo servidor. Mantenha esta opção ativada, a menos que o servidor use a mesma conexão de internet que você, pois o YouTube só envia streams para o endereço que os solicitou. As miniaturas são sempre carregadas diretamente do YouTube.
+    Notifications: Escolha como o OpenTubeX avisa você sobre transmissões ao vivo, novos envios e downloads automáticos. Com Sistema e no app, as notificações aparecem dentro do OpenTubeX enquanto você o usa e como notificações do sistema caso contrário, e o sino as guarda. Desativadas também oculta as opções de notificação.
   Proxy Settings:
     IP Block Recovery Script Path: Caminho do arquivo de script executando quando é detectado um bloqueio de IP. O OpenTubeX aguarda que termine e depois recarrega o vídeo. Se o método alternativo estiver ativado, o script só é executado quando esse método também falha.
   Player Settings:
@@ -2482,3 +2488,11 @@ Digital Wellbeing:
   Time for bed: "Hora de dormir"
   Bedtime started at: "Sua hora de dormir começou às {time}."
   Remind Me in 10 Minutes: "Lembrar-me em 10 minutos"
+Notification Center:
+  Notifications: "Notificações"
+  Notifications With Unread: "Notificações (não lidas: {count})"
+  Mark as Read: "Marcar como lida"
+  Mark All as Read: "Marcar todas como lidas"
+  Clear All: "Limpar tudo"
+  Empty: "Nenhuma notificação ainda"
+  Empty Hint: "Lembretes de transmissões ao vivo e novos envios de canais com notificações ativadas vão aparecer aqui."

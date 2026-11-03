@@ -6,6 +6,8 @@ import { isWithinDailyWindow, minuteOfDay } from './renderer/helpers/digitalWell
  * feed types that subscription refreshes fetch.
  * @param {{
  *   enabled: boolean,
+ *   mode?: 'both' | 'system' | 'off',
+ *   thumbnailUrl?: string | null,
  *   subscriptions: object[],
  *   hiddenFeedTypes?: string[],
  *   showMembersOnly: boolean,
@@ -15,7 +17,7 @@ import { isWithinDailyWindow, minuteOfDay } from './renderer/helpers/digitalWell
  * }} input quiet hours are minutes since midnight during which notifications are silent;
  * original titles replace YouTube's auto-translated video titles
  */
-export function createUploadNotificationConfiguration({ enabled, subscriptions, hiddenFeedTypes = [], showMembersOnly, titles, quietHours = null, originalTitles = false }) {
+export function createUploadNotificationConfiguration({ enabled, mode = 'both', thumbnailUrl = null, subscriptions, hiddenFeedTypes = [], showMembersOnly, titles, quietHours = null, originalTitles = false }) {
   const channels = enabled
     ? Object.fromEntries(subscriptions.flatMap(channel => {
         if (typeof channel?.id !== 'string' || channel.id.length === 0) return []
@@ -31,7 +33,9 @@ export function createUploadNotificationConfiguration({ enabled, subscriptions, 
       }))
     : {}
   if (Object.keys(channels).length === 0) return { enabled: false }
-  return { enabled: true, titles, channels, ...(quietHours ? { quietHours } : {}), ...(originalTitles ? { originalTitles } : {}) }
+  // Android keeps a history and defers to the visible app only with both.
+  // The thumbnail URL has an {id} placeholder for the video ID.
+  return { enabled: true, mode, titles, channels, ...(thumbnailUrl ? { thumbnailUrl } : {}), ...(quietHours ? { quietHours } : {}), ...(originalTitles ? { originalTitles } : {}) }
 }
 
 /**
@@ -198,6 +202,18 @@ export function takeVisibleUploads(state, channelId, feedType, entries, showMemb
  * @param {string} feedType
  * @param {string} id
  */
+/**
+ * The thumbnail of an uploaded video, if the configuration has one. Posts have none.
+ * @param {{ thumbnailUrl?: string } | null | undefined} configuration
+ * @param {string} feedType
+ * @param {string} id
+ */
+export function getUploadThumbnailUrl(configuration, feedType, id) {
+  return feedType !== 'posts' && typeof configuration?.thumbnailUrl === 'string'
+    ? configuration.thumbnailUrl.replace('{id}', encodeURIComponent(id))
+    : undefined
+}
+
 export function getUploadUrl(feedType, id) {
   if (feedType === 'posts') return `https://www.youtube.com/post/${encodeURIComponent(id)}`
   if (feedType === 'shorts') return `https://www.youtube.com/shorts/${encodeURIComponent(id)}`

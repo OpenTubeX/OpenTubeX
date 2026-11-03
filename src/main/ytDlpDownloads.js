@@ -73,7 +73,7 @@ const execFileAsync = promisify(execFile)
  * @property {number} [minFileSizeMb]
  * @property {number} [maxFileSizeMb]
  * @property {number} [maxAgeDays]
- * @property {{ startedTitle?: string, startedBody?: string, completedTitle?: string, completedBody?: string, failedTitle?: string, failedBody?: string }} [notification]
+ * @property {{ startedTitle?: string, startedBody?: string, completedTitle?: string, completedBody?: string, failedTitle?: string, failedBody?: string, thumbnail?: string }} [notification]
  */
 
 /**

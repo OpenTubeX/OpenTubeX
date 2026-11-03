@@ -494,6 +494,11 @@ Settings:
         Invalid credentials: Netþjónninn hafnaði notandanafninu eða lykilorðinu.
         Rate limited: Netþjónninn lokar á innskráningar eftir of margar misheppnaðar tilraunir. Reyndu aftur síðar.
         Server error: Netþjónninn skilaði villu (HTTP {status}).
+    Notifications:
+      Notifications: Tilkynningar
+      System and In-App: Kerfi og í forritinu
+      System Only: Aðeins kerfi
+      Off: Slökkt
   Context Menu Search Settings:
     Context Menu Search Settings: Leit í samhengisvalmynd
     Description: Veldu hvaða leitarvélar birtast þegar þú hægrismellir á valinn texta. Leitin opnast í sjálfgefna vafranum þínum.
@@ -2109,6 +2114,7 @@ Tooltips:
     Remember Tab Navigation History: Ferill fyrir aftur- og áframflakk hvers flipa er vistaður og endurheimtur þegar OpenTubeX er endurræst.
     Yattee Server: Tilvik yattee-server sem OpenTubeX sækir myndskeið, rásir, spilunarlista og leitarniðurstöður frá. Notandanafnið og lykilorðið eru aðeins geymd á þessu tæki.
     Proxy Videos Through Yattee Server: Beinir mynd- og hljóðstreymum í gegnum netþjóninn. Hafðu kveikt á þessu nema netþjónninn deili nettengingunni þinni, því YouTube afhendir streymi aðeins því vistfangi sem bað um þau. Smámyndir hlaðast alltaf beint frá YouTube.
+    Notifications: Veldu hvernig OpenTubeX lætur þig vita af beinum útsendingum, nýjum myndskeiðum og sjálfvirkum niðurhölum. Með Kerfi og í forritinu birtast tilkynningar í OpenTubeX á meðan þú notar það og annars sem kerfistilkynningar, og bjallan geymir þær. Slökkt felur einnig tilkynningavalkostina.
   Proxy Settings:
     IP Block Recovery Script Path: Slóð að skriftuskrá sem keyra skal þegar vart verður við að IP-tölu hafi verið lokað. OpenTubeX bíður eftir að keyrslu ljúki og endurhleður síðan myndbandinu. Ef varaleið er virk er skriftan aðeins keyrð þegar varaleiðin bregst einnig.
   Player Settings:
@@ -2539,3 +2545,11 @@ Digital Wellbeing:
   Time for bed: "Kominn háttatími"
   Bedtime started at: "Háttatíminn þinn hófst kl. {time}."
   Remind Me in 10 Minutes: "Minna mig á eftir 10 mínútur"
+Notification Center:
+  Notifications: "Tilkynningar"
+  Notifications With Unread: "Tilkynningar (ólesnar: {count})"
+  Mark as Read: "Merkja sem lesið"
+  Mark All as Read: "Merkja allt sem lesið"
+  Clear All: "Hreinsa allt"
+  Empty: "Engar tilkynningar enn"
+  Empty Hint: "Áminningar um beinar útsendingar og ný myndskeið frá rásum með kveikt á tilkynningum birtast hér."

@@ -70,6 +70,10 @@ import {
 } from './kdeWaylandWindowState'
 import { createSubscriptionBackgroundService } from './subscriptionBackground'
 import { createUploadNotifier } from './uploadNotifications'
+import { createNotificationHistory, createNotifier } from './notificationHistory'
+import { loadNotificationImage, setNotificationImagesAllowed } from './notificationImage'
+import { setAutomaticDownloadNotifier } from './ytDlpAutomaticDownloads'
+import { getLiveReminderTarget } from '../notificationHistory'
 import { supportsNativeNotifications } from './nativeNotifications'
 import { getTrayMenuIcon } from './trayMenuIcons'
 import { createScheduledBackups } from './scheduledBackups'
@@ -85,7 +89,7 @@ import { setupIpBlockRecoveryIpc } from './ipBlockRecovery'
 import { isSubscriptionAutoRefreshInProgress, setupSubscriptionAutoRefreshIpc } from './subscriptionAutoRefresh'
 import { setupCastIpc } from './castIpc'
 import { createUrlOpener, getDirectOpenUrl } from './openUrl'
-import { sendToAppWindows } from './ipc'
+import { handleTrusted, sendToAppWindows } from './ipc'
 import { setupBackupIpc } from './backupIpc'
 import { setupLibraryNotices } from './libraryNotices'
 import { setupLiveReminderIpc } from './liveReminderIpc'
@@ -591,6 +595,29 @@ function runApp() {
   supportsAutoPictureInPictureMinimize.then(supported => { isTrayOnMinimizeSupported = supported })
 
   const userDataPath = app.getPath('userData')
+  const notificationHistory = createNotificationHistory({
+    file: path.join(userDataPath, 'notification-history.json'),
+    onChange: entries => sendToAppWindows(IpcChannels.NOTIFICATION_HISTORY_UPDATED, entries)
+  })
+  /** @type {import('./notificationHistory').NotificationMode} */
+  let notificationMode = 'both'
+  let thumbnailPreference = ''
+  let blurThumbnails = false
+  setNotificationImagesAllowed(() => thumbnailPreference !== 'hidden' && !blurThumbnails)
+  const notify = createNotifier({
+    history: notificationHistory,
+    getMode: () => notificationMode,
+    getForegroundWindow: () => {
+      const window = BrowserWindow.getFocusedWindow()
+      return window && !window.isDestroyed() && isOpenTubeXUrl(window.webContents.getURL()) ? window : null
+    },
+    showInApp: (window, entry) => window.webContents.send(IpcChannels.NOTIFICATION_SHOW_IN_APP, entry)
+  })
+  setAutomaticDownloadNotifier(notify)
+  handleTrusted(IpcChannels.NOTIFICATION_HISTORY_LIST, () => notificationHistory.list(), [])
+  handleTrusted(IpcChannels.NOTIFICATION_HISTORY_MARK_READ, (_event, id) => (
+    id === undefined || typeof id === 'string' ? notificationHistory.markRead(id) : undefined))
+  handleTrusted(IpcChannels.NOTIFICATION_HISTORY_CLEAR, () => notificationHistory.clear())
   const uploadNotifier = createUploadNotifier({
     file: path.join(userDataPath, 'upload-notifications.json'),
     show: showUrlNotification,
@@ -745,17 +772,28 @@ function runApp() {
     showUrlNotification({
       title: reminder.notificationTitle,
       body: reminder.notificationBody,
-      url: `https://www.youtube.com/watch?v=${reminder.videoId}`
+      thumbnail: reminder.thumbnail,
+      url: `https://www.youtube.com/watch?v=${reminder.videoId}`,
+      target: getLiveReminderTarget(reminder.videoId)
     })
   }
 
   /**
-   * @param {{ title: string, body: string, url: string }} options
+   * @param {{ title: string, body: string, url: string, silent?: boolean, thumbnail?: string, target: import('../notificationHistory').NotificationHistoryTarget | null }} options
    */
-  function showUrlNotification({ title, body, url, silent = false }) {
+  function showUrlNotification({ title, body, url, silent = false, thumbnail, target }) {
+    return notify({ title, body, thumbnail, target, showSystemNotification: () => showSystemUrlNotification({ title, body, url, silent, thumbnail }) })
+      .catch(error => console.error('Failed to show a notification', error))
+  }
+
+  /**
+   * @param {{ title: string, body: string, url: string, silent: boolean, thumbnail?: string }} options
+   */
+  async function showSystemUrlNotification({ title, body, url, silent, thumbnail }) {
     if (!supportsNativeNotifications(Notification)) return
 
-    const notification = new Notification({ title, body, silent })
+    const icon = await loadNotificationImage(thumbnail)
+    const notification = new Notification({ title, body, silent, ...(icon ? { icon } : {}) })
     activeNotifications.add(notification)
     notification.once('close', () => activeNotifications.delete(notification))
     notification.once('click', () => {
@@ -1081,6 +1119,15 @@ function runApp() {
             break
           case 'iconPack':
             trayMenuIconPack = doc.value
+            break
+          case 'notificationMode':
+            if (['both', 'system', 'off'].includes(doc.value)) notificationMode = doc.value
+            break
+          case 'thumbnailPreference':
+            thumbnailPreference = doc.value
+            break
+          case 'blurThumbnails':
+            blurThumbnails = doc.value === true
             break
         }
       })
@@ -2938,6 +2985,15 @@ function runApp() {
             case 'iconPack':
               trayMenuIconPack = data.value
               createTrayContextMenu()
+              break
+            case 'notificationMode':
+              if (['both', 'system', 'off'].includes(data.value)) notificationMode = data.value
+              break
+            case 'thumbnailPreference':
+              thumbnailPreference = data.value
+              break
+            case 'blurThumbnails':
+              blurThumbnails = data.value === true
               break
             case 'baseTheme':
               if (isCustomThemeValue(data.value)) {

@@ -122,6 +122,7 @@ test('the desktop notifier persists state and shows localized notifications', as
     const restarted = createUploadNotifier({ file, show: notification => shown.push(notification) })
     await restarted.configure({
       enabled: true,
+      thumbnailUrl: 'https://i.ytimg.com/vi/{id}/mqdefault.jpg',
       titles: { videos: 'New video from {channel}', live: '{channel} is live' },
       channels: { UC1: { name: 'One', feedTypes: ['videos'], membersOnly: false } }
     })
@@ -131,8 +132,8 @@ test('the desktop notifier persists state and shows localized notifications', as
       entries: [entry('m', NOW, { membersOnly: true }), entry('l', Date.now(), { live: true }), entry('b', Date.now()), entry('a')]
     })
     assert.deepEqual(shown, [
-      { title: 'One is live', body: 'Title l', url: 'https://www.youtube.com/watch?v=l', silent: false },
-      { title: 'New video from One', body: 'Title b', url: 'https://www.youtube.com/watch?v=b', silent: false }
+      { title: 'One is live', body: 'Title l', url: 'https://www.youtube.com/watch?v=l', silent: false, target: { kind: 'live', path: '/watch/l' }, thumbnail: 'https://i.ytimg.com/vi/l/mqdefault.jpg' },
+      { title: 'New video from One', body: 'Title b', url: 'https://www.youtube.com/watch?v=b', silent: false, target: { kind: 'video', path: '/watch/b' }, thumbnail: 'https://i.ytimg.com/vi/b/mqdefault.jpg' }
     ])
 
     await restarted.configure({ enabled: false })
@@ -485,4 +486,23 @@ test('refreshes of another profile also fetch channels with notifications turned
   assert.deepEqual(fetched([], 'posts'), ['UCc'])
   context.store.getters.getEnableUploadNotifications = false
   assert.deepEqual(fetched([alpha], 'videos'), ['UCa'])
+})
+
+test('settling waits for notifications that are still being delivered', async () => {
+  const directory = await mkdtemp(path.join(tmpdir(), 'upload-notifications-'))
+  try {
+    let delivered = false
+    const notifier = createUploadNotifier({
+      file: path.join(directory, 'state.json'),
+      // Delivery can wait for a history write and a thumbnail.
+      show: () => new Promise(resolve => setTimeout(() => { delivered = true; resolve() }, 50))
+    })
+    await notifier.configure({ enabled: true, titles: { videos: '{channel}' }, channels: { UC1: { name: 'One', feedTypes: ['videos'], membersOnly: false } } })
+    await notifier.observe({ channelId: 'UC1', feedType: 'videos', entries: [entry('a')] })
+    notifier.observe({ channelId: 'UC1', feedType: 'videos', entries: [entry('b', Date.now()), entry('a')] })
+    await notifier.settle()
+    assert.equal(delivered, true)
+  } finally {
+    await rm(directory, { recursive: true, force: true })
+  }
 })

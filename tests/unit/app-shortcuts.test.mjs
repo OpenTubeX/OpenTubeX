@@ -86,6 +86,7 @@ test('retained startup clicks and running-app clicks navigate and update localiz
       set: async ({ shortcuts }) => { updates.push(shortcuts) },
     },
     initializeCapacitorLiveReminderActions: async () => () => {},
+    showInAppNotification: () => {},
     addAndroidMediaSessionActionListener: async () => () => {},
     setAndroidAppVisible() {},
     setAndroidAppActive() {},

@@ -694,6 +694,7 @@ import { fetchReleasePages, findUpdateReleases, formatReleaseChangelog } from '.
 import { copyToClipboard, isUnloadedBackgroundTabClick, openExternalLink, openInternalPath, shareLink, showToast } from './helpers/utils'
 import { getChannelLinkDetails, getChannelLinkMenuItems } from './helpers/channel-context-menu'
 import { initializeCapacitorLiveReminderActions } from './helpers/liveReminders'
+import { showInAppNotification } from './helpers/notificationHistory'
 import {
   addAndroidMediaSessionActionListener,
   shouldPauseAndroidPlaybackOnAppStateChange,
@@ -4327,7 +4328,7 @@ async function enableCapacitorIntegrations() {
   const stopHomeWidgetUpdates = syncContinueWatchingWidget(store, watch)
   const removeReminderActions = await initializeCapacitorLiveReminderActions((videoId) => {
     handleYoutubeLink(`https://www.youtube.com/watch?v=${videoId}`)
-  })
+  }, showInAppNotification)
   const removeMediaActions = await addAndroidMediaSessionActionListener(({ action, ...details }) => {
     tabMediaCoordinator.dispatchAction(action, details)
   })

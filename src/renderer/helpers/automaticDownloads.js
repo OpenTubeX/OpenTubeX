@@ -8,6 +8,7 @@ import {
   parseAutomaticDownloadRules
 } from './automaticDownloadRules'
 import { showToastOnAllTabs } from './utils'
+import { withThumbnail } from './notificationHistory'
 
 // Feed refreshes can overlap across profiles and views. Keep a session-level
 // guard in addition to the persistent download history in the main process.
@@ -134,7 +135,9 @@ export async function startAutomaticDownloadsForChannel(channel, videos, source,
           completedTitle: t('Downloads.Automatic Download Complete'),
           completedBody: t('Downloads.Download Complete Template', { title }),
           failedTitle: t('Downloads.Automatic Download Failed'),
-          failedBody: t('Downloads.Download Failed Template', { title })
+          failedBody: t('Downloads.Download Failed Template', { title }),
+          // Follows the thumbnail settings, unlike the download's own artwork.
+          ...withThumbnail(video.videoId)
         }
       })
     } catch {

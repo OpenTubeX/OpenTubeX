@@ -10,6 +10,8 @@ import { settings } from '../datastores/handlers/base'
 import { TabManager } from './tabs/TabManager'
 import { IpcChannels } from '../constants'
 import { supportsNativeNotifications } from './nativeNotifications'
+import { getAutomaticDownloadTarget, isThumbnailUrl } from '../notificationHistory'
+import { loadNotificationImage } from './notificationImage'
 import { downloadManagedYtDlp, pushProxyArgument, resolveExecutable } from './ytDlpBinaries'
 
 /** @typedef {import('./ytDlpDownloads').YtDlpDownloadPayload} YtDlpDownloadPayload */
@@ -42,8 +44,16 @@ const BUILT_IN_AUTOMATIC_TEMPLATE_OPTIONS = new Map([
 const automaticDiscoveryCache = new Map()
 const activeAutomaticDownloadNotifications = new Set()
 
+/** @type {ReturnType<typeof import('./notificationHistory').createNotifier> | null} */
+let notify = null
+
+/** @param {typeof notify} notifier */
+export function setAutomaticDownloadNotifier(notifier) {
+  notify = notifier
+}
+
 export function showAutomaticDownloadNotification(payload, phase, downloadId = null) {
-  if (payload.automatic !== true || !supportsNativeNotifications(Notification)) {
+  if (payload.automatic !== true) {
     return
   }
 
@@ -54,7 +64,21 @@ export function showAutomaticDownloadNotification(payload, phase, downloadId = n
     return
   }
 
-  const notification = new Notification({ title, body })
+  const thumbnail = isThumbnailUrl(payload.notification?.thumbnail) ? payload.notification.thumbnail : undefined
+  const showSystemNotification = () => showSystemNotificationForDownload(payload, phase, downloadId, title, body, thumbnail)
+  if (notify) {
+    notify({ title, body, thumbnail, target: getAutomaticDownloadTarget(phase, payload.videoId, downloadId), showSystemNotification })
+      .catch(error => console.error('Failed to show an automatic download notification', error))
+  } else {
+    showSystemNotification().catch(error => console.error('Failed to show an automatic download notification', error))
+  }
+}
+
+async function showSystemNotificationForDownload(payload, phase, downloadId, title, body, thumbnail) {
+  if (!supportsNativeNotifications(Notification)) return
+
+  const icon = await loadNotificationImage(thumbnail)
+  const notification = new Notification({ title, body, ...(icon ? { icon } : {}) })
   activeAutomaticDownloadNotifications.add(notification)
   notification.once('close', () => activeAutomaticDownloadNotifications.delete(notification))
   notification.once('click', () => {
