@@ -449,9 +449,12 @@ test('separates replaceable search results from saved search history', async ({ 
 
 test('shows the page before asynchronous size calculation finishes', async ({ app, page }) => {
   await app.electronApp.evaluate(({ ipcMain }, channel) => {
+    // Held until the test has seen the page, since navigating there can take longer than any fixed delay.
+    const usage = Promise.withResolvers()
+    globalThis.__releaseStorageUsage = usage.resolve
     ipcMain.removeHandler(channel)
     ipcMain.handle(channel, async () => {
-      await new Promise(resolve => setTimeout(resolve, 400))
+      await usage.promise
       return {
         downloadRecords: 0,
         videoMetadata: 0,
@@ -479,6 +482,7 @@ test('shows the page before asynchronous size calculation finishes', async ({ ap
   const storage = await goToSettingsSection(page, 'storage')
   const breakdown = storage.locator('.storageBreakdown')
   await expect(breakdown.locator('.storageDonutCenter')).toContainText('Calculating…')
+  await app.electronApp.evaluate(() => globalThis.__releaseStorageUsage())
   await expect(breakdown.locator('.storageDonutCenter')).toContainText('0 B')
   await expect(breakdown.locator('li')).toHaveCount(0)
   await expect(breakdown.locator('.storageDonutSegment')).toHaveCount(0)
