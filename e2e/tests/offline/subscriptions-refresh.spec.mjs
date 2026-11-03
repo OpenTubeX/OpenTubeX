@@ -116,14 +116,15 @@ function profileWithDailyLimit(limit) {
 }
 
 /**
- * @param {(index: number) => number} delayFor per channel response delay
+ * @param {import('@playwright/test').Page | import('@playwright/test').BrowserContext} page
+ * @param {(index: number) => number | Promise<number>} delayFor per channel response delay
  */
 async function routeFeeds(page, delayFor, feedFor = rssFeed) {
   await page.route(/^https?:\/\//, abortUnmockedRequest)
 
   await page.route('**/feeds/videos.xml**', async (route, request) => {
     const index = channelIndexFromUrl(request.url())
-    const delay = delayFor(index)
+    const delay = await delayFor(index)
 
     if (delay > 0) {
       await new Promise(resolve => setTimeout(resolve, delay))
@@ -831,8 +832,20 @@ test.describe('cancelling a subscription feed refresh', () => {
 
 test.describe('cancelling an automatic subscription feed refresh', () => {
   const channelCount = 12
+  /** @type {(delayFor: (index: number) => number) => void} */
+  let chooseFeedDelays
 
   test.use({
+    // A slow startup can start the automatic refresh before the test body
+    // runs, and its feeds would reach unmocked endpoints. Route them from
+    // launch and hold them until the test chooses their delays.
+    // eslint-disable-next-line no-empty-pattern -- Playwright requires a fixture object
+    onPhase: async ({}, use) => {
+      const chosen = new Promise(resolve => { chooseFeedDelays = resolve })
+      await use(async (phase, _page, electronApp) => {
+        if (phase === 'electronConnected') await routeFeeds(electronApp.context(), async index => (await chosen)(index))
+      })
+    },
     seed: {
       settings: {
         ...commonSettings,
@@ -846,7 +859,7 @@ test.describe('cancelling an automatic subscription feed refresh', () => {
   })
 
   test('shows persistent progress in a toast without the global progress bar', async ({ page }) => {
-    await routeFeeds(page, (index) => index === 0 ? 0 : 8_000)
+    chooseFeedDelays((index) => index === 0 ? 0 : 8_000)
     await goTo(page, 'history')
 
     const refreshToast = page.getByTestId('subscription-refresh-toast')
@@ -906,7 +919,7 @@ test.describe('cancelling an automatic subscription feed refresh', () => {
 
   test('resets the timer instead of immediately refreshing again', async ({ page }) => {
     let requestCount = 0
-    await routeFeeds(page, () => {
+    chooseFeedDelays(() => {
       requestCount++
       return 4_000
     })
