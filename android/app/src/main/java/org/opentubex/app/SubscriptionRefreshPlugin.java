@@ -29,6 +29,7 @@ public class SubscriptionRefreshPlugin extends Plugin {
     // Original title lookups use the network, so they must not block other plugin calls.
     private static final ExecutorService UPLOADS = Executors.newSingleThreadExecutor();
     private BroadcastReceiver cancellationReceiver;
+    private BroadcastReceiver notificationsQueuedReceiver;
     private Consumer<Boolean> rendererActiveListener;
     private volatile String rendererToken;
     private boolean destroyed;
@@ -97,6 +98,18 @@ public class SubscriptionRefreshPlugin extends Plugin {
             new IntentFilter(SubscriptionRefreshCancelReceiver.ACTION_CANCELLED),
             ContextCompat.RECEIVER_NOT_EXPORTED
         );
+        notificationsQueuedReceiver = new BroadcastReceiver() {
+            @Override
+            public void onReceive(Context context, Intent intent) {
+                notifyListeners("notificationsQueued", new JSObject());
+            }
+        };
+        ContextCompat.registerReceiver(
+            getContext(),
+            notificationsQueuedReceiver,
+            new IntentFilter(UploadNotifications.ACTION_QUEUED),
+            ContextCompat.RECEIVER_NOT_EXPORTED
+        );
     }
 
     @Override
@@ -120,6 +133,10 @@ public class SubscriptionRefreshPlugin extends Plugin {
         if (cancellationReceiver != null) {
             getContext().unregisterReceiver(cancellationReceiver);
             cancellationReceiver = null;
+        }
+        if (notificationsQueuedReceiver != null) {
+            getContext().unregisterReceiver(notificationsQueuedReceiver);
+            notificationsQueuedReceiver = null;
         }
         super.handleOnDestroy();
     }

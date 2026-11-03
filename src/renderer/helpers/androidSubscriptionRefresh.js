@@ -134,6 +134,13 @@ export function forgetAndroidSubscriptionRefreshFingerprints(channelIds) {
   return SubscriptionRefresh.forgetFingerprints(channelIds ? { channelIds } : {})
 }
 
+/** Android queued notifications for the visible app, for example from a background refresh. */
+export async function addAndroidNotificationsQueuedListener(listener) {
+  if (!SubscriptionRefresh) return () => {}
+  const handle = await SubscriptionRefresh.addListener('notificationsQueued', listener)
+  return () => handle.remove()
+}
+
 export async function addAndroidSubscriptionRefreshCancelledListener(listener) {
   if (!SubscriptionRefresh) return () => {}
   const handle = await SubscriptionRefresh.addListener('cancelled', listener)

@@ -91,6 +91,7 @@ import FtNotificationList from './FtNotificationList.vue'
 
 import { usePhoneLayout } from '../../composables/usePhoneLayout'
 import { useScrollClamp } from '../../composables/useScrollClamp'
+import { addAndroidNotificationsQueuedListener } from '../../helpers/androidSubscriptionRefresh'
 import {
   collectNotificationHistory,
   notificationHistory,
@@ -167,6 +168,7 @@ function handleVisibilityChange() {
 
 let removeListener = null
 let removeInAppListener = null
+let unmounted = false
 onMounted(async () => {
   let updated = false
   removeListener = notificationHistory.onUpdated(value => {
@@ -174,12 +176,19 @@ onMounted(async () => {
     entries.value = value
   })
   if (process.env.IS_ELECTRON) removeInAppListener = window.ftElectron.notificationHistory.onShowInApp(showInAppNotification)
+  if (process.env.IS_CAPACITOR) {
+    addAndroidNotificationsQueuedListener(collectNotificationHistory).then(remove => {
+      if (unmounted) remove()
+      else removeInAppListener = remove
+    })
+  }
   document.addEventListener('visibilitychange', handleVisibilityChange)
   await collectNotificationHistory()
   const initial = await notificationHistory.list()
   if (!updated) entries.value = initial
 })
 onBeforeUnmount(() => {
+  unmounted = true
   removeListener?.()
   removeInAppListener?.()
   document.removeEventListener('visibilitychange', handleVisibilityChange)

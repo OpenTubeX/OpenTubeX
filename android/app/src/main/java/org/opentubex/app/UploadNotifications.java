@@ -42,6 +42,7 @@ final class UploadNotifications {
     private static final String CONFIGURATION_KEY = "configuration";
     private static final String STATE_FILE = "upload-notifications.json";
     private static final String SHOWN_FILE = "shown-upload-notifications.json";
+    static final String ACTION_QUEUED = "org.opentubex.app.action.UPLOAD_NOTIFICATIONS_QUEUED";
     // Matches the in-app notification history limit.
     private static final int SHOWN_LIMIT = 100;
     // Loads notification thumbnails one at a time; the thread ends when idle.
@@ -157,7 +158,11 @@ final class UploadNotifications {
                 android.util.Log.w("OpenTubeXUploads", "Unable to record a shown upload notification", error);
             }
         }
-        if (inApp) return;
+        if (inApp) {
+            // The visible app shows it, also when a background refresh finds it.
+            context.sendBroadcast(new Intent(ACTION_QUEUED).setPackage(context.getPackageName()));
+            return;
+        }
         try {
             show(context, title, body, url(feedType, upload.getString("id")), silent, thumbnail);
         } catch (RuntimeException error) {

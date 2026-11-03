@@ -70,7 +70,7 @@ test('notifications appear in the app while it is visible and in the system othe
     // While the app is visible, Android leaves the notification to the app.
     await observe([visible, seed])
     assert.doesNotMatch(systemNotifications(), new RegExp(`Upload ${visible}`))
-    await page.evaluate(() => document.dispatchEvent(new Event('visibilitychange')))
+    // Android tells the app, like after a background refresh that finishes while it is open.
     await expect.poll(() => toastShown(`New video from Alpha Channel: Upload ${visible}`)).toBe(true)
     await expect(page.getByRole('button', { name: 'Notifications (1 unread)', exact: true })).toBeVisible()
 
