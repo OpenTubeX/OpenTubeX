@@ -82,10 +82,24 @@ export function setupSubscriptionAutoRefreshIpc({ backgroundSubscriptions, updat
     webContents.once('destroyed', () => releaseOwner(webContents))
   }
 
-  ipcMain.handle(IpcChannels.SUBSCRIPTION_AUTO_REFRESH_ACQUIRE, async (event, tabId, feedTab) => {
+  // A failed acquisition restores the background work, so a concurrent one
+  // must not leave the background before that
+  let acquisition = Promise.resolve(false)
+  ipcMain.handle(IpcChannels.SUBSCRIPTION_AUTO_REFRESH_ACQUIRE, (event, tabId, feedTab) => {
     // The renderer that asked can reload or crash while this waits
     trackRendererLifecycle(event.sender)
     const generation = rendererGenerations.get(event.sender)
+    acquisition = acquisition.catch(() => {}).then(() => acquire(event, generation, tabId, feedTab))
+    return acquisition
+  })
+
+  /**
+   * @param {import('electron').IpcMainInvokeEvent} event
+   * @param {number} generation
+   * @param {unknown} tabId
+   * @param {unknown} feedTab
+   */
+  async function acquire(event, generation, tabId, feedTab) {
     const canAcquire = () => {
       const manager = TabManager.getFromWebContents(event.sender)
       return manager != null &&
@@ -131,7 +145,7 @@ export function setupSubscriptionAutoRefreshIpc({ backgroundSubscriptions, updat
     subscriptionAutoRefreshProgress = 0
     broadcastSubscriptionAutoRefreshState()
     return true
-  })
+  }
 
   ipcMain.handle(IpcChannels.SUBSCRIPTION_AUTO_REFRESH_GET_STATE, (event) => {
     if (!isOpenTubeXUrl(event.senderFrame.url)) {

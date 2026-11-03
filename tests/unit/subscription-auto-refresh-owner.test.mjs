@@ -8,6 +8,8 @@ const handlers = new Map()
 const listeners = new Map()
 const windows = []
 let visibilityUpdates = 0
+// The background state the main process last asked for, with every window hidden
+let background = false
 
 const [refresh, { IpcChannels }] = await importWithStubs(
   [sourceUrl('src/main/subscriptionAutoRefresh.js'), sourceUrl('src/constants.js')],
@@ -27,8 +29,16 @@ const [refresh, { IpcChannels }] = await importWithStubs(
 
 let setBackground = async () => {}
 refresh.setupSubscriptionAutoRefreshIpc({
-  backgroundSubscriptions: { setBackground: background => setBackground(background) },
-  updateBackgroundSubscriptionVisibility: () => visibilityUpdates++,
+  backgroundSubscriptions: {
+    setBackground: value => {
+      background = value
+      return setBackground(value)
+    },
+  },
+  updateBackgroundSubscriptionVisibility: () => {
+    visibilityUpdates++
+    background = !refresh.isSubscriptionAutoRefreshInProgress()
+  },
 })
 
 let nextId = 1
@@ -96,6 +106,28 @@ for (const [name, lose] of [
     await release(owner)
   })
 }
+
+test('a failed acquisition does not restore background work for a refresh that another window acquires', async () => {
+  const first = createWindow()
+  const second = createWindow()
+  const leaveForeground = []
+  setBackground = () => new Promise(resolve => leaveForeground.push(resolve))
+  const acquiring = [acquire(first), acquire(second)]
+  await new Promise(resolve => setImmediate(resolve))
+
+  first.emit('did-start-navigation', {}, 'app://bundle/index.html', false, true)
+  let settled = false
+  Promise.all(acquiring).then(() => { settled = true })
+  while (!settled) {
+    leaveForeground.splice(0).forEach(resolve => resolve())
+    await new Promise(resolve => setImmediate(resolve))
+  }
+  setBackground = async () => {}
+
+  assert.deepEqual(await Promise.all(acquiring), [false, true])
+  assert.equal(background, false)
+  await release(second)
+})
 
 test('in-page navigation keeps the refresh running', async () => {
   const owner = createWindow()
