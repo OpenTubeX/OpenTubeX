@@ -2352,8 +2352,9 @@ test('shows an upcoming external stream before formats are available', async ({ 
   await expect(page.locator(`${activeTab} .externalMediaExtra`)).toContainText('Release date')
   await expect(page.locator(`${activeTab} .externalMediaExtra`)).toContainText('1 Oct 2026')
   const description = page.locator(`${activeTab} .externalMediaDescription`)
-  await description.getByRole('button', { name: 'Show more' }).click()
+  // Short metadata-only descriptions show in full without a Show more button.
   await expect(description).toContainText('Creative Commons')
+  await expect(description.getByRole('button', { name: 'Show more' })).toHaveCount(0)
   await expect(page.locator(`${activeTab} .videoPlayer`)).toHaveCount(0)
 })
 
