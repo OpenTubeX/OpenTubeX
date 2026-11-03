@@ -77,9 +77,10 @@
 
 .infoActionsContainer {
   display: flex;
-  gap: 30px;
+  gap: 10px;
   justify-content: space-between;
   align-items: center;
+  align-self: flex-end;
 }
 
 .infoActionsContainer:empty {
@@ -257,7 +258,7 @@
   .infoActionsContainer {
     flex-direction: row-reverse;
     justify-content: left;
-    gap: 10px;
+    align-self: stretch;
   }
 }
 
