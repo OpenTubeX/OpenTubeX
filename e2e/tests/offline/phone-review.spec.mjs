@@ -190,11 +190,15 @@ test('description preview summarizes metadata as chips', async ({ app, page }) =
   await expect(preview).toHaveAccessibleDescription(`Remote HTML description ${disclosure.label} Music 2 Games 1 Video Tags 12`)
 
   // Local API descriptions are formatted text runs, so they contain markup too.
-  await watch.evaluate(vm => { vm.videoDescription = '<b>Music &amp; games</b> by <a href="https://www.youtube.com/channel/UC1">Channel</a>' })
+  await watch.evaluate(vm => { vm.videoDescriptionHtml = ''; vm.videoDescription = '<b>Music &amp; games</b> by <a href="https://www.youtube.com/channel/UC1">Channel</a>' })
   await expect(preview.locator('.phoneDescriptionExcerpt')).toHaveText('Music & games by Channel')
 
-  // Metadata alone still offers the description sheet.
-  await watch.evaluate(vm => { vm.videoDescription = ''; vm.videoDescriptionHtml = ''; vm.videoMusicTracks = []; vm.videoTags = []; vm.contentDisclosures = [] })
+  // Invidious sends plain text alongside escaped HTML, so literal angle brackets survive.
+  await watch.evaluate(vm => { vm.videoDescription = 'Press <Ctrl>'; vm.videoDescriptionHtml = 'Press &lt;Ctrl&gt;' })
+  await expect(preview.locator('.phoneDescriptionExcerpt')).toHaveText('Press <Ctrl>')
+
+  // Metadata alone still offers the description sheet, even without any description value.
+  await watch.evaluate(vm => { vm.videoDescription = null; vm.videoDescriptionHtml = ''; vm.videoMusicTracks = []; vm.videoTags = []; vm.contentDisclosures = [] })
   await expect(preview.locator('.phoneDescriptionExcerpt')).toHaveCount(0)
   await expect(preview.locator('.phoneDescriptionChip')).toHaveText(['Games1'])
   await preview.click()

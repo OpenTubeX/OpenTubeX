@@ -73,10 +73,11 @@ const { t } = useI18n()
 const id = useId()
 
 const excerpt = computed(() => {
-  // Both props can hold markup, e.g. formatted text runs from the local API.
+  // Prefer the escaped HTML (Invidious), since `description` is plain text there.
+  // Without it, `description` can hold markup, e.g. formatted text runs from the local API.
   // Template contents stay inert while extracting text from remote HTML.
   const template = document.createElement('template')
-  template.innerHTML = props.description.trim() ? props.description : props.descriptionHtml
+  template.innerHTML = props.descriptionHtml || props.description || ''
   return (template.content.textContent ?? '').replaceAll(/\s+/g, ' ').trim()
 })
 
