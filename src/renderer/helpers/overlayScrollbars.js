@@ -156,6 +156,9 @@ function create(element) {
   const vertical = createScrollbar('y')
   const scrollbars = [horizontal, vertical]
   const clickScroll = !process.env.IS_CAPACITOR && element.matches('[data-scrollbar-click-scroll]')
+  // Windowed lists estimate rows that never mounted, so their range can grow
+  // after a scroll to the end mounts the last rows.
+  const keepEnd = !isPage && element.matches('[data-scrollbar-keep-end]')
   let updateFrame = null
   let reportedStatic = false
 
@@ -216,8 +219,10 @@ function create(element) {
     }
 
     // A container scrolled to its end stays there while its viewport resizes,
-    // also through intermediate layouts that shortened its range.
-    if (!isPage && instance.atEnd && sizes.y.client !== instance.clientHeight &&
+    // also through intermediate layouts that shortened its range, and with
+    // `keepEnd` while its content grows.
+    if (!isPage && instance.atEnd &&
+      (sizes.y.client !== instance.clientHeight || (keepEnd && ranges.y > instance.range)) &&
       scrollElement.scrollTop < ranges.y - SCROLL_BOUNDARY_TOLERANCE) {
       scrollElement.scrollTop = ranges.y
     }

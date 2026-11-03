@@ -166,14 +166,17 @@ test('short portrait fullscreen keeps panel actions reachable', { tag: '@scale' 
   const scroller = queue.locator('.queueItems')
   await expect(queue).toBeVisible()
   await expect(player.locator('.fullscreenDockSheet[open]')).toHaveCSS('background-color', await queue.evaluate(element => getComputedStyle(element).backgroundColor))
-  // Rows mount with their real heights near the end, and wrapped rows are
-  // taller than the estimate, so keep scrolling until the last row renders.
-  await expect.poll(() => scroller.evaluate(element => {
-    element.scrollTop = element.scrollHeight
-    return !element.querySelector('.queueItem:last-child').classList.contains('windowedListShell') &&
-      element.scrollTop + element.clientHeight >= element.scrollHeight - 1
-  })).toBe(true)
+  // Wrapped rows mount taller than the estimate of rows that never mounted,
+  // yet one scroll to the end must reach the end.
+  await scroller.evaluate(element => { element.scrollTop = element.scrollHeight })
+  const lastRow = scroller.locator('.queueItem').last()
+  await expect(lastRow).not.toHaveClass(/windowedListShell/)
   await expectScrollAtRenderedEnd(scroller)
+  // The short dock can be shorter than one row, so check where the last row ends.
+  await expect.poll(() => scroller.evaluate(element => {
+    const row = element.querySelector('.queueItem:last-child').getBoundingClientRect()
+    return Math.abs(row.bottom - element.getBoundingClientRect().bottom)
+  })).toBeLessThanOrEqual(1)
   await expect.poll(async () => {
     const content = await queue.boundingBox()
     const dock = await actions.boundingBox()

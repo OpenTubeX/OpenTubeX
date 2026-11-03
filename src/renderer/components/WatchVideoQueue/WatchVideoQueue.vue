@@ -79,6 +79,7 @@
       ref="queueItems"
       v-overlay-scrollbars
       class="queueItems"
+      data-scrollbar-keep-end
     >
       <TransitionGroup
         ref="queueContent"
