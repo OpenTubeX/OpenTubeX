@@ -1050,17 +1050,20 @@ for (const width of [1600, 480]) {
 
     test('selects in switch columns have equal spacing above and below', async ({ page }) => {
       const section = await goToSettingsSection(page, 'distraction')
-      const select = section.getByRole('combobox', { name: /AI video summaries/i })
-      await select.scrollIntoViewIfNeeded()
-      const gaps = await select.evaluate(element => {
-        const control = element.closest('.select')
-        const field = element.getBoundingClientRect()
-        const before = control.previousElementSibling.getBoundingClientRect()
-        const after = control.nextElementSibling.getBoundingClientRect()
-        return { above: field.top - before.bottom, below: after.top - field.bottom }
-      })
-      expect(gaps.above).toBeGreaterThan(0)
-      expect(gaps.above).toBeCloseTo(gaps.below, 0)
+      // Adjacent selects keep the same spacing as a select between switches.
+      for (const name of ['AI video summaries', 'Video descriptions']) {
+        const select = section.getByRole('combobox', { name, exact: true })
+        await select.scrollIntoViewIfNeeded()
+        const gaps = await select.evaluate(element => {
+          const control = element.closest('.select')
+          const field = element.getBoundingClientRect()
+          const before = control.previousElementSibling.getBoundingClientRect()
+          const after = control.nextElementSibling.getBoundingClientRect()
+          return { above: field.top - before.bottom, below: after.top - field.bottom }
+        })
+        expect(gaps.above, name).toBeGreaterThan(0)
+        expect(gaps.above, name).toBeCloseTo(gaps.below, 0)
+      }
     })
 
     test('uses the subscription column width for refresh interval labels', async ({ page }) => {

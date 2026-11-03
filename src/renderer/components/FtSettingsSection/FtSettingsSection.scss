@@ -78,6 +78,11 @@
   row-gap: 0;
 }
 
+/* Flex items keep both margins, so a select after another select drops its top margin to keep one row gap. */
+:deep(.switchColumn > .select + .select) {
+  margin-block-start: 0;
+}
+
 :deep(.switchColumn .pure-material-slider) {
   box-sizing: border-box;
   inline-size: min(380px, calc(100% - 16px));
