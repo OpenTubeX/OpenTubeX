@@ -55,8 +55,13 @@ export function useRssFeedAutoRefresh(dataReady) {
         schedule()
         return
       }
-      // A manual refresh sets the next deadline once it finishes
-      if (rssFeedsRefreshing.value || interval.value <= 0) return
+      if (interval.value <= 0) return
+      // A running refresh counts as this one. It sets the next deadline again if
+      // it refreshes every feed, and a partial or cancelled one keeps this one.
+      if (rssFeedsRefreshing.value) {
+        setRssFeedsNextAutoRefresh(Date.now() + interval.value)
+        return
+      }
 
       // Claimed before the refresh, which can fail or be replaced by a manual one
       setRssFeedsNextAutoRefresh(Date.now() + interval.value)

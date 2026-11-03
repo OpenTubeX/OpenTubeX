@@ -1095,6 +1095,20 @@ test.describe('with new items', () => {
       .toHaveText(['Brand new VOD', 'Second new VOD', 'Newest VOD', 'Older VOD'])
     await expect.poll(nextRefresh).toBeGreaterThan(Date.now() + 29 * 60000)
 
+    // Reaching the deadline during a refresh that ends without moving it, such
+    // as a cancelled one, still schedules the next refresh
+    await page.route(RSS_URL, () => {})
+    await header.getByRole('button', { name: /^Refresh RSS/ }).click()
+    await expect(header.getByRole('button', { name: 'Cancel Refresh' })).toBeVisible()
+    await page.evaluate(() => {
+      localStorage.setItem('rssFeedsNextAutoRefresh', String(Date.now() - 1000))
+      window.dispatchEvent(new StorageEvent('storage', { key: 'rssFeedsNextAutoRefresh' }))
+    })
+    await expect.poll(nextRefresh).toBeGreaterThan(Date.now() + 29 * 60000)
+    await header.getByRole('button', { name: 'Cancel Refresh' }).click()
+    await expect(header.getByRole('button', { name: /^Refresh RSS/ })).toBeVisible()
+    expect(await nextRefresh()).toBeGreaterThan(Date.now() + 29 * 60000)
+
     // Turning it off stops the refreshes
     await page.evaluate(() => window.$store.dispatch('updateRssFeedsAutoRefreshInterval', '0'))
     await expect.poll(nextRefresh).toBe(0)

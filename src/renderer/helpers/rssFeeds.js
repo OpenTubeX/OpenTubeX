@@ -445,6 +445,8 @@ export const rssFeedsNextAutoRefresh = shallowRef(loadRssFeedsNextAutoRefresh())
 let refreshedFeedUrls = new Set()
 let seenHistory = loadSeenHistory()
 let activeRefresh = null
+/** Names this window's running refresh to the others */
+let activeRefreshLockName = null
 /** Feeds that were added or retried on their own during the active refresh, with their items cached */
 let loadedDuringRefresh = new Set()
 
@@ -477,7 +479,8 @@ if (typeof window !== 'undefined') {
     refreshChannel = new BroadcastChannel('opentubex-rss-feeds-refresh')
     refreshChannel.addEventListener('message', ({ data }) => {
       if (data?.type === 'started' && typeof data.lockName === 'string') trackOtherWindowRefresh(data.lockName)
-      if (data?.type === 'cancel') activeRefresh?.abort()
+      // Only the refreshes the other window saw, not one that started since
+      if (data?.type === 'cancel' && data.lockNames?.includes(activeRefreshLockName)) activeRefresh?.abort()
     })
     navigator.locks.query().then(({ held }) => {
       for (const { name } of held ?? []) {
@@ -683,6 +686,7 @@ export async function refreshRssFeeds(feeds, { automatic = false, cachedUrls = n
   const finished = new Promise(resolve => { finish = resolve })
   if (refreshChannel) {
     const lockName = REFRESH_LOCK_PREFIX + crypto.randomUUID()
+    activeRefreshLockName = lockName
     navigator.locks.request(lockName, () => {
       refreshChannel.postMessage({ type: 'started', lockName })
       return finished
@@ -741,6 +745,7 @@ export async function refreshRssFeeds(feeds, { automatic = false, cachedUrls = n
     progress.finish()
     if (activeRefresh === controller) {
       activeRefresh = null
+      activeRefreshLockName = null
       refreshingHere.value = false
     }
   }
@@ -752,7 +757,7 @@ export async function refreshRssFeeds(feeds, { automatic = false, cachedUrls = n
  */
 export function cancelRssFeedsRefresh() {
   activeRefresh?.abort()
-  refreshChannel?.postMessage({ type: 'cancel' })
+  refreshChannel?.postMessage({ type: 'cancel', lockNames: [...otherWindowRefreshes.value] })
 }
 
 export function openRssFeedManager() {
