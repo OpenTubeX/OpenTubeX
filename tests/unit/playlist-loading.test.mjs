@@ -24,7 +24,7 @@ async function fixture(records, { settingsDelay = false, settingsError = null } 
   const errors = []
   // Observe detached writes too, so the test reports their errors as assertions.
   const pending = []
-  for (const method of ['create', 'upsert', 'delete']) {
+  for (const method of ['create', 'upsert', 'update', 'delete']) {
     const original = DBPlaylistHandlers[method].bind(DBPlaylistHandlers)
     DBPlaylistHandlers[method] = (...args) => {
       const result = original(...args).catch(error => { errors.push(error) })
@@ -129,7 +129,7 @@ test('a failed protection repair does not hide loaded playlists', async () => {
   const records = [playlist('watchLater', 'Watch Later', true), playlist('custom', 'My playlist')]
   const { module, errors, handlers, load } = await fixture(records)
   const failure = new Error('Storage temporarily unavailable')
-  handlers.upsert = async () => { throw failure }
+  handlers.update = async () => { throw failure }
 
   await load()
 
@@ -148,4 +148,43 @@ test('bulk playlist deletion removes every requested editable record and preserv
   assert.deepEqual(await db.playlists.findAsync({}).sort({ _id: 1 }), [protectedPlaylist, retained])
   assert.equal(await handlers.deleteMultiple(['first', 'second']), 0)
   assert.deepEqual(await db.playlists.findAsync({}).sort({ _id: 1 }), [protectedPlaylist, retained])
+})
+
+test('metadata and last-played updates never recreate a playlist deleted in another window', async () => {
+  const { db, dispatch, module, load } = await fixture([playlist('custom', 'Custom')])
+  await load()
+  await db.playlists.removeAsync({ _id: 'custom' })
+
+  assert.equal(await dispatch('updatePlaylist', { _id: 'custom', playlistName: 'Renamed' }), false)
+  await dispatch('updatePlaylistLastPlayedAt', { _id: 'custom' })
+
+  assert.equal(await db.playlists.findOneAsync({ _id: 'custom' }), null)
+  assert.equal(module.state.playlists.find(item => item._id === 'custom').playlistName, 'Custom')
+})
+
+test('loading repairs a playlist stored without videos', async () => {
+  const { db, errors, module, load } = await fixture([playlist('custom', 'Custom'), { _id: 'partial', lastPlayedAt: 5 }])
+  await load()
+  assert.deepEqual(errors, [])
+  assert.deepEqual(Array.from(module.state.playlists.find(item => item._id === 'partial').videos), [])
+  assert.deepEqual(Array.from((await db.playlists.findOneAsync({ _id: 'partial' })).videos), [])
+})
+
+test('reordering keeps entries another window added or removed meanwhile', async () => {
+  const video = id => ({ videoId: id, playlistItemId: `item-${id}`, timeAdded: 1, type: 'video' })
+  const { db, handlers } = await fixture([{ ...playlist('custom', 'Custom'), videos: ['a', 'b', 'c', 'd'].map(video) }])
+  // The drag started from a, b, c, d. Meanwhile b was removed and e added.
+  await db.playlists.updateAsync({ _id: 'custom' }, { $pull: { videos: { playlistItemId: 'item-b' } } })
+  await db.playlists.updateAsync({ _id: 'custom' }, { $push: { videos: video('e') } })
+
+  const saved = await handlers.reorderVideos('custom', 5, ['item-c', 'item-a', 'item-b', 'item-d'])
+  const expected = ['c', 'a', 'd', 'e']
+  assert.deepEqual(Array.from(saved, item => item.videoId), expected)
+  const stored = await db.playlists.findOneAsync({ _id: 'custom' })
+  assert.deepEqual(Array.from(stored.videos, item => item.videoId), expected)
+  assert.equal(stored.lastUpdatedAt, 5)
+
+  await db.playlists.removeAsync({ _id: 'custom' })
+  assert.equal(await handlers.reorderVideos('custom', 6, ['item-a']), null)
+  assert.equal(await db.playlists.findOneAsync({ _id: 'custom' }), null)
 })

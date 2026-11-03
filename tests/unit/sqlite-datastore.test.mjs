@@ -438,6 +438,30 @@ test('array edits write only the members they add, remove or move', async (t) =>
   assert.deepEqual(await saved(), [...expected, video('last')])
 })
 
+test('reads skip members unless the query, projection or sort uses them', async (t) => {
+  const driver = createNodeSqliteDriver(':memory:')
+  t.after(() => driver.close())
+  let memberReads = 0
+  const store = new SqliteDatastore({
+    childField: 'videos',
+    driver: { ...driver, execute (statements, transaction) { memberReads += statements.filter(([sql]) => sql.includes('FROM children')).length; return driver.execute(statements, transaction) } },
+  })
+  const videos = [video('a'), video('b')]
+  await store.insertAsync({ _id: 'p', playlistName: 'P', videos })
+  const reads = async read => {
+    memberReads = 0
+    const result = await read()
+    return [result, memberReads]
+  }
+
+  assert.deepEqual(await reads(() => store.findOneAsync({ _id: 'p' }, { videos: 0 })), [{ _id: 'p', playlistName: 'P' }, 0])
+  assert.deepEqual(await reads(() => store.findOneAsync({ _id: 'p' }, { playlistName: 1 })), [{ _id: 'p', playlistName: 'P' }, 0])
+  assert.deepEqual(await reads(() => store.findOneAsync({ _id: 'p' }, { videos: 1 })), [{ _id: 'p', videos }, 1])
+  assert.deepEqual(await reads(() => store.findOneAsync({ _id: 'p' })), [{ _id: 'p', playlistName: 'P', videos }, 1])
+  assert.deepEqual(await reads(() => store.findAsync({ 'videos.videoId': 'b' }, { playlistName: 1 })), [[{ _id: 'p', playlistName: 'P' }], 1])
+  assert.deepEqual(await reads(() => store.findMembersAsync('p', 'videoId', ['b', 'missing'])), [[video('b')], 1])
+})
+
 test('operations through an asynchronous driver run one at a time', async (t) => {
   const store = new SqliteDatastore({ driver: slowDriver(createNodeSqliteDriver(':memory:')), childField: 'videos' })
   t.after(() => store.driver.close())
@@ -574,6 +598,43 @@ test('existing NeDB handler tests pass against SQLite', async () => {
     'sync-seen-videos',
   ].map(name => `tests/unit/${name}.test.mjs`)
   await promisify(execFile)(process.execPath, ['--import', './tests/helpers/nedb-as-sqlite.mjs', '--test', ...files], { maxBuffer: 64 * 1024 * 1024 })
+})
+
+test('updateManyAsync applies updates in order in one transaction', async (t) => {
+  const driver = createNodeSqliteDriver(':memory:')
+  t.after(() => driver.close())
+  const calls = []
+  const store = new SqliteDatastore({ driver: { ...driver, execute (statements, transaction) { calls.push(transaction); return driver.execute(statements, transaction) } }, indexes: ['videoId'] })
+  await store.insertAsync([{ _id: 'a', videoId: 'a', title: 'A' }, { _id: 'b', videoId: 'b', title: 'B', pending: 1 }])
+  calls.length = 0
+
+  const results = await store.updateManyAsync([
+    { query: { videoId: 'new' }, update: { videoId: 'new', title: 'Inserted' }, options: { upsert: true } },
+    // Later updates see earlier ones, including documents inserted by this batch
+    { query: { videoId: 'new' }, update: { $set: { title: 'Updated' } }, options: { returnUpdatedDocs: true } },
+    { query: { videoId: 'a' }, update: { $set: { videoId: 'moved' } } },
+    { query: { videoId: 'moved' }, update: { $set: { title: 'Moved' } } },
+    { query: { videoId: 'a' }, update: { $set: { title: 'Lost' } } },
+    { query: { videoId: 'b', pending: 1 }, update: { $unset: { pending: true } } },
+    { query: { videoId: 'b', pending: 1 }, update: { $set: { title: 'Lost' } } },
+    { query: { _id: 'b' }, update: { $set: { 'nested.path': 1 } } },
+    { query: { _id: 'b' }, update: { $inc: { title: 1 } } },
+  ])
+  assert.deepEqual(results.map(result => result.error ? 'error' : result.numAffected), [1, 1, 1, 1, 0, 1, 0, 'error', 'error'])
+  assert.equal(results[0].upsert, true)
+  assert.equal(results[1].affectedDocuments.title, 'Updated')
+  assert.deepEqual(calls, [undefined, true], 'one read for every update and one commit')
+  const stored = await store.findAsync({}, { _id: 0 }).sort({ videoId: 1 })
+  assert.deepEqual(stored, [{ videoId: 'b', title: 'B' }, { videoId: 'moved', title: 'Moved' }, { videoId: 'new', title: 'Updated' }])
+
+  // A batch that cannot be committed leaves every document unchanged
+  await assert.rejects(store.updateManyAsync([
+    { query: { videoId: 'b' }, update: { $set: { title: 'Changed' } } },
+    { query: { videoId: 'missing' }, update: { _id: 'a2', videoId: 'missing' }, options: { upsert: true } },
+    { query: { videoId: 'other' }, update: { _id: 'a', videoId: 'other' }, options: { upsert: true } },
+  ]))
+  assert.equal((await store.findOneAsync({ videoId: 'b' })).title, 'B')
+  assert.equal(await store.findOneAsync({ videoId: 'missing' }), null)
 })
 
 test('replaceManyAsync writes every document in one transaction', async (t) => {

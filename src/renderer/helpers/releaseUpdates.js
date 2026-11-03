@@ -4,13 +4,18 @@ const VERSION_PATTERN = /^v?(\d+)\.(\d+)\.(\d+)(?:-beta|-nightly-(\d+))?$/
 const NOTE_ITEM = /^(?:[-*+]|\d+[.)]) /m
 
 /**
- * Fetches every page of releases by following GitHub's next-page links.
+ * Fetches pages of releases by following GitHub's next-page links, until a page
+ * reaches a release of the installed channel that is not newer than the
+ * installed build. GitHub lists a stable release ahead of the nightlies built
+ * on its version, so only releases of the same channel are in version order.
  *
  * @param {string} initialUrl
  * @param {typeof fetch} fetchPage
+ * @param {string} installedVersion
  * @returns {Promise<object[]>}
  */
-export async function fetchReleasePages(initialUrl, fetchPage) {
+export async function fetchReleasePages(initialUrl, fetchPage, installedVersion) {
+  const installed = parseVersion(installedVersion)
   const releases = []
   let pageUrl = initialUrl
 
@@ -20,7 +25,17 @@ export async function fetchReleasePages(initialUrl, fetchPage) {
       throw new Error(`GitHub returned ${response.status}`)
     }
 
-    releases.push(...await response.json())
+    /** @type {Array<{ tag_name?: string }>} */
+    const page = await response.json()
+    releases.push(...page)
+    const reachedInstalled = installed === null || page.some((release) => {
+      const version = parseVersion(release.tag_name ?? '')
+      return version?.channel === installed.channel && compareVersionParts(version.parts, installed.parts) <= 0
+    })
+    if (reachedInstalled) {
+      break
+    }
+
     const nextLink = response.headers.get('link')
       ?.split(',')
       .find((link) => /\brel="next"/.test(link))

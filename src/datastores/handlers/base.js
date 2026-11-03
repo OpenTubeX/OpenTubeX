@@ -155,6 +155,45 @@ function historyReplacement(record) {
   return fields
 }
 
+// Bounds each transaction and, on mobile, each bridge message.
+const HISTORY_UPDATE_BATCH_SIZE = 100
+
+/**
+ * Applies history updates in batches, each committed in one transaction.
+ * @param {{ query: object, update: object, options?: object }[]} updates
+ * @returns {Promise<({ numAffected: number, affectedDocuments: unknown } | { error: Error })[]>}
+ *   each update's result, or its error, which is also every update's in a batch that could not be saved
+ */
+async function updateHistoryRecords(updates) {
+  const results = []
+  for (let index = 0; index < updates.length; index += HISTORY_UPDATE_BATCH_SIZE) {
+    const batch = updates.slice(index, index + HISTORY_UPDATE_BATCH_SIZE)
+    try {
+      if (typeof db.history.updateManyAsync === 'function') {
+        results.push(...await db.history.updateManyAsync(batch))
+      } else {
+        // NeDB, used by unit tests, cannot batch them.
+        for (const { query, update, options } of batch) {
+          try {
+            results.push(await db.history.updateAsync(query, update, options))
+          } catch (error) {
+            results.push({ error })
+          }
+        }
+      }
+    } catch (error) {
+      results.push(...batch.map(() => ({ error })))
+    }
+  }
+  return results
+}
+
+/** Throws the first failed update's error. */
+function throwHistoryUpdateError(results) {
+  const failed = results.find(result => result.error)
+  if (failed) throw failed.error
+}
+
 class History {
   static migrationPromise = null
 
@@ -185,41 +224,29 @@ class History {
   static updateSubscriptionState({ records = [], unseenVideo, metadata, acknowledgedRepairs }) {
     return Settings.runSeenStateUpdate(async () => {
       const updatedRecords = []
-      if (acknowledgedRepairs) {
-        let failedCount = 0
-        for (const repair of acknowledgedRepairs) {
+      if (acknowledgedRepairs || metadata) {
+        const updates = acknowledgedRepairs
           // Only clear the repair that reached the server. Another repair or
           // deletion while an upload was pending must remain untouched.
-          try {
-            const { affectedDocuments } = await db.history.updateAsync(
-              { videoId: repair.videoId, lengthSeconds: repair.lengthSeconds, pendingDurationRepair: repair.pendingDurationRepair },
-              { $unset: { pendingDurationRepair: true } },
-              { returnUpdatedDocs: true }
-            )
-            if (affectedDocuments) updatedRecords.push(affectedDocuments)
-          } catch (error) {
-            console.error(error)
-            failedCount++
-          }
-        }
-        return { records: updatedRecords, seenVideos: null, failedCount }
-      }
-      if (metadata) {
+          ? acknowledgedRepairs.map(repair => ({
+              query: { videoId: repair.videoId, lengthSeconds: repair.lengthSeconds, pendingDurationRepair: repair.pendingDurationRepair },
+              update: { $unset: { pendingDurationRepair: true } },
+            }))
+          : metadata.flatMap(patch => {
+              const fields = {}
+              for (const key of ['title', 'author', 'authorId', 'description', 'published', 'lengthSeconds', 'isLive', 'liveNow', 'isUpcoming', 'pendingDurationRepair']) {
+                if (patch[key] !== undefined) fields[key] = patch[key]
+              }
+              return Object.keys(fields).length === 0 ? [] : [{ query: { videoId: patch.videoId }, update: { $set: fields } }]
+            })
         let failedCount = 0
-        for (const patch of metadata) {
-          const fields = {}
-          for (const key of ['title', 'author', 'authorId', 'description', 'published', 'lengthSeconds', 'isLive', 'liveNow', 'isUpcoming', 'pendingDurationRepair']) {
-            if (patch[key] !== undefined) fields[key] = patch[key]
-          }
-          if (Object.keys(fields).length === 0) continue
-          try {
-            const { affectedDocuments } = await db.history.updateAsync(
-              { videoId: patch.videoId }, { $set: fields }, { returnUpdatedDocs: true }
-            )
-            if (affectedDocuments) updatedRecords.push(affectedDocuments)
-          } catch (error) {
+        const results = await updateHistoryRecords(updates.map(update => ({ ...update, options: { returnUpdatedDocs: true } })))
+        for (const { error, affectedDocuments } of results) {
+          if (error) {
             console.error(error)
             failedCount++
+          } else if (affectedDocuments) {
+            updatedRecords.push(affectedDocuments)
           }
         }
         return { records: updatedRecords, seenVideos: null, failedCount }
@@ -232,14 +259,12 @@ class History {
         )
         if (affectedDocuments) updatedRecords.push(affectedDocuments)
       } else {
-        for (const record of records) {
+        const results = await updateHistoryRecords(records.map(record => {
           const migratedRecord = historyReplacement(record)
-          const { affectedDocuments } = await db.history.updateAsync(
-            { videoId: migratedRecord.videoId }, migratedRecord,
-            { upsert: true, returnUpdatedDocs: true }
-          )
-          updatedRecords.push(affectedDocuments)
-        }
+          return { query: { videoId: migratedRecord.videoId }, update: migratedRecord, options: { upsert: true, returnUpdatedDocs: true } }
+        }))
+        throwHistoryUpdateError(results)
+        updatedRecords.push(...results.map(result => result.affectedDocuments))
       }
 
       let seenVideos = null
@@ -320,9 +345,9 @@ class History {
       ...updates,
       ...insertions.filter(record => stored.has(record.videoId) && !skipped.has(record.videoId)),
     ].map(historyReplacement)
-    for (const record of migratedUpdates) {
-      await db.history.updateAsync({ videoId: record.videoId }, record, { upsert: true })
-    }
+    throwHistoryUpdateError(await updateHistoryRecords(migratedUpdates.map(record => ({
+      query: { videoId: record.videoId }, update: record, options: { upsert: true },
+    }))))
     if (migratedInsertions.length > 0) {
       await db.history.insertAsync(migratedInsertions)
     }
@@ -353,29 +378,20 @@ class History {
     }
 
     const records = await db.history.findAsync({ isWatched: { $exists: false } })
-    const batchSize = 250
+    throwHistoryUpdateError(await updateHistoryRecords(records.map(record => {
+      const migratedRecord = migrateLegacyHistoryRecord(record)
+      const updates = { isWatched: migratedRecord.isWatched }
 
-    for (let i = 0; i < records.length; i += batchSize) {
-      const batch = records.slice(i, i + batchSize)
+      if (migratedRecord.watchProgress !== record.watchProgress) {
+        updates.watchProgress = migratedRecord.watchProgress
+      }
 
-      await Promise.all(batch.map(record => {
-        const migratedRecord = migrateLegacyHistoryRecord(record)
-        const updates = { isWatched: migratedRecord.isWatched }
+      if (migratedRecord.isLive !== record.isLive) {
+        updates.isLive = migratedRecord.isLive
+      }
 
-        if (migratedRecord.watchProgress !== record.watchProgress) {
-          updates.watchProgress = migratedRecord.watchProgress
-        }
-
-        if (migratedRecord.isLive !== record.isLive) {
-          updates.isLive = migratedRecord.isLive
-        }
-
-        return db.history.updateAsync(
-          { _id: record._id },
-          { $set: updates }
-        )
-      }))
-    }
+      return { query: { _id: record._id }, update: { $set: updates } }
+    })))
 
     if (records.length > 0) {
       await db.history.compactDatafileAsync()
@@ -840,6 +856,16 @@ class Playlists {
     return db.playlists.updateAsync({ _id: playlist._id }, { $set: playlist }, { upsert: true })
   }
 
+  /**
+   * Unlike `upsert`, this never recreates a playlist that was deleted, which
+   * a partial update would leave without its videos.
+   * @returns {Promise<boolean>} whether the playlist still existed
+   */
+  static async update(playlist) {
+    const { numAffected } = await db.playlists.updateAsync({ _id: playlist._id }, { $set: playlist })
+    return numAffected > 0
+  }
+
   /** Unlike `upsert`, this never recreates a playlist that was deleted */
   static async updateSortOrder(_id, sortOrder) {
     const { numAffected } = await db.playlists.updateAsync({ _id }, { $set: { sortOrder } }, { upsert: false })
@@ -979,11 +1005,15 @@ class Playlists {
   static async _insertVideos(_id, lastUpdatedAt, videos, deduplicate) {
     // Retry if another window changes the playlist between reading and saving it.
     for (let attempt = 0; attempt < 5; attempt++) {
-      const playlist = await db.playlists.findOneAsync({ _id })
+      // Appending needs neither the stored entries nor more than the matching
+      // ones for the duplicate check. Prepending rewrites them all.
+      let playlist = await db.playlists.findOneAsync({ _id }, { videos: 0 })
+      if (playlist?.addVideosToTop === true) playlist = await db.playlists.findOneAsync({ _id })
       if (!playlist) return { status: PlaylistVideoAddResult.PLAYLIST_MISSING }
       let inserted = videos
       if (deduplicate) {
-        const present = new Set(playlist.videos.map(video => video.videoId))
+        const stored = playlist.videos ?? await db.playlists.findMembersAsync(_id, 'videoId', [...new Set(videos.map(video => video.videoId))])
+        const present = new Set(stored.map(video => video.videoId))
         inserted = videos.filter(video => {
           if (present.has(video.videoId)) return false
           present.add(video.videoId)
@@ -1028,6 +1058,34 @@ class Playlists {
     throw new Error(`Unable to add videos to playlist ${_id}: repeated concurrent changes`)
   }
 
+  /**
+   * Puts the given entries into the given order, in the positions they hold
+   * now. Entries added since the order was taken keep their positions, and
+   * removed ones stay removed.
+   * @param {string} _id
+   * @param {number} lastUpdatedAt
+   * @param {string[]} playlistItemIds
+   * @returns {Promise<object[] | null>} the saved videos, or null when the playlist is gone
+   */
+  static async reorderVideos(_id, lastUpdatedAt, playlistItemIds) {
+    const order = new Map(playlistItemIds.map((id, index) => [id, index]))
+    // Retry if another window changes the playlist between reading and saving it.
+    for (let attempt = 0; attempt < 5; attempt++) {
+      const playlist = await db.playlists.findOneAsync({ _id })
+      if (!playlist) return null
+      const moved = playlist.videos.filter(video => order.has(video.playlistItemId))
+        .sort((a, b) => order.get(a.playlistItemId) - order.get(b.playlistItemId))
+      let next = 0
+      const videos = playlist.videos.map(video => order.has(video.playlistItemId) ? moved[next++] : video)
+      const { numAffected } = await db.playlists.updateAsync(
+        { _id, $where() { return Playlists._sameVideoEntries(this.videos, playlist.videos) } },
+        { $set: { videos, lastUpdatedAt } }
+      )
+      if (numAffected > 0) return videos
+    }
+    throw new Error(`Unable to reorder playlist ${_id}: repeated concurrent changes`)
+  }
+
   static delete(_id) {
     return db.playlists.removeAsync({ _id, protected: { $ne: true } })
   }
@@ -1068,11 +1126,7 @@ class Playlists {
   }
 
   static deleteAllVideosByPlaylistId(_id) {
-    return db.playlists.updateAsync(
-      { _id },
-      { $set: { videos: [] } },
-      { upsert: true }
-    )
+    return db.playlists.updateAsync({ _id }, { $set: { videos: [] } })
   }
 
   static deleteMultiple(ids) {
@@ -1103,10 +1157,9 @@ class SearchHistory {
     return resolvedEntry
   }
 
-  static async overwrite(records) {
-    await db.searchHistory.removeAsync({}, { multi: true })
-
-    await db.searchHistory.insertAsync(records)
+  static overwrite(records) {
+    // One transaction, so a failed import keeps the saved history
+    return db.searchHistory.replaceAllAsync(records)
   }
 
   static delete(_id) {
@@ -1336,6 +1389,11 @@ class TabSession {
 
   static async clear(sessionId = 'session') {
     return db.tabSession.removeAsync({ _id: sessionId })
+  }
+
+  /** Replaces every session in one transaction, so a failed write keeps the saved ones. */
+  static replaceAll(sessions) {
+    return db.tabSession.replaceAllAsync(sessions.map(({ sessionId, ...value }) => ({ _id: sessionId, value })))
   }
 
   static async clearAll() {

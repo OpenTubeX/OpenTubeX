@@ -8,6 +8,12 @@ import {
   migrateLegacyHistoryRecord,
 } from '../../helpers/history'
 
+// The datastore cannot index `timeWatched`, so its cleanup query reads every
+// record. Records without a watch time never match it.
+function hasExpiredHistory(records, cutoff) {
+  return records.some(record => record.timeWatched < cutoff)
+}
+
 const continueWatchingCache = new WeakMap()
 // Progress and last-viewed playlist saves keep every record's identity, channel
 // and watched status. Views derived from those skip the frequent playback saves.
@@ -69,12 +75,16 @@ const actions = {
   async grabHistory({ commit, rootGetters }) {
     try {
       const cutoff = getRetentionCutoff(rootGetters.getHistoryRetentionDays)
+      let results = await DBHistoryHandlers.find()
       if (cutoff !== null) {
-        await DBHistoryHandlers.deleteOlderThan(cutoff)
+        if (hasExpiredHistory(results, cutoff)) {
+          await DBHistoryHandlers.deleteOlderThan(cutoff)
+          // Other windows may have changed history during the cleanup, and the
+          // main process keeps expired entries they are playing.
+          results = await DBHistoryHandlers.find()
+        }
         removeExternalMediaPositionsBefore(cutoff)
       }
-
-      const results = await DBHistoryHandlers.find()
 
       const resultsById = {}
       results.forEach(video => {
@@ -168,16 +178,19 @@ const actions = {
     }
   },
 
-  async removeHistoryOlderThan({ commit }, days) {
+  async removeHistoryOlderThan({ commit, state }, days) {
     const cutoff = getRetentionCutoff(days)
     if (cutoff === null) {
       return 0
     }
 
     try {
-      const videoIds = await DBHistoryHandlers.deleteOlderThan(cutoff)
       removeExternalMediaPositionsBefore(cutoff)
-      commit('removeMultipleFromHistoryCache', videoIds)
+      // The cache mirrors the datastore, so skip its full scan when nothing expired.
+      if (!hasExpiredHistory(toRaw(state.historyCacheSorted), cutoff)) return 0
+      const videoIds = await DBHistoryHandlers.deleteOlderThan(cutoff)
+      // Every history mutation recomputes Home and History and schedules a sync.
+      if (videoIds.length > 0) commit('removeMultipleFromHistoryCache', videoIds)
       return videoIds.length
     } catch (errMessage) {
       console.error(errMessage)
@@ -325,19 +338,20 @@ const mutations = {
   },
 
   removeFromHistoryCacheById(state, videoId) {
-    for (let i = 0; i < state.historyCacheSorted.length; i++) {
-      if (state.historyCacheSorted[i].videoId === videoId) {
-        state.historyCacheSorted.splice(i, 1)
-        break
-      }
+    // Like upsertToHistoryCache, edit the raw array and publish it once.
+    const history = toRaw(state.historyCacheSorted)
+    const i = history.findIndex(record => record.videoId === videoId)
+    if (i !== -1) {
+      state.historyCacheSorted = history.slice(0, i).concat(history.slice(i + 1))
     }
 
     delete state.historyCacheById[videoId]
   },
 
   removeMultipleFromHistoryCache(state, videoIds) {
+    // Filtering through the proxy would store reactive proxies in the raw array.
     const videoIdSet = new Set(videoIds)
-    state.historyCacheSorted = state.historyCacheSorted.filter(record => !videoIdSet.has(record.videoId))
+    state.historyCacheSorted = toRaw(state.historyCacheSorted).filter(record => !videoIdSet.has(record.videoId))
 
     for (const videoId of videoIds) {
       delete state.historyCacheById[videoId]

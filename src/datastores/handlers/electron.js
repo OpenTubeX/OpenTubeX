@@ -255,6 +255,16 @@ class Playlists {
     })
   }
 
+  static update(playlist) {
+    return dbPlaylists(DBActions.PLAYLISTS.UPDATE, playlist, {
+      inWorker: playlist.videos?.length > LARGE_PLAYLIST_VIDEO_COUNT
+    })
+  }
+
+  static reorderVideos(_id, lastUpdatedAt, playlistItemIds) {
+    return dbPlaylists(DBActions.PLAYLISTS.REORDER_VIDEOS, { _id, lastUpdatedAt, playlistItemIds })
+  }
+
   static upsertVideoByPlaylistId(_id, lastUpdatedAt, videoData) {
     return dbPlaylists(
       DBActions.PLAYLISTS.UPSERT_VIDEO,

@@ -87,6 +87,13 @@ function isAppend(update, field) {
   return !references(others, field)
 }
 
+/** True when `projection` keeps `field`, following NeDB's projection rules. */
+function projects(projection = {}, field) {
+  const keys = Object.keys(projection).filter(key => key !== '_id')
+  if (keys.length === 0) return true
+  return projection[keys[0]] === 1 ? projection[field] === 1 : !Object.hasOwn(projection, field)
+}
+
 function isModifierUpdate(update) {
   return Object.keys(update).some(key => key.startsWith('$'))
 }
@@ -142,6 +149,16 @@ function memberDiffStatements(id, stored, serialized) {
   }
   for (const child of inserted) statements.push([SQL.insertChild, [id, position++, child]])
   return statements
+}
+
+/** The document an upsert inserts when nothing matches, as NeDB builds it. */
+function upsertedDocument(query, update) {
+  try {
+    model.checkObject(update)
+    return update
+  } catch {
+    return model.modify(model.deepCopy(query, true), update)
+  }
 }
 
 function uniqueViolation(key) {
@@ -431,8 +448,12 @@ export class SqliteDatastore {
       UNION ALL ${SELECT_DOCS} WHERE json_type(data, '$.${field}') = 'array'`
   }
 
-  /** Rows that can match `query`, using an index for simple equality lookups. */
-  _candidateRows(query) {
+  /**
+   * An indexed read for simple equality lookups in `query`, with a check for
+   * whether a document outside its rows can match, or null for a full scan.
+   * @returns {{ statement: Statement, mayMatch: (doc: object) => boolean } | null}
+   */
+  _indexedLookup(query) {
     for (const field of ['_id', ...this.indexes]) {
       if (!Object.hasOwn(query, field)) continue
       const value = query[field]
@@ -442,10 +463,18 @@ export class SqliteDatastore {
       const usable = field === '_id' ? isPrimitiveKey : item => typeof item === 'string'
       if (multiple ? !values.every(usable) : !usable(value)) continue
       const param = multiple ? JSON.stringify(values) : value
-      if (field === '_id') return this._query(multiple ? SQL.byIds : SQL.byId, [param])
-      return this._query(this._indexQuery(field, multiple), [param])
+      const matching = new Set(multiple ? values : [value])
+      return field === '_id'
+        ? { statement: [multiple ? SQL.byIds : SQL.byId, [param]], mayMatch: doc => matching.has(doc._id) }
+        : { statement: [this._indexQuery(field, multiple), [param]], mayMatch: doc => Array.isArray(doc[field]) || matching.has(doc[field]) }
     }
-    return this._query(SQL.all, [], true)
+    return null
+  }
+
+  /** Rows that can match `query`, using an index for simple equality lookups. */
+  _candidateRows(query) {
+    const lookup = this._indexedLookup(query)
+    return lookup ? this._query(...lookup.statement) : this._query(SQL.all, [], true)
   }
 
   /** @returns {Promise<{ id: unknown, doc: object, hasChildren: boolean }[]>} */
@@ -477,10 +506,44 @@ export class SqliteDatastore {
     return matches
   }
 
-  // Used by NeDB's Cursor
-  async _getCandidatesAsync(query) {
+  async _getCandidatesAsync(query, withChildren) {
     if (this.dropped) return []
-    return (await this._candidates(query, Boolean(this.childField))).map(candidate => candidate.doc)
+    return (await this._candidates(query, withChildren)).map(candidate => candidate.doc)
+  }
+
+  /**
+   * A NeDB cursor that loads the members of `childField` only when its query,
+   * projection or sort uses them, so reading playlist metadata skips the videos.
+   */
+  _cursor(query, execFn) {
+    const field = this.childField
+    const cursor = new Cursor({
+      executor: this.executor,
+      _getCandidatesAsync: query => this._getCandidatesAsync(query, Boolean(field) && (
+        projects(cursor._projection, field) || references(query, field) || references(cursor._sort, field)
+      )),
+    }, query, execFn)
+    return cursor
+  }
+
+  /**
+   * Members of `childField` in the document `id` whose `field` has one of
+   * `values`, read without the other members.
+   * @param {unknown} id
+   * @param {string} field
+   * @param {unknown[]} values
+   * @returns {Promise<object[]>}
+   */
+  findMembersAsync(id, field, values) {
+    return this._exclusive(async () => {
+      if (!FIELD_NAME.test(field)) throw new Error(`Unsupported member field: ${field}`)
+      if (this.dropped) return []
+      const rows = await this._query(
+        `SELECT data FROM children WHERE parent = ? AND json_extract(data, '$.${field}') IN (SELECT value FROM json_each(?))`,
+        [keyOf(id), JSON.stringify(values)]
+      )
+      return rows.map(([data]) => deserialize(data))
+    }, 'read')
   }
 
   /**
@@ -569,7 +632,7 @@ export class SqliteDatastore {
   }
 
   find(query = {}, projection = {}) {
-    return new Cursor(this, query).projection(projection)
+    return this._cursor(query).projection(projection)
   }
 
   findAsync(query = {}, projection = {}) {
@@ -577,7 +640,7 @@ export class SqliteDatastore {
   }
 
   findOneAsync(query = {}, projection = {}) {
-    return new Cursor(this, query, docs => docs.length === 1 ? docs[0] : null).projection(projection).limit(1)
+    return this._cursor(query, docs => docs.length === 1 ? docs[0] : null).projection(projection).limit(1)
   }
 
   async countAsync(query = {}) {
@@ -599,14 +662,7 @@ export class SqliteDatastore {
 
     const matches = await this._matches(query, withChildren, multi)
     if (matches.length === 0 && upsert) {
-      let toBeInserted
-      try {
-        model.checkObject(update)
-        toBeInserted = update
-      } catch {
-        toBeInserted = model.modify(model.deepCopy(query, true), update)
-      }
-      return { numAffected: 1, affectedDocuments: await this._insert(toBeInserted), upsert: true }
+      return { numAffected: 1, affectedDocuments: await this._insert(upsertedDocument(query, update)), upsert: true }
     }
 
     // Prepare every change before writing, as NeDB does, so an invalid
@@ -628,6 +684,85 @@ export class SqliteDatastore {
     if (!returnUpdatedDocs) return { numAffected: modifications.length, upsert: false, affectedDocuments: null }
     const updated = modifications.map(({ newDoc }) => model.deepCopy(newDoc))
     return { numAffected: modifications.length, affectedDocuments: multi ? updated : updated[0], upsert: false }
+  }
+
+  /**
+   * Applies `updateAsync` calls in order and commits them in one transaction,
+   * so a batch costs one disk sync instead of one per update. Each update sees
+   * the ones before it. An update that cannot be applied, such as one with an
+   * invalid modifier, is reported as `{ error }` and changes nothing; the
+   * others still apply. Members of `childField` are never read, so updates
+   * that use them, or replace or return a document that has them, fail.
+   * @param {{ query: object, update: object, options?: { multi?: boolean, upsert?: boolean, returnUpdatedDocs?: boolean } }[]} updates
+   * @returns {Promise<({ numAffected: number, affectedDocuments: unknown, upsert: boolean } | { error: Error })[]>}
+   */
+  updateManyAsync(updates) {
+    return this._exclusive(async () => {
+      // Read the indexed candidates of every update in one call.
+      const lookups = updates.map(({ query }) => this._indexedLookup(query))
+      const reads = lookups.filter(Boolean).map(lookup => lookup.statement)
+      const rowSets = reads.length ? await this.driver.execute(reads) : []
+      let read = 0
+      // Documents as this batch leaves them, by key. Stored members of
+      // `withMembers` documents are not loaded and stay untouched.
+      const written = new Map()
+      const inserted = new Set()
+      const withMembers = new Set()
+      const results = []
+      for (const [index, { query, update, options = {} }] of updates.entries()) {
+        const lookup = lookups[index]
+        const rows = lookup ? rowSets[read++] : await this._query(SQL.all, [], true)
+        try {
+          const { multi = false, upsert = false, returnUpdatedDocs = false } = options
+          const modifier = isModifierUpdate(update)
+          if (modifier) checkModifierPaths(update)
+          if (this.childField && (references(query, this.childField) || references(update, this.childField))) {
+            throw new Error('Batched updates cannot use members')
+          }
+          const candidates = rows.map(([id, data, hasChildren]) => {
+            if (hasChildren === 1) withMembers.add(id)
+            return { id, doc: written.get(id) ?? deserialize(data) }
+          })
+          const stored = new Set(rows.map(([id]) => id))
+          for (const [id, doc] of written) {
+            if (!stored.has(id) && (!lookup || lookup.mayMatch(doc))) candidates.push({ id, doc })
+          }
+          const matches = []
+          for (const candidate of candidates) {
+            if (!model.match(candidate.doc, query)) continue
+            matches.push(candidate)
+            if (!multi) break
+          }
+          if (matches.length === 0 && upsert) {
+            const { docs: [doc], keys: [id] } = this._prepareInsert([upsertedDocument(query, update)])
+            if (written.has(id)) throw uniqueViolation(id)
+            written.set(id, doc)
+            inserted.add(id)
+            results.push({ numAffected: 1, affectedDocuments: model.deepCopy(doc), upsert: true })
+            continue
+          }
+          if ((!modifier || returnUpdatedDocs) && matches.some(({ id }) => withMembers.has(id))) {
+            throw new Error('Batched updates cannot replace or return documents with members')
+          }
+          const modifications = matches.map(({ id, doc }) => {
+            const newDoc = model.modify(doc, update)
+            if (keyOf(newDoc._id) !== id) throw new Error('You cannot change a document\'s _id')
+            return { id, newDoc }
+          })
+          for (const { id, newDoc } of modifications) written.set(id, newDoc)
+          const updated = returnUpdatedDocs ? modifications.map(({ newDoc }) => model.deepCopy(newDoc)) : null
+          results.push({ numAffected: modifications.length, affectedDocuments: updated && (multi ? updated : updated[0]), upsert: false })
+        } catch (error) {
+          results.push({ error })
+        }
+      }
+      // A new document whose key is already stored fails the whole batch.
+      await this._execute([...written].flatMap(([id, doc]) => inserted.has(id)
+        ? this._insertStatements(id, doc)
+        : [[SQL.upsert, [id, model.serialize(doc), withMembers.has(id) ? 1 : 0]]]
+      ), true)
+      return results
+    })
   }
 
   removeAsync(query, options = {}) {

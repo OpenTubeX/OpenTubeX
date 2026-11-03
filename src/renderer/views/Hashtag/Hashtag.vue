@@ -212,10 +212,15 @@ watch(() => route.params.hashtag, () => {
   getHashtag()
 })
 
+/**
+ * Incremented for each opened hashtag, so responses for a hashtag the page
+ * has since left are ignored. Fallback requests keep the hashtag's generation.
+ */
+let requestGeneration = 0
+
 function resetData() {
   isLoading.value = true
   unsupported.value = false
-  hashtag.value = ''
   hashtagFeed.value = null
   hashtagContinuationData.value = null
   currentTab.value = 'videos'
@@ -232,29 +237,35 @@ function resetData() {
 }
 
 async function getHashtag() {
+  const generation = ++requestGeneration
   // Hashtag pages only exist in lowercase, querying them with the casing used in
   // a video description (e.g. `#ShiorinSketch`) returns no videos at all
   hashtag.value = decodeURIComponent(route.params.hashtag).toLowerCase()
   if (process.env.SUPPORTS_LOCAL_API && backendPreference.value === 'local') {
-    await getLocalHashtag()
+    await getLocalHashtag(generation)
   } else {
-    await getInvidiousHashtag()
+    await getInvidiousHashtag(generation)
   }
-  setTabTitle(`#${hashtag.value}`)
+  if (generation === requestGeneration) {
+    setTabTitle(`#${hashtag.value}`)
+  }
 }
 
 /**
+ * @param {number} generation
  * @param {number} page
  */
-async function getInvidiousHashtag(page = 1) {
+async function getInvidiousHashtag(generation, page = 1) {
   try {
     const fetchedVideos = await getHashtagInvidious(hashtag.value, page)
+    if (generation !== requestGeneration) return
     isLoading.value = false
     apiUsed.value = 'invidious'
     videos.value = videos.value.concat(fetchedVideos)
     hasMoreVideos.value = fetchedVideos.length > 0
     pageNumber.value += 1
   } catch (error) {
+    if (generation !== requestGeneration) return
     console.error(error)
     const isUnsupported = error instanceof YatteeUnsupportedError
     if (!isUnsupported) {
@@ -263,7 +274,7 @@ async function getInvidiousHashtag(page = 1) {
     if (process.env.SUPPORTS_LOCAL_API && usesInvidiousApi(backendPreference.value) && backendFallback.value) {
       showInvidiousFallbackToast(backendPreference.value)
       resetData()
-      getLocalHashtag()
+      getLocalHashtag(generation)
     } else {
       unsupported.value = isUnsupported
       isLoading.value = false
@@ -271,9 +282,13 @@ async function getInvidiousHashtag(page = 1) {
   }
 }
 
-async function getLocalHashtag() {
+/**
+ * @param {number} generation
+ */
+async function getLocalHashtag(generation) {
   try {
     const hashtagData = await getHashtagLocal(hashtag.value)
+    if (generation !== requestGeneration) return
     counts.value = parseLocalHashtagHeader(hashtagData.header)
     videos.value = hashtagData.videos.map((video) => parseLocalListVideo(video)).filter(_ => _)
     apiUsed.value = 'local'
@@ -282,34 +297,40 @@ async function getLocalHashtag() {
     hasMoreVideos.value = hashtagContinuationData.value !== null
     isLoading.value = false
   } catch (error) {
+    if (generation !== requestGeneration) return
     console.error(error)
     const errorMessage = t('Local API Error (Click to copy)')
     showApiErrorToast(errorMessage, error)
     if (backendPreference.value === 'local' && backendFallback.value) {
       showToast({ message: t('Falling back to Invidious API'), icon: ['fas', 'exchange-alt'] })
       resetData()
-      getInvidiousHashtag()
+      getInvidiousHashtag(generation)
     } else {
       isLoading.value = false
     }
   }
 }
 
-async function getLocalHashtagMore() {
+/**
+ * @param {number} generation
+ */
+async function getLocalHashtagMore(generation) {
   try {
     const continuation = await hashtagContinuationData.value.getContinuation()
+    if (generation !== requestGeneration) return
     const newVideos = continuation.videos.map((video) => parseLocalListVideo(video)).filter(_ => _)
     hashtagContinuationData.value = continuation.has_continuation ? continuation : null
     hasMoreVideos.value = hashtagContinuationData.value !== null
     videos.value = videos.value.concat(newVideos)
   } catch (error) {
+    if (generation !== requestGeneration) return
     console.error(error)
     const errorMessage = t('Local API Error (Click to copy)')
     showApiErrorToast(errorMessage, error)
     if (backendPreference.value === 'local' && backendFallback.value) {
       showToast({ message: t('Falling back to Invidious API'), icon: ['fas', 'exchange-alt'] })
       resetData()
-      getInvidiousHashtag()
+      getInvidiousHashtag(generation)
     } else {
       isLoading.value = false
     }
@@ -374,17 +395,20 @@ async function handleFetchMore() {
     return
   }
 
+  const generation = requestGeneration
   isLoadingMore.value = true
   try {
     if (currentTab.value === 'shorts') {
       await getLocalHashtagShortsMore()
     } else if (process.env.SUPPORTS_LOCAL_API && apiUsed.value === 'local') {
-      await getLocalHashtagMore()
+      await getLocalHashtagMore(generation)
     } else if (apiUsed.value === 'invidious') {
-      await getInvidiousHashtag(pageNumber.value)
+      await getInvidiousHashtag(generation, pageNumber.value)
     }
   } finally {
-    isLoadingMore.value = false
+    if (generation === requestGeneration) {
+      isLoadingMore.value = false
+    }
   }
 }
 </script>

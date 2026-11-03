@@ -1,3 +1,4 @@
+import { toRaw } from 'vue'
 import { applyPlaylistRepairUpdate } from '../../../playlistRepair'
 import { PlaylistVideoAddResult } from '../../../constants'
 import { DBPlaylistHandlers } from '../../../datastores/handlers/index'
@@ -235,7 +236,8 @@ const actions = {
     playlist.lastUpdatedAt = Date.now()
 
     try {
-      await DBPlaylistHandlers.upsert(playlist)
+      // Another window may have deleted the playlist, which must stay deleted
+      if (!await DBPlaylistHandlers.update(playlist)) return false
       commit('upsertPlaylistToList', playlist)
       return true
     } catch (errMessage) {
@@ -254,14 +256,26 @@ const actions = {
     return true
   },
 
+  /**
+   * Saves a new order of the given entries. Entries added or removed by
+   * another window meanwhile are kept as they are.
+   * @returns {Promise<boolean>} whether the playlist still existed
+   */
+  async reorderPlaylistVideos({ commit }, { _id, playlistItemIds }) {
+    const lastUpdatedAt = Date.now()
+    const videos = await DBPlaylistHandlers.reorderVideos(_id, lastUpdatedAt, playlistItemIds)
+    if (videos === null) return false
+    commit('upsertPlaylistToList', { _id, lastUpdatedAt, videos })
+    return true
+  },
+
   async updatePlaylistLastPlayedAt({ commit }, playlist) {
     // This action does NOT update `lastUpdatedAt` on purpose
     // Only `lastPlayedAt` should be updated
     playlist.lastPlayedAt = Date.now()
 
     try {
-      await DBPlaylistHandlers.upsert(playlist)
-      commit('upsertPlaylistToList', playlist)
+      if (await DBPlaylistHandlers.update(playlist)) commit('upsertPlaylistToList', playlist)
     } catch (errMessage) {
       console.error(errMessage)
     }
@@ -403,6 +417,11 @@ const actions = {
             playlist.lastUpdatedAt = dateNow
             anythingUpdated = true
           }
+          // Older versions could recreate a deleted playlist without videos
+          if (!Array.isArray(playlist.videos)) {
+            playlist.videos = []
+            anythingUpdated = true
+          }
           playlist.videos.forEach((v) => {
             // Ensure all videos has `timeAdded` property
             if (v.timeAdded == null) {
@@ -434,7 +453,7 @@ const actions = {
           })
           // Save updated playlist object
           if (anythingUpdated) {
-            repairs.push(DBPlaylistHandlers.upsert(playlist))
+            repairs.push(DBPlaylistHandlers.update(playlist))
           }
         })
         // A failed repair write must be logged, not left as an unhandled rejection.
@@ -449,7 +468,7 @@ const actions = {
           if (playlist != null && playlist.protected !== defaultPlaylist.protected) {
             playlist.protected = defaultPlaylist.protected
             try {
-              await DBPlaylistHandlers.upsert(playlist)
+              await DBPlaylistHandlers.update(playlist)
             } catch (errMessage) {
               console.error(errMessage)
             }
@@ -580,7 +599,8 @@ function dropPlaylistVideos(state, playlist, matches) {
   const removed = []
   const kept = []
 
-  for (const video of playlist.videos) {
+  // Iterating the proxy would store reactive proxies in the new raw array.
+  for (const video of toRaw(playlist.videos)) {
     (matches(video) ? removed : kept).push(video)
   }
 
@@ -628,7 +648,8 @@ const mutations = {
     const playlist = state.playlists.find(playlist => playlist._id === payload._id)
     if (playlist) {
       if (payload.addVideosToTop === true) {
-        playlist.videos.unshift(payload.videoData)
+        // Unshifting through the proxy would trigger every index it shifts.
+        playlist.videos = [payload.videoData, ...toRaw(playlist.videos)]
       } else {
         playlist.videos.push(payload.videoData)
       }
@@ -640,9 +661,10 @@ const mutations = {
   addVideos(state, payload) {
     const playlist = state.playlists.find(playlist => playlist._id === payload._id)
     if (playlist) {
+      const videos = toRaw(playlist.videos)
       playlist.videos = payload.addVideosToTop === true
-        ? payload.videos.concat(playlist.videos)
-        : playlist.videos.concat(payload.videos)
+        ? payload.videos.concat(videos)
+        : videos.concat(payload.videos)
       playlist.lastUpdatedAt = payload.lastUpdatedAt
       incrementPlaylistVideoCounts(state.playlistVideoCounts, payload.videos)
     }
@@ -699,7 +721,7 @@ const mutations = {
       }
     }
 
-    state.playlists = state.playlists.filter(isKept)
+    state.playlists = toRaw(state.playlists).filter(isKept)
   },
 
   setAllPlaylists(state, payload) {

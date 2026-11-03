@@ -77,6 +77,7 @@ test.describe('Invidious instance list refresh', () => {
   let listRequested
 
   test.use({
+    seed: { settings: { backendPreference: 'invidious' } },
     // eslint-disable-next-line no-empty-pattern -- Playwright requires a fixture object
     onPhase: async ({}, use) => use(async (phase, _page, electronApp) => {
       if (phase !== 'electronConnected') return
@@ -95,6 +96,39 @@ test.describe('Invidious instance list refresh', () => {
     fulfill([['refreshed.invidious.test', { api: true, cors: true, uri: refreshed }]])
     await expect.poll(() => page.evaluate(() => window.$store.getters.getInvidiousInstancesList)).toEqual([refreshed])
     expect(await page.evaluate(() => window.$store.getters.getCurrentInvidiousInstance)).toBe('https://chosen.invidious.test')
+  })
+})
+
+test.describe('Invidious instance list without Invidious API use', () => {
+  let listRequests = 0
+  const refreshed = 'https://refreshed.invidious.test'
+
+  test.use({
+    // eslint-disable-next-line no-empty-pattern -- Playwright requires a fixture object
+    onPhase: async ({}, use) => use(async (phase, _page, electronApp) => {
+      if (phase !== 'electronConnected') return
+      listRequests = 0
+      await electronApp.context().route('https://api.invidious.io/instances.json', route => {
+        listRequests++
+        return route.fulfill({ json: [['refreshed.invidious.test', { api: true, cors: true, uri: refreshed }]] })
+      })
+    })
+  })
+
+  test('does not contact api.invidious.io when only the local API is used', async ({ page }) => {
+    // The list would be requested right after startup picks a random instance.
+    await expect.poll(() => page.evaluate(() => window.$store.getters.getCurrentInvidiousInstance)).not.toBe('')
+    await page.evaluate(() => new Promise(resolve => setTimeout(resolve, 1000)))
+    expect(listRequests).toBe(0)
+  })
+
+  test('fetches the list once Invidious is selected without a restart', async ({ page }) => {
+    await expect.poll(() => page.evaluate(() => window.$store.getters.getCurrentInvidiousInstance)).not.toBe('')
+    await page.evaluate(() => window.$store.dispatch('updateBackendPreference', 'invidious'))
+    await expect.poll(() => page.evaluate(() => window.$store.getters.getCurrentInvidiousInstance)).toBe(refreshed)
+    await page.evaluate(() => window.$store.dispatch('updateBackendFallback', true))
+    await page.evaluate(() => window.$store.dispatch('updateBackendPreference', 'local'))
+    expect(listRequests).toBe(1)
   })
 })
 

@@ -5,6 +5,7 @@ import { readFile } from 'node:fs/promises'
 import { strToU8, zipSync } from 'fflate'
 import { previewBackupImport, previewTakeoutImport, parseTakeoutWatchHistory } from '../../src/renderer/helpers/import-preview.js'
 import { mergeBackupProfile, mergeBackupPlaylist } from '../../src/renderer/helpers/unifiedBackup.js'
+import { processToBeAddedPlaylistVideo } from '../../src/renderer/helpers/playlists.js'
 import { forEachTakeoutImportEntry, listYouTubeTakeoutZipEntries } from '../../src/renderer/helpers/youtube-takeout-zip.js'
 
 const counts = row => [row.added, row.existing, row.skipped]
@@ -137,8 +138,8 @@ test('duplicate backup identities accumulate subscriptions and videos promised b
     backupBusy: { value: false }, backupData: { value: data }, selectedBackupSections: { value: ['profiles', 'playlists'] },
     DBProfileHandlers: { find: async () => [], upsert: async record => profiles.set(record._id, record) },
     DBPlaylistHandlers: { find: async () => [] },
-    mergeBackupProfile, mergeBackupPlaylist, normalizeImportedPlaylistThumbnail: async () => {},
-    store: { dispatch: async (action, record) => { if (action === 'updatePlaylist') playlists.set(record._id, record); return true } },
+    mergeBackupProfile, mergeBackupPlaylist, processToBeAddedPlaylistVideo, normalizeImportedPlaylistThumbnail: async () => {},
+    store: { dispatch: async (action, record) => { if (action === 'updatePlaylist' || action === 'importPlaylist') playlists.set(record._id, record); return true } },
     compactAllDatastores: async () => true, closeBackupImport() {}, showToast() {}, t: key => key,
   })
   vm.runInContext(componentSection('async function importUnifiedBackup()', 'const showTakeoutImport'), context)

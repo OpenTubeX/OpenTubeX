@@ -29,6 +29,19 @@ test('normalizes selected Invidious URLs before constructing image proxies', () 
   }
 })
 
+test('sends decoded credentials in the Basic authorization header', () => {
+  for (const [input, credentials] of [
+    ['https://us er:p@ss w0rd@invidious.test/', 'us er:p@ss w0rd'],
+    ['https://user:%E2%82%AC100%25@invidious.test/', 'user:€100%'],
+    ['https://user:50%zz@invidious.test/', 'user:50%zz']
+  ]) {
+    const state = {}
+    mutations.setCurrentInvidiousInstance(state, input)
+    assert.equal(state.currentInvidiousInstanceUrl, 'https://invidious.test')
+    assert.equal(state.currentInvidiousInstanceAuthorization, `Basic ${Buffer.from(credentials).toString('base64')}`)
+  }
+})
+
 test('preserves incomplete and unsupported Invidious input', () => {
   for (const input of ['', 'https://', 'not a URL']) {
     const state = {}

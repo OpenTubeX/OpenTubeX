@@ -1785,13 +1785,25 @@ onMounted(async () => {
     await store.dispatch('setRandomCurrentInvidiousInstance')
   }
 
-  const startupInvidiousInstance = store.getters.getCurrentInvidiousInstance
-  store.dispatch('fetchInvidiousInstances').then(() => {
-    // Keep an instance chosen while the list was loading
-    if (defaultInvidiousInstance.value === '' && store.getters.getCurrentInvidiousInstance === startupInvidiousInstance) {
-      store.dispatch('setRandomCurrentInvidiousInstance')
-    }
-  })
+  // Refresh the bundled list once a random instance serves API requests,
+  // including when a settings change makes it do so
+  let invidiousInstancesRefreshed = false
+  watch(() => {
+    const { backendPreference, backendFallback } = store.state.settings
+    // Yattee requests go to its own server, never to a random instance
+    return defaultInvidiousInstance.value === '' && backendPreference !== 'yattee' &&
+      (!process.env.SUPPORTS_LOCAL_API || backendPreference === 'invidious' || (backendPreference === 'local' && backendFallback))
+  }, (usesRandomInstance) => {
+    if (!usesRandomInstance || invidiousInstancesRefreshed) return
+    invidiousInstancesRefreshed = true
+    const previousInvidiousInstance = store.getters.getCurrentInvidiousInstance
+    store.dispatch('fetchInvidiousInstances').then(() => {
+      // Keep an instance chosen while the list was loading
+      if (defaultInvidiousInstance.value === '' && store.getters.getCurrentInvidiousInstance === previousInvidiousInstance) {
+        store.dispatch('setRandomCurrentInvidiousInstance')
+      }
+    })
+  }, { immediate: true })
 
   profilesReady.then(async (hasExistingProfiles) => {
     const hasExistingInstallation = tutorialState.hasExistingSettings === true || hasExistingProfiles === true
@@ -2376,10 +2388,11 @@ async function checkForNewUpdates() {
     return
   }
 
-  const releasesUrl = 'https://api.github.com/repos/OpenTubeX/OpenTubeX/releases?per_page=100'
+  // Each release lists dozens of assets, so fetch small pages and stop at the installed release
+  const releasesUrl = 'https://api.github.com/repos/OpenTubeX/OpenTubeX/releases?per_page=5'
 
   try {
-    const availableReleases = await fetchReleasePages(releasesUrl, fetch)
+    const availableReleases = await fetchReleasePages(releasesUrl, fetch, packageDetails.version)
     const releases = findUpdateReleases(availableReleases, packageDetails.version)
     if (releases.length === 0) {
       return

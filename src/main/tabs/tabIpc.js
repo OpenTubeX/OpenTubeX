@@ -76,13 +76,12 @@ export async function setupTabsIPC(options = {}) {
     const localBounds = new Map(Array.from(assignments, ([liveManager, session]) => (
       [session.sessionId, liveManager._getCurrentBounds()]
     )))
-    await replaceAllTabSessions(validSessions.map(session => ({
+    return replaceAllTabSessions(validSessions.map(session => ({
       ...session,
       ...(localBounds.get(session.sessionId) && {
         bounds: localBounds.get(session.sessionId)
       })
     })))
-    return true
   })
 
   ipcMain.handle(IpcChannels.TABS_CREATE, async (event, options) => {

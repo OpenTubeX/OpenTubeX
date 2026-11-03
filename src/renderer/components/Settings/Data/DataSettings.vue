@@ -520,8 +520,15 @@ async function importUnifiedBackup() {
       const currentPlaylists = new Map((await DBPlaylistHandlers.find()).map(playlist => [playlist._id, playlist]))
       for (const playlist of data.playlists) {
         await normalizeImportedPlaylistThumbnail(playlist)
-        const merged = mergeBackupPlaylist(currentPlaylists.get(playlist._id), playlist)
-        if (await store.dispatch('updatePlaylist', merged) !== true) throw new Error('Could not restore playlist')
+        const current = currentPlaylists.get(playlist._id)
+        const merged = mergeBackupPlaylist(current, playlist)
+        // Reordering finds entries by playlistItemId, so restored entries need one
+        merged.videos.forEach(processToBeAddedPlaylistVideo)
+        if (current === undefined) {
+          await store.dispatch('importPlaylist', { ...merged, lastUpdatedAt: Date.now() })
+        } else if (await store.dispatch('updatePlaylist', merged) !== true) {
+          throw new Error('Could not restore playlist')
+        }
         currentPlaylists.set(playlist._id, merged)
       }
     }
@@ -1874,8 +1881,10 @@ async function importPlaylistDatabase(data) {
   ]
 
   const newPlaylists = []
-  // Later picked files must see these writes
-  const updates = []
+  // Later picked files must see these writes. One update per existing
+  // playlist, so records merged into the same playlist build on each other.
+  /** @type {Map<string, object>} */
+  const updates = new Map()
   let importedCount = 0
 
   for (const playlistData of playlists) {
@@ -1944,18 +1953,17 @@ async function importPlaylistDatabase(data) {
 
     importedCount++
 
-    const existingPlaylist = allPlaylists.value.find((playlist) => {
-      if (playlistObject._id != null && playlist._id === playlistObject._id) {
-        return true
-      }
+    // An exact ID match wins over an earlier playlist with the same name
+    const targetPlaylist = (playlistObject._id != null &&
+      allPlaylists.value.find(playlist => playlist._id === playlistObject._id)) ||
+      allPlaylists.value.find(playlist => playlist.playlistName === playlistObject.playlistName)
 
-      return playlist.playlistName === playlistObject.playlistName
-    })
-
-    if (existingPlaylist === undefined) {
+    if (targetPlaylist === undefined) {
       newPlaylists.push(playlistObject)
       return
     }
+
+    const existingPlaylist = { ...targetPlaylist, ...updates.get(targetPlaylist._id) }
 
     /** @type {Set<string> | undefined} */
     let existingVideoIdSet
@@ -2014,7 +2022,8 @@ async function importPlaylistDatabase(data) {
       ? playlistVideos.slice(existingPlaylist.videos.length).concat(playlistVideos.slice(0, existingPlaylist.videos.length))
       : playlistVideos
     // Update playlist's `lastUpdatedAt` & other attributes
-    updates.push(store.dispatch('updatePlaylist', {
+    updates.set(existingPlaylist._id, {
+      ...updates.get(existingPlaylist._id),
       _id: existingPlaylist._id,
       // Only these attributes would be updated (besides videos)
       playlistName: playlistObject.playlistName,
@@ -2024,17 +2033,20 @@ async function importPlaylistDatabase(data) {
       ...(Object.hasOwn(playlistObject, 'shuffleByDefault') ? { shuffleByDefault: playlistObject.shuffleByDefault } : {}),
       ...(Object.hasOwn(playlistObject, 'sortOrder') ? { sortOrder: playlistObject.sortOrder } : {}),
       videos: orderedVideos
-    }))
+    })
   })
 
-  await Promise.all(updates)
+  const saved = await Promise.all(Array.from(updates.values(), playlist => store.dispatch('updatePlaylist', playlist)))
+
+  if (importedCount > 0 && newPlaylists.length > 0) {
+    await store.dispatch('addPlaylists', newPlaylists)
+  }
+  // A playlist deleted in another window meanwhile isn't recreated, so report
+  // that part of the import failed after saving the rest
+  if (saved.some(result => result !== true)) throw new Error('Could not import playlists')
 
   if (importedCount === 0) {
     return
-  }
-
-  if (newPlaylists.length > 0) {
-    await store.dispatch('addPlaylists', newPlaylists)
   }
 
   showToast({

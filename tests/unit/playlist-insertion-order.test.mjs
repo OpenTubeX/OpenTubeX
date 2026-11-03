@@ -2,15 +2,15 @@ import assert from 'node:assert/strict'
 import { readFile } from 'node:fs/promises'
 import test from 'node:test'
 import vm from 'node:vm'
-import Datastore from '@seald-io/nedb'
 import { SqliteDatastore } from '../../src/datastores/sqlite.js'
 import { createNodeSqliteDriver } from '../../src/datastores/sqliteNode.js'
 import { DBActions, IpcChannels, PlaylistVideoAddResult, SyncEvents } from '../../src/constants.js'
 import { incrementPlaylistVideoCounts } from '../../src/renderer/helpers/playlist-video-counts.js'
+import { toRaw } from 'vue'
 
 const source = await readFile(new URL('../../src/datastores/handlers/base.js', import.meta.url), 'utf8')
 const storeSource = await readFile(new URL('../../src/renderer/store/modules/playlists.js', import.meta.url), 'utf8')
-const mutations = vm.runInNewContext(storeSource.slice(storeSource.indexOf('const mutations ='), storeSource.indexOf('\nexport default')) + '\nmutations', { incrementPlaylistVideoCounts })
+const mutations = vm.runInNewContext(storeSource.slice(storeSource.indexOf('const mutations ='), storeSource.indexOf('\nexport default')) + '\nmutations', { incrementPlaylistVideoCounts, toRaw })
 const componentSource = await readFile(new URL('../../src/renderer/components/PlaylistInfo/PlaylistInfo.vue', import.meta.url), 'utf8')
 const refreshSource = componentSource.slice(componentSource.indexOf('async function addMissingVideos()'), componentSource.indexOf('async function savePlaylistInfo()'))
 const mainSource = await readFile(new URL('../../src/main/index.js', import.meta.url), 'utf8')
@@ -35,7 +35,7 @@ function storeActions(handlers) {
 const loadPlaylists = db => vm.runInNewContext(source.slice(source.indexOf('class Playlists {'), source.indexOf('\nclass SearchHistory {')) + '\nPlaylists', { db, PlaylistVideoAddResult })
 
 async function fixture(addVideosToTop) {
-  const db = { playlists: new Datastore({ inMemoryOnly: true }) }
+  const db = { playlists: new SqliteDatastore({ driver: createNodeSqliteDriver(':memory:'), childField: 'videos' }) }
   const Playlists = loadPlaylists(db)
   const playlist = { _id: 'custom', videos: [{ videoId: 'first' }, { videoId: 'second' }], ...(addVideosToTop === undefined ? {} : { addVideosToTop }) }
   await db.playlists.insertAsync(playlist)
@@ -377,31 +377,51 @@ test('an insertion retry does not overwrite a newer playlist timestamp', async (
   assert.equal((await db.playlists.findOneAsync({ _id: 'custom' })).lastUpdatedAt, 100)
 })
 
-test('adding one video to a large playlist appends one row without rewriting or comparing existing entries', async t => {
+test('adding videos to a large playlist reads and writes only the entries it needs', async t => {
   const driver = createNodeSqliteDriver(':memory:')
   t.after(() => driver.close())
   const statements = []
+  let memberRows = 0
   const playlists = new SqliteDatastore({
     childField: 'videos',
-    driver: { ...driver, execute (list, transaction) { statements.push(...list.map(([sql]) => sql)); return driver.execute(list, transaction) } },
+    driver: {
+      ...driver,
+      async execute (list, transaction) {
+        statements.push(...list.map(([sql]) => sql))
+        const results = await driver.execute(list, transaction)
+        list.forEach(([sql], index) => { if (/^SELECT (parent, )?data FROM children/.test(sql)) memberRows += results[index].length })
+        return results
+      },
+    },
   })
   const Playlists = loadPlaylists({ playlists })
-  const videos = Array.from({ length: 2000 }, (_, index) => ({ videoId: `video-${index}`, playlistItemId: `item-${index}`, title: `Video ${index}` }))
+  const videos = Array.from({ length: 10000 }, (_, index) => ({ videoId: `video-${index}`, playlistItemId: `item-${index}`, title: `Video ${index}` }))
   await playlists.insertAsync({ _id: 'large', playlistName: 'Large', videos, lastUpdatedAt: 1 })
-  statements.length = 0
-  const result = await Playlists.upsertVideoByPlaylistId('large', 10, { videoId: 'new', playlistItemId: 'item-new' })
-  assert.equal(result.status, PlaylistVideoAddResult.ADDED)
-  assert.equal(result.lastUpdatedAt, 10)
-  const count = sql => statements.filter(statement => statement.startsWith(sql)).length
-  assert.equal(count('INSERT INTO children'), 1, 'only the new entry is serialized and written')
-  assert.equal(count('DELETE FROM children'), 0)
-  assert.equal(count('SELECT pos, data FROM children'), 0, 'stored entries are not compared with a rewritten list')
-  assert.equal(count('SELECT parent, data FROM children'), 1, 'stored entries are read once, for the duplicate check')
+  const measure = async operation => {
+    statements.length = 0
+    memberRows = 0
+    const result = await operation()
+    const count = sql => statements.filter(statement => statement.startsWith(sql)).length
+    return { result, memberRows, inserted: count('INSERT INTO children'), deleted: count('DELETE FROM children'), compared: count('SELECT pos, data FROM children') }
+  }
+
+  const single = await measure(() => Playlists.upsertVideoByPlaylistId('large', 10, { videoId: 'new', playlistItemId: 'item-new' }))
+  assert.equal(single.result.status, PlaylistVideoAddResult.ADDED)
+  assert.equal(single.result.lastUpdatedAt, 10)
+  assert.deepEqual({ ...single, result: undefined }, { result: undefined, memberRows: 0, inserted: 1, deleted: 0, compared: 0 }, 'the duplicate check reads only matching entries')
+
+  const present = await measure(() => Playlists.upsertVideoByPlaylistId('large', 20, { videoId: 'video-5000' }))
+  assert.equal(present.result.status, PlaylistVideoAddResult.ALREADY_PRESENT)
+  assert.equal(present.memberRows, 1)
+
+  const bulk = await measure(() => Playlists.upsertVideosByPlaylistId('large', 30, [{ videoId: 'a', playlistItemId: 'item-a' }, { videoId: 'b', playlistItemId: 'item-b' }]))
+  assert.equal(bulk.result.status, PlaylistVideoAddResult.ADDED)
+  assert.deepEqual([bulk.memberRows, bulk.inserted], [0, 2], 'appending without the duplicate check reads no entries')
+
   const saved = await playlists.findOneAsync({ _id: 'large' })
-  assert.equal(saved.videos.length, 2001)
-  assert.equal(saved.videos.at(-1).videoId, 'new')
-  assert.equal(saved.lastUpdatedAt, 10)
-  assert.equal((await Playlists.upsertVideoByPlaylistId('large', 20, { videoId: 'new' })).status, PlaylistVideoAddResult.ALREADY_PRESENT)
+  assert.deepEqual(saved.videos.slice(-3).map(video => video.videoId), ['new', 'a', 'b'])
+  assert.equal(saved.videos.length, 10003)
+  assert.equal(saved.lastUpdatedAt, 30)
 })
 
 test('an appended video is checked again when another write changes the playlist first', async () => {
