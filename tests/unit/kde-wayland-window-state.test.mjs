@@ -617,3 +617,46 @@ test('retries the restore check when its first query fails', async t => {
   assert.equal(windowQueries, 2)
   assert.deepEqual(states, [true, false])
 })
+
+test('retries a reporter reload that fails after a reconnect', async t => {
+  const originalSessionBus = dbus.sessionBus
+  const bus = new EventEmitter()
+  bus.name = ':1.10'
+  bus.connection = new EventEmitter()
+  let reportInterface
+  let loads = 0
+  let resolveRetried
+  const retried = new Promise(resolve => { resolveRetried = resolve })
+  const scripting = {
+    unloadScript: async () => true,
+    start: async () => { reportInterface.ReportActiveWindow('window', false, 'electron') },
+  }
+  const service = {
+    getInterface: async path => {
+      if (path === '/KWin') return { getWindowInfo: async () => null }
+      if (path === '/WindowsRunner') return { Match: async () => [] }
+      if (path === '/Scripting') return scripting
+      return { run: async () => {} }
+    },
+  }
+  bus.getService = () => service
+  bus.invoke = async () => {
+    loads++
+    // The first reload after the reconnect fails
+    if (loads === 2) throw new Error('KWin is not ready yet')
+    if (loads === 3) resolveRetried()
+    return loads
+  }
+  bus.exportInterface = implementation => { reportInterface = implementation }
+  bus.unexportInterface = () => {}
+  bus.close = async () => {}
+  dbus.sessionBus = () => bus
+  t.after(() => { dbus.sessionBus = originalSessionBus })
+
+  const backend = await createKdeWaylandWindowStateBackend()
+  assert.notEqual(backend, null)
+  bus.emit('reconnected', { name: bus.name })
+  await retried
+  assert.equal(loads, 3)
+  await backend.close()
+})

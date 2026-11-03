@@ -365,8 +365,15 @@ workspace.windowAdded.connect(watchMinimized)
     await loadActiveWindowScript()
     if (await initialReport === null) throw new Error('KWin did not report its active window')
     let scriptReload = Promise.resolve()
+    // Without the reporter, restores without focus go unnoticed, so keep
+    // retrying a failed reload as the removed poll kept checking.
+    const reloadScript = attempt => loadActiveWindowScript().catch(() => {
+      if (closed) return
+      return new Promise(resolve => setTimeout(resolve, Math.min(1000 * 2 ** attempt, 30_000)))
+        .then(() => closed ? undefined : reloadScript(attempt + 1))
+    })
     const handleReconnect = () => {
-      scriptReload = scriptReload.then(loadActiveWindowScript).catch(() => {})
+      scriptReload = scriptReload.then(() => reloadScript(0))
     }
     bus.on('reconnected', handleReconnect)
 
