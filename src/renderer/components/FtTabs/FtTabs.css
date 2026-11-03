@@ -36,19 +36,28 @@
     color var(--motion-fast-effects),
     border-radius var(--motion-fast-spatial);
 
-  /* light-dark() follows the theme. Selected labels keep the primary hue at a
-     clamped lightness, opposite their tint, to reach 4.5:1 on every theme
-     surface and main color. */
-  color-scheme: var(--native-color-scheme);
+  /* Selected labels and their tint use the main color where light-dark() and
+     relative colors are missing (iOS before 17.5). */
+  --material-tab-tint-color: var(--primary-color);
+  --material-tab-selected-color: var(--primary-color);
+}
 
-  --material-tab-tint-color: light-dark(
-    rgb(from oklch(from var(--primary-color) max(l, 0.7) c h) clamp(0, r, 255) clamp(0, g, 255) clamp(0, b, 255)),
-    rgb(from oklch(from var(--primary-color) min(l, 0.4) c h) clamp(0, r, 255) clamp(0, g, 255) clamp(0, b, 255))
-  );
-  --material-tab-selected-color: light-dark(
-    rgb(from oklch(from var(--primary-color) min(l, 0.4) c h) clamp(0, r, 255) clamp(0, g, 255) clamp(0, b, 255)),
-    rgb(from oklch(from var(--primary-color) max(l, 0.9) c h) clamp(0, r, 255) clamp(0, g, 255) clamp(0, b, 255))
-  );
+@supports (color: light-dark(red, red)) and (color: rgb(from red r g b)) {
+  .materialTabs[role='tablist'] :deep([role='tab']) {
+    /* light-dark() follows the theme. Selected labels keep the primary hue at a
+       clamped lightness, opposite their tint, to reach 4.5:1 on every theme
+       surface and main color. */
+    color-scheme: var(--native-color-scheme);
+
+    --material-tab-tint-color: light-dark(
+      rgb(from oklch(from var(--primary-color) max(l, 0.7) c h) clamp(0, r, 255) clamp(0, g, 255) clamp(0, b, 255)),
+      rgb(from oklch(from var(--primary-color) min(l, 0.4) c h) clamp(0, r, 255) clamp(0, g, 255) clamp(0, b, 255))
+    );
+    --material-tab-selected-color: light-dark(
+      rgb(from oklch(from var(--primary-color) min(l, 0.4) c h) clamp(0, r, 255) clamp(0, g, 255) clamp(0, b, 255)),
+      rgb(from oklch(from var(--primary-color) max(l, 0.9) c h) clamp(0, r, 255) clamp(0, g, 255) clamp(0, b, 255))
+    );
+  }
 }
 
 .materialTabs[role='tablist'] :deep([role='tab'][aria-selected='true']) {
