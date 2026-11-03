@@ -10100,6 +10100,8 @@ export default defineComponent({
 
       // Apply the subtitle default the load had no captions for, unless a track was chosen meanwhile.
       // The late metadata can also bring the channel, so its preference is read now.
+      // Later loads of this player, such as format switches, keep the viewer's choice.
+      mountedWithoutCaptions = false
       const textTracks = player.getTextTracks()
       const enableSubtitles = getSavedChannelSubtitlesState() ?? store.getters.getEnableSubtitlesByDefault
       if (enableSubtitles && !textTracks.some(track => track.active)) {
