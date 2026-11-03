@@ -302,6 +302,23 @@ test.describe('subscribed channels', () => {
     await expect(relaunchedDropdown.locator('.dailyVideoLimitCount')).toHaveAttribute('aria-pressed', 'true')
   })
 
+  test('a profile unsubscribe confirmation from the phone sheet can be answered', async ({ page }) => {
+    await page.setViewportSize({ width: 375, height: 812 })
+    await goTo(page, 'subscribedchannels')
+    await page.locator('.channel', { hasText: 'Alpha Channel' }).getByRole('button', { name: 'Subscription settings' }).click()
+    const sheet = page.getByRole('dialog', { name: 'Subscription settings', exact: true })
+    await expect(sheet).toHaveClass(/bottomSheet/)
+    await sheet.getByRole('group', { name: 'Profiles' }).getByRole('checkbox', { name: 'Profile 0', exact: true }).click()
+
+    // The modal sheet would cover the confirmation, so it closes first.
+    const confirmation = page.getByRole('dialog', { name: /unsubscribe from.*Alpha Channel/i })
+    await expect(sheet).toHaveCount(0)
+    await page.getByRole('button', { name: 'Yes', exact: true }).click()
+    await expect(confirmation).toHaveCount(0)
+    await expect.poll(() => page.evaluate(() => window.$store.getters.getProfileList
+      .find(profile => profile._id === 'profile-0').subscriptions.length)).toBe(0)
+  })
+
   test('unsubscribing asks for confirmation and persists', async ({ app, page }) => {
     await goTo(page, 'subscribedchannels')
 

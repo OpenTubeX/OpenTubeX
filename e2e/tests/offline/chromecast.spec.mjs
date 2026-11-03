@@ -244,7 +244,7 @@ test('phones pick casting protocols and devices from the context menu sheet', as
   await expect(page.locator('.castControl .iconDropdown')).toHaveCount(0)
   await expect(sheet.locator('.mobileLinkActionsHeader')).toHaveText('Cast')
   await sheet.getByRole('menuitem', { name: 'DLNA', exact: true }).click()
-  await expect(sheet.getByRole('menuitem', { name: 'DLNA TV', exact: true })).toBeEnabled()
+  await expect(sheet.getByRole('menuitemcheckbox', { name: 'DLNA TV', exact: true, checked: false })).toBeEnabled()
   await sheet.getByRole('button', { name: 'Back', exact: true }).click()
   await sheet.getByRole('menuitem', { name: 'Google Cast', exact: true }).click()
   await sheet.getByRole('menuitem', { name: 'Test TV', exact: true }).click()

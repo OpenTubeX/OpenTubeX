@@ -63,7 +63,7 @@
       compact
       bottom
       @close="profileSheetOpen = false"
-      @closed="isProfileDropdownOpen = false"
+      @closed="finishProfileSheet"
     >
       <Teleport
         :to="profileDropdownTarget"
@@ -473,6 +473,14 @@ const isProfileDropdownPositioned = ref(false)
 const profileDropdownOpensAbove = ref(false)
 /** @type {import('vue').ShallowRef<Profile | null>} */
 const showUnsubscribePopupForProfile = shallowRef(null)
+/** @type {Profile | null} */
+let pendingUnsubscribeProfile = null
+
+function finishProfileSheet() {
+  isProfileDropdownOpen.value = false
+  showUnsubscribePopupForProfile.value = pendingUnsubscribeProfile ?? showUnsubscribePopupForProfile.value
+  pendingUnsubscribeProfile = null
+}
 
 let scrollAreaResizeObserver = null
 let profileListObservationGeneration = 0
@@ -767,7 +775,13 @@ function handleSubscription(profile) {
 
   if (isProfileSubscribed(profile)) {
     if (store.getters.getUnsubscriptionPopupStatus) {
-      showUnsubscribePopupForProfile.value = profile
+      if (isProfileDropdownOpen.value && profileSheet.value) {
+        // The modal sheet would cover the confirmation, so it asks once the sheet has closed.
+        pendingUnsubscribeProfile = profile
+        profileSheetOpen.value = false
+      } else {
+        showUnsubscribePopupForProfile.value = profile
+      }
     } else {
       handleUnsubscription(profile)
     }

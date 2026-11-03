@@ -311,6 +311,7 @@ const mobileDropdownActions = computed(() => props.mobileActions ?? props.dropdo
   : {
       label: option.label,
       icon: option.active ? ['fas', 'check'] : option.icon,
+      checked: option.active,
       enabled: !option.disabled,
       run: () => emit('click', option.value)
     }))

@@ -358,7 +358,8 @@
                   <button
                     v-else
                     type="button"
-                    role="menuitem"
+                    :role="action.checked === undefined ? 'menuitem' : 'menuitemcheckbox'"
+                    :aria-checked="action.checked"
                     :aria-label="action.label"
                     :disabled="action.enabled === false"
                     :aria-haspopup="action.submenu ? 'menu' : undefined"

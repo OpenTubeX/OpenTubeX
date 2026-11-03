@@ -432,6 +432,7 @@ function mobileOptions(protocol) {
     : {
         label: option.label,
         icon: option.active ? ['fas', 'check'] : option.icon,
+        checked: option.active,
         enabled: !option.disabled && option.value !== undefined,
         run: () => control.handleChoice(option.value)
       })
