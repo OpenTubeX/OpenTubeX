@@ -14,6 +14,7 @@ import {
 } from '../../src/newUploadNotifications.js'
 import { createUploadNotifier } from '../../src/main/uploadNotifications.js'
 import vm from 'node:vm'
+import { threadCpuMilliseconds } from '../helpers/cpu-time.mjs'
 
 const NOW = Date.UTC(2026, 9, 19)
 const HOUR = 3_600_000
@@ -338,10 +339,11 @@ test('post text strips tags in linear time', () => {
   assert.equal(post.title, 'a b<c')
 
   const unclosed = '<'.repeat(400_000)
-  const start = performance.now()
+  const start = threadCpuMilliseconds()
   const [long] = normalizeUploadEntries([{ postId: 'q', postText: unclosed }])
+  const elapsed = threadCpuMilliseconds() - start
   assert.equal(long.title, unclosed)
-  assert.ok(performance.now() - start < 1000)
+  assert.ok(elapsed < 1000, `stripping tags took ${Math.round(elapsed)} ms of CPU time`)
 })
 
 test('withheld members-first uploads notify once they become public', () => {

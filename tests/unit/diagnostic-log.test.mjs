@@ -9,13 +9,7 @@ import {
   formatDiagnosticMessage,
   redactDiagnosticText,
 } from '../../src/diagnosticLog.js'
-
-// Wall-clock budgets fail whenever the parallel test runner or other load
-// deschedules this process; CPU time on this thread counts only the work done.
-function threadCpuMilliseconds () {
-  const { user, system } = process.threadCpuUsage()
-  return (user + system) / 1000
-}
+import { threadCpuMilliseconds } from '../helpers/cpu-time.mjs'
 
 test('URLs keep their origin and path but lose parameters and opaque segments', () => {
   assert.equal(

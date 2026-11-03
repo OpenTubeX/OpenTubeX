@@ -661,7 +661,7 @@ test('retries a reporter reload that fails after a reconnect', async t => {
   await backend.close()
 })
 
-test('closing ends a pending reporter reload retry without waiting for it', async t => {
+test('closing ends a pending reporter reload retry without waiting for it', { timeout: 10_000 }, async t => {
   const originalSessionBus = dbus.sessionBus
   const bus = new EventEmitter()
   bus.name = ':1.10'
@@ -697,11 +697,12 @@ test('closing ends a pending reporter reload retry without waiting for it', asyn
   t.after(() => { dbus.sessionBus = originalSessionBus })
 
   const backend = await createKdeWaylandWindowStateBackend()
+  // The retry timer never fires on its own: if close waited for it, the test
+  // would hit its timeout.
+  t.mock.timers.enable({ apis: ['setTimeout'] })
   bus.emit('reconnected', { name: bus.name })
   await failed
   await new Promise(resolve => setImmediate(resolve))
-  const started = Date.now()
   await backend.close()
-  assert.ok(Date.now() - started < 500, 'close does not wait for the retry delay')
   assert.equal(loads, 2)
 })

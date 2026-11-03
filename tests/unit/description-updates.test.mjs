@@ -6,6 +6,7 @@ import vm from 'node:vm'
 import { computed, nextTick, reactive, ref, watch } from 'vue'
 import { babelParse, parse } from 'vue/compiler-sfc'
 import { linkifyDescription, linkifyHashtagsAndHandles } from '../../src/renderer/helpers/descriptionLinks.js'
+import { threadCpuMilliseconds } from '../helpers/cpu-time.mjs'
 
 const source = await readFile(new URL('../../src/renderer/components/WatchVideoDescription/WatchVideoDescription.vue', import.meta.url), 'utf8')
 const script = parse(source).descriptor.scriptSetup.content
@@ -163,11 +164,12 @@ test('Invidious HTML descriptions drop YouTube redirects and tracking attributes
 })
 
 test('Invidious HTML descriptions with repeated unterminated attributes are cleaned in linear time', () => {
-  const started = performance.now()
+  const started = threadCpuMilliseconds()
   for (const candidate of ['/redirect', 'class=', 'id=', 'data-url=', '&v', '&redir_token']) {
     const html = candidate.repeat(100_000 / candidate.length)
     assert.equal(parseDescriptionHtml(html), html)
   }
   parseDescriptionHtml(`class="${'a'.repeat(100_000)}\n`.repeat(2))
-  assert.ok(performance.now() - started < 1000)
+  const elapsed = threadCpuMilliseconds() - started
+  assert.ok(elapsed < 1000, `cleaning took ${Math.round(elapsed)} ms of CPU time`)
 })
