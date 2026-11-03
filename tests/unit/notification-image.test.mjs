@@ -38,3 +38,14 @@ test('notification images stay off while the thumbnail settings hide or blur thu
   allowed = true
   assert.equal((await loadNotificationImage('https://i.ytimg.com/vi/abc/mqdefault.jpg')).size, 3)
 })
+
+test('notification images give up on a body that stalls past the timeout', async () => {
+  setNotificationImagesAllowed(() => true)
+  respond = async () => new Response(new ReadableStream({
+    start(controller) { controller.enqueue(new Uint8Array([1, 2, 3])) },
+    pull() { return new Promise(() => {}) }
+  }))
+  const start = Date.now()
+  assert.equal(await loadNotificationImage('https://i.ytimg.com/vi/abc/mqdefault.jpg'), undefined)
+  assert.ok(Date.now() - start < 5000)
+})

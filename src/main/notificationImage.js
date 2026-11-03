@@ -25,18 +25,30 @@ export function setNotificationImagesAllowed(allowed) {
  */
 export async function loadNotificationImage(url) {
   if (!isThumbnailUrl(url) || !imagesAllowed()) return undefined
+  const signal = AbortSignal.timeout(TIMEOUT_MS)
   try {
-    const response = await net.fetch(url, { signal: AbortSignal.timeout(TIMEOUT_MS) })
+    const response = await net.fetch(url, { signal })
     if (!response.ok || !response.body || Number(response.headers.get('content-length')) > MAX_IMAGE_BYTES) return undefined
-    // Without a length, stop reading once the body exceeds the limit.
+    // The timeout also ends a body that stalls, and without a length, reading
+    // stops once the body exceeds the limit.
+    const reader = response.body.getReader()
+    const stop = () => { reader.cancel().catch(() => {}) }
+    signal.addEventListener('abort', stop, { once: true })
     const chunks = []
     let size = 0
-    for await (const chunk of response.body) {
-      size += chunk.length
-      // Leaving the loop cancels the rest of the body.
-      if (size > MAX_IMAGE_BYTES) return undefined
-      chunks.push(chunk)
+    try {
+      for (let read = await reader.read(); !read.done; read = await reader.read()) {
+        size += read.value.length
+        if (size > MAX_IMAGE_BYTES) {
+          stop()
+          return undefined
+        }
+        chunks.push(read.value)
+      }
+    } finally {
+      signal.removeEventListener('abort', stop)
     }
+    if (signal.aborted) return undefined
     const image = nativeImage.createFromBuffer(Buffer.concat(chunks))
     return image.isEmpty() ? undefined : image
   } catch {
