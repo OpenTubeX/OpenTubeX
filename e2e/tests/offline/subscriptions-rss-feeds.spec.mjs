@@ -581,8 +581,9 @@ test.describe('with followed feeds', () => {
     await expect(loading).toHaveCount(0)
     await expect.poll(() => aborted).toBe(3)
 
+    // The tab renders its items after switching
     await page.locator('[data-rss-feeds-tab]').click()
-    expect(await titles.allTextContents()).toEqual(['Newest VOD', 'Older VOD'])
+    await expect(titles).toHaveText(['Newest VOD', 'Older VOD'])
     await expect(panel.getByText('1 feed could not be refreshed.')).toBeVisible()
   })
 
