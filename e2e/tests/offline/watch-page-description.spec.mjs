@@ -1,4 +1,4 @@
-import { test, expect } from '../../helpers/app.mjs'
+import { test, expect, setWindowSize } from '../../helpers/app.mjs'
 import { activeTab, findWatchComponent, openMockedVideo } from '../../helpers/player.mjs'
 import { mockPlayableWatchPage } from '../../helpers/watch.mjs'
 import { WATCH_PAGE_SEED } from '../../helpers/watch-page.mjs'
@@ -302,6 +302,68 @@ test.describe('watch page', () => {
       }
     }
     await page.evaluate(() => window.ftElectron.setZoomFactor(1))
+    await watchComponent.dispose()
+  })
+
+  test('decides Show more again when the card width changes', { tag: '@scale' }, async ({ app, page }) => {
+    // Every window resize relays out the whole watch page.
+    test.slow()
+    // The narrow window stays wider than the phone layout, which replaces the card with a preview.
+    await setWindowSize(app, page, { width: 1800, height: 1000 })
+    await mockPlayableWatchPage(app, page)
+    await openMockedVideo(page)
+    const watchComponent = await page.evaluateHandle(findWatchComponent)
+    const setDescription = description => watchComponent.evaluate(async (component, description) => {
+      const view = component.proxy
+      view.isLoading = true
+      await view.$nextTick()
+      Object.assign(view, { videoDescription: description, videoDescriptionHtml: '', videoTags: [], videoGames: [], license: null, contentDisclosures: [] })
+      view.isLoading = false
+      await view.$nextTick()
+    }, description)
+    const card = page.locator(`${activeTab} .videoDescription`)
+    await setDescription('Line 1\nLine 2\nLine 3')
+    // A fourth line that fills most of the wide card, so it wraps once the card narrows.
+    const lastLine = await card.locator('.description').evaluate(element => {
+      const style = getComputedStyle(element)
+      const width = element.clientWidth - Number.parseFloat(style.paddingInlineStart) - Number.parseFloat(style.paddingInlineEnd)
+      const context = document.createElement('canvas').getContext('2d')
+      context.font = style.font
+      let line = 'A last line'
+      while (context.measureText(`${line} that wraps`).width < width * 0.9) line += ' that wraps'
+      return line
+    })
+    await setDescription(`Line 1\nLine 2\nLine 3\n${lastLine}`)
+
+    const footer = card.locator(':scope > .descriptionStatus')
+    const expectFull = async () => {
+      await expect(card).not.toHaveClass(/short/)
+      await expect(footer).toHaveCount(0)
+    }
+    const textLines = () => card.locator('.description').evaluate(element =>
+      element.scrollHeight / Number.parseFloat(getComputedStyle(element).lineHeight)
+    )
+    await expectFull()
+    expect(await textLines()).toBeLessThanOrEqual(4)
+
+    for (const userExpands of [false, true]) {
+      await setWindowSize(app, page, { width: 850, height: 900 })
+      expect(await textLines()).toBeGreaterThan(4)
+      await expect(card).toHaveClass(/short/)
+      await expect(footer).toHaveAccessibleName('Show more')
+      if (userExpands) {
+        await footer.click()
+        await expect(footer).toHaveAccessibleName('Show less')
+      }
+
+      await setWindowSize(app, page, { width: 1800, height: 1000 })
+      await expectFull()
+    }
+
+    // The user's expansion survives the card fitting in between.
+    await setWindowSize(app, page, { width: 850, height: 900 })
+    await expect(card).not.toHaveClass(/short/)
+    await expect(footer).toHaveAccessibleName('Show less')
     await watchComponent.dispose()
   })
 
