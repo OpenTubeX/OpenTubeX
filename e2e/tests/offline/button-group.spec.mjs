@@ -7,20 +7,20 @@ function measure(group) {
   }))
 }
 
-test('a pressed group button widens without moving or wrapping its neighbors', { tag: '@scale' }, async ({ page }) => {
-  const storage = await goToSettingsSection(page, 'storage')
-  await storage.getByRole('button', { name: 'Remove Watch History' }).click()
-  const group = page.getByRole('dialog').getByRole('group')
-  const buttons = group.locator(':scope > .btn')
-  await expect(buttons).toHaveCount(2)
-  // The dialog scales in, so wait until its buttons stop moving.
+// The dialog scales in, so wait until its buttons stop moving.
+async function measureAtRest(group) {
   let resting
   await expect.poll(async () => {
     const previous = resting
     resting = await measure(group)
     return JSON.stringify(previous) === JSON.stringify(resting)
   }).toBe(true)
+  return resting
+}
 
+async function expectPressesKeepLayout(page, group) {
+  const buttons = group.locator(':scope > .btn')
+  const resting = await measureAtRest(group)
   for (const [pressed, neighbor] of [[0, 1], [1, 0]]) {
     const bounds = await buttons.nth(pressed).boundingBox()
     await page.mouse.move(bounds.x + bounds.width / 2, bounds.y + bounds.height / 2)
@@ -38,4 +38,20 @@ test('a pressed group button widens without moving or wrapping its neighbors', {
     await page.mouse.up()
     await expect.poll(async () => (await measure(group))[pressed].width).toBeCloseTo(resting[pressed].width, 0)
   }
+}
+
+test('a pressed group button widens without moving or wrapping its neighbors', { tag: '@scale' }, async ({ page }) => {
+  const storage = await goToSettingsSection(page, 'storage')
+  await storage.getByRole('button', { name: 'Remove Watch History' }).click()
+  const group = page.getByRole('dialog').getByRole('group')
+  await expect(group.locator(':scope > .btn')).toHaveCount(2)
+  await expectPressesKeepLayout(page, group)
+
+  // Labels such as "Yes" and "No" leave buttons at FtButton's minimum width.
+  await group.locator(':scope > .btn').evaluateAll(buttons => {
+    for (const button of buttons) button.textContent = 'No'
+  })
+  await expect.poll(() => group.locator(':scope > .btn').first().evaluate(button => button.getBoundingClientRect().width))
+    .toBeCloseTo(64, 0)
+  await expectPressesKeepLayout(page, group)
 })

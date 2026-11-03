@@ -255,11 +255,6 @@
   min-inline-size: 44px;
 }
 
-@media (prefers-reduced-motion: reduce) {
-  .activityIconBusy::before {
-    animation: none;
-  }
-}
 
 @media only screen and (width <= 480px) {
   .activityIcon {

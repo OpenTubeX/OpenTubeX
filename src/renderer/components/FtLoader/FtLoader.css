@@ -87,8 +87,3 @@
   }
 }
 
-@media (prefers-reduced-motion: reduce) {
-  .double-bounce2 {
-    animation: none;
-  }
-}

@@ -72,6 +72,7 @@
 .queueItem {
   --reorder-row-color: color-mix(in srgb, var(--primary-text-color) 6%, var(--card-bg-color));
 
+  background-color: var(--reorder-row-color);
   display: grid;
   grid-template-columns: 30px minmax(0, 1fr) auto;
   align-items: center;

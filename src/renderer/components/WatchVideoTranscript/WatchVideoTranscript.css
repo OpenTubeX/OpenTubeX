@@ -195,9 +195,11 @@
   block-size: calc(var(--transcript-chunk-rows) * (22px + 1.4em));
 }
 
-/* Segments form one segmented list across chunks: large outer corners, tight inner ones. */
+/* Segments form one segmented list across chunks: large outer corners, tight
+   inner ones. Padding rather than margin keeps the gap inside each chunk's
+   measured height, because a first row's margin would collapse out of it. */
 .transcriptChunk [role='listitem'] {
-  margin-block-start: 2px;
+  padding-block-start: 2px;
 }
 
 .transcriptSegment {
@@ -235,7 +237,7 @@
 
 /* The first segment of the list has no gap or neighbor above it. */
 .transcriptChunk:first-child > [role='listitem']:first-child {
-  margin-block-start: 0;
+  padding-block-start: 0;
 }
 
 .transcriptChunk:first-child > [role='listitem']:first-child > .transcriptSegment {
