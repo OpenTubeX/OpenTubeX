@@ -133,6 +133,8 @@ for (const width of [1600, 480]) {
     const transcriptLanguage = 'Transcript language'
     await expect(page.locator(`.transcriptHeaderAction[aria-label="${transcriptLanguage}"]`)).toBeDisabled()
     await watch.evaluate(vm => vm.closeTranscript())
+    // The closing sheet stays open while it animates, so check the panel state.
+    if (width === 480) expect(await watch.evaluate(vm => vm.mobilePanel)).toBe('comments')
     expect(await watch.evaluate(vm => vm.transcriptAvailable)).toBe(true)
     await watch.evaluate(vm => { vm.showTranscript = true })
     await expect(page.locator('.transcriptSegment')).not.toHaveCount(0)
