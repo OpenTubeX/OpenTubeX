@@ -228,6 +228,7 @@
 @media (pointer: coarse), (width <= 680px) {
   .castDevice,
   .castCaption,
+  .castSlider,
   .castHeaderButton,
   .castTransportButton,
   .castVolumeButton,

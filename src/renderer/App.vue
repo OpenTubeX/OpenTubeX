@@ -1184,7 +1184,7 @@ const mobileContextMenuTitle = computed(() => mobileContextMenuStack.value.at(-1
 let mobileContextTrigger = null
 let mobileContextReturnFocus = null
 async function openMobileContextActions(menu) {
-  if (!mobileContextActions.value) mobileContextTrigger = document.activeElement
+  if (!mobileContextActions.value) mobileContextTrigger = menu.trigger ?? null
   mobileContextMenuPath.value = []
   mobileContextLink.value = null
   mobileContextActions.value = menu

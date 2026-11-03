@@ -417,9 +417,7 @@ function handleIconClick(e, isRightOrLongClick = false) {
   if ((!props.openOnRightOrLongClick || (props.openOnRightOrLongClick && isRightOrLongClick)) &&
     (props.forceDropdown || props.dropdownOptions.length > 0)) {
     if (!dropdownShown.value && (props.mobileActions || !slots.default) && usesMobileContextSheet()) {
-      // The sheet returns focus to the button when it closes.
-      ftIconButton.value?.firstElementChild?.focus({ preventScroll: true })
-      openMobileContextMenu({ title: props.title, actions: mobileDropdownActions })
+      openMobileContextMenu({ title: props.title, actions: mobileDropdownActions, trigger: ftIconButton.value?.firstElementChild })
       emit('dropdown-open')
       return
     }

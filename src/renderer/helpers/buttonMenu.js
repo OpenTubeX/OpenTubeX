@@ -9,7 +9,8 @@ export function usesMobileContextSheet() {
 
 /**
  * Opens the bottom sheet that phones use for context menus.
- * @param {{ title: string, actions: object[] | import('vue').Ref<object[]> }} menu
+ * @param {{ title: string, actions: object[] | import('vue').Ref<object[]>, trigger?: HTMLElement }} menu
+ *   `trigger` is the button that gets focus back when the sheet closes.
  */
 export function openMobileContextMenu(menu) {
   window.dispatchEvent(new CustomEvent(OPEN_MOBILE_CONTEXT_MENU_EVENT, { detail: menu }))
@@ -23,12 +24,11 @@ export function openMobileContextMenu(menu) {
  * @param {string} title The bottom sheet's heading
  */
 export function openButtonMenu(button, items, title) {
-  // Either menu returns focus to the button when it closes.
-  button.focus({ preventScroll: true })
   if (usesMobileContextSheet()) {
-    openMobileContextMenu({ title, actions: items })
+    openMobileContextMenu({ title, actions: items, trigger: button })
     return
   }
+  button.focus({ preventScroll: true })
   const bounds = button.getBoundingClientRect()
   window.dispatchEvent(new CustomEvent('opentubex:context-menu', {
     detail: { x: document.body.dir === 'rtl' ? bounds.right : bounds.left, y: bounds.bottom, items, touchFriendly: true }
