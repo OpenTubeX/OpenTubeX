@@ -2,6 +2,7 @@ import { parseLocalVideoSummary } from '../../helpers/video-summary.js'
 import WatchVideoSummary from '../../components/WatchVideoSummary/WatchVideoSummary.vue'
 import FtPhonePanel from '../../components/FtPhonePanel/FtPhonePanel.vue'
 import PhoneCommentsButton from '../../components/PhoneCommentsButton/PhoneCommentsButton.vue'
+import PhoneDescriptionButton from '../../components/PhoneDescriptionButton/PhoneDescriptionButton.vue'
 import { usePhoneLayout } from '../../composables/usePhoneLayout'
 import { isVerticalTabBarPosition } from '../../constants/tabBarPosition'
 import { holdRootClass } from '../../helpers/rootClasses'
@@ -204,6 +205,7 @@ export default defineComponent({
     FtRetryImage,
     FtPhonePanel,
     PhoneCommentsButton,
+    PhoneDescriptionButton,
     'ft-shaka-video-player': FtShakaVideoPlayer,
     WatchCast,
     WatchVideoDownloadPrompt,

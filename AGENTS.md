@@ -12,7 +12,9 @@ Requests such as "implement issue #X" authorize local changes, not a PR. Open a 
 
 ## Follow-ups
 
-Record every follow-up you would suggest (an unrelated bug, a deferred edge case, a cleanup, a missing test) as a comment on the pinned "Agent follow-ups" issue (#2661), not only in your thread, where it goes unread. This needs no further approval.
+Handle small follow-ups in the current task instead of deferring them: a missing test, an edge case or cleanup in code you touched, or a small fix that fits the change's scope. Use judgment: include it if a reviewer would accept it in the same PR without it distracting from the main change.
+
+Record the rest (unrelated bugs, larger or riskier work, anything needing its own decision) as a comment on the pinned "Agent follow-ups" issue (#2661), not only in your thread, where it goes unread. This needs no further approval.
 
 - Read the existing comments first and skip follow-ups already listed.
 - Post one comment per follow-up, following the `leaving-pr-comments` skill: a bold one-line summary, why it matters, and links to the relevant code and, if one exists, the PR.

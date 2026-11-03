@@ -5,13 +5,12 @@
     :class="{
       videoDescription: true,
       short: !isExpanded,
-      alwaysExpanded,
-      descriptionPreview: previewOnly
+      alwaysExpanded
     }"
     @click="expandDescriptionWithClick"
   >
     <FtIconButton
-      v-if="shownDescription.length > 0 && !previewOnly"
+      v-if="shownDescription.length > 0"
       class="descriptionCopyButton"
       :title="t('Description.Copy Description')"
       :icon="['fas', 'copy']"
@@ -185,10 +184,10 @@
       />
     </div>
     <button
-      v-if="previewOnly || (showControls && !alwaysExpanded)"
+      v-if="showControls && !alwaysExpanded"
       type="button"
       class="descriptionStatus"
-      :aria-expanded="previewOnly ? undefined : isExpanded"
+      :aria-expanded="isExpanded"
       @click="isExpanded ? collapseDescription() : expandDescription()"
       @keydown.space.stop
       @keyup.space.stop
@@ -249,7 +248,6 @@ const props = defineProps({
     type: Array,
     default: () => [],
   },
-  previewOnly: { type: Boolean, default: false },
   /** Starts expanded, while still letting the user collapse it. */
   expanded: { type: Boolean, default: false },
   alwaysExpanded: {
@@ -258,7 +256,7 @@ const props = defineProps({
   }
 })
 
-const emit = defineEmits(['timestamp-event', 'expand'])
+const emit = defineEmits(['timestamp-event'])
 const { t } = useI18n()
 
 const descriptionScroll = useTemplateRef('descriptionScroll')
@@ -269,7 +267,7 @@ const showFullDescription = ref(props.expanded)
 const showControls = ref(false)
 let userWantsExpandedDescription = props.expanded
 const descriptionFadeTop = ref(false)
-const isExpanded = computed(() => !props.previewOnly && (props.alwaysExpanded || showFullDescription.value))
+const isExpanded = computed(() => props.alwaysExpanded || showFullDescription.value)
 
 const descriptionContent = computed(() => {
   let shownDescription = ''
@@ -348,7 +346,6 @@ function expandDescriptionWithClick(e) {
  * Enables user to view entire contents of description
  */
 function expandDescription() {
-  if (props.previewOnly) { emit('expand'); return }
   if (isExpanded.value) { return }
   userWantsExpandedDescription = true
   showFullDescription.value = true
@@ -397,7 +394,7 @@ function isShortDescription() {
 // expanded with no collapse control. Only measure once the element has a real
 // layout, retrying when the tab is first presented.
 function measureDescription() {
-  if (hasMeasured || props.alwaysExpanded || props.previewOnly) {
+  if (hasMeasured || props.alwaysExpanded) {
     return
   }
 

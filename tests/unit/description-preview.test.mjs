@@ -19,9 +19,9 @@ const measureFunction = script.slice(measureDeclaration.start, measureDeclaratio
 const shortDeclaration = statements.find(statement => statement.type === 'FunctionDeclaration' && statement.id.name === 'isShortDescription')
 const shortFunction = script.slice(shortDeclaration.start, shortDeclaration.end)
 
-function measure({ previewOnly = false, alwaysExpanded = false, short = true, tags = [], games = [], musicTracks = [], license = null, contentDisclosures = [], description = 'Sie haben Post\nDer Klassiker von AOL' } = {}) {
+function measure({ alwaysExpanded = false, short = true, tags = [], games = [], musicTracks = [], license = null, contentDisclosures = [], description = 'Sie haben Post\nDer Klassiker von AOL' } = {}) {
   const context = vm.createContext({
-    props: { previewOnly, alwaysExpanded, tags, games, musicTracks, license, contentDisclosures },
+    props: { alwaysExpanded, tags, games, musicTracks, license, contentDisclosures },
     computed: getter => getter(),
     shownDescription: description,
     showFullDescription: { value: false },
@@ -41,17 +41,6 @@ function measure({ previewOnly = false, alwaysExpanded = false, short = true, ta
     showControls: context.showControls.value,
   }
 }
-
-test('mobile previews stay collapsed after measuring short descriptions', () => {
-  assert.deepEqual(measure({ previewOnly: true }), {
-    expanded: false, measured: false, showFullDescription: false, showControls: false,
-  })
-})
-
-test('mobile previews stay collapsed for long and empty descriptions with metadata', () => {
-  assert.equal(measure({ previewOnly: true, short: false }).expanded, false)
-  assert.equal(measure({ previewOnly: true, description: '' }).expanded, false)
-})
 
 test('regular descriptions expand short content and keep long content collapsed', () => {
   assert.deepEqual(measure(), {
