@@ -9,7 +9,7 @@
       role="status"
     >
       <div
-        v-if="!isLoading && errorFeedUrls.length > 0 && !rssFeedErrorsDismissed"
+        v-if="isBannerShown"
         ref="bannerRef"
         class="errorBanner"
       >
@@ -110,20 +110,16 @@ const isLoading = computed(() => rssFeedsRefreshing.value)
 const panelRef = useTemplateRef('panelRef')
 const bannerRef = useTemplateRef('bannerRef')
 
-// The banner's close button disappears, so keep the focus in the panel
-function keepFocusInPanel() {
-  panelRef.value?.focus({ preventScroll: true })
-}
+const isBannerShown = computed(() => !isLoading.value && errorFeedUrls.value.length > 0 && !rssFeedErrorsDismissed.value)
 
 function dismissErrors() {
   rssFeedErrorsDismissed.value = true
-  keepFocusInPanel()
 }
 
-// Runs before the refresh hides the banner
-watch(isLoading, loading => {
-  if (loading && bannerRef.value?.contains(document.activeElement)) {
-    keepFocusInPanel()
+// Runs before the banner unmounts, so a focused close button doesn't take the focus with it
+watch(isBannerShown, shown => {
+  if (!shown && bannerRef.value?.contains(document.activeElement)) {
+    panelRef.value?.focus({ preventScroll: true })
   }
 })
 
