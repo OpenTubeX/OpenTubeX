@@ -8,6 +8,8 @@
     :aria-label="t('Description.Title')"
     :aria-describedby="describedBy"
     @click="emit('open')"
+    @keydown.space.stop
+    @keyup.space.stop
   >
     <span class="phoneDescriptionContent">
       <span class="phoneDescriptionHeading">
@@ -80,8 +82,11 @@ const excerpt = computed(() => {
   // Template contents stay inert while extracting text from remote HTML.
   const template = document.createElement('template')
   template.innerHTML = props.descriptionHtml || props.description || ''
-  // Yattee separates lines with <br>, which textContent drops without a space.
-  for (const element of template.content.querySelectorAll('br, p, div, li')) element.after(' ')
+  // Yattee separates lines with <br>, and textContent adds no space at line or block boundaries.
+  for (const element of template.content.querySelectorAll('br, p, div, li')) {
+    element.before(' ')
+    element.after(' ')
+  }
   const text = (template.content.textContent ?? '').replaceAll(/\s+/g, ' ').trim()
   // Longer than two lines on any phone, but keeps the button's accessible description short.
   return Array.from(text).slice(0, EXCERPT_LENGTH).join('')

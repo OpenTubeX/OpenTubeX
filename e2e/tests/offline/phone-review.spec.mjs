@@ -122,8 +122,18 @@ test('description preview opens the description sheet as one button', async ({ a
   await expect(preview).toHaveAttribute('aria-expanded', 'false')
   await expect(preview.locator('a, button')).toHaveCount(0)
   await preview.press('Enter')
-  await expect(page.locator('.mobileSheet[open]')).toContainText('Description')
+  const sheet = page.locator('.mobileSheet[open]')
+  await expect(sheet).toContainText('Description')
   await expect(preview).toHaveAttribute('aria-expanded', 'true')
+  await sheet.getByRole('button', { name: 'Close', exact: true }).click()
+  await expect(sheet).toHaveCount(0)
+
+  // Space activates the button instead of reaching the player's shortcut.
+  const video = page.locator('.ftVideoPlayer video')
+  const paused = await video.evaluate(element => element.paused)
+  await preview.press('Space')
+  await expect(sheet).toContainText('Description')
+  expect(await video.evaluate(element => element.paused)).toBe(paused)
 })
 
 test('description preview clamps its excerpt to two lines on phones', { tag: '@scale' }, async ({ app, page, uiScale }) => {
