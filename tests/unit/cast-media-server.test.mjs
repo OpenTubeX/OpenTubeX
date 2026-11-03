@@ -828,7 +828,15 @@ async function pendingPlaylistRequest(t, query, upstreamQuery = '', targetDurati
   media.setOrigin(await listen(media.server))
   t.after(() => close(media.server))
   const root = media.mediaUrl()
-  if (prime) assert.equal((await fetch(root)).status, 200)
+  if (prime) {
+    // fetch() would keep its connection alive and arm undici's keep-alive
+    // timer with the mocked setTimeout below. Clearing that stale timer in a
+    // later test corrupts that test's mocked timer queue.
+    const status = await new Promise((resolve, reject) => {
+      httpRequest(root, { agent: false }, incoming => { incoming.resume(); resolve(incoming.statusCode) }).on('error', reject).end()
+    })
+    assert.equal(status, 200)
+  }
   hold = true
   t.mock.timers.enable({ apis: ['setTimeout'] })
   let client

@@ -8,6 +8,9 @@ import { compileScript, parse } from 'vue/compiler-sfc'
 import { vFirstVisible } from '../../src/renderer/helpers/firstVisible.js'
 
 const observers = []
+// Each list mounts after the previous one released its shared observer, so
+// every test starts counting the observers it creates from zero.
+test.beforeEach(() => { observers.length = 0 })
 globalThis.IntersectionObserver = class {
   constructor(callback) {
     this.callback = callback
@@ -107,12 +110,10 @@ test('Electron list cards wait for their first sighting on the shared observer',
     FtCommunityPost: {},
     FtListHashtag: {},
   })
-  // The previous list released its observer when it unmounted.
-  const previousObservers = observers.length
   const app = mountList(Wrapper, index => ({ data: { type: 'video', videoId: `video-${index}` }, appearance: 'result', firstScreen: false }))
 
-  assert.equal(observers.length, previousObservers + 1)
-  const observer = observers.at(-1)
+  assert.equal(observers.length, 1)
+  const [observer] = observers
   assert.equal(observer.observed.size, 500)
   const rows = [...observer.observed]
   observer.callback([{ target: rows[7], isIntersecting: true }])
