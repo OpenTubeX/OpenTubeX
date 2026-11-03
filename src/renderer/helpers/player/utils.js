@@ -5,8 +5,7 @@ import { sponsorBlockSkipSegments } from '../sponsorblock'
 
 /** @typedef {import('../sponsorblock').SponsorBlockCategory} SponsorBlockCategory */
 
-export const MANIFEST_TYPE_DASH = 'application/dash+xml'
-export const MANIFEST_TYPE_HLS = 'application/x-mpegurl'
+export { MANIFEST_TYPE_DASH, MANIFEST_TYPE_HLS } from './manifestTypes'
 
 /**
  * @param {shaka.util.Error | Error} error

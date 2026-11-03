@@ -6,7 +6,7 @@ import { compileFunction } from 'node:vm'
 import Datastore from '@seald-io/nedb'
 import { createStore } from 'vuex'
 
-import { migrateLegacyHistoryRecord } from '../../src/history.js'
+import { migrateLegacyHistoryRecord, newestUniqueHistoryRecords } from '../../src/history.js'
 import * as seenVideos from '../../src/subscriptionSeenVideos.js'
 import * as playlistCounts from '../../src/renderer/helpers/playlist-video-counts.js'
 
@@ -49,7 +49,7 @@ export async function datastoreHandlers (root = repositoryRoot) {
   const source = await readSource(root, 'src/datastores/handlers/base.js')
   const historySource = source.slice(source.indexOf('class Settings {'), source.indexOf('\nclass WatchStats {'))
   const playlistSource = source.slice(source.indexOf('class Playlists {'), source.indexOf('\nclass SearchHistory {'))
-  const dependencies = { db, recommendations, createIdQuery, migrateLegacyHistoryRecord, ...seenVideos, HISTORY_WATCHED_STATUS_MIGRATION_ID: 'historyWatchedStatusMigrated' }
+  const dependencies = { db, recommendations, createIdQuery, migrateLegacyHistoryRecord, newestUniqueHistoryRecords, ...seenVideos, HISTORY_WATCHED_STATUS_MIGRATION_ID: 'historyWatchedStatusMigrated' }
   const { History, Playlists } = compileFunction(
     `${historySource}\n${playlistSource}\nreturn { History, Playlists }`,
     Object.keys(dependencies)

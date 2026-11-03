@@ -48,9 +48,20 @@ export function onTrusted(channel, listener) {
  * @param {...unknown} args
  */
 export function sendToAppWindows(channel, ...args) {
+  sendToOtherAppWindows(null, channel, ...args)
+}
+
+/**
+ * Like `sendToAppWindows`, but skips the window that caused the message, for
+ * example because it already receives the result as its reply.
+ * @param {import('electron').WebContents | null} sender
+ * @param {string} channel
+ * @param {...unknown} args
+ */
+export function sendToOtherAppWindows(sender, channel, ...args) {
   for (const window of BrowserWindow.getAllWindows()) {
     try {
-      if (window.isDestroyed() || window.webContents.isDestroyed() || !isOpenTubeXUrl(window.webContents.getURL())) continue
+      if (window.isDestroyed() || window.webContents.isDestroyed() || window.webContents === sender || !isOpenTubeXUrl(window.webContents.getURL())) continue
       window.webContents.send(channel, ...args)
     } catch (error) {
       console.warn(`Could not send ${channel} to a window`, error)

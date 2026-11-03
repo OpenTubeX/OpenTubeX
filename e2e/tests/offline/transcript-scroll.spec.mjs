@@ -23,7 +23,7 @@ test('transcript animation after closing search is smooth', { tag: '@scale' }, a
   })
   const list = page.locator('.transcriptSegments')
   const card = page.locator('.transcriptCard')
-  await expect(card.locator('.transcriptSegment')).toHaveCount(300)
+  await expect(list.locator('[aria-current="true"]')).toHaveText(/Transcript line 150\./)
   await expect.poll(() => list.evaluate(element => {
     const active = element.querySelector('[aria-current="true"]')
     return Math.abs(element.scrollTop - (active.offsetTop - element.clientHeight / 2 + active.clientHeight / 2))
@@ -57,7 +57,9 @@ test('transcript animation after closing search is smooth', { tag: '@scale' }, a
   })
   await search.click()
   await expect(card.getByRole('searchbox', { name: 'Search transcript', exact: true })).toHaveCount(0)
-  await expect(card.locator('.transcriptSegment')).toHaveCount(300)
+  // Only the segments near the viewport mount, so check the whole range instead.
+  await expect(card.getByText('Transcript line 0.', { exact: true })).toBeVisible()
+  await expect.poll(() => list.evaluate(element => element.scrollHeight - element.clientHeight)).toBeGreaterThan(5000)
   await view.evaluate(view => { view.currentTime = 151 })
   await expect.poll(() => page.evaluate(() => window.transcriptScrollCalls.length)).toBe(1)
   const [returnScroll] = await page.evaluate(() => window.transcriptScrollCalls)

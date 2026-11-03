@@ -134,3 +134,13 @@ test('long history lists stop measuring every card once moves cannot animate', a
     await page.evaluate(() => { Element.prototype.getBoundingClientRect = window.__originalGetBoundingClientRect })
   }
 })
+
+test('windows receive history as stored text instead of record objects', async ({ page }) => {
+  // Records cross IPC and the context bridge as strings, which copy far
+  // faster than object graphs; the window builds the records itself.
+  const rows = await page.evaluate(() => window.ftElectron.dbHistory(1))
+  expect(rows).toHaveLength(channelCount)
+  expect(rows.every(row => typeof row === 'string')).toBe(true)
+  expect(await page.evaluate(() => window.$store.getters.getHistoryCacheSorted.slice(0, 3).map(record => record.videoId)))
+    .toEqual(history.slice(0, 3).map(record => record.videoId))
+})

@@ -158,6 +158,10 @@ export function createListWindow({ IntersectionObserver: Intersection, ResizeObs
       resize.observe(element)
       return {
         refresh: () => item.refresh(),
+        // Mounts a row held back meanwhile, unless it has scrolled away again.
+        mountIfNear: () => {
+          if (item.near && !item.isMounted()) item.mount()
+        },
         // Restyled content changes the height a shell keeps. Distant shells
         // are remounted through the bounded queue to measure it again.
         remeasure: () => {

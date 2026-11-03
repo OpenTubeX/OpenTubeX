@@ -30,12 +30,11 @@ export function encryptSyncChange(change, exportedKey, salt) {
   return encryptSyncDocument(change, exportedKey, salt, { paddingBytes: SYNC_CHANGE_PADDING_BYTES })
 }
 
-function applySyncChange(collection, data, change) {
+function assertKnownSyncChange(collection, change) {
   if (!SYNC_CHANGE_COLLECTIONS.has(collection) || !change || typeof change !== 'object' ||
       !Array.isArray(change.upserts) || !Array.isArray(change.deletions)) {
     throw new Error('Sync data was saved by a newer OpenTubeX version. Update OpenTubeX to sync.')
   }
-  return applyRemoteHistoryChanges({ history: data ?? [], upserts: change.upserts, deletions: change.deletions })
 }
 
 /**
@@ -60,13 +59,32 @@ export async function readSyncCollection(collection, response, base, exportedKey
   } else {
     return { revision: 0, data: undefined }
   }
-  for (const change of response.changes ?? []) {
-    if (change.revision !== revision + 1) throw new Error('Invalid encrypted sync response')
-    data = applySyncChange(collection, data, await decryptSyncDocument(change.payload, exportedKey))
-    revision = change.revision
+  const changes = response.changes ?? []
+  changes.forEach((change, index) => {
+    if (change.revision !== revision + index + 1) throw new Error('Invalid encrypted sync response')
+  })
+  if (revision + changes.length !== response.revision) throw new Error('Invalid encrypted sync response')
+  if (changes.length === 0) return { revision, data }
+
+  // Applying each change would rebuild the whole history once per change.
+  // Fold them into one change instead, in which the last change of an entry wins.
+  const upserts = new Map()
+  const deletions = new Set()
+  for (const { payload } of changes) {
+    const change = await decryptSyncDocument(payload, exportedKey)
+    assertKnownSyncChange(collection, change)
+    for (const id of change.deletions) {
+      upserts.delete(id)
+      deletions.add(id)
+    }
+    for (const entry of change.upserts) {
+      // Re-inserting moves the entry to the end, like applying the change would.
+      upserts.delete(entry.video.id)
+      upserts.set(entry.video.id, entry)
+    }
   }
-  if (revision !== response.revision) throw new Error('Invalid encrypted sync response')
-  return { revision, data }
+  data = applyRemoteHistoryChanges({ history: data ?? [], upserts: [...upserts.values()], deletions: [...deletions] })
+  return { revision: response.revision, data }
 }
 
 export function createEmptySyncDocument() {

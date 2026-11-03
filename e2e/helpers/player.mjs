@@ -231,6 +231,17 @@ export async function waitForPlaybackOrSkip(test, page) {
  */
 export async function openCaptionLanguages(player) {
   await player.locator('.shaka-overflow-menu > .shaka-caption-button').click()
+  await settleMenuZoom(player)
+}
+
+/**
+ * Waits for the overflow menu to open, or to zoom between its views, which scales its boxes.
+ * @param {import('@playwright/test').Locator} player
+ */
+export async function settleMenuZoom(player) {
+  await player.locator('.shaka-overflow-menu').evaluate(menu => Promise.all(menu.getAnimations({ subtree: true })
+    .filter(animation => /^ft-menu-(open|zoom-)/.test(animation.animationName ?? ''))
+    .map(animation => animation.finished.catch(() => {}))))
 }
 
 /**

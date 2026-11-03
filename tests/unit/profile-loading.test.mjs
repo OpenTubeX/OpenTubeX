@@ -89,3 +89,26 @@ test('loads existing profiles when persisting the default icon fails', async () 
   assert.equal(module.state.activeProfile, 'second')
   assert.deepEqual(errors, [writeError])
 })
+
+// Other windows and server sync delete profiles without going through the
+// profile editor, which used to be the only path that switched profiles.
+test('deleting the active profile falls back to the main profile', async () => {
+  const { module, load } = await fixture()
+  await load()
+  assert.equal(module.state.activeProfile, 'second')
+
+  module.mutations.removeProfileFromList(module.state, 'second')
+
+  assert.equal(module.state.activeProfile, 'allChannels')
+  assert.equal(module.getters.getActiveProfile(module.state)._id, 'allChannels')
+})
+
+test('deleting another profile keeps the active profile', async () => {
+  const { module, load } = await fixture()
+  await load()
+  module.mutations.addProfileToList(module.state, { _id: 'third', name: 'Third', subscriptions: [] })
+
+  module.mutations.removeProfileFromList(module.state, 'third')
+
+  assert.equal(module.state.activeProfile, 'second')
+})

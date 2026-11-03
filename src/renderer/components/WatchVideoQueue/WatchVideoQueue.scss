@@ -72,6 +72,11 @@
   border-block-end: 1px solid var(--side-nav-hover-color);
 }
 
+/* Rows that never mounted estimate a default row; released rows keep their measured height. */
+.queueItem.windowedListShell {
+  block-size: 104px;
+}
+
 .queueItem-move {
   transition: transform 200ms ease;
 }

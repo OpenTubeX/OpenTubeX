@@ -195,6 +195,12 @@ function fixture (overrides = {}, { encrypted = false, respond, connectionState 
         settings.playlistBookmarks = value
         return true
       }
+      if (action === 'updateProfileSubscriptionsFromSync') {
+        const profile = context.rootState.profiles.profileList.find(profile => profile._id === value.profileId)
+        if (JSON.stringify(profile.subscriptions) !== JSON.stringify(value.previous)) return false
+        profile.subscriptions = value.subscriptions
+        return true
+      }
       if (action === 'updateChannelSettings') {
         const channel = context.rootState.profiles.profileList[0].subscriptions.find(channel => channel.id === value.channelId)
         Object.assign(channel, value.settings, { subscriptionSettingsUpdatedAt: value.updatedAt })

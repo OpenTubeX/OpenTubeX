@@ -3,7 +3,7 @@ import * as db from '../index'
 import { updateSettingIfUnchanged } from '../settingRepair'
 import { migrateStoredSettings } from '../settingsMigrations'
 import { MAIN_PROFILE_ID, PlaylistVideoAddResult } from '../../constants'
-import { hasReachedWatchedThreshold, migrateLegacyHistoryRecord } from '../../history'
+import { hasReachedWatchedThreshold, migrateLegacyHistoryRecord, newestUniqueHistoryRecords } from '../../history'
 import { resolveSearchHistoryEntry } from '../../search-history'
 import { createRecommendationStore } from '../recommendations'
 import { createIdQuery } from '../idQuery'
@@ -205,24 +205,36 @@ class History {
     // Queue the read with the writes, so none can land on a duplicate that is
     // about to be removed.
     const records = await Settings.runSeenStateUpdate(async () => {
-      const records = await db.history.findAsync({}).sort({ timeWatched: -1 })
-      // Older sync runs could insert a video already written locally. Keep the
-      // newest record so updates by video ID and the cache agree on one document.
-      const seen = new Set()
-      const duplicateIds = []
-      const uniqueRecords = records.filter(record => {
-        if (!seen.has(record.videoId)) return seen.add(record.videoId)
-        duplicateIds.push(record._id)
-        return false
-      })
+      // Keep the newest record of each video so updates by video ID and the
+      // cache agree on one document.
+      const { records, duplicateIds } = newestUniqueHistoryRecords(await db.history.findAsync({}))
       if (duplicateIds.length > 0) await db.history.removeAsync(createIdQuery('_id', duplicateIds), { multi: true })
-      return uniqueRecords
+      return records
     })
-    // Prepare the index once the datastore is loaded, before playback and bulk
-    // edits start writing by video ID. Seen-mark merging is not always enabled.
-    await db.history.ensureIndexAsync({ fieldName: 'videoId' })
+    await this.prepareVideoIdIndex()
     return records
   }
+
+  // Prepare the index once the datastore is loaded, before playback and bulk
+  // edits start writing by video ID. Seen-mark merging is not always enabled.
+  static prepareVideoIdIndex() {
+    return db.history.ensureIndexAsync({ fieldName: 'videoId' })
+  }
+
+  // ******************** //
+  // Unique Electron main process handlers
+  /**
+   * Every record as its stored JSON text, unsorted. The renderer parses and
+   * sorts them with `newestUniqueHistoryRecords` and asks for `find` to
+   * remove duplicates, so this process never builds the records.
+   */
+  static async _findSerialized() {
+    await this.migrateWatchedStatus()
+    const records = await Settings.runSeenStateUpdate(() => db.history.findSerializedAsync())
+    await this.prepareVideoIdIndex()
+    return records
+  }
+  // ******************** //
 
   static updateSubscriptionState({ records = [], unseenVideo, metadata, acknowledgedRepairs }) {
     return Settings.runSeenStateUpdate(async () => {
@@ -798,6 +810,17 @@ class Profiles {
     return this.updateSubscriptions(profiles, profile => (
       getProfileWithUpdatedSubscriptionDetails(profile, channels)?.subscriptions ?? null
     ))
+  }
+
+  /** Saves `subscriptions` only while the saved ones still equal `previous`, returning the updated profile or null */
+  static async updateSubscriptionsIfUnchanged(profileId, subscriptions, previous) {
+    const snapshot = JSON.stringify(previous)
+    const { affectedDocuments } = await db.profiles.updateAsync(
+      { _id: profileId, $where() { return JSON.stringify(this.subscriptions) === snapshot } },
+      { $set: { subscriptions } },
+      { returnUpdatedDocs: true }
+    )
+    return affectedDocuments ?? null
   }
 
   /**

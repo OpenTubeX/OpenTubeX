@@ -195,6 +195,35 @@ test('a combined history change turns the loaded collection into the edited one'
   assert.equal(adapter.getChange('settings'), null)
 })
 
+test('replays many history changes with one pass over the history, keeping the last change of each entry', async () => {
+  const privacy = await preparePrivacyKey(null, 'change-log-passphrase')
+  const changeList = [
+    { upserts: [historyEntry('new'), historyEntry('a', 2)], deletions: ['b'] },
+    { upserts: [historyEntry('b', 3)], deletions: ['new'] },
+    { upserts: [historyEntry('c', 4)], deletions: [] },
+    { upserts: [historyEntry('a', 5)], deletions: ['d'] },
+    { upserts: [historyEntry('d', 6)], deletions: ['c'] },
+  ]
+  const changes = await Promise.all(changeList.map(async (change, index) => ({
+    revision: index + 2, payload: await encryptSyncChange(change, privacy.key, privacy.salt),
+  })))
+  // Arrays derived from it count each pass over the history too.
+  let passes = 0
+  class CountedHistory extends Array {
+    filter(...args) { passes++; return super.filter(...args) }
+  }
+  const history = CountedHistory.from(['a', 'b', 'c', 'd', 'e'].map(id => historyEntry(id)))
+  const base = deepFreeze({ revision: 1, data: history })
+
+  const result = await readSyncCollection('history', { revision: 6, payload: null, base_revision: 1, changes }, base, privacy.key)
+
+  const expected = changeList.reduce((data, change) => applyRemoteHistoryChanges({ history: data, ...change }), [...history])
+  assert.deepEqual({ ...result, data: [...result.data] }, { revision: 6, data: expected })
+  assert.equal(passes, 1)
+  assert.equal(base.data, history, 'leaves the cached collection unchanged')
+  assert.equal(history.length, 5)
+})
+
 test('reads full and incremental collection responses with their changes', async () => {
   const privacy = await preparePrivacyKey(null, 'change-log-passphrase')
   const base = [historyEntry('a'), historyEntry('b')]

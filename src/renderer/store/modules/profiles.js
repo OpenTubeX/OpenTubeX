@@ -239,6 +239,16 @@ const actions = {
     }
   },
 
+  /** Replaces subscriptions unless they changed since `previous`, here or in the datastore */
+  async updateProfileSubscriptionsFromSync({ commit, state }, { profileId, subscriptions, previous }) {
+    const current = state.profileList.find(profile => profile._id === profileId)
+    if (JSON.stringify(current?.subscriptions) !== JSON.stringify(previous)) return false
+    const profile = await DBProfileHandlers.updateSubscriptionsIfUnchanged(profileId, subscriptions, previous)
+    if (profile === null) return false
+    commit('upsertProfileToList', profile)
+    return true
+  },
+
   async addChannelToProfiles({ commit }, { channel, profileIds }) {
     // If this is an Invidious URL, convert it to a YouTube one
     if (!channel.thumbnail.startsWith('https://yt3.googleusercontent.com/')) {
@@ -381,6 +391,11 @@ const mutations = {
 
     if (i !== -1) {
       state.profileList.splice(i, 1)
+    }
+    // Other windows and server sync delete profiles too, so every deletion
+    // keeps the active profile valid here.
+    if (state.activeProfile === profileId) {
+      state.activeProfile = MAIN_PROFILE_ID
     }
   }
 }

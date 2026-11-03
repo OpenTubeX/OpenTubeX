@@ -30,8 +30,9 @@ test('transcript cues carry their formatted timestamp from parsing', () => {
   ])
 })
 
-test('transcript rows only rerender when their cue or active state changes', () => {
-  assert.match(transcriptSource, /v-memo="\[segment, segment\.index === activeSegmentIndex\]"/)
+test('transcript rows only rerender when their chunk or its active segment changes', () => {
+  assert.match(transcriptSource, /v-memo="\[chunk, active, keepMounted\]"/)
+  assert.match(transcriptSource, /segment\.index === active \}/)
   assert.match(transcriptSource, /\{\{ segment\.timestamp \}\}/)
 })
 

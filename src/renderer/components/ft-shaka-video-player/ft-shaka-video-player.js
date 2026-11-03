@@ -1,5 +1,6 @@
 import { setupPhoneOptionsMenu } from '../../helpers/player/phoneOptionsMenu'
 import { CONTROL_BAR_MENUS, setupSubmenuScrolling } from '../../helpers/player/submenuScrolling'
+import { setupMenuTransitions } from '../../helpers/player/menuTransitions'
 import { chooseAndroidDirectory } from '../../helpers/androidStorage'
 import { isAppHidden, getAndroidAppActive, waitForAndroidAppState } from '../../helpers/appVisibility.js'
 import { playbackScreenWake } from '../../helpers/playbackScreenWake'
@@ -22,6 +23,7 @@ import { bindIosFullscreen } from '../../helpers/player/iosFullscreen'
 import { bindIosNativeCaptions } from '../../helpers/player/iosNativeCaptions'
 import { bindNativeCaptionTiming } from '../../helpers/player/nativeCaptionTiming'
 import { createIOSMediaTransport } from '../../helpers/player/iosMediaTransport'
+import { withoutNetworkRecovery } from '../../helpers/networkRecovery'
 import { useI18n } from 'vue-i18n'
 import { createPopularityPath, isMostReplayed } from '../../helpers/player/videoPopularity'
 
@@ -242,12 +244,18 @@ const defaultShakaElementFactories = new Map([
 const RequestType = shaka.net.NetworkingEngine.RequestType
 const AdvancedRequestType = shaka.net.NetworkingEngine.AdvancedRequestType
 
+// Shaka keeps the window.fetch it finds when it loads, which is the network
+// recovery wrapper because Shaka loads with the Watch view. That wrapper's
+// per-origin queue would hold manifests and segments behind unrelated failed
+// requests. Shaka retries, times out and resumes after reconnecting itself.
+const fetchPlugin = (...args) => withoutNetworkRecovery(() => shaka.net.HttpFetchPlugin.parse(...args))
+const { PluginPriority } = shaka.net.NetworkingEngine
+shaka.net.NetworkingEngine.registerScheme('http', fetchPlugin, PluginPriority.APPLICATION, true)
+shaka.net.NetworkingEngine.registerScheme('https',
+  process.env.IS_IOS ? createIOSMediaTransport(shaka, registerPlugin('SabrHttp'), fetchPlugin) : fetchPlugin,
+  PluginPriority.APPLICATION, true)
 if (process.env.IS_IOS) {
-  shaka.net.NetworkingEngine.registerScheme('https',
-    createIOSMediaTransport(shaka, registerPlugin('SabrHttp')),
-    shaka.net.NetworkingEngine.PluginPriority.APPLICATION, true)
-  shaka.net.NetworkingEngine.registerScheme('capacitor', shaka.net.HttpFetchPlugin.parse,
-    shaka.net.NetworkingEngine.PluginPriority.APPLICATION, true)
+  shaka.net.NetworkingEngine.registerScheme('capacitor', fetchPlugin, PluginPriority.APPLICATION, true)
 }
 const TrackLabelFormat = shaka.ui.Overlay.TrackLabelFormat
 const { Severity: ErrorSeverity, Category: ErrorCategory, Code: ErrorCode } = shaka.util.Error
@@ -4241,9 +4249,11 @@ export default defineComponent({
       addOverlayScrollbars(menu)
       const cleanupOverflowSubmenus = setupSubmenuScrolling(menu, ui.getControls())
       const cleanupControlBarMenus = setupSubmenuScrolling(controlsContainer, ui.getControls(), CONTROL_BAR_MENUS)
+      const cleanupMenuTransitions = setupMenuTransitions(menu, ui.getControls())
       cleanupSubmenuScrolling = () => {
         cleanupOverflowSubmenus()
         cleanupControlBarMenus()
+        cleanupMenuTransitions()
       }
       cleanupPhoneOptionsMenu = setupPhoneOptionsMenu(menu, ui.getControls(), t)
 
@@ -4266,14 +4276,15 @@ export default defineComponent({
       // Opening a submenu replaces the tiles, which would otherwise resize the
       // popup around them. Remember how tall the menu is while its own tiles are
       // shown, so that a shorter submenu only leaves empty space below itself.
-      overflowMenuResizeObserver = new ResizeObserver(() => {
+      // Its border box, unlike its bounding box, isn't scaled while it opens.
+      overflowMenuResizeObserver = new ResizeObserver((entries) => {
         scheduleOverflowMenuLabelTitles(menu)
 
         if (menu.querySelector(':scope > .shaka-sub-menu:not(.shaka-hidden)')) {
           return
         }
 
-        overflowMenuIdleHeight = menu.getBoundingClientRect().height
+        overflowMenuIdleHeight = entries.at(-1).borderBoxSize[0].blockSize
       })
       overflowMenuResizeObserver.observe(menu)
 

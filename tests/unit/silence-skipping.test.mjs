@@ -21,12 +21,13 @@ test('rejects late responses from an earlier presentation', () => {
   assert.equal(tracker.isCurrent(currentRequest), true)
 })
 
-function analysisFixture (t, { standard = false, managed = false, enabled = true } = {}) {
-  const previous = Object.fromEntries(['MediaSource', 'ManagedMediaSource', 'AudioContext', 'document'].map(key =>
+function analysisFixture (t, { standard = false, managed = false, enabled = true, video = null } = {}) {
+  const previous = Object.fromEntries(['MediaSource', 'ManagedMediaSource', 'AudioContext', 'document', 'requestAnimationFrame', 'cancelAnimationFrame'].map(key =>
     [key, Object.getOwnPropertyDescriptor(globalThis, key)]))
   const sources = []
   const audioElements = []
   const appended = []
+  const contexts = []
   class Source extends EventTarget {
     static isTypeSupported (type) { return type === 'audio/mp4; codecs="mp4a.40.2"' }
     constructor () {
@@ -49,7 +50,18 @@ function analysisFixture (t, { standard = false, managed = false, enabled = true
   const node = () => ({ connect () {}, disconnect () {} })
   globalThis.AudioContext = class {
     destination = {}
-    resume () { return Promise.resolve() }
+    state = 'running'
+    constructor () { contexts.push(this) }
+    resume () {
+      this.state = 'running'
+      return Promise.resolve()
+    }
+
+    suspend () {
+      this.state = 'suspended'
+      return Promise.resolve()
+    }
+
     close () { return Promise.resolve() }
     createMediaElementSource = node
     createGain = () => ({ ...node(), gain: { value: 1 } })
@@ -59,10 +71,22 @@ function analysisFixture (t, { standard = false, managed = false, enabled = true
   class ManagedSource extends Source {}
   globalThis.MediaSource = standard ? Source : undefined
   globalThis.ManagedMediaSource = managed ? ManagedSource : undefined
+  globalThis.requestAnimationFrame = () => 1
+  globalThis.cancelAnimationFrame = () => {}
   globalThis.document = {
     createElement (tag) {
       assert.equal(tag, 'audio')
-      const audio = Object.assign(new EventTarget(), { buffered: { length: 0 }, pause () {}, load () {}, removeAttribute () {} })
+      const audio = Object.assign(new EventTarget(), {
+        buffered: { length: 0 },
+        paused: true,
+        play () {
+          this.paused = false
+          return Promise.resolve()
+        },
+        pause () { this.paused = true },
+        load () {},
+        removeAttribute () {},
+      })
       audioElements.push(audio)
       return audio
     },
@@ -74,7 +98,7 @@ function analysisFixture (t, { standard = false, managed = false, enabled = true
   const renderer = createRenderer({ createComment: () => ({}), insert () {}, remove () {}, parentNode () {}, nextSibling () {} })
   const app = renderer.createApp({
     setup () {
-      analysis = useSilenceSkipping({ enabled: enabledRef, isLive: ref(false), video: ref(null), setCurrentTime () {} })
+      analysis = useSilenceSkipping({ enabled: enabledRef, isLive: ref(false), video: ref(video), setCurrentTime () {} })
       return () => null
     },
   })
@@ -100,6 +124,7 @@ function analysisFixture (t, { standard = false, managed = false, enabled = true
     sources,
     audioElements,
     appended,
+    contexts,
     enabled: enabledRef,
     response,
     openSource,
@@ -115,6 +140,39 @@ test('analyses the captured audio while skipping is enabled', async t => {
   f.response({ startTime: 0, endTime: 5 }, [1])
   await f.openSource()
   assert.deepEqual(f.appended, [[9], [1]])
+})
+
+test('pauses the look-ahead analysis with playback and resumes it from the same position', async t => {
+  const video = Object.assign(new EventTarget(), { paused: false, ended: false, muted: false, volume: 1, seeking: false, currentTime: 0 })
+  const f = analysisFixture(t, { standard: true, video })
+  f.response(undefined, [9])
+  f.response({ startTime: 0, endTime: 5 }, [1])
+  const [audio] = f.audioElements
+  audio.buffered = { length: 1, start: () => 0, end: () => 10 }
+  await f.openSource()
+  assert.equal(audio.paused, false)
+
+  video.paused = true
+  video.dispatchEvent(new Event('pause'))
+  await new Promise(resolve => setImmediate(resolve))
+  assert.equal(audio.paused, true)
+  assert.equal(f.contexts[0].state, 'suspended')
+
+  // Newly buffered audio and media events must not restart it while paused.
+  audio.currentTime = 3
+  f.response({ startTime: 5, endTime: 10 }, [2])
+  audio.dispatchEvent(new Event('seeked'))
+  for (let i = 0; i < 5; i++) await new Promise(resolve => setImmediate(resolve))
+  assert.deepEqual(f.appended, [[9], [1], [2]])
+  assert.equal(audio.paused, true)
+  assert.equal(f.contexts[0].state, 'suspended')
+
+  video.paused = false
+  video.dispatchEvent(new Event('play'))
+  for (let i = 0; i < 5; i++) await new Promise(resolve => setImmediate(resolve))
+  assert.equal(audio.paused, false)
+  assert.equal(f.contexts[0].state, 'running')
+  assert.equal(audio.currentTime, 3)
 })
 
 test('does not copy media segments while skipping is disabled', async t => {
@@ -192,4 +250,19 @@ test('allows evicted analysis segments to be queued again after a backward seek'
 
   assert.deepEqual([...analysisSegments.keys()], ['init', 'current'])
   assert.deepEqual(appendQueue, [retainedSegment])
+})
+
+test('suspends an analysis graph that finishes starting after playback paused', async t => {
+  const video = Object.assign(new EventTarget(), { paused: false, ended: false, muted: false, volume: 1, seeking: false, currentTime: 0 })
+  const f = analysisFixture(t, { standard: true, video })
+  f.response(undefined, [9])
+  f.response({ startTime: 0, endTime: 5 }, [1])
+  const [audio] = f.audioElements
+  audio.buffered = { length: 1, start: () => 0, end: () => 10 }
+
+  video.paused = true
+  video.dispatchEvent(new Event('pause'))
+  await f.openSource()
+  assert.equal(audio.paused, true)
+  assert.equal(f.contexts[0].state, 'suspended')
 })

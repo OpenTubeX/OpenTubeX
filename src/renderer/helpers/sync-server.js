@@ -749,7 +749,23 @@ function isSameLocalPlaylist(playlist, metadata, videos) {
 }
 
 export async function syncSubscriptions(client, store, previousIds = [], options = {}) {
-  const profiles = store.state.profiles.profileList
+  // Subscriptions edited here or in another window while the server responds
+  // would be overwritten, so merge again from the changed subscriptions.
+  let baseline = previousIds
+  for (let attempt = 0; attempt < 3; attempt++) {
+    const result = await mergeSubscriptions(client, store, baseline, options)
+    if (result.mergedIds) return result.mergedIds
+    // The attempt already brought the server to its merge of the local
+    // subscriptions it read, so the retry merges against those. Otherwise an
+    // edit made meanwhile would look like a change from another device and be
+    // undone.
+    baseline = result.baseline
+  }
+  throw new Error('Subscriptions changed during sync. Try again.')
+}
+
+async function mergeSubscriptions(client, store, previousIds, options) {
+  const profiles = deepCopy(store.state.profiles.profileList)
   const mainProfile = profiles.find(profile => profile._id === MAIN_PROFILE_ID) ?? profiles[0]
   const localSubscriptions = mainProfile.subscriptions.map(channel => ({
     ...channel,
@@ -784,18 +800,27 @@ export async function syncSubscriptions(client, store, previousIds = [], options
   })
   const mergedIdSet = new Set(mergedIds)
 
+  let mainProfileSaved = false
   for (const profile of profiles) {
-    const updatedProfile = deepCopy(profile)
-    updatedProfile.subscriptions = profile._id === mainProfile._id
+    const subscriptions = profile._id === mainProfile._id
       ? mergedSubscriptions
-      : updatedProfile.subscriptions.filter(channel => mergedIdSet.has(channel.id))
+      : profile.subscriptions.filter(channel => mergedIdSet.has(channel.id))
 
-    if (!metadataEquals(profile.subscriptions, updatedProfile.subscriptions)) {
-      await store.dispatch('updateProfile', updatedProfile)
+    if (!metadataEquals(profile.subscriptions, subscriptions)) {
+      const saved = await store.dispatch('updateProfileSubscriptionsFromSync', {
+        profileId: profile._id,
+        subscriptions,
+        previous: profile.subscriptions,
+      })
+      if (!saved) {
+        // Once the main profile holds the merge, both sides agree on it.
+        return { baseline: Array.from(mainProfileSaved ? mergedIds : localById.keys()) }
+      }
     }
+    if (profile._id === mainProfile._id) mainProfileSaved = true
   }
 
-  return Array.from(mergedIds)
+  return { mergedIds: Array.from(mergedIds) }
 }
 
 export async function syncPlaylistBookmarks(client, store, previousIds = [], options = {}) {

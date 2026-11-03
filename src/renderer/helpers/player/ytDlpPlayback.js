@@ -1,7 +1,7 @@
 import { ytDlp } from '../ytDlp'
 import { FormatUtils, Misc } from 'youtubei.js'
 
-import { MANIFEST_TYPE_DASH, MANIFEST_TYPE_HLS } from './utils'
+import { MANIFEST_TYPE_DASH, MANIFEST_TYPE_HLS } from './manifestTypes'
 import { fetchGoogleVideo } from './googleVideoFallback'
 import { probeStreamByteRanges } from './streamByteRanges'
 import { getCompatibleAdaptiveFormats } from './compatibleAdaptiveFormats'

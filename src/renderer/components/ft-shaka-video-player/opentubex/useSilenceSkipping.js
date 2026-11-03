@@ -312,8 +312,27 @@ export function useSilenceSkipping({ enabled, isLive, video, setCurrentTime }) {
     return null
   }
 
+  // The look-ahead only needs to stay ahead of playback, so it pauses with it.
+  // Ranges found so far stay valid for when playback resumes.
+  function isPlaybackRunning() {
+    const videoElement = video.value
+    return !!videoElement && !videoElement.paused && !videoElement.ended
+  }
+
+  function pauseAnalysis() {
+    if (analysisFrame !== null) {
+      cancelAnimationFrame(analysisFrame)
+      analysisFrame = null
+    }
+    flushPendingSilence()
+    analysisAudio?.pause()
+    if (analysisAudioContext?.state === 'running') {
+      analysisAudioContext.suspend().catch(() => {})
+    }
+  }
+
   async function ensureAnalysisPlayback() {
-    if (!analysisAudio || !analysisAudioContext || analysisPlayPending || !enabled.value || isLive.value) {
+    if (!analysisAudio || !analysisAudioContext || analysisPlayPending || !enabled.value || isLive.value || !isPlaybackRunning()) {
       return
     }
 
@@ -347,10 +366,16 @@ export function useSilenceSkipping({ enabled, isLive, video, setCurrentTime }) {
       analysisAudio.defaultPlaybackRate = ANALYSIS_PLAYBACK_RATE
       analysisAudio.playbackRate = ANALYSIS_PLAYBACK_RATE
       await analysisAudio.play()
-      scheduleAnalysis()
+      // Playback may have paused while the analysis was starting.
+      if (isPlaybackRunning()) scheduleAnalysis()
+      else pauseAnalysis()
     } catch (error) {
       if (error?.name !== 'AbortError' && error?.name !== 'NotAllowedError') {
         console.warn('Unable to start look-ahead audio analysis for silence skipping', error)
+      }
+      // A pause interrupted the start, but playback may have resumed while it was pending.
+      if (error?.name === 'AbortError' && isPlaybackRunning()) {
+        queueMicrotask(ensureAnalysisPlayback)
       }
     } finally {
       analysisPlayPending = false
@@ -436,6 +461,11 @@ export function useSilenceSkipping({ enabled, isLive, video, setCurrentTime }) {
       sampleBuffers.push(new Float32Array(analyser.fftSize))
     }
     analysisSink.connect(analysisAudioContext.destination)
+
+    // Playback may have paused while the graph was being set up.
+    if (!isPlaybackRunning()) {
+      analysisAudioContext.suspend().catch(() => {})
+    }
   }
 
   function destroyAnalysisPipeline() {
@@ -627,6 +657,9 @@ export function useSilenceSkipping({ enabled, isLive, video, setCurrentTime }) {
     } else if (skipFrame !== null) {
       cancelAnimationFrame(skipFrame)
       skipFrame = null
+    }
+    if (!isPlaybackRunning()) {
+      pauseAnalysis()
     }
   }
 
