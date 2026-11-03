@@ -487,3 +487,22 @@ test('refreshes of another profile also fetch channels with notifications turned
   context.store.getters.getEnableUploadNotifications = false
   assert.deepEqual(fetched([alpha], 'videos'), ['UCa'])
 })
+
+test('settling waits for notifications that are still being delivered', async () => {
+  const directory = await mkdtemp(path.join(tmpdir(), 'upload-notifications-'))
+  try {
+    let delivered = false
+    const notifier = createUploadNotifier({
+      file: path.join(directory, 'state.json'),
+      // Delivery can wait for a history write and a thumbnail.
+      show: () => new Promise(resolve => setTimeout(() => { delivered = true; resolve() }, 50))
+    })
+    await notifier.configure({ enabled: true, titles: { videos: '{channel}' }, channels: { UC1: { name: 'One', feedTypes: ['videos'], membersOnly: false } } })
+    await notifier.observe({ channelId: 'UC1', feedType: 'videos', entries: [entry('a')] })
+    notifier.observe({ channelId: 'UC1', feedType: 'videos', entries: [entry('b', Date.now()), entry('a')] })
+    await notifier.settle()
+    assert.equal(delivered, true)
+  } finally {
+    await rm(directory, { recursive: true, force: true })
+  }
+})

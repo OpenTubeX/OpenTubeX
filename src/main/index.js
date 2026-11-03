@@ -779,7 +779,7 @@ function runApp() {
    * @param {{ title: string, body: string, url: string, silent?: boolean, thumbnail?: string, target: import('../notificationHistory').NotificationHistoryTarget | null }} options
    */
   function showUrlNotification({ title, body, url, silent = false, thumbnail, target }) {
-    notify({ title, body, thumbnail, target, showSystemNotification: () => showSystemUrlNotification({ title, body, url, silent, thumbnail }) })
+    return notify({ title, body, thumbnail, target, showSystemNotification: () => showSystemUrlNotification({ title, body, url, silent, thumbnail }) })
       .catch(error => console.error('Failed to show a notification', error))
   }
 
