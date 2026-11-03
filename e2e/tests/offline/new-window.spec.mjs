@@ -231,7 +231,11 @@ test.describe('disabled multi-tab window close confirmation', () => {
     await page.evaluate(() => window.ftElectron.reopenClosedWindow())
     await expect.poll(() => app.electronApp.evaluate(() => globalThis.reopenFailureInjected)).toBe(true)
     await expect.poll(() => app.electronApp.evaluate(({ BrowserWindow }) => BrowserWindow.getAllWindows().length)).toBe(1)
-    const reopenedPromise = app.electronApp.waitForEvent('window')
+    // The window whose initialization failed can be reported after it is gone.
+    // It closes without ever loading the app.
+    const reopenedPromise = app.electronApp.waitForEvent('window', {
+      predicate: window => window.waitForURL(url => url.protocol !== 'about:', { waitUntil: 'commit' }).then(() => true, () => false)
+    })
     await page.evaluate(() => window.ftElectron.reopenClosedWindow())
     const reopened = await reopenedPromise
     await waitForAppReady(reopened)
