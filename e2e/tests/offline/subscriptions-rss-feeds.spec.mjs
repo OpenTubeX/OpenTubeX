@@ -8,7 +8,9 @@ import {
   goToSettingsSection,
   abortUnmockedRequest,
   expectScrollAtRenderedEnd,
-  setWindowSize
+  openNewWindowFromTabBar,
+  setWindowSize,
+  waitForAppReady
 } from '../../helpers/app.mjs'
 import { encryptSyncDocument, decryptSyncDocument } from '../../../src/renderer/helpers/sync-server-privacy.js'
 
@@ -804,6 +806,59 @@ test.describe('with followed feeds', () => {
     await older.getByRole('button', { name: 'More Options' }).click()
     await menu.getByRole('menuitem', { name: 'Download Video' }).click()
     await expect(page.getByRole('dialog', { name: 'Older VOD' })).toBeVisible()
+  })
+})
+
+test.describe('with a followed feed', () => {
+  test.use({
+    seed: {
+      settings: { fetchSubscriptionsAutomatically: false, enableRssFeeds: true, followedRssFeeds: [RSS_FEED] }
+    }
+  })
+
+  test('shows and cancels a refresh running in another window', async ({ app, page }) => {
+    await mockFeeds(page)
+    await goTo(page, 'subscriptions')
+    await page.locator('[data-rss-feeds-tab]').click()
+    await expect(page.locator('#subscriptionsPanel .ft-list-item .h3Title')).toHaveText(['Newest VOD', 'Older VOD'])
+
+    // The feed never answers, so only cancelling ends the refresh
+    let aborted = 0
+    page.on('requestfailed', (request) => {
+      if (request.url() === RSS_URL) aborted++
+    })
+    await page.route(RSS_URL, () => {})
+    await page.locator('.subscriptionsHeader').getByRole('button', { name: /^Refresh RSS/ }).click()
+    await expect(page.locator('[data-rss-feeds-tab] .tabLoadingIndicator')).toBeVisible()
+
+    const other = await openNewWindowFromTabBar(app, page)
+    await waitForAppReady(other)
+    // The other window shows the cached items and doesn't refresh them itself
+    const otherRequests = []
+    await mockFeeds(other)
+    other.on('request', (request) => {
+      if (request.url() === RSS_URL) otherRequests.push(request.url())
+    })
+    await goTo(other, 'subscriptions')
+    await other.locator('[data-rss-feeds-tab]').click()
+    await expect(other.locator('#subscriptionsPanel .ft-list-item .h3Title')).toHaveText(['Newest VOD', 'Older VOD'])
+    const otherLoading = other.locator('[data-rss-feeds-tab] .tabLoadingIndicator')
+    await expect(otherLoading).toBeVisible()
+
+    await other.locator('.subscriptionsHeader').getByRole('button', { name: 'Cancel Refresh' }).click()
+    await expect.poll(() => aborted).toBe(1)
+    await expect(page.locator('[data-rss-feeds-tab] .tabLoadingIndicator')).toHaveCount(0)
+    await expect(otherLoading).toHaveCount(0)
+    await expect(other.locator('.subscriptionsHeader').getByRole('button', { name: /^Refresh RSS/ }))
+      .toHaveAttribute('aria-disabled', 'false')
+
+    // The refresh ends for the other window when its window closes
+    await page.locator('.subscriptionsHeader').getByRole('button', { name: /^Refresh RSS/ }).click()
+    await expect(otherLoading).toBeVisible()
+    await page.close()
+    app.page = other
+    await expect(otherLoading).toHaveCount(0)
+    expect(otherRequests).toEqual([])
   })
 })
 

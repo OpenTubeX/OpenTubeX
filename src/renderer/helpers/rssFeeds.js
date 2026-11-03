@@ -1,4 +1,4 @@
-import { shallowRef } from 'vue'
+import { computed, shallowRef } from 'vue'
 
 import store from '../store/index'
 import i18n from '../i18n/index'
@@ -435,7 +435,11 @@ export const rssFeedErrors = shallowRef(/** @type {string[]} */ ([]))
 /** Whether the user closed the banner for the current failed feeds */
 export const rssFeedErrorsDismissed = shallowRef(false)
 export const rssFeedsLastRefresh = shallowRef(/** @type {number | null} */ (null))
-export const rssFeedsRefreshing = shallowRef(false)
+const refreshingHere = shallowRef(false)
+/** The locks that other windows hold while they refresh the feeds */
+const otherWindowRefreshes = shallowRef(/** @type {Set<string>} */ (new Set()))
+/** Whether this or another window refreshes the feeds */
+export const rssFeedsRefreshing = computed(() => refreshingHere.value || otherWindowRefreshes.value.size > 0)
 export const rssFeedsNextAutoRefresh = shallowRef(loadRssFeedsNextAutoRefresh())
 /** The feeds that the cached items belong to */
 let refreshedFeedUrls = new Set()
@@ -444,6 +448,22 @@ let activeRefresh = null
 /** Feeds that were added or retried on their own during the active refresh, with their items cached */
 let loadedDuringRefresh = new Set()
 
+const REFRESH_LOCK_PREFIX = 'opentubex-rss-feeds-refresh:'
+/** @type {BroadcastChannel | null} */
+let refreshChannel = null
+
+/**
+ * @param {string} lockName held by another window until its refresh ends
+ */
+function trackOtherWindowRefresh(lockName) {
+  if (otherWindowRefreshes.value.has(lockName)) return
+  otherWindowRefreshes.value = new Set([...otherWindowRefreshes.value, lockName])
+  // Granted once the refresh ends, also when its window closes or crashes
+  navigator.locks.request(lockName, () => {
+    otherWindowRefreshes.value = new Set([...otherWindowRefreshes.value].filter(name => name !== lockName))
+  })
+}
+
 if (typeof window !== 'undefined') {
   // Other windows refresh the feeds and mark their items as seen too
   window.addEventListener('storage', (event) => {
@@ -451,6 +471,20 @@ if (typeof window !== 'undefined') {
     if (event.key === null || event.key === SEEN_HISTORY_STORAGE_KEY) seenHistory = loadSeenHistory()
     if (event.key === null || event.key === NEXT_AUTO_REFRESH_STORAGE_KEY) rssFeedsNextAutoRefresh.value = loadRssFeedsNextAutoRefresh()
   })
+
+  // Every window shows the refreshes of the others and can cancel them
+  if (navigator.locks && typeof BroadcastChannel !== 'undefined') {
+    refreshChannel = new BroadcastChannel('opentubex-rss-feeds-refresh')
+    refreshChannel.addEventListener('message', ({ data }) => {
+      if (data?.type === 'started' && typeof data.lockName === 'string') trackOtherWindowRefresh(data.lockName)
+      if (data?.type === 'cancel') activeRefresh?.abort()
+    })
+    navigator.locks.query().then(({ held }) => {
+      for (const { name } of held ?? []) {
+        if (name?.startsWith(REFRESH_LOCK_PREFIX)) trackOtherWindowRefresh(name)
+      }
+    })
+  }
 }
 
 /**
@@ -644,7 +678,16 @@ export async function refreshRssFeeds(feeds, { automatic = false, cachedUrls = n
   const controller = new AbortController()
   activeRefresh = controller
   loadedDuringRefresh = new Set()
-  rssFeedsRefreshing.value = true
+  refreshingHere.value = true
+  let finish
+  const finished = new Promise(resolve => { finish = resolve })
+  if (refreshChannel) {
+    const lockName = REFRESH_LOCK_PREFIX + crypto.randomUUID()
+    navigator.locks.request(lockName, () => {
+      refreshChannel.postMessage({ type: 'started', lockName })
+      return finished
+    })
+  }
   // Shown as a notification or in the progress bar, like subscription refreshes
   const message = i18n.global.t('Subscriptions.RSS Feeds.Refreshing')
   const progress = startProgressBarOperation(store, { icon: ['fas', 'rss'], message, percentage: 0 })
@@ -694,17 +737,22 @@ export async function refreshRssFeeds(feeds, { automatic = false, cachedUrls = n
       return result.status === 'fulfilled' ? [[feed, result.value]] : []
     }))
   } finally {
+    finish()
     progress.finish()
     if (activeRefresh === controller) {
       activeRefresh = null
-      rssFeedsRefreshing.value = false
+      refreshingHere.value = false
     }
   }
 }
 
-/** Stops the running refresh. Its feeds keep their previous items and errors. */
+/**
+ * Stops the running refreshes of every window. Their feeds keep their previous
+ * items and errors.
+ */
 export function cancelRssFeedsRefresh() {
   activeRefresh?.abort()
+  refreshChannel?.postMessage({ type: 'cancel' })
 }
 
 export function openRssFeedManager() {
