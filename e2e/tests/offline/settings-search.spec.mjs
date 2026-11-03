@@ -9,7 +9,8 @@ async function expectSubscriptionRefreshIntervalSelectHighlight(page) {
     'Live Auto Refresh Interval',
     'Posts Auto Refresh Interval',
     'Videos Auto Refresh Interval',
-    'Shorts Auto Refresh Interval'
+    'Shorts Auto Refresh Interval',
+    'RSS Feeds Auto Refresh Interval'
   ])
   await page.getByRole('button', { name: 'Videos Auto Refresh Interval', exact: true }).click()
 
