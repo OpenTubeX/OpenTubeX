@@ -97,6 +97,35 @@ test('upgrades the Homebrew cask on macOS', async () => {
   ), null)
 })
 
+test('upgrades the nightly Homebrew cask on macOS', async () => {
+  const appPath = '/Applications/OpenTubeX.app/Contents/Resources/app.asar'
+  assert.deepEqual(
+    await getPackageManagerUpdate(appPath, system({}, { '/usr/local/Caskroom/opentubex@nightly': '' }, { platform: 'darwin' })),
+    { packageManager: 'Homebrew', command: 'brew upgrade --cask opentubex@nightly' }
+  )
+})
+
+test('updates Scoop installs from a bucket', async () => {
+  const appDirectory = 'C:\\Users\\user\\scoop\\apps\\opentubex-nightly\\current'
+  const appPath = `${appDirectory}\\resources\\app.asar`
+  const windows = (files) => system({}, files, { platform: 'win32' })
+  assert.deepEqual(
+    await getPackageManagerUpdate(appPath, windows({ [`${appDirectory}\\install.json`]: '{"bucket":"opentubex","architecture":"64bit"}' })),
+    { packageManager: 'Scoop', command: 'scoop update opentubex-nightly' }
+  )
+  assert.deepEqual(
+    await getPackageManagerUpdate('D:\\scoop\\apps\\opentubex\\0.37.3-beta\\resources\\app.asar', windows({
+      'D:\\scoop\\apps\\opentubex\\0.37.3-beta\\install.json': '{"bucket":"extras"}',
+    })),
+    { packageManager: 'Scoop', command: 'scoop update opentubex' }
+  )
+  assert.equal(await getPackageManagerUpdate(appPath, windows({
+    [`${appDirectory}\\install.json`]: '{"url":"C:\\\\opentubex.json"}',
+  })), null)
+  assert.equal(await getPackageManagerUpdate(appPath, windows({})), null)
+  assert.equal(await getPackageManagerUpdate('C:\\Program Files\\OpenTubeX\\resources\\app.asar', windows({})), null)
+})
+
 test('upgrades APT installs from the OpenTubeX repository', async () => {
   const update = await getPackageManagerUpdate(APP_PATH, system({
     'dpkg-query': `opentubex: ${APP_PATH}\n`,
