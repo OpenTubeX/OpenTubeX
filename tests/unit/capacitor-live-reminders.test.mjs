@@ -12,6 +12,7 @@ async function loadCapacitorReminder(notifications) {
   const { liveReminder, applyCapacitorNotificationMode } = vm.runInNewContext(`${source.replace(/^import .*$/gm, '').replaceAll('export ', '')}
     ({ liveReminder, applyCapacitorNotificationMode })`, {
     process: { env: { IS_CAPACITOR: true } },
+    console: { error: () => {} },
     LocalNotifications: notifications,
     localStorage: { getItem: key => storage.get(key) ?? null, setItem: (key, value) => storage.set(key, value) },
     Date: class extends Date { static now() { return clock.now } },
@@ -118,5 +119,46 @@ test('turning notifications off while they resume leaves no reminder scheduled',
   const pausing = applyCapacitorNotificationMode('off')
   blocked.resolve()
   await Promise.all([resuming, pausing])
+  assert.equal(scheduled.size, 0)
+})
+
+test('a reminder scheduled while notifications turn off is cancelled too', async () => {
+  const scheduled = new Map()
+  let permission = null
+  const { liveReminder, applyCapacitorNotificationMode } = await loadCapacitorReminder({
+    checkPermissions: async () => { await permission?.promise; return { display: 'granted' } },
+    cancel: async ({ notifications }) => { for (const { id } of notifications) scheduled.delete(id) },
+    getPending: async () => ({ notifications: [...scheduled.keys()].map(id => ({ id })) }),
+    schedule: async ({ notifications }) => { for (const notification of notifications) scheduled.set(notification.id, notification) },
+  })
+  await applyCapacitorNotificationMode('both')
+
+  permission = Promise.withResolvers()
+  const scheduling = liveReminder.schedule(reminder(START + 60_000))
+  const pausing = applyCapacitorNotificationMode('off')
+  permission.resolve()
+  await Promise.all([scheduling, pausing])
+  assert.equal(scheduled.size, 0)
+})
+
+test('turning notifications off again retries a cancellation that failed', async () => {
+  const scheduled = new Map()
+  let failCancel = false
+  const { liveReminder, applyCapacitorNotificationMode } = await loadCapacitorReminder({
+    checkPermissions: async () => ({ display: 'granted' }),
+    cancel: async ({ notifications }) => {
+      if (failCancel) throw new Error('Cancellation failed')
+      for (const { id } of notifications) scheduled.delete(id)
+    },
+    getPending: async () => ({ notifications: [...scheduled.keys()].map(id => ({ id })) }),
+    schedule: async ({ notifications }) => { for (const notification of notifications) scheduled.set(notification.id, notification) },
+  })
+  assert.equal(await liveReminder.schedule(reminder(START + 60_000)), true)
+
+  failCancel = true
+  await applyCapacitorNotificationMode('off')
+  assert.equal(scheduled.size, 1)
+  failCancel = false
+  await applyCapacitorNotificationMode('off')
   assert.equal(scheduled.size, 0)
 })

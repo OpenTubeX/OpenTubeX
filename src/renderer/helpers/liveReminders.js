@@ -125,7 +125,6 @@ export function applyCapacitorNotificationMode(mode) {
 async function applyPausedState(mode) {
   const paused = mode === 'off'
   if (paused !== isPaused()) {
-    localStorage.setItem(PAUSED_STORAGE_KEY, String(paused))
     const stored = readStoredReminders()
     // Reminders that expired while paused never fired, so they leave without a history entry.
     const pending = stored.filter(record => record.startTimestamp > Date.now())
@@ -139,6 +138,8 @@ async function applyPausedState(mode) {
       } else if (pending.length > 0 && (await LocalNotifications.checkPermissions()).display === 'granted') {
         for (const record of pending) await scheduleSystemReminder(record)
       }
+      // Saved only once the system accepted the change, so a failed one is tried again.
+      localStorage.setItem(PAUSED_STORAGE_KEY, String(paused))
     } catch (error) {
       console.error('Failed to update the live reminder schedule', error)
     }
@@ -237,6 +238,31 @@ async function requestNotificationPermission() {
   return status.display === 'granted'
 }
 
+async function scheduleReminder(reminder) {
+  // The premiere may have started before the reminder was toggled or while the
+  // permission prompt was open, and a past start cannot be scheduled. A reminder
+  // being rescheduled would otherwise still fire at its old time.
+  const started = async () => {
+    if (reminder.startTimestamp > Date.now()) return false
+    await capacitorLiveReminder.cancel(reminder.videoId)
+    return true
+  }
+  // Synced reminders are kept while notifications are off, and scheduled once they are on again.
+  const paused = isPaused()
+  if (await started() || (!paused && !await requestNotificationPermission()) || await started()) return false
+
+  const records = readCapacitorReminders()
+  const record = { ...reminder, notificationId: notificationIdForVideo(reminder.videoId, records) }
+  handledAlarms.delete(record.notificationId)
+  if (!paused) await scheduleSystemReminder(record)
+  writeCapacitorReminders([
+    ...records.filter(item => item.videoId !== reminder.videoId),
+    record,
+  ])
+  emitUpdated(reminder.videoId, true)
+  return true
+}
+
 const capacitorLiveReminder = {
   async get(videoId) {
     const records = readCapacitorReminders()
@@ -251,31 +277,15 @@ const capacitorLiveReminder = {
     return records
   },
 
-  async schedule(reminder) {
-    // The premiere may have started before the reminder was toggled or while the
-    // permission prompt was open, and a past start cannot be scheduled. A reminder
-    // being rescheduled would otherwise still fire at its old time.
-    const started = async () => {
-      if (reminder.startTimestamp > Date.now()) return false
-      await capacitorLiveReminder.cancel(reminder.videoId)
-      return true
-    }
-    // Synced reminders are kept while notifications are off, and scheduled once they are on again.
-    const paused = isPaused()
-    if (await started() || (!paused && !await requestNotificationPermission()) || await started()) return false
-
-    const records = readCapacitorReminders()
-    const record = { ...reminder, notificationId: notificationIdForVideo(reminder.videoId, records) }
-    handledAlarms.delete(record.notificationId)
-    if (!paused) await scheduleSystemReminder(record)
-    writeCapacitorReminders([
-      ...records.filter(item => item.videoId !== reminder.videoId),
-      record,
-    ])
-    emitUpdated(reminder.videoId, true)
-    return true
+  /**
+   * Runs between mode changes, so turning notifications off also cancels a
+   * reminder that was being scheduled meanwhile.
+   */
+  schedule(reminder) {
+    const scheduling = modeChange.then(() => scheduleReminder(reminder))
+    modeChange = scheduling.then(() => {}, () => {})
+    return scheduling
   },
-
   async cancel(videoId) {
     const records = readCapacitorReminders()
     const record = records.find(item => item.videoId === videoId)
