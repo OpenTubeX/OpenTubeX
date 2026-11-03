@@ -10,6 +10,16 @@ Requests such as "implement issue #X" authorize local changes, not a PR. Open a 
 - Follow `release-notes/README.md` and `.github/PULL_REQUEST_AGENT_INSTRUCTIONS.md` for release notes and their screenshots and recordings.
 - End the PR description with a blurb about the model and harness that made the changes. Use the public model name the harness reports for the model that made the changes. If the harness does not expose a model name, use the harness name. Do not guess.
 
+## Follow-ups
+
+Record every follow-up you would suggest (an unrelated bug, a deferred edge case, a cleanup, a missing test) as a comment on the pinned "Agent follow-ups" issue (#2661), not only in your thread, where it goes unread. This needs no further approval.
+
+- Read the existing comments first and skip follow-ups already listed.
+- Post one comment per follow-up, following the `leaving-pr-comments` skill: a bold one-line summary, why it matters, and links to the relevant code and, if one exists, the PR.
+- When your task addresses a follow-up from the issue, delete its comment (`gh api -X DELETE repos/OpenTubeX/OpenTubeX/issues/comments/<id>`) once the fix is merged. If the work is only partly done, leave the comment and post an update instead.
+- Never edit the issue body or other comments, and never close the issue.
+- Link the posted comments in your final message.
+
 ## Documentation
 
 - Create new documentation, writeups, implementation notes, plans, or summaries only when requested; explain changes and validation in the PR description. Update existing documentation only when the change makes it inaccurate.
