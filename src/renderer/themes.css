@@ -805,20 +805,21 @@ it can be safely elided. This looks quite pleasant on this theme. */
 
 /*************** PRIMARY THEME COLOR DEFINTIONS ***************/
 
-.mainRed,
-.mainPink,
+/* Text on each primary color keeps at least 4.5:1 contrast. */
 .mainPurple,
 .mainDeepPurple,
-.mainIndigo,
+.mainIndigo {
+  --text-with-main-color: #fff;
+}
+
+/* primary theme colors too light for white text */
+.mainRed,
+.mainPink,
 .mainBlue,
 .mainLightBlue,
 .mainCyan,
 .mainTeal,
-.mainGreen {
-  --text-with-main-color: #fff;
-}
-
-/* light primary theme colors */
+.mainGreen,
 .mainLightGreen,
 .mainLime,
 .mainYellow,
@@ -1149,14 +1150,11 @@ it can be safely elided. This looks quite pleasant on this theme. */
 .mainDraculaCyan,
 .mainDraculaGreen,
 .mainDraculaOrange,
+.mainDraculaPink,
+.mainDraculaPurple,
 .mainDraculaRed,
 .mainDraculaYellow {
   --text-with-main-color: #282a36;
-}
-
-.mainDraculaPink,
-.mainDraculaPurple {
-  --text-with-main-color: #f8f8f2;
 }
 
 .mainDraculaCyan {
@@ -1206,12 +1204,9 @@ it can be safely elided. This looks quite pleasant on this theme. */
 .mainSolarizedRed,
 .mainSolarizedMagenta,
 .mainSolarizedViolet,
-.mainSolarizedGreen {
-  --text-with-main-color: #fdf6e3;
-}
-
 .mainSolarizedBlue,
-.mainSolarizedCyan {
+.mainSolarizedCyan,
+.mainSolarizedGreen {
   --text-with-main-color: #000;
 }
 
@@ -1450,15 +1445,18 @@ it can be safely elided. This looks quite pleasant on this theme. */
 .mainEverforestDarkGreen,
 .mainEverforestDarkAqua,
 .mainEverforestDarkBlue,
-.mainEverforestDarkPurple,
-.mainEverforestLightRed,
+.mainEverforestDarkPurple {
+  --text-with-main-color: #1e2326;
+}
+
+/* The light theme's accents are too dark for #1e2326 and too light for white. */
 .mainEverforestLightOrange,
 .mainEverforestLightYellow,
 .mainEverforestLightGreen,
 .mainEverforestLightAqua,
 .mainEverforestLightBlue,
 .mainEverforestLightPurple {
-  --text-with-main-color: #1e2326;
+  --text-with-main-color: #000;
 }
 
 .mainEverforestDarkRed {
@@ -1503,10 +1501,12 @@ it can be safely elided. This looks quite pleasant on this theme. */
   --primary-color-active: #b67a96;
 }
 
+/* Black text stays just below 4.5:1 on this red. */
 .mainEverforestLightRed {
   --primary-color: #d83532;
   --primary-color-hover: #e84e3f;
   --primary-color-active: #b83232;
+  --text-with-main-color: #fff;
 }
 
 .mainEverforestLightOrange {

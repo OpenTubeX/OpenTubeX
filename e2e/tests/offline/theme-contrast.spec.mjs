@@ -1,10 +1,11 @@
 import path from 'node:path'
+import { readFileSync } from 'node:fs'
 
 import { test, expect, goTo, goToSettingsSection, repoRoot, setPlayerFullscreen } from '../../helpers/app.mjs'
 import { sampleColors } from '../../helpers/colors.mjs'
 import { openMockedVideo } from '../../helpers/player.mjs'
 import { mockPlayableWatchPage } from '../../helpers/watch.mjs'
-import { BUILTIN_BASE_THEME_VALUES } from '../../../src/constants.js'
+import { BUILTIN_BASE_THEME_VALUES, CATPPUCCIN_MACCHIATO_COLORS } from '../../../src/constants.js'
 
 /** Text color and background composited over ancestors, including color(srgb ...) values. */
 function renderedColors(locator) {
@@ -374,6 +375,70 @@ test.describe('bright main color toggle contrast', () => {
     const surface = await renderedColors(page.locator('.settingsHeaderActions'))
     expect(contrastRatio(enabled.foreground, enabled.background), 'enabled icon').toBeGreaterThanOrEqual(3)
     expect(contrastRatio(enabled.background, surface.background), 'enabled container').toBeGreaterThanOrEqual(1.2)
+  })
+})
+
+// The main color picker offers every color in this list.
+const MAIN_COLORS = [
+  ...readFileSync(path.join(repoRoot, 'src/renderer/helpers/colors.js'), 'utf8').matchAll(/\bname: '(\w+)'/g)
+].map(([, name]) => name).concat(CATPPUCCIN_MACCHIATO_COLORS.map(({ name }) => name))
+
+test.describe('main color text contrast', () => {
+  test.use({ seed: { settings: { currentLocale: 'en-US' } } })
+
+  test('text on every main color stays readable on filled primary controls', async ({ page }) => {
+    const privacy = await goToSettingsSection(page, 'privacy')
+    // Matching entries enable the primary Set Password button, which is filled.
+    await privacy.getByLabel('Password', { exact: true }).fill('contrast')
+    await privacy.getByLabel('Confirm password', { exact: true }).fill('contrast')
+    const button = privacy.getByRole('button', { name: 'Set Password', exact: true })
+    await expect(button).toBeEnabled()
+    await expect(button).toHaveClass(/\bvariant-filled\b/)
+    // Enabled header toggles use the selected-container color pair.
+    const toggle = page.getByRole('button', { name: 'Highlight settings changed from defaults', exact: true })
+    if (await toggle.getAttribute('aria-pressed') !== 'true') await toggle.click()
+    await expect(toggle).toHaveAttribute('aria-pressed', 'true')
+    await page.mouse.move(0, 0)
+    await page.evaluate(() => document.activeElement?.blur())
+
+    expect(MAIN_COLORS.length).toBeGreaterThan(90)
+    const targets = { button: await button.elementHandle(), toggle: await toggle.elementHandle() }
+    for (const baseTheme of ['light', 'dark']) {
+      await page.evaluate(theme => window.$store.dispatch('updateBaseTheme', theme), baseTheme)
+      await expect(page.locator('body')).toHaveClass(new RegExp(`\\b${baseTheme}\\b`))
+      // Swap the class the app applies for the main color setting directly;
+      // saving the setting for every color exceeds the test timeout.
+      const results = await page.evaluate(({ names, button, toggle }) => {
+        const rgb = color => color.match(/[\d.]+/g).slice(0, 3).map(Number)
+        const probe = document.createElement('span')
+        probe.style.color = 'var(--text-with-main-color)'
+        probe.style.backgroundColor = 'var(--primary-color)'
+        document.body.append(probe)
+        const measure = element => {
+          const style = getComputedStyle(element)
+          return { foreground: rgb(style.color), background: rgb(style.backgroundColor) }
+        }
+        const results = names.map(name => {
+          const { classList } = document.body
+          classList.remove(...[...classList].filter(className => /^main[A-Z]/.test(className)))
+          classList.add(`main${name}`)
+          // Start the color transitions, then read their settled colors.
+          for (const element of [button, toggle]) measure(element)
+          for (const animation of document.getAnimations()) animation.finish()
+          return { name, palette: measure(probe), button: measure(button), 'selected toggle': measure(toggle) }
+        })
+        probe.remove()
+        return results
+      }, { names: MAIN_COLORS, ...targets })
+      // Each class applies its own primary color.
+      expect(new Set(results.map(({ palette }) => `${palette.background}`)).size).toBeGreaterThan(90)
+      for (const { name, ...colors } of results) {
+        for (const [label, { foreground, background }] of Object.entries(colors)) {
+          expect.soft(contrastRatio(foreground, background), `${baseTheme} ${name} ${label} ${JSON.stringify({ foreground, background })}`)
+            .toBeGreaterThanOrEqual(4.5)
+        }
+      }
+    }
   })
 })
 
