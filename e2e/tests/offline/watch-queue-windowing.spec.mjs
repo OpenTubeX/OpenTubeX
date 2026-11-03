@@ -124,12 +124,14 @@ test('keeps a focused queue row mounted while it scrolls away', async ({ app, pa
   await expect(first.getByRole('button', { name: 'Reorder Queued video 1' })).toBeFocused()
 })
 
-test('a drag that scrolls through the queue keeps going as rows come into view', async ({ app, page }) => {
+test('a drag that scrolls through the queue keeps going as rows come into view', { tag: '@scale' }, async ({ app, page }) => {
   const scroller = await openLongQueue(app, page, { longTitles: true })
   // Fonts, UI scale and dock widths make real rows differ from the estimate
   // that rows which never mounted use, so they resize when they mount.
   await page.addStyleTag({ content: '.queueItem.windowedListShell:not([style*="block-size"]) { block-size: 60px }' })
   const firstId = await page.evaluate(() => window.$store.getters.getWatchQueue[0].queueItemId)
+  // At larger UI scales the queue starts below the visible part of the page.
+  await scroller.evaluate(element => element.scrollIntoView({ block: 'end' }))
   const handle = scroller.locator('.queueItem').first().locator('.queueDragHandle')
   const handleBox = await handle.boundingBox()
   const scrollerBox = await scroller.boundingBox()
