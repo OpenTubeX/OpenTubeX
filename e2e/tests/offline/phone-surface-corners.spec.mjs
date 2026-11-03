@@ -343,21 +343,23 @@ test.describe('phone surface corners', { tag: '@scale' }, () => {
     await openMockedVideo(page)
     await setWindowSize(app, page, { width: Math.round(375 * uiScale / 100), height: Math.round(812 * uiScale / 100) })
     await mockCapacitorPhoneLayout(page)
-    const cards = page.locator('.watchVideoInfo:visible, .videoDescription:visible, .watchVideoRecommendations:visible')
-    await expect(cards).toHaveCount(3)
+    const cards = page.locator('.watchVideoInfo:visible, .watchVideoRecommendations:visible')
+    await expect(cards).toHaveCount(2)
     for (const card of await cards.all()) {
       await expectFullWidth(card)
       await expectRounded(card)
     }
+    for (const button of ['.phoneCommentsButton', '.phoneDescriptionButton']) {
+      await expect(page.locator(button)).toBeVisible()
+      const inset = await page.locator(button).evaluate(element => {
+        const bounds = element.getBoundingClientRect()
+        return { left: bounds.left, right: innerWidth - bounds.right, radius: Number.parseFloat(getComputedStyle(element).borderTopLeftRadius) }
+      })
+      expect(inset.left, button).toBeGreaterThan(0)
+      expect(inset.right, button).toBeGreaterThan(0)
+      expect(inset.radius, button).toBeGreaterThan(0)
+    }
     const comments = page.locator('.phoneCommentsButton')
-    await expect(comments).toBeVisible()
-    const inset = await comments.evaluate(element => {
-      const bounds = element.getBoundingClientRect()
-      return { left: bounds.left, right: innerWidth - bounds.right, radius: Number.parseFloat(getComputedStyle(element).borderTopLeftRadius) }
-    })
-    expect(inset.left).toBeGreaterThan(0)
-    expect(inset.right).toBeGreaterThan(0)
-    expect(inset.radius).toBeGreaterThan(0)
 
     await comments.click()
     const sheet = page.locator('.mobileSheet.dockedSheet[open]')

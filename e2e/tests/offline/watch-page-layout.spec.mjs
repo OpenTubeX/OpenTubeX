@@ -357,8 +357,9 @@ test('keeps stacked watch cards separated in the Capacitor phone layout', async 
     element.classList.remove('topTabs', 'bottomTabs', 'verticalTabs')
   })
 
-  const cards = page.locator('.watchVideoInfo:visible, .videoDescription:visible, .watchVideoRecommendations:visible, .commentsArea > .watchVideo:visible')
-  await expect(cards).toHaveCount(3)
+  // The description and comments open from inset panel buttons, not full-width cards.
+  const cards = page.locator('.watchVideoInfo:visible, .watchVideoRecommendations:visible, .commentsArea > .watchVideo:visible')
+  await expect(cards).toHaveCount(2)
 
   const geometry = await cards.evaluateAll((elements) => elements.map((element) => {
     const bounds = element.getBoundingClientRect()
