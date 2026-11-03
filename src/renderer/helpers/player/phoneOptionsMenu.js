@@ -168,6 +168,11 @@ export function setupPhoneOptionsMenu(menu, controls, t) {
   }
 
   function schedule() {
+    // Reopened while fading out, the fade must not finish closing it before the next frame
+    if (closing && query.matches && !menu.classList.contains('shaka-hidden')) {
+      closing = null
+      delete dialog.dataset.ftMenuClosing
+    }
     frame ??= requestAnimationFrame(update)
   }
 
