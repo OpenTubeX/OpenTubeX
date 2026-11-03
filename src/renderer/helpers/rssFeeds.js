@@ -7,12 +7,8 @@ import { shouldShowProgressStartToast } from './progressPresentation'
 import { showToastOnAllTabs } from './utils'
 import { appFetch } from './rssHub'
 import { supportsYtDlp } from './ytDlpCapabilities'
-import {
-  RSS_FEED_SEEN_ITEMS_STORAGE_KEY,
-  loadRssFeedSeenMarks,
-  onRssFeedSeenItemsSynced,
-  recordRssFeedSeenItems
-} from './rssFeedSeenItems'
+import { isRssFeedItemSeen, onRssFeedSeenItemsSynced, toRssFeedSeenMarks } from './rssFeedSeenItems'
+import { unmarkExternalMediaWatchedBefore } from './externalMediaPosition'
 import { resolveYtDlpCreatorAvatarUrl } from '../../main/ytDlpCreatorAvatar'
 
 const FETCH_TIMEOUT_MS = 15_000
@@ -297,7 +293,15 @@ export async function fetchRssFeed(url, signal) {
 
 const ITEMS_STORAGE_KEY = 'rssFeedItems'
 const NEXT_AUTO_REFRESH_STORAGE_KEY = 'rssFeedsNextAutoRefresh'
-const LOADED_FEEDS_STORAGE_KEY = 'rssFeedsLoaded'
+const SEEN_HISTORY_STORAGE_KEY = 'rssFeedSeenHistory'
+const MAX_SEEN_HISTORY_PER_FEED = 500
+
+/**
+ * @returns {Map<string, boolean>} whether each marked item is seen
+ */
+function loadRssFeedSeenMarks() {
+  return toRssFeedSeenMarks(store.getters.getRssFeedSeenItems)
+}
 
 /**
  * The last loaded items, so that they show right away after a restart and
@@ -343,29 +347,46 @@ function setRssFeedItems(items) {
 }
 
 /**
- * Feeds that loaded before, so that items of a feed that was empty, such as
- * a live stream feed, still become new.
- * @returns {Set<string>}
+ * The IDs of the items that weren't new in each feed that loaded before,
+ * newest first. Unlike the cached items, they outlast items that leave their
+ * feed, so that the items keep their state when they come back. A feed that
+ * loaded empty, such as a live stream feed, has no IDs, so that its first item
+ * still becomes new.
+ * @returns {Map<string, string[]>}
  */
-function loadLoadedFeedUrls() {
+function loadSeenHistory() {
   try {
-    const urls = JSON.parse(localStorage.getItem(LOADED_FEEDS_STORAGE_KEY) ?? '[]')
-    return new Set(Array.isArray(urls) ? urls : [])
+    const history = JSON.parse(localStorage.getItem(SEEN_HISTORY_STORAGE_KEY) ?? '{}')
+    if (history === null || typeof history !== 'object' || Array.isArray(history)) return new Map()
+    return new Map(Object.entries(history).filter(([, ids]) => Array.isArray(ids)))
   } catch {
-    return new Set()
+    return new Map()
   }
 }
 
 /**
- * @param {Set<string>} urls
+ * @param {Map<string, string[]>} history
  */
-function setLoadedFeedUrls(urls) {
-  loadedFeedUrls = urls
+function setSeenHistory(history) {
+  seenHistory = history
   try {
-    localStorage.setItem(LOADED_FEEDS_STORAGE_KEY, JSON.stringify([...urls]))
+    localStorage.setItem(SEEN_HISTORY_STORAGE_KEY, JSON.stringify(Object.fromEntries(history)))
   } catch (error) {
-    console.error('Failed to save the loaded RSS feeds', error)
+    console.error('Failed to save the seen RSS feed history', error)
   }
+}
+
+/**
+ * @param {Map<string, string[]>} history updated in place
+ * @param {string} feedUrl
+ * @param {RssFeedItem[]} items the freshly loaded items of the feed
+ */
+function recordSeenHistory(history, feedUrl, items) {
+  const ids = new Set(items.map(item => item.id))
+  history.set(feedUrl, [
+    ...items.filter(item => item.isNew !== true).map(item => item.id),
+    ...(history.get(feedUrl) ?? []).filter(id => !ids.has(id))
+  ].slice(0, MAX_SEEN_HISTORY_PER_FEED))
 }
 
 /** @returns {number | null} */
@@ -415,7 +436,7 @@ export const rssFeedsRefreshing = shallowRef(false)
 export const rssFeedsNextAutoRefresh = shallowRef(loadRssFeedsNextAutoRefresh())
 /** The feeds that the cached items belong to */
 let refreshedFeedUrls = new Set()
-let loadedFeedUrls = loadLoadedFeedUrls()
+let seenHistory = loadSeenHistory()
 let activeRefresh = null
 /** Feeds that were added or retried on their own during the active refresh, with their items cached */
 let loadedDuringRefresh = new Set()
@@ -423,10 +444,8 @@ let loadedDuringRefresh = new Set()
 if (typeof window !== 'undefined') {
   // Other windows refresh the feeds and mark their items as seen too
   window.addEventListener('storage', (event) => {
-    if (event.key === null || event.key === ITEMS_STORAGE_KEY || event.key === RSS_FEED_SEEN_ITEMS_STORAGE_KEY) {
-      rssFeedItems.value = loadStoredItems()
-    }
-    if (event.key === null || event.key === LOADED_FEEDS_STORAGE_KEY) loadedFeedUrls = loadLoadedFeedUrls()
+    if (event.key === null || event.key === ITEMS_STORAGE_KEY) rssFeedItems.value = loadStoredItems()
+    if (event.key === null || event.key === SEEN_HISTORY_STORAGE_KEY) seenHistory = loadSeenHistory()
     if (event.key === null || event.key === NEXT_AUTO_REFRESH_STORAGE_KEY) rssFeedsNextAutoRefresh.value = loadRssFeedsNextAutoRefresh()
   })
 }
@@ -448,12 +467,14 @@ export function getRssFeedItemKey(item) {
 function reconcileNewItems(feedUrl, items, previousItems) {
   // Items can be marked on another device before they load here
   const marks = loadRssFeedSeenMarks()
-  if (!loadedFeedUrls.has(feedUrl) && previousItems.length === 0) return applySeenMarks(items, marks)
+  const seenIds = seenHistory.get(feedUrl)
+  if (seenIds === undefined && previousItems.length === 0) return applySeenMarks(items, marks)
   const previousById = new Map(previousItems.map(item => [item.id, item]))
+  const seenBefore = new Set(seenIds)
   return items.map((item) => {
     const previous = previousById.get(item.id)
     const seen = marks.get(getRssFeedItemKey(item))
-    return (seen === undefined ? (previous ? previous.isNew === true : true) : !seen)
+    return (seen === undefined ? (previous ? previous.isNew === true : !seenBefore.has(item.id)) : !seen)
       ? { ...item, isNew: true }
       : item
   })
@@ -483,14 +504,28 @@ function setRssFeedItemsSeen(items, seen) {
     .filter(item => (item.isNew === true) === seen && keys.has(getRssFeedItemKey(item)))
     .map(getRssFeedItemKey)
   if (changedKeys.length === 0) return
-  recordRssFeedSeenItems(changedKeys, seen)
+  store.dispatch('mergeRssFeedSeenItems', { keys: changedKeys, seen }).catch((error) => {
+    console.error('Failed to save the seen RSS feed items', error)
+  })
   setRssFeedItems(applySeenMarks(rssFeedItems.value, new Map(changedKeys.map(key => [key, seen]))))
-  store.dispatch('scheduleSyncServer', 'history')
 }
 
-onRssFeedSeenItemsSynced((marks) => {
-  const items = applySeenMarks(rssFeedItems.value, marks)
+// Marks also change in other windows and with syncs
+store.watch((_, getters) => getters.getRssFeedSeenItems, () => {
+  const items = applySeenMarks(rssFeedItems.value, loadRssFeedSeenMarks())
   if (items !== rssFeedItems.value) setRssFeedItems(items)
+})
+
+// Devices can watch an item and mark it as unseen without knowing about each
+// other. The later change wins, so an unseen mark after the item was last
+// saved as watched unmarks it as watched, and brings it back to the New feed.
+onRssFeedSeenItemsSynced((entries) => {
+  const unseenAt = new Map(entries.filter(entry => !isRssFeedItemSeen(entry)).map(entry => [entry.key, entry.unseenAt ?? 0]))
+  if (unseenAt.size === 0) return
+  for (const item of rssFeedItems.value) {
+    const timestamp = unseenAt.get(getRssFeedItemKey(item))
+    if (timestamp !== undefined) unmarkExternalMediaWatchedBefore(item.url, timestamp)
+  }
 })
 
 /**
@@ -551,12 +586,11 @@ export async function updateMissingRssFeedAvatars(results) {
  * @param {{ items: RssFeedItem[], image: string | null, isRssHub: boolean }} result
  */
 export function addLoadedRssFeed(feed, result) {
-  const previousItems = rssFeedItems.value.filter(item => item.feedUrl === feed.url)
-  setRssFeedItems([
-    ...rssFeedItems.value.filter(item => item.feedUrl !== feed.url),
-    ...reconcileNewItems(feed.url, result.items, previousItems)
-  ].sort(compareFeedItems))
-  setLoadedFeedUrls(new Set([...loadedFeedUrls, feed.url]))
+  const items = reconcileNewItems(feed.url, result.items, rssFeedItems.value.filter(item => item.feedUrl === feed.url))
+  setRssFeedItems([...rssFeedItems.value.filter(item => item.feedUrl !== feed.url), ...items].sort(compareFeedItems))
+  const history = new Map(seenHistory)
+  recordSeenHistory(history, feed.url, items)
+  setSeenHistory(history)
   refreshedFeedUrls.add(feed.url)
   loadedDuringRefresh.add(feed.url)
   setRssFeedErrors(rssFeedErrors.value.filter(url => url !== feed.url))
@@ -615,13 +649,15 @@ export async function refreshRssFeeds(feeds, { automatic = false } = {}) {
     const failedUrls = new Set(feeds.filter((feed, index) => results[index].status === 'rejected' && !loadedUrls.has(feed.url))
       .map(feed => feed.url))
     const previousItems = rssFeedItems.value
+    /** @type {Map<string, RssFeedItem[]>} */
+    const refreshedItems = new Map(results.flatMap((result, index) => (
+      result.status === 'fulfilled' && !loadedUrls.has(feeds[index].url)
+        ? [[feeds[index].url, reconcileNewItems(feeds[index].url, result.value.items, previousItems.filter(item => item.feedUrl === feeds[index].url))]]
+        : []
+    )))
     setRssFeedItems([
       ...rssFeedItems.value.filter(item => loadedUrls.has(item.feedUrl) || failedUrls.has(item.feedUrl)),
-      ...results.flatMap((result, index) => (
-        result.status === 'fulfilled' && !loadedUrls.has(feeds[index].url)
-          ? reconcileNewItems(feeds[index].url, result.value.items, previousItems.filter(item => item.feedUrl === feeds[index].url))
-          : []
-      ))
+      ...[...refreshedItems.values()].flat()
     ].sort(compareFeedItems))
     setRssFeedErrors([...failedUrls])
     rssFeedsLastRefresh.value = Date.now()
@@ -629,10 +665,10 @@ export async function refreshRssFeeds(feeds, { automatic = false } = {}) {
     setRssFeedsNextAutoRefresh(interval > 0 ? Date.now() + interval : null)
     refreshedFeedUrls = new Set([...feeds.map(feed => feed.url), ...loadedUrls])
     // Removed feeds start over when they are added again
-    setLoadedFeedUrls(new Set([
-      ...feeds.map(feed => feed.url).filter((url, index) => results[index].status === 'fulfilled' || loadedFeedUrls.has(url)),
-      ...loadedUrls
-    ]))
+    const feedUrls = new Set(feeds.map(feed => feed.url))
+    const history = new Map([...seenHistory].filter(([url]) => feedUrls.has(url) || loadedUrls.has(url)))
+    for (const [url, items] of refreshedItems) recordSeenHistory(history, url, items)
+    setSeenHistory(history)
     updateMissingRssFeedAvatars(feeds.flatMap((feed, index) => {
       const result = results[index]
       return result.status === 'fulfilled' ? [[feed, result.value]] : []

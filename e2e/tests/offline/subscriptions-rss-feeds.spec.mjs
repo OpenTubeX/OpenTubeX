@@ -748,6 +748,68 @@ test.describe('with followed feeds', () => {
   })
 })
 
+const SYNC_KEY = Buffer.alloc(32, 1).toString('base64')
+const SYNC_SALT = Buffer.alloc(16, 2).toString('base64')
+
+/**
+ * An encrypted sync server that keeps the uploaded collections in `remote`.
+ * Register it after the catch-all route of the feeds, which would abort it.
+ * @param {import('@playwright/test').Page} page
+ * @param {Record<string, string>} remote encrypted collections
+ * @param {Record<string, number>} [capabilities]
+ */
+async function mockSyncServer(page, remote, capabilities = {}) {
+  await page.route('https://rss-seen-sync.example/**', async (route) => {
+    const request = route.request()
+    const pathname = new URL(request.url()).pathname
+    let body
+    if (pathname === '/health') {
+      body = { capabilities: { encrypted_sync: 1, live_sync: 1, seen_rss_items: 1, ...capabilities } }
+    } else if (pathname === '/v1/encrypted_sync/events') {
+      body = []
+    } else if (pathname === '/v1/account/sessions') {
+      body = { sessions: [] }
+    } else if (pathname === '/v1/encrypted_sync') {
+      body = { collections: [], legacy_data: false, legacy_encrypted_data: false }
+    } else {
+      const collection = pathname.split('/').at(-1)
+      expect(Object.hasOwn(remote, collection)).toBe(true)
+      if (request.method() === 'PUT') remote[collection] = request.postDataJSON().payload
+      body = { revision: 1, payload: remote[collection] }
+    }
+    await route.fulfill({ json: body })
+  })
+}
+
+/**
+ * Syncs history with the server of `mockSyncServer`.
+ * @param {import('@playwright/test').Page} page
+ * @returns {Promise<[string, string]>} the sync status and error
+ */
+function syncWithSyncServer(page) {
+  return page.evaluate(async ({ key, salt }) => {
+    const store = window.$store
+    const settings = {
+      SyncServerEnabled: true,
+      SyncServerUrl: 'https://rss-seen-sync.example',
+      SyncServerToken: 'test-token',
+      SyncServerPrivacyMode: 'enhanced',
+      SyncServerPrivacyKey: key,
+      SyncServerPrivacySalt: salt,
+      SyncServerAutoSync: false,
+      SyncServerSyncHistory: true,
+      SyncServerSyncSubscriptions: false,
+      SyncServerSyncPlaylists: false,
+      SyncServerSyncProfiles: false,
+      SyncServerSyncSettings: false,
+      SyncServerSyncSessions: false
+    }
+    for (const [setting, value] of Object.entries(settings)) store.commit(`set${setting}`, value)
+    await store.dispatch('syncWithSyncServer')
+    return [store.state.syncServer.syncServerStatus, store.state.syncServer.syncServerError]
+  }, { key: SYNC_KEY, salt: SYNC_SALT })
+}
+
 test.describe('with new items', () => {
   test.use({
     seed: {
@@ -1092,66 +1154,80 @@ test.describe('with new items', () => {
     await expect.poll(() => requests).toBe(2)
   })
 
-  test('syncs the seen items with history', async ({ page }) => {
-    const key = Buffer.alloc(32, 1).toString('base64')
-    const salt = Buffer.alloc(16, 2).toString('base64')
+  test('keeps the seen state of items that leave the feed and come back', async ({ page }) => {
+    await loadNewItems(page)
+    const panel = page.locator('#subscriptionsPanel')
+    const newItems = panel.locator('.ft-list-item').filter({ has: page.locator('.newContentDot') })
+    await expect(newItems.locator('.h3Title')).toHaveText(['Brand new VOD', 'Second new VOD'])
+
+    // The feed drops an item that wasn't new and one that was
+    const withoutItems = updatedRssFeed.replace(/<item>\s*<title>(?:Older VOD|Second new VOD)<\/title>[\s\S]*?<\/item>/g, '')
+    await page.route(RSS_URL, route => route.fulfill({ contentType: 'application/rss+xml', body: withoutItems }))
+    const refresh = page.locator('.subscriptionsHeader').getByRole('button', { name: /^Refresh RSS/ })
+    await refresh.click()
+    await expect(panel.locator('.ft-list-item .h3Title')).toHaveText(['Brand new VOD', 'Newest VOD'])
+
+    // When they come back, each keeps its state
+    await page.route(RSS_URL, route => route.fulfill({ contentType: 'application/rss+xml', body: updatedRssFeed }))
+    await refresh.click()
+    await expect(panel.locator('.ft-list-item .h3Title'))
+      .toHaveText(['Brand new VOD', 'Second new VOD', 'Newest VOD', 'Older VOD'])
+    await expect(newItems.locator('.h3Title')).toHaveText(['Brand new VOD', 'Second new VOD'])
+  })
+
+  test('brings back unseen items that another device watched earlier', async ({ page }) => {
+    await loadNewItems(page)
+    const panel = page.locator('#subscriptionsPanel')
+    const menu = page.locator('.contextMenu')
+    const item = title => panel.locator('.ft-list-item', { hasText: title })
+
+    // Watched here, then marked as unseen on another device
+    await item('Newest VOD').locator('.title').click({ button: 'right' })
+    await menu.getByRole('menuitem', { name: 'Mark As Watched' }).click()
+    await expect(item('Newest VOD')).toHaveClass(/watched/)
+    const watchedAt = await page.evaluate(() => (
+      JSON.parse(localStorage.getItem('externalMediaPosition:https://www.twitch.tv/videos/3')).updatedAt
+    ))
+    // Watched on another device, then marked as unseen here
+    await item('Older VOD').locator('.title').click({ button: 'right' })
+    await menu.getByRole('menuitem', { name: 'Mark As Unseen' }).click()
+
     const remote = {
-      history: await encryptSyncDocument([], key, salt),
+      history: await encryptSyncDocument([], SYNC_KEY, SYNC_SALT),
+      seenRssItems: await encryptSyncDocument([{ key: `${RSS_URL}\nvod-3`, unseenAt: watchedAt + 1000 }], SYNC_KEY, SYNC_SALT),
+      externalMediaPositions: await encryptSyncDocument([
+        { url: 'https://www.twitch.tv/videos/1', seconds: 0, watched: true, updatedAt: now - 60000 }
+      ], SYNC_KEY, SYNC_SALT)
+    }
+    await mockSyncServer(page, remote, { external_media_positions: 1 })
+    expect(await syncWithSyncServer(page)).toEqual(['success', ''])
+
+    // The later unseen marks win over the earlier watches
+    await expect(item('Newest VOD')).not.toHaveClass(/watched/)
+    await expect(item('Older VOD')).not.toHaveClass(/watched/)
+    await page.locator('[data-subscription-feed-tab="all"]').click()
+    const section = panel.locator('section', { has: page.getByRole('heading', { name: 'RSS' }) })
+    await expect(section.locator('.ft-list-item .h3Title'))
+      .toHaveText(['Brand new VOD', 'Second new VOD', 'Newest VOD', 'Older VOD'])
+  })
+
+  test('syncs the seen items with history', async ({ page }) => {
+    const remote = {
+      history: await encryptSyncDocument([], SYNC_KEY, SYNC_SALT),
       seenRssItems: await encryptSyncDocument([
         { key: `${RSS_URL}\nvod-4`, seenAt: now },
         // Seen on another device before it loads here
         { key: `${RSS_URL}\nvod-6`, seenAt: now }
-      ], key, salt)
+      ], SYNC_KEY, SYNC_SALT)
     }
     await loadNewItems(page)
-    // After the catch-all route of the feeds, which would abort it
-    await page.route('https://rss-seen-sync.example/**', async (route) => {
-      const request = route.request()
-      const pathname = new URL(request.url()).pathname
-      let body
-      if (pathname === '/health') {
-        body = { capabilities: { encrypted_sync: 1, live_sync: 1, seen_rss_items: 1 } }
-      } else if (pathname === '/v1/encrypted_sync/events') {
-        body = []
-      } else if (pathname === '/v1/account/sessions') {
-        body = { sessions: [] }
-      } else if (pathname === '/v1/encrypted_sync') {
-        body = { collections: [], legacy_data: false, legacy_encrypted_data: false }
-      } else {
-        const collection = pathname.split('/').at(-1)
-        expect(Object.hasOwn(remote, collection)).toBe(true)
-        if (request.method() === 'PUT') remote[collection] = request.postDataJSON().payload
-        body = { revision: 1, payload: remote[collection] }
-      }
-      await route.fulfill({ json: body })
-    })
+    await mockSyncServer(page, remote)
 
     const panel = page.locator('#subscriptionsPanel')
     const newItems = panel.locator('.ft-list-item').filter({ has: page.locator('.newContentDot') })
     await expect(newItems.locator('.h3Title')).toHaveText(['Brand new VOD', 'Second new VOD'])
 
-    const status = await page.evaluate(async ({ key, salt }) => {
-      const store = window.$store
-      const settings = {
-        SyncServerEnabled: true,
-        SyncServerUrl: 'https://rss-seen-sync.example',
-        SyncServerToken: 'test-token',
-        SyncServerPrivacyMode: 'enhanced',
-        SyncServerPrivacyKey: key,
-        SyncServerPrivacySalt: salt,
-        SyncServerAutoSync: false,
-        SyncServerSyncHistory: true,
-        SyncServerSyncSubscriptions: false,
-        SyncServerSyncPlaylists: false,
-        SyncServerSyncProfiles: false,
-        SyncServerSyncSettings: false,
-        SyncServerSyncSessions: false
-      }
-      for (const [setting, value] of Object.entries(settings)) store.commit(`set${setting}`, value)
-      await store.dispatch('syncWithSyncServer')
-      return [store.state.syncServer.syncServerStatus, store.state.syncServer.syncServerError]
-    }, { key, salt })
-    expect(status).toEqual(['success', ''])
+    expect(await syncWithSyncServer(page)).toEqual(['success', ''])
     await expect(newItems.locator('.h3Title')).toHaveText(['Second new VOD'])
 
     // An item that another device saw before it loaded here doesn't become new
@@ -1175,7 +1251,7 @@ test.describe('with new items', () => {
     await page.locator('.contextMenu').getByRole('menuitem', { name: 'Mark As Seen' }).click()
     await expect(newItems).toHaveCount(0)
     await page.evaluate(() => window.$store.dispatch('syncWithSyncServer'))
-    expect((await decryptSyncDocument(remote.seenRssItems, key)).map(entry => entry.key)).toEqual([
+    expect((await decryptSyncDocument(remote.seenRssItems, SYNC_KEY)).map(entry => entry.key)).toEqual([
       `${RSS_URL}\nvod-4`,
       `${RSS_URL}\nvod-5`,
       `${RSS_URL}\nvod-6`

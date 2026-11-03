@@ -65,6 +65,10 @@ class Settings {
     return dbSettings(DBActions.SETTINGS.MERGE_SEEN_VIDEOS, update)
   }
 
+  static mergeSeenRssItems(update) {
+    return dbSettings(DBActions.SETTINGS.MERGE_SEEN_RSS_ITEMS, update)
+  }
+
   static find() {
     return dbSettings(DBActions.GENERAL.FIND)
   }

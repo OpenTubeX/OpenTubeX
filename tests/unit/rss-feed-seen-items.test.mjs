@@ -1,24 +1,47 @@
 import assert from 'node:assert/strict'
-import { beforeEach, test } from 'node:test'
-import {
+import { readFile } from 'node:fs/promises'
+import { test } from 'node:test'
+import vm from 'node:vm'
+import Datastore from '@seald-io/nedb'
+import { migrateStoredSettings } from '../../src/datastores/settingsMigrations.js'
+import * as rssSeenItems from '../../src/renderer/helpers/rssFeedSeenItems.js'
+
+const {
   MAX_RSS_FEED_SEEN_ITEMS,
-  RSS_FEED_SEEN_ITEMS_STORAGE_KEY,
-  loadRssFeedSeenMarks,
+  createRssFeedSeenMarks,
   mergeRssFeedSeenItems,
   onRssFeedSeenItemsSynced,
   parseRssFeedSeenItems,
-  recordRssFeedSeenItems,
   syncRssFeedSeenItems,
-} from '../../src/renderer/helpers/rssFeedSeenItems.js'
+  toRssFeedSeenMarks,
+} = rssSeenItems
 
-const storage = new Map()
-Object.defineProperty(globalThis, 'localStorage', { configurable: true, value: {
-  getItem: key => storage.get(key) ?? null,
-  setItem: (key, value) => storage.set(key, value),
-  removeItem: key => storage.delete(key),
-} })
+/** The settings database handlers of the main process, shared by all windows */
+async function settingsDatabase() {
+  const source = await readFile(new URL('../../src/datastores/handlers/base.js', import.meta.url), 'utf8')
+  const db = { settings: new Datastore({ inMemoryOnly: true }) }
+  const Settings = vm.runInNewContext(source.slice(source.indexOf('class Settings {'), source.indexOf('\nclass History {')) +
+    '\nSettings', { db, ...rssSeenItems, migrateStoredSettings })
+  return { db, Settings }
+}
 
-beforeEach(() => storage.clear())
+/** A window's store, whose marks the database replies update */
+async function windowStore(Settings) {
+  const source = await readFile(new URL('../../src/renderer/store/modules/settings.js', import.meta.url), 'utf8')
+  const context = vm.createContext({ ...rssSeenItems, DBSettingHandlers: Settings, ANDROID_PROXY_SETTING_KEYS: [] })
+  vm.runInContext(source.slice(source.indexOf('const customActions ='), source.indexOf('  recordSyncSettingEdit:')) +
+    '\n}\nglobalThis.actions = customActions', context)
+  const state = { rssFeedSeenItems: '[]' }
+  const module = {
+    state,
+    commit: (type, value) => {
+      assert.equal(type, 'setRssFeedSeenItems')
+      state.rssFeedSeenItems = value
+    },
+    dispatch: (type, payload) => context.actions[type](module, payload),
+  }
+  return { state: { settings: state }, dispatch: module.dispatch }
+}
 
 test('parsing drops malformed marks and extra fields', () => {
   assert.deepEqual(parseRssFeedSeenItems(JSON.stringify([
@@ -49,33 +72,58 @@ test('merging keeps the latest seen and unseen times of each item and the most r
 })
 
 test('the later of the seen and unseen marks decides', () => {
-  recordRssFeedSeenItems(['feed\na', 'feed\nb'], true, 1)
-  recordRssFeedSeenItems(['feed\nb', 'feed\nc'], false, 2)
-  recordRssFeedSeenItems([], true, 3)
-  assert.deepEqual(JSON.parse(storage.get(RSS_FEED_SEEN_ITEMS_STORAGE_KEY)), [
+  let saved = mergeRssFeedSeenItems([], createRssFeedSeenMarks([], ['feed\na', 'feed\nb'], true, 1))
+  saved = mergeRssFeedSeenItems(saved, createRssFeedSeenMarks(saved, ['feed\nb', 'feed\nc'], false, 2))
+  assert.deepEqual(createRssFeedSeenMarks(saved, [], true, 3), [])
+  assert.deepEqual(saved, [
     { key: 'feed\na', seenAt: 1 },
     { key: 'feed\nb', seenAt: 1, unseenAt: 2 },
     { key: 'feed\nc', unseenAt: 2 },
   ])
-  assert.deepEqual(loadRssFeedSeenMarks(), new Map([['feed\na', true], ['feed\nb', false], ['feed\nc', false]]))
+  assert.deepEqual(toRssFeedSeenMarks(saved), new Map([['feed\na', true], ['feed\nb', false], ['feed\nc', false]]))
 
-  recordRssFeedSeenItems(['feed\nb'], true, 3)
-  assert.equal(loadRssFeedSeenMarks().get('feed\nb'), true)
+  saved = mergeRssFeedSeenItems(saved, createRssFeedSeenMarks(saved, ['feed\nb'], true, 3))
+  assert.equal(toRssFeedSeenMarks(saved).get('feed\nb'), true)
 })
 
-test('syncing merges both sides, applies the marks and uploads them', async () => {
-  recordRssFeedSeenItems(['feed\nlocal'], true, 2)
-  const applied = []
-  onRssFeedSeenItemsSynced(marks => applied.push([...marks]))
+test('a new mark stays ahead of earlier marks from a device whose clock is ahead', () => {
+  let saved = [{ key: 'feed\na', unseenAt: 5000 }]
+  saved = mergeRssFeedSeenItems(saved, createRssFeedSeenMarks(saved, ['feed\na', 'feed\nb'], true, 1000))
+  assert.deepEqual(saved, [
+    { key: 'feed\na', seenAt: 5001, unseenAt: 5000 },
+    { key: 'feed\nb', seenAt: 1000 },
+  ])
+  assert.equal(toRssFeedSeenMarks(saved).get('feed\na'), true)
+
+  // Marks in the same millisecond keep their order
+  saved = mergeRssFeedSeenItems(saved, createRssFeedSeenMarks(saved, ['feed\nb'], false, 1000))
+  assert.equal(toRssFeedSeenMarks(saved).get('feed\nb'), false)
+})
+
+test('the marks are saved in the settings database and ignore malformed keys', async () => {
+  const { db, Settings } = await settingsDatabase()
+  const value = await Settings.mergeSeenRssItems({ keys: ['feed\na', '', null], seen: true })
+  assert.deepEqual(JSON.parse(value).map(entry => entry.key), ['feed\na'])
+  assert.equal((await db.settings.findOneAsync({ _id: 'rssFeedSeenItems' })).value, value)
+  await Settings.mergeSeenRssItems({ keys: ['feed\na'], seen: false })
+  assert.equal(toRssFeedSeenMarks((await db.settings.findOneAsync({ _id: 'rssFeedSeenItems' })).value).get('feed\na'), false)
+})
+
+test('syncing merges both sides, reports the marks and uploads them', async () => {
+  const { Settings } = await settingsDatabase()
+  const store = await windowStore(Settings)
+  await store.dispatch('mergeRssFeedSeenItems', [{ key: 'feed\nlocal', seenAt: 2 }])
+  const reported = []
+  onRssFeedSeenItemsSynced(entries => reported.push(entries))
   let uploaded
   const count = await syncRssFeedSeenItems({
     getSeenRssItems: async () => {
       // A mark recorded while the download runs is kept
-      recordRssFeedSeenItems(['feed\nduring'], true, 3)
+      await store.dispatch('mergeRssFeedSeenItems', [{ key: 'feed\nduring', seenAt: 3 }])
       return [{ key: 'feed\nremote', seenAt: 1 }, { key: 'feed\nlocal', unseenAt: 4 }]
     },
     putSeenRssItems: async entries => { uploaded = entries },
-  })
+  }, store)
   const expected = [
     { key: 'feed\nduring', seenAt: 3 },
     { key: 'feed\nlocal', seenAt: 2, unseenAt: 4 },
@@ -83,20 +131,33 @@ test('syncing merges both sides, applies the marks and uploads them', async () =
   ]
   assert.equal(count, 3)
   assert.deepEqual(uploaded, expected)
-  assert.deepEqual(JSON.parse(storage.get(RSS_FEED_SEEN_ITEMS_STORAGE_KEY)), expected)
-  assert.deepEqual(applied, [[['feed\nduring', true], ['feed\nlocal', false], ['feed\nremote', true]]])
+  assert.deepEqual(JSON.parse(store.state.settings.rssFeedSeenItems), expected)
+  assert.deepEqual(reported, [expected])
 })
 
-test('a new mark stays ahead of earlier marks from a device whose clock is ahead', () => {
-  storage.set(RSS_FEED_SEEN_ITEMS_STORAGE_KEY, JSON.stringify([{ key: 'feed\na', unseenAt: 5000 }]))
-  recordRssFeedSeenItems(['feed\na', 'feed\nb'], true, 1000)
-  assert.deepEqual(JSON.parse(storage.get(RSS_FEED_SEEN_ITEMS_STORAGE_KEY)), [
-    { key: 'feed\na', seenAt: 5001, unseenAt: 5000 },
-    { key: 'feed\nb', seenAt: 1000 },
-  ])
-  assert.equal(loadRssFeedSeenMarks().get('feed\na'), true)
+test('a mark saved in another window while a sync writes is kept', async () => {
+  const { db, Settings } = await settingsDatabase()
+  const syncing = await windowStore(Settings)
+  const marking = await windowStore(Settings)
+  await syncRssFeedSeenItems({
+    getSeenRssItems: async () => {
+      // Neither window waits for the other's write
+      marking.dispatch('mergeRssFeedSeenItems', { keys: ['feed\nmarked'], seen: true })
+      return [{ key: 'feed\nremote', seenAt: 1 }]
+    },
+    putSeenRssItems: async () => {},
+  }, syncing)
+  await Settings.runSeenStateUpdate(() => {})
+  const saved = (await db.settings.findOneAsync({ _id: 'rssFeedSeenItems' })).value
+  assert.deepEqual(toRssFeedSeenMarks(saved), new Map([['feed\nmarked', true], ['feed\nremote', true]]))
+})
 
-  // Marks in the same millisecond keep their order
-  recordRssFeedSeenItems(['feed\nb'], false, 1000)
-  assert.equal(loadRssFeedSeenMarks().get('feed\nb'), false)
+test('a delayed database reply keeps newer marks of the window', async () => {
+  const { Settings } = await settingsDatabase()
+  const store = await windowStore(Settings)
+  const older = await Settings.mergeSeenRssItems({ keys: ['feed\na'], seen: true })
+  const newer = await Settings.mergeSeenRssItems({ keys: ['feed\nb'], seen: true })
+  await store.dispatch('applyRssFeedSeenItems', newer)
+  await store.dispatch('applyRssFeedSeenItems', older)
+  assert.equal(store.state.settings.rssFeedSeenItems, newer)
 })

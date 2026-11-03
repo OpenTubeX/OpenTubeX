@@ -27,9 +27,9 @@ import { mergeSubscriptionSeenPosts } from '../../src/subscriptionSeenPosts.js'
 import { mergeSubscriptionSeenVideos } from '../../src/subscriptionSeenVideos.js'
 import { syncSubscriptionSeenVideos, syncSubscriptionSeenPosts } from '../../src/renderer/helpers/subscription-seen-videos.js'
 import { syncExternalMediaPositions } from '../../src/renderer/helpers/externalMediaPosition.js'
-import { RSS_FEED_SEEN_ITEMS_STORAGE_KEY, syncRssFeedSeenItems } from '../../src/renderer/helpers/rssFeedSeenItems.js'
+import { mergeRssFeedSeenItems, syncRssFeedSeenItems } from '../../src/renderer/helpers/rssFeedSeenItems.js'
 
-// External media positions and RSS seen marks sync from the renderer's browser storage.
+// External media positions sync from the renderer's browser storage.
 const browserStorage = new Map()
 Object.defineProperty(globalThis, 'localStorage', { configurable: true, value: {
   get length() { return browserStorage.size },
@@ -210,6 +210,9 @@ function fixture (overrides = {}, { encrypted = false, respond, connectionState 
       if (action === 'applySyncServerEnabled') return store.exports.actions.applySyncServerEnabled(context, value)
       if (action === 'mergeSubscriptionSeenPosts') {
         settings.subscriptionSeenPosts = JSON.stringify(mergeSubscriptionSeenPosts(settings.subscriptionSeenPosts, value))
+      }
+      if (action === 'mergeRssFeedSeenItems') {
+        settings.rssFeedSeenItems = JSON.stringify(mergeRssFeedSeenItems(settings.rssFeedSeenItems, value))
       }
       if (action === 'mergeSubscriptionSeenVideos') {
         settings.subscriptionSeenVideos = JSON.stringify(mergeSubscriptionSeenVideos(settings.subscriptionSeenVideos, value))
@@ -493,6 +496,7 @@ for (const [method, args, path, verb] of [
 for (const [collection, idKey, setting, capability] of [
   ['seenVideos', 'videoId', 'subscriptionSeenVideos', 'seen_videos'],
   ['seenPosts', 'postId', 'subscriptionSeenPosts', 'seen_posts'],
+  ['seenRssItems', 'key', 'rssFeedSeenItems', 'seen_rss_items'],
 ]) {
   test(`a live check discovers newly supported ${collection} before consuming its revision`, async () => {
     let supported = false
@@ -613,46 +617,6 @@ for (const historyEnabled of [false, true]) {
         assert.ok(!upload.body.includes('videos.example.test'))
         const entries = await privacy.decryptSyncDocument(JSON.parse(upload.body).payload, f.settings.syncServerPrivacyKey)
         assert.deepEqual(entries.map(entry => entry.url), ['https://videos.example.test/local', 'https://videos.example.test/remote'])
-      }
-    })
-  }
-}
-
-for (const historyEnabled of [false, true]) {
-  for (const supported of [false, true]) {
-    test(`RSS seen marks sync requires history enabled=${historyEnabled} and server support=${supported}`, async () => {
-      browserStorage.clear()
-      const localKey = 'https://feeds.example.test/rss\nlocal-item'
-      const remoteKey = 'https://feeds.example.test/rss\nremote-item'
-      browserStorage.set(RSS_FEED_SEEN_ITEMS_STORAGE_KEY, JSON.stringify([{ key: localKey, seenAt: 2000 }]))
-      const f = fixture({ syncServerSyncSubscriptions: false, syncServerSyncHistory: historyEnabled }, {
-        encrypted: true,
-        respond: async (url, options) => {
-          if (url.endsWith('/health')) {
-            return { capabilities: { encrypted_sync: 1, live_sync: 1, seen_rss_items: supported ? 1 : 0 } }
-          }
-          if (url.endsWith('/encrypted_sync')) return { collections: [{ collection: 'seenRssItems', revision: 1 }], legacy_data: false }
-          if (url.endsWith('/encrypted_sync/seenRssItems') && !options.method) {
-            return {
-              revision: 1,
-              payload: await privacy.encryptSyncDocument([{ key: remoteKey, seenAt: 1000 }],
-                f.settings.syncServerPrivacyKey, f.settings.syncServerPrivacySalt),
-            }
-          }
-        },
-      })
-      await f.actions.syncWithSyncServer(f.context)
-      assert.equal(f.context.state.syncServerStatus, 'success')
-      const requests = f.requests.filter(request => request.url.endsWith('/encrypted_sync/seenRssItems'))
-      const synced = historyEnabled && supported
-      assert.equal(requests.length, synced ? 2 : 0)
-      assert.deepEqual(JSON.parse(browserStorage.get(RSS_FEED_SEEN_ITEMS_STORAGE_KEY)).map(entry => entry.key),
-        synced ? [localKey, remoteKey] : [localKey])
-      if (synced) {
-        const upload = requests.find(request => request.method === 'PUT')
-        assert.ok(!upload.body.includes('feeds.example.test'))
-        const entries = await privacy.decryptSyncDocument(JSON.parse(upload.body).payload, f.settings.syncServerPrivacyKey)
-        assert.deepEqual(entries, [{ key: localKey, seenAt: 2000 }, { key: remoteKey, seenAt: 1000 }])
       }
     })
   }

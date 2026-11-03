@@ -446,7 +446,7 @@ async function runSync(context, { allowDataLoss = false, notifyDataLoss = true, 
         result.seenPosts = await syncSubscriptionSeenPosts(targetClient, store)
         break
       case 'seenRssItems':
-        result.seenRssItems = await syncRssFeedSeenItems(targetClient)
+        result.seenRssItems = await syncRssFeedSeenItems(targetClient, store)
         break
       case 'externalMediaPositions': {
         const { synced, retryBaseline } = await syncExternalMediaPositions(

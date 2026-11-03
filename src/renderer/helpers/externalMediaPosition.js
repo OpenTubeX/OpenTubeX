@@ -135,6 +135,17 @@ export function unmarkExternalMediaWatched(url) {
   writePosition(key, position.seconds > 0 ? position : null)
 }
 
+/**
+ * Unmarks media that was marked as watched before the timestamp, keeping where it was left.
+ * @param {string} url
+ * @param {number} timestamp
+ */
+export function unmarkExternalMediaWatchedBefore(url, timestamp) {
+  const key = positionKey(url)
+  const position = key === null ? null : readPosition(key)
+  if (position?.watched === true && position.updatedAt < timestamp) unmarkExternalMediaWatched(url)
+}
+
 export function removeExternalMediaPositionsBefore(cutoff) {
   removePositions(position => position === null || position.updatedAt < cutoff)
   externalMediaPositionVersion.value++

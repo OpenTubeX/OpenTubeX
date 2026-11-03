@@ -402,6 +402,7 @@ export function createDefaultSettings({ supportsLocalApi, isElectron }) {
     syncServerActivityClearedThrough: {},
     subscriptionSeenVideos: '[]',
     subscriptionSeenPosts: '[]',
+    rssFeedSeenItems: '[]',
     playlistBookmarks: [],
     useProxy: false,
     userPlaylistSortOrder: 'date_added_descending',
