@@ -7,7 +7,7 @@ import { shouldShowProgressStartToast } from './progressPresentation'
 import { showToastOnAllTabs } from './utils'
 import { appFetch } from './rssHub'
 import { supportsYtDlp } from './ytDlpCapabilities'
-import { isRssFeedItemSeen, onRssFeedSeenItemsSynced, toRssFeedSeenMarks } from './rssFeedSeenItems'
+import { isRssFeedItemSeen, onRssFeedSeenItemsSynced, parseRssFeedSeenItems, toRssFeedSeenMarks } from './rssFeedSeenItems'
 import { unmarkExternalMediaWatchedBefore } from './externalMediaPosition'
 import { resolveYtDlpCreatorAvatarUrl } from '../../main/ytDlpCreatorAvatar'
 
@@ -466,7 +466,9 @@ export function getRssFeedItemKey(item) {
  */
 function reconcileNewItems(feedUrl, items, previousItems) {
   // Items can be marked on another device before they load here
-  const marks = loadRssFeedSeenMarks()
+  const entries = parseRssFeedSeenItems(store.getters.getRssFeedSeenItems)
+  unwatchItemsMarkedUnseen(items, entries)
+  const marks = toRssFeedSeenMarks(entries)
   const seenIds = seenHistory.get(feedUrl)
   if (seenIds === undefined && previousItems.length === 0) return applySeenMarks(items, marks)
   const previousById = new Map(previousItems.map(item => [item.id, item]))
@@ -516,17 +518,24 @@ store.watch((_, getters) => getters.getRssFeedSeenItems, () => {
   if (items !== rssFeedItems.value) setRssFeedItems(items)
 })
 
-// Devices can watch an item and mark it as unseen without knowing about each
-// other. The later change wins, so an unseen mark after the item was last
-// saved as watched unmarks it as watched, and brings it back to the New feed.
-onRssFeedSeenItemsSynced((entries) => {
+/**
+ * Devices can watch an item and mark it as unseen without knowing about each
+ * other. The later change wins, so an unseen mark after the item was last
+ * saved as watched unmarks it as watched, and brings it back to the New feed.
+ * Items that are out of their feed when a mark syncs catch up when they load.
+ * @param {RssFeedItem[]} items
+ * @param {import('./rssFeedSeenItems').RssFeedSeenItem[]} entries
+ */
+function unwatchItemsMarkedUnseen(items, entries) {
   const unseenAt = new Map(entries.filter(entry => !isRssFeedItemSeen(entry)).map(entry => [entry.key, entry.unseenAt ?? 0]))
   if (unseenAt.size === 0) return
-  for (const item of rssFeedItems.value) {
+  for (const item of items) {
     const timestamp = unseenAt.get(getRssFeedItemKey(item))
     if (timestamp !== undefined) unmarkExternalMediaWatchedBefore(item.url, timestamp)
   }
-})
+}
+
+onRssFeedSeenItemsSynced(entries => unwatchItemsMarkedUnseen(rssFeedItems.value, entries))
 
 /**
  * Removed feeds are filtered out of the cached items, added ones need a refresh.

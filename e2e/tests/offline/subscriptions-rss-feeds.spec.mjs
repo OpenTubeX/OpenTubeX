@@ -1221,6 +1221,38 @@ test.describe('with new items', () => {
       .toHaveText(['Brand new VOD', 'Second new VOD', 'Newest VOD', 'Older VOD'])
   })
 
+  test('brings back unseen items that another device watched earlier while they were out of their feed', async ({ page }) => {
+    await loadNewItems(page)
+    const panel = page.locator('#subscriptionsPanel')
+    const titles = panel.locator('.ft-list-item .h3Title')
+    const item = panel.locator('.ft-list-item', { hasText: 'Older VOD' })
+    await item.locator('.title').click({ button: 'right' })
+    await page.locator('.contextMenu').getByRole('menuitem', { name: 'Mark As Watched' }).click()
+    await expect(item).toHaveClass(/watched/)
+    const watchedAt = await page.evaluate(() => (
+      JSON.parse(localStorage.getItem('externalMediaPosition:https://www.twitch.tv/videos/1')).updatedAt
+    ))
+
+    // The item leaves its feed before a later unseen mark from another device syncs
+    const withoutItem = updatedRssFeed.replace(/<item>\s*<title>Older VOD<\/title>[\s\S]*?<\/item>/, '')
+    await page.route(RSS_URL, route => route.fulfill({ contentType: 'application/rss+xml', body: withoutItem }))
+    const refresh = page.locator('.subscriptionsHeader').getByRole('button', { name: /^Refresh RSS/ })
+    await refresh.click()
+    await expect(titles).toHaveText(['Brand new VOD', 'Second new VOD', 'Newest VOD'])
+    await mockSyncServer(page, {
+      history: await encryptSyncDocument([], SYNC_KEY, SYNC_SALT),
+      seenRssItems: await encryptSyncDocument([{ key: `${RSS_URL}\nvod-1`, unseenAt: watchedAt + 1000 }], SYNC_KEY, SYNC_SALT)
+    })
+    expect(await syncWithSyncServer(page)).toEqual(['success', ''])
+
+    // When it comes back, the later unseen mark wins over the earlier watch
+    await page.route(RSS_URL, route => route.fulfill({ contentType: 'application/rss+xml', body: updatedRssFeed }))
+    await refresh.click()
+    await expect(titles).toHaveText(['Brand new VOD', 'Second new VOD', 'Newest VOD', 'Older VOD'])
+    await expect(item).not.toHaveClass(/watched/)
+    await expect(item.locator('.newContentDot')).toBeVisible()
+  })
+
   test('syncs the seen items with history', async ({ page }) => {
     const remote = {
       history: await encryptSyncDocument([], SYNC_KEY, SYNC_SALT),
