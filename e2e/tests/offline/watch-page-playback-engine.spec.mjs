@@ -1093,9 +1093,15 @@ test.describe('watch page', () => {
 
   test('falls back to yt-dlp when the built-in live source has no manifest', async ({ app, page }) => {
     await mockPlayableWatchPage(app, page)
+    // Serve a playable live stream. Shaka rejects an empty manifest, and the
+    // app's recovery would then replace the source while it is checked.
+    await routePostLiveMedia(page)
     await page.route('https://example.invalid/live.m3u8', route => route.fulfill({
       contentType: 'application/x-mpegURL',
-      body: '#EXTM3U\n'
+      body: '#EXTM3U\n#EXT-X-VERSION:7\n#EXT-X-TARGETDURATION:2\n#EXT-X-MEDIA-SEQUENCE:0\n' +
+        Array.from({ length: 20 }, (_, index) =>
+          `${index ? '#EXT-X-DISCONTINUITY\n' : ''}#EXTINF:2,\n${POST_LIVE_VIDEO_URL}&segment=${index}\n`
+        ).join('')
     }))
     await page.route('https://example.invalid/rejected.mp4', route => route.fulfill({ status: 403 }))
     await openMockedVideo(page)
@@ -1144,6 +1150,7 @@ test.describe('watch page', () => {
     })
 
     await expect(page.locator(`${activeTab} .videoTitle`)).toHaveText('Active live stream')
+    await expect.poll(() => watchView.evaluate((view) => view.$refs.player?.hasLoaded)).toBe(true)
     expect(await watchView.evaluate((view) => ({
       manifestSrc: view.manifestSrc,
       activeFormat: view.activeFormat,
