@@ -1,11 +1,36 @@
 <template>
-  <div>
-    <p
-      v-if="!isLoading && errorFeedUrls.length > 0"
-      class="message"
+  <div
+    ref="panelRef"
+    tabindex="-1"
+  >
+    <!-- Stays mounted so that screen readers announce the banner when it appears -->
+    <div
+      class="errorStatus"
+      role="status"
     >
-      {{ t('Subscriptions.RSS Feeds.Refresh Errors', { count: errorFeedUrls.length }, errorFeedUrls.length) }}
-    </p>
+      <div
+        v-if="isBannerShown"
+        ref="bannerRef"
+        class="errorBanner"
+      >
+        <FtIcon
+          class="errorBannerIcon"
+          :icon="['fas', 'triangle-exclamation']"
+          aria-hidden="true"
+        />
+        <p class="errorBannerText">
+          {{ t('Subscriptions.RSS Feeds.Refresh Errors', { count: errorFeedUrls.length }, errorFeedUrls.length) }}
+        </p>
+        <FtIconButton
+          :title="t('Close')"
+          :icon="['fas', 'xmark']"
+          theme="base-no-default"
+          :size="16"
+          :padding="6"
+          @click="dismissErrors"
+        />
+      </div>
+    </div>
     <div
       v-if="feeds.length === 0"
       class="noFeeds"
@@ -21,7 +46,7 @@
     </div>
     <FtSkeletonGrid v-else-if="isLoading && items.length === 0" />
     <p
-      v-else-if="!isLoading && items.length === 0 && errorFeedUrls.length < feeds.length"
+      v-else-if="!isLoading && items.length === 0 && (errorFeedUrls.length < feeds.length || rssFeedErrorsDismissed)"
       class="message"
     >
       {{ t('Subscriptions.RSS Feeds.Empty Items') }}
@@ -43,11 +68,13 @@
 </template>
 
 <script setup>
-import { computed } from 'vue'
+import { computed, useTemplateRef, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 
 import FtAutoGrid from '../FtAutoGrid/FtAutoGrid.vue'
 import FtButton from '../FtButton/FtButton.vue'
+import FtIcon from '../FtIcon/FtIcon.vue'
+import FtIconButton from '../FtIconButton/FtIconButton.vue'
 import FtListFeedItem from '../FtListFeedItem/FtListFeedItem.vue'
 import FtSkeletonGrid from '../FtSkeletonGrid/FtSkeletonGrid.vue'
 
@@ -63,6 +90,7 @@ import {
   openRssFeedManager,
   refreshRssFeeds,
   rssFeedErrors,
+  rssFeedErrorsDismissed,
   rssFeedsLastRefresh,
   rssFeedsNextAutoRefresh,
   rssFeedsRefreshing
@@ -78,6 +106,22 @@ const { feeds, feedUrls, feedAvatars, items } = useFollowedRssFeedItems()
 const itemKeys = computed(() => items.value.map(getRssFeedItemKey))
 const errorFeedUrls = computed(() => rssFeedErrors.value.filter(url => feedUrls.value.has(url)))
 const isLoading = computed(() => rssFeedsRefreshing.value)
+
+const panelRef = useTemplateRef('panelRef')
+const bannerRef = useTemplateRef('bannerRef')
+
+const isBannerShown = computed(() => !isLoading.value && errorFeedUrls.value.length > 0 && !rssFeedErrorsDismissed.value)
+
+function dismissErrors() {
+  rssFeedErrorsDismissed.value = true
+}
+
+// Runs before the banner unmounts, so a focused close button doesn't take the focus with it
+watch(isBannerShown, shown => {
+  if (!shown && bannerRef.value?.contains(document.activeElement)) {
+    panelRef.value?.focus({ preventScroll: true })
+  }
+})
 
 // Full width is a single-column grid, so its items render as grid cards.
 const layout = computed(() => store.getters.getListType === 'list' ? 'list' : 'grid')

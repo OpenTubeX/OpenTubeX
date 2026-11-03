@@ -408,6 +408,8 @@ export function getRssFeedsAutoRefreshInterval() {
 export const rssFeedItems = shallowRef(loadStoredItems())
 /** URLs of the feeds that failed in the last refresh */
 export const rssFeedErrors = shallowRef(/** @type {string[]} */ ([]))
+/** Whether the user closed the banner for the current failed feeds */
+export const rssFeedErrorsDismissed = shallowRef(false)
 export const rssFeedsLastRefresh = shallowRef(/** @type {number | null} */ (null))
 export const rssFeedsRefreshing = shallowRef(false)
 export const rssFeedsNextAutoRefresh = shallowRef(loadRssFeedsNextAutoRefresh())
@@ -557,7 +559,19 @@ export function addLoadedRssFeed(feed, result) {
   setLoadedFeedUrls(new Set([...loadedFeedUrls, feed.url]))
   refreshedFeedUrls.add(feed.url)
   loadedDuringRefresh.add(feed.url)
-  rssFeedErrors.value = rssFeedErrors.value.filter(url => url !== feed.url)
+  setRssFeedErrors(rssFeedErrors.value.filter(url => url !== feed.url))
+}
+
+/**
+ * A closed banner stays closed until the set of failed feeds changes.
+ * @param {string[]} urls
+ */
+function setRssFeedErrors(urls) {
+  const previous = new Set(rssFeedErrors.value)
+  if (urls.length !== previous.size || urls.some(url => !previous.has(url))) {
+    rssFeedErrorsDismissed.value = false
+  }
+  rssFeedErrors.value = urls
 }
 
 /**
@@ -609,7 +623,7 @@ export async function refreshRssFeeds(feeds, { automatic = false } = {}) {
           : []
       ))
     ].sort(compareFeedItems))
-    rssFeedErrors.value = [...failedUrls]
+    setRssFeedErrors([...failedUrls])
     rssFeedsLastRefresh.value = Date.now()
     const interval = getRssFeedsAutoRefreshInterval()
     setRssFeedsNextAutoRefresh(interval > 0 ? Date.now() + interval : null)

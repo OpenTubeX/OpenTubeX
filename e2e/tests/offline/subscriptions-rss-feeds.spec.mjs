@@ -354,6 +354,85 @@ test.describe('with followed feeds', () => {
     await expect(panel.getByText('1 feed could not be refreshed.')).toBeHidden()
   })
 
+  test('dismisses the refresh error banner until the failed feeds change', async ({ page }) => {
+    await mockFeeds(page)
+    await goTo(page, 'subscriptions')
+    await page.locator('[data-rss-feeds-tab]').click()
+    const panel = page.locator('#subscriptionsPanel')
+    // The status region stays mounted so that screen readers announce the banner
+    const status = panel.getByRole('status').filter({ has: page.locator('.errorBanner') })
+    const banner = status.locator('.errorBanner')
+    await expect(banner).toHaveText('1 feed could not be refreshed.')
+
+    // A refresh hides the banner, so it takes the focus off its button
+    let releaseShortcutRefresh
+    const shortcutRefreshHeld = new Promise(resolve => { releaseShortcutRefresh = resolve })
+    await page.route(RSS_URL, async route => {
+      await shortcutRefreshHeld
+      await route.fallback()
+    })
+    await banner.getByRole('button', { name: 'Close' }).focus()
+    await page.keyboard.press('r')
+    await expect(banner).toHaveCount(0)
+    await expect(panel).toBeFocused()
+    releaseShortcutRefresh()
+    await expect(banner).toHaveText('1 feed could not be refreshed.')
+    await page.unroute(RSS_URL)
+
+    await banner.getByRole('button', { name: 'Close' }).click()
+    await expect(banner).toHaveCount(0)
+    await expect(panel).toBeFocused()
+    await expect(panel.locator('.errorStatus')).toBeEmpty()
+
+    // Leaving the page keeps the banner dismissed
+    await goTo(page, 'history')
+    await goTo(page, 'subscriptions')
+    await page.locator('[data-rss-feeds-tab]').click()
+    await expect(panel.locator('.ft-list-item .h3Title')).toHaveText(['Newest VOD', 'Older VOD'])
+    await expect(banner).toHaveCount(0)
+
+    // The same feed failing again keeps the banner dismissed
+    let release
+    const held = new Promise(resolve => { release = resolve })
+    await page.route(RSS_URL, async route => {
+      await held
+      await route.fulfill({ contentType: 'application/rss+xml', body: rssFeed })
+    })
+    const header = page.locator('.subscriptionsHeader')
+    const refreshing = page.locator('[data-rss-feeds-tab] .tabLoadingIndicator')
+    await header.getByRole('button', { name: /^Refresh RSS/ }).click()
+    await expect(refreshing).toBeVisible()
+    release()
+    await expect(refreshing).toHaveCount(0)
+    await expect(panel.locator('.ft-list-item .h3Title')).toHaveText(['Newest VOD', 'Older VOD'])
+    await expect(banner).toHaveCount(0)
+
+    await page.unroute(RSS_URL)
+    await page.route(RSS_URL, route => route.fulfill({ status: 500, body: 'Server error' }))
+    await header.getByRole('button', { name: /^Refresh RSS/ }).click()
+    await expect(banner).toHaveText('2 feeds could not be refreshed.')
+
+    // The earlier dismissal no longer applies once the failures changed
+    await page.unroute(RSS_URL)
+    await header.getByRole('button', { name: /^Refresh RSS/ }).click()
+    await expect(banner).toHaveText('1 feed could not be refreshed.')
+  })
+
+  test('shows the empty state after dismissing the errors of every feed', async ({ page }) => {
+    await mockFeeds(page)
+    await page.route(RSS_URL, route => route.fulfill({ status: 500, body: 'Server error' }))
+    await goTo(page, 'subscriptions')
+    await page.locator('[data-rss-feeds-tab]').click()
+    const panel = page.locator('#subscriptionsPanel')
+    const banner = panel.locator('.errorBanner')
+    const empty = panel.getByText('Your feeds currently do not have any items.')
+    await expect(banner).toHaveText('2 feeds could not be refreshed.')
+    await expect(empty).toHaveCount(0)
+
+    await banner.getByRole('button', { name: 'Close' }).click()
+    await expect(empty).toBeVisible()
+  })
+
   test('opens the feed manager from the RSS tab after settings were opened before', async ({ page }) => {
     await mockFeeds(page)
     const section = await goToSettingsSection(page, 'subscriptions')
