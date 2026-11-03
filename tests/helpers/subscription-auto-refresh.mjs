@@ -20,6 +20,7 @@ function resetHooks() {
     startAndroid: async () => ({ acquired: true, notificationsDenied: false }),
     updateAndroid: () => {},
     cancelSubscriptionRefresh: () => {},
+    cancelRssFeedsRefresh: () => {},
     notifySubscriptionChannelRefreshed: () => {},
     refresh: async () => [],
     enrichSubscriptionRssEntries: async entries => entries,
@@ -132,6 +133,7 @@ export async function loadSubscriptionAutoRefresh(env) {
     [sourceUrl('src/renderer/helpers/subscription-entries.js')]: {
       reconcileFetchedSubscriptionEntries: call('reconcileFetchedSubscriptionEntries'),
     },
+    [sourceUrl('src/renderer/helpers/rssFeeds.js')]: { cancelRssFeedsRefresh: call('cancelRssFeedsRefresh') },
     [sourceUrl('src/renderer/helpers/subscriptions.js')]: {
       enrichSubscriptionRssEntries: call('enrichSubscriptionRssEntries'),
       enrichSubscriptionShortDates: call('enrichSubscriptionShortDates'),

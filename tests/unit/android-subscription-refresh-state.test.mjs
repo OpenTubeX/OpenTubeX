@@ -217,6 +217,20 @@ test('notification cancellation postpones native work without sending another na
   assert.deepEqual(scheduled, [stored], 'the native notification must move the timer')
 })
 
+test('the notification cancel action also cancels the RSS refresh of the combined New feed', async t => {
+  const calls = []
+  let cancelled
+  t.mock.method(hooks, 'addCancelledListener', async listener => { cancelled = listener; return () => {} })
+  t.mock.method(hooks, 'cancelSubscriptionRefresh', () => calls.push('subscriptions'))
+  t.mock.method(hooks, 'cancelRssFeedsRefresh', () => calls.push('rss'))
+  const autoRefresh = useSubscriptionAutoRefresh({ dataReady: ref(false), t: key => key })
+  t.after(() => autoRefresh.stop())
+  await autoRefresh.listenForNativeCancellation()
+
+  cancelled()
+  assert.deepEqual(calls, ['subscriptions', 'rss'])
+})
+
 for (const method of ['requestSubscriptionRefreshCancellation', 'cancelSubscriptionRefresh']) {
   test(`${method} keeps an existing future automatic-refresh deadline`, async t => {
     const deadline = Date.now() + 120000
