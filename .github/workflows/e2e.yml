@@ -52,8 +52,8 @@ jobs:
     - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
       with:
         persist-credentials: false
-        # Only PR test selection needs the base branch history.
-        fetch-depth: ${{ github.event_name == 'pull_request' && '0' || '1' }}
+        # PR test selection diffs the merge commit against its base parent.
+        fetch-depth: ${{ github.event_name == 'pull_request' && '2' || '1' }}
         ref: ${{ inputs.checkoutRef }}
 
     - name: Use Node.js 24.x
@@ -97,18 +97,18 @@ jobs:
       env:
         EVENT: ${{ github.event_name }}
         SELECTED_PROJECT: ${{ github.event_name == 'workflow_dispatch' && inputs.project || 'all' }}
-        PR_BASE_REF: ${{ github.event_name == 'pull_request' && github.base_ref || '' }}
       run: |
         set -euo pipefail
         full_report="$RUNNER_TEMP/e2e-full.json"
         changed_report="$full_report"
         pnpm exec playwright test -c e2e/playwright.config.mjs --list --reporter=json > "$full_report"
-        if [ -n "$PR_BASE_REF" ]; then
-          # Fetch only the base history needed for Playwright's merge-base check.
-          git fetch --no-tags origin "$PR_BASE_REF:refs/remotes/origin/$PR_BASE_REF"
+        if [ "$EVENT" = pull_request ]; then
+          # HEAD is the PR merge commit and HEAD^1 the base it was merged into.
+          # Playwright diffs against that commit directly, so the moving base
+          # branch tip would also select tests changed by later base pushes.
           changed_report="$RUNNER_TEMP/e2e-changed.json"
           pnpm exec playwright test -c e2e/playwright.config.mjs --list --reporter=json \
-            "--only-changed=origin/$PR_BASE_REF" --pass-with-no-tests > "$changed_report"
+            --only-changed=HEAD^1 --pass-with-no-tests > "$changed_report"
         fi
         node --input-type=module - "$full_report" "$changed_report" <<'NODE' >> "$GITHUB_OUTPUT"
         import { appendFileSync, readFileSync } from 'node:fs'
@@ -170,8 +170,8 @@ jobs:
     steps:
     - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
       with:
-        # Playwright needs the base branch history to identify tests changed by a PR.
-        fetch-depth: ${{ github.event_name == 'pull_request' && (matrix.project == 'network' || matrix.project == 'repeat') && '0' || '1' }}
+        # Playwright diffs the PR merge commit against its base parent to find changed tests.
+        fetch-depth: ${{ github.event_name == 'pull_request' && (matrix.project == 'network' || matrix.project == 'repeat') && '2' || '1' }}
         persist-credentials: false
         ref: ${{ inputs.checkoutRef }}
 
@@ -259,10 +259,10 @@ jobs:
           test_args+=("--project=$project")
         done
         if [ "${{ github.event_name }}" = "pull_request" ] && [ "${{ matrix.project }}" = "network" ]; then
-          test_args+=("--only-changed=origin/${GITHUB_BASE_REF}" "--pass-with-no-tests")
+          test_args+=("--only-changed=HEAD^1" "--pass-with-no-tests")
         fi
         if [ "${{ matrix.project }}" = "repeat" ]; then
-          test_args+=("--only-changed=origin/${GITHUB_BASE_REF}" "--repeat-each=${{ matrix.repeatEach }}" "--retries=0")
+          test_args+=("--only-changed=HEAD^1" "--repeat-each=${{ matrix.repeatEach }}" "--retries=0")
         fi
 
         xvfb-run --auto-servernum --server-args='-screen 0 1920x1080x24' pnpm exec playwright test -c e2e/playwright.config.mjs "${test_args[@]}"
