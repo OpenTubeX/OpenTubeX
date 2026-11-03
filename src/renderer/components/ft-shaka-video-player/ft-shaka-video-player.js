@@ -138,8 +138,8 @@ import { setupSabrScheme } from '../../helpers/player/SabrSchemePlugin'
 import { prepareGoogleVideoRequest } from '../../helpers/player/playbackRequestPolicy'
 import {
   avoidUnreachableGoogleVideoHost,
-  GOOGLEVIDEO_CONNECTION_TIMEOUT_MS,
-  markGoogleVideoHostUnreachable
+  markGoogleVideoHostUnreachable,
+  setGoogleVideoConnectionTimeout
 } from '../../helpers/player/googleVideoFallback'
 import { getRememberedPlayerVolume, setRememberedPlayerVolume } from '../../helpers/player/volume-storage'
 import { parseChannelPreferences, removeChannelPreference } from '../../helpers/channel-preferences'
@@ -6044,9 +6044,7 @@ export default defineComponent({
         request.uris = request.uris.map(avoidUnreachableGoogleVideoHost)
         const url = new URL(request.uris[0])
         if (url.hostname.endsWith('.googlevideo.com')) {
-          // Give up on an unresponsive node as quickly as the other googlevideo requests do.
-          // The parameters are shared with the player configuration, so replace them.
-          request.retryParameters = { ...request.retryParameters, connectionTimeout: GOOGLEVIDEO_CONNECTION_TIMEOUT_MS }
+          setGoogleVideoConnectionTimeout(request, player.getConfiguration().streaming.retryParameters.connectionTimeout)
         }
         const isSabrRequest = props.sabrData && url.protocol === `${props.sabrData.scheme}:`
 
@@ -9087,6 +9085,10 @@ export default defineComponent({
 
     let ignoreErrors = false
 
+    /** Segment timeouts retried since the last appended segment */
+    let segmentTimeoutRetries = 0
+    const MAX_SEGMENT_TIMEOUT_RETRIES = 3
+
     /**
      * @param {shaka.util.Error} error
      * @param {string} context
@@ -9135,6 +9137,21 @@ export default defineComponent({
         error.code === ErrorCode.PRELOAD_DESTROYED
       ) {
         console.warn(`Ignoring player abort/interruption (code ${error.code}) in ${context}`)
+        return
+      }
+
+      // Shaka treats a segment request that didn't answer in time as fatal for videos. On a
+      // high-latency network that doesn't mean the format is broken, so keep streaming
+      // instead of falling back to the legacy formats and reloading (#2604)
+      if (
+        error.code === ErrorCode.TIMEOUT &&
+        error.data[1] === RequestType.SEGMENT &&
+        !isSabrPlayback.value &&
+        segmentTimeoutRetries < MAX_SEGMENT_TIMEOUT_RETRIES &&
+        player?.retryStreaming()
+      ) {
+        segmentTimeoutRetries++
+        console.warn('Segment request timed out, retrying...', error.data[0])
         return
       }
 
@@ -9717,6 +9734,9 @@ export default defineComponent({
 
       player.addEventListener('buffering', event => {
         isBuffering.value = event.buffering
+      })
+      player.addEventListener('segmentappended', () => {
+        segmentTimeoutRetries = 0
       })
 
       player.addEventListener('error', event => handleError(event.detail, 'shaka error handler'))
