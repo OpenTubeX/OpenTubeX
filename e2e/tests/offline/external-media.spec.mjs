@@ -1150,7 +1150,8 @@ test('external media uses phone sheets for chat and the description', { tag: '@s
 
   // A page too short to scroll keeps the mobile navigation over its last
   // card, so use the keyboard like the watch page's phone description test.
-  await preview.getByRole('button', { name: 'Show more', exact: true }).press('Enter')
+  await expect(preview).toHaveAccessibleName('Description')
+  await preview.press('Enter')
   const descriptionSheet = page.locator('dialog[open]').filter({ has: page.locator('.externalMediaDescription') })
   await expect(descriptionSheet).toContainText('A Twitch broadcast description')
   await page.keyboard.press('Escape')
