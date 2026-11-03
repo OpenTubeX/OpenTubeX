@@ -204,6 +204,7 @@ Subscriptions:
   Posts:
     RSS Message: YouTube no proporciona fuentes RSS para las publicaciones. Desactivá el ajuste "{rssSetting}" para ver las publicaciones o activá el ajuste "{hideSetting}" para ocultar esta pestaña.
   RSS Feeds:
+    Refreshing: Actualizando los feeds RSS
     Tab: RSS
     Followed Feeds: Feeds RSS seguidos
     Add Feed: Agregar feed
@@ -2329,6 +2330,7 @@ Context Menu:
   Reload Live: Recargar emisiones en directo
   Reload Posts: Recargar publicaciones
   Reload All Feeds: Recargar todas las fuentes
+  Reload RSS Feeds: Volver a cargar los feeds RSS
   Close Multiple Tabs: Cerrar {count} pestañas | Cerrar {count} pestañas
   Duplicate Tab: Duplicar pestaña
   Duplicate Multiple Tabs: Duplicar {count} pestañas | Duplicar {count} pestañas

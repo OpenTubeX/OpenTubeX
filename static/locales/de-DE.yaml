@@ -188,6 +188,7 @@ Subscriptions:
   Posts:
     RSS Message: YouTube stellt keine RSS-Feeds für Beiträge bereit. Deaktiviere die Einstellung „{rssSetting}“, um Beiträge anzuzeigen, oder aktiviere die Einstellung „{hideSetting}“, um diesen Tab auszublenden.
   RSS Feeds:
+    Refreshing: RSS-Feeds werden aktualisiert
     Tab: RSS
     Followed Feeds: Abonnierte RSS-Feeds
     Add Feed: Feed hinzufügen
@@ -3232,6 +3233,7 @@ Context Menu:
   Reload Live: Live neu laden
   Reload Posts: Beiträge neu laden
   Reload All Feeds: Alle Feeds neu laden
+  Reload RSS Feeds: RSS-Feeds neu laden
   Close Multiple Tabs: '{count} Tabs schließen'
   Duplicate Tab: Tab duplizieren
   Duplicate Multiple Tabs: '{count} Tabs duplizieren'

@@ -397,7 +397,7 @@ export const tabs = {
 
   /**
    * Track which tab-related surface the next context menu should target.
-   * @param {{ tabId: string | null, selectedTabIds?: string[], surface: 'tab' | 'tabBar' | 'content' | 'subscriptionFeedTab', feedTab?: 'videos' | 'shorts' | 'live' | 'posts' | 'all' | null, isNewFeedTab?: boolean, hasNewContent?: boolean, verticalLayout?: boolean }} payload
+   * @param {{ tabId: string | null, selectedTabIds?: string[], surface: 'tab' | 'tabBar' | 'content' | 'subscriptionFeedTab', feedTab?: 'videos' | 'shorts' | 'live' | 'posts' | 'all' | 'feeds' | null, isNewFeedTab?: boolean, hasNewContent?: boolean, verticalLayout?: boolean }} payload
    */
   setContextMenuTab: (payload) => {
     ipcRenderer.send(IpcChannels.TABS_SET_CONTEXT_MENU_TAB, payload)

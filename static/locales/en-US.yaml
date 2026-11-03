@@ -337,6 +337,7 @@ Subscriptions:
   Posts:
     RSS Message: YouTube does not provide RSS feeds for posts. Disable the "{rssSetting}" setting to view posts or enable the "{hideSetting}" setting to hide this tab.
   RSS Feeds:
+    Refreshing: Refreshing RSS feeds
     Tab: RSS
     Followed Feeds: Followed RSS feeds
     Add Feed: Add Feed
@@ -2954,6 +2955,7 @@ Context Menu:
   Reload Live: Reload Live
   Reload Posts: Reload Posts
   Reload All Feeds: Reload All Feeds
+  Reload RSS Feeds: Reload RSS Feeds
   Close Multiple Tabs: Close {count} Tabs
   Duplicate Tab: Duplicate Tab
   Duplicate Multiple Tabs: Duplicate {count} Tabs

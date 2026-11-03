@@ -203,6 +203,7 @@ Subscriptions:
   Posts:
     RSS Message: YouTube는 게시물용 RSS 피드를 제공하지 않습니다. 게시물을 보려면 "{rssSetting}" 설정을 끄거나 이 탭을 숨기려면 "{hideSetting}" 설정을 켜세요.
   RSS Feeds:
+    Refreshing: RSS 피드 새로고침 중
     Tab: RSS
     Followed Feeds: 팔로우 중인 RSS 피드
     Add Feed: 피드 추가
@@ -2283,6 +2284,7 @@ Context Menu:
   Reload Live: 실시간 스트림 다시 불러오기
   Reload Posts: 게시물 다시 불러오기
   Reload All Feeds: 모든 피드 다시 불러오기
+  Reload RSS Feeds: RSS 피드 새로고침
   Close Multiple Tabs: 탭 {count}개 닫기
   Duplicate Tab: 탭 복제
   Duplicate Multiple Tabs: 탭 {count}개 복제

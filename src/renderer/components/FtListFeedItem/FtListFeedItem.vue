@@ -132,7 +132,7 @@ import {
   unmarkExternalMediaWatched
 } from '../../helpers/externalMediaPosition'
 import { lightHaptic } from '../../helpers/mobileHaptics'
-import { markRssFeedItemsAsSeen } from '../../helpers/rssFeeds'
+import { markRssFeedItemsAsSeen, markRssFeedItemsAsUnseen } from '../../helpers/rssFeeds'
 import { copyToClipboard, getRelativeTimeFromDate, showToast } from '../../helpers/utils'
 import { supportsYtDlp } from '../../helpers/ytDlpCapabilities'
 
@@ -175,9 +175,17 @@ const publishedText = computed(() => props.data.published === null
 const showNewIndicator = computed(() => store.getters.getShowNewSubscriptionFeedIndicators &&
   props.data.isNew === true && !props.inNewFeed && !position.value?.watched)
 const showMarkAsSeen = computed(() => props.data.isNew === true && (props.inNewFeed || showNewIndicator.value))
+// Like subscription videos, items that aren't new can come back to the New feed
+const showMarkAsUnseen = computed(() => props.data.isNew !== true && !props.inNewFeed)
 
 function markAsSeen() {
   if (props.data.isNew === true) markRssFeedItemsAsSeen([props.data])
+}
+
+function markAsUnseen() {
+  // The New feed leaves out watched items
+  if (position.value?.watched) unmarkExternalMediaWatched(props.data.url)
+  markRssFeedItemsAsUnseen([props.data])
 }
 
 const showDownloadPrompt = ref(false)
@@ -221,6 +229,13 @@ const menuItems = computed(() => {
       label: t('Subscriptions.Mark As Seen'),
       icon: ['fas', 'check'],
       run: markAsSeen
+    })
+  }
+  if (showMarkAsUnseen.value) {
+    items.push({
+      label: t('Subscriptions.Mark As Unseen'),
+      icon: ['fas', 'eye-slash'],
+      run: markAsUnseen
     })
   }
   if (canDownload.value) {

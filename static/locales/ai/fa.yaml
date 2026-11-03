@@ -206,6 +206,7 @@ Subscriptions:
   Posts:
     RSS Message: 'یوتیوب برای پست‌ها خوراک RSS ارائه نمی‌کند. برای دیدن پست‌ها تنظیم "{rssSetting}" را غیرفعال کنید یا برای پنهان‌کردن این زبانه تنظیم "{hideSetting}" را فعال کنید.'
   RSS Feeds:
+    Refreshing: در حال تازه‌سازی خوراک‌های RSS
     Tab: RSS
     Followed Feeds: خوراک‌های RSS دنبال‌شده
     Add Feed: افزودن خوراک
@@ -1999,6 +2000,7 @@ Context Menu:
   Reload Live: بارگیری دوبارهٔ پخش‌های زنده
   Reload Posts: بارگیری دوبارهٔ پست‌ها
   Reload All Feeds: بارگیری دوبارهٔ همهٔ خوراک‌ها
+  Reload RSS Feeds: بارگذاری دوبارهٔ خوراک‌های RSS
   Close Multiple Tabs: بستن {count} زبانه
   Duplicate Tab: تکثیر زبانه
   Duplicate Multiple Tabs: تکثیر {count} زبانه

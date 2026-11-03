@@ -187,6 +187,7 @@ Subscriptions:
   Newest First: Νεότερα πρώτα
   Oldest First: Παλαιότερα πρώτα
   RSS Feeds:
+    Refreshing: Ανανέωση ροών RSS
     Tab: RSS
     Followed Feeds: Ροές RSS που ακολουθείτε
     Add Feed: Προσθήκη ροής
@@ -1936,6 +1937,7 @@ Context Menu:
   Reload Live: Επαναφόρτωση ζωντανών μεταδόσεων
   Reload Posts: Επαναφόρτωση αναρτήσεων
   Reload All Feeds: Επαναφόρτωση όλων των ροών
+  Reload RSS Feeds: Επαναφόρτωση ροών RSS
   Close Multiple Tabs: Κλείσιμο {count} καρτελών
   Duplicate Tab: Δημιουργία διπλότυπης καρτέλας
   Duplicate Multiple Tabs: Δημιουργία {count} διπλότυπων καρτελών

@@ -202,6 +202,7 @@ Subscriptions:
   Posts:
     RSS Message: YouTube не дае RSS-стужак для допісаў. Адключыце наладу "{rssSetting}", каб праглядаць допісы, або ўключыце наладу "{hideSetting}", каб схаваць гэту ўкладку.
   RSS Feeds:
+    Refreshing: Абнаўленне RSS-стужак
     Tab: RSS
     Followed Feeds: Падпісаныя RSS-стужкі
     Add Feed: Дадаць стужку
@@ -2005,6 +2006,7 @@ Context Menu:
   Reload Live: Перазагрузіць жывыя трансляцыі
   Reload Posts: Перазагрузіць допісы
   Reload All Feeds: Перазагрузіць усе стужкі
+  Reload RSS Feeds: Перазагрузіць RSS-стужкі
   Close Multiple Tabs: Закрыць {count} укладку | Закрыць {count} укладкі | Закрыць {count} укладак
   Duplicate Tab: Дубляваць укладку
   Duplicate Multiple Tabs: Дубляваць {count} укладку | Дубляваць {count} укладкі | Дубляваць {count} укладак

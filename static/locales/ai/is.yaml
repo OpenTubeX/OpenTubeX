@@ -187,6 +187,7 @@ Subscriptions:
   Newest First: Nýjast fyrst
   Oldest First: Elst fyrst
   RSS Feeds:
+    Refreshing: Uppfæri RSS-strauma
     Tab: RSS
     Followed Feeds: RSS-straumar sem þú fylgist með
     Add Feed: Bæta við straumi
@@ -1924,6 +1925,7 @@ Context Menu:
   Reload Live: Endurhlaða beinar útsendingar
   Reload Posts: Endurhlaða færslur
   Reload All Feeds: Endurhlaða allar veitur
+  Reload RSS Feeds: Endurhlaða RSS-straumum
   Close Multiple Tabs: Loka {count} flipa | Loka {count} flipum
   Duplicate Tab: Tvítaka flipa
   Duplicate Multiple Tabs: Tvítaka {count} flipa | Tvítaka {count} flipa

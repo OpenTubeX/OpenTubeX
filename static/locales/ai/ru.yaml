@@ -160,6 +160,7 @@ Subscriptions:
   Newest First: Сначала новые
   Oldest First: Сначала старые
   RSS Feeds:
+    Refreshing: Обновление RSS-лент
     Tab: RSS
     Followed Feeds: Отслеживаемые RSS-ленты
     Add Feed: Добавить ленту
@@ -1883,6 +1884,7 @@ Context Menu:
   Reload Live: Перезагрузить трансляции
   Reload Posts: Перезагрузить публикации
   Reload All Feeds: Перезагрузить все ленты
+  Reload RSS Feeds: Перезагрузить RSS-ленты
   Close Multiple Tabs: Закрыть {count} вкладку | Закрыть {count} вкладки | Закрыть {count} вкладок
   Duplicate Tab: Дублировать вкладку
   Duplicate Multiple Tabs: Дублировать {count} вкладку | Дублировать {count} вкладки | Дублировать {count} вкладок

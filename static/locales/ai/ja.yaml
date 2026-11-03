@@ -187,6 +187,7 @@ Subscriptions:
   Newest First: 新しい順
   Oldest First: 古い順
   RSS Feeds:
+    Refreshing: RSS フィードを更新中
     Tab: RSS
     Followed Feeds: フォロー中の RSS フィード
     Add Feed: フィードを追加
@@ -1907,6 +1908,7 @@ Context Menu:
   Reload Live: ライブ配信を再読み込み
   Reload Posts: 投稿を再読み込み
   Reload All Feeds: すべてのフィードを再読み込み
+  Reload RSS Feeds: RSS フィードを再読み込み
   Close Multiple Tabs: '{count}個のタブを閉じる'
   Duplicate Tab: タブを複製
   Duplicate Multiple Tabs: '{count}個のタブを複製'

@@ -298,6 +298,7 @@ export function setupContextMenu(contextMenuOptions, { createWindow, confirmClos
       shorts: 'Reload Shorts',
       live: 'Reload Live',
       posts: 'Reload Posts',
+      feeds: 'Reload RSS Feeds',
       all: 'Reload All Feeds'
     }
     const contextMenuTabYouTubeUrls = contextMenuTabs.map(tab => {
@@ -387,14 +388,15 @@ export function setupContextMenu(contextMenuOptions, { createWindow, confirmClos
 
     return [
       {
-        // While a refresh runs, the same entry cancels it
+        // While a subscription refresh runs, the same entry cancels it. RSS
+        // feeds refresh separately, without cancellation.
         label: contextMenuLabel(subscriptionFeedLabelKeys[subscriptionFeedTab] ?? 'Reload Videos'),
-        refreshingLabel: contextMenuLabel('Cancel Refresh'),
+        refreshingLabel: subscriptionFeedTab === 'feeds' ? undefined : contextMenuLabel('Cancel Refresh'),
         visible: subscriptionFeedTab != null,
         click: () => {
           if (!manager || !subscriptionFeedTab) return
 
-          if (isSubscriptionAutoRefreshInProgress()) {
+          if (subscriptionFeedTab !== 'feeds' && isSubscriptionAutoRefreshInProgress()) {
             requestSubscriptionAutoRefreshCancellation()
             return
           }
@@ -409,8 +411,8 @@ export function setupContextMenu(contextMenuOptions, { createWindow, confirmClos
       },
       {
         label: contextMenuLabel('Mark All as Seen'),
-        visible: isSubscriptionNewFeedTab &&
-          manager?.contextMenuSubscriptionNewFeedHasContent === true,
+        visible: (isSubscriptionNewFeedTab || subscriptionFeedTab === 'feeds') &&
+          manager?.contextMenuSubscriptionFeedHasNewContent === true,
         click: () => {
           if (!manager?.presentedTabId || !subscriptionFeedTab || subscriptionFeedTab === 'all') {
             return

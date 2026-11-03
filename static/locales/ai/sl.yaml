@@ -230,6 +230,7 @@ Subscriptions:
   Posts:
     RSS Message: YouTube ne zagotavlja virov RSS za objave. Izklopite nastavitev »{rssSetting}«, če želite videti objave, ali vklopite nastavitev »{hideSetting}«, če želite skriti ta zavihek.
   RSS Feeds:
+    Refreshing: Osveževanje virov RSS
     Tab: RSS
     Followed Feeds: Spremljani viri RSS
     Add Feed: Dodaj vir
@@ -2396,6 +2397,7 @@ Context Menu:
   Reload Live: Znova naloži prenose v živo
   Reload Posts: Znova naloži objave
   Reload All Feeds: Znova naloži vse vire
+  Reload RSS Feeds: Znova naloži vire RSS
   Close Multiple Tabs: Zapri {count} zavihek | Zapri {count} zavihka | Zapri {count} zavihke | Zapri {count} zavihkov
   Duplicate Tab: Podvoji zavihek
   Duplicate Multiple Tabs: Podvoji {count} zavihek | Podvoji {count} zavihka | Podvoji {count} zavihke | Podvoji {count} zavihkov

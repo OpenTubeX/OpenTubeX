@@ -187,6 +187,7 @@ Subscriptions:
   Newest First: Plus récents d’abord
   Oldest First: Plus anciens d’abord
   RSS Feeds:
+    Refreshing: Actualisation des flux RSS
     Tab: RSS
     Followed Feeds: Flux RSS suivis
     Add Feed: Ajouter un flux
@@ -1908,6 +1909,7 @@ Context Menu:
   Reload Live: Recharger les directs
   Reload Posts: Recharger les publications
   Reload All Feeds: Recharger tous les flux
+  Reload RSS Feeds: Recharger les flux RSS
   Close Multiple Tabs: Fermer {count} onglets | Fermer {count} onglets
   Duplicate Tab: Dupliquer l’onglet
   Duplicate Multiple Tabs: Dupliquer {count} onglets | Dupliquer {count} onglets

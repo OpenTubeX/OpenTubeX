@@ -187,6 +187,7 @@ Subscriptions:
   Newest First: "Ar re nevesañ da gentañ"
   Oldest First: "Ar re goshañ da gentañ"
   RSS Feeds:
+    Refreshing: O freskaat ar gwazhioù RSS
     Tab: RSS
     Followed Feeds: Gwazhioù RSS heuliet
     Add Feed: Ouzhpennañ ur gwazh
@@ -1916,6 +1917,7 @@ Context Menu:
   Reload Live: "Adkargañ ar skignadoù war-eeun"
   Reload Posts: "Adkargañ ar pennadoù"
   Reload All Feeds: "Adkargañ an holl wazhioù"
+  Reload RSS Feeds: Adkargañ ar gwazhioù RSS
   Close Multiple Tabs: "Serriñ {count} ivinell | Serriñ {count} ivinell | Serriñ {count} ivinell | Serriñ {count} ivinell | Serriñ {count} ivinell"
   Duplicate Tab: "Eilañ an ivinell"
   Duplicate Multiple Tabs: "Eilañ {count} ivinell | Eilañ {count} ivinell | Eilañ {count} ivinell | Eilañ {count} ivinell | Eilañ {count} ivinell"

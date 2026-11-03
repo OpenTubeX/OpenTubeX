@@ -52,6 +52,7 @@ import { createSyncScheduler } from '../../helpers/sync-server-scheduler'
 import { isSettingSyncEnabled } from './settings'
 import { syncSubscriptionSeenVideos, syncSubscriptionSeenPosts } from '../../helpers/subscription-seen-videos'
 import { syncExternalMediaPositions } from '../../helpers/externalMediaPosition'
+import { syncRssFeedSeenItems } from '../../helpers/rssFeedSeenItems'
 import { containsWatchStatsDevice, mergeWatchStats, replaceWatchStatsDevice, persistUploadedWatchStatsReset, syncWatchStats, watchStatsDeviceDays } from '../../helpers/sync-watch-stats'
 import { areJsonValuesEqual } from '../../helpers/jsonValues'
 import { DBSettingHandlers, DBWatchStatsHandlers } from '../../../datastores/handlers/index'
@@ -405,7 +406,7 @@ async function runSync(context, { allowDataLoss = false, notifyDataLoss = true, 
 
   async function runStage(stage, callback) {
     assertSyncStillActive()
-    const progressStage = ['seenVideos', 'seenPosts', 'externalMediaPositions'].includes(stage) ? 'history' : stage
+    const progressStage = ['seenVideos', 'seenPosts', 'seenRssItems', 'externalMediaPositions'].includes(stage) ? 'history' : stage
     if (progressStarted) {
       commit('setSyncServerProgress', {
         stage: progressStage,
@@ -443,6 +444,9 @@ async function runSync(context, { allowDataLoss = false, notifyDataLoss = true, 
         break
       case 'seenPosts':
         result.seenPosts = await syncSubscriptionSeenPosts(targetClient, store)
+        break
+      case 'seenRssItems':
+        result.seenRssItems = await syncRssFeedSeenItems(targetClient)
         break
       case 'externalMediaPositions': {
         const { synced, retryBaseline } = await syncExternalMediaPositions(
@@ -586,7 +590,7 @@ async function runSync(context, { allowDataLoss = false, notifyDataLoss = true, 
       requiredCapabilities: [
         ...(stages.includes('watchStats') ? ['watch_stats'] : []),
         ...(stages.includes('liveReminders') ? ['live_reminders'] : []),
-        ...(encrypted && settings.syncServerSyncHistory ? ['seen_videos', 'seen_posts', 'external_media_positions'] : []),
+        ...(encrypted && settings.syncServerSyncHistory ? ['seen_videos', 'seen_posts', 'seen_rss_items', 'external_media_positions'] : []),
       ],
     })
     const watchStatsSupported = encrypted && capabilities.watch_stats === 1
@@ -615,6 +619,9 @@ async function runSync(context, { allowDataLoss = false, notifyDataLoss = true, 
       }
       if (settings.syncServerSyncHistory && capabilities.seen_posts === 1) {
         stages.splice(stages.indexOf('history') + 1, 0, 'seenPosts')
+      }
+      if (settings.syncServerSyncHistory && capabilities.seen_rss_items === 1) {
+        stages.splice(stages.indexOf('history') + 1, 0, 'seenRssItems')
       }
       if (settings.syncServerSyncHistory && capabilities.external_media_positions === 1) {
         stages.splice(stages.indexOf('history') + 1, 0, 'externalMediaPositions')

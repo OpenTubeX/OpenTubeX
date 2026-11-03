@@ -156,6 +156,7 @@ Subscriptions:
   Newest First: Mais recentes primeiro
   Oldest First: Mais antigos primeiro
   RSS Feeds:
+    Refreshing: Atualizando feeds RSS
     Tab: RSS
     Followed Feeds: Feeds RSS seguidos
     Add Feed: Adicionar feed
@@ -1877,6 +1878,7 @@ Context Menu:
   Reload Live: Recarregar emissões ao vivo
   Reload Posts: Recarregar publicações
   Reload All Feeds: Recarregar todos os feeds
+  Reload RSS Feeds: Recarregar feeds RSS
   Close Multiple Tabs: Fechar {count} guia | Fechar {count} guias
   Duplicate Tab: Duplicar guia
   Duplicate Multiple Tabs: Duplicar {count} guia | Duplicar {count} guias

@@ -187,6 +187,7 @@ Subscriptions:
   Newest First: 最新優先
   Oldest First: 最舊優先
   RSS Feeds:
+    Refreshing: 正在重新整理 RSS 訂閱源
     Tab: RSS
     Followed Feeds: 已追蹤的 RSS 摘要
     Add Feed: 新增摘要
@@ -1910,6 +1911,7 @@ Context Menu:
   Reload Live: 重新載入直播
   Reload Posts: 重新載入貼文
   Reload All Feeds: 重新載入所有動態消息
+  Reload RSS Feeds: 重新載入 RSS 訂閱源
   Close Multiple Tabs: 關閉 {count} 個分頁
   Duplicate Tab: 複製分頁
   Duplicate Multiple Tabs: 複製 {count} 個分頁

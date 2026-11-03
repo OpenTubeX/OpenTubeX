@@ -187,6 +187,7 @@ Subscriptions:
   Newest First: Terbaru dahulu
   Oldest First: Terlama dahulu
   RSS Feeds:
+    Refreshing: Menyegarkan feed RSS
     Tab: RSS
     Followed Feeds: Umpan RSS yang diikuti
     Add Feed: Tambah Umpan
@@ -1928,6 +1929,7 @@ Context Menu:
   Reload Live: Muat Ulang Siaran Langsung
   Reload Posts: Muat Ulang Postingan
   Reload All Feeds: Muat Ulang Semua Umpan
+  Reload RSS Feeds: Muat ulang feed RSS
   Close Multiple Tabs: Tutup {count} Tab
   Duplicate Tab: Duplikasikan Tab
   Duplicate Multiple Tabs: Duplikasikan {count} Tab

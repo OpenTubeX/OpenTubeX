@@ -189,6 +189,7 @@ Subscriptions:
   Posts:
     RSS Message: 'YouTube לא מספק עדכוני RSS לפוסטים. השביתו את ההגדרה "{rssSetting}" כדי לראות פוסטים, או הפעילו את ההגדרה "{hideSetting}" כדי להסתיר את הכרטיסייה הזאת.'
   RSS Feeds:
+    Refreshing: מרענן הזנות RSS
     Tab: RSS
     Followed Feeds: פידי RSS במעקב
     Add Feed: הוספת פיד
@@ -1959,6 +1960,7 @@ Context Menu:
   Reload Live: טעינה מחדש של השידורים החיים
   Reload Posts: טעינה מחדש של הפוסטים
   Reload All Feeds: טעינה מחדש של כל הפידים
+  Reload RSS Feeds: טעינה מחדש של הזנות RSS
   Close Multiple Tabs: סגירת {count} כרטיסייה | סגירת {count} כרטיסיות
   Duplicate Tab: שכפול הכרטיסייה
   Duplicate Multiple Tabs: שכפול {count} כרטיסייה | שכפול {count} כרטיסיות

@@ -187,6 +187,7 @@ Subscriptions:
   Newest First: Berrienak lehenik
   Oldest First: Zaharrenak lehenik
   RSS Feeds:
+    Refreshing: RSS jarioak freskatzen
     Tab: RSS
     Followed Feeds: Jarraitutako RSS jarioak
     Add Feed: Gehitu jarioa
@@ -1917,6 +1918,7 @@ Context Menu:
   Reload Live: Kargatu berriro zuzenekoak
   Reload Posts: Kargatu berriro argitalpenak
   Reload All Feeds: Kargatu berriro jario guztiak
+  Reload RSS Feeds: Birkargatu RSS jarioak
   Close Multiple Tabs: Itxi {count} fitxa
   Duplicate Tab: Bikoiztu fitxa
   Duplicate Multiple Tabs: Bikoiztu {count} fitxa

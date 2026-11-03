@@ -189,6 +189,7 @@ Subscriptions:
   Posts:
     RSS Message: 'YouTube ne pruža RSS izvore za objave. Isključite postavku "{rssSetting}" za prikaz objava ili uključite postavku "{hideSetting}" kako biste sakrili ovu karticu.'
   RSS Feeds:
+    Refreshing: Osvježavanje RSS izvora
     Tab: RSS
     Followed Feeds: Praćeni RSS izvori
     Add Feed: Dodaj izvor
@@ -1938,6 +1939,7 @@ Context Menu:
   Reload Live: Ponovno učitaj sadržaj uživo
   Reload Posts: Ponovno učitaj objave
   Reload All Feeds: Ponovno učitaj sve sažetke
+  Reload RSS Feeds: Ponovno učitaj RSS izvore
   Close Multiple Tabs: Zatvori {count} karticu | Zatvori {count} kartice | Zatvori {count} kartica
   Duplicate Tab: Dupliciraj karticu
   Duplicate Multiple Tabs: Dupliciraj {count} karticu | Dupliciraj {count} kartice | Dupliciraj {count} kartica

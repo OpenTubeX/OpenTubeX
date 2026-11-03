@@ -190,6 +190,7 @@
                   :aria-selected="selectedTab === 'feeds'"
                   aria-controls="subscriptionsPanel"
                   data-rss-feeds-tab
+                  :data-has-new-content="rssFeedsHaveNewContent"
                   :tabindex="currentTab === 'feeds' ? 0 : -1"
                   :class="{ selectedTab: selectedTab === 'feeds' }"
                   @click="changeTabFromPointer($event, 'feeds')"
@@ -440,6 +441,7 @@ import {
   getRssFeedsAutoRefreshInterval,
   markRssFeedItemsAsSeen,
   openRssFeedManager,
+  refreshRssFeeds,
   rssFeedItems,
   rssFeedsNextAutoRefresh,
   rssFeedsRefreshing
@@ -449,6 +451,7 @@ import { supportsYtDlp } from '../../helpers/ytDlpCapabilities'
 const isElectron = process.env.IS_ELECTRON
 const usesLogicalTabs = process.env.IS_ELECTRON || process.env.IS_CAPACITOR
 const openMobileContextActions = inject('openMobileContextActions')
+const FEED_TAB_SELECTOR = '[data-subscription-feed-tab], [data-new-feed-tab], [data-rss-feeds-tab], [data-new-feed-rss-tab]'
 let feedTabHold = null
 
 function cancelFeedTabHold() {
@@ -459,7 +462,7 @@ function cancelFeedTabHold() {
 function startFeedTabHold(event) {
   resetFeedTabHold()
   if (event.pointerType !== 'touch' || !event.isPrimary) return
-  const tab = event.target.closest('[data-subscription-feed-tab], [data-new-feed-tab]')
+  const tab = event.target.closest(FEED_TAB_SELECTOR)
   if (!tab) return
 
   feedTabHold = {
@@ -498,7 +501,7 @@ function suppressFeedTabHoldClick(event) {
 
 function handleFeedContextMenu(event) {
   if (!process.env.IS_CAPACITOR && event.pointerType !== 'touch') return
-  const tab = event.target.closest('[data-subscription-feed-tab], [data-new-feed-tab]')
+  const tab = event.target.closest(FEED_TAB_SELECTOR)
   if (!tab) return
 
   event.preventDefault()
@@ -511,26 +514,29 @@ function handleFeedContextMenu(event) {
     document.addEventListener('pointerdown', resetFeedTabHold, true)
     document.addEventListener('keydown', resetFeedTabHold, true)
   }
-  const feedTab = tab.dataset.subscriptionFeedTab ?? tab.dataset.newFeedTab
+  const feedTab = tab.dataset.subscriptionFeedTab ?? tab.dataset.newFeedTab ?? 'feeds'
   const reloadLabels = {
     videos: t('Context Menu.Reload Videos'),
     shorts: t('Context Menu.Reload Shorts'),
     live: t('Context Menu.Reload Live'),
     posts: t('Context Menu.Reload Posts'),
-    all: t('Context Menu.Reload All Feeds')
+    all: t('Context Menu.Reload All Feeds'),
+    feeds: t('Context Menu.Reload RSS Feeds')
   }
+  // RSS feeds refresh separately, without cancellation
+  const cancels = feedTab !== 'feeds' && subscriptionFeedRefreshInProgress.value
   const actions = [{
-    label: subscriptionFeedRefreshInProgress.value ? t('Context Menu.Cancel Refresh') : reloadLabels[feedTab],
-    icon: subscriptionFeedRefreshInProgress.value ? ['fas', 'xmark'] : ['fas', 'sync'],
-    run: subscriptionFeedRefreshInProgress.value
+    label: cancels ? t('Context Menu.Cancel Refresh') : reloadLabels[feedTab],
+    icon: cancels ? ['fas', 'xmark'] : ['fas', 'sync'],
+    run: cancels
       ? cancelRefresh
       : () => handleFeedReloadRequest({ tabId, feedTab })
   }]
-  if (tab.dataset.newFeedTab && newFeedTabHasNewContent(feedTab)) {
+  if (tab.dataset.hasNewContent === 'true' && (tab.dataset.newFeedTab || feedTab === 'feeds')) {
     actions.push({
       label: t('Subscriptions.Mark All as Seen'),
       icon: ['fas', 'check'],
-      run: () => markAllAsSeen('new', feedTab)
+      run: () => handleFeedMarkSeenRequest({ tabId, feedTab })
     })
   }
   openMobileContextActions({ title: tab.textContent.trim(), actions })
@@ -803,7 +809,8 @@ const visibleTabs = computed(() => {
     tabs.push('community')
   }
 
-  if (showNewSubscriptionFeed.value && tabs.length > 0) {
+  // The New feed lists the new RSS items too
+  if (showNewSubscriptionFeed.value && (tabs.length > 0 || enableRssFeeds.value)) {
     tabs.push('new')
   }
 
@@ -833,14 +840,24 @@ const visibleNewFeedTabs = computed(() => {
 const storedNewFeedTab = localStorage.getItem(currentNewFeedTabStorageKey)
 /** @type {import('vue').Ref<'videos' | 'shorts' | 'live' | 'posts' | 'feeds'>} */
 const currentNewFeedTab = ref(storedNewFeedTab ?? 'videos')
+const rssFeedsHaveNewContent = computed(() => {
+  const urls = new Set(followedRssFeeds.value.map(feed => feed.url))
+  return rssFeedItems.value.some(item => item.isNew === true && urls.has(item.feedUrl))
+})
 /** The combined New feed also refreshes the RSS feeds */
 const combinedNewFeedRefreshesRssFeeds = computed(() => {
   return currentTab.value === 'new' && newFeedView.value === 'combined' && enableRssFeeds.value &&
     followedRssFeeds.value.length > 0
 })
-/** Whether the New feed shows only the items of the RSS feeds */
+/**
+ * Whether the New feed shows only the items of the RSS feeds: its RSS tab, or
+ * the combined feed while every subscription feed is hidden
+ */
 const currentNewFeedRssTab = computed(() => {
-  return currentTab.value === 'new' && newFeedView.value === 'tabbed' && currentNewFeedTab.value === 'feeds'
+  if (currentTab.value !== 'new') return false
+  return newFeedView.value === 'tabbed'
+    ? currentNewFeedTab.value === 'feeds'
+    : visibleTabs.value.every(tab => tab === 'new' || tab === 'feeds')
 })
 /** @type {Map<string, HTMLElement>} */
 const newFeedTabRefs = new Map()
@@ -1177,9 +1194,15 @@ async function markAllAsSeen(tab, newFeedTab = currentNewFeedTab.value) {
 }
 
 /**
- * @param {{tabId: string, feedTab: 'videos' | 'shorts' | 'live' | 'posts'}} payload
+ * @param {{tabId: string, feedTab: 'videos' | 'shorts' | 'live' | 'posts' | 'feeds'}} payload
  */
 function handleFeedMarkSeenRequest(payload) {
+  if (payload?.tabId === tabId && payload.feedTab === 'feeds') {
+    // Both RSS tabs list the same new items. Mark them through the New feed
+    // while it shows them, so that they leave with its animation.
+    markAllAsSeen(currentTab.value === 'new' && newFeedView.value === 'tabbed' ? 'new' : 'feeds', 'feeds')
+    return
+  }
   if (
     payload?.tabId !== tabId ||
     currentTab.value !== 'new' ||
@@ -1337,6 +1360,10 @@ function cancelRefresh() {
  * @param {{tabId: string, feedTab: 'videos' | 'shorts' | 'live' | 'posts' | 'all'}} payload
  */
 async function handleFeedReloadRequest(payload) {
+  if (payload?.tabId === tabId && payload.feedTab === 'feeds') {
+    refreshRssFeeds(followedRssFeeds.value)
+    return
+  }
   if (payload?.tabId !== tabId || subscriptionFeedRefreshInProgress.value) {
     return
   }
