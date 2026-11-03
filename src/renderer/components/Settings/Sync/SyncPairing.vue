@@ -2,7 +2,7 @@
   <FtButton
     v-if="connected && supported"
     :label="t('Settings.Sync Settings.Pair Another Device')"
-    :icon="['fas', 'key']"
+    :icon="['fas', 'link']"
     :disabled="disabled"
     @click="openScanner"
   />
