@@ -410,9 +410,7 @@
 
 @media (prefers-reduced-motion: reduce) {
   .ft-input,
-  .floatingLabel .selectLabel,
-  .outlined .inputOutline,
-  .inputAction {
+  .floatingLabel .selectLabel {
     transition: none;
   }
 }

@@ -446,9 +446,4 @@
   .profile-dropdown-leave-active {
     transition: none;
   }
-
-  .subscribeButton.justToggled,
-  .subscribeButton.justToggled :deep(svg) {
-    animation: none;
-  }
 }
