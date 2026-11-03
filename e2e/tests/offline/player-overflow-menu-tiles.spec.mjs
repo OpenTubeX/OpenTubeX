@@ -73,7 +73,7 @@ for (const usePlayerMenuGrid of [true, false]) {
   test.describe(`${usePlayerMenuGrid ? 'grid' : 'list'} menu`, () => {
     test.use({ seed: { settings: { ...WATCH_PAGE_SEED, videoPlaybackRateInterval: 0.25, maxVideoPlaybackRate: 3, usePlayerMenuGrid } } })
 
-    test('moving between the menu and a submenu zooms only the new view in', { tag: '@scale' }, async ({ app, page }) => {
+    test('moving between the menu and a submenu zooms the menu, not each entry', { tag: '@scale' }, async ({ app, page }) => {
       await mockPlayableWatchPage(app, page)
       await openMockedVideo(page)
       const player = page.locator(`${activeTab} .ftVideoPlayer`)
@@ -81,25 +81,26 @@ for (const usePlayerMenuGrid of [true, false]) {
       const tile = menu.locator(':scope > .shaka-playbackrate-button')
       const submenu = menu.locator(':scope > .shaka-playback-rates')
 
-      // Recorded as they start, since they finish within a few frames.
+      // Recorded as they start, since they finish within a few frames. Zooming
+      // each entry would give every entry Shaka has just shown a layer of its own.
       await menu.evaluate((element) => {
         window.__menuZooms = []
         element.addEventListener('animationstart', ({ animationName, target }) => {
           if (!animationName.startsWith('ft-menu-zoom')) return
           window.__menuZooms.push({
             zoom: animationName.startsWith('ft-menu-zoom-in') ? 'in' : 'out',
-            view: target.parentElement.classList.contains('shaka-playback-rates') ? 'submenu' : 'menu',
+            target: target === element ? 'menu' : 'entry',
           })
         })
       })
       const takeZooms = () => page.evaluate(() => window.__menuZooms.splice(0))
       const afterFrames = () => page.evaluate(() => new Promise(resolve => requestAnimationFrame(() => requestAnimationFrame(resolve))))
-      const expectZooms = async (zoom, view) => {
+      const expectZooms = async (zoom) => {
         await expect.poll(() => menu.evaluate(element => element.querySelector('[data-ft-menu-transition]') === null &&
           !element.hasAttribute('data-ft-menu-transition'))).toBe(true)
         const zooms = await takeZooms()
         expect(zooms.length).toBeGreaterThan(0)
-        expect(new Set(zooms.map(entry => `${entry.zoom} ${entry.view}`))).toEqual(new Set([`${zoom} ${view}`]))
+        expect(zooms).toEqual([{ zoom, target: 'menu' }])
       }
 
       await openOverflowMenuWith(player, tile)
@@ -108,18 +109,28 @@ for (const usePlayerMenuGrid of [true, false]) {
 
       await tile.click()
       await expect(submenu).toBeVisible()
-      await expectZooms('in', 'submenu')
+      await expectZooms('in')
 
       await submenu.locator('.shaka-back-to-overflow-button').click()
       await expect(tile).toBeVisible()
-      await expectZooms('out', 'menu')
+      await expectZooms('out')
 
-      // Going back before the submenu has zoomed in still zooms the tiles all the way.
+      // Views marked while the menu zooms, such as those of its menu groups, are cleared with it.
+      await menu.evaluate((element) => {
+        element.querySelector(':scope > .shaka-playbackrate-button').click()
+        element.querySelector(':scope > .shaka-playback-rates').dataset.ftMenuTransition = 'in'
+      })
+      await expectZooms('in')
+      await submenu.locator('.shaka-back-to-overflow-button').click()
+      await expect(tile).toBeVisible()
+      await expectZooms('out')
+
+      // Going back before the submenu has zoomed in still zooms the menu all the way.
       const returnZooms = await menu.evaluate(async (element) => {
         const frame = () => new Promise(resolve => requestAnimationFrame(resolve))
         const outcomes = { animationend: 0, animationcancel: 0 }
         const count = ({ type, animationName, target }) => {
-          if (animationName.startsWith('ft-menu-zoom-out') && target.parentElement === element) outcomes[type]++
+          if (animationName.startsWith('ft-menu-zoom-out') && target === element) outcomes[type]++
         }
         element.addEventListener('animationend', count)
         element.addEventListener('animationcancel', count)
@@ -141,9 +152,9 @@ for (const usePlayerMenuGrid of [true, false]) {
       expect(returnZooms.animationcancel).toBe(0)
       await takeZooms()
 
-      // Closing the menu over a submenu and opening it again doesn't zoom the tiles.
+      // Closing the menu over a submenu and opening it again doesn't zoom it.
       await tile.click()
-      await expectZooms('in', 'submenu')
+      await expectZooms('in')
       await closePlayerMenus(player)
       await openOverflowMenuWith(player, tile)
       await afterFrames()
@@ -220,7 +231,7 @@ test('a view switch with reduced motion leaves no zoom for later', async ({ app,
     window.__menuZooms = []
     element.addEventListener('animationstart', ({ animationName, target }) => {
       if (animationName.startsWith('ft-menu-zoom')) {
-        window.__menuZooms.push(target.parentElement.classList.contains('shaka-playback-rates') ? 'submenu' : 'menu')
+        window.__menuZooms.push(target === element ? 'menu' : 'entry')
       }
     })
   })
@@ -245,7 +256,7 @@ test('a view switch with reduced motion leaves no zoom for later', async ({ app,
   // The next switch zooms as usual.
   await tile.click()
   await expect(submenu).toBeVisible()
-  await expect.poll(takeZooms).toContain('submenu')
+  await expect.poll(takeZooms).toContain('menu')
 })
 
 test.describe('phone options sheet', () => {
