@@ -1326,6 +1326,8 @@ export default defineComponent({
     // Caption tracks are added in parallel, so Shaka's track order can differ from props.captions.
     // Remember the caption itself to find its track once they are loaded.
     let initialCaption = null
+    // Downloads can mount before their metadata brings the captions
+    let mountedWithoutCaptions = props.captions.length === 0
 
     if (restoreCaptionIndex === null && enableSubtitlesInitially && props.captions.length > 0) {
       initialCaption = getCaptionToEnable()
@@ -10209,6 +10211,15 @@ export default defineComponent({
 
         if (textTrack) {
           player.selectTextTrack(textTrack, false)
+        }
+      } else if (mountedWithoutCaptions && props.captions.length > 0) {
+        // Captions that arrived between mounting and loading were added above,
+        // but the subtitle default was decided while there were none.
+        mountedWithoutCaptions = false
+        const textTracks = player.getTextTracks()
+        if ((getSavedChannelSubtitlesState() ?? store.getters.getEnableSubtitlesByDefault) && !textTracks.some(track => track.active)) {
+          const textTrack = findMatchingTextTrack(textTracks, getCaptionToEnable()) ?? textTracks[0]
+          if (textTrack) player.selectTextTrack(textTrack, false)
         }
       }
       syncShortsCaptionsEnabled()
