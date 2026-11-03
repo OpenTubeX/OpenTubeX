@@ -65,6 +65,131 @@ test('playback speed presets offer every interval step up to the maximum', async
   await expect.poll(() => player.locator('video').evaluate(element => element.playbackRate)).toBe(3.5)
 })
 
+test('moving between the grid menu and a submenu zooms only the new view in', async ({ app, page }) => {
+  await mockPlayableWatchPage(app, page)
+  await openMockedVideo(page)
+  const player = page.locator(`${activeTab} .ftVideoPlayer`)
+  const menu = player.locator('.shaka-overflow-menu')
+  const tile = menu.locator(':scope > .shaka-playbackrate-button')
+  const submenu = menu.locator(':scope > .shaka-playback-rates')
+
+  // Recorded as they start, since they finish within a few frames.
+  await menu.evaluate((element) => {
+    window.__menuZooms = []
+    element.addEventListener('animationstart', ({ animationName, target }) => {
+      if (!animationName.startsWith('ft-menu-zoom')) return
+      window.__menuZooms.push({
+        zoom: animationName.startsWith('ft-menu-zoom-in') ? 'in' : 'out',
+        view: target.parentElement.classList.contains('shaka-playback-rates') ? 'submenu' : 'menu',
+      })
+    })
+  })
+  const takeZooms = () => page.evaluate(() => window.__menuZooms.splice(0))
+  const afterFrames = () => page.evaluate(() => new Promise(resolve => requestAnimationFrame(() => requestAnimationFrame(resolve))))
+  const expectZooms = async (zoom, view) => {
+    await expect.poll(() => menu.evaluate(element => element.querySelector('[data-ft-menu-transition]') === null &&
+      !element.hasAttribute('data-ft-menu-transition'))).toBe(true)
+    const zooms = await takeZooms()
+    expect(zooms.length).toBeGreaterThan(0)
+    expect(new Set(zooms.map(entry => `${entry.zoom} ${entry.view}`))).toEqual(new Set([`${zoom} ${view}`]))
+  }
+
+  await openOverflowMenuWith(player, tile)
+  await afterFrames()
+  expect(await takeZooms()).toEqual([])
+
+  await tile.click()
+  await expect(submenu).toBeVisible()
+  await expectZooms('in', 'submenu')
+
+  await submenu.locator('.shaka-back-to-overflow-button').click()
+  await expect(tile).toBeVisible()
+  await expectZooms('out', 'menu')
+
+  // Going back before the submenu has zoomed in still zooms the tiles all the way.
+  const returnZooms = await menu.evaluate(async (element) => {
+    const frame = () => new Promise(resolve => requestAnimationFrame(resolve))
+    const outcomes = { animationend: 0, animationcancel: 0 }
+    const count = ({ type, animationName, target }) => {
+      if (animationName.startsWith('ft-menu-zoom-out') && target.parentElement === element) outcomes[type]++
+    }
+    element.addEventListener('animationend', count)
+    element.addEventListener('animationcancel', count)
+    const zoomingIn = new Promise((resolve) => {
+      element.addEventListener('animationstart', ({ animationName }) => {
+        if (animationName.startsWith('ft-menu-zoom-in')) resolve()
+      })
+    })
+    element.querySelector(':scope > .shaka-playbackrate-button').click()
+    await zoomingIn
+    await frame()
+    element.querySelector(':scope > .shaka-playback-rates > .shaka-back-to-overflow-button').click()
+    await Promise.all(element.getAnimations({ subtree: true }).map(animation => animation.finished.catch(() => {})))
+    await frame()
+    await frame()
+    return outcomes
+  })
+  expect(returnZooms.animationend).toBeGreaterThan(0)
+  expect(returnZooms.animationcancel).toBe(0)
+  await takeZooms()
+
+  // Closing the menu over a submenu and opening it again doesn't zoom the tiles.
+  await tile.click()
+  await expectZooms('in', 'submenu')
+  await closePlayerMenus(player)
+  await openOverflowMenuWith(player, tile)
+  await afterFrames()
+  expect(await takeZooms()).toEqual([])
+})
+
+test('the options menu grows in and fades out, but closes at once from a submenu', async ({ app, page }) => {
+  await mockPlayableWatchPage(app, page)
+  await openMockedVideo(page)
+  const player = page.locator(`${activeTab} .ftVideoPlayer`)
+  const menu = player.locator('.shaka-overflow-menu')
+  const tile = menu.locator(':scope > .shaka-playbackrate-button')
+
+  await menu.evaluate((element) => {
+    window.__menuMotion = []
+    element.addEventListener('animationstart', ({ animationName, target }) => {
+      if (target === element && animationName.startsWith('ft-menu-open')) window.__menuMotion.push('open')
+    })
+    element.addEventListener('transitionrun', ({ propertyName, target }) => {
+      if (target === element && propertyName === 'scale') window.__menuMotion.push('close')
+    })
+  })
+  const takeMotion = () => page.evaluate(() => window.__menuMotion.splice(0))
+  const afterFrames = () => page.evaluate(() => new Promise(resolve => requestAnimationFrame(() => requestAnimationFrame(resolve))))
+
+  await openOverflowMenuWith(player, tile)
+  await expect.poll(takeMotion).toEqual(['open'])
+
+  // Fading out, the menu stays displayed until it has faded.
+  expect(await player.evaluate((element) => {
+    element.ui.getControls().hideSettingsMenus()
+    const overflowMenu = element.querySelector('.shaka-overflow-menu')
+    return overflowMenu.classList.contains('shaka-hidden') && overflowMenu.checkVisibility()
+  })).toBe(true)
+  await expect(menu).toBeHidden()
+  expect(await takeMotion()).toEqual(['close'])
+
+  await openOverflowMenuWith(player, tile)
+  await tile.click()
+  await expect(menu.locator(':scope > .shaka-playback-rates')).toBeVisible()
+  await takeMotion()
+  await closePlayerMenus(player)
+  await afterFrames()
+  expect(await menu.evaluate(element => element.checkVisibility())).toBe(false)
+  expect(await takeMotion()).toEqual([])
+
+  // Hidden again, it fades the next time.
+  await afterFrames()
+  await openOverflowMenuWith(player, tile)
+  await closePlayerMenus(player)
+  await expect(menu).toBeHidden()
+  expect(await takeMotion()).toEqual(['open', 'close'])
+})
+
 test('playback speed tile is highlighted exactly while the speed is not 1x', async ({ app, page }) => {
   await mockPlayableWatchPage(app, page)
   const video = await openMockedVideo(page)

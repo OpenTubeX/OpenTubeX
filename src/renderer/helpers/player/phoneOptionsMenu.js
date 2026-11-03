@@ -1,6 +1,7 @@
 import shaka from 'shaka-player'
 import { PHONE_LAYOUT_QUERY } from '../../composables/usePhoneLayout'
 import { clampOverlayScrollTop, restoreOverlayScrollTop } from '../overlayScrollbars'
+import { measureWithoutMenuZoom } from './menuTransitions'
 
 /** Keep Shaka's controls and selection state, presenting their menu over the video on phones without locking page scrolling. */
 export function setupPhoneOptionsMenu(menu, controls, t) {
@@ -130,7 +131,7 @@ export function setupPhoneOptionsMenu(menu, controls, t) {
       restoreOverlayScrollTop(menu, 0)
     }
     // Measured once the new view starts at the top
-    updateHeaderAction(submenu)
+    measureWithoutMenuZoom(menu, () => updateHeaderAction(submenu))
     const end = [...view.children].filter(child => child.getClientRects().length > 0 && !child.classList.contains('os-scrollbar')).at(-1)
     clampOverlayScrollTop(menu, end ?? view)
   }
