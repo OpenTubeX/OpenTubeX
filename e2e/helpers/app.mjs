@@ -676,7 +676,7 @@ export const test = base.extend({
       }
 
       await use(appHandle)
-      expect(scrollbarErrors, 'Overlay scrollbar containers must not be static').toEqual([])
+      expect.soft(scrollbarErrors, 'Overlay scrollbar containers must not be static').toEqual([])
     } finally {
       const failed = testInfo.status !== testInfo.expectedStatus
       if (appHandle && failed) {
