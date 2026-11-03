@@ -190,12 +190,14 @@ test('loop steps back from the first video to the last one once every page has l
   await expect(page).toHaveURL(new RegExp(`#/watch/${pagedPlaylistVideoId(VIDEO_COUNT - 1, 0)}\\?`))
 })
 
-test('a current video on a later page loads the pages up to it', async ({ app, page }) => {
+test('a current video on a later page loads the pages up to it', { tag: '@scale' }, async ({ app, page }) => {
   const { watch, panel, requestedPages } = await openPagedPlaylist({ app, page }, { videoCount: VIDEO_COUNT, playableIndex: 150 })
   await expect(panel.locator('.playlistIndex label')).toHaveText(`151 / ${VIDEO_COUNT}`)
   await waitForPlaylistPagesIdle(watch)
   // Video 151 is within 50 videos of the second page's end, so the third loads too
   expect(requestedPages).toEqual([2, 3])
+  // At larger UI scales the panel starts below the visible part of the page
+  await panel.scrollIntoViewIfNeeded()
   await expect(panel.locator('.playlistItem').nth(150)).toBeInViewport()
   expect(await watch.evaluate(view => view.$refs.watchVideoPlaylist.nextVideo?.videoId)).toBe(pagedPlaylistVideoId(151, 150))
 })
@@ -206,7 +208,7 @@ test('the last cached video plays next into the page loaded ahead of it', async 
   await waitForPlaylistPagesIdle(watch)
   expect(requestedPages).toEqual([2])
   await expect.poll(() => watch.evaluate(view => view.playlistSkipAvailability.canPlayNext)).toBe(true)
-  expect(await watch.evaluate(view => view.$refs.watchVideoPlaylist.isWaitingForNextVideo)).toBe(false)
+  await expect.poll(() => watch.evaluate(view => view.$refs.watchVideoPlaylist.isWaitingForNextVideo)).toBe(false)
 
   await watch.evaluate(view => view.$refs.watchVideoPlaylist.playNextVideo())
   await expect(page).toHaveURL(new RegExp(`#/watch/${pagedPlaylistVideoId(100, 99)}\\?`))
