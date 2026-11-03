@@ -220,9 +220,10 @@ function create(element) {
 
     // A container scrolled to its end stays there while its viewport resizes,
     // also through intermediate layouts that shortened its range, and with
-    // `keepEnd` while its content grows.
+    // `keepEnd` while its content grows, unless it was scrolled away since.
     if (!isPage && instance.atEnd &&
-      (sizes.y.client !== instance.clientHeight || (keepEnd && ranges.y > instance.range)) &&
+      (sizes.y.client !== instance.clientHeight ||
+        (keepEnd && ranges.y > instance.range && scrollElement.scrollTop >= instance.range - SCROLL_BOUNDARY_TOLERANCE)) &&
       scrollElement.scrollTop < ranges.y - SCROLL_BOUNDARY_TOLERANCE) {
       scrollElement.scrollTop = ranges.y
     }

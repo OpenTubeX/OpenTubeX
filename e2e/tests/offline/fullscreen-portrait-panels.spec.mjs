@@ -189,6 +189,15 @@ test('short portrait fullscreen keeps panel actions reachable', { tag: '@scale' 
   })
   await setWindowSize(app, page, { width: 420, height: 1000 })
   await expectScrollAtRenderedEnd(scroller)
+  // Scrolling away from the end as a row is added keeps the new offset
+  const awayFromEnd = await scroller.evaluate(element => {
+    element.scrollTop -= 40
+    window.$store.commit('addVideoToWatchQueue', { video: { videoId: 'queued00030', title: 'Queued video 31', author: 'Queue channel' } })
+    return element.scrollTop
+  })
+  await expect(scroller.locator('.queueItem')).toHaveCount(31)
+  await page.evaluate(() => new Promise(resolve => requestAnimationFrame(() => requestAnimationFrame(resolve))))
+  expect(Math.abs(await scroller.evaluate(element => element.scrollTop) - awayFromEnd)).toBeLessThanOrEqual(1)
   await player.hover({ position: { x: 20, y: 20 } })
   await expect(player).toHaveAttribute('data-action-dock-visible', 'true')
   await actions.getByRole('button', { name: 'Queue', exact: true }).click()
