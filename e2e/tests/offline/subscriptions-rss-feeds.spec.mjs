@@ -1121,6 +1121,30 @@ test.describe('when RSS feeds are the only enabled feeds', () => {
     await page.getByRole('button', { name: 'Mark all as seen' }).click()
     await expect(panel.getByText('There is no new content.')).toBeVisible()
   })
+
+  test.describe('besides posts, which the New feed leaves out with YouTube\'s RSS feeds', () => {
+    test.use({
+      seed: {
+        settings: {
+          fetchSubscriptionsAutomatically: false,
+          enableRssFeeds: true,
+          followedRssFeeds: [RSS_FEED],
+          useRssFeeds: true,
+          hideSubscriptionsVideos: true,
+          hideSubscriptionsShorts: true,
+          hideSubscriptionsLive: true
+        }
+      }
+    })
+
+    test('treats the New feed as an RSS feed', async ({ page }) => {
+      await mockFeeds(page)
+      await goTo(page, 'subscriptions')
+      await page.locator('[data-subscription-feed-tab="all"]').click()
+      await expect(page.locator('#subscriptionsPanel').getByText('There is no new content.')).toBeVisible()
+      await expect(page.locator('.subscriptionsHeader').getByRole('button', { name: 'Manage RSS Feeds' })).toBeVisible()
+    })
+  })
 })
 
 test.describe('with many followed feeds', () => {

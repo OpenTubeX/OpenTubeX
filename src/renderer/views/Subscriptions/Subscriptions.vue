@@ -437,6 +437,7 @@ import {
   refreshSubscriptionVideosFromRemote
 } from '../../helpers/subscriptions'
 import { getSubscriptionsForFeed } from '../../helpers/subscription-channels'
+import { getEnabledSubscriptionFeedSources } from '../../helpers/newSubscriptionFeed'
 import {
   getRssFeedsAutoRefreshInterval,
   markRssFeedItemsAsSeen,
@@ -855,9 +856,10 @@ const combinedNewFeedRefreshesRssFeeds = computed(() => {
  */
 const currentNewFeedRssTab = computed(() => {
   if (currentTab.value !== 'new') return false
+  // The same check as the New feed, which leaves out posts with YouTube's RSS feeds
   return newFeedView.value === 'tabbed'
     ? currentNewFeedTab.value === 'feeds'
-    : visibleTabs.value.every(tab => tab === 'new' || tab === 'feeds')
+    : enableRssFeeds.value && getEnabledSubscriptionFeedSources(store.getters).length === 0
 })
 /** @type {Map<string, HTMLElement>} */
 const newFeedTabRefs = new Map()
