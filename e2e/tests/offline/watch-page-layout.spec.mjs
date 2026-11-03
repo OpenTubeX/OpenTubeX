@@ -659,8 +659,27 @@ test('sidebar chapters resize from their handle and keep the size for later pane
   await expect(chapters).toHaveCSS('resize', 'vertical')
   await expect.poll(async () => Math.abs(await listHeight() - 480)).toBeLessThan(2)
 
+  // Growing the list from its end shrinks the scroll range; it must stay at
+  // the new end with a matching scrollbar.
+  await chapters.hover()
+  await page.mouse.wheel(0, 2000)
+  await chapters.evaluate(element => { element.scrollTop = element.scrollHeight })
   await dragHandle(200)
   await expect.poll(listHeight).toBeGreaterThan(640)
+  await expect(chapters.locator(':scope > .os-scrollbar-vertical')).not.toHaveClass(/os-scrollbar-unusable/)
+  await expect.poll(() => chapters.evaluate(element => {
+    const maximum = element.scrollHeight - element.clientHeight
+    const viewport = element.getBoundingClientRect()
+    const content = element.querySelector('.chaptersContent').getBoundingClientRect()
+    const track = element.querySelector(':scope > .os-scrollbar-vertical .os-scrollbar-track').getBoundingClientRect()
+    const thumb = element.querySelector(':scope > .os-scrollbar-vertical .os-scrollbar-handle').getBoundingClientRect()
+    return Math.max(
+      Math.max(0, -element.scrollTop, element.scrollTop - maximum),
+      Math.abs(content.bottom - viewport.bottom),
+      Math.abs(thumb.height / track.height - element.clientHeight / element.scrollHeight) * track.height,
+      Math.abs(track.bottom - thumb.bottom)
+    ) * devicePixelRatio
+  })).toBeLessThanOrEqual(2)
   const expanded = await listHeight()
   await reopen()
   await expect.poll(async () => Math.abs(await listHeight() - expanded)).toBeLessThan(2)
