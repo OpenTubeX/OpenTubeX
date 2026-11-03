@@ -252,6 +252,8 @@ test.describe('with followed feeds', () => {
     await mockFeeds(page)
     const otherUrl = 'https://rss.example.test/twitch/video/Other'
     const requests = []
+    let release
+    const held = new Promise(resolve => { release = resolve })
     await page.route('https://raw.githubusercontent.com/RSSNext/rsshub-docs/**', route => route.fulfill({
       body: `const instances = [
   { url: 'https://down.example.test', location: '🇩🇪', maintainer: 'Down' },
@@ -263,7 +265,7 @@ test.describe('with followed feeds', () => {
       const url = route.request().url()
       requests.push(url)
       if (url === otherUrl) {
-        return route.fulfill({ contentType: 'application/rss+xml', body: rssFeed.replace("Streamer's Twitch videos", "Other's Twitch videos") })
+        return held.then(() => route.fulfill({ contentType: 'application/rss+xml', body: rssFeed.replace("Streamer's Twitch videos", "Other's Twitch videos") }))
       }
       return route.fulfill({ json: RSSHUB_NAMESPACES })
     })
@@ -315,8 +317,17 @@ test.describe('with followed feeds', () => {
     await expect(dialog.locator('.feedUrlPreview')).toHaveText(otherUrl)
     await add.click()
 
+    // The dialog closes without waiting for the feed, which loads from the feed URL box
     await expect(dialog).toHaveCount(0)
+    const input = manager.getByRole('textbox', { name: 'Add Feed' })
+    await expect(input).toHaveValue(otherUrl)
+    await expect(input).toBeDisabled()
+    await expect(manager.getByRole('progressbar', { name: 'Add Feed' })).toBeVisible()
+    await expect(manager.getByRole('button', { name: 'Browse RSSHub' })).toBeDisabled()
+
+    release()
     await expect(manager.locator('.feedRow').last()).toContainText("Other's Twitch videos")
+    await expect(input).toHaveValue('')
     expect(await page.evaluate(() => window.$store.getters.getFollowedRssFeeds.at(-1).url)).toBe(otherUrl)
     expect(requests).toEqual(['https://rss.example.test/api/namespace', otherUrl])
 
