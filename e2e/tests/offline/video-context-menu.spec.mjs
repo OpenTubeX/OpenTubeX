@@ -665,3 +665,26 @@ test('optional video menu button can be enabled in appearance settings', async (
   await page.reload()
   await expect(button).toHaveCount(1)
 })
+
+test('mobile quick actions stay unhighlighted under a touch point that cannot hover', async ({ page }) => {
+  await goTo(page, 'history')
+  await page.setViewportSize({ width: 375, height: 812 })
+  const session = await page.context().newCDPSession(page)
+  try {
+    await session.send('Emulation.setTouchEmulationEnabled', { enabled: true })
+    await page.locator('.ft-list-video .title').first().evaluate(element => element.dispatchEvent(new PointerEvent('contextmenu', {
+      bubbles: true, cancelable: true, pointerType: 'touch'
+    })))
+    const quickAction = page.locator('.mobileLinkActions .mobileLinkQuickActionRow > button:not(:disabled)').first()
+    await expect(quickAction).toBeVisible()
+    const backgroundColor = () => quickAction.evaluate(async element => {
+      await Promise.all(element.getAnimations().map(animation => animation.finished))
+      return getComputedStyle(element).backgroundColor
+    })
+    const idle = await backgroundColor()
+    await quickAction.hover()
+    expect(await backgroundColor()).toBe(idle)
+  } finally {
+    await session.detach()
+  }
+})

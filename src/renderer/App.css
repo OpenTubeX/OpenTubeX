@@ -290,8 +290,11 @@
   --quick-action-foreground: var(--on-selected-container-color);
 }
 
-.mobileLinkActions .mobileLinkQuickActionRow > button:not(:disabled):hover {
-  background-color: color-mix(in srgb, var(--quick-action-foreground) 8%, var(--quick-action-container));
+/* Touch WebViews emulate hover at a held touch point beneath the opening sheet. */
+@media (hover: hover) {
+  .mobileLinkActions .mobileLinkQuickActionRow > button:not(:disabled):hover {
+    background-color: color-mix(in srgb, var(--quick-action-foreground) 8%, var(--quick-action-container));
+  }
 }
 
 .mobileLinkActions .mobileLinkQuickActionRow > button:not(:disabled):active {

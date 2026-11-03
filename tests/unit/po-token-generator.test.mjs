@@ -58,6 +58,8 @@ function load({ attest, mint = () => attested, validForSecs = 600, clearData = a
         debugger: { attach() {}, async sendCommand() {} },
         async loadURL() {},
         isDestroyed: () => this.closed,
+        // Electron segfaults here for offscreen views outside a window
+        isFocused: () => { throw new Error('isFocused() crashes the main process') },
         close: () => { this.closed = true },
         executeJavaScript: async (script) => {
           if (script.startsWith('window.ftMintPoToken')) return mint()
@@ -204,4 +206,12 @@ test('an attestation without a lifetime is not kept', async () => {
   assert.equal(views.length, 2)
   assert.equal(views[0].closed, true)
   assert.equal(cleanups(), 2)
+})
+
+test('the BotGuard view never asks Electron whether it is focused', async () => {
+  // Menu accelerators call isFocused() on every web contents while the view exists
+  const { generate, views } = load({ attest: () => attested })
+  await generate()
+  assert.equal(views[0].closed, false)
+  assert.equal(views[0].webContents.isFocused(), false)
 })
