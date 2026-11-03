@@ -1789,7 +1789,8 @@ onMounted(async () => {
   let invidiousInstancesRefreshed = false
   watch(() => {
     const { backendPreference, backendFallback } = store.state.settings
-    return defaultInvidiousInstance.value === '' && (backendPreference === 'invidious' || (backendPreference === 'local' && backendFallback))
+    return defaultInvidiousInstance.value === '' && (!process.env.SUPPORTS_LOCAL_API || backendPreference === 'invidious' ||
+      (backendPreference === 'local' && backendFallback))
   }, (usesRandomInstance) => {
     if (!usesRandomInstance || invidiousInstancesRefreshed) return
     invidiousInstancesRefreshed = true
