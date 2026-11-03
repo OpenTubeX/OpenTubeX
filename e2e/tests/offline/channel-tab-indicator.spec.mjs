@@ -158,11 +158,11 @@ test('keeps channel header rows evenly spaced below the banner', async ({ app, p
       const gaps = {
         bannerToAvatar: avatar.top - banner.bottom,
         infoToControls: controls.top - info.bottom,
+        actionsToSearch: search.top - subscribe.bottom,
         belowTabs: container.bottom - tabs.bottom
       }
       if (actions.top >= avatar.bottom) {
         gaps.avatarToActions = subscribe.top - avatar.bottom
-        gaps.actionsToSearch = search.top - subscribe.bottom
       }
       if (search.bottom <= tabs.top) {
         gaps.searchToTabs = tabs.top - search.bottom
@@ -171,8 +171,9 @@ test('keeps channel header rows evenly spaced below the banner', async ({ app, p
     }), { message: `20px header gaps at ${width}x${height}, ${scale}% UI scale` }).toEqual({
       bannerToAvatar: 20,
       infoToControls: 20,
+      actionsToSearch: 20,
       belowTabs: 20,
-      ...(width < 680 || scale === 125 ? { avatarToActions: 20, actionsToSearch: 20 } : {}),
+      ...(width < 680 || scale === 125 ? { avatarToActions: 20 } : {}),
       ...(width <= 800 || scale === 125 ? { searchToTabs: 20 } : {})
     })
   }
