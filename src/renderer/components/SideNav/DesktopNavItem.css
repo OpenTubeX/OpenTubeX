@@ -69,15 +69,11 @@
   }
 
   :is(.navOption, .navChannel).router-link-active {
-    color: var(--on-selected-container-color);
+    color: var(--primary-color);
   }
 
   :is(.navOption, .navChannel).router-link-active::before {
-    background-color: var(--selected-container-color);
-  }
-
-  :is(.navOption, .navChannel).router-link-active:is(:hover, :focus-visible)::before {
-    background-color: color-mix(in srgb, var(--on-selected-container-color) 8%, var(--selected-container-color));
+    background-color: color-mix(in srgb, var(--primary-color) 20%, transparent);
   }
 
   .navOption .thumbnailContainer {
@@ -195,11 +191,6 @@
   :is(.navOption, .navChannel).router-link-active .navLabel {
     color: var(--primary-text-color);
     font-weight: 700;
-  }
-
-  /* The expanded drawer draws the indicator behind the label too. */
-  .expanded :is(.navOption, .navChannel).router-link-active .navLabel {
-    color: var(--on-selected-container-color);
   }
 }
 

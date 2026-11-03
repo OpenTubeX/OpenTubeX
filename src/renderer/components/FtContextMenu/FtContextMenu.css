@@ -298,10 +298,9 @@
   transition-delay: 0s;
 }
 
-/* Keyboard focus matches hover; the outline marks the focused item. */
 .menuItem:focus-visible {
-  color: var(--primary-text-color);
-  background-color: color-mix(in srgb, var(--primary-color) 16%, var(--card-bg-color));
+  color: var(--text-with-main-color);
+  background-color: var(--primary-color);
   outline: 2px solid var(--primary-text-color);
   outline-offset: -2px;
 }
@@ -312,8 +311,8 @@
 
 .menuItem:not(:disabled):hover,
 .submenuContainer:hover > .menuItem:not(:disabled) {
-  color: var(--primary-text-color);
-  background-color: color-mix(in srgb, var(--primary-color) 16%, var(--card-bg-color));
+  color: var(--text-with-main-color);
+  background-color: var(--primary-color);
 }
 
 @media (prefers-reduced-motion: reduce) {

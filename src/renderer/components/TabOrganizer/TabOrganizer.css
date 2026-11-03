@@ -13,7 +13,7 @@
 .tabOrganizer {
   background: var(--card-bg-color);
   border: 1px solid var(--divider-color);
-  border-radius: var(--shape-corner-extra-large);
+  border-radius: var(--shape-corner-medium);
   box-shadow: 0 20px 70px rgb(0 0 0 / 38%);
   color: var(--primary-text-color);
   display: flex;

@@ -20,7 +20,7 @@
   background-attachment: fixed;
   backdrop-filter: var(--card-bg-blur, none);
   border: 1px solid var(--border-color);
-  border-radius: var(--shape-corner-extra-large);
+  border-radius: calc(10px * var(--ui-roundness));
   box-shadow: 0 12px 40px rgb(0 0 0 / 38%);
   container-name: settings-window;
   container-type: inline-size;
@@ -649,7 +649,7 @@
 .resize-nw {
   /* The window clips its rounded corners, so keep each corner handle's center
      inside the corner arc (about 0.29 of the radius in from both edges). */
-  --resize-corner-inset: max(-2px, calc(var(--shape-corner-extra-large) * 0.29 - 6px));
+  --resize-corner-inset: max(-2px, calc(calc(10px * var(--ui-roundness)) * 0.29 - 6px));
 
   inline-size: 16px;
   block-size: 16px;
