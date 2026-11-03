@@ -207,6 +207,32 @@ test('turning notifications off while the bell saves shows no system notificatio
   assert.equal(systemShown, 0)
 })
 
+test('switching to system notifications while the bell saves uses the system', async () => {
+  let mode = 'both'
+  let systemShown = 0
+  const inApp = []
+  const notify = createNotifier({
+    history: {
+      add: async entry => {
+        mode = 'system'
+        return { ...entry, id: '1', createdAt: 0, read: false }
+      }
+    },
+    getMode: () => mode,
+    getForegroundWindow: () => 'window',
+    showInApp: window => inApp.push(window)
+  })
+
+  await notify({
+    title: 'Title',
+    body: 'Body',
+    target: { kind: 'video', path: '/watch/abc' },
+    showSystemNotification: () => { systemShown++ }
+  })
+  assert.equal(systemShown, 1)
+  assert.deepEqual(inApp, [])
+})
+
 test('entries keep web thumbnails, and uploads get theirs from the configured template', () => {
   assert.equal(isThumbnailUrl('https://i.ytimg.com/vi/abc/mqdefault.jpg'), true)
   // Invidious instances can be local servers.
