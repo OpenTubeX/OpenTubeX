@@ -180,3 +180,24 @@ for (const mode of ['phone', 'tablet']) {
     await expect(target).toBeFocused()
   })
 }
+
+test('tab sheet actions stay unhighlighted under a touch point that cannot hover', async ({ app, page }) => {
+  await setWindowSize(app, page, { width: 375, height: 760 })
+  await enableTabMenus(page, 'phone')
+  await page.locator('.capacitorPhoneTabSwitcherButton').click()
+  const session = await page.context().newCDPSession(page)
+  try {
+    // Touch-only WebViews emulate hover at the held touch point, so the sheet
+    // can open beneath a finger that is still down.
+    await session.send('Emulation.setTouchEmulationEnabled', { enabled: true })
+    await page.locator('.capacitorPhoneTabTarget').filter({ hasText: 'Subscriptions' }).click({ button: 'right' })
+    const menu = page.locator('.capacitorTabActions')
+    await expect(menu).toBeVisible()
+    await settled(menu)
+    const pin = menu.getByRole('menuitem', { name: 'Pin Tab', exact: true })
+    await pin.hover()
+    await expect(pin).toHaveCSS('background-color', 'rgba(0, 0, 0, 0)')
+  } finally {
+    await session.detach()
+  }
+})
