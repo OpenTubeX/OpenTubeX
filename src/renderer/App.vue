@@ -348,7 +348,7 @@
                 </div>
                 <template
                   v-for="(action, index) in mobileContextMenuRows"
-                  :key="action.label ?? index"
+                  :key="`${index}:${action.label}`"
                 >
                   <div
                     v-if="action.type === 'separator'"

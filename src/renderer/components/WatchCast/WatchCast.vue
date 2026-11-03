@@ -407,7 +407,8 @@ async function sendDraft(action, draft) {
   if (!control || value === null || control.busy || sendingDrafts[action] === value) return
   sendingDrafts[action] = value
   await control.control(action, value)
-  sendingDrafts[action] = null
+  // A newer value may already be sending, and keeps its own marker.
+  if (sendingDrafts[action] === value) sendingDrafts[action] = null
   // A newer value from a drag during the command is still pending.
   if (draft.value === value) draft.value = null
 }
