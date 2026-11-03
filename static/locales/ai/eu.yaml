@@ -1140,6 +1140,10 @@ Settings:
     Collapsed: Tolestuta
     Expanded: Zabalduta
     Video Descriptions: Bideoen deskribapenak
+    Video Description Modes:
+      Hide: Ezkutatu
+      Collapsed: Tolestuta
+      Expanded: Zabalduta
     Playing Interface Hide Delay: Erreprodukzioan interfazea ezkutatzeko atzerapena
     Hide Startup Splash: Ezkutatu abio-pantaila
     Hide Header Sync Indicator: Ezkutatu aplikazioaren goiburuko sinkronizazio-adierazlea

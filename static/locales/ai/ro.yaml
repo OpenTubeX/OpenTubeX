@@ -1145,6 +1145,10 @@ Settings:
     Collapsed: Restrânse
     Expanded: Extinse
     Video Descriptions: Descrierile videoclipurilor
+    Video Description Modes:
+      Hide: Ascunde
+      Collapsed: Restrânse
+      Expanded: Extinse
     Playing Interface Hide Delay: Întârziere la ascunderea interfeței în timpul redării
     Hide Startup Splash: Ascunde ecranul de pornire
     Hide Header Sync Indicator: Ascunde indicatorul de sincronizare din antetul aplicației

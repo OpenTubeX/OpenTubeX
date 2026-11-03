@@ -1142,6 +1142,10 @@ Settings:
     Collapsed: Yığılmış
     Expanded: Genişləndirilmiş
     Video Descriptions: Video təsvirləri
+    Video Description Modes:
+      Hide: Gizlət
+      Collapsed: Yığılmış
+      Expanded: Genişləndirilmiş
     Playing Interface Hide Delay: Oxutma zamanı interfeysin gizlədilmə gecikməsi
     Hide Startup Splash: Başlanğıc ekranını gizlət
     Hide Header Sync Indicator: Tətbiq başlığındakı sinxronizasiya göstəricisini gizlət

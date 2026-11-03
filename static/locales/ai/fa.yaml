@@ -1177,6 +1177,10 @@ Settings:
     Collapsed: جمع‌شده
     Expanded: بازشده
     Video Descriptions: توضیحات ویدیو
+    Video Description Modes:
+      Hide: پنهان
+      Collapsed: جمع‌شده
+      Expanded: بازشده
     Playing Interface Hide Delay: تأخیر پنهان شدن رابط هنگام پخش
     Hide Startup Splash: پنهان کردن صفحهٔ آغازین
     Hide Header Sync Indicator: پنهان کردن نشانگر همگام‌سازی در سربرگ برنامه

@@ -1142,6 +1142,10 @@ Settings:
     Collapsed: Samanbrotin
     Expanded: Útvíkkuð
     Video Descriptions: Myndbandslýsingar
+    Video Description Modes:
+      Hide: Fela
+      Collapsed: Samanbrotnar
+      Expanded: Útvíkkaðar
     Playing Interface Hide Delay: Töf áður en viðmótið er falið við spilun
     Hide Startup Splash: Fela upphafsskjá
     Hide Header Sync Indicator: Fela samstillingarvísi í haus forritsins

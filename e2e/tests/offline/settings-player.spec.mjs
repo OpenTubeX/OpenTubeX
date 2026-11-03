@@ -897,6 +897,23 @@ test.describe('video description visibility migration', () => {
   })
 })
 
+test.describe('video description mode labels', () => {
+  test.use({
+    seed: {
+      settings: { useAITranslationCompletions: true, aiVideoSummaryMode: 'collapsed', videoDescriptionMode: 'collapsed' }
+    }
+  })
+
+  // "Résumés" is masculine and "descriptions" is feminine, so the shared
+  // labels read wrong for one of the two selects.
+  test('agree with the noun they describe', async ({ page }) => {
+    await page.evaluate(() => window.$store.dispatch('updateCurrentLocale', 'fr-FR'))
+    const focus = await goToSettingsSection(page, 'focus')
+    await expect(focus.getByRole('combobox', { name: 'Résumés vidéo générés par l’IA' })).toHaveText('Réduits')
+    await expect(focus.getByRole('combobox', { name: 'Descriptions des vidéos' })).toHaveText('Réduites')
+  })
+})
+
 test.describe('SponsorBlock highlight settings', () => {
   test.use({
     seed: {

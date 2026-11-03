@@ -1151,6 +1151,10 @@ Settings:
     Collapsed: Contraídos
     Expanded: Expandidos
     Video Descriptions: Descricións dos vídeos
+    Video Description Modes:
+      Hide: Agochar
+      Collapsed: Contraídas
+      Expanded: Expandidas
     Playing Interface Hide Delay: Atraso para agochar a interface durante a reprodución
     Hide Startup Splash: Agochar a pantalla de inicio
     Hide Header Sync Indicator: Agochar o indicador de sincronización da cabeceira da aplicación

@@ -1323,6 +1323,10 @@ Settings:
     Collapsed: Ingevou
     Expanded: Uitgevou
     Video Descriptions: Videobeskrywings
+    Video Description Modes:
+      Hide: Versteek
+      Collapsed: Ingevou
+      Expanded: Uitgevou
     Playing Interface Hide Delay: Versteekvertraging van koppelvlak tydens afspeel
     Hide Startup Splash: Versteek opstartskerm
     Hide Header Sync Indicator: Versteek sinkroniseringsaanwyser in kopstuk

@@ -1155,6 +1155,10 @@ Settings:
     Collapsed: Ingeklapt
     Expanded: Uitgeklapt
     Video Descriptions: Videobeschrijvingen
+    Video Description Modes:
+      Hide: Verbergen
+      Collapsed: Ingeklapt
+      Expanded: Uitgeklapt
     Playing Interface Hide Delay: Vertraging bij het verbergen van de interface tijdens het afspelen
     Hide Startup Splash: Opstartscherm verbergen
     Hide Header Sync Indicator: Synchronisatie-indicator in de appkop verbergen

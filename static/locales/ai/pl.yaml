@@ -669,6 +669,10 @@ Settings:
     Collapsed: Zwinięte
     Expanded: Rozwinięte
     Video Descriptions: Opisy filmów
+    Video Description Modes:
+      Hide: Ukryj
+      Collapsed: Zwinięte
+      Expanded: Rozwinięte
     Playing Interface Hide Delay: Opóźnienie ukrywania interfejsu podczas odtwarzania
     Hide Startup Splash: Ukryj ekran startowy
     Hide Header Sync Indicator: Ukryj wskaźnik synchronizacji w nagłówku aplikacji

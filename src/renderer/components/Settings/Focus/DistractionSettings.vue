@@ -369,7 +369,7 @@
           :placeholder="t('Settings.Distraction Free Settings.Video Descriptions')"
           :value="videoDescriptionMode"
           setting-key="videoDescriptionMode"
-          :select-names="visibilityModeNames"
+          :select-names="videoDescriptionModeNames"
           :select-values="VISIBILITY_MODES"
           :show-icon="false"
           @change="store.dispatch('updateVideoDescriptionMode', $event)"
@@ -605,6 +605,12 @@ const visibilityModeNames = computed(() => [
 
 /** @type {import('vue').ComputedRef<string>} */
 const videoDescriptionMode = computed(() => store.getters.getVideoDescriptionMode)
+// Separate keys so languages can match the grammatical gender of "descriptions"
+const videoDescriptionModeNames = computed(() => [
+  t('Settings.Distraction Free Settings.Video Description Modes.Hide'),
+  t('Settings.Distraction Free Settings.Video Description Modes.Collapsed'),
+  t('Settings.Distraction Free Settings.Video Description Modes.Expanded'),
+])
 
 /** @type {import('vue').ComputedRef<boolean>} */
 const hideComments = computed(() => store.getters.getHideComments)

@@ -1140,6 +1140,10 @@ Settings:
     Collapsed: Zbalené
     Expanded: Rozbalené
     Video Descriptions: Popisy videí
+    Video Description Modes:
+      Hide: Skryť
+      Collapsed: Zbalené
+      Expanded: Rozbalené
     Playing Interface Hide Delay: Oneskorenie skrytia rozhrania počas prehrávania
     Hide Startup Splash: Skryť úvodnú obrazovku
     Hide Header Sync Indicator: Skryť indikátor synchronizácie v hlavičke aplikácie

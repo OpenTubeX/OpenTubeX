@@ -1140,6 +1140,10 @@ Settings:
     Collapsed: 折叠
     Expanded: 展开
     Video Descriptions: 视频简介
+    Video Description Modes:
+      Hide: 隐藏
+      Collapsed: 折叠
+      Expanded: 展开
     Playing Interface Hide Delay: 播放时界面隐藏延迟
     Hide Startup Splash: 隐藏启动画面
     Hide Header Sync Indicator: 隐藏应用标题栏中的同步指示器

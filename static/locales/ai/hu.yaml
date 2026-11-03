@@ -1140,6 +1140,10 @@ Settings:
     Collapsed: Összecsukva
     Expanded: Kibontva
     Video Descriptions: Videóleírások
+    Video Description Modes:
+      Hide: Elrejtés
+      Collapsed: Összecsukva
+      Expanded: Kibontva
     Playing Interface Hide Delay: Felület elrejtésének késleltetése lejátszás közben
     Hide Startup Splash: Indítóképernyő elrejtése
     Hide Header Sync Indicator: Alkalmazásfejléc szinkronizálási jelzőjének elrejtése

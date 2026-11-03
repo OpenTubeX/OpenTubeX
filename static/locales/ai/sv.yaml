@@ -1145,6 +1145,10 @@ Settings:
     Collapsed: Komprimerade
     Expanded: Expanderade
     Video Descriptions: Videobeskrivningar
+    Video Description Modes:
+      Hide: Dölj
+      Collapsed: Komprimerade
+      Expanded: Expanderade
     Playing Interface Hide Delay: Fördröjning innan gränssnittet döljs under uppspelning
     Hide Startup Splash: Dölj startskärm
     Hide Header Sync Indicator: Dölj synkroniseringsindikatorn i apphuvudet

@@ -123,9 +123,9 @@ export const BASIC_QUICK_SETTING_DEFINITIONS = Object.freeze([
     control: 'select',
     values: ['hide', 'collapsed', 'expanded'],
     optionLabelKeys: [
-      'Settings.Distraction Free Settings.Hide',
-      'Settings.Distraction Free Settings.Collapsed',
-      'Settings.Distraction Free Settings.Expanded',
+      'Settings.Distraction Free Settings.Video Description Modes.Hide',
+      'Settings.Distraction Free Settings.Video Description Modes.Collapsed',
+      'Settings.Distraction Free Settings.Video Description Modes.Expanded',
     ],
     icon: ['fas', 'file-lines'],
   },
