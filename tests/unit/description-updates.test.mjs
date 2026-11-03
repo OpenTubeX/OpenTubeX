@@ -37,7 +37,8 @@ function descriptionComponent({ laidOut = false } = {}) {
     nextTick,
     watch(...args) { stops.push(watch(...args)) },
     useTemplateRef: name => ref(laidOut && name === 'descriptionContainer'
-      ? { $el: { clientHeight: 48, scrollHeight: 48 } }
+      // Text followed by a metadata block taller than the four-line threshold.
+      ? { $el: { clientHeight: 48, scrollHeight: 48, getBoundingClientRect: () => ({ top: 0, bottom: 48, height: 48 }), nextElementSibling: { getBoundingClientRect: () => ({ top: 48, bottom: 248, height: 200 }) } } }
       : null),
     getComputedStyle: () => ({ lineHeight: '16px' }),
     onMounted() {},

@@ -36,7 +36,7 @@ test.describe('content disclosures', { tag: '@scale' }, () => {
   // Each variant remounts and reloads the player, so one test per variant
   // keeps each within the timeout on a busy host.
   for (const [variant, text] of [['without regular text', ''], ['with short text', 'A short description.'], ['with long text', longText]]) {
-    test(`includes disclosures in collapsed descriptions ${variant}`, async ({ app, page }, testInfo) => {
+    test(`includes disclosures in descriptions ${variant}`, async ({ app, page }, testInfo) => {
       await mockWatchPage(app, page, { playable: true, contentDisclosures: [autoDubbed] })
       const video = await openMockedVideo(page)
       await video.evaluate(element => element.pause())
@@ -59,21 +59,21 @@ test.describe('content disclosures', { tag: '@scale' }, () => {
       // resize cannot move the description while the test clicks it.
       await (await waitForPlayback(page)).evaluate(element => element.pause())
 
-      await expect(card).toHaveClass(/short/)
       await expect(card.locator('.contentDisclosureTitle')).toHaveText('How this was made')
       if (text === '') {
-        await expect.poll(() => card.evaluate(element => {
-          const title = element.querySelector('.contentDisclosureTitle').getBoundingClientRect()
-          const viewport = element.querySelector('.descriptionScroll').getBoundingClientRect()
-          return title.top >= viewport.top && title.bottom <= viewport.bottom
-        })).toBe(true)
+        // A lone disclosure fits the card, so it shows in full without a footer.
+        await expect(card).not.toHaveClass(/short/)
+        await expect(card.locator(':scope > .descriptionStatus')).toHaveCount(0)
+        await expect(card.locator('.contentDisclosureBody')).toHaveText(autoDubbed.description)
         await page.mouse.move(0, 0)
         for (const theme of ['dark', 'light']) {
           await page.emulateMedia({ colorScheme: theme })
           await expect(page.locator('body')).toContainClass(theme)
-          await card.screenshot({ path: testInfo.outputPath(`collapsed-disclosure-${theme}.png`) })
+          await card.screenshot({ path: testInfo.outputPath(`disclosure-only-${theme}.png`) })
         }
+        return
       }
+      await expect(card).toHaveClass(/short/)
       await card.locator(':scope > .descriptionStatus').click()
       await expect(card).not.toHaveClass(/short/)
       await expect(card.locator('.contentDisclosureHeader')).toHaveText(autoDubbed.label)

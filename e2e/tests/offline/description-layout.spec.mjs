@@ -33,7 +33,8 @@ test.describe('description layout', () => {
       await view.evaluate(async component => {
         component.isLoading = true
         await component.$nextTick()
-        component.videoDescription = 'A short description.'
+        // Three lines stay below the four-line threshold until any metadata follows them.
+        component.videoDescription = 'A short description.\nSecond line.\nThird line.'
         component.videoDescriptionHtml = ''
         component.videoTags = []
         component.videoGames = []
@@ -43,7 +44,7 @@ test.describe('description layout', () => {
         component.isLoading = false
         await component.$nextTick()
       })
-      await expect(card.locator('.description')).toHaveText('A short description.')
+      await expect(card.locator('.description')).toHaveText('A short description.\nSecond line.\nThird line.')
       await expect(card).not.toHaveClass(/short/)
       await expect(card.locator('.descriptionStatus')).toHaveCount(0)
       await card.locator('.description').click({ position: { x: 10, y: 10 } })
@@ -97,8 +98,16 @@ test.describe('description layout', () => {
       await expect(card).toHaveClass(/short/)
 
       // Metadata must also render when it is the card's only content.
-      await view.evaluate(component => { component.videoDescription = '' })
-      await expect(card.locator(selector)).toHaveText(text)
+      // Enough of it stays collapsible without text above it.
+      await view.evaluate((component, metadata) => {
+        component.videoDescription = ''
+        for (const [key, value] of Object.entries(metadata)) {
+          component[key] = typeof value === 'string'
+            ? value.repeat(100)
+            : Array.from({ length: 40 }, (_, index) => typeof value[0] === 'string' ? `tag-${index}` : value[0])
+        }
+      }, metadata)
+      await expect(card.locator(selector).first()).toBeVisible()
       await expect(card).toHaveClass(/short/)
       await expect(card.locator(':scope > .descriptionStatus')).toBeVisible()
       // Empty space alongside metadata must expand the card just like description text.
