@@ -16,10 +16,17 @@ export async function loadNotificationImage(url) {
   if (!isThumbnailUrl(url)) return undefined
   try {
     const response = await net.fetch(url, { signal: AbortSignal.timeout(TIMEOUT_MS) })
-    if (!response.ok || Number(response.headers.get('content-length')) > MAX_IMAGE_BYTES) return undefined
-    const buffer = Buffer.from(await response.arrayBuffer())
-    if (buffer.length > MAX_IMAGE_BYTES) return undefined
-    const image = nativeImage.createFromBuffer(buffer)
+    if (!response.ok || !response.body || Number(response.headers.get('content-length')) > MAX_IMAGE_BYTES) return undefined
+    // Without a length, stop reading once the body exceeds the limit.
+    const chunks = []
+    let size = 0
+    for await (const chunk of response.body) {
+      size += chunk.length
+      // Leaving the loop cancels the rest of the body.
+      if (size > MAX_IMAGE_BYTES) return undefined
+      chunks.push(chunk)
+    }
+    const image = nativeImage.createFromBuffer(Buffer.concat(chunks))
     return image.isEmpty() ? undefined : image
   } catch {
     return undefined
