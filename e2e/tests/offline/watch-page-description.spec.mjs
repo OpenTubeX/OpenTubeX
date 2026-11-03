@@ -232,42 +232,41 @@ test.describe('watch page', () => {
     await watchComponent.dispose()
   })
 
-  test('preserves collapsed card height with short metadata', async ({ app, page }) => {
+  test('shows short metadata-only cards in full without a footer', async ({ app, page }) => {
     await mockPlayableWatchPage(app, page)
     await openMockedVideo(page)
     const watchComponent = await page.evaluateHandle(findWatchComponent)
-    await watchComponent.evaluate(async component => {
-      const view = component.proxy
-      view.isLoading = true
-      await view.$nextTick()
-      view.videoDescription = ''
-      view.videoDescriptionHtml = ''
-      view.videoTags = ['tag']
-      view.videoGames = []
-      view.license = null
-      view.isLoading = false
-      await view.$nextTick()
-    })
-
     const card = page.locator(`${activeTab} .videoDescription`)
+
     for (const scale of [1, 1.25]) {
       await page.evaluate(value => window.ftElectron.setZoomFactor(value), scale)
-      await expect(card).toHaveClass(/short/)
-      const layout = await card.evaluate(element => {
-        const scroll = element.querySelector('.descriptionScroll')
-        const contentEnd = element.querySelector('.descriptionContentEnd').getBoundingClientRect()
-        const scrollBottom = scroll.getBoundingClientRect().bottom
-        const footer = element.querySelector(':scope > .descriptionStatus').getBoundingClientRect()
-        return {
-          // Short content stays clear of the 16px bottom fade.
-          fadeReserve: scrollBottom - contentEnd.top,
-          footerGap: footer.top - scrollBottom,
-          footerBottomGap: element.getBoundingClientRect().bottom - footer.bottom,
-        }
-      })
-      expect(layout.fadeReserve).toBeCloseTo(16, 0)
-      expect(layout.footerGap).toBeCloseTo(12, 0)
-      expect(layout.footerBottomGap).toBeCloseTo(0, 0)
+      for (const metadata of [
+        { videoTags: ['tag'] },
+        { license: 'Creative Commons Attribution license (reuse allowed)' },
+        { contentDisclosures: [{ label: 'Auto-dubbed', description: 'Audio tracks for some languages were automatically generated.', attribution: '' }] },
+      ]) {
+        await watchComponent.evaluate(async (component, metadata) => {
+          const view = component.proxy
+          view.isLoading = true
+          await view.$nextTick()
+          Object.assign(view, { videoDescription: '', videoDescriptionHtml: '', videoTags: [], videoGames: [], license: null, contentDisclosures: [] }, metadata)
+          view.isLoading = false
+          await view.$nextTick()
+        }, metadata)
+
+        await expect(card).not.toHaveClass(/short/)
+        await expect(card.locator(':scope > .descriptionStatus')).toHaveCount(0)
+        // The empty text reserves no extra space, so the metadata sits within the card's normal padding.
+        await expect.poll(() => card.evaluate(element => {
+          const bounds = element.getBoundingClientRect()
+          const metadata = element.querySelector('.descriptionContentEnd').previousElementSibling.getBoundingClientRect()
+          const style = getComputedStyle(element)
+          return Math.max(
+            Math.abs(metadata.top - bounds.top - Number.parseFloat(style.paddingBlockStart)),
+            Math.abs(bounds.bottom - metadata.bottom - Number.parseFloat(style.paddingBlockEnd)),
+          )
+        })).toBeLessThanOrEqual(1)
+      }
     }
     await page.evaluate(() => window.ftElectron.setZoomFactor(1))
     await watchComponent.dispose()
@@ -361,7 +360,8 @@ test.describe('watch page', () => {
     await mockPlayableWatchPage(app, page)
     await openMockedVideo(page)
     const watchComponent = await page.evaluateHandle(findWatchComponent)
-    await watchComponent.evaluate(async component => {
+    const license = 'Creative Commons Attribution license (reuse allowed). '.repeat(20).trim()
+    await watchComponent.evaluate(async (component, license) => {
       const view = component.proxy
       view.isLoading = true
       await view.$nextTick()
@@ -369,18 +369,18 @@ test.describe('watch page', () => {
       view.videoDescriptionHtml = ''
       view.videoTags = []
       view.videoGames = []
-      view.license = 'Creative Commons Attribution license (reuse allowed)'
+      view.license = license
       view.isLoading = false
       await view.$nextTick()
-    })
+    }, license)
 
     const card = page.locator(`${activeTab} .videoDescription`)
     await expect(card).toHaveClass(/short/)
     await card.locator(':scope > .descriptionStatus').click()
-    await expect(card.locator('.license')).toHaveText('Creative Commons Attribution license (reuse allowed)')
+    await expect(card.locator('.license')).toHaveText(license)
     await card.locator(':scope > .descriptionStatus').click()
     await expect(card).toHaveClass(/short/)
-    await expect(card.locator('.license')).toHaveText('Creative Commons Attribution license (reuse allowed)')
+    await expect(card.locator('.license')).toHaveText(license)
     await watchComponent.dispose()
   })
 
