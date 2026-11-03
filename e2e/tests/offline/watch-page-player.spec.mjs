@@ -1210,7 +1210,8 @@ test('loops a chapter from the chapters panel with A-B repeat', async ({ app, pa
   await expect.poll(() => loopOutro.evaluate(button => {
     const row = button.closest('.chapter')
     const color = getComputedStyle(button).color
-    return row.classList.contains('current') && color === getComputedStyle(row).color && color !== getComputedStyle(row).backgroundColor
+    return row.classList.contains('current') && color === getComputedStyle(row).color &&
+      color !== getComputedStyle(row).backgroundColor && getComputedStyle(button).boxShadow.includes(color)
   })).toBe(true)
   await page.evaluate(() => window.$store.dispatch('updateSecColor', 'Blue'))
 

@@ -85,9 +85,10 @@
 }
 
 /* The current chapter is filled with the primary color, which the accent can
-   match, so an active loop there follows the row's text on a tint instead. */
+   match, so an active loop there follows the row's text and gets a ring in
+   that color, which contrasts with the fill as much as the text does. */
 .watchVideoChaptersPanel :deep(.chapter.current .loopChapter.active) {
-  background-color: color-mix(in srgb, currentcolor 18%, transparent);
+  box-shadow: inset 0 0 0 2px currentcolor;
   color: inherit;
 }
 
