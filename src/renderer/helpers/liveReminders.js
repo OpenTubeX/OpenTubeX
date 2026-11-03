@@ -124,7 +124,8 @@ export function applyCapacitorNotificationMode(mode) {
 /** @param {import('../../main/notificationHistory').NotificationMode} mode */
 async function applyPausedState(mode) {
   const paused = mode === 'off'
-  if (paused !== isPaused()) {
+  // Off always cancels, since a resume that failed partway can leave alarms scheduled.
+  if (paused || isPaused()) {
     const stored = readStoredReminders()
     // Reminders that expired while paused never fired, so they leave without a history entry.
     const pending = stored.filter(record => record.startTimestamp > Date.now())
@@ -195,9 +196,17 @@ async function showReminderInApp({ id, title, body, extra }) {
   foregroundTimers.delete(id)
   if (!showForegroundReminder || notificationMode !== 'both' || !isAppVisible() || handledAlarms.has(id)) return
   handledAlarms.add(id)
+  let entry
+  try {
+    entry = await takeFiredReminderEntry(extra.videoId, Date.now(), { title, body })
+  } catch (error) {
+    // Without an entry, the system notification is the only way to show the reminder.
+    handledAlarms.delete(id)
+    console.error('Failed to record a reminder shown in the app', error)
+    return
+  }
   await LocalNotifications.cancel({ notifications: [{ id }] })
     .catch(error => console.error('Failed to cancel a reminder shown in the app', error))
-  const entry = await takeFiredReminderEntry(extra.videoId, Date.now(), { title, body })
   emitUpdated(extra.videoId, false)
   if (entry) showForegroundReminder(entry)
 }
@@ -213,8 +222,10 @@ async function takeFiredReminderEntry(videoId, due, notification = {}) {
   const stored = readStoredReminders()
   const record = stored.find(item => item.videoId === videoId)
   if (record) {
+    // Recorded first, so a failed history write keeps the reminder.
+    const [entry] = recordFiredReminders([{ ...record, startTimestamp: Math.min(record.startTimestamp, due) }])
     writeCapacitorReminders(stored.filter(item => item !== record))
-    return recordFiredReminders([{ ...record, startTimestamp: Math.min(record.startTimestamp, due) }])[0]
+    return entry
   }
   if (notificationMode !== 'both') return undefined
   const target = getLiveReminderTarget(videoId)
@@ -344,13 +355,34 @@ export async function initializeCapacitorLiveReminderActions(openVideo, showInAp
         return
       }
       // The app is in use, so it shows the reminder instead of the system.
-      const shown = handledAlarms.has(id)
-      handledAlarms.add(id)
-      await LocalNotifications.removeDeliveredNotifications({ notifications: [{ id, title: '', body: '' }] })
+      const removeDelivered = () => LocalNotifications.removeDeliveredNotifications({ notifications: [{ id, title: '', body: '' }] })
         .catch(error => console.error('Failed to remove a delivered reminder', error))
-      if (shown) return
-      const entry = await takeFiredReminderEntry(videoId, due)
-      readCapacitorReminders()
+      if (handledAlarms.has(id)) {
+        await removeDelivered()
+        return
+      }
+      handledAlarms.add(id)
+      let entry
+      try {
+        entry = await takeFiredReminderEntry(videoId, due)
+      } catch (error) {
+        // Keep the system notification when the app cannot record the reminder.
+        handledAlarms.delete(id)
+        console.error('Failed to record a delivered reminder', error)
+        return
+      }
+      // Without an entry to show in the app, the system notification stays.
+      if (notificationMode === 'both' && !entry) {
+        handledAlarms.delete(id)
+        emitUpdated(videoId, false)
+        return
+      }
+      await removeDelivered()
+      try {
+        readCapacitorReminders()
+      } catch (error) {
+        console.error('Failed to collect fired reminders', error)
+      }
       emitUpdated(videoId, false)
       if (entry && notificationMode === 'both') showInApp(entry)
     }

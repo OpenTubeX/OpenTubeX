@@ -5,19 +5,21 @@ import vm from 'node:vm'
 
 const START = Date.UTC(2026, 0, 1)
 
-async function loadCapacitorReminder(notifications) {
+async function loadCapacitorReminder(notifications, context = {}) {
   const source = await readFile(new URL('../../src/renderer/helpers/liveReminders.js', import.meta.url), 'utf8')
   const storage = new Map()
   const clock = { now: START }
-  const { liveReminder, applyCapacitorNotificationMode } = vm.runInNewContext(`${source.replace(/^import .*$/gm, '').replaceAll('export ', '')}
-    ({ liveReminder, applyCapacitorNotificationMode })`, {
+  const { liveReminder, applyCapacitorNotificationMode, initializeCapacitorLiveReminderActions } = vm.runInNewContext(`${source.replace(/^import .*$/gm, '').replaceAll('export ', '')}
+    ({ liveReminder, applyCapacitorNotificationMode, initializeCapacitorLiveReminderActions })`, {
     process: { env: { IS_CAPACITOR: true } },
     console: { error: () => {} },
     LocalNotifications: notifications,
     localStorage: { getItem: key => storage.get(key) ?? null, setItem: (key, value) => storage.set(key, value) },
     Date: class extends Date { static now() { return clock.now } },
+    getLiveReminderTarget: videoId => ({ kind: 'live-reminder', path: `/watch/${videoId}` }),
+    ...context,
   })
-  return { liveReminder, applyCapacitorNotificationMode, clock }
+  return { liveReminder, applyCapacitorNotificationMode, initializeCapacitorLiveReminderActions, storage, clock }
 }
 
 function reminder(startTimestamp) {
@@ -161,4 +163,66 @@ test('turning notifications off again retries a cancellation that failed', async
   failCancel = false
   await applyCapacitorNotificationMode('off')
   assert.equal(scheduled.size, 0)
+})
+
+test('turning notifications off cancels alarms that a failed resume left scheduled', async () => {
+  const scheduled = new Map()
+  let failSchedule = false
+  const { liveReminder, applyCapacitorNotificationMode } = await loadCapacitorReminder({
+    checkPermissions: async () => ({ display: 'granted' }),
+    cancel: async ({ notifications }) => { for (const { id } of notifications) scheduled.delete(id) },
+    getPending: async () => ({ notifications: [...scheduled.keys()].map(id => ({ id })) }),
+    schedule: async ({ notifications }) => {
+      if (failSchedule && scheduled.size > 0) throw new Error('Scheduling failed')
+      for (const notification of notifications) scheduled.set(notification.id, notification)
+    },
+  })
+  for (const videoId of ['first', 'second']) {
+    assert.equal(await liveReminder.schedule({ ...reminder(START + 60_000), videoId }), true)
+  }
+  await applyCapacitorNotificationMode('off')
+  failSchedule = true
+  // The first reminder is scheduled again before the second fails.
+  await applyCapacitorNotificationMode('both')
+  assert.equal(scheduled.size, 1)
+  await applyCapacitorNotificationMode('off')
+  assert.equal(scheduled.size, 0)
+})
+
+/** Sets up foreground reminders whose history writes fail. */
+async function loadForegroundReminders(alarm) {
+  const calls = []
+  const listeners = {}
+  const timers = []
+  const loaded = await loadCapacitorReminder({
+    checkPermissions: async () => ({ display: 'granted' }),
+    addListener: async (name, listener) => { listeners[name] = listener; return { remove() {} } },
+    getAll: async () => ({ notifications: alarm ? [alarm] : [] }),
+    cancel: async ({ notifications }) => calls.push(['cancel', notifications[0].id]),
+    removeDeliveredNotifications: async ({ notifications }) => calls.push(['removeDelivered', notifications[0].id]),
+  }, {
+    document: { visibilityState: 'visible', addEventListener() {}, removeEventListener() {} },
+    setTimeout: callback => { timers.push(callback); return timers.length },
+    clearTimeout() {},
+    capacitorNotificationHistory: { add() { throw new Error('Storage is full') }, list: async () => [] },
+  })
+  loaded.storage.set('opentubex-capacitor-live-reminders', JSON.stringify([
+    { videoId: 'premiere00a', startTimestamp: START, notificationId: 7, notificationTitle: 'Starting', notificationBody: 'Premiere' }
+  ]))
+  const shown = []
+  await loaded.initializeCapacitorLiveReminderActions(() => {}, entry => shown.push(entry))
+  return { ...loaded, calls, listeners, timers, shown }
+}
+
+test('a reminder the app cannot record keeps its system notification', async () => {
+  const alarm = { id: 7, title: 'Starting', body: 'Premiere', schedule: { at: new Date(START + 1000).toISOString() }, extra: { videoId: 'premiere00a' } }
+  const { calls, timers, listeners } = await loadForegroundReminders(alarm)
+  await new Promise(resolve => setImmediate(resolve))
+  assert.equal(timers.length, 1)
+  await timers[0]()
+  assert.deepEqual(calls, [])
+
+  // The system delivers it later, and the app leaves that notification alone too.
+  await listeners.localNotificationReceived({ id: 7, extra: { videoId: 'premiere00a' } })
+  assert.deepEqual(calls, [])
 })
