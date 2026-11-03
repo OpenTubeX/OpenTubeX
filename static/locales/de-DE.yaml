@@ -615,6 +615,7 @@ Settings:
       Tab Close Focus: Nach dem Schließen des aktiven Tabs
   Theme Settings:
     Material Accent Color: "Material-Akzentfarbe"
+    Signal Accent Color: "Signal-Akzentfarbe"
     Material Wallpaper Colors: "Farben des Hintergrundbilds"
     Material System Accent Color: "Systemakzentfarbe"
     Tab Loading Indicator:
@@ -645,8 +646,8 @@ Settings:
       One Dark: One Dark
       Carbonfox: Carbonfox
       Catppuccin Macchiato: Catppuccin Macchiato
-      Ocean Light: "Ocean Hell"
-      Ocean Dark: "Ocean Dunkel"
+      Signal Light: "Signal Hell"
+      Signal Dark: "Signal Dunkel"
       Base Theme: Grundlegendes Farbschema
       Black: Schwarz
       Dark: Dunkel

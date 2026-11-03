@@ -513,6 +513,7 @@ Settings:
     Only Show Important Notifications: Visa endast viktiga aviseringar
     Visible Search Suggestions: "Synliga sökförslag"
     Material Accent Color: "Material-accentfärg"
+    Signal Accent Color: "Signal-accentfärg"
     Material Wallpaper Colors: "Bakgrundsbildens färger"
     Material System Accent Color: "Systemets accentfärg"
     Tab Loading Indicator:
@@ -608,8 +609,8 @@ Settings:
       One Dark: One Dark
       Carbonfox: Carbonfox
       Catppuccin Macchiato: Catppuccin Macchiato
-      Ocean Light: "Ocean Ljust"
-      Ocean Dark: "Ocean Mörkt"
+      Signal Light: "Signal Ljust"
+      Signal Dark: "Signal Mörkt"
       Custom: Anpassat
     Light Theme: Ljust tema
     Dark Theme: Mörkt tema

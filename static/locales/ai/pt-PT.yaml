@@ -515,6 +515,7 @@ Settings:
     Only Show Important Notifications: Mostrar apenas notificações importantes
     Visible Search Suggestions: "Sugestões de pesquisa visíveis"
     Material Accent Color: "Cor de destaque Material"
+    Signal Accent Color: "Cor de destaque Signal"
     Material Wallpaper Colors: "Cores da imagem de fundo"
     Material System Accent Color: "Cor de destaque do sistema"
     Tab Loading Indicator:
@@ -610,8 +611,8 @@ Settings:
       One Dark: One Dark
       Carbonfox: Carbonfox
       Catppuccin Macchiato: Catppuccin Macchiato
-      Ocean Light: "Ocean Claro"
-      Ocean Dark: "Ocean Escuro"
+      Signal Light: "Signal Claro"
+      Signal Dark: "Signal Escuro"
       Custom: Personalizado
     Light Theme: Tema claro
     Dark Theme: Tema escuro

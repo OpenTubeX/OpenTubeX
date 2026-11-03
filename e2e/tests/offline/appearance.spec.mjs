@@ -11,6 +11,7 @@ import {
   sel,
   waitForAppReady,
   readDatastore,
+  latestSettings,
 } from '../../helpers/app.mjs'
 import { sampleColors } from '../../helpers/colors.mjs'
 
@@ -1633,6 +1634,27 @@ async function settingsBackgroundVariation(app) {
 
 // The first captures after a zoom or scroll change can show an unsettled frame
 // under load, so wait for two matching readings.
+/** Resolve a CSS color in the body's context to 8-bit sRGB channels. */
+function resolvedColor(page, value) {
+  return page.locator('body').evaluate((body, value) => {
+    const probe = document.createElement('span')
+    probe.style.color = value
+    body.append(probe)
+    const color = getComputedStyle(probe).color
+    probe.remove()
+    const channels = color.match(/-?[\d.]+(?:e[-+]?\d+)?/gi).slice(0, 3).map(Number)
+    return color.startsWith('color(srgb ') ? channels.map(channel => Math.round(channel * 255)) : channels
+  }, value)
+}
+
+function contrastRatio(first, second) {
+  const luminance = rgb => rgb.map(value => value / 255)
+    .map(value => value <= 0.04045 ? value / 12.92 : ((value + 0.055) / 1.055) ** 2.4)
+    .reduce((total, value, index) => total + value * [0.2126, 0.7152, 0.0722][index], 0)
+  const values = [luminance(first), luminance(second)].sort((a, b) => b - a)
+  return (values[0] + 0.05) / (values[1] + 0.05)
+}
+
 async function stableSettingsBackgroundVariation(app) {
   let previous
   await expect.poll(async () => {
@@ -1644,27 +1666,23 @@ async function stableSettingsBackgroundVariation(app) {
   return previous
 }
 
-test.describe('Ocean themes', () => {
-  test('selects, persists, and follows the system with the Ocean palettes', async ({ app, page, attachScreenshot }) => {
+test.describe('Signal themes', () => {
+  test('selects, persists, and follows the system with the Signal palettes', async ({ app, page, attachScreenshot }) => {
+    // Launches the app twice and samples screenshots at two scales, which takes longer than the default under load.
+    test.setTimeout(120_000)
     await goToSettingsSection(page, 'theme')
     for (const [mode, background, accent] of [
-      ['Light', 'rgb(232, 242, 240)', 'rgb(17, 104, 95)'],
-      ['Dark', 'rgb(11, 20, 22)', 'rgb(46, 196, 182)'],
+      ['Light', 'rgb(246, 245, 244)', [186, 12, 6]],
+      ['Dark', 'rgb(17, 17, 17)', [255, 88, 70]],
     ]) {
       await page.getByRole('combobox', { name: /^Base theme/i }).click()
-      await page.getByRole('option', { name: `Ocean ${mode}`, exact: true }).click()
+      await page.getByRole('option', { name: `Signal ${mode}`, exact: true }).click()
       await expect(page.locator('body')).toHaveCSS('background-color', background)
-      await expect(page.getByRole('combobox', { name: /Main colou?r theme/i })).toBeDisabled()
-      await expect(page.getByRole('combobox', { name: /Secondary colou?r theme/i })).toBeDisabled()
+      // The accent picker replaces the main and secondary colors.
+      await expect(page.getByRole('combobox', { name: /Main colou?r theme/i })).toHaveCount(0)
+      await expect(page.getByRole('combobox', { name: /Secondary colou?r theme/i })).toHaveCount(0)
       // Read resolved colors so accidental inheritance from Red/Blue is detected.
-      expect(await page.locator('body').evaluate(body => {
-        const probe = document.createElement('span')
-        probe.style.color = 'var(--accent-color)'
-        body.append(probe)
-        const color = getComputedStyle(probe).color
-        probe.remove()
-        return color
-      })).toBe(accent)
+      expect(await resolvedColor(page, 'var(--accent-color)')).toEqual(accent)
       for (const selector of ['.app', '.ft-card', '.settingsWindow']) {
         await expect(page.locator(selector).first()).not.toHaveCSS('background-image', 'none')
       }
@@ -1682,7 +1700,7 @@ test.describe('Ocean themes', () => {
       }
       await page.evaluate(() => window.$store
         .dispatch('updateUiScale', 100))
-      await attachScreenshot(`Ocean ${mode} settings`)
+      await attachScreenshot(`Signal ${mode} settings`)
     }
 
     ;({ page } = await app.relaunch())
@@ -1693,8 +1711,8 @@ test.describe('Ocean themes', () => {
     await page.getByRole('option', { name: /^System default$/i }).click()
     for (const [mode, other] of [['Light', 'Dark'], ['Dark', 'Light']]) {
       await page.getByRole('combobox', { name: `${mode} theme`, exact: true }).click()
-      await expect(page.getByRole('option', { name: `Ocean ${other}`, exact: true })).toHaveCount(0)
-      await page.getByRole('option', { name: `Ocean ${mode}`, exact: true }).click()
+      await expect(page.getByRole('option', { name: `Signal ${other}`, exact: true })).toHaveCount(0)
+      await page.getByRole('option', { name: `Signal ${mode}`, exact: true }).click()
       await page.emulateMedia({ colorScheme: mode.toLowerCase() })
       await expect(page.locator('body')).toHaveClass(new RegExp(`openTubeX${mode}`))
     }
@@ -1707,5 +1725,66 @@ test.describe('Ocean themes', () => {
     await expect(page.locator('.app')).toHaveCSS('background-image', 'none')
     await expect(page.locator('.settingsWindow')).toHaveCSS('background-image', 'none')
     expect(await settingsBackgroundVariation(app)).toBe(0)
+  })
+
+  test('follows the chosen and system Signal accent colors', async ({ app, page, attachScreenshot }) => {
+    const section = await goToSettingsSection(page, 'theme')
+    await page.evaluate(() => window.$store.dispatch('updateBaseTheme', 'openTubeXDark'))
+    const picker = section.getByRole('group', { name: 'Signal accent color' })
+    await expect(picker).toBeVisible()
+    await expect(section.getByRole('group', { name: 'Material accent color' })).toHaveCount(0)
+    await expect(picker.getByRole('button', { name: 'Red', exact: true })).toHaveAttribute('aria-pressed', 'true')
+    await expect(page.locator('body')).toHaveCSS('--signal-accent', '#f34132')
+
+    await picker.getByRole('button', { name: 'Blue', exact: true }).click()
+    await expect(page.locator('body')).toHaveCSS('--signal-accent', '#3b82f6')
+    const [r, g, b] = await resolvedColor(page, 'var(--accent-color)')
+    expect(b, `blue accent: ${[r, g, b]}`).toBeGreaterThan(Math.max(r, g) + 50)
+    await expect.poll(() => latestSettings(readDatastore(app.userDataDir, 'settings')).signalAccentColor).toBe('#3b82f6')
+    await attachScreenshot('Signal Dark with a blue accent')
+
+    // Desktop accents appear as a system option and update live.
+    await app.electronApp.evaluate(({ systemPreferences }) => {
+      systemPreferences.getAccentColor = () => '22C55EFF'
+      systemPreferences.emit('accent-color-changed', {}, '22C55EFF')
+    })
+    await picker.getByRole('button', { name: 'System accent color' }).click()
+    await expect(page.locator('body')).toHaveCSS('--signal-accent', '#22c55e')
+    await app.electronApp.evaluate(({ systemPreferences }) => {
+      systemPreferences.getAccentColor = () => '8B5CF6FF'
+      systemPreferences.emit('accent-color-changed', {}, '8B5CF6FF')
+    })
+    await expect(page.locator('body')).toHaveCSS('--signal-accent', '#8b5cf6')
+    await expect.poll(() => latestSettings(readDatastore(app.userDataDir, 'settings')).signalAccentColor).toBe('system')
+
+    // Clamped lightness keeps text-sized accents readable for any choice.
+    for (const [theme, color] of [['openTubeXLight', '#ffff00'], ['openTubeXLight', '#00ffff'], ['openTubeXDark', '#000080'], ['openTubeXDark', '#000000']]) {
+      await page.evaluate(async ([theme, color]) => {
+        await window.$store.dispatch('updateBaseTheme', theme)
+        await window.$store.dispatch('updateSignalAccentColor', color)
+      }, [theme, color])
+      await expect(page.locator('body')).toHaveCSS('--signal-accent', color)
+      const [accent, background, fill] = await Promise.all(['var(--accent-color)', 'var(--bg-color)', 'var(--primary-color)']
+        .map(value => resolvedColor(page, value)))
+      expect(contrastRatio(accent, background), `${theme} ${color} accent text`).toBeGreaterThanOrEqual(4.5)
+      expect(contrastRatio(fill, [255, 255, 255]), `${theme} ${color} filled control text`).toBeGreaterThanOrEqual(4.5)
+    }
+
+    await page.evaluate(() => window.$store.dispatch('updateBaseTheme', 'dark'))
+    await expect(picker).toHaveCount(0)
+    await expect(page.locator('body')).toHaveCSS('--signal-accent', '')
+
+    // Custom themes copy the derived colors, whose near-zero channels can use exponents.
+    await page.evaluate(async () => {
+      await window.$store.dispatch('updateBaseTheme', 'openTubeXDark')
+      await window.$store.dispatch('updateSignalAccentColor', '#ffff00')
+    })
+    await section.getByRole('button', { name: 'Create custom theme' }).click()
+    await expect(page.getByRole('combobox', { name: 'Based on' })).toHaveText('Signal Dark')
+    const editorColor = label => page.locator('.customThemeEditor .ftColorPicker')
+      .filter({ has: page.getByText(label, { exact: true }) }).locator('code')
+    await expect(editorColor('Page background')).toHaveText('#111111')
+    await expect(editorColor('Logo icon')).toHaveText('#ffff00')
+    await expect(editorColor('Selected text background')).toHaveText(/^#(?!000000)[\da-f]{6}$/)
   })
 })

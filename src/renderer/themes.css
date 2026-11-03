@@ -393,7 +393,7 @@ it can be safely elided. This looks quite pleasant on this theme. */
   --logo-text: url('../../_icons/textBlackSmall.svg');
 }
 
-/* Custom, Ocean, and dynamic themes tint the header logo instead of displaying the fixed-color
+/* Custom, Signal, and dynamic themes tint the header logo instead of displaying the fixed-color
    theme assets. Keeping the assets as masks preserves their sharp edges. */
 :is(.custom, .openTubeXLight, .openTubeXDark, .dynamicColors) .topNav .logoIcon,
 :is(.custom, .openTubeXLight, .openTubeXDark, .dynamicColors) .topNav .logoText {
@@ -2573,26 +2573,31 @@ a:visited {
 }
 
 
-/* Homepage palette from opentubex.github.io/src/styles/signal.css.
+/* Signal palette from opentubex.github.io/src/styles/signal.css.
    Keep these after the selectable color palettes: the brand themes supply
-   their own primary and secondary colors. */
+   their own primary and secondary colors. Every accent shade derives from
+   --signal-accent, which the renderer sets from the Signal accent setting.
+   Lightness is clamped so any accent keeps its contrast, and each derived
+   color resolves to in-gamut sRGB for code that reads computed colors. */
 .openTubeXLight,
 .openTubeXDark {
-  /* Keep a pale teal tint while leaving tonal headroom for SponsorBlock markers. */
-  --seekbar-played-color: #c4d8d4;
-  --toggle-track-color: #758b87;
-  --toggle-checked-track-color: #4e9185;
-  --toggle-thumb-color: #e6f4f1;
+  --signal-accent-color: var(--signal-accent, #f34132);
+
+  /* Filled controls carry white text in both modes. */
+  --signal-accent-fill: rgb(from oklch(from var(--signal-accent-color) min(l, 0.5) min(c, 0.2) h) clamp(0, r, 255) clamp(0, g, 255) clamp(0, b, 255));
+  --seekbar-played-color: color-mix(in srgb, var(--signal-accent-color) 20%, #e4e1df);
   --bg-glows:
-    radial-gradient(ellipse 80% 50% at 15% 10%, var(--bg-glow-teal), transparent 55%),
+    radial-gradient(ellipse 80% 50% at 15% 10%, var(--bg-glow-accent), transparent 55%),
     radial-gradient(ellipse 60% 45% at 90% 20%, var(--bg-glow-ink), transparent 50%),
-    radial-gradient(ellipse 70% 40% at 50% 100%, var(--bg-glow-teal-soft), transparent 55%);
+    radial-gradient(ellipse 70% 40% at 50% 100%, var(--bg-glow-accent-soft), transparent 55%);
   --bg-image:
     var(--bg-glows),
     linear-gradient(165deg, var(--bg-gradient-start), var(--bg-color) 40%, var(--bg-gradient-end));
   --card-bg-image:
     var(--bg-glows),
     linear-gradient(165deg, var(--card-bg-color), var(--card-bg-color) 40%, var(--bg-gradient-end));
+  --bg-glow-accent: rgb(from var(--signal-accent-color) r g b / 10%);
+  --bg-glow-accent-soft: rgb(from var(--signal-accent-color) r g b / 7%);
 
   /* Settings sections share the window's field instead of repeating it. */
   --settings-section-bg-color: transparent;
@@ -2602,17 +2607,28 @@ a:visited {
   --toggle-checked-thumb-color: var(--toggle-thumb-color);
   --slider-track-color: var(--tertiary-text-color);
   --input-border-color: var(--tertiary-text-color);
-  --primary-color: #147a70;
-  --text-with-main-color: #fbfefd;
+  --primary-color: var(--signal-accent-fill);
+  --primary-color-hover: rgb(from oklch(from var(--signal-accent-fill) calc(l - 0.06) c h) clamp(0, r, 255) clamp(0, g, 255) clamp(0, b, 255));
+  --primary-color-active: rgb(from oklch(from var(--signal-accent-fill) calc(l - 0.1) c h) clamp(0, r, 255) clamp(0, g, 255) clamp(0, b, 255));
+  --text-with-main-color: #fff;
+  --accent-color-opacity1: rgb(from var(--accent-color) r g b / 4%);
+  --accent-color-opacity2: rgb(from var(--accent-color) r g b / 12%);
+  --accent-color-opacity3: rgb(from var(--accent-color) r g b / 16%);
+  --accent-color-opacity4: rgb(from var(--accent-color) r g b / 24%);
+  --accent-color-visited: var(--secondary-text-color);
+  --selection-background-color: var(--signal-accent-fill);
+  --selection-text-color: #fff;
+  --favorite-icon-color: var(--accent-color);
   --title-color: var(--primary-text-color);
   --divider-color: var(--border-color);
   --subtle-surface-color: var(--secondary-card-bg-color);
   --dropdown-item-hover-color: var(--side-nav-hover-color);
   --dropdown-item-hover-text-color: var(--primary-text-color);
   --settings-search-bar-color: var(--search-bar-color);
-  --logo-primary-color: var(--primary-text-color);
+  --scrollbar-color-hover: var(--accent-color);
+  --logo-primary-color: var(--accent-color);
   --logo-secondary-color: var(--primary-text-color);
-  --logo-tertiary-color: var(--accent-color);
+  --logo-tertiary-color: var(--accent-color-hover);
   --logo-pressed-color: var(--accent-color-active);
   --logo-icon: url('../../_icons/iconWhiteSmall.svg');
   --logo-text: url('../../_icons/textWhiteSmall.svg');
@@ -2624,77 +2640,63 @@ a:visited {
 }
 
 .openTubeXLight {
-  --toggle-track-color: #b7c9c5;
-  --toggle-checked-track-color: #8cbaae;
-  --toggle-thumb-color: #17665f;
-  --bg-glow-teal: rgb(26 155 142 / 14%);
-  --bg-glow-ink: rgb(11 61 62 / 8%);
-  --bg-glow-teal-soft: rgb(26 155 142 / 10%);
-  --bg-gradient-start: #eef6f4;
-  --bg-gradient-end: #dceee9;
-  --primary-text-color: #0b3d3e;
-  --secondary-text-color: #3d5a5b;
-  --tertiary-text-color: #476263;
-  --bg-color: #e8f2f0;
-  --card-bg-color: #fbfefd;
-  --secondary-card-bg-color: #f4f9f8;
-  --side-nav-color: #f4f9f8;
-  --side-nav-hover-color: #d5e8e4;
-  --side-nav-active-color: #bfdcd6;
-  --search-bar-color: #e8f2f0;
-  --border-color: rgb(11 61 62 / 12%);
-  --primary-shadow-color: rgb(11 61 62 / 12%);
-  --primary-color-hover: #0b3d3e;
-  --primary-color-active: #1a4f50;
-  --accent-color-rgb: 17 104 95;
-  --accent-color-hover: #0b3d3e;
-  --accent-color-active: #1a4f50;
-  --accent-color-light: #d5e8e4;
-  --accent-color-visited: #3d5a5b;
-  --text-with-accent-color: #fbfefd;
-  --selection-background-color: #147a70;
-  --selection-text-color: #fbfefd;
-  --scrollbar-color: #49968a;
-  --scrollbar-color-hover: #147a70;
-  --scrollbar-color-active: #0b3d3e;
-  --favorite-icon-color: #147a70;
+  --toggle-track-color: #b5b0ad;
+  --toggle-checked-track-color: rgb(from oklch(from var(--signal-accent-color) 78% min(c, 0.1) h) clamp(0, r, 255) clamp(0, g, 255) clamp(0, b, 255));
+  --toggle-thumb-color: #3a3a3a;
+  --bg-glow-ink: rgb(26 26 26 / 5%);
+  --bg-gradient-start: color-mix(in srgb, var(--signal-accent-color) 2%, #faf9f8);
+  --bg-gradient-end: color-mix(in srgb, var(--signal-accent-color) 3%, #edebea);
+  --primary-text-color: #1a1a1a;
+  --secondary-text-color: #4f4f4f;
+  --tertiary-text-color: #5e5e5e;
+  --bg-color: #f6f5f4;
+  --card-bg-color: #fff;
+  --secondary-card-bg-color: #faf9f8;
+  --side-nav-color: #faf9f8;
+  --side-nav-hover-color: #ebe8e6;
+  --side-nav-active-color: color-mix(in srgb, var(--signal-accent-fill) 14%, #ebe8e6);
+  --search-bar-color: #ebe8e6;
+  --inactive-tab-color: #ebe8e6;
+  --border-color: rgb(26 26 26 / 12%);
+  --primary-shadow-color: rgb(26 26 26 / 12%);
+  --accent-color: var(--signal-accent-fill);
+  --accent-color-hover: var(--primary-color-hover);
+  --accent-color-active: var(--primary-color-active);
+  --accent-color-light: color-mix(in srgb, var(--signal-accent-fill) 12%, #fff);
+  --text-with-accent-color: #fff;
+  --scrollbar-color: color-mix(in srgb, var(--signal-accent-fill) 42%, #737373);
+  --scrollbar-color-active: #1a1a1a;
 }
 
 .openTubeXDark {
-  --toggle-track-color: #758b87;
-  --toggle-checked-track-color: #4e9185;
-  --toggle-thumb-color: #e6f4f1;
-  --bg-glow-teal: rgb(46 196 182 / 12%);
-  --bg-glow-ink: rgb(46 196 182 / 6%);
-  --bg-glow-teal-soft: rgb(26 155 142 / 10%);
-  --bg-gradient-start: #0e1a1c;
-  --bg-gradient-end: #0a1618;
-  --primary-text-color: #e6f4f1;
-  --secondary-text-color: #8aa3a4;
-  --tertiary-text-color: #8aa3a4;
-  --bg-color: #0b1416;
-  --card-bg-color: #142224;
-  --secondary-card-bg-color: #122022;
-  --side-nav-color: #101a1c;
-  --side-nav-hover-color: #203638;
-  --side-nav-active-color: #2a4547;
-  --search-bar-color: #122022;
-  --border-color: rgb(232 242 240 / 12%);
+  --toggle-track-color: #6b6b6b;
+  --toggle-checked-track-color: rgb(from oklch(from var(--signal-accent-color) 60% min(c, 0.16) h) clamp(0, r, 255) clamp(0, g, 255) clamp(0, b, 255));
+  --toggle-thumb-color: #f2f2f2;
+  --bg-glow-ink: rgb(from var(--signal-accent-color) r g b / 5%);
+  --bg-gradient-start: color-mix(in srgb, var(--signal-accent-color) 4%, #151515);
+  --bg-gradient-end: #0c0c0c;
+  --primary-text-color: #f2f2f2;
+  --secondary-text-color: #a3a3a3;
+  --tertiary-text-color: #a3a3a3;
+  --bg-color: #111;
+  --card-bg-color: #1a1a1a;
+  --secondary-card-bg-color: #171717;
+  --side-nav-color: #141414;
+  --side-nav-hover-color: #262626;
+  --side-nav-active-color: color-mix(in srgb, var(--accent-color) 18%, #1c1c1c);
+  --search-bar-color: #1e1e1e;
+  --inactive-tab-color: #262626;
+  --border-color: rgb(255 255 255 / 12%);
   --primary-shadow-color: rgb(0 0 0 / 24%);
-  --primary-color-hover: #0f625c;
-  --primary-color-active: #0b3d3e;
-  --accent-color-rgb: 46 196 182;
-  --accent-color-hover: #68d8ce;
-  --accent-color-active: #1fb5a7;
-  --accent-color-light: #122022;
-  --accent-color-visited: #8aa3a4;
-  --text-with-accent-color: #071113;
-  --selection-background-color: #2ec4b6;
-  --selection-text-color: #071113;
-  --scrollbar-color: #549c98;
-  --scrollbar-color-hover: #2ec4b6;
-  --scrollbar-color-active: #68d8ce;
-  --favorite-icon-color: #2ec4b6;
+
+  /* Text-sized accents stay light enough to read on the dark surfaces. */
+  --accent-color: rgb(from oklch(from var(--signal-accent-color) max(l, 0.7) c h) clamp(0, r, 255) clamp(0, g, 255) clamp(0, b, 255));
+  --accent-color-hover: rgb(from oklch(from var(--accent-color) min(calc(l + 0.06), 0.92) c h) clamp(0, r, 255) clamp(0, g, 255) clamp(0, b, 255));
+  --accent-color-active: rgb(from oklch(from var(--accent-color) calc(l - 0.05) c h) clamp(0, r, 255) clamp(0, g, 255) clamp(0, b, 255));
+  --accent-color-light: color-mix(in srgb, var(--accent-color) 12%, #171717);
+  --text-with-accent-color: #111;
+  --scrollbar-color: color-mix(in srgb, var(--accent-color) 42%, #7a7a7a);
+  --scrollbar-color-active: var(--accent-color-hover);
 }
 
 

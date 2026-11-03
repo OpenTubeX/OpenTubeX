@@ -89,7 +89,7 @@
         </template>
       </FtSelect>
       <FtSelect
-        v-if="!isMaterialThemeSelected"
+        v-if="!hasAccentPicker"
         size-to-content
         :placeholder="$t('Settings.Theme Settings.Main Color Theme.Main Color Theme')"
         :value="mainColor"
@@ -103,7 +103,7 @@
         @change="updateMainColor"
       />
       <FtSelect
-        v-if="!isMaterialThemeSelected"
+        v-if="!hasAccentPicker"
         size-to-content
         :placeholder="$t('Settings.Theme Settings.Secondary Color Theme')"
         :value="secColor"
@@ -117,10 +117,16 @@
         @change="updateSecColor"
       />
     </FtFlexBox>
-    <MaterialColorSettings
+    <AccentColorSettings
       v-if="showMaterialSeedColor"
       :model-value="materialSeedColor"
       @update:model-value="store.dispatch('updateMaterialSeedColor', $event)"
+    />
+    <AccentColorSettings
+      v-if="showSignalAccentColor"
+      variant="signal"
+      :model-value="signalAccentColor"
+      @update:model-value="store.dispatch('updateSignalAccentColor', $event)"
     />
     <FtFlexBox class="customThemeActions">
       <FtButton
@@ -170,13 +176,14 @@ import FtButton from '../../FtButton/FtButton.vue'
 import ThemeDiscovery from '../../ThemeDiscovery.vue'
 import CustomThemeEditor from '../../CustomThemeEditor/CustomThemeEditor.vue'
 import AppIconSettings from './AppIconSettings.vue'
-import MaterialColorSettings from './MaterialColorSettings.vue'
+import AccentColorSettings from './AccentColorSettings.vue'
 import TrayIconSettings from './TrayIconSettings.vue'
 
 import store from '../../../store/index'
 import { getThemeClassification, hasFixedThemeColors } from '../../../../appearanceSettings'
 import { customThemeIdFromValue } from '../../../../customTheme'
 import { MATERIAL_THEME_VALUES } from '../../../../materialTheme.js'
+import { SIGNAL_THEME_VALUES } from '../../../../signalTheme.js'
 
 import { colors } from '../../../helpers/colors'
 import { androidDynamicColors } from '../../../helpers/dynamicColors.js'
@@ -306,7 +313,8 @@ function updateIconPack(value) {
   store.dispatch('updateIconPack', value)
 }
 
-const isMaterialThemeSelected = computed(() => MATERIAL_THEME_VALUES.includes(baseTheme.value === 'system'
+// Material and Signal themes replace the main and secondary colors with their accent pickers.
+const hasAccentPicker = computed(() => [...MATERIAL_THEME_VALUES, ...SIGNAL_THEME_VALUES].includes(baseTheme.value === 'system'
   ? (systemUsesDarkTheme.value ? systemDarkTheme.value : systemLightTheme.value)
   : baseTheme.value))
 
@@ -316,6 +324,11 @@ const usesMaterialSeedColor = theme => MATERIAL_THEME_VALUES.includes(theme) &&
 const showMaterialSeedColor = computed(() => baseTheme.value === 'system'
   ? [systemLightTheme.value, systemDarkTheme.value].some(usesMaterialSeedColor)
   : usesMaterialSeedColor(baseTheme.value))
+
+const signalAccentColor = computed(() => store.getters.getSignalAccentColor)
+const showSignalAccentColor = computed(() => baseTheme.value === 'system'
+  ? [systemLightTheme.value, systemDarkTheme.value].some(theme => SIGNAL_THEME_VALUES.includes(theme))
+  : SIGNAL_THEME_VALUES.includes(baseTheme.value))
 
 const areColorThemesEnabled = computed(() => baseTheme.value === 'system'
   ? !hasFixedThemeColors(systemUsesDarkTheme.value ? systemDarkTheme.value : systemLightTheme.value)

@@ -4,6 +4,7 @@ import store from '../store/index'
 import { getCapacitorTabService } from '../tabs/CapacitorTabService'
 import { tabLifecycleService } from '../tabs/TabLifecycleService'
 import { tabRuntimeRegistry } from '../tabs/TabRuntimeRegistry'
+import { resolveColorProperty } from './colors'
 
 const PullToRefresh = registerPlugin('PullToRefresh')
 const EXCLUDED_TARGETS = '[data-playlist-drag-item] .grabBar, [data-playlist-drag-item] .videoIndexArea, button, input, textarea, select, [contenteditable]:not([contenteditable="false"]), [role="slider"], [role="dialog"], [role="menu"], video, audio, .shaka-video-container'
@@ -55,7 +56,7 @@ export async function initializeCapacitorPullToRefresh() {
       fullPath: tab.route.fullPath,
       refreshKey: tab.refreshKey,
       offset: Math.max(0, root.getBoundingClientRect().top) / window.innerHeight,
-      color: style.getPropertyValue('--primary-color').trim(),
+      color: resolveColorProperty(root, '--primary-color') ?? '#000000',
       backgroundColor: style.getPropertyValue('--card-bg-color').trim()
     }
   }

@@ -1,5 +1,6 @@
 import { randomArrayItem } from './utils'
 import { CATPPUCCIN_MACCHIATO_COLORS } from '../../constants'
+import { cssColorToHex } from '../../customTheme.js'
 
 export const colors = [
   { name: 'Red', value: '#d50000' },
@@ -112,7 +113,27 @@ export function resolveColor(value, fallback) {
  * @returns {string}
  */
 export function resolveThemeColor() {
-  return getComputedStyle(document.body).getPropertyValue('--primary-color').trim() || '#000000'
+  return resolveColorProperty(document.body, '--primary-color') ?? '#000000'
+}
+
+/**
+ * Resolve a color custom property to hex. Custom properties keep their declared
+ * text, so relative colors, such as the Signal themes' accents, resolve through `color`.
+ * Hex declarations are returned as written.
+ * @param {Element} element
+ * @param {string} property
+ * @returns {string | null}
+ */
+export function resolveColorProperty(element, property) {
+  const value = getComputedStyle(element).getPropertyValue(property).trim()
+  if (/^#[\da-f]{3,8}$/i.test(value)) return value
+  const probe = document.createElement('span')
+  probe.hidden = true
+  probe.style.color = `var(${property})`
+  element.append(probe)
+  const color = getComputedStyle(probe).color
+  probe.remove()
+  return cssColorToHex(color)
 }
 
 export function getRandomColorClass() {

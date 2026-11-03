@@ -515,6 +515,7 @@ Settings:
     Only Show Important Notifications: Показувати лише важливі сповіщення
     Visible Search Suggestions: "Видимі підказки пошуку"
     Material Accent Color: "Акцентний колір Material"
+    Signal Accent Color: "Акцентний колір Signal"
     Material Wallpaper Colors: "Кольори шпалер"
     Material System Accent Color: "Системний колір акценту"
     Tab Loading Indicator:
@@ -610,8 +611,8 @@ Settings:
       One Dark: One Dark
       Carbonfox: Carbonfox
       Catppuccin Macchiato: Catppuccin Macchiato
-      Ocean Light: "Ocean Світла"
-      Ocean Dark: "Ocean Темна"
+      Signal Light: "Signal Світла"
+      Signal Dark: "Signal Темна"
       Custom: Власна
     Light Theme: Світла тема
     Dark Theme: Темна тема

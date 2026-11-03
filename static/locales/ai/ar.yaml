@@ -515,6 +515,7 @@ Settings:
     Only Show Important Notifications: إظهار الإشعارات المهمة فقط
     Visible Search Suggestions: "اقتراحات البحث المرئية"
     Material Accent Color: "لون تمييز Material"
+    Signal Accent Color: "لون تمييز Signal"
     Material Wallpaper Colors: "ألوان الخلفية"
     Material System Accent Color: "لون التمييز للنظام"
     Tab Loading Indicator:
@@ -610,8 +611,8 @@ Settings:
       One Dark: One Dark
       Carbonfox: Carbonfox
       Catppuccin Macchiato: Catppuccin Macchiato
-      Ocean Light: "Ocean فاتح"
-      Ocean Dark: "Ocean داكن"
+      Signal Light: "Signal فاتح"
+      Signal Dark: "Signal داكن"
       Custom: مخصص
     Light Theme: سمة فاتحة
     Dark Theme: سمة داكنة

@@ -652,6 +652,7 @@ Settings:
     Only Show Important Notifications: Mostra només les notificacions importants
     Visible Search Suggestions: "Suggeriments de cerca visibles"
     Material Accent Color: "Color d’accent de Material"
+    Signal Accent Color: "Color d’accent de Signal"
     Material Wallpaper Colors: "Colors del fons de pantalla"
     Material System Accent Color: "Color d'èmfasi del sistema"
     Tab Loading Indicator:
@@ -733,8 +734,8 @@ Settings:
       One Dark: One Dark
       Carbonfox: Carbonfox
       Catppuccin Macchiato: Catppuccin Macchiato
-      Ocean Light: "Ocean Clar"
-      Ocean Dark: "Ocean Fosc"
+      Signal Light: "Signal Clar"
+      Signal Dark: "Signal Fosc"
       Custom: Personalitzat
       Catppuccin Frappe: Catppuccin Frappe
       Catppuccin Latte: Catppuccin Latte

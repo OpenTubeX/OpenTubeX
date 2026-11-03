@@ -31,6 +31,13 @@ export async function initializeAndroidDynamicColors(request = getAndroidDynamic
   }
 }
 
+/** The wallpaper's primary accent on Android, otherwise the desktop accent color, if any. */
+export function getSystemAccentColor() {
+  return androidDynamicColors.value.supported
+    ? androidDynamicColors.value.palette.accent1[500]
+    : desktopSystemAccentColor.value
+}
+
 /** Dynamic colors, or a fixed Material variant seeded with the system palette, follows the system. */
 export function getMaterialPalette(seed, theme) {
   if (theme !== 'dynamic' && seed !== MATERIAL_SYSTEM_SEED) return materialSeedPalette(seed)

@@ -675,6 +675,7 @@ Settings:
   Theme Settings:
     Only Show Important Notifications: Wys slegs belangrike kennisgewings
     Material Accent Color: Material-aksentkleur
+    Signal Accent Color: Signal-aksentkleur
     Material Wallpaper Colors: Muurpapierkleure
     Material System Accent Color: "Stelselaksentkleur"
     Tab Loading Indicator:
@@ -756,8 +757,8 @@ Settings:
       One Dark: One Dark
       Carbonfox: Carbonfox
       Catppuccin Macchiato: Catppuccin Macchiato
-      Ocean Light: Oseaan lig
-      Ocean Dark: Oseaan donker
+      Signal Light: Signal lig
+      Signal Dark: Signal donker
       Custom: Pasgemaak
       Catppuccin Latte: Catppuccin Latte
     Light Theme: Ligte tema

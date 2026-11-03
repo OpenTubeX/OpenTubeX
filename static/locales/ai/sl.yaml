@@ -644,6 +644,7 @@ Settings:
     Only Show Important Notifications: Prikaži samo pomembna obvestila
     Visible Search Suggestions: "Vidni predlogi iskanja"
     Material Accent Color: "Poudarjena barva Material"
+    Signal Accent Color: "Poudarjena barva Signal"
     Material Wallpaper Colors: "Barve slike ozadja"
     Material System Accent Color: "Sistemska barva poudarka"
     Tab Loading Indicator:
@@ -724,8 +725,8 @@ Settings:
       One Dark: One Dark
       Carbonfox: Carbonfox
       Catppuccin Macchiato: Catppuccin Macchiato
-      Ocean Light: "Ocean svetla"
-      Ocean Dark: "Ocean temna"
+      Signal Light: "Signal svetla"
+      Signal Dark: "Signal temna"
       Custom: Po meri
       Catppuccin Frappe: Catppuccin Frappe
       Catppuccin Latte: Catppuccin Latte

@@ -59,6 +59,7 @@ function setup({ available = true, handled = false, fail = false, enabled = true
     Capacitor: { isPluginAvailable: () => available }, registerPlugin: () => plugin,
     window, document, Date, setTimeout,
     getComputedStyle: element => ({ overflowX: 'visible', overflowY: 'visible', getPropertyValue: () => '#ffffff', ...element.style }),
+    resolveColorProperty: () => '#ffffff',
     store: { getters, watch: (getter, callback, options) => watch(() => getter({}, getters), callback, options) }, nextTick: async () => {},
     getCapacitorTabService: () => ({ reloadTab: async id => {
       calls.push(`reload:${id}`)

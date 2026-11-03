@@ -1,6 +1,7 @@
 import { createDefaultSettings, resolveDefaultLandingPage } from '../../../settingsDefaults.js'
 import { NON_TRANSFERABLE_SETTINGS } from '../../../nonTransferableSettings.js'
 import { normalizeMaterialSeedColor } from '../../../materialTheme.js'
+import { normalizeSignalAccentColor } from '../../../signalTheme.js'
 import i18n, { loadLocale, setAITranslationCompletionsEnabled } from '../../i18n/index'
 import allLocales from '../../../../static/locales/activeLocales.json'
 import { applyKeyboardShortcutOverrides, resolveLandingPage, sanitizeKeyboardShortcutOverrides, SyncEvents } from '../../../constants'
@@ -835,6 +836,10 @@ const customActions = {
 
   updateMaterialSeedColor: ({ commit, state }, value) => updateOrderedSetting(
     commit, state, 'materialSeedColor', normalizeMaterialSeedColor(value)
+  ),
+
+  updateSignalAccentColor: ({ commit, state }, value) => updateOrderedSetting(
+    commit, state, 'signalAccentColor', normalizeSignalAccentColor(value)
   ),
 
   updateBaseTheme: ({ commit, rootGetters, state }, value) => updateValidatedSetting(

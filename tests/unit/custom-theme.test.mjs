@@ -2,6 +2,7 @@ import assert from 'node:assert/strict'
 import { test } from 'node:test'
 
 import {
+  cssColorToHex,
   customThemeBackdropBlur,
   customThemeContentHash,
   DEFAULT_CUSTOM_THEME,
@@ -158,4 +159,12 @@ test('keeps existing fingerprints for missing and default watched overlays after
     assert.equal(await customThemeContentHash(normalized), fingerprint)
     assert.equal(await customThemeContentHash(JSON.parse(JSON.stringify(normalized))), fingerprint)
   }
+})
+
+test('computed colors convert to hex, including exponents and out-of-range channels', () => {
+  assert.equal(cssColorToHex('rgb(255, 0, 138)'), '#ff008a')
+  assert.equal(cssColorToHex('rgba(26, 26, 26, 0.12)'), '#1a1a1a1f')
+  assert.equal(cssColorToHex('color(srgb 1 1 3.85046e-7)'), '#ffff00')
+  assert.equal(cssColorToHex('color(srgb 1.04156 0.344351 -0.01 / 0.5)'), '#ff580080')
+  assert.equal(cssColorToHex('oklch(0.5 0.2 29)'), null)
 })

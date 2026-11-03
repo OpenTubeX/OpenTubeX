@@ -275,6 +275,23 @@ export function hexColorToRgbComponents(color) {
   return components.slice(0, 3).map(value => Number.parseInt(value, 16)).join(' ')
 }
 
+/**
+ * Convert a computed rgb() or color(srgb ...) value to hex. Chromium can write
+ * near-zero channels with exponents, such as 3.85e-7.
+ * @param {string} color
+ * @returns {string | null}
+ */
+export function cssColorToHex(color) {
+  if (!/^(?:rgba?\(|color\(srgb )/.test(color)) return null
+  const values = color.match(/-?[\d.]+(?:e[-+]?\d+)?/gi)?.map(Number)
+  if (!values || values.length < 3 || values.some(Number.isNaN)) return null
+  const scale = color.startsWith('color(srgb ') ? 255 : 1
+  const channels = values.slice(0, 3).map(value => Math.min(255, Math.max(0, Math.round(value * scale))))
+  const alpha = Math.round((values[3] ?? 1) * 255)
+  return '#' + [...channels, ...(alpha < 255 ? [alpha] : [])]
+    .map(value => value.toString(16).padStart(2, '0')).join('')
+}
+
 export function customThemeBackdropBlur(color, strength) {
   const alpha = color.length === 9 ? Number.parseInt(color.slice(7, 9), 16) : 255
   return alpha < 255 && strength > 0 ? `blur(${strength}px)` : 'none'

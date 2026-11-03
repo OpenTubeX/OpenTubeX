@@ -9,8 +9,9 @@ import {
 } from '../../customTheme.js'
 import { PALETTE_BASE_THEMES } from '../../constants.js'
 
-import { MATERIAL_COLOR_ROLES, MATERIAL_THEME_VALUES, materialColorProperty, materialThemeMode } from '../../materialTheme.js'
-import { getMaterialPalette, applyDynamicColors, dynamicThemeColors } from './dynamicColors.js'
+import { MATERIAL_COLOR_ROLES, MATERIAL_SYSTEM_SEED, MATERIAL_THEME_VALUES, materialColorProperty, materialThemeMode } from '../../materialTheme.js'
+import { DEFAULT_SIGNAL_ACCENT_COLOR, SIGNAL_THEME_VALUES } from '../../signalTheme.js'
+import { getMaterialPalette, applyDynamicColors, dynamicThemeColors, getSystemAccentColor } from './dynamicColors.js'
 
 const STORAGE_KEY = 'opentubex-custom-theme'
 let appliedBodyThemeClasses = []
@@ -34,7 +35,12 @@ export function getThemeBackground(baseTheme, customThemes, dark, seed) {
   }
 }
 
-export function applyThemeToDocument(baseTheme, mainColor, secColor, customTheme, seed) {
+/** Resolve the Signal accent setting, following the system accent when requested and available. */
+export function resolveSignalAccentColor(value) {
+  return value === MATERIAL_SYSTEM_SEED ? getSystemAccentColor() ?? DEFAULT_SIGNAL_ACCENT_COLOR : value
+}
+
+export function applyThemeToDocument(baseTheme, mainColor, secColor, customTheme, seed, signalAccent) {
   const dynamic = MATERIAL_THEME_VALUES.includes(baseTheme)
   const palette = dynamic ? getMaterialPalette(seed, baseTheme) : null
   const dark = window.matchMedia('(prefers-color-scheme: dark)').matches
@@ -66,6 +72,12 @@ export function applyThemeToDocument(baseTheme, mainColor, secColor, customTheme
     document.body.style.removeProperty(property)
   }
   document.body.style.removeProperty('--accent-color-rgb')
+  // Signal themes derive every accent shade from this color in themes.css.
+  if (SIGNAL_THEME_VALUES.includes(baseTheme)) {
+    document.body.style.setProperty('--signal-accent', resolveSignalAccentColor(signalAccent))
+  } else {
+    document.body.style.removeProperty('--signal-accent')
+  }
   for (const role of MATERIAL_COLOR_ROLES) document.body.style.removeProperty(materialColorProperty(role))
 
   if (isCustomThemeValue(baseTheme) && customTheme) {

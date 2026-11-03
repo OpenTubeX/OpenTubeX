@@ -511,6 +511,7 @@ Settings:
     Only Show Important Notifications: Dangos hysbysiadau pwysig yn unig
     Visible Search Suggestions: "Awgrymiadau chwilio gweladwy"
     Material Accent Color: "Lliw acen Material"
+    Signal Accent Color: "Lliw acen Signal"
     Material Wallpaper Colors: "Lliwiau papur wal"
     Material System Accent Color: "Lliw acen y system"
     Tab Loading Indicator:
@@ -606,8 +607,8 @@ Settings:
       One Dark: One Dark
       Carbonfox: Carbonfox
       Catppuccin Macchiato: Catppuccin Macchiato
-      Ocean Light: "Ocean Golau"
-      Ocean Dark: "Ocean Tywyll"
+      Signal Light: "Signal Golau"
+      Signal Dark: "Signal Tywyll"
       Custom: Personol
     Light Theme: Thema olau
     Dark Theme: Thema dywyll

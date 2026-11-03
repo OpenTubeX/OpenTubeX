@@ -510,6 +510,7 @@ Settings:
     Only Show Important Notifications: 僅顯示重要通知
     Visible Search Suggestions: "可見搜尋建議數"
     Material Accent Color: "Material 強調色"
+    Signal Accent Color: "Signal 強調色"
     Material Wallpaper Colors: "桌布顏色"
     Material System Accent Color: "系統強調色"
     Tab Loading Indicator:
@@ -605,8 +606,8 @@ Settings:
       One Dark: One Dark
       Carbonfox: Carbonfox
       Catppuccin Macchiato: Catppuccin Macchiato
-      Ocean Light: "Ocean 淺色"
-      Ocean Dark: "Ocean 深色"
+      Signal Light: "Signal 淺色"
+      Signal Dark: "Signal 深色"
       Custom: 自訂
     Light Theme: 淺色主題
     Dark Theme: 深色主題
