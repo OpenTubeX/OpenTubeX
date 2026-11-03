@@ -502,10 +502,17 @@ export function monitorKdeWaylandWindowState({
     stopRestoreWatch = value.watchWindowMinimized((reportedUuid, isMinimized) => {
       if (reportedUuid === uuid && !isMinimized) restored()
     })
-    // The window can be restored before the watch starts
-    value.queryWindow(uuid).then(window => {
-      if (!window?.minimized) restored()
-    }).catch(() => {})
+    // The window can be restored before the watch starts. Retry a failed
+    // check while this watch still applies, as the removed poll did.
+    const checkRestored = () => {
+      value.queryWindow(uuid).then(window => {
+        if (!window?.minimized) restored()
+      }).catch(() => {
+        if (stopped || generation !== token || minimizedUuid !== uuid) return
+        setTimeout(checkRestored, 1000)
+      })
+    }
+    checkRestored()
   }
   const isDesktopPopup = activeWindow => activeWindow !== null &&
     activeWindow.skipTaskbar &&

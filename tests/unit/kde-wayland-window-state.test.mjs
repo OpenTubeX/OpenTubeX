@@ -583,3 +583,37 @@ test('gives up on a session bus that stays too slow', async t => {
   assert.equal(await createKdeWaylandWindowStateBackend([0, 0, 0]), null)
   assert.equal(attempts.length, 4)
 })
+
+test('retries the restore check when its first query fails', async t => {
+  const browserWindow = new EventEmitter()
+  browserWindow.getBounds = () => targetWindow().bounds
+  browserWindow.getTitle = () => targetWindow().caption
+  browserWindow.isFocused = () => false
+  let windowQueries = 0
+  const backend = Promise.resolve({
+    queryWindow: async () => {
+      // The window was restored, but the first check fails
+      if (++windowQueries === 1) throw new Error('D-Bus call failed')
+      return windowInfo({ minimized: false })
+    },
+    queryWindows: async () => [windowInfo({ minimized: true })],
+    watchActiveWindow: () => ({ activeWindow: null, stop: () => {} }),
+    watchWindowMinimized: () => () => {},
+  })
+  const states = []
+  const stop = monitorKdeWaylandWindowState({
+    browserWindow,
+    backend,
+    detectionDelay: 0,
+    onMinimizedState: state => states.push(state),
+  })
+  t.after(stop)
+  await new Promise(resolve => setTimeout(resolve, 10))
+
+  browserWindow.emit('blur')
+  await new Promise(resolve => setTimeout(resolve, 20))
+  assert.deepEqual(states, [true])
+  await new Promise(resolve => setTimeout(resolve, 1100))
+  assert.equal(windowQueries, 2)
+  assert.deepEqual(states, [true, false])
+})
