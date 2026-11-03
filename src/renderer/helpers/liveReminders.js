@@ -255,7 +255,7 @@ async function scheduleReminder(reminder) {
   // being rescheduled would otherwise still fire at its old time.
   const started = async () => {
     if (reminder.startTimestamp > Date.now()) return false
-    await capacitorLiveReminder.cancel(reminder.videoId)
+    await cancelReminder(reminder.videoId)
     return true
   }
   // Synced reminders are kept while notifications are off, and scheduled once they are on again.
@@ -272,6 +272,28 @@ async function scheduleReminder(reminder) {
   ])
   emitUpdated(reminder.videoId, true)
   return true
+}
+
+/**
+ * @template T
+ * @param {() => Promise<T>} task
+ */
+function afterModeChange(task) {
+  const result = modeChange.then(task)
+  modeChange = result.then(() => {}, () => {})
+  return result
+}
+
+/** @param {string} videoId */
+async function cancelReminder(videoId) {
+  const records = readCapacitorReminders()
+  const record = records.find(item => item.videoId === videoId)
+  if (record) {
+    await LocalNotifications.cancel({ notifications: [{ id: record.notificationId }] })
+  }
+  writeCapacitorReminders(records.filter(item => item.videoId !== videoId))
+  emitUpdated(videoId, false)
+  return record !== undefined
 }
 
 const capacitorLiveReminder = {
@@ -293,21 +315,12 @@ const capacitorLiveReminder = {
    * reminder that was being scheduled meanwhile.
    */
   schedule(reminder) {
-    const scheduling = modeChange.then(() => scheduleReminder(reminder))
-    modeChange = scheduling.then(() => {}, () => {})
-    return scheduling
+    return afterModeChange(() => scheduleReminder(reminder))
   },
-  async cancel(videoId) {
-    const records = readCapacitorReminders()
-    const record = records.find(item => item.videoId === videoId)
-    if (record) {
-      await LocalNotifications.cancel({ notifications: [{ id: record.notificationId }] })
-    }
-    writeCapacitorReminders(records.filter(item => item.videoId !== videoId))
-    emitUpdated(videoId, false)
-    return record !== undefined
+  /** Runs between mode changes, so a resume cannot schedule the reminder again. */
+  cancel(videoId) {
+    return afterModeChange(() => cancelReminder(videoId))
   },
-
   onUpdated(listener) {
     listeners.add(listener)
     return () => listeners.delete(listener)

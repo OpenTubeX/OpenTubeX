@@ -124,6 +124,28 @@ test('turning notifications off while they resume leaves no reminder scheduled',
   assert.equal(scheduled.size, 0)
 })
 
+test('a reminder cancelled while notifications resume stays cancelled', async () => {
+  const scheduled = new Map()
+  let permission = null
+  const { liveReminder, applyCapacitorNotificationMode } = await loadCapacitorReminder({
+    checkPermissions: async () => { await permission?.promise; return { display: 'granted' } },
+    cancel: async ({ notifications }) => { for (const { id } of notifications) scheduled.delete(id) },
+    getPending: async () => ({ notifications: [...scheduled.keys()].map(id => ({ id })) }),
+    schedule: async ({ notifications }) => { for (const notification of notifications) scheduled.set(notification.id, notification) },
+  })
+  assert.equal(await liveReminder.schedule(reminder(START + 60_000)), true)
+  await applyCapacitorNotificationMode('off')
+
+  // The user cancels the reminder while turning notifications on again waits on the system.
+  permission = Promise.withResolvers()
+  const resuming = applyCapacitorNotificationMode('both')
+  const cancelling = liveReminder.cancel('premiere')
+  permission.resolve()
+  await Promise.all([resuming, cancelling])
+  assert.equal(scheduled.size, 0)
+  assert.equal(await liveReminder.get('premiere'), null)
+})
+
 test('a reminder scheduled while notifications turn off is cancelled too', async () => {
   const scheduled = new Map()
   let permission = null
