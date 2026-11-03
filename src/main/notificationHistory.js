@@ -88,6 +88,8 @@ export function createNotifier({ history, getMode, getForegroundWindow, showInAp
     if (mode === 'off') return
     if (mode === 'both' && target) {
       const entry = await history.add({ title, body, thumbnail, ...target })
+      // The mode may have changed while the entry was saved.
+      if (getMode() === 'off') return
       const window = entry && getForegroundWindow()
       if (window) {
         showInApp(window, entry)

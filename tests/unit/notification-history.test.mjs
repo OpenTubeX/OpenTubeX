@@ -183,6 +183,30 @@ test('a window that loses focus while the bell saves gets a system notification 
   assert.deepEqual(inApp, [])
 })
 
+test('turning notifications off while the bell saves shows no system notification', async () => {
+  let mode = 'both'
+  let systemShown = 0
+  const notify = createNotifier({
+    history: {
+      add: async entry => {
+        mode = 'off'
+        return { ...entry, id: '1', createdAt: 0, read: false }
+      }
+    },
+    getMode: () => mode,
+    getForegroundWindow: () => null,
+    showInApp: () => {}
+  })
+
+  await notify({
+    title: 'Title',
+    body: 'Body',
+    target: { kind: 'video', path: '/watch/abc' },
+    showSystemNotification: () => { systemShown++ }
+  })
+  assert.equal(systemShown, 0)
+})
+
 test('entries keep web thumbnails, and uploads get theirs from the configured template', () => {
   assert.equal(isThumbnailUrl('https://i.ytimg.com/vi/abc/mqdefault.jpg'), true)
   // Invidious instances can be local servers.
