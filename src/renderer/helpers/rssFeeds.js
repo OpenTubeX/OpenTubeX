@@ -538,17 +538,16 @@ function unwatchItemsMarkedUnseen(items, entries) {
 onRssFeedSeenItemsSynced(entries => unwatchItemsMarkedUnseen(rssFeedItems.value, entries))
 
 /**
- * Removed feeds are filtered out of the cached items, added ones need a refresh.
- * Before the first refresh in a window, the items cached by earlier sessions
- * cover the feeds that loaded before (those with a seen history), unless feeds
- * are fetched on startup.
- * @param {RssFeed[]} feeds
+ * The feeds whose cached items don't need a refresh. Removed feeds are filtered
+ * out of the cached items, added ones need a refresh. Before the first refresh
+ * in a window, the items cached by earlier sessions cover the feeds that loaded
+ * before (those with a seen history), unless feeds are fetched on startup.
+ * @returns {Set<string>}
  */
-export function rssFeedCacheCovers(feeds) {
-  const coveredUrls = rssFeedsLastRefresh.value !== null
-    ? refreshedFeedUrls
-    : store.getters.getFetchSubscriptionsAutomatically ? new Set() : seenHistory
-  return feeds.every(feed => coveredUrls.has(feed.url))
+export function getCachedRssFeedUrls() {
+  if (rssFeedsLastRefresh.value !== null) return new Set(refreshedFeedUrls)
+  if (store.getters.getFetchSubscriptionsAutomatically) return new Set()
+  return new Set([...seenHistory.keys(), ...refreshedFeedUrls])
 }
 
 /**
@@ -631,9 +630,12 @@ const AUTO_REFRESH_TOAST_DURATION = 5000
 
 /**
  * @param {RssFeed[]} feeds
- * @param {{ automatic?: boolean }} [options]
+ * @param {{ automatic?: boolean, cachedUrls?: Set<string> }} [options] `cachedUrls`
+ * are feeds that keep their cached items instead of loading, such as the
+ * feeds that loaded in an earlier session. The refresh then only loads the
+ * others, and doesn't count as a refresh of all feeds.
  */
-export async function refreshRssFeeds(feeds, { automatic = false } = {}) {
+export async function refreshRssFeeds(feeds, { automatic = false, cachedUrls = new Set() } = {}) {
   activeRefresh?.abort()
   const controller = new AbortController()
   activeRefresh = controller
@@ -647,39 +649,43 @@ export async function refreshRssFeeds(feeds, { automatic = false } = {}) {
   }
 
   try {
+    const cachedFeedUrls = new Set(feeds.filter(feed => cachedUrls.has(feed.url)).map(feed => feed.url))
+    const fetchedFeeds = feeds.filter(feed => !cachedFeedUrls.has(feed.url))
     let settledCount = 0
-    const results = await Promise.allSettled(feeds.map(feed => fetchRssFeed(feed.url, controller.signal).finally(() => {
-      if (!controller.signal.aborted) progress.update({ percentage: (++settledCount / feeds.length) * 100 })
+    const results = await Promise.allSettled(fetchedFeeds.map(feed => fetchRssFeed(feed.url, controller.signal).finally(() => {
+      if (!controller.signal.aborted) progress.update({ percentage: (++settledCount / fetchedFeeds.length) * 100 })
     })))
     if (controller.signal.aborted) return
 
     // Feeds added or retried while this refresh ran keep their own, newer result,
-    // and feeds that fail keep their previous items
+    // and cached feeds and feeds that fail keep their previous items
     const loadedUrls = loadedDuringRefresh
-    const failedUrls = new Set(feeds.filter((feed, index) => results[index].status === 'rejected' && !loadedUrls.has(feed.url))
+    const failedUrls = new Set(fetchedFeeds.filter((feed, index) => results[index].status === 'rejected' && !loadedUrls.has(feed.url))
       .map(feed => feed.url))
     const previousItems = rssFeedItems.value
     /** @type {Map<string, RssFeedItem[]>} */
     const refreshedItems = new Map(results.flatMap((result, index) => (
-      result.status === 'fulfilled' && !loadedUrls.has(feeds[index].url)
-        ? [[feeds[index].url, reconcileNewItems(feeds[index].url, result.value.items, previousItems.filter(item => item.feedUrl === feeds[index].url))]]
+      result.status === 'fulfilled' && !loadedUrls.has(fetchedFeeds[index].url)
+        ? [[fetchedFeeds[index].url, reconcileNewItems(fetchedFeeds[index].url, result.value.items, previousItems.filter(item => item.feedUrl === fetchedFeeds[index].url))]]
         : []
     )))
     setRssFeedItems([
-      ...rssFeedItems.value.filter(item => loadedUrls.has(item.feedUrl) || failedUrls.has(item.feedUrl)),
+      ...rssFeedItems.value.filter(item => cachedFeedUrls.has(item.feedUrl) || loadedUrls.has(item.feedUrl) || failedUrls.has(item.feedUrl)),
       ...[...refreshedItems.values()].flat()
     ].sort(compareFeedItems))
-    setRssFeedErrors([...failedUrls])
-    rssFeedsLastRefresh.value = Date.now()
-    const interval = getRssFeedsAutoRefreshInterval()
-    setRssFeedsNextAutoRefresh(interval > 0 ? Date.now() + interval : null)
+    setRssFeedErrors([...rssFeedErrors.value.filter(url => cachedFeedUrls.has(url)), ...failedUrls])
+    if (cachedFeedUrls.size === 0) {
+      rssFeedsLastRefresh.value = Date.now()
+      const interval = getRssFeedsAutoRefreshInterval()
+      setRssFeedsNextAutoRefresh(interval > 0 ? Date.now() + interval : null)
+    }
     refreshedFeedUrls = new Set([...feeds.map(feed => feed.url), ...loadedUrls])
     // Removed feeds start over when they are added again
     const feedUrls = new Set(feeds.map(feed => feed.url))
     const history = new Map([...seenHistory].filter(([url]) => feedUrls.has(url) || loadedUrls.has(url)))
     for (const [url, items] of refreshedItems) recordSeenHistory(history, url, items)
     setSeenHistory(history)
-    updateMissingRssFeedAvatars(feeds.flatMap((feed, index) => {
+    updateMissingRssFeedAvatars(fetchedFeeds.flatMap((feed, index) => {
       const result = results[index]
       return result.status === 'fulfilled' ? [[feed, result.value]] : []
     }))

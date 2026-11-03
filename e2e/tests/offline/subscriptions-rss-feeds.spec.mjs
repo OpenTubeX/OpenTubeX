@@ -603,37 +603,86 @@ test.describe('with followed feeds', () => {
     expect(await titles.allTextContents()).toEqual(['Newest VOD', 'Older VOD'])
   })
 
-  test('keeps the items of a feed that fails to refresh after a restart', async ({ page }) => {
-    await mockFeeds(page)
+  test('loads only the feeds that never loaded after a restart', async ({ page }) => {
+    const state = await mockFeeds(page)
     await goTo(page, 'subscriptions')
     await page.locator('[data-rss-feeds-tab]').click()
     const panel = page.locator('#subscriptionsPanel')
     const titles = panel.locator('.ft-list-item .h3Title')
     await expect(titles).toHaveText(['Newest VOD', 'Older VOD'])
+    await expect(panel.getByText('1 feed could not be refreshed.')).toBeVisible()
 
-    await page.route(RSS_URL, route => route.fulfill({ status: 500, body: 'Server error' }))
+    let requested = false
+    await page.route(RSS_URL, (route) => {
+      requested = true
+      return route.fulfill({ contentType: 'application/rss+xml', body: rssFeed })
+    })
     await page.reload()
     await goTo(page, 'subscriptions')
     await page.locator('[data-rss-feeds-tab]').click()
-    await expect(panel.getByText('2 feeds could not be refreshed.')).toBeVisible()
+    await expect(panel.getByText('1 feed could not be refreshed.')).toBeVisible()
     await expect(titles).toHaveText(['Newest VOD', 'Older VOD'])
+    expect(requested).toBe(false)
+
+    // Once the feed loads, it shows its cached items after a restart too
+    state.brokenFeedWorks = true
+    await page.reload()
+    await goTo(page, 'subscriptions')
+    await page.locator('[data-rss-feeds-tab]').click()
+    await expect(titles).toHaveText(['Newest VOD', 'Repaired item', 'Older VOD'])
+    state.brokenFeedWorks = false
+    await page.reload()
+    await goTo(page, 'subscriptions')
+    await page.locator('[data-rss-feeds-tab]').click()
+    await expect(titles).toHaveText(['Newest VOD', 'Repaired item', 'Older VOD'])
+    await expect(page.locator('[data-rss-feeds-tab] .tabLoadingIndicator')).toHaveCount(0)
+    await expect(panel.getByText(/could not be refreshed/)).toHaveCount(0)
+    expect(requested).toBe(false)
   })
 
-  test('keeps the items of a feed added before the RSS tab was opened after a restart', async ({ page }) => {
-    await mockFeeds(page)
-    const manager = await openFeedManager(page)
-    const input = manager.getByRole('textbox', { name: 'Add Feed' })
-    await input.fill(ATOM_URL)
-    await input.press('Enter')
-    await expect(manager.locator('.feedRow')).toHaveCount(3)
+  test.describe('with fetching on startup enabled', () => {
+    test.use({
+      seed: {
+        settings: {
+          fetchSubscriptionsAutomatically: true,
+          enableRssFeeds: true,
+          followedRssFeeds: [RSS_FEED, BROKEN_FEED]
+        }
+      }
+    })
 
-    await page.route(ATOM_URL, route => route.fulfill({ status: 500, body: 'Server error' }))
-    await page.reload()
-    await goTo(page, 'subscriptions')
-    await page.locator('[data-rss-feeds-tab]').click()
-    const panel = page.locator('#subscriptionsPanel')
-    await expect(panel.getByText('2 feeds could not be refreshed.')).toBeVisible()
-    await expect(panel.locator('.ft-list-item .h3Title', { hasText: 'Atom video' })).toBeVisible()
+    test('keeps the items of a feed that fails to refresh after a restart', async ({ page }) => {
+      await mockFeeds(page)
+      await goTo(page, 'subscriptions')
+      await page.locator('[data-rss-feeds-tab]').click()
+      const panel = page.locator('#subscriptionsPanel')
+      const titles = panel.locator('.ft-list-item .h3Title')
+      await expect(titles).toHaveText(['Newest VOD', 'Older VOD'])
+
+      await page.route(RSS_URL, route => route.fulfill({ status: 500, body: 'Server error' }))
+      await page.reload()
+      await goTo(page, 'subscriptions')
+      await page.locator('[data-rss-feeds-tab]').click()
+      await expect(panel.getByText('2 feeds could not be refreshed.')).toBeVisible()
+      await expect(titles).toHaveText(['Newest VOD', 'Older VOD'])
+    })
+
+    test('keeps the items of a feed added before the RSS tab was opened after a restart', async ({ page }) => {
+      await mockFeeds(page)
+      const manager = await openFeedManager(page)
+      const input = manager.getByRole('textbox', { name: 'Add Feed' })
+      await input.fill(ATOM_URL)
+      await input.press('Enter')
+      await expect(manager.locator('.feedRow')).toHaveCount(3)
+
+      await page.route(ATOM_URL, route => route.fulfill({ status: 500, body: 'Server error' }))
+      await page.reload()
+      await goTo(page, 'subscriptions')
+      await page.locator('[data-rss-feeds-tab]').click()
+      const panel = page.locator('#subscriptionsPanel')
+      await expect(panel.getByText('2 feeds could not be refreshed.')).toBeVisible()
+      await expect(panel.locator('.ft-list-item .h3Title', { hasText: 'Atom video' })).toBeVisible()
+    })
   })
 
   test('shows progress while a feed is added', { tag: '@scale' }, async ({ page }) => {
