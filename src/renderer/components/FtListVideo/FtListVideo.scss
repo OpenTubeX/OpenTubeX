@@ -90,12 +90,16 @@
   place-self: end start;
   max-inline-size: calc(100% - 8px);
   margin: 4px;
-  // Only the icon fits here, so it shows the category in its tooltip.
+  // Only the icon fits here, so it is a button that names the category in its
+  // tooltip and opens it in a prompt.
+  border: 0;
   cursor: pointer;
+  font-family: inherit;
+  line-height: inherit;
   pointer-events: auto;
 }
 
-// Leave the category text to the tooltip and screen readers.
+// Leave the category text to the tooltip, the prompt and screen readers.
 .watchPlaylistItem .sponsorBlockVideoLabel > span:last-child {
   position: absolute;
   overflow: hidden;

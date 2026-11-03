@@ -109,11 +109,13 @@ test.describe('SponsorBlock video labels', () => {
     }
   })
 
-  test('show only their icon beside wide durations and still open the video', { tag: '@scale' }, async ({ app, page, attachScreenshot, uiScale }) => {
-    await openPlaylist(app, page, () => page.route('**/api/videoLabels/**', route => route.fulfill({
-      body: JSON.stringify(videos.slice(0, 2).map(video => ({ videoID: video.videoId, segments: [{ category: 'exclusive_access', actionType: 'full' }] }))),
-      contentType: 'application/json'
-    })))
+  const mockFullVideoLabels = page => () => page.route('**/api/videoLabels/**', route => route.fulfill({
+    body: JSON.stringify(videos.slice(0, 2).map(video => ({ videoID: video.videoId, segments: [{ category: 'exclusive_access', actionType: 'full' }] }))),
+    contentType: 'application/json'
+  }))
+
+  test('show only their icon beside wide durations', { tag: '@scale' }, async ({ app, page, attachScreenshot, uiScale }) => {
+    await openPlaylist(app, page, mockFullVideoLabels(page))
     const panel = page.locator('.watchVideoPlaylist').filter({ visible: true })
     const labelsClear = thumbnails => thumbnails.evaluateAll(elements => elements.every(thumbnail => {
       const label = thumbnail.querySelector('.sponsorBlockVideoLabel').getBoundingClientRect()
@@ -133,26 +135,12 @@ test.describe('SponsorBlock video labels', () => {
     for (const thumbnail of await thumbnails.all()) {
       await expect(thumbnail.locator('.videoDuration [data-icon="music"]')).toBeVisible()
       const label = thumbnail.locator('.sponsorBlockVideoLabel')
-      // The text is left to the tooltip and screen readers.
+      // The text is left to the tooltip, the prompt and screen readers.
       await expect(label).toHaveAttribute('title', 'Exclusive Access · Full Video')
-      await expect(label).toMatchAriaSnapshot('- text: Exclusive Access')
+      await expect(label).toMatchAriaSnapshot('- button "Exclusive Access"')
     }
     await expect.poll(() => labelsClear(thumbnails)).toBe(true)
     await attachScreenshot('playlist-sponsorblock-icon-labels')
-
-    // The icon catches the pointer for its tooltip but still opens the video,
-    // in a background tab when middle-clicked.
-    await thumbnails.nth(1).locator('.sponsorBlockVideoLabel').click({ button: 'middle' })
-    await expect(page.locator(sel.tabs)).toHaveCount(2)
-    await expect(page.locator(sel.tabs).first()).toHaveClass(/active/)
-    await expect.poll(() => page.evaluate(async () => {
-      const state = await window.ftElectron.tabs.getState()
-      return state.tabs.find(tab => tab.id !== state.activeTabId)?.route.path
-    })).toBe(`/watch/${videos[1].videoId}`)
-    await page.locator(sel.tabs).nth(1).getByRole('button', { name: 'Close Tab' }).click()
-    await expect(page.locator(sel.tabs)).toHaveCount(1)
-    await thumbnails.nth(1).locator('.sponsorBlockVideoLabel').click()
-    await expect(panel.locator('.playlistIndex label')).toHaveText('2 / 12')
 
     await page.locator('.ftVideoPlayer video').evaluate(element => element.pause())
     await setWindowSize(app, page, { width: 960, height: 440 })
@@ -167,6 +155,57 @@ test.describe('SponsorBlock video labels', () => {
     for (const label of await dock.locator('.sponsorBlockVideoLabel').all()) await expect(label).toBeHidden()
     await attachScreenshot('fullscreen-playlist-sponsorblock-icon-labels')
     await setPlayerFullscreen(page, false)
+  })
+
+  test('open their category in a prompt by click and keyboard without opening the video', async ({ app, page }) => {
+    await openPlaylist(app, page, mockFullVideoLabels(page))
+    await page.locator('.ftVideoPlayer video').evaluate(element => element.pause())
+    const panel = page.locator('.watchVideoPlaylist').filter({ visible: true })
+    const label = panel.locator('.playlistItem').nth(1).getByRole('button', { name: 'Exclusive Access', exact: true })
+    const prompt = page.getByRole('dialog', { name: 'Exclusive Access · Full Video' })
+    const closeButton = prompt.getByRole('button', { name: 'Close' })
+    const expectStillOnFirstVideo = async () => {
+      await expect(page.locator(sel.tabs)).toHaveCount(1)
+      await expect(panel.locator('.playlistIndex label')).toHaveText('1 / 12')
+      expect(await page.evaluate(async () => {
+        const state = await window.ftElectron.tabs.getState()
+        return state.tabs.find(tab => tab.id === state.activeTabId)?.route.path
+      })).toBe(`/watch/${videos[0].videoId}`)
+    }
+
+    await expect(label).toHaveAttribute('aria-haspopup', 'dialog')
+    await label.click()
+    await expect(prompt).toBeVisible()
+    await expect(prompt.getByRole('heading')).toHaveText('Exclusive Access · Full Video')
+    await expect(closeButton).toBeFocused()
+    await expectStillOnFirstVideo()
+    await closeButton.click()
+    await expect(prompt).toBeHidden()
+    await expect(label).toBeFocused()
+
+    // A middle-click does not open the video in a background tab either, and it
+    // starts no autoscroll that would swallow the next key press.
+    await label.click({ button: 'middle' })
+    await expect(prompt).toBeHidden()
+    await expectStillOnFirstVideo()
+
+    await label.focus()
+    await page.keyboard.press('Enter')
+    await expect(prompt).toBeVisible()
+    await expect(closeButton).toBeFocused()
+    await page.keyboard.press('Escape')
+    await expect(prompt).toBeHidden()
+    await expect(label).toBeFocused()
+
+    // Space opens it too instead of toggling playback.
+    await page.keyboard.press('Space')
+    await expect(prompt).toBeVisible()
+    await expect(closeButton).toBeFocused()
+    expect(await page.locator('.ftVideoPlayer video').evaluate(element => element.paused)).toBe(true)
+    await page.keyboard.press('Enter')
+    await expect(prompt).toBeHidden()
+    await expect(label).toBeFocused()
+    await expectStillOnFirstVideo()
   })
 })
 
