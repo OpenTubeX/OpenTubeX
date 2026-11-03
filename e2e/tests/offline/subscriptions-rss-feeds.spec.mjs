@@ -1064,6 +1064,44 @@ test.describe('with new items', () => {
   })
 })
 
+for (const fetchOnStartup of [false, true]) {
+  test.describe(`after a restart with fetching on startup ${fetchOnStartup ? 'enabled' : 'disabled'}`, () => {
+    test.use({
+      seed: {
+        settings: {
+          fetchSubscriptionsAutomatically: fetchOnStartup,
+          enableRssFeeds: true,
+          followedRssFeeds: [RSS_FEED]
+        }
+      }
+    })
+
+    test(`${fetchOnStartup ? 'refreshes' : 'shows the cached items of'} the feeds`, async ({ page }) => {
+      await mockFeeds(page)
+      await goTo(page, 'subscriptions')
+      await page.locator('[data-rss-feeds-tab]').click()
+      const titles = page.locator('#subscriptionsPanel .ft-list-item .h3Title')
+      await expect(titles).toHaveText(['Newest VOD', 'Older VOD'])
+
+      // Held, so that a refresh stays visible
+      let requested = false
+      await page.route(RSS_URL, () => { requested = true })
+      await page.reload()
+      await goTo(page, 'subscriptions')
+      await page.locator('[data-rss-feeds-tab]').click()
+      await expect(titles).toHaveText(['Newest VOD', 'Older VOD'])
+      const loader = page.locator('[data-rss-feeds-tab] .tabLoadingIndicator')
+      if (fetchOnStartup) {
+        await expect(loader).toBeVisible()
+        await expect.poll(() => requested).toBe(true)
+      } else {
+        await expect(loader).toHaveCount(0)
+        expect(requested).toBe(false)
+      }
+    })
+  })
+}
+
 test.describe('when RSS feeds are the only enabled feeds', () => {
   test.use({
     seed: {
