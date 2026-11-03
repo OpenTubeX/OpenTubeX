@@ -238,7 +238,8 @@ export async function createKdeWaylandWindowStateBackend(retryDelays = BACKEND_R
  *   watchActiveWindow: (listener: (window: KwinActiveWindowInfo) => void) => {
  *     activeWindow: KwinActiveWindowInfo | null,
  *     stop: () => void
- *   }
+ *   },
+ *   watchWindowMinimized: (listener: (uuid: string, minimized: boolean) => void) => () => void
  * } | null>}
  */
 async function connectKdeWaylandWindowStateBackend() {
@@ -267,6 +268,7 @@ async function connectKdeWaylandWindowStateBackend() {
     let activeWindow = null
     let closed = false
     const activeWindowListeners = new Set()
+    const minimizedListeners = new Set()
     let resolveInitialReport
     const initialReport = new Promise(resolve => {
       const timeout = setTimeout(() => {
@@ -289,10 +291,17 @@ async function connectKdeWaylandWindowStateBackend() {
         }
         return null
       },
+      ReportWindowMinimized: (uuid, minimized) => {
+        for (const listener of minimizedListeners) {
+          listener(uuid, minimized)
+        }
+        return null
+      },
     }, ACTIVE_WINDOW_REPORT_PATH, {
       name: ACTIVE_WINDOW_REPORT_INTERFACE,
       methods: {
         ReportActiveWindow: ['sbs', '', ['uuid', 'skipTaskbar', 'resourceClass'], []],
+        ReportWindowMinimized: ['sb', '', ['uuid', 'minimized'], []],
       },
       signals: {},
       properties: {},
@@ -308,12 +317,10 @@ async function connectKdeWaylandWindowStateBackend() {
       await scripting.unloadScript(scriptPluginName).catch(() => {})
       if (closed) return
 
+      const report = `callDBus(${[destination, ACTIVE_WINDOW_REPORT_PATH, ACTIVE_WINDOW_REPORT_INTERFACE].map(value => JSON.stringify(value)).join(', ')}`
       const script = `
 const reportActiveWindow = activeWindow => {
-  callDBus(
-    ${JSON.stringify(destination)},
-    ${JSON.stringify(ACTIVE_WINDOW_REPORT_PATH)},
-    ${JSON.stringify(ACTIVE_WINDOW_REPORT_INTERFACE)},
+  ${report},
     "ReportActiveWindow",
     activeWindow ? activeWindow.internalId.toString() : "",
     activeWindow ? activeWindow.skipTaskbar : false,
@@ -322,6 +329,16 @@ const reportActiveWindow = activeWindow => {
 }
 reportActiveWindow(workspace.activeWindow)
 workspace.windowActivated.connect(reportActiveWindow)
+const watchMinimized = window => {
+  const reportMinimized = () => {
+    ${report}, "ReportWindowMinimized", window.internalId.toString(), window.minimized)
+  }
+  window.minimizedChanged.connect(reportMinimized)
+  return reportMinimized
+}
+// A reload after a D-Bus reconnect misses changes made while no script ran
+workspace.windowList().forEach(window => watchMinimized(window)())
+workspace.windowAdded.connect(watchMinimized)
 `
       await writeFile(scriptPath, script, 'utf8')
       if (closed) return
@@ -348,8 +365,25 @@ workspace.windowActivated.connect(reportActiveWindow)
     await loadActiveWindowScript()
     if (await initialReport === null) throw new Error('KWin did not report its active window')
     let scriptReload = Promise.resolve()
+    // Without the reporter, restores without focus go unnoticed, so keep
+    // retrying a failed reload as the removed poll kept checking.
+    let endRetryWait = null
+    const reloadScript = attempt => loadActiveWindowScript().catch(() => {
+      if (closed) return
+      return new Promise(resolve => {
+        const timer = setTimeout(resolve, Math.min(1000 * 2 ** attempt, 30_000))
+        // Closing ends the wait instead of holding up shutdown
+        endRetryWait = () => {
+          clearTimeout(timer)
+          resolve()
+        }
+      }).then(() => {
+        endRetryWait = null
+        return closed ? undefined : reloadScript(attempt + 1)
+      })
+    })
     const handleReconnect = () => {
-      scriptReload = scriptReload.then(loadActiveWindowScript).catch(() => {})
+      scriptReload = scriptReload.then(() => reloadScript(0))
     }
     bus.on('reconnected', handleReconnect)
 
@@ -360,6 +394,8 @@ workspace.windowActivated.connect(reportActiveWindow)
         bus.removeListener('reconnected', handleReconnect)
         resolveInitialReport?.(null)
         activeWindowListeners.clear()
+        minimizedListeners.clear()
+        endRetryWait?.()
         await scriptReload
         await scripting.unloadScript(scriptPluginName).catch(() => {})
         bus.unexportInterface(ACTIVE_WINDOW_REPORT_PATH, ACTIVE_WINDOW_REPORT_INTERFACE)
@@ -373,6 +409,11 @@ workspace.windowActivated.connect(reportActiveWindow)
           activeWindow,
           stop: () => activeWindowListeners.delete(listener),
         }
+      },
+      watchWindowMinimized: listener => {
+        if (closed) return () => {}
+        minimizedListeners.add(listener)
+        return () => minimizedListeners.delete(listener)
       },
       queryWindow: uuid => queryKwinWindow(kwin, uuid),
       queryWindows: processId => queryKwinWindows(kwin, runner, processId),
@@ -394,8 +435,8 @@ workspace.windowActivated.connect(reportActiveWindow)
 
 /**
  * Electron does not receive KWin's compositor-driven minimize event on native
- * Wayland. Compare KWin state after blur, then poll only while minimized so a
- * restore is forwarded too.
+ * Wayland. Compare KWin state after blur, then follow KWin's minimized reports
+ * so a restore is forwarded too.
  *
  * @param {{
  *   browserWindow: import('electron').BrowserWindow,
@@ -406,8 +447,7 @@ workspace.windowActivated.connect(reportActiveWindow)
  *   releaseWindowIdentity?: () => void,
  *   processId?: number,
  *   detectionDelay?: number,
- *   focusHandoffDelay?: number,
- *   pollInterval?: number
+ *   focusHandoffDelay?: number
  * }} options
  * @returns {() => void}
  */
@@ -421,7 +461,6 @@ export function monitorKdeWaylandWindowState({
   processId = process.pid,
   detectionDelay = 100,
   focusHandoffDelay = 100,
-  pollInterval = 1_000,
 }) {
   let baseline = []
   let generation = 0
@@ -429,7 +468,7 @@ export function monitorKdeWaylandWindowState({
   let minimizedUuid = null
   let windowUuid = null
   let focusHandoffTimer = null
-  let pollTimer = null
+  let stopRestoreWatch = null
   let stopActiveWindowWatch = null
   let stopped = false
 
@@ -442,9 +481,9 @@ export function monitorKdeWaylandWindowState({
     stopActiveWindowWatch?.()
     stopActiveWindowWatch = null
   }
-  const clearPoll = () => {
-    if (pollTimer !== null) clearTimeout(pollTimer)
-    pollTimer = null
+  const clearRestoreWatch = () => {
+    stopRestoreWatch?.()
+    stopRestoreWatch = null
   }
   const setMinimized = value => {
     if (minimized === value) return
@@ -469,33 +508,29 @@ export function monitorKdeWaylandWindowState({
     }).catch(() => {})
     return pending
   }
-  const schedulePoll = token => {
-    clearPoll()
-    if (stopped) return
-    pollTimer = setTimeout(async () => {
-      pollTimer = null
-      if (stopped || generation !== token || minimizedUuid === null) return
-
-      let window
-      try {
-        const value = await backend
-        if (value === null) return
-        window = await value.queryWindow(minimizedUuid)
-      } catch {
-        schedulePoll(token)
-        return
-      }
-      if (stopped || generation !== token) return
-
-      if (window?.minimized) {
-        schedulePoll(token)
-        return
-      }
-
+  const watchRestore = (value, token, uuid) => {
+    clearRestoreWatch()
+    const restored = () => {
+      if (stopped || generation !== token || minimizedUuid !== uuid) return
+      clearRestoreWatch()
       minimizedUuid = null
       setMinimized(false)
       refreshBaseline(token).catch(() => {})
-    }, pollInterval)
+    }
+    stopRestoreWatch = value.watchWindowMinimized((reportedUuid, isMinimized) => {
+      if (reportedUuid === uuid && !isMinimized) restored()
+    })
+    // The window can be restored before the watch starts. Retry a failed
+    // check while this watch still applies, as the removed poll did.
+    const checkRestored = () => {
+      value.queryWindow(uuid).then(window => {
+        if (!window?.minimized) restored()
+      }).catch(() => {
+        if (stopped || generation !== token || minimizedUuid !== uuid) return
+        setTimeout(checkRestored, 1000)
+      })
+    }
+    checkRestored()
   }
   const isDesktopPopup = activeWindow => activeWindow !== null &&
     activeWindow.skipTaskbar &&
@@ -541,7 +576,7 @@ export function monitorKdeWaylandWindowState({
     applyWindowIdentity()
     const token = ++generation
     clearActiveWindowWatch()
-    clearPoll()
+    clearRestoreWatch()
     minimizedUuid = null
     setMinimized(false)
     onFocusedState(true)
@@ -551,7 +586,7 @@ export function monitorKdeWaylandWindowState({
     applyWindowIdentity()
     const token = ++generation
     clearActiveWindowWatch()
-    clearPoll()
+    clearRestoreWatch()
 
     const previous = baseline
     try {
@@ -593,7 +628,7 @@ export function monitorKdeWaylandWindowState({
       releaseWindowIdentity()
       minimizedUuid = window.uuid
       setMinimized(true)
-      schedulePoll(token)
+      watchRestore(value, token, window.uuid)
     } catch {
       // A failed query disables this transition only. The next focus or blur
       // retries without affecting normal Electron window events.
@@ -604,7 +639,7 @@ export function monitorKdeWaylandWindowState({
     stopped = true
     generation++
     clearActiveWindowWatch()
-    clearPoll()
+    clearRestoreWatch()
     browserWindow.removeListener('focus', handleFocus)
     browserWindow.removeListener('blur', handleBlur)
     browserWindow.removeListener('closed', stop)

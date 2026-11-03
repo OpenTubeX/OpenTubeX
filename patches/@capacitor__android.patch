@@ -13,7 +13,7 @@ index 9a3c6e0739682c9ff3b1254324ef59bb4fb2f4bd..0cca9fb306c9a5ff8b7450a132bb2427
          this.pluginCallForLastActivity = null;
          return pluginCallForLastActivity;
 diff --git a/capacitor/src/main/java/com/getcapacitor/plugin/util/HttpRequestHandler.java b/capacitor/src/main/java/com/getcapacitor/plugin/util/HttpRequestHandler.java
-index 69278bc63b3fc8b2489ac3cf88b37c0330d3e516..72a2f1b0bb626def3aa7df1f88c5a12c10660d99 100644
+index d92eb9bb44dc0b064312ca43f97a78206a67be21..2fa4a3b4c90614910d10cd8abe7ce1207a1d3e9a 100644
 --- a/capacitor/src/main/java/com/getcapacitor/plugin/util/HttpRequestHandler.java
 +++ b/capacitor/src/main/java/com/getcapacitor/plugin/util/HttpRequestHandler.java
 @@ -219,7 +219,9 @@ public class HttpRequestHandler {
@@ -40,3 +40,21 @@ index 69278bc63b3fc8b2489ac3cf88b37c0330d3e516..72a2f1b0bb626def3aa7df1f88c5a12c
          if (errorStream != null) {
              if (isOneOf(contentType, MimeType.APPLICATION_JSON, MimeType.APPLICATION_VND_API_JSON)) {
                  return parseJSON(readStreamAsString(errorStream));
+@@ -423,6 +431,9 @@ public class HttpRequestHandler {
+             .openConnection();
+ 
+         CapacitorHttpUrlConnection connection = connectionBuilder.build();
++        // Publish the connection before writing a request body opens it, so
++        // callers can disconnect a request stuck in its TLS handshake.
++        call.getData().put("activeCapacitorHttpUrlConnection", connection);
+ 
+         if (null != bridge && !isDomainExcludedFromSSL(bridge, url)) {
+             connection.setSSLSocketFactory(bridge);
+@@ -437,7 +448,6 @@ public class HttpRequestHandler {
+             }
+         }
+ 
+-        call.getData().put("activeCapacitorHttpUrlConnection", connection);
+         connection.connect();
+ 
+         JSObject response = buildResponse(connection, responseType);

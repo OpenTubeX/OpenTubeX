@@ -1838,6 +1838,8 @@ Video:
   How this was made: How this was made
   Save Queue to Playlist: "Save queue to playlist"
   Live Chat is currently not supported with the Yattee server. A direct connection to YouTube is required.: Live Chat is currently not supported with the Yattee server. A direct connection to YouTube is required.
+  External Player:
+    LaunchFailedTemplate: Could not start {externalPlayer}. Make sure it is installed, or set its executable path in the external player settings.
 Playlist:
   Playlist Already Preloaded: "All playlist videos are already preloaded"
   Playlist Preload Progress: "Preloading videos: {completed} of {requested}"
@@ -2351,6 +2353,7 @@ Downloads:
     Subtitles Format: Subtitles - {format}
   Waiting for Unmetered Network: "Waiting for an unmetered network"
   Waiting for Charging: "Waiting for a charger"
+  Remove File Failed: Could not remove the downloaded file.
 Search Bar:
   Use Suggestion: Use suggestion
   Open Search Container: Open Search Container

@@ -1846,6 +1846,8 @@ Video:
       unlisted: "不公开列出的视频"
   Save Queue to Playlist: "将队列保存到播放列表"
   Live Chat is currently not supported with the Yattee server. A direct connection to YouTube is required.: 使用 Yattee 服务器时暂不支持在线聊天。需要直接连接 YouTube。
+  External Player:
+    LaunchFailedTemplate: 无法启动 {externalPlayer}。请确认它已安装，或在外部播放器设置中设置其可执行文件路径。
 Playlist:
   Playlist Already Preloaded: "播放列表中的所有视频均已预加载"
   Playlist Preload Progress: "正在预加载视频：{completed}/{requested}"
@@ -2356,6 +2358,7 @@ Downloads:
     Subtitles Format: 字幕 - {format}
   Waiting for Unmetered Network: "正在等待不按流量计费的网络"
   Waiting for Charging: "正在等待充电器"
+  Remove File Failed: 无法删除已下载的文件。
 Channels:
   Load More Channels: "加载更多频道"
 Theme Discovery:

@@ -1907,6 +1907,8 @@ Video:
   How this was made: இது எப்படி உருவாக்கப்பட்டது
   Save Queue to Playlist: "வரிசையை பிளேலிச்ட்டில் சேமி"
   Live Chat is currently not supported with the Yattee server. A direct connection to YouTube is required.: நேரடி அரட்டை தற்போது Yattee சேவையகத்துடன் ஆதரிக்கப்படவில்லை. YouTube உடன் நேரடி இணைப்பு தேவை.
+  External Player:
+    LaunchFailedTemplate: "{externalPlayer} ஐத் தொடங்க முடியவில்லை. அது நிறுவப்பட்டுள்ளதா எனச் சரிபார்க்கவும், அல்லது வெளிப்புற இயக்கி அமைப்புகளில் அதன் இயக்கக்கூடிய கோப்பின் பாதையை அமைக்கவும்."
 Playlist:
   Playlist Already Preloaded: "பிளேலிஸ்ட்டின் அனைத்து காணொளிகளும் ஏற்கனவே முன்பே ஏற்றப்பட்டுள்ளன"
   Playlist Preload Progress: "காணொளிகளை முன்பே ஏற்றுகிறது: {requested} இல் {completed}"
@@ -2423,6 +2425,7 @@ Downloads:
     Subtitles Format: துணைத்தலைப்புகள் - {format}
   Waiting for Unmetered Network: "அளவிடப்படாத நெட்வொர்க்கிற்காகக் காத்திருக்கிறது"
   Waiting for Charging: "சார்ஜருக்காகக் காத்திருக்கிறது"
+  Remove File Failed: பதிவிறக்கிய கோப்பை அகற்ற முடியவில்லை.
 Channels:
   Load More Channels: "மேலும் சேனல்களை ஏற்று"
 Search Bar:

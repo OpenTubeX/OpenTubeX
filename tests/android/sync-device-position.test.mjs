@@ -64,7 +64,7 @@ test('Android sends live tab progress and receives it ahead of stale history', {
       const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
       window.__handoffNative = window.Capacitor.nativePromise
       window.Capacitor.nativePromise = function(plugin, method, options, ...rest) {
-        if (plugin === 'CapacitorHttp' && method === 'request') {
+        if ((plugin === 'CapacitorHttp' || plugin === 'AndroidHttp') && method === 'request') {
           return options.url.startsWith('https://sync.example/')
             ? window.__handoffRequest(options) : Promise.reject(new Error('Local media fixture'))
         }

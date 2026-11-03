@@ -8,6 +8,11 @@ import { isOpenTubeXUrl } from './utils'
 /** @type {{ webContents: import('electron').WebContents, tabId: string } | null} */
 let subscriptionAutoRefreshOwner = null
 let subscriptionAutoRefreshProgress = 0
+/**
+ * Main-frame navigations and crashes of each tracked WebContents
+ * @type {WeakMap<import('electron').WebContents, number>}
+ */
+const rendererGenerations = new WeakMap()
 
 export function isSubscriptionAutoRefreshInProgress() {
   return subscriptionAutoRefreshOwner !== null && !subscriptionAutoRefreshOwner.webContents.isDestroyed()
@@ -50,10 +55,55 @@ function broadcastSubscriptionAutoRefreshState() {
  * @param {() => void} options.updateBackgroundSubscriptionVisibility
  */
 export function setupSubscriptionAutoRefreshIpc({ backgroundSubscriptions, updateBackgroundSubscriptionVisibility }) {
-  ipcMain.handle(IpcChannels.SUBSCRIPTION_AUTO_REFRESH_ACQUIRE, async (event, tabId, feedTab) => {
+  /** @param {import('electron').WebContents} webContents */
+  const releaseOwner = (webContents) => {
+    if (subscriptionAutoRefreshOwner?.webContents.id !== webContents.id) return false
+    subscriptionAutoRefreshOwner = null
+    subscriptionAutoRefreshProgress = 0
+    broadcastSubscriptionAutoRefreshState()
+    return true
+  }
+
+  // A renderer that reloads or crashes never releases its refresh, and a
+  // reload keeps the same WebContents
+  /** @param {import('electron').WebContents} webContents */
+  const trackRendererLifecycle = (webContents) => {
+    if (rendererGenerations.has(webContents)) return
+    rendererGenerations.set(webContents, 0)
+    const release = () => {
+      rendererGenerations.set(webContents, rendererGenerations.get(webContents) + 1)
+      if (releaseOwner(webContents)) updateBackgroundSubscriptionVisibility()
+    }
+    webContents.on('did-start-navigation', (_event, url, isInPlace, isMainFrame) => {
+      if (isMainFrame && !isInPlace && isOpenTubeXUrl(url)) release()
+    })
+    webContents.on('render-process-gone', release)
+    // The window's 'closed' handler updates the background visibility
+    webContents.once('destroyed', () => releaseOwner(webContents))
+  }
+
+  // A failed acquisition restores the background work, so a concurrent one
+  // must not leave the background before that
+  let acquisition = Promise.resolve(false)
+  ipcMain.handle(IpcChannels.SUBSCRIPTION_AUTO_REFRESH_ACQUIRE, (event, tabId, feedTab) => {
+    // The renderer that asked can reload or crash while this waits
+    trackRendererLifecycle(event.sender)
+    const generation = rendererGenerations.get(event.sender)
+    acquisition = acquisition.catch(() => {}).then(() => acquire(event, generation, tabId, feedTab))
+    return acquisition
+  })
+
+  /**
+   * @param {import('electron').IpcMainInvokeEvent} event
+   * @param {number} generation
+   * @param {unknown} tabId
+   * @param {unknown} feedTab
+   */
+  async function acquire(event, generation, tabId, feedTab) {
     const canAcquire = () => {
       const manager = TabManager.getFromWebContents(event.sender)
       return manager != null &&
+        rendererGenerations.get(event.sender) === generation &&
         typeof tabId === 'string' &&
         manager.activeTabId === tabId &&
         !event.sender.isDestroyed() &&
@@ -81,7 +131,11 @@ export function setupSubscriptionAutoRefreshIpc({ backgroundSubscriptions, updat
     }
 
     await backgroundSubscriptions.setBackground(false)
-    if (!canAcquire() || isSubscriptionAutoRefreshInProgress()) return false
+    if (!canAcquire() || isSubscriptionAutoRefreshInProgress()) {
+      // No release restores the background work of a refresh that never started
+      updateBackgroundSubscriptionVisibility()
+      return false
+    }
     const owner = event.sender
     subscriptionAutoRefreshOwner = {
       webContents: owner,
@@ -89,16 +143,9 @@ export function setupSubscriptionAutoRefreshIpc({ backgroundSubscriptions, updat
       feedTab: typeof feedTab === 'string' ? feedTab : null
     }
     subscriptionAutoRefreshProgress = 0
-    owner.once('destroyed', () => {
-      if (subscriptionAutoRefreshOwner?.webContents.id === owner.id) {
-        subscriptionAutoRefreshOwner = null
-        subscriptionAutoRefreshProgress = 0
-        broadcastSubscriptionAutoRefreshState()
-      }
-    })
     broadcastSubscriptionAutoRefreshState()
     return true
-  })
+  }
 
   ipcMain.handle(IpcChannels.SUBSCRIPTION_AUTO_REFRESH_GET_STATE, (event) => {
     if (!isOpenTubeXUrl(event.senderFrame.url)) {
@@ -134,13 +181,7 @@ export function setupSubscriptionAutoRefreshIpc({ backgroundSubscriptions, updat
   })
 
   ipcMain.handle(IpcChannels.SUBSCRIPTION_AUTO_REFRESH_RELEASE, (event, tabId) => {
-    if (
-      subscriptionAutoRefreshOwner?.webContents.id === event.sender.id &&
-      subscriptionAutoRefreshOwner?.tabId === tabId
-    ) {
-      subscriptionAutoRefreshOwner = null
-      subscriptionAutoRefreshProgress = 0
-      broadcastSubscriptionAutoRefreshState()
+    if (subscriptionAutoRefreshOwner?.tabId === tabId && releaseOwner(event.sender)) {
       updateBackgroundSubscriptionVisibility()
     }
   })

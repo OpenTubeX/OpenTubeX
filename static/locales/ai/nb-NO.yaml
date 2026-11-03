@@ -1851,6 +1851,8 @@ Video:
       unlisted: "Ikke oppført"
   Save Queue to Playlist: "Lagre kø i spilleliste"
   Live Chat is currently not supported with the Yattee server. A direct connection to YouTube is required.: Direktechat støttes for tiden ikke med Yattee-tjeneren. Direkte tilkobling til YouTube kreves.
+  External Player:
+    LaunchFailedTemplate: Kunne ikke starte {externalPlayer}. Kontroller at den er installert, eller angi stien til den kjørbare filen i innstillingene for ekstern avspiller.
 Playlist:
   Playlist Already Preloaded: "Alle videoene i spillelisten er allerede forhåndslastet"
   Playlist Preload Progress: "Forhåndslaster videoer: {completed} av {requested}"
@@ -2361,6 +2363,7 @@ Downloads:
     Subtitles Format: Undertekster – {format}
   Waiting for Unmetered Network: "Venter på et nettverk uten datamåling"
   Waiting for Charging: "Venter på en lader"
+  Remove File Failed: Kunne ikke fjerne den nedlastede filen.
 Channels:
   Load More Channels: "Last inn flere kanaler"
 Search Bar:

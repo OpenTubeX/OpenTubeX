@@ -1856,6 +1856,8 @@ Video:
       unlisted: "Zerrendatu gabeak"
   Save Queue to Playlist: "Gorde ilara erreprodukzio-zerrendan"
   Live Chat is currently not supported with the Yattee server. A direct connection to YouTube is required.: Zuzeneko txata ez da oraingoz onartzen Yattee zerbitzariarekin. Beharrezkoa da YouTubera zuzenean konektatzea.
+  External Player:
+    LaunchFailedTemplate: Ezin izan da {externalPlayer} abiarazi. Egiaztatu instalatuta dagoela, edo ezarri exekutagarriaren bidea kanpoko erreproduzigailuaren ezarpenetan.
 Playlist:
   Playlist Already Preloaded: "Erreprodukzio-zerrendako bideo guztiak aurrez kargatuta daude"
   Playlist Preload Progress: "Bideoak aurrez kargatzen: {completed}/{requested}"
@@ -2366,6 +2368,7 @@ Downloads:
     Subtitles Format: Azpitituluak - {format}
   Waiting for Unmetered Network: "Neurtu gabeko sare baten zain"
   Waiting for Charging: "Kargagailu baten zain"
+  Remove File Failed: Ezin izan da deskargatutako fitxategia kendu.
 Channels:
   Load More Channels: "Kargatu kanal gehiago"
 Theme Discovery:

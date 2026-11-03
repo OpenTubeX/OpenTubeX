@@ -1848,6 +1848,8 @@ Video:
       unlisted: "Neuvedené"
   Save Queue to Playlist: "Uložiť poradie do playlistu"
   Live Chat is currently not supported with the Yattee server. A direct connection to YouTube is required.: Živý chat momentálne nie je podporovaný so serverom Yattee. Vyžaduje sa priame spojenie s YouTube.
+  External Player:
+    LaunchFailedTemplate: "{externalPlayer} sa nepodarilo spustiť. Skontrolujte, či je nainštalovaný, alebo nastavte cestu k spustiteľnému súboru v nastaveniach externého prehrávača."
 Playlist:
   Playlist Already Preloaded: "Všetky videá v playliste sú už predbežne načítané"
   Playlist Preload Progress: "Predbežné načítavanie videí: {completed} z {requested}"
@@ -2358,6 +2360,7 @@ Downloads:
     Subtitles Format: Titulky – {format}
   Waiting for Unmetered Network: "Čaká sa na nemeranú sieť"
   Waiting for Charging: "Čaká sa na nabíjačku"
+  Remove File Failed: Stiahnutý súbor sa nepodarilo odstrániť.
 Channels:
   Load More Channels: "Načítať ďalšie kanály"
 Theme Discovery:

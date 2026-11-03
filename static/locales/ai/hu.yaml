@@ -1846,6 +1846,8 @@ Video:
       unlisted: "Listázatlan"
   Save Queue to Playlist: "Lejátszási sor mentése lejátszási listába"
   Live Chat is currently not supported with the Yattee server. A direct connection to YouTube is required.: Az élő csevegést jelenleg nem támogatja a Yattee-kiszolgáló. Közvetlen kapcsolat szükséges a YouTube-hoz.
+  External Player:
+    LaunchFailedTemplate: A(z) {externalPlayer} nem indítható el. Ellenőrizze, hogy telepítve van-e, vagy adja meg a végrehajtható fájl útvonalát a külső lejátszó beállításaiban.
 Playlist:
   Playlist Already Preloaded: "A lejátszási lista összes videója már elő van töltve"
   Playlist Preload Progress: "Videók előtöltése: {completed}/{requested}"
@@ -2357,6 +2359,7 @@ Downloads:
     Subtitles Format: Feliratok - {format}
   Waiting for Unmetered Network: "Várakozás nem forgalomkorlátos hálózatra"
   Waiting for Charging: "Várakozás töltőre"
+  Remove File Failed: A letöltött fájl nem távolítható el.
 Channels:
   Load More Channels: "További csatornák betöltése"
 Theme Discovery:

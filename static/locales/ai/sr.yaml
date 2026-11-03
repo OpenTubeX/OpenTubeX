@@ -1918,6 +1918,8 @@ Video:
   How this was made: Како је ово направљено
   Save Queue to Playlist: "Сачувај ред за репродукцију у плејлисту"
   Live Chat is currently not supported with the Yattee server. A direct connection to YouTube is required.: Ћаскање уживо тренутно није подржано са Yattee сервером. Потребна је директна веза са YouTube-ом.
+  External Player:
+    LaunchFailedTemplate: Није могуће покренути {externalPlayer}. Проверите да ли је инсталиран или подесите путању извршне датотеке у подешавањима спољног плејера.
 Playlist:
   Playlist Already Preloaded: "Сви видео снимци са плејлисте су већ претходно учитани"
   Playlist Preload Progress: "Претходно учитавање видео снимака: {completed} од {requested}"
@@ -2438,6 +2440,7 @@ Downloads:
     Subtitles Format: Титлови - {format}
   Waiting for Unmetered Network: "Чека се мрежа без ограничења података"
   Waiting for Charging: "Чека се пуњач"
+  Remove File Failed: Није могуће уклонити преузету датотеку.
 Channels:
   Load More Channels: "Учитај још канала"
 Search Bar:

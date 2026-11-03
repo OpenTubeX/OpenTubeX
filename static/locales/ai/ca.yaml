@@ -2054,6 +2054,7 @@ Video:
       reversing playlists: invertir llistes de reproducció
       shuffling playlists: barrejar llistes de reproducció
       looping playlists: reproduir llistes de reproducció en bucle
+    LaunchFailedTemplate: No s’ha pogut iniciar {externalPlayer}. Comproveu que està instal·lat o definiu el camí de l’executable a la configuració del reproductor extern.
   Player:
     Playing in Picture-in-Picture: S'està reproduint en mode d'imatge sobre imatge
     Stream Recovery:
@@ -3017,6 +3018,7 @@ Downloads:
     Subtitles Format: Subtítols - {format}
   Waiting for Unmetered Network: "S'està esperant una xarxa sense límit de dades"
   Waiting for Charging: "S'està esperant un carregador"
+  Remove File Failed: No s’ha pogut eliminar el fitxer baixat.
 Theme Discovery:
   Discover Themes: "Descobreix temes"
   Refresh: "Actualitza"

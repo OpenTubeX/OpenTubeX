@@ -178,20 +178,34 @@ export async function handleOpenInExternalPlayer(event, payload) {
     }
   }
 
-  event.reply(
-    IpcChannels.OPEN_IN_EXTERNAL_PLAYER_RESULT,
-    externalPlayer,
-    unsupportedActions,
-    hasValidPlaylistId
-  )
-
   /** @type {string} */
   const externalPlayerExecutable = (await settings._findOne('externalPlayerExecutable'))?.value || ''
 
   const executable = externalPlayerExecutable.length > 0 ? externalPlayerExecutable : cmdArgs.defaultExecutable
 
-  const child = spawn(executable, args, { detached: true, stdio: 'ignore' })
-  child.unref()
+  let launchFailed = false
+  try {
+    const child = spawn(executable, args, { detached: true, stdio: 'ignore' })
+    // Without an error listener, a missing executable crashes the main process
+    await new Promise((resolve, reject) => {
+      child.once('spawn', resolve)
+      child.once('error', reject)
+    })
+    child.unref()
+  } catch (error) {
+    console.error('Could not start the external player', error)
+    launchFailed = true
+  }
+
+  if (event.sender.isDestroyed()) return
+
+  event.reply(
+    IpcChannels.OPEN_IN_EXTERNAL_PLAYER_RESULT,
+    externalPlayer,
+    unsupportedActions,
+    hasValidPlaylistId,
+    launchFailed
+  )
 }
 
 async function loadExternalPlayerData() {

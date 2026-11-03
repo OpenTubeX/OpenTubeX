@@ -58,7 +58,7 @@ for (const browseDownloads of [false, true]) for (const autoplayVideos of [true,
         ? window.__offlineQueueFetch(url, options) : Promise.reject(new Error('Offline queue test'))
       window.__offlineQueueNativePromise = window.Capacitor.nativePromise
       window.Capacitor.nativePromise = function(plugin, method, options, ...rest) {
-        if (plugin === 'CapacitorHttp' && method === 'request') return Promise.reject(new Error('Offline queue test'))
+        if ((plugin === 'CapacitorHttp' || plugin === 'AndroidHttp') && method === 'request') return Promise.reject(new Error('Offline queue test'))
         return window.__offlineQueueNativePromise.call(this, plugin, method, options, ...rest)
       }
       window.__offlineQueuePlayed = []

@@ -1869,6 +1869,8 @@ Video:
   How this was made: Så skapades detta
   Save Queue to Playlist: "Spara kön i en spellista"
   Live Chat is currently not supported with the Yattee server. A direct connection to YouTube is required.: Livechatt stöds för närvarande inte via Yattee-servern. En direktanslutning till YouTube krävs.
+  External Player:
+    LaunchFailedTemplate: Det gick inte att starta {externalPlayer}. Kontrollera att den är installerad, eller ange sökvägen till den körbara filen i inställningarna för extern spelare.
 Playlist:
   Playlist Already Preloaded: "Alla videor i spellistan är redan förladdade"
   Playlist Preload Progress: "Förladdar videor: {completed} av {requested}"
@@ -2383,6 +2385,7 @@ Downloads:
     Subtitles Format: Undertexter - {format}
   Waiting for Unmetered Network: "Väntar på ett obegränsat nätverk"
   Waiting for Charging: "Väntar på en laddare"
+  Remove File Failed: Det gick inte att ta bort den nedladdade filen.
 Channels:
   Load More Channels: "Läs in fler kanaler"
 Search Bar:

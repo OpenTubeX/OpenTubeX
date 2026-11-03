@@ -137,6 +137,8 @@ let powerSourcePollTimer = null
 const activeDownloads = new Map()
 /** @type {Map<number, YtDlpDownloadStatus>} */
 const downloadRecords = new Map()
+const MAX_SAVED_FILELESS_DOWNLOAD_RECORDS = 200
+const FILELESS_DOWNLOAD_STATUSES = ['failed', 'cancelled', 'skipped']
 /** @type {Map<number, (permitted: boolean) => void>} */
 const queuedDownloadWaiters = new Map()
 const individuallyResumedDownloadIds = new Set()
@@ -310,12 +312,21 @@ function saveDownloadRecords() {
         .map(record => ['preparing', 'downloading', 'processing', 'pausing'].includes(record.status)
           ? { ...record, status: record.status === 'pausing' ? 'paused' : 'queued', speed: null, eta: null }
           : record)
-        .slice(-200)
+      // Completed and unfinished downloads stay listed and playable. Records
+      // without a file have their own limit, so recent failures stay retryable
+      // however many downloads completed.
+      let excessRecords = records.filter(record => FILELESS_DOWNLOAD_STATUSES.includes(record.status)).length -
+        MAX_SAVED_FILELESS_DOWNLOAD_RECORDS
+      const savedRecords = records.filter(record => {
+        if (excessRecords <= 0 || !FILELESS_DOWNLOAD_STATUSES.includes(record.status)) return true
+        excessRecords--
+        return false
+      })
       // Write atomically so a crash mid-write cannot wipe the download history
       // and reset the id counter.
       const path = getDownloadRecordsPath()
       const temporaryPath = `${path}.tmp`
-      await writeFile(temporaryPath, JSON.stringify(records), 'utf8')
+      await writeFile(temporaryPath, JSON.stringify(savedRecords), 'utf8')
       await rename(temporaryPath, path)
     })
   return downloadRecordsSaveQueue
@@ -1256,17 +1267,16 @@ export async function handleYtDlpRemoveDownload(event, id) {
     return false
   }
 
-  let trashed = false
   for (const destination of destinations) {
     if (!existsSync(destination)) continue
     try {
       await moveToTrash(destination)
-      trashed = true
     } catch (error) {
       console.warn('Could not move download to trash', destination, error)
     }
   }
-  if (!trashed) return false
+  // Keep the record while any of its files remain
+  if (destinations.some(existsSync)) return false
 
   downloadRecords.delete(id)
   await saveDownloadRecords()

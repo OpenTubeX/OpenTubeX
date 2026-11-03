@@ -140,11 +140,6 @@ public class OpenTubeXWebViewClient extends BridgeWebViewClient {
         try {
             Response response = ExternalStreamRedirects.fetchForWebView(builder.build(), externalStreamClient);
             int statusCode = response.code();
-            if (statusCode >= 300 && statusCode < 400) {
-                // WebResourceResponse rejects every 3xx code, including 304.
-                if (response.body() != null) response.close();
-                return errorResponse(502, "Bad Gateway");
-            }
             ResponseBody body = response.body();
             InputStream stream = body == null ? new ByteArrayInputStream(new byte[0]) : body.byteStream();
             Map<String, String> responseHeaders = AndroidHttpUtils.flattenHeaders(response.headers().toMultimap());
@@ -216,6 +211,12 @@ public class OpenTubeXWebViewClient extends BridgeWebViewClient {
             );
             String responseMessage = connection.getResponseMessage();
 
+            if (isRedirect(statusCode)) {
+                stream.close();
+                connection.disconnect();
+                sabrRequests.complete(request);
+                return errorResponse(502, "Bad Gateway");
+            }
             return new WebResourceResponse(
                 AndroidHttpUtils.mimeType(
                     connection.getContentType(),
@@ -243,6 +244,10 @@ public class OpenTubeXWebViewClient extends BridgeWebViewClient {
     static WebResourceResponse mediaResponse(WebResourceRequest request, String mimeType,
                                              int statusCode, String responseMessage,
                                              Map<String, String> headers, InputStream stream) {
+        if (isRedirect(statusCode)) {
+            try { stream.close(); } catch (IOException ignored) { /* Already failed. */ }
+            return errorResponse(502, "Bad Gateway");
+        }
         // WebView adds Content-Type from WebResourceResponse's MIME type.
         // Supplying it again produces an invalid "video/mp4, video/mp4".
         removeHeader(headers, "Content-Type");
@@ -270,6 +275,11 @@ public class OpenTubeXWebViewClient extends BridgeWebViewClient {
             }
         }
         return new WebResourceResponse(mimeType, null, statusCode, responseMessage, headers, stream);
+    }
+
+    // WebResourceResponse rejects every 3xx code, including 304, by throwing.
+    private static boolean isRedirect(int statusCode) {
+        return statusCode >= 300 && statusCode < 400;
     }
 
     private static String headerValue(Map<String, String> headers, String name) {

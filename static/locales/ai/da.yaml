@@ -1924,6 +1924,8 @@ Video:
   How this was made: Sådan blev dette lavet
   Save Queue to Playlist: "Gem kø i playliste"
   Live Chat is currently not supported with the Yattee server. A direct connection to YouTube is required.: Live chat understøttes i øjeblikket ikke med Yattee-serveren. Direkte forbindelse til YouTube kræves.
+  External Player:
+    LaunchFailedTemplate: "{externalPlayer} kunne ikke startes. Kontrollér, at den er installeret, eller angiv stien til den eksekverbare fil i indstillingerne for ekstern afspiller."
 Playlist:
   Playlist Already Preloaded: "Alle videoer i playlisten er allerede forudindlæst"
   Playlist Preload Progress: "Forudindlæser videoer: {completed} af {requested}"
@@ -2447,6 +2449,7 @@ Downloads:
     Subtitles Format: Undertekster - {format}
   Waiting for Unmetered Network: "Venter på et netværk uden datamåling"
   Waiting for Charging: "Venter på en oplader"
+  Remove File Failed: Den downloadede fil kunne ikke fjernes.
 Channels:
   Load More Channels: "Indlæs flere kanaler"
 Search Bar:

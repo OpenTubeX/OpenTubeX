@@ -370,7 +370,8 @@ import { parseSpeedByChannelValues, resolveSpeedByChannelValues } from '../../..
 import { previewBackupImport, previewTakeoutImport, parseTakeoutSubscriptions, parseTakeoutWatchHistory, parseTakeoutSearchHistory } from '../../../helpers/import-preview'
 import FtImportPreview from '../../FtImportPreview/FtImportPreview.vue'
 import FtLoader from '../../FtLoader/FtLoader.vue'
-import { BACKUP_SECTIONS, createUnifiedBackup, mergeBackupHistoryRecord, mergeBackupPlaylist, mergeBackupProfile, readUnifiedBackup } from '../../../helpers/unifiedBackup'
+import { BACKUP_SECTIONS, mergeBackupHistoryRecord, mergeBackupPlaylist, mergeBackupProfile } from '../../../helpers/unifiedBackup'
+import { runBackgroundJob } from '../../../helpers/background-jobs'
 import { compactAllDatastores, DBHistoryHandlers, DBPlaylistHandlers, DBProfileHandlers, DBSearchHistoryHandlers, DBWatchStatsHandlers } from '../../../../datastores/handlers/index'
 import { forEachTakeoutImportEntry, forEachTakeoutPlaylistFile, listYouTubeTakeoutZipEntries } from '../../../helpers/youtube-takeout-zip'
 import {
@@ -468,7 +469,7 @@ async function exportUnifiedBackup() {
           },
         }
         const entries = await Promise.all(selected.map(async section => [section, await readers[section]()]))
-        return createUnifiedBackup(Object.fromEntries(entries))
+        return runBackgroundJob('createUnifiedBackup', Object.fromEntries(entries))
       },
       t('Settings.Data Settings.Complete backup'), 'application/zip', '.zip',
       t('Settings.Data Settings.Backup exported')
@@ -487,7 +488,7 @@ async function selectUnifiedBackup() {
   try {
     const file = await pickFileWithPicker(t('Settings.Data Settings.Complete backup'), { 'application/zip': '.zip' }, IMPORT_DIRECTORY_ID, START_IN_DIRECTORY)
     if (file === null) return
-    const { data } = await readUnifiedBackup(file)
+    const { data } = await runBackgroundJob('readUnifiedBackup', file)
     const current = await readImportState(Object.keys(data))
     backupPreview.value = previewBackupImport(data, current)
     backupFilename.value = file.name

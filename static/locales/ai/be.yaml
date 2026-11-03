@@ -1942,6 +1942,8 @@ Video:
   How this was made: Як гэта было зроблена
   Save Queue to Playlist: "Захаваць чаргу ў плэй-ліст"
   Live Chat is currently not supported with the Yattee server. A direct connection to YouTube is required.: Жывы чат зараз не падтрымліваецца серверам Yattee. Патрабуецца прамое падключэнне да YouTube.
+  External Player:
+    LaunchFailedTemplate: Не ўдалося запусціць {externalPlayer}. Пераканайцеся, што ён усталяваны, або ўкажыце шлях да выканальнага файла ў наладах вонкавага прайгравальніка.
 Playlist:
   Playlist Already Preloaded: "Усе відэа плэйліста ўжо папярэдне загружаны"
   Playlist Preload Progress: "Папярэдняя загрузка відэа: {completed} з {requested}"
@@ -2465,6 +2467,7 @@ Downloads:
     Subtitles Format: Субцітры — {format}
   Waiting for Unmetered Network: "Чаканне безлімітнай сеткі"
   Waiting for Charging: "Чаканне зараднай прылады"
+  Remove File Failed: Не ўдалося выдаліць спампаваны файл.
 Channels:
   Load More Channels: "Загрузіць больш каналаў"
 Search Bar:

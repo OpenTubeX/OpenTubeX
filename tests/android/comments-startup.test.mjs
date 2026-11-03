@@ -40,7 +40,7 @@ test('restored Android Watch tabs retain comment previews and both panel entry p
       const original = window.Capacitor.nativePromise
       window.Capacitor.nativePromise = async function(plugin, method, options, ...rest) {
         if (plugin === 'PoToken' && method === 'generate') return { token: 'test-po-token' }
-        if (plugin === 'CapacitorHttp' && method === 'request') {
+        if ((plugin === 'CapacitorHttp' || plugin === 'AndroidHttp') && method === 'request') {
           const response = await fetch(options.url, { method: options.method, headers: options.headers, body: options.data })
           return { status: response.status, headers: Object.fromEntries(response.headers), data: await response.text(), url: options.url }
         }

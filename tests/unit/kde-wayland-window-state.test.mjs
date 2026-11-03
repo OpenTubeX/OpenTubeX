@@ -3,6 +3,7 @@ import dbus from 'dbus-native'
 import { EventEmitter } from 'node:events'
 import { readFile } from 'node:fs/promises'
 import test from 'node:test'
+import vm from 'node:vm'
 
 import {
   createKdeWaylandWindowStateBackend,
@@ -172,6 +173,27 @@ test('starts the KWin reporter despite a reused script ID and reloads it after r
   assert.doesNotMatch(scripts[1], /":1\.10"/)
   assert.deepEqual(activeWindows, [{ uuid: 'window', skipTaskbar: false, resourceClass: 'electron' }])
   watch.stop()
+
+  // KWin reports minimize changes instead of being polled
+  assert.match(scripts[1], /minimizedChanged\.connect/)
+  assert.match(scripts[1], /workspace\.windowAdded\.connect/)
+  const minimizedReports = []
+  const stopMinimizedWatch = backend.watchWindowMinimized((uuid, minimized) => minimizedReports.push([uuid, minimized]))
+  reportInterface.ReportWindowMinimized('window', true)
+  stopMinimizedWatch()
+  reportInterface.ReportWindowMinimized('window', false)
+  assert.deepEqual(minimizedReports, [['window', true]])
+
+  // The reloaded script reports current states, so a restore while no script
+  // ran is not missed
+  const calls = []
+  const signal = () => ({ connect: () => {} })
+  const restoredWindow = { internalId: 'window', minimized: false, minimizedChanged: signal() }
+  vm.runInNewContext(scripts[1], {
+    callDBus: (...args) => calls.push(args.slice(3)),
+    workspace: { activeWindow: null, windowActivated: signal(), windowAdded: signal(), windowList: () => [restoredWindow] },
+  })
+  assert.deepEqual(calls.filter(([method]) => method === 'ReportWindowMinimized'), [['ReportWindowMinimized', 'window', false]])
   await backend.close()
   assert.equal(bus.listenerCount('reconnected'), 0)
 })
@@ -385,7 +407,6 @@ test('preserves the window identity across title updates during detection', asyn
         setWindowTitle(targetWindow().caption)
       },
       detectionDelay: 0,
-      pollInterval: 60000,
       onMinimizedState: state => {
         states.push(state)
         stop()
@@ -407,6 +428,53 @@ test('preserves the window identity across title updates during detection', asyn
   await detected
 
   assert.deepEqual(states, [true])
+})
+
+test('forwards a restore that KWin reports without polling or focus', async t => {
+  const browserWindow = new EventEmitter()
+  browserWindow.getBounds = () => targetWindow().bounds
+  browserWindow.getTitle = () => targetWindow().caption
+  browserWindow.isFocused = () => false
+  let minimizedListener = null
+  let windowQueries = 0
+  const backend = Promise.resolve({
+    queryWindow: async () => {
+      windowQueries++
+      return windowInfo({ minimized: true })
+    },
+    queryWindows: async () => [windowInfo({ minimized: true })],
+    watchActiveWindow: () => ({ activeWindow: null, stop: () => {} }),
+    watchWindowMinimized: listener => {
+      minimizedListener = listener
+      return () => {
+        if (minimizedListener === listener) minimizedListener = null
+      }
+    },
+  })
+  const states = []
+  const stop = monitorKdeWaylandWindowState({
+    browserWindow,
+    backend,
+    detectionDelay: 0,
+    onMinimizedState: state => states.push(state),
+  })
+  t.after(stop)
+  await new Promise(resolve => setTimeout(resolve, 10))
+
+  browserWindow.emit('blur')
+  await new Promise(resolve => setTimeout(resolve, 20))
+  assert.deepEqual(states, [true])
+  // One check covers a restore that happened before the watch started
+  assert.equal(windowQueries, 1)
+
+  minimizedListener('other', false)
+  await new Promise(resolve => setTimeout(resolve, 1_100))
+  assert.deepEqual(states, [true])
+  assert.equal(windowQueries, 1)
+
+  minimizedListener('window', false)
+  assert.deepEqual(states, [true, false])
+  assert.equal(minimizedListener, null)
 })
 
 function windowInfo (overrides = {}) {
@@ -514,4 +582,126 @@ test('gives up on a session bus that stays too slow', async t => {
 
   assert.equal(await createKdeWaylandWindowStateBackend([0, 0, 0]), null)
   assert.equal(attempts.length, 4)
+})
+
+test('retries the restore check when its first query fails', async t => {
+  const browserWindow = new EventEmitter()
+  browserWindow.getBounds = () => targetWindow().bounds
+  browserWindow.getTitle = () => targetWindow().caption
+  browserWindow.isFocused = () => false
+  let windowQueries = 0
+  const backend = Promise.resolve({
+    queryWindow: async () => {
+      // The window was restored, but the first check fails
+      if (++windowQueries === 1) throw new Error('D-Bus call failed')
+      return windowInfo({ minimized: false })
+    },
+    queryWindows: async () => [windowInfo({ minimized: true })],
+    watchActiveWindow: () => ({ activeWindow: null, stop: () => {} }),
+    watchWindowMinimized: () => () => {},
+  })
+  const states = []
+  const stop = monitorKdeWaylandWindowState({
+    browserWindow,
+    backend,
+    detectionDelay: 0,
+    onMinimizedState: state => states.push(state),
+  })
+  t.after(stop)
+  await new Promise(resolve => setTimeout(resolve, 10))
+
+  browserWindow.emit('blur')
+  await new Promise(resolve => setTimeout(resolve, 20))
+  assert.deepEqual(states, [true])
+  await new Promise(resolve => setTimeout(resolve, 1100))
+  assert.equal(windowQueries, 2)
+  assert.deepEqual(states, [true, false])
+})
+
+test('retries a reporter reload that fails after a reconnect', async t => {
+  const originalSessionBus = dbus.sessionBus
+  const bus = new EventEmitter()
+  bus.name = ':1.10'
+  bus.connection = new EventEmitter()
+  let reportInterface
+  let loads = 0
+  let resolveRetried
+  const retried = new Promise(resolve => { resolveRetried = resolve })
+  const scripting = {
+    unloadScript: async () => true,
+    start: async () => { reportInterface.ReportActiveWindow('window', false, 'electron') },
+  }
+  const service = {
+    getInterface: async path => {
+      if (path === '/KWin') return { getWindowInfo: async () => null }
+      if (path === '/WindowsRunner') return { Match: async () => [] }
+      if (path === '/Scripting') return scripting
+      return { run: async () => {} }
+    },
+  }
+  bus.getService = () => service
+  bus.invoke = async () => {
+    loads++
+    // The first reload after the reconnect fails
+    if (loads === 2) throw new Error('KWin is not ready yet')
+    if (loads === 3) resolveRetried()
+    return loads
+  }
+  bus.exportInterface = implementation => { reportInterface = implementation }
+  bus.unexportInterface = () => {}
+  bus.close = async () => {}
+  dbus.sessionBus = () => bus
+  t.after(() => { dbus.sessionBus = originalSessionBus })
+
+  const backend = await createKdeWaylandWindowStateBackend()
+  assert.notEqual(backend, null)
+  bus.emit('reconnected', { name: bus.name })
+  await retried
+  assert.equal(loads, 3)
+  await backend.close()
+})
+
+test('closing ends a pending reporter reload retry without waiting for it', async t => {
+  const originalSessionBus = dbus.sessionBus
+  const bus = new EventEmitter()
+  bus.name = ':1.10'
+  bus.connection = new EventEmitter()
+  let reportInterface
+  let loads = 0
+  let resolveFailed
+  const failed = new Promise(resolve => { resolveFailed = resolve })
+  const scripting = {
+    unloadScript: async () => true,
+    start: async () => { reportInterface.ReportActiveWindow('window', false, 'electron') },
+  }
+  const service = {
+    getInterface: async path => {
+      if (path === '/KWin') return { getWindowInfo: async () => null }
+      if (path === '/WindowsRunner') return { Match: async () => [] }
+      if (path === '/Scripting') return scripting
+      return { run: async () => {} }
+    },
+  }
+  bus.getService = () => service
+  bus.invoke = async () => {
+    if (++loads > 1) {
+      resolveFailed()
+      throw new Error('KWin is not ready yet')
+    }
+    return loads
+  }
+  bus.exportInterface = implementation => { reportInterface = implementation }
+  bus.unexportInterface = () => {}
+  bus.close = async () => {}
+  dbus.sessionBus = () => bus
+  t.after(() => { dbus.sessionBus = originalSessionBus })
+
+  const backend = await createKdeWaylandWindowStateBackend()
+  bus.emit('reconnected', { name: bus.name })
+  await failed
+  await new Promise(resolve => setImmediate(resolve))
+  const started = Date.now()
+  await backend.close()
+  assert.ok(Date.now() - started < 500, 'close does not wait for the retry delay')
+  assert.equal(loads, 2)
 })

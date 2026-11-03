@@ -1953,6 +1953,8 @@ Video:
     Unavailable videos are hidden: 1 غیر دستیاب ویڈیو پوشیدہ ہے | {count} غیر دستیاب ویڈیوز پوشیدہ ہیں
   How this was made: یہ کیسے بنایا گیا
   Info panel source: 'ماخذ: {source}'
+  External Player:
+    LaunchFailedTemplate: "{externalPlayer} شروع نہیں ہو سکا۔ یقینی بنائیں کہ یہ انسٹال ہے، یا بیرونی پلیئر کی ترتیبات میں اس کی قابلِ اجرا فائل کا راستہ مقرر کریں۔"
 Playlist:
   Close Playlist: پلے لسٹ بند کریں
   Add Playlist to Queue: پلے لسٹ قطار میں شامل کریں
@@ -2480,6 +2482,7 @@ Downloads:
     Audio Best: آڈیو - بہترین کوالٹی
     Audio Format: آڈیو - {format}
     Subtitles Format: سب ٹائٹلز - {format}
+  Remove File Failed: ڈاؤن لوڈ کی گئی فائل ہٹائی نہیں جا سکی۔
 Theme Discovery:
   Discover Themes: تھیمز دریافت کریں
   Refresh: ریفریش کریں

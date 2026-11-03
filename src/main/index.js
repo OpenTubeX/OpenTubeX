@@ -2706,7 +2706,9 @@ function runApp() {
     }
   })
 
-  ipcMain.on(IpcChannels.OPEN_IN_EXTERNAL_PLAYER, handleOpenInExternalPlayer)
+  ipcMain.on(IpcChannels.OPEN_IN_EXTERNAL_PLAYER, (event, payload) => {
+    handleOpenInExternalPlayer(event, payload).catch(error => console.error('Could not open the external player', error))
+  })
   /** The API server the user configured, which may run on a private network */
   async function getConfiguredApiServerUrl() {
     if ((await baseHandlers.settings._findOne('backendPreference'))?.value === 'yattee') {

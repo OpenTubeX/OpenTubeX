@@ -1822,6 +1822,8 @@ Video:
       unlisted: "Отсутствует в списках"
   Save Queue to Playlist: "Сохранить очередь в плейлист"
   Live Chat is currently not supported with the Yattee server. A direct connection to YouTube is required.: Чат трансляции в настоящее время не поддерживается сервером Yattee. Требуется прямое подключение к YouTube.
+  External Player:
+    LaunchFailedTemplate: Не удалось запустить {externalPlayer}. Убедитесь, что он установлен, или укажите путь к исполняемому файлу в настройках внешнего проигрывателя.
 Playlist:
   Playlist Already Preloaded: "Все видео из плейлиста уже предварительно загружены"
   Playlist Preload Progress: "Предварительная загрузка видео: {completed} из {requested}"
@@ -2328,6 +2330,7 @@ Downloads:
     Subtitles Format: Субтитры - {format}
   Waiting for Unmetered Network: "Ожидание безлимитной сети"
   Waiting for Charging: "Ожидание зарядного устройства"
+  Remove File Failed: Не удалось удалить скачанный файл.
 Channels:
   Load More Channels: "Загрузить больше каналов"
 Search Bar:

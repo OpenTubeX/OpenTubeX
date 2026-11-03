@@ -2218,6 +2218,7 @@ Video:
       opening playlists: Playlists öffnen
     UnsupportedActionTemplate: '{externalPlayer} unterstützt nicht: {action}'
     OpeningTemplate: '{videoOrPlaylist} wird in {externalPlayer} geöffnet ...'
+    LaunchFailedTemplate: '{externalPlayer} konnte nicht gestartet werden. Stelle sicher, dass er installiert ist, oder lege den Pfad zur ausführbaren Datei in den Einstellungen für externe Video-Player fest.'
     playlist: Playlist
     video: Video
   Premiere: Premiere
@@ -3496,6 +3497,7 @@ Downloads:
   Remove File Confirmation: Heruntergeladene Datei entfernen?
   Remove File Warning: Dadurch wird „{title}“ in den Papierkorb deines Geräts verschoben.
   File Not Found: Die heruntergeladene Datei wurde nicht gefunden.
+  Remove File Failed: Die heruntergeladene Datei konnte nicht entfernt werden.
   Download Missing: Download nicht verfügbar
   Files Missing: >-
     Die heruntergeladene Datei ist im Dateisystem nicht mehr verfügbar. | Die heruntergeladenen Dateien sind im

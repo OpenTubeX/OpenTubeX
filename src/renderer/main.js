@@ -115,7 +115,15 @@ if (process.env.IS_ELECTRON) {
   })
 
   window.ftElectron.handleOpenInExternalPlayerResult(
-    (externalPlayer, unsupportedActions, isPlaylist) => {
+    (externalPlayer, unsupportedActions, isPlaylist, launchFailed) => {
+      if (launchFailed) {
+        showToast({
+          message: i18n.global.t('Video.External Player.LaunchFailedTemplate', { externalPlayer }),
+          icon: ['fas', 'circle-exclamation'],
+        })
+        return
+      }
+
       for (const action of unsupportedActions) {
         showExternalPlayerUnsupportedActionToast(externalPlayer, action)
       }

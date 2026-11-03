@@ -1863,6 +1863,8 @@ Video:
       unlisted: "Óskráð"
   Save Queue to Playlist: "Vista biðröð í spilunarlista"
   Live Chat is currently not supported with the Yattee server. A direct connection to YouTube is required.: Spjall í beinni er ekki stutt með Yattee-netþjóninum. Nauðsynlegt er að vera með beina tengingu við YouTube.
+  External Player:
+    LaunchFailedTemplate: Ekki tókst að ræsa {externalPlayer}. Athugaðu að hann sé uppsettur, eða stilltu slóð keyrsluskrárinnar í stillingum ytri spilara.
 Playlist:
   Playlist Already Preloaded: "Öll myndskeið spilunarlistans eru þegar forhlaðin"
   Playlist Preload Progress: "Forhleðsla myndskeiða: {completed} af {requested}"
@@ -2375,6 +2377,7 @@ Downloads:
     Subtitles Format: Skjátextar – {format}
   Waiting for Unmetered Network: "Bíður eftir ómældu neti"
   Waiting for Charging: "Bíður eftir hleðslutæki"
+  Remove File Failed: Ekki tókst að fjarlægja sóttu skrána.
 Channels:
   Load More Channels: "Hlaða fleiri rásum"
 Theme Discovery:

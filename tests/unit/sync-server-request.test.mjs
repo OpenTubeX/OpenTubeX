@@ -29,13 +29,16 @@ async function loadClient(env, version, requests, nativeRequest, browserRequest,
       const timeout = setTimeout(callback, ms)
       return () => clearTimeout(timeout)
     },
-    CapacitorHttp: {
+    // Android requests use the cancellable AndroidHttp plugin.
+    registerPlugin: () => ({
       request: async options => {
         requests.push(options)
         if (nativeRequest) return nativeRequest(options)
         return { status: 200, data: '{}', headers: {} }
       },
-    },
+      abort: async () => {},
+    }),
+    crypto: globalThis.crypto,
     fetch: async (url, options) => {
       requests.push({ url, ...options })
       return browserRequest ? browserRequest(options) : new Response('{}')

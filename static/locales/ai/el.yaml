@@ -1874,6 +1874,8 @@ Video:
   How this was made: Πώς δημιουργήθηκε αυτό
   Save Queue to Playlist: "Αποθήκευση ουράς αναπαραγωγής σε λίστα αναπαραγωγής"
   Live Chat is currently not supported with the Yattee server. A direct connection to YouTube is required.: Η ζωντανή συνομιλία δεν υποστηρίζεται προς το παρόν με τον διακομιστή Yattee. Απαιτείται άμεση σύνδεση με το YouTube.
+  External Player:
+    LaunchFailedTemplate: Δεν ήταν δυνατή η εκκίνηση του {externalPlayer}. Βεβαιωθείτε ότι είναι εγκατεστημένο ή ορίστε τη διαδρομή του εκτελέσιμου αρχείου στις ρυθμίσεις εξωτερικού προγράμματος αναπαραγωγής.
 Playlist:
   Playlist Already Preloaded: "Όλα τα βίντεο της λίστας αναπαραγωγής έχουν ήδη προφορτωθεί"
   Playlist Preload Progress: "Προφόρτωση βίντεο: {completed} από {requested}"
@@ -2390,6 +2392,7 @@ Downloads:
     Subtitles Format: Υπότιτλοι - {format}
   Waiting for Unmetered Network: "Αναμονή για δίκτυο χωρίς χρέωση δεδομένων"
   Waiting for Charging: "Αναμονή για φορτιστή"
+  Remove File Failed: Δεν ήταν δυνατή η αφαίρεση του ληφθέντος αρχείου.
 Channels:
   Load More Channels: "Φόρτωση περισσότερων καναλιών"
 Search Bar:

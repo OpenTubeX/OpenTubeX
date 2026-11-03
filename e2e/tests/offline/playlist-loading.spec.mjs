@@ -630,6 +630,25 @@ test.describe('YouTube playlist search', () => {
     await expect.poll(() => app.electronApp.evaluate(() => globalThis.__externalLaunches)).toEqual([2, 2])
   })
 
+  test('reports an external player that cannot be started', async ({ app, page }) => {
+    await page.evaluate(async () => {
+      await window.$store.dispatch('updateExternalPlayer', 'mpv')
+      await window.$store.dispatch('updateExternalPlayerExecutable', '/nonexistent/opentubex-external-player')
+    })
+    await page.route(/\/api\/v1\/playlists\/missing-player\?/, route => route.fulfill({
+      json: playlistResponse([playlistVideo(0)])
+    }))
+
+    await openPlaylistTab(page, '/playlist/missing-player')
+    await page.locator('.playlistPage .playlistItem').first().locator('.externalPlayerIcon').click()
+
+    await expect(page.locator('.toast .message', {
+      hasText: 'Could not start mpv. Make sure it is installed, or set its executable path in the external player settings.'
+    })).toBeVisible()
+    await expect(page.locator('.toast .message', { hasText: 'Opening' })).toHaveCount(0)
+    expect(await app.electronApp.evaluate(({ BrowserWindow }) => BrowserWindow.getAllWindows().length)).toBeGreaterThan(0)
+  })
+
   test('keeps a restored search editable on a playlist with one video', async ({ page }) => {
     await page.route(/\/api\/v1\/playlists\/single-video\?/, route => route.fulfill({
       json: playlistResponse([playlistVideo(0)])

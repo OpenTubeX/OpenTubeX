@@ -1847,6 +1847,8 @@ Video:
       unlisted: "Non répertorié"
   Save Queue to Playlist: "Enregistrer la file d’attente dans une playlist"
   Live Chat is currently not supported with the Yattee server. A direct connection to YouTube is required.: Le chat en direct n’est actuellement pas pris en charge avec le serveur Yattee. Une connexion directe à YouTube est requise.
+  External Player:
+    LaunchFailedTemplate: Impossible de lancer {externalPlayer}. Vérifiez qu’il est installé ou définissez le chemin de son exécutable dans les paramètres du lecteur externe.
 Playlist:
   Playlist Already Preloaded: "Toutes les vidéos de la playlist sont déjà préchargées"
   Playlist Preload Progress: "Préchargement des vidéos : {completed} sur {requested}"
@@ -2357,6 +2359,7 @@ Downloads:
     Subtitles Format: Sous-titres - {format}
   Waiting for Unmetered Network: "En attente d'un réseau non limité"
   Waiting for Charging: "En attente d'un chargeur"
+  Remove File Failed: Impossible de supprimer le fichier téléchargé.
 Channels:
   Load More Channels: "Charger plus de chaînes"
 Theme Discovery:

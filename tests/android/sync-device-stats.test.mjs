@@ -69,7 +69,7 @@ test('Android repairs duplicate stats and reuses its identity when creating anot
       const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
       window.__statsRepairNativePromise = window.Capacitor.nativePromise
       window.Capacitor.nativePromise = (plugin, method, options) => (
-        plugin === 'CapacitorHttp' && method === 'request' && options.url.startsWith('https://sync.example/')
+        plugin === 'AndroidHttp' && method === 'request' && options.url.startsWith('https://sync.example/')
           ? window.__statsRepairNativeRequest(options)
           : window.__statsRepairNativePromise(plugin, method, options)
       )

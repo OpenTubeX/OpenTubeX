@@ -1895,6 +1895,8 @@ Video:
       No Devices: Neniu FCast-ricevilo trovita
       No Source: Neniu kongrua fluo por FCast
   Info panel source: 'Fonto: {source}'
+  External Player:
+    LaunchFailedTemplate: Ne eblis lanĉi {externalPlayer}. Kontrolu, ke ĝi estas instalita, aŭ agordu la vojon al ĝia plenumebla dosiero en la agordoj de ekstera ludilo.
 Playlist:
   Close Playlist: Fermi ludliston
   Add Playlist to Queue: Aldoni ludliston al la vico
@@ -2416,6 +2418,7 @@ Downloads:
     Audio Best: Sono - Plej bona kvalito
     Audio Format: Sono - {format}
     Subtitles Format: Subtekstoj - {format}
+  Remove File Failed: Ne eblis forigi la elŝutitan dosieron.
 Theme Discovery:
   Discover Themes: Malkovri etosojn
   Refresh: Aktualigi

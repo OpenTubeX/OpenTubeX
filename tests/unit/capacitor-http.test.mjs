@@ -302,7 +302,7 @@ test('rejects invalid native avatar responses', async () => {
   }
 })
 
-async function loadNativeHttp(request, ios = null, entryPoint = 'capacitorHttpFetch', preflight) {
+async function loadNativeHttp(request, ios = null, entryPoint = 'capacitorHttpFetch', preflight, android = { request, abort: async () => {} }) {
   const source = (await readFile(new URL('../../src/renderer/helpers/api/capacitor-http.js', import.meta.url), 'utf8'))
     .replace(/^import .* from .*\n/gm, '')
     .replace(/^export /gm, '')
@@ -310,7 +310,7 @@ async function loadNativeHttp(request, ios = null, entryPoint = 'capacitorHttpFe
     CapacitorHttp: { request },
     process: { env: { IS_IOS: ios !== null, IS_CAPACITOR: !!preflight } },
     ensureAndroidLocalNetworkAccess: preflight,
-    registerPlugin: () => ios, crypto: globalThis.crypto,
+    registerPlugin: name => name === 'IOSHttp' ? ios : android, crypto: globalThis.crypto,
     withNetworkRecovery: (input, init, task) => task(init?.signal ?? (input instanceof Request ? input.signal : undefined)),
     createAbortError, waitForRequest, Request, Response, Headers, URL, URLSearchParams, setTimeout, clearTimeout,
   })
@@ -497,6 +497,23 @@ test('iOS abort cancels the native API request as well as its JavaScript wait', 
   assert.equal(cancelled[0], requests[0].requestId)
 })
 
+
+test('Android abort cancels the native API request as well as its JavaScript wait', async () => {
+  const requests = []
+  const cancelled = []
+  const request = options => { requests.push(options); return new Promise(() => {}) }
+  const fetchNative = await loadNativeHttp(() => assert.fail('Abortable requests must not use CapacitorHttp'), null,
+    'capacitorHttpFetch', async () => {}, { request, abort: async options => { cancelled.push(options.requestId) } })
+  const controller = new AbortController()
+  const pending = fetchNative('https://www.youtube.com', { signal: controller.signal })
+  const rejected = assert.rejects(pending, { name: 'AbortError' })
+  await new Promise(resolve => setImmediate(resolve))
+  assert.equal(requests.length, 1)
+  controller.abort()
+  await rejected
+  assert.equal(typeof requests[0].requestId, 'string')
+  assert.deepEqual(cancelled, [requests[0].requestId])
+})
 
 test('iOS does not cancel completed requests or launch requests aborted while reading the body', async () => {
   const requests = []
