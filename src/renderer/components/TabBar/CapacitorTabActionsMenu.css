@@ -63,8 +63,16 @@
   text-align: start;
 }
 
-.capacitorTabActions button:is(:hover, :active, :focus-visible) {
+.capacitorTabActions button:is(:active, :focus-visible) {
   background-color: var(--side-nav-hover-color);
+}
+
+/* Touch WebViews emulate hover at a held touch point, which would highlight
+   whatever action the sheet opens beneath the finger. */
+@media (hover: hover) {
+  .capacitorTabActions button:hover {
+    background-color: var(--side-nav-hover-color);
+  }
 }
 
 .capacitorTabActions button:disabled {
