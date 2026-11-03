@@ -76,6 +76,9 @@ test('renders animated attachments in empty comments, text comments and replies 
       if (width === 360) {
         await page.locator('.phoneCommentsOpen').click()
         await expect(page.locator('.mobileSheet[open]')).toBeVisible()
+        // The sheet opens under the pointer, and hovering an attachment
+        // replaces its poster with the animation.
+        await page.mouse.move(0, 0)
       }
       const visiblePosters = page.locator('.commentAttachmentPoster:visible')
       await expect(visiblePosters.first()).toBeVisible()
