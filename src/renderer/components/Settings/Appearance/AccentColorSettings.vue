@@ -319,7 +319,7 @@ function swatchStyle(scheme) {
     border-radius var(--motion-fast-spatial);
 }
 
-.accentCustomSwatch :deep(.colorFieldTrigger:active) .materialCustomColor {
+.accentCustomSwatch :deep(.colorFieldTrigger:active) .accentCustomColor {
   border-radius: var(--shape-corner-extra-small);
 }
 
