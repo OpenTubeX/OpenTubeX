@@ -505,6 +505,8 @@ for (const withChat of [false, true]) {
     const player = externalMedia.locator('.videoPlayer')
     const layout = externalMedia.locator('.videoLayout')
     await expect(layout).toHaveClass(withChat ? /useTheatreMode/ : /noSidebar/)
+    // Keep the controls shown, they can fade out before the clicks on slow machines
+    await player.locator('.shaka-controls-container').evaluate(element => element.setAttribute('casting', 'true'))
     await player.hover()
     await player.locator('.shaka-controls-button-panel .ft-chapters-button').click()
     await expect(externalMedia.locator('.sidebarArea .watchVideoChaptersPanel')).toBeVisible()
@@ -516,12 +518,18 @@ for (const withChat of [false, true]) {
 
     // A layout chosen in the player survives reopening the panel
     const chaptersButton = player.locator('.shaka-controls-button-panel .ft-chapters-button')
+    // The player moves while the layout changes. Clicking its controls then
+    // retries, and Playwright's third attempt scrolls them under the tab bar.
+    const settleLayout = () => expect.poll(() => externalMedia.evaluate(element => element.getAnimations({ subtree: true })
+      .filter(animation => animation.effect?.target?.matches('.videoPlayer, .infoArea, .sidebarArea')).length)).toBe(0)
     await player.hover()
     await player.locator('.theatre-button').click()
     await expect(layout).not.toHaveClass(/useTheatreMode/)
+    await settleLayout()
     await player.hover()
     await chaptersButton.click()
     await expect(layout).toHaveClass(/noSidebar/)
+    await settleLayout()
     await player.hover()
     await chaptersButton.click()
     await expect(layout).not.toHaveClass(/noSidebar/)
