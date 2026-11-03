@@ -362,6 +362,21 @@ test.describe('with followed feeds', () => {
     const banner = panel.locator('.errorBanner')
     await expect(banner).toHaveText('1 feed could not be refreshed.')
 
+    // A refresh hides the banner, so it takes the focus off its button
+    let releaseShortcutRefresh
+    const shortcutRefreshHeld = new Promise(resolve => { releaseShortcutRefresh = resolve })
+    await page.route(RSS_URL, async route => {
+      await shortcutRefreshHeld
+      await route.fallback()
+    })
+    await banner.getByRole('button', { name: 'Close' }).focus()
+    await page.keyboard.press('r')
+    await expect(banner).toHaveCount(0)
+    await expect(panel).toBeFocused()
+    releaseShortcutRefresh()
+    await expect(banner).toHaveText('1 feed could not be refreshed.')
+    await page.unroute(RSS_URL)
+
     await banner.getByRole('button', { name: 'Close' }).click()
     await expect(banner).toHaveCount(0)
     await expect(panel).toBeFocused()

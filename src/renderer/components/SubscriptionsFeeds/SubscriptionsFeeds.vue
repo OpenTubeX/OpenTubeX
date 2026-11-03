@@ -5,6 +5,7 @@
   >
     <div
       v-if="!isLoading && errorFeedUrls.length > 0 && !rssFeedErrorsDismissed"
+      ref="bannerRef"
       class="errorBanner"
       role="status"
     >
@@ -62,7 +63,7 @@
 </template>
 
 <script setup>
-import { computed, useTemplateRef } from 'vue'
+import { computed, useTemplateRef, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 
 import FtAutoGrid from '../FtAutoGrid/FtAutoGrid.vue'
@@ -102,12 +103,24 @@ const errorFeedUrls = computed(() => rssFeedErrors.value.filter(url => feedUrls.
 const isLoading = computed(() => rssFeedsRefreshing.value)
 
 const panelRef = useTemplateRef('panelRef')
+const bannerRef = useTemplateRef('bannerRef')
+
+// The banner's close button disappears, so keep the focus in the panel
+function keepFocusInPanel() {
+  panelRef.value?.focus({ preventScroll: true })
+}
 
 function dismissErrors() {
   rssFeedErrorsDismissed.value = true
-  // The close button disappears, so keep the focus in the panel
-  panelRef.value?.focus({ preventScroll: true })
+  keepFocusInPanel()
 }
+
+// Runs before the refresh hides the banner
+watch(isLoading, loading => {
+  if (loading && bannerRef.value?.contains(document.activeElement)) {
+    keepFocusInPanel()
+  }
+})
 
 // Full width is a single-column grid, so its items render as grid cards.
 const layout = computed(() => store.getters.getListType === 'list' ? 'list' : 'grid')
