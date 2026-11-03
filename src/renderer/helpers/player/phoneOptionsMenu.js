@@ -21,6 +21,8 @@ export function setupPhoneOptionsMenu(menu, controls, t) {
   const query = window.matchMedia(PHONE_LAYOUT_QUERY)
   let frame = null
   let activeView = null
+  // The fade the sheet closes with (`playerMenu.css`)
+  let closing = null
   let previousFocus = null
   // Shaka rebuilds submenus around their back button, so it stays in place and
   // the dialog's header shows a copy of it.
@@ -104,23 +106,52 @@ export function setupPhoneOptionsMenu(menu, controls, t) {
     schedule()
   }
 
+  function finishClosing() {
+    closing = null
+    delete dialog.dataset.ftMenuClosing
+    dialog.close()
+    updateHeader(null)
+    updateHeaderAction(null)
+    parent.append(menu)
+    activeView = null
+    const trigger = parent.querySelector('.shaka-overflow-menu-button')
+    if (trigger?.isConnected) trigger.focus({ preventScroll: true })
+    else if (previousFocus?.isConnected) previousFocus.focus({ preventScroll: true })
+  }
+
+  // Shaka returns a closing menu to its entries, which would show while the
+  // sheet fades, so it closes at once from a submenu.
+  function startClosing() {
+    if (!query.matches || activeView !== menu || menu.hasAttribute('data-ft-menu-instant-close')) {
+      finishClosing()
+      return
+    }
+    dialog.dataset.ftMenuClosing = ''
+    const fades = dialog.getAnimations()
+    if (fades.length === 0) {
+      finishClosing()
+      return
+    }
+    const current = closing = Promise.all(fades.map(animation => animation.finished.catch(() => {})))
+    current.then(() => {
+      if (closing === current) finishClosing()
+    })
+  }
+
   function update() {
     frame = null
     const open = query.matches && !menu.classList.contains('shaka-hidden')
+    if (open && closing) {
+      closing = null
+      delete dialog.dataset.ftMenuClosing
+    }
     if (open && !dialog.open) {
       previousFocus = document.activeElement
       dialog.append(menu)
       dialog.show()
       close.focus({ preventScroll: true })
-    } else if (!open && dialog.open) {
-      dialog.close()
-      updateHeader(null)
-      updateHeaderAction(null)
-      parent.append(menu)
-      activeView = null
-      const trigger = parent.querySelector('.shaka-overflow-menu-button')
-      if (trigger?.isConnected) trigger.focus({ preventScroll: true })
-      else if (previousFocus?.isConnected) previousFocus.focus({ preventScroll: true })
+    } else if (!open && dialog.open && !closing) {
+      startClosing()
     }
     if (!open) return
     const submenu = visibleSubmenu()
@@ -204,6 +235,7 @@ export function setupPhoneOptionsMenu(menu, controls, t) {
     observer.disconnect()
     resize.disconnect()
     cancelAnimationFrame(frame)
+    closing = null
     query.removeEventListener('change', schedule)
     window.removeEventListener('resize', schedule)
     updateHeader(null)

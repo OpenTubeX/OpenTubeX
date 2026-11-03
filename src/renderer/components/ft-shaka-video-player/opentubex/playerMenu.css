@@ -778,3 +778,37 @@
     scale: 0.95;
   }
 }
+
+/*
+  On phones, the sheet fades in and out instead, and the menu in it grows in
+  and shrinks as it does. Closing keeps the menu in the sheet until it has
+  faded (`setupPhoneOptionsMenu`), and closes at once from a submenu for the
+  same reason as above. The menu doesn't stay on a layer of its own, which
+  would become the containing block of a submenu's header action.
+*/
+:deep(.phonePlayerOptions[open]) {
+  animation: ft-menu-fade-in 150ms ease-out;
+}
+
+:deep(.phonePlayerOptions > .shaka-overflow-menu:not(.shaka-hidden)) {
+  animation: ft-menu-open 200ms cubic-bezier(0.2, 0, 0, 1);
+}
+
+:deep(.phonePlayerOptions) {
+  transition: opacity 150ms ease-in;
+}
+
+:deep(.phonePlayerOptions[data-ft-menu-closing]) {
+  pointer-events: none;
+  opacity: 0;
+}
+
+:deep(.phonePlayerOptions[data-ft-menu-closing] > .shaka-overflow-menu) {
+  scale: 0.95;
+}
+
+:deep(.phonePlayerOptions > .shaka-overflow-menu.shaka-hidden:not([data-ft-menu-instant-close])) {
+  transition:
+    scale 150ms ease-in,
+    display 150ms allow-discrete;
+}

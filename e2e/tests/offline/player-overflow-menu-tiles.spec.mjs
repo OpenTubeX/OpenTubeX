@@ -1,4 +1,4 @@
-import { test, expect } from '../../helpers/app.mjs'
+import { setWindowSize, test, expect } from '../../helpers/app.mjs'
 import { activeTab, openMockedVideo, openPlayerOptions } from '../../helpers/player.mjs'
 import { mockPlayableWatchPage } from '../../helpers/watch.mjs'
 import { WATCH_PAGE_SEED } from '../../helpers/watch-page.mjs'
@@ -242,6 +242,103 @@ test('a view switch with reduced motion leaves no zoom for later', async ({ app,
   await tile.click()
   await expect(submenu).toBeVisible()
   await expect.poll(takeZooms).toContain('submenu')
+})
+
+test.describe('phone options sheet', () => {
+  test('fades in and out, but closes at once from a submenu', { tag: '@scale' }, async ({ app, page }) => {
+    await mockPlayableWatchPage(app, page)
+    await openMockedVideo(page)
+    await setWindowSize(app, page, { width: 360, height: 760 })
+    const player = page.locator(`${activeTab} .ftVideoPlayer`)
+    const sheet = player.locator('.phonePlayerOptions')
+    const menu = player.locator('.shaka-overflow-menu')
+    const tile = sheet.locator('.shaka-playbackrate-button')
+
+    // On the player, as the controls are rebuilt for the phone layout along with the sheet.
+    await player.evaluate((element) => {
+      window.__sheetMotion = []
+      element.addEventListener('animationstart', ({ animationName, target }) => {
+        if (target.matches('.phonePlayerOptions') && animationName.startsWith('ft-menu-fade-in')) window.__sheetMotion.push('fade in')
+        if (target.matches('.phonePlayerOptions > .shaka-overflow-menu') && animationName.startsWith('ft-menu-open')) window.__sheetMotion.push('grow')
+      })
+      element.addEventListener('transitionrun', ({ propertyName, target }) => {
+        if (target.matches('.phonePlayerOptions') && propertyName === 'opacity') window.__sheetMotion.push('fade out')
+      })
+    })
+    const takeMotion = () => page.evaluate(() => window.__sheetMotion.splice(0).sort())
+    const afterFrames = () => page.evaluate(() => new Promise(resolve => requestAnimationFrame(() => requestAnimationFrame(resolve))))
+    // The sheet's own fades, and the menu's animations
+    const settleSheet = () => sheet.evaluate(element => Promise.all(element.getAnimations({ subtree: true })
+      .filter(animation => animation.effect?.target === element || /^ft-menu-/.test(animation.animationName ?? ''))
+      .map(animation => animation.finished.catch(() => {}))))
+    const openSheet = async () => {
+      await player.locator('.shaka-controls-container').evaluate(element => element.setAttribute('shown', 'true'))
+      await player.locator('.shaka-overflow-menu-button').click({ force: true })
+      await expect(tile).toBeVisible()
+    }
+
+    await openSheet()
+    await expect.poll(() => page.evaluate(() => window.__sheetMotion.length)).toBe(2)
+    expect(await takeMotion()).toEqual(['fade in', 'grow'])
+    await settleSheet()
+    // Grown in, it fills the player and its menu isn't scaled.
+    const layout = await sheet.evaluate((element) => {
+      const sheetBox = element.getBoundingClientRect()
+      const playerBox = element.closest('.ftVideoPlayer').getBoundingClientRect()
+      const overflowMenu = element.querySelector('.shaka-overflow-menu')
+      return {
+        widthDifference: Math.abs(sheetBox.width - playerBox.width),
+        heightDifference: Math.abs(sheetBox.height - playerBox.height),
+        scale: overflowMenu.getBoundingClientRect().width / overflowMenu.offsetWidth,
+        opacity: getComputedStyle(element).opacity,
+      }
+    })
+    expect(layout.widthDifference).toBeLessThan(2)
+    expect(layout.heightDifference).toBeLessThan(2)
+    expect(layout.scale).toBeCloseTo(1, 2)
+    expect(layout.opacity).toBe('1')
+
+    // Fading out, the sheet keeps showing the menu until it has faded.
+    expect(await sheet.evaluate((element) => {
+      element.querySelector('.phonePlayerOptionsClose').click()
+      const overflowMenu = element.querySelector('.shaka-overflow-menu')
+      return element.open && overflowMenu?.classList.contains('shaka-hidden') && overflowMenu.checkVisibility()
+    })).toBe(true)
+    await expect(sheet).toBeHidden()
+    await expect(menu).toBeHidden()
+    expect(await sheet.evaluate(element => element.contains(element.ownerDocument.querySelector('.shaka-overflow-menu')))).toBe(false)
+    expect(await takeMotion()).toEqual(['fade out'])
+
+    // Reopened while it fades, it stays open.
+    await openSheet()
+    await sheet.evaluate((element) => {
+      element.querySelector('.phonePlayerOptionsClose').click()
+      element.closest('.ftVideoPlayer').querySelector('.shaka-overflow-menu-button').click()
+    })
+    await settleSheet()
+    await afterFrames()
+    expect(await sheet.evaluate(element => element.open && getComputedStyle(element).opacity === '1')).toBe(true)
+    await expect(tile).toBeVisible()
+    await takeMotion()
+
+    // From a submenu, which Shaka resets to the tiles as it closes, it closes at once.
+    await tile.click()
+    await expect(sheet.locator('.shaka-playback-rates')).toBeVisible()
+    await takeMotion()
+    await sheet.evaluate(element => element.querySelector('.phonePlayerOptionsClose').click())
+    await afterFrames()
+    expect(await sheet.evaluate(element => element.open)).toBe(false)
+    expect(await takeMotion()).toEqual([])
+
+    // With reduced motion, it opens and closes without animating.
+    await page.evaluate(() => window.$store.dispatch('updateReducedMotion', 'on'))
+    await openSheet()
+    expect(await sheet.evaluate(element => element.getAnimations({ subtree: true })
+      .filter(animation => animation.effect?.target === element || /^ft-menu-/.test(animation.animationName ?? '')).length)).toBe(0)
+    await sheet.evaluate(element => element.querySelector('.phonePlayerOptionsClose').click())
+    expect(await sheet.evaluate(element => element.open)).toBe(false)
+    expect(await takeMotion()).toEqual([])
+  })
 })
 
 test('playback speed tile is highlighted exactly while the speed is not 1x', async ({ app, page }) => {
