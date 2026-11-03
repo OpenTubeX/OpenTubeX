@@ -1213,6 +1213,29 @@ test.describe('with new items', () => {
     await expect.poll(() => requests).toBe(2)
   })
 
+  test('remembers items marked as seen that leave the feed before the next refresh', async ({ page }) => {
+    await loadNewItems(page)
+    const panel = page.locator('#subscriptionsPanel')
+    const newItems = panel.locator('.ft-list-item').filter({ has: page.locator('.newContentDot') })
+    await panel.locator('.ft-list-item').filter({ hasText: 'Second new VOD' }).locator('.title').click({ button: 'right' })
+    await page.locator('.contextMenu').getByRole('menuitem', { name: 'Mark As Seen' }).click()
+    await expect(newItems.locator('.h3Title')).toHaveText(['Brand new VOD'])
+
+    const withoutItem = updatedRssFeed.replace(/<item>\s*<title>Second new VOD<\/title>[\s\S]*?<\/item>/, '')
+    await page.route(RSS_URL, route => route.fulfill({ contentType: 'application/rss+xml', body: withoutItem }))
+    const refresh = page.locator('.subscriptionsHeader').getByRole('button', { name: /^Refresh RSS/ })
+    await refresh.click()
+    await expect(panel.locator('.ft-list-item .h3Title')).toHaveText(['Brand new VOD', 'Newest VOD', 'Older VOD'])
+
+    // Newer marks push old ones out of the bounded marks, the feed's history still knows it
+    await page.evaluate(() => window.$store.commit('setRssFeedSeenItems', '[]'))
+    await page.route(RSS_URL, route => route.fulfill({ contentType: 'application/rss+xml', body: updatedRssFeed }))
+    await refresh.click()
+    await expect(panel.locator('.ft-list-item .h3Title'))
+      .toHaveText(['Brand new VOD', 'Second new VOD', 'Newest VOD', 'Older VOD'])
+    await expect(newItems.locator('.h3Title')).toHaveText(['Brand new VOD'])
+  })
+
   test('keeps the seen state of items that leave the feed and come back', async ({ page }) => {
     await loadNewItems(page)
     const panel = page.locator('#subscriptionsPanel')

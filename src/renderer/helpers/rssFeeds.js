@@ -380,12 +380,15 @@ function setSeenHistory(history) {
  * @param {Map<string, string[]>} history updated in place
  * @param {string} feedUrl
  * @param {RssFeedItem[]} items the freshly loaded items of the feed
+ * @param {RssFeedItem[]} previousItems the items of the feed it replaces
  */
-function recordSeenHistory(history, feedUrl, items) {
+function recordSeenHistory(history, feedUrl, items, previousItems) {
+  // Items seen since the last refresh may have left the feed already
+  const seenIds = new Set([...items, ...previousItems].filter(item => item.isNew !== true).map(item => item.id))
   const ids = new Set(items.map(item => item.id))
   history.set(feedUrl, [
-    ...items.filter(item => item.isNew !== true).map(item => item.id),
-    ...(history.get(feedUrl) ?? []).filter(id => !ids.has(id))
+    ...seenIds,
+    ...(history.get(feedUrl) ?? []).filter(id => !seenIds.has(id) && !ids.has(id))
   ].slice(0, MAX_SEEN_HISTORY_PER_FEED))
 }
 
@@ -595,10 +598,11 @@ export async function updateMissingRssFeedAvatars(results) {
  * @param {{ items: RssFeedItem[], image: string | null, isRssHub: boolean }} result
  */
 export function addLoadedRssFeed(feed, result) {
-  const items = reconcileNewItems(feed.url, result.items, rssFeedItems.value.filter(item => item.feedUrl === feed.url))
+  const previousItems = rssFeedItems.value.filter(item => item.feedUrl === feed.url)
+  const items = reconcileNewItems(feed.url, result.items, previousItems)
   setRssFeedItems([...rssFeedItems.value.filter(item => item.feedUrl !== feed.url), ...items].sort(compareFeedItems))
   const history = new Map(seenHistory)
-  recordSeenHistory(history, feed.url, items)
+  recordSeenHistory(history, feed.url, items, previousItems)
   setSeenHistory(history)
   refreshedFeedUrls.add(feed.url)
   loadedDuringRefresh.add(feed.url)
@@ -683,7 +687,7 @@ export async function refreshRssFeeds(feeds, { automatic = false, cachedUrls = n
     // Removed feeds start over when they are added again
     const feedUrls = new Set(feeds.map(feed => feed.url))
     const history = new Map([...seenHistory].filter(([url]) => feedUrls.has(url) || loadedUrls.has(url)))
-    for (const [url, items] of refreshedItems) recordSeenHistory(history, url, items)
+    for (const [url, items] of refreshedItems) recordSeenHistory(history, url, items, previousItems.filter(item => item.feedUrl === url))
     setSeenHistory(history)
     updateMissingRssFeedAvatars(fetchedFeeds.flatMap((feed, index) => {
       const result = results[index]
