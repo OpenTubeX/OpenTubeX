@@ -187,6 +187,7 @@ Subscriptions:
   Newest First: Najnovšie ako prvé
   Oldest First: Najstaršie ako prvé
   RSS Feeds:
+    Refreshing: Obnovujú sa kanály RSS
     Tab: RSS
     Followed Feeds: Sledované RSS kanály
     Add Feed: Pridať kanál
@@ -263,7 +264,6 @@ History:
   Clear Filters: 'Vymazať filtre'
   Invalid Date Range: 'Počiatočný dátum musí byť pred koncovým dátumom alebo sa mu rovnať.'
   Empty Filter Message: 'Žiadne videá vo vašej histórii nezodpovedajú týmto filtrom.'
-  Delete Old Compact: "Zmazať staré"
   Repair Compact: "Opraviť"
   Mark All Watched Compact: "Všetky pozreté"
   Repair Use Cookies: "Použiť nastavené cookies yt-dlp"
@@ -282,7 +282,6 @@ History:
   Mark All As Watched: Označiť všetko ako pozreté
   Mark All As Watched Confirmation: Naozaj chcete označiť všetky videá v histórii ako pozreté?
   All History Marked as Watched: Všetky videá v histórii boli označené ako pozreté
-  Delete Old History: Odstrániť starú históriu
   Select History Age: Vyberte, aký starý musí byť záznam, aby sa odstránil.
   Delete Entries Older Than: Odstrániť záznamy staršie ako
   Number of Days: Počet dní
@@ -1854,6 +1853,8 @@ Video:
       unlisted: "Neuvedené"
   Save Queue to Playlist: "Uložiť poradie do playlistu"
   Live Chat is currently not supported with the Yattee server. A direct connection to YouTube is required.: Živý chat momentálne nie je podporovaný so serverom Yattee. Vyžaduje sa priame spojenie s YouTube.
+  External Player:
+    LaunchFailedTemplate: "{externalPlayer} sa nepodarilo spustiť. Skontrolujte, či je nainštalovaný, alebo nastavte cestu k spustiteľnému súboru v nastaveniach externého prehrávača."
 Playlist:
   Playlist Already Preloaded: "Všetky videá v playliste sú už predbežne načítané"
   Playlist Preload Progress: "Predbežné načítavanie videí: {completed} z {requested}"
@@ -1914,6 +1915,7 @@ Context Menu:
   Reload Live: Znova načítať živé prenosy
   Reload Posts: Znova načítať príspevky
   Reload All Feeds: Znova načítať všetky kanály
+  Reload RSS Feeds: Znova načítať kanály RSS
   Close Multiple Tabs: Zavrieť {count} kartu | Zavrieť {count} kariet
   Duplicate Tab: Duplikovať kartu
   Duplicate Multiple Tabs: Duplikovať {count} kartu | Duplikovať {count} kariet
@@ -2364,6 +2366,7 @@ Downloads:
     Subtitles Format: Titulky – {format}
   Waiting for Unmetered Network: "Čaká sa na nemeranú sieť"
   Waiting for Charging: "Čaká sa na nabíjačku"
+  Remove File Failed: Stiahnutý súbor sa nepodarilo odstrániť.
 Channels:
   Load More Channels: "Načítať ďalšie kanály"
 Theme Discovery:

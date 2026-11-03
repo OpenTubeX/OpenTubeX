@@ -187,6 +187,7 @@ Subscriptions:
   Newest First: Mwyaf newydd yn gyntaf
   Oldest First: Hynaf yn gyntaf
   RSS Feeds:
+    Refreshing: Yn adnewyddu ffrydiau RSS
     Tab: RSS
     Followed Feeds: Ffrydiau RSS rydych chi'n eu dilyn
     Add Feed: Ychwanegu Ffrwd
@@ -264,7 +265,6 @@ History:
   Clear Filters: 'Clirio''r Hidlyddion'
   Invalid Date Range: 'Rhaid i''r dyddiad cychwyn fod ar neu cyn y dyddiad gorffen.'
   Empty Filter Message: 'Nid oes fideos yn eich hanes sy''n cyfateb i''r hidlyddion hyn.'
-  Delete Old Compact: "Dileu hen"
   Repair Compact: "Trwsio"
   Mark All Watched Compact: "Pob un wedi’i weld"
   Repair Use Cookies: "Defnyddio cwcis yt-dlp sydd wedi'u ffurfweddu"
@@ -283,7 +283,6 @@ History:
   Mark All As Watched: Marcio'r cyfan fel wedi'u gwylio
   Mark All As Watched Confirmation: Ydych chi'n siŵr eich bod am farcio pob fideo yn eich hanes fel wedi'i wylio?
   All History Marked as Watched: Mae pob fideo yn eich hanes wedi'i farcio fel wedi'i wylio
-  Delete Old History: Dileu hen hanes
   Select History Age: Dewiswch pa mor hen y mae'n rhaid i gofnod fod cyn iddo gael ei ddileu.
   Delete Entries Older Than: Dileu cofnodion sy'n hŷn na
   Number of Days: Nifer y diwrnodau
@@ -1882,6 +1881,8 @@ Video:
   How this was made: Sut cafodd hwn ei wneud
   Save Queue to Playlist: "Cadw'r ciw mewn rhestr chwarae"
   Live Chat is currently not supported with the Yattee server. A direct connection to YouTube is required.: Nid yw Sgwrsio Byw yn cael ei gefnogi gan y gweinydd Yattee ar hyn o bryd. Mae angen cysylltiad uniongyrchol â YouTube.
+  External Player:
+    LaunchFailedTemplate: Methu cychwyn {externalPlayer}. Gwiriwch ei fod wedi’i osod, neu gosodwch lwybr y ffeil weithredadwy yng ngosodiadau’r chwaraewr allanol.
 Playlist:
   Playlist Already Preloaded: "Mae holl fideos y rhestr chwarae eisoes wedi'u rhaglwytho"
   Playlist Preload Progress: "Yn rhaglwytho fideos: {completed} o {requested}"
@@ -1943,6 +1944,7 @@ Context Menu:
   Reload Live: Ail-lwytho ffrydiau byw
   Reload Posts: Ail-lwytho postiadau
   Reload All Feeds: Ail-lwytho pob ffrwd
+  Reload RSS Feeds: Ail-lwytho ffrydiau RSS
   Close Multiple Tabs: Cau {count} o dabiau | Cau {count} tab | Cau {count} dab | Cau {count} thab | Cau {count} thab | Cau {count} tab
   Duplicate Tab: Dyblygu'r tab
   Duplicate Multiple Tabs: Dyblygu {count} o dabiau | Dyblygu {count} tab | Dyblygu {count} dab | Dyblygu {count} thab | Dyblygu {count} thab | Dyblygu {count} tab
@@ -2396,6 +2398,7 @@ Downloads:
     Subtitles Format: Isdeitlau - {format}
   Waiting for Unmetered Network: "Yn aros am rwydwaith heb fesurydd"
   Waiting for Charging: "Yn aros am wefrydd"
+  Remove File Failed: Methu tynnu’r ffeil a lwythwyd i lawr.
 Channels:
   Load More Channels: "Llwytho mwy o sianeli"
 Search Bar:

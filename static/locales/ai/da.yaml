@@ -191,6 +191,7 @@ Subscriptions:
   Posts:
     RSS Message: YouTube tilbyder ikke RSS-feeds til opslag. Deaktivér indstillingen "{rssSetting}" for at se opslag, eller aktivér indstillingen "{hideSetting}" for at skjule denne fane.
   RSS Feeds:
+    Refreshing: Opdaterer RSS-feeds
     Tab: RSS
     Followed Feeds: Fulgte RSS-feeds
     Add Feed: Tilføj feed
@@ -272,7 +273,6 @@ History:
   Clear Filters: 'Ryd filtre'
   Invalid Date Range: 'Startdatoen skal være før eller på slutdatoen.'
   Empty Filter Message: 'Ingen videoer i din historik matcher disse filtre.'
-  Delete Old Compact: "Slet gamle"
   Repair Compact: "Reparer"
   Mark All Watched Compact: "Marker alle set"
   Repair Use Cookies: "Brug konfigurerede yt-dlp-cookies"
@@ -293,7 +293,6 @@ History:
   All History Marked as Watched: Alle videoer i din historik er blevet markeret som set
   DateOldestHistory: Set-dato (ældste)
   DateNewestHistory: Set-dato (nyeste)
-  Delete Old History: Slet gammel historik
   Select History Age: Vælg, hvor gammel en post skal være, før den slettes.
   Delete Entries Older Than: Slet poster, der er ældre end
   Number of Days: Antal dage
@@ -1930,6 +1929,8 @@ Video:
   How this was made: Sådan blev dette lavet
   Save Queue to Playlist: "Gem kø i playliste"
   Live Chat is currently not supported with the Yattee server. A direct connection to YouTube is required.: Live chat understøttes i øjeblikket ikke med Yattee-serveren. Direkte forbindelse til YouTube kræves.
+  External Player:
+    LaunchFailedTemplate: "{externalPlayer} kunne ikke startes. Kontrollér, at den er installeret, eller angiv stien til den eksekverbare fil i indstillingerne for ekstern afspiller."
 Playlist:
   Playlist Already Preloaded: "Alle videoer i playlisten er allerede forudindlæst"
   Playlist Preload Progress: "Forudindlæser videoer: {completed} af {requested}"
@@ -1992,6 +1993,7 @@ Context Menu:
   Reload Live: Genindlæs livestreams
   Reload Posts: Genindlæs opslag
   Reload All Feeds: Genindlæs alle feeds
+  Reload RSS Feeds: Genindlæs RSS-feeds
   Close Multiple Tabs: Luk {count} faner
   Duplicate Tab: Dupliker fane
   Duplicate Multiple Tabs: Dupliker {count} faner
@@ -2453,6 +2455,7 @@ Downloads:
     Subtitles Format: Undertekster - {format}
   Waiting for Unmetered Network: "Venter på et netværk uden datamåling"
   Waiting for Charging: "Venter på en oplader"
+  Remove File Failed: Den downloadede fil kunne ikke fjernes.
 Channels:
   Load More Channels: "Indlæs flere kanaler"
 Search Bar:

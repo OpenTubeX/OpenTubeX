@@ -156,6 +156,7 @@ Subscriptions:
   Newest First: Mais recentes primeiro
   Oldest First: Mais antigos primeiro
   RSS Feeds:
+    Refreshing: Atualizando feeds RSS
     Tab: RSS
     Followed Feeds: Feeds RSS seguidos
     Add Feed: Adicionar feed
@@ -232,7 +233,6 @@ History:
   Clear Filters: 'Limpar filtros'
   Invalid Date Range: 'A data inicial deve ser anterior ou igual à data final.'
   Empty Filter Message: 'Nenhum vídeo do seu histórico corresponde a estes filtros.'
-  Delete Old Compact: "Excluir antigos"
   Repair Compact: "Reparar"
   Mark All Watched Compact: "Marcar todos vistos"
   Repair Use Cookies: "Usar os cookies configurados do yt-dlp"
@@ -251,7 +251,6 @@ History:
   Mark All As Watched: Marcar tudo como reproduzido
   Mark All As Watched Confirmation: Tem certeza de que deseja marcar como reproduzidos todos os vídeos do histórico?
   All History Marked as Watched: Todos os vídeos do histórico foram marcados como reproduzidos
-  Delete Old History: Excluir histórico antigo
   Select History Age: Selecione a antiguidade mínima das entradas a excluir.
   Delete Entries Older Than: Excluir entradas com mais de
   Number of Days: Número de dias
@@ -1822,6 +1821,8 @@ Video:
       unlisted: "Não listado"
   Save Queue to Playlist: "Salvar fila em uma playlist"
   Live Chat is currently not supported with the Yattee server. A direct connection to YouTube is required.: Atualmente, o chat ao vivo não é suportado pelo servidor Yattee. É necessária uma conexão direta com o YouTube.
+  External Player:
+    LaunchFailedTemplate: Não foi possível iniciar {externalPlayer}. Verifique se está instalado ou defina o caminho do executável nas configurações do player externo.
 Playlist:
   Playlist Already Preloaded: "Todos os vídeos da playlist já estão pré-carregados"
   Playlist Preload Progress: "Pré-carregando vídeos: {completed} de {requested}"
@@ -1882,6 +1883,7 @@ Context Menu:
   Reload Live: Recarregar emissões ao vivo
   Reload Posts: Recarregar publicações
   Reload All Feeds: Recarregar todos os feeds
+  Reload RSS Feeds: Recarregar feeds RSS
   Close Multiple Tabs: Fechar {count} guia | Fechar {count} guias
   Duplicate Tab: Duplicar guia
   Duplicate Multiple Tabs: Duplicar {count} guia | Duplicar {count} guias
@@ -2332,6 +2334,7 @@ Downloads:
     Subtitles Format: Legendas - {format}
   Waiting for Unmetered Network: "Aguardando uma rede não limitada"
   Waiting for Charging: "Aguardando um carregador"
+  Remove File Failed: Não foi possível remover o arquivo baixado.
 Channels:
   Load More Channels: "Carregar mais canais"
 Theme Discovery:

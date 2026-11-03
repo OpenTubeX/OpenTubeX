@@ -189,6 +189,7 @@ Subscriptions:
   Posts:
     RSS Message: 'YouTube tillhandahåller inte RSS-flöden för inlägg. Inaktivera inställningen "{rssSetting}" för att visa inlägg eller aktivera inställningen "{hideSetting}" för att dölja den här fliken.'
   RSS Feeds:
+    Refreshing: Uppdaterar RSS-flöden
     Tab: RSS
     Followed Feeds: Följda RSS-flöden
     Add Feed: Lägg till flöde
@@ -266,7 +267,6 @@ History:
   Clear Filters: 'Rensa filter'
   Invalid Date Range: 'Startdatumet måste vara före eller samma som slutdatumet.'
   Empty Filter Message: 'Inga videor i din historik matchar dessa filter.'
-  Delete Old Compact: "Radera gamla"
   Repair Compact: "Reparera"
   Mark All Watched Compact: "Markera alla sedda"
   Repair Use Cookies: "Använd konfigurerade yt-dlp-kakor"
@@ -285,7 +285,6 @@ History:
   Mark All As Watched: Markera alla som sedda
   Mark All As Watched Confirmation: Vill du markera alla videor i historiken som sedda?
   All History Marked as Watched: Alla videor i historiken har markerats som sedda
-  Delete Old History: Ta bort gammal historik
   Select History Age: Välj hur gammal en post måste vara innan den tas bort.
   Delete Entries Older Than: Ta bort poster äldre än
   Number of Days: Antal dagar
@@ -1875,6 +1874,8 @@ Video:
   How this was made: Så skapades detta
   Save Queue to Playlist: "Spara kön i en spellista"
   Live Chat is currently not supported with the Yattee server. A direct connection to YouTube is required.: Livechatt stöds för närvarande inte via Yattee-servern. En direktanslutning till YouTube krävs.
+  External Player:
+    LaunchFailedTemplate: Det gick inte att starta {externalPlayer}. Kontrollera att den är installerad, eller ange sökvägen till den körbara filen i inställningarna för extern spelare.
 Playlist:
   Playlist Already Preloaded: "Alla videor i spellistan är redan förladdade"
   Playlist Preload Progress: "Förladdar videor: {completed} av {requested}"
@@ -1936,6 +1937,7 @@ Context Menu:
   Reload Live: Läs in liveströmmar igen
   Reload Posts: Läs in inlägg igen
   Reload All Feeds: Läs in alla flöden igen
+  Reload RSS Feeds: Läs in RSS-flöden igen
   Close Multiple Tabs: Stäng {count} flikar
   Duplicate Tab: Duplicera flik
   Duplicate Multiple Tabs: Duplicera {count} flikar
@@ -2389,6 +2391,7 @@ Downloads:
     Subtitles Format: Undertexter - {format}
   Waiting for Unmetered Network: "Väntar på ett obegränsat nätverk"
   Waiting for Charging: "Väntar på en laddare"
+  Remove File Failed: Det gick inte att ta bort den nedladdade filen.
 Channels:
   Load More Channels: "Läs in fler kanaler"
 Search Bar:

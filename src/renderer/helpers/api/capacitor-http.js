@@ -23,7 +23,11 @@ const MAX_AVATAR_BASE64_LENGTH = Math.ceil(MAX_AVATAR_BYTES / 3) * 4
 const AVATAR_TIMEOUT_MS = 3000
 const DNS_RETRY_DELAYS_MS = [150, 500]
 const DEFAULT_NATIVE_TIMEOUT_MS = 30_000
-const IOSHttp = process.env.IS_IOS ? registerPlugin('IOSHttp') : null
+// Capacitor's HTTP plugin cannot cancel requests, so both platforms use
+// plugins that close the native connection when a request is aborted.
+const AbortableHttp = process.env.IS_IOS
+  ? registerPlugin('IOSHttp')
+  : process.env.IS_CAPACITOR ? registerPlugin('AndroidHttp') : null
 const REDIRECT_STATUSES = new Set([301, 302, 303, 307, 308])
 
 function waitForRetry(delay, signal) {
@@ -47,10 +51,10 @@ async function requestWithDnsRetry(options, signal) {
   for (let attempt = 0; ; attempt++) {
     try {
       if (signal?.aborted) throw createAbortError()
-      if (IOSHttp) {
+      if (AbortableHttp) {
         const requestId = crypto.randomUUID()
-        return await waitForRequest(IOSHttp.request({ ...options, requestId }), signal,
-          () => { IOSHttp.abort({ requestId }).catch(() => {}) })
+        return await waitForRequest(AbortableHttp.request({ ...options, requestId }), signal,
+          () => { AbortableHttp.abort({ requestId }).catch(() => {}) })
       }
       return await waitForRequest(CapacitorHttp.request(options), signal)
     } catch (error) {
@@ -87,8 +91,7 @@ async function getRequestBody(input, init) {
  * WebView so their response bodies are streamed instead of copied through the
  * JavaScript bridge as base64. nativeTimeoutMs bounds connection and read
  * inactivity on Android, defaulting to 30 seconds so stalled requests release
- * the subscription queue. On iOS, signal also cancels the native task; on
- * Android it limits the JavaScript wait.
+ * the subscription queue. signal also cancels the native request.
  * @param {RequestInfo | URL} input
  * @param {RequestInit & { nativeTimeoutMs?: number, allowHttp?: boolean, responseType?: 'arraybuffer' }} [init]
  * @returns {Promise<Response>}

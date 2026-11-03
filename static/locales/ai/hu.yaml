@@ -187,6 +187,7 @@ Subscriptions:
   Newest First: Legújabb elöl
   Oldest First: Legrégebbi elöl
   RSS Feeds:
+    Refreshing: RSS-hírcsatornák frissítése
     Tab: RSS
     Followed Feeds: Követett RSS-hírcsatornák
     Add Feed: Hírcsatorna hozzáadása
@@ -263,7 +264,6 @@ History:
   Clear Filters: 'Szűrők törlése'
   Invalid Date Range: 'A kezdő dátumnak meg kell előznie a záró dátumot, vagy azonosnak kell lennie vele.'
   Empty Filter Message: 'Az előzményekben nincs ezeknek a szűrőknek megfelelő videó.'
-  Delete Old Compact: "Régiek törlése"
   Repair Compact: "Javítás"
   Mark All Watched Compact: "Mind megtekintve"
   Repair Use Cookies: "Beállított yt-dlp sütik használata"
@@ -282,7 +282,6 @@ History:
   Mark All As Watched: Összes megjelölése megtekintettként
   Mark All As Watched Confirmation: Biztosan megtekintettként jelöli meg az előzmények összes videóját?
   All History Marked as Watched: Az előzmények összes videója megtekintettként megjelölve
-  Delete Old History: Régi előzmények törlése
   Select History Age: Válassza ki, milyen régi bejegyzéseket szeretne törölni.
   Delete Entries Older Than: Ennél régebbi bejegyzések törlése
   Number of Days: Napok száma
@@ -1852,6 +1851,8 @@ Video:
       unlisted: "Listázatlan"
   Save Queue to Playlist: "Lejátszási sor mentése lejátszási listába"
   Live Chat is currently not supported with the Yattee server. A direct connection to YouTube is required.: Az élő csevegést jelenleg nem támogatja a Yattee-kiszolgáló. Közvetlen kapcsolat szükséges a YouTube-hoz.
+  External Player:
+    LaunchFailedTemplate: A(z) {externalPlayer} nem indítható el. Ellenőrizze, hogy telepítve van-e, vagy adja meg a végrehajtható fájl útvonalát a külső lejátszó beállításaiban.
 Playlist:
   Playlist Already Preloaded: "A lejátszási lista összes videója már elő van töltve"
   Playlist Preload Progress: "Videók előtöltése: {completed}/{requested}"
@@ -1912,6 +1913,7 @@ Context Menu:
   Reload Live: Élő adások újratöltése
   Reload Posts: Bejegyzések újratöltése
   Reload All Feeds: Összes hírfolyam újratöltése
+  Reload RSS Feeds: RSS-hírcsatornák újratöltése
   Close Multiple Tabs: Lapok bezárása ({count})
   Duplicate Tab: Lap megkettőzése
   Duplicate Multiple Tabs: Lapok megkettőzése ({count})
@@ -2363,6 +2365,7 @@ Downloads:
     Subtitles Format: Feliratok - {format}
   Waiting for Unmetered Network: "Várakozás nem forgalomkorlátos hálózatra"
   Waiting for Charging: "Várakozás töltőre"
+  Remove File Failed: A letöltött fájl nem távolítható el.
 Channels:
   Load More Channels: "További csatornák betöltése"
 Theme Discovery:

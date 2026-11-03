@@ -403,6 +403,28 @@ test('large history sync lets renderer input run before merging finishes', async
   }
 })
 
+test('backup archives are created and read without blocking renderer input', async () => {
+  const jobs = createJobs()
+  const history = Array.from({ length: 50_000 }, (_, index) => ({
+    videoId: `video-${index}`, title: `Video ${index}`, authorId: 'UCtest', author: 'Channel',
+    description: `Description ${index} `.repeat(40), lengthSeconds: 120, timeWatched: index + 1, watchProgress: 15,
+  }))
+  const input = monitorInputDelay()
+  try {
+    const archive = await jobs.run('createUnifiedBackup', { history, settings: { locale: 'en-US' } })
+    assert.ok(archive instanceof Blob)
+    const { manifest, data } = await jobs.run('readUnifiedBackup', archive)
+    assert.deepEqual(manifest.sections, ['settings', 'history'])
+    assert.deepEqual(data.settings, { locale: 'en-US' })
+    assert.equal(data.history.length, history.length)
+    assert.deepEqual(data.history.at(-1), history.at(-1))
+    await input.finish()
+  } finally {
+    input.stop()
+    jobs.dispose()
+  }
+})
+
 test('foreground RSS parsing lets renderer input run before returning entries', async () => {
   const start = subscriptions.indexOf('export async function parseYouTubeRSSFeed(')
   const end = subscriptions.indexOf('\n/**', start)

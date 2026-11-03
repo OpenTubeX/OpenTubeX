@@ -439,8 +439,9 @@ async function removeDownload(id) {
   if (await ytDlp.ytDlpRemoveDownload(id)) {
     store.commit('removeYtDlpDownload', id)
   } else {
-    await refreshDownloads()
-    showToast({ message: t('Downloads.File Not Found'), icon: ['fas', 'circle-exclamation'] })
+    const download = (await refreshDownloads()).find(record => record.id === id)
+    const filesRemain = ['available', 'partial'].includes(download?.availability)
+    showToast({ message: filesRemain ? t('Downloads.Remove File Failed') : t('Downloads.File Not Found'), icon: ['fas', 'circle-exclamation'] })
   }
 }
 async function handleRemovePrompt(option) {

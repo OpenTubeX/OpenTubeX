@@ -160,6 +160,7 @@ Subscriptions:
   Newest First: Сначала новые
   Oldest First: Сначала старые
   RSS Feeds:
+    Refreshing: Обновление RSS-лент
     Tab: RSS
     Followed Feeds: Отслеживаемые RSS-ленты
     Add Feed: Добавить ленту
@@ -236,7 +237,6 @@ History:
   Clear Filters: 'Сбросить фильтры'
   Invalid Date Range: 'Начальная дата должна быть не позже конечной.'
   Empty Filter Message: 'В вашей истории нет видео, соответствующих этим фильтрам.'
-  Delete Old Compact: "Удалить старые"
   Repair Compact: "Восстановить"
   Mark All Watched Compact: "Все просмотрены"
   Repair Use Cookies: "Использовать настроенные файлы cookie yt-dlp"
@@ -255,7 +255,6 @@ History:
   Mark All As Watched: Отметить всё как просмотренное
   Mark All As Watched Confirmation: Отметить все видео в истории как просмотренные?
   All History Marked as Watched: Все видео в истории отмечены как просмотренные
-  Delete Old History: Удалить старую историю
   Select History Age: Укажите, через сколько времени удалять записи.
   Delete Entries Older Than: Удалять записи старше
   Number of Days: Количество дней
@@ -1828,6 +1827,8 @@ Video:
       unlisted: "Отсутствует в списках"
   Save Queue to Playlist: "Сохранить очередь в плейлист"
   Live Chat is currently not supported with the Yattee server. A direct connection to YouTube is required.: Чат трансляции в настоящее время не поддерживается сервером Yattee. Требуется прямое подключение к YouTube.
+  External Player:
+    LaunchFailedTemplate: Не удалось запустить {externalPlayer}. Убедитесь, что он установлен, или укажите путь к исполняемому файлу в настройках внешнего проигрывателя.
 Playlist:
   Playlist Already Preloaded: "Все видео из плейлиста уже предварительно загружены"
   Playlist Preload Progress: "Предварительная загрузка видео: {completed} из {requested}"
@@ -1888,6 +1889,7 @@ Context Menu:
   Reload Live: Перезагрузить трансляции
   Reload Posts: Перезагрузить публикации
   Reload All Feeds: Перезагрузить все ленты
+  Reload RSS Feeds: Перезагрузить RSS-ленты
   Close Multiple Tabs: Закрыть {count} вкладку | Закрыть {count} вкладки | Закрыть {count} вкладок
   Duplicate Tab: Дублировать вкладку
   Duplicate Multiple Tabs: Дублировать {count} вкладку | Дублировать {count} вкладки | Дублировать {count} вкладок
@@ -2334,6 +2336,7 @@ Downloads:
     Subtitles Format: Субтитры - {format}
   Waiting for Unmetered Network: "Ожидание безлимитной сети"
   Waiting for Charging: "Ожидание зарядного устройства"
+  Remove File Failed: Не удалось удалить скачанный файл.
 Channels:
   Load More Channels: "Загрузить больше каналов"
 Search Bar:

@@ -1,8 +1,18 @@
 import { shallowRef } from 'vue'
 
 import store from '../store/index'
+import i18n from '../i18n/index'
+import { startProgressBarOperation } from './progressBar'
+import { shouldShowProgressStartToast } from './progressPresentation'
+import { showToastOnAllTabs } from './utils'
 import { appFetch } from './rssHub'
 import { supportsYtDlp } from './ytDlpCapabilities'
+import {
+  RSS_FEED_SEEN_ITEMS_STORAGE_KEY,
+  loadRssFeedSeenMarks,
+  onRssFeedSeenItemsSynced,
+  recordRssFeedSeenItems
+} from './rssFeedSeenItems'
 import { resolveYtDlpCreatorAvatarUrl } from '../../main/ytDlpCreatorAvatar'
 
 const FETCH_TIMEOUT_MS = 15_000
@@ -297,10 +307,27 @@ const LOADED_FEEDS_STORAGE_KEY = 'rssFeedsLoaded'
 function loadStoredItems() {
   try {
     const items = JSON.parse(localStorage.getItem(ITEMS_STORAGE_KEY) ?? '[]')
-    return Array.isArray(items) ? items : []
+    return Array.isArray(items) ? applySeenMarks(items, loadRssFeedSeenMarks()) : []
   } catch {
     return []
   }
+}
+
+/**
+ * Items marked as seen are no longer new, items marked as unseen are new again.
+ * @param {RssFeedItem[]} items
+ * @param {Map<string, boolean>} marks whether each marked item is seen
+ */
+function applySeenMarks(items, marks) {
+  if (marks.size === 0) return items
+  let changed = false
+  const marked = items.map((item) => {
+    const seen = marks.get(getRssFeedItemKey(item))
+    if (seen === undefined || seen === (item.isNew !== true)) return item
+    changed = true
+    return { ...item, isNew: !seen }
+  })
+  return changed ? marked : items
 }
 
 /**
@@ -394,7 +421,9 @@ let loadedDuringRefresh = new Set()
 if (typeof window !== 'undefined') {
   // Other windows refresh the feeds and mark their items as seen too
   window.addEventListener('storage', (event) => {
-    if (event.key === null || event.key === ITEMS_STORAGE_KEY) rssFeedItems.value = loadStoredItems()
+    if (event.key === null || event.key === ITEMS_STORAGE_KEY || event.key === RSS_FEED_SEEN_ITEMS_STORAGE_KEY) {
+      rssFeedItems.value = loadStoredItems()
+    }
     if (event.key === null || event.key === LOADED_FEEDS_STORAGE_KEY) loadedFeedUrls = loadLoadedFeedUrls()
     if (event.key === null || event.key === NEXT_AUTO_REFRESH_STORAGE_KEY) rssFeedsNextAutoRefresh.value = loadRssFeedsNextAutoRefresh()
   })
@@ -415,11 +444,16 @@ export function getRssFeedItemKey(item) {
  * @param {RssFeedItem[]} previousItems the cached items of the same feed
  */
 function reconcileNewItems(feedUrl, items, previousItems) {
-  if (!loadedFeedUrls.has(feedUrl) && previousItems.length === 0) return items
+  // Items can be marked on another device before they load here
+  const marks = loadRssFeedSeenMarks()
+  if (!loadedFeedUrls.has(feedUrl) && previousItems.length === 0) return applySeenMarks(items, marks)
   const previousById = new Map(previousItems.map(item => [item.id, item]))
   return items.map((item) => {
     const previous = previousById.get(item.id)
-    return (previous ? previous.isNew === true : true) ? { ...item, isNew: true } : item
+    const seen = marks.get(getRssFeedItemKey(item))
+    return (seen === undefined ? (previous ? previous.isNew === true : true) : !seen)
+      ? { ...item, isNew: true }
+      : item
   })
 }
 
@@ -427,12 +461,35 @@ function reconcileNewItems(feedUrl, items, previousItems) {
  * @param {RssFeedItem[]} items
  */
 export function markRssFeedItemsAsSeen(items) {
-  const keys = new Set(items.map(getRssFeedItemKey))
-  if (!rssFeedItems.value.some(item => item.isNew && keys.has(getRssFeedItemKey(item)))) return
-  setRssFeedItems(rssFeedItems.value.map(item => (
-    item.isNew && keys.has(getRssFeedItemKey(item)) ? { ...item, isNew: false } : item
-  )))
+  setRssFeedItemsSeen(items, true)
 }
+
+/**
+ * @param {RssFeedItem[]} items
+ */
+export function markRssFeedItemsAsUnseen(items) {
+  setRssFeedItemsSeen(items, false)
+}
+
+/**
+ * @param {RssFeedItem[]} items
+ * @param {boolean} seen
+ */
+function setRssFeedItemsSeen(items, seen) {
+  const keys = new Set(items.map(getRssFeedItemKey))
+  const changedKeys = rssFeedItems.value
+    .filter(item => (item.isNew === true) === seen && keys.has(getRssFeedItemKey(item)))
+    .map(getRssFeedItemKey)
+  if (changedKeys.length === 0) return
+  recordRssFeedSeenItems(changedKeys, seen)
+  setRssFeedItems(applySeenMarks(rssFeedItems.value, new Map(changedKeys.map(key => [key, seen]))))
+  store.dispatch('scheduleSyncServer', 'history')
+}
+
+onRssFeedSeenItemsSynced((marks) => {
+  const items = applySeenMarks(rssFeedItems.value, marks)
+  if (items !== rssFeedItems.value) setRssFeedItems(items)
+})
 
 /**
  * Removed feeds are filtered out of the cached items, added ones need a refresh.
@@ -507,18 +564,30 @@ export async function retryRssFeed(feed) {
   updateMissingRssFeedAvatars([[feed, result]])
 }
 
+const AUTO_REFRESH_TOAST_DURATION = 5000
+
 /**
  * @param {RssFeed[]} feeds
+ * @param {{ automatic?: boolean }} [options]
  */
-export async function refreshRssFeeds(feeds) {
+export async function refreshRssFeeds(feeds, { automatic = false } = {}) {
   activeRefresh?.abort()
   const controller = new AbortController()
   activeRefresh = controller
   loadedDuringRefresh = new Set()
   rssFeedsRefreshing.value = true
+  // Shown as a notification or in the progress bar, like subscription refreshes
+  const message = i18n.global.t('Subscriptions.RSS Feeds.Refreshing')
+  const progress = startProgressBarOperation(store, { icon: ['fas', 'rss'], message, percentage: 0 })
+  if (automatic && shouldShowProgressStartToast(store.getters.getEffectiveShowProgressBarToast)) {
+    showToastOnAllTabs(message, AUTO_REFRESH_TOAST_DURATION, ['fas', 'rss'])
+  }
 
   try {
-    const results = await Promise.allSettled(feeds.map(feed => fetchRssFeed(feed.url, controller.signal)))
+    let settledCount = 0
+    const results = await Promise.allSettled(feeds.map(feed => fetchRssFeed(feed.url, controller.signal).finally(() => {
+      if (!controller.signal.aborted) progress.update({ percentage: (++settledCount / feeds.length) * 100 })
+    })))
     if (controller.signal.aborted) return
 
     // Feeds added or retried while this refresh ran keep their own, newer result,
@@ -550,6 +619,7 @@ export async function refreshRssFeeds(feeds) {
       return result.status === 'fulfilled' ? [[feed, result.value]] : []
     }))
   } finally {
+    progress.finish()
     if (activeRefresh === controller) {
       activeRefresh = null
       rssFeedsRefreshing.value = false

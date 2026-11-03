@@ -553,13 +553,14 @@ export default {
    * @param {(
    *   externalPlayer: string,
    *   unsuportedActions: (import('../constants').UnsupportedPlayerAction)[],
-   *   isPlaylist: boolean
+   *   isPlaylist: boolean,
+   *   launchFailed: boolean
    * ) => void} handler
    */
   handleOpenInExternalPlayerResult: (handler) => {
     ipcRenderer.on(IpcChannels.OPEN_IN_EXTERNAL_PLAYER_RESULT,
-      (event, externalPlayer, unsupportedActions, isPlaylist) => {
-        handler(externalPlayer, unsupportedActions, isPlaylist)
+      (event, externalPlayer, unsupportedActions, isPlaylist, launchFailed) => {
+        handler(externalPlayer, unsupportedActions, isPlaylist, launchFailed)
       })
   },
 

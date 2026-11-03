@@ -466,12 +466,12 @@ export async function setupTabsIPC(options = {}) {
       ? payload.surface
       : payload?.isTabBar === true ? 'tabBar' : 'content'
     manager.contextMenuSubscriptionFeedTab = manager.contextMenuSurface === 'subscriptionFeedTab' &&
-      ['videos', 'shorts', 'live', 'posts', 'all'].includes(payload?.feedTab)
+      ['videos', 'shorts', 'live', 'posts', 'all', 'feeds'].includes(payload?.feedTab)
       ? payload.feedTab
       : null
     manager.contextMenuSubscriptionNewFeedTab = manager.contextMenuSubscriptionFeedTab !== null &&
       payload?.isNewFeedTab === true
-    manager.contextMenuSubscriptionNewFeedHasContent = manager.contextMenuSubscriptionNewFeedTab &&
+    manager.contextMenuSubscriptionFeedHasNewContent = manager.contextMenuSubscriptionFeedTab !== null &&
       payload?.hasNewContent === true
     manager.contextMenuTabBarVertical = payload?.verticalLayout === true
   })

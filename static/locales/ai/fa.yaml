@@ -206,6 +206,7 @@ Subscriptions:
   Posts:
     RSS Message: 'یوتیوب برای پست‌ها خوراک RSS ارائه نمی‌کند. برای دیدن پست‌ها تنظیم "{rssSetting}" را غیرفعال کنید یا برای پنهان‌کردن این زبانه تنظیم "{hideSetting}" را فعال کنید.'
   RSS Feeds:
+    Refreshing: در حال تازه‌سازی خوراک‌های RSS
     Tab: RSS
     Followed Feeds: خوراک‌های RSS دنبال‌شده
     Add Feed: افزودن خوراک
@@ -287,7 +288,6 @@ History:
   Clear Filters: 'پاک کردن فیلترها'
   Invalid Date Range: 'تاریخ شروع باید قبل از تاریخ پایان یا برابر با آن باشد.'
   Empty Filter Message: 'هیچ ویدیویی در سابقهٔ شما با این فیلترها مطابقت ندارد.'
-  Delete Old Compact: "حذف قدیمی‌ها"
   Repair Compact: "ترمیم"
   Mark All Watched Compact: "همه تماشا شده"
   Repair Use Cookies: "استفاده از کوکی‌های پیکربندی‌شدهٔ yt-dlp"
@@ -306,7 +306,6 @@ History:
   Mark All As Watched: علامت‌گذاری همه به‌عنوان تماشاشده
   Mark All As Watched Confirmation: مطمئنید می‌خواهید همه ویدیوهای تاریخچه را تماشاشده علامت‌گذاری کنید؟
   All History Marked as Watched: همه ویدیوهای تاریخچه تماشاشده علامت‌گذاری شدند
-  Delete Old History: حذف تاریخچه قدیمی
   Select History Age: مشخص کنید یک مورد پس از چه مدتی حذف شود.
   Delete Entries Older Than: حذف موارد قدیمی‌تر از
   Number of Days: تعداد روزها
@@ -1942,6 +1941,8 @@ Video:
   How this was made: این چگونه ساخته شده است
   Save Queue to Playlist: "ذخیرهٔ صف در فهرست پخش"
   Live Chat is currently not supported with the Yattee server. A direct connection to YouTube is required.: گفتگوی زنده در حال حاضر با سرور Yattee پشتیبانی نمی‌شود. اتصال مستقیم به YouTube مورد نیاز است.
+  External Player:
+    LaunchFailedTemplate: اجرای {externalPlayer} ممکن نشد. مطمئن شوید نصب شده است، یا مسیر فایل اجرایی آن را در تنظیمات پخش‌کنندهٔ خارجی تعیین کنید.
 Playlist:
   Playlist Already Preloaded: "همه ویدیوهای فهرست پخش از قبل پیش‌بارگذاری شده‌اند"
   Playlist Preload Progress: "در حال پیش‌بارگذاری ویدیوها: {completed} از {requested}"
@@ -2004,6 +2005,7 @@ Context Menu:
   Reload Live: بارگیری دوبارهٔ پخش‌های زنده
   Reload Posts: بارگیری دوبارهٔ پست‌ها
   Reload All Feeds: بارگیری دوبارهٔ همهٔ خوراک‌ها
+  Reload RSS Feeds: بارگذاری دوبارهٔ خوراک‌های RSS
   Close Multiple Tabs: بستن {count} زبانه
   Duplicate Tab: تکثیر زبانه
   Duplicate Multiple Tabs: تکثیر {count} زبانه
@@ -2462,6 +2464,7 @@ Downloads:
     Subtitles Format: زیرنویس - {format}
   Waiting for Unmetered Network: "در انتظار شبکهٔ بدون محدودیت"
   Waiting for Charging: "در انتظار شارژر"
+  Remove File Failed: حذف فایل بارگیری‌شده ممکن نشد.
 Channels:
   Load More Channels: "بارگیری کانال‌های بیشتر"
 Search Bar:

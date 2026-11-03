@@ -187,6 +187,7 @@ Subscriptions:
   Newest First: Berrienak lehenik
   Oldest First: Zaharrenak lehenik
   RSS Feeds:
+    Refreshing: RSS jarioak freskatzen
     Tab: RSS
     Followed Feeds: Jarraitutako RSS jarioak
     Add Feed: Gehitu jarioa
@@ -263,7 +264,6 @@ History:
   Clear Filters: 'Garbitu iragazkiak'
   Invalid Date Range: 'Hasiera-datak amaiera-data baino lehenagokoa edo berdina izan behar du.'
   Empty Filter Message: 'Zure historiako bideorik ez dator bat iragazki hauekin.'
-  Delete Old Compact: "Zaharrak ezabatu"
   Repair Compact: "Konpondu"
   Mark All Watched Compact: "Denak ikusita"
   Repair Use Cookies: "Erabili konfiguratutako yt-dlp cookieak"
@@ -282,7 +282,6 @@ History:
   Mark All As Watched: Markatu guztiak ikusita
   Mark All As Watched Confirmation: Ziur historiako bideo guztiak ikusita markatu nahi dituzula?
   All History Marked as Watched: Historiako bideo guztiak ikusita markatu dira
-  Delete Old History: Ezabatu historia zaharra
   Select History Age: Aukeratu sarrera batek zenbat denbora izan behar duen ezabatu aurretik.
   Delete Entries Older Than: Ezabatu hau baino zaharragoak diren sarrerak
   Number of Days: Egun kopurua
@@ -1862,6 +1861,8 @@ Video:
       unlisted: "Zerrendatu gabeak"
   Save Queue to Playlist: "Gorde ilara erreprodukzio-zerrendan"
   Live Chat is currently not supported with the Yattee server. A direct connection to YouTube is required.: Zuzeneko txata ez da oraingoz onartzen Yattee zerbitzariarekin. Beharrezkoa da YouTubera zuzenean konektatzea.
+  External Player:
+    LaunchFailedTemplate: Ezin izan da {externalPlayer} abiarazi. Egiaztatu instalatuta dagoela, edo ezarri exekutagarriaren bidea kanpoko erreproduzigailuaren ezarpenetan.
 Playlist:
   Playlist Already Preloaded: "Erreprodukzio-zerrendako bideo guztiak aurrez kargatuta daude"
   Playlist Preload Progress: "Bideoak aurrez kargatzen: {completed}/{requested}"
@@ -1922,6 +1923,7 @@ Context Menu:
   Reload Live: Kargatu berriro zuzenekoak
   Reload Posts: Kargatu berriro argitalpenak
   Reload All Feeds: Kargatu berriro jario guztiak
+  Reload RSS Feeds: Birkargatu RSS jarioak
   Close Multiple Tabs: Itxi {count} fitxa
   Duplicate Tab: Bikoiztu fitxa
   Duplicate Multiple Tabs: Bikoiztu {count} fitxa
@@ -2372,6 +2374,7 @@ Downloads:
     Subtitles Format: Azpitituluak - {format}
   Waiting for Unmetered Network: "Neurtu gabeko sare baten zain"
   Waiting for Charging: "Kargagailu baten zain"
+  Remove File Failed: Ezin izan da deskargatutako fitxategia kendu.
 Channels:
   Load More Channels: "Kargatu kanal gehiago"
 Theme Discovery:

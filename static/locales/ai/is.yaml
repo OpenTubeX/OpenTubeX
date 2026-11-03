@@ -187,6 +187,7 @@ Subscriptions:
   Newest First: Nýjast fyrst
   Oldest First: Elst fyrst
   RSS Feeds:
+    Refreshing: Uppfæri RSS-strauma
     Tab: RSS
     Followed Feeds: RSS-straumar sem þú fylgist með
     Add Feed: Bæta við straumi
@@ -263,7 +264,6 @@ History:
   Clear Filters: 'Hreinsa síur'
   Invalid Date Range: 'Upphafsdagsetningin verður að vera fyrir eða á lokadagsetningunni.'
   Empty Filter Message: 'Engin myndskeið í ferlinum þínum passa við þessar síur.'
-  Delete Old Compact: "Eyða gömlu"
   Repair Compact: "Lagfæra"
   Mark All Watched Compact: "Merkja allt skoðað"
   Repair Use Cookies: "Nota stilltar yt-dlp vafrakökur"
@@ -282,7 +282,6 @@ History:
   Mark All As Watched: Merkja öll myndbönd sem skoðuð
   Mark All As Watched Confirmation: Viltu örugglega merkja öll myndbönd í áhorfsferlinum sem skoðuð?
   All History Marked as Watched: Öll myndbönd í áhorfsferlinum hafa verið merkt sem skoðuð
-  Delete Old History: Eyða gömlum áhorfsferli
   Select History Age: Veldu hversu gömul færsla þarf að vera áður en henni er eytt.
   Delete Entries Older Than: Eyða færslum eldri en
   Number of Days: Fjöldi daga
@@ -1869,6 +1868,8 @@ Video:
       unlisted: "Óskráð"
   Save Queue to Playlist: "Vista biðröð í spilunarlista"
   Live Chat is currently not supported with the Yattee server. A direct connection to YouTube is required.: Spjall í beinni er ekki stutt með Yattee-netþjóninum. Nauðsynlegt er að vera með beina tengingu við YouTube.
+  External Player:
+    LaunchFailedTemplate: Ekki tókst að ræsa {externalPlayer}. Athugaðu að hann sé uppsettur, eða stilltu slóð keyrsluskrárinnar í stillingum ytri spilara.
 Playlist:
   Playlist Already Preloaded: "Öll myndskeið spilunarlistans eru þegar forhlaðin"
   Playlist Preload Progress: "Forhleðsla myndskeiða: {completed} af {requested}"
@@ -1929,6 +1930,7 @@ Context Menu:
   Reload Live: Endurhlaða beinar útsendingar
   Reload Posts: Endurhlaða færslur
   Reload All Feeds: Endurhlaða allar veitur
+  Reload RSS Feeds: Endurhlaða RSS-straumum
   Close Multiple Tabs: Loka {count} flipa | Loka {count} flipum
   Duplicate Tab: Tvítaka flipa
   Duplicate Multiple Tabs: Tvítaka {count} flipa | Tvítaka {count} flipa
@@ -2381,6 +2383,7 @@ Downloads:
     Subtitles Format: Skjátextar – {format}
   Waiting for Unmetered Network: "Bíður eftir ómældu neti"
   Waiting for Charging: "Bíður eftir hleðslutæki"
+  Remove File Failed: Ekki tókst að fjarlægja sóttu skrána.
 Channels:
   Load More Channels: "Hlaða fleiri rásum"
 Theme Discovery:

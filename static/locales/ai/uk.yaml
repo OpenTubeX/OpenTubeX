@@ -189,6 +189,7 @@ Subscriptions:
   Posts:
     RSS Message: 'YouTube не надає RSS-каналів для дописів. Вимкніть налаштування "{rssSetting}", щоб переглядати дописи, або ввімкніть "{hideSetting}", щоб приховати цю вкладку.'
   RSS Feeds:
+    Refreshing: Оновлення RSS-стрічок
     Tab: RSS
     Followed Feeds: Відстежувані RSS-стрічки
     Add Feed: Додати стрічку
@@ -268,7 +269,6 @@ History:
   Clear Filters: 'Скинути фільтри'
   Invalid Date Range: 'Початкова дата має бути не пізніше кінцевої.'
   Empty Filter Message: 'У вашій історії немає відео, які відповідають цим фільтрам.'
-  Delete Old Compact: "Видалити старі"
   Repair Compact: "Відновити"
   Mark All Watched Compact: "Усі переглянуті"
   Repair Use Cookies: "Використовувати налаштовані cookies yt-dlp"
@@ -287,7 +287,6 @@ History:
   Mark All As Watched: Позначити все як переглянуте
   Mark All As Watched Confirmation: Позначити всі відео в історії як переглянуті?
   All History Marked as Watched: Усі відео в історії позначено як переглянуті
-  Delete Old History: Видалити давню історію
   Select History Age: Виберіть, скільки часу має минути до видалення запису.
   Delete Entries Older Than: Видалити записи, давніші за
   Number of Days: Кількість днів
@@ -1897,6 +1896,8 @@ Video:
   How this was made: Як це було створено
   Save Queue to Playlist: "Зберегти чергу в список відтворення"
   Live Chat is currently not supported with the Yattee server. A direct connection to YouTube is required.: Чат в режимі реального часу наразі не підтримується сервером Yattee. Потрібне пряме з’єднання з YouTube.
+  External Player:
+    LaunchFailedTemplate: Не вдалося запустити {externalPlayer}. Переконайтеся, що його встановлено, або вкажіть шлях до виконуваного файлу в налаштуваннях зовнішнього програвача.
 Playlist:
   Playlist Already Preloaded: "Усі відео з плейлиста вже попередньо завантажені"
   Playlist Preload Progress: "Попереднє завантаження відео: {completed} з {requested}"
@@ -1958,6 +1959,7 @@ Context Menu:
   Reload Live: Оновити трансляції наживо
   Reload Posts: Оновити дописи
   Reload All Feeds: Оновити всі стрічки
+  Reload RSS Feeds: Перезавантажити RSS-стрічки
   Close Multiple Tabs: Закрити {count} вкладку | Закрити {count} вкладки | Закрити {count} вкладок
   Duplicate Tab: Дублювати вкладку
   Duplicate Multiple Tabs: Дублювати {count} вкладку | Дублювати {count} вкладки | Дублювати {count} вкладок
@@ -2411,6 +2413,7 @@ Downloads:
     Subtitles Format: Субтитри - {format}
   Waiting for Unmetered Network: "Очікування безлімітної мережі"
   Waiting for Charging: "Очікування зарядного пристрою"
+  Remove File Failed: Не вдалося видалити завантажений файл.
 Channels:
   Load More Channels: "Завантажити більше каналів"
 Search Bar:

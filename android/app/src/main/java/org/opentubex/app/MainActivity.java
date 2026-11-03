@@ -82,6 +82,7 @@ public class MainActivity extends BridgeActivity {
         registerPlugin(SubscriptionRefreshPlugin.class);
         registerPlugin(BackgroundSyncPlugin.class);
         registerPlugin(SabrHttpPlugin.class);
+        registerPlugin(AndroidHttpPlugin.class);
         registerPlugin(VoiceOverHttpPlugin.class);
         registerPlugin(AndroidSharePlugin.class);
         registerPlugin(HomeWidgetsPlugin.class);

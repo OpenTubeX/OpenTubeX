@@ -22,16 +22,16 @@
         >
           <FtButton
             class="historyActionButton"
-            :label="t('History.Delete Old History')"
-            :aria-label="t('History.Delete Old History')"
-            :title="t('History.Delete Old History')"
+            :label="t('Delete')"
+            :aria-label="t('Delete')"
+            :title="t('Delete')"
             :icon="['fas', 'trash']"
             theme="destructive"
             @click="showHistoryCleanupPrompt = true"
           >
             <template #label>
-              <span class="historyFullActionLabel">{{ t('History.Delete Old History') }}</span>
-              <span class="historyCompactActionLabel">{{ t('History.Delete Old Compact') }}</span>
+              <span class="historyFullActionLabel">{{ t('Delete') }}</span>
+              <span class="historyCompactActionLabel">{{ t('Delete') }}</span>
             </template>
           </FtButton>
           <FtButton
@@ -371,7 +371,7 @@
             :id="labelId"
             class="cleanupPromptTitle"
           >
-            {{ t('History.Delete Old History') }}
+            {{ t('Delete') }}
           </h2>
         </template>
         <div class="cleanupPromptContent">

@@ -202,6 +202,7 @@ Subscriptions:
   Posts:
     RSS Message: YouTube не дае RSS-стужак для допісаў. Адключыце наладу "{rssSetting}", каб праглядаць допісы, або ўключыце наладу "{hideSetting}", каб схаваць гэту ўкладку.
   RSS Feeds:
+    Refreshing: Абнаўленне RSS-стужак
     Tab: RSS
     Followed Feeds: Падпісаныя RSS-стужкі
     Add Feed: Дадаць стужку
@@ -284,7 +285,6 @@ History:
   Clear Filters: 'Скінуць фільтры'
   Invalid Date Range: 'Пачатковая дата павінна быць не пазней за канчатковую.'
   Empty Filter Message: 'У вашай гісторыі няма відэа, якія адпавядаюць гэтым фільтрам.'
-  Delete Old Compact: "Выдаліць старыя"
   Repair Compact: "Аднавіць"
   Mark All Watched Compact: "Усе прагледжаны"
   Repair Use Cookies: "Выкарыстоўваць наладжаныя файлы cookie yt-dlp"
@@ -305,7 +305,6 @@ History:
   All History Marked as Watched: Усе відэа ў гісторыі пазначаныя прагледжанымі
   DateOldestHistory: Дата прагляду (спачатку даўнейшыя)
   DateNewestHistory: Дата прагляду (спачатку навейшыя)
-  Delete Old History: Выдаліць старую гісторыю
   Select History Age: Выберыце, колькі часу мусіць мінуць, каб запіс быў выдалены.
   Delete Entries Older Than: Выдаліць запісы, старэйшыя за
   Number of Days: Колькасць дзён
@@ -1948,6 +1947,8 @@ Video:
   How this was made: Як гэта было зроблена
   Save Queue to Playlist: "Захаваць чаргу ў плэй-ліст"
   Live Chat is currently not supported with the Yattee server. A direct connection to YouTube is required.: Жывы чат зараз не падтрымліваецца серверам Yattee. Патрабуецца прамое падключэнне да YouTube.
+  External Player:
+    LaunchFailedTemplate: Не ўдалося запусціць {externalPlayer}. Пераканайцеся, што ён усталяваны, або ўкажыце шлях да выканальнага файла ў наладах вонкавага прайгравальніка.
 Playlist:
   Playlist Already Preloaded: "Усе відэа плэйліста ўжо папярэдне загружаны"
   Playlist Preload Progress: "Папярэдняя загрузка відэа: {completed} з {requested}"
@@ -2010,6 +2011,7 @@ Context Menu:
   Reload Live: Перазагрузіць жывыя трансляцыі
   Reload Posts: Перазагрузіць допісы
   Reload All Feeds: Перазагрузіць усе стужкі
+  Reload RSS Feeds: Перазагрузіць RSS-стужкі
   Close Multiple Tabs: Закрыць {count} укладку | Закрыць {count} укладкі | Закрыць {count} укладак
   Duplicate Tab: Дубляваць укладку
   Duplicate Multiple Tabs: Дубляваць {count} укладку | Дубляваць {count} укладкі | Дубляваць {count} укладак
@@ -2471,6 +2473,7 @@ Downloads:
     Subtitles Format: Субцітры — {format}
   Waiting for Unmetered Network: "Чаканне безлімітнай сеткі"
   Waiting for Charging: "Чаканне зараднай прылады"
+  Remove File Failed: Не ўдалося выдаліць спампаваны файл.
 Channels:
   Load More Channels: "Загрузіць больш каналаў"
 Search Bar:

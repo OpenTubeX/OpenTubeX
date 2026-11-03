@@ -189,6 +189,7 @@ Subscriptions:
   Posts:
     RSS Message: 'YouTube ne pruža RSS izvore za objave. Isključite postavku "{rssSetting}" za prikaz objava ili uključite postavku "{hideSetting}" kako biste sakrili ovu karticu.'
   RSS Feeds:
+    Refreshing: Osvježavanje RSS izvora
     Tab: RSS
     Followed Feeds: Praćeni RSS izvori
     Add Feed: Dodaj izvor
@@ -266,7 +267,6 @@ History:
   Clear Filters: 'Očisti filtre'
   Invalid Date Range: 'Početni datum mora biti prije završnog datuma ili jednak njemu.'
   Empty Filter Message: 'Nijedan videozapis u vašoj povijesti ne odgovara ovim filtrima.'
-  Delete Old Compact: "Izbriši stare"
   Repair Compact: "Popravi"
   Mark All Watched Compact: "Sve pogledano"
   Repair Use Cookies: "Koristi konfigurirane yt-dlp kolačiće"
@@ -285,7 +285,6 @@ History:
   Mark All As Watched: Označi sve kao pogledano
   Mark All As Watched Confirmation: Jeste li sigurni da sve videozapise u povijesti želite označiti kao pogledane?
   All History Marked as Watched: Svi videozapisi u povijesti označeni su kao pogledani
-  Delete Old History: Izbriši staru povijest
   Select History Age: Odaberite koliko zapis mora biti star da bi se izbrisao.
   Delete Entries Older Than: Izbriši zapise starije od
   Number of Days: Broj dana
@@ -1882,6 +1881,8 @@ Video:
   How this was made: Kako je ovo izrađeno
   Save Queue to Playlist: "Spremi red čekanja u zbirku"
   Live Chat is currently not supported with the Yattee server. A direct connection to YouTube is required.: Razgovor uživo trenutačno nije podržan s Yattee poslužiteljem. Potrebna je izravna veza s YouTubeom.
+  External Player:
+    LaunchFailedTemplate: Nije moguće pokrenuti {externalPlayer}. Provjerite je li instaliran ili postavite putanju izvršne datoteke u postavkama vanjskog playera.
 Playlist:
   Playlist Already Preloaded: "Svi videozapisi na popisu već su predučitani"
   Playlist Preload Progress: "Predučitavanje videozapisa: {completed} od {requested}"
@@ -1943,6 +1944,7 @@ Context Menu:
   Reload Live: Ponovno učitaj sadržaj uživo
   Reload Posts: Ponovno učitaj objave
   Reload All Feeds: Ponovno učitaj sve sažetke
+  Reload RSS Feeds: Ponovno učitaj RSS izvore
   Close Multiple Tabs: Zatvori {count} karticu | Zatvori {count} kartice | Zatvori {count} kartica
   Duplicate Tab: Dupliciraj karticu
   Duplicate Multiple Tabs: Dupliciraj {count} karticu | Dupliciraj {count} kartice | Dupliciraj {count} kartica
@@ -2396,6 +2398,7 @@ Downloads:
     Subtitles Format: Titlovi - {format}
   Waiting for Unmetered Network: "Čeka se mreža bez ograničenja podataka"
   Waiting for Charging: "Čeka se punjač"
+  Remove File Failed: Nije moguće ukloniti preuzetu datoteku.
 Channels:
   Load More Channels: "Učitaj više kanala"
 Search Bar:

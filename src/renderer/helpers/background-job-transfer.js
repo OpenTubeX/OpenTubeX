@@ -16,7 +16,7 @@ export async function sendJobValue(postMessage, id, value, clone = value => valu
         postMessage({ type: 'chunk', id, path, items: clone(value.slice(offset, offset + CHUNK_SIZE)) })
         await yieldIfNeeded()
       }
-    } else if (value instanceof Date) {
+    } else if (value instanceof Date || value instanceof Blob) {
       postMessage({ type: 'value', id, path, value: clone(value) })
     } else if (value !== null && typeof value === 'object') {
       const keys = Object.keys(value)

@@ -207,6 +207,7 @@ Subscriptions:
   Newest First: Plej novaj unue
   Oldest First: Plej malnovaj unue
   RSS Feeds:
+    Refreshing: Refreŝigante RSS-fluojn
     Tab: RSS
     Followed Feeds: Sekvataj RSS-fluoj
     Add Feed: Aldoni fluon
@@ -312,14 +313,12 @@ History:
   Repair Finished: Riparo finiĝis
   Repair Stopped: Riparo haltigita
   Repair: Ripari historion
-  Delete Old Compact: Forigi malnovajn
   Repair Compact: Ripari
   Mark All Watched Compact: Marki ĉiujn spektitaj
   Repair Progress: Kontrolitaj {checked}/{total} · Riparitaj {repaired} · Malsukcesintaj {failed}
   Mark All As Watched: Marki ĉiujn kiel spektitaj
   Mark All As Watched Confirmation: Ĉu vi certas, ke vi volas marki ĉiujn videaĵojn en via historio kiel spektitaj?
   All History Marked as Watched: Ĉiuj videaĵoj en via historio estis markitaj kiel spektitaj
-  Delete Old History: Forigi malnovan historion
   Select History Age: Elektu kiom malnova ero devas esti antaŭ ol ĝi estas forigita.
   Delete Entries Older Than: Forigi erojn pli malnovajn ol
   Number of Days: Nombro de tagoj
@@ -1901,6 +1900,8 @@ Video:
       No Devices: Neniu FCast-ricevilo trovita
       No Source: Neniu kongrua fluo por FCast
   Info panel source: 'Fonto: {source}'
+  External Player:
+    LaunchFailedTemplate: Ne eblis lanĉi {externalPlayer}. Kontrolu, ke ĝi estas instalita, aŭ agordu la vojon al ĝia plenumebla dosiero en la agordoj de ekstera ludilo.
 Playlist:
   Close Playlist: Fermi ludliston
   Add Playlist to Queue: Aldoni ludliston al la vico
@@ -1961,6 +1962,7 @@ Context Menu:
   Reload Live: Reŝargi tujelsendojn
   Reload Posts: Reŝargi afiŝojn
   Reload All Feeds: Reŝargi ĉiujn fluojn
+  Reload RSS Feeds: Reŝargi RSS-fluojn
   Close Multiple Tabs: Fermi {count} langetojn
   Duplicate Tab: Duobligi langeton
   Duplicate Multiple Tabs: Duobligi {count} langetojn
@@ -2422,6 +2424,7 @@ Downloads:
     Audio Best: Sono - Plej bona kvalito
     Audio Format: Sono - {format}
     Subtitles Format: Subtekstoj - {format}
+  Remove File Failed: Ne eblis forigi la elŝutitan dosieron.
 Theme Discovery:
   Discover Themes: Malkovri etosojn
   Refresh: Aktualigi

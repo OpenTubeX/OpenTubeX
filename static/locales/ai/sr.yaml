@@ -191,6 +191,7 @@ Subscriptions:
   Posts:
     RSS Message: YouTube не пружа RSS изворе за објаве. Искључите подешавање „{rssSetting}“ да бисте видели објаве или укључите подешавање „{hideSetting}“ да бисте сакрили ову картицу.
   RSS Feeds:
+    Refreshing: Освежавање RSS фидова
     Tab: RSS
     Followed Feeds: Праћени RSS фидови
     Add Feed: Додај фид
@@ -273,7 +274,6 @@ History:
   Clear Filters: 'Обриши филтере'
   Invalid Date Range: 'Почетни датум мора бити пре крајњег датума или једнак њему.'
   Empty Filter Message: 'Ниједан видео у вашој историји не одговара овим филтерима.'
-  Delete Old Compact: "Обриши старе"
   Repair Compact: "Поправи"
   Mark All Watched Compact: "Све одгледано"
   Repair Use Cookies: "Користи подешене yt-dlp колачиће"
@@ -292,7 +292,6 @@ History:
   Mark All As Watched: Означи све као одгледано
   Mark All As Watched Confirmation: Желите ли заиста да означите све видео-снимке у историји као одгледане?
   All History Marked as Watched: Сви видео-снимци у историји означени су као одгледани
-  Delete Old History: Обриши стару историју
   Select History Age: Изаберите колико унос мора бити стар да би се обрисао.
   Delete Entries Older Than: Обриши уносе старије од
   Number of Days: Број дана
@@ -1924,6 +1923,8 @@ Video:
   How this was made: Како је ово направљено
   Save Queue to Playlist: "Сачувај ред за репродукцију у плејлисту"
   Live Chat is currently not supported with the Yattee server. A direct connection to YouTube is required.: Ћаскање уживо тренутно није подржано са Yattee сервером. Потребна је директна веза са YouTube-ом.
+  External Player:
+    LaunchFailedTemplate: Није могуће покренути {externalPlayer}. Проверите да ли је инсталиран или подесите путању извршне датотеке у подешавањима спољног плејера.
 Playlist:
   Playlist Already Preloaded: "Сви видео снимци са плејлисте су већ претходно учитани"
   Playlist Preload Progress: "Претходно учитавање видео снимака: {completed} од {requested}"
@@ -1986,6 +1987,7 @@ Context Menu:
   Reload Live: Поново учитај преносе уживо
   Reload Posts: Поново учитај објаве
   Reload All Feeds: Поново учитај све изворе
+  Reload RSS Feeds: Поново учитај RSS фидове
   Close Multiple Tabs: Затвори {count} картицу | Затвори {count} картице | Затвори {count} картица
   Duplicate Tab: Дуплирај картицу
   Duplicate Multiple Tabs: Дуплирај {count} картицу | Дуплирај {count} картице | Дуплирај {count} картица
@@ -2444,6 +2446,7 @@ Downloads:
     Subtitles Format: Титлови - {format}
   Waiting for Unmetered Network: "Чека се мрежа без ограничења података"
   Waiting for Charging: "Чека се пуњач"
+  Remove File Failed: Није могуће уклонити преузету датотеку.
 Channels:
   Load More Channels: "Учитај још канала"
 Search Bar:

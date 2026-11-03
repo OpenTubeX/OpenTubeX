@@ -203,6 +203,7 @@ Subscriptions:
   Posts:
     RSS Message: YouTube는 게시물용 RSS 피드를 제공하지 않습니다. 게시물을 보려면 "{rssSetting}" 설정을 끄거나 이 탭을 숨기려면 "{hideSetting}" 설정을 켜세요.
   RSS Feeds:
+    Refreshing: RSS 피드 새로고침 중
     Tab: RSS
     Followed Feeds: 팔로우 중인 RSS 피드
     Add Feed: 피드 추가
@@ -354,7 +355,6 @@ History:
   Clear Filters: '필터 초기화'
   Invalid Date Range: '시작일은 종료일보다 이전이거나 같아야 합니다.'
   Empty Filter Message: '기록에 이 필터와 일치하는 동영상이 없습니다.'
-  Delete Old Compact: "오래된 기록 삭제"
   Repair Compact: "복구"
   Mark All Watched Compact: "모두 시청 완료로"
   Repair Use Cookies: "설정된 yt-dlp 쿠키 사용"
@@ -376,7 +376,6 @@ History:
   All History Marked as Watched: 시청 기록의 모든 동영상을 시청함으로 표시했습니다
   DateOldestHistory: 시청 날짜 (오래된순)
   DateNewestHistory: 시청 날짜 (최신순)
-  Delete Old History: 오래된 기록 삭제
   Select History Age: 삭제할 기록의 최소 경과 기간을 선택하세요.
   Delete Entries Older Than: 다음보다 오래된 기록 삭제
   Number of Days: 일수
@@ -2213,6 +2212,8 @@ Video:
   How this was made: 제작 방식
   Save Queue to Playlist: "대기열을 재생목록에 저장"
   Live Chat is currently not supported with the Yattee server. A direct connection to YouTube is required.: 라이브 채팅은 현재 Yattee 서버에서 지원되지 않습니다. YouTube에 직접 연결해야 합니다.
+  External Player:
+    LaunchFailedTemplate: "{externalPlayer}을(를) 시작할 수 없습니다. 설치되어 있는지 확인하거나 외부 플레이어 설정에서 실행 파일 경로를 지정하세요."
 Playlist:
   Playlist Already Preloaded: "재생목록의 모든 동영상을 이미 미리 불러왔습니다"
   Playlist Preload Progress: "동영상 미리 불러오는 중: {requested}개 중 {completed}개"
@@ -2288,6 +2289,7 @@ Context Menu:
   Reload Live: 실시간 스트림 다시 불러오기
   Reload Posts: 게시물 다시 불러오기
   Reload All Feeds: 모든 피드 다시 불러오기
+  Reload RSS Feeds: RSS 피드 새로고침
   Close Multiple Tabs: 탭 {count}개 닫기
   Duplicate Tab: 탭 복제
   Duplicate Multiple Tabs: 탭 {count}개 복제
@@ -2826,6 +2828,7 @@ Downloads:
     Subtitles Format: 자막 - {format}
   Waiting for Unmetered Network: "종량제가 아닌 네트워크를 기다리는 중"
   Waiting for Charging: "충전기를 기다리는 중"
+  Remove File Failed: 다운로드한 파일을 제거할 수 없습니다.
 Channels:
   Load More Channels: "채널 더 불러오기"
 Search Bar:

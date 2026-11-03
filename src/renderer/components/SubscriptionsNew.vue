@@ -1,6 +1,6 @@
 <template>
   <div
-    v-if="activeCategory === 'feeds'"
+    v-if="showsOnlyRssItems"
     v-bind="$attrs"
     ref="rssFeed"
     class="newFeed"
@@ -41,6 +41,7 @@
     :attempted-fetch="attemptedFetch"
     :only-show-new="true"
     :has-additional-content="showCombinedView && (hasAdditionalContent || newRssItems.length > 0)"
+    :has-other-refresh-sources="showCombinedView && rssFeeds.length > 0"
     :is-community="activeCategory === 'posts'"
     :youtube-style-shorts="activeCategory === 'shorts' && useCustomShortsPlayer"
     :track-global-refresh="false"
@@ -160,6 +161,7 @@ import SubscriptionsTabUi from './SubscriptionsTabUi/SubscriptionsTabUi.vue'
 
 import store from '../store/index'
 
+import { useFeedRefreshShortcut } from '../composables/useFeedRefreshShortcut'
 import { useFollowedRssFeedItems } from '../composables/useFollowedRssFeedItems'
 import { useKeepAliveEffectScope } from '../composables/useKeepAliveEffectScope'
 import { useSubscriptionChannelUpdates } from '../composables/useSubscriptionChannelUpdates'
@@ -203,7 +205,7 @@ onBeforeUnmount(cancelRemovalAnimation)
 /** @param {() => Promise<unknown>} markSeen */
 async function markAllAsSeen(markSeen) {
   try {
-    const element = props.activeCategory === 'feeds' ? rssFeed.value : feed.value?.$el
+    const element = showsOnlyRssItems.value ? rssFeed.value : feed.value?.$el
     if (element && !isReducedMotionEnabled()) {
       const animation = applyAnimationSpeed(element.animate([
         { opacity: 1, transform: 'translateY(0)' },
@@ -361,13 +363,18 @@ const newRssItems = computed(() => {
 const newRssItemKeys = computed(() => newRssItems.value.map(getRssFeedItemKey))
 // Full width is a single-column grid, so its items render as grid cards.
 const rssLayout = computed(() => store.getters.getListType === 'list' ? 'list' : 'grid')
+// The RSS tab, or the combined feed while every subscription feed is hidden
+const showsOnlyRssItems = computed(() => {
+  return props.activeCategory === 'feeds' ||
+    (showCombinedView.value && enableRssFeeds.value && enabledFeeds.value.length === 0)
+})
 
 const hasAdditionalContent = computed(() => {
   return newShorts.value.length > 0 || newLive.value.length > 0 || newPosts.value.length > 0
 })
 
 const isLoading = computed(() => {
-  if (props.activeCategory === 'feeds') {
+  if (showsOnlyRssItems.value) {
     return rssFeedsRefreshing.value
   }
 
@@ -376,7 +383,7 @@ const isLoading = computed(() => {
 })
 
 const hasNewContent = computed(() => {
-  if (props.activeCategory === 'feeds') {
+  if (showsOnlyRssItems.value) {
     return newRssItems.value.length > 0
   }
 
@@ -396,13 +403,19 @@ const hasNewContentByCategory = computed(() => ({
 }))
 
 function refreshNewContent() {
-  if (props.activeCategory !== 'feeds' && activeSubscriptions.value.length > 0) {
+  if (!showsOnlyRssItems.value && enabledFeeds.value.length > 0 && activeSubscriptions.value.length > 0) {
     refresh()
   }
-  if ((props.activeCategory === 'feeds' || showCombinedView.value) && rssFeeds.value.length > 0) {
+  if ((showsOnlyRssItems.value || showCombinedView.value) && rssFeeds.value.length > 0) {
     refreshRssFeeds(rssFeeds.value)
   }
 }
+
+// The subscription feeds handle the shortcut themselves
+useFeedRefreshShortcut(
+  () => showsOnlyRssItems.value && rssFeeds.value.length > 0 && !rssFeedsRefreshing.value,
+  refreshNewContent
+)
 
 defineExpose({
   markAllAsSeen,

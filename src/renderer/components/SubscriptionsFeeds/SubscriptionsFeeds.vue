@@ -52,6 +52,7 @@ import FtListFeedItem from '../FtListFeedItem/FtListFeedItem.vue'
 import FtSkeletonGrid from '../FtSkeletonGrid/FtSkeletonGrid.vue'
 
 import store from '../../store/index'
+import { useFeedRefreshShortcut } from '../../composables/useFeedRefreshShortcut'
 import { useFollowedRssFeedItems } from '../../composables/useFollowedRssFeedItems'
 import { useKeepAliveEffectScope } from '../../composables/useKeepAliveEffectScope'
 import { useRelativeTimeClock } from '../../composables/useRelativeTimeClock'
@@ -104,6 +105,8 @@ const hasNewContent = computed(() => items.value.some(item => item.isNew === tru
 function refresh() {
   return refreshRssFeeds(feeds.value)
 }
+
+useFeedRefreshShortcut(() => feeds.value.length > 0 && !isLoading.value, refresh)
 
 defineExpose({
   refresh,

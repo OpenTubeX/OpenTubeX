@@ -50,7 +50,7 @@ test('Android keeps the UI thread responsive while syncing a large encrypted his
       const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
       window.__syncResponsivenessNativePromise = window.Capacitor.nativePromise
       window.Capacitor.nativePromise = (plugin, method, options) => (
-        plugin === 'CapacitorHttp' && method === 'request' && options.url.startsWith('https://sync-responsiveness.example/')
+        plugin === 'AndroidHttp' && method === 'request' && options.url.startsWith('https://sync-responsiveness.example/')
           ? window.__syncResponsivenessRequest(options)
           : window.__syncResponsivenessNativePromise(plugin, method, options)
       )

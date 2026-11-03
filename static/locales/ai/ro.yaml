@@ -187,6 +187,7 @@ Subscriptions:
   Newest First: Cele mai noi primele
   Oldest First: Cele mai vechi primele
   RSS Feeds:
+    Refreshing: Se reîmprospătează fluxurile RSS
     Tab: RSS
     Followed Feeds: Fluxuri RSS urmărite
     Add Feed: Adaugă flux
@@ -264,7 +265,6 @@ History:
   Clear Filters: 'Șterge filtrele'
   Invalid Date Range: 'Data de început trebuie să fie înainte de data de sfârșit sau egală cu aceasta.'
   Empty Filter Message: 'Niciun videoclip din istoric nu corespunde acestor filtre.'
-  Delete Old Compact: "Șterge vechi"
   Repair Compact: "Repară"
   Mark All Watched Compact: "Toate vizionate"
   Repair Use Cookies: "Folosește cookie-urile configurate pentru yt-dlp"
@@ -283,7 +283,6 @@ History:
   Mark All As Watched: Marchează totul ca vizionat
   Mark All As Watched Confirmation: Sigur doriți să marcați ca vizionate toate videoclipurile din istoric?
   All History Marked as Watched: Toate videoclipurile din istoric au fost marcate ca vizionate
-  Delete Old History: Șterge istoricul vechi
   Select History Age: Alegeți vechimea minimă a unei înregistrări pentru a fi ștearsă.
   Delete Entries Older Than: Șterge înregistrările mai vechi de
   Number of Days: Număr de zile
@@ -1898,6 +1897,8 @@ Video:
   How this was made: Cum a fost creat
   Save Queue to Playlist: "Salvează coada într-o listă de redare"
   Live Chat is currently not supported with the Yattee server. A direct connection to YouTube is required.: Chatul în direct nu este acceptat în prezent cu serverul Yattee. Este necesară o conexiune directă la YouTube.
+  External Player:
+    LaunchFailedTemplate: "{externalPlayer} nu a putut fi pornit. Verifică dacă este instalat sau setează calea executabilului în setările playerului extern."
 Playlist:
   Playlist Already Preloaded: "Toate videoclipurile din lista de redare sunt deja preîncărcate"
   Playlist Preload Progress: "Se preîncarcă videoclipurile: {completed} din {requested}"
@@ -1960,6 +1961,7 @@ Context Menu:
   Reload Live: Reîncarcă transmisiunile în direct
   Reload Posts: Reîncarcă postările
   Reload All Feeds: Reîncarcă toate fluxurile
+  Reload RSS Feeds: Reîncarcă fluxurile RSS
   Close Multiple Tabs: Închide {count} filă | Închide {count} file
   Duplicate Tab: Duplică fila
   Duplicate Multiple Tabs: Duplică {count} filă | Duplică {count} file
@@ -2418,6 +2420,7 @@ Downloads:
     Subtitles Format: Subtitrări - {format}
   Waiting for Unmetered Network: "Se așteaptă o rețea necontorizată"
   Waiting for Charging: "Se așteaptă un încărcător"
+  Remove File Failed: Fișierul descărcat nu a putut fi eliminat.
 Channels:
   Load More Channels: "Încarcă mai multe canale"
 Search Bar:

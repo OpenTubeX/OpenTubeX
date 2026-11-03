@@ -189,6 +189,7 @@ Subscriptions:
   Posts:
     RSS Message: لا يوفّر YouTube خلاصات RSS للمنشورات. عطّل إعداد "{rssSetting}" لعرض المنشورات أو فعّل إعداد "{hideSetting}" لإخفاء علامة التبويب هذه.
   RSS Feeds:
+    Refreshing: جارٍ تحديث موجزات RSS
     Tab: RSS
     Followed Feeds: خلاصات RSS المتابَعة
     Add Feed: إضافة خلاصة
@@ -268,7 +269,6 @@ History:
   Clear Filters: 'مسح عوامل التصفية'
   Invalid Date Range: 'يجب أن يكون تاريخ البداية قبل تاريخ النهاية أو مطابقًا له.'
   Empty Filter Message: 'لا توجد فيديوهات في سجلك تطابق عوامل التصفية هذه.'
-  Delete Old Compact: "حذف القديم"
   Repair Compact: "إصلاح"
   Mark All Watched Compact: "تمييز الكل كمشاهَد"
   Repair Use Cookies: "استخدام ملفات تعريف الارتباط المعدّة لـ yt-dlp"
@@ -287,7 +287,6 @@ History:
   Mark All As Watched: وضع علامة على الكل كما تمت مشاهدته
   Mark All As Watched Confirmation: هل أنت متأكد أنك تريد وضع علامة على جميع مقاطع الفيديو في سجلك كمشاهدة؟
   All History Marked as Watched: تم وضع علامة على جميع مقاطع الفيديو في سجلك على أنها تمت مشاهدتها
-  Delete Old History: 'حذف السجل القديم'
   Select History Age: حدد العمر الذي يجب أن يكون عليه الإدخال قبل حذفه.
   Delete Entries Older Than: حذف الإدخالات الأقدم من
   Number of Days: عدد الأيام
@@ -1897,6 +1896,8 @@ Video:
   How this was made: كيف تم صنع هذا
   Save Queue to Playlist: "حفظ قائمة الانتظار في قائمة تشغيل"
   Live Chat is currently not supported with the Yattee server. A direct connection to YouTube is required.: المحادثة المباشرة غير مدعومة حالياً مع خادم Yattee. يلزم الاتصال المباشر بـ YouTube.
+  External Player:
+    LaunchFailedTemplate: تعذّر تشغيل {externalPlayer}. تأكد من تثبيته، أو حدّد مسار الملف التنفيذي في إعدادات المشغّل الخارجي.
 Playlist:
   Playlist Already Preloaded: "تم تحميل جميع فيديوهات قائمة التشغيل مسبقًا بالفعل"
   Playlist Preload Progress: "جارٍ تحميل الفيديوهات مسبقًا: {completed} من {requested}"
@@ -1958,6 +1959,7 @@ Context Menu:
   Reload Live: إعادة تحميل لايف
   Reload Posts: إعادة تحميل المشاركات
   Reload All Feeds: إعادة تحميل كافة الخلاصات
+  Reload RSS Feeds: إعادة تحميل موجزات RSS
   Close Multiple Tabs: 'إغلاق علامتي تبويب ({count}) | إغلاق {count} علامات تبويب | إغلاق {count} علامة تبويب | إغلاق {count} علامة تبويب'
   Duplicate Tab: علامة تبويب مكررة
   Duplicate Multiple Tabs: 'تكرار علامتي تبويب ({count}) | تكرار {count} علامات تبويب | تكرار {count} علامة تبويب | تكرار {count} علامة تبويب'
@@ -2396,6 +2398,7 @@ Downloads:
     Subtitles Format: ترجمات - {format}
   Waiting for Unmetered Network: "في انتظار شبكة غير محدودة"
   Waiting for Charging: "في انتظار الشاحن"
+  Remove File Failed: تعذّرت إزالة الملف الذي تم تنزيله.
 Channels:
   Load More Channels: "تحميل المزيد من القنوات"
 Search Bar:

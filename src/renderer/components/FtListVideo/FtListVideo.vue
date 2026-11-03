@@ -1568,8 +1568,9 @@ async function removeSwipeDownload(option) {
   if (await ytDlp.ytDlpRemoveDownload(download.id)) {
     store.commit('removeYtDlpDownload', download.id)
   } else {
-    await refreshDownloadRecords(ytDlp, store)
-    showToast({ message: t('Downloads.File Not Found'), icon: ['fas', 'circle-exclamation'] })
+    const refreshed = (await refreshDownloadRecords(ytDlp, store)).find(record => record.id === download.id)
+    const filesRemain = ['available', 'partial'].includes(refreshed?.availability)
+    showToast({ message: filesRemain ? t('Downloads.Remove File Failed') : t('Downloads.File Not Found'), icon: ['fas', 'circle-exclamation'] })
   }
 }
 

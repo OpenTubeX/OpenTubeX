@@ -233,6 +233,7 @@ Subscriptions:
   Posts:
     RSS Message: YouTube no proporciona canals RSS per a les publicacions. Desactiveu l'opció "{rssSetting}" per veure les publicacions o activeu l'opció "{hideSetting}" per ocultar aquesta pestanya.
   RSS Feeds:
+    Refreshing: "S'estan actualitzant els canals RSS"
     Tab: RSS
     Followed Feeds: Canals RSS seguits
     Add Feed: Afegeix un canal
@@ -397,7 +398,6 @@ History:
   Clear Filters: 'Neteja els filtres'
   Invalid Date Range: 'La data inicial ha de ser anterior o igual a la data final.'
   Empty Filter Message: 'Cap vídeo de l''historial coincideix amb aquests filtres.'
-  Delete Old Compact: "Esborra antics"
   Repair Compact: "Repara"
   Mark All Watched Compact: "Marca tots vistos"
   Repair Use Cookies: "Utilitza les galetes configurades de yt-dlp"
@@ -419,7 +419,6 @@ History:
   All History Marked as Watched: S'han marcat com a vistos tots els vídeos de l'historial
   DateOldestHistory: Data de visualització (més antiga)
   DateNewestHistory: Data de visualització (més nova)
-  Delete Old History: Suprimeix l'historial antic
   Select History Age: Seleccioneu l'antiguitat que ha de tenir una entrada per poder-la suprimir.
   Delete Entries Older Than: Suprimeix les entrades anteriors a
   Number of Days: Nombre de dies
@@ -2060,6 +2059,7 @@ Video:
       reversing playlists: invertir llistes de reproducció
       shuffling playlists: barrejar llistes de reproducció
       looping playlists: reproduir llistes de reproducció en bucle
+    LaunchFailedTemplate: No s’ha pogut iniciar {externalPlayer}. Comproveu que està instal·lat o definiu el camí de l’executable a la configuració del reproductor extern.
   Player:
     Playing in Picture-in-Picture: S'està reproduint en mode d'imatge sobre imatge
     Stream Recovery:
@@ -2425,6 +2425,7 @@ Context Menu:
   Reload Live: Torna a carregar els directes
   Reload Posts: Torna a carregar les publicacions
   Reload All Feeds: Torna a carregar tots els canals
+  Reload RSS Feeds: Torna a carregar els canals RSS
   Close Multiple Tabs: Tanca {count} pestanya | Tanca {count} pestanyes
   Duplicate Tab: Duplica la pestanya
   Duplicate Multiple Tabs: Duplica {count} pestanya | Duplica {count} pestanyes
@@ -3023,6 +3024,7 @@ Downloads:
     Subtitles Format: Subtítols - {format}
   Waiting for Unmetered Network: "S'està esperant una xarxa sense límit de dades"
   Waiting for Charging: "S'està esperant un carregador"
+  Remove File Failed: No s’ha pogut eliminar el fitxer baixat.
 Theme Discovery:
   Discover Themes: "Descobreix temes"
   Refresh: "Actualitza"

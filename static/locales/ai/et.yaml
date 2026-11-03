@@ -187,6 +187,7 @@ Subscriptions:
   Newest First: Uuemad ees
   Oldest First: Vanemad ees
   RSS Feeds:
+    Refreshing: RSS-voogude värskendamine
     Tab: RSS
     Followed Feeds: Jälgitavad RSS-vood
     Add Feed: Lisa voog
@@ -263,7 +264,6 @@ History:
   Clear Filters: 'Tühjenda filtrid'
   Invalid Date Range: 'Alguskuupäev peab olema lõppkuupäevast varasem või sellega sama.'
   Empty Filter Message: 'Ükski video sinu ajaloos ei vasta nendele filtritele.'
-  Delete Old Compact: "Kustuta vanad"
   Repair Compact: "Paranda"
   Mark All Watched Compact: "Kõik vaadatud"
   Repair Use Cookies: "Kasuta seadistatud yt-dlp küpsiseid"
@@ -282,7 +282,6 @@ History:
   Mark All As Watched: Märgi kõik vaadatuks
   Mark All As Watched Confirmation: Kas soovite kindlasti kõik ajaloos olevad videod vaadatuks märkida?
   All History Marked as Watched: Kõik ajaloos olevad videod on vaadatuks märgitud
-  Delete Old History: Kustuta vana ajalugu
   Select History Age: Valige, kui vana peab kirje kustutamiseks olema.
   Delete Entries Older Than: Kustuta kirjed, mis on vanemad kui
   Number of Days: Päevade arv
@@ -1856,6 +1855,8 @@ Video:
       unlisted: "Registriväline"
   Save Queue to Playlist: "Salvesta esitusjärjekord esitusloendisse"
   Live Chat is currently not supported with the Yattee server. A direct connection to YouTube is required.: Kui kasutad Yattee serverit, siis reaalajas vestlus hetkel ei ole toetatud. Selleks on vajalik otseliidestus YouTube'iga.
+  External Player:
+    LaunchFailedTemplate: "{externalPlayer} käivitamine nurjus. Kontrolli, et see on paigaldatud, või määra välise mängija seadetes käivitusfaili asukoht."
 Playlist:
   Playlist Already Preloaded: "Kõik esitusloendi videod on juba eellaaditud"
   Playlist Preload Progress: "Videote eellaadimine: {completed}/{requested}"
@@ -1916,6 +1917,7 @@ Context Menu:
   Reload Live: Laadi otseülekanded uuesti
   Reload Posts: Laadi postitused uuesti
   Reload All Feeds: Laadi kõik vood uuesti
+  Reload RSS Feeds: Laadi RSS-vood uuesti
   Close Multiple Tabs: Sulge {count} vahekaarti
   Duplicate Tab: Klooni vahekaart
   Duplicate Multiple Tabs: Klooni {count} vahekaarti
@@ -2367,6 +2369,7 @@ Downloads:
     Subtitles Format: Subtiitrid - {format}
   Waiting for Unmetered Network: "Ootab mahupiiranguta võrku"
   Waiting for Charging: "Ootab laadijat"
+  Remove File Failed: Allalaaditud faili eemaldamine nurjus.
 Channels:
   Load More Channels: "Laadi rohkem kanaleid"
 Theme Discovery:

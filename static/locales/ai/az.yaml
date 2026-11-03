@@ -187,6 +187,7 @@ Subscriptions:
   Newest First: Əvvəlcə ən yeni
   Oldest First: Əvvəlcə ən köhnə
   RSS Feeds:
+    Refreshing: RSS lentləri yenilənir
     Tab: RSS
     Followed Feeds: İzlənilən RSS axınları
     Add Feed: Axın əlavə et
@@ -265,7 +266,6 @@ History:
   Clear Filters: 'Filtrləri təmizlə'
   Invalid Date Range: 'Başlanğıc tarixi son tarixdən əvvəl və ya ona bərabər olmalıdır.'
   Empty Filter Message: 'Tarixçənizdə bu filtrlərə uyğun video yoxdur.'
-  Delete Old Compact: "Köhnəni sil"
   Repair Compact: "Təmir et"
   Mark All Watched Compact: "Hamısı izlənib"
   Repair Use Cookies: "Konfiqurasiya edilmiş yt-dlp kukilərindən istifadə et"
@@ -284,7 +284,6 @@ History:
   Mark All As Watched: Hamısını baxılmış kimi işarələ
   Mark All As Watched Confirmation: Tarixçənizdəki bütün videoları baxılmış kimi işarələmək istədiyinizə əminsiniz?
   All History Marked as Watched: Tarixçənizdəki bütün videolar baxılmış kimi işarələndi
-  Delete Old History: Köhnə tarixçəni sil
   Select History Age: Qeydin silinməsi üçün nə qədər köhnə olmalı olduğunu seçin.
   Delete Entries Older Than: Bu müddətdən köhnə qeydləri sil
   Number of Days: Günlərin sayı
@@ -1864,6 +1863,8 @@ Video:
       unlisted: "Siyahıda olmayan"
   Save Queue to Playlist: "Növbəni pleylistdə saxla"
   Live Chat is currently not supported with the Yattee server. A direct connection to YouTube is required.: Canlı Söhbət hazırda Yattee serveri ilə dəstəklənmir. YouTube-a birbaşa bağlantı tələb olunur.
+  External Player:
+    LaunchFailedTemplate: "{externalPlayer} başladıla bilmədi. Onun quraşdırıldığını yoxlayın və ya xarici pleyer ayarlarında icra faylının yolunu təyin edin."
 Playlist:
   Close Playlist: Pleylisti bağla
   Preload Playlist: Bütün videoları öncədən yüklə
@@ -1924,6 +1925,7 @@ Context Menu:
   Reload Live: Canlı yayımları yenidən yüklə
   Reload Posts: Postları yenidən yüklə
   Reload All Feeds: Bütün axınları yenidən yüklə
+  Reload RSS Feeds: RSS lentlərini yenidən yüklə
   Close Multiple Tabs: "{count} vərəqni bağla"
   Duplicate Tab: Vərəqnin surətini yarat
   Duplicate Multiple Tabs: "{count} vərəqnin surətini yarat"
@@ -2375,6 +2377,7 @@ Downloads:
     Subtitles Format: Titrlər - {format}
   Waiting for Unmetered Network: "Limitsiz şəbəkə gözlənilir"
   Waiting for Charging: "Şarj cihazı gözlənilir"
+  Remove File Failed: Endirilmiş fayl silinə bilmədi.
 Theme Discovery:
   Discover Themes: Mövzuları kəşf et
   Refresh: Yenilə

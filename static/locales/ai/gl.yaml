@@ -189,6 +189,7 @@ Subscriptions:
   Posts:
     RSS Message: 'YouTube non fornece fontes RSS para as publicacións. Desactiva a opción "{rssSetting}" para ver as publicacións ou activa "{hideSetting}" para ocultar esta lapela.'
   RSS Feeds:
+    Refreshing: Actualizando as fontes RSS
     Tab: RSS
     Followed Feeds: Fontes RSS seguidas
     Add Feed: Engadir fonte
@@ -268,7 +269,6 @@ History:
   Clear Filters: 'Limpar filtros'
   Invalid Date Range: 'A data inicial debe ser anterior ou igual á data final.'
   Empty Filter Message: 'Ningún vídeo do teu historial coincide con estes filtros.'
-  Delete Old Compact: "Borrar antigos"
   Repair Compact: "Reparar"
   Mark All Watched Compact: "Marcar todos vistos"
   Repair Use Cookies: "Usar as cookies configuradas de yt-dlp"
@@ -287,7 +287,6 @@ History:
   Mark All As Watched: Marcar todo como visto
   Mark All As Watched Confirmation: Seguro que queres marcar como vistos todos os vídeos do historial?
   All History Marked as Watched: Marcáronse como vistos todos os vídeos do historial
-  Delete Old History: Eliminar o historial antigo
   Select History Age: Escolle a antigüidade que debe ter unha entrada para eliminala.
   Delete Entries Older Than: Eliminar as entradas anteriores a
   Number of Days: Número de días
@@ -1906,6 +1905,8 @@ Video:
   How this was made: Como se fixo
   Save Queue to Playlist: "Gardar a cola nunha lista de reprodución"
   Live Chat is currently not supported with the Yattee server. A direct connection to YouTube is required.: O chat en directo non é compatible actualmente co servidor Yattee. Precísase dunha conexión directa con YouTube.
+  External Player:
+    LaunchFailedTemplate: Non se puido iniciar {externalPlayer}. Comproba que está instalado ou define a ruta do executable na configuración do reprodutor externo.
 Playlist:
   Playlist Already Preloaded: "Todos os vídeos da lista xa están precargados"
   Playlist Preload Progress: "Precargando vídeos: {completed} de {requested}"
@@ -1967,6 +1968,7 @@ Context Menu:
   Reload Live: Recargar as emisións en directo
   Reload Posts: Recargar as publicacións
   Reload All Feeds: Recargar todas as fontes
+  Reload RSS Feeds: Recargar as fontes RSS
   Close Multiple Tabs: Pechar {count} lapelas
   Duplicate Tab: Duplicar a lapela
   Duplicate Multiple Tabs: Duplicar {count} lapelas
@@ -2420,6 +2422,7 @@ Downloads:
     Subtitles Format: Subtítulos - {format}
   Waiting for Unmetered Network: "Agardando por unha rede sen límite de datos"
   Waiting for Charging: "Agardando por un cargador"
+  Remove File Failed: Non se puido eliminar o ficheiro descargado.
 Channels:
   Load More Channels: "Cargar máis canles"
 Search Bar:

@@ -188,6 +188,7 @@ Subscriptions:
   Posts:
     RSS Message: YouTube does not provide RSS feeds for posts. Disable the "{rssSetting}" setting to view posts or enable the "{hideSetting}" setting to hide this tab.
   RSS Feeds:
+    Refreshing: Refreshing RSS feeds
     Tab: RSS
     Followed Feeds: Followed RSS feeds
     Add Feed: Add feed
@@ -265,7 +266,6 @@ History:
   Clear Filters: 'Clear filters'
   Invalid Date Range: 'The From date must be on or before the To date.'
   Empty Filter Message: 'No videos in your history match these filters.'
-  Delete Old Compact: "Delete old"
   Repair Compact: "Repair"
   Mark All Watched Compact: "Mark all watched"
   Repair Use Cookies: "Use configured yt-dlp cookies"
@@ -284,7 +284,6 @@ History:
   Mark All As Watched: Mark All As Watched
   Mark All As Watched Confirmation: Are you sure you want to mark all videos in your history as watched?
   All History Marked as Watched: All videos in your history have been marked as watched
-  Delete Old History: Delete Old History
   Select History Age: Select how old an entry must be before it is deleted.
   Delete Entries Older Than: Delete entries older than
   Number of Days: Number of days
@@ -1844,6 +1843,8 @@ Video:
   How this was made: How this was made
   Save Queue to Playlist: "Save queue to playlist"
   Live Chat is currently not supported with the Yattee server. A direct connection to YouTube is required.: Live Chat is currently not supported with the Yattee server. A direct connection to YouTube is required.
+  External Player:
+    LaunchFailedTemplate: Could not start {externalPlayer}. Make sure it is installed, or set its executable path in the external player settings.
 Playlist:
   Playlist Already Preloaded: "All playlist videos are already preloaded"
   Playlist Preload Progress: "Preloading videos: {completed} of {requested}"
@@ -1905,6 +1906,7 @@ Context Menu:
   Reload Live: Reload Live
   Reload Posts: Reload Posts
   Reload All Feeds: Reload All Feeds
+  Reload RSS Feeds: Reload RSS Feeds
   Close Multiple Tabs: Close {count} Tabs
   Duplicate Tab: Duplicate Tab
   Duplicate Multiple Tabs: Duplicate {count} Tabs
@@ -2357,6 +2359,7 @@ Downloads:
     Subtitles Format: Subtitles - {format}
   Waiting for Unmetered Network: "Waiting for an unmetered network"
   Waiting for Charging: "Waiting for a charger"
+  Remove File Failed: Could not remove the downloaded file.
 Search Bar:
   Use Suggestion: Use suggestion
   Open Search Container: Open Search Container

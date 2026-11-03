@@ -187,6 +187,7 @@ Subscriptions:
   Newest First: 最新优先
   Oldest First: 最早优先
   RSS Feeds:
+    Refreshing: 正在刷新 RSS 订阅源
     Tab: RSS
     Followed Feeds: 已关注的 RSS 订阅源
     Add Feed: 添加订阅源
@@ -263,7 +264,6 @@ History:
   Clear Filters: '清除筛选'
   Invalid Date Range: '开始日期必须早于或等于结束日期。'
   Empty Filter Message: '历史记录中没有符合这些筛选条件的视频。'
-  Delete Old Compact: "删除旧记录"
   Repair Compact: "修复"
   Mark All Watched Compact: "全部标为已看"
   Repair Use Cookies: "使用已配置的 yt-dlp Cookie"
@@ -282,7 +282,6 @@ History:
   Mark All As Watched: 全部标记为已观看
   Mark All As Watched Confirmation: 确定要将历史记录中的所有视频标记为已观看吗？
   All History Marked as Watched: 已将历史记录中的所有视频标记为已观看
-  Delete Old History: 删除较早的历史记录
   Select History Age: 请选择记录保留多久后再删除。
   Delete Entries Older Than: 删除早于以下时间的记录
   Number of Days: 天数
@@ -1852,6 +1851,8 @@ Video:
       unlisted: "不公开列出的视频"
   Save Queue to Playlist: "将队列保存到播放列表"
   Live Chat is currently not supported with the Yattee server. A direct connection to YouTube is required.: 使用 Yattee 服务器时暂不支持在线聊天。需要直接连接 YouTube。
+  External Player:
+    LaunchFailedTemplate: 无法启动 {externalPlayer}。请确认它已安装，或在外部播放器设置中设置其可执行文件路径。
 Playlist:
   Playlist Already Preloaded: "播放列表中的所有视频均已预加载"
   Playlist Preload Progress: "正在预加载视频：{completed}/{requested}"
@@ -1912,6 +1913,7 @@ Context Menu:
   Reload Live: 重新加载直播
   Reload Posts: 重新加载帖子
   Reload All Feeds: 重新加载所有订阅源
+  Reload RSS Feeds: 重新加载 RSS 订阅源
   Close Multiple Tabs: 关闭 {count} 个标签页
   Duplicate Tab: 复制标签页
   Duplicate Multiple Tabs: 复制 {count} 个标签页
@@ -2362,6 +2364,7 @@ Downloads:
     Subtitles Format: 字幕 - {format}
   Waiting for Unmetered Network: "正在等待不按流量计费的网络"
   Waiting for Charging: "正在等待充电器"
+  Remove File Failed: 无法删除已下载的文件。
 Channels:
   Load More Channels: "加载更多频道"
 Theme Discovery:

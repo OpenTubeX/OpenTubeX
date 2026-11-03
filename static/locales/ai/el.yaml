@@ -187,6 +187,7 @@ Subscriptions:
   Newest First: Νεότερα πρώτα
   Oldest First: Παλαιότερα πρώτα
   RSS Feeds:
+    Refreshing: Ανανέωση ροών RSS
     Tab: RSS
     Followed Feeds: Ροές RSS που ακολουθείτε
     Add Feed: Προσθήκη ροής
@@ -264,7 +265,6 @@ History:
   Clear Filters: 'Εκκαθάριση φίλτρων'
   Invalid Date Range: 'Η ημερομηνία έναρξης πρέπει να είναι προγενέστερη ή ίση με την ημερομηνία λήξης.'
   Empty Filter Message: 'Κανένα βίντεο στο ιστορικό σας δεν ταιριάζει με αυτά τα φίλτρα.'
-  Delete Old Compact: "Διαγραφή παλιών"
   Repair Compact: "Επιδιόρθωση"
   Mark All Watched Compact: "Όλα προβλήθηκαν"
   Repair Use Cookies: "Χρήση των ρυθμισμένων cookies του yt-dlp"
@@ -283,7 +283,6 @@ History:
   Mark All As Watched: Επισήμανση όλων ως παρακολουθημένων
   Mark All As Watched Confirmation: Θέλετε σίγουρα να επισημάνετε ως παρακολουθημένα όλα τα βίντεο στο ιστορικό σας;
   All History Marked as Watched: Όλα τα βίντεο στο ιστορικό σας επισημάνθηκαν ως παρακολουθημένα
-  Delete Old History: Διαγραφή παλιού ιστορικού
   Select History Age: Επιλέξτε πόσο παλιά πρέπει να είναι μια καταχώριση για να διαγραφεί.
   Delete Entries Older Than: Διαγραφή καταχωρίσεων παλαιότερων από
   Number of Days: Αριθμός ημερών
@@ -1880,6 +1879,8 @@ Video:
   How this was made: Πώς δημιουργήθηκε αυτό
   Save Queue to Playlist: "Αποθήκευση ουράς αναπαραγωγής σε λίστα αναπαραγωγής"
   Live Chat is currently not supported with the Yattee server. A direct connection to YouTube is required.: Η ζωντανή συνομιλία δεν υποστηρίζεται προς το παρόν με τον διακομιστή Yattee. Απαιτείται άμεση σύνδεση με το YouTube.
+  External Player:
+    LaunchFailedTemplate: Δεν ήταν δυνατή η εκκίνηση του {externalPlayer}. Βεβαιωθείτε ότι είναι εγκατεστημένο ή ορίστε τη διαδρομή του εκτελέσιμου αρχείου στις ρυθμίσεις εξωτερικού προγράμματος αναπαραγωγής.
 Playlist:
   Playlist Already Preloaded: "Όλα τα βίντεο της λίστας αναπαραγωγής έχουν ήδη προφορτωθεί"
   Playlist Preload Progress: "Προφόρτωση βίντεο: {completed} από {requested}"
@@ -1941,6 +1942,7 @@ Context Menu:
   Reload Live: Επαναφόρτωση ζωντανών μεταδόσεων
   Reload Posts: Επαναφόρτωση αναρτήσεων
   Reload All Feeds: Επαναφόρτωση όλων των ροών
+  Reload RSS Feeds: Επαναφόρτωση ροών RSS
   Close Multiple Tabs: Κλείσιμο {count} καρτελών
   Duplicate Tab: Δημιουργία διπλότυπης καρτέλας
   Duplicate Multiple Tabs: Δημιουργία {count} διπλότυπων καρτελών
@@ -2396,6 +2398,7 @@ Downloads:
     Subtitles Format: Υπότιτλοι - {format}
   Waiting for Unmetered Network: "Αναμονή για δίκτυο χωρίς χρέωση δεδομένων"
   Waiting for Charging: "Αναμονή για φορτιστή"
+  Remove File Failed: Δεν ήταν δυνατή η αφαίρεση του ληφθέντος αρχείου.
 Channels:
   Load More Channels: "Φόρτωση περισσότερων καναλιών"
 Search Bar:

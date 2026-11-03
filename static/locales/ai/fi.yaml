@@ -189,6 +189,7 @@ Subscriptions:
   Posts:
     RSS Message: 'YouTube ei tarjoa julkaisuille RSS-syötteitä. Poista "{rssSetting}" käytöstä nähdäksesi julkaisut tai ota "{hideSetting}" käyttöön piilottaaksesi tämän välilehden.'
   RSS Feeds:
+    Refreshing: Päivitetään RSS-syötteitä
     Tab: RSS
     Followed Feeds: Seuratut RSS-syötteet
     Add Feed: Lisää syöte
@@ -268,7 +269,6 @@ History:
   Clear Filters: 'Tyhjennä suodattimet'
   Invalid Date Range: 'Alkupäivän on oltava ennen loppupäivää tai sama kuin loppupäivä.'
   Empty Filter Message: 'Katseluhistoriassasi ei ole videoita, jotka vastaavat näitä suodattimia.'
-  Delete Old Compact: "Siivoa"
   Repair Compact: "Korjaa"
   Mark All Watched Compact: "Kaikki katsottu"
   Repair Use Cookies: "Käytä määritettyjä yt-dlp-evästeitä"
@@ -287,7 +287,6 @@ History:
   Mark All As Watched: Merkitse kaikki katsotuiksi
   Mark All As Watched Confirmation: Haluatko varmasti merkitä kaikki katseluhistoriasi videot katsotuiksi?
   All History Marked as Watched: Kaikki katseluhistoriasi videot on merkitty katsotuiksi
-  Delete Old History: Poista vanha historia
   Select History Age: Valitse, kuinka vanha merkinnän on oltava ennen poistamista.
   Delete Entries Older Than: Poista tätä vanhemmat merkinnät
   Number of Days: Päivien määrä
@@ -1901,6 +1900,8 @@ Video:
   How this was made: Miten tämä tehtiin
   Save Queue to Playlist: "Tallenna jono soittolistalle"
   Live Chat is currently not supported with the Yattee server. A direct connection to YouTube is required.: Live-keskustelua ei tällä hetkellä tueta Yattee-palvelimen kanssa. Suora yhteys YouTubeen vaaditaan.
+  External Player:
+    LaunchFailedTemplate: Kohdetta {externalPlayer} ei voitu käynnistää. Varmista, että se on asennettu, tai määritä suoritettavan tiedoston polku ulkoisen soittimen asetuksissa.
 Playlist:
   Playlist Already Preloaded: "Kaikki soittolistan videot on jo esiladattu"
   Playlist Preload Progress: "Esiladataan videoita: {completed}/{requested}"
@@ -1962,6 +1963,7 @@ Context Menu:
   Reload Live: Lataa suorat lähetykset uudelleen
   Reload Posts: Lataa julkaisut uudelleen
   Reload All Feeds: Lataa kaikki syötteet uudelleen
+  Reload RSS Feeds: Lataa RSS-syötteet uudelleen
   Close Multiple Tabs: Sulje {count} välilehteä
   Duplicate Tab: Monista välilehti
   Duplicate Multiple Tabs: Monista {count} välilehteä
@@ -2417,6 +2419,7 @@ Downloads:
     Subtitles Format: Tekstitykset - {format}
   Waiting for Unmetered Network: "Odotetaan rajoittamatonta verkkoa"
   Waiting for Charging: "Odotetaan laturia"
+  Remove File Failed: Ladattua tiedostoa ei voitu poistaa.
 Channels:
   Load More Channels: "Lataa lisää kanavia"
 Search Bar:

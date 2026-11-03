@@ -189,6 +189,7 @@ Subscriptions:
   Posts:
     RSS Message: YouTube не предоставя RSS емисии за публикации. Изключете настройката "{rssSetting}", за да преглеждате публикации, или включете настройката "{hideSetting}", за да скриете този раздел.
   RSS Feeds:
+    Refreshing: Опресняване на RSS емисиите
     Tab: RSS
     Followed Feeds: Следвани RSS емисии
     Add Feed: Добавяне на емисия
@@ -266,7 +267,6 @@ History:
   Clear Filters: 'Изчисти филтрите'
   Invalid Date Range: 'Началната дата трябва да е преди или на крайната дата.'
   Empty Filter Message: 'Няма видеоклипове в историята ви, които да отговарят на тези филтри.'
-  Delete Old Compact: "Изтрий стари"
   Repair Compact: "Поправи"
   Mark All Watched Compact: "Всички гледани"
   Repair Use Cookies: "Използване на настроените бисквитки на yt-dlp"
@@ -285,7 +285,6 @@ History:
   Mark All As Watched: Отбележи всички като гледани
   Mark All As Watched Confirmation: Наистина ли искате да отбележите като гледани всички видеоклипове в историята си?
   All History Marked as Watched: Всички видеоклипове в историята ви са отбелязани като гледани
-  Delete Old History: Изтриване на старата история
   Select History Age: Изберете след колко време да се изтриват записите.
   Delete Entries Older Than: Изтрий записите, по-стари от
   Number of Days: Брой дни
@@ -1878,6 +1877,8 @@ Video:
   How this was made: Как е създадено това
   Save Queue to Playlist: "Запазване на опашката в плейлист"
   Live Chat is currently not supported with the Yattee server. A direct connection to YouTube is required.: Чатът на живо засега не се поддържа от сървъра Yattee. Изисква се директна връзка с YouTube.
+  External Player:
+    LaunchFailedTemplate: "{externalPlayer} не може да бъде стартиран. Уверете се, че е инсталиран, или задайте пътя до изпълнимия файл в настройките на външния плейър."
 Playlist:
   Playlist Already Preloaded: "Всички видеоклипове в плейлиста вече са предварително заредени"
   Playlist Preload Progress: "Предварително зареждане на видеоклипове: {completed} от {requested}"
@@ -1939,6 +1940,7 @@ Context Menu:
   Reload Live: Презареждане на предаванията на живо
   Reload Posts: Презареждане на публикациите
   Reload All Feeds: Презареждане на всички емисии
+  Reload RSS Feeds: Презареждане на RSS емисиите
   Close Multiple Tabs: Затваряне на {count} раздела
   Duplicate Tab: Дублиране на раздела
   Duplicate Multiple Tabs: Дублиране на {count} раздела
@@ -2392,6 +2394,7 @@ Downloads:
     Subtitles Format: Субтитри - {format}
   Waiting for Unmetered Network: "Изчакване на нетаксувана мрежа"
   Waiting for Charging: "Изчакване на зарядно устройство"
+  Remove File Failed: Изтегленият файл не може да бъде премахнат.
 Channels:
   Load More Channels: "Зареждане на още канали"
 Search Bar:

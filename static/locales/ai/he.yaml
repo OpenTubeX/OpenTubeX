@@ -189,6 +189,7 @@ Subscriptions:
   Posts:
     RSS Message: 'YouTube לא מספק עדכוני RSS לפוסטים. השביתו את ההגדרה "{rssSetting}" כדי לראות פוסטים, או הפעילו את ההגדרה "{hideSetting}" כדי להסתיר את הכרטיסייה הזאת.'
   RSS Feeds:
+    Refreshing: מרענן הזנות RSS
     Tab: RSS
     Followed Feeds: פידי RSS במעקב
     Add Feed: הוספת פיד
@@ -268,7 +269,6 @@ History:
   Clear Filters: 'ניקוי מסננים'
   Invalid Date Range: 'תאריך ההתחלה חייב להיות מוקדם מתאריך הסיום או זהה לו.'
   Empty Filter Message: 'אין סרטונים בהיסטוריה שלך שתואמים למסננים האלה.'
-  Delete Old Compact: "מחיקת ישנים"
   Repair Compact: "תיקון"
   Mark All Watched Compact: "סימון הכול כנצפה"
   Repair Use Cookies: "שימוש בעוגיות שהוגדרו ב־yt-dlp"
@@ -287,7 +287,6 @@ History:
   Mark All As Watched: סימון הכול כנצפה
   Mark All As Watched Confirmation: לסמן את כל הסרטונים בהיסטוריה שלך כנצפו?
   All History Marked as Watched: כל הסרטונים בהיסטוריה שלך סומנו כנצפו
-  Delete Old History: מחיקת היסטוריה ישנה
   Select History Age: יש לבחור כמה זמן יישמר כל פריט לפני מחיקתו.
   Delete Entries Older Than: מחיקת פריטים שגילם עולה על
   Number of Days: מספר ימים
@@ -1903,6 +1902,8 @@ Video:
   How this was made: איך זה נוצר
   Save Queue to Playlist: "שמירת התור ברשימת נגינה"
   Live Chat is currently not supported with the Yattee server. A direct connection to YouTube is required.: הצ׳אט החי כרגע לא נתמך בשרת Yattee. דרוש חיבור ישיר ל־YouTube.
+  External Player:
+    LaunchFailedTemplate: לא ניתן להפעיל את {externalPlayer}. יש לוודא שהוא מותקן, או להגדיר את נתיב קובץ ההפעלה בהגדרות הנגן החיצוני.
 Playlist:
   Playlist Already Preloaded: "כל סרטוני הפלייליסט כבר נטענו מראש"
   Playlist Preload Progress: "טוען סרטונים מראש: {completed} מתוך {requested}"
@@ -1964,6 +1965,7 @@ Context Menu:
   Reload Live: טעינה מחדש של השידורים החיים
   Reload Posts: טעינה מחדש של הפוסטים
   Reload All Feeds: טעינה מחדש של כל הפידים
+  Reload RSS Feeds: טעינה מחדש של הזנות RSS
   Close Multiple Tabs: סגירת {count} כרטיסייה | סגירת {count} כרטיסיות
   Duplicate Tab: שכפול הכרטיסייה
   Duplicate Multiple Tabs: שכפול {count} כרטיסייה | שכפול {count} כרטיסיות
@@ -2419,6 +2421,7 @@ Downloads:
     Subtitles Format: כתוביות - {format}
   Waiting for Unmetered Network: "ממתין לרשת ללא הגבלת נתונים"
   Waiting for Charging: "ממתין למטען"
+  Remove File Failed: לא ניתן להסיר את הקובץ שהורד.
 Channels:
   Load More Channels: "טעינת ערוצים נוספים"
 Search Bar:

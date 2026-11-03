@@ -230,6 +230,7 @@ Subscriptions:
   Posts:
     RSS Message: YouTube ne zagotavlja virov RSS za objave. Izklopite nastavitev »{rssSetting}«, če želite videti objave, ali vklopite nastavitev »{hideSetting}«, če želite skriti ta zavihek.
   RSS Feeds:
+    Refreshing: Osveževanje virov RSS
     Tab: RSS
     Followed Feeds: Spremljani viri RSS
     Add Feed: Dodaj vir
@@ -389,7 +390,6 @@ History:
   Clear Filters: 'Počisti filtre'
   Invalid Date Range: 'Začetni datum mora biti pred končnim datumom ali enak njemu.'
   Empty Filter Message: 'Noben videoposnetek v vaši zgodovini ne ustreza tem filtrom.'
-  Delete Old Compact: "Izbriši stare"
   Repair Compact: "Popravi"
   Mark All Watched Compact: "Vse ogledano"
   Repair Use Cookies: "Uporabi nastavljene piškotke yt-dlp"
@@ -411,7 +411,6 @@ History:
   All History Marked as Watched: Vsi videoposnetki v zgodovini so označeni kot ogledani
   DateOldestHistory: Datum ogleda (najstarejši)
   DateNewestHistory: Datum ogleda (najnovejši)
-  Delete Old History: Izbriši staro zgodovino
   Select History Age: Izberite, koliko mora biti vnos star, preden se izbriše.
   Delete Entries Older Than: Izbriši vnose, starejše od
   Number of Days: Število dni
@@ -2039,6 +2038,7 @@ Video:
       reversing playlists: obračanje vrstnega reda seznamov predvajanja
       shuffling playlists: naključno predvajanje seznamov predvajanja
       looping playlists: ponavljanje seznamov predvajanja
+    LaunchFailedTemplate: "{externalPlayer} ni bilo mogoče zagnati. Preverite, ali je nameščen, ali pa nastavite pot do izvršljive datoteke v nastavitvah zunanjega predvajalnika."
   Player:
     Playing in Picture-in-Picture: Predvaja se v načinu slika v sliki
     Stream Recovery:
@@ -2401,6 +2401,7 @@ Context Menu:
   Reload Live: Znova naloži prenose v živo
   Reload Posts: Znova naloži objave
   Reload All Feeds: Znova naloži vse vire
+  Reload RSS Feeds: Znova naloži vire RSS
   Close Multiple Tabs: Zapri {count} zavihek | Zapri {count} zavihka | Zapri {count} zavihke | Zapri {count} zavihkov
   Duplicate Tab: Podvoji zavihek
   Duplicate Multiple Tabs: Podvoji {count} zavihek | Podvoji {count} zavihka | Podvoji {count} zavihke | Podvoji {count} zavihkov
@@ -2972,6 +2973,7 @@ Downloads:
     Subtitles Format: Podnapisi - {format}
   Waiting for Unmetered Network: "Čakanje na omrežje brez omejitve prenosa"
   Waiting for Charging: "Čakanje na polnilnik"
+  Remove File Failed: Prenesene datoteke ni bilo mogoče odstraniti.
 Channels:
   Load More Channels: "Naloži več kanalov"
 Theme Discovery:

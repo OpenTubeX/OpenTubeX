@@ -189,6 +189,7 @@ Subscriptions:
   Posts:
     RSS Message: YouTube biedt geen RSS-feeds voor berichten. Schakel de instelling "{rssSetting}" uit om berichten te bekijken of schakel de instelling "{hideSetting}" in om dit tabblad te verbergen.
   RSS Feeds:
+    Refreshing: RSS-feeds vernieuwen
     Tab: RSS
     Followed Feeds: Gevolgde RSS-feeds
     Add Feed: Feed toevoegen
@@ -268,7 +269,6 @@ History:
   Clear Filters: 'Filters wissen'
   Invalid Date Range: 'De begindatum moet vóór of op de einddatum liggen.'
   Empty Filter Message: 'Geen video''s in je geschiedenis komen overeen met deze filters.'
-  Delete Old Compact: "Oude wissen"
   Repair Compact: "Herstellen"
   Mark All Watched Compact: "Alles bekeken"
   Repair Use Cookies: "Geconfigureerde yt-dlp-cookies gebruiken"
@@ -287,7 +287,6 @@ History:
   Mark All As Watched: Alles markeren als bekeken
   Mark All As Watched Confirmation: Weet je zeker dat je alle video's in je geschiedenis als bekeken wilt markeren?
   All History Marked as Watched: Alle video's in je geschiedenis zijn als bekeken gemarkeerd
-  Delete Old History: Oude geschiedenis verwijderen
   Select History Age: Kies hoe oud een item moet zijn voordat het wordt verwijderd.
   Delete Entries Older Than: Items verwijderen die ouder zijn dan
   Number of Days: Aantal dagen
@@ -1912,6 +1911,8 @@ Video:
   How this was made: Hoe dit is gemaakt
   Save Queue to Playlist: "Wachtrij opslaan in afspeellijst"
   Live Chat is currently not supported with the Yattee server. A direct connection to YouTube is required.: Livechat wordt momenteel niet ondersteund door de Yattee-server. Een directe verbinding met YouTube is nodig.
+  External Player:
+    LaunchFailedTemplate: Kan {externalPlayer} niet starten. Controleer of het is geïnstalleerd, of stel het pad naar het uitvoerbare bestand in bij de instellingen voor externe spelers.
 Playlist:
   Playlist Already Preloaded: "Alle video's in de afspeellijst zijn al vooraf geladen"
   Playlist Preload Progress: "Video's vooraf laden: {completed} van {requested}"
@@ -1973,6 +1974,7 @@ Context Menu:
   Reload Live: Livestreams opnieuw laden
   Reload Posts: Berichten opnieuw laden
   Reload All Feeds: Alle feeds opnieuw laden
+  Reload RSS Feeds: RSS-feeds opnieuw laden
   Close Multiple Tabs: '{count} tabbladen sluiten'
   Duplicate Tab: Tabblad dupliceren
   Duplicate Multiple Tabs: '{count} tabbladen dupliceren'
@@ -2428,6 +2430,7 @@ Downloads:
     Subtitles Format: Ondertiteling - {format}
   Waiting for Unmetered Network: "Wachten op een netwerk zonder datalimiet"
   Waiting for Charging: "Wachten op een oplader"
+  Remove File Failed: Kan het gedownloade bestand niet verwijderen.
 Channels:
   Load More Channels: "Meer kanalen laden"
 Search Bar:

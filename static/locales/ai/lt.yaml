@@ -221,6 +221,7 @@ Subscriptions:
   Posts:
     RSS Message: YouTube neteikia įrašų RSS kanalų. Išjunkite nustatymą „{rssSetting}“, kad matytumėte įrašus, arba įjunkite nustatymą „{hideSetting}“, kad paslėptumėte šį skirtuką.
   RSS Feeds:
+    Refreshing: Atnaujinami RSS sklaidos kanalai
     Tab: RSS
     Followed Feeds: Stebimi RSS sklaidos kanalai
     Add Feed: Pridėti sklaidos kanalą
@@ -379,7 +380,6 @@ History:
   Clear Filters: 'Išvalyti filtrus'
   Invalid Date Range: 'Pradžios data turi būti ankstesnė už pabaigos datą arba jai lygi.'
   Empty Filter Message: 'Jūsų istorijoje nėra vaizdo įrašų, atitinkančių šiuos filtrus.'
-  Delete Old Compact: "Šalinti senus"
   Repair Compact: "Taisyti"
   Mark All Watched Compact: "Visi peržiūrėti"
   Repair Use Cookies: "Naudoti sukonfigūruotus yt-dlp slapukus"
@@ -401,7 +401,6 @@ History:
   All History Marked as Watched: Visi istorijos vaizdo įrašai pažymėti kaip peržiūrėti
   DateOldestHistory: Peržiūros data (pirmiausia seniausi)
   DateNewestHistory: Peržiūros data (pirmiausia naujausi)
-  Delete Old History: Ištrinti senus istorijos įrašus
   Select History Age: Pasirinkite, kokio senumo įrašai turi būti ištrinti.
   Delete Entries Older Than: Ištrinti senesnius įrašus nei
   Number of Days: Dienų skaičius
@@ -2247,6 +2246,8 @@ Video:
   How this was made: Kaip tai buvo sukurta
   Save Queue to Playlist: "Išsaugoti eilę grojaraštyje"
   Live Chat is currently not supported with the Yattee server. A direct connection to YouTube is required.: Tiesioginė diskusija šiuo metu nepalaikoma naudojant Yattee serverį. Būtinas tiesioginis ryšys su YouTube.
+  External Player:
+    LaunchFailedTemplate: Nepavyko paleisti {externalPlayer}. Patikrinkite, ar jis įdiegtas, arba nurodykite vykdomojo failo kelią išorinio grotuvo nustatymuose.
 Playlist:
   Playlist Already Preloaded: "Visi grojaraščio vaizdo įrašai jau įkelti iš anksto"
   Playlist Preload Progress: "Vaizdo įrašų išankstinis įkėlimas: {completed} iš {requested}"
@@ -2322,6 +2323,7 @@ Context Menu:
   Reload Live: Įkelti tiesiogines transliacijas iš naujo
   Reload Posts: Įkelti įrašus iš naujo
   Reload All Feeds: Iš naujo įkelti visus kanalus
+  Reload RSS Feeds: Iš naujo įkelti RSS sklaidos kanalus
   Close Multiple Tabs: Uždaryti {count} kortelę | Uždaryti {count} korteles | Uždaryti {count} kortelių
   Duplicate Tab: Dubliuoti kortelę
   Duplicate Multiple Tabs: Dubliuoti {count} kortelę | Dubliuoti {count} korteles | Dubliuoti {count} kortelių
@@ -2872,6 +2874,7 @@ Downloads:
     Subtitles Format: Subtitrai - {format}
   Waiting for Unmetered Network: "Laukiama nematuojamo tinklo"
   Waiting for Charging: "Laukiama įkroviklio"
+  Remove File Failed: Nepavyko pašalinti atsisiųsto failo.
 Channels:
   Load More Channels: "Įkelti daugiau kanalų"
 Search Bar:

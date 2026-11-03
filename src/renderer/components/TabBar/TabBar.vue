@@ -1196,7 +1196,7 @@ function createNewTab() {
 
 // ===== Context menu =====
 /**
- * @param {{ tabId: string | null, selectedTabIds?: string[], surface: 'tab' | 'tabBar' | 'content' | 'subscriptionFeedTab', feedTab?: 'videos' | 'shorts' | 'live' | 'posts' | 'all' | null, isNewFeedTab?: boolean, hasNewContent?: boolean }} payload
+ * @param {{ tabId: string | null, selectedTabIds?: string[], surface: 'tab' | 'tabBar' | 'content' | 'subscriptionFeedTab', feedTab?: 'videos' | 'shorts' | 'live' | 'posts' | 'all' | 'feeds' | null, isNewFeedTab?: boolean, hasNewContent?: boolean }} payload
  */
 function updateContextMenuTab(payload) {
   window.ftElectron.tabs.setContextMenuTab({ ...payload, verticalLayout: vertical.value })
@@ -1208,9 +1208,10 @@ function updateContextMenuTab(payload) {
 function updateContextMenuTarget(target) {
   const tabId = target.closest('.tab[data-tab-id]')?.dataset.tabId ?? null
   const contextMenuSelectedTabIds = getContextMenuSelectedTabIds(tabId)
-  const newFeedTab = target.closest('[data-new-feed-tab]')
+  const newFeedTab = target.closest('[data-new-feed-tab], [data-new-feed-rss-tab]')
+  const rssFeedsTab = target.closest('[data-rss-feeds-tab], [data-new-feed-rss-tab]')
   const feedTab = target.closest('[data-subscription-feed-tab]')?.dataset.subscriptionFeedTab ??
-    newFeedTab?.dataset.newFeedTab ?? null
+    newFeedTab?.dataset.newFeedTab ?? (rssFeedsTab ? 'feeds' : null)
   const isTabBar = target.closest('.tabBar') != null
   updateContextMenuTab({
     tabId,
@@ -1218,7 +1219,7 @@ function updateContextMenuTarget(target) {
     surface: tabId ? 'tab' : isTabBar ? 'tabBar' : feedTab ? 'subscriptionFeedTab' : 'content',
     feedTab,
     isNewFeedTab: newFeedTab != null,
-    hasNewContent: newFeedTab?.dataset.hasNewContent === 'true'
+    hasNewContent: (newFeedTab ?? rssFeedsTab)?.dataset.hasNewContent === 'true'
   })
 }
 

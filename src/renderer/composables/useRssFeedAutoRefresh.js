@@ -60,7 +60,7 @@ export function useRssFeedAutoRefresh(dataReady) {
 
       // Claimed before the refresh, which can fail or be replaced by a manual one
       setRssFeedsNextAutoRefresh(Date.now() + interval.value)
-      await refreshRssFeeds(store.getters.getFollowedRssFeeds)
+      await refreshRssFeeds(store.getters.getFollowedRssFeeds, { automatic: true })
     })
   }
 

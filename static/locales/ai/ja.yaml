@@ -187,6 +187,7 @@ Subscriptions:
   Newest First: 新しい順
   Oldest First: 古い順
   RSS Feeds:
+    Refreshing: RSS フィードを更新中
     Tab: RSS
     Followed Feeds: フォロー中の RSS フィード
     Add Feed: フィードを追加
@@ -263,7 +264,6 @@ History:
   Clear Filters: 'フィルターをクリア'
   Invalid Date Range: '開始日は終了日以前にしてください。'
   Empty Filter Message: '履歴にこれらのフィルターに一致する動画はありません。'
-  Delete Old Compact: "古い履歴を削除"
   Repair Compact: "修復"
   Mark All Watched Compact: "すべて視聴済みに"
   Repair Use Cookies: "設定済みの yt-dlp Cookie を使用する"
@@ -282,7 +282,6 @@ History:
   Mark All As Watched: すべて視聴済みにする
   Mark All As Watched Confirmation: 履歴内のすべての動画を視聴済みにしてもよろしいですか？
   All History Marked as Watched: 履歴内のすべての動画を視聴済みにしました
-  Delete Old History: 古い履歴を削除
   Select History Age: 削除する履歴の経過期間を選択してください。
   Delete Entries Older Than: 次の期間より古い履歴を削除
   Number of Days: 日数
@@ -1852,6 +1851,8 @@ Video:
       unlisted: "限定公開"
   Save Queue to Playlist: "キューを再生リストに保存"
   Live Chat is currently not supported with the Yattee server. A direct connection to YouTube is required.: 現在、ライブチャットは Yattee サーバーでは未対応です。直接 YouTube への接続が必要です。
+  External Player:
+    LaunchFailedTemplate: "{externalPlayer} を起動できませんでした。インストールされていることを確認するか、外部プレーヤーの設定で実行ファイルのパスを指定してください。"
 Playlist:
   Playlist Already Preloaded: "プレイリストのすべての動画は先読み済みです"
   Playlist Preload Progress: "動画を先読み中: {requested} 本中 {completed} 本"
@@ -1912,6 +1913,7 @@ Context Menu:
   Reload Live: ライブ配信を再読み込み
   Reload Posts: 投稿を再読み込み
   Reload All Feeds: すべてのフィードを再読み込み
+  Reload RSS Feeds: RSS フィードを再読み込み
   Close Multiple Tabs: '{count}個のタブを閉じる'
   Duplicate Tab: タブを複製
   Duplicate Multiple Tabs: '{count}個のタブを複製'
@@ -2362,6 +2364,7 @@ Downloads:
     Subtitles Format: 字幕 - {format}
   Waiting for Unmetered Network: "従量制ではないネットワークを待機中"
   Waiting for Charging: "充電器の接続を待機中"
+  Remove File Failed: ダウンロードしたファイルを削除できませんでした。
 Channels:
   Load More Channels: "チャンネルをさらに読み込む"
 Theme Discovery:

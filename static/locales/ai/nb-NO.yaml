@@ -187,6 +187,7 @@ Subscriptions:
   Newest First: Nyeste først
   Oldest First: Eldste først
   RSS Feeds:
+    Refreshing: Oppdaterer RSS-strømmer
     Tab: RSS
     Followed Feeds: Fulgte RSS-strømmer
     Add Feed: Legg til strøm
@@ -263,7 +264,6 @@ History:
   Clear Filters: 'Nullstill filtre'
   Invalid Date Range: 'Startdatoen må være før eller på sluttdatoen.'
   Empty Filter Message: 'Ingen videoer i historikken din samsvarer med disse filtrene.'
-  Delete Old Compact: "Slett gamle"
   Repair Compact: "Reparer"
   Mark All Watched Compact: "Merk alle som sett"
   Repair Use Cookies: "Bruk konfigurerte yt-dlp-informasjonskapsler"
@@ -282,7 +282,6 @@ History:
   Mark All As Watched: Merk alle som sett
   Mark All As Watched Confirmation: Er du sikker på at du vil merke alle videoene i loggen som sett?
   All History Marked as Watched: Alle videoene i loggen er merket som sett
-  Delete Old History: Slett gammel logg
   Select History Age: Velg hvor gammel en oppføring må være før den slettes.
   Delete Entries Older Than: Slett oppføringer eldre enn
   Number of Days: Antall dager
@@ -1857,6 +1856,8 @@ Video:
       unlisted: "Ikke oppført"
   Save Queue to Playlist: "Lagre kø i spilleliste"
   Live Chat is currently not supported with the Yattee server. A direct connection to YouTube is required.: Direktechat støttes for tiden ikke med Yattee-tjeneren. Direkte tilkobling til YouTube kreves.
+  External Player:
+    LaunchFailedTemplate: Kunne ikke starte {externalPlayer}. Kontroller at den er installert, eller angi stien til den kjørbare filen i innstillingene for ekstern avspiller.
 Playlist:
   Playlist Already Preloaded: "Alle videoene i spillelisten er allerede forhåndslastet"
   Playlist Preload Progress: "Forhåndslaster videoer: {completed} av {requested}"
@@ -1917,6 +1918,7 @@ Context Menu:
   Reload Live: Last inn direktesendinger på nytt
   Reload Posts: Last inn innlegg på nytt
   Reload All Feeds: Last inn alle innholdsstrømmene på nytt
+  Reload RSS Feeds: Last inn RSS-strømmer på nytt
   Close Multiple Tabs: Lukk {count} faner
   Duplicate Tab: Dupliser fanen
   Duplicate Multiple Tabs: Dupliser {count} faner
@@ -2367,6 +2369,7 @@ Downloads:
     Subtitles Format: Undertekster – {format}
   Waiting for Unmetered Network: "Venter på et nettverk uten datamåling"
   Waiting for Charging: "Venter på en lader"
+  Remove File Failed: Kunne ikke fjerne den nedlastede filen.
 Channels:
   Load More Channels: "Last inn flere kanaler"
 Search Bar:

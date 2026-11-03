@@ -307,6 +307,7 @@ const itemIcons = {
   'Reload All Feeds': ['fas', 'sync'],
   'Reload Live': ['fas', 'sync'],
   'Reload Posts': ['fas', 'sync'],
+  'Reload RSS Feeds': ['fas', 'sync'],
   'Reload Shorts': ['fas', 'sync'],
   'Reload Tab': ['fas', 'sync'],
   'Reload Tabs': ['fas', 'sync'],

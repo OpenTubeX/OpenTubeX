@@ -187,6 +187,7 @@ Subscriptions:
   Newest First: Nyaste først
   Oldest First: Eldste først
   RSS Feeds:
+    Refreshing: Oppdaterer RSS-straumar
     Tab: RSS
     Followed Feeds: Fylgde RSS-straumar
     Add Feed: Legg til straum
@@ -273,7 +274,6 @@ History:
   Clear Filters: 'Nullstill filter'
   Invalid Date Range: 'Startdatoen må vere før eller på sluttdatoen.'
   Empty Filter Message: 'Ingen videoar i historikken din samsvarar med desse filtera.'
-  Delete Old Compact: "Slett gamle"
   Repair Compact: "Reparer"
   Mark All Watched Compact: "Merk alle som sette"
   Repair Use Cookies: "Bruk konfigurerte yt-dlp-informasjonskapslar"
@@ -295,7 +295,6 @@ History:
   All History Marked as Watched: Alle videoane i historikken er merkte som sette
   DateOldestHistory: Sjådato (eldste)
   DateNewestHistory: Sjådato (nyaste)
-  Delete Old History: Slett gammal historikk
   Select History Age: Vel kor gammal ei oppføring må vere før ho blir sletta.
   Delete Entries Older Than: Slett oppføringar eldre enn
   Number of Days: Tal på dagar
@@ -2137,6 +2136,8 @@ Video:
   How this was made: Slik vart dette laga
   Save Queue to Playlist: "Lagre køen i ei speleliste"
   Live Chat is currently not supported with the Yattee server. A direct connection to YouTube is required.: Direktechat er førebels ikkje støtta av Yattee-tenaren. Det krevst ei direkte tilkopling til YouTube.
+  External Player:
+    LaunchFailedTemplate: Kunne ikkje starte {externalPlayer}. Sjekk at han er installert, eller set stigen til den køyrbare fila i innstillingane for ekstern avspelar.
 Playlist:
   Playlist Already Preloaded: "Alle videoane i spelelista er allereie førehandslasta"
   Playlist Preload Progress: "Førehandslastar videoar: {completed} av {requested}"
@@ -2212,6 +2213,7 @@ Context Menu:
   Reload Live: Last inn direktesendingar på nytt
   Reload Posts: Last inn innlegg på nytt
   Reload All Feeds: Last inn alle straumane på nytt
+  Reload RSS Feeds: Last inn RSS-straumar på nytt
   Close Multiple Tabs: Lukk {count} faner
   Duplicate Tab: Dupliser fana
   Duplicate Multiple Tabs: Dupliser {count} faner
@@ -2757,6 +2759,7 @@ Downloads:
     Subtitles Format: Undertekstar - {format}
   Waiting for Unmetered Network: "Ventar på eit nettverk utan datamåling"
   Waiting for Charging: "Ventar på ein ladar"
+  Remove File Failed: Kunne ikkje fjerne den nedlasta fila.
 Channels:
   Load More Channels: "Last inn fleire kanalar"
 Theme Discovery:
