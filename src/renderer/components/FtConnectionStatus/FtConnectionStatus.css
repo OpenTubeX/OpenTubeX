@@ -36,10 +36,7 @@
   to { transform: translateX(400%); }
 }
 
-@media (prefers-reduced-motion: reduce) {
-  .connectionStatus.reconnecting::after {
-    animation: none;
-    inline-size: 100%;
-    opacity: 0.25;
-  }
+:root[data-reduced-motion='reduce'] .connectionStatus.reconnecting::after {
+  inline-size: 100%;
+  opacity: 0.25;
 }

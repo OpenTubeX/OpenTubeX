@@ -214,12 +214,11 @@
   }
 }
 
-@media (prefers-reduced-motion: reduce) {
-  .input::-webkit-slider-thumb {
-    transition: none;
-  }
+/* The global reduced motion rule does not reach the thumb pseudo-elements. */
+:root[data-reduced-motion='reduce'] .input::-webkit-slider-thumb {
+  transition: none;
+}
 
-  .input::-moz-range-thumb {
-    transition: none;
-  }
+:root[data-reduced-motion='reduce'] .input::-moz-range-thumb {
+  transition: none;
 }

@@ -146,14 +146,12 @@ export function useTabletTabReorder({ tabs, viewport, openActions, closeActions,
     dragging.value = false
     settling.value = true
     offsets.value = computeReorderOffsets(session.rects, session.order, session.gap)
-    const reducedMotion = document.documentElement.dataset.reducedMotion === 'reduce' ||
-      matchMedia('(prefers-reduced-motion: reduce)').matches
     dropTimer = setTimeout(() => {
       const { tabId, sourceIndex, targetIndex } = session
       reset()
       if (targetIndex !== sourceIndex && getCapacitorTabService().moveTab(tabId, targetIndex)) lightHaptic()
       releaseClickSuppression()
-    }, reducedMotion ? 0 : 160)
+    }, document.documentElement.dataset.reducedMotion === 'reduce' ? 0 : 160)
   }
 
   function preventHoldScroll(event) {

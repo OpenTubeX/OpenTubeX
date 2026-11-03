@@ -76,12 +76,6 @@
   margin-block-end: 0;
 }
 
-@media (prefers-reduced-motion: reduce) {
-  .summaryChevron {
-    transition: none;
-  }
-}
-
 /* Phones match the watch page's Comments and Description cards: an icon, title and
    chevron row with the disclaimer below it. */
 .videoSummary.phoneVideoSummary summary {

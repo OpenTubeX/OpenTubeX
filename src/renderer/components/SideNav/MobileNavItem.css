@@ -115,9 +115,3 @@
     inset-block-start: calc((var(--mobile-nav-content-height) - 32px) / 2);
   }
 }
-
-@media (prefers-reduced-motion: reduce) {
-  .sideNav .mobileNavItem::before {
-    transition: none;
-  }
-}

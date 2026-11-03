@@ -1,10 +1,3 @@
-@media (prefers-reduced-motion: reduce) {
-  :deep(.playerFullscreenTitleOverlay) {
-    transition: opacity cubic-bezier(0.4, 0, 0.6, 1) 0.6s,
-      background-color 150ms ease;
-  }
-}
-
 :deep(.playerFullscreenTitleOverlay:hover),
 :deep(.playerFullscreenTitleOverlay:focus-visible) {
   background-color: rgb(255 255 255 / 14%);

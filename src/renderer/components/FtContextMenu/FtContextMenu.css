@@ -303,14 +303,6 @@
   background-color: var(--primary-color);
 }
 
-@media (prefers-reduced-motion: reduce) {
-  .context-menu-enter-active,
-  .context-menu-leave-active,
-  .submenu {
-    transition: none;
-  }
-}
-
 @media (width <= 600px) {
   .videoMenu .submenu {
     position: static;

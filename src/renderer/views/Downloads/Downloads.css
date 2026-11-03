@@ -246,12 +246,6 @@
   transform: none !important;
 }
 
-@media (prefers-reduced-motion: reduce) {
-  .progressFill.indeterminate {
-    animation: none;
-  }
-}
-
 .emptyDownloads {
   color: var(--secondary-text-color);
   padding-block: 90px;

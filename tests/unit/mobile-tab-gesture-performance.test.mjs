@@ -55,7 +55,7 @@ function fixture({ reducedMotion = false, close = null, pinned = false } = {}) {
     performance: { now: () => now },
     getTabGridReorder(...args) { layouts++; return getTabGridReorder(...args) },
     getComputedStyle: () => ({ paddingBottom: '88px' }),
-    matchMedia: () => ({ matches: reducedMotion }),
+    isReducedMotionEnabled: () => reducedMotion,
     requestAnimationFrame(callback) { frames.set(++nextId, callback); return nextId },
     cancelAnimationFrame(id) { frames.delete(id) },
     window: {

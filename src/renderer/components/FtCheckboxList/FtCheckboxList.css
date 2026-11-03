@@ -146,11 +146,3 @@
     padding-block: 12px;
   }
 }
-
-@media (prefers-reduced-motion: reduce) {
-  .pure-checkbox input + label::before,
-  .pure-checkbox input + label::after,
-  .checkboxStateLayer {
-    transition: none;
-  }
-}

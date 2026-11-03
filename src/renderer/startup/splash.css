@@ -78,8 +78,15 @@
   to { transform: translateX(0); }
 }
 
+/* The Reduced Motion setting resolves once the renderer bundle loads.
+   Until then, follow the system preference. */
+:root[data-reduced-motion='reduce'] .startupProgress {
+  animation: none;
+  transform: translateX(-35%);
+}
+
 @media (prefers-reduced-motion: reduce) {
-  .startupProgress {
+  :root:not([data-reduced-motion]) .startupProgress {
     animation: none;
     transform: translateX(-35%);
   }

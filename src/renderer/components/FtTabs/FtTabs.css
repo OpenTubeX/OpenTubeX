@@ -134,9 +134,3 @@
     --material-tab-min-height: var(--phone-touch-target, 48px);
   }
 }
-
-@media (prefers-reduced-motion: reduce) {
-  .materialTabs[role='tablist'] :deep([role='tab']) {
-    transition: none;
-  }
-}

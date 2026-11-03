@@ -46,7 +46,7 @@ export function revealStartupSplash() {
   const onVisibilityChange = () => {
     if (document.hidden) finish()
   }
-  if (document.hidden || matchMedia('(prefers-reduced-motion: reduce)').matches) {
+  if (document.hidden || document.documentElement.dataset.reducedMotion === 'reduce') {
     finish()
     return
   }

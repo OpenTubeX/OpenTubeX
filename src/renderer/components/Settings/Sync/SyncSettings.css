@@ -83,12 +83,6 @@
   }
 }
 
-@media (prefers-reduced-motion: reduce) {
-  .syncProgressFill {
-    animation: none;
-  }
-}
-
 .privacyStatus,
 .privacyWarning {
   margin-block: 0.5rem;

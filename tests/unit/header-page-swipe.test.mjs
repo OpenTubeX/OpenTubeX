@@ -19,7 +19,7 @@ function headerGesture(targetSelector = 'button') {
     store: { getters: { getTabs: [{ id: 'first', loadState: 'loaded' }, { id: 'second', loadState: 'loaded' }] } },
     findSwipeTab, shouldFinishPageSwipe,
     nextTick: async () => {}, capacitorTabService: { activateTab: async id => activations.push(id) },
-    window: { scrollY: 640, matchMedia: () => ({ matches: false }), setTimeout: fn => { timers.set(++sequence, fn); return sequence }, clearTimeout: id => timers.delete(id) },
+    window: { scrollY: 640, setTimeout: fn => { timers.set(++sequence, fn); return sequence }, clearTimeout: id => timers.delete(id) },
     document: { documentElement: { dataset: { reducedMotion: 'reduce' } }, querySelector: () => ({ getBoundingClientRect: () => ({ width: 375 }) }) },
   })
   vm.runInContext(handlers, context)

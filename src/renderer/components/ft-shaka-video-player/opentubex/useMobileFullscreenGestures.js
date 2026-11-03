@@ -446,7 +446,7 @@ export function useMobileFullscreenGestures({
 
     // A committed swipe hands off to the system animation immediately.
     // Only canceled gestures need to animate back to their starting position.
-    const settleDuration = shouldToggle || window.matchMedia('(prefers-reduced-motion: reduce)').matches ? 0 : 140
+    const settleDuration = shouldToggle || document.documentElement.dataset.reducedMotion === 'reduce' ? 0 : 140
     mobileFullscreenSettleTimer = window.setTimeout(async () => {
       mobileFullscreenSettleTimer = null
       mobileFullscreenSwipeOffset.value = 0
@@ -492,7 +492,7 @@ export function useMobileFullscreenGestures({
     mobileMiniPlayerDismissSettling.value = true
     mobileMiniPlayerDismissOffset.value = commit ? height + 96 : 0
     const duration = miniPlayerDrag.dismissDuration?.() ??
-      (window.matchMedia('(prefers-reduced-motion: reduce)').matches ? 0 : 140)
+      (document.documentElement.dataset.reducedMotion === 'reduce' ? 0 : 140)
     nextTick(() => {
       if (sequence !== mobileMiniPlayerDismissSequence) return
       // Start the timeout after Vue applies the transform and the browser
