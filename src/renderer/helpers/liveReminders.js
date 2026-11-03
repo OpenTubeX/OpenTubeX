@@ -250,6 +250,13 @@ async function requestNotificationPermission() {
 }
 
 async function scheduleReminder(reminder) {
+  // A reschedule keeps the alarm ID, so the timer for the old time must not show
+  // the reminder and cancel the new alarm. Changes arm the timers again.
+  const existing = readStoredReminders().find(item => item.videoId === reminder.videoId)
+  if (existing) {
+    clearTimeout(foregroundTimers.get(existing.notificationId))
+    foregroundTimers.delete(existing.notificationId)
+  }
   // The premiere may have started before the reminder was toggled or while the
   // permission prompt was open, and a past start cannot be scheduled. A reminder
   // being rescheduled would otherwise still fire at its old time.

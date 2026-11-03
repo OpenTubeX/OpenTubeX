@@ -17,6 +17,8 @@ async function loadCapacitorReminder(notifications, context = {}) {
     localStorage: { getItem: key => storage.get(key) ?? null, setItem: (key, value) => storage.set(key, value) },
     Date: class extends Date { static now() { return clock.now } },
     getLiveReminderTarget: videoId => ({ kind: 'live-reminder', path: `/watch/${videoId}` }),
+    setTimeout,
+    clearTimeout,
     ...context,
   })
   return { liveReminder, applyCapacitorNotificationMode, initializeCapacitorLiveReminderActions, storage, clock }
@@ -283,4 +285,45 @@ test('a reminder the app cannot record keeps its system notification', async () 
   // The system delivers it later, and the app leaves that notification alone too.
   await listeners.localNotificationReceived({ id: 7, extra: { videoId: 'premiere00a' } })
   assert.deepEqual(calls, [])
+})
+
+test('rescheduling a reminder keeps its old foreground timer from cancelling the new alarm', async () => {
+  const calls = []
+  const timers = []
+  const cleared = new Set()
+  let blocked = null
+  const loaded = await loadCapacitorReminder({
+    checkPermissions: async () => ({ display: 'granted' }),
+    addListener: async () => ({ remove() {} }),
+    getAll: async () => ({ notifications: [{ id: 7, title: 'Starting', body: 'Premiere', schedule: { at: new Date(START + 60_000).toISOString() }, extra: { videoId: 'premiere00a' } }] }),
+    cancel: async ({ notifications }) => { calls.push(['cancel', notifications[0].id]) },
+    schedule: async ({ notifications }) => {
+      calls.push(['schedule', notifications[0].id])
+      await blocked?.promise
+    },
+  }, {
+    document: { visibilityState: 'visible', addEventListener() {}, removeEventListener() {} },
+    setTimeout: callback => { timers.push(callback); return timers.length },
+    clearTimeout: id => { cleared.add(id) },
+    capacitorNotificationHistory: { add: entries => entries.map((entry, index) => ({ ...entry, id: String(index) })), list: async () => [] },
+  })
+  loaded.storage.set('opentubex-capacitor-live-reminders', JSON.stringify([
+    { videoId: 'premiere00a', startTimestamp: START + 60_000, notificationId: 7, notificationTitle: 'Starting', notificationBody: 'Premiere' }
+  ]))
+  const shown = []
+  await loaded.initializeCapacitorLiveReminderActions(() => {}, entry => shown.push(entry))
+  await new Promise(resolve => setImmediate(resolve))
+  assert.equal(timers.length, 1)
+
+  // The premiere moves later. The old timer comes due while the system schedules the new alarm.
+  blocked = Promise.withResolvers()
+  const scheduling = loaded.liveReminder.schedule({ videoId: 'premiere00a', startTimestamp: START + 600_000, notificationTitle: 'Starting', notificationBody: 'Premiere' })
+  await new Promise(resolve => setImmediate(resolve))
+  if (!cleared.has(1)) await timers[0]()
+  blocked.resolve()
+  assert.equal(await scheduling, true)
+
+  assert.deepEqual(calls.slice(calls.findLastIndex(([name]) => name === 'schedule')), [['schedule', 7]])
+  assert.deepEqual(shown, [])
+  assert.equal((await loaded.liveReminder.get('premiere00a')).startTimestamp, START + 600_000)
 })
