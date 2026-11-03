@@ -163,7 +163,7 @@ By default, subscriptions, playlists, settings, history, profiles and other app 
 The following extensions open YouTube links directly in OpenTubeX:
 
 - [LibRedirect](https://libredirect.manerakai.com/) since version [3.5.0](https://github.com/libredirect/browser_extension/releases/tag/v3.5.0)
-- [RedirectTube](https://github.com/MStankiewiczOfficial/RedirectTube) since version 2.0.0 (26071)
+- [RedirectTube](https://github.com/stankiewiczmichal/RedirectTube) since version [2.0.0 (26071)](https://github.com/stankiewiczmichal/RedirectTube/releases/tag/26071)
 
 LibRedirect automatically redirects YouTube links to OpenTubeX.
 > [!IMPORTANT]
