@@ -39,12 +39,12 @@ test('the bell is off per channel until turned on, which selects every type', as
   await goTo(page, 'subscribedchannels')
   const bell = page.locator('.channel', { hasText: 'Alpha Channel' }).getByRole('button', { name: 'Notify about new uploads', exact: true })
   await expect(bell).toHaveAttribute('aria-pressed', 'false')
-  // Like the settings page, the popover lists notified types only while notifications are on.
+  // The popover keeps the notified types while the bell is off, with none selected.
   await page.locator('.channel', { hasText: 'Alpha Channel' }).getByRole('button', { name: 'Subscription settings', exact: true }).click()
   const popover = page.locator('.profileDropdown')
   const popoverNotifications = popover.getByRole('group', { name: 'Notify about new uploads', exact: true })
   await expect(popover).toBeVisible()
-  await expect(popoverNotifications).toHaveCount(0)
+  await expect(popoverNotifications.getByRole('checkbox', { checked: true })).toHaveCount(0)
   await bell.click()
   await expect(bell).toHaveAttribute('aria-pressed', 'true')
   await expect.poll(() => readNotificationTypes(app.userDataDir)).toStrictEqual({
@@ -165,13 +165,18 @@ test.describe('with a channel notification turned on', () => {
     await feedLive.click()
     await notifications.getByRole('checkbox', { name: 'Videos' }).click()
     await expect(bell).toHaveAttribute('aria-pressed', 'false')
-    await expect(notifications).toHaveCount(0)
+    await expect(notifications.getByRole('checkbox', { checked: true })).toHaveCount(0)
     await expect(popover).toBeVisible()
     // The hidden type keeps its choice for when it is shown again.
     await expect.poll(() => readNotificationTypes(app.userDataDir)['Alpha Channel']).toStrictEqual(['live'])
     await feedLive.click()
     await expect(bell).toHaveAttribute('aria-pressed', 'true')
     await expect(notifications.getByRole('checkbox', { name: 'Live' })).toHaveAttribute('aria-checked', 'true')
+    // With the bell off, a notified type turns it back on.
+    await notifications.getByRole('checkbox', { name: 'Live' }).click()
+    await expect(bell).toHaveAttribute('aria-pressed', 'false')
+    await notifications.getByRole('checkbox', { name: 'Videos' }).click()
+    await expect(bell).toHaveAttribute('aria-pressed', 'true')
   })
 
   test('refresh results notify only about new uploads of turned-on channels and types', async ({ app, page }) => {
@@ -233,19 +238,17 @@ test.describe('in a short window', () => {
     }
   })
 
-  test('the popover keeps every preference reachable and its scroll range valid', { tag: '@scale' }, async ({ app, page }) => {
+  test('the bottom sheet keeps every preference reachable and its scroll range valid', { tag: '@scale' }, async ({ app, page }) => {
     await page.emulateMedia({ reducedMotion: 'reduce' })
-    await setWindowSize(app, page, { width: 1000, height: 380 })
+    // Short windows use the phone layout, so the options open in a bottom sheet.
+    // A narrow one wraps the chips onto enough rows for the preferences to scroll.
+    await setWindowSize(app, page, { width: 360, height: 380 })
     await goTo(page, 'subscribedchannels')
     const alpha = page.locator('.channel', { hasText: 'Alpha Channel' })
-    const bell = alpha.getByRole('button', { name: 'Notify about new uploads', exact: true })
-    // The popover fits on neither side of a bell in the middle of this window and
-    // would cover it. At the bottom, the popover opens above and leaves the bell clickable.
-    await bell.evaluate(element => element.scrollIntoView({ block: 'end' }))
     await alpha.getByRole('button', { name: 'Subscription settings', exact: true }).click()
-    const popover = page.locator('.profileDropdown')
-    await expect(popover).toHaveClass(/profileDropdownPositioned/)
-    await expect(popover).toHaveClass(/profileDropdownOpensAbove/)
+    const sheet = page.getByRole('dialog', { name: 'Subscription settings', exact: true })
+    await expect(sheet).toHaveClass(/bottomSheet/)
+    const popover = sheet.locator('.profileDropdown')
     const preferences = popover.locator('.feedTypePreferences')
     await expect(preferences).toHaveAttribute('data-overlayscrollbars-viewport')
     // The profile list keeps at least one row.
@@ -253,13 +256,13 @@ test.describe('in a short window', () => {
 
     await preferences.evaluate(element => { element.scrollTop = element.scrollHeight })
     await expect.poll(() => preferences.evaluate(element => element.scrollTop)).toBeGreaterThan(0)
-    const limit = popover.getByRole('combobox', { name: 'Videos per day' })
+    const limit = popover.locator('.dailyVideoLimit')
     const [limitBox, preferencesBox] = await Promise.all([limit.boundingBox(), preferences.boundingBox()])
     expect(limitBox.y + limitBox.height).toBeLessThanOrEqual(preferencesBox.y + preferencesBox.height + 0.5)
 
-    // The bell hides the notification group while the preferences stay scrolled to the bottom.
-    await bell.click()
-    await expect(popover.getByRole('group', { name: 'Notify about new uploads', exact: true })).toHaveCount(0)
+    // A wider window puts the chips on fewer rows while the preferences stay scrolled to the bottom.
+    await setWindowSize(app, page, { width: 1000, height: 390 })
+    await expect(sheet).toBeVisible()
     const scrollbar = preferences.locator(':scope > .os-scrollbar-vertical')
     await expect.poll(() => preferences.evaluate(element => (
       element.scrollTop <= Math.max(0, element.scrollHeight - element.clientHeight) + 1

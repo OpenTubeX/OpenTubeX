@@ -259,7 +259,7 @@ const { startMenuHold, moveMenuHold, cancelMenuHold, suppressMenuHoldClick } = u
 
 function openOptionsMenu() {
   cancelMenuHold()
-  openButtonMenu(menuButton.value.$el.querySelector('button'), menuItems)
+  openButtonMenu(menuButton.value.$el.querySelector('button'), menuItems, props.data.title)
 }
 
 function openContextMenu(event) {

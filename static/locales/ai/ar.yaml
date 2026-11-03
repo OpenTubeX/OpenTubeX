@@ -1522,6 +1522,8 @@ Profile:
   Theme Color: لون الموضوع
   Go To Profile Manager: الانتقال إلى مدير الملفات الشخصية
 Channel:
+  Fewer videos per day: "مقاطع فيديو أقل يوميًا"
+  More videos per day: "مقاطع فيديو أكثر يوميًا"
   Verified: تم التحقق منه
   Official Artist Channel: قناة فنان رسمية
   About:
@@ -1829,6 +1831,7 @@ Video:
       SubmitCategoryVote: إرسال تصويت الفئة
       CategoryVoteSuccess: تم إرسال تصويت الفئة.
     Google Cast:
+      Position: "موضع التشغيل"
       Invalid Authentication: "أرسل جهاز الاستقبال استجابة مصادقة غير صالحة."
       Authentication Declined: "رفض جهاز الاستقبال المصادقة."
       Audio Only Receiver: "يدعم جهاز الاستقبال بث الصوت فقط."

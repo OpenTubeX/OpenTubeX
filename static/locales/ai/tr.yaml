@@ -1492,6 +1492,8 @@ Profile:
   The selected image could not be loaded: Seçilen görsel yüklenemedi
   Theme Color: Tema Rengi
 Channel:
+  Fewer videos per day: "Günde daha az video"
+  More videos per day: "Günde daha fazla video"
   Verified: Doğrulanmış
   Official Artist Channel: Resmi Sanatçı Kanalı
   Subscription settings: Abonelik ayarları
@@ -1788,6 +1790,7 @@ Video:
       SubmitCategoryVote: Kategori oyunu gönder
       CategoryVoteSuccess: Kategori oyu gönderildi.
     Google Cast:
+      Position: "Oynatma konumu"
       Invalid Authentication: "Alıcı geçersiz bir kimlik doğrulama yanıtı gönderdi."
       Authentication Declined: "Alıcı kimlik doğrulamayı reddetti."
       Audio Only Receiver: "Alıcı yalnızca ses yayınını destekliyor."

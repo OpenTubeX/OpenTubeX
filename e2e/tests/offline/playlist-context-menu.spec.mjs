@@ -40,8 +40,29 @@ test('playlist actions use the context menu and respect the menu icon setting', 
   await expect(page.getByText('Media Type', { exact: true })).toBeVisible()
 })
 
-test('playlist menu buttons use comfortable touch targets', { tag: '@scale' }, async ({ app, page }, testInfo) => {
+test('playlist menu buttons open the context menu sheet on phones', async ({ app, page }) => {
   await setWindowSize(app, page, { width: 375, height: 812 })
+  await page.evaluate(() => window.$store.dispatch('updateShowVideoMenuButton', true))
+  await goTo(page, 'userplaylists')
+  const card = page.locator('.ft-list-item').filter({ hasText: 'Playlist menu test' })
+  const sheet = page.locator('.mobileLinkActions')
+
+  await card.getByRole('button', { name: /More options/i }).click()
+  await expect(sheet.locator('.mobileLinkActionsHeader')).toHaveText('Playlist menu test')
+  await expect(sheet.getByRole('menuitem', { name: 'Download Playlist', exact: true })).toBeVisible()
+  await expect(page.getByRole('menu', { name: 'Context menu', exact: true })).toHaveCount(0)
+  await page.keyboard.press('Escape')
+  await expect(sheet).toHaveCount(0)
+
+  await card.locator('.title').click()
+  await page.locator('.playlistOptions').filter({ visible: true }).getByRole('button', { name: 'More', exact: true }).click()
+  await expect(sheet.locator('.mobileLinkActionsHeader')).toHaveText('Playlist menu test')
+  await expect(page.getByRole('menu', { name: 'Context menu', exact: true })).toHaveCount(0)
+})
+
+test('playlist menu buttons use comfortable touch targets', { tag: '@scale' }, async ({ app, page }, testInfo) => {
+  // Phones use the bottom sheet, so the touch-sized popover is for wider touch screens.
+  await setWindowSize(app, page, { width: 800, height: 812 })
   await page.evaluate(() => window.$store.dispatch('updateShowVideoMenuButton', true))
   await goTo(page, 'userplaylists')
   const card = page.locator('.ft-list-item').filter({ hasText: 'Playlist menu test' })

@@ -1492,6 +1492,8 @@ Profile:
   The selected image could not be loaded: Valitud pilti ei õnnestunud laadida
   Theme Color: Kujunduse värv
 Channel:
+  Fewer videos per day: "Vähem videoid päevas"
+  More videos per day: "Rohkem videoid päevas"
   Verified: Kinnitatud
   Official Artist Channel: Ametlik esitaja kanal
   About:
@@ -1792,6 +1794,7 @@ Video:
       SubmitCategoryVote: Saada kategooriahääl
       CategoryVoteSuccess: Kategooriahääl saadetud.
     Google Cast:
+      Position: "Taasesituse asukoht"
       Invalid Authentication: "Vastuvõtja saatis vigase autentimisvastuse."
       Authentication Declined: "Vastuvõtja keeldus autentimisest."
       Audio Only Receiver: "Vastuvõtja toetab ainult heli edastamist."

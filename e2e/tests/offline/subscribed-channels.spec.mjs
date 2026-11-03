@@ -16,7 +16,8 @@ test.use({
           { id: 'UCbbbbbbbbbbbbbbbbbbbbbb', name: 'Beta Channel', thumbnail: '' }
         ]
       },
-      ...Array.from({ length: 6 }, (_, index) => ({
+      // Enough profiles for the settings popover's profile chips to scroll
+      ...Array.from({ length: 30 }, (_, index) => ({
         _id: `profile-${index}`,
         name: `Profile ${index}`,
         bgColor: '#000000',
@@ -80,26 +81,24 @@ test.describe('subscribed channels', () => {
     await expect(fallbackAvatar).toHaveCSS('font-size', '120px')
   })
 
-  test('desktop videos per day picker remains reachable with blurred card backgrounds', async ({ page }) => {
+  test('desktop videos per day stepper stays within its bounds', async ({ page }) => {
     await goTo(page, 'subscribedchannels')
-    await page.evaluate(() => document.body.style.setProperty('--card-bg-blur', 'blur(8px)'))
     await page.locator('.channel', { hasText: 'Alpha Channel' }).locator('.profileDropdownToggle').click()
     const popup = page.locator('.profileDropdown')
-    await popup.getByRole('combobox', { name: 'Videos per day' }).click()
-    const list = page.getByRole('listbox', { name: 'Videos per day' })
-    await expect(list).toBeVisible()
-    expect(await list.evaluate(element => {
-      const rect = element.getBoundingClientRect()
-      return rect.left >= 0 && rect.top >= 0 && rect.right <= innerWidth && rect.bottom <= innerHeight
-    })).toBe(true)
-    const option = list.getByRole('option', { name: '2', exact: true })
-    expect(await option.evaluate(element => {
-      const rect = element.getBoundingClientRect()
-      return element.contains(document.elementFromPoint(rect.x + rect.width / 2, rect.y + rect.height / 2))
-    })).toBe(true)
-    await option.click()
+    const more = popup.getByRole('button', { name: 'More videos per day', exact: true })
+    const fewer = popup.getByRole('button', { name: 'Fewer videos per day', exact: true })
+    const count = popup.locator('.dailyVideoLimitCount')
+    await expect(fewer).toHaveAttribute('aria-disabled', 'true')
+    for (let step = 0; step < 29; step++) await more.click()
+    await expect(count).toHaveText('30')
+    await expect(more).toHaveAttribute('aria-disabled', 'true')
+    // The limit keeps focus on the button, so the popover stays open.
+    await expect(more).toBeFocused()
     await expect(popup).toBeVisible()
-    await expect(popup.getByRole('combobox', { name: 'Videos per day' })).toHaveText('2')
+    await fewer.click()
+    await expect(count).toHaveText('29')
+    await expect(popup).toBeVisible()
+    expect(await popup.locator('.dailyVideoLimit').evaluate(element => element.scrollWidth - element.clientWidth)).toBeLessThanOrEqual(1)
   })
 
   test('profile dropdown uses an overlay scrollbar', async ({ page }) => {
@@ -123,30 +122,12 @@ test.describe('subscribed channels', () => {
         alpha.locator('.buttonList').boundingBox(),
         dropdown.boundingBox()
       ])
-      const anchoredEdgeDifference = direction === 'rtl'
-        ? Math.abs(triggerBox.x - dropdownBox.x)
-        : Math.abs(triggerBox.x + triggerBox.width - dropdownBox.x - dropdownBox.width)
-      expect(anchoredEdgeDifference).toBeLessThanOrEqual(1)
-
-      const scrollWidthBefore = await page.evaluate(() => document.documentElement.scrollWidth)
-      await dropdown.getByRole('combobox', { name: 'Videos per day' }).click()
-      const selectDropdown = page.getByRole('listbox', { name: 'Videos per day' })
-      await expect(selectDropdown).toBeVisible()
-      expect(await selectDropdown.evaluate((element, popover) => {
-        const rect = element.getBoundingClientRect()
-        return {
-          abovePopover: Number(getComputedStyle(element).zIndex) >
-            Number(getComputedStyle(popover).zIndex),
-          fitsViewport: rect.left >= 7.5 && rect.right <= window.innerWidth - 7.5,
-          noHorizontalOverflow: document.documentElement.scrollWidth === document.documentElement.clientWidth
-        }
-      }, await dropdown.elementHandle())).toEqual({
-        abovePopover: true,
-        fitsViewport: true,
-        noHorizontalOverflow: true
-      })
-      expect(await page.evaluate(width => document.documentElement.scrollWidth === width, scrollWidthBefore)).toBe(true)
-      await page.getByRole('option', { name: 'Use global setting' }).click()
+      // The popover aligns with the trigger's end, unless that would push it past the window edge.
+      const viewportWidth = await page.evaluate(() => window.innerWidth)
+      const anchoredX = direction === 'rtl' ? triggerBox.x : triggerBox.x + triggerBox.width - dropdownBox.width
+      const expectedX = Math.min(Math.max(anchoredX, 8), viewportWidth - 8 - dropdownBox.width)
+      expect(Math.abs(dropdownBox.x - expectedX)).toBeLessThanOrEqual(1)
+      expect(await page.evaluate(() => document.documentElement.scrollWidth === document.documentElement.clientWidth)).toBe(true)
 
       await alpha.locator('.profileDropdownToggle').click()
     }
@@ -244,13 +225,13 @@ test.describe('subscribed channels', () => {
 
     await page.evaluate(() => {
       const store = window.$store
-      for (const profileId of ['profile-1', 'profile-2', 'profile-3', 'profile-4', 'profile-5']) {
-        store.commit('removeProfileFromList', profileId)
+      for (const { _id } of [...store.getters.getProfileList]) {
+        if (!['allChannels', 'profile-0'].includes(_id)) store.commit('removeProfileFromList', _id)
       }
     })
 
     await expect(dropdown.getByText('Show in subscription feed', { exact: true })).toBeVisible()
-    await expect(dropdown.getByRole('checkbox')).toHaveCount(6)
+    await expect(dropdown.getByRole('group', { name: 'Profiles' }).getByRole('checkbox')).toHaveCount(2)
     await expect.poll(() => scroller.evaluate(element => element.scrollTop)).toBe(0)
     await expect(scrollbar).toHaveClass(/os-scrollbar-unusable/)
   })
@@ -264,22 +245,21 @@ test.describe('subscribed channels', () => {
     const dropdown = page.locator('.profileDropdown')
     await expect(dropdown.getByText('Show in subscription feed', { exact: true })).toBeVisible()
 
-    const videos = dropdown.getByRole('checkbox', { name: 'Videos', exact: true })
-    const shorts = dropdown.getByRole('checkbox', { name: 'Shorts', exact: true })
-    const live = dropdown.getByRole('checkbox', { name: 'Live', exact: true })
-    const posts = dropdown.getByRole('checkbox', { name: 'Posts', exact: true })
+    const feed = dropdown.getByRole('group', { name: 'Show in subscription feed' })
+    const videos = feed.getByRole('checkbox', { name: 'Videos', exact: true })
+    const shorts = feed.getByRole('checkbox', { name: 'Shorts', exact: true })
+    const live = feed.getByRole('checkbox', { name: 'Live', exact: true })
+    const posts = feed.getByRole('checkbox', { name: 'Posts', exact: true })
     await expect(videos).toBeChecked()
     await expect(shorts).toBeChecked()
     await expect(live).toBeChecked()
     await expect(posts).toBeChecked()
-    const dailyVideoLimit = dropdown.getByRole('combobox', { name: 'Videos per day' })
-    await expect(dailyVideoLimit).toHaveText('Use global setting')
+    await expect(dropdown.getByRole('button', { name: 'Use global setting', exact: true })).toHaveAttribute('aria-pressed', 'true')
 
     await shorts.click()
     await live.click()
     await posts.click()
-    await dailyVideoLimit.click()
-    await page.getByRole('option', { name: '1', exact: true }).click()
+    await dropdown.locator('.dailyVideoLimitCount').click()
     await expect(shorts).not.toBeChecked()
     await expect(live).not.toBeChecked()
     await expect(posts).not.toBeChecked()
@@ -310,11 +290,13 @@ test.describe('subscribed channels', () => {
     const relaunchedAlpha = page.locator('.channel', { hasText: 'Alpha Channel' })
     await relaunchedAlpha.getByRole('button', { name: 'Subscription settings' }).click()
     const relaunchedDropdown = page.locator('.profileDropdown')
-    await expect(relaunchedDropdown.getByRole('checkbox', { name: 'Videos', exact: true })).toBeChecked()
-    await expect(relaunchedDropdown.getByRole('checkbox', { name: 'Shorts', exact: true })).not.toBeChecked()
-    await expect(relaunchedDropdown.getByRole('checkbox', { name: 'Live', exact: true })).not.toBeChecked()
-    await expect(relaunchedDropdown.getByRole('checkbox', { name: 'Posts', exact: true })).not.toBeChecked()
-    await expect(relaunchedDropdown.getByRole('combobox', { name: 'Videos per day' })).toHaveText('1')
+    const relaunchedFeed = relaunchedDropdown.getByRole('group', { name: 'Show in subscription feed' })
+    await expect(relaunchedFeed.getByRole('checkbox', { name: 'Videos', exact: true })).toBeChecked()
+    await expect(relaunchedFeed.getByRole('checkbox', { name: 'Shorts', exact: true })).not.toBeChecked()
+    await expect(relaunchedFeed.getByRole('checkbox', { name: 'Live', exact: true })).not.toBeChecked()
+    await expect(relaunchedFeed.getByRole('checkbox', { name: 'Posts', exact: true })).not.toBeChecked()
+    await expect(relaunchedDropdown.locator('.dailyVideoLimitCount')).toHaveText('1')
+    await expect(relaunchedDropdown.locator('.dailyVideoLimitCount')).toHaveAttribute('aria-pressed', 'true')
   })
 
   test('unsubscribing asks for confirmation and persists', async ({ app, page }) => {

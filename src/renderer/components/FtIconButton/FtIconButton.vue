@@ -201,7 +201,7 @@
 
 <script setup>
 import { FtIcon, FtIconLayers } from '@opentubex/icons'
-import { provide, computed, nextTick, onBeforeUnmount, ref, useId, useTemplateRef, watch } from 'vue'
+import { provide, computed, nextTick, onBeforeUnmount, ref, useId, useSlots, useTemplateRef, watch } from 'vue'
 
 import FtPrompt from '../FtPrompt/FtPrompt.vue'
 import { usePhoneLayout } from '../../composables/usePhoneLayout'
@@ -209,9 +209,12 @@ import { clampOverlayScrollTop, restoreOverlayScrollTop } from '../../helpers/ov
 import { getAnchoredPosition, supportsAnchorPositioning } from '../../helpers/anchoredPosition'
 import { useAnchoredViewportBounds } from '../../composables/useAnchoredViewportBounds'
 import { useSettingsOverlay } from '../../composables/useSettingsOverlay'
+import { openMobileContextMenu, usesMobileContextSheet } from '../../helpers/buttonMenu'
 
 const props = defineProps({
   mobileSheet: { type: Boolean, default: false },
+  // Context menu actions that replace the dropdown on phones
+  mobileActions: { type: Array, default: null },
   title: {
     type: String,
     required: true,
@@ -300,6 +303,17 @@ const LONG_CLICK_BOUNDARY_MS = 500
 
 const id = useId()
 const dropdownAnchor = `--icon-menu-${id}`
+const slots = useSlots()
+
+// Phones show the options in the bottom sheet that context menus use.
+const mobileDropdownActions = computed(() => props.mobileActions ?? props.dropdownOptions.map(option => option.type === 'divider'
+  ? { type: 'separator' }
+  : {
+      label: option.label,
+      icon: option.active ? ['fas', 'check'] : option.icon,
+      enabled: !option.disabled,
+      run: () => emit('click', option.value)
+    }))
 
 const isKebabMenu = computed(() => (
   Array.isArray(props.icon) && ['ellipsis-v', 'ellipsis-vertical'].includes(props.icon[1])
@@ -369,7 +383,12 @@ watch(fullscreenDropdownTarget, (target) => {
   document.addEventListener('fullscreenchange', syncFullscreenDropdownTarget)
 })
 
+function closeMobileSheet() {
+  window.dispatchEvent(new CustomEvent('opentubex:close-context-menu', { detail: mobileDropdownActions }))
+}
+
 onBeforeUnmount(() => {
+  if (props.mobileActions || props.dropdownOptions.length > 0) closeMobileSheet()
   clearLongPress()
   clearLongPressClick()
   removeDropdownViewportListeners()
@@ -396,6 +415,11 @@ function handleIconClick(e, isRightOrLongClick = false) {
 
   if ((!props.openOnRightOrLongClick || (props.openOnRightOrLongClick && isRightOrLongClick)) &&
     (props.forceDropdown || props.dropdownOptions.length > 0)) {
+    if (!dropdownShown.value && (props.mobileActions || !slots.default) && usesMobileContextSheet()) {
+      openMobileContextMenu({ title: props.title, actions: mobileDropdownActions })
+      emit('dropdown-open')
+      return
+    }
     if (!dropdownShown.value) {
       fullscreenDropdownTarget.value = props.dropdownModalOnMobile
         ? ftIconButton.value?.closest(':fullscreen, .fullWindow') ?? null
@@ -687,6 +711,7 @@ defineExpose({
 
   hideDropdown: () => {
     dropdownShown.value = false
+    if (props.mobileActions) closeMobileSheet()
   }
 })
 </script>

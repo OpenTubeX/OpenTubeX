@@ -1520,6 +1520,8 @@ Profile:
   Theme Color: Màu chủ đề
   Go To Profile Manager: Đi đến trình quản lý hồ sơ
 Channel:
+  Fewer videos per day: "Ít video hơn mỗi ngày"
+  More videos per day: "Nhiều video hơn mỗi ngày"
   Verified: Đã xác minh
   Official Artist Channel: Kênh nghệ sĩ chính thức
   About:
@@ -1826,6 +1828,7 @@ Video:
       SubmitCategoryVote: Gửi phiếu danh mục
       CategoryVoteSuccess: Đã gửi phiếu danh mục.
     Google Cast:
+      Position: "Vị trí phát"
       Invalid Authentication: "Thiết bị nhận gửi phản hồi xác thực không hợp lệ."
       Authentication Declined: "Thiết bị nhận từ chối xác thực."
       Audio Only Receiver: "Thiết bị nhận chỉ hỗ trợ truyền âm thanh."

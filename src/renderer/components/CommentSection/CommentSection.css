@@ -153,8 +153,6 @@
   z-index: 5;
   inset-block-start: calc(100% + 8px);
   inset-inline-end: 0;
-  display: flex;
-  flex-direction: column;
   inline-size: min(240px, calc(100vw - 32px));
   padding: 6px;
   color: var(--primary-text-color);
@@ -164,7 +162,17 @@
   box-shadow: 0 8px 24px rgb(0 0 0 / 28%);
 }
 
-.commentFilterMenu button {
+.commentFilterOptions {
+  display: flex;
+  flex-direction: column;
+}
+
+.commentFilterSheet {
+  padding-block: 0 12px;
+  padding-inline: 12px;
+}
+
+.commentFilterOptions button {
   display: grid;
   grid-template-columns: 24px minmax(0, 1fr) 14px;
   min-block-size: 40px;
@@ -180,11 +188,6 @@
   border-radius: var(--shape-corner-medium);
   cursor: pointer;
   transition: background-color var(--motion-fast-effects);
-}
-
-.commentFilterMenu :where(button:hover, button:focus-visible) {
-  color: var(--side-nav-hover-text-color);
-  background-color: var(--side-nav-hover-color);
 }
 
 .commentFilterMenuIcon {
@@ -236,6 +239,11 @@
 .fullscreenSortMenu button:hover,
 .fullscreenSortMenu button:focus-visible,
 .fullscreenSortMenu .selected {
+  background-color: var(--side-nav-hover-color);
+}
+
+.commentFilterOptions button:is(:hover, :focus-visible) {
+  color: var(--side-nav-hover-text-color);
   background-color: var(--side-nav-hover-color);
 }
 

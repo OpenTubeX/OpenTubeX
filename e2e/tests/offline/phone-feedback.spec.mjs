@@ -422,11 +422,18 @@ test('comments fill the card width and keep their scrollbar at the panel edge', 
   const right = await sheet.evaluate(el => el.getBoundingClientRect().right - el.querySelector('.commentsContentWrapper').getBoundingClientRect().right)
   expect(right).toBeLessThan(2)
   await sheet.getByRole('button', { name: 'Filter loaded comments', exact: true }).click()
-  const option = sheet.getByRole('checkbox', { name: 'Contains timestamps', exact: true })
+  // Phones show the filters in a bottom sheet, which stays open while toggling them.
+  const filterSheet = page.getByRole('dialog', { name: 'Comment filters', exact: true })
+  await expect(filterSheet).toHaveClass(/bottomSheet/)
+  const option = filterSheet.getByRole('checkbox', { name: 'Contains timestamps', exact: true })
   const labelLeft = () => option.locator('span').nth(1).evaluate(el => el.getBoundingClientRect().left)
   const before = await labelLeft()
   await option.click()
   expect(await labelLeft()).toBeCloseTo(before, 1)
+  await expect(option).toHaveAttribute('aria-checked', 'true')
+  await expect(filterSheet).toBeVisible()
+  await filterSheet.getByRole('button', { name: 'Close', exact: true }).click()
+  await expect(filterSheet).toHaveCount(0)
 })
 
 test('phone player menus have a fixed close control and equal centered tiles', async ({ app, page }) => {

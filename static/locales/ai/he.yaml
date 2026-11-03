@@ -1526,6 +1526,8 @@ Profile:
   Theme Color: צבע ערכת הנושא
   Go To Profile Manager: מעבר למנהל הפרופילים
 Channel:
+  Fewer videos per day: "פחות סרטונים ביום"
+  More videos per day: "יותר סרטונים ביום"
   Verified: מאומת
   Official Artist Channel: ערוץ אומן רשמי
   About:
@@ -1835,6 +1837,7 @@ Video:
       SubmitCategoryVote: שליחת הצבעה על קטגוריה
       CategoryVoteSuccess: ההצבעה על הקטגוריה נשלחה.
     Google Cast:
+      Position: "מיקום ההפעלה"
       Invalid Authentication: "המקלט שלח תגובת אימות לא תקינה."
       Authentication Declined: "המקלט סירב לאימות."
       Audio Only Receiver: "המקלט תומך בשידור שמע בלבד."

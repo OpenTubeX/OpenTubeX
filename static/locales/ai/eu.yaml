@@ -1492,6 +1492,8 @@ Profile:
   The selected image could not be loaded: Ezin izan da hautatutako irudia kargatu
   Theme Color: Gaiaren kolorea
 Channel:
+  Fewer videos per day: "Eguneko bideo gutxiago"
+  More videos per day: "Eguneko bideo gehiago"
   Verified: Egiaztatua
   Official Artist Channel: Artistaren kanal ofiziala
   Subscription settings: Harpidetzaren ezarpenak
@@ -1798,6 +1800,7 @@ Video:
       SubmitCategoryVote: Bidali kategoriaren botoa
       CategoryVoteSuccess: Kategoriaren botoa bidali da.
     Google Cast:
+      Position: "Erreprodukzio-posizioa"
       Invalid Authentication: "Hartzaileak autentifikazio-erantzun baliogabea bidali du."
       Authentication Declined: "Hartzaileak autentifikazioa ukatu du."
       Audio Only Receiver: "Hartzaileak audio-igorpena soilik onartzen du."

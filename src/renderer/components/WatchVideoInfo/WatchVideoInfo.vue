@@ -241,6 +241,7 @@
             dropdown-class="channelSettingsDropdown"
             dropdown-position-x="left"
             force-dropdown
+            :mobile-actions="channelSettingMobileActions"
           >
             <div
               v-for="action in channelSettingSaveActions"
@@ -971,6 +972,7 @@ function createChannelSettingSaveAction(type, visible, label, settingLabel, icon
   return {
     visible,
     label: actionLabel,
+    settingLabel,
     icon,
     value: type,
     saved: hasSavedValue,
@@ -989,6 +991,22 @@ const channelSettingSaveActions = computed(() => [
   createChannelSettingSaveAction('volume', showSaveChannelVolumeButton.value,
     t('Video.Save Channel Volume'), t('Settings.Channel Settings.Volume'), ['fas', 'volume-high'])
 ].filter(action => action.visible && store.getters.getEnableChannelSettings && props.channelId !== ''))
+
+// The bottom sheet has no room for trailing buttons, so saved values get their own rows.
+const channelSettingMobileActions = computed(() => [
+  ...channelSettingSaveActions.value.map(action => ({
+    label: action.label,
+    icon: action.icon,
+    enabled: !action.disabled,
+    run: () => saveChannelSetting(action.value)
+  })),
+  { type: 'separator' },
+  ...channelSettingSaveActions.value.filter(action => action.saved).map(action => ({
+    label: t('Display Label', { label: t('Settings.Channel Settings.Forget Value'), value: action.settingLabel }),
+    icon: ['fas', 'trash'],
+    run: () => removeChannelSetting(action.value)
+  }))
+])
 
 /**
  * @param {'playbackSpeed'|'videoQuality'|'subtitlesState'|'volume'} setting

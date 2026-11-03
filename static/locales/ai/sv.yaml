@@ -1502,6 +1502,8 @@ Profile:
   Theme Color: Temafärg
   Go To Profile Manager: Gå till profilhanteraren
 Channel:
+  Fewer videos per day: "Färre videor per dag"
+  More videos per day: "Fler videor per dag"
   Verified: Verifierad
   Official Artist Channel: Officiell artistkanal
   About:
@@ -1807,6 +1809,7 @@ Video:
       SubmitCategoryVote: Skicka kategoriröst
       CategoryVoteSuccess: Kategoriröst skickad.
     Google Cast:
+      Position: "Uppspelningsposition"
       Invalid Authentication: "Mottagaren skickade ett ogiltigt autentiseringssvar."
       Authentication Declined: "Mottagaren avvisade autentisering."
       Audio Only Receiver: "Mottagaren stöder bara casting av ljud."

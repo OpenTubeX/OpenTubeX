@@ -1549,6 +1549,8 @@ Profile:
   Theme Color: Temafarve
   Go To Profile Manager: Gå til profilhåndtering
 Channel:
+  Fewer videos per day: "Færre videoer pr. dag"
+  More videos per day: "Flere videoer pr. dag"
   Verified: Bekræftet
   Official Artist Channel: Officiel kunstnerkanal
   About:
@@ -1859,6 +1861,7 @@ Video:
       SubmitCategoryVote: Indsend kategoristemme
       CategoryVoteSuccess: Kategoristemme indsendt.
     Google Cast:
+      Position: "Afspilningsposition"
       Invalid Authentication: "Modtageren sendte et ugyldigt godkendelsessvar."
       Authentication Declined: "Modtageren afviste godkendelse."
       Audio Only Receiver: "Modtageren understøtter kun casting af lyd."

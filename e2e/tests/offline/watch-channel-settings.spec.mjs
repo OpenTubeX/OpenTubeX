@@ -86,6 +86,30 @@ test('removes each saved channel override from the watch popover without changin
   await expect.poll(async () => Object.keys((await savedValues(page))[0])).toEqual(['other'])
 })
 
+test('phones save and forget channel settings from the context menu sheet', async ({ app, page }) => {
+  await mockPlayableWatchPage(app, page)
+  await openMockedVideo(page)
+  await page.setViewportSize({ width: 400, height: 800 })
+  const view = await watchViewHandle(page)
+  await view.evaluate(view => view.$store.dispatch('updateChannelVideoQualities', JSON.stringify({ [view.channelId]: '360', other: '360' })))
+  const openSheet = () => page.locator(`${activeTab} .watchVideoInfo`).getByRole('button', { name: 'Save channel setting…', exact: true }).click()
+  const sheet = page.locator('.mobileLinkActions')
+
+  await openSheet()
+  await expect(sheet).toBeVisible()
+  await expect(page.locator('.iconDropdown')).toHaveCount(0)
+  await expect(sheet.locator('.mobileLinkActionsHeader')).toHaveText('Save channel setting…')
+  await sheet.getByRole('menuitem', { name: 'Forget this setting: Video Quality', exact: true }).click()
+  await expect(sheet).toHaveCount(0)
+  await expect.poll(async () => Object.keys((await savedValues(page))[1])).toEqual(['other'])
+
+  await openSheet()
+  await expect(sheet.getByRole('menuitem', { name: /^Forget this setting/ })).toHaveCount(0)
+  await sheet.getByRole('menuitem', { name: 'Save Channel Volume', exact: true }).click()
+  await expect(sheet).toHaveCount(0)
+  await expect.poll(async () => Object.keys((await savedValues(page))[3]).length).toBe(1)
+})
+
 test('quick speed action saves, replaces and removes the channel speed through its button', async ({ app, page }) => {
   await mockPlayableWatchPage(app, page)
   await openMockedVideo(page)

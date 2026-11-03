@@ -1680,6 +1680,8 @@ Profile:
   Open Profile Dropdown: Opna profilmenyen
   Go To Profile Manager: Gå til profilhandsaming
 Channel:
+  Fewer videos per day: "Færre videoar per dag"
+  More videos per day: "Fleire videoar per dag"
   Verified: Stadfesta
   Official Artist Channel: Offisiell artistkanal
   Subscription settings: Abonnementsinnstillingar
@@ -2066,6 +2068,7 @@ Video:
       SubmitCategoryVote: Send kategorirøyst
       CategoryVoteSuccess: Kategorirøyst sendt.
     Google Cast:
+      Position: "Avspelingsposisjon"
       Invalid Authentication: "Mottakaren sende eit ugyldig autentiseringssvar."
       Authentication Declined: "Mottakaren avviste autentisering."
       Audio Only Receiver: "Mottakaren støttar berre casting av lyd."

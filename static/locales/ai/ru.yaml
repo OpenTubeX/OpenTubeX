@@ -1465,6 +1465,8 @@ Profile:
   The selected image could not be loaded: Не удалось загрузить выбранное изображение
   Theme Color: Цвет темы
 Channel:
+  Fewer videos per day: "Меньше видео в день"
+  More videos per day: "Больше видео в день"
   Verified: Подтверждено
   Official Artist Channel: Официальный канал исполнителя
   About:
@@ -1764,6 +1766,7 @@ Video:
       SubmitCategoryVote: Отправить голос за категорию
       CategoryVoteSuccess: Голос за категорию отправлен.
     Google Cast:
+      Position: "Позиция воспроизведения"
       Invalid Authentication: "Приёмник отправил недопустимый ответ аутентификации."
       Authentication Declined: "Приёмник отказался от аутентификации."
       Audio Only Receiver: "Приёмник поддерживает только трансляцию аудио."

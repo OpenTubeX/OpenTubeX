@@ -1836,6 +1836,8 @@ Profile:
   Open Profile Dropdown: Odpri spustni meni profila
   Go To Profile Manager: Pojdi v upravitelja profilov
 Channel:
+  Fewer videos per day: "Manj videoposnetkov na dan"
+  More videos per day: "Več videoposnetkov na dan"
   Verified: Preverjeno
   Official Artist Channel: Uradni kanal izvajalca
   Subscription settings: Nastavitve naročnine
@@ -2253,6 +2255,7 @@ Video:
       SubmitCategoryVote: Pošlji glas za kategorijo
       CategoryVoteSuccess: Glas za kategorijo je poslan.
     Google Cast:
+      Position: "Položaj predvajanja"
       Invalid Authentication: "Sprejemnik je poslal neveljaven odgovor za preverjanje pristnosti."
       Authentication Declined: "Sprejemnik je zavrnil preverjanje pristnosti."
       Audio Only Receiver: "Sprejemnik podpira le predvajanje zvoka."

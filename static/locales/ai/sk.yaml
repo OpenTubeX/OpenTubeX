@@ -1492,6 +1492,8 @@ Profile:
   The selected image could not be loaded: Vybraný obrázok sa nepodarilo načítať
   Theme Color: Farba motívu
 Channel:
+  Fewer videos per day: "Menej videí za deň"
+  More videos per day: "Viac videí za deň"
   Verified: Overené
   Official Artist Channel: Oficiálny kanál interpreta
   About:
@@ -1790,6 +1792,7 @@ Video:
       SubmitCategoryVote: Odoslať hlas za kategóriu
       CategoryVoteSuccess: Hlas za kategóriu bol odoslaný.
     Google Cast:
+      Position: "Pozícia prehrávania"
       Invalid Authentication: "Prijímač odoslal neplatnú overovaciu odpoveď."
       Authentication Declined: "Prijímač odmietol overenie."
       Audio Only Receiver: "Prijímač podporuje iba vysielanie zvuku."

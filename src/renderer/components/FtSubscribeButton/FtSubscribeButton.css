@@ -217,7 +217,7 @@
   display: flex;
   flex-direction: column;
   font-size: 14px;
-  inline-size: min(240px, calc(100vw - 16px));
+  inline-size: min(340px, calc(100vw - 16px));
   max-block-size: min(540px, 70vh);
   overflow: hidden;
   padding: 5px;
@@ -231,6 +231,24 @@
 
 .profileDropdownPositioned {
   visibility: visible;
+}
+
+/* Inside the phone bottom sheet, which provides the surface and the scrolling limit */
+.profileDropdown.profileSheet {
+  position: static;
+  visibility: visible;
+  flex: 1 1 auto;
+  min-block-size: 0;
+  inline-size: auto;
+  max-block-size: none;
+  padding-block: 0 12px;
+  padding-inline: 12px;
+  background: none;
+  border: 0;
+  border-radius: 0;
+  box-shadow: none;
+  backdrop-filter: none;
+  font-size: 1rem;
 }
 
 .profileDropdownOpensAbove {
@@ -248,117 +266,172 @@
 .feedTypePreferences {
   min-block-size: 0;
   overflow-y: auto;
-  padding-block-end: 5px;
 }
 
-.feedTypePreferencesLabel {
+.preferenceSection {
+  padding-block: 2px 8px;
+  padding-inline: 6px;
+}
+
+.preferenceLabel {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin: 0;
+  padding-block: 8px 6px;
   color: var(--secondary-text-color);
   font-size: 12px;
   font-weight: 600;
   line-height: 1.2;
-  margin: 0;
-  padding-block: 7px;
-  padding-inline: 8px;
   text-align: start;
   text-transform: uppercase;
 }
 
-.feedTypePreferenceGrid {
-  display: grid;
-  gap: 2px;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
+.preferenceChips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
 }
 
-.feedTypePreference {
+.preferenceChip {
+  display: inline-flex;
   align-items: center;
+  gap: 6px;
+  max-inline-size: 100%;
+  min-block-size: 32px;
+  box-sizing: border-box;
+  padding-block: 4px;
+  padding-inline: 10px 12px;
+  border: 1px solid var(--border-color);
+  border-radius: var(--shape-corner-full);
   background: transparent;
-  border: 0;
-  border-radius: var(--shape-corner-medium);
   color: inherit;
-  cursor: pointer;
-  display: grid;
   font: inherit;
-  gap: 8px;
-  grid-template-columns: 18px minmax(0, 1fr) 16px;
-  inline-size: 100%;
-  min-block-size: 40px;
-  padding-block: 7px;
-  padding-inline: 8px;
-  text-align: start;
+  cursor: pointer;
 }
 
-.feedTypePreference:is(:hover, :focus-visible) {
+.preferenceChip bdi {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.preferenceChip[aria-checked='true'] {
+  border-color: transparent;
+  background-color: color-mix(in srgb, var(--primary-color) 20%, transparent);
+}
+
+.preferenceChip[aria-checked='true'] > .ft-icon {
+  color: var(--primary-color);
+}
+
+.preferenceChip:disabled {
+  cursor: default;
+  opacity: 0.4;
+}
+
+.preferenceChip:focus-visible {
+  outline: 2px solid var(--primary-color);
+  outline-offset: 1px;
+}
+
+.preferenceChip:not(:disabled):is(:hover, :focus-visible) {
   background-color: var(--side-nav-hover-color);
   color: var(--side-nav-hover-text-color);
 }
 
-.feedTypePreference:focus-visible {
+/* With the bell off, the notification chips stay available but recede. */
+.notificationsOff .preferenceChips {
+  opacity: 0.7;
+}
+
+.profileChipIcon {
+  inline-size: 18px;
+  block-size: 18px;
+  flex-shrink: 0;
+  border-radius: 50%;
+  font-size: 9px;
+}
+
+.dailyVideoLimit {
+  display: flex;
+  min-block-size: 34px;
+  border: 1px solid var(--border-color);
+  border-radius: var(--shape-corner-medium);
+  overflow: hidden;
+}
+
+.dailyVideoLimit button {
+  border: 0;
+  background: transparent;
+  color: var(--secondary-text-color);
+  font: inherit;
+  cursor: pointer;
+}
+
+.dailyVideoLimitOption {
+  flex: 1 1 auto;
+  padding-inline: 8px;
+}
+
+.dailyVideoLimitOption,
+.dailyVideoLimitStepper {
+  border-inline-start: 1px solid var(--border-color);
+}
+
+.dailyVideoLimitOption:first-child {
+  border-inline-start: 0;
+}
+
+.dailyVideoLimitStepper {
+  display: flex;
+  flex: 0 0 auto;
+  align-items: stretch;
+}
+
+.dailyVideoLimitStepper button {
+  min-inline-size: 30px;
+  padding-inline: 4px;
+}
+
+/* Unlike disabled buttons, these keep focus at the limit, which keeps the popover open. */
+.dailyVideoLimitStepper button[aria-disabled='true'] {
+  cursor: default;
+  opacity: 0.4;
+}
+
+.dailyVideoLimitCount {
+  min-inline-size: 28px;
+  font-variant-numeric: tabular-nums;
+}
+
+.dailyVideoLimitOption[aria-pressed='true'],
+.dailyVideoLimitStepper.active {
+  background-color: color-mix(in srgb, var(--primary-color) 20%, transparent);
+}
+
+.dailyVideoLimitOption[aria-pressed='true'],
+.dailyVideoLimitStepper.active .dailyVideoLimitCount {
+  color: var(--primary-text-color);
+  font-weight: 600;
+}
+
+.dailyVideoLimit button:focus-visible {
   outline: 2px solid var(--primary-color);
   outline-offset: -2px;
 }
 
-.feedTypePreference:disabled {
-  background-color: transparent;
-  color: inherit;
-  cursor: default;
-  opacity: 0.5;
+.dailyVideoLimit button:not([aria-disabled='true']):is(:hover, :focus-visible) {
+  background-color: var(--side-nav-hover-color);
+  color: var(--side-nav-hover-text-color);
 }
 
-.feedTypePreferenceGroup + .feedTypePreferenceGroup {
-  margin-block-start: 3px;
+.membersOnlyPreference {
+  padding-block: 4px 8px;
+  padding-inline: 6px;
 }
 
-.secondaryPreferences {
-  border-block-start: 1px solid var(--divider-color);
-  display: grid;
-  gap: 8px;
-  margin-block-start: 5px;
-  padding-block: 5px 2px;
-  padding-inline: 8px;
-}
-
-.membersOnlyPreference,
-.dailyVideoLimitPreference {
-  min-inline-size: 0;
-}
-
-.dailyVideoLimitSelect {
-  inline-size: 100%;
-  margin-block-start: 7px;
-}
-
-@media (any-pointer: coarse), (width <= 680px) {
-  .dailyVideoLimitSelect {
-    margin-block-start: 8px;
-  }
-}
-
-.feedTypePreferenceIcon,
-.feedTypePreferenceCheck,
-.profileCheck {
-  align-items: center;
-  display: flex;
-  justify-content: center;
-}
-
-.feedTypePreferenceIcon {
-  color: var(--secondary-text-color);
-  inline-size: 18px;
-}
-
-.feedTypePreferenceCheck,
-.profileCheck {
-  color: var(--primary-color);
-  inline-size: 16px;
-}
-
-.profileList {
-  list-style-type: none;
-  margin: 0;
-  padding: 0;
-}
-
-/* The profile list gives up its space first and keeps at least one row. */
+/* The profile and group chips give up their space first and keep at least one row. */
 .profileDropdownScroller {
   flex-shrink: 1000;
   min-block-size: 46px;
@@ -367,78 +440,13 @@
 
 .feedTypePreferences + .profileDropdownScroller {
   border-block-start: 1px solid var(--divider-color);
-  padding-block-start: 5px;
 }
 
-.profile {
-  align-items: center;
-  background: transparent;
-  border-radius: var(--shape-corner-medium);
-  cursor: pointer;
-  display: grid;
-  gap: 10px;
-  grid-template-columns: 32px minmax(0, 1fr) 16px;
-  min-block-size: 46px;
-  padding-block: 7px;
-  padding-inline: 8px;
-  transition: background-color var(--motion-fast-effects);
-}
-
-.profile:is(:hover, :focus-visible) {
-  background-color: var(--side-nav-hover-color);
-  color: var(--side-nav-hover-text-color);
-}
-
-.profile.groupOption {
-  box-sizing: border-box;
-  grid-template-columns: minmax(0, 1fr) 16px;
-  min-block-size: 40px;
-}
-
-/* Names stay aligned when only some groups have an icon. */
-.withGroupIcons .profile.groupOption {
-  grid-template-columns: 18px minmax(0, 1fr) 16px;
-}
-
-.groupIcon {
-  display: grid;
-  place-items: center;
-  font-size: 18px;
-}
-
-.profileList:not(.withGroupIcons) .groupIcon {
-  display: none;
-}
-
-@media (any-pointer: coarse) {
-  .profile.groupOption {
-    min-block-size: 48px;
+@media (any-pointer: coarse), (width <= 680px) {
+  .preferenceChip,
+  .dailyVideoLimit {
+    min-block-size: 40px;
   }
-}
-
-.profileList + .groupPreferences {
-  border-block-start: 1px solid var(--divider-color);
-  margin-block-start: 5px;
-  padding-block-start: 5px;
-}
-
-.colorOption {
-  inline-size: 32px;
-  block-size: 32px;
-  cursor: pointer;
-  align-items: center;
-  display: flex;
-  justify-content: center;
-  flex-shrink: 0;
-  border-radius: 50%;
-}
-
-.profileName {
-  margin: 0;
-  text-align: start;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
 }
 
 @media (prefers-reduced-motion: reduce) {

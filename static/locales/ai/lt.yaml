@@ -1782,6 +1782,8 @@ Profile:
   Open Profile Dropdown: Atverti profilio išskleidžiamąjį meniu
   Go To Profile Manager: Eiti į profilių tvarkytuvę
 Channel:
+  Fewer videos per day: "Mažiau vaizdo įrašų per dieną"
+  More videos per day: "Daugiau vaizdo įrašų per dieną"
   Verified: Patvirtinta
   Official Artist Channel: Oficialus atlikėjo kanalas
   Subscription settings: Prenumeratos nustatymai
@@ -2176,6 +2178,7 @@ Video:
       SubmitCategoryVote: Pateikti balsą už kategoriją
       CategoryVoteSuccess: Balsas už kategoriją pateiktas.
     Google Cast:
+      Position: "Atkūrimo vieta"
       Invalid Authentication: "Imtuvas atsiuntė neteisingą tapatybės patvirtinimo atsakymą."
       Authentication Declined: "Imtuvas atsisakė patvirtinti tapatybę."
       Audio Only Receiver: "Imtuvas palaiko tik garso perdavimą."

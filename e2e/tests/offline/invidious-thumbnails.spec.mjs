@@ -105,13 +105,12 @@ test('only offers subscription options while subscribed', async ({ page }) => {
   await expect(subscribeButton).toContainText('Unsubscribe')
   await settingsArrow.click()
   const dropdown = page.locator('body > .profileDropdown')
-  const shorts = dropdown.getByRole('checkbox', { name: 'Shorts' })
+  const shorts = dropdown.getByRole('group', { name: 'Show in subscription feed' }).getByRole('checkbox', { name: 'Shorts' })
   await expect(shorts).toHaveAttribute('aria-checked', 'true')
   await shorts.click()
 
-  const dailyLimit = dropdown.getByRole('combobox', { name: 'Videos per day' })
-  await dailyLimit.click()
-  await page.getByRole('option', { name: '2', exact: true }).click()
+  // The stepper starts at one, so one step sets a limit of two.
+  await dropdown.getByRole('button', { name: 'More videos per day', exact: true }).click()
 
   await expect(channel.getByRole('button', { name: 'Unsubscribe', exact: true })).toBeVisible()
   await expect.poll(() => page.evaluate(channelId => {

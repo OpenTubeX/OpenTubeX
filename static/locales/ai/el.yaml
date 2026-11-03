@@ -1505,6 +1505,8 @@ Profile:
   Theme Color: Χρώμα θέματος
   Go To Profile Manager: Μετάβαση στη διαχείριση προφίλ
 Channel:
+  Fewer videos per day: "Λιγότερα βίντεο ανά ημέρα"
+  More videos per day: "Περισσότερα βίντεο ανά ημέρα"
   Verified: Επαληθευμένο
   Official Artist Channel: Επίσημο κανάλι καλλιτέχνη
   About:
@@ -1812,6 +1814,7 @@ Video:
       SubmitCategoryVote: Υποβολή ψήφου κατηγορίας
       CategoryVoteSuccess: Η ψήφος κατηγορίας υποβλήθηκε.
     Google Cast:
+      Position: "Θέση αναπαραγωγής"
       Invalid Authentication: "Ο δέκτης έστειλε μη έγκυρη απάντηση ελέγχου ταυτότητας."
       Authentication Declined: "Ο δέκτης αρνήθηκε τον έλεγχο ταυτότητας."
       Audio Only Receiver: "Ο δέκτης υποστηρίζει μόνο μετάδοση ήχου."

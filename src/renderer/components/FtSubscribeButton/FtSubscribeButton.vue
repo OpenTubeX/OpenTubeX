@@ -54,77 +54,145 @@
         @click="toggleProfileDropdown"
       />
     </div>
-    <Teleport
+    <!-- Phones show the options in a bottom sheet; elsewhere the sheet is only a wrapper. -->
+    <FtMobileSheet
       v-if="isProfileDropdownOpen"
-      :to="profileDropdownTarget"
+      :enabled="profileSheet"
+      :open="profileSheetOpen"
+      :title="subscriptionOptionsTitle"
+      compact
+      bottom
+      @close="profileSheetOpen = false"
+      @closed="isProfileDropdownOpen = false"
     >
-      <Transition
-        name="profile-dropdown"
-        appear
+      <Teleport
+        :to="profileDropdownTarget"
+        :disabled="profileSheet"
       >
-        <div
-          ref="profileDropdown"
-          tabindex="-1"
-          class="profileDropdown"
-          :class="{
-            profileDropdownAnchoredLeftEdge,
-            profileDropdownPositioned: isProfileDropdownPositioned,
-            profileDropdownOpensAbove: profileDropdownOpensAbove
-          }"
-          :style="profileDropdownStyle"
-          @focusout="handleProfileDropdownFocusOut"
-          @keydown.esc.stop.prevent="closeProfileDropdown"
+        <Transition
+          name="profile-dropdown"
+          appear
+          :css="!profileSheet"
         >
           <div
-            ref="preferencesScroller"
-            v-overlay-scrollbars
-            class="feedTypePreferences"
+            ref="profileDropdown"
+            tabindex="-1"
+            class="profileDropdown"
+            :class="{
+              profileSheet,
+              profileDropdownAnchoredLeftEdge,
+              profileDropdownPositioned: isProfileDropdownPositioned,
+              profileDropdownOpensAbove: profileDropdownOpensAbove
+            }"
+            :style="profileSheet ? null : profileDropdownStyle"
+            @focusout="handleProfileDropdownFocusOut"
+            @keydown.esc.stop.prevent="closeProfileDropdown"
           >
-            <div ref="preferencesContent">
-              <div
-                v-for="group in feedTypeGroups"
-                :key="group.key"
-                role="group"
-                class="feedTypePreferenceGroup"
-                :aria-labelledby="`${id}-${group.key}`"
-              >
-                <p
-                  :id="`${id}-${group.key}`"
-                  class="feedTypePreferencesLabel"
+            <div
+              ref="preferencesScroller"
+              v-overlay-scrollbars
+              class="feedTypePreferences"
+            >
+              <div ref="preferencesContent">
+                <div
+                  v-for="group in feedTypeGroups"
+                  :key="group.key"
+                  role="group"
+                  class="preferenceSection"
+                  :class="{ notificationsOff: group.key === 'notificationFeedTypes' && !notificationsEnabled }"
+                  :aria-labelledby="`${id}-${group.key}`"
                 >
-                  {{ group.label }}
-                </p>
-                <div class="feedTypePreferenceGrid">
-                  <button
-                    v-for="feedType in feedTypes"
-                    :key="feedType.id"
-                    type="button"
-                    class="feedTypePreference"
-                    role="checkbox"
-                    :aria-checked="isFeedTypeChecked(feedType.id, group.key)"
-                    :disabled="group.key === 'notificationFeedTypes' && !isFeedTypeChecked(feedType.id)"
-                    @click="updateFeedType(feedType.id, !isFeedTypeChecked(feedType.id, group.key), group.key)"
+                  <p
+                    :id="`${id}-${group.key}`"
+                    class="preferenceLabel"
                   >
-                    <span
-                      class="feedTypePreferenceIcon"
+                    <FtIcon
+                      v-if="group.key === 'notificationFeedTypes'"
+                      :icon="['fas', 'bell']"
                       aria-hidden="true"
-                    >
-                      <FtIcon :icon="feedType.icon" />
-                    </span>
-                    <span>{{ feedType.label }}</span>
-                    <span
-                      class="feedTypePreferenceCheck"
-                      aria-hidden="true"
+                    />
+                    {{ group.label }}
+                  </p>
+                  <div class="preferenceChips">
+                    <button
+                      v-for="feedType in feedTypes"
+                      :key="feedType.id"
+                      type="button"
+                      class="preferenceChip"
+                      role="checkbox"
+                      :aria-checked="isFeedTypeChecked(feedType.id, group.key)"
+                      :disabled="group.key === 'notificationFeedTypes' && !isFeedTypeChecked(feedType.id)"
+                      @click="updateFeedType(feedType.id, !isFeedTypeChecked(feedType.id, group.key), group.key)"
                     >
                       <FtIcon
-                        v-if="isFeedTypeChecked(feedType.id, group.key)"
-                        :icon="['fas', 'check']"
+                        :icon="isFeedTypeChecked(feedType.id, group.key) ? ['fas', 'check'] : feedType.icon"
+                        aria-hidden="true"
                       />
-                    </span>
-                  </button>
+                      {{ feedType.label }}
+                    </button>
+                  </div>
                 </div>
-              </div>
-              <div class="secondaryPreferences">
+                <div
+                  role="group"
+                  class="preferenceSection"
+                  :aria-labelledby="`${id}-daily-limit`"
+                >
+                  <p
+                    :id="`${id}-daily-limit`"
+                    class="preferenceLabel"
+                  >
+                    {{ $t('Channel.Videos per day') }}
+                  </p>
+                  <div class="dailyVideoLimit">
+                    <button
+                      v-for="option in ['global', 'unlimited']"
+                      :key="option"
+                      type="button"
+                      class="dailyVideoLimitOption"
+                      :aria-pressed="dailyVideoLimitValue === option"
+                      @click="updateDailyVideoLimit(option)"
+                    >
+                      {{ option === 'global' ? $t('Channel.Use global setting') : $t('Channel.Unlimited') }}
+                    </button>
+                    <div
+                      class="dailyVideoLimitStepper"
+                      :class="{ active: dailyVideoLimitCount !== null }"
+                    >
+                      <button
+                        type="button"
+                        :title="$t('Channel.Fewer videos per day')"
+                        :aria-label="$t('Channel.Fewer videos per day')"
+                        :aria-disabled="dailyVideoLimitDraft <= 1"
+                        @click="stepDailyVideoLimit(-1)"
+                      >
+                        <FtIcon
+                          :icon="['fas', 'minus']"
+                          aria-hidden="true"
+                        />
+                      </button>
+                      <button
+                        type="button"
+                        class="dailyVideoLimitCount"
+                        :aria-pressed="dailyVideoLimitCount !== null"
+                        @click="updateDailyVideoLimit(String(dailyVideoLimitDraft))"
+                      >
+                        {{ dailyVideoLimitDraft }}
+                      </button>
+                      <button
+                        type="button"
+                        :title="$t('Channel.More videos per day')"
+                        :aria-label="$t('Channel.More videos per day')"
+                        :aria-disabled="dailyVideoLimitDraft >= MAX_DAILY_VIDEO_LIMIT"
+                        @click="stepDailyVideoLimit(1)"
+                      >
+                        <FtIcon
+                          :icon="['fas', 'plus']"
+                          aria-hidden="true"
+                        />
+                      </button>
+                    </div>
+                  </div>
+                </div>
                 <div
                   v-if="restrictedPlaybackConfigured"
                   class="membersOnlyPreference"
@@ -137,125 +205,91 @@
                     @change="updateShowMembersOnly"
                   />
                 </div>
-                <div class="dailyVideoLimitPreference">
-                  <FtSelect
-                    class="dailyVideoLimitSelect"
-                    :value="dailyVideoLimitValue"
-                    :placeholder="$t('Channel.Videos per day')"
-                    :select-names="dailyVideoLimitNames"
-                    :select-values="dailyVideoLimitValues"
-                    :icon="['fas', 'clock']"
-                    :dropdown-z-index="1002"
-                    @change="updateDailyVideoLimit"
-                  />
+              </div>
+            </div>
+            <div
+              v-if="isProfileDropdownEnabled || isGroupListEnabled"
+              ref="profileDropdownScroller"
+              v-overlay-scrollbars
+              class="profileDropdownScroller"
+            >
+              <div ref="profileListContent">
+                <div
+                  v-if="isProfileDropdownEnabled"
+                  role="group"
+                  class="preferenceSection"
+                  :aria-labelledby="`${id}-profiles`"
+                >
+                  <p
+                    :id="`${id}-profiles`"
+                    class="preferenceLabel"
+                  >
+                    {{ $t('Settings.Sync Settings.Profiles') }}
+                  </p>
+                  <div class="preferenceChips">
+                    <button
+                      v-for="profile in profileDisplayList"
+                      :key="profile._id"
+                      type="button"
+                      class="preferenceChip profileChip"
+                      role="checkbox"
+                      :aria-checked="isProfileSubscribed(profile)"
+                      :aria-current="isActiveProfile(profile) || null"
+                      @click="handleSubscription(profile)"
+                    >
+                      <FtIcon
+                        v-if="isProfileSubscribed(profile)"
+                        :icon="['fas', 'check']"
+                        aria-hidden="true"
+                      />
+                      <FtProfileIcon
+                        v-else
+                        class="profileChipIcon"
+                        :profile="profile"
+                        :fallback="profileInitials[profile._id]"
+                        aria-hidden="true"
+                      />
+                      <bdi>{{ profile.name }}</bdi>
+                    </button>
+                  </div>
+                </div>
+                <div
+                  v-if="isGroupListEnabled"
+                  role="group"
+                  class="preferenceSection"
+                  :aria-labelledby="`${id}-groups`"
+                >
+                  <p
+                    :id="`${id}-groups`"
+                    class="preferenceLabel"
+                  >
+                    {{ $t('Subscription Groups.Groups') }}
+                  </p>
+                  <div class="preferenceChips">
+                    <button
+                      v-for="group in subscriptionGroups"
+                      :key="group.id"
+                      type="button"
+                      class="preferenceChip"
+                      role="checkbox"
+                      :aria-checked="isInGroup(group)"
+                      @click="toggleGroup(group)"
+                    >
+                      <FtIcon
+                        v-if="isInGroup(group) || group.icon"
+                        :icon="isInGroup(group) ? ['fas', 'check'] : ['fas', group.icon]"
+                        aria-hidden="true"
+                      />
+                      <bdi>{{ group.name }}</bdi>
+                    </button>
+                  </div>
                 </div>
               </div>
             </div>
           </div>
-          <div
-            v-if="isProfileDropdownEnabled || isGroupListEnabled"
-            ref="profileDropdownScroller"
-            v-overlay-scrollbars
-            class="profileDropdownScroller"
-          >
-            <div ref="profileListContent">
-              <ul
-                v-if="isProfileDropdownEnabled"
-                class="profileList"
-              >
-                <li
-                  v-for="(profile, index) in profileDisplayList"
-                  :key="index"
-                  class="profile"
-                  :aria-labelledby="id + '-' + index"
-                  :aria-selected="isActiveProfile(profile)"
-                  :aria-checked="isProfileSubscribed(profile)"
-                  tabindex="0"
-                  role="checkbox"
-                  @click.stop.prevent="handleSubscription(profile)"
-                  @keydown.space.stop.prevent="handleSubscription(profile)"
-                >
-                  <FtProfileIcon
-                    class="colorOption"
-                    :profile="profile"
-                    :fallback="profileInitials[profile._id]"
-                  />
-                  <p
-                    :id="id + '-' + index"
-                    class="profileName"
-                    dir="auto"
-                  >
-                    {{ profile.name }}
-                  </p>
-                  <span
-                    class="profileCheck"
-                    aria-hidden="true"
-                  >
-                    <FtIcon
-                      v-if="isProfileSubscribed(profile)"
-                      :icon="['fas', 'check']"
-                    />
-                  </span>
-                </li>
-              </ul>
-              <div
-                v-if="isGroupListEnabled"
-                role="group"
-                class="groupPreferences"
-                :aria-labelledby="`${id}-groups`"
-              >
-                <p
-                  :id="`${id}-groups`"
-                  class="feedTypePreferencesLabel"
-                >
-                  {{ $t('Subscription Groups.Groups') }}
-                </p>
-                <ul
-                  class="profileList"
-                  :class="{ withGroupIcons: subscriptionGroups.some(group => group.icon) }"
-                >
-                  <li
-                    v-for="group in subscriptionGroups"
-                    :key="group.id"
-                    class="profile groupOption"
-                    :aria-checked="isInGroup(group)"
-                    tabindex="0"
-                    role="checkbox"
-                    @click.stop.prevent="toggleGroup(group)"
-                    @keydown.space.stop.prevent="toggleGroup(group)"
-                  >
-                    <span
-                      class="groupIcon"
-                      aria-hidden="true"
-                    >
-                      <FtIcon
-                        v-if="group.icon"
-                        :icon="['fas', group.icon]"
-                      />
-                    </span>
-                    <p
-                      class="profileName"
-                      dir="auto"
-                    >
-                      {{ group.name }}
-                    </p>
-                    <span
-                      class="profileCheck"
-                      aria-hidden="true"
-                    >
-                      <FtIcon
-                        v-if="isInGroup(group)"
-                        :icon="['fas', 'check']"
-                      />
-                    </span>
-                  </li>
-                </ul>
-              </div>
-            </div>
-          </div>
-        </div>
-      </Transition>
-    </Teleport>
+        </Transition>
+      </Teleport>
+    </FtMobileSheet>
   </div>
 </template>
 
@@ -265,9 +299,9 @@ import { computed, nextTick, onBeforeUnmount, ref, shallowRef, useId, useTemplat
 import { useI18n } from 'vue-i18n'
 
 import FtButton from '../FtButton/FtButton.vue'
+import FtMobileSheet from '../FtMobileSheet/FtMobileSheet.vue'
 import FtPrompt from '../FtPrompt/FtPrompt.vue'
 import FtProfileIcon from '../FtProfileIcon/FtProfileIcon.vue'
-import FtSelect from '../FtSelect/FtSelect.vue'
 import FtToggleSwitch from '../FtToggleSwitch/FtToggleSwitch.vue'
 
 import store from '../../store/index'
@@ -279,10 +313,11 @@ import { getFirstCharacter } from '../../helpers/strings'
 import { clampOverlayScrollTop } from '../../helpers/overlayScrollbars'
 import { getAnchoredPosition, supportsAnchorPositioning } from '../../helpers/anchoredPosition'
 import { useAnchoredViewportBounds } from '../../composables/useAnchoredViewportBounds'
+import { usePhoneLayout } from '../../composables/usePhoneLayout'
 import { hasConfiguredRestrictedPlaybackAuthentication } from '../../helpers/restricted-playback'
 import {
   formatSubscriptionDailyVideoLimit,
-  getSubscriptionDailyVideoLimitOptions,
+  MAX_SUBSCRIPTION_DAILY_VIDEO_LIMIT as MAX_DAILY_VIDEO_LIMIT,
   getSubscriptionFeedTypeOptions,
   getUpdatedSubscriptionFeedTypes,
   hasSubscriptionNotifications,
@@ -423,7 +458,11 @@ const isProfileDropdownOpen = ref(false)
 const profileDropdownTarget = shallowRef(document.body)
 const buttonList = useTemplateRef('buttonList')
 const profileDropdown = useTemplateRef('profileDropdown')
-useAnchoredViewportBounds(buttonList, profileDropdown, isProfileDropdownOpen)
+const phoneLayout = usePhoneLayout()
+// Whether the open options use the phone bottom sheet instead of the dropdown
+const profileSheet = ref(false)
+const profileSheetOpen = ref(false)
+useAnchoredViewportBounds(buttonList, profileDropdown, computed(() => isProfileDropdownOpen.value && !profileSheet.value))
 const preferencesScroller = useTemplateRef('preferencesScroller')
 const preferencesContent = useTemplateRef('preferencesContent')
 const profileDropdownScroller = useTemplateRef('profileDropdownScroller')
@@ -451,6 +490,28 @@ watch(isProfileDropdownOpen, async (open) => {
   if (generation !== profileListObservationGeneration ||
     !isProfileDropdownOpen.value || profileDropdown.value === null) return
 
+  if (!profileSheet.value) await trackProfileDropdownPosition(generation)
+  if (generation !== profileListObservationGeneration ||
+    !isProfileDropdownOpen.value || profileDropdown.value === null) return
+
+  // Both sections shrink in short windows; hiding or removing rows shortens them.
+  const scrollAreas = [
+    [preferencesScroller.value, preferencesContent.value],
+    [profileDropdownScroller.value, profileListContent.value]
+  ].filter(([scroller, content]) => scroller && content)
+  const clampScroll = () => {
+    for (const [scroller, content] of scrollAreas) clampOverlayScrollTop(scroller, content)
+  }
+  scrollAreaResizeObserver = new ResizeObserver(clampScroll)
+  for (const [scroller, content] of scrollAreas) {
+    scrollAreaResizeObserver.observe(scroller)
+    scrollAreaResizeObserver.observe(content)
+  }
+  clampScroll()
+})
+
+/** @param {number} generation */
+async function trackProfileDropdownPosition(generation) {
   positionProfileDropdown()
   await nextTick()
   if (generation !== profileListObservationGeneration ||
@@ -481,22 +542,7 @@ watch(isProfileDropdownOpen, async (open) => {
   }
   window.addEventListener('resize', scheduleProfileDropdownPositionUpdate)
   document.addEventListener('fullscreenchange', closeProfileDropdownOnFullscreenChange)
-
-  // Both sections shrink in short windows; hiding or removing rows shortens them.
-  const scrollAreas = [
-    [preferencesScroller.value, preferencesContent.value],
-    [profileDropdownScroller.value, profileListContent.value]
-  ].filter(([scroller, content]) => scroller && content)
-  const clampScroll = () => {
-    for (const [scroller, content] of scrollAreas) clampOverlayScrollTop(scroller, content)
-  }
-  scrollAreaResizeObserver = new ResizeObserver(clampScroll)
-  for (const [scroller, content] of scrollAreas) {
-    scrollAreaResizeObserver.observe(scroller)
-    scrollAreaResizeObserver.observe(content)
-  }
-  clampScroll()
-})
+}
 
 // The store caches one id set per active profile, so the subscribed channels
 // page does not scan the subscriptions once per button.
@@ -519,7 +565,8 @@ const activeChannelSettings = computed(() => (
 ))
 const feedTypeGroups = computed(() => [
   { key: 'feedTypes', label: t('Channel.Show in subscription feed') },
-  ...(isNotificationBellEnabled.value && notificationsEnabled.value
+  // The group stays while the bell is off, so its chips can turn notifications back on.
+  ...(isNotificationBellEnabled.value
     ? [{ key: 'notificationFeedTypes', label: t('Channel.Notify about new uploads') }]
     : [])
 ])
@@ -527,9 +574,21 @@ const notificationsEnabled = computed(() => hasSubscriptionNotifications(activeC
 const dailyVideoLimitValue = computed(() => (
   formatSubscriptionDailyVideoLimit(activeChannelSettings.value.dailyVideoLimit)
 ))
-const dailyVideoLimitOptions = computed(() => getSubscriptionDailyVideoLimitOptions(t))
-const dailyVideoLimitNames = computed(() => dailyVideoLimitOptions.value.map(option => option.label))
-const dailyVideoLimitValues = computed(() => dailyVideoLimitOptions.value.map(option => option.value))
+const dailyVideoLimitCount = computed(() => {
+  const limit = activeChannelSettings.value.dailyVideoLimit
+  return typeof limit === 'number' ? limit : null
+})
+// The stepper keeps the last count while Global or Unlimited is selected.
+const dailyVideoLimitDraft = ref(dailyVideoLimitCount.value ?? 1)
+watch(dailyVideoLimitCount, count => { if (count !== null) dailyVideoLimitDraft.value = count })
+
+/** @param {number} step */
+function stepDailyVideoLimit(step) {
+  const count = Math.min(MAX_DAILY_VIDEO_LIMIT, Math.max(1, dailyVideoLimitDraft.value + step))
+  if (count === dailyVideoLimitDraft.value) return
+  dailyVideoLimitDraft.value = count
+  updateDailyVideoLimit(String(count))
+}
 let channelSettingsUpdateSequence = 0
 let channelSettingsUpdateQueue = Promise.resolve()
 
@@ -611,7 +670,7 @@ function prepareProfileDropdownPosition() {
   if (trigger === null) return
 
   const viewportMargin = 8
-  const dropdownWidth = Math.min(240, window.innerWidth - 2 * viewportMargin)
+  const dropdownWidth = Math.min(340, window.innerWidth - 2 * viewportMargin)
   const triggerRect = trigger.getBoundingClientRect()
   const horizontalPosition = getProfileDropdownHorizontalPosition(
     trigger,
@@ -688,6 +747,7 @@ function removeProfileDropdownPositionTracking() {
  * @param {FocusEvent} event
  */
 function handleProfileDropdownFocusOut(event) {
+  if (profileSheet.value) return
   const nextTarget = event.relatedTarget
   const focusStaysInControl = nextTarget instanceof Node && (
     subscribeButton.value?.contains(nextTarget) ||
@@ -754,8 +814,10 @@ const subscribeButton = useTemplateRef('subscribeButton')
 
 function toggleProfileDropdown() {
   if (isProfileDropdownOpen.value) {
-    isProfileDropdownOpen.value = false
+    closeProfileDropdown()
   } else {
+    profileSheet.value = phoneLayout.value
+    profileSheetOpen.value = true
     profileDropdownTarget.value = subscribeButton.value?.closest(':fullscreen') ?? document.body
     prepareProfileDropdownPosition()
     isProfileDropdownOpen.value = true
@@ -763,6 +825,11 @@ function toggleProfileDropdown() {
 }
 
 function closeProfileDropdown() {
+  // The sheet closes with its animation and restores focus itself.
+  if (profileSheet.value) {
+    profileSheetOpen.value = false
+    return
+  }
   isProfileDropdownOpen.value = false
   nextTick(() => {
     subscribeButton.value?.querySelector('.profileDropdownToggle')?.focus({ preventScroll: true })
@@ -792,10 +859,6 @@ function updateFeedType(feedType, enabled, key = 'feedTypes') {
       feedType,
       enabled
     )
-  }
-  // The notification group hides with its focused checkbox, which would close the dropdown.
-  if (key === 'notificationFeedTypes' && !hasSubscriptionNotifications({ ...activeChannelSettings.value, ...patch })) {
-    profileDropdown.value?.focus({ preventScroll: true })
   }
   persistChannelSettings(patch)
 }

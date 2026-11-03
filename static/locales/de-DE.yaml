@@ -2030,6 +2030,8 @@ Channel:
   Different values: Unterschiedliche Werte
   Use global setting: Globale Einstellung verwenden
   Unlimited: Unbegrenzt
+  Fewer videos per day: Weniger Videos pro Tag
+  More videos per day: Mehr Videos pro Tag
   More videos hidden: '+{count} weiteres | +{count} weitere'
   Subscribe: Abonnieren
   Unsubscribe: Deabonnieren
@@ -2479,6 +2481,7 @@ Video:
       Connected: "Übertragung an {device}"
       Rewind: "10 Sekunden zurück"
       Forward: "10 Sekunden vor"
+      Position: Wiedergabeposition
       Subtitles Off: "Untertitel aus"
       Return: "Zur lokalen Wiedergabe zurückkehren"
       No Devices: "Keine Google-Cast-Geräte gefunden"

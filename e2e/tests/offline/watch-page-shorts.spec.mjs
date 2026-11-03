@@ -124,7 +124,7 @@ test.describe('Shorts transcript navigation', () => {
     await expect(channelRow.locator('.notificationBell')).toBeVisible()
     await channelRow.locator('.profileDropdownToggle').click()
     const dropdown = page.locator('.profileDropdown')
-    await expect(dropdown.getByRole('checkbox')).toHaveCount(4)
+    await expect(dropdown.getByRole('group', { name: 'Show in subscription feed' }).getByRole('checkbox')).toHaveCount(4)
     await dropdown.press('Escape')
     await expect(dropdown).toBeHidden()
 
@@ -134,7 +134,7 @@ test.describe('Shorts transcript navigation', () => {
     await fullscreenRow.locator('.profileDropdownToggle').click()
     const fullscreenDropdown = page.locator(':fullscreen .profileDropdown')
     await expect(fullscreenDropdown).toBeVisible()
-    const shortsFeedType = fullscreenDropdown.getByRole('checkbox', { name: 'Shorts', exact: true })
+    const shortsFeedType = fullscreenDropdown.getByRole('group', { name: 'Show in subscription feed' }).getByRole('checkbox', { name: 'Shorts', exact: true })
     await expect(shortsFeedType).toHaveAttribute('aria-checked', 'true')
     await shortsFeedType.click()
     await expect(shortsFeedType).toHaveAttribute('aria-checked', 'false')

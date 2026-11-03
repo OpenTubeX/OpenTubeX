@@ -1529,6 +1529,8 @@ Profile:
   Theme Color: Themakleur
   Go To Profile Manager: Naar profielbeheer
 Channel:
+  Fewer videos per day: "Minder video’s per dag"
+  More videos per day: "Meer video’s per dag"
   Verified: Geverifieerd
   Official Artist Channel: Officieel artiestenkanaal
   About:
@@ -1841,6 +1843,7 @@ Video:
       SubmitCategoryVote: Categoriestem versturen
       CategoryVoteSuccess: Categoriestem verstuurd.
     Google Cast:
+      Position: "Afspeelpositie"
       Invalid Authentication: "De ontvanger stuurde een ongeldig authenticatieantwoord."
       Authentication Declined: "De ontvanger weigerde authenticatie."
       Audio Only Receiver: "De ontvanger ondersteunt alleen het casten van audio."

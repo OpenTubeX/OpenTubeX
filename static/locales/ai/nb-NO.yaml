@@ -1492,6 +1492,8 @@ Profile:
   The selected image could not be loaded: Det valgte bildet kunne ikke lastes inn
   Theme Color: Temafarge
 Channel:
+  Fewer videos per day: "Færre videoer per dag"
+  More videos per day: "Flere videoer per dag"
   Verified: Bekreftet
   Official Artist Channel: Offisiell artistkanal
   Subscription settings: Abonnementsinnstillinger
@@ -1793,6 +1795,7 @@ Video:
       SubmitCategoryVote: Send kategoristemme
       CategoryVoteSuccess: Kategoristemme sendt.
     Google Cast:
+      Position: "Avspillingsposisjon"
       Invalid Authentication: "Mottakeren sendte et ugyldig autentiseringssvar."
       Authentication Declined: "Mottakeren avviste autentisering."
       Audio Only Receiver: "Mottakeren støtter bare casting av lyd."

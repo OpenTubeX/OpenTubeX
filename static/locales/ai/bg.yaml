@@ -1505,6 +1505,8 @@ Profile:
   Theme Color: Цвят на темата
   Go To Profile Manager: Към управлението на профили
 Channel:
+  Fewer videos per day: "По-малко видеоклипове на ден"
+  More videos per day: "Повече видеоклипове на ден"
   Verified: Потвърден
   Official Artist Channel: Официален канал на изпълнител
   About:
@@ -1810,6 +1812,7 @@ Video:
       SubmitCategoryVote: Изпращане на вот за категория
       CategoryVoteSuccess: Вотът за категория е изпратен.
     Google Cast:
+      Position: "Позиция на възпроизвеждане"
       Invalid Authentication: "Приемникът изпрати невалиден отговор за удостоверяване."
       Authentication Declined: "Приемникът отказа удостоверяване."
       Audio Only Receiver: "Приемникът поддържа само предаване на звук."

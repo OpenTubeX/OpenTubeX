@@ -1498,6 +1498,8 @@ Profile:
   The selected image could not be loaded: Gambar yang dipilih tidak dapat dimuat
   Theme Color: Warna Tema
 Channel:
+  Fewer videos per day: "Lebih sedikit video per hari"
+  More videos per day: "Lebih banyak video per hari"
   Verified: Terverifikasi
   Official Artist Channel: Channel Artis Resmi
   About:
@@ -1805,6 +1807,7 @@ Video:
       SubmitCategoryVote: Kirim suara kategori
       CategoryVoteSuccess: Suara kategori terkirim.
     Google Cast:
+      Position: "Posisi pemutaran"
       Invalid Authentication: "Penerima mengirim respons autentikasi yang tidak valid."
       Authentication Declined: "Penerima menolak autentikasi."
       Audio Only Receiver: "Penerima hanya mendukung casting audio."

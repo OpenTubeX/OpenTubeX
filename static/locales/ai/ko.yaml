@@ -1761,6 +1761,8 @@ Profile:
   Open Profile Dropdown: 프로필 드롭다운 열기
   Go To Profile Manager: 프로필 관리자로 이동
 Channel:
+  Fewer videos per day: "일일 동영상 수 줄이기"
+  More videos per day: "일일 동영상 수 늘리기"
   Verified: 인증됨
   Official Artist Channel: 공식 아티스트 채널
   Subscription settings: 구독 설정
@@ -2142,6 +2144,7 @@ Video:
       SubmitCategoryVote: 카테고리 투표 제출
       CategoryVoteSuccess: 카테고리 투표가 제출되었습니다.
     Google Cast:
+      Position: "재생 위치"
       Invalid Authentication: "수신기가 잘못된 인증 응답을 보냈습니다."
       Authentication Declined: "수신기가 인증을 거부했습니다."
       Audio Only Receiver: "수신기는 오디오 전송만 지원합니다."

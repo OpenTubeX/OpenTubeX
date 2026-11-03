@@ -365,7 +365,12 @@
                     @click="runMobileContextAction(action)"
                   >
                     <FtIcon
+                      v-if="action.icon"
                       :icon="action.icon"
+                      aria-hidden="true"
+                    />
+                    <span
+                      v-else
                       aria-hidden="true"
                     />
                     <span>{{ action.label }}</span>
@@ -592,6 +597,7 @@
 
 <script setup>
 import { useBottomSheetDismiss } from './composables/useBottomSheetDismiss'
+import { OPEN_MOBILE_CONTEXT_MENU_EVENT } from './helpers/buttonMenu'
 import { installIosContextMenu } from './helpers/iosContextMenu'
 import '@fontsource-variable/geist'
 import '@fontsource-variable/google-sans'
@@ -1173,13 +1179,18 @@ const mobileContextMenuRows = computed(() => {
   return collapseSeparators(rows)
 })
 const mobileContextMenuTitle = computed(() => mobileContextMenuStack.value.at(-1).label)
-provide('openMobileContextActions', async (menu) => {
+async function openMobileContextActions(menu) {
   mobileContextMenuPath.value = []
   mobileContextLink.value = null
   mobileContextActions.value = menu
   await nextTick()
   mobileLinkActionsRef.value?.focus({ preventScroll: true })
-})
+}
+provide('openMobileContextActions', openMobileContextActions)
+/** @param {CustomEvent} event */
+function handleOpenMobileContextMenu(event) {
+  openMobileContextActions(event.detail)
+}
 const mobileLinkActionsPromptId = useId()
 const mobileLinkActionsRef = useTemplateRef('mobileLinkActionsRef')
 const {
@@ -1937,6 +1948,7 @@ onMounted(async () => {
 
   document.addEventListener('keydown', handleKeyboardShortcuts)
   window.addEventListener('opentubex:close-context-menu', closeOwnedMobileContextMenu)
+  window.addEventListener(OPEN_MOBILE_CONTEXT_MENU_EVENT, handleOpenMobileContextMenu)
   window.addEventListener(OPEN_COMMAND_PALETTE_EVENT, openCommandPalette)
   window.addEventListener(OPEN_TAB_ORGANIZER_EVENT, openTabOrganizer)
   if (isCapacitor) {
@@ -1991,6 +2003,7 @@ onBeforeUnmount(() => {
   store.dispatch('stopSyncServerAutoSync')
   document.removeEventListener('keydown', handleKeyboardShortcuts)
   window.removeEventListener('opentubex:close-context-menu', closeOwnedMobileContextMenu)
+  window.removeEventListener(OPEN_MOBILE_CONTEXT_MENU_EVENT, handleOpenMobileContextMenu)
   window.removeEventListener(OPEN_COMMAND_PALETTE_EVENT, openCommandPalette)
   window.removeEventListener(OPEN_TAB_ORGANIZER_EVENT, openTabOrganizer)
   window.removeEventListener('opentubex:android-pip', handleAndroidPictureInPictureChange)

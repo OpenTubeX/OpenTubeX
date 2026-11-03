@@ -222,7 +222,7 @@ const failureCheck = setInterval(async () => {
   } finally { busy.value = false }
 }, 1000)
 
-defineExpose({ options, castId, menuTitle, refreshDevices, handleChoice })
+defineExpose({ options, castId, deviceName, loading, busy, menuTitle, refreshDevices, handleChoice })
 
 onBeforeUnmount(() => {
   disposed = true
