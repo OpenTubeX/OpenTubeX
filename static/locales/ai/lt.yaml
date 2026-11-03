@@ -1827,8 +1827,9 @@ Channel:
     View Full Post: Rodyti visą įrašą
     Reveal Answers: Rodyti atsakymus
     Hide Answers: Slėpti atsakymus
-    Video hidden by OpenTubeX: Vaizdo įrašą paslėpė OpenTubeX
     Original post unavailable: "Originalus įrašas nepasiekiamas"
+    Members-only video hidden by OpenTubeX: "OpenTubeX paslėpė tik nariams skirtą vaizdo įrašą"
+    Video hidden by OpenTubeX because of its title: "OpenTubeX paslėpė vaizdo įrašą, nes jo pavadinime yra paslėpto teksto"
   Videos:
     This channel has videos but none could be displayed, try fetching more: "Šiame kanale yra vaizdo įrašų, bet nė vieno nepavyko parodyti. Pabandykite įkelti daugiau"
 Video:

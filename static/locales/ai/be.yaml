@@ -1576,6 +1576,8 @@ Channel:
     This channel has videos but none could be displayed, try fetching more: "На гэтым канале ёсць відэа, але ніводнае не ўдалося паказаць. Паспрабуйце загрузіць больш"
   Posts:
     Original post unavailable: "Арыгінальны допіс недаступны"
+    Members-only video hidden by OpenTubeX: "OpenTubeX схаваў відэа толькі для ўдзельнікаў"
+    Video hidden by OpenTubeX because of its title: "OpenTubeX схаваў відэа, бо яго назва змяшчае схаваны тэкст"
 Video:
   Info panel source: 'Крыніца: {source}'
   External DRM Protected: "Відэа, абароненыя DRM, нельга прайграваць у OpenTubeX, бо для іх патрэбны прапрыетарныя кампаненты з закрытым зыходным кодам."

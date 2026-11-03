@@ -1538,6 +1538,8 @@ Channel:
     This channel has videos but none could be displayed, try fetching more: "Esta canle ten vídeos, pero non se puido mostrar ningún. Proba a cargar máis"
   Posts:
     Original post unavailable: "A publicación orixinal non está dispoñible"
+    Members-only video hidden by OpenTubeX: "Vídeo só para membros oculto por OpenTubeX"
+    Video hidden by OpenTubeX because of its title: "Vídeo oculto por OpenTubeX porque o seu título contén texto oculto"
 Video:
   Info panel source: 'Fonte: {source}'
   External DRM Protected: "Os vídeos protexidos con DRM non se poden reproducir en OpenTubeX, xa que requiren compoñentes propietarios e de código pechado."

@@ -1725,8 +1725,9 @@ Channel:
     View Full Post: Vis heile innlegget
     Reveal Answers: Vis svara
     Hide Answers: Gøym svar
-    Video hidden by OpenTubeX: Videoen er gøymd av OpenTubeX
     Original post unavailable: "Det opphavlege innlegget er ikkje tilgjengeleg"
+    Members-only video hidden by OpenTubeX: "Video berre for medlemmer er gøymd av OpenTubeX"
+    Video hidden by OpenTubeX because of its title: "Videoen er gøymd av OpenTubeX fordi tittelen inneheld gøymd tekst"
   Videos:
     This channel has videos but none could be displayed, try fetching more: "Denne kanalen har videoar, men ingen kunne visast. Prøv å hente fleire"
 Video:

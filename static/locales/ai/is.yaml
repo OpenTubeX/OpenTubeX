@@ -1510,6 +1510,8 @@ Channel:
   All Results: Allt
   Posts:
     Original post unavailable: "Upprunalega færslan er ekki tiltæk"
+    Members-only video hidden by OpenTubeX: "OpenTubeX faldi myndskeið eingöngu fyrir meðlimi"
+    Video hidden by OpenTubeX because of its title: "OpenTubeX faldi myndskeiðið því titill þess inniheldur falinn texta"
 Video:
   Info panel source: 'Heimild: {source}'
   External DRM Protected: "Ekki er hægt að spila DRM-varin myndskeið í OpenTubeX, þar sem þau krefjast notkunar lokaðs séreignarhugbúnaðar."

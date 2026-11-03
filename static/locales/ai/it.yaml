@@ -1503,6 +1503,8 @@ Channel:
   All Results: Tutti
   Posts:
     Original post unavailable: "Post originale non disponibile"
+    Members-only video hidden by OpenTubeX: "Video riservato ai membri nascosto da OpenTubeX"
+    Video hidden by OpenTubeX because of its title: "Video nascosto da OpenTubeX perché il titolo contiene testo nascosto"
 Video:
   Info panel source: 'Fonte: {source}'
   External DRM Protected: "I video protetti da DRM non possono essere riprodotti in OpenTubeX, poiché richiedono componenti proprietari e closed source."

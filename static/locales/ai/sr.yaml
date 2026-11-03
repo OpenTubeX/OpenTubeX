@@ -1561,6 +1561,8 @@ Channel:
     This channel has videos but none could be displayed, try fetching more: "Овај канал има видео-снимке, али ниједан није могао да се прикаже. Покушајте да учитате још"
   Posts:
     Original post unavailable: "Оригинална објава није доступна"
+    Members-only video hidden by OpenTubeX: "OpenTubeX је сакрио видео само за чланове"
+    Video hidden by OpenTubeX because of its title: "OpenTubeX је сакрио видео јер његов наслов садржи скривени текст"
 Video:
   Info panel source: 'Извор: {source}'
   External DRM Protected: "Видео снимци заштићени DRM не могу се репродуковати у OpenTubeX-у, јер захтевају власничке компоненте затвореног кода."

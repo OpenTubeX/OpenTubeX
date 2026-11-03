@@ -94,7 +94,7 @@
       v-else-if="postType === 'video'"
     >
       <FtListVideo
-        v-if="!hideVideo"
+        v-if="hiddenVideoReason == null"
         :data="data.postContent.content"
         appearance="communityPost"
         force-list-type="grid"
@@ -103,7 +103,7 @@
         v-else
         class="hiddenVideo"
       >
-        {{ '[' + $t('Channel.Posts.Video hidden by OpenTubeX') + ']' }}
+        {{ '[' + hiddenVideoReason + ']' }}
       </p>
     </div>
     <div
@@ -263,10 +263,16 @@ const forbiddenTitles = computed(() => {
   return store.getters.getActiveForbiddenTitles
 })
 
-const hideVideo = computed(() => {
+/** @type {import('vue').ComputedRef<string | null>} */
+const hiddenVideoReason = computed(() => {
   const video = props.data.postContent.content
-  return forbiddenTitles.value.some((text) => video.title?.toLowerCase().includes(text)) ||
-    isVideoHiddenByPreferences(video, { membersOnlyChannelIds: store.getters.getMembersOnlyChannelIdSet })
+  if (isVideoHiddenByPreferences(video, { membersOnlyChannelIds: store.getters.getMembersOnlyChannelIdSet })) {
+    return t('Channel.Posts.Members-only video hidden by OpenTubeX')
+  }
+  if (forbiddenTitles.value.some((text) => video.title?.toLowerCase().includes(text))) {
+    return t('Channel.Posts.Video hidden by OpenTubeX because of its title')
+  }
+  return null
 })
 
 /** @type {import('vue').ComputedRef<boolean>} */

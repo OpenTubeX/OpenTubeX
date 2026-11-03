@@ -1880,8 +1880,9 @@ Channel:
     View Full Post: Prikaži celotno objavo
     Reveal Answers: Prikaži odgovore
     Hide Answers: Skrij odgovore
-    Video hidden by OpenTubeX: OpenTubeX je skril videoposnetek
     Original post unavailable: "Izvirna objava ni na voljo"
+    Members-only video hidden by OpenTubeX: "OpenTubeX je skril videoposnetek samo za člane"
+    Video hidden by OpenTubeX because of its title: "OpenTubeX je skril videoposnetek, ker njegov naslov vsebuje skrito besedilo"
   Videos:
     This channel has videos but none could be displayed, try fetching more: "Ta kanal ima videoposnetke, vendar nobenega ni bilo mogoče prikazati. Poskusite naložiti več"
 Video:

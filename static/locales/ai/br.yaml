@@ -1503,6 +1503,8 @@ Channel:
   All Results: "Pep tra"
   Posts:
     Original post unavailable: "N'eo ket hegerz an embann orin"
+    Members-only video hidden by OpenTubeX: "Video evit an izili hepken kuzhet gant OpenTubeX"
+    Video hidden by OpenTubeX because of its title: "Video kuzhet gant OpenTubeX peogwir e titl a endalc'h testenn guzhet"
 Video:
   Info panel source: 'Mammenn: {source}'
   External DRM Protected: "Ne c'heller ket lenn ar videoioù gwarezet gant DRM war OpenTubeX, peogwir e vije ezhomm implijout elfennoù perc'hennet gant gwirioù ha n'int ket digor."

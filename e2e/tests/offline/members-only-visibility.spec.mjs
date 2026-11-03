@@ -108,18 +108,22 @@ test.describe('community post attachments', () => {
     }
   })
 
-  test('hides an attached members-only video unless the subscription shows it', async ({ page }) => {
+  test('hides an attached video and names the reason', async ({ page }) => {
     await goTo(page, 'subscriptions')
     await page.locator('[data-subscription-feed-tab="posts"]').click()
 
     const post = page.locator('.ft-list-post').filter({ hasText: 'Watch the members video' })
-    await expect(post.locator('.hiddenVideo')).toBeVisible()
+    await expect(post.locator('.hiddenVideo')).toHaveText('[Members-only video hidden by OpenTubeX]')
     await expect(post.getByText('Attached members video')).toHaveCount(0)
 
     await page.evaluate(channelId => window.$store.dispatch('updateChannelSettings', {
       channelId, settings: { showMembersOnly: true }
     }), MEMBER_CHANNEL)
     await expect(post.getByText('Attached members video')).toBeVisible()
+
+    await page.evaluate(() => window.$store.dispatch('updateForbiddenTitles', JSON.stringify(['attached'])))
+    await expect(post.locator('.hiddenVideo')).toHaveText('[Video hidden by OpenTubeX because its title contains hidden text]')
+    await expect(post.getByText('Attached members video')).toHaveCount(0)
   })
 })
 

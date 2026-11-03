@@ -1504,6 +1504,8 @@ Channel:
   All Results: Tous
   Posts:
     Original post unavailable: "Publication d’origine indisponible"
+    Members-only video hidden by OpenTubeX: "Vidéo réservée aux membres masquée par OpenTubeX"
+    Video hidden by OpenTubeX because of its title: "Vidéo masquée par OpenTubeX, car son titre contient du texte masqué"
 Video:
   Info panel source: 'Source : {source}'
   External DRM Protected: "Les vidéos protégées par DRM ne peuvent pas être lues dans OpenTubeX, car elles nécessitent des composants propriétaires et à source fermée."

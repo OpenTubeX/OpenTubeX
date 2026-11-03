@@ -1513,6 +1513,8 @@ Channel:
     This channel has videos but none could be displayed, try fetching more: "Kanal ini memiliki video, tetapi tidak ada yang dapat ditampilkan. Coba muat lebih banyak"
   Posts:
     Original post unavailable: "Postingan asli tidak tersedia"
+    Members-only video hidden by OpenTubeX: "Video khusus anggota disembunyikan oleh OpenTubeX"
+    Video hidden by OpenTubeX because of its title: "Video disembunyikan oleh OpenTubeX karena judulnya berisi teks yang disembunyikan"
 Video:
   Info panel source: 'Sumber: {source}'
   External DRM Protected: "Video yang dilindungi DRM tidak dapat diputar di OpenTubeX, karena memerlukan komponen sumber tertutup dan berpemilik."

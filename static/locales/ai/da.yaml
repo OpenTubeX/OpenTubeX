@@ -1565,6 +1565,8 @@ Channel:
     This channel has videos but none could be displayed, try fetching more: "Denne kanal har videoer, men ingen kunne vises. Prøv at hente flere"
   Posts:
     Original post unavailable: "Det oprindelige opslag er ikke tilgængeligt"
+    Members-only video hidden by OpenTubeX: "Video kun for medlemmer skjult af OpenTubeX"
+    Video hidden by OpenTubeX because of its title: "Video skjult af OpenTubeX, fordi titlen indeholder skjult tekst"
 Video:
   Info panel source: 'Kilde: {source}'
   External DRM Protected: "DRM-beskyttede videoer kan ikke afspilles i OpenTubeX, da de kræver proprietære komponenter med lukket kilde."

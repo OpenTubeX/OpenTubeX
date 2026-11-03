@@ -1761,8 +1761,9 @@ Channel:
     View Full Post: Ver toda la publicación
     Reveal Answers: Revelar las respuestas
     Hide Answers: Ocultar las respuestas
-    Video hidden by OpenTubeX: Video oculto por OpenTubeX
     Original post unavailable: "La publicación original no está disponible"
+    Members-only video hidden by OpenTubeX: "Video solo para miembros oculto por OpenTubeX"
+    Video hidden by OpenTubeX because of its title: "Video oculto por OpenTubeX porque su título contiene texto oculto"
   Videos:
     This channel has videos but none could be displayed, try fetching more: "Este canal tiene videos, pero no se pudo mostrar ninguno. Intenta cargar más"
 Video:

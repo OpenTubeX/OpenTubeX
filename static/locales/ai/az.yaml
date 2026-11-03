@@ -1506,6 +1506,8 @@ Channel:
   All Results: Hamısı
   Posts:
     Original post unavailable: "Orijinal paylaşım əlçatan deyil"
+    Members-only video hidden by OpenTubeX: "Yalnız üzvlər üçün video OpenTubeX tərəfindən gizlədildi"
+    Video hidden by OpenTubeX because of its title: "Başlığında gizlədilmiş mətn olduğu üçün video OpenTubeX tərəfindən gizlədildi"
 Video:
   Info panel source: 'Mənbə: {source}'
   External DRM Protected: "DRM ilə qorunan videolar xüsusi, qapalı mənbəli komponentlər tələb etdiyindən OpenTubeX vasitəsilə oynadıla bilmir."
