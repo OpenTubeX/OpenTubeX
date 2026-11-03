@@ -105,7 +105,10 @@
   white-space: nowrap;
 }
 
-.watchPlaylistItem.watched .sponsorBlockVideoLabel {
+// Clear the Watched badge and the external player button, which the label
+// would otherwise cover and take clicks from.
+.watchPlaylistItem.watched .sponsorBlockVideoLabel,
+.watchPlaylistItem .videoThumbnail:has(.externalPlayerIcon) .sponsorBlockVideoLabel {
   margin-block: 4px 28px;
 }
 

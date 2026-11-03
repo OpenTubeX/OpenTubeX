@@ -1,4 +1,4 @@
-import { test, expect, goTo, setPlayerFullscreen, setWindowSize } from '../../helpers/app.mjs'
+import { test, expect, goTo, sel, setPlayerFullscreen, setWindowSize } from '../../helpers/app.mjs'
 import { clickFullscreenAction, waitForPlayback } from '../../helpers/player.mjs'
 import { mockPlayableWatchPage, watchViewHandle } from '../../helpers/watch.mjs'
 
@@ -103,7 +103,7 @@ test.describe('SponsorBlock video labels', () => {
   test.use({
     seed: {
       ...seed,
-      settings: { ...seed.settings, useSponsorBlock: true },
+      settings: { ...seed.settings, useSponsorBlock: true, externalPlayer: 'mpv' },
       // Music videos add a note before the duration.
       playlists: [{ ...seed.playlists[0], videos: videos.map((video, index) => index < 2 ? { ...video, isMusic: true } : video) }]
     }
@@ -120,8 +120,11 @@ test.describe('SponsorBlock video labels', () => {
       const icon = thumbnail.querySelector('.sponsorBlockVideoLabel .ft-icon').getBoundingClientRect()
       const text = thumbnail.querySelector('.sponsorBlockVideoLabel > span:last-child').getBoundingClientRect()
       const duration = thumbnail.querySelector('.videoDuration').getBoundingClientRect()
+      // The external player button shows on hover and must stay clickable.
+      const externalPlayer = thumbnail.querySelector('.externalPlayerIcon').getBoundingClientRect()
       const bounds = thumbnail.getBoundingClientRect()
       return label.right <= duration.left + 0.5 && label.left >= bounds.left && label.bottom <= bounds.bottom + 0.5 &&
+        label.bottom <= externalPlayer.top + 0.5 &&
         icon.left >= label.left - 0.5 && icon.right <= label.right + 0.5 && text.width <= 1
     }))
     // The second video is watched, which stacks the label above the Watched badge.
@@ -137,7 +140,17 @@ test.describe('SponsorBlock video labels', () => {
     await expect.poll(() => labelsClear(thumbnails)).toBe(true)
     await attachScreenshot('playlist-sponsorblock-icon-labels')
 
-    // The icon catches the pointer for its tooltip but still opens the video.
+    // The icon catches the pointer for its tooltip but still opens the video,
+    // in a background tab when middle-clicked.
+    await thumbnails.nth(1).locator('.sponsorBlockVideoLabel').click({ button: 'middle' })
+    await expect(page.locator(sel.tabs)).toHaveCount(2)
+    await expect(page.locator(sel.tabs).first()).toHaveClass(/active/)
+    await expect.poll(() => page.evaluate(async () => {
+      const state = await window.ftElectron.tabs.getState()
+      return state.tabs.find(tab => tab.id !== state.activeTabId)?.route.path
+    })).toBe(`/watch/${videos[1].videoId}`)
+    await page.locator(sel.tabs).nth(1).getByRole('button', { name: 'Close Tab' }).click()
+    await expect(page.locator(sel.tabs)).toHaveCount(1)
     await thumbnails.nth(1).locator('.sponsorBlockVideoLabel').click()
     await expect(panel.locator('.playlistIndex label')).toHaveText('2 / 12')
 

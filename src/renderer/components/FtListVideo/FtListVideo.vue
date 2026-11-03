@@ -140,6 +140,7 @@
           {{ displayDurationLabel === '0:00' ? '' : displayDurationLabel }}
         </div>
         <!-- Only forwards pointer clicks to the thumbnail link, which keyboards skip too. -->
+        <!-- Unlike on the link, a middle mousedown here would start autoscroll and suppress auxclick. -->
         <!-- eslint-disable-next-line vuejs-accessibility/click-events-have-key-events -->
         <div
           v-if="useSponsorBlock && sponsorBlockFullVideoCategory"
@@ -148,6 +149,8 @@
             segmentCategory: sponsorBlockFullVideoLabel
           })"
           @click="forwardSponsorBlockLabelClick"
+          @mousedown.middle.prevent
+          @auxclick.middle="forwardSponsorBlockLabelClick"
         >
           <FtIcon :icon="sponsorBlockFullVideoIcon" />
           <span>{{ sponsorBlockFullVideoLabel }}</span>
@@ -1627,11 +1630,11 @@ const thumbnailLink = useTemplateRef('thumbnailLink')
 
 /**
  * Narrow cards show only the SponsorBlock icon, which catches the pointer for its
- * tooltip, so clicks on it still open the video.
+ * tooltip, so clicks and middle-clicks on it still open the video.
  * @param {MouseEvent} event
  */
 function forwardSponsorBlockLabelClick(event) {
-  thumbnailLink.value?.$el.dispatchEvent(new MouseEvent('click', event))
+  thumbnailLink.value?.$el.dispatchEvent(new MouseEvent(event.type, event))
 }
 
 function openVideoOptionsMenu() {
