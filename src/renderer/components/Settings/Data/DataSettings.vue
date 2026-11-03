@@ -2034,7 +2034,9 @@ async function importPlaylistDatabase(data) {
     })
   })
 
-  await Promise.all(Array.from(updates.values(), playlist => store.dispatch('updatePlaylist', playlist)))
+  const saved = await Promise.all(Array.from(updates.values(), playlist => store.dispatch('updatePlaylist', playlist)))
+  // A playlist deleted in another window meanwhile isn't recreated, so the import failed
+  if (saved.some(result => result !== true)) throw new Error('Could not import playlists')
 
   if (importedCount === 0) {
     return
