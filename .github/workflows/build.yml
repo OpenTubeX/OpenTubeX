@@ -713,6 +713,12 @@ jobs:
           - repository: sidestore
             pattern: '-ios-unsigned[.]ipa$'
             count: 1
+          - repository: homebrew-tap
+            pattern: '-mac-(x64|arm64)[.]zip$'
+            count: 2
+          - repository: scoop-bucket
+            pattern: '-win-(x64|arm64)-portable[.]zip$'
+            count: 2
     steps:
     - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
       with:

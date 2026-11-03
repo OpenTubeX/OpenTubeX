@@ -755,6 +755,12 @@ export async function goTo(page, route) {
   }
   await visibleLink().click()
   await expect(page).toHaveURL(new RegExp(`#/${route}`))
+  if (route === 'home') {
+    // Home mounts its sections over several frames, then inserts its empty
+    // state above them. A click in between can press a control and release
+    // over the empty state.
+    await expect(page.locator('.homePage')).toHaveAttribute('aria-busy', 'false')
+  }
 }
 
 /**

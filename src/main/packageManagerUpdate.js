@@ -84,10 +84,24 @@ export async function getPackageManagerUpdate(appPath, {
   if (platform === 'darwin') {
     if (!appPath.startsWith('/Applications/OpenTubeX.app/')) return null
     for (const prefix of ['/opt/homebrew', '/usr/local']) {
-      if (await exists(`${prefix}/Caskroom/opentubex`)) {
-        return { packageManager: 'Homebrew', command: 'brew upgrade --cask opentubex' }
+      for (const cask of ['opentubex', 'opentubex@nightly']) {
+        if (await exists(`${prefix}/Caskroom/${cask}`)) {
+          return { packageManager: 'Homebrew', command: `brew upgrade --cask ${cask}` }
+        }
       }
     }
+    return null
+  }
+
+  if (platform === 'win32') {
+    // Scoop installs apps to <root>\apps\<name>\<version or current>.
+    const name = appPath.match(/[\\/]apps[\\/](opentubex(?:-nightly)?)[\\/][^\\/]+[\\/]resources[\\/]app\.asar$/i)?.[1]
+    if (!name) return null
+    try {
+      // Apps installed from a manifest file or URL have no bucket to update from.
+      const install = JSON.parse(await readTextFile(path.win32.join(appPath, '..', '..', 'install.json')))
+      if (install.bucket) return { packageManager: 'Scoop', command: `scoop update ${name}` }
+    } catch {}
     return null
   }
 

@@ -19,6 +19,7 @@ async function fixture (t, tag) {
     ...['x64', 'arm64'].flatMap(arch => [
       `opentubex-${version}-linux-${arch}-portable.zip`,
       `opentubex-${version}-mac-${arch}.zip`,
+      `opentubex-${version}-win-${arch}-portable.zip`,
       `opentubex-${version}-setup-${arch}.exe`,
     ]),
     ...['arm64-v8a', 'armeabi-v7a', 'x86', 'x86_64', 'universal'].map(arch => stable
@@ -109,6 +110,7 @@ const stableConsumers = {
   'sidestore-update': /-ios-unsigned\.ipa$/,
   'nix-update': /(_beta_(amd64|arm64)\.deb|-mac-(x64|arm64)\.zip)$/,
   'homebrew-update': /-mac-(x64|arm64)\.zip$/,
+  'scoop-update': /-win-(x64|arm64)-portable\.zip$/,
 }
 
 for (const [consumer, pattern] of Object.entries(stableConsumers)) {
@@ -149,7 +151,7 @@ test('nightly publishers wait independently so a missing IPA cannot suppress oth
   const job = workflow.jobs['notify-nightly-repositories']
   assert.equal(job.needs, 'publish-nightly')
   assert.equal(job.strategy['fail-fast'], false)
-  assert.deepEqual(job.strategy.matrix.include.map(slot => slot.repository), ['apt', 'rpm', 'arch', 'aur', 'fdroid', 'flatpak', 'snap', 'sidestore'])
+  assert.deepEqual(job.strategy.matrix.include.map(slot => slot.repository), ['apt', 'rpm', 'arch', 'aur', 'fdroid', 'flatpak', 'snap', 'sidestore', 'homebrew-tap', 'scoop-bucket'])
   assert.match(job.steps.at(-1).env.GH_TOKEN, /secrets\.PUSH_TOKEN/)
   for (const slot of job.strategy.matrix.include) {
     const setup = await fixture(t, 'v0.35.2-nightly-1758')

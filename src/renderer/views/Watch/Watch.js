@@ -2204,7 +2204,8 @@ export default defineComponent({
       }
     },
     closeTranscript() {
-      this.mobilePanel = null
+      // Leave another open phone panel, such as the comments, in place.
+      if (this.mobilePanel === 'transcript') this.mobilePanel = null
       if (this.showTranscript) {
         this.sidebarPanelLeaving = true
       }
