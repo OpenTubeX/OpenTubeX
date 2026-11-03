@@ -114,6 +114,8 @@ for (const theme of ['openTubeXLight', 'openTubeXDark']) {
 
 test.describe('subscriptions feed from cache', () => {
   test('hides cached members-only videos after enabling and disabling them with Select All during channel-detail updates', async ({ app, page }) => {
+    // Launches the app twice, which takes longer than the default under load.
+    test.setTimeout(120_000)
     await goTo(page, 'subscriptions')
     await page.locator('[data-subscription-feed-tab="all"]').click()
     const membersVideo = page.locator('.ft-list-video').filter({ hasText: 'Video A newer' })
@@ -175,6 +177,8 @@ test.describe('subscriptions feed from cache', () => {
   })
 
   test('preserves a members-only disable when another window refreshes channel details', async ({ app, page }) => {
+    // Launches the app twice, which takes longer than the default under load.
+    test.setTimeout(120_000)
     await goTo(page, 'subscriptions')
     await page.locator('[data-subscription-feed-tab="all"]').click()
     const other = await openNewWindowFromTabBar(app, page)
