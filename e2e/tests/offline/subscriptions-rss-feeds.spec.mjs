@@ -569,6 +569,16 @@ test.describe('with followed feeds', () => {
     await expect(loading).toHaveCount(0)
     await expect.poll(() => aborted).toBe(2)
 
+    // Holding the New tab on phones cancels it too
+    await header.getByRole('button', { name: /^Refresh / }).click()
+    await expect(loading).toBeVisible()
+    await page.locator('[data-subscription-feed-tab="all"]').evaluate(element => element.dispatchEvent(new PointerEvent('contextmenu', {
+      bubbles: true, cancelable: true, pointerType: 'touch'
+    })))
+    await page.locator('.mobileLinkActions').getByRole('menuitem', { name: 'Cancel Refresh' }).click()
+    await expect(loading).toHaveCount(0)
+    await expect.poll(() => aborted).toBe(3)
+
     await page.locator('[data-rss-feeds-tab]').click()
     expect(await titles.allTextContents()).toEqual(['Newest VOD', 'Older VOD'])
     await expect(panel.getByText('1 feed could not be refreshed.')).toBeVisible()

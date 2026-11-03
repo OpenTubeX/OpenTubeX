@@ -525,13 +525,20 @@ function handleFeedContextMenu(event) {
     all: t('Context Menu.Reload All Feeds'),
     feeds: t('Context Menu.Reload RSS Feeds')
   }
-  // RSS feeds refresh separately
-  const cancels = feedTab === 'feeds' ? rssFeedsRefreshing.value : subscriptionFeedRefreshInProgress.value
+  // RSS feeds refresh separately, and the combined New feed refreshes them too
+  const newFeedHasRss = feedTab === 'all' && newFeedView.value === 'combined' && enableRssFeeds.value &&
+    followedRssFeeds.value.length > 0
+  const cancelsRss = (feedTab === 'feeds' || newFeedHasRss) && rssFeedsRefreshing.value
+  const cancelsSubscriptions = feedTab !== 'feeds' && subscriptionFeedRefreshInProgress.value
+  const cancels = cancelsRss || cancelsSubscriptions
   const actions = [{
     label: cancels ? t('Context Menu.Cancel Refresh') : reloadLabels[feedTab],
     icon: cancels ? ['fas', 'xmark'] : ['fas', 'sync'],
     run: cancels
-      ? (feedTab === 'feeds' ? cancelRssFeedsRefresh : requestSubscriptionRefreshCancellation)
+      ? () => {
+          if (cancelsRss) cancelRssFeedsRefresh()
+          if (cancelsSubscriptions) requestSubscriptionRefreshCancellation()
+        }
       : () => handleFeedReloadRequest({ tabId, feedTab })
   }]
   if (tab.dataset.hasNewContent === 'true' && (tab.dataset.newFeedTab || feedTab === 'feeds')) {
