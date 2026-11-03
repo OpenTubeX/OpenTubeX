@@ -24,6 +24,10 @@ function isHighlighted(tile) {
  * @param {import('@playwright/test').Locator} tile
  */
 async function openOverflowMenuWith(player, tile) {
+  // The hover below restarts Shaka's idle timer, which hides the controls a few
+  // seconds after the menu closes while playing, and nothing shows them again
+  // for the next call. Paused, Shaka keeps them shown.
+  await player.locator('video').evaluate(video => video.pause())
   await player.locator('.shaka-controls-container').evaluate(element => element.setAttribute('shown', 'true'))
   await openPlayerOptions(player)
   await expect(tile).toBeVisible()
