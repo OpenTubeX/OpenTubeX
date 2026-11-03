@@ -444,6 +444,92 @@ test.describe('main color text contrast', () => {
   })
 })
 
+/**
+ * Apply every main or secondary color class and measure its text on the hover
+ * and pressed state colors, plus `elements` in their current state.
+ */
+async function measureStateColors(page, prefix, elements = {}) {
+  const [text, fill] = prefix === 'main'
+    ? ['--text-with-main-color', '--primary-color']
+    : ['--text-with-accent-color', '--accent-color']
+  return page.evaluate(({ names, prefix, text, fill, elements }) => {
+    const rgb = color => color.match(/[\d.]+/g).slice(0, 3).map(Number)
+    const probes = Object.fromEntries(['hover', 'active'].map(state => {
+      const probe = document.createElement('span')
+      probe.style.color = `var(${text})`
+      probe.style.backgroundColor = `var(${fill}-${state})`
+      document.body.append(probe)
+      return [state === 'active' ? 'pressed' : state, probe]
+    }))
+    const measure = element => {
+      const style = getComputedStyle(element)
+      return { foreground: rgb(style.color), background: rgb(style.backgroundColor) }
+    }
+    const pattern = new RegExp(`^${prefix}[A-Z]`)
+    const results = names.map(name => {
+      const { classList } = document.body
+      classList.remove(...[...classList].filter(className => pattern.test(className)))
+      classList.add(`${prefix}${name}`)
+      // Start the color transitions, then read their settled colors.
+      for (const element of Object.values(elements)) measure(element)
+      for (const animation of document.getAnimations()) animation.finish()
+      return {
+        name,
+        ...Object.fromEntries(Object.entries({ ...probes, ...elements }).map(([label, element]) => [label, measure(element)]))
+      }
+    })
+    for (const probe of Object.values(probes)) probe.remove()
+    return results
+  }, { names: THEME_COLORS, prefix, text, fill, elements })
+}
+
+test.describe('state color text contrast', () => {
+  test.use({ seed: { settings: { currentLocale: 'en-US' } } })
+
+  test('text on every main and secondary color stays readable on hover and pressed fills', async ({ page }) => {
+    await goToSettingsSection(page, 'privacy')
+    // Enabled header toggles fill with the main hover color on hover.
+    const toggle = page.getByRole('button', { name: 'Highlight settings changed from defaults', exact: true })
+    if (await toggle.getAttribute('aria-pressed') !== 'true') await toggle.click()
+    await expect(toggle).toHaveAttribute('aria-pressed', 'true')
+    await page.mouse.move(0, 0)
+    await page.evaluate(() => document.activeElement?.blur())
+    const cdp = await page.context().newCDPSession(page)
+    await cdp.send('DOM.enable')
+    await cdp.send('CSS.enable')
+    const { root } = await cdp.send('DOM.getDocument', { depth: 0 })
+    const { nodeId } = await cdp.send('DOM.querySelector', { nodeId: root.nodeId, selector: '.settingsHeaderButton.active[aria-pressed="true"]' })
+    expect(nodeId).toBeTruthy()
+    await cdp.send('CSS.forcePseudoState', { nodeId, forcedPseudoClasses: ['hover'] })
+    const hoveredToggle = await toggle.elementHandle()
+
+    expect(THEME_COLORS.length).toBeGreaterThan(90)
+    for (const baseTheme of ['light', 'dark']) {
+      await page.evaluate(theme => window.$store.dispatch('updateBaseTheme', theme), baseTheme)
+      await expect(page.locator('body')).toHaveClass(new RegExp(`\\b${baseTheme}\\b`))
+      // Swap the classes the app applies for the color settings directly;
+      // saving the settings for every color exceeds the test timeout.
+      const results = {
+        main: await measureStateColors(page, 'main', { 'hovered selected toggle': hoveredToggle }),
+        secondary: await measureStateColors(page, 'sec'),
+      }
+      for (const [kind, colors] of Object.entries(results)) {
+        // Each class applies its own state colors.
+        expect(new Set(colors.map(({ pressed }) => `${pressed.background}`)).size).toBeGreaterThan(80)
+        for (const { name, ...states } of colors) {
+          for (const [label, { foreground, background }] of Object.entries(states)) {
+            expect.soft(contrastRatio(foreground, background), `${baseTheme} ${kind} ${name} ${label} ${JSON.stringify({ foreground, background })}`)
+              .toBeGreaterThanOrEqual(4.5)
+          }
+        }
+      }
+    }
+    // The forced hover fills the toggle with the hover color, not its rest color.
+    const { hover, 'hovered selected toggle': hovered } = (await measureStateColors(page, 'main', { 'hovered selected toggle': hoveredToggle }))[0]
+    expect(hovered.background).toEqual(hover.background)
+  })
+})
+
 test.describe('secondary color text contrast', () => {
   test.use({ seed: { settings: { currentLocale: 'en-US', useProxy: true } } })
 

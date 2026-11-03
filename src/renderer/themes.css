@@ -831,14 +831,14 @@ it can be safely elided. This looks quite pleasant on this theme. */
 
 .mainRed {
   --primary-color: #f44336;
-  --primary-color-hover: #e53935;
-  --primary-color-active: #c62828;
+  --primary-color-hover: #ef5350;
+  --primary-color-active: #e57373;
 }
 
 .mainPink {
   --primary-color: #e91e63;
-  --primary-color-hover: #d81b60;
-  --primary-color-active: #ad1457;
+  --primary-color-hover: #ec407a;
+  --primary-color-active: #f06292;
 }
 
 .mainPurple {
@@ -862,13 +862,13 @@ it can be safely elided. This looks quite pleasant on this theme. */
 .mainBlue {
   --primary-color: #2196f3;
   --primary-color-hover: #1e88e5;
-  --primary-color-active: #1565c0;
+  --primary-color-active: #1976d2;
 }
 
 .mainLightBlue {
   --primary-color: #03a9f4;
   --primary-color-hover: #039be5;
-  --primary-color-active: #0277bd;
+  --primary-color-active: #0288d1;
 }
 
 .mainCyan {
@@ -879,14 +879,14 @@ it can be safely elided. This looks quite pleasant on this theme. */
 
 .mainTeal {
   --primary-color: #009688;
-  --primary-color-hover: #00897b;
-  --primary-color-active: #00695c;
+  --primary-color-hover: #26a69a;
+  --primary-color-active: #4db6ac;
 }
 
 .mainGreen {
   --primary-color: #4caf50;
   --primary-color-hover: #43a047;
-  --primary-color-active: #2e7d32;
+  --primary-color-active: #388e3c;
 }
 
 .mainLightGreen {
@@ -1190,7 +1190,7 @@ it can be safely elided. This looks quite pleasant on this theme. */
 .mainDraculaRed {
   --primary-color: #f55;
   --primary-color-hover: #f66;
-  --primary-color-active: #e64d4d;
+  --primary-color-active: #f77;
 }
 
 .mainDraculaYellow {
@@ -1297,7 +1297,7 @@ it can be safely elided. This looks quite pleasant on this theme. */
 .mainGruvboxLightRed {
   --primary-color: #9d0006;
   --primary-color-hover: #bd2026;
-  --primary-color-active: #dd4046;
+  --primary-color-active: #cc2e39;
 }
 
 .mainGruvboxLightBlue {
@@ -1308,14 +1308,14 @@ it can be safely elided. This looks quite pleasant on this theme. */
 
 .mainGruvboxLightPurple {
   --primary-color: #8f3f71;
-  --primary-color-hover: #af5f91;
-  --primary-color-active: #cf7fb1;
+  --primary-color-hover: #7f3063;
+  --primary-color-active: #6f2255;
 }
 
 .mainGruvboxLightOrange {
   --primary-color: #af3a03;
-  --primary-color-hover: #cf5a23;
-  --primary-color-active: #ef7a43;
+  --primary-color-hover: #993100;
+  --primary-color-active: #822901;
 }
 
 .mainGruvboxLightOrange,
@@ -1382,7 +1382,7 @@ it can be safely elided. This looks quite pleasant on this theme. */
 .mainCatppuccinFrappeRed {
   --primary-color: #e78284;
   --primary-color-hover: #e99a9c;
-  --primary-color-active: #d46b6d;
+  --primary-color-active: #da7172;
 }
 
 .mainCatppuccinFrappeMaroon {
@@ -1430,7 +1430,7 @@ it can be safely elided. This looks quite pleasant on this theme. */
 .mainCatppuccinFrappeBlue {
   --primary-color: #8caaee;
   --primary-color-hover: #9eb7f0;
-  --primary-color-active: #6c8dbf;
+  --primary-color-active: #7092c4;
 }
 
 .mainCatppuccinFrappeLavender {
@@ -1462,13 +1462,13 @@ it can be safely elided. This looks quite pleasant on this theme. */
 .mainEverforestDarkRed {
   --primary-color: #e67e80;
   --primary-color-hover: #e89e9f;
-  --primary-color-active: #d65f61;
+  --primary-color-active: #dc6566;
 }
 
 .mainEverforestDarkOrange {
   --primary-color: #e69875;
   --primary-color-hover: #e8b095;
-  --primary-color-active: #b96e4f;
+  --primary-color-active: #c37757;
 }
 
 .mainEverforestDarkYellow {
@@ -1504,7 +1504,7 @@ it can be safely elided. This looks quite pleasant on this theme. */
 /* Black text stays just below 4.5:1 on this red. */
 .mainEverforestLightRed {
   --primary-color: #d83532;
-  --primary-color-hover: #e84e3f;
+  --primary-color-hover: #c8332f;
   --primary-color-active: #b83232;
   --text-with-main-color: #fff;
 }
@@ -1512,25 +1512,25 @@ it can be safely elided. This looks quite pleasant on this theme. */
 .mainEverforestLightOrange {
   --primary-color: #d55d0f;
   --primary-color-hover: #e66f10;
-  --primary-color-active: #b64f00;
+  --primary-color-active: #bf5813;
 }
 
 .mainEverforestLightYellow {
   --primary-color: #a96e00;
   --primary-color-hover: #c88b00;
-  --primary-color-active: #8b6e00;
+  --primary-color-active: #90730c;
 }
 
 .mainEverforestLightGreen {
   --primary-color: #6d8100;
   --primary-color-hover: #8da101;
-  --primary-color-active: #4f5f00;
+  --primary-color-active: #7d9100;
 }
 
 .mainEverforestLightAqua {
   --primary-color: #25976c;
   --primary-color-hover: #46b38a;
-  --primary-color-active: #0d7e51;
+  --primary-color-active: #1c8658;
 }
 
 .mainEverforestLightBlue {
@@ -1542,7 +1542,7 @@ it can be safely elided. This looks quite pleasant on this theme. */
 .mainEverforestLightPurple {
   --primary-color: #cf59aa;
   --primary-color-hover: #e77dc9;
-  --primary-color-active: #a63f9a;
+  --primary-color-active: #b64ea9;
 }
 
 .mainCatppuccinLatteMauve,
@@ -1552,13 +1552,13 @@ it can be safely elided. This looks quite pleasant on this theme. */
 
 .mainCatppuccinLatteMauve {
   --primary-color: #8839ef;
-  --primary-color-hover: #9f5cf1;
+  --primary-color-hover: #9450e5;
   --primary-color-active: #6c28ce;
 }
 
 .mainCatppuccinLatteRed {
   --primary-color: #d20f39;
-  --primary-color-hover: #dd385c;
+  --primary-color-hover: #d83358;
   --primary-color-active: #a60c2d;
 }
 
@@ -1590,16 +1590,16 @@ it can be safely elided. This looks quite pleasant on this theme. */
 
 .secRed {
   --accent-color-rgb: 244 67 54;
-  --accent-color-hover: #e53935;
-  --accent-color-active: #c62828;
+  --accent-color-hover: #ef5350;
+  --accent-color-active: #e57373;
   --accent-color-light: #ef9a9a;
   --accent-color-visited: #b71c1c;
 }
 
 .secPink {
   --accent-color-rgb: 233 30 99;
-  --accent-color-hover: #d81b60;
-  --accent-color-active: #ad1457;
+  --accent-color-hover: #ec407a;
+  --accent-color-active: #f06292;
   --accent-color-light: #f48fb1;
   --accent-color-visited: #880e4f;
 }
@@ -1631,7 +1631,7 @@ it can be safely elided. This looks quite pleasant on this theme. */
 .secBlue {
   --accent-color-rgb: 33 150 243;
   --accent-color-hover: #1e88e5;
-  --accent-color-active: #1565c0;
+  --accent-color-active: #1976d2;
   --accent-color-light: #90caf9;
   --accent-color-visited: #0d47a1;
 }
@@ -1639,7 +1639,7 @@ it can be safely elided. This looks quite pleasant on this theme. */
 .secLightBlue {
   --accent-color-rgb: 3 169 244;
   --accent-color-hover: #039be5;
-  --accent-color-active: #0277bd;
+  --accent-color-active: #0288d1;
   --accent-color-light: #81d4fa;
   --accent-color-visited: #01579b;
 }
@@ -1654,8 +1654,8 @@ it can be safely elided. This looks quite pleasant on this theme. */
 
 .secTeal {
   --accent-color-rgb: 0 150 136;
-  --accent-color-hover: #00897b;
-  --accent-color-active: #00695c;
+  --accent-color-hover: #26a69a;
+  --accent-color-active: #4db6ac;
   --accent-color-light: #80cbc4;
   --accent-color-visited: #004d40;
 }
@@ -1663,7 +1663,7 @@ it can be safely elided. This looks quite pleasant on this theme. */
 .secGreen {
   --accent-color-rgb: 76 175 80;
   --accent-color-hover: #43a047;
-  --accent-color-active: #2e7d32;
+  --accent-color-active: #388e3c;
   --accent-color-light: #a5d6a7;
   --accent-color-visited: #1b5e20;
 }
@@ -1923,7 +1923,7 @@ it can be safely elided. This looks quite pleasant on this theme. */
 .secDraculaRed {
   --accent-color-rgb: 255 85 85;
   --accent-color-hover: #f66;
-  --accent-color-active: #e64d4d;
+  --accent-color-active: #f77;
   --accent-color-light: #f77;
   --accent-color-visited: #c44;
 }
@@ -1962,8 +1962,8 @@ it can be safely elided. This looks quite pleasant on this theme. */
 .secSolarizedOrange {
   --accent-color-rgb: 169 47 20;
   --primary-color-hover: #c94d34;
-  --accent-color-hover: #db8140;
-  --accent-color-active: #b35936;
+  --accent-color-hover: #ae5808;
+  --accent-color-active: #b05633;
   --accent-color-light: #eb8156;
   --accent-color-visited: #c94d34;
 }
@@ -1971,7 +1971,7 @@ it can be safely elided. This looks quite pleasant on this theme. */
 .secSolarizedRed {
   --accent-color-rgb: 186 16 29;
   --primary-color-hover: #d8302d;
-  --accent-color-hover: #da504d;
+  --accent-color-hover: #c73e3e;
   --accent-color-active: #b8282b;
   --accent-color-light: #fa726f;
   --accent-color-visited: #d8302d;
@@ -1980,7 +1980,7 @@ it can be safely elided. This looks quite pleasant on this theme. */
 .secSolarizedMagenta {
   --accent-color-rgb: 176 20 96;
   --primary-color-hover: #d23480;
-  --accent-color-hover: #dc5280;
+  --accent-color-hover: #c43c6c;
   --accent-color-active: #b814a0;
   --accent-color-light: #fc5280;
   --accent-color-visited: #d23480;
@@ -1989,8 +1989,8 @@ it can be safely elided. This looks quite pleasant on this theme. */
 .secSolarizedViolet {
   --accent-color-rgb: 78 83 164;
   --primary-color-hover: #6e83c4;
-  --accent-color-hover: #8e77c4;
-  --accent-color-active: #5e63e4;
+  --accent-color-hover: #7a63ae;
+  --accent-color-active: #5c60e1;
   --accent-color-light: #ae95f4;
   --accent-color-visited: #6e83c4;
 }
@@ -2016,8 +2016,8 @@ it can be safely elided. This looks quite pleasant on this theme. */
 .secSolarizedGreen {
   --accent-color-rgb: 101 119 0;
   --primary-color-hover: #857720;
-  --accent-color-hover: #a59640;
-  --accent-color-active: #837720;
+  --accent-color-hover: #5a6b02;
+  --accent-color-active: #505f00;
   --accent-color-light: #c5d940;
   --accent-color-visited: #857720;
 }
@@ -2074,7 +2074,7 @@ it can be safely elided. This looks quite pleasant on this theme. */
 .secGruvboxLightRed {
   --text-with-accent-color: #fbf1c7;
   --accent-color-rgb: 204 36 29;
-  --accent-color-hover: #d23c2a;
+  --accent-color-hover: #bc2313;
   --accent-color-active: #a61f1f;
   --accent-color-light: #fb4934;
   --accent-color-visited: #a61f1f;
@@ -2324,7 +2324,7 @@ it can be safely elided. This looks quite pleasant on this theme. */
 .secEverforestLightRed {
   --accent-color-rgb: 248 85 82;
   --accent-color-hover: #f96360;
-  --accent-color-active: #e64441;
+  --accent-color-active: #fa716e;
   --accent-color-light: #f97673;
   --accent-color-visited: #e64441;
 }
@@ -2348,7 +2348,7 @@ it can be safely elided. This looks quite pleasant on this theme. */
 .secEverforestLightGreen {
   --accent-color-rgb: 141 161 1;
   --accent-color-hover: #9dbf0f;
-  --accent-color-active: #7b8f00;
+  --accent-color-active: #7f940e;
   --accent-color-light: #a5d000;
   --accent-color-visited: #7b8f00;
 }
@@ -2364,7 +2364,7 @@ it can be safely elided. This looks quite pleasant on this theme. */
 .secEverforestLightBlue {
   --accent-color-rgb: 58 148 197;
   --accent-color-hover: #4aa2d3;
-  --accent-color-active: #2881b2;
+  --accent-color-active: #5ab0e1;
   --accent-color-light: #5ab0e0;
   --accent-color-visited: #2881b2;
 }
@@ -2372,7 +2372,7 @@ it can be safely elided. This looks quite pleasant on this theme. */
 .secEverforestLightPurple {
   --accent-color-rgb: 223 105 186;
   --accent-color-hover: #e77dc9;
-  --accent-color-active: #c84f9a;
+  --accent-color-active: #d85ea9;
   --accent-color-light: #f09ed0;
   --accent-color-visited: #c84f9a;
 }
@@ -2384,7 +2384,7 @@ it can be safely elided. This looks quite pleasant on this theme. */
 
 .secCatppuccinLatteMauve {
   --accent-color-rgb: 136 57 239;
-  --accent-color-hover: #9f5cf1;
+  --accent-color-hover: #9450e5;
   --accent-color-active: #7129d2;
   --accent-color-light: #b076f8;
   --accent-color-visited: #6021a9;
@@ -2392,7 +2392,7 @@ it can be safely elided. This looks quite pleasant on this theme. */
 
 .secCatppuccinLatteRed {
   --accent-color-rgb: 210 15 57;
-  --accent-color-hover: #dd385c;
+  --accent-color-hover: #d83358;
   --accent-color-active: #ad0c2e;
   --accent-color-light: #e64e71;
   --accent-color-visited: #810922;
