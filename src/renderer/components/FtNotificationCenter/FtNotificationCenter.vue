@@ -180,7 +180,7 @@ onMounted(async () => {
     addAndroidNotificationsQueuedListener(collectNotificationHistory).then(remove => {
       if (unmounted) remove()
       else removeInAppListener = remove
-    })
+    }).catch(error => console.error('Failed to listen for queued notifications', error))
   }
   document.addEventListener('visibilitychange', handleVisibilityChange)
   await collectNotificationHistory()
