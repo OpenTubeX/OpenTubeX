@@ -46,6 +46,22 @@ export function getGoogleVideoFallbackUrl(url) {
   return fallbackUrl.toString()
 }
 
+/**
+ * Gives up on an unresponsive node as quickly as the other googlevideo requests do, so the
+ * retry can use the backup server. Requests without one keep the configured timeout, as
+ * high-latency networks can take longer to answer (#2604).
+ * Shaka retries with the same request, so this runs for every attempt.
+ * @param {{ uris: string[], retryParameters: { connectionTimeout: number } }} request
+ * @param {number} configuredTimeout
+ */
+export function setGoogleVideoConnectionTimeout(request, configuredTimeout) {
+  const connectionTimeout = getGoogleVideoFallbackUrl(request.uris[0]) === null
+    ? configuredTimeout
+    : GOOGLEVIDEO_CONNECTION_TIMEOUT_MS
+  // The parameters are shared with the player configuration, so replace them
+  request.retryParameters = { ...request.retryParameters, connectionTimeout }
+}
+
 /** @param {string | URL} url */
 export function markGoogleVideoHostUnreachable(url) {
   const { hostname } = new URL(url)

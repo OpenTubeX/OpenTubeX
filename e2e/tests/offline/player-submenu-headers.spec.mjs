@@ -1,5 +1,5 @@
 import { test, expect } from '../../helpers/app.mjs'
-import { openMockedVideo, openCaptionLanguages } from '../../helpers/player.mjs'
+import { openMockedVideo, openCaptionLanguages, settleMenuZoom } from '../../helpers/player.mjs'
 import { mockPlayableWatchPage } from '../../helpers/watch.mjs'
 
 /**
@@ -47,6 +47,8 @@ for (const usePlayerMenuGrid of [true, false]) {
        */
       async function expectCenteredTitle(submenu) {
         await expect(submenu).toBeVisible()
+        // Each part of a new view zooms in, which pulls the divider toward the title.
+        await settleMenuZoom(player)
         const { above, below } = await titleSpacing(submenu)
         expect(Math.abs(above - below)).toBeLessThanOrEqual(1)
       }

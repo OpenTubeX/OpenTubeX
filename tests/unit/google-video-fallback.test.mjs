@@ -5,8 +5,10 @@ import {
   avoidUnreachableGoogleVideoHost,
   fetchGoogleVideo,
   getGoogleVideoFallbackUrl,
+  GOOGLEVIDEO_CONNECTION_TIMEOUT_MS,
   markGoogleVideoHostUnreachable,
-  setAlwaysUseGoogleVideoBackupServer
+  setAlwaysUseGoogleVideoBackupServer,
+  setGoogleVideoConnectionTimeout
 } from '../../src/renderer/helpers/player/googleVideoFallback.js'
 
 const streamUrl = host => `https://${host}.googlevideo.com/videoplayback?expire=1&mn=sn-dead-1%2Csn-backup-2&fvip=4&itag=251`
@@ -107,4 +109,20 @@ test('the backup server can be used for every request', async t => {
   })
   assert.equal(await response.text(), 'ok')
   assert.deepEqual(requested, ['rr4---sn-backup-2.googlevideo.com'])
+})
+
+test('segment requests on the backup server keep the configured connection timeout', () => {
+  const configuredTimeout = 10_000
+  const retryParameters = { maxAttempts: 2, connectionTimeout: configuredTimeout }
+  const request = { uris: [streamUrl('rr10---sn-dead-1')], retryParameters }
+
+  setGoogleVideoConnectionTimeout(request, configuredTimeout)
+  assert.equal(request.retryParameters.connectionTimeout, GOOGLEVIDEO_CONNECTION_TIMEOUT_MS)
+  assert.equal(retryParameters.connectionTimeout, configuredTimeout)
+
+  // Shaka retries with the same request after the filter moved it to the backup server
+  request.uris = [getGoogleVideoFallbackUrl(request.uris[0])]
+  setGoogleVideoConnectionTimeout(request, configuredTimeout)
+  assert.equal(request.retryParameters.connectionTimeout, configuredTimeout)
+  assert.equal(request.retryParameters.maxAttempts, 2)
 })

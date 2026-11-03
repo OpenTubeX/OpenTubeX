@@ -138,8 +138,8 @@ import { setupSabrScheme } from '../../helpers/player/SabrSchemePlugin'
 import { prepareGoogleVideoRequest } from '../../helpers/player/playbackRequestPolicy'
 import {
   avoidUnreachableGoogleVideoHost,
-  GOOGLEVIDEO_CONNECTION_TIMEOUT_MS,
-  markGoogleVideoHostUnreachable
+  markGoogleVideoHostUnreachable,
+  setGoogleVideoConnectionTimeout
 } from '../../helpers/player/googleVideoFallback'
 import { getRememberedPlayerVolume, setRememberedPlayerVolume } from '../../helpers/player/volume-storage'
 import { parseChannelPreferences, removeChannelPreference } from '../../helpers/channel-preferences'
@@ -6044,9 +6044,7 @@ export default defineComponent({
         request.uris = request.uris.map(avoidUnreachableGoogleVideoHost)
         const url = new URL(request.uris[0])
         if (url.hostname.endsWith('.googlevideo.com')) {
-          // Give up on an unresponsive node as quickly as the other googlevideo requests do.
-          // The parameters are shared with the player configuration, so replace them.
-          request.retryParameters = { ...request.retryParameters, connectionTimeout: GOOGLEVIDEO_CONNECTION_TIMEOUT_MS }
+          setGoogleVideoConnectionTimeout(request, player.getConfiguration().streaming.retryParameters.connectionTimeout)
         }
         const isSabrRequest = props.sabrData && url.protocol === `${props.sabrData.scheme}:`
 
@@ -9087,6 +9085,11 @@ export default defineComponent({
 
     let ignoreErrors = false
 
+    /** When segment requests started timing out, without a segment loading since */
+    let segmentTimeoutsStartedAt = null
+    /** How long to keep retrying segment requests that time out before reporting the error */
+    const SEGMENT_TIMEOUT_RECOVERY_MS = 60_000
+
     /**
      * @param {shaka.util.Error} error
      * @param {string} context
@@ -9136,6 +9139,18 @@ export default defineComponent({
       ) {
         console.warn(`Ignoring player abort/interruption (code ${error.code}) in ${context}`)
         return
+      }
+
+      // Shaka treats a segment request that didn't answer in time as fatal for videos. On a
+      // high-latency network that doesn't mean the format is broken, so keep streaming
+      // instead of falling back to the legacy formats and reloading (#2604)
+      // Audio and video report their timeouts separately, so limit the time rather than the retries
+      if (error.code === ErrorCode.TIMEOUT && error.data[1] === RequestType.SEGMENT && !isSabrPlayback.value) {
+        segmentTimeoutsStartedAt ??= Date.now()
+        if (Date.now() - segmentTimeoutsStartedAt < SEGMENT_TIMEOUT_RECOVERY_MS && player?.retryStreaming()) {
+          console.warn('Segment request timed out, retrying...', error.data[0])
+          return
+        }
       }
 
       // Shaka retries the retained stream on reconnect. Do not mark an offline
@@ -9718,6 +9733,11 @@ export default defineComponent({
       player.addEventListener('buffering', event => {
         isBuffering.value = event.buffering
       })
+      const resetSegmentTimeouts = () => {
+        segmentTimeoutsStartedAt = null
+      }
+      player.addEventListener('loading', resetSegmentTimeouts)
+      player.addEventListener('segmentappended', resetSegmentTimeouts)
 
       player.addEventListener('error', event => handleError(event.detail, 'shaka error handler'))
 
