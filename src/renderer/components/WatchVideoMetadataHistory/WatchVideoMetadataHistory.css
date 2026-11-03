@@ -11,6 +11,7 @@
 
 .historySection h3 {
   margin-block: 0 12px;
+  letter-spacing: -0.01em;
   text-align: center;
 }
 
@@ -49,7 +50,7 @@
 
 .metadataText {
   background: var(--secondary-card-bg-color);
-  border-radius: calc(6px * var(--ui-roundness));
+  border-radius: var(--shape-corner-medium);
   overflow-wrap: anywhere;
   padding: 10px;
   white-space: pre-wrap;
@@ -63,7 +64,7 @@
 .thumbnailFrame {
   aspect-ratio: 16 / 9;
   background: var(--secondary-card-bg-color);
-  border-radius: calc(6px * var(--ui-roundness));
+  border-radius: var(--shape-corner-medium);
   overflow: hidden;
 }
 

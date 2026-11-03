@@ -1,5 +1,8 @@
-.infoPanels {
-  padding-block: 12px;
+/* A tonal callout surface, set apart from the plain cards around it. */
+.infoPanels.ft-card {
+  background-color: color-mix(in srgb, var(--primary-color) 16%, var(--card-bg-color));
+  border-radius: var(--shape-corner-large-increased);
+  padding-block: 16px;
   overflow-wrap: anywhere;
 }
 
@@ -15,9 +18,14 @@
 }
 
 .infoPanelIcon {
+  display: grid;
   flex: none;
-  margin-block-start: 2px;
-  color: var(--secondary-text-color);
+  place-items: center;
+  inline-size: 36px;
+  block-size: 36px;
+  border-radius: 50%;
+  background-color: color-mix(in srgb, var(--primary-color) 24%, var(--card-bg-color));
+  color: var(--primary-color);
   font-size: 18px;
 }
 
@@ -26,7 +34,7 @@
 }
 
 .infoPanelTitle {
-  margin-block: 0 4px;
+  margin-block: 6px 4px;
   font-size: 15px;
   font-weight: 600;
 }

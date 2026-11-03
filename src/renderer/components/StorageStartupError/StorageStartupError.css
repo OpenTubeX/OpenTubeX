@@ -12,7 +12,12 @@
 }
 
 section { max-inline-size: 32rem; }
-h1 { font-size: 1.5rem; }
+
+h1 {
+  font-size: 1.75rem;
+  font-weight: 700;
+  letter-spacing: -0.01em;
+}
 p { margin-block: 16px 24px; }
 
 .retry {
@@ -23,14 +28,20 @@ p { margin-block: 16px 24px; }
   padding-block: 12px;
   padding-inline: 24px;
   border: 1px solid currentcolor;
-  border-radius: 24px;
+
+  /* Half the minimum height, so the press morph does not stall. */
+  border-radius: calc(24px * var(--ui-roundness));
   background: transparent;
   color: inherit;
   font: inherit;
   cursor: pointer;
+  transition: opacity var(--motion-fast-effects), border-radius var(--motion-fast-spatial);
 }
 
-.retry:active { opacity: 0.7; }
+.retry:active {
+  border-radius: var(--shape-corner-medium);
+  opacity: 0.7;
+}
 
 .retry:focus-visible {
   outline: 2px solid currentcolor;

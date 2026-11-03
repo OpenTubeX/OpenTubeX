@@ -604,7 +604,8 @@ test('chapters stay centered through layout changes until manually scrolled', { 
   await page.mouse.wheel(0, 2000)
   await scroller.evaluate(element => { element.scrollTop = element.scrollHeight })
   await expect.poll(() => scroller.evaluate(element => element.scrollTop)).toBeGreaterThan(2000)
-  await view.evaluate(view => { view.videoChapters = view.videoChapters.slice(0, 3) })
+  // Two padded segmented rows fit the 240px list without scrolling.
+  await view.evaluate(view => { view.videoChapters = view.videoChapters.slice(0, 2) })
   await expect.poll(() => scroller.evaluate(element => element.scrollTop)).toBe(0)
   await expect(scroller.locator(':scope > .os-scrollbar-vertical')).toHaveClass(/os-scrollbar-unusable/)
   await view.dispose()

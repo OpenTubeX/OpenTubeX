@@ -9,22 +9,41 @@
 }
 
 .likeBar {
-  border-radius: calc(4px * var(--ui-roundness));
+  border-radius: var(--shape-corner-extra-small);
   block-size: 8px;
   margin-block-end: 4px;
 }
 
+/* Likes and dislikes read as one connected pair of tonal pills. */
 .likeCounts {
   display: flex;
-  gap: 10px;
+  gap: 2px;
   justify-content: flex-end;
 }
 
 .likeCount,
 .dislikeCount {
+  align-items: center;
+  background-color: var(--secondary-card-bg-color);
+  border-radius: var(--shape-corner-extra-small);
+  color: var(--primary-text-color);
   margin-inline-end: 0;
   display: flex;
-  gap: 3px;
+  gap: 4px;
+  padding-block: 2px;
+  padding-inline: 10px;
+}
+
+.likeCount:first-child,
+.dislikeCount:first-child {
+  border-start-start-radius: var(--shape-corner-full);
+  border-end-start-radius: var(--shape-corner-full);
+}
+
+.likeCount:last-child,
+.dislikeCount:last-child {
+  border-start-end-radius: var(--shape-corner-full);
+  border-end-end-radius: var(--shape-corner-full);
 }
 
 @media screen and (width <= 680px) {

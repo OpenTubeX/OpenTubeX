@@ -72,9 +72,13 @@
     position: absolute;
     inset-block-start: 50%;
     transform: translate(0, -50%);
-    transition: background-color 200ms ease, border-color 200ms ease,
-      inline-size 200ms ease, block-size 200ms ease, inset-inline-start 200ms ease,
-      box-shadow 150ms ease;
+    transition:
+      background-color var(--motion-default-effects),
+      border-color var(--motion-default-effects),
+      inline-size var(--motion-fast-spatial),
+      block-size var(--motion-fast-spatial),
+      inset-inline-start var(--motion-fast-spatial),
+      box-shadow var(--motion-fast-effects);
   }
 
   &::before {
@@ -169,6 +173,7 @@
 }
 
 .switch-input:focus-visible + .switch-label {
+  /* The focus ring keeps a fixed shape at every UI Roundness. */
   border-radius: 4px;
   outline: 2px solid var(--primary-color);
   outline-offset: -3px;

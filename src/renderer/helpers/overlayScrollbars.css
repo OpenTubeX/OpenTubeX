@@ -56,9 +56,9 @@ html[data-overlayscrollbars-initialize],
   opacity: 0;
   visibility: hidden;
   transition:
-    opacity 0.15s,
-    visibility 0.15s,
-    inset 0.15s;
+    opacity var(--motion-fast-effects),
+    visibility var(--motion-fast-effects),
+    inset var(--motion-fast-effects);
 }
 
 /* The padding is part of the bar's size, also inside the player, whose
@@ -191,9 +191,9 @@ body > .os-scrollbar {
   min-block-size: var(--os-handle-min-size);
   max-block-size: var(--os-handle-max-size);
   transition:
-    opacity 0.15s,
-    background-color 0.15s,
-    inline-size 0.15s;
+    opacity var(--motion-fast-effects),
+    background-color var(--motion-fast-effects),
+    inline-size var(--motion-fast-effects);
 }
 
 .os-scrollbar-horizontal .os-scrollbar-handle {
@@ -204,9 +204,9 @@ body > .os-scrollbar {
   max-inline-size: var(--os-handle-max-size);
   block-size: var(--os-handle-perpendicular-size);
   transition:
-    opacity 0.15s,
-    background-color 0.15s,
-    block-size 0.15s;
+    opacity var(--motion-fast-effects),
+    background-color var(--motion-fast-effects),
+    block-size var(--motion-fast-effects);
 }
 
 .os-scrollbar-vertical:hover .os-scrollbar-handle {

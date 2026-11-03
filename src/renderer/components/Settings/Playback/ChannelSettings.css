@@ -83,7 +83,7 @@
   align-items: center;
   background: transparent;
   border: 0;
-  border-radius: calc(4px * var(--ui-roundness));
+  border-radius: var(--shape-corner-extra-small);
   color: inherit;
   cursor: pointer;
   display: grid;
@@ -166,7 +166,7 @@
   max-inline-size: 760px;
   padding: 1em;
   border: 1px solid var(--border-color);
-  border-radius: calc(4px * var(--ui-roundness));
+  border-radius: var(--shape-corner-large);
 }
 
 .channelHeader {

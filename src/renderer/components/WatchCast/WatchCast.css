@@ -31,6 +31,7 @@
   padding-inline: 10px;
   text-align: start;
   white-space: nowrap;
+  transition: background-color var(--motion-fast-effects);
 }
 
 .castOption:not([aria-disabled='true']):is(:hover, :focus-visible),

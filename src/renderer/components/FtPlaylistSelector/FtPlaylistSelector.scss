@@ -1,18 +1,31 @@
 .ft-playlist-selector {
   padding: 6px;
+  border-radius: var(--shape-corner-large);
+  transition: background-color var(--motion-fast-effects), border-radius var(--motion-fast-spatial);
 
-  &:hover ,
+  &:hover,
   &.selected {
-    background-color: var(--bg-color);
+    background-color: color-mix(in srgb, var(--primary-color) 16%, var(--secondary-card-bg-color));
 
     .thumbnailImage {
       opacity: 0.3;
     }
   }
 
+  &.selected {
+    color: var(--on-selected-container-color);
+    background-color: var(--selected-container-color);
+  }
+
+  // Disabled tiles get tabindex -1 from the prompt.
+  &:not([tabindex='-1']):active {
+    border-radius: var(--shape-corner-medium);
+  }
+
   .thumbnail {
     overflow: hidden;
     position: relative;
+    border-radius: var(--shape-corner-medium);
 
     .thumbnailImage.blur {
       filter: blur(20px);

@@ -44,8 +44,13 @@
   inline-size: 20px;
   block-size: 20px;
   border: 2px solid var(--secondary-text-color);
-  transform: translateY(-50%);
-  transition: border-color 150ms ease, box-shadow 150ms ease;
+
+  /* Separate translates keep the press scale centered on the ring. */
+  translate: 0 -50%;
+  transition:
+    border-color var(--motion-fast-effects),
+    box-shadow var(--motion-fast-effects),
+    scale var(--motion-fast-spatial);
 }
 
 .pure-radiobutton input + label::after {
@@ -53,8 +58,9 @@
   inset-inline-start: 10px;
   inline-size: 10px;
   block-size: 10px;
-  transform: translate(var(--radio-dot-offset), -50%) scale(0);
-  transition: transform 150ms ease;
+  translate: var(--radio-dot-offset) -50%;
+  transform: scale(0);
+  transition: transform var(--motion-fast-spatial), scale var(--motion-fast-spatial);
 }
 
 .pure-radiobutton input:checked + label::before {
@@ -62,7 +68,7 @@
 }
 
 .pure-radiobutton input:checked + label::after {
-  transform: translate(var(--radio-dot-offset), -50%) scale(1);
+  transform: scale(1);
 }
 
 .pure-radiobutton input:not(:disabled) + label:hover::before,
@@ -70,10 +76,21 @@
   box-shadow: 0 0 0 8px var(--accent-color-opacity2);
 }
 
+/* Pressing shrinks the ring and its dot together under a stronger state layer,
+   whose spread grows so its outer size stays the same. */
+.pure-radiobutton input:not(:disabled) + label:active::before,
+.pure-radiobutton input:not(:disabled) + label:active::after {
+  scale: 0.85;
+}
+
+.pure-radiobutton input:not(:disabled) + label:active::before {
+  box-shadow: 0 0 0 11px color-mix(in srgb, var(--accent-color) 20%, transparent);
+}
+
 .pure-radiobutton input:focus-visible + label {
   outline: 2px solid var(--primary-color);
   outline-offset: -2px;
-  border-radius: calc(4px * var(--ui-roundness));
+  border-radius: var(--shape-corner-extra-small);
 }
 
 .pure-radiobutton input:disabled + label {

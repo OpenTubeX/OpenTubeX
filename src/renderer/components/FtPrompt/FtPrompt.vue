@@ -67,7 +67,7 @@
               {{ extraLabel }}
             </strong>
           </p>
-          <FtFlexBox>
+          <FtButtonGroup>
             <FtButton
               v-for="(option, index) in optionNames"
               :key="index"
@@ -78,7 +78,7 @@
               :icon="optionIcons[index] ?? (index === 0 && isFirstOptionDestructive ? ['fas', 'trash'] : null)"
               @click="click(optionValues[index])"
             />
-          </FtFlexBox>
+          </FtButtonGroup>
         </slot>
       </FtCard>
     </div>
@@ -94,8 +94,8 @@ import { useSettingsOverlay } from '../../composables/useSettingsOverlay'
 import store from '../../store/index'
 
 import FtCard from '../ft-card/ft-card.vue'
-import FtFlexBox from '../ft-flex-box/ft-flex-box.vue'
 import FtButton from '../FtButton/FtButton.vue'
+import FtButtonGroup from '../FtButtonGroup/FtButtonGroup.vue'
 import { lockBodyScroll, unlockBodyScroll } from './scrollLock'
 
 const props = defineProps({
@@ -224,6 +224,8 @@ function deactivatePrompt() {
 function optionButtonTextColor(index) {
   if (index === 0 && props.isFirstOptionDestructive) {
     return 'var(--destructive-text-color)'
+  } else if (index === 0) {
+    return 'var(--text-with-main-color)'
   } else if (index < props.optionNames.length - 1) {
     return 'var(--text-with-accent-color)'
   } else {
@@ -237,6 +239,8 @@ function optionButtonTextColor(index) {
 function optionButtonBackgroundColor(index) {
   if (index === 0 && props.isFirstOptionDestructive) {
     return 'var(--destructive-color)'
+  } else if (index === 0) {
+    return 'var(--primary-color)'
   } else if (index < props.optionNames.length - 1) {
     return 'var(--accent-color)'
   } else {

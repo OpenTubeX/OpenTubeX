@@ -29,7 +29,7 @@ test('highlight fades keep the animation speed through a long task', async ({ pa
       while (performance.now() < end);
     }))
   }, { once: true }))
-  expect(await selectTabWithHighlightAnimation(tab)).toEqual({ property: 'opacity', playbackRate: 0.25, duration: 140 })
+  expect(await selectTabWithHighlightAnimation(tab)).toEqual({ property: 'opacity', playbackRate: 0.25, duration: 250 })
 })
 
 test('shared tabs crossfade between selections and snap after layout changes', async ({ app, page }) => {
@@ -43,7 +43,7 @@ test('shared tabs crossfade between selections and snap after layout changes', a
     await aligned()
     for (const name of ['Storage', 'Data']) {
       expect(await selectTabWithHighlightAnimation(tabs.getByRole('tab', { name, exact: true }))).toEqual(
-        { property: 'opacity', playbackRate: 0.25, duration: 140 }
+        { property: 'opacity', playbackRate: 0.25, duration: 250 }
       )
       await aligned()
       await expect.poll(() => tabs.locator('[role="tab"]').evaluateAll(buttons =>

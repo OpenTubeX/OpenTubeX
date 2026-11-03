@@ -21,8 +21,8 @@
   margin-inline: -16px;
   padding-block: var(--page-title-offset) 12px;
   padding-inline: 16px;
-  border-start-start-radius: calc(8px * var(--ui-roundness));
-  border-start-end-radius: calc(8px * var(--ui-roundness));
+  border-start-start-radius: var(--shape-corner-medium);
+  border-start-end-radius: var(--shape-corner-medium);
   background-color: var(--card-bg-color);
   background-image: var(--card-bg-image);
   background-attachment: fixed;

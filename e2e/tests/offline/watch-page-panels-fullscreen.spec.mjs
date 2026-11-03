@@ -1029,9 +1029,9 @@ test.describe('fullscreen playlist dock', () => {
     await expect(actions).toBeVisible()
     const duration = thumbnail.locator('.videoDuration')
     await expect(watched).toHaveCSS('font-size', '12px')
-    await expect(watched).toHaveCSS('border-radius', '10px')
+    await expect(watched).toHaveCSS('border-radius', '16px')
     await expect(duration).toHaveCSS('font-size', '12px')
-    await expect(duration).toHaveCSS('border-radius', '10px')
+    await expect(duration).toHaveCSS('border-radius', '16px')
 
     const [watchedBox, actionsBox] = await Promise.all([
       watched.boundingBox(),

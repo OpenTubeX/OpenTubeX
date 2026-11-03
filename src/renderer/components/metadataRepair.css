@@ -34,7 +34,7 @@
 .repairDetails {
   padding: 16px;
   border-inline-start: 3px solid var(--primary-color);
-  border-radius: calc(6px * var(--ui-roundness));
+  border-radius: var(--shape-corner-small);
   background: var(--secondary-card-bg-color);
 }
 
@@ -60,8 +60,7 @@
 .repairStatus {
   padding: 16px;
   margin-block: 16px;
-  border: 1px solid var(--border-color);
-  border-radius: calc(8px * var(--ui-roundness));
+  border-radius: var(--shape-corner-large);
   background: var(--secondary-card-bg-color);
 }
 
@@ -83,6 +82,7 @@
   color: var(--secondary-text-color);
   font-size: 0.9rem;
   font-variant-numeric: tabular-nums;
+  font-weight: 500;
   overflow-wrap: anywhere;
 }
 
@@ -92,23 +92,23 @@
   inline-size: 100%;
   block-size: 6px;
   border: 0;
-  border-radius: calc(3px * var(--ui-roundness));
+  border-radius: var(--shape-corner-full);
   background: var(--border-color);
   accent-color: var(--primary-color);
 }
 
 .repairProgress::-webkit-progress-bar {
-  border-radius: calc(3px * var(--ui-roundness));
+  border-radius: var(--shape-corner-full);
   background: var(--border-color);
 }
 
 .repairProgress::-webkit-progress-value {
-  border-radius: calc(3px * var(--ui-roundness));
+  border-radius: var(--shape-corner-full);
   background: var(--primary-color);
 }
 
 .repairProgress::-moz-progress-bar {
-  border-radius: calc(3px * var(--ui-roundness));
+  border-radius: var(--shape-corner-full);
   background: var(--primary-color);
 }
 

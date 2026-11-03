@@ -11,7 +11,7 @@
 
 .text {
   background-color: color-mix(in srgb, var(--primary-text-color) 80%, var(--card-bg-color));
-  border-radius: calc(20px * var(--ui-roundness));
+  border-radius: var(--shape-corner-large-increased);
   box-sizing: border-box;
   color: var(--card-bg-color);
   display: block;
@@ -30,6 +30,13 @@
 
   /* Above prompts, including the prompt layer in full-window playback. */
   z-index: 1002;
+  transition: opacity var(--motion-fast-effects);
+}
+
+@starting-style {
+  .text {
+    opacity: 0;
+  }
 }
 
 .text.allowNewlines {

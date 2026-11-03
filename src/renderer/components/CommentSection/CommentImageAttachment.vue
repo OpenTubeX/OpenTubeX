@@ -93,7 +93,7 @@ watch([width, height], drawPoster, { flush: 'post' })
   max-inline-size: 100%;
   block-size: auto;
   object-fit: contain;
-  border-radius: calc(8px * var(--ui-roundness));
+  border-radius: var(--shape-corner-medium);
 }
 
 .commentAttachmentReady > .commentAttachmentAnimation,

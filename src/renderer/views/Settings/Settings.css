@@ -20,7 +20,7 @@
   background-attachment: fixed;
   backdrop-filter: var(--card-bg-blur, none);
   border: 1px solid var(--border-color);
-  border-radius: calc(10px * var(--ui-roundness));
+  border-radius: var(--shape-corner-extra-large);
   box-shadow: 0 12px 40px rgb(0 0 0 / 38%);
   container-name: settings-window;
   container-type: inline-size;
@@ -47,8 +47,8 @@
 .settingsWindow.settings-window-enter-active {
   transform-origin: center;
   transition:
-    opacity 160ms ease,
-    transform 180ms cubic-bezier(0.2, 0.8, 0.2, 1);
+    opacity var(--motion-fast-effects),
+    transform var(--motion-default-spatial);
 }
 
 .settingsWindow.settings-window-enter-from {
@@ -59,7 +59,7 @@
 /* A closing window must not take clicks meant for the controls it uncovers. */
 .settingsWindow.settings-window-leave-active {
   transform-origin: center;
-  animation: settings-window-leave 160ms ease;
+  animation: settings-window-leave var(--motion-fast-effects);
   pointer-events: none;
 }
 
@@ -214,8 +214,13 @@
   display: grid;
   place-items: center;
   padding: 0;
-  border-radius: calc(6px * var(--ui-roundness));
+  border-radius: 50%;
   color: var(--tertiary-text-color);
+  transition: border-radius var(--motion-fast-spatial);
+}
+
+.settingsHeaderButton:active {
+  border-radius: var(--shape-corner-medium);
 }
 
 .settingsHeaderButton > svg {
@@ -236,8 +241,13 @@
 }
 
 .settingsHeaderButton.active {
+  border-radius: var(--shape-corner-medium);
   color: var(--on-selected-container-color);
   background: var(--selected-container-color);
+}
+
+.settingsHeaderButton.active:active {
+  border-radius: var(--shape-corner-small);
 }
 
 .settingsHeaderButton.active:is(:hover, :focus-visible) {
@@ -345,7 +355,7 @@
   gap: 6px;
   padding: 14px;
   border: 1px solid var(--border-color);
-  border-radius: calc(6px * var(--ui-roundness));
+  border-radius: var(--shape-corner-large);
   background: var(--card-bg-color);
   backdrop-filter: var(--card-bg-blur, none);
 }
@@ -358,20 +368,23 @@
   gap: 9px;
   color: var(--primary-text-color);
   font: inherit;
-  font-weight: 600;
+  font-size: 1.0625rem;
+  font-weight: 650;
+  letter-spacing: -0.01em;
   text-align: start;
 }
 
 .settingsSearchResultHeading > svg {
   inline-size: 18px;
   block-size: 18px;
+  color: var(--primary-color);
 }
 
 .settingsSearchResultMatch {
   padding-block: 6px;
   padding-inline: 8px;
   border: 0;
-  border-radius: calc(4px * var(--ui-roundness));
+  border-radius: var(--shape-corner-small);
   overflow: hidden;
   color: var(--tertiary-text-color);
   background: transparent;
@@ -380,6 +393,14 @@
   text-overflow: ellipsis;
   white-space: nowrap;
   cursor: pointer;
+  transition:
+    color var(--motion-fast-effects),
+    background-color var(--motion-fast-effects),
+    border-radius var(--motion-fast-spatial);
+}
+
+.settingsSearchResultMatch:active {
+  border-radius: var(--shape-corner-extra-small);
 }
 
 .settingsSearchResultMatch:hover,
@@ -394,7 +415,7 @@
 .settingsSubpageScroll :deep(.select.settingsSearchTarget > .selectSearchHighlightFrame) {
   outline: 2px solid transparent;
   outline-offset: 4px;
-  border-radius: calc(4px * var(--ui-roundness));
+  border-radius: var(--shape-corner-extra-small);
   animation: settings-search-highlight 2.2s ease-in-out;
 }
 
@@ -529,19 +550,19 @@
 }
 
 .settingsSectionSlideForward {
-  animation: settings-section-slide-forward 180ms ease-out;
+  animation: settings-section-slide-forward var(--motion-default-effects);
 }
 
 .settingsSectionSlideBackward {
-  animation: settings-section-slide-backward 180ms ease-out;
+  animation: settings-section-slide-backward var(--motion-default-effects);
 }
 
 .settingsCompactSlideForward {
-  animation: settings-compact-slide-forward 200ms ease-out;
+  animation: settings-compact-slide-forward var(--motion-slow-effects);
 }
 
 .settingsCompactSlideBackward {
-  animation: settings-compact-slide-backward 200ms ease-out;
+  animation: settings-compact-slide-backward var(--motion-slow-effects);
 }
 
 @keyframes settings-section-slide-forward {
@@ -626,31 +647,35 @@
 .resize-se,
 .resize-sw,
 .resize-nw {
+  /* The window clips its rounded corners, so keep each corner handle's center
+     inside the corner arc (about 0.29 of the radius in from both edges). */
+  --resize-corner-inset: max(-2px, calc(var(--shape-corner-extra-large) * 0.29 - 6px));
+
   inline-size: 16px;
   block-size: 16px;
 }
 
 .resize-ne {
-  inset-block-start: -2px;
-  inset-inline-end: -2px;
+  inset-block-start: var(--resize-corner-inset);
+  inset-inline-end: var(--resize-corner-inset);
   cursor: nesw-resize;
 }
 
 .resize-se {
-  inset-block-end: -2px;
-  inset-inline-end: -2px;
+  inset-block-end: var(--resize-corner-inset);
+  inset-inline-end: var(--resize-corner-inset);
   cursor: nwse-resize;
 }
 
 .resize-sw {
-  inset-block-end: -2px;
-  inset-inline-start: -2px;
+  inset-block-end: var(--resize-corner-inset);
+  inset-inline-start: var(--resize-corner-inset);
   cursor: nesw-resize;
 }
 
 .resize-nw {
-  inset-block-start: -2px;
-  inset-inline-start: -2px;
+  inset-block-start: var(--resize-corner-inset);
+  inset-inline-start: var(--resize-corner-inset);
   cursor: nwse-resize;
 }
 

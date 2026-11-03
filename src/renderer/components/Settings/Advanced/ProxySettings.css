@@ -9,6 +9,7 @@
 .proxy-warning {
   padding-block: 12px;
   padding-inline: 4%;
+  border-radius: var(--shape-corner-medium);
   background-color: var(--accent-color);
   color: var(--text-with-accent-color);
   font-weight: bold;

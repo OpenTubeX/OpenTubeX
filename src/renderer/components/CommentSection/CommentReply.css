@@ -39,7 +39,7 @@
   block-size: 15px;
   border-block-end: 1px solid var(--comment-parent-thread-line-color, var(--comment-thread-line-color));
   border-inline-start: 1px solid var(--comment-parent-thread-line-color, var(--comment-thread-line-color));
-  border-end-start-radius: calc(12px * var(--ui-roundness));
+  border-end-start-radius: var(--shape-corner-medium);
   pointer-events: none;
 }
 

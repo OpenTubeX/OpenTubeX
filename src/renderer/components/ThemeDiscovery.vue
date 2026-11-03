@@ -97,6 +97,7 @@
                     :label="installLabel(entry)"
                     :icon="['fas', hasUpdate(entry) ? 'sync' : installed(entry) ? 'check' : 'download']"
                     :disabled="installing !== null || (active(entry) && !hasUpdate(entry))"
+                    theme="primary"
                     @click="install(entry)"
                   />
                   <FtButton
@@ -404,9 +405,8 @@ async function install(entry) {
   display: flex;
   flex-direction: column;
   min-inline-size: 0;
-  border: 1px solid var(--border-color);
-  border-radius: calc(8px * var(--ui-roundness));
-  background: var(--card-bg-color);
+  border-radius: var(--shape-corner-large);
+  background: var(--secondary-card-bg-color);
 }
 
 .themePreview {
@@ -498,7 +498,7 @@ async function install(entry) {
 
 .themeScreenshot-enter-active,
 .themeScreenshot-leave-active {
-  transition: opacity 120ms ease;
+  transition: opacity var(--motion-fast-effects);
 }
 
 .themeScreenshot-enter-from,
@@ -521,11 +521,11 @@ async function install(entry) {
 }
 
 .screenshotChoices button {
-  transition: background-color 120ms ease, color 120ms ease;
+  transition: background-color var(--motion-fast-effects), color var(--motion-fast-effects), border-radius var(--motion-fast-spatial);
   min-inline-size: 36px;
   min-block-size: 36px;
   border: 1px solid var(--border-color);
-  border-radius: calc(4px * var(--ui-roundness));
+  border-radius: var(--shape-corner-small);
   background: var(--card-bg-color);
   color: var(--primary-text-color);
   cursor: pointer;
@@ -544,6 +544,10 @@ async function install(entry) {
 .screenshotChoices button[aria-pressed='true']:hover {
   background: color-mix(in oklab, var(--accent-color) 88%, white);
   color: var(--text-with-accent-color);
+}
+
+.screenshotChoices button:active {
+  border-radius: var(--shape-corner-extra-small);
 }
 
 .screenshotChoices button:focus-visible,
@@ -567,6 +571,7 @@ async function install(entry) {
 .themeDetails h2 {
   margin-block: 0 8px;
   font-size: 1.2em;
+  letter-spacing: -0.01em;
 }
 
 .themeDetails p {

@@ -66,7 +66,9 @@
   position: absolute;
   inset-block-start: 50%;
   block-size: var(--slider-track-height);
-  border-radius: calc(2px * var(--ui-roundness));
+
+  /* Inner corners beside the handle match its rounding. */
+  border-radius: calc(var(--slider-handle-width) / 2 * var(--ui-roundness));
   transform: translateY(-50%);
   pointer-events: none;
   overflow: clip;
@@ -119,7 +121,7 @@
 .input:focus-visible {
   outline: 2px solid var(--primary-color);
   outline-offset: -2px;
-  border-radius: calc(4px * var(--ui-roundness));
+  border-radius: var(--shape-corner-extra-small);
 }
 
 .input:disabled {
@@ -135,7 +137,7 @@
 }
 
 .pure-material-slider:has(.input[data-gamepad-active='true']) {
-  border-radius: calc(4px * var(--ui-roundness));
+  border-radius: var(--shape-corner-extra-small);
   background-color: var(--accent-color-opacity2);
   box-shadow: inset 0 0 0 2px var(--primary-color);
 }
@@ -148,13 +150,18 @@
 
 .input::-webkit-slider-thumb {
   appearance: none;
-  border: 0;
-  border-radius: calc(2px * var(--ui-roundness));
+  box-sizing: border-box;
+  border: 0 solid transparent;
+  border-radius: calc(var(--slider-handle-width) / 2 * var(--ui-roundness));
   block-size: var(--slider-handle-height);
   inline-size: var(--slider-handle-width);
   margin-block-start: calc((var(--slider-track-height) - var(--slider-handle-height)) / 2);
   background-color: var(--primary-color);
-  transition: background-color 150ms ease;
+
+  /* Narrowing paints a transparent border so the handle keeps its layout
+     width and the track gaps stay aligned with the native thumb. */
+  background-clip: padding-box;
+  transition: background-color var(--motion-fast-effects), border-inline-width var(--motion-fast-spatial);
 }
 
 .input:not(:disabled):is(:hover, :focus-visible)::-webkit-slider-thumb {
@@ -162,6 +169,7 @@
 }
 
 .input:not(:disabled):active::-webkit-slider-thumb {
+  border-inline-width: calc(var(--slider-handle-width) / 4);
   background-color: var(--primary-color-active);
 }
 
@@ -173,11 +181,11 @@
 
 .input::-moz-range-thumb {
   border: 0;
-  border-radius: calc(2px * var(--ui-roundness));
+  border-radius: calc(var(--slider-handle-width) / 2 * var(--ui-roundness));
   block-size: var(--slider-handle-height);
   inline-size: var(--slider-handle-width);
   background-color: var(--primary-color);
-  transition: background-color 150ms ease;
+  transition: background-color var(--motion-fast-effects);
 }
 
 .input::-moz-range-progress {

@@ -12,6 +12,7 @@
           v-if="enableDownloads"
           :label="t('Downloads.Add Download')"
           :icon="['fas', 'plus']"
+          theme="primary"
           @click="showUrlPrompt = true"
         />
         <FtButton
@@ -204,6 +205,7 @@
             :label="t('Video.Next')"
             :icon="['fas', 'arrow-right']"
             :disabled="!validDownloadUrl"
+            theme="primary"
             @click="openDownloadOptions"
           />
           <FtButton

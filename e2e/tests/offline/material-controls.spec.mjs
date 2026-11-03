@@ -108,7 +108,8 @@ for (const baseTheme of ['dark', 'light']) {
       for (const direction of ['ltr', 'rtl']) {
         await page.evaluate(value => { document.body.dir = value }, direction)
         await select.click()
-        const selectedBackground = await menu.locator('[aria-selected="true"]').evaluate(element => getComputedStyle(element).backgroundColor)
+        // The selection fill is an inset rounded layer behind the option.
+        const selectedBackground = await menu.locator('[aria-selected="true"]').evaluate(element => getComputedStyle(element, '::before').backgroundColor)
         expect(selectedBackground).not.toBe('rgba(0, 0, 0, 0)')
         for (const option of await menu.getByRole('option').all()) {
           await expect(option).toHaveCSS('padding-inline-start', '12px')
@@ -116,7 +117,7 @@ for (const baseTheme of ['dark', 'light']) {
         }
         for (const roundness of [0, 100, 200]) {
           await page.evaluate(value => window.$store.dispatch('updateUiRoundness', value), roundness)
-          await expect(menu).toHaveCSS('border-top-left-radius', `${4 * roundness / 100}px`)
+          await expect(menu).toHaveCSS('border-top-left-radius', `${16 * roundness / 100}px`)
         }
         await select.press('Escape')
       }
@@ -164,7 +165,7 @@ for (const baseTheme of ['dark', 'light']) {
           const canvas = document.createElement('canvas')
           canvas.width = canvas.height = 1
           const context = canvas.getContext('2d')
-          context.fillStyle = getComputedStyle(element).backgroundColor
+          context.fillStyle = getComputedStyle(element, '::before').backgroundColor
           context.fillRect(0, 0, 1, 1)
           const [red, green, blue] = context.getImageData(0, 0, 1, 1).data
           return color === 'Red' ? red - green : blue - red
@@ -337,7 +338,11 @@ test.describe('modal control regressions', () => {
             const style = getComputedStyle(element, pseudo)
             const width = parseFloat(style.width) + (style.boxSizing === 'border-box' ? 0 : parseFloat(style.borderLeftWidth) + parseFloat(style.borderRightWidth))
             const left = style.left === 'auto' ? element.clientWidth - parseFloat(style.right) - width : parseFloat(style.left)
-            return left + width / 2 + new DOMMatrix(style.transform).e
+            // The mark offset lives in the separate translate property, which
+            // keeps percentages of the border box in its computed value.
+            const [offset = '0px'] = style.translate === 'none' ? [] : style.translate.split(' ')
+            const translateX = offset.endsWith('%') ? parseFloat(offset) / 100 * width : parseFloat(offset)
+            return left + width / 2 + translateX + new DOMMatrix(style.transform).e
           }
           return Math.abs(center('::before') - center('::after'))
         })
@@ -1729,7 +1734,7 @@ test('shared Material controls follow UI Roundness while switch focus keeps its 
   const button = card.locator('.btn').first()
   for (const roundness of [0, 50, 100, 200]) {
     await page.evaluate(value => window.$store.dispatch('updateUiRoundness', value), roundness)
-    for (const [element, radius] of [[card, 12], [field, 4], [button, 20]]) {
+    for (const [element, radius] of [[card, 28], [field, 4], [button, 20]]) {
       expect(await element.evaluate(element => parseFloat(getComputedStyle(element).borderTopLeftRadius))).toBeCloseTo(radius * roundness / 100, 1)
     }
   }

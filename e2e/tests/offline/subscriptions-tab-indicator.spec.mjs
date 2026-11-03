@@ -144,7 +144,7 @@ test.describe('subscriptions feed tab indicator', () => {
     expect((await tab.boundingBox()).width).toBe(widthBeforeHover)
   })
 
-  test('only animates opacity, so it runs on the compositor', async ({ page }) => {
+  test('only animates opacity and scale, so it runs on the compositor', async ({ page }) => {
     await goTo(page, 'subscriptions')
 
     await expectTabHighlightAligned(page.locator('.tabs [aria-selected="true"]'))
@@ -152,7 +152,7 @@ test.describe('subscriptions feed tab indicator', () => {
     // The initial placement is intentionally not animated
     await page.locator('[data-subscription-feed-tab="shorts"]').click()
 
-    await expectTabHighlightStyle(page.locator('.tabs [aria-selected="true"]'), 'transitionProperty', 'opacity')
+    await expectTabHighlightStyle(page.locator('.tabs [aria-selected="true"]'), 'transitionProperty', 'opacity, scale')
   })
 
   test('paints selection feedback before mounting the selected feed', async ({ page }) => {
@@ -207,7 +207,7 @@ test.describe('subscriptions feed tab indicator', () => {
       tablist.querySelector('[data-subscription-feed-tab="shorts"]').click()
     }))
 
-    expect(animation).toBeCloseTo(0.14, 2)
+    expect(animation).toBeCloseTo(0.25, 2)
   })
 
   test('does not replay cached feed appearance when switching back to it', async ({ page }) => {

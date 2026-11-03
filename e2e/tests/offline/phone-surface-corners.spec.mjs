@@ -241,7 +241,7 @@ test.describe('phone surface corners', { tag: '@scale' }, () => {
     await navigate(page, `channel/${CHANNEL_ID}`)
     const banner = page.locator('.channelDetails:visible .bannerContainer')
     const info = page.locator('.channelDetails:visible .infoContainer')
-    await expect(banner).toHaveCSS('border-top-left-radius', '8px')
+    await expect(banner).toHaveCSS('border-top-left-radius', '16px')
     await mockCapacitorPhoneLayout(page)
     for (const [width, height] of [[375, 812], [640, 390]]) {
       await page.setViewportSize({ width: Math.round(width * uiScale / 100), height: Math.round(height * uiScale / 100) })
@@ -259,8 +259,8 @@ test.describe('phone surface corners', { tag: '@scale' }, () => {
     }
     await page.setViewportSize({ width: 1600, height: 900 })
     await page.reload()
-    await expect(banner).toHaveCSS('border-top-left-radius', '8px')
-    await expect(info).toHaveCSS('border-bottom-left-radius', '8px')
+    await expect(banner).toHaveCSS('border-top-left-radius', '16px')
+    await expect(info).toHaveCSS('border-bottom-left-radius', '16px')
   })
 
   test('preserves rounding on phone page panels above the edge-to-edge breakpoint', async ({ page, uiScale }) => {
@@ -364,8 +364,8 @@ test.describe('phone surface corners', { tag: '@scale' }, () => {
     await comments.click()
     const sheet = page.locator('.mobileSheet.dockedSheet[open]')
     await expectFullWidth(sheet)
-    await expect(sheet).toHaveCSS('border-top-left-radius', '16px')
-    await expect(sheet).toHaveCSS('border-top-right-radius', '16px')
+    await expect(sheet).toHaveCSS('border-top-left-radius', '28px')
+    await expect(sheet).toHaveCSS('border-top-right-radius', '28px')
     await page.screenshot({ path: testInfo.outputPath('rounded-mobile-panel.png'), animations: 'disabled' })
     await sheet.getByRole('button', { name: 'Close', exact: true }).click()
     await expect(sheet).toHaveCount(0)

@@ -23,14 +23,22 @@
   display: flex;
   align-items: center;
   padding-block: 8px;
-  padding-inline: 10px;
+  padding-inline: 14px;
   border: 0;
-  border-radius: calc(6px * var(--ui-roundness));
+
+  /* Items with descriptions are two lines tall, so a pill radius would curve
+     into the icon. */
+  border-radius: var(--shape-corner-large);
   color: var(--tertiary-text-color);
   background: transparent;
   font: inherit;
   text-align: start;
   cursor: pointer;
+  transition: border-radius var(--motion-fast-spatial);
+}
+
+.title:active {
+  border-radius: var(--shape-corner-medium);
 }
 
 .title:hover,

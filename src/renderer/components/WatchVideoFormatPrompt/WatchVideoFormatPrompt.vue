@@ -305,11 +305,12 @@ function selectPlaybackEngine(value) {
 .currentSource {
   align-items: center;
   background-color: var(--side-nav-hover-color);
-  border-radius: calc(8px * var(--ui-roundness));
+  border-radius: var(--shape-corner-large);
   display: flex;
   flex-wrap: wrap;
   gap: 12px;
-  padding: 12px 14px;
+  padding-block: 12px;
+  padding-inline: 14px;
 }
 
 .currentSourceLabel {
@@ -332,13 +333,14 @@ function selectPlaybackEngine(value) {
   align-items: center;
   background-color: var(--card-bg-color);
   backdrop-filter: var(--card-bg-blur, none);
-  border-radius: calc(20px * var(--ui-roundness));
+  border-radius: var(--shape-corner-full);
   color: var(--secondary-text-color);
   display: inline-flex;
   font-size: 12px;
   font-weight: 600;
   gap: 5px;
-  padding: 4px 10px;
+  padding-block: 4px;
+  padding-inline: 10px;
   white-space: nowrap;
 }
 
@@ -361,17 +363,19 @@ function selectPlaybackEngine(value) {
   text-transform: uppercase;
 }
 
+/* A connected button group: tight inner corners, and the selected option
+   rounds fully. */
 .engineOptions {
   display: grid;
-  gap: 8px;
+  gap: 2px;
   grid-template-columns: repeat(2, minmax(0, 1fr));
 }
 
 .engineOption {
   align-items: center;
-  background-color: transparent;
-  border: 1px solid var(--side-nav-hover-color);
-  border-radius: calc(8px * var(--ui-roundness));
+  background-color: color-mix(in srgb, var(--primary-color) 16%, var(--card-bg-color));
+  border: 0;
+  border-radius: var(--shape-corner-extra-small);
   color: inherit;
   cursor: pointer;
   display: flex;
@@ -379,23 +383,49 @@ function selectPlaybackEngine(value) {
   font-weight: 600;
   gap: 8px;
   justify-content: center;
-  padding: 10px 12px;
+  min-block-size: 42px;
+  padding-block: 10px;
+  padding-inline: 12px;
+  transition:
+    background-color var(--motion-default-effects),
+    color var(--motion-default-effects),
+    border-radius var(--motion-fast-spatial);
+}
+
+.engineOption:first-child {
+  border-start-start-radius: var(--shape-corner-large-increased);
+  border-end-start-radius: var(--shape-corner-large-increased);
+}
+
+.engineOption:last-child {
+  border-start-end-radius: var(--shape-corner-large-increased);
+  border-end-end-radius: var(--shape-corner-large-increased);
 }
 
 .engineOption:hover,
 .engineOption:focus-visible {
-  background-color: var(--side-nav-hover-color);
+  background-color: color-mix(in srgb, var(--primary-color) 26%, var(--card-bg-color));
 }
 
 .engineOption.active {
-  border-color: var(--accent-color);
-  color: var(--accent-color);
+  border-radius: var(--shape-corner-large-increased);
+  background-color: var(--selected-container-color);
+  color: var(--on-selected-container-color);
 }
 
+.engineOption.active:is(:hover, :focus-visible) {
+  background-color: var(--selected-container-hover-color);
+}
+
+.engineOption:active {
+  border-radius: var(--shape-corner-small);
+}
+
+/* The formats form one segmented list: large outer corners, tight inner ones. */
 .formatOptions {
   display: flex;
   flex-direction: column;
-  gap: 8px;
+  gap: 2px;
   list-style: none;
   margin-block: 0;
   padding-inline-start: 0;
@@ -403,32 +433,43 @@ function selectPlaybackEngine(value) {
 
 .formatOption {
   align-items: center;
-  background-color: transparent;
-  border: 1px solid var(--side-nav-hover-color);
-  border-radius: calc(8px * var(--ui-roundness));
+  background-color: color-mix(in srgb, var(--primary-text-color) 6%, var(--card-bg-color));
+  border: 0;
+  border-radius: var(--shape-corner-extra-small);
   color: inherit;
   cursor: pointer;
   display: flex;
   font: inherit;
   gap: 12px;
   inline-size: 100%;
-  padding: 12px 14px;
+  padding-block: 12px;
+  padding-inline: 14px;
   text-align: start;
-  transition: background-color 0.15s ease, border-color 0.15s ease;
+  transition: background-color var(--motion-default-effects);
 }
 
-.formatOption:hover:not(:disabled),
+.formatOption:where(:not(:disabled)):hover,
 .formatOption:focus-visible {
   background-color: var(--side-nav-hover-color);
 }
 
 .formatOption.active {
-  border-color: var(--accent-color);
+  background-color: color-mix(in srgb, var(--primary-color) 24%, var(--card-bg-color));
 }
 
 .formatOption:disabled {
   cursor: not-allowed;
   opacity: 0.5;
+}
+
+li:first-child > .formatOption {
+  border-start-start-radius: var(--shape-corner-large-increased);
+  border-start-end-radius: var(--shape-corner-large-increased);
+}
+
+li:last-child > .formatOption {
+  border-end-start-radius: var(--shape-corner-large-increased);
+  border-end-end-radius: var(--shape-corner-large-increased);
 }
 
 .formatOptionIcon {

@@ -444,6 +444,7 @@ defineExpose({
 .mediaSection h3,
 .postsSection h3 {
   margin-block-start: 0;
+  letter-spacing: -0.01em;
 }
 
 .newFeed :deep(.autoGrid) {

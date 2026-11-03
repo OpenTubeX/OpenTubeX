@@ -21,6 +21,7 @@
   max-block-size: 300px;
   overflow-y: auto;
   overscroll-behavior: contain;
+  border-block-end: 1px solid var(--border-color);
 }
 
 .playlistRow {
@@ -33,31 +34,31 @@
   padding-block: 8px;
   padding-inline: 10px;
   text-align: start;
-  transition: background 0.2s ease-out;
+  border-radius: var(--shape-corner-medium);
+  transition: background-color var(--motion-fast-effects), border-radius var(--motion-fast-spatial);
 
   &:hover,
   &:focus-visible {
-    background-color: var(--side-nav-hover-color);
-    color: var(--side-nav-hover-text-color);
-    transition: background 0.2s ease-in;
+    background-color: color-mix(in srgb, var(--primary-color) 16%, var(--card-bg-color));
+    color: var(--primary-text-color);
   }
 
   &:active {
-    background-color: var(--side-nav-active-color);
-    color: var(--side-nav-active-text-color);
-    transition: background 0.1s ease-in;
+    background-color: color-mix(in srgb, var(--primary-color) 26%, var(--card-bg-color));
+    color: var(--primary-text-color);
+    border-radius: var(--shape-corner-extra-small);
   }
 }
 
 .playlistThumbnail {
   block-size: 27px;
-  border-radius: calc(3px * var(--ui-roundness));
+  border-radius: var(--shape-corner-extra-small);
   flex-shrink: 0;
   inline-size: 48px;
   object-fit: cover;
 
   &.blur {
-    clip-path: inset(0 round calc(3px * var(--ui-roundness)));
+    clip-path: inset(0 round var(--shape-corner-extra-small));
     filter: blur(5px);
   }
 }
@@ -85,11 +86,11 @@
 .createRow {
   background: none;
   border: 0;
-  border-block-start: 1px solid var(--border-color);
   color: inherit;
   font: inherit;
   gap: 8px;
   justify-content: flex-start;
+  margin: 4px;
 }
 
 .playlistSearch {
@@ -107,10 +108,11 @@
   }
 }
 
+/* Rows are rounded items inset from the menu edge. */
 .playlistListContent {
   list-style: none;
   margin: 0;
-  padding: 0;
+  padding: 4px;
 }
 
 .phonePlaylistPicker {

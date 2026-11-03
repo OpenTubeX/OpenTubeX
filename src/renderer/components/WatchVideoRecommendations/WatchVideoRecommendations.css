@@ -16,6 +16,10 @@
   justify-content: space-between;
 }
 
+.VideoRecommendationsTopBar h3 {
+  letter-spacing: -0.01em;
+}
+
 .VideoRecommendationsTopBar:not(.fullscreenDockHeader) h3 {
   /* Include the card's 3px top padding in the 20px item gap. */
   margin-block: 17px 6px;
@@ -47,7 +51,9 @@
   gap: 12px;
   min-block-size: 72px;
   min-inline-size: 0;
+  border-radius: var(--shape-corner-small);
   text-decoration: none;
+  transition: background-color var(--motion-fast-effects);
 }
 
 .offlineDownloadRecommendation:hover,
@@ -59,11 +65,12 @@
   aspect-ratio: 16 / 9;
   background: #000;
   inline-size: 120px;
+  border-radius: var(--shape-corner-small);
   object-fit: cover;
 }
 
 .offlineDownloadThumbnail.blur {
-  clip-path: inset(0);
+  clip-path: inset(0 round var(--shape-corner-small));
   filter: blur(20px);
 }
 

@@ -9,9 +9,7 @@
   z-index: 3;
   box-shadow: 1px -1px 1px -1px var(--primary-shadow-color);
   background-color: var(--side-nav-color);
-  transition-property: inline-size;
-  transition-duration: 150ms;
-  transition-timing-function: ease-in-out;
+  transition: inline-size var(--motion-default-effects);
   user-select: none;
 }
 
@@ -294,11 +292,11 @@
 }
 
 .channelThumbnail.playlistThumbnail {
-  border-radius: calc(8px * var(--ui-roundness));
+  border-radius: var(--shape-corner-small);
   object-fit: cover;
 }
 
 .channelThumbnail.playlistThumbnail.blur {
-  clip-path: inset(0 round calc(8px * var(--ui-roundness)));
+  clip-path: inset(0 round var(--shape-corner-small));
   filter: blur(5px);
 }

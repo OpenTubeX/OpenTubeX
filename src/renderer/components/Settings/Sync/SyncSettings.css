@@ -56,7 +56,7 @@
 .syncProgressTrack {
   background-color: var(--side-nav-color);
   block-size: 0.4rem;
-  border-radius: calc(999px * var(--ui-roundness));
+  border-radius: var(--shape-corner-full);
   overflow: hidden;
 }
 
@@ -74,7 +74,7 @@
   );
   background-size: 1rem 1rem;
   block-size: 100%;
-  transition: inline-size 180ms ease;
+  transition: inline-size var(--motion-default-effects);
 }
 
 @keyframes sync-progress-stripes {

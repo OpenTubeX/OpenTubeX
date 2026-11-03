@@ -16,6 +16,7 @@
   > .downloadRow {
     background-color: var(--bg-color);
     position: relative;
+    // useThumbnailSwipe ends the settle after 200ms, so this keeps its own timing.
     transition: translate 200ms cubic-bezier(0.2, 0, 0, 1);
     translate: var(--video-swipe-offset) 0;
     z-index: 1;
@@ -38,11 +39,11 @@
   opacity: min(1, calc(var(--video-swipe-progress) * 2));
   pointer-events: none;
   position: absolute;
-  transition: opacity 200ms;
+  transition: opacity var(--motion-fast-effects);
   translate: 0 -50%;
 
   &::before {
-    animation: thumbnail-swipe-ripple 350ms cubic-bezier(0.2, 0, 0, 1) both;
+    animation: thumbnail-swipe-ripple var(--motion-fast-spatial) both;
     background-color: currentcolor;
     border-radius: 50%;
     content: '';

@@ -73,7 +73,7 @@ test('recovers a failed channel banner after switching away and back', async ({ 
       })).toBe(true)
     }
   }
-  await expect(container).toHaveCSS('border-top-left-radius', '16px')
+  await expect(container).toHaveCSS('border-top-left-radius', '32px')
 })
 
 test('uses the default banner after permanent failure and loads a replacement banner', async ({ page }) => {

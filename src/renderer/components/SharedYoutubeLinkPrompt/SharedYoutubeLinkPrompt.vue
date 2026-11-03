@@ -18,6 +18,7 @@
       :aria-busy="loading"
     >
       <FtButton
+        theme="primary"
         :label="videoId ? t('Share.Open in Player') : t('Share.Open Link')"
         :icon="['fas', 'play']"
         size="medium"

@@ -31,7 +31,10 @@
   text-align: center;
   cursor: pointer;
   touch-action: manipulation;
-  transition: background-color 160ms ease, color 160ms ease;
+  transition:
+    background-color var(--motion-fast-effects),
+    color var(--motion-fast-effects),
+    border-radius var(--motion-fast-spatial);
 }
 
 .materialTabs[role='tablist'] :deep([role='tab'][aria-selected='true']) {
@@ -52,6 +55,7 @@
 }
 
 .materialTabs[role='tablist'] :deep([role='tab']:active:not(:disabled)) {
+  border-radius: var(--shape-corner-medium);
   background: color-mix(in srgb, var(--primary-text-color) 12%, transparent);
 }
 
@@ -73,7 +77,8 @@
   overflow: clip;
 }
 
-.materialTabs.segmented[role='tablist'] :deep([role='tab']) {
+.materialTabs.segmented[role='tablist'] :deep([role='tab']),
+.materialTabs.segmented[role='tablist'] :deep([role='tab']:active:not(:disabled)) {
   border-radius: 0;
 }
 
@@ -81,7 +86,8 @@
   border-inline-start: 1px solid var(--divider-color);
 }
 
-/* Selection fades in place. Mounting or revealing a page needs no entrance. */
+/* Selection fades in place while the pill springs open from its center.
+   Mounting or revealing a page needs no entrance. */
 .materialTabs[role='tablist'] :deep([role='tab']::before) {
   content: '';
   position: absolute;
@@ -91,11 +97,18 @@
   z-index: -1;
   background: color-mix(in srgb, var(--primary-color) 20%, transparent);
   opacity: 0;
-  transition: var(--material-tab-highlight-transition, opacity 140ms ease);
+  scale: 0.6 1;
+  transition: var(--material-tab-highlight-transition, opacity var(--motion-default-effects), scale var(--motion-default-spatial));
 }
 
 .materialTabs[role='tablist'] :deep([role='tab'][aria-selected='true']::before) {
   opacity: 1;
+  scale: none;
+}
+
+/* Segments fill their whole cell, so their highlight only fades. */
+.materialTabs.segmented[role='tablist'] :deep([role='tab']::before) {
+  scale: none;
 }
 
 @media (any-pointer: coarse) {

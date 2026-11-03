@@ -12,7 +12,7 @@
 
 .tutorialHighlight {
   position: fixed;
-  border-radius: calc(10px * var(--ui-roundness));
+  border-radius: var(--shape-corner-medium);
   box-shadow:
     inset 0 0 0 2px var(--primary-color),
     0 0 0 9999px rgb(0 0 0 / 72%);
@@ -21,7 +21,11 @@
 
   /* Physical target coordinates must not mirror in RTL layouts. */
   /* stylelint-disable-next-line liberty/use-logical-spec */
-  transition: inset-block-start 180ms ease-out, left 180ms ease-out, inline-size 180ms ease-out, block-size 180ms ease-out;
+  transition:
+    inset-block-start var(--motion-default-spatial),
+    left var(--motion-default-spatial),
+    inline-size var(--motion-default-spatial),
+    block-size var(--motion-default-spatial);
 }
 
 .tutorialCard {
@@ -37,6 +41,10 @@
   color: var(--primary-text-color);
   box-shadow: 0 18px 55px rgb(0 0 0 / 55%);
   text-align: center;
+}
+
+.ft-card.tutorialCard {
+  border-radius: var(--shape-corner-extra-large);
 }
 
 .centered .tutorialCard {
@@ -59,25 +67,34 @@
   block-size: 7px;
   border-radius: 50%;
   background-color: var(--subtle-surface-color);
-  transition: inline-size 180ms ease-out, background-color 180ms ease-out;
+  transition: inline-size var(--motion-fast-spatial), background-color var(--motion-fast-effects);
 }
 
 .tutorialProgress .active {
   inline-size: 22px;
-  border-radius: calc(4px * var(--ui-roundness));
+  border-radius: var(--shape-corner-full);
   background-color: var(--primary-color);
 }
 
 .tutorialIcon {
+  position: relative;
   display: grid;
   place-items: center;
   inline-size: 48px;
   block-size: 48px;
   margin-inline: auto;
-  border-radius: 50%;
-  background-color: var(--primary-color);
   color: var(--text-with-main-color);
   font-size: 22px;
+  isolation: isolate;
+}
+
+.tutorialIcon::before {
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  background-color: var(--primary-color);
+  clip-path: var(--shape-cookie-9);
+  content: '';
 }
 
 .tutorialProgress,
@@ -89,6 +106,8 @@
 .tutorialCard h2 {
   margin-block: 16px 8px;
   font-size: 1.35rem;
+  font-weight: 700;
+  letter-spacing: -0.01em;
 }
 
 .tutorialCard p {

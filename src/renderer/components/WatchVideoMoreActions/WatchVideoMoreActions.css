@@ -21,7 +21,7 @@
   padding-block: 10px;
   padding-inline: 12px;
   border: 0;
-  border-radius: calc(8px * var(--ui-roundness));
+  border-radius: var(--shape-corner-small);
   background: transparent;
   color: inherit;
   font: inherit;

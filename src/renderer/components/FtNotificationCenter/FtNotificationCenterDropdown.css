@@ -1,7 +1,7 @@
 .iconDropdown.notificationCenterDropdown {
   inline-size: min(380px, calc(100vw - 16px));
   border: 1px solid var(--border-color);
-  border-radius: calc(12px * var(--ui-roundness));
+  border-radius: var(--shape-corner-large);
   background: var(--card-bg-color);
   color: var(--primary-text-color);
   font-size: 14px;

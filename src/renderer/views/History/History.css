@@ -243,6 +243,9 @@
 
 .message {
   color: var(--tertiary-text-color);
+  font-size: 1.125rem;
+  font-weight: 600;
+  letter-spacing: -0.01em;
 }
 
 .headingIcon {
@@ -293,8 +296,7 @@
 
 .historyFilterCard {
   padding: var(--history-control-gap);
-  border: 1px solid var(--divider-color);
-  border-radius: calc(12px * var(--ui-roundness));
+  border-radius: var(--shape-corner-large-increased);
   background-color: var(--secondary-card-bg-color);
 }
 

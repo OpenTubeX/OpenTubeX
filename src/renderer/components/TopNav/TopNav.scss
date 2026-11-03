@@ -123,6 +123,8 @@
   display: inline-flex;
   align-items: center;
   justify-content: center;
+
+  // Half of the 40px button, so the press morph starts moving at once.
   border-radius: calc(20px * var(--ui-roundness));
   border-style: none;
   background-color: transparent;
@@ -131,7 +133,7 @@
   font-size: 20px;
   line-height: 0;
   padding: 10px;
-  transition: background-color 150ms ease, border-radius 200ms ease;
+  transition: background-color var(--motion-fast-effects), border-radius var(--motion-fast-spatial);
 }
 
 .navButton :deep(.ft-icon) {
@@ -149,7 +151,7 @@
   &:active {
     background-color: var(--header-button-pressed-color);
     color: var(--header-button-pressed-text-color);
-    border-radius: calc(12px * var(--ui-roundness));
+    border-radius: var(--shape-corner-medium);
   }
 }
 
@@ -159,13 +161,19 @@
 
   &.active {
     color: var(--primary-color);
-    background-color: var(--side-nav-hover-color);
+    background-color: color-mix(in srgb, var(--primary-color) 16%, var(--card-bg-color));
   }
 }
 
 .minimizedUtilityButton {
   color: var(--primary-color);
-  background-color: var(--side-nav-hover-color);
+  background-color: color-mix(in srgb, var(--primary-color) 16%, var(--card-bg-color));
+}
+
+.downloadsButton.active:hover,
+.settingsButton.active:hover,
+.minimizedUtilityButton:hover {
+  background-color: color-mix(in srgb, var(--primary-color) 26%, var(--card-bg-color));
 }
 
 .navIcon {
@@ -214,21 +222,21 @@
 
   .logo {
     align-items: center;
-    border-radius: calc(20px * var(--ui-roundness));
+    border-radius: var(--shape-corner-large-increased);
     cursor: pointer;
     display: flex;
     padding-block: 0;
     padding-inline: 10px;
+    transition: background-color var(--motion-fast-effects), border-radius var(--motion-fast-spatial);
 
     &:hover {
       background-color: var(--header-button-hover-color);
       color: var(--header-button-hover-text-color);
-      transition: background 0.2s ease-in;
     }
 
     &:active {
       background-color: var(--header-button-pressed-color);
-      transition: background 0.2s ease-in;
+      border-radius: var(--shape-corner-medium);
     }
 
     .logoIcon {
@@ -331,6 +339,8 @@
     min-block-size: 48px;
     padding-inline: 12px;
     border: 0;
+
+    // Half of the 48px bar, so the press morph starts moving at once.
     border-radius: calc(24px * var(--ui-roundness));
     background-color: var(--search-bar-color);
     box-shadow: inset 0 0 0 1px var(--input-border-color, transparent);
@@ -340,6 +350,7 @@
     line-height: normal;
     text-align: start;
     cursor: pointer;
+    transition: background-color var(--motion-fast-effects), border-radius var(--motion-fast-spatial);
 
     &:hover,
     &:focus-visible {
@@ -350,6 +361,7 @@
     &:active {
       background-color: var(--header-button-pressed-color);
       color: var(--header-button-pressed-text-color);
+      border-radius: var(--shape-corner-medium);
     }
 
     .ft-icon {
@@ -387,7 +399,7 @@
     .searchContainer {
       align-items: center;
       background-color: var(--search-bar-color);
-      border-radius: calc(24px * var(--ui-roundness));
+      border-radius: var(--shape-corner-full);
       box-shadow: inset 0 0 0 1px var(--input-border-color, transparent);
     }
 
@@ -580,6 +592,8 @@
     flex-shrink: 0;
     font-size: 20px;
   }
+
+  transition: background-color var(--motion-fast-effects);
 
   &:hover,
   &:focus-visible {

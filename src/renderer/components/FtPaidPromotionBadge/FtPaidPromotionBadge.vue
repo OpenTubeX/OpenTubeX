@@ -42,7 +42,7 @@ function openPaidPromotionHelp() {
   padding-inline: 9px 7px;
   border: 0;
   border-inline-start: 4px solid #3ea6ff;
-  border-radius: calc(3px * var(--ui-roundness));
+  border-radius: var(--shape-corner-extra-small);
   color: #fff;
   background-color: rgb(32 32 32 / 92%);
   box-shadow: 0 1px 2px rgb(0 0 0 / 35%);
@@ -51,6 +51,7 @@ function openPaidPromotionHelp() {
   white-space: nowrap;
   cursor: pointer;
   backdrop-filter: blur(4px);
+  transition: background-color var(--motion-fast-effects);
 }
 
 .paidPromotionBadge:hover,

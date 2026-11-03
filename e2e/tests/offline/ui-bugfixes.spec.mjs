@@ -1849,11 +1849,11 @@ test.describe('thumbnail watched progress', () => {
     const thumbnail = video.locator('.thumbnailLink')
     const progress = video.locator('.watchedProgressBar')
 
-    await expect(thumbnail).toHaveCSS('border-radius', '16px')
+    await expect(thumbnail).toHaveCSS('border-radius', '24px')
     await expect(progress).toBeVisible()
     const progressPath = progress.locator('.embeddedProgressPath')
     // The path starts from a placeholder size until its resize observer reports the thumbnail.
-    await expect(progressPath).toHaveAttribute('d', /A 14\.5 14\.5/)
+    await expect(progressPath).toHaveAttribute('d', /A 22\.5 22\.5/)
     const progressGeometry = await progressPath.evaluate(element => {
       const line = getComputedStyle(element)
       return {
@@ -1870,7 +1870,7 @@ test.describe('thumbnail watched progress', () => {
       strokeWidth: '3px',
       vectorEffect: 'none',
     })
-    expect(progressGeometry.path).toContain('A 14.5 14.5')
+    expect(progressGeometry.path).toContain('A 22.5 22.5')
     const [visibleLength, gapLength] = progressGeometry.strokeDasharray
       .split(' ')
       .map(Number.parseFloat)
@@ -1961,7 +1961,7 @@ test.describe('toast timeout progress', () => {
     const indicator = track.locator('.timeout-indicator')
     await expect(toast).toBeVisible()
     await toast.hover()
-    await expect(track).toHaveCSS('border-radius', '24px')
+    await expect(track).toHaveCSS('border-radius', '32px')
     await expect(indicator).toHaveCSS('transform', 'none')
     const indicatorPath = indicator.locator('.embeddedProgressPath')
     const initialGeometry = await indicatorPath.evaluate(element => {
@@ -2165,7 +2165,8 @@ test.describe('select dropdown pixel grid', () => {
 
     const selectedOption = dropdown.locator('.selectOption[aria-selected="true"]')
     const selectedTextPosition = await textPosition(selectedOption)
-    const selectedBackground = await selectedOption.evaluate(element => getComputedStyle(element).backgroundColor)
+    // The selection fill is the option's inset ::before layer.
+    const selectedBackground = await selectedOption.evaluate(element => getComputedStyle(element, '::before').backgroundColor)
     expect(selectedBackground).not.toBe('rgba(0, 0, 0, 0)')
     await selectedOption.hover()
     await expect(selectedOption).toHaveClass(/active/)
@@ -2174,7 +2175,7 @@ test.describe('select dropdown pixel grid', () => {
       const hoverLayer = getComputedStyle(element, '::before')
       return {
         hoverLayerZIndex: hoverLayer.zIndex,
-        selectionBackground: getComputedStyle(element).backgroundColor
+        selectionBackground: hoverLayer.backgroundColor
       }
     })
     expect(indicatorAppearance).toMatchObject({

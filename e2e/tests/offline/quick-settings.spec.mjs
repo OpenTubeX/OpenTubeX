@@ -234,7 +234,8 @@ test.describe('quick settings select interactions', () => {
       overlay: getComputedStyle(element, '::before').backgroundColor,
     }))
     const initialColors = await selectedColors()
-    expect(initialColors.overlay).toBe('rgba(0, 0, 0, 0)')
+    // The accent is an inset rounded layer behind the option.
+    expect(initialColors.background).toBe('rgba(0, 0, 0, 0)')
     const expectedAccent = await dropdown.evaluate(menu => {
       const sample = document.createElement('span')
       sample.style.backgroundColor = 'color-mix(in srgb, var(--primary-color) 20%, var(--select-menu-surface))'
@@ -243,7 +244,7 @@ test.describe('quick settings select interactions', () => {
       sample.remove()
       return color
     })
-    expect(initialColors.background).toBe(expectedAccent)
+    expect(initialColors.overlay).toBe(expectedAccent)
     await attachScreenshot('selected option accent immediately after opening')
     await dropdown.locator('[aria-selected="false"]').first().hover()
     expect(await selectedColors()).toEqual(initialColors)

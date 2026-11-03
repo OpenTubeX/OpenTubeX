@@ -19,7 +19,7 @@
 
   background-color: var(--settings-section-bg-color, var(--card-bg-color));
   backdrop-filter: var(--card-bg-blur, none);
-  border-radius: calc(8px * var(--ui-roundness));
+  border-radius: var(--shape-corner-large-increased);
   padding-block: calc(var(--settings-row-gap, 20px) / 2);
 
   > :deep(div) {
@@ -30,7 +30,13 @@
   }
 }
 
+/* Material 3 Expressive emphasized title: larger and heavier than the
+   setting labels below it. */
 .sectionTitle {
+  font-size: 1.375rem;
+  font-weight: 650;
+  letter-spacing: -0.01em;
+  line-height: 1.75rem;
   user-select: none;
   margin-inline-start: 20px;
   margin-block: 0.5em;

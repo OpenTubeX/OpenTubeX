@@ -1,5 +1,6 @@
 h2 {
   text-align: center;
+  letter-spacing: -0.01em;
 }
 
 h3 {
@@ -51,20 +52,29 @@ h3 {
   background: var(--card-bg-color);
   backdrop-filter: var(--card-bg-blur, none);
   border: 2px solid transparent;
-  border-radius: calc(8px * var(--ui-roundness));
+  border-radius: var(--shape-corner-medium);
   cursor: pointer;
   color: var(--primary-text-color);
   font-size: 24px;
   block-size: 42px;
   inline-size: 42px;
   padding: 0;
+  transition:
+    background-color var(--motion-fast-effects),
+    border-color var(--motion-fast-effects),
+    border-radius var(--motion-fast-spatial);
 }
 
 .builtinIconOption:hover,
 .builtinIconOption:focus-visible,
 .emojiOption:hover,
 .emojiOption:focus-visible {
-  background: var(--side-nav-hover-color);
+  background: color-mix(in srgb, var(--primary-color) 16%, var(--card-bg-color));
+}
+
+.builtinIconOption:active,
+.emojiOption:active {
+  border-radius: var(--shape-corner-small);
 }
 
 /* Keep a focus indicator when outlines are hidden. */
@@ -197,6 +207,11 @@ h3 {
   margin: 2px;
   cursor: pointer;
   border-radius: 50%;
+  transition: border-radius var(--motion-fast-spatial);
+}
+
+.colorOption:active {
+  border-radius: var(--shape-corner-medium);
 }
 
 .colorOption.selected {

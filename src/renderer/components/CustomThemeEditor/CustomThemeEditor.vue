@@ -122,6 +122,7 @@
         <FtButton
           :label="t('Settings.Theme Settings.Custom Theme.Save and Apply')"
           :icon="['fas', 'floppy-disk']"
+          theme="primary"
           :disabled="savedTheme !== null && !hasChanges"
           @click="saveAndApply"
         />

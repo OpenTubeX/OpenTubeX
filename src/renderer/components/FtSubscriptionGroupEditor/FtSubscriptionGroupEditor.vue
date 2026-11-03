@@ -101,10 +101,11 @@
       </FtAutoLoadNextPageWrapper>
     </template>
     <template #footer>
-      <FtFlexBox>
+      <FtButtonGroup>
         <FtButton
           v-if="group !== null"
           theme="destructive"
+          variant="tonal"
           :label="t('Subscription Groups.Delete Group')"
           :icon="['fas', 'trash']"
           @click="showDeletePrompt = true"
@@ -123,7 +124,7 @@
           :background-color="null"
           @click="close"
         />
-      </FtFlexBox>
+      </FtButtonGroup>
     </template>
   </FtPrompt>
   <FtPrompt
@@ -144,6 +145,7 @@ import { useI18n } from 'vue-i18n'
 
 import FtAutoLoadNextPageWrapper from '../FtAutoLoadNextPageWrapper.vue'
 import FtButton from '../FtButton/FtButton.vue'
+import FtButtonGroup from '../FtButtonGroup/FtButtonGroup.vue'
 import FtChannelBubble from '../FtChannelBubble/FtChannelBubble.vue'
 import FtFlexBox from '../ft-flex-box/ft-flex-box.vue'
 import FtInput from '../FtInput/FtInput.vue'

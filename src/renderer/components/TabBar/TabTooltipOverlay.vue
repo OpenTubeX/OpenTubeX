@@ -218,7 +218,7 @@ function updateTooltipPosition() {
   max-inline-size: min(340px, calc(100vw - 16px));
   padding: 8px;
   border: 1px solid var(--border-color);
-  border-radius: calc(8px * var(--ui-roundness));
+  border-radius: var(--shape-corner-medium);
   background-color: var(--card-bg-color);
   backdrop-filter: var(--card-bg-blur, none);
   box-shadow: 0 8px 26px rgb(0 0 0 / 32%);
@@ -228,7 +228,7 @@ function updateTooltipPosition() {
   letter-spacing: 0;
   pointer-events: none;
   -webkit-app-region: no-drag;
-  transition: top 0.14s ease, left 0.14s ease;
+  transition: top var(--motion-fast-effects), left var(--motion-fast-effects);
 }
 
 .tabTooltip.withPreview {
@@ -256,7 +256,11 @@ function updateTooltipPosition() {
 
 .tab-tooltip-enter-active,
 .tab-tooltip-leave-active {
-  transition: opacity 0.14s ease, transform 0.14s ease, top 0.14s ease, left 0.14s ease;
+  transition:
+    opacity var(--motion-fast-effects),
+    transform var(--motion-fast-effects),
+    top var(--motion-fast-effects),
+    left var(--motion-fast-effects);
 }
 
 .tab-tooltip-enter-from,

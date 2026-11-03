@@ -16,6 +16,14 @@
   flex-direction: column;
 }
 
+// Feed posts sit on their own tonal card.
+.ft-list-post.ft-list-item {
+  padding: 16px;
+  border-radius: var(--shape-corner-large-increased);
+  background-color: var(--secondary-card-bg-color);
+  backdrop-filter: var(--secondary-card-bg-blur, none);
+}
+
 .hiddenVideo,
 .unavailablePost {
   font-style: italic;
@@ -27,7 +35,7 @@
   display: block;
   inline-size: 100%;
   block-size: auto;
-  border-radius: calc(8px * var(--ui-roundness));
+  border-radius: var(--shape-corner-medium);
 }
 
 .communityThumbnail {
@@ -90,9 +98,15 @@
   }
 
   .likeBar {
-    border-radius: calc(4px * var(--ui-roundness));
+    border-radius: var(--shape-corner-full);
     block-size: 8px;
     margin-block-end: 4px;
+  }
+
+  .likeCount,
+  .commentCount {
+    font-variant-numeric: tabular-nums;
+    font-weight: 600;
   }
 
   .likeCount {
@@ -164,7 +178,6 @@
 
 .ft-list-item.grid {
   min-block-size: 0 !important;
-  padding-block-end: 20px;
 }
 
 // The shared list layout is a 'grabBar thumbnail info' column grid meant for
@@ -179,8 +192,8 @@
 }
 
 .sharedPostCard {
-  border: 1px solid var(--divider-color);
-  border-radius: calc(8px * var(--ui-roundness));
+  border-radius: var(--shape-corner-large);
+  background-color: var(--card-bg-color);
   margin-block-start: 8px;
   padding: 12px;
 

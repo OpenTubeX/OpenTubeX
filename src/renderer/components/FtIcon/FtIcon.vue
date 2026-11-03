@@ -326,7 +326,7 @@ const iconifyGlyphStyle = computed(() => cssFromIconTransform(props.transform))
 }
 
 .ft-custom-icon--image {
-  border-radius: calc(2px * var(--ui-roundness));
+  border-radius: var(--shape-corner-extra-small);
 }
 
 .ft-custom-icon--image > img,

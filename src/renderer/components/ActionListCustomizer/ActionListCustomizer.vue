@@ -402,7 +402,7 @@ function resetItems() {
 .itemPickerPopover {
   background: var(--card-bg-color);
   border: 1px solid var(--divider-color);
-  border-radius: calc(6px * var(--ui-roundness));
+  border-radius: var(--shape-corner-large);
   box-shadow: 0 8px 24px rgb(0 0 0 / 35%);
   box-sizing: border-box;
   inline-size: min(520px, 100%);
@@ -429,7 +429,7 @@ function resetItems() {
   align-items: center;
   background: transparent;
   border: 0;
-  border-radius: calc(4px * var(--ui-roundness));
+  border-radius: var(--shape-corner-extra-small);
   color: inherit;
   cursor: pointer;
   display: flex;
@@ -456,9 +456,11 @@ function resetItems() {
   opacity: 0.6;
 }
 
+/* Rows form one segmented group: large outer corners, tight inner ones.
+   A dragged row lifts out of the group with fully rounded corners. */
 .selectedActions {
   display: grid;
-  gap: 8px;
+  gap: 2px;
   inline-size: 100%;
   list-style: none;
   margin-block: 0;
@@ -468,12 +470,28 @@ function resetItems() {
 }
 
 .selectedAction {
+  --reorder-row-color: color-mix(in srgb, var(--primary-text-color) 6%, var(--card-bg-color));
+
   align-items: center;
-  background: var(--card-bg-color);
-  border: 1px solid var(--divider-color);
-  border-radius: calc(6px * var(--ui-roundness));
+  background: var(--reorder-row-color);
+  border-radius: var(--shape-corner-extra-small);
   min-block-size: 56px;
+  transition: border-radius var(--motion-fast-spatial);
   user-select: none;
+}
+
+.selectedAction:first-child {
+  border-start-start-radius: var(--shape-corner-large-increased);
+  border-start-end-radius: var(--shape-corner-large-increased);
+}
+
+.selectedAction:last-child {
+  border-end-start-radius: var(--shape-corner-large-increased);
+  border-end-end-radius: var(--shape-corner-large-increased);
+}
+
+.selectedAction.dragging {
+  border-radius: var(--shape-corner-large-increased);
 }
 
 .selectedAction {

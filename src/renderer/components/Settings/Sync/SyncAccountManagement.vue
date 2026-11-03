@@ -25,7 +25,7 @@
         :disabled="loading || actionBusy"
         :padding="11"
         :size="20"
-        theme="base-no-default"
+        theme="primary"
         @click="loadSessions"
       />
     </div>
@@ -120,7 +120,7 @@
             :disabled="actionBusy"
             :padding="11"
             :size="20"
-            theme="base-no-default"
+            theme="base"
             @click="openRenamePrompt(session)"
           />
           <FtIconButton
@@ -130,7 +130,7 @@
             :disabled="actionBusy"
             :padding="11"
             :size="20"
-            theme="base-no-default"
+            theme="destructive"
             @click="openRevokePrompt(session)"
           />
         </div>

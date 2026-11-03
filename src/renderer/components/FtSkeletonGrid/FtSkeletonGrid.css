@@ -14,7 +14,7 @@
 .skeletonThumbnail {
   aspect-ratio: 16 / 9;
   inline-size: 100%;
-  border-radius: calc(5px * var(--ui-roundness));
+  border-radius: var(--shape-corner-medium);
 }
 
 .youtubeStyleShorts .skeletonThumbnail {
@@ -35,7 +35,7 @@
 
 .skeletonLine {
   block-size: 14px;
-  border-radius: calc(4px * var(--ui-roundness));
+  border-radius: var(--shape-corner-full);
   inline-size: 90%;
 }
 

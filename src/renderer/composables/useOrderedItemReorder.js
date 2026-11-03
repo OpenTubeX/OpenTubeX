@@ -30,7 +30,7 @@ export function useOrderedItemReorder({ items, rowSelector, itemIdAttribute, upd
       transition: session.reducedMotion || (dragged && !settling.value) ? 'none' : 'transform 160ms ease',
       zIndex: dragged ? 2 : 1,
       position: 'relative',
-      backgroundColor: 'var(--card-bg-color)',
+      backgroundColor: 'var(--reorder-row-color, var(--card-bg-color))',
       boxShadow: dragged ? '0 4px 12px rgb(0 0 0 / 18%)' : undefined,
     }
   }

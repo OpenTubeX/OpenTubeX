@@ -8,6 +8,7 @@
       <div class="activityTitle">
         <span
           class="activityIcon"
+          :class="{ activityIconBusy: loading }"
           aria-hidden="true"
         >
           <FtIcon :icon="['fas', 'history']" />
@@ -27,7 +28,9 @@
         :aria-label="t('Settings.Sync Settings.Clear Activity')"
         :title="t('Settings.Sync Settings.Clear Activity')"
         :icon="['fas', 'trash']"
-        variant="outlined"
+        variant="tonal"
+        background-color="var(--primary-color)"
+        text-color="var(--text-with-main-color)"
         :disabled="loading || !entries.length"
         @click="showClearPrompt = true"
       >
@@ -53,7 +56,7 @@
         :disabled="loading"
         :padding="11"
         :size="20"
-        theme="base-no-default"
+        theme="primary"
         @click="refresh"
       />
     </div>
@@ -85,6 +88,12 @@
           :key="entry.id"
           tabindex="-1"
         >
+          <span
+            class="activityEntryIcon"
+            aria-hidden="true"
+          >
+            <FtIcon :icon="entry.icon" />
+          </span>
           <I18nT
             :keypath="entry.messageKey"
             tag="p"
@@ -130,7 +139,7 @@
     >
       <span>{{ showAll ? t('Description.Collapse Description') : t('Settings.Sync Settings.Show More') }}</span>
       <FtIcon
-        :icon="['fas', showAll ? 'angle-up' : 'angle-down']"
+        :icon="['fas', 'angle-down']"
         aria-hidden="true"
       />
     </button>
@@ -375,6 +384,8 @@ const visibleEntries = computed(() => (showAll.value ? entries.value : entries.v
       : entry.action === 'renamed'
         ? 'Settings.Sync Settings.Item Renamed'
         : hasValue ? 'Settings.Sync Settings.Setting Changed' : 'Settings.Sync Settings.Item Updated'
+  const icon = { added: 'plus', removed: 'minus', renamed: 'pencil' }[entry.action] ??
+    (hasValue ? 'sliders-h' : 'sync')
   const setting = entry.parent || [labels.join(' · '),
     entry.action === 'updated' && !entry.key ? entry.item : null].filter(Boolean).join(' · ')
   return {
@@ -382,6 +393,7 @@ const visibleEntries = computed(() => (showAll.value ? entries.value : entries.v
     setting: setting || entry.key || entry.collection,
     target,
     messageKey,
+    icon: ['fas', icon],
     displayValue: displayActivityValue(entry),
   }
 }))

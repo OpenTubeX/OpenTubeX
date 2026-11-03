@@ -9,6 +9,29 @@ body {
 
   --app-font-family: 'Geist Variable', system-ui, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol', 'Noto Color Emoji';
   --ui-roundness: 1;
+
+  /* Material 3 corner scale, scaled by the UI Roundness setting. */
+  --shape-corner-extra-small: calc(4px * var(--ui-roundness));
+  --shape-corner-small: calc(8px * var(--ui-roundness));
+  --shape-corner-medium: calc(12px * var(--ui-roundness));
+  --shape-corner-large: calc(16px * var(--ui-roundness));
+  --shape-corner-large-increased: calc(20px * var(--ui-roundness));
+  --shape-corner-extra-large: calc(28px * var(--ui-roundness));
+  --shape-corner-full: calc(999px * var(--ui-roundness));
+
+  /* Expressive shapes for decorative clip-path layers. */
+  --shape-cookie-9: polygon(50% 0%, 54.3% 1.4%, 58% 4.7%, 61.2% 8.3%, 64.4% 10.5%, 68.2% 10.9%, 73% 10.2%, 78% 10%, 82.1% 11.7%, 84.5% 15.5%, 85.2% 20.4%, 85.4% 25.2%, 86.4% 29%, 89.1% 31.8%, 93.2% 34.3%, 97.2% 37.4%, 99.2% 41.3%, 98.6% 45.7%, 96% 50%, 93% 53.8%, 91.4% 57.3%, 91.7% 61.2%, 93.2% 65.7%, 94.3% 70.6%, 93.3% 75%, 90% 78%, 85.2% 79.6%, 80.5% 80.5%, 77% 82.2%, 74.8% 85.4%, 73% 89.8%, 70.6% 94.3%, 67.1% 97%, 62.6% 97.2%, 58% 95.3%, 53.8% 93%, 50% 92%, 46.2% 93%, 42% 95.3%, 37.4% 97.2%, 32.9% 97%, 29.4% 94.3%, 27% 89.8%, 25.2% 85.4%, 23% 82.2%, 19.5% 80.5%, 14.8% 79.6%, 10% 78%, 6.7% 75%, 5.7% 70.6%, 6.8% 65.7%, 8.3% 61.2%, 8.6% 57.3%, 7% 53.8%, 4% 50%, 1.4% 45.7%, 0.8% 41.3%, 2.8% 37.4%, 6.8% 34.3%, 10.9% 31.8%, 13.6% 29%, 14.6% 25.2%, 14.8% 20.4%, 15.5% 15.5%, 17.9% 11.7%, 22% 10%, 27% 10.2%, 31.8% 10.9%, 35.6% 10.5%, 38.8% 8.3%, 42% 4.7%, 45.7% 1.4%);
+
+  /* Material 3 Expressive springs (damping, stiffness) sampled into
+     duration + easing pairs: `transition: transform var(--motion-fast-spatial)`.
+     Spatial springs overshoot and suit position, size and shape; effects
+     springs do not and suit color and opacity. */
+  --motion-fast-spatial: 350ms linear(0, 0.075, 0.248, 0.456, 0.657, 0.825, 0.95, 1.033, 1.078, 1.094, 1.091, 1.076, 1.057, 1.038, 1.021, 1.008, 0.999, 0.994, 0.991, 0.991, 0.992, 0.994, 0.996, 0.998, 1);
+  --motion-default-spatial: 450ms linear(0, 0.052, 0.17, 0.316, 0.463, 0.597, 0.712, 0.804, 0.875, 0.927, 0.963, 0.987, 1.002, 1.011, 1.014, 1.015, 1.014, 1.012, 1.01, 1.008, 1.006, 1.004, 1.003, 1.002, 1);
+  --motion-slow-spatial: 650ms linear(0, 0.06, 0.194, 0.354, 0.511, 0.649, 0.761, 0.848, 0.912, 0.956, 0.985, 1.002, 1.011, 1.015, 1.015, 1.014, 1.011, 1.009, 1.007, 1.005, 1.003, 1.002, 1.001, 1.001, 1);
+  --motion-fast-effects: 150ms linear(0, 0.058, 0.181, 0.321, 0.456, 0.574, 0.672, 0.751, 0.813, 0.861, 0.897, 0.924, 0.945, 0.96, 0.971, 0.979, 0.985, 0.989, 0.992, 0.994, 0.996, 0.997, 0.998, 0.999, 1);
+  --motion-default-effects: 250ms linear(0, 0.057, 0.18, 0.32, 0.454, 0.572, 0.67, 0.749, 0.812, 0.86, 0.896, 0.924, 0.944, 0.959, 0.971, 0.979, 0.985, 0.989, 0.992, 0.994, 0.996, 0.997, 0.998, 0.999, 1);
+  --motion-slow-effects: 350ms linear(0, 0.065, 0.2, 0.351, 0.491, 0.611, 0.708, 0.783, 0.841, 0.885, 0.917, 0.941, 0.958, 0.97, 0.979, 0.985, 0.99, 0.993, 0.995, 0.997, 0.998, 0.998, 0.999, 0.999, 1);
   --focus-border-width: 2px;
   --form-control-height: 45px;
   --native-color-scheme: light;
@@ -2461,6 +2484,17 @@ a:visited {
 }
 
 /* stylelint-enable no-descending-specificity */
+
+/* Follows the app's Reduced Motion setting, which already resolves the system
+   preference, so choosing Off still animates on a reduced-motion system. */
+:root[data-reduced-motion='reduce'] body {
+  --motion-fast-spatial: 0s;
+  --motion-default-spatial: 0s;
+  --motion-slow-spatial: 0s;
+  --motion-fast-effects: 0s;
+  --motion-default-effects: 0s;
+  --motion-slow-effects: 0s;
+}
 
 /* stylelint-disable no-descending-specificity */
 :root[data-reduced-motion='reduce'],

@@ -90,15 +90,21 @@
   margin-block-end: 16px;
 }
 
+/* Material 3 filter chips */
 .channelSearchFilter {
   color: var(--primary-text-color);
   background-color: var(--search-bar-color);
   backdrop-filter: var(--search-bar-blur, none);
   border: 1px solid var(--border-color);
-  border-radius: calc(999px * var(--ui-roundness));
+  border-radius: var(--shape-corner-small);
   padding-block: 7px;
   padding-inline: 14px;
   cursor: pointer;
+  transition:
+    background-color var(--motion-fast-effects),
+    border-color var(--motion-fast-effects),
+    color var(--motion-fast-effects),
+    border-radius var(--motion-fast-spatial);
 }
 
 .channelSearchFilter:hover,
@@ -106,10 +112,14 @@
   border-color: var(--primary-color);
 }
 
+.channelSearchFilter:active {
+  border-radius: var(--shape-corner-extra-small);
+}
+
 .channelSearchFilter.selected {
-  color: var(--text-with-accent-color);
-  background-color: var(--accent-color);
-  border-color: var(--accent-color);
+  color: var(--on-selected-container-color);
+  background-color: var(--selected-container-color);
+  border-color: var(--selected-container-color);
 }
 
 .elementListLoading {
@@ -124,15 +134,27 @@
   margin-block: 0;
 }
 
+/* The radius is half the height rather than full, so the press morph is
+   smooth. */
 .getNextPage {
   background-color: var(--search-bar-color);
   backdrop-filter: var(--search-bar-blur, none);
+  border-radius: calc(22.5px * var(--ui-roundness));
   inline-size: 100%;
   block-size: 45px;
   line-height: 45px;
   text-align: center;
   cursor: pointer;
   margin-block-start: 16px;
+  transition: background-color var(--motion-fast-effects), border-radius var(--motion-fast-spatial);
+}
+
+.getNextPage:hover {
+  background-color: color-mix(in srgb, var(--primary-text-color) 8%, var(--search-bar-color));
+}
+
+.getNextPage:active {
+  border-radius: var(--shape-corner-medium);
 }
 
 @media only screen and (width <= 680px) {

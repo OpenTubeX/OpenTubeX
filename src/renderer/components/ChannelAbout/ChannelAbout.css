@@ -10,6 +10,10 @@
   z-index: 1;
 }
 
+.about h2 {
+  letter-spacing: -0.01em;
+}
+
 .about > :first-child,
 .about > section:first-child > :first-child {
   margin-block-start: 0;
@@ -95,9 +99,24 @@
   background-color: var(--secondary-card-bg-color);
   backdrop-filter: var(--secondary-card-bg-blur, none);
   color: var(--primary-text-color);
-  border-radius: calc(7px * var(--ui-roundness));
+  border-radius: var(--shape-corner-small);
   padding: 7px;
   text-decoration: none;
+  transition: background-color var(--motion-fast-effects);
+}
+
+/* The radius only transitions under the pointer, so UI Roundness changes stay
+   instant. */
+.aboutTagLink:is(:hover, :active) {
+  transition: background-color var(--motion-fast-effects), border-radius var(--motion-fast-spatial);
+}
+
+.aboutTagLink:hover {
+  background-color: color-mix(in srgb, var(--primary-color) 16%, var(--secondary-card-bg-color));
+}
+
+.aboutTagLink:active {
+  border-radius: var(--shape-corner-extra-small);
 }
 
 .aboutDetails {

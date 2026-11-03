@@ -579,7 +579,8 @@ for (const withChat of [false, true]) {
       for (const theme of ['dark', 'light']) {
         await page.emulateMedia({ colorScheme: theme })
         await expect(page.locator('body')).toHaveClass(new RegExp(`\\b${theme}\\b`))
-        await expect.poll(() => panel.locator('.chapterSeek').first().evaluate(element =>
+        // The current chapter is a filled row, so check one that is not current.
+        await expect.poll(() => panel.locator('.chapter:not(.current) .chapterSeek').first().evaluate(element =>
           getComputedStyle(element).color === getComputedStyle(document.body).color)).toBe(true)
         const playerBox = await player.boundingBox()
         const panelBox = await panel.boundingBox()

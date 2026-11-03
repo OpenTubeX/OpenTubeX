@@ -1,4 +1,5 @@
 h2 {
+  letter-spacing: -0.01em;
   text-align: center;
 }
 
@@ -35,7 +36,7 @@ h2 {
   align-items: center;
   background: transparent;
   border: 0;
-  border-radius: calc(8px * var(--ui-roundness));
+  border-radius: var(--shape-corner-small);
   box-sizing: border-box;
   color: var(--primary-text-color);
   cursor: pointer;
@@ -50,11 +51,15 @@ h2 {
   padding-block: 30px 8px;
   padding-inline: 10px;
   text-align: center;
-  transition: background 0.2s ease-out;
+  transition: background-color var(--motion-default-effects), border-radius var(--motion-fast-spatial);
 }
 
 .createProfileOption:is(:hover, :focus-visible) {
   background-color: color-mix(in srgb, var(--side-nav-hover-color) 30%, transparent);
+}
+
+.createProfileOption:active {
+  border-radius: var(--shape-corner-extra-small);
 }
 
 .createProfileIcon {
@@ -68,14 +73,12 @@ h2 {
 }
 
 .openedProfile {
-  background-color: color-mix(in srgb, var(--primary-text-color) 15%, transparent);
-  transition: background 0.2s ease-out;
+  background-color: color-mix(in srgb, var(--primary-color) 16%, transparent);
 }
 
 .openedProfile:hover,
 .openedProfile:focus-visible {
-  background-color: color-mix(in srgb, var(--primary-text-color) 20%, transparent);
-  transition: background 0.2s ease-in;
+  background-color: color-mix(in srgb, var(--primary-color) 26%, transparent);
 }
 
 .card {

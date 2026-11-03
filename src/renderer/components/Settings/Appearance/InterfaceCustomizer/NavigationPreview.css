@@ -10,7 +10,7 @@
   background-color: var(--bg-color);
   block-size: 100%;
   border: 1px solid var(--divider-color);
-  border-radius: calc(12px * var(--ui-roundness));
+  border-radius: var(--shape-corner-medium);
   box-sizing: border-box;
   color: var(--primary-text-color);
   container-type: inline-size;
@@ -27,7 +27,7 @@
 }
 
 .mobile .previewWindow {
-  border-radius: calc(24px * var(--ui-roundness));
+  border-radius: var(--shape-corner-extra-large);
   border-width: 6px;
   inline-size: min(100%, 320px);
 }
@@ -169,7 +169,7 @@
   block-size: 32px;
   place-items: center;
   inline-size: 64px;
-  border-radius: calc(24px * var(--ui-roundness));
+  border-radius: var(--shape-corner-full);
 }
 
 .hiddenLabels .previewNavIcon {
@@ -252,7 +252,7 @@
 .previewThumbnail {
   aspect-ratio: 16 / 9;
   background-color: var(--secondary-card-bg-color);
-  border-radius: calc(10px * var(--ui-roundness));
+  border-radius: var(--shape-corner-medium);
 }
 
 .previewLine {

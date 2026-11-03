@@ -23,8 +23,8 @@
   margin-inline: -16px;
   padding-block: var(--page-title-offset) var(--subscriptions-header-padding-block-end);
   padding-inline: 16px;
-  border-start-start-radius: calc(8px * var(--ui-roundness));
-  border-start-end-radius: calc(8px * var(--ui-roundness));
+  border-start-start-radius: var(--shape-corner-medium);
+  border-start-end-radius: var(--shape-corner-medium);
   background-color: var(--card-bg-color);
   background-image: var(--card-bg-image);
   background-attachment: fixed;
@@ -64,7 +64,9 @@
   align-items: center;
   background: transparent;
   border: 0;
-  border-radius: calc(4px * var(--ui-roundness));
+
+  /* Half the height rather than full, so the press morph is smooth. */
+  border-radius: calc(13px * var(--ui-roundness));
   color: var(--primary-color);
   cursor: pointer;
   display: inline-flex;
@@ -74,6 +76,7 @@
   padding-block: 5px;
   padding-inline: 7px;
   white-space: nowrap;
+  transition: background-color var(--motion-fast-effects), border-radius var(--motion-fast-spatial);
 }
 
 .markAllSeenButton:hover,
@@ -84,6 +87,10 @@
 .markAllSeenButton:disabled {
   cursor: not-allowed;
   opacity: 0.5;
+}
+
+.markAllSeenButton:not(:disabled):active {
+  border-radius: var(--shape-corner-small);
 }
 
 .headerActions {
@@ -500,6 +507,7 @@
 
   .markAllSeenButton {
     min-block-size: 36px;
+    border-radius: calc(18px * var(--ui-roundness));
     order: 2;
   }
 

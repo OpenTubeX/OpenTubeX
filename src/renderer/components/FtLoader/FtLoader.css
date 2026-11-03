@@ -29,12 +29,8 @@
   block-size: 85vh;
 }
 
-/*
-* Thanks to @tobiasahlin for the loading animation.
-* Find it here: http://tobiasahlin.com/spinkit/
-* Twitter: https://twitter.com/tobiasahlin
-*/
-
+/* Material 3 Expressive contained loading indicator: a shape that morphs
+   between rounded forms while it turns, on a tonal circle. */
 .spinner {
   inline-size: 40px;
   block-size: 40px;
@@ -45,28 +41,49 @@
 
 .double-bounce1,
 .double-bounce2 {
-  inline-size: 100%;
-  block-size: 100%;
-  border-radius: 50%;
-  opacity: 0.6;
   position: absolute;
-  inset-block-start: 0;
-  inset-inline-start: 0;
-  background-color: var(--primary-color);
-  animation: sk-bounce 2s infinite ease-in-out;
+  border-radius: 50%;
+}
+
+.double-bounce1 {
+  inset: 0;
+  background-color: color-mix(in srgb, var(--primary-color) 16%, var(--card-bg-color));
 }
 
 .double-bounce2 {
-  animation-delay: -1s;
+  inset: 5px;
+  background-color: var(--primary-color);
+  animation:
+    ft-loader-spin 4.8s linear infinite,
+    ft-loader-morph 2.4s ease-in-out infinite;
 }
 
-@keyframes sk-bounce {
+@keyframes ft-loader-spin {
+  to {
+    rotate: 360deg;
+  }
+}
+
+@keyframes ft-loader-morph {
   0%,
   100% {
-    transform: scale(0);
+    border-radius: 50%;
+    scale: 0.9;
+  }
+
+  25% {
+    border-radius: 30% 70% 70% 30% / 30% 30% 70% 70%;
+    scale: 1;
   }
 
   50% {
-    transform: scale(1);
+    border-radius: 28%;
+    scale: 0.82;
+  }
+
+  75% {
+    border-radius: 60% 40% 30% 70% / 60% 30% 70% 40%;
+    scale: 1;
   }
 }
+

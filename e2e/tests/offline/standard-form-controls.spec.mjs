@@ -208,6 +208,6 @@ test('quick-settings picker hover follows UI roundness', async ({ page }) => {
   await expect(option).toHaveClass(/hover/)
   for (const roundness of [0, 150]) {
     await page.evaluate(value => window.$store.dispatch('updateUiRoundness', value), roundness)
-    await expect(option).toHaveCSS('border-top-left-radius', `${5 * roundness / 100}px`)
+    await expect(option).toHaveCSS('border-top-left-radius', `${4 * roundness / 100}px`)
   }
 })

@@ -362,7 +362,7 @@ onBeforeUnmount(() => resizeObserver?.disconnect())
   align-items: center;
   background: var(--card-bg-color);
   border: 1px solid var(--divider-color);
-  border-radius: calc(6px * var(--ui-roundness));
+  border-radius: var(--shape-corner-small);
   display: grid;
   grid-template-columns: 44px 24px minmax(0, 1fr) auto;
   min-block-size: 56px;

@@ -35,6 +35,9 @@
 
 .message {
   color: var(--tertiary-text-color);
+  font-size: 1.125rem;
+  font-weight: 600;
+  letter-spacing: -0.01em;
 }
 
 .count {
@@ -57,7 +60,7 @@
   align-items: center;
   row-gap: 0.75rem;
   padding: 0.5rem;
-  border-radius: calc(12px * var(--ui-roundness));
+  border-radius: var(--shape-corner-medium);
 }
 
 .channel.reorderable {
@@ -87,12 +90,17 @@
   touch-action: none;
   user-select: none;
   -webkit-touch-callout: none;
+  transition: background-color var(--motion-fast-effects), color var(--motion-fast-effects), border-radius var(--motion-fast-spatial);
 }
 
 .grabBar:hover,
 .grabBar:focus-visible {
   background-color: var(--side-nav-hover-color);
   color: var(--primary-text-color);
+}
+
+.grabBar:active {
+  border-radius: var(--shape-corner-medium);
 }
 
 .thumbnailContainer {

@@ -301,11 +301,12 @@
             {{ downloadFolderRequired ? t('Downloads.Select Folder') : t('Downloads.Choose Folder') }}
           </FtButton>
         </p>
-        <FtFlexBox>
+        <FtButtonGroup>
           <FtButton
             v-if="activeDownload === null"
             :label="t('Downloads.Download')"
             :icon="['fas', 'download']"
+            theme="primary"
             :disabled="downloadFolderRequired"
             @click="startDownload"
           />
@@ -331,7 +332,7 @@
             :background-color="null"
             @click="close"
           />
-        </FtFlexBox>
+        </FtButtonGroup>
       </footer>
     </template>
   </FtPrompt>
@@ -353,10 +354,11 @@
         @input="(value) => newTemplateName = value"
         @keydown.enter="saveTemplate"
       />
-      <FtFlexBox>
+      <FtButtonGroup>
         <FtButton
           :label="t('Downloads.Save Template')"
           :icon="['fas', 'save']"
+          theme="primary"
           :disabled="newTemplateName.trim() === ''"
           @click="saveTemplate"
         />
@@ -367,7 +369,7 @@
           :background-color="null"
           @click="closeSaveTemplatePrompt"
         />
-      </FtFlexBox>
+      </FtButtonGroup>
     </div>
   </FtPrompt>
 </template>
@@ -384,7 +386,7 @@ import { useScrollClamp } from '../../composables/useScrollClamp'
 import DownloadFailureHint from '../DownloadFailureHint/DownloadFailureHint.vue'
 import FtButton from '../FtButton/FtButton.vue'
 import FtCheckboxList from '../FtCheckboxList/FtCheckboxList.vue'
-import FtFlexBox from '../ft-flex-box/ft-flex-box.vue'
+import FtButtonGroup from '../FtButtonGroup/FtButtonGroup.vue'
 import FtIconButton from '../FtIconButton/FtIconButton.vue'
 import FtInput from '../FtInput/FtInput.vue'
 import FtPrompt from '../FtPrompt/FtPrompt.vue'

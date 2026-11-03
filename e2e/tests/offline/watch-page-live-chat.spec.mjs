@@ -642,11 +642,11 @@ test.describe('watch page', () => {
     })
 
     const owner = activeChat.locator('.channelName.owner', { hasText: 'Channel owner' })
-    await expect(owner).toHaveCSS('border-radius', '2px')
+    await expect(owner).toHaveCSS('border-radius', '4px')
     await page.locator('body').evaluate(element => {
       element.style.setProperty('--ui-roundness', '2')
     })
-    await expect(owner).toHaveCSS('border-radius', '4px')
+    await expect(owner).toHaveCSS('border-radius', '8px')
     await attachScreenshot('rounded live chat owner label')
 
     await watchView.evaluate(async (view) => {

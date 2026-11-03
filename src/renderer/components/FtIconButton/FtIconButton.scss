@@ -13,14 +13,23 @@
   align-items: center;
   justify-content: center;
   background-color: transparent;
-  border-radius: 50%;
+
+  // Pressing morphs the circle into a rounded square. Components that set
+  // their own border-radius opt out of the morph.
+  --icon-button-shape: 50%;
+
+  border-radius: var(--icon-button-shape);
   border-style: none;
   color: inherit;
   cursor: pointer;
 
   // Avoid text-baseline strut so FA / Iconify glyphs share the same geometric center.
   line-height: 0;
-  transition: background 0.15s ease-out;
+  transition: background-color var(--motion-default-effects), border-radius var(--motion-fast-spatial);
+
+  &:not(.disabled):active {
+    --icon-button-shape: var(--shape-corner-medium);
+  }
 
   // Tonal fill like FtButton's tonal variant: the theme color tints the card
   // color, while the icon keeps the text color so it stays readable in every
@@ -141,7 +150,7 @@
 
 .iconDropdown {
   background-color: var(--side-nav-color);
-  border-radius: calc(8px * var(--ui-roundness));
+  border-radius: var(--shape-corner-large);
   box-shadow: 0 1px 2px rgb(0 0 0 / 50%);
   color: var(--secondary-text-color);
   display: inline;
@@ -209,7 +218,7 @@
     margin: 0;
     padding-block: 8px;
     padding-inline: 10px;
-    transition: background 0.2s ease-out;
+    transition: background-color var(--motion-fast-effects);
     white-space: nowrap;
 
     &:hover,
@@ -218,7 +227,6 @@
     &.active {
       background-color: var(--side-nav-hover-color);
       color: var(--side-nav-hover-text-color);
-      transition: background 0.2s ease-in;
     }
 
     &.active {
@@ -240,7 +248,6 @@
     &:active {
       background-color: var(--side-nav-active-color);
       color: var(--side-nav-active-text-color);
-      transition: background 0.1s ease-in;
     }
   }
 

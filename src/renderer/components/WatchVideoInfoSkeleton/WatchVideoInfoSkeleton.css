@@ -1,6 +1,6 @@
 .infoSkeleton {
   padding: 16px;
-  border-radius: calc(5px * var(--ui-roundness));
+  border-radius: var(--shape-corner-medium);
   background-color: var(--card-bg-color);
   backdrop-filter: var(--card-bg-blur, none);
   box-sizing: border-box;
@@ -8,7 +8,7 @@
 
 .skeletonLine {
   block-size: 14px;
-  border-radius: calc(4px * var(--ui-roundness));
+  border-radius: var(--shape-corner-extra-small);
 }
 
 .skeletonTitle {

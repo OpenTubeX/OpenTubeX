@@ -18,7 +18,7 @@
   padding-block: 4px;
   padding-inline: 14px 4px;
   border: 1px solid color-mix(in srgb, var(--destructive-color) 35%, transparent);
-  border-radius: calc(12px * var(--ui-roundness));
+  border-radius: var(--shape-corner-medium);
   background-color: color-mix(in srgb, var(--destructive-color) 10%, var(--card-bg-color));
   color: var(--primary-text-color);
 }

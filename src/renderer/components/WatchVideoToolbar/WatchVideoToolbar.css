@@ -3,10 +3,9 @@
   align-items: center;
   gap: 2px;
   padding: 5px;
-  border-radius: calc(16px * var(--ui-roundness));
+  border-radius: var(--shape-corner-large);
   background-color: var(--secondary-card-bg-color);
   backdrop-filter: var(--secondary-card-bg-blur, none);
-  box-shadow: 0 1px 3px rgb(0 0 0 / 30%);
 }
 
 /*
@@ -72,9 +71,14 @@
 }
 
 .videoOptions :deep(.iconButton) {
+  --icon-button-shape: var(--shape-corner-medium);
+
   position: relative;
-  border-radius: calc(11px * var(--ui-roundness));
   color: var(--primary-text-color);
+}
+
+.videoOptions :deep(.iconButton:not(.disabled):active) {
+  --icon-button-shape: var(--shape-corner-small);
 }
 
 .videoOptions :deep(.iconButton:not(.disabled):is(:hover, :focus-visible, .pressed)) {

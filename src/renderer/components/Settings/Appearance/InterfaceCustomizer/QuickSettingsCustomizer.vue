@@ -409,7 +409,7 @@ function resetQuickSettings() {
 .settingPickerPopover {
   background: var(--card-bg-color);
   border: 1px solid var(--divider-color);
-  border-radius: calc(6px * var(--ui-roundness));
+  border-radius: var(--shape-corner-large);
   box-shadow: 0 8px 24px rgb(0 0 0 / 35%);
   box-sizing: border-box;
   inline-size: min(520px, 100%);
@@ -427,7 +427,7 @@ function resetQuickSettings() {
 
 .settingPicker :deep(.list) {
   border-block-start: 1px solid var(--divider-color);
-  border-radius: 0 0 calc(5px * var(--ui-roundness)) calc(5px * var(--ui-roundness));
+  border-radius: 0 0 var(--shape-corner-extra-small) var(--shape-corner-extra-small);
   box-shadow: none;
   margin-block-start: 8px;
   position: relative;
@@ -438,7 +438,7 @@ function resetQuickSettings() {
 }
 
 .settingPicker :deep(.list > li) {
-  border-radius: calc(5px * var(--ui-roundness));
+  border-radius: var(--shape-corner-extra-small);
 }
 
 .settingPicker :deep(.optionWrapper) {
@@ -457,20 +457,45 @@ function resetQuickSettings() {
   padding: 0;
 }
 
+/* Each section is a segmented group: its header and settings share large
+   outer corners and tight inner ones. A dragged row lifts out of the group
+   with fully rounded corners. */
 .selectedSection {
-  background: var(--card-bg-color);
-  border: 1px solid var(--divider-color);
-  border-radius: calc(6px * var(--ui-roundness));
+  border-radius: var(--shape-corner-large-increased);
+  display: grid;
+  gap: 2px;
   position: relative;
   user-select: none;
 }
 
 .sectionHeader,
 .selectedSetting {
+  --reorder-row-color: color-mix(in srgb, var(--primary-text-color) 6%, var(--card-bg-color));
+
   align-items: center;
+  background: var(--reorder-row-color);
+  border-radius: var(--shape-corner-extra-small);
   display: grid;
   grid-template-columns: 44px 24px minmax(0, 1fr) auto;
   min-block-size: 56px;
+  transition: border-radius var(--motion-fast-spatial);
+}
+
+.sectionHeader {
+  --reorder-row-color: color-mix(in srgb, var(--primary-color) 14%, var(--card-bg-color));
+
+  border-start-start-radius: var(--shape-corner-large-increased);
+  border-start-end-radius: var(--shape-corner-large-increased);
+}
+
+.selectedSection:not(:has(.selectedSetting)) .sectionHeader,
+.selectedSetting:last-child {
+  border-end-start-radius: var(--shape-corner-large-increased);
+  border-end-end-radius: var(--shape-corner-large-increased);
+}
+
+.selectedSetting.dragging {
+  border-radius: var(--shape-corner-large-increased);
 }
 
 .sectionHeader {
@@ -484,13 +509,14 @@ function resetQuickSettings() {
 }
 
 .sectionSettings {
+  display: grid;
+  gap: 2px;
   list-style: none;
   margin: 0;
   padding: 0;
 }
 
 .selectedSetting {
-  border-block-start: 1px solid var(--divider-color);
   padding-inline-end: 8px;
   user-select: none;
 }

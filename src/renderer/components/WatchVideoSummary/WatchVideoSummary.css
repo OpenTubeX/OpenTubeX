@@ -3,12 +3,11 @@
   min-inline-size: 0;
   padding-block: 0;
   padding-inline: 16px;
-  border-radius: calc(8px * var(--ui-roundness));
-  background-color: var(--card-bg-color);
+  border-radius: var(--shape-corner-large-increased);
+  background-color: color-mix(in srgb, var(--primary-color) 16%, var(--card-bg-color));
   background-image: var(--card-bg-image);
   background-attachment: fixed;
   backdrop-filter: var(--card-bg-blur, none);
-  box-shadow: 0 1px 2px rgb(0 0 0 / 10%);
   color: var(--primary-text-color);
   overflow-wrap: anywhere;
 }
@@ -39,7 +38,8 @@
 }
 
 .summaryTitle {
-  font-weight: bold;
+  font-weight: 600;
+  letter-spacing: -0.01em;
 }
 
 .summaryDisclaimer {
@@ -49,7 +49,7 @@
 
 .summaryChevron {
   flex-shrink: 0;
-  transition: transform 180ms ease;
+  transition: transform var(--motion-default-spatial);
 }
 
 .videoSummary[open] .summaryChevron {

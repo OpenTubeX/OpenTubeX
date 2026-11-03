@@ -20,7 +20,7 @@
   /* The offsets shift when the persistent progress toast appears or goes away,
      so the stack slides across instead of jumping */
   /* stylelint-disable-next-line liberty/use-logical-spec */
-  transition: transform 400ms ease, top 300ms ease, bottom 300ms ease;
+  transition: transform var(--motion-default-effects), top var(--motion-default-effects), bottom var(--motion-default-effects);
 }
 
 /* Each toast is a full-width row, so the toast inside it can be aligned to the
@@ -277,7 +277,7 @@
 /* The scale half of the enter and leave animations, kept off the row itself so
    sonner's height measurements stay accurate */
 .toast-holder[data-sonner-toaster] .toast-slot {
-  transition: transform var(--toast-transition-duration) cubic-bezier(0.34, 1.56, 0.64, 1);
+  transition: transform var(--motion-default-spatial);
 }
 
 .toast-holder[data-sonner-toaster] [data-sonner-toast][data-removed='true'] .toast-slot {
@@ -290,7 +290,7 @@
 }
 
 .progress-toast-holder .toast-slot.persistent-slot {
-  transition: transform 250ms cubic-bezier(0.4, 0, 0.2, 1);
+  transition: transform var(--motion-default-spatial);
 }
 
 .progress-toast-holder.position-bottom-left .persistent-slot {
@@ -387,7 +387,7 @@
   background-color: rgb(28 28 28 / 92%);
   backdrop-filter: blur(12px);
   color: #fff;
-  border-radius: calc(12px * var(--ui-roundness));
+  border-radius: var(--shape-corner-large);
   box-shadow: 0 4px 16px rgb(0 0 0 / 35%);
   transition: background-color var(--toast-transition-duration);
   pointer-events: auto;
@@ -459,7 +459,7 @@
 :is(.toast-holder, .progress-toast-holder) .timeout-indicator-track {
   position: absolute;
   inset: 0;
-  border-radius: calc(12px * var(--ui-roundness));
+  border-radius: var(--shape-corner-large);
   pointer-events: none;
 }
 
@@ -526,7 +526,7 @@
   inline-size: 64px;
   block-size: 36px;
   object-fit: cover;
-  border-radius: calc(6px * var(--ui-roundness));
+  border-radius: var(--shape-corner-small);
 }
 
 :is(.toast-holder, .progress-toast-holder) .icon {
@@ -781,12 +781,12 @@
 
   .connection-status-holder {
     transform: translateY(0);
-    transition: transform 280ms cubic-bezier(0.2, 0, 0, 1);
+    transition: var(--mobile-nav-reveal-transition);
   }
 
   :where(.app > .sideNav.scrollHidden:not(:has(:focus-visible))) ~ .connection-status-holder {
     transform: translateY(calc(var(--connection-navigation-inset) + var(--safe-area-inset-bottom, env(safe-area-inset-bottom, 0px))));
-    transition: transform 220ms cubic-bezier(0.4, 0, 1, 1);
+    transition: var(--mobile-nav-hide-transition);
   }
 
   @media (prefers-reduced-motion: reduce) {

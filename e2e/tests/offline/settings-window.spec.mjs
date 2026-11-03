@@ -325,9 +325,11 @@ test.describe('settings', () => {
     const content = page.locator('.settingsContent')
     await content.evaluate(element => { element.scrollTop = element.scrollHeight })
     await expect.poll(() => content.evaluate(element => element.scrollTop)).toBeGreaterThan(0)
+    // At 95% UI Scale, scrollHeight rounds to whole CSS pixels while scrollTop
+    // snaps to device pixels, so the end can differ by one more device pixel.
     await expect.poll(() => content.evaluate(element => Math.abs(
       element.scrollHeight - element.clientHeight - element.scrollTop
-    ))).toBeLessThanOrEqual(1)
+    ) - 1 / devicePixelRatio)).toBeLessThanOrEqual(1)
     const scrollTop = await content.evaluate(element => element.scrollTop)
     const appearanceRange = await content.evaluate(element => element.scrollHeight - element.clientHeight)
 
