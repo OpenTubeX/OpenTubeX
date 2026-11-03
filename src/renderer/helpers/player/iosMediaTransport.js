@@ -11,12 +11,13 @@ export function isIOSNativeMediaUrl(url) {
 
 /** Stream HLS manifests/segments through the same native transport as SABR.
  * Shaka invokes the plugin again on retries, so each attempt gets a fresh URL.
+ * `parse` performs the WebView requests, Shaka's fetch plugin by default.
  */
-export function createIOSMediaTransport(shaka, native) {
+export function createIOSMediaTransport(shaka, native, parse = shaka.net.HttpFetchPlugin.parse) {
   return (uri, request, ...args) => {
     const url = new URL(uri)
     if (!isIOSNativeMediaUrl(url) || !['GET', 'HEAD'].includes(request.method)) {
-      return shaka.net.HttpFetchPlugin.parse(uri, request, ...args)
+      return parse(uri, request, ...args)
     }
 
     let aborted = false
@@ -35,7 +36,7 @@ export function createIOSMediaTransport(shaka, native) {
         throw new shaka.util.Error(shaka.util.Error.Severity.RECOVERABLE,
           shaka.util.Error.Category.NETWORK, shaka.util.Error.Code.OPERATION_ABORTED)
       }
-      operation = shaka.net.HttpFetchPlugin.parse(
+      operation = parse(
         `/_opentubex_sabr/${encodeURIComponent(requestId)}`, request, ...args)
       try {
         const response = await operation.promise

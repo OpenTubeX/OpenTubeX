@@ -3010,6 +3010,10 @@ function runApp() {
         }
 
         case DBActions.GENERAL.FIND:
+          // Strings cross IPC and the context bridge far faster than records.
+          return await baseHandlers.history._findSerialized()
+
+        case DBActions.HISTORY.REMOVE_DUPLICATES:
           return await baseHandlers.history.find()
 
         case DBActions.GENERAL.UPSERT:
@@ -3285,6 +3289,14 @@ function runApp() {
             )
           }
           return result
+        }
+
+        case DBActions.PROFILES.UPDATE_SUBSCRIPTIONS_IF_UNCHANGED: {
+          const profile = await baseHandlers.profiles.updateSubscriptionsIfUnchanged(data.profileId, data.subscriptions, data.previous)
+          if (profile !== null) {
+            syncOtherWindows(IpcChannels.SYNC_PROFILES, event, { event: SyncEvents.GENERAL.UPSERT, data: profile })
+          }
+          return profile
         }
 
         case DBActions.GENERAL.DELETE:

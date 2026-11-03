@@ -278,6 +278,69 @@ test('Electron route failures recover while the OS still reports online', async 
   assert.equal(app.recovery.state, 'online')
 })
 
+test('a client with its own recovery reaches an origin that is waiting to retry another request', async t => {
+  t.mock.timers.enable({ apis: ['setTimeout'] })
+  const inits = new Map()
+  const app = await loadAppNetwork(t, async (input, init) => {
+    inits.set(String(input), init)
+    if (String(input).endsWith('/comments')) throw new TypeError('Failed to fetch')
+    return new Response('#EXTM3U')
+  }, undefined, { corsDisabled: true })
+  app.window.fetch('https://invidious.example/comments').catch(() => {})
+  await flush()
+  let queuedSettled = false
+  app.window.fetch('https://invidious.example/queued.m3u8').finally(() => { queuedSettled = true }).catch(() => {})
+  await flush()
+  assert.equal(queuedSettled, false, 'the origin queue holds ordinary requests')
+
+  const init = { signal: new AbortController().signal }
+  let manifest
+  app.withoutNetworkRecovery(() => app.window.fetch('https://invidious.example/master.m3u8', init))
+    .then(response => { manifest = response })
+  await flush()
+  assert.equal(await manifest?.text(), '#EXTM3U')
+  assert.equal(inits.get('https://invidious.example/master.m3u8'), init, 'keeps the caller signal without the header deadline')
+
+  app.window.fetch('https://invidious.example/later.m3u8').catch(() => {})
+  await flush()
+  assert.equal(inits.has('https://invidious.example/later.m3u8'), false, 'later requests use the queue again')
+})
+
+test('a bypassed HTTPS response confirms reachability while the internet check is blocked', async t => {
+  t.mock.timers.enable({ apis: ['setTimeout'] })
+  const app = await loadAppNetwork(t, async input => {
+    if (input === INTERNET_CHECK_URL || String(input).startsWith('https://service.example/')) {
+      throw new TypeError('Failed to fetch')
+    }
+    return new Response('segment')
+  }, undefined, { checkInternet: true, corsDisabled: true })
+  app.window.fetch('https://service.example/data').catch(() => {})
+  await flush()
+  assert.equal(app.recovery.state, 'offline')
+
+  const response = await app.withoutNetworkRecovery(() => app.window.fetch('https://media.example/segment'))
+  assert.equal(await response.text(), 'segment')
+  await flush()
+  assert.notEqual(app.recovery.state, 'offline')
+})
+
+test('a failed bypassed request checks whether the internet is still reachable', async t => {
+  t.mock.timers.enable({ apis: ['setTimeout'] })
+  let reachable = true
+  const app = await loadAppNetwork(t, async input => {
+    if (!reachable) throw new TypeError('Failed to fetch')
+    return new Response(input === INTERNET_CHECK_URL ? null : 'segment', { status: input === INTERNET_CHECK_URL ? 204 : 200 })
+  }, undefined, { checkInternet: true, corsDisabled: true })
+  await flush()
+  assert.equal(app.recovery.state, 'online')
+
+  reachable = false
+  const error = await app.withoutNetworkRecovery(() => app.window.fetch('https://media.example/segment')).catch(error => error)
+  assert.equal(error.name, 'TypeError')
+  await flush()
+  assert.equal(app.recovery.state, 'offline')
+})
+
 test('delegated subscription transport retains browser CORS classification', async t => {
   const app = await loadAppNetwork(t, async () => { throw new TypeError('Failed to fetch') }, undefined)
   const controller = new AbortController()

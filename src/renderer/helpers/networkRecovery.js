@@ -227,6 +227,11 @@ function isLocalHostname(hostname) {
   return host === 'localhost' || /\.(localhost|local|lan|home\.arpa)$/.test(host)
 }
 
+// A captive portal can answer plain HTTP, but not HTTPS with a valid certificate.
+function confirmsInternetReachability(url) {
+  return url.protocol === 'https:' && !isLocalHostname(url.hostname)
+}
+
 /** Use the same queue for native HTTP and WebView requests. */
 export function withNetworkRecovery(input, init, task, options = {}) {
   if (typeof window === 'undefined') return task(init?.signal)
@@ -238,8 +243,7 @@ export function withNetworkRecovery(input, init, task, options = {}) {
   } catch (error) {
     return Promise.reject(error)
   }
-  // A captive portal can answer plain HTTP, but not HTTPS with a valid certificate.
-  const confirmsInternet = url.protocol === 'https:' && !isLocalHostname(url.hostname)
+  const confirmsInternet = confirmsInternetReachability(url)
   const confirm = response => {
     if (confirmsInternet) appRecovery?.confirmInternetReachable()
     return response
@@ -259,6 +263,25 @@ export function withNetworkRecovery(input, init, task, options = {}) {
       /^\/youtubei\/v1\/(browse|search|player|next|guide|get_transcript|navigation\/resolve_url|updated_metadata|live_chat\/get_live_chat(?:_replay)?)$/.test(url.pathname))
   return initializeNetworkRecovery().run(url.origin, task, { ...options, signal: init?.signal ?? request?.signal, retry, retryDuringOutage: true })
     .then(confirm)
+}
+
+let networkRecoveryBypasses = 0
+
+/**
+ * Sends the `window.fetch` calls that `callback` makes synchronously straight
+ * to the network, for clients with their own retries, deadlines and reconnect
+ * handling, such as Shaka Player.
+ * @template T
+ * @param {() => T} callback
+ * @returns {T}
+ */
+export function withoutNetworkRecovery(callback) {
+  networkRecoveryBypasses++
+  try {
+    return callback()
+  } finally {
+    networkRecoveryBypasses--
+  }
 }
 
 export function installNetworkFetch({ corsDisabled = false, checkInternet = false, internetChecksEnabled = true } = {}) {
@@ -281,7 +304,7 @@ export function installNetworkFetch({ corsDisabled = false, checkInternet = fals
       : undefined,
     internetChecksEnabled
   })
-  window.fetch = async (input, init) => withNetworkRecovery(input, init, async signal => {
+  const recoveringFetch = async (input, init) => withNetworkRecovery(input, init, async signal => {
     if (signal && appRecovery.ownsDeadline(signal)) return fetch(input instanceof Request ? input.clone() : input, init)
     // A fetch can stall while the OS still reports online. Bound the wait for
     // response headers; media response bodies keep their streaming behavior.
@@ -306,4 +329,22 @@ export function installNetworkFetch({ corsDisabled = false, checkInternet = fals
       return networkError
     }
   })
+  window.fetch = async (input, init) => {
+    if (networkRecoveryBypasses === 0) return recoveringFetch(input, init)
+    let response
+    try {
+      response = await fetch(input, init)
+    } catch (error) {
+      // The caller retries on its own, but an outage must still be noticed.
+      if (classifyRequestFailure(error) === 'network') appRecovery?.checkConnection().catch(() => {})
+      throw error
+    }
+    // Bypassed requests still show that the internet is reachable.
+    try {
+      if (confirmsInternetReachability(new URL(input instanceof Request ? input.url : input.toString(), location.href))) {
+        appRecovery?.confirmInternetReachable()
+      }
+    } catch {}
+    return response
+  }
 }

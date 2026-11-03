@@ -97,7 +97,7 @@
             :class="{ isCollapsed: playlistCollapsed }"
           >
             <label for="playlistProgressBar">
-              {{ currentVideoIndexOneBased }} / {{ playlistVideoCount }}
+              {{ currentPlaylistPosition }} / {{ playlistVideoCount }}
             </label>
 
             <!-- eslint-disable vuejs-accessibility/mouse-events-have-key-events, vuejs-accessibility/click-events-have-key-events -->
@@ -116,7 +116,7 @@
               >
                 <div
                   class="playlistProgressBarFill"
-                  :style="{ width: (currentVideoIndexOneBased / playlistVideoCount) * 100 + '%' }"
+                  :style="{ width: (currentPlaylistPosition / playlistVideoCount) * 100 + '%' }"
                 />
                 <div
                   v-if="showProgressBarPreview"
@@ -241,7 +241,7 @@
             :is-video-dragging="isVideoDragging"
             appearance="watchPlaylistItem"
             nested-scroller
-            :initial-visible-state="index < (currentVideoIndexZeroBased + 4) && index > (currentVideoIndexZeroBased - 4)"
+            :initial-visible-state="Math.abs(index - currentVideoIndexZeroBased) < 4 || (progressBarTargetIndex >= 0 && Math.abs(index - progressBarTargetIndex) < 4)"
             @drag-video="setDraggedVideo"
             @drag-video-end="onDragVideoEnd"
             @move-dragged-video="onMoveDraggedVideo"
@@ -275,7 +275,7 @@
 <script setup>
 import FtRetryImage from '../FtRetryImage.vue'
 import { FtIcon } from '@opentubex/icons'
-import { computed, inject, nextTick, onBeforeUnmount, onMounted, ref, shallowRef, TransitionGroup, useTemplateRef, watch } from 'vue'
+import { computed, inject, nextTick, onBeforeUnmount, onMounted, ref, shallowRef, TransitionGroup, triggerRef, useTemplateRef, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useRouter } from 'vue-router'
 
@@ -292,8 +292,8 @@ import { getInvidiousApiErrorMessage, showInvidiousFallbackToast, deepCopy, extr
 import {
   getLocalCachedFeedContinuation,
   getLocalPlaylist,
+  getLocalPlaylistContinuation,
   parseLocalPlaylistVideos,
-  untilEndOfLocalPlayList,
 } from '../../helpers/api/local'
 import { invidiousGetPlaylistInfo } from '../../helpers/api/invidious'
 import { hasMoreInvidiousPlaylistPages, mergeInvidiousPlaylistVideos } from '../../helpers/api/invidious-playlists'
@@ -355,7 +355,17 @@ const needsInitialCenter = ref(false)
 
 const isLoading = ref(false)
 const isFetchingPlaylistContinuation = ref(false)
+// Later pages exist that have not loaded, including after a failed request.
 const hasUnloadedPlaylistVideos = ref(false)
+const playlistContinuationFailed = ref(false)
+// Set when the panel shows its end or the progress bar picks an unloaded video.
+const playlistPanelNearEnd = ref(false)
+const requestedPlaylistVideoCount = ref(0)
+/** @type {number | null} the progress bar position to scroll to once it loads */
+let pendingProgressBarIndex = null
+// Rows around the video picked on the progress bar render right away, like
+// those around the current video, so they do not grow after centering it.
+const progressBarTargetIndex = ref(-1)
 const isCollapsed = ref(false)
 const playlistCollapsed = computed(() => isCollapsed.value && !props.fullscreenOverlay && !props.phonePanel)
 let savedScrollTop = 0
@@ -470,13 +480,20 @@ const currentVideoIndexZeroBased = computed(() => {
 
 const currentVideoIndexOneBased = computed(() => currentVideoIndexZeroBased.value + 1)
 
+// Reversed playlists add later pages at the start, so videos still unloaded come before the loaded ones.
+const currentPlaylistPosition = computed(() => currentVideoIndexOneBased.value +
+  (reversePlaylist.value ? playlistVideoCount.value - playlistItems.value.length : 0))
+
 const currentVideo = computed(() => playlistItems.value[currentVideoIndexZeroBased.value])
 
-const playlistVideoCount = computed(() => playlistItems.value.length)
+// Later pages load only when needed, so count them towards the progress.
+const playlistVideoCount = computed(() => canLoadMorePlaylistVideos.value && Number.isFinite(playlistTotalVideoCount.value)
+  ? Math.max(playlistItems.value.length, playlistTotalVideoCount.value)
+  : playlistItems.value.length)
 
 const playlistUnavailableVideoCount = computed(() => hasUnloadedPlaylistVideos.value
   ? 0
-  : playlistTotalVideoCount.value - playlistVideoCount.value)
+  : playlistTotalVideoCount.value - playlistItems.value.length)
 
 const videoIndexInPlaylistItems = computed(() => {
   const items = shuffleEnabled.value ? randomizedPlaylistItems.value : playlistItems.value
@@ -489,14 +506,31 @@ const videoIsLastPlaylistItem = computed(() => {
 
 const videoIsNotPlaylistItem = computed(() => videoIndexInPlaylistItems.value === -1)
 
+// Until the last page loads, the loaded videos are not the whole playlist.
+const canLoadMorePlaylistVideos = computed(() => hasUnloadedPlaylistVideos.value && !playlistContinuationFailed.value)
+
 // The current video may still be on an unloaded page, so do not fall back to
-// the playlist start while later pages are loading.
-const isWaitingForNextVideo = computed(() => isFetchingPlaylistContinuation.value &&
+// the playlist start while later pages can still load.
+const isWaitingForNextVideo = computed(() => canLoadMorePlaylistVideos.value &&
   (videoIsLastPlaylistItem.value || videoIsNotPlaylistItem.value))
 
 // A page that is still loading or failed to load may hold the current video;
-// wrapping to the first or last entry would jump away from its real neighbours.
+// wrapping to the first or last entry would jump away from its real neighbors.
 const currentVideoMayBeUnloaded = computed(() => hasUnloadedPlaylistVideos.value && videoIsNotPlaylistItem.value)
+
+// Sequential playback loads the next page while this many videos are still ahead.
+const PLAYLIST_PRELOAD_DISTANCE = 50
+
+const needsMorePlaylistVideos = computed(() => {
+  if (!canLoadMorePlaylistVideos.value) return false
+  // Reversed playback starts at the end and shuffle picks from the whole playlist.
+  if (reversePlaylist.value || shuffleEnabled.value || playlistPanelNearEnd.value) return true
+  if (playlistItems.value.length < requestedPlaylistVideoCount.value) return true
+  const index = currentVideoIndexZeroBased.value
+  // -1: the current video is on a later page. Loop steps back from the first video to the last.
+  return index === -1 || index >= playlistItems.value.length - PLAYLIST_PRELOAD_DISTANCE ||
+    (loopEnabled.value && index === 0)
+})
 
 const nextVideo = computed(() => {
   if (isWaitingForNextVideo.value || currentVideoMayBeUnloaded.value) return null
@@ -516,7 +550,7 @@ const upcomingVideos = computed(() => {
   const startIndex = currentIndex === -1 ? 0 : currentIndex + 1
   const remainingVideos = targetList.slice(startIndex)
 
-  return loopEnabled.value && !isFetchingPlaylistContinuation.value && currentIndex !== -1
+  return loopEnabled.value && !canLoadMorePlaylistVideos.value && currentIndex !== -1
     ? remainingVideos.concat(targetList.slice(0, startIndex))
     : remainingVideos
 })
@@ -571,7 +605,7 @@ const previewStyle = computed(() => ({
 }))
 
 const previewVideoTitle = computed(() => {
-  const index = previewVideoIndex.value - 1
+  const index = playlistArrayIndex(previewVideoIndex.value - 1)
 
   if (index >= 0 && index < playlistItems.value.length) {
     return playlistItems.value[index].title || 'Unknown Title'
@@ -580,7 +614,7 @@ const previewVideoTitle = computed(() => {
 })
 
 const previewVideoThumbnail = computed(() => {
-  const index = previewVideoIndex.value - 1
+  const index = playlistArrayIndex(previewVideoIndex.value - 1)
 
   if (index >= 0 && index < playlistItems.value.length) {
     const videoId = playlistItems.value[index].videoId
@@ -679,7 +713,11 @@ if (isTabPresented != null) {
 watch(() => props.playlistId, () => {
   playlistLoadGeneration += 1
   isFetchingPlaylistContinuation.value = false
-  hasUnloadedPlaylistVideos.value = false
+  setPlaylistPageLoader(null)
+  playlistPanelNearEnd.value = false
+  requestedPlaylistVideoCount.value = 0
+  pendingProgressBarIndex = null
+  progressBarTargetIndex.value = -1
   resetUnavailableSkipChain()
   reversePlaylist.value = storedReversePlaylist.value
   applyShuffleByDefault()
@@ -697,6 +735,10 @@ watch(() => props.playlistId, () => {
   } else {
     getPlaylistInformationLocal()
   }
+})
+
+watch(needsMorePlaylistVideos, (needed) => {
+  if (needed) continueLoadingPlaylistPages()
 })
 
 watch(storedReversePlaylist, (newVal) => {
@@ -1128,22 +1170,20 @@ function parseVisibleLocalPlaylistVideos(items) {
 }
 
 /**
- * @param {object[]} videos every video loaded so far, extended in place
- * @param {object[]} items the raw items of the next page
- */
-function appendLocalPlaylistPage(videos, items) {
-  appendPlaylistVideos(videos, parseVisibleLocalPlaylistVideos(items))
-}
-
-/**
- * @param {object[]} videos every video loaded so far, extended in place
+ * Adds the visible videos of the next page. The list grows in place, as copying
+ * it for every page would take quadratic time on long playlists.
  * @param {object[]} newVideos
  */
-function appendPlaylistVideos(videos, newVideos) {
-  videos.push(...newVideos)
-  playlistItems.value = applyReversePlaylistState(videos.slice())
+function appendPlaylistVideos(newVideos) {
+  if (newVideos.length === 0) return
+  if (reversePlaylist.value) {
+    playlistItems.value = newVideos.toReversed().concat(playlistItems.value)
+  } else {
+    playlistItems.value.push(...newVideos)
+    triggerRef(playlistItems)
+  }
   if (!shuffleEnabled.value) return
-  const order = randomizedPlaylistItems.value.slice()
+  const order = randomizedPlaylistItems.value
   const start = findIndexOfCurrentVideoInPlaylist(order) + 1
   if (start === 0) {
     // The current video may be on this page; restart the order from it.
@@ -1152,35 +1192,88 @@ function appendPlaylistVideos(videos, newVideos) {
   }
   // Keep entries up to the current video and mix new ones into the unplayed rest.
   for (const video of newVideos) {
-    order.splice(start + Math.floor(Math.random() * (order.length - start + 1)), 0, video)
+    const target = start + Math.floor(Math.random() * (order.length - start + 1))
+    order.push(order[target] ?? video)
+    order[target] = video
   }
-  randomizedPlaylistItems.value = order
+  triggerRef(randomizedPlaylistItems)
+}
+
+/** @type {{ generation: number, loadNextPage: () => Promise<{ videos: object[], hasMore: boolean }>, errorMessage: string } | null} */
+let playlistPageLoader = null
+
+/**
+ * @param {(() => Promise<{ videos: object[], hasMore: boolean }>) | null} loadNextPage
+ * @param {string} [errorMessage]
+ */
+function setPlaylistPageLoader(loadNextPage, errorMessage = '') {
+  playlistPageLoader = loadNextPage && { generation: playlistLoadGeneration, loadNextPage, errorMessage }
+  hasUnloadedPlaylistVideos.value = loadNextPage != null
+  playlistContinuationFailed.value = false
+}
+
+// Requests later pages one at a time while `needsMorePlaylistVideos` holds.
+async function continueLoadingPlaylistPages() {
+  const loader = playlistPageLoader
+  if (loader == null || loader.generation !== playlistLoadGeneration || isFetchingPlaylistContinuation.value) return
+
+  isFetchingPlaylistContinuation.value = true
+  try {
+    while (needsMorePlaylistVideos.value) {
+      const { videos, hasMore } = await loader.loadNextPage()
+      if (loader.generation !== playlistLoadGeneration) return
+      appendPlaylistVideos(videos)
+      hasUnloadedPlaylistVideos.value = hasMore
+      // Measure the panel with the new videos before deciding on another page.
+      await nextTick()
+      if (loader.generation !== playlistLoadGeneration) return
+      updatePlaylistPanelNearEnd()
+    }
+  } catch (err) {
+    // Keep the pages already shown instead of replacing them through the fallback.
+    if (loader.generation !== playlistLoadGeneration) return
+    playlistContinuationFailed.value = true
+    console.error(err)
+    showApiErrorToast(loader.errorMessage, err)
+  } finally {
+    if (loader.generation === playlistLoadGeneration) isFetchingPlaylistContinuation.value = false
+  }
+}
+
+/**
+ * @param {import('youtubei.js').YT.Playlist | null} playlist the last loaded page
+ * @param {string} [cachedContinuation] the next page of a playlist the Playlist page loaded
+ */
+function localPlaylistPageLoader(playlist, cachedContinuation) {
+  return async () => {
+    playlist = playlist == null
+      ? await getLocalCachedFeedContinuation('playlist', cachedContinuation)
+      : await getLocalPlaylistContinuation(playlist)
+    if (playlist == null) return { videos: [], hasMore: false }
+    return { videos: parseVisibleLocalPlaylistVideos(playlist.items), hasMore: playlist.has_continuation }
+  }
 }
 
 /**
  * Invidious pages overlap, so each later page adds only the videos not seen yet.
  * @param {string} playlistId
- * @param {object[]} videos every visible video loaded so far, extended in place
  * @param {object[]} loaded every video the instance returned so far
- * @param {{ videoCount: number, pageNumber: number, pageVideoCount: number }} position
- * @param {number} generation
+ * @param {{ videoCount: number, pageNumber: number }} position
  */
-async function loadRemainingInvidiousPages(playlistId, videos, loaded, { videoCount, pageNumber, pageVideoCount }, generation) {
-  while (hasMoreInvidiousPlaylistPages(videoCount, pageNumber, loaded.length, pageVideoCount)) {
+function invidiousPlaylistPageLoader(playlistId, loaded, { videoCount, pageNumber }) {
+  return async () => {
     const page = await invidiousGetPlaylistInfo(playlistId, ++pageNumber)
-    if (generation !== playlistLoadGeneration) return
     const merged = mergeInvidiousPlaylistVideos(loaded, page.videos)
-    appendPlaylistVideos(videos, filterVisiblePlaylistVideos(merged.slice(loaded.length)))
+    const videos = filterVisiblePlaylistVideos(merged.slice(loaded.length))
     loaded = merged
-    pageVideoCount = page.pageVideoCount
+    return { videos, hasMore: hasMoreInvidiousPlaylistPages(videoCount, pageNumber, loaded.length, page.pageVideoCount) }
   }
 }
 
 /**
  * @param {{ id: string, title: string, channelName: string, channelId: string, items: VideoData[], continuationData: string | null, nextInvidiousPage?: number | null }} cachedPlaylist
  */
-async function loadCachedPlaylistInformation(cachedPlaylist) {
-  const generation = playlistLoadGeneration
+function loadCachedPlaylistInformation(cachedPlaylist) {
   getPlaylistInfoRun = true
   store.commit('setCachedPlaylist', { tabId: playlistCacheTabId, value: null })
 
@@ -1190,12 +1283,19 @@ async function loadCachedPlaylistInformation(cachedPlaylist) {
   channelId.value = cachedPlaylist.channelId
 
   const nextInvidiousPage = cachedPlaylist.nextInvidiousPage ?? null
-  // The local API caches continuations, including when it was the fallback
-  hasUnloadedPlaylistVideos.value = nextInvidiousPage !== null || (process.env.SUPPORTS_LOCAL_API && cachedPlaylist.continuationData !== null)
-  isFetchingPlaylistContinuation.value = hasUnloadedPlaylistVideos.value
+  const videos = cachedPlaylist.items.slice()
+  if (nextInvidiousPage !== null) {
+    setPlaylistPageLoader(invidiousPlaylistPageLoader(cachedPlaylist.id, videos, {
+      videoCount: cachedPlaylist.totalVideoCount, pageNumber: nextInvidiousPage - 1,
+    }), getInvidiousApiErrorMessage(backendPreference.value))
+  } else if (process.env.SUPPORTS_LOCAL_API && cachedPlaylist.continuationData !== null) {
+    // The local API caches continuations, including when it was the fallback
+    setPlaylistPageLoader(localPlaylistPageLoader(null, cachedPlaylist.continuationData), t('Local API Error (Click to copy)'))
+  } else {
+    setPlaylistPageLoader(null)
+  }
 
   // Playback must not wait for later pages when the next video is already cached.
-  const videos = cachedPlaylist.items.slice()
   // A sort preference can finish saving after the page cached its previous order.
   playlistItems.value = isUserPlaylist.value
     ? getSortedPlaylistItems(videos, sortOrder.value, locale.value, reversePlaylist.value)
@@ -1204,28 +1304,7 @@ async function loadCachedPlaylistInformation(cachedPlaylist) {
   if (shuffleEnabled.value) shufflePlaylistItems()
   isLoading.value = false
 
-  if (!isFetchingPlaylistContinuation.value) return
-
-  try {
-    if (nextInvidiousPage !== null) {
-      await loadRemainingInvidiousPages(cachedPlaylist.id, videos, videos.slice(), {
-        videoCount: cachedPlaylist.totalVideoCount, pageNumber: nextInvidiousPage - 1, pageVideoCount: videos.length,
-      }, generation)
-    } else {
-      const continuationData = await getLocalCachedFeedContinuation('playlist', cachedPlaylist.continuationData)
-      await untilEndOfLocalPlayList(continuationData, (p) => {
-        if (generation !== playlistLoadGeneration) return
-        appendLocalPlaylistPage(videos, p.items)
-      }, { shouldContinue: () => generation === playlistLoadGeneration })
-    }
-    if (generation === playlistLoadGeneration) hasUnloadedPlaylistVideos.value = false
-  } catch (err) {
-    if (generation !== playlistLoadGeneration) return
-    console.error(err)
-    showApiErrorToast(nextInvidiousPage !== null ? getInvidiousApiErrorMessage(backendPreference.value) : t('Local API Error (Click to copy)'), err)
-  } finally {
-    if (generation === playlistLoadGeneration) isFetchingPlaylistContinuation.value = false
-  }
+  return continueLoadingPlaylistPages()
 }
 
 async function getPlaylistInformationLocal() {
@@ -1253,29 +1332,12 @@ async function getPlaylistInformationLocal() {
     channelName.value = channelName_
     channelId.value = playlist.info.author?.id
 
-    hasUnloadedPlaylistVideos.value = playlist.has_continuation
-    isFetchingPlaylistContinuation.value = hasUnloadedPlaylistVideos.value
+    setPlaylistPageLoader(playlist.has_continuation ? localPlaylistPageLoader(playlist) : null, t('Local API Error (Click to copy)'))
 
-    // Show the first page right away; later pages append while playback continues.
-    const videos = parseVisibleLocalPlaylistVideos(playlist.items)
-    playlistItems.value = applyReversePlaylistState(videos.slice())
+    // Show the first page right away; later pages load as playback approaches them.
+    playlistItems.value = applyReversePlaylistState(parseVisibleLocalPlaylistVideos(playlist.items))
     if (shuffleEnabled.value) shufflePlaylistItems()
     isLoading.value = false
-
-    if (!isFetchingPlaylistContinuation.value) return
-
-    try {
-      await untilEndOfLocalPlayList(playlist, (p) => {
-        if (generation !== playlistLoadGeneration) return
-        appendLocalPlaylistPage(videos, p.items)
-      }, { runCallbackOnceFirst: false, shouldContinue: () => generation === playlistLoadGeneration })
-      if (generation === playlistLoadGeneration) hasUnloadedPlaylistVideos.value = false
-    } catch (err) {
-      // Keep the pages already shown instead of replacing them through the fallback.
-      if (generation !== playlistLoadGeneration) return
-      console.error(err)
-      showApiErrorToast(t('Local API Error (Click to copy)'), err)
-    }
   } catch (err) {
     if (generation !== playlistLoadGeneration) return
     console.error(err)
@@ -1287,17 +1349,19 @@ async function getPlaylistInformationLocal() {
     } else {
       isLoading.value = false
     }
-  } finally {
-    if (generation === playlistLoadGeneration) isFetchingPlaylistContinuation.value = false
+    return
   }
+
+  return continueLoadingPlaylistPages()
 }
 
 async function getPlaylistInformationInvidious() {
+  const playlistId = props.playlistId
   const generation = playlistLoadGeneration
   isLoading.value = true
 
   try {
-    const result = await invidiousGetPlaylistInfo(props.playlistId)
+    const result = await invidiousGetPlaylistInfo(playlistId)
     if (generation !== playlistLoadGeneration) return
 
     playlistTitle.value = result.title
@@ -1305,27 +1369,18 @@ async function getPlaylistInformationInvidious() {
     channelName.value = result.author
     channelId.value = result.authorId
 
-    const position = { videoCount: result.videoCount, pageNumber: 1, pageVideoCount: result.pageVideoCount }
-    hasUnloadedPlaylistVideos.value = hasMoreInvidiousPlaylistPages(position.videoCount, position.pageNumber, result.videos.length, position.pageVideoCount)
-    isFetchingPlaylistContinuation.value = hasUnloadedPlaylistVideos.value
+    const position = { videoCount: result.videoCount, pageNumber: 1 }
+    setPlaylistPageLoader(
+      hasMoreInvidiousPlaylistPages(position.videoCount, position.pageNumber, result.videos.length, result.pageVideoCount)
+        ? invidiousPlaylistPageLoader(playlistId, result.videos, position)
+        : null,
+      getInvidiousApiErrorMessage(backendPreference.value)
+    )
 
-    // Show the first page right away; later pages append while playback continues.
-    const videos = filterVisiblePlaylistVideos(result.videos)
-    playlistItems.value = applyReversePlaylistState(videos.slice())
+    // Show the first page right away; later pages load as playback approaches them.
+    playlistItems.value = applyReversePlaylistState(filterVisiblePlaylistVideos(result.videos))
     if (shuffleEnabled.value) shufflePlaylistItems()
     isLoading.value = false
-
-    if (!isFetchingPlaylistContinuation.value) return
-
-    try {
-      await loadRemainingInvidiousPages(props.playlistId, videos, result.videos, position, generation)
-      if (generation === playlistLoadGeneration) hasUnloadedPlaylistVideos.value = false
-    } catch (err) {
-      // Keep the pages already shown instead of replacing them through the fallback.
-      if (generation !== playlistLoadGeneration) return
-      console.error(err)
-      showApiErrorToast(getInvidiousApiErrorMessage(backendPreference.value), err)
-    }
   } catch (err) {
     if (generation !== playlistLoadGeneration) return
     console.error(err)
@@ -1337,9 +1392,10 @@ async function getPlaylistInformationInvidious() {
     } else {
       isLoading.value = false
     }
-  } finally {
-    if (generation === playlistLoadGeneration) isFetchingPlaylistContinuation.value = false
+    return
   }
+
+  return continueLoadingPlaylistPages()
 }
 
 function parseUserPlaylist(playlist) {
@@ -1399,10 +1455,13 @@ const playlistItemsWrapper = useTemplateRef('playlistItemsWrapper')
 let playlistItemsObserver = null
 let playlistItemsResizeObserver = null
 let playlistItemsClampFrame = null
+let playlistItemsScrollListener = null
 
 function stopObservingPlaylistItems() {
   playlistItemsObserver?.disconnect()
   playlistItemsObserver = null
+  playlistItemsScrollListener?.abort()
+  playlistItemsScrollListener = null
   playlistItemsResizeObserver?.disconnect()
   playlistItemsResizeObserver = null
   if (playlistItemsClampFrame !== null) {
@@ -1429,8 +1488,11 @@ watch(playlistItemsWrapper, (wrapper) => {
       if (needsInitialCenter.value && container.clientHeight > 0) {
         centerCurrentVideo()
       }
+      updatePlaylistPanelNearEnd()
     })
   }
+  playlistItemsScrollListener = new AbortController()
+  container.addEventListener('scroll', updatePlaylistPanelNearEnd, { passive: true, signal: playlistItemsScrollListener.signal })
   // Windowed rows shrink to measured shells after layout changes without any
   // child list mutation, so watch each row's size as well as the viewport.
   const resizeObserver = playlistItemsResizeObserver = new ResizeObserver(scheduleClamp)
@@ -1451,6 +1513,13 @@ watch(playlistItemsWrapper, (wrapper) => {
 }, { flush: 'post' })
 
 onBeforeUnmount(stopObservingPlaylistItems)
+
+// Load later pages before the end of the panel scrolls into view.
+function updatePlaylistPanelNearEnd() {
+  const container = playlistItemsWrapper.value?.$el ?? playlistItemsWrapper.value
+  playlistPanelNearEnd.value = canLoadMorePlaylistVideos.value && container != null && container.clientHeight > 0 &&
+    container.scrollHeight - container.scrollTop - container.clientHeight < container.clientHeight * 2
+}
 
 function getScrollTop() {
   const container = playlistItemsWrapper.value?.$el ?? playlistItemsWrapper.value
@@ -1602,11 +1671,48 @@ function handleProgressBarClick(event) {
   const clickPercentage = clickX / progressBarWidth
 
   const targetVideoIndex = Math.max(1, Math.min(playlistVideoCount.value, Math.ceil(clickPercentage * playlistVideoCount.value)))
-  const targetArrayIndex = targetVideoIndex - 1
+  const targetArrayIndex = playlistArrayIndex(targetVideoIndex - 1)
 
   if (targetArrayIndex >= 0 && targetArrayIndex < playlistItems.value.length) {
-    scrollToVideo(targetArrayIndex)
+    pendingProgressBarIndex = null
+    // Stop loading towards an unloaded video chosen before.
+    requestedPlaylistVideoCount.value = 0
+    scrollToProgressBarTarget(targetArrayIndex)
+  } else {
+    // Load the pages up to the chosen video, then show it.
+    pendingProgressBarIndex = targetVideoIndex - 1
+    requestedPlaylistVideoCount.value = targetVideoIndex
   }
+}
+
+/**
+ * The index in the loaded videos of a position in the whole playlist. Reversed
+ * playlists add later pages at the start, so their loaded videos fill its end.
+ * @param {number} position
+ */
+function playlistArrayIndex(position) {
+  return reversePlaylist.value ? position - (playlistVideoCount.value - playlistItems.value.length) : position
+}
+
+watch([() => playlistItems.value.length, canLoadMorePlaylistVideos], ([length, canLoadMore]) => {
+  if (pendingProgressBarIndex === null) return
+  const arrayIndex = playlistArrayIndex(pendingProgressBarIndex)
+  if ((arrayIndex < 0 || arrayIndex >= length) && canLoadMore) return
+  // Hidden or unavailable videos can leave the playlist shorter than its total.
+  const index = Math.max(0, Math.min(arrayIndex, length - 1))
+  pendingProgressBarIndex = null
+  scrollToProgressBarTarget(index)
+}, { flush: 'post' })
+
+/** @param {number} index */
+function scrollToProgressBarTarget(index) {
+  progressBarTargetIndex.value = index
+  nextTick(() => {
+    requestAnimationFrame(() => {
+      scrollToVideo(index)
+      requestAnimationFrame(() => scrollToVideo(index))
+    })
+  })
 }
 
 const videoIsLastInInPlaylistItems = computed(() => {
@@ -1619,7 +1725,7 @@ const videoIsLastInInPlaylistItems = computed(() => {
 
 const shouldStopDueToPlaylistEnd = computed(() => {
   // Loop enabled = should not stop
-  return videoIsLastInInPlaylistItems.value && !loopEnabled.value && !isFetchingPlaylistContinuation.value
+  return videoIsLastInInPlaylistItems.value && !loopEnabled.value && !canLoadMorePlaylistVideos.value
 })
 
 /**
@@ -1645,7 +1751,7 @@ const skipAvailability = computed(() => {
   return getPlaylistSkipAvailability({
     itemCount: items.length,
     currentIndex: videoIndexInPlaylistItems.value,
-    loopEnabled: loopEnabled.value && !isFetchingPlaylistContinuation.value,
+    loopEnabled: loopEnabled.value && !canLoadMorePlaylistVideos.value,
     previousVideoSourceIndex: previousVideoSourceIndex.value
   })
 })

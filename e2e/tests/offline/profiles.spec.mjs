@@ -1,6 +1,6 @@
 import { readFile } from 'node:fs/promises'
 
-import { test, expect, goToSettingsSection, setWindowSize, readDatastore } from '../../helpers/app.mjs'
+import { test, expect, goToSettingsSection, openNewWindowFromTabBar, setWindowSize, readDatastore, waitForAppReady } from '../../helpers/app.mjs'
 import { expectImagesLoaded } from '../../helpers/visual-fixtures.mjs'
 
 // Fractional UI scales round innerWidth, so try neighbouring device widths
@@ -296,6 +296,23 @@ test.describe('profile selector', () => {
 
     await expect(page.locator('.profileList .profileOption')).toHaveCount(2)
     await expect(page.locator('.profileList .profileOption').filter({ hasText: 'Second profile' })).toBeVisible()
+  })
+
+  test('switches to All Channels when another window deletes the active profile', async ({ app, page }) => {
+    const errors = []
+    page.on('pageerror', error => errors.push(error.message))
+    page.on('console', message => { if (message.type() === 'error') errors.push(message.text()) })
+    await openProfileList(page)
+    await page.locator('.profileList .profileOption').filter({ hasText: 'Second profile' }).click()
+    await expect(profileIconInitial(page)).toHaveText('S')
+
+    const secondWindow = await openNewWindowFromTabBar(app, page)
+    await waitForAppReady(secondWindow)
+    expect(await secondWindow.evaluate(() => window.$store.dispatch('removeProfile', 'e2eprofile'))).toBe(true)
+
+    await expect(profileIconInitial(page)).toHaveText('A')
+    expect(await page.evaluate(() => window.$store.getters.getActiveProfile._id)).toBe('allChannels')
+    expect(errors).toEqual([])
   })
 
   test('ignores channel updates for profiles removed in another window', async ({ page }) => {

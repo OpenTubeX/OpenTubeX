@@ -2,7 +2,7 @@ import assert from 'node:assert/strict'
 import { readFileSync } from 'node:fs'
 import test from 'node:test'
 import vm from 'node:vm'
-import { ref, shallowRef } from 'vue'
+import { computed, nextTick, ref, shallowRef, triggerRef } from 'vue'
 
 import { hasMoreInvidiousPlaylistPages, mergeInvidiousPlaylistVideos } from '../../src/renderer/helpers/api/invidious-playlists.js'
 
@@ -18,14 +18,20 @@ function extractSourceBetweenMarkers(start, end) {
 const video = index => ({ videoId: `video${index}`, index, title: `Video ${index}`, author: 'Channel', authorId: 'channel' })
 const range = (from, to) => Array.from({ length: to - from }, (_, i) => video(from + i))
 
-function harness(pages) {
+function harness(pages, { needed = true } = {}) {
   const requests = []
   const errors = []
+  const hasUnloadedPlaylistVideos = ref(false)
+  const playlistContinuationFailed = ref(false)
+  // Whether playback, the panel or a playlist mode needs the next page
+  const needsNextPage = ref(needed)
   const context = {
     props: { playlistId: 'long-playlist' },
     playlistLoadGeneration: 0,
     getPlaylistInfoRun: false,
-    playlistItems: shallowRef([]), isLoading: ref(true), isFetchingPlaylistContinuation: ref(false), hasUnloadedPlaylistVideos: ref(false),
+    playlistItems: shallowRef([]), isLoading: ref(true), isFetchingPlaylistContinuation: ref(false), hasUnloadedPlaylistVideos, playlistContinuationFailed,
+    needsMorePlaylistVideos: computed(() => hasUnloadedPlaylistVideos.value && !playlistContinuationFailed.value && needsNextPage.value),
+    reversePlaylist: ref(false), nextTick, triggerRef, updatePlaylistPanelNearEnd() {},
     shuffleEnabled: ref(false), randomizedPlaylistItems: shallowRef([]),
     playlistTitle: ref(''), playlistTotalVideoCount: ref(0), channelName: ref(''), channelId: ref(''),
     backendPreference: ref('invidious'), backendFallback: ref(false), isUserPlaylist: ref(false), playlistCacheTabId: 'web',
@@ -45,13 +51,23 @@ function harness(pages) {
     console: { error() {} },
     process: { env: { SUPPORTS_LOCAL_API: true } },
   }
-  const loaders = vm.runInNewContext(`${extractSourceBetweenMarkers('function appendLocalPlaylistPage(', '\nasync function getPlaylistInformationLocal(')}
+  const loaders = vm.runInNewContext(`${extractSourceBetweenMarkers('function appendPlaylistVideos(', '\nasync function getPlaylistInformationLocal(')}
 ${extractSourceBetweenMarkers('async function getPlaylistInformationInvidious() {', '\nfunction parseUserPlaylist(')}
 ;({ loadCachedPlaylistInformation, getPlaylistInformationInvidious })`, context)
   return { context, requests, errors, ...loaders }
 }
 
-test('the watch page loads every Invidious playlist page after showing the first one', async () => {
+test('the watch page shows the first Invidious page and loads no later page until one is needed', async () => {
+  const { context, requests, errors, getPlaylistInformationInvidious } = harness([range(0, 200), range(100, 250)], { needed: false })
+  await getPlaylistInformationInvidious()
+  assert.deepEqual(errors, [])
+  assert.deepEqual(requests, [1])
+  assert.equal(context.playlistItems.value.length, 200)
+  assert.equal(context.hasUnloadedPlaylistVideos.value, true)
+  assert.equal(context.isFetchingPlaylistContinuation.value, false)
+})
+
+test('the watch page loads the needed Invidious pages after showing the first one', async () => {
   // Invidious pages advance 100 positions but can return up to 200 overlapping entries.
   const { context, requests, errors, getPlaylistInformationInvidious } = harness([range(0, 200), range(100, 250)])
   await getPlaylistInformationInvidious()

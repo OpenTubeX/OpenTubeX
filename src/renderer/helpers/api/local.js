@@ -315,30 +315,6 @@ export async function getLocalPlaylistContinuation(playlist) {
 }
 
 /**
- * Callback for processing a Local playlist.
- *
- * @callback untilEndOfLocalPlayListCallback
- * @param {import('youtubei.js').YT.Playlist} playlist
- */
-
-/**
- * @param {import('youtubei.js').YT.Playlist} playlist
- * @param {untilEndOfLocalPlayListCallback} callback
- * @param {object} [options]
- * @param {boolean} [options.runCallbackOnceFirst]
- * @param {() => boolean} [options.shouldContinue] Stops requesting further pages once it returns false
- */
-export async function untilEndOfLocalPlayList(playlist, callback, { runCallbackOnceFirst = true, shouldContinue = () => true } = {}) {
-  if (runCallbackOnceFirst) { callback(playlist) }
-
-  while (playlist != null && playlist.has_continuation && shouldContinue()) {
-    playlist = await getLocalPlaylistContinuation(playlist)
-
-    if (playlist != null) { callback(playlist) }
-  }
-}
-
-/**
  * @param {string} location
  * @param {'gaming' | 'music' | 'sports' | 'podcasts'} tab
  */

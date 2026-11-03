@@ -2,7 +2,7 @@ import assert from 'node:assert/strict'
 import { readFileSync } from 'node:fs'
 import test from 'node:test'
 import vm from 'node:vm'
-import { computed, reactive, ref, shallowRef } from 'vue'
+import { computed, nextTick, reactive, ref, shallowRef, triggerRef, watch } from 'vue'
 
 import { getPlaylistSkipAvailability } from '../../src/renderer/helpers/playlists.js'
 
@@ -33,14 +33,18 @@ function harness({ random } = {}) {
   const isLoading = ref(true)
   const backendFallback = ref(false)
   const errors = []
-  const continuationChecks = []
+  let continuationRequests = 0
   const unmountCallbacks = []
+  const reversePlaylist = ref(false)
+  const loopEnabled = ref(false)
   const context = {
     ...(random ? { Math: Object.create(Math, { random: { value: random } }) } : {}),
     onBeforeUnmount: callback => unmountCallbacks.push(callback),
     playlistLoadGeneration: 0,
     props, playlistItems, isLoading, isFetchingPlaylistContinuation, hasUnloadedPlaylistVideos,
-    randomizedPlaylistItems, shuffleEnabled, loopEnabled: ref(false), computed,
+    playlistContinuationFailed: ref(false), playlistPanelNearEnd: ref(false), requestedPlaylistVideoCount: ref(0),
+    randomizedPlaylistItems, shuffleEnabled, loopEnabled, reversePlaylist, computed, watch, nextTick, triggerRef,
+    updatePlaylistPanelNearEnd() {},
     shufflePlaylistItems: () => { randomizedPlaylistItems.value = playlistItems.value.slice().reverse() },
     shuffleItems: items => items,
     playlistTitle: ref(''), playlistTotalVideoCount: ref(0), channelName: ref(''), channelId: ref(''),
@@ -51,33 +55,34 @@ function harness({ random } = {}) {
     parseVisibleLocalPlaylistVideos: videos => videos,
     extractNumberFromString: value => Number(value),
     getLocalPlaylist: () => firstPage.promise,
-    untilEndOfLocalPlayList: async (_page, callback, options) => {
-      assert.equal(options?.runCallbackOnceFirst, false)
-      callback(await continuation.promise)
-      continuationChecks.push(options.shouldContinue())
+    getLocalPlaylistContinuation: () => {
+      continuationRequests++
+      return continuation.promise
     },
     getPlaylistInformationInvidious: () => { throw new Error('unexpected fallback') },
     showApiErrorToast: (_message, error) => errors.push(error), showToast() {}, t: key => key,
     console: { error: error => errors.push(error) },
   }
   vm.runInNewContext(extractSourceBetweenMarkers(playlistSource, '// Unmounting stops the playlist watcher', '\nlet previewAnimationFrame'), context)
-  const load = vm.runInNewContext(`${extractSourceBetweenMarkers(playlistSource, 'function appendLocalPlaylistPage(', '\nasync function loadCachedPlaylistInformation(')}\n${extractSourceBetweenMarkers(playlistSource, 'async function getPlaylistInformationLocal() {', '\nasync function getPlaylistInformationInvidious(')}\ngetPlaylistInformationLocal`, context)
-  const state = vm.runInNewContext(`${extractSourceBetweenMarkers(playlistSource, 'const currentVideoIndexZeroBased =', '\nwatch(')}\n;({ nextVideo, isWaitingForNextVideo, upcomingVideos })`, context)
+  const load = vm.runInNewContext(`${extractSourceBetweenMarkers(playlistSource, 'function appendPlaylistVideos(', '\nfunction parseUserPlaylist(')}\ngetPlaylistInformationLocal`, context)
+  const state = vm.runInNewContext(`${extractSourceBetweenMarkers(playlistSource, 'const currentVideoIndexZeroBased =', '\nwatch(')}\n;({ nextVideo, isWaitingForNextVideo, upcomingVideos, canLoadMorePlaylistVideos, needsMorePlaylistVideos })`, context)
   Object.assign(context, state)
+  const stopLoadingOnDemand = vm.runInNewContext(extractSourceBetweenMarkers(playlistSource, 'watch(needsMorePlaylistVideos,', '\nwatch(storedReversePlaylist'), context)
   const skips = vm.runInNewContext(`${extractSourceBetweenMarkers(playlistSource, 'const previousVideoSourceIndex =', '\nwatch(')}\n;({ canPlayNextVideo, canPlayPreviousVideo })`, context)
   Object.assign(state, skips)
   return {
     props, playlistItems, isLoading, isFetchingPlaylistContinuation, hasUnloadedPlaylistVideos, errors, state,
-    load, backendFallback, continuationChecks,
+    load, backendFallback, reversePlaylist, loopEnabled,
+    get continuationRequests() { return continuationRequests },
     randomizedPlaylistItems, shuffleEnabled,
-    unmount: () => unmountCallbacks.forEach(callback => callback()),
+    unmount: () => { stopLoadingOnDemand(); unmountCallbacks.forEach(callback => callback()) },
     changePlaylist: playlistId => { props.playlistId = playlistId; context.playlistLoadGeneration += 1 },
-    resolveFirstPage: () => firstPage.resolve({
+    resolveFirstPage: (items = [{ videoId: 'first' }, { videoId: 'second' }]) => firstPage.resolve({
       info: { title: 'YouTube playlist', total_items: '100', author: { name: 'Test', id: 'channel' } },
-      items: [{ videoId: 'first' }, { videoId: 'second' }],
+      items,
       has_continuation: true,
     }),
-    finishContinuation: items => continuation.resolve({ items }),
+    finishContinuation: (items, hasMore = false) => continuation.resolve({ items, has_continuation: hasMore }),
     failContinuation: error => continuation.reject(error),
     title: context.playlistTitle,
   }
@@ -181,7 +186,7 @@ test('later pages are mixed into the unplayed part of the shuffled order', async
   state.finishContinuation([{ videoId: 'third' }, { videoId: 'fourth' }])
   await loading
 
-  assert.deepEqual(state.randomizedPlaylistItems.value.map(video => video.videoId), ['second', 'fourth', 'third', 'first'])
+  assert.deepEqual(state.randomizedPlaylistItems.value.map(video => video.videoId), ['second', 'fourth', 'first', 'third'])
 })
 
 test('a page containing the not yet loaded current video restarts the shuffled order from it', async () => {
@@ -256,10 +261,10 @@ test('switching playlists stops requesting the remaining pages of the previous o
   state.resolveFirstPage()
   await new Promise(resolve => setImmediate(resolve))
   state.changePlaylist('different-playlist')
-  state.finishContinuation([{ videoId: 'third' }])
+  state.finishContinuation([{ videoId: 'third' }], true)
   await loading
 
-  assert.deepEqual(state.continuationChecks, [false])
+  assert.equal(state.continuationRequests, 1)
 })
 
 test('leaving the watch view stops requesting pages and reporting their errors', async () => {
@@ -285,4 +290,73 @@ test('no upcoming videos are reported while the current video may be on an unloa
   state.finishContinuation([{ videoId: 'third' }, { videoId: 'fourth' }])
   await loading
   assert.deepEqual(state.state.upcomingVideos.value.map(video => video.videoId), ['fourth'])
+})
+
+const longFirstPage = Array.from({ length: 60 }, (_, index) => ({ videoId: `video${index}` }))
+const settle = () => new Promise(resolve => setImmediate(resolve))
+
+test('later pages load only once playback comes within 50 videos of the loaded end', async () => {
+  const state = harness()
+  state.props.videoId = 'video0'
+  await (state.load(), state.resolveFirstPage(longFirstPage), settle())
+
+  assert.equal(state.continuationRequests, 0)
+  assert.equal(state.isFetchingPlaylistContinuation.value, false)
+  assert.equal(state.hasUnloadedPlaylistVideos.value, true)
+  assert.equal(state.state.nextVideo.value.videoId, 'video1')
+  assert.equal(state.state.canPlayNextVideo.value, true)
+  // Loop cannot wrap past videos that have not loaded
+  assert.deepEqual(state.state.upcomingVideos.value.length, 59)
+
+  state.props.videoId = 'video9'
+  await settle()
+  assert.equal(state.continuationRequests, 0)
+
+  state.props.videoId = 'video10'
+  await settle()
+  assert.equal(state.continuationRequests, 1)
+  assert.equal(state.isFetchingPlaylistContinuation.value, true)
+  state.finishContinuation([{ videoId: 'video60' }], true)
+  await settle()
+  // With 61 videos loaded, video10 is 51 from the end
+  assert.equal(state.continuationRequests, 1)
+  assert.equal(state.isFetchingPlaylistContinuation.value, false)
+  assert.equal(state.state.canPlayNextVideo.value, true)
+})
+
+for (const [mode, enable] of [
+  ['reversed', state => { state.reversePlaylist.value = true }],
+  ['shuffled', state => { state.shuffleEnabled.value = true }],
+  ['looped from its first video', state => { state.loopEnabled.value = true }],
+]) {
+  test(`a ${mode} playlist loads its remaining pages`, async () => {
+    const state = harness()
+    state.props.videoId = 'video0'
+    await (state.load(), state.resolveFirstPage(longFirstPage), settle())
+    assert.equal(state.continuationRequests, 0)
+
+    enable(state)
+    await settle()
+    assert.equal(state.continuationRequests, 1)
+    state.finishContinuation([{ videoId: 'video60' }])
+    await settle()
+    assert.equal(state.hasUnloadedPlaylistVideos.value, false)
+    assert.equal(state.isFetchingPlaylistContinuation.value, false)
+    assert.equal(state.playlistItems.value.length, 61)
+  })
+}
+
+test('a failed page stops loading on demand and lets loop wrap around the loaded videos', async () => {
+  const state = harness()
+  state.loopEnabled.value = true
+  const loading = state.load()
+  state.resolveFirstPage()
+  state.failContinuation(new Error('Continuation failed'))
+  await loading
+
+  state.props.videoId = 'first'
+  await settle()
+  assert.equal(state.continuationRequests, 1)
+  assert.equal(state.state.canPlayPreviousVideo.value, true)
+  assert.deepEqual(state.state.upcomingVideos.value.map(video => video.videoId), ['second', 'first'])
 })

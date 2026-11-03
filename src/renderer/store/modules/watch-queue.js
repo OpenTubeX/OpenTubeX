@@ -27,11 +27,19 @@ export function persistWatchQueue(store, storage, sharedQueue) {
     else if (!settled) return
     // Keep local edits visible until their transactions commit, including
     // when an earlier reply or another tab's update arrives in the meantime.
-    const state = { items: JSON.parse(JSON.stringify(latest.items)) }
+    // Mutations never edit an item, so the snapshot's items can be shared.
+    const state = { items: latest.items.slice() }
     for (const request of pending) {
       if (PERSISTED_MUTATIONS.has(request.type)) watchQueueMutations[request.type](state, request.payload)
     }
-    store.commit('setWatchQueue', state.items)
+    // An item never changes after it is queued, so keep the current object
+    // for each ID. Its card then only updates if the item itself is new.
+    const current = store.getters.getWatchQueue
+    const currentItems = new Map(current.map(item => [item.queueItemId, item]))
+    const items = state.items.map(item => currentItems.get(item.queueItemId) ?? item)
+    if (items.length !== current.length || items.some((item, index) => item !== current[index])) {
+      store.commit('setWatchQueue', items)
+    }
   }
   const updateSharedQueue = request => {
     const result = sharedQueue.update(request)

@@ -1,4 +1,5 @@
 import { DBActions } from '../../constants'
+import { newestUniqueHistoryRecords } from '../../history'
 import { runBackgroundJob } from '../../renderer/helpers/background-jobs.js'
 
 /**
@@ -86,8 +87,15 @@ class History {
     return dbHistory(DBActions.HISTORY.UPDATE_SUBSCRIPTION_STATE, update)
   }
 
-  static find() {
-    return dbHistory(DBActions.GENERAL.FIND)
+  static async find() {
+    // The main process sends each record's stored JSON text. Strings cross IPC
+    // and the context bridge far faster than the records' object graph.
+    const stored = await dbHistory(DBActions.GENERAL.FIND)
+    const { records, duplicateIds } = newestUniqueHistoryRecords(stored.map(record => JSON.parse(record)))
+    // The main process selects and removes duplicates in one queued step. Its
+    // records replace these, which a write in between could have outdated.
+    if (duplicateIds.length > 0) return dbHistory(DBActions.HISTORY.REMOVE_DUPLICATES)
+    return records
   }
 
   static upsert(record) {
@@ -217,6 +225,10 @@ class Profiles {
 
   static updateSubscriptionDetails(channels) {
     return dbProfiles(DBActions.PROFILES.UPDATE_SUBSCRIPTION_DETAILS, channels)
+  }
+
+  static updateSubscriptionsIfUnchanged(profileId, subscriptions, previous) {
+    return dbProfiles(DBActions.PROFILES.UPDATE_SUBSCRIPTIONS_IF_UNCHANGED, { profileId, subscriptions, previous })
   }
 
   static delete(id) {

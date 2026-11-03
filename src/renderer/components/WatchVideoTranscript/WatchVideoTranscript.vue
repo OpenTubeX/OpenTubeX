@@ -133,21 +133,36 @@
       @scroll="updateTranscriptFadeState"
     >
       <div
-        v-for="segment in filteredSegments"
-        :key="`${segment.start}-${segment.index}`"
-        v-memo="[segment, segment.index === activeSegmentIndex]"
-        role="listitem"
+        ref="segmentContent"
+        role="none"
       >
-        <button
-          :data-segment-index="segment.index"
-          class="transcriptSegment"
-          :class="{ active: segment.index === activeSegmentIndex }"
-          :aria-current="segment.index === activeSegmentIndex ? 'true' : null"
-          @click="emit('timestamp-event', segment.start)"
+        <FtWindowedListItem
+          v-for="({ chunk, active, keepMounted }, chunkIndex) in segmentChunkStates"
+          :key="`${segmentChunks.generation}-${chunkIndex}`"
+          v-memo="[chunk, active, keepMounted]"
+          class="transcriptChunk"
+          role="none"
+          :style="{ '--transcript-chunk-rows': chunk.length }"
+          :initially-visible="chunkIndex === 0"
+          :keep-mounted="keepMounted"
         >
-          <span class="transcriptTimestamp">{{ segment.timestamp }}</span>
-          <span class="transcriptText">{{ segment.text }}</span>
-        </button>
+          <div
+            v-for="segment in chunk"
+            :key="`${segment.start}-${segment.index}`"
+            role="listitem"
+          >
+            <button
+              :data-segment-index="segment.index"
+              class="transcriptSegment"
+              :class="{ active: segment.index === active }"
+              :aria-current="segment.index === active ? 'true' : null"
+              @click="emit('timestamp-event', segment.start)"
+            >
+              <span class="transcriptTimestamp">{{ segment.timestamp }}</span>
+              <span class="transcriptText">{{ segment.text }}</span>
+            </button>
+          </div>
+        </FtWindowedListItem>
       </div>
     </div>
   </FtCard>
@@ -164,6 +179,8 @@ import FtCard from '../ft-card/ft-card.vue'
 import FtIconButton from '../FtIconButton/FtIconButton.vue'
 import FtInput from '../FtInput/FtInput.vue'
 import FtLoader from '../FtLoader/FtLoader.vue'
+import FtWindowedListItem from '../FtWindowedListItem/FtWindowedListItem.vue'
+import { useScrollClamp } from '../../composables/useScrollClamp'
 import { getTranscriptPreScrollTop } from './transcriptScroll.js'
 import { filterTranscriptSegments } from './transcriptSearch.js'
 import { findActiveTranscriptSegmentIndex } from './activeTranscriptSegment.js'
@@ -229,6 +246,9 @@ const segments = ref([])
 const isLoading = ref(false)
 const loadFailed = ref(false)
 const segmentList = useTemplateRef('segmentList')
+const segmentContent = useTemplateRef('segmentContent')
+// Mounting chunks changes the content height without resizing the list.
+useScrollClamp(segmentList, segmentContent)
 const searchInput = useTemplateRef('searchInput')
 const transcriptFadeTop = ref(false)
 const transcriptFadeBottom = ref(false)
@@ -242,8 +262,34 @@ const normalizedSearchQuery = computed(() => searchQuery.value.trim().toLocaleLo
 const filteredSegments = computed(() => {
   return filterTranscriptSegments(segments.value, normalizedSearchQuery.value)
 })
+// Long videos have thousands of segments, so only the chunks near the viewport
+// mount their rows. The chunk with the active segment always stays mounted, so
+// the list can scroll to it. New segments replace every chunk and its height.
+const SEGMENT_CHUNK_SIZE = 25
+let segmentChunksGeneration = 0
+const segmentChunks = computed(() => {
+  const chunks = []
+  for (let start = 0; start < filteredSegments.value.length; start += SEGMENT_CHUNK_SIZE) {
+    chunks.push(filteredSegments.value.slice(start, start + SEGMENT_CHUNK_SIZE))
+  }
+  return { generation: ++segmentChunksGeneration, chunks }
+})
 const activeSegmentIndex = computed(() => {
   return findActiveTranscriptSegmentIndex(segments.value, props.currentTime)
+})
+// Rows read the active index of their chunk instead of the shared one, so a
+// new active segment only rerenders the chunks it leaves and enters. The
+// chunks around it stay mounted too, so the rows that share the viewport with
+// it have their real heights when the list centers it.
+const segmentChunkStates = computed(() => {
+  const activeIndex = activeSegmentIndex.value
+  const { chunks } = segmentChunks.value
+  const activeChunk = chunks.findIndex(chunk => chunk[0].index <= activeIndex && chunk.at(-1).index >= activeIndex)
+  return chunks.map((chunk, index) => ({
+    chunk,
+    active: index === activeChunk ? activeIndex : -1,
+    keepMounted: activeChunk !== -1 && Math.abs(index - activeChunk) <= 1,
+  }))
 })
 const statusMessage = computed(() => {
   if (props.captions.length === 0) {
@@ -350,6 +396,7 @@ watch(segmentList, (list) => {
   if (list) {
     segmentResizeObserver = new ResizeObserver(updateTranscriptFadeState)
     segmentResizeObserver.observe(list)
+    segmentResizeObserver.observe(segmentContent.value)
     nextTick(updateTranscriptFadeState)
   }
 }, { flush: 'post' })

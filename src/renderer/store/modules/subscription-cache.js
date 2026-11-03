@@ -92,7 +92,7 @@ const getters = {
 }
 
 const actions = {
-  async grabAllSubscriptions({ commit, dispatch, rootGetters }) {
+  async grabAllSubscriptions({ commit, dispatch, rootState, rootGetters }) {
     try {
       const payload = await DBSubscriptionCacheHandlers.find()
 
@@ -111,8 +111,9 @@ const actions = {
       for (const dataEntry of payload) {
         const channelId = dataEntry._id
         if (!subscribedChannelIdSet.has(channelId)) {
-          // Clean up cache data for unsubscribed channels
-          toBeRemovedChannelIds.push(channelId)
+          // Clean up cache data for unsubscribed channels. Without loaded
+          // profiles every channel looks unsubscribed, so keep the data.
+          if (rootState.profiles.profilesLoaded) toBeRemovedChannelIds.push(channelId)
           // No need to load data for unsubscribed channels
           continue
         }

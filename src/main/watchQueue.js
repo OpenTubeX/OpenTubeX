@@ -22,11 +22,13 @@ export function createSharedWatchQueue(storage) {
       state = restoredState
     }
     if (PERSISTED_MUTATIONS.has(request.type)) {
-      const previousItems = structuredClone(state.items)
+      // Mutations only add, remove and reorder items and never edit one, so
+      // the previous order is enough to detect changes and roll them back.
+      const previousItems = state.items.slice()
       watchQueueMutations[request.type](state, request.payload)
       // Every window forwards shared events such as download removals.
       // Only the first one changes the queue, so skip the others.
-      if (JSON.stringify(state.items) !== JSON.stringify(previousItems)) {
+      if (state.items.length !== previousItems.length || state.items.some((item, index) => item !== previousItems[index])) {
         revision++
         try {
           await storage.write(state.items)
@@ -36,7 +38,8 @@ export function createSharedWatchQueue(storage) {
         }
       }
     }
-    return { items: structuredClone(state.items), revision }
+    // IPC serializes the reply, so it only needs the current order.
+    return { items: state.items.slice(), revision }
   }
   return request => {
     const result = previousRequest.then(() => apply(request))

@@ -1,20 +1,20 @@
 // @ts-check
 import { IpcChannels } from '../constants'
-import { handleTrusted, sendToAppWindows } from './ipc'
+import { handleTrusted, sendToOtherAppWindows } from './ipc'
 
 /**
  * Applies watch queue changes from any window and shares each new revision
- * with all of them.
+ * with the others. The window that made the change gets it as its reply.
  * @param {(request: unknown) => Promise<import('./watchQueue').WatchQueueSnapshot>} updateWatchQueue
  */
 export function setupWatchQueueIpc(updateWatchQueue) {
   let broadcastRevision = 0
-  handleTrusted(IpcChannels.WATCH_QUEUE_UPDATE, async (_event, request) => {
+  handleTrusted(IpcChannels.WATCH_QUEUE_UPDATE, async (event, request) => {
     try {
       const snapshot = await updateWatchQueue(request)
       if (snapshot.revision > broadcastRevision) {
         broadcastRevision = snapshot.revision
-        sendToAppWindows(IpcChannels.WATCH_QUEUE_UPDATED, snapshot)
+        sendToOtherAppWindows(event.sender, IpcChannels.WATCH_QUEUE_UPDATED, snapshot)
       }
       return snapshot
     } catch (error) {

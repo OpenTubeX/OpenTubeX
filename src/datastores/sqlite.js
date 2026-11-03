@@ -25,6 +25,7 @@ const SCHEMA = [
 const SELECT_DOCS = 'SELECT id, data, has_children FROM docs'
 const SQL = {
   all: SELECT_DOCS,
+  allData: 'SELECT data FROM docs',
   byId: `${SELECT_DOCS} WHERE id = ?`,
   byIds: `${SELECT_DOCS} WHERE id IN (SELECT value FROM json_each(?))`,
   existingIds: 'SELECT id FROM docs WHERE id IN (SELECT value FROM json_each(?))',
@@ -629,6 +630,21 @@ export class SqliteDatastore {
       await this._execute(statements, true)
       return docs.length
     })
+  }
+
+  /**
+   * The stored JSON text of every document, in storage order. Nothing is
+   * parsed here, so a large datastore leaves this process as strings, which
+   * cost far less to copy between processes than the objects they encode.
+   * Dates keep NeDB's `{ "$$date": … }` form.
+   * @returns {Promise<string[]>}
+   */
+  findSerializedAsync() {
+    return this._exclusive(async () => {
+      if (this.childField) throw new Error('Serialized reads do not include members stored in separate rows')
+      if (this.dropped) return []
+      return (await this._query(SQL.allData, [], true)).map(([data]) => data)
+    }, 'read')
   }
 
   find(query = {}, projection = {}) {

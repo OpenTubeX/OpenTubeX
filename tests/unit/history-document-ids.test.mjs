@@ -2,7 +2,7 @@ import assert from 'node:assert/strict'
 import { readFile } from 'node:fs/promises'
 import test from 'node:test'
 import vm from 'node:vm'
-import { migrateLegacyHistoryRecord } from '../../src/history.js'
+import { migrateLegacyHistoryRecord, newestUniqueHistoryRecords } from '../../src/history.js'
 import * as seenVideos from '../../src/subscriptionSeenVideos.js'
 import { migrateStoredSettings } from '../../src/datastores/settingsMigrations.js'
 import Datastore from '@seald-io/nedb'
@@ -30,6 +30,7 @@ async function fixture(t, createDatastore) {
       db,
       ...seenVideos,
       migrateLegacyHistoryRecord,
+      newestUniqueHistoryRecords,
       migrateStoredSettings,
       createIdQuery,
       recommendations: { remove: async () => {} },
