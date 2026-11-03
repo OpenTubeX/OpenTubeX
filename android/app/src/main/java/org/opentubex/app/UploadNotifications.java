@@ -156,6 +156,8 @@ final class UploadNotifications {
                     .putOpt("thumbnail", thumbnail)));
             } catch (Exception error) {
                 android.util.Log.w("OpenTubeXUploads", "Unable to record a shown upload notification", error);
+                // The app has nothing to collect, so the system shows it instead.
+                inApp = false;
             }
         }
         if (inApp) {
