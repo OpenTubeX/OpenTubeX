@@ -107,8 +107,10 @@
   color: var(--primary-text-color);
 }
 
+/* A tint would lighten the row fill behind small text, so the current
+   timestamp sits directly on it. */
 .watchVideoChaptersPanel :deep(.chapter.current .chapterTimestamp) {
-  background-color: color-mix(in srgb, currentcolor 18%, transparent);
+  background-color: transparent;
   color: inherit;
 }
 
