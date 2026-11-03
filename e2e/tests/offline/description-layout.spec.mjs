@@ -225,7 +225,10 @@ test.describe('description layout', () => {
     })
     await expect(page.locator('.videoDescription').visible()).toHaveClass(/short/)
 
-    await page.locator('.watchVideoInfo .shareButton').visible().click()
+    // Leave room below the toolbar, or the menu opens above the button instead of over the description.
+    const shareButton = page.locator('.watchVideoInfo .shareButton').visible()
+    await shareButton.evaluate(element => element.scrollIntoView({ block: 'center' }))
+    await shareButton.click()
     const dropdown = page.locator('.watchVideoInfo .iconDropdown').visible()
     await expect(dropdown).toBeVisible()
 
