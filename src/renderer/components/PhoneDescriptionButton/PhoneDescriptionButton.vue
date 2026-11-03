@@ -80,6 +80,8 @@ const excerpt = computed(() => {
   // Template contents stay inert while extracting text from remote HTML.
   const template = document.createElement('template')
   template.innerHTML = props.descriptionHtml || props.description || ''
+  // Yattee separates lines with <br>, which textContent drops without a space.
+  for (const element of template.content.querySelectorAll('br, p, div, li')) element.after(' ')
   const text = (template.content.textContent ?? '').replaceAll(/\s+/g, ' ').trim()
   // Longer than two lines on any phone, but keeps the button's accessible description short.
   return Array.from(text).slice(0, EXCERPT_LENGTH).join('')

@@ -197,6 +197,10 @@ test('description preview summarizes metadata as chips', async ({ app, page }) =
   await watch.evaluate(vm => { vm.videoDescription = 'Press <Ctrl>'; vm.videoDescriptionHtml = 'Press &lt;Ctrl&gt;' })
   await expect(preview.locator('.phoneDescriptionExcerpt')).toHaveText('Press <Ctrl>')
 
+  // Yattee joins lines with <br>, so line and block boundaries become spaces.
+  await watch.evaluate(vm => { vm.videoDescriptionHtml = 'First line<br>Second line<p>Third</p><p>Fourth</p>' })
+  await expect(preview.locator('.phoneDescriptionExcerpt')).toHaveText('First line Second line Third Fourth')
+
   // Long descriptions keep a short accessible description; the sheet has the full text.
   await watch.evaluate(vm => { vm.videoDescriptionHtml = ''; vm.videoDescription = 'word '.repeat(200) })
   await expect.poll(() => preview.locator('.phoneDescriptionExcerpt').evaluate(element => element.textContent.length)).toBeLessThanOrEqual(300)
