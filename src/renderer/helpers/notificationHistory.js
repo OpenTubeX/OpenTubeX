@@ -61,6 +61,8 @@ export function openNotificationEntry(entry) {
   if (entry.path === '/downloads') {
     store.dispatch('showSettingsWindow', 'downloads')
   } else {
+    // A toast can be opened while settings cover the page it navigates.
+    store.dispatch('hideSettingsWindow')
     openInternalPath({ path: entry.path, query: entry.query })
   }
 }
