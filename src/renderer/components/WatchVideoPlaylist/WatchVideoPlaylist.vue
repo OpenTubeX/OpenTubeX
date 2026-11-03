@@ -714,6 +714,7 @@ watch(() => props.playlistId, () => {
   playlistLoadGeneration += 1
   isFetchingPlaylistContinuation.value = false
   setPlaylistPageLoader(null)
+  playlistPanelNearEnd.value = false
   requestedPlaylistVideoCount.value = 0
   pendingProgressBarIndex = null
   progressBarTargetIndex.value = -1
