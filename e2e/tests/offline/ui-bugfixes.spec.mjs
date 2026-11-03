@@ -2365,10 +2365,11 @@ test('fetches an uncached synced channel avatar in the phone organizer', async (
   await page.route('https://invidious.test/avatar.svg', route => route.fulfill({
     contentType: 'image/svg+xml', body: '<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24"><rect width="24" height="24" fill="red"/></svg>'
   }))
-  await page.evaluate(id => {
+  await page.evaluate(async id => {
     const store = window.$store
+    // A default instance keeps the instance list refresh from picking a random one.
+    await store.dispatch('updateDefaultInvidiousInstance', 'https://invidious.test')
     store.commit('setBackendPreference', 'invidious')
-    store.commit('setCurrentInvidiousInstance', 'https://invidious.test')
     store.commit('setSyncServerEnabled', true)
     store.commit('setSyncServerToken', 'e2e-token')
     store.commit('setSyncServerPrivacyMode', 'enhanced')
@@ -2401,8 +2402,8 @@ test('fetches an uncached local channel avatar in the phone organizer', async ({
     const store = window.$store
     // Exercise the phone organizer's on-demand loader independently of Electron tab icons.
     store.commit('setShowTabIcons', false)
+    await store.dispatch('updateDefaultInvidiousInstance', 'https://invidious.test')
     store.commit('setBackendPreference', 'invidious')
-    store.commit('setCurrentInvidiousInstance', 'https://invidious.test')
     await store.dispatch('createTab', { route: '/channel/' + id, title: 'Local channel', makeActive: false, lazyLoad: true })
   }, channelId)
   const activeUrl = page.url()
