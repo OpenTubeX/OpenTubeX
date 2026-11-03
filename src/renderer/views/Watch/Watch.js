@@ -354,6 +354,7 @@ export default defineComponent({
       liveReminderLoading: false,
       liveReminderNow: Date.now(),
       liveReminderStartTimer: null,
+      downloadedPlaybackFallbackTimer: null,
       removeLiveReminderUpdatedListener: null,
       removeVideoMetadataCacheClearedListener: null,
       /** @type {'dash' | 'audio' | 'legacy'} */
