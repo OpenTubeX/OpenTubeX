@@ -522,6 +522,8 @@ async function importUnifiedBackup() {
         await normalizeImportedPlaylistThumbnail(playlist)
         const current = currentPlaylists.get(playlist._id)
         const merged = mergeBackupPlaylist(current, playlist)
+        // Reordering finds entries by playlistItemId, so restored entries need one
+        merged.videos.forEach(processToBeAddedPlaylistVideo)
         if (current === undefined) {
           await store.dispatch('importPlaylist', { ...merged, lastUpdatedAt: Date.now() })
         } else if (await store.dispatch('updatePlaylist', merged) !== true) {
