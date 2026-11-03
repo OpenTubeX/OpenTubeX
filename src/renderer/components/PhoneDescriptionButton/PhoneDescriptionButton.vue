@@ -1,6 +1,6 @@
 <template>
   <button
-    v-if="excerpt || chips.length > 0 || license"
+    v-if="parsedDescription.excerpt || parsedDescription.hasImages || chips.length > 0 || license"
     type="button"
     class="phonePanelButton phoneDescriptionButton"
     aria-haspopup="dialog"
@@ -24,11 +24,11 @@
         />
       </span>
       <span
-        v-if="excerpt"
+        v-if="parsedDescription.excerpt"
         :id="`${id}-excerpt`"
         class="phoneDescriptionExcerpt"
         dir="auto"
-      >{{ excerpt }}</span>
+      >{{ parsedDescription.excerpt }}</span>
       <span
         v-if="chips.length > 0"
         :id="`${id}-chips`"
@@ -76,7 +76,7 @@ const emit = defineEmits(['open'])
 const { t } = useI18n()
 const id = useId()
 
-const excerpt = computed(() => {
+const parsedDescription = computed(() => {
   // Prefer the escaped HTML (Invidious), since `description` is plain text there.
   // Without it, `description` can hold markup, e.g. formatted text runs from the local API.
   // Template contents stay inert while extracting text from remote HTML.
@@ -88,8 +88,12 @@ const excerpt = computed(() => {
     element.after(' ')
   }
   const text = (template.content.textContent ?? '').replaceAll(/\s+/g, ' ').trim()
-  // Longer than two lines on any phone, but keeps the button's accessible description short.
-  return Array.from(text).slice(0, EXCERPT_LENGTH).join('')
+  return {
+    // Longer than two lines on any phone, but keeps the button's accessible description short.
+    excerpt: Array.from(text).slice(0, EXCERPT_LENGTH).join(''),
+    // A description of only custom emoji images has no text, but the sheet still shows it.
+    hasImages: template.content.querySelector('img') !== null
+  }
 })
 
 const chips = computed(() => [
@@ -101,7 +105,7 @@ const chips = computed(() => [
 ].filter(Boolean))
 
 const describedBy = computed(() => [
-  excerpt.value && `${id}-excerpt`,
+  parsedDescription.value.excerpt && `${id}-excerpt`,
   chips.value.length > 0 && `${id}-chips`
 ].filter(Boolean).join(' ') || null)
 </script>

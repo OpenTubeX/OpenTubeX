@@ -136,6 +136,24 @@ test('description preview opens the description sheet as one button', async ({ a
   expect(await video.evaluate(element => element.paused)).toBe(paused)
 })
 
+test('phone panel buttons open their sheets with Space instead of toggling playback', async ({ app, page }) => {
+  await mockPlayableWatchPage(app, page)
+  const video = await openMockedVideo(page)
+  await page.evaluate(() => window.$store.commit('addVideoToWatchQueue', {
+    video: { videoId: 'jNQXAC9IVRw', title: 'Queue item', author: 'Test channel' }
+  }))
+  await setWindowSize(app, page, { width: 480, height: 800 })
+  const sheet = page.locator('.mobileSheet[open]')
+  for (const [button, title] of [['.phoneCommentsOpen', 'Comments'], ['.phoneQueueButton', 'Queue']]) {
+    const paused = await video.evaluate(element => element.paused)
+    await page.locator(button).press('Space')
+    await expect(sheet.locator('.mobileSheetHeader')).toContainText(title)
+    expect(await video.evaluate(element => element.paused), button).toBe(paused)
+    await sheet.getByRole('button', { name: 'Close', exact: true }).click()
+    await expect(sheet).toHaveCount(0)
+  }
+})
+
 test('description preview clamps its excerpt to two lines on phones', { tag: '@scale' }, async ({ app, page, uiScale }) => {
   await mockPlayableWatchPage(app, page)
   await openMockedVideo(page)
@@ -220,7 +238,17 @@ test('description preview summarizes metadata as chips', async ({ app, page }) =
   await expect(preview.locator('.phoneDescriptionExcerpt')).toHaveCount(0)
   await expect(preview.locator('.phoneDescriptionChip')).toHaveText(['Games1'])
   await preview.click()
-  await expect(page.locator('.mobileSheet[open]')).toContainText('Example game')
+  const sheet = page.locator('.mobileSheet[open]')
+  await expect(sheet).toContainText('Example game')
+  await sheet.getByRole('button', { name: 'Close', exact: true }).click()
+  await expect(sheet).toHaveCount(0)
+
+  // A description of only custom emoji has no excerpt text but still opens the sheet.
+  await watch.evaluate(vm => { vm.videoGames = []; vm.videoDescription = '<img src="https://yt3.ggpht.com/emoji" alt="Custom emoji" width="16" height="16">' })
+  await expect(preview.locator('.phoneDescriptionExcerpt')).toHaveCount(0)
+  await expect(preview.locator('.phoneDescriptionChip')).toHaveCount(0)
+  await preview.click()
+  await expect(sheet.locator('.description')).not.toBeEmpty()
 })
 
 test('phone comments keep their inset and hide unavailable visibility actions', async ({ app, page }) => {

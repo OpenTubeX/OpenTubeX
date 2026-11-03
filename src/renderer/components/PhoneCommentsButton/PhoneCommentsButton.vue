@@ -10,6 +10,8 @@
       :aria-label="$t('Comments.Comments')"
       :aria-describedby="currentComment ? previewId : null"
       @click="emit('open')"
+      @keydown.space.stop
+      @keyup.space.stop
     >
       <span
         v-if="currentComment"

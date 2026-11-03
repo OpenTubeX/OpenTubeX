@@ -958,6 +958,8 @@
           type="button"
           class="phonePanelButton phoneQueueButton watchVideo"
           @click="openPhonePanel('queue')"
+          @keydown.space.stop
+          @keyup.space.stop
         >
           <ft-icon
             :icon="['fas', 'queue']"
@@ -982,6 +984,8 @@
           aria-haspopup="dialog"
           :aria-expanded="mobilePanel === 'playlist'"
           @click="openPhonePanel('playlist')"
+          @keydown.space.stop
+          @keyup.space.stop
         >
           <ft-icon
             :icon="['fas', 'list']"

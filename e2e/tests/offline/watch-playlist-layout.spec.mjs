@@ -388,6 +388,17 @@ test('phone playlist centers pending current items when opened', { tag: '@scale'
   await watch.dispose()
 })
 
+test('portrait playlist button opens the sheet with Space instead of toggling playback', async ({ app, page }) => {
+  const watch = await openPlaylist(app, page)
+  await setWindowSize(app, page, { width: 480, height: 800 })
+  const video = page.locator('.ftVideoPlayer video')
+  const paused = await video.evaluate(element => element.paused)
+  await page.locator('.phonePlaylistButton').press('Space')
+  await expect(page.locator('.dockedSheet[open] .mobileSheetHeader')).toContainText('Layout test playlist')
+  expect(await video.evaluate(element => element.paused)).toBe(paused)
+  await watch.dispose()
+})
+
 test('portrait playlist opens below the video and clamps after resize and removal', { tag: '@scale' }, async ({ app, page, attachScreenshot, uiScale }) => {
   const watch = await openPlaylist(app, page)
   await setWindowSize(app, page, { width: 480, height: 800 })
