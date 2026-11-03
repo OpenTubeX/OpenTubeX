@@ -72,14 +72,26 @@ public class AndroidHttpPlugin extends Plugin {
         // The request stays tracked until its worker finishes, because an
         // abort can arrive before the connection is open.
         RequestOptions request = requestId == null ? null : activeRequests.get(requestId);
-        if (request != null) request.abort();
+        Runnable disconnect = request == null ? null : request.abort();
+        // Disconnecting can wait for the connection, which would hold up
+        // other plugin calls.
+        if (disconnect != null) {
+            try {
+                executor.execute(disconnect);
+            } catch (RejectedExecutionException shutdown) {
+                // handleOnDestroy disconnects every active request
+            }
+        }
         call.resolve();
     }
 
     @Override
     protected void handleOnDestroy() {
         executor.shutdownNow();
-        for (RequestOptions request : activeRequests.values()) request.abort();
+        for (RequestOptions request : activeRequests.values()) {
+            Runnable disconnect = request.abort();
+            if (disconnect != null) disconnect.run();
+        }
         activeRequests.clear();
         super.handleOnDestroy();
     }
@@ -112,9 +124,10 @@ public class AndroidHttpPlugin extends Plugin {
             this.disconnect = disconnect;
         }
 
-        synchronized void abort() {
+        /** Returns the disconnect of the attached connection, if any, for the caller to run. */
+        synchronized Runnable abort() {
             aborted = true;
-            if (disconnect != null) disconnect.run();
+            return disconnect;
         }
 
         synchronized boolean isAborted() {

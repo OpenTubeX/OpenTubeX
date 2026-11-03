@@ -6,6 +6,7 @@ import static org.junit.Assert.fail;
 
 import com.getcapacitor.JSObject;
 import com.getcapacitor.PluginCall;
+import com.getcapacitor.plugin.util.CapacitorHttpUrlConnection;
 import com.getcapacitor.plugin.util.HttpRequestHandler;
 
 import java.io.IOException;
@@ -20,6 +21,7 @@ import java.net.SocketAddress;
 import java.net.URI;
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
@@ -93,12 +95,14 @@ public class AndroidHttpPluginTest {
 
             assertTrue("Request never connected", connecting.await(5, TimeUnit.SECONDS));
             // OkHttp asks for the route while holding the connection pool
-            // that disconnecting needs, so abort from another thread and
-            // release the route once the abort waits for it.
+            // that disconnecting needs, so the abort must not wait for its
+            // disconnect. Release the route once the disconnect waits for it.
             Thread aborting = new Thread(() -> abort(plugin));
             aborting.start();
+            aborting.join(5000);
+            assertEquals("Abort waited for the connection", Thread.State.TERMINATED, aborting.getState());
             long deadline = System.nanoTime() + TimeUnit.SECONDS.toNanos(5);
-            while (aborting.getState() != Thread.State.BLOCKED && aborting.getState() != Thread.State.TERMINATED) {
+            while (!isDisconnectBlocked()) {
                 assertTrue("Abort never reached the connection", System.nanoTime() < deadline);
                 Thread.yield();
             }
@@ -208,6 +212,18 @@ public class AndroidHttpPluginTest {
             for (Socket socket : accepted) socket.close();
             abort(plugin);
         }
+    }
+
+    private static boolean isDisconnectBlocked() {
+        for (Map.Entry<Thread, StackTraceElement[]> thread : Thread.getAllStackTraces().entrySet()) {
+            if (thread.getKey().getState() != Thread.State.BLOCKED) continue;
+            for (StackTraceElement frame : thread.getValue()) {
+                if (frame.getClassName().equals(CapacitorHttpUrlConnection.class.getName()) && frame.getMethodName().equals("disconnect")) {
+                    return true;
+                }
+            }
+        }
+        return false;
     }
 
     private static void abort(AndroidHttpPlugin plugin) {
