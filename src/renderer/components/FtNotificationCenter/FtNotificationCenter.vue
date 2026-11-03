@@ -2,9 +2,10 @@
   <FtIconButton
     ref="button"
     class="notificationCenter"
+    :class="{ wiggle }"
     :data-unread-count="unreadCount > 0 ? (unreadCount > 99 ? '99+' : unreadCount) : null"
     :title="buttonLabel"
-    :icon="['fas', 'bell']"
+    :icon="icon"
     :theme="null"
     :size="20"
     force-dropdown
@@ -13,6 +14,8 @@
     dropdown-position-x="left"
     dropdown-class="notificationCenterDropdown"
     @dropdown-open="handleOpen"
+    @animationend="wiggle = false"
+    @animationcancel="wiggle = false"
   >
     <template #dropdown-header>
       <header class="notificationCenterHeader">
@@ -98,6 +101,7 @@ import {
   openNotificationEntry,
   showInAppNotification
 } from '../../helpers/notificationHistory'
+import { isReducedMotionEnabled } from '../../helpers/reducedMotion'
 
 const { t } = useI18n()
 const phoneLayout = usePhoneLayout()
@@ -110,6 +114,11 @@ const openedAt = ref(Date.now())
 const sheetOpen = ref(true)
 
 const unreadCount = computed(() => entries.value.filter(entry => !entry.read).length)
+const icon = computed(() => {
+  if (unreadCount.value > 0) return ['fas', 'bell']
+  return ['fas', entries.value.length > 0 ? 'bell-plain' : 'bell-outline']
+})
+const wiggle = ref(false)
 const buttonLabel = computed(() => unreadCount.value > 0
   ? t('Notification Center.Notifications With Unread', { count: unreadCount.value })
   : t('Notification Center.Notifications'))
@@ -166,6 +175,18 @@ function handleVisibilityChange() {
   if (document.visibilityState === 'visible') collectNotificationHistory()
 }
 
+// Notifications collected while the bell loads are not new to the user.
+let loaded = false
+
+/** @param {import('../../../notificationHistory').NotificationHistoryEntry[]} value */
+function setEntries(value) {
+  if (loaded && !isReducedMotionEnabled()) {
+    const known = new Set(entries.value.map(entry => entry.id))
+    if (value.some(entry => !entry.read && !known.has(entry.id))) wiggle.value = true
+  }
+  entries.value = value
+}
+
 let removeListener = null
 let removeInAppListener = null
 let unmounted = false
@@ -173,7 +194,7 @@ onMounted(async () => {
   let updated = false
   removeListener = notificationHistory.onUpdated(value => {
     updated = true
-    entries.value = value
+    setEntries(value)
   })
   if (process.env.IS_ELECTRON) removeInAppListener = window.ftElectron.notificationHistory.onShowInApp(showInAppNotification)
   if (process.env.IS_CAPACITOR) {
@@ -186,6 +207,7 @@ onMounted(async () => {
   await collectNotificationHistory()
   const initial = await notificationHistory.list()
   if (!updated) entries.value = initial
+  loaded = true
 })
 onBeforeUnmount(() => {
   unmounted = true

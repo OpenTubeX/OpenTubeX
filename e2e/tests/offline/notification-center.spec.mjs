@@ -138,6 +138,38 @@ test('mark all as read keeps the list open', async ({ app, page }) => {
   await expect(page.locator('.notificationCenter')).not.toHaveAttribute('data-unread-count')
 })
 
+test('the bell icon follows the notifications and wiggles for new ones', async ({ app, page }) => {
+  await page.emulateMedia({ reducedMotion: 'no-preference' })
+  await mockSystemNotifications(app)
+  const bell = page.locator('.notificationCenter')
+  const bellIcon = bell.locator('.iconButton > .icon')
+  await expect(bellIcon).toHaveAttribute('data-icon', 'bell-outline')
+  await page.evaluate(() => {
+    window.bellWiggles = 0
+    document.addEventListener('animationstart', (event) => {
+      if (event.animationName.startsWith('notification-bell-wiggle')) window.bellWiggles++
+    })
+  })
+  const historyLength = () => page.evaluate(async () => (await window.ftElectron.notificationHistory.list()).length)
+
+  await announceUploads(page, ['a'])
+  await expect(bellIcon).toHaveAttribute('data-icon', 'bell')
+  await expect.poll(() => page.evaluate(() => window.bellWiggles)).toBe(1)
+  // The wiggle ends, so the next notification starts it again.
+  await expect(bell).not.toHaveClass(/\bwiggle\b/)
+  await announceUploads(page, ['b'], async () => await historyLength() - 1)
+  await expect.poll(() => page.evaluate(() => window.bellWiggles)).toBe(2)
+
+  await page.getByRole('button', { name: 'Notifications (2 unread)', exact: true }).click()
+  const dropdown = page.locator('.notificationCenterDropdown')
+  await dropdown.getByRole('button', { name: 'Mark all as read', exact: true }).click()
+  await expect(bellIcon).toHaveAttribute('data-icon', 'bell-plain')
+  await dropdown.getByRole('button', { name: 'Clear all', exact: true }).click()
+  await expect(bellIcon).toHaveAttribute('data-icon', 'bell-outline')
+  // Reading and clearing are not new notifications.
+  expect(await page.evaluate(() => window.bellWiggles)).toBe(2)
+})
+
 test('notifications appear in the app instead of the system while it is in use', async ({ app, page }) => {
   await page.emulateMedia({ reducedMotion: 'reduce' })
   await mockSystemNotifications(app, { foreground: true })

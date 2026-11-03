@@ -2,6 +2,33 @@
   position: relative;
 }
 
+.notificationCenter.wiggle :deep(.iconButton > .icon) {
+  transform-origin: 50% 10%;
+  animation: notification-bell-wiggle 800ms ease-in-out;
+}
+
+@keyframes notification-bell-wiggle {
+  15% {
+    transform: rotate(14deg);
+  }
+
+  30% {
+    transform: rotate(-12deg);
+  }
+
+  45% {
+    transform: rotate(9deg);
+  }
+
+  60% {
+    transform: rotate(-6deg);
+  }
+
+  75% {
+    transform: rotate(3deg);
+  }
+}
+
 .notificationCenter[data-unread-count]::after {
   position: absolute;
   inset-block-start: 4px;
