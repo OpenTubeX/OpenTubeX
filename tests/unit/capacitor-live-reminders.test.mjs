@@ -377,12 +377,40 @@ test('a reminder cancelled as its foreground timer comes due stays hidden', asyn
 
 test('a reminder shows no toast once the app left the screen while the system cancelled it', async () => {
   let blocked = null
-  const { timers, document, shown } = await loadArmedReminder(() => blocked?.promise)
+  const { timers, document, shown, calls } = await loadArmedReminder(() => blocked?.promise)
   blocked = Promise.withResolvers()
   const firing = timers[0]()
   await new Promise(resolve => setImmediate(resolve))
   document.visibilityState = 'hidden'
   blocked.resolve()
+  blocked = null
   await firing
   assert.deepEqual(shown, [])
+  // The alarm is gone, so the system shows the reminder after all.
+  assert.deepEqual(calls.at(-1), ['schedule', 7])
+})
+
+test('a reminder synced while turning notifications off failed waits for them to come back on', async () => {
+  const scheduled = new Map()
+  let failCancel = false
+  const { liveReminder, applyCapacitorNotificationMode } = await loadCapacitorReminder({
+    checkPermissions: async () => ({ display: 'granted' }),
+    cancel: async ({ notifications }) => {
+      if (failCancel) throw new Error('Cancel failed')
+      for (const { id } of notifications) scheduled.delete(id)
+    },
+    getPending: async () => ({ notifications: [...scheduled.keys()].map(id => ({ id })) }),
+    schedule: async ({ notifications }) => { for (const notification of notifications) scheduled.set(notification.id, notification) },
+  })
+  assert.equal(await liveReminder.schedule({ ...reminder(START + 60_000), videoId: 'first' }), true)
+  failCancel = true
+  await applyCapacitorNotificationMode('off')
+  failCancel = false
+
+  // Sync adds a reminder while notifications are off.
+  assert.equal(await liveReminder.schedule({ ...reminder(START + 60_000), videoId: 'second' }), true)
+  assert.deepEqual([...scheduled.values()].map(notification => notification.extra.videoId), ['first'])
+
+  await applyCapacitorNotificationMode('both')
+  assert.deepEqual([...scheduled.values()].map(notification => notification.extra.videoId).sort(), ['first', 'second'])
 })

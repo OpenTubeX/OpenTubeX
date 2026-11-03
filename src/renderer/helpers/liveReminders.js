@@ -223,7 +223,19 @@ async function showReminderInApp({ id, title, body, extra }) {
   await LocalNotifications.cancel({ notifications: [{ id }] })
     .catch(error => console.error('Failed to cancel a reminder shown in the app', error))
   emitUpdated(extra.videoId, false)
-  if (entry && showsRemindersInApp()) showForegroundReminder(entry)
+  if (showsRemindersInApp()) {
+    if (entry) showForegroundReminder(entry)
+  } else if (notificationMode !== 'off') {
+    // The app left the screen while the alarm was cancelled, so the system shows it after all.
+    handledAlarms.delete(id)
+    await scheduleSystemReminder({
+      notificationId: id,
+      notificationTitle: title,
+      notificationBody: body,
+      startTimestamp: Date.now() + 1000,
+      videoId: extra.videoId,
+    }).catch(error => console.error('Failed to show a reminder the app could not', error))
+  }
 }
 
 /**
@@ -278,13 +290,15 @@ async function scheduleReminder(reminder) {
     return true
   }
   // Synced reminders are kept while notifications are off, and scheduled once they are on again.
-  const paused = isPaused()
+  // Off pauses them even when cancelling the earlier alarms failed and left the pause unsaved.
+  const paused = isPaused() || notificationMode === 'off'
   if (await started() || (!paused && !await requestNotificationPermission()) || await started()) return false
 
   const records = readCapacitorReminders()
   const record = { ...reminder, notificationId: notificationIdForVideo(reminder.videoId, records) }
   handledAlarms.delete(record.notificationId)
   if (!paused) await scheduleSystemReminder(record)
+  else localStorage.setItem(PAUSED_STORAGE_KEY, 'true')
   // Read again, since the app may have shown another reminder meanwhile and removed its record.
   writeCapacitorReminders([
     ...readStoredReminders().filter(item => item.videoId !== reminder.videoId),
