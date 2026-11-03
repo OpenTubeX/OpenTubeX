@@ -1,5 +1,5 @@
 import { test, expect } from '../../helpers/app.mjs'
-import { activeTab, openMockedVideo } from '../../helpers/player.mjs'
+import { activeTab, openMockedVideo, settleMenuZoom } from '../../helpers/player.mjs'
 import { mockPlayableWatchPage } from '../../helpers/watch.mjs'
 import { WATCH_PAGE_SEED } from '../../helpers/watch-page.mjs'
 
@@ -151,18 +151,27 @@ test('the options menu grows in and fades out, but closes at once from a submenu
 
   await menu.evaluate((element) => {
     window.__menuMotion = []
-    element.addEventListener('animationstart', ({ animationName, target }) => {
-      if (target === element && animationName.startsWith('ft-menu-open')) window.__menuMotion.push('open')
-    })
-    element.addEventListener('transitionrun', ({ propertyName, target }) => {
-      if (target === element && propertyName === 'scale') window.__menuMotion.push('close')
-    })
+    // Animation events wait for a rendered frame, which a loaded renderer may
+    // not draw before the motion has ended, so look for it as the menu opens or closes.
+    let hidden = element.classList.contains('shaka-hidden')
+    new MutationObserver(() => {
+      if (hidden === element.classList.contains('shaka-hidden')) return
+      hidden = !hidden
+      const animations = element.getAnimations()
+      if (hidden
+        ? animations.some(animation => animation instanceof CSSTransition && animation.transitionProperty === 'scale')
+        : animations.some(animation => animation instanceof CSSAnimation && animation.animationName.startsWith('ft-menu-open'))) {
+        window.__menuMotion.push(hidden ? 'close' : 'open')
+      }
+    }).observe(element, { attributes: true, attributeFilter: ['class'] })
   })
   const takeMotion = () => page.evaluate(() => window.__menuMotion.splice(0))
   const afterFrames = () => page.evaluate(() => new Promise(resolve => requestAnimationFrame(() => requestAnimationFrame(resolve))))
 
   await openOverflowMenuWith(player, tile)
-  await expect.poll(takeMotion).toEqual(['open'])
+  expect(await takeMotion()).toEqual(['open'])
+  // Closed before it has grown at all, it is already as small as it shrinks to.
+  await settleMenuZoom(player)
 
   // Fading out, the menu stays displayed until it has faded.
   expect(await player.evaluate((element) => {
@@ -185,6 +194,7 @@ test('the options menu grows in and fades out, but closes at once from a submenu
   // Hidden again, it fades the next time.
   await afterFrames()
   await openOverflowMenuWith(player, tile)
+  await settleMenuZoom(player)
   await closePlayerMenus(player)
   await expect(menu).toBeHidden()
   expect(await takeMotion()).toEqual(['open', 'close'])

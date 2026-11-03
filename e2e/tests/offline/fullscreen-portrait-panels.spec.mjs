@@ -166,7 +166,13 @@ test('short portrait fullscreen keeps panel actions reachable', { tag: '@scale' 
   const scroller = queue.locator('.queueItems')
   await expect(queue).toBeVisible()
   await expect(player.locator('.fullscreenDockSheet[open]')).toHaveCSS('background-color', await queue.evaluate(element => getComputedStyle(element).backgroundColor))
-  await scroller.evaluate(element => { element.scrollTop = element.scrollHeight })
+  // Rows mount with their real heights near the end, and wrapped rows are
+  // taller than the estimate, so keep scrolling until the last row renders.
+  await expect.poll(() => scroller.evaluate(element => {
+    element.scrollTop = element.scrollHeight
+    return !element.querySelector('.queueItem:last-child').classList.contains('windowedListShell') &&
+      element.scrollTop + element.clientHeight >= element.scrollHeight - 1
+  })).toBe(true)
   await expectScrollAtRenderedEnd(scroller)
   await expect.poll(async () => {
     const content = await queue.boundingBox()
