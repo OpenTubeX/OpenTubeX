@@ -1535,6 +1535,8 @@ Channel:
     This channel has videos but none could be displayed, try fetching more: "Acest canal are videoclipuri, dar niciunul nu a putut fi afișat. Încearcă să încarci mai multe"
   Posts:
     Original post unavailable: "Postarea originală nu este disponibilă"
+    Members-only video hidden by OpenTubeX: "Videoclip doar pentru membri ascuns de OpenTubeX"
+    Video hidden by OpenTubeX because of its title: "Videoclip ascuns de OpenTubeX deoarece titlul conține text ascuns"
 Video:
   Info panel source: 'Sursă: {source}'
   External DRM Protected: "Videoclipurile protejate DRM nu pot fi redate în OpenTubeX, deoarece necesită componente proprietare, cu sursă închisă."

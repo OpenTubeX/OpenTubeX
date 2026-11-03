@@ -1536,6 +1536,8 @@ Channel:
     This channel has videos but none could be displayed, try fetching more: "Kênh này có video nhưng không thể hiển thị video nào. Hãy thử tải thêm"
   Posts:
     Original post unavailable: "Bài đăng gốc không khả dụng"
+    Members-only video hidden by OpenTubeX: "Video chỉ dành cho hội viên đã bị OpenTubeX ẩn"
+    Video hidden by OpenTubeX because of its title: "Video đã bị OpenTubeX ẩn vì tiêu đề chứa văn bản bị ẩn"
 Video:
   Info panel source: 'Nguồn: {source}'
   External DRM Protected: "Không thể phát video được bảo vệ DRM trong OpenTubeX vì chúng yêu cầu các thành phần nguồn đóng độc quyền."

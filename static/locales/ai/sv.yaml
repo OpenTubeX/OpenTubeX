@@ -1517,6 +1517,8 @@ Channel:
     This channel has videos but none could be displayed, try fetching more: "Den här kanalen har videor, men ingen kunde visas. Försök att hämta fler"
   Posts:
     Original post unavailable: "Det ursprungliga inlägget är inte tillgängligt"
+    Members-only video hidden by OpenTubeX: "Video endast för medlemmar dold av OpenTubeX"
+    Video hidden by OpenTubeX because of its title: "Video dold av OpenTubeX eftersom titeln innehåller dold text"
 Video:
   Info panel source: 'Källa: {source}'
   External DRM Protected: "DRM-skyddade videor kan inte spelas upp i OpenTubeX eftersom de kräver proprietära komponenter med sluten källkod."

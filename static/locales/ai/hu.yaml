@@ -1503,6 +1503,8 @@ Channel:
   All Results: Összes
   Posts:
     Original post unavailable: "Az eredeti bejegyzés nem érhető el"
+    Members-only video hidden by OpenTubeX: "Az OpenTubeX elrejtett egy csak tagoknak szóló videót"
+    Video hidden by OpenTubeX because of its title: "Az OpenTubeX elrejtette a videót, mert a címe rejtett szöveget tartalmaz"
 Video:
   Info panel source: 'Forrás: {source}'
   External DRM Protected: "A DRM-védelemmel ellátott videók nem játszhatók le az OpenTubeX-ban, mivel ezekhez zárt forráskódú, tulajdonosi komponensekre van szükség."

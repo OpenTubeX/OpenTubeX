@@ -1478,6 +1478,8 @@ Channel:
   All Results: Все
   Posts:
     Original post unavailable: "Исходная публикация недоступна"
+    Members-only video hidden by OpenTubeX: "OpenTubeX скрыл видео только для спонсоров"
+    Video hidden by OpenTubeX because of its title: "OpenTubeX скрыл видео, так как его название содержит скрытый текст"
 Video:
   Info panel source: 'Источник: {source}'
   External DRM Protected: "Видео, защищенное DRM, не может быть воспроизведено в OpenTubeX, так как оно требует использования проприетарных компонентов с закрытым исходным кодом."

@@ -1503,6 +1503,8 @@ Channel:
   All Results: 全部
   Posts:
     Original post unavailable: "原始貼文無法使用"
+    Members-only video hidden by OpenTubeX: "OpenTubeX 已隱藏會員專屬影片"
+    Video hidden by OpenTubeX because of its title: "OpenTubeX 已隱藏此影片，因為其標題包含隱藏文字"
 Video:
   Info panel source: '來源：{source}'
   External DRM Protected: "受 DRM 保護的影片無法在 OpenTubeX 上播放，因為它們需要專屬的封閉原始碼元件。"

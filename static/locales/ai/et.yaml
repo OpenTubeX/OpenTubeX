@@ -1505,6 +1505,8 @@ Channel:
   All Results: Kõik
   Posts:
     Original post unavailable: "Algne postitus pole saadaval"
+    Members-only video hidden by OpenTubeX: "OpenTubeX peitis ainult liikmetele mõeldud video"
+    Video hidden by OpenTubeX because of its title: "OpenTubeX peitis video, sest selle pealkiri sisaldab peidetud teksti"
 Video:
   Info panel source: 'Allikas: {source}'
   External DRM Protected: "DRMiga kaitstud videoid ei saa OpenTubeXis esitada, kuna nende jaoks on vaja omanduslikke suletud lähtekoodiga komponente."

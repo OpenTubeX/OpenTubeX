@@ -1542,6 +1542,8 @@ Channel:
     This channel has videos but none could be displayed, try fetching more: "Tällä kanavalla on videoita, mutta yhtäkään ei voitu näyttää. Yritä ladata lisää"
   Posts:
     Original post unavailable: "Alkuperäinen julkaisu ei ole saatavilla"
+    Members-only video hidden by OpenTubeX: "OpenTubeX piilotti vain jäsenille tarkoitetun videon"
+    Video hidden by OpenTubeX because of its title: "OpenTubeX piilotti videon, koska sen otsikko sisältää piilotettua tekstiä"
 Video:
   Info panel source: 'Lähde: {source}'
   External DRM Protected: "DRM-suojattuja videoita ei voida katsoa OpenTubeXissä, koska ne vaativat ei-vapaita, suljetun koodin osia."

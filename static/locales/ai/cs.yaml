@@ -1505,6 +1505,8 @@ Channel:
   All Results: Vše
   Posts:
     Original post unavailable: "Původní příspěvek není k dispozici"
+    Members-only video hidden by OpenTubeX: "OpenTubeX skryl video pouze pro členy"
+    Video hidden by OpenTubeX because of its title: "OpenTubeX skryl video, protože jeho název obsahuje skrytý text"
 Video:
   Info panel source: 'Zdroj: {source}'
   External DRM Protected: "Videa chráněná DRM nelze v aplikaci OpenTubeX přehrávat, protože vyžadují proprietární komponenty s uzavřeným zdrojovým kódem."

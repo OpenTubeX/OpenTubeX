@@ -1548,6 +1548,8 @@ Channel:
     This channel has videos but none could be displayed, try fetching more: "இந்தச் சேனலில் காணொளிகள் உள்ளன, ஆனால் எதையும் காட்ட முடியவில்லை. மேலும் காணொளிகளை ஏற்ற முயற்சிக்கவும்"
   Posts:
     Original post unavailable: "அசல் இடுகை கிடைக்கவில்லை"
+    Members-only video hidden by OpenTubeX: "உறுப்பினர்களுக்கு மட்டுமான வீடியோ OpenTubeX ஆல் மறைக்கப்பட்டது"
+    Video hidden by OpenTubeX because of its title: "தலைப்பில் மறைக்கப்பட்ட உரை இருப்பதால் வீடியோ OpenTubeX ஆல் மறைக்கப்பட்டது"
 Video:
   Info panel source: 'மூலம்: {source}'
   External DRM Protected: "டி.ஆர்.எம் பாதுகாக்கப்பட்ட வீடியோக்களை OpenTubeX-இல் இயக்க முடியாது, ஏனெனில் அவற்றுக்கு தனியுரிம, மூடிய மூல கூறுகள் தேவைப்படுகின்றன."

@@ -1503,6 +1503,8 @@ Channel:
   All Results: Alle
   Posts:
     Original post unavailable: "Det opprinnelige innlegget er ikke tilgjengelig"
+    Members-only video hidden by OpenTubeX: "Video kun for medlemmer skjult av OpenTubeX"
+    Video hidden by OpenTubeX because of its title: "Video skjult av OpenTubeX fordi tittelen inneholder skjult tekst"
 Video:
   Info panel source: 'Kilde: {source}'
   External DRM Protected: "DRM-beskyttede videoer kan ikke bli avspilt i OpenTubeX, ettersom de krever proprietære komponenter med lukket kildekode."

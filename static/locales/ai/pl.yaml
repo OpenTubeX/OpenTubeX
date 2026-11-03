@@ -962,6 +962,8 @@ Channel:
   All Results: Wszystkie
   Posts:
     Original post unavailable: "Oryginalny post jest niedostępny"
+    Members-only video hidden by OpenTubeX: "OpenTubeX ukrył film tylko dla członków"
+    Video hidden by OpenTubeX because of its title: "OpenTubeX ukrył film, ponieważ jego tytuł zawiera ukryty tekst"
 Video:
   Info panel source: 'Źródło: {source}'
   Remove Video from Queue: Usuń z kolejki

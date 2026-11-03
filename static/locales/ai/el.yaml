@@ -1521,6 +1521,8 @@ Channel:
     This channel has videos but none could be displayed, try fetching more: "Αυτό το κανάλι έχει βίντεο, αλλά κανένα δεν μπόρεσε να εμφανιστεί. Δοκιμάστε να φορτώσετε περισσότερα"
   Posts:
     Original post unavailable: "Η αρχική ανάρτηση δεν είναι διαθέσιμη"
+    Members-only video hidden by OpenTubeX: "Το OpenTubeX απέκρυψε βίντεο μόνο για μέλη"
+    Video hidden by OpenTubeX because of its title: "Το OpenTubeX απέκρυψε το βίντεο επειδή ο τίτλος του περιέχει κρυφό κείμενο"
 Video:
   Info panel source: 'Πηγή: {source}'
   External DRM Protected: "Τα βίντεο που προστατεύονται με DRM δεν μπορούν να αναπαραχθούν στο OpenTubeX, καθώς απαιτούν ιδιόκτητα εξαρτήματα κλειστού κώδικα."

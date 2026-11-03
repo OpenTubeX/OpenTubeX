@@ -1520,6 +1520,8 @@ Channel:
     This channel has videos but none could be displayed, try fetching more: "Този канал има видеоклипове, но нито един не може да бъде показан. Опитайте да заредите още"
   Posts:
     Original post unavailable: "Оригиналната публикация не е налична"
+    Members-only video hidden by OpenTubeX: "Видеоклип само за членове, скрит от OpenTubeX"
+    Video hidden by OpenTubeX because of its title: "Видеоклипът е скрит от OpenTubeX, защото заглавието му съдържа скрит текст"
 Video:
   Info panel source: 'Източник: {source}'
   External DRM Protected: "Видеата, защитени с DRM, не могат да се възпроизвеждат в OpenTubeX, тъй като изискват собствени компоненти със затворен код."
