@@ -86,3 +86,17 @@ test('syncing merges both sides, applies the marks and uploads them', async () =
   assert.deepEqual(JSON.parse(storage.get(RSS_FEED_SEEN_ITEMS_STORAGE_KEY)), expected)
   assert.deepEqual(applied, [[['feed\nduring', true], ['feed\nlocal', false], ['feed\nremote', true]]])
 })
+
+test('a new mark stays ahead of earlier marks from a device whose clock is ahead', () => {
+  storage.set(RSS_FEED_SEEN_ITEMS_STORAGE_KEY, JSON.stringify([{ key: 'feed\na', unseenAt: 5000 }]))
+  recordRssFeedSeenItems(['feed\na', 'feed\nb'], true, 1000)
+  assert.deepEqual(JSON.parse(storage.get(RSS_FEED_SEEN_ITEMS_STORAGE_KEY)), [
+    { key: 'feed\na', seenAt: 5001, unseenAt: 5000 },
+    { key: 'feed\nb', seenAt: 1000 },
+  ])
+  assert.equal(loadRssFeedSeenMarks().get('feed\na'), true)
+
+  // Marks in the same millisecond keep their order
+  recordRssFeedSeenItems(['feed\nb'], false, 1000)
+  assert.equal(loadRssFeedSeenMarks().get('feed\nb'), false)
+})

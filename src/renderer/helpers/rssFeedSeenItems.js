@@ -133,8 +133,14 @@ function saveRssFeedSeenItems(entries) {
  */
 export function recordRssFeedSeenItems(keys, seen, timestamp = Date.now()) {
   if (keys.length === 0) return
-  const marks = keys.map(key => seen ? { key, seenAt: timestamp } : { key, unseenAt: timestamp })
-  saveRssFeedSeenItems(mergeRssFeedSeenItems(loadRssFeedSeenItems(), marks))
+  const saved = loadRssFeedSeenItems()
+  const latestByKey = new Map(saved.map(entry => [entry.key, latestMark(entry)]))
+  // Stay ahead of earlier marks, which can come from a device whose clock is ahead
+  const marks = keys.map((key) => {
+    const markedAt = Math.max(timestamp, (latestByKey.get(key) ?? 0) + 1)
+    return seen ? { key, seenAt: markedAt } : { key, unseenAt: markedAt }
+  })
+  saveRssFeedSeenItems(mergeRssFeedSeenItems(saved, marks))
 }
 
 /**
