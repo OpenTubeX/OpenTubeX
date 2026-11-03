@@ -67,6 +67,7 @@
         @dragstart="onDragStart"
       >
         <RouterLink
+          ref="thumbnailLink"
           class="thumbnailLink"
           tabindex="-1"
           :to="watchVideoRouterLink"
@@ -138,12 +139,15 @@
           />
           {{ displayDurationLabel === '0:00' ? '' : displayDurationLabel }}
         </div>
+        <!-- Only forwards pointer clicks to the thumbnail link, which keyboards skip too. -->
+        <!-- eslint-disable-next-line vuejs-accessibility/click-events-have-key-events -->
         <div
           v-if="useSponsorBlock && sponsorBlockFullVideoCategory"
           class="sponsorBlockVideoLabel"
           :title="t('Video.Player.SponsorBlock.FullVideoLabel', {
             segmentCategory: sponsorBlockFullVideoLabel
           })"
+          @click="forwardSponsorBlockLabelClick"
         >
           <FtIcon :icon="sponsorBlockFullVideoIcon" />
           <span>{{ sponsorBlockFullVideoLabel }}</span>
@@ -1619,6 +1623,16 @@ onBeforeUnmount(() => {
 const showVideoMenuButton = computed(() => store.getters.getShowVideoMenuButton)
 
 const videoMenuButton = useTemplateRef('videoMenuButton')
+const thumbnailLink = useTemplateRef('thumbnailLink')
+
+/**
+ * Narrow cards show only the SponsorBlock icon, which catches the pointer for its
+ * tooltip, so clicks on it still open the video.
+ * @param {MouseEvent} event
+ */
+function forwardSponsorBlockLabelClick(event) {
+  thumbnailLink.value?.$el.dispatchEvent(new MouseEvent('click', event))
+}
 
 function openVideoOptionsMenu() {
   cancelMenuHold()

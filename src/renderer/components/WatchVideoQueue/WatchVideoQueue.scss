@@ -266,6 +266,11 @@
   .fullscreenQueue .queueVideo :deep(.info) {
     min-inline-size: 0;
   }
+
+  /* Not even the SponsorBlock icon fits beside the duration in these thumbnails. */
+  .fullscreenQueue .queueVideo :deep(.sponsorBlockVideoLabel) {
+    display: none;
+  }
 }
 
 @media (width <= 600px), (pointer: coarse) {
