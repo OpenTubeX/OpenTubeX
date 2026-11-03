@@ -2763,7 +2763,7 @@ export default defineComponent({
       // Without metadata it's unknown whether the video is family friendly.
       if (this.showFamilyFriendlyOnly || !Number.isInteger(Number(this.tabRoute.query.downloadId))) return
       this.downloadedPlaybackFallbackTimer = setTimeout(() => {
-        if (this.isCurrentVideoLoad(loadGeneration, videoId) && this.isLoading && !this.localFilePlayback) {
+        if (this.isCurrentVideoLoad(loadGeneration, videoId) && this.isLoading && !this.localFilePlayback && !this.showFamilyFriendlyOnly) {
           this.finishDownloadedPlaybackWithoutMetadata()
         }
       }, DOWNLOADED_PLAYBACK_METADATA_TIMEOUT_MS)

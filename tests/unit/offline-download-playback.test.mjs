@@ -180,6 +180,29 @@ test('a download waits for its metadata while only family friendly videos are al
   assert.equal(timers.length, 1, 'only the unrestricted page plays the download before its metadata')
 })
 
+test('a download keeps waiting when family friendly mode is turned on during the timeout', () => {
+  let fallback
+  let played = false
+  const methods = runInNewContext(`({ ${method('scheduleDownloadedPlaybackFallback', 'onMountedDependOnLocalStateLoading()')} })`, {
+    DOWNLOADED_PLAYBACK_METADATA_TIMEOUT_MS: 3000,
+    setTimeout: callback => { fallback = callback },
+    clearTimeout() {},
+  })
+  const watch = {
+    ...methods,
+    showFamilyFriendlyOnly: false,
+    isLoading: true,
+    localFilePlayback: false,
+    tabRoute: { query: { downloadId: '1' } },
+    isCurrentVideoLoad: () => true,
+    finishDownloadedPlaybackWithoutMetadata() { played = true },
+  }
+  watch.scheduleDownloadedPlaybackFallback(1, 'downloaded1')
+  watch.showFamilyFriendlyOnly = true
+  fallback()
+  assert.equal(played, false)
+})
+
 test('metadata that arrives after a download started playing is cached', () => {
   const methods = runInNewContext(`({ ${method('finishMetadataLoad', 'settleDownloadedPlaybackFallback')} })`)
   for (const [downloadedPlaybackWithoutMetadata, isLoading, expected] of [[true, false, 1], [false, true, 0]]) {
