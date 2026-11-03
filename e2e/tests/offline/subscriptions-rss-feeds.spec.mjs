@@ -359,7 +359,9 @@ test.describe('with followed feeds', () => {
     await goTo(page, 'subscriptions')
     await page.locator('[data-rss-feeds-tab]').click()
     const panel = page.locator('#subscriptionsPanel')
-    const banner = panel.locator('.errorBanner')
+    // The status region stays mounted so that screen readers announce the banner
+    const status = panel.getByRole('status').filter({ has: page.locator('.errorBanner') })
+    const banner = status.locator('.errorBanner')
     await expect(banner).toHaveText('1 feed could not be refreshed.')
 
     // A refresh hides the banner, so it takes the focus off its button
@@ -380,6 +382,7 @@ test.describe('with followed feeds', () => {
     await banner.getByRole('button', { name: 'Close' }).click()
     await expect(banner).toHaveCount(0)
     await expect(panel).toBeFocused()
+    await expect(panel.locator('.errorStatus')).toBeEmpty()
 
     // Leaving the page keeps the banner dismissed
     await goTo(page, 'history')

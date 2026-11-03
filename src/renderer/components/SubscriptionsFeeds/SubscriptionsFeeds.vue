@@ -3,28 +3,33 @@
     ref="panelRef"
     tabindex="-1"
   >
+    <!-- Stays mounted so that screen readers announce the banner when it appears -->
     <div
-      v-if="!isLoading && errorFeedUrls.length > 0 && !rssFeedErrorsDismissed"
-      ref="bannerRef"
-      class="errorBanner"
+      class="errorStatus"
       role="status"
     >
-      <FtIcon
-        class="errorBannerIcon"
-        :icon="['fas', 'triangle-exclamation']"
-        aria-hidden="true"
-      />
-      <p class="errorBannerText">
-        {{ t('Subscriptions.RSS Feeds.Refresh Errors', { count: errorFeedUrls.length }, errorFeedUrls.length) }}
-      </p>
-      <FtIconButton
-        :title="t('Close')"
-        :icon="['fas', 'xmark']"
-        theme="base-no-default"
-        :size="16"
-        :padding="6"
-        @click="dismissErrors"
-      />
+      <div
+        v-if="!isLoading && errorFeedUrls.length > 0 && !rssFeedErrorsDismissed"
+        ref="bannerRef"
+        class="errorBanner"
+      >
+        <FtIcon
+          class="errorBannerIcon"
+          :icon="['fas', 'triangle-exclamation']"
+          aria-hidden="true"
+        />
+        <p class="errorBannerText">
+          {{ t('Subscriptions.RSS Feeds.Refresh Errors', { count: errorFeedUrls.length }, errorFeedUrls.length) }}
+        </p>
+        <FtIconButton
+          :title="t('Close')"
+          :icon="['fas', 'xmark']"
+          theme="base-no-default"
+          :size="16"
+          :padding="6"
+          @click="dismissErrors"
+        />
+      </div>
     </div>
     <div
       v-if="feeds.length === 0"
