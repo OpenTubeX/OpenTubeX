@@ -2583,7 +2583,7 @@ a:visited {
 .openTubeXDark {
   --signal-accent-color: var(--signal-accent, #f34132);
 
-  /* Filled controls carry white text in both modes. */
+  /* Filled controls carry white text in the light theme. */
   --signal-accent-fill: rgb(from oklch(from var(--signal-accent-color) min(l, 0.5) min(c, 0.2) h) clamp(0, r, 255) clamp(0, g, 255) clamp(0, b, 255));
   --seekbar-played-color: color-mix(in srgb, var(--signal-accent-color) 20%, #e4e1df);
   --bg-glows:
@@ -2689,8 +2689,15 @@ a:visited {
   --border-color: rgb(255 255 255 / 12%);
   --primary-shadow-color: rgb(0 0 0 / 24%);
 
-  /* Text-sized accents stay light enough to read on the dark surfaces. */
+  /* Accents stay light enough to read on the dark surfaces. The primary
+     color also colors selected labels, so filled controls use dark text. */
   --accent-color: rgb(from oklch(from var(--signal-accent-color) max(l, 0.7) c h) clamp(0, r, 255) clamp(0, g, 255) clamp(0, b, 255));
+  --primary-color: var(--accent-color);
+  --primary-color-hover: var(--accent-color-hover);
+  --primary-color-active: var(--accent-color-active);
+  --text-with-main-color: #111;
+  --selection-background-color: var(--accent-color);
+  --selection-text-color: #111;
   --accent-color-hover: rgb(from oklch(from var(--accent-color) min(calc(l + 0.06), 0.92) c h) clamp(0, r, 255) clamp(0, g, 255) clamp(0, b, 255));
   --accent-color-active: rgb(from oklch(from var(--accent-color) calc(l - 0.05) c h) clamp(0, r, 255) clamp(0, g, 255) clamp(0, b, 255));
   --accent-color-light: color-mix(in srgb, var(--accent-color) 12%, #171717);
