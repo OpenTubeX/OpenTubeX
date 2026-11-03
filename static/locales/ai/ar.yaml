@@ -189,6 +189,7 @@ Subscriptions:
   Posts:
     RSS Message: لا يوفّر YouTube خلاصات RSS للمنشورات. عطّل إعداد "{rssSetting}" لعرض المنشورات أو فعّل إعداد "{hideSetting}" لإخفاء علامة التبويب هذه.
   RSS Feeds:
+    Refreshing: جارٍ تحديث موجزات RSS
     Tab: RSS
     Followed Feeds: خلاصات RSS المتابَعة
     Add Feed: إضافة خلاصة
@@ -1953,6 +1954,7 @@ Context Menu:
   Reload Live: إعادة تحميل لايف
   Reload Posts: إعادة تحميل المشاركات
   Reload All Feeds: إعادة تحميل كافة الخلاصات
+  Reload RSS Feeds: إعادة تحميل موجزات RSS
   Close Multiple Tabs: 'إغلاق علامتي تبويب ({count}) | إغلاق {count} علامات تبويب | إغلاق {count} علامة تبويب | إغلاق {count} علامة تبويب'
   Duplicate Tab: علامة تبويب مكررة
   Duplicate Multiple Tabs: 'تكرار علامتي تبويب ({count}) | تكرار {count} علامات تبويب | تكرار {count} علامة تبويب | تكرار {count} علامة تبويب'

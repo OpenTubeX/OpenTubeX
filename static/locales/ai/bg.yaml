@@ -189,6 +189,7 @@ Subscriptions:
   Posts:
     RSS Message: YouTube не предоставя RSS емисии за публикации. Изключете настройката "{rssSetting}", за да преглеждате публикации, или включете настройката "{hideSetting}", за да скриете този раздел.
   RSS Feeds:
+    Refreshing: Опресняване на RSS емисиите
     Tab: RSS
     Followed Feeds: Следвани RSS емисии
     Add Feed: Добавяне на емисия
@@ -1934,6 +1935,7 @@ Context Menu:
   Reload Live: Презареждане на предаванията на живо
   Reload Posts: Презареждане на публикациите
   Reload All Feeds: Презареждане на всички емисии
+  Reload RSS Feeds: Презареждане на RSS емисиите
   Close Multiple Tabs: Затваряне на {count} раздела
   Duplicate Tab: Дублиране на раздела
   Duplicate Multiple Tabs: Дублиране на {count} раздела

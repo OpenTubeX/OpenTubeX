@@ -191,6 +191,7 @@ Subscriptions:
   Posts:
     RSS Message: YouTube не пружа RSS изворе за објаве. Искључите подешавање „{rssSetting}“ да бисте видели објаве или укључите подешавање „{hideSetting}“ да бисте сакрили ову картицу.
   RSS Feeds:
+    Refreshing: Освежавање RSS фидова
     Tab: RSS
     Followed Feeds: Праћени RSS фидови
     Add Feed: Додај фид
@@ -1981,6 +1982,7 @@ Context Menu:
   Reload Live: Поново учитај преносе уживо
   Reload Posts: Поново учитај објаве
   Reload All Feeds: Поново учитај све изворе
+  Reload RSS Feeds: Поново учитај RSS фидове
   Close Multiple Tabs: Затвори {count} картицу | Затвори {count} картице | Затвори {count} картица
   Duplicate Tab: Дуплирај картицу
   Duplicate Multiple Tabs: Дуплирај {count} картицу | Дуплирај {count} картице | Дуплирај {count} картица

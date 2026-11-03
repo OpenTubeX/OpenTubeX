@@ -364,7 +364,7 @@ export class TabManager {
     this.contextMenuSurface = 'content'
     this.contextMenuSubscriptionFeedTab = null
     this.contextMenuSubscriptionNewFeedTab = false
-    this.contextMenuSubscriptionNewFeedHasContent = false
+    this.contextMenuSubscriptionFeedHasNewContent = false
     this.contextMenuTabBarVertical = false
     this._sessionSaveTimer = null
     this._lastSessionSaveContent = null

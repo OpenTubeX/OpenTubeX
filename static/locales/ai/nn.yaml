@@ -187,6 +187,7 @@ Subscriptions:
   Newest First: Nyaste først
   Oldest First: Eldste først
   RSS Feeds:
+    Refreshing: Oppdaterer RSS-straumar
     Tab: RSS
     Followed Feeds: Fylgde RSS-straumar
     Add Feed: Legg til straum
@@ -2207,6 +2208,7 @@ Context Menu:
   Reload Live: Last inn direktesendingar på nytt
   Reload Posts: Last inn innlegg på nytt
   Reload All Feeds: Last inn alle straumane på nytt
+  Reload RSS Feeds: Last inn RSS-straumar på nytt
   Close Multiple Tabs: Lukk {count} faner
   Duplicate Tab: Dupliser fana
   Duplicate Multiple Tabs: Dupliser {count} faner

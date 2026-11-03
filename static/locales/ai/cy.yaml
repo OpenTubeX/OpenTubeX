@@ -187,6 +187,7 @@ Subscriptions:
   Newest First: Mwyaf newydd yn gyntaf
   Oldest First: Hynaf yn gyntaf
   RSS Feeds:
+    Refreshing: Yn adnewyddu ffrydiau RSS
     Tab: RSS
     Followed Feeds: Ffrydiau RSS rydych chi'n eu dilyn
     Add Feed: Ychwanegu Ffrwd
@@ -1938,6 +1939,7 @@ Context Menu:
   Reload Live: Ail-lwytho ffrydiau byw
   Reload Posts: Ail-lwytho postiadau
   Reload All Feeds: Ail-lwytho pob ffrwd
+  Reload RSS Feeds: Ail-lwytho ffrydiau RSS
   Close Multiple Tabs: Cau {count} o dabiau | Cau {count} tab | Cau {count} dab | Cau {count} thab | Cau {count} thab | Cau {count} tab
   Duplicate Tab: Dyblygu'r tab
   Duplicate Multiple Tabs: Dyblygu {count} o dabiau | Dyblygu {count} tab | Dyblygu {count} dab | Dyblygu {count} thab | Dyblygu {count} thab | Dyblygu {count} tab

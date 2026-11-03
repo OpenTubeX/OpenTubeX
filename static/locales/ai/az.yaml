@@ -187,6 +187,7 @@ Subscriptions:
   Newest First: Əvvəlcə ən yeni
   Oldest First: Əvvəlcə ən köhnə
   RSS Feeds:
+    Refreshing: RSS lentləri yenilənir
     Tab: RSS
     Followed Feeds: İzlənilən RSS axınları
     Add Feed: Axın əlavə et
@@ -1919,6 +1920,7 @@ Context Menu:
   Reload Live: Canlı yayımları yenidən yüklə
   Reload Posts: Postları yenidən yüklə
   Reload All Feeds: Bütün axınları yenidən yüklə
+  Reload RSS Feeds: RSS lentlərini yenidən yüklə
   Close Multiple Tabs: "{count} vərəqni bağla"
   Duplicate Tab: Vərəqnin surətini yarat
   Duplicate Multiple Tabs: "{count} vərəqnin surətini yarat"

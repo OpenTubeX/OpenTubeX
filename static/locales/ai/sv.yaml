@@ -189,6 +189,7 @@ Subscriptions:
   Posts:
     RSS Message: 'YouTube tillhandahåller inte RSS-flöden för inlägg. Inaktivera inställningen "{rssSetting}" för att visa inlägg eller aktivera inställningen "{hideSetting}" för att dölja den här fliken.'
   RSS Feeds:
+    Refreshing: Uppdaterar RSS-flöden
     Tab: RSS
     Followed Feeds: Följda RSS-flöden
     Add Feed: Lägg till flöde
@@ -1931,6 +1932,7 @@ Context Menu:
   Reload Live: Läs in liveströmmar igen
   Reload Posts: Läs in inlägg igen
   Reload All Feeds: Läs in alla flöden igen
+  Reload RSS Feeds: Läs in RSS-flöden igen
   Close Multiple Tabs: Stäng {count} flikar
   Duplicate Tab: Duplicera flik
   Duplicate Multiple Tabs: Duplicera {count} flikar

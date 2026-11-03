@@ -207,6 +207,7 @@ Subscriptions:
   Newest First: Plej novaj unue
   Oldest First: Plej malnovaj unue
   RSS Feeds:
+    Refreshing: Refreŝigante RSS-fluojn
     Tab: RSS
     Followed Feeds: Sekvataj RSS-fluoj
     Add Feed: Aldoni fluon
@@ -1956,6 +1957,7 @@ Context Menu:
   Reload Live: Reŝargi tujelsendojn
   Reload Posts: Reŝargi afiŝojn
   Reload All Feeds: Reŝargi ĉiujn fluojn
+  Reload RSS Feeds: Reŝargi RSS-fluojn
   Close Multiple Tabs: Fermi {count} langetojn
   Duplicate Tab: Duobligi langeton
   Duplicate Multiple Tabs: Duobligi {count} langetojn

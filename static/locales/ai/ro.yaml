@@ -187,6 +187,7 @@ Subscriptions:
   Newest First: Cele mai noi primele
   Oldest First: Cele mai vechi primele
   RSS Feeds:
+    Refreshing: Se reîmprospătează fluxurile RSS
     Tab: RSS
     Followed Feeds: Fluxuri RSS urmărite
     Add Feed: Adaugă flux
@@ -1955,6 +1956,7 @@ Context Menu:
   Reload Live: Reîncarcă transmisiunile în direct
   Reload Posts: Reîncarcă postările
   Reload All Feeds: Reîncarcă toate fluxurile
+  Reload RSS Feeds: Reîncarcă fluxurile RSS
   Close Multiple Tabs: Închide {count} filă | Închide {count} file
   Duplicate Tab: Duplică fila
   Duplicate Multiple Tabs: Duplică {count} filă | Duplică {count} file

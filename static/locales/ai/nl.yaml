@@ -189,6 +189,7 @@ Subscriptions:
   Posts:
     RSS Message: YouTube biedt geen RSS-feeds voor berichten. Schakel de instelling "{rssSetting}" uit om berichten te bekijken of schakel de instelling "{hideSetting}" in om dit tabblad te verbergen.
   RSS Feeds:
+    Refreshing: RSS-feeds vernieuwen
     Tab: RSS
     Followed Feeds: Gevolgde RSS-feeds
     Add Feed: Feed toevoegen
@@ -1968,6 +1969,7 @@ Context Menu:
   Reload Live: Livestreams opnieuw laden
   Reload Posts: Berichten opnieuw laden
   Reload All Feeds: Alle feeds opnieuw laden
+  Reload RSS Feeds: RSS-feeds opnieuw laden
   Close Multiple Tabs: '{count} tabbladen sluiten'
   Duplicate Tab: Tabblad dupliceren
   Duplicate Multiple Tabs: '{count} tabbladen dupliceren'

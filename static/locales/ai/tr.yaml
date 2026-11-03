@@ -187,6 +187,7 @@ Subscriptions:
   Newest First: Önce en yeniler
   Oldest First: Önce en eskiler
   RSS Feeds:
+    Refreshing: RSS beslemeleri yenileniyor
     Tab: RSS
     Followed Feeds: Takip edilen RSS akışları
     Add Feed: Akış Ekle
@@ -1907,6 +1908,7 @@ Context Menu:
   Reload Live: Canlı Yayınları Yeniden Yükle
   Reload Posts: Gönderileri Yeniden Yükle
   Reload All Feeds: Tüm Akışları Yeniden Yükle
+  Reload RSS Feeds: RSS beslemelerini yeniden yükle
   Close Multiple Tabs: '{count} Sekmeyi Kapat'
   Duplicate Tab: Sekmeyi Çoğalt
   Duplicate Multiple Tabs: '{count} Sekmeyi Çoğalt'

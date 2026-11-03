@@ -221,6 +221,7 @@ Subscriptions:
   Posts:
     RSS Message: YouTube neteikia įrašų RSS kanalų. Išjunkite nustatymą „{rssSetting}“, kad matytumėte įrašus, arba įjunkite nustatymą „{hideSetting}“, kad paslėptumėte šį skirtuką.
   RSS Feeds:
+    Refreshing: Atnaujinami RSS sklaidos kanalai
     Tab: RSS
     Followed Feeds: Stebimi RSS sklaidos kanalai
     Add Feed: Pridėti sklaidos kanalą
@@ -2317,6 +2318,7 @@ Context Menu:
   Reload Live: Įkelti tiesiogines transliacijas iš naujo
   Reload Posts: Įkelti įrašus iš naujo
   Reload All Feeds: Iš naujo įkelti visus kanalus
+  Reload RSS Feeds: Iš naujo įkelti RSS sklaidos kanalus
   Close Multiple Tabs: Uždaryti {count} kortelę | Uždaryti {count} korteles | Uždaryti {count} kortelių
   Duplicate Tab: Dubliuoti kortelę
   Duplicate Multiple Tabs: Dubliuoti {count} kortelę | Dubliuoti {count} korteles | Dubliuoti {count} kortelių

@@ -187,6 +187,7 @@ Subscriptions:
   Newest First: Legújabb elöl
   Oldest First: Legrégebbi elöl
   RSS Feeds:
+    Refreshing: RSS-hírcsatornák frissítése
     Tab: RSS
     Followed Feeds: Követett RSS-hírcsatornák
     Add Feed: Hírcsatorna hozzáadása
@@ -1907,6 +1908,7 @@ Context Menu:
   Reload Live: Élő adások újratöltése
   Reload Posts: Bejegyzések újratöltése
   Reload All Feeds: Összes hírfolyam újratöltése
+  Reload RSS Feeds: RSS-hírcsatornák újratöltése
   Close Multiple Tabs: Lapok bezárása ({count})
   Duplicate Tab: Lap megkettőzése
   Duplicate Multiple Tabs: Lapok megkettőzése ({count})

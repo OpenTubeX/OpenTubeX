@@ -187,6 +187,7 @@ Subscriptions:
   Newest First: Uuemad ees
   Oldest First: Vanemad ees
   RSS Feeds:
+    Refreshing: RSS-voogude värskendamine
     Tab: RSS
     Followed Feeds: Jälgitavad RSS-vood
     Add Feed: Lisa voog
@@ -1911,6 +1912,7 @@ Context Menu:
   Reload Live: Laadi otseülekanded uuesti
   Reload Posts: Laadi postitused uuesti
   Reload All Feeds: Laadi kõik vood uuesti
+  Reload RSS Feeds: Laadi RSS-vood uuesti
   Close Multiple Tabs: Sulge {count} vahekaarti
   Duplicate Tab: Klooni vahekaart
   Duplicate Multiple Tabs: Klooni {count} vahekaarti

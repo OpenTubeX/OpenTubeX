@@ -199,6 +199,7 @@ Subscriptions:
   Posts:
     RSS Message: 'பதிவுகளுக்கு YouTube RSS ஊட்டங்களை வழங்குவதில்லை. பதிவுகளைக் காண "{rssSetting}" அமைப்பை முடக்கவும் அல்லது இந்தத் தாவலை மறைக்க "{hideSetting}" அமைப்பை இயக்கவும்.'
   RSS Feeds:
+    Refreshing: RSS ஊட்டங்கள் புதுப்பிக்கப்படுகின்றன
     Tab: RSS
     Followed Feeds: பின்தொடரும் RSS ஊட்டங்கள்
     Add Feed: ஊட்டத்தைச் சேர்
@@ -1969,6 +1970,7 @@ Context Menu:
   Reload Live: நேரலைகளை மீண்டும் ஏற்று
   Reload Posts: இடுகைகளை மீண்டும் ஏற்று
   Reload All Feeds: எல்லா ஊட்டங்களையும் மீண்டும் ஏற்று
+  Reload RSS Feeds: RSS ஊட்டங்களை மீண்டும் ஏற்று
   Close Multiple Tabs: '{count} தாவல்களை மூடு'
   Duplicate Tab: தாவலை நகலெடு
   Duplicate Multiple Tabs: '{count} தாவல்களை நகலெடு'

@@ -189,6 +189,7 @@ Subscriptions:
   Posts:
     RSS Message: 'YouTube не надає RSS-каналів для дописів. Вимкніть налаштування "{rssSetting}", щоб переглядати дописи, або ввімкніть "{hideSetting}", щоб приховати цю вкладку.'
   RSS Feeds:
+    Refreshing: Оновлення RSS-стрічок
     Tab: RSS
     Followed Feeds: Відстежувані RSS-стрічки
     Add Feed: Додати стрічку
@@ -1953,6 +1954,7 @@ Context Menu:
   Reload Live: Оновити трансляції наживо
   Reload Posts: Оновити дописи
   Reload All Feeds: Оновити всі стрічки
+  Reload RSS Feeds: Перезавантажити RSS-стрічки
   Close Multiple Tabs: Закрити {count} вкладку | Закрити {count} вкладки | Закрити {count} вкладок
   Duplicate Tab: Дублювати вкладку
   Duplicate Multiple Tabs: Дублювати {count} вкладку | Дублювати {count} вкладки | Дублювати {count} вкладок

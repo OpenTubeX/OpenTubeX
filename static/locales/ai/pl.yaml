@@ -70,6 +70,7 @@ Subscriptions:
   Show Tabbed View: Pokaż widok kart
   Show Combined View: Pokaż widok łączny
   RSS Feeds:
+    Refreshing: Odświeżanie kanałów RSS
     Tab: RSS
     Followed Feeds: Obserwowane kanały RSS
     Add Feed: Dodaj kanał
@@ -1204,6 +1205,7 @@ Change Format:
   yt-dlp Default Clients Fallback: Preferowani klienci yt-dlp nie dostarczyli strumieni możliwych do odtworzenia. Zostaną użyci domyślni klienci yt-dlp
   Built-in Fallback Template: 'Wbudowany mechanizm nie odtworzył strumienia. Zostanie użyty yt-dlp: {error}'
 Context Menu:
+  Reload RSS Feeds: Załaduj ponownie kanały RSS
   Opened in a Background Tab: "Otwarto w karcie w tle"
   Open in a Background Tab: "Otwórz w karcie w tle"
   Select Tab: Zaznacz kartę

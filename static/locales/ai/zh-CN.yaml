@@ -187,6 +187,7 @@ Subscriptions:
   Newest First: 最新优先
   Oldest First: 最早优先
   RSS Feeds:
+    Refreshing: 正在刷新 RSS 订阅源
     Tab: RSS
     Followed Feeds: 已关注的 RSS 订阅源
     Add Feed: 添加订阅源
@@ -1907,6 +1908,7 @@ Context Menu:
   Reload Live: 重新加载直播
   Reload Posts: 重新加载帖子
   Reload All Feeds: 重新加载所有订阅源
+  Reload RSS Feeds: 重新加载 RSS 订阅源
   Close Multiple Tabs: 关闭 {count} 个标签页
   Duplicate Tab: 复制标签页
   Duplicate Multiple Tabs: 复制 {count} 个标签页

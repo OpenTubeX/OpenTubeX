@@ -218,6 +218,7 @@ Subscriptions:
   Posts:
     RSS Message: YouTube پوسٹس کے لیے RSS فیڈز فراہم نہیں کرتا۔ پوسٹس دیکھنے کے لیے "{rssSetting}" سیٹنگ غیر فعال کریں یا یہ ٹیب چھپانے کے لیے "{hideSetting}" سیٹنگ فعال کریں۔
   RSS Feeds:
+    Refreshing: RSS فیڈز تازہ ہو رہی ہیں
     Tab: RSS
     Followed Feeds: فالو کی گئی RSS فیڈز
     Add Feed: فیڈ شامل کریں
@@ -2015,6 +2016,7 @@ Context Menu:
   Reload Live: لائیو دوبارہ لوڈ کریں
   Reload Posts: پوسٹس دوبارہ لوڈ کریں
   Reload All Feeds: تمام فیڈز دوبارہ لوڈ کریں
+  Reload RSS Feeds: RSS فیڈز دوبارہ لوڈ کریں
   Close Multiple Tabs: '{count} ٹیبز بند کریں'
   Duplicate Tab: ٹیب کی نقل بنائیں
   Duplicate Multiple Tabs: '{count} ٹیبز کی نقل بنائیں'

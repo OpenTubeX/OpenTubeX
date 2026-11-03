@@ -189,6 +189,7 @@ Subscriptions:
   Posts:
     RSS Message: 'YouTube non fornece fontes RSS para as publicacións. Desactiva a opción "{rssSetting}" para ver as publicacións ou activa "{hideSetting}" para ocultar esta lapela.'
   RSS Feeds:
+    Refreshing: Actualizando as fontes RSS
     Tab: RSS
     Followed Feeds: Fontes RSS seguidas
     Add Feed: Engadir fonte
@@ -1962,6 +1963,7 @@ Context Menu:
   Reload Live: Recargar as emisións en directo
   Reload Posts: Recargar as publicacións
   Reload All Feeds: Recargar todas as fontes
+  Reload RSS Feeds: Recargar as fontes RSS
   Close Multiple Tabs: Pechar {count} lapelas
   Duplicate Tab: Duplicar a lapela
   Duplicate Multiple Tabs: Duplicar {count} lapelas

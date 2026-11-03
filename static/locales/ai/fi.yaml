@@ -189,6 +189,7 @@ Subscriptions:
   Posts:
     RSS Message: 'YouTube ei tarjoa julkaisuille RSS-syötteitä. Poista "{rssSetting}" käytöstä nähdäksesi julkaisut tai ota "{hideSetting}" käyttöön piilottaaksesi tämän välilehden.'
   RSS Feeds:
+    Refreshing: Päivitetään RSS-syötteitä
     Tab: RSS
     Followed Feeds: Seuratut RSS-syötteet
     Add Feed: Lisää syöte
@@ -1957,6 +1958,7 @@ Context Menu:
   Reload Live: Lataa suorat lähetykset uudelleen
   Reload Posts: Lataa julkaisut uudelleen
   Reload All Feeds: Lataa kaikki syötteet uudelleen
+  Reload RSS Feeds: Lataa RSS-syötteet uudelleen
   Close Multiple Tabs: Sulje {count} välilehteä
   Duplicate Tab: Monista välilehti
   Duplicate Multiple Tabs: Monista {count} välilehteä

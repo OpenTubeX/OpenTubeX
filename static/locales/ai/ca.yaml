@@ -233,6 +233,7 @@ Subscriptions:
   Posts:
     RSS Message: YouTube no proporciona canals RSS per a les publicacions. Desactiveu l'opció "{rssSetting}" per veure les publicacions o activeu l'opció "{hideSetting}" per ocultar aquesta pestanya.
   RSS Feeds:
+    Refreshing: "S'estan actualitzant els canals RSS"
     Tab: RSS
     Followed Feeds: Canals RSS seguits
     Add Feed: Afegeix un canal
@@ -2420,6 +2421,7 @@ Context Menu:
   Reload Live: Torna a carregar els directes
   Reload Posts: Torna a carregar les publicacions
   Reload All Feeds: Torna a carregar tots els canals
+  Reload RSS Feeds: Torna a carregar els canals RSS
   Close Multiple Tabs: Tanca {count} pestanya | Tanca {count} pestanyes
   Duplicate Tab: Duplica la pestanya
   Duplicate Multiple Tabs: Duplica {count} pestanya | Duplica {count} pestanyes
