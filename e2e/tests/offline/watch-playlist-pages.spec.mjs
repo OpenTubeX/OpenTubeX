@@ -117,7 +117,7 @@ test('reversing the playlist loads every page and starts from its last video', a
   await expect(panel.locator('.playlistIndex label')).toHaveText(`${VIDEO_COUNT} / ${VIDEO_COUNT}`)
 })
 
-test('the progress bar of a reversed playlist shows the video it selects while pages load', async ({ app, page }) => {
+test('the progress bar of a reversed playlist shows the video it selects while pages load', { tag: '@scale' }, async ({ app, page }) => {
   let releasePage
   const pageReleased = new Promise(resolve => { releasePage = resolve })
   const { watch, panel } = await openPagedPlaylist({ app, page }, {
@@ -139,7 +139,7 @@ test('the progress bar of a reversed playlist shows the video it selects while p
   await expect(panel.locator(`.playlistItem[data-video-id="${pagedPlaylistVideoId(VIDEO_COUNT - 15, 0)}"]`)).toBeInViewport()
 })
 
-test('choosing a loaded video on the progress bar stops loading towards an earlier unloaded choice', async ({ app, page }) => {
+test('choosing a loaded video on the progress bar stops loading towards an earlier unloaded choice', { tag: '@scale' }, async ({ app, page }) => {
   let releasePage
   const pageReleased = new Promise(resolve => { releasePage = resolve })
   const { watch, panel, requestedPages } = await openPagedPlaylist({ app, page }, {
