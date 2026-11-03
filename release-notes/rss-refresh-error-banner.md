@@ -2,7 +2,7 @@
 category: improvement
 ---
 
-The RSS tab now reports feeds that could not be refreshed in a banner that you can close. It stays closed until other feeds fail.
+The RSS tab now reports feeds that could not be refreshed in a banner that you can close. It stays closed until the set of failed feeds changes.
 
 <picture>
   <source media="(prefers-color-scheme: dark)" srcset="https://github.com/user-attachments/assets/be1b25a2-674c-4299-8de5-cb42d3d017ce">

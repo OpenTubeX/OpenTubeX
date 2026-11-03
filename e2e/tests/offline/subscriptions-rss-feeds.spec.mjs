@@ -354,7 +354,7 @@ test.describe('with followed feeds', () => {
     await expect(panel.getByText('1 feed could not be refreshed.')).toBeHidden()
   })
 
-  test('dismisses the refresh error banner until other feeds fail', async ({ page }) => {
+  test('dismisses the refresh error banner until the failed feeds change', async ({ page }) => {
     await mockFeeds(page)
     await goTo(page, 'subscriptions')
     await page.locator('[data-rss-feeds-tab]').click()
@@ -364,6 +364,7 @@ test.describe('with followed feeds', () => {
 
     await banner.getByRole('button', { name: 'Close' }).click()
     await expect(banner).toHaveCount(0)
+    await expect(panel).toBeFocused()
 
     // Leaving the page keeps the banner dismissed
     await goTo(page, 'history')
@@ -392,6 +393,26 @@ test.describe('with followed feeds', () => {
     await page.route(RSS_URL, route => route.fulfill({ status: 500, body: 'Server error' }))
     await header.getByRole('button', { name: /^Refresh RSS/ }).click()
     await expect(banner).toHaveText('2 feeds could not be refreshed.')
+
+    // The earlier dismissal no longer applies once the failures changed
+    await page.unroute(RSS_URL)
+    await header.getByRole('button', { name: /^Refresh RSS/ }).click()
+    await expect(banner).toHaveText('1 feed could not be refreshed.')
+  })
+
+  test('shows the empty state after dismissing the errors of every feed', async ({ page }) => {
+    await mockFeeds(page)
+    await page.route(RSS_URL, route => route.fulfill({ status: 500, body: 'Server error' }))
+    await goTo(page, 'subscriptions')
+    await page.locator('[data-rss-feeds-tab]').click()
+    const panel = page.locator('#subscriptionsPanel')
+    const banner = panel.locator('.errorBanner')
+    const empty = panel.getByText('Your feeds currently do not have any items.')
+    await expect(banner).toHaveText('2 feeds could not be refreshed.')
+    await expect(empty).toHaveCount(0)
+
+    await banner.getByRole('button', { name: 'Close' }).click()
+    await expect(empty).toBeVisible()
   })
 
   test('opens the feed manager from the RSS tab after settings were opened before', async ({ page }) => {

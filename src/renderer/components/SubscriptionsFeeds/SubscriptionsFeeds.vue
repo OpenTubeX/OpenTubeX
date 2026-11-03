@@ -1,7 +1,10 @@
 <template>
-  <div>
+  <div
+    ref="panelRef"
+    tabindex="-1"
+  >
     <div
-      v-if="!isLoading && errorFeedUrls.length > 0 && !errorsDismissed"
+      v-if="!isLoading && errorFeedUrls.length > 0 && !rssFeedErrorsDismissed"
       class="errorBanner"
       role="status"
     >
@@ -37,7 +40,7 @@
     </div>
     <FtSkeletonGrid v-else-if="isLoading && items.length === 0" />
     <p
-      v-else-if="!isLoading && items.length === 0 && errorFeedUrls.length < feeds.length"
+      v-else-if="!isLoading && items.length === 0 && (errorFeedUrls.length < feeds.length || rssFeedErrorsDismissed)"
       class="message"
     >
       {{ t('Subscriptions.RSS Feeds.Empty Items') }}
@@ -59,7 +62,7 @@
 </template>
 
 <script setup>
-import { computed } from 'vue'
+import { computed, useTemplateRef } from 'vue'
 import { useI18n } from 'vue-i18n'
 
 import FtAutoGrid from '../FtAutoGrid/FtAutoGrid.vue'
@@ -76,12 +79,12 @@ import { useKeepAliveEffectScope } from '../../composables/useKeepAliveEffectSco
 import { useRelativeTimeClock } from '../../composables/useRelativeTimeClock'
 import { formatShortDateTime } from '../../helpers/dateFormat'
 import {
-  dismissedRssFeedErrors,
   getRssFeedItemKey,
   getRssFeedsAutoRefreshInterval,
   openRssFeedManager,
   refreshRssFeeds,
   rssFeedErrors,
+  rssFeedErrorsDismissed,
   rssFeedsLastRefresh,
   rssFeedsNextAutoRefresh,
   rssFeedsRefreshing
@@ -98,12 +101,12 @@ const itemKeys = computed(() => items.value.map(getRssFeedItemKey))
 const errorFeedUrls = computed(() => rssFeedErrors.value.filter(url => feedUrls.value.has(url)))
 const isLoading = computed(() => rssFeedsRefreshing.value)
 
-// A dismissed banner stays hidden until a different set of feeds fails.
-const errorKey = computed(() => errorFeedUrls.value.toSorted().join('\n'))
-const errorsDismissed = computed(() => errorKey.value === dismissedRssFeedErrors.value)
+const panelRef = useTemplateRef('panelRef')
 
 function dismissErrors() {
-  dismissedRssFeedErrors.value = errorKey.value
+  rssFeedErrorsDismissed.value = true
+  // The close button disappears, so keep the focus in the panel
+  panelRef.value?.focus({ preventScroll: true })
 }
 
 // Full width is a single-column grid, so its items render as grid cards.
