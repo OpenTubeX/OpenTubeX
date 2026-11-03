@@ -162,16 +162,16 @@ By default, subscriptions, playlists, settings, history, profiles and other app 
 ## 🧩 Browser Extensions
 The following extensions open YouTube links directly in OpenTubeX:
 
-- ~~[LibRedirect](https://libredirect.manerakai.com/)~~ not yet, pending PR [#1139](https://github.com/libredirect/browser_extension/pull/1139)
-- [RedirectTube](https://github.com/MStankiewiczOfficial/RedirectTube) since version 2.0.0 (26071)
+- [LibRedirect](https://libredirect.manerakai.com/) since version [3.5.0](https://github.com/libredirect/browser_extension/releases/tag/v3.5.0)
+- [RedirectTube](https://github.com/stankiewiczmichal/RedirectTube) since version [2.0.0 (26071)](https://github.com/stankiewiczmichal/RedirectTube/releases/tag/26071)
 
-LibRedirect automatically redirect YouTube links to OpenTubeX.
+LibRedirect automatically redirects YouTube links to OpenTubeX.
 > [!IMPORTANT]
 > To ensure proper functionality, select OpenTubeX as Frontend in the Services settings of the extension.
 
 RedirectTube, doesn’t automatically open YouTube links in OpenTubeX (although this feature can be enabled in the settings). Instead, it adds buttons to the toolbar and context menu, which you can click to open videos in OpenTubeX manually.
 
-- Download LibRedirect from [Mozilla Add-ons](https://addons.mozilla.org/firefox/addon/libredirect/) (for Firefox based-browsers) or [developer's website](https://libredirect.manerakai.com/download_chromium.html) (for Chrome and Chromium-based browsers).
+- Download LibRedirect from [Mozilla Add-ons](https://addons.mozilla.org/firefox/addon/libredirect/) (for Firefox based-browsers) or [developer's website](https://libredirect.manerakai.com/docs.html#chromium-install) (for Chrome and Chromium-based browsers).
 
 - Download RedirectTube from [Mozilla Add-ons](https://addons.mozilla.org/firefox/addon/redirecttube/) (for Firefox based-browsers) or [Chrome Web Store](https://chromewebstore.google.com/detail/redirecttube/jpbaggklodpddjcadlebabhiopjkjfjh) (for Chrome and Chromium-based browsers).
 
