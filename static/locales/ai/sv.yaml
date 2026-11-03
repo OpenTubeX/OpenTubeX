@@ -267,7 +267,6 @@ History:
   Clear Filters: 'Rensa filter'
   Invalid Date Range: 'Startdatumet måste vara före eller samma som slutdatumet.'
   Empty Filter Message: 'Inga videor i din historik matchar dessa filter.'
-  Delete Old Compact: "Radera gamla"
   Repair Compact: "Reparera"
   Mark All Watched Compact: "Markera alla sedda"
   Repair Use Cookies: "Använd konfigurerade yt-dlp-kakor"
@@ -286,7 +285,6 @@ History:
   Mark All As Watched: Markera alla som sedda
   Mark All As Watched Confirmation: Vill du markera alla videor i historiken som sedda?
   All History Marked as Watched: Alla videor i historiken har markerats som sedda
-  Delete Old History: Ta bort gammal historik
   Select History Age: Välj hur gammal en post måste vara innan den tas bort.
   Delete Entries Older Than: Ta bort poster äldre än
   Number of Days: Antal dagar

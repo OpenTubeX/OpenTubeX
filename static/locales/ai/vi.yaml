@@ -269,7 +269,6 @@ History:
   Clear Filters: 'Xóa bộ lọc'
   Invalid Date Range: 'Ngày bắt đầu phải trước hoặc cùng ngày với ngày kết thúc.'
   Empty Filter Message: 'Không có video nào trong lịch sử khớp với các bộ lọc này.'
-  Delete Old Compact: "Xóa mục cũ"
   Repair Compact: "Sửa chữa"
   Mark All Watched Compact: "Đánh dấu tất cả đã xem"
   Repair Use Cookies: "Dùng cookie yt-dlp đã cấu hình"
@@ -288,7 +287,6 @@ History:
   Mark All As Watched: Đánh dấu tất cả là đã xem
   Mark All As Watched Confirmation: Bạn có chắc muốn đánh dấu mọi video trong lịch sử là đã xem không?
   All History Marked as Watched: Đã đánh dấu mọi video trong lịch sử là đã xem
-  Delete Old History: Xóa lịch sử cũ
   Select History Age: Chọn thời gian tồn tại tối thiểu của mục trước khi xóa.
   Delete Entries Older Than: Xóa các mục cũ hơn
   Number of Days: Số ngày

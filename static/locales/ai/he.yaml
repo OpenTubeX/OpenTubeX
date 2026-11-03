@@ -269,7 +269,6 @@ History:
   Clear Filters: 'ניקוי מסננים'
   Invalid Date Range: 'תאריך ההתחלה חייב להיות מוקדם מתאריך הסיום או זהה לו.'
   Empty Filter Message: 'אין סרטונים בהיסטוריה שלך שתואמים למסננים האלה.'
-  Delete Old Compact: "מחיקת ישנים"
   Repair Compact: "תיקון"
   Mark All Watched Compact: "סימון הכול כנצפה"
   Repair Use Cookies: "שימוש בעוגיות שהוגדרו ב־yt-dlp"
@@ -288,7 +287,6 @@ History:
   Mark All As Watched: סימון הכול כנצפה
   Mark All As Watched Confirmation: לסמן את כל הסרטונים בהיסטוריה שלך כנצפו?
   All History Marked as Watched: כל הסרטונים בהיסטוריה שלך סומנו כנצפו
-  Delete Old History: מחיקת היסטוריה ישנה
   Select History Age: יש לבחור כמה זמן יישמר כל פריט לפני מחיקתו.
   Delete Entries Older Than: מחיקת פריטים שגילם עולה על
   Number of Days: מספר ימים

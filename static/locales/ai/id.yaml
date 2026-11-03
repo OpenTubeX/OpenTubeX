@@ -265,7 +265,6 @@ History:
   Clear Filters: 'Hapus filter'
   Invalid Date Range: 'Tanggal awal harus sebelum atau sama dengan tanggal akhir.'
   Empty Filter Message: 'Tidak ada video dalam riwayat Anda yang cocok dengan filter ini.'
-  Delete Old Compact: "Hapus lama"
   Repair Compact: "Perbaiki"
   Mark All Watched Compact: "Tandai semua ditonton"
   Repair Use Cookies: "Gunakan kuki yt-dlp yang telah dikonfigurasi"
@@ -284,7 +283,6 @@ History:
   Mark All As Watched: Tandai Semua Sudah Ditonton
   Mark All As Watched Confirmation: Anda yakin ingin menandai semua video dalam riwayat sebagai sudah ditonton?
   All History Marked as Watched: Semua video dalam riwayat telah ditandai sebagai sudah ditonton
-  Delete Old History: Hapus Riwayat Lama
   Select History Age: Pilih usia minimum entri sebelum dihapus.
   Delete Entries Older Than: Hapus entri yang lebih lama dari
   Number of Days: Jumlah hari

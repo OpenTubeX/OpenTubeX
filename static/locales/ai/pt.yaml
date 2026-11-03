@@ -264,7 +264,6 @@ History:
   Clear Filters: 'Limpar filtros'
   Invalid Date Range: 'A data inicial deve ser anterior ou igual à data final.'
   Empty Filter Message: 'Nenhum vídeo do seu histórico corresponde a estes filtros.'
-  Delete Old Compact: "Apagar antigos"
   Repair Compact: "Reparar"
   Mark All Watched Compact: "Marcar todos vistos"
   Repair Use Cookies: "Usar os cookies configurados do yt-dlp"
@@ -283,7 +282,6 @@ History:
   Mark All As Watched: Marcar tudo como reproduzido
   Mark All As Watched Confirmation: Tem a certeza de que pretende marcar como reproduzidos todos os vídeos do histórico?
   All History Marked as Watched: Todos os vídeos do histórico foram marcados como reproduzidos
-  Delete Old History: Eliminar histórico antigo
   Select History Age: Selecione a antiguidade mínima das entradas a eliminar.
   Delete Entries Older Than: Eliminar entradas com mais de
   Number of Days: Número de dias

@@ -277,7 +277,6 @@ History:
   Clear Filters: 'வடிகட்டிகளை அழி'
   Invalid Date Range: 'தொடக்க தேதி முடிவு தேதிக்கு முந்தையதாகவோ அதே தேதியாகவோ இருக்க வேண்டும்.'
   Empty Filter Message: 'இந்த வடிகட்டிகளுடன் பொருந்தும் காணொளிகள் உங்கள் வரலாற்றில் இல்லை.'
-  Delete Old Compact: "பழையது அழி"
   Repair Compact: "சரி"
   Mark All Watched Compact: "யாவும் கண்டது"
   Repair Use Cookies: "அமைக்கப்பட்ட yt-dlp குக்கீகளைப் பயன்படுத்து"
@@ -296,7 +295,6 @@ History:
   Mark All As Watched: அனைத்தையும் பார்த்ததாகக் குறி
   Mark All As Watched Confirmation: வரலாற்றிலுள்ள எல்லாக் காணொளிகளையும் பார்த்ததாகக் குறிக்க விரும்புகிறீர்களா?
   All History Marked as Watched: வரலாற்றிலுள்ள எல்லாக் காணொளிகளும் பார்த்ததாகக் குறிக்கப்பட்டன
-  Delete Old History: பழைய வரலாற்றை நீக்கு
   Select History Age: ஓர் உள்ளீட்டை நீக்குவதற்கு அது எவ்வளவு பழையதாக இருக்க வேண்டும் என்பதைத் தேர்ந்தெடுக்கவும்.
   Delete Entries Older Than: இதைவிடப் பழைய உள்ளீடுகளை நீக்கு
   Number of Days: நாட்களின் எண்ணிக்கை

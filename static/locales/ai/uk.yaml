@@ -269,7 +269,6 @@ History:
   Clear Filters: 'Скинути фільтри'
   Invalid Date Range: 'Початкова дата має бути не пізніше кінцевої.'
   Empty Filter Message: 'У вашій історії немає відео, які відповідають цим фільтрам.'
-  Delete Old Compact: "Видалити старі"
   Repair Compact: "Відновити"
   Mark All Watched Compact: "Усі переглянуті"
   Repair Use Cookies: "Використовувати налаштовані cookies yt-dlp"
@@ -288,7 +287,6 @@ History:
   Mark All As Watched: Позначити все як переглянуте
   Mark All As Watched Confirmation: Позначити всі відео в історії як переглянуті?
   All History Marked as Watched: Усі відео в історії позначено як переглянуті
-  Delete Old History: Видалити давню історію
   Select History Age: Виберіть, скільки часу має минути до видалення запису.
   Delete Entries Older Than: Видалити записи, давніші за
   Number of Days: Кількість днів

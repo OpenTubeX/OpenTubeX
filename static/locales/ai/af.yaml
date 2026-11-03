@@ -430,7 +430,6 @@ History:
   Repair Finished: Herstel voltooi
   Repair Stopped: Herstel gestop
   Repair: Herstel geskiedenis
-  Delete Old Compact: Skrap oues
   Repair Compact: Herstel
   Mark All Watched Compact: Merk alles as gekyk
   Repair Progress: Nagegaan {checked}/{total} · Herstel {repaired} · Misluk {failed}
@@ -445,7 +444,6 @@ History:
   All History Marked as Watched: Alle video’s in u geskiedenis is as gekyk gemerk
   DateOldestHistory: Datum gekyk (oudste)
   DateNewestHistory: Datum gekyk (nuutste)
-  Delete Old History: Skrap ou geskiedenis
   Select History Age: Kies hoe oud ’n inskrywing moet wees voordat dit geskrap word.
   Delete Entries Older Than: Skrap inskrywings ouer as
   Number of Days: Aantal dae

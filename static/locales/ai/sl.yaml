@@ -390,7 +390,6 @@ History:
   Clear Filters: 'Počisti filtre'
   Invalid Date Range: 'Začetni datum mora biti pred končnim datumom ali enak njemu.'
   Empty Filter Message: 'Noben videoposnetek v vaši zgodovini ne ustreza tem filtrom.'
-  Delete Old Compact: "Izbriši stare"
   Repair Compact: "Popravi"
   Mark All Watched Compact: "Vse ogledano"
   Repair Use Cookies: "Uporabi nastavljene piškotke yt-dlp"
@@ -412,7 +411,6 @@ History:
   All History Marked as Watched: Vsi videoposnetki v zgodovini so označeni kot ogledani
   DateOldestHistory: Datum ogleda (najstarejši)
   DateNewestHistory: Datum ogleda (najnovejši)
-  Delete Old History: Izbriši staro zgodovino
   Select History Age: Izberite, koliko mora biti vnos star, preden se izbriše.
   Delete Entries Older Than: Izbriši vnose, starejše od
   Number of Days: Število dni

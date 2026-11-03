@@ -269,7 +269,6 @@ History:
   Clear Filters: 'مسح عوامل التصفية'
   Invalid Date Range: 'يجب أن يكون تاريخ البداية قبل تاريخ النهاية أو مطابقًا له.'
   Empty Filter Message: 'لا توجد فيديوهات في سجلك تطابق عوامل التصفية هذه.'
-  Delete Old Compact: "حذف القديم"
   Repair Compact: "إصلاح"
   Mark All Watched Compact: "تمييز الكل كمشاهَد"
   Repair Use Cookies: "استخدام ملفات تعريف الارتباط المعدّة لـ yt-dlp"
@@ -288,7 +287,6 @@ History:
   Mark All As Watched: وضع علامة على الكل كما تمت مشاهدته
   Mark All As Watched Confirmation: هل أنت متأكد أنك تريد وضع علامة على جميع مقاطع الفيديو في سجلك كمشاهدة؟
   All History Marked as Watched: تم وضع علامة على جميع مقاطع الفيديو في سجلك على أنها تمت مشاهدتها
-  Delete Old History: 'حذف السجل القديم'
   Select History Age: حدد العمر الذي يجب أن يكون عليه الإدخال قبل حذفه.
   Delete Entries Older Than: حذف الإدخالات الأقدم من
   Number of Days: عدد الأيام

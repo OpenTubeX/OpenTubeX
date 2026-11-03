@@ -266,7 +266,6 @@ History:
   Clear Filters: 'Filtrləri təmizlə'
   Invalid Date Range: 'Başlanğıc tarixi son tarixdən əvvəl və ya ona bərabər olmalıdır.'
   Empty Filter Message: 'Tarixçənizdə bu filtrlərə uyğun video yoxdur.'
-  Delete Old Compact: "Köhnəni sil"
   Repair Compact: "Təmir et"
   Mark All Watched Compact: "Hamısı izlənib"
   Repair Use Cookies: "Konfiqurasiya edilmiş yt-dlp kukilərindən istifadə et"
@@ -285,7 +284,6 @@ History:
   Mark All As Watched: Hamısını baxılmış kimi işarələ
   Mark All As Watched Confirmation: Tarixçənizdəki bütün videoları baxılmış kimi işarələmək istədiyinizə əminsiniz?
   All History Marked as Watched: Tarixçənizdəki bütün videolar baxılmış kimi işarələndi
-  Delete Old History: Köhnə tarixçəni sil
   Select History Age: Qeydin silinməsi üçün nə qədər köhnə olmalı olduğunu seçin.
   Delete Entries Older Than: Bu müddətdən köhnə qeydləri sil
   Number of Days: Günlərin sayı

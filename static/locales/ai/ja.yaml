@@ -264,7 +264,6 @@ History:
   Clear Filters: 'フィルターをクリア'
   Invalid Date Range: '開始日は終了日以前にしてください。'
   Empty Filter Message: '履歴にこれらのフィルターに一致する動画はありません。'
-  Delete Old Compact: "古い履歴を削除"
   Repair Compact: "修復"
   Mark All Watched Compact: "すべて視聴済みに"
   Repair Use Cookies: "設定済みの yt-dlp Cookie を使用する"
@@ -283,7 +282,6 @@ History:
   Mark All As Watched: すべて視聴済みにする
   Mark All As Watched Confirmation: 履歴内のすべての動画を視聴済みにしてもよろしいですか？
   All History Marked as Watched: 履歴内のすべての動画を視聴済みにしました
-  Delete Old History: 古い履歴を削除
   Select History Age: 削除する履歴の経過期間を選択してください。
   Delete Entries Older Than: 次の期間より古い履歴を削除
   Number of Days: 日数

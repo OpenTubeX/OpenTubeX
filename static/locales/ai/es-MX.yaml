@@ -297,7 +297,6 @@ History:
   Clear Filters: 'Borrar filtros'
   Invalid Date Range: 'La fecha inicial debe ser anterior o igual a la fecha final.'
   Empty Filter Message: 'Ningún video de tu historial coincide con estos filtros.'
-  Delete Old Compact: "Borrar antiguos"
   Repair Compact: "Reparar"
   Mark All Watched Compact: "Marcar todos vistos"
   Repair Use Cookies: "Usar las cookies configuradas de yt-dlp"
@@ -318,7 +317,6 @@ History:
   All History Marked as Watched: Todos los videos del historial se han marcado como vistos
   DateOldestHistory: Fecha de Visualización (Más antigua)
   DateNewestHistory: Fecha de visualización (Más reciente)
-  Delete Old History: Eliminar historial antiguo
   Select History Age: Elige la antigüedad que debe tener una entrada para eliminarla.
   Delete Entries Older Than: Eliminar entradas anteriores a
   Number of Days: Número de días

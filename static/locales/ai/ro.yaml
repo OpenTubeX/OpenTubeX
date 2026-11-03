@@ -265,7 +265,6 @@ History:
   Clear Filters: 'Șterge filtrele'
   Invalid Date Range: 'Data de început trebuie să fie înainte de data de sfârșit sau egală cu aceasta.'
   Empty Filter Message: 'Niciun videoclip din istoric nu corespunde acestor filtre.'
-  Delete Old Compact: "Șterge vechi"
   Repair Compact: "Repară"
   Mark All Watched Compact: "Toate vizionate"
   Repair Use Cookies: "Folosește cookie-urile configurate pentru yt-dlp"
@@ -284,7 +283,6 @@ History:
   Mark All As Watched: Marchează totul ca vizionat
   Mark All As Watched Confirmation: Sigur doriți să marcați ca vizionate toate videoclipurile din istoric?
   All History Marked as Watched: Toate videoclipurile din istoric au fost marcate ca vizionate
-  Delete Old History: Șterge istoricul vechi
   Select History Age: Alegeți vechimea minimă a unei înregistrări pentru a fi ștearsă.
   Delete Entries Older Than: Șterge înregistrările mai vechi de
   Number of Days: Număr de zile

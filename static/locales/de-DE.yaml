@@ -362,7 +362,6 @@ History:
   Repair Finished: "Reparatur abgeschlossen"
   Repair Stopped: "Reparatur gestoppt"
   Repair: "Verlauf reparieren"
-  Delete Old Compact: Alte löschen
   Repair Compact: Reparatur
   Mark All Watched Compact: Alle gesehen
   Repair Progress: "Geprüft {checked}/{total} · Repariert {repaired} · Fehlgeschlagen {failed}"
@@ -378,7 +377,6 @@ History:
   All History Marked as Watched: Alle Videos in deinem Verlauf wurden als angesehen markiert
   DateOldestHistory: Wiedergabedatum (älteste)
   DateNewestHistory: Wiedergabedatum (neueste)
-  Delete Old History: Alten Verlauf löschen
   Select History Age: Wähle aus, wie alt ein Eintrag sein muss, bevor er gelöscht wird.
   Delete Entries Older Than: Einträge löschen, die älter sind als
   Number of Days: Anzahl der Tage

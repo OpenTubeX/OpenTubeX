@@ -266,7 +266,6 @@ History:
   Clear Filters: 'Clear filters'
   Invalid Date Range: 'The From date must be on or before the To date.'
   Empty Filter Message: 'No videos in your history match these filters.'
-  Delete Old Compact: "Delete old"
   Repair Compact: "Repair"
   Mark All Watched Compact: "Mark all watched"
   Repair Use Cookies: "Use configured yt-dlp cookies"
@@ -285,7 +284,6 @@ History:
   Mark All As Watched: Mark All As Watched
   Mark All As Watched Confirmation: Are you sure you want to mark all videos in your history as watched?
   All History Marked as Watched: All videos in your history have been marked as watched
-  Delete Old History: Delete Old History
   Select History Age: Select how old an entry must be before it is deleted.
   Delete Entries Older Than: Delete entries older than
   Number of Days: Number of days

@@ -264,7 +264,6 @@ History:
   Clear Filters: '清除篩選'
   Invalid Date Range: '開始日期必須早於或等於結束日期。'
   Empty Filter Message: '觀看紀錄中沒有符合這些篩選條件的影片。'
-  Delete Old Compact: "刪除舊紀錄"
   Repair Compact: "修復"
   Mark All Watched Compact: "全部標為已看"
   Repair Use Cookies: "使用已設定的 yt-dlp Cookie"
@@ -283,7 +282,6 @@ History:
   Mark All As Watched: 全部標示為已觀看
   Mark All As Watched Confirmation: 確定要將觀看記錄中的所有影片標示為已觀看嗎？
   All History Marked as Watched: 已將觀看記錄中的所有影片標示為已觀看
-  Delete Old History: 刪除舊的觀看記錄
   Select History Age: 選擇項目保留多久後刪除。
   Delete Entries Older Than: 刪除早於以下時間的項目
   Number of Days: 天數

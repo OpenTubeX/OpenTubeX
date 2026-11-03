@@ -273,7 +273,6 @@ History:
   Clear Filters: 'Ryd filtre'
   Invalid Date Range: 'Startdatoen skal være før eller på slutdatoen.'
   Empty Filter Message: 'Ingen videoer i din historik matcher disse filtre.'
-  Delete Old Compact: "Slet gamle"
   Repair Compact: "Reparer"
   Mark All Watched Compact: "Marker alle set"
   Repair Use Cookies: "Brug konfigurerede yt-dlp-cookies"
@@ -294,7 +293,6 @@ History:
   All History Marked as Watched: Alle videoer i din historik er blevet markeret som set
   DateOldestHistory: Set-dato (ældste)
   DateNewestHistory: Set-dato (nyeste)
-  Delete Old History: Slet gammel historik
   Select History Age: Vælg, hvor gammel en post skal være, før den slettes.
   Delete Entries Older Than: Slet poster, der er ældre end
   Number of Days: Antal dage

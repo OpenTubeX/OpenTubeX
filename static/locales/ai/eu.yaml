@@ -264,7 +264,6 @@ History:
   Clear Filters: 'Garbitu iragazkiak'
   Invalid Date Range: 'Hasiera-datak amaiera-data baino lehenagokoa edo berdina izan behar du.'
   Empty Filter Message: 'Zure historiako bideorik ez dator bat iragazki hauekin.'
-  Delete Old Compact: "Zaharrak ezabatu"
   Repair Compact: "Konpondu"
   Mark All Watched Compact: "Denak ikusita"
   Repair Use Cookies: "Erabili konfiguratutako yt-dlp cookieak"
@@ -283,7 +282,6 @@ History:
   Mark All As Watched: Markatu guztiak ikusita
   Mark All As Watched Confirmation: Ziur historiako bideo guztiak ikusita markatu nahi dituzula?
   All History Marked as Watched: Historiako bideo guztiak ikusita markatu dira
-  Delete Old History: Ezabatu historia zaharra
   Select History Age: Aukeratu sarrera batek zenbat denbora izan behar duen ezabatu aurretik.
   Delete Entries Older Than: Ezabatu hau baino zaharragoak diren sarrerak
   Number of Days: Egun kopurua

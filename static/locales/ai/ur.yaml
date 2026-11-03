@@ -327,14 +327,12 @@ History:
   Repair Finished: مرمت مکمل ہو گئی
   Repair Stopped: مرمت روک دی گئی
   Repair: ہسٹری کی مرمت کریں
-  Delete Old Compact: پرانی حذف کریں
   Repair Compact: مرمت
   Mark All Watched Compact: سب دیکھی گئی
   Repair Progress: چیک کی گئیں {checked}/{total} · مرمت شدہ {repaired} · ناکام {failed}
   Mark All As Watched: سب کو دیکھا گیا نشان زد کریں
   Mark All As Watched Confirmation: کیا آپ واقعی اپنی ہسٹری کی تمام ویڈیوز کو دیکھی گئی نشان زد کرنا چاہتے ہیں؟
   All History Marked as Watched: آپ کی ہسٹری کی تمام ویڈیوز دیکھی گئی نشان زد کر دی گئی ہیں
-  Delete Old History: پرانی ہسٹری حذف کریں
   Select History Age: منتخب کریں کہ حذف ہونے سے پہلے اندراج کتنا پرانا ہونا چاہیے۔
   Delete Entries Older Than: اس سے پرانے اندراجات حذف کریں
   Number of Days: دنوں کی تعداد

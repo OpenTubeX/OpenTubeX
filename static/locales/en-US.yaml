@@ -560,7 +560,6 @@ History:
   Repair Finished: "Repair finished"
   Repair Stopped: "Repair stopped"
   Repair: "Repair History"
-  Delete Old Compact: Delete old
   Repair Compact: Repair
   Mark All Watched Compact: Mark all watched
   Repair Progress: "Checked {checked}/{total} · Repaired {repaired} · Failed {failed}"
@@ -576,7 +575,6 @@ History:
   All History Marked as Watched: All videos in your history have been marked as watched
   DateOldestHistory: Date Watched (Oldest)
   DateNewestHistory: Date Watched (Newest)
-  Delete Old History: Delete Old History
   Select History Age: Select how old an entry must be before it is deleted.
   Delete Entries Older Than: Delete entries older than
   Number of Days: Number of days

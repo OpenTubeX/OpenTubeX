@@ -1715,9 +1715,9 @@ test.describe('autosized prompts', () => {
     }
   })
 
-  test('centers the Delete Old History dialog in the viewport', async ({ page }) => {
+  test('centers the history deletion dialog in the viewport', async ({ page }) => {
     await goTo(page, 'history')
-    await page.getByRole('button', { name: 'Delete Old History' }).click()
+    await page.locator('.headingActions').getByRole('button', { name: 'Delete', exact: true }).click()
 
     const dialog = page.getByRole('dialog')
     await expect(dialog).toBeVisible()

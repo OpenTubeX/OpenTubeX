@@ -269,7 +269,6 @@ History:
   Clear Filters: 'Filters wissen'
   Invalid Date Range: 'De begindatum moet vóór of op de einddatum liggen.'
   Empty Filter Message: 'Geen video''s in je geschiedenis komen overeen met deze filters.'
-  Delete Old Compact: "Oude wissen"
   Repair Compact: "Herstellen"
   Mark All Watched Compact: "Alles bekeken"
   Repair Use Cookies: "Geconfigureerde yt-dlp-cookies gebruiken"
@@ -288,7 +287,6 @@ History:
   Mark All As Watched: Alles markeren als bekeken
   Mark All As Watched Confirmation: Weet je zeker dat je alle video's in je geschiedenis als bekeken wilt markeren?
   All History Marked as Watched: Alle video's in je geschiedenis zijn als bekeken gemarkeerd
-  Delete Old History: Oude geschiedenis verwijderen
   Select History Age: Kies hoe oud een item moet zijn voordat het wordt verwijderd.
   Delete Entries Older Than: Items verwijderen die ouder zijn dan
   Number of Days: Aantal dagen

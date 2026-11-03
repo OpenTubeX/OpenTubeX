@@ -264,7 +264,6 @@ History:
   Clear Filters: 'Tühjenda filtrid'
   Invalid Date Range: 'Alguskuupäev peab olema lõppkuupäevast varasem või sellega sama.'
   Empty Filter Message: 'Ükski video sinu ajaloos ei vasta nendele filtritele.'
-  Delete Old Compact: "Kustuta vanad"
   Repair Compact: "Paranda"
   Mark All Watched Compact: "Kõik vaadatud"
   Repair Use Cookies: "Kasuta seadistatud yt-dlp küpsiseid"
@@ -283,7 +282,6 @@ History:
   Mark All As Watched: Märgi kõik vaadatuks
   Mark All As Watched Confirmation: Kas soovite kindlasti kõik ajaloos olevad videod vaadatuks märkida?
   All History Marked as Watched: Kõik ajaloos olevad videod on vaadatuks märgitud
-  Delete Old History: Kustuta vana ajalugu
   Select History Age: Valige, kui vana peab kirje kustutamiseks olema.
   Delete Entries Older Than: Kustuta kirjed, mis on vanemad kui
   Number of Days: Päevade arv

@@ -264,7 +264,6 @@ History:
   Clear Filters: 'Vymazať filtre'
   Invalid Date Range: 'Počiatočný dátum musí byť pred koncovým dátumom alebo sa mu rovnať.'
   Empty Filter Message: 'Žiadne videá vo vašej histórii nezodpovedajú týmto filtrom.'
-  Delete Old Compact: "Zmazať staré"
   Repair Compact: "Opraviť"
   Mark All Watched Compact: "Všetky pozreté"
   Repair Use Cookies: "Použiť nastavené cookies yt-dlp"
@@ -283,7 +282,6 @@ History:
   Mark All As Watched: Označiť všetko ako pozreté
   Mark All As Watched Confirmation: Naozaj chcete označiť všetky videá v histórii ako pozreté?
   All History Marked as Watched: Všetky videá v histórii boli označené ako pozreté
-  Delete Old History: Odstrániť starú históriu
   Select History Age: Vyberte, aký starý musí byť záznam, aby sa odstránil.
   Delete Entries Older Than: Odstrániť záznamy staršie ako
   Number of Days: Počet dní

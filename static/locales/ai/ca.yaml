@@ -398,7 +398,6 @@ History:
   Clear Filters: 'Neteja els filtres'
   Invalid Date Range: 'La data inicial ha de ser anterior o igual a la data final.'
   Empty Filter Message: 'Cap vídeo de l''historial coincideix amb aquests filtres.'
-  Delete Old Compact: "Esborra antics"
   Repair Compact: "Repara"
   Mark All Watched Compact: "Marca tots vistos"
   Repair Use Cookies: "Utilitza les galetes configurades de yt-dlp"
@@ -420,7 +419,6 @@ History:
   All History Marked as Watched: S'han marcat com a vistos tots els vídeos de l'historial
   DateOldestHistory: Data de visualització (més antiga)
   DateNewestHistory: Data de visualització (més nova)
-  Delete Old History: Suprimeix l'historial antic
   Select History Age: Seleccioneu l'antiguitat que ha de tenir una entrada per poder-la suprimir.
   Delete Entries Older Than: Suprimeix les entrades anteriors a
   Number of Days: Nombre de dies

@@ -269,7 +269,6 @@ History:
   Clear Filters: 'Tyhjennä suodattimet'
   Invalid Date Range: 'Alkupäivän on oltava ennen loppupäivää tai sama kuin loppupäivä.'
   Empty Filter Message: 'Katseluhistoriassasi ei ole videoita, jotka vastaavat näitä suodattimia.'
-  Delete Old Compact: "Siivoa"
   Repair Compact: "Korjaa"
   Mark All Watched Compact: "Kaikki katsottu"
   Repair Use Cookies: "Käytä määritettyjä yt-dlp-evästeitä"
@@ -288,7 +287,6 @@ History:
   Mark All As Watched: Merkitse kaikki katsotuiksi
   Mark All As Watched Confirmation: Haluatko varmasti merkitä kaikki katseluhistoriasi videot katsotuiksi?
   All History Marked as Watched: Kaikki katseluhistoriasi videot on merkitty katsotuiksi
-  Delete Old History: Poista vanha historia
   Select History Age: Valitse, kuinka vanha merkinnän on oltava ennen poistamista.
   Delete Entries Older Than: Poista tätä vanhemmat merkinnät
   Number of Days: Päivien määrä

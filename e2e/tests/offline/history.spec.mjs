@@ -244,7 +244,7 @@ test.describe('watch history', () => {
 
   test('consumes the backdrop tap when dismissing a prompt', async ({ page }) => {
     await goTo(page, 'history')
-    await page.getByRole('button', { name: 'Delete Old History' }).click()
+    await page.locator('.headingActions').getByRole('button', { name: 'Delete', exact: true }).click()
 
     const prompt = page.locator('.prompt')
     await expect(prompt).toBeVisible()
@@ -340,14 +340,14 @@ test.describe('watch history', () => {
   test('history actions and labels stay on one line without clipping at narrow widths', { tag: '@scale' }, async ({ app, page }) => {
     await goTo(page, 'history')
     const actions = page.locator('.headingActions')
-    await expect(actions.locator('.historyFullActionLabel:visible')).toHaveText(['Delete Old History', 'Repair History', 'Mark All As Watched'])
+    await expect(actions.locator('.historyFullActionLabel:visible')).toHaveText(['Delete', 'Repair History', 'Mark All As Watched'])
     const compactLabels = {
-      'en-US': ['Delete old', 'Repair', 'Mark all watched'],
-      'de-DE': ['Alte löschen', 'Reparatur', 'Alle gesehen'],
-      fi: ['Siivoa', 'Korjaa', 'Kaikki katsottu'],
-      cy: ['Dileu hen', 'Trwsio', 'Pob un wedi’i weld'],
-      'fr-FR': ['Suppr. anciens', 'Réparer', 'Tout vu'],
-      ta: ['பழையது அழி', 'சரி', 'யாவும் கண்டது']
+      'en-US': ['Delete', 'Repair', 'Mark all watched'],
+      'de-DE': ['Löschen', 'Reparatur', 'Alle gesehen'],
+      fi: ['Poista', 'Korjaa', 'Kaikki katsottu'],
+      cy: ['Dileu', 'Trwsio', 'Pob un wedi’i weld'],
+      'fr-FR': ['Supprimer', 'Réparer', 'Tout vu'],
+      ta: ['அழி', 'சரி', 'யாவும் கண்டது']
     }
     for (const [locale, labels] of Object.entries(compactLabels)) {
       await page.evaluate(locale => {
@@ -916,7 +916,7 @@ test.describe('history cleanup', () => {
 
   test('keeps the custom history age label clear of the dropdown @scale', async ({ app, page }) => {
     await goTo(page, 'history')
-    await page.getByRole('button', { name: 'Delete Old History' }).click()
+    await page.locator('.headingActions').getByRole('button', { name: 'Delete', exact: true }).click()
     const dialog = page.getByRole('dialog')
     await dialog.locator('select').selectOption('custom')
     const days = dialog.getByRole('spinbutton', { name: 'Number of days', exact: false })
@@ -937,9 +937,9 @@ test.describe('history cleanup', () => {
     await expect(page.getByText('Recent video')).toBeVisible()
     await expect(page.getByText('Old video')).toBeVisible()
 
-    await page.getByRole('button', { name: 'Delete Old History' }).click()
+    await page.locator('.headingActions').getByRole('button', { name: 'Delete', exact: true }).click()
     await page.locator('.cleanupPromptContent select').selectOption('30')
-    await page.getByRole('button', { name: 'Delete', exact: true }).click()
+    await page.getByRole('dialog').getByRole('button', { name: 'Delete', exact: true }).click()
 
     await expect(page.getByText('Old video')).toBeHidden()
     await expect(page.getByText('Recent video')).toBeVisible()
@@ -955,9 +955,9 @@ test.describe('history cleanup', () => {
     await goTo(page, 'history')
     await expect(page.getByText('Recent video')).toBeVisible()
 
-    await page.getByRole('button', { name: 'Delete Old History' }).click()
+    await page.locator('.headingActions').getByRole('button', { name: 'Delete', exact: true }).click()
     await page.locator('.cleanupPromptContent select').selectOption('all')
-    await page.getByRole('button', { name: 'Delete', exact: true }).click()
+    await page.getByRole('dialog').getByRole('button', { name: 'Delete', exact: true }).click()
 
     await expect(page.getByText('Watch history has been cleared')).toBeVisible()
     await expect(page.getByText('Recent video')).toBeHidden()
@@ -977,9 +977,9 @@ test.describe('history cleanup', () => {
       window.$store._actions.removeAllHistory = [() => Promise.resolve(false)]
     })
 
-    await page.getByRole('button', { name: 'Delete Old History' }).click()
+    await page.locator('.headingActions').getByRole('button', { name: 'Delete', exact: true }).click()
     await page.locator('.cleanupPromptContent select').selectOption('all')
-    await page.getByRole('button', { name: 'Delete', exact: true }).click()
+    await page.getByRole('dialog').getByRole('button', { name: 'Delete', exact: true }).click()
 
     await expect(page.getByText('Storage cleanup failed')).toBeVisible()
     await expect(page.getByText('Watch history has been cleared')).toBeHidden()
@@ -988,9 +988,10 @@ test.describe('history cleanup', () => {
 
   test('selects a history cutoff from the modal dropdown', async ({ page }) => {
     await goTo(page, 'history')
-    await page.getByRole('button', { name: 'Delete Old History' }).click()
+    await page.locator('.headingActions').getByRole('button', { name: 'Delete', exact: true }).click()
 
     const dialog = page.getByRole('dialog')
+    await expect(dialog).toHaveAccessibleName('Delete')
     const combobox = dialog.getByRole('combobox', { name: /Delete entries older than/i })
     await combobox.click()
 

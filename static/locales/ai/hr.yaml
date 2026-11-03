@@ -267,7 +267,6 @@ History:
   Clear Filters: 'Očisti filtre'
   Invalid Date Range: 'Početni datum mora biti prije završnog datuma ili jednak njemu.'
   Empty Filter Message: 'Nijedan videozapis u vašoj povijesti ne odgovara ovim filtrima.'
-  Delete Old Compact: "Izbriši stare"
   Repair Compact: "Popravi"
   Mark All Watched Compact: "Sve pogledano"
   Repair Use Cookies: "Koristi konfigurirane yt-dlp kolačiće"
@@ -286,7 +285,6 @@ History:
   Mark All As Watched: Označi sve kao pogledano
   Mark All As Watched Confirmation: Jeste li sigurni da sve videozapise u povijesti želite označiti kao pogledane?
   All History Marked as Watched: Svi videozapisi u povijesti označeni su kao pogledani
-  Delete Old History: Izbriši staru povijest
   Select History Age: Odaberite koliko zapis mora biti star da bi se izbrisao.
   Delete Entries Older Than: Izbriši zapise starije od
   Number of Days: Broj dana

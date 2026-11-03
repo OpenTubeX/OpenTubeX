@@ -265,7 +265,6 @@ History:
   Clear Filters: 'Clirio''r Hidlyddion'
   Invalid Date Range: 'Rhaid i''r dyddiad cychwyn fod ar neu cyn y dyddiad gorffen.'
   Empty Filter Message: 'Nid oes fideos yn eich hanes sy''n cyfateb i''r hidlyddion hyn.'
-  Delete Old Compact: "Dileu hen"
   Repair Compact: "Trwsio"
   Mark All Watched Compact: "Pob un wedi’i weld"
   Repair Use Cookies: "Defnyddio cwcis yt-dlp sydd wedi'u ffurfweddu"
@@ -284,7 +283,6 @@ History:
   Mark All As Watched: Marcio'r cyfan fel wedi'u gwylio
   Mark All As Watched Confirmation: Ydych chi'n siŵr eich bod am farcio pob fideo yn eich hanes fel wedi'i wylio?
   All History Marked as Watched: Mae pob fideo yn eich hanes wedi'i farcio fel wedi'i wylio
-  Delete Old History: Dileu hen hanes
   Select History Age: Dewiswch pa mor hen y mae'n rhaid i gofnod fod cyn iddo gael ei ddileu.
   Delete Entries Older Than: Dileu cofnodion sy'n hŷn na
   Number of Days: Nifer y diwrnodau

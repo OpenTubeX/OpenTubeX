@@ -355,7 +355,6 @@ History:
   Clear Filters: '필터 초기화'
   Invalid Date Range: '시작일은 종료일보다 이전이거나 같아야 합니다.'
   Empty Filter Message: '기록에 이 필터와 일치하는 동영상이 없습니다.'
-  Delete Old Compact: "오래된 기록 삭제"
   Repair Compact: "복구"
   Mark All Watched Compact: "모두 시청 완료로"
   Repair Use Cookies: "설정된 yt-dlp 쿠키 사용"
@@ -377,7 +376,6 @@ History:
   All History Marked as Watched: 시청 기록의 모든 동영상을 시청함으로 표시했습니다
   DateOldestHistory: 시청 날짜 (오래된순)
   DateNewestHistory: 시청 날짜 (최신순)
-  Delete Old History: 오래된 기록 삭제
   Select History Age: 삭제할 기록의 최소 경과 기간을 선택하세요.
   Delete Entries Older Than: 다음보다 오래된 기록 삭제
   Number of Days: 일수

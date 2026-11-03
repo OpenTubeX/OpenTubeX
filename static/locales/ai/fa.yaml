@@ -288,7 +288,6 @@ History:
   Clear Filters: 'پاک کردن فیلترها'
   Invalid Date Range: 'تاریخ شروع باید قبل از تاریخ پایان یا برابر با آن باشد.'
   Empty Filter Message: 'هیچ ویدیویی در سابقهٔ شما با این فیلترها مطابقت ندارد.'
-  Delete Old Compact: "حذف قدیمی‌ها"
   Repair Compact: "ترمیم"
   Mark All Watched Compact: "همه تماشا شده"
   Repair Use Cookies: "استفاده از کوکی‌های پیکربندی‌شدهٔ yt-dlp"
@@ -307,7 +306,6 @@ History:
   Mark All As Watched: علامت‌گذاری همه به‌عنوان تماشاشده
   Mark All As Watched Confirmation: مطمئنید می‌خواهید همه ویدیوهای تاریخچه را تماشاشده علامت‌گذاری کنید؟
   All History Marked as Watched: همه ویدیوهای تاریخچه تماشاشده علامت‌گذاری شدند
-  Delete Old History: حذف تاریخچه قدیمی
   Select History Age: مشخص کنید یک مورد پس از چه مدتی حذف شود.
   Delete Entries Older Than: حذف موارد قدیمی‌تر از
   Number of Days: تعداد روزها

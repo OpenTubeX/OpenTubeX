@@ -274,7 +274,6 @@ History:
   Clear Filters: 'Nullstill filter'
   Invalid Date Range: 'Startdatoen må vere før eller på sluttdatoen.'
   Empty Filter Message: 'Ingen videoar i historikken din samsvarar med desse filtera.'
-  Delete Old Compact: "Slett gamle"
   Repair Compact: "Reparer"
   Mark All Watched Compact: "Merk alle som sette"
   Repair Use Cookies: "Bruk konfigurerte yt-dlp-informasjonskapslar"
@@ -296,7 +295,6 @@ History:
   All History Marked as Watched: Alle videoane i historikken er merkte som sette
   DateOldestHistory: Sjådato (eldste)
   DateNewestHistory: Sjådato (nyaste)
-  Delete Old History: Slett gammal historikk
   Select History Age: Vel kor gammal ei oppføring må vere før ho blir sletta.
   Delete Entries Older Than: Slett oppføringar eldre enn
   Number of Days: Tal på dagar

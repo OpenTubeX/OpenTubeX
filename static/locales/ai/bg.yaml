@@ -267,7 +267,6 @@ History:
   Clear Filters: 'Изчисти филтрите'
   Invalid Date Range: 'Началната дата трябва да е преди или на крайната дата.'
   Empty Filter Message: 'Няма видеоклипове в историята ви, които да отговарят на тези филтри.'
-  Delete Old Compact: "Изтрий стари"
   Repair Compact: "Поправи"
   Mark All Watched Compact: "Всички гледани"
   Repair Use Cookies: "Използване на настроените бисквитки на yt-dlp"
@@ -286,7 +285,6 @@ History:
   Mark All As Watched: Отбележи всички като гледани
   Mark All As Watched Confirmation: Наистина ли искате да отбележите като гледани всички видеоклипове в историята си?
   All History Marked as Watched: Всички видеоклипове в историята ви са отбелязани като гледани
-  Delete Old History: Изтриване на старата история
   Select History Age: Изберете след колко време да се изтриват записите.
   Delete Entries Older Than: Изтрий записите, по-стари от
   Number of Days: Брой дни

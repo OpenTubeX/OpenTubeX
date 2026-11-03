@@ -264,7 +264,6 @@ History:
   Clear Filters: 'Hreinsa síur'
   Invalid Date Range: 'Upphafsdagsetningin verður að vera fyrir eða á lokadagsetningunni.'
   Empty Filter Message: 'Engin myndskeið í ferlinum þínum passa við þessar síur.'
-  Delete Old Compact: "Eyða gömlu"
   Repair Compact: "Lagfæra"
   Mark All Watched Compact: "Merkja allt skoðað"
   Repair Use Cookies: "Nota stilltar yt-dlp vafrakökur"
@@ -283,7 +282,6 @@ History:
   Mark All As Watched: Merkja öll myndbönd sem skoðuð
   Mark All As Watched Confirmation: Viltu örugglega merkja öll myndbönd í áhorfsferlinum sem skoðuð?
   All History Marked as Watched: Öll myndbönd í áhorfsferlinum hafa verið merkt sem skoðuð
-  Delete Old History: Eyða gömlum áhorfsferli
   Select History Age: Veldu hversu gömul færsla þarf að vera áður en henni er eytt.
   Delete Entries Older Than: Eyða færslum eldri en
   Number of Days: Fjöldi daga
