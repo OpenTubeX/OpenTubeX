@@ -93,7 +93,10 @@ async function collectOnce() {
       : []
   })
   const inApp = new Set(additions.filter(addition => addition.inApp).map(({ path, createdAt }) => `${path} ${createdAt}`))
-  for (const entry of capacitorNotificationHistory.add(additions)) {
+  const entries = capacitorNotificationHistory.add(additions)
+  // Notifications may have changed mode while Android handed the uploads over.
+  if (store.getters.getNotificationMode !== 'both') return
+  for (const entry of entries) {
     if (inApp.has(`${entry.path} ${entry.createdAt}`)) showInAppNotification(entry)
   }
 }

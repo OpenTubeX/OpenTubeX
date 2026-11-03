@@ -6,6 +6,8 @@ process.env.IS_CAPACITOR = 'true'
 
 const queues = []
 const added = []
+const toasts = []
+const getters = { getNotificationMode: 'both' }
 let gate = null
 const [{ collectNotificationHistory }] = await importWithStubs([sourceUrl('src/renderer/helpers/notificationHistory.js')], {
   [sourceUrl('src/renderer/helpers/androidSubscriptionRefresh.js')]: {
@@ -16,12 +18,12 @@ const [{ collectNotificationHistory }] = await importWithStubs([sourceUrl('src/r
     }
   },
   [sourceUrl('src/renderer/helpers/capacitorNotificationHistory.js')]: {
-    capacitorNotificationHistory: { add: additions => { added.push(...additions); return [] } }
+    capacitorNotificationHistory: { add: additions => { added.push(...additions); return additions.map((addition, index) => ({ ...addition, id: String(index), read: false })) } }
   },
   [sourceUrl('src/renderer/helpers/liveReminders.js')]: { collectFiredCapacitorReminders: () => {} },
-  [sourceUrl('src/renderer/helpers/utils.js')]: { getVideoThumbnailUrl: () => null, openInternalPath: () => {}, showToast: () => {} },
+  [sourceUrl('src/renderer/helpers/utils.js')]: { getVideoThumbnailUrl: () => null, openInternalPath: () => {}, showToast: (...args) => { toasts.push(args) } },
   [sourceUrl('src/renderer/i18n/index.js')]: { default: { global: { t: key => key } } },
-  [sourceUrl('src/renderer/store/index.js')]: { default: { getters: {}, dispatch: () => {} } }
+  [sourceUrl('src/renderer/store/index.js')]: { default: { getters, dispatch: () => {} } }
 })
 
 const upload = id => ({ feedType: 'videos', id, live: false, title: 'New video', body: id, createdAt: 1, inApp: true })
@@ -37,4 +39,18 @@ test('a collection requested while one runs also takes what Android queued meanw
   gate.resolve()
   await Promise.all([running, requested])
   assert.deepEqual(added.map(addition => addition.body), ['first', 'second'])
+})
+
+test('uploads Android left to the app show no toast once notifications are off', async () => {
+  toasts.length = 0
+  queues.push([upload('third')])
+  gate = Promise.withResolvers()
+  const running = collectNotificationHistory()
+  // The user turns notifications off while the pass waits for Android.
+  await Promise.resolve()
+  getters.getNotificationMode = 'off'
+  gate.resolve()
+  await running
+  assert.deepEqual(toasts, [])
+  getters.getNotificationMode = 'both'
 })
