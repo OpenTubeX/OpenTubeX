@@ -547,7 +547,7 @@ export const SYNC_SETTING_VALUE_LABELS = {
     video_duration_descending: 'Playlist.Sort By.VideoDurationDescending',
     custom: 'Playlist.Sort By.Custom',
   },
-  videoDescriptionMode: { hide: 'Settings.Distraction Free Settings.Hide', collapsed: 'Settings.Distraction Free Settings.Collapsed', expanded: 'Settings.Distraction Free Settings.Expanded' },
+  videoDescriptionMode: { hide: 'Settings.Distraction Free Settings.Video Description Modes.Hide', collapsed: 'Settings.Distraction Free Settings.Video Description Modes.Collapsed', expanded: 'Settings.Distraction Free Settings.Video Description Modes.Expanded' },
   videoPlaybackEngine: { 'yt-dlp': `${general}Stream Extraction Method.yt-dlp`, 'built-in': `${general}Stream Extraction Method.Built-in` },
   voiceOverTranslationLanguage: { en: `${player}Voice-over Translation.English`, ru: `${player}Voice-over Translation.Russian`, kk: `${player}Voice-over Translation.Kazakh` },
   watchedProgressSavingMode: { auto: `${privacy}Watched Progress Saving Mode.Modes.Auto`, 'semi-auto': `${privacy}Watched Progress Saving Mode.Modes.Semi-auto`, never: `${privacy}Watched Progress Saving Mode.Modes.Never` },

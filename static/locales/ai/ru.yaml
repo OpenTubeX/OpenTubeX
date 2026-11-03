@@ -1113,6 +1113,10 @@ Settings:
     Collapsed: Свёрнутые
     Expanded: Развёрнутые
     Video Descriptions: Описания видео
+    Video Description Modes:
+      Hide: Скрывать
+      Collapsed: Свёрнутые
+      Expanded: Развёрнутые
     Playing Interface Hide Delay: Задержка скрытия интерфейса во время воспроизведения
     Hide Startup Splash: Скрыть стартовый экран
     Hide Header Sync Indicator: Скрыть индикатор синхронизации в заголовке приложения

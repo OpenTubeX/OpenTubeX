@@ -1,12 +1,12 @@
 import { computed, watch } from 'vue'
 
 import store from '../store/index'
-import { refreshRssFeeds, rssFeedCacheCovers, rssFeedItems } from '../helpers/rssFeeds'
+import { getCachedRssFeedUrls, refreshRssFeeds, rssFeedItems } from '../helpers/rssFeeds'
 
 /**
  * The cached items of the followed RSS feeds. They load on first use, unless
  * fetching on startup is disabled and they are cached, and after feeds were
- * added in the settings.
+ * added in the settings. Only the feeds without cached items load then.
  * @param {() => boolean} [enabled]
  */
 export function useFollowedRssFeedItems(enabled = () => true) {
@@ -19,8 +19,10 @@ export function useFollowedRssFeedItems(enabled = () => true) {
   const items = computed(() => rssFeedItems.value.filter(item => feedUrls.value.has(item.feedUrl)))
 
   watch(feeds, (value) => {
-    if (value.length > 0 && !rssFeedCacheCovers(value)) {
-      refreshRssFeeds(value)
+    const cachedUrls = getCachedRssFeedUrls()
+    if (value.some(feed => !cachedUrls.has(feed.url))) {
+      // Feeds that never loaded, for example because they failed, don't reload the cached ones
+      refreshRssFeeds(value, { cachedUrls })
     }
   }, { immediate: true })
 

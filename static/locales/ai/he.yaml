@@ -1155,6 +1155,10 @@ Settings:
     Collapsed: מכווצים
     Expanded: מורחבים
     Video Descriptions: תיאורי סרטונים
+    Video Description Modes:
+      Hide: הסתרה
+      Collapsed: מכווצים
+      Expanded: מורחבים
     Playing Interface Hide Delay: השהיה להסתרת הממשק בזמן ניגון
     Hide Startup Splash: הסתרת מסך הפתיחה
     Hide Header Sync Indicator: הסתרת מחוון הסנכרון בכותרת היישום

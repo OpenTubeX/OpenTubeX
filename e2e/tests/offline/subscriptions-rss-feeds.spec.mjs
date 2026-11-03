@@ -8,7 +8,9 @@ import {
   goToSettingsSection,
   abortUnmockedRequest,
   expectScrollAtRenderedEnd,
-  setWindowSize
+  openNewWindowFromTabBar,
+  setWindowSize,
+  waitForAppReady
 } from '../../helpers/app.mjs'
 import { encryptSyncDocument, decryptSyncDocument } from '../../../src/renderer/helpers/sync-server-privacy.js'
 
@@ -535,6 +537,56 @@ test.describe('with followed feeds', () => {
     await expect(panel.getByText('1 feed could not be refreshed.')).toHaveCount(0)
   })
 
+  test('cancels a running refresh and keeps the previous items', async ({ page }) => {
+    await mockFeeds(page)
+    await goTo(page, 'subscriptions')
+    await page.locator('[data-rss-feeds-tab]').click()
+    const panel = page.locator('#subscriptionsPanel')
+    const titles = panel.locator('.ft-list-item .h3Title')
+    await expect(titles).toHaveText(['Newest VOD', 'Older VOD'])
+    await expect(panel.getByText('1 feed could not be refreshed.')).toBeVisible()
+
+    // The feed never answers, so only cancelling ends the refresh
+    let aborted = 0
+    page.on('requestfailed', (request) => {
+      if (request.url() === RSS_URL) aborted++
+    })
+    await page.route(RSS_URL, () => {})
+    const header = page.locator('.subscriptionsHeader')
+    const loading = page.locator('[data-rss-feeds-tab] .tabLoadingIndicator')
+    await header.getByRole('button', { name: /^Refresh RSS/ }).click()
+    await expect(loading).toBeVisible()
+    await header.getByRole('button', { name: 'Cancel Refresh' }).click()
+    await expect(loading).toHaveCount(0)
+    await expect.poll(() => aborted).toBe(1)
+    await expect(header.getByRole('button', { name: /^Refresh RSS/ })).toHaveAttribute('aria-disabled', 'false')
+    expect(await titles.allTextContents()).toEqual(['Newest VOD', 'Older VOD'])
+    await expect(panel.getByText('1 feed could not be refreshed.')).toBeVisible()
+
+    // The New feed refreshes only the RSS feeds without subscriptions, and cancels them too
+    await page.locator('[data-subscription-feed-tab="all"]').click()
+    await header.getByRole('button', { name: /^Refresh / }).click()
+    await expect(loading).toBeVisible()
+    await header.getByRole('button', { name: 'Cancel Refresh' }).click()
+    await expect(loading).toHaveCount(0)
+    await expect.poll(() => aborted).toBe(2)
+
+    // Holding the New tab on phones cancels it too
+    await header.getByRole('button', { name: /^Refresh / }).click()
+    await expect(loading).toBeVisible()
+    await page.locator('[data-subscription-feed-tab="all"]').evaluate(element => element.dispatchEvent(new PointerEvent('contextmenu', {
+      bubbles: true, cancelable: true, pointerType: 'touch'
+    })))
+    await page.locator('.mobileLinkActions').getByRole('menuitem', { name: 'Cancel Refresh' }).click()
+    await expect(loading).toHaveCount(0)
+    await expect.poll(() => aborted).toBe(3)
+
+    // The tab renders its items after switching
+    await page.locator('[data-rss-feeds-tab]').click()
+    await expect(titles).toHaveText(['Newest VOD', 'Older VOD'])
+    await expect(panel.getByText('1 feed could not be refreshed.')).toBeVisible()
+  })
+
   test('keeps the previous items of a feed that fails to refresh', async ({ page }) => {
     await mockFeeds(page)
     await goTo(page, 'subscriptions')
@@ -554,37 +606,86 @@ test.describe('with followed feeds', () => {
     expect(await titles.allTextContents()).toEqual(['Newest VOD', 'Older VOD'])
   })
 
-  test('keeps the items of a feed that fails to refresh after a restart', async ({ page }) => {
-    await mockFeeds(page)
+  test('loads only the feeds that never loaded after a restart', async ({ page }) => {
+    const state = await mockFeeds(page)
     await goTo(page, 'subscriptions')
     await page.locator('[data-rss-feeds-tab]').click()
     const panel = page.locator('#subscriptionsPanel')
     const titles = panel.locator('.ft-list-item .h3Title')
     await expect(titles).toHaveText(['Newest VOD', 'Older VOD'])
+    await expect(panel.getByText('1 feed could not be refreshed.')).toBeVisible()
 
-    await page.route(RSS_URL, route => route.fulfill({ status: 500, body: 'Server error' }))
+    let requested = false
+    await page.route(RSS_URL, (route) => {
+      requested = true
+      return route.fulfill({ contentType: 'application/rss+xml', body: rssFeed })
+    })
     await page.reload()
     await goTo(page, 'subscriptions')
     await page.locator('[data-rss-feeds-tab]').click()
-    await expect(panel.getByText('2 feeds could not be refreshed.')).toBeVisible()
+    await expect(panel.getByText('1 feed could not be refreshed.')).toBeVisible()
     await expect(titles).toHaveText(['Newest VOD', 'Older VOD'])
+    expect(requested).toBe(false)
+
+    // Once the feed loads, it shows its cached items after a restart too
+    state.brokenFeedWorks = true
+    await page.reload()
+    await goTo(page, 'subscriptions')
+    await page.locator('[data-rss-feeds-tab]').click()
+    await expect(titles).toHaveText(['Newest VOD', 'Repaired item', 'Older VOD'])
+    state.brokenFeedWorks = false
+    await page.reload()
+    await goTo(page, 'subscriptions')
+    await page.locator('[data-rss-feeds-tab]').click()
+    await expect(titles).toHaveText(['Newest VOD', 'Repaired item', 'Older VOD'])
+    await expect(page.locator('[data-rss-feeds-tab] .tabLoadingIndicator')).toHaveCount(0)
+    await expect(panel.getByText(/could not be refreshed/)).toHaveCount(0)
+    expect(requested).toBe(false)
   })
 
-  test('keeps the items of a feed added before the RSS tab was opened after a restart', async ({ page }) => {
-    await mockFeeds(page)
-    const manager = await openFeedManager(page)
-    const input = manager.getByRole('textbox', { name: 'Add Feed' })
-    await input.fill(ATOM_URL)
-    await input.press('Enter')
-    await expect(manager.locator('.feedRow')).toHaveCount(3)
+  test.describe('with fetching on startup enabled', () => {
+    test.use({
+      seed: {
+        settings: {
+          fetchSubscriptionsAutomatically: true,
+          enableRssFeeds: true,
+          followedRssFeeds: [RSS_FEED, BROKEN_FEED]
+        }
+      }
+    })
 
-    await page.route(ATOM_URL, route => route.fulfill({ status: 500, body: 'Server error' }))
-    await page.reload()
-    await goTo(page, 'subscriptions')
-    await page.locator('[data-rss-feeds-tab]').click()
-    const panel = page.locator('#subscriptionsPanel')
-    await expect(panel.getByText('2 feeds could not be refreshed.')).toBeVisible()
-    await expect(panel.locator('.ft-list-item .h3Title', { hasText: 'Atom video' })).toBeVisible()
+    test('keeps the items of a feed that fails to refresh after a restart', async ({ page }) => {
+      await mockFeeds(page)
+      await goTo(page, 'subscriptions')
+      await page.locator('[data-rss-feeds-tab]').click()
+      const panel = page.locator('#subscriptionsPanel')
+      const titles = panel.locator('.ft-list-item .h3Title')
+      await expect(titles).toHaveText(['Newest VOD', 'Older VOD'])
+
+      await page.route(RSS_URL, route => route.fulfill({ status: 500, body: 'Server error' }))
+      await page.reload()
+      await goTo(page, 'subscriptions')
+      await page.locator('[data-rss-feeds-tab]').click()
+      await expect(panel.getByText('2 feeds could not be refreshed.')).toBeVisible()
+      await expect(titles).toHaveText(['Newest VOD', 'Older VOD'])
+    })
+
+    test('keeps the items of a feed added before the RSS tab was opened after a restart', async ({ page }) => {
+      await mockFeeds(page)
+      const manager = await openFeedManager(page)
+      const input = manager.getByRole('textbox', { name: 'Add Feed' })
+      await input.fill(ATOM_URL)
+      await input.press('Enter')
+      await expect(manager.locator('.feedRow')).toHaveCount(3)
+
+      await page.route(ATOM_URL, route => route.fulfill({ status: 500, body: 'Server error' }))
+      await page.reload()
+      await goTo(page, 'subscriptions')
+      await page.locator('[data-rss-feeds-tab]').click()
+      const panel = page.locator('#subscriptionsPanel')
+      await expect(panel.getByText('2 feeds could not be refreshed.')).toBeVisible()
+      await expect(panel.locator('.ft-list-item .h3Title', { hasText: 'Atom video' })).toBeVisible()
+    })
   })
 
   test('shows progress while a feed is added', { tag: '@scale' }, async ({ page }) => {
@@ -709,6 +810,121 @@ test.describe('with followed feeds', () => {
   })
 })
 
+test.describe('with a followed feed', () => {
+  test.use({
+    seed: {
+      settings: { fetchSubscriptionsAutomatically: false, enableRssFeeds: true, followedRssFeeds: [RSS_FEED] }
+    }
+  })
+
+  test('shows and cancels a refresh running in another window', async ({ app, page }) => {
+    await mockFeeds(page)
+    await goTo(page, 'subscriptions')
+    await page.locator('[data-rss-feeds-tab]').click()
+    await expect(page.locator('#subscriptionsPanel .ft-list-item .h3Title')).toHaveText(['Newest VOD', 'Older VOD'])
+
+    // The feed never answers, so only cancelling ends the refresh
+    let aborted = 0
+    page.on('requestfailed', (request) => {
+      if (request.url() === RSS_URL) aborted++
+    })
+    await page.route(RSS_URL, () => {})
+    await page.locator('.subscriptionsHeader').getByRole('button', { name: /^Refresh RSS/ }).click()
+    await expect(page.locator('[data-rss-feeds-tab] .tabLoadingIndicator')).toBeVisible()
+
+    const other = await openNewWindowFromTabBar(app, page)
+    await waitForAppReady(other)
+    // The other window shows the cached items and doesn't refresh them itself
+    const otherRequests = []
+    await mockFeeds(other)
+    other.on('request', (request) => {
+      if (request.url() === RSS_URL) otherRequests.push(request.url())
+    })
+    await goTo(other, 'subscriptions')
+    await other.locator('[data-rss-feeds-tab]').click()
+    await expect(other.locator('#subscriptionsPanel .ft-list-item .h3Title')).toHaveText(['Newest VOD', 'Older VOD'])
+    const otherLoading = other.locator('[data-rss-feeds-tab] .tabLoadingIndicator')
+    await expect(otherLoading).toBeVisible()
+
+    await other.locator('.subscriptionsHeader').getByRole('button', { name: 'Cancel Refresh' }).click()
+    await expect.poll(() => aborted).toBe(1)
+    await expect(page.locator('[data-rss-feeds-tab] .tabLoadingIndicator')).toHaveCount(0)
+    await expect(otherLoading).toHaveCount(0)
+    await expect(other.locator('.subscriptionsHeader').getByRole('button', { name: /^Refresh RSS/ }))
+      .toHaveAttribute('aria-disabled', 'false')
+
+    // The refresh ends for the other window when its window closes
+    await page.locator('.subscriptionsHeader').getByRole('button', { name: /^Refresh RSS/ }).click()
+    await expect(otherLoading).toBeVisible()
+    await page.close()
+    app.page = other
+    await expect(otherLoading).toHaveCount(0)
+    expect(otherRequests).toEqual([])
+  })
+})
+
+const SYNC_KEY = Buffer.alloc(32, 1).toString('base64')
+const SYNC_SALT = Buffer.alloc(16, 2).toString('base64')
+
+/**
+ * An encrypted sync server that keeps the uploaded collections in `remote`.
+ * Register it after the catch-all route of the feeds, which would abort it.
+ * @param {import('@playwright/test').Page} page
+ * @param {Record<string, string>} remote encrypted collections
+ * @param {Record<string, number>} [capabilities]
+ */
+async function mockSyncServer(page, remote, capabilities = {}) {
+  await page.route('https://rss-seen-sync.example/**', async (route) => {
+    const request = route.request()
+    const pathname = new URL(request.url()).pathname
+    let body
+    if (pathname === '/health') {
+      body = { capabilities: { encrypted_sync: 1, live_sync: 1, seen_rss_items: 1, ...capabilities } }
+    } else if (pathname === '/v1/encrypted_sync/events') {
+      body = []
+    } else if (pathname === '/v1/account/sessions') {
+      body = { sessions: [] }
+    } else if (pathname === '/v1/encrypted_sync') {
+      body = { collections: [], legacy_data: false, legacy_encrypted_data: false }
+    } else {
+      const collection = pathname.split('/').at(-1)
+      expect(Object.hasOwn(remote, collection)).toBe(true)
+      if (request.method() === 'PUT') remote[collection] = request.postDataJSON().payload
+      body = { revision: 1, payload: remote[collection] }
+    }
+    await route.fulfill({ json: body })
+  })
+}
+
+/**
+ * Syncs history with the server of `mockSyncServer`.
+ * @param {import('@playwright/test').Page} page
+ * @returns {Promise<[string, string]>} the sync status and error
+ */
+function syncWithSyncServer(page) {
+  return page.evaluate(async ({ key, salt }) => {
+    const store = window.$store
+    const settings = {
+      SyncServerEnabled: true,
+      SyncServerUrl: 'https://rss-seen-sync.example',
+      SyncServerToken: 'test-token',
+      SyncServerPrivacyMode: 'enhanced',
+      SyncServerPrivacyKey: key,
+      SyncServerPrivacySalt: salt,
+      SyncServerAutoSync: false,
+      SyncServerSyncHistory: true,
+      SyncServerSyncSubscriptions: false,
+      SyncServerSyncPlaylists: false,
+      SyncServerSyncProfiles: false,
+      SyncServerSyncSettings: false,
+      SyncServerSyncSessions: false
+    }
+    for (const [setting, value] of Object.entries(settings)) store.commit(`set${setting}`, value)
+    await store.dispatch('syncWithSyncServer')
+    return [store.state.syncServer.syncServerStatus, store.state.syncServer.syncServerError]
+  }, { key: SYNC_KEY, salt: SYNC_SALT })
+}
+
 test.describe('with new items', () => {
   test.use({
     seed: {
@@ -825,10 +1041,11 @@ test.describe('with new items', () => {
       await held
       await route.fulfill({ contentType: 'application/rss+xml', body: updatedRssFeed })
     })
-    const refresh = page.locator('.subscriptionsHeader').getByRole('button', { name: /^Refresh / })
+    const header = page.locator('.subscriptionsHeader')
+    const refresh = header.getByRole('button', { name: /^Refresh / })
     await refresh.click()
     await expect(page.locator('[data-rss-feeds-tab] .tabLoadingIndicator')).toBeVisible()
-    await expect(refresh).toHaveAttribute('aria-disabled', 'true')
+    await expect(header.getByRole('button', { name: 'Cancel Refresh' })).toBeVisible()
     release()
     await expect(page.locator('[data-rss-feeds-tab] .tabLoadingIndicator')).toHaveCount(0)
     await expect(refresh).toHaveAttribute('aria-disabled', 'false')
@@ -878,6 +1095,20 @@ test.describe('with new items', () => {
     await expect(panel.locator('.ft-list-item .h3Title'))
       .toHaveText(['Brand new VOD', 'Second new VOD', 'Newest VOD', 'Older VOD'])
     await expect.poll(nextRefresh).toBeGreaterThan(Date.now() + 29 * 60000)
+
+    // Reaching the deadline during a refresh that ends without moving it, such
+    // as a cancelled one, still schedules the next refresh
+    await page.route(RSS_URL, () => {})
+    await header.getByRole('button', { name: /^Refresh RSS/ }).click()
+    await expect(header.getByRole('button', { name: 'Cancel Refresh' })).toBeVisible()
+    await page.evaluate(() => {
+      localStorage.setItem('rssFeedsNextAutoRefresh', String(Date.now() - 1000))
+      window.dispatchEvent(new StorageEvent('storage', { key: 'rssFeedsNextAutoRefresh' }))
+    })
+    await expect.poll(nextRefresh).toBeGreaterThan(Date.now() + 29 * 60000)
+    await header.getByRole('button', { name: 'Cancel Refresh' }).click()
+    await expect(header.getByRole('button', { name: /^Refresh RSS/ })).toBeVisible()
+    expect(await nextRefresh()).toBeGreaterThan(Date.now() + 29 * 60000)
 
     // Turning it off stops the refreshes
     await page.evaluate(() => window.$store.dispatch('updateRssFeedsAutoRefreshInterval', '0'))
@@ -1052,66 +1283,135 @@ test.describe('with new items', () => {
     await expect.poll(() => requests).toBe(2)
   })
 
-  test('syncs the seen items with history', async ({ page }) => {
-    const key = Buffer.alloc(32, 1).toString('base64')
-    const salt = Buffer.alloc(16, 2).toString('base64')
+  test('remembers items marked as seen that leave the feed before the next refresh', async ({ page }) => {
+    await loadNewItems(page)
+    const panel = page.locator('#subscriptionsPanel')
+    const newItems = panel.locator('.ft-list-item').filter({ has: page.locator('.newContentDot') })
+    await panel.locator('.ft-list-item').filter({ hasText: 'Second new VOD' }).locator('.title').click({ button: 'right' })
+    await page.locator('.contextMenu').getByRole('menuitem', { name: 'Mark As Seen' }).click()
+    await expect(newItems.locator('.h3Title')).toHaveText(['Brand new VOD'])
+
+    const withoutItem = updatedRssFeed.replace(/<item>\s*<title>Second new VOD<\/title>[\s\S]*?<\/item>/, '')
+    await page.route(RSS_URL, route => route.fulfill({ contentType: 'application/rss+xml', body: withoutItem }))
+    const refresh = page.locator('.subscriptionsHeader').getByRole('button', { name: /^Refresh RSS/ })
+    await refresh.click()
+    await expect(panel.locator('.ft-list-item .h3Title')).toHaveText(['Brand new VOD', 'Newest VOD', 'Older VOD'])
+
+    // Newer marks push old ones out of the bounded marks, the feed's history still knows it
+    await page.evaluate(() => window.$store.commit('setRssFeedSeenItems', '[]'))
+    await page.route(RSS_URL, route => route.fulfill({ contentType: 'application/rss+xml', body: updatedRssFeed }))
+    await refresh.click()
+    await expect(panel.locator('.ft-list-item .h3Title'))
+      .toHaveText(['Brand new VOD', 'Second new VOD', 'Newest VOD', 'Older VOD'])
+    await expect(newItems.locator('.h3Title')).toHaveText(['Brand new VOD'])
+  })
+
+  test('keeps the seen state of items that leave the feed and come back', async ({ page }) => {
+    await loadNewItems(page)
+    const panel = page.locator('#subscriptionsPanel')
+    const newItems = panel.locator('.ft-list-item').filter({ has: page.locator('.newContentDot') })
+    await expect(newItems.locator('.h3Title')).toHaveText(['Brand new VOD', 'Second new VOD'])
+
+    // The feed drops an item that wasn't new and one that was
+    const withoutItems = updatedRssFeed.replace(/<item>\s*<title>(?:Older VOD|Second new VOD)<\/title>[\s\S]*?<\/item>/g, '')
+    await page.route(RSS_URL, route => route.fulfill({ contentType: 'application/rss+xml', body: withoutItems }))
+    const refresh = page.locator('.subscriptionsHeader').getByRole('button', { name: /^Refresh RSS/ })
+    await refresh.click()
+    await expect(panel.locator('.ft-list-item .h3Title')).toHaveText(['Brand new VOD', 'Newest VOD'])
+
+    // When they come back, each keeps its state
+    await page.route(RSS_URL, route => route.fulfill({ contentType: 'application/rss+xml', body: updatedRssFeed }))
+    await refresh.click()
+    await expect(panel.locator('.ft-list-item .h3Title'))
+      .toHaveText(['Brand new VOD', 'Second new VOD', 'Newest VOD', 'Older VOD'])
+    await expect(newItems.locator('.h3Title')).toHaveText(['Brand new VOD', 'Second new VOD'])
+  })
+
+  test('brings back unseen items that another device watched earlier', async ({ page }) => {
+    await loadNewItems(page)
+    const panel = page.locator('#subscriptionsPanel')
+    const menu = page.locator('.contextMenu')
+    const item = title => panel.locator('.ft-list-item', { hasText: title })
+
+    // Watched here, then marked as unseen on another device
+    await item('Newest VOD').locator('.title').click({ button: 'right' })
+    await menu.getByRole('menuitem', { name: 'Mark As Watched' }).click()
+    await expect(item('Newest VOD')).toHaveClass(/watched/)
+    const watchedAt = await page.evaluate(() => (
+      JSON.parse(localStorage.getItem('externalMediaPosition:https://www.twitch.tv/videos/3')).updatedAt
+    ))
+    // Watched on another device, then marked as unseen here
+    await item('Older VOD').locator('.title').click({ button: 'right' })
+    await menu.getByRole('menuitem', { name: 'Mark As Unseen' }).click()
+
     const remote = {
-      history: await encryptSyncDocument([], key, salt),
+      history: await encryptSyncDocument([], SYNC_KEY, SYNC_SALT),
+      seenRssItems: await encryptSyncDocument([{ key: `${RSS_URL}\nvod-3`, unseenAt: watchedAt + 1000 }], SYNC_KEY, SYNC_SALT),
+      externalMediaPositions: await encryptSyncDocument([
+        { url: 'https://www.twitch.tv/videos/1', seconds: 0, watched: true, updatedAt: now - 60000 }
+      ], SYNC_KEY, SYNC_SALT)
+    }
+    await mockSyncServer(page, remote, { external_media_positions: 1 })
+    expect(await syncWithSyncServer(page)).toEqual(['success', ''])
+
+    // The later unseen marks win over the earlier watches
+    await expect(item('Newest VOD')).not.toHaveClass(/watched/)
+    await expect(item('Older VOD')).not.toHaveClass(/watched/)
+    await page.locator('[data-subscription-feed-tab="all"]').click()
+    const section = panel.locator('section', { has: page.getByRole('heading', { name: 'RSS' }) })
+    await expect(section.locator('.ft-list-item .h3Title'))
+      .toHaveText(['Brand new VOD', 'Second new VOD', 'Newest VOD', 'Older VOD'])
+  })
+
+  test('brings back unseen items that another device watched earlier while they were out of their feed', async ({ page }) => {
+    await loadNewItems(page)
+    const panel = page.locator('#subscriptionsPanel')
+    const titles = panel.locator('.ft-list-item .h3Title')
+    const item = panel.locator('.ft-list-item', { hasText: 'Older VOD' })
+    await item.locator('.title').click({ button: 'right' })
+    await page.locator('.contextMenu').getByRole('menuitem', { name: 'Mark As Watched' }).click()
+    await expect(item).toHaveClass(/watched/)
+    const watchedAt = await page.evaluate(() => (
+      JSON.parse(localStorage.getItem('externalMediaPosition:https://www.twitch.tv/videos/1')).updatedAt
+    ))
+
+    // The item leaves its feed before a later unseen mark from another device syncs
+    const withoutItem = updatedRssFeed.replace(/<item>\s*<title>Older VOD<\/title>[\s\S]*?<\/item>/, '')
+    await page.route(RSS_URL, route => route.fulfill({ contentType: 'application/rss+xml', body: withoutItem }))
+    const refresh = page.locator('.subscriptionsHeader').getByRole('button', { name: /^Refresh RSS/ })
+    await refresh.click()
+    await expect(titles).toHaveText(['Brand new VOD', 'Second new VOD', 'Newest VOD'])
+    await mockSyncServer(page, {
+      history: await encryptSyncDocument([], SYNC_KEY, SYNC_SALT),
+      seenRssItems: await encryptSyncDocument([{ key: `${RSS_URL}\nvod-1`, unseenAt: watchedAt + 1000 }], SYNC_KEY, SYNC_SALT)
+    })
+    expect(await syncWithSyncServer(page)).toEqual(['success', ''])
+
+    // When it comes back, the later unseen mark wins over the earlier watch
+    await page.route(RSS_URL, route => route.fulfill({ contentType: 'application/rss+xml', body: updatedRssFeed }))
+    await refresh.click()
+    await expect(titles).toHaveText(['Brand new VOD', 'Second new VOD', 'Newest VOD', 'Older VOD'])
+    await expect(item).not.toHaveClass(/watched/)
+    await expect(item.locator('.newContentDot')).toBeVisible()
+  })
+
+  test('syncs the seen items with history', async ({ page }) => {
+    const remote = {
+      history: await encryptSyncDocument([], SYNC_KEY, SYNC_SALT),
       seenRssItems: await encryptSyncDocument([
         { key: `${RSS_URL}\nvod-4`, seenAt: now },
         // Seen on another device before it loads here
         { key: `${RSS_URL}\nvod-6`, seenAt: now }
-      ], key, salt)
+      ], SYNC_KEY, SYNC_SALT)
     }
     await loadNewItems(page)
-    // After the catch-all route of the feeds, which would abort it
-    await page.route('https://rss-seen-sync.example/**', async (route) => {
-      const request = route.request()
-      const pathname = new URL(request.url()).pathname
-      let body
-      if (pathname === '/health') {
-        body = { capabilities: { encrypted_sync: 1, live_sync: 1, seen_rss_items: 1 } }
-      } else if (pathname === '/v1/encrypted_sync/events') {
-        body = []
-      } else if (pathname === '/v1/account/sessions') {
-        body = { sessions: [] }
-      } else if (pathname === '/v1/encrypted_sync') {
-        body = { collections: [], legacy_data: false, legacy_encrypted_data: false }
-      } else {
-        const collection = pathname.split('/').at(-1)
-        expect(Object.hasOwn(remote, collection)).toBe(true)
-        if (request.method() === 'PUT') remote[collection] = request.postDataJSON().payload
-        body = { revision: 1, payload: remote[collection] }
-      }
-      await route.fulfill({ json: body })
-    })
+    await mockSyncServer(page, remote)
 
     const panel = page.locator('#subscriptionsPanel')
     const newItems = panel.locator('.ft-list-item').filter({ has: page.locator('.newContentDot') })
     await expect(newItems.locator('.h3Title')).toHaveText(['Brand new VOD', 'Second new VOD'])
 
-    const status = await page.evaluate(async ({ key, salt }) => {
-      const store = window.$store
-      const settings = {
-        SyncServerEnabled: true,
-        SyncServerUrl: 'https://rss-seen-sync.example',
-        SyncServerToken: 'test-token',
-        SyncServerPrivacyMode: 'enhanced',
-        SyncServerPrivacyKey: key,
-        SyncServerPrivacySalt: salt,
-        SyncServerAutoSync: false,
-        SyncServerSyncHistory: true,
-        SyncServerSyncSubscriptions: false,
-        SyncServerSyncPlaylists: false,
-        SyncServerSyncProfiles: false,
-        SyncServerSyncSettings: false,
-        SyncServerSyncSessions: false
-      }
-      for (const [setting, value] of Object.entries(settings)) store.commit(`set${setting}`, value)
-      await store.dispatch('syncWithSyncServer')
-      return [store.state.syncServer.syncServerStatus, store.state.syncServer.syncServerError]
-    }, { key, salt })
-    expect(status).toEqual(['success', ''])
+    expect(await syncWithSyncServer(page)).toEqual(['success', ''])
     await expect(newItems.locator('.h3Title')).toHaveText(['Second new VOD'])
 
     // An item that another device saw before it loaded here doesn't become new
@@ -1135,7 +1435,7 @@ test.describe('with new items', () => {
     await page.locator('.contextMenu').getByRole('menuitem', { name: 'Mark As Seen' }).click()
     await expect(newItems).toHaveCount(0)
     await page.evaluate(() => window.$store.dispatch('syncWithSyncServer'))
-    expect((await decryptSyncDocument(remote.seenRssItems, key)).map(entry => entry.key)).toEqual([
+    expect((await decryptSyncDocument(remote.seenRssItems, SYNC_KEY)).map(entry => entry.key)).toEqual([
       `${RSS_URL}\nvod-4`,
       `${RSS_URL}\nvod-5`,
       `${RSS_URL}\nvod-6`

@@ -1151,6 +1151,10 @@ Settings:
     Collapsed: مطوية
     Expanded: موسعة
     Video Descriptions: أوصاف الفيديو
+    Video Description Modes:
+      Hide: إخفاء
+      Collapsed: مطوية
+      Expanded: موسعة
     Playing Interface Hide Delay: مهلة إخفاء الواجهة أثناء التشغيل
     Hide Startup Splash: إخفاء شاشة بدء التشغيل
     Hide Header Sync Indicator: إخفاء مؤشر المزامنة في ترويسة التطبيق

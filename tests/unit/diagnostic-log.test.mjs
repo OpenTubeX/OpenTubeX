@@ -9,6 +9,7 @@ import {
   formatDiagnosticMessage,
   redactDiagnosticText,
 } from '../../src/diagnosticLog.js'
+import { threadCpuMilliseconds } from '../helpers/cpu-time.mjs'
 
 test('URLs keep their origin and path but lose parameters and opaque segments', () => {
   assert.equal(
@@ -176,17 +177,18 @@ test('console capture forwards calls once, ignores logging from the recorder and
 test('huge messages are bounded before redaction and keep secrets near the cut redacted', () => {
   const beforeSecret = 'a-'.repeat((DIAGNOSTIC_ENTRY_MAX_LENGTH - 200) / 2)
   const text = `${beforeSecret} token=secret-value ${'b-'.repeat(1500000)}`
-  const start = performance.now()
+  const start = threadCpuMilliseconds()
   const message = formatDiagnosticMessage(['Response body', text])
-  const elapsed = performance.now() - start
+  const elapsed = threadCpuMilliseconds() - start
 
-  assert.ok(elapsed < 1000, `formatting took ${Math.round(elapsed)} ms`)
+  assert.ok(elapsed < 1000, `formatting took ${Math.round(elapsed)} ms of CPU time`)
   assert.ok(message.includes(' token=<redacted> '))
   assert.ok(!message.includes('secret-value'))
   assert.ok(message.length < DIAGNOSTIC_ENTRY_MAX_LENGTH + 50, `${message.length} characters`)
   assert.match(message, /… \(\d+ more characters\)$/)
 
-  const closersStart = performance.now()
+  const closersStart = threadCpuMilliseconds()
   assert.equal(redactDiagnosticText(`https://example.com/a?b=c${')'.repeat(8000)}`), `https://example.com/a?<redacted>${')'.repeat(8000)}`)
-  assert.ok(performance.now() - closersStart < 100, 'trimming closing brackets is linear')
+  const closersElapsed = threadCpuMilliseconds() - closersStart
+  assert.ok(closersElapsed < 100, `trimming closing brackets is linear, but took ${Math.round(closersElapsed)} ms of CPU time`)
 })

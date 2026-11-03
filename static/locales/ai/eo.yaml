@@ -1171,9 +1171,13 @@ Settings:
       Stop Autoplay at Bedtime and After the Daily Limit: Haltigi aŭtomatan ludadon dum dormotempo kaj post la ĉiutaga limo
     AI Video Summaries: AI-resumoj de videaĵoj
     Hide: Kaŝi
-    Collapsed: Faldita
-    Expanded: Malfaldita
+    Collapsed: Falditaj
+    Expanded: Malfalditaj
     Video Descriptions: Priskriboj de videaĵoj
+    Video Description Modes:
+      Hide: Kaŝi
+      Collapsed: Falditaj
+      Expanded: Malfalditaj
     Playing Interface Hide Delay: Prokrasto de kaŝo de la interfaco dum ludado
     Hide Startup Splash: Kaŝi startan ekranon
     Hide Header Sync Indicator: Kaŝi sinkronigan indikilon en la kapo

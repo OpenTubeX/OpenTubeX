@@ -1437,6 +1437,10 @@ Settings:
     Collapsed: Eingeklappt
     Expanded: Ausgeklappt
     Video Descriptions: Videobeschreibungen
+    Video Description Modes:
+      Hide: Ausblenden
+      Collapsed: Eingeklappt
+      Expanded: Ausgeklappt
     Playing Interface Hide Delay: Verzögerung zum Ausblenden der Oberfläche bei Wiedergabe
     Hide Startup Splash: Startbildschirm ausblenden
     Hide Header Sync Indicator: Synchronisierungsanzeige in der App-Kopfzeile ausblenden

@@ -10,6 +10,7 @@ import { createIdQuery } from '../idQuery'
 import { MAX_SUBSCRIPTION_SEEN_VIDEOS, mergeSubscriptionSeenVideos, parseSubscriptionSeenVideos, nextSubscriptionSeenTimestamp } from '../../subscriptionSeenVideos'
 import { preserveSubscriptionSeenEntries, subscriptionFeedField } from '../../subscriptionFeedState'
 import { mergeSubscriptionSeenPosts, parseSubscriptionSeenPosts } from '../../subscriptionSeenPosts'
+import { createRssFeedSeenMarks, mergeRssFeedSeenItems, parseRssFeedSeenItems } from '../../renderer/helpers/rssFeedSeenItems'
 import { mergeBackupWatchStatsAdjustment, mergeBackupWatchStatsRecord, validateBackupWatchStats } from '../../renderer/helpers/unifiedBackup'
 import { DEFAULT_PROFILE_ICON } from '../../renderer/helpers/profileIcons'
 import { copySubscriptionChannelSettings, getChannelWithUpdatedSettings } from '../../renderer/helpers/subscription-channels'
@@ -44,6 +45,23 @@ class Settings {
         : update
       const value = JSON.stringify(mergeSubscriptionSeenPosts(local, incoming))
       if (value !== saved?.value) await this.upsert('subscriptionSeenPosts', value)
+      return value
+    })
+  }
+
+  /**
+   * @param {{ keys: string[], seen: boolean } | unknown} update items marked
+   * now, or marks to merge, such as synced ones
+   */
+  static mergeSeenRssItems(update) {
+    return this.runSeenStateUpdate(async () => {
+      const saved = await db.settings.findOneAsync({ _id: 'rssFeedSeenItems' })
+      const local = parseRssFeedSeenItems(saved?.value)
+      const incoming = Array.isArray(update?.keys)
+        ? createRssFeedSeenMarks(local, update.keys, update.seen === true)
+        : update
+      const value = JSON.stringify(mergeRssFeedSeenItems(local, incoming))
+      if (value !== saved?.value) await this.upsert('rssFeedSeenItems', value)
       return value
     })
   }

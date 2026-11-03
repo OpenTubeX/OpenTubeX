@@ -1140,6 +1140,10 @@ Settings:
     Collapsed: Sammenfoldet
     Expanded: Utvidet
     Video Descriptions: Videobeskrivelser
+    Video Description Modes:
+      Hide: Skjul
+      Collapsed: Sammenfoldet
+      Expanded: Utvidet
     Playing Interface Hide Delay: Forsinkelse før grensesnittet skjules under avspilling
     Hide Startup Splash: Skjul oppstartsskjerm
     Hide Header Sync Indicator: Skjul synkroniseringsindikatoren i apphodet

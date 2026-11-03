@@ -1195,9 +1195,13 @@ Settings:
       Stop Autoplay at Bedtime and After the Daily Limit: سونے کے وقت اور روزانہ حد کے بعد آٹو پلے روکیں
     AI Video Summaries: AI ویڈیو خلاصے
     Hide: چھپائیں
-    Collapsed: سمٹا ہوا
-    Expanded: پھیلا ہوا
+    Collapsed: سمٹے ہوئے
+    Expanded: پھیلے ہوئے
     Video Descriptions: ویڈیو کی تفصیل
+    Video Description Modes:
+      Hide: چھپائیں
+      Collapsed: سمٹی ہوئی
+      Expanded: پھیلی ہوئی
     Playing Interface Hide Delay: چلتے وقت انٹرفیس چھپنے میں تاخیر
     Hide Startup Splash: آغاز کی اسپلیش اسکرین چھپائیں
     Hide Header Sync Indicator: ہیڈر کا سنک اشارہ چھپائیں

@@ -27,6 +27,8 @@ const multiFileRecord = {
 await writeFile(join(userData, 'downloads.json'), JSON.stringify([...oldCompletedRecords, ...failedRecords, multiFileRecord]))
 
 const broadcasts = []
+// Each test checks only the broadcasts its own changes send.
+test.beforeEach(() => { broadcasts.length = 0 })
 const [downloads] = await importWithStubs([sourceUrl('src/main/ytDlpDownloads.js')], {
   electron: {
     app: { getPath: () => userData },

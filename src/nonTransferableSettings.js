@@ -90,6 +90,7 @@ export const NON_TRANSFERABLE_SETTINGS = new Set([
   'syncServerActivityClearedThrough',
   'subscriptionSeenVideos',
   'subscriptionSeenPosts',
+  'rssFeedSeenItems',
 
   /* Depends on process.env.SUPPORTS_LOCAL_API */
   'backendFallback',

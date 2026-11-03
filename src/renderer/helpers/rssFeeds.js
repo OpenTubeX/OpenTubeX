@@ -1,4 +1,4 @@
-import { shallowRef } from 'vue'
+import { computed, shallowRef } from 'vue'
 
 import store from '../store/index'
 import i18n from '../i18n/index'
@@ -7,12 +7,8 @@ import { shouldShowProgressStartToast } from './progressPresentation'
 import { showToastOnAllTabs } from './utils'
 import { appFetch } from './rssHub'
 import { supportsYtDlp } from './ytDlpCapabilities'
-import {
-  RSS_FEED_SEEN_ITEMS_STORAGE_KEY,
-  loadRssFeedSeenMarks,
-  onRssFeedSeenItemsSynced,
-  recordRssFeedSeenItems
-} from './rssFeedSeenItems'
+import { isRssFeedItemSeen, onRssFeedSeenItemsSynced, parseRssFeedSeenItems, toRssFeedSeenMarks } from './rssFeedSeenItems'
+import { unmarkExternalMediaWatchedBefore } from './externalMediaPosition'
 import { resolveYtDlpCreatorAvatarUrl } from '../../main/ytDlpCreatorAvatar'
 
 const FETCH_TIMEOUT_MS = 15_000
@@ -297,7 +293,15 @@ export async function fetchRssFeed(url, signal) {
 
 const ITEMS_STORAGE_KEY = 'rssFeedItems'
 const NEXT_AUTO_REFRESH_STORAGE_KEY = 'rssFeedsNextAutoRefresh'
-const LOADED_FEEDS_STORAGE_KEY = 'rssFeedsLoaded'
+const SEEN_HISTORY_STORAGE_KEY = 'rssFeedSeenHistory'
+const MAX_SEEN_HISTORY_PER_FEED = 500
+
+/**
+ * @returns {Map<string, boolean>} whether each marked item is seen
+ */
+function loadRssFeedSeenMarks() {
+  return toRssFeedSeenMarks(store.getters.getRssFeedSeenItems)
+}
 
 /**
  * The last loaded items, so that they show right away after a restart and
@@ -343,29 +347,49 @@ function setRssFeedItems(items) {
 }
 
 /**
- * Feeds that loaded before, so that items of a feed that was empty, such as
- * a live stream feed, still become new.
- * @returns {Set<string>}
+ * The IDs of the items that weren't new in each feed that loaded before,
+ * newest first. Unlike the cached items, they outlast items that leave their
+ * feed, so that the items keep their state when they come back. A feed that
+ * loaded empty, such as a live stream feed, has no IDs, so that its first item
+ * still becomes new.
+ * @returns {Map<string, string[]>}
  */
-function loadLoadedFeedUrls() {
+function loadSeenHistory() {
   try {
-    const urls = JSON.parse(localStorage.getItem(LOADED_FEEDS_STORAGE_KEY) ?? '[]')
-    return new Set(Array.isArray(urls) ? urls : [])
+    const history = JSON.parse(localStorage.getItem(SEEN_HISTORY_STORAGE_KEY) ?? '{}')
+    if (history === null || typeof history !== 'object' || Array.isArray(history)) return new Map()
+    return new Map(Object.entries(history).filter(([, ids]) => Array.isArray(ids)))
   } catch {
-    return new Set()
+    return new Map()
   }
 }
 
 /**
- * @param {Set<string>} urls
+ * @param {Map<string, string[]>} history
  */
-function setLoadedFeedUrls(urls) {
-  loadedFeedUrls = urls
+function setSeenHistory(history) {
+  seenHistory = history
   try {
-    localStorage.setItem(LOADED_FEEDS_STORAGE_KEY, JSON.stringify([...urls]))
+    localStorage.setItem(SEEN_HISTORY_STORAGE_KEY, JSON.stringify(Object.fromEntries(history)))
   } catch (error) {
-    console.error('Failed to save the loaded RSS feeds', error)
+    console.error('Failed to save the seen RSS feed history', error)
   }
+}
+
+/**
+ * @param {Map<string, string[]>} history updated in place
+ * @param {string} feedUrl
+ * @param {RssFeedItem[]} items the freshly loaded items of the feed
+ * @param {RssFeedItem[]} previousItems the items of the feed it replaces
+ */
+function recordSeenHistory(history, feedUrl, items, previousItems) {
+  // Items seen since the last refresh may have left the feed already
+  const seenIds = new Set([...items, ...previousItems].filter(item => item.isNew !== true).map(item => item.id))
+  const ids = new Set(items.map(item => item.id))
+  history.set(feedUrl, [
+    ...seenIds,
+    ...(history.get(feedUrl) ?? []).filter(id => !seenIds.has(id) && !ids.has(id))
+  ].slice(0, MAX_SEEN_HISTORY_PER_FEED))
 }
 
 /** @returns {number | null} */
@@ -411,24 +435,59 @@ export const rssFeedErrors = shallowRef(/** @type {string[]} */ ([]))
 /** Whether the user closed the banner for the current failed feeds */
 export const rssFeedErrorsDismissed = shallowRef(false)
 export const rssFeedsLastRefresh = shallowRef(/** @type {number | null} */ (null))
-export const rssFeedsRefreshing = shallowRef(false)
+const refreshingHere = shallowRef(false)
+/** The locks that other windows hold while they refresh the feeds */
+const otherWindowRefreshes = shallowRef(/** @type {Set<string>} */ (new Set()))
+/** Whether this or another window refreshes the feeds */
+export const rssFeedsRefreshing = computed(() => refreshingHere.value || otherWindowRefreshes.value.size > 0)
 export const rssFeedsNextAutoRefresh = shallowRef(loadRssFeedsNextAutoRefresh())
 /** The feeds that the cached items belong to */
 let refreshedFeedUrls = new Set()
-let loadedFeedUrls = loadLoadedFeedUrls()
+let seenHistory = loadSeenHistory()
 let activeRefresh = null
+/** Names this window's running refresh to the others */
+let activeRefreshLockName = null
 /** Feeds that were added or retried on their own during the active refresh, with their items cached */
 let loadedDuringRefresh = new Set()
+
+const REFRESH_LOCK_PREFIX = 'opentubex-rss-feeds-refresh:'
+/** @type {BroadcastChannel | null} */
+let refreshChannel = null
+
+/**
+ * @param {string} lockName held by another window until its refresh ends
+ */
+function trackOtherWindowRefresh(lockName) {
+  if (otherWindowRefreshes.value.has(lockName)) return
+  otherWindowRefreshes.value = new Set([...otherWindowRefreshes.value, lockName])
+  // Granted once the refresh ends, also when its window closes or crashes
+  navigator.locks.request(lockName, () => {
+    otherWindowRefreshes.value = new Set([...otherWindowRefreshes.value].filter(name => name !== lockName))
+  })
+}
 
 if (typeof window !== 'undefined') {
   // Other windows refresh the feeds and mark their items as seen too
   window.addEventListener('storage', (event) => {
-    if (event.key === null || event.key === ITEMS_STORAGE_KEY || event.key === RSS_FEED_SEEN_ITEMS_STORAGE_KEY) {
-      rssFeedItems.value = loadStoredItems()
-    }
-    if (event.key === null || event.key === LOADED_FEEDS_STORAGE_KEY) loadedFeedUrls = loadLoadedFeedUrls()
+    if (event.key === null || event.key === ITEMS_STORAGE_KEY) rssFeedItems.value = loadStoredItems()
+    if (event.key === null || event.key === SEEN_HISTORY_STORAGE_KEY) seenHistory = loadSeenHistory()
     if (event.key === null || event.key === NEXT_AUTO_REFRESH_STORAGE_KEY) rssFeedsNextAutoRefresh.value = loadRssFeedsNextAutoRefresh()
   })
+
+  // Every window shows the refreshes of the others and can cancel them
+  if (navigator.locks && typeof BroadcastChannel !== 'undefined') {
+    refreshChannel = new BroadcastChannel('opentubex-rss-feeds-refresh')
+    refreshChannel.addEventListener('message', ({ data }) => {
+      if (data?.type === 'started' && typeof data.lockName === 'string') trackOtherWindowRefresh(data.lockName)
+      // Only the refreshes the other window saw, not one that started since
+      if (data?.type === 'cancel' && data.lockNames?.includes(activeRefreshLockName)) activeRefresh?.abort()
+    })
+    navigator.locks.query().then(({ held }) => {
+      for (const { name } of held ?? []) {
+        if (name?.startsWith(REFRESH_LOCK_PREFIX)) trackOtherWindowRefresh(name)
+      }
+    })
+  }
 }
 
 /**
@@ -447,13 +506,17 @@ export function getRssFeedItemKey(item) {
  */
 function reconcileNewItems(feedUrl, items, previousItems) {
   // Items can be marked on another device before they load here
-  const marks = loadRssFeedSeenMarks()
-  if (!loadedFeedUrls.has(feedUrl) && previousItems.length === 0) return applySeenMarks(items, marks)
+  const entries = parseRssFeedSeenItems(store.getters.getRssFeedSeenItems)
+  unwatchItemsMarkedUnseen(items, entries)
+  const marks = toRssFeedSeenMarks(entries)
+  const seenIds = seenHistory.get(feedUrl)
+  if (seenIds === undefined && previousItems.length === 0) return applySeenMarks(items, marks)
   const previousById = new Map(previousItems.map(item => [item.id, item]))
+  const seenBefore = new Set(seenIds)
   return items.map((item) => {
     const previous = previousById.get(item.id)
     const seen = marks.get(getRssFeedItemKey(item))
-    return (seen === undefined ? (previous ? previous.isNew === true : true) : !seen)
+    return (seen === undefined ? (previous ? previous.isNew === true : !seenBefore.has(item.id)) : !seen)
       ? { ...item, isNew: true }
       : item
   })
@@ -483,27 +546,48 @@ function setRssFeedItemsSeen(items, seen) {
     .filter(item => (item.isNew === true) === seen && keys.has(getRssFeedItemKey(item)))
     .map(getRssFeedItemKey)
   if (changedKeys.length === 0) return
-  recordRssFeedSeenItems(changedKeys, seen)
+  store.dispatch('mergeRssFeedSeenItems', { keys: changedKeys, seen }).catch((error) => {
+    console.error('Failed to save the seen RSS feed items', error)
+  })
   setRssFeedItems(applySeenMarks(rssFeedItems.value, new Map(changedKeys.map(key => [key, seen]))))
-  store.dispatch('scheduleSyncServer', 'history')
 }
 
-onRssFeedSeenItemsSynced((marks) => {
-  const items = applySeenMarks(rssFeedItems.value, marks)
+// Marks also change in other windows and with syncs
+store.watch((_, getters) => getters.getRssFeedSeenItems, () => {
+  const items = applySeenMarks(rssFeedItems.value, loadRssFeedSeenMarks())
   if (items !== rssFeedItems.value) setRssFeedItems(items)
 })
 
 /**
- * Removed feeds are filtered out of the cached items, added ones need a refresh.
- * Before the first refresh in a window, the items cached by earlier sessions
- * cover the feeds that loaded before, unless feeds are fetched on startup.
- * @param {RssFeed[]} feeds
+ * Devices can watch an item and mark it as unseen without knowing about each
+ * other. The later change wins, so an unseen mark after the item was last
+ * saved as watched unmarks it as watched, and brings it back to the New feed.
+ * Items that are out of their feed when a mark syncs catch up when they load.
+ * @param {RssFeedItem[]} items
+ * @param {import('./rssFeedSeenItems').RssFeedSeenItem[]} entries
  */
-export function rssFeedCacheCovers(feeds) {
-  const coveredUrls = rssFeedsLastRefresh.value !== null
-    ? refreshedFeedUrls
-    : store.getters.getFetchSubscriptionsAutomatically ? new Set() : loadedFeedUrls
-  return feeds.every(feed => coveredUrls.has(feed.url))
+function unwatchItemsMarkedUnseen(items, entries) {
+  const unseenAt = new Map(entries.filter(entry => !isRssFeedItemSeen(entry)).map(entry => [entry.key, entry.unseenAt ?? 0]))
+  if (unseenAt.size === 0) return
+  for (const item of items) {
+    const timestamp = unseenAt.get(getRssFeedItemKey(item))
+    if (timestamp !== undefined) unmarkExternalMediaWatchedBefore(item.url, timestamp)
+  }
+}
+
+onRssFeedSeenItemsSynced(entries => unwatchItemsMarkedUnseen(rssFeedItems.value, entries))
+
+/**
+ * The feeds whose cached items don't need a refresh. Removed feeds are filtered
+ * out of the cached items, added ones need a refresh. Before the first refresh
+ * in a window, the items cached by earlier sessions cover the feeds that loaded
+ * before (those with a seen history), unless feeds are fetched on startup.
+ * @returns {Set<string>}
+ */
+export function getCachedRssFeedUrls() {
+  if (rssFeedsLastRefresh.value !== null) return new Set(refreshedFeedUrls)
+  if (store.getters.getFetchSubscriptionsAutomatically) return new Set()
+  return new Set([...seenHistory.keys(), ...refreshedFeedUrls])
 }
 
 /**
@@ -552,11 +636,11 @@ export async function updateMissingRssFeedAvatars(results) {
  */
 export function addLoadedRssFeed(feed, result) {
   const previousItems = rssFeedItems.value.filter(item => item.feedUrl === feed.url)
-  setRssFeedItems([
-    ...rssFeedItems.value.filter(item => item.feedUrl !== feed.url),
-    ...reconcileNewItems(feed.url, result.items, previousItems)
-  ].sort(compareFeedItems))
-  setLoadedFeedUrls(new Set([...loadedFeedUrls, feed.url]))
+  const items = reconcileNewItems(feed.url, result.items, previousItems)
+  setRssFeedItems([...rssFeedItems.value.filter(item => item.feedUrl !== feed.url), ...items].sort(compareFeedItems))
+  const history = new Map(seenHistory)
+  recordSeenHistory(history, feed.url, items, previousItems)
+  setSeenHistory(history)
   refreshedFeedUrls.add(feed.url)
   loadedDuringRefresh.add(feed.url)
   setRssFeedErrors(rssFeedErrors.value.filter(url => url !== feed.url))
@@ -587,14 +671,27 @@ const AUTO_REFRESH_TOAST_DURATION = 5000
 
 /**
  * @param {RssFeed[]} feeds
- * @param {{ automatic?: boolean }} [options]
+ * @param {{ automatic?: boolean, cachedUrls?: Set<string> }} [options] `cachedUrls`
+ * are feeds that keep their cached items instead of loading, such as the
+ * feeds that loaded in an earlier session. The refresh then only loads the
+ * others, and doesn't count as a refresh of all feeds.
  */
-export async function refreshRssFeeds(feeds, { automatic = false } = {}) {
+export async function refreshRssFeeds(feeds, { automatic = false, cachedUrls = new Set() } = {}) {
   activeRefresh?.abort()
   const controller = new AbortController()
   activeRefresh = controller
   loadedDuringRefresh = new Set()
-  rssFeedsRefreshing.value = true
+  refreshingHere.value = true
+  let finish
+  const finished = new Promise(resolve => { finish = resolve })
+  if (refreshChannel) {
+    const lockName = REFRESH_LOCK_PREFIX + crypto.randomUUID()
+    activeRefreshLockName = lockName
+    navigator.locks.request(lockName, () => {
+      refreshChannel.postMessage({ type: 'started', lockName })
+      return finished
+    })
+  }
   // Shown as a notification or in the progress bar, like subscription refreshes
   const message = i18n.global.t('Subscriptions.RSS Feeds.Refreshing')
   const progress = startProgressBarOperation(store, { icon: ['fas', 'rss'], message, percentage: 0 })
@@ -603,47 +700,64 @@ export async function refreshRssFeeds(feeds, { automatic = false } = {}) {
   }
 
   try {
+    const cachedFeedUrls = new Set(feeds.filter(feed => cachedUrls.has(feed.url)).map(feed => feed.url))
+    const fetchedFeeds = feeds.filter(feed => !cachedFeedUrls.has(feed.url))
     let settledCount = 0
-    const results = await Promise.allSettled(feeds.map(feed => fetchRssFeed(feed.url, controller.signal).finally(() => {
-      if (!controller.signal.aborted) progress.update({ percentage: (++settledCount / feeds.length) * 100 })
+    const results = await Promise.allSettled(fetchedFeeds.map(feed => fetchRssFeed(feed.url, controller.signal).finally(() => {
+      if (!controller.signal.aborted) progress.update({ percentage: (++settledCount / fetchedFeeds.length) * 100 })
     })))
     if (controller.signal.aborted) return
 
     // Feeds added or retried while this refresh ran keep their own, newer result,
-    // and feeds that fail keep their previous items
+    // and cached feeds and feeds that fail keep their previous items
     const loadedUrls = loadedDuringRefresh
-    const failedUrls = new Set(feeds.filter((feed, index) => results[index].status === 'rejected' && !loadedUrls.has(feed.url))
+    const failedUrls = new Set(fetchedFeeds.filter((feed, index) => results[index].status === 'rejected' && !loadedUrls.has(feed.url))
       .map(feed => feed.url))
     const previousItems = rssFeedItems.value
+    /** @type {Map<string, RssFeedItem[]>} */
+    const refreshedItems = new Map(results.flatMap((result, index) => (
+      result.status === 'fulfilled' && !loadedUrls.has(fetchedFeeds[index].url)
+        ? [[fetchedFeeds[index].url, reconcileNewItems(fetchedFeeds[index].url, result.value.items, previousItems.filter(item => item.feedUrl === fetchedFeeds[index].url))]]
+        : []
+    )))
     setRssFeedItems([
-      ...rssFeedItems.value.filter(item => loadedUrls.has(item.feedUrl) || failedUrls.has(item.feedUrl)),
-      ...results.flatMap((result, index) => (
-        result.status === 'fulfilled' && !loadedUrls.has(feeds[index].url)
-          ? reconcileNewItems(feeds[index].url, result.value.items, previousItems.filter(item => item.feedUrl === feeds[index].url))
-          : []
-      ))
+      ...rssFeedItems.value.filter(item => cachedFeedUrls.has(item.feedUrl) || loadedUrls.has(item.feedUrl) || failedUrls.has(item.feedUrl)),
+      ...[...refreshedItems.values()].flat()
     ].sort(compareFeedItems))
-    setRssFeedErrors([...failedUrls])
-    rssFeedsLastRefresh.value = Date.now()
-    const interval = getRssFeedsAutoRefreshInterval()
-    setRssFeedsNextAutoRefresh(interval > 0 ? Date.now() + interval : null)
+    setRssFeedErrors([...rssFeedErrors.value.filter(url => cachedFeedUrls.has(url)), ...failedUrls])
+    if (cachedFeedUrls.size === 0) {
+      rssFeedsLastRefresh.value = Date.now()
+      const interval = getRssFeedsAutoRefreshInterval()
+      setRssFeedsNextAutoRefresh(interval > 0 ? Date.now() + interval : null)
+    }
     refreshedFeedUrls = new Set([...feeds.map(feed => feed.url), ...loadedUrls])
     // Removed feeds start over when they are added again
-    setLoadedFeedUrls(new Set([
-      ...feeds.map(feed => feed.url).filter((url, index) => results[index].status === 'fulfilled' || loadedFeedUrls.has(url)),
-      ...loadedUrls
-    ]))
-    updateMissingRssFeedAvatars(feeds.flatMap((feed, index) => {
+    const feedUrls = new Set(feeds.map(feed => feed.url))
+    const history = new Map([...seenHistory].filter(([url]) => feedUrls.has(url) || loadedUrls.has(url)))
+    for (const [url, items] of refreshedItems) recordSeenHistory(history, url, items, previousItems.filter(item => item.feedUrl === url))
+    setSeenHistory(history)
+    updateMissingRssFeedAvatars(fetchedFeeds.flatMap((feed, index) => {
       const result = results[index]
       return result.status === 'fulfilled' ? [[feed, result.value]] : []
     }))
   } finally {
+    finish()
     progress.finish()
     if (activeRefresh === controller) {
       activeRefresh = null
-      rssFeedsRefreshing.value = false
+      activeRefreshLockName = null
+      refreshingHere.value = false
     }
   }
+}
+
+/**
+ * Stops the running refreshes of every window. Their feeds keep their previous
+ * items and errors.
+ */
+export function cancelRssFeedsRefresh() {
+  activeRefresh?.abort()
+  refreshChannel?.postMessage({ type: 'cancel', lockNames: [...otherWindowRefreshes.value] })
 }
 
 export function openRssFeedManager() {

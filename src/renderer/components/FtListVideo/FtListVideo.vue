@@ -67,7 +67,6 @@
         @dragstart="onDragStart"
       >
         <RouterLink
-          ref="thumbnailLink"
           class="thumbnailLink"
           tabindex="-1"
           :to="watchVideoRouterLink"
@@ -139,22 +138,24 @@
           />
           {{ displayDurationLabel === '0:00' ? '' : displayDurationLabel }}
         </div>
-        <!-- Only forwards pointer clicks to the thumbnail link, which keyboards skip too. -->
-        <!-- Unlike on the link, a middle mousedown here would start autoscroll and suppress auxclick. -->
-        <!-- eslint-disable-next-line vuejs-accessibility/click-events-have-key-events -->
-        <div
+        <!-- Watch playlist and queue thumbnails only fit the icon, so it opens the -->
+        <!-- category in a prompt for touch and keyboard users. -->
+        <!-- Watch page shortcuts must not take Space and Enter from it. A middle -->
+        <!-- mousedown would start autoscroll, which swallows the next key press. -->
+        <component
+          :is="sponsorBlockLabelOpensPrompt ? 'button' : 'div'"
           v-if="useSponsorBlock && sponsorBlockFullVideoCategory"
           class="sponsorBlockVideoLabel"
-          :title="t('Video.Player.SponsorBlock.FullVideoLabel', {
-            segmentCategory: sponsorBlockFullVideoLabel
-          })"
-          @click="forwardSponsorBlockLabelClick"
+          :type="sponsorBlockLabelOpensPrompt ? 'button' : null"
+          :aria-haspopup="sponsorBlockLabelOpensPrompt ? 'dialog' : null"
+          :title="sponsorBlockFullVideoTitle"
+          @click="sponsorBlockLabelOpensPrompt && (sponsorBlockPromptOpen = true)"
+          @keydown.space.enter.stop
           @mousedown.middle.prevent
-          @auxclick.middle="forwardSponsorBlockLabelClick"
         >
           <FtIcon :icon="sponsorBlockFullVideoIcon" />
           <span>{{ sponsorBlockFullVideoLabel }}</span>
-        </div>
+        </component>
         <FtIconButton
           v-if="externalPlayer !== '' && !externalPlayerIsDefaultViewingMode"
           :title="t('Video.External Player.OpenInTemplate', { externalPlayer })"
@@ -498,6 +499,16 @@
       :video-data="addToPlaylistVideoData"
       force-sheet
       @closed="mobilePlaylistPickerOpen = false"
+    />
+    <FtPrompt
+      v-if="sponsorBlockPromptOpen"
+      autosize
+      theme="slim"
+      :label="sponsorBlockFullVideoTitle"
+      :option-names="[t('Close')]"
+      :option-values="[null]"
+      :option-icons="[['fas', 'xmark']]"
+      @click="sponsorBlockPromptOpen = false"
     />
     <FtPrompt
       v-if="pendingSwipeRemoval"
@@ -999,6 +1010,13 @@ const sponsorBlockFullVideoLabel = computed(() => {
       return t('Video.Sponsor Block category.sponsor')
   }
 })
+
+const sponsorBlockFullVideoTitle = computed(() => t('Video.Player.SponsorBlock.FullVideoLabel', {
+  segmentCategory: sponsorBlockFullVideoLabel.value
+}))
+
+const sponsorBlockLabelOpensPrompt = computed(() => props.appearance === 'watchPlaylistItem')
+const sponsorBlockPromptOpen = ref(false)
 
 const extraThumbnailAction = computed(() => store.getters.getExtraThumbnailAction)
 
@@ -1630,16 +1648,6 @@ onBeforeUnmount(() => {
 const showVideoMenuButton = computed(() => store.getters.getShowVideoMenuButton)
 
 const videoMenuButton = useTemplateRef('videoMenuButton')
-const thumbnailLink = useTemplateRef('thumbnailLink')
-
-/**
- * Narrow cards show only the SponsorBlock icon, which catches the pointer for its
- * tooltip, so clicks and middle-clicks on it still open the video.
- * @param {MouseEvent} event
- */
-function forwardSponsorBlockLabelClick(event) {
-  thumbnailLink.value?.$el.dispatchEvent(new MouseEvent(event.type, event))
-}
 
 function openVideoOptionsMenu() {
   cancelMenuHold()
@@ -2693,6 +2701,7 @@ onBeforeUnmount(() => {
 
 watch([useSponsorBlock, id], ([enabled, videoId]) => {
   sponsorBlockFullVideoCategory.value = null
+  sponsorBlockPromptOpen.value = false
   if (enabled && videoId) {
     fetchSponsorBlockVideoLabel(videoId)
   }

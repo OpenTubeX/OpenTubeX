@@ -1140,6 +1140,10 @@ Settings:
     Collapsed: Daraltılmış
     Expanded: Genişletilmiş
     Video Descriptions: Video açıklamaları
+    Video Description Modes:
+      Hide: Gizle
+      Collapsed: Daraltılmış
+      Expanded: Genişletilmiş
     Playing Interface Hide Delay: Oynatma sırasında arayüzü gizleme gecikmesi
     Hide Startup Splash: Başlangıç Ekranını Gizle
     Hide Header Sync Indicator: Uygulama başlığındaki eşitleme göstergesini gizle

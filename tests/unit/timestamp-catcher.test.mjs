@@ -4,6 +4,7 @@ import test from 'node:test'
 import vm from 'node:vm'
 import { computed } from 'vue'
 import { babelParse, parse } from 'vue/compiler-sfc'
+import { threadCpuMilliseconds } from '../helpers/cpu-time.mjs'
 
 const source = await readFile(new URL('../../src/renderer/components/FtTimestampCatcher.vue', import.meta.url), 'utf8')
 const script = parse(source).descriptor.scriptSetup.content
@@ -36,7 +37,8 @@ test('links minute and hour timestamps', () => {
 
 test('scans long digit runs from remote text in linear time', () => {
   const digits = '1'.repeat(100_000)
-  const started = performance.now()
+  const started = threadCpuMilliseconds()
   assert.equal(displayText(`${digits} ${digits}:`), `${digits} ${digits}:`)
-  assert.ok(performance.now() - started < 1000)
+  const elapsed = threadCpuMilliseconds() - started
+  assert.ok(elapsed < 1000, `scanning took ${Math.round(elapsed)} ms of CPU time`)
 })

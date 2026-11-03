@@ -36,6 +36,7 @@ import { normalizeHiddenPlayerMenuControls, normalizePlayerMenuControls, without
 import { createOptimisticSettingUpdater, createSettingUpdateQueue } from '../../helpers/settingUpdateQueue.js'
 import { mergeSubscriptionSeenVideos } from '../../../subscriptionSeenVideos.js'
 import { mergeSubscriptionSeenPosts } from '../../../subscriptionSeenPosts.js'
+import { mergeRssFeedSeenItems } from '../../helpers/rssFeedSeenItems.js'
 import { filterAvailableNavigationItems } from '../../../navigationAvailability.js'
 import { navigationItemsFromLegacySettings, normalizeNavigationItems } from '../../../navigationItems.js'
 import { migrateStoredAiVideoSummarySetting, migrateSyncServerUrl } from '../../helpers/settings-migrations.js'
@@ -682,6 +683,15 @@ const customActions = {
   applySubscriptionSeenPosts({ commit, state }, saved) {
     const value = JSON.stringify(mergeSubscriptionSeenPosts(state.subscriptionSeenPosts, saved))
     if (value !== state.subscriptionSeenPosts) commit('setSubscriptionSeenPosts', value)
+  },
+  async mergeRssFeedSeenItems({ dispatch }, update) {
+    const saved = await DBSettingHandlers.mergeSeenRssItems(update)
+    await dispatch('applyRssFeedSeenItems', saved)
+  },
+  applyRssFeedSeenItems({ commit, state }, saved) {
+    // Another window's newer update may arrive before this request's reply.
+    const value = JSON.stringify(mergeRssFeedSeenItems(state.rssFeedSeenItems, saved))
+    if (value !== state.rssFeedSeenItems) commit('setRssFeedSeenItems', value)
   },
   applySubscriptionSeenVideos({ commit, state, rootGetters }, saved) {
     // Another window's newer update may arrive before this request's reply.

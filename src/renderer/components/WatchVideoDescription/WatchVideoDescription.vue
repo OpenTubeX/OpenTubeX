@@ -432,6 +432,28 @@ function updateDescriptionLayout() {
 }
 
 let descriptionResizeObserver = null
+let cardInlineSize = 0
+let remeasureFrame = 0
+
+/**
+ * A narrower or wider card rewraps the text, which can cross the four-line threshold.
+ * Only its inline size counts, so the card's own height changes cannot retrigger it.
+ * The next frame applies the result, outside of the ResizeObserver delivery.
+ * @param {ResizeObserverEntry[]} entries
+ */
+function onDescriptionResize(entries) {
+  const cardEntry = entries.find(entry => entry.target === descriptionCard.value?.$el)
+  const inlineSize = cardEntry?.contentBoxSize[0]?.inlineSize
+  if (inlineSize !== undefined && inlineSize !== cardInlineSize) {
+    cardInlineSize = inlineSize
+    cancelAnimationFrame(remeasureFrame)
+    remeasureFrame = requestAnimationFrame(() => {
+      hasMeasured = false
+      measureDescription()
+    })
+  }
+  updateDescriptionLayout()
+}
 
 function observeDescriptionElements() {
   descriptionResizeObserver?.disconnect()
@@ -447,13 +469,16 @@ function observeDescriptionElements() {
 onMounted(() => {
   measureDescription()
 
-  descriptionResizeObserver = new ResizeObserver(updateDescriptionLayout)
+  descriptionResizeObserver = new ResizeObserver(onDescriptionResize)
   observeDescriptionElements()
 
   nextTick(updateDescriptionLayout)
 })
 
-onBeforeUnmount(() => descriptionResizeObserver?.disconnect())
+onBeforeUnmount(() => {
+  descriptionResizeObserver?.disconnect()
+  cancelAnimationFrame(remeasureFrame)
+})
 
 watch(isExpanded, () => nextTick(updateDescriptionLayout))
 watch([shownDescription, () => props.tags, () => props.games, () => props.musicTracks, () => props.license, () => props.contentDisclosures], async () => {

@@ -33,6 +33,7 @@ import { fillYatteeShortDates } from '../helpers/api/yattee'
 import { formatRequestDiagnostic } from '../helpers/api/requestDiagnostics'
 import { reconcileFetchedSubscriptionEntries } from '../helpers/subscription-entries'
 import { parseSubscriptionRss } from '../helpers/api/feed-rss'
+import { cancelRssFeedsRefresh } from '../helpers/rssFeeds'
 import {
   enrichSubscriptionRssEntries,
   enrichSubscriptionShortDates,
@@ -1273,7 +1274,12 @@ export function useSubscriptionAutoRefresh({ dataReady, t }) {
   /** Lets the cancel action of the native refresh notification stop the refresh. */
   async function listenForNativeCancellation() {
     removeAndroidSubscriptionRefreshCancelledListener =
-      await addAndroidSubscriptionRefreshCancelledListener(cancelSubscriptionRefresh)
+      await addAndroidSubscriptionRefreshCancelledListener(() => {
+        cancelSubscriptionRefresh()
+        // Only YouTube refreshes show the notification, but the combined New
+        // feed refreshes RSS feeds alongside them.
+        cancelRssFeedsRefresh()
+      })
   }
 
   function stop() {

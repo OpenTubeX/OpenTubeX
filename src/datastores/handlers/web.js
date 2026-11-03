@@ -27,6 +27,10 @@ class Settings {
     return baseHandlers.settings.mergeSeenVideos(update)
   }
 
+  static mergeSeenRssItems(update) {
+    return baseHandlers.settings.mergeSeenRssItems(update)
+  }
+
   static find() {
     return baseHandlers.settings.find()
   }

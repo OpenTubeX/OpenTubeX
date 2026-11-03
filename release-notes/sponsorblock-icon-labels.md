@@ -2,7 +2,7 @@
 category: fix
 ---
 
-SponsorBlock labels on watch page playlist and queue thumbnails no longer cover the video length. They show only their icon and name the category when you hover it.
+SponsorBlock labels on watch page playlist and queue thumbnails no longer cover the video length. They show only their icon, which names the category when you hover over it and in a dialog when you click or tap it.
 
 <picture>
   <source media="(prefers-color-scheme: dark)" srcset="https://github.com/user-attachments/assets/cdb922eb-f683-4a2e-adc9-2526cdb8f188">

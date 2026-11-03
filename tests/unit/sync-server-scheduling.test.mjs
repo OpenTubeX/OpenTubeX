@@ -40,6 +40,8 @@ test('maps local actions to their affected sync collection', () => {
   assert.equal(SYNC_MUTATION_REASONS.get('setSubscriptionSeenVideos'), 'history')
   assert.equal(SYNC_ACTION_REASONS.get('mergeSubscriptionSeenPosts'), 'history')
   assert.equal(SYNC_MUTATION_REASONS.get('setSubscriptionSeenPosts'), 'history')
+  assert.equal(SYNC_ACTION_REASONS.get('mergeRssFeedSeenItems'), 'history')
+  assert.equal(SYNC_MUTATION_REASONS.get('setRssFeedSeenItems'), 'history')
   assert.equal(SYNC_ACTION_REASONS.get('addVideo'), 'playlists')
   assert.equal(SYNC_ACTION_REASONS.get('updatePlaylistSortOrder'), 'playlists')
   assert.equal(SYNC_ACTION_REASONS.has('updateChannelPlaybackSpeeds'), false)

@@ -2924,6 +2924,15 @@ function runApp() {
           return value
         }
 
+        case DBActions.SETTINGS.MERGE_SEEN_RSS_ITEMS: {
+          const value = await baseHandlers.settings.mergeSeenRssItems(data)
+          syncOtherWindows(IpcChannels.SYNC_SETTINGS, event, {
+            event: SyncEvents.GENERAL.UPSERT,
+            data: { _id: 'rssFeedSeenItems', value }
+          })
+          return value
+        }
+
         case DBActions.GENERAL.FIND:
           return await baseHandlers.settings.find()
 

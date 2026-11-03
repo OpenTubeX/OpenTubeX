@@ -1155,6 +1155,10 @@ Settings:
     Collapsed: Supistettu
     Expanded: Laajennettu
     Video Descriptions: Videoiden kuvaukset
+    Video Description Modes:
+      Hide: Piilota
+      Collapsed: Supistettu
+      Expanded: Laajennettu
     Playing Interface Hide Delay: Käyttöliittymän piilotusviive toiston aikana
     Hide Startup Splash: Piilota käynnistysruutu
     Hide Header Sync Indicator: Piilota sovelluksen otsakepalkin synkronoinnin ilmaisin

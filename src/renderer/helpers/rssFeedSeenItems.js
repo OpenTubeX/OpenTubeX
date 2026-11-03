@@ -2,11 +2,10 @@
 
 /**
  * Seen and unseen marks of RSS feed items, so that items marked on one device
- * are marked on the others too. They sync with history through the
- * `seenRssItems` collection.
+ * are marked on the others too. They are saved in the `rssFeedSeenItems`
+ * setting and sync with history through the `seenRssItems` collection.
  */
 
-export const RSS_FEED_SEEN_ITEMS_STORAGE_KEY = 'rssFeedSeenItems'
 export const MAX_RSS_FEED_SEEN_ITEMS = 10000
 
 /**
@@ -15,7 +14,7 @@ export const MAX_RSS_FEED_SEEN_ITEMS = 10000
  * `seenAt` and `unseenAt` decides whether the item is seen.
  */
 
-/** @type {Set<(marks: Map<string, boolean>) => void>} */
+/** @type {Set<(entries: RssFeedSeenItem[]) => void>} */
 const listeners = new Set()
 
 /**
@@ -91,61 +90,35 @@ export function mergeRssFeedSeenItems(local, remote) {
     .sort(byItemKey)
 }
 
-/** @returns {RssFeedSeenItem[]} */
-export function loadRssFeedSeenItems() {
-  try {
-    return parseRssFeedSeenItems(localStorage.getItem(RSS_FEED_SEEN_ITEMS_STORAGE_KEY))
-  } catch {
-    return []
-  }
-}
-
 /**
- * @param {RssFeedSeenItem[]} entries
- * @returns {Map<string, boolean>} whether each marked item is seen
- */
-function toMarks(entries) {
-  return new Map(entries.map(entry => [entry.key, isRssFeedItemSeen(entry)]))
-}
-
-/**
- * @returns {Map<string, boolean>} whether each marked item is seen
- */
-export function loadRssFeedSeenMarks() {
-  return toMarks(loadRssFeedSeenItems())
-}
-
-/**
- * @param {RssFeedSeenItem[]} entries
- */
-function saveRssFeedSeenItems(entries) {
-  try {
-    localStorage.setItem(RSS_FEED_SEEN_ITEMS_STORAGE_KEY, JSON.stringify(entries))
-  } catch (error) {
-    console.error('Failed to save the seen RSS feed items', error)
-  }
-}
-
-/**
- * @param {string[]} keys
+ * Marks for items marked now. They stay ahead of the saved marks, which can
+ * come from a device whose clock is ahead.
+ * @param {RssFeedSeenItem[]} saved
+ * @param {unknown} keys
  * @param {boolean} seen
  * @param {number} [timestamp]
+ * @returns {RssFeedSeenItem[]}
  */
-export function recordRssFeedSeenItems(keys, seen, timestamp = Date.now()) {
-  if (keys.length === 0) return
-  const saved = loadRssFeedSeenItems()
+export function createRssFeedSeenMarks(saved, keys, seen, timestamp = Date.now()) {
+  if (!Array.isArray(keys)) return []
   const latestByKey = new Map(saved.map(entry => [entry.key, latestMark(entry)]))
-  // Stay ahead of earlier marks, which can come from a device whose clock is ahead
-  const marks = keys.map((key) => {
+  return keys.filter(key => typeof key === 'string' && key.length > 0).map((key) => {
     const markedAt = Math.max(timestamp, (latestByKey.get(key) ?? 0) + 1)
     return seen ? { key, seenAt: markedAt } : { key, unseenAt: markedAt }
   })
-  saveRssFeedSeenItems(mergeRssFeedSeenItems(saved, marks))
 }
 
 /**
- * Called with the downloaded marks after a sync.
- * @param {(marks: Map<string, boolean>) => void} listener
+ * @param {unknown} value A JSON string or an array
+ * @returns {Map<string, boolean>} whether each marked item is seen
+ */
+export function toRssFeedSeenMarks(value) {
+  return new Map(parseRssFeedSeenItems(value).map(entry => [entry.key, isRssFeedItemSeen(entry)]))
+}
+
+/**
+ * Called with the merged marks after a sync.
+ * @param {(entries: RssFeedSeenItem[]) => void} listener
  */
 export function onRssFeedSeenItemsSynced(listener) {
   listeners.add(listener)
@@ -154,15 +127,14 @@ export function onRssFeedSeenItemsSynced(listener) {
 /**
  * Syncs the marks with the `seenRssItems` collection.
  * @param {{ getSeenRssItems: () => Promise<unknown>, putSeenRssItems: (entries: RssFeedSeenItem[]) => Promise<void> }} client
+ * @param {{ dispatch: (action: string, payload: unknown) => Promise<unknown>, state: { settings: { rssFeedSeenItems: string } } }} store
  * @returns {Promise<number>} the number of synced marks
  */
-export async function syncRssFeedSeenItems(client) {
+export async function syncRssFeedSeenItems(client, store) {
   const remote = await client.getSeenRssItems()
-  // Read after the download, so that marks recorded meanwhile are kept
-  const merged = mergeRssFeedSeenItems(loadRssFeedSeenItems(), remote)
-  saveRssFeedSeenItems(merged)
-  const marks = toMarks(merged)
-  for (const listener of listeners) listener(marks)
+  await store.dispatch('mergeRssFeedSeenItems', remote)
+  const merged = parseRssFeedSeenItems(store.state.settings.rssFeedSeenItems)
+  for (const listener of listeners) listener(merged)
   await client.putSeenRssItems(merged)
   return merged.length
 }

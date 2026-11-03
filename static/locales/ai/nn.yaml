@@ -1260,6 +1260,10 @@ Settings:
     Collapsed: Samanfalda
     Expanded: Utvida
     Video Descriptions: Videoskildringar
+    Video Description Modes:
+      Hide: Gøym
+      Collapsed: Samanfalda
+      Expanded: Utvida
     Playing Interface Hide Delay: Forseinking før grensesnittet vert skjult under avspeling
     Hide Startup Splash: Gøym oppstartsskjerm
     Hide Header Sync Indicator: Gøym synkroniseringsindikatoren i apphovudet

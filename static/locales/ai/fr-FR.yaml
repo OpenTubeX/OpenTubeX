@@ -1140,6 +1140,10 @@ Settings:
     Collapsed: Réduits
     Expanded: Développés
     Video Descriptions: Descriptions des vidéos
+    Video Description Modes:
+      Hide: Masquer
+      Collapsed: Réduites
+      Expanded: Développées
     Playing Interface Hide Delay: Délai de masquage de l’interface pendant la lecture
     Hide Startup Splash: Masquer l’écran de démarrage
     Hide Header Sync Indicator: Masquer l’indicateur de synchronisation dans l’en-tête de l’application

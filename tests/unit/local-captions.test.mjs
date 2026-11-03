@@ -2,6 +2,7 @@ import assert from 'node:assert/strict'
 import test from 'node:test'
 
 import { createLocalCaption, LOCAL_CAPTION_FILE_TYPES, normalizeLocalCaptionText } from '../../src/renderer/helpers/player/localCaptions.js'
+import { threadCpuMilliseconds } from '../helpers/cpu-time.mjs'
 
 const srt = '1\n00:00:01,000 --> 00:00:02,000\nÜbersetzung & mehr\n'
 
@@ -29,9 +30,10 @@ test('converts SRT timing and separators that Shaka cannot parse', () => {
 
 test('normalizes long digit runs in SRT timing lines in linear time', () => {
   const digits = '1'.repeat(100_000)
-  const started = performance.now()
+  const started = threadCpuMilliseconds()
   assert.equal(normalizeLocalCaptionText('movie.srt', `${digits} --> 00:00:02.000`), `${digits} --> 00:00:02,000`)
-  assert.ok(performance.now() - started < 1000)
+  const elapsed = threadCpuMilliseconds() - started
+  assert.ok(elapsed < 1000, `normalizing took ${Math.round(elapsed)} ms of CPU time`)
 })
 
 test('rejects files that are not SRT or WebVTT subtitles', () => {
