@@ -1789,8 +1789,9 @@ onMounted(async () => {
   let invidiousInstancesRefreshed = false
   watch(() => {
     const { backendPreference, backendFallback } = store.state.settings
-    return defaultInvidiousInstance.value === '' && (!process.env.SUPPORTS_LOCAL_API || backendPreference === 'invidious' ||
-      (backendPreference === 'local' && backendFallback))
+    // Yattee requests go to its own server, never to a random instance
+    return defaultInvidiousInstance.value === '' && backendPreference !== 'yattee' &&
+      (!process.env.SUPPORTS_LOCAL_API || backendPreference === 'invidious' || (backendPreference === 'local' && backendFallback))
   }, (usesRandomInstance) => {
     if (!usesRandomInstance || invidiousInstancesRefreshed) return
     invidiousInstancesRefreshed = true
