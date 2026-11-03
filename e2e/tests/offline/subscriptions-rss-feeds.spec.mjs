@@ -354,6 +354,46 @@ test.describe('with followed feeds', () => {
     await expect(panel.getByText('1 feed could not be refreshed.')).toBeHidden()
   })
 
+  test('dismisses the refresh error banner until other feeds fail', async ({ page }) => {
+    await mockFeeds(page)
+    await goTo(page, 'subscriptions')
+    await page.locator('[data-rss-feeds-tab]').click()
+    const panel = page.locator('#subscriptionsPanel')
+    const banner = panel.locator('.errorBanner')
+    await expect(banner).toHaveText('1 feed could not be refreshed.')
+
+    await banner.getByRole('button', { name: 'Close' }).click()
+    await expect(banner).toHaveCount(0)
+
+    // Leaving the page keeps the banner dismissed
+    await goTo(page, 'history')
+    await goTo(page, 'subscriptions')
+    await page.locator('[data-rss-feeds-tab]').click()
+    await expect(panel.locator('.ft-list-item .h3Title')).toHaveText(['Newest VOD', 'Older VOD'])
+    await expect(banner).toHaveCount(0)
+
+    // The same feed failing again keeps the banner dismissed
+    let release
+    const held = new Promise(resolve => { release = resolve })
+    await page.route(RSS_URL, async route => {
+      await held
+      await route.fulfill({ contentType: 'application/rss+xml', body: rssFeed })
+    })
+    const header = page.locator('.subscriptionsHeader')
+    const refreshing = page.locator('[data-rss-feeds-tab] .tabLoadingIndicator')
+    await header.getByRole('button', { name: /^Refresh RSS/ }).click()
+    await expect(refreshing).toBeVisible()
+    release()
+    await expect(refreshing).toHaveCount(0)
+    await expect(panel.locator('.ft-list-item .h3Title')).toHaveText(['Newest VOD', 'Older VOD'])
+    await expect(banner).toHaveCount(0)
+
+    await page.unroute(RSS_URL)
+    await page.route(RSS_URL, route => route.fulfill({ status: 500, body: 'Server error' }))
+    await header.getByRole('button', { name: /^Refresh RSS/ }).click()
+    await expect(banner).toHaveText('2 feeds could not be refreshed.')
+  })
+
   test('opens the feed manager from the RSS tab after settings were opened before', async ({ page }) => {
     await mockFeeds(page)
     const section = await goToSettingsSection(page, 'subscriptions')

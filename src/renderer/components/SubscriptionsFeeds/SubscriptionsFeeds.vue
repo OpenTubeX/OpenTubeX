@@ -1,11 +1,27 @@
 <template>
   <div>
-    <p
-      v-if="!isLoading && errorFeedUrls.length > 0"
-      class="message"
+    <div
+      v-if="!isLoading && errorFeedUrls.length > 0 && !errorsDismissed"
+      class="errorBanner"
+      role="status"
     >
-      {{ t('Subscriptions.RSS Feeds.Refresh Errors', { count: errorFeedUrls.length }, errorFeedUrls.length) }}
-    </p>
+      <FtIcon
+        class="errorBannerIcon"
+        :icon="['fas', 'triangle-exclamation']"
+        aria-hidden="true"
+      />
+      <p class="errorBannerText">
+        {{ t('Subscriptions.RSS Feeds.Refresh Errors', { count: errorFeedUrls.length }, errorFeedUrls.length) }}
+      </p>
+      <FtIconButton
+        :title="t('Close')"
+        :icon="['fas', 'xmark']"
+        theme="base-no-default"
+        :size="16"
+        :padding="6"
+        @click="dismissErrors"
+      />
+    </div>
     <div
       v-if="feeds.length === 0"
       class="noFeeds"
@@ -48,6 +64,8 @@ import { useI18n } from 'vue-i18n'
 
 import FtAutoGrid from '../FtAutoGrid/FtAutoGrid.vue'
 import FtButton from '../FtButton/FtButton.vue'
+import FtIcon from '../FtIcon/FtIcon.vue'
+import FtIconButton from '../FtIconButton/FtIconButton.vue'
 import FtListFeedItem from '../FtListFeedItem/FtListFeedItem.vue'
 import FtSkeletonGrid from '../FtSkeletonGrid/FtSkeletonGrid.vue'
 
@@ -58,6 +76,7 @@ import { useKeepAliveEffectScope } from '../../composables/useKeepAliveEffectSco
 import { useRelativeTimeClock } from '../../composables/useRelativeTimeClock'
 import { formatShortDateTime } from '../../helpers/dateFormat'
 import {
+  dismissedRssFeedErrors,
   getRssFeedItemKey,
   getRssFeedsAutoRefreshInterval,
   openRssFeedManager,
@@ -78,6 +97,14 @@ const { feeds, feedUrls, feedAvatars, items } = useFollowedRssFeedItems()
 const itemKeys = computed(() => items.value.map(getRssFeedItemKey))
 const errorFeedUrls = computed(() => rssFeedErrors.value.filter(url => feedUrls.value.has(url)))
 const isLoading = computed(() => rssFeedsRefreshing.value)
+
+// A dismissed banner stays hidden until a different set of feeds fails.
+const errorKey = computed(() => errorFeedUrls.value.toSorted().join('\n'))
+const errorsDismissed = computed(() => errorKey.value === dismissedRssFeedErrors.value)
+
+function dismissErrors() {
+  dismissedRssFeedErrors.value = errorKey.value
+}
 
 // Full width is a single-column grid, so its items render as grid cards.
 const layout = computed(() => store.getters.getListType === 'list' ? 'list' : 'grid')
