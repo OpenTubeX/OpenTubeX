@@ -5,7 +5,9 @@ import { test, expect, goTo, goToSettingsSection, repoRoot, setPlayerFullscreen 
 import { sampleColors } from '../../helpers/colors.mjs'
 import { openMockedVideo } from '../../helpers/player.mjs'
 import { mockPlayableWatchPage } from '../../helpers/watch.mjs'
-import { BUILTIN_BASE_THEME_VALUES, CATPPUCCIN_MACCHIATO_COLORS } from '../../../src/constants.js'
+import { BUILTIN_BASE_THEME_VALUES, CATPPUCCIN_MACCHIATO_COLORS, FIXED_COLOR_BASE_THEMES } from '../../../src/constants.js'
+import { MATERIAL_SEED_PRESETS } from '../../../src/materialTheme.js'
+import { SIGNAL_ACCENT_PRESETS } from '../../../src/signalTheme.js'
 
 /** Text color and background composited over ancestors, including color(srgb ...) values. */
 function renderedColors(locator) {
@@ -523,5 +525,74 @@ test.describe('browser tab contrast', () => {
       expect.soft(contrastRatio(active, inactive), `${theme} active tab beside an inactive tab`).toBeGreaterThanOrEqual(1.05)
       if (['black', 'materialDark', 'materialBlack'].includes(theme)) await attachScreenshot(`${theme} vertical tabs`)
     }
+  })
+})
+
+test.describe('selected tab label contrast', () => {
+  test.use({ seed: { settings: { currentLocale: 'en-US' } } })
+
+  test('selected labels stay readable on their tint in every theme and accent', async ({ page }) => {
+    test.slow()
+    // Every theme's own accents, plus the main colors that stress light and dark surfaces most.
+    const mainColors = ['Pink', 'Yellow', 'CatppuccinLatteRed']
+    const combos = BUILTIN_BASE_THEME_VALUES.filter(theme => theme !== 'system').flatMap(theme => {
+      if (theme.startsWith('openTubeX')) return SIGNAL_ACCENT_PRESETS.map(({ color }) => ({ theme, mutation: 'setSignalAccentColor', color }))
+      if (theme.startsWith('material')) return MATERIAL_SEED_PRESETS.map(({ color }) => ({ theme, mutation: 'setMaterialSeedColor', color }))
+      if (FIXED_COLOR_BASE_THEMES.includes(theme)) return [{ theme }]
+      return mainColors.map(color => ({ theme, mutation: 'setMainColor', color }))
+    })
+
+    await goToSettingsSection(page, 'data')
+    const tab = page.locator('.settingsWindow [data-settings-tab="data"]')
+    await expect(tab).toHaveAttribute('aria-selected', 'true')
+    await tab.blur()
+
+    // Hover adds a fill, so recheck the combinations closest to the limit at rest.
+    const hoverCombos = combos.filter(({ theme, color }) =>
+      ['gruvboxDark', 'gruvboxLight', 'pastelPink', 'hotPink'].includes(theme) || (['light', 'dark'].includes(theme) && color === 'Yellow'))
+    const failures = []
+    for (const [state, stateCombos] of [['rest', combos], ['hover', hoverCombos]]) {
+      if (state === 'hover') await tab.hover()
+      else await page.mouse.move(0, 0)
+      const results = await tab.evaluate(async (tab, combos) => {
+        const context = new OffscreenCanvas(1, 1).getContext('2d', { willReadFrequently: true })
+        // Composite the layers like the renderer, so any color syntax resolves to sRGB bytes.
+        const paint = layers => {
+          context.globalAlpha = 1
+          context.fillStyle = '#fff'
+          context.fillRect(0, 0, 1, 1)
+          for (const [color, alpha = 1] of layers) {
+            context.globalAlpha = alpha
+            context.fillStyle = color
+            context.fillRect(0, 0, 1, 1)
+          }
+          return [...context.getImageData(0, 0, 1, 1).data].slice(0, 3)
+        }
+        const ancestors = []
+        for (let node = tab.parentElement; node; node = node.parentElement) ancestors.unshift(node)
+        const results = []
+        // Skip persistence: the theme watcher applies committed values on the next tick.
+        for (const { theme, mutation, color } of combos) {
+          window.$store.commit('setBaseTheme', theme)
+          if (mutation) window.$store.commit(mutation, color)
+          await new Promise(resolve => setTimeout(resolve))
+          document.getAnimations().forEach(animation => animation.finish())
+          const highlight = getComputedStyle(tab, '::before')
+          // The highlight sits below the tab's own hover fill.
+          const background = paint([
+            ...ancestors.map(node => [getComputedStyle(node).backgroundColor]),
+            [highlight.backgroundColor, Number(highlight.opacity)],
+            [getComputedStyle(tab).backgroundColor],
+          ])
+          results.push({ theme, color, foreground: paint([[getComputedStyle(tab).color]]), background })
+        }
+        return results
+      }, stateCombos)
+      for (const { theme, color, foreground, background } of results) {
+        const ratio = contrastRatio(foreground, background)
+        if (ratio < 4.5) failures.push(`${state} ${theme} ${color ?? ''} ${ratio.toFixed(2)}:1 ${JSON.stringify({ foreground, background })}`)
+      }
+    }
+    expect(failures).toEqual([])
   })
 })
