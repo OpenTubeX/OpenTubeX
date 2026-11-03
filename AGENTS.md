@@ -16,6 +16,7 @@ Record every follow-up you would suggest (an unrelated bug, a deferred edge case
 
 - Read the existing comments first and skip follow-ups already listed.
 - Post one comment per follow-up, following the `leaving-pr-comments` skill: a bold one-line summary, why it matters, and links to the relevant code and, if one exists, the PR.
+- Before working on a follow-up from the issue, check its comment for an 👀 reaction. If one is there, another agent has it in progress; leave it alone unless the user assigned it to you. Otherwise add the reaction (`gh api repos/OpenTubeX/OpenTubeX/issues/comments/<id>/reactions -f content=eyes`). If you stop without finishing, remove it (`gh api -X DELETE repos/OpenTubeX/OpenTubeX/issues/comments/<id>/reactions/<reaction-id>`).
 - When your task addresses a follow-up from the issue, delete its comment (`gh api -X DELETE repos/OpenTubeX/OpenTubeX/issues/comments/<id>`) once the fix is merged. If the work is only partly done, leave the comment and post an update instead.
 - Never edit the issue body or other comments, and never close the issue.
 - Link the posted comments in your final message.
