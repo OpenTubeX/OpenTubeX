@@ -809,15 +809,6 @@ class Profiles {
     ))
   }
 
-  /**
-   * Retry against current subscriptions when another window changes them
-   * between reading and saving, up to five attempts per profile.
-   * Never write a stale whole-profile snapshot.
-   * Retain completed writes if a later profile fails so windows can sync them.
-   * @param {object[]} profiles
-   * @param {(profile: object) => object[] | null} update
-   * @returns {Promise<{profileIds: string[], success: boolean}>}
-   */
   /** Saves `subscriptions` only while the saved ones still equal `previous`, returning the updated profile or null */
   static async updateSubscriptionsIfUnchanged(profileId, subscriptions, previous) {
     const snapshot = JSON.stringify(previous)
@@ -829,6 +820,15 @@ class Profiles {
     return affectedDocuments ?? null
   }
 
+  /**
+   * Retry against current subscriptions when another window changes them
+   * between reading and saving, up to five attempts per profile.
+   * Never write a stale whole-profile snapshot.
+   * Retain completed writes if a later profile fails so windows can sync them.
+   * @param {object[]} profiles
+   * @param {(profile: object) => object[] | null} update
+   * @returns {Promise<{profileIds: string[], success: boolean}>}
+   */
   static async updateSubscriptions(profiles, update) {
     const updatedProfileIds = []
     try {
