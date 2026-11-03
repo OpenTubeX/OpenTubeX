@@ -660,3 +660,48 @@ test('retries a reporter reload that fails after a reconnect', async t => {
   assert.equal(loads, 3)
   await backend.close()
 })
+
+test('closing ends a pending reporter reload retry without waiting for it', async t => {
+  const originalSessionBus = dbus.sessionBus
+  const bus = new EventEmitter()
+  bus.name = ':1.10'
+  bus.connection = new EventEmitter()
+  let reportInterface
+  let loads = 0
+  let resolveFailed
+  const failed = new Promise(resolve => { resolveFailed = resolve })
+  const scripting = {
+    unloadScript: async () => true,
+    start: async () => { reportInterface.ReportActiveWindow('window', false, 'electron') },
+  }
+  const service = {
+    getInterface: async path => {
+      if (path === '/KWin') return { getWindowInfo: async () => null }
+      if (path === '/WindowsRunner') return { Match: async () => [] }
+      if (path === '/Scripting') return scripting
+      return { run: async () => {} }
+    },
+  }
+  bus.getService = () => service
+  bus.invoke = async () => {
+    if (++loads > 1) {
+      resolveFailed()
+      throw new Error('KWin is not ready yet')
+    }
+    return loads
+  }
+  bus.exportInterface = implementation => { reportInterface = implementation }
+  bus.unexportInterface = () => {}
+  bus.close = async () => {}
+  dbus.sessionBus = () => bus
+  t.after(() => { dbus.sessionBus = originalSessionBus })
+
+  const backend = await createKdeWaylandWindowStateBackend()
+  bus.emit('reconnected', { name: bus.name })
+  await failed
+  await new Promise(resolve => setImmediate(resolve))
+  const started = Date.now()
+  await backend.close()
+  assert.ok(Date.now() - started < 500, 'close does not wait for the retry delay')
+  assert.equal(loads, 2)
+})

@@ -367,10 +367,20 @@ workspace.windowAdded.connect(watchMinimized)
     let scriptReload = Promise.resolve()
     // Without the reporter, restores without focus go unnoticed, so keep
     // retrying a failed reload as the removed poll kept checking.
+    let endRetryWait = null
     const reloadScript = attempt => loadActiveWindowScript().catch(() => {
       if (closed) return
-      return new Promise(resolve => setTimeout(resolve, Math.min(1000 * 2 ** attempt, 30_000)))
-        .then(() => closed ? undefined : reloadScript(attempt + 1))
+      return new Promise(resolve => {
+        const timer = setTimeout(resolve, Math.min(1000 * 2 ** attempt, 30_000))
+        // Closing ends the wait instead of holding up shutdown
+        endRetryWait = () => {
+          clearTimeout(timer)
+          resolve()
+        }
+      }).then(() => {
+        endRetryWait = null
+        return closed ? undefined : reloadScript(attempt + 1)
+      })
     })
     const handleReconnect = () => {
       scriptReload = scriptReload.then(() => reloadScript(0))
@@ -385,6 +395,7 @@ workspace.windowAdded.connect(watchMinimized)
         resolveInitialReport?.(null)
         activeWindowListeners.clear()
         minimizedListeners.clear()
+        endRetryWait?.()
         await scriptReload
         await scripting.unloadScript(scriptPluginName).catch(() => {})
         bus.unexportInterface(ACTIVE_WINDOW_REPORT_PATH, ACTIVE_WINDOW_REPORT_INTERFACE)
