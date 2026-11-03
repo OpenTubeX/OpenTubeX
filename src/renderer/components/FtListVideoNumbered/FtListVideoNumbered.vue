@@ -89,7 +89,7 @@
 
 <script setup>
 import { FtIcon } from '@opentubex/icons'
-import { computed, nextTick, onBeforeUnmount, ref, useTemplateRef, watch } from 'vue'
+import { computed, inject, nextTick, onBeforeUnmount, ref, useTemplateRef, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 
 import { usePlaylistDrag } from '../../composables/usePlaylistDrag'
@@ -99,6 +99,7 @@ import store from '../../store/index'
 import { restoreOverlayScrollTop } from '../../helpers/overlayScrollbars'
 import { openButtonMenu } from '../../helpers/buttonMenu'
 import { usePhoneLayout } from '../../composables/usePhoneLayout'
+import { thumbnailSizeSettingKey } from '../../composables/useThumbnailSizeSlider'
 
 import FtListVideo from '../FtListVideo/FtListVideo.vue'
 import FtIconButton from '../FtIconButton/FtIconButton.vue'
@@ -269,6 +270,7 @@ if (!props.initialVisibleState) {
 const windowed = process.env.IS_CAPACITOR || process.env.IS_ELECTRON
 const row = useTemplateRef('row')
 const shellHeight = ref(0)
+const thumbnailSizeSetting = inject(thumbnailSizeSettingKey, 'thumbnailSize')
 if (windowed) {
   let windowItem = null
   watch(row, element => {
@@ -285,8 +287,13 @@ if (windowed) {
         !!element.querySelector('[aria-expanded="true"], [role="dialog"]'),
     })
   }, { flush: 'post' })
-  // Two-line titles change row heights without a resize that remeasures shells.
-  watch(() => store.getters.getLimitTitlesToTwoLines, () => windowItem?.remeasure(), { flush: 'post' })
+  // Two-line titles and list thumbnail sizes change row heights without the
+  // width change that remeasures shells.
+  watch(
+    [() => store.getters.getLimitTitlesToTwoLines, () => store.state.settings[thumbnailSizeSetting]],
+    () => windowItem?.remeasure(),
+    { flush: 'post' }
+  )
   onBeforeUnmount(() => windowItem?.dispose())
 }
 
