@@ -199,6 +199,7 @@ RedirectTube, doesn’t automatically open YouTube links in OpenTubeX (although 
 * [GitHub Releases](https://github.com/OpenTubeX/OpenTubeX/releases)
 * [OpenTubeX Website](https://opentubex.org/downloads/)
 * Windows: [WinGet](https://github.com/microsoft/winget-pkgs/tree/master/manifests/o/OpenTubeX/OpenTubeX) (`winget install OpenTubeX.OpenTubeX`) <a href="https://github.com/microsoft/winget-pkgs/tree/master/manifests/o/OpenTubeX/OpenTubeX"><img src="https://opentubex-badges.withered-flower-f0f2.workers.dev/winget.svg" alt="WinGet version" align="absmiddle"></a>
+* Windows: [Scoop bucket](https://github.com/OpenTubeX/scoop-bucket) (`scoop bucket add opentubex https://github.com/OpenTubeX/scoop-bucket`, then `scoop install opentubex/opentubex`), with [installation instructions](https://opentubex.org/downloads/#install-scoop).
 * macOS: [Homebrew tap](https://github.com/OpenTubeX/homebrew-tap) (`brew install --cask opentubex/tap/opentubex`), with [installation and update instructions](https://opentubex.org/downloads/#install-homebrew).
   * To update a Homebrew installation, run `brew update` followed by `brew upgrade --cask opentubex`. Both Apple Silicon and Intel Macs are supported. If macOS blocks the first launch, allow OpenTubeX in **System Settings → Privacy & Security**.
 * Debian / Ubuntu: [APT repository](https://apt.opentubex.org/)
@@ -251,6 +252,8 @@ The first build with a green check mark is the latest build.
 > Downloading directly from GitHub Actions requires a GitHub account.
 > You can also download the builds without an account via [nightly.link](https://nightly.link/OpenTubeX/OpenTubeX/workflows/build/development?preview).
 
+* Windows: [Scoop bucket](https://github.com/OpenTubeX/scoop-bucket#nightly-builds) (`scoop install opentubex/opentubex-nightly`), which shares settings and data with the stable package
+* macOS: [Homebrew tap](https://github.com/OpenTubeX/homebrew-tap#nightly-builds) (`brew install --cask opentubex/tap/opentubex@nightly`), which replaces the stable cask and shares its data
 * Debian / Ubuntu: [APT nightly repository](https://apt.opentubex.org/#nightly-builds)
 * Fedora / Enterprise Linux: [RPM nightly repository](https://rpm.opentubex.org/#nightly-builds)
 * openSUSE: [RPM nightly repository](https://rpm.opentubex.org/#nightly-builds)
