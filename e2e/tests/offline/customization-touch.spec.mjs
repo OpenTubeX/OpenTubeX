@@ -35,11 +35,13 @@ test.describe('touch customization', { tag: '@scale' }, () => {
               type: 'touchMove', touchPoints: [{ x, y: startY + (endY - startY) * step / 5, id: 1 }],
             })
           }
+          // At non-100% UI Scale, scrollHeight rounds to whole CSS pixels while
+          // scrollTop snaps to device pixels, so allow one more device pixel.
           await expect.poll(() => scroller.evaluate((element, scrollDown) => (
             scrollDown
               ? element.scrollHeight - element.clientHeight - element.scrollTop
               : element.scrollTop
-          ), down)).toBeLessThanOrEqual(1)
+          ) - 1 / devicePixelRatio, down)).toBeLessThanOrEqual(1)
           await expect.poll(() => rows.evaluateAll((elements, attribute) => elements
             .toSorted((a, b) => a.getBoundingClientRect().top - b.getBoundingClientRect().top)
             .map(element => element.getAttribute(attribute)), idAttribute))
