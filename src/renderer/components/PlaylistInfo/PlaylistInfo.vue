@@ -370,6 +370,7 @@ import { usesInvidiousApi } from '../../../apiBackends'
 import {
   ctrlFHandler,
   debounce,
+  formatDurationAsTimestamp,
   formatNumber,
   formatViewCount,
   showToast,
@@ -496,7 +497,7 @@ const props = defineProps({
 
 const emit = defineEmits(['enter-edit-mode', 'exit-edit-mode', 'search-video-query-change', 'prompt-open', 'prompt-close', 'toggle-playlist-bookmark', 'preload-playlist'])
 
-const { locale, t } = useI18n()
+const { t } = useI18n()
 const enableDownloads = computed(() => store.getters.getEnableDownloads)
 
 const query = ref('')
@@ -524,15 +525,7 @@ if (props.videoCount > 0) {
 }
 
 const durationFormatted = computed(() => {
-  const total = props.totalPlaylistDuration
-
-  const duration = {
-    hours: Math.floor(total / 3600),
-    minutes: Math.floor((total % 3600) / 60),
-    seconds: total % 60,
-  }
-
-  let formatted = new Intl.DurationFormat([locale.value, 'en'], { style: 'short' }).format(duration)
+  let formatted = formatDurationAsTimestamp(props.totalPlaylistDuration)
 
   if (props.moreVideoDataAvailable && !isUserPlaylist.value) {
     formatted += '+'
