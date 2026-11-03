@@ -258,10 +258,13 @@ async function addFeedFromInput(text) {
  * and keeps the address for another try if it fails
  * @param {string} url
  */
-function addFeedFromRssHub(url) {
+async function addFeedFromRssHub(url) {
   showRssHubPrompt.value = false
   feedInput.value?.setText(url)
-  addFeedFromInput(url)
+  await addFeedFromInput(url)
+  // The dialog couldn't return focus to the Browse button, which is disabled while the feed loads
+  await nextTick()
+  if (document.activeElement === document.body) feedInput.value?.focus()
 }
 
 /**

@@ -1663,6 +1663,34 @@ test.describe('without followed feeds', () => {
     await expect(manager.locator('.feedRow')).toHaveCount(0)
   })
 
+  test('keeps an RSSHub feed that could not be loaded in the focused feed URL box', async ({ page }) => {
+    const feedUrl = 'https://rss.example.test/peertube/channel/missing'
+    await page.route(/^https?:\/\//, abortUnmockedRequest)
+    await page.route('https://raw.githubusercontent.com/RSSNext/rsshub-docs/**', route => route.fulfill({ body: '' }))
+    await page.route('https://rss.example.test/**', route => route.request().url() === feedUrl
+      ? route.fulfill({ status: 500, body: 'Server error' })
+      : route.fulfill({ json: RSSHUB_NAMESPACES }))
+
+    const manager = await openFeedManager(page)
+    await manager.getByRole('button', { name: 'Browse RSSHub' }).click()
+    const dialog = page.getByRole('dialog', { name: 'Add a feed from RSSHub' })
+    const instance = dialog.getByRole('textbox', { name: 'RSSHub instance' })
+    await instance.fill('rss.example.test')
+    await instance.press('Enter')
+    await dialog.getByRole('textbox', { name: 'Service' }).fill('PeerTube')
+    await dialog.locator('.serviceInput .list li').first().click()
+    await dialog.getByRole('textbox', { name: 'id' }).fill('missing')
+    await dialog.getByRole('button', { name: 'Add Feed' }).click()
+
+    await expect(dialog).toHaveCount(0)
+    await expect(page.getByText('The feed could not be loaded.', { exact: false })).toBeVisible()
+    const input = manager.getByRole('textbox', { name: 'Add Feed' })
+    await expect(input).toHaveValue(feedUrl)
+    // Focus can't return to the Browse button, which was disabled when the dialog closed
+    await expect(input).toBeFocused()
+    await expect(manager.locator('.feedRow')).toHaveCount(0)
+  })
+
   test('keeps the newer RSSHub instance when a closed dialog finishes loading', async ({ page }) => {
     await page.route(/^https?:\/\//, abortUnmockedRequest)
     await page.route('https://raw.githubusercontent.com/RSSNext/rsshub-docs/**', route => route.fulfill({ body: '' }))
