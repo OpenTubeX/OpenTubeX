@@ -547,8 +547,9 @@
     white-space: nowrap;
   }
 
-  .fullscreenPlaylist :deep(.watchPlaylistItem.watched .sponsorBlockVideoLabel) {
-    margin-block: 4px;
+  /* Not even the SponsorBlock icon fits beside the duration in these thumbnails. */
+  .fullscreenPlaylist :deep(.sponsorBlockVideoLabel) {
+    display: none;
   }
 
   .fullscreenPlaylist .playlistItem :deep(.restArea) {

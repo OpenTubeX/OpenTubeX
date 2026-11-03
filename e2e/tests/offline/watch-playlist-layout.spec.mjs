@@ -1,4 +1,4 @@
-import { test, expect, goTo, setPlayerFullscreen, setWindowSize } from '../../helpers/app.mjs'
+import { test, expect, goTo, sel, setPlayerFullscreen, setWindowSize } from '../../helpers/app.mjs'
 import { clickFullscreenAction, waitForPlayback } from '../../helpers/player.mjs'
 import { mockPlayableWatchPage, watchViewHandle } from '../../helpers/watch.mjs'
 
@@ -42,30 +42,31 @@ const videos = Array.from({ length: 12 }, (_, index) => ({
 // workers share the CPU.
 test.describe.configure({ timeout: 120_000 })
 
-test.use({
-  seed: {
-    settings: {
-      animationSpeed: 0,
-      shortenViewCounts: false,
-      userPlaylistSortOrder: 'custom',
-      videoPlaybackEngine: 'built-in',
-      ytDlpPlaybackEngineDefaultMigration: true
-    },
-    history: [{ ...videos[1], _id: videos[1].videoId, isWatched: true, watchProgress: 60, timeWatched: Date.now() }],
-    playlists: [{
-      _id: 'layout-playlist',
-      playlistName: 'Layout test playlist',
-      protected: false,
-      description: '',
-      videos,
-      createdAt: Date.now(),
-      lastUpdatedAt: Date.now()
-    }]
-  }
-})
+const seed = {
+  settings: {
+    animationSpeed: 0,
+    shortenViewCounts: false,
+    userPlaylistSortOrder: 'custom',
+    videoPlaybackEngine: 'built-in',
+    ytDlpPlaybackEngineDefaultMigration: true
+  },
+  history: [{ ...videos[1], _id: videos[1].videoId, isWatched: true, watchProgress: 60, timeWatched: Date.now() }],
+  playlists: [{
+    _id: 'layout-playlist',
+    playlistName: 'Layout test playlist',
+    protected: false,
+    description: '',
+    videos,
+    createdAt: Date.now(),
+    lastUpdatedAt: Date.now()
+  }]
+}
 
-async function openPlaylist(app, page) {
+test.use({ seed })
+
+async function openPlaylist(app, page, beforeOpen = null) {
   await mockPlayableWatchPage(app, page)
+  await beforeOpen?.()
   await goTo(page, 'userplaylists')
   await page.getByText('Layout test playlist', { exact: true }).click()
   await page.getByText('Playlist video 1', { exact: true }).click()
@@ -96,6 +97,77 @@ test('playing playlist shows thumbnail numbers and retains reorder controls', { 
   await expect(panel.locator('.playlistItem').nth(2).locator('.playlistIndexBadge')).toHaveText('3')
   await expect(panel.locator('.playlistIndex label')).toHaveText('1 / 12')
   await watch.dispose()
+})
+
+test.describe('SponsorBlock video labels', () => {
+  test.use({
+    seed: {
+      ...seed,
+      settings: { ...seed.settings, useSponsorBlock: true, externalPlayer: 'mpv' },
+      // Music videos add a note before the duration.
+      playlists: [{ ...seed.playlists[0], videos: videos.map((video, index) => index < 2 ? { ...video, isMusic: true } : video) }]
+    }
+  })
+
+  test('show only their icon beside wide durations and still open the video', { tag: '@scale' }, async ({ app, page, attachScreenshot, uiScale }) => {
+    await openPlaylist(app, page, () => page.route('**/api/videoLabels/**', route => route.fulfill({
+      body: JSON.stringify(videos.slice(0, 2).map(video => ({ videoID: video.videoId, segments: [{ category: 'exclusive_access', actionType: 'full' }] }))),
+      contentType: 'application/json'
+    })))
+    const panel = page.locator('.watchVideoPlaylist').filter({ visible: true })
+    const labelsClear = thumbnails => thumbnails.evaluateAll(elements => elements.every(thumbnail => {
+      const label = thumbnail.querySelector('.sponsorBlockVideoLabel').getBoundingClientRect()
+      const icon = thumbnail.querySelector('.sponsorBlockVideoLabel .ft-icon').getBoundingClientRect()
+      const text = thumbnail.querySelector('.sponsorBlockVideoLabel > span:last-child').getBoundingClientRect()
+      const duration = thumbnail.querySelector('.videoDuration').getBoundingClientRect()
+      // The external player button shows on hover and must stay clickable.
+      const externalPlayer = thumbnail.querySelector('.externalPlayerIcon').getBoundingClientRect()
+      const bounds = thumbnail.getBoundingClientRect()
+      return label.right <= duration.left + 0.5 && label.left >= bounds.left && label.bottom <= bounds.bottom + 0.5 &&
+        label.bottom <= externalPlayer.top + 0.5 &&
+        icon.left >= label.left - 0.5 && icon.right <= label.right + 0.5 && text.width <= 1
+    }))
+    // The second video is watched, which stacks the label above the Watched badge.
+    const thumbnails = panel.locator('.playlistItem .videoThumbnail').filter({ has: page.locator('.sponsorBlockVideoLabel') })
+    await expect(thumbnails).toHaveCount(2)
+    for (const thumbnail of await thumbnails.all()) {
+      await expect(thumbnail.locator('.videoDuration [data-icon="music"]')).toBeVisible()
+      const label = thumbnail.locator('.sponsorBlockVideoLabel')
+      // The text is left to the tooltip and screen readers.
+      await expect(label).toHaveAttribute('title', 'Exclusive Access · Full Video')
+      await expect(label).toMatchAriaSnapshot('- text: Exclusive Access')
+    }
+    await expect.poll(() => labelsClear(thumbnails)).toBe(true)
+    await attachScreenshot('playlist-sponsorblock-icon-labels')
+
+    // The icon catches the pointer for its tooltip but still opens the video,
+    // in a background tab when middle-clicked.
+    await thumbnails.nth(1).locator('.sponsorBlockVideoLabel').click({ button: 'middle' })
+    await expect(page.locator(sel.tabs)).toHaveCount(2)
+    await expect(page.locator(sel.tabs).first()).toHaveClass(/active/)
+    await expect.poll(() => page.evaluate(async () => {
+      const state = await window.ftElectron.tabs.getState()
+      return state.tabs.find(tab => tab.id !== state.activeTabId)?.route.path
+    })).toBe(`/watch/${videos[1].videoId}`)
+    await page.locator(sel.tabs).nth(1).getByRole('button', { name: 'Close Tab' }).click()
+    await expect(page.locator(sel.tabs)).toHaveCount(1)
+    await thumbnails.nth(1).locator('.sponsorBlockVideoLabel').click()
+    await expect(panel.locator('.playlistIndex label')).toHaveText('2 / 12')
+
+    await page.locator('.ftVideoPlayer video').evaluate(element => element.pause())
+    await setWindowSize(app, page, { width: 960, height: 440 })
+    await page.setViewportSize({ width: Math.round(960 * uiScale / 100), height: Math.round(440 * uiScale / 100) })
+    await setPlayerFullscreen(page, true)
+    await clickFullscreenAction(page.locator('.ftVideoPlayer'), '.fullscreenPlaylistToggle')
+    const dock = page.locator('.fullscreenPlaylistTarget')
+    await expect(dock.locator('.playlistItem')).toHaveCount(videos.length)
+    // Not even the icon fits there, so the labels are left out.
+    await expect(dock.locator('.playlistItem .videoThumbnail [data-icon="music"]')).toHaveCount(2)
+    await expect(dock.locator('.sponsorBlockVideoLabel')).toHaveCount(2)
+    for (const label of await dock.locator('.sponsorBlockVideoLabel').all()) await expect(label).toBeHidden()
+    await attachScreenshot('fullscreen-playlist-sponsorblock-icon-labels')
+    await setPlayerFullscreen(page, false)
+  })
 })
 
 test('playlist row menu adds, moves and removes videos while thumbnail shortcuts stay contained', { tag: '@scale' }, async ({ app, page, attachScreenshot }) => {
@@ -619,17 +691,6 @@ test('landscape fullscreen playlist shows more videos and keeps controls outside
     thumbnail.querySelector('.playlistIndexBadge').textContent = original.index
     thumbnail.querySelector('.videoWatched').textContent = original.watched
   }, originalBadges)
-  await watchedThumbnail.evaluate(thumbnail => {
-    const label = thumbnail.querySelector('.videoDuration').cloneNode(false)
-    label.className = 'sponsorBlockVideoLabel'
-    label.textContent = 'Sponsor'
-    thumbnail.append(label)
-  })
-  await expect.poll(() => watchedThumbnail.evaluate(thumbnail => {
-    const index = thumbnail.querySelector('.playlistIndexBadge').getBoundingClientRect()
-    const sponsor = thumbnail.querySelector('.sponsorBlockVideoLabel').getBoundingClientRect()
-    return index.bottom <= sponsor.top
-  })).toBe(true)
   await expect.poll(() => watchedThumbnail.evaluate(thumbnail => thumbnail.getBoundingClientRect().height)).toBeLessThanOrEqual(45.1)
   const list = dock.locator('.playlistItemsWrapper')
   await expect.poll(() => list.locator('.playlistItem').evaluateAll(items => {

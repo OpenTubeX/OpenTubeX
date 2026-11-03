@@ -90,20 +90,26 @@
   place-self: end start;
   max-inline-size: calc(100% - 8px);
   margin: 4px;
+  // Only the icon fits here, so it shows the category in its tooltip.
+  cursor: pointer;
+  pointer-events: auto;
 }
 
-.watchPlaylistItem .sponsorBlockVideoLabel span {
+// Leave the category text to the tooltip and screen readers.
+.watchPlaylistItem .sponsorBlockVideoLabel > span:last-child {
+  position: absolute;
   overflow: hidden;
-  text-overflow: ellipsis;
+  clip-path: inset(50%);
+  block-size: 1px;
+  inline-size: 1px;
   white-space: nowrap;
 }
 
-.watchPlaylistItem.watched .sponsorBlockVideoLabel {
+// Clear the Watched badge and the external player button, which the label
+// would otherwise cover and take clicks from.
+.watchPlaylistItem.watched .sponsorBlockVideoLabel,
+.watchPlaylistItem .videoThumbnail:has(.externalPlayerIcon) .sponsorBlockVideoLabel {
   margin-block: 4px 28px;
-}
-
-.watchPlaylistItem .videoThumbnail:has(.videoDuration) .sponsorBlockVideoLabel {
-  max-inline-size: calc(100% - 46px);
 }
 
 .channelName.channelResolverButton {
