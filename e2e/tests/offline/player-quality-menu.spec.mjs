@@ -26,6 +26,16 @@ const TRACKS = [
  * 320x180 and a name for its video rendition
  */
 async function openAdaptiveVideo(app, page, streams = ['avc1.42c00d']) {
+  // Software decoding on a busy machine drops frames, and automatic quality
+  // then disables the playing stream for 30 seconds, which also hides it from
+  // the resolution menu and switches to another codec
+  await page.evaluate(() => {
+    const getVideoPlaybackQuality = HTMLVideoElement.prototype.getVideoPlaybackQuality
+    HTMLVideoElement.prototype.getVideoPlaybackQuality = function () {
+      const { creationTime, totalVideoFrames } = getVideoPlaybackQuality.call(this)
+      return { creationTime, totalVideoFrames, droppedVideoFrames: 0, corruptedVideoFrames: 0 }
+    }
+  })
   await mockPlayableWatchPage(app, page)
   await routePostLiveMedia(page)
   await page.route('https://quality-menu.test/*.m3u8', route => route.fulfill({
