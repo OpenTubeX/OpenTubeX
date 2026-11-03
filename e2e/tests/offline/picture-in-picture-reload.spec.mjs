@@ -1,5 +1,5 @@
 import { fileURLToPath } from 'node:url'
-import { test, expect, setPlayerFullscreen } from '../../helpers/app.mjs'
+import { test, expect, sel, setPlayerFullscreen } from '../../helpers/app.mjs'
 import { activeTab, openMockedVideo, waitForPlayback } from '../../helpers/player.mjs'
 import { mockPlayableWatchPage, reloadWatchView, watchViewHandle } from '../../helpers/watch.mjs'
 
@@ -127,6 +127,10 @@ test('does not transfer Picture-in-Picture from another tab during reload', asyn
   )).toBe(true)
 
   await page.keyboard.press('Control+t')
+  // The new tab activates asynchronously, and a video opened before it does
+  // replaces the first tab's page.
+  await expect(page.locator(sel.tabs)).toHaveCount(2)
+  await expect(page.locator(sel.tabs).nth(1)).toHaveClass(/active/)
   await openMockedVideo(page)
   const secondTabId = await page.locator(activeTab).getAttribute('data-tab-id')
 

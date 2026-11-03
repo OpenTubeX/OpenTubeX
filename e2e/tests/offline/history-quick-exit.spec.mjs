@@ -99,7 +99,13 @@ for (const exit of ['navigate', 'close tab']) {
   test(`retains successive seeks after reopening with ${exit}`, async ({ app, page }) => {
     await mockPlayableWatchPage(app, page)
     for (const position of [12, 15]) {
-      if (exit === 'close tab') await page.keyboard.press('Control+t')
+      if (exit === 'close tab') {
+        await page.keyboard.press('Control+t')
+        // The new tab activates asynchronously, and a video opened before it
+        // does replaces the previous tab's page.
+        await expect(page.locator(sel.tabs)).toHaveCount(2)
+        await expect(page.locator(sel.tabs).nth(1)).toHaveClass(/active/)
+      }
       const video = await openMockedVideo(page)
       await video.evaluate((element, seconds) => {
         element.pause()
