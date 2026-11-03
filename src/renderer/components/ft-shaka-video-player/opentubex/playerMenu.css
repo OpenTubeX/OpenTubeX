@@ -711,7 +711,7 @@
   already has a layer of its own. Zooming each entry instead gives every entry
   Shaka has just shown a new layer, which a busy renderer takes frames to draw.
   The opening animations stay listed, so that they don't run again once the
-  zoom has ended.
+  zoom has ended. The phone sheet zooms its menu too (below).
 */
 /* stylelint-disable selector-max-compound-selectors -- Telling the phone layout apart takes a compound of its own. */
 :deep(.shaka-overflow-menu:not(.phonePlayerOptions > *, .shaka-hidden):is([data-ft-menu-transition='in'], :has([data-ft-menu-transition='in']))) {
@@ -728,24 +728,16 @@
     ft-menu-zoom-out 300ms cubic-bezier(0.2, 0, 0, 1);
 }
 
-/*
-  On phones, the entries zoom by themselves, as a scale on the menu would
-  become the containing block of the header action fixed to the dialog.
-*/
-:deep(.phonePlayerOptions [data-ft-menu-transition='in'] > .shaka-sub-menu > :not(.os-scrollbar)) {
-  animation:
-    ft-menu-fade-in 150ms ease-out,
-    ft-menu-zoom-in-entries 300ms cubic-bezier(0.2, 0, 0, 1);
-}
-
-:deep(.phonePlayerOptions [data-ft-menu-transition='out'] > :not(.shaka-sub-menu, .os-scrollbar)) {
-  animation:
-    ft-menu-fade-in 150ms ease-out,
-    ft-menu-zoom-out-entries 300ms cubic-bezier(0.2, 0, 0, 1);
-}
 /* stylelint-enable selector-max-compound-selectors */
 
 @keyframes ft-menu-fade-in {
+  from {
+    opacity: 0;
+  }
+}
+
+/* The same fade, under a name of its own, so going back fades again even before the fade in has ended */
+@keyframes ft-menu-fade-in-again {
   from {
     opacity: 0;
   }
@@ -760,18 +752,6 @@
 @keyframes ft-menu-zoom-out {
   from {
     scale: 1.04;
-  }
-}
-
-@keyframes ft-menu-zoom-in-entries {
-  from {
-    scale: 0.9;
-  }
-}
-
-@keyframes ft-menu-zoom-out-entries {
-  from {
-    scale: 1.08;
   }
 }
 
@@ -827,6 +807,52 @@
 
 :deep(.phonePlayerOptions > .shaka-overflow-menu:not(.shaka-hidden)) {
   animation: ft-menu-open 200ms cubic-bezier(0.2, 0, 0, 1);
+}
+
+/*
+  The menu scrolls the views in the sheet, so it zooms them as a whole, on a
+  single layer instead of one for each entry. Its grow-in stays in the list, so
+  that it doesn't start over once the zoom has ended.
+*/
+:deep(.phonePlayerOptions [data-ft-menu-transition='in']) {
+  animation:
+    ft-menu-fade-in 150ms ease-out,
+    ft-menu-zoom-in 300ms cubic-bezier(0.2, 0, 0, 1);
+}
+
+:deep(.phonePlayerOptions [data-ft-menu-transition='out']) {
+  animation:
+    ft-menu-fade-in-again 150ms ease-out,
+    ft-menu-zoom-out 300ms cubic-bezier(0.2, 0, 0, 1);
+}
+
+:deep(.phonePlayerOptions > .shaka-overflow-menu[data-ft-menu-transition='in']:not(.shaka-hidden)) {
+  animation:
+    ft-menu-open 200ms cubic-bezier(0.2, 0, 0, 1),
+    ft-menu-fade-in 150ms ease-out,
+    ft-menu-zoom-in 300ms cubic-bezier(0.2, 0, 0, 1);
+}
+
+:deep(.phonePlayerOptions > .shaka-overflow-menu[data-ft-menu-transition='out']:not(.shaka-hidden)) {
+  animation:
+    ft-menu-open 200ms cubic-bezier(0.2, 0, 0, 1),
+    ft-menu-fade-in-again 150ms ease-out,
+    ft-menu-zoom-out 300ms cubic-bezier(0.2, 0, 0, 1);
+}
+
+/*
+  While the menu zooms, it is the containing block of a header action that sits
+  in the dialog's header, which would show it in the menu instead. The action
+  waits out of view until then, and fades in by itself.
+*/
+:deep(.phonePlayerOptions[data-header-action] .ft-submenu-header-action) {
+  animation: ft-menu-fade-in 150ms ease-out;
+}
+
+:deep(.phonePlayerOptions[data-header-action] [data-ft-menu-transition] .ft-submenu-header-action) {
+  pointer-events: none;
+  opacity: 0;
+  animation: none;
 }
 
 :deep(.phonePlayerOptions) {
