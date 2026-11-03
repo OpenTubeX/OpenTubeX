@@ -146,6 +146,21 @@ test('a reminder cancelled while notifications resume stays cancelled', async ()
   assert.equal(await liveReminder.get('premiere'), null)
 })
 
+test('scheduling a reminder keeps reminders that left the list meanwhile out of it', async () => {
+  let whileScheduling = null
+  const { liveReminder, storage } = await loadCapacitorReminder({
+    checkPermissions: async () => ({ display: 'granted' }),
+    cancel: async () => {},
+    schedule: async () => whileScheduling?.(),
+  })
+  assert.equal(await liveReminder.schedule({ ...reminder(START + 60_000), videoId: 'first' }), true)
+
+  // While the system schedules the second reminder, the app shows the first and removes its record.
+  whileScheduling = () => storage.set('opentubex-capacitor-live-reminders', '[]')
+  assert.equal(await liveReminder.schedule({ ...reminder(START + 120_000), videoId: 'second' }), true)
+  assert.deepEqual(JSON.parse(storage.get('opentubex-capacitor-live-reminders')).map(record => record.videoId), ['second'])
+})
+
 test('a reminder scheduled while notifications turn off is cancelled too', async () => {
   const scheduled = new Map()
   let permission = null

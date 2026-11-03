@@ -266,8 +266,9 @@ async function scheduleReminder(reminder) {
   const record = { ...reminder, notificationId: notificationIdForVideo(reminder.videoId, records) }
   handledAlarms.delete(record.notificationId)
   if (!paused) await scheduleSystemReminder(record)
+  // Read again, since the app may have shown another reminder meanwhile and removed its record.
   writeCapacitorReminders([
-    ...records.filter(item => item.videoId !== reminder.videoId),
+    ...readStoredReminders().filter(item => item.videoId !== reminder.videoId),
     record,
   ])
   emitUpdated(reminder.videoId, true)
