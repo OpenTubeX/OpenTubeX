@@ -9,7 +9,7 @@ import { BUILTIN_BASE_THEME_VALUES } from '../../../src/constants.js'
 /** Text color and background composited over ancestors, including color(srgb ...) values. */
 function renderedColors(locator) {
   return locator.evaluate(element => {
-    const rgba = color => color.match(/[\d.]+/g).map(Number)
+    const rgba = color => color.match(/-?[\d.]+(?:e[-+]?\d+)?/gi).map(Number)
       .map((value, i) => color.startsWith('color(srgb ') && i < 3 ? value * 255 : value)
     const ancestors = []
     for (let node = element; node; node = node.parentElement) ancestors.unshift(node)
@@ -121,7 +121,7 @@ for (const [theme, scale] of [['openTubeXLight', 100], ['openTubeXDark', 125]]) 
   test.describe(`${theme} control contrast at ${scale}%`, () => {
     test.use({ seed: { settings: { baseTheme: theme, currentLocale: 'en-US', uiScale: scale } } })
 
-    test('seekbar progress keeps a subtle teal tint and SponsorBlock categories remain visible', async ({ app, page }) => {
+    test('seekbar progress keeps a subtle accent tint and SponsorBlock categories remain visible', async ({ app, page }) => {
       await mockPlayableWatchPage(app, page)
       // An aborted label lookup would queue later SponsorBlock requests behind
       // network recovery. A 404 is the API's normal "no labels" response.
@@ -168,9 +168,10 @@ for (const [theme, scale] of [['openTubeXLight', 100], ['openTubeXDark', 125]]) 
         ]
       })
       const [played, unplayed, ...markers] = await sampleColors(app, bar, points)
-      expect(played[1] - played[0], `teal progress: ${played}`).toBeGreaterThanOrEqual(10)
-      expect(played[2] - played[0], `teal progress: ${played}`).toBeGreaterThanOrEqual(8)
-      expect(Math.min(...played), `soft teal progress: ${played}`).toBeGreaterThanOrEqual(190)
+      // The default red accent tints the neutral progress fill.
+      expect(played[0] - played[1], `red progress: ${played}`).toBeGreaterThanOrEqual(10)
+      expect(played[0] - played[2], `red progress: ${played}`).toBeGreaterThanOrEqual(10)
+      expect(Math.min(...played), `soft red progress: ${played}`).toBeGreaterThanOrEqual(180)
       expect(Math.max(...played), `retain marker colors: ${played}`).toBeLessThanOrEqual(235)
       expect(Math.max(...played.map((value, index) => Math.abs(value - unplayed[index])))).toBeGreaterThanOrEqual(20)
       for (const [index, marker] of markers.entries()) {
@@ -231,11 +232,11 @@ for (const [theme, scale] of [['openTubeXLight', 100], ['openTubeXDark', 125]]) 
       const select = await controlContrast(app, page.getByRole('combobox', { name: /^Base theme/i }), 'field')
       expect.soft(select.ratio, `dropdown ${JSON.stringify(select)}`).toBeGreaterThanOrEqual(3)
       const icon = page.locator('.changedSettingIndicator').first()
-      const iconColor = await icon.evaluate(element => getComputedStyle(element).color.match(/[\d.]+/g).slice(0, 3).map(Number))
+      const { foreground: iconColor } = await renderedColors(icon)
       expect.soft(contrastRatio(iconColor, select.surface), `reset icon ${JSON.stringify({ iconColor, surface: select.surface })}`).toBeGreaterThanOrEqual(3)
       const search = await controlContrast(app, page.locator('.settingsSearch'), 'field')
       expect.soft(search.ratio, `search ${JSON.stringify(search)}`).toBeGreaterThanOrEqual(3)
-      await expect(page.getByRole('combobox', { name: /Main color theme/i })).toBeDisabled()
+      await expect(page.getByRole('combobox', { name: /Main color theme/i })).toHaveCount(0)
       await attachScreenshot(`${theme} fields and sliders at ${scale}%`)
     })
   })
@@ -297,7 +298,7 @@ test.describe('hotPink contrast', () => {
       }
       const colors = await button.evaluate(element => {
         // Selected categories use a translucent color-mix(), serialized as color(srgb ...).
-        const rgba = color => color.match(/[\d.]+/g).map(Number)
+        const rgba = color => color.match(/-?[\d.]+(?:e[-+]?\d+)?/gi).map(Number)
           .map((value, i) => color.startsWith('color(srgb ') && i < 3 ? value * 255 : value)
         const rgb = color => rgba(color).slice(0, 3)
         const menu = rgb(getComputedStyle(element.closest('.settingsMenu')).backgroundColor)

@@ -510,6 +510,7 @@ Settings:
     Only Show Important Notifications: Csak a fontos értesítések megjelenítése
     Visible Search Suggestions: "Látható keresési javaslatok"
     Material Accent Color: "Material kiemelőszín"
+    Signal Accent Color: "Signal kiemelőszín"
     Material Wallpaper Colors: "Háttérkép színei"
     Material System Accent Color: "Rendszer kiemelőszíne"
     Tab Loading Indicator:
@@ -605,8 +606,8 @@ Settings:
       One Dark: One Dark
       Carbonfox: Carbonfox
       Catppuccin Macchiato: Catppuccin Macchiato
-      Ocean Light: "Ocean Világos"
-      Ocean Dark: "Ocean Sötét"
+      Signal Light: "Signal Világos"
+      Signal Dark: "Signal Sötét"
       Custom: Egyéni
     Light Theme: Világos téma
     Dark Theme: Sötét téma

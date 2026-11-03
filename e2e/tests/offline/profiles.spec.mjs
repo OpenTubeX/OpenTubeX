@@ -974,6 +974,26 @@ test.describe('profile manager', () => {
       await expect(page.locator('.profileColorPicker code')).toHaveText('#4caf50')
     })
 
+    test('resolves the derived Signal accent as the theme color', async ({ page }) => {
+      await page.evaluate(async () => {
+        await window.$store.dispatch('updateBaseTheme', 'openTubeXLight')
+        await window.$store.dispatch('updateSignalAccentColor', '#ffff00')
+      })
+      await openProfileList(page)
+      await page.locator('.profilePanelHeader button').last().click()
+      await page.locator('.card .profileList').getByText('All Channels').click()
+      await page.locator('.themeColorOption').click()
+      // The light theme darkens yellow for contrast; the picker needs a hex value.
+      await expect(page.locator('.profileColorPicker code')).toHaveText(/^#[\da-f]{6}$/)
+      const hex = await page.locator('.profileColorPicker code').textContent()
+      expect(hex).not.toBe('#ffff00')
+      // The preview paints the theme variable itself, so compare its resolved channels.
+      const preview = await page.locator('.profilePreviewIcon').evaluate(element =>
+        getComputedStyle(element).backgroundColor.match(/[\d.]+(?:e-?\d+)?/g).slice(0, 3)
+          .map(value => Math.round(Number(value) * 255)))
+      expect(preview).toEqual(hex.match(/[\da-f]{2}/g).map(value => Number.parseInt(value, 16)))
+    })
+
     test('keeps a keyboard-selected swatch when the custom picker was open', async ({ app, page }) => {
       await openProfileList(page)
       await page.locator('.profilePanelHeader button').last().click()

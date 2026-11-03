@@ -532,6 +532,7 @@ Settings:
     Only Show Important Notifications: Vis berre viktige varsel
     Visible Search Suggestions: "Synlege søkjeforslag"
     Material Accent Color: "Material-aksentfarge"
+    Signal Accent Color: "Signal-aksentfarge"
     Material Wallpaper Colors: "Fargar frå bakgrunnsbiletet"
     Material System Accent Color: "Systemet sin aksentfarge"
     Tab Loading Indicator:
@@ -612,8 +613,8 @@ Settings:
       One Dark: One Dark
       Carbonfox: Carbonfox
       Catppuccin Macchiato: Catppuccin Macchiato
-      Ocean Light: "Ocean Lys"
-      Ocean Dark: "Ocean Mørk"
+      Signal Light: "Signal Lys"
+      Signal Dark: "Signal Mørk"
       Custom: Eige
       Catppuccin Frappe: Catppuccin Frappe
       Catppuccin Latte: Catppuccin Latte

@@ -820,9 +820,9 @@ const BUILTIN_BASE_THEMES = [
   { value: 'light', translationKey: 'Light', classification: 'light', background: '#f1f1f1' },
   { value: 'dark', translationKey: 'Dark', classification: 'dark', background: '#0f0f0f' },
   { value: 'black', translationKey: 'Black', classification: 'dark', background: '#000000' },
-  // Keep the persisted IDs so existing Ocean theme selections remain valid.
-  { value: 'openTubeXLight', translationKey: 'Ocean Light', classification: 'light', background: '#e8f2f0', fixedColors: true },
-  { value: 'openTubeXDark', translationKey: 'Ocean Dark', classification: 'dark', background: '#0b1416', fixedColors: true },
+  // Keep the persisted IDs so existing Ocean (now Signal) theme selections remain valid.
+  { value: 'openTubeXLight', translationKey: 'Signal Light', classification: 'light', background: '#f6f5f4', fixedColors: true },
+  { value: 'openTubeXDark', translationKey: 'Signal Dark', classification: 'dark', background: '#111111', fixedColors: true },
   { value: 'dynamic', translationKey: 'Dynamic colors', fixedColors: true },
   { value: 'materialLight', translationKey: 'Material Light', classification: 'light', fixedColors: true },
   { value: 'materialDark', translationKey: 'Material Dark', classification: 'dark', fixedColors: true },

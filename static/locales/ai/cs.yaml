@@ -510,6 +510,7 @@ Settings:
     Only Show Important Notifications: Zobrazovat pouze důležitá oznámení
     Visible Search Suggestions: "Viditelné návrhy vyhledávání"
     Material Accent Color: "Barva zvýraznění Material"
+    Signal Accent Color: "Barva zvýraznění Signal"
     Material Wallpaper Colors: "Barvy tapety"
     Material System Accent Color: "Systémová barva zvýraznění"
     Tab Loading Indicator:
@@ -605,8 +606,8 @@ Settings:
       One Dark: One Dark
       Carbonfox: Carbonfox
       Catppuccin Macchiato: Catppuccin Macchiato
-      Ocean Light: "Ocean Světlý"
-      Ocean Dark: "Ocean Tmavý"
+      Signal Light: "Signal Světlý"
+      Signal Dark: "Signal Tmavý"
       Custom: Vlastní
     Light Theme: Světlý motiv
     Dark Theme: Tmavý motiv

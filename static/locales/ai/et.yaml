@@ -510,6 +510,7 @@ Settings:
     Only Show Important Notifications: Kuva ainult olulised teavitused
     Visible Search Suggestions: "Nähtavad otsingusoovitused"
     Material Accent Color: "Materiali aktsentvärv"
+    Signal Accent Color: "Signali aktsentvärv"
     Material Wallpaper Colors: "Taustapildi värvid"
     Material System Accent Color: "Süsteemi rõhuvärv"
     Tab Loading Indicator:
@@ -605,8 +606,8 @@ Settings:
       One Dark: One Dark
       Carbonfox: Carbonfox
       Catppuccin Macchiato: Catppuccin Macchiato
-      Ocean Light: "Ocean Hele"
-      Ocean Dark: "Ocean Tume"
+      Signal Light: "Signal Hele"
+      Signal Dark: "Signal Tume"
       Custom: Kohandatud
     Light Theme: Hele teema
     Dark Theme: Tume teema

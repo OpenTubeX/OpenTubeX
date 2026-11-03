@@ -510,6 +510,7 @@ Settings:
     Only Show Important Notifications: Yalnızca önemli bildirimleri göster
     Visible Search Suggestions: "Görünür arama önerileri"
     Material Accent Color: "Material vurgu rengi"
+    Signal Accent Color: "Signal vurgu rengi"
     Material Wallpaper Colors: "Duvar kağıdı renkleri"
     Material System Accent Color: "Sistem vurgu rengi"
     Tab Loading Indicator:
@@ -605,8 +606,8 @@ Settings:
       One Dark: One Dark
       Carbonfox: Carbonfox
       Catppuccin Macchiato: Catppuccin Macchiato
-      Ocean Light: "Ocean Açık"
-      Ocean Dark: "Ocean Koyu"
+      Signal Light: "Signal Açık"
+      Signal Dark: "Signal Koyu"
       Custom: Özel
     Light Theme: Açık tema
     Dark Theme: Koyu tema

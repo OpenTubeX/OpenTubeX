@@ -5,7 +5,7 @@ test.use({ seed: { settings: { currentLocale: 'en-US', baseTheme: 'materialLight
 
 test('dragging the Material accent picker limits app-wide theme updates and commits the final color', async ({ page }) => {
   const section = await goToSettingsSection(page, 'theme')
-  await section.locator('.materialCustomSwatch .colorFieldTrigger').click()
+  await section.locator('.accentCustomSwatch .colorFieldTrigger').click()
   const picker = page.getByRole('dialog', { name: 'Material accent color' })
   const area = picker.getByRole('slider', { name: 'Saturation and brightness' })
   const bounds = await area.boundingBox()

@@ -1,4 +1,5 @@
 import { DEFAULT_MATERIAL_SEED_COLOR } from './materialTheme.js'
+import { DEFAULT_SIGNAL_ACCENT_COLOR } from './signalTheme.js'
 import { DEFAULT_LANDING_PAGE, LEGACY_DEFAULT_LANDING_PAGE, DEFAULT_QUICK_PLAYBACK_SPEED_BAR_OPTIONS, DEFAULT_WATCHED_PERCENTAGE_THRESHOLD, MAIN_PROFILE_ID } from './constants.js'
 import { DEFAULT_THUMBNAIL_SIZE } from './renderer/constants/thumbnailSize.js'
 import { DEFAULT_FIXED_TAB_WIDTH } from './renderer/constants/tabWidth.js'
@@ -73,6 +74,7 @@ export function createDefaultSettings({ supportsLocalApi, isElectron }) {
     appFont: DEFAULT_APP_FONT,
     baseTheme: 'system',
     materialSeedColor: DEFAULT_MATERIAL_SEED_COLOR,
+    signalAccentColor: DEFAULT_SIGNAL_ACCENT_COLOR,
     systemLightTheme: 'light',
     systemDarkTheme: 'dark',
     iconPack: 'material',

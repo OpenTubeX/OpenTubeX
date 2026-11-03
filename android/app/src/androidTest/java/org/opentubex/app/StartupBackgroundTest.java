@@ -49,7 +49,7 @@ public class StartupBackgroundTest {
     public void launchWithoutSplashKeepsTheSelectedBackgroundBeforeRendererLoads() throws Exception {
         for (String[] appearance : new String[][] {
             {"dark", "#0f0f0f"}, {"light", "#f1f1f1"},
-            {"openTubeXDark", "#0b1416"}, {"hotPink", "#dd197f"}
+            {"openTubeXDark", "#111111"}, {"hotPink", "#dd197f"}
         }) {
             try (ActivityScenario<MainActivity> scenario = ActivityScenario.launch(MainActivity.class)) {
                 AtomicReference<WebView> reference = new AtomicReference<>();

@@ -512,6 +512,7 @@ Settings:
     Only Show Important Notifications: Yalnız vacib bildirişləri göstər
     Visible Search Suggestions: "Görünən axtarış təklifləri"
     Material Accent Color: "Material vurğu rəngi"
+    Signal Accent Color: "Signal vurğu rəngi"
     Material Wallpaper Colors: "Divar kağızı rəngləri"
     Material System Accent Color: "Sistem vurğu rəngi"
     Tab Loading Indicator:
@@ -592,8 +593,8 @@ Settings:
       One Dark: One Dark
       Carbonfox: Carbonfox
       Catppuccin Macchiato: Catppuccin Macchiato
-      Ocean Light: Ocean Açıq
-      Ocean Dark: Ocean Tünd
+      Signal Light: Signal Açıq
+      Signal Dark: Signal Tünd
       Custom: Fərdi
     Main Color Theme:
       Catppuccin Macchiato Rosewater: Catppuccin Macchiato Rosewater

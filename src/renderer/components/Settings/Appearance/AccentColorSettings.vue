@@ -1,18 +1,18 @@
 <template>
   <div
-    class="materialColorSettings"
+    class="accentColorSettings"
     role="group"
-    :aria-label="t('Settings.Theme Settings.Material Accent Color')"
+    :aria-label="label"
   >
-    <div class="materialColorHeader">
-      <span>{{ t('Settings.Theme Settings.Material Accent Color') }}</span>
+    <div class="accentColorHeader">
+      <span>{{ label }}</span>
       <code>{{ systemSelected ? systemLabel : modelValue }}</code>
     </div>
-    <div class="materialColorSwatches">
+    <div class="accentColorSwatches">
       <button
         v-if="systemScheme"
         type="button"
-        class="materialColorSwatch"
+        class="accentColorSwatch"
         :aria-label="systemLabel"
         :title="systemLabel"
         :aria-pressed="systemSelected"
@@ -20,12 +20,12 @@
         @click="emit('update:modelValue', MATERIAL_SYSTEM_SEED)"
       >
         <span
-          class="materialSwatchPalette"
+          class="accentSwatchPalette"
           aria-hidden="true"
         >
           <FtIcon
             :icon="['fas', androidDynamicColors.supported ? 'wallpaper' : 'display']"
-            class="materialSwatchCheck"
+            class="accentSwatchCheck"
             aria-hidden="true"
           />
         </span>
@@ -34,7 +34,7 @@
         v-for="preset in presets"
         :key="preset.color"
         type="button"
-        class="materialColorSwatch"
+        class="accentColorSwatch"
         :aria-label="colorNames[preset.name] ?? preset.name"
         :title="colorNames[preset.name] ?? preset.name"
         :aria-pressed="modelValue.toLowerCase() === preset.color"
@@ -42,22 +42,22 @@
         @click="emit('update:modelValue', preset.color)"
       >
         <span
-          class="materialSwatchPalette"
+          class="accentSwatchPalette"
           aria-hidden="true"
         >
           <FtIcon
             v-if="modelValue.toLowerCase() === preset.color"
             :icon="['fas', 'check']"
-            class="materialSwatchCheck"
+            class="accentSwatchCheck"
             aria-hidden="true"
           />
         </span>
       </button>
       <FtColorPicker
-        class="materialCustomSwatch"
-        data-setting-key="materialSeedColor"
+        class="accentCustomSwatch"
+        :data-setting-key="settingKey"
         :model-value="customColor"
-        :label="t('Settings.Theme Settings.Material Accent Color')"
+        :label="label"
         :allow-alpha="false"
         @update:model-value="updateCustomColor"
         @change="flushCustomColor"
@@ -66,13 +66,13 @@
       >
         <template #trigger>
           <span
-            class="materialCustomColor"
+            class="accentCustomColor"
             :style="{ backgroundColor: customColor }"
             aria-hidden="true"
           >
             <FtIcon
               :icon="['fas', 'pencil']"
-              class="materialSwatchEdit"
+              class="accentSwatchEdit"
               aria-hidden="true"
             />
           </span>
@@ -87,30 +87,55 @@ import { useI18n } from 'vue-i18n'
 import { computed, onBeforeUnmount, ref } from 'vue'
 import FtColorPicker from '../../FtColorPicker/FtColorPicker.vue'
 import FtIcon from '../../FtIcon/FtIcon.vue'
-import { MATERIAL_SEED_PRESETS, MATERIAL_SYSTEM_SEED, materialColorScheme, materialSeedPalette } from '../../../../materialTheme.js'
-import { androidDynamicColors, desktopSystemAccentColor, getMaterialPalette } from '../../../helpers/dynamicColors.js'
+import { DEFAULT_MATERIAL_SEED_COLOR, MATERIAL_SEED_PRESETS, MATERIAL_SYSTEM_SEED, materialColorScheme, materialSeedPalette } from '../../../../materialTheme.js'
+import { DEFAULT_SIGNAL_ACCENT_COLOR, SIGNAL_ACCENT_PRESETS } from '../../../../signalTheme.js'
+import { androidDynamicColors, desktopSystemAccentColor, getMaterialPalette, getSystemAccentColor } from '../../../helpers/dynamicColors.js'
+import { calculateColorLuminance } from '../../../helpers/colors.js'
+
+const props = defineProps({
+  modelValue: { type: String, required: true },
+  /** Material swatches preview the seed's tonal palette, Signal swatches the color itself. */
+  variant: { type: String, default: 'material', validator: value => ['material', 'signal'].includes(value) },
+})
+const emit = defineEmits(['update:modelValue'])
 
 const { t, tm } = useI18n()
 const colorNames = computed(() => tm('Settings.Theme Settings.Main Color Theme'))
-const presets = MATERIAL_SEED_PRESETS.map(preset => ({
+const material = props.variant === 'material'
+const label = computed(() => material
+  ? t('Settings.Theme Settings.Material Accent Color')
+  : t('Settings.Theme Settings.Signal Accent Color'))
+const settingKey = material ? 'materialSeedColor' : 'signalAccentColor'
+
+/** A solid swatch with a readable check mark. */
+function flatScheme(color) {
+  return {
+    primary: color,
+    onPrimary: calculateColorLuminance(color),
+    primaryContainer: color,
+    secondaryContainer: color,
+    tertiaryContainer: color,
+  }
+}
+const presets = (material ? MATERIAL_SEED_PRESETS : SIGNAL_ACCENT_PRESETS).map(preset => ({
   ...preset,
-  scheme: materialColorScheme(materialSeedPalette(preset.color), false),
+  scheme: material ? materialColorScheme(materialSeedPalette(preset.color), false) : flatScheme(preset.color),
 }))
 
-const props = defineProps({ modelValue: { type: String, required: true } })
-const emit = defineEmits(['update:modelValue'])
-
 // Android offers its wallpaper palette, desktops their accent color.
-const systemScheme = computed(() => androidDynamicColors.value.supported || desktopSystemAccentColor.value
-  ? materialColorScheme(getMaterialPalette(MATERIAL_SYSTEM_SEED), false)
-  : null)
+const systemScheme = computed(() => {
+  if (!androidDynamicColors.value.supported && !desktopSystemAccentColor.value) return null
+  return material
+    ? materialColorScheme(getMaterialPalette(MATERIAL_SYSTEM_SEED), false)
+    : flatScheme(getSystemAccentColor())
+})
 const systemLabel = computed(() => androidDynamicColors.value.supported
   ? t('Settings.Theme Settings.Material Wallpaper Colors')
   : t('Settings.Theme Settings.Material System Accent Color'))
 const systemSelected = computed(() => props.modelValue === MATERIAL_SYSTEM_SEED)
 const draftColor = ref(null)
 const customColor = computed(() => draftColor.value ?? (systemSelected.value
-  ? materialColorScheme(getMaterialPalette(MATERIAL_SYSTEM_SEED), false).primary
+  ? systemScheme.value?.primary ?? (material ? DEFAULT_MATERIAL_SEED_COLOR : DEFAULT_SIGNAL_ACCENT_COLOR)
   : props.modelValue))
 
 // Each seed change restyles the whole document, so dragging previews the app
@@ -167,7 +192,7 @@ function swatchStyle(scheme) {
 </script>
 
 <style scoped>
-.materialColorSettings[role='group'] {
+.accentColorSettings[role='group'] {
   box-sizing: border-box;
   inline-size: min(100%, 640px);
   margin-inline: auto;
@@ -178,7 +203,7 @@ function swatchStyle(scheme) {
   color: var(--md-sys-color-on-primary-container, var(--primary-text-color));
 }
 
-.materialColorHeader {
+.accentColorHeader {
   display: flex;
   flex-wrap: wrap;
   justify-content: space-between;
@@ -186,11 +211,11 @@ function swatchStyle(scheme) {
   gap: 8px;
 }
 
-.materialColorHeader code {
+.accentColorHeader code {
   font-size: 0.78rem;
 }
 
-.materialColorSwatches {
+.accentColorSwatches {
   display: flex;
   flex-wrap: wrap;
   justify-content: center;
@@ -198,8 +223,8 @@ function swatchStyle(scheme) {
   margin-block-start: 16px;
 }
 
-.materialColorSwatch,
-.materialCustomSwatch :deep(.colorFieldTrigger) {
+.accentColorSwatch,
+.accentCustomSwatch :deep(.colorFieldTrigger) {
   box-sizing: border-box;
   display: grid;
   place-items: center;
@@ -213,22 +238,22 @@ function swatchStyle(scheme) {
   cursor: pointer;
 }
 
-.materialColorSwatch[aria-pressed='true'] {
+.accentColorSwatch[aria-pressed='true'] {
   border-color: var(--primary-color);
 }
 
-.materialColorSwatch:focus-visible,
-.materialCustomSwatch :deep(.colorFieldTrigger:focus-visible) {
+.accentColorSwatch:focus-visible,
+.accentCustomSwatch :deep(.colorFieldTrigger:focus-visible) {
   outline: 2px solid var(--primary-color);
   outline-offset: 2px;
 }
 
-.materialColorSwatch:hover .materialSwatchPalette,
-.materialCustomSwatch :deep(.colorFieldTrigger:hover) .materialCustomColor {
+.accentColorSwatch:hover .accentSwatchPalette,
+.accentCustomSwatch :deep(.colorFieldTrigger:hover) .accentCustomColor {
   box-shadow: 0 0 0 2px var(--md-sys-color-on-primary-container, var(--primary-text-color));
 }
 
-.materialSwatchPalette {
+.accentSwatchPalette {
   display: grid;
   place-items: center;
   inline-size: 100%;
@@ -242,7 +267,7 @@ function swatchStyle(scheme) {
   );
 }
 
-.materialSwatchCheck {
+.accentSwatchCheck {
   box-sizing: border-box;
   padding: 3px;
   inline-size: 24px;
@@ -252,13 +277,13 @@ function swatchStyle(scheme) {
   background: var(--swatch-primary);
 }
 
-.materialCustomSwatch :deep(.colorFieldTrigger) {
+.accentCustomSwatch :deep(.colorFieldTrigger) {
   grid-template-columns: 1fr;
   min-block-size: 48px;
   border-radius: calc(14px * var(--ui-roundness));
 }
 
-.materialCustomColor {
+.accentCustomColor {
   box-sizing: border-box;
   display: grid;
   place-items: center;
@@ -268,7 +293,7 @@ function swatchStyle(scheme) {
   border-radius: calc(8px * var(--ui-roundness));
 }
 
-.materialSwatchEdit {
+.accentSwatchEdit {
   box-sizing: border-box;
   inline-size: 24px;
   block-size: 24px;

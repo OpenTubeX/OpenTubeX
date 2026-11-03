@@ -545,6 +545,7 @@ Settings:
   Theme Settings:
     Only Show Important Notifications: Montri nur gravajn sciigojn
     Material Accent Color: Material-akcenta koloro
+    Signal Accent Color: Signal-akcenta koloro
     Material Wallpaper Colors: Koloroj de ekranfono
     Material System Accent Color: "Sistema akcenta koloro"
     Tab Loading Indicator:
@@ -626,8 +627,8 @@ Settings:
       One Dark: One Dark
       Carbonfox: Carbonfox
       Catppuccin Macchiato: Catppuccin Macchiato
-      Ocean Light: Ocean luma
-      Ocean Dark: Ocean malluma
+      Signal Light: Signal luma
+      Signal Dark: Signal malluma
       Custom: Laŭmenda
     Light Theme: Luma etoso
     Dark Theme: Malluma etoso

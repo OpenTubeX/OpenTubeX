@@ -276,6 +276,7 @@ Settings:
     Visible Search Suggestions: "Widoczne sugestie wyszukiwania"
     Use Custom Title Bar: Użyj niestandardowego paska tytułu
     Material Accent Color: "Kolor akcentu Material"
+    Signal Accent Color: "Kolor akcentu Signal"
     Material Wallpaper Colors: "Kolory tapety"
     Material System Accent Color: "Systemowy kolor akcentu"
     Tab Loading Indicator:
@@ -323,8 +324,8 @@ Settings:
       One Dark: One Dark
       Carbonfox: Carbonfox
       Catppuccin Macchiato: Catppuccin Macchiato
-      Ocean Light: "Ocean Jasny"
-      Ocean Dark: "Ocean Ciemny"
+      Signal Light: "Signal Jasny"
+      Signal Dark: "Signal Ciemny"
     Toast Position:
       Test Toast: Powiadomienie testowe
     Scroll Speed: Szybkość przewijania

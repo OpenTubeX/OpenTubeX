@@ -4,8 +4,8 @@ import { test, expect, goToSettingsSection, latestSettings, readDatastore } from
 for (const [theme, background, zoom] of [
   ['dark', 'rgb(15, 15, 15)', 1.25],
   ['light', 'rgb(241, 241, 241)', 0.8],
-  ['openTubeXDark', 'rgb(11, 20, 22)', 1.25],
-  ['openTubeXLight', 'rgb(232, 242, 240)', 0.8],
+  ['openTubeXDark', 'rgb(17, 17, 17)', 1.25],
+  ['openTubeXLight', 'rgb(246, 245, 244)', 0.8],
   ['hotPink', 'rgb(255, 0, 138)', 1],
   ['pastelPink', 'rgb(255, 234, 221)', 1],
 ]) {
@@ -142,7 +142,7 @@ test('shows a new window before its renderer loads and respects hiding during st
   }
 })
 
-test.describe('startup splash with a system-selected Ocean theme', () => {
+test.describe('startup splash with a system-selected Signal theme', () => {
   test.use({
     seed: {
       settings: {
@@ -151,7 +151,7 @@ test.describe('startup splash with a system-selected Ocean theme', () => {
     }
   })
 
-  for (const [mode, background] of [['dark', 'rgb(11, 20, 22)'], ['light', 'rgb(232, 242, 240)']]) {
+  for (const [mode, background] of [['dark', 'rgb(17, 17, 17)'], ['light', 'rgb(246, 245, 244)']]) {
     test(`uses the resolved ${mode} theme before loading the renderer`, async ({ page, app }) => {
       await app.electronApp.evaluate(({ nativeTheme }, source) => { nativeTheme.themeSource = source }, mode)
       let releaseRenderer

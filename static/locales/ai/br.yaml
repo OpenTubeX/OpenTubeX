@@ -510,6 +510,7 @@ Settings:
     Only Show Important Notifications: Diskouez ar c'hemennoù pouezus hepken
     Visible Search Suggestions: "Kinnigoù klask gwelus"
     Material Accent Color: "Liv pouez Material"
+    Signal Accent Color: "Liv pouez Signal"
     Material Wallpaper Colors: "Livioù ar skeudenn drekleur"
     Material System Accent Color: "Liv pouez ar reizhiad"
     Tab Loading Indicator:
@@ -605,8 +606,8 @@ Settings:
       One Dark: One Dark
       Carbonfox: Carbonfox
       Catppuccin Macchiato: Catppuccin Macchiato
-      Ocean Light: "Ocean Sklaer"
-      Ocean Dark: "Ocean Teñval"
+      Signal Light: "Signal Sklaer"
+      Signal Dark: "Signal Teñval"
       Custom: "Personelaet"
     Light Theme: "Neuz sklaer"
     Dark Theme: "Neuz teñval"

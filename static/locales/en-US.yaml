@@ -846,6 +846,7 @@ Settings:
     Engine Limit: You can add up to {count} custom search engines.
   Theme Settings:
     Material Accent Color: "Material accent color"
+    Signal Accent Color: "Signal accent color"
     Material Wallpaper Colors: "Wallpaper colors"
     Material System Accent Color: "System accent color"
     Tab Loading Indicator:
@@ -934,8 +935,8 @@ Settings:
       One Dark: One Dark
       Carbonfox: Carbonfox
       Catppuccin Macchiato: Catppuccin Macchiato
-      Ocean Light: "Ocean Light"
-      Ocean Dark: "Ocean Dark"
+      Signal Light: "Signal Light"
+      Signal Dark: "Signal Dark"
       Base Theme: Base Theme
       Black: Black
       Custom: Custom

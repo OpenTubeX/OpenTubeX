@@ -648,6 +648,7 @@ import { vSaferHtml } from './directives/vSaferHtml.js'
 
 import store from './store/index'
 import { MATERIAL_SYSTEM_SEED, MATERIAL_THEME_VALUES, normalizeSystemAccentColor } from '../materialTheme.js'
+import { SIGNAL_THEME_VALUES } from '../signalTheme.js'
 import { androidDynamicColors, desktopSystemAccentColor, getAndroidDynamicColors, onAndroidDynamicColorsChanged } from './helpers/dynamicColors'
 import {
   exitAndroidApp,
@@ -2136,7 +2137,8 @@ if (isCapacitor) {
     const theme = baseTheme.value === 'system'
       ? (systemUsesDarkTheme.value ? store.getters.getSystemDarkTheme : store.getters.getSystemLightTheme)
       : baseTheme.value
-    if (MATERIAL_THEME_VALUES.includes(theme)) updateTheme()
+    if (MATERIAL_THEME_VALUES.includes(theme) ||
+      (SIGNAL_THEME_VALUES.includes(theme) && store.getters.getSignalAccentColor === MATERIAL_SYSTEM_SEED)) updateTheme()
   }
   onMounted(async () => {
     try {
@@ -2162,7 +2164,7 @@ if (isElectron) {
   const receiveAccent = color => {
     if (disposed) return
     desktopSystemAccentColor.value = normalizeSystemAccentColor(color)
-    if (baseTheme.value === 'dynamic' || store.getters.getMaterialSeedColor === MATERIAL_SYSTEM_SEED) updateTheme()
+    if (baseTheme.value === 'dynamic' || [store.getters.getMaterialSeedColor, store.getters.getSignalAccentColor].includes(MATERIAL_SYSTEM_SEED)) updateTheme()
   }
   const removeListener = window.ftElectron.handleSystemAccentColorUpdated(color => {
     receivedUpdate = true
@@ -2179,6 +2181,7 @@ if (isElectron) {
 
 watch(baseTheme, updateTheme)
 watch(() => store.getters.getMaterialSeedColor, updateTheme)
+watch(() => store.getters.getSignalAccentColor, updateTheme)
 watch(appFont, updateAppFont)
 watch(() => store.getters.getSystemLightTheme, updateTheme)
 watch(() => store.getters.getSystemDarkTheme, updateTheme)
@@ -2229,7 +2232,10 @@ function updateTheme() {
   const customThemes = store.getters.getCustomThemes
   const customTheme = customThemes.find(theme => `custom:${theme.id}` === effectiveTheme) ??
     (effectiveTheme === 'custom' ? customThemes[0] : null) ?? null
-  applyThemeToDocument(effectiveTheme, mainColor.value, secColor.value, customTheme, store.getters.getMaterialSeedColor)
+  applyThemeToDocument(
+    effectiveTheme, mainColor.value, secColor.value, customTheme,
+    store.getters.getMaterialSeedColor, store.getters.getSignalAccentColor
+  )
   cacheCapacitorStartupAppearance()
   if (store.getters.getTrayIconPreset === 'theme') refreshTrayIcon()
   updateSystemBarsStyle()

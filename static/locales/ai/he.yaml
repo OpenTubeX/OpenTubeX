@@ -515,6 +515,7 @@ Settings:
     Only Show Important Notifications: הצגת התראות חשובות בלבד
     Visible Search Suggestions: "הצעות חיפוש גלויות"
     Material Accent Color: "צבע הדגשה של Material"
+    Signal Accent Color: "צבע הדגשה של Signal"
     Material Wallpaper Colors: "צבעי הטפט"
     Material System Accent Color: "צבע ההדגשה של המערכת"
     Tab Loading Indicator:
@@ -610,8 +611,8 @@ Settings:
       One Dark: One Dark
       Carbonfox: Carbonfox
       Catppuccin Macchiato: Catppuccin Macchiato
-      Ocean Light: "Ocean בהירה"
-      Ocean Dark: "Ocean כהה"
+      Signal Light: "Signal בהירה"
+      Signal Dark: "Signal כהה"
       Custom: מותאמת אישית
     Light Theme: ערכת נושא בהירה
     Dark Theme: ערכת נושא כהה

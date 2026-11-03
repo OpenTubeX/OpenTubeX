@@ -48,13 +48,13 @@ test('Material swatches retain contrast when editing an inactive System theme', 
   })
   await page.emulateMedia({ colorScheme: 'dark' })
   await expect(page.locator('body')).not.toHaveClass(/dynamicColors/)
-  await expect(section.locator('.materialColorSettings')).toBeVisible()
+  await expect(section.locator('.accentColorSettings')).toBeVisible()
   for (const seed of ['#ffffff', '#000000', '#ffff00']) {
     await page.evaluate(seed => window.$store.dispatch('updateMaterialSeedColor', seed), seed)
-    const editIcon = await colorsOf(section.locator('.materialSwatchEdit'))
+    const editIcon = await colorsOf(section.locator('.accentSwatchEdit'))
     expect(contrast(editIcon.foreground, editIcon.background), `${seed}: inactive Material edit icon`).toBeGreaterThanOrEqual(3)
-    const boundary = await colorsOf(section.locator('.materialCustomColor'))
-    const container = await colorsOf(section.locator('.materialColorSettings'))
+    const boundary = await colorsOf(section.locator('.accentCustomColor'))
+    const container = await colorsOf(section.locator('.accentColorSettings'))
     expect(contrast(boundary.border, container.background), `${seed}: inactive Material swatch boundary`).toBeGreaterThanOrEqual(3)
   }
 })
@@ -63,7 +63,7 @@ test('desktop Dynamic colors follows native accents and hides manual controls', 
   await page.emulateMedia({ colorScheme: 'light' })
   const section = await goToSettingsSection(page, 'theme')
   await page.evaluate(() => window.$store.dispatch('updateBaseTheme', 'dynamic'))
-  await expect(section.locator('.materialColorSettings')).toHaveCount(0)
+  await expect(section.locator('.accentColorSettings')).toHaveCount(0)
   await expect(section.getByRole('combobox', { name: /Main color theme/i })).toHaveCount(0)
   for (const [nativeColor, seed, dark] of [['#895AA2FF', '#895aa2', false], ['006A6AFF', '#006a6a', false], ['006A6AFF', '#006a6a', true]]) {
     await page.emulateMedia({ colorScheme: dark ? 'dark' : 'light' })
@@ -77,7 +77,7 @@ test('desktop Dynamic colors follows native accents and hides manual controls', 
       const { foreground, background } = await colorsOf(element)
       expect(contrast(foreground, background)).toBeGreaterThanOrEqual(4.5)
     }
-    await expect(section.locator('.materialColorSettings')).toHaveCount(0)
+    await expect(section.locator('.accentColorSettings')).toHaveCount(0)
   }
   // Reload reads the native accent again rather than retaining renderer state.
   await page.reload()
@@ -90,8 +90,8 @@ test('desktop Dynamic colors follows native accents and hides manual controls', 
   await testInfo.attach('Desktop Dynamic colors', { path, contentType: 'image/png' })
   for (const [theme, dark] of [['materialLight', false], ['materialDark', true], ['materialBlack', true]]) {
     await page.evaluate(theme => window.$store.dispatch('updateBaseTheme', theme), theme)
-    await expect(section.locator('.materialColorSettings')).toBeVisible()
-    await expect(section.locator('.materialColorHeader code')).toHaveText('#ffff00')
+    await expect(section.locator('.accentColorSettings')).toBeVisible()
+    await expect(section.locator('.accentColorHeader code')).toHaveText('#ffff00')
     await expect(page.locator('body')).toHaveCSS('--primary-color', materialColorScheme(materialSeedPalette('#ffff00'), dark).primary)
   }
   await page.evaluate(() => window.$store.dispatch('updateBaseTheme', 'dynamic'))
@@ -100,7 +100,7 @@ test('desktop Dynamic colors follows native accents and hides manual controls', 
     systemPreferences.emit('accent-color-changed', {}, '')
   })
   await expect(page.locator('body')).toHaveCSS('--primary-color', materialColorScheme(materialSeedPalette('#ffff00'), true).primary)
-  await expect(section.locator('.materialColorSettings')).toHaveCount(0)
+  await expect(section.locator('.accentColorSettings')).toHaveCount(0)
 })
 
 test('desktop system accents reach new windows, startup backgrounds and live renderers', async ({ app, page }) => {
@@ -130,12 +130,12 @@ test('desktop system accents reach new windows, startup backgrounds and live ren
 test('hiding system accent controls clamps settings at the bottom', { tag: '@scale' }, async ({ page }) => {
   const section = await goToSettingsSection(page, 'theme')
   const scroller = page.locator('.settingsContent')
-  await expect(section.locator('.materialColorSettings')).toBeVisible()
+  await expect(section.locator('.accentColorSettings')).toBeVisible()
   await scroller.evaluate(element => { element.scrollTop = element.scrollHeight })
   await expectScrollAtRenderedEnd(scroller)
   const oldRange = await scroller.evaluate(element => element.scrollHeight - element.clientHeight)
   await page.evaluate(() => window.$store.dispatch('updateBaseTheme', 'dynamic'))
-  await expect(section.locator('.materialColorSettings')).toHaveCount(0)
+  await expect(section.locator('.accentColorSettings')).toHaveCount(0)
   await expectScrollAtRenderedEnd(scroller)
   await expect.poll(() => scroller.evaluate(element => element.scrollHeight - element.clientHeight)).toBeLessThan(oldRange)
   await expect.poll(() => scroller.evaluate(element => {
@@ -150,18 +150,18 @@ test('hiding system accent controls clamps settings at the bottom', { tag: '@sca
 
 test('Material accent box has vertical padding and a clickable custom swatch', { tag: '@scale' }, async ({ page }) => {
   const section = await goToSettingsSection(page, 'theme')
-  const box = section.locator('.materialColorSettings')
-  const customSwatch = box.locator('.materialCustomSwatch .colorFieldTrigger')
+  const box = section.locator('.accentColorSettings')
+  const customSwatch = box.locator('.accentCustomSwatch .colorFieldTrigger')
   const picker = page.getByRole('dialog', { name: 'Material accent color' })
   const padding = await box.evaluate(element => {
     const bounds = element.getBoundingClientRect()
-    const header = element.querySelector('.materialColorHeader').getBoundingClientRect()
-    const swatches = element.querySelector('.materialColorSwatches').getBoundingClientRect()
+    const header = element.querySelector('.accentColorHeader').getBoundingClientRect()
+    const swatches = element.querySelector('.accentColorSwatches').getBoundingClientRect()
     return [header.top - bounds.top, bounds.bottom - swatches.bottom]
   })
   for (const value of padding) expect(value).toBeGreaterThanOrEqual(23.5)
   await expect(customSwatch).toBeVisible()
-  await expect(customSwatch.locator('.materialCustomColor')).toHaveCSS('background-color', 'rgb(255, 255, 0)')
+  await expect(customSwatch.locator('.accentCustomColor')).toHaveCSS('background-color', 'rgb(255, 255, 0)')
   await customSwatch.click()
   await expect(picker).toBeVisible()
   await expect(customSwatch).toHaveAttribute('aria-expanded', 'true')
@@ -226,18 +226,18 @@ for (const [theme, label] of variants) {
       page.locator('.settingsMenu .title.active .titleDescription'),
       section.getByRole('combobox', { name: /^Base theme/i }),
       page.locator('.settingsSearch input'),
-      section.locator('.materialColorHeader'),
-      section.locator('.materialColorHeader code'),
+      section.locator('.accentColorHeader'),
+      section.locator('.accentColorHeader code'),
     ]) {
       const { foreground, background } = await colorsOf(element)
       expect(contrast(foreground, background), `${theme}: ${element}`).toBeGreaterThanOrEqual(4.5)
     }
     const placeholder = await colorsOf(page.locator('.settingsSearch input'), '::placeholder')
     expect(contrast(placeholder.foreground, placeholder.background), `${theme}: search placeholder`).toBeGreaterThanOrEqual(4.5)
-    const customBorder = await colorsOf(section.locator('.materialCustomColor'))
-    const accentBox = await colorsOf(section.locator('.materialColorSettings'))
+    const customBorder = await colorsOf(section.locator('.accentCustomColor'))
+    const accentBox = await colorsOf(section.locator('.accentColorSettings'))
     expect(contrast(customBorder.border, accentBox.background), `${theme}: custom swatch boundary`).toBeGreaterThanOrEqual(3)
-    const editIcon = await colorsOf(section.locator('.materialSwatchEdit'))
+    const editIcon = await colorsOf(section.locator('.accentSwatchEdit'))
     expect(contrast(editIcon.foreground, editIcon.background), `${theme}: custom swatch edit icon`).toBeGreaterThanOrEqual(3)
     for (const field of [section.getByRole('combobox', { name: /^Base theme/i }), page.locator('.settingsSearch input')]) {
       expect(await fieldBoundaryContrast(app, field), `${theme}: field boundary`).toBeGreaterThanOrEqual(3)
@@ -323,9 +323,9 @@ test('a synced system seed follows desktop accents and survives a canceled custo
     }, nativeColor)
     const primary = materialColorScheme(materialSeedPalette(seed), false).primary
     await expect(page.locator('body')).toHaveCSS('--primary-color', primary)
-    await expect(section.locator('.materialCustomColor')).toHaveCSS('background-color', `rgb(${primary.slice(1).match(/../g).map(value => parseInt(value, 16)).join(', ')})`)
+    await expect(section.locator('.accentCustomColor')).toHaveCSS('background-color', `rgb(${primary.slice(1).match(/../g).map(value => parseInt(value, 16)).join(', ')})`)
   }
-  const customSwatch = section.locator('.materialCustomSwatch .colorFieldTrigger')
+  const customSwatch = section.locator('.accentCustomSwatch .colorFieldTrigger')
   await customSwatch.click()
   const picker = page.getByRole('dialog', { name: 'Material accent color' })
   await picker.getByRole('textbox', { name: /^Hex color/ }).fill('#00aaff')
@@ -347,7 +347,7 @@ function setDesktopAccent(app, color) {
 test('a desktop accent color adds a system swatch that follows it', async ({ app, page }, testInfo) => {
   await page.emulateMedia({ colorScheme: 'light' })
   const section = await goToSettingsSection(page, 'theme')
-  const systemSwatch = section.locator('.materialColorSwatches').getByRole('button', { name: 'System accent color', exact: true })
+  const systemSwatch = section.locator('.accentColorSwatches').getByRole('button', { name: 'System accent color', exact: true })
   // Without an accent, as on desktops that set none
   await setDesktopAccent(app, '')
   await expect(systemSwatch).toHaveCount(0)
@@ -359,11 +359,11 @@ test('a desktop accent color adds a system swatch that follows it', async ({ app
     if (seed === '#895aa2') {
       await systemSwatch.click()
       await expect(systemSwatch).toHaveAttribute('aria-pressed', 'true')
-      await expect(section.locator('.materialColorHeader code')).toHaveText('System accent color')
+      await expect(section.locator('.accentColorHeader code')).toHaveText('System accent color')
       await expect.poll(() => page.evaluate(() => window.$store.getters.getMaterialSeedColor)).toBe('system')
-      await section.locator('.materialColorSettings').scrollIntoViewIfNeeded()
+      await section.locator('.accentColorSettings').scrollIntoViewIfNeeded()
       const path = testInfo.outputPath('desktop-system-accent-swatch.png')
-      await section.locator('.materialColorSettings').screenshot({ path })
+      await section.locator('.accentColorSettings').screenshot({ path })
       await testInfo.attach('Desktop system accent swatch', { path, contentType: 'image/png' })
     }
     await expect(page.locator('body')).toHaveCSS('--primary-color', primary)
@@ -384,7 +384,7 @@ test('seed picker persists colors, system preferences select Material variants, 
   await hexField.fill('#00aaff')
   await picker.getByRole('textbox', { name: /^Hex color/ }).press('Tab')
   await picker.getByRole('button', { name: 'Apply', exact: true }).click()
-  await expect(section.locator('.materialColorHeader code')).toHaveText('#00aaff')
+  await expect(section.locator('.accentColorHeader code')).toHaveText('#00aaff')
   const primary = await page.locator('body').evaluate(el => el.style.getPropertyValue('--primary-color'))
   await page.evaluate(async () => {
     const store = window.$store
@@ -399,7 +399,7 @@ test('seed picker persists colors, system preferences select Material variants, 
   expect(await page.locator('body').evaluate(el => el.style.getPropertyValue('--primary-color'))).toBe(primary)
   await page.reload()
   await goToSettingsSection(page, 'theme')
-  await expect(section.locator('.materialColorHeader code')).toHaveText('#00aaff')
+  await expect(section.locator('.accentColorHeader code')).toHaveText('#00aaff')
   await page.evaluate(() => window.$store.dispatch('updateBaseTheme', 'dark'))
   await expect(page.locator('body')).not.toHaveClass(/dynamicColors/)
   await expect(section.getByRole('button', { name: 'Material accent color' })).toHaveCount(0)
@@ -429,13 +429,13 @@ test('Material preset swatches preview palettes and persist the selected seed', 
   // The host desktop's accent would add a system swatch
   await setDesktopAccent(app, '')
   const section = await goToSettingsSection(page, 'theme')
-  const swatches = section.locator('.materialColorSwatches > button')
+  const swatches = section.locator('.accentColorSwatches > button')
   await expect(swatches).toHaveCount(8)
   for (const name of ['Purple', 'Blue', 'Teal', 'Green', 'Amber', 'Pink', 'Red', 'Indigo']) {
-    const preset = section.locator('.materialColorSwatches').getByRole('button', { name, exact: true })
+    const preset = section.locator('.accentColorSwatches').getByRole('button', { name, exact: true })
     await preset.click()
     await expect(preset).toHaveAttribute('aria-pressed', 'true')
-    await expect(section.locator('.materialSwatchCheck')).toHaveCount(1)
+    await expect(section.locator('.accentSwatchCheck')).toHaveCount(1)
     const colors = await preset.evaluate(el => ({ seed: window.$store.getters.getMaterialSeedColor, palette: getComputedStyle(el).getPropertyValue('--swatch-primary') }))
     expect(colors.seed).toMatch(/^#[a-f0-9]{6}$/)
     expect(colors.palette).toMatch(/^#[a-f0-9]{6}$/)
@@ -443,7 +443,7 @@ test('Material preset swatches preview palettes and persist the selected seed', 
   // Observe Indigo on disk so the final check cannot match the earlier Blue selection.
   const savedSeed = () => latestSettings(readDatastore(app.userDataDir, 'settings')).materialSeedColor
   await expect.poll(savedSeed).toBe('#3f51b5')
-  const blue = section.locator('.materialColorSwatches').getByRole('button', { name: 'Blue', exact: true })
+  const blue = section.locator('.accentColorSwatches').getByRole('button', { name: 'Blue', exact: true })
   await blue.focus()
   await blue.press('Space')
   await expect(blue).toHaveAttribute('aria-pressed', 'true')
@@ -456,7 +456,7 @@ test('Material preset swatches preview palettes and persist the selected seed', 
 
 test('applying a seed after an interrupted drag lets presets update the custom swatch', async ({ page }) => {
   const section = await goToSettingsSection(page, 'theme')
-  await section.locator('.materialCustomSwatch .colorFieldTrigger').click()
+  await section.locator('.accentCustomSwatch .colorFieldTrigger').click()
   const picker = page.getByRole('dialog', { name: 'Material accent color' })
   const bounds = await picker.getByRole('slider', { name: 'Saturation and brightness' }).boundingBox()
   await page.mouse.move(bounds.x + 4, bounds.y + 4)
@@ -467,14 +467,14 @@ test('applying a seed after an interrupted drag lets presets update the custom s
   await page.mouse.up()
   await picker.getByRole('button', { name: 'Apply', exact: true }).click()
   await expect(picker).toBeHidden()
-  await section.locator('.materialColorSwatches').getByRole('button', { name: 'Blue', exact: true }).click()
-  await expect(section.locator('.materialCustomColor')).toHaveCSS('background-color', 'rgb(66, 133, 244)')
+  await section.locator('.accentColorSwatches').getByRole('button', { name: 'Blue', exact: true }).click()
+  await expect(section.locator('.accentCustomColor')).toHaveCSS('background-color', 'rgb(66, 133, 244)')
 })
 
 for (const movedAfterPreview of [false, true]) {
   test(`an interrupted drag does not overwrite a newer seed from elsewhere${movedAfterPreview ? ' after moving' : ''}`, async ({ page }) => {
     const section = await goToSettingsSection(page, 'theme')
-    await section.locator('.materialCustomSwatch .colorFieldTrigger').click()
+    await section.locator('.accentCustomSwatch .colorFieldTrigger').click()
     const picker = page.getByRole('dialog', { name: 'Material accent color' })
     const bounds = await picker.getByRole('slider', { name: 'Saturation and brightness' }).boundingBox()
     // Pressing previews the color immediately and starts the preview timer.

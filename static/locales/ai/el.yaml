@@ -511,6 +511,7 @@ Settings:
     Only Show Important Notifications: Εμφάνιση μόνο σημαντικών ειδοποιήσεων
     Visible Search Suggestions: "Ορατές προτάσεις αναζήτησης"
     Material Accent Color: "Χρώμα έμφασης Material"
+    Signal Accent Color: "Χρώμα έμφασης Signal"
     Material Wallpaper Colors: "Χρώματα ταπετσαρίας"
     Material System Accent Color: "Χρώμα έμφασης συστήματος"
     Tab Loading Indicator:
@@ -606,8 +607,8 @@ Settings:
       One Dark: One Dark
       Carbonfox: Carbonfox
       Catppuccin Macchiato: Catppuccin Macchiato
-      Ocean Light: "Ocean Φωτεινό"
-      Ocean Dark: "Ocean Σκοτεινό"
+      Signal Light: "Signal Φωτεινό"
+      Signal Dark: "Signal Σκοτεινό"
       Custom: Προσαρμοσμένο
     Light Theme: Φωτεινό θέμα
     Dark Theme: Σκοτεινό θέμα
