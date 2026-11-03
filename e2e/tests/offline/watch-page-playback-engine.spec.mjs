@@ -1,4 +1,7 @@
-import { sel, setWindowSize, test, expect } from '../../helpers/app.mjs'
+import { readFile } from 'node:fs/promises'
+import path from 'node:path'
+
+import { repoRoot, sel, setWindowSize, test, expect } from '../../helpers/app.mjs'
 import { activeTab, openMockedVideo, waitForPlayback, openCaptionLanguages } from '../../helpers/player.mjs'
 import { mockPlayableWatchPage, watchViewHandle } from '../../helpers/watch.mjs'
 import {
@@ -11,6 +14,36 @@ import {
 import { WATCH_PAGE_SEED } from '../../helpers/watch-page.mjs'
 
 test.use({ seed: { settings: WATCH_PAGE_SEED } })
+
+/**
+ * Serves a playable live HLS stream. An empty playlist fails the player, and its
+ * recovery extracts the streams again while a test still checks the extraction.
+ * @param {import('@playwright/test').Page} page
+ * @param {string} url the playlist URL, or a glob for several
+ */
+async function routeLiveHls(page, url) {
+  const fixture = await readFile(path.join(repoRoot, 'e2e/fixtures/media/hls-1080.mp4'))
+  const fragmentStart = fixture.indexOf(Buffer.from('moof')) - 4
+  await page.route('https://example.invalid/hls/init.mp4', route => route.fulfill({
+    contentType: 'video/mp4',
+    body: fixture.subarray(0, fragmentStart)
+  }))
+  await page.route('https://example.invalid/hls/segment.mp4', route => route.fulfill({
+    contentType: 'video/mp4',
+    body: fixture.subarray(fragmentStart)
+  }))
+  await page.route(url, route => route.fulfill({
+    contentType: 'application/x-mpegURL',
+    body: `#EXTM3U
+#EXT-X-TARGETDURATION:2
+#EXT-X-VERSION:7
+#EXT-X-MEDIA-SEQUENCE:0
+#EXT-X-MAP:URI="https://example.invalid/hls/init.mp4"
+#EXTINF:2,
+https://example.invalid/hls/segment.mp4
+`
+  }))
+}
 
 /**
  * @param {import('@playwright/test').Page} page
@@ -742,10 +775,7 @@ test.describe('watch page', () => {
 
   test('shares a pending yt-dlp extraction after rapid engine switches', async ({ app, page }) => {
     await mockPlayableWatchPage(app, page)
-    await page.route('https://example.invalid/*.m3u8', route => route.fulfill({
-      contentType: 'application/x-mpegURL',
-      body: '#EXTM3U\n'
-    }))
+    await routeLiveHls(page, 'https://example.invalid/*.m3u8')
     await openMockedVideo(page)
 
     await app.electronApp.evaluate(({ ipcMain }) => {
@@ -1050,10 +1080,7 @@ test.describe('watch page', () => {
 
   test('treats yt-dlp live status as live and does not cache its HLS source', async ({ app, page }) => {
     await mockPlayableWatchPage(app, page)
-    await page.route('https://example.invalid/live-status.m3u8', route => route.fulfill({
-      contentType: 'application/x-mpegURL',
-      body: '#EXTM3U\n'
-    }))
+    await routeLiveHls(page, 'https://example.invalid/live-status.m3u8')
     await openMockedVideo(page)
 
     await app.electronApp.evaluate(({ ipcMain }) => {
