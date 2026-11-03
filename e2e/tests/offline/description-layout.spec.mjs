@@ -207,8 +207,9 @@ test.describe('description layout', () => {
   })
 
   test('keeps description controls below open toolbar dropdowns', { tag: '@scale' }, async ({ app, page, uiScale }) => {
-    // Keep a 1400x1000 CSS viewport at every scale so the share menu stays a dropdown.
-    await setWindowSize(app, page, { width: Math.round(14 * uiScale), height: Math.round(10 * uiScale) })
+    // Keep a 1400x1300 CSS viewport at every scale so the share menu stays a
+    // dropdown and fits below its button, where it opens over the description.
+    await setWindowSize(app, page, { width: Math.round(14 * uiScale), height: Math.round(13 * uiScale) })
     await mockUnplayableWatchPage(app, page)
     await goTo(page, 'history')
     // Invidious options widen the share menu and hiding Download moves it to the card edge,
