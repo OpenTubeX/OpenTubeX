@@ -646,6 +646,11 @@ export async function refreshRssFeeds(feeds, { automatic = false } = {}) {
   }
 }
 
+/** Stops the running refresh. Its feeds keep their previous items and errors. */
+export function cancelRssFeedsRefresh() {
+  activeRefresh?.abort()
+}
+
 export function openRssFeedManager() {
   store.commit('setSettingsWindowSection', { section: 'subscriptions', subpage: 'rss-feeds' })
   store.dispatch('showSettingsWindow')

@@ -280,7 +280,7 @@
                 :next-auto-refresh-at="currentAutoRefresh.timestamp"
                 :auto-refresh-interval="currentAutoRefresh.interval"
                 :title="currentTabPanel.refreshTitle"
-                :refresh-in-progress="currentTab !== 'feeds' && !currentNewFeedRssTab && subscriptionFeedRefreshInProgress"
+                :refresh-in-progress="currentTabRefreshInProgress"
                 @click="refreshCurrentTab"
                 @cancel="cancelRefresh"
               />
@@ -439,6 +439,7 @@ import {
 import { getSubscriptionsForFeed } from '../../helpers/subscription-channels'
 import { getEnabledSubscriptionFeedSources } from '../../helpers/newSubscriptionFeed'
 import {
+  cancelRssFeedsRefresh,
   getRssFeedsAutoRefreshInterval,
   markRssFeedItemsAsSeen,
   openRssFeedManager,
@@ -524,13 +525,13 @@ function handleFeedContextMenu(event) {
     all: t('Context Menu.Reload All Feeds'),
     feeds: t('Context Menu.Reload RSS Feeds')
   }
-  // RSS feeds refresh separately, without cancellation
-  const cancels = feedTab !== 'feeds' && subscriptionFeedRefreshInProgress.value
+  // RSS feeds refresh separately
+  const cancels = feedTab === 'feeds' ? rssFeedsRefreshing.value : subscriptionFeedRefreshInProgress.value
   const actions = [{
     label: cancels ? t('Context Menu.Cancel Refresh') : reloadLabels[feedTab],
     icon: cancels ? ['fas', 'xmark'] : ['fas', 'sync'],
     run: cancels
-      ? cancelRefresh
+      ? (feedTab === 'feeds' ? cancelRssFeedsRefresh : requestSubscriptionRefreshCancellation)
       : () => handleFeedReloadRequest({ tabId, feedTab })
   }]
   if (tab.dataset.hasNewContent === 'true' && (tab.dataset.newFeedTab || feedTab === 'feeds')) {
@@ -681,6 +682,15 @@ const currentTabRefreshing = computed(() => {
 
   const currentFeedTab = currentTab.value === 'community' ? 'posts' : currentTab.value
   return refreshingFeedTab.value !== null && refreshingFeedTab.value === currentFeedTab
+})
+
+// Includes the RSS refresh where the current tab shows its items
+const currentTabRefreshInProgress = computed(() => {
+  if (currentTab.value === 'feeds' || currentNewFeedRssTab.value) {
+    return rssFeedsRefreshing.value
+  }
+  return subscriptionFeedRefreshInProgress.value ||
+    (combinedNewFeedRefreshesRssFeeds.value && rssFeedsRefreshing.value)
 })
 
 /** @type {import('vue').Ref<'videos' | 'shorts' | 'live' | 'community' | 'new' | 'feeds' | null>} */
@@ -1354,8 +1364,14 @@ function refreshCurrentTab() {
 }
 
 function cancelRefresh() {
-  // The refresh may be owned by another window, so it is cancelled everywhere
-  requestSubscriptionRefreshCancellation()
+  const rssTab = currentTab.value === 'feeds' || currentNewFeedRssTab.value
+  if (rssTab || combinedNewFeedRefreshesRssFeeds.value) {
+    cancelRssFeedsRefresh()
+  }
+  if (!rssTab) {
+    // The refresh may be owned by another window, so it is cancelled everywhere
+    requestSubscriptionRefreshCancellation()
+  }
 }
 
 /**

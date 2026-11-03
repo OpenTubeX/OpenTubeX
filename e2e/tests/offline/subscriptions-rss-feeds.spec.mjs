@@ -535,6 +535,45 @@ test.describe('with followed feeds', () => {
     await expect(panel.getByText('1 feed could not be refreshed.')).toHaveCount(0)
   })
 
+  test('cancels a running refresh and keeps the previous items', async ({ page }) => {
+    await mockFeeds(page)
+    await goTo(page, 'subscriptions')
+    await page.locator('[data-rss-feeds-tab]').click()
+    const panel = page.locator('#subscriptionsPanel')
+    const titles = panel.locator('.ft-list-item .h3Title')
+    await expect(titles).toHaveText(['Newest VOD', 'Older VOD'])
+    await expect(panel.getByText('1 feed could not be refreshed.')).toBeVisible()
+
+    // The feed never answers, so only cancelling ends the refresh
+    let aborted = 0
+    page.on('requestfailed', (request) => {
+      if (request.url() === RSS_URL) aborted++
+    })
+    await page.route(RSS_URL, () => {})
+    const header = page.locator('.subscriptionsHeader')
+    const loading = page.locator('[data-rss-feeds-tab] .tabLoadingIndicator')
+    await header.getByRole('button', { name: /^Refresh RSS/ }).click()
+    await expect(loading).toBeVisible()
+    await header.getByRole('button', { name: 'Cancel Refresh' }).click()
+    await expect(loading).toHaveCount(0)
+    await expect.poll(() => aborted).toBe(1)
+    await expect(header.getByRole('button', { name: /^Refresh RSS/ })).toHaveAttribute('aria-disabled', 'false')
+    expect(await titles.allTextContents()).toEqual(['Newest VOD', 'Older VOD'])
+    await expect(panel.getByText('1 feed could not be refreshed.')).toBeVisible()
+
+    // The New feed refreshes only the RSS feeds without subscriptions, and cancels them too
+    await page.locator('[data-subscription-feed-tab="all"]').click()
+    await header.getByRole('button', { name: /^Refresh / }).click()
+    await expect(loading).toBeVisible()
+    await header.getByRole('button', { name: 'Cancel Refresh' }).click()
+    await expect(loading).toHaveCount(0)
+    await expect.poll(() => aborted).toBe(2)
+
+    await page.locator('[data-rss-feeds-tab]').click()
+    expect(await titles.allTextContents()).toEqual(['Newest VOD', 'Older VOD'])
+    await expect(panel.getByText('1 feed could not be refreshed.')).toBeVisible()
+  })
+
   test('keeps the previous items of a feed that fails to refresh', async ({ page }) => {
     await mockFeeds(page)
     await goTo(page, 'subscriptions')
@@ -825,10 +864,11 @@ test.describe('with new items', () => {
       await held
       await route.fulfill({ contentType: 'application/rss+xml', body: updatedRssFeed })
     })
-    const refresh = page.locator('.subscriptionsHeader').getByRole('button', { name: /^Refresh / })
+    const header = page.locator('.subscriptionsHeader')
+    const refresh = header.getByRole('button', { name: /^Refresh / })
     await refresh.click()
     await expect(page.locator('[data-rss-feeds-tab] .tabLoadingIndicator')).toBeVisible()
-    await expect(refresh).toHaveAttribute('aria-disabled', 'true')
+    await expect(header.getByRole('button', { name: 'Cancel Refresh' })).toBeVisible()
     release()
     await expect(page.locator('[data-rss-feeds-tab] .tabLoadingIndicator')).toHaveCount(0)
     await expect(refresh).toHaveAttribute('aria-disabled', 'false')
