@@ -71,7 +71,7 @@ import {
 import { createSubscriptionBackgroundService } from './subscriptionBackground'
 import { createUploadNotifier } from './uploadNotifications'
 import { createNotificationHistory, createNotifier } from './notificationHistory'
-import { loadNotificationImage } from './notificationImage'
+import { loadNotificationImage, setNotificationImagesAllowed } from './notificationImage'
 import { setAutomaticDownloadNotifier } from './ytDlpAutomaticDownloads'
 import { getLiveReminderTarget } from '../notificationHistory'
 import { supportsNativeNotifications } from './nativeNotifications'
@@ -601,6 +601,9 @@ function runApp() {
   })
   /** @type {import('./notificationHistory').NotificationMode} */
   let notificationMode = 'both'
+  let thumbnailPreference = ''
+  let blurThumbnails = false
+  setNotificationImagesAllowed(() => thumbnailPreference !== 'hidden' && !blurThumbnails)
   const notify = createNotifier({
     history: notificationHistory,
     getMode: () => notificationMode,
@@ -1119,6 +1122,12 @@ function runApp() {
             break
           case 'notificationMode':
             if (['both', 'system', 'off'].includes(doc.value)) notificationMode = doc.value
+            break
+          case 'thumbnailPreference':
+            thumbnailPreference = doc.value
+            break
+          case 'blurThumbnails':
+            blurThumbnails = doc.value === true
             break
         }
       })
@@ -2979,6 +2988,12 @@ function runApp() {
               break
             case 'notificationMode':
               if (['both', 'system', 'off'].includes(data.value)) notificationMode = data.value
+              break
+            case 'thumbnailPreference':
+              thumbnailPreference = data.value
+              break
+            case 'blurThumbnails':
+              blurThumbnails = data.value === true
               break
             case 'baseTheme':
               if (isCustomThemeValue(data.value)) {

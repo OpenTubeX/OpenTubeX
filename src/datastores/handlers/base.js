@@ -133,7 +133,9 @@ class Settings {
           'hideToTrayOnClose',
           'hideToTrayOnMinimize',
           'iconPack',
-          'notificationMode'
+          'notificationMode',
+          'thumbnailPreference',
+          'blurThumbnails'
         ]
       }
     })

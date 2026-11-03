@@ -3,7 +3,7 @@ import test from 'node:test'
 import { importWithElectron } from '../helpers/main-process.mjs'
 
 let respond = null
-const [{ loadNotificationImage }] = await importWithElectron([
+const [{ loadNotificationImage, setNotificationImagesAllowed }] = await importWithElectron([
   new URL('../../src/main/notificationImage.js', import.meta.url).href,
 ], {
   net: { fetch: (...args) => respond(...args) },
@@ -24,5 +24,17 @@ test('notification images stop reading a body without a length once it exceeds t
 
 test('notification images load small bodies', async () => {
   respond = async () => new Response(new Uint8Array([1, 2, 3]))
+  assert.equal((await loadNotificationImage('https://i.ytimg.com/vi/abc/mqdefault.jpg')).size, 3)
+})
+
+test('notification images stay off while the thumbnail settings hide or blur thumbnails', async () => {
+  let fetched = 0
+  respond = async () => { fetched++; return new Response(new Uint8Array([1, 2, 3])) }
+  let allowed = false
+  setNotificationImagesAllowed(() => allowed)
+  assert.equal(await loadNotificationImage('https://i.ytimg.com/vi/abc/mqdefault.jpg'), undefined)
+  assert.equal(fetched, 0)
+
+  allowed = true
   assert.equal((await loadNotificationImage('https://i.ytimg.com/vi/abc/mqdefault.jpg')).size, 3)
 })

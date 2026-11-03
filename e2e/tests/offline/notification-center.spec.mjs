@@ -175,6 +175,29 @@ test('system notifications load the video thumbnail through the app session', as
   expect(await app.electronApp.evaluate(() => globalThis.createdImages)).toBe(1)
 })
 
+test('system notifications follow thumbnail settings changed after a reminder was set', async ({ app, page }) => {
+  await mockSystemNotifications(app)
+  await app.electronApp.evaluate(({ net }) => {
+    globalThis.fetchedImages = []
+    net.fetch = async url => {
+      globalThis.fetchedImages.push(String(url))
+      throw new Error('No thumbnails offline')
+    }
+  })
+  const videoId = 'abcdefghijk'
+  await page.evaluate(videoId => window.ftElectron.liveReminder.schedule({
+    videoId,
+    startTimestamp: Date.now() + 2000,
+    notificationTitle: 'Premiere starting',
+    notificationBody: 'Starting now',
+    thumbnail: `https://i.ytimg.com/vi/${videoId}/mqdefault.jpg`
+  }), videoId)
+  await page.evaluate(() => window.$store.dispatch('updateBlurThumbnails', true))
+
+  await expect.poll(async () => (await shownNotifications(app)).map(notification => notification.title)).toStrictEqual(['Premiere starting'])
+  expect(await app.electronApp.evaluate(() => globalThis.fetchedImages)).toStrictEqual([])
+})
+
 test('the bell records notifications the system cannot show', async ({ app, page }) => {
   await mockSystemNotifications(app, { supported: false })
   await announceUploads(page, ['a'])
