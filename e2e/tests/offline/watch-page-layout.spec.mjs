@@ -288,7 +288,9 @@ for (const blur of [false, true]) {
     }
 
     const videoInfo = page.locator('.infoArea .watchVideoInfo')
-    await videoInfo.locator('.videoOptions').evaluate(element => element.scrollIntoView({ block: 'start' }))
+    // Leaves room for the dropdown below the toolbar. Scrolling it to the top would hide
+    // the button behind the top navigation, and the click would scroll the page back.
+    await videoInfo.locator('.videoOptions').evaluate(element => element.scrollIntoView({ block: 'center' }))
     await videoInfo.locator('.videoOptions').getByRole('button', { name: 'Add to playlist', exact: true }).click()
     const dropdown = videoInfo.locator('.iconDropdown:has(.addToPlaylistDropdown)')
     await expect(dropdown.locator('.playlistRow').first()).toBeVisible()
@@ -311,6 +313,31 @@ for (const blur of [false, true]) {
     expect(hits.missed).toEqual([])
   })
 }
+
+test('opens the toolbar\'s Save to dropdown above the button without scrolling when only the space above fits it', { tag: '@scale' }, async ({ app, page }) => {
+  await page.evaluate(() => window.$store.dispatch('updateScrollMiniPlayerEnabled', false))
+  await mockPlayableWatchPage(app, page)
+  await openMockedVideo(page)
+
+  const videoInfo = page.locator('.infoArea .watchVideoInfo')
+  const button = videoInfo.locator('.videoOptions').getByRole('button', { name: 'Add to playlist', exact: true })
+  await videoInfo.locator('.videoOptions').evaluate(element => element.scrollIntoView({ block: 'end' }))
+  const buttonBefore = await button.boundingBox()
+  const viewportHeight = await page.evaluate(() => window.innerHeight)
+  // Only meaningful when the button sits low enough that the dropdown cannot fit below it
+  expect(buttonBefore.y).toBeGreaterThan(viewportHeight / 2)
+
+  await button.click()
+  const dropdown = videoInfo.locator('.iconDropdown:has(.addToPlaylistDropdown)')
+  await expect(dropdown.locator('.playlistRow').first()).toBeVisible()
+
+  const buttonAfter = await button.boundingBox()
+  const dropdownBounds = await dropdown.boundingBox()
+  expect(dropdownBounds.height).toBeGreaterThan(viewportHeight - buttonBefore.y - buttonBefore.height)
+  expect(buttonAfter.y).toBe(buttonBefore.y)
+  expect(dropdownBounds.y + dropdownBounds.height).toBeLessThanOrEqual(buttonAfter.y)
+  expect(dropdownBounds.y).toBeGreaterThanOrEqual(0)
+})
 
 test('keeps watch metadata and comment filters inside a narrow viewport', async ({ app, page }) => {
   await mockPlayableWatchPage(app, page)

@@ -408,8 +408,9 @@ function handleIconClick(e, isRightOrLongClick = false) {
       // then focus it so we can hide it automatically when it loses focus
       nextTick(() => {
         if (!settingsOverlayActive.value || !dropdownShown.value) return
-        dropdown.value?.focus()
+        // Place the menu first: focusing it where it overflows would scroll the page to it.
         keepDropdownInViewport()
+        dropdown.value?.focus({ preventScroll: true })
       })
     }
   } else {
@@ -493,6 +494,19 @@ function getTopChromeBottom() {
   return bottom
 }
 
+/**
+ * Keeps the preferred side unless only the other one fits the whole menu.
+ * @param {number} aboveTop the menu's top edge when it opens above the button
+ * @param {number} belowTop the menu's top edge when it opens below the button
+ * @param {number} minTop
+ * @param {number} maxTop
+ */
+function opensAbove(aboveTop, belowTop, minTop, maxTop) {
+  const fitsAbove = aboveTop >= minTop
+  const fitsBelow = belowTop <= maxTop
+  return props.dropdownPositionY === 'top' ? fitsAbove || !fitsBelow : fitsAbove && !fitsBelow
+}
+
 function keepDropdownInViewport() {
   if (dropdown.value == null) {
     return
@@ -544,13 +558,11 @@ function keepDropdownInViewport() {
 
     const aboveButton = buttonRect.top - dropdownRect.height - 4
     const belowButton = buttonRect.bottom + 4
-    const top = fullscreenDropdownTarget.value
-      ? window.innerHeight - bottomMargin - dropdownRect.height
-      : props.dropdownPositionY === 'top' && (aboveButton >= minTop || belowButton + dropdownRect.height > window.innerHeight - bottomMargin)
-        ? aboveButton
-        : belowButton
     const maxLeft = window.innerWidth - viewportMargin - dropdownRect.width
     const maxTop = window.innerHeight - bottomMargin - dropdownRect.height
+    const top = fullscreenDropdownTarget.value
+      ? maxTop
+      : opensAbove(aboveButton, belowButton, minTop, maxTop) ? aboveButton : belowButton
 
     dropdown.value.style.inset = 'auto'
     const clampedLeft = Math.max(viewportMargin, Math.min(left, maxLeft))
@@ -572,7 +584,15 @@ function keepDropdownInViewport() {
 
   const rect = dropdown.value.getBoundingClientRect()
   const offsetX = Math.max(viewportMargin - rect.left, Math.min(0, window.innerWidth - viewportMargin - rect.right))
-  const offsetY = Math.max(minTop - rect.top, Math.min(0, window.innerHeight - viewportMargin - rect.bottom))
+
+  // .top and .bottom keep the same distance from the button, so the other side mirrors the menu across it
+  const container = ftIconButton.value.getBoundingClientRect()
+  const gap = props.dropdownPositionY === 'top' ? container.top - rect.bottom : rect.top - container.bottom
+  const maxTop = window.innerHeight - viewportMargin - rect.height
+  const top = opensAbove(container.top - gap - rect.height, container.bottom + gap, minTop, maxTop)
+    ? container.top - gap - rect.height
+    : container.bottom + gap
+  const offsetY = Math.max(minTop, Math.min(top, maxTop)) - rect.top
 
   dropdown.value.style.transform = `translate(${offsetX}px, ${offsetY}px)`
 }
