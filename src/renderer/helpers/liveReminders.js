@@ -287,12 +287,12 @@ function afterModeChange(task) {
 
 /** @param {string} videoId */
 async function cancelReminder(videoId) {
-  const records = readCapacitorReminders()
-  const record = records.find(item => item.videoId === videoId)
+  // Includes due reminders, since queued work can delay this past the start and the system may not have delivered it yet.
+  const record = readStoredReminders().find(item => item.videoId === videoId)
   if (record) {
     await LocalNotifications.cancel({ notifications: [{ id: record.notificationId }] })
   }
-  writeCapacitorReminders(records.filter(item => item.videoId !== videoId))
+  writeCapacitorReminders(readCapacitorReminders().filter(item => item.videoId !== videoId))
   emitUpdated(videoId, false)
   return record !== undefined
 }

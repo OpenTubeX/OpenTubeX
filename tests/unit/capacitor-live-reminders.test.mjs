@@ -161,6 +161,27 @@ test('scheduling a reminder keeps reminders that left the list meanwhile out of 
   assert.deepEqual(JSON.parse(storage.get('opentubex-capacitor-live-reminders')).map(record => record.videoId), ['second'])
 })
 
+test('cancelling a reminder that became due while it waited still cancels its alarm', async () => {
+  const cancelled = []
+  const history = []
+  const { liveReminder, clock } = await loadCapacitorReminder({
+    checkPermissions: async () => ({ display: 'granted' }),
+    cancel: async ({ notifications }) => { cancelled.push(...notifications.map(({ id }) => id)) },
+    schedule: async () => {},
+  }, { capacitorNotificationHistory: { add: entries => { history.push(...entries); return entries } } })
+  assert.equal(await liveReminder.schedule(reminder(START + 60_000)), true)
+  const { notificationId } = await liveReminder.get('premiere')
+  cancelled.length = 0
+
+  // Queued work delayed the cancellation until after the start, before the system delivered the alarm.
+  clock.now = START + 61_000
+  assert.equal(await liveReminder.cancel('premiere'), true)
+  assert.deepEqual(cancelled, [notificationId])
+  assert.equal(await liveReminder.get('premiere'), null)
+  // The system may have shown it already, so the bell keeps it as before.
+  assert.deepEqual(history.map(entry => entry.path), ['/watch/premiere'])
+})
+
 test('a reminder scheduled while notifications turn off is cancelled too', async () => {
   const scheduled = new Map()
   let permission = null
