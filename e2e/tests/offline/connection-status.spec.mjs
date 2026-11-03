@@ -603,6 +603,10 @@ test('startup recognises WAN loss and later recovery without an OS network event
 })
 
 test('a blocked internet check neither stops reachable services nor keeps the banner', async ({ page }) => {
+  // Only the request below may prove reachability. A startup reply from
+  // another host, such as the Invidious instance list, would end the outage
+  // before the banner can be observed.
+  await page.route(url => url.protocol === 'https:', route => route.abort('internetdisconnected'))
   await page.route(INTERNET_CHECK_URL, route => route.abort('blockedbyclient'))
   await page.route('https://wan.example/**', route => route.fulfill({ status: 200, body: 'working', headers: { 'access-control-allow-origin': '*' } }))
   await page.reload()
