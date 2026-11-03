@@ -74,7 +74,7 @@ function mountSheet(t, expandPanel = null, { reducedMotion = false } = {}) {
       disconnect() { activeObservers.clear() }
     },
     applyAnimationSpeed: animation => animation, lockBodyScroll() {}, unlockBodyScroll() {},
-    matchMedia: () => ({ matches: true }), getComputedStyle: () => ({ transform: 'none', opacity: 1 })
+    matchMedia: () => ({ matches: true }), getComputedStyle: () => ({ transform: 'none', opacity: 1, getPropertyValue: () => '' })
   }
   scope.run(() => vm.runInNewContext(source + '\nglobalThis.state = { expanded, updatePresentation, sheetStyle, startDrag, moveDrag, endDrag, cancelDrag, handleHeaderClick };', context))
   const unmount = () => { cleanup.splice(0).forEach(callback => callback()); scope.stop() }
