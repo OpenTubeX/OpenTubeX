@@ -69,7 +69,7 @@
     class="notificationsEmpty"
   >
     <FtIcon
-      :icon="['fas', 'bell']"
+      :icon="['fas', 'bell-outline']"
       aria-hidden="true"
     />
     <strong>{{ t('Notification Center.Empty') }}</strong>
