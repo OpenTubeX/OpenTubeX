@@ -9085,9 +9085,10 @@ export default defineComponent({
 
     let ignoreErrors = false
 
-    /** Segment timeouts retried since the last appended segment */
-    let segmentTimeoutRetries = 0
-    const MAX_SEGMENT_TIMEOUT_RETRIES = 3
+    /** When segment requests started timing out, without a segment loading since */
+    let segmentTimeoutsStartedAt = null
+    /** How long to keep retrying segment requests that time out before reporting the error */
+    const SEGMENT_TIMEOUT_RECOVERY_MS = 60_000
 
     /**
      * @param {shaka.util.Error} error
@@ -9143,16 +9144,13 @@ export default defineComponent({
       // Shaka treats a segment request that didn't answer in time as fatal for videos. On a
       // high-latency network that doesn't mean the format is broken, so keep streaming
       // instead of falling back to the legacy formats and reloading (#2604)
-      if (
-        error.code === ErrorCode.TIMEOUT &&
-        error.data[1] === RequestType.SEGMENT &&
-        !isSabrPlayback.value &&
-        segmentTimeoutRetries < MAX_SEGMENT_TIMEOUT_RETRIES &&
-        player?.retryStreaming()
-      ) {
-        segmentTimeoutRetries++
-        console.warn('Segment request timed out, retrying...', error.data[0])
-        return
+      // Audio and video report their timeouts separately, so limit the time rather than the retries
+      if (error.code === ErrorCode.TIMEOUT && error.data[1] === RequestType.SEGMENT && !isSabrPlayback.value) {
+        segmentTimeoutsStartedAt ??= Date.now()
+        if (Date.now() - segmentTimeoutsStartedAt < SEGMENT_TIMEOUT_RECOVERY_MS && player?.retryStreaming()) {
+          console.warn('Segment request timed out, retrying...', error.data[0])
+          return
+        }
       }
 
       // Shaka retries the retained stream on reconnect. Do not mark an offline
@@ -9735,9 +9733,11 @@ export default defineComponent({
       player.addEventListener('buffering', event => {
         isBuffering.value = event.buffering
       })
-      player.addEventListener('segmentappended', () => {
-        segmentTimeoutRetries = 0
-      })
+      const resetSegmentTimeouts = () => {
+        segmentTimeoutsStartedAt = null
+      }
+      player.addEventListener('loading', resetSegmentTimeouts)
+      player.addEventListener('segmentappended', resetSegmentTimeouts)
 
       player.addEventListener('error', event => handleError(event.detail, 'shaka error handler'))
 
