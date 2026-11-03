@@ -84,6 +84,13 @@
   color: var(--accent-color);
 }
 
+/* The current chapter is filled with the primary color, which the accent can
+   match, so an active loop there follows the row's text on a tint instead. */
+.watchVideoChaptersPanel :deep(.chapter.current .loopChapter.active) {
+  background-color: color-mix(in srgb, currentcolor 18%, transparent);
+  color: inherit;
+}
+
 /* Round the last action's hover fill with the row's end corners. */
 .watchVideoChaptersPanel :deep(.copyTimestamp) {
   border-start-end-radius: inherit;
