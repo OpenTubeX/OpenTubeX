@@ -36,10 +36,11 @@
     color var(--motion-fast-effects),
     border-radius var(--motion-fast-spatial);
 
-  /* Selected labels and their tint use the main color where light-dark() and
-     relative colors are missing (iOS before 17.5). */
+  /* Where light-dark() and relative colors are missing (iOS before 17.5), the
+     tint uses the main color and the label the theme's text color, which stays
+     readable on it. */
   --material-tab-tint-color: var(--primary-color);
-  --material-tab-selected-color: var(--primary-color);
+  --material-tab-selected-color: var(--primary-text-color);
 }
 
 @supports (color: light-dark(red, red)) and (color: rgb(from red r g b)) {
