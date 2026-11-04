@@ -163,8 +163,17 @@ test('middle and Ctrl clicks open notifications in new tabs', async ({ app, page
   await expect(entries).toHaveCount(2)
   await expect(bell).toHaveAttribute('data-unread-count', '1')
 
+  // The list opens the tab itself instead of leaving it to Chromium's new-window fallback.
+  await app.electronApp.evaluate(({ BrowserWindow }) => {
+    globalThis.windowOpenRequests = 0
+    BrowserWindow.getAllWindows()[0].webContents.setWindowOpenHandler(() => {
+      globalThis.windowOpenRequests++
+      return { action: 'deny' }
+    })
+  })
   await entries.nth(0).click({ modifiers: [shortcutModifier] })
   await expect(page.locator(sel.tabs)).toHaveCount(3)
+  expect(await app.electronApp.evaluate(() => globalThis.windowOpenRequests)).toBe(0)
   await expect(page).toHaveURL(new RegExp(`#/watch/${second}$`))
   await expect(dropdown).toHaveCount(0)
   await expect(bell).not.toHaveAttribute('data-unread-count')

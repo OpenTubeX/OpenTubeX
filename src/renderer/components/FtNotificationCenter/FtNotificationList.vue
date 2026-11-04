@@ -102,7 +102,7 @@ import { RouterLink } from 'vue-router'
 import FtRetryImage from '../FtRetryImage.vue'
 import store from '../../store/index'
 
-import { getRelativeTimeFromDate } from '../../helpers/utils'
+import { getRelativeTimeFromDate, openInternalPath } from '../../helpers/utils'
 import { NOTIFICATION_KIND_ICONS } from '../../helpers/notificationHistory'
 
 defineProps({
@@ -116,16 +116,20 @@ const { locale, t } = useI18n()
 const showThumbnails = computed(() => store.getters.getThumbnailPreference !== 'hidden')
 const blurThumbnails = computed(() => store.getters.getBlurThumbnails)
 
-// The desktop app opens middle and Ctrl or Cmd clicks on internal links in new tabs.
+// The desktop app opens middle clicks on internal links in background tabs.
 const opensTabs = !!process.env.IS_ELECTRON
 
 /**
+ * Opens Ctrl or Cmd clicks in a new tab, like the app's link shortcuts, which
+ * never see clicks inside the dropdown.
  * @param {import('../../../notificationHistory').NotificationHistoryEntry} entry
  * @param {MouseEvent} event
  */
 function handleClick(entry, event) {
   const ctrlOrCmdPressed = process.platform === 'darwin' ? event.metaKey : event.ctrlKey
   if (opensTabs && ctrlOrCmdPressed && !event.altKey) {
+    event.preventDefault()
+    openInternalPath({ path: entry.path, query: entry.query, doCreateNewWindow: event.shiftKey, doCreateNewTab: !event.shiftKey })
     emit('opened-in-tab', entry, event)
     return
   }
