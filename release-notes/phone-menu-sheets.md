@@ -2,7 +2,7 @@
 category: improvement
 ---
 
-More menus open as bottom sheets on phones, including the channel setting, cast, subscription settings, comment filter, and "More options" menus.
+More menus open as bottom sheets on phones, including the channel setting, cast, subscription settings, comment filter, comment sort, and "More options" menus.
 
 <picture>
   <source media="(prefers-color-scheme: dark)" srcset="https://github.com/user-attachments/assets/f491785f-fe54-4a2c-89f8-4670480b5923">
