@@ -376,6 +376,9 @@
   max-inline-size: calc(100% - 16px);
   max-block-size: calc(100% - 88px);
   transform: none !important;
+
+  /* The menu hangs below its button here, so it grows from and zooms toward that corner. */
+  transform-origin: top right;
 }
 
 .ftVideoPlayer.shortsPlayer :deep(.shaka-context-menu) {

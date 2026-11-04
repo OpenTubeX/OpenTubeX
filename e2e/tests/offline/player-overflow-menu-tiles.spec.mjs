@@ -1,5 +1,5 @@
 import { setWindowSize, test, expect } from '../../helpers/app.mjs'
-import { activeTab, openMockedVideo, openPlayerOptions, settleMenuZoom } from '../../helpers/player.mjs'
+import { activeTab, findWatchComponent, openMockedVideo, openPlayerOptions, settleMenuZoom } from '../../helpers/player.mjs'
 import { mockPlayableWatchPage } from '../../helpers/watch.mjs'
 import { WATCH_PAGE_SEED } from '../../helpers/watch-page.mjs'
 
@@ -216,6 +216,54 @@ test('the options menu grows in and fades out, but closes at once from a submenu
   await closePlayerMenus(player)
   await expect(menu).toBeHidden()
   expect(await takeMotion()).toEqual(['open', 'close'])
+})
+
+test('on Shorts, the options menu grows from and zooms toward the button above it', { tag: '@scale' }, async ({ app, page }) => {
+  await mockPlayableWatchPage(app, page)
+  await openMockedVideo(page)
+  const watch = await page.evaluateHandle(findWatchComponent)
+  await watch.evaluate(async component => {
+    component.proxy.useCustomShortsPlayerForCurrentVideo = true
+    component.proxy.updateShortsPlayerState(30, [{ width: 360, height: 640 }])
+    await component.proxy.$nextTick()
+  })
+  await watch.dispose()
+  const player = page.locator(`${activeTab} .ftVideoPlayer`)
+  await expect(player).toHaveClass(/shortsPlayer/)
+  await player.locator('video').evaluate(video => video.pause())
+  await player.hover()
+
+  /**
+   * The menu's top right corner at the start and the end of the motion that
+   * `action` starts, which stays where it is if the menu grows from it.
+   */
+  const cornerDrift = action => player.evaluate(async (element, action) => {
+    const menu = element.querySelector('.shaka-overflow-menu')
+    if (action === 'open') {
+      element.querySelector('.shortsTopControl[aria-label="More options" i]').click()
+    } else {
+      menu.querySelector(':scope > .shaka-playbackrate-button').click()
+    }
+    const name = action === 'open' ? 'ft-menu-open' : 'ft-menu-zoom-in'
+    let animation
+    for (let frame = 0; frame < 10 && !animation; frame++) {
+      await new Promise(requestAnimationFrame)
+      animation = menu.getAnimations().find(animation => animation.animationName?.startsWith(name))
+    }
+    if (!animation) throw new Error(`Expected the menu to run ${name}`)
+    animation.pause()
+    animation.currentTime = 0
+    const start = menu.getBoundingClientRect()
+    animation.finish()
+    const end = menu.getBoundingClientRect()
+    return { top: Math.abs(end.top - start.top), right: Math.abs(end.right - start.right) }
+  }, action)
+
+  for (const action of ['open', 'submenu']) {
+    const drift = await cornerDrift(action)
+    expect(drift.top, action).toBeLessThan(0.5)
+    expect(drift.right, action).toBeLessThan(0.5)
+  }
 })
 
 test('a view switch with reduced motion leaves no zoom for later', async ({ app, page }) => {
