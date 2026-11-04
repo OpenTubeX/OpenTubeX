@@ -2,7 +2,7 @@ import { createI18n } from 'vue-i18n'
 import { ref } from 'vue'
 import { createWebURL } from '../helpers/utils'
 import { createPluralRules, expandMultipleOnlyPluralMessages } from './plurals'
-import { composeLocaleMessages } from '../../localeComposition'
+import { composeLocaleMessages, resolveMessagesWithFallback } from '../../localeComposition'
 // List of locales approved for use
 import activeLocales from '../../../static/locales/activeLocales.json'
 
@@ -156,6 +156,17 @@ export async function loadLocale(locale) {
 
   requestedLocales.add(locale)
   await recomposeLocale(locale)
+}
+
+/**
+ * Like `tm`, but with the en-US fallback that `t` applies to each message, so
+ * lists built from a message subtree match the labels the app renders.
+ *
+ * @param {string} key
+ */
+export function tmWithFallback(key) {
+  const { locale, getLocaleMessage } = i18n.global
+  return resolveMessagesWithFallback([getLocaleMessage(locale.value), getLocaleMessage('en-US')], key)
 }
 
 // Set by _scripts/ProcessLocalesPlugin.js

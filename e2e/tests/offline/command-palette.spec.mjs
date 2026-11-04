@@ -193,6 +193,19 @@ test('finds and highlights an individual setting', async ({ page }) => {
     .toContainEqual(expect.stringContaining('Thumbnail Preference'))
 })
 
+test.describe('partially translated locale', () => {
+  // en-GB lacks this label, so the toggle renders the en-US fallback.
+  test.use({ seed: { settings: { currentLocale: 'en-GB' } } })
+
+  test('finds settings that use the en-US fallback label', async ({ page }) => {
+    await page.keyboard.press('Control+k')
+    const input = page.getByRole('combobox', { name: 'Search commands' })
+    await input.fill('limit titles to two lines')
+
+    await expect(page.getByRole('option', { name: /Limit titles to two lines/ })).toBeVisible()
+  })
+})
+
 test('transfers focus to Find in Page', async ({ page }) => {
   const navigationSearch = page.locator('.topNav .searchInput input.ft-input')
   await navigationSearch.focus()
