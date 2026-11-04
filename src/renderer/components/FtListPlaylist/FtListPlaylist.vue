@@ -188,6 +188,7 @@ const playlistMenuItems = computed(() => {
       run: () => openInternalPath({ ...playlistPageLinkTo.value, title: titleForDisplay.value, doCreateNewWindow: true, makeActive: true })
     })
   }
+  if (items.length > 0) items.push({ type: 'separator' })
   if (externalPlayer.value !== '' && !isUserPlaylist.value) {
     items.push({
       label: t('Video.External Player.OpenInTemplate', { externalPlayer: externalPlayer.value }),

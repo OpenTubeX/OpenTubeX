@@ -258,9 +258,11 @@ const quickActionKeys = [
 const tabQuickActions = computed(() => tabColorMenu.value
   ? quickActionKeys.map(keys => displayedItems.value.find(item => keys.includes(item.labelKey))).filter(Boolean)
   : [])
-const videoQuickActions = computed(() => localItems.value
-  ? displayedItems.value.filter(item => item.quickAction)
-  : [])
+// The icon-only header has four columns; fewer actions would leave it half empty, so they stay regular rows.
+const videoQuickActions = computed(() => {
+  const actions = localItems.value ? displayedItems.value.filter(item => item.quickAction) : []
+  return actions.length === 4 ? actions : []
+})
 const quickActions = computed(() => tabColorMenu.value ? tabQuickActions.value : videoQuickActions.value)
 const menuRows = computed(() => {
   const rows = displayedItems.value.filter(item => item !== tabColorMenu.value && !quickActions.value.includes(item))
