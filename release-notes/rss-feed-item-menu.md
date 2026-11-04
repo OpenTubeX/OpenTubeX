@@ -2,7 +2,7 @@
 category: improvement
 ---
 
-Items on the RSS tab now have a context menu to mark them as watched or fully watched, download them, and copy their link.
+Items on the RSS tab now have a context menu to open them in a new tab or window, mark them as watched or fully watched, download them, and copy their link.
 
 <picture>
   <source media="(prefers-color-scheme: dark)" srcset="https://github.com/user-attachments/assets/76d9c258-16f3-4f3b-a05e-b73877d1f614">
