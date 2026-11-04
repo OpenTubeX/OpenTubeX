@@ -12,172 +12,92 @@
     :dropdown-position-y="dropdownPositionY"
     :force-dropdown="true"
   >
-    <FtFlexBox>
-      <FtToggleSwitch
+    <div class="shareMenu">
+      <div
         v-if="isVideo && !externalUrl"
-        :label="t('Share.Include Timestamp')"
-        :compact="true"
-        :default-value="includeTimestamp"
-        @change="updateIncludeTimestamp"
-      />
-    </FtFlexBox>
-    <div class="shareLinks">
-      <template v-if="externalUrl">
-        <div class="header">
-          {{ externalHostname }}
-        </div>
-        <div class="buttons">
-          <FtButton
-            v-if="canShare"
-            class="action"
-            :icon="['fas', 'share-alt']"
-            :label="t('Share.Share Link')"
-            @click="shareExternal"
-          />
-          <FtButton
-            class="action"
-            :icon="['fas', 'copy']"
-            :label="t('Share.Copy Link')"
-            @click="copyExternal"
-          />
-          <FtButton
-            class="action"
-            :icon="['fas', 'globe']"
-            :label="t('Share.Open Link')"
-            @click="openExternal"
-          />
-        </div>
-      </template>
-      <div
-        v-if="!externalUrl"
-        class="header"
+        class="shareTimestamp"
       >
-        <img
-          id="youtubeShareImage"
-          class="youtubeLogo"
-          src="~../../assets/img/yt_logo_mono_dark.png"
-          alt="YouTube"
-          width="794"
-          height="178"
-        >
+        <FtIcon
+          class="shareTimestampIcon"
+          :icon="['fas', 'clock']"
+          aria-hidden="true"
+        />
+        <FtToggleSwitch
+          :label="t('Share.Include Timestamp')"
+          compact
+          trailing
+          :default-value="includeTimestamp"
+          @change="updateIncludeTimestamp"
+        />
       </div>
-
-      <div
-        v-if="!externalUrl"
-        class="buttons"
-      >
-        <FtButton
-          v-if="canShare"
-          class="action"
-          aria-describedby="youtubeShareImage"
-          :icon="['fas', 'share-alt']"
-          :label="t('Share.Share Link')"
-          @click="shareYoutube"
-        />
-        <FtButton
-          class="action"
-          aria-describedby="youtubeShareImage"
-          :icon="['fas', 'copy']"
-          :label="t('Share.Copy Link')"
-          @click="copyYoutube"
-        />
-        <FtButton
-          class="action"
-          aria-describedby="youtubeShareImage"
-          :icon="['fas', 'globe']"
-          :label="t('Share.Open Link')"
-          @click="openYoutube"
-        />
+      <div class="shareLinks">
         <template
-          v-if="isVideo || isPlaylist"
+          v-for="(section, sectionIndex) in shareSections"
+          :key="section.id"
         >
-          <FtButton
-            class="action"
-            aria-describedby="youtubeShareImage"
-            background-color="var(--accent-color-active)"
-            :icon="['fas', 'copy']"
-            :label="t('Share.Copy Embed')"
-            @click="copyYoutubeEmbed"
+          <div
+            v-if="sectionIndex > 0"
+            class="shareSectionDivider"
           />
-          <FtButton
-            class="action"
-            aria-describedby="youtubeShareImage"
-            background-color="var(--accent-color-active)"
-            :icon="['fas', 'globe']"
-            :label="t('Share.Open Embed')"
-            @click="openYoutubeEmbed"
-          />
+          <section
+            class="shareSection"
+            :aria-labelledby="section.id"
+          >
+            <div
+              :id="section.id"
+              class="shareSectionHeader"
+            >
+              <img
+                v-if="section.kind === 'youtube'"
+                class="youtubeLogo"
+                src="~../../assets/img/yt_logo_mono_dark.png"
+                alt="YouTube"
+                width="794"
+                height="178"
+              >
+              <template v-else-if="section.kind === 'invidious'">
+                <span class="invidiousLogo" /> Invidious
+              </template>
+              <template v-else>
+                {{ section.label }}
+              </template>
+            </div>
+            <template
+              v-for="action in section.actions"
+              :key="action.label"
+            >
+              <div
+                v-if="action.embedStart"
+                class="shareActionDivider"
+              />
+              <button
+                type="button"
+                class="shareAction promptAction"
+                @click="action.run"
+              >
+                <FtIcon
+                  :icon="action.icon"
+                  aria-hidden="true"
+                />
+                <span>{{ action.label }}</span>
+              </button>
+            </template>
+          </section>
         </template>
       </div>
-
-      <template v-if="!externalUrl && showInvidiousOptions">
-        <div class="divider" />
-
-        <div
-          id="invidiousShare"
-          class="header invidious"
-        >
-          <span class="invidiousLogo" /> Invidious
-        </div>
-
-        <div class="buttons">
-          <FtButton
-            v-if="canShare"
-            class="action"
-            aria-describedby="invidiousShare"
-            :icon="['fas', 'share-alt']"
-            :label="t('Share.Share Link')"
-            @click="shareInvidious"
-          />
-          <FtButton
-            aria-describedby="invidiousShare"
-            class="action"
-            :icon="['fas', 'copy']"
-            :label="t('Share.Copy Link')"
-            @click="copyInvidious"
-          />
-          <FtButton
-            aria-describedby="invidiousShare"
-            class="action"
-            :icon="['fas', 'globe']"
-            :label="t('Share.Open Link')"
-            @click="openInvidious"
-          />
-          <template
-            v-if="isVideo || isPlaylist"
-          >
-            <FtButton
-              aria-describedby="invidiousShare"
-              class="action"
-              background-color="var(--accent-color-active)"
-              :icon="['fas', 'copy']"
-              :label="t('Share.Copy Embed')"
-              @click="copyInvidiousEmbed"
-            />
-            <FtButton
-              aria-describedby="invidiousShare"
-              class="action"
-              background-color="var(--accent-color-active)"
-              :icon="['fas', 'globe']"
-              :label="t('Share.Open Embed')"
-              @click="openInvidiousEmbed"
-            />
-          </template>
-        </div>
-      </template>
     </div>
   </FtIconButton>
 </template>
 
 <script setup>
-import { computed, ref, useTemplateRef } from 'vue'
+import { computed, ref, useId, useTemplateRef } from 'vue'
 import { copyToClipboard, openExternalLink, shareLink } from '../../helpers/utils'
 import { appendTimestamp, getInvidiousVideoUrl, getYoutubeVideoShareUrl } from '../../helpers/share'
 import { useI18n } from 'vue-i18n'
 
-import FtFlexBox from '../ft-flex-box/ft-flex-box.vue'
+import { FtIcon } from '@opentubex/icons'
+
 import FtIconButton from '../FtIconButton/FtIconButton.vue'
-import FtButton from '../FtButton/FtButton.vue'
 import FtToggleSwitch from '../FtToggleSwitch/FtToggleSwitch.vue'
 import store from '../../store/index'
 import { usesInvidiousInstance } from '../../../apiBackends'
@@ -221,6 +141,7 @@ const props = defineProps({
   }
 })
 
+const sectionId = useId()
 const includeTimestamp = ref(false)
 const iconButton = useTemplateRef('iconButton')
 
@@ -349,6 +270,46 @@ const youtubeEmbedURL = computed(() => {
     return `https://www.youtube-nocookie.com/embed/videoseries?list=${props.id}`
   }
   return `https://www.youtube-nocookie.com/embed/${props.id}`
+})
+
+/**
+ * @param {() => void} share
+ * @param {() => void} copy
+ * @param {() => void} open
+ * @param {{ copy: () => void, open: () => void } | null} [embed]
+ */
+function linkActions(share, copy, open, embed = null) {
+  return [
+    ...(canShare ? [{ icon: ['fas', 'share-alt'], label: t('Share.Share Link'), run: share }] : []),
+    { icon: ['fas', 'copy'], label: t('Share.Copy Link'), run: copy },
+    { icon: ['fas', 'globe'], label: t('Share.Open Link'), run: open },
+    ...(embed
+      ? [
+          { icon: ['fas', 'copy'], label: t('Share.Copy Embed'), run: embed.copy, embedStart: true },
+          { icon: ['fas', 'globe'], label: t('Share.Open Embed'), run: embed.open }
+        ]
+      : [])
+  ]
+}
+
+const shareSections = computed(() => {
+  if (props.externalUrl) {
+    return [{ id: `${sectionId}-external`, kind: 'external', label: externalHostname.value, actions: linkActions(shareExternal, copyExternal, openExternal) }]
+  }
+  const hasEmbed = isVideo.value || isPlaylist.value
+  const sections = [{
+    id: `${sectionId}-youtube`,
+    kind: 'youtube',
+    actions: linkActions(shareYoutube, copyYoutube, openYoutube, hasEmbed ? { copy: copyYoutubeEmbed, open: openYoutubeEmbed } : null)
+  }]
+  if (showInvidiousOptions.value) {
+    sections.push({
+      id: `${sectionId}-invidious`,
+      kind: 'invidious',
+      actions: linkActions(shareInvidious, copyInvidious, openInvidious, hasEmbed ? { copy: copyInvidiousEmbed, open: openInvidiousEmbed } : null)
+    })
+  }
+  return sections
 })
 
 if (isVideo.value && !props.externalUrl && !props.getTimestamp) {

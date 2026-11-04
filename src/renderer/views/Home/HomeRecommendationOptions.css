@@ -1,12 +1,5 @@
 .iconDropdown.recommendationOptionsPopover {
   inline-size: min(360px, calc(100vw - 16px));
-  border: 1px solid var(--border-color);
-  border-radius: var(--shape-corner-large);
-  background: var(--card-bg-color);
-  color: var(--primary-text-color);
-  box-shadow: 0 8px 24px rgb(0 0 0 / 20%);
-  font-size: 14px;
-  text-align: start;
 }
 
 .recommendationSettings {
@@ -117,15 +110,16 @@
   gap: 4px;
   margin-block-start: 16px;
   padding-block-start: 12px;
-  border-block-start: 1px solid var(--border-color);
+  border-block-start: 1px solid color-mix(in srgb, var(--border-color) 45%, transparent);
 }
 
 .recommendationSettingsActions button {
   display: flex;
   align-items: center;
   gap: 12px;
-  min-block-size: 44px;
-  padding: 10px;
+  min-block-size: 40px;
+  padding-block: 8px;
+  padding-inline: 12px;
   border: 0;
   border-radius: var(--shape-corner-medium);
   background: transparent;
@@ -134,16 +128,27 @@
   line-height: 1.4;
   text-align: start;
   cursor: pointer;
+  transition: background-color var(--motion-fast-effects), border-radius var(--motion-fast-spatial);
 }
 
 .recommendationSettingsActions .ft-icon {
   flex-shrink: 0;
-  font-size: 18px;
+  inline-size: 18px;
+  color: var(--secondary-text-color);
+  font-size: 16px;
 }
 
 .recommendationSettingsActions button:hover {
   background: var(--side-nav-hover-color);
   color: var(--side-nav-hover-text-color);
+}
+
+.recommendationSettingsActions button:hover .ft-icon {
+  color: inherit;
+}
+
+.recommendationSettingsActions button:active {
+  border-radius: var(--shape-corner-extra-small);
 }
 
 .recommendationSettingsActions button:focus-visible {
