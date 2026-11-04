@@ -459,22 +459,13 @@
 
 .voiceOverTranslationProgressSpinner {
   flex: 0 0 auto;
-  inline-size: 16px;
-  block-size: 16px;
-  border: 2px solid rgb(255 255 255 / 35%);
-  border-block-start-color: #fff;
-  border-radius: 50%;
-  animation: ft-voice-over-translation-spin 700ms linear infinite;
+
+  /* Matches the white text on the dark scrim. */
+  --primary-color: #fff;
 }
 
 :deep(.voice-over-translation-loading > .shaka-ui-icon) {
   animation: ft-voice-over-translation-pulse 1.2s ease-in-out infinite;
-}
-
-@keyframes ft-voice-over-translation-spin {
-  to {
-    transform: rotate(360deg);
-  }
 }
 
 @keyframes ft-voice-over-translation-pulse {
