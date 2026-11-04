@@ -54,9 +54,9 @@
 }
 
 :deep(.phonePlayerOptions > .shaka-overflow-menu.ft-menu-grid) {
-  grid-template-columns: repeat(auto-fit, minmax(70px, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(80px, 1fr));
   grid-auto-rows: 68px;
-  gap: 3px;
+  gap: 6px;
   align-content: safe center;
 }
 
@@ -66,6 +66,12 @@
 }
 
 :deep(.phonePlayerOptions .shaka-sub-menu) {
+  /* Submenus keep their own tile sizes in fullscreen. */
+  --ft-tile-icon-size: initial;
+  --ft-tile-label-size: initial;
+  --ft-tile-value-size: initial;
+  --ft-tile-radius: initial;
+
   max-block-size: none;
 }
 
@@ -151,13 +157,30 @@
   inset-block-start: calc(var(--safe-area-inset-top, env(safe-area-inset-top, 0px)) + (var(--phone-touch-target, 48px) - 36px) / 2);
 }
 
+/* Fullscreen has room for larger tiles than the two rows that fit inline. */
+.ftVideoPlayer:is(:fullscreen, .fullWindow) :deep(.phonePlayerOptions > .shaka-overflow-menu.ft-menu-grid) {
+  --phone-tile-padding: 6px;
+  --phone-tile-gap: 4px;
+  --ft-tile-icon-size: 24px;
+  --ft-tile-label-size: 13px;
+  --ft-tile-value-size: 11px;
+  --ft-tile-radius: 12px;
+
+  inline-size: min(100%, 880px) !important;
+  padding: 12px;
+  grid-template-columns: repeat(auto-fit, minmax(96px, 1fr));
+  grid-auto-rows: 92px;
+  gap: 8px;
+}
+
+/* Comes after the fullscreen tiles, whose selector has the same specificity */
 :deep(.phonePlayerOptions > .shaka-overflow-menu.ft-menu-grid:has(.shaka-sub-menu:not(.shaka-hidden))) {
   grid-auto-rows: minmax(min-content, 1fr);
 }
 
 :deep(.phonePlayerOptions > .shaka-overflow-menu.ft-menu-grid > button) {
-  padding: 2px;
-  gap: 1px;
+  padding: var(--phone-tile-padding, 2px);
+  gap: var(--phone-tile-gap, 1px);
 }
 
 /* An open touch menu should advertise its remaining content even without a mouse. */
