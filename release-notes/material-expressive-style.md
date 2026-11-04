@@ -15,3 +15,9 @@ The app takes on Material 3 Expressive: rounder and more consistent corners, but
   <source media="(prefers-color-scheme: light)" srcset="https://github.com/user-attachments/assets/d0a4ab6a-83ce-4d52-acab-c1113c42f315">
   <img alt="Tab Organizer with tonal buttons, connected tab lists and selected tabs" src="https://github.com/user-attachments/assets/d322f528-04d8-4530-a95d-efe4e608b424">
 </picture>
+
+<picture>
+  <source media="(prefers-color-scheme: dark)" srcset="https://github.com/OpenTubeX/media/releases/download/attachments/20261104T083945Z-loader-dark-dark-a656c03a43.webp">
+  <source media="(prefers-color-scheme: light)" srcset="https://github.com/OpenTubeX/media/releases/download/attachments/20261104T083945Z-loader-light-light-1dae66ec32.webp">
+  <img alt="Loading indicator morphing between Material 3 Expressive shapes" src="https://github.com/OpenTubeX/media/releases/download/attachments/20261104T083945Z-loader-dark-dark-a656c03a43.webp">
+</picture>
