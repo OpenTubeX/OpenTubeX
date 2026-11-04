@@ -752,10 +752,15 @@
   transform-origin: top left;
 }
 
-/* The field has no outline of its own, so keyboard focus rings the bar. */
+/* The field has no outline of its own, so keyboard focus rings the bar.
+   Like the global ring, a contrast line keeps light accents visible. */
 :root:not(.hideOutlines) .findbar:has(.findbarInput:focus-visible) {
   outline: var(--focus-border-width) solid var(--primary-color);
   outline-offset: 0;
+  box-shadow:
+    0 0 0 calc(var(--focus-border-width) + 1px) var(--focus-ring-contrast-color),
+    0 2px 6px 2px rgb(0 0 0 / 15%),
+    0 1px 2px rgb(0 0 0 / 30%);
 }
 
 .findbarIcon {

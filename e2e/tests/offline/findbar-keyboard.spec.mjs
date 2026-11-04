@@ -14,22 +14,26 @@ test('Enter and Shift+Enter navigate one find bar match at a time', async ({ pag
   await expect(page.locator('.app')).not.toHaveClass(/hideOutlines/)
   // The field has no outline of its own; keyboard focus rings the whole bar.
   const findbar = page.locator('.findbar')
-  const primaryColor = await findbarInput.evaluate((input) => {
+  const [primaryColor, contrastColor] = await findbarInput.evaluate(input => ['--primary-color', '--focus-ring-contrast-color'].map((name) => {
     const probe = document.createElement('span')
-    probe.style.color = 'var(--primary-color)'
+    probe.style.color = `var(${name})`
     input.after(probe)
     const color = getComputedStyle(probe).color
     probe.remove()
     return color
-  })
+  }))
+  const contrastRing = `${contrastColor} 0px 0px 0px`
   await expect(findbar).toHaveCSS('outline-style', 'solid')
   await expect(findbar).toHaveCSS('outline-color', primaryColor)
+  // A contrast line keeps light accents visible, as on the global focus ring.
+  expect(await findbar.evaluate(element => getComputedStyle(element).boxShadow)).toContain(contrastRing)
   await expect(findbarInput).toHaveCSS('outline-style', 'none')
   // The focus ring belongs to the bar; it must not leak onto the document root.
   await expect(page.locator('html')).toHaveCSS('box-shadow', 'none')
   await findbarInput.click()
   await expect(page.locator('.app')).toHaveClass(/hideOutlines/)
   await expect(findbar).toHaveCSS('outline-style', 'none')
+  expect(await findbar.evaluate(element => getComputedStyle(element).boxShadow)).not.toContain(contrastRing)
   await findbarInput.fill('findbar regression marker')
   await expect(findbarStatus).toHaveText('1/2')
 
