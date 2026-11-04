@@ -408,7 +408,7 @@ test('expanded sheets clear Android status bars and animate on close', async ({ 
   await expect(sheet).toHaveCount(0)
 })
 
-test('comments fill the card width and keep their scrollbar at the panel edge', async ({ app, page }) => {
+test('comments fill the card width and keep their scrollbar at the panel edge', { tag: '@scale' }, async ({ app, page }) => {
   await mockPlayableWatchPage(app, page)
   await openMockedVideo(page)
   await setWindowSize(app, page, { width: 480, height: 800 })
@@ -432,8 +432,108 @@ test('comments fill the card width and keep their scrollbar at the panel edge', 
   expect(await labelLeft()).toBeCloseTo(before, 1)
   await expect(option).toHaveAttribute('aria-checked', 'true')
   await expect(filterSheet).toBeVisible()
-  await filterSheet.getByRole('button', { name: 'Close', exact: true }).click()
+  // Rows match the other phone bottom sheets.
+  for (const height of await filterSheet.getByRole('checkbox').evaluateAll(rows => rows.map(row => row.getBoundingClientRect().height))) {
+    expect(height).toBeCloseTo(56, 0)
+  }
+  await filterSheet.getByRole('checkbox', { name: 'Search loaded comments', exact: true }).click()
   await expect(filterSheet).toHaveCount(0)
+  // The search lines up with the comments and its floating label clears the header.
+  const search = await sheet.evaluate(el => {
+    const header = el.querySelector('.mobileSheetHeader').getBoundingClientRect()
+    const field = el.querySelector('.commentTools .ft-input-component').getBoundingClientRect()
+    const comments = el.querySelector('.commentsContentWrapper')
+    const content = comments.getBoundingClientRect().left + parseFloat(getComputedStyle(comments).paddingLeft)
+    return { gap: field.top - header.bottom, left: field.left - content }
+  })
+  expect(search.gap).toBeGreaterThan(15.5)
+  expect(Math.abs(search.left)).toBeLessThan(1)
+})
+
+test('the AI summary matches the phone Description card, also while pressed', { tag: '@scale' }, async ({ app, page }) => {
+  await mockPlayableWatchPage(app, page)
+  await openMockedVideo(page)
+  await setWindowSize(app, page, { width: 480, height: 800 })
+  await page.emulateMedia({ reducedMotion: 'reduce' })
+  const watch = await watchViewHandle(page)
+  await watch.evaluate(async vm => {
+    vm.videoSummary = ['A summary paragraph.']
+    await vm.$store.dispatch('updateAiVideoSummaryMode', 'collapsed')
+  })
+  const description = page.locator('.phoneDescriptionButton')
+  const summary = page.locator('.videoSummary')
+  const surface = locator => locator.evaluate(element => {
+    const { left, width } = element.getBoundingClientRect()
+    const { backgroundColor, borderRadius, color } = getComputedStyle(element)
+    return { left, width, backgroundColor, borderRadius, color }
+  })
+  await summary.scrollIntoViewIfNeeded()
+  const { left, width, ...summarySurface } = await surface(summary)
+  const { left: descriptionLeft, width: descriptionWidth, ...descriptionSurface } = await surface(description)
+  expect(summarySurface).toEqual(descriptionSurface)
+  // UI scales leave subpixel differences between the button and the details element.
+  expect(left).toBeCloseTo(descriptionLeft, 0)
+  expect(width).toBeCloseTo(descriptionWidth, 0)
+
+  const pressed = async (locator, target = locator) => {
+    // The sticky phone player can cover a card that is only scrolled into view.
+    await target.evaluate(element => element.scrollIntoView({ block: 'center' }))
+    const box = await target.boundingBox()
+    await page.mouse.move(box.x + box.width / 2, box.y + box.height / 2)
+    await page.mouse.down()
+    const { backgroundColor, borderRadius, color } = await surface(locator)
+    await page.mouse.move(0, 0)
+    await page.mouse.up()
+    return { backgroundColor, borderRadius, color }
+  }
+  const pressedDescription = await pressed(description)
+  expect(pressedDescription.backgroundColor).not.toBe((await surface(description)).backgroundColor)
+  expect(await pressed(summary, summary.locator('summary'))).toEqual(pressedDescription)
+  expect(await pressed(page.locator('.phoneCommentsButton'))).toEqual(pressedDescription)
+
+  // A long press opens collapsed cards rather than selecting their preview text.
+  for (const element of [description, page.locator('.phoneCommentsButton'), summary.locator('summary')]) {
+    await expect(element).toHaveCSS('user-select', 'none')
+  }
+  await summary.evaluate(element => { element.open = true })
+  await expect(summary.locator('.summaryParagraph')).not.toHaveCSS('user-select', 'none')
+})
+
+test('pressed phone cards keep their text visible in Hot Pink', async ({ app, page }) => {
+  await page.evaluate(() => window.$store.dispatch('updateBaseTheme', 'hotPink'))
+  await mockPlayableWatchPage(app, page)
+  await openMockedVideo(page)
+  await setWindowSize(app, page, { width: 480, height: 800 })
+  await page.emulateMedia({ reducedMotion: 'reduce' })
+  const watch = await watchViewHandle(page)
+  await watch.evaluate(async vm => {
+    vm.videoSummary = ['A summary paragraph.']
+    await vm.$store.dispatch('updateAiVideoSummaryMode', 'collapsed')
+  })
+  const summary = page.locator('.videoSummary')
+  await summary.evaluate(element => element.scrollIntoView({ block: 'center' }))
+  const box = await summary.locator('summary').boundingBox()
+  await page.mouse.move(box.x + box.width / 2, box.y + box.height / 2)
+  await page.mouse.down()
+  const colors = await summary.evaluate(element => ['.summaryTitle', '.summaryDisclaimer'].map(selector => getComputedStyle(element.querySelector(selector)).color).concat(getComputedStyle(element).backgroundColor))
+  await page.mouse.up()
+  const [title, disclaimer, background] = colors
+  expect(background).toBe('rgb(255, 255, 255)')
+  expect(title).not.toBe(background)
+  expect(disclaimer).not.toBe(background)
+})
+
+test('subscribed button segments share the Material tonal color', async ({ app, page }) => {
+  await page.evaluate(() => window.$store.dispatch('updateBaseTheme', 'materialDark'))
+  await mockPlayableWatchPage(app, page)
+  await openMockedVideo(page)
+  await setWindowSize(app, page, { width: 480, height: 800 })
+  const list = page.locator('.infoArea .buttonList').first()
+  await list.locator('.subscribeButton').click()
+  await expect(list.locator('.notificationBell')).toBeVisible()
+  await page.mouse.move(0, 0)
+  await list.locator('.notificationBell').blur()
+  await expect.poll(() => list.evaluate(element => new Set([...element.children].map(child => getComputedStyle(child).backgroundColor)).size)).toBe(1)
 })
 
 test('phone player menus have a fixed close control and equal centered tiles', async ({ app, page }) => {

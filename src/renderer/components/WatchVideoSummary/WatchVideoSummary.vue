@@ -1,12 +1,19 @@
 <template>
   <details
     class="videoSummary"
+    :class="{ 'phoneVideoSummary phonePanelCard': phone }"
     :open="expanded"
   >
     <summary
       @keydown.enter.space.stop
       @keyup.enter.space.stop
     >
+      <ft-icon
+        v-if="phone"
+        class="summaryIcon"
+        :icon="['fas', 'robot']"
+        aria-hidden="true"
+      />
       <FtInlineMetadata class="summaryHeading">
         <span class="summaryTitle">{{ $t('Video.AI-generated video summary') }}</span>
         <span class="summaryDisclaimer">
@@ -35,8 +42,11 @@ import FtInlineMetadata from '../FtInlineMetadata/FtInlineMetadata.vue'
 
 defineProps({
   paragraphs: { type: Array, required: true },
-  expanded: { type: Boolean, default: false }
+  expanded: { type: Boolean, default: false },
+  // Matches the phone watch page's Comments and Description cards
+  phone: { type: Boolean, default: false }
 })
 </script>
 
 <style scoped src="./WatchVideoSummary.css" />
+<style scoped src="../phonePanelCard.css" />

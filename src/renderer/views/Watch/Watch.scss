@@ -1785,6 +1785,11 @@
   }
 }
 
+.videoLayout :is(.phonePanelButton, .phoneVideoSummary) {
+  margin-block: 12px;
+  margin-inline: 16px;
+}
+
 .videoLayout .phonePanelButton {
   display: flex;
   align-items: center;
@@ -1792,22 +1797,12 @@
   box-sizing: border-box;
   inline-size: calc(100% - 32px);
   min-block-size: var(--phone-touch-target, 48px);
-  margin-block: 12px;
-  margin-inline: 16px;
   padding-block: 12px;
   padding-inline: 16px;
   border: 0;
-  border-radius: var(--shape-corner-large);
-  background: var(--card-bg-color);
-  color: var(--primary-text-color);
   font: inherit;
   text-align: start;
   cursor: pointer;
-  transition: background-color var(--motion-fast-effects), border-radius var(--motion-fast-spatial);
-
-  &:active {
-    border-radius: var(--shape-corner-medium);
-  }
 
   .phoneCommentsLabel {
     min-inline-size: 0;

@@ -162,14 +162,16 @@
   box-shadow: 0 8px 24px rgb(0 0 0 / 28%);
 }
 
-.commentFilterOptions {
+.commentFilterOptionsContent {
   display: flex;
   flex-direction: column;
 }
 
+/* Short phone layouts scroll the filters below the fixed sheet header. */
 .commentFilterSheet {
-  padding-block: 0 12px;
-  padding-inline: 12px;
+  flex: 1 1 auto;
+  min-block-size: 0;
+  padding-block: 4px 12px;
 }
 
 .commentFilterOptions button {
@@ -190,10 +192,24 @@
   transition: background-color var(--motion-fast-effects);
 }
 
+/* Rows match the other phone bottom sheets. */
+.commentFilterSheet button {
+  grid-template-columns: 24px minmax(0, 1fr) auto;
+  min-block-size: 56px;
+  gap: 16px;
+  padding-inline: 24px;
+  border-radius: 0;
+  font-size: 1rem;
+}
+
 .commentFilterMenuIcon {
   display: grid;
   place-items: center;
   inline-size: 24px;
+}
+
+.commentFilterSheet .commentFilterMenuIcon {
+  font-size: 20px;
 }
 
 .fullscreenCommentFilterMenu {
@@ -883,6 +899,13 @@
   overscroll-behavior: contain;
   padding-inline: 16px;
   box-sizing: border-box;
+}
+
+/* Line the search up with the comments and keep its floating label clear of the header. */
+.phoneCommentCard > .commentTools {
+  flex: 0 0 auto;
+  padding-block: 16px 8px;
+  padding-inline: 16px;
 }
 
 .phoneCommentHeader {

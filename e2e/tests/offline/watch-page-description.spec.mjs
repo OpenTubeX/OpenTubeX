@@ -194,6 +194,22 @@ test.describe('watch page', () => {
     await component.dispose()
   })
 
+  test('draws the desktop AI summary as a plain card like the description', async ({ app, page }) => {
+    await mockPlayableWatchPage(app, page)
+    await openMockedVideo(page)
+    const component = await page.evaluateHandle(findWatchComponent)
+    await component.evaluate(async component => {
+      component.proxy.videoSummary = ['A summary paragraph.']
+      await component.proxy.$store.dispatch('updateAiVideoSummaryMode', 'collapsed')
+    })
+    const surface = selector => page.locator(`${activeTab} ${selector}`).evaluate(element => {
+      const { backgroundColor, borderRadius, boxShadow } = getComputedStyle(element)
+      return { backgroundColor, borderRadius, boxShadow }
+    })
+    await expect(page.locator(`${activeTab} .videoSummary`)).toBeVisible()
+    expect(await surface('.videoSummary')).toEqual(await surface('.videoDescription'))
+  })
+
   test('keeps short and empty descriptions collapsible when they have metadata', async ({ app, page }) => {
     await mockPlayableWatchPage(app, page)
     await openMockedVideo(page)

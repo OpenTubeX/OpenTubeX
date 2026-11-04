@@ -2,7 +2,7 @@
   <button
     v-if="parsedDescription.excerpt || parsedDescription.hasImages || chips.length > 0 || license"
     type="button"
-    class="phonePanelButton phoneDescriptionButton"
+    class="phonePanelButton phonePanelCard phoneDescriptionButton"
     aria-haspopup="dialog"
     :aria-expanded="panelOpen"
     :aria-label="t('Description.Title')"
@@ -111,3 +111,4 @@ const describedBy = computed(() => [
 </script>
 
 <style scoped src="./PhoneDescriptionButton.css" />
+<style scoped src="../phonePanelCard.css" />
