@@ -21,6 +21,7 @@ import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicReference;
 
+import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
@@ -28,6 +29,17 @@ import org.junit.runner.RunWith;
 public class PredictiveBackTest {
     private static final String STORE = "document.querySelector('#app').__vue_app__.config.globalProperties.$store";
     private int drawerOriginalOrientation;
+
+    @Before
+    public void grantNotifications() {
+        // Opening Subscriptions refreshes the feed, which asks for notification
+        // permission. Its dialog would cover the app and take the edge swipes.
+        if (Build.VERSION.SDK_INT >= 33) {
+            InstrumentationRegistry.getInstrumentation().getUiAutomation().grantRuntimePermission(
+                InstrumentationRegistry.getInstrumentation().getTargetContext().getPackageName(),
+                android.Manifest.permission.POST_NOTIFICATIONS);
+        }
+    }
 
     @Test
     public void settingsBackDismissalNeverReappears() throws Exception {
