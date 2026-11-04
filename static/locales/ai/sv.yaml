@@ -186,8 +186,6 @@ Subscriptions:
   Show Combined View: Visa kombinerad vy
   Newest First: Nyaste först
   Oldest First: Äldsta först
-  Posts:
-    RSS Message: 'YouTube tillhandahåller inte RSS-flöden för inlägg. Inaktivera inställningen "{rssSetting}" för att visa inlägg eller aktivera inställningen "{hideSetting}" för att dölja den här fliken.'
   RSS Feeds:
     Refreshing: Uppdaterar RSS-flöden
     Tab: RSS
@@ -228,7 +226,6 @@ Feed:
 User Playlists:
   Save: "Spara"
   Edit: "Redigera"
-  This playlist is private or does not exist.: "Den här spellistan är privat eller finns inte."
   Pin to Navigation: "Fäst i navigeringen"
   Unpin from Navigation: "Lossa från navigeringen"
   Reorder Hint: Dra eller använd piltangenterna för att ändra ordning
@@ -706,8 +703,6 @@ Settings:
   Player Settings:
     Mono Audio: 'Monoljud'
     Show Mono Audio Toggle: 'Visa reglage för monoljud'
-    Default Media Format:
-      Default Media Format: 'Förvalt medieformat'
     Pause on Stream Recovery: "Pausa vid återställning av ström"
     Buffering:
       Buffering: Buffring
@@ -1169,8 +1164,6 @@ Settings:
     Show Video Title: Visa videotitel
     Show Bottom Right Actions Dock: Visa åtgärdsfältet längst ned till höger
     Paused Interface Hide Delay: Fördröjning innan pausgränssnittet döljs
-    Add: Lägg till
-    Remove: Ta bort
   Data Settings:
     Scheduled backups: "Schemalagda säkerhetskopior"
     Scheduled backup description: "Spara fullständiga ZIP-kopior medan OpenTubeX är öppet. Missade kopior skapas vid start. Gränsen gäller bara schemalagda kopior i den här mappen."
@@ -1419,8 +1412,6 @@ Settings:
     Unlocking: Låser upp…
   Search Settings: Sök i inställningar
   No Settings Found: Inga inställningar hittades
-  Experimental Settings:
-    Disable Hardware Acceleration: Inaktivera maskinvaruacceleration
   Interface Customizer:
     Customize Interface: "Anpassa gränssnitt"
     Preview: "Förhandsvisning"
@@ -1501,14 +1492,11 @@ Profile:
   Use Initial: Använd initial
   The selected image could not be loaded: Den valda bilden kunde inte läsas in
   Theme Color: Temafärg
-  Go To Profile Manager: Gå till profilhanteraren
 Channel:
   Fewer videos per day: "Färre videor per dag"
   More videos per day: "Fler videor per dag"
   Verified: Verifierad
   Official Artist Channel: Officiell artistkanal
-  About:
-    Links: Länkar
   Subscription settings: Prenumerationsinställningar
   Failed to save subscription settings: Det gick inte att spara kanalinställningarna
   Videos per day: Videor per dag
@@ -1526,8 +1514,6 @@ Channel:
   Channel Name Unavailable: Kanalnamnet är inte tillgängligt
   Search Result Types: Typer av sökresultat
   All Results: Alla
-  Videos:
-    This channel has videos but none could be displayed, try fetching more: "Den här kanalen har videor, men ingen kunde visas. Försök att hämta fler"
   Posts:
     Original post unavailable: "Det ursprungliga inlägget är inte tillgängligt"
     Members-only video hidden by OpenTubeX: "Video endast för medlemmar dold av OpenTubeX"
@@ -1590,8 +1576,6 @@ Video:
   Configure Restricted Playback Cookies Hint: "Konfigurera kakor under Inställningar → Avancerat → Extern programvara → yt-dlp-kakor."
   Try With Configured Cookies: Försök med konfigurerade kakor
   Restricted Playback Authentication Failed Template: 'yt-dlp kunde inte komma åt videon med de konfigurerade kakorna: {error}'
-  Collapse Playlist: Fäll ihop spellista
-  Expand Playlist: Fäll ut spellista
   Unmark As Watched: Avmarkera som sedd
   Video has been unmarked as watched: Videon har avmarkerats som sedd
   Save Channel Playback Speed: Spara uppspelningshastighet för kanalen
@@ -1616,8 +1600,6 @@ Video:
   Notification unavailable: Systemaviseringar är inte tillgängliga
   Scheduled video starting: Schemalagd video startar
   Live notification body: '{videoTitle} startar nu'
-  Premiere: Premiär
-  AI: AI
   AI-generated content: AI-genererat innehåll
   Collaborators: Medverkande
   Live Chat Replay: Repris av livechatt
@@ -1855,9 +1837,6 @@ Video:
       Load: "Läs in undertextfil…"
       Subtitle Files: "Undertextfiler"
       Error: "Det gick inte att läsa in undertextfilen. Välj en SRT- eller WebVTT-fil."
-  Station: Station
-  Playlist:
-    Unavailable videos are hidden: 1 otillgänglig video är dold | {count} otillgängliga videor är dolda
   External Media:
     Dislikes: "Ogillamarkering | Ogillamarkeringar"
     Reposts: "Återinlägg | Återinlägg"
@@ -1883,7 +1862,6 @@ Video:
       subscriber_only: "Endast prenumeranter"
       needs_auth: "Inloggning krävs"
       unlisted: "Olistad"
-  How this was made: Så skapades detta
   Save Queue to Playlist: "Spara kön i en spellista"
   Live Chat is currently not supported with the Yattee server. A direct connection to YouTube is required.: Livechatt stöds för närvarande inte via Yattee-servern. En direktanslutning till YouTube krävs.
   External Player:
@@ -1897,7 +1875,6 @@ Playlist:
   Playlist Preload Complete: "Förinlästa videor: {count}."
   Playlist Preload Partial: "Förinläste {preloaded} av {requested} videor. {failed} kunde inte förinläsas."
   Playlist Preload Pagination Failed: "Hela spellistan kunde inte läsas in, så förinläsningen avbröts."
-  Unavailable videos are hidden: Otillgängliga videor är dolda
   Add Playlist to Queue: "Lägg till spellistan i kön"
   Playlist Added to Queue: "Spellistan har lagts till i kön"
 Change Format:
@@ -2070,7 +2047,6 @@ Comments:
   Getting comment replies, please wait: Hämtar svar på kommentaren, vänta
   Reload Comments: Läs in kommentarer igen
   Reply Count: 1 svar | {replyCount} svar
-  Comments are turned off: Kommentarer är inaktiverade
   YouTube did not provide advertised replies: YouTube angav att kommentaren har svar men tillhandahöll dem inte. De kan ha tagits bort eller dolts, så svarsknappen har tagits bort.
   Pinned by you: Fäst av dig
   A reply is pinned: Ett svar är fäst
@@ -2212,8 +2188,6 @@ Tooltips:
     Use Fixed Tab Width: Ger alla flikar i det vågräta flikfältet samma bredd i stället för att anpassa bredden efter titeln.
     Use Custom Title Bar: Ersätter systemets namnlist med flikfältet, eller med den övre navigeringen när flikarna inte är högst upp, för att spara vertikalt utrymme. Fönsterknapparna visas i hörnet av det fältet.
     Use Grid Player Menu: Ordnar videospelarens inställningsmeny som ett rutnät med rutor i stället för en lista med rader.
-  Experimental Settings:
-    Disable Hardware Acceleration: Inaktiverar GPU-maskinvaruacceleration. Kan lösa grafikproblem, men kommer troligen att försämra prestandan.
 The playlist is at the beginning. Enable loop to continue playing: Spellistan är vid början. Aktivera upprepning för att fortsätta spela
 External link opening has been disabled in Settings → Privacy: Öppning av externa länkar har inaktiverats under Inställningar → Integritet
 KeyboardShortcutPrompt:
@@ -2408,8 +2382,6 @@ Channels:
   Load More Channels: "Läs in fler kanaler"
 Search Bar:
   Use Suggestion: Använd förslag
-  Open Search Container: Öppna sökfältet
-  Search: Sök
 Theme Discovery:
   Discover Themes: "Upptäck teman"
   Refresh: "Läs in igen"

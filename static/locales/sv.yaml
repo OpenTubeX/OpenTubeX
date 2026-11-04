@@ -607,10 +607,6 @@ Settings:
     UseDeArrowTitles: Använd DeArrow för videotitlar
     'DeArrow Thumbnail Generator API Url (Default is https://dearrow-thumb.ajay.app)': 'Webbadress till DeArrows API för att generera miniatyrbilder (förvald: https://dearrow-thumb.ajay.app)'
     UseDeArrowThumbnails: Använd DeArrow för miniatyrbilder
-    Excluded Channels:
-      Disabled Message: FreeTube hämtar kanaluppgifter för vissa kanal-ID:n i undantagslistan. Du kan redigera listan när hämtningen är klar.
-      Excluded Channels: Undantagna kanaler
-      Tooltip: Ange ett kanal-ID för att inaktivera SponsorBlock för kanalen. Sponsorsegment i kanalens videor hoppas då inte över. Ange hela kanal-ID:t och skilj på stora och små bokstäver.
   External Player Settings:
     Ignore Unsupported Action Warnings: Ignorera varningar för åtgärder som inte stöds
     External Player: Extern spelare
