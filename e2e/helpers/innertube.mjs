@@ -264,6 +264,37 @@ export async function setupInnertube(app, testInfo, { alwaysReplay = false } = {
 }
 
 /**
+ * Keeps YouTube's API and watch page responses during a live attempt. Traces
+ * don't keep their bodies, which a failure against changing live data needs.
+ * @param {import('@playwright/test').BrowserContext} context
+ */
+function collectYouTubeResponses(context) {
+  /** @type {Promise<object>[]} */
+  const entries = []
+  /** @param {import('@playwright/test').Response} response */
+  const onResponse = response => {
+    const url = response.url()
+    if (!url.includes('/youtubei/v1/') && !/^https:\/\/www\.youtube\.com\/watch\?/.test(url)) return
+    const status = response.status()
+    const request = response.request().postData()
+    // Read the body right away; it can be gone once the page moves on.
+    entries.push(response.text().then(
+      body => ({ url, status, request, body }),
+      error => ({ url, status, request, error: error.message })
+    ))
+  }
+  context.on('response', onResponse)
+  return {
+    stop: () => context.off('response', onResponse),
+    /** @param {import('@playwright/test').TestInfo} testInfo */
+    async attach(testInfo) {
+      const body = gzipSync(JSON.stringify(await Promise.all(entries)))
+      await testInfo.attach('youtube-responses.json.gz', { body, contentType: 'application/gzip' })
+    }
+  }
+}
+
+/**
  * App test extended with an `innertube` fixture. Reference it in network
  * tests to get record/replay behaviour, and gate assertions that need data
  * only the live API has (or that has no fixtures) on `innertube.replay`.
@@ -271,7 +302,10 @@ export async function setupInnertube(app, testInfo, { alwaysReplay = false } = {
 export const test = baseAppTest.extend({
   innertube: [async ({ app }, use, testInfo) => {
     const mode = await setupInnertube(app, testInfo)
+    const responses = mode.record || mode.replay ? null : collectYouTubeResponses(app.electronApp.context())
     await use(mode)
+    responses?.stop()
+    if (responses && testInfo.status !== testInfo.expectedStatus) await responses.attach(testInfo)
   }, { auto: true }]
 })
 

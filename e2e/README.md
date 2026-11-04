@@ -202,7 +202,9 @@ Playwright. They do not replace native Android emulator testing.
 The Playwright HTML report and functional-test traces are uploaded as artifacts.
 For Electron, Playwright's own trace only lists API calls, so a failed test
 also attaches the app's trace, with DOM snapshots, console messages and
-network requests, and the main process output.
+network requests, and the main process output, also when the app fails to
+start. A failed live network attempt also attaches YouTube's API and watch page
+responses as `youtube-responses.json.gz`, since the trace doesn't keep their bodies.
 The performance project disables tracing to avoid distorting measurements.
 On CI, Playwright retries each failed test once. A test that passes only on
 retry does not fail the run: it gets a warning annotation and an entry in the
