@@ -418,7 +418,7 @@ test.describe('synced setting indicators', () => {
     const sliders = themeSection.locator('.sliderGrid')
       .filter({ has: page.getByRole('slider', { name: /^UI Roundness:/ }) })
       .locator(':scope > *')
-    await expect(sliders).toHaveCount(6)
+    await expect(sliders).toHaveCount(7)
 
     const boxes = await sliders.evaluateAll((elements) => elements.map((element) => {
       const { y, width } = element.getBoundingClientRect()
@@ -430,7 +430,7 @@ test.describe('synced setting indicators', () => {
     for (const { y } of boxes) {
       rowSizes.set(y, (rowSizes.get(y) ?? 0) + 1)
     }
-    expect([...rowSizes.values()]).toEqual([3, 3])
+    expect([...rowSizes.values()]).toEqual([3, 3, 1])
     // The row they landed on doesn't change how much room they get.
     expect(new Set(boxes.map(({ width }) => width)).size).toBe(1)
   })
