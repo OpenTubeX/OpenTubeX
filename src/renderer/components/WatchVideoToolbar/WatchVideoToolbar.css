@@ -111,6 +111,14 @@
   margin: 0;
   margin-inline-start: 4px;
   padding-inline: 12px 14px;
+
+  /*
+    Drops the padding transition, the last one FtButton lists. The script
+    measures the labeled layout in the same frame, and an animating padding
+    would make the button seem narrower than it is, which flashes the label
+    whenever the even toolbar measures itself again.
+  */
+  transition-property: background-color, border-color, box-shadow, border-radius;
 }
 
 .videoOptions.even:not(.measuring) :deep(.downloadButton) {

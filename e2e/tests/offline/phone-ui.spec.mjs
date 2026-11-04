@@ -376,6 +376,40 @@ test.describe('phone UI', () => {
     await expect(toolbar.locator('.downloadLabel')).toBeVisible()
   })
 
+  test('keeps the even video actions when opening a sheet just below the labeled width', { tag: '@scale' }, async ({ app, page, uiScale }) => {
+    await page.evaluate(async () => {
+      await window.$store.dispatch('updateUseSponsorBlock', true)
+      await window.$store.dispatch('updateQuickBookmarkTargetPlaylistId', 'phone-list-0')
+    })
+    await mockPlayableWatchPage(app, page)
+    await openMockedVideo(page)
+    const width = 600
+    await setWindowSize(app, page, { width: Math.round(width * uiScale / 100), height: 860 })
+    const toolbar = page.locator('.videoOptions')
+    await expect(toolbar).toHaveClass(/\bfull\b/)
+    const { labeledWidth, rowWidth } = await toolbar.evaluate(element => ({
+      labeledWidth: element.getBoundingClientRect().width,
+      rowWidth: element.parentElement.clientWidth
+    }))
+    // The labeled toolbar misses fitting by less than the download button's padding
+    await setWindowSize(app, page, { width: Math.round((width - rowWidth + labeledWidth - 8) * uiScale / 100), height: 820 })
+    await toolbar.scrollIntoViewIfNeeded()
+    await expect(toolbar).toHaveClass(/\beven\b/)
+    await toolbar.evaluate(element => {
+      window.toolbarLayouts = []
+      new MutationObserver(() => window.toolbarLayouts.push(element.className))
+        .observe(element, { attributes: true, attributeFilter: ['class'] })
+    })
+
+    // Mounting the sheet in the toolbar measures it again
+    await toolbar.getByRole('button', { name: 'Add to playlist', exact: true }).click()
+    const sheet = page.locator('dialog[open]')
+    await expect(sheet).toBeVisible()
+    await page.evaluate(() => new Promise(resolve => setTimeout(resolve, 500)))
+    expect(await page.evaluate(() => window.toolbarLayouts.filter(layout => !layout.includes('measuring')))).not.toContainEqual(expect.stringMatching(/\bfull\b/))
+    await expect(toolbar).toHaveClass(/\beven\b/)
+  })
+
   test('opens chapters and transcript as independent sheets', async ({ app, page }) => {
     await mockPlayableWatchPage(app, page, { captionTranslations: true })
     await openMockedVideo(page)
