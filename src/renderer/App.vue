@@ -3949,6 +3949,8 @@ function handleMobileContextKeydown(event) {
   const sheet = mobileLinkActionsRef.value
   if (!sheet) return
   event.preventDefault()
+  // Like Tab, so a sheet opened by touch shows where focus moves.
+  store.dispatch('showOutlines')
   const focused = document.activeElement instanceof HTMLElement && sheet.contains(document.activeElement)
     ? document.activeElement
     : null

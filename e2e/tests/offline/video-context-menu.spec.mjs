@@ -697,6 +697,9 @@ test('mobile context sheet moves between items and submenus with arrow keys', as
   })))
   const menu = page.locator('.mobileLinkActions')
   await expect(menu).toBeFocused()
+  // A touch press hides focus outlines.
+  await page.evaluate(() => window.$store.dispatch('hideOutlines'))
+  await expect(page.locator('html')).toHaveClass(/\bhideOutlines\b/)
   const item = name => menu.getByRole('menuitem', { name, exact: true })
   const press = async (key, focused) => {
     await page.keyboard.press(key)
@@ -704,6 +707,7 @@ test('mobile context sheet moves between items and submenus with arrow keys', as
   }
 
   await press('ArrowDown', item('Open in a New Tab'))
+  await expect(page.locator('html')).not.toHaveClass(/\bhideOutlines\b/)
   // Left and Right stay within a quick action row and wrap around it.
   await press('ArrowRight', item('Open in a New Window'))
   await press('ArrowLeft', item('Open in a New Tab'))

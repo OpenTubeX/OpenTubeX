@@ -39,7 +39,8 @@ mobile layout and breaks selectors.
   Seed settings/datastores per file via `test.use({ seed: { ... } })`.
   The main process honours `OPENTUBEX_E2E_USER_DATA_DIR` for isolation.
   In offline projects, renderer requests to hosts a test has not routed fail
-  from launch on: `www.youtube.com` answers 404 and other hosts abort.
+  from launch on: `www.youtube.com` answers 404, `api.invidious.io` answers
+  an empty list, and other hosts abort.
   Loopback servers stay reachable.
   Inside `page.evaluate`, `window.$store` and `window.$router` reach the
   renderer's Vuex store and router in every window, including after reloads.
