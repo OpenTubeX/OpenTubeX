@@ -9,6 +9,9 @@ import {
   randomSyncServerDeviceId,
 } from '../../../src/renderer/helpers/sync-server-sessions.js'
 
+// A closing filters prompt stays in the page while it fades out.
+const filters = page => page.locator('.prompt:not([inert])')
+
 /**
  * Returns the box of an element that has stopped moving. Menus and submenus
  * animate in, so measuring right after they become visible yields coordinates
@@ -2193,7 +2196,7 @@ test.describe('tab bar', () => {
     const filterButton = page.locator('.navFilterButton')
 
     await filterButton.click()
-    await page.locator('.searchRadio', { hasText: 'Time' }).getByText('Today', { exact: true }).click()
+    await filters(page).locator('.searchRadio', { hasText: 'Time' }).getByText('Today', { exact: true }).click()
     await page.getByRole('button', { name: 'Close', exact: true }).click()
     await expect(filterButton).toHaveClass(/filterChanged/)
 
@@ -2201,20 +2204,20 @@ test.describe('tab bar', () => {
     await expect(filterButton).not.toHaveClass(/filterChanged/)
 
     await filterButton.click()
-    await expect(page.locator('input[type="radio"][value="today"]')).not.toBeChecked()
-    await page.locator('.searchRadio', { hasText: 'Prioritize' }).getByText('Popularity', { exact: true }).click()
+    await expect(filters(page).locator('input[type="radio"][value="today"]')).not.toBeChecked()
+    await filters(page).locator('.searchRadio', { hasText: 'Prioritize' }).getByText('Popularity', { exact: true }).click()
     await page.getByRole('button', { name: 'Close', exact: true }).click()
 
     await page.locator(sel.tabs).first().click()
     await filterButton.click()
-    await expect(page.locator('input[type="radio"][value="today"]')).toBeChecked()
-    await expect(page.locator('input[type="radio"][value="relevance"]')).toBeChecked()
+    await expect(filters(page).locator('input[type="radio"][value="today"]')).toBeChecked()
+    await expect(filters(page).locator('input[type="radio"][value="relevance"]')).toBeChecked()
     await page.getByRole('button', { name: 'Close', exact: true }).click()
 
     await page.locator(sel.tabs).nth(1).click()
     await filterButton.click()
-    await expect(page.locator('input[type="radio"][value="popularity"]')).toBeChecked()
-    await expect(page.locator('input[type="radio"][value="today"]')).not.toBeChecked()
+    await expect(filters(page).locator('input[type="radio"][value="popularity"]')).toBeChecked()
+    await expect(filters(page).locator('input[type="radio"][value="today"]')).not.toBeChecked()
   })
 
   test('loading a search tab fills the search bar from its route', async ({ page }) => {

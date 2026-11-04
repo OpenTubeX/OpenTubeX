@@ -1,5 +1,8 @@
 import { test, expect, goTo, goToSettingsSection, sel, readDatastore } from '../../helpers/app.mjs'
 
+// A closing filters prompt stays in the page while it fades out.
+const filters = page => page.locator('.prompt:not([inert])')
+
 const now = Date.now()
 
 test.use({
@@ -162,16 +165,16 @@ test.describe('search history suggestions', () => {
     await expect(page.locator('.navFilterButton')).toHaveClass(/filterChanged/)
 
     await page.locator('.navFilterButton').click()
-    await expect(page.locator('input[type="radio"][value="popularity"]')).toBeChecked()
-    await expect(page.locator('input[type="radio"][value="today"]')).toBeChecked()
-    await expect(page.locator('input[type="radio"][value="video"]')).toBeChecked()
-    await expect(page.locator('input[type="radio"][value="three_to_twenty_mins"]')).toBeChecked()
+    await expect(filters(page).locator('input[type="radio"][value="popularity"]')).toBeChecked()
+    await expect(filters(page).locator('input[type="radio"][value="today"]')).toBeChecked()
+    await expect(filters(page).locator('input[type="radio"][value="video"]')).toBeChecked()
+    await expect(filters(page).locator('input[type="radio"][value="three_to_twenty_mins"]')).toBeChecked()
   })
 
   test('the same query saves and restores each distinct filter set', async ({ app, page }) => {
     await page.locator('.navFilterButton').click()
-    await page.locator('.searchRadio', { hasText: 'Time' }).getByText('Today', { exact: true }).click()
-    await page.locator('.searchRadio', { hasText: 'Duration' }).getByText('3 - 20 minutes', { exact: true }).click()
+    await filters(page).locator('.searchRadio', { hasText: 'Time' }).getByText('Today', { exact: true }).click()
+    await filters(page).locator('.searchRadio', { hasText: 'Duration' }).getByText('3 - 20 minutes', { exact: true }).click()
     await page.getByRole('button', { name: 'Close', exact: true }).click()
 
     await page.locator(sel.searchInput).fill('daily news')
