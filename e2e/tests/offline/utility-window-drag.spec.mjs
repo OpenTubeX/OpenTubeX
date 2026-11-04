@@ -136,13 +136,14 @@ test('ignores a second pointer while a window gesture is active', async ({ page 
   const dialog = page.locator('.settingsWindow')
   await expect(dialog).toBeVisible()
   await expect(dialog).not.toHaveClass(/settings-window-enter-active/)
-  const activeGestures = await dialog.evaluate(element => {
+  const activeGestures = await dialog.evaluate(async element => {
     const header = element.querySelector('.settingsWindowHeader')
     const handle = element.querySelector('.resize-se')
     const press = (target, pointerId) => target.dispatchEvent(new PointerEvent('pointerdown', { bubbles: true, button: 0, pointerId, clientX: 600, clientY: 80 }))
     const release = pointerId => window.dispatchEvent(new PointerEvent('pointerup', { pointerId }))
     const gestures = () => ['draggingSettingsWindow', 'resizingSettingsWindow']
       .filter(className => document.documentElement.classList.contains(className))
+    const maximize = element.querySelector('.settingsHeaderButton[aria-label="Maximize"]')
     const states = []
     for (const [first, other] of [[header, handle], [handle, header]]) {
       press(first, 1)
@@ -151,11 +152,15 @@ test('ignores a second pointer while a window gesture is active', async ({ page 
       // Only the pointer that started the gesture may end it.
       release(2)
       release(3)
+      // A keyboard press on the focused maximize button must wait too.
+      maximize.click()
+      await new Promise(resolve => requestAnimationFrame(resolve))
+      states.push(element.classList.contains('maximized'))
       states.push(gestures())
       release(1)
       states.push(gestures())
     }
     return states
   })
-  expect(activeGestures).toEqual([['draggingSettingsWindow'], [], ['resizingSettingsWindow'], []])
+  expect(activeGestures).toEqual([false, ['draggingSettingsWindow'], [], false, ['resizingSettingsWindow'], []])
 })

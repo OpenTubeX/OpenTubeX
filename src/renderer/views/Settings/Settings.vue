@@ -1432,7 +1432,8 @@ function restorePreservedScrollPositions() {
 }
 
 async function toggleMaximized() {
-  if (isMaximizationForced.value) return
+  // A gesture commits its bounds on release, so the restore bounds would be stale.
+  if (isMaximizationForced.value || draggingPointerId !== null || resizeSession !== null) return
   cancelBoundsAnimation()
   const element = settingsWindowRef.value
   const from = getWindowAnimationState(element)
