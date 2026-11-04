@@ -22,6 +22,25 @@ async function clickAndMeasureNextPaint(locator) {
   }
 }
 
+// Rows that render above the viewport move the offset to keep the visible rows in
+// place, so compare the visible rows rather than the offset.
+function firstVisibleRow(list) {
+  return list.evaluate((element) => {
+    const top = element.getBoundingClientRect().top
+    const rows = [...element.querySelectorAll(':scope > .playlistItem')]
+    const index = rows.findIndex(row => row.getBoundingClientRect().bottom > top)
+    return { index, offset: rows[index].getBoundingClientRect().top - top }
+  })
+}
+
+// Each of those adjustments rounds the offset to a whole pixel.
+async function expectSameVisibleRow(list, expected) {
+  await expect.poll(async () => {
+    const { index, offset } = await firstVisibleRow(list)
+    return { index, offset: Math.abs(offset - expected.offset) <= 2 ? expected.offset : offset }
+  }).toEqual(expected)
+}
+
 test('large fullscreen playlist dock remains responsive and preserves its state', async ({ page, innertube }) => {
   test.skip(innertube.replay, 'playlist hydration needs the real API')
 
@@ -32,10 +51,11 @@ test('large fullscreen playlist dock remains responsive and preserves its state'
 
   const sidebar = page.locator('.playlistItemsWrapper')
   await expect(sidebar).toBeVisible({ timeout: 60000 })
-  await expect.poll(
-    () => sidebar.locator('.playlistItem').count(),
-    { timeout: 60000 }
-  ).toBeGreaterThan(1000)
+  // Later pages load once the panel scrolls near its end.
+  await expect.poll(async () => {
+    await sidebar.evaluate((element) => { element.scrollTop = element.scrollHeight })
+    return sidebar.locator('.playlistItem').count()
+  }, { timeout: 60000 }).toBeGreaterThan(1000)
   await expect(sidebar).toHaveAttribute('data-overlayscrollbars-viewport')
   await expect(sidebar.locator(':scope > .os-scrollbar-vertical')).toHaveCount(1)
   await expect.poll(async () => sidebar.evaluate((element) => element.scrollHeight)).toBeGreaterThan(1000)
@@ -87,8 +107,13 @@ test('large fullscreen playlist dock remains responsive and preserves its state'
   const video = await waitForPlaybackOrSkip(test, page)
   await video.evaluate(element => element.pause())
 
-  await sidebar.evaluate((element) => { element.scrollTop = 420 })
-  await expect.poll(async () => sidebar.evaluate((element) => element.scrollTop)).toBe(420)
+  // Rows that first render above the viewport keep the visible rows in place by
+  // moving the offset, so scroll again until the rows above it have rendered.
+  await expect.poll(async () => sidebar.evaluate(async (element) => {
+    element.scrollTop = 420
+    await new Promise(resolve => requestAnimationFrame(() => requestAnimationFrame(resolve)))
+    return element.scrollTop
+  })).toBe(420)
 
   await setPlayerFullscreen(page, true)
   const sidebarScrollTop = await sidebar.evaluate((element) => element.scrollTop)
@@ -116,7 +141,7 @@ test('large fullscreen playlist dock remains responsive and preserves its state'
   const centeredDockScrollTop = await dock.evaluate((element) => element.scrollTop)
   await dock.evaluate((element) => element.scrollBy(0, 480))
   await expect.poll(async () => dock.evaluate((element) => element.scrollTop)).toBeGreaterThan(centeredDockScrollTop)
-  const dockScrollTop = await dock.evaluate((element) => element.scrollTop)
+  const dockRow = await firstVisibleRow(dock)
   const closeDuration = await clickAndMeasureNextPaint(page.getByRole('button', { name: 'Close Playlist' }))
   expect(closeDuration).toBeLessThan(1500)
   await expect(playlistToggle).toHaveAttribute('aria-expanded', 'false')
@@ -124,7 +149,7 @@ test('large fullscreen playlist dock remains responsive and preserves its state'
   expect(reopenDuration).toBeLessThan(1500)
   await expect(playlistToggle).toHaveAttribute('aria-expanded', 'true')
   await expect(dock).toBeVisible()
-  await expect.poll(async () => dock.evaluate((element) => element.scrollTop)).toBe(dockScrollTop)
+  await expectSameVisibleRow(dock, dockRow)
 
   await page.locator('.playerFullscreenTitleOverlay').click({ force: true })
   const metadataOverlay = page.locator('.fullscreenMetadataOverlay.open')
@@ -180,5 +205,5 @@ test('large fullscreen playlist dock remains responsive and preserves its state'
   expect(Date.now() - fullscreenStart).toBeLessThan(3000)
   await expect(playlistToggle).toHaveAttribute('aria-expanded', 'true')
   await expect(dock).toBeVisible()
-  await expect.poll(async () => dock.evaluate((element) => element.scrollTop)).toBe(dockScrollTop)
+  await expectSameVisibleRow(dock, dockRow)
 })
