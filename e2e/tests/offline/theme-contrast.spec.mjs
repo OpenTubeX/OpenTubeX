@@ -426,7 +426,10 @@ test.describe('main color text contrast', () => {
           classList.add(`main${name}`)
           // Start the color transitions, then read their settled colors.
           for (const element of [button, toggle]) measure(element)
-          for (const animation of document.getAnimations()) animation.finish()
+          // Looping animations, such as spinners, can't finish and would throw
+          for (const animation of document.getAnimations()) {
+            if (animation.effect?.getComputedTiming().endTime !== Infinity) animation.finish()
+          }
           return { name, palette: measure(probe), button: measure(button), 'selected toggle': measure(toggle) }
         })
         probe.remove()
@@ -472,7 +475,10 @@ async function measureStateColors(page, prefix, elements = {}) {
       classList.add(`${prefix}${name}`)
       // Start the color transitions, then read their settled colors.
       for (const element of Object.values(elements)) measure(element)
-      for (const animation of document.getAnimations()) animation.finish()
+      // Looping animations, such as spinners, can't finish and would throw
+      for (const animation of document.getAnimations()) {
+        if (animation.effect?.getComputedTiming().endTime !== Infinity) animation.finish()
+      }
       return {
         name,
         ...Object.fromEntries(Object.entries({ ...probes, ...elements }).map(([label, element]) => [label, measure(element)]))
@@ -735,7 +741,7 @@ test.describe('selected tab label contrast', () => {
           window.$store.commit('setBaseTheme', theme)
           if (mutation) window.$store.commit(mutation, color)
           await new Promise(resolve => setTimeout(resolve))
-          document.getAnimations().forEach(animation => animation.finish())
+          document.getAnimations().forEach(animation => animation.effect?.getComputedTiming().endTime !== Infinity && animation.finish())
           const highlight = getComputedStyle(tab, '::before')
           // The highlight sits below the tab's own hover fill.
           const background = paint([
