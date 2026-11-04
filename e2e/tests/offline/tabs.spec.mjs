@@ -2766,14 +2766,15 @@ test.describe('vertical tab height', () => {
     )).toBe(30)
   })
 
-  // 15 tabs stop overflowing once they shrink, 40 tabs still overflow.
+  // 15 tabs stop overflowing once they shrink, 40 tabs still overflow. The
+  // last tab is active, so revealing it keeps the strip at its end.
   for (const tabCount of [15, 40]) {
     test(`clamps the scrolled strip when ${tabCount} tabs shrink`, { tag: '@scale' }, async ({ app, page }) => {
       await setWindowSize(app, page, { width: 1000, height: 700 })
       await page.evaluate(async count => {
         window.$store.commit('setVerticalTabHeight', 56)
         for (let index = 1; index < count; index++) {
-          await window.ftElectron.tabs.create({ route: '/history', title: `History ${index}`, makeActive: false, lazyLoad: true })
+          await window.ftElectron.tabs.create({ route: '/history', title: `History ${index}`, makeActive: index === count - 1, lazyLoad: true })
         }
       }, tabCount)
       await expect(page.locator(sel.tabs)).toHaveCount(tabCount)
@@ -2801,6 +2802,28 @@ test.describe('vertical tab height', () => {
       })).toBe(true)
     })
   }
+
+  test('keeps the active tab in view when tabs grow', { tag: '@scale' }, async ({ app, page }) => {
+    await setWindowSize(app, page, { width: 1000, height: 700 })
+    // The 21st of 40 tabs is in view at 24px, but not at 56px.
+    const activeTabId = await page.evaluate(async () => {
+      window.$store.commit('setVerticalTabHeight', 24)
+      const tabs = []
+      for (let index = 1; index < 40; index++) {
+        tabs.push(await window.ftElectron.tabs.create({ route: '/history', title: `History ${index}`, makeActive: false, lazyLoad: true }))
+      }
+      await window.ftElectron.tabs.activate(tabs[19].id)
+      return tabs[19].id
+    })
+    await expect(page.locator(sel.activeTab)).toHaveAttribute('data-tab-id', activeTabId)
+    await expectActiveTabInView(page)
+
+    await page.evaluate(() => window.$store.commit('setVerticalTabHeight', 56))
+    await expect.poll(() => page.locator(sel.activeTab).evaluate(
+      tab => Math.round(tab.getBoundingClientRect().height)
+    )).toBe(56)
+    await expectActiveTabInView(page)
+  })
 })
 
 /**

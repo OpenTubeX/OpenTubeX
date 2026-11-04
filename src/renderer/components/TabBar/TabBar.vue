@@ -319,9 +319,11 @@ async function migrateTabAvatar(tab, avatarUrl) {
 
 // Only the horizontal bar sizes tabs by their content, so the fixed width is
 // applied there; vertical tabs always fill the column and take a set height.
+const verticalTabHeight = computed(() => normalizeVerticalTabHeight(store.getters.getVerticalTabHeight))
+
 const tabSizeStyle = computed(() => {
   if (vertical.value) {
-    return { '--vertical-tab-height': `${normalizeVerticalTabHeight(store.getters.getVerticalTabHeight)}px` }
+    return { '--vertical-tab-height': `${verticalTabHeight.value}px` }
   }
 
   if (!store.getters.getUseFixedTabWidth) {
@@ -1500,6 +1502,13 @@ watch([activeTabId, activeStripItemId], () => {
 
 watch(stripItems, () => {
   clampTabsScroll()
+  revealActiveTab()
+}, { flush: 'post' })
+
+// Taller tabs can push the active tab out of view.
+watch(verticalTabHeight, () => {
+  if (!vertical.value) return
+  revealActiveTabPending = true
   revealActiveTab()
 }, { flush: 'post' })
 
