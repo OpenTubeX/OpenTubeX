@@ -254,6 +254,12 @@ it can be safely elided. This looks quite pleasant on this theme. */
   --primary-color: #fff;
 }
 
+/* Pressed phone cards turn white with black text (phonePanelCard.css), so
+   their chips need a light surface instead of the translucent black one. */
+.hotPink .phonePanelCard:is(:active, :has(> summary:active)) {
+  --secondary-card-bg-color: rgb(0 0 0 / 12%);
+}
+
 
 /*************** DARK THEME ADJUSTMENTS ***************/
 
