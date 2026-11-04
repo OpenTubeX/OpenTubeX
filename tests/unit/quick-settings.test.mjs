@@ -147,7 +147,7 @@ test('disables quick settings whose parent setting turns them off', () => {
   assert.equal(definitions.get('hideSubscriptionsLive').disabledWhen({ hideLiveStreams: true }), true)
   assert.equal(definitions.get('enableSkipSilenceByDefault').disabledWhen({ showSkipSilenceButton: false }), true)
   assert.equal(definitions.get('hideSubscriptionsLive').effectiveValue({ hideLiveStreams: true, hideSubscriptionsLive: false }), true)
-  assert.equal(definitions.get('toastPosition').effectiveValue({ toastPosition: 'middle' }), 'bottom-left')
+  assert.equal(definitions.get('toastPosition').effectiveValue({ toastPosition: 'middle' }), 'bottom-center')
   assert.equal(definitions.get('reducedMotion').effectiveValue({ reducedMotion: 'sometimes' }), 'system')
   assert.equal(definitions.get('reducedMotion').effectiveValue({ reducedMotion: 'on' }), 'on')
 })

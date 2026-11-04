@@ -371,7 +371,7 @@ export function createDefaultSettings({ supportsLocalApi, isElectron }) {
     onlyShowImportantToasts: false,
     usePlayerMenuGrid: true,
     useFrostedGlassPlayerUi: true,
-    toastPosition: 'bottom-left',
+    toastPosition: 'bottom-center',
     extraThumbnailAction: '',
     thumbnailLeftSwipeAction: 'disabled',
     thumbnailRightSwipeAction: 'disabled',

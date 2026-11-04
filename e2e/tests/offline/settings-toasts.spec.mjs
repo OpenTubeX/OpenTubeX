@@ -85,6 +85,9 @@ test.describe('settings', () => {
       }))
     }
 
+    await expect(positionSelect).toHaveValue('bottom-center')
+    await expect(holder).toHaveClass(/position-bottom-center/)
+
     const dismissDragDistance = 120
 
     await positionSelect.selectOption('bottom-left')
@@ -888,14 +891,14 @@ test.describe('settings', () => {
 test.describe('invalid toast position', () => {
   test.use({ seed: { settings: { toastPosition: 'unsupported' } } })
 
-  test('falls back to bottom left', async ({ page }) => {
+  test('falls back to bottom center', async ({ page }) => {
     await goTo(page, 'settings')
     await page.locator('.settingsMenu [data-section="appearance"]').click()
 
     const positionSelect = page.locator('[data-section="appearance"] .select')
       .filter({ hasText: 'Toast Position' })
       .locator('select')
-    await expect(positionSelect).toHaveValue('bottom-left')
+    await expect(positionSelect).toHaveValue('bottom-center')
 
     await page.evaluate(() => {
       window.ftElectron.showToastOnAllTabs('Fallback toast', 10000)
@@ -903,6 +906,6 @@ test.describe('invalid toast position', () => {
 
     const holder = page.locator('.toast-holder')
     await expect(holder.locator('.toast', { hasText: 'Fallback toast' })).toBeVisible()
-    await expect(holder).toHaveClass(/position-bottom-left/)
+    await expect(holder).toHaveClass(/position-bottom-center/)
   })
 })
