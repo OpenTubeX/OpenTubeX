@@ -39,21 +39,23 @@
       @close="showManager = false"
     >
       <div class="rssFeedsHeader">
-        <Translation
-          keypath="Subscriptions.RSS Feeds.Description"
-          tag="p"
-        >
-          <template #rssHub>
-            <a :href="RSSHUB_URL">{{ RSSHUB_NAME }}</a>
-          </template>
-        </Translation>
-        <FtButton
-          class="rssHubButton"
-          :label="t('Subscriptions.RSS Feeds.RSSHub.Browse')"
-          :icon="['fas', 'magnifying-glass']"
-          :disabled="isAdding"
-          @click="showRssHubPrompt = true"
-        />
+        <div class="rssHubRow">
+          <Translation
+            keypath="Subscriptions.RSS Feeds.Description"
+            tag="p"
+          >
+            <template #rssHub>
+              <a :href="RSSHUB_URL">{{ RSSHUB_NAME }}</a>
+            </template>
+          </Translation>
+          <FtButton
+            class="rssHubButton"
+            :label="t('Subscriptions.RSS Feeds.RSSHub.Browse')"
+            :icon="['fas', 'magnifying-glass']"
+            :disabled="isAdding"
+            @click="showRssHubPrompt = true"
+          />
+        </div>
         <div class="feedInput">
           <FtInput
             ref="feedInput"
