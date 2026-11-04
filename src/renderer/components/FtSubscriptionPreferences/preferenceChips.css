@@ -1,0 +1,83 @@
+.preferenceSection {
+  padding-block: 2px 8px;
+  padding-inline: 6px;
+}
+
+.preferenceLabel {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin: 0;
+  padding-block: 8px 6px;
+  color: var(--secondary-text-color);
+  font-size: 12px;
+  font-weight: 600;
+  line-height: 1.2;
+  text-align: start;
+  text-transform: uppercase;
+}
+
+.preferenceChips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.preferenceChip {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  max-inline-size: 100%;
+  min-block-size: 32px;
+  box-sizing: border-box;
+  padding-block: 4px;
+  padding-inline: 10px 12px;
+  border: 1px solid var(--border-color);
+  border-radius: var(--shape-corner-full);
+  background: transparent;
+  color: inherit;
+  font: inherit;
+  cursor: pointer;
+}
+
+.preferenceChip bdi {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.preferenceChip[aria-checked='true'] {
+  border-color: transparent;
+  background-color: color-mix(in srgb, var(--primary-color) 20%, transparent);
+}
+
+/* Some, but not all, of the selected channels have it. */
+.preferenceChip[aria-checked='mixed'] {
+  border-color: color-mix(in srgb, var(--primary-color) 55%, var(--border-color));
+  background-color: color-mix(in srgb, var(--primary-color) 8%, transparent);
+}
+
+.preferenceChip:is([aria-checked='true'], [aria-checked='mixed']) > .ft-icon {
+  color: var(--primary-color);
+}
+
+.preferenceChip:disabled {
+  cursor: default;
+  opacity: 0.4;
+}
+
+.preferenceChip:focus-visible {
+  outline: 2px solid var(--primary-color);
+  outline-offset: 1px;
+}
+
+.preferenceChip:not(:disabled):is(:hover, :focus-visible) {
+  background-color: var(--side-nav-hover-color);
+  color: var(--side-nav-hover-text-color);
+}
+
+@media (any-pointer: coarse), (width <= 680px) {
+  .preferenceChip {
+    min-block-size: 40px;
+  }
+}

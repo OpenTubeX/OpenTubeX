@@ -132,6 +132,7 @@ for (const category of types) {
     const settings = await goToSettingsSection(page, 'subscription')
     await settings.getByRole('button', { name: 'Subscription settings', exact: true }).click()
     const group = page.getByRole('group', { name: 'Channel A', exact: true })
+      .getByRole('group', { name: 'Show in subscription feed', exact: true })
     await expect(group.getByRole('checkbox', { name: labels[category], exact: true })).toHaveAttribute('aria-checked', 'false')
     await group.getByRole('checkbox', { name: labels[category], exact: true }).click()
     await page.locator('.settingsWindow').getByRole('button', { name: 'Close', exact: true }).click()
