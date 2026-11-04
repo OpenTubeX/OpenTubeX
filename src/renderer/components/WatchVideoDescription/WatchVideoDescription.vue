@@ -21,7 +21,7 @@
       ref="descriptionScroll"
       v-overlay-scrollbars="!alwaysExpanded"
       class="descriptionScroll"
-      :class="{ descriptionFadeTop }"
+      :class="{ descriptionFadeTop, descriptionFadeBottom }"
       @scroll="updateDescriptionFadeState"
     >
       <FtTimestampCatcher
@@ -267,6 +267,7 @@ const showFullDescription = ref(props.expanded)
 const showControls = ref(false)
 let userWantsExpandedDescription = props.expanded
 const descriptionFadeTop = ref(false)
+const descriptionFadeBottom = ref(false)
 const isExpanded = computed(() => props.alwaysExpanded || showFullDescription.value)
 
 const descriptionContent = computed(() => {
@@ -514,7 +515,10 @@ if (isTabPresented) {
 }
 
 function updateDescriptionFadeState() {
-  descriptionFadeTop.value = (descriptionScroll.value?.scrollTop ?? 0) > 1
+  const element = descriptionScroll.value
+  descriptionFadeTop.value = (element?.scrollTop ?? 0) > 1
+  descriptionFadeBottom.value = element != null &&
+    element.scrollHeight - element.clientHeight - element.scrollTop > 1
 }
 
 /**
