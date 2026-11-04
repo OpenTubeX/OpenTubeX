@@ -1489,8 +1489,11 @@ test.describe('with new items', () => {
     await menu.getByRole('menuitem', { name: 'Mark As Unseen' }).click()
     await expect(item).not.toHaveClass(/watched/)
     await expect(item.locator('.newContentDot')).toHaveCount(1)
-    // Other devices learn that it is no longer watched
-    expect(await page.evaluate(() => window.scheduledSyncs)).toContain('history')
+    // Other devices learn that it is no longer watched, and the fresh unseen
+    // mark wins over older seen marks they haven't synced yet
+    await expect.poll(() => page.evaluate(() => window.scheduledSyncs)).toContain('history')
+    expect(await page.evaluate(key => JSON.parse(window.$store.getters.getRssFeedSeenItems)
+      .find(entry => entry.key === key), `${RSS_URL}\nvod-4`)).toEqual({ key: `${RSS_URL}\nvod-4`, unseenAt: expect.any(Number) })
   })
 
   test('opens items in a new tab or window from the context menu and marks them as seen', async ({ app, page }) => {

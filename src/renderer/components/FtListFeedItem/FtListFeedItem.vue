@@ -185,10 +185,7 @@ function markAsSeen() {
 
 function markAsUnseen() {
   // The New feed leaves out watched items
-  if (position.value?.watched) {
-    unmarkExternalMediaWatched(props.data.url)
-    store.dispatch('scheduleSyncServer', 'history')
-  }
+  if (position.value?.watched) unmarkExternalMediaWatched(props.data.url)
   markRssFeedItemsAsUnseen([props.data])
 }
 
