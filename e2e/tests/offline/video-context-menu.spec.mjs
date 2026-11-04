@@ -666,6 +666,21 @@ test('optional video menu button can be enabled in appearance settings', async (
   await expect(button).toHaveCount(1)
 })
 
+test('the phone video menu button reports its sheet as expanded and gets focus back', async ({ page }) => {
+  await page.evaluate(() => window.$store.dispatch('updateShowVideoMenuButton', true))
+  await goTo(page, 'history')
+  await page.setViewportSize({ width: 375, height: 812 })
+  const button = page.locator('.ft-list-video').first().getByRole('button', { name: /^More options$/i })
+  await expect(button).toHaveAttribute('aria-expanded', 'false')
+  await button.click()
+  await expect(page.locator('.mobileLinkActions')).toBeVisible()
+  await expect(button).toHaveAttribute('aria-expanded', 'true')
+  await page.keyboard.press('Escape')
+  await expect(page.locator('.mobileLinkActions')).toHaveCount(0)
+  await expect(button).toBeFocused()
+  await expect(button).toHaveAttribute('aria-expanded', 'false')
+})
+
 test('mobile quick actions stay unhighlighted under a touch point that cannot hover', async ({ page }) => {
   await goTo(page, 'history')
   await page.setViewportSize({ width: 375, height: 812 })

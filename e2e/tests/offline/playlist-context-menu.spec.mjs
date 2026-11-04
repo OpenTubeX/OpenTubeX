@@ -47,19 +47,28 @@ test('playlist menu buttons open the context menu sheet on phones', async ({ app
   const card = page.locator('.ft-list-item').filter({ hasText: 'Playlist menu test' })
   const sheet = page.locator('.mobileLinkActions')
 
-  await card.getByRole('button', { name: /More options/i }).click()
+  const menuButton = card.getByRole('button', { name: /More options/i })
+  await expect(menuButton).toHaveAttribute('aria-expanded', 'false')
+  await menuButton.click()
   await expect(sheet.locator('.mobileLinkActionsHeader')).toHaveText('Playlist menu test')
   await expect(sheet.getByRole('menuitem', { name: 'Download Playlist', exact: true })).toBeVisible()
   await expect(page.getByRole('menu', { name: 'Context menu', exact: true })).toHaveCount(0)
+  await expect(menuButton).toHaveAttribute('aria-expanded', 'true')
   await page.keyboard.press('Escape')
   await expect(sheet).toHaveCount(0)
   // Dismissing the sheet returns focus to the button that opened it.
-  await expect(card.getByRole('button', { name: /More options/i })).toBeFocused()
+  await expect(menuButton).toBeFocused()
+  await expect(menuButton).toHaveAttribute('aria-expanded', 'false')
 
   await card.locator('.title').click()
-  await page.locator('.playlistOptions').filter({ visible: true }).getByRole('button', { name: 'More', exact: true }).click()
+  const moreButton = page.locator('.playlistOptions').filter({ visible: true }).getByRole('button', { name: 'More', exact: true })
+  await moreButton.click()
   await expect(sheet.locator('.mobileLinkActionsHeader')).toHaveText('Playlist menu test')
   await expect(page.getByRole('menu', { name: 'Context menu', exact: true })).toHaveCount(0)
+  await expect(moreButton).toHaveAttribute('aria-expanded', 'true')
+  await page.keyboard.press('Escape')
+  await expect(sheet).toHaveCount(0)
+  await expect(moreButton).toHaveAttribute('aria-expanded', 'false')
 })
 
 test('playlist menu buttons use comfortable touch targets', { tag: '@scale' }, async ({ app, page }, testInfo) => {

@@ -1182,8 +1182,20 @@ const mobileContextMenuTitle = computed(() => mobileContextMenuStack.value.at(-1
 // The button that opened the sheet gets focus back when it closes.
 let mobileContextTrigger = null
 let mobileContextReturnFocus = null
+/**
+ * Menu buttons bind `aria-expanded` to their own popover, which the sheet
+ * replaces, so report the sheet's state on them while it is open.
+ * @param {HTMLElement | null} trigger
+ * @param {boolean} expanded
+ */
+function setMobileContextTriggerExpanded(trigger, expanded) {
+  if (trigger?.matches('[aria-expanded], [aria-haspopup]')) trigger.setAttribute('aria-expanded', String(expanded))
+}
 async function openMobileContextActions(menu) {
-  if (!mobileContextActions.value) mobileContextTrigger = menu.trigger ?? null
+  if (!mobileContextActions.value) {
+    mobileContextTrigger = menu.trigger ?? null
+    setMobileContextTriggerExpanded(mobileContextTrigger, true)
+  }
   mobileContextMenuPath.value = []
   mobileContextLink.value = null
   mobileContextActions.value = menu
@@ -3933,6 +3945,7 @@ function closeOwnedMobileContextMenu(event) {
 watch(() => route.fullPath, closeMobileLinkActions)
 
 function closeMobileLinkActions() {
+  setMobileContextTriggerExpanded(mobileContextTrigger, false)
   mobileContextReturnFocus = mobileContextTrigger ?? mobileContextReturnFocus
   mobileContextTrigger = null
   mobileContextMenuPath.value = []
