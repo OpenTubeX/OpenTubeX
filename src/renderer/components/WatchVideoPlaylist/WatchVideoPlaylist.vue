@@ -715,6 +715,7 @@ watch(() => props.playlistId, () => {
   isFetchingPlaylistContinuation.value = false
   setPlaylistPageLoader(null)
   playlistPanelNearEnd.value = false
+  lastScrollPosition = null
   requestedPlaylistVideoCount.value = 0
   pendingProgressBarIndex = null
   progressBarTargetIndex.value = -1
@@ -1477,9 +1478,17 @@ watch(playlistItemsWrapper, (wrapper) => {
     return
   }
 
+  let wasScrollContainer = getComputedStyle(container).overflowY !== 'visible'
   const scheduleClamp = () => {
     playlistItemsClampFrame ??= requestAnimationFrame(() => {
       playlistItemsClampFrame = null
+      // The browser keeps the raw offset while a stacked fullscreen panel makes the
+      // whole dock scroll, but rows above can be remeasured meanwhile.
+      const scrollContainer = getComputedStyle(container).overflowY !== 'visible'
+      if (scrollContainer && !wasScrollContainer && lastScrollPosition != null) {
+        applyScrollPosition(container, lastScrollPosition)
+      }
+      wasScrollContainer = scrollContainer
       const items = container.querySelectorAll(':scope > .playlistItem')
       clampOverlayScrollTop(
         container,
@@ -1493,6 +1502,7 @@ watch(playlistItemsWrapper, (wrapper) => {
   }
   playlistItemsScrollListener = new AbortController()
   container.addEventListener('scroll', updatePlaylistPanelNearEnd, { passive: true, signal: playlistItemsScrollListener.signal })
+  container.addEventListener('scroll', rememberScrollPosition, { passive: true, signal: playlistItemsScrollListener.signal })
   // Windowed rows shrink to measured shells after layout changes without any
   // child list mutation, so watch each row's size as well as the viewport.
   const resizeObserver = playlistItemsResizeObserver = new ResizeObserver(scheduleClamp)
@@ -1544,6 +1554,62 @@ function restoreScrollTop(scrollTop) {
       }
     })
   })
+}
+
+// Distant rows keep the heights they had in the previous layout until they are
+// remeasured, so the same offset would show other rows after moving between the
+// sidebar and the fullscreen dock. Keep the first visible row in place instead.
+// Leaving fullscreen restyles the dock before it closes, so remember the row
+// whenever the list scrolls rather than measuring it then.
+/** @type {{ index: number, offset: number } | null} */
+let lastScrollPosition = null
+
+function rememberScrollPosition() {
+  const container = playlistItemsWrapper.value?.$el ?? playlistItemsWrapper.value
+  // A stacked fullscreen panel can make the whole dock scroll instead of the list.
+  if (container != null && getComputedStyle(container).overflowY !== 'visible') {
+    lastScrollPosition = measureScrollPosition()
+  }
+}
+
+function getScrollPosition() {
+  return lastScrollPosition ?? measureScrollPosition()
+}
+
+function measureScrollPosition() {
+  const container = playlistItemsWrapper.value?.$el ?? playlistItemsWrapper.value
+  const rows = container?.querySelectorAll(':scope > .playlistItem') ?? []
+  if (rows.length === 0) return null
+  // Layout offsets ignore the transforms of rows that are moving into place.
+  // Overlay scrollbars keep the list positioned, so it is the rows' offset parent.
+  const scrollTop = container.scrollTop
+  let low = 0
+  let high = rows.length - 1
+  while (low < high) {
+    const middle = (low + high) >> 1
+    if (rows[middle].offsetTop + rows[middle].offsetHeight > scrollTop) high = middle
+    else low = middle + 1
+  }
+  return { index: low, offset: rows[low].offsetTop - scrollTop }
+}
+
+/** @param {{ index: number, offset: number }} position */
+function restoreScrollPosition(position) {
+  nextTick(() => {
+    requestAnimationFrame(() => {
+      const container = playlistItemsWrapper.value?.$el ?? playlistItemsWrapper.value
+      if (container != null) applyScrollPosition(container, position)
+    })
+  })
+}
+
+/**
+ * @param {HTMLElement} container
+ * @param {{ index: number, offset: number }} position
+ */
+function applyScrollPosition(container, { index, offset }) {
+  const row = container.querySelectorAll(':scope > .playlistItem')[index]
+  if (row != null) restoreOverlayScrollTop(container, row.offsetTop - offset)
 }
 
 /**
@@ -1784,8 +1850,8 @@ watch([canPlayNextVideo, canPlayPreviousVideo], ([canPlayNext, canPlayPrevious])
 
 defineExpose({
   centerCurrentVideo,
-  getScrollTop,
-  restoreScrollTop,
+  getScrollPosition,
+  restoreScrollPosition,
   setScrollTop,
   playNextVideo,
   resetUnavailableSkipChain,

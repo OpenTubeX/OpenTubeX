@@ -319,7 +319,13 @@ async function onFirstVisible() {
   if (aboveViewport) {
     batch = mountBatches.get(scroller)
     if (!batch) {
-      batch = { scrollTop: scroller.scrollTop, growth: 0, pending: 0 }
+      // The browser rounds the offset to whole device pixels. Continue from the
+      // previous adjustment's exact offset so the rounding does not add up.
+      const previous = adjustedScrollTops.get(scroller)
+      const scrollTop = previous !== undefined && Math.abs(previous - scroller.scrollTop) < 1
+        ? previous
+        : scroller.scrollTop
+      batch = { scrollTop, growth: 0, pending: 0 }
       mountBatches.set(scroller, batch)
     }
     batch.pending++
@@ -337,7 +343,10 @@ async function onFirstVisible() {
     batch.growth += element.getBoundingClientRect().height - placeholderBounds.height
     if (--batch.pending === 0) {
       mountBatches.delete(scroller)
-      if (batch.growth !== 0) restoreOverlayScrollTop(scroller, batch.scrollTop + batch.growth)
+      if (batch.growth !== 0) {
+        adjustedScrollTops.set(scroller, batch.scrollTop + batch.growth)
+        restoreOverlayScrollTop(scroller, batch.scrollTop + batch.growth)
+      }
     }
   }
 }
@@ -406,6 +415,8 @@ function removeFromPlaylist(videoId, playlistItemId) {
 // Shared by every row, so rows that mount together adjust their list once.
 /** @type {WeakMap<HTMLElement, { scrollTop: number, growth: number, pending: number }>} */
 const mountBatches = new WeakMap()
+/** @type {WeakMap<HTMLElement, number>} */
+const adjustedScrollTops = new WeakMap()
 </script>
 
 <style scoped src="./FtListVideoNumbered.css" />

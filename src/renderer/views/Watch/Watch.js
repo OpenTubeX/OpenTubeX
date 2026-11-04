@@ -2056,15 +2056,15 @@ export default defineComponent({
       const sourceLayout = this.fullscreenPlaylistOpen ? 'fullscreen' : 'sidebar'
       const destinationLayout = open && target !== null ? 'fullscreen' : 'sidebar'
 
-      this.playlistScrollPositions[sourceLayout] = playlist?.getScrollTop() ?? 0
+      this.playlistScrollPositions[sourceLayout] = playlist?.getScrollPosition() ?? null
       this.fullscreenPlaylistTarget = target
       this.fullscreenPlaylistOpen = open && target !== null
       this.$nextTick(() => {
-        const scrollTop = this.playlistScrollPositions[destinationLayout]
-        if (scrollTop == null) {
+        const position = this.playlistScrollPositions[destinationLayout]
+        if (position == null) {
           playlist?.centerCurrentVideo()
         } else {
-          playlist?.restoreScrollTop(scrollTop)
+          playlist?.restoreScrollPosition(position)
         }
       })
     },
