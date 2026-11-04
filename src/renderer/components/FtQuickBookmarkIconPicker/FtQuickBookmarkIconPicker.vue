@@ -34,37 +34,37 @@
         {{ emoji }}
       </button>
     </div>
-    <!-- eslint-disable-next-line vuejs-accessibility/label-has-for -- FtInput renders the nested input control. -->
-    <label class="customEmojiLabel">
-      <span>{{ t('User Playlists.Custom Emoji') }}</span>
-      <FtInput
-        class="customEmojiInput"
-        :placeholder="CUSTOM_EMOJI_PLACEHOLDER"
-        :label="t('User Playlists.Custom Emoji')"
-        :show-label="false"
-        :value="selectedEmoji"
-        :show-action-button="false"
-        :input-filter="filterCustomEmoji"
-        @input="selectCustomEmoji"
+    <div class="customIconRow">
+      <!-- eslint-disable-next-line vuejs-accessibility/label-has-for -- FtInput renders the nested input control. -->
+      <label class="customEmojiLabel">
+        <span>{{ t('User Playlists.Custom Emoji') }}</span>
+        <FtInput
+          class="customEmojiInput"
+          :placeholder="CUSTOM_EMOJI_PLACEHOLDER"
+          :label="t('User Playlists.Custom Emoji')"
+          :show-label="false"
+          :value="selectedEmoji"
+          :show-action-button="false"
+          :input-filter="filterCustomEmoji"
+          @input="selectCustomEmoji"
+        >
+          <template #extraAction>
+            <span
+              v-if="!selectedEmoji"
+              class="customEmojiPlaceholder"
+              aria-hidden="true"
+            >{{ CUSTOM_EMOJI_PLACEHOLDER }}</span>
+          </template>
+        </FtInput>
+      </label>
+      <input
+        ref="imageInput"
+        class="imageInput"
+        type="file"
+        accept="image/*,image/svg+xml,.svg"
+        :aria-label="t('User Playlists.Choose Image')"
+        @change="selectImage"
       >
-        <template #extraAction>
-          <span
-            v-if="!selectedEmoji"
-            class="customEmojiPlaceholder"
-            aria-hidden="true"
-          >{{ CUSTOM_EMOJI_PLACEHOLDER }}</span>
-        </template>
-      </FtInput>
-    </label>
-    <input
-      ref="imageInput"
-      class="imageInput"
-      type="file"
-      accept="image/*,image/svg+xml,.svg"
-      :aria-label="t('User Playlists.Choose Image')"
-      @change="selectImage"
-    >
-    <FtFlexBox class="iconActions">
       <FtButton
         :label="t('User Playlists.Choose Image')"
         :icon="['fas', 'file-image']"
@@ -76,7 +76,7 @@
         :icon="['fas', 'undo']"
         @click="emit('update:modelValue', 'bookmark')"
       />
-    </FtFlexBox>
+    </div>
   </fieldset>
   <FtPrompt
     v-if="cropDialogOpen"
@@ -381,7 +381,7 @@ function closeCropEditor() {
   display: flex;
   flex-direction: column;
   gap: 8px;
-  margin: 8px auto;
+  margin: 0;
   padding: 0;
 }
 
@@ -439,9 +439,17 @@ function closeCropEditor() {
   color: var(--primary-color);
 }
 
+.customIconRow {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: center;
+  gap: 8px 12px;
+  max-inline-size: 100%;
+}
+
 .customEmojiLabel {
   display: flex;
-  flex-direction: column;
   align-items: center;
   gap: 8px;
   font-size: 14px;
@@ -478,7 +486,6 @@ function closeCropEditor() {
   display: none;
 }
 
-.iconActions,
 .cropActions {
   justify-content: center;
 }

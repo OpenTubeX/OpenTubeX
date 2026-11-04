@@ -34,10 +34,11 @@
       />
     </div>
 
-    <div class="playlistStats">
-      <template
-        v-if="editMode"
-      >
+    <div
+      v-if="editMode"
+      class="editForm"
+    >
+      <div class="editFields">
         <FtInput
           ref="playlistTitleInput"
           class="inputElement"
@@ -50,20 +51,54 @@
           @input="handlePlaylistNameInput"
           @keydown.enter="savePlaylistInfo"
         />
-        <FtFlexBox v-if="inputPlaylistNameBlank">
-          <p>
-            {{ $t('User Playlists.SinglePlaylistView.Toast["Playlist name cannot be empty. Please input a name."]') }}
-          </p>
-        </FtFlexBox>
-        <FtFlexBox v-if="inputPlaylistWithNameExists">
-          <p>
-            {{ $t('User Playlists.CreatePlaylistPrompt.Toast["There is already a playlist with this name. Please pick a different name."]') }}
-          </p>
-        </FtFlexBox>
-      </template>
-      <template
-        v-else
-      >
+        <p
+          v-if="inputPlaylistNameBlank"
+          class="editError"
+        >
+          {{ $t('User Playlists.SinglePlaylistView.Toast["Playlist name cannot be empty. Please input a name."]') }}
+        </p>
+        <p
+          v-if="inputPlaylistWithNameExists"
+          class="editError"
+        >
+          {{ $t('User Playlists.CreatePlaylistPrompt.Toast["There is already a playlist with this name. Please pick a different name."]') }}
+        </p>
+        <FtInput
+          class="inputElement descriptionInput"
+          :label="$t('User Playlists.Playlist Description')"
+          :icon="['fas', 'file-lines']"
+          :placeholder="$t('Form Inputs.Playlist Description Hint')"
+          :show-action-button="false"
+          :value="newDescription"
+          @input="(input) => newDescription = input"
+          @keydown.enter="savePlaylistInfo"
+        />
+        <div class="editToggles">
+          <FtToggleSwitch
+            :label="$t('User Playlists.Add new videos to the top (custom order)')"
+            :default-value="newAddVideosToTop"
+            @change="newAddVideosToTop = $event"
+          />
+          <FtToggleSwitch
+            :label="t('User Playlists.Shuffle videos by default')"
+            :default-value="newShuffleByDefault"
+            @change="newShuffleByDefault = $event"
+          />
+        </div>
+      </div>
+      <div class="editPickers">
+        <FtPlaylistThumbnailPicker
+          v-model="newCustomThumbnail"
+          :default-thumbnail="defaultThumbnail"
+          @loading="thumbnailLoading = $event"
+        />
+        <FtQuickBookmarkIconPicker
+          v-model="newQuickBookmarkIcon"
+        />
+      </div>
+    </div>
+    <template v-else>
+      <div class="playlistStats">
         <h2
           class="playlistTitle"
           dir="auto"
@@ -92,50 +127,17 @@
             {{ t('User Playlists.Source Playlist') }}
           </router-link>
         </p>
-      </template>
-    </div>
+      </div>
 
-    <FtInput
-      v-if="editMode"
-      class="inputElement descriptionInput"
-      :label="$t('User Playlists.Playlist Description')"
-      :icon="['fas', 'file-lines']"
-      :placeholder="$t('Form Inputs.Playlist Description Hint')"
-      :show-action-button="false"
-      :value="newDescription"
-      @input="(input) => newDescription = input"
-      @keydown.enter="savePlaylistInfo"
-    />
-    <FtToggleSwitch
-      v-if="editMode"
-      :label="$t('User Playlists.Add new videos to the top (custom order)')"
-      :default-value="newAddVideosToTop"
-      @change="newAddVideosToTop = $event"
-    />
-    <FtToggleSwitch
-      v-if="editMode"
-      :label="t('User Playlists.Shuffle videos by default')"
-      :default-value="newShuffleByDefault"
-      @change="newShuffleByDefault = $event"
-    />
-    <FtPlaylistThumbnailPicker
-      v-if="editMode"
-      v-model="newCustomThumbnail"
-      :default-thumbnail="defaultThumbnail"
-      @loading="thumbnailLoading = $event"
-    />
-    <FtQuickBookmarkIconPicker
-      v-if="editMode"
-      v-model="newQuickBookmarkIcon"
-    />
-    <p
-      v-else-if="description"
-      v-overlay-scrollbars
-      class="playlistDescription"
-      dir="auto"
-    >
-      {{ description }}
-    </p>
+      <p
+        v-if="description"
+        v-overlay-scrollbars
+        class="playlistDescription"
+        dir="auto"
+      >
+        {{ description }}
+      </p>
+    </template>
 
     <hr class="playlistInfoSeparator">
 
@@ -356,7 +358,6 @@ import { FtIcon } from '@opentubex/icons'
 
 import FtButton from '../FtButton/FtButton.vue'
 import FtButtonGroup from '../FtButtonGroup/FtButtonGroup.vue'
-import FtFlexBox from '../ft-flex-box/ft-flex-box.vue'
 import FtInput from '../FtInput/FtInput.vue'
 import FtPrompt from '../FtPrompt/FtPrompt.vue'
 import FtToggleSwitch from '../FtToggleSwitch/FtToggleSwitch.vue'

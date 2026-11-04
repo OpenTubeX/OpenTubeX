@@ -62,6 +62,57 @@
   }
 }
 
+// The fields share a row with the pickers while they fit
+.editForm {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  justify-content: center;
+  gap: 16px 32px;
+  padding-block-start: var(--playlist-label-outset, 7px);
+}
+
+// The pickers wrap together so they stay side by side below the fields
+.editPickers {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  justify-content: center;
+  gap: 16px 32px;
+  max-inline-size: 100%;
+}
+
+.editFields {
+  display: flex;
+  flex: 1 1 420px;
+  flex-direction: column;
+  gap: 12px;
+  min-inline-size: 0;
+
+  .inputElement {
+    --input-bottom-spacing: 0;
+
+    inline-size: 100%;
+  }
+}
+
+.editError {
+  color: var(--secondary-text-color);
+  margin: 0;
+}
+
+.editToggles {
+  --settings-control-margin: 0;
+
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0 16px;
+
+  .switch-ctn {
+    margin-inline: 0;
+  }
+}
+
 .playlistChannel {
   align-items: center;
   color: inherit;
@@ -170,10 +221,6 @@
 
   .playlistDescription {
     max-block-size: 10vh;
-  }
-
-  .descriptionInput {
-    margin-block-start: 8px;
   }
 
   .playlistOptionsWrapper {
