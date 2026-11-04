@@ -36,13 +36,13 @@
     </FtPrompt>
     <Teleport :to="tooltipTarget">
       <p
-        v-show="visible && settingsOverlayActive"
         :id="id"
         ref="textRef"
         class="text"
         :class="{
           [position]: true,
           allowNewlines,
+          open: visible && settingsOverlayActive,
         }"
         role="tooltip"
         :style="tooltipStyle"
@@ -57,7 +57,7 @@
 import { FtIcon } from '@opentubex/icons'
 import { nextTick, onBeforeUnmount, ref, shallowRef, useId, useTemplateRef } from 'vue'
 import { useI18n } from 'vue-i18n'
-import { getAnchoredPosition, supportsAnchorPositioning } from '../../helpers/anchoredPosition'
+import { getAnchoredPosition, getUntransformedRect, supportsAnchorPositioning } from '../../helpers/anchoredPosition'
 import { useAnchoredViewportBounds } from '../../composables/useAnchoredViewportBounds'
 import { useSettingsOverlay } from '../../composables/useSettingsOverlay'
 import { usePhoneLayout } from '../../composables/usePhoneLayout'
@@ -115,7 +115,19 @@ function updateVisibility() {
     })
   } else {
     stopTrackingPosition()
+    freezePosition()
   }
+}
+
+/**
+ * The trigger loses its anchor-name once the tooltip closes, so keep the
+ * tooltip where it is while the close animation plays.
+ */
+function freezePosition() {
+  const text = textRef.value
+  if (!text || !tooltipStyle.value.positionAnchor) return
+  const rect = getUntransformedRect(text)
+  tooltipStyle.value = { left: `${rect.left}px`, top: `${rect.top}px` }
 }
 
 function startTrackingPosition() {

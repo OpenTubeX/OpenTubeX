@@ -2,6 +2,11 @@ import { test, expect } from '../../helpers/app.mjs'
 
 const menuButton = '.topNav .menuButton'
 
+// The tooltip scales in, so geometry is only final once its open animation ends
+async function waitForOpenAnimation(tooltip) {
+  await expect.poll(() => tooltip.evaluate(element => element.getAnimations().length)).toBe(0)
+}
+
 test.describe('title tooltips', () => {
   test('replace the native tooltip with a themed one below the element @scale', async ({ page }) => {
     const button = page.locator(menuButton)
@@ -13,6 +18,7 @@ test.describe('title tooltips', () => {
     await expect(tooltip).toHaveText('Expand side navigation')
     // An empty title hides the native tooltips of the element and its ancestors
     await expect(button).toHaveAttribute('title', '')
+    await waitForOpenAnimation(tooltip)
 
     const [buttonBox, tooltipBox, viewport] = await Promise.all([
       button.boundingBox(),
@@ -26,7 +32,7 @@ test.describe('title tooltips', () => {
     const colors = await tooltip.evaluate(element => {
       const style = getComputedStyle(element)
       const probe = document.createElement('div')
-      probe.style.cssText = 'background-color: var(--card-bg-color); color: var(--primary-text-color)'
+      probe.style.cssText = 'background-color: color-mix(in srgb, var(--primary-text-color) 90%, var(--card-bg-color)); color: var(--card-bg-color)'
       document.body.append(probe)
       const expected = getComputedStyle(probe)
       const result = {
@@ -55,6 +61,7 @@ test.describe('title tooltips', () => {
 
     await page.mouse.move(box.x + 4, box.y + box.height / 2)
     await expect(tooltip).toBeVisible()
+    await waitForOpenAnimation(tooltip)
     const before = await tooltip.boundingBox()
     expect(before.y).toBeGreaterThan(box.y + box.height)
     // The side navigation touches the window edge, so the tooltip keeps an 8px margin
@@ -131,6 +138,7 @@ test.describe('title tooltips', () => {
 
     await page.locator('#titleTooltipOuter').hover({ position: { x: 150, y: 80 } })
     await expect(tooltip).toHaveText('Outer title')
+    await waitForOpenAnimation(tooltip)
 
     // On a large element the tooltip opens below the pointer and stays there
     const before = await tooltip.boundingBox()
@@ -143,5 +151,30 @@ test.describe('title tooltips', () => {
     await page.locator('#titleTooltipInner').hover()
     await expect(tooltip).toBeHidden()
     await expect(page.locator('#titleTooltipOuter')).toHaveAttribute('title', 'Outer title')
+  })
+
+  test('animate opening and closing on the compositor', async ({ page }) => {
+    // Slow motion keeps each transition running long enough to inspect it
+    await page.evaluate(() => {
+      document.body.style.setProperty('--motion-fast-effects', '5s linear')
+      document.body.style.setProperty('--motion-fast-spatial', '5s linear')
+    })
+    const button = page.locator(menuButton)
+    const tooltip = page.locator('.ftTitleTooltip')
+    // Opacity and transform need no layout or paint while they animate
+    const animatedProperties = () => tooltip.evaluate(element => element.getAnimations()
+      .map(animation => animation.transitionProperty)
+      .filter(property => property !== 'display' && property !== 'overlay')
+      .sort())
+
+    await button.hover()
+    await expect(tooltip).toBeVisible()
+    await expect.poll(animatedProperties).toEqual(['opacity', 'transform'])
+
+    await page.mouse.move(600, 600)
+    await expect.poll(() => tooltip.evaluate(element => element.matches(':popover-open'))).toBe(false)
+    // The tooltip stays rendered while it fades out
+    await expect(tooltip).toBeVisible()
+    await expect.poll(animatedProperties).toEqual(['opacity', 'transform'])
   })
 })
