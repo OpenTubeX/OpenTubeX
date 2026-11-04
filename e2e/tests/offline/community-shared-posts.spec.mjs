@@ -1,4 +1,4 @@
-import { test, expect, goTo } from '../../helpers/app.mjs'
+import { test, expect, goTo, latestSettings, readDatastore } from '../../helpers/app.mjs'
 
 const now = Date.now()
 const SHARER_ID = 'UCGg-UqjRgzhYDPJMr-9HXCg'
@@ -63,6 +63,20 @@ test.describe('shared community posts', () => {
         communityPostsTimestamp: new Date(now - 60000).toISOString()
       }]
     }
+  })
+
+  test('pins a shared post author with their own name and avatar', async ({ app, page }) => {
+    await goTo(page, 'subscriptions')
+    await page.locator('[data-subscription-feed-tab="posts"]').click()
+    const original = page.locator('.sharedPostCard')
+    await expect(original.locator('img.communityThumbnail')).toBeVisible()
+    await original.locator('.authorNameLink').click({ button: 'right' })
+    await page.getByRole('menuitem', { name: 'Pin to Navigation', exact: true }).click()
+    await expect.poll(() => latestSettings(readDatastore(app.userDataDir, 'settings')).pinnedChannels).toEqual([{
+      id: ORIGINAL_AUTHOR_ID,
+      name: originalPost.author,
+      thumbnail: originalPost.authorThumbnails[0].url
+    }])
   })
 
   test('nests the original post inside the shared post', async ({ page, attachScreenshot }) => {

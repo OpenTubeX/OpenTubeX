@@ -15,13 +15,34 @@ export function getChannelLinkDetails(link) {
     link.textContent?.trim() ||
     id
 
-  return { id, name }
+  const image = link.querySelector('img:not(.retryImagePlaceholder)') ??
+    link.closest('.ft-list-channel, .author-div, .channel')?.querySelector('img:not(.retryImagePlaceholder)')
+  const thumbnail = image?.getAttribute('src') ||
+    store.getters.getSubscribedChannelsById.get(id)?.thumbnail ||
+    store.getters.getChannelThumbnail(id) || null
+
+  return {
+    id,
+    name,
+    thumbnail: thumbnail?.replace(/^https?:\/\/[^/]+\/ggpht/, 'https://yt3.googleusercontent.com') ?? null
+  }
 }
 
-export function getChannelLinkMenuItems({ id, name }, t) {
+export function getChannelLinkMenuItems({ id, name, thumbnail }, t) {
   const hidden = store.getters.getChannelsHiddenNames.has(id)
+  const pinned = store.getters.getPinnedChannels.some(channel => channel.id === id)
 
   return [{
+    label: pinned ? t('User Playlists.Unpin from Navigation') : t('User Playlists.Pin to Navigation'),
+    icon: ['fas', pinned ? 'thumbtack-slash' : 'thumbtack'],
+    enabled: true,
+    run: () => {
+      const channels = store.getters.getPinnedChannels
+      return store.dispatch('updatePinnedChannels', pinned
+        ? channels.filter(channel => channel.id !== id)
+        : [...channels.filter(channel => channel.id !== id), { id, name, thumbnail }])
+    }
+  }, {
     label: hidden ? t('Video.Unhide Channel') : t('Video.Hide Channel'),
     icon: hidden ? ['fas', 'user-check'] : ['fas', 'user-lock'],
     enabled: true,
