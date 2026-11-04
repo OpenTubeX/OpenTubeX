@@ -85,7 +85,7 @@ for (const gesture of [
   { name: 'dragging', handle: '.settingsWindowHeader', className: 'draggingSettingsWindow' },
   { name: 'resizing', handle: '.resize-se', className: 'resizingSettingsWindow' }
 ]) {
-  test(`stops ${gesture.name} when the viewport forces a maximized layout`, async ({ page }) => {
+  test(`stops ${gesture.name} when the viewport forces a maximized layout`, { tag: '@scale' }, async ({ page }) => {
     await page.evaluate(() => {
       localStorage.setItem('opentubex-settings-window-bounds', JSON.stringify({ x: 100, y: 60, width: 850, height: 520 }))
       return window.$store.dispatch('showSettingsWindow')
@@ -104,7 +104,7 @@ for (const gesture of [
     const bounds = await dialog.boundingBox()
     expect(bounds.x).toBeCloseTo(0, 0)
     expect(bounds.y).toBeCloseTo(0, 0)
-    expect(bounds.width).toBeCloseTo(375, 0)
+    expect(bounds.width).toBeCloseTo(await page.evaluate(() => window.visualViewport.width), 0)
   })
 }
 
@@ -126,4 +126,32 @@ test('keeps following the pointer when a resize crosses the narrow layout breakp
   await expect.poll(async () => (await dialog.boundingBox()).width).toBeCloseTo(before.width - 100, 0)
   await page.mouse.up()
   await expect.poll(async () => (await dialog.boundingBox()).width).toBeCloseTo(before.width - 100, 0)
+})
+
+test('ignores a second pointer that starts the other gesture', async ({ page }) => {
+  await page.evaluate(() => {
+    localStorage.setItem('opentubex-settings-window-bounds', JSON.stringify({ x: 100, y: 60, width: 850, height: 520 }))
+    return window.$store.dispatch('showSettingsWindow')
+  })
+  const dialog = page.locator('.settingsWindow')
+  await expect(dialog).toBeVisible()
+  await expect(dialog).not.toHaveClass(/settings-window-enter-active/)
+  const activeGestures = await dialog.evaluate(element => {
+    const header = element.querySelector('.settingsWindowHeader')
+    const handle = element.querySelector('.resize-se')
+    const press = (target, pointerId) => target.dispatchEvent(new PointerEvent('pointerdown', { bubbles: true, button: 0, pointerId, clientX: 600, clientY: 80 }))
+    const release = pointerId => window.dispatchEvent(new PointerEvent('pointerup', { pointerId }))
+    const gestures = () => ['draggingSettingsWindow', 'resizingSettingsWindow']
+      .filter(className => document.documentElement.classList.contains(className))
+    press(header, 1)
+    press(handle, 2)
+    const whileDragging = gestures()
+    release(1)
+    press(handle, 3)
+    press(header, 4)
+    const whileResizing = gestures()
+    release(3)
+    return { whileDragging, whileResizing, after: gestures() }
+  })
+  expect(activeGestures).toEqual({ whileDragging: ['draggingSettingsWindow'], whileResizing: ['resizingSettingsWindow'], after: [] })
 })
