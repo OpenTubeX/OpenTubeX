@@ -308,9 +308,20 @@ test.describe('settings', () => {
     await expect(settingsWindow).toBeVisible()
     await expect(page.locator('.shortcutColumns')).toBeVisible()
 
+    // Read the closing view when the leave starts. Polling for it afterwards can
+    // miss the short leave animation on a loaded machine.
+    await settingsWindow.evaluate(element => {
+      window.shortcutsShownWhileLeaving = new Promise(resolve => {
+        const observer = new MutationObserver(() => {
+          if (!element.classList.contains('settings-window-leave-active')) return
+          observer.disconnect()
+          resolve(element.querySelector('.shortcutColumns')?.checkVisibility() ?? false)
+        })
+        observer.observe(element, { attributes: true, attributeFilter: ['class'] })
+      })
+    })
     await page.keyboard.press('Shift+?')
-    await expect(settingsWindow).toHaveClass(/settings-window-leave-active/)
-    await expect(page.locator('.shortcutColumns')).toBeVisible()
+    expect(await page.evaluate(() => window.shortcutsShownWhileLeaving)).toBe(true)
     await expect(settingsWindow).toBeHidden()
   })
 
