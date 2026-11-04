@@ -172,7 +172,9 @@ broke it and fix it on `development`.
 
 The offline and scaled projects share up to 16 CI shards, and the performance
 project has its own shards. The cap keeps a full run within GitHub's 20
-concurrent jobs. `E2E_XVFB=1` requires each Playwright worker's private Xvfb
+concurrent jobs. Shards take turns picking tests instead of using `--shard`,
+which splits tests in file order and put all the slow player specs in one
+shard. `E2E_XVFB=1` requires each Playwright worker's private Xvfb
 display, so windows cannot move each other's cursor or steal focus. With it,
 offline shards run two workers; the performance and network projects keep one.
 Isolated Chromium checks run in one separate job, so only that runner installs

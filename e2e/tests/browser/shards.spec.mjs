@@ -1,5 +1,5 @@
 import { test, expect } from '@playwright/test'
-import { createShardMatrix, REPEAT_EACH, REPEAT_LIMIT } from '../../shards.mjs'
+import { createShardMatrix, REPEAT_EACH, REPEAT_LIMIT, shardTestList } from '../../shards.mjs'
 import config from '../../playwright.config.mjs'
 
 function report(counts) {
@@ -65,6 +65,43 @@ test('offline dispatch includes performance and browser but excludes network tes
       { project: 'network', projects: 'network', shard: 1, shardTotal: 1 }
     ]
   })
+})
+
+test('shards take turns picking tests, so neighboring slow files spread out', () => {
+  const tests = (...projectNames) => projectNames.map(projectName => ({ projectName }))
+  const listed = {
+    suites: [
+      {
+        title: 'offline/a.spec.mjs',
+        specs: [{ file: 'offline/a.spec.mjs', title: 'first', tests: tests('offline', 'offline-95') }],
+        suites: [{
+          title: '',
+          specs: [{ file: 'offline/a.spec.mjs', title: 'untitled group', tests: tests('offline') }],
+          suites: [{
+            title: 'group',
+            specs: [{ file: 'offline/a.spec.mjs', title: 'nested', tests: tests('offline') }]
+          }]
+        }]
+      },
+      {
+        title: 'offline/b.spec.mjs',
+        specs: [{ file: 'offline/b.spec.mjs', title: 'last', tests: tests('offline') }]
+      }
+    ]
+  }
+
+  expect(shardTestList(listed, 1, 2).split('\n')).toEqual([
+    '[offline] › offline/a.spec.mjs › first',
+    '[offline] › offline/a.spec.mjs › untitled group',
+    '[offline] › offline/b.spec.mjs › last'
+  ])
+  expect(shardTestList(listed, 2, 2).split('\n')).toEqual([
+    '[offline-95] › offline/a.spec.mjs › first',
+    '[offline] › offline/a.spec.mjs › group › nested'
+  ])
+
+  listed.suites[1].specs[0].title = 'a › b'
+  expect(() => shardTestList(listed, 1, 2)).toThrow('Test title cannot be used in a test list: "a › b"')
 })
 
 test('missing projects fail planning instead of silently losing test coverage', () => {
