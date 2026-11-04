@@ -38,11 +38,17 @@ export function getChannelLinkMenuItems({ id, name, thumbnail }, t) {
     label: pinned ? t('User Playlists.Unpin from Navigation') : t('User Playlists.Pin to Navigation'),
     icon: ['fas', pinned ? 'thumbtack-slash' : 'thumbtack'],
     enabled: true,
-    run: () => {
+    run: async () => {
       const channels = store.getters.getPinnedChannels
-      return store.dispatch('updatePinnedChannels', pinned
+      const saved = await store.dispatch('updatePinnedChannels', pinned
         ? channels.filter(channel => channel.id !== id)
         : [...channels.filter(channel => channel.id !== id), { id, name, thumbnail }])
+      if (!saved) {
+        showToast({
+          message: t('Channel.Failed to save subscription settings'),
+          icon: ['fas', 'circle-exclamation']
+        })
+      }
     }
   }, {
     label: hidden ? t('Video.Unhide Channel') : t('Video.Hide Channel'),

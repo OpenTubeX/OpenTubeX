@@ -61,6 +61,7 @@ for (const [surface, selector] of [['name', '.title'], ['avatar', '.channelThumb
     await expect(page).toHaveURL(searchUrl)
     await expect.poll(() => latestSettings(readDatastore(app.userDataDir, 'settings')).pinnedChannels)
       .toEqual([otherChannel, channel])
+    await expect(page.getByText('Failed to save channel settings', { exact: true })).toHaveCount(0)
     await expect.poll(() => page.evaluate(() => window.$store.getters.getActiveProfile.subscriptions.map(channel => channel.id)))
       .toEqual([otherChannel.id])
 
@@ -115,3 +116,20 @@ test('pins an uncached watch-page channel from its name with the visible avatar'
   await expect.poll(() => latestSettings(readDatastore(app.userDataDir, 'settings')).pinnedChannels)
     .toEqual([otherChannel, { id, name, thumbnail }])
 })
+
+for (const pinned of [false, true]) {
+  test(`reports a failed channel ${pinned ? 'unpin' : 'pin'} save`, async ({ app, page }) => {
+    const savedChannels = pinned ? [otherChannel] : []
+    await page.evaluate(async channels => {
+      await window.$store.dispatch('updatePinnedChannels', channels)
+      window.$store._actions.updatePinnedChannels = [() => Promise.resolve(false)]
+    }, savedChannels)
+    await goTo(page, 'subscribedchannels')
+    await page.locator('.channels .channelName').click({ button: 'right' })
+    const menu = page.getByRole('menu', { name: 'Context menu', exact: true })
+    await menu.getByRole('menuitem', { name: pinned ? 'Unpin from Navigation' : 'Pin to Navigation', exact: true }).click()
+    await expect(menu).toBeHidden()
+    await expect(page.getByText('Failed to save channel settings', { exact: true })).toBeVisible()
+    expect(latestSettings(readDatastore(app.userDataDir, 'settings')).pinnedChannels).toEqual(savedChannels)
+  })
+}
