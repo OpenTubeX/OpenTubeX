@@ -611,6 +611,95 @@ test('chapters stay centered through layout changes until manually scrolled', { 
   await view.dispose()
 })
 
+test('sidebar chapters resize from their handle and keep the size for later panels', { tag: '@scale' }, async ({ app, page, uiScale }) => {
+  await mockPlayableWatchPage(app, page)
+  await openMockedVideo(page)
+  await page.locator(`${activeTab} .ftVideoPlayer video`).evaluate(video => video.pause())
+  // Keep the sidebar layout at every scale; stacked, the scroll mini player
+  // covers the list's handle.
+  await setWindowSize(app, page, { width: Math.round(1300 * uiScale / 100), height: Math.round(1100 * uiScale / 100) })
+  const view = await watchViewHandle(page)
+  const setChapters = (count) => view.evaluate(async (view, count) => {
+    view.videoChapters = Array.from({ length: count }, (_, index) => ({
+      title: `Chapter ${index + 1}`,
+      timestamp: `${index}:00`,
+      startSeconds: index * 0.5
+    }))
+    view.videoCurrentChapterIndex = 0
+    view.showSidebarChapters = true
+    await view.$nextTick()
+  }, count)
+  const reopen = async () => {
+    await view.evaluate(async view => {
+      view.showSidebarChapters = false
+      await view.$nextTick()
+    })
+    await expect(panel).toHaveCount(0)
+    await view.evaluate(view => { view.showSidebarChapters = true })
+    await expect(panel).not.toHaveClass(/chapters-panel-enter-active/)
+  }
+  const panel = page.locator(`${activeTab} .watchVideoChaptersPanel`)
+  const chapters = panel.locator('.chaptersWrapper')
+  const listHeight = () => chapters.evaluate(element => element.getBoundingClientRect().height)
+  const dragHandle = async (distance) => {
+    await chapters.scrollIntoViewIfNeeded()
+    const box = await chapters.boundingBox()
+    // The handle sits in the list's bottom end corner.
+    const x = box.x + box.width - 3
+    const y = box.y + box.height - 3
+    await page.mouse.move(x, y)
+    await page.mouse.down()
+    await page.mouse.move(x, y + distance / 2)
+    await page.mouse.move(x, y + distance)
+    await page.mouse.up()
+  }
+
+  await setChapters(40)
+  await expect(panel).not.toHaveClass(/chapters-panel-enter-active/)
+  await expect(chapters).toHaveCSS('resize', 'vertical')
+  await expect.poll(async () => Math.abs(await listHeight() - 480)).toBeLessThan(2)
+
+  // Growing the list from its end shrinks the scroll range; it must stay at
+  // the new end with a matching scrollbar.
+  await chapters.hover()
+  await page.mouse.wheel(0, 2000)
+  await chapters.evaluate(element => { element.scrollTop = element.scrollHeight })
+  await dragHandle(200)
+  await expect.poll(listHeight).toBeGreaterThan(640)
+  await expect(chapters.locator(':scope > .os-scrollbar-vertical')).not.toHaveClass(/os-scrollbar-unusable/)
+  await expect.poll(() => chapters.evaluate(element => {
+    const maximum = element.scrollHeight - element.clientHeight
+    const viewport = element.getBoundingClientRect()
+    const content = element.querySelector('.chaptersContent').getBoundingClientRect()
+    const track = element.querySelector(':scope > .os-scrollbar-vertical .os-scrollbar-track').getBoundingClientRect()
+    const thumb = element.querySelector(':scope > .os-scrollbar-vertical .os-scrollbar-handle').getBoundingClientRect()
+    return Math.max(
+      Math.max(0, -element.scrollTop, element.scrollTop - maximum),
+      Math.abs(content.bottom - viewport.bottom),
+      Math.abs(thumb.height / track.height - element.clientHeight / element.scrollHeight) * track.height,
+      Math.abs(track.bottom - thumb.bottom)
+    ) * devicePixelRatio
+  })).toBeLessThanOrEqual(2)
+  const expanded = await listHeight()
+  await reopen()
+  await expect.poll(async () => Math.abs(await listHeight() - expanded)).toBeLessThan(2)
+
+  await dragHandle(-400)
+  await expect.poll(listHeight).toBeLessThan(320)
+  const shrunk = await listHeight()
+  await reopen()
+  await expect.poll(async () => Math.abs(await listHeight() - shrunk)).toBeLessThan(2)
+
+  // The stored size is a limit; a short list still fits its chapters.
+  await dragHandle(400)
+  await expect.poll(listHeight).toBeGreaterThan(640)
+  await setChapters(2)
+  await reopen()
+  const contentHeight = await chapters.evaluate(element => element.querySelector('.chaptersContent').getBoundingClientRect().height)
+  await expect.poll(async () => Math.abs(await listHeight() - contentHeight)).toBeLessThan(2)
+  await view.dispose()
+})
+
 test('a background watch tab stays loading until its cached avatar is ready', async ({ app, page }) => {
   await mockPlayableWatchPage(app, page)
 

@@ -140,3 +140,8 @@
 .phonePanelContent :deep(.chaptersWrapper) {
   max-block-size: none !important;
 }
+
+/* The sheet sets the list's height, so it keeps no resize handle. */
+.phonePanelContent :deep(.watchVideoChaptersPanel .chaptersWrapper) {
+  resize: none;
+}

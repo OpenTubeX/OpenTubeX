@@ -22,12 +22,28 @@
 }
 
 .watchVideoChaptersPanel :deep(.chaptersWrapper) {
-  max-block-size: 480px;
+  /* One chapter row and the list's padding */
+  min-block-size: 90px;
+  max-block-size: var(--chapters-max-block-size, 480px);
+  resize: vertical;
 
   /* In the sidebar the chapters sit on a card rather than above the video,
      so drop the light handle and take the theme's color again */
   --scrollbar-color: inherit;
   --scrollbar-color-hover: inherit;
+}
+
+/* Matches the playlist panel's resize handle. */
+.watchVideoChaptersPanel :deep(.chaptersWrapper::-webkit-resizer) {
+  background:
+    linear-gradient(
+      135deg,
+      transparent 0 55%,
+      var(--tertiary-text-color) 55% 61%,
+      transparent 61% 70%,
+      var(--tertiary-text-color) 70% 76%,
+      transparent 76%
+    ) var(--card-bg-color);
 }
 
 @media (pointer: coarse) {

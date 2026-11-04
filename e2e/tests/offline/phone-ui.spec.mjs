@@ -361,6 +361,10 @@ test.describe('phone UI', () => {
       }
       const sheet = page.locator('dialog[open]')
       await expect(sheet.locator(content)).toBeVisible()
+      if (label === 'Chapters') {
+        // The sheet sizes the list, so it has no resize handle.
+        await expect(sheet.locator('.chaptersWrapper')).toHaveCSS('resize', 'none')
+      }
       await sheet.locator('.mobileSheetHeader').getByRole('button', { name: 'Close', exact: true }).click()
       await expect(sheet).toHaveCount(0)
     }
