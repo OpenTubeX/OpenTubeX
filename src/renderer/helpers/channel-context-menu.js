@@ -11,7 +11,7 @@ export function getChannelLinkDetails(link) {
   const name = link.dataset.tabTitle?.trim() ||
     link.getAttribute('title')?.trim() ||
     link.getAttribute('aria-label')?.trim() ||
-    link.closest('.ft-list-channel, .ft-list-post, .channel')?.querySelector('.h3Title, .channelName, .authorNameLink')?.textContent?.trim() ||
+    link.closest('.ft-list-channel, .author-div, .channel')?.querySelector('.h3Title, .channelName, .authorNameLink')?.textContent?.trim() ||
     link.textContent?.trim() ||
     id
 
@@ -24,7 +24,9 @@ export function getChannelLinkDetails(link) {
   return {
     id,
     name,
-    thumbnail: thumbnail?.replace(/^https?:\/\/[^/]+\/ggpht/, 'https://yt3.googleusercontent.com') ?? null
+    thumbnail: typeof thumbnail === 'string'
+      ? thumbnail.replace(/^https?:\/\/[^/]+\/ggpht/, 'https://yt3.googleusercontent.com')
+      : null
   }
 }
 
