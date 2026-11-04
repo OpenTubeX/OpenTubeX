@@ -107,8 +107,7 @@
                     class="preferenceLabel"
                   >
                     <FtIcon
-                      v-if="group.key === 'notificationFeedTypes'"
-                      :icon="['fas', 'bell']"
+                      :icon="group.icon"
                       aria-hidden="true"
                     />
                     {{ group.label }}
@@ -141,6 +140,10 @@
                     :id="`${id}-daily-limit`"
                     class="preferenceLabel"
                   >
+                    <FtIcon
+                      :icon="['fas', 'calendar-day']"
+                      aria-hidden="true"
+                    />
                     {{ $t('Channel.Videos per day') }}
                   </p>
                   <div class="dailyVideoLimit">
@@ -197,10 +200,16 @@
                   v-if="restrictedPlaybackConfigured"
                   class="membersOnlyPreference"
                 >
+                  <FtIcon
+                    class="membersOnlyIcon"
+                    :icon="['fas', 'users']"
+                    aria-hidden="true"
+                  />
                   <FtToggleSwitch
-                    :label="$t('Search Listing.Label.Members Only')"
+                    :label="$t('Channel.Show members-only videos')"
                     :default-value="activeChannelSettings.showMembersOnly"
                     compact
+                    trailing
                     controlled
                     @change="updateShowMembersOnly"
                   />
@@ -224,6 +233,10 @@
                     :id="`${id}-profiles`"
                     class="preferenceLabel"
                   >
+                    <FtIcon
+                      :icon="['fas', 'circle-user']"
+                      aria-hidden="true"
+                    />
                     {{ $t('Settings.Sync Settings.Profiles') }}
                   </p>
                   <div class="preferenceChips">
@@ -263,6 +276,10 @@
                     :id="`${id}-groups`"
                     class="preferenceLabel"
                   >
+                    <FtIcon
+                      :icon="['fas', 'layer-group']"
+                      aria-hidden="true"
+                    />
                     {{ $t('Subscription Groups.Groups') }}
                   </p>
                   <div class="preferenceChips">
@@ -572,10 +589,10 @@ const activeChannelSettings = computed(() => (
   optimisticChannelSettings.value ?? storedChannelSettings.value
 ))
 const feedTypeGroups = computed(() => [
-  { key: 'feedTypes', label: t('Channel.Show in subscription feed') },
+  { key: 'feedTypes', label: t('Channel.Show in subscription feed'), icon: ['fas', 'subscriptions'] },
   // The group stays while the bell is off, so its chips can turn notifications back on.
   ...(isNotificationBellEnabled.value
-    ? [{ key: 'notificationFeedTypes', label: t('Channel.Notify about new uploads') }]
+    ? [{ key: 'notificationFeedTypes', label: t('Channel.Notify about new uploads'), icon: ['fas', 'bell'] }]
     : [])
 ])
 const notificationsEnabled = computed(() => hasSubscriptionNotifications(activeChannelSettings.value))

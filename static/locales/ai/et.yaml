@@ -1508,6 +1508,7 @@ Channel:
   More videos hidden: '+{count} veel | +{count} veel'
   Show in subscription feed: Kuva tellimuste voos
   Notify about new uploads: Teavita uutest üleslaadimistest
+  Show members-only videos: Näita ainult liikmetele mõeldud videoid
   Upload Notifications On: "Sind teavitatakse kanali {channelName} uutest üleslaadimistest, kui tellimusi värskendatakse"
   Upload Notifications Off: "Sind ei teavitata kanali {channelName} uutest üleslaadimistest"
   Upload Notifications Disabled In Settings: "Kanali {channelName} teavitused on sees, kuid uute üleslaadimiste teavitused on seadetes välja lülitatud"

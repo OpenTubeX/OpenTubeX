@@ -1694,6 +1694,7 @@ Channel:
   More videos hidden: '+{count} til | +{count} til'
   Show in subscription feed: Vis i abonnementsstraumen
   Notify about new uploads: Varsle om nye opplastingar
+  Show members-only videos: Vis videoar berre for medlemmer
   Upload Notifications On: "Du blir varsla om nye opplastingar frå {channelName} når abonnementa dine blir oppdaterte"
   Upload Notifications Off: "Du blir ikkje varsla om nye opplastingar frå {channelName}"
   Upload Notifications Disabled In Settings: "Varsel for {channelName} er slått på, men varsel om nye opplastingar er slått av i innstillingane dine"

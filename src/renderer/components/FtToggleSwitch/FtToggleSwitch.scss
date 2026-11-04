@@ -59,6 +59,9 @@
 }
 
 .switch-label-text {
+  /* Where the track starts, relative to the text. */
+  --switch-track-start: calc(-1 * var(--switch-track-width) - 12px);
+
   position: relative;
   min-inline-size: 0;
   hyphens: auto;
@@ -87,7 +90,7 @@
     box-sizing: border-box;
     border-radius: calc(var(--switch-track-height) / 2 * max(1, var(--ui-roundness)));
     block-size: var(--switch-track-height);
-    inset-inline-start: calc(-1 * var(--switch-track-width) - 12px);
+    inset-inline-start: var(--switch-track-start);
     inline-size: var(--switch-track-width);
 
     .switch-input:is(:checked, :indeterminate) + .switch-label & {
@@ -107,14 +110,14 @@
     border-radius: 50%;
     box-shadow: inset 0 0 0 1px var(--toggle-thumb-outline-color, transparent);
     block-size: var(--switch-unchecked-thumb-size);
-    inset-inline-start: calc(-1 * var(--switch-track-width) - 12px + (var(--switch-track-height) - var(--switch-unchecked-thumb-size)) / 2);
+    inset-inline-start: calc(var(--switch-track-start) + (var(--switch-track-height) - var(--switch-unchecked-thumb-size)) / 2);
     inline-size: var(--switch-unchecked-thumb-size);
 
     .switch-input:checked + .switch-label & {
       color: var(--toggle-checked-track-color, var(--accent-color));
       font-size: calc((var(--switch-track-height) - 2 * var(--switch-thumb-inset)) * 0.8);
       background-color: var(--toggle-checked-thumb-color, var(--accent-thumb-color, var(--text-with-accent-color)));
-      inset-inline-start: calc(-12px - var(--switch-track-height) + var(--switch-thumb-inset));
+      inset-inline-start: calc(var(--switch-track-start) + var(--switch-track-width) - var(--switch-track-height) + var(--switch-thumb-inset));
       block-size: calc(var(--switch-track-height) - 2 * var(--switch-thumb-inset));
       inline-size: calc(var(--switch-track-height) - 2 * var(--switch-thumb-inset));
     }
@@ -122,8 +125,33 @@
     .switch-input:indeterminate + .switch-label & {
       color: var(--toggle-checked-track-color, var(--accent-color));
       background-color: var(--toggle-checked-thumb-color, var(--accent-thumb-color, var(--text-with-accent-color)));
-      inset-inline-start: calc(-12px - (var(--switch-track-width) + var(--switch-unchecked-thumb-size)) / 2);
+      inset-inline-start: calc(var(--switch-track-start) + (var(--switch-track-width) - var(--switch-unchecked-thumb-size)) / 2);
     }
+  }
+}
+
+/* The label leads and the switch sits at the end of the space it fills. */
+.trailing {
+  flex: 1 1 auto;
+  min-inline-size: 0;
+  inline-size: auto;
+
+  .switch-input {
+    inset-inline: auto 6px;
+  }
+
+  .switch-label {
+    flex: 1 1 auto;
+    padding-inline: 6px calc(var(--switch-track-width) + 18px);
+  }
+
+  .switch-label-main,
+  .switch-label-text {
+    flex: 1 1 auto;
+  }
+
+  .switch-label-text {
+    --switch-track-start: calc(100% + 12px);
   }
 }
 
@@ -183,10 +211,11 @@
 .switch-input:not(:disabled) + .switch-label:active .switch-label-text .switch-thumb {
   block-size: calc(var(--switch-track-height) - 4px);
   inline-size: calc(var(--switch-track-height) - 4px);
-  inset-inline-start: calc(-1 * var(--switch-track-width) - 10px);
+  inset-inline-start: calc(var(--switch-track-start) + 2px);
 }
 
 .switch-input:checked:not(:disabled):active + .switch-label .switch-label-text .switch-thumb,
 .switch-input:checked:not(:disabled) + .switch-label:active .switch-label-text .switch-thumb {
-  inset-inline-start: calc(-10px - var(--switch-track-height));
+  inset-inline-start: calc(var(--switch-track-start) + var(--switch-track-width) - var(--switch-track-height) + 2px);
 }
+

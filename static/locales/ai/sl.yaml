@@ -1850,6 +1850,7 @@ Channel:
   More videos hidden: '+{count} več | +{count} več | +{count} več | +{count} več'
   Show in subscription feed: Prikaži v viru naročnin
   Notify about new uploads: Obveščaj o novi vsebini
+  Show members-only videos: Prikaži videoposnetke samo za člane
   Upload Notifications On: "Ob osvežitvi naročnin boste obveščeni o novi vsebini kanala {channelName}"
   Upload Notifications Off: "Ne boste obveščeni o novi vsebini kanala {channelName}"
   Upload Notifications Disabled In Settings: "Obvestila za {channelName} so vklopljena, vendar so obvestila o novi vsebini izklopljena v nastavitvah"

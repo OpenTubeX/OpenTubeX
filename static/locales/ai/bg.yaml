@@ -1521,6 +1521,7 @@ Channel:
   More videos hidden: '+{count} още | +{count} още'
   Show in subscription feed: Показване в емисията с абонаменти
   Notify about new uploads: Известия за нови качвания
+  Show members-only videos: Показване на видеоклипове само за членове
   Upload Notifications On: "Ще получавате известия за нови качвания от {channelName}, когато абонаментите ви се опреснят"
   Upload Notifications Off: "Няма да получавате известия за нови качвания от {channelName}"
   Upload Notifications Disabled In Settings: "Известията за {channelName} са включени, но известията за нови качвания са изключени в настройките ви"

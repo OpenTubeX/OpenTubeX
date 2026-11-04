@@ -1506,6 +1506,7 @@ Channel:
   More videos hidden: '另有 {count} 个'
   Show in subscription feed: 在订阅动态中显示
   Notify about new uploads: 新上传通知
+  Show members-only videos: 显示仅限会员的视频
   Upload Notifications On: "订阅刷新时，你将收到 {channelName} 的新上传通知"
   Upload Notifications Off: "你将不再收到 {channelName} 的新上传通知"
   Upload Notifications Disabled In Settings: "{channelName} 的通知已开启，但新上传通知已在设置中关闭"

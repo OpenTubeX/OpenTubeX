@@ -1506,6 +1506,7 @@ Channel:
   More videos hidden: '+{count} gehiago | +{count} gehiago'
   Show in subscription feed: Erakutsi harpidetzen jarioan
   Notify about new uploads: Jakinarazi igoera berriak
+  Show members-only videos: Erakutsi kideentzako soilik diren bideoak
   Upload Notifications On: "{channelName} kanalaren igoera berrien jakinarazpenak jasoko dituzu harpidetzak freskatzean"
   Upload Notifications Off: "Ez duzu {channelName} kanalaren igoera berrien jakinarazpenik jasoko"
   Upload Notifications Disabled In Settings: "{channelName} kanalaren jakinarazpenak aktibatuta daude, baina igoera berrien jakinarazpenak desaktibatuta daude ezarpenetan"
