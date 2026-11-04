@@ -511,6 +511,11 @@
   padding: 0;
 }
 
+/* The scroller already pads the page, so drop the route's bottom margin. */
+.settingsAboutPage :deep(.card) {
+  margin-block-end: 0;
+}
+
 .settingsDownloadsPage {
   background: var(--base-color);
 }

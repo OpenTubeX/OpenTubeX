@@ -862,6 +862,20 @@ test.describe('settings', () => {
     await expect.poll(() => page.locator('.settingsDownloadsPage').evaluate(element => element.scrollTop)).toBe(0)
   })
 
+  test('ends the About scroll range at the scroller padding', { tag: '@scale' }, async ({ page }) => {
+    await page.evaluate(() => window.$store.dispatch('showSettingsWindow', 'about'))
+    const scroller = page.getByRole('dialog', { name: 'About', exact: true }).locator('.settingsAboutPage')
+    await expect(scroller).toBeVisible()
+    await scroller.evaluate(element => { element.scrollTop = element.scrollHeight })
+
+    const gap = await scroller.evaluate(element => {
+      const card = element.querySelector('.card')
+      return element.getBoundingClientRect().bottom - card.getBoundingClientRect().bottom -
+        Number.parseFloat(getComputedStyle(element).paddingBlockEnd)
+    })
+    expect(gap).toBeLessThanOrEqual(1)
+  })
+
   test('clamps the settings scroll position after repeated resizing', async ({ page }) => {
     await goTo(page, 'settings')
     const settingsWindow = page.locator('.settingsWindow')
