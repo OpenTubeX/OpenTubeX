@@ -121,6 +121,11 @@ test('settings fields retain labels and compact search overlays retain their pla
 })
 
 test('credentials and native theme fields offer hints while retaining their labels', async ({ page }) => {
+  // The passphrase field only stays while the server is not known to be
+  // unreachable, so advertise encrypted sync instead of letting the check fail.
+  await page.route('https://sync.opentubex.org/health', route => route.fulfill({
+    json: { capabilities: { encrypted_sync: 1, live_sync: 1 } },
+  }))
   await page.evaluate(() => Object.assign(
     window.$store.state.settings,
     { useProxy: true, proxyProtocol: 'http', syncServerEnabled: true, enableScreenshot: true }
