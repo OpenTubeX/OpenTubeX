@@ -497,6 +497,7 @@ function resetItems() {
 .selectedAction {
   display: grid;
   grid-template-columns: 44px 24px minmax(0, 1fr) auto;
+  padding-inline-end: 8px;
   position: relative;
 }
 

@@ -369,6 +369,7 @@ onBeforeUnmount(() => resizeObserver?.disconnect())
   display: grid;
   grid-template-columns: 44px 24px minmax(0, 1fr) auto;
   min-block-size: 56px;
+  padding-inline-end: 8px;
   position: relative;
   transition: border-radius var(--motion-fast-spatial);
   user-select: none;

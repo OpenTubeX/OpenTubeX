@@ -417,6 +417,31 @@ test.describe('interface customizer', () => {
     expect(await getter('getHiddenPlayerMenuControls')).toEqual([])
   })
 
+  test('insets the row actions from the row end the same way in every editor', { tag: '@scale' }, async ({ page }) => {
+    const rowSelectors = {
+      quickSettings: '.selectedSetting',
+      navigation: '.selectedItem',
+      controlBar: '.placementItem',
+      fullscreenActions: '.selectedAction'
+    }
+    const customizer = await openInterfaceCustomizer(page, 'quick settings')
+    const endInsets = {}
+    for (const [tab, rowSelector] of Object.entries(rowSelectors)) {
+      await customizer.locator(`[data-settings-subpage-tab="${tab}"]`).click()
+      const row = customizer.locator(rowSelector).first()
+      await expect(row).toBeVisible()
+      endInsets[tab] = await row.evaluate((element) => {
+        const buttons = element.querySelectorAll('button')
+        return element.getBoundingClientRect().right - buttons[buttons.length - 1].getBoundingClientRect().right
+      })
+    }
+
+    expect(endInsets.quickSettings).toBeGreaterThan(0)
+    for (const tab of ['navigation', 'controlBar', 'fullscreenActions']) {
+      expect(endInsets[tab], `${tab} row actions`).toBeCloseTo(endInsets.quickSettings, 1)
+    }
+  })
+
   test('opens the matching tab from settings search', async ({ page }) => {
     await goTo(page, 'settings')
     await page.getByRole('searchbox', { name: 'Search settings' }).fill('Add action')
