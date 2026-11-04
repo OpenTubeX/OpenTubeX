@@ -583,7 +583,7 @@ test('switching sheets during their exit keeps the new player anchor and focus',
   await expect(sheet.locator('.comment').first()).toBeVisible()
 })
 
-test('phone comment sort opens the context menu sheet and returns focus after choosing', async ({ app, page }) => {
+test('phone comment sort opens the context menu sheet and returns focus after choosing', { tag: '@scale' }, async ({ app, page }) => {
   await mockPlayableWatchPage(app, page)
   await openMockedVideo(page)
   await setWindowSize(app, page, { width: 480, height: 800 })
