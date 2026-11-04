@@ -68,7 +68,9 @@
             :entries="entries"
             :now="openedAt"
             @open="openEntry"
+            @opened-in-tab="openedInTab"
             @mark-read="markRead"
+            @remove="remove"
           />
         </div>
       </div>
@@ -78,7 +80,9 @@
       :entries="entries"
       :now="openedAt"
       @open="openEntry"
+      @opened-in-tab="openedInTab"
       @mark-read="markRead"
+      @remove="remove"
     />
   </FtIconButton>
 </template>
@@ -159,6 +163,15 @@ function markRead(entry, event) {
   notificationHistory.markRead(entry?.id)
 }
 
+/**
+ * @param {import('../../../notificationHistory').NotificationHistoryEntry} entry
+ * @param {MouseEvent} event
+ */
+function remove(entry, event) {
+  keepFocus(event)
+  notificationHistory.remove(entry.id)
+}
+
 /** @param {MouseEvent} event */
 function clear(event) {
   keepFocus(event)
@@ -169,6 +182,16 @@ function clear(event) {
 function openEntry(entry) {
   button.value?.hideDropdown()
   openNotificationEntry(entry)
+}
+
+/**
+ * Background tabs from middle clicks leave the list open for more.
+ * @param {import('../../../notificationHistory').NotificationHistoryEntry} entry
+ * @param {MouseEvent} event
+ */
+function openedInTab(entry, event) {
+  if (event.type === 'click') button.value?.hideDropdown()
+  if (!entry.read) notificationHistory.markRead(entry.id)
 }
 
 function handleVisibilityChange() {

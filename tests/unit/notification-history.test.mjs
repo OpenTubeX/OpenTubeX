@@ -11,7 +11,8 @@ import {
   getUploadTarget,
   isThumbnailUrl,
   markNotificationHistoryRead,
-  normalizeNotificationHistory
+  normalizeNotificationHistory,
+  removeNotificationHistoryEntry
 } from '../../src/notificationHistory.js'
 import { createNotificationHistory, createNotifier } from '../../src/main/notificationHistory.js'
 import { getUploadThumbnailUrl } from '../../src/newUploadNotifications.js'
@@ -39,6 +40,10 @@ test('new entries are unread, newest first, and limited', () => {
   // Unchanged histories stay the same array, so they are not saved again.
   assert.equal(markNotificationHistoryRead(one, entries[1].id), one)
   assert.equal(markNotificationHistoryRead(one, 'unknown'), one)
+
+  const removed = removeNotificationHistoryEntry(one, entries[1].id)
+  assert.deepEqual(removed.map(entry => entry.id), one.filter(entry => entry.id !== entries[1].id).map(entry => entry.id))
+  assert.equal(removeNotificationHistoryEntry(removed, entries[1].id), removed)
 })
 
 test('saved histories keep only valid entries', () => {
@@ -87,6 +92,11 @@ test('the desktop history persists changes and reports each one', async () => {
     await history.markRead()
     assert.equal(reported.length, 4)
     assert.ok(reported.at(-1).every(entry => entry.read))
+
+    await history.remove(upload.id)
+    await history.remove(upload.id)
+    assert.equal(reported.length, 5)
+    assert.deepEqual((await history.list()).map(entry => entry.title), ['Live'])
 
     const restarted = createNotificationHistory({ file, onChange: () => {} })
     assert.deepEqual(await restarted.list(), await history.list())

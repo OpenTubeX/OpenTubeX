@@ -49,6 +49,7 @@ const IpcChannels = {
   LIVE_REMINDER_UPDATED: 'live-reminder-updated',
   NOTIFICATION_HISTORY_LIST: 'notification-history-list',
   NOTIFICATION_HISTORY_MARK_READ: 'notification-history-mark-read',
+  NOTIFICATION_HISTORY_REMOVE: 'notification-history-remove',
   NOTIFICATION_HISTORY_CLEAR: 'notification-history-clear',
   NOTIFICATION_HISTORY_UPDATED: 'notification-history-updated',
   NOTIFICATION_SHOW_IN_APP: 'notification-show-in-app',

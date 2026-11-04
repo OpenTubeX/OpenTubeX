@@ -976,6 +976,9 @@ export default {
     /** @param {string} [id] Omit to mark every entry read. */
     markRead: (id) => ipcRenderer.invoke(IpcChannels.NOTIFICATION_HISTORY_MARK_READ, id),
 
+    /** @param {string} id */
+    remove: (id) => ipcRenderer.invoke(IpcChannels.NOTIFICATION_HISTORY_REMOVE, id),
+
     clear: () => ipcRenderer.invoke(IpcChannels.NOTIFICATION_HISTORY_CLEAR),
 
     /**

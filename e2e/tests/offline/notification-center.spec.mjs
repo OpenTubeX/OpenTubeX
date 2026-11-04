@@ -5,8 +5,11 @@ import {
   goToSettingsSection,
   latestSettings,
   readDatastore,
+  sel,
   setWindowSize,
 } from '../../helpers/app.mjs'
+
+const shortcutModifier = process.platform === 'darwin' ? 'Meta' : 'Control'
 
 const CHANNEL_ID = `UC${'0'.repeat(22)}`
 
@@ -138,6 +141,82 @@ test('mark all as read keeps the list open', async ({ app, page }) => {
   await expect(page.locator('.notificationCenter')).not.toHaveAttribute('data-unread-count')
 })
 
+test('middle and Ctrl clicks open notifications in new tabs', async ({ app, page }) => {
+  await page.emulateMedia({ reducedMotion: 'reduce' })
+  await mockSystemNotifications(app)
+  const [first, second] = await announceUploads(page, ['b', 'a'])
+  const bell = page.locator('.notificationCenter')
+  await page.getByRole('button', { name: 'Notifications (2 unread)', exact: true }).click()
+  const dropdown = page.locator('.notificationCenterDropdown')
+  const entries = dropdown.locator('.notificationEntry')
+  const startUrl = page.url()
+
+  await entries.nth(1).click({ button: 'middle' })
+  await expect(page.locator(sel.tabs)).toHaveCount(2)
+  await expect(page.locator(sel.tabs).first()).toHaveClass(/active/)
+  await expect.poll(() => page.evaluate(async () => {
+    const state = await window.ftElectron.tabs.getState()
+    return state.tabs.find(tab => tab.id !== state.activeTabId)?.route.fullPath
+  })).toBe(`/watch/${first}`)
+  expect(page.url()).toBe(startUrl)
+  // The list stays open for more background tabs, and the opened entry is read.
+  await expect(entries).toHaveCount(2)
+  await expect(bell).toHaveAttribute('data-unread-count', '1')
+
+  // The list opens the tab itself instead of leaving it to Chromium's new-window fallback.
+  await app.electronApp.evaluate(({ BrowserWindow }) => {
+    globalThis.windowOpenRequests = 0
+    BrowserWindow.getAllWindows()[0].webContents.setWindowOpenHandler(() => {
+      globalThis.windowOpenRequests++
+      return { action: 'deny' }
+    })
+  })
+  await entries.nth(0).click({ modifiers: [shortcutModifier] })
+  await expect(page.locator(sel.tabs)).toHaveCount(3)
+  expect(await app.electronApp.evaluate(() => globalThis.windowOpenRequests)).toBe(0)
+  await expect(page).toHaveURL(new RegExp(`#/watch/${second}$`))
+  await expect(dropdown).toHaveCount(0)
+  await expect(bell).not.toHaveAttribute('data-unread-count')
+})
+
+test('Ctrl clicks on notifications close the settings window like plain clicks', async ({ app, page }) => {
+  await page.emulateMedia({ reducedMotion: 'reduce' })
+  await mockSystemNotifications(app)
+  const [upload] = await announceUploads(page, ['a'])
+  await goToSettingsSection(page, 'general')
+  const settings = page.locator('.settingsWindow')
+  await expect(settings).toBeVisible()
+
+  await page.getByRole('button', { name: 'Notifications (1 unread)', exact: true }).click()
+  await page.locator('.notificationCenterDropdown .notificationEntry').click({ modifiers: [shortcutModifier] })
+  await expect(page.locator(sel.tabs)).toHaveCount(2)
+  await expect(page).toHaveURL(new RegExp(`#/watch/${upload}$`))
+  await expect(settings).toHaveCount(0)
+})
+
+test('read notifications can be cleared one at a time', async ({ app, page }) => {
+  await page.emulateMedia({ reducedMotion: 'reduce' })
+  await mockSystemNotifications(app)
+  const [first] = await announceUploads(page, ['b', 'a'])
+
+  await page.getByRole('button', { name: 'Notifications (2 unread)', exact: true }).click()
+  const dropdown = page.locator('.notificationCenterDropdown')
+  const entries = dropdown.locator('.notificationEntry')
+  const clear = dropdown.getByRole('button', { name: 'Clear', exact: true })
+  // Unread entries offer marking them read instead.
+  await expect(clear).toHaveCount(0)
+  await dropdown.getByRole('button', { name: 'Mark as read', exact: true }).first().click()
+  await expect(clear).toHaveCount(1)
+
+  await clear.click()
+  // The dropdown stays open after the entry and its button disappear.
+  await expect(entries).toHaveCount(1)
+  await expect(entries).toContainText(`Upload ${first}`)
+  await expect(dropdown.getByRole('button', { name: 'Mark as read', exact: true })).toHaveCount(1)
+  await expect.poll(async () => (await page.evaluate(() => window.ftElectron.notificationHistory.list())).map(entry => entry.body))
+    .toStrictEqual([`Upload ${first}`])
+})
+
 test('the bell icon follows the notifications and wiggles for new ones', async ({ app, page }) => {
   await page.emulateMedia({ reducedMotion: 'no-preference' })
   await mockSystemNotifications(app)
@@ -253,6 +332,30 @@ async function clearScrolledList(container, scroller) {
   await expect(scroller.locator(':scope > .os-scrollbar-vertical')).toHaveClass(/os-scrollbar-unusable/)
 }
 
+/**
+ * Scrolls a list of read entries to its end, clears the last one, and checks
+ * that the list still ends at the bottom of the shrunk scroll range.
+ * @param {import('@playwright/test').Locator} container
+ * @param {import('@playwright/test').Locator} scroller
+ */
+async function clearLastOfScrolledList(container, scroller) {
+  await container.getByRole('button', { name: 'Mark all as read', exact: true }).click()
+  const entries = container.locator('.notificationEntry')
+  const count = await entries.count()
+  await expect(scroller).toHaveAttribute('data-overlayscrollbars-viewport')
+  await scroller.evaluate(element => { element.scrollTop = element.scrollHeight })
+  await expect.poll(() => scroller.evaluate(element => element.scrollTop)).toBeGreaterThan(0)
+
+  await container.getByRole('button', { name: 'Clear', exact: true }).last().click()
+  await expect(entries).toHaveCount(count - 1)
+  // Fractional UI scales leave subpixel offsets that scrollTop rounds.
+  await expect.poll(() => scroller.evaluate(element => element.scrollHeight - element.clientHeight - element.scrollTop))
+    .toBeLessThan(2)
+  const [last, viewport] = await Promise.all([entries.last().boundingBox(), scroller.boundingBox()])
+  expect(last.y + last.height).toBeLessThan(viewport.y + viewport.height + 2)
+  expect(viewport.y + viewport.height - (last.y + last.height)).toBeLessThan(last.height)
+}
+
 const UPLOADS = Array.from({ length: 12 }, (_, index) => `upload${index}`)
 
 test('clearing a scrolled list leaves a valid scroll range', { tag: '@scale' }, async ({ app, page }) => {
@@ -264,6 +367,17 @@ test('clearing a scrolled list leaves a valid scroll range', { tag: '@scale' }, 
   await page.getByRole('button', { name: 'Notifications (12 unread)', exact: true }).click()
   const dropdown = page.locator('.notificationCenterDropdown')
   await clearScrolledList(dropdown, dropdown.locator('.iconDropdownContent'))
+})
+
+test('clearing one entry of a scrolled list leaves a valid scroll range', { tag: '@scale' }, async ({ app, page }) => {
+  await page.emulateMedia({ reducedMotion: 'reduce' })
+  await mockSystemNotifications(app)
+  await setWindowSize(app, page, { width: 1000, height: 760 })
+  await announceUploads(page, UPLOADS)
+
+  await page.getByRole('button', { name: 'Notifications (12 unread)', exact: true }).click()
+  const dropdown = page.locator('.notificationCenterDropdown')
+  await clearLastOfScrolledList(dropdown, dropdown.locator('.iconDropdownContent'))
 })
 
 test('phone layouts show the list in a sheet', { tag: '@scale' }, async ({ app, page }) => {
@@ -280,6 +394,7 @@ test('phone layouts show the list in a sheet', { tag: '@scale' }, async ({ app, 
   await expect(sheet).toHaveCount(0)
 
   await page.getByRole('button', { name: 'Notifications (11 unread)', exact: true }).click()
+  await clearLastOfScrolledList(sheet, sheet.locator('.notificationSheetScroller'))
   await clearScrolledList(sheet, sheet.locator('.notificationSheetScroller'))
 })
 
