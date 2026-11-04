@@ -870,25 +870,28 @@ test.describe('filled button state contrast', () => {
       'showCreatePlaylistPrompt', { title: '', description: '', sourcePlaylistId: null }
     ))
     await page.locator('.playlistNameInput input').fill('Filled button states')
-    const button = page.locator('.promptCard .btn.primary.variant-filled').first()
+    await page.locator('.promptCard .btn.primary.variant-filled').first().evaluate(element => {
+      element.dataset.stateTest = ''
+      element.addEventListener('click', event => {
+        event.preventDefault()
+        event.stopImmediatePropagation()
+      }, true)
+    })
+    const button = page.locator('[data-state-test]')
     await expect(button).toBeEnabled()
-    await button.evaluate(element => element.addEventListener('click', event => {
-      event.preventDefault()
-      event.stopImmediatePropagation()
-    }, true))
-    // The fill and the theme's state shade, both as rendered sRGB channels
+    // The fill and the button's state shades, as rendered sRGB channels
     const fill = () => button.evaluate(element => {
       const context = document.createElement('canvas').getContext('2d')
       const channels = color => {
         context.fillStyle = color
         context.fillRect(0, 0, 1, 1)
-        return [...context.getImageData(0, 0, 1, 1).data].slice(0, 3)
+        return [...context.getImageData(0, 0, 1, 1).data].slice(0, 3).join()
       }
       const styles = getComputedStyle(element)
       return {
         background: channels(styles.backgroundColor),
-        hover: channels(styles.getPropertyValue('--primary-color-hover')),
-        active: channels(styles.getPropertyValue('--primary-color-active')),
+        hover: channels(styles.getPropertyValue('--button-hover')),
+        active: channels(styles.getPropertyValue('--button-active')),
       }
     })
     const ratio = async () => {
@@ -896,15 +899,20 @@ test.describe('filled button state contrast', () => {
       return contrastRatio(foreground, background)
     }
 
-    await button.hover()
-    await expect.poll(async () => { const colors = await fill(); return colors.background.join() === colors.hover.join() }).toBe(true)
-    expect(await ratio()).toBeGreaterThanOrEqual(4.5)
-    await page.mouse.down()
-    try {
-      await expect.poll(async () => { const colors = await fill(); return colors.background.join() === colors.active.join() }).toBe(true)
-      expect(await ratio()).toBeGreaterThanOrEqual(4.5)
-    } finally {
-      await page.mouse.up()
+    for (const theme of ['primary', 'destructive']) {
+      // Keep the rendered component's scoped styles while exercising its theme.
+      await button.evaluate((element, theme) => element.classList.replace('primary', theme), theme)
+      await button.hover()
+      await expect.poll(async () => { const colors = await fill(); return colors.background === colors.hover }, { message: `${theme} hover` }).toBe(true)
+      expect(await ratio(), `${theme} hover`).toBeGreaterThanOrEqual(4.5)
+      await page.mouse.down()
+      try {
+        await expect.poll(async () => { const colors = await fill(); return colors.background === colors.active }, { message: `${theme} pressed` }).toBe(true)
+        expect(await ratio(), `${theme} pressed`).toBeGreaterThanOrEqual(4.5)
+      } finally {
+        await page.mouse.up()
+        await page.mouse.move(0, 0)
+      }
     }
   })
 })
