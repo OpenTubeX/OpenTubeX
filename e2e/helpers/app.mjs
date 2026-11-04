@@ -595,6 +595,8 @@ function recordAppDiagnostics(testInfo, recordTrace) {
       }
       // The HTML report opens attachments named "trace" in the trace viewer.
       for (const tracePath of tracePaths) {
+        // An app that exits while stopping its trace may not write it.
+        if (!existsSync(tracePath)) continue
         // Attaching copies the file into the report's attachments.
         await testInfo.attach('trace', { path: tracePath, contentType: 'application/zip' })
         await rm(tracePath, { force: true })
