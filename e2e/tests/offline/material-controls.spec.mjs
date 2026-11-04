@@ -1734,7 +1734,7 @@ test('shared Material controls follow UI Roundness while switch focus keeps its 
   const button = card.locator('.btn').first()
   for (const roundness of [0, 50, 100, 200]) {
     await page.evaluate(value => window.$store.dispatch('updateUiRoundness', value), roundness)
-    for (const [element, radius] of [[card, 28], [field, 4], [button, 20]]) {
+    for (const [element, radius] of [[card, 12], [field, 4], [button, 20]]) {
       expect(await element.evaluate(element => parseFloat(getComputedStyle(element).borderTopLeftRadius))).toBeCloseTo(radius * roundness / 100, 1)
     }
   }

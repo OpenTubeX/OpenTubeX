@@ -150,27 +150,23 @@
 
 .input::-webkit-slider-thumb {
   appearance: none;
-  box-sizing: border-box;
-  border: 0 solid transparent;
+  border: 0;
   border-radius: calc(var(--slider-handle-width) / 2 * var(--ui-roundness));
   block-size: var(--slider-handle-height);
   inline-size: var(--slider-handle-width);
   margin-block-start: calc((var(--slider-track-height) - var(--slider-handle-height)) / 2);
   background-color: var(--primary-color);
-
-  /* Narrowing paints a transparent border so the handle keeps its layout
-     width and the track gaps stay aligned with the native thumb. */
-  background-clip: padding-box;
-  transition: background-color var(--motion-fast-effects), border-inline-width var(--motion-fast-spatial);
+  transition: background-color var(--motion-fast-effects);
 }
 
 .input:not(:disabled):is(:hover, :focus-visible)::-webkit-slider-thumb {
-  background-color: var(--primary-color-hover);
+  background-color: rgb(from var(--primary-color-hover) r g b / 100%);
 }
 
+/* Custom themes may use translucent state colors, so draw them opaque to
+   keep the handle visible. */
 .input:not(:disabled):active::-webkit-slider-thumb {
-  border-inline-width: calc(var(--slider-handle-width) / 4);
-  background-color: var(--primary-color-active);
+  background-color: rgb(from var(--primary-color-active) r g b / 100%);
 }
 
 .input::-moz-range-track {
@@ -193,11 +189,11 @@
 }
 
 .input:not(:disabled):is(:hover, :focus-visible)::-moz-range-thumb {
-  background-color: var(--primary-color-hover);
+  background-color: rgb(from var(--primary-color-hover) r g b / 100%);
 }
 
 .input:not(:disabled):active::-moz-range-thumb {
-  background-color: var(--primary-color-active);
+  background-color: rgb(from var(--primary-color-active) r g b / 100%);
 }
 
 @media (any-pointer: coarse), (width <= 680px) {

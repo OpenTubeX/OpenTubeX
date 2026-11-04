@@ -15,6 +15,18 @@ import {
 } from '../../helpers/app.mjs'
 import { sampleColors } from '../../helpers/colors.mjs'
 
+// Custom theme state colors are drawn opaque with relative color syntax, which
+// computes to color(srgb ...), so compare the rendered sRGB channels.
+function backgroundRgb(locator) {
+  return locator.evaluate(element => {
+    const context = document.createElement('canvas').getContext('2d')
+    context.fillStyle = getComputedStyle(element).backgroundColor
+    context.fillRect(0, 0, 1, 1)
+    const [red, green, blue, alpha] = context.getImageData(0, 0, 1, 1).data
+    return alpha === 255 ? `rgb(${red}, ${green}, ${blue})` : `rgba(${red}, ${green}, ${blue}, ${alpha})`
+  })
+}
+
 async function readSavedThemes (userDataDir) {
   const themeDirectory = path.join(userDataDir, 'themes')
   const files = (await readdir(themeDirectory)).filter(file => file.endsWith('.json'))
@@ -599,8 +611,9 @@ test.describe('custom theme editor', () => {
       for (const token of ['primary-color-hover', 'accent-color-hover', 'destructive-hover-color']) {
         element.style.setProperty(`--${token}`, '#111111')
       }
+      // Translucent pressed colors must not let the card show through the label.
       for (const token of ['primary-color-active', 'accent-color-active', 'destructive-active-color']) {
-        element.style.setProperty(`--${token}`, '#222222')
+        element.style.setProperty(`--${token}`, '#2222221a')
       }
       for (const token of ['text-with-main-color', 'text-with-accent-color', 'destructive-text-color']) {
         element.style.setProperty(`--${token}`, '#ffffff')
@@ -614,13 +627,13 @@ test.describe('custom theme editor', () => {
           element.classList.add(theme, `variant-${variant}`)
         }, { theme, variant })
         await button.hover()
-        await expect(button).toHaveCSS('background-color', 'rgb(17, 17, 17)')
+        await expect.poll(() => backgroundRgb(button)).toBe('rgb(17, 17, 17)')
         await expect(button).toHaveCSS('color', 'rgb(255, 255, 255)')
         await button.focus()
         await page.mouse.move(0, 0)
         await expect(button).toHaveCSS('color', 'rgb(255, 255, 255)')
         await page.keyboard.down('Space')
-        await expect(button).toHaveCSS('background-color', 'rgb(34, 34, 34)')
+        await expect.poll(() => backgroundRgb(button)).toBe('rgb(34, 34, 34)')
         await expect(button).toHaveCSS('color', 'rgb(255, 255, 255)')
         // Blurring before keyup keeps this styling check from saving the draft.
         await button.evaluate(element => element.blur())
@@ -634,7 +647,7 @@ test.describe('custom theme editor', () => {
       element.style.setProperty('--button-on-base', '#ffffff')
     })
     await button.hover()
-    await expect(button).not.toHaveCSS('background-color', 'rgb(17, 17, 17)')
+    await expect.poll(() => backgroundRgb(button)).not.toBe('rgb(17, 17, 17)')
     await expect(button).toHaveCSS('color', 'rgb(255, 255, 255)')
     await page.mouse.move(0, 0)
     await expect(button).toHaveCSS('background-color', 'rgb(0, 100, 0)')
@@ -1135,11 +1148,11 @@ test.describe('custom theme editor', () => {
     await page.keyboard.press('Tab')
     // Reset is a secondary action and Save and apply the primary one.
     await resetButton.focus()
-    await expect(resetButton).toHaveCSS('background-color', 'rgb(52, 86, 120)')
+    await expect.poll(() => backgroundRgb(resetButton)).toBe('rgb(52, 86, 120)')
     await saveAndApplyButton.focus()
-    await expect(saveAndApplyButton).toHaveCSS('background-color', 'rgb(18, 52, 86)')
+    await expect.poll(() => backgroundRgb(saveAndApplyButton)).toBe('rgb(18, 52, 86)')
     await page.keyboard.down('Space')
-    await expect(saveAndApplyButton).toHaveCSS('background-color', 'rgb(35, 69, 103)')
+    await expect.poll(() => backgroundRgb(saveAndApplyButton)).toBe('rgb(35, 69, 103)')
     await page.keyboard.up('Space')
     await expect.poll(async () => {
       const themes = await readSavedThemes(app.userDataDir)
@@ -1177,9 +1190,9 @@ test.describe('custom theme editor', () => {
     await expect(removeHistoryButton).toHaveCSS('background-color', 'rgb(18, 58, 188)')
     await expect(removeHistoryButton).toHaveCSS('color', 'rgb(254, 220, 186)')
     await removeHistoryButton.hover()
-    await expect(removeHistoryButton).toHaveCSS('background-color', 'rgb(69, 109, 239)')
+    await expect.poll(() => backgroundRgb(removeHistoryButton)).toBe('rgb(69, 109, 239)')
     await page.mouse.down()
-    await expect(removeHistoryButton).toHaveCSS('background-color', 'rgb(120, 154, 188)')
+    await expect.poll(() => backgroundRgb(removeHistoryButton)).toBe('rgb(120, 154, 188)')
     await page.mouse.move(0, 0)
     await page.mouse.up()
     await goToSettingsSection(page, 'theme')

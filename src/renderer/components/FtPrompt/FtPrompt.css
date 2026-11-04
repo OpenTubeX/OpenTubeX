@@ -30,10 +30,6 @@
   box-shadow: 0 12px 40px rgb(0 0 0 / 38%);
 }
 
-.ft-card.promptCard {
-  border-radius: var(--shape-corner-extra-large);
-}
-
 .promptCard > :deep(h2) {
   font-weight: 700;
   letter-spacing: -0.01em;

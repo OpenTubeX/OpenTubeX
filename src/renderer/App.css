@@ -841,7 +841,7 @@
   padding: 12px;
   background-color: color-mix(in srgb, var(--bg-color) 92%, #000);
   border: 1px solid var(--border-color);
-  border-radius: var(--shape-corner-extra-large);
+  border-radius: var(--shape-corner-small);
   box-shadow: 0 16px 40px rgb(0 0 0 / 38%);
 }
 

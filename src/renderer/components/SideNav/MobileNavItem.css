@@ -51,19 +51,14 @@
       background-color var(--motion-default-effects);
   }
 
-  .sideNav .mobileNavItem.router-link-active,
-  .sideNav .mobileNavItem.router-link-active:is(:hover, :active, :focus-visible) {
-    color: var(--on-selected-container-color);
+  .sideNav .mobileNavItem.router-link-active {
+    color: var(--primary-color);
   }
 
   .sideNav .mobileNavItem.router-link-active::before {
-    background-color: var(--selected-container-color);
+    background-color: color-mix(in srgb, var(--primary-color) 20%, transparent);
     opacity: 1;
     transform: scaleX(1);
-  }
-
-  .sideNav .mobileNavItem.router-link-active:is(:hover, :focus-visible)::before {
-    background-color: color-mix(in srgb, var(--on-selected-container-color) 8%, var(--selected-container-color));
   }
 
   .sideNav .mobileNavItem:hover::before,

@@ -31,12 +31,8 @@
 }
 
 .moreOptionContainer .navOption.router-link-active {
-  color: var(--on-selected-container-color);
-  background-color: var(--selected-container-color);
-}
-
-.moreOptionContainer .navOption.router-link-active:hover {
-  background-color: color-mix(in srgb, var(--on-selected-container-color) 8%, var(--selected-container-color));
+  color: var(--primary-color);
+  background-color: color-mix(in srgb, var(--primary-color) 20%, transparent);
 }
 
 .moreOptionBackdrop {
@@ -98,10 +94,6 @@
   font-size: 24px;
   margin: 0;
   color: var(--secondary-text-color);
-}
-
-.moreOptionContainer .navOption.router-link-active .navIcon {
-  color: inherit;
 }
 
 /* Thumbnails overflow the icon box, keeping labels and row heights aligned. */

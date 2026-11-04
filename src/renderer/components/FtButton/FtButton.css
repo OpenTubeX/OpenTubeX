@@ -115,14 +115,16 @@
   background-color: color-mix(in srgb, var(--button-foreground) 12%, var(--button-container));
 }
 
+/* Custom themes may use translucent state colors, which would leave the
+   label on the card behind, so draw them opaque. */
 .custom .btn:is(.primary, .secondary, .destructive):not(:disabled):is(:hover, :focus-visible, :active) {
   --button-foreground: var(--button-on-base);
 
-  background-color: var(--button-hover);
+  background-color: rgb(from var(--button-hover) r g b / 100%);
 }
 
 .custom .btn:is(.primary, .secondary, .destructive):not(:disabled):active {
-  background-color: var(--button-active);
+  background-color: rgb(from var(--button-active) r g b / 100%);
 }
 
 .btn:disabled {

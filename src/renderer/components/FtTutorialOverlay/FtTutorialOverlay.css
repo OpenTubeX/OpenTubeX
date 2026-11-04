@@ -43,10 +43,6 @@
   text-align: center;
 }
 
-.ft-card.tutorialCard {
-  border-radius: var(--shape-corner-extra-large);
-}
-
 .centered .tutorialCard {
   position: relative;
 }
