@@ -17,7 +17,7 @@
       :style="{
         padding: padding + 'px',
         fontSize: size + 'px',
-        anchorName: dropdownShown ? dropdownAnchor : null
+        anchorName: dropdownShown || dropdownRendered ? dropdownAnchor : null
       }"
       :aria-disabled="disabled"
       :aria-expanded="ariaExpanded ?? dropdownShown"
@@ -47,12 +47,10 @@
         :spin="spin"
       />
     </button>
-    <template
-      v-if="dropdownShown && settingsOverlayActive"
-    >
-      <slot v-if="ownsPhoneSheet" />
+    <template v-if="settingsOverlayActive">
+      <slot v-if="dropdownShown && ownsPhoneSheet" />
       <FtPrompt
-        v-else-if="useModal"
+        v-else-if="dropdownShown && useModal"
         :autosize="true"
         :card-class="dropdownClass"
         :label="title"
@@ -99,101 +97,111 @@
         </slot>
       </FtPrompt>
       <Teleport
-        v-else
+        v-else-if="(dropdownShown || dropdownRendered) && !ownsPhoneSheet && !useModal"
         :to="fullscreenDropdownTarget ?? '.app'"
         :disabled="!portaledDropdown"
       >
-        <div
-          class="dropdownLayer"
-          :class="{ fullscreenDropdownLayer: fullscreenDropdownTarget }"
-          :role="fullscreenDropdownTarget ? 'dialog' : null"
-          :aria-label="fullscreenDropdownTarget ? title : null"
-          @keydown.esc.stop="handleDropdownEscape"
-          @pointerdown.self.prevent
-          @pointerdown.stop
-          @touchstart.stop
-          @touchend.stop
-          @dblclick.stop
-          @click.stop="($event.target === $event.currentTarget) && handleDropdownEscape()"
+        <Transition
+          name="icon-dropdown"
+          :css="animatedDropdown"
+          appear
+          @enter="finishDropdownTransition"
+          @leave="finishDropdownTransition"
+          @after-leave="dropdownRendered = dropdownShown"
         >
           <div
-            ref="dropdown"
-            v-overlay-scrollbars="!$slots['dropdown-header']"
-            tabindex="-1"
-            class="iconDropdown"
-            :class="{
-              kebabMenu: isKebabMenu,
-              left: dropdownPositionX === 'left',
-              right: dropdownPositionX === 'right',
-              center: dropdownPositionX === 'center',
-              bottom: dropdownPositionY === 'bottom',
-              top: dropdownPositionY === 'top',
-              portal: portaledDropdown,
-              hasFixedHeader: !!$slots['dropdown-header'],
-              [dropdownClass]: dropdownClass !== ''
-            }"
-            @focusout="handleDropdownFocusOut"
+            v-if="dropdownShown"
+            class="dropdownLayer"
+            :class="{ fullscreenDropdownLayer: fullscreenDropdownTarget }"
+            :role="fullscreenDropdownTarget ? 'dialog' : null"
+            :aria-label="fullscreenDropdownTarget ? title : null"
             @keydown.esc.stop="handleDropdownEscape"
+            @pointerdown.self.prevent
+            @pointerdown.stop
+            @touchstart.stop
+            @touchend.stop
+            @dblclick.stop
+            @click.stop="($event.target === $event.currentTarget) && handleDropdownEscape()"
           >
             <div
-              v-if="$slots['dropdown-header']"
-              class="iconDropdownHeader"
+              ref="dropdown"
+              v-overlay-scrollbars="!$slots['dropdown-header']"
+              tabindex="-1"
+              class="iconDropdown"
+              :class="{
+                kebabMenu: isKebabMenu,
+                left: dropdownPositionX === 'left',
+                right: dropdownPositionX === 'right',
+                center: dropdownPositionX === 'center',
+                bottom: dropdownPositionY === 'bottom',
+                top: dropdownPositionY === 'top',
+                portal: portaledDropdown,
+                hasFixedHeader: !!$slots['dropdown-header'],
+                [dropdownClass]: dropdownClass !== ''
+              }"
+              @focusout="handleDropdownFocusOut"
+              @keydown.esc.stop="handleDropdownEscape"
             >
-              <slot name="dropdown-header" />
-            </div>
-            <div
-              v-if="$slots['dropdown-header']"
-              ref="dropdownContent"
-              v-overlay-scrollbars
-              class="iconDropdownContent"
-            >
-              <div ref="dropdownContentInner">
-                <slot />
-              </div>
-            </div>
-            <slot v-else>
-              <ul
-                v-if="dropdownOptions.length > 0"
-                ref="dropdownContentInner"
-                class="list"
-                role="listbox"
+              <div
+                v-if="$slots['dropdown-header']"
+                class="iconDropdownHeader"
               >
-                <li
-                  v-for="(option, index) in dropdownOptions"
-                  :id="id + index"
-                  :key="index"
-                  :role="option.type === 'divider' ? 'separator' : 'option'"
-                  :aria-selected="option.active"
-                  :aria-disabled="option.disabled"
-                  :tabindex="option.type === 'divider' || option.disabled ? '-1' : '0'"
-                  :class="{
-                    listItemDivider: option.type === 'divider',
-                    listItem: option.type !== 'divider',
-                    hasIcon: option.icon,
-                    active: option.active,
-                    disabled: option.disabled
-                  }"
-                  @click="handleDropdownClick(option)"
-                  @keydown.enter="handleDropdownClick(option)"
-                  @keydown.space="handleDropdownClick(option)"
+                <slot name="dropdown-header" />
+              </div>
+              <div
+                v-if="$slots['dropdown-header']"
+                ref="dropdownContent"
+                v-overlay-scrollbars
+                class="iconDropdownContent"
+              >
+                <div ref="dropdownContentInner">
+                  <slot />
+                </div>
+              </div>
+              <slot v-else>
+                <ul
+                  v-if="dropdownOptions.length > 0"
+                  ref="dropdownContentInner"
+                  class="list"
+                  role="listbox"
                 >
-                  <div
-                    v-if="option.icon || option.active"
-                    class="optionIconColumn"
+                  <li
+                    v-for="(option, index) in dropdownOptions"
+                    :id="id + index"
+                    :key="index"
+                    :role="option.type === 'divider' ? 'separator' : 'option'"
+                    :aria-selected="option.active"
+                    :aria-disabled="option.disabled"
+                    :tabindex="option.type === 'divider' || option.disabled ? '-1' : '0'"
+                    :class="{
+                      listItemDivider: option.type === 'divider',
+                      listItem: option.type !== 'divider',
+                      hasIcon: option.icon,
+                      active: option.active,
+                      disabled: option.disabled
+                    }"
+                    @click="handleDropdownClick(option)"
+                    @keydown.enter="handleDropdownClick(option)"
+                    @keydown.space="handleDropdownClick(option)"
                   >
-                    <FtIcon
-                      :icon="option.active ? ['fas', 'check'] : option.icon"
-                    />
-                  </div>
-                  <span
-                    v-if="option.type !== 'divider'"
-                    :class="{ wrapLabel: option.wrapLabel }"
-                  >{{ option.label }}</span>
-                </li>
-              </ul>
-            </slot>
+                    <div
+                      v-if="option.icon || option.active"
+                      class="optionIconColumn"
+                    >
+                      <FtIcon
+                        :icon="option.active ? ['fas', 'check'] : option.icon"
+                      />
+                    </div>
+                    <span
+                      v-if="option.type !== 'divider'"
+                      :class="{ wrapLabel: option.wrapLabel }"
+                    >{{ option.label }}</span>
+                  </li>
+                </ul>
+              </slot>
+            </div>
           </div>
-        </div>
+        </Transition>
       </Teleport>
     </template>
   </div>
@@ -206,7 +214,8 @@ import { provide, computed, nextTick, onBeforeUnmount, ref, useId, useSlots, use
 import FtPrompt from '../FtPrompt/FtPrompt.vue'
 import { usePhoneLayout } from '../../composables/usePhoneLayout'
 import { clampOverlayScrollTop, restoreOverlayScrollTop } from '../../helpers/overlayScrollbars'
-import { getAnchoredPosition, supportsAnchorPositioning } from '../../helpers/anchoredPosition'
+import { getAnchoredPosition, getUntransformedRect, supportsAnchorPositioning } from '../../helpers/anchoredPosition'
+import { finishTransition } from '../../helpers/animationSpeed'
 import { useAnchoredViewportBounds } from '../../composables/useAnchoredViewportBounds'
 import { useSettingsOverlay } from '../../composables/useSettingsOverlay'
 import { openMobileContextMenu, usesMobileContextSheet } from '../../helpers/buttonMenu'
@@ -260,6 +269,11 @@ const props = defineProps({
     default: false
   },
   dropdownPortal: {
+    type: Boolean,
+    default: false
+  },
+  // Opens and closes the dropdown like the quick settings menu
+  animatedDropdown: {
     type: Boolean,
     default: false
   },
@@ -321,8 +335,11 @@ const isKebabMenu = computed(() => (
 ))
 
 const dropdownShown = ref(false)
+// Keeps the dropdown, its Teleport, and the anchor it is placed against while its close animation runs
+const dropdownRendered = ref(false)
 const settingsOverlayActive = useSettingsOverlay(() => {
   dropdownShown.value = false
+  dropdownRendered.value = false
   clearLongPress()
   clearLongPressClick()
 })
@@ -354,6 +371,7 @@ watch(dropdownContentInner, (content, _, onCleanup) => {
 
 watch(dropdownShown, (shown) => {
   if (shown && !useModal.value && !ownsPhoneSheet.value) {
+    dropdownRendered.value = true
     window.addEventListener('resize', scheduleDropdownViewportUpdate)
     if (!usesDropdownAnchor.value) {
       window.addEventListener('scroll', handleViewportScroll, { capture: true, passive: true })
@@ -554,7 +572,7 @@ function keepDropdownInViewport() {
   // A menu that is too tall for the space below the chrome has to scroll,
   // otherwise clamping it would just push it past the viewport bottom instead.
   const availableHeight = window.innerHeight - minTop - bottomMargin
-  if (dropdown.value.getBoundingClientRect().height > availableHeight) {
+  if (getUntransformedRect(dropdown.value).height > availableHeight) {
     dropdown.value.style.maxBlockSize = `${availableHeight}px`
     dropdown.value.style.overflowY = dropdownContent.value ? 'hidden' : 'auto'
   }
@@ -571,7 +589,7 @@ function keepDropdownInViewport() {
     }
 
     const buttonRect = button.getBoundingClientRect()
-    const dropdownRect = dropdown.value.getBoundingClientRect()
+    const dropdownRect = getUntransformedRect(dropdown.value)
     let left
     if (props.dropdownPositionX === 'left') {
       left = buttonRect.right - dropdownRect.width
@@ -607,7 +625,7 @@ function keepDropdownInViewport() {
     return
   }
 
-  const rect = dropdown.value.getBoundingClientRect()
+  const rect = getUntransformedRect(dropdown.value)
   const offsetX = Math.max(viewportMargin - rect.left, Math.min(0, window.innerWidth - viewportMargin - rect.right))
 
   // .top and .bottom keep the same distance from the button, so the other side mirrors the menu across it
@@ -685,6 +703,15 @@ function handleDropdownFocusOut(event) {
 }
 
 provide('closeIconDropdown', handleDropdownEscape)
+
+/**
+ * @param {Element} layer
+ * @param {() => void} done
+ */
+function finishDropdownTransition(layer, done) {
+  if (props.animatedDropdown) finishTransition(layer.firstElementChild ?? layer, done)
+  else done()
+}
 
 function handleDropdownEscape() {
   dropdownShown.value = false

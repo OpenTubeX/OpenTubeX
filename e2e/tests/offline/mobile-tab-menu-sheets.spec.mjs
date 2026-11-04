@@ -201,3 +201,22 @@ test('tab sheet actions stay unhighlighted under a touch point that cannot hover
     await session.detach()
   }
 })
+
+test('tab switcher cards keep their content inside the rounded border', async ({ app, page }) => {
+  await setWindowSize(app, page, { width: 375, height: 760 })
+  await enableTabMenus(page, 'phone')
+  await page.locator('.capacitorPhoneTabSwitcherButton').click()
+  const row = page.locator('.capacitorPhoneTabRow.active')
+  await expect(row).toBeVisible()
+  // A tighter inner radius would let the preview and hover fill paint over the border's corners.
+  const radii = await row.evaluate(element => {
+    const rowStyle = getComputedStyle(element)
+    const targetStyle = getComputedStyle(element.querySelector('.capacitorPhoneTabTarget'))
+    return {
+      inner: Number.parseFloat(rowStyle.borderTopLeftRadius) - Number.parseFloat(rowStyle.borderTopWidth),
+      target: Number.parseFloat(targetStyle.borderTopLeftRadius)
+    }
+  })
+  expect(radii.inner).toBeGreaterThan(0)
+  expect(radii.target).toBeCloseTo(radii.inner, 1)
+})

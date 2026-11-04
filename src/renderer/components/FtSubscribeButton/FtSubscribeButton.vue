@@ -94,126 +94,17 @@
               class="feedTypePreferences"
             >
               <div ref="preferencesContent">
-                <div
-                  v-for="group in feedTypeGroups"
-                  :key="group.key"
-                  role="group"
-                  class="preferenceSection"
-                  :class="{ notificationsOff: group.key === 'notificationFeedTypes' && !notificationsEnabled }"
-                  :aria-labelledby="`${id}-${group.key}`"
-                >
-                  <p
-                    :id="`${id}-${group.key}`"
-                    class="preferenceLabel"
-                  >
-                    <FtIcon
-                      :icon="group.icon"
-                      aria-hidden="true"
-                    />
-                    {{ group.label }}
-                  </p>
-                  <div class="preferenceChips">
-                    <button
-                      v-for="feedType in feedTypes"
-                      :key="feedType.id"
-                      type="button"
-                      class="preferenceChip"
-                      role="checkbox"
-                      :aria-checked="isFeedTypeChecked(feedType.id, group.key)"
-                      :disabled="group.key === 'notificationFeedTypes' && !isFeedTypeChecked(feedType.id)"
-                      @click="updateFeedType(feedType.id, !isFeedTypeChecked(feedType.id, group.key), group.key)"
-                    >
-                      <FtIcon
-                        :icon="isFeedTypeChecked(feedType.id, group.key) ? ['fas', 'check'] : feedType.icon"
-                        aria-hidden="true"
-                      />
-                      {{ feedType.label }}
-                    </button>
-                  </div>
-                </div>
-                <div
-                  role="group"
-                  class="preferenceSection"
-                  :aria-labelledby="`${id}-daily-limit`"
-                >
-                  <p
-                    :id="`${id}-daily-limit`"
-                    class="preferenceLabel"
-                  >
-                    <FtIcon
-                      :icon="['fas', 'calendar-day']"
-                      aria-hidden="true"
-                    />
-                    {{ $t('Channel.Videos per day') }}
-                  </p>
-                  <div class="dailyVideoLimit">
-                    <button
-                      v-for="option in ['global', 'unlimited']"
-                      :key="option"
-                      type="button"
-                      class="dailyVideoLimitOption"
-                      :aria-pressed="dailyVideoLimitValue === option"
-                      @click="updateDailyVideoLimit(option)"
-                    >
-                      {{ option === 'global' ? $t('Channel.Use global setting') : $t('Channel.Unlimited') }}
-                    </button>
-                    <div
-                      class="dailyVideoLimitStepper"
-                      :class="{ active: dailyVideoLimitCount !== null }"
-                    >
-                      <button
-                        type="button"
-                        :title="$t('Channel.Fewer videos per day')"
-                        :aria-label="$t('Channel.Fewer videos per day')"
-                        :aria-disabled="dailyVideoLimitDraft <= 1"
-                        @click="stepDailyVideoLimit(-1)"
-                      >
-                        <FtIcon
-                          :icon="['fas', 'minus']"
-                          aria-hidden="true"
-                        />
-                      </button>
-                      <button
-                        type="button"
-                        class="dailyVideoLimitCount"
-                        :aria-pressed="dailyVideoLimitCount !== null"
-                        @click="updateDailyVideoLimit(String(dailyVideoLimitDraft))"
-                      >
-                        {{ dailyVideoLimitDraft }}
-                      </button>
-                      <button
-                        type="button"
-                        :title="$t('Channel.More videos per day')"
-                        :aria-label="$t('Channel.More videos per day')"
-                        :aria-disabled="dailyVideoLimitDraft >= MAX_DAILY_VIDEO_LIMIT"
-                        @click="stepDailyVideoLimit(1)"
-                      >
-                        <FtIcon
-                          :icon="['fas', 'plus']"
-                          aria-hidden="true"
-                        />
-                      </button>
-                    </div>
-                  </div>
-                </div>
-                <div
-                  v-if="restrictedPlaybackConfigured"
-                  class="membersOnlyPreference"
-                >
-                  <FtIcon
-                    class="membersOnlyIcon"
-                    :icon="['fas', 'users']"
-                    aria-hidden="true"
-                  />
-                  <FtToggleSwitch
-                    :label="$t('Channel.Show members-only videos')"
-                    :default-value="activeChannelSettings.showMembersOnly"
-                    compact
-                    trailing
-                    controlled
-                    @change="updateShowMembersOnly"
-                  />
-                </div>
+                <FtSubscriptionPreferences
+                  v-model:daily-video-limit-draft="dailyVideoLimitDraft"
+                  :feed-type-states="feedTypeStates"
+                  :notification-feed-type-states="isNotificationBellEnabled ? notificationFeedTypeStates : null"
+                  :notifications-off="!notificationsEnabled"
+                  :daily-video-limit="activeChannelSettings.dailyVideoLimit"
+                  :show-members-only="restrictedPlaybackConfigured ? activeChannelSettings.showMembersOnly : null"
+                  @toggle-feed-type="(feedType, key) => updateFeedType(feedType, !isFeedTypeChecked(feedType, key), key)"
+                  @update-daily-video-limit="updateDailyVideoLimit"
+                  @update-show-members-only="updateShowMembersOnly"
+                />
               </div>
             </div>
             <div
@@ -319,7 +210,7 @@ import FtButton from '../FtButton/FtButton.vue'
 import FtMobileSheet from '../FtMobileSheet/FtMobileSheet.vue'
 import FtPrompt from '../FtPrompt/FtPrompt.vue'
 import FtProfileIcon from '../FtProfileIcon/FtProfileIcon.vue'
-import FtToggleSwitch from '../FtToggleSwitch/FtToggleSwitch.vue'
+import FtSubscriptionPreferences from '../FtSubscriptionPreferences/FtSubscriptionPreferences.vue'
 
 import store from '../../store/index'
 import { supportsUploadNotifications } from '../../helpers/uploadNotifications'
@@ -333,8 +224,6 @@ import { useAnchoredViewportBounds } from '../../composables/useAnchoredViewport
 import { usePhoneLayout } from '../../composables/usePhoneLayout'
 import { hasConfiguredRestrictedPlaybackAuthentication } from '../../helpers/restricted-playback'
 import {
-  formatSubscriptionDailyVideoLimit,
-  MAX_SUBSCRIPTION_DAILY_VIDEO_LIMIT as MAX_DAILY_VIDEO_LIMIT,
   getSubscriptionFeedTypeOptions,
   getUpdatedSubscriptionFeedTypes,
   hasSubscriptionNotifications,
@@ -588,32 +477,16 @@ const optimisticChannelSettings = ref(null)
 const activeChannelSettings = computed(() => (
   optimisticChannelSettings.value ?? storedChannelSettings.value
 ))
-const feedTypeGroups = computed(() => [
-  { key: 'feedTypes', label: t('Channel.Show in subscription feed'), icon: ['fas', 'subscriptions'] },
-  // The group stays while the bell is off, so its chips can turn notifications back on.
-  ...(isNotificationBellEnabled.value
-    ? [{ key: 'notificationFeedTypes', label: t('Channel.Notify about new uploads'), icon: ['fas', 'bell'] }]
-    : [])
-])
 const notificationsEnabled = computed(() => hasSubscriptionNotifications(activeChannelSettings.value))
-const dailyVideoLimitValue = computed(() => (
-  formatSubscriptionDailyVideoLimit(activeChannelSettings.value.dailyVideoLimit)
+const feedTypeStates = computed(() => Object.fromEntries(
+  feedTypes.value.map(({ id }) => [id, isFeedTypeChecked(id)])
 ))
-const dailyVideoLimitCount = computed(() => {
-  const limit = activeChannelSettings.value.dailyVideoLimit
-  return typeof limit === 'number' ? limit : null
-})
-// The stepper keeps the last count while Global or Unlimited is selected.
-const dailyVideoLimitDraft = ref(dailyVideoLimitCount.value ?? 1)
-watch(dailyVideoLimitCount, count => { if (count !== null) dailyVideoLimitDraft.value = count })
-
-/** @param {number} step */
-function stepDailyVideoLimit(step) {
-  const count = Math.min(MAX_DAILY_VIDEO_LIMIT, Math.max(1, dailyVideoLimitDraft.value + step))
-  if (count === dailyVideoLimitDraft.value) return
-  dailyVideoLimitDraft.value = count
-  updateDailyVideoLimit(String(count))
-}
+// Outlives the popover, so reopening it keeps the last stepper count.
+const dailyVideoLimitDraft = ref()
+// The group stays while the bell is off, so its chips can turn notifications back on.
+const notificationFeedTypeStates = computed(() => Object.fromEntries(
+  feedTypes.value.map(({ id }) => [id, isFeedTypeChecked(id, 'notificationFeedTypes')])
+))
 let channelSettingsUpdateSequence = 0
 let channelSettingsUpdateQueue = Promise.resolve()
 
@@ -1068,4 +941,5 @@ let latestBellClick = 0
 let notificationsToastController = null
 </script>
 
+<style scoped src="../FtSubscriptionPreferences/preferenceChips.css" />
 <style scoped src="./FtSubscribeButton.css" />

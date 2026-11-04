@@ -48,7 +48,7 @@ test.describe('channel settings incremental loading', { tag: '@scale' }, () => {
     await expect(page.getByRole('checkbox', { name: 'Channel 000', exact: true })).toBeChecked()
     await page.getByRole('checkbox', { name: 'Channel 024', exact: true }).click()
     await expect(toolbar).toContainText('2 selected')
-    await page.locator('.bulkFeedTypeSettings').getByRole('checkbox', { name: 'Videos', exact: true }).click()
+    await page.locator('.bulkFeedTypeSettings').getByRole('group', { name: 'Show in subscription feed', exact: true }).getByRole('checkbox', { name: 'Videos', exact: true }).click()
     await expect.poll(() => page.evaluate(() => {
       const store = window.$store
       return store.getters.getProfileList[0].subscriptions

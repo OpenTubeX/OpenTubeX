@@ -293,7 +293,9 @@
   color: inherit;
   background-color: transparent;
   border: 0;
-  border-radius: var(--shape-corner-small);
+
+  /* Match the inner edge of the row's 2px border so the preview and hover fill don't cover it */
+  border-radius: calc(var(--shape-corner-medium) - 2px);
   cursor: pointer;
   font: inherit;
   text-align: start;

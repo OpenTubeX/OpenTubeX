@@ -1,5 +1,5 @@
 import { watch } from 'vue'
-import { supportsAnchorPositioning } from '../helpers/anchoredPosition'
+import { getUntransformedRect, supportsAnchorPositioning } from '../helpers/anchoredPosition'
 
 /**
  * CSS anchors follow the trigger, but their post-layout scroll shift can move
@@ -46,7 +46,7 @@ export function useAnchoredViewportBounds(trigger, popup, enabled) {
           if (![minLeft, maxLeft, minTop, maxTop].every(Number.isFinite)) return
 
           const [tx = 0, ty = 0] = menu.style.translate.split(' ').map(Number.parseFloat)
-          const rect = menu.getBoundingClientRect()
+          const rect = getUntransformedRect(menu)
           const left = rect.left - (tx || 0)
           const top = rect.top - (ty || 0)
           const x = Math.max(minLeft, Math.min(left, maxLeft)) - left

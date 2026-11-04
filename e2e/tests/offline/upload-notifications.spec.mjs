@@ -80,25 +80,29 @@ test('the bell is off per channel until turned on, which selects every type', as
   await expect(liveNotification).toBeEnabled()
   await expect(liveNotification).toHaveAttribute('aria-checked', 'true')
   const beta = page.getByRole('group', { name: 'Beta Channel' })
-  await expect(beta.getByRole('checkbox', { name: 'Notify about new uploads' })).not.toBeChecked()
+  await expect(beta.getByRole('group', { name: 'Notify about new uploads', exact: true })
+    .getByRole('checkbox', { checked: true })).toHaveCount(0)
   await page.getByRole('checkbox', { name: 'Alpha Channel' }).click()
   await page.getByRole('checkbox', { name: 'Beta Channel' }).click()
   const bulk = page.locator('.bulkFeedTypeSettings')
-  await expect(bulk.getByRole('checkbox', { name: 'Notify about new uploads' })).toHaveAttribute('aria-checked', 'mixed')
-  await bulk.locator('label', { hasText: 'Notify about new uploads' }).click()
+  const bulkNotifications = bulk.getByRole('group', { name: 'Notify about new uploads', exact: true })
+  const bulkVideos = bulkNotifications.getByRole('checkbox', { name: 'Videos' })
+  await expect(bulkVideos).toHaveAttribute('aria-checked', 'mixed')
+  await bulkVideos.click()
+  await bulkNotifications.getByRole('checkbox', { name: 'Posts' }).click()
   await expect.poll(() => readNotificationTypes(app.userDataDir)).toStrictEqual({
     'Alpha Channel': ['videos', 'live', 'posts'],
-    'Beta Channel': ['videos', 'shorts', 'live', 'posts']
+    'Beta Channel': ['videos', 'posts']
   })
 
   // Bulk notification changes skip channels that hide the feed type.
   await alpha.getByRole('group', { name: 'Show in subscription feed', exact: true }).getByRole('checkbox', { name: 'Posts' }).click()
-  const bulkPosts = bulk.getByRole('group', { name: 'Notify about new uploads', exact: true }).getByRole('checkbox', { name: 'Posts' })
+  const bulkPosts = bulkNotifications.getByRole('checkbox', { name: 'Posts' })
   await expect(bulkPosts).toHaveAttribute('aria-checked', 'true')
   await bulkPosts.click()
   await expect.poll(() => readNotificationTypes(app.userDataDir)).toStrictEqual({
     'Alpha Channel': ['videos', 'live', 'posts'],
-    'Beta Channel': ['videos', 'shorts', 'live']
+    'Beta Channel': ['videos']
   })
 })
 

@@ -70,26 +70,14 @@
   padding-block-start: 12px;
 }
 
-.bulkFeedTypeOptions {
-  max-inline-size: 680px;
+/* Matches a channel card instead of stretching the limit control across the toolbar. */
+.bulkFeedTypeSettings > .subscriptionPreferences {
+  max-inline-size: 600px;
+  margin-inline: auto;
 }
 
-.bulkAdditionalSettings {
-  align-items: end;
-  display: grid;
-  gap: 12px;
-  grid-template-columns: repeat(auto-fit, minmax(min(100%, 240px), 1fr));
-  margin-block-start: var(--settings-row-gap, 20px);
-  max-inline-size: 680px;
-}
-
-.bulkMembersOnlySetting {
-  min-block-size: var(--form-control-height);
-}
-
-.bulkDailyLimitSelect {
-  inline-size: 100%;
-  margin-block: 7px 0;
+.bulkFeedTypeSettings :deep(:is(.preferenceLabel, .preferenceChips)) {
+  justify-content: center;
 }
 
 .channelSettingsScroller {
@@ -206,133 +194,6 @@
   overflow-wrap: anywhere;
 }
 
-.feedTypeSettings {
-  min-inline-size: 0;
-}
-
-.settingLabel {
-  color: var(--secondary-text-color);
-  font-size: 12px;
-  font-weight: 600;
-  line-height: 1.2;
-  margin-block: 0 8px;
-  text-transform: uppercase;
-}
-
-.feedTypeOptions {
-  display: grid;
-  gap: 6px;
-  grid-template-columns: repeat(4, minmax(0, 1fr));
-}
-
-.bulkNotificationSetting {
-  margin-block-start: var(--settings-row-gap, 20px);
-}
-
-.bulkNotificationSetting + .feedTypeOptions,
-.notificationSettings > .feedTypeOptions {
-  margin-block-start: 8px;
-}
-
-.feedTypeOption {
-  align-items: center;
-  background-color: transparent;
-  border: 1px solid var(--border-color);
-  border-radius: var(--shape-corner-small);
-  color: var(--secondary-text-color);
-  cursor: pointer;
-  display: grid;
-  font: inherit;
-  gap: 6px;
-  grid-template-columns: 16px minmax(0, 1fr) 14px;
-  min-block-size: 44px;
-  min-inline-size: 0;
-  padding-block: 7px;
-  padding-inline: 8px;
-  text-align: start;
-  transition:
-    color var(--motion-fast-effects),
-    background-color var(--motion-fast-effects),
-    border-color var(--motion-fast-effects),
-    border-radius var(--motion-fast-spatial);
-}
-
-.feedTypeOption:is(:hover, :focus-visible) {
-  background-color: var(--side-nav-hover-color);
-  color: var(--side-nav-hover-text-color);
-}
-
-.feedTypeOption:focus-visible {
-  outline: 2px solid var(--primary-color);
-  outline-offset: -2px;
-}
-
-.feedTypeOption.enabled {
-  border-color: transparent;
-  color: var(--on-selected-container-color);
-  background-color: var(--selected-container-color);
-}
-
-.feedTypeOption.enabled:is(:hover, :focus-visible):not(:disabled) {
-  background-color: var(--selected-container-hover-color);
-}
-
-.feedTypeOption.mixed {
-  border-color: color-mix(in srgb, var(--primary-color) 55%, var(--border-color));
-  color: var(--primary-text-color);
-}
-
-.feedTypeOption:disabled {
-  background-color: transparent;
-  color: var(--secondary-text-color);
-  cursor: default;
-  opacity: 0.5;
-}
-
-.feedTypeOption:active:not(:disabled) {
-  border-radius: var(--shape-corner-extra-small);
-}
-
-.feedTypeOption > span {
-  min-inline-size: 0;
-  overflow-wrap: anywhere;
-}
-
-.feedTypeCheck {
-  color: var(--primary-color);
-}
-
-.feedTypeOption.enabled .feedTypeCheck {
-  color: inherit;
-}
-
-.feedTypeMixedIndicator {
-  background-color: var(--primary-color);
-  block-size: 2px;
-  inline-size: 10px;
-  justify-self: center;
-}
-
-.membersOnlySetting,
-.dailyLimitSetting {
-  border-block-start: 1px solid var(--divider-color);
-  padding-block-start: 12px;
-}
-
-.dailyLimitSelect {
-  inline-size: 100%;
-
-  /* Reserve the outlined label's overhang above the control border. */
-  margin-block: 7px 0;
-}
-
-@media (any-pointer: coarse), (width <= 680px) {
-  .dailyLimitSelect,
-  .bulkDailyLimitSelect {
-    margin-block-start: 9px;
-  }
-}
-
 @container (width <= 560px) {
   .channelSelectionSummary {
     align-items: stretch;
@@ -350,10 +211,6 @@
     min-inline-size: 0;
     padding-inline: 8px;
     white-space: normal;
-  }
-
-  .feedTypeOptions {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 }
 
