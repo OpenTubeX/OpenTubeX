@@ -3,4 +3,4 @@ category: fix
 platforms: [ios]
 ---
 
-Blurred backgrounds behind cards, toolbars, menus, and dialogs now show on iOS 17.
+Blurred backgrounds behind cards, toolbars, and menus now show on iOS 17.
