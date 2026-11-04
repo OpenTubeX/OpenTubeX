@@ -530,6 +530,33 @@ test.describe('state color text contrast', () => {
   })
 })
 
+test.describe('secondary colors and main color states', () => {
+  test.use({ seed: { settings: { currentLocale: 'en-US' } } })
+
+  // Controls filled with the main color take its text color, so a secondary
+  // color must not swap in a hover or pressed fill of its own.
+  test('leave the hover and pressed fills of the main color alone', async ({ page }) => {
+    await goToSettingsSection(page, 'privacy')
+    const changed = await page.evaluate(names => {
+      const { classList } = document.body
+      const read = () => {
+        const style = getComputedStyle(document.body)
+        return ['--primary-color-hover', '--primary-color-active'].map(name => style.getPropertyValue(name).trim()).join()
+      }
+      classList.remove(...[...classList].filter(className => /^(main|sec)[A-Z]/.test(className)))
+      classList.add('mainDraculaPink')
+      const main = read()
+      return names.filter(name => {
+        classList.add(`sec${name}`)
+        const states = read()
+        classList.remove(`sec${name}`)
+        return states !== main
+      })
+    }, THEME_COLORS)
+    expect(changed).toEqual([])
+  })
+})
+
 test.describe('secondary color text contrast', () => {
   test.use({ seed: { settings: { currentLocale: 'en-US', useProxy: true } } })
 

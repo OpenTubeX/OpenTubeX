@@ -1952,7 +1952,6 @@ it can be safely elided. This looks quite pleasant on this theme. */
 
 .secSolarizedYellow {
   --accent-color-rgb: 165 165 0;
-  --primary-color-hover: #a9a130;
   --accent-color-hover: #bb9f40;
   --accent-color-active: #897710;
   --accent-color-light: #dbc050;
@@ -1961,7 +1960,6 @@ it can be safely elided. This looks quite pleasant on this theme. */
 
 .secSolarizedOrange {
   --accent-color-rgb: 169 47 20;
-  --primary-color-hover: #c94d34;
   --accent-color-hover: #ae5808;
   --accent-color-active: #b05633;
   --accent-color-light: #eb8156;
@@ -1970,7 +1968,6 @@ it can be safely elided. This looks quite pleasant on this theme. */
 
 .secSolarizedRed {
   --accent-color-rgb: 186 16 29;
-  --primary-color-hover: #d8302d;
   --accent-color-hover: #c73e3e;
   --accent-color-active: #b8282b;
   --accent-color-light: #fa726f;
@@ -1979,7 +1976,6 @@ it can be safely elided. This looks quite pleasant on this theme. */
 
 .secSolarizedMagenta {
   --accent-color-rgb: 176 20 96;
-  --primary-color-hover: #d23480;
   --accent-color-hover: #c43c6c;
   --accent-color-active: #b814a0;
   --accent-color-light: #fc5280;
@@ -1988,7 +1984,6 @@ it can be safely elided. This looks quite pleasant on this theme. */
 
 .secSolarizedViolet {
   --accent-color-rgb: 78 83 164;
-  --primary-color-hover: #6e83c4;
   --accent-color-hover: #7a63ae;
   --accent-color-active: #5c60e1;
   --accent-color-light: #ae95f4;
@@ -1997,7 +1992,6 @@ it can be safely elided. This looks quite pleasant on this theme. */
 
 .secSolarizedBlue {
   --accent-color-rgb: 4 131 178;
-  --primary-color-hover: #4899d2;
   --accent-color-hover: #469fd2;
   --accent-color-active: #2483d4;
   --accent-color-light: #66b1f4;
@@ -2006,7 +2000,6 @@ it can be safely elided. This looks quite pleasant on this theme. */
 
 .secSolarizedCyan {
   --accent-color-rgb: 8 135 118;
-  --primary-color-hover: #2ca998;
   --accent-color-hover: #4cb9b8;
   --accent-color-active: #1c9788;
   --accent-color-light: #6ce1d8;
@@ -2015,7 +2008,6 @@ it can be safely elided. This looks quite pleasant on this theme. */
 
 .secSolarizedGreen {
   --accent-color-rgb: 101 119 0;
-  --primary-color-hover: #857720;
   --accent-color-hover: #5a6b02;
   --accent-color-active: #505f00;
   --accent-color-light: #c5d940;
