@@ -413,6 +413,17 @@ test.describe('phone options sheet', () => {
     expect(actionBounds.y + actionBounds.height).toBeLessThanOrEqual(headerBounds.y + headerBounds.height + 1)
     expect(actionBounds.x + actionBounds.width).toBeLessThanOrEqual(headerBounds.x + headerBounds.width + 1)
 
+    // Caption style options open in a group that can't scale itself, and the menu still zooms.
+    await action.click()
+    await settle()
+    expect(await switchView('.shaka-overflow-menu .shaka-caption-font-color-button')).toEqual(['menu'])
+    await settle()
+    await header.click()
+    await settle()
+    await header.click()
+    await settle()
+    await expect(action).toBeVisible()
+
     // Without motion, it shows in the header at once.
     await switchView(':scope > .shaka-back-to-overflow-button')
     await settle()

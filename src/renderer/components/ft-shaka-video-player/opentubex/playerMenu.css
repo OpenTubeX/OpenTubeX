@@ -811,29 +811,18 @@
 
 /*
   The menu scrolls the views in the sheet, so it zooms them as a whole, on a
-  single layer instead of one for each entry. Its grow-in stays in the list, so
-  that it doesn't start over once the zoom has ended.
+  single layer instead of one for each entry, also when Shaka marks a group
+  inside it that can't scale itself. Its grow-in stays in the list, so that it
+  doesn't start over once the zoom has ended.
 */
-:deep(.phonePlayerOptions [data-ft-menu-transition='in']) {
-  animation:
-    ft-menu-fade-in 150ms ease-out,
-    ft-menu-zoom-in 300ms cubic-bezier(0.2, 0, 0, 1);
-}
-
-:deep(.phonePlayerOptions [data-ft-menu-transition='out']) {
-  animation:
-    ft-menu-fade-in-again 150ms ease-out,
-    ft-menu-zoom-out 300ms cubic-bezier(0.2, 0, 0, 1);
-}
-
-:deep(.phonePlayerOptions > .shaka-overflow-menu[data-ft-menu-transition='in']:not(.shaka-hidden)) {
+:deep(.phonePlayerOptions > .shaka-overflow-menu:not(.shaka-hidden):is([data-ft-menu-transition='in'], :has([data-ft-menu-transition='in']))) {
   animation:
     ft-menu-open 200ms cubic-bezier(0.2, 0, 0, 1),
     ft-menu-fade-in 150ms ease-out,
     ft-menu-zoom-in 300ms cubic-bezier(0.2, 0, 0, 1);
 }
 
-:deep(.phonePlayerOptions > .shaka-overflow-menu[data-ft-menu-transition='out']:not(.shaka-hidden)) {
+:deep(.phonePlayerOptions > .shaka-overflow-menu:not(.shaka-hidden):is([data-ft-menu-transition='out'], :has([data-ft-menu-transition='out']))) {
   animation:
     ft-menu-open 200ms cubic-bezier(0.2, 0, 0, 1),
     ft-menu-fade-in-again 150ms ease-out,
@@ -849,7 +838,7 @@
   animation: ft-menu-fade-in 150ms ease-out;
 }
 
-:deep(.phonePlayerOptions[data-header-action] [data-ft-menu-transition] .ft-submenu-header-action) {
+:deep(.phonePlayerOptions[data-header-action]:has([data-ft-menu-transition]) .ft-submenu-header-action) {
   pointer-events: none;
   opacity: 0;
   animation: none;
