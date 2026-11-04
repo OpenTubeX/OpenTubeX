@@ -98,7 +98,12 @@ for (const { uiScale, colorScheme } of [{ uiScale: 175, colorScheme: 'light' }, 
         })).toBe(true)
         await handle.press('ArrowDown')
         await expect(queue.locator('.queueItem h3').first()).toHaveText('Queued video 2')
-        for (const button of await queue.locator('.queueItemMenu button').all()) {
+        // The windowed queue swaps rows out of view for empty shells, which shifts
+        // positional locators, so address each row by its ID.
+        for (const id of await queue.locator('.queueItem').evaluateAll(rows => rows.map(row => row.dataset.queueItemId))) {
+          const row = queue.locator(`.queueItem[data-queue-item-id="${id}"]`)
+          await row.scrollIntoViewIfNeeded()
+          const button = row.locator('.queueItemMenu button')
           await button.scrollIntoViewIfNeeded()
           await expect.poll(() => button.evaluate(element => {
             const rect = element.getBoundingClientRect()
