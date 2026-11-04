@@ -653,6 +653,29 @@ test.describe('custom theme editor', () => {
     await expect(button).toHaveCSS('background-color', 'rgb(0, 100, 0)')
   })
 
+  test('groups theme options into built-in and custom themes once custom themes exist', async ({ page }) => {
+    await goToSettingsSection(page, 'theme')
+    const baseTheme = page.getByRole('combobox', { name: 'Base Theme' })
+    const dropdown = page.locator(`#${await baseTheme.getAttribute('aria-controls')}`)
+    const headings = dropdown.locator('.selectGroupHeading')
+    await baseTheme.click()
+    await expect(dropdown.getByRole('option').first()).toBeVisible()
+    await expect(headings).toHaveCount(0)
+    await page.keyboard.press('Escape')
+
+    const theme = cloneDefaultCustomTheme()
+    theme.name = 'Grouped midnight'
+    await page.evaluate(theme => window.$store.commit('setCustomThemes', [theme]), theme)
+    await baseTheme.click()
+    await expect(headings).toHaveText(['Built-in themes', 'Custom themes'])
+    const options = dropdown.getByRole('option')
+    await expect(options.first()).toHaveText('System default')
+    await expect(options.first()).not.toHaveAttribute('aria-describedby')
+    await expect(options.nth(1)).toHaveAccessibleDescription('Built-in themes')
+    await expect(options.last()).toHaveText(theme.name)
+    await expect(options.last()).toHaveAccessibleDescription('Custom themes')
+  })
+
   test('imports clipboard themes as new drafts and saves only on confirmation', async ({ app, page }) => {
     const theme = cloneDefaultCustomTheme()
     theme.name = 'Clipboard midnight'

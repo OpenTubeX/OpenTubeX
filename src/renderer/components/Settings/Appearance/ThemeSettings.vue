@@ -10,6 +10,8 @@
         setting-key="baseTheme"
         :select-names="baseThemeNames"
         :select-values="baseThemeValues"
+        :option-groups="baseThemeValues.map(baseThemeGroup)"
+        :option-group-labels="baseThemeGroupLabels"
         :icon="['fas', 'palette']"
         @change="updateBaseTheme"
       />
@@ -53,6 +55,8 @@
         setting-key="systemLightTheme"
         :select-names="systemLightThemeNames"
         :select-values="systemLightThemeValues"
+        :option-groups="systemLightThemeValues.map(baseThemeGroup)"
+        :option-group-labels="baseThemeGroupLabels"
         :icon="['fas', 'sun']"
         @change="store.dispatch('updateSystemLightTheme', $event)"
       />
@@ -63,6 +67,8 @@
         setting-key="systemDarkTheme"
         :select-names="systemDarkThemeNames"
         :select-values="systemDarkThemeValues"
+        :option-groups="systemDarkThemeValues.map(baseThemeGroup)"
+        :option-group-labels="baseThemeGroupLabels"
         :icon="['fas', 'moon']"
         @change="store.dispatch('updateSystemDarkTheme', $event)"
       />
@@ -188,7 +194,7 @@ import { SIGNAL_THEME_VALUES } from '../../../../signalTheme.js'
 import { colors } from '../../../helpers/colors'
 import { androidDynamicColors } from '../../../helpers/dynamicColors.js'
 import { useColorTranslations } from '../../../composables/colors'
-import { useBaseThemeOptions } from '../../../composables/baseThemes'
+import { baseThemeGroup, useBaseThemeOptions } from '../../../composables/baseThemes'
 import { normalizeToastPosition, TOAST_POSITION_VALUES } from '../../../constants/toastPosition'
 import { showToast } from '../../../helpers/utils'
 import { ICON_PACKS } from '../../../icons/iconPackState'
@@ -201,7 +207,7 @@ const IS_CAPACITOR = !!process.env.IS_CAPACITOR
 const usingElectron = process.env.IS_ELECTRON
 
 const customThemes = computed(() => store.getters.getCustomThemes)
-const { baseThemeValues, baseThemeNames } = useBaseThemeOptions(customThemes)
+const { baseThemeValues, baseThemeNames, baseThemeGroupLabels } = useBaseThemeOptions(customThemes)
 function systemThemeOptions(classification) {
   return baseThemeValues.value.flatMap((value, index) =>
     getThemeClassification(value, customThemes.value) === classification

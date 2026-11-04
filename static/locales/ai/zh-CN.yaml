@@ -615,6 +615,8 @@ Settings:
       Signal Light: "Signal 浅色"
       Signal Dark: "Signal 深色"
       Custom: 自定义
+      Built-in Themes: 内置主题
+      Custom Themes: 自定义主题
     Light Theme: 浅色主题
     Dark Theme: 深色主题
     Custom Theme:

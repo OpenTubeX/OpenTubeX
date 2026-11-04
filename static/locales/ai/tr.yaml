@@ -615,6 +615,8 @@ Settings:
       Signal Light: "Signal Açık"
       Signal Dark: "Signal Koyu"
       Custom: Özel
+      Built-in Themes: Yerleşik temalar
+      Custom Themes: Özel temalar
     Light Theme: Açık tema
     Dark Theme: Koyu tema
     Custom Theme:
