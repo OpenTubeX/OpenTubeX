@@ -620,6 +620,8 @@ Settings:
       Signal Light: "Signal Licht"
       Signal Dark: "Signal Donker"
       Custom: Aangepast
+      Built-in Themes: "Ingebouwde thema's"
+      Custom Themes: "Aangepaste thema's"
     Light Theme: Licht thema
     Dark Theme: Donker thema
     Custom Theme:

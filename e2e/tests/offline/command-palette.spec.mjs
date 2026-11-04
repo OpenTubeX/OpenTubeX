@@ -172,13 +172,25 @@ test('finds and highlights an individual setting', async ({ page }) => {
 
   const setting = page.getByRole('option', { name: /Thumbnail Preference/ })
   await expect(setting).toContainText('Appearance')
+  // The highlight only lasts 2.2s, and rendering the Settings window for the
+  // first time can keep the renderer too busy for polling to see it. Record it.
+  await page.evaluate(() => {
+    window.__settingsSearchTargets = []
+    new MutationObserver(records => {
+      for (const { target } of records) {
+        if (target.classList.contains('settingsSearchTarget')) {
+          window.__settingsSearchTargets.push(target.textContent)
+        }
+      }
+    }).observe(document.body, { subtree: true, attributes: true, attributeFilter: ['class'] })
+  })
   await input.press('Enter')
 
   const settings = page.getByRole('dialog', { name: 'Settings' })
   await expect(settings).toBeVisible()
   await expect(settings.locator('.settingsMenu .active')).toContainText('Appearance')
-  await expect(settings.locator('.settingsSearchTarget'))
-    .toContainText('Thumbnail Preference')
+  await expect.poll(() => page.evaluate(() => window.__settingsSearchTargets))
+    .toContainEqual(expect.stringContaining('Thumbnail Preference'))
 })
 
 test('transfers focus to Find in Page', async ({ page }) => {
@@ -543,8 +555,15 @@ test.describe('local video commands', () => {
     await page.getByRole('combobox', { name: 'Search commands' }).fill('current queued journey')
     const options = page.getByRole('group', { name: 'Local videos', exact: true }).getByRole('option')
     await expect(options).toHaveCount(2)
+    // Under load, polling can miss the seconds before playback passes 3s again, so record the restart.
+    await player.evaluate(element => {
+      window.__queuedVideoRestarted = false
+      element.addEventListener('seeking', () => {
+        if (element.currentTime < 3) window.__queuedVideoRestarted = true
+      })
+    })
     await options.last().click()
-    await expect.poll(() => player.evaluate(element => !element.paused && element.currentTime < 3)).toBe(true)
+    await expect.poll(() => player.evaluate(element => window.__queuedVideoRestarted && !element.paused)).toBe(true)
     await expect.poll(() => page.evaluate(() => (
       window.$store.getters.getWatchQueue.map(video => video.queueItemId)
     ))).toEqual([firstId])

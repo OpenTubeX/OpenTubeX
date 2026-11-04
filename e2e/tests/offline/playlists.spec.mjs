@@ -513,7 +513,7 @@ test.describe('seeded playlists', () => {
     await page.getByText('My seeded playlist').click()
 
     await page.getByTitle('Edit Playlist Info').click()
-    await page.locator('.playlistStats input').fill('Renamed seeded playlist')
+    await page.getByRole('textbox', { name: 'Playlist name' }).fill('Renamed seeded playlist')
     await page.locator('.descriptionInput input').fill('Updated through E2E')
     await page.getByRole('button', { name: 'Save Changes' }).click()
 
