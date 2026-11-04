@@ -135,6 +135,7 @@
             </button>
             <button
               type="button"
+              class="primaryButton"
               @click="openCreateGroupPrompt"
             >
               <FtIcon
@@ -197,7 +198,7 @@
                     @click="toggleGroup(section)"
                   >
                     <FtIcon
-                      :icon="['fas', section.isCollapsed ? 'chevron-right' : 'angle-down']"
+                      :icon="['fas', 'angle-down']"
                       aria-hidden="true"
                     />
                   </button>
@@ -364,6 +365,7 @@
                     class="tabOrganizerRow"
                     :class="{
                       active: tab.id === activeTabId,
+                      selected: selectedTabIds.has(tab.id),
                       dragging: draggedTabIds.includes(tab.id)
                     }"
                     draggable="true"
@@ -409,7 +411,10 @@
                       <small>{{ tab.route.fullPath || tab.url }}</small>
                     </button>
                     <div class="tabIndicators">
-                      <span v-if="tab.id === activeTabId">{{ t('Tab Organizer.Active') }}</span>
+                      <span
+                        v-if="tab.id === activeTabId"
+                        class="activeIndicator"
+                      >{{ t('Tab Organizer.Active') }}</span>
                       <span v-if="tab.isPinned">{{ t('Tab Organizer.Pinned') }}</span>
                       <span v-if="tab.isUnloaded">{{ t('Tab Organizer.Unloaded') }}</span>
                       <span v-if="tab.isPlaying">{{ t('Tab Organizer.Playing') }}</span>
