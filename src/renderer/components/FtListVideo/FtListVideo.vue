@@ -1653,7 +1653,12 @@ const videoMenuButton = useTemplateRef('videoMenuButton')
 function openVideoOptionsMenu() {
   cancelMenuHold()
   if (process.env.IS_CAPACITOR || window.matchMedia(PHONE_LAYOUT_QUERY).matches) {
-    openMobileContextActions({ title: title.value, actions: videoContextMenuItems, thumbnailActions: mobileThumbnailActions })
+    openMobileContextActions({
+      title: title.value,
+      actions: videoContextMenuItems,
+      thumbnailActions: mobileThumbnailActions,
+      trigger: videoMenuButton.value.$el.querySelector('button')
+    })
     return
   }
   const button = videoMenuButton.value.$el.querySelector('button')
