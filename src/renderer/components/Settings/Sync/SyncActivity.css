@@ -216,7 +216,7 @@
   min-inline-size: 0;
 }
 
-/* Expressive cookie shape; it spins while activity loads. */
+/* Expressive cookie shape. */
 .activityIcon {
   position: relative;
   align-items: center;
@@ -237,16 +237,6 @@
   background-color: var(--primary-color);
   clip-path: var(--shape-cookie-9);
   content: '';
-}
-
-.activityIconBusy::before {
-  animation: activity-icon-spin 1.6s linear infinite;
-}
-
-@keyframes activity-icon-spin {
-  to {
-    transform: rotate(1turn);
-  }
 }
 
 .activityAction :deep(.iconButton) {

@@ -8,7 +8,6 @@
       <div class="activityTitle">
         <span
           class="activityIcon"
-          :class="{ activityIconBusy: loading }"
           aria-hidden="true"
         >
           <FtIcon :icon="['fas', 'history']" />
