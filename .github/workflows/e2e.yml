@@ -254,16 +254,32 @@ jobs:
         E2E_XVFB: '1'
         E2E_FLAKY_REPORT: ${{ runner.temp }}/e2e-flaky.json
       run: |
-        test_args=("--shard=${{ matrix.shard }}/${{ matrix.shardTotal }}")
+        test_args=()
         for project in $PROJECTS; do
           test_args+=("--project=$project")
         done
+        list_args=("${test_args[@]}")
         if [ "${{ github.event_name }}" = "pull_request" ] && [ "${{ matrix.project }}" = "network" ]; then
-          test_args+=("--only-changed=HEAD^1" "--pass-with-no-tests")
+          list_args+=("--only-changed=HEAD^1")
+          test_args+=("--pass-with-no-tests")
         fi
         if [ "${{ matrix.project }}" = "repeat" ]; then
-          test_args+=("--only-changed=HEAD^1" "--repeat-each=${{ matrix.repeatEach }}" "--retries=0")
+          list_args+=("--only-changed=HEAD^1")
+          test_args+=("--repeat-each=${{ matrix.repeatEach }}" "--retries=0")
         fi
+
+        # Deal the tests out to shards in turn instead of using --shard, which
+        # puts neighboring slow files in one shard. See shardTestList.
+        tests_json="$RUNNER_TEMP/e2e-tests.json"
+        test_list="$RUNNER_TEMP/e2e-test-list.txt"
+        pnpm exec playwright test -c e2e/playwright.config.mjs --list --reporter=json --pass-with-no-tests "${list_args[@]}" > "$tests_json"
+        node --input-type=module -e "
+          import { readFileSync } from 'node:fs'
+          import { shardTestList } from './e2e/shards.mjs'
+          const [file, shard, shardTotal] = process.argv.slice(1)
+          console.log(shardTestList(JSON.parse(readFileSync(file, 'utf8')), Number(shard), Number(shardTotal)))
+        " "$tests_json" "${{ matrix.shard }}" "${{ matrix.shardTotal }}" > "$test_list"
+        test_args+=("--test-list=$test_list")
 
         xvfb-run --auto-servernum --server-args='-screen 0 1920x1080x24' pnpm exec playwright test -c e2e/playwright.config.mjs "${test_args[@]}"
       shell: bash

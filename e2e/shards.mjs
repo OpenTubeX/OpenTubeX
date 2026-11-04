@@ -60,6 +60,38 @@ export function createShardMatrix(fullReport, changedReport = fullReport, { even
   return { include }
 }
 
+/**
+ * List the tests one shard runs, in Playwright's `--test-list` format.
+ * `--shard` splits tests in file order, so neighboring slow files, such as the
+ * player specs, all land in one shard. Dealing tests out in turn spreads them.
+ */
+export function shardTestList(report, shard, shardTotal) {
+  return listTests(report)
+    .filter((_, index) => index % shardTotal === shard - 1)
+    .join('\n')
+}
+
+function listTests(report) {
+  const lines = []
+  const visit = (suite, titles) => {
+    for (const spec of suite.specs ?? []) {
+      const titlePath = [...titles, spec.title]
+      // Playwright splits the list into lines, and lines at › with each part
+      // trimmed, so such a title would silently drop its test from every shard.
+      const unlisted = titlePath.find(title => title.includes('›') || title.includes('\n') || title !== title.trim())
+      if (unlisted !== undefined) throw new Error(`Test title cannot be used in a test list: "${unlisted}"`)
+      for (const test of spec.tests) {
+        lines.push([`[${test.projectName}]`, spec.file, ...titlePath].join(' › '))
+      }
+    }
+    // Untitled describe blocks are not part of a test's title path either.
+    for (const child of suite.suites ?? []) visit(child, child.title ? [...titles, child.title] : titles)
+  }
+  // Top-level suites are files; their titles are not part of a test's title.
+  for (const file of report.suites ?? []) visit(file, [])
+  return lines
+}
+
 /** Count the offline tests in a report, including their scaled runs. */
 export function countRepeatTests(report) {
   const counts = countTests(report)
