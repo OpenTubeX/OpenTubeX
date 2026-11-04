@@ -36,14 +36,16 @@
   --description-fade-size: 16px;
   --description-scrollbar-reserve: 14px;
   --description-fade-top: #000;
+  --description-fade-bottom: #000;
 
-  /* Fade clipped text at the top while keeping the overlay scrollbar sharp. */
+  /* Fade clipped text at either edge while keeping the overlay scrollbar sharp. */
   mask-image:
     linear-gradient(
       to bottom,
       var(--description-fade-top),
       #000 var(--description-fade-size),
-      #000 100%
+      #000 calc(100% - var(--description-fade-size)),
+      var(--description-fade-bottom)
     ),
     linear-gradient(#000 0 0);
   mask-size:
@@ -56,6 +58,10 @@
 
 .videoDescription:not(.short, .alwaysExpanded) .descriptionScroll.descriptionFadeTop {
   --description-fade-top: transparent;
+}
+
+.videoDescription:not(.short, .alwaysExpanded) .descriptionScroll.descriptionFadeBottom {
+  --description-fade-bottom: transparent;
 }
 
 .videoDescription:not(.short, .alwaysExpanded) .descriptionScroll:dir(rtl) {

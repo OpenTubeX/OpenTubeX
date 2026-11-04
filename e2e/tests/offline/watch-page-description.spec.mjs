@@ -55,6 +55,7 @@ test.describe('watch page', () => {
     expect(await descriptionScroll.evaluate(element => getComputedStyle(element).maskImage))
       .toContain('linear-gradient')
     await expect(descriptionScroll).not.toHaveClass(/descriptionFadeTop/)
+    await expect(descriptionScroll).toHaveClass(/descriptionFadeBottom/)
     // The same footer collapses the card again, so keyboard focus stays on it.
     await expect(expandControl).toBeFocused()
     await expect(expandControl).toHaveAccessibleName('Show less')
@@ -69,9 +70,16 @@ test.describe('watch page', () => {
     }, maxScrollTop)
     await expect.poll(() => descriptionScroll.evaluate(element => element.scrollTop)).toBeGreaterThan(0)
     await expect(descriptionScroll).toHaveClass(/descriptionFadeTop/)
+    await expect(descriptionScroll).toHaveClass(/descriptionFadeBottom/)
     await expect.poll(() => descriptionScroll.evaluate(element =>
       element.scrollTop < element.scrollHeight - element.clientHeight
     )).toBe(true)
+    // At the end, the last line stays sharp above the footer.
+    await descriptionScroll.evaluate((element, maxScrollTop) => {
+      element.scrollTop = maxScrollTop
+    }, maxScrollTop)
+    await expect(descriptionScroll).not.toHaveClass(/descriptionFadeBottom/)
+    await expect(descriptionScroll).toHaveClass(/descriptionFadeTop/)
     expect(await footerLayout()).toEqual(footerAtEdges)
     await expandControl.press('Enter')
     await expect(description).toHaveClass(/short/)
