@@ -555,8 +555,15 @@ test.describe('local video commands', () => {
     await page.getByRole('combobox', { name: 'Search commands' }).fill('current queued journey')
     const options = page.getByRole('group', { name: 'Local videos', exact: true }).getByRole('option')
     await expect(options).toHaveCount(2)
+    // Under load, polling can miss the seconds before playback passes 3s again, so record the restart.
+    await player.evaluate(element => {
+      window.__queuedVideoRestarted = false
+      element.addEventListener('seeking', () => {
+        if (element.currentTime < 3) window.__queuedVideoRestarted = true
+      })
+    })
     await options.last().click()
-    await expect.poll(() => player.evaluate(element => !element.paused && element.currentTime < 3)).toBe(true)
+    await expect.poll(() => player.evaluate(element => window.__queuedVideoRestarted && !element.paused)).toBe(true)
     await expect.poll(() => page.evaluate(() => (
       window.$store.getters.getWatchQueue.map(video => video.queueItemId)
     ))).toEqual([firstId])
