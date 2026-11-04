@@ -36,7 +36,7 @@ test.describe('channel page', () => {
     }
 
     await page.getByRole('tab', { name: 'Playlists' }).click()
-    await expectTabHighlightStyle(page.locator('.channelDetails [role="tab"][aria-selected="true"]'), 'transitionProperty', 'opacity')
+    await expectTabHighlightStyle(page.locator('.channelDetails [role="tab"][aria-selected="true"]'), 'transitionProperty', 'opacity, scale')
     await expect(page.locator('#playlistPanel .ft-list-video').first()).toBeVisible({ timeout: 30_000 })
     const show = page.locator('#playlistPanel .ft-list-video')
       .filter({ has: page.getByRole('heading', { name: 'Meta Runner', exact: true }) })
@@ -96,10 +96,10 @@ test.describe('channel page', () => {
     }
     await expect(page.locator('#videoPanel .ft-list-video').first()).toBeVisible({ timeout: 30_000 })
     await expect(page.locator('body')).toHaveCSS('--ui-roundness', '2')
-    await expect(page.locator('.channelDetails .bannerContainer')).toHaveCSS('border-top-left-radius', '16px')
-    await expect(page.locator('.channelDetails .bannerContainer')).toHaveCSS('border-top-right-radius', '16px')
-    await expect(page.locator('.channelDetails .infoContainer')).toHaveCSS('border-bottom-left-radius', '16px')
-    await expect(page.locator('.channelDetails .infoContainer')).toHaveCSS('border-bottom-right-radius', '16px')
+    await expect(page.locator('.channelDetails .bannerContainer')).toHaveCSS('border-top-left-radius', '32px')
+    await expect(page.locator('.channelDetails .bannerContainer')).toHaveCSS('border-top-right-radius', '32px')
+    await expect(page.locator('.channelDetails .infoContainer')).toHaveCSS('border-bottom-left-radius', '32px')
+    await expect(page.locator('.channelDetails .infoContainer')).toHaveCSS('border-bottom-right-radius', '32px')
     for (const roundness of [0, 50, 100, 200]) {
       await page.evaluate(value => {
         window.$store.commit('setUiRoundness', value)
