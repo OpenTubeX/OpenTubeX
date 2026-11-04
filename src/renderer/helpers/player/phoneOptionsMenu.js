@@ -161,10 +161,12 @@ export function setupPhoneOptionsMenu(menu, controls, t) {
       activeView = view
       restoreOverlayScrollTop(menu, 0)
     }
-    // Measured once the new view starts at the top
-    measureWithoutMenuZoom(menu, () => updateHeaderAction(submenu))
-    const end = [...view.children].filter(child => child.getClientRects().length > 0 && !child.classList.contains('os-scrollbar')).at(-1)
-    clampOverlayScrollTop(menu, end ?? view)
+    // Measured once the new view starts at the top, and without the zoom that scales the whole menu
+    measureWithoutMenuZoom(menu, () => {
+      updateHeaderAction(submenu)
+      const end = [...view.children].filter(child => child.getClientRects().length > 0 && !child.classList.contains('os-scrollbar')).at(-1)
+      clampOverlayScrollTop(menu, end ?? view)
+    })
   }
 
   function schedule() {

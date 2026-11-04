@@ -193,10 +193,3 @@
     font-weight: 700;
   }
 }
-
-@media (prefers-reduced-motion: reduce) {
-  .navOption::before,
-  .navChannel::before {
-    transition: none;
-  }
-}

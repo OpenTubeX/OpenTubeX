@@ -213,19 +213,10 @@ onBeforeUnmount(() => resizeObserver?.disconnect())
   border: 0;
 }
 
-@media (prefers-reduced-motion: reduce) {
-  .shelf-next-enter-active,
-  .shelf-next-leave-active,
-  .shelf-previous-enter-active,
-  .shelf-previous-leave-active {
-    transition: none;
-  }
-
-  .shelf-next-enter-from,
-  .shelf-next-leave-to,
-  .shelf-previous-enter-from,
-  .shelf-previous-leave-to {
-    transform: none;
-  }
+:root[data-reduced-motion='reduce'] .shelf-next-enter-from,
+:root[data-reduced-motion='reduce'] .shelf-next-leave-to,
+:root[data-reduced-motion='reduce'] .shelf-previous-enter-from,
+:root[data-reduced-motion='reduce'] .shelf-previous-leave-to {
+  transform: none;
 }
 </style>

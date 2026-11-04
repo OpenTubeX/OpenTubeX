@@ -374,12 +374,6 @@ const iconifyGlyphStyle = computed(() => cssFromIconTransform(props.transform))
   animation: ft-icon-spin 2s linear infinite;
 }
 
-@media (prefers-reduced-motion: reduce) {
-  .ft-icon--spin .ft-icon__glyph {
-    animation-duration: 10s;
-  }
-}
-
 @keyframes ft-icon-spin {
   from {
     rotate: 0deg;

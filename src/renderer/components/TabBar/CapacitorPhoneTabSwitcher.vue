@@ -443,6 +443,7 @@ import store from '../../store/index'
 import { createOrganizerSwipeAnimation, organizerSwipeProgress, shouldOpenSwipedOrganizer } from '../../helpers/organizerSwipe'
 import { shouldCloseSwipedTab } from '../../helpers/capacitorTabSwipe'
 import { lightHaptic } from '../../helpers/mobileHaptics'
+import { isReducedMotionEnabled } from '../../helpers/reducedMotion'
 import { clampOverlayScrollTop, restoreOverlayScrollTop } from '../../helpers/overlayScrollbars'
 import { formatDeviceSessionLabel, shouldShowOtherDeviceSessions } from '../../helpers/sync-sessions'
 import { showToast } from '../../helpers/utils'
@@ -1025,7 +1026,7 @@ function finishTabGesture(event) {
       const targetIndex = dragLayout.targetIndex
       dragSettling.value = true
       dragOffsets.value = { ...dragOffsets.value, [tabId]: dragLayout.dropOffset }
-      const duration = matchMedia('(prefers-reduced-motion: reduce)').matches ? 0 : 160
+      const duration = isReducedMotionEnabled() ? 0 : 160
       dropTimer = window.setTimeout(() => {
         dropTimer = null
         if (dragRects[targetIndex].id !== tabId) {
@@ -1220,7 +1221,7 @@ function finishTabSwipe(event) {
   swipeElement.setAttribute('data-tab-closing', '')
   renderTabSwipe()
   const element = swipeElement
-  const delay = matchMedia('(prefers-reduced-motion: reduce)').matches ? 0 : 160
+  const delay = isReducedMotionEnabled() ? 0 : 160
   // An accepted close belongs to this card, not to the next pointer session.
   let finishing = false
   const finish = async () => {

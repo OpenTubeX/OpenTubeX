@@ -706,12 +706,6 @@
   background-color: rgb(28 28 28);
 }
 
-@media (prefers-reduced-motion: reduce) {
-  .progress-toast-holder .toast-slot.persistent-slot {
-    transition-duration: 1ms;
-  }
-}
-
 /* The App mirrors its layout classes on <html>: selecting them with
    body:has() rechecked the whole page for every DOM change.
    Top positions stay below the app header. */
@@ -787,12 +781,6 @@
   :where(.app > .sideNav.scrollHidden:not(:has(:focus-visible))) ~ .connection-status-holder {
     transform: translateY(calc(var(--connection-navigation-inset) + var(--safe-area-inset-bottom, env(safe-area-inset-bottom, 0px))));
     transition: var(--mobile-nav-hide-transition);
-  }
-
-  @media (prefers-reduced-motion: reduce) {
-    :root body .connection-status-holder {
-      transition: none;
-    }
   }
 }
 

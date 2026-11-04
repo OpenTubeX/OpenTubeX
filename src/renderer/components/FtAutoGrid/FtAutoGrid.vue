@@ -29,6 +29,7 @@ import store from '../../store/index'
 import { getThumbnailGridStyles, PHONE_THUMBNAIL_VIEWPORT_WIDTH } from '../../constants/thumbnailSize'
 import { GRID_COLUMNS_SETTINGS, setThumbnailGridVisible, thumbnailSizeSettingKey, VIEW_TYPE_SETTINGS } from '../../composables/useThumbnailSizeSlider'
 import { getAnimationSpeedMultiplier } from '../../helpers/animationSpeed'
+import { usePhoneLayout } from '../../composables/usePhoneLayout'
 import { measureStableGridWidth } from './gridWidth'
 import { measureLeavingItemLayouts } from './leavingItemLayout'
 
@@ -105,23 +106,17 @@ const thumbnailSizeReady = ref(false)
 const suppressMoveTransition = ref(false)
 let suppressResetTimeout = null
 
-const prefersReducedMotion = ref(false)
-/** @type {MediaQueryList | null} */
-let reducedMotionQuery = null
-
-function handleReducedMotionChange(event) {
-  prefersReducedMotion.value = event.matches
-}
+const systemReducedMotion = usePhoneLayout('(prefers-reduced-motion: reduce)')
+const reducedMotion = computed(() => store.getters.getReducedMotion === 'on' ||
+  (store.getters.getReducedMotion === 'system' && systemReducedMotion.value))
 
 // Vue otherwise infers timing with getComputedStyle for every entering card,
 // interleaving style reads with class writes across the whole incoming batch.
 const transitionDurations = computed(() => {
-  const reducedMotion = store.getters.getReducedMotion === 'on' ||
-    (store.getters.getReducedMotion === 'system' && prefersReducedMotion.value)
   return {
-    enter: reducedMotion ? 0 : 300 / animationSpeedMultiplier.value,
+    enter: reducedMotion.value ? 0 : 300 / animationSpeedMultiplier.value,
     // Only the New feed fades departing cards; other lists remove them immediately.
-    leave: reducedMotion || !gridElement.value?.$el?.closest('.newFeed') ? 0 : 200 / animationSpeedMultiplier.value
+    leave: reducedMotion.value || !gridElement.value?.$el?.closest('.newFeed') ? 0 : 200 / animationSpeedMultiplier.value
   }
 })
 
@@ -129,7 +124,7 @@ const transitionDurations = computed(() => {
 // patched TransitionGroup not to measure every child before each update.
 const moveClass = computed(() => {
   const suppressed = suppressMoveTransition.value ||
-    prefersReducedMotion.value ||
+    reducedMotion.value ||
     props.itemCount > MOVE_TRANSITION_MAX_ITEMS
 
   return suppressed ? 'feed-move-suppressed' : undefined
@@ -310,9 +305,6 @@ function handlePhoneWidthChange() {
 onMounted(() => {
   phoneWidthQuery = window.matchMedia(`(width <= ${PHONE_THUMBNAIL_VIEWPORT_WIDTH}px)`)
   phoneWidthQuery.addEventListener('change', handlePhoneWidthChange)
-  reducedMotionQuery = window.matchMedia('(prefers-reduced-motion: reduce)')
-  prefersReducedMotion.value = reducedMotionQuery.matches
-  reducedMotionQuery.addEventListener('change', handleReducedMotionChange)
 
   resizeObserver = new ResizeObserver(([entry]) => updateGridWidth(entry.contentRect.width))
   resizeObserver.observe(gridElement.value.$el)
@@ -326,7 +318,6 @@ onBeforeUnmount(() => {
   resizeObserver?.disconnect()
   phoneWidthQuery?.removeEventListener('change', handlePhoneWidthChange)
   window.removeEventListener('scroll', updatePageAtBottom)
-  reducedMotionQuery?.removeEventListener('change', handleReducedMotionChange)
   clearTimeout(suppressResetTimeout)
 })
 </script>

@@ -85,17 +85,3 @@
     stroke-dashoffset: -99.5;
   }
 }
-
-@media (prefers-reduced-motion: reduce) {
-  :deep(.shaka-spinner-container) {
-    animation: none;
-  }
-
-  :deep(.shaka-spinner) > svg {
-    animation-duration: 3s;
-  }
-
-  :deep(.shaka-spinner) svg circle {
-    animation-duration: 2.8s;
-  }
-}

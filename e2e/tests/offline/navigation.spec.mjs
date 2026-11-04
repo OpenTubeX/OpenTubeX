@@ -995,13 +995,16 @@ test.describe('expressive desktop navigation', () => {
   })
 
   test('header button hover respects reduced motion', async ({ page }) => {
-    await page.evaluate(() => window.$store.dispatch('updateReducedMotion', 'off'))
-    await page.emulateMedia({ reducedMotion: 'reduce' })
-    // Exercise the component's OS preference fallback without the global override.
-    await page.evaluate(() => document.documentElement.removeAttribute('data-reduced-motion'))
+    // The app setting wins over the system preference in both directions.
+    await page.emulateMedia({ reducedMotion: 'no-preference' })
+    await page.evaluate(() => window.$store.dispatch('updateReducedMotion', 'on'))
     const button = page.locator('.topNav .menuButton')
     await button.hover()
     await expect(button).toHaveCSS('transition-duration', '0s')
+
+    await page.emulateMedia({ reducedMotion: 'reduce' })
+    await page.evaluate(() => window.$store.dispatch('updateReducedMotion', 'off'))
+    await expect(button).not.toHaveCSS('transition-duration', '0s')
   })
 
   test('animates the header button radius while pressing with a mouse', async ({ page }) => {

@@ -468,10 +468,3 @@
     flex: 1;
   }
 }
-
-@media (prefers-reduced-motion: reduce) {
-  .profile-dropdown-enter-active,
-  .profile-dropdown-leave-active {
-    transition: none;
-  }
-}

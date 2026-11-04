@@ -1,5 +1,5 @@
 import { setWindowSize, test, expect } from '../../helpers/app.mjs'
-import { activeTab, openMockedVideo, openPlayerOptions } from '../../helpers/player.mjs'
+import { activeTab, openMockedVideo, openPlayerOptions, settleMenuZoom } from '../../helpers/player.mjs'
 import { mockPlayableWatchPage } from '../../helpers/watch.mjs'
 import { WATCH_PAGE_SEED } from '../../helpers/watch-page.mjs'
 
@@ -353,6 +353,86 @@ test.describe('phone options sheet', () => {
     await sheet.evaluate(element => element.querySelector('.phonePlayerOptionsClose').click())
     expect(await sheet.evaluate(element => element.open)).toBe(false)
     expect(await takeMotion()).toEqual([])
+  })
+
+  test('switching views zooms the menu instead of each entry, and keeps the header action in the header', { tag: '@scale' }, async ({ app, page }) => {
+    await mockPlayableWatchPage(app, page, { captionTranslations: true })
+    await openMockedVideo(page)
+    await setWindowSize(app, page, { width: 420, height: 910 })
+    const player = page.locator(`${activeTab} .ftVideoPlayer`)
+    const sheet = player.locator('.phonePlayerOptions')
+    const header = sheet.locator(':scope > .shaka-back-to-overflow-button')
+    const action = sheet.locator('.shaka-text-languages > .ft-caption-options-button')
+    const afterFrames = () => page.evaluate(() => new Promise(resolve => requestAnimationFrame(() => requestAnimationFrame(resolve))))
+
+    await player.locator('video').evaluate(video => video.pause())
+    await player.locator('.shaka-controls-container').evaluate(element => element.setAttribute('shown', 'true'))
+    await openPlayerOptions(player)
+    await expect(sheet.locator('.shaka-playbackrate-button')).toBeVisible()
+
+    /**
+     * Clicks the element and returns the elements that fade or zoom as the
+     * view switches, besides the sheet. They start with the style update, so
+     * they are read before anything else runs. With `pause`, they are held at
+     * their start.
+     * @param {string} selector
+     * @param {boolean} [pause]
+     */
+    const switchView = (selector, pause = false) => sheet.evaluate((element, [selector, pause]) => {
+      element.querySelector(selector).click()
+      const animations = element.getAnimations({ subtree: true })
+        .filter(animation => /^ft-menu-(fade|zoom)/.test(animation.animationName ?? '') && animation.effect?.target !== element)
+      if (pause) {
+        for (const animation of animations) animation.pause()
+        window.__heldMenuAnimations = animations
+      }
+      return [...new Set(animations.map(animation => animation.effect.target))]
+        .map(target => target.matches('.phonePlayerOptions > .shaka-overflow-menu') ? 'menu' : target.className)
+    }, [selector, pause])
+    const settle = async () => {
+      await settleMenuZoom(player)
+      await expect.poll(() => sheet.evaluate(element => element.querySelector('[data-ft-menu-transition]') === null)).toBe(true)
+    }
+
+    // However many entries the new view has, only the menu animates.
+    expect(await switchView('.shaka-overflow-menu > .shaka-playbackrate-button')).toEqual(['menu'])
+    await settle()
+    expect(await switchView(':scope > .shaka-back-to-overflow-button')).toEqual(['menu'])
+    await settle()
+
+    // The zooming menu would hold the header action, which stays out of view until it is back in the header.
+    expect(await switchView('.shaka-overflow-menu > .shaka-caption-button', true)).toEqual(['menu'])
+    await expect(sheet).toHaveAttribute('data-header-action', '')
+    await afterFrames()
+    expect(await action.evaluate(element => getComputedStyle(element).opacity)).toBe('0')
+    await page.evaluate(() => window.__heldMenuAnimations.splice(0).forEach(animation => animation.play()))
+    await settle()
+    await expect.poll(() => action.evaluate(element => getComputedStyle(element).opacity)).toBe('1')
+    const [headerBounds, actionBounds] = await Promise.all([header.boundingBox(), action.boundingBox()])
+    expect(actionBounds.y).toBeGreaterThanOrEqual(headerBounds.y - 1)
+    expect(actionBounds.y + actionBounds.height).toBeLessThanOrEqual(headerBounds.y + headerBounds.height + 1)
+    expect(actionBounds.x + actionBounds.width).toBeLessThanOrEqual(headerBounds.x + headerBounds.width + 1)
+
+    // Caption style options open in a group that can't scale itself, and the menu still zooms.
+    await action.click()
+    await settle()
+    expect(await switchView('.shaka-overflow-menu .shaka-caption-font-color-button')).toEqual(['menu'])
+    await settle()
+    await header.click()
+    await settle()
+    await header.click()
+    await settle()
+    await expect(action).toBeVisible()
+
+    // Without motion, it shows in the header at once.
+    await switchView(':scope > .shaka-back-to-overflow-button')
+    await settle()
+    await page.evaluate(() => window.$store.dispatch('updateReducedMotion', 'on'))
+    expect(await switchView('.shaka-overflow-menu > .shaka-caption-button')).toEqual([])
+    await expect(sheet).toHaveAttribute('data-header-action', '')
+    await afterFrames()
+    expect(await action.evaluate(element => getComputedStyle(element).opacity)).toBe('1')
+    expect(await sheet.evaluate(element => element.querySelector('[data-ft-menu-transition]'))).toBeNull()
   })
 })
 

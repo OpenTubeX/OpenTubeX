@@ -204,13 +204,6 @@
   }
 }
 
-@media (prefers-reduced-motion: reduce) {
-  .btn,
-  .ripple::after {
-    transition: none;
-  }
-
-  .ripple::after {
-    display: none;
-  }
+:root[data-reduced-motion='reduce'] .ripple::after {
+  display: none;
 }

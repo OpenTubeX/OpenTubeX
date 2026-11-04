@@ -272,12 +272,6 @@
   }
 }
 
-@media (prefers-reduced-motion: reduce) {
-  .sideNav {
-    transition: none;
-  }
-}
-
 @media only screen and (width <= 400px) {
   /* Hide settings so that they appear in the more dropdown on smaller screens */
   .smallMobileOnlyHidden {

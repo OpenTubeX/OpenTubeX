@@ -602,11 +602,4 @@ async function install(entry) {
 .themeAutoLoadSentinel {
   block-size: 1px;
 }
-@media (prefers-reduced-motion: reduce) {
-  .themeScreenshot-enter-active,
-  .themeScreenshot-leave-active,
-  .screenshotChoices button {
-    transition: none;
-  }
-}
 </style>

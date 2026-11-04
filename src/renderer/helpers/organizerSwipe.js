@@ -23,8 +23,7 @@ export function createOrganizerSwipeAnimation(page, preview, overlay) {
   const cropBottom = Math.min(visibleBottom, top + to.height / scale)
   const fillsPreview = (from.height - top - bottom) * scale >= to.height
   const radius = Number.parseFloat(getComputedStyle(preview).borderTopLeftRadius) || 0
-  const reduced = document.documentElement.dataset.reducedMotion === 'reduce' ||
-    matchMedia('(prefers-reduced-motion: reduce)').matches
+  const reduced = document.documentElement.dataset.reducedMotion === 'reduce'
   const animations = []
   if (!reduced) {
     page.classList.add('organizerSwipePage')

@@ -1,10 +1,13 @@
 import path from 'node:path'
+import { readFileSync } from 'node:fs'
 
 import { test, expect, goTo, goToSettingsSection, repoRoot, setPlayerFullscreen } from '../../helpers/app.mjs'
 import { sampleColors } from '../../helpers/colors.mjs'
 import { openMockedVideo } from '../../helpers/player.mjs'
 import { mockPlayableWatchPage } from '../../helpers/watch.mjs'
-import { BUILTIN_BASE_THEME_VALUES } from '../../../src/constants.js'
+import { BUILTIN_BASE_THEME_VALUES, CATPPUCCIN_MACCHIATO_COLORS, FIXED_COLOR_BASE_THEMES } from '../../../src/constants.js'
+import { MATERIAL_SEED_PRESETS } from '../../../src/materialTheme.js'
+import { SIGNAL_ACCENT_PRESETS } from '../../../src/signalTheme.js'
 
 /** Text color and background composited over ancestors, including color(srgb ...) values. */
 function renderedColors(locator) {
@@ -377,6 +380,235 @@ test.describe('bright main color toggle contrast', () => {
   })
 })
 
+// The main and secondary color pickers offer every color in this list.
+const THEME_COLORS = [
+  ...readFileSync(path.join(repoRoot, 'src/renderer/helpers/colors.js'), 'utf8').matchAll(/\bname: '(\w+)'/g)
+].map(([, name]) => name).concat(CATPPUCCIN_MACCHIATO_COLORS.map(({ name }) => name))
+
+test.describe('main color text contrast', () => {
+  test.use({ seed: { settings: { currentLocale: 'en-US' } } })
+
+  test('text on every main color stays readable on filled primary controls', async ({ page }) => {
+    const privacy = await goToSettingsSection(page, 'privacy')
+    // Matching entries enable the primary Set Password button, which is filled.
+    await privacy.getByLabel('Password', { exact: true }).fill('contrast')
+    await privacy.getByLabel('Confirm password', { exact: true }).fill('contrast')
+    const button = privacy.getByRole('button', { name: 'Set Password', exact: true })
+    await expect(button).toBeEnabled()
+    await expect(button).toHaveClass(/\bvariant-filled\b/)
+    // Enabled header toggles use the selected-container color pair.
+    const toggle = page.getByRole('button', { name: 'Highlight settings changed from defaults', exact: true })
+    if (await toggle.getAttribute('aria-pressed') !== 'true') await toggle.click()
+    await expect(toggle).toHaveAttribute('aria-pressed', 'true')
+    await page.mouse.move(0, 0)
+    await page.evaluate(() => document.activeElement?.blur())
+
+    expect(THEME_COLORS.length).toBeGreaterThan(90)
+    const targets = { button: await button.elementHandle(), toggle: await toggle.elementHandle() }
+    for (const baseTheme of ['light', 'dark']) {
+      await page.evaluate(theme => window.$store.dispatch('updateBaseTheme', theme), baseTheme)
+      await expect(page.locator('body')).toHaveClass(new RegExp(`\\b${baseTheme}\\b`))
+      // Swap the class the app applies for the main color setting directly;
+      // saving the setting for every color exceeds the test timeout.
+      const results = await page.evaluate(({ names, button, toggle }) => {
+        const rgb = color => color.match(/[\d.]+/g).slice(0, 3).map(Number)
+        const probe = document.createElement('span')
+        probe.style.color = 'var(--text-with-main-color)'
+        probe.style.backgroundColor = 'var(--primary-color)'
+        document.body.append(probe)
+        const measure = element => {
+          const style = getComputedStyle(element)
+          return { foreground: rgb(style.color), background: rgb(style.backgroundColor) }
+        }
+        const results = names.map(name => {
+          const { classList } = document.body
+          classList.remove(...[...classList].filter(className => /^main[A-Z]/.test(className)))
+          classList.add(`main${name}`)
+          // Start the color transitions, then read their settled colors.
+          for (const element of [button, toggle]) measure(element)
+          // Looping animations, such as spinners, can't finish and would throw
+          for (const animation of document.getAnimations()) {
+            if (animation.effect?.getComputedTiming().endTime !== Infinity) animation.finish()
+          }
+          return { name, palette: measure(probe), button: measure(button), 'selected toggle': measure(toggle) }
+        })
+        probe.remove()
+        return results
+      }, { names: THEME_COLORS, ...targets })
+      // Each class applies its own primary color.
+      expect(new Set(results.map(({ palette }) => `${palette.background}`)).size).toBeGreaterThan(90)
+      for (const { name, ...colors } of results) {
+        for (const [label, { foreground, background }] of Object.entries(colors)) {
+          expect.soft(contrastRatio(foreground, background), `${baseTheme} ${name} ${label} ${JSON.stringify({ foreground, background })}`)
+            .toBeGreaterThanOrEqual(4.5)
+        }
+      }
+    }
+  })
+})
+
+/**
+ * Apply every main or secondary color class and measure its text on the hover
+ * and pressed state colors, plus `elements` in their current state.
+ */
+async function measureStateColors(page, prefix, elements = {}) {
+  const [text, fill] = prefix === 'main'
+    ? ['--text-with-main-color', '--primary-color']
+    : ['--text-with-accent-color', '--accent-color']
+  return page.evaluate(({ names, prefix, text, fill, elements }) => {
+    const rgb = color => color.match(/[\d.]+/g).slice(0, 3).map(Number)
+    const probes = Object.fromEntries(['hover', 'active'].map(state => {
+      const probe = document.createElement('span')
+      probe.style.color = `var(${text})`
+      probe.style.backgroundColor = `var(${fill}-${state})`
+      document.body.append(probe)
+      return [state === 'active' ? 'pressed' : state, probe]
+    }))
+    const measure = element => {
+      const style = getComputedStyle(element)
+      return { foreground: rgb(style.color), background: rgb(style.backgroundColor) }
+    }
+    const pattern = new RegExp(`^${prefix}[A-Z]`)
+    const results = names.map(name => {
+      const { classList } = document.body
+      classList.remove(...[...classList].filter(className => pattern.test(className)))
+      classList.add(`${prefix}${name}`)
+      // Start the color transitions, then read their settled colors.
+      for (const element of Object.values(elements)) measure(element)
+      // Looping animations, such as spinners, can't finish and would throw
+      for (const animation of document.getAnimations()) {
+        if (animation.effect?.getComputedTiming().endTime !== Infinity) animation.finish()
+      }
+      return {
+        name,
+        ...Object.fromEntries(Object.entries({ ...probes, ...elements }).map(([label, element]) => [label, measure(element)]))
+      }
+    })
+    for (const probe of Object.values(probes)) probe.remove()
+    return results
+  }, { names: THEME_COLORS, prefix, text, fill, elements })
+}
+
+test.describe('state color text contrast', () => {
+  test.use({ seed: { settings: { currentLocale: 'en-US' } } })
+
+  test('text on every main and secondary color stays readable on hover and pressed fills', async ({ page }) => {
+    await goToSettingsSection(page, 'privacy')
+    // Enabled header toggles fill with the main hover color on hover.
+    const toggle = page.getByRole('button', { name: 'Highlight settings changed from defaults', exact: true })
+    if (await toggle.getAttribute('aria-pressed') !== 'true') await toggle.click()
+    await expect(toggle).toHaveAttribute('aria-pressed', 'true')
+    await page.mouse.move(0, 0)
+    await page.evaluate(() => document.activeElement?.blur())
+    const cdp = await page.context().newCDPSession(page)
+    await cdp.send('DOM.enable')
+    await cdp.send('CSS.enable')
+    const { root } = await cdp.send('DOM.getDocument', { depth: 0 })
+    const { nodeId } = await cdp.send('DOM.querySelector', { nodeId: root.nodeId, selector: '.settingsHeaderButton.active[aria-pressed="true"]' })
+    expect(nodeId).toBeTruthy()
+    await cdp.send('CSS.forcePseudoState', { nodeId, forcedPseudoClasses: ['hover'] })
+    const hoveredToggle = await toggle.elementHandle()
+
+    expect(THEME_COLORS.length).toBeGreaterThan(90)
+    for (const baseTheme of ['light', 'dark']) {
+      await page.evaluate(theme => window.$store.dispatch('updateBaseTheme', theme), baseTheme)
+      await expect(page.locator('body')).toHaveClass(new RegExp(`\\b${baseTheme}\\b`))
+      // Swap the classes the app applies for the color settings directly;
+      // saving the settings for every color exceeds the test timeout.
+      const results = {
+        main: await measureStateColors(page, 'main', { 'hovered selected toggle': hoveredToggle }),
+        secondary: await measureStateColors(page, 'sec'),
+      }
+      for (const [kind, colors] of Object.entries(results)) {
+        // Each class applies its own state colors.
+        expect(new Set(colors.map(({ pressed }) => `${pressed.background}`)).size).toBeGreaterThan(80)
+        for (const { name, ...states } of colors) {
+          for (const [label, { foreground, background }] of Object.entries(states)) {
+            expect.soft(contrastRatio(foreground, background), `${baseTheme} ${kind} ${name} ${label} ${JSON.stringify({ foreground, background })}`)
+              .toBeGreaterThanOrEqual(4.5)
+          }
+        }
+      }
+    }
+    // The forced hover fills the toggle with the hover color, not its rest color.
+    const { hover, 'hovered selected toggle': hovered } = (await measureStateColors(page, 'main', { 'hovered selected toggle': hoveredToggle }))[0]
+    expect(hovered.background).toEqual(hover.background)
+  })
+})
+
+test.describe('secondary colors and main color states', () => {
+  test.use({ seed: { settings: { currentLocale: 'en-US' } } })
+
+  // Controls filled with the main color take its text color, so a secondary
+  // color must not swap in a hover or pressed fill of its own.
+  test('leave the hover and pressed fills of the main color alone', async ({ page }) => {
+    await goToSettingsSection(page, 'privacy')
+    const changed = await page.evaluate(names => {
+      const { classList } = document.body
+      const read = () => {
+        const style = getComputedStyle(document.body)
+        return ['--primary-color-hover', '--primary-color-active'].map(name => style.getPropertyValue(name).trim()).join()
+      }
+      classList.remove(...[...classList].filter(className => /^(main|sec)[A-Z]/.test(className)))
+      classList.add('mainDraculaPink')
+      const main = read()
+      return names.filter(name => {
+        classList.add(`sec${name}`)
+        const states = read()
+        classList.remove(`sec${name}`)
+        return states !== main
+      })
+    }, THEME_COLORS)
+    expect(changed).toEqual([])
+  })
+})
+
+test.describe('secondary color text contrast', () => {
+  test.use({ seed: { settings: { currentLocale: 'en-US', useProxy: true } } })
+
+  test('text on every secondary color stays readable on accent-filled surfaces', async ({ page }) => {
+    const advanced = await goToSettingsSection(page, 'proxy')
+    // The proxy warning is filled with the accent color.
+    const warning = advanced.locator('.proxy-warning')
+    await expect(warning).toBeVisible()
+
+    expect(THEME_COLORS.length).toBeGreaterThan(90)
+    for (const baseTheme of ['light', 'dark']) {
+      await page.evaluate(theme => window.$store.dispatch('updateBaseTheme', theme), baseTheme)
+      await expect(page.locator('body')).toHaveClass(new RegExp(`\\b${baseTheme}\\b`))
+      // Swap the class the app applies for the secondary color setting directly;
+      // saving the setting for every color exceeds the test timeout.
+      const results = await warning.evaluate((warning, names) => {
+        const rgb = color => color.match(/[\d.]+/g).slice(0, 3).map(Number)
+        const probe = document.createElement('span')
+        probe.style.color = 'var(--text-with-accent-color)'
+        probe.style.backgroundColor = 'var(--accent-color)'
+        document.body.append(probe)
+        const measure = element => {
+          const style = getComputedStyle(element)
+          return { foreground: rgb(style.color), background: rgb(style.backgroundColor) }
+        }
+        const results = names.map(name => {
+          const { classList } = document.body
+          classList.remove(...[...classList].filter(className => /^sec[A-Z]/.test(className)))
+          classList.add(`sec${name}`)
+          return { name, palette: measure(probe), 'proxy warning': measure(warning) }
+        })
+        probe.remove()
+        return results
+      }, THEME_COLORS)
+      // Each class applies its own accent color.
+      expect(new Set(results.map(({ palette }) => `${palette.background}`)).size).toBeGreaterThan(90)
+      for (const { name, ...colors } of results) {
+        for (const [label, { foreground, background }] of Object.entries(colors)) {
+          expect.soft(contrastRatio(foreground, background), `${baseTheme} ${name} ${label} ${JSON.stringify({ foreground, background })}`)
+            .toBeGreaterThanOrEqual(4.5)
+        }
+      }
+    }
+  })
+})
+
 test.describe('toast action contrast', () => {
   test.use({ seed: { settings: { baseTheme: 'light', currentLocale: 'en-US' } } })
 
@@ -458,5 +690,74 @@ test.describe('browser tab contrast', () => {
       expect.soft(contrastRatio(active, inactive), `${theme} active tab beside an inactive tab`).toBeGreaterThanOrEqual(1.05)
       if (['black', 'materialDark', 'materialBlack'].includes(theme)) await attachScreenshot(`${theme} vertical tabs`)
     }
+  })
+})
+
+test.describe('selected tab label contrast', () => {
+  test.use({ seed: { settings: { currentLocale: 'en-US' } } })
+
+  test('selected labels stay readable on their tint in every theme and accent', async ({ page }) => {
+    test.slow()
+    // Every theme's own accents, plus the main colors that stress light and dark surfaces most.
+    const mainColors = ['Pink', 'Yellow', 'CatppuccinLatteRed']
+    const combos = BUILTIN_BASE_THEME_VALUES.filter(theme => theme !== 'system').flatMap(theme => {
+      if (theme.startsWith('openTubeX')) return SIGNAL_ACCENT_PRESETS.map(({ color }) => ({ theme, mutation: 'setSignalAccentColor', color }))
+      if (theme.startsWith('material')) return MATERIAL_SEED_PRESETS.map(({ color }) => ({ theme, mutation: 'setMaterialSeedColor', color }))
+      if (FIXED_COLOR_BASE_THEMES.includes(theme)) return [{ theme }]
+      return mainColors.map(color => ({ theme, mutation: 'setMainColor', color }))
+    })
+
+    await goToSettingsSection(page, 'data')
+    const tab = page.locator('.settingsWindow [data-settings-tab="data"]')
+    await expect(tab).toHaveAttribute('aria-selected', 'true')
+    await tab.blur()
+
+    // Hover adds a fill, so recheck the combinations closest to the limit at rest.
+    const hoverCombos = combos.filter(({ theme, color }) =>
+      ['gruvboxDark', 'gruvboxLight', 'pastelPink', 'hotPink'].includes(theme) || (['light', 'dark'].includes(theme) && color === 'Yellow'))
+    const failures = []
+    for (const [state, stateCombos] of [['rest', combos], ['hover', hoverCombos]]) {
+      if (state === 'hover') await tab.hover()
+      else await page.mouse.move(0, 0)
+      const results = await tab.evaluate(async (tab, combos) => {
+        const context = new OffscreenCanvas(1, 1).getContext('2d', { willReadFrequently: true })
+        // Composite the layers like the renderer, so any color syntax resolves to sRGB bytes.
+        const paint = layers => {
+          context.globalAlpha = 1
+          context.fillStyle = '#fff'
+          context.fillRect(0, 0, 1, 1)
+          for (const [color, alpha = 1] of layers) {
+            context.globalAlpha = alpha
+            context.fillStyle = color
+            context.fillRect(0, 0, 1, 1)
+          }
+          return [...context.getImageData(0, 0, 1, 1).data].slice(0, 3)
+        }
+        const ancestors = []
+        for (let node = tab.parentElement; node; node = node.parentElement) ancestors.unshift(node)
+        const results = []
+        // Skip persistence: the theme watcher applies committed values on the next tick.
+        for (const { theme, mutation, color } of combos) {
+          window.$store.commit('setBaseTheme', theme)
+          if (mutation) window.$store.commit(mutation, color)
+          await new Promise(resolve => setTimeout(resolve))
+          document.getAnimations().forEach(animation => animation.effect?.getComputedTiming().endTime !== Infinity && animation.finish())
+          const highlight = getComputedStyle(tab, '::before')
+          // The highlight sits below the tab's own hover fill.
+          const background = paint([
+            ...ancestors.map(node => [getComputedStyle(node).backgroundColor]),
+            [highlight.backgroundColor, Number(highlight.opacity)],
+            [getComputedStyle(tab).backgroundColor],
+          ])
+          results.push({ theme, color, foreground: paint([[getComputedStyle(tab).color]]), background })
+        }
+        return results
+      }, stateCombos)
+      for (const { theme, color, foreground, background } of results) {
+        const ratio = contrastRatio(foreground, background)
+        if (ratio < 4.5) failures.push(`${state} ${theme} ${color ?? ''} ${ratio.toFixed(2)}:1 ${JSON.stringify({ foreground, background })}`)
+      }
+    }
+    expect(failures).toEqual([])
   })
 })

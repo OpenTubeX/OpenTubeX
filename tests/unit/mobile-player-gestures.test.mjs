@@ -18,8 +18,8 @@ function fixture(t, { left = 'brightness', right = 'volume', fullscreenSwipe = t
   const frames = []
   globalThis.requestAnimationFrame = callback => { frames.push(callback); return frames.length }
   globalThis.Element = ElementStub
-  globalThis.document = { querySelector: () => ({ classList: { contains: () => mobile } }) }
-  globalThis.window = { setTimeout: (...args) => setTimeout(...args), matchMedia: () => ({ matches: reducedMotion }) }
+  globalThis.document = { documentElement: { dataset: { reducedMotion: reducedMotion ? 'reduce' : 'no-preference' } }, querySelector: () => ({ classList: { contains: () => mobile } }) }
+  globalThis.window = { setTimeout: (...args) => setTimeout(...args) }
   const surface = new ElementStub()
   const calls = []
   const captures = new Set()

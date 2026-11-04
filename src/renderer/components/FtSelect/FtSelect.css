@@ -567,19 +567,6 @@
   }
 }
 
-@media (prefers-reduced-motion: reduce) {
-  .select-dropdown-enter-active,
-  .select-dropdown-leave-active,
-  .select-text,
-  .selectOutline,
-  .selectOption::before,
-  .select-bar::before,
-  .select-bar::after,
-  .iconSelect {
-    transition: none;
-  }
-}
-
 .pickerSearchField {
   --input-bottom-spacing: 0;
 

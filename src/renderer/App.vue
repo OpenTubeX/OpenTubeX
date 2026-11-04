@@ -909,8 +909,7 @@ async function finishPageSwipe(event, cancelled = false) {
 
   const commit = !cancelled && !isAnyPromptOpen.value && shouldFinishPageSwipe(swipe.offset, swipe.width, event.timeStamp - pointer.time) &&
     findSwipeTab(store.getters.getTabs, swipe.fromId, swipe.direction)?.id === swipe.toId
-  const reducedMotion = document.documentElement.dataset.reducedMotion === 'reduce' ||
-    window.matchMedia('(prefers-reduced-motion: reduce)').matches
+  const reducedMotion = document.documentElement.dataset.reducedMotion === 'reduce'
   if (!reducedMotion) {
     // Let a fast drag paint once before starting the release transition.
     await nextTick()

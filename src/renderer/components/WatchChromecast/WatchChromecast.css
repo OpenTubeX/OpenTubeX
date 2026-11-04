@@ -38,7 +38,3 @@
 @keyframes cast-progress-spin {
   to { transform: rotate(360deg); }
 }
-
-@media (prefers-reduced-motion: reduce) {
-  .castProgressSpinner { animation: none; }
-}

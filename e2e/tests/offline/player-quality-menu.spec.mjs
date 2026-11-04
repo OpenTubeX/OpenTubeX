@@ -1,5 +1,5 @@
 import { test, expect, setWindowSize } from '../../helpers/app.mjs'
-import { activeTab, openMockedVideo, openPlayerOptions } from '../../helpers/player.mjs'
+import { activeTab, openMockedVideo, openPlayerOptions, settleMenuZoom } from '../../helpers/player.mjs'
 import { mockPlayableWatchPage } from '../../helpers/watch.mjs'
 import { POST_LIVE_VIDEO_URL, routePostLiveMedia } from '../../helpers/media.mjs'
 
@@ -401,6 +401,8 @@ test.describe('quality codecs with classic controls', () => {
     const dialog = player.locator('.phonePlayerOptions[open]')
     await dialog.locator('.shaka-resolution-button').click()
     await expect(dialog).toHaveAttribute('data-header-action', '')
+    // The zooming menu holds the switcher until the zoom has ended
+    await settleMenuZoom(player)
     const header = await dialog.locator(':scope > .shaka-back-to-overflow-button').boundingBox()
     // Away from the top of the window, where the viewport would place it
     expect(header.y).toBeGreaterThan(20)

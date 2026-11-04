@@ -970,13 +970,6 @@
   -webkit-box-orient: vertical;
 }
 
-@media (prefers-reduced-motion: reduce) {
-  .app {
-    --mobile-nav-reveal-transition: none;
-    --mobile-nav-hide-transition: none;
-  }
-}
-
 @media only screen and (width <= 680px) {
   :global(:root.appCompactNavigation body) {
     --mobile-nav-content-height: 48px;

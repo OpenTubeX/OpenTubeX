@@ -327,12 +327,4 @@ function updateTooltipPosition() {
   margin-block-start: 8px;
   text-align: end;
 }
-
-@media (prefers-reduced-motion: reduce) {
-  .tabTooltip,
-  .tab-tooltip-enter-active,
-  .tab-tooltip-leave-active {
-    transition: none;
-  }
-}
 </style>

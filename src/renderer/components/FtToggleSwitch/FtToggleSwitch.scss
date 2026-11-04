@@ -158,13 +158,6 @@
   }
 }
 
-@media (prefers-reduced-motion: reduce) {
-  .switch-label-text::before,
-  .switch-label-text .switch-thumb {
-    transition: none;
-  }
-}
-
 /* The label is the visible control, so it also owns the focus indicator. */
 /* stylelint-disable-next-line a11y/no-outline-none */
 .switch-input:focus-visible {

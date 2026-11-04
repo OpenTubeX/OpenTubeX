@@ -108,10 +108,3 @@
     padding-block: 12px;
   }
 }
-
-@media (prefers-reduced-motion: reduce) {
-  .pure-radiobutton input + label::before,
-  .pure-radiobutton input + label::after {
-    transition: none;
-  }
-}
