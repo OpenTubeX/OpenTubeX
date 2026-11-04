@@ -37,6 +37,7 @@
 
 .ftVideoPlayer:fullscreen.fullscreenDockLayoutOpen :is(
   :deep(.shaka-spinner-container),
+  .musicAudioSurface,
   .endedPoster,
   .endedScreen,
   .countdownPoster,
@@ -47,6 +48,7 @@
 ),
   .ftVideoPlayer.fullWindow.fullscreenDockLayoutOpen :is(
   :deep(.shaka-spinner-container),
+  .musicAudioSurface,
   .endedPoster,
   .endedScreen,
   .countdownPoster,
