@@ -445,6 +445,8 @@ test('panel scrollbar stays aligned with its viewport while scrolling', async ({
     body: `WEBVTT\n\n${cues.join('\n\n')}\n`,
   }))
   await openMockedVideo(page)
+  // Playback moves the active caption every second and scrolls the transcript to it.
+  await page.locator('video').evaluate(video => { video.pause(); video.currentTime = 0 })
   await setWindowSize(app, page, { width: 480, height: 800 })
   const watch = await watchViewHandle(page)
   await watch.evaluate(vm => vm.openPhonePanel('transcript'))
@@ -465,7 +467,8 @@ test('panel scrollbar stays aligned with its viewport while scrolling', async ({
   const initial = await measureAlignment()
   await page.mouse.wheel(0, 200)
   await expect.poll(() => segments.evaluate(element => element.scrollTop)).toBeGreaterThan(0)
+  // The handle follows a scroll timeline, which only advances in the next rendered frame.
+  await expect.poll(async () => (await measureAlignment()).handleOffset).toBeGreaterThan(initial.handleOffset)
   const alignment = await measureAlignment()
   expect(Math.abs(alignment.trackOffset - initial.trackOffset)).toBeLessThan(1)
-  expect(alignment.handleOffset).toBeGreaterThan(initial.handleOffset)
 })
