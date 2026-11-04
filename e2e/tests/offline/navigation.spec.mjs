@@ -244,8 +244,7 @@ test.describe('compact navigation labels', () => {
     await page.evaluate(() => {
       const store = window.$store
       store.commit('setAlwaysShowNavigationBar', true)
-      store.commit('setShowProgressBar', true)
-      store.commit('setProgressBarPercentage', 50)
+      store.commit('addProgressOperation', { id: 'e2e', icon: ['fas', 'sync'], message: '', percentage: 50 })
       document.documentElement.style.setProperty('--safe-area-inset-bottom', '24px')
       document.querySelector('.app').classList.add('capacitorPhoneLayout')
       const content = document.createElement('div')

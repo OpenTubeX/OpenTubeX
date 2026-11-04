@@ -4,61 +4,66 @@ import test from 'node:test'
 import { startProgressBarOperation } from '../../src/renderer/helpers/progressBar.js'
 
 function createStore () {
-  const state = {}
+  const state = { progressOperations: [] }
+  const mutations = {
+    addProgressOperation (operation) {
+      state.progressOperations.push(operation)
+    },
+    updateProgressOperation ({ id, ...progress }) {
+      Object.assign(state.progressOperations.find(operation => operation.id === id), progress)
+    },
+    removeProgressOperation (id) {
+      state.progressOperations = state.progressOperations.filter(operation => operation.id !== id)
+    },
+  }
   return {
     state,
     commit (mutation, value) {
-      state[mutation] = value
+      mutations[mutation](value)
     },
   }
 }
 
-test('restores an earlier operation after an overlapping operation finishes', () => {
+function visibleMessages (store) {
+  return store.state.progressOperations.map(operation => operation.message)
+}
+
+test('lists every running operation in the order they started', () => {
   const store = createStore()
   const first = startProgressBarOperation(store, {
-    icon: ['fas', 'forward'],
-    message: 'Playlist: 0 of 2',
+    icon: ['fas', 'rss'],
+    message: 'Refreshing RSS feeds',
     percentage: 0,
   })
-  first.update({ message: 'Playlist: 1 of 2', percentage: 50 })
-
   const second = startProgressBarOperation(store, {
-    icon: ['fas', 'forward'],
+    icon: ['fas', 'download'],
     message: 'Tool download: 0%',
     percentage: 0,
   })
-  first.update({ message: 'Playlist: 2 of 2', percentage: 100 })
-  assert.equal(store.state.setProgressBarMessage, 'Tool download: 0%')
 
-  second.finish()
-  assert.equal(store.state.setShowProgressBar, true)
-  assert.equal(store.state.setProgressBarMessage, 'Playlist: 2 of 2')
-  assert.equal(store.state.setProgressBarPercentage, 100)
+  first.update({ percentage: 50 })
+  second.update({ message: 'Tool download: 25%', percentage: 25 })
+  assert.deepEqual(store.state.progressOperations.map(({ message, percentage }) => ({ message, percentage })), [
+    { message: 'Refreshing RSS feeds', percentage: 50 },
+    { message: 'Tool download: 25%', percentage: 25 },
+  ])
 
   first.finish()
-  assert.equal(store.state.setShowProgressBar, false)
-  assert.equal(store.state.setProgressBarMessage, '')
-  assert.equal(store.state.setProgressBarPercentage, 0)
+  assert.deepEqual(visibleMessages(store), ['Tool download: 25%'])
+
+  second.finish()
+  assert.deepEqual(store.state.progressOperations, [])
 })
 
-test('keeps a newer operation visible when an earlier operation finishes', () => {
+test('ignores updates and repeated finishes after an operation finishes', () => {
   const store = createStore()
-  const first = startProgressBarOperation(store, {
-    icon: ['fas', 'forward'],
-    message: 'First',
-    percentage: 50,
-  })
-  const second = startProgressBarOperation(store, {
-    icon: ['fas', 'forward'],
-    message: 'Second',
-    percentage: 25,
-  })
+  const first = startProgressBarOperation(store, { icon: ['fas', 'sync'], message: 'First', percentage: 0 })
+  const second = startProgressBarOperation(store, { icon: ['fas', 'sync'], message: 'Second', percentage: 0 })
 
   first.finish()
-  assert.equal(store.state.setShowProgressBar, true)
-  assert.equal(store.state.setProgressBarMessage, 'Second')
-  assert.equal(store.state.setProgressBarPercentage, 25)
+  first.update({ message: 'Late update', percentage: 100 })
+  first.finish()
+  assert.deepEqual(visibleMessages(store), ['Second'])
 
   second.finish()
-  assert.equal(store.state.setShowProgressBar, false)
 })

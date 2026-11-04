@@ -151,7 +151,6 @@ test('mobile progress sits above the navigation without moving its active indica
     document.documentElement.style.setProperty('--safe-area-inset-bottom', '24px')
     const store = window.$store
     store.commit('setShowProgressBarToast', false)
-    store.commit('setShowProgressBar', false)
   })
   const nav = page.locator('.sideNav')
   const activeOption = nav.locator('.navOption.router-link-active:visible')
@@ -162,8 +161,7 @@ test('mobile progress sits above the navigation without moving its active indica
   const originalHeight = await nav.evaluate(element => element.getBoundingClientRect().height)
   await page.evaluate(() => {
     const store = window.$store
-    store.commit('setProgressBarPercentage', 50)
-    store.commit('setShowProgressBar', true)
+    store.commit('addProgressOperation', { id: 'e2e', icon: ['fas', 'sync'], message: '', percentage: 50 })
   })
   await expect(page.locator('.progressBar')).toBeVisible()
   const metrics = await nav.evaluate(element => {
@@ -180,7 +178,7 @@ test('mobile progress sits above the navigation without moving its active indica
   expect(metrics.progressBottom).toBeCloseTo(metrics.navTop, 0)
   expect(metrics.pill).toEqual(originalPill)
   await page.evaluate(() => {
-    window.$store.commit('setShowProgressBar', false)
+    window.$store.commit('removeProgressOperation', 'e2e')
   })
   await expect(page.locator('.progressBar')).toHaveCount(0)
   expect(await nav.evaluate(element => element.getBoundingClientRect().height)).toBeCloseTo(originalHeight, 0)

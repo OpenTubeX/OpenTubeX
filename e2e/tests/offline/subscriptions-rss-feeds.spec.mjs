@@ -821,6 +821,91 @@ test.describe('with followed feeds', () => {
   })
 })
 
+test.describe('with a followed feed and a YouTube subscription', () => {
+  const CHANNEL_ID = 'UC0000000000000000000000'
+
+  test.use({
+    seed: {
+      settings: {
+        fetchSubscriptionsAutomatically: false,
+        enableRssFeeds: true,
+        followedRssFeeds: [RSS_FEED],
+        useRssFeeds: true,
+        backendPreference: 'local',
+        hideSubscriptionsShorts: true,
+        hideSubscriptionsLive: true,
+        toastPosition: 'bottom-left'
+      },
+      profiles: [{
+        _id: 'allChannels',
+        name: 'All Channels',
+        bgColor: '#000000',
+        textColor: '#FFFFFF',
+        subscriptions: [{ id: CHANNEL_ID, name: 'YouTube channel', thumbnail: '' }]
+      }]
+    }
+  })
+
+  test('shows the progress of the subscription and RSS refreshes running together', { tag: '@scale' }, async ({ page }) => {
+    await mockFeeds(page)
+    await goTo(page, 'subscriptions')
+    await page.locator('[data-subscription-feed-tab="all"]').click()
+    await expect(page.locator('[data-rss-feeds-tab] .tabLoadingIndicator')).toHaveCount(0)
+
+    let releaseSubscriptions
+    let releaseRss
+    const subscriptionsHeld = new Promise(resolve => { releaseSubscriptions = resolve })
+    const rssHeld = new Promise(resolve => { releaseRss = resolve })
+    await page.route('**/feeds/videos.xml**', async route => {
+      await subscriptionsHeld
+      await route.fulfill({
+        contentType: 'application/xml',
+        body: `<?xml version="1.0" encoding="UTF-8"?>
+<feed xmlns:yt="http://www.youtube.com/xml/schemas/2015" xmlns="http://www.w3.org/2005/Atom">
+  <author><name>YouTube channel</name></author>
+</feed>`
+      }).catch(() => {})
+    })
+    await page.route(RSS_URL, async route => {
+      await rssHeld
+      await route.fulfill({ contentType: 'application/rss+xml', body: rssFeed }).catch(() => {})
+    })
+
+    // The New feed refreshes the subscriptions and the RSS feeds together
+    await page.locator('.subscriptionsHeader').getByRole('button', { name: /^Refresh / }).click()
+    const subscriptionToast = page.getByTestId('subscription-refresh-toast')
+    const rssToast = page.getByTestId('progress-toast')
+    await expect(subscriptionToast).toContainText('Refreshing subscription videos')
+    await expect(rssToast).toContainText('Refreshing RSS feeds')
+    await expect(rssToast.locator('.icon')).toHaveAttribute('data-icon', 'rss')
+
+    // The subscription refresh sits nearest the edge, with the RSS refresh above it
+    const subscriptionBounds = await subscriptionToast.boundingBox()
+    const rssBounds = await rssToast.boundingBox()
+    expect(rssBounds.y + rssBounds.height).toBeLessThanOrEqual(subscriptionBounds.y)
+
+    // Approaching either toast tucks them both away
+    const stack = page.locator('.persistent-stack')
+    await page.mouse.move(rssBounds.x + rssBounds.width / 2, rssBounds.y + rssBounds.height / 2)
+    await expect(stack).toHaveClass(/minimized/)
+    // Progress updates keep them tucked away while the pointer stays there
+    await page.evaluate(() => window.$store.commit('setSubscriptionFeedRefreshProgress', 50))
+    await expect(subscriptionToast.locator('.progress-indicator')).toHaveAttribute('data-progress', '50')
+    await page.evaluate(() => new Promise(resolve => requestAnimationFrame(() => requestAnimationFrame(resolve))))
+    await expect(stack).toHaveClass(/minimized/)
+    const viewport = await page.evaluate(() => ({ width: innerWidth, height: innerHeight }))
+    await page.mouse.move(viewport.width / 2, viewport.height / 2)
+    await expect(stack).not.toHaveClass(/minimized/)
+
+    releaseRss()
+    await expect(rssToast).toHaveCount(0)
+    await expect(subscriptionToast).toBeVisible()
+
+    releaseSubscriptions()
+    await expect(subscriptionToast).toHaveCount(0)
+  })
+})
+
 test.describe('with a followed feed', () => {
   test.use({
     seed: {

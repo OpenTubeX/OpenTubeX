@@ -1085,11 +1085,14 @@ const showAddToPlaylistPrompt = computed(() => store.getters.getShowAddToPlaylis
 /** @type {import('vue').ComputedRef<boolean>} */
 const showCreatePlaylistPrompt = computed(() => store.getters.getShowCreatePlaylistPrompt)
 
-/** @type {import('vue').ComputedRef<boolean>} */
-const localProgressBarVisible = computed(() => store.getters.getShowProgressBar)
-
-/** @type {import('vue').ComputedRef<boolean>} */
-const subscriptionRefreshInProgress = computed(() => store.getters.getSubscriptionFeedRefreshInProgress)
+/** @type {import('vue').ComputedRef<number[]>} */
+const progressPercentages = computed(() => {
+  const percentages = store.getters.getProgressOperations.map(operation => operation.percentage ?? 0)
+  if (store.getters.getSubscriptionFeedRefreshInProgress) {
+    percentages.unshift(store.getters.getSubscriptionFeedRefreshProgress)
+  }
+  return percentages
+})
 const progressUsesToast = computed(() => {
   return shouldUseProgressToast(store.getters.getEffectiveShowProgressBarToast)
 })
@@ -1098,13 +1101,12 @@ const showProgressStartToast = computed(() => {
 })
 
 const showProgressBar = computed(() => {
-  return (localProgressBarVisible.value && !progressUsesToast.value) ||
-    (subscriptionRefreshInProgress.value && !progressUsesToast.value)
+  return !progressUsesToast.value && progressPercentages.value.length > 0
 })
+// The single bar shows the combined progress of every running operation.
 const displayedProgressBarPercentage = computed(() => {
-  return localProgressBarVisible.value
-    ? store.getters.getProgressBarPercentage
-    : store.getters.getSubscriptionFeedRefreshProgress
+  const percentages = progressPercentages.value
+  return percentages.reduce((sum, percentage) => sum + percentage, 0) / Math.max(percentages.length, 1)
 })
 
 const landingPage = computed(() => '/' + store.getters.getLandingPage)

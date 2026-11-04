@@ -1383,10 +1383,7 @@ test.describe('global progress presentation', () => {
   test('uses a persistent notification or the global bar based on the theme setting', async ({ page }) => {
     await page.evaluate(() => {
       const store = window.$store
-      store.commit('setProgressBarMessage', 'Downloading yt-dlp and ffmpeg')
-      store.commit('setProgressBarIcon', ['fas', 'download'])
-      store.commit('setProgressBarPercentage', 42)
-      store.commit('setShowProgressBar', true)
+      store.commit('addProgressOperation', { id: 'e2e', icon: ['fas', 'download'], message: 'Downloading yt-dlp and ffmpeg', percentage: 42 })
     })
 
     const progressToast = page.getByTestId('progress-toast')

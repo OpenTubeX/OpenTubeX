@@ -289,79 +289,88 @@
   transform: scale(0.95);
 }
 
-.progress-toast-holder .toast-slot.persistent-slot {
+.progress-toast-holder .persistent-stack {
+  display: flex;
+  flex-direction: column;
+  align-items: inherit;
+  gap: 10px;
   transition: transform var(--motion-default-spatial);
 }
 
-.progress-toast-holder.position-bottom-left .persistent-slot {
+/* The first toast sits nearest the edge the stack is anchored to. */
+.progress-toast-holder:is(.position-bottom-left, .position-bottom-center, .position-bottom-right) .persistent-stack {
+  flex-direction: column-reverse;
+}
+
+.progress-toast-holder.position-bottom-left .persistent-stack {
   transform-origin: bottom left;
 }
 
-.progress-toast-holder.position-bottom-center .persistent-slot {
+.progress-toast-holder.position-bottom-center .persistent-stack {
   transform-origin: bottom center;
 }
 
-.progress-toast-holder.position-bottom-right .persistent-slot {
+.progress-toast-holder.position-bottom-right .persistent-stack {
   transform-origin: bottom right;
 }
 
-.progress-toast-holder.position-top-left .persistent-slot {
+.progress-toast-holder.position-top-left .persistent-stack {
   transform-origin: top left;
 }
 
-.progress-toast-holder.position-top-center .persistent-slot {
+.progress-toast-holder.position-top-center .persistent-stack {
   transform-origin: top center;
 }
 
-.progress-toast-holder.position-top-right .persistent-slot {
+.progress-toast-holder.position-top-right .persistent-stack {
   transform-origin: top right;
 }
 
-.progress-toast-holder.position-bottom-left .persistent-slot.minimized {
+.progress-toast-holder.position-bottom-left .persistent-stack.minimized {
   transform: translate(-18px, 18px) scale(0.5);
 }
 
-.progress-toast-holder.position-bottom-center .persistent-slot.minimized {
+.progress-toast-holder.position-bottom-center .persistent-stack.minimized {
   transform: translateY(18px) scale(0.5);
 }
 
-.progress-toast-holder.position-bottom-right .persistent-slot.minimized {
+.progress-toast-holder.position-bottom-right .persistent-stack.minimized {
   transform: translate(18px, 18px) scale(0.5);
 }
 
-.progress-toast-holder.position-top-left .persistent-slot.minimized {
+.progress-toast-holder.position-top-left .persistent-stack.minimized {
   transform: translate(-18px, -18px) scale(0.5);
 }
 
-.progress-toast-holder.position-top-center .persistent-slot.minimized {
+.progress-toast-holder.position-top-center .persistent-stack.minimized {
   transform: translateY(-18px) scale(0.5);
 }
 
-.progress-toast-holder.position-top-right .persistent-slot.minimized {
+.progress-toast-holder.position-top-right .persistent-stack.minimized {
   transform: translate(18px, -18px) scale(0.5);
 }
 
-.progress-toast-holder.top-tabs.position-top-left .persistent-slot.minimized {
+.progress-toast-holder.top-tabs.position-top-left .persistent-stack.minimized {
   transform: translateX(-18px) scale(0.5);
 }
 
-.progress-toast-holder.top-tabs.position-top-center .persistent-slot.minimized {
+.progress-toast-holder.top-tabs.position-top-center .persistent-stack.minimized {
   transform: scale(0.5);
 }
 
-.progress-toast-holder.top-tabs.position-top-right .persistent-slot.minimized {
+.progress-toast-holder.top-tabs.position-top-right .persistent-stack.minimized {
   transform: translateX(18px) scale(0.5);
 }
 
-.progress-toast-holder.bottom-tabs.position-bottom-left .persistent-slot.minimized {
+.progress-toast-holder.bottom-tabs.position-bottom-left .persistent-stack.minimized {
   transform: translateX(-18px) scale(0.5);
 }
 
-.progress-toast-holder.bottom-tabs.position-bottom-center .persistent-slot.minimized {
+.progress-toast-holder.bottom-tabs.position-bottom-center .persistent-stack.minimized {
   transform: scale(0.5);
 }
 
-.progress-toast-holder.bottom-tabs.position-bottom-right .persistent-slot.minimized {
+.progress-toast-holder.bottom-tabs.position-bottom-right .persistent-stack.minimized {
   transform: translateX(18px) scale(0.5);
 }
 
