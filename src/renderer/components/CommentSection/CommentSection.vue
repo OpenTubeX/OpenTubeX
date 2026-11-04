@@ -44,7 +44,7 @@
             :title="$t('Global.Sort By')"
             :disabled="offline"
             :aria-expanded="String(sortMenuOpen)"
-            @click="toggleSortMenu"
+            @click="toggleSortMenu($event.currentTarget)"
           >
             <FtIcon :icon="['fas', 'arrow-down-short-wide']" />
           </button>
@@ -660,6 +660,7 @@ import {
   shouldLoadInitialReplies
 } from '../../helpers/comment-replies'
 import { clampOverlayScrollTop, restoreOverlayScrollTop } from '../../helpers/overlayScrollbars'
+import { openMobileContextMenu, usesMobileContextSheet } from '../../helpers/buttonMenu'
 import { getYoutubeCommunityPostCommentUrl, getYoutubeVideoCommentUrl } from '../../helpers/share'
 import {
   createCommentPinSnapshot,
@@ -1149,6 +1150,10 @@ function closeCommentMenus() {
   sortMenuOpen.value = false
 }
 
+function closeSortSheet() {
+  window.dispatchEvent(new CustomEvent('opentubex:close-context-menu', { detail: sortSheetActions }))
+}
+
 watch(commentPinStorageKey, (contentKey) => {
   const pinState = loadCommentPins(contentKey)
   personalPinnedCommentIds.value = pinState.commentIds
@@ -1454,8 +1459,25 @@ const sortMenuOpen = ref(false)
 
 const currentSortValue = computed(() => sortNewest.value ? 'newest' : 'top')
 
-function toggleSortMenu() {
+// Phones show the sort options in the bottom sheet that context menus use.
+const sortSheetActions = computed(() => sortValues.map((value, index) => {
+  const selected = currentSortValue.value === value
+  return {
+    label: sortNames.value[index],
+    icon: selected ? ['fas', 'check'] : undefined,
+    checked: selected,
+    run: () => handleSortChange(value)
+  }
+}))
+
+/** @param {HTMLElement} button */
+function toggleSortMenu(button) {
   if (props.offline) return
+  if (usesMobileContextSheet()) {
+    commentFilterMenuOpen.value = false
+    openMobileContextMenu({ title: t('Global.Sort By'), actions: sortSheetActions, trigger: button })
+    return
+  }
   sortMenuOpen.value = !sortMenuOpen.value
   if (sortMenuOpen.value) {
     commentFilterMenuOpen.value = false
@@ -1505,9 +1527,14 @@ watch(() => commentData.value.slice(0, 5).map(comment => ({
 })), comments => emit('preview-comments', comments), { immediate: true })
 
 watch(() => commentData.value.length > 0, loaded => emit('loaded', loaded))
-onBeforeUnmount(() => emit('loaded', false))
+onBeforeUnmount(() => {
+  emit('loaded', false)
+  closeSortSheet()
+})
 watch(() => props.offline, offline => {
-  if (offline) closeCommentMenus()
+  if (!offline) return
+  closeCommentMenus()
+  closeSortSheet()
 })
 
 const enableChannelLinks = computed(() => !store.getters.getDisableChannelLinks)

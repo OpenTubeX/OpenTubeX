@@ -26,14 +26,18 @@ for (const presentation of ['phone', 'fullscreen']) {
     const sort = header.getByRole('button', { name: 'Sort by', exact: true })
     const reload = header.getByRole('button', { name: 'Reload Comments', exact: true })
     const filter = header.getByRole('button', { name: 'Filter loaded comments', exact: true })
+    // Phones show the sort options in the context menu sheet.
+    const sortMenu = presentation === 'phone'
+      ? page.getByRole('menu', { name: /^sort by$/i })
+      : header.locator('.fullscreenSortMenu')
     await sort.click()
-    await expect(header.locator('.fullscreenSortMenu')).toBeVisible()
+    await expect(sortMenu).toBeVisible()
 
     await page.evaluate(() => {
       Object.defineProperty(navigator, 'onLine', { configurable: true, get: () => false })
       window.dispatchEvent(new Event('offline'))
     })
-    await expect(header.locator('.fullscreenSortMenu')).toHaveCount(0)
+    await expect(sortMenu).toHaveCount(0)
     for (const button of [sort, reload]) {
       await expect(button).toBeDisabled()
       await expect(button).toHaveCSS('opacity', '0.5')
@@ -76,6 +80,6 @@ for (const presentation of ['phone', 'fullscreen']) {
       await expect(button).toHaveCSS('cursor', 'pointer')
     }
     await sort.click()
-    await expect(header.locator('.fullscreenSortMenu')).toBeVisible()
+    await expect(sortMenu).toBeVisible()
   })
 }
