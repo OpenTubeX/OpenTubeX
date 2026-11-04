@@ -32,6 +32,7 @@ body {
   --motion-fast-effects: 150ms linear(0, 0.058, 0.181, 0.321, 0.456, 0.574, 0.672, 0.751, 0.813, 0.861, 0.897, 0.924, 0.945, 0.96, 0.971, 0.979, 0.985, 0.989, 0.992, 0.994, 0.996, 0.997, 0.998, 0.999, 1);
   --motion-default-effects: 250ms linear(0, 0.057, 0.18, 0.32, 0.454, 0.572, 0.67, 0.749, 0.812, 0.86, 0.896, 0.924, 0.944, 0.959, 0.971, 0.979, 0.985, 0.989, 0.992, 0.994, 0.996, 0.997, 0.998, 0.999, 1);
   --motion-slow-effects: 350ms linear(0, 0.065, 0.2, 0.351, 0.491, 0.611, 0.708, 0.783, 0.841, 0.885, 0.917, 0.941, 0.958, 0.97, 0.979, 0.985, 0.99, 0.993, 0.995, 0.997, 0.998, 0.998, 0.999, 0.999, 1);
+  --modal-backdrop-blur: blur(2px);
   --focus-border-width: 2px;
   --form-control-height: 45px;
   --native-color-scheme: light;
@@ -2490,6 +2491,12 @@ a:visited {
 }
 
 /* stylelint-enable no-descending-specificity */
+
+@media (prefers-reduced-transparency) {
+  body {
+    --modal-backdrop-blur: none;
+  }
+}
 
 /* Follows the app's Reduced Motion setting, which already resolves the system
    preference, so choosing Off still animates on a reduced-motion system. */

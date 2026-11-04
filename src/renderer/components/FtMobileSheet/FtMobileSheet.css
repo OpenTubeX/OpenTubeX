@@ -51,6 +51,7 @@
 
 .compactSheet::backdrop {
   background: rgb(0 0 0 / 55%);
+  backdrop-filter: var(--modal-backdrop-blur);
 }
 
 .mobileSheetHeader {

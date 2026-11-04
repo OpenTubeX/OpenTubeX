@@ -6,6 +6,7 @@
   inline-size: 100%;
   block-size: 100%;
   background-color: rgb(0 0 0 / 70%);
+  backdrop-filter: var(--modal-backdrop-blur);
 
   /* Higher than components like playlist info */
   z-index: 201;

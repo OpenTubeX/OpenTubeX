@@ -2,6 +2,7 @@
   align-items: flex-start;
   animation: command-palette-backdrop-enter var(--motion-fast-effects);
   background: rgb(0 0 0 / 68%);
+  backdrop-filter: var(--modal-backdrop-blur);
   block-size: 100%;
   box-sizing: border-box;
   display: flex;
