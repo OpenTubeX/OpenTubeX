@@ -322,3 +322,51 @@
   z-index: 100;
   pointer-events: auto;
 }
+
+// animatedDropdown: the same open and close animation as the quick settings menu.
+.icon-dropdown-enter-active .iconDropdown {
+  transition:
+    opacity var(--motion-default-effects),
+    transform var(--motion-default-spatial);
+}
+
+.icon-dropdown-leave-active {
+  // Clicks during the close animation reach the page below.
+  pointer-events: none;
+
+  .iconDropdown {
+    transition:
+      opacity var(--motion-fast-effects),
+      transform var(--motion-fast-effects);
+  }
+}
+
+.icon-dropdown-enter-active,
+.icon-dropdown-leave-active {
+  .iconDropdown {
+    transform-origin: top;
+
+    &.left {
+      transform-origin: top right;
+    }
+
+    &.right {
+      transform-origin: top left;
+    }
+  }
+}
+
+.icon-dropdown-enter-from,
+.icon-dropdown-leave-to {
+  .iconDropdown {
+    opacity: 0;
+    transform: translateY(-8px) scale(0.92);
+  }
+}
+
+:root[data-reduced-motion='reduce'] {
+  .icon-dropdown-enter-active .iconDropdown,
+  .icon-dropdown-leave-active .iconDropdown {
+    transition: none;
+  }
+}

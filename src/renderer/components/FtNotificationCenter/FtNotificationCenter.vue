@@ -11,6 +11,7 @@
     force-dropdown
     mobile-sheet
     dropdown-portal
+    animated-dropdown
     dropdown-position-x="left"
     dropdown-class="notificationCenterDropdown"
     @dropdown-open="handleOpen"
