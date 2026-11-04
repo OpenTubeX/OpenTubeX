@@ -4,7 +4,7 @@
       ref="triggerRef"
       type="button"
       class="colorFieldTrigger"
-      :style="{ anchorName: popoverAnchor }"
+      :style="{ anchorName: open ? popoverAnchor : null }"
       :aria-label="label"
       :aria-expanded="open"
       :title="`${label}: ${modelValue}`"

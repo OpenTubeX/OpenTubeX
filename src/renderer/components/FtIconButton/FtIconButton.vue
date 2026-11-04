@@ -17,7 +17,7 @@
       :style="{
         padding: padding + 'px',
         fontSize: size + 'px',
-        anchorName: dropdownAnchor
+        anchorName: dropdownShown ? dropdownAnchor : null
       }"
       :aria-disabled="disabled"
       :aria-expanded="ariaExpanded ?? dropdownShown"

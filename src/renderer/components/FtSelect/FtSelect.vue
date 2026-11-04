@@ -43,7 +43,7 @@
       :disabled="disabled"
       :dir="isLocaleSelector ? 'auto' : null"
       :lang="selectedLocale"
-      :style="{ anchorName: dropdownAnchor }"
+      :style="{ anchorName: dropdownRendered ? dropdownAnchor : null }"
       @click="toggleDropdown"
       @keydown="handleButtonKeydown"
     >

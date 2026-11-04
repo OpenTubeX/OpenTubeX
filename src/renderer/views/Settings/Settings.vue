@@ -379,6 +379,7 @@ import {
   onBeforeUnmount,
   onDeactivated,
   onMounted,
+  onUpdated,
   provide,
   ref,
   useId,
@@ -546,7 +547,8 @@ let draggingPointerId = null
 let resizeSession = null
 let dragOffsetX = 0
 let dragOffsetY = 0
-let draggedBounds = null
+/** Bounds applied directly to the element while a drag or resize is in progress */
+let liveBounds = null
 let maximizedDragSession = null
 let restoreBounds = null
 /** @type {Array<{ element: HTMLElement, scrollTop: number }>} */
@@ -810,6 +812,11 @@ provide(settingsSubpageKey, {
 // KeepAlive retains the window while it is closed.
 const windowActive = ref(true)
 useRootClass('appSettingsMaximized', () => windowActive.value && isWindowMaximized.value)
+// Vue rewrites the bound style on every update, which would put a gesture's
+// window back at its committed bounds until the pointer is released.
+onUpdated(() => {
+  if (liveBounds !== null) applyLiveBounds()
+})
 onMounted(() => {
   handleMounted()
   systemColorScheme.addEventListener('change', updateSystemColorScheme)
@@ -1555,23 +1562,33 @@ function dragWindow(event) {
     isMaximized.value = false
     return
   }
-  draggedBounds = clampBounds({
+  liveBounds = clampBounds({
     ...windowBounds.value,
     x: event.clientX - dragOffsetX,
     y: event.clientY - dragOffsetY
   })
   // Updating reactive bounds here also rerenders the settings controls and their
   // scrollbar directives. Only commit the final bounds when the drag stops.
-  settingsWindowRef.value.style.translate = getWindowTranslate(draggedBounds)
+  applyLiveBounds()
+}
+
+function applyLiveBounds() {
+  const { style } = settingsWindowRef.value
+  style.translate = getWindowTranslate(liveBounds)
+  style.inlineSize = `${liveBounds.width}px`
+  style.blockSize = `${liveBounds.height}px`
+}
+
+function commitLiveBounds() {
+  if (liveBounds === null) return
+  windowBounds.value = liveBounds
+  liveBounds = null
 }
 
 function stopDragging(event) {
   if (event && event.pointerId !== draggingPointerId) return
   if (draggingPointerId === null) return
-  if (draggedBounds !== null) {
-    windowBounds.value = draggedBounds
-    draggedBounds = null
-  }
+  commitLiveBounds()
   draggingPointerId = null
   maximizedDragSession = null
   document.documentElement.classList.remove('draggingSettingsWindow')
@@ -1633,16 +1650,19 @@ function resizeWindow(event) {
     else bottom = Math.min(maximumBottom, top + minimumHeight)
   }
 
-  windowBounds.value = {
+  liveBounds = {
     x: left,
     y: top,
     width: right - left,
     height: bottom - top
   }
+  // As with dragging, commit the reactive bounds only when the resize stops.
+  applyLiveBounds()
 }
 
 function stopResizing(event) {
   if (resizeSession === null || (event && event.pointerId !== resizeSession.pointerId)) return
+  commitLiveBounds()
   resizeSession = null
   document.documentElement.classList.remove('resizingSettingsWindow')
   document.documentElement.style.removeProperty('cursor')
@@ -1654,7 +1674,10 @@ function stopResizing(event) {
 
 function handleViewportResize() {
   updateNarrowLayout()
-  if (isMaximizationForced.value) stopDragging()
+  if (isMaximizationForced.value) {
+    stopDragging()
+    stopResizing()
+  }
   clampWindowToViewport()
 }
 
@@ -1664,8 +1687,8 @@ function updateNarrowLayout() {
 
 function clampWindowToViewport() {
   if (isWindowMaximized.value) return
-  windowBounds.value = clampBounds(draggedBounds ?? windowBounds.value)
-  if (draggedBounds !== null) draggedBounds = windowBounds.value
+  windowBounds.value = clampBounds(liveBounds ?? windowBounds.value)
+  if (liveBounds !== null) liveBounds = windowBounds.value
 }
 
 // Whole CSS pixels still fall between device pixels at fractional UI or display

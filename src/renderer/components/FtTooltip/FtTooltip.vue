@@ -5,7 +5,7 @@
       :aria-labelledby="id"
       class="button"
       type="button"
-      :style="{ anchorName: tooltipAnchor }"
+      :style="{ anchorName: visible ? tooltipAnchor : null }"
       @mouseenter="setHovered(true)"
       @mouseleave="setHovered(false)"
       @focus="setFocused(true)"
