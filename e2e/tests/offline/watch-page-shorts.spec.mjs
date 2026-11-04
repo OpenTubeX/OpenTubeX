@@ -122,10 +122,15 @@ test.describe('Shorts transcript navigation', () => {
     await expect(channelRow.locator('.subscribeButton')).toHaveText(/^Subscribe\b/)
     await channelRow.locator('.subscribeButton').click()
     await expect(channelRow.locator('.notificationBell')).toBeVisible()
-    await channelRow.locator('.profileDropdownToggle').click()
+    // The toggle can end a few pixels below the fold, and Playwright would
+    // scroll it into view. Subscribing fills the subscription Shorts feed, so
+    // that document scroll would advance to the next Short.
+    await channelRow.locator('.profileDropdownToggle').evaluate(element => element.click())
     const dropdown = page.locator('.profileDropdown')
     await expect(dropdown.getByRole('group', { name: 'Show in subscription feed' }).getByRole('checkbox')).toHaveCount(4)
-    await dropdown.press('Escape')
+    // Locator.press() would also scroll the dropdown into view.
+    await expect(dropdown).toBeFocused()
+    await page.keyboard.press('Escape')
     await expect(dropdown).toBeHidden()
 
     await setPlayerFullscreen(page, true)
