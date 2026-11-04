@@ -9,18 +9,24 @@ test.use({
   }
 })
 
+/**
+ * Opens the hashtag in a new active tab. A background tab can finish loading
+ * while a click on it is pending, and its relabeling can move the click onto
+ * its close button.
+ * @param {import('@playwright/test').Page} page
+ * @param {string} hashtag
+ */
+async function openHashtag(page, hashtag) {
+  await page.evaluate(route => window.ftElectron.tabs.create({ route, makeActive: true }), `/hashtag/${hashtag}`)
+  await expect(page).toHaveURL(new RegExp(`#/hashtag/${hashtag}`))
+}
+
 test('stops showing the auto-load spinner when a hashtag has no more videos', async ({ page }) => {
   await page.route('**/api/v1/hashtag/**', async (route) => {
     await route.fulfill({ json: { results: [] } })
   })
 
-  const hashtagTab = await page.evaluate(() => window.ftElectron.tabs.create({
-    route: '/hashtag/pagination-test',
-    makeActive: false
-  }))
-  await page.locator(`.tab[data-tab-id="${hashtagTab.id}"]`).click()
-
-  await expect(page).toHaveURL(/#\/hashtag\/pagination-test/)
+  await openHashtag(page, 'pagination-test')
   await expect(page.getByText('This hashtag does not currently have any videos')).toBeVisible()
   await expect(page.locator('.ft-auto-load-next-page-wrapper')).toHaveCount(0)
 })
@@ -33,26 +39,11 @@ test('does not offer to fetch more after the initial hashtag request fails', asy
     response.url().includes('/api/v1/hashtag/') && response.status() === 500
   )
 
-  const hashtagTab = await page.evaluate(() => window.ftElectron.tabs.create({
-    route: '/hashtag/request-failure',
-    makeActive: false
-  }))
-  await page.locator(`.tab[data-tab-id="${hashtagTab.id}"]`).click()
-
-  await expect(page).toHaveURL(/#\/hashtag\/request-failure/)
+  await openHashtag(page, 'request-failure')
   await failedResponse
   await expect(page.getByText('This hashtag does not currently have any videos')).toBeVisible()
   await expect(page.locator('.ft-auto-load-next-page-wrapper')).toHaveCount(0)
 })
-
-/**
- * @param {import('@playwright/test').Page} page
- * @param {string} hashtag
- */
-async function openHashtag(page, hashtag) {
-  const hashtagTab = await page.evaluate(route => window.ftElectron.tabs.create({ route, makeActive: false }), `/hashtag/${hashtag}`)
-  await page.locator(`.tab[data-tab-id="${hashtagTab.id}"]`).click()
-}
 
 /**
  * @param {string} videoId
@@ -69,7 +60,10 @@ test('falls back to Invidious with the requested hashtag', async ({ page }) => {
   ]))
   await page.route('https://www.youtube.com/youtubei/v1/browse**', route => route.fulfill({ status: 500, json: {} }))
   const invidiousRequest = page.waitForRequest('**/api/v1/hashtag/**')
-  await page.route('**/api/v1/hashtag/**', route => route.fulfill({ json: { results: [hashtagVideo('fallback001', 'Fallback video')] } }))
+  // Auto-loading asks for the next page right after the first one renders.
+  await page.route('**/api/v1/hashtag/**', route => route.fulfill({
+    json: { results: new URL(route.request().url()).searchParams.get('page') === '1' ? [hashtagVideo('fallback001', 'Fallback video')] : [] }
+  }))
 
   await openHashtag(page, 'music')
 

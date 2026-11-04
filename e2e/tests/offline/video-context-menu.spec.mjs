@@ -688,3 +688,37 @@ test('mobile quick actions stay unhighlighted under a touch point that cannot ho
     await session.detach()
   }
 })
+
+test('mobile context sheet moves between items and submenus with arrow keys', async ({ page }) => {
+  await goTo(page, 'history')
+  await page.setViewportSize({ width: 375, height: 812 })
+  await page.locator('.ft-list-video .title').first().evaluate(element => element.dispatchEvent(new PointerEvent('contextmenu', {
+    bubbles: true, cancelable: true, pointerType: 'touch'
+  })))
+  const menu = page.locator('.mobileLinkActions')
+  await expect(menu).toBeFocused()
+  const item = name => menu.getByRole('menuitem', { name, exact: true })
+  const press = async (key, focused) => {
+    await page.keyboard.press(key)
+    await expect(focused).toBeFocused()
+  }
+
+  await press('ArrowDown', item('Open in a New Tab'))
+  // Left and Right stay within a quick action row and wrap around it.
+  await press('ArrowRight', item('Open in a New Window'))
+  await press('ArrowLeft', item('Open in a New Tab'))
+  await press('ArrowLeft', item('Add to Queue'))
+  await press('ArrowDown', item('Open in a Background Tab'))
+  await press('End', item('Open Link'))
+  await press('ArrowDown', item('Open in a New Tab'))
+  await press('ArrowUp', item('Open Link'))
+  await press('ArrowUp', item('Copy Link'))
+  await press('ArrowLeft', item('Copy Link'))
+
+  await press('ArrowRight', item('Copy YouTube Link'))
+  await expect(menu).toHaveAttribute('aria-label', 'Copy Link')
+  await press('ArrowDown', item('Copy Invidious Link'))
+  await press('Home', menu.getByRole('button', { name: 'Back', exact: true }))
+  await press('ArrowLeft', item('Copy Link'))
+  await expect(menu.locator('strong')).toHaveText('Video menu test')
+})
