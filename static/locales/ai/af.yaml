@@ -1712,6 +1712,8 @@ Profile:
   Theme Color: Temakleur
   Go To Profile Manager: Gaan na profielbestuurder
 Channel:
+  Fewer videos per day: "Minder video’s per dag"
+  More videos per day: "Meer video’s per dag"
   Subscription settings: Intekeninginstellings
   Failed to save subscription settings: Kon nie kanaalinstellings stoor nie
   Videos per day: Video’s per dag
@@ -2064,6 +2066,7 @@ Video:
       SubmitCategoryVote: Dien kategoriestem in
       CategoryVoteSuccess: Kategoriestem ingedien.
     Google Cast:
+      Position: "Afspeelposisie"
       Invalid Authentication: Die ontvanger het ’n ongeldige verifikasieantwoord gestuur.
       Authentication Declined: Die ontvanger het verifikasie geweier.
       Audio Only Receiver: Die ontvanger ondersteun slegs oudio-uitsaai.

@@ -1560,6 +1560,8 @@ Profile:
   Theme Color: Колер тэмы
   Go To Profile Manager: Перайсці да кіравання профілямі
 Channel:
+  Fewer videos per day: "Менш відэа за дзень"
+  More videos per day: "Больш відэа за дзень"
   Verified: Пацверджаны
   Official Artist Channel: Афіцыйны канал выканаўцы
   About:
@@ -1877,6 +1879,7 @@ Video:
       SubmitCategoryVote: Адправіць голас за катэгорыю
       CategoryVoteSuccess: Голас за катэгорыю адпраўлены.
     Google Cast:
+      Position: "Пазіцыя прайгравання"
       Invalid Authentication: "Прыёмнік даслаў няправільны адказ аўтэнтыфікацыі."
       Authentication Declined: "Прыёмнік адхіліў аўтэнтыфікацыю."
       Audio Only Receiver: "Прыёмнік падтрымлівае толькі трансляцыю аўдыя."

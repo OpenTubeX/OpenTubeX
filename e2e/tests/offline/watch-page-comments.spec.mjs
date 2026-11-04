@@ -810,6 +810,10 @@ test.describe('manual comment loading', () => {
     await page.getByRole('button', { name: 'Filter loaded comments' }).click()
     const creatorFilter = page.getByRole('checkbox', { name: 'From creator' })
     await expect(creatorFilter.locator('img.commentCreatorFilterAvatar')).toHaveAttribute('src', /.+/)
+    // Rows highlight on hover like the other menus.
+    await expect(creatorFilter).toHaveCSS('background-color', 'rgba(0, 0, 0, 0)')
+    await creatorFilter.hover()
+    await expect(creatorFilter).not.toHaveCSS('background-color', 'rgba(0, 0, 0, 0)')
     await creatorFilter.click()
 
     await expect(page.locator('.commentThread')).toHaveCount(1)

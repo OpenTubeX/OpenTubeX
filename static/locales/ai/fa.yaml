@@ -1557,6 +1557,8 @@ Profile:
   Theme Color: رنگ پوسته
   Go To Profile Manager: رفتن به مدیر نمایه‌ها
 Channel:
+  Fewer videos per day: "ویدیوی کمتر در روز"
+  More videos per day: "ویدیوی بیشتر در روز"
   Verified: تأییدشده
   Official Artist Channel: کانال رسمی هنرمند
   About:
@@ -1871,6 +1873,7 @@ Video:
       SubmitCategoryVote: ارسال رأی دسته‌بندی
       CategoryVoteSuccess: رأی دسته‌بندی ارسال شد.
     Google Cast:
+      Position: "موقعیت پخش"
       Invalid Authentication: "گیرنده پاسخ احراز هویت نامعتبری فرستاد."
       Authentication Declined: "گیرنده احراز هویت را رد کرد."
       Audio Only Receiver: "گیرنده فقط از پخش صدا پشتیبانی می‌کند."

@@ -325,15 +325,17 @@ test.describe('editing subscription groups', () => {
     await expect(music.locator('.ft-icon')).toHaveCount(1)
     expect((await storedGroups(page)).find(group => group.id === 'music').icon).toBe('headphones')
 
-    // The subscribe button's group list aligns names when only some groups have an icon
-    await page.locator('.channel', { hasText: 'Alpha Channel' }).locator('.profileDropdownToggle').click()
+    // The subscribe button's group chips show a group's icon, or a check once the channel is in the group
+    await groups(page).getByRole('tab', { name: 'All' }).click()
+    await page.locator('.channel', { hasText: 'Beta Channel' }).locator('.profileDropdownToggle').click()
     const groupList = page.locator('.profileDropdown').getByRole('group', { name: 'Groups' })
-    await expect(groupList.getByRole('checkbox', { name: 'Music' }).locator('.groupIcon .ft-icon')).toHaveCount(1)
-    await expect(groupList.getByRole('checkbox', { name: 'Empty' }).locator('.groupIcon .ft-icon')).toHaveCount(0)
-    const nameStarts = await groupList.locator('.profileName').evaluateAll(names => {
-      return names.map(name => name.getBoundingClientRect().left)
-    })
-    expect(nameStarts[0]).toBeCloseTo(nameStarts[1], 1)
+    await expect(groupList.getByRole('checkbox', { name: 'Music' }).locator('.ft-icon')).toHaveAttribute('data-icon', 'headphones')
+    await expect(groupList.getByRole('checkbox', { name: 'Empty' }).locator('.ft-icon')).toHaveCount(0)
+    await page.keyboard.press('Escape')
+    await page.locator('.channel', { hasText: 'Alpha Channel' }).locator('.profileDropdownToggle').click()
+    await expect(groupList.getByRole('checkbox', { name: 'Music' }).locator('.ft-icon')).toHaveAttribute('data-icon', 'check')
+    await page.keyboard.press('Escape')
+    await music.click()
 
     await page.getByRole('button', { name: 'Edit Group' }).click()
     await expect(icons.getByRole('button', { name: 'Music', exact: true })).toHaveAttribute('aria-pressed', 'true')
@@ -435,6 +437,26 @@ test.describe('editing subscription groups', () => {
     await expect(music).toHaveAttribute('aria-checked', 'false')
     await expect.poll(async () => (await storedGroups(page)).find(group => group.id === 'music').channelIds)
       .toEqual([ALPHA, GAMMA, 'UCnotsubscribedhere00000'])
+  })
+
+  test('phones show the subscription settings in a bottom sheet that stays open while toggling', async ({ page }) => {
+    await page.setViewportSize({ width: 375, height: 812 })
+    await goTo(page, 'subscribedchannels')
+    await page.locator('.channel', { hasText: 'Beta Channel' }).locator('.profileDropdownToggle').click()
+
+    const sheet = page.getByRole('dialog', { name: 'Subscription settings', exact: true })
+    await expect(sheet).toHaveClass(/bottomSheet/)
+    await expect(sheet.locator('.profileDropdown')).toHaveCSS('position', 'static')
+    const music = sheet.getByRole('group', { name: 'Groups' }).getByRole('checkbox', { name: 'Music' })
+    await music.click()
+    await expect(music).toHaveAttribute('aria-checked', 'true')
+    await expect(sheet).toBeVisible()
+    await expect.poll(async () => (await storedGroups(page)).find(group => group.id === 'music').channelIds)
+      .toContain(BETA)
+
+    await sheet.getByRole('button', { name: 'Close', exact: true }).click()
+    await expect(sheet).toHaveCount(0)
+    await expect(page.locator('.profileDropdown')).toHaveCount(0)
   })
 })
 

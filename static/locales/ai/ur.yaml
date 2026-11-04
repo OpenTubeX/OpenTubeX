@@ -1575,6 +1575,8 @@ Profile:
   Theme Color: تھیم کا رنگ
   Go To Profile Manager: پروفائل مینیجر پر جائیں
 Channel:
+  Fewer videos per day: "فی دن کم ویڈیوز"
+  More videos per day: "فی دن زیادہ ویڈیوز"
   Subscription settings: سبسکرپشن سیٹنگز
   Failed to save subscription settings: چینل سیٹنگز محفوظ نہیں ہو سکیں
   Videos per day: فی دن ویڈیوز
@@ -1923,6 +1925,7 @@ Video:
       SubmitCategoryVote: کیٹیگری ووٹ جمع کرائیں
       CategoryVoteSuccess: کیٹیگری ووٹ جمع ہو گیا۔
     Google Cast:
+      Position: "پلے بیک کی جگہ"
       Invalid Authentication: ریسیور نے غلط تصدیقی جواب بھیجا۔
       Authentication Declined: ریسیور نے تصدیق مسترد کر دی۔
       Audio Only Receiver: ریسیور صرف آڈیو کاسٹنگ کو سپورٹ کرتا ہے۔

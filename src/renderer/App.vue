@@ -348,7 +348,7 @@
                 </div>
                 <template
                   v-for="(action, index) in mobileContextMenuRows"
-                  :key="action.label ?? index"
+                  :key="`${index}:${action.label}`"
                 >
                   <div
                     v-if="action.type === 'separator'"
@@ -358,14 +358,20 @@
                   <button
                     v-else
                     type="button"
-                    role="menuitem"
+                    :role="action.checked === undefined ? 'menuitem' : 'menuitemcheckbox'"
+                    :aria-checked="action.checked"
                     :aria-label="action.label"
                     :disabled="action.enabled === false"
                     :aria-haspopup="action.submenu ? 'menu' : undefined"
                     @click="runMobileContextAction(action)"
                   >
                     <FtIcon
+                      v-if="action.icon"
                       :icon="action.icon"
+                      aria-hidden="true"
+                    />
+                    <span
+                      v-else
                       aria-hidden="true"
                     />
                     <span>{{ action.label }}</span>
@@ -592,6 +598,7 @@
 
 <script setup>
 import { useBottomSheetDismiss } from './composables/useBottomSheetDismiss'
+import { OPEN_MOBILE_CONTEXT_MENU_EVENT } from './helpers/buttonMenu'
 import { installIosContextMenu } from './helpers/iosContextMenu'
 import '@fontsource-variable/geist'
 import '@fontsource-variable/google-sans'
@@ -1173,13 +1180,22 @@ const mobileContextMenuRows = computed(() => {
   return collapseSeparators(rows)
 })
 const mobileContextMenuTitle = computed(() => mobileContextMenuStack.value.at(-1).label)
-provide('openMobileContextActions', async (menu) => {
+// The button that opened the sheet gets focus back when it closes.
+let mobileContextTrigger = null
+let mobileContextReturnFocus = null
+async function openMobileContextActions(menu) {
+  if (!mobileContextActions.value) mobileContextTrigger = menu.trigger ?? null
   mobileContextMenuPath.value = []
   mobileContextLink.value = null
   mobileContextActions.value = menu
   await nextTick()
   mobileLinkActionsRef.value?.focus({ preventScroll: true })
-})
+}
+provide('openMobileContextActions', openMobileContextActions)
+/** @param {CustomEvent} event */
+function handleOpenMobileContextMenu(event) {
+  openMobileContextActions(event.detail)
+}
 const mobileLinkActionsPromptId = useId()
 const mobileLinkActionsRef = useTemplateRef('mobileLinkActionsRef')
 const {
@@ -1245,6 +1261,14 @@ function releaseMobileContextSheet() {
   store.commit('removeOpenPrompt', mobileLinkActionsPromptId)
   unlockBodyScroll()
   mobileLinkActionsLocked = false
+  const trigger = mobileContextReturnFocus
+  mobileContextReturnFocus = null
+  // The app stays inert until the prompt is removed. Skip it when an action already moved focus, like into a dialog.
+  nextTick(() => {
+    if (trigger instanceof HTMLElement && trigger.isConnected && (!document.activeElement || document.activeElement === document.body)) {
+      trigger.focus({ preventScroll: true })
+    }
+  })
 }
 const tabOrganizerOpen = ref(false)
 const showAndroidExitPrompt = ref(false)
@@ -1937,6 +1961,7 @@ onMounted(async () => {
 
   document.addEventListener('keydown', handleKeyboardShortcuts)
   window.addEventListener('opentubex:close-context-menu', closeOwnedMobileContextMenu)
+  window.addEventListener(OPEN_MOBILE_CONTEXT_MENU_EVENT, handleOpenMobileContextMenu)
   window.addEventListener(OPEN_COMMAND_PALETTE_EVENT, openCommandPalette)
   window.addEventListener(OPEN_TAB_ORGANIZER_EVENT, openTabOrganizer)
   if (isCapacitor) {
@@ -1991,6 +2016,7 @@ onBeforeUnmount(() => {
   store.dispatch('stopSyncServerAutoSync')
   document.removeEventListener('keydown', handleKeyboardShortcuts)
   window.removeEventListener('opentubex:close-context-menu', closeOwnedMobileContextMenu)
+  window.removeEventListener(OPEN_MOBILE_CONTEXT_MENU_EVENT, handleOpenMobileContextMenu)
   window.removeEventListener(OPEN_COMMAND_PALETTE_EVENT, openCommandPalette)
   window.removeEventListener(OPEN_TAB_ORGANIZER_EVENT, openTabOrganizer)
   window.removeEventListener('opentubex:android-pip', handleAndroidPictureInPictureChange)
@@ -3905,6 +3931,8 @@ function closeOwnedMobileContextMenu(event) {
 watch(() => route.fullPath, closeMobileLinkActions)
 
 function closeMobileLinkActions() {
+  mobileContextReturnFocus = mobileContextTrigger ?? mobileContextReturnFocus
+  mobileContextTrigger = null
   mobileContextMenuPath.value = []
   mobileContextLink.value = null
   mobileContextActions.value = null

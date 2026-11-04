@@ -8,7 +8,7 @@
         v-if="isOpen"
         ref="menuRef"
         class="contextMenu"
-        :class="{ submenusOpenStart, compactTabMenu: tabColorMenu != null, videoMenu: localItems != null, touchFriendly, nativeTouchMenu: touchFriendly && IS_CAPACITOR }"
+        :class="{ submenusOpenStart, compactTabMenu: tabColorMenu != null, videoMenu: localItems != null, touchFriendly }"
         :style="menuStyle"
         role="menu"
         :aria-label="t('Context Menu.Context Menu')"
@@ -203,7 +203,6 @@ import { getTabDeviceMenuItem } from '../../helpers/tab-device-menu'
 import { collapseSeparators } from '../../helpers/menuSeparators'
 
 const { t } = useI18n()
-const IS_CAPACITOR = !!process.env.IS_CAPACITOR
 const route = useRoute()
 const menuRef = useTemplateRef('menuRef')
 const fullscreenTarget = ref(null)

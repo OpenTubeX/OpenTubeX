@@ -1492,6 +1492,8 @@ Profile:
   The selected image could not be loaded: Impossibile caricare l'immagine selezionata
   Theme Color: Colore del tema
 Channel:
+  Fewer videos per day: "Meno video al giorno"
+  More videos per day: "Più video al giorno"
   Verified: Verificato
   Official Artist Channel: Canale ufficiale dell’artista
   Subscription settings: Impostazioni iscrizione
@@ -1788,6 +1790,7 @@ Video:
       SubmitCategoryVote: Invia voto per la categoria
       CategoryVoteSuccess: Voto per la categoria inviato.
     Google Cast:
+      Position: "Posizione di riproduzione"
       Invalid Authentication: "Il ricevitore ha inviato una risposta di autenticazione non valida."
       Authentication Declined: "Il ricevitore ha rifiutato l’autenticazione."
       Audio Only Receiver: "Il ricevitore supporta solo la trasmissione audio."

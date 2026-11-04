@@ -80,7 +80,7 @@ test.describe('subscription settings layout', { tag: '@scale' }, () => {
     }
   })
 
-  test('keeps subscription popover controls compact', async ({ app, page }, testInfo) => {
+  test('keeps subscription popover controls within the popover', async ({ app, page }, testInfo) => {
     await page.emulateMedia({ reducedMotion: 'reduce' })
     await goTo(page, 'subscribedchannels')
     const alpha = page.locator('.channel', { hasText: 'Alpha Channel' })
@@ -90,30 +90,22 @@ test.describe('subscription settings layout', { tag: '@scale' }, () => {
       await setWindowSize(app, page, { width, height: width === 1200 ? 800 : 900 })
       for (const direction of ['ltr', 'rtl']) {
         await page.evaluate(value => { document.body.dir = value }, direction)
-        const gap = await popover.evaluate(element => {
-          const members = element.querySelector('.membersOnlyPreference .switch-label').getBoundingClientRect()
-          const label = element.querySelector('.dailyVideoLimitSelect .select-label').getBoundingClientRect()
-          return label.top - members.bottom
+        const overflow = await popover.evaluate(element => {
+          const bounds = element.getBoundingClientRect()
+          return [...element.querySelectorAll('.preferenceChip, .dailyVideoLimit, .membersOnlyPreference')].some(control => {
+            const rect = control.getBoundingClientRect()
+            return rect.left < bounds.left - 0.5 || rect.right > bounds.right + 0.5 || control.scrollWidth > control.clientWidth + 1
+          })
         })
-        expect.soft(gap, `${direction} control spacing at ${width}px`).toBeGreaterThanOrEqual(6.95)
-        expect.soft(gap, `${direction} control spacing at ${width}px`).toBeLessThanOrEqual(9.05)
-        const bottomGap = await popover.locator('.dailyVideoLimitPreference').evaluate(element => (
-          element.getBoundingClientRect().bottom - element.querySelector('.select-text').getBoundingClientRect().bottom
-        ))
-        expect.soft(bottomGap, `${direction} empty space below the daily limit at ${width}px`).toBeCloseTo(0, 0)
-        await expect(popover.getByRole('combobox', { name: 'Videos per day' })).toBeVisible()
+        expect.soft(overflow, `${direction} controls overflow at ${width}px`).toBe(false)
+        await expect(popover.getByRole('checkbox', { name: 'Members only' })).toBeVisible()
       }
       await page.evaluate(() => { document.body.dir = 'ltr' })
       await popover.screenshot({ path: testInfo.outputPath(`subscription-popover-${width}.png`) })
     }
     await page.evaluate(() => window.$store.dispatch('updateYtDlpPlaybackAuthMode', 'none'))
     await expect(popover.getByRole('checkbox', { name: 'Members only' })).toHaveCount(0)
-    await expect(popover.getByRole('combobox', { name: 'Videos per day' })).toBeVisible()
-    // Fractional UI scales round this 5px gap (4.8 CSS px at 125%).
-    expect(await popover.evaluate(element => {
-      const label = element.querySelector('.dailyVideoLimitSelect .select-label').getBoundingClientRect()
-      return label.top - element.querySelector('.secondaryPreferences').getBoundingClientRect().top
-    })).toBeGreaterThanOrEqual(4.5)
+    await expect(popover.getByRole('button', { name: 'Use global setting', exact: true })).toBeVisible()
   })
 
   test('keeps the selection toolbar fixed with equal search and list gaps', async ({ app, page, uiScale }, testInfo) => {
@@ -239,8 +231,9 @@ test('keeps the popover and Subscription Settings manager in sync', async ({ app
   await expect(popoverScroller).toHaveAttribute('data-overlayscrollbars-viewport')
   await expect(popoverScroller.locator(':scope > .os-scrollbar-vertical'))
     .toHaveClass(/os-scrollbar-unusable/)
-  const popoverVideos = popover.getByRole('checkbox', { name: 'Videos' })
-  const popoverShorts = popover.getByRole('checkbox', { name: 'Shorts' })
+  const popoverFeed = popover.getByRole('group', { name: 'Show in subscription feed' })
+  const popoverVideos = popoverFeed.getByRole('checkbox', { name: 'Videos' })
+  const popoverShorts = popoverFeed.getByRole('checkbox', { name: 'Shorts' })
   await expect.poll(async () => {
     const [videosBounds, shortsBounds] = await Promise.all([
       popoverVideos.boundingBox(),
@@ -257,13 +250,12 @@ test('keeps the popover and Subscription Settings manager in sync', async ({ app
   await expect(popoverMembersOnly).toBeChecked()
   await popover.locator('label', { hasText: 'Members only' }).click()
   await expect(popoverMembersOnly).not.toBeChecked()
-  await popover.getByRole('checkbox', { name: 'Live' }).click()
-  const popoverLimit = page.locator('.profileDropdown')
-    .getByRole('combobox', { name: 'Videos per day' })
+  await popoverFeed.getByRole('checkbox', { name: 'Live' }).click()
+  const popoverLimit = popover.locator('.dailyVideoLimitCount')
   await expect(popoverLimit).toHaveText('2')
+  await expect(popoverLimit).toHaveAttribute('aria-pressed', 'true')
 
-  await popoverLimit.click()
-  await page.getByRole('option', { name: 'Unlimited' }).click()
+  await popover.getByRole('button', { name: 'Unlimited', exact: true }).click()
   await expect.poll(async () => {
     const contents = readDatastore(app.userDataDir, 'profiles')
     const records = contents.trim().split('\n').filter(Boolean).map(line => JSON.parse(line))
@@ -435,7 +427,7 @@ test('reports subscription setting write failures from the channel popover', asy
   const alpha = page.locator('.channel', { hasText: 'Alpha Channel' })
   await alpha.getByRole('button', { name: 'Subscription settings' }).click()
   const popover = page.locator('.profileDropdown')
-  const shorts = popover.getByRole('checkbox', { name: 'Shorts' })
+  const shorts = popover.getByRole('group', { name: 'Show in subscription feed' }).getByRole('checkbox', { name: 'Shorts' })
   await expect(shorts).toHaveAttribute('aria-checked', 'false')
 
   await page.evaluate(() => {
@@ -475,9 +467,8 @@ test('does not carry a failed popover edit into a later update', async ({ app, p
   await popover.locator('label', { hasText: 'Members only' }).click()
   await expect.poll(() => page.evaluate(() => window.channelSettingsUpdateCount())).toBe(1)
 
-  const limit = popover.getByRole('combobox', { name: 'Videos per day' })
-  await limit.click()
-  await page.getByRole('option', { name: '2', exact: true }).click()
+  // The stepper starts at one, so one step sets a limit of two.
+  await popover.getByRole('button', { name: 'More videos per day', exact: true }).click()
   await page.evaluate(() => window.resolveFirstChannelSettingsWrite())
 
   await expect.poll(async () => {

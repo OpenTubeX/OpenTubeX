@@ -1529,6 +1529,8 @@ Profile:
   The selected image could not be loaded: La elektita bildo ne povis esti ŝargita
   Theme Color: Etosa koloro
 Channel:
+  Fewer videos per day: "Malpli da videaĵoj tage"
+  More videos per day: "Pli da videaĵoj tage"
   Subscription settings: Abonaj agordoj
   Failed to save subscription settings: Malsukcesis konservi kanalajn agordojn
   Videos per day: Videaĵoj tage
@@ -1868,6 +1870,7 @@ Video:
       SubmitCategoryVote: Sendi kategorian voĉdonon
       CategoryVoteSuccess: Kategoria voĉdono sendita.
     Google Cast:
+      Position: "Ludpozicio"
       Invalid Authentication: La ricevilo sendis nevalidan aŭtentigan respondon.
       Authentication Declined: La ricevilo rifuzis aŭtentigon.
       Audio Only Receiver: La ricevilo subtenas nur sonelsendadon.

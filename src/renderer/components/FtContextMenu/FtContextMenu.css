@@ -117,18 +117,6 @@
   }
 }
 
-/* Native WebViews can report a fine pointer when a mouse is connected. */
-.nativeTouchMenu {
-  inline-size: 280px;
-  font-size: 16px;
-}
-
-.nativeTouchMenu .menuItem {
-  min-block-size: 48px;
-  padding-block: 12px;
-  padding-inline: 12px;
-}
-
 .tabColorPalette :deep(.groupColorSwatch) {
   inline-size: 14px;
   block-size: 14px;

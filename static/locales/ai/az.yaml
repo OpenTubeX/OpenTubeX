@@ -1495,6 +1495,8 @@ Profile:
   The selected image could not be loaded: Seçilmiş şəkli yükləmək mümkün olmadı
   Theme Color: Mövzu rəngi
 Channel:
+  Fewer videos per day: "Gündə daha az video"
+  More videos per day: "Gündə daha çox video"
   Verified: Təsdiqlənib
   Official Artist Channel: Rəsmi ifaçı kanalı
   Subscription settings: Abunəlik tənzimləmələri
@@ -1800,6 +1802,7 @@ Video:
       SubmitCategoryVote: Kateqoriya səsini göndər
       CategoryVoteSuccess: Kateqoriya səsi göndərildi.
     Google Cast:
+      Position: "Oxutma mövqeyi"
       Invalid Authentication: "Qəbuledici yanlış doğrulama cavabı göndərdi."
       Authentication Declined: "Qəbuledici doğrulamanı rədd etdi."
       Audio Only Receiver: "Qəbuledici yalnız səs yayımını dəstəkləyir."

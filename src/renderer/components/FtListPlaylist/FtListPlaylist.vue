@@ -229,7 +229,7 @@ const { startMenuHold, moveMenuHold, cancelMenuHold, suppressMenuHoldClick } = u
 
 function openPlaylistOptionsMenu() {
   cancelMenuHold()
-  openButtonMenu(menuButton.value.$el.querySelector('button'), playlistMenuItems)
+  openButtonMenu(menuButton.value.$el.querySelector('button'), playlistMenuItems, titleForDisplay.value)
 }
 function openPlaylistContextMenu(event) {
   if (event.target.closest('.channelName, [role="dialog"], [role="menu"], .iconDropdown')) return

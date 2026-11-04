@@ -1505,6 +1505,8 @@ Profile:
   Theme Color: Boja teme
   Go To Profile Manager: Otvori upravitelja profila
 Channel:
+  Fewer videos per day: "Manje videozapisa dnevno"
+  More videos per day: "Više videozapisa dnevno"
   Verified: Potvrđeno
   Official Artist Channel: Službeni kanal izvođača
   About:
@@ -1814,6 +1816,7 @@ Video:
       SubmitCategoryVote: Pošalji glas za kategoriju
       CategoryVoteSuccess: Glas za kategoriju je poslan.
     Google Cast:
+      Position: "Položaj reprodukcije"
       Invalid Authentication: "Prijamnik je poslao nevažeći odgovor za provjeru autentičnosti."
       Authentication Declined: "Prijamnik je odbio provjeru autentičnosti."
       Audio Only Receiver: "Prijamnik podržava samo emitiranje zvuka."

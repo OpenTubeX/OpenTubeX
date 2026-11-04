@@ -1522,6 +1522,8 @@ Profile:
   Theme Color: Cor do tema
   Go To Profile Manager: Ir ao xestor de perfís
 Channel:
+  Fewer videos per day: "Menos vídeos ao día"
+  More videos per day: "Máis vídeos ao día"
   Verified: Verificado
   Official Artist Channel: Canle oficial de artista
   About:
@@ -1838,6 +1840,7 @@ Video:
       SubmitCategoryVote: Enviar voto de categoría
       CategoryVoteSuccess: Voto de categoría enviado.
     Google Cast:
+      Position: "Posición de reprodución"
       Invalid Authentication: "O receptor enviou unha resposta de autenticación non válida."
       Authentication Declined: "O receptor rexeitou a autenticación."
       Audio Only Receiver: "O receptor só admite a transmisión de audio."

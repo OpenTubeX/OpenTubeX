@@ -1532,6 +1532,8 @@ Profile:
   Theme Color: அலங்கார நிறம்
   Go To Profile Manager: சுயவிவர மேலாளருக்குச் செல்
 Channel:
+  Fewer videos per day: "நாளுக்குக் குறைவான காணொளிகள்"
+  More videos per day: "நாளுக்கு அதிகமான காணொளிகள்"
   Verified: சரிபார்க்கப்பட்டது
   Official Artist Channel: அதிகாரப்பூர்வ கலைஞர் சேனல்
   About:
@@ -1843,6 +1845,7 @@ Video:
       SubmitCategoryVote: வகை வாக்கைச் சமர்ப்பி
       CategoryVoteSuccess: வகை வாக்கு சமர்ப்பிக்கப்பட்டது.
     Google Cast:
+      Position: "இயக்க நிலை"
       Invalid Authentication: "பெறுநர் செல்லாத அங்கீகாரப் பதிலை அனுப்பியது."
       Authentication Declined: "பெறுநர் அங்கீகாரத்தை நிராகரித்தது."
       Audio Only Receiver: "பெறுநர் ஒலி ஒளிபரப்பை மட்டுமே ஆதரிக்கிறது."

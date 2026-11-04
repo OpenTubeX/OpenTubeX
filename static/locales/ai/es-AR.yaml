@@ -1686,6 +1686,8 @@ Profile:
   Open Profile Dropdown: Abrir el desplegable del Perfil
   Go To Profile Manager: Ir al administrador de perfiles
 Channel:
+  Fewer videos per day: "Menos videos por día"
+  More videos per day: "Más videos por día"
   Verified: Verificado
   Official Artist Channel: Canal oficial de artista
   Subscription settings: Configuración de la suscripción
@@ -2163,6 +2165,7 @@ Video:
       SubmitCategoryVote: Enviar voto de categoría
       CategoryVoteSuccess: Voto de categoría enviado.
     Google Cast:
+      Position: "Posición de reproducción"
       Invalid Authentication: "El receptor envió una respuesta de autenticación no válida."
       Authentication Declined: "El receptor rechazó la autenticación."
       Audio Only Receiver: "El receptor solo admite la transmisión de audio."

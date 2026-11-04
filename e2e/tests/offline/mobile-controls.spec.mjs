@@ -62,39 +62,27 @@ test('mobile select labels are readable and centered with both icon packs', asyn
   }
 })
 
-test('subscription videos per day picker preserves its parent popup', async ({ page }) => {
+test('subscription videos per day stepper keeps its parent sheet open', async ({ page }) => {
   await goTo(page, 'subscribedchannels')
-  await page.evaluate(() => document.body.style.setProperty('--card-bg-blur', 'blur(8px)'))
   await page.locator('.channel').getByRole('button', { name: 'Subscription settings' }).click()
-  const popup = page.locator('body > .profileDropdown')
-  const select = popup.getByRole('combobox', { name: 'Videos per day' })
-  await select.click()
-  const picker = page.getByRole('dialog', { name: 'Videos per day' })
-  await expect(picker).toBeVisible()
-  expect(await picker.evaluate(element => {
-    const rect = element.getBoundingClientRect()
-    return {
-      fitsViewport: rect.left >= 0 && rect.top >= 0 && rect.right <= innerWidth && rect.bottom <= innerHeight,
-      centered: Math.abs(rect.left + rect.width / 2 - innerWidth / 2) < 1,
-      expectedWidth: Math.abs(rect.width - Math.min(innerWidth - 40, 400)) < 1
-    }
-  })).toEqual({ fitsViewport: true, centered: true, expectedWidth: true })
-  expect(await picker.getByRole('option', { name: '2', exact: true }).evaluate(element => {
-    const rect = element.getBoundingClientRect()
-    return element.contains(document.elementFromPoint(rect.x + rect.width / 2, rect.y + rect.height / 2))
-  })).toBe(true)
-  await picker.getByRole('option', { name: '2', exact: true }).click()
-  await expect(picker).toBeHidden()
+  const popup = page.locator('.profileDropdown')
+  const limit = () => page.evaluate(() => window.$store.getters.getActiveProfile.subscriptions[0].dailyVideoLimit)
+  const fewer = popup.getByRole('button', { name: 'Fewer videos per day', exact: true })
+  const count = popup.locator('.dailyVideoLimitCount')
+  await expect(fewer).toHaveAttribute('aria-disabled', 'true')
+  await popup.getByRole('button', { name: 'More videos per day', exact: true }).click()
+  await expect.poll(limit).toBe(2)
+  await expect(count).toHaveAttribute('aria-pressed', 'true')
+  await popup.getByRole('button', { name: 'Unlimited', exact: true }).click()
+  await expect.poll(limit).toBe(null)
+  // The stepper keeps its count for when a limit is chosen again.
+  await expect(count).toHaveText('2')
+  await expect(count).toHaveAttribute('aria-pressed', 'false')
+  await popup.getByRole('button', { name: 'Use global setting', exact: true }).click()
+  await expect.poll(limit).toBe(undefined)
+  await count.click()
+  await expect.poll(limit).toBe(2)
   await expect(popup).toBeVisible()
-  await expect(select).toHaveText('2')
-  await select.click()
-  await picker.getByRole('button', { name: 'Close', exact: true }).click()
-  await expect(popup).toBeVisible()
-  await expect(select).toBeFocused()
-  await select.click()
-  await picker.press('Escape')
-  await expect(popup).toBeVisible()
-  await expect(select).toBeFocused()
-  await select.press('Escape')
+  await count.press('Escape')
   await expect(popup).toBeHidden()
 })

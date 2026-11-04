@@ -229,7 +229,7 @@ const playlistItemMenuItems = computed(() => [
 ])
 
 function openPlaylistItemMenu() {
-  openButtonMenu(playlistItemMenuButton.value.$el.querySelector('button'), playlistItemMenuItems)
+  openButtonMenu(playlistItemMenuButton.value.$el.querySelector('button'), playlistItemMenuItems, props.data.title)
 }
 
 function closePlaylistItemMenu() {

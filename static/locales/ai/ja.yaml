@@ -1492,6 +1492,8 @@ Profile:
   The selected image could not be loaded: 選択した画像を読み込めませんでした
   Theme Color: テーマカラー
 Channel:
+  Fewer videos per day: "1日あたりの動画数を減らす"
+  More videos per day: "1日あたりの動画数を増やす"
   Verified: 確認済み
   Official Artist Channel: 公式アーティスト チャンネル
   Subscription settings: 登録設定
@@ -1788,6 +1790,7 @@ Video:
       SubmitCategoryVote: カテゴリ変更の投票を送信
       CategoryVoteSuccess: カテゴリ変更の投票を送信しました。
     Google Cast:
+      Position: "再生位置"
       Invalid Authentication: "受信機が無効な認証応答を送信しました。"
       Authentication Declined: "受信機が認証を拒否しました。"
       Audio Only Receiver: "受信機は音声のキャストのみをサポートしています。"

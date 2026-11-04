@@ -757,7 +757,7 @@ const moreMenuItems = computed(() => {
 const moreOptionsButton = useTemplateRef('moreOptionsButton')
 
 function openMoreOptionsMenu() {
-  openButtonMenu(moreOptionsButton.value.$el, moreMenuItems)
+  openButtonMenu(moreOptionsButton.value.$el, moreMenuItems, props.title)
 }
 
 onBeforeUnmount(() => {

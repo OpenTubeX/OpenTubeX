@@ -255,10 +255,7 @@ async function handleChoice(choice) {
         value = Math.min(1, Math.max(0, status.value.volume + (choice === 'volume-up' ? 0.1 : -0.1)))
       } else if (choice === 'mute') value = !status.value.muted
       else if (choice.startsWith('caption-')) { action = 'caption'; value = Number(choice.slice(8)) }
-      const result = await cast.control(castId.value, action, value)
-      if (result.error) throw Object.assign(new Error(result.error), { code: result.errorCode })
-      status.value = result
-      emit('playback-state', result)
+      await sendControl(action, value)
       return
     }
     if (!choice.startsWith('device-') || !source.value) return
@@ -336,7 +333,31 @@ async function handleChoice(choice) {
   }
 }
 
-defineExpose({ stopCasting, options, castId, menuTitle, refreshDevices, handleChoice })
+async function sendControl(action, value) {
+  const result = await cast.control(castId.value, action, value)
+  if (result.error) throw Object.assign(new Error(result.error), { code: result.errorCode })
+  status.value = result
+  emit('playback-state', result)
+}
+
+/**
+ * Sends a receiver command with an exact value, such as a seek position or volume.
+ * @param {'seek' | 'volume'} action
+ * @param {number} value
+ */
+async function control(action, value) {
+  if (disposed || busy.value || props.disabled || !castId.value) return
+  busy.value = true
+  try {
+    await sendControl(action, value)
+  } catch (error) {
+    reportError(error)
+  } finally {
+    busy.value = false
+  }
+}
+
+defineExpose({ stopCasting, options, castId, deviceName, status, castCaptions, loading, busy, menuTitle, refreshDevices, handleChoice, control })
 
 onBeforeUnmount(() => {
   // Capture the original player before Vue clears refs; navigation never resumes it.

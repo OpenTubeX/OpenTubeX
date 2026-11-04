@@ -2287,6 +2287,8 @@ Channel:
   Different values: Different values
   Use global setting: Use global setting
   Unlimited: Unlimited
+  Fewer videos per day: Fewer videos per day
+  More videos per day: More videos per day
   More videos hidden: '+{count} more | +{count} more'
   Subscribe: Subscribe
   Unsubscribe: Unsubscribe
@@ -2830,6 +2832,7 @@ Video:
       Connected: "Casting to {device}"
       Rewind: "Rewind 10 seconds"
       Forward: "Forward 10 seconds"
+      Position: Playback position
       Subtitles Off: "Subtitles off"
       Return: "Return to local playback"
       No Devices: "No Google Cast devices found"

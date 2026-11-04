@@ -1480,6 +1480,8 @@ Profile:
   Theme Color: Theme Colour
   Go To Profile Manager: Go to Profile Manager
 Channel:
+  Fewer videos per day: "Fewer videos per day"
+  More videos per day: "More videos per day"
   Verified: Verified
   Official Artist Channel: Official Artist Channel
   About:
@@ -1776,6 +1778,7 @@ Video:
       SubmitCategoryVote: Submit category vote
       CategoryVoteSuccess: Category vote submitted.
     Google Cast:
+      Position: "Playback position"
       Invalid Authentication: "The receiver sent an invalid authentication response."
       Authentication Declined: "The receiver declined authentication."
       Audio Only Receiver: "The receiver only supports audio casting."

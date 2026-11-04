@@ -314,7 +314,8 @@ function setQueueItemMenuButton(queueItemId, component) {
 
 function openQueueItemMenu(queueItemId) {
   openMenuQueueItemId.value = queueItemId
-  openButtonMenu(queueItemMenuButtons.get(queueItemId).$el.querySelector('button'), queueItemMenuItems)
+  openButtonMenu(queueItemMenuButtons.get(queueItemId).$el.querySelector('button'), queueItemMenuItems,
+    items.value.find(item => item.queueItemId === queueItemId)?.title ?? t('Video.More Options'))
 }
 
 function closeQueueItemMenu() {

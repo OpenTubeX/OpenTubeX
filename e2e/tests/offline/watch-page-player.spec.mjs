@@ -287,14 +287,14 @@ for (const mode of ['combined', 'merged', 'fallback', 'late-failure', 'pending-e
     }).toBe(true)
     await castButton.click()
     if (pendingExtraction) {
-      await expect(page.getByRole('option', { name: 'Living room TV' })).toBeVisible({ timeout: 3000 })
+      await expect(page.locator('.castMenu').getByRole('button', { name: 'Living room TV' })).toBeVisible({ timeout: 3000 })
       await castButton.click()
       await castButton.click()
-      await expect(page.getByRole('option', { name: 'Living room TV' })).toBeVisible()
+      await expect(page.locator('.castMenu').getByRole('button', { name: 'Living room TV' })).toBeVisible()
       expect(await app.electronApp.evaluate(() => globalThis.__dlnaExtractionCalls)).toBe(1)
       await page.screenshot({ path: test.info().outputPath('dlna-devices-while-extracting.png') })
     }
-    await page.getByRole('option', { name: 'Living room TV' }).click()
+    await page.locator('.castMenu').getByRole('button', { name: 'Living room TV' }).click()
     if (fallback) {
       // Renderer evaluate() calls grant a fresh user gesture in Playwright.
       // Observe the main process while waiting for the authorized fallback.
@@ -319,7 +319,7 @@ for (const mode of ['combined', 'merged', 'fallback', 'late-failure', 'pending-e
     }
 
     await castButton.click()
-    await page.getByRole('option', { name: 'Stop casting' }).click()
+    await page.locator('.castMenu').getByRole('button', { name: 'Stop casting' }).click()
     await expect.poll(() => video.evaluate(element => element.paused)).toBe(false)
     expect(await app.electronApp.evaluate(() => globalThis.__dlnaCalls.at(-1))).toEqual({
       action: 'stop', castId: lateFailure ? 'recovered-cast' : 'test-cast'
@@ -327,13 +327,13 @@ for (const mode of ['combined', 'merged', 'fallback', 'late-failure', 'pending-e
 
     await video.evaluate(element => element.pause())
     await castButton.click()
-    await page.getByRole('option', { name: 'Living room TV' }).click()
+    await page.locator('.castMenu').getByRole('button', { name: 'Living room TV' }).click()
     if (fallback) {
       await expect.poll(() => app.electronApp.evaluate(() => globalThis.__dlnaCalls.filter(call => call.action === 'start').length)).toBe(4)
     }
     await expect(castButton).toHaveAttribute('aria-pressed', 'true')
     await castButton.click()
-    await page.getByRole('option', { name: 'Stop casting' }).click()
+    await page.locator('.castMenu').getByRole('button', { name: 'Stop casting' }).click()
     await expect.poll(() => video.evaluate(element => element.paused)).toBe(true)
   })
 }

@@ -1492,6 +1492,8 @@ Profile:
   The selected image could not be loaded: "N'eus ket bet gallet kargañ ar skeudenn diuzet"
   Theme Color: "Liv an neuz"
 Channel:
+  Fewer videos per day: "Nebeutoc’h a videoioù dre zevezh"
+  More videos per day: "Muioc’h a videoioù dre zevezh"
   Verified: Gwiriet
   Official Artist Channel: Chadenn ofisiel an arzour
   Subscription settings: Arventennoù ar c'houmanant
@@ -1797,6 +1799,7 @@ Video:
       SubmitCategoryVote: Kas ar vot evit ar rummad
       CategoryVoteSuccess: Kaset eo ar vot evit ar rummad.
     Google Cast:
+      Position: "Lec’hiadur al lenn"
       Invalid Authentication: "Ur respont dilesa direizh en deus kaset ar resever."
       Authentication Declined: "Nac'het en deus ar resever an dilesa."
       Audio Only Receiver: "Skignañ aodio hepken a vez skoret gant ar resever."

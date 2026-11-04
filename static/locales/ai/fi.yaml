@@ -1526,6 +1526,8 @@ Profile:
   Theme Color: Teemaväri
   Go To Profile Manager: Siirry profiilien hallintaan
 Channel:
+  Fewer videos per day: "Vähemmän videoita päivässä"
+  More videos per day: "Enemmän videoita päivässä"
   Verified: Vahvistettu
   Official Artist Channel: Virallinen artistikanava
   About:
@@ -1833,6 +1835,7 @@ Video:
       SubmitCategoryVote: Lähetä luokkaääni
       CategoryVoteSuccess: Luokkaääni lähetetty.
     Google Cast:
+      Position: "Toistokohta"
       Invalid Authentication: "Vastaanottaja lähetti virheellisen todennusvastauksen."
       Authentication Declined: "Vastaanottaja hylkäsi todennuksen."
       Audio Only Receiver: "Vastaanottaja tukee vain äänen lähettämistä."

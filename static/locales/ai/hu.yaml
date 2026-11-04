@@ -1492,6 +1492,8 @@ Profile:
   The selected image could not be loaded: A kiválasztott kép nem tölthető be
   Theme Color: Téma színe
 Channel:
+  Fewer videos per day: "Kevesebb videó naponta"
+  More videos per day: "Több videó naponta"
   Verified: Ellenőrzött
   Official Artist Channel: Hivatalos előadói csatorna
   Subscription settings: Feliratkozási beállítások
@@ -1788,6 +1790,7 @@ Video:
       SubmitCategoryVote: Kategóriaszavazat elküldése
       CategoryVoteSuccess: Kategóriaszavazat elküldve.
     Google Cast:
+      Position: "Lejátszási pozíció"
       Invalid Authentication: "A fogadó érvénytelen hitelesítési választ küldött."
       Authentication Declined: "A fogadó elutasította a hitelesítést."
       Audio Only Receiver: "A fogadó csak hangközvetítést támogat."

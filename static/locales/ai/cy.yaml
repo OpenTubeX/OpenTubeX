@@ -1500,6 +1500,8 @@ Profile:
   Theme Color: Lliw'r thema
   Go To Profile Manager: Mynd i'r rheolwr proffiliau
 Channel:
+  Fewer videos per day: "Llai o fideos y dydd"
+  More videos per day: "Mwy o fideos y dydd"
   Verified: Wedi’i ddilysu
   Official Artist Channel: Sianel Artist Swyddogol
   About:
@@ -1814,6 +1816,7 @@ Video:
       SubmitCategoryVote: Cyflwyno pleidlais categori
       CategoryVoteSuccess: Cyflwynwyd y bleidlais categori.
     Google Cast:
+      Position: "Safle chwarae"
       Invalid Authentication: "Anfonodd y derbynnydd ymateb dilysu annilys."
       Authentication Declined: "Gwrthododd y derbynnydd ddilysu."
       Audio Only Receiver: "Dim ond castio sain y mae’r derbynnydd yn ei gefnogi."

@@ -123,9 +123,15 @@ async function waitForCastStart(app) {
   await expect.poll(() => app.electronApp.evaluate(() => globalThis.castTest.startCompletions)).toBe(1)
 }
 
+/** The desktop casting menu */
+const castMenu = page => page.locator('.castMenu')
+
 async function choice(page, name) {
-  await page.locator('.chromecastControl > button').click()
-  await page.getByRole('option', { name, exact: true }).click()
+  // The receiver controls stay open between choices.
+  if (!await page.locator('.castMenu, .mobileLinkActions').isVisible()) await page.locator('.chromecastControl > button').click()
+  // Phones list the choices in the context menu sheet.
+  await castMenu(page).getByRole('button', { name, exact: true })
+    .or(page.locator('.mobileLinkActions').getByRole('menuitem', { name, exact: true })).click()
 }
 
 async function selectLocalEnglishCaption(page, watch) {
@@ -205,32 +211,56 @@ test('Cast loading feedback fits fractional scale and respects reduced motion', 
   await expect(progress).toHaveCount(0)
 })
 
-test('both casting protocols share one button with Google Cast and DLNA tabs', async ({ app, page }) => {
+test('both casting protocols share one button and one device list', async ({ app, page }) => {
   await openCastVideo(app, page)
   await mockDlna(app)
   await page.evaluate(() => window.$store.dispatch('updateShowDlnaCastButton', true))
   const castButtons = page.locator('.videoOptions .chromecastControl > button, .videoOptions .dlnaCastControl > button')
   await expect(castButtons).toHaveCount(1)
   await castButtons.click()
-  await expect(page.getByRole('tab', { name: 'Google Cast', exact: true })).toHaveAttribute('aria-selected', 'true')
-  await expect(page.getByRole('tab', { name: 'DLNA', exact: true })).toBeVisible()
-  await expect(page.getByRole('option', { name: 'Test TV', exact: true })).toBeVisible()
-  await page.getByRole('tab', { name: 'DLNA', exact: true }).click()
-  await expect(page.getByRole('tab', { name: 'DLNA', exact: true })).toHaveAttribute('aria-selected', 'true')
-  await expect(page.getByRole('option', { name: 'DLNA TV', exact: true })).toBeVisible()
-  await page.getByRole('tab', { name: 'DLNA', exact: true }).press('ArrowLeft')
-  await expect(page.getByRole('tab', { name: 'Google Cast', exact: true })).toBeFocused()
-  await expect(page.getByRole('option', { name: 'Test TV', exact: true })).toBeVisible()
+  await expect(page.getByRole('tab')).toHaveCount(0)
+  const googleDevice = castMenu(page).getByRole('button', { name: 'Test TV', exact: true })
+  const dlnaDevice = castMenu(page).getByRole('button', { name: 'DLNA TV', exact: true })
+  await expect(googleDevice).toHaveAccessibleDescription('Google Cast')
+  await expect(dlnaDevice).toHaveAccessibleDescription('DLNA')
+  await page.keyboard.press('Escape')
   await page.evaluate(() => window.$store.dispatch('updateShowChromecastButton', false))
   await expect(castButtons).toHaveCount(1)
   await castButtons.click()
-  await expect(page.getByRole('tab', { name: /Google Cast|DLNA/ })).toHaveCount(0)
-  await expect(page.getByRole('option', { name: 'DLNA TV', exact: true })).toBeVisible()
+  await expect(googleDevice).toHaveCount(0)
+  // A single protocol needs no caption.
+  await expect(dlnaDevice).toHaveAccessibleDescription('')
   await page.evaluate(() => window.$store.dispatch('updateShowDlnaCastButton', false))
   await expect(castButtons).toHaveCount(0)
 })
 
-test('FCast casts from its own tab without subtitles and blocks the other protocols', async ({ app, page }) => {
+test('phones pick casting protocols and devices from the context menu sheet', async ({ app, page }) => {
+  await openCastVideo(app, page)
+  await mockDlna(app)
+  await page.evaluate(() => window.$store.dispatch('updateShowDlnaCastButton', true))
+  await setWindowSize(app, page, { width: 480, height: 850 })
+  const sheet = page.locator('.mobileLinkActions')
+  await page.locator('.castControl > button').click()
+  await expect(page.locator('.castControl .iconDropdown')).toHaveCount(0)
+  await expect(sheet.locator('.mobileLinkActionsHeader')).toHaveText('Cast')
+  await sheet.getByRole('menuitem', { name: 'DLNA', exact: true }).click()
+  await expect(sheet.getByRole('menuitemcheckbox', { name: 'DLNA TV', exact: true, checked: false })).toBeEnabled()
+  await sheet.getByRole('button', { name: 'Back', exact: true }).click()
+  await sheet.getByRole('menuitem', { name: 'Google Cast', exact: true }).click()
+  await sheet.getByRole('menuitem', { name: 'Test TV', exact: true }).click()
+  await expect(sheet).toHaveCount(0)
+  await waitForCastStart(app)
+
+  // An active session lists its own controls without the protocol submenus.
+  await page.locator('.castControl > button').click()
+  const returnAction = sheet.getByRole('menuitem', { name: 'Return to local playback', exact: true })
+  await expect(returnAction).toBeVisible()
+  await expect(sheet.getByRole('menuitem', { name: 'DLNA', exact: true })).toHaveCount(0)
+  await returnAction.click()
+  await expect.poll(() => app.electronApp.evaluate(() => globalThis.castTest.stops)).toEqual(['session-id'])
+})
+
+test('FCast casts from the shared device list without subtitles and blocks the other protocols', async ({ app, page }) => {
   const watch = await openCastVideo(app, page)
   await mockDlna(app)
   await page.evaluate(async () => {
@@ -240,43 +270,29 @@ test('FCast casts from its own tab without subtitles and blocks the other protoc
   await selectLocalEnglishCaption(page, watch)
   await watch.evaluate(vm => { vm.$refs.player.setCurrentTime(5); vm.$refs.player.play() })
   const castButton = page.locator('.castControl > button')
-  const tabs = page.getByRole('tab')
-  const googleTab = page.getByRole('tab', { name: 'Google Cast', exact: true })
-  const fcastTab = page.getByRole('tab', { name: 'FCast', exact: true })
-  const dlnaTab = page.getByRole('tab', { name: 'DLNA', exact: true })
+  const devices = castMenu(page).locator('.castDevice')
   await castButton.click()
-  await expect(tabs).toHaveText(['Google Cast', 'FCast', 'DLNA'])
-  await googleTab.press('ArrowRight')
-  await expect(fcastTab).toBeFocused()
-  await expect(fcastTab).toHaveAttribute('aria-selected', 'true')
-  await expect(page.getByRole('option', { name: 'FCast TV', exact: true })).toBeVisible()
-  await fcastTab.press('ArrowRight')
-  await expect(dlnaTab).toBeFocused()
-  await dlnaTab.press('ArrowRight')
-  await expect(googleTab).toBeFocused()
-  await googleTab.press('ArrowLeft')
-  await expect(dlnaTab).toBeFocused()
-  await dlnaTab.press('ArrowLeft')
-  await expect(fcastTab).toBeFocused()
-  await page.getByRole('option', { name: 'FCast TV', exact: true }).click()
+  await expect(devices).toHaveText(['Test TVGoogle Cast', 'FCast TVFCast', 'DLNA TVDLNA'])
+  await castMenu(page).getByRole('button', { name: 'FCast TV', exact: true }).click()
   await expect(castButton).toHaveAttribute('aria-pressed', 'true')
   await expect(castButton).toHaveAttribute('title', 'Casting to FCast TV')
   await expect.poll(() => page.locator('.ftVideoPlayer video').evaluate(video => video.paused)).toBe(true)
   const [payload] = await app.electronApp.evaluate(() => globalThis.castTest.starts)
   expect(payload).toMatchObject({ deviceId: 'fcast-tv', source: { url: 'https://cast-media.test/video.mp4', contentType: 'video/mp4' }, captions: [], captionIndex: null, paused: false })
 
+  // The connected receiver's controls replace the device list.
   await castButton.click()
-  await expect(googleTab).toBeDisabled()
-  await expect(dlnaTab).toBeDisabled()
-  await expect(page.getByRole('option', { name: 'English', exact: true })).toHaveCount(0)
-  await page.getByRole('option', { name: 'Pause', exact: true }).click()
-  await castButton.click()
-  await page.getByRole('option', { name: 'Return to local playback', exact: true }).click()
+  await expect(castMenu(page).locator('.castHeader')).toHaveText('FCast TVFCast')
+  await expect(devices).toHaveCount(0)
+  await expect(castMenu(page).getByRole('group', { name: 'Subtitles', exact: true })).toHaveCount(0)
+  await castMenu(page).getByRole('button', { name: 'Pause', exact: true }).click()
+  await expect(castMenu(page).getByRole('button', { name: 'Play', exact: true })).toBeVisible()
+  await castMenu(page).getByRole('button', { name: 'Return to local playback', exact: true }).click()
   await expect(castButton).toHaveAttribute('aria-pressed', 'false')
   expect(await app.electronApp.evaluate(() => globalThis.castTest.protocols)).toEqual([['start', 'fcast'], ['control', 'fcast'], ['stop', 'fcast']])
   await castButton.click()
-  await expect(googleTab).toBeEnabled()
-  await expect(dlnaTab).toBeEnabled()
+  await expect(castMenu(page).getByRole('button', { name: 'Test TV', exact: true })).toBeEnabled()
+  await expect(castMenu(page).getByRole('button', { name: 'DLNA TV', exact: true })).toBeEnabled()
 })
 
 test('FCast alone uses the casting button with FCast labels', async ({ app, page }) => {
@@ -293,7 +309,7 @@ test('FCast alone uses the casting button with FCast labels', async ({ app, page
   await expect(castButton).toHaveAttribute('title', 'Cast to an FCast receiver')
   await castButton.click()
   await expect(page.getByRole('tab')).toHaveCount(0)
-  await expect(page.getByRole('option', { name: 'No FCast receivers found', exact: true })).toBeVisible()
+  await expect(castMenu(page).getByRole('button', { name: 'No FCast receivers found', exact: true })).toBeVisible()
   await page.keyboard.press('Escape')
   await page.evaluate(() => window.$store.dispatch('updateShowFcastButton', false))
   await expect(page.locator('.castControl')).toHaveCount(0)
@@ -317,18 +333,16 @@ test('reopening the casting menu refreshes each receiver list once per opening',
   for (const round of [1, 2]) {
     await app.electronApp.evaluate((_, value) => { globalThis.discoveryRound = value }, round)
     await page.locator('.castControl > button').click()
-    for (const [tab, protocol] of [['Google Cast', 'google'], ['DLNA', 'dlna']]) {
-      await page.getByRole('tab', { name: tab, exact: true }).click()
-      await expect(page.getByRole('option', { name: `${protocol} TV ${round}`, exact: true })).toBeVisible()
+    for (const protocol of ['google', 'dlna']) {
+      await expect(castMenu(page).getByRole('button', { name: `${protocol} TV ${round}`, exact: true })).toBeVisible()
     }
-    await page.getByRole('tab', { name: 'Google Cast', exact: true }).click()
     expect(await app.electronApp.evaluate(() => globalThis.discoveryCounts)).toEqual({ google: round, dlna: round })
     await page.keyboard.press('Escape')
   }
 })
 
 for (const uiScale of [80, 125]) {
-  test(`casting tabs and options retain 48px touch targets at ${uiScale}% scale`, async ({ app, page }) => {
+  test(`casting devices and refresh retain 48px touch targets at ${uiScale}% scale`, async ({ app, page }) => {
     await openCastVideo(app, page)
     await mockDlna(app)
     await page.evaluate(async scale => {
@@ -336,31 +350,29 @@ for (const uiScale of [80, 125]) {
       await store.dispatch('updateUiScale', scale)
       await store.dispatch('updateShowDlnaCastButton', true)
     }, uiScale)
+    // Phones use the context menu sheet, so the touch-sized menu is for wider touch screens.
     const session = await page.context().newCDPSession(page)
-    for (const coarsePointer of [false, true]) {
-      await session.send('Emulation.setTouchEmulationEnabled', { enabled: coarsePointer })
-      await setWindowSize(app, page, { width: coarsePointer ? 1200 : 375, height: coarsePointer ? 950 : 850 })
-      expect(await page.evaluate(() => matchMedia('(pointer: coarse)').matches)).toBe(coarsePointer)
-      await page.locator('.castControl > button').click()
-      for (const protocol of ['Google Cast', 'DLNA']) {
-        await page.getByRole('tab', { name: protocol, exact: true }).click()
-        await expect(page.getByRole('option', { name: protocol === 'DLNA' ? 'DLNA TV' : 'Test TV', exact: true })).toBeVisible()
-        const targets = page.locator('.castControl .castTab, .castControl .castOption')
-        const bounds = await targets.evaluateAll(elements => elements.map(element => element.getBoundingClientRect().toJSON()))
-        for (const target of bounds) {
-          // Fractional Electron zoom can round CSS bounds slightly downward.
-          expect(target.height).toBeGreaterThanOrEqual(47.75)
-          expect(target.height * uiScale / 100).toBeGreaterThanOrEqual(47.75)
-          expect(target.width).toBeGreaterThanOrEqual(47.75)
-        }
-      }
-      await page.keyboard.press('Escape')
+    await session.send('Emulation.setTouchEmulationEnabled', { enabled: true })
+    await setWindowSize(app, page, { width: 1200, height: 950 })
+    expect(await page.evaluate(() => matchMedia('(pointer: coarse)').matches)).toBe(true)
+    await page.locator('.castControl > button').click()
+    await expect(castMenu(page).getByRole('button', { name: 'Test TV', exact: true })).toBeVisible()
+    await expect(castMenu(page).getByRole('button', { name: 'DLNA TV', exact: true })).toBeVisible()
+    const targets = castMenu(page).locator('.castDevice, .castHeaderButton')
+    await expect(targets).toHaveCount(3)
+    const bounds = await targets.evaluateAll(elements => elements.map(element => element.getBoundingClientRect().toJSON()))
+    for (const target of bounds) {
+      // Fractional Electron zoom can round CSS bounds slightly downward.
+      expect(target.height).toBeGreaterThanOrEqual(47.75)
+      expect(target.height * uiScale / 100).toBeGreaterThanOrEqual(47.75)
+      expect(target.width).toBeGreaterThanOrEqual(47.75)
     }
+    await page.keyboard.press('Escape')
     await session.detach()
   })
 }
 
-test('casting tabs restore and clamp themed scrolling', { tag: '@scale' }, async ({ app, page }) => {
+test('the casting device list clamps themed scrolling', { tag: '@scale' }, async ({ app, page, uiScale }) => {
   const watch = await openCastVideo(app, page)
   await mockDlna(app)
   await app.electronApp.evaluate(({ ipcMain }) => {
@@ -368,23 +380,15 @@ test('casting tabs restore and clamp themed scrolling', { tag: '@scale' }, async
     ipcMain.removeHandler('cast-discover')
     ipcMain.handle('cast-discover', () => globalThis.castDevices)
   })
-  await setWindowSize(app, page, { width: 800, height: 650 })
+  // Keep the window above the phone layout's 600 CSS pixels at every UI scale, so the menu stays a dropdown.
+  await setWindowSize(app, page, { width: Math.round(800 * uiScale / 100), height: Math.round(650 * uiScale / 100) })
   await page.evaluate(() => window.$store.dispatch('updateShowDlnaCastButton', true))
   await page.locator('.castControl > button').click()
   const scroller = page.locator('.castControl .iconDropdownContent')
   const scrollbar = scroller.locator(':scope > .os-scrollbar-vertical')
-  await expect(page.getByRole('option', { name: 'Google TV 39', exact: true })).toHaveCount(1)
+  await expect(castMenu(page).getByRole('button', { name: 'Google TV 39', exact: true })).toHaveCount(1)
   await expect(scrollbar).not.toHaveClass(/os-scrollbar-unusable/)
   await scroller.evaluate(element => { element.scrollTop = element.scrollHeight })
-  await expectScrollAtRenderedEnd(scroller)
-  const offset = await scroller.evaluate(element => element.scrollTop)
-  await page.getByRole('tab', { name: 'DLNA', exact: true }).click()
-  await expect(page.getByRole('option', { name: 'DLNA TV', exact: true })).toBeVisible()
-  await expect.poll(() => scroller.evaluate(element => element.scrollTop)).toBe(0)
-  await expect(scrollbar).toHaveClass(/os-scrollbar-unusable/)
-  await page.getByRole('tab', { name: 'Google Cast', exact: true }).click()
-  await expect(page.getByRole('option', { name: 'Google TV 39', exact: true })).toHaveCount(1)
-  await expect.poll(() => scroller.evaluate(element => element.scrollTop)).toBeCloseTo(offset, 0)
   await expectScrollAtRenderedEnd(scroller)
   await setWindowSize(app, page, { width: 1200, height: 950 })
   await expectScrollAtRenderedEnd(scroller)
@@ -405,7 +409,7 @@ test('casting tabs restore and clamp themed scrolling', { tag: '@scale' }, async
   await app.electronApp.evaluate(() => { globalThis.castDevices = [{ id: 'test-tv', name: 'Test TV' }] })
   // Rediscovery replaces the long list while the menu is still open.
   await watch.evaluate(vm => vm.$refs.chromecast.$refs.googleCast.refreshDevices())
-  await expect(page.getByRole('option', { name: 'Test TV', exact: true })).toBeVisible()
+  await expect(castMenu(page).getByRole('button', { name: 'Test TV', exact: true })).toBeVisible()
   await expect.poll(() => scroller.evaluate(element => element.scrollTop)).toBe(0)
   await expect(scrollbar).toHaveClass(/os-scrollbar-unusable/)
 })
@@ -425,7 +429,7 @@ test('casts the current video, controls the receiver and returns to its remote p
 
   await choice(page, 'Pause')
   await choice(page, 'Forward 10 seconds')
-  await choice(page, 'Increase volume')
+  await castMenu(page).getByRole('slider', { name: 'Volume', exact: true }).fill('0.6')
   await choice(page, 'Mute')
   await choice(page, 'English')
   await choice(page, 'Play')
@@ -440,6 +444,37 @@ test('casts the current video, controls the receiver and returns to its remote p
   expect(controls.map(control => control.action)).toEqual(['pause', 'seek', 'volume', 'mute', 'caption', 'play'])
   expect(controls[1].value).toBeGreaterThanOrEqual(15)
   expect(await app.electronApp.evaluate(() => globalThis.castTest.stops)).toEqual(['session-id'])
+})
+
+test('a slider change during a pending receiver command is sent once the command finishes', async ({ app, page }) => {
+  await openCastVideo(app, page)
+  await choice(page, 'Test TV')
+  await expect(page.locator('.chromecastControl > button')).toHaveAttribute('aria-pressed', 'true')
+  // Hold the next receiver command until the test releases it.
+  await app.electronApp.evaluate(({ ipcMain }) => {
+    const handler = ipcMain._invokeHandlers.get('cast-control')
+    ipcMain.removeHandler('cast-control')
+    ipcMain.handle('cast-control', async (...args) => {
+      if (!globalThis.castTest.releasedHold) {
+        await new Promise(resolve => { globalThis.castTest.releaseControl = resolve })
+        globalThis.castTest.releasedHold = true
+      }
+      return handler(...args)
+    })
+  })
+  await page.locator('.chromecastControl > button').click()
+  await castMenu(page).getByRole('slider', { name: 'Playback position', exact: true }).fill('20')
+  await expect.poll(() => app.electronApp.evaluate(() => typeof globalThis.castTest.releaseControl)).toBe('function')
+  // Busy sliders stay draggable; Playwright's fill() refuses aria-disabled controls.
+  await castMenu(page).getByRole('slider', { name: 'Volume', exact: true }).evaluate(slider => {
+    slider.value = '0.3'
+    slider.dispatchEvent(new Event('input', { bubbles: true }))
+    slider.dispatchEvent(new Event('change', { bubbles: true }))
+  })
+  await app.electronApp.evaluate(() => globalThis.castTest.releaseControl())
+  await expect.poll(() => app.electronApp.evaluate(() => globalThis.castTest.controls.map(({ action, value }) => [action, value])))
+    .toEqual([['seek', 20], ['volume', 0.3]])
+  await expect(castMenu(page).getByRole('slider', { name: 'Volume', exact: true })).toHaveValue('0.3')
 })
 
 for (const paused of [false, true]) {
@@ -598,42 +633,40 @@ test('DLNA and Google Cast cannot start overlapping sessions', async ({ app, pag
   await watch.evaluate(vm => vm.$refs.player.play())
   await expect.poll(() => page.locator('.ftVideoPlayer video').evaluate(video => video.paused)).toBe(false)
   const castButton = page.locator('.castControl > button')
-  const googleTab = page.getByRole('tab', { name: 'Google Cast', exact: true })
-  const dlnaTab = page.getByRole('tab', { name: 'DLNA', exact: true })
+  const googleDevice = castMenu(page).getByRole('button', { name: 'Test TV', exact: true })
+  const dlnaDevice = castMenu(page).getByRole('button', { name: 'DLNA TV', exact: true })
   await castButton.click()
-  await dlnaTab.click()
-  await page.getByRole('option', { name: 'DLNA TV', exact: true }).click()
+  await dlnaDevice.click()
   await expect.poll(() => app.electronApp.evaluate(() => globalThis.dlnaTest.starts.length)).toBe(1)
   await castButton.click()
-  await expect(googleTab).toBeDisabled()
+  await expect(googleDevice).toBeDisabled()
   await app.electronApp.evaluate(() => globalThis.dlnaTest.finishStart())
   await expect(castButton).toHaveAttribute('aria-pressed', 'true')
   expect(await app.electronApp.evaluate(() => globalThis.castTest.starts)).toEqual([])
-  await expect(googleTab).toHaveCount(0)
+  await expect(googleDevice).toHaveCount(0)
   await castButton.click()
-  await page.getByRole('option', { name: 'Stop casting', exact: true }).click()
+  await castMenu(page).getByRole('button', { name: 'Stop casting', exact: true }).click()
   await expect.poll(() => app.electronApp.evaluate(() => globalThis.dlnaTest.stopRequests)).toBe(1)
   await castButton.click()
-  await expect(googleTab).toBeDisabled()
+  await expect(googleDevice).toBeDisabled()
   expect(await app.electronApp.evaluate(() => globalThis.dlnaTest.stops)).toEqual([])
   await app.electronApp.evaluate(() => globalThis.dlnaTest.finishStop())
   await expect.poll(() => app.electronApp.evaluate(() => globalThis.dlnaTest.stops.length)).toBe(1)
-  await expect(googleTab).toBeEnabled()
+  await expect(googleDevice).toBeEnabled()
   await expect.poll(() => page.locator('.ftVideoPlayer video').evaluate(video => video.paused)).toBe(false)
-  await googleTab.click()
-  await page.getByRole('option', { name: 'Test TV', exact: true }).click()
+  await googleDevice.click()
   await expect.poll(() => app.electronApp.evaluate(() => globalThis.castTest.starts.length)).toBe(1)
   await castButton.click()
-  await expect(dlnaTab).toBeDisabled()
+  await expect(dlnaDevice).toBeDisabled()
   await app.electronApp.evaluate(() => globalThis.castTest.finishStart())
   await expect(castButton).toHaveAttribute('aria-pressed', 'true')
-  await expect(dlnaTab).toHaveCount(0)
+  await expect(dlnaDevice).toHaveCount(0)
   await castButton.click()
   const [payload] = await app.electronApp.evaluate(() => globalThis.castTest.starts)
   expect(payload.paused).toBe(false)
-  await page.getByRole('option', { name: 'Return to local playback', exact: true }).click()
+  await castMenu(page).getByRole('button', { name: 'Return to local playback', exact: true }).click()
   await castButton.click()
-  await expect(dlnaTab).toBeEnabled()
+  await expect(dlnaDevice).toBeEnabled()
 })
 
 test('failed casting preserves local playback and paused casting returns paused', async ({ app, page }) => {
@@ -813,8 +846,9 @@ test('Cast controls fit a narrow window at fractional UI scale and stop on navig
   await choice(page, 'Test TV')
   await expect(page.locator('.chromecastControl > button')).toHaveAttribute('aria-pressed', 'true')
   await page.locator('.chromecastControl > button').click()
-  await expect(page.getByRole('option', { name: 'Return to local playback', exact: true })).toBeVisible()
-  const bounds = await page.getByRole('option', { name: 'Return to local playback', exact: true }).boundingBox()
+  const returnAction = page.locator('.mobileLinkActions').getByRole('menuitem', { name: 'Return to local playback', exact: true })
+  await expect(returnAction).toBeVisible()
+  const bounds = await returnAction.boundingBox()
   const width = await page.evaluate(() => window.innerWidth)
   expect(bounds.x).toBeGreaterThanOrEqual(0)
   expect(bounds.x + bounds.width).toBeLessThanOrEqual(width + 1)
@@ -879,9 +913,7 @@ test('packaged sender discovers and plays on the selected authenticated Cast rec
     expect(mediaRequests.every(headers => headers.authorization === undefined)).toBe(true)
     await choice(page, 'Forward 10 seconds')
     await choice(page, 'Pause')
-    await button.click()
-    await expect(page.getByRole('option', { name: 'Play', exact: true })).toBeVisible()
-    await page.keyboard.press('Escape')
+    await expect(castMenu(page).getByRole('button', { name: 'Play', exact: true })).toBeVisible()
     await choice(page, 'Return to local playback')
     await expect(button).toHaveAttribute('aria-pressed', 'false')
     await expect.poll(() => page.locator('.ftVideoPlayer video').evaluate(video => video.currentTime)).toBeGreaterThanOrEqual(9)
@@ -942,8 +974,8 @@ test('packaged helper discovers and plays on the selected FCast receiver', async
     }, `${instanceUrl}/videoplayback`)
     const button = page.locator('.fcastControl > button')
     const choose = async name => {
-      await button.click()
-      await page.getByRole('option', { name, exact: true }).click({ timeout: 30_000 })
+      if (!await castMenu(page).isVisible()) await button.click()
+      await castMenu(page).getByRole('button', { name, exact: true }).click({ timeout: 30_000 })
     }
     await choose(process.env.OPENTUBEX_FCAST_TEST_DEVICE)
     await expect(button).toHaveAttribute('aria-pressed', 'true', { timeout: 30_000 })
@@ -953,9 +985,7 @@ test('packaged helper discovers and plays on the selected FCast receiver', async
     expect(mediaRequests.length).toBeGreaterThan(0)
     await choose('Forward 10 seconds')
     await choose('Pause')
-    await button.click()
-    await expect(page.getByRole('option', { name: 'Play', exact: true })).toBeVisible()
-    await page.keyboard.press('Escape')
+    await expect(castMenu(page).getByRole('button', { name: 'Play', exact: true })).toBeVisible()
     await choose('Return to local playback')
     await expect(button).toHaveAttribute('aria-pressed', 'false')
     await expect.poll(() => page.locator('.ftVideoPlayer video').evaluate(video => video.currentTime)).toBeGreaterThanOrEqual(9)
@@ -1177,8 +1207,8 @@ test('Cast prepares selected authenticated captions and retains public optional 
   expect(started.captions[1].url).toBe('https://cast-media.test/ja.vtt')
   expect(await app.electronApp.evaluate(() => globalThis.castSubtitleRequests.length)).toBe(1)
   await page.locator('.chromecastControl > button').click()
-  await expect(page.getByRole('option', { name: 'German', exact: true })).toHaveCount(0)
-  await expect(page.getByRole('option', { name: 'English', exact: true })).toBeVisible()
+  await expect(castMenu(page).getByRole('button', { name: 'German', exact: true })).toHaveCount(0)
+  await expect(castMenu(page).getByRole('button', { name: 'English', exact: true })).toBeVisible()
   await page.keyboard.press('Escape')
   await choice(page, 'Japanese')
   expect((await app.electronApp.evaluate(() => globalThis.castTest.controls)).at(-1)).toEqual({ id: 'session-id', action: 'caption', value: 2 })
@@ -1288,7 +1318,7 @@ test('Cast discovery publishes receivers while source extraction is stalled', as
   })
   await page.locator('.chromecastControl > button').click()
   await expect.poll(() => page.evaluate(() => typeof window.finishCastLookup)).toBe('function')
-  await page.getByRole('option', { name: 'Test TV', exact: true }).click({ timeout: 5000 })
+  await castMenu(page).getByRole('button', { name: 'Test TV', exact: true }).click({ timeout: 5000 })
   await expect(page.locator('.chromecastControl > button')).toHaveAttribute('aria-pressed', 'true')
   const [started] = await app.electronApp.evaluate(() => globalThis.castTest.starts)
   expect(started.source).toEqual({ url: 'https://cast-media.test/video.mp4', contentType: 'video/mp4' })
@@ -1319,7 +1349,7 @@ for (const outcome of ['resolved', 'rejected']) {
       window.finishCastLookup({ url: 'https://cast-media.test/obsolete.mpd', contentType: 'application/dash+xml' })
     })
     await expect.poll(() => page.evaluate(() => window.castSourceLookups), { timeout: 5000 }).toBe(2)
-    await page.getByRole('option', { name: 'Test TV', exact: true }).click()
+    await castMenu(page).getByRole('button', { name: 'Test TV', exact: true }).click()
     await expect(page.locator('.chromecastControl > button')).toHaveAttribute('aria-pressed', 'true')
     const [started] = await app.electronApp.evaluate(() => globalThis.castTest.starts)
     expect(started.source.url).toBe('https://cast-media.test/recovered.mpd')

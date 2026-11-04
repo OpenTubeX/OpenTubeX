@@ -397,7 +397,7 @@ const menuItems = computed(() => {
   return items.map(item => ({ enabled: true, ...item }))
 })
 function openMenu() {
-  openButtonMenu(menuButton.value.$el.querySelector('button'), menuItems)
+  openButtonMenu(menuButton.value.$el.querySelector('button'), menuItems, props.download.title || t('Downloads.Downloading'))
 }
 function closeMenu() {
   window.dispatchEvent(new CustomEvent('opentubex:close-context-menu', { detail: menuItems }))
