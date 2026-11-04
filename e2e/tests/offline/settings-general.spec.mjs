@@ -583,7 +583,7 @@ test.describe('settings', () => {
     await expect(page.locator('[role="tooltip"]:visible')).toHaveCount(0)
   })
 
-  test('animates help tooltips open and closed in place on the compositor', async ({ page }) => {
+  test('animates help tooltips open and closed in place on the compositor @scale', async ({ page }) => {
     await goTo(page, 'settings')
     // Slow motion keeps each transition running long enough to inspect it
     await page.evaluate(() => {
