@@ -80,6 +80,10 @@ test('removes each saved channel override from the watch popover without changin
   await rows.first().locator('.channelSettingSave').press('Enter')
   await expect.poll(async () => Object.keys((await savedValues(page))[0]).length).toBe(2)
   await expect(rows).toHaveCount(0)
+  // The confirmation slides in over the toolbar and stays while the pointer rests on it.
+  const savedToast = page.locator('[data-sonner-toast]', { hasText: 'Channel Playback Speed Saved: 1×' })
+  await savedToast.press('Escape')
+  await expect(savedToast).toHaveCount(0)
   await page.locator(`${activeTab} .watchVideoInfo`).getByRole('button', { name: 'Save channel setting…', exact: true }).click()
   await expect(rows.first().getByRole('button', { name: 'Forget this setting' })).toBeVisible()
   await rows.first().getByRole('button', { name: 'Forget this setting' }).press('Enter')
