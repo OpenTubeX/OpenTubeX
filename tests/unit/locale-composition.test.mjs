@@ -5,7 +5,7 @@ import path from 'node:path'
 import { createRequire } from 'node:module'
 import test from 'node:test'
 
-import { composeLocaleMessages } from '../../src/localeComposition.js'
+import { composeLocaleMessages, resolveMessagesWithFallback } from '../../src/localeComposition.js'
 
 const require = createRequire(import.meta.url)
 const ProcessLocalesPlugin = require('../../_scripts/ProcessLocalesPlugin.js')
@@ -153,4 +153,18 @@ test('AI locale processing watches overlays created after startup', async () => 
   } finally {
     await rm(fixtureDirectory, { recursive: true, force: true })
   }
+})
+
+test('resolveMessagesWithFallback fills messages the locale lacks within a subtree', () => {
+  const enUS = { Settings: { General: { Title: 'Title', Limit: 'Limit titles', Empty: 'Empty' } } }
+  const enGB = { Settings: { General: { Title: 'Title (GB)', Empty: '' } } }
+
+  assert.deepEqual(resolveMessagesWithFallback([enGB, enUS], 'Settings.General'), {
+    Title: 'Title (GB)',
+    Limit: 'Limit titles',
+    Empty: 'Empty',
+  })
+  assert.equal(resolveMessagesWithFallback([enGB, enUS], 'Settings.General.Limit'), 'Limit titles')
+  assert.equal(resolveMessagesWithFallback([enGB, enUS], 'Settings.Missing'), undefined)
+  assert.deepEqual(enGB, { Settings: { General: { Title: 'Title (GB)', Empty: '' } } })
 })

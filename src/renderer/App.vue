@@ -631,6 +631,7 @@ import { useScrollClamp } from './composables/useScrollClamp'
 import { usePhoneLayout } from './composables/usePhoneLayout'
 import { useTitleBarOverlay } from './composables/useTitleBarOverlay'
 import { useI18n } from 'vue-i18n'
+import { tmWithFallback } from './i18n/index'
 import { routerKey, useRoute, useRouter } from 'vue-router'
 
 import FtFlexBox from './components/ft-flex-box/ft-flex-box.vue'
@@ -772,7 +773,7 @@ const capacitorTabService = isCapacitor
 if (usesLogicalTabs) {
   provide(routerKey, navigation.createPresentedRouterFacade())
 }
-const { locale, t, tm } = useI18n()
+const { locale, t } = useI18n()
 initializePlatformInfo()
 
 const tabContainers = computed(() => {
@@ -2535,7 +2536,7 @@ const commandPaletteVideoSources = computed(() => ({
 }))
 const commandPaletteCommands = computed(() => createCommandPaletteRegistry({
   t,
-  tm,
+  tm: tmWithFallback,
   locale: locale.value,
   routePath: route.path,
   store,

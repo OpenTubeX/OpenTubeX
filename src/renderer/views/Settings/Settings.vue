@@ -387,6 +387,7 @@ import {
   watch
 } from 'vue'
 import { useI18n } from 'vue-i18n'
+import { tmWithFallback } from '../../i18n/index'
 
 import DownloadSettings from '../../components/Settings/Downloads/DownloadSettings.vue'
 import DataSection from '../../components/Settings/Data/DataSection.vue'
@@ -471,7 +472,7 @@ const LEGACY_SETTINGS_SECTION_MAP = {
   experimental: 'advanced'
 }
 
-const { locale, t, tm } = useI18n()
+const { locale, t } = useI18n()
 const normalizeSearchText = value => normalizeSettingsSearchText(value, locale.value)
 initializePlatformInfo()
 const systemColorScheme = window.matchMedia('(prefers-color-scheme: dark)')
@@ -686,7 +687,7 @@ const settingsSectionComponents = computed(() => [{
 }, ...settingsComponentsData.value])
 const settingsSearchableValues = computed(() => createSettingsSearchIndex({
   sections: settingsSectionComponents.value,
-  tm,
+  tm: tmWithFallback,
   store,
   usingElectron: USING_ELECTRON,
   isCapacitor: IS_CAPACITOR,
