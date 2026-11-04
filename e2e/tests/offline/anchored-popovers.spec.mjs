@@ -145,13 +145,20 @@ for (const anchors of [true, false]) {
         const frame = () => new Promise(requestAnimationFrame)
         await frame()
         await frame()
+        // Start with the popup centered, so the viewport margins clamp neither
+        // position: a popup at an edge moves less than its trigger.
+        const opened = measure()
+        const center = innerWidth / 2 - (opened.left + opened.right) / 2
+        trigger.style.translate = `${center}px 0px`
+        window.dispatchEvent(new Event('scroll'))
+        for (let i = 0; i < 6; i++) await frame()
         const initial = measure()
-        const shift = initial.right + 32 < innerWidth - 8 ? 32 : -32
+        const shift = 32
         let reads = 0
         const original = trigger.getBoundingClientRect
         trigger.getBoundingClientRect = function () { reads++; return original.call(this) }
         try {
-          trigger.style.translate = `${shift}px 0px`
+          trigger.style.translate = `${center + shift}px 0px`
           // Ancestor transforms and scrolling are followed by CSS, without
           // writing new offsets or measuring the trigger on a scroll callback.
           window.dispatchEvent(new Event('scroll'))
