@@ -1,3 +1,4 @@
+/* stylelint-disable no-descending-specificity */
 .tabOrganizerBackdrop {
   align-items: flex-start;
   background: rgb(0 0 0 / 52%);
@@ -11,11 +12,16 @@
   animation: tab-organizer-backdrop-enter var(--motion-default-effects);
 }
 
+/* Rows and fields sit on a container one step above the dialog surface;
+   selected rows take a primary tint, like the current Sync session. */
 .tabOrganizer {
+  --organizer-container: color-mix(in srgb, var(--primary-text-color) 5%, var(--card-bg-color));
+  --organizer-tonal: color-mix(in srgb, var(--primary-color) 16%, var(--card-bg-color));
+  --organizer-selected: color-mix(in srgb, var(--primary-color) 22%, var(--card-bg-color));
+
   background: var(--card-bg-color);
-  border: 1px solid var(--divider-color);
-  border-radius: var(--shape-corner-medium);
-  box-shadow: 0 20px 70px rgb(0 0 0 / 38%);
+  border-radius: var(--shape-corner-extra-large);
+  box-shadow: 0 16px 48px rgb(0 0 0 / 38%);
   color: var(--primary-text-color);
   display: flex;
   flex-direction: column;
@@ -27,16 +33,15 @@
 
 .tabOrganizerHeader {
   align-items: center;
-  border-block-end: 1px solid var(--divider-color);
   display: flex;
   flex: 0 0 auto;
   justify-content: space-between;
-  padding-block: 14px;
-  padding-inline: 18px;
+  padding-block: 20px 8px;
+  padding-inline: 24px 16px;
 }
 
 .tabOrganizerHeader h2 {
-  font-size: 22px;
+  font-size: 24px;
   font-weight: 700;
   letter-spacing: -0.01em;
   margin: 0;
@@ -44,37 +49,84 @@
 
 .tabOrganizerHeader span {
   color: var(--secondary-text-color);
-  font-size: 12px;
+  font-size: 13px;
 }
 
-.iconButton {
+/* Buttons are tonal pills by default. Each variant sets its container and
+   content colors; hover and press layer the content color on top. The corner
+   is half the height rather than full, so the press morph is smooth. */
+.tabOrganizer button:where(:not([role='tab'])) {
+  --organizer-button-height: 40px;
+  --organizer-button-container: var(--organizer-tonal);
+  --organizer-button-foreground: var(--primary-text-color);
+
   align-items: center;
+  background-color: var(--organizer-button-container);
+  border: 0;
+  border-radius: calc(var(--organizer-button-height) / 2 * var(--ui-roundness));
+  color: var(--organizer-button-foreground);
+  cursor: pointer;
+  font: inherit;
+  font-size: 14px;
+  font-weight: 500;
+  gap: 8px;
+  justify-content: center;
+  min-block-size: var(--organizer-button-height);
+  padding-block: 6px;
+  padding-inline: 14px;
+  transition:
+    background-color var(--motion-default-effects),
+    border-radius var(--motion-fast-spatial);
+}
+
+.tabOrganizer button:where(:not([role='tab'], :disabled)):hover {
+  background-color: color-mix(in srgb, var(--organizer-button-foreground) 8%, var(--organizer-button-container));
+}
+
+.tabOrganizer button:where(:not([role='tab'], :disabled)):active {
+  background-color: color-mix(in srgb, var(--organizer-button-foreground) 12%, var(--organizer-button-container));
+  border-radius: var(--shape-corner-small);
+}
+
+.tabOrganizer button:disabled {
+  cursor: default;
+  opacity: 0.38;
+}
+
+.tabOrganizer button:focus-visible {
+  outline: 2px solid var(--primary-color);
+  outline-offset: 2px;
+}
+
+.tabOrganizer .primaryButton {
+  --organizer-button-container: var(--primary-color);
+  --organizer-button-foreground: var(--text-with-main-color);
+}
+
+.tabOrganizer .dangerButton {
+  --organizer-button-container: color-mix(in srgb, var(--destructive-color) 16%, var(--card-bg-color));
+}
+
+.dangerButton .ft-icon {
+  color: var(--destructive-color);
+}
+
+/* Standard icon buttons: a transparent circle that squares off when pressed. */
+.tabOrganizer .iconButton {
+  --organizer-button-container: transparent;
+
   aspect-ratio: 1;
   display: inline-flex;
-  justify-content: center;
-  min-block-size: 36px;
-  min-inline-size: 36px;
+  min-inline-size: var(--organizer-button-height);
   padding: 0;
 }
 
-.tabOrganizer button,
-.tabOrganizer input {
-  border: 1px solid var(--divider-color);
-  border-radius: var(--shape-corner-small);
-  color: inherit;
-  font: inherit;
+.tabOrganizer .iconButton:not(:disabled):active {
+  border-radius: var(--shape-corner-medium);
 }
 
-.tabOrganizer button {
-  background: var(--side-nav-color);
-  cursor: pointer;
-  min-block-size: 34px;
-  padding-block: 6px;
-  padding-inline: 10px;
-  transition:
-    background-color var(--motion-fast-effects),
-    border-color var(--motion-fast-effects),
-    border-radius var(--motion-fast-spatial);
+.tabOrganizerHeader .iconButton {
+  font-size: 20px;
 }
 
 .tabOrganizerSearch {
@@ -89,19 +141,38 @@
 .tabOrganizerSearch .searchIcon {
   color: var(--secondary-text-color);
   inset-block-start: 50%;
-  inset-inline-start: 10px;
+  inset-inline-start: 16px;
   pointer-events: none;
   position: absolute;
   transform: translateY(-50%);
   z-index: 1;
 }
 
+.tabOrganizer input {
+  background: var(--organizer-container);
+  border: 0;
+  box-sizing: border-box;
+  color: inherit;
+  font: inherit;
+  outline: 2px solid transparent;
+  outline-offset: -2px;
+  transition: outline-color var(--motion-fast-effects), background-color var(--motion-fast-effects);
+}
+
+.tabOrganizer input:hover {
+  background: color-mix(in srgb, var(--primary-text-color) 8%, var(--organizer-container));
+}
+
+.tabOrganizer input:focus-visible {
+  outline-color: var(--primary-color);
+}
+
 .tabOrganizerSearch input {
-  background: color-mix(in srgb, var(--card-bg-color) 88%, var(--primary-text-color));
+  block-size: 40px;
+  border-radius: calc(20px * var(--ui-roundness));
   inline-size: 100%;
-  min-block-size: 34px;
   min-inline-size: 0;
-  padding-inline: 34px 10px;
+  padding-inline: 44px 16px;
 }
 
 .tabOrganizerControls {
@@ -110,8 +181,8 @@
   flex: 0 0 auto;
   flex-wrap: wrap;
   gap: 8px;
-  padding-block: 6px 12px;
-  padding-inline: 18px;
+  padding-block: 4px 16px;
+  padding-inline: 24px;
 }
 
 .selectionControls,
@@ -132,16 +203,14 @@
   align-items: center;
   color: var(--secondary-text-color);
   display: flex;
-  min-block-size: 34px;
+  font-weight: 500;
+  min-block-size: 40px;
   min-inline-size: 100px;
 }
 
 .selectionControls > button,
 .bulkActions button {
-  align-items: center;
   display: inline-flex;
-  gap: 6px;
-  justify-content: center;
 }
 
 .compactSelect {
@@ -150,17 +219,15 @@
 }
 
 .compactSelect :deep(.select-text) {
-  background: var(--card-bg-color);
-  block-size: 34px;
-  border: 1px solid var(--divider-color);
+  block-size: 40px;
   border-radius: var(--shape-corner-small);
   font-size: 13px;
-  min-block-size: 34px;
-  padding-inline-start: 9px;
+  min-block-size: 40px;
+  padding-inline-start: 12px;
 }
 
 .compactSelect :deep(.nativeSelect) {
-  block-size: 34px;
+  block-size: 40px;
 }
 
 .compactSelect :deep(.select-label) {
@@ -168,7 +235,7 @@
 }
 
 .compactSelect :deep(.iconSelect) {
-  inset-inline-end: 8px;
+  inset-inline-end: 10px;
 }
 
 .newGroupNameInput {
@@ -176,10 +243,6 @@
 
   inline-size: min(420px, calc(100vw - 100px));
   max-inline-size: 100%;
-}
-
-.dangerButton {
-  color: var(--error-color, #d84f4f) !important;
 }
 
 .tabOrganizerScroll {
@@ -190,56 +253,92 @@
 }
 
 .tabOrganizerScrollContent {
-  padding-block: 8px 18px;
+  padding-block: 12px 20px;
 }
 
 .tabGroup,
 .syncedTabsSection,
 .recentlyClosed {
-  margin-inline: 12px;
+  margin-inline: 16px;
 }
 
 .tabGroup {
-  border-radius: var(--shape-corner-small);
+  border-radius: var(--shape-corner-large-increased);
+  outline: 2px dashed transparent;
+  outline-offset: -2px;
   transition: background-color var(--motion-fast-effects), outline-color var(--motion-fast-effects);
 }
 
-.tabGroupHeader,
-.recentlyClosed > header {
-  align-items: center;
-  display: flex;
-  gap: 8px;
-  min-block-size: 44px;
-  padding-inline: 6px;
-}
-
-.tabGroupHeader {
-  position: relative;
+.tabGroup + .tabGroup {
+  margin-block-start: 12px;
 }
 
 .tabGroup.dropTarget {
-  background: color-mix(in srgb, var(--accent-color) 14%, transparent);
-  outline: 2px solid var(--accent-color);
-  outline-offset: -2px;
+  background: color-mix(in srgb, var(--primary-color) 14%, transparent);
+  outline-color: var(--primary-color);
 }
 
-.tabGroupHeader h3,
-.recentlyClosed h3 {
-  font-size: 14px;
+.tabGroupHeader,
+.recentlyClosed > header,
+.syncedTabsHeader {
+  align-items: center;
+  display: flex;
+  gap: 8px;
+  min-block-size: 48px;
+  padding-inline: 8px;
+}
+
+/* The header checkbox lines up with the rows' checkbox column. */
+.tabGroupHeader {
+  padding-inline-start: 40px;
+  position: relative;
+}
+
+.tabGroupHeader h3 {
+  font-size: 15px;
+  font-weight: 600;
+  margin: 0;
+}
+
+.recentlyClosed h3,
+.syncedTabsHeader h3 {
+  font-size: 18px;
+  font-weight: 600;
+  letter-spacing: -0.01em;
   margin: 0;
 }
 
 .tabGroupCount {
+  background: color-mix(in srgb, var(--primary-text-color) 8%, transparent);
+  border-radius: var(--shape-corner-full);
   color: var(--secondary-text-color);
   flex: 0 0 auto;
   font-size: 12px;
+  font-weight: 500;
+  padding-block: 2px;
+  padding-inline: 8px;
   white-space: nowrap;
 }
 
-.collapseButton {
-  min-block-size: 32px !important;
+.tabOrganizer .collapseButton {
+  --organizer-button-height: 32px;
+  --organizer-button-container: transparent;
+
+  aspect-ratio: 1;
   min-inline-size: 32px;
-  padding: 0 !important;
+  padding: 0;
+}
+
+.collapseButton .ft-icon {
+  transition: transform var(--motion-default-spatial);
+}
+
+.collapseButton[aria-expanded='false'] .ft-icon {
+  transform: rotate(-90deg);
+}
+
+.collapseButton[aria-expanded='false']:dir(rtl) .ft-icon {
+  transform: rotate(90deg);
 }
 
 .groupColor {
@@ -252,24 +351,26 @@
 
 .groupColor.noColor {
   background: transparent;
-  border: 1px solid var(--secondary-text-color);
+  border: 2px solid var(--secondary-text-color);
   box-sizing: border-box;
 }
 
-.groupIconButton {
+/* The group icon sits in a circle tinted with the group's color, and morphs
+   into a rounded square while its picker is open. */
+.tabOrganizer .groupIconButton {
+  --organizer-button-height: 36px;
+  --organizer-button-container: color-mix(in srgb, currentcolor 18%, transparent);
+  --organizer-button-foreground: currentcolor;
+
   aspect-ratio: 1;
-  background: transparent !important;
-  border-color: transparent !important;
   display: grid;
-  min-block-size: 30px !important;
-  min-inline-size: 30px;
-  padding: 0 !important;
+  min-inline-size: 36px;
+  padding: 0;
   place-items: center;
 }
 
-.groupIconButton:hover,
-.groupIconButton:focus-visible {
-  background: var(--side-nav-hover-color) !important;
+.tabOrganizer .groupIconButton[aria-expanded='true'] {
+  border-radius: var(--shape-corner-medium);
 }
 
 .groupIconEditor {
@@ -277,25 +378,40 @@
 }
 
 .groupAppearancePicker {
-  background: var(--card-bg-color);
-  border: 1px solid var(--divider-color);
+  animation: organizer-picker-enter var(--motion-default-spatial);
+  background: color-mix(in srgb, var(--card-bg-color) 96%, var(--bg-color));
+  border: 1px solid color-mix(in srgb, var(--border-color) 55%, transparent);
   border-radius: var(--shape-corner-large);
-  box-shadow: 0 8px 24px rgb(0 0 0 / 30%);
+  box-shadow: 0 12px 32px rgb(0 0 0 / 34%);
   box-sizing: border-box;
   display: grid;
-  gap: 6px;
-  inline-size: min(305px, calc(100vw - 116px));
-  inset-block-start: calc(100% + 3px);
+  gap: 8px;
+  inline-size: min(320px, calc(100vw - 116px));
+  inset-block-start: calc(100% + 4px);
   inset-inline-start: 0;
-  padding: 5px;
+  padding: 8px;
   position: absolute;
+  transform-origin: top left;
   z-index: 3;
 }
 
-.groupAppearancePicker button {
+.groupAppearancePicker:dir(rtl) {
+  transform-origin: top right;
+}
+
+@keyframes organizer-picker-enter {
+  from {
+    opacity: 0;
+    transform: scale(0.9);
+  }
+}
+
+/* Choices are circles; the chosen one morphs into a filled rounded square. */
+.tabOrganizer .groupAppearancePicker button {
+  --organizer-button-container: transparent;
+
   aspect-ratio: 1;
-  background: transparent;
-  border-color: transparent;
+  border-radius: 50%;
   display: grid;
   min-block-size: 0;
   min-inline-size: 0;
@@ -303,38 +419,49 @@
   place-items: center;
 }
 
-.groupIconPicker button[aria-pressed='true'],
-.groupColorPicker button[aria-selected='true'] {
-  background: var(--side-nav-hover-color);
-  border-color: var(--accent-color);
+.tabOrganizer .groupIconPicker button[aria-pressed='true'],
+.tabOrganizer .groupColorPicker button[aria-selected='true'] {
+  --organizer-button-container: var(--organizer-selected);
+
+  border-radius: var(--shape-corner-medium);
+}
+
+.tabOrganizer .groupIconPicker button[aria-pressed='true'] {
+  --organizer-button-container: var(--primary-color);
+  --organizer-button-foreground: var(--text-with-main-color);
 }
 
 .groupColorPicker,
 .groupIconPicker {
   display: grid;
-  gap: 3px;
+  gap: 4px;
   grid-template-columns: repeat(8, minmax(0, 1fr));
 }
 
 .groupColorPicker .groupColor {
-  block-size: 18px;
-  inline-size: 18px;
+  block-size: 20px;
+  inline-size: 20px;
+  transition: scale var(--motion-fast-spatial);
+}
+
+.groupColorPicker button[aria-selected='true'] .groupColor {
+  scale: 1.15;
 }
 
 .groupIconPicker {
   border-block-start: 1px solid var(--divider-color);
-  padding-block-start: 6px;
+  padding-block-start: 8px;
 }
 
-.groupNameButton {
-  align-items: center;
-  background: transparent !important;
-  border-color: transparent !important;
+.tabOrganizer .groupNameButton {
+  --organizer-button-height: 32px;
+  --organizer-button-container: transparent;
+
   display: inline-flex;
-  font-size: 14px;
+  font-size: 15px;
+  font-weight: 600;
   gap: 8px;
-  min-block-size: 30px !important;
-  padding-inline: 4px !important;
+  padding-inline: 8px;
 }
 
 .groupNameButton .ft-icon {
@@ -350,36 +477,38 @@
 }
 
 .groupRenameInput {
-  background: var(--card-bg-color);
   block-size: 32px;
+  border-radius: var(--shape-corner-small);
   min-inline-size: 120px;
-  padding-inline: 8px;
+  padding-inline: 12px;
 }
 
 .groupActions {
   align-items: center;
   display: flex;
   flex-wrap: wrap;
-  gap: 5px;
+  gap: 6px;
   margin-inline-start: auto;
 }
 
-.groupActions button,
-.groupActions :deep(.select-text) {
-  font-size: 12px;
-  min-block-size: 30px;
-}
+.tabOrganizer .groupActions > button {
+  --organizer-button-height: 32px;
 
-.groupActions > button {
-  align-items: center;
   display: inline-flex;
-  gap: 5px;
-  justify-content: center;
+  font-size: 13px;
+  gap: 6px;
+  padding-inline: 12px;
 }
 
 .groupActions .compactSelect {
   inline-size: 150px;
   margin-block-start: 0;
+}
+
+.groupActions .compactSelect :deep(.select-text),
+.groupActions .compactSelect :deep(.nativeSelect) {
+  block-size: 32px;
+  min-block-size: 32px;
 }
 
 .groupActions .compactSelect :deep(.select-label) {
@@ -393,48 +522,96 @@
   position: absolute;
 }
 
+/* Rows form one segmented list: large outer corners, tight inner ones. */
 .tabGroup ul,
-.recentlyClosed ul {
+.recentlyClosed ul,
+.syncedTabList {
   display: flex;
   flex-direction: column;
-  gap: 3px;
+  gap: 2px;
   list-style: none;
   margin: 0;
   padding: 0;
 }
 
-.tabOrganizerRow {
-  align-items: center;
-  border: 1px solid transparent;
-  border-radius: var(--shape-corner-small);
-  display: grid;
-  gap: 10px;
-  grid-template-columns: 24px 34px 24px minmax(0, 1fr) auto 36px;
-  min-block-size: 54px;
-  padding-block: 4px;
-  padding-inline: 8px;
-  transition: background-color var(--motion-fast-effects), border-color var(--motion-fast-effects);
+.tabOrganizerRow,
+.syncedTabList > li {
+  background-color: var(--organizer-container);
+  border-radius: var(--shape-corner-extra-small);
+  transition: background-color var(--motion-fast-effects), opacity var(--motion-fast-effects);
 }
 
+.tabOrganizerRow:first-child,
+.syncedTabList > li:first-child {
+  border-start-start-radius: var(--shape-corner-large-increased);
+  border-start-end-radius: var(--shape-corner-large-increased);
+}
+
+.tabOrganizerRow:last-child,
+.syncedTabList > li:last-child {
+  border-end-start-radius: var(--shape-corner-large-increased);
+  border-end-end-radius: var(--shape-corner-large-increased);
+}
+
+.tabOrganizerRow {
+  align-items: center;
+  display: grid;
+  gap: 8px;
+  grid-template-columns: 20px 32px 36px minmax(0, 1fr) auto 40px;
+  min-block-size: 56px;
+  padding-block: 6px;
+  padding-inline: 12px 8px;
+}
+
+.tabOrganizerRow:hover,
+.tabOrganizerRow:focus-within {
+  background-color: color-mix(in srgb, var(--primary-text-color) 8%, var(--organizer-container));
+}
+
+.tabOrganizerRow.selected {
+  background-color: var(--organizer-selected);
+}
+
+.tabOrganizerRow.selected:hover,
+.tabOrganizerRow.selected:focus-within {
+  background-color: color-mix(in srgb, var(--primary-text-color) 8%, var(--organizer-selected));
+}
+
+.tabOrganizerRow.dragging {
+  opacity: 0.5;
+}
+
+/* Page icons sit in a tonal circle; the active tab's circle is filled. */
 .tabIcon {
   align-items: center;
   align-self: center;
-  color: var(--secondary-text-color);
+  background-color: var(--organizer-tonal);
+  block-size: 36px;
+  border-radius: 50%;
+  color: var(--primary-color);
   display: flex;
-  inline-size: 24px;
+  inline-size: 36px;
   justify-content: center;
+  transition: background-color var(--motion-fast-effects), color var(--motion-fast-effects);
 }
 
 .tabIcon img,
 .tabIcon .retryImagePlaceholder {
-  block-size: 20px;
+  block-size: 36px;
   border-radius: 50%;
-  inline-size: 20px;
+  inline-size: 36px;
   object-fit: cover;
 }
 
-.tabOrganizerRow.dragging {
-  opacity: 0.55;
+.tabOrganizerRow.active .tabIcon {
+  background-color: var(--primary-color);
+  color: var(--text-with-main-color);
+}
+
+.tabOrganizerRow.active .tabIcon img {
+  box-sizing: border-box;
+  outline: 2px solid var(--primary-color);
+  outline-offset: 2px;
 }
 
 .dragHandle {
@@ -445,15 +622,6 @@
 
 .tabOrganizerRow.dragging .dragHandle {
   cursor: grabbing;
-}
-
-.tabOrganizerRow:hover,
-.tabOrganizerRow:focus-within {
-  background: var(--side-nav-hover-color);
-}
-
-.tabOrganizerRow.active {
-  border-color: color-mix(in srgb, var(--accent-color) 70%, transparent);
 }
 
 .tabSelection {
@@ -497,14 +665,28 @@
 
 .tabIdentity {
   align-items: flex-start;
-  background: transparent !important;
-  border: 0 !important;
   display: flex;
   flex-direction: column;
   justify-content: center;
   min-inline-size: 0;
-  padding-inline: 2px !important;
   text-align: start;
+}
+
+.tabOrganizer .tabIdentity {
+  --organizer-button-height: 44px;
+  --organizer-button-container: transparent;
+
+  align-items: flex-start;
+  border-radius: var(--shape-corner-small);
+  font-weight: 400;
+  gap: 0;
+  padding-block: 2px;
+  padding-inline: 4px;
+}
+
+.tabOrganizer .tabIdentity:not(:disabled):is(:hover, :active) {
+  background-color: transparent;
+  border-radius: var(--shape-corner-small);
 }
 
 .tabIdentity span,
@@ -515,9 +697,15 @@
   white-space: nowrap;
 }
 
+.tabIdentity span,
+.syncedTabIdentity > span {
+  font-size: 15px;
+  font-weight: 500;
+}
+
 .tabIdentity small {
   color: var(--secondary-text-color);
-  font-size: 11px;
+  font-size: 12px;
 }
 
 .tabIndicators {
@@ -528,34 +716,41 @@
 }
 
 .tabIndicators span {
-  background: var(--side-nav-color);
-  border: 1px solid var(--divider-color);
-  border-radius: var(--shape-corner-full);
+  background: color-mix(in srgb, var(--primary-text-color) 8%, transparent);
+  border-radius: var(--shape-corner-small);
   color: var(--secondary-text-color);
-  font-size: 10px;
-  padding-block: 2px;
-  padding-inline: 6px;
+  font-size: 11px;
+  font-weight: 500;
+  padding-block: 3px;
+  padding-inline: 8px;
 }
 
+.tabIndicators .activeIndicator {
+  background: var(--primary-color);
+  color: var(--text-with-main-color);
+}
+
+.syncedTabsSection,
 .recentlyClosed {
-  border-block-start: 1px solid var(--divider-color);
-  margin-block-start: 14px;
-  padding-block-start: 8px;
+  margin-block-start: 28px;
 }
 
 .recentlyClosed > header {
   justify-content: space-between;
 }
 
+.recentlyClosed > header,
+.syncedTabsHeader {
+  padding-inline: 8px 0;
+}
+
 .closedTabRow {
-  grid-template-columns: 24px minmax(0, 1fr) auto;
+  grid-template-columns: 36px minmax(0, 1fr) auto;
 }
 
 .closedTabRow > button,
 .recentlyClosed > header button {
-  align-items: center;
   display: inline-flex;
-  gap: 6px;
 }
 
 .emptyMessage {
@@ -564,40 +759,24 @@
   text-align: center;
 }
 
-.syncedTabsSection {
-  border-block-start: 1px solid var(--divider-color);
-  margin-block-start: 14px;
-  padding-block-start: 8px;
-}
-
-.syncedTabsHeader {
-  align-items: center;
-  display: flex;
-  min-block-size: 44px;
-  padding-inline: 6px;
-}
-
 .syncedTabsHeader h3 {
   align-items: center;
   display: flex;
-  font-size: 14px;
-  gap: 8px;
-  margin: 0;
+  gap: 10px;
 }
 
 .syncedTabsIcon {
-  color: var(--secondary-text-color);
+  color: var(--primary-color);
 }
 
 .syncedSessionTabs {
   --material-tab-font-size: 13px;
 
-  border-block-end: 1px solid var(--divider-color);
   display: flex;
   flex-wrap: wrap;
   gap: 4px;
   padding-block: 4px;
-  padding-inline: 4px;
+  padding-inline: 0;
 }
 
 .syncedSessionTab strong {
@@ -606,21 +785,18 @@
 }
 
 .syncedSessionPanels {
-  padding-block-start: 10px;
+  padding-block-start: 8px;
 }
 
 .syncedSessionCard {
-  background: color-mix(in srgb, var(--side-nav-color) 72%, transparent);
-  border: 1px solid var(--divider-color);
-  border-radius: var(--shape-corner-large);
+  background: color-mix(in srgb, var(--primary-color) 6%, var(--card-bg-color));
+  border-radius: var(--shape-corner-extra-large);
   min-inline-size: 0;
-  padding-block: 10px;
-  padding-inline: 10px;
+  padding: 16px;
 }
 
 .syncedSessionHeader,
-.syncedSessionActions,
-.syncedSessionActionButton {
+.syncedSessionActions {
   align-items: center;
   display: flex;
 }
@@ -629,11 +805,14 @@
   flex-wrap: wrap;
   gap: 10px;
   justify-content: space-between;
+  margin-block-end: 12px;
+  padding-inline-start: 4px;
 }
 
 .syncedSessionName {
   flex: 1 1 160px;
-  font-size: 14px;
+  font-size: 16px;
+  font-weight: 600;
   margin: 0;
   min-inline-size: 0;
   overflow-wrap: anywhere;
@@ -641,9 +820,9 @@
 
 .syncedSessionIcon {
   align-items: center;
-  background: color-mix(in srgb, var(--accent-color) 14%, transparent);
+  background: var(--organizer-tonal);
   border-radius: 50%;
-  color: var(--accent-color);
+  color: var(--primary-color);
   display: flex;
   flex: 0 0 32px;
   block-size: 32px;
@@ -653,44 +832,35 @@
 
 .syncedSessionActions {
   flex: 0 0 auto;
-  gap: 5px;
+  gap: 6px;
   margin-inline-start: auto;
 }
 
-.syncedSessionActionButton {
-  font-size: 12px;
-  gap: 6px;
-  justify-content: center;
+.tabOrganizer .syncedSessionActionButton {
+  display: inline-flex;
 }
 
-.syncedSessionActions > .iconButton {
-  min-block-size: 34px;
-  min-inline-size: 34px;
-  padding: 0;
+.syncedTabList > li {
+  background-color: var(--card-bg-color);
 }
 
-.syncedTabList {
-  border-block-start: 1px solid var(--divider-color);
-  display: flex;
-  flex-direction: column;
-  gap: 3px;
-  list-style: none;
-  margin-block: 10px 0;
-  padding-block: 8px 0;
-  padding-inline: 0;
-}
+.tabOrganizer .syncedTabTarget {
+  --organizer-button-height: 56px;
+  --organizer-button-container: transparent;
 
-.syncedTabTarget {
-  align-items: center;
-  background: transparent !important;
-  border-color: transparent !important;
+  border-radius: inherit;
   display: grid;
-  gap: 10px;
-  grid-template-columns: 24px minmax(0, 1fr) 24px;
+  font-weight: 400;
+  gap: 12px;
+  grid-template-columns: 36px minmax(0, 1fr) 24px;
   inline-size: 100%;
-  min-block-size: 48px !important;
-  padding-block: 5px !important;
+  padding-block: 6px;
+  padding-inline: 12px;
   text-align: start;
+}
+
+.tabOrganizer .syncedTabTarget:not(:disabled):active {
+  border-radius: inherit;
 }
 
 .syncedTabIdentity {
@@ -708,7 +878,7 @@
 
 .syncedTabIdentity small {
   color: var(--secondary-text-color);
-  font-size: 11px;
+  font-size: 12px;
 }
 
 .syncedTabOpenIcon {
@@ -716,33 +886,9 @@
   justify-self: center;
 }
 
-.syncedTabTarget:hover:not(:disabled) {
-  background: var(--side-nav-hover-color) !important;
-}
-
-.tabOrganizer button:disabled,
 .tabOrganizer input:disabled {
   cursor: default;
-  opacity: 0.5;
-}
-
-.tabOrganizer button:focus-visible,
-.tabOrganizer input:focus-visible {
-  border-color: var(--accent-color);
-  outline: 2px solid color-mix(in srgb, var(--accent-color) 45%, transparent);
-  outline-offset: 1px;
-}
-
-.tabOrganizer button:hover:not(:disabled) {
-  border-color: var(--accent-color);
-}
-
-.tabOrganizer button:not(:disabled):active {
-  border-radius: var(--shape-corner-extra-small);
-}
-
-.tabIdentity:hover:not(:disabled) {
-  outline: none;
+  opacity: 0.38;
 }
 
 @media only screen and (width <= 720px) {
@@ -759,11 +905,11 @@
   }
 
   .tabOrganizerRow {
-    grid-template-columns: 24px 34px 24px minmax(0, 1fr) 36px;
+    grid-template-columns: 20px 32px 36px minmax(0, 1fr) 40px;
   }
 
   .closedTabRow {
-    grid-template-columns: 24px minmax(0, 1fr) auto;
+    grid-template-columns: 36px minmax(0, 1fr) auto;
   }
 
   .tabOrganizerSearch {
@@ -779,6 +925,7 @@
     inline-size: auto;
     justify-content: flex-start;
     margin-inline-start: 0;
+    padding-block-end: 8px;
   }
 
   .syncedSessionHeader {
@@ -793,7 +940,19 @@
 @media only screen and (width <= 480px) {
   .tabOrganizerHeader,
   .tabOrganizerControls {
-    padding-inline: 12px;
+    padding-inline: 16px;
+  }
+
+  .tabGroup,
+  .syncedTabsSection,
+  .recentlyClosed {
+    margin-inline: 8px;
+  }
+
+  /* Phones have no room to indent the header under the rows' drag handles,
+     and the appearance picker needs the width. */
+  .tabGroupHeader {
+    padding-inline-start: 8px;
   }
 
   .selectionControls label {
