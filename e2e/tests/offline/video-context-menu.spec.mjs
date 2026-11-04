@@ -1,5 +1,7 @@
 import { test, expect, goTo, goToSettingsSection, sel } from '../../helpers/app.mjs'
 import { fulfillVisualFixture, expectImagesLoaded } from '../../helpers/visual-fixtures.mjs'
+import { openMockedVideo } from '../../helpers/player.mjs'
+import { mockPlayableWatchPage } from '../../helpers/watch.mjs'
 
 const VIDEO_ID = 'jNQXAC9IVRw'
 
@@ -725,4 +727,30 @@ test('mobile context sheet moves between items and submenus with arrow keys', as
   await press('Home', menu.getByRole('button', { name: 'Back', exact: true }))
   await press('ArrowLeft', item('Copy Link'))
   await expect(menu.locator('strong')).toHaveText('Video menu test')
+})
+
+test.describe('mobile context sheet on a watch page', () => {
+  test.use({ seed: { settings: { videoPlaybackEngine: 'built-in', ytDlpPlaybackEngineDefaultMigration: true } } })
+
+  test('Space activates the focused item instead of toggling playback', async ({ app, page }) => {
+    await mockPlayableWatchPage(app, page)
+    await openMockedVideo(page)
+    await page.setViewportSize({ width: 375, height: 812 })
+    const video = page.locator('video')
+    await video.evaluate(element => element.pause())
+    await page.evaluate(() => {
+      window.sheetActionRuns = 0
+      window.dispatchEvent(new CustomEvent('opentubex:mobile-context-menu', {
+        detail: { title: 'Space test', actions: [{ label: 'Space action', run: () => { window.sheetActionRuns++ } }] }
+      }))
+    })
+    const menu = page.locator('.mobileLinkActions')
+    await expect(menu).toBeFocused()
+    await page.keyboard.press('ArrowDown')
+    await expect(menu.getByRole('menuitem', { name: 'Space action', exact: true })).toBeFocused()
+    await page.keyboard.press('Space')
+    await expect.poll(() => page.evaluate(() => window.sheetActionRuns)).toBe(1)
+    await expect(menu).toBeHidden()
+    expect(await video.evaluate(element => element.paused)).toBe(true)
+  })
 })
