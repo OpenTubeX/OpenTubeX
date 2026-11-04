@@ -172,13 +172,25 @@ test('finds and highlights an individual setting', async ({ page }) => {
 
   const setting = page.getByRole('option', { name: /Thumbnail Preference/ })
   await expect(setting).toContainText('Appearance')
+  // The highlight only lasts 2.2s, and rendering the Settings window for the
+  // first time can keep the renderer too busy for polling to see it. Record it.
+  await page.evaluate(() => {
+    window.__settingsSearchTargets = []
+    new MutationObserver(records => {
+      for (const { target } of records) {
+        if (target.classList.contains('settingsSearchTarget')) {
+          window.__settingsSearchTargets.push(target.textContent)
+        }
+      }
+    }).observe(document.body, { subtree: true, attributes: true, attributeFilter: ['class'] })
+  })
   await input.press('Enter')
 
   const settings = page.getByRole('dialog', { name: 'Settings' })
   await expect(settings).toBeVisible()
   await expect(settings.locator('.settingsMenu .active')).toContainText('Appearance')
-  await expect(settings.locator('.settingsSearchTarget'))
-    .toContainText('Thumbnail Preference')
+  await expect.poll(() => page.evaluate(() => window.__settingsSearchTargets))
+    .toContainEqual(expect.stringContaining('Thumbnail Preference'))
 })
 
 test('transfers focus to Find in Page', async ({ page }) => {
