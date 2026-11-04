@@ -99,3 +99,26 @@ export function getAnchoredPosition(anchor, triggerRect, left, top, limits, plac
       : {})
   }
 }
+
+/**
+ * Measures a popup's box without its own transform, such as the scale of an
+ * open animation, so it is placed where it ends up once the animation ends.
+ * Handles the translate and scale such animations use.
+ * @param {Element} element
+ * @returns {DOMRect}
+ */
+export function getUntransformedRect(element) {
+  const rect = element.getBoundingClientRect()
+  const style = getComputedStyle(element)
+  if (style.transform === 'none') return rect
+
+  const { a, d, e, f } = new DOMMatrixReadOnly(style.transform)
+  if (a === 0 || d === 0) return rect
+  const [originX, originY] = style.transformOrigin.split(' ').map(Number.parseFloat)
+  return new DOMRect(
+    rect.left - e - originX * (1 - a),
+    rect.top - f - originY * (1 - d),
+    rect.width / a,
+    rect.height / d
+  )
+}

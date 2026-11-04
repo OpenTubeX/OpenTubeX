@@ -249,6 +249,50 @@ test('the bell icon follows the notifications and wiggles for new ones', async (
   expect(await page.evaluate(() => window.bellWiggles)).toBe(2)
 })
 
+test('the list opens and closes with the quick settings animation', { tag: '@scale' }, async ({ page }) => {
+  await page.emulateMedia({ reducedMotion: 'no-preference' })
+  const bell = page.getByRole('button', { name: 'Notifications', exact: true })
+  const dropdown = page.locator('.notificationCenterDropdown')
+  await page.evaluate(() => {
+    window.dropdownTransitions = []
+    document.addEventListener('transitionrun', (event) => {
+      if (event.target instanceof Element && event.target.matches('.notificationCenterDropdown')) window.dropdownTransitions.push(event.propertyName)
+    })
+  })
+
+  await bell.click()
+  await expect.poll(() => page.evaluate(() => window.dropdownTransitions.toSorted())).toEqual(['opacity', 'transform'])
+  await dropdown.evaluate(element => Promise.all(element.getAnimations().map(animation => animation.finished)))
+  // The menu is placed while it is still scaled down, but ends up aligned with the bell.
+  const [bellBox, dropdownBox] = await Promise.all([bell.boundingBox(), dropdown.boundingBox()])
+  expect(Math.abs(dropdownBox.x + dropdownBox.width - (bellBox.x + bellBox.width))).toBeLessThan(1)
+
+  // Pause the close animation as it starts to inspect the closing menu.
+  await dropdown.evaluate(element => {
+    window.dropdownLeave = []
+    element.addEventListener('transitionrun', (event) => {
+      const animation = element.getAnimations().find(animation => animation.transitionProperty === event.propertyName)
+      animation.pause()
+      window.dropdownLeave.push(animation)
+    })
+  })
+  await page.keyboard.press('Escape')
+  await expect.poll(() => page.evaluate(() => window.dropdownLeave.map(animation => animation.transitionProperty).toSorted()))
+    .toEqual(['opacity', 'transform'])
+  // The closing menu stays where it was, attached to the bell, instead of
+  // disappearing with the anchor of the closed button.
+  await page.evaluate(() => window.dropdownLeave.forEach(animation => { animation.currentTime = 0 }))
+  const closingBox = await dropdown.boundingBox()
+  expect(Math.abs(closingBox.x + closingBox.width - (bellBox.x + bellBox.width))).toBeLessThan(1)
+  expect(Math.abs(closingBox.y - dropdownBox.y)).toBeLessThan(1)
+  // Clicks reach the page below while it closes, and removal waits for the animation.
+  await expect(dropdown).toHaveCSS('pointer-events', 'none')
+  await page.evaluate(() => new Promise(resolve => setTimeout(resolve, 500)))
+  await expect(dropdown).toHaveCount(1)
+  await page.evaluate(() => window.dropdownLeave.forEach(animation => animation.play()))
+  await expect(dropdown).toHaveCount(0)
+})
+
 test('notifications appear in the app instead of the system while it is in use', async ({ app, page }) => {
   await page.emulateMedia({ reducedMotion: 'reduce' })
   await mockSystemNotifications(app, { foreground: true })

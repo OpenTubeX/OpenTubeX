@@ -73,8 +73,8 @@
         name="quick-settings-menu"
         :css="!phoneLayout"
         appear
-        @enter="finishMenuTransition"
-        @leave="finishMenuTransition"
+        @enter="finishTransition"
+        @leave="finishTransition"
         @after-leave="handleMenuAfterLeave"
       >
         <FtCard
@@ -494,6 +494,7 @@ import FtQuickSettingControl from '../FtQuickSettingControl/FtQuickSettingContro
 import store from '../../store/index'
 import allLocales from '../../../../static/locales/activeLocales.json'
 import { localeTranslationPercentages } from '../../i18n/index'
+import { finishTransition } from '../../helpers/animationSpeed'
 import { colors } from '../../helpers/colors'
 import { OPEN_COMMAND_PALETTE_EVENT } from '../../helpers/commandPalette'
 import { useColorTranslations } from '../../composables/colors'
@@ -708,15 +709,6 @@ function toggleMenu() {
       observeMainContent()
     })
   }
-}
-
-async function finishMenuTransition(element, done) {
-  // Vue starts CSS transitions two frames after rendering. Await their actual
-  // completion because the animation-speed setting adjusts their playback rate.
-  await nextTick()
-  await new Promise(resolve => requestAnimationFrame(() => requestAnimationFrame(resolve)))
-  await Promise.allSettled(element.getAnimations().map(animation => animation.finished))
-  done()
 }
 
 function handleMenuAfterLeave() {

@@ -89,3 +89,19 @@ export function applyAnimationSpeed(animation) {
   animation.updatePlaybackRate(animationPlaybackRate)
   return animation
 }
+
+/**
+ * Completes a Vue transition hook once the element's CSS transitions finish.
+ * Vue would derive their end from their declared durations, which the
+ * animation-speed setting no longer matches.
+ * @param {Element} element
+ * @param {() => void} done
+ */
+export async function finishTransition(element, done) {
+  // Vue starts the transitions two frames after calling the hook; queue these
+  // frames after its own, which it requests once the hook returns.
+  await Promise.resolve()
+  await new Promise(resolve => requestAnimationFrame(() => requestAnimationFrame(resolve)))
+  await Promise.allSettled(element.getAnimations().map(animation => animation.finished))
+  done()
+}
