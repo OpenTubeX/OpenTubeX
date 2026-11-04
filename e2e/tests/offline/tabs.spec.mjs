@@ -3,7 +3,7 @@ import { sampleColors } from '../../helpers/colors.mjs'
 import { fulfillVisualFixture } from '../../helpers/visual-fixtures.mjs'
 import { mockPlayableWatchPage } from '../../helpers/watch.mjs'
 
-import { abortUnmockedRequest, test, expect, sel, goTo, goToSettingsSection, clickSearchCancel, openNewWindowFromTabBar, setWindowSize, waitForAppReady } from '../../helpers/app.mjs'
+import { abortUnmockedRequest, test, expect, sel, goTo, goToSettingsSection, clickSearchCancel, expectScrollAtRenderedEnd, openNewWindowFromTabBar, setWindowSize, waitForAppReady } from '../../helpers/app.mjs'
 import {
   encryptSyncServerDeviceInfo,
   randomSyncServerDeviceId,
@@ -2765,6 +2765,42 @@ test.describe('vertical tab height', () => {
       tab => Math.round(tab.getBoundingClientRect().height)
     )).toBe(30)
   })
+
+  // 15 tabs stop overflowing once they shrink, 40 tabs still overflow.
+  for (const tabCount of [15, 40]) {
+    test(`clamps the scrolled strip when ${tabCount} tabs shrink`, { tag: '@scale' }, async ({ app, page }) => {
+      await setWindowSize(app, page, { width: 1000, height: 700 })
+      await page.evaluate(async count => {
+        window.$store.commit('setVerticalTabHeight', 56)
+        for (let index = 1; index < count; index++) {
+          await window.ftElectron.tabs.create({ route: '/history', title: `History ${index}`, makeActive: false, lazyLoad: true })
+        }
+      }, tabCount)
+      await expect(page.locator(sel.tabs)).toHaveCount(tabCount)
+
+      const container = page.locator('.tabBar .tabsContainer')
+      await expect(container).toHaveAttribute('data-overlayscrollbars-viewport')
+      await container.evaluate(element => { element.scrollTop = element.scrollHeight })
+      await expect.poll(() => container.evaluate(element => element.scrollTop)).toBeGreaterThan(0)
+
+      await page.evaluate(() => window.$store.commit('setVerticalTabHeight', 24))
+      await expect.poll(() => page.locator(sel.tabs).first().evaluate(
+        tab => Math.round(tab.getBoundingClientRect().height)
+      )).toBe(24)
+
+      const overflows = await container.evaluate(element => element.scrollHeight > element.clientHeight + 1)
+      expect(overflows).toBe(tabCount === 40)
+      if (overflows) {
+        await expectScrollAtRenderedEnd(container)
+      } else {
+        await expect.poll(() => container.evaluate(element => element.scrollTop)).toBe(0)
+      }
+      await expect.poll(() => container.evaluate(element => {
+        const scrollbar = element.querySelector(':scope > .os-scrollbar-vertical')
+        return scrollbar.classList.contains('os-scrollbar-unusable') === (element.scrollHeight <= element.clientHeight)
+      })).toBe(true)
+    })
+  }
 })
 
 /**
