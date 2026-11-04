@@ -863,6 +863,7 @@ test.describe('cancelling an automatic subscription feed refresh', () => {
     await goTo(page, 'history')
 
     const refreshToast = page.getByTestId('subscription-refresh-toast')
+    const progressToasts = page.locator('.persistent-stack')
     await expect(refreshToast).toContainText('Refreshing subscription videos', { timeout: 10_000 })
     await expect(refreshToast.locator('.icon')).toHaveAttribute('data-icon', 'video')
     await expect(page.locator('.app > .progressBar')).toHaveCount(0)
@@ -882,7 +883,7 @@ test.describe('cancelling an automatic subscription feed refresh', () => {
     expect(expandedBounds.y).toBeGreaterThanOrEqual(tabBarBounds.y + tabBarBounds.height)
 
     await page.mouse.move(expandedBounds.x + expandedBounds.width / 2, expandedBounds.y + expandedBounds.height / 2)
-    await expect(refreshToast).toHaveClass(/minimized/)
+    await expect(progressToasts).toHaveClass(/minimized/)
     await expect.poll(async () => (await refreshToast.boundingBox()).width).toBeLessThan(expandedBounds.width * 0.6)
 
     const minimizedBounds = await refreshToast.boundingBox()
@@ -897,7 +898,7 @@ test.describe('cancelling an automatic subscription feed refresh', () => {
     })
     const leftTabBar = page.locator('.tabBar.position-left')
     await expect(leftTabBar).toBeVisible()
-    await expect(refreshToast).not.toHaveClass(/minimized/)
+    await expect(progressToasts).not.toHaveClass(/minimized/)
     const [shiftedBounds, leftTabBarBounds] = await Promise.all([
       refreshToast.boundingBox(),
       leftTabBar.boundingBox()
@@ -906,7 +907,7 @@ test.describe('cancelling an automatic subscription feed refresh', () => {
 
     const viewport = await page.evaluate(() => ({ width: innerWidth, height: innerHeight }))
     await page.mouse.move(viewport.width / 2, viewport.height / 2)
-    await expect(refreshToast).not.toHaveClass(/minimized/)
+    await expect(progressToasts).not.toHaveClass(/minimized/)
     await expect.poll(async () => (await refreshToast.boundingBox()).width).toBeGreaterThan(expandedBounds.width * 0.9)
 
     await page.evaluate(() => document.documentElement.requestFullscreen())

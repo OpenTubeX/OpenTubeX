@@ -13,8 +13,7 @@ for (const [uiScale, reducedMotion, compactNavigationLabels] of [
       await goTo(page, 'settings')
       await page.evaluate(() => {
         const store = window.$store
-        store.commit('setShowProgressBar', true)
-        store.commit('setProgressBarPercentage', 50)
+        store.commit('addProgressOperation', { id: 'e2e', icon: ['fas', 'sync'], message: '', percentage: 50 })
         document.querySelector('.app > .flexBox').style.minHeight = '3000px'
         document.documentElement.style.setProperty('--safe-area-inset-bottom', '17px')
         document.activeElement?.blur()
@@ -92,8 +91,7 @@ for (const [uiScale, reducedMotion, compactNavigationLabels] of [
       await page.evaluate(() => {
         document.querySelector('.app').classList.add('capacitorPhoneLayout')
         const store = window.$store
-        store.commit('setShowProgressBar', true)
-        store.commit('setProgressBarPercentage', 50)
+        store.commit('addProgressOperation', { id: 'e2e', icon: ['fas', 'sync'], message: '', percentage: 50 })
         document.querySelector('.app > .flexBox').style.minHeight = '3000px'
         document.documentElement.style.setProperty('--safe-area-inset-bottom', '17px')
         document.activeElement?.blur()

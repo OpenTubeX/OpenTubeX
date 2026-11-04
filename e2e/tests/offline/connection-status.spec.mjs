@@ -80,7 +80,7 @@ test.describe('full-window connection banner', () => {
     await page.evaluate(() => {
       const store = window.$store
       store.commit('setShowProgressBarToast', false)
-      store.commit('setShowProgressBar', true)
+      store.commit('addProgressOperation', { id: 'e2e', icon: ['fas', 'sync'], message: '', percentage: 0 })
     })
     await expect(page.locator('.app > .progressBar')).toBeVisible()
     for (const safeArea of ['0px', '24px']) {
@@ -89,7 +89,7 @@ test.describe('full-window connection banner', () => {
     }
     await page.evaluate(() => {
       document.documentElement.style.removeProperty('--safe-area-inset-bottom')
-      window.$store.commit('setShowProgressBar', false)
+      window.$store.commit('removeProgressOperation', 'e2e')
     })
     await banner.evaluate(element => { element.style.fontSize = '28px' })
     await page.setViewportSize({ width: 480, height: 800 })
@@ -306,7 +306,7 @@ test('sync connection status does not reserve global banner space', async ({ pag
     document.documentElement.style.setProperty('--safe-area-inset-bottom', '24px')
     const store = window.$store
     store.commit('setShowProgressBarToast', false)
-    store.commit('setShowProgressBar', true)
+    store.commit('addProgressOperation', { id: 'e2e', icon: ['fas', 'sync'], message: '', percentage: 0 })
   })
   await expect(page.locator('.app > .progressBar')).toBeVisible()
   await expect(page.locator('.connection-status-holder .connectionStatus')).toBeHidden()
@@ -533,9 +533,7 @@ test('connection status shares space with progress and hides offline in fullscre
     Object.defineProperty(navigator, 'onLine', { configurable: true, value: false })
     window.dispatchEvent(new Event('offline'))
     const store = window.$store
-    store.commit('setProgressBarMessage', 'A separate operation in progress')
-    store.commit('setProgressBarIcon', ['fas', 'download'])
-    store.commit('setShowProgressBar', true)
+    store.commit('addProgressOperation', { id: 'e2e', icon: ['fas', 'download'], message: 'A separate operation in progress', percentage: 0 })
     window.ftElectron.showToastOnAllTabs('A separate notification', 30000, ['fas', 'check'])
   })
   const banner = page.locator('.connectionStatus')

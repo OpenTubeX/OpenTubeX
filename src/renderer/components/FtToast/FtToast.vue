@@ -22,37 +22,42 @@
       :style="toastHolderStyle"
     >
       <div
-        v-if="showProgressToast"
-        ref="progressToast"
-        class="toast-slot persistent-slot"
+        ref="progressToastStack"
+        class="persistent-stack"
         :class="{ minimized: progressToastMinimized }"
-        :data-testid="store.getters.getShowProgressBar ? 'progress-toast' : 'subscription-refresh-toast'"
       >
         <div
-          class="toast persistent"
-          role="status"
+          v-for="progressToast in progressToasts"
+          :key="progressToast.key"
+          class="toast-slot persistent-slot"
+          :data-testid="progressToast.testId"
         >
-          <FtIcon
-            :icon="progressToastIcon"
-            class="icon"
-            fixed-width
-          />
-          <p class="message">
-            {{ progressToastMessage }}
-          </p>
-        </div>
-        <div
-          class="timeout-indicator-track"
-          aria-hidden="true"
-        >
-          <FtEmbeddedProgress
-            class="timeout-indicator progress-indicator"
-            :corner-radius="toastProgressRadius"
-            :end-arc-fraction="0.5"
-            :line-width="toastProgressLineWidth"
-            :progress="progressToastPercentage"
-            :start-arc-fraction="0.5"
-          />
+          <div
+            class="toast persistent"
+            role="status"
+          >
+            <FtIcon
+              :icon="progressToast.icon"
+              class="icon"
+              fixed-width
+            />
+            <p class="message">
+              {{ progressToast.message }}
+            </p>
+          </div>
+          <div
+            class="timeout-indicator-track"
+            aria-hidden="true"
+          >
+            <FtEmbeddedProgress
+              class="timeout-indicator progress-indicator"
+              :corner-radius="toastProgressRadius"
+              :end-arc-fraction="0.5"
+              :line-width="toastProgressLineWidth"
+              :progress="progressToast.percentage"
+              :start-arc-fraction="0.5"
+            />
+          </div>
         </div>
       </div>
     </div>
@@ -139,7 +144,7 @@ const TOAST_WIDTH = 'calc(100vw - 60px)'
 const TOAST_GAP = 10
 /** Distance in px from the screen edges the toasts are anchored to */
 const VIEWPORT_INSET = 29
-/** Distance in px at which the persistent refresh toast gets out of the pointer's way */
+/** Distance in px at which the persistent progress toasts get out of the pointer's way */
 const PROGRESS_TOAST_PROXIMITY = 32
 /** Extra distance required before restoring the toast, to avoid flicker around the boundary */
 const PROGRESS_TOAST_PROXIMITY_HYSTERESIS = 20
@@ -171,7 +176,7 @@ const showConnectionStatus = computed(() => connectionState.value !== 'online' &
 // Pages reserve room for the status bar.
 useRootClass('appConnectionStatus', showConnectionStatus)
 /** @type {import('vue').Ref<HTMLElement|null>} */
-const progressToast = useTemplateRef('progressToast')
+const progressToastStack = useTemplateRef('progressToastStack')
 const progressToastMinimized = ref(false)
 const persistentContentHeight = ref(0)
 /**
@@ -209,10 +214,10 @@ const stackWidth = ref(null)
 let frontToastResizeObserver = null
 /** @type {MutationObserver|null} */
 let toastListObserver = null
-/** @type {DOMRect|null} */
+/** @type {DOMRect[]|null} */
 let progressToastBounds = null
 /** @type {HTMLElement|null} */
-let measuredProgressToast = null
+let measuredProgressToastStack = null
 /** @type {number|null} */
 let progressToastPointerFrame = null
 let progressToastPointerX = 0
@@ -268,20 +273,6 @@ const toasterOffset = computed(() => {
   }
 })
 
-const showProgressToast = computed(() => {
-  // The toast holder is teleported into the fullscreen element, so a progress
-  // toast would sit on top of the fullscreen player. Hide it until fullscreen
-  // is left, as progress updates aren't urgent enough to interrupt playback.
-  return fullscreenTarget.value === null &&
-    shouldUseProgressToast(store.getters.getEffectiveShowProgressBarToast) &&
-    (store.getters.getShowProgressBar ||
-      store.getters.getSubscriptionFeedRefreshInProgress)
-})
-const progressToastPercentage = computed(() => {
-  return store.getters.getShowProgressBar
-    ? store.getters.getProgressBarPercentage
-    : store.getters.getSubscriptionFeedRefreshProgress
-})
 const subscriptionRefreshIcon = computed(() => {
   switch (store.getters.getSubscriptionFeedRefreshTab) {
     case 'shorts':
@@ -306,17 +297,39 @@ const subscriptionRefreshMessage = computed(() => {
       return t('Subscriptions.Refreshing Subscription Videos')
   }
 })
-const progressToastIcon = computed(() => {
-  return store.getters.getShowProgressBar
-    ? store.getters.getProgressBarIcon
-    : subscriptionRefreshIcon.value
-})
-const progressToastMessage = computed(() => {
-  if (!store.getters.getShowProgressBar) {
-    return subscriptionRefreshMessage.value
+/**
+ * One toast per running operation. The subscription refresh comes first and
+ * the others follow in the order they started, so the toasts already on screen
+ * stay put when another operation starts.
+ */
+const progressToasts = computed(() => {
+  const toasts = store.getters.getProgressOperations.map(operation => ({
+    key: operation.id,
+    testId: 'progress-toast',
+    icon: operation.icon ?? ['fas', 'sync'],
+    message: operation.message || t('Settings.Theme Settings.Operation in Progress'),
+    percentage: operation.percentage ?? 0
+  }))
+
+  if (store.getters.getSubscriptionFeedRefreshInProgress) {
+    toasts.unshift({
+      key: 'subscription-refresh',
+      testId: 'subscription-refresh-toast',
+      icon: subscriptionRefreshIcon.value,
+      message: subscriptionRefreshMessage.value,
+      percentage: store.getters.getSubscriptionFeedRefreshProgress
+    })
   }
 
-  return store.getters.getProgressBarMessage || t('Settings.Theme Settings.Operation in Progress')
+  return toasts
+})
+const showProgressToast = computed(() => {
+  // The toast holder is teleported into the fullscreen element, so a progress
+  // toast would sit on top of the fullscreen player. Hide it until fullscreen
+  // is left, as progress updates aren't urgent enough to interrupt playback.
+  return fullscreenTarget.value === null &&
+    shouldUseProgressToast(store.getters.getEffectiveShowProgressBarToast) &&
+    progressToasts.value.length > 0
 })
 // Matches --shape-corner-large on the toast.
 const toastProgressRadius = computed(() => 16 * store.getters.getUiRoundness / 100)
@@ -381,9 +394,10 @@ function measureStack(holder) {
 }
 
 /**
- * Keeps the non-interactive refresh toast readable until the mouse approaches,
- * then tucks it into its configured edge of the screen. The expanded bounds
- * remain the hit area while minimized so scaling cannot make the state flicker.
+ * Keeps the non-interactive progress toasts readable until the mouse approaches
+ * one of them, then tucks them all into their configured edge of the screen.
+ * The expanded bounds remain the hit area while minimized so scaling cannot make
+ * the state flicker.
  * @param {MouseEvent} event
  */
 function onProgressToastPointerMove(event) {
@@ -396,29 +410,30 @@ function onProgressToastPointerMove(event) {
 
 function updateProgressToastProximity() {
   progressToastPointerFrame = null
-  const element = progressToast.value
+  const element = progressToastStack.value
 
   if (!element) {
-    measuredProgressToast = null
+    measuredProgressToastStack = null
     progressToastBounds = null
     progressToastMinimized.value = false
     return
   }
 
-  if (element !== measuredProgressToast) {
-    measuredProgressToast = element
+  if (element !== measuredProgressToastStack) {
+    measuredProgressToastStack = element
     progressToastBounds = null
     progressToastMinimized.value = false
   }
 
   if (!progressToastMinimized.value || progressToastBounds === null) {
-    progressToastBounds = element.getBoundingClientRect()
+    progressToastBounds = [...element.children].map(slot => slot.getBoundingClientRect())
   }
 
-  const bounds = progressToastBounds
-  const horizontalDistance = Math.max(bounds.left - progressToastPointerX, 0, progressToastPointerX - bounds.right)
-  const verticalDistance = Math.max(bounds.top - progressToastPointerY, 0, progressToastPointerY - bounds.bottom)
-  const distance = Math.hypot(horizontalDistance, verticalDistance)
+  const distance = Math.min(...progressToastBounds.map(bounds => {
+    const horizontalDistance = Math.max(bounds.left - progressToastPointerX, 0, progressToastPointerX - bounds.right)
+    const verticalDistance = Math.max(bounds.top - progressToastPointerY, 0, progressToastPointerY - bounds.bottom)
+    return Math.hypot(horizontalDistance, verticalDistance)
+  }))
   const threshold = PROGRESS_TOAST_PROXIMITY +
     (progressToastMinimized.value ? PROGRESS_TOAST_PROXIMITY_HYSTERESIS : 0)
 
@@ -609,7 +624,7 @@ watch(persistentHolder, element => {
   persistentHolderResizeObserver.observe(element)
 })
 
-watch(progressToast, (element) => {
+watch(progressToastStack, (element) => {
   stopProgressToastPointerTracking()
 
   if (!element) {
@@ -621,7 +636,7 @@ watch(progressToast, (element) => {
 })
 
 watch(
-  () => [tabBarPosition.value, store.getters.getVerticalTabBarWidth],
+  [tabBarPosition, () => store.getters.getVerticalTabBarWidth, () => progressToasts.value.length],
   async () => {
     await nextTick()
     resetProgressToastProximity()

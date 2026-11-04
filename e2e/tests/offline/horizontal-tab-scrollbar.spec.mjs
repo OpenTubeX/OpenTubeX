@@ -59,8 +59,7 @@ for (const position of ['top', 'bottom']) {
     await page.evaluate(() => {
       const store = window.$store
       store.commit('setShowProgressBarToast', true)
-      store.commit('setProgressBarMessage', 'Reserved row progress')
-      store.commit('setShowProgressBar', true)
+      store.commit('addProgressOperation', { id: 'e2e', icon: ['fas', 'sync'], message: 'Reserved row progress', percentage: 0 })
     })
     const progress = page.getByTestId('progress-toast')
     await expect(progress).toBeVisible()

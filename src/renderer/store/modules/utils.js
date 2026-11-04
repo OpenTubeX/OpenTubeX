@@ -75,9 +75,8 @@ const state = {
   // tabs to image files without opening every tab first.
   channelThumbnailCache: loadLegacyChannelThumbnailCache(),
   videoAvatarCache: loadLegacyVideoAvatarCache(),
-  showProgressBar: false,
-  progressBarMessage: '',
-  progressBarIcon: ['fas', 'sync'],
+  /** @type {{ id: number, icon: string[], message: string, percentage: number }[]} */
+  progressOperations: [],
   showAddToPlaylistPrompt: false,
   showCreatePlaylistPrompt: false,
   isKeyboardShortcutPromptShown: false,
@@ -92,7 +91,6 @@ const state = {
   customThemes: [],
   showSearchFilters: false,
   searchFilterValueChangedByTabId: {},
-  progressBarPercentage: 0,
   toBeAddedToPlaylistVideoList: [],
   newPlaylistDefaultProperties: {},
   newPlaylistVideoObject: [],
@@ -234,20 +232,8 @@ const getters = {
     return state.newPlaylistVideoObject
   },
 
-  getShowProgressBar(state) {
-    return state.showProgressBar
-  },
-
-  getProgressBarPercentage(state) {
-    return state.progressBarPercentage
-  },
-
-  getProgressBarMessage(state) {
-    return state.progressBarMessage
-  },
-
-  getProgressBarIcon(state) {
-    return state.progressBarIcon
+  getProgressOperations(state) {
+    return state.progressOperations
   },
 
   getRegionNames(state) {
@@ -526,10 +512,6 @@ const actions = {
 
   hideSearchFilters ({ commit }) {
     commit('setShowSearchFilters', false)
-  },
-
-  updateShowProgressBar ({ commit }, value) {
-    commit('setShowProgressBar', value)
   },
 
   async getRegionData ({ commit }, locale) {
@@ -864,20 +846,19 @@ const mutations = {
     state.outlinesHidden = value
   },
 
-  setShowProgressBar (state, value) {
-    state.showProgressBar = value
+  addProgressOperation (state, operation) {
+    state.progressOperations.push(operation)
   },
 
-  setProgressBarPercentage (state, value) {
-    state.progressBarPercentage = value
+  updateProgressOperation (state, { id, ...progress }) {
+    const operation = state.progressOperations.find(operation => operation.id === id)
+    if (operation) {
+      Object.assign(operation, progress)
+    }
   },
 
-  setProgressBarMessage (state, value) {
-    state.progressBarMessage = value
-  },
-
-  setProgressBarIcon (state, value) {
-    state.progressBarIcon = value
+  removeProgressOperation (state, id) {
+    state.progressOperations = state.progressOperations.filter(operation => operation.id !== id)
   },
 
   setSessionSearchHistory (state, history) {
