@@ -512,6 +512,13 @@ Settings:
     Invalid Engine: 请输入名称以及包含 %s 的有效 HTTP 或 HTTPS 搜索 URL。
     Engine Limit: 最多可以添加 {count} 个自定义搜索引擎。
   Theme Settings:
+    Sections:
+      Interface: "界面"
+      Side Bar and Header: "侧边栏和标题栏"
+      Tabs: "标签页"
+      Player: "播放器"
+      Scrolling: "滚动"
+      Notifications: "通知"
     Only Show Important Notifications: 仅显示重要通知
     Visible Search Suggestions: "可见搜索建议数"
     Material Accent Color: "Material 强调色"

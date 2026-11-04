@@ -1,0 +1,29 @@
+/* Each grid sizes its two columns to its own labels and centers them.
+   Neighbors of a wrapped label stay aligned with its first line. */
+.appearanceSwitchGrid {
+  align-items: start;
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, max-content));
+  justify-content: center;
+  column-gap: 48px;
+}
+
+@container settings-content (width <= 680px) {
+  .appearanceSwitchGrid {
+    grid-template-columns: minmax(0, 1fr);
+    justify-items: center;
+  }
+
+  .appearanceSwitchGrid :deep(.switch-ctn) {
+    inline-size: min(100%, 294px);
+    margin-inline: auto;
+  }
+}
+
+@media only screen and (width <= 680px) {
+  @container settings-content (width <= 680px) {
+    .appearanceSwitchGrid :deep(.switch-ctn) {
+      inline-size: 100%;
+    }
+  }
+}

@@ -512,6 +512,13 @@ Settings:
     Invalid Engine: 請輸入名稱，以及包含 %s 的有效 HTTP 或 HTTPS 搜尋 URL。
     Engine Limit: 最多可新增 {count} 個自訂搜尋引擎。
   Theme Settings:
+    Sections:
+      Interface: "介面"
+      Side Bar and Header: "側邊欄和標題列"
+      Tabs: "分頁"
+      Player: "播放器"
+      Scrolling: "捲動"
+      Notifications: "通知"
     Only Show Important Notifications: 僅顯示重要通知
     Visible Search Suggestions: "可見搜尋建議數"
     Material Accent Color: "Material 強調色"

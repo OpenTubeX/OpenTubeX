@@ -512,6 +512,13 @@ Settings:
     Invalid Engine: Adjon meg egy nevet és egy érvényes, %s elemet tartalmazó HTTP vagy HTTPS keresési URL-t.
     Engine Limit: Legfeljebb {count} egyéni keresőmotort adhat hozzá.
   Theme Settings:
+    Sections:
+      Interface: "Felület"
+      Side Bar and Header: "Oldalsáv és fejléc"
+      Tabs: "Lapok"
+      Player: "Lejátszó"
+      Scrolling: "Görgetés"
+      Notifications: "Értesítések"
     Only Show Important Notifications: Csak a fontos értesítések megjelenítése
     Visible Search Suggestions: "Látható keresési javaslatok"
     Material Accent Color: "Material kiemelőszín"

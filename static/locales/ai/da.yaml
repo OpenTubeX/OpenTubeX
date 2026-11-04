@@ -524,6 +524,13 @@ Settings:
     Invalid Engine: Angiv et navn og en gyldig HTTP- eller HTTPS-søge-URL, der indeholder %s.
     Engine Limit: Du kan tilføje op til {count} brugerdefinerede søgemaskiner.
   Theme Settings:
+    Sections:
+      Interface: "Brugerflade"
+      Side Bar and Header: "Sidebjælke og header"
+      Tabs: "Faner"
+      Player: "Afspiller"
+      Scrolling: "Rulning"
+      Notifications: "Notifikationer"
     Only Show Important Notifications: Vis kun vigtige notifikationer
     Visible Search Suggestions: "Synlige søgeforslag"
     Material Accent Color: "Material-accentfarve"

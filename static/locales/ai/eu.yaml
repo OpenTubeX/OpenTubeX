@@ -512,6 +512,13 @@ Settings:
     Invalid Engine: Idatzi izen bat eta %s duen baliozko HTTP edo HTTPS bilaketa-URL bat.
     Engine Limit: Gehienez {count} bilaketa-motor pertsonalizatu gehi ditzakezu.
   Theme Settings:
+    Sections:
+      Interface: "Interfazea"
+      Side Bar and Header: "Alboko barra eta goiburua"
+      Tabs: "Fitxak"
+      Player: "Erreproduzigailua"
+      Scrolling: "Korritzea"
+      Notifications: "Jakinarazpenak"
     Only Show Important Notifications: Erakutsi jakinarazpen garrantzitsuak soilik
     Visible Search Suggestions: "Bilaketa-iradokizun ikusgaiak"
     Material Accent Color: "Material azentu-kolorea"
