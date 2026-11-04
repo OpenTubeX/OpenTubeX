@@ -512,6 +512,13 @@ Settings:
     Invalid Engine: Inserisci un nome e un URL di ricerca HTTP o HTTPS valido contenente %s.
     Engine Limit: Puoi aggiungere fino a {count} motori di ricerca personalizzati.
   Theme Settings:
+    Sections:
+      Interface: "Interfaccia"
+      Side Bar and Header: "Barra laterale e intestazione"
+      Tabs: "Schede"
+      Player: "Lettore"
+      Scrolling: "Scorrimento"
+      Notifications: "Notifiche"
     Only Show Important Notifications: Mostra solo le notifiche importanti
     Visible Search Suggestions: "Suggerimenti di ricerca visibili"
     Material Accent Color: "Colore di accento Material"

@@ -512,6 +512,13 @@ Settings:
     Invalid Engine: "Lakait un anv hag un URL enklask HTTP pe HTTPS talvoudek ennañ %s."
     Engine Limit: "Gallout a rit ouzhpennañ betek {count} keflusker enklask personelaet."
   Theme Settings:
+    Sections:
+      Interface: "Etrefas"
+      Side Bar and Header: "Barrenn gostez ha talbenn"
+      Tabs: "Ivinelloù"
+      Player: "Lenner"
+      Scrolling: "Dibunañ"
+      Notifications: "Kemennoù"
     Only Show Important Notifications: Diskouez ar c'hemennoù pouezus hepken
     Visible Search Suggestions: "Kinnigoù klask gwelus"
     Material Accent Color: "Liv pouez Material"

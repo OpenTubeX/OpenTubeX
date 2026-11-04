@@ -636,6 +636,13 @@ Settings:
     Invalid Engine: Įveskite pavadinimą ir tinkamą HTTP arba HTTPS paieškos URL su %s.
     Engine Limit: Galite pridėti iki {count} pasirinktinių paieškos sistemų.
   Theme Settings:
+    Sections:
+      Interface: "Sąsaja"
+      Side Bar and Header: "Šoninė juosta ir antraštė"
+      Tabs: "Kortelės"
+      Player: "Grotuvas"
+      Scrolling: "Slinkimas"
+      Notifications: "Pranešimai"
     Only Show Important Notifications: Rodyti tik svarbius pranešimus
     Visible Search Suggestions: "Matomi paieškos pasiūlymai"
     Material Accent Color: "Material akcento spalva"

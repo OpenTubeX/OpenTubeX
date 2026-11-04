@@ -2,7 +2,7 @@
   <FtSettingsSection
     :title="t('Settings.Categories.Content appearance')"
   >
-    <div class="switchColumnGrid switchFlowGrid appearanceSwitchGrid">
+    <div class="appearanceSwitchGrid switchFlowGrid">
       <FtToggleSwitch
         :label="t('Settings.General Settings.Show Video Menu Button')"
         :default-value="showVideoMenuButton"
@@ -277,9 +277,4 @@ function resetThumbnailPreference() {
 </script>
 
 <style scoped src="../generalSelectGrid.css" />
-<style scoped>
-.appearanceSwitchGrid.appearanceSwitchGrid {
-  grid-template-columns: auto;
-  justify-content: center;
-}
-</style>
+<style scoped src="./appearanceSwitchGrid.css" />

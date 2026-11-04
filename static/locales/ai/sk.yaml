@@ -512,6 +512,13 @@ Settings:
     Invalid Engine: Zadajte názov a platnú adresu URL vyhľadávania cez HTTP alebo HTTPS, ktorá obsahuje %s.
     Engine Limit: Môžete pridať najviac {count} vlastných vyhľadávačov.
   Theme Settings:
+    Sections:
+      Interface: "Rozhranie"
+      Side Bar and Header: "Bočný panel a hlavička"
+      Tabs: "Karty"
+      Player: "Prehrávač"
+      Scrolling: "Posúvanie"
+      Notifications: "Upozornenia"
     Only Show Important Notifications: Zobrazovať iba dôležité upozornenia
     Visible Search Suggestions: "Viditeľné návrhy vyhľadávania"
     Material Accent Color: "Farba zvýraznenia Material"

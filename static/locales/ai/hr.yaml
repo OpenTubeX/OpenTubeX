@@ -515,6 +515,13 @@ Settings:
     Invalid Engine: Unesite naziv i valjani HTTP ili HTTPS URL za pretraživanje koji sadrži %s.
     Engine Limit: Možete dodati najviše {count} prilagođenih tražilica.
   Theme Settings:
+    Sections:
+      Interface: "Sučelje"
+      Side Bar and Header: "Bočna traka i zaglavlje"
+      Tabs: "Kartice"
+      Player: "Player"
+      Scrolling: "Pomicanje"
+      Notifications: "Obavijesti"
     Only Show Important Notifications: Prikaži samo važne obavijesti
     Visible Search Suggestions: "Vidljivi prijedlozi pretraživanja"
     Material Accent Color: "Material boja naglaska"

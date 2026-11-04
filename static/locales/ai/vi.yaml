@@ -517,6 +517,13 @@ Settings:
     Invalid Engine: Nhập tên và URL tìm kiếm HTTP hoặc HTTPS hợp lệ có chứa %s.
     Engine Limit: Bạn có thể thêm tối đa {count} công cụ tìm kiếm tùy chỉnh.
   Theme Settings:
+    Sections:
+      Interface: "Giao diện"
+      Side Bar and Header: "Thanh bên và tiêu đề"
+      Tabs: "Thẻ"
+      Player: "Trình phát"
+      Scrolling: "Cuộn"
+      Notifications: "Thông báo"
     Only Show Important Notifications: Chỉ hiển thị thông báo quan trọng
     Visible Search Suggestions: "Số gợi ý tìm kiếm hiển thị"
     Material Accent Color: "Màu nhấn Material"

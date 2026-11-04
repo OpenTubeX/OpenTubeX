@@ -512,6 +512,13 @@ Settings:
     Invalid Engine: Skriv inn et navn og en gyldig HTTP- eller HTTPS-søke-URL som inneholder %s.
     Engine Limit: Du kan legge til opptil {count} egendefinerte søkemotorer.
   Theme Settings:
+    Sections:
+      Interface: "Grensesnitt"
+      Side Bar and Header: "Sidefelt og topptekst"
+      Tabs: "Faner"
+      Player: "Avspiller"
+      Scrolling: "Rulling"
+      Notifications: "Varsler"
     Only Show Important Notifications: Vis bare viktige varsler
     Visible Search Suggestions: "Synlige søkeforslag"
     Material Accent Color: "Material-aksentfarge"

@@ -654,6 +654,13 @@ Settings:
     Invalid Engine: Introduïu un nom i un URL de cerca HTTP o HTTPS vàlid que contingui %s.
     Engine Limit: Podeu afegir fins a {count} motors de cerca personalitzats.
   Theme Settings:
+    Sections:
+      Interface: "Interfície"
+      Side Bar and Header: "Barra lateral i capçalera"
+      Tabs: "Pestanyes"
+      Player: "Reproductor"
+      Scrolling: "Desplaçament"
+      Notifications: "Notificacions"
     Only Show Important Notifications: Mostra només les notificacions importants
     Visible Search Suggestions: "Suggeriments de cerca visibles"
     Material Accent Color: "Color d’accent de Material"

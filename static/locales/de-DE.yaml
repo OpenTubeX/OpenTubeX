@@ -619,6 +619,13 @@ Settings:
       System Only: Nur System
       Off: Aus
   Theme Settings:
+    Sections:
+      Interface: "Oberfläche"
+      Side Bar and Header: "Seitenleiste & Kopfzeile"
+      Tabs: "Tabs"
+      Player: "Player"
+      Scrolling: "Scrollen"
+      Notifications: "Benachrichtigungen"
     Material Accent Color: "Material-Akzentfarbe"
     Signal Accent Color: "Signal-Akzentfarbe"
     Material Wallpaper Colors: "Farben des Hintergrundbilds"

@@ -678,6 +678,13 @@ Settings:
     Invalid Engine: Voer ’n naam en ’n geldige HTTP- of HTTPS-soek-URL in wat %s bevat.
     Engine Limit: U kan tot {count} pasgemaakte soekenjins byvoeg.
   Theme Settings:
+    Sections:
+      Interface: "Koppelvlak"
+      Side Bar and Header: "Sybalk en kopstuk"
+      Tabs: "Oortjies"
+      Player: "Speler"
+      Scrolling: "Rollees"
+      Notifications: "Kennisgewings"
     Only Show Important Notifications: Wys slegs belangrike kennisgewings
     Material Accent Color: Material-aksentkleur
     Signal Accent Color: Signal-aksentkleur
