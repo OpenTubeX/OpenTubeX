@@ -3811,7 +3811,8 @@ function handleNumberInputPointer(event) {
   if (Math.abs(event.clientX - edge) <= 12 && Math.abs(event.clientY - middle) <= 14) {
     hoveredStep = event.clientY < middle ? 'up' : 'down'
   }
-  const highlight = event.buttons & 1 ? 'var(--primary-color-active)' : 'var(--primary-color)'
+  // Custom themes may use a translucent pressed color, which would fade the arrow out.
+  const highlight = event.buttons & 1 ? 'rgb(from var(--primary-color-active) r g b / 100%)' : 'var(--primary-color)'
   for (const step of ['up', 'down']) {
     const property = `--number-step-${step}-color`
     const color = hoveredStep === step ? highlight : ''

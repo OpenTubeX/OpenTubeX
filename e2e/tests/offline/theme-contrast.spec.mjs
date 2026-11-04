@@ -861,3 +861,65 @@ test.describe('hover surface contrast', () => {
     expect(failures).toEqual([])
   })
 })
+
+test.describe('filled button state contrast', () => {
+  test.use({ seed: { settings: { baseTheme: 'light', mainColor: 'Pink', currentLocale: 'en-US' } } })
+
+  test('filled buttons keep their label readable on hover and when pressed', async ({ page }) => {
+    await page.evaluate(() => window.$store.dispatch(
+      'showCreatePlaylistPrompt', { title: '', description: '', sourcePlaylistId: null }
+    ))
+    await page.locator('.playlistNameInput input').fill('Filled button states')
+    await page.locator('.promptCard .btn.primary.variant-filled').first().evaluate(element => {
+      element.dataset.stateTest = ''
+      element.addEventListener('click', event => {
+        event.preventDefault()
+        event.stopImmediatePropagation()
+      }, true)
+    })
+    const button = page.locator('[data-state-test]')
+    await expect(button).toBeEnabled()
+    // The settled fill, label and state shades as rendered sRGB channels. The fill
+    // animates, and mid-transition colors compute to syntaxes like oklab().
+    const colors = () => button.evaluate(element => {
+      const context = document.createElement('canvas').getContext('2d')
+      const channels = color => {
+        context.fillStyle = color
+        context.fillRect(0, 0, 1, 1)
+        return [...context.getImageData(0, 0, 1, 1).data].slice(0, 3)
+      }
+      const styles = getComputedStyle(element)
+      return {
+        settled: element.getAnimations().length === 0,
+        foreground: channels(styles.color),
+        background: channels(styles.backgroundColor),
+        hover: channels(styles.getPropertyValue('--button-hover')),
+        active: channels(styles.getPropertyValue('--button-active')),
+      }
+    })
+    // Waits for the fill to settle on a state shade, then returns the label contrast.
+    const settledRatio = async (shade, message) => {
+      let ratio
+      await expect.poll(async () => {
+        const { settled, foreground, background, [shade]: expected } = await colors()
+        ratio = contrastRatio(foreground, background)
+        return settled && background.join() === expected.join()
+      }, { message }).toBe(true)
+      return ratio
+    }
+
+    for (const theme of ['primary', 'destructive']) {
+      // Keep the rendered component's scoped styles while exercising its theme.
+      await button.evaluate((element, theme) => element.classList.replace('primary', theme), theme)
+      await button.hover()
+      expect(await settledRatio('hover', `${theme} hover`), `${theme} hover`).toBeGreaterThanOrEqual(4.5)
+      await page.mouse.down()
+      try {
+        expect(await settledRatio('active', `${theme} pressed`), `${theme} pressed`).toBeGreaterThanOrEqual(4.5)
+      } finally {
+        await page.mouse.up()
+        await page.mouse.move(0, 0)
+      }
+    }
+  })
+})

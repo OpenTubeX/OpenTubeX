@@ -81,8 +81,10 @@ body {
   --red-500: #f44336;
   --destructive-color: #f44336;
   --destructive-text-color: #000;
-  --destructive-hover-color: #e53935;
-  --destructive-active-color: #c62828;
+
+  /* Lighter, away from the black label, so it stays readable */
+  --destructive-hover-color: #ef5350;
+  --destructive-active-color: #e57373;
   --members-only-color: #1b7331;
   --favorite-icon-filter: grayscale(1) sepia(1) saturate(2.2) hue-rotate(68deg) brightness(0.9);
 
