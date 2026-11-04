@@ -182,7 +182,11 @@ function contrast(first, second) {
 }
 
 async function colorsOf(element, pseudo = null) {
-  return element.evaluate((node, pseudo) => {
+  return element.evaluate(async (node, pseudo) => {
+    // Theme and hover changes transition colors; read them once they settle.
+    await Promise.all(document.getAnimations()
+      .filter(animation => animation.effect?.target?.contains(node) && animation.effect.getComputedTiming().iterations !== Infinity)
+      .map(animation => animation.finished.catch(() => {})))
     const rgba = color => color.match(/[\d.]+/g).map(Number)
       .map((value, i) => color.startsWith('color(srgb ') && i < 3 ? value * 255 : value)
     const rgb = color => rgba(color).slice(0, 3)
