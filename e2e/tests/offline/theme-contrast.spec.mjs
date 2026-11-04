@@ -826,3 +826,38 @@ test.describe('selected tab label contrast', () => {
     expect(failures).toEqual([])
   })
 })
+
+test.describe('hover surface contrast', () => {
+  test.use({ seed: { settings: { currentLocale: 'en-US' } } })
+
+  // Side navigation entries and pressed phone cards put the hover text color on the hover color.
+  test('hover text stays readable on the hover color in every theme', async ({ page }) => {
+    const results = await page.evaluate(async themes => {
+      const context = new OffscreenCanvas(1, 1).getContext('2d', { willReadFrequently: true })
+      const paint = color => {
+        context.fillStyle = '#fff'
+        context.fillRect(0, 0, 1, 1)
+        context.fillStyle = color
+        context.fillRect(0, 0, 1, 1)
+        return [...context.getImageData(0, 0, 1, 1).data].slice(0, 3)
+      }
+      const probe = document.createElement('span')
+      probe.style.color = 'var(--side-nav-hover-text-color)'
+      probe.style.backgroundColor = 'var(--side-nav-hover-color)'
+      document.body.append(probe)
+      const results = []
+      for (const theme of themes) {
+        window.$store.commit('setBaseTheme', theme)
+        await new Promise(resolve => setTimeout(resolve))
+        const style = getComputedStyle(probe)
+        results.push({ theme, foreground: paint(style.color), background: paint(style.backgroundColor) })
+      }
+      probe.remove()
+      return results
+    }, BUILTIN_BASE_THEME_VALUES.filter(theme => theme !== 'system'))
+    expect(results.length).toBeGreaterThan(40)
+    const failures = results.filter(({ foreground, background }) => contrastRatio(foreground, background) < 4.5)
+      .map(({ theme, foreground, background }) => `${theme} ${contrastRatio(foreground, background).toFixed(2)}:1`)
+    expect(failures).toEqual([])
+  })
+})
