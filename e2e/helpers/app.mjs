@@ -236,6 +236,7 @@ export async function createUserDataDir(seed = {}) {
  * @param {Record<string, string>} [options.env] additional environment variables
  * @param {(message: import('@playwright/test').ConsoleMessage) => void} [options.onConsole] receives every console message, from the connection on
  * @param {(phase: 'electronConnected'|'windowCreated'|'routeCommitted'|'interactive', page?: import('@playwright/test').Page, electronApp?: import('@playwright/test').ElectronApplication) => void|Promise<void>} [options.onPhase]
+ * @param {(page: import('@playwright/test').Page) => void|Promise<void>} [options.onStartupFailure] runs before a window that never became ready is closed
  * @param {number} [windowRetry] internal first-window retry count
  */
 export async function launchApp(userDataDir, extraArgs = [], options = {}, windowRetry = 0) {
@@ -394,6 +395,7 @@ export async function launchApp(userDataDir, extraArgs = [], options = {}, windo
     await notifyPhase('interactive', page)
     expect(startupErrors, 'Renderer errors during startup').toEqual([])
   } catch (error) {
+    await options.onStartupFailure?.(page)
     await electronApp.close().catch(() => {})
     expect(startupErrors, 'Renderer errors during startup').toEqual([])
     throw error
@@ -654,6 +656,7 @@ export const test = base.extend({
     }
     let appRoot
     let appHandle
+    let settingUp = true
     try {
       appRoot = hasLocaleOverrides
         ? await mkdtemp(path.join(tmpdir(), 'opentubex-e2e-app-'))
@@ -685,6 +688,11 @@ export const test = base.extend({
       const launchOptions = {
         appRoot,
         onPhase,
+        // Keep the trace and a screenshot of a window that never became ready.
+        onStartupFailure: async page => {
+          await attachScreenshot(testInfo, page, 'startup failure')
+          await diagnostics.save()
+        },
         onConsole: message => {
           if (message.type() === 'error' && message.text().startsWith(UNPOSITIONED_VIEWPORT_ERROR)) {
             scrollbarErrors.push(message.text())
@@ -720,10 +728,12 @@ export const test = base.extend({
         await expect(tutorial).toBeHidden()
       }
 
+      settingUp = false
       await use(appHandle)
       expect.soft(scrollbarErrors, 'Overlay scrollbar containers must not be static').toEqual([])
     } finally {
-      const failed = testInfo.status !== testInfo.expectedStatus
+      // A failed launch has not set the test's status yet.
+      const failed = settingUp || testInfo.status !== testInfo.expectedStatus
       if (appHandle && failed) {
         await attachScreenshot(testInfo, appHandle.page, 'failure')
       }
