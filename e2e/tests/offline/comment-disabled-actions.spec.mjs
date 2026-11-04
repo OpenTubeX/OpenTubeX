@@ -44,8 +44,15 @@ for (const presentation of ['phone', 'fullscreen']) {
     await expect(filter).toBeEnabled()
     await expect(filter).toHaveCSS('opacity', '1')
     await filter.click()
-    await expect(header.getByRole('dialog', { name: 'Comment filters' })).toBeVisible()
-    await filter.click()
+    const filters = header.getByRole('dialog', { name: 'Comment filters' })
+    await expect(filters).toBeVisible()
+    // The phone sheet covers the toggle, so it closes with its own button.
+    if (presentation === 'phone') {
+      await filters.getByRole('button', { name: 'Close', exact: true }).click()
+    } else {
+      await filter.click()
+    }
+    await expect(filters).toHaveCount(0)
     await page.mouse.move(0, 0)
     for (const theme of ['light', 'dark']) {
       await page.emulateMedia({ colorScheme: theme })

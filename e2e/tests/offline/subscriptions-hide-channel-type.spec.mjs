@@ -216,7 +216,9 @@ for (const locale of ['en-US', 'de-DE']) {
             : card(page, category).locator('.title')
           await menuButton.click({ button: category === 'posts' ? 'left' : 'right' })
           const type = locale === 'de-DE' && category === 'posts' ? 'Beiträge' : labels[category]
-          const label = page.getByRole(category === 'posts' ? 'option' : 'menuitem', {
+          // Phones show the post menu in the context menu sheet instead of a dropdown.
+          const menu = category === 'posts' && width === 375 ? page.locator('.mobileLinkActions') : page
+          const label = menu.getByRole(category === 'posts' && width === 1600 ? 'option' : 'menuitem', {
             name: locale === 'en-US'
               ? `Never show ${type} from this channel in feeds again`
               : `Nie wieder ${type} von diesem Kanal in Feeds anzeigen`,
