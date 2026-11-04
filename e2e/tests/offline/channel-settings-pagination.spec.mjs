@@ -65,6 +65,42 @@ test.describe('channel settings scroll layout', { tag: '@scale' }, () => {
     }
   })
 
+  test('puts the saved channel search and the add button in one row', async ({ app, page, attachScreenshot }) => {
+    await goToSettingsSection(page, 'playback')
+    await page.getByRole('button', { name: 'Manage Saved Channels (49)', exact: true }).click()
+    const toolbar = page.locator('.channelManagerToolbar')
+    await expect(toolbar.locator('.channelSearch')).toBeVisible()
+    await expect(toolbar.getByRole('button', { name: 'Add subscribed channel', exact: true })).toBeVisible()
+
+    for (const { width, height } of [{ width: 1500, height: 700 }, { width: 650, height: 500 }]) {
+      await setWindowSize(app, page, { width, height })
+      const geometry = await toolbar.evaluate(element => {
+        const bounds = element.getBoundingClientRect()
+        const field = element.querySelector('.channelSearch .inputWrapper').getBoundingClientRect()
+        const action = element.querySelector('.addSubscribedChannelButton').getBoundingClientRect()
+        return {
+          wrapped: action.top >= field.bottom,
+          centerOffset: Math.abs((field.top + field.bottom) / 2 - (action.top + action.bottom) / 2),
+          fieldStart: field.left - bounds.left,
+          fieldEnd: bounds.right - field.right,
+          actionEnd: bounds.right - action.right,
+          between: action.left - field.right
+        }
+      })
+      // Narrow content may stack the button below a full-width search field.
+      if (width === 1500) expect(geometry.wrapped, 'wide toolbar wraps').toBe(false)
+      expect.soft(Math.abs(geometry.fieldStart), `${width}px search start`).toBeLessThanOrEqual(1)
+      expect.soft(Math.abs(geometry.actionEnd), `${width}px button end`).toBeLessThanOrEqual(1)
+      if (geometry.wrapped) {
+        expect.soft(Math.abs(geometry.fieldEnd), `${width}px wrapped search end`).toBeLessThanOrEqual(1)
+      } else {
+        expect.soft(geometry.centerOffset, `${width}px vertical offset`).toBeLessThanOrEqual(1)
+        expect.soft(geometry.between, `${width}px gap`).toBeGreaterThan(0)
+      }
+      await attachScreenshot(`Saved channel toolbar at ${width}px`)
+    }
+  })
+
   test('keeps the subscribed channel search above scrolling results and clamps shorter lists', async ({ app, page, attachScreenshot }) => {
     await goToSettingsSection(page, 'playback')
     await page.getByRole('button', { name: 'Manage Saved Channels (49)', exact: true }).click()
@@ -159,7 +195,8 @@ test.describe('saved channel incremental loading', { tag: '@scale' }, () => {
     await expect(page.locator('.channelEntry')).toHaveCount(1)
     await expectAtTop()
 
-    await setWindowSize(app, page, { width: 650, height: 350 })
+    // Narrow enough that the remaining preferences stack and one card still overflows at every UI scale
+    await setWindowSize(app, page, { width: 480, height: 380 })
     await scrollToBottom()
     await page.locator('.channelEntry').getByRole('button', { name: 'Forget this setting', exact: true }).first().evaluate(button => button.click())
     await expect(page.locator('.channelPreference')).toHaveCount(3)

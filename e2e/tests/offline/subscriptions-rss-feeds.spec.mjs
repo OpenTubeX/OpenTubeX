@@ -725,6 +725,29 @@ test.describe('with followed feeds', () => {
     await expect(progress).toHaveCount(0)
   })
 
+  test('puts the feed manager description after the RSSHub button', { tag: '@scale' }, async ({ app, page, attachScreenshot }) => {
+    await mockFeeds(page)
+    const manager = await openFeedManager(page)
+    const button = manager.getByRole('button', { name: 'Browse RSSHub', exact: true })
+    const description = manager.locator('.rssHubRow p')
+    await expect(description).toContainText('RSSHub')
+
+    for (const { width, height } of [{ width: 1500, height: 700 }, { width: 375, height: 800 }]) {
+      await setWindowSize(app, page, { width, height })
+      const [action, text] = await Promise.all([button.boundingBox(), description.boundingBox()])
+      if (width === 1500) {
+        // Same row, text to the right of the button
+        expect(Math.abs((action.y + action.height / 2) - (text.y + text.height / 2))).toBeLessThanOrEqual(1)
+        expect(text.x).toBeGreaterThan(action.x + action.width)
+      } else {
+        // Narrow content wraps the button below the text instead of squeezing it
+        expect(action.y).toBeGreaterThanOrEqual(text.y + text.height)
+        expect(Math.abs(action.x - text.x)).toBeLessThanOrEqual(1)
+      }
+      await attachScreenshot(`RSS feed manager header at ${width}px`)
+    }
+  })
+
   test('keeps the feed manager button on the refresh row at phone widths', { tag: '@scale' }, async ({ app, page }) => {
     await mockFeeds(page)
     await goTo(page, 'subscriptions')
