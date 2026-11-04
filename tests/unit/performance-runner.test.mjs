@@ -98,12 +98,44 @@ test('PR shard commands run packed-app projects in full and only changed network
       .replaceAll('${{ github.event_name }}', 'pull_request')
     /* eslint-enable no-template-curly-in-string */
     assert.equal(step.env.PROJECTS, '${{ matrix.projects }}') // eslint-disable-line no-template-curly-in-string
-    const args = execFileSync('bash', ['-c', `function xvfb-run() { printf '%s\\n' "$@"; }\n${script}`], {
-      encoding: 'utf8', env: { ...process.env, PROJECTS: projects }
-    }).trim().split('\n')
-    for (const name of projects.split(' ')) assert.ok(args.includes(`--project=${name}`))
-    assert.ok(args.includes('--shard=1/2'))
-    assert.equal(args.includes('--only-changed=HEAD^1'), project === 'network')
-    assert.equal(args.includes('--pass-with-no-tests'), project === 'network')
+    const runnerTemp = await mkdtemp(path.join(tmpdir(), 'opentubex-shard-'))
+    try {
+      // The listing prints a report with each project's four tests in one file.
+      const report = {
+        suites: [{
+          title: 'offline/a.spec.mjs',
+          specs: [1, 2, 3, 4].map(n => ({
+            file: 'offline/a.spec.mjs',
+            title: `test ${n}`,
+            tests: projects.split(' ').map(projectName => ({ projectName }))
+          }))
+        }]
+      }
+      await writeFile(path.join(runnerTemp, 'report.json'), JSON.stringify(report))
+      const stubs = [
+        'function xvfb-run() { printf \'%s\\n\' "$@"; }',
+        'function pnpm() { printf \'%s\\n\' "$@" > "$RUNNER_TEMP/list-args"; cat "$RUNNER_TEMP/report.json"; }'
+      ].join('\n')
+      const args = execFileSync('bash', ['-c', `${stubs}\n${script}`], {
+        encoding: 'utf8', env: { ...process.env, PROJECTS: projects, RUNNER_TEMP: runnerTemp }
+      }).trim().split('\n')
+      const listArgs = (await readFile(path.join(runnerTemp, 'list-args'), 'utf8')).trim().split('\n')
+      for (const name of projects.split(' ')) {
+        assert.ok(listArgs.includes(`--project=${name}`))
+        assert.ok(args.includes(`--project=${name}`))
+      }
+      assert.equal(listArgs.includes('--only-changed=HEAD^1'), project === 'network')
+      assert.equal(args.includes('--pass-with-no-tests'), project === 'network')
+
+      // Shard 1 of 2 runs every other listed test instead of a --shard block.
+      const testListArg = args.find(arg => arg.startsWith('--test-list='))
+      assert.ok(testListArg)
+      const testList = testListArg.slice('--test-list='.length)
+      assert.ok(!args.some(arg => arg.startsWith('--shard') || arg.startsWith('--only-changed')))
+      const all = [1, 2, 3, 4].flatMap(n => projects.split(' ').map(name => `[${name}] › offline/a.spec.mjs › test ${n}`))
+      assert.deepEqual((await readFile(testList, 'utf8')).trim().split('\n'), all.filter((_, index) => index % 2 === 0))
+    } finally {
+      await rm(runnerTemp, { recursive: true, force: true })
+    }
   }
 })
