@@ -8,7 +8,7 @@
       ref="buttonList"
       class="buttonList"
       :class="{ subscribed: isSubscribed }"
-      :style="{ anchorName: profileDropdownAnchor }"
+      :style="{ anchorName: isProfileDropdownOpen ? profileDropdownAnchor : null }"
     >
       <FtButton
         :label="subscribedText"

@@ -43,6 +43,9 @@ function measureAnchorBox(anchor) {
 /**
  * Keep measured placement and viewport limits while CSS follows the trigger.
  * Browsers without anchors retain the measured, fixed coordinates.
+ * Give the trigger its anchor-name only while the popup is rendered: Chromium
+ * relayouts the whole document on every frame that a translated ancestor of a
+ * named anchor moves, such as a dragged settings window.
  * @param {string} anchor
  * @param {DOMRect} triggerRect
  * @param {number} left

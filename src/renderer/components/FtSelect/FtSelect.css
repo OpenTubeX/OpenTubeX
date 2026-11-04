@@ -102,6 +102,10 @@
   block-size: 100%;
   opacity: 0;
   pointer-events: none;
+
+  /* Chromium relayouts the whole document on every frame that a translated
+     ancestor of a rendered <select> moves, such as a dragged settings window. */
+  content-visibility: hidden;
 }
 
 /* stylelint-disable-next-line a11y/no-outline-none */
