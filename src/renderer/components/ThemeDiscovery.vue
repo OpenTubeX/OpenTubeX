@@ -109,9 +109,11 @@
               </div>
             </article>
           </div>
-          <FtSpinner
+          <FtLoader
             v-if="loading"
             :label="t('Theme Discovery.Loading')"
+            compact
+            :tab-loading-indicator="false"
           />
           <FtButton
             v-if="!loading && hasMore && (!autoLoad || loadFailed)"
@@ -216,7 +218,7 @@ import FtButton from './FtButton/FtButton.vue'
 import FtRetryImage from './FtRetryImage.vue'
 import FtPrompt from './FtPrompt/FtPrompt.vue'
 import FtIconButton from './FtIconButton/FtIconButton.vue'
-import FtSpinner from './FtSpinner/FtSpinner.vue'
+import FtLoader from './FtLoader/FtLoader.vue'
 import FtSettingsSubpage from './FtSettingsSubpage/FtSettingsSubpage.vue'
 import store from '../store/index'
 import { customThemeValue } from '../../customTheme'

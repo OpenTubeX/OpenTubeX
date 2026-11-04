@@ -123,7 +123,10 @@
           class="pairingPollStatus pairingSecondary"
           aria-live="polite"
         >
-          <FtLoader />
+          <FtLoader
+            inline
+            size="1.5rem"
+          />
           <span>{{ t('Settings.Sync Settings.Pairing Expires', { time: receiveExpiryLabel }) }}</span>
         </div>
       </template>
@@ -166,7 +169,10 @@
           class="pairingPollStatus pairingSecondary"
           aria-live="polite"
         >
-          <FtLoader />
+          <FtLoader
+            inline
+            size="1.5rem"
+          />
           <span>{{ t('Settings.Sync Settings.Pairing Expires', { time: receiveExpiryLabel }) }}</span>
         </div>
       </template>
@@ -336,7 +342,10 @@
           class="pairingPollStatus pairingSecondary"
           aria-live="polite"
         >
-          <FtLoader />
+          <FtLoader
+            inline
+            size="1.5rem"
+          />
           <span>{{ t('Settings.Sync Settings.Pairing Expires', { time: inviteExpiryLabel }) }}</span>
         </div>
       </template>

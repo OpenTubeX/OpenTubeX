@@ -382,7 +382,7 @@ test('automatically loads more at the bottom with a spinner and stops retrying o
   await expect(gallery.getByRole('button', { name: 'Load more', exact: true })).toHaveCount(0)
   const scroller = gallery.locator('.discoveryScroller')
   await scroller.evaluate(element => { element.scrollTop = element.scrollHeight })
-  await expect(gallery.locator('.spinnerContainer')).toBeVisible()
+  await expect(gallery.locator('.loadingIndicator')).toBeVisible()
   await expect.poll(() => requests).toEqual([1, 2])
   finishSecondPage()
   await expect(gallery.locator('article')).toHaveCount(10)
@@ -391,7 +391,7 @@ test('automatically loads more at the bottom with a spinner and stops retrying o
   await expect(gallery.getByRole('button', { name: 'Load more', exact: true })).toBeVisible()
   expect(requests).toEqual([1, 2, 3])
   await expect(gallery.locator('.themeAutoLoadSentinel')).toHaveCount(0)
-  await expect(gallery.locator('.spinnerContainer')).toHaveCount(0)
+  await expect(gallery.locator('.loadingIndicator')).toHaveCount(0)
 })
 
 test('reloads the feed when an already-open gallery is remounted', async ({ page }) => {

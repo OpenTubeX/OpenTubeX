@@ -10,9 +10,11 @@
       aria-live="polite"
       aria-atomic="true"
     >
-      <span
+      <FtLoader
         class="castProgressSpinner"
-        aria-hidden="true"
+        inline
+        size="20px"
+        :tab-loading-indicator="false"
       />
       <span>{{ progressMessage }}</span>
     </div>
@@ -24,6 +26,7 @@ import { computed, onBeforeUnmount, ref, shallowRef, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useStore } from 'vuex'
 import { useRoute } from 'vue-router'
+import FtLoader from '../FtLoader/FtLoader.vue'
 import { showToast, formatDurationAsTimestamp } from '../../helpers/utils'
 import { chromecast, fcast } from '../../helpers/player/chromecast'
 import { selectCastSource } from '../../helpers/player/castSource'

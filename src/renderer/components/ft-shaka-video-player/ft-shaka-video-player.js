@@ -10,6 +10,7 @@ import FtPaidPromotionBadge from '../FtPaidPromotionBadge/FtPaidPromotionBadge.v
 import FtRetryImage from '../FtRetryImage.vue'
 import FtSelect from '../FtSelect/FtSelect.vue'
 import FtMobileSheet from '../FtMobileSheet/FtMobileSheet.vue'
+import FtLoader from '../FtLoader/FtLoader.vue'
 import { usePhoneLayout } from '../../composables/usePhoneLayout'
 import SponsorBlockSegmentEditor from '../WatchVideoSponsorBlock/SponsorBlockSegmentEditor.vue'
 import shaka from 'shaka-player'
@@ -327,6 +328,7 @@ export default defineComponent({
     FtRetryImage,
     FtSelect,
     FtMobileSheet,
+    FtLoader,
     SponsorBlockSegmentEditor,
     FtShareButton,
     FtIconButton,

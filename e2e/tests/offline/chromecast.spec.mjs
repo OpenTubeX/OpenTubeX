@@ -202,7 +202,7 @@ test('Cast loading feedback fits fractional scale and respects reduced motion', 
   expect(progressBounds, 'Cast progress must have visible bounds').not.toBeNull()
   expect(progressBounds.x).toBeGreaterThanOrEqual(playerBounds.x)
   expect(progressBounds.x + progressBounds.width).toBeLessThanOrEqual(playerBounds.x + playerBounds.width)
-  await expect(page.locator('.castProgressSpinner')).toHaveCSS('animation-name', 'none')
+  await expect(page.locator('.castProgressSpinner .activeIndicator')).toHaveCSS('animation-name', 'none')
   await app.electronApp.evaluate(() => {
     globalThis.castTest.failStart = true
     globalThis.castTest.finishStart()

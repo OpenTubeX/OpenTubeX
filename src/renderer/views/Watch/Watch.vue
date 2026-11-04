@@ -96,9 +96,10 @@
               alt=""
             />
             <div class="streamPlaceholderOverlay">
-              <span class="streamPlaceholderSpinner">
-                <ft-loader />
-              </span>
+              <ft-loader
+                inline
+                class="streamPlaceholderSpinner"
+              />
               <span class="streamPlaceholderText">{{ ytDlpStreamsPending ? $t("Video.Fetching Streams") : $t("Theme Discovery.Loading") }}</span>
             </div>
           </div>

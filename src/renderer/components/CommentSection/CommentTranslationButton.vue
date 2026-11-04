@@ -10,12 +10,12 @@
       :aria-busy="loading"
       @click="emit('translate-comment', comment)"
     >
-      <FtSpinner
+      <FtLoader
         v-if="loading"
         inline
         size="14px"
-        border-width="2px"
         :label="$t('Comments.Translating comment, please wait')"
+        :tab-loading-indicator="false"
       />
       <template v-else>
         <FtIcon :icon="['fas', 'language']" />
@@ -33,7 +33,7 @@
 <script setup>
 import { ref, watch } from 'vue'
 
-import FtSpinner from '../FtSpinner/FtSpinner.vue'
+import FtLoader from '../FtLoader/FtLoader.vue'
 import { shouldOfferCommentTranslation } from '../../helpers/comment-translations'
 
 const props = defineProps({

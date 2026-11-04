@@ -68,17 +68,6 @@
   margin-block-start: 0.5rem;
 }
 
-.pairingPollStatus :deep(.container) {
-  block-size: auto;
-  inline-size: auto;
-}
-
-.pairingPollStatus :deep(.spinner) {
-  block-size: 1.5rem;
-  inline-size: 1.5rem;
-  margin: 0;
-}
-
 .scannerFrame {
   aspect-ratio: 1;
   inline-size: min(100%, 24rem);

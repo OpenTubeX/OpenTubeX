@@ -36,18 +36,7 @@
 }
 
 .streamPlaceholderSpinner {
-  // `inline-size`/`block-size` don't apply to inline boxes, which would leave
-  // FtLoader's `100%` container resolving against the whole pill
-  display: flex;
-  block-size: 24px;
   flex: 0 0 auto;
-  inline-size: 24px;
-
-  :deep(.spinner) {
-    block-size: 100%;
-    inline-size: 100%;
-    margin-block: 0;
-  }
 }
 
 .streamPlaceholderText {

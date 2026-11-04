@@ -56,12 +56,7 @@
 }
 
 .externalMediaSpinner {
-  block-size: 40px;
-  inline-size: 40px;
-}
-
-.externalMediaSpinner :deep(.spinner) {
-  margin: 0;
+  --loading-indicator-size: 40px;
 }
 
 .externalMediaLoading .externalMediaStateContent {
@@ -85,8 +80,7 @@
   }
 
   .externalMediaSpinner {
-    block-size: 24px;
-    inline-size: 24px;
+    --loading-indicator-size: 24px;
   }
 
   .externalMediaLoading .externalMediaStateContent > p {

@@ -9,9 +9,11 @@
         Dummy element to be observed by Intersection Observer
       -->
     </div>
-    <FtSpinner
+    <FtLoader
       v-if="loading || generalAutoLoadMorePaginatedItemsEnabled"
       :label="$t('Global.Loading More')"
+      compact
+      :tab-loading-indicator="false"
     />
     <slot v-else />
   </div>
@@ -21,7 +23,7 @@
 import { computed } from 'vue'
 import { ObserveVisibility as vObserveVisibility } from 'vue-observe-visibility'
 
-import FtSpinner from './FtSpinner/FtSpinner.vue'
+import FtLoader from './FtLoader/FtLoader.vue'
 import store from '../store/index'
 
 defineProps({
