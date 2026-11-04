@@ -1,6 +1,6 @@
 <template>
   <div
-    class="phonePanelButton phoneCommentsButton"
+    class="phonePanelButton phonePanelCard phoneCommentsButton"
   >
     <button
       type="button"
@@ -129,3 +129,4 @@ onBeforeUnmount(() => document.removeEventListener('visibilitychange', updateDoc
 </script>
 
 <style scoped src="./PhoneCommentsButton.css" />
+<style scoped src="../phonePanelCard.css" />

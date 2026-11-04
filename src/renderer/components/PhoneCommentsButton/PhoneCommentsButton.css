@@ -115,11 +115,6 @@
   color: var(--primary-text-color);
 }
 
-.phoneCommentsOpen:active {
-  background: var(--side-nav-hover-color);
-  color: var(--side-nav-hover-text-color);
-}
-
 .commentPreview-enter-active,
 .commentPreview-leave-active {
   transition: opacity var(--motion-default-effects), transform var(--motion-default-effects);

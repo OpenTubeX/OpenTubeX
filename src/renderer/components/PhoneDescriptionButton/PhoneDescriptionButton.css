@@ -1,4 +1,4 @@
-/* The watch page's .phonePanelButton rule adds the shared margins and size. */
+/* phonePanelCard.css styles the surface; the watch page's .phonePanelButton rule adds the margins. */
 .phoneDescriptionButton {
   display: flex;
   box-sizing: border-box;
@@ -7,18 +7,9 @@
   padding-block: 12px;
   padding-inline: 16px;
   border: 0;
-  border-radius: var(--shape-corner-medium);
-  background: var(--card-bg-color);
-  color: var(--primary-text-color);
   font: inherit;
   text-align: start;
   cursor: pointer;
-  transition: background-color var(--motion-fast-effects);
-}
-
-.phoneDescriptionButton:active {
-  background: var(--side-nav-hover-color);
-  color: var(--side-nav-hover-text-color);
 }
 
 .phoneDescriptionContent {

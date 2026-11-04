@@ -956,7 +956,7 @@
         <button
           v-if="phonePanelsEnabled && $store.getters.getNextQueuedVideo && !isLoading"
           type="button"
-          class="phonePanelButton phoneQueueButton watchVideo"
+          class="phonePanelButton phonePanelCard phoneQueueButton watchVideo"
           @click="openPhonePanel('queue')"
           @keydown.space.stop
           @keyup.space.stop
@@ -980,7 +980,7 @@
         <button
           v-if="phonePanelsEnabled && watchingPlaylist && !isLoading"
           type="button"
-          class="phonePanelButton phonePlaylistButton watchVideo"
+          class="phonePanelButton phonePanelCard phonePlaylistButton watchVideo"
           aria-haspopup="dialog"
           :aria-expanded="mobilePanel === 'playlist'"
           @click="openPhonePanel('playlist')"
@@ -1046,6 +1046,7 @@
           :key="videoId"
           :paragraphs="videoSummary"
           :expanded="aiVideoSummaryMode === 'expanded'"
+          :phone="phonePanelsEnabled"
           class="watchVideo"
         />
       </Teleport>
@@ -1353,3 +1354,4 @@
 
 <script src="./Watch.js" />
 <style scoped src="./Watch.scss" lang="scss" />
+<style scoped src="../../components/phonePanelCard.css" />
