@@ -1,4 +1,9 @@
-import { addNotificationHistoryEntries, markNotificationHistoryRead, normalizeNotificationHistory } from '../../notificationHistory.js'
+import {
+  addNotificationHistoryEntries,
+  markNotificationHistoryRead,
+  normalizeNotificationHistory,
+  removeNotificationHistoryEntry
+} from '../../notificationHistory.js'
 
 const STORAGE_KEY = 'opentubex-notification-history'
 const listeners = new Set()
@@ -39,6 +44,13 @@ export const capacitorNotificationHistory = {
     const entries = read()
     const marked = markNotificationHistoryRead(entries, id)
     if (marked !== entries) write(marked)
+  },
+
+  /** @param {string} id */
+  async remove(id) {
+    const entries = read()
+    const remaining = removeNotificationHistoryEntry(entries, id)
+    if (remaining !== entries) write(remaining)
   },
 
   async clear() {

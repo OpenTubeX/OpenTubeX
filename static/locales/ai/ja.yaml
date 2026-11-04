@@ -2539,5 +2539,6 @@ Notification Center:
   Mark as Read: "既読にする"
   Mark All as Read: "すべて既読にする"
   Clear All: "すべて消去"
+  Clear: "消去"
   Empty: "まだ通知はありません"
   Empty Hint: "ライブ配信のリマインダーと、通知をオンにしたチャンネルの新しいアップロードがここに表示されます。"

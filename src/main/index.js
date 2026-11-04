@@ -617,6 +617,8 @@ function runApp() {
   handleTrusted(IpcChannels.NOTIFICATION_HISTORY_LIST, () => notificationHistory.list(), [])
   handleTrusted(IpcChannels.NOTIFICATION_HISTORY_MARK_READ, (_event, id) => (
     id === undefined || typeof id === 'string' ? notificationHistory.markRead(id) : undefined))
+  handleTrusted(IpcChannels.NOTIFICATION_HISTORY_REMOVE, (_event, id) => (
+    typeof id === 'string' ? notificationHistory.remove(id) : undefined))
   handleTrusted(IpcChannels.NOTIFICATION_HISTORY_CLEAR, () => notificationHistory.clear())
   const uploadNotifier = createUploadNotifier({
     file: path.join(userDataPath, 'upload-notifications.json'),

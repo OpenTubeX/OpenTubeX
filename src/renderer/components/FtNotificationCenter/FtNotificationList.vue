@@ -9,10 +9,13 @@
       class="notificationRow"
       :class="{ unread: !entry.read }"
     >
-      <button
-        type="button"
+      <component
+        :is="opensTabs ? RouterLink : 'button'"
+        :type="opensTabs ? null : 'button'"
+        :to="opensTabs ? { path: entry.path, query: entry.query } : null"
         class="notificationEntry"
-        @click="emit('open', entry)"
+        @click.capture="handleClick(entry, $event)"
+        @auxclick="handleAuxClick(entry, $event)"
       >
         <span
           v-if="entry.thumbnail && showThumbnails"
@@ -48,17 +51,30 @@
             :title="new Date(entry.createdAt).toLocaleString(locale)"
           >{{ getRelativeTimeFromDate(entry.createdAt, true, true, now) }}</time>
         </span>
-      </button>
+      </component>
       <button
         v-if="!entry.read"
         type="button"
-        class="markRead"
+        class="entryAction"
         :aria-label="t('Notification Center.Mark as Read')"
         :title="t('Notification Center.Mark as Read')"
         @click="emit('mark-read', entry, $event)"
       >
         <FtIcon
           :icon="['fas', 'check']"
+          aria-hidden="true"
+        />
+      </button>
+      <button
+        v-else
+        type="button"
+        class="entryAction"
+        :aria-label="t('Notification Center.Clear')"
+        :title="t('Notification Center.Clear')"
+        @click="emit('remove', entry, $event)"
+      >
+        <FtIcon
+          :icon="['fas', 'xmark']"
           aria-hidden="true"
         />
       </button>
@@ -81,6 +97,7 @@
 import { FtIcon } from '@opentubex/icons'
 import { computed } from 'vue'
 import { useI18n } from 'vue-i18n'
+import { RouterLink } from 'vue-router'
 
 import FtRetryImage from '../FtRetryImage.vue'
 import store from '../../store/index'
@@ -93,11 +110,36 @@ defineProps({
   entries: { type: Array, required: true },
   now: { type: Number, required: true }
 })
-const emit = defineEmits(['open', 'mark-read'])
+const emit = defineEmits(['open', 'opened-in-tab', 'mark-read', 'remove'])
 const { locale, t } = useI18n()
 // Entries keep the thumbnails they were shown with; current settings still apply.
 const showThumbnails = computed(() => store.getters.getThumbnailPreference !== 'hidden')
 const blurThumbnails = computed(() => store.getters.getBlurThumbnails)
+
+// The desktop app opens middle and Ctrl or Cmd clicks on internal links in new tabs.
+const opensTabs = !!process.env.IS_ELECTRON
+
+/**
+ * @param {import('../../../notificationHistory').NotificationHistoryEntry} entry
+ * @param {MouseEvent} event
+ */
+function handleClick(entry, event) {
+  const ctrlOrCmdPressed = process.platform === 'darwin' ? event.metaKey : event.ctrlKey
+  if (opensTabs && ctrlOrCmdPressed && !event.altKey) {
+    emit('opened-in-tab', entry, event)
+    return
+  }
+  event.preventDefault()
+  emit('open', entry)
+}
+
+/**
+ * @param {import('../../../notificationHistory').NotificationHistoryEntry} entry
+ * @param {MouseEvent} event
+ */
+function handleAuxClick(entry, event) {
+  if (opensTabs && event.button === 1) emit('opened-in-tab', entry, event)
+}
 </script>
 
 <style scoped src="./FtNotificationList.css" />

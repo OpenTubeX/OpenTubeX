@@ -1,7 +1,12 @@
 // @ts-check
 import { readFile, rename, writeFile } from 'node:fs/promises'
 
-import { addNotificationHistoryEntries, markNotificationHistoryRead, normalizeNotificationHistory } from '../notificationHistory.js'
+import {
+  addNotificationHistoryEntries,
+  markNotificationHistoryRead,
+  normalizeNotificationHistory,
+  removeNotificationHistoryEntry
+} from '../notificationHistory.js'
 
 /**
  * Keeps the past system notifications for the in-app notification list. It
@@ -60,6 +65,8 @@ export function createNotificationHistory({ file, onChange }) {
     },
     /** @param {string} [id] Omit to mark every entry read. */
     markRead: id => change(current => markNotificationHistoryRead(current, id)),
+    /** @param {string} id */
+    remove: id => change(current => removeNotificationHistoryEntry(current, id)),
     clear: () => change(current => current.length === 0 ? current : [])
   }
 }

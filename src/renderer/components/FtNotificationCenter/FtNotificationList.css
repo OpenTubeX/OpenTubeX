@@ -28,6 +28,7 @@
   font: inherit;
   line-height: 1.4;
   text-align: start;
+  text-decoration: none;
   cursor: pointer;
 }
 
@@ -54,7 +55,7 @@
   vertical-align: 0.1em;
 }
 
-.markRead {
+.entryAction {
   display: inline-flex;
   flex-shrink: 0;
   align-items: center;
@@ -71,8 +72,8 @@
   cursor: pointer;
 }
 
-.markRead:hover,
-.markRead:focus-visible {
+.entryAction:hover,
+.entryAction:focus-visible {
   background-color: var(--side-nav-hover-color);
   color: var(--side-nav-hover-text-color);
 }

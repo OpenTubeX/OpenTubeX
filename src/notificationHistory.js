@@ -110,6 +110,16 @@ export function markNotificationHistoryRead(entries, id) {
 }
 
 /**
+ * Removes one entry. Returns the same array when it is missing.
+ * @param {NotificationHistoryEntry[]} entries
+ * @param {string} id
+ * @returns {NotificationHistoryEntry[]}
+ */
+export function removeNotificationHistoryEntry(entries, id) {
+  return entries.some(entry => entry.id === id) ? entries.filter(entry => entry.id !== id) : entries
+}
+
+/**
  * @param {string} videoId
  * @returns {NotificationHistoryTarget}
  */
