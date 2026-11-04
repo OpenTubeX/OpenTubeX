@@ -172,7 +172,7 @@ test.describe('settings', () => {
     await expect(relaunchedFocus.getByRole('combobox', { name: 'AI video summaries' })).toHaveText('Expanded')
   })
 
-  test('adds and removes languages that comment translation should ignore', async ({ app, page }) => {
+  test('adds and removes languages that comment translation should ignore', { tag: '@scale' }, async ({ app, page }) => {
     const general = await goToSettingsSection(page, 'general')
     const enableTranslations = general.getByRole('checkbox', {
       name: 'Enable comment translations'
@@ -200,46 +200,68 @@ test.describe('settings', () => {
     })
     await expect(removeGerman.locator('.ft-icon')).toHaveAttribute('aria-hidden', 'true')
     await expect(removeGerman.locator('.ft-icon__glyph')).toHaveAttribute('aria-hidden', 'true')
-    const accentColor = await removeGerman.evaluate(element => {
-      const probe = document.createElement('span')
-      probe.style.color = 'var(--accent-color)'
-      element.append(probe)
-      const color = getComputedStyle(probe).color
-      probe.remove()
-      return color
-    })
+    const germanChip = ignoredLanguages.getByRole('listitem').filter({ hasText: 'German' })
     for (const size of [{ width: 1440, height: 800 }, { width: 375, height: 700 }]) {
       await setWindowSize(app, page, size)
-      await expect(removeGerman.locator('.ft-icon')).toHaveCSS('font-size', '20px')
-      if (size.width <= 680) {
-        await expect.poll(() => removeGerman.evaluate(element => {
-          const { width, height } = element.getBoundingClientRect()
-          return Math.min(width, height)
-        })).toBeGreaterThanOrEqual(48)
-      }
+      await expect(germanChip).toHaveCSS('min-height', '32px')
+      await expect(removeGerman.locator('.ft-icon')).toHaveCSS('font-size', '18px')
+      // The 24px icon button keeps a 48px touch target past its edges.
+      await removeGerman.scrollIntoViewIfNeeded()
+      await expect.poll(() => removeGerman.evaluate(element => {
+        const { x, y, width, height } = element.getBoundingClientRect()
+        const cx = x + width / 2
+        const cy = y + height / 2
+        return [[cx - 23, cy], [cx + 23, cy], [cx, cy - 23], [cx, cy + 23]]
+          .every(([px, py]) => document.elementFromPoint(px, py) === element)
+      })).toBe(true)
       await expect(removeGerman).toHaveCSS('background-color', 'rgba(0, 0, 0, 0)')
       await removeGerman.hover()
-      await expect(removeGerman).toHaveCSS('color', accentColor)
-      await expect(removeGerman).toHaveCSS('background-color', 'rgba(0, 0, 0, 0)')
+      await expect(removeGerman).not.toHaveCSS('background-color', 'rgba(0, 0, 0, 0)')
       await page.mouse.move(0, 0)
+      await expect(removeGerman).toHaveCSS('background-color', 'rgba(0, 0, 0, 0)')
       await page.keyboard.press('Tab')
       await removeGerman.focus()
-      await expect(removeGerman).toHaveCSS('color', accentColor)
-      await expect(removeGerman).toHaveCSS('background-color', 'rgba(0, 0, 0, 0)')
+      await expect(removeGerman).not.toHaveCSS('background-color', 'rgba(0, 0, 0, 0)')
       await removeGerman.evaluate(element => element.blur())
-      await expect(removeGerman).not.toHaveCSS('color', accentColor)
+      await expect(removeGerman).toHaveCSS('background-color', 'rgba(0, 0, 0, 0)')
     }
     await enableTranslations.locator('..').locator('label.switch-label').click()
     await expect(enableTranslations).not.toBeChecked()
     await expect(languageSelect).toBeDisabled()
     await expect(removeGerman).toBeDisabled()
+    await expect(germanChip).toHaveCSS('opacity', '0.38')
     await removeGerman.hover()
-    await expect(removeGerman).not.toHaveCSS('color', accentColor)
     await expect(removeGerman).toHaveCSS('background-color', 'rgba(0, 0, 0, 0)')
 
     await enableTranslations.locator('..').locator('label.switch-label').click()
     await removeGerman.click()
     await expect(ignoredLanguages).toHaveCount(0)
+  })
+
+  test('keeps the touch targets of wrapped language chips apart', { tag: '@scale' }, async ({ app, page }) => {
+    await setWindowSize(app, page, { width: 375, height: 700 })
+    const general = await goToSettingsSection(page, 'general')
+    await page.evaluate(() => window.$store.dispatch('updateCommentTranslationIgnoredLanguages', [
+      'de', 'fr', 'ja', 'es', 'it', 'pt', 'nl', 'pl'
+    ]))
+    const ignoredLanguages = general.getByRole('list', { name: 'Never translate comments in' })
+    const removeButtons = ignoredLanguages.getByRole('button')
+    await expect(removeButtons).toHaveCount(8)
+    await ignoredLanguages.scrollIntoViewIfNeeded()
+
+    // Rows are 48px apart, so neighboring 48px touch targets meet exactly at
+    // their edges; probe 2px inside to allow for fractional UI Scale rounding.
+    await expect.poll(() => removeButtons.evaluateAll(elements => {
+      const chipTops = new Set(elements.map(element => Math.round(element.getBoundingClientRect().top)))
+      const misses = elements.filter(element => {
+        const { x, y, width, height } = element.getBoundingClientRect()
+        const cx = x + width / 2
+        const cy = y + height / 2
+        return ![[cx - 22, cy], [cx + 22, cy], [cx, cy - 22], [cx, cy + 22]]
+          .every(([px, py]) => document.elementFromPoint(px, py) === element)
+      })
+      return { wrapped: chipTops.size > 1, misses: misses.length }
+    })).toEqual({ wrapped: true, misses: 0 })
   })
 
   test('keeps SponsorBlock category controls inside its equal column layout', async ({ page }) => {

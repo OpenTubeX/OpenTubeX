@@ -20,49 +20,70 @@
   display: flex;
   flex-wrap: wrap;
   justify-content: center;
-  gap: 8px;
+
+  /* Rows stay 48px apart so the remove buttons' touch targets never overlap. */
+  gap: 16px 8px;
   list-style: none;
   margin-block: 18px 0;
   padding: 0;
   max-inline-size: 700px;
 }
 
+/* Material 3 input chips: outlined, 32px tall, with a trailing remove icon
+   whose touch target extends past the chip to 48px. */
 .commentTranslationLanguage {
   align-items: center;
-  background-color: var(--search-bar-color);
-  border: 1px solid var(--border-color);
-  border-radius: calc(22px * var(--ui-roundness));
+  border: 1px solid var(--divider-color);
+  border-radius: var(--shape-corner-small);
+  box-sizing: border-box;
+  color: var(--primary-text-color);
   display: flex;
-  min-block-size: 44px;
-  padding-inline-start: 14px;
+  font-size: 14px;
+  font-weight: 500;
+  gap: 4px;
+  line-height: 20px;
+  min-block-size: 32px;
+  padding-inline: 12px 4px;
+  transition: opacity var(--motion-fast-effects);
+}
+
+.commentTranslationLanguage:has(.commentTranslationLanguageRemove:disabled) {
+  opacity: 0.38;
 }
 
 .commentTranslationLanguageRemove {
   align-items: center;
-  align-self: stretch;
   background: transparent;
   border: 0;
-  color: var(--tertiary-text-color);
+  border-radius: var(--shape-corner-full);
+  block-size: 24px;
+  color: var(--secondary-text-color);
   cursor: pointer;
   display: flex;
-  font-size: 20px;
+  flex: none;
+  font-size: 18px;
+  inline-size: 24px;
   justify-content: center;
-  min-inline-size: 44px;
   padding: 0;
+  position: relative;
+  transition: background-color var(--motion-fast-effects), color var(--motion-fast-effects);
+}
+
+.commentTranslationLanguageRemove::after {
+  content: '';
+  inset: -12px;
+  position: absolute;
 }
 
 .commentTranslationLanguageRemove:disabled {
   cursor: not-allowed;
-  opacity: 0.4;
 }
 
-.commentTranslationLanguageRemove:is(:hover, :focus-visible, :active):not(:disabled) {
-  color: var(--accent-color);
+.commentTranslationLanguageRemove:is(:hover, :focus-visible):not(:disabled) {
+  background-color: color-mix(in srgb, var(--primary-text-color) 8%, transparent);
+  color: var(--primary-text-color);
 }
 
-@media (any-pointer: coarse), (width <= 680px) {
-  .commentTranslationLanguageRemove {
-    min-inline-size: 48px;
-    min-block-size: 48px;
-  }
+.commentTranslationLanguageRemove:active:not(:disabled) {
+  background-color: color-mix(in srgb, var(--primary-text-color) 12%, transparent);
 }
