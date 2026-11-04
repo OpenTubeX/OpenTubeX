@@ -732,6 +732,30 @@ test.describe('settings', () => {
     }).toBe(100)
   })
 
+  test('the vertical tab height slider only becomes usable with vertical tabs', { tag: '@scale' }, async ({ app, page }) => {
+    await goTo(page, 'settings')
+    await page.locator('.settingsMenu [data-section="appearance"]').click()
+
+    const slider = page.getByRole('slider', { name: /Vertical Tab Height/ })
+    await expect(slider).toBeDisabled()
+
+    await page.evaluate(() => window.$store.dispatch('updateTabBarPosition', 'right'))
+    await expect(slider).toBeEnabled()
+
+    // Dragging resizes the tabs live and saves the value on release.
+    await slider.evaluate((input) => {
+      input.value = '40'
+      input.dispatchEvent(new Event('input', { bubbles: true }))
+    })
+    await expect.poll(() => page.locator(sel.activeTab).evaluate(
+      tab => Math.round(tab.getBoundingClientRect().height)
+    )).toBe(40)
+    await slider.evaluate(input => input.dispatchEvent(new Event('change', { bubbles: true })))
+    await expect.poll(() => latestSettings(
+      readDatastore(app.userDataDir, 'settings')
+    ).verticalTabHeight).toBe(40)
+  })
+
   test('keeps the settings scrollbar stationary while dragging animation speed', { tag: '@scale' }, async ({ page }) => {
     await page.evaluate(() => window.$store.dispatch('updateAnimationSpeed', 50))
     await goTo(page, 'settings')

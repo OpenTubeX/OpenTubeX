@@ -679,6 +679,7 @@ Settings:
     Use Fixed Tab Width: V vodoravnem načinu uporabi stalno širino zavihkov
     Use Custom Title Bar: Uporabi prilagojeno naslovno vrstico
     Tab Width: Širina zavihka
+    Vertical Tab Height: Višina navpičnih zavihkov
     Tab Layout:
       Tab Layout: Razporeditev zavihkov
       Horizontal Top: Vodoravno na vrhu

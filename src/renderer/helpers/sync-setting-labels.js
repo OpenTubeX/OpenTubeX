@@ -404,6 +404,7 @@ export const SYNC_SETTING_LABELS = {
     'Playlists',
     'Playlist.Sort By.Custom'
   ],
+  verticalTabHeight: 'Settings.Theme Settings.Vertical Tab Height',
   videoDescriptionMode: 'Settings.Distraction Free Settings.Video Descriptions',
   videoIpBlockScriptPath: 'Settings.Proxy Settings.IP Block Recovery Script Path',
   videoPlaybackEngine: 'Settings.General Settings.Stream Extraction Method.Stream Extraction Method',

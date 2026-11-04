@@ -529,6 +529,7 @@ Settings:
     Use Fixed Tab Width: Usar largura fixa das guias no modo horizontal
     Use Custom Title Bar: Usar barra de título personalizada
     Tab Width: Largura das guias
+    Vertical Tab Height: Altura das guias verticais
     Tab Layout:
       Tab Layout: Layout das guias
       Horizontal Top: Horizontal em cima

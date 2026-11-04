@@ -6,7 +6,7 @@
     class="tabBar"
     data-tutorial="tabs"
     :class="[`position-${tabBarPosition}`, { vertical }]"
-    :style="fixedTabWidthStyle"
+    :style="tabSizeStyle"
   >
     <div class="tabsViewport">
       <div
@@ -142,6 +142,7 @@ import store from '../../store/index'
 import { getConfiguredKeyboardShortcuts } from '../../../constants'
 import { localizeAndAddKeyboardShortcutToActionTitle } from '../../helpers/utils'
 import { normalizeFixedTabWidth } from '../../constants/tabWidth'
+import { normalizeVerticalTabHeight } from '../../constants/tabHeight'
 import { isVerticalTabBarPosition, normalizeTabBarPosition } from '../../constants/tabBarPosition'
 import { getTabAvatarUrl } from '../../tabs/tabPreview'
 import { getTabAccentColor } from '../../constants/tabColors'
@@ -317,9 +318,15 @@ async function migrateTabAvatar(tab, avatarUrl) {
 }
 
 // Only the horizontal bar sizes tabs by their content, so the fixed width is
-// applied there; vertical tabs always fill the column.
-const fixedTabWidthStyle = computed(() => {
-  if (vertical.value || !store.getters.getUseFixedTabWidth) {
+// applied there; vertical tabs always fill the column and take a set height.
+const verticalTabHeight = computed(() => normalizeVerticalTabHeight(store.getters.getVerticalTabHeight))
+
+const tabSizeStyle = computed(() => {
+  if (vertical.value) {
+    return { '--vertical-tab-height': `${verticalTabHeight.value}px` }
+  }
+
+  if (!store.getters.getUseFixedTabWidth) {
     return null
   }
 
@@ -1495,6 +1502,13 @@ watch([activeTabId, activeStripItemId], () => {
 
 watch(stripItems, () => {
   clampTabsScroll()
+  revealActiveTab()
+}, { flush: 'post' })
+
+// Taller tabs can push the active tab out of view.
+watch(verticalTabHeight, () => {
+  if (!vertical.value) return
+  revealActiveTabPending = true
   revealActiveTab()
 }, { flush: 'post' })
 

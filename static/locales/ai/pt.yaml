@@ -545,6 +545,7 @@ Settings:
     Use Fixed Tab Width: Usar largura fixa dos separadores no modo horizontal
     Use Custom Title Bar: Usar barra de título personalizada
     Tab Width: Largura dos separadores
+    Vertical Tab Height: Altura dos separadores verticais
     Tab Layout:
       Tab Layout: Disposição dos separadores
       Horizontal Top: Horizontal em cima

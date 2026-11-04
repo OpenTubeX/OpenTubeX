@@ -560,6 +560,7 @@ Settings:
     Use Fixed Tab Width: Používat v režimu vodorovných karet pevnou šířku
     Use Custom Title Bar: Používat vlastní záhlaví okna
     Tab Width: Šířka karty
+    Vertical Tab Height: Výška svislých karet
     Tab Layout:
       Tab Layout: Rozvržení karet
       Horizontal Top: Vodorovně nahoře

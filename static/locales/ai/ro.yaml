@@ -561,6 +561,7 @@ Settings:
     Use Fixed Tab Width: Folosește o lățime fixă a filelor în modul orizontal
     Use Custom Title Bar: Folosește o bară de titlu personalizată
     Tab Width: Lățimea filelor
+    Vertical Tab Height: Înălțimea filelor verticale
     Tab Layout:
       Tab Layout: Aranjarea filelor
       Horizontal Top: Orizontal, sus

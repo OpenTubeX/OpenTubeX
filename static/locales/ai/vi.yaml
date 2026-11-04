@@ -565,6 +565,7 @@ Settings:
     Use Fixed Tab Width: Dùng chiều rộng thẻ cố định ở chế độ ngang
     Use Custom Title Bar: Dùng thanh tiêu đề tùy chỉnh
     Tab Width: Chiều rộng thẻ
+    Vertical Tab Height: Chiều cao thẻ dọc
     Tab Layout:
       Tab Layout: Bố cục thẻ
       Horizontal Top: Nằm ngang ở trên

@@ -3,7 +3,7 @@ import { sampleColors } from '../../helpers/colors.mjs'
 import { fulfillVisualFixture } from '../../helpers/visual-fixtures.mjs'
 import { mockPlayableWatchPage } from '../../helpers/watch.mjs'
 
-import { abortUnmockedRequest, test, expect, sel, goTo, goToSettingsSection, clickSearchCancel, openNewWindowFromTabBar, setWindowSize, waitForAppReady } from '../../helpers/app.mjs'
+import { abortUnmockedRequest, test, expect, sel, goTo, goToSettingsSection, clickSearchCancel, expectScrollAtRenderedEnd, openNewWindowFromTabBar, setWindowSize, waitForAppReady } from '../../helpers/app.mjs'
 import {
   encryptSyncServerDeviceInfo,
   randomSyncServerDeviceId,
@@ -2735,6 +2735,94 @@ test.describe('fixed tab width', () => {
         tab => Math.round(tab.getBoundingClientRect().width)
       )
     }).toBeGreaterThan(140)
+  })
+})
+
+test.describe('vertical tab height', () => {
+  test.use({ seed: { settings: { tabBarPosition: 'left', verticalTabHeight: 44 } } })
+
+  test('gives vertical tabs and collapsed groups the configured height', { tag: '@scale' }, async ({ page }) => {
+    await page.evaluate(async () => {
+      const tab = await window.ftElectron.tabs.create({ route: '/history', makeActive: false, lazyLoad: true })
+      const group = await window.ftElectron.tabs.createGroup({ name: 'Grouped', color: 'green' })
+      await window.ftElectron.tabs.setGroup([tab.id], group.id)
+      await window.ftElectron.tabs.updateGroup(group.id, { isCollapsed: true })
+    })
+    await expect(page.locator('.tabBar .collapsedTabGroup')).toHaveCount(1)
+
+    const itemHeights = () => page.locator('.tabBar .tabBarReorderItem').evaluateAll(
+      items => items.map(item => Math.round(item.getBoundingClientRect().height))
+    )
+    await expect.poll(itemHeights).toEqual([44, 44])
+
+    await page.evaluate(() => window.$store.commit('setVerticalTabHeight', 26))
+    await expect.poll(itemHeights).toEqual([26, 26])
+
+    // The horizontal bar keeps its own fixed height.
+    await page.keyboard.press('F1')
+    await expect(page.locator('.app')).not.toHaveClass(/verticalTabs/)
+    await expect.poll(() => page.locator(sel.activeTab).evaluate(
+      tab => Math.round(tab.getBoundingClientRect().height)
+    )).toBe(30)
+  })
+
+  // 15 tabs stop overflowing once they shrink, 40 tabs still overflow. The
+  // last tab is active, so revealing it keeps the strip at its end.
+  for (const tabCount of [15, 40]) {
+    test(`clamps the scrolled strip when ${tabCount} tabs shrink`, { tag: '@scale' }, async ({ app, page }) => {
+      await setWindowSize(app, page, { width: 1000, height: 700 })
+      await page.evaluate(async count => {
+        window.$store.commit('setVerticalTabHeight', 56)
+        for (let index = 1; index < count; index++) {
+          await window.ftElectron.tabs.create({ route: '/history', title: `History ${index}`, makeActive: index === count - 1, lazyLoad: true })
+        }
+      }, tabCount)
+      await expect(page.locator(sel.tabs)).toHaveCount(tabCount)
+
+      const container = page.locator('.tabBar .tabsContainer')
+      await expect(container).toHaveAttribute('data-overlayscrollbars-viewport')
+      await container.evaluate(element => { element.scrollTop = element.scrollHeight })
+      await expect.poll(() => container.evaluate(element => element.scrollTop)).toBeGreaterThan(0)
+
+      await page.evaluate(() => window.$store.commit('setVerticalTabHeight', 24))
+      await expect.poll(() => page.locator(sel.tabs).first().evaluate(
+        tab => Math.round(tab.getBoundingClientRect().height)
+      )).toBe(24)
+
+      const overflows = await container.evaluate(element => element.scrollHeight > element.clientHeight + 1)
+      expect(overflows).toBe(tabCount === 40)
+      if (overflows) {
+        await expectScrollAtRenderedEnd(container)
+      } else {
+        await expect.poll(() => container.evaluate(element => element.scrollTop)).toBe(0)
+      }
+      await expect.poll(() => container.evaluate(element => {
+        const scrollbar = element.querySelector(':scope > .os-scrollbar-vertical')
+        return scrollbar.classList.contains('os-scrollbar-unusable') === (element.scrollHeight <= element.clientHeight)
+      })).toBe(true)
+    })
+  }
+
+  test('keeps the active tab in view when tabs grow', { tag: '@scale' }, async ({ app, page }) => {
+    await setWindowSize(app, page, { width: 1000, height: 700 })
+    // The 21st of 40 tabs is in view at 24px, but not at 56px.
+    const activeTabId = await page.evaluate(async () => {
+      window.$store.commit('setVerticalTabHeight', 24)
+      const tabs = []
+      for (let index = 1; index < 40; index++) {
+        tabs.push(await window.ftElectron.tabs.create({ route: '/history', title: `History ${index}`, makeActive: false, lazyLoad: true }))
+      }
+      await window.ftElectron.tabs.activate(tabs[19].id)
+      return tabs[19].id
+    })
+    await expect(page.locator(sel.activeTab)).toHaveAttribute('data-tab-id', activeTabId)
+    await expectActiveTabInView(page)
+
+    await page.evaluate(() => window.$store.commit('setVerticalTabHeight', 56))
+    await expect.poll(() => page.locator(sel.activeTab).evaluate(
+      tab => Math.round(tab.getBoundingClientRect().height)
+    )).toBe(56)
+    await expectActiveTabInView(page)
   })
 })
 

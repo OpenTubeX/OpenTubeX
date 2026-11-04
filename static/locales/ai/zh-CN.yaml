@@ -560,6 +560,7 @@ Settings:
     Use Fixed Tab Width: 在水平模式下使用固定标签页宽度
     Use Custom Title Bar: 使用自定义标题栏
     Tab Width: 标签页宽度
+    Vertical Tab Height: 垂直标签页高度
     Tab Layout:
       Tab Layout: 标签页布局
       Horizontal Top: 顶部水平排列

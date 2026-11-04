@@ -560,6 +560,7 @@ Settings:
     Use Fixed Tab Width: Utiliser une largeur d’onglet fixe en mode horizontal
     Use Custom Title Bar: Utiliser une barre de titre personnalisée
     Tab Width: Largeur des onglets
+    Vertical Tab Height: Hauteur des onglets verticaux
     Tab Layout:
       Tab Layout: Disposition des onglets
       Horizontal Top: Horizontaux en haut

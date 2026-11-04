@@ -354,6 +354,7 @@ function isSettingsSearchMessageVisible(sectionType, path, options) {
       'Show Tab Previews',
       'Tab Layout',
       'Tab Loading Indicator',
+      'Vertical Tab Height',
       'Load Missing Tab Icons'
     ].includes(group)) {
       return usingElectron && (

@@ -565,6 +565,7 @@ Settings:
     Use Fixed Tab Width: Використовувати фіксовану ширину вкладок у горизонтальному режимі
     Use Custom Title Bar: Використовувати власний рядок заголовка
     Tab Width: Ширина вкладки
+    Vertical Tab Height: Висота вертикальних вкладок
     Tab Layout:
       Tab Layout: Розташування вкладок
       Horizontal Top: Горизонтально вгорі

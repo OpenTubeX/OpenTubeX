@@ -565,6 +565,7 @@ Settings:
     Use Fixed Tab Width: Usar unha largura fixa das lapelas no modo horizontal
     Use Custom Title Bar: Usar unha barra de título personalizada
     Tab Width: Largura das lapelas
+    Vertical Tab Height: Altura das lapelas verticais
     Tab Layout:
       Tab Layout: Disposición das lapelas
       Horizontal Top: Horizontais na parte superior

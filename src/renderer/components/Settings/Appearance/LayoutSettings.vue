@@ -234,6 +234,19 @@
     </template>
     <FtSliderGrid>
       <FtSlider
+        v-if="usingElectron"
+        :label="$t('Settings.Theme Settings.Vertical Tab Height')"
+        :default-value="verticalTabHeight"
+        setting-key="verticalTabHeight"
+        :min-value="MIN_VERTICAL_TAB_HEIGHT"
+        :max-value="MAX_VERTICAL_TAB_HEIGHT"
+        :step="VERTICAL_TAB_HEIGHT_STEP"
+        :disabled="!isVerticalTabBarPosition(tabBarPosition)"
+        value-extension="px"
+        @input="previewVerticalTabHeight"
+        @change="updateVerticalTabHeight"
+      />
+      <FtSlider
         v-if="usingElectron || IS_CAPACITOR"
         :label="$t('Settings.Theme Settings.UI Scale')"
         :default-value="uiScale"
@@ -330,6 +343,12 @@ import {
   MIN_FIXED_TAB_WIDTH
 } from '../../../constants/tabWidth'
 import {
+  MAX_VERTICAL_TAB_HEIGHT,
+  MIN_VERTICAL_TAB_HEIGHT,
+  VERTICAL_TAB_HEIGHT_STEP
+} from '../../../constants/tabHeight'
+import {
+  isVerticalTabBarPosition,
   normalizeTabBarPosition,
   TAB_BAR_POSITIONS
 } from '../../../constants/tabBarPosition'
@@ -580,6 +599,23 @@ function previewFixedTabWidth(value) {
  */
 function updateFixedTabWidth(value) {
   store.dispatch('updateFixedTabWidth', value)
+}
+
+/** @type {import('vue').ComputedRef<number>} */
+const verticalTabHeight = computed(() => store.getters.getVerticalTabHeight)
+
+/**
+ * @param {number} value
+ */
+function previewVerticalTabHeight(value) {
+  store.commit('setVerticalTabHeight', value)
+}
+
+/**
+ * @param {number} value
+ */
+function updateVerticalTabHeight(value) {
+  store.dispatch('updateVerticalTabHeight', value)
 }
 
 /** @type {import('vue').ComputedRef<number>} */
