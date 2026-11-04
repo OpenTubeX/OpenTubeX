@@ -27,7 +27,7 @@ test.beforeEach(async ({ page }) => {
           subCount: 0,
           totalViews: 0,
           joined: 0,
-          tabs: ['videos', 'shorts', 'streams', 'playlists', 'posts', 'releases', 'podcasts', 'courses', 'shows', 'about'],
+          tabs: ['videos', 'shorts', 'streams', 'playlists', 'posts', 'releases', 'podcasts', 'courses', 'about'],
           relatedChannels: [],
           videos: [],
           latestVideos: [],
@@ -54,7 +54,7 @@ for (const [width, scale] of [[1600, 100], [375, 95], [812, 125]]) {
       BrowserWindow.getAllWindows()[0].setSize(width, 900)
     }, width)
     await page.evaluate(value => window.$store.dispatch('updateUiScale', value), scale)
-    for (const tab of ['videos', 'shorts', 'live', 'podcasts', 'releases', 'courses', 'shows', 'playlists', 'community']) {
+    for (const tab of ['videos', 'shorts', 'live', 'podcasts', 'releases', 'courses', 'playlists', 'community']) {
       await page.locator(`#${tab}Tab`).click()
       await expect(card.locator('.message')).toBeVisible()
       const layout = await card.evaluate(element => {
@@ -118,7 +118,7 @@ test('hides channel tab icons and preserves full labels when space is limited', 
   }
   await page.evaluate(async () => {
     const store = window.$store
-    await Promise.all(['Community', 'Releases', 'Courses', 'Shows'].map(tab => store.dispatch(`updateHideChannel${tab}`, true)))
+    await Promise.all(['Community', 'Releases', 'Courses'].map(tab => store.dispatch(`updateHideChannel${tab}`, true)))
     await store.dispatch('updateUiScale', 100)
   })
   await app.electronApp.evaluate(({ BrowserWindow }) => BrowserWindow.getAllWindows()[0].setSize(450, 900))
@@ -265,7 +265,7 @@ test('separates the content card on every channel tab', { tag: '@scale' }, async
       subCount: 0,
       totalViews: 0,
       joined: 0,
-      tabs: ['videos', 'shorts', 'streams', 'playlists', 'posts', 'podcasts', 'releases', 'courses', 'shows'],
+      tabs: ['videos', 'shorts', 'streams', 'playlists', 'posts', 'podcasts', 'releases', 'courses'],
       relatedChannels: [],
       videos,
       latestVideos: videos,
@@ -290,7 +290,6 @@ test('separates the content card on every channel tab', { tag: '@scale' }, async
       ['podcastsTab', '.elementList .message:visible'],
       ['releasesTab', '.elementList .message:visible'],
       ['coursesTab', '.elementList .message:visible'],
-      ['showsTab', '.elementList .message:visible'],
       ['aboutTab', '#aboutPanel h2:first-child']
     ]) {
       await page.locator(`#${tabId}`).click()
@@ -554,7 +553,7 @@ test('scrolls full channel labels and clamps the range after labels or available
   await tabs.evaluate(element => { element.scrollLeft = element.scrollWidth })
   await page.evaluate(async () => {
     const store = window.$store
-    await Promise.all(['Shorts', 'Playlists', 'Community', 'Releases', 'Podcasts', 'Courses', 'Shows']
+    await Promise.all(['Shorts', 'Playlists', 'Community', 'Releases', 'Podcasts', 'Courses']
       .map(tab => store.dispatch(`updateHideChannel${tab}`, true)))
   })
   await expectFullLabels()
