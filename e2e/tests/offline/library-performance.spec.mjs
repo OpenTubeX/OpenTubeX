@@ -60,7 +60,7 @@ test('large-library search, metadata edits and bulk operations work with a throt
       window.__performancePlaylistVideos = store.getters.getPlaylist('large-library').videos
     })
     await page.getByTitle('Edit Playlist Info').click()
-    await page.locator('.playlistStats input').fill('Renamed large library')
+    await page.getByRole('textbox', { name: 'Playlist name' }).fill('Renamed large library')
     await page.getByRole('button', { name: 'Save Changes' }).click()
     await expect(page.locator('.playlistTitle')).toHaveText('Renamed large library')
     expect(await page.evaluate(() => {

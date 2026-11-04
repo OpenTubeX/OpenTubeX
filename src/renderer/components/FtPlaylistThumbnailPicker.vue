@@ -94,7 +94,7 @@ async function selectImage(event) {
   display: flex;
   flex-direction: column;
   gap: 8px;
-  margin: 8px auto;
+  margin: 0;
   min-inline-size: 0;
   padding: 0;
 }
