@@ -115,7 +115,8 @@ test('reserves Space for playback when assigning SponsorBlock shortcuts', async 
   const start = page.locator('[data-shortcut-path="VIDEO_PLAYER.SPONSORBLOCK.START_SPONSORBLOCK_SEGMENT"]')
   await start.click()
   await start.press('Space')
-  const conflict = page.locator('.prompt')
+  // A closing conflict prompt stays in the page while it fades out.
+  const conflict = page.locator('.prompt:not([inert])')
   await expect(conflict).toContainText('Toggle play/pause')
   await expect(conflict.getByRole('button', { name: 'Reassign', exact: true })).toHaveCount(0)
   await conflict.locator('.promptCard').screenshot({ path: testInfo.outputPath('reserved-space-conflict.png') })
