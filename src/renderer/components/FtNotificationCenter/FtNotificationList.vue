@@ -129,6 +129,8 @@ function handleClick(entry, event) {
   const ctrlOrCmdPressed = process.platform === 'darwin' ? event.metaKey : event.ctrlKey
   if (opensTabs && ctrlOrCmdPressed && !event.altKey) {
     event.preventDefault()
+    // Like plain clicks, but a new window leaves this one's settings open.
+    if (!event.shiftKey) store.dispatch('hideSettingsWindow')
     openInternalPath({ path: entry.path, query: entry.query, doCreateNewWindow: event.shiftKey, doCreateNewTab: !event.shiftKey })
     emit('opened-in-tab', entry, event)
     return

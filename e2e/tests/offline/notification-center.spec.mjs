@@ -179,6 +179,21 @@ test('middle and Ctrl clicks open notifications in new tabs', async ({ app, page
   await expect(bell).not.toHaveAttribute('data-unread-count')
 })
 
+test('Ctrl clicks on notifications close the settings window like plain clicks', async ({ app, page }) => {
+  await page.emulateMedia({ reducedMotion: 'reduce' })
+  await mockSystemNotifications(app)
+  const [upload] = await announceUploads(page, ['a'])
+  await goToSettingsSection(page, 'general')
+  const settings = page.locator('.settingsWindow')
+  await expect(settings).toBeVisible()
+
+  await page.getByRole('button', { name: 'Notifications (1 unread)', exact: true }).click()
+  await page.locator('.notificationCenterDropdown .notificationEntry').click({ modifiers: [shortcutModifier] })
+  await expect(page.locator(sel.tabs)).toHaveCount(2)
+  await expect(page).toHaveURL(new RegExp(`#/watch/${upload}$`))
+  await expect(settings).toHaveCount(0)
+})
+
 test('read notifications can be cleared one at a time', async ({ app, page }) => {
   await page.emulateMedia({ reducedMotion: 'reduce' })
   await mockSystemNotifications(app)
