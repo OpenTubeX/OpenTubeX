@@ -22,6 +22,10 @@
 }
 
 .phonePanelCard:is(:active, :has(> summary:active)) {
+  /* Themes such as Hot Pink press to a surface their text colors would vanish on. */
+  --primary-text-color: var(--side-nav-hover-text-color);
+  --secondary-text-color: color-mix(in srgb, var(--side-nav-hover-text-color) 70%, var(--side-nav-hover-color));
+
   border-radius: var(--shape-corner-medium);
   background: var(--side-nav-hover-color);
   color: var(--side-nav-hover-text-color);

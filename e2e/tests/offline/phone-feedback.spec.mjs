@@ -499,6 +499,30 @@ test('the AI summary matches the phone Description card, also while pressed', { 
   await expect(summary.locator('.summaryParagraph')).not.toHaveCSS('user-select', 'none')
 })
 
+test('pressed phone cards keep their text visible in Hot Pink', async ({ app, page }) => {
+  await page.evaluate(() => window.$store.dispatch('updateBaseTheme', 'hotPink'))
+  await mockPlayableWatchPage(app, page)
+  await openMockedVideo(page)
+  await setWindowSize(app, page, { width: 480, height: 800 })
+  await page.emulateMedia({ reducedMotion: 'reduce' })
+  const watch = await watchViewHandle(page)
+  await watch.evaluate(async vm => {
+    vm.videoSummary = ['A summary paragraph.']
+    await vm.$store.dispatch('updateAiVideoSummaryMode', 'collapsed')
+  })
+  const summary = page.locator('.videoSummary')
+  await summary.evaluate(element => element.scrollIntoView({ block: 'center' }))
+  const box = await summary.locator('summary').boundingBox()
+  await page.mouse.move(box.x + box.width / 2, box.y + box.height / 2)
+  await page.mouse.down()
+  const colors = await summary.evaluate(element => ['.summaryTitle', '.summaryDisclaimer'].map(selector => getComputedStyle(element.querySelector(selector)).color).concat(getComputedStyle(element).backgroundColor))
+  await page.mouse.up()
+  const [title, disclaimer, background] = colors
+  expect(background).toBe('rgb(255, 255, 255)')
+  expect(title).not.toBe(background)
+  expect(disclaimer).not.toBe(background)
+})
+
 test('subscribed button segments share the Material tonal color', async ({ app, page }) => {
   await page.evaluate(() => window.$store.dispatch('updateBaseTheme', 'materialDark'))
   await mockPlayableWatchPage(app, page)

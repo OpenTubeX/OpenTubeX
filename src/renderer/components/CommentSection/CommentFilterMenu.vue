@@ -31,75 +31,81 @@
     >
       <div
         ref="menu"
+        v-overlay-scrollbars="phoneLayout"
         class="commentFilterOptions"
         :class="{ commentFilterSheet: phoneLayout }"
       >
-        <button
-          type="button"
-          role="checkbox"
-          :aria-checked="searchOpen"
-          @click="emit('toggle-search')"
+        <div
+          ref="menuContent"
+          class="commentFilterOptionsContent"
         >
-          <span
-            class="commentFilterMenuIcon"
-            aria-hidden="true"
+          <button
+            type="button"
+            role="checkbox"
+            :aria-checked="searchOpen"
+            @click="emit('toggle-search')"
           >
-            <FtIcon :icon="['fas', 'magnifying-glass']" />
-          </span>
-          <span>{{ $t('Comments.Search loaded comments') }}</span>
-          <FtIcon
-            v-if="searchOpen"
-            :icon="['fas', 'check']"
-            aria-hidden="true"
-          />
-        </button>
-        <button
-          type="button"
-          role="checkbox"
-          :aria-checked="creatorCommentsOnly"
-          @click="emit('toggle-creator')"
-        >
-          <span
-            class="commentFilterMenuIcon"
-            aria-hidden="true"
-          >
-            <FtRetryImage
-              v-if="channelThumbnail"
-              :fallback-icon="['fas', 'circle-user']"
-              :src="channelThumbnail"
-              class="commentCreatorFilterAvatar"
-            />
+            <span
+              class="commentFilterMenuIcon"
+              aria-hidden="true"
+            >
+              <FtIcon :icon="['fas', 'magnifying-glass']" />
+            </span>
+            <span>{{ $t('Comments.Search loaded comments') }}</span>
             <FtIcon
-              v-else
-              :icon="['fas', 'circle-user']"
+              v-if="searchOpen"
+              :icon="['fas', 'check']"
+              aria-hidden="true"
             />
-          </span>
-          <span>{{ $t('Comments.From creator') }}</span>
-          <FtIcon
-            v-if="creatorCommentsOnly"
-            :icon="['fas', 'check']"
-            aria-hidden="true"
-          />
-        </button>
-        <button
-          type="button"
-          role="checkbox"
-          :aria-checked="timestampCommentsOnly"
-          @click="emit('toggle-timestamps')"
-        >
-          <span
-            class="commentFilterMenuIcon"
-            aria-hidden="true"
+          </button>
+          <button
+            type="button"
+            role="checkbox"
+            :aria-checked="creatorCommentsOnly"
+            @click="emit('toggle-creator')"
           >
-            <FtIcon :icon="['fas', 'clock']" />
-          </span>
-          <span>{{ $t('Comments.Contains timestamps') }}</span>
-          <FtIcon
-            v-if="timestampCommentsOnly"
-            :icon="['fas', 'check']"
-            aria-hidden="true"
-          />
-        </button>
+            <span
+              class="commentFilterMenuIcon"
+              aria-hidden="true"
+            >
+              <FtRetryImage
+                v-if="channelThumbnail"
+                :fallback-icon="['fas', 'circle-user']"
+                :src="channelThumbnail"
+                class="commentCreatorFilterAvatar"
+              />
+              <FtIcon
+                v-else
+                :icon="['fas', 'circle-user']"
+              />
+            </span>
+            <span>{{ $t('Comments.From creator') }}</span>
+            <FtIcon
+              v-if="creatorCommentsOnly"
+              :icon="['fas', 'check']"
+              aria-hidden="true"
+            />
+          </button>
+          <button
+            type="button"
+            role="checkbox"
+            :aria-checked="timestampCommentsOnly"
+            @click="emit('toggle-timestamps')"
+          >
+            <span
+              class="commentFilterMenuIcon"
+              aria-hidden="true"
+            >
+              <FtIcon :icon="['fas', 'clock']" />
+            </span>
+            <span>{{ $t('Comments.Contains timestamps') }}</span>
+            <FtIcon
+              v-if="timestampCommentsOnly"
+              :icon="['fas', 'check']"
+              aria-hidden="true"
+            />
+          </button>
+        </div>
       </div>
     </component>
   </div>
@@ -107,11 +113,12 @@
 
 <script setup>
 import { FtIcon } from '@opentubex/icons'
-import { computed, nextTick, useTemplateRef, watch } from 'vue'
+import { computed, nextTick, onBeforeUnmount, useTemplateRef, watch } from 'vue'
 
 import FtRetryImage from '../FtRetryImage.vue'
 import FtMobileSheet from '../FtMobileSheet/FtMobileSheet.vue'
 import { usePhoneLayout } from '../../composables/usePhoneLayout'
+import { clampOverlayScrollTop } from '../../helpers/overlayScrollbars'
 
 const props = defineProps({
   open: {
@@ -147,6 +154,7 @@ const props = defineProps({
 const phoneLayout = usePhoneLayout()
 const trigger = useTemplateRef('trigger')
 const menu = useTemplateRef('menu')
+const menuContent = useTemplateRef('menuContent')
 const hasActiveFilters = computed(() => {
   return props.searchOpen || props.creatorCommentsOnly || props.timestampCommentsOnly
 })
@@ -156,6 +164,21 @@ const emit = defineEmits([
   'toggle-creator',
   'toggle-timestamps'
 ])
+
+// Short phone layouts scroll the filters; keep the offset valid when the sheet grows
+const menuResizeObserver = new ResizeObserver(() => {
+  if (phoneLayout.value) clampOverlayScrollTop(menu.value, menuContent.value)
+})
+
+watch(menu, (element) => {
+  menuResizeObserver.disconnect()
+  if (element) {
+    menuResizeObserver.observe(element)
+    menuResizeObserver.observe(menuContent.value)
+  }
+})
+
+onBeforeUnmount(() => menuResizeObserver.disconnect())
 
 watch(() => props.open, (open) => {
   if (open) {

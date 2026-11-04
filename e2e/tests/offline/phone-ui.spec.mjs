@@ -267,6 +267,34 @@ test.describe('phone UI', () => {
     await expectNoScrollbarOverflow(list)
   })
 
+  test('scrolls the comment filters sheet on short screens and clamps it when the screen grows', { tag: '@scale' }, async ({ app, page, uiScale }) => {
+    await mockPlayableWatchPage(app, page)
+    await openMockedVideo(page)
+    await setWindowSize(app, page, { width: Math.round(360 * uiScale / 100), height: Math.round(781 * uiScale / 100) })
+    await page.locator('.phoneCommentsButton').click()
+    const comments = page.locator('.dockedSheet[open]')
+    await expect(comments.locator('.comment').first()).toBeVisible()
+    await comments.getByRole('button', { name: 'Filter loaded comments', exact: true }).click()
+    const list = page.getByRole('dialog', { name: 'Comment filters', exact: true }).locator('.commentFilterSheet')
+    await expect(list).toBeVisible()
+    // Shrink the visible viewport the sheet fits itself into, as the keyboard or split screen does
+    await page.evaluate(() => document.documentElement.style.setProperty('--phone-viewport-height', '200px'))
+    await expect(list.locator('.os-scrollbar-vertical')).toHaveCount(1)
+    await expect.poll(() => list.evaluate(element => element.scrollHeight > element.clientHeight)).toBe(true)
+    await list.evaluate(element => { element.scrollTop = element.scrollHeight })
+    await expectScrollAtRenderedEnd(list)
+    // The last filter is fully reachable inside the sheet
+    expect(await list.evaluate(element => {
+      const last = element.querySelector('button:last-of-type').getBoundingClientRect()
+      const viewport = element.getBoundingClientRect()
+      return last.top >= viewport.top - 0.5 && last.bottom <= viewport.bottom + 0.5
+    })).toBe(true)
+
+    // The viewport tracking restores the full height on the next resize
+    await page.evaluate(() => window.dispatchEvent(new Event('resize')))
+    await expectNoScrollbarOverflow(list)
+  })
+
   for (const trigger of ['hidden actions', 'a wider toolbar']) {
     test(`clamps the scrolled More actions sheet when ${trigger} leave it`, { tag: '@scale' }, async ({ app, page, uiScale }) => {
       await page.evaluate(async () => {
