@@ -66,117 +66,17 @@
           v-if="selectedChannelIds.size > 0"
           class="bulkFeedTypeSettings"
           role="group"
-          :aria-labelledby="`${id}-selection-summary ${id}-bulk-feed-types`"
+          :aria-labelledby="`${id}-selection-summary`"
         >
-          <p
-            :id="`${id}-bulk-feed-types`"
-            class="settingLabel"
-          >
-            {{ t('Channel.Show in subscription feed') }}
-          </p>
-          <div class="feedTypeOptions bulkFeedTypeOptions">
-            <button
-              v-for="feedType in feedTypes"
-              :key="feedType.id"
-              type="button"
-              class="feedTypeOption"
-              :class="{
-                enabled: selectedFeedTypeStates[feedType.id] === true,
-                mixed: selectedFeedTypeStates[feedType.id] === 'mixed'
-              }"
-              role="checkbox"
-              :aria-checked="selectedFeedTypeStates[feedType.id]"
-              @click="updateSelectedFeedType(feedType.id)"
-            >
-              <FtIcon
-                :icon="feedType.icon"
-                aria-hidden="true"
-              />
-              <span>{{ feedType.label }}</span>
-              <FtIcon
-                v-if="selectedFeedTypeStates[feedType.id] === true"
-                class="feedTypeCheck"
-                :icon="['fas', 'check']"
-                aria-hidden="true"
-              />
-              <span
-                v-else-if="selectedFeedTypeStates[feedType.id] === 'mixed'"
-                class="feedTypeMixedIndicator"
-                aria-hidden="true"
-              />
-            </button>
-          </div>
-          <template v-if="uploadNotificationsAvailable">
-            <div class="bulkNotificationSetting">
-              <FtToggleSwitch
-                :label="t('Channel.Notify about new uploads')"
-                :default-value="selectedNotificationState === true"
-                :indeterminate="selectedNotificationState === 'mixed'"
-                compact
-                controlled
-                @change="updateSelectedNotifications"
-              />
-            </div>
-            <div
-              v-if="selectedNotificationState !== false"
-              class="feedTypeOptions bulkFeedTypeOptions"
-              role="group"
-              :aria-label="t('Channel.Notify about new uploads')"
-            >
-              <button
-                v-for="feedType in feedTypes"
-                :key="feedType.id"
-                type="button"
-                class="feedTypeOption"
-                :class="{
-                  enabled: selectedNotificationFeedTypeStates[feedType.id] === true,
-                  mixed: selectedNotificationFeedTypeStates[feedType.id] === 'mixed'
-                }"
-                role="checkbox"
-                :aria-checked="selectedNotificationFeedTypeStates[feedType.id]"
-                :disabled="selectedChannelsForFeedType(feedType.id, 'notificationFeedTypes').length === 0"
-                @click="updateSelectedFeedType(feedType.id, 'notificationFeedTypes')"
-              >
-                <FtIcon
-                  :icon="feedType.icon"
-                  aria-hidden="true"
-                />
-                <span>{{ feedType.label }}</span>
-                <FtIcon
-                  v-if="selectedNotificationFeedTypeStates[feedType.id] === true"
-                  class="feedTypeCheck"
-                  :icon="['fas', 'check']"
-                  aria-hidden="true"
-                />
-                <span
-                  v-else-if="selectedNotificationFeedTypeStates[feedType.id] === 'mixed'"
-                  class="feedTypeMixedIndicator"
-                  aria-hidden="true"
-                />
-              </button>
-            </div>
-          </template>
-          <div class="bulkAdditionalSettings">
-            <FtToggleSwitch
-              v-if="restrictedPlaybackConfigured"
-              class="bulkMembersOnlySetting"
-              :label="t('Search Listing.Label.Members Only')"
-              :default-value="selectedMembersOnlyState === true"
-              :indeterminate="selectedMembersOnlyState === 'mixed'"
-              compact
-              controlled
-              @change="updateSelectedShowMembersOnly"
-            />
-            <FtSelect
-              class="bulkDailyLimitSelect"
-              :placeholder="t('Channel.Videos per day')"
-              :value="selectedDailyLimitValue"
-              :select-names="bulkLimitNames"
-              :select-values="bulkLimitValues"
-              :icon="['fas', 'clock']"
-              @change="updateSelectedChannelLimit"
-            />
-          </div>
+          <FtSubscriptionPreferences
+            :feed-type-states="selectedFeedTypeStates"
+            :notification-feed-type-states="uploadNotificationsAvailable ? selectedNotificationFeedTypeStates : null"
+            :daily-video-limit="selectedDailyVideoLimit"
+            :show-members-only="restrictedPlaybackConfigured ? selectedMembersOnlyState : null"
+            @toggle-feed-type="updateSelectedFeedType"
+            @update-daily-video-limit="updateSelectedChannelLimit"
+            @update-show-members-only="updateSelectedShowMembersOnly"
+          />
         </div>
       </div>
     </div>
@@ -247,115 +147,15 @@
                 {{ channel.name || channel.id }}
               </p>
             </div>
-            <div
-              class="feedTypeSettings"
-              role="group"
-              :aria-labelledby="`${id}-channel-${index}-feed-types`"
-            >
-              <p
-                :id="`${id}-channel-${index}-feed-types`"
-                class="settingLabel"
-              >
-                {{ t('Channel.Show in subscription feed') }}
-              </p>
-              <div class="feedTypeOptions">
-                <button
-                  v-for="feedType in feedTypes"
-                  :key="feedType.id"
-                  type="button"
-                  class="feedTypeOption"
-                  :class="{ enabled: isFeedTypeEnabled(channel, feedType.id) }"
-                  role="checkbox"
-                  :aria-checked="isFeedTypeEnabled(channel, feedType.id)"
-                  @click="updateFeedType(
-                    channel,
-                    feedType.id,
-                    !isFeedTypeEnabled(channel, feedType.id)
-                  )"
-                >
-                  <FtIcon
-                    :icon="feedType.icon"
-                    aria-hidden="true"
-                  />
-                  <span>{{ feedType.label }}</span>
-                  <FtIcon
-                    v-if="isFeedTypeEnabled(channel, feedType.id)"
-                    class="feedTypeCheck"
-                    :icon="['fas', 'check']"
-                    aria-hidden="true"
-                  />
-                </button>
-              </div>
-            </div>
-            <div
-              v-if="uploadNotificationsAvailable"
-              class="notificationSettings"
-            >
-              <FtToggleSwitch
-                :label="t('Channel.Notify about new uploads')"
-                :default-value="hasSubscriptionNotifications(channelSettings(channel))"
-                compact
-                controlled
-                @change="value => updateNotifications(channel, value)"
-              />
-              <div
-                v-if="hasSubscriptionNotifications(channelSettings(channel))"
-                class="feedTypeOptions"
-                role="group"
-                :aria-label="t('Channel.Notify about new uploads')"
-              >
-                <button
-                  v-for="feedType in feedTypes"
-                  :key="feedType.id"
-                  type="button"
-                  class="feedTypeOption"
-                  :class="{ enabled: isNotifying(channel, feedType.id) }"
-                  role="checkbox"
-                  :aria-checked="isNotifying(channel, feedType.id)"
-                  :disabled="!isFeedTypeEnabled(channel, feedType.id)"
-                  @click="updateFeedType(
-                    channel,
-                    feedType.id,
-                    !isFeedTypeEnabled(channel, feedType.id, 'notificationFeedTypes'),
-                    'notificationFeedTypes'
-                  )"
-                >
-                  <FtIcon
-                    :icon="feedType.icon"
-                    aria-hidden="true"
-                  />
-                  <span>{{ feedType.label }}</span>
-                  <FtIcon
-                    v-if="isNotifying(channel, feedType.id)"
-                    class="feedTypeCheck"
-                    :icon="['fas', 'check']"
-                    aria-hidden="true"
-                  />
-                </button>
-              </div>
-            </div>
-            <div
-              v-if="restrictedPlaybackConfigured"
-              class="membersOnlySetting"
-            >
-              <FtToggleSwitch
-                :label="t('Search Listing.Label.Members Only')"
-                :default-value="channelSettings(channel).showMembersOnly"
-                compact
-                @change="value => updateShowMembersOnly(channel, value)"
-              />
-            </div>
-            <div class="dailyLimitSetting">
-              <FtSelect
-                class="dailyLimitSelect"
-                :placeholder="t('Channel.Videos per day')"
-                :value="channelLimitValue(channel)"
-                :select-names="limitNames"
-                :select-values="limitValues"
-                :icon="['fas', 'clock']"
-                @change="value => updateChannelLimit(channel, value)"
-              />
-            </div>
+            <FtSubscriptionPreferences
+              :feed-type-states="channelFeedTypeStates(channel)"
+              :notification-feed-type-states="uploadNotificationsAvailable ? channelFeedTypeStates(channel, 'notificationFeedTypes') : null"
+              :daily-video-limit="channelSettings(channel).dailyVideoLimit"
+              :show-members-only="restrictedPlaybackConfigured ? channelSettings(channel).showMembersOnly : null"
+              @toggle-feed-type="(feedType, key) => updateFeedType(channel, feedType, !isFeedTypeEnabled(channel, feedType, key), key)"
+              @update-daily-video-limit="value => updateChannelLimit(channel, value)"
+              @update-show-members-only="value => updateShowMembersOnly(channel, value)"
+            />
           </li>
         </ul>
         <FtAutoLoadNextPageWrapper
@@ -391,9 +191,8 @@ import FtAutoLoadNextPageWrapper from '../../FtAutoLoadNextPageWrapper.vue'
 import { useListPagination } from '../../../composables/useListPagination'
 import FtFlexBox from '../../ft-flex-box/ft-flex-box.vue'
 import FtInput from '../../FtInput/FtInput.vue'
-import FtSelect from '../../FtSelect/FtSelect.vue'
 import FtSettingsSubpage from '../../FtSettingsSubpage/FtSettingsSubpage.vue'
-import FtToggleSwitch from '../../FtToggleSwitch/FtToggleSwitch.vue'
+import FtSubscriptionPreferences from '../../FtSubscriptionPreferences/FtSubscriptionPreferences.vue'
 
 import store from '../../../store/index'
 import { supportsUploadNotifications as uploadNotificationsSupported } from '../../../helpers/uploadNotifications'
@@ -401,15 +200,11 @@ import { showToast } from '../../../helpers/utils'
 import { clampOverlayScrollTop } from '../../../helpers/overlayScrollbars'
 import { hasConfiguredRestrictedPlaybackAuthentication } from '../../../helpers/restricted-playback'
 import {
-
   formatSubscriptionDailyVideoLimit,
-  getSubscriptionDailyVideoLimitOptions,
   getSubscriptionFeedTypeOptions,
   getUpdatedSubscriptionFeedTypes,
-  hasSubscriptionNotifications,
   normalizeSubscriptionChannelSettings,
-  parseSubscriptionDailyVideoLimit,
-  SUBSCRIPTION_FEED_TYPES
+  parseSubscriptionDailyVideoLimit
 } from '../../../helpers/subscription-channels'
 
 const uploadNotificationsAvailable = computed(() => uploadNotificationsSupported && store.getters.getNotificationMode !== 'off')
@@ -493,9 +288,6 @@ const { page: channelPage, hasMore: hasMoreChannels, displayedItems: displayedCh
 })
 
 const feedTypes = computed(() => getSubscriptionFeedTypeOptions(t))
-const limitOptions = computed(() => getSubscriptionDailyVideoLimitOptions(t))
-const limitNames = computed(() => limitOptions.value.map(option => option.label))
-const limitValues = computed(() => limitOptions.value.map(option => option.value))
 const selectedChannels = computed(() => channels.value.filter(channel => (
   selectedChannelIds.value.has(channel.id)
 )))
@@ -509,15 +301,10 @@ const allVisibleChannelsSelected = computed(() => (
 const selectedMembersOnlyState = computed(() => selectedState(channel => (
   channelSettings(channel).showMembersOnly
 )))
-const selectedDailyLimitValue = computed(() => {
-  const values = selectedChannels.value.map(channelLimitValue)
-  return values.every(value => value === values[0]) ? values[0] : 'mixed'
+const selectedDailyVideoLimit = computed(() => {
+  const [first, ...others] = selectedChannels.value.map(channel => channelSettings(channel).dailyVideoLimit)
+  return others.every(limit => limit === first) ? first : 'mixed'
 })
-const bulkLimitOptions = computed(() => selectedDailyLimitValue.value === 'mixed'
-  ? [{ value: 'mixed', label: t('Channel.Different values') }, ...limitOptions.value]
-  : limitOptions.value)
-const bulkLimitNames = computed(() => bulkLimitOptions.value.map(option => option.label))
-const bulkLimitValues = computed(() => bulkLimitOptions.value.map(option => option.value))
 
 watch(channels, (channelList) => {
   const channelIds = new Set(channelList.map(channel => channel.id))
@@ -562,6 +349,17 @@ function isFeedTypeEnabled(channel, feedType, key = 'feedTypes') {
  */
 function isNotifying(channel, feedType) {
   return isFeedTypeEnabled(channel, feedType) && isFeedTypeEnabled(channel, feedType, 'notificationFeedTypes')
+}
+
+/**
+ * @param {SubscriptionChannel} channel
+ * @param {'feedTypes' | 'notificationFeedTypes'} [key]
+ */
+function channelFeedTypeStates(channel, key = 'feedTypes') {
+  return Object.fromEntries(feedTypes.value.map(({ id }) => [
+    id,
+    key === 'feedTypes' ? isFeedTypeEnabled(channel, id) : isNotifying(channel, id)
+  ]))
 }
 
 /**
@@ -632,9 +430,6 @@ function selectedChannelsForFeedType(feedType, key) {
 const selectedFeedTypeStates = computed(() => Object.fromEntries(
   feedTypes.value.map(({ id }) => [id, selectedFeedTypeState(id)])
 ))
-const selectedNotificationState = computed(() => selectedState(channel => (
-  hasSubscriptionNotifications(channelSettings(channel))
-)))
 const selectedNotificationFeedTypeStates = computed(() => Object.fromEntries(
   feedTypes.value.map(({ id }) => [id, selectedFeedTypeState(id, 'notificationFeedTypes')])
 ))
@@ -655,15 +450,10 @@ function updateSelectedFeedType(feedType, key = 'feedTypes') {
     })))
 }
 
-function updateSelectedNotifications() {
-  const enabled = selectedNotificationState.value !== true
-  persistChannelSettingsUpdates(selectedChannels.value
-    .filter(channel => (hasSubscriptionNotifications(channelSettings(channel))) !== enabled)
-    .map(channel => ({ channel, patch: { notificationFeedTypes: enabled ? [...SUBSCRIPTION_FEED_TYPES] : [] } })))
-}
-
-function updateSelectedShowMembersOnly() {
-  const enabled = selectedMembersOnlyState.value !== true
+/**
+ * @param {boolean} enabled
+ */
+function updateSelectedShowMembersOnly(enabled) {
   persistChannelSettingsUpdates(selectedChannels.value
     .filter(channel => channelSettings(channel).showMembersOnly !== enabled)
     .map(channel => ({ channel, patch: { showMembersOnly: enabled } })))
@@ -673,8 +463,6 @@ function updateSelectedShowMembersOnly() {
  * @param {string} value
  */
 function updateSelectedChannelLimit(value) {
-  if (value === 'mixed') return
-
   persistChannelSettingsUpdates(selectedChannels.value
     .filter(channel => channelLimitValue(channel) !== value)
     .map(channel => ({ channel, patch: { dailyVideoLimit: parseSubscriptionDailyVideoLimit(value) } })))
@@ -693,17 +481,6 @@ function updateFeedType(channel, feedType, enabled, key = 'feedTypes') {
       feedType,
       enabled
     )
-  })
-}
-
-/**
- * Turning notifications on starts with every feed type.
- * @param {SubscriptionChannel} channel
- * @param {boolean} enabled
- */
-function updateNotifications(channel, enabled) {
-  persistChannelSettings(channel, {
-    notificationFeedTypes: enabled ? [...SUBSCRIPTION_FEED_TYPES] : []
   })
 }
 
