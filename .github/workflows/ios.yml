@@ -1,20 +1,6 @@
 name: iOS and iPadOS
 
 on:
-  pull_request:
-    branches: [ master, development, '**-RC' ]
-    paths:
-      - 'ios/**'
-      - 'capacitor.config.json'
-      - '_scripts/**/*[Ii][Oo][Ss]*'
-      - '_scripts/webpack.capacitor.config.js'
-      - 'src/renderer/**/*[Ii][Oo][Ss]*'
-      - 'src/renderer/**/*[Cc]apacitor*'
-      - 'src/renderer/**/*[Mm]obile*'
-      - 'tests/**/*[Ii][Oo][Ss]*'
-      - 'package.json'
-      - 'pnpm-lock.yaml'
-      - '.github/workflows/ios.yml'
   schedule:
     - cron: '45 3 * * *'
   workflow_dispatch:
@@ -28,7 +14,7 @@ permissions: {}
 cache-mode: none
 
 concurrency:
-  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  group: ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
 
 jobs:
