@@ -579,7 +579,7 @@ for (const layout of ['phone', 'desktop']) {
       }
       if (dismiss === 'cancel') await confirmation.getByRole('button', { name: 'Cancel' }).click()
       else if (dismiss === 'escape') await page.keyboard.press('Escape')
-      else await page.locator('.prompt').click({ position: { x: 5, y: 5 } })
+      else await page.locator('.prompt:not([inert])').click({ position: { x: 5, y: 5 } })
       await expect(confirmation).toHaveCount(0)
       await expect(organizer).not.toHaveAttribute('inert')
       await expect(openAll).toBeFocused()

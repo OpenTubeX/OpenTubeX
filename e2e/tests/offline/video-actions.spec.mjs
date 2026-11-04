@@ -1756,7 +1756,8 @@ test('asks for confirmation before removing a downloaded file', async ({ page })
   await expect(removePrompt).toContainText('Remove downloaded file?')
   await expect(removePrompt).toContainText('Finished download')
   await page.getByRole('button', { name: 'Cancel' }).click()
-  await expect(page.getByText('Finished download')).toBeVisible()
+  await expect(removePrompt).toHaveCount(0)
+  await expect(downloadRow).toBeVisible()
 })
 
 test.describe('list video actions', () => {
