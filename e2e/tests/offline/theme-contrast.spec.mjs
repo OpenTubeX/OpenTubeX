@@ -861,3 +861,50 @@ test.describe('hover surface contrast', () => {
     expect(failures).toEqual([])
   })
 })
+
+test.describe('filled button state contrast', () => {
+  test.use({ seed: { settings: { baseTheme: 'light', mainColor: 'Pink', currentLocale: 'en-US' } } })
+
+  test('filled buttons keep their label readable on hover and when pressed', async ({ page }) => {
+    await page.evaluate(() => window.$store.dispatch(
+      'showCreatePlaylistPrompt', { title: '', description: '', sourcePlaylistId: null }
+    ))
+    await page.locator('.playlistNameInput input').fill('Filled button states')
+    const button = page.locator('.promptCard .btn.primary.variant-filled').first()
+    await expect(button).toBeEnabled()
+    await button.evaluate(element => element.addEventListener('click', event => {
+      event.preventDefault()
+      event.stopImmediatePropagation()
+    }, true))
+    // The fill and the theme's state shade, both as rendered sRGB channels
+    const fill = () => button.evaluate(element => {
+      const context = document.createElement('canvas').getContext('2d')
+      const channels = color => {
+        context.fillStyle = color
+        context.fillRect(0, 0, 1, 1)
+        return [...context.getImageData(0, 0, 1, 1).data].slice(0, 3)
+      }
+      const styles = getComputedStyle(element)
+      return {
+        background: channels(styles.backgroundColor),
+        hover: channels(styles.getPropertyValue('--primary-color-hover')),
+        active: channels(styles.getPropertyValue('--primary-color-active')),
+      }
+    })
+    const ratio = async () => {
+      const { foreground, background } = await renderedColors(button)
+      return contrastRatio(foreground, background)
+    }
+
+    await button.hover()
+    await expect.poll(async () => { const colors = await fill(); return colors.background.join() === colors.hover.join() }).toBe(true)
+    expect(await ratio()).toBeGreaterThanOrEqual(4.5)
+    await page.mouse.down()
+    try {
+      await expect.poll(async () => { const colors = await fill(); return colors.background.join() === colors.active.join() }).toBe(true)
+      expect(await ratio()).toBeGreaterThanOrEqual(4.5)
+    } finally {
+      await page.mouse.up()
+    }
+  })
+})

@@ -115,15 +115,19 @@
   background-color: color-mix(in srgb, var(--button-foreground) 12%, var(--button-container));
 }
 
-/* Custom themes may use translucent state colors, which would leave the
-   label on the card behind, so draw them opaque. */
-.custom .btn:is(.primary, .secondary, .destructive):not(:disabled):is(:hover, :focus-visible, :active) {
+/* Filled buttons use their color's hover and pressed shades, which keep the
+   label readable, instead of mixing the label color into the fill. Custom
+   themes use them for every variant. They may be translucent, which would
+   leave the label on the card behind, so draw them opaque. */
+.custom .btn:is(.primary, .secondary, .destructive):not(:disabled):is(:hover, :focus-visible, :active),
+.btn:is(.primary, .secondary, .destructive):is(.variant-filled:not([aria-pressed='false']), .selected):not(:disabled):is(:hover, :focus-visible, :active) {
   --button-foreground: var(--button-on-base);
 
   background-color: rgb(from var(--button-hover) r g b / 100%);
 }
 
-.custom .btn:is(.primary, .secondary, .destructive):not(:disabled):active {
+.custom .btn:is(.primary, .secondary, .destructive):not(:disabled):active,
+.btn:is(.primary, .secondary, .destructive):is(.variant-filled:not([aria-pressed='false']), .selected):not(:disabled):active {
   background-color: rgb(from var(--button-active) r g b / 100%);
 }
 

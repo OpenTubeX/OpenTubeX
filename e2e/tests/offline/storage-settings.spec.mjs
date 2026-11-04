@@ -176,11 +176,23 @@ test('number arrow pressed paint reaches controls inside dialog overlays', async
   // Settings is already a dialog. Model FtPrompt/FtMobileSheet's propagation
   // boundary without replacing the input or its native stepping behavior.
   await input.evaluate(element => element.closest('[role="dialog"]').addEventListener('pointerdown', event => event.stopPropagation()))
+  // Custom themes can make the pressed color translucent, the arrow stays opaque.
+  await page.locator('body').evaluate(element => element.style.setProperty('--primary-color-active', '#b38fdf1a'))
   await input.hover({ position })
   await page.mouse.down()
   try {
-    await expect.poll(() => input.evaluate(element => element.style.getPropertyValue('--number-step-up-color'))).toBe('var(--primary-color-active)')
+    await expect.poll(() => input.evaluate(element => element.style.getPropertyValue('--number-step-up-color'))).not.toBe('')
     await expect.poll(() => input.evaluate(element => element.style.getPropertyValue('--number-step-down-color'))).toBe('')
+    expect(await input.evaluate(element => {
+      const probe = document.createElement('div')
+      probe.style.backgroundColor = element.style.getPropertyValue('--number-step-up-color')
+      document.body.append(probe)
+      const context = document.createElement('canvas').getContext('2d')
+      context.fillStyle = getComputedStyle(probe).backgroundColor
+      probe.remove()
+      context.fillRect(0, 0, 1, 1)
+      return [...context.getImageData(0, 0, 1, 1).data]
+    })).toEqual([179, 143, 223, 255])
   } finally {
     await page.mouse.up()
   }
