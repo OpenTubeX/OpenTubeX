@@ -50,6 +50,19 @@ test('default captions prefer the auto-translation remembered from the player', 
   assert.equal(getPreferredCaption(captions, 'es', false), captions[2])
 })
 
+test('default captions prefer original captions in the preferred language over a remembered translation into another language', () => {
+  const captions = [
+    { language: 'de', label: 'German (auto-generated)', isOriginalLanguage: true },
+    { language: 'en', label: 'English (translated from German (auto-generated))', isAutotranslated: true, isPreferredTranslation: true }
+  ]
+
+  assert.equal(getPreferredCaption(captions, 'de', false), captions[0])
+  assert.equal(getPreferredCaption(captions, 'de', true), captions[0])
+
+  // Without captions in the preferred language, the remembered translation still wins
+  assert.equal(getPreferredCaption(captions, 'fr', false), captions[1])
+})
+
 test('yt-dlp captions flag dubbed transcripts and translate from the original language', () => {
   const timedText = (lang, tlang) =>
     `https://www.youtube.com/api/timedtext?v=aaaaaaaaaaa&kind=asr&lang=${lang}${tlang ? `&tlang=${tlang}` : ''}&fmt=vtt`
