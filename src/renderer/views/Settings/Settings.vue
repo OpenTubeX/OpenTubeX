@@ -1520,6 +1520,7 @@ function startDragging(event) {
   if (
     isMaximizationForced.value ||
     event.button !== 0 ||
+    draggingPointerId !== null ||
     resizeSession !== null ||
     event.target.closest('button, input, .settingsSearch')
   ) return
@@ -1600,7 +1601,7 @@ function stopDragging(event) {
 }
 
 function startResizing(event, direction) {
-  if (event.button !== 0 || isWindowMaximized.value || draggingPointerId !== null) return
+  if (event.button !== 0 || isWindowMaximized.value || draggingPointerId !== null || resizeSession !== null) return
   cancelBoundsAnimation()
   resizeSession = {
     direction,

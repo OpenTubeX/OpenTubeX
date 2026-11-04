@@ -128,7 +128,7 @@ test('keeps following the pointer when a resize crosses the narrow layout breakp
   await expect.poll(async () => (await dialog.boundingBox()).width).toBeCloseTo(before.width - 100, 0)
 })
 
-test('ignores a second pointer that starts the other gesture', async ({ page }) => {
+test('ignores a second pointer while a window gesture is active', async ({ page }) => {
   await page.evaluate(() => {
     localStorage.setItem('opentubex-settings-window-bounds', JSON.stringify({ x: 100, y: 60, width: 850, height: 520 }))
     return window.$store.dispatch('showSettingsWindow')
@@ -143,15 +143,19 @@ test('ignores a second pointer that starts the other gesture', async ({ page }) 
     const release = pointerId => window.dispatchEvent(new PointerEvent('pointerup', { pointerId }))
     const gestures = () => ['draggingSettingsWindow', 'resizingSettingsWindow']
       .filter(className => document.documentElement.classList.contains(className))
-    press(header, 1)
-    press(handle, 2)
-    const whileDragging = gestures()
-    release(1)
-    press(handle, 3)
-    press(header, 4)
-    const whileResizing = gestures()
-    release(3)
-    return { whileDragging, whileResizing, after: gestures() }
+    const states = []
+    for (const [first, other] of [[header, handle], [handle, header]]) {
+      press(first, 1)
+      press(other, 2)
+      press(first, 3)
+      // Only the pointer that started the gesture may end it.
+      release(2)
+      release(3)
+      states.push(gestures())
+      release(1)
+      states.push(gestures())
+    }
+    return states
   })
-  expect(activeGestures).toEqual({ whileDragging: ['draggingSettingsWindow'], whileResizing: ['resizingSettingsWindow'], after: [] })
+  expect(activeGestures).toEqual([['draggingSettingsWindow'], [], ['resizingSettingsWindow'], []])
 })
