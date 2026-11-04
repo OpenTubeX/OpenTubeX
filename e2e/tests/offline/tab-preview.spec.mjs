@@ -116,6 +116,14 @@ test.describe('tab previews', () => {
     }))
     const tabs = page.locator(sel.tabs)
     await expect(tabs).toHaveCount(2)
+    // The main process refreshes the presented tab's preview shortly after
+    // startup. Run that capture now so it cannot start once the clock is paused
+    // and stand in for the tooltip's capture.
+    await page.evaluate(async () => {
+      const { activeTabId } = await window.ftElectron.tabs.getState()
+      window.ftElectron.tabs.requestPreviewRefresh({ tabId: activeTabId, delayMs: 0 })
+      await window.ftElectron.tabs.capturePreview(activeTabId)
+    })
     await page.clock.install()
     await page.clock.pauseAt(new Date(Date.now() + 1000))
     await tabs.first().hover()
