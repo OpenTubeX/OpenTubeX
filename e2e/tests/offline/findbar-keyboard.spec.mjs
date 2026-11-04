@@ -12,21 +12,24 @@ test('Enter and Shift+Enter navigate one find bar match at a time', async ({ pag
   const findbarStatus = page.locator('.findbarStatus')
   await expect(findbarInput).toBeFocused()
   await expect(page.locator('.app')).not.toHaveClass(/hideOutlines/)
-  await expect(findbarInput).not.toHaveCSS('box-shadow', 'none')
-  const primaryTextColor = await findbarInput.evaluate((input) => {
+  // The field has no outline of its own; keyboard focus rings the whole bar.
+  const findbar = page.locator('.findbar')
+  const primaryColor = await findbarInput.evaluate((input) => {
     const probe = document.createElement('span')
-    probe.style.color = 'var(--primary-text-color)'
+    probe.style.color = 'var(--primary-color)'
     input.after(probe)
     const color = getComputedStyle(probe).color
     probe.remove()
     return color
   })
-  await expect(findbarInput).toHaveCSS('border-color', primaryTextColor)
-  // The focus ring belongs to the input; it must not leak onto the document root.
+  await expect(findbar).toHaveCSS('outline-style', 'solid')
+  await expect(findbar).toHaveCSS('outline-color', primaryColor)
+  await expect(findbarInput).toHaveCSS('outline-style', 'none')
+  // The focus ring belongs to the bar; it must not leak onto the document root.
   await expect(page.locator('html')).toHaveCSS('box-shadow', 'none')
   await findbarInput.click()
   await expect(page.locator('.app')).toHaveClass(/hideOutlines/)
-  await expect(findbarInput).toHaveCSS('box-shadow', 'none')
+  await expect(findbar).toHaveCSS('outline-style', 'none')
   await findbarInput.fill('findbar regression marker')
   await expect(findbarStatus).toHaveText('1/2')
 
@@ -58,3 +61,17 @@ for (const position of ['top', 'bottom']) {
     })).toBeLessThanOrEqual(1)
   })
 }
+
+test('find bar keeps its buttons inside the narrowest window', { tag: '@scale' }, async ({ app, page }) => {
+  await setWindowSize(app, page, { width: 340, height: 640 })
+  await page.keyboard.press('Control+f')
+  await page.locator('.findbarInput').fill('zzz no such text zzz')
+  await expect(page.locator('.findbarStatus')).toHaveText('No matches')
+  const overflow = await page.locator('.findbar').evaluate((findbar) => {
+    const bar = findbar.getBoundingClientRect()
+    const close = findbar.querySelector('.findbarButton:last-child').getBoundingClientRect()
+    return { bar: bar.right - innerWidth, close: close.right - bar.right }
+  })
+  expect(overflow.bar).toBeLessThanOrEqual(0)
+  expect(overflow.close).toBeLessThanOrEqual(0)
+})
