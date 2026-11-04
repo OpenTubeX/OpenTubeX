@@ -17,6 +17,16 @@ const modals = [
     selector: '.commandPaletteBackdrop',
     animations: ['command-palette-backdrop-leave', 'command-palette-leave'],
   },
+  {
+    name: 'tab organizer',
+    open: async page => {
+      await page.locator('.tabOrganizerButton').click()
+      // Escape only closes the organizer once focus has moved into it.
+      await expect(page.locator('.tabOrganizer input[type="search"]')).toBeFocused()
+    },
+    selector: '.tabOrganizerBackdrop',
+    animations: ['tab-organizer-backdrop-leave', 'tab-organizer-leave'],
+  },
 ]
 
 for (const modal of modals) {

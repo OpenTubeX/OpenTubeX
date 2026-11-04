@@ -1,624 +1,626 @@
 <template>
   <Teleport :to="teleportTarget">
-    <div
-      class="tabOrganizerBackdrop"
-      @pointerdown.self.stop
-      @click.self.stop="close"
-      @keydown.esc="close"
-    >
-      <section
-        ref="dialogRef"
-        class="tabOrganizer"
-        role="dialog"
-        aria-modal="true"
-        :aria-labelledby="titleId"
-        :inert="showCreateGroupPrompt || sessionToDelete !== null || sessionToOpen !== null"
-        @keydown="handleDialogKeydown"
+    <ModalLeaveTransition>
+      <div
+        class="tabOrganizerBackdrop"
+        @pointerdown.self.stop
+        @click.self.stop="close"
+        @keydown.esc="close"
       >
-        <header class="tabOrganizerHeader">
-          <div>
-            <h2 :id="titleId">
-              {{ t('Tab Organizer.Title') }}
-            </h2>
-            <span>{{ t('Tab Organizer.Open Tab Count', { count: tabs.length }, tabs.length) }}</span>
-          </div>
-          <button
-            type="button"
-            class="iconButton"
-            :aria-label="t('Close')"
-            :title="t('Close')"
-            @click="close"
-          >
-            <FtIcon
-              :icon="['fas', 'xmark']"
-              aria-hidden="true"
-            />
-          </button>
-        </header>
-
-        <div class="tabOrganizerControls selectionControls bulkActions">
-          <span aria-live="polite">
-            {{ t('Tab Organizer.Selected Count', { count: selectedTabs.length }, selectedTabs.length) }}
-          </span>
-          <button
-            type="button"
-            :disabled="tabs.length === 0"
-            @click="toggleAllTabsSelection"
-          >
-            <FtIcon
-              :icon="['fas', hasSelectedTabs ? 'xmark' : 'check']"
-              aria-hidden="true"
-            />
-            {{ hasSelectedTabs ? t('Tab Organizer.Select None') : t('Tab Organizer.Select All') }}
-          </button>
-          <FtSelect
-            variant="outlined"
-            class="compactSelect bulkActionSelect"
-            :placeholder="t('Tab Organizer.Move To Group')"
-            :value="selectedGroupTarget"
-            :select-names="groupSelectNames"
-            :select-values="groupSelectValues"
-            :option-colors="groupSelectColors"
-            :option-icons="groupSelectIcons"
-            :disabled="selectedTabs.length === 0"
-            :show-icon="false"
-            @change="moveSelectedTabsToGroup"
-          />
-          <FtSelect
-            v-if="moveTargets.length > 0"
-            variant="outlined"
-            class="compactSelect"
-            :placeholder="t('Tab Organizer.Move To Window')"
-            :value="selectedWindowTarget"
-            :select-names="windowSelectNames"
-            :select-values="windowSelectValues"
-            :disabled="selectedTabs.length === 0"
-            :show-icon="false"
-            @change="moveSelectedTabsToWindow"
-          />
-          <button
-            type="button"
-            :disabled="!canPinSelectedTabs"
-            @click="setSelectedPinned(true)"
-          >
-            <FtIcon
-              :icon="['fas', 'thumbtack']"
-              aria-hidden="true"
-            />
-            {{ t('Tab Organizer.Pin') }}
-          </button>
-          <button
-            type="button"
-            :disabled="!canUnpinSelectedTabs"
-            @click="setSelectedPinned(false)"
-          >
-            <FtIcon
-              :icon="['fas', 'thumbtack-slash']"
-              aria-hidden="true"
-            />
-            {{ t('Tab Organizer.Unpin') }}
-          </button>
-          <button
-            type="button"
-            :disabled="!canLoadSelectedTabs"
-            @click="runAction('load', selectedTabIdsArray)"
-          >
-            <FtIcon
-              :icon="['fas', 'download']"
-              aria-hidden="true"
-            />
-            {{ t('Tab Organizer.Load') }}
-          </button>
-          <button
-            type="button"
-            :disabled="!canUnloadSelectedTabs"
-            @click="runAction('unload', selectedTabIdsArray)"
-          >
-            <FtIcon
-              :icon="['fas', 'right-from-bracket']"
-              aria-hidden="true"
-            />
-            {{ t('Tab Organizer.Unload') }}
-          </button>
-          <button
-            type="button"
-            class="dangerButton"
-            :disabled="selectedTabs.length === 0"
-            @click="runAction('close', selectedTabIdsArray)"
-          >
-            <FtIcon
-              :icon="['fas', 'rectangle-xmark']"
-              aria-hidden="true"
-            />
-            {{ t('Close') }}
-          </button>
-          <button
-            type="button"
-            @click="openCreateGroupPrompt"
-          >
-            <FtIcon
-              :icon="['fas', 'plus']"
-              aria-hidden="true"
-            />
-            {{ t('Tab Organizer.Create Group') }}
-          </button>
-          <label class="tabOrganizerSearch">
-            <FtIcon
-              class="searchIcon"
-              :icon="['fas', 'magnifying-glass']"
-              aria-hidden="true"
-            />
-            <input
-              ref="searchRef"
-              v-model="query"
-              type="search"
-              autocomplete="off"
-              :placeholder="t('Tab Organizer.Search Label')"
-              :aria-label="t('Tab Organizer.Search Label')"
-            >
-          </label>
-        </div>
-
-        <div
-          ref="scrollRef"
-          v-overlay-scrollbars
-          class="tabOrganizerScroll"
+        <section
+          ref="dialogRef"
+          class="tabOrganizer"
+          role="dialog"
+          aria-modal="true"
+          :aria-labelledby="titleId"
+          :inert="showCreateGroupPrompt || sessionToDelete !== null || sessionToOpen !== null"
+          @keydown="handleDialogKeydown"
         >
-          <div
-            ref="scrollContentRef"
-            class="tabOrganizerScrollContent"
-          >
-            <section
-              v-for="section in displayedSections"
-              :key="section.id ?? 'ungrouped'"
-              class="tabGroup"
-              :class="{ dropTarget: draggedTabIds.length > 0 && dragTargetGroupId === section.id }"
-              @dragenter.prevent="dragTargetGroupId = section.id"
-              @dragover.prevent="handleTabDragOver"
-              @dragleave="handleGroupDragLeave($event, section.id)"
-              @drop.prevent="dropTabsOnGroup(section.id)"
+          <header class="tabOrganizerHeader">
+            <div>
+              <h2 :id="titleId">
+                {{ t('Tab Organizer.Title') }}
+              </h2>
+              <span>{{ t('Tab Organizer.Open Tab Count', { count: tabs.length }, tabs.length) }}</span>
+            </div>
+            <button
+              type="button"
+              class="iconButton"
+              :aria-label="t('Close')"
+              :title="t('Close')"
+              @click="close"
             >
-              <header class="tabGroupHeader">
-                <FtCheckboxList
-                  class="tabSelection groupSelection"
-                  :model-value="section.allTabs.length > 0 && section.allTabs.every(tab => selectedTabIds.has(tab.id)) ? ['group'] : []"
-                  :labels="[`${t('Tab Organizer.Select All')}: ${section.name}`]"
-                  :values="['group']"
-                  :disabled="section.allTabs.length === 0"
-                  @update:model-value="toggleGroupSelection(section, $event.includes('group'))"
-                />
-                <button
-                  v-if="section.id"
-                  type="button"
-                  class="collapseButton"
-                  :aria-label="section.isCollapsed ? t('Tab Organizer.Expand Group') : t('Tab Organizer.Collapse Group')"
-                  :aria-expanded="!section.isCollapsed || normalizedQuery.length > 0"
-                  @click="toggleGroup(section)"
-                >
-                  <FtIcon
-                    :icon="['fas', section.isCollapsed ? 'chevron-right' : 'angle-down']"
-                    aria-hidden="true"
+              <FtIcon
+                :icon="['fas', 'xmark']"
+                aria-hidden="true"
+              />
+            </button>
+          </header>
+
+          <div class="tabOrganizerControls selectionControls bulkActions">
+            <span aria-live="polite">
+              {{ t('Tab Organizer.Selected Count', { count: selectedTabs.length }, selectedTabs.length) }}
+            </span>
+            <button
+              type="button"
+              :disabled="tabs.length === 0"
+              @click="toggleAllTabsSelection"
+            >
+              <FtIcon
+                :icon="['fas', hasSelectedTabs ? 'xmark' : 'check']"
+                aria-hidden="true"
+              />
+              {{ hasSelectedTabs ? t('Tab Organizer.Select None') : t('Tab Organizer.Select All') }}
+            </button>
+            <FtSelect
+              variant="outlined"
+              class="compactSelect bulkActionSelect"
+              :placeholder="t('Tab Organizer.Move To Group')"
+              :value="selectedGroupTarget"
+              :select-names="groupSelectNames"
+              :select-values="groupSelectValues"
+              :option-colors="groupSelectColors"
+              :option-icons="groupSelectIcons"
+              :disabled="selectedTabs.length === 0"
+              :show-icon="false"
+              @change="moveSelectedTabsToGroup"
+            />
+            <FtSelect
+              v-if="moveTargets.length > 0"
+              variant="outlined"
+              class="compactSelect"
+              :placeholder="t('Tab Organizer.Move To Window')"
+              :value="selectedWindowTarget"
+              :select-names="windowSelectNames"
+              :select-values="windowSelectValues"
+              :disabled="selectedTabs.length === 0"
+              :show-icon="false"
+              @change="moveSelectedTabsToWindow"
+            />
+            <button
+              type="button"
+              :disabled="!canPinSelectedTabs"
+              @click="setSelectedPinned(true)"
+            >
+              <FtIcon
+                :icon="['fas', 'thumbtack']"
+                aria-hidden="true"
+              />
+              {{ t('Tab Organizer.Pin') }}
+            </button>
+            <button
+              type="button"
+              :disabled="!canUnpinSelectedTabs"
+              @click="setSelectedPinned(false)"
+            >
+              <FtIcon
+                :icon="['fas', 'thumbtack-slash']"
+                aria-hidden="true"
+              />
+              {{ t('Tab Organizer.Unpin') }}
+            </button>
+            <button
+              type="button"
+              :disabled="!canLoadSelectedTabs"
+              @click="runAction('load', selectedTabIdsArray)"
+            >
+              <FtIcon
+                :icon="['fas', 'download']"
+                aria-hidden="true"
+              />
+              {{ t('Tab Organizer.Load') }}
+            </button>
+            <button
+              type="button"
+              :disabled="!canUnloadSelectedTabs"
+              @click="runAction('unload', selectedTabIdsArray)"
+            >
+              <FtIcon
+                :icon="['fas', 'right-from-bracket']"
+                aria-hidden="true"
+              />
+              {{ t('Tab Organizer.Unload') }}
+            </button>
+            <button
+              type="button"
+              class="dangerButton"
+              :disabled="selectedTabs.length === 0"
+              @click="runAction('close', selectedTabIdsArray)"
+            >
+              <FtIcon
+                :icon="['fas', 'rectangle-xmark']"
+                aria-hidden="true"
+              />
+              {{ t('Close') }}
+            </button>
+            <button
+              type="button"
+              @click="openCreateGroupPrompt"
+            >
+              <FtIcon
+                :icon="['fas', 'plus']"
+                aria-hidden="true"
+              />
+              {{ t('Tab Organizer.Create Group') }}
+            </button>
+            <label class="tabOrganizerSearch">
+              <FtIcon
+                class="searchIcon"
+                :icon="['fas', 'magnifying-glass']"
+                aria-hidden="true"
+              />
+              <input
+                ref="searchRef"
+                v-model="query"
+                type="search"
+                autocomplete="off"
+                :placeholder="t('Tab Organizer.Search Label')"
+                :aria-label="t('Tab Organizer.Search Label')"
+              >
+            </label>
+          </div>
+
+          <div
+            ref="scrollRef"
+            v-overlay-scrollbars
+            class="tabOrganizerScroll"
+          >
+            <div
+              ref="scrollContentRef"
+              class="tabOrganizerScrollContent"
+            >
+              <section
+                v-for="section in displayedSections"
+                :key="section.id ?? 'ungrouped'"
+                class="tabGroup"
+                :class="{ dropTarget: draggedTabIds.length > 0 && dragTargetGroupId === section.id }"
+                @dragenter.prevent="dragTargetGroupId = section.id"
+                @dragover.prevent="handleTabDragOver"
+                @dragleave="handleGroupDragLeave($event, section.id)"
+                @drop.prevent="dropTabsOnGroup(section.id)"
+              >
+                <header class="tabGroupHeader">
+                  <FtCheckboxList
+                    class="tabSelection groupSelection"
+                    :model-value="section.allTabs.length > 0 && section.allTabs.every(tab => selectedTabIds.has(tab.id)) ? ['group'] : []"
+                    :labels="[`${t('Tab Organizer.Select All')}: ${section.name}`]"
+                    :values="['group']"
+                    :disabled="section.allTabs.length === 0"
+                    @update:model-value="toggleGroupSelection(section, $event.includes('group'))"
                   />
-                </button>
-                <div
-                  v-if="section.id"
-                  class="groupIconEditor"
-                  @focusout="handleIconPickerFocusOut($event, section.id)"
-                  @keydown.esc="closeIconPicker"
-                >
                   <button
+                    v-if="section.id"
                     type="button"
-                    class="groupIconButton"
-                    :aria-label="`${t('Tab Organizer.Group Icon')} / ${t('Tab Organizer.Change Group Color', { name: section.name })}`"
-                    :title="`${t('Tab Organizer.Group Icon')} / ${t('Tab Organizer.Change Group Color', { name: section.name })}`"
-                    :style="section.color ? { color: getTabAccentColor(section.color) } : null"
-                    :aria-expanded="editingIconGroupId === section.id"
-                    @click="toggleIconPicker(section.id)"
+                    class="collapseButton"
+                    :aria-label="section.isCollapsed ? t('Tab Organizer.Expand Group') : t('Tab Organizer.Collapse Group')"
+                    :aria-expanded="!section.isCollapsed || normalizedQuery.length > 0"
+                    @click="toggleGroup(section)"
                   >
                     <FtIcon
-                      :icon="['fas', normalizeTabGroupIcon(section.icon)]"
+                      :icon="['fas', section.isCollapsed ? 'chevron-right' : 'angle-down']"
                       aria-hidden="true"
                     />
                   </button>
                   <div
-                    v-if="editingIconGroupId === section.id"
-                    class="groupAppearancePicker"
-                  >
-                    <div
-                      class="groupColorPicker"
-                      role="listbox"
-                      :aria-label="t('Tab Organizer.Change Group Color', { name: section.name })"
-                    >
-                      <button
-                        v-for="color in editableGroupColors"
-                        :key="color.value || 'none'"
-                        type="button"
-                        role="option"
-                        :aria-selected="(section.color ?? '') === color.value"
-                        :aria-label="color.label"
-                        :title="color.label"
-                        @click="updateGroupColor(section.id, color.value)"
-                      >
-                        <span
-                          class="groupColor"
-                          :class="{ noColor: color.value === '' }"
-                          :style="color.value ? { '--group-color': color.color } : null"
-                          aria-hidden="true"
-                        />
-                      </button>
-                    </div>
-                    <div
-                      class="groupIconPicker"
-                      role="group"
-                      :aria-label="t('Tab Organizer.Group Icon')"
-                    >
-                      <button
-                        v-for="icon in TAB_GROUP_ICONS"
-                        :key="icon"
-                        type="button"
-                        :aria-pressed="normalizeTabGroupIcon(section.icon) === icon"
-                        :aria-label="groupIconLabels[icon]"
-                        :title="groupIconLabels[icon]"
-                        @click="updateGroupIcon(section.id, icon)"
-                      >
-                        <FtIcon
-                          :icon="['fas', icon]"
-                          aria-hidden="true"
-                        />
-                      </button>
-                    </div>
-                  </div>
-                </div>
-                <template v-if="section.id && editingNameGroupId === section.id">
-                  <input
-                    v-model="editingGroupName"
-                    :placeholder="t('Form Inputs.Example', { example: t('Tab Organizer.Icon Labels.Favorites') })"
-                    class="groupRenameInput"
-                    type="text"
-                    maxlength="80"
-                    :aria-label="t('Tab Organizer.Group Name')"
-                    :data-group-name-input="section.id"
-                    @blur="finishGroupRename(section.id)"
-                    @keydown.enter.prevent="finishGroupRename(section.id)"
-                    @keydown.escape.stop.prevent="cancelGroupRename"
-                  >
-                </template>
-                <h3 v-else>
-                  <button
                     v-if="section.id"
-                    type="button"
-                    class="groupNameButton"
-                    :aria-label="t('Tab Organizer.Rename Group', { name: section.name })"
-                    :title="t('Tab Organizer.Rename Group', { name: section.name })"
-                    @click="startGroupRename(section)"
+                    class="groupIconEditor"
+                    @focusout="handleIconPickerFocusOut($event, section.id)"
+                    @keydown.esc="closeIconPicker"
                   >
-                    <span>{{ section.name }}</span>
-                    <FtIcon
-                      :icon="['fas', 'edit']"
-                      aria-hidden="true"
-                    />
-                  </button>
-                  <template v-else>
-                    {{ section.name }}
-                  </template>
-                </h3>
-                <span class="tabGroupCount">
-                  {{ t('Tab Organizer.Tab Count', { count: section.tabs.length }, section.tabs.length) }}
-                </span>
-                <div
-                  v-if="section.id"
-                  class="groupActions"
-                >
-                  <button
-                    v-if="section.allTabs.length > 0"
-                    type="button"
-                    :disabled="tabs.length <= 1 || section.allTabs.every(tab => tab.isUnloaded)"
-                    @click="runAction('unload', section.allTabs.map(tab => tab.id))"
-                  >
-                    <FtIcon
-                      :icon="['fas', 'right-from-bracket']"
-                      aria-hidden="true"
-                    />
-                    {{ t('Tab Organizer.Unload All') }}
-                  </button>
-                  <FtSelect
-                    v-if="section.allTabs.length > 0 && moveTargets.length > 0"
-                    variant="outlined"
-                    class="compactSelect groupWindowSelect"
-                    :placeholder="t('Tab Organizer.Move To Window')"
-                    value=""
-                    :select-names="groupWindowSelectNames"
-                    :select-values="windowSelectValues"
-                    :show-icon="false"
-                    @change="moveGroupToWindow(section, $event)"
-                  />
-                  <button
-                    v-if="section.allTabs.length > 0"
-                    type="button"
-                    class="dangerButton"
-                    @click="runAction('close', section.allTabs.map(tab => tab.id))"
-                  >
-                    <FtIcon
-                      :icon="['fas', 'rectangle-xmark']"
-                      aria-hidden="true"
-                    />
-                    {{ t('Tab Organizer.Close All') }}
-                  </button>
-                  <button
-                    type="button"
-                    @click="deleteGroup(section.id)"
-                  >
-                    <FtIcon
-                      :icon="['fas', 'link-slash']"
-                      aria-hidden="true"
-                    />
-                    {{ t('Tab Organizer.Ungroup') }}
-                  </button>
-                </div>
-              </header>
-              <ul v-if="!section.isCollapsed || normalizedQuery.length > 0">
-                <li
-                  v-for="tab in section.tabs"
-                  :key="tab.id"
-                  class="tabOrganizerRow"
-                  :class="{
-                    active: tab.id === activeTabId,
-                    dragging: draggedTabIds.includes(tab.id)
-                  }"
-                  draggable="true"
-                  @dragstart="startTabDrag($event, tab.id)"
-                  @dragend="finishTabDrag"
-                >
-                  <span
-                    class="dragHandle"
-                    :title="t('Tab Organizer.Drag Tab')"
-                    aria-hidden="true"
-                  >
-                    <FtIcon :icon="['fas', 'grip']" />
-                  </span>
-                  <FtCheckboxList
-                    class="tabSelection"
-                    :model-value="selectedTabIds.has(tab.id) ? [tab.id] : []"
-                    :labels="[t('Tab Organizer.Select Tab', { title: formatTabTitle(tab.title) })]"
-                    :values="[tab.id]"
-                    @click.capture="handleTabSelectionClick($event, tab.id)"
-                    @update:model-value="toggleTabSelection(tab.id, $event.includes(tab.id))"
-                  />
-                  <span class="tabIcon">
-                    <FtRetryImage
-                      v-if="usableTabAvatarUrl(tab)"
-                      :fallback-icon="getTabPageIcon(tab) || ['fas', 'display']"
-                      :src="usableTabAvatarUrl(tab)"
-                      alt=""
-                      draggable="false"
-                      @error="handleTabAvatarError(tab)"
-                    />
-                    <FtIcon
-                      v-else
-                      :icon="getTabPageIcon(tab) || ['fas', 'display']"
-                      aria-hidden="true"
-                    />
-                  </span>
-                  <button
-                    type="button"
-                    class="tabIdentity"
-                    @click="activateTab(tab.id)"
-                  >
-                    <span>{{ formatTabTitle(tab.title) }}</span>
-                    <small>{{ tab.route.fullPath || tab.url }}</small>
-                  </button>
-                  <div class="tabIndicators">
-                    <span v-if="tab.id === activeTabId">{{ t('Tab Organizer.Active') }}</span>
-                    <span v-if="tab.isPinned">{{ t('Tab Organizer.Pinned') }}</span>
-                    <span v-if="tab.isUnloaded">{{ t('Tab Organizer.Unloaded') }}</span>
-                    <span v-if="tab.isPlaying">{{ t('Tab Organizer.Playing') }}</span>
-                  </div>
-                  <button
-                    type="button"
-                    class="iconButton"
-                    :aria-label="t('Tab Organizer.Close Tab', { title: formatTabTitle(tab.title) })"
-                    :title="t('Close')"
-                    @click="runAction('close', [tab.id])"
-                  >
-                    <FtIcon
-                      :icon="['fas', 'xmark']"
-                      aria-hidden="true"
-                    />
-                  </button>
-                </li>
-              </ul>
-            </section>
-
-            <p
-              v-if="visibleTabs.length === 0 && visibleOtherDeviceSessions.length === 0"
-              class="emptyMessage"
-            >
-              {{ t('Tab Organizer.No Open Results') }}
-            </p>
-
-            <section
-              v-if="showSyncedTabs && (normalizedQuery.length === 0 || visibleOtherDeviceSessions.length > 0)"
-              class="syncedTabsSection"
-            >
-              <header class="syncedTabsHeader">
-                <h3>
-                  <FtIcon
-                    class="syncedTabsIcon"
-                    :icon="['fas', 'layer-group']"
-                    aria-hidden="true"
-                  />
-                  {{ t('Settings.Sync Settings.Tabs From Other Devices') }}
-                </h3>
-              </header>
-              <FtTabs
-                class="syncedSessionTabs"
-                role="tablist"
-                :aria-label="t('Settings.Sync Settings.Tabs From Other Devices')"
-              >
-                <button
-                  v-for="(session, index) in visibleOtherDeviceSessions"
-                  :id="syncedSessionTabId(index)"
-                  :key="`${session.syncDeviceId}:${session.sessionId}`"
-                  type="button"
-                  class="syncedSessionTab"
-                  :class="{ selected: activeOtherDeviceSessionKey === otherDeviceSessionKey(session) }"
-                  role="tab"
-                  :aria-controls="syncedSessionPanelId"
-                  :aria-selected="activeOtherDeviceSessionKey === otherDeviceSessionKey(session)"
-                  :tabindex="activeOtherDeviceSessionKey === otherDeviceSessionKey(session) ? 0 : -1"
-                  @click="selectOtherDeviceSession(session)"
-                  @keydown.left.prevent="selectOtherDeviceSessionAt(index - 1, true)"
-                  @keydown.right.prevent="selectOtherDeviceSessionAt(index + 1, true)"
-                  @keydown.home.prevent="selectOtherDeviceSessionAt(0, true)"
-                  @keydown.end.prevent="selectOtherDeviceSessionAt(visibleOtherDeviceSessions.length - 1, true)"
-                >
-                  <span class="syncedSessionIcon">
-                    <FtIcon
-                      :icon="session.syncPlatform === 'mobile' ? ['fas', 'smartphone'] : ['fas', 'display']"
-                      aria-hidden="true"
-                    />
-                  </span>
-                  <strong>{{ formatDeviceSessionLabel(session, t) }}</strong>
-                </button>
-              </FtTabs>
-              <div class="syncedSessionPanels">
-                <article
-                  v-if="activeOtherDeviceSession"
-                  :id="syncedSessionPanelId"
-                  :key="activeOtherDeviceSessionKey"
-                  class="syncedSessionCard"
-                  role="tabpanel"
-                  :aria-labelledby="activeOtherDeviceSessionTabId"
-                >
-                  <header class="syncedSessionHeader">
-                    <h4
-                      class="syncedSessionName"
-                      dir="auto"
+                    <button
+                      type="button"
+                      class="groupIconButton"
+                      :aria-label="`${t('Tab Organizer.Group Icon')} / ${t('Tab Organizer.Change Group Color', { name: section.name })}`"
+                      :title="`${t('Tab Organizer.Group Icon')} / ${t('Tab Organizer.Change Group Color', { name: section.name })}`"
+                      :style="section.color ? { color: getTabAccentColor(section.color) } : null"
+                      :aria-expanded="editingIconGroupId === section.id"
+                      @click="toggleIconPicker(section.id)"
                     >
-                      {{ activeOtherDeviceName }}
-                    </h4>
-                    <div class="syncedSessionActions">
-                      <button
-                        type="button"
-                        class="syncedSessionActionButton"
-                        @click="sessionToOpen = activeOtherDeviceSession"
-                      >
-                        <FtIcon
-                          :icon="['fas', 'folder-open']"
-                          aria-hidden="true"
-                        />
-                        {{ t('Settings.Sync Settings.Open All Tabs') }}
-                      </button>
-                      <button
-                        type="button"
-                        class="syncedSessionActionButton dangerButton"
-                        :aria-label="`${t('Delete')}: ${formatDeviceSessionLabel(activeOtherDeviceSession, t)}`"
-                        :title="t('Delete')"
-                        @click="sessionToDelete = activeOtherDeviceSession"
-                      >
-                        <FtIcon
-                          :icon="['fas', 'trash']"
-                          aria-hidden="true"
-                        />
-                        {{ t('Delete') }}
-                      </button>
-                    </div>
-                  </header>
-                  <ul class="syncedTabList">
-                    <li
-                      v-for="tab in activeOtherDeviceSession.visibleTabs"
-                      :key="tab.id"
+                      <FtIcon
+                        :icon="['fas', normalizeTabGroupIcon(section.icon)]"
+                        aria-hidden="true"
+                      />
+                    </button>
+                    <div
+                      v-if="editingIconGroupId === section.id"
+                      class="groupAppearancePicker"
                     >
-                      <button
-                        type="button"
-                        class="syncedTabTarget"
-                        @click="openOtherDeviceSession({ ...activeOtherDeviceSession, tabs: [tab] })"
+                      <div
+                        class="groupColorPicker"
+                        role="listbox"
+                        :aria-label="t('Tab Organizer.Change Group Color', { name: section.name })"
                       >
-                        <span class="tabIcon">
-                          <FtRetryImage
-                            v-if="usableTabAvatarUrl(syncedTabPreview(tab))"
-                            :fallback-icon="getTabPageIcon(syncedTabPreview(tab)) || ['fas', 'display']"
-                            :src="usableTabAvatarUrl(syncedTabPreview(tab))"
-                            alt=""
-                            @error="handleTabAvatarError(syncedTabPreview(tab))"
-                          />
-                          <FtIcon
-                            v-else
-                            :icon="getTabPageIcon(syncedTabPreview(tab)) || ['fas', 'display']"
+                        <button
+                          v-for="color in editableGroupColors"
+                          :key="color.value || 'none'"
+                          type="button"
+                          role="option"
+                          :aria-selected="(section.color ?? '') === color.value"
+                          :aria-label="color.label"
+                          :title="color.label"
+                          @click="updateGroupColor(section.id, color.value)"
+                        >
+                          <span
+                            class="groupColor"
+                            :class="{ noColor: color.value === '' }"
+                            :style="color.value ? { '--group-color': color.color } : null"
                             aria-hidden="true"
                           />
-                        </span>
-                        <span class="syncedTabIdentity">
-                          <span dir="auto">{{ formatTabTitle(tab.title || getSyncTabRoute(tab.url)) }}</span>
-                          <small>{{ getSyncTabRoute(tab.url) }}</small>
-                        </span>
-                        <FtIcon
-                          class="syncedTabOpenIcon"
-                          :icon="['fas', 'arrow-up-right-from-square']"
-                          aria-hidden="true"
-                        />
-                      </button>
-                    </li>
-                  </ul>
-                </article>
-              </div>
-            </section>
-
-            <section class="recentlyClosed">
-              <header>
-                <h3>{{ t('Tab Organizer.Recently Closed') }}</h3>
-                <button
-                  type="button"
-                  class="dangerButton"
-                  :disabled="closedTabs.length === 0"
-                  @click="clearClosedTabs"
-                >
-                  <FtIcon
-                    :icon="['fas', 'trash']"
-                    aria-hidden="true"
-                  />
-                  {{ t('Tab Organizer.Clear') }}
-                </button>
-              </header>
-              <ul v-if="visibleClosedTabs.length > 0">
-                <li
-                  v-for="tab in visibleClosedTabs"
-                  :key="tab.id"
-                  class="tabOrganizerRow closedTabRow"
-                >
-                  <span class="tabIcon">
-                    <FtIcon
-                      :icon="getTabPageIcon(tab) || ['fas', 'display']"
-                      aria-hidden="true"
-                    />
-                  </span>
-                  <div class="tabIdentity">
-                    <span>{{ formatTabTitle(tab.title) }}</span>
-                    <small>{{ tab.route.fullPath || tab.url }}</small>
+                        </button>
+                      </div>
+                      <div
+                        class="groupIconPicker"
+                        role="group"
+                        :aria-label="t('Tab Organizer.Group Icon')"
+                      >
+                        <button
+                          v-for="icon in TAB_GROUP_ICONS"
+                          :key="icon"
+                          type="button"
+                          :aria-pressed="normalizeTabGroupIcon(section.icon) === icon"
+                          :aria-label="groupIconLabels[icon]"
+                          :title="groupIconLabels[icon]"
+                          @click="updateGroupIcon(section.id, icon)"
+                        >
+                          <FtIcon
+                            :icon="['fas', icon]"
+                            aria-hidden="true"
+                          />
+                        </button>
+                      </div>
+                    </div>
                   </div>
-                  <button
-                    type="button"
-                    @click="restoreClosedTab(tab.id)"
+                  <template v-if="section.id && editingNameGroupId === section.id">
+                    <input
+                      v-model="editingGroupName"
+                      :placeholder="t('Form Inputs.Example', { example: t('Tab Organizer.Icon Labels.Favorites') })"
+                      class="groupRenameInput"
+                      type="text"
+                      maxlength="80"
+                      :aria-label="t('Tab Organizer.Group Name')"
+                      :data-group-name-input="section.id"
+                      @blur="finishGroupRename(section.id)"
+                      @keydown.enter.prevent="finishGroupRename(section.id)"
+                      @keydown.escape.stop.prevent="cancelGroupRename"
+                    >
+                  </template>
+                  <h3 v-else>
+                    <button
+                      v-if="section.id"
+                      type="button"
+                      class="groupNameButton"
+                      :aria-label="t('Tab Organizer.Rename Group', { name: section.name })"
+                      :title="t('Tab Organizer.Rename Group', { name: section.name })"
+                      @click="startGroupRename(section)"
+                    >
+                      <span>{{ section.name }}</span>
+                      <FtIcon
+                        :icon="['fas', 'edit']"
+                        aria-hidden="true"
+                      />
+                    </button>
+                    <template v-else>
+                      {{ section.name }}
+                    </template>
+                  </h3>
+                  <span class="tabGroupCount">
+                    {{ t('Tab Organizer.Tab Count', { count: section.tabs.length }, section.tabs.length) }}
+                  </span>
+                  <div
+                    v-if="section.id"
+                    class="groupActions"
                   >
-                    <FtIcon
-                      :icon="['fas', 'clock-rotate-left']"
-                      aria-hidden="true"
+                    <button
+                      v-if="section.allTabs.length > 0"
+                      type="button"
+                      :disabled="tabs.length <= 1 || section.allTabs.every(tab => tab.isUnloaded)"
+                      @click="runAction('unload', section.allTabs.map(tab => tab.id))"
+                    >
+                      <FtIcon
+                        :icon="['fas', 'right-from-bracket']"
+                        aria-hidden="true"
+                      />
+                      {{ t('Tab Organizer.Unload All') }}
+                    </button>
+                    <FtSelect
+                      v-if="section.allTabs.length > 0 && moveTargets.length > 0"
+                      variant="outlined"
+                      class="compactSelect groupWindowSelect"
+                      :placeholder="t('Tab Organizer.Move To Window')"
+                      value=""
+                      :select-names="groupWindowSelectNames"
+                      :select-values="windowSelectValues"
+                      :show-icon="false"
+                      @change="moveGroupToWindow(section, $event)"
                     />
-                    {{ t('Restore') }}
-                  </button>
-                </li>
-              </ul>
+                    <button
+                      v-if="section.allTabs.length > 0"
+                      type="button"
+                      class="dangerButton"
+                      @click="runAction('close', section.allTabs.map(tab => tab.id))"
+                    >
+                      <FtIcon
+                        :icon="['fas', 'rectangle-xmark']"
+                        aria-hidden="true"
+                      />
+                      {{ t('Tab Organizer.Close All') }}
+                    </button>
+                    <button
+                      type="button"
+                      @click="deleteGroup(section.id)"
+                    >
+                      <FtIcon
+                        :icon="['fas', 'link-slash']"
+                        aria-hidden="true"
+                      />
+                      {{ t('Tab Organizer.Ungroup') }}
+                    </button>
+                  </div>
+                </header>
+                <ul v-if="!section.isCollapsed || normalizedQuery.length > 0">
+                  <li
+                    v-for="tab in section.tabs"
+                    :key="tab.id"
+                    class="tabOrganizerRow"
+                    :class="{
+                      active: tab.id === activeTabId,
+                      dragging: draggedTabIds.includes(tab.id)
+                    }"
+                    draggable="true"
+                    @dragstart="startTabDrag($event, tab.id)"
+                    @dragend="finishTabDrag"
+                  >
+                    <span
+                      class="dragHandle"
+                      :title="t('Tab Organizer.Drag Tab')"
+                      aria-hidden="true"
+                    >
+                      <FtIcon :icon="['fas', 'grip']" />
+                    </span>
+                    <FtCheckboxList
+                      class="tabSelection"
+                      :model-value="selectedTabIds.has(tab.id) ? [tab.id] : []"
+                      :labels="[t('Tab Organizer.Select Tab', { title: formatTabTitle(tab.title) })]"
+                      :values="[tab.id]"
+                      @click.capture="handleTabSelectionClick($event, tab.id)"
+                      @update:model-value="toggleTabSelection(tab.id, $event.includes(tab.id))"
+                    />
+                    <span class="tabIcon">
+                      <FtRetryImage
+                        v-if="usableTabAvatarUrl(tab)"
+                        :fallback-icon="getTabPageIcon(tab) || ['fas', 'display']"
+                        :src="usableTabAvatarUrl(tab)"
+                        alt=""
+                        draggable="false"
+                        @error="handleTabAvatarError(tab)"
+                      />
+                      <FtIcon
+                        v-else
+                        :icon="getTabPageIcon(tab) || ['fas', 'display']"
+                        aria-hidden="true"
+                      />
+                    </span>
+                    <button
+                      type="button"
+                      class="tabIdentity"
+                      @click="activateTab(tab.id)"
+                    >
+                      <span>{{ formatTabTitle(tab.title) }}</span>
+                      <small>{{ tab.route.fullPath || tab.url }}</small>
+                    </button>
+                    <div class="tabIndicators">
+                      <span v-if="tab.id === activeTabId">{{ t('Tab Organizer.Active') }}</span>
+                      <span v-if="tab.isPinned">{{ t('Tab Organizer.Pinned') }}</span>
+                      <span v-if="tab.isUnloaded">{{ t('Tab Organizer.Unloaded') }}</span>
+                      <span v-if="tab.isPlaying">{{ t('Tab Organizer.Playing') }}</span>
+                    </div>
+                    <button
+                      type="button"
+                      class="iconButton"
+                      :aria-label="t('Tab Organizer.Close Tab', { title: formatTabTitle(tab.title) })"
+                      :title="t('Close')"
+                      @click="runAction('close', [tab.id])"
+                    >
+                      <FtIcon
+                        :icon="['fas', 'xmark']"
+                        aria-hidden="true"
+                      />
+                    </button>
+                  </li>
+                </ul>
+              </section>
+
               <p
-                v-else
+                v-if="visibleTabs.length === 0 && visibleOtherDeviceSessions.length === 0"
                 class="emptyMessage"
               >
-                {{ t('Tab Organizer.No Closed Results') }}
+                {{ t('Tab Organizer.No Open Results') }}
               </p>
-            </section>
+
+              <section
+                v-if="showSyncedTabs && (normalizedQuery.length === 0 || visibleOtherDeviceSessions.length > 0)"
+                class="syncedTabsSection"
+              >
+                <header class="syncedTabsHeader">
+                  <h3>
+                    <FtIcon
+                      class="syncedTabsIcon"
+                      :icon="['fas', 'layer-group']"
+                      aria-hidden="true"
+                    />
+                    {{ t('Settings.Sync Settings.Tabs From Other Devices') }}
+                  </h3>
+                </header>
+                <FtTabs
+                  class="syncedSessionTabs"
+                  role="tablist"
+                  :aria-label="t('Settings.Sync Settings.Tabs From Other Devices')"
+                >
+                  <button
+                    v-for="(session, index) in visibleOtherDeviceSessions"
+                    :id="syncedSessionTabId(index)"
+                    :key="`${session.syncDeviceId}:${session.sessionId}`"
+                    type="button"
+                    class="syncedSessionTab"
+                    :class="{ selected: activeOtherDeviceSessionKey === otherDeviceSessionKey(session) }"
+                    role="tab"
+                    :aria-controls="syncedSessionPanelId"
+                    :aria-selected="activeOtherDeviceSessionKey === otherDeviceSessionKey(session)"
+                    :tabindex="activeOtherDeviceSessionKey === otherDeviceSessionKey(session) ? 0 : -1"
+                    @click="selectOtherDeviceSession(session)"
+                    @keydown.left.prevent="selectOtherDeviceSessionAt(index - 1, true)"
+                    @keydown.right.prevent="selectOtherDeviceSessionAt(index + 1, true)"
+                    @keydown.home.prevent="selectOtherDeviceSessionAt(0, true)"
+                    @keydown.end.prevent="selectOtherDeviceSessionAt(visibleOtherDeviceSessions.length - 1, true)"
+                  >
+                    <span class="syncedSessionIcon">
+                      <FtIcon
+                        :icon="session.syncPlatform === 'mobile' ? ['fas', 'smartphone'] : ['fas', 'display']"
+                        aria-hidden="true"
+                      />
+                    </span>
+                    <strong>{{ formatDeviceSessionLabel(session, t) }}</strong>
+                  </button>
+                </FtTabs>
+                <div class="syncedSessionPanels">
+                  <article
+                    v-if="activeOtherDeviceSession"
+                    :id="syncedSessionPanelId"
+                    :key="activeOtherDeviceSessionKey"
+                    class="syncedSessionCard"
+                    role="tabpanel"
+                    :aria-labelledby="activeOtherDeviceSessionTabId"
+                  >
+                    <header class="syncedSessionHeader">
+                      <h4
+                        class="syncedSessionName"
+                        dir="auto"
+                      >
+                        {{ activeOtherDeviceName }}
+                      </h4>
+                      <div class="syncedSessionActions">
+                        <button
+                          type="button"
+                          class="syncedSessionActionButton"
+                          @click="sessionToOpen = activeOtherDeviceSession"
+                        >
+                          <FtIcon
+                            :icon="['fas', 'folder-open']"
+                            aria-hidden="true"
+                          />
+                          {{ t('Settings.Sync Settings.Open All Tabs') }}
+                        </button>
+                        <button
+                          type="button"
+                          class="syncedSessionActionButton dangerButton"
+                          :aria-label="`${t('Delete')}: ${formatDeviceSessionLabel(activeOtherDeviceSession, t)}`"
+                          :title="t('Delete')"
+                          @click="sessionToDelete = activeOtherDeviceSession"
+                        >
+                          <FtIcon
+                            :icon="['fas', 'trash']"
+                            aria-hidden="true"
+                          />
+                          {{ t('Delete') }}
+                        </button>
+                      </div>
+                    </header>
+                    <ul class="syncedTabList">
+                      <li
+                        v-for="tab in activeOtherDeviceSession.visibleTabs"
+                        :key="tab.id"
+                      >
+                        <button
+                          type="button"
+                          class="syncedTabTarget"
+                          @click="openOtherDeviceSession({ ...activeOtherDeviceSession, tabs: [tab] })"
+                        >
+                          <span class="tabIcon">
+                            <FtRetryImage
+                              v-if="usableTabAvatarUrl(syncedTabPreview(tab))"
+                              :fallback-icon="getTabPageIcon(syncedTabPreview(tab)) || ['fas', 'display']"
+                              :src="usableTabAvatarUrl(syncedTabPreview(tab))"
+                              alt=""
+                              @error="handleTabAvatarError(syncedTabPreview(tab))"
+                            />
+                            <FtIcon
+                              v-else
+                              :icon="getTabPageIcon(syncedTabPreview(tab)) || ['fas', 'display']"
+                              aria-hidden="true"
+                            />
+                          </span>
+                          <span class="syncedTabIdentity">
+                            <span dir="auto">{{ formatTabTitle(tab.title || getSyncTabRoute(tab.url)) }}</span>
+                            <small>{{ getSyncTabRoute(tab.url) }}</small>
+                          </span>
+                          <FtIcon
+                            class="syncedTabOpenIcon"
+                            :icon="['fas', 'arrow-up-right-from-square']"
+                            aria-hidden="true"
+                          />
+                        </button>
+                      </li>
+                    </ul>
+                  </article>
+                </div>
+              </section>
+
+              <section class="recentlyClosed">
+                <header>
+                  <h3>{{ t('Tab Organizer.Recently Closed') }}</h3>
+                  <button
+                    type="button"
+                    class="dangerButton"
+                    :disabled="closedTabs.length === 0"
+                    @click="clearClosedTabs"
+                  >
+                    <FtIcon
+                      :icon="['fas', 'trash']"
+                      aria-hidden="true"
+                    />
+                    {{ t('Tab Organizer.Clear') }}
+                  </button>
+                </header>
+                <ul v-if="visibleClosedTabs.length > 0">
+                  <li
+                    v-for="tab in visibleClosedTabs"
+                    :key="tab.id"
+                    class="tabOrganizerRow closedTabRow"
+                  >
+                    <span class="tabIcon">
+                      <FtIcon
+                        :icon="getTabPageIcon(tab) || ['fas', 'display']"
+                        aria-hidden="true"
+                      />
+                    </span>
+                    <div class="tabIdentity">
+                      <span>{{ formatTabTitle(tab.title) }}</span>
+                      <small>{{ tab.route.fullPath || tab.url }}</small>
+                    </div>
+                    <button
+                      type="button"
+                      @click="restoreClosedTab(tab.id)"
+                    >
+                      <FtIcon
+                        :icon="['fas', 'clock-rotate-left']"
+                        aria-hidden="true"
+                      />
+                      {{ t('Restore') }}
+                    </button>
+                  </li>
+                </ul>
+                <p
+                  v-else
+                  class="emptyMessage"
+                >
+                  {{ t('Tab Organizer.No Closed Results') }}
+                </p>
+              </section>
+            </div>
           </div>
-        </div>
-      </section>
-    </div>
+        </section>
+      </div>
+    </ModalLeaveTransition>
   </Teleport>
   <FtPrompt
     v-if="showCreateGroupPrompt"
@@ -690,6 +692,7 @@ import { useI18n } from 'vue-i18n'
 
 import { TAB_GROUP_ICONS, normalizeTabGroupIcon } from '../../../tabGroupIcons'
 import { getTabAccentColor } from '../../constants/tabColors'
+import { ModalLeaveTransition } from '../../helpers/modalTransition'
 import { clampOverlayScrollTop, restoreOverlayScrollTop } from '../../helpers/overlayScrollbars'
 import { formatDeviceSessionLabel, getSyncTabRoute, shouldShowOtherDeviceSessions } from '../../helpers/sync-sessions'
 import { getTabGroupIconLabels } from '../../helpers/tabGroupIconLabels'
