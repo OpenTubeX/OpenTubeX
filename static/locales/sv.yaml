@@ -94,7 +94,7 @@ Subscriptions:
     # On Subscriptions Page
   Subscriptions: 'Prenumerationer'
   'Your Subscription list is currently empty. Start adding subscriptions to see them here.': 'Din prenumerationslista är tom. Välj ”Importera prenumerationer” under ”Datahantering” i inställningarna om du vill importera en lista. Du kan också söka efter en kanal och prenumerera på den.'
-  This profile has a large number of subscriptions. Forcing RSS to avoid rate limiting: Den här profilen har många prenumerationer. FreeTube använder därför RSS för att hålla sig inom gränsen för antalet förfrågningar.
+  This profile has a large number of subscriptions. Forcing RSS to avoid rate limiting: Den här profilen har många prenumerationer. OpenTubeX använder därför RSS för att hålla sig inom gränsen för antalet förfrågningar.
   Load More Videos: Hämta fler videor
   Error Channels: Kanaler med fel
   Disabled Automatic Fetching: Automatisk hämtning av prenumerationsflödet är inaktiverad. Uppdatera flödet för att visa innehållet här.
