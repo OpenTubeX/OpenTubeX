@@ -148,6 +148,10 @@ test.describe('New feed refresh while saving seen marks', () => {
       feedRequests++
       return route.fulfill({ status: 500, body: 'Failed' })
     })
+    // A failed feed falls back to the channel's videos tab, which reports the channel as gone.
+    await page.route('**/youtubei/v1/browse?*', route => route.fulfill({
+      json: { alerts: [{ alertRenderer: { type: 'ERROR', text: { simpleText: 'This channel does not exist.' } } }] }
+    }))
     await goTo(page, 'subscriptions')
     await page.locator('[data-subscription-feed-tab="all"]').click()
     await page.getByRole('button', { name: /Refresh New content/ }).click()

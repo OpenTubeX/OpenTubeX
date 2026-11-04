@@ -279,6 +279,8 @@
             @scroll.capture="updateMobileContextScrollAction"
             @click.capture="filterMobileContextClick"
             @keydown.esc.stop="backMobileContextMenu"
+            @keydown="handleMobileContextKeydown"
+            @keydown.space.stop
           >
             <div
               class="bottomSheetHandle"
@@ -3954,6 +3956,45 @@ function closeMobileLinkActions() {
   mobileContextActions.value = null
 }
 
+/**
+ * Up and Down move through the sheet's items, Left and Right through a quick
+ * action row, and the inline-end arrow opens a submenu that the other leaves.
+ * @param {KeyboardEvent} event
+ */
+function handleMobileContextKeydown(event) {
+  if (!['ArrowDown', 'ArrowUp', 'ArrowLeft', 'ArrowRight', 'Home', 'End'].includes(event.key)) return
+  const sheet = mobileLinkActionsRef.value
+  if (!sheet) return
+  event.preventDefault()
+  // Like Tab, so a sheet opened by touch shows where focus moves.
+  store.dispatch('showOutlines')
+  const focused = document.activeElement instanceof HTMLElement && sheet.contains(document.activeElement)
+    ? document.activeElement
+    : null
+  const rtl = document.body.dir === 'rtl'
+  const forward = event.key === (rtl ? 'ArrowLeft' : 'ArrowRight')
+  const backward = event.key === (rtl ? 'ArrowRight' : 'ArrowLeft')
+  const row = focused?.closest('.mobileLinkQuickActionRow')
+  if ((forward || backward) && !row) {
+    if (forward && focused?.getAttribute('aria-haspopup') === 'menu') {
+      const action = mobileContextMenuRows.value.find(item => item.label === focused.getAttribute('aria-label'))
+      if (action) runMobileContextAction(action, { focusFirstItem: true })
+    } else if (backward && mobileContextMenuStack.value.length > 1) {
+      backMobileContextMenu()
+    }
+    return
+  }
+  const buttons = [...((forward || backward) ? row : sheet).querySelectorAll('button:enabled')]
+  const index = focused ? buttons.indexOf(focused) : -1
+  const step = event.key === 'ArrowUp' || backward ? -1 : 1
+  const nextIndex = event.key === 'Home'
+    ? 0
+    : event.key === 'End'
+      ? buttons.length - 1
+      : index < 0 ? (step > 0 ? 0 : buttons.length - 1) : (index + step + buttons.length) % buttons.length
+  buttons[nextIndex]?.focus()
+}
+
 async function backMobileContextMenu() {
   if (mobileContextMenuStack.value.length === 1) {
     closeMobileLinkActions()
@@ -3965,12 +4006,15 @@ async function backMobileContextMenu() {
   mobileLinkActionsRef.value?.querySelector(`[role="menuitem"][aria-label="${CSS.escape(triggerLabel)}"]:not(:disabled)`)?.focus({ preventScroll: true })
 }
 
-async function runMobileContextAction(action) {
+async function runMobileContextAction(action, { focusFirstItem = false } = {}) {
   if (action.enabled === false) return
   if (action.submenu) {
     mobileContextMenuPath.value = [...mobileContextMenuStack.value.slice(1).map(level => level.label), action.label]
     await nextTick()
-    mobileLinkActionsRef.value?.querySelector('.mobileLinkActionsBack')?.focus({ preventScroll: true })
+    const sheet = mobileLinkActionsRef.value
+    const target = (focusFirstItem && sheet?.querySelector('.mobileLinkActionsContent button:enabled')) ||
+      sheet?.querySelector('.mobileLinkActionsBack')
+    target?.focus({ preventScroll: true })
     return
   }
   closeMobileLinkActions()

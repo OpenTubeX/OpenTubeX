@@ -41,6 +41,48 @@ export function abortUnmockedRequest(route) {
   return route.abort()
 }
 
+const LOOPBACK_HOSTS = new Set(['localhost', '127.0.0.1', '[::1]'])
+
+/**
+ * Lets local test servers through, including hosts that `--host-resolver-rules`
+ * maps to them, and blocks every other unmocked host.
+ * @param {string[]} launchArgs
+ */
+function unmockedHostBlocker(launchArgs) {
+  const mappedHosts = launchArgs
+    .flatMap(arg => arg.startsWith('--host-resolver-rules=') ? arg.split('=')[1].split(',') : [])
+    .map(rule => rule.trim().split(/\s+/))
+    .filter(([type, , target]) => type === 'MAP' && LOOPBACK_HOSTS.has(target))
+    .map(([, pattern]) => new RegExp(`^${pattern.replaceAll('.', '\\.').replaceAll('*', '.*')}$`))
+  return async route => {
+    const { hostname } = new URL(route.request().url())
+    if (LOOPBACK_HOSTS.has(hostname) || hostname.endsWith('.localhost') || mappedHosts.some(host => host.test(hostname))) {
+      return route.fallback()
+    }
+    try {
+      // An abort would mark the YouTube origin unavailable and hold later
+      // mocked requests to it in the network-recovery backoff.
+      if (hostname === 'www.youtube.com') await route.fulfill({ status: 404, contentType: 'application/json', body: '{}' })
+      // Every launch fetches the instance list. An empty one keeps the bundled list without logging an error.
+      else if (hostname === 'api.invidious.io') await route.fulfill({ json: [] })
+      else await abortUnmockedRequest(route)
+    } catch {
+      // Like Playwright's own last-resort continue: a request can already be
+      // settled when it falls through, e.g. after a test's page.unrouteAll().
+    }
+  }
+}
+
+/** Offline projects set `blockUnmockedHosts`, so that also covers apps a test launches itself. */
+function projectBlocksUnmockedHosts() {
+  try {
+    return base.info().project.use.blockUnmockedHosts === true
+  } catch {
+    // Called outside a test, such as by the performance comparison scripts.
+    return false
+  }
+}
+
 /**
  * Exposes the renderer's Vuex store and router to `page.evaluate` callbacks as
  * `window.$store` and `window.$router`. Helpers shared with the Android CDP
@@ -268,6 +310,9 @@ export async function launchApp(userDataDir, extraArgs = [], options = {}, windo
       throw error
     }
   }
+  // Requests sent before a test sets up its mocks, such as automatic refreshes
+  // during launch, must not reach the real network. Later routes take precedence.
+  if (projectBlocksUnmockedHosts()) await context.route(/^https?:\/\//, unmockedHostBlocker(extraArgs))
   // Tests control WAN reachability independently of the host running them.
   // Page routes can override these replies to exercise real offline recovery.
   await context.route(INTERNET_CHECK_URL, route => route.fulfill({ status: 204 }))

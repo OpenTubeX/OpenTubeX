@@ -1,5 +1,7 @@
 import { test, expect, goTo, goToSettingsSection, sel } from '../../helpers/app.mjs'
 import { fulfillVisualFixture, expectImagesLoaded } from '../../helpers/visual-fixtures.mjs'
+import { openMockedVideo } from '../../helpers/player.mjs'
+import { mockPlayableWatchPage } from '../../helpers/watch.mjs'
 
 const VIDEO_ID = 'jNQXAC9IVRw'
 
@@ -702,4 +704,89 @@ test('mobile quick actions stay unhighlighted under a touch point that cannot ho
   } finally {
     await session.detach()
   }
+})
+
+test('mobile context sheet moves between items and submenus with arrow keys', async ({ page }) => {
+  await goTo(page, 'history')
+  await page.setViewportSize({ width: 375, height: 812 })
+  await page.locator('.ft-list-video .title').first().evaluate(element => element.dispatchEvent(new PointerEvent('contextmenu', {
+    bubbles: true, cancelable: true, pointerType: 'touch'
+  })))
+  const menu = page.locator('.mobileLinkActions')
+  await expect(menu).toBeFocused()
+  // A touch press hides focus outlines.
+  await page.evaluate(() => window.$store.dispatch('hideOutlines'))
+  await expect(page.locator('html')).toHaveClass(/\bhideOutlines\b/)
+  const item = name => menu.getByRole('menuitem', { name, exact: true })
+  const press = async (key, focused) => {
+    await page.keyboard.press(key)
+    await expect(focused).toBeFocused()
+  }
+
+  await press('ArrowDown', item('Open in a New Tab'))
+  await expect(page.locator('html')).not.toHaveClass(/\bhideOutlines\b/)
+  // Left and Right stay within a quick action row and wrap around it.
+  await press('ArrowRight', item('Open in a New Window'))
+  await press('ArrowLeft', item('Open in a New Tab'))
+  await press('ArrowLeft', item('Add to Queue'))
+  await press('ArrowDown', item('Open in a Background Tab'))
+  await press('End', item('Open Link'))
+  await press('ArrowDown', item('Open in a New Tab'))
+  await press('ArrowUp', item('Open Link'))
+  await press('ArrowUp', item('Copy Link'))
+  await press('ArrowLeft', item('Copy Link'))
+
+  await press('ArrowRight', item('Copy YouTube Link'))
+  await expect(menu).toHaveAttribute('aria-label', 'Copy Link')
+  await press('ArrowDown', item('Copy Invidious Link'))
+  await press('Home', menu.getByRole('button', { name: 'Back', exact: true }))
+  await press('ArrowLeft', item('Copy Link'))
+  await expect(menu.locator('strong')).toHaveText('Video menu test')
+})
+
+test.describe('mobile context sheet on a watch page', () => {
+  test.use({ seed: { settings: { videoPlaybackEngine: 'built-in', ytDlpPlaybackEngineDefaultMigration: true, holdToDoublePlaybackSpeed: true } } })
+
+  async function openSheet(page) {
+    await page.evaluate(() => {
+      window.sheetActionRuns = 0
+      window.dispatchEvent(new CustomEvent('opentubex:mobile-context-menu', {
+        detail: { title: 'Space test', actions: [{ label: 'Space action', run: () => { window.sheetActionRuns++ } }] }
+      }))
+    })
+    const menu = page.locator('.mobileLinkActions')
+    await expect(menu).toBeFocused()
+    return menu
+  }
+
+  test.beforeEach(async ({ app, page }) => {
+    await mockPlayableWatchPage(app, page)
+    await openMockedVideo(page)
+    await page.setViewportSize({ width: 375, height: 812 })
+  })
+
+  test('Space activates the focused item instead of toggling playback', async ({ page }) => {
+    const video = page.locator('video')
+    await video.evaluate(element => element.pause())
+    const menu = await openSheet(page)
+    await page.keyboard.press('ArrowDown')
+    await expect(menu.getByRole('menuitem', { name: 'Space action', exact: true })).toBeFocused()
+    await page.keyboard.press('Space')
+    await expect.poll(() => page.evaluate(() => window.sheetActionRuns)).toBe(1)
+    await expect(menu).toBeHidden()
+    expect(await video.evaluate(element => element.paused)).toBe(true)
+  })
+
+  test('releasing a held Space in the sheet ends the faster playback', async ({ page }) => {
+    const video = page.locator('video')
+    await page.evaluate(() => document.activeElement?.blur())
+    await page.keyboard.down('Space')
+    try {
+      await expect(video).toHaveJSProperty('playbackRate', 2)
+      await openSheet(page)
+    } finally {
+      await page.keyboard.up('Space')
+    }
+    await expect(video).toHaveJSProperty('playbackRate', 1)
+  })
 })

@@ -120,7 +120,8 @@ test('shows a new window before its renderer loads and respects hiding during st
   const context = app.electronApp.context()
   await context.route('**/renderer.js', async route => {
     await gate
-    await route.continue()
+    // The window can close before the request continues.
+    await route.continue().catch(() => {})
   })
   try {
     const created = app.electronApp.waitForEvent('window')
@@ -138,7 +139,8 @@ test('shows a new window before its renderer loads and respects hiding during st
     expect(await browserWindow.evaluate(window => window.isVisible())).toBe(false)
   } finally {
     releaseRenderer()
-    await context.unrouteAll({ behavior: 'wait' })
+    // Keep the fixture's routes, which block unmocked hosts.
+    await context.unroute('**/renderer.js')
   }
 })
 
@@ -159,7 +161,8 @@ test.describe('startup splash with a system-selected Signal theme', () => {
       const context = app.electronApp.context()
       await context.route('**/renderer.js', async route => {
         await gate
-        await route.continue()
+        // The window can close before the request continues.
+        await route.continue().catch(() => {})
       })
       try {
         const created = app.electronApp.waitForEvent('window')
@@ -172,7 +175,8 @@ test.describe('startup splash with a system-selected Signal theme', () => {
         await expect(nextPage.locator('#startup-splash')).toHaveCount(0)
       } finally {
         releaseRenderer()
-        await context.unrouteAll({ behavior: 'wait' })
+        // Keep the fixture's routes, which block unmocked hosts.
+        await context.unroute('**/renderer.js')
       }
     })
   }
@@ -246,7 +250,8 @@ test('distraction-free switch disables the early splash in new windows and can r
     const context = app.electronApp.context()
     await context.route('**/renderer.js', async route => {
       await gate
-      await route.continue()
+      // The window can close before the request continues.
+      await route.continue().catch(() => {})
     })
     let browserWindow
     try {
@@ -269,7 +274,8 @@ test('distraction-free switch disables the early splash in new windows and can r
       await expect(nextPage.locator('#app')).not.toHaveAttribute('inert')
     } finally {
       releaseRenderer()
-      await context.unrouteAll({ behavior: 'wait' })
+      // Keep the fixture's routes, which block unmocked hosts.
+      await context.unroute('**/renderer.js')
       await browserWindow?.evaluate(window => window.destroy())
     }
   }

@@ -4,6 +4,8 @@ const useFixtures = !!process.env.E2E_USE_FIXTURES
 const record = !!process.env.E2E_RECORD
 // Performance checks live in *-performance.spec.mjs files or carry the tag.
 const performanceTests = [/-performance\.spec\.mjs/, /@performance/]
+// Offline tests abort requests to hosts they have not mocked (see helpers/app.mjs).
+const offline = { blockUnmockedHosts: true }
 
 export default defineConfig({
   testDir: './tests',
@@ -30,7 +32,8 @@ export default defineConfig({
     {
       name: 'offline',
       testMatch: 'offline/**/*.spec.mjs',
-      grepInvert: performanceTests
+      grepInvert: performanceTests,
+      use: offline
     },
     // Layout, scrolling and measurement checks tagged @scale also run at a
     // fractional downscale and upscale. See the uiScale fixture option.
@@ -39,7 +42,7 @@ export default defineConfig({
       testMatch: 'offline/**/*.spec.mjs',
       grep: /@scale/,
       grepInvert: performanceTests,
-      use: { uiScale }
+      use: { ...offline, uiScale }
     })),
     {
       // Tracing would distort the measurements.
@@ -47,7 +50,7 @@ export default defineConfig({
       workers: 1,
       testMatch: 'offline/**/*.spec.mjs',
       grep: performanceTests,
-      use: { trace: 'off' }
+      use: { ...offline, trace: 'off' }
     },
     {
       name: 'browser',
