@@ -116,12 +116,12 @@
   container-type: size;
   color: rgb(255 255 255 / 90%);
   text-align: center;
-  text-shadow: 0 1px 3px rgb(0 0 0 / 70%);
+  text-shadow: 0 1px 2px #000, 0 2px 8px rgb(0 0 0 / 85%);
 }
 
 .pictureInPictureIcon {
   font-size: clamp(32px, 18cqmin, 96px);
-  filter: drop-shadow(0 1px 3px rgb(0 0 0 / 70%));
+  filter: drop-shadow(0 1px 2px #000) drop-shadow(0 2px 8px rgb(0 0 0 / 85%));
 }
 
 .pictureInPictureText {
