@@ -241,6 +241,8 @@
                       setting-key="baseTheme"
                       :select-names="baseThemeNames"
                       :select-values="baseThemeValues"
+                      :option-groups="baseThemeValues.map(baseThemeGroup)"
+                      :option-group-labels="baseThemeGroupLabels"
                       :disabled="customThemeEditorOpen"
                       :icon="['fas', 'palette']"
                       @change="updateSetting('BaseTheme', $event)"
@@ -253,6 +255,8 @@
                       :setting-key="setting.id"
                       :select-names="systemThemeOptions[setting.id].map(({ name }) => name)"
                       :select-values="systemThemeOptions[setting.id].map(({ value }) => value)"
+                      :option-groups="systemThemeOptions[setting.id].map(({ value }) => baseThemeGroup(value))"
+                      :option-group-labels="baseThemeGroupLabels"
                       :disabled="customThemeEditorOpen"
                       :icon="setting.icon"
                       @change="updateBasicQuickSetting(setting.id, $event)"
@@ -493,7 +497,7 @@ import { localeTranslationPercentages } from '../../i18n/index'
 import { colors } from '../../helpers/colors'
 import { OPEN_COMMAND_PALETTE_EVENT } from '../../helpers/commandPalette'
 import { useColorTranslations } from '../../composables/colors'
-import { useBaseThemeOptions } from '../../composables/baseThemes'
+import { baseThemeGroup, useBaseThemeOptions } from '../../composables/baseThemes'
 import { useThumbnailSizeSlider } from '../../composables/useThumbnailSizeSlider'
 import {
   MIN_THUMBNAIL_SIZE,
@@ -567,7 +571,7 @@ const profileInitials = computed(() => profileList.value.reduce((initials, profi
 }, {}))
 
 const customThemes = computed(() => store.getters.getCustomThemes)
-const { baseThemeValues, baseThemeNames } = useBaseThemeOptions(customThemes)
+const { baseThemeValues, baseThemeNames, baseThemeGroupLabels } = useBaseThemeOptions(customThemes)
 const systemThemeOptions = computed(() => {
   const options = { systemLightTheme: [], systemDarkTheme: [] }
   baseThemeValues.value.forEach((value, index) => {
