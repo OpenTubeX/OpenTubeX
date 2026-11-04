@@ -3,6 +3,7 @@ import { DEFAULT_SIGNAL_ACCENT_COLOR } from './signalTheme.js'
 import { DEFAULT_LANDING_PAGE, LEGACY_DEFAULT_LANDING_PAGE, DEFAULT_QUICK_PLAYBACK_SPEED_BAR_OPTIONS, DEFAULT_WATCHED_PERCENTAGE_THRESHOLD, MAIN_PROFILE_ID } from './constants.js'
 import { DEFAULT_THUMBNAIL_SIZE } from './renderer/constants/thumbnailSize.js'
 import { DEFAULT_FIXED_TAB_WIDTH } from './renderer/constants/tabWidth.js'
+import { DEFAULT_VERTICAL_TAB_HEIGHT } from './renderer/constants/tabHeight.js'
 import { DEFAULT_SCROLLBAR_THUMB_WIDTH } from './renderer/constants/scrollbar.js'
 import { DEFAULT_SCROLL_SPEED } from './renderer/helpers/scrollSpeed.js'
 import { DEFAULT_SEARCH_ENGINES_SETTING } from './searchEngines.js'
@@ -271,6 +272,7 @@ export function createDefaultSettings({ supportsLocalApi, isElectron }) {
     tabBarPosition: 'top',
     customTitleBar: false,
     verticalTabBarWidth: 220,
+    verticalTabHeight: DEFAULT_VERTICAL_TAB_HEIGHT,
     useFixedTabWidth: false,
     fixedTabWidth: DEFAULT_FIXED_TAB_WIDTH,
     listType: 'grid',

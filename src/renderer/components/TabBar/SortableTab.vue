@@ -316,6 +316,7 @@ watch(tabAvatarUrl, (avatarUrl) => {
 }
 
 .tab.vertical {
+  block-size: var(--vertical-tab-height, 30px);
   inline-size: calc(100% - 1px);
   min-inline-size: 0;
   max-inline-size: none;

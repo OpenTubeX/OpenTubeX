@@ -560,6 +560,7 @@ Settings:
     Use Fixed Tab Width: 横表示でタブの幅を固定
     Use Custom Title Bar: カスタムタイトルバーを使用
     Tab Width: タブの幅
+    Vertical Tab Height: 縦タブの高さ
     Tab Layout:
       Tab Layout: タブの配置
       Horizontal Top: 上部に横表示

@@ -560,6 +560,7 @@ Settings:
     Use Fixed Tab Width: Usa una larghezza fissa per le schede in modalità orizzontale
     Use Custom Title Bar: Usa una barra del titolo personalizzata
     Tab Width: Larghezza delle schede
+    Vertical Tab Height: Altezza delle schede verticali
     Tab Layout:
       Tab Layout: Disposizione delle schede
       Horizontal Top: Orizzontali in alto

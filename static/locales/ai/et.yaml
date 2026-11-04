@@ -560,6 +560,7 @@ Settings:
     Use Fixed Tab Width: Kasuta rõhtrežiimis vahekaartide kindlat laiust
     Use Custom Title Bar: Kasuta kohandatud tiitliriba
     Tab Width: Vahekaardi laius
+    Vertical Tab Height: Vertikaalsete vahekaartide kõrgus
     Tab Layout:
       Tab Layout: Vahekaartide paigutus
       Horizontal Top: Rõhtsalt ülal

@@ -2738,6 +2738,35 @@ test.describe('fixed tab width', () => {
   })
 })
 
+test.describe('vertical tab height', () => {
+  test.use({ seed: { settings: { tabBarPosition: 'left', verticalTabHeight: 44 } } })
+
+  test('gives vertical tabs and collapsed groups the configured height', { tag: '@scale' }, async ({ page }) => {
+    await page.evaluate(async () => {
+      const tab = await window.ftElectron.tabs.create({ route: '/history', makeActive: false, lazyLoad: true })
+      const group = await window.ftElectron.tabs.createGroup({ name: 'Grouped', color: 'green' })
+      await window.ftElectron.tabs.setGroup([tab.id], group.id)
+      await window.ftElectron.tabs.updateGroup(group.id, { isCollapsed: true })
+    })
+    await expect(page.locator('.tabBar .collapsedTabGroup')).toHaveCount(1)
+
+    const itemHeights = () => page.locator('.tabBar .tabBarReorderItem').evaluateAll(
+      items => items.map(item => Math.round(item.getBoundingClientRect().height))
+    )
+    await expect.poll(itemHeights).toEqual([44, 44])
+
+    await page.evaluate(() => window.$store.commit('setVerticalTabHeight', 26))
+    await expect.poll(itemHeights).toEqual([26, 26])
+
+    // The horizontal bar keeps its own fixed height.
+    await page.keyboard.press('F1')
+    await expect(page.locator('.app')).not.toHaveClass(/verticalTabs/)
+    await expect.poll(() => page.locator(sel.activeTab).evaluate(
+      tab => Math.round(tab.getBoundingClientRect().height)
+    )).toBe(30)
+  })
+})
+
 /**
  * Waits until the active tab, or the collapsed group that contains it, lies
  * inside the scrolled tab strip, which must overflow for the check to mean

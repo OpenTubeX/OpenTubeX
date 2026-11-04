@@ -569,6 +569,7 @@ Settings:
     Use Fixed Tab Width: Usar un ancho fijo para las pestañas en modo horizontal
     Use Custom Title Bar: Usar barra de título personalizada
     Tab Width: Ancho de las pestañas
+    Vertical Tab Height: Altura de las pestañas verticales
     Tab Layout:
       Tab Layout: Disposición de las pestañas
       Horizontal Top: Horizontales arriba

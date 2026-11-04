@@ -46,6 +46,7 @@ test('platform-specific settings stay local to every device', () => {
     'showTabPreviews',
     'tabBarPosition',
     'tabLoadingIndicator',
+    'verticalTabHeight',
     'thumbnailLeftSwipeAction',
     'thumbnailRightSwipeAction',
     'ytDlpDownloadFolderPath',

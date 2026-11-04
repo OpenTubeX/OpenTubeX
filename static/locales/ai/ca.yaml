@@ -687,6 +687,7 @@ Settings:
     Use Fixed Tab Width: Utilitza una amplada fixa de pestanya en el mode horitzontal
     Use Custom Title Bar: Utilitza una barra de títol personalitzada
     Tab Width: Amplada de les pestanyes
+    Vertical Tab Height: Alçada de les pestanyes verticals
     Tab Layout:
       Tab Layout: Disposició de les pestanyes
       Horizontal Top: Horitzontals a dalt

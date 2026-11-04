@@ -37,6 +37,7 @@ export const DEVICE_LOCAL_SETTING_KEYS = new Set([
   'showTabPreviews',
   'tabBarPosition',
   'tabLoadingIndicator',
+  'verticalTabHeight',
   'thumbnailLeftSwipeAction',
   'thumbnailRightSwipeAction',
   'ytDlpDownloadFolderPath',

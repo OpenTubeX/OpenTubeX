@@ -565,6 +565,7 @@ Settings:
     Use Fixed Tab Width: استخدم عرض علامة التبويب الثابت في الوضع الأفقي
     Use Custom Title Bar: استخدام شريط عنوان مخصص
     Tab Width: عرض علامة التبويب
+    Vertical Tab Height: ارتفاع علامات التبويب العمودية
     Tab Layout:
       Tab Layout: تخطيط علامة التبويب
       Horizontal Top: أفقي في الأعلى

@@ -648,6 +648,7 @@ Settings:
     Use Fixed Tab Width: 가로 모드에서 고정 탭 너비 사용
     Use Custom Title Bar: 사용자 지정 제목 표시줄 사용
     Tab Width: 탭 너비
+    Vertical Tab Height: 세로 탭 높이
     Tab Layout:
       Tab Layout: 탭 레이아웃
       Horizontal Top: 위쪽에 가로로

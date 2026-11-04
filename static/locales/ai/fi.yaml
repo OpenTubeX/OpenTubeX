@@ -565,6 +565,7 @@ Settings:
     Use Fixed Tab Width: Käytä vaakasuuntaisessa tilassa kiinteälevyisiä välilehtiä
     Use Custom Title Bar: Käytä mukautettua otsikkopalkkia
     Tab Width: Välilehden leveys
+    Vertical Tab Height: Pystysuuntaisten välilehtien korkeus
     Tab Layout:
       Tab Layout: Välilehtien asettelu
       Horizontal Top: Vaakasuuntaisesti ylhäällä
