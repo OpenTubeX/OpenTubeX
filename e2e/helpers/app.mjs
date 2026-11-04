@@ -63,6 +63,8 @@ function unmockedHostBlocker(launchArgs) {
       // An abort would mark the YouTube origin unavailable and hold later
       // mocked requests to it in the network-recovery backoff.
       if (hostname === 'www.youtube.com') await route.fulfill({ status: 404, contentType: 'application/json', body: '{}' })
+      // Every launch fetches the instance list. An empty one keeps the bundled list without logging an error.
+      else if (hostname === 'api.invidious.io') await route.fulfill({ json: [] })
       else await abortUnmockedRequest(route)
     } catch {
       // Like Playwright's own last-resort continue: a request can already be
