@@ -1148,6 +1148,7 @@ Settings:
     Hide Paid Promotion Badge: Hide Paid Promotion Badge
     Add: Add
     Remove: Remove
+    Hide Channel Shows: Hide Channel "Shows" Tab
   Data Settings:
     Scheduled backups: "Scheduled backups"
     Scheduled backup description: "Save complete ZIP backups while OpenTubeX is open. Missed backups run on startup. The limit applies only to scheduled backups in this folder."
@@ -1510,6 +1511,9 @@ Channel:
     Original post unavailable: "Original post unavailable"
     Members-only video hidden by OpenTubeX: "Members-only video hidden by OpenTubeX"
     Video hidden by OpenTubeX because of its title: "Video hidden by OpenTubeX because its title contains hidden text"
+  Shows:
+    Shows: Shows
+    This channel does not currently have any shows: This channel does not currently have any shows
 Video:
   Info panel source: 'Source: {source}'
   External DRM Protected: "DRM protected videos cannot be played in OpenTubeX, as they require proprietary, closed source components."

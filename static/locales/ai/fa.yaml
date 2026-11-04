@@ -1203,6 +1203,7 @@ Settings:
     Paused Interface Hide Delay: تأخیر پنهان‌شدن رابط هنگام توقف
     Add: افزودن
     Remove: حذف
+    Hide Channel Shows: پنهان کردن زبانه "برنامه‌ها" کانال
   Data Settings:
     Scheduled backups: "پشتیبان‌گیری زمان‌بندی‌شده"
     Scheduled backup description: "هنگام باز بودن OpenTubeX نسخه‌های کامل ZIP ذخیره کنید. پشتیبان‌های انجام‌نشده هنگام راه‌اندازی ساخته می‌شوند. محدودیت فقط برای پشتیبان‌های زمان‌بندی‌شده در این پوشه است."
@@ -1588,6 +1589,9 @@ Channel:
     Original post unavailable: "پست اصلی در دسترس نیست"
     Members-only video hidden by OpenTubeX: "ویدیوی مخصوص اعضا توسط OpenTubeX پنهان شد"
     Video hidden by OpenTubeX because of its title: "ویدیو توسط OpenTubeX پنهان شد، زیرا عنوان آن شامل متن پنهان‌شده است"
+  Shows:
+    Shows: برنامه‌ها
+    This channel does not currently have any shows: این کانال در حال حاضر هیچ برنامه‌ای ندارد
 Video:
   Info panel source: 'منبع: {source}'
   External DRM Protected: "ویدیوهای محافظت شده DRM را نمی توان در OpenTubeX پخش کرد، زیرا به اجزای اختصاصی و منبع بسته نیاز دارند."

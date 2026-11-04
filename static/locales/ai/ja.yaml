@@ -1518,6 +1518,8 @@ Channel:
     Original post unavailable: "元の投稿は利用できません"
     Members-only video hidden by OpenTubeX: "OpenTubeX がメンバー限定動画を非表示にしました"
     Video hidden by OpenTubeX because of its title: "タイトルに非表示のテキストが含まれているため、OpenTubeX が動画を非表示にしました"
+  Shows:
+    This channel does not currently have any shows: このチャンネルには現在番組がありません
 Video:
   Info panel source: '出典: {source}'
   External DRM Protected: "DRMで保護された動画は、独自のクローズドソースコンポーネントが必要なため、OpenTubeXでは再生できません。"

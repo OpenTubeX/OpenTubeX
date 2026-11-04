@@ -1379,6 +1379,7 @@ Settings:
     Hide Channel Podcasts: 채널의 "팟캐스트" 탭 숨기기
     Hide Channel Releases: 채널의 "출시작" 탭 숨기기
     Hide Channel Courses: 채널의 "강의" 탭 숨기기
+    Hide Channel Shows: 채널의 "프로그램" 탭 숨기기
     Hide Videos, Playlists and Channels Containing Text: 지정한 텍스트가 포함된 동영상, 재생목록 및 채널 숨기기
     Hide Videos, Playlists and Channels Containing Text Placeholder: 단어, 단어 일부 또는 구문
     Hide Subscriptions Videos: 구독 동영상 숨기기
@@ -1823,6 +1824,9 @@ Channel:
     Video hidden by OpenTubeX because of its title: "제목에 숨긴 텍스트가 포함되어 OpenTubeX에서 숨긴 동영상"
   Videos:
     This channel has videos but none could be displayed, try fetching more: "이 채널에는 동영상이 있지만 표시할 수 없습니다. 더 불러오기를 시도하세요"
+  Shows:
+    Shows: 프로그램
+    This channel does not currently have any shows: 이 채널에는 현재 프로그램이 없습니다
 Video:
   Info panel source: '출처: {source}'
   External DRM Protected: "DRM 보호 동영상에는 독점 비공개 소스 구성 요소가 필요하므로 OpenTubeX에서 재생할 수 없습니다."

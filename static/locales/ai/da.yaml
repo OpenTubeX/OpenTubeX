@@ -1192,6 +1192,7 @@ Settings:
     Paused Interface Hide Delay: Forsinkelse før brugerfladen skjules under pause
     Add: Tilføj
     Remove: Fjern
+    Hide Channel Shows: Skjul "Serier"-fanen på kanaler
   Data Settings:
     Scheduled backups: "Planlagte sikkerhedskopier"
     Scheduled backup description: "Gem komplette ZIP-sikkerhedskopier, mens OpenTubeX er åbent. Manglende kopier oprettes ved opstart. Grænsen gælder kun planlagte kopier i denne mappe."
@@ -1580,6 +1581,9 @@ Channel:
     Original post unavailable: "Det oprindelige opslag er ikke tilgængeligt"
     Members-only video hidden by OpenTubeX: "Video kun for medlemmer skjult af OpenTubeX"
     Video hidden by OpenTubeX because of its title: "Video skjult af OpenTubeX, fordi titlen indeholder skjult tekst"
+  Shows:
+    Shows: Serier
+    This channel does not currently have any shows: Denne kanal har i øjeblikket ingen serier
 Video:
   Info panel source: 'Kilde: {source}'
   External DRM Protected: "DRM-beskyttede videoer kan ikke afspilles i OpenTubeX, da de kræver proprietære komponenter med lukket kilde."

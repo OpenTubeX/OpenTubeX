@@ -1177,6 +1177,7 @@ Settings:
     Paused Interface Hide Delay: Atraso até ocultar a interface durante a pausa
     Add: Adicionar
     Remove: Remover
+    Hide Channel Shows: Ocultar o separador “Programas” do canal
   Data Settings:
     Scheduled backups: "Cópias de segurança agendadas"
     Scheduled backup description: "Guarde cópias ZIP completas enquanto o OpenTubeX estiver aberto. As cópias em falta são feitas ao iniciar. O limite aplica-se apenas às cópias agendadas nesta pasta."
@@ -1550,6 +1551,9 @@ Channel:
     Original post unavailable: "Publicação original indisponível"
     Members-only video hidden by OpenTubeX: "Vídeo só para membros ocultado pelo OpenTubeX"
     Video hidden by OpenTubeX because of its title: "Vídeo ocultado pelo OpenTubeX porque o título contém texto oculto"
+  Shows:
+    Shows: Programas
+    This channel does not currently have any shows: Este canal não tem atualmente nenhum programa
 Video:
   Info panel source: 'Fonte: {source}'
   External DRM Protected: "Os vídeos protegidos por DRM não podem ser reproduzidos no OpenTubeX, uma vez que requerem componentes proprietários e de código fechado."

@@ -1418,6 +1418,7 @@ Settings:
     Hide Channel Podcasts: Skrij zavihek kanala »Podkasti«
     Hide Channel Releases: Skrij zavihek kanala »Izdaje«
     Hide Channel Courses: Skrij zavihek kanala »Tečaji«
+    Hide Channel Shows: Skrij zavihek kanala »Oddaje«
     Hide Videos, Playlists and Channels Containing Text: Skrij videoposnetke, sezname predvajanja in kanale, ki vsebujejo besedilo
     Hide Videos, Playlists and Channels Containing Text Placeholder: Beseda, del besede ali besedna zveza
     Hide Subscriptions Videos: Skrij videoposnetke iz naročnin
@@ -1898,6 +1899,9 @@ Channel:
     Video hidden by OpenTubeX because of its title: "OpenTubeX je skril videoposnetek, ker njegov naslov vsebuje skrito besedilo"
   Videos:
     This channel has videos but none could be displayed, try fetching more: "Ta kanal ima videoposnetke, vendar nobenega ni bilo mogoče prikazati. Poskusite naložiti več"
+  Shows:
+    Shows: Oddaje
+    This channel does not currently have any shows: Ta kanal trenutno nima oddaj
 Video:
   Info panel source: 'Vir: {source}'
   External DRM Protected: "Videoposnetkov z zaščito DRM ni mogoče predvajati v OpenTubeX, saj zahtevajo lastniške zaprtokodne komponente."

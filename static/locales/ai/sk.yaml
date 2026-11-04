@@ -1164,6 +1164,7 @@ Settings:
     Show Video Title: Zobraziť názov videa
     Show Bottom Right Actions Dock: Zobraziť panel akcií vpravo dole
     Paused Interface Hide Delay: Oneskorenie skrytia rozhrania pri pozastavení
+    Hide Channel Shows: Skryť kartu kanálov "Relácie"
   Data Settings:
     Scheduled backups: "Plánované zálohy"
     Scheduled backup description: "Ukladajte úplné ZIP zálohy, kým je OpenTubeX otvorený. Zmeškané zálohy sa vytvoria pri spustení. Limit platí iba pre plánované zálohy v tomto priečinku."
@@ -1520,6 +1521,9 @@ Channel:
     Original post unavailable: "Pôvodný príspevok nie je k dispozícii"
     Members-only video hidden by OpenTubeX: "OpenTubeX skryl video iba pre členov"
     Video hidden by OpenTubeX because of its title: "OpenTubeX skryl video, pretože jeho názov obsahuje skrytý text"
+  Shows:
+    Shows: Relácie
+    This channel does not currently have any shows: Tento kanál momentálne nemá žiadne relácie
 Video:
   Info panel source: 'Zdroj: {source}'
   External DRM Protected: "Videá chránené DRM nemôžu byť prehrávané v OpenTubeX, pretože vyžadujú proprietárne, uzavreté zdrojové komponenty."

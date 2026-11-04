@@ -1171,6 +1171,7 @@ Settings:
     Paused Interface Hide Delay: Odgoda skrivanja sučelja tijekom pauze
     Add: Dodaj
     Remove: Ukloni
+    Hide Channel Shows: Sakrij karticu "Emisije" kanala
   Data Settings:
     Scheduled backups: "Zakazane sigurnosne kopije"
     Scheduled backup description: "Spremajte potpune ZIP kopije dok je OpenTubeX otvoren. Propuštene kopije izrađuju se pri pokretanju. Ograničenje vrijedi samo za zakazane kopije u ovoj mapi."
@@ -1535,6 +1536,9 @@ Channel:
     Original post unavailable: "Izvorna objava nije dostupna"
     Members-only video hidden by OpenTubeX: "OpenTubeX je sakrio videozapis samo za članove"
     Video hidden by OpenTubeX because of its title: "OpenTubeX je sakrio videozapis jer njegov naslov sadrži skriveni tekst"
+  Shows:
+    Shows: Emisije
+    This channel does not currently have any shows: Ovaj kanal trenutno nema emisije
 Video:
   Info panel source: 'Izvor: {source}'
   External DRM Protected: "DRM-om zaštićena videa ne mogu se reproducirati u OpenTubeXu jer zahtijevaju vlasničke komponente zatvorenog koda."

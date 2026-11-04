@@ -1177,6 +1177,7 @@ Settings:
     Paused Interface Hide Delay: Затримка приховування інтерфейсу під час паузи
     Add: Додати
     Remove: Видалити
+    Hide Channel Shows: Приховати вкладку «Шоу» каналу
   Data Settings:
     Scheduled backups: "Заплановані резервні копії"
     Scheduled backup description: "Зберігайте повні ZIP-копії, поки OpenTubeX відкрито. Пропущені копії створюються під час запуску. Обмеження стосується лише запланованих копій у цій папці."
@@ -1553,6 +1554,9 @@ Channel:
     Original post unavailable: "Оригінальний допис недоступний"
     Members-only video hidden by OpenTubeX: "OpenTubeX приховав відео лише для спонсорів"
     Video hidden by OpenTubeX because of its title: "OpenTubeX приховав відео, бо його назва містить прихований текст"
+  Shows:
+    Shows: Шоу
+    This channel does not currently have any shows: На цьому каналі наразі немає шоу
 Video:
   Info panel source: 'Джерело: {source}'
   External DRM Protected: "Відео, захищені DRM, неможливо відтворити в OpenTubeX, оскільки для цього потрібні пропрієтарні компоненти з закритим вихідним кодом."

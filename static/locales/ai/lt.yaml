@@ -1392,6 +1392,7 @@ Settings:
     Hide Channel Podcasts: Slėpti kanalo kortelę „Tinklalaidės“
     Hide Channel Releases: Slėpti kanalo kortelę „Leidiniai“
     Hide Channel Courses: Slėpti kanalo kortelę „Kursai“
+    Hide Channel Shows: Slėpti kanalo kortelę „Laidos“
     Hide Videos, Playlists and Channels Containing Text: Slėpti vaizdo įrašus, grojaraščius ir kanalus, kuriuose yra nurodyto teksto
     Hide Videos, Playlists and Channels Containing Text Placeholder: Žodis, žodžio dalis arba frazė
     Hide Subscriptions Videos: Slėpti prenumeratų vaizdo įrašus
@@ -1845,6 +1846,9 @@ Channel:
     Video hidden by OpenTubeX because of its title: "OpenTubeX paslėpė vaizdo įrašą, nes jo pavadinime yra paslėpto teksto"
   Videos:
     This channel has videos but none could be displayed, try fetching more: "Šiame kanale yra vaizdo įrašų, bet nė vieno nepavyko parodyti. Pabandykite įkelti daugiau"
+  Shows:
+    Shows: Laidos
+    This channel does not currently have any shows: Šiame kanale šiuo metu nėra laidų
 Video:
   Info panel source: 'Šaltinis: {source}'
   External DRM Protected: "DRM apsaugotų vaizdo įrašų negalima leisti naudojant OpenTubeX, nes jiems reikia nuosavybinių uždarojo kodo komponentų."

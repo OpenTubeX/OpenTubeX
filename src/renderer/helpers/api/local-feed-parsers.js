@@ -389,6 +389,7 @@ export function createLocalFeedParsers(shouldHideMembersOnly) {
         authorThumbnailUrl: getResultAuthorThumbnailUrl(gridShow),
         videoCount: undefined,
         itemCountText: gridShow.thumbnail_overlays[0]?.text?.text ?? '',
+        isShow: true,
       }
     } else {
       let internalChannelName
@@ -802,7 +803,8 @@ export function createLocalFeedParsers(shouldHideMembersOnly) {
           ...(isShow ? { itemCountText: thumbnailOverlayBadgeView.badges[0].text } : {}),
           isPodcast: lockupView.content_type === 'PODCAST',
           isAlbum: lockupView.content_type === 'ALBUM' || (thumbnailOverlayBadgeView?.badges.some(badge => badge.icon_name === 'music') ?? false),
-          isCourse: lockupView.content_type === 'COURSE' || (thumbnailOverlayBadgeView?.badges.some(badge => badge.icon_name === 'COURSE') ?? false)
+          isCourse: lockupView.content_type === 'COURSE' || (thumbnailOverlayBadgeView?.badges.some(badge => badge.icon_name === 'COURSE') ?? false),
+          isShow,
         }
       }
       case 'SHORT':

@@ -223,6 +223,30 @@
             </div>
             <!-- eslint-disable-next-line vuejs-accessibility/interactive-supports-focus -->
             <div
+              v-if="visibleTabs.includes('shows')"
+              id="showsTab"
+              class="tab"
+              role="tab"
+              :aria-selected="currentTab === 'shows'"
+              aria-controls="showsPanel"
+              :tabindex="currentTab === 'shows' ? 0 : -1"
+              :class="{ selectedTab: currentTab === 'shows' }"
+              @click="changeTabFromPointer($event, 'shows')"
+              @keydown.left.right="focusTab('shows', $event)"
+              @keydown.enter.space.prevent="changeTab('shows')"
+            >
+              <FtIcon
+                :icon="['fas', 'tv']"
+                class="channelTabIcon"
+                aria-hidden="true"
+              />
+              <span
+                class="tabLabel"
+                :data-label="$t('Channel.Shows.Shows')"
+              ><span>{{ $t("Channel.Shows.Shows") }}</span></span>
+            </div>
+            <!-- eslint-disable-next-line vuejs-accessibility/interactive-supports-focus -->
+            <div
               v-if="visibleTabs.includes('podcasts')"
               id="podcastsTab"
               class="tab"

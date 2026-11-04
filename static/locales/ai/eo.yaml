@@ -1200,6 +1200,7 @@ Settings:
     Show Video Title: Montri titolon de videaĵo
     Show Bottom Right Actions Dock: Montri agobreton malsupre dekstre
     Paused Interface Hide Delay: Prokrasto de kaŝo de la interfaco dum paŭzo
+    Hide Channel Shows: Kaŝi elsendo-langeton de kanaloj
   Data Settings:
     Scheduled backups: Planitaj savkopioj
     Scheduled backup description: Konservi kompletajn ZIP-savkopiojn dum OpenTubeX estas malfermita. Maltrafitaj savkopioj ruliĝas je startigo. La limo validas nur por planitaj savkopioj en ĉi tiu dosierujo.
@@ -1557,6 +1558,9 @@ Channel:
     Original post unavailable: Originala afiŝo ne disponeblas
     Members-only video hidden by OpenTubeX: "Video nur por membroj kaŝita de OpenTubeX"
     Video hidden by OpenTubeX because of its title: "Video kaŝita de OpenTubeX ĉar ĝia titolo enhavas kaŝitan tekston"
+  Shows:
+    Shows: Elsendoj
+    This channel does not currently have any shows: Tiu ĉi kanalo aktuale ne havas iun ajn elsendon
 Video:
   Mark As Fully Watched: Marki kiel tute spektita
   AI-generated video summary: Resumo de videaĵo generita de AI

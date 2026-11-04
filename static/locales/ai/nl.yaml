@@ -1181,6 +1181,7 @@ Settings:
     Paused Interface Hide Delay: Wachttijd voor verbergen van gepauzeerde interface
     Add: Toevoegen
     Remove: Verwijderen
+    Hide Channel Shows: Kanaal­tabblad ‘Programma's’ verbergen
   Data Settings:
     Scheduled backups: "Geplande back-ups"
     Scheduled backup description: "Bewaar volledige ZIP-back-ups terwijl OpenTubeX geopend is. Gemiste back-ups worden bij het opstarten gemaakt. De limiet geldt alleen voor geplande back-ups in deze map."
@@ -1560,6 +1561,9 @@ Channel:
     Original post unavailable: "Oorspronkelijk bericht niet beschikbaar"
     Members-only video hidden by OpenTubeX: "Video alleen voor leden verborgen door OpenTubeX"
     Video hidden by OpenTubeX because of its title: "Video verborgen door OpenTubeX omdat de titel verborgen tekst bevat"
+  Shows:
+    Shows: Programma's
+    This channel does not currently have any shows: Dit kanaal heeft momenteel geen programma's
 Video:
   Info panel source: 'Bron: {source}'
   External DRM Protected: "Video's die beschermd worden door DRM kunnen niet worden afgespeeld in OpenTubeX omdat ze propriëtaire onderdelen met gesloten broncode vereisen."

@@ -624,7 +624,6 @@ Settings:
       Signal Light: "Signal Светлая"
       Signal Dark: "Signal Цёмная"
       Custom: Карыстальніцкая
-      Catppuccin Latte: Catppuccin Latte
     Light Theme: Светлая тэма
     Dark Theme: Цёмная тэма
     Custom Theme:
@@ -726,7 +725,6 @@ Settings:
       Catppuccin Macchiato Blue: "Catppuccin Macchiato Сіні"
       Catppuccin Macchiato Lavender: "Catppuccin Macchiato Лаванда"
       Catppuccin Latte Mauve: Catppuccin Latte Mauve
-      Catppuccin Latte Red: Catppuccin Latte Red
   Player Settings:
     Mono Audio: 'Мона-гук'
     Show Mono Audio Toggle: 'Паказваць пераключальнік мона-гуку'
@@ -1203,6 +1201,7 @@ Settings:
     Paused Interface Hide Delay: Затрымка схавання інтэрфейсу падчас паўзы
     Add: Дадаць
     Remove: Выдаліць
+    Hide Channel Shows: Схаваць укладку «Шоу» канала
   Data Settings:
     Scheduled backups: "Запланаваныя рэзервовыя копіі"
     Scheduled backup description: "Захоўвайце поўныя ZIP-копіі, пакуль OpenTubeX адкрыты. Прапушчаныя копіі ствараюцца пры запуску. Абмежаванне датычыцца толькі запланаваных копій у гэтай папцы."
@@ -1591,6 +1590,9 @@ Channel:
     Original post unavailable: "Арыгінальны допіс недаступны"
     Members-only video hidden by OpenTubeX: "OpenTubeX схаваў відэа толькі для ўдзельнікаў"
     Video hidden by OpenTubeX because of its title: "OpenTubeX схаваў відэа, бо яго назва змяшчае схаваны тэкст"
+  Shows:
+    Shows: Шоу
+    This channel does not currently have any shows: Зараз на гэтым канале няма шоу
 Video:
   Info panel source: 'Крыніца: {source}'
   External DRM Protected: "Відэа, абароненыя DRM, нельга прайграваць у OpenTubeX, бо для іх патрэбны прапрыетарныя кампаненты з закрытым зыходным кодам."
@@ -1618,8 +1620,6 @@ Video:
   Queue Item Cannot Move Down: Немагчыма перамясціць {title} ніжэй. Яно ўжо на пазіцыі {total} з {total}.
   Metadata: Звесткі пра відэа
   Close Metadata: Закрыць звесткі пра відэа
-  Collapse Playlist: Згарнуць плэйліст
-  Expand Playlist: Разгарнуць плэйліст
   Metadata Cache:
     Title History: Гісторыя назваў
     Thumbnail History: Гісторыя мініяцюр

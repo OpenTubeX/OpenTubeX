@@ -288,6 +288,7 @@ const playlistTypeIcon = computed(() => {
     if (props.data.isPodcast === true) return 'podcast'
     if (props.data.isAlbum === true) return 'music'
     if (props.data.isCourse === true) return 'graduation-cap'
+    if (props.data.isShow === true) return 'tv'
   }
   return 'list'
 })
