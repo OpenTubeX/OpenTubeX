@@ -3,85 +3,87 @@
     v-if="settingsOverlayActive"
     :to="teleportTarget"
   >
-    <div
-      ref="prompt"
-      class="prompt"
-      :class="{ lockScroll }"
-      tabindex="-1"
-      :inert="inert"
-      @vue:before-mount="preparePrompt"
-      @vue:mounted="activatePrompt"
-      @vue:before-unmount="deactivatePrompt"
-      @pointerdown.stop
-      @touchstart.stop
-      @touchend.stop
-      @dblclick.stop
-      @click.stop="handleClick"
-      @keydown.enter.stop="($event.target === $event.currentTarget) && hide()"
-      @keydown.space.stop
-      @keydown.left.right.capture="handleArrowKeys"
-    >
-      <FtCard
-        ref="promptCard"
-        v-overlay-scrollbars="!fixedLayout"
-        class="promptCard"
-        :class="{ autosize, fixedLayout, [theme]: true, [cardClass]: cardClass !== '' }"
-        :inert="busy"
-        role="dialog"
-        aria-modal="true"
-        :aria-labelledby="id"
+    <ModalLeaveTransition>
+      <div
+        ref="prompt"
+        class="prompt"
+        :class="{ lockScroll }"
+        tabindex="-1"
+        :inert="inert"
+        @vue:before-mount="preparePrompt"
+        @vue:mounted="activatePrompt"
+        @vue:before-unmount="deactivatePrompt"
+        @pointerdown.stop
+        @touchstart.stop
+        @touchend.stop
+        @dblclick.stop
+        @click.stop="handleClick"
+        @keydown.enter.stop="($event.target === $event.currentTarget) && hide()"
+        @keydown.space.stop
+        @keydown.left.right.capture="handleArrowKeys"
       >
-        <slot
-          name="label"
-          :label-id="id"
+        <FtCard
+          ref="promptCard"
+          v-overlay-scrollbars="!fixedLayout"
+          class="promptCard"
+          :class="{ autosize, fixedLayout, [theme]: true, [cardClass]: cardClass !== '' }"
+          :inert="busy"
+          role="dialog"
+          aria-modal="true"
+          :aria-labelledby="id"
         >
-          <h2
-            :id="id"
-            class="center"
+          <slot
+            name="label"
+            :label-id="id"
           >
-            {{ label }}
-          </h2>
-        </slot>
+            <h2
+              :id="id"
+              class="center"
+            >
+              {{ label }}
+            </h2>
+          </slot>
 
-        <template v-if="fixedLayout">
-          <div
-            ref="promptContentScroller"
-            v-overlay-scrollbars="contentScrollable"
-            :class="contentScrollable ? 'promptContentScroller' : 'promptManagedContent'"
-          >
-            <div class="promptContent">
-              <slot />
+          <template v-if="fixedLayout">
+            <div
+              ref="promptContentScroller"
+              v-overlay-scrollbars="contentScrollable"
+              :class="contentScrollable ? 'promptContentScroller' : 'promptManagedContent'"
+            >
+              <div class="promptContent">
+                <slot />
+              </div>
             </div>
-          </div>
-          <div class="promptFixedFooter">
-            <slot name="footer" />
-          </div>
-        </template>
-        <slot v-else>
-          <p
-            v-for="extraLabel in extraLabels"
-            :key="extraLabel"
-            class="center"
-          >
-            <strong>
-              {{ extraLabel }}
-            </strong>
-          </p>
-          <FtButtonGroup>
-            <FtButton
-              v-for="(option, index) in optionNames"
-              :key="index"
-              :label="option"
-              :text-color="optionButtonTextColor(index)"
-              :background-color="optionButtonBackgroundColor(index)"
-              :theme="index === 0 && isFirstOptionDestructive ? 'destructive' : ''"
-              :icon="optionIcons[index] ?? (index === 0 && isFirstOptionDestructive ? ['fas', 'trash'] : null)"
-              @click="click(optionValues[index])"
-            />
-          </FtButtonGroup>
-        </slot>
-      </FtCard>
-    </div>
+            <div class="promptFixedFooter">
+              <slot name="footer" />
+            </div>
+          </template>
+          <slot v-else>
+            <p
+              v-for="extraLabel in extraLabels"
+              :key="extraLabel"
+              class="center"
+            >
+              <strong>
+                {{ extraLabel }}
+              </strong>
+            </p>
+            <FtButtonGroup>
+              <FtButton
+                v-for="(option, index) in optionNames"
+                :key="index"
+                :label="option"
+                :text-color="optionButtonTextColor(index)"
+                :background-color="optionButtonBackgroundColor(index)"
+                :theme="index === 0 && isFirstOptionDestructive ? 'destructive' : ''"
+                :icon="optionIcons[index] ?? (index === 0 && isFirstOptionDestructive ? ['fas', 'trash'] : null)"
+                @click="click(optionValues[index])"
+              />
+            </FtButtonGroup>
+          </slot>
+        </FtCard>
+      </div>
+    </ModalLeaveTransition>
   </Teleport>
 </template>
 
@@ -89,6 +91,7 @@
 import { inject, nextTick, useId, useTemplateRef } from 'vue'
 
 import { clampOverlayScrollTop } from '../../helpers/overlayScrollbars'
+import { ModalLeaveTransition } from '../../helpers/modalTransition'
 import { useFullscreenTeleportTarget } from '../../composables/useFullscreenTeleportTarget'
 import { useSettingsOverlay } from '../../composables/useSettingsOverlay'
 import store from '../../store/index'
