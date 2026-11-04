@@ -21,9 +21,9 @@ const TRACKS = [
  *
  * @param {{ electronApp: import('@playwright/test').ElectronApplication }} app
  * @param {import('@playwright/test').Page} page
- * @param {(string | [string, string, string?])[]} streams The codecs that the
- * manifest offers the stream in, optionally with a resolution other than
- * 320x180 and a name for its video rendition
+ * @param {(string | [string, string, string?, number?])[]} streams The codecs
+ * that the manifest offers the stream in, optionally with a resolution other
+ * than 320x180, a name for its video rendition and a bandwidth
  */
 async function openAdaptiveVideo(app, page, streams = ['avc1.42c00d']) {
   // Software decoding on a busy machine drops frames, and automatic quality
@@ -42,9 +42,9 @@ async function openAdaptiveVideo(app, page, streams = ['avc1.42c00d']) {
     contentType: 'application/x-mpegurl',
     body: route.request().url().endsWith('/master.m3u8')
       ? `#EXTM3U
-${streams.map(stream => [stream].flat()).map(([codec, resolution = '320x180', name], index) => [
+${streams.map(stream => [stream].flat()).map(([codec, resolution = '320x180', name, bandwidth = 84000], index) => [
   ...(name ? [`#EXT-X-MEDIA:TYPE=VIDEO,GROUP-ID="${name}",NAME="${name}",AUTOSELECT=YES,DEFAULT=YES`] : []),
-  `#EXT-X-STREAM-INF:BANDWIDTH=84000,CODECS="${codec}",RESOLUTION=${resolution}${name ? `,VIDEO="${name}"` : ''}`,
+  `#EXT-X-STREAM-INF:BANDWIDTH=${bandwidth},CODECS="${codec}",RESOLUTION=${resolution}${name ? `,VIDEO="${name}"` : ''}`,
   `video-${index}.m3u8\n`
 ].join('\n')).join('')}`
       : `#EXTM3U
@@ -506,5 +506,54 @@ test.describe('default quality with a preferred codec', () => {
     await expect.poll(() => player.evaluate(element => {
       return element.ui.getControls().getPlayer().getVariantTracks().find(track => track.active)?.videoCodec
     })).toBe('avc1.42c00d')
+  })
+})
+
+test.describe('automatic quality after a stream is disabled', () => {
+  test.use({
+    seed: {
+      settings: {
+        videoPlaybackEngine: 'yt-dlp',
+        ytDlpPlaybackEngineDefaultMigration: true,
+        defaultVideoFormat: 'dash',
+        defaultQuality: 'auto',
+        useSponsorBlock: false,
+        playNextVideo: false,
+        fetchSubscriptionsAutomatically: false,
+      }
+    }
+  })
+
+  test('drops to a lower resolution of the same codec instead of switching to AV1', async ({ app, page }) => {
+    // A GPU that decodes H.264 but not AV1, so automatic quality prefers H.264
+    await page.evaluate(() => {
+      const capabilities = navigator.mediaCapabilities
+      const decodingInfo = capabilities.decodingInfo.bind(capabilities)
+      capabilities.decodingInfo = async configuration => {
+        const info = await decodingInfo(configuration)
+        const av1 = configuration.video?.contentType.includes('av01')
+        return { supported: info.supported, smooth: true, powerEfficient: !av1, keySystemAccess: info.keySystemAccess }
+      }
+    })
+    await openAdaptiveVideo(app, page, [
+      ['avc1.42c00d', '640x360', undefined, 200000],
+      ['av01.0.04M.08', '640x360', undefined, 200000],
+      ['avc1.42c00d', '320x180'],
+    ])
+    const player = page.locator(`${activeTab} .ftVideoPlayer`)
+    const activeVideo = () => player.evaluate(element => {
+      const track = element.ui.getControls().getPlayer().getVariantTracks().find(track => track.active)
+      return `${track?.videoCodec} ${track?.height}p`
+    })
+    await expect.poll(activeVideo).toBe('avc1.42c00d 360p')
+
+    // Shaka disables the playing stream for a while when it drops frames
+    await player.evaluate(element => {
+      const shakaPlayer = element.ui.getControls().getPlayer()
+      const { videoId } = shakaPlayer.getVariantTracks().find(track => track.active)
+      const { video } = shakaPlayer.getManifest().variants.find(variant => variant.video?.id === videoId)
+      shakaPlayer.disableStream(video, 30)
+    })
+    await expect.poll(activeVideo).toBe('avc1.42c00d 180p')
   })
 })

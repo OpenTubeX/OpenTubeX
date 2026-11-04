@@ -112,3 +112,33 @@ export function chooseAutoVariants(variants, preferredCodecs, preferredDecodingA
 
   return candidates.filter(variant => !variant.video || chosenStreams.has(variant.video))
 }
+
+/** Codecs to fall back to once every chosen stream is disabled, cheapest to decode first */
+const FALLBACK_CODECS = ['avc1', 'vp09', 'vp9']
+
+/**
+ * `chooseAutoVariants` for a playable subset of the manifest. Shaka disables a
+ * stream for a while when it drops frames or fails to load, and leaves it out
+ * of the playable variants. Choosing from those alone would hand its
+ * resolution to another codec, often AV1, the hardest to decode, so the
+ * choice is made with the disabled variants and then limited to the playable
+ * ones. Automatic quality then drops to another resolution of the same codec,
+ * as with Shaka's own codec filtering. Only when every chosen stream is
+ * disabled does it fall back to another codec, the cheapest to decode first.
+ * @param {shaka.extern.Variant[]} playableVariants
+ * @param {Iterable<shaka.extern.Variant>} knownVariants including disabled ones
+ * @param {string[]} preferredCodecs
+ * @param {string[]} preferredDecodingAttributes
+ * @returns {shaka.extern.Variant[]}
+ */
+export function chooseAutoVariantsWithDisabled(playableVariants, knownVariants, preferredCodecs, preferredDecodingAttributes) {
+  const playable = new Set(playableVariants)
+  const candidates = [...knownVariants].filter(variant => playable.has(variant) ||
+    (variant.disabledUntilTime > 0 && variant.allowedByApplication && variant.allowedByKeySystem))
+  const chosenVideoIds = new Set(chooseAutoVariants(candidates, preferredCodecs, preferredDecodingAttributes)
+    .map(variant => variant.video?.id))
+  const chosen = playableVariants.filter(variant => !variant.video || chosenVideoIds.has(variant.video.id))
+  return chosen.some(variant => variant.video)
+    ? chosen
+    : chooseAutoVariants(playableVariants, [...preferredCodecs, ...FALLBACK_CODECS], preferredDecodingAttributes)
+}

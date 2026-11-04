@@ -1,6 +1,6 @@
 import shaka from 'shaka-player'
 
-import { chooseAutoVariants } from './videoCodecPreference'
+import { chooseAutoVariantsWithDisabled } from './videoCodecPreference'
 
 /**
  * Shaka's ABR, limited to the codecs that Shaka would otherwise keep in the
@@ -22,6 +22,19 @@ export class AutoQualityAbrManager extends shaka.abr.SimpleAbrManager {
     this.preferredDecodingAttributes_ = preferredDecodingAttributes
     /** @private */
     this.onVariantsChosen_ = onVariantsChosen
+    /**
+     * Every variant of the current manifest, including the ones Shaka
+     * disables for a while, which it leaves out of `setVariants`
+     * @private
+     * @type {Set<shaka.extern.Variant>}
+     */
+    this.knownVariants_ = new Set()
+  }
+
+  /** @override */
+  stop() {
+    this.knownVariants_.clear()
+    return super.stop()
   }
 
   /**
@@ -30,7 +43,10 @@ export class AutoQualityAbrManager extends shaka.abr.SimpleAbrManager {
    * @param {boolean} isLowLatency
    */
   setVariants(variants, isLowLatency) {
-    const autoVariants = chooseAutoVariants(variants, this.preferredCodecs_, this.preferredDecodingAttributes_)
+    for (const variant of variants) this.knownVariants_.add(variant)
+    const autoVariants = chooseAutoVariantsWithDisabled(
+      variants, this.knownVariants_, this.preferredCodecs_, this.preferredDecodingAttributes_
+    )
     this.onVariantsChosen_(new Set(autoVariants.map(variant => variant.video?.id)))
     return super.setVariants(autoVariants, isLowLatency)
   }
