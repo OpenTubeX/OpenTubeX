@@ -228,6 +228,10 @@ test.describe('translated import actions', () => {
       }))
       return new Set(actionBounds.map(bounds => Math.round(bounds.top))).size
     }).toBe(1)
+    // Buttons animate their padding into the compact layout.
+    await Promise.all(actions.map(action => action.evaluate(element => {
+      return Promise.all(element.getAnimations({ subtree: true }).map(animation => animation.finished.catch(() => {})))
+    })))
     const actionWidths = await Promise.all(actions.map(action => {
       return action.evaluate(element => {
         const contentRange = document.createRange()
