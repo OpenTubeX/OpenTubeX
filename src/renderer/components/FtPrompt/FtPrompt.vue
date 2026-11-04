@@ -280,7 +280,7 @@ function handleClick(event) {
  * @returns {HTMLElement[]}
  */
 function getPromptButtons() {
-  return Array.from(promptCard.value?.$el.querySelectorAll('.btn.ripple, .iconButton') ?? [])
+  return Array.from(promptCard.value?.$el.querySelectorAll('.btn.ripple, .iconButton, .promptAction') ?? [])
 }
 
 /**

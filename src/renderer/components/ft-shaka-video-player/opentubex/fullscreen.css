@@ -521,7 +521,7 @@
   color: var(--primary-text-color);
   background-color: rgb(12 12 12 / 62%);
   border: 1px solid rgb(255 255 255 / 10%);
-  border-radius: calc(10px * var(--ui-roundness));
+  border-radius: var(--shape-corner-large);
   box-shadow: 0 6px 20px rgb(0 0 0 / 35%);
   backdrop-filter: blur(14px) saturate(1.05);
 }

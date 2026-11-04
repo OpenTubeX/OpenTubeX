@@ -148,16 +148,25 @@
   user-select: none;
 }
 
+// The Material 3 menu surface shared with the context menu and the
+// subscription settings popover.
 .iconDropdown {
-  background-color: var(--side-nav-color);
+  --menu-row-hover-color: var(--side-nav-hover-color);
+  --menu-row-selected-color: color-mix(in srgb, var(--primary-color) 20%, var(--card-bg-color));
+
+  box-sizing: border-box;
+  background-color: color-mix(in srgb, var(--card-bg-color) 96%, var(--bg-color));
+  backdrop-filter: var(--card-bg-blur, none);
+  border: 1px solid color-mix(in srgb, var(--border-color) 55%, transparent);
   border-radius: var(--shape-corner-large);
-  box-shadow: 0 1px 2px rgb(0 0 0 / 50%);
-  color: var(--secondary-text-color);
+  box-shadow: 0 12px 32px rgb(0 0 0 / 34%);
+  color: var(--primary-text-color);
   display: inline;
-  font-size: 12px;
+  font-size: 14px;
+  line-height: 1.4;
   list-style-type: none;
   position: absolute;
-  text-align: center;
+  text-align: start;
   user-select: none;
 
   // Above route headers and the tab bar, while the top navigation stays above
@@ -207,30 +216,49 @@
     z-index: 1000;
   }
 
+  // Rows are rounded items inset from the menu edge.
   .list {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
     list-style-type: none;
     margin: 0;
-    padding: 0;
+    padding: 4px;
   }
 
   .listItem {
+    align-items: center;
+    border-radius: var(--shape-corner-medium);
+    box-sizing: border-box;
     cursor: pointer;
+    display: flex;
+    gap: 12px;
     margin: 0;
+    min-block-size: 40px;
     padding-block: 8px;
-    padding-inline: 10px;
-    transition: background-color var(--motion-fast-effects);
+    padding-inline: 12px;
+    transition: background-color var(--motion-fast-effects), border-radius var(--motion-fast-spatial);
     white-space: nowrap;
 
     &:hover,
     &:focus-visible,
-    &.pressed,
-    &.active {
-      background-color: var(--side-nav-hover-color);
+    &.pressed {
+      background-color: var(--menu-row-hover-color);
       color: var(--side-nav-hover-text-color);
     }
 
     &.active {
+      background-color: var(--menu-row-selected-color);
+      color: var(--primary-text-color);
       font-weight: 600;
+    }
+
+    &.active:is(:hover, :focus-visible) {
+      background-color: color-mix(in srgb, var(--primary-text-color) 8%, var(--menu-row-selected-color));
+    }
+
+    &:not(.disabled):active {
+      border-radius: var(--shape-corner-extra-small);
     }
 
     &.disabled {
@@ -244,35 +272,26 @@
       background-color: transparent;
       color: inherit;
     }
-
-    &:active {
-      background-color: var(--side-nav-active-color);
-      color: var(--side-nav-active-text-color);
-    }
   }
 
   .listItemDivider {
-    border-block-start: 1px solid var(--border-color);
-    margin-block: 1px;
-    margin-inline: auto;
-    // Too "visible" with current color
-    opacity: 0.5;
-    inline-size: 95%;
-  }
-
-  .listItem.hasIcon,
-  .listItem.active {
-    align-items: center;
-    display: flex;
-    gap: 8px;
-    text-align: start;
+    block-size: 1px;
+    margin-block: 4px;
+    margin-inline: 12px;
+    background-color: color-mix(in srgb, var(--border-color) 45%, transparent);
   }
 
   .optionIconColumn {
     display: inline-flex;
-    inline-size: 1em;
+    flex-shrink: 0;
+    inline-size: 18px;
     justify-content: center;
-    min-inline-size: 1em;
+    color: var(--secondary-text-color);
+    font-size: 16px;
+  }
+
+  .listItem:is(:hover, :focus-visible, .active) .optionIconColumn {
+    color: inherit;
   }
 
   .listItem > .wrapLabel {
@@ -293,9 +312,6 @@
     }
 
     .listItem {
-      align-items: center;
-      box-sizing: border-box;
-      display: flex;
       min-block-size: 48px;
       padding: 12px;
     }

@@ -1,9 +1,6 @@
 /* Outranks FtIconButton's scoped centered, small and secondary dropdown text. */
 :global(.ftIconButton .iconDropdown.castMenu) {
   inline-size: min(300px, calc(100vw - 16px));
-  color: var(--primary-text-color);
-  font-size: 14px;
-  text-align: start;
 }
 
 .castHeader {

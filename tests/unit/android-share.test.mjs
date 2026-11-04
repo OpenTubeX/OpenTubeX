@@ -18,6 +18,7 @@ function createShareActions(props = {}, userPlaylist = null) {
   const bindings = {
     computed,
     ref,
+    useId: () => 'share',
     useTemplateRef: () => ({ value: { hideDropdown: () => calls.push('close') } }),
     useI18n: () => ({ t: key => key }),
     defineProps: () => ({ shareTargetType: 'Video', id: 'video123', playlistId: '', getTimestamp: () => 42, ...props }),

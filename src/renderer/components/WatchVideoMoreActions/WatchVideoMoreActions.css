@@ -5,6 +5,13 @@
 .moreActionsContent {
   display: flex;
   flex-direction: column;
+  gap: 2px;
+  padding: 4px;
+}
+
+.mobileSheetEnabled .moreActionsContent {
+  gap: 0;
+  padding: 0;
 }
 
 .mobileSheetEnabled .moreActionsList {
@@ -16,20 +23,27 @@
 .moreAction {
   display: flex;
   align-items: center;
-  gap: 16px;
-  min-block-size: 48px;
-  padding-block: 10px;
+  gap: 12px;
+  min-block-size: 40px;
+  padding-block: 8px;
   padding-inline: 12px;
   border: 0;
-  border-radius: var(--shape-corner-small);
+  border-radius: var(--shape-corner-medium);
   background: transparent;
   color: inherit;
   font: inherit;
   text-align: start;
   cursor: pointer;
+  transition: background-color var(--motion-fast-effects), border-radius var(--motion-fast-spatial);
+}
+
+/* Precedes the sheet rows, which keep their square shape. */
+.moreAction:active {
+  border-radius: var(--shape-corner-extra-small);
 }
 
 .mobileSheetEnabled .moreAction {
+  gap: 16px;
   min-block-size: 56px;
   padding-inline: 24px;
   border-radius: 0;
@@ -41,9 +55,15 @@
   color: var(--side-nav-hover-text-color);
 }
 
-.moreAction > svg {
+.moreAction > .ft-icon {
   flex: none;
-  font-size: 20px;
+  inline-size: 18px;
+  color: var(--secondary-text-color);
+  font-size: 16px;
+}
+
+.moreAction:is(:hover, :focus-visible) > .ft-icon {
+  color: inherit;
 }
 
 .moreActionLabel {
@@ -52,6 +72,6 @@
   overflow-wrap: anywhere;
 }
 
-.moreActionCheck {
+.moreAction > .moreActionCheck {
   color: var(--accent-color);
 }
