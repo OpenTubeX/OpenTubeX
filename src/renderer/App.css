@@ -1063,8 +1063,12 @@
     display: none;
   }
 
+  /* Long translations of "No matches" truncate instead of crowding out the query. */
   .findbarStatus {
-    min-inline-size: 40px;
+    flex-shrink: 1;
+    min-inline-size: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
   }
 
   .tabSwitcher {

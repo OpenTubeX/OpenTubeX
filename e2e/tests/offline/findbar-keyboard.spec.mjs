@@ -67,11 +67,15 @@ test('find bar keeps its buttons inside the narrowest window', { tag: '@scale' }
   await page.keyboard.press('Control+f')
   await page.locator('.findbarInput').fill('zzz no such text zzz')
   await expect(page.locator('.findbarStatus')).toHaveText('No matches')
-  const overflow = await page.locator('.findbar').evaluate((findbar) => {
+  // Stand in for a long translation, such as Japanese, of "No matches".
+  await page.locator('.findbarStatus').evaluate((status) => { status.textContent = '一致する項目はありません' })
+  const layout = await page.locator('.findbar').evaluate((findbar) => {
     const bar = findbar.getBoundingClientRect()
     const close = findbar.querySelector('.findbarButton:last-child').getBoundingClientRect()
-    return { bar: bar.right - innerWidth, close: close.right - bar.right }
+    const input = findbar.querySelector('.findbarInput').getBoundingClientRect()
+    return { bar: bar.right - innerWidth, close: close.right - bar.right, input: input.width }
   })
-  expect(overflow.bar).toBeLessThanOrEqual(0)
-  expect(overflow.close).toBeLessThanOrEqual(0)
+  expect(layout.bar).toBeLessThanOrEqual(0)
+  expect(layout.close).toBeLessThanOrEqual(0)
+  expect(layout.input).toBeGreaterThanOrEqual(48)
 })
