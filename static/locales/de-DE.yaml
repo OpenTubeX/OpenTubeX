@@ -2040,6 +2040,7 @@ Channel:
   Official Artist Channel: Offizieller Künstlerkanal
   Show in subscription feed: Im Abo-Feed anzeigen
   Notify about new uploads: Über neue Uploads benachrichtigen
+  Show members-only videos: Videos nur für Mitglieder anzeigen
   Upload Notifications On: "Du wirst über neue Uploads von {channelName} benachrichtigt, wenn deine Abos aktualisiert werden"
   Upload Notifications Off: "Du wirst nicht mehr über neue Uploads von {channelName} benachrichtigt"
   Upload Notifications Disabled In Settings: "Benachrichtigungen für {channelName} sind aktiviert, aber Benachrichtigungen über neue Uploads sind in deinen Einstellungen deaktiviert"

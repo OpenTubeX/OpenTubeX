@@ -1775,6 +1775,7 @@ Channel:
   More videos hidden: '+{count}개 더'
   Show in subscription feed: 구독 피드에 표시
   Notify about new uploads: 새 업로드 알림
+  Show members-only videos: 회원 전용 동영상 표시
   Upload Notifications On: "구독이 새로 고쳐질 때 {channelName}의 새 업로드를 알려드립니다"
   Upload Notifications Off: "{channelName}의 새 업로드 알림을 받지 않습니다"
   Upload Notifications Disabled In Settings: "{channelName}의 알림은 켜져 있지만 설정에서 새 업로드 알림이 꺼져 있습니다"

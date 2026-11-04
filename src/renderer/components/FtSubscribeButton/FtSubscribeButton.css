@@ -217,7 +217,12 @@
   display: flex;
   flex-direction: column;
   font-size: 14px;
-  inline-size: min(340px, calc(100vw - 16px));
+
+  /* Grows past the base width, when the viewport allows, to keep the feed type chips in one row.
+     Unlike fit-content, max-content does not shrink toward the viewport edge the popover sits at. */
+  inline-size: max-content;
+  min-inline-size: min(340px, calc(100vw - 16px));
+  max-inline-size: min(440px, calc(100vw - 16px));
   max-block-size: min(540px, 70vh);
   overflow: hidden;
   padding: 5px;
@@ -240,6 +245,8 @@
   flex: 1 1 auto;
   min-block-size: 0;
   inline-size: auto;
+  min-inline-size: 0;
+  max-inline-size: none;
   max-block-size: none;
   padding-block: 0 12px;
   padding-inline: 12px;
@@ -426,13 +433,26 @@
   color: var(--side-nav-hover-text-color);
 }
 
+/* Applies to the channel everywhere, so it sits apart from the feed settings. */
 .membersOnlyPreference {
-  padding-block: 4px 8px;
-  padding-inline: 6px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-block-start: 4px;
+  padding-block: 4px;
+  padding-inline: 6px 0;
+  border-block-start: 1px solid var(--divider-color);
+}
+
+.membersOnlyIcon {
+  flex-shrink: 0;
+  color: var(--secondary-text-color);
 }
 
 /* The profile and group chips give up their space first and keep at least one row. */
 .profileDropdownScroller {
+  /* Long profile and group lists wrap instead of widening the popover. */
+  contain: inline-size;
   flex-shrink: 1000;
   min-block-size: 46px;
   overflow-y: auto;

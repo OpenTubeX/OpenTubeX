@@ -1538,6 +1538,7 @@ Channel:
   More videos hidden: '+{count} ще | +{count} ще | +{count} ще'
   Show in subscription feed: Показувати у стрічці підписок
   Notify about new uploads: Сповіщати про новий вміст
+  Show members-only videos: Показувати відео лише для учасників
   Upload Notifications On: "Ви отримуватимете сповіщення про новий вміст {channelName} під час оновлення підписок"
   Upload Notifications Off: "Ви не отримуватимете сповіщень про новий вміст {channelName}"
   Upload Notifications Disabled In Settings: "Сповіщення для {channelName} увімкнено, але сповіщення про новий вміст вимкнено в налаштуваннях"

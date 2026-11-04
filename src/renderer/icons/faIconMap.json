@@ -91,6 +91,10 @@
     "ri": "focus-2-line",
     "material": "target-rounded"
   },
+  "calendar-day": {
+    "ri": "calendar-event-line",
+    "material": "today-outline-rounded"
+  },
   "calendar-days": {
     "ri": "calendar-line",
     "material": "calendar-month-outline"

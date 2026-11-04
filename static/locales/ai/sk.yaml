@@ -1508,6 +1508,7 @@ Channel:
   More videos hidden: '+{count} ďalších | +{count} ďalších | +{count} ďalších'
   Show in subscription feed: Zobraziť v kanáli odberov
   Notify about new uploads: Oznamovať nový obsah
+  Show members-only videos: Zobraziť videá len pre členov
   Upload Notifications On: "Pri obnovení odberov budete upozornení na nový obsah od {channelName}"
   Upload Notifications Off: "Nebudete upozorňovaní na nový obsah od {channelName}"
   Upload Notifications Disabled In Settings: "Oznámenia pre {channelName} sú zapnuté, ale oznámenia o novom obsahu sú vypnuté v nastaveniach"

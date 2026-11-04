@@ -1506,6 +1506,7 @@ Channel:
   More videos hidden: '+{count} további | +{count} további'
   Show in subscription feed: Megjelenítés a feliratkozási hírfolyamban
   Notify about new uploads: Értesítés új feltöltésekről
+  Show members-only videos: Csak tagoknak szóló videók megjelenítése
   Upload Notifications On: "Értesítést kapsz {channelName} új feltöltéseiről, amikor a feliratkozásaid frissülnek"
   Upload Notifications Off: "Nem kapsz értesítést {channelName} új feltöltéseiről"
   Upload Notifications Disabled In Settings: "{channelName} értesítései be vannak kapcsolva, de az új feltöltésekről szóló értesítések ki vannak kapcsolva a beállításokban"

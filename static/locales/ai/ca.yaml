@@ -1881,6 +1881,7 @@ Channel:
   More videos hidden: '+{count} més | +{count} més | +{count} més'
   Show in subscription feed: Mostra al canal de subscripcions
   Notify about new uploads: Notifica les pujades noves
+  Show members-only videos: Mostra els vídeos només per a membres
   Upload Notifications On: "Rebràs notificacions de les pujades noves de {channelName} quan s'actualitzin les subscripcions"
   Upload Notifications Off: "No rebràs notificacions de les pujades noves de {channelName}"
   Upload Notifications Disabled In Settings: "Les notificacions de {channelName} estan activades, però les notificacions de pujades noves estan desactivades a la configuració"

@@ -1506,6 +1506,7 @@ Channel:
   More videos hidden: '+{count} mais | +{count} mais | +{count} mais'
   Show in subscription feed: Mostrar no feed de subscrições
   Notify about new uploads: Notificar novos carregamentos
+  Show members-only videos: Mostrar vídeos exclusivos para membros
   Upload Notifications On: "Será notificado sobre novos carregamentos de {channelName} quando as suas subscrições forem atualizadas"
   Upload Notifications Off: "Não será notificado sobre novos carregamentos de {channelName}"
   Upload Notifications Disabled In Settings: "As notificações de {channelName} estão ativadas, mas as notificações de novos carregamentos estão desativadas nas suas definições"

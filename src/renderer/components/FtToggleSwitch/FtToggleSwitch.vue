@@ -4,6 +4,7 @@
     :data-setting-key="settingKey || undefined"
     :class="{
       compact,
+      trailing,
       disabled: disabled,
       containsTooltip: tooltip.length > 0
     }"
@@ -74,6 +75,10 @@ const props = defineProps({
     default: false
   },
   compact: {
+    type: Boolean,
+    default: false
+  },
+  trailing: {
     type: Boolean,
     default: false
   },

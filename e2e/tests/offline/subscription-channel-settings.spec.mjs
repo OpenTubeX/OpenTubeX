@@ -98,13 +98,28 @@ test.describe('subscription settings layout', { tag: '@scale' }, () => {
           })
         })
         expect.soft(overflow, `${direction} controls overflow at ${width}px`).toBe(false)
-        await expect(popover.getByRole('checkbox', { name: 'Members only' })).toBeVisible()
+        await expect(popover.getByRole('checkbox', { name: 'Show members-only videos' })).toBeVisible()
+        // The members-only label leads and its switch ends the row.
+        expect.soft(await popover.locator('.membersOnlyPreference').evaluate((row, direction) => {
+          const bounds = row.getBoundingClientRect()
+          const text = row.querySelector('.switch-label-text').getBoundingClientRect()
+          const thumb = row.querySelector('.switch-thumb').getBoundingClientRect()
+          return direction === 'ltr'
+            ? thumb.left > text.right && thumb.right < bounds.right
+            : thumb.right < text.left && thumb.left > bounds.left
+        }, direction), `${direction} members-only switch trails its label`).toBe(true)
+        if (width === 1200) {
+          const rowCounts = await popover.locator('.feedTypePreferences .preferenceChips').evaluateAll(groups => groups.map(group => (
+            new Set([...group.children].map(chip => Math.round(chip.getBoundingClientRect().top))).size
+          )))
+          expect.soft(rowCounts, `${direction} feed type chips wrap`).toEqual([1, 1])
+        }
       }
       await page.evaluate(() => { document.body.dir = 'ltr' })
       await popover.screenshot({ path: testInfo.outputPath(`subscription-popover-${width}.png`) })
     }
     await page.evaluate(() => window.$store.dispatch('updateYtDlpPlaybackAuthMode', 'none'))
-    await expect(popover.getByRole('checkbox', { name: 'Members only' })).toHaveCount(0)
+    await expect(popover.getByRole('checkbox', { name: 'Show members-only videos' })).toHaveCount(0)
     await expect(popover.getByRole('button', { name: 'Use global setting', exact: true })).toBeVisible()
   })
 
@@ -246,9 +261,9 @@ test('keeps the popover and Subscription Settings manager in sync', async ({ app
     .toHaveAttribute('aria-checked', 'false')
   await expect(popoverShorts)
     .toHaveAttribute('aria-checked', 'true')
-  const popoverMembersOnly = popover.getByRole('checkbox', { name: 'Members only' })
+  const popoverMembersOnly = popover.getByRole('checkbox', { name: 'Show members-only videos' })
   await expect(popoverMembersOnly).toBeChecked()
-  await popover.locator('label', { hasText: 'Members only' }).click()
+  await popover.locator('label', { hasText: 'Show members-only videos' }).click()
   await expect(popoverMembersOnly).not.toBeChecked()
   await popoverFeed.getByRole('checkbox', { name: 'Live' }).click()
   const popoverLimit = popover.locator('.dailyVideoLimitCount')
@@ -419,7 +434,7 @@ test('only offers members-only controls when yt-dlp playback cookies are configu
   const alpha = page.locator('.channel', { hasText: 'Alpha Channel' })
   await alpha.getByRole('button', { name: 'Subscription settings' }).click()
   await expect(page.locator('.profileDropdown')
-    .getByRole('checkbox', { name: 'Members only' })).toHaveCount(0)
+    .getByRole('checkbox', { name: 'Show members-only videos' })).toHaveCount(0)
 })
 
 test('reports subscription setting write failures from the channel popover', async ({ page }) => {
@@ -464,7 +479,7 @@ test('does not carry a failed popover edit into a later update', async ({ app, p
     window.channelSettingsUpdateCount = () => updateCount
   })
 
-  await popover.locator('label', { hasText: 'Members only' }).click()
+  await popover.locator('label', { hasText: 'Show members-only videos' }).click()
   await expect.poll(() => page.evaluate(() => window.channelSettingsUpdateCount())).toBe(1)
 
   // The stepper starts at one, so one step sets a limit of two.
