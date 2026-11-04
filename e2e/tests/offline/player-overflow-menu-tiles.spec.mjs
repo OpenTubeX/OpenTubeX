@@ -482,6 +482,57 @@ test.describe('phone options sheet', () => {
     expect(await action.evaluate(element => getComputedStyle(element).opacity)).toBe('1')
     expect(await sheet.evaluate(element => element.querySelector('[data-ft-menu-transition]'))).toBeNull()
   })
+
+  test('keeps two rows inline and spaces out larger tiles in full window', { tag: '@scale' }, async ({ app, page, uiScale }) => {
+    await page.evaluate(() => window.$store.dispatch('updateReducedMotion', 'on'))
+    await mockPlayableWatchPage(app, page)
+    await openMockedVideo(page)
+    // The same CSS viewport at every UI scale
+    const windowSize = (width, height) => setWindowSize(app, page, { width: Math.round(width * uiScale / 100), height: Math.round(height * uiScale / 100) })
+    await windowSize(390, 844)
+    const player = page.locator(`${activeTab} .ftVideoPlayer`)
+    const sheet = player.locator('.phonePlayerOptions')
+    const openSheet = async () => {
+      await player.locator('.shaka-controls-container').evaluate(element => element.setAttribute('shown', 'true'))
+      await player.locator('.shaka-overflow-menu-button').click({ force: true })
+      await expect(sheet.locator('.shaka-playbackrate-button')).toBeVisible()
+    }
+    const measure = () => sheet.evaluate((element) => {
+      const tiles = [...element.querySelectorAll(':scope > .shaka-overflow-menu > button')]
+        .filter(tile => tile.checkVisibility())
+        .map(tile => ({ box: tile.getBoundingClientRect(), parts: [...tile.children].filter(part => part.checkVisibility()).map(part => part.getBoundingClientRect()) }))
+      const [first, second] = tiles
+      const secondRow = tiles.find(tile => tile.box.top > first.box.bottom)
+      return {
+        height: first.box.height,
+        columnGap: second.box.left - first.box.right,
+        rowGap: secondRow ? secondRow.box.top - first.box.bottom : null,
+        secondRowEnd: secondRow?.box.bottom ?? null,
+        sheetEnd: element.getBoundingClientRect().bottom - Number.parseFloat(getComputedStyle(element).paddingBottom),
+        // Icons, names and values that leave their tile
+        overflowing: tiles.filter(({ box, parts }) => parts.some(part => part.top < box.top - 0.5 || part.bottom > box.bottom + 0.5)).length,
+      }
+    })
+
+    await openSheet()
+    const inline = await measure()
+    expect(inline.overflowing).toBe(0)
+    expect(inline.secondRowEnd).not.toBeNull()
+    expect(inline.secondRowEnd).toBeLessThanOrEqual(inline.sheetEnd + 0.5)
+    await sheet.evaluate(element => element.querySelector('.phonePlayerOptionsClose').click())
+    await expect(sheet).toBeHidden()
+
+    await windowSize(844, 390)
+    await page.keyboard.press('s')
+    await expect(player).toHaveClass(/fullWindow/)
+    await openSheet()
+    const fullWindow = await measure()
+    expect(fullWindow.overflowing).toBe(0)
+    expect(fullWindow.height).toBeGreaterThan(inline.height + 16)
+    expect(fullWindow.columnGap).toBeGreaterThanOrEqual(7.5)
+    expect(fullWindow.rowGap).not.toBeNull()
+    expect(fullWindow.rowGap).toBeGreaterThanOrEqual(7.5)
+  })
 })
 
 test('playback speed tile is highlighted exactly while the speed is not 1x', async ({ app, page }) => {
