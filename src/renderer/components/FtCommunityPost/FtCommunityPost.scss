@@ -24,6 +24,17 @@
   backdrop-filter: var(--secondary-card-bg-blur, none);
 }
 
+// Stacked feed posts form a connected list: only its outer corners stay large.
+:where(.autoGrid.list > :not(:first-child)) > .ft-list-post.ft-list-item {
+  border-start-start-radius: var(--shape-corner-extra-small);
+  border-start-end-radius: var(--shape-corner-extra-small);
+}
+
+:where(.autoGrid.list > :not(:last-child)) > .ft-list-post.ft-list-item {
+  border-end-start-radius: var(--shape-corner-extra-small);
+  border-end-end-radius: var(--shape-corner-extra-small);
+}
+
 .hiddenVideo,
 .unavailablePost {
   font-style: italic;

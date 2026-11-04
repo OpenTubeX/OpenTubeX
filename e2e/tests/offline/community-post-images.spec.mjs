@@ -179,6 +179,27 @@ test.describe('community post images', () => {
     }
   })
 
+  test('connects stacked feed posts with small inner corners', async ({ page, attachScreenshot }) => {
+    await stubPostImages(page)
+    await goTo(page, 'subscriptions')
+    await page.locator('[data-subscription-feed-tab="posts"]').click()
+
+    const posts = page.locator('.ft-list-post')
+    await expect(posts).toHaveCount(2)
+    await expect(posts.last()).toBeVisible()
+
+    // uiRoundness 200 → extra-small 8px, large-increased 40px
+    const corners = await posts.evaluateAll(elements => elements.map((element) => {
+      const style = getComputedStyle(element)
+      return [style.borderTopLeftRadius, style.borderTopRightRadius, style.borderBottomLeftRadius, style.borderBottomRightRadius]
+    }))
+    expect(corners).toEqual([
+      ['40px', '40px', '8px', '8px'],
+      ['8px', '8px', '40px', '40px']
+    ])
+    await attachScreenshot('connected posts feed')
+  })
+
   test('shows cached posts immediately when block lists are turned off', async ({ page }) => {
     await stubPostImages(page)
     await goTo(page, 'subscriptions')
