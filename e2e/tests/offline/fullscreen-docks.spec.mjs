@@ -267,6 +267,7 @@ for (const layout of ['desktop', 'phone landscape']) {
       await expect(metadata).toBeVisible()
       await expect.poll(async () => {
         const [surfaceBounds, metadataBounds] = await Promise.all([surface.boundingBox(), metadata.boundingBox()])
+        if (!surfaceBounds || !metadataBounds) return Infinity
         return surfaceBounds.x + surfaceBounds.width - metadataBounds.x
       }).toBeLessThanOrEqual(1)
       await attachScreenshot(`Audio-only surface beside the ${layout} fullscreen dock`)
