@@ -43,7 +43,8 @@
   --material-tab-selected-color: var(--primary-text-color);
 }
 
-@supports (color: light-dark(red, red)) and (color: rgb(from red r g b)) {
+/* Tests the same nesting as the colors below, which older WebKit parses only in part */
+@supports (color: light-dark(rgb(from oklch(from red max(l, 0.7) c h) clamp(0, r, 255) clamp(0, g, 255) clamp(0, b, 255)), red)) {
   .materialTabs[role='tablist'] :deep([role='tab']) {
     /* light-dark() follows the theme. Selected labels keep the primary hue at a
        clamped lightness, opposite their tint, to reach 4.5:1 on every theme
