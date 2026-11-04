@@ -2,7 +2,7 @@ import assert from 'node:assert/strict'
 import test from 'node:test'
 import { readFileSync } from 'node:fs'
 import { runInNewContext } from 'node:vm'
-import { chooseAutoVariants, getVideoCodecPreferences, preferredVideoDecodingAttributes } from '../../src/renderer/helpers/player/videoCodecPreference.js'
+import { chooseAutoVariants, chooseAutoVariantsWithDisabled, getVideoCodecPreferences, preferredVideoDecodingAttributes } from '../../src/renderer/helpers/player/videoCodecPreference.js'
 
 test('automatic selection leaves all supported codecs available for hardware selection', () => {
   assert.deepEqual(getVideoCodecPreferences('auto'), [{ codec: '', hdrLevel: 'AUTO' }])
@@ -151,4 +151,41 @@ test('Auto chooses the same variants as Shaka would keep in the manifest', () =>
       }
     }
   }
+})
+
+test('Auto keeps the chosen codec at lower resolutions when Shaka disables its streams', () => {
+  // A GPU without AV1 decoding, where automatic quality chooses VP9
+  const formats = [
+    ['av01.0.04M.08', 854, 480, 120e3], ['vp9', 854, 480, 180e3], ['avc1.4D401F', 854, 480, 300e3],
+    ['av01.0.09M.08', 1920, 1080, 500e3], ['vp9', 1920, 1080, 650e3], ['avc1.64002A', 1920, 1080, 1.5e6],
+    ['av01.0.13M.08', 3840, 2160, 2.5e6], ['vp9', 3840, 2160, 3.5e6],
+  ]
+  const variants = formats.map(([codecs, width, height, bandwidth], id) => ({
+    id,
+    video: { id, codecs, width, height, frameRate: 30, bandwidth, hdr: 'SDR', roles: [] },
+    decodingInfos: [{ supported: true, smooth: true, powerEfficient: !codecs.startsWith('av01') }],
+    allowedByApplication: true,
+    allowedByKeySystem: true,
+    disabledUntilTime: 0,
+  }))
+  const choose = () => chooseAutoVariantsWithDisabled(
+    variants.filter(variant => variant.disabledUntilTime === 0), variants, [], preferredVideoDecodingAttributes
+  ).map(variant => variant.video.codecs + '@' + variant.video.height)
+
+  assert.deepEqual(choose(), ['vp9@480', 'vp9@1080', 'vp9@2160'])
+
+  // Dropped frames disable the 4K VP9 stream, which left AV1 as the only 4K stream
+  variants[7].disabledUntilTime = 1
+  assert.deepEqual(choose(), ['vp9@480', 'vp9@1080'])
+
+  // Once every VP9 stream is disabled, fall back to the cheapest codec to decode
+  variants[1].disabledUntilTime = variants[4].disabledUntilTime = 1
+  assert.deepEqual(choose(), ['avc1.4D401F@480', 'avc1.64002A@1080'])
+
+  // Streams the application restricts are not kept for later
+  for (const variant of variants) variant.disabledUntilTime = 0
+  variants[7].allowedByApplication = false
+  assert.deepEqual(chooseAutoVariantsWithDisabled(
+    variants.filter(variant => variant.allowedByApplication), variants, [], preferredVideoDecodingAttributes
+  ).map(variant => variant.video.codecs + '@' + variant.video.height), ['vp9@480', 'vp9@1080', 'av01.0.13M.08@2160'])
 })
