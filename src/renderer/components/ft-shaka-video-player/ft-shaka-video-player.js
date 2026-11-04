@@ -5,7 +5,7 @@ import { chooseAndroidDirectory } from '../../helpers/androidStorage'
 import { isAppHidden, getAndroidAppActive, waitForAndroidAppState } from '../../helpers/appVisibility.js'
 import { playbackScreenWake } from '../../helpers/playbackScreenWake'
 import { createRepeatStatsTracker } from '../../helpers/player/repeatStats'
-import { computed, defineComponent, inject, nextTick, onActivated, onBeforeUnmount, onDeactivated, onMounted, onUnmounted, reactive, ref, shallowRef, useId, watch } from 'vue'
+import { computed, defineComponent, inject, nextTick, onActivated, onBeforeUnmount, onBeforeUpdate, onDeactivated, onMounted, onUnmounted, onUpdated, reactive, ref, shallowRef, useId, watch } from 'vue'
 import FtPaidPromotionBadge from '../FtPaidPromotionBadge/FtPaidPromotionBadge.vue'
 import FtRetryImage from '../FtRetryImage.vue'
 import FtSelect from '../FtSelect/FtSelect.vue'
@@ -864,6 +864,16 @@ export default defineComponent({
 
     /** @type {import('vue').Ref<HTMLDivElement | null>} */
     const container = ref(null)
+
+    // Vue replaces the container's classes when playback or layout changes.
+    // Preserve Shaka's idle cursor state after its mouse timer has already fired.
+    let cursorHiddenBeforeUpdate = false
+    onBeforeUpdate(() => {
+      cursorHiddenBeforeUpdate = container.value?.classList.contains('no-cursor') ?? false
+    })
+    onUpdated(() => {
+      if (cursorHiddenBeforeUpdate) container.value?.classList.toggle('no-cursor', true)
+    })
     const mobileMiniBarOverlay = ref(null)
 
     /** @type {import('vue').Ref<HTMLVideoElement | null>} */
