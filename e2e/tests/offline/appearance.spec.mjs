@@ -158,6 +158,26 @@ test.describe('default appearance', () => {
     }
   })
 
+  test('follows the system Reduce Transparency setting while running', async ({ page, attachScreenshot }) => {
+    const session = await page.context().newCDPSession(page)
+    const setReducedTransparency = value => session.send('Emulation.setEmulatedMedia', {
+      features: [{ name: 'prefers-reduced-transparency', value }]
+    })
+    await setReducedTransparency('no-preference')
+    await page.keyboard.press('Control+k')
+    const backdrop = page.locator('.commandPaletteBackdrop')
+    await expect(backdrop).toHaveCSS('backdrop-filter', 'blur(2px)')
+
+    await setReducedTransparency('reduce')
+    await expect(page.locator(':root')).toHaveAttribute('data-reduced-transparency', '')
+    await expect(backdrop).toHaveCSS('backdrop-filter', 'none')
+    await attachScreenshot('command palette backdrop without blur')
+
+    await setReducedTransparency('no-preference')
+    await expect(page.locator(':root')).not.toHaveAttribute('data-reduced-transparency')
+    await expect(backdrop).toHaveCSS('backdrop-filter', 'blur(2px)')
+  })
+
   test('selects every tab layout from Theme settings instead of the header', async ({ page, attachScreenshot }) => {
     await expect(page.locator('.navTabLayoutButton')).toHaveCount(0)
     const themeSection = await goToSettingsSection(page, 'theme')

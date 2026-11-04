@@ -289,6 +289,22 @@ export async function getAndroidHardwareKeyboardState() {
   return result.attached === true
 }
 
+/**
+ * Reports iOS's Reduce Transparency setting, now and whenever it changes.
+ * @param {(enabled: boolean) => void} callback
+ */
+export async function observeIosReduceTransparency(callback) {
+  if (!IOSUi) return
+  let changed = false
+  await IOSUi.addListener('reduceTransparencyChange', ({ enabled }) => {
+    changed = true
+    callback(enabled)
+  })
+  const { enabled } = await IOSUi.getReduceTransparency()
+  // A change that arrived in the meantime may be newer than this reading.
+  if (!changed) callback(enabled)
+}
+
 export function getAndroidDeviceArchitecture() {
   return AndroidUi?.getDeviceArchitecture() ?? Promise.resolve({ architecture: '' })
 }

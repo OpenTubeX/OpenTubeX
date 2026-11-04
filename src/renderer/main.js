@@ -14,6 +14,7 @@ import { initializeAppScrollbars, overlayScrollbarsDirective } from './helpers/o
 import { releaseAutomaticDownloadSchedule } from './helpers/automaticDownloads'
 import { initializeAndroidDynamicColors } from './helpers/dynamicColors'
 import { observeAndroidNetworkMetered } from './helpers/androidUi'
+import './helpers/reducedTransparency'
 import { networkMetered } from './helpers/player/meteredNetworkQuality'
 // import the styles
 import './helpers/overlayScrollbars.css'

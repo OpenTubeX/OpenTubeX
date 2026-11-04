@@ -56,13 +56,16 @@ public class IOSUiPlugin: CAPPlugin, CAPBridgedPlugin {
     public let identifier = "IOSUiPlugin"
     public let jsName = "IOSUi"
     public let pluginMethods: [CAPPluginMethod] = [
-        CAPPluginMethod(name: "getHardwareKeyboardState", returnType: CAPPluginReturnPromise)
+        CAPPluginMethod(name: "getHardwareKeyboardState", returnType: CAPPluginReturnPromise),
+        CAPPluginMethod(name: "getReduceTransparency", returnType: CAPPluginReturnPromise)
     ]
 
     public override func load() {
         for name in [NSNotification.Name.GCKeyboardDidConnect, NSNotification.Name.GCKeyboardDidDisconnect] {
             NotificationCenter.default.addObserver(self, selector: #selector(keyboardChanged), name: name, object: nil)
         }
+        NotificationCenter.default.addObserver(self, selector: #selector(reduceTransparencyChanged),
+                                               name: UIAccessibility.reduceTransparencyStatusDidChangeNotification, object: nil)
     }
 
     @objc func getHardwareKeyboardState(_ call: CAPPluginCall) {
@@ -73,6 +76,17 @@ public class IOSUiPlugin: CAPPlugin, CAPBridgedPlugin {
         DispatchQueue.main.async {
             self.bridge?.triggerJSEvent(eventName: "opentubex:hardware-keyboard", target: "window",
                                        data: "{\"attached\":\(GCKeyboard.coalesced != nil)}")
+        }
+    }
+
+    // WebKit does not implement the prefers-reduced-transparency media feature.
+    @objc func getReduceTransparency(_ call: CAPPluginCall) {
+        DispatchQueue.main.async { call.resolve(["enabled": UIAccessibility.isReduceTransparencyEnabled]) }
+    }
+
+    @objc private func reduceTransparencyChanged() {
+        DispatchQueue.main.async {
+            self.notifyListeners("reduceTransparencyChange", data: ["enabled": UIAccessibility.isReduceTransparencyEnabled])
         }
     }
 
