@@ -542,8 +542,10 @@ export function markRssFeedItemsAsUnseen(items) {
  */
 function setRssFeedItemsSeen(items, seen) {
   const keys = new Set(items.map(getRssFeedItemKey))
+  // A fresh unseen mark also outlasts an older seen mark from another device,
+  // even for a new item that is only out of the New feed because it was watched
   const changedKeys = rssFeedItems.value
-    .filter(item => (item.isNew === true) === seen && keys.has(getRssFeedItemKey(item)))
+    .filter(item => (!seen || item.isNew === true) && keys.has(getRssFeedItemKey(item)))
     .map(getRssFeedItemKey)
   if (changedKeys.length === 0) return
   store.dispatch('mergeRssFeedSeenItems', { keys: changedKeys, seen }).catch((error) => {

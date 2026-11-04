@@ -133,7 +133,7 @@ import {
 } from '../../helpers/externalMediaPosition'
 import { lightHaptic } from '../../helpers/mobileHaptics'
 import { markRssFeedItemsAsSeen, markRssFeedItemsAsUnseen } from '../../helpers/rssFeeds'
-import { copyToClipboard, getRelativeTimeFromDate, showToast } from '../../helpers/utils'
+import { copyToClipboard, getRelativeTimeFromDate, openInternalPath, showToast } from '../../helpers/utils'
 import { supportsYtDlp } from '../../helpers/ytDlpCapabilities'
 
 const props = defineProps({
@@ -175,8 +175,9 @@ const publishedText = computed(() => props.data.published === null
 const showNewIndicator = computed(() => store.getters.getShowNewSubscriptionFeedIndicators &&
   props.data.isNew === true && !props.inNewFeed && !position.value?.watched)
 const showMarkAsSeen = computed(() => props.data.isNew === true && (props.inNewFeed || showNewIndicator.value))
-// Like subscription videos, items that aren't new can come back to the New feed
-const showMarkAsUnseen = computed(() => props.data.isNew !== true && !props.inNewFeed)
+// Like subscription videos, items that aren't new can come back to the New feed,
+// and so can new items that it leaves out because they were watched
+const showMarkAsUnseen = computed(() => !props.inNewFeed && (props.data.isNew !== true || position.value?.watched === true))
 
 function markAsSeen() {
   if (props.data.isNew === true) markRssFeedItemsAsSeen([props.data])
@@ -209,13 +210,38 @@ function setWatched(watched, fully = false) {
   })
 }
 
+function openElsewhere(newWindow) {
+  openInternalPath({ ...to.value, title: props.data.title, doCreateNewTab: !newWindow, doCreateNewWindow: newWindow })
+  markAsSeen()
+}
+
 const menuItems = computed(() => {
   const watched = position.value?.watched === true
-  const items = [{
+  const items = []
+  if (store.getters.getTabsEnabled) {
+    items.push({
+      label: t('Context Menu.Open in a New Tab'),
+      shortLabel: t('New Tab'),
+      icon: ['fas', 'arrow-up-right-from-square'],
+      quickAction: true,
+      run: () => openElsewhere(false)
+    })
+  }
+  if (process.env.IS_ELECTRON) {
+    items.push({
+      label: t('Context Menu.Open in a New Window'),
+      shortLabel: t('New Window'),
+      icon: ['fas', 'external-link-alt'],
+      quickAction: true,
+      run: () => openElsewhere(true)
+    })
+  }
+  if (items.length > 0) items.push({ type: 'separator' })
+  items.push({
     label: watched ? t('Video.Unmark As Watched') : t('Video.Mark As Watched'),
     icon: ['fas', watched ? 'eye-slash' : 'eye'],
     run: () => setWatched(!watched)
-  }]
+  })
   // Without a saved position, marking it as watched already starts it over next time
   if (position.value?.seconds > 0) {
     items.push({

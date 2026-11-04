@@ -1459,6 +1459,71 @@ test.describe('with new items', () => {
       .toHaveText(['Brand new VOD', 'Second new VOD', 'Newest VOD', 'Older VOD'])
   })
 
+  test('brings back new items that another device watched', async ({ page }) => {
+    await loadNewItems(page)
+    const panel = page.locator('#subscriptionsPanel')
+    const menu = page.locator('.contextMenu')
+    const item = panel.locator('.ft-list-item', { hasText: 'Brand new VOD' })
+
+    const remote = {
+      history: await encryptSyncDocument([], SYNC_KEY, SYNC_SALT),
+      seenRssItems: await encryptSyncDocument([], SYNC_KEY, SYNC_SALT),
+      externalMediaPositions: await encryptSyncDocument([
+        { url: 'https://www.twitch.tv/videos/4', seconds: 0, watched: true, updatedAt: Date.now() }
+      ], SYNC_KEY, SYNC_SALT)
+    }
+    await mockSyncServer(page, remote, { external_media_positions: 1 })
+    expect(await syncWithSyncServer(page)).toEqual(['success', ''])
+
+    // The New feed leaves it out, so it can't be marked as seen, only brought back
+    await expect(item).toHaveClass(/watched/)
+    await expect(item.locator('.newContentDot')).toHaveCount(0)
+    await item.locator('.title').click({ button: 'right' })
+    await expect(menu.getByRole('menuitem', { name: 'Mark As Seen' })).toHaveCount(0)
+    await page.evaluate(() => {
+      window.scheduledSyncs = []
+      window.$store.subscribeAction(action => {
+        if (action.type === 'scheduleSyncServer') window.scheduledSyncs.push(action.payload)
+      })
+    })
+    await menu.getByRole('menuitem', { name: 'Mark As Unseen' }).click()
+    await expect(item).not.toHaveClass(/watched/)
+    await expect(item.locator('.newContentDot')).toHaveCount(1)
+    // Other devices learn that it is no longer watched, and the fresh unseen
+    // mark wins over older seen marks they haven't synced yet
+    await expect.poll(() => page.evaluate(() => window.scheduledSyncs)).toContain('history')
+    expect(await page.evaluate(key => JSON.parse(window.$store.getters.getRssFeedSeenItems)
+      .find(entry => entry.key === key), `${RSS_URL}\nvod-4`)).toEqual({ key: `${RSS_URL}\nvod-4`, unseenAt: expect.any(Number) })
+  })
+
+  test('opens items in a new tab or window from the context menu and marks them as seen', async ({ app, page }) => {
+    await loadNewItems(page)
+    const panel = page.locator('#subscriptionsPanel')
+    const menu = page.locator('.contextMenu')
+    const item = title => panel.locator('.ft-list-item', { hasText: title })
+    const tabState = () => page.evaluate(() => window.ftElectron.tabs.getState())
+    const newTitles = () => page.evaluate(() => JSON.parse(localStorage.getItem('rssFeedItems'))
+      .filter(item => item.isNew).map(item => item.title))
+    const { tabs: initialTabs, activeTabId } = await tabState()
+
+    await item('Brand new VOD').locator('.title').click({ button: 'right' })
+    await menu.getByRole('menuitem', { name: 'Open in a New Tab', exact: true }).click()
+    await expect.poll(async () => (await tabState()).tabs.length).toBe(initialTabs.length + 1)
+    await expect(page).toHaveURL(/#\/external-media\?url=https:\/\/www\.twitch\.tv\/videos\/4$/)
+    expect(await newTitles()).toEqual(['Second new VOD'])
+
+    await page.evaluate(tabId => window.ftElectron.tabs.activate(tabId), activeTabId)
+    await expect(page).toHaveURL(/#\/subscriptions$/)
+    await item('Second new VOD').locator('.title').click({ button: 'right' })
+    const [newWindow] = await Promise.all([
+      app.electronApp.waitForEvent('window'),
+      menu.getByRole('menuitem', { name: 'Open in a New Window', exact: true }).click()
+    ])
+    await waitForAppReady(newWindow)
+    await expect(newWindow).toHaveURL(/#\/external-media\?url=https:\/\/www\.twitch\.tv\/videos\/5$/)
+    expect(await newTitles()).toEqual([])
+  })
+
   test('brings back unseen items that another device watched earlier while they were out of their feed', async ({ page }) => {
     await loadNewItems(page)
     const panel = page.locator('#subscriptionsPanel')
