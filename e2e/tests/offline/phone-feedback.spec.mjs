@@ -521,6 +521,37 @@ test('pressed phone cards keep their text visible in Hot Pink', async ({ app, pa
   expect(background).toBe('rgb(255, 255, 255)')
   expect(title).not.toBe(background)
   expect(disclaimer).not.toBe(background)
+
+  // The Description card's chips keep a surface their pressed text reads on.
+  await watch.evaluate(async vm => {
+    vm.videoTags = ['tag']
+    vm.videoMusicTracks = [{ title: 'Track' }]
+    await vm.$nextTick()
+  })
+  const description = page.locator('.phoneDescriptionPreview')
+  await description.evaluate(element => element.scrollIntoView({ block: 'center' }))
+  const chip = description.locator('.phoneDescriptionChip').first()
+  const chipBox = await chip.boundingBox()
+  await page.mouse.move(chipBox.x + chipBox.width / 2, chipBox.y + chipBox.height / 2)
+  await page.mouse.down()
+  const ratios = await description.evaluate(element => [...element.querySelectorAll('.phoneDescriptionChip, .phoneDescriptionChipCount')].map(node => {
+    const rgba = color => color.match(/[\d.]+/g).map(Number)
+      .map((value, index) => color.startsWith('color(srgb ') && index < 3 ? value * 255 : value)
+    const layers = []
+    for (let layer = node; layer; layer = layer.parentElement) layers.unshift(layer)
+    const background = layers.reduce((below, layer) => {
+      const [r, g, b, alpha = 1] = rgba(getComputedStyle(layer).backgroundColor)
+      return [r, g, b].map((channel, index) => channel * alpha + below[index] * (1 - alpha))
+    }, [255, 255, 255])
+    const luminance = rgb => rgb.map(value => value / 255)
+      .map(value => value <= 0.04045 ? value / 12.92 : ((value + 0.055) / 1.055) ** 2.4)
+      .reduce((total, value, index) => total + value * [0.2126, 0.7152, 0.0722][index], 0)
+    const [high, low] = [luminance(rgba(getComputedStyle(node).color).slice(0, 3)), luminance(background)].sort((a, b) => b - a)
+    return (high + 0.05) / (low + 0.05)
+  }))
+  await page.mouse.up()
+  expect(ratios.length).toBeGreaterThan(2)
+  for (const ratio of ratios) expect(ratio).toBeGreaterThanOrEqual(4.5)
 })
 
 test('subscribed button segments share the Material tonal color', async ({ app, page }) => {
