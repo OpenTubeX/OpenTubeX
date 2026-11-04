@@ -575,7 +575,8 @@ public class PredictiveBackTest {
                 const routerKey = Object.getOwnPropertySymbols(root.provides).find(key =>
                     typeof root.provides[key]?.push === 'function' && typeof root.provides[key]?.resolve === 'function');
                 window.__backRouter = root.provides[routerKey];
-                window.__backRouter.push('/subscriptions');
+                // Home is the landing page; replace it so Back at the root still asks to close the app.
+                window.__backRouter.replace('/subscriptions');
             })()
             """);
         await(view, STORE + ".getters.getActiveTab.route.path === '/subscriptions'");
