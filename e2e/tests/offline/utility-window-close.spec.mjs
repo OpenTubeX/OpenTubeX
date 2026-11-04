@@ -139,7 +139,7 @@ for (const prompt of ['Add download', 'Download options', 'Remove file']) {
         await expect(page.locator('.downloadPromptCard')).toBeVisible()
       }
     }
-    await expect(page.locator('.prompt')).toBeVisible()
+    await expect(page.locator('.prompt:not([inert])')).toBeVisible()
     await expect.poll(() => page.evaluate(() => window.$store.getters.isAnyPromptOpen)).toBe(true)
     await page.evaluate(() => window.$store.dispatch('hideSettingsWindow'))
     await expect(dialog).toHaveCount(0)

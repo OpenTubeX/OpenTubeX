@@ -1,175 +1,177 @@
 <template>
   <Teleport :to="teleportTarget">
-    <div
-      class="commandPaletteBackdrop"
-      @pointerdown.self.stop
-      @click.self.stop="close"
-      @keydown.esc="close"
-    >
-      <section
-        class="commandPalette"
-        role="dialog"
-        aria-modal="true"
-        :aria-label="t('CommandPalette.Title')"
-        @keydown="handleDialogKeydown"
+    <ModalLeaveTransition>
+      <div
+        class="commandPaletteBackdrop"
+        @pointerdown.self.stop
+        @click.self.stop="close"
+        @keydown.esc="close"
       >
-        <header class="commandPaletteHeader">
-          <label class="commandPaletteSearch">
-            <FtIcon
-              :icon="['fas', 'magnifying-glass']"
-              aria-hidden="true"
-            />
-            <input
-              ref="inputRef"
-              v-model="query"
-              type="search"
-              role="combobox"
-              autocomplete="off"
-              :placeholder="t('CommandPalette.Search Placeholder')"
-              :aria-label="t('CommandPalette.Search Label')"
-              aria-autocomplete="list"
-              aria-haspopup="listbox"
-              :aria-expanded="displayedCommands.length > 0"
-              :aria-controls="listId"
-              :aria-activedescendant="activeOptionId"
-              :aria-describedby="statusId"
-              @keydown.down.prevent="moveSelection(1)"
-              @keydown.up.prevent="moveSelection(-1)"
-              @keydown.home.prevent="selectBoundary(0)"
-              @keydown.end.prevent="selectBoundary(displayedCommands.length - 1)"
-              @keydown.enter.prevent="runSelectedCommand"
-            >
-          </label>
-          <button
-            ref="closeButtonRef"
-            type="button"
-            class="commandPaletteClose"
-            :aria-label="t('Close')"
-            :title="t('Close')"
-            @click="close"
-          >
-            <FtIcon
-              :icon="['fas', 'xmark']"
-              aria-hidden="true"
-            />
-          </button>
-        </header>
-
-        <div
-          ref="resultsRef"
-          v-overlay-scrollbars
-          class="commandPaletteResults"
+        <section
+          class="commandPalette"
+          role="dialog"
+          aria-modal="true"
+          :aria-label="t('CommandPalette.Title')"
+          @keydown="handleDialogKeydown"
         >
-          <div
-            :id="listId"
-            ref="resultsContentRef"
-            class="commandPaletteResultsContent"
-            role="listbox"
-            :aria-label="t('CommandPalette.Results')"
-            :aria-busy="searchPending"
-          >
-            <template v-if="displayedCommands.length > 0">
-              <div
-                v-for="group in groupedCommands"
-                :key="group.name"
-                class="commandPaletteGroup"
-                role="group"
-                :aria-label="group.name"
+          <header class="commandPaletteHeader">
+            <label class="commandPaletteSearch">
+              <FtIcon
+                :icon="['fas', 'magnifying-glass']"
+                aria-hidden="true"
+              />
+              <input
+                ref="inputRef"
+                v-model="query"
+                type="search"
+                role="combobox"
+                autocomplete="off"
+                :placeholder="t('CommandPalette.Search Placeholder')"
+                :aria-label="t('CommandPalette.Search Label')"
+                aria-autocomplete="list"
+                aria-haspopup="listbox"
+                :aria-expanded="displayedCommands.length > 0"
+                :aria-controls="listId"
+                :aria-activedescendant="activeOptionId"
+                :aria-describedby="statusId"
+                @keydown.down.prevent="moveSelection(1)"
+                @keydown.up.prevent="moveSelection(-1)"
+                @keydown.home.prevent="selectBoundary(0)"
+                @keydown.end.prevent="selectBoundary(displayedCommands.length - 1)"
+                @keydown.enter.prevent="runSelectedCommand"
               >
-                <h3 aria-hidden="true">
-                  {{ group.name }}
-                </h3>
-                <div
-                  v-for="command in group.commands"
-                  :id="optionId(command)"
-                  :key="command.id"
-                  class="commandPaletteOption"
-                  :class="{
-                    selected: command.id === selectedCommand?.id,
-                    disabled: command.disabledReason
-                  }"
-                  role="option"
-                  tabindex="-1"
-                  :aria-selected="command.id === selectedCommand?.id"
-                  :aria-disabled="command.disabledReason ? 'true' : undefined"
-                  @pointermove="selectCommand(command)"
-                  @click="runCommand(command)"
-                  @keydown.enter.prevent="runCommand(command)"
-                >
-                  <FtProfileIcon
-                    v-if="command.profile"
-                    class="commandPaletteOptionProfileIcon"
-                    :profile="command.profile"
-                    :fallback="command.profileFallback"
-                    aria-hidden="true"
-                  />
-                  <FtRetryImage
-                    v-else-if="hasUsableIconUrl(command)"
-                    :fallback-icon="command.icon || ['fas', 'circle-user']"
-                    class="commandPaletteOptionIconImage"
-                    :src="command.iconUrl"
-                    alt=""
-                    draggable="false"
-                    @error="handleIconError(command.iconUrl)"
-                  />
-                  <FtIcon
-                    v-else-if="command.icon"
-                    class="commandPaletteOptionIcon"
-                    :icon="command.icon"
-                    aria-hidden="true"
-                  />
-                  <span class="commandPaletteOptionText">
-                    <span>
-                      <template
-                        v-for="(segment, index) in highlightedLabel(command)"
-                        :key="`${segment.highlighted}-${index}`"
-                      >
-                        <strong
-                          v-if="segment.highlighted"
-                          class="commandPaletteOptionMatch"
-                        >{{ segment.text }}</strong>
-                        <template v-else>{{ segment.text }}</template>
-                      </template>
-                    </span>
-                    <small v-if="command.disabledReason">{{ command.disabledReason }}</small>
-                    <small v-else-if="command.detail">{{ command.detail }}</small>
-                  </span>
-                  <kbd v-if="showShortcuts && command.shortcut">{{ getLocalizedShortcut(command.shortcut) }}</kbd>
-                </div>
-              </div>
-            </template>
-            <p
-              v-else-if="!searchPending"
-              class="commandPaletteEmpty"
+            </label>
+            <button
+              ref="closeButtonRef"
+              type="button"
+              class="commandPaletteClose"
+              :aria-label="t('Close')"
+              :title="t('Close')"
+              @click="close"
             >
-              {{ t('CommandPalette.No Results') }}
-            </p>
-            <FtLoader
-              v-if="searchPending"
-              :tab-loading-indicator="false"
-              aria-hidden="true"
-            />
-          </div>
-        </div>
+              <FtIcon
+                :icon="['fas', 'xmark']"
+                aria-hidden="true"
+              />
+            </button>
+          </header>
 
-        <footer
-          v-if="showShortcuts"
-          class="commandPaletteFooter"
-          aria-hidden="true"
-        >
-          <span><kbd>{{ t('CommandPalette.Keys.Up') }}</kbd><kbd>{{ t('CommandPalette.Keys.Down') }}</kbd> {{ t('CommandPalette.Move') }}</span>
-          <span><kbd>{{ t('Keys.enter') }}</kbd> {{ t('CommandPalette.Run') }}</span>
-          <span><kbd>{{ t('CommandPalette.Keys.Escape') }}</kbd> {{ t('Close') }}</span>
-        </footer>
-        <p
-          :id="statusId"
-          class="visuallyHidden"
-          aria-live="polite"
-        >
-          {{ resultStatus }}
-        </p>
-      </section>
-    </div>
+          <div
+            ref="resultsRef"
+            v-overlay-scrollbars
+            class="commandPaletteResults"
+          >
+            <div
+              :id="listId"
+              ref="resultsContentRef"
+              class="commandPaletteResultsContent"
+              role="listbox"
+              :aria-label="t('CommandPalette.Results')"
+              :aria-busy="searchPending"
+            >
+              <template v-if="displayedCommands.length > 0">
+                <div
+                  v-for="group in groupedCommands"
+                  :key="group.name"
+                  class="commandPaletteGroup"
+                  role="group"
+                  :aria-label="group.name"
+                >
+                  <h3 aria-hidden="true">
+                    {{ group.name }}
+                  </h3>
+                  <div
+                    v-for="command in group.commands"
+                    :id="optionId(command)"
+                    :key="command.id"
+                    class="commandPaletteOption"
+                    :class="{
+                      selected: command.id === selectedCommand?.id,
+                      disabled: command.disabledReason
+                    }"
+                    role="option"
+                    tabindex="-1"
+                    :aria-selected="command.id === selectedCommand?.id"
+                    :aria-disabled="command.disabledReason ? 'true' : undefined"
+                    @pointermove="selectCommand(command)"
+                    @click="runCommand(command)"
+                    @keydown.enter.prevent="runCommand(command)"
+                  >
+                    <FtProfileIcon
+                      v-if="command.profile"
+                      class="commandPaletteOptionProfileIcon"
+                      :profile="command.profile"
+                      :fallback="command.profileFallback"
+                      aria-hidden="true"
+                    />
+                    <FtRetryImage
+                      v-else-if="hasUsableIconUrl(command)"
+                      :fallback-icon="command.icon || ['fas', 'circle-user']"
+                      class="commandPaletteOptionIconImage"
+                      :src="command.iconUrl"
+                      alt=""
+                      draggable="false"
+                      @error="handleIconError(command.iconUrl)"
+                    />
+                    <FtIcon
+                      v-else-if="command.icon"
+                      class="commandPaletteOptionIcon"
+                      :icon="command.icon"
+                      aria-hidden="true"
+                    />
+                    <span class="commandPaletteOptionText">
+                      <span>
+                        <template
+                          v-for="(segment, index) in highlightedLabel(command)"
+                          :key="`${segment.highlighted}-${index}`"
+                        >
+                          <strong
+                            v-if="segment.highlighted"
+                            class="commandPaletteOptionMatch"
+                          >{{ segment.text }}</strong>
+                          <template v-else>{{ segment.text }}</template>
+                        </template>
+                      </span>
+                      <small v-if="command.disabledReason">{{ command.disabledReason }}</small>
+                      <small v-else-if="command.detail">{{ command.detail }}</small>
+                    </span>
+                    <kbd v-if="showShortcuts && command.shortcut">{{ getLocalizedShortcut(command.shortcut) }}</kbd>
+                  </div>
+                </div>
+              </template>
+              <p
+                v-else-if="!searchPending"
+                class="commandPaletteEmpty"
+              >
+                {{ t('CommandPalette.No Results') }}
+              </p>
+              <FtLoader
+                v-if="searchPending"
+                :tab-loading-indicator="false"
+                aria-hidden="true"
+              />
+            </div>
+          </div>
+
+          <footer
+            v-if="showShortcuts"
+            class="commandPaletteFooter"
+            aria-hidden="true"
+          >
+            <span><kbd>{{ t('CommandPalette.Keys.Up') }}</kbd><kbd>{{ t('CommandPalette.Keys.Down') }}</kbd> {{ t('CommandPalette.Move') }}</span>
+            <span><kbd>{{ t('Keys.enter') }}</kbd> {{ t('CommandPalette.Run') }}</span>
+            <span><kbd>{{ t('CommandPalette.Keys.Escape') }}</kbd> {{ t('Close') }}</span>
+          </footer>
+          <p
+            :id="statusId"
+            class="visuallyHidden"
+            aria-live="polite"
+          >
+            {{ resultStatus }}
+          </p>
+        </section>
+      </div>
+    </ModalLeaveTransition>
   </Teleport>
 </template>
 
@@ -181,6 +183,7 @@ import { useI18n } from 'vue-i18n'
 
 import { filterCommandPaletteCommands, filterCommandPaletteCommandsAsync, highlightCommandText } from '../../helpers/commandPalette'
 import { hasDownloadSearchChanged, isLocalVideoMutation, iterateLocalVideoCommands } from '../../helpers/commandPaletteVideos'
+import { ModalLeaveTransition } from '../../helpers/modalTransition'
 import { clampOverlayScrollTop, restoreOverlayScrollTop } from '../../helpers/overlayScrollbars'
 import { getLocalizedShortcut } from '../../helpers/utils'
 import { useFullscreenTeleportTarget } from '../../composables/useFullscreenTeleportTarget'

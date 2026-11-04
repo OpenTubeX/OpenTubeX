@@ -271,6 +271,26 @@ kbd {
   }
 }
 
+.modal-leave-active {
+  animation: command-palette-backdrop-leave var(--motion-fast-effects) forwards;
+  pointer-events: none;
+}
+
+.modal-leave-active > .commandPalette {
+  animation: command-palette-leave var(--motion-fast-effects) forwards;
+}
+
+@keyframes command-palette-backdrop-leave {
+  to { opacity: 0; }
+}
+
+/* The backdrop fades the palette with it; fading both would compound. */
+@keyframes command-palette-leave {
+  to {
+    transform: translateY(-8px) scale(0.985);
+  }
+}
+
 :root[data-reduced-motion='reduce'] .commandPaletteBackdrop,
 :root[data-reduced-motion='reduce'] .commandPalette {
   animation: none;
