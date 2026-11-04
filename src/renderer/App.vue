@@ -281,7 +281,6 @@
             @keydown.esc.stop="backMobileContextMenu"
             @keydown="handleMobileContextKeydown"
             @keydown.space.stop
-            @keyup.space.stop
           >
             <div
               class="bottomSheetHandle"

@@ -730,14 +730,9 @@ test('mobile context sheet moves between items and submenus with arrow keys', as
 })
 
 test.describe('mobile context sheet on a watch page', () => {
-  test.use({ seed: { settings: { videoPlaybackEngine: 'built-in', ytDlpPlaybackEngineDefaultMigration: true } } })
+  test.use({ seed: { settings: { videoPlaybackEngine: 'built-in', ytDlpPlaybackEngineDefaultMigration: true, holdToDoublePlaybackSpeed: true } } })
 
-  test('Space activates the focused item instead of toggling playback', async ({ app, page }) => {
-    await mockPlayableWatchPage(app, page)
-    await openMockedVideo(page)
-    await page.setViewportSize({ width: 375, height: 812 })
-    const video = page.locator('video')
-    await video.evaluate(element => element.pause())
+  async function openSheet(page) {
     await page.evaluate(() => {
       window.sheetActionRuns = 0
       window.dispatchEvent(new CustomEvent('opentubex:mobile-context-menu', {
@@ -746,11 +741,37 @@ test.describe('mobile context sheet on a watch page', () => {
     })
     const menu = page.locator('.mobileLinkActions')
     await expect(menu).toBeFocused()
+    return menu
+  }
+
+  test.beforeEach(async ({ app, page }) => {
+    await mockPlayableWatchPage(app, page)
+    await openMockedVideo(page)
+    await page.setViewportSize({ width: 375, height: 812 })
+  })
+
+  test('Space activates the focused item instead of toggling playback', async ({ page }) => {
+    const video = page.locator('video')
+    await video.evaluate(element => element.pause())
+    const menu = await openSheet(page)
     await page.keyboard.press('ArrowDown')
     await expect(menu.getByRole('menuitem', { name: 'Space action', exact: true })).toBeFocused()
     await page.keyboard.press('Space')
     await expect.poll(() => page.evaluate(() => window.sheetActionRuns)).toBe(1)
     await expect(menu).toBeHidden()
     expect(await video.evaluate(element => element.paused)).toBe(true)
+  })
+
+  test('releasing a held Space in the sheet ends the faster playback', async ({ page }) => {
+    const video = page.locator('video')
+    await page.evaluate(() => document.activeElement?.blur())
+    await page.keyboard.down('Space')
+    try {
+      await expect(video).toHaveJSProperty('playbackRate', 2)
+      await openSheet(page)
+    } finally {
+      await page.keyboard.up('Space')
+    }
+    await expect(video).toHaveJSProperty('playbackRate', 1)
   })
 })
