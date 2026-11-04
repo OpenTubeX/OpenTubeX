@@ -16,6 +16,7 @@
             <div class="externalMediaStateContent">
               <FtLoader
                 class="externalMediaSpinner"
+                inline
                 :tab-loading-indicator="false"
               />
               <p>{{ t('Video.Fetching Streams') }}</p>

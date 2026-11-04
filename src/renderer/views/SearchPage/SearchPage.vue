@@ -78,8 +78,7 @@
           />
           <FtLoader
             v-if="isRetryingWithCookies"
-            role="status"
-            :aria-label="t('Search Filters[&quot;Fetching results. Please wait&quot;]')"
+            :label="t('Search Filters[&quot;Fetching results. Please wait&quot;]')"
           />
         </template>
       </div>
@@ -133,8 +132,7 @@
       />
       <FtLoader
         v-if="isRetryingWithCookies && !searchNotice && !isLoadingMore"
-        role="status"
-        :aria-label="t('Search Filters[&quot;Fetching results. Please wait&quot;]')"
+        :label="t('Search Filters[&quot;Fetching results. Please wait&quot;]')"
       />
     </FtCard>
   </div>

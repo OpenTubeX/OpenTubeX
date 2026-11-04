@@ -392,7 +392,7 @@ for (const mode of ['file', 'browser']) {
     const retry = page.getByRole('button', { name: 'Try with configured cookies' })
     await retry.click()
     await expect(retry).toBeDisabled()
-    await expect(page.locator('.searchNotice .spinner')).toBeVisible({ timeout: 1000 })
+    await expect(page.locator('.searchNotice .loadingIndicator')).toBeVisible({ timeout: 1000 })
     await expect(page.getByText('Fetching results. Please wait')).toHaveCount(0)
     await expect(page.locator('.searchNotice [data-tab-loading-indicator]')).toBeVisible()
     const theme = mode === 'file' ? 'dark' : 'light'
@@ -400,7 +400,7 @@ for (const mode of ['file', 'browser']) {
     await expect(page.locator('body')).toHaveClass(new RegExp(`\\b${theme}\\b`))
     await captureSearchNotice(page, `age-restricted-search-loading-${theme}.png`)
     await expect(page.getByText('Authenticated search result', { exact: true })).toBeVisible()
-    await expect(page.locator('.searchNotice .spinner')).toHaveCount(0)
+    await expect(page.locator('.searchNotice .loadingIndicator')).toHaveCount(0)
     await expect(page.getByRole('heading', { name: 'Confirm your age' })).toHaveCount(0)
     const args = JSON.parse(await readFile(log, 'utf8'))
     const cookieFlag = mode === 'file' ? '--cookies' : '--cookies-from-browser'
@@ -421,7 +421,7 @@ test('preserves the restriction and allows another retry when cookies return no 
   await expect(page.getByRole('alert')).toContainText('Search failed with the configured cookies.')
   await expect(page.getByRole('heading', { name: 'Confirm your age' })).toBeVisible()
   await expect(page.getByRole('button', { name: 'Try with configured cookies' })).toBeEnabled()
-  await expect(page.locator('.searchNotice .spinner')).toHaveCount(0)
+  await expect(page.locator('.searchNotice .loadingIndicator')).toHaveCount(0)
   await expect(page.getByText('Your search results have returned 0 results')).toHaveCount(0)
 })
 
@@ -511,8 +511,7 @@ for (const autoLoadMore of [true, false]) {
         return args[args.indexOf('--playlist-start') + 1]
       }).toBe('21')
       await expect(page.getByRole('status', { name: 'Loading more', exact: true })).toBeVisible()
-      await expect(page.locator('.double-bounce1')).toHaveCount(0, { timeout: 500 })
-      await expect(page.locator('.spinner')).toHaveCount(1)
+      await expect(page.locator('.loadingIndicator')).toHaveCount(1, { timeout: 500 })
       await expectImagesLoaded(page.locator('.ft-list-item img'))
       const box = await pagination.boundingBox()
       const width = Math.min(600, box.width)
@@ -525,7 +524,7 @@ for (const autoLoadMore of [true, false]) {
     }
     await expect(page.getByText('There are no more results for this search')).toBeVisible()
     await expect(pagination).toHaveCount(0)
-    await expect(page.locator('.spinner')).toHaveCount(0)
+    await expect(page.locator('.loadingIndicator')).toHaveCount(0)
   })
 }
 

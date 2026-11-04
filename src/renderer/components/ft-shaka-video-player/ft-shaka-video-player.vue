@@ -315,9 +315,11 @@
         role="status"
         aria-live="polite"
       >
-        <span
+        <FtLoader
           class="voiceOverTranslationProgressSpinner"
-          aria-hidden="true"
+          inline
+          size="16px"
+          :tab-loading-indicator="false"
         />
         {{ $t('Video.Player.Voice-over Translation.Progress') }}
       </div>

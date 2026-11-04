@@ -237,12 +237,12 @@
             :disabled="loadingReplyIds.has(reply.id)"
             @click="emit('get-more-replies', reply.id)"
           >
-            <FtSpinner
+            <FtLoader
               v-if="loadingReplyIds.has(reply.id)"
               inline
               size="18px"
-              border-width="2px"
               :label="$t('Comments.Getting comment replies, please wait')"
+              :tab-loading-indicator="false"
             />
             <template v-else>
               <span>{{ $t("Comments.Show More Replies") }}</span>
@@ -287,7 +287,7 @@ import CommentTranslationButton from './CommentTranslationButton.vue'
 import CommentImageAttachment from './CommentImageAttachment.vue'
 import FtRetryImage from '../FtRetryImage.vue'
 import FtVerifiedBadge from '../FtVerifiedBadge/FtVerifiedBadge.vue'
-import FtSpinner from '../FtSpinner/FtSpinner.vue'
+import FtLoader from '../FtLoader/FtLoader.vue'
 import { useRelativeTimeClock } from '../../composables/useRelativeTimeClock'
 import { formatViewCount, getRelativeTimeFromDate } from '../../helpers/utils'
 import { getCommentReplyCount } from '../../helpers/comment-replies'

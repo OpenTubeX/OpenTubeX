@@ -367,18 +367,6 @@
   position: absolute;
 }
 
-.tab .tabLoadingIndicator {
-  display: inline-flex;
-  inline-size: auto;
-  block-size: auto;
-}
-
-.tab .tabLoadingIndicator :deep(.spinner) {
-  inline-size: 16px;
-  block-size: 16px;
-  margin: 0;
-}
-
 @media only screen and (width <= 680px), only screen and (orientation: landscape) and (height <= 600px) {
   .subscriptionsHeader {
     --subscriptions-top-bar-block-size: var(--top-nav-sticky-offset);

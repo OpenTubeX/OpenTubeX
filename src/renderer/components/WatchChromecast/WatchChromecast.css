@@ -27,14 +27,4 @@
 
 .castProgressSpinner {
   flex-shrink: 0;
-  inline-size: 20px;
-  block-size: 20px;
-  border: 2px solid var(--primary-text-color);
-  border-block-start-color: var(--primary-color);
-  border-radius: 50%;
-  animation: cast-progress-spin 1s linear infinite;
-}
-
-@keyframes cast-progress-spin {
-  to { transform: rotate(360deg); }
 }

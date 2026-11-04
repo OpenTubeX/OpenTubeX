@@ -9,19 +9,19 @@ import { createI18n } from 'vue-i18n'
 const files = {
   autoLoad: path.join(process.cwd(), 'src/renderer/components/FtAutoLoadNextPageWrapper.vue'),
   comments: path.join(process.cwd(), 'src/renderer/components/CommentSection/CommentSection.vue'),
-  spinner: path.join(process.cwd(), 'src/renderer/components/FtSpinner/FtSpinner.vue'),
+  loader: path.join(process.cwd(), 'src/renderer/components/FtLoader/FtLoader.vue'),
   userPlaylists: path.join(process.cwd(), 'src/renderer/views/UserPlaylists/UserPlaylists.vue'),
 }
 
 test('pagination controls pass translated labels to buttons and status indicators', async () => {
-  const [autoLoad, comments, spinner, userPlaylists] = await Promise.all(
+  const [autoLoad, comments, loader, userPlaylists] = await Promise.all(
     Object.values(files).map(file => readFile(file, 'utf8'))
   )
 
   assert.match(autoLoad, /:label="\$t\('Global\.Loading More'\)"/)
   assert.match(comments, /:label="\$t\('Comments\.Load More Comments'\)"/)
   assert.match(userPlaylists, /:label="\$t\('User Playlists\.Load More Playlists'\)"/)
-  assert.match(spinner, /:aria-label="label"/)
+  assert.match(loader, /:aria-label="label \|\| undefined"/)
 })
 
 test('the comment loading status has a German accessibility name', async () => {

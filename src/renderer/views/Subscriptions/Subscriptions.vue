@@ -71,6 +71,8 @@
                   <FtLoader
                     v-if="refreshingFeedTab === 'videos'"
                     class="tabLoadingIndicator"
+                    inline
+                    size="16px"
                   />
                 </div>
                 <!-- eslint-disable-next-line vuejs-accessibility/interactive-supports-focus -->
@@ -99,6 +101,8 @@
                   <FtLoader
                     v-if="refreshingFeedTab === 'shorts'"
                     class="tabLoadingIndicator"
+                    inline
+                    size="16px"
                   />
                 </div>
                 <!-- eslint-disable-next-line vuejs-accessibility/interactive-supports-focus -->
@@ -127,6 +131,8 @@
                   <FtLoader
                     v-if="refreshingFeedTab === 'live'"
                     class="tabLoadingIndicator"
+                    inline
+                    size="16px"
                   />
                 </div>
                 <!-- eslint-disable-next-line vuejs-accessibility/interactive-supports-focus -->
@@ -155,6 +161,8 @@
                   <FtLoader
                     v-if="refreshingFeedTab === 'posts'"
                     class="tabLoadingIndicator"
+                    inline
+                    size="16px"
                   />
                 </div>
                 <!-- eslint-disable-next-line vuejs-accessibility/interactive-supports-focus -->
@@ -208,6 +216,8 @@
                   <FtLoader
                     v-if="rssFeedsRefreshing"
                     class="tabLoadingIndicator"
+                    inline
+                    size="16px"
                   />
                 </div>
               </FtTabs>

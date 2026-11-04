@@ -423,12 +423,12 @@
               :disabled="isReplyLoading(comment.id)"
               @click="toggleCommentReplies(index)"
             >
-              <FtSpinner
+              <FtLoader
                 v-if="isReplyLoading(comment.id)"
                 inline
                 size="18px"
-                border-width="2px"
                 :label="$t('Comments.Getting comment replies, please wait')"
+                :tab-loading-indicator="false"
               />
               <template v-else>
                 <span class="commentReplyToggleLabel">
@@ -500,12 +500,12 @@
                 :disabled="isReplyLoading(comment.id)"
                 @click="getCommentReplies(index)"
               >
-                <FtSpinner
+                <FtLoader
                   v-if="isReplyLoading(comment.id)"
                   inline
                   size="18px"
-                  border-width="2px"
                   :label="$t('Comments.Getting comment replies, please wait')"
+                  :tab-loading-indicator="false"
                 />
                 <template v-else>
                   <span>{{ $t("Comments.Show More Replies") }}</span>
@@ -589,9 +589,11 @@
           />
         </div>
       </div>
-      <FtSpinner
+      <FtLoader
         v-if="shouldShowAutoLoadMoreCommentsSpinner"
         :label="$t('Comments.Load More Comments')"
+        compact
+        :tab-loading-indicator="false"
       />
       <FtButton
         v-else-if="shouldShowManualLoadMoreComments"
@@ -640,7 +642,6 @@ import FtLoader from '../FtLoader/FtLoader.vue'
 import FtRetryImage from '../FtRetryImage.vue'
 import FtVerifiedBadge from '../FtVerifiedBadge/FtVerifiedBadge.vue'
 import FtSelect from '../FtSelect/FtSelect.vue'
-import FtSpinner from '../FtSpinner/FtSpinner.vue'
 import FtTimestampCatcher from '../FtTimestampCatcher.vue'
 import CommentImageAttachment from './CommentImageAttachment.vue'
 
