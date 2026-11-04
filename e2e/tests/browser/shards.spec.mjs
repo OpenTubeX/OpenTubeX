@@ -100,8 +100,10 @@ test('shards take turns picking tests, so neighboring slow files spread out', ()
     '[offline] › offline/a.spec.mjs › group › nested'
   ])
 
-  listed.suites[1].specs[0].title = 'a › b'
-  expect(() => shardTestList(listed, 1, 2)).toThrow('Test title cannot be used in a test list: "a › b"')
+  for (const title of ['a › b', 'a\nb', ' a']) {
+    listed.suites[1].specs[0].title = title
+    expect(() => shardTestList(listed, 1, 2)).toThrow(`Test title cannot be used in a test list: "${title}"`)
+  }
 })
 
 test('missing projects fail planning instead of silently losing test coverage', () => {

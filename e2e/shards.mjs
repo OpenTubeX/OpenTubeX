@@ -76,9 +76,9 @@ function listTests(report) {
   const visit = (suite, titles) => {
     for (const spec of suite.specs ?? []) {
       const titlePath = [...titles, spec.title]
-      // Playwright splits list lines at › and trims each part, so such a title
-      // would silently drop its test from every shard.
-      const unlisted = titlePath.find(title => title.includes('›') || title !== title.trim())
+      // Playwright splits the list into lines, and lines at › with each part
+      // trimmed, so such a title would silently drop its test from every shard.
+      const unlisted = titlePath.find(title => title.includes('›') || title.includes('\n') || title !== title.trim())
       if (unlisted !== undefined) throw new Error(`Test title cannot be used in a test list: "${unlisted}"`)
       for (const test of spec.tests) {
         lines.push([`[${test.projectName}]`, spec.file, ...titlePath].join(' › '))
