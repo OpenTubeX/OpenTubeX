@@ -16,7 +16,7 @@ export function getChannelLinkDetails(link) {
     id
 
   const image = link.querySelector('img:not(.retryImagePlaceholder)') ??
-    link.closest('.ft-list-channel, .author-div, .channel')?.querySelector('img:not(.retryImagePlaceholder)')
+    link.closest('.ft-list-channel, .author-div, .channel, .profileRow')?.querySelector('img:not(.retryImagePlaceholder)')
   const thumbnail = image?.getAttribute('src') ||
     store.getters.getSubscribedChannelsById.get(id)?.thumbnail ||
     store.getters.getChannelThumbnail(id) || null

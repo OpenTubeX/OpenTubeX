@@ -1,5 +1,6 @@
 import { test, expect, latestSettings, readDatastore, goTo, sel, waitForAppReady } from '../../helpers/app.mjs'
 import { fulfillVisualFixture, expectImagesLoaded } from '../../helpers/visual-fixtures.mjs'
+import { mockWatchPage } from '../../helpers/watch.mjs'
 
 const channel = { id: 'UCaaaaaaaaaaaaaaaaaaaaaa', name: 'Example Channel', thumbnail: 'https://yt3.googleusercontent.com/example=s176' }
 const otherChannel = { id: 'UCbbbbbbbbbbbbbbbbbbbbbb', name: 'Other Channel', thumbnail: null }
@@ -92,4 +93,25 @@ test('unpins and repins a subscribed channel without an avatar', async ({ app, p
   await menu.getByRole('menuitem', { name: 'Pin to Navigation', exact: true }).click()
   await expect.poll(() => latestSettings(readDatastore(app.userDataDir, 'settings')).pinnedChannels).toEqual([otherChannel])
   await expect(link).toBeVisible()
+})
+
+test('pins an uncached watch-page channel from its name with the visible avatar', async ({ app, page }) => {
+  await page.evaluate(() => window.$store.dispatch('updateBackendPreference', 'local'))
+  await mockWatchPage(app, page)
+  await page.route(/^https:\/\/yt3\.(ggpht|googleusercontent)\.com\//, route => fulfillVisualFixture(route, 'avatar'))
+  await page.evaluate(() => window.ftElectron.tabs.create({ route: '/watch/jNQXAC9IVRw', makeActive: true }))
+  const info = page.locator('.watchVideoInfo:visible')
+  const link = info.locator('.channelName')
+  await expect(link).toBeVisible()
+  const image = info.locator('img.channelThumbnail')
+  await expectImagesLoaded(image)
+  const id = (await link.getAttribute('href')).split('/').at(-1)
+  const name = (await link.textContent()).trim()
+  const thumbnail = await image.getAttribute('src')
+  expect(await page.evaluate(id => window.$store.getters.getChannelThumbnail(id), id)).toBeNull()
+  expect(await page.evaluate(id => window.$store.getters.getSubscribedChannelsById.has(id), id)).toBe(false)
+  await link.click({ button: 'right' })
+  await page.getByRole('menuitem', { name: 'Pin to Navigation', exact: true }).click()
+  await expect.poll(() => latestSettings(readDatastore(app.userDataDir, 'settings')).pinnedChannels)
+    .toEqual([otherChannel, { id, name, thumbnail }])
 })
