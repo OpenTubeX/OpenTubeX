@@ -2,6 +2,7 @@
 .tabOrganizerBackdrop {
   align-items: flex-start;
   background: rgb(0 0 0 / 52%);
+  backdrop-filter: var(--modal-backdrop-blur);
   display: flex;
   inset: 0;
   justify-content: center;
