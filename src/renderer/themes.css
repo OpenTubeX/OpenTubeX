@@ -1594,6 +1594,13 @@ it can be safely elided. This looks quite pleasant on this theme. */
   --text-with-accent-color: #000;
 }
 
+/* Switch thumbs are graphics and need only 3:1 against the accent track, so
+   they stay light where text on the accent color has to be dark. Custom themes
+   bring their own accent and keep their text color on it. */
+:is(.secRed, .secPink, .secBlue, .secTeal):not(.custom) {
+  --accent-thumb-color: #fff;
+}
+
 .secRed {
   --accent-color-rgb: 244 67 54;
   --accent-color-hover: #ef5350;
@@ -2115,6 +2122,11 @@ it can be safely elided. This looks quite pleasant on this theme. */
 .secGruvboxLightBlue,
 .secGruvboxLightPurple {
   --text-with-accent-color: #000;
+}
+
+/* Switch thumbs only need 3:1, which #fbf1c7 reaches on these. */
+:is(.secGruvboxLightOrange, .secGruvboxLightBlue, .secGruvboxLightPurple):not(.custom) {
+  --accent-thumb-color: #fbf1c7;
 }
 
 .secCatppuccinFrappeRosewater,

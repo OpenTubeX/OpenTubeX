@@ -609,6 +609,71 @@ test.describe('secondary color text contrast', () => {
   })
 })
 
+test.describe('secondary color switch thumbs', () => {
+  test.use({ seed: { settings: { currentLocale: 'en-US' } } })
+
+  test('checked switch thumbs stay light where they contrast with the accent track', async ({ page }) => {
+    await goToSettingsSection(page, 'general')
+    const toggle = page.getByRole('checkbox', { name: 'Keep relative timestamps updated' })
+    if (!await toggle.isChecked()) await toggle.locator('..').locator('.switch-label').click()
+    await expect(toggle).toBeChecked()
+
+    for (const baseTheme of ['light', 'dark']) {
+      await page.evaluate(theme => window.$store.dispatch('updateBaseTheme', theme), baseTheme)
+      await expect(page.locator('body')).toHaveClass(new RegExp(`\\b${baseTheme}\\b`))
+      // Swap the class the app applies for the secondary color setting directly;
+      // saving the setting for every color exceeds the test timeout.
+      const results = await toggle.locator('..').locator('.switch-label-text').evaluate((text, names) => {
+        const rgb = color => color.match(/[\d.]+/g).slice(0, 3).map(Number)
+        const thumb = text.querySelector('.switch-thumb')
+        const measure = () => ({
+          thumb: rgb(getComputedStyle(thumb).backgroundColor),
+          track: rgb(getComputedStyle(text, '::before').backgroundColor),
+        })
+        return names.map(name => {
+          const { classList } = document.body
+          classList.remove(...[...classList].filter(className => /^sec[A-Z]/.test(className)))
+          classList.add(`sec${name}`)
+          // Start the color transitions, then read their settled colors.
+          measure()
+          for (const animation of document.getAnimations()) {
+            if (animation.effect?.getComputedTiming().endTime !== Infinity) animation.finish()
+          }
+          return { name, ...measure() }
+        })
+      }, THEME_COLORS)
+      for (const { name, thumb, track } of results) {
+        expect.soft(contrastRatio(thumb, track), `${baseTheme} ${name} ${JSON.stringify({ thumb, track })}`)
+          .toBeGreaterThanOrEqual(3)
+      }
+      // The thumb is a graphic, so it needs 3:1 rather than the 4.5:1 that
+      // pushed text on these colors to black.
+      const thumbs = Object.fromEntries(results.map(({ name, thumb }) => [name, thumb]))
+      for (const name of ['Blue', 'Red', 'Pink', 'Teal']) {
+        expect.soft(thumbs[name], `${baseTheme} ${name}`).toEqual([255, 255, 255])
+      }
+      for (const name of ['GruvboxLightOrange', 'GruvboxLightBlue', 'GruvboxLightPurple']) {
+        expect.soft(thumbs[name], `${baseTheme} ${name}`).toEqual([251, 241, 199])
+      }
+    }
+    // Custom themes keep their own text color on their own accent.
+    const customThumb = await toggle.locator('..').locator('.switch-thumb').evaluate(thumb => {
+      const { classList, style } = document.body
+      classList.remove(...[...classList].filter(className => /^sec[A-Z]/.test(className)))
+      classList.add('custom', 'secBlue')
+      style.setProperty('--text-with-accent-color', 'rgb(1, 2, 3)')
+      const read = () => getComputedStyle(thumb).backgroundColor
+      // Start the color transition, then read its settled color.
+      read()
+      for (const animation of document.getAnimations()) {
+        if (animation.effect?.getComputedTiming().endTime !== Infinity) animation.finish()
+      }
+      return read()
+    })
+    expect(customThumb).toBe('rgb(1, 2, 3)')
+  })
+})
+
 test.describe('toast action contrast', () => {
   test.use({ seed: { settings: { baseTheme: 'light', currentLocale: 'en-US' } } })
 
