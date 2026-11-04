@@ -702,8 +702,8 @@ final class AppTests: XCTestCase {
                 responded.fulfill()
             }
             _ = try await webView.callAsyncJavaScript("document.querySelector('video').loop=true; await document.querySelector('video').play(); document.querySelector('.dlnaCastControl button').click()", arguments: [:], in: nil, contentWorld: .page)
-            try await wait("Array.from(document.querySelectorAll('[role=option]')).some(option=>option.textContent.trim()==='iOS test TV')")
-            _ = try await evaluate("document.querySelector('video').currentTime=dlnaMergedUi?0:0.5;Array.from(document.querySelectorAll('[role=option]')).find(option=>option.textContent.trim()==='iOS test TV').click();true")
+            try await wait("!!document.querySelector('.mobileLinkActions button[aria-label=\"iOS test TV\"]:not(:disabled)')")
+            _ = try await evaluate("document.querySelector('video').currentTime=dlnaMergedUi?0:0.5;document.querySelector('.mobileLinkActions button[aria-label=\"iOS test TV\"]:not(:disabled)').click();true")
             try await wait("document.querySelector('.dlnaCastControl button')?.getAttribute('aria-pressed')==='true'")
             await fulfillment(of: [responded, transferred], timeout: 12)
             if !merged || privateInstance || startupFailure || keyframeRecovery { XCTAssertEqual(receivedVideo, media) }
@@ -748,8 +748,8 @@ final class AppTests: XCTestCase {
             let (image, _) = try await generator.image(at: .zero)
             XCTAssertGreaterThan(image.width, 0)
             _ = try await evaluate("document.querySelector('.dlnaCastControl button').click();true")
-            try await wait("Array.from(document.querySelectorAll('[role=option]')).some(option=>option.textContent.trim()==='Stop casting')")
-            _ = try await evaluate("Array.from(document.querySelectorAll('[role=option]')).find(option=>option.textContent.trim()==='Stop casting').click();true")
+            try await wait("!!document.querySelector('.mobileLinkActions button[aria-label=\"Stop casting\"]:not(:disabled)')")
+            _ = try await evaluate("document.querySelector('.mobileLinkActions button[aria-label=\"Stop casting\"]:not(:disabled)').click();true")
             try await wait("document.querySelector('.dlnaCastControl button')?.getAttribute('aria-pressed')==='false' && !document.querySelector('video').paused")
             XCTAssertEqual(actions.last, "Stop")
             XCTAssertEqual(nativeCast.castLifetime.task, .invalid, "Stop releases the cast background assertion")

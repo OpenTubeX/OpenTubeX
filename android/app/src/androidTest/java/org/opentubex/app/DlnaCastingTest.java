@@ -309,8 +309,8 @@ public class DlnaCastingTest {
                 evaluate(webView, String.format(java.util.Locale.ROOT, "watchFixture.legacyFormats=watchFixture.legacyFormats.map(format=>({...format,url:'http://%s:%d/real.mp4'}));true", host, fixture.getLocalPort()));
                 if (privateInstance) evaluate(webView, "testStore.commit('setCurrentInvidiousInstance','http://fixture:secret@" + host + ":" + fixture.getLocalPort() + "');true");
                 evaluate(webView, "document.querySelector('video').loop=true;document.querySelector('video').play();document.querySelector('.dlnaCastControl button').click();true");
-                await(webView, "Array.from(document.querySelectorAll('[role=option]')).some(option=>option.textContent.trim()==='Android test TV')");
-                evaluate(webView, "document.querySelector('video').currentTime=dlnaMergedUi?0:0.5;Array.from(document.querySelectorAll('[role=option]')).find(option=>option.textContent.trim()==='Android test TV').click();true");
+                await(webView, "!!document.querySelector('.mobileLinkActions button[aria-label=\"Android test TV\"]:not(:disabled)')");
+                evaluate(webView, "document.querySelector('video').currentTime=dlnaMergedUi?0:0.5;document.querySelector('.mobileLinkActions button[aria-label=\"Android test TV\"]:not(:disabled)').click();true");
                 await(webView, "document.querySelector('.dlnaCastControl button')?.getAttribute('aria-pressed')==='true'");
                 if (privateInstance) await(webView, "window.dlnaStartedOptions && !window.dlnaStartedOptions.audioUrl && document.querySelector('.dlnaCastControl button')?.getAttribute('aria-pressed')==='true'");
                 if (privateInstance) {
@@ -379,8 +379,8 @@ public class DlnaCastingTest {
                     assertEquals("Notification Stop must leave local playback paused", "true", evaluate(webView, "document.querySelector('video').paused"));
                 } else {
                     evaluate(webView, "document.querySelector('.dlnaCastControl button').click();true");
-                    await(webView, "Array.from(document.querySelectorAll('[role=option]')).some(option=>option.textContent.trim()==='Stop casting')");
-                    evaluate(webView, "Array.from(document.querySelectorAll('[role=option]')).find(option=>option.textContent.trim()==='Stop casting').click();true");
+                    await(webView, "!!document.querySelector('.mobileLinkActions button[aria-label=\"Stop casting\"]:not(:disabled)')");
+                    evaluate(webView, "document.querySelector('.mobileLinkActions button[aria-label=\"Stop casting\"]:not(:disabled)').click();true");
                     await(webView, "document.querySelector('.dlnaCastControl button')?.getAttribute('aria-pressed')==='false' && !document.querySelector('video').paused");
                 }
                 assertEquals("Stop", actions.get(actions.size() - 1));
