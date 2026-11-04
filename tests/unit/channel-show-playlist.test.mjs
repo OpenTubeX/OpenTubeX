@@ -55,6 +55,7 @@ test('parses a GridShow as its episode playlist and preserves the season label',
   assert.equal(playlist.channelName, 'Fallback channel')
   assert.equal(playlist.itemCountText, '3 seasons')
   assert.equal(playlist.videoCount, undefined)
+  assert.equal(playlist.isShow, true)
 })
 
 test('parses a channel TV show as a playlist with its season count', () => {
@@ -88,7 +89,8 @@ test('parses a channel TV show as a playlist with its season count', () => {
     itemCountText: '3 seasons',
     isPodcast: false,
     isAlbum: false,
-    isCourse: false
+    isCourse: false,
+    isShow: true
   })
 })
 
