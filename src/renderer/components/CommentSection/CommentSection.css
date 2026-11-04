@@ -780,12 +780,9 @@
   z-index: 2;
 }
 
-/* A tonal surface groups the replies under their comment. */
 .commentReplies {
   clear: both;
   margin-inline-start: 30px;
-  background-color: color-mix(in srgb, var(--primary-color) 8%, transparent);
-  border-radius: var(--shape-corner-large);
 }
 
 .commentReplyContinuation {
