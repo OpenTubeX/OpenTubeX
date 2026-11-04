@@ -349,25 +349,43 @@ onBeforeUnmount(() => resizeObserver?.disconnect())
   text-transform: uppercase;
 }
 
+/* Each section's rows form one segmented group: large outer corners, tight
+   inner ones. A dragged row lifts out of the group with fully rounded corners. */
 .placementLists,
 .placementList {
   display: grid;
-  gap: 8px;
+  gap: 2px;
   list-style: none;
   margin: 0;
   padding: 0;
 }
 
 .placementItem {
+  --reorder-row-color: color-mix(in srgb, var(--primary-text-color) 6%, var(--card-bg-color));
+
   align-items: center;
-  background: var(--card-bg-color);
-  border: 1px solid var(--divider-color);
-  border-radius: var(--shape-corner-small);
+  background: var(--reorder-row-color);
+  border-radius: var(--shape-corner-extra-small);
   display: grid;
   grid-template-columns: 44px 24px minmax(0, 1fr) auto;
   min-block-size: 56px;
   position: relative;
+  transition: border-radius var(--motion-fast-spatial);
   user-select: none;
+}
+
+.placementList:first-child > .placementItem:first-child {
+  border-start-start-radius: var(--shape-corner-large-increased);
+  border-start-end-radius: var(--shape-corner-large-increased);
+}
+
+.placementList:last-child > .placementItem:last-child {
+  border-end-start-radius: var(--shape-corner-large-increased);
+  border-end-end-radius: var(--shape-corner-large-increased);
+}
+
+.placementItem.dragging {
+  border-radius: var(--shape-corner-large-increased);
 }
 
 .placementItem.unordered {
