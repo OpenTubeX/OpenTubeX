@@ -549,8 +549,11 @@ test('keeps the loaded feed stable while loading more and when cancelling that l
     await expectBothSources(backend, requestCount)
     await backend.settled('channel')
     await expect(titles).toHaveText(originalTitles)
+    await expect(section.getByRole('status', { name: 'Loading more', exact: true })).toBeVisible()
+    await expect(section.getByRole('button', { name: 'Load more videos', exact: true })).toHaveCount(0)
     release()
     await backend.settled()
+    await expect(section.getByRole('status', { name: 'Loading more', exact: true })).toHaveCount(0)
     await expect(titles).toHaveText([...originalTitles, /Linux desktop customization extra suggestions/])
     const loadedTitles = await titles.allTextContents()
 
