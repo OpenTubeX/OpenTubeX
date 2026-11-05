@@ -3990,14 +3990,12 @@ test.describe('tab organizer', () => {
     await expect(row.locator('.tabIcon [data-icon="clock-rotate-left"]')).toBeVisible()
     await expect(group.getByRole('button', { name: 'Unload All' })).toBeDisabled()
 
-    const [iconBox, titleBox, urlBox] = await Promise.all([
-      row.locator('.tabIcon').boundingBox(),
-      row.locator('.tabIdentity > span').boundingBox(),
-      row.locator('.tabIdentity > small').boundingBox()
-    ])
-    expect(Math.abs(
-      iconBox.y + iconBox.height / 2 - (titleBox.y + urlBox.y + urlBox.height) / 2
-    )).toBeLessThanOrEqual(1)
+    // The organizer still slides in, so measure every part in the same frame.
+    expect(await row.evaluate(row => {
+      const [iconBox, titleBox, urlBox] = ['.tabIcon', '.tabIdentity > span', '.tabIdentity > small']
+        .map(selector => row.querySelector(selector).getBoundingClientRect())
+      return Math.abs(iconBox.y + iconBox.height / 2 - (titleBox.y + urlBox.y + urlBox.height) / 2)
+    })).toBeLessThanOrEqual(1)
   })
 })
 
