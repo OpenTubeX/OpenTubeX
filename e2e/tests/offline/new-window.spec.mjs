@@ -140,48 +140,57 @@ test.describe('multi-tab window close confirmation', () => {
       }).toBe(true)
     })
 
-    test('confirms quitting when a context menu close becomes the last window while confirming', async ({ app, page }) => {
-      const { newWindow, primaryWindowId } = await openSecondWindowWithTwoTabs(app, page)
-      await newWindow.evaluate(async () => {
-        const { tabs } = await window.ftElectron.tabs.getState()
-        const group = await window.ftElectron.tabs.createGroup({ name: 'Research' })
-        await window.ftElectron.tabs.setGroup(tabs.map(tab => tab.id), group.id)
-        await window.ftElectron.tabs.updateGroup(group.id, { isCollapsed: true })
-      })
+    for (const source of ['tab bar', 'context menu']) {
+      test(`confirms quitting when a ${source} close becomes the last window while confirming`, async ({ app, page }) => {
+        const { newWindow, primaryWindowId } = await openSecondWindowWithTwoTabs(app, page)
+        await app.electronApp.evaluate(({ dialog }) => {
+          globalThis.windowCloseDialogMessages = []
+          globalThis.windowCloseDialogResolvers = []
+          dialog.showMessageBox = async (_window, options) => new Promise(resolve => {
+            globalThis.windowCloseDialogMessages.push(options.message)
+            globalThis.windowCloseDialogResolvers.push(response => resolve({ response }))
+          })
+        })
 
-      await app.electronApp.evaluate(({ dialog }) => {
-        globalThis.windowCloseDialogMessages = []
-        globalThis.windowCloseDialogResolvers = []
-        dialog.showMessageBox = async (_window, options) => new Promise(resolve => {
-          globalThis.windowCloseDialogMessages.push(options.message)
-          globalThis.windowCloseDialogResolvers.push(response => resolve({ response }))
+        if (source === 'tab bar') {
+          // The renderer's call stays pending while the confirmation is open.
+          await newWindow.evaluate(async () => {
+            const { tabs } = await window.ftElectron.tabs.getState()
+            window.ftElectron.tabs.closeMultiple(tabs.map(tab => tab.id))
+          })
+        } else {
+          await newWindow.evaluate(async () => {
+            const { tabs } = await window.ftElectron.tabs.getState()
+            const group = await window.ftElectron.tabs.createGroup({ name: 'Research' })
+            await window.ftElectron.tabs.setGroup(tabs.map(tab => tab.id), group.id)
+            await window.ftElectron.tabs.updateGroup(group.id, { isCollapsed: true })
+          })
+          await newWindow.locator('.collapsedTabGroup').click({ button: 'right' })
+          await newWindow.getByRole('menuitem', { name: 'Close 2 Tabs', exact: true }).click()
+        }
+        await expect.poll(() => app.electronApp.evaluate(() => globalThis.windowCloseDialogMessages)).toEqual([
+          'This window contains 2 tabs. Are you sure you want to close it?'
+        ])
+
+        const primaryClosed = page.waitForEvent('close')
+        await app.electronApp.evaluate(({ BrowserWindow }, id) => BrowserWindow.fromId(id)?.close(), primaryWindowId)
+        await primaryClosed
+
+        await app.electronApp.evaluate(() => globalThis.windowCloseDialogResolvers[0](0))
+        await expect.poll(() => app.electronApp.evaluate(() => globalThis.windowCloseDialogMessages)).toEqual([
+          'This window contains 2 tabs. Are you sure you want to close it?',
+          'Are you sure you want to quit OpenTubeX?'
+        ])
+        await app.electronApp.evaluate(() => globalThis.windowCloseDialogResolvers[1](1))
+        await expect.poll(() => newWindow.evaluate(async () => (await window.ftElectron.tabs.getState()).tabs.length)).toBe(2)
+        expect(newWindow.isClosed()).toBe(false)
+
+        // Let the fixture quit the app without the held prompts.
+        await app.electronApp.evaluate(({ dialog }) => {
+          dialog.showMessageBox = async () => ({ response: 0 })
         })
       })
-
-      await newWindow.locator('.collapsedTabGroup').click({ button: 'right' })
-      await newWindow.getByRole('menuitem', { name: 'Close 2 Tabs', exact: true }).click()
-      await expect.poll(() => app.electronApp.evaluate(() => globalThis.windowCloseDialogMessages)).toEqual([
-        'This window contains 2 tabs. Are you sure you want to close it?'
-      ])
-
-      const primaryClosed = page.waitForEvent('close')
-      await app.electronApp.evaluate(({ BrowserWindow }, id) => BrowserWindow.fromId(id)?.close(), primaryWindowId)
-      await primaryClosed
-
-      await app.electronApp.evaluate(() => globalThis.windowCloseDialogResolvers[0](0))
-      await expect.poll(() => app.electronApp.evaluate(() => globalThis.windowCloseDialogMessages)).toEqual([
-        'This window contains 2 tabs. Are you sure you want to close it?',
-        'Are you sure you want to quit OpenTubeX?'
-      ])
-      await app.electronApp.evaluate(() => globalThis.windowCloseDialogResolvers[1](1))
-      await expect.poll(() => newWindow.evaluate(async () => (await window.ftElectron.tabs.getState()).tabs.length)).toBe(2)
-      expect(newWindow.isClosed()).toBe(false)
-
-      // Let the fixture quit the app without the held prompts.
-      await app.electronApp.evaluate(({ dialog }) => {
-        dialog.showMessageBox = async () => ({ response: 0 })
-      })
-    })
+    }
   })
 
   test('confirms when the renderer closes every tab in a multi-tab window', async ({ app, page }) => {

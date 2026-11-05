@@ -338,14 +338,16 @@ function runApp() {
   /**
    * @param {BrowserWindow} browserWindow
    */
-  function confirmCloseWindow(browserWindow) {
+  async function confirmCloseWindow(browserWindow) {
     const isLastWindow = BrowserWindow.getAllWindows().length === 1
     if (isLastWindow) return confirmCloseApp(browserWindow)
 
     const manager = TabManager.getForWindow(browserWindow.id)
-    return manager && manager.tabs.size > 1
-      ? confirmCloseWindowWithMultipleTabs(browserWindow, manager.tabs.size)
-      : true
+    if (manager && manager.tabs.size > 1 && !await confirmCloseWindowWithMultipleTabs(browserWindow, manager.tabs.size)) {
+      return false
+    }
+    // Closing the other windows meanwhile turns this close into a quit
+    return BrowserWindow.getAllWindows().length > 1 || confirmCloseApp(browserWindow)
   }
 
   // Becomes true once the user asks the app to quit (e.g. Ctrl+Q / "Quit" menu
@@ -548,7 +550,6 @@ function runApp() {
   const contextMenu = setupContextMenu(contextMenuOptions, {
     createWindow,
     confirmCloseWindow,
-    confirmCloseApp,
     confirmMultipleTabsAction,
     closeConfirmedWindowIds
   })
