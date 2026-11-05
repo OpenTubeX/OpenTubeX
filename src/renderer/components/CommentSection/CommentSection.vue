@@ -1514,7 +1514,7 @@ function reloadCommentData() {
   localCommentsInstance = undefined
   replyTokens.clear()
   resetCommentsScroll()
-  getCommentData({ preserveSort: true })
+  getCommentData()
 }
 
 function handleFullscreenActionsFocusout(event) {
@@ -1639,7 +1639,7 @@ function copyCommentYoutubeLink(commentId) {
   })
 }
 
-async function getCommentData({ preserveSort = false } = {}) {
+async function getCommentData() {
   showComments.value = false
   isLoading.value = true
   areCommentsDisabled.value = false
@@ -1650,7 +1650,7 @@ async function getCommentData({ preserveSort = false } = {}) {
     if (useInvidious) {
       return props.isPostComments ? await getPostCommentsInvidious() : await getCommentDataInvidious()
     }
-    return await getCommentDataLocal(false, preserveSort)
+    return await getCommentDataLocal()
   } finally {
     automaticInitialLoadFailed = canPerformInitialCommentLoading.value
   }
@@ -1882,9 +1882,8 @@ async function loadHighlightedReply() {
 
 /**
  * @param {boolean | undefined} more
- * @param {boolean} preserveSort
  */
-async function getCommentDataLocal(more = false, preserveSort = false) {
+async function getCommentDataLocal(more = false) {
   const requestedHighlightedCommentId = props.highlightedCommentId
 
   try {
@@ -1896,19 +1895,15 @@ async function getCommentDataLocal(more = false, preserveSort = false) {
     } else if (localCommentsInstance?.header?.sort_menu?.sub_menu_items?.[sortNewest.value ? 1 : 0] && !props.highlightedCommentId) {
       comments = await localCommentsInstance.applySort(sortNewest.value ? 'NEWEST_FIRST' : 'TOP_COMMENTS')
     } else {
+      const sortBy = sortNewest.value ? 'NEWEST_FIRST' : undefined
       if (props.isPostComments) {
-        comments = await getLocalCommunityPostComments(props.id, props.postAuthorId)
+        comments = await getLocalCommunityPostComments(props.id, props.postAuthorId, sortBy)
       } else {
-        const sortBy = sortNewest.value ? 'NEWEST_FIRST' : undefined
         comments = await getLocalComments(props.id, sortBy, getHighlightedRootCommentId() ?? undefined)
       }
 
-      if (preserveSort && props.isPostComments) {
-        comments = await comments.applySort(sortNewest.value ? 'NEWEST_FIRST' : 'TOP_COMMENTS')
-      } else {
-        const selectedSortIndex = comments.header?.sort_menu?.sub_menu_items?.findIndex(item => item.selected)
-        if (selectedSortIndex === 0 || selectedSortIndex === 1) loadedSortNewest = selectedSortIndex === 1
-      }
+      const selectedSortIndex = comments.header?.sort_menu?.sub_menu_items?.findIndex(item => item.selected)
+      if (selectedSortIndex === 0 || selectedSortIndex === 1) loadedSortNewest = selectedSortIndex === 1
     }
 
     if (requestedHighlightedCommentId !== props.highlightedCommentId) {

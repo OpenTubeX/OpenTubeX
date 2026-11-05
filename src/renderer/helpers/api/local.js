@@ -2202,11 +2202,12 @@ export async function getLocalCommunityPost(postId, channelId) {
 /**
  * @param {string} postId
  * @param {string} channelId
+ * @param {'TOP_COMMENTS' | 'NEWEST_FIRST'} [sortBy]
  */
-export async function getLocalCommunityPostComments(postId, channelId) {
+export async function getLocalCommunityPostComments(postId, channelId, sortBy) {
   const innertube = await createInnertube({ generateSessionLocally: false })
 
-  return await innertube.getPostComments(postId, channelId)
+  return await innertube.getPostComments(postId, channelId, sortBy)
 }
 
 /** Fetch public history metadata without player setup or stream extraction. */
