@@ -113,6 +113,9 @@ test('preserves the displayed cache size when clearing fails', async ({ app, pag
 })
 
 test('stores and presents every previous metadata version', async ({ app, page }) => {
+  // It stores six revisions, then checks the dialog's layout and clearing,
+  // which takes about 45 seconds when several workers load the machine.
+  test.slow()
   const thumbnailServer = createServer((request, response) => {
     const requestUrl = new URL(request.url, 'http://localhost')
     if (requestUrl.pathname === '/redirect.png') {
