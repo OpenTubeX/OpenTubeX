@@ -27,7 +27,11 @@ function harness({ laterPageError = null, backend = 'local' } = {}) {
   const errors = []
   const toasts = []
   let laterPageRequests = 0
-  const router = { push() {} }
+  const router = {
+    push() {},
+    resolve: ({ path }) => ({ path, query: {}, fullPath: path }),
+    currentRoute: computed(() => ({ path: `/watch/${props.videoId}`, query: {}, fullPath: `/watch/${props.videoId}` })),
+  }
   let finishContinuation
   let failContinuation
   const continuation = new Promise((resolve, reject) => { finishContinuation = resolve; failContinuation = reject })
@@ -60,7 +64,7 @@ function harness({ laterPageError = null, backend = 'local' } = {}) {
   const state = vm.runInNewContext(`${extractSourceBetweenMarkers(playlistSource, 'const currentVideoIndexZeroBased =', '\nwatch(')}\n;({ nextVideo, upcomingVideos, playlistUnavailableVideoCount, isWaitingForNextVideo })`, context)
 
   const shouldStop = vm.runInNewContext(`${extractSourceBetweenMarkers(playlistSource, 'const videoIsLastInInPlaylistItems =', '\n/**\n * Index that')}\nshouldStopDueToPlaylistEnd`, context)
-  const playNext = vm.runInNewContext(`${extractSourceBetweenMarkers(playlistSource, 'function playNextVideo() {', '\nfunction playPreviousVideo() {')}\nplayNextVideo`, context)
+  const playNext = vm.runInNewContext(`${extractSourceBetweenMarkers(playlistSource, 'function playNextVideo(', '\nfunction playPreviousVideo() {')}\nplayNextVideo`, context)
   const watch = {
     isCurrentlyPresented: () => true, handleWatchProgressAutoSaveWhenProgressEnabled() {},
     customShortsPlayerActive: false, isStandaloneShort: false, playNextQueuedVideo: () => false,

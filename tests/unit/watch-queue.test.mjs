@@ -220,9 +220,44 @@ test('queued downloads explicitly start after loading even when general autoplay
 })
 
 
+test('playlist and recommendation autoplay start the next video even when general autoplay is disabled', async () => {
+  const source = await readFile(new URL('../../src/renderer/views/Watch/Watch.js', import.meta.url), 'utf8')
+  const methods = watchMethods(source, ['playNextVideoNow', 'handleUnavailablePlaylistVideoSkipped', 'restartCurrentVideo', 'watchRouteForVideo'])
+  const actions = []
+  const watch = {
+    ...methods, watchingPlaylist: true, isOffline: false, videoId: 'current', queuedPlaybackVideoId: null,
+    abortAutoplayCountdown() { this.autoplayCountdown = null },
+    $store: { getters: {} }, tabRouter: { push() {} }, t: key => key,
+    $refs: {
+      player: { isPaused: () => true, setCurrentTime: time => actions.push(['seek', time]), play: () => actions.push(['play']) },
+      watchVideoPlaylist: { playNextVideo: options => { actions.push(['next', options]); return 'next' } },
+    },
+  }
+  watch.playNextVideoNow(false)
+  assert.equal(watch.queuedPlaybackVideoId, 'next', 'the next playlist video starts')
+  assert.equal(actions[0][1].autoplay, true, 'a restart of the same video plays it too')
+
+  actions.length = 0
+  watch.restartCurrentVideo(false)
+  assert.deepEqual(actions, [['seek', 0]], 'a manual restart keeps the video paused')
+
+  watch.videoId = 'next'
+  watch.handleUnavailablePlaylistVideoSkipped('after')
+  assert.equal(watch.queuedPlaybackVideoId, 'after', 'skipping an unavailable video keeps the start request')
+
+  watch.queuedPlaybackVideoId = null
+  watch.handleUnavailablePlaylistVideoSkipped('later')
+  assert.equal(watch.queuedPlaybackVideoId, null, 'skipping from a manually opened video keeps it paused')
+
+  watch.watchingPlaylist = false
+  watch.autoplayCountdown = { video: { videoId: 'recommended' } }
+  watch.playNextVideoNow()
+  assert.equal(watch.queuedPlaybackVideoId, 'recommended', 'the next recommended video starts')
+})
+
 for (const timestamp of ['', '&timestamp=0.25']) test(`a queued duplicate of the current download replays${timestamp ? ' from a timestamped route' : ' without a route change'}`, async () => {
   const source = await readFile(new URL('../../src/renderer/views/Watch/Watch.js', import.meta.url), 'utf8')
-  const methods = watchMethods(source, ['playNextQueuedVideo', 'watchRouteWithoutTimestamp'])
+  const methods = watchMethods(source, ['playNextQueuedVideo', 'restartCurrentVideo', 'watchRouteWithoutTimestamp'])
   const route = { path: '/watch/saved', query: { downloadId: '42' } }
   const actions = []
   const watch = {
@@ -265,17 +300,26 @@ test('an explicit queue request starts a SABR replacement without re-enabling pr
   assert.equal(autoplay.value, false, 'consuming the queue request must retain the original suppression')
 })
 
+// Arguments for the format switch watcher, and whether a queued request restarts the source
+const initialLoadCases = {
+  'source switches during initial loading': ['[props.format, 1], [props.format, 0]', true],
+  'format fallbacks after a source switch': ['[props.format, 1], [props.format, 0]); await initialSwitch([props.format, 1], [props.format, 1]', true],
+  'format fallbacks during initial loading': ['[props.format, 0], [props.format, 0]', false],
+  'fresh loads': [null, false],
+}
+
 for (const format of ['audio', 'dash', 'legacy']) {
   for (const queued of [true, false]) {
-    for (const switching of queued ? [true, false] : [true]) {
-      test(`${queued ? 'queued' : 'manual'} ${format} ${switching ? 'source switches during initial loading' : 'fresh loads'} ${queued && switching ? 'start at zero' : 'preserve the requested start'}`, async () => {
+    for (const [loadCase, [switchArgs, restartsSource]] of Object.entries(initialLoadCases)) {
+      const restart = queued && restartsSource
+      test(`${queued ? 'queued' : 'manual'} ${format} ${loadCase} ${restart ? 'start at zero' : 'preserve the requested start'}`, async () => {
         const firstLoad = playerSource.slice(playerSource.indexOf('    async function performFirstLoad('), playerSource.indexOf('\n    /**', playerSource.indexOf('    async function performFirstLoad(')))
-        const switchStart = playerSource.indexOf('      async ([newFormat], [oldFormat]) => {')
+        const switchStart = playerSource.indexOf('      async ([newFormat, newSourceKey], [oldFormat, oldSourceKey]) => {')
         const initialSwitch = playerSource.slice(switchStart, playerSource.indexOf('        const video_ = video.value', switchStart)) + '\n}'
         const starts = []
         const context = {
           props: { format, startTime: 2, autoplayRequested: queued, localFilePlayback: true, manifestSrc: 'queued-file', manifestMimeType: 'audio/mpeg' },
-          autoplayRequested: ref(queued), formatSwitchGeneration: 0, pendingFormatSwitchState: null,
+          autoplayRequested: ref(queued), formatSwitchGeneration: 0, pendingFormatSwitchState: null, restartedSourceKey: null,
           hasLoaded: ref(false), preferAutoQuality: ref(true), hasMultipleAudioTracks: ref(false),
           player: { configure() {}, getVariantTracks: () => [] }, ui: {}, ignoreErrors: false,
           foregroundLoadAbortController: null, clearSabrBackoffTimer() {}, clearPreRollTimer() {},
@@ -283,8 +327,9 @@ for (const format of ['audio', 'dash', 'legacy']) {
           loadPlaybackSource: async (url, start) => starts.push(start), setLegacyQuality: async start => starts.push(start),
           process: { env: {} }, Date,
         }
-        await runInNewContext(`${firstLoad}\nconst initialSwitch = ${initialSwitch}; ${switching ? 'initialSwitch([props.format], [props.format])' : 'performFirstLoad()'}`, context)
-        assert.deepEqual(starts, [queued && switching ? 0 : 2])
+        await runInNewContext(`(async () => { ${firstLoad}\nconst initialSwitch = ${initialSwitch}; await ${switchArgs ? `initialSwitch(${switchArgs})` : 'performFirstLoad()'} })()`, context)
+        assert.deepEqual(starts, starts.map(() => restart ? 0 : 2))
+        assert.ok(starts.length > 0)
       })
     }
   }

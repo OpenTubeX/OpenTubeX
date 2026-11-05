@@ -13,13 +13,18 @@ const component = [
   slice(source, 'function findIndexOfCurrentVideoInPlaylist(', 'function getPlaylistInfoWithDelay('),
   slice(source, 'const currentVideoIndexZeroBased =', 'const upcomingVideos ='),
   slice(source, 'function shuffleItems(', 'const playlistItemsWrapper ='),
-  slice(source, 'function playNextVideo() {', 'function playPreviousVideo() {'),
+  slice(source, 'function playNextVideo(', 'function playPreviousVideo() {'),
   slice(source, 'watch(() => props.videoId, (newId, oldId) => {', 'watch(() => props.playlistItemId,'),
   slice(source, 'watch(\n  [() => props.autoSkipUnavailable,', '// The watch view owns the skip actions'),
   'globalThis.actions = { playNextVideo, resetUnavailableSkipChain }',
 ].join('\n')
 
-function setup(t, items = ['A', 'B', 'C'].map(id => ({ videoId: id, playlistItemId: id }))) {
+function resolveRoute({ path, query }) {
+  const params = new URLSearchParams(Object.entries(query).filter(([, value]) => value != null))
+  return { path, query, fullPath: `${path}?${params}` }
+}
+
+function setup(t, items = ['A', 'B', 'C'].map(id => ({ videoId: id, playlistItemId: id })), { downloadId, currentQuery = {} } = {}) {
   const last = items.at(-1)
   const props = reactive({
     videoId: last.videoId,
@@ -32,6 +37,8 @@ function setup(t, items = ['A', 'B', 'C'].map(id => ({ videoId: id, playlistItem
   const playlistItems = shallowRef(items)
   const randomizedPlaylistItems = shallowRef(items.slice())
   const navigations = []
+  const skippedTo = []
+  const restarts = []
   const context = vm.createContext({
     props, playlistItems, randomizedPlaylistItems, computed, ref, watch,
     playlistTotalVideoCount: ref(items.length),
@@ -42,9 +49,20 @@ function setup(t, items = ['A', 'B', 'C'].map(id => ({ videoId: id, playlistItem
     isFetchingPlaylistContinuation: ref(false),
     hasUnloadedPlaylistVideos: ref(false),
     canPlayNextVideo: ref(true),
-    router: { push(payload) { navigations.push(payload) } },
+    router: {
+      push(payload) { navigations.push(payload) },
+      resolve: resolveRoute,
+      currentRoute: computed(() => resolveRoute({
+        path: `/watch/${props.videoId}`,
+        query: { playlistId: props.playlistId, playlistType: props.playlistType, playlistItemId: props.playlistItemId, ...currentQuery },
+      })),
+    },
+    emit: (name, videoId) => {
+      if (name === 'unavailable-video-skipped') skippedTo.push(videoId)
+      if (name === 'restart-current-video') restarts.push({ autoplay: videoId })
+    },
     store: { getters: {} },
-    navigationDownloadId: () => undefined,
+    navigationDownloadId: () => downloadId,
     Math: Object.assign(Object.create(Math), { random: () => 0 }),
     showToast() {},
     t: key => key,
@@ -70,7 +88,7 @@ function setup(t, items = ['A', 'B', 'C'].map(id => ({ videoId: id, playlistItem
     await nextTick()
   }
 
-  return { props, navigations, randomizedPlaylistItems, failCurrentVideo, finishNavigation, actions: context.actions }
+  return { props, navigations, skippedTo, restarts, randomizedPlaylistItems, failCurrentVideo, finishNavigation, actions: context.actions }
 }
 
 test('looping shuffled playback skips consecutive unavailable videos and reaches a playable item', async t => {
@@ -120,4 +138,28 @@ test('ordinary playlist loop navigation still reshuffles after successful playba
   assert.deepEqual(playlist.randomizedPlaylistItems.value.map(item => item.playlistItemId), ['C', 'B', 'A'])
   await playlist.finishNavigation()
   assert.deepEqual(playlist.randomizedPlaylistItems.value.map(item => item.playlistItemId), ['A', 'C', 'B'])
+})
+
+test('reports automatic skips so the watch view can keep a pending autoplay', async t => {
+  const playlist = setup(t)
+  assert.equal(playlist.actions.playNextVideo(), 'A')
+  assert.deepEqual(playlist.skippedTo, [], 'an ordinary advance is not an unavailable skip')
+  await playlist.finishNavigation()
+  await playlist.failCurrentVideo()
+  assert.deepEqual(playlist.skippedTo, [playlist.navigations[0].path.slice('/watch/'.length)])
+})
+
+test('reports a single-item playlist loop as a navigation only when the route changes', async t => {
+  const item = { videoId: 'only', playlistItemId: 'only' }
+  const sameRoute = setup(t, [item])
+  assert.equal(sameRoute.actions.playNextVideo(), null, 'the same route loads nothing new')
+  assert.deepEqual(sameRoute.navigations, [], 'nothing navigates')
+  assert.deepEqual(sameRoute.restarts, [{ autoplay: false }], 'the current video restarts instead')
+  sameRoute.actions.playNextVideo({ autoplay: true })
+  assert.deepEqual(sameRoute.restarts.at(-1), { autoplay: true }, 'only automatic advances ask the restart to play')
+  assert.equal(setup(t, [item], { downloadId: '42' }).actions.playNextVideo(), 'only', 'a finished download changes the source')
+  assert.equal(setup(t, [item], { downloadId: '42', currentQuery: { downloadId: '42' } }).actions.playNextVideo(), null, 'the download already plays')
+  const timestamped = setup(t, [item], { currentQuery: { timestamp: '30' } })
+  assert.equal(timestamped.actions.playNextVideo(), null, 'dropping the timestamp does not reload the video')
+  assert.deepEqual(timestamped.restarts, [{ autoplay: false }])
 })

@@ -342,7 +342,7 @@ const props = defineProps({
   },
 })
 
-const emit = defineEmits(['close', 'pause-player', 'skip-availability-change', 'upcoming-videos-change'])
+const emit = defineEmits(['close', 'pause-player', 'restart-current-video', 'skip-availability-change', 'unavailable-video-skipped', 'upcoming-videos-change'])
 
 const { locale, t } = useI18n()
 const phonePanelHeader = inject('phonePanelHeader', null)
@@ -1063,8 +1063,12 @@ function onMoveDraggedVideo(video, source) {
   else moveDraggedVideoTemporarilyThrottled(video, source)
 }
 
-function playNextVideo() {
-  if (isWaitingForNextVideo.value || currentVideoMayBeUnloaded.value) return
+/**
+ * @param {{ autoplay?: boolean }} [options] whether a restart of the current video should play it
+ * @returns {string|null} the video ID it navigated to, or null when it did not navigate
+ */
+function playNextVideo({ autoplay = false } = {}) {
+  if (isWaitingForNextVideo.value || currentVideoMayBeUnloaded.value) return null
   const videoIndex = videoIndexInPlaylistItems.value
   const targetVideoIndex = (videoIsNotPlaylistItem.value || videoIsLastPlaylistItem.value) ? 0 : videoIndex + 1
 
@@ -1073,7 +1077,7 @@ function playNextVideo() {
   const targetPlaylistItem = targetList[targetVideoIndex]
 
   if (!targetPlaylistItem?.videoId) {
-    return
+    return null
   }
 
   const downloadId = navigationDownloadId(store.getters, targetPlaylistItem.videoId, props.downloadId)
@@ -1087,19 +1091,25 @@ function playNextVideo() {
     }
   }
 
+  // Looping a single-item playlist can keep the current route, where a push loads
+  // nothing. The watch view also ignores a change that only drops the timestamp.
+  const withoutTimestamp = ({ path, query }) => router.resolve({ path, query: { ...query, timestamp: undefined } }).fullPath
+  const staysOnRoute = withoutTimestamp(router.resolve(routerPushPayload)) === withoutTimestamp(router.currentRoute.value)
+  const navigate = () => staysOnRoute ? emit('restart-current-video', autoplay) : router.push(routerPushPayload)
+
   if (shuffleEnabled.value) {
     let doShufflePlaylistItems = false
 
     if (videoIsLastPlaylistItem.value && !loopEnabled.value) {
       showToast({ message: t('The playlist has ended. Enable loop to continue playing'), icon: ['fas', 'retweet'] })
-      return
+      return null
     }
     // loopEnabled = true
     if (videoIsLastPlaylistItem.value || videoIsNotPlaylistItem.value) {
       doShufflePlaylistItems = true
     }
 
-    router.push(routerPushPayload)
+    navigate()
 
     showToast({ message: t('Playing Next Video'), icon: ['fas', 'step-forward'] })
 
@@ -1111,12 +1121,13 @@ function playNextVideo() {
 
     if (stopDueToLoopDisabled) {
       showToast({ message: t('The playlist has ended. Enable loop to continue playing'), icon: ['fas', 'retweet'] })
-      return
+      return null
     }
 
-    router.push(routerPushPayload)
+    navigate()
     showToast({ message: t('Playing Next Video'), icon: ['fas', 'step-forward'] })
   }
+  return staysOnRoute ? null : targetPlaylistItem.videoId
 }
 
 function playPreviousVideo() {
@@ -1838,7 +1849,8 @@ watch(
 
     skippedUnavailableItems.add(currentKey)
     expectedAutoSkipItem = nextKey
-    playNextVideo()
+    const nextVideoId = playNextVideo()
+    if (nextVideoId) emit('unavailable-video-skipped', nextVideoId)
   },
   { flush: 'post' }
 )

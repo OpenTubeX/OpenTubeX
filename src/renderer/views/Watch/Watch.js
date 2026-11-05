@@ -5545,9 +5545,12 @@ export default defineComponent({
         return
       }
 
+      // Autoplay advances and Play Now start the next video even when Start
+      // Videos Automatically keeps manually opened videos paused
       if (this.watchingPlaylist) {
-        this.$refs.watchVideoPlaylist?.playNextVideo()
+        this.queuedPlaybackVideoId = this.$refs.watchVideoPlaylist?.playNextVideo({ autoplay: true }) ?? null
       } else if (!this.isOffline && nextVideo?.videoId) {
+        this.queuedPlaybackVideoId = nextVideo.videoId
         this.tabRouter.push(this.watchRouteForVideo(nextVideo))
         showToast({ message: this.t('Playing Next Video'), icon: ['fas', 'step-forward'] })
       }
@@ -5580,14 +5583,30 @@ export default defineComponent({
         this.watchRouteWithoutTimestamp(nextFullPath) ===
         this.watchRouteWithoutTimestamp(this.tabRoute.fullPath)
       ) {
-        this.$refs.player?.setCurrentTime(0)
-        this.$refs.player?.play()
+        this.restartCurrentVideo()
       } else {
         this.queuedPlaybackVideoId = nextVideo.videoId
         this.tabRouter.push(route)
       }
       showToast({ message: this.t('Playing Next Video'), icon: ['fas', 'step-forward'] })
       return true
+    },
+
+    /**
+     * Manual skips keep the current play state, as manually opened videos do not start.
+     * @param {boolean} [autoplay]
+     */
+    restartCurrentVideo: function (autoplay = true) {
+      this.$refs.player?.setCurrentTime(0)
+      if (autoplay) this.$refs.player?.play()
+    },
+
+    /**
+     * Keeps an autoplay request when the playlist skips past an unavailable video.
+     * @param {string} nextVideoId
+     */
+    handleUnavailablePlaylistVideoSkipped: function (nextVideoId) {
+      if (this.queuedPlaybackVideoId === this.videoId) this.queuedPlaybackVideoId = nextVideoId
     },
 
     /**
