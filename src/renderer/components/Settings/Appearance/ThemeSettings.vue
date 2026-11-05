@@ -91,7 +91,10 @@
         @open="loadSystemFonts"
       >
         <template #option="{ label, value }">
-          <span :style="{ fontFamily: getAppFontFamily(value) }">{{ label }}</span>
+          <span
+            class="fontPreview"
+            :style="{ fontFamily: getAppFontFamily(value) }"
+          >{{ label }}</span>
         </template>
       </FtSelect>
       <FtSelect
@@ -412,6 +415,14 @@ onUnmounted(() => {
 
 <style scoped src="./themeSelectRow.css" />
 <style scoped>
+/* Loading every installed font to lay out the list stalls the first open, so
+   offscreen previews wait until they scroll into view. */
+.optionName > .fontPreview {
+  display: block;
+  content-visibility: auto;
+  contain-intrinsic-size: auto none auto 24px;
+}
+
 .customThemeActions,
 .appIconActions {
   margin-block-start: 24px;
