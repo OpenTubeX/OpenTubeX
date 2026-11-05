@@ -25,9 +25,10 @@ test('restored Android Watch tabs retain comment previews and both panel entry p
     saved = await page.evaluate(async () => {
       const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
       const values = { StartupBehavior: 'loadLastActiveTab', VideoPlaybackEngine: 'built-in', AutoplayVideos: false,
-        UseSponsorBlock: false, UseReturnYouTubeDislikes: false, HideComments: false, VideoDescriptionMode: 'collapsed',
+        UseSponsorBlock: false, UseReturnYouTubeDislikes: false, HideComments: false, VideoDescriptionMode: 'collapsed', BackendFallback: false,
         GeneralAutoLoadMorePaginatedItemsEnabled: true, FullscreenActions: ['comments'],
-        PlayingInterfaceHideDelay: 30, RotateFullscreenToLandscape: false }
+        PlayingInterfaceHideDelay: 30, RotateFullscreenToLandscape: false, EnterFullscreenOnDisplayRotate: false,
+        ShowPlayerControlsWhenPaused: true, ShowFullscreenActionsWhenPaused: true }
       const settings = Object.fromEntries(Object.keys(values).map(key => [key, JSON.parse(JSON.stringify(store.getters['get' + key]))]))
       for (const [key, value] of Object.entries(values)) await store.dispatch('update' + key, value)
       return { settings, route: location.hash }
@@ -57,18 +58,76 @@ test('restored Android Watch tabs retain comment previews and both panel entry p
       await expect(page.locator('.phoneCommentsOpen')).toBeVisible({ timeout: 60_000 })
       page.on('console', recordError)
       await page.reload()
+      await page.evaluate(mockNativeRequests)
       await expect(page.locator('.phoneCommentDot')).toHaveCount(5, { timeout: 60_000 })
       assert.deepEqual(errors, [], 'Restoring the video must mount every phone panel without Vue render errors')
       await page.locator('.phoneCommentsOpen').click()
       await expect(page.locator('.mobileSheet[open] .comment').first()).toBeVisible()
-      if (process.env.ANDROID_ARTIFACT_DIR) await page.screenshot({ path: `${process.env.ANDROID_ARTIFACT_DIR}/restored-comments.png` })
+      const sheet = page.locator('.mobileSheet[open]')
+      const reload = sheet.getByRole('button', { name: 'Reload Comments', exact: true })
+      await expect(reload).toHaveCount(1)
+      let responseMode = 'incomplete'
+      let incompleteRequests = 0
+      const nextRequest = /\/youtubei\/v1\/next/
+      await page.route(nextRequest, (route, request) => {
+        if (!JSON.parse(request.postData() ?? '{}').continuation || responseMode === 'loaded') return route.fallback()
+        if (responseMode === 'incomplete') incompleteRequests++
+        const data = responseMode === 'incomplete' ? {} : {
+          onResponseReceivedEndpoints: [
+            { reloadContinuationItemsCommand: { targetId: 'comments-section', continuationItems: [
+              { commentsHeaderRenderer: { countText: { simpleText: '0 Comments' } } }
+            ] } },
+            { reloadContinuationItemsCommand: { targetId: 'comments-section', continuationItems: [] } }
+          ]
+        }
+        return route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify(data) })
+      })
+      await reload.click()
+      await expect(sheet.locator('.getCommentsTitle')).toBeVisible({ timeout: 30_000 })
+      await expect(sheet.locator('.noCommentMsg')).toHaveCount(0)
+      await page.evaluate(() => new Promise(resolve => {
+        let frames = 10
+        const step = () => (--frames ? requestAnimationFrame(step) : resolve())
+        requestAnimationFrame(step)
+      }))
+      assert.equal(incompleteRequests, 1, 'A failed load must wait for an explicit retry')
+      responseMode = 'empty'
+      await sheet.locator('.getCommentsTitle').click()
+      await expect(sheet.locator('.noCommentMsg')).toHaveText('There are no comments available for this video', { timeout: 30_000 })
+      await expect(reload).toHaveCount(1)
+      await expect(sheet.getByRole('button', { name: /^sort by$/i })).toHaveCount(1)
+      await expect(sheet.locator('.noCommentActions')).toHaveCount(0)
+      if (process.env.ANDROID_ARTIFACT_DIR) await sheet.screenshot({ path: `${process.env.ANDROID_ARTIFACT_DIR}/empty-comments.png` })
+      await reload.click()
+      await expect(sheet.locator('.noCommentMsg')).toHaveText('There are no comments available for this video', { timeout: 30_000 })
+      await expect(sheet.locator('.getCommentsTitle')).toHaveCount(0)
+      responseMode = 'loaded'
+      await reload.click()
+      await expect(sheet.locator('.comment').first()).toBeVisible({ timeout: 30_000 })
+      await page.unroute(nextRequest)
+      if (process.env.ANDROID_ARTIFACT_DIR) await sheet.screenshot({ path: `${process.env.ANDROID_ARTIFACT_DIR}/restored-comments.png` })
       await page.locator('.mobileSheet[open]').getByRole('button', { name: 'Close', exact: true }).click()
       await page.locator('.phoneDescriptionPreview').click()
       await expect(page.locator('.mobileSheet[open] .videoDescription')).toBeVisible()
       if (process.env.ANDROID_ARTIFACT_DIR) await page.screenshot({ path: `${process.env.ANDROID_ARTIFACT_DIR}/restored-description.png` })
       await page.locator('.mobileSheet[open]').getByRole('button', { name: 'Close', exact: true }).click()
+      await expect(page.locator('.mobileSheet[open]')).toHaveCount(0)
+      const miniPlayerReturn = page.locator('.mobileMiniBarReturn')
+      if (await miniPlayerReturn.isVisible()) await miniPlayerReturn.click()
+      await expect(page.locator('.ftVideoPlayer')).not.toHaveClass(/mobileMiniBar/)
       watch = await page.evaluateHandle(findWatchComponent)
       await page.locator('.ftVideoPlayer').evaluate(element => element.requestFullscreen())
+      await expect.poll(() => page.locator('.ftVideoPlayer').evaluate(element => document.fullscreenElement === element)).toBe(true)
+      await page.mouse.move(0, 0)
+      const controls = page.locator('.shaka-controls-container')
+      if (await controls.getAttribute('shown') !== 'true') {
+        const playerBounds = await page.locator('.ftVideoPlayer').boundingBox()
+        await initScript.send('Input.dispatchTouchEvent', {
+          type: 'touchStart', touchPoints: [{ x: playerBounds.x + playerBounds.width / 2, y: playerBounds.y + playerBounds.height * 0.35 }]
+        })
+        await initScript.send('Input.dispatchTouchEvent', { type: 'touchEnd', touchPoints: [] })
+      }
+      await expect(controls).toHaveAttribute('shown', 'true')
       await page.locator('.fullscreenCommentsToggle').click()
       await expect(page.locator('.fullscreenCommentCard .comment').first()).toBeVisible()
       await watch.evaluate(component => component.proxy.$refs.player.setFullscreenMetadata(true))

@@ -545,7 +545,7 @@
       <div
         v-else-if="commentsDisabled || (showComments && !isLoading)"
         class="noComments"
-        :class="{ noCommentsMessageOnly: commentsDisabled || fullscreenOverlay }"
+        :class="{ noCommentsMessageOnly: commentsDisabled || fullscreenOverlay || phonePanelHeader }"
       >
         <h3
           v-if="commentsDisabled"
@@ -566,7 +566,7 @@
           {{ $t("Comments.There are no comments available for this video") }}
         </h3>
         <div
-          v-if="!fullscreenOverlay && !commentsDisabled"
+          v-if="!fullscreenOverlay && !phonePanelHeader && !commentsDisabled"
           class="noCommentActions"
         >
           <FtIconButton
@@ -1514,7 +1514,7 @@ function reloadCommentData() {
   localCommentsInstance = undefined
   replyTokens.clear()
   resetCommentsScroll()
-  getCommentData({ preserveSort: true })
+  getCommentData()
 }
 
 function handleFullscreenActionsFocusout(event) {
@@ -1563,21 +1563,18 @@ function setCommentCount(count) {
 }
 
 /**
- * @param {any} text
+ * @param {import('youtubei.js').Misc.Text | string | null | undefined} text
  */
 function getCommentCountText(text) {
-  if (text == null) {
-    return ''
-  }
-
-  return text.text ?? text.toString()
+  return typeof text === 'string' ? text : text?.text ?? ''
 }
 
 /**
  * @param {import('youtubei.js').YT.Comments} comments
  */
 function setLocalCommentCount(comments) {
-  const countText = getCommentCountText(comments.header?.comments_count ?? comments.header?.count)
+  const countText = getCommentCountText(comments.header?.comments_count) || getCommentCountText(comments.header?.count)
+  if (!countText) return
   const count = parseLocalSubscriberCount(countText)
 
   setCommentCount(count)
@@ -1642,27 +1639,26 @@ function copyCommentYoutubeLink(commentId) {
   })
 }
 
-function getCommentData({ preserveSort = false } = {}) {
+async function getCommentData() {
+  showComments.value = false
   isLoading.value = true
   areCommentsDisabled.value = false
 
   const useInvidious = !process.env.SUPPORTS_LOCAL_API || usesInvidiousApi(backendPreference.value)
 
-  if (useInvidious) {
-    if (!props.isPostComments) {
-      return getCommentDataInvidious()
-    } else {
-      return getPostCommentsInvidious()
+  try {
+    if (useInvidious) {
+      return props.isPostComments ? await getPostCommentsInvidious() : await getCommentDataInvidious()
     }
-  } else {
-    return getCommentDataLocal(false, preserveSort)
+    return await getCommentDataLocal()
+  } finally {
+    automaticInitialLoadFailed = canPerformInitialCommentLoading.value
   }
 }
 
 async function loadInitialCommentsAutomatically() {
   if (automaticInitialLoadFailed) return
   await getCommentData()
-  automaticInitialLoadFailed = canPerformInitialCommentLoading.value
 }
 
 function getMoreComments() {
@@ -1886,36 +1882,37 @@ async function loadHighlightedReply() {
 
 /**
  * @param {boolean | undefined} more
- * @param {boolean} preserveSort
  */
-async function getCommentDataLocal(more = false, preserveSort = false) {
+async function getCommentDataLocal(more = false) {
   const requestedHighlightedCommentId = props.highlightedCommentId
 
   try {
     /** @type {import('youtubei.js').YT.Comments} */
     let comments
+    let loadedSortNewest
     if (more) {
       comments = await nextPageToken.value.getContinuation()
-    } else if (localCommentsInstance && !props.highlightedCommentId) {
+    } else if (localCommentsInstance?.header?.sort_menu?.sub_menu_items?.[sortNewest.value ? 1 : 0] && !props.highlightedCommentId) {
       comments = await localCommentsInstance.applySort(sortNewest.value ? 'NEWEST_FIRST' : 'TOP_COMMENTS')
     } else {
+      const sortBy = sortNewest.value ? 'NEWEST_FIRST' : undefined
       if (props.isPostComments) {
-        comments = await getLocalCommunityPostComments(props.id, props.postAuthorId)
+        comments = await getLocalCommunityPostComments(props.id, props.postAuthorId, sortBy)
       } else {
-        const sortBy = preserveSort ? (sortNewest.value ? 'NEWEST_FIRST' : 'TOP_COMMENTS') : undefined
         comments = await getLocalComments(props.id, sortBy, getHighlightedRootCommentId() ?? undefined)
       }
 
-      if (preserveSort && (props.isPostComments || !props.highlightedCommentId)) {
-        comments = await comments.applySort(sortNewest.value ? 'NEWEST_FIRST' : 'TOP_COMMENTS')
-      } else {
-        sortNewest.value = comments.header?.sort_menu?.sub_menu_items?.[1].selected ?? false
-      }
+      const selectedSortIndex = comments.header?.sort_menu?.sub_menu_items?.findIndex(item => item.selected)
+      if (selectedSortIndex === 0 || selectedSortIndex === 1) loadedSortNewest = selectedSortIndex === 1
     }
 
     if (requestedHighlightedCommentId !== props.highlightedCommentId) {
       return
     }
+    if (!comments.page.on_response_received_endpoints?.[1]) {
+      throw new Error('The comments response is missing its content')
+    }
+    if (loadedSortNewest !== undefined) sortNewest.value = loadedSortNewest
 
     if (!more) {
       localCommentsInstance = comments
@@ -1946,22 +1943,6 @@ async function getCommentDataLocal(more = false, preserveSort = false) {
     if (requestedHighlightedCommentId !== props.highlightedCommentId) {
       return
     }
-
-    // region No comment detection
-    // No comment related info when video info requested earlier in parent component
-    if (/comments page did not have any content/i.test(err?.message)) {
-      // For videos without any comment (comment disabled?)
-      // e.g. https://youtu.be/8NBSwDEf8a8
-      commentData.value = []
-      nextPageToken.value = null
-      setCommentCount(0)
-      isLoading.value = false
-      showComments.value = true
-      areCommentsDisabled.value = true
-      localCommentsInstance = undefined
-      return
-    }
-    // endregion No comment detection
 
     console.error(err)
     const errorMessage = t('Local API Error (Click to copy)')

@@ -6,7 +6,21 @@ import { WATCH_PAGE_SEED } from '../../helpers/watch-page.mjs'
 
 test.use({ seed: { settings: WATCH_PAGE_SEED } })
 
-test('treats an empty comments response as no comments', async ({ app, page }) => {
+const emptyCommentsResponse = JSON.stringify({
+  onResponseReceivedEndpoints: [
+    {
+      reloadContinuationItemsCommand: {
+        targetId: 'comments-section',
+        continuationItems: [
+          { commentsHeaderRenderer: { countText: { simpleText: '0 Comments' } } }
+        ]
+      }
+    },
+    { reloadContinuationItemsCommand: { targetId: 'comments-section', continuationItems: [] } }
+  ]
+})
+
+test('treats an empty comments response as no comments', { tag: '@scale' }, async ({ app, page }) => {
   await mockPlayableWatchPage(app, page)
 
   let commentRequestCount = 0
@@ -20,7 +34,7 @@ test('treats an empty comments response as no comments', async ({ app, page }) =
     return route.fulfill({
       status: 200,
       contentType: 'application/json',
-      body: '{}'
+      body: emptyCommentsResponse
     })
   })
 
@@ -52,16 +66,6 @@ test('treats an empty comments response as no comments', async ({ app, page }) =
     (messageBox.y + messageBox.height / 2)
   )).toBeLessThanOrEqual(1)
 
-  await page.evaluate(() => window.ftElectron.setZoomFactor(1.25))
-  const [scaledActionsBox, scaledMessageBox] = await Promise.all([
-    page.locator('.noCommentActions').boundingBox(),
-    page.locator('.noCommentMsg').boundingBox()
-  ])
-  expect(Math.abs(
-    scaledActionsBox.y + scaledActionsBox.height / 2 -
-    (scaledMessageBox.y + scaledMessageBox.height / 2)
-  )).toBeLessThanOrEqual(1)
-
   await setWindowSize(app, page, { width: 375, height: 800 })
   await page.locator('.app').evaluate((element) => {
     element.classList.add('capacitorTabs', 'capacitorPhoneLayout')
@@ -70,27 +74,114 @@ test('treats an empty comments response as no comments', async ({ app, page }) =
   await (await watchViewHandle(page)).evaluate(view => view.openPhonePanel('comments'))
   await expect(page.locator('.mobileSheet[open] .noComments')).toBeVisible()
 
-  const readMobileLayout = () => page.locator('.noComments').evaluate((element) => {
-    const actionsBounds = element.querySelector('.noCommentActions').getBoundingClientRect()
-    const messageBounds = element.querySelector('.noCommentMsg').getBoundingClientRect()
-    return {
-      actionsAboveMessage: actionsBounds.bottom <= messageBounds.top,
-      hasHorizontalOverflow: element.scrollWidth > element.clientWidth + 1
-    }
-  })
-  const expectedMobileLayout = {
-    actionsAboveMessage: true,
-    hasHorizontalOverflow: false
-  }
-  expect(await readMobileLayout()).toEqual(expectedMobileLayout)
-  await expectReloadAlignedBeforeSort()
-
+  await expect(page.locator('.mobileSheet[open] .noCommentActions')).toHaveCount(0)
+  await expect.poll(() => page.locator('.mobileSheet[open] .noComments').evaluate(element => element.scrollWidth > element.clientWidth + 1)).toBe(false)
+  await expect(page.locator('.mobileSheet[open]').getByRole('button', { name: 'Reload Comments', exact: true })).toHaveCount(1)
+  await expect(page.locator('.mobileSheet[open]').getByRole('button', { name: /^sort by$/i })).toHaveCount(1)
   await setWindowSize(app, page, { width: 800, height: 375 })
-  expect(await readMobileLayout()).toEqual(expectedMobileLayout)
-  await expectReloadAlignedBeforeSort()
+  await expect(page.locator('.mobileSheet[open] .noCommentActions')).toHaveCount(0)
+  await expect.poll(() => page.locator('.mobileSheet[open] .noComments').evaluate(element => element.scrollWidth > element.clientWidth + 1)).toBe(false)
   await expect(page.locator('.toast', { hasText: 'Local API Error' })).toHaveCount(0)
   expect(commentRequestCount).toBe(1)
 })
+
+const headerOnlyResponse = JSON.parse(emptyCommentsResponse)
+headerOnlyResponse.onResponseReceivedEndpoints.pop()
+headerOnlyResponse.onResponseReceivedEndpoints[0].reloadContinuationItemsCommand.continuationItems[0].commentsHeaderRenderer.countText.simpleText = '123 Comments'
+
+for (const trigger of ['initial load', 'header-only load', 'reload', 'sort', 'newest reload', 'single-sort reload']) {
+  test(`incomplete comments during ${trigger} stay retryable instead of reporting no comments`, async ({ app, page }) => {
+    await mockPlayableWatchPage(app, page)
+    await page.evaluate(() => window.$store.dispatch('updateBackendFallback', false))
+    const initialLoad = ['initial load', 'header-only load'].includes(trigger)
+    let fail = initialLoad
+    let headerOnly = trigger === 'header-only load'
+    let failedRequests = 0
+    let failedContinuation
+    let lastContinuation
+    let loadedResponse
+    const firstResponse = ['sort', 'newest reload', 'single-sort reload'].includes(trigger)
+      ? page.waitForResponse(response =>
+          response.url().includes('/youtubei/v1/next') && JSON.parse(response.request().postData() ?? '{}').continuation
+        )
+      : null
+    await page.route(/\/youtubei\/v1\/next/, (route, request) => {
+      const { continuation } = JSON.parse(request.postData() ?? '{}')
+      if (!continuation) return route.fallback()
+      lastContinuation = continuation
+      // Replay the recorded comments when retrying a sort whose page is not recorded.
+      if (!fail) {
+        return loadedResponse
+          ? route.fulfill({ status: 200, contentType: 'application/json', body: loadedResponse })
+          : route.fallback()
+      }
+      failedRequests++
+      failedContinuation = continuation
+      return route.fulfill({
+        status: 200,
+        contentType: 'application/json',
+        body: headerOnly ? JSON.stringify(headerOnlyResponse) : '{}'
+      })
+    })
+    await openMockedVideo(page)
+    if (firstResponse) loadedResponse = await (await firstResponse).text()
+    const sort = async () => {
+      await page.locator('.commentHeaderActions').getByRole('combobox').click()
+      await page.getByRole('option', { name: /^newest first$/i }).click()
+    }
+    if (trigger === 'newest reload' || trigger === 'single-sort reload') {
+      const data = JSON.parse(loadedResponse)
+      const items = data.onResponseReceivedEndpoints[0].reloadContinuationItemsCommand.continuationItems[0]
+        .commentsHeaderRenderer.sortMenu.sortFilterSubMenuRenderer.subMenuItems
+      if (trigger === 'single-sort reload') items.splice(1)
+      else items.forEach((item, index) => { item.selected = index === 1 })
+      loadedResponse = JSON.stringify(data)
+      if (trigger === 'newest reload') {
+        await sort()
+        await expect(page.locator('.comment').first()).toBeVisible()
+      }
+    }
+    if (!initialLoad) {
+      await expect(page.locator('.comment').first()).toBeVisible()
+      fail = true
+      if (trigger.endsWith('reload')) await page.getByRole('button', { name: 'Reload Comments', exact: true }).click()
+      else await sort()
+    }
+    await expect(page.locator('.getCommentsTitle')).toBeVisible()
+    await expect(page.locator('.noCommentMsg')).toHaveCount(0)
+    await page.locator('.commentAutoLoadSentinel').scrollIntoViewIfNeeded()
+    await page.evaluate(() => new Promise(resolve => {
+      requestAnimationFrame(() => requestAnimationFrame(resolve))
+    }))
+    expect(failedRequests).toBe(1)
+    if (trigger === 'newest reload') {
+      headerOnly = true
+      await page.locator('.getCommentsTitle').click()
+      await expect(page.locator('.getCommentsTitle')).toBeVisible()
+      expect(failedRequests).toBe(2)
+      const data = JSON.parse(loadedResponse)
+      delete data.onResponseReceivedEndpoints[0].reloadContinuationItemsCommand.continuationItems[0].commentsHeaderRenderer.sortMenu
+      loadedResponse = JSON.stringify(data)
+    }
+    fail = false
+    await page.locator('.getCommentsTitle').click()
+    await expect(page.locator('.comment').first()).toBeVisible()
+    await expect(page.locator('.noCommentMsg')).toHaveCount(0)
+    await expect(page.locator('.commentsTitle')).not.toHaveText(/^0 Comments/)
+    if (trigger === 'newest reload') {
+      expect(lastContinuation).toBe(failedContinuation)
+      await expect(page.locator('.commentHeaderActions .selectedValue')).toHaveText(/^newest first$/i)
+      await page.getByRole('button', { name: 'Reload Comments', exact: true }).click()
+      await expect(page.locator('.comment').first()).toBeVisible()
+      await expect(page.locator('.commentHeaderActions .selectedValue')).toHaveText(/^newest first$/i)
+      const newestContinuation = lastContinuation
+      await page.locator('.commentHeaderActions').getByRole('combobox').click()
+      await page.getByRole('option', { name: /^top comments$/i }).click()
+      await expect.poll(() => lastContinuation).not.toBe(newestContinuation)
+      await expect(page.locator('.comment').first()).toBeVisible()
+    }
+  })
+}
 
 test('loads initial comments with the video when automatic pagination is enabled', async ({ app, page }) => {
   await mockPlayableWatchPage(app, page)
@@ -415,16 +506,36 @@ test.describe('manual comment loading', () => {
     const viewComments = page.locator('.getCommentsTitle')
     const comments = page.locator('.commentThread')
 
+    const firstPageResponse = page.waitForResponse(response =>
+      response.url().includes('/youtubei/v1/next') && JSON.parse(response.request().postData() ?? '{}').continuation
+    )
     await viewComments.press('Space')
+    const firstPage = await (await firstPageResponse).json()
     await expect(page.locator('.commentsTitle')).toBeVisible()
     await page.locator('.commentTitleAction').press('Space')
     await expect(comments).toHaveCount(0)
     await viewComments.press('Enter')
     await expect(comments.first()).toBeVisible()
 
+    const secondPageComment = firstPage.onResponseReceivedEndpoints[1].reloadContinuationItemsCommand.continuationItems
+      .find(item => item.commentThreadRenderer)
+    secondPageComment.commentThreadRenderer.commentViewModel.commentViewModel.commentId += '-next-page'
+    await page.route(/\/youtubei\/v1\/next/, (route, request) => {
+      if (!JSON.parse(request.postData() ?? '{}').continuation) return route.fallback()
+      return route.fulfill({
+        status: 200,
+        contentType: 'application/json',
+        body: JSON.stringify({
+          onResponseReceivedEndpoints: [{ appendContinuationItemsAction: { targetId: 'comments-section', continuationItems: [secondPageComment] } }],
+          frameworkUpdates: firstPage.frameworkUpdates
+        })
+      })
+    })
+    const loadedCommentCount = await comments.count()
     const loadMoreRequest = page.waitForRequest(request => /\/youtubei\/v1\/next/.test(request.url()) && !!request.postDataJSON()?.continuation)
     await page.locator('.getMoreComments').press('Space')
     await loadMoreRequest
+    await expect.poll(() => comments.count()).toBeGreaterThan(loadedCommentCount)
 
     expect(await video.evaluate(element => element.paused)).toBe(false)
   })
