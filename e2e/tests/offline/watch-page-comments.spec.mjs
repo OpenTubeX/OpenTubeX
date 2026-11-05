@@ -149,6 +149,10 @@ for (const trigger of ['initial load', 'header-only load', 'reload', 'sort', 'ne
     }
     await expect(page.locator('.getCommentsTitle')).toBeVisible()
     await expect(page.locator('.noCommentMsg')).toHaveCount(0)
+    await page.locator('.commentAutoLoadSentinel').scrollIntoViewIfNeeded()
+    await page.evaluate(() => new Promise(resolve => {
+      requestAnimationFrame(() => requestAnimationFrame(resolve))
+    }))
     expect(failedRequests).toBe(1)
     if (trigger === 'newest reload') {
       headerOnly = true
