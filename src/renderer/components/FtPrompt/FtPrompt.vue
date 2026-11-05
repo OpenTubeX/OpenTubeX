@@ -73,6 +73,7 @@
                 v-for="(option, index) in optionNames"
                 :key="index"
                 :label="option"
+                :variant="optionVariants[index]"
                 :text-color="optionButtonTextColor(index)"
                 :background-color="optionButtonBackgroundColor(index)"
                 :theme="index === 0 && isFirstOptionDestructive ? 'destructive' : ''"
@@ -119,6 +120,10 @@ const props = defineProps({
     default: () => []
   },
   optionIcons: {
+    type: Array,
+    default: () => []
+  },
+  optionVariants: {
     type: Array,
     default: () => []
   },

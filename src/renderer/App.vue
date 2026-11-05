@@ -189,6 +189,8 @@
       :extra-labels="[lastExternalLinkToBeOpened]"
       :option-names="externalLinkOpeningPromptNames"
       :option-values="EXTERNAL_LINK_OPENING_PROMPT_VALUES"
+      :option-icons="[['fas', 'arrow-up-right-from-square'], ['fas', 'xmark']]"
+      :option-variants="['tonal']"
       @click="handleExternalLinkOpeningPromptAnswer"
     />
     <FtPrompt
