@@ -1,4 +1,4 @@
-import { test, expect, goTo, setPlayerFullscreen } from '../../helpers/app.mjs'
+import { test, expect, goTo, openInterfaceCustomizer, setPlayerFullscreen } from '../../helpers/app.mjs'
 import { sampleColors } from '../../helpers/colors.mjs'
 import { openMockedVideo, waitForPlayback } from '../../helpers/player.mjs'
 import { mockPlayableWatchPage, watchViewHandle } from '../../helpers/watch.mjs'
@@ -165,6 +165,65 @@ for (const [theme, scale] of [['openTubeXLight', 100], ['openTubeXDark', 125]]) 
       await expect(dropdown).toBeVisible()
       await expect(dropdown).toHaveCSS('background-image', /radial-gradient.*linear-gradient/)
       await expect(dropdown).toHaveCSS('background-attachment', /^scroll(, scroll)*$/)
+    })
+
+    test('Profile Manager and About cards stay solid on the settings window gradient', async ({ app, page }, testInfo) => {
+      const window = page.locator('.settingsWindow')
+      const expectSolidCards = async cards => {
+        await expect(cards.first()).toBeVisible()
+        await expect(window).toHaveCSS('background-image', /linear-gradient/)
+        for (const card of await cards.all()) await expect(card).toHaveCSS('background-image', 'none')
+      }
+      await page.locator('.topNav .profileTrigger').click()
+      await page.locator('.profileSummary').click()
+      await page.locator('.profilePanelHeader').getByRole('button', { name: 'Profile', exact: true }).click()
+      await expectSolidCards(page.locator('.profileSettingsContent .ft-card'))
+      await attachThemeScreenshot(app, testInfo, `${theme} profile manager at ${scale}%`)
+      await window.getByRole('button', { name: 'Close', exact: true }).first().click()
+      await expect(window).toHaveCount(0)
+
+      await page.locator('.topNav .profileTrigger').click()
+      await page.getByRole('dialog', { name: 'Quick settings' }).getByRole('button', { name: 'About' }).click()
+      await expectSolidCards(page.locator('.settingsAboutPage .ft-card'))
+      await attachThemeScreenshot(app, testInfo, `${theme} about window at ${scale}%`)
+
+      // The Quick Settings preview mirrors the real menu, gradient included.
+      await window.getByRole('button', { name: 'Close', exact: true }).first().click()
+      await expect(window).toHaveCount(0)
+      const customizer = await openInterfaceCustomizer(page, 'quick settings')
+      await expect(customizer.locator('.quickSettingsMenu')).toHaveCSS('background-image', /linear-gradient/)
+    })
+
+    test('Watch page keeps the window background below the top bar', async ({ app, page }, testInfo) => {
+      await mockPlayableWatchPage(app, page)
+      await openMockedVideo(page)
+      await page.locator('.ftVideoPlayer video').evaluate(video => video.pause())
+      await page.mouse.move(0, 0)
+      const host = page.locator('.watchPreviewHost.watchRouteActive')
+      await expect(host).toBeVisible()
+      // The host is taller than the window, so measure from the top bar,
+      // which stays on screen, to sample beside the player across its top edge.
+      const topNav = page.locator('.topNav')
+      await expectContinuousBackground(app, topNav, async () => {
+        const [nav, watch] = await Promise.all([topNav, host].map(locator =>
+          locator.evaluate(element => element.getBoundingClientRect())))
+        const offset = watch.y - nav.y
+        return [[watch.x - nav.x + 5, offset - 4], [watch.x - nav.x + 5, offset + 4]]
+      })
+      await attachThemeScreenshot(app, testInfo, `${theme} Watch page top at ${scale}%`)
+    })
+
+    test('download dialog footer blends into its card', async ({ app, page }, testInfo) => {
+      await mockPlayableWatchPage(app, page)
+      await openMockedVideo(page)
+      await page.locator('.ftVideoPlayer video').evaluate(video => video.pause())
+      await page.locator('.watchVideoInfo').getByRole('button', { name: 'Download Video' }).click()
+      const footer = page.locator('.downloadPromptCard .downloadFooter')
+      await expect(footer).toBeVisible()
+      await page.mouse.move(0, 0)
+      // Left of the centered folder row and buttons.
+      await expectPanelOwnsBackground(app, footer, [[5, 4], [5, 30]])
+      await attachThemeScreenshot(app, testInfo, `${theme} download dialog at ${scale}%`)
     })
 
     test('description controls and fades blend into their card', async ({ app, page }, testInfo) => {

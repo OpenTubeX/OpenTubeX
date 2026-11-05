@@ -103,5 +103,8 @@ h2 {
 }
 
 .profileSettingsContent {
+  /* The settings window already paints the card gradient behind these cards. */
+  --card-bg-image: none;
+
   display: flow-root;
 }

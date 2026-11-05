@@ -410,7 +410,6 @@ function cancelLoaderSettle() {
 .pageSwipePresented {
   position: relative;
   z-index: 1;
-  background-color: var(--bg-color);
 }
 
 .pageSwipePrewarm {
@@ -431,11 +430,6 @@ function cancelLoaderSettle() {
 .pageSwipePrewarm :deep(*::before),
 .pageSwipePrewarm :deep(*::after) {
   animation-play-state: paused !important;
-}
-
-.pageSwipeFrom,
-.pageSwipeTo {
-  background-color: var(--bg-color);
 }
 
 .pageSwipePlaceholder {
