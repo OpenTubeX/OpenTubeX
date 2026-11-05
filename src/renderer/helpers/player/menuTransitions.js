@@ -13,32 +13,10 @@
  * @returns {() => void} cleanup
  */
 export function setupMenuTransitions(menu, controls) {
-  /**
-   * Shaka switches the views after sending its events, so the zoom is looked
-   * for once it has, anywhere in the menu, as the menu zooms itself for the
-   * views of its menu groups.
-   *
-   * @param {HTMLElement} container
-   * @param {'in' | 'out'} zoom
-   */
-  function mark(container, zoom) {
-    container.dataset.ftMenuTransition = zoom
-    queueMicrotask(() => {
-      if (
-        container.dataset.ftMenuTransition === zoom &&
-        !menu.getAnimations({ subtree: true }).some(animation => (
-          animation instanceof CSSAnimation && animation.animationName.startsWith(`ft-menu-zoom-${zoom}`)
-        ))
-      ) {
-        delete container.dataset.ftMenuTransition
-      }
-    })
-  }
-
   /** @param {Event & { container?: unknown }} event */
   function onSubmenuOpen({ container }) {
     if (container instanceof HTMLElement && menu.contains(container)) {
-      mark(container, 'in')
+      markMenuTransition(container, 'in')
     }
   }
 
@@ -56,7 +34,7 @@ export function setupMenuTransitions(menu, controls) {
       return
     }
     if (!menu.classList.contains('shaka-hidden') && menu.checkVisibility()) {
-      mark(container, 'out')
+      markMenuTransition(container, 'out')
     }
   }
 
@@ -123,6 +101,36 @@ export function setupMenuTransitions(menu, controls) {
     delete menu.dataset.ftMenuTransition
     delete menu.dataset.ftMenuInstantClose
   }
+}
+
+/**
+ * Zooms the view just shown in an overflow menu into place, as moving to a
+ * submenu (`'in'`) or back from one (`'out'`) does. Shaka marks its own
+ * submenus through its events, while views that switch themselves, such as
+ * those of the captions menu, mark their container here. Outside an overflow
+ * menu, nothing zooms.
+ *
+ * The zoom is looked for once the current task has switched the views,
+ * anywhere in the menu, as the menu zooms itself for the views of its menu
+ * groups. Without one, the marker expires.
+ *
+ * @param {HTMLElement} container the element holding the views
+ * @param {'in' | 'out'} zoom
+ */
+export function markMenuTransition(container, zoom) {
+  const menu = container.closest('.shaka-overflow-menu')
+  if (!(menu instanceof HTMLElement)) return
+  container.dataset.ftMenuTransition = zoom
+  queueMicrotask(() => {
+    if (
+      container.dataset.ftMenuTransition === zoom &&
+      !menu.getAnimations({ subtree: true }).some(animation => (
+        animation instanceof CSSAnimation && animation.animationName.startsWith(`ft-menu-zoom-${zoom}`)
+      ))
+    ) {
+      delete container.dataset.ftMenuTransition
+    }
+  })
 }
 
 /**

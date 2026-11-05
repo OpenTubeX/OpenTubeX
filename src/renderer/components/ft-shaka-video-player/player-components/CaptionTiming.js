@@ -5,6 +5,7 @@ import { FtIcon } from '@opentubex/icons'
 import i18n from '../../../i18n/index'
 import { addOverlayScrollbars, clampOverlayScrollTop, removeOverlayScrollbars, restoreOverlayScrollTop } from '../../../helpers/overlayScrollbars'
 import { goBackOnEmptyClicks } from '../../../helpers/player/emptyMenuClicks'
+import { markMenuTransition } from '../../../helpers/player/menuTransitions'
 
 export class CaptionTiming extends shaka.ui.Element {
   /**
@@ -85,6 +86,7 @@ export class CaptionTiming extends shaka.ui.Element {
       this.updateOffset_()
       captionMenu.classList.add('shaka-hidden')
       this.menu_.classList.remove('shaka-hidden')
+      markMenuTransition(this.parent, 'in')
       restoreOverlayScrollTop(captionMenu.parentElement, 0)
       back.button.focus({ preventScroll: true })
       cancelAnimationFrame(this.scrollbarFrame_)
@@ -98,6 +100,7 @@ export class CaptionTiming extends shaka.ui.Element {
     const goBack = () => {
       this.menu_.classList.add('shaka-hidden')
       captionMenu.classList.remove('shaka-hidden')
+      markMenuTransition(this.parent, 'out')
       this.button.focus({ preventScroll: true })
     }
     this.eventManager.listen(back.button, 'click', goBack)
