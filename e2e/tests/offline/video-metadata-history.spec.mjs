@@ -78,9 +78,11 @@ test('compares feed titles only with each other', async ({ page }) => {
   await storeFeedTitle(page, 'feedtitle01', 'Renamed translated title', now - 40_000)
   await storeFeedTitle(page, 'feedtitle01', 'Translated title', now - 35_000)
   await storeFeedTitle(page, 'feedtitle01', 'Renamed translated title', now - 30_000)
+  await storeFeedTitle(page, 'feedtitle01', 'Renamed translated title', now - 20_000)
   // Another channel's feed that was fetched earlier but stored later, as with
-  // a collaboration, must not record its older title as the latest.
-  await storeFeedTitle(page, 'feedtitle01', 'Stale title', now - 32_000, 'UCfeedtitlechannel00001')
+  // a collaboration, must not record its older title as the latest, even when
+  // it is newer than the latest title change.
+  await storeFeedTitle(page, 'feedtitle01', 'Stale title', now - 25_000, 'UCfeedtitlechannel00001')
   // The feed may translate titles, so the title it shows now is not a previous
   // title, even though it differs from the watch page.
   await expect.poll(async () => (await update())?.feedTitles.map(({ title }) => title))

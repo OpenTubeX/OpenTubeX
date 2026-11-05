@@ -206,14 +206,16 @@ export function recordFeedVideoTitles(observations) {
 
     for (const observation of valid) {
       const id = feedTitlesId(observation.videoId)
-      const doc = documents.get(id) ?? { _id: id, titles: [] }
+      const doc = documents.get(id) ?? { _id: id, titles: [], observedAt: 0 }
       const title = normalizeText(observation.title, MAX_TITLE_LENGTH)
       const observedAt = Math.min(observation.observedAt, Date.now())
-      const latest = doc.titles.at(-1)
-      // An older feed refresh that finished late must not undo a newer title.
-      if (latest && (latest.observedAt > observedAt || latest.title === title)) continue
+      // An older feed refresh that finished late, such as another channel's
+      // feed with the same collaboration video, must not undo a newer title.
+      // Unchanged titles advance this time too, so it covers every refresh.
+      if (doc.observedAt >= observedAt) continue
 
-      doc.titles.push({ title, observedAt })
+      if (doc.titles.at(-1)?.title !== title) doc.titles.push({ title, observedAt })
+      doc.observedAt = observedAt
       documents.set(id, doc)
       changed.set(id, doc)
     }
