@@ -227,13 +227,14 @@
   color: var(--side-nav-hover-text-color);
 }
 
+/* The active segment takes a tonal tint, like the current chapter. */
 .transcriptSegment.active {
-  background-color: var(--selected-container-color);
-  color: var(--on-selected-container-color);
+  background-color: color-mix(in srgb, var(--primary-color) 24%, transparent);
 }
 
 .transcriptSegment.active:is(:hover, :focus-visible) {
-  background-color: var(--selected-container-hover-color);
+  background-color: color-mix(in srgb, var(--primary-color) 32%, transparent);
+  color: var(--primary-text-color);
 }
 
 /* The first segment of the list has no gap or neighbor above it. */

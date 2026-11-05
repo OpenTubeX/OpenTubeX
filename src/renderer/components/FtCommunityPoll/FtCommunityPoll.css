@@ -32,8 +32,8 @@
   margin-inline-start: 10px;
 }
 
-/* Choices are tonal bars. The transparent border keeps the box size of the
-   former outline, and the correct answer recolors it. */
+/* Choices are neutral filled bars. The transparent border keeps the box size
+   of the former outline, and the correct answer recolors it. */
 .option {
   display: flex;
   align-items: center;
@@ -42,7 +42,7 @@
   border-radius: var(--shape-corner-medium);
   padding-inline-start: 10px;
   margin-block-end: 10px;
-  background-color: color-mix(in srgb, var(--primary-color) 16%, var(--secondary-card-bg-color));
+  background-color: color-mix(in srgb, var(--primary-text-color) 6%, var(--secondary-card-bg-color));
   transition:
     background-color var(--motion-default-effects),
     border-color var(--motion-default-effects);
@@ -90,7 +90,7 @@
 
 .reveal-answer:hover,
 .reveal-answer:focus {
-  background-color: color-mix(in srgb, var(--primary-color) 26%, var(--secondary-card-bg-color));
+  background-color: color-mix(in srgb, var(--primary-text-color) 12%, var(--secondary-card-bg-color));
 }
 
 .reveal-answer:active {

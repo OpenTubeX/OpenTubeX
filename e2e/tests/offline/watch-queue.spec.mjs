@@ -94,6 +94,30 @@ test('dragging the bottom queue item follows the pointer upward', { tag: '@scale
   await expect(bottom).not.toHaveClass(/dragging/)
 })
 
+test('keeps the queue header actions round with a coarse pointer', { tag: '@scale' }, async ({ app, page }) => {
+  await setWindowSize(app, page, { width: 1500, height: 1100 })
+  await page.evaluate(() => window.$store.dispatch('updateHideRecommendedVideos', true))
+  // Touch emulation makes (pointer: coarse) match, which raises the actions' touch target.
+  const cdp = await page.context().newCDPSession(page)
+  await cdp.send('Emulation.setTouchEmulationEnabled', { enabled: true, maxTouchPoints: 5 })
+  expect(await page.evaluate(() => matchMedia('(pointer: coarse)').matches)).toBe(true)
+  await goTo(page, 'history')
+  await page.evaluate(() => {
+    window.$store.commit('addVideoToWatchQueue', { video: { videoId: 'queuevideo1', title: 'Queue video one', author: 'Queue Test Channel', lengthSeconds: 60 } })
+  })
+  await page.locator('a.title').filter({ hasText: /Current video/ }).click()
+  const actions = page.locator('.watchQueue .queueHeaderAction')
+  await expect(actions).toHaveCount(2)
+  const sizes = await actions.evaluateAll(elements => elements.map(element => {
+    const { width, height } = element.getBoundingClientRect()
+    return { width, height }
+  }))
+  for (const size of sizes) {
+    expect(size.width).toBeCloseTo(size.height, 1)
+    expect(size.width).toBeCloseTo(sizes[0].width, 1)
+  }
+})
+
 test('centers queue item content between the row dividers', { tag: '@scale' }, async ({ app, page, attachScreenshot }) => {
   await setWindowSize(app, page, { width: 1500, height: 1100 })
   await page.evaluate(() => window.$store.dispatch('updateHideRecommendedVideos', true))

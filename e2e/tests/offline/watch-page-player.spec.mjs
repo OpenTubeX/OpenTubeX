@@ -1204,16 +1204,12 @@ test('loops a chapter from the chapters panel with A-B repeat', async ({ app, pa
   expect(duration).toBeLessThan(31)
   await expect.poll(() => video.evaluate(element => element.currentTime)).toBe(20)
 
-  // The current chapter is filled with the primary color, which the accent can
-  // match, so its active loop follows the row's text color instead.
-  await page.evaluate(() => window.$store.dispatch('updateSecColor', 'Red'))
+  // The current chapter only takes a tint, so its active loop keeps the accent
+  // color that sets it apart from the row's text.
   await expect.poll(() => loopOutro.evaluate(button => {
     const row = button.closest('.chapter')
-    const color = getComputedStyle(button).color
-    return row.classList.contains('current') && color === getComputedStyle(row).color &&
-      color !== getComputedStyle(row).backgroundColor && getComputedStyle(button).boxShadow.includes(color)
+    return row.classList.contains('current') && getComputedStyle(button).color !== getComputedStyle(row).color
   })).toBe(true)
-  await page.evaluate(() => window.$store.dispatch('updateSecColor', 'Blue'))
 
   // Moving a point turns the range into a custom one.
   const endMarker = player.locator('.abRepeatMarkerB')
