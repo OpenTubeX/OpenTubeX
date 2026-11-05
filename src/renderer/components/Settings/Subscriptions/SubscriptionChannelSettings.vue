@@ -169,7 +169,7 @@
               :icon="['fas', 'arrow-down']"
               background-color="var(--primary-color)"
               text-color="var(--text-with-main-color)"
-              @click="channelPage++"
+              @click="loadMoreChannels"
             />
           </FtFlexBox>
         </FtAutoLoadNextPageWrapper>
@@ -280,11 +280,12 @@ const visibleChannels = computed(() => {
   ))
 })
 
-const { page: channelPage, hasMore: hasMoreChannels, displayedItems: displayedChannels, reset: resetChannelPage } = useListPagination(visibleChannels, {
+const { page: channelPage, hasMore: hasMoreChannels, displayedItems: displayedChannels, reset: resetChannelPage, loadMore: loadMoreChannels } = useListPagination(visibleChannels, {
   pageSize: channelsPerPage,
   append: true,
   resetOn: searchQuery,
-  scrollTarget: channelSettingsScroller
+  scrollTarget: channelSettingsScroller,
+  focusItem: index => channelSettingsContent.value?.querySelectorAll('.channelSelectionOption')[index]?.focus()
 })
 
 const feedTypes = computed(() => getSubscriptionFeedTypeOptions(t))

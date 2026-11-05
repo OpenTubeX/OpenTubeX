@@ -12,8 +12,9 @@ import { restoreOverlayScrollTop } from '../helpers/overlayScrollbars'
  * @param {boolean} [options.append]
  * @param {import('vue').WatchSource | import('vue').WatchSource[]} [options.resetOn]
  * @param {import('vue').Ref<HTMLElement | null>} [options.scrollTarget]
+ * @param {(index: number) => void} [options.focusItem] Focuses a newly appended item after manual loading.
  */
-export function useListPagination(items, { pageSize, append = false, resetOn, scrollTarget }) {
+export function useListPagination(items, { pageSize, append = false, resetOn, scrollTarget, focusItem }) {
   const page = ref(0)
   const lastPage = computed(() => Math.max(0, Math.ceil(items.value.length / pageSize) - 1))
   const displayedItems = computed(() => items.value.slice(
@@ -32,6 +33,14 @@ export function useListPagination(items, { pageSize, append = false, resetOn, sc
     if (scrollTarget.value) restoreOverlayScrollTop(scrollTarget.value, 0)
   }
 
+  async function loadMore() {
+    if (!hasMore.value) return
+    const firstNewIndex = displayedItems.value.length
+    page.value++
+    await nextTick()
+    focusItem?.(firstNewIndex)
+  }
+
   function reset() {
     // A new query is a new view even when it stays on the first page.
     if (append || page.value === 0) {
@@ -40,5 +49,5 @@ export function useListPagination(items, { pageSize, append = false, resetOn, sc
     page.value = 0
   }
 
-  return { page, lastPage, displayedItems, hasMore, reset, restoreScroll }
+  return { page, lastPage, displayedItems, hasMore, reset, restoreScroll, loadMore }
 }
