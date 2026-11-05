@@ -501,16 +501,14 @@
   }
 }
 
-@media (prefers-reduced-transparency) {
-  :deep(.ft-chapter-preview),
-  :deep(.playerFullscreenTitleOverlay),
-  .stats {
-    background-color: rgb(0 0 0 / 90%);
-  }
+:root[data-reduced-transparency] .ftVideoPlayer :deep(.ft-chapter-preview),
+:root[data-reduced-transparency] .ftVideoPlayer :deep(.playerFullscreenTitleOverlay),
+:root[data-reduced-transparency] .stats {
+  background-color: rgb(0 0 0 / 90%);
+}
 
-  .skippedSegment {
-    --skipped-segment-background: rgb(0 0 0 / 90%);
-  }
+:root[data-reduced-transparency] .skippedSegment:not(.editing) {
+  --skipped-segment-background: rgb(0 0 0);
 }
 
 /* stylelint-enable liberty/use-logical-spec */

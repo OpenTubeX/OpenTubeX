@@ -2492,10 +2492,9 @@ a:visited {
 
 /* stylelint-enable no-descending-specificity */
 
-@media (prefers-reduced-transparency) {
-  body {
-    --modal-backdrop-blur: none;
-  }
+/* Set from the system Reduce Transparency setting by helpers/reducedTransparency.js */
+:root[data-reduced-transparency] body {
+  --modal-backdrop-blur: none;
 }
 
 /* Follows the app's Reduced Motion setting, which already resolves the system
