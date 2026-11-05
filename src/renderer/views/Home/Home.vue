@@ -256,12 +256,18 @@
               </div>
             </div>
           </FtAutoGrid>
+          <FtLoader
+            v-if="recommendationsLoading && recommendations.length > 0"
+            :label="t('Global.Loading More')"
+            compact
+            :tab-loading-indicator="false"
+          />
           <FtButton
-            v-if="recommendations.length > 0"
+            v-else-if="recommendations.length > 0"
             class="recommendationLoadMore"
             :label="t('Subscriptions.Load More Videos')"
             :icon="['fas', 'angle-down']"
-            :disabled="recommendationsLoading || !recommendationsHaveSeeds"
+            :disabled="!recommendationsHaveSeeds"
             @click="loadMoreRecommendations"
           />
         </template>
