@@ -488,16 +488,36 @@ test.describe('manual comment loading', () => {
     const viewComments = page.locator('.getCommentsTitle')
     const comments = page.locator('.commentThread')
 
+    const firstPageResponse = page.waitForResponse(response =>
+      response.url().includes('/youtubei/v1/next') && JSON.parse(response.request().postData() ?? '{}').continuation
+    )
     await viewComments.press('Space')
+    const firstPage = await (await firstPageResponse).json()
     await expect(page.locator('.commentsTitle')).toBeVisible()
     await page.locator('.commentTitleAction').press('Space')
     await expect(comments).toHaveCount(0)
     await viewComments.press('Enter')
     await expect(comments.first()).toBeVisible()
 
+    const secondPageComment = firstPage.onResponseReceivedEndpoints[1].reloadContinuationItemsCommand.continuationItems
+      .find(item => item.commentThreadRenderer)
+    secondPageComment.commentThreadRenderer.commentViewModel.commentViewModel.commentId += '-next-page'
+    await page.route(/\/youtubei\/v1\/next/, (route, request) => {
+      if (!JSON.parse(request.postData() ?? '{}').continuation) return route.fallback()
+      return route.fulfill({
+        status: 200,
+        contentType: 'application/json',
+        body: JSON.stringify({
+          onResponseReceivedEndpoints: [{ appendContinuationItemsAction: { targetId: 'comments-section', continuationItems: [secondPageComment] } }],
+          frameworkUpdates: firstPage.frameworkUpdates
+        })
+      })
+    })
+    const loadedCommentCount = await comments.count()
     const loadMoreRequest = page.waitForRequest(request => /\/youtubei\/v1\/next/.test(request.url()) && !!request.postDataJSON()?.continuation)
     await page.locator('.getMoreComments').press('Space')
     await loadMoreRequest
+    await expect.poll(() => comments.count()).toBeGreaterThan(loadedCommentCount)
 
     expect(await video.evaluate(element => element.paused)).toBe(false)
   })
