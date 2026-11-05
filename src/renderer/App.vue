@@ -2498,8 +2498,10 @@ function copyPackageManagerUpdateCommand() {
 }
 
 function openDownloadsPage() {
+  handleExternalLink('https://opentubex.org/downloads/')
+  // Keep the release notes when the link can't open, so the update stays reachable
+  if (resolveExternalLinkAction(externalLinkHandling.value) === 'disabled') return
   dismissAvailableUpdate()
-  openExternalLink('https://opentubex.org/downloads/')
   showReleaseNotes.value = false
 }
 

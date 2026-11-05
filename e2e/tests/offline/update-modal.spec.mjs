@@ -356,6 +356,48 @@ test.describe('with external links behind a prompt', () => {
       .toEqual(['https://opentubex.org/donate/'])
     await expect(page.locator('.changeLogTitle')).toBeVisible()
   })
+
+  test('the download button asks before opening the downloads page', async ({ app, page }) => {
+    await app.electronApp.evaluate(({ shell }) => {
+      globalThis.downloadExternalUrls = []
+      shell.openExternal = async url => {
+        globalThis.downloadExternalUrls.push(url)
+      }
+    })
+    await showUpdatePrompt(page, [
+      release(`OpenTubeX ${newestUpdateVersion}`, `v${newestUpdateVersion}-beta`, NEWEST_NOTES)
+    ])
+
+    await page.getByRole('button', { name: 'Download From Site' }).click()
+    const prompt = page.getByRole('dialog', { name: 'Are you sure you want to open this link?' })
+    await expect(prompt).toContainText('https://opentubex.org/downloads/')
+    expect(await app.electronApp.evaluate(() => globalThis.downloadExternalUrls)).toEqual([])
+
+    await prompt.getByRole('button', { name: 'Yes, Open Link' }).click()
+    await expect.poll(() => app.electronApp.evaluate(() => globalThis.downloadExternalUrls))
+      .toEqual(['https://opentubex.org/downloads/'])
+  })
+})
+
+test.describe('with external links disabled', () => {
+  test.use({ seed: { settings: { externalLinkHandling: 'doNothing' } } })
+
+  test('the download button keeps the release notes open without opening a link', async ({ app, page }) => {
+    await app.electronApp.evaluate(({ shell }) => {
+      globalThis.downloadExternalUrls = []
+      shell.openExternal = async url => {
+        globalThis.downloadExternalUrls.push(url)
+      }
+    })
+    await showUpdatePrompt(page, [
+      release(`OpenTubeX ${newestUpdateVersion}`, `v${newestUpdateVersion}-beta`, NEWEST_NOTES)
+    ])
+
+    await page.getByRole('button', { name: 'Download From Site' }).click()
+    await expect(page.locator('.toast', { hasText: 'External link opening has been disabled' })).toBeVisible()
+    await expect(page.locator('.changeLogTitle')).toBeVisible()
+    expect(await app.electronApp.evaluate(() => globalThis.downloadExternalUrls)).toEqual([])
+  })
 })
 
 test('skipped updates keep a heading per release', async ({ page, attachScreenshot }) => {
