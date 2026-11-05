@@ -22,7 +22,9 @@
   display: flex;
   flex: 0 0 auto;
   align-items: stretch;
+  column-gap: 4px;
   min-block-size: 74px;
+  padding-inline-end: 8px;
   border-block-end: 1px solid rgb(255 255 255 / 6%);
   background-color: rgb(20 20 20 / 38%);
   transition: background-color var(--motion-default-effects);
@@ -107,9 +109,12 @@
 
 .chapterAction {
   display: grid;
-  flex: 0 0 48px;
+  flex: 0 0 40px;
   place-items: center;
+  align-self: center;
+  block-size: 40px;
   border: 0;
+  border-radius: var(--shape-corner-full);
   background: transparent;
   color: #fff;
   cursor: pointer;
@@ -118,15 +123,27 @@
   transition: background-color var(--motion-fast-effects);
 }
 
+/* Material 3 state layer: the icon color at low opacity. */
 .chapterAction:hover,
 .chapterAction:focus-visible {
-  background-color: rgb(255 255 255 / 8%);
+  background-color: color-mix(in srgb, currentcolor 10%, transparent);
   opacity: 1;
 }
 
+.chapterAction:active {
+  background-color: color-mix(in srgb, currentcolor 16%, transparent);
+}
+
+/* A selected toggle keeps a tonal fill, like a Material 3 toggle icon button. */
 .loopChapter.active {
+  background-color: color-mix(in srgb, currentcolor 16%, transparent);
   color: #55b6ff;
   opacity: 1;
+}
+
+.loopChapter.active:hover,
+.loopChapter.active:focus-visible {
+  background-color: color-mix(in srgb, currentcolor 24%, transparent);
 }
 
 @media only screen and (width <= 680px) {
