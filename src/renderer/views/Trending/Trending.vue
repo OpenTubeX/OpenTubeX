@@ -110,6 +110,7 @@
             {{ t("Channel.Podcasts.Podcasts") }}
           </div>
         </FtTabs>
+        <FtFixedBackground />
       </div>
       <div
         id="trendingPanel"
@@ -143,6 +144,7 @@ import { computed, nextTick, onBeforeUnmount, onMounted, ref, useTemplateRef } f
 import { useI18n } from 'vue-i18n'
 
 import FtCard from '../../components/ft-card/ft-card.vue'
+import FtFixedBackground from '../../components/FtFixedBackground/FtFixedBackground.vue'
 import FtLoader from '../../components/FtLoader/FtLoader.vue'
 import FtElementList from '../../components/FtElementList/FtElementList.vue'
 import FtRefreshWidget from '../../components/FtRefreshWidget/FtRefreshWidget.vue'

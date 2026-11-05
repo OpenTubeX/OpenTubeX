@@ -342,6 +342,7 @@
           class="subscriptionGroups"
           panel-id="subscriptionsPanel"
         />
+        <FtFixedBackground />
       </div>
       <KeepAlive>
         <SubscriptionsVideos
@@ -415,6 +416,7 @@ import { useI18n } from 'vue-i18n'
 import { useRoute, useRouter } from 'vue-router'
 
 import FtCard from '../../components/ft-card/ft-card.vue'
+import FtFixedBackground from '../../components/FtFixedBackground/FtFixedBackground.vue'
 import FtLoader from '../../components/FtLoader/FtLoader.vue'
 import FtNewContentDot from '../../components/FtNewContentDot/FtNewContentDot.vue'
 import FtIconButton from '../../components/FtIconButton/FtIconButton.vue'

@@ -25,6 +25,7 @@
         <FtCard
           ref="promptCard"
           v-overlay-scrollbars="!fixedLayout"
+          :fixed-background="false"
           class="promptCard"
           :class="{ autosize, fixedLayout, [theme]: true, [cardClass]: cardClass !== '' }"
           :inert="busy"

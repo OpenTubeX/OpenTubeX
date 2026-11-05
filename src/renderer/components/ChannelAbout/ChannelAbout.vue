@@ -160,6 +160,7 @@
         </li>
       </ul>
     </template>
+    <FtFixedBackground />
   </div>
 </template>
 
@@ -169,6 +170,7 @@ import { computed, inject, reactive } from 'vue'
 import { useI18n } from 'vue-i18n'
 
 import FtChannelBubble from '../../components/FtChannelBubble/FtChannelBubble.vue'
+import FtFixedBackground from '../FtFixedBackground/FtFixedBackground.vue'
 import FtRetryImage from '../FtRetryImage.vue'
 import FtFlexBox from '../../components/ft-flex-box/ft-flex-box.vue'
 import { vSaferHtml } from '../../directives/vSaferHtml.js'

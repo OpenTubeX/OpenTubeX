@@ -393,6 +393,7 @@
           @click="toggleSearch"
         />
       </FtFlexBox>
+      <FtFixedBackground />
     </div>
   </FtCard>
 </template>
@@ -405,6 +406,7 @@ import { useI18n } from 'vue-i18n'
 
 import { FtIcon } from '@opentubex/icons'
 import FtCard from '../ft-card/ft-card.vue'
+import FtFixedBackground from '../FtFixedBackground/FtFixedBackground.vue'
 import FtFlexBox from '../ft-flex-box/ft-flex-box.vue'
 import FtShareButton from '../FtShareButton/FtShareButton.vue'
 import FtSubscribeButton from '../FtSubscribeButton/FtSubscribeButton.vue'

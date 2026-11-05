@@ -81,6 +81,7 @@
           v-if="menuOpen || phoneLayout || preview"
           :id="id"
           ref="menuRef"
+          :fixed-background="false"
           class="quickSettingsMenu"
           :class="{ phoneQuickSettings: phoneLayout }"
           :role="phoneLayout || preview ? null : 'dialog'"

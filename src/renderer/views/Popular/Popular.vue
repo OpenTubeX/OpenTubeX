@@ -24,6 +24,7 @@
             @click="fetchPopularInfo"
           />
         </div>
+        <FtFixedBackground />
       </div>
       <ft-loader
         v-if="isLoading"
@@ -49,6 +50,7 @@ import { computed, onBeforeUnmount, onMounted, ref, shallowRef } from 'vue'
 
 import FtLoader from '../../components/FtLoader/FtLoader.vue'
 import FtCard from '../../components/ft-card/ft-card.vue'
+import FtFixedBackground from '../../components/FtFixedBackground/FtFixedBackground.vue'
 import FtElementList from '../../components/FtElementList/FtElementList.vue'
 import FtRefreshWidget from '../../components/FtRefreshWidget/FtRefreshWidget.vue'
 import store from '../../store/index'
