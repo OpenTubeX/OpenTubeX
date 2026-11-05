@@ -390,6 +390,12 @@ let autoRefreshOnSortByChangeEnabled = false
 let channelInstance = null
 /** @type {'local' | 'invidious' | ''} */
 let apiUsed = ''
+/**
+ * The backend that returned each tab's continuation. A tab that falls back to
+ * the other backend has to load its next pages from that backend as well.
+ * @type {Map<string, 'local' | 'invidious'>}
+ */
+const tabApiUsed = new Map()
 let mayContainContentFromOtherChannels = false
 // Every tab is its own request, so a tab's content is fetched the first time it is shown.
 const loadedTabs = new Set()
@@ -680,14 +686,9 @@ watch(route, () => {
   pendingTabs.clear()
   channelLoaded = false
   isArtistTopicChannel.value = false
-  videoContinuationData.value = null
-  shortContinuationData.value = null
-  liveContinuationData.value = null
-  playlistContinuationData.value = null
-  podcastContinuationData.value = null
-  releaseContinuationData.value = null
+  resetTabContinuations()
   searchContinuationData.value = null
-  communityContinuationData.value = null
+  tabApiUsed.clear()
   showSearchBar.value = true
   // Yattee servers ignore the sort order of channel tabs
   const sortable = backendPreference.value !== 'yattee'
@@ -823,6 +824,21 @@ function updateChannelDetails({ channelId, channelName, channelThumbnailUrl }) {
   })
 }
 
+/**
+ * Loading the channel again reloads its tabs, possibly from the other backend,
+ * so their continuations must not carry over. The search tab keeps its own.
+ */
+function resetTabContinuations() {
+  videoContinuationData.value = null
+  shortContinuationData.value = null
+  liveContinuationData.value = null
+  playlistContinuationData.value = null
+  podcastContinuationData.value = null
+  releaseContinuationData.value = null
+  coursesContinuationData.value = null
+  communityContinuationData.value = null
+}
+
 async function getChannelLocal() {
   // Tab requests from an earlier load, such as one falling back to another
   // backend, must not land in this one.
@@ -830,6 +846,7 @@ async function getChannelLocal() {
   // Those requests stop without clearing their loading state.
   elementListLoadingTabs.value = {}
   apiUsed = 'local'
+  resetTabContinuations()
   loadedTabs.clear()
   pendingTabs.clear()
   channelLoaded = false
@@ -1141,6 +1158,7 @@ async function getChannelInfoInvidious() {
   elementListLoadingTabs.value = {}
   isLoading.value = true
   apiUsed = 'invidious'
+  resetTabContinuations()
   loadedTabs.clear()
   pendingTabs.clear()
   channelLoaded = false
@@ -1290,6 +1308,7 @@ async function getChannelVideosLocal() {
 
       latestVideos.value = parseLocalPlaylistVideos(playlist.items)
       videoContinuationData.value = playlist.has_continuation ? playlist : null
+      tabApiUsed.set('videos', 'local')
       setElementListLoading('videos', false)
     } else {
       await ensureChannelInstance()
@@ -1315,6 +1334,7 @@ async function getChannelVideosLocal() {
 
       latestVideos.value = parseLocalChannelVideos(videosTab.videos, id.value, channelName.value)
       videoContinuationData.value = videosTab.has_continuation ? videosTab : null
+      tabApiUsed.set('videos', 'local')
       setElementListLoading('videos', false)
     }
 
@@ -1405,6 +1425,7 @@ async function channelInvidiousVideos(sortByChanged = false) {
       latestVideos.value = response.videos
     }
     videoContinuationData.value = response.continuation || null
+    tabApiUsed.set('videos', 'invidious')
     setElementListLoading('videos', false)
 
     if (isSubscribedInAnyProfile.value && !more && latestVideos.value.length > 0 && videoSortBy.value === 'newest') {
@@ -1493,6 +1514,7 @@ async function getChannelShortsLocal() {
 
     latestShorts.value = withChannelShortsContext(parsedShorts)
     shortContinuationData.value = shortsTab.has_continuation ? shortsTab : null
+    tabApiUsed.set('shorts', 'local')
     setElementListLoading('shorts', false)
 
     if (isSubscribedInAnyProfile.value && latestShorts.value.length > 0 && shortSortBy.value === 'newest') {
@@ -1572,6 +1594,7 @@ async function channelInvidiousShorts(sortByChanged = false) {
       latestShorts.value = response.videos
     }
     shortContinuationData.value = response.continuation || null
+    tabApiUsed.set('shorts', 'invidious')
     setElementListLoading('shorts', false)
 
     if (isSubscribedInAnyProfile.value && !more && latestShorts.value.length > 0 && shortSortBy.value === 'newest') {
@@ -1646,6 +1669,7 @@ async function getChannelLiveLocal() {
 
     latestLive.value = parseLocalChannelVideos(videos, id.value, channelName.value)
     liveContinuationData.value = liveTab.has_continuation ? liveTab : null
+    tabApiUsed.set('live', 'local')
     setElementListLoading('live', false)
 
     if (isSubscribedInAnyProfile.value && latestLive.value.length > 0 && liveSortBy.value === 'newest') {
@@ -1713,6 +1737,7 @@ async function channelInvidiousLive(sortByChanged) {
       latestLive.value = response.videos
     }
     liveContinuationData.value = response.continuation || null
+    tabApiUsed.set('live', 'invidious')
     setElementListLoading('live', false)
 
     if (isSubscribedInAnyProfile.value && !more && latestLive.value.length > 0 && liveSortBy.value === 'newest') {
@@ -1796,6 +1821,7 @@ async function getChannelPlaylistsLocal() {
 
     latestPlaylists.value = parseChannelPlaylists(playlistsTab.playlists)
     playlistContinuationData.value = playlistsTab.has_continuation ? playlistsTab : null
+    tabApiUsed.set('playlists', 'local')
     setElementListLoading('playlists', false)
   } catch (err) {
     if (!isCurrentRequest()) return
@@ -1840,6 +1866,7 @@ async function getPlaylistsInvidious() {
     const response = await getInvidiousChannelPlaylists(id.value, playlistSortBy.value)
     if (!isCurrentRequest()) return
     playlistContinuationData.value = response.continuation || null
+    tabApiUsed.set('playlists', 'invidious')
     latestPlaylists.value = response.playlists
     setElementListLoading('playlists', false)
   } catch (err) {
@@ -1893,6 +1920,7 @@ async function getChannelReleasesLocal() {
 
       latestReleases.value = releases
       releaseContinuationData.value = continuationData
+      tabApiUsed.set('releases', 'local')
     } else {
       const releaseTab = await channelInstance.getReleases()
 
@@ -1902,6 +1930,7 @@ async function getChannelReleasesLocal() {
 
       latestReleases.value = parseChannelPlaylists(releaseTab.playlists)
       releaseContinuationData.value = releaseTab.has_continuation ? releaseTab : null
+      tabApiUsed.set('releases', 'local')
     }
 
     setElementListLoading('releases', false)
@@ -1963,6 +1992,7 @@ async function channelInvidiousReleases() {
     const response = await getInvidiousChannelReleases(id.value)
     if (!isCurrentRequest()) return
     releaseContinuationData.value = response.continuation || null
+    tabApiUsed.set('releases', 'invidious')
     latestReleases.value = response.playlists
     setElementListLoading('releases', false)
   } catch (err) {
@@ -2015,6 +2045,7 @@ async function getChannelPodcastsLocal() {
 
     latestPodcasts.value = parseChannelPlaylists(podcastTab.playlists)
     podcastContinuationData.value = podcastTab.has_continuation ? podcastTab : null
+    tabApiUsed.set('podcasts', 'local')
     setElementListLoading('podcasts', false)
   } catch (err) {
     if (!isCurrentRequest()) return
@@ -2059,6 +2090,7 @@ async function channelInvidiousPodcasts() {
     const response = await getInvidiousChannelPodcasts(id.value)
     if (!isCurrentRequest()) return
     podcastContinuationData.value = response.continuation || null
+    tabApiUsed.set('podcasts', 'invidious')
     latestPodcasts.value = response.playlists
     setElementListLoading('podcasts', false)
   } catch (err) {
@@ -2113,6 +2145,7 @@ async function getChannelCoursesLocal() {
 
     latestCourses.value = parseChannelPlaylists(coursesTab.playlists)
     coursesContinuationData.value = coursesTab.has_continuation ? coursesTab : null
+    tabApiUsed.set('courses', 'local')
     setElementListLoading('courses', false)
   } catch (err) {
     if (!isCurrentRequest()) return
@@ -2159,6 +2192,7 @@ async function channelInvidiousCourses() {
     const response = await getInvidiousChannelCourses(id.value)
     if (!isCurrentRequest()) return
     coursesContinuationData.value = response.continuation || null
+    tabApiUsed.set('courses', 'invidious')
     latestCourses.value = response.playlists
     setElementListLoading('courses', false)
   } catch (err) {
@@ -2225,6 +2259,7 @@ async function getCommunityPostsLocal() {
 
     latestCommunityPosts.value = parseLocalCommunityPosts(communityTab)
     communityContinuationData.value = communityTab.has_continuation ? communityTab : null
+    tabApiUsed.set('community', 'local')
     setElementListLoading('community', false)
 
     if (latestCommunityPosts.value.length > 0) {
@@ -2294,6 +2329,7 @@ async function getCommunityPostsInvidious() {
       latestCommunityPosts.value = posts
     }
     communityContinuationData.value = continuation
+    tabApiUsed.set('community', 'invidious')
     setElementListLoading('community', false)
 
     if (isSubscribedInAnyProfile.value && !more && latestCommunityPosts.value.length > 0) {
@@ -2421,6 +2457,7 @@ async function searchChannelLocal() {
     }
 
     searchContinuationData.value = result.has_continuation ? result : null
+    tabApiUsed.set('search', 'local')
     isSearchTabLoading.value = false
   } catch (err) {
     if (!isCurrentRequest()) return
@@ -2457,6 +2494,7 @@ async function searchChannelInvidious() {
 
     isSearchTabLoading.value = false
     searchPage++
+    tabApiUsed.set('search', 'invidious')
   } catch (err) {
     if (!isCurrentRequest()) return
     console.error(err)
@@ -2618,66 +2656,67 @@ async function handleFetchMore() {
   if (isFetchMoreLoading.value) return
 
   isFetchMoreLoading.value = true
+  const useLocalApi = process.env.SUPPORTS_LOCAL_API && tabApiUsed.get(currentTab.value) === 'local'
 
   switch (currentTab.value) {
     case 'videos':
-      if (process.env.SUPPORTS_LOCAL_API && apiUsed === 'local') {
+      if (useLocalApi) {
         await getChannelVideosLocalMore()
       } else {
         await channelInvidiousVideos()
       }
       break
     case 'shorts':
-      if (process.env.SUPPORTS_LOCAL_API && apiUsed === 'local') {
+      if (useLocalApi) {
         await getChannelShortsLocalMore()
       } else {
         await channelInvidiousShorts()
       }
       break
     case 'live':
-      if (process.env.SUPPORTS_LOCAL_API && apiUsed === 'local') {
+      if (useLocalApi) {
         await getChannelLiveLocalMore()
       } else {
         await channelInvidiousLive()
       }
       break
     case 'releases':
-      if (process.env.SUPPORTS_LOCAL_API && apiUsed === 'local') {
+      if (useLocalApi) {
         await getChannelReleasesLocalMore()
       } else {
         await channelInvidiousReleasesMore()
       }
       break
     case 'podcasts':
-      if (process.env.SUPPORTS_LOCAL_API && apiUsed === 'local') {
+      if (useLocalApi) {
         await getChannelPodcastsLocalMore()
       } else {
         await channelInvidiousPodcastsMore()
       }
       break
     case 'courses':
-      if (process.env.SUPPORTS_LOCAL_API && apiUsed === 'local') {
+      if (useLocalApi) {
         await getChannelCoursesLocalMore()
       } else {
         await channelInvidiousCoursesMore()
       }
       break
     case 'playlists':
-      if (process.env.SUPPORTS_LOCAL_API && apiUsed === 'local') {
+      if (useLocalApi) {
         await getChannelPlaylistsLocalMore()
       } else {
         await getPlaylistsInvidiousMore()
       }
       break
     case 'search':
-      if (process.env.SUPPORTS_LOCAL_API && apiUsed === 'local') {
+      if (useLocalApi) {
         await searchChannelLocal()
       } else {
         await searchChannelInvidious()
       }
       break
     case 'community':
-      if (process.env.SUPPORTS_LOCAL_API && apiUsed === 'local') {
+      if (useLocalApi) {
         await getCommunityPostsLocalMore()
       } else {
         await getCommunityPostsInvidious()
