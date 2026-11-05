@@ -1,4 +1,5 @@
 .iconDropdown.notificationCenterDropdown {
+  background-image: var(--card-bg-image);
   inline-size: min(380px, calc(100vw - 16px));
   user-select: text;
 }

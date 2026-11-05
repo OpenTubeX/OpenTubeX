@@ -52,8 +52,6 @@
 }
 
 .profileHeaderRow {
-  background-color: var(--card-bg-color);
-  backdrop-filter: var(--card-bg-blur, none);
   display: grid;
   grid-auto-columns: 44px;
   grid-auto-flow: column;
@@ -191,6 +189,9 @@
 }
 
 .ft-card.quickSettingsMenu {
+  /* A fixed background follows the viewport only while no transform applies,
+     so it would jump when the opening transition ends. */
+  background-attachment: scroll;
   border-radius: var(--shape-corner-large);
 }
 
