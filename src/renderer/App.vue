@@ -2504,7 +2504,7 @@ function openDownloadsPage() {
 }
 
 function openDonatePage() {
-  openExternalLink('https://opentubex.org/donate/')
+  handleExternalLink('https://opentubex.org/donate/')
 }
 
 /** @type {import('vue').ComputedRef<boolean>} */
