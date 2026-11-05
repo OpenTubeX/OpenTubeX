@@ -1,4 +1,7 @@
 .notificationList {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
   margin: 0;
   padding: 4px;
   list-style: none;
