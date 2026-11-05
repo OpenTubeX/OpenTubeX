@@ -71,6 +71,12 @@ test('Android header swipes include controls and preserve taps and long presses'
       await page.locator('#capacitor-phone-tab-dialog').getByRole('button', { name: 'Close', exact: true }).click()
       await expect(page.locator('#capacitor-phone-tab-dialog')).toHaveCount(0)
     }
+    // Leftover tabs would become swipe neighbors; the tablet back button swipe
+    // below expects the first tab to have none on its left.
+    await page.evaluate(() => {
+      const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+      store.commit('setTabsState', { ...store.state.tabs, tabs: [store.getters.getPresentedTab] })
+    })
     await goTo(page, 'userplaylists')
     const first = await presented()
     await tap('.capacitorPhoneTabSwitcherButton')
@@ -275,17 +281,20 @@ test('Android header swipes include controls and preserve taps and long presses'
     await goTo(page, 'history')
     await expect(page.locator('.navBackButton')).toBeVisible()
     await swipe('.navBackButton', 180, true)
-    await expect(page.locator('.navBackButton .iconDropdown')).toHaveCount(0)
+    // Mobile icon button menus open in the shared context menu sheet.
+    const historySheet = page.locator('.mobileLinkActions')
+    await expect(historySheet).toHaveCount(0)
     await goTo(page, 'history')
     await expect(page.locator('.navBackButton .iconButton')).toHaveAttribute('aria-disabled', 'false')
     await touch('touchStart', await pointFor('.navBackButton'))
-    await page.waitForTimeout(600)
-    await touch('touchEnd')
-    await expect(page.locator('.navBackButton .iconDropdown')).toBeVisible()
+    await expect(historySheet).toBeVisible()
+    // Android's own long press fires contextmenu and sends no click on release,
+    // but a CDP touchEnd clicks the sheet's backdrop. Cancel the touch instead.
+    await touch('touchCancel')
     await expect(page).toHaveURL(/#\/history/)
-    await page.locator('.navBackButton .iconDropdown').focus()
+    await historySheet.focus()
     await page.keyboard.press('Escape')
-    await expect(page.locator('.navBackButton .iconDropdown')).toHaveCount(0)
+    await expect(historySheet).toHaveCount(0)
     await tap('.navBackButton .iconButton')
     await expect(page).toHaveURL(/#\/userplaylists/)
   } finally {
