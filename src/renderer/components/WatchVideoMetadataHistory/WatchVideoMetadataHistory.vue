@@ -180,7 +180,18 @@ function createFieldHistory(valueForRevision) {
   return versions.reverse()
 }
 
-const titleHistory = computed(() => createFieldHistory(revision => revision.title))
+const titleHistory = computed(() => {
+  const versions = createFieldHistory(revision => revision.title)
+  const shownTitles = new Set(versions.map(({ value }) => value))
+  // Feed titles arrive oldest first; keep the latest time each one was seen.
+  for (const { title, observedAt } of (props.history.feedTitles ?? []).toReversed()) {
+    if (shownTitles.has(title)) continue
+    shownTitles.add(title)
+    versions.push({ _id: `feed-${observedAt}`, value: title, cachedAt: observedAt })
+  }
+
+  return versions.sort((a, b) => b.cachedAt - a.cachedAt)
+})
 const descriptionHistory = computed(() => createFieldHistory(revision => revision.description))
 const thumbnailHistory = computed(() => createFieldHistory(revision => revision.thumbnail ?? revision.thumbnailUrl))
 

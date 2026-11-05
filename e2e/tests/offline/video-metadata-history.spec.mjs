@@ -40,6 +40,88 @@ test('shows metadata history after loading a video with a previously recorded ti
     .toContainText('Previously recorded title')
 })
 
+async function storeFeedTitle(page, videoId, title, timestamp, channelId = 'UCfeedtitlechannel00000') {
+  await page.evaluate(({ action, channelId, videoId, title, timestamp }) => window.ftElectron.dbSubscriptionCache(action, [{
+    channelId,
+    field: 'videos',
+    entries: [{ type: 'video', videoId, title }],
+    timestamp: new Date(timestamp)
+  }]), { action: DBActions.SUBSCRIPTION_CACHE.UPDATE_FEEDS, channelId, videoId, title, timestamp })
+}
+
+test('shows a title that only the subscription feed delivered before the visit', async ({ app, page }) => {
+  const now = Date.now()
+  await storeFeedTitle(page, 'jNQXAC9IVRw', 'Title variant from the feed', now - 60_000)
+  await storeFeedTitle(page, 'jNQXAC9IVRw', 'Title the feed shows now', now - 30_000)
+  await mockPlayableWatchPage(app, page)
+  await openMockedVideo(page)
+
+  const historyButton = page.locator(`${activeTab} .infoArea`)
+    .getByRole('button', { name: 'Metadata history' })
+  await expect(historyButton).toBeVisible({ timeout: 25_000 })
+  await historyButton.click()
+  const dialog = page.getByRole('dialog', { name: 'Metadata history' })
+  await expect(dialog).toContainText('Title variant from the feed')
+  await expect(dialog).not.toContainText('Title the feed shows now')
+})
+
+test('compares feed titles only with each other', async ({ page }) => {
+  const now = Date.now()
+  const update = () => page.evaluate(() => window.ftElectron.videoMetadataCache.update({
+    videoId: 'feedtitle01',
+    title: 'Original title',
+    description: '',
+    thumbnailUrl: ''
+  }))
+
+  await storeFeedTitle(page, 'feedtitle01', 'Translated title', now - 60_000)
+  await storeFeedTitle(page, 'feedtitle01', 'Renamed translated title', now - 40_000)
+  await storeFeedTitle(page, 'feedtitle01', 'Translated title', now - 35_000)
+  await storeFeedTitle(page, 'feedtitle01', 'Renamed translated title', now - 30_000)
+  await storeFeedTitle(page, 'feedtitle01', 'Renamed translated title', now - 20_000)
+  // Another channel's feed that was fetched earlier but stored later, as with
+  // a collaboration, must not record its older title as the latest, even when
+  // it is newer than the latest title change.
+  await storeFeedTitle(page, 'feedtitle01', 'Stale title', now - 25_000, 'UCfeedtitlechannel00001')
+  // The feed may translate titles, so the title it shows now is not a previous
+  // title, even though it differs from the watch page.
+  await expect.poll(async () => (await update())?.feedTitles.map(({ title }) => title))
+    .toEqual(['Translated title', 'Translated title'])
+})
+
+test('keeps the older feed title when one refresh lists it after a newer one', async ({ page }) => {
+  const now = Date.now()
+  await page.evaluate(({ action, now }) => window.ftElectron.dbSubscriptionCache(action, [
+    { channelId: 'UCfeedtitlechannel00000', field: 'videos', entries: [{ type: 'video', videoId: 'feedtitle02', title: 'Newer title' }], timestamp: new Date(now - 10_000) },
+    { channelId: 'UCfeedtitlechannel00001', field: 'videos', entries: [{ type: 'video', videoId: 'feedtitle02', title: 'Older title' }], timestamp: new Date(now - 20_000) },
+    // A feed fetched in the same millisecond is not older, so its title counts too.
+    { channelId: 'UCfeedtitlechannel00002', field: 'videos', entries: [{ type: 'video', videoId: 'feedtitle02', title: 'Simultaneous title' }], timestamp: new Date(now - 10_000) }
+  ]), { action: DBActions.SUBSCRIPTION_CACHE.UPDATE_FEEDS, now })
+
+  await expect.poll(async () => (await page.evaluate(() => window.ftElectron.videoMetadataCache.update({
+    videoId: 'feedtitle02',
+    title: 'Original title',
+    description: '',
+    thumbnailUrl: ''
+  })))?.feedTitles.map(({ title }) => title)).toEqual(['Older title', 'Newer title'])
+})
+
+test('skips feed titles fetched before the cache was cleared', async ({ page }) => {
+  const fetchedBeforeClear = Date.now() - 1000
+  await page.evaluate(() => window.ftElectron.videoMetadataCache.clear())
+  await storeFeedTitle(page, 'feedtitle03', 'Title fetched before the clear', fetchedBeforeClear)
+  const fetchedAfterClear = Date.now()
+  await storeFeedTitle(page, 'feedtitle03', 'Title fetched after the clear', fetchedAfterClear, 'UCfeedtitlechannel00001')
+  await storeFeedTitle(page, 'feedtitle03', 'Later title', fetchedAfterClear + 1, 'UCfeedtitlechannel00002')
+
+  await expect.poll(async () => (await page.evaluate(() => window.ftElectron.videoMetadataCache.update({
+    videoId: 'feedtitle03',
+    title: 'Original title',
+    description: '',
+    thumbnailUrl: ''
+  })))?.feedTitles.map(({ title }) => title)).toEqual(['Title fetched after the clear'])
+})
+
 test('detects a replaced thumbnail at the same cacheable URL', async ({ page }) => {
   let revision = 0
   let requests = 0

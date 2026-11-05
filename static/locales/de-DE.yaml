@@ -1225,7 +1225,8 @@ Settings:
     Cache Video Metadata: Metadatenverlauf
     Cache Video Metadata Tooltip: >-
       Speichert jede Version der unterstützten Videometadaten besuchter Videos, einschließlich Titel, Vorschaubilder und
-      Beschreibungen. Standardmäßig deaktiviert, da das Speichern des Metadatenverlaufs zusätzlichen Speicherplatz belegt.
+      Beschreibungen. Speichert außerdem die Titel, die in deinen Abo-Feeds angezeigt werden. Standardmäßig deaktiviert, da
+      das Speichern des Metadatenverlaufs zusätzlichen Speicherplatz belegt.
     Watched Percentage Threshold: Prozentschwelle für angesehene Videos
     Watched Percentage Threshold Tooltip: >-
       Videos werden als angesehen markiert, sobald der ausgewählte Prozentsatz erreicht ist und höchstens 2 Minuten

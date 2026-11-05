@@ -1271,7 +1271,7 @@ Settings:
     Week Starts On: La setmana comença en
     Remember Search History: Recorda l'historial de cerques
     Cache Video Metadata: Historial de metadades
-    Cache Video Metadata Tooltip: Conserva totes les versions admeses de les metadades dels vídeos que visiteu, inclosos els títols, les miniatures i les descripcions. Està desactivat de manera predeterminada perquè desar l'historial de metadades augmenta l'ús del disc.
+    Cache Video Metadata Tooltip: Conserva totes les versions admeses de les metadades dels vídeos que visiteu, inclosos els títols, les miniatures i les descripcions. També conserva els títols que es mostren als vostres fils de subscripcions. Està desactivat de manera predeterminada perquè desar l'historial de metadades augmenta l'ús del disc.
     Watched Percentage Threshold: Llindar de percentatge vist
     Watched Percentage Threshold Tooltip: Els vídeos es marquen com a vistos després d'arribar al percentatge seleccionat i quan no els queden més de 2 minuts. Amb el 0%, es marquen en començar la reproducció. Amb el 100%, es marquen quan acaba.
     Watched Progress Saving Mode:

@@ -1015,7 +1015,7 @@ Settings:
     Enable Watch Statistics: 啟用觀看統計
     Week Starts On: 每週起始日
     Cache Video Metadata: 中繼資料歷程
-    Cache Video Metadata Tooltip: 保留您瀏覽過之支援影片的每個中繼資料版本，包括標題、縮圖和說明。由於儲存中繼資料歷程會增加磁碟用量，因此預設停用。
+    Cache Video Metadata Tooltip: 保留您瀏覽過之支援影片的每個中繼資料版本，包括標題、縮圖和說明。也會保留訂閱內容中顯示的標題。由於儲存中繼資料歷程會增加磁碟用量，因此預設停用。
     Watched Percentage Threshold: 已觀看百分比門檻
     Watched Percentage Threshold Tooltip: 影片播放到所選百分比且剩餘時間不超過 2 分鐘時，會標示為已觀看。設為 0% 時，影片會在開始播放時標示；設為 100% 時，則會在播放結束時標示。
     Clear Video Metadata Cache: 清除影片中繼資料快取

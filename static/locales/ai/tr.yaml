@@ -1015,7 +1015,7 @@ Settings:
     Enable Watch Statistics: İzleme İstatistiklerini Etkinleştir
     Week Starts On: Haftanın Başlangıç Günü
     Cache Video Metadata: Meta veri geçmişi
-    Cache Video Metadata Tooltip: Ziyaret ettiğiniz desteklenen videoların başlık, küçük resim ve açıklama dâhil tüm meta veri sürümlerini saklar. Meta veri geçmişini saklamak disk kullanımını artırdığı için varsayılan olarak devre dışıdır.
+    Cache Video Metadata Tooltip: Ziyaret ettiğiniz desteklenen videoların başlık, küçük resim ve açıklama dâhil tüm meta veri sürümlerini saklar. Abonelik akışlarınızda gösterilen başlıkları da saklar. Meta veri geçmişini saklamak disk kullanımını artırdığı için varsayılan olarak devre dışıdır.
     Watched Percentage Threshold: İzlenmiş Sayılma Yüzdesi Eşiği
     Watched Percentage Threshold Tooltip: Videolar seçilen yüzdeye ulaştığında ve en fazla 2 dakika kaldığında izlenmiş olarak işaretlenir. %0'da oynatma başladığında, %100'de ise oynatma bittiğinde işaretlenir.
     Clear Video Metadata Cache: Video Meta Verisi Önbelleğini Temizle

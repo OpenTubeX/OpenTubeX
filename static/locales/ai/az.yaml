@@ -1017,7 +1017,7 @@ Settings:
     Enable Watch Statistics: Baxış statistikasını aktivləşdir
     Week Starts On: Həftənin ilk günü
     Cache Video Metadata: Metaməlumat tarixçəsi
-    Cache Video Metadata Tooltip: Baxdığınız videoların dəstəklənən metaməlumatlarının bütün versiyalarını, o cümlədən başlıqları, miniatürləri və təsvirləri saxlayır. Metaməlumat tarixçəsinin saxlanması disk istifadəsini artırdığı üçün varsayılan olaraq söndürülüb.
+    Cache Video Metadata Tooltip: Baxdığınız videoların dəstəklənən metaməlumatlarının bütün versiyalarını, o cümlədən başlıqları, miniatürləri və təsvirləri saxlayır. Abunəlik lentlərinizdə göstərilən başlıqları da saxlayır. Metaməlumat tarixçəsinin saxlanması disk istifadəsini artırdığı üçün varsayılan olaraq söndürülüb.
     Watched Percentage Threshold: Baxılmış sayılma faizi
     Watched Percentage Threshold Tooltip: Seçilmiş faizə çatdıqda və sonuna ən çox 2 dəqiqə qaldıqda videolar baxılmış kimi işarələnir. 0% seçildikdə oxutma başlayanda, 100% seçildikdə isə oxutma bitəndə işarələnir.
     Clear Video Metadata Cache: Video metaməlumat keşini təmizlə

@@ -553,7 +553,7 @@ Settings:
     Internet Connectivity Checks: "Sprawdzanie połączenia z internetem"
     Internet Connectivity Checks Tooltip: "Wysyła niewielkie żądania do serwera hostowanego przez GrapheneOS w celu sprawdzenia dostępu do internetu."
     Cache Video Metadata: Historia metadanych
-    Cache Video Metadata Tooltip: Zachowuje wszystkie obsługiwane wersje metadanych odwiedzonych filmów, w tym tytuły, miniatury i opisy. Funkcja jest domyślnie wyłączona, ponieważ historia metadanych zajmuje dodatkowe miejsce na dysku.
+    Cache Video Metadata Tooltip: Zachowuje wszystkie obsługiwane wersje metadanych odwiedzonych filmów, w tym tytuły, miniatury i opisy. Zachowuje również tytuły wyświetlane w kanałach subskrypcji. Funkcja jest domyślnie wyłączona, ponieważ historia metadanych zajmuje dodatkowe miejsce na dysku.
     Clear Video Metadata Cache: Wyczyść pamięć podręczną metadanych filmów
     Are you sure you want to clear the video metadata cache?: Czy na pewno wyczyścić zapisane tytuły, miniatury i opisy filmów?
     Failed to clear video metadata cache: Nie udało się wyczyścić pamięci podręcznej metadanych filmów

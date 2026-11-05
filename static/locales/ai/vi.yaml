@@ -1015,7 +1015,7 @@ Settings:
     Enable Watch Statistics: Bật thống kê xem
     Week Starts On: Ngày đầu tuần
     Cache Video Metadata: Lịch sử siêu dữ liệu
-    Cache Video Metadata Tooltip: Lưu mọi phiên bản siêu dữ liệu được hỗ trợ của video bạn truy cập, gồm tiêu đề, hình thu nhỏ và mô tả. Tính năng này mặc định tắt vì việc lưu lịch sử siêu dữ liệu làm tăng dung lượng đĩa sử dụng.
+    Cache Video Metadata Tooltip: Lưu mọi phiên bản siêu dữ liệu được hỗ trợ của video bạn truy cập, gồm tiêu đề, hình thu nhỏ và mô tả. Đồng thời lưu các tiêu đề hiển thị trong nguồn cấp dữ liệu kênh đăng ký của bạn. Tính năng này mặc định tắt vì việc lưu lịch sử siêu dữ liệu làm tăng dung lượng đĩa sử dụng.
     Watched Percentage Threshold: Ngưỡng phần trăm đã xem
     Watched Percentage Threshold Tooltip: Video được đánh dấu đã xem sau khi đạt tỷ lệ đã chọn và còn không quá 2 phút. Ở mức 0%, video được đánh dấu khi bắt đầu phát. Ở mức 100%, video được đánh dấu khi phát xong.
     Clear Video Metadata Cache: Xóa bộ nhớ đệm siêu dữ liệu video

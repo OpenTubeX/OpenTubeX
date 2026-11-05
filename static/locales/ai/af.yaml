@@ -1194,7 +1194,7 @@ Settings:
     Enable Watch Statistics: Aktiveer kykstatistieke
     Week Starts On: Week begin op
     Cache Video Metadata: Metadatageskiedenis
-    Cache Video Metadata Tooltip: Hou elke weergawe van ondersteunde videometadata vir video’s wat u besoek, insluitend titels, duimnaels en beskrywings. By verstek gedeaktiveer omdat die stoor van metadatageskiedenis skyfgebruik verhoog.
+    Cache Video Metadata Tooltip: Hou elke weergawe van ondersteunde videometadata vir video’s wat u besoek, insluitend titels, duimnaels en beskrywings. Hou ook die titels wat in u intekeningvoere gewys word. By verstek gedeaktiveer omdat die stoor van metadatageskiedenis skyfgebruik verhoog.
     Watched Percentage Threshold: Drempelpersentasie vir gekyk
     Watched Percentage Threshold Tooltip: Video’s word as gekyk gemerk nadat die gekose persentasie bereik is en daar nie meer as 2 minute oor is nie. By 0% word hulle gemerk wanneer afspeel begin. By 100% word hulle gemerk wanneer afspeel eindig.
     Watched Progress Saving Mode:

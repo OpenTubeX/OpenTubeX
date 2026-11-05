@@ -1238,7 +1238,7 @@ Settings:
     Week Starts On: Začetek tedna
     Remember Search History: Zapomni si zgodovino iskanja
     Cache Video Metadata: Zgodovina metapodatkov
-    Cache Video Metadata Tooltip: Ohrani vse različice podprtih metapodatkov obiskanih videoposnetkov, vključno z naslovi, sličicami in opisi. Privzeto je onemogočeno, ker shranjevanje zgodovine metapodatkov poveča porabo prostora na disku.
+    Cache Video Metadata Tooltip: Ohrani vse različice podprtih metapodatkov obiskanih videoposnetkov, vključno z naslovi, sličicami in opisi. Ohrani tudi naslove, prikazane v virih naročnin. Privzeto je onemogočeno, ker shranjevanje zgodovine metapodatkov poveča porabo prostora na disku.
     Watched Percentage Threshold: Odstotni prag za ogledano
     Watched Percentage Threshold Tooltip: Videoposnetki so označeni kot ogledani, ko dosežejo izbrani odstotek in do konca ostaneta največ 2 minuti. Pri 0 % so označeni ob začetku predvajanja. Pri 100 % so označeni ob koncu predvajanja.
     Watched Progress Saving Mode:

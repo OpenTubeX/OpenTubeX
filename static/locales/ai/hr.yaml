@@ -1020,7 +1020,7 @@ Settings:
     Enable Watch Statistics: Omogući statistiku gledanja
     Week Starts On: Početak tjedna
     Cache Video Metadata: Povijest metapodataka
-    Cache Video Metadata Tooltip: Čuva svaku inačicu podržanih metapodataka posjećenih videozapisa, uključujući naslove, minijature i opise. Zadano je onemogućeno jer čuvanje povijesti metapodataka povećava zauzeće diska.
+    Cache Video Metadata Tooltip: Čuva svaku inačicu podržanih metapodataka posjećenih videozapisa, uključujući naslove, minijature i opise. Čuva i naslove prikazane u vašim feedovima pretplata. Zadano je onemogućeno jer čuvanje povijesti metapodataka povećava zauzeće diska.
     Watched Percentage Threshold: Prag postotka gledanja
     Watched Percentage Threshold Tooltip: Videozapisi se označavaju kao pogledani nakon što dosegnu odabrani postotak i preostanu im najviše 2 minute. Pri 0 % označavaju se na početku reprodukcije. Pri 100 % označavaju se na završetku reprodukcije.
     Clear Video Metadata Cache: Očisti predmemoriju metapodataka videozapisa

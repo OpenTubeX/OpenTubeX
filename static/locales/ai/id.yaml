@@ -1018,7 +1018,7 @@ Settings:
     Enable Watch Statistics: Aktifkan Statistik Tontonan
     Week Starts On: Awal Minggu
     Cache Video Metadata: Riwayat metadata
-    Cache Video Metadata Tooltip: Menyimpan setiap versi metadata video yang didukung untuk video yang Anda kunjungi, termasuk judul, gambar mini, dan deskripsi. Fitur ini nonaktif secara bawaan karena menyimpan riwayat metadata akan menambah penggunaan disk.
+    Cache Video Metadata Tooltip: Menyimpan setiap versi metadata video yang didukung untuk video yang Anda kunjungi, termasuk judul, gambar mini, dan deskripsi. Juga menyimpan judul yang ditampilkan di feed langganan Anda. Fitur ini nonaktif secara bawaan karena menyimpan riwayat metadata akan menambah penggunaan disk.
     Watched Percentage Threshold: Ambang Persentase Sudah Ditonton
     Watched Percentage Threshold Tooltip: Video ditandai sudah ditonton setelah mencapai persentase yang dipilih dan menyisakan waktu tidak lebih dari 2 menit. Pada 0%, video ditandai saat pemutaran dimulai. Pada 100%, video ditandai saat pemutaran berakhir.
     Clear Video Metadata Cache: Bersihkan Cache Metadata Video

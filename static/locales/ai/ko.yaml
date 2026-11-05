@@ -1200,7 +1200,7 @@ Settings:
     Week Starts On: 한 주의 시작 요일
     Remember Search History: 검색 기록 저장
     Cache Video Metadata: 메타데이터 기록
-    Cache Video Metadata Tooltip: 방문한 동영상에서 지원되는 메타데이터의 모든 버전을 제목, 썸네일, 설명과 함께 보관합니다. 메타데이터 기록을 저장하면 디스크 사용량이 늘어나므로 기본적으로 비활성화되어 있습니다.
+    Cache Video Metadata Tooltip: 방문한 동영상에서 지원되는 메타데이터의 모든 버전을 제목, 썸네일, 설명과 함께 보관합니다. 구독 피드에 표시된 제목도 보관합니다. 메타데이터 기록을 저장하면 디스크 사용량이 늘어나므로 기본적으로 비활성화되어 있습니다.
     Watched Percentage Threshold: 시청함 처리 기준 비율
     Watched Percentage Threshold Tooltip: 선택한 비율에 도달하고 남은 시간이 2분 이하이면 동영상을 시청함으로 표시합니다. 0%에서는 재생을 시작할 때, 100%에서는 재생이 끝날 때 표시합니다.
     Watched Progress Saving Mode:

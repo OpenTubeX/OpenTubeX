@@ -2,7 +2,7 @@ import { app, BrowserWindow, ipcMain, net, session } from 'electron'
 import { stat } from 'node:fs/promises'
 
 import { IpcChannels } from '../constants'
-import { videoMetadataCache } from '../datastores'
+import { settings, videoMetadataCache } from '../datastores'
 import { desktopDatastorePaths } from '../datastores/sqliteNode'
 import { isNonPublicNetworkAddress, isOpenTubeXUrl } from './utils'
 const MAX_TITLE_LENGTH = 10_000
@@ -10,6 +10,8 @@ const MAX_DESCRIPTION_LENGTH = 1_000_000
 const MAX_THUMBNAIL_DATA_URL_LENGTH = 8_000_000
 
 let pendingOperation = Promise.resolve()
+// Feeds fetched before a clear may finish saving after it.
+let clearedAt = 0
 
 function enqueue(operation) {
   const result = pendingOperation.then(operation, operation)
@@ -69,14 +71,31 @@ function materializeRevision(revisions, index) {
   return { ...revision, thumbnail }
 }
 
-function createMetadataHistory(revisions) {
-  if (revisions.length < 2) return null
+function feedTitlesId(videoId) {
+  return `feed-titles:${videoId}`
+}
 
-  const previous = materializeRevision(revisions, revisions.length - 2)
-  const current = materializeRevision(revisions, revisions.length - 1)
-  const changedFields = compareRevisions(previous, current)
+/**
+ * @param {object[]} revisions
+ * @param {{ title: string, observedAt: number }[]} feedTitles
+ */
+function createMetadataHistory(revisions, feedTitles) {
+  const currentTitles = new Set([revisions.at(-1).title, feedTitles.at(-1)?.title])
+  // Feeds may carry a translated title, so their titles are only compared with
+  // each other. The latest one is what the feed shows now, not a previous title.
+  const previousFeedTitles = feedTitles.filter(({ title }) => !currentTitles.has(title))
+  const hasRevisionChange = revisions.length > 1 && compareRevisions(
+    materializeRevision(revisions, revisions.length - 2),
+    materializeRevision(revisions, revisions.length - 1)
+  ).length > 0
 
-  return changedFields.length === 0 ? null : { revisions }
+  return hasRevisionChange || previousFeedTitles.length > 0
+    ? { revisions, feedTitles: previousFeedTitles }
+    : null
+}
+
+async function findFeedTitles(videoId) {
+  return (await videoMetadataCache.findOneAsync({ _id: feedTitlesId(videoId) }))?.titles ?? []
 }
 
 /**
@@ -133,10 +152,11 @@ export function updateVideoMetadataCache(input) {
       }
     }
 
+    const feedTitles = await findFeedTitles(input.videoId)
     // Concurrent tabs may finish fetching the thumbnail out of order. Do not
     // let an older observation replace a newer revision that already won.
     if (previous?.cachedAt > current.cachedAt) {
-      return createMetadataHistory(revisions)
+      return createMetadataHistory(revisions, feedTitles)
     }
 
     if (!previous) {
@@ -145,7 +165,7 @@ export function updateVideoMetadataCache(input) {
         ...current,
         hasThumbnailChange: true
       })
-      return null
+      return createMetadataHistory([current], feedTitles)
     }
 
     const changedFields = compareRevisions(previous, current)
@@ -162,8 +182,73 @@ export function updateVideoMetadataCache(input) {
       revisions.push(storedRevision)
     }
 
-    return createMetadataHistory(revisions)
+    return createMetadataHistory(revisions, feedTitles)
   })
+}
+
+/**
+ * Keeps every distinct title that subscription feeds delivered for a video,
+ * so a title the feed showed before the first visit, such as one variant of
+ * a title A/B test, still reaches the history.
+ * @param {{ videoId: string, title: string, observedAt: number }[]} observations
+ */
+export function recordFeedVideoTitles(observations) {
+  return enqueue(async () => {
+    const valid = observations.filter(({ videoId, title, observedAt }) =>
+      typeof videoId === 'string' && /^[\w-]{11}$/.test(videoId) &&
+      typeof title === 'string' && title !== '' &&
+      Number.isSafeInteger(observedAt) && observedAt > clearedAt
+    )
+    if (valid.length === 0) return
+    // One refresh can list a collaboration video in several channels' feeds,
+    // in any order, and an older observation must not be dropped.
+    valid.sort((a, b) => a.observedAt - b.observedAt)
+
+    const ids = [...new Set(valid.map(({ videoId }) => feedTitlesId(videoId)))]
+    const stored = await videoMetadataCache.findAsync({ _id: { $in: ids } })
+    const documents = new Map(stored.map(doc => [doc._id, doc]))
+    const changed = new Map()
+
+    for (const observation of valid) {
+      const id = feedTitlesId(observation.videoId)
+      const doc = documents.get(id) ?? { _id: id, titles: [], observedAt: 0 }
+      const title = normalizeText(observation.title, MAX_TITLE_LENGTH)
+      const observedAt = Math.min(observation.observedAt, Date.now())
+      // An older feed refresh that finished late, such as another channel's
+      // feed with the same collaboration video, must not undo a newer title.
+      // Unchanged titles advance this time too, so it covers every refresh.
+      if (doc.observedAt > observedAt) continue
+
+      if (doc.titles.at(-1)?.title !== title) doc.titles.push({ title, observedAt })
+      doc.observedAt = observedAt
+      documents.set(id, doc)
+      changed.set(id, doc)
+    }
+
+    if (changed.size > 0) await videoMetadataCache.replaceManyAsync([...changed.values()])
+  })
+}
+
+const VIDEO_FEED_FIELDS = new Set(['videos', 'liveStreams', 'shorts'])
+
+/**
+ * Records the titles of stored subscription feeds while the metadata history
+ * is enabled. Failures only cost the history entries, never the feed write.
+ * @param {{ field: string, entries: object[], timestamp: Date | string | number }[]} updates
+ */
+export async function recordSubscriptionFeedTitles(updates) {
+  try {
+    if ((await settings.findOneAsync({ _id: 'enableVideoMetadataCache' }))?.value !== true) return
+
+    await recordFeedVideoTitles(updates
+      .filter(({ field, entries }) => VIDEO_FEED_FIELDS.has(field) && Array.isArray(entries))
+      .flatMap(({ entries, timestamp }) => {
+        const observedAt = new Date(timestamp).getTime()
+        return entries.map(entry => ({ videoId: entry?.videoId, title: entry?.title, observedAt }))
+      }))
+  } catch (error) {
+    console.error('Failed to record subscription feed titles', error)
+  }
 }
 
 export async function getVideoMetadataCacheSize() {
@@ -182,6 +267,7 @@ export async function getVideoMetadataCacheSize() {
 }
 
 export function clearVideoMetadataCache() {
+  clearedAt = Date.now()
   return enqueue(async () => {
     await videoMetadataCache.dropDatabaseAsync()
   })

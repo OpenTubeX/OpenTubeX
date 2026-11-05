@@ -1015,7 +1015,7 @@ Settings:
     Enable Watch Statistics: "Gweredekaat ar stadegoù sellout"
     Week Starts On: "Derou ar sizhun"
     Cache Video Metadata: "Istor ar metaroadennoù"
-    Cache Video Metadata Tooltip: "Mirout a ra pep stumm eus metaroadennoù skoret ar videoioù a weladennit, en o zouez an titloù, ar skeudennigoù hag an deskrivadurioù. Diweredekaet eo dre ziouer rak mirout istor ar metaroadennoù a gresk implij ar bladenn."
+    Cache Video Metadata Tooltip: "Mirout a ra pep stumm eus metaroadennoù skoret ar videoioù a weladennit, en o zouez an titloù, ar skeudennigoù hag an deskrivadurioù. Mirout a ra ivez an titloù diskouezet en ho lanvoù koumanantoù. Diweredekaet eo dre ziouer rak mirout istor ar metaroadennoù a gresk implij ar bladenn."
     Watched Percentage Threshold: "Gwehin evit dregantad sellet"
     Watched Percentage Threshold Tooltip: "Merket e vez ar videoioù evel sellet goude tizhout an dregantad diuzet pa chom 2 vunutenn d'ar muiañ. Gant 0% e vezont merket pa grog al lenn. Gant 100% e vezont merket pa echu al lenn."
     Clear Video Metadata Cache: "Skarzhañ krubuilh metaroadennoù ar videoioù"

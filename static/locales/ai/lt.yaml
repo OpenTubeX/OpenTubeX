@@ -1221,7 +1221,7 @@ Settings:
     Week Starts On: Pirmoji savaitės diena
     Remember Search History: Įsiminti paieškos istoriją
     Cache Video Metadata: Metaduomenų istorija
-    Cache Video Metadata Tooltip: Išsaugoma kiekviena aplankytų palaikomų vaizdo įrašų metaduomenų versija, įskaitant pavadinimus, miniatiūras ir aprašus. Pagal numatytuosius nustatymus ši funkcija išjungta, nes metaduomenų istorija užima daugiau vietos diske.
+    Cache Video Metadata Tooltip: Išsaugoma kiekviena aplankytų palaikomų vaizdo įrašų metaduomenų versija, įskaitant pavadinimus, miniatiūras ir aprašus. Taip pat išsaugomi prenumeratų sklaidos kanaluose rodomi pavadinimai. Pagal numatytuosius nustatymus ši funkcija išjungta, nes metaduomenų istorija užima daugiau vietos diske.
     Watched Percentage Threshold: Peržiūrėjimo procento slenkstis
     Watched Percentage Threshold Tooltip: Vaizdo įrašai pažymimi kaip peržiūrėti pasiekus pasirinktą procentą ir likus ne daugiau kaip 2 minutėms. Pasirinkus 0 %, jie pažymimi pradėjus atkūrimą. Pasirinkus 100 %, jie pažymimi atkūrimui pasibaigus.
     Watched Progress Saving Mode:

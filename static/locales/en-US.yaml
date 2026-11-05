@@ -1543,7 +1543,7 @@ Settings:
     Week Starts On: Week Starts On
     Remember Search History: Remember Search History
     Cache Video Metadata: Metadata history
-    Cache Video Metadata Tooltip: Keeps every version of supported video metadata for videos you visit, including titles, thumbnails, and descriptions. Disabled by default because storing metadata history increases disk usage.
+    Cache Video Metadata Tooltip: Keeps every version of supported video metadata for videos you visit, including titles, thumbnails, and descriptions. Also keeps the titles shown in your subscription feeds. Disabled by default because storing metadata history increases disk usage.
     Save Watched Progress: Save Watched Progress
     Watched Percentage Threshold: Watched Percentage Threshold
     Watched Percentage Threshold Tooltip: Videos are marked as watched after reaching the selected percentage and having no more than 2 minutes remaining. At 0%, they are marked when playback begins. At 100%, they are marked when playback ends.

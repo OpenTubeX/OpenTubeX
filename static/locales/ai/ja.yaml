@@ -1015,7 +1015,7 @@ Settings:
     Enable Watch Statistics: 視聴統計を有効化
     Week Starts On: 週の開始曜日
     Cache Video Metadata: メタデータの履歴
-    Cache Video Metadata Tooltip: 閲覧した動画について、対応している動画メタデータの各バージョンを保存します。対象にはタイトル、サムネイル、説明が含まれます。ディスク使用量が増えるため、既定では無効です。
+    Cache Video Metadata Tooltip: 閲覧した動画について、対応している動画メタデータの各バージョンを保存します。対象にはタイトル、サムネイル、説明が含まれます。登録チャンネルのフィードに表示されたタイトルも保存します。ディスク使用量が増えるため、既定では無効です。
     Watched Percentage Threshold: 視聴済みとする割合
     Watched Percentage Threshold Tooltip: 選択した割合に達し、残り時間が2分以下になると視聴済みになります。0%では再生開始時、100%では再生終了時に視聴済みになります。
     Clear Video Metadata Cache: 動画メタデータのキャッシュを消去
