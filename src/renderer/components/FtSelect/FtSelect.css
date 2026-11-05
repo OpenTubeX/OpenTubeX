@@ -657,7 +657,8 @@
 }
 
 .selectGroupHeading {
-  margin: 0;
+  margin-block: 0 4px;
+  margin-inline: 0;
   padding-block: 8px;
   padding-inline: 16px;
   font-size: 13px;
@@ -665,6 +666,11 @@
   color: var(--secondary-text-color);
   background-color: color-mix(in srgb, var(--primary-text-color) 5%, var(--card-bg-color));
   list-style: none;
+}
+
+/* Space headings evenly from the option rows around them */
+.selectOption + .selectGroupHeading {
+  margin-block-start: 4px;
 }
 
 .selectLoadMore {
