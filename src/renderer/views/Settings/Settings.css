@@ -514,6 +514,10 @@
 /* The window already paints the card gradient behind the About card. */
 .settingsAboutPage {
   --card-bg-image: none;
+
+  /* These cards scroll inside the window, which can't clip a fixed layer. */
+  --fixed-background-display: none;
+  --fixed-background-host-clip: border-box;
 }
 
 /* The scroller already pads the page, so drop the route's bottom margin. */

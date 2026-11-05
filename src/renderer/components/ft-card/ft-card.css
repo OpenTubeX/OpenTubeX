@@ -9,16 +9,9 @@
   box-shadow: 0 1px 2px rgb(0 0 0 / 10%);
 }
 
-/* FtFixedBackground paints the image fixed to the viewport. Keep the base
-   specificity so pages can still position their cards. */
+/* FtFixedBackground paints the background fixed to the viewport. Keep the
+   base specificity so pages can still position their cards. */
 .ft-card:where(.fixedBackground) {
   position: relative;
-  isolation: isolate;
-  background-size: 0 0;
-}
-
-/* Lift the card while it holds an open dropdown, or the cards after it would
-   paint over the menu. */
-.ft-card:where(.fixedBackground):has(.iconDropdown) {
-  z-index: 1;
+  background-clip: var(--fixed-background-host-clip, border-box);
 }

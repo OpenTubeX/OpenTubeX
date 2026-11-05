@@ -2647,6 +2647,7 @@ a:visited {
   /* Composite the layered fields instead of repainting them on every scroll
      frame, at the cost of subpixel text over them on low-DPI screens. */
   --fixed-background-display: block;
+  --fixed-background-host-clip: border-area;
 
   /* Settings sections share the window's field instead of repeating it. */
   --settings-section-bg-color: transparent;

@@ -10,9 +10,11 @@
    the phone card's surface. */
 .videoSummary:not(.phonePanelCard) {
   position: relative;
-  isolation: isolate;
   border-radius: var(--shape-corner-medium);
   background-color: var(--card-bg-color);
+
+  /* FtFixedBackground paints the background fixed to the viewport. */
+  background-clip: var(--fixed-background-host-clip, border-box);
   backdrop-filter: var(--card-bg-blur, none);
   box-shadow: 0 1px 2px rgb(0 0 0 / 10%);
   color: var(--primary-text-color);
@@ -30,9 +32,10 @@
 }
 
 /* Closed details render only their summary, so the fixed background lives
-   in it and takes the card's image and corners. */
+   in it and takes the card's background and corners. */
 .videoSummary summary > .fixedBackgroundLayer {
   border-radius: var(--shape-corner-medium);
+  background-color: var(--card-bg-color);
   background-image: var(--card-bg-image);
 }
 

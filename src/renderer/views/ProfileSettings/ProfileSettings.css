@@ -106,5 +106,9 @@ h2 {
   /* The settings window already paints the card gradient behind these cards. */
   --card-bg-image: none;
 
+  /* These cards scroll inside the window, which can't clip a fixed layer. */
+  --fixed-background-display: none;
+  --fixed-background-host-clip: border-box;
+
   display: flow-root;
 }
