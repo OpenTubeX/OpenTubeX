@@ -1,24 +1,10 @@
 import { setPlayerFullscreen, setWindowSize, test, expect } from '../../helpers/app.mjs'
 import { openMockedVideo, waitForPlayback } from '../../helpers/player.mjs'
-import { mockPlayableWatchPage, watchViewHandle } from '../../helpers/watch.mjs'
+import { emptyCommentsResponse, mockPlayableWatchPage, watchViewHandle } from '../../helpers/watch.mjs'
 import { fulfillVisualFixture } from '../../helpers/visual-fixtures.mjs'
 import { WATCH_PAGE_SEED } from '../../helpers/watch-page.mjs'
 
 test.use({ seed: { settings: WATCH_PAGE_SEED } })
-
-const emptyCommentsResponse = JSON.stringify({
-  onResponseReceivedEndpoints: [
-    {
-      reloadContinuationItemsCommand: {
-        targetId: 'comments-section',
-        continuationItems: [
-          { commentsHeaderRenderer: { countText: { simpleText: '0 Comments' } } }
-        ]
-      }
-    },
-    { reloadContinuationItemsCommand: { targetId: 'comments-section', continuationItems: [] } }
-  ]
-})
 
 test('treats an empty comments response as no comments', { tag: '@scale' }, async ({ app, page }) => {
   await mockPlayableWatchPage(app, page)

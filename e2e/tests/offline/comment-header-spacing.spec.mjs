@@ -1,6 +1,6 @@
 import { test, expect } from '../../helpers/app.mjs'
 import { openMockedVideo } from '../../helpers/player.mjs'
-import { mockPlayableWatchPage } from '../../helpers/watch.mjs'
+import { emptyCommentsResponse, mockPlayableWatchPage } from '../../helpers/watch.mjs'
 
 async function resizeViewport(app, page, width, uiScale) {
   await app.electronApp.evaluate(({ BrowserWindow }, { width, uiScale }) => {
@@ -35,7 +35,7 @@ test.describe('comment header spacing', { tag: '@scale' }, () => {
     await mockPlayableWatchPage(app, page)
     await page.route(/\/youtubei\/v1\/next/, (route, request) => {
       const body = JSON.parse(request.postData() ?? '{}')
-      return body.continuation ? route.fulfill({ json: {} }) : route.fallback()
+      return body.continuation ? route.fulfill({ contentType: 'application/json', body: emptyCommentsResponse }) : route.fallback()
     })
     await openMockedVideo(page)
     const actions = page.locator('.noCommentActions')

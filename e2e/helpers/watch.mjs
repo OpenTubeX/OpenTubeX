@@ -9,6 +9,20 @@ import { abortUnmockedRequest, repoRoot } from './app.mjs'
 import { fixtureKey, SHARED_PLAYER_SCRIPT } from './innertube.mjs'
 import { DEMO_MEDIA_DURATION_SECONDS, demoPlayerResponse, routeDemoMedia, routeIframeApi, routeWatchPageHtml, stubPoToken } from './media.mjs'
 
+export const emptyCommentsResponse = JSON.stringify({
+  onResponseReceivedEndpoints: [
+    {
+      reloadContinuationItemsCommand: {
+        targetId: 'comments-section',
+        continuationItems: [
+          { commentsHeaderRenderer: { countText: { simpleText: '0 Comments' } } }
+        ]
+      }
+    },
+    { reloadContinuationItemsCommand: { targetId: 'comments-section', continuationItems: [] } }
+  ]
+})
+
 const watchFixtures = path.join(repoRoot, 'e2e', 'fixtures', 'innertube', 'watch')
 const sharedDir = path.join(repoRoot, 'e2e', 'fixtures', 'innertube', 'shared')
 
@@ -316,6 +330,12 @@ export async function mockWatchPage(app, page, {
       for (const dir of fixtureDirs) {
         body = await fixture(dir, `${key}.${index}.json.gz`) ?? await fixture(dir, `${key}.0.json.gz`)
         if (body) break
+      }
+
+      // Unrecorded videos have different comment tokens. Do not serve their
+      // watch metadata as a comment page through the generic endpoint fallback.
+      if (!body && url.includes('/next') && JSON.parse(request.postData() ?? '{}').continuation) {
+        body = Buffer.from(emptyCommentsResponse)
       }
 
       if (!body) {
