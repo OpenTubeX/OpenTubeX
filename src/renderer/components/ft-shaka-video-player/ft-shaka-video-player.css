@@ -507,7 +507,7 @@
   background-color: rgb(0 0 0 / 90%);
 }
 
-:root[data-reduced-transparency] .skippedSegment {
+:root[data-reduced-transparency] .skippedSegment:not(.editing) {
   --skipped-segment-background: rgb(0 0 0);
 }
 
