@@ -425,6 +425,8 @@ const elementListLoadingTabs = ref({})
 const elementListRequestIds = {}
 const isSearchTabLoading = ref(false)
 const isFetchMoreLoading = ref(false)
+/** Set when the last page failed, so automatic loading waits for a click instead of retrying it in a loop */
+const autoLoadPaused = ref(false)
 const currentTab = ref('videos')
 const isElementListLoading = computed(() => !!elementListLoadingTabs.value[currentTab.value])
 
@@ -434,6 +436,8 @@ function setElementListLoading(tab, loading) {
 
 function startElementListRequest(tab) {
   elementListRequestIds[tab] = (elementListRequestIds[tab] || 0) + 1
+  // A new list, for example after changing the sort order, loads automatically again.
+  autoLoadPaused.value = false
   return currentElementListRequest(tab)
 }
 
@@ -2491,7 +2495,7 @@ async function getCommunityPostsInvidious() {
 
 const lastSearchQuery = ref('')
 const searchResults = shallowRef([])
-/** The local API's search result, or the next page number for Invidious */
+/** The local API's search result, or the next page for Invidious, as a new object per page so pages of different searches never match */
 const searchContinuationData = shallowRef(null)
 const channelSearchFilter = ref(CHANNEL_SEARCH_FILTERS.ALL)
 
@@ -2612,7 +2616,7 @@ async function searchChannelLocal() {
 
 async function searchChannelInvidious() {
   const isCurrentRequest = currentElementListRequest('search')
-  const page = searchContinuationData.value ?? 1
+  const page = searchContinuationData.value?.page ?? 1
 
   try {
     const response = await searchInvidiousChannel(id.value, lastSearchQuery.value, page)
@@ -2629,7 +2633,7 @@ async function searchChannelInvidious() {
     }
 
     // Invidious has no continuation token; the last page is the first empty one.
-    searchContinuationData.value = response.length > 0 ? page + 1 : null
+    searchContinuationData.value = response.length > 0 ? { page: page + 1 } : null
     isSearchTabLoading.value = false
     tabApiUsed.set('search', 'invidious')
   } catch (err) {
@@ -2793,9 +2797,6 @@ function tabContinuation(tab) {
 }
 
 const showFetchMoreButton = computed(() => !isNullOrEmpty(tabContinuation(currentTab.value)))
-
-/** Set when the last page failed, so automatic loading waits for a click instead of retrying it in a loop */
-const autoLoadPaused = ref(false)
 
 async function handleFetchMore() {
   if (isFetchMoreLoading.value) return

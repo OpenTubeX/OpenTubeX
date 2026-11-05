@@ -306,3 +306,54 @@ test('a failed page pauses automatic loading only while its tab is selected', as
   await context.handleFetchMore()
   assert.equal(context.autoLoadPaused.value, false, 'a page that loads resumes automatic loading')
 })
+
+test('a superseded search page cannot pause the next search, and a new list loads automatically again', async () => {
+  const pending = []
+  const context = {
+    currentTab: ref('search'),
+    autoLoadPaused: ref(false),
+    isFetchMoreLoading: ref(false),
+    isSearchTabLoading: ref(false),
+    tabApiUsed: new Map([['search', 'invidious']]),
+    process: { env: {} },
+    console,
+    id: ref('UCchannel'),
+    channelRouteGeneration: 0,
+    elementListRequestIds: {},
+    lastSearchQuery: ref('old'),
+    searchResults: shallowRef([]),
+    hideChannelPlaylists: ref(false),
+    getInvidiousChannelSearchResultType: () => 'video',
+    searchInvidiousChannel: () => new Promise(resolve => { pending.push(resolve) }),
+  }
+  for (const name of ['video', 'short', 'live', 'release', 'podcast', 'courses', 'playlist', 'community', 'search']) {
+    context[`${name}ContinuationData`] = shallowRef(null)
+  }
+  vm.runInNewContext([
+    slice('function startElementListRequest(', 'const isCurrentTabLoading'),
+    slice('function tabContinuation(', 'const showFetchMoreButton'),
+    slice('async function searchChannelInvidious() {', '/**\n * @param {string} query'),
+    slice('async function handleFetchMore() {', '/**\n * Handles a user-initiated tab change'),
+  ].join('\n'), context)
+  const video = { type: 'video', videoId: 'video' }
+
+  context.startElementListRequest('search')
+  const firstSearch = context.searchChannelInvidious()
+  pending.shift()([video])
+  await firstSearch
+  const oldPageTwo = context.handleFetchMore()
+
+  // A new search starts while page 2 of the old one is still loading.
+  context.searchContinuationData.value = null
+  context.startElementListRequest('search')
+  const newSearch = context.searchChannelInvidious()
+  pending.pop()([video])
+  await newSearch
+  pending.shift()([video])
+  await oldPageTwo
+  assert.equal(context.autoLoadPaused.value, false, 'the new search keeps loading automatically')
+
+  context.autoLoadPaused.value = true
+  context.startElementListRequest('videos')
+  assert.equal(context.autoLoadPaused.value, false, 'reloading a list, for example after sorting, resumes automatic loading')
+})
