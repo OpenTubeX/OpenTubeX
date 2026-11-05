@@ -333,10 +333,6 @@ watch(tabAvatarUrl, (avatarUrl) => {
   border-color: var(--tab-border-color, var(--border-color));
 }
 
-.tab.vertical.colored {
-  box-shadow: inset 2px 0 0 var(--tab-accent-color);
-}
-
 .tab.vertical.pinned {
   inline-size: calc(100% - 1px);
   min-inline-size: 0;
@@ -369,8 +365,6 @@ watch(tabAvatarUrl, (avatarUrl) => {
   --tab-hover-color: color-mix(in srgb, var(--tab-accent-color) 22%, var(--card-bg-color));
   --tab-active-color: color-mix(in srgb, var(--tab-accent-color) 26%, var(--card-bg-color));
   --tab-border-color: color-mix(in srgb, var(--tab-accent-color) var(--tab-accent-border-mix), var(--border-color));
-
-  box-shadow: inset 0 2px 0 var(--tab-accent-color);
 }
 
 .tab.pinned {
