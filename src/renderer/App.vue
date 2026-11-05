@@ -174,6 +174,12 @@
           @click="openDownloadsPage"
         />
         <FtButton
+          :label="t('About.Donate')"
+          :icon="['fas', 'heart']"
+          variant="tonal"
+          @click="openDonatePage"
+        />
+        <FtButton
           :label="t('Close')"
           :icon="['fas', 'xmark']"
           :text-color="null"
@@ -2492,9 +2498,15 @@ function copyPackageManagerUpdateCommand() {
 }
 
 function openDownloadsPage() {
+  handleExternalLink('https://opentubex.org/downloads/')
+  // Keep the update reachable unless the link opened right away
+  if (resolveExternalLinkAction(externalLinkHandling.value) !== 'open') return
   dismissAvailableUpdate()
-  openExternalLink('https://opentubex.org/downloads/')
   showReleaseNotes.value = false
+}
+
+function openDonatePage() {
+  handleExternalLink('https://opentubex.org/donate/')
 }
 
 /** @type {import('vue').ComputedRef<boolean>} */
