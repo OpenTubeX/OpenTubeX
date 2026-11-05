@@ -13,7 +13,7 @@
       <FtButton
         :label="subscribedText"
         :no-border="true"
-        :icon="isSubscribed ? ['fas', 'check'] : null"
+        :icon="['fas', isSubscribed ? 'check' : 'user-plus']"
         class="subscribeButton"
         :class="{
           hasProfileDropdownToggle: isSubscriptionOptionsEnabled,
