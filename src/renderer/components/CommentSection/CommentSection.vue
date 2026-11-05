@@ -545,7 +545,7 @@
       <div
         v-else-if="commentsDisabled || (showComments && !isLoading)"
         class="noComments"
-        :class="{ noCommentsMessageOnly: commentsDisabled || fullscreenOverlay }"
+        :class="{ noCommentsMessageOnly: commentsDisabled || fullscreenOverlay || phonePanelHeader }"
       >
         <h3
           v-if="commentsDisabled"
@@ -566,7 +566,7 @@
           {{ $t("Comments.There are no comments available for this video") }}
         </h3>
         <div
-          v-if="!fullscreenOverlay && !commentsDisabled"
+          v-if="!fullscreenOverlay && !phonePanelHeader && !commentsDisabled"
           class="noCommentActions"
         >
           <FtIconButton
@@ -1563,21 +1563,18 @@ function setCommentCount(count) {
 }
 
 /**
- * @param {any} text
+ * @param {import('youtubei.js').Misc.Text | string | null | undefined} text
  */
 function getCommentCountText(text) {
-  if (text == null) {
-    return ''
-  }
-
-  return text.text ?? text.toString()
+  return typeof text === 'string' ? text : text?.text ?? ''
 }
 
 /**
  * @param {import('youtubei.js').YT.Comments} comments
  */
 function setLocalCommentCount(comments) {
-  const countText = getCommentCountText(comments.header?.comments_count ?? comments.header?.count)
+  const countText = getCommentCountText(comments.header?.comments_count) || getCommentCountText(comments.header?.count)
+  if (!countText) return
   const count = parseLocalSubscriberCount(countText)
 
   setCommentCount(count)
@@ -1642,27 +1639,26 @@ function copyCommentYoutubeLink(commentId) {
   })
 }
 
-function getCommentData({ preserveSort = false } = {}) {
+async function getCommentData({ preserveSort = false } = {}) {
+  showComments.value = false
   isLoading.value = true
   areCommentsDisabled.value = false
 
   const useInvidious = !process.env.SUPPORTS_LOCAL_API || usesInvidiousApi(backendPreference.value)
 
-  if (useInvidious) {
-    if (!props.isPostComments) {
-      return getCommentDataInvidious()
-    } else {
-      return getPostCommentsInvidious()
+  try {
+    if (useInvidious) {
+      return props.isPostComments ? await getPostCommentsInvidious() : await getCommentDataInvidious()
     }
-  } else {
-    return getCommentDataLocal(false, preserveSort)
+    return await getCommentDataLocal(false, preserveSort)
+  } finally {
+    automaticInitialLoadFailed = canPerformInitialCommentLoading.value
   }
 }
 
 async function loadInitialCommentsAutomatically() {
   if (automaticInitialLoadFailed) return
   await getCommentData()
-  automaticInitialLoadFailed = canPerformInitialCommentLoading.value
 }
 
 function getMoreComments() {
@@ -1946,22 +1942,6 @@ async function getCommentDataLocal(more = false, preserveSort = false) {
     if (requestedHighlightedCommentId !== props.highlightedCommentId) {
       return
     }
-
-    // region No comment detection
-    // No comment related info when video info requested earlier in parent component
-    if (/comments page did not have any content/i.test(err?.message)) {
-      // For videos without any comment (comment disabled?)
-      // e.g. https://youtu.be/8NBSwDEf8a8
-      commentData.value = []
-      nextPageToken.value = null
-      setCommentCount(0)
-      isLoading.value = false
-      showComments.value = true
-      areCommentsDisabled.value = true
-      localCommentsInstance = undefined
-      return
-    }
-    // endregion No comment detection
 
     console.error(err)
     const errorMessage = t('Local API Error (Click to copy)')

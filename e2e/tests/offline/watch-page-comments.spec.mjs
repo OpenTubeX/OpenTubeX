@@ -6,7 +6,21 @@ import { WATCH_PAGE_SEED } from '../../helpers/watch-page.mjs'
 
 test.use({ seed: { settings: WATCH_PAGE_SEED } })
 
-test('treats an empty comments response as no comments', async ({ app, page }) => {
+const emptyCommentsResponse = JSON.stringify({
+  onResponseReceivedEndpoints: [
+    {
+      reloadContinuationItemsCommand: {
+        targetId: 'comments-section',
+        continuationItems: [
+          { commentsHeaderRenderer: { countText: { simpleText: '0 Comments' } } }
+        ]
+      }
+    },
+    { reloadContinuationItemsCommand: { targetId: 'comments-section', continuationItems: [] } }
+  ]
+})
+
+test('treats an empty comments response as no comments', { tag: '@scale' }, async ({ app, page }) => {
   await mockPlayableWatchPage(app, page)
 
   let commentRequestCount = 0
@@ -20,7 +34,7 @@ test('treats an empty comments response as no comments', async ({ app, page }) =
     return route.fulfill({
       status: 200,
       contentType: 'application/json',
-      body: '{}'
+      body: emptyCommentsResponse
     })
   })
 
@@ -52,16 +66,6 @@ test('treats an empty comments response as no comments', async ({ app, page }) =
     (messageBox.y + messageBox.height / 2)
   )).toBeLessThanOrEqual(1)
 
-  await page.evaluate(() => window.ftElectron.setZoomFactor(1.25))
-  const [scaledActionsBox, scaledMessageBox] = await Promise.all([
-    page.locator('.noCommentActions').boundingBox(),
-    page.locator('.noCommentMsg').boundingBox()
-  ])
-  expect(Math.abs(
-    scaledActionsBox.y + scaledActionsBox.height / 2 -
-    (scaledMessageBox.y + scaledMessageBox.height / 2)
-  )).toBeLessThanOrEqual(1)
-
   await setWindowSize(app, page, { width: 375, height: 800 })
   await page.locator('.app').evaluate((element) => {
     element.classList.add('capacitorTabs', 'capacitorPhoneLayout')
@@ -70,27 +74,62 @@ test('treats an empty comments response as no comments', async ({ app, page }) =
   await (await watchViewHandle(page)).evaluate(view => view.openPhonePanel('comments'))
   await expect(page.locator('.mobileSheet[open] .noComments')).toBeVisible()
 
-  const readMobileLayout = () => page.locator('.noComments').evaluate((element) => {
-    const actionsBounds = element.querySelector('.noCommentActions').getBoundingClientRect()
-    const messageBounds = element.querySelector('.noCommentMsg').getBoundingClientRect()
-    return {
-      actionsAboveMessage: actionsBounds.bottom <= messageBounds.top,
-      hasHorizontalOverflow: element.scrollWidth > element.clientWidth + 1
-    }
-  })
-  const expectedMobileLayout = {
-    actionsAboveMessage: true,
-    hasHorizontalOverflow: false
-  }
-  expect(await readMobileLayout()).toEqual(expectedMobileLayout)
-  await expectReloadAlignedBeforeSort()
-
+  await expect(page.locator('.mobileSheet[open] .noCommentActions')).toHaveCount(0)
+  await expect.poll(() => page.locator('.mobileSheet[open] .noComments').evaluate(element => element.scrollWidth > element.clientWidth + 1)).toBe(false)
+  await expect(page.locator('.mobileSheet[open]').getByRole('button', { name: 'Reload Comments', exact: true })).toHaveCount(1)
+  await expect(page.locator('.mobileSheet[open]').getByRole('button', { name: /^sort by$/i })).toHaveCount(1)
   await setWindowSize(app, page, { width: 800, height: 375 })
-  expect(await readMobileLayout()).toEqual(expectedMobileLayout)
-  await expectReloadAlignedBeforeSort()
+  await expect(page.locator('.mobileSheet[open] .noCommentActions')).toHaveCount(0)
+  await expect.poll(() => page.locator('.mobileSheet[open] .noComments').evaluate(element => element.scrollWidth > element.clientWidth + 1)).toBe(false)
   await expect(page.locator('.toast', { hasText: 'Local API Error' })).toHaveCount(0)
   expect(commentRequestCount).toBe(1)
 })
+
+for (const trigger of ['initial load', 'reload', 'sort']) {
+  test(`incomplete comments during ${trigger} stay retryable instead of reporting no comments`, async ({ app, page }) => {
+    await mockPlayableWatchPage(app, page)
+    await page.evaluate(() => window.$store.dispatch('updateBackendFallback', false))
+    let fail = trigger === 'initial load'
+    let failedRequests = 0
+    let loadedResponse
+    const firstResponse = trigger === 'sort'
+      ? page.waitForResponse(response =>
+          response.url().includes('/youtubei/v1/next') && JSON.parse(response.request().postData() ?? '{}').continuation
+        )
+      : null
+    await page.route(/\/youtubei\/v1\/next/, (route, request) => {
+      if (!JSON.parse(request.postData() ?? '{}').continuation) return route.fallback()
+      // The recordings contain the top-comments page, so replay that valid
+      // response when the failed sort request is retried.
+      if (!fail) {
+        return loadedResponse
+          ? route.fulfill({ status: 200, contentType: 'application/json', body: loadedResponse })
+          : route.fallback()
+      }
+      failedRequests++
+      return route.fulfill({ status: 200, contentType: 'application/json', body: '{}' })
+    })
+    await openMockedVideo(page)
+    if (firstResponse) loadedResponse = await (await firstResponse).text()
+    if (trigger !== 'initial load') {
+      await expect(page.locator('.comment').first()).toBeVisible()
+      fail = true
+      if (trigger === 'reload') await page.getByRole('button', { name: 'Reload Comments', exact: true }).click()
+      else {
+        await page.locator('.commentHeaderActions').getByRole('combobox').click()
+        await page.getByRole('option', { name: /^newest first$/i }).click()
+      }
+    }
+    await expect(page.locator('.getCommentsTitle')).toBeVisible()
+    await expect(page.locator('.noCommentMsg')).toHaveCount(0)
+    expect(failedRequests).toBe(1)
+    fail = false
+    await page.locator('.getCommentsTitle').click()
+    await expect(page.locator('.comment').first()).toBeVisible()
+    await expect(page.locator('.noCommentMsg')).toHaveCount(0)
+    await expect(page.locator('.commentsTitle')).not.toHaveText(/^0 Comments/)
+  })
+}
 
 test('loads initial comments with the video when automatic pagination is enabled', async ({ app, page }) => {
   await mockPlayableWatchPage(app, page)

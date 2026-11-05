@@ -2,4 +2,4 @@
 category: fix
 ---
 
-When comments fail to load, the watch page no longer keeps retrying, showing error toasts and jumping around. Use Load comments to try again.
+Failed or incomplete comment loads now offer a retry instead of reporting no comments or repeatedly retrying. The phone comments panel no longer duplicates its refresh and sort controls.
