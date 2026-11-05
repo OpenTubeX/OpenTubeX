@@ -1180,6 +1180,7 @@ Settings:
     Paused Interface Hide Delay: Întârzierea ascunderii interfeței în pauză
     Add: Adaugă
     Remove: Elimină
+    Hide Channel Shows: Ascunde fila „Emisiuni” a canalului
   Data Settings:
     Scheduled backups: "Copii de siguranță programate"
     Scheduled backup description: "Salvează copii ZIP complete cât timp OpenTubeX este deschis. Copiile ratate sunt create la pornire. Limita se aplică doar copiilor programate din acest dosar."
@@ -1558,6 +1559,9 @@ Channel:
     Original post unavailable: "Postarea originală nu este disponibilă"
     Members-only video hidden by OpenTubeX: "Videoclip doar pentru membri ascuns de OpenTubeX"
     Video hidden by OpenTubeX because of its title: "Videoclip ascuns de OpenTubeX deoarece titlul conține text ascuns"
+  Shows:
+    Shows: Emisiuni
+    This channel does not currently have any shows: Acest canal nu are momentan emisiuni
 Video:
   Info panel source: 'Sursă: {source}'
   External DRM Protected: "Videoclipurile protejate DRM nu pot fi redate în OpenTubeX, deoarece necesită componente proprietare, cu sursă închisă."

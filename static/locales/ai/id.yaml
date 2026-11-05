@@ -1176,6 +1176,7 @@ Settings:
     Show Video Title: Tampilkan Judul Video
     Show Bottom Right Actions Dock: Tampilkan Dok Tindakan Kanan Bawah
     Paused Interface Hide Delay: Jeda Sebelum Menyembunyikan Antarmuka yang Dijeda
+    Hide Channel Shows: Sembunyikan Tab "Acara" Saluran
   Data Settings:
     Scheduled backups: "Cadangan terjadwal"
     Scheduled backup description: "Simpan cadangan ZIP lengkap saat OpenTubeX terbuka. Cadangan yang terlewat dibuat saat aplikasi dimulai. Batas hanya berlaku untuk cadangan terjadwal di folder ini."
@@ -1536,6 +1537,9 @@ Channel:
     Original post unavailable: "Postingan asli tidak tersedia"
     Members-only video hidden by OpenTubeX: "Video khusus anggota disembunyikan oleh OpenTubeX"
     Video hidden by OpenTubeX because of its title: "Video disembunyikan oleh OpenTubeX karena judulnya berisi teks yang disembunyikan"
+  Shows:
+    Shows: Acara
+    This channel does not currently have any shows: Saluran ini saat ini tidak memiliki acara apa pun
 Video:
   Info panel source: 'Sumber: {source}'
   External DRM Protected: "Video yang dilindungi DRM tidak dapat diputar di OpenTubeX, karena memerlukan komponen sumber tertutup dan berpemilik."

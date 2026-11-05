@@ -1190,6 +1190,7 @@ Settings:
     Paused Interface Hide Delay: השהיה לפני הסתרת הממשק כשהסרטון מושהה
     Add: הוספה
     Remove: הסרה
+    Hide Channel Shows: הסתר את לשונית "תוכניות" של הערוץ
   Data Settings:
     Scheduled backups: "גיבויים מתוזמנים"
     Scheduled backup description: "שמירת גיבויי ZIP מלאים כאשר OpenTubeX פתוח. גיבויים שהוחמצו מתבצעים בהפעלה. המגבלה חלה רק על גיבויים מתוזמנים בתיקייה זו."
@@ -1565,6 +1566,9 @@ Channel:
     Original post unavailable: "הפוסט המקורי אינו זמין"
     Members-only video hidden by OpenTubeX: "OpenTubeX הסתיר סרטון לחברי ערוץ בלבד"
     Video hidden by OpenTubeX because of its title: "OpenTubeX הסתיר את הסרטון כי הכותרת שלו מכילה טקסט מוסתר"
+  Shows:
+    Shows: תוכניות
+    This channel does not currently have any shows: ערוץ זה אינו כולל כרגע תוכניות
 Video:
   Info panel source: 'מקור: {source}'
   External DRM Protected: "סרטונים המוגנים ב-DRM אינם יכולים להתנגן ב-OpenTubeX, מכיוון שהם דורשים רכיבים קנייניים בקוד סגור."

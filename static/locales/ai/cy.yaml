@@ -1176,6 +1176,7 @@ Settings:
     Show Video Title: Dangos teitl y fideo
     Show Bottom Right Actions Dock: Dangos doc gweithredoedd y gwaelod ar y dde
     Paused Interface Hide Delay: Oedi cyn cuddio'r rhyngwyneb wrth oedi
+    Hide Channel Shows: Cuddio Tab "Sioeau" Sianel
   Data Settings:
     Scheduled backups: "Copïau wrth gefn wedi’u hamserlennu"
     Scheduled backup description: "Cadw copïau ZIP cyflawn tra bo OpenTubeX ar agor. Gwneir copïau a gollwyd wrth gychwyn. Dim ond copïau wedi’u hamserlennu yn y ffolder hon sy’n cyfrif tuag at y terfyn."
@@ -1538,6 +1539,9 @@ Channel:
     Original post unavailable: "Nid yw'r postiad gwreiddiol ar gael"
     Members-only video hidden by OpenTubeX: "Fideo i aelodau yn unig wedi'i guddio gan OpenTubeX"
     Video hidden by OpenTubeX because of its title: "Fideo wedi'i guddio gan OpenTubeX oherwydd bod ei deitl yn cynnwys testun cudd"
+  Shows:
+    Shows: Sioeau
+    This channel does not currently have any shows: Nid oes gan y sianel hon unrhyw sioeau ar hyn o bryd
 Video:
   Info panel source: 'Ffynhonnell: {source}'
   External DRM Protected: "Nid oes modd chwarae fideos gwarchodedig DRM yn OpenTubeX, gan fod angen cydrannau ffynhonnell gaeedig perchnogol arnynt."

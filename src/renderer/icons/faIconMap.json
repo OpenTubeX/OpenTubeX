@@ -721,6 +721,10 @@
     "ri": "trophy-line",
     "material": "trophy-outline"
   },
+  "tv": {
+    "ri": "tv-line",
+    "material": "tv-outline-rounded"
+  },
   "undo": {
     "ri": "arrow-go-back-line",
     "material": "undo-rounded"

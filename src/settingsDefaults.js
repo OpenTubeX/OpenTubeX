@@ -180,6 +180,7 @@ export function createDefaultSettings({ supportsLocalApi, isElectron }) {
     hideChannelReleases: false,
     hideChannelPodcasts: false,
     hideChannelCourses: false,
+    hideChannelShows: false,
     hideChannelShorts: false,
     hideChannelSubscriptions: false,
     hideCommentLikes: false,

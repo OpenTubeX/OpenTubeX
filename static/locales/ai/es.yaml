@@ -1135,6 +1135,7 @@ Settings:
     Show Video Title: Mostrar título del vídeo
     Show Bottom Right Actions Dock: Mostrar panel de acciones inferior derecho
     Paused Interface Hide Delay: Retraso para ocultar la interfaz al pausar
+    Hide Channel Shows: Ocultar la pestaña "Programas" del canal
   Data Settings:
     Scheduled backups: "Copias de seguridad programadas"
     Scheduled backup description: "Guarda copias ZIP completas mientras OpenTubeX está abierto. Las copias pendientes se realizan al iniciar. El límite solo se aplica a las copias programadas de esta carpeta."
@@ -1494,6 +1495,9 @@ Channel:
     Original post unavailable: "La publicación original no está disponible"
     Members-only video hidden by OpenTubeX: "Vídeo solo para miembros ocultado por OpenTubeX"
     Video hidden by OpenTubeX because of its title: "Vídeo ocultado por OpenTubeX porque su título contiene texto oculto"
+  Shows:
+    Shows: Programas
+    This channel does not currently have any shows: Este canal no tiene actualmente ningún programa
 Video:
   Info panel source: 'Fuente: {source}'
   External DRM Protected: "Los vídeos restringidos con DRM no pueden reproducirse en OpenTubeX, dado que requieren componentes propietarios de fuente cerrada."

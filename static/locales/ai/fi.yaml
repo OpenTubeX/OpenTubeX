@@ -1190,6 +1190,7 @@ Settings:
     Paused Interface Hide Delay: Keskeytetyn käyttöliittymän piilotusviive
     Add: Lisää
     Remove: Poista
+    Hide Channel Shows: Piilota kanavan Ohjelmat-välilehti
   Data Settings:
     Scheduled backups: "Ajastetut varmuuskopiot"
     Scheduled backup description: "Tallenna täydellisiä ZIP-varmuuskopioita, kun OpenTubeX on auki. Väliin jääneet kopiot luodaan käynnistyessä. Raja koskee vain tämän kansion ajastettuja kopioita."
@@ -1565,6 +1566,9 @@ Channel:
     Original post unavailable: "Alkuperäinen julkaisu ei ole saatavilla"
     Members-only video hidden by OpenTubeX: "OpenTubeX piilotti vain jäsenille tarkoitetun videon"
     Video hidden by OpenTubeX because of its title: "OpenTubeX piilotti videon, koska sen otsikko sisältää piilotettua tekstiä"
+  Shows:
+    Shows: Ohjelmat
+    This channel does not currently have any shows: Tällä kanavalla ei ole tällä hetkellä ohjelmia
 Video:
   Info panel source: 'Lähde: {source}'
   External DRM Protected: "DRM-suojattuja videoita ei voida katsoa OpenTubeXissä, koska ne vaativat ei-vapaita, suljetun koodin osia."

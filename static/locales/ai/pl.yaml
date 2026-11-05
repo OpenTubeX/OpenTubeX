@@ -965,8 +965,6 @@ Channel:
   More videos per day: "Więcej filmów dziennie"
   Verified: Zweryfikowany
   Official Artist Channel: Oficjalny kanał wykonawcy
-  About:
-    Links: Odnośniki
   Subscription settings: Ustawienia subskrypcji
   Failed to save subscription settings: Nie udało się zapisać ustawień kanału
   Videos per day: Filmy dziennie
@@ -987,6 +985,8 @@ Channel:
     Original post unavailable: "Oryginalny post jest niedostępny"
     Members-only video hidden by OpenTubeX: "OpenTubeX ukrył film tylko dla członków"
     Video hidden by OpenTubeX because of its title: "OpenTubeX ukrył film, ponieważ jego tytuł zawiera ukryty tekst"
+  Shows:
+    This channel does not currently have any shows: Na tym kanale nie ma obecnie żadnych programów
 Video:
   Info panel source: 'Źródło: {source}'
   Remove Video from Queue: Usuń z kolejki

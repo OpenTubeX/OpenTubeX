@@ -125,6 +125,7 @@ export const SYNC_SETTING_LABELS = {
   hideChannelPodcasts: 'Settings.Distraction Free Settings.Hide Channel Podcasts',
   hideChannelReleases: 'Settings.Distraction Free Settings.Hide Channel Releases',
   hideChannelShorts: 'Settings.Distraction Free Settings.Hide Channel Shorts',
+  hideChannelShows: 'Settings.Distraction Free Settings.Hide Channel Shows',
   hideChannelSubscriptions: 'Settings.Distraction Free Settings.Hide Channel Subscribers',
   hideChapters: 'Settings.Distraction Free Settings.Hide Chapters',
   hideCommentLikes: 'Settings.Distraction Free Settings.Hide Comment Likes',

@@ -95,3 +95,53 @@ test('the About tab of an Invidious channel can be reached with the arrow keys',
   await expect(videosTab).toBeFocused()
   await expect(videosTab).toHaveAttribute('aria-selected', 'true')
 })
+
+for (const listTab of ['shows', 'courses']) {
+  test(`opening another channel does not keep the previous channel's ${listTab}`, async ({ page }) => {
+    const OTHER_ID = 'UCbbbbbbbbbbbbbbbbbbbbbb'
+    await page.route('https://invidious.test/api/v1/channels/**', route => {
+      const [, , , , channelId, tab] = new URL(route.request().url()).pathname.split('/')
+      if (tab === listTab && channelId === OTHER_ID) return route.fulfill({ status: 500, body: '' })
+      return route.fulfill({
+        json: tab
+          ? {
+              playlists: tab === listTab
+                ? [{ type: 'playlist', title: 'First channel list item', playlistId: 'PLfirst', playlistThumbnail: '', author: 'Second', authorId: OTHER_ID, videoCount: 3 }]
+                : [],
+              videos: [],
+              continuation: null
+            }
+          : {
+              author: channelId === OTHER_ID ? 'Second' : 'First',
+              authorId: channelId,
+              authorThumbnails: [],
+              authorBanners: [],
+              description: '',
+              subCount: 0,
+              totalViews: 0,
+              joined: 0,
+              tabs: ['videos', listTab],
+              relatedChannels: []
+            }
+      })
+    })
+
+    const tab = await page.evaluate(id => window.ftElectron.tabs.create({
+      route: `/channel/${id}`,
+      makeActive: false
+    }), CHANNEL_ID)
+    await page.locator(`.tab[data-tab-id="${tab.id}"]`).click()
+    const channel = page.locator('.channelDetails:visible')
+    const content = page.locator('.channelContent:visible')
+    await channel.locator(`#${listTab}Tab`).click()
+    await expect(content.locator('.ft-list-item')).toHaveCount(1)
+
+    // The listed item belongs to the second channel, so its channel link opens it in this tab.
+    await content.locator('.ft-list-item').getByRole('link', { name: 'Second', exact: true }).click()
+    await expect(page.locator('.channelDetails:visible').getByText('Second', { exact: true })).toBeVisible()
+    await channel.locator(`#${listTab}Tab`).click()
+    await expect(channel.locator(`#${listTab}Tab`)).toHaveAttribute('aria-selected', 'true')
+    await expect(content.locator('.message')).toBeVisible()
+    await expect(content.locator('.ft-list-item')).toHaveCount(0)
+  })
+}

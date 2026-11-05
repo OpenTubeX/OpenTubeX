@@ -275,6 +275,13 @@
           setting-key="hideChannelPodcasts"
           @change="updateHideChannelPodcasts"
         />
+        <FtToggleSwitch
+          :label="t('Settings.Distraction Free Settings.Hide Channel Shows')"
+          :compact="true"
+          :default-value="hideChannelShows"
+          setting-key="hideChannelShows"
+          @change="updateHideChannelShows"
+        />
       </div>
       <div class="switchColumn">
         <FtToggleSwitch
@@ -776,6 +783,16 @@ const hideChannelCourses = computed(() => store.getters.getHideChannelCourses)
  */
 function updateHideChannelCourses(value) {
   store.dispatch('updateHideChannelCourses', value)
+}
+
+/** @type {import('vue').ComputedRef<boolean>} */
+const hideChannelShows = computed(() => store.getters.getHideChannelShows)
+
+/**
+ * @param {boolean} value
+ */
+function updateHideChannelShows(value) {
+  store.dispatch('updateHideChannelShows', value)
 }
 
 /** @type {import('vue').ComputedRef<boolean>} */

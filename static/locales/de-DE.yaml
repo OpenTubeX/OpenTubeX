@@ -1519,6 +1519,7 @@ Settings:
     Paused Interface Hide Delay: Verzögerung zum Ausblenden der pausierten Oberfläche
     Add: Hinzufügen
     Remove: Entfernen
+    Hide Channel Shows: Tab „Shows“ im Kanal ausblenden
   The app needs to restart for changes to take effect. Restart and apply change?: Die App muss neu gestartet werden, damit die Änderungen wirksam werden. Neu starten und Änderung übernehmen?
   Proxy Settings:
     Ip: IP-Adresse
@@ -2119,6 +2120,9 @@ Channel:
   Channel Name Unavailable: Kanalname nicht verfügbar
   Search Result Types: Suchergebnistypen
   All Results: Alle
+  Shows:
+    Shows: Shows
+    This channel does not currently have any shows: Dieser Kanal hat derzeit keine Shows
 Video:
   Mark As Fully Watched: Als vollständig angesehen markieren
   AI-generated video summary: "KI-generierte Videozusammenfassung"

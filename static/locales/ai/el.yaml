@@ -1178,6 +1178,7 @@ Settings:
     Show Video Title: Εμφάνιση τίτλου βίντεο
     Show Bottom Right Actions Dock: Εμφάνιση βάσης ενεργειών κάτω δεξιά
     Paused Interface Hide Delay: Καθυστέρηση απόκρυψης περιβάλλοντος κατά την παύση
+    Hide Channel Shows: Απόκρυψη της καρτέλας «Εκπομπές» του καναλιού
   Data Settings:
     Scheduled backups: "Προγραμματισμένα αντίγραφα ασφαλείας"
     Scheduled backup description: "Αποθήκευση πλήρων αντιγράφων ZIP όσο το OpenTubeX είναι ανοιχτό. Τα παραλειπόμενα αντίγραφα δημιουργούνται κατά την εκκίνηση. Το όριο ισχύει μόνο για προγραμματισμένα αντίγραφα σε αυτόν τον φάκελο."
@@ -1544,6 +1545,9 @@ Channel:
     Original post unavailable: "Η αρχική ανάρτηση δεν είναι διαθέσιμη"
     Members-only video hidden by OpenTubeX: "Το OpenTubeX απέκρυψε βίντεο μόνο για μέλη"
     Video hidden by OpenTubeX because of its title: "Το OpenTubeX απέκρυψε το βίντεο επειδή ο τίτλος του περιέχει κρυφό κείμενο"
+  Shows:
+    Shows: Εκπομπές
+    This channel does not currently have any shows: Αυτό το κανάλι δεν έχει προς το παρόν εκπομπές
 Video:
   Info panel source: 'Πηγή: {source}'
   External DRM Protected: "Τα βίντεο που προστατεύονται με DRM δεν μπορούν να αναπαραχθούν στο OpenTubeX, καθώς απαιτούν ιδιόκτητα εξαρτήματα κλειστού κώδικα."

@@ -1186,6 +1186,7 @@ Settings:
     Paused Interface Hide Delay: واجهة متوقفة مؤقتًا إخفاء التأخير
     Add: إضافة
     Remove: إزالة
+    Hide Channel Shows: إخفاء علامة التبويب "العروض" في القناة
   Data Settings:
     Scheduled backups: "النسخ الاحتياطية المجدولة"
     Scheduled backup description: "احفظ نسخ ZIP كاملة أثناء فتح OpenTubeX. تُنفّذ النسخ الفائتة عند بدء التشغيل. ينطبق الحد فقط على النسخ المجدولة في هذا المجلد."
@@ -1561,6 +1562,9 @@ Channel:
     Original post unavailable: "المنشور الأصلي غير متاح"
     Members-only video hidden by OpenTubeX: "أخفى OpenTubeX فيديو مخصصًا للأعضاء فقط"
     Video hidden by OpenTubeX because of its title: "أخفى OpenTubeX الفيديو لأن عنوانه يحتوي على نص مخفي"
+  Shows:
+    Shows: العروض
+    This channel does not currently have any shows: هذه القناة لا تحتوي حاليًا على أي عروض
 Video:
   Info panel source: 'المصدر: {source}'
   External DRM Protected: "لا يمكن تشغيل مقاطع الفيديو المحمية بنظام إدارة الحقوق الرقمية في OpenTubeX، لأنها تتطلب مكونات خاصة ومغلقة المصدر."

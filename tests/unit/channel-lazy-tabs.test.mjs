@@ -13,10 +13,10 @@ function slice(start, end) {
   return source.slice(from, to)
 }
 
-const SUPPORTED_CHANNEL_TABS = ['home', 'videos', 'shorts', 'live', 'releases', 'podcasts', 'courses', 'playlists', 'community', 'about']
+const SUPPORTED_CHANNEL_TABS = ['home', 'videos', 'shorts', 'live', 'releases', 'shows', 'podcasts', 'courses', 'playlists', 'community', 'about']
 const LOADERS = {
-  local: ['getChannelAboutLocal', 'getChannelVideosLocal', 'getChannelShortsLocal', 'getChannelLiveLocal', 'getChannelPodcastsLocal', 'getChannelReleasesLocal', 'getChannelCoursesLocal', 'getChannelPlaylistsLocal', 'getCommunityPostsLocal'],
-  invidious: ['channelInvidiousVideos', 'channelInvidiousShorts', 'channelInvidiousLive', 'channelInvidiousPodcasts', 'channelInvidiousReleases', 'channelInvidiousCourses', 'getPlaylistsInvidious', 'getCommunityPostsInvidious'],
+  local: ['getChannelAboutLocal', 'getChannelVideosLocal', 'getChannelShortsLocal', 'getChannelLiveLocal', 'getChannelPodcastsLocal', 'getChannelReleasesLocal', 'getChannelCoursesLocal', 'getChannelShowsLocal', 'getChannelPlaylistsLocal', 'getCommunityPostsLocal'],
+  invidious: ['channelInvidiousVideos', 'channelInvidiousShorts', 'channelInvidiousLive', 'channelInvidiousPodcasts', 'channelInvidiousReleases', 'channelInvidiousCourses', 'channelInvidiousShows', 'getPlaylistsInvidious', 'getCommunityPostsInvidious'],
 }
 
 function channelView({ routeTab, tabs = ['videos', 'shorts', 'live', 'playlists', 'community'] } = {}) {
@@ -64,6 +64,7 @@ function channelView({ routeTab, tabs = ['videos', 'shorts', 'live', 'playlists'
     hideChannelPodcasts: ref(false),
     hideChannelReleases: ref(false),
     hideChannelCourses: ref(false),
+    hideChannelShows: ref(false),
     hideChannelPlaylists: ref(false),
     hideChannelCommunity: ref(false),
     videoSortBy: ref('newest'),
@@ -95,6 +96,7 @@ function channelView({ routeTab, tabs = ['videos', 'shorts', 'live', 'playlists'
         has_shorts: tabs.includes('shorts'),
         has_live_streams: tabs.includes('live'),
         has_playlists: tabs.includes('playlists'),
+        has_shows: tabs.includes('shows'),
         has_community: tabs.includes('community'),
       }
     },
@@ -152,6 +154,15 @@ for (const api of ['local', 'invidious']) {
     // As before lazy tabs, the finished load shows the tab from the route.
     assert.equal(view.context.currentTab.value, 'playlists')
     assert.deepEqual(view.fetched.filter(name => name !== 'getChannelHomeLocal'), [playlists])
+  })
+
+  test(`the shows tab is listed and fetched when opened (${api})`, async () => {
+    const shows = api === 'local' ? 'getChannelShowsLocal' : 'channelInvidiousShows'
+    const view = channelView({ tabs: ['videos', 'shows', 'playlists'] })
+    await view.context[load]()
+    assert.deepEqual(view.context.channelTabs.value, ['videos', 'shows', 'playlists', 'about'])
+    view.context.changeTab('shows')
+    assert.deepEqual(view.fetched.filter(name => name !== 'getChannelHomeLocal'), [videos, shows])
   })
 
   test(`reloading a channel fetches its tabs again (${api})`, async () => {

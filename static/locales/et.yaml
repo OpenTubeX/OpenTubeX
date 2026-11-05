@@ -568,6 +568,7 @@ Settings:
     Hide Channel Posts: Peida kanalite vahekaart „Postitused“
     Add: Lisa
     Remove: Eemalda
+    Hide Channel Shows: Peida kanalite vahekaart „Sarjad“
   Proxy Settings:
     Error getting network information. Is your proxy configured properly?: Võrguteavet ei õnnestu leida. Kas sa oled puhverserveri ikka korralikult seadistanud?
     City: Linn
@@ -739,6 +740,7 @@ Channel:
       Search for: Otsi silti „{tag}“
       Tags: Sildid
     Joined: Liitunud
+    Links: Lingid
   This channel does not allow searching: See kanal ei luba otsingu kasutamist
   Channel Tabs: Kanali kaardid
   Shorts:
@@ -769,6 +771,9 @@ Channel:
     Courses: Kursused
     This channel does not currently have any courses: Sellel kanalil pole hetkel kursuseid
   View All: Vaata kõiki
+  Shows:
+    Shows: Sarjad
+    This channel does not currently have any shows: Selles kanalis pole hetkel ühtegi sarja
 Video:
   Mark As Watched: 'Märgi vaadatuks'
   Remove From History: 'Kustuta ajaloost'

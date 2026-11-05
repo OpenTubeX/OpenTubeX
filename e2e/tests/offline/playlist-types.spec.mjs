@@ -5,7 +5,8 @@ const types = [
   { title: 'Playlist', icon: 'list' },
   { title: 'Album', icon: 'music', flag: 'isAlbum', tab: 'releases' },
   { title: 'Podcast', icon: 'podcast', flag: 'isPodcast', tab: 'podcasts' },
-  { title: 'Course', icon: 'graduation-cap', flag: 'isCourse', tab: 'courses' }
+  { title: 'Course', icon: 'graduation-cap', flag: 'isCourse', tab: 'courses' },
+  { title: 'Show', icon: 'tv', flag: 'isShow', tab: 'shows' }
 ]
 
 test.use({
@@ -33,7 +34,7 @@ test('playlist types render in both icon packs and Invidious channel tabs', asyn
         subCount: 0,
         totalViews: 0,
         joined: 0,
-        tabs: ['videos', 'playlists', 'releases', 'podcasts', 'courses'],
+        tabs: ['videos', 'playlists', 'releases', 'podcasts', 'courses', 'shows'],
         relatedChannels: [],
         videos: [],
         latestVideos: [],

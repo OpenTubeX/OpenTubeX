@@ -1467,6 +1467,7 @@ Settings:
     Hide Channel Podcasts: Oculta la pestanya "Pòdcasts" del canal
     Hide Channel Releases: Oculta la pestanya "Llançaments" del canal
     Hide Channel Courses: Oculta la pestanya "Cursos" del canal
+    Hide Channel Shows: Oculta la pestanya "Programes" del canal
     Hide Videos, Playlists and Channels Containing Text: Oculta els vídeos, les llistes de reproducció i els canals que continguin text
     Hide Videos, Playlists and Channels Containing Text Placeholder: Paraula, fragment de paraula o frase
     Hide Subscriptions Videos: Oculta els vídeos de les subscripcions
@@ -1938,6 +1939,9 @@ Channel:
     Video hidden by OpenTubeX because of its title: "Vídeo ocult per l'OpenTubeX perquè el títol conté text ocult"
   Videos:
     This channel has videos but none could be displayed, try fetching more: "Aquest canal té vídeos, però no se n'ha pogut mostrar cap. Prova de carregar-ne més"
+  Shows:
+    Shows: Programes
+    This channel does not currently have any shows: Aquest canal no té cap programa ara mateix
 Video:
   Info panel source: 'Font: {source}'
   External DRM Protected: "Els vídeos protegits amb DRM no es poden reproduir a l'OpenTubeX perquè requereixen components propietaris de codi tancat."

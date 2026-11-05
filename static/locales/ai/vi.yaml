@@ -1186,6 +1186,7 @@ Settings:
     Paused Interface Hide Delay: Độ trễ ẩn giao diện khi tạm dừng
     Add: Thêm
     Remove: Xóa
+    Hide Channel Shows: Ẩn Tab "Chương trình" của Kênh
   Data Settings:
     Scheduled backups: "Sao lưu theo lịch"
     Scheduled backup description: "Lưu bản sao ZIP đầy đủ khi OpenTubeX đang mở. Các lần sao lưu bị lỡ sẽ chạy khi khởi động. Giới hạn chỉ áp dụng cho bản sao theo lịch trong thư mục này."
@@ -1559,6 +1560,9 @@ Channel:
     Original post unavailable: "Bài đăng gốc không khả dụng"
     Members-only video hidden by OpenTubeX: "Video chỉ dành cho hội viên đã bị OpenTubeX ẩn"
     Video hidden by OpenTubeX because of its title: "Video đã bị OpenTubeX ẩn vì tiêu đề chứa văn bản bị ẩn"
+  Shows:
+    Shows: Chương trình
+    This channel does not currently have any shows: Kênh này hiện không có chương trình nào
 Video:
   Info panel source: 'Nguồn: {source}'
   External DRM Protected: "Không thể phát video được bảo vệ DRM trong OpenTubeX vì chúng yêu cầu các thành phần nguồn đóng độc quyền."

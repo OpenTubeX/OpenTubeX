@@ -1235,6 +1235,7 @@ Settings:
     Paused Interface Hide Delay: رکنے پر انٹرفیس چھپنے میں تاخیر
     Add: شامل کریں
     Remove: ہٹائیں
+    Hide Channel Shows: چینل کا ”شوز“ ٹیب چھپائیں
   Data Settings:
     Scheduled backups: شیڈول شدہ بیک اپس
     Scheduled backup description: OpenTubeX کھلا ہونے کے دوران مکمل ZIP بیک اپس محفوظ کریں۔ چھوٹ جانے والے بیک اپس آغاز پر چلتے ہیں۔ حد صرف اس فولڈر کے شیڈول شدہ بیک اپس پر لاگو ہوتی ہے۔
@@ -1614,6 +1615,9 @@ Channel:
     Original post unavailable: اصل پوسٹ دستیاب نہیں
     Members-only video hidden by OpenTubeX: "صرف اراکین کے لیے ویڈیو OpenTubeX نے چھپا دی"
     Video hidden by OpenTubeX because of its title: "ویڈیو OpenTubeX نے چھپا دی کیونکہ اس کے عنوان میں چھپایا گیا متن شامل ہے"
+  Shows:
+    Shows: شوز
+    This channel does not currently have any shows: اس چینل پر فی الحال کوئی شوز نہیں ہیں
 Video:
   Mark As Fully Watched: مکمل دیکھی گئی نشان زد کریں
   AI-generated video summary: AI سے تیار کردہ ویڈیو کا خلاصہ

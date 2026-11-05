@@ -826,6 +826,7 @@ Settings:
     Hide End-Screen Annotations: Ukryj adnotacje na ekranie końcowym
     Add: Dodaj
     Remove: Usuń
+    Hide Channel Shows: Ukryj zakładkę „Programy” w kanale
   The app needs to restart for changes to take effect. Restart and apply change?: Aplikacja musi zostać ponownie uruchomiona, aby zmiany zostały wprowadzone. Uruchomić ponownie i zastosować zmiany?
   Proxy Settings:
     Your Info: O Tobie
@@ -1152,6 +1153,7 @@ Channel:
     Tags:
       Tags: Tagi kanału
       Search for: Szukaj „{tag}”
+    Links: Linki
   Added channel to your subscriptions: Dodano kanał do twoich subskrypcji
   Removed subscription from {count} other channel(s): Usunięto subskrypcję z 1 innego kanału | Usunięto subskrypcję z {count} innych kanałów
   Channel has been removed from your subscriptions: Kanał został usunięty z twoich subskrypcji
@@ -1185,6 +1187,8 @@ Channel:
     Courses: Kursy
     This channel does not currently have any courses: Na tym kanale nie ma obecnie żadnych kursów
   View All: Wyświetl wszystko
+  Shows:
+    Shows: Programy
 Video:
   Mark As Watched: 'Oznacz jako obejrzany'
   Remove From History: 'Usuń z historii'

@@ -56,6 +56,7 @@
   overflow-y: auto;
   white-space: break-spaces;
   margin-inline: auto;
+  overflow-wrap: break-word;
 
   @media only screen and (width <= 500px) {
     max-block-size: 10vh;

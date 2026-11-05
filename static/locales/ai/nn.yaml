@@ -1307,6 +1307,7 @@ Settings:
     Hide Channel Podcasts: Gøym fana "Podkastar" på kanalen
     Hide Channel Releases: Gøym fana "Utgjevingar" på kanalen
     Hide Channel Courses: Gøym fana "Kurs" på kanalen
+    Hide Channel Shows: Gøym fana "Seriar" på kanalen
     Hide Videos, Playlists and Channels Containing Text: Gøym videoar, spelelister og kanalar som inneheld tekst
     Hide Videos, Playlists and Channels Containing Text Placeholder: Ord, del av ord eller frase
     Hide Subscriptions Videos: Gøym videoar frå abonnement
@@ -1751,6 +1752,9 @@ Channel:
     Video hidden by OpenTubeX because of its title: "Videoen er gøymd av OpenTubeX fordi tittelen inneheld gøymd tekst"
   Videos:
     This channel has videos but none could be displayed, try fetching more: "Denne kanalen har videoar, men ingen kunne visast. Prøv å hente fleire"
+  Shows:
+    Shows: Seriar
+    This channel does not currently have any shows: Denne kanalen har ingen seriar enno
 Video:
   Info panel source: 'Kjelde: {source}'
   External DRM Protected: "DRM-verna videoar kan ikkje spelast av i OpenTubeX fordi dei krev proprietære komponentar med lukka kjeldekode."
