@@ -19,3 +19,7 @@ Stop it and delete its test data when finished:
 ```sh
 docker compose -f e2e/sync-server/compose.yml down -v
 ```
+
+## Changing collections or capabilities
+
+When changing sync-server collections or capabilities, search the tests for every expectation of collection lists, upload counts, and capabilities and update them, including the capability-dependent cases in `e2e/tests/network/sync-server.spec.mjs`. Run the affected test against a local server that has the new capability.

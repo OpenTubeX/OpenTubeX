@@ -12,9 +12,9 @@ Requests such as "implement issue #X" authorize local changes, not a PR. Open a 
 
 ## Follow-ups
 
-Handle small follow-ups in the current task instead of deferring them: a missing test, an edge case or cleanup in code you touched, or a small fix that fits the change's scope. Use judgment: include it if a reviewer would accept it in the same PR without it distracting from the main change.
+Fix follow-ups in the current task by default, including bugs that predate it: a missing test, an edge case or cleanup, a bug in a component you touched or of the same kind as the one you are fixing, and anything raised in review of your PR. "It predates this PR" or "it affects other places too" is not a reason to defer.
 
-Record the rest (unrelated bugs, larger or riskier work, anything needing its own decision) as a comment on the pinned "Agent follow-ups" issue (#2661), not only in your thread, where it goes unread. This needs no further approval.
+Record a follow-up instead only when it lies in an unrelated area, is larger or riskier work, or needs the user's decision. Post it as a comment on the pinned "Agent follow-ups" issue (#2661), not only in your thread, where it goes unread. This needs no further approval.
 
 - Read the existing comments first and skip follow-ups already listed.
 - Post one comment per follow-up, following the `leaving-pr-comments` skill: a bold one-line summary, why it matters, and links to the relevant code and, if one exists, the PR.
@@ -32,15 +32,21 @@ Record the rest (unrelated bugs, larger or riskier work, anything needing its ow
 ## Testing
 
 - Run the relevant checks: `pnpm run test:unit` (unit tests and AI locale validation), `pnpm run lint` (JavaScript/Vue and styles), `pnpm run typecheck` (files marked `// @ts-check`), `pnpm run lint-json` (static JSON), `pnpm run lint-yml` (YAML), and filtered E2E tests for affected Electron flows.
-- Fix unrelated test failures (tests that fail locally, or fail CI even after its retry): reproduce on the latest `origin/development`, find the root cause, fix and verify it, and push directly to `origin/development`, however large the fix is (authorized without further approval; keep it out of the current task's branch and PR). Never skip, quarantine, or defer the test (`test.fixme`, `test.skip`, new follow-up issues), and never loosen an assertion to hide a regression. Then rebase the working branch onto the updated `origin/development` and rerun the affected checks.
+- Fix unrelated test failures (tests that fail locally, or fail CI even after its retry). This is authorized; do not ask first. Keep the fix out of the current task's branch and PR.
+  1. Fetch `origin/development` and check its recent commits and open PRs, and other agent threads if your harness lists them, for a fix that has landed or is in progress. Do not duplicate one.
+  2. Reproduce on the latest `origin/development`, find the root cause, and fix and verify it.
+  3. Push fixes that only touch tests, test helpers, fixtures, or test configuration directly to `origin/development`, however large. Open a separate PR for fixes that change application code so CI runs them, and merge it once it passes.
+  4. Rebase the working branch onto the updated `origin/development` and rerun the affected checks.
+
+  Never skip, quarantine, or defer the test (`test.fixme`, `test.skip`, new follow-up issues), and never loosen an assertion to hide a regression. Widen a geometry tolerance only for the fractional UI Scale geometry described under UI, never to make an unexplained failure pass.
 - Flaky E2E tests: CI retries each E2E test once. Tests that pass only on retry do not fail the PR. They get an inline warning and an entry in the open "Flaky E2E tests" issue, which the Flaky E2E Tests workflow maintains. During unrelated work, leave those entries alone. When asked to fix flaky tests, work through the issue, starting with the highest counts:
   1. Read the failed attempt in the run's `playwright-report-*` artifact: its failure screenshot, its app trace (DOM snapshots, console, network), and the main process output. Reproduce each entry with its listed project, `--repeat-each=20 --retries=0`, and enough `--workers` to load the machine like CI does. If it only fails on CI, add `E2E_CPU_THROTTLE` (see `e2e/README.md`).
   2. Find the root cause, fix it, and verify with the same command.
-  3. Push the fix directly to `origin/development` as above, then delete the entry's line from the issue. It comes back if the test flakes again.
+  3. Land the fix as described above, then delete the entry's line from the issue. It comes back if the test flakes again.
 - On PRs, the `repeat` E2E shards run changed offline tests five times without retries. If one fails, the PR's own test is flaky. Fix it in the PR; do not rerun the job until it passes.
-- PRs do not run the full offline E2E suite; it runs after each push to `development`. Run the affected offline tests locally before merging. After merging a PR, watch the E2E Tests run for its merge commit (`gh run list --workflow e2e.yml --event push`); a run can cover several merges. When it fails, find the merge that broke it and fix it on `development` as described above.
+- PRs do not run the full offline E2E suite; it runs after each push to `development`. Run the affected offline tests locally before merging. After merging a PR, watch the E2E Tests run that covers its merge commit (`gh run list --workflow e2e.yml --event push`). Newer pushes cancel older runs, so whenever the run you follow is cancelled, switch to the newest run whose head contains your merge (`git merge-base --is-ancestor <merge-sha> <head-sha>`). Stop at the first one that finishes without being cancelled; it covers every merge before its head. When it fails, find the merge that broke it and fix it on `development` as described above.
 - For bugfixes, demonstrate the failure first, add a regression test where practical, and verify the fix. Verify new features with checks appropriate to the affected code. If automated verification is impractical, explain why and report the evidence used, unless the user waived verification.
-- When changing sync-server collections or capabilities, search tests for and update every expectation for collection lists, upload counts, and capabilities, including capability-dependent cases in `e2e/tests/network/sync-server.spec.mjs`, and run the affected E2E test against a local server with the new capability.
+- When changing sync-server collections or capabilities, follow `e2e/sync-server/README.md`.
 
 ### E2E
 
@@ -58,9 +64,9 @@ Record the rest (unrelated bugs, larger or riskier work, anything needing its ow
 
 ## UI
 
-- After any visual change or implementation, show the user a screenshot (static appearance) or short recording (interaction, animation, transitions) of the finished result in the final response.
+- After any visual change or implementation, show the user a screenshot (static appearance) or short recording (interaction, animation, transitions) of the finished result in the final response. Link a copy outside `e2e/results`, which the next test run clears.
 - UI Scale changes Electron's zoom factor, so fractional CSS-pixel geometry is legitimate. Changes involving scrolling, measurements, positioning, reflow, or animation boundaries must work at non-100% scales; do not treat subpixel differences from integer layout properties as stale or invalid state.
-- Custom Shaka overflow-menu controls must hide while a submenu is open: override `checkAvailability()` and toggle `shaka-hidden` from `isSubMenuOpened`, which `shaka.ui.Element` updates on `submenuopen` / `submenuclose`.
+- Before adding or changing Shaka player controls, read `src/renderer/components/ft-shaka-video-player/README.md`.
 - Labeled action buttons, such as Enable, Load more, Refresh, and Reset, need a relevant icon from the registry beside their visible label; hide decorative icons from assistive technology.
 
 ### Icons
@@ -80,12 +86,7 @@ Record the rest (unrelated bugs, larger or riskier work, anything needing its ow
 
 - The npm `allow` list in `.github/dependabot.yml` must contain exactly the direct dependencies in `package.json` that are absent from the latest `upstream/development:package.json`; upstream manages shared ones. Fetch `upstream/development` and resync the list whenever dependencies or the Dependabot configuration change.
 - Do not add migrations, compatibility aliases, or legacy handling for behavior or data formats introduced only by unshipped changes in the current PR. Change them directly; if that breaks local development data, tell the user instead of shipping a migration path.
-- When `shaka-player` changes version, including through an upstream merge, diff the old and new `ui/` sources and check our customizations against them; a passing E2E suite missed the 5.3 regressions. Check:
-  - icon constants by how Shaka's own buttons use them, not by name (5.3 swapped the meaning of `LOOP` and `UNLOOP`);
-  - the signatures of methods our subclasses override, passing new arguments through to `super` (5.3 added `onChangeStart(fromTouchEvent)`);
-  - our CSS overrides against Shaka's new rules, including pseudo-elements (5.3 moved the submenu chevron to `::after`);
-  - how often Shaka dispatches the events we react to, and where it moves focus (5.3 sends `submenuclose` on every seek bar input and focuses the player container);
-  - that every hunk of `patches/shaka-player@<version>.patch` is ported to both the `ui/` source and the compiled `dist/shaka-player.ui-es2021.js` the app runs.
+- When `shaka-player` changes version, including through an upstream merge, follow the upgrade checklist in `src/renderer/components/ft-shaka-video-player/README.md`.
 
 ## Translations
 
