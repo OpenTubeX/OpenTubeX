@@ -100,17 +100,6 @@
   color: var(--accent-color);
 }
 
-/* Round the last action's hover fill with the row's end corners. */
-.watchVideoChaptersPanel :deep(.copyTimestamp) {
-  border-start-end-radius: inherit;
-  border-end-end-radius: inherit;
-}
-
-.watchVideoChaptersPanel :deep(.chapterAction:hover),
-.watchVideoChaptersPanel :deep(.chapterAction:focus-visible) {
-  background-color: color-mix(in srgb, currentcolor 10%, transparent);
-}
-
 .watchVideoChaptersPanel :deep(.chapterTimestamp) {
   background-color: color-mix(in srgb, var(--primary-color) 16%, var(--card-bg-color));
   color: var(--primary-text-color);
