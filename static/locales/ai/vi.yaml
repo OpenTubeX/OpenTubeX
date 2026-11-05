@@ -186,8 +186,6 @@ Subscriptions:
   Show Combined View: Hiện dạng kết hợp
   Newest First: Mới nhất trước
   Oldest First: Cũ nhất trước
-  Posts:
-    RSS Message: YouTube không cung cấp nguồn cấp RSS cho bài đăng. Tắt cài đặt "{rssSetting}" để xem bài đăng hoặc bật cài đặt "{hideSetting}" để ẩn thẻ này.
   RSS Feeds:
     Refreshing: Đang làm mới nguồn cấp RSS
     Tab: RSS
@@ -228,7 +226,6 @@ Feed:
 User Playlists:
   Save: "Lưu"
   Edit: "Chỉnh sửa"
-  This playlist is private or does not exist.: "Danh sách phát này ở chế độ riêng tư hoặc không tồn tại."
   Pin to Navigation: "Ghim vào thanh điều hướng"
   Unpin from Navigation: "Bỏ ghim khỏi thanh điều hướng"
   Reorder Hint: Kéo hoặc dùng phím mũi tên để sắp xếp lại
@@ -244,8 +241,6 @@ User Playlists:
   Remove Saved Playlist: "Xóa danh sách phát đã lưu"
   Load More Playlists: Tải thêm danh sách phát
   Save to: Lưu vào…
-  Move Video to the Top: Chuyển video lên đầu
-  Move Video to the Bottom: Chuyển video xuống cuối
   Quick Bookmark Icon: Biểu tượng dấu trang nhanh
   Custom Emoji: Biểu tượng cảm xúc tùy chỉnh
   Choose Image: Chọn ảnh
@@ -717,8 +712,6 @@ Settings:
   Player Settings:
     Mono Audio: 'Âm thanh đơn kênh'
     Show Mono Audio Toggle: 'Hiển thị nút bật/tắt âm thanh đơn kênh'
-    Default Media Format:
-      Default Media Format: 'Định dạng phương tiện mặc định'
     Pause on Stream Recovery: "Tạm dừng khi khôi phục luồng"
     Buffering:
       Buffering: Bộ đệm
@@ -807,10 +800,6 @@ Settings:
         Magenta: Đỏ tía
         Red: Đỏ
         Black: Đen
-    Default Viewing Mode:
-      Full Window (Always On): Toàn cửa sổ (luôn bật)
-      Full Screen (Always On): Toàn màn hình (luôn bật)
-      Tooltip: Hầu hết chế độ xem mặc định chỉ được áp dụng khi bắt đầu mỗi phiên xem. Thay đổi trong phiên sẽ được giữ đến khi phiên kết thúc. Chế độ xem luôn bật được áp dụng mỗi khi bạn chuyển sang video mới, bất kể chế độ xem đã thay đổi khi xem video trước đó.
     Auto Picture in Picture:
       Auto Picture in Picture: Tự động chuyển sang Hình trong hình
       On Tab Change: Khi chuyển thẻ
@@ -1184,8 +1173,6 @@ Settings:
     Show Video Title: Hiện tiêu đề video
     Show Bottom Right Actions Dock: Hiện thanh thao tác dưới bên phải
     Paused Interface Hide Delay: Độ trễ ẩn giao diện khi tạm dừng
-    Add: Thêm
-    Remove: Xóa
     Hide Channel Shows: Ẩn Tab "Chương trình" của Kênh
   Data Settings:
     Scheduled backups: "Sao lưu theo lịch"
@@ -1229,13 +1216,7 @@ Settings:
     Data And Storage: Dữ liệu và bộ nhớ
     Profile Directory: Thư mục hồ sơ
     Open Profile Directory: Mở thư mục hồ sơ
-    Settings File: Tệp cài đặt
-    Import Settings: Nhập cài đặt
-    Export Settings: Xuất cài đặt
-    Settings Tooltip: Không thể xuất hoặc nhập các cài đặt dành riêng cho hệ điều hành/người dùng hoặc đang thử nghiệm (ví dụ proxy, trình phát bên ngoài, thư mục ảnh chụp màn hình...)
     Invalid JSON row, skipping item: JSON không hợp lệ ở hàng {row}, bỏ qua mục
-    All settings have been successfully imported: Đã nhập tất cả cài đặt
-    All settings have been successfully exported: Đã xuất tất cả cài đặt
     Setting object has insufficient data, skipping item: Đối tượng cài đặt thiếu dữ liệu, bỏ qua mục
     Unknown setting key: 'Khóa cài đặt không xác định: {key}'
     Non-transferable setting key: 'Khóa cài đặt không thể chuyển: {key}'
@@ -1423,9 +1404,6 @@ Settings:
     Reloading video after IP block recovery: Đang tải lại video sau khi khôi phục từ lỗi chặn IP
     Failed to select IP block recovery script: Không thể chọn tập lệnh khôi phục khi bị chặn IP
   SponsorBlock Settings:
-    Excluded Channels:
-      Excluded Channels: "Kênh được loại trừ"
-      Tooltip: "Nhập ID kênh để ngăn bỏ qua các đoạn SponsorBlock trong video của kênh đó. ID phải khớp chính xác và phân biệt chữ hoa, chữ thường."
     Enable SponsorBlock Submission: Bật gửi dữ liệu lên SponsorBlock
     SponsorBlock Private User ID (optional): ID người dùng riêng tư (tùy chọn)
     SponsorBlock Private User ID Tooltip: Dán ID người dùng riêng tư SponsorBlock từ tiện ích trình duyệt. Để trống để dùng ID do ứng dụng tạo.
@@ -1447,8 +1425,6 @@ Settings:
     Unlocking: Đang mở khóa…
   Search Settings: Tìm trong cài đặt
   No Settings Found: Không tìm thấy cài đặt
-  Experimental Settings:
-    Disable Hardware Acceleration: Tắt tăng tốc phần cứng
   Interface Customizer:
     Customize Interface: "Tùy chỉnh giao diện"
     Preview: "Xem trước"
@@ -1529,14 +1505,11 @@ Profile:
   Use Initial: Dùng chữ cái đầu
   The selected image could not be loaded: Không thể tải ảnh đã chọn
   Theme Color: Màu chủ đề
-  Go To Profile Manager: Đi đến trình quản lý hồ sơ
 Channel:
   Fewer videos per day: "Ít video hơn mỗi ngày"
   More videos per day: "Nhiều video hơn mỗi ngày"
   Verified: Đã xác minh
   Official Artist Channel: Kênh nghệ sĩ chính thức
-  About:
-    Links: Liên kết
   Subscription settings: Cài đặt đăng ký
   Failed to save subscription settings: Không thể lưu cài đặt kênh
   Videos per day: Video mỗi ngày
@@ -1553,9 +1526,6 @@ Channel:
   Channel Name Unavailable: Không có tên kênh
   Search Result Types: Loại kết quả tìm kiếm
   All Results: Tất cả
-  View All: Xem tất cả
-  Videos:
-    This channel has videos but none could be displayed, try fetching more: "Kênh này có video nhưng không thể hiển thị video nào. Hãy thử tải thêm"
   Posts:
     Original post unavailable: "Bài đăng gốc không khả dụng"
     Members-only video hidden by OpenTubeX: "Video chỉ dành cho hội viên đã bị OpenTubeX ẩn"
@@ -1645,8 +1615,6 @@ Video:
   Notification unavailable: Không dùng được thông báo hệ thống
   Scheduled video starting: Video đã lên lịch sắp bắt đầu
   Live notification body: '{videoTitle} đang bắt đầu'
-  Premiere: Công chiếu
-  AI: AI
   AI-generated content: Nội dung do AI tạo
   Collaborators: Cộng tác viên
   Live Chat Replay: Bản phát lại trò chuyện trực tiếp
@@ -1884,7 +1852,6 @@ Video:
       Load: "Tải tệp phụ đề…"
       Subtitle Files: "Tệp phụ đề"
       Error: "Không thể tải tệp phụ đề. Vui lòng chọn tệp SRT hoặc WebVTT."
-  Station: Trạm
   Playlist:
     Unavailable videos are hidden: '{count} video không có sẵn đã bị ẩn'
   External Media:
@@ -2437,8 +2404,6 @@ Channels:
   Load More Channels: "Tải thêm kênh"
 Search Bar:
   Use Suggestion: Dùng gợi ý
-  Open Search Container: Mở ô tìm kiếm
-  Search: Tìm kiếm
 Theme Discovery:
   Discover Themes: "Khám phá giao diện"
   Refresh: "Làm mới"

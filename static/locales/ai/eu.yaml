@@ -1526,8 +1526,6 @@ Channel:
     Original post unavailable: "Jatorrizko argitalpena ez dago erabilgarri"
     Members-only video hidden by OpenTubeX: "OpenTubeX-ek kideentzako soilik den bideoa ezkutatu du"
     Video hidden by OpenTubeX because of its title: "OpenTubeX-ek bideoa ezkutatu du, izenburuak testu ezkutatua duelako"
-  Shows:
-    This channel does not currently have any shows: Une honetan kanal honek ez du saiorik
 Video:
   Info panel source: 'Iturria: {source}'
   External DRM Protected: "DRM babestutako bideoak ezin dira erreproduzitu OpenTubeXn, kode itxiko osagai jabedunak behar baitituzte."
