@@ -831,16 +831,59 @@ test.describe('selected tab label contrast', () => {
   })
 })
 
-test.describe('selected context menu item contrast', () => {
+/** Label, icon and composited background of a context menu item in each theme and accent. */
+function menuItemColors(item, combos) {
+  return item.evaluate(async (item, combos) => {
+    const context = new OffscreenCanvas(1, 1).getContext('2d', { willReadFrequently: true })
+    // Composite the layers like the renderer, so any color syntax resolves to sRGB bytes.
+    const paint = layers => {
+      context.globalAlpha = 1
+      context.fillStyle = '#fff'
+      context.fillRect(0, 0, 1, 1)
+      for (const color of layers) {
+        context.fillStyle = color
+        context.fillRect(0, 0, 1, 1)
+      }
+      return [...context.getImageData(0, 0, 1, 1).data].slice(0, 3)
+    }
+    const results = []
+    // Skip persistence: the theme watcher applies committed values on the next tick.
+    for (const { theme, mutation, color } of combos) {
+      window.$store.commit('setBaseTheme', theme)
+      if (mutation) window.$store.commit(mutation, color)
+      await new Promise(resolve => setTimeout(resolve))
+      document.getAnimations().forEach(animation => animation.effect?.getComputedTiming().endTime !== Infinity && animation.finish())
+      const layers = []
+      for (let node = item; node; node = node.parentElement) {
+        if (node.classList.contains('contextMenu')) layers.unshift(getComputedStyle(node, '::before').backgroundColor)
+        layers.unshift(getComputedStyle(node).backgroundColor)
+      }
+      results.push({
+        theme,
+        color,
+        foreground: paint([getComputedStyle(item).color]),
+        icon: paint([getComputedStyle(item.querySelector('.itemIcon')).color]),
+        background: paint(layers),
+      })
+    }
+    return results
+  }, combos)
+}
+
+test.describe('context menu item contrast', () => {
   test.use({ seed: { settings: { currentLocale: 'en-US' } } })
+
+  async function openTabMenu(page) {
+    const tab = page.locator('.tabBar .tab.active')
+    const tabBox = await tab.boundingBox()
+    await page.mouse.click(tabBox.x + 24, tabBox.y + tabBox.height / 2, { button: 'right' })
+    return page.locator('.contextMenu')
+  }
 
   test('selected menu items stay readable on their tint in every theme and accent', async ({ page }) => {
     test.slow()
     const combos = tintedSelectionCombos()
-    const tab = page.locator('.tabBar .tab.active')
-    const tabBox = await tab.boundingBox()
-    await page.mouse.click(tabBox.x + 24, tabBox.y + tabBox.height / 2, { button: 'right' })
-    const menu = page.locator('.contextMenu')
+    const menu = await openTabMenu(page)
     const trigger = menu.getByRole('menuitem', { name: 'Move Tab to Group', exact: true })
     await trigger.hover()
     // A new tab is ungrouped, so this row is the selected one
@@ -851,38 +894,30 @@ test.describe('selected context menu item contrast', () => {
     const failures = []
     for (const state of ['rest', 'hover']) {
       if (state === 'hover') await item.hover()
-      const results = await item.evaluate(async (item, combos) => {
-        const context = new OffscreenCanvas(1, 1).getContext('2d', { willReadFrequently: true })
-        // Composite the layers like the renderer, so any color syntax resolves to sRGB bytes.
-        const paint = layers => {
-          context.globalAlpha = 1
-          context.fillStyle = '#fff'
-          context.fillRect(0, 0, 1, 1)
-          for (const color of layers) {
-            context.fillStyle = color
-            context.fillRect(0, 0, 1, 1)
-          }
-          return [...context.getImageData(0, 0, 1, 1).data].slice(0, 3)
-        }
-        const results = []
-        // Skip persistence: the theme watcher applies committed values on the next tick.
-        for (const { theme, mutation, color } of combos) {
-          window.$store.commit('setBaseTheme', theme)
-          if (mutation) window.$store.commit(mutation, color)
-          await new Promise(resolve => setTimeout(resolve))
-          document.getAnimations().forEach(animation => animation.effect?.getComputedTiming().endTime !== Infinity && animation.finish())
-          const layers = []
-          for (let node = item; node; node = node.parentElement) {
-            if (node.classList.contains('contextMenu')) layers.unshift(getComputedStyle(node, '::before').backgroundColor)
-            layers.unshift(getComputedStyle(node).backgroundColor)
-          }
-          results.push({ theme, color, foreground: paint([getComputedStyle(item).color]), background: paint(layers) })
-        }
-        return results
-      }, combos)
-      for (const { theme, color, foreground, background } of results) {
+      for (const { theme, color, foreground, background } of await menuItemColors(item, combos)) {
         const ratio = contrastRatio(foreground, background)
         if (ratio < 4.5) failures.push(`${state} ${theme} ${color ?? ''} ${ratio.toFixed(2)}:1 ${JSON.stringify({ foreground, background })}`)
+      }
+    }
+    expect(failures).toEqual([])
+  })
+
+  // Icons take an accent tone, and the hover layer is tinted with it.
+  test('menu icons stand out and labels stay readable on hover in every theme and accent', async ({ page }) => {
+    test.slow()
+    const combos = tintedSelectionCombos()
+    const menu = await openTabMenu(page)
+    const item = menu.getByRole('menuitem', { name: 'Move Tab to Group', exact: true })
+    await expect(item).toBeVisible()
+
+    const failures = []
+    for (const state of ['rest', 'hover']) {
+      if (state === 'hover') await item.hover()
+      for (const { theme, color, foreground, icon, background } of await menuItemColors(item, combos)) {
+        const iconRatio = contrastRatio(icon, background)
+        if (iconRatio < 3) failures.push(`${state} icon ${theme} ${color ?? ''} ${iconRatio.toFixed(2)}:1 ${JSON.stringify({ icon, background })}`)
+        const labelRatio = contrastRatio(foreground, background)
+        if (labelRatio < 4.5) failures.push(`${state} label ${theme} ${color ?? ''} ${labelRatio.toFixed(2)}:1 ${JSON.stringify({ foreground, background })}`)
       }
     }
     expect(failures).toEqual([])
