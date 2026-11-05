@@ -225,11 +225,11 @@ function serializeContextMenuItems(items, actions, actionPrefix = 'item') {
  * @param {{ prepend: Function, append: Function }} contextMenuOptions
  * @param {object} options
  * @param {(options?: object) => Promise<import('electron').BrowserWindow>} options.createWindow
- * @param {(browserWindow: import('electron').BrowserWindow) => Promise<boolean>} options.confirmCloseApp
+ * @param {(browserWindow: import('electron').BrowserWindow) => boolean | Promise<boolean>} options.confirmCloseWindow Confirms closing the window, or quitting when it's the last one
  * @param {(manager: TabManager, count: number, action: 'close' | 'load' | 'unload') => Promise<boolean>} options.confirmMultipleTabsAction
  * @param {Set<number>} options.closeConfirmedWindowIds Windows that may close without another prompt
  */
-export function setupContextMenu(contextMenuOptions, { createWindow, confirmCloseApp, confirmMultipleTabsAction, closeConfirmedWindowIds }) {
+export function setupContextMenu(contextMenuOptions, { createWindow, confirmCloseWindow, confirmMultipleTabsAction, closeConfirmedWindowIds }) {
   const faviconPromises = new Map()
   let configuredSearchEngines = parseSearchEngines(DEFAULT_SEARCH_ENGINES_SETTING)
   // Menus must not queue a settings read behind unrelated writes on slow storage.
@@ -380,10 +380,9 @@ export function setupContextMenu(contextMenuOptions, { createWindow, confirmClos
       if (existingTabIds.length === 0) return
 
       const isLastWindow = BrowserWindow.getAllWindows().length === 1
-      const closesWindow = await manager.closingTabsClosesWindow(existingTabIds.length)
-      if (closesWindow && isLastWindow) {
-        // The quit confirmation already covers this case
-        if (!await confirmCloseApp(manager.browserWindow)) return
+      if (await manager.closingTabsClosesWindow(existingTabIds.length)) {
+        // The window or quit confirmation already covers these tabs
+        if (!await confirmCloseWindow(manager.browserWindow)) return
       } else if (!await confirmMultipleTabsAction(manager, existingTabIds.length, 'close')) {
         return
       }

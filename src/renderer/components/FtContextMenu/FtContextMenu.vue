@@ -437,7 +437,8 @@ async function open(event) {
 
   touchFriendly.value = false
   localItems.value = channel ? ref(getChannelLinkMenuItems(channel, t)) : null
-  await showMenu(result.items, result.sessionId, event.clientX, event.clientY, request)
+  // Chromium reports no button for menus opened with Shift+F10 or the Menu key
+  await showMenu(result.items, result.sessionId, event.clientX, event.clientY, request, event.button === -1)
 }
 
 /**
@@ -478,7 +479,7 @@ async function openLocalMenu(event) {
   await showMenu(contextualMenu.items, contextualMenu.sessionId, x, y, request)
 }
 
-async function showMenu(menuItems, menuSessionId, clientX, clientY, request) {
+async function showMenu(menuItems, menuSessionId, clientX, clientY, request, focusFirstItem = false) {
   items.value = menuItems
   resolveItemFavicons(items.value)
   sessionId.value = menuSessionId
@@ -520,7 +521,7 @@ async function showMenu(menuItems, menuSessionId, clientX, clientY, request) {
     x: Math.max(8, Math.min(x, window.innerWidth - menuWidth - 8)),
     y: Math.max(8, Math.min(clientY, window.innerHeight - menuHeight - 8))
   }
-  if (localItems.value) menuRef.value.querySelector('button:enabled')?.focus({ preventScroll: true })
+  if (localItems.value || focusFirstItem) menuRef.value.querySelector('button:enabled')?.focus({ preventScroll: true })
 }
 
 function close(event) {
@@ -619,7 +620,7 @@ function handleKeydown(event) {
     previousFocus?.focus({ preventScroll: true })
     return
   }
-  if ((!tabColorMenu.value && !localItems.value) || !['ArrowDown', 'ArrowUp', 'ArrowLeft', 'ArrowRight', 'Home', 'End'].includes(event.key)) return
+  if (!['ArrowDown', 'ArrowUp', 'ArrowLeft', 'ArrowRight', 'Home', 'End'].includes(event.key)) return
 
   event.preventDefault()
   event.stopPropagation()

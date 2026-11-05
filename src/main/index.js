@@ -335,6 +335,19 @@ function runApp() {
     updateSettingFromMain
   })
 
+  /**
+   * @param {BrowserWindow} browserWindow
+   */
+  function confirmCloseWindow(browserWindow) {
+    const isLastWindow = BrowserWindow.getAllWindows().length === 1
+    if (isLastWindow) return confirmCloseApp(browserWindow)
+
+    const manager = TabManager.getForWindow(browserWindow.id)
+    return manager && manager.tabs.size > 1
+      ? confirmCloseWindowWithMultipleTabs(browserWindow, manager.tabs.size)
+      : true
+  }
+
   // Becomes true once the user asks the app to quit (e.g. Ctrl+Q / "Quit" menu
   // item / last-window-closed on non-darwin). Window close handlers use this to
   // decide whether their persisted tab session record should be kept (so the
@@ -534,7 +547,7 @@ function runApp() {
 
   const contextMenu = setupContextMenu(contextMenuOptions, {
     createWindow,
-    confirmCloseApp,
+    confirmCloseWindow,
     confirmMultipleTabsAction,
     closeConfirmedWindowIds
   })
@@ -1444,15 +1457,7 @@ function runApp() {
 
     // Setup tab IPC handlers
     const tabsIpcReady = setupTabsIPC({
-      confirmCloseWindow: (browserWindow) => {
-        const isLastWindow = BrowserWindow.getAllWindows().length === 1
-        if (isLastWindow) return confirmCloseApp(browserWindow)
-
-        const manager = TabManager.getForWindow(browserWindow.id)
-        return manager && manager.tabs.size > 1
-          ? confirmCloseWindowWithMultipleTabs(browserWindow, manager.tabs.size)
-          : true
-      },
+      confirmCloseWindow,
       confirmMultipleTabsAction,
       markWindowCloseConfirmed: (browserWindow) => {
         if (BrowserWindow.getAllWindows().length === 1) {

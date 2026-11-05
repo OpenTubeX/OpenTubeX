@@ -352,3 +352,43 @@ test('a collapsed tab group opens a group menu', async ({ page }) => {
   await expect.poll(async () => (await state()).tabs.filter(tab => music.tabIds.includes(tab.id))).toHaveLength(0)
   await expect(page.locator(sel.tabs)).toHaveCount(3)
 })
+
+test('menus without a tab palette take focus from the keyboard and navigate with arrow keys', async ({ page }) => {
+  await page.evaluate(async () => {
+    const tabs = await Promise.all([1, 2].map(index => window.ftElectron.tabs.create({
+      route: '/history', title: `Research ${index}`, makeActive: false, lazyLoad: true
+    })))
+    const group = await window.ftElectron.tabs.createGroup({ name: 'Research' })
+    await window.ftElectron.tabs.setGroup(tabs.map(tab => tab.id), group.id)
+    await window.ftElectron.tabs.updateGroup(group.id, { isCollapsed: true })
+  })
+  const menu = page.locator('.contextMenu')
+  const item = name => menu.getByRole('menuitem', { name, exact: true })
+
+  // A pointer-opened menu leaves focus in place until an arrow key moves it in.
+  const container = await page.locator('.tabsContainer').boundingBox()
+  await page.mouse.click(container.x + container.width - 12, container.y + container.height / 2, { button: 'right' })
+  await expect(item('New Tab')).toBeVisible()
+  await expect(item('New Tab')).not.toBeFocused()
+  await page.keyboard.press('ArrowDown')
+  await expect(item('New Tab')).toBeFocused()
+  await page.keyboard.press('ArrowUp')
+  await expect(item('Reopen Closed Tab')).not.toBeFocused()
+  await page.keyboard.press('Escape')
+  await expect(menu).toHaveCount(0)
+
+  // A keyboard-opened menu focuses its first item, so Enter picks from the menu.
+  const group = page.locator('.collapsedTabGroup')
+  await group.focus()
+  await page.keyboard.press('Shift+F10')
+  await expect(item('Expand Group')).toBeFocused()
+  await page.keyboard.press('End')
+  await expect(item('Manage Tab Groups…')).toBeFocused()
+  await page.keyboard.press('Home')
+  await page.keyboard.press('ArrowDown')
+  await expect(item('Close 2 Tabs')).toBeFocused()
+  await page.keyboard.press('ArrowUp')
+  await page.keyboard.press('Enter')
+  await expect(menu).toHaveCount(0)
+  await expect(group).toHaveCount(0)
+})
