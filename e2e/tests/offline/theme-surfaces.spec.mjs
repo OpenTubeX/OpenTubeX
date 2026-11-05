@@ -1,4 +1,4 @@
-import { test, expect, goTo, setPlayerFullscreen } from '../../helpers/app.mjs'
+import { test, expect, goTo, openInterfaceCustomizer, setPlayerFullscreen } from '../../helpers/app.mjs'
 import { sampleColors } from '../../helpers/colors.mjs'
 import { openMockedVideo, waitForPlayback } from '../../helpers/player.mjs'
 import { mockPlayableWatchPage, watchViewHandle } from '../../helpers/watch.mjs'
@@ -165,6 +165,33 @@ for (const [theme, scale] of [['openTubeXLight', 100], ['openTubeXDark', 125]]) 
       await expect(dropdown).toBeVisible()
       await expect(dropdown).toHaveCSS('background-image', /radial-gradient.*linear-gradient/)
       await expect(dropdown).toHaveCSS('background-attachment', /^scroll(, scroll)*$/)
+    })
+
+    test('Profile Manager and About cards stay solid on the settings window gradient', async ({ app, page }, testInfo) => {
+      const window = page.locator('.settingsWindow')
+      const expectSolidCards = async cards => {
+        await expect(cards.first()).toBeVisible()
+        await expect(window).toHaveCSS('background-image', /linear-gradient/)
+        for (const card of await cards.all()) await expect(card).toHaveCSS('background-image', 'none')
+      }
+      await page.locator('.topNav .profileTrigger').click()
+      await page.locator('.profileSummary').click()
+      await page.locator('.profilePanelHeader').getByRole('button', { name: 'Profile', exact: true }).click()
+      await expectSolidCards(page.locator('.profileSettingsContent .ft-card'))
+      await attachThemeScreenshot(app, testInfo, `${theme} profile manager at ${scale}%`)
+      await window.getByRole('button', { name: 'Close', exact: true }).first().click()
+      await expect(window).toHaveCount(0)
+
+      await page.locator('.topNav .profileTrigger').click()
+      await page.getByRole('dialog', { name: 'Quick settings' }).getByRole('button', { name: 'About' }).click()
+      await expectSolidCards(page.locator('.settingsAboutPage .ft-card'))
+      await attachThemeScreenshot(app, testInfo, `${theme} about window at ${scale}%`)
+
+      // The Quick Settings preview mirrors the real menu, gradient included.
+      await window.getByRole('button', { name: 'Close', exact: true }).first().click()
+      await expect(window).toHaveCount(0)
+      const customizer = await openInterfaceCustomizer(page, 'quick settings')
+      await expect(customizer.locator('.quickSettingsMenu')).toHaveCSS('background-image', /linear-gradient/)
     })
 
     test('Watch page keeps the window background below the top bar', async ({ app, page }, testInfo) => {
