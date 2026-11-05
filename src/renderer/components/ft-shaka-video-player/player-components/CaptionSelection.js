@@ -11,6 +11,7 @@ import {
   restoreOverlayScrollTop,
 } from '../../../helpers/overlayScrollbars'
 import { goBackOnEmptyClicks } from '../../../helpers/player/emptyMenuClicks'
+import { markMenuTransition } from '../../../helpers/player/menuTransitions'
 
 /**
  * Shaka's caption style menu group, opened from the Options button of the captions menu
@@ -105,16 +106,14 @@ export class CaptionSelection extends shaka.ui.TextSelection {
     this.optionsButton_.classList.add('ft-caption-options-button', 'ft-submenu-header-action')
     this.eventManager.listen(this.optionsButton_, 'click', (event) => {
       event.stopPropagation()
-      this.setMenuDisplay_(this.menu, false)
-      this.setMenuDisplay_(this.styleGroup_.menu, true)
+      this.switchMenu_(this.menu, this.styleGroup_.menu, 'in')
       restoreOverlayScrollTop(this.styleGroup_.menu, 0)
       this.styleGroup_.backButton.focus({ preventScroll: true })
     })
     // Shaka's listener on the menu would return to the overflow menu instead
     this.eventManager.listen(this.styleGroup_.backButton, 'click', (event) => {
       event.stopPropagation()
-      this.setMenuDisplay_(this.styleGroup_.menu, false)
-      this.setMenuDisplay_(this.menu, true)
+      this.switchMenu_(this.styleGroup_.menu, this.menu, 'out')
       this.optionsButton_.focus({ preventScroll: true })
     })
 
@@ -241,8 +240,7 @@ export class CaptionSelection extends shaka.ui.TextSelection {
 
     this.eventManager.listen(button, 'click', (event) => {
       event.stopPropagation()
-      this.setMenuDisplay_(this.menu, false)
-      this.setMenuDisplay_(menu, true)
+      this.switchMenu_(this.menu, menu, 'in')
       backButton.focus({ preventScroll: true })
       cancelAnimationFrame(optionsMenu.overlayFrame)
       optionsMenu.overlayFrame = requestAnimationFrame(() => {
@@ -253,8 +251,7 @@ export class CaptionSelection extends shaka.ui.TextSelection {
     })
 
     const goBack = () => {
-      this.setMenuDisplay_(menu, false)
-      this.setMenuDisplay_(this.menu, true)
+      this.switchMenu_(menu, this.menu, 'out')
       button.focus({ preventScroll: true })
       this.resetMenuScroll_(this.menu.parentElement)
     }
@@ -301,8 +298,7 @@ export class CaptionSelection extends shaka.ui.TextSelection {
           this.updateOptionsSelection_(optionsMenu, choices, isSelected)
 
           if (selected) {
-            this.setMenuDisplay_(optionsMenu.menu, false)
-            this.setMenuDisplay_(this.menu, true)
+            this.switchMenu_(optionsMenu.menu, this.menu, 'out')
             this.menu.querySelector('.shaka-back-to-overflow-button')?.focus({ preventScroll: true })
             this.resetMenuScroll_(this.menu.parentElement)
           }
@@ -362,6 +358,20 @@ export class CaptionSelection extends shaka.ui.TextSelection {
    */
   setMenuDisplay_(menu, visible) {
     menu.classList.toggle('shaka-hidden', !visible)
+  }
+
+  /**
+   * Moves between the captions menu and one of its views, zooming the new
+   * view into place like Shaka's submenus.
+   * @param {HTMLElement} from
+   * @param {HTMLElement} to
+   * @param {'in' | 'out'} zoom
+   * @private
+   */
+  switchMenu_(from, to, zoom) {
+    this.setMenuDisplay_(from, false)
+    this.setMenuDisplay_(to, true)
+    markMenuTransition(this.parent, zoom)
   }
 
   /** @private */

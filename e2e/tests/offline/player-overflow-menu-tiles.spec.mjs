@@ -163,6 +163,60 @@ for (const usePlayerMenuGrid of [true, false]) {
   })
 }
 
+test.describe('captions menu', () => {
+  test.use({ seed: { settings: { ...WATCH_PAGE_SEED, enableSubtitlesByDefault: true } } })
+
+  test('moving between the captions menu and its own views zooms the menu like other submenus', async ({ app, page }) => {
+    await mockPlayableWatchPage(app, page, { captionTranslations: true })
+    await openMockedVideo(page)
+    const player = page.locator(`${activeTab} .ftVideoPlayer`)
+    const menu = player.locator('.shaka-overflow-menu')
+    const captionsMenu = menu.locator(':scope > .shaka-text-languages')
+
+    await menu.evaluate((element) => {
+      window.__menuZooms = []
+      element.addEventListener('animationstart', ({ animationName, target }) => {
+        if (!animationName.startsWith('ft-menu-zoom')) return
+        window.__menuZooms.push({
+          zoom: animationName.startsWith('ft-menu-zoom-in') ? 'in' : 'out',
+          target: target === element ? 'menu' : 'entry',
+        })
+      })
+    })
+    const expectZooms = async (zoom) => {
+      await expect.poll(() => menu.evaluate(element => element.querySelector('[data-ft-menu-transition]') === null &&
+        !element.hasAttribute('data-ft-menu-transition'))).toBe(true)
+      expect(await page.evaluate(() => window.__menuZooms.splice(0))).toEqual([{ zoom, target: 'menu' }])
+    }
+
+    await openOverflowMenuWith(player, menu.locator(':scope > .shaka-caption-button'))
+    await menu.locator(':scope > .shaka-caption-button').click()
+    await expect(captionsMenu).toBeVisible()
+    await expectZooms('in')
+
+    for (const [entry, view] of [
+      [captionsMenu.getByRole('button', { name: 'Auto-translate', exact: true }), menu.locator(':scope > .ft-caption-translation-menu')],
+      [captionsMenu.getByRole('button', { name: 'Adjust timing…', exact: true }), menu.locator(':scope > .ft-caption-timing-menu')],
+      [captionsMenu.locator(':scope > .ft-caption-options-button'), menu.locator(':scope > .ft-caption-style-menu')],
+    ]) {
+      await entry.click()
+      await expect(view).toBeVisible()
+      await expectZooms('in')
+      await view.locator(':scope > .shaka-back-to-overflow-button').click()
+      await expect(captionsMenu).toBeVisible()
+      await expectZooms('out')
+    }
+
+    // Choosing a translation returns to the captions menu too.
+    const translations = menu.locator(':scope > .ft-caption-translation-menu')
+    await captionsMenu.getByRole('button', { name: 'Auto-translate', exact: true }).click()
+    await expectZooms('in')
+    await translations.locator('.ft-caption-translation-options > button').first().click()
+    await expect(captionsMenu).toBeVisible()
+    await expectZooms('out')
+  })
+})
+
 test('the options menu grows in and fades out, but closes at once from a submenu', async ({ app, page }) => {
   await mockPlayableWatchPage(app, page)
   await openMockedVideo(page)
