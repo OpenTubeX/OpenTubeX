@@ -32,6 +32,17 @@ function contrastRatio(first, second) {
   return (values[0] + 0.05) / (values[1] + 0.05)
 }
 
+/** Every theme's own accents, plus the main colors that stress light and dark surfaces most. */
+function tintedSelectionCombos() {
+  const mainColors = ['Pink', 'Yellow', 'CatppuccinLatteRed']
+  return BUILTIN_BASE_THEME_VALUES.filter(theme => theme !== 'system').flatMap(theme => {
+    if (theme.startsWith('openTubeX')) return SIGNAL_ACCENT_PRESETS.map(({ color }) => ({ theme, mutation: 'setSignalAccentColor', color }))
+    if (theme.startsWith('material')) return MATERIAL_SEED_PRESETS.map(({ color }) => ({ theme, mutation: 'setMaterialSeedColor', color }))
+    if (FIXED_COLOR_BASE_THEMES.includes(theme)) return [{ theme }]
+    return mainColors.map(color => ({ theme, mutation: 'setMainColor', color }))
+  })
+}
+
 async function switchContrast(app, label, checked) {
   const height = await label.evaluate(element => element.getBoundingClientRect().height)
   // Sample the exposed half of the track, its adjacent background and the
@@ -763,14 +774,7 @@ test.describe('selected tab label contrast', () => {
 
   test('selected labels stay readable on their tint in every theme and accent', async ({ page }) => {
     test.slow()
-    // Every theme's own accents, plus the main colors that stress light and dark surfaces most.
-    const mainColors = ['Pink', 'Yellow', 'CatppuccinLatteRed']
-    const combos = BUILTIN_BASE_THEME_VALUES.filter(theme => theme !== 'system').flatMap(theme => {
-      if (theme.startsWith('openTubeX')) return SIGNAL_ACCENT_PRESETS.map(({ color }) => ({ theme, mutation: 'setSignalAccentColor', color }))
-      if (theme.startsWith('material')) return MATERIAL_SEED_PRESETS.map(({ color }) => ({ theme, mutation: 'setMaterialSeedColor', color }))
-      if (FIXED_COLOR_BASE_THEMES.includes(theme)) return [{ theme }]
-      return mainColors.map(color => ({ theme, mutation: 'setMainColor', color }))
-    })
+    const combos = tintedSelectionCombos()
 
     await goToSettingsSection(page, 'data')
     const tab = page.locator('.settingsWindow [data-settings-tab="data"]')
@@ -818,6 +822,64 @@ test.describe('selected tab label contrast', () => {
         }
         return results
       }, stateCombos)
+      for (const { theme, color, foreground, background } of results) {
+        const ratio = contrastRatio(foreground, background)
+        if (ratio < 4.5) failures.push(`${state} ${theme} ${color ?? ''} ${ratio.toFixed(2)}:1 ${JSON.stringify({ foreground, background })}`)
+      }
+    }
+    expect(failures).toEqual([])
+  })
+})
+
+test.describe('selected context menu item contrast', () => {
+  test.use({ seed: { settings: { currentLocale: 'en-US' } } })
+
+  test('selected menu items stay readable on their tint in every theme and accent', async ({ page }) => {
+    test.slow()
+    const combos = tintedSelectionCombos()
+    const tab = page.locator('.tabBar .tab.active')
+    const tabBox = await tab.boundingBox()
+    await page.mouse.click(tabBox.x + 24, tabBox.y + tabBox.height / 2, { button: 'right' })
+    const menu = page.locator('.contextMenu')
+    const trigger = menu.getByRole('menuitem', { name: 'Move Tab to Group', exact: true })
+    await trigger.hover()
+    // A new tab is ungrouped, so this row is the selected one
+    const item = menu.getByRole('menuitemradio', { name: 'Ungrouped', exact: true })
+    await expect(item).toHaveAttribute('aria-checked', 'true')
+    await expect(item).toBeVisible()
+
+    const failures = []
+    for (const state of ['rest', 'hover']) {
+      if (state === 'hover') await item.hover()
+      const results = await item.evaluate(async (item, combos) => {
+        const context = new OffscreenCanvas(1, 1).getContext('2d', { willReadFrequently: true })
+        // Composite the layers like the renderer, so any color syntax resolves to sRGB bytes.
+        const paint = layers => {
+          context.globalAlpha = 1
+          context.fillStyle = '#fff'
+          context.fillRect(0, 0, 1, 1)
+          for (const color of layers) {
+            context.fillStyle = color
+            context.fillRect(0, 0, 1, 1)
+          }
+          return [...context.getImageData(0, 0, 1, 1).data].slice(0, 3)
+        }
+        const results = []
+        // Skip persistence: the theme watcher applies committed values on the next tick.
+        for (const { theme, mutation, color } of combos) {
+          window.$store.commit('setBaseTheme', theme)
+          if (mutation) window.$store.commit(mutation, color)
+          await new Promise(resolve => setTimeout(resolve))
+          document.getAnimations().forEach(animation => animation.effect?.getComputedTiming().endTime !== Infinity && animation.finish())
+          const layers = []
+          for (let node = item; node; node = node.parentElement) {
+            if (node.classList.contains('contextMenu')) layers.unshift(getComputedStyle(node, '::before').backgroundColor)
+            layers.unshift(getComputedStyle(node).backgroundColor)
+          }
+          results.push({ theme, color, foreground: paint([getComputedStyle(item).color]), background: paint(layers) })
+        }
+        return results
+      }, combos)
       for (const { theme, color, foreground, background } of results) {
         const ratio = contrastRatio(foreground, background)
         if (ratio < 4.5) failures.push(`${state} ${theme} ${color ?? ''} ${ratio.toFixed(2)}:1 ${JSON.stringify({ foreground, background })}`)

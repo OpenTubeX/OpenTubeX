@@ -1,3 +1,4 @@
+/* Material 3 menu: a tonal surface at elevation level 2, without an outline. */
 .contextMenu,
 .submenu {
   box-sizing: border-box;
@@ -5,18 +6,48 @@
   max-inline-size: min(360px, calc(100vw - 16px));
   padding: 5px;
   color: var(--primary-text-color);
-  background-color: color-mix(in srgb, var(--card-bg-color) 96%, var(--bg-color));
-  border: 1px solid color-mix(in srgb, var(--border-color) 55%, transparent);
   border-radius: var(--shape-corner-large);
-  box-shadow: 0 12px 32px rgb(0 0 0 / 34%);
 }
 
+/* Fly-outs are descendants, so they inherit these. */
 .contextMenu {
+  --menu-container-color: var(--md-sys-color-surface-container, color-mix(in srgb, var(--card-bg-color) 94%, var(--primary-text-color)));
+  --menu-elevation: 0 1px 2px rgb(0 0 0 / 30%), 0 2px 6px 2px rgb(0 0 0 / 15%);
+  --menu-state-layer: color-mix(in srgb, var(--primary-text-color) 8%, transparent);
+  --menu-pressed-layer: color-mix(in srgb, var(--primary-text-color) 12%, transparent);
+
   position: fixed;
   z-index: 20000;
   display: flex;
   flex-direction: column;
   max-block-size: calc(100vh - 16px);
+}
+
+/* The surface is a pseudo-element so the open animation can scale it: a
+   transform on .contextMenu itself would make it the containing block of its
+   fixed-position fly-outs and clip them to the scrollport while it runs.
+
+   The menu opens with keyframe animations of transform and opacity only, which
+   start with the frame that first shows the menu and run on the compositor, so
+   a busy main thread neither delays nor stutters them. The menu takes input
+   from that first frame on. The surface expands from the pointer, and the
+   items fade in once it covers most of them. */
+.contextMenu::before {
+  position: absolute;
+  z-index: -1;
+  inset: 0;
+  background-color: var(--menu-container-color);
+  border-radius: inherit;
+  box-shadow: var(--menu-elevation);
+  content: '';
+  transform-origin: var(--menu-origin, top left);
+  animation:
+    context-menu-expand var(--motion-fast-spatial),
+    context-menu-fade-in var(--motion-fast-effects);
+}
+
+.contextMenu > * {
+  animation: context-menu-content-in var(--motion-fast-effects);
 }
 
 .menuScroll {
@@ -25,16 +56,35 @@
   overscroll-behavior: contain;
 }
 
-/* Only a fade: a transform would make the menu the containing block of its
-   fixed-position fly-outs and clip them to the scrollport while it runs. */
-.context-menu-enter-active,
-.context-menu-leave-active {
-  transition: opacity var(--motion-fast-effects);
+@keyframes context-menu-expand {
+  from {
+    transform: scale(0.94, 0.8);
+  }
 }
 
-.context-menu-enter-from,
-.context-menu-leave-to {
-  opacity: 0;
+@keyframes context-menu-fade-in {
+  from {
+    opacity: 0;
+  }
+}
+
+@keyframes context-menu-content-in {
+  0%,
+  30% {
+    opacity: 0;
+  }
+}
+
+/* A closing menu stops taking input at once and only fades out. */
+.context-menu-leave-active {
+  pointer-events: none;
+  animation: context-menu-fade-out var(--motion-fast-effects) both;
+}
+
+@keyframes context-menu-fade-out {
+  to {
+    opacity: 0;
+  }
 }
 
 .menuItem {
@@ -72,7 +122,7 @@
 .tabMenuHeader {
   flex-shrink: 0;
   margin-block-end: 4px;
-  border-block-end: 1px solid color-mix(in srgb, var(--border-color) 45%, transparent);
+  border-block-end: 1px solid var(--divider-color);
 }
 
 .tabQuickActions,
@@ -84,7 +134,7 @@
 .tabQuickActions {
   grid-template-columns: repeat(4, minmax(0, 1fr));
   padding-block-end: 4px;
-  border-block-end: 1px solid color-mix(in srgb, var(--border-color) 45%, transparent);
+  border-block-end: 1px solid var(--divider-color);
 }
 
 .videoMenu .tabQuickActions {
@@ -122,11 +172,6 @@
   block-size: 14px;
 }
 
-.colorButton[aria-checked='true'] {
-  color: var(--on-selected-container-color);
-  background-color: var(--selected-container-color);
-}
-
 /* Labels wrap instead of being clipped, so translations are never cut off */
 .menuItem > span:nth-child(2):last-child {
   grid-column: 2;
@@ -150,9 +195,7 @@
   text-align: center;
 }
 
-.menuItem:hover .itemIcon:not(.colorIcon),
-.menuItem:focus-visible .itemIcon:not(.colorIcon),
-.submenuContainer:hover > .menuItem .itemIcon:not(.colorIcon) {
+.menuItem[aria-checked='true'] .itemIcon:not(.colorIcon) {
   color: inherit;
 }
 
@@ -184,7 +227,7 @@
   block-size: 1px;
   margin-block: 4px;
   margin-inline: 7px;
-  background-color: color-mix(in srgb, var(--border-color) 45%, transparent);
+  background-color: var(--divider-color);
 }
 
 .submenuScroll {
@@ -232,6 +275,8 @@
   flex-direction: column;
   right: auto;
   left: var(--submenu-left, 8px);
+  background-color: var(--menu-container-color);
+  box-shadow: var(--menu-elevation);
   visibility: hidden;
   opacity: 0;
   pointer-events: none;
@@ -286,21 +331,56 @@
   transition-delay: 0s;
 }
 
+/* Material 3 states: a translucent on-surface layer instead of an accent fill,
+   so hovering keeps the item's colors and only the selected item stands out. */
 .menuItem:focus-visible {
-  color: var(--text-with-main-color);
-  background-color: var(--primary-color);
+  background-color: var(--menu-state-layer);
   outline: 2px solid var(--primary-text-color);
   outline-offset: -2px;
 }
 
 .menuItem:not(:disabled):active {
+  background-color: var(--menu-pressed-layer);
   border-radius: var(--shape-corner-extra-small);
 }
 
-.menuItem:not(:disabled):hover,
-.submenuContainer:hover > .menuItem:not(:disabled) {
-  color: var(--text-with-main-color);
-  background-color: var(--primary-color);
+.menuItem:not(:disabled):hover:not(:active),
+.submenuContainer:hover > .menuItem:not(:disabled, :active) {
+  background-color: var(--menu-state-layer);
+}
+
+/* Selected rows get a tonal tint of the main color instead of a solid fill,
+   like selected Material tabs. The label keeps the main color's hue at a
+   lightness opposite the tint, a bit darker than on tabs to stay readable on
+   the hover tint, and a capped chroma on dark themes, which
+   reaches 4.5:1 on every theme surface and main color. light-dark() follows
+   the theme. */
+.menuItem[aria-checked='true'] {
+  --menu-selected-tint: light-dark(
+    rgb(from oklch(from var(--primary-color) max(l, 0.7) c h) clamp(0, r, 255) clamp(0, g, 255) clamp(0, b, 255)),
+    rgb(from oklch(from var(--primary-color) min(l, 0.4) c h) clamp(0, r, 255) clamp(0, g, 255) clamp(0, b, 255))
+  );
+
+  color-scheme: var(--native-color-scheme);
+  color: light-dark(
+    rgb(from oklch(from var(--primary-color) min(l, 0.36) c h) clamp(0, r, 255) clamp(0, g, 255) clamp(0, b, 255)),
+    rgb(from oklch(from var(--primary-color) max(l, 0.9) min(c, 0.1) h) clamp(0, r, 255) clamp(0, g, 255) clamp(0, b, 255))
+  );
+  background-color: color-mix(in srgb, var(--menu-selected-tint) 20%, transparent);
+}
+
+.menuItem[aria-checked='true']:not(:disabled):is(:hover, :focus-visible, :active) {
+  background-color: color-mix(in srgb, var(--menu-selected-tint) 28%, transparent);
+}
+
+/* The tint already marks the selection, so the check badge would only cover the icon. */
+.menuItem[aria-checked='true'] :deep(.checkedMark) {
+  display: none;
+}
+
+/* A closing menu must not keep an open fly-out under the pointer. */
+.contextMenu.context-menu-leave-active .submenu {
+  pointer-events: none;
 }
 
 @media (width <= 600px) {
@@ -311,7 +391,7 @@
     max-inline-size: 100%;
     padding: 0;
     padding-inline-start: 12px;
-    border: 0;
+    background: transparent;
     box-shadow: none;
     transform: none;
     transition: none;
@@ -325,4 +405,9 @@
   .videoMenu .submenuContainer:focus-within > .submenu {
     display: flex;
   }
+}
+
+/* Any lighter tint of Hot Pink's card drops its white text below 4.5:1. */
+.hotPink .contextMenu {
+  --menu-container-color: var(--card-bg-color);
 }
