@@ -687,7 +687,7 @@ Settings:
       Notifications: "Kennisgewings"
     Only Show Important Notifications: Wys slegs belangrike kennisgewings
     Material Accent Color: Material-aksentkleur
-    Signal Accent Color: Signal-aksentkleur
+    Tally Accent Color: Tally-aksentkleur
     Material Wallpaper Colors: Muurpapierkleure
     Material System Accent Color: "Stelselaksentkleur"
     Tab Loading Indicator:
@@ -770,8 +770,8 @@ Settings:
       One Dark: One Dark
       Carbonfox: Carbonfox
       Catppuccin Macchiato: Catppuccin Macchiato
-      Signal Light: Signal lig
-      Signal Dark: Signal donker
+      Tally Light: Tally lig
+      Tally Dark: Tally donker
       Custom: Pasgemaak
       Catppuccin Latte: Catppuccin Latte
       Built-in Themes: Ingeboude temas

@@ -144,7 +144,7 @@ test('shows a new window before its renderer loads and respects hiding during st
   }
 })
 
-test.describe('startup splash with a system-selected Signal theme', () => {
+test.describe('startup splash with a system-selected Tally theme', () => {
   test.use({
     seed: {
       settings: {

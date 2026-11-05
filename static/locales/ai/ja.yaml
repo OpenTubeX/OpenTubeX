@@ -522,7 +522,7 @@ Settings:
     Only Show Important Notifications: 重要な通知のみ表示
     Visible Search Suggestions: "表示する検索候補の数"
     Material Accent Color: "Material のアクセントカラー"
-    Signal Accent Color: "Signal のアクセントカラー"
+    Tally Accent Color: "Tally のアクセントカラー"
     Material Wallpaper Colors: "壁紙の色"
     Material System Accent Color: "システムのアクセントカラー"
     Tab Loading Indicator:
@@ -619,8 +619,8 @@ Settings:
       One Dark: One Dark
       Carbonfox: Carbonfox
       Catppuccin Macchiato: Catppuccin Macchiato
-      Signal Light: "Signal ライト"
-      Signal Dark: "Signal ダーク"
+      Tally Light: "Tally ライト"
+      Tally Dark: "Tally ダーク"
       Custom: カスタム
       Built-in Themes: 組み込みテーマ
       Custom Themes: カスタムテーマ

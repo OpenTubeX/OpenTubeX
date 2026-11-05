@@ -522,7 +522,7 @@ Settings:
     Only Show Important Notifications: Diskouez ar c'hemennoù pouezus hepken
     Visible Search Suggestions: "Kinnigoù klask gwelus"
     Material Accent Color: "Liv pouez Material"
-    Signal Accent Color: "Liv pouez Signal"
+    Tally Accent Color: "Liv pouez Tally"
     Material Wallpaper Colors: "Livioù ar skeudenn drekleur"
     Material System Accent Color: "Liv pouez ar reizhiad"
     Tab Loading Indicator:
@@ -619,8 +619,8 @@ Settings:
       One Dark: One Dark
       Carbonfox: Carbonfox
       Catppuccin Macchiato: Catppuccin Macchiato
-      Signal Light: "Signal Sklaer"
-      Signal Dark: "Signal Teñval"
+      Tally Light: "Tally Sklaer"
+      Tally Dark: "Tally Teñval"
       Custom: "Personelaet"
       Built-in Themes: Neuzioù enframmet
       Custom Themes: Neuzioù personelaet

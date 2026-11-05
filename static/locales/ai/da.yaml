@@ -534,7 +534,7 @@ Settings:
     Only Show Important Notifications: Vis kun vigtige notifikationer
     Visible Search Suggestions: "Synlige søgeforslag"
     Material Accent Color: "Material-accentfarve"
-    Signal Accent Color: "Signal-accentfarve"
+    Tally Accent Color: "Tally-accentfarve"
     Material Wallpaper Colors: "Farver fra baggrundsbilledet"
     Material System Accent Color: "Systemets accentfarve"
     Tab Loading Indicator:
@@ -616,8 +616,8 @@ Settings:
       One Dark: One Dark
       Carbonfox: Carbonfox
       Catppuccin Macchiato: Catppuccin Macchiato
-      Signal Light: "Signal Lys"
-      Signal Dark: "Signal Mørk"
+      Tally Light: "Tally Lys"
+      Tally Dark: "Tally Mørk"
       Custom: Brugerdefineret
       Catppuccin Latte: Catppuccin Latte
       Built-in Themes: Indbyggede temaer

@@ -523,7 +523,7 @@ Settings:
     Only Show Important Notifications: Εμφάνιση μόνο σημαντικών ειδοποιήσεων
     Visible Search Suggestions: "Ορατές προτάσεις αναζήτησης"
     Material Accent Color: "Χρώμα έμφασης Material"
-    Signal Accent Color: "Χρώμα έμφασης Signal"
+    Tally Accent Color: "Χρώμα έμφασης Tally"
     Material Wallpaper Colors: "Χρώματα ταπετσαρίας"
     Material System Accent Color: "Χρώμα έμφασης συστήματος"
     Tab Loading Indicator:
@@ -620,8 +620,8 @@ Settings:
       One Dark: One Dark
       Carbonfox: Carbonfox
       Catppuccin Macchiato: Catppuccin Macchiato
-      Signal Light: "Signal Φωτεινό"
-      Signal Dark: "Signal Σκοτεινό"
+      Tally Light: "Tally Φωτεινό"
+      Tally Dark: "Tally Σκοτεινό"
       Custom: Προσαρμοσμένο
       Built-in Themes: Ενσωματωμένα θέματα
       Custom Themes: Προσαρμοσμένα θέματα

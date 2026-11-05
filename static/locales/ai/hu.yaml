@@ -522,7 +522,7 @@ Settings:
     Only Show Important Notifications: Csak a fontos értesítések megjelenítése
     Visible Search Suggestions: "Látható keresési javaslatok"
     Material Accent Color: "Material kiemelőszín"
-    Signal Accent Color: "Signal kiemelőszín"
+    Tally Accent Color: "Tally kiemelőszín"
     Material Wallpaper Colors: "Háttérkép színei"
     Material System Accent Color: "Rendszer kiemelőszíne"
     Tab Loading Indicator:
@@ -619,8 +619,8 @@ Settings:
       One Dark: One Dark
       Carbonfox: Carbonfox
       Catppuccin Macchiato: Catppuccin Macchiato
-      Signal Light: "Signal Világos"
-      Signal Dark: "Signal Sötét"
+      Tally Light: "Tally Világos"
+      Tally Dark: "Tally Sötét"
       Custom: Egyéni
       Built-in Themes: Beépített témák
       Custom Themes: Egyéni témák

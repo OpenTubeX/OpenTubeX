@@ -523,7 +523,7 @@ Settings:
     Only Show Important Notifications: Hanya tampilkan notifikasi penting
     Visible Search Suggestions: "Saran pencarian yang terlihat"
     Material Accent Color: "Warna aksen Material"
-    Signal Accent Color: "Warna aksen Signal"
+    Tally Accent Color: "Warna aksen Tally"
     Material Wallpaper Colors: "Warna wallpaper"
     Material System Accent Color: "Warna aksen sistem"
     Tab Loading Indicator:
@@ -620,8 +620,8 @@ Settings:
       One Dark: One Dark
       Carbonfox: Carbonfox
       Catppuccin Macchiato: Catppuccin Macchiato
-      Signal Light: "Signal Terang"
-      Signal Dark: "Signal Gelap"
+      Tally Light: "Tally Terang"
+      Tally Dark: "Tally Gelap"
       Custom: Khusus
       Built-in Themes: Tema bawaan
       Custom Themes: Tema khusus

@@ -94,7 +94,7 @@ import { calculateColorLuminance } from '../../../helpers/colors.js'
 
 const props = defineProps({
   modelValue: { type: String, required: true },
-  /** Material swatches preview the seed's tonal palette, Signal swatches the color itself. */
+  /** Material swatches preview the seed's tonal palette, Tally swatches the color itself. */
   variant: { type: String, default: 'material', validator: value => ['material', 'signal'].includes(value) },
 })
 const emit = defineEmits(['update:modelValue'])
@@ -104,7 +104,7 @@ const colorNames = computed(() => tm('Settings.Theme Settings.Main Color Theme')
 const material = props.variant === 'material'
 const label = computed(() => material
   ? t('Settings.Theme Settings.Material Accent Color')
-  : t('Settings.Theme Settings.Signal Accent Color'))
+  : t('Settings.Theme Settings.Tally Accent Color'))
 const settingKey = material ? 'materialSeedColor' : 'signalAccentColor'
 
 /** A solid swatch with a readable check mark. */

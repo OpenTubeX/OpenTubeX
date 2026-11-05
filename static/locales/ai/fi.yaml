@@ -527,7 +527,7 @@ Settings:
     Only Show Important Notifications: Näytä vain tärkeät ilmoitukset
     Visible Search Suggestions: "Näkyvät hakuehdotukset"
     Material Accent Color: "Material-korostusväri"
-    Signal Accent Color: "Signal-korostusväri"
+    Tally Accent Color: "Tally-korostusväri"
     Material Wallpaper Colors: "Taustakuvan värit"
     Material System Accent Color: "Järjestelmän korostusväri"
     Tab Loading Indicator:
@@ -624,8 +624,8 @@ Settings:
       One Dark: One Dark
       Carbonfox: Carbonfox
       Catppuccin Macchiato: Catppuccin Macchiato
-      Signal Light: "Signal Vaalea"
-      Signal Dark: "Signal Tumma"
+      Tally Light: "Tally Vaalea"
+      Tally Dark: "Tally Tumma"
       Custom: Mukautettu
       Built-in Themes: Sisäänrakennetut teemat
       Custom Themes: Mukautetut teemat

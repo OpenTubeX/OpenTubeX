@@ -522,7 +522,7 @@ Settings:
     Only Show Important Notifications: 仅显示重要通知
     Visible Search Suggestions: "可见搜索建议数"
     Material Accent Color: "Material 强调色"
-    Signal Accent Color: "Signal 强调色"
+    Tally Accent Color: "Tally 强调色"
     Material Wallpaper Colors: "壁纸颜色"
     Material System Accent Color: "系统强调色"
     Tab Loading Indicator:
@@ -619,8 +619,8 @@ Settings:
       One Dark: One Dark
       Carbonfox: Carbonfox
       Catppuccin Macchiato: Catppuccin Macchiato
-      Signal Light: "Signal 浅色"
-      Signal Dark: "Signal 深色"
+      Tally Light: "Tally 浅色"
+      Tally Dark: "Tally 深色"
       Custom: 自定义
       Built-in Themes: 内置主题
       Custom Themes: 自定义主题

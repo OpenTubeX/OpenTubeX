@@ -118,7 +118,7 @@ export function resolveThemeColor() {
 
 /**
  * Resolve a color custom property to hex. Custom properties keep their declared
- * text, so relative colors, such as the Signal themes' accents, resolve through `color`.
+ * text, so relative colors, such as the Tally themes' accents, resolve through `color`.
  * Hex declarations are returned as written.
  * @param {Element} element
  * @param {string} property

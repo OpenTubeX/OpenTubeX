@@ -527,7 +527,7 @@ Settings:
     Only Show Important Notifications: Alleen belangrijke meldingen tonen
     Visible Search Suggestions: "Zichtbare zoeksuggesties"
     Material Accent Color: "Material-accentkleur"
-    Signal Accent Color: "Signal-accentkleur"
+    Tally Accent Color: "Tally-accentkleur"
     Material Wallpaper Colors: "Kleuren van de achtergrondafbeelding"
     Material System Accent Color: "Systeemaccentkleur"
     Tab Loading Indicator:
@@ -624,8 +624,8 @@ Settings:
       One Dark: One Dark
       Carbonfox: Carbonfox
       Catppuccin Macchiato: Catppuccin Macchiato
-      Signal Light: "Signal Licht"
-      Signal Dark: "Signal Donker"
+      Tally Light: "Tally Licht"
+      Tally Dark: "Tally Donker"
       Custom: Aangepast
       Built-in Themes: "Ingebouwde thema's"
       Custom Themes: "Aangepaste thema's"

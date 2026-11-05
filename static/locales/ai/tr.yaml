@@ -522,7 +522,7 @@ Settings:
     Only Show Important Notifications: Yalnızca önemli bildirimleri göster
     Visible Search Suggestions: "Görünür arama önerileri"
     Material Accent Color: "Material vurgu rengi"
-    Signal Accent Color: "Signal vurgu rengi"
+    Tally Accent Color: "Tally vurgu rengi"
     Material Wallpaper Colors: "Duvar kağıdı renkleri"
     Material System Accent Color: "Sistem vurgu rengi"
     Tab Loading Indicator:
@@ -619,8 +619,8 @@ Settings:
       One Dark: One Dark
       Carbonfox: Carbonfox
       Catppuccin Macchiato: Catppuccin Macchiato
-      Signal Light: "Signal Açık"
-      Signal Dark: "Signal Koyu"
+      Tally Light: "Tally Açık"
+      Tally Dark: "Tally Koyu"
       Custom: Özel
       Built-in Themes: Yerleşik temalar
       Custom Themes: Özel temalar

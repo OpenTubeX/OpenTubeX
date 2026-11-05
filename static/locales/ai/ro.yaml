@@ -523,7 +523,7 @@ Settings:
     Only Show Important Notifications: Afișează doar notificările importante
     Visible Search Suggestions: "Sugestii de căutare vizibile"
     Material Accent Color: "Culoare de accent Material"
-    Signal Accent Color: "Culoare de accent Signal"
+    Tally Accent Color: "Culoare de accent Tally"
     Material Wallpaper Colors: "Culorile imaginii de fundal"
     Material System Accent Color: "Culoarea de accent a sistemului"
     Tab Loading Indicator:
@@ -620,8 +620,8 @@ Settings:
       One Dark: One Dark
       Carbonfox: Carbonfox
       Catppuccin Macchiato: Catppuccin Macchiato
-      Signal Light: "Signal Luminoasă"
-      Signal Dark: "Signal Întunecată"
+      Tally Light: "Tally Luminoasă"
+      Tally Dark: "Tally Întunecată"
       Custom: Personalizată
       Built-in Themes: Teme integrate
       Custom Themes: Teme personalizate

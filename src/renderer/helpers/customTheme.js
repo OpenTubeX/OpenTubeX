@@ -35,7 +35,7 @@ export function getThemeBackground(baseTheme, customThemes, dark, seed) {
   }
 }
 
-/** Resolve the Signal accent setting, following the system accent when requested and available. */
+/** Resolve the Tally accent setting, following the system accent when requested and available. */
 export function resolveSignalAccentColor(value) {
   return value === MATERIAL_SYSTEM_SEED ? getSystemAccentColor() ?? DEFAULT_SIGNAL_ACCENT_COLOR : value
 }
@@ -72,7 +72,7 @@ export function applyThemeToDocument(baseTheme, mainColor, secColor, customTheme
     document.body.style.removeProperty(property)
   }
   document.body.style.removeProperty('--accent-color-rgb')
-  // Signal themes derive every accent shade from this color in themes.css.
+  // Tally themes derive every accent shade from this color in themes.css.
   if (SIGNAL_THEME_VALUES.includes(baseTheme)) {
     document.body.style.setProperty('--signal-accent', resolveSignalAccentColor(signalAccent))
   } else {

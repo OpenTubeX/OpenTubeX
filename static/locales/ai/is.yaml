@@ -522,7 +522,7 @@ Settings:
     Only Show Important Notifications: Sýna aðeins mikilvægar tilkynningar
     Visible Search Suggestions: "Sýnilegar leitartillögur"
     Material Accent Color: "Material-áherslulitur"
-    Signal Accent Color: "Signal-áherslulitur"
+    Tally Accent Color: "Tally-áherslulitur"
     Material Wallpaper Colors: "Litir veggfóðurs"
     Material System Accent Color: "Áherslulitur kerfisins"
     Tab Loading Indicator:
@@ -619,8 +619,8 @@ Settings:
       One Dark: One Dark
       Carbonfox: Carbonfox
       Catppuccin Macchiato: Catppuccin Macchiato
-      Signal Light: "Signal Ljóst"
-      Signal Dark: "Signal Dökkt"
+      Tally Light: "Tally Ljóst"
+      Tally Dark: "Tally Dökkt"
       Custom: Sérsniðið
       Built-in Themes: Innbyggð þemu
       Custom Themes: Sérsniðin þemu

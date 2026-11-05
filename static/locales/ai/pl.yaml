@@ -289,7 +289,7 @@ Settings:
     Visible Search Suggestions: "Widoczne sugestie wyszukiwania"
     Use Custom Title Bar: Użyj niestandardowego paska tytułu
     Material Accent Color: "Kolor akcentu Material"
-    Signal Accent Color: "Kolor akcentu Signal"
+    Tally Accent Color: "Kolor akcentu Tally"
     Material Wallpaper Colors: "Kolory tapety"
     Material System Accent Color: "Systemowy kolor akcentu"
     Tab Loading Indicator:
@@ -337,8 +337,8 @@ Settings:
       One Dark: One Dark
       Carbonfox: Carbonfox
       Catppuccin Macchiato: Catppuccin Macchiato
-      Signal Light: "Signal Jasny"
-      Signal Dark: "Signal Ciemny"
+      Tally Light: "Tally Jasny"
+      Tally Dark: "Tally Ciemny"
       Built-in Themes: Wbudowane motywy
       Custom Themes: Niestandardowe motywy
     Toast Position:
