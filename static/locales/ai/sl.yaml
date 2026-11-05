@@ -1802,6 +1802,8 @@ Tutorial:
     Action: Uvozi podatke
     Not Now: Ne zdaj
 About:
+  Downloads: Prenosi
+  Changelog: Dnevnik sprememb
   Commit: Revizija
   Licensed under the {licenseLink}: Izdano pod licenco {licenseLink}
   AGPLv3: AGPLv3

@@ -1646,6 +1646,8 @@ Tutorial:
     Action: Importer data
     Not Now: Ikkje no
 About:
+  Downloads: Nedlastingar
+  Changelog: Endringslogg
   Commit: Git-innsending
   Licensed under the {licenseLink}: Lisensiert under {licenseLink}
   AGPLv3: AGPLv3

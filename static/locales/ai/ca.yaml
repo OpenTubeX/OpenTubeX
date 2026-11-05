@@ -1833,6 +1833,8 @@ Tutorial:
     Action: Importa dades
     Not Now: Ara no
 About:
+  Downloads: Descàrregues
+  Changelog: Registre de canvis
   Commit: Commit
   Licensed under the {licenseLink}: Amb llicència {licenseLink}
   AGPLv3: AGPLv3

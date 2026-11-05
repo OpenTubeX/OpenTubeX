@@ -1523,6 +1523,8 @@ Tutorial:
     Action: Importér data
     Not Now: Ikke nu
 About:
+  Downloads: Downloads
+  Changelog: Ændringslog
   Commit: Commit
   Licensed under the {licenseLink}: Licenseret under {licenseLink}
   Fluxer: Deltag i vores Fluxer-fællesskab

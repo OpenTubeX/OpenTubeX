@@ -1727,6 +1727,8 @@ Tutorial:
     Action: 데이터 가져오기
     Not Now: 나중에
 About:
+  Downloads: 다운로드
+  Changelog: 변경 로그
   Commit: 커밋
   Licensed under the {licenseLink}: '{licenseLink} 라이선스로 배포'
   AGPLv3: AGPLv3

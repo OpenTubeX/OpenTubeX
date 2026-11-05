@@ -100,9 +100,22 @@ const chunks = computed(() => [
     ].join('<br>'),
   },
   {
+    icon: ['fas', 'globe'],
+    title: t('About.Website'),
+    content: '<a href="https://opentubex.org/">https://opentubex.org/</a>',
+  },
+  {
     icon: ['fas', 'file-download'],
-    title: t('About.Downloads / Changelog'),
-    content: `<a href="https://github.com/OpenTubeX/OpenTubeX/releases">${t('About.GitHub releases')}</a>`,
+    title: t('About.Downloads'),
+    content: [
+      `<a href="https://opentubex.org/downloads/">${t('About.Website')}</a>`,
+      `<a href="https://github.com/OpenTubeX/OpenTubeX/releases">${t('About.GitHub releases')}</a>`,
+    ].join('<br>'),
+  },
+  {
+    icon: ['fas', 'file-lines'],
+    title: t('About.Changelog'),
+    content: '<a href="https://opentubex.org/changelog/">https://opentubex.org/changelog/</a>',
   },
   {
     icon: ['fas', 'question-circle'],
@@ -110,16 +123,6 @@ const chunks = computed(() => [
     content: [
       `<a href="https://github.com/OpenTubeX/OpenTubeX/discussions/">${t('About.Discussions')}</a>`,
     ].join(' / '),
-  },
-  {
-    icon: ['fac', 'fluxer'],
-    title: t('About.Fluxer'),
-    content: '<a href="https://fluxer.opentubex.org">https://fluxer.opentubex.org</a>',
-  },
-  {
-    icon: ['fac', 'matrix'],
-    title: t('About.Chat on Matrix'),
-    content: '<a href="https://matrix.opentubex.org">#opentubex:matrix.org</a>',
   },
   {
     icon: ['fas', 'exclamation-circle'],
@@ -130,9 +133,14 @@ const chunks = computed(() => [
     ].join('<br>'),
   },
   {
-    icon: ['fas', 'globe'],
-    title: t('About.Website'),
-    content: '<a href="https://opentubex.org/">https://opentubex.org/</a>',
+    icon: ['fac', 'fluxer'],
+    title: t('About.Fluxer'),
+    content: '<a href="https://fluxer.opentubex.org">https://fluxer.opentubex.org</a>',
+  },
+  {
+    icon: ['fac', 'matrix'],
+    title: t('About.Chat on Matrix'),
+    content: '<a href="https://matrix.opentubex.org">#opentubex:matrix.org</a>',
   },
   {
     icon: ['fas', 'language'],
