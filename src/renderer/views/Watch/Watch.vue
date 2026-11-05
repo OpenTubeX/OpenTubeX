@@ -1263,6 +1263,7 @@
             @close="closeFullscreenPlaylist"
             @pause-player="pausePlayer"
             @skip-availability-change="handlePlaylistSkipAvailabilityChange"
+            @unavailable-video-skipped="handleUnavailablePlaylistVideoSkipped"
             @upcoming-videos-change="handleUpcomingPlaylistVideosChange"
           />
         </FtPhonePanel>

@@ -5545,9 +5545,12 @@ export default defineComponent({
         return
       }
 
+      // Autoplay advances and Play Now start the next video even when Start
+      // Videos Automatically keeps manually opened videos paused
       if (this.watchingPlaylist) {
-        this.$refs.watchVideoPlaylist?.playNextVideo()
+        this.queuedPlaybackVideoId = this.$refs.watchVideoPlaylist?.playNextVideo() ?? null
       } else if (!this.isOffline && nextVideo?.videoId) {
+        this.queuedPlaybackVideoId = nextVideo.videoId
         this.tabRouter.push(this.watchRouteForVideo(nextVideo))
         showToast({ message: this.t('Playing Next Video'), icon: ['fas', 'step-forward'] })
       }
@@ -5588,6 +5591,14 @@ export default defineComponent({
       }
       showToast({ message: this.t('Playing Next Video'), icon: ['fas', 'step-forward'] })
       return true
+    },
+
+    /**
+     * Keeps an autoplay request when the playlist skips past an unavailable video.
+     * @param {string} nextVideoId
+     */
+    handleUnavailablePlaylistVideoSkipped: function (nextVideoId) {
+      if (this.queuedPlaybackVideoId === this.videoId) this.queuedPlaybackVideoId = nextVideoId
     },
 
     /**

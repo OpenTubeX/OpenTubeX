@@ -1,5 +1,5 @@
 import { goTo, test, expect } from '../../helpers/app.mjs'
-import { activeTab, waitForPlayback } from '../../helpers/player.mjs'
+import { activeTab, playWhenLoaded, waitForPlayback } from '../../helpers/player.mjs'
 import { mockPlayableWatchPage } from '../../helpers/watch.mjs'
 
 const VIDEO_TITLES = ['Skip test video one', 'Skip test video two', 'Skip test video three']
@@ -21,56 +21,56 @@ function playlistVideo(title, index, isShort = false) {
   }
 }
 
-test.use({
-  seed: {
-    settings: {
-      // Keep the seeded order, the default sorts the newest addition to the top
-      userPlaylistSortOrder: 'custom',
-      useCustomShortsPlayer: true,
-      loopShorts: true,
-      autoplayPlaylists: true,
-      videoPlaybackEngine: 'built-in',
-      ytDlpPlaybackEngineDefaultMigration: true
-    },
-    playlists: [{
-      _id: 'e2eskipplaylist',
-      playlistName: 'Skip button playlist',
-      protected: false,
-      description: 'Playlist for the player skip buttons',
-      videos: VIDEO_TITLES.map((title, index) => playlistVideo(title, index)),
-      createdAt: Date.now() - 86_400_000,
-      lastUpdatedAt: Date.now()
-    }, {
-      _id: SHORT_PLAYLIST_ID,
-      playlistName: SHORT_PLAYLIST_NAME,
-      protected: false,
-      description: 'Playlist with a Short followed by a normal video',
-      videos: VIDEO_TITLES.slice(0, 2).map((title, index) => playlistVideo(
-        title,
-        index,
-        index === 0
-      )),
-      createdAt: Date.now() - 86_400_000,
-      lastUpdatedAt: Date.now()
-    }],
-    history: ['Queued video', 'Standalone video'].map((title, index) => ({
-      _id: `queuevideo${index}`,
-      videoId: `queuevideo${index}`,
+const seed = {
+  settings: {
+    // Keep the seeded order, the default sorts the newest addition to the top
+    userPlaylistSortOrder: 'custom',
+    useCustomShortsPlayer: true,
+    loopShorts: true,
+    autoplayPlaylists: true,
+    videoPlaybackEngine: 'built-in',
+    ytDlpPlaybackEngineDefaultMigration: true
+  },
+  playlists: [{
+    _id: 'e2eskipplaylist',
+    playlistName: 'Skip button playlist',
+    protected: false,
+    description: 'Playlist for the player skip buttons',
+    videos: VIDEO_TITLES.map((title, index) => playlistVideo(title, index)),
+    createdAt: Date.now() - 86_400_000,
+    lastUpdatedAt: Date.now()
+  }, {
+    _id: SHORT_PLAYLIST_ID,
+    playlistName: SHORT_PLAYLIST_NAME,
+    protected: false,
+    description: 'Playlist with a Short followed by a normal video',
+    videos: VIDEO_TITLES.slice(0, 2).map((title, index) => playlistVideo(
       title,
-      author: 'Test Channel',
-      authorId: 'UC-test-channel-id',
-      published: Date.now() - 86_400_000,
-      description: '',
-      viewCount: 100,
-      lengthSeconds: 60,
-      watchProgress: 0,
-      isWatched: false,
-      timeWatched: Date.now() - index,
-      isLive: false,
-      type: 'video'
-    }))
-  }
-})
+      index,
+      index === 0
+    )),
+    createdAt: Date.now() - 86_400_000,
+    lastUpdatedAt: Date.now()
+  }],
+  history: ['Queued video', 'Standalone video'].map((title, index) => ({
+    _id: `queuevideo${index}`,
+    videoId: `queuevideo${index}`,
+    title,
+    author: 'Test Channel',
+    authorId: 'UC-test-channel-id',
+    published: Date.now() - 86_400_000,
+    description: '',
+    viewCount: 100,
+    lengthSeconds: 60,
+    watchProgress: 0,
+    isWatched: false,
+    timeWatched: Date.now() - index,
+    isLive: false,
+    type: 'video'
+  }))
+}
+
+test.use({ seed })
 
 /**
  * The videos themselves cannot be loaded offline, but the playlist is local, so the
@@ -233,3 +233,41 @@ test('offers skipping to a queued video without a playlist', async ({ page }) =>
     canPlayPrevious: false
   })
 })
+
+// Manually selected videos stay paused, but the playlist still continues on its own
+for (const { name, defaultInterval } of [
+  { name: 'when the countdown ends', defaultInterval: 1 },
+  { name: 'from Play Now', defaultInterval: 60 }
+]) {
+  test.describe(`with Start Videos Automatically turned off, ${name}`, () => {
+    test.use({ seed: { ...seed, settings: { ...seed.settings, autoplayVideos: false, defaultInterval } } })
+
+    test('starts the next playlist video', async ({ app, page }) => {
+      await mockPlayableWatchPage(app, page)
+
+      await goTo(page, 'userplaylists')
+      await page.getByText('Skip button playlist').click()
+      await page.getByText(VIDEO_TITLES[0]).first().click()
+      await expect(page).toHaveURL(/#\/watch\/skipvideo0\?/)
+
+      const video = page.locator(`${activeTab} video`)
+      // The video waits for a cold watch page load, so allow as long as waitForPlayback does.
+      await expect
+        .poll(() => video.evaluate(element => element.readyState).catch(() => 0), { timeout: 60_000 })
+        .toBeGreaterThanOrEqual(1)
+      expect(await video.evaluate(element => element.paused), 'a manually selected video must not start').toBe(true)
+
+      await playWhenLoaded(video)
+      await waitForPlayback(page)
+      await video.evaluate(element => {
+        element.currentTime = Math.max(0, element.duration - 0.25)
+      })
+
+      if (defaultInterval > 1) {
+        await page.locator('.autoplayCountdownOverlay').getByRole('button', { name: 'Play Now' }).click()
+      }
+      await expect(page).toHaveURL(/#\/watch\/skipvideo1\?/)
+      await waitForPlayback(page)
+    })
+  })
+}

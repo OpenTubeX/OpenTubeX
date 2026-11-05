@@ -32,6 +32,7 @@ function setup(t, items = ['A', 'B', 'C'].map(id => ({ videoId: id, playlistItem
   const playlistItems = shallowRef(items)
   const randomizedPlaylistItems = shallowRef(items.slice())
   const navigations = []
+  const skippedTo = []
   const context = vm.createContext({
     props, playlistItems, randomizedPlaylistItems, computed, ref, watch,
     playlistTotalVideoCount: ref(items.length),
@@ -43,6 +44,7 @@ function setup(t, items = ['A', 'B', 'C'].map(id => ({ videoId: id, playlistItem
     hasUnloadedPlaylistVideos: ref(false),
     canPlayNextVideo: ref(true),
     router: { push(payload) { navigations.push(payload) } },
+    emit: (name, videoId) => { if (name === 'unavailable-video-skipped') skippedTo.push(videoId) },
     store: { getters: {} },
     navigationDownloadId: () => undefined,
     Math: Object.assign(Object.create(Math), { random: () => 0 }),
@@ -70,7 +72,7 @@ function setup(t, items = ['A', 'B', 'C'].map(id => ({ videoId: id, playlistItem
     await nextTick()
   }
 
-  return { props, navigations, randomizedPlaylistItems, failCurrentVideo, finishNavigation, actions: context.actions }
+  return { props, navigations, skippedTo, randomizedPlaylistItems, failCurrentVideo, finishNavigation, actions: context.actions }
 }
 
 test('looping shuffled playback skips consecutive unavailable videos and reaches a playable item', async t => {
@@ -120,4 +122,13 @@ test('ordinary playlist loop navigation still reshuffles after successful playba
   assert.deepEqual(playlist.randomizedPlaylistItems.value.map(item => item.playlistItemId), ['C', 'B', 'A'])
   await playlist.finishNavigation()
   assert.deepEqual(playlist.randomizedPlaylistItems.value.map(item => item.playlistItemId), ['A', 'C', 'B'])
+})
+
+test('reports automatic skips so the watch view can keep a pending autoplay', async t => {
+  const playlist = setup(t)
+  assert.equal(playlist.actions.playNextVideo(), 'A')
+  assert.deepEqual(playlist.skippedTo, [], 'an ordinary advance is not an unavailable skip')
+  await playlist.finishNavigation()
+  await playlist.failCurrentVideo()
+  assert.deepEqual(playlist.skippedTo, [playlist.navigations[0].path.slice('/watch/'.length)])
 })

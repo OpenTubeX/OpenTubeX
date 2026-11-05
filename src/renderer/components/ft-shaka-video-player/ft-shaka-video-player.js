@@ -10355,6 +10355,8 @@ export default defineComponent({
      * } | null}
      */
     let pendingFormatSwitchState = null
+    /** @type {number|null} */
+    let restartedSourceKey = null
 
     watch(
       () => [props.format, props.playbackSourceKey],
@@ -10369,8 +10371,13 @@ export default defineComponent({
        * @param {'dash'|'audio'|'legacy'} newFormat
        * @param {'dash'|'audio'|'legacy'} oldFormat
        */
-      async ([newFormat], [oldFormat]) => {
+      async ([newFormat, newSourceKey], [oldFormat, oldSourceKey]) => {
         const generation = ++formatSwitchGeneration
+        // A queued copy of the same video replaced this player's source, so it
+        // starts over, also after format fallbacks. Fallbacks of other queued
+        // loads, such as playlist advances, keep their requested start.
+        if (props.autoplayRequested && newSourceKey !== oldSourceKey) restartedSourceKey = newSourceKey
+        const queuedSourceSwitch = props.autoplayRequested && newSourceKey === restartedSourceKey
         foregroundLoadAbortController?.abort()
         const isCurrentFormatSwitch = () => generation === formatSwitchGeneration
         ignoreErrors = true
@@ -10378,7 +10385,7 @@ export default defineComponent({
         // format switch happened before the player loaded, probably because of an error
         // as there are no previous player settings to restore, we should treat it like this was the original format
         if (!hasLoaded.value && pendingFormatSwitchState === null) {
-          const startTime = props.autoplayRequested ? 0 : props.startTime
+          const startTime = queuedSourceSwitch ? 0 : props.startTime
           await unloadForFormatSwitch()
           if (!isCurrentFormatSwitch()) return
           ensureSabrStream()
@@ -10449,9 +10456,8 @@ export default defineComponent({
           hasPlaybackPosition.value = false
         }
 
-        // A queued copy of the same video switches sources in this player.
         // Start the queued item instead of restoring the previous source's end.
-        if (props.autoplayRequested) {
+        if (queuedSourceSwitch) {
           pendingFormatSwitchState.wasPaused = false
           pendingFormatSwitchState.playbackPosition = 0
         }

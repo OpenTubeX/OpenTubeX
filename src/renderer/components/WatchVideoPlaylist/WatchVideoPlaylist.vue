@@ -342,7 +342,7 @@ const props = defineProps({
   },
 })
 
-const emit = defineEmits(['close', 'pause-player', 'skip-availability-change', 'upcoming-videos-change'])
+const emit = defineEmits(['close', 'pause-player', 'skip-availability-change', 'unavailable-video-skipped', 'upcoming-videos-change'])
 
 const { locale, t } = useI18n()
 const phonePanelHeader = inject('phonePanelHeader', null)
@@ -1063,8 +1063,11 @@ function onMoveDraggedVideo(video, source) {
   else moveDraggedVideoTemporarilyThrottled(video, source)
 }
 
+/**
+ * @returns {string|null} the video ID it navigated to
+ */
 function playNextVideo() {
-  if (isWaitingForNextVideo.value || currentVideoMayBeUnloaded.value) return
+  if (isWaitingForNextVideo.value || currentVideoMayBeUnloaded.value) return null
   const videoIndex = videoIndexInPlaylistItems.value
   const targetVideoIndex = (videoIsNotPlaylistItem.value || videoIsLastPlaylistItem.value) ? 0 : videoIndex + 1
 
@@ -1073,7 +1076,7 @@ function playNextVideo() {
   const targetPlaylistItem = targetList[targetVideoIndex]
 
   if (!targetPlaylistItem?.videoId) {
-    return
+    return null
   }
 
   const downloadId = navigationDownloadId(store.getters, targetPlaylistItem.videoId, props.downloadId)
@@ -1092,7 +1095,7 @@ function playNextVideo() {
 
     if (videoIsLastPlaylistItem.value && !loopEnabled.value) {
       showToast({ message: t('The playlist has ended. Enable loop to continue playing'), icon: ['fas', 'retweet'] })
-      return
+      return null
     }
     // loopEnabled = true
     if (videoIsLastPlaylistItem.value || videoIsNotPlaylistItem.value) {
@@ -1111,12 +1114,13 @@ function playNextVideo() {
 
     if (stopDueToLoopDisabled) {
       showToast({ message: t('The playlist has ended. Enable loop to continue playing'), icon: ['fas', 'retweet'] })
-      return
+      return null
     }
 
     router.push(routerPushPayload)
     showToast({ message: t('Playing Next Video'), icon: ['fas', 'step-forward'] })
   }
+  return targetPlaylistItem.videoId
 }
 
 function playPreviousVideo() {
@@ -1838,7 +1842,8 @@ watch(
 
     skippedUnavailableItems.add(currentKey)
     expectedAutoSkipItem = nextKey
-    playNextVideo()
+    const nextVideoId = playNextVideo()
+    if (nextVideoId) emit('unavailable-video-skipped', nextVideoId)
   },
   { flush: 'post' }
 )
