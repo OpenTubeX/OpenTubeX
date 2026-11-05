@@ -9,13 +9,23 @@
   border-radius: var(--shape-corner-large);
 }
 
-/* Fly-outs are descendants, so they inherit these. */
+/* Fly-outs are descendants, so they inherit these.
+
+   The accent is the main color's hue at a lightness that stands out from the
+   surface, light with capped chroma on dark themes and deep on light ones.
+   Icons use it, and so do the hover and press layers, since a Material state
+   layer takes the color of the content. light-dark() follows the theme. */
 .contextMenu {
+  --menu-accent: light-dark(
+    rgb(from oklch(from var(--primary-color) min(l, 0.5) c h) clamp(0, r, 255) clamp(0, g, 255) clamp(0, b, 255)),
+    rgb(from oklch(from var(--primary-color) max(l, 0.8) min(c, 0.14) h) clamp(0, r, 255) clamp(0, g, 255) clamp(0, b, 255))
+  );
   --menu-container-color: var(--md-sys-color-surface-container, color-mix(in srgb, var(--card-bg-color) 94%, var(--primary-text-color)));
   --menu-elevation: 0 1px 2px rgb(0 0 0 / 30%), 0 2px 6px 2px rgb(0 0 0 / 15%);
-  --menu-state-layer: color-mix(in srgb, var(--primary-text-color) 8%, transparent);
-  --menu-pressed-layer: color-mix(in srgb, var(--primary-text-color) 12%, transparent);
+  --menu-state-layer: color-mix(in srgb, var(--menu-accent) 8%, transparent);
+  --menu-pressed-layer: color-mix(in srgb, var(--menu-accent) 12%, transparent);
 
+  color-scheme: var(--native-color-scheme);
   position: fixed;
   z-index: 20000;
   display: flex;
@@ -190,12 +200,12 @@
   display: grid;
   place-items: center;
   inline-size: 16px;
-  color: var(--secondary-text-color);
+  color: var(--menu-accent);
   font-size: 14px;
   text-align: center;
 }
 
-.menuItem[aria-checked='true'] .itemIcon:not(.colorIcon) {
+.menuItem:is(.disabled, [aria-checked='true']) .itemIcon:not(.colorIcon) {
   color: inherit;
 }
 
@@ -331,7 +341,7 @@
   transition-delay: 0s;
 }
 
-/* Material 3 states: a translucent on-surface layer instead of an accent fill,
+/* Material 3 states: a translucent accent layer instead of a solid fill,
    so hovering keeps the item's colors and only the selected item stands out. */
 .menuItem:focus-visible {
   background-color: var(--menu-state-layer);
@@ -361,7 +371,6 @@
     rgb(from oklch(from var(--primary-color) min(l, 0.4) c h) clamp(0, r, 255) clamp(0, g, 255) clamp(0, b, 255))
   );
 
-  color-scheme: var(--native-color-scheme);
   color: light-dark(
     rgb(from oklch(from var(--primary-color) min(l, 0.36) c h) clamp(0, r, 255) clamp(0, g, 255) clamp(0, b, 255)),
     rgb(from oklch(from var(--primary-color) max(l, 0.9) min(c, 0.1) h) clamp(0, r, 255) clamp(0, g, 255) clamp(0, b, 255))
@@ -407,7 +416,11 @@
   }
 }
 
-/* Any lighter tint of Hot Pink's card drops its white text below 4.5:1. */
+/* Any lighter tint of Hot Pink's card drops its white text below 4.5:1, and
+   its black main color makes no accent, so icons stay white and states darken. */
 .hotPink .contextMenu {
+  --menu-accent: var(--primary-text-color);
   --menu-container-color: var(--card-bg-color);
+  --menu-state-layer: rgb(0 0 0 / 8%);
+  --menu-pressed-layer: rgb(0 0 0 / 12%);
 }
