@@ -180,6 +180,7 @@ async function toggleSync() {
   --indicator-state-layer: 0%;
 
   position: relative;
+  isolation: isolate;
   border-radius: 50%;
 }
 
@@ -188,6 +189,7 @@ async function toggleSync() {
 .syncedSettingIndicator::before,
 .changedSettingIndicator::before {
   position: absolute;
+  z-index: -1;
   top: 50%;
   left: 50%;
   width: 1.8em;
