@@ -1,3 +1,5 @@
+import { createServer } from 'node:http'
+
 import { test, expect, goTo, goToSettingsSection, latestSettings, readDatastore } from '../../helpers/app.mjs'
 import { createInternetProbe, INTERNET_CHECK_URL } from '../../../src/renderer/helpers/internetConnectivity.js'
 import { openMockedVideo } from '../../helpers/player.mjs'
@@ -482,6 +484,32 @@ test('an unavailable service retries quietly while another service remains usabl
       window.connectionTestController.abort()
       await window.connectionTestPending
     })
+  }
+})
+
+test('a redirect loop fails at once instead of retrying like a lost connection', async ({ page }) => {
+  let requests = 0
+  const server = createServer((request, response) => {
+    requests++
+    response.writeHead(302, { location: '/loop' }).end()
+  })
+  await new Promise(resolve => server.listen(0, '127.0.0.1', resolve))
+  try {
+    const url = `http://127.0.0.1:${server.address().port}/loop`
+    // A retried request would still be waiting for its first 5 s backoff.
+    const outcome = await page.evaluate(url => Promise.race([
+      fetch(url).then(() => 'resolved', error => error.name),
+      new Promise(resolve => setTimeout(() => resolve('pending'), 4000)),
+    ]), url)
+    expect(outcome).toBe('TypeError')
+    const attempt = requests
+    expect(attempt).toBeGreaterThan(1)
+    // Another request to the origin must not queue behind a retry probe.
+    expect(await page.evaluate(url => fetch(url).catch(error => error.name), url)).toBe('TypeError')
+    expect(requests).toBe(attempt * 2)
+    await expect(page.locator('.connectionStatus')).toBeHidden()
+  } finally {
+    server.close()
   }
 })
 

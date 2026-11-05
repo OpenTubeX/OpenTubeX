@@ -173,6 +173,7 @@ const IpcChannels = {
   VOICE_OVER_TRANSLATION_REQUEST: 'voice-over-translation-request',
 
   SET_INVIDIOUS_AUTHORIZATION: 'set-invidious-authorization',
+  GET_REQUEST_ERROR: 'get-request-error',
 
   GENERATE_PO_TOKEN: 'generate-po-token',
 
