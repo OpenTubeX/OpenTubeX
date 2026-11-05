@@ -93,7 +93,9 @@ test('keeps the older feed title when one refresh lists it after a newer one', a
   const now = Date.now()
   await page.evaluate(({ action, now }) => window.ftElectron.dbSubscriptionCache(action, [
     { channelId: 'UCfeedtitlechannel00000', field: 'videos', entries: [{ type: 'video', videoId: 'feedtitle02', title: 'Newer title' }], timestamp: new Date(now - 10_000) },
-    { channelId: 'UCfeedtitlechannel00001', field: 'videos', entries: [{ type: 'video', videoId: 'feedtitle02', title: 'Older title' }], timestamp: new Date(now - 20_000) }
+    { channelId: 'UCfeedtitlechannel00001', field: 'videos', entries: [{ type: 'video', videoId: 'feedtitle02', title: 'Older title' }], timestamp: new Date(now - 20_000) },
+    // A feed fetched in the same millisecond is not older, so its title counts too.
+    { channelId: 'UCfeedtitlechannel00002', field: 'videos', entries: [{ type: 'video', videoId: 'feedtitle02', title: 'Simultaneous title' }], timestamp: new Date(now - 10_000) }
   ]), { action: DBActions.SUBSCRIPTION_CACHE.UPDATE_FEEDS, now })
 
   await expect.poll(async () => (await page.evaluate(() => window.ftElectron.videoMetadataCache.update({
@@ -101,7 +103,7 @@ test('keeps the older feed title when one refresh lists it after a newer one', a
     title: 'Original title',
     description: '',
     thumbnailUrl: ''
-  })))?.feedTitles.map(({ title }) => title)).toEqual(['Older title'])
+  })))?.feedTitles.map(({ title }) => title)).toEqual(['Older title', 'Newer title'])
 })
 
 test('skips feed titles fetched before the cache was cleared', async ({ page }) => {

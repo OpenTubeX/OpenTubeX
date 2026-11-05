@@ -217,7 +217,7 @@ export function recordFeedVideoTitles(observations) {
       // An older feed refresh that finished late, such as another channel's
       // feed with the same collaboration video, must not undo a newer title.
       // Unchanged titles advance this time too, so it covers every refresh.
-      if (doc.observedAt >= observedAt) continue
+      if (doc.observedAt > observedAt) continue
 
       if (doc.titles.at(-1)?.title !== title) doc.titles.push({ title, observedAt })
       doc.observedAt = observedAt
