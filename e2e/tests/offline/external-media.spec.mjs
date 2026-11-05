@@ -1037,6 +1037,8 @@ test('offers in-app playback for YouTube URL downloads only', async ({ page }) =
 test('offers download options for external media with the watch page button styling', async ({ app, page }, testInfo) => {
   test.skip(process.platform === 'win32', 'The fake yt-dlp executable uses a POSIX shell')
   const buttonAppearance = button => button.evaluate(element => {
+    // A color scheme switch animates the tonal fill; read its settled color.
+    for (const animation of element.getAnimations()) animation.finish()
     const style = getComputedStyle(element)
     return {
       background: style.backgroundColor,
