@@ -240,13 +240,13 @@
 }
 
 /* Inset state and selection layers give the options rounded shapes inside
-   the menu. */
+   the menu, with a gap so neighboring highlights don't touch. */
 .selectOption::before {
   --select-option-selected-color: color-mix(in srgb, var(--primary-color) 20%, var(--select-menu-surface));
 
   content: '';
   position: absolute;
-  inset-block: 0;
+  inset-block: 1px;
   inset-inline: 4px;
   border-radius: var(--shape-corner-medium);
   background-color: transparent;
