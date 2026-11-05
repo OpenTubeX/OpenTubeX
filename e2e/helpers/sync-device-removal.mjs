@@ -58,10 +58,12 @@ export async function verifySyncDeviceRemoval(page, { phone = false, current = f
     })
   }
   const requests = []
+  const authorizedRequests = []
   const routeHandler = async route => {
     const request = route.request()
     const pathname = new URL(request.url()).pathname
     requests.push(`${request.method()} ${pathname}`)
+    if (request.headers().authorization) authorizedRequests.push(`${request.method()} ${pathname}`)
     if (current && revoked) return route.fulfill({ status: 401 })
     if (pathname === '/health') {
       return route.fulfill({ json: { capabilities: { encrypted_sync: 1, live_sync: 1, account_sessions: 1 } } })
@@ -139,7 +141,12 @@ export async function verifySyncDeviceRemoval(page, { phone = false, current = f
     // Android sync uses native HTTP rather than the WebView's fetch. Supply the
     // same deterministic server responses at that transport boundary.
     await page.exposeBinding('__syncDeviceRemovalRequest', async (_source, options) => routeHandler({
-      request: () => ({ url: () => options.url, method: () => options.method, postDataJSON: () => JSON.parse(options.data) }),
+      request: () => ({
+        url: () => options.url,
+        method: () => options.method,
+        headers: () => Object.fromEntries(Object.entries(options.headers ?? {}).map(([name, value]) => [name.toLowerCase(), value])),
+        postDataJSON: () => JSON.parse(options.data),
+      }),
       fulfill: async ({ status = 200, json, body = '' }) => ({ status, data: json ? JSON.stringify(json) : body, headers: {}, url: options.url }),
     }))
     await page.evaluate(() => {
@@ -225,7 +232,9 @@ export async function verifySyncDeviceRemoval(page, { phone = false, current = f
     await expect(device).toHaveCount(0)
     if (current) {
       expect(revoked).toBe(true)
-      expect(requests.slice(requests.indexOf('DELETE /v1/account/sessions/old-login') + 1)).toEqual([])
+      // Nothing may use the revoked login afterwards. Sync settings checks the
+      // server again without credentials so the user can sign back in.
+      expect(authorizedRequests.slice(authorizedRequests.indexOf('DELETE /v1/account/sessions/old-login') + 1)).toEqual([])
       expect(document.devices[oldDeviceId].sessions.map(session => session.sessionId)).toEqual(['old-tabs', 'older-tabs', 'reconnected-tabs'])
       expect(document.deletedSessions[oldDeviceId]).toBeUndefined()
       await expect.poll(() => page.evaluate(() => {
