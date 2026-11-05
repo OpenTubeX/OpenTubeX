@@ -117,7 +117,7 @@
 
 /* A stronger layer would cost tonal labels contrast on their tint, so pressing
    keeps the hover layer; the corner morph and ripple show the press. */
-.btn:is(.variant-tonal, .variant-filled[aria-pressed='false']):not(:disabled):active {
+.btn:is(.variant-tonal, .variant-filled[aria-pressed='false']):not(:disabled, .selected):active {
   background-color: color-mix(in srgb, var(--button-foreground) 8%, var(--button-container));
 }
 

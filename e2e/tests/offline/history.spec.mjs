@@ -192,6 +192,26 @@ test.describe('single history entry', () => {
       }), { timeout: 2000 }).toBeCloseTo(20, 0)
     }
   })
+
+  test('keeps the selected Search filters toggle at its hover tint while pressed', async ({ page }) => {
+    await goTo(page, 'history')
+    const toggle = page.locator('.historyFilterToggleRow').getByRole('button', { name: /^Search filters$/i })
+    await toggle.click()
+    await expect(toggle).toHaveClass(/\bselected\b/)
+    const background = () => toggle.evaluate(element => {
+      for (const animation of element.getAnimations()) animation.finish()
+      return getComputedStyle(element).backgroundColor
+    })
+    await toggle.hover()
+    const hovered = await background()
+    await page.mouse.down()
+    try {
+      // Selected buttons soften their tint on hover and press instead of adding a text-colored layer.
+      expect(await background()).toBe(hovered)
+    } finally {
+      await page.mouse.up()
+    }
+  })
 })
 
 test.describe('watch history', () => {
