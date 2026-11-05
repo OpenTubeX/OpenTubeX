@@ -67,9 +67,11 @@ test('restored Android Watch tabs retain comment previews and both panel entry p
       const reload = sheet.getByRole('button', { name: 'Reload Comments', exact: true })
       await expect(reload).toHaveCount(1)
       let responseMode = 'incomplete'
+      let incompleteRequests = 0
       const nextRequest = /\/youtubei\/v1\/next/
       await page.route(nextRequest, (route, request) => {
         if (!JSON.parse(request.postData() ?? '{}').continuation || responseMode === 'loaded') return route.fallback()
+        if (responseMode === 'incomplete') incompleteRequests++
         const data = responseMode === 'incomplete' ? {} : {
           onResponseReceivedEndpoints: [
             { reloadContinuationItemsCommand: { targetId: 'comments-section', continuationItems: [
@@ -83,6 +85,12 @@ test('restored Android Watch tabs retain comment previews and both panel entry p
       await reload.click()
       await expect(sheet.locator('.getCommentsTitle')).toBeVisible({ timeout: 30_000 })
       await expect(sheet.locator('.noCommentMsg')).toHaveCount(0)
+      await page.evaluate(() => new Promise(resolve => {
+        let frames = 10
+        const step = () => (--frames ? requestAnimationFrame(step) : resolve())
+        requestAnimationFrame(step)
+      }))
+      assert.equal(incompleteRequests, 1, 'A failed load must wait for an explicit retry')
       responseMode = 'empty'
       await sheet.locator('.getCommentsTitle').click()
       await expect(sheet.locator('.noCommentMsg')).toHaveText('There are no comments available for this video', { timeout: 30_000 })

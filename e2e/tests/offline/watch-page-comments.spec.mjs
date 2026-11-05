@@ -89,7 +89,7 @@ const headerOnlyResponse = JSON.parse(emptyCommentsResponse)
 headerOnlyResponse.onResponseReceivedEndpoints.pop()
 headerOnlyResponse.onResponseReceivedEndpoints[0].reloadContinuationItemsCommand.continuationItems[0].commentsHeaderRenderer.countText.simpleText = '123 Comments'
 
-for (const trigger of ['initial load', 'header-only load', 'reload', 'sort', 'newest reload']) {
+for (const trigger of ['initial load', 'header-only load', 'reload', 'sort', 'newest reload', 'single-sort reload']) {
   test(`incomplete comments during ${trigger} stay retryable instead of reporting no comments`, async ({ app, page }) => {
     await mockPlayableWatchPage(app, page)
     await page.evaluate(() => window.$store.dispatch('updateBackendFallback', false))
@@ -100,7 +100,7 @@ for (const trigger of ['initial load', 'header-only load', 'reload', 'sort', 'ne
     let failedContinuation
     let lastContinuation
     let loadedResponse
-    const firstResponse = ['sort', 'newest reload'].includes(trigger)
+    const firstResponse = ['sort', 'newest reload', 'single-sort reload'].includes(trigger)
       ? page.waitForResponse(response =>
           response.url().includes('/youtubei/v1/next') && JSON.parse(response.request().postData() ?? '{}').continuation
         )
@@ -129,14 +129,17 @@ for (const trigger of ['initial load', 'header-only load', 'reload', 'sort', 'ne
       await page.locator('.commentHeaderActions').getByRole('combobox').click()
       await page.getByRole('option', { name: /^newest first$/i }).click()
     }
-    if (trigger === 'newest reload') {
+    if (trigger === 'newest reload' || trigger === 'single-sort reload') {
       const data = JSON.parse(loadedResponse)
       const items = data.onResponseReceivedEndpoints[0].reloadContinuationItemsCommand.continuationItems[0]
         .commentsHeaderRenderer.sortMenu.sortFilterSubMenuRenderer.subMenuItems
-      items.forEach((item, index) => { item.selected = index === 1 })
+      if (trigger === 'single-sort reload') items.splice(1)
+      else items.forEach((item, index) => { item.selected = index === 1 })
       loadedResponse = JSON.stringify(data)
-      await sort()
-      await expect(page.locator('.comment').first()).toBeVisible()
+      if (trigger === 'newest reload') {
+        await sort()
+        await expect(page.locator('.comment').first()).toBeVisible()
+      }
     }
     if (!initialLoad) {
       await expect(page.locator('.comment').first()).toBeVisible()

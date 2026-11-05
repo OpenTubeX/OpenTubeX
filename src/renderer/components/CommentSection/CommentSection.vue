@@ -1906,7 +1906,7 @@ async function getCommentDataLocal(more = false, preserveSort = false) {
       if (preserveSort && (props.isPostComments || !props.highlightedCommentId)) {
         comments = await comments.applySort(sortNewest.value ? 'NEWEST_FIRST' : 'TOP_COMMENTS')
       } else {
-        loadedSortNewest = comments.header?.sort_menu?.sub_menu_items?.[1].selected ?? false
+        loadedSortNewest = comments.header?.sort_menu?.sub_menu_items?.[1]?.selected ?? false
       }
     }
 
