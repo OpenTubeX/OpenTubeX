@@ -256,14 +256,10 @@
             type="button"
             theme="destructive"
             class="resetStatsButton"
+            :label="t('Stats.Reset statistics')"
+            :icon="['fas', 'trash']"
             @click="showResetPrompt = true"
-          >
-            <FtIcon
-              aria-hidden="true"
-              :icon="['fas', 'trash']"
-            />
-            {{ t('Stats.Reset statistics') }}
-          </FtButton>
+          />
         </div>
       </footer>
       <FtPrompt

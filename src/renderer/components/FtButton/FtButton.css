@@ -78,6 +78,21 @@
   --button-border: var(--secondary-text-color);
 }
 
+/* Destructive buttons stay red unless the red is their fill, so they stand
+   apart from tinted primary buttons even when the main color is red. The
+   label keeps the text color's lightness, and with it its contrast, and only
+   takes a red hue (the default destructive red's); the icon carries a
+   stronger red. Custom themes set their own label colors. */
+/* stylelint-disable-next-line selector-no-qualifying-type */
+body:not(.custom) .btn.destructive:not(.variant-filled:not([aria-pressed='false']), .selected) {
+  --button-foreground: oklch(from var(--primary-text-color) l 0.08 29deg);
+}
+
+/* stylelint-disable-next-line selector-no-qualifying-type */
+body:not(.custom) .btn.destructive:not(.variant-filled:not([aria-pressed='false']), .selected) > .ft-icon {
+  color: var(--destructive-icon-color, oklch(from color-mix(in oklab, var(--destructive-color) 40%, var(--primary-text-color)) l 0.18 29deg));
+}
+
 .btn.variant-elevated {
   --button-container: var(--card-bg-color);
   --button-foreground: var(--primary-text-color);

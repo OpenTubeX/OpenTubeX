@@ -1081,3 +1081,86 @@ test.describe('filled button state contrast', () => {
     }
   })
 })
+
+test.describe('destructive button colors', () => {
+  test.use({ seed: { settings: { baseTheme: 'dark', mainColor: 'Red', secColor: 'Purple', currentLocale: 'en-US' } } })
+
+  test('destructive actions stay red when the main color is red', async ({ page }) => {
+    const body = page.locator('body')
+    await expect(body).toHaveClass(/\bmainRed\b/)
+    await expect(body).toHaveClass(/\bsecPurple\b/)
+    await expect(body).toHaveCSS('--destructive-color', '#f44336')
+  })
+
+  test('tonal destructive buttons stay red and readable in every theme and accent', async ({ page }) => {
+    test.slow()
+    const combos = tintedSelectionCombos()
+    const privacy = await goToSettingsSection(page, 'privacy')
+    // Matching entries enable the tonal Set Password button; give it the destructive theme.
+    await privacy.getByLabel('Password', { exact: true }).fill('contrast')
+    await privacy.getByLabel('Confirm password', { exact: true }).fill('contrast')
+    const button = privacy.getByRole('button', { name: 'Set Password', exact: true })
+    await expect(button).toBeEnabled()
+    await expect(button).toHaveClass(/\bvariant-tonal\b/)
+    await button.evaluate(element => {
+      element.classList.replace('primary', 'destructive')
+      element.dataset.contrastTarget = ''
+    })
+    await page.mouse.move(0, 0)
+    await page.evaluate(() => document.activeElement?.blur())
+    const cdp = await page.context().newCDPSession(page)
+    await cdp.send('DOM.enable')
+    await cdp.send('CSS.enable')
+    const { root } = await cdp.send('DOM.getDocument', { depth: 0 })
+    const { nodeId } = await cdp.send('DOM.querySelector', { nodeId: root.nodeId, selector: '[data-contrast-target]' })
+    const failures = []
+    for (const state of ['rest', 'hover', 'active']) {
+      await cdp.send('CSS.forcePseudoState', { nodeId, forcedPseudoClasses: state === 'rest' ? [] : [state] })
+      const results = await button.evaluate(async (button, combos) => {
+        const context = new OffscreenCanvas(1, 1).getContext('2d', { willReadFrequently: true })
+        // Composite the layers like the renderer, so any color syntax resolves to sRGB bytes.
+        const paint = layers => {
+          context.fillStyle = '#fff'
+          context.fillRect(0, 0, 1, 1)
+          for (const color of layers) {
+            context.fillStyle = color
+            context.fillRect(0, 0, 1, 1)
+          }
+          return [...context.getImageData(0, 0, 1, 1).data].slice(0, 3)
+        }
+        const layers = []
+        for (let node = button; node; node = node.parentElement) layers.unshift(node)
+        const results = []
+        // Skip persistence: the theme watcher applies committed values on the next tick.
+        for (const { theme, mutation, color } of combos) {
+          window.$store.commit('setBaseTheme', theme)
+          if (mutation) window.$store.commit(mutation, color)
+          await new Promise(resolve => setTimeout(resolve))
+          document.getAnimations().forEach(animation => animation.effect?.getComputedTiming().endTime !== Infinity && animation.finish())
+          const style = getComputedStyle(button)
+          results.push({
+            theme,
+            color,
+            foreground: paint([style.color]),
+            icon: paint([getComputedStyle(button.querySelector(':scope > .ft-icon')).color]),
+            text: paint([style.getPropertyValue('--primary-text-color')]),
+            background: paint(layers.map(node => getComputedStyle(node).backgroundColor))
+          })
+        }
+        return results
+      }, combos)
+      for (const { theme, color, foreground, icon, text, background } of results) {
+        const label = `${state} ${theme} ${color ?? ''}`
+        const ratio = contrastRatio(foreground, background)
+        if (ratio < 4.5) failures.push(`${label} label ${ratio.toFixed(2)}:1 ${JSON.stringify({ foreground, background })}`)
+        const iconRatio = contrastRatio(icon, background)
+        if (iconRatio < 3) failures.push(`${label} icon ${iconRatio.toFixed(2)}:1 ${JSON.stringify({ icon, background })}`)
+        if (foreground.join() === text.join()) failures.push(`${label} label uses the plain text color`)
+        // A pink card leaves no room for a red icon, so it matches the label there.
+        const [red, green, blue] = icon
+        if (theme !== 'hotPink' && !(red > green + 60 && red > blue + 60)) failures.push(`${label} icon is not red ${JSON.stringify(icon)}`)
+      }
+    }
+    expect(failures).toEqual([])
+  })
+})
