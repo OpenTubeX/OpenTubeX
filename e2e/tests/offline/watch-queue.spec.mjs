@@ -66,6 +66,9 @@ test('dragging the bottom queue item follows the pointer upward', { tag: '@scale
     }
   })
   await page.locator('a.title').filter({ hasText: /Current video/ }).click()
+  // The offline comment load fails and shrinks the page, which can scroll the
+  // queue after its rows are measured.
+  await expect(page.locator('.getCommentsTitle')).toBeVisible()
   const queue = page.locator('.watchQueue')
   const bottom = queue.locator('.queueItem').filter({ hasText: 'Queue video two' })
   const top = queue.locator('.queueItem').filter({ hasText: 'Queue video one' })
@@ -79,6 +82,7 @@ test('dragging the bottom queue item follows the pointer upward', { tag: '@scale
   const x = handleBounds.x + handleBounds.width / 2
   const y = handleBounds.y + handleBounds.height / 2
   const distance = bottomBounds.y - topBounds.y
+  await page.mouse.move(x, y)
   await page.mouse.down()
   await page.mouse.move(x, y - distance, { steps: 10 })
   await expect(bottom).toHaveClass(/dragging/)
