@@ -272,6 +272,7 @@
   flex: 1 1 auto;
   inline-size: auto;
   min-inline-size: 0;
+  justify-content: var(--ft-caption-action-justify, flex-start);
   block-size: var(--ft-caption-timing-row-size);
   min-block-size: 0;
   padding-block: 0;
@@ -279,7 +280,8 @@
   margin: 0;
 
   /* Rounded like the tiles above them, so they follow the menu's corners. */
-  border-radius: calc(10px * var(--ui-roundness));
+  border-radius: calc(var(--ft-tile-radius, 10px) * var(--ui-roundness));
+  font-size: var(--ft-caption-action-font-size, 13px);
   white-space: nowrap;
 }
 

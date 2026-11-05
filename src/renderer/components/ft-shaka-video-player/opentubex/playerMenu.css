@@ -146,7 +146,7 @@
 
 /* The entries of menu groups are laid out like the options of submenus, all one size. */
 :deep(.shaka-menu-group.ft-menu-grid > button:not(.shaka-back-to-overflow-button)) {
-  inline-size: 90px;
+  inline-size: var(--ft-option-inline-size, 90px);
 }
 
 /* The icon sits above the label instead of next to it. */
@@ -270,7 +270,7 @@
     Options that don't fit start at the top, where they can be scrolled to.
   */
   place-content: safe center;
-  gap: 4px;
+  gap: var(--ft-option-gap, 4px);
   padding-block-start: calc(var(--ft-submenu-header-size) + 4px);
 }
 
@@ -342,11 +342,11 @@
   gap: 0 2px;
 
   /* Room for a name that wraps onto a second line, so every option is one size. */
-  inline-size: 90px;
-  min-block-size: 40px;
+  inline-size: var(--ft-option-inline-size, 90px);
+  min-block-size: var(--ft-option-block-size, 40px);
   padding: 6px 4px;
-  border-radius: calc(10px * var(--ui-roundness));
-  font-size: 11px;
+  border-radius: calc(var(--ft-tile-radius, 10px) * var(--ui-roundness));
+  font-size: var(--ft-option-font-size, 11px);
   line-height: 1.25;
   text-align: center;
   background: rgb(255 255 255 / 7%);
@@ -403,7 +403,7 @@
   flex-wrap: nowrap;
   align-items: center;
   inline-size: max-content;
-  min-inline-size: 90px;
+  min-inline-size: var(--ft-option-inline-size, 90px);
   max-inline-size: 100%;
   padding-inline: 12px;
 }
@@ -436,7 +436,7 @@
   min-block-size: 24px;
   padding: 0 10px;
   border-radius: inherit;
-  font-size: 12px;
+  font-size: var(--ft-header-action-font-size, 12px);
 }
 
 :deep(.shaka-overflow-menu .ft-quality-codecs > button[aria-pressed='true']) {
@@ -471,12 +471,12 @@
   background: none;
 }
 
-/* Together with the gap between the tiles */
+/* Together with the gap between the tiles, as far as the menu's padding above */
 :deep(.phonePlayerOptions .ft-menu-grid > .ft-quality-codecs) {
   position: static;
   flex: 1 0 100%;
   justify-content: center;
-  margin-block-end: 4px;
+  margin-block-end: calc(8px - var(--ft-option-gap, 4px));
 }
 
 :deep(.phonePlayerOptions:not([data-header-action]) .ft-menu-grid:has(> .ft-quality-codecs)) {
@@ -584,18 +584,18 @@
 
   /* Centered like the other submenus, but a list that scrolls starts at its first option */
   place-content: safe center;
-  gap: 4px;
+  gap: var(--ft-option-gap, 4px);
   padding: 4px;
 }
 
 :deep(.ft-caption-list-options.ft-menu-grid > button) {
   flex-wrap: wrap;
   place-content: center;
-  inline-size: 90px;
-  min-block-size: 40px;
+  inline-size: var(--ft-option-inline-size, 90px);
+  min-block-size: var(--ft-option-block-size, 40px);
   padding: 6px 4px;
-  border-radius: calc(10px * var(--ui-roundness));
-  font-size: 11px;
+  border-radius: calc(var(--ft-tile-radius, 10px) * var(--ui-roundness));
+  font-size: var(--ft-option-font-size, 11px);
   line-height: 1.25;
   text-align: center;
   background: rgb(255 255 255 / 7%);
