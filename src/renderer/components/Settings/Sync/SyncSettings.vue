@@ -251,8 +251,6 @@
           <FtButton
             :label="t('Settings.Sync Settings.Sync Now')"
             :icon="['fas', 'sync']"
-            background-color="var(--primary-color)"
-            text-color="var(--text-with-main-color)"
             :disabled="busy"
             @click="syncNow"
           />
