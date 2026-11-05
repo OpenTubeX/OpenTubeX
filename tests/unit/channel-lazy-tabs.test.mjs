@@ -355,5 +355,7 @@ test('a superseded search page cannot pause the next search, and a new list load
 
   context.autoLoadPaused.value = true
   context.startElementListRequest('videos')
+  assert.equal(context.autoLoadPaused.value, true, 'a list loading in a hidden tab keeps the selected tab paused')
+  context.startElementListRequest('search')
   assert.equal(context.autoLoadPaused.value, false, 'reloading a list, for example after sorting, resumes automatic loading')
 })

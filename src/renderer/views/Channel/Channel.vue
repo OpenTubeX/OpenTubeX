@@ -437,7 +437,9 @@ function setElementListLoading(tab, loading) {
 function startElementListRequest(tab) {
   elementListRequestIds[tab] = (elementListRequestIds[tab] || 0) + 1
   // A new list, for example after changing the sort order, loads automatically again.
-  autoLoadPaused.value = false
+  if (tab === currentTab.value) {
+    autoLoadPaused.value = false
+  }
   return currentElementListRequest(tab)
 }
 
