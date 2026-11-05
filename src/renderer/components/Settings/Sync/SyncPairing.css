@@ -25,7 +25,6 @@
 }
 
 .pairingFooter {
-  background: var(--card-bg-color);
   border-block-start: 1px solid var(--divider-color);
   justify-content: center;
   padding-block-start: 0.75rem;

@@ -167,6 +167,38 @@ for (const [theme, scale] of [['openTubeXLight', 100], ['openTubeXDark', 125]]) 
       await expect(dropdown).toHaveCSS('background-attachment', /^scroll(, scroll)*$/)
     })
 
+    test('Watch page keeps the window background below the top bar', async ({ app, page }, testInfo) => {
+      await mockPlayableWatchPage(app, page)
+      await openMockedVideo(page)
+      await page.locator('.ftVideoPlayer video').evaluate(video => video.pause())
+      await page.mouse.move(0, 0)
+      const host = page.locator('.watchPreviewHost.watchRouteActive')
+      await expect(host).toBeVisible()
+      // The host is taller than the window, so measure from the top bar,
+      // which stays on screen, to sample beside the player across its top edge.
+      const topNav = page.locator('.topNav')
+      await expectContinuousBackground(app, topNav, async () => {
+        const [nav, watch] = await Promise.all([topNav, host].map(locator =>
+          locator.evaluate(element => element.getBoundingClientRect())))
+        const offset = watch.y - nav.y
+        return [[watch.x - nav.x + 5, offset - 4], [watch.x - nav.x + 5, offset + 4]]
+      })
+      await attachThemeScreenshot(app, testInfo, `${theme} Watch page top at ${scale}%`)
+    })
+
+    test('download dialog footer blends into its card', async ({ app, page }, testInfo) => {
+      await mockPlayableWatchPage(app, page)
+      await openMockedVideo(page)
+      await page.locator('.ftVideoPlayer video').evaluate(video => video.pause())
+      await page.locator('.watchVideoInfo').getByRole('button', { name: 'Download Video' }).click()
+      const footer = page.locator('.downloadPromptCard .downloadFooter')
+      await expect(footer).toBeVisible()
+      await page.mouse.move(0, 0)
+      // Left of the centered folder row and buttons.
+      await expectPanelOwnsBackground(app, footer, [[5, 4], [5, 30]])
+      await attachThemeScreenshot(app, testInfo, `${theme} download dialog at ${scale}%`)
+    })
+
     test('description controls and fades blend into their card', async ({ app, page }, testInfo) => {
       await mockPlayableWatchPage(app, page)
       await openMockedVideo(page)

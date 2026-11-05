@@ -428,10 +428,6 @@ onBeforeUnmount(() => {
   inset: 0;
 }
 
-.watchRouteActive:not(.watchPreviewing) {
-  background: var(--bg-color);
-}
-
 .watchDragPreview {
   position: absolute;
   z-index: 100;
