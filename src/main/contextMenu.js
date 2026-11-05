@@ -226,10 +226,11 @@ function serializeContextMenuItems(items, actions, actionPrefix = 'item') {
  * @param {object} options
  * @param {(options?: object) => Promise<import('electron').BrowserWindow>} options.createWindow
  * @param {(browserWindow: import('electron').BrowserWindow) => boolean | Promise<boolean>} options.confirmCloseWindow Confirms closing the window, or quitting when it's the last one
+ * @param {(browserWindow: import('electron').BrowserWindow) => Promise<boolean>} options.confirmCloseApp
  * @param {(manager: TabManager, count: number, action: 'close' | 'load' | 'unload') => Promise<boolean>} options.confirmMultipleTabsAction
  * @param {Set<number>} options.closeConfirmedWindowIds Windows that may close without another prompt
  */
-export function setupContextMenu(contextMenuOptions, { createWindow, confirmCloseWindow, confirmMultipleTabsAction, closeConfirmedWindowIds }) {
+export function setupContextMenu(contextMenuOptions, { createWindow, confirmCloseWindow, confirmCloseApp, confirmMultipleTabsAction, closeConfirmedWindowIds }) {
   const faviconPromises = new Map()
   let configuredSearchEngines = parseSearchEngines(DEFAULT_SEARCH_ENGINES_SETTING)
   // Menus must not queue a settings read behind unrelated writes on slow storage.
@@ -381,14 +382,18 @@ export function setupContextMenu(contextMenuOptions, { createWindow, confirmClos
 
       if (await manager.closingTabsClosesWindow(existingTabIds.length)) {
         // The window or quit confirmation already covers these tabs
+        const wasLastWindow = BrowserWindow.getAllWindows().length === 1
         if (!await confirmCloseWindow(manager.browserWindow)) return
+        // Closing the other windows meanwhile turns this close into a quit
+        if (!wasLastWindow && BrowserWindow.getAllWindows().length === 1 &&
+          !await confirmCloseApp(manager.browserWindow)) return
       } else if (!await confirmMultipleTabsAction(manager, existingTabIds.length, 'close')) {
         return
       }
 
       const hasRemainingTabs = await manager.closeTabs(existingTabIds)
       if (!hasRemainingTabs) {
-        // Other windows may have closed while the confirmation was open
+        // The quit was confirmed above if this became the last window
         if (BrowserWindow.getAllWindows().length === 1) closeConfirmedWindowIds.add(manager.browserWindow.id)
         manager.browserWindow.close()
       }

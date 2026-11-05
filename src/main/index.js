@@ -548,6 +548,7 @@ function runApp() {
   const contextMenu = setupContextMenu(contextMenuOptions, {
     createWindow,
     confirmCloseWindow,
+    confirmCloseApp,
     confirmMultipleTabsAction,
     closeConfirmedWindowIds
   })
