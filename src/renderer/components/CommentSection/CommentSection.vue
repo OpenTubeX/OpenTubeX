@@ -1893,7 +1893,7 @@ async function getCommentDataLocal(more = false, preserveSort = false) {
     let loadedSortNewest
     if (more) {
       comments = await nextPageToken.value.getContinuation()
-    } else if (localCommentsInstance && !props.highlightedCommentId) {
+    } else if (localCommentsInstance?.header?.sort_menu?.sub_menu_items?.[sortNewest.value ? 1 : 0] && !props.highlightedCommentId) {
       comments = await localCommentsInstance.applySort(sortNewest.value ? 'NEWEST_FIRST' : 'TOP_COMMENTS')
     } else {
       if (props.isPostComments) {
@@ -1903,10 +1903,11 @@ async function getCommentDataLocal(more = false, preserveSort = false) {
         comments = await getLocalComments(props.id, sortBy, getHighlightedRootCommentId() ?? undefined)
       }
 
-      if (preserveSort && (props.isPostComments || !props.highlightedCommentId)) {
+      if (preserveSort && props.isPostComments) {
         comments = await comments.applySort(sortNewest.value ? 'NEWEST_FIRST' : 'TOP_COMMENTS')
       } else {
-        loadedSortNewest = comments.header?.sort_menu?.sub_menu_items?.[1]?.selected ?? false
+        const selectedSortIndex = comments.header?.sort_menu?.sub_menu_items?.findIndex(item => item.selected)
+        if (selectedSortIndex === 0 || selectedSortIndex === 1) loadedSortNewest = selectedSortIndex === 1
       }
     }
 

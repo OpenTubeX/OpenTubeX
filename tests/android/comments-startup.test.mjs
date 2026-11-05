@@ -98,6 +98,9 @@ test('restored Android Watch tabs retain comment previews and both panel entry p
       await expect(sheet.getByRole('button', { name: /^sort by$/i })).toHaveCount(1)
       await expect(sheet.locator('.noCommentActions')).toHaveCount(0)
       if (process.env.ANDROID_ARTIFACT_DIR) await sheet.screenshot({ path: `${process.env.ANDROID_ARTIFACT_DIR}/empty-comments.png` })
+      await reload.click()
+      await expect(sheet.locator('.noCommentMsg')).toHaveText('There are no comments available for this video', { timeout: 30_000 })
+      await expect(sheet.locator('.getCommentsTitle')).toHaveCount(0)
       responseMode = 'loaded'
       await reload.click()
       await expect(sheet.locator('.comment').first()).toBeVisible({ timeout: 30_000 })

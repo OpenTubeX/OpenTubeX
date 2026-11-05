@@ -155,6 +155,9 @@ for (const trigger of ['initial load', 'header-only load', 'reload', 'sort', 'ne
       await page.locator('.getCommentsTitle').click()
       await expect(page.locator('.getCommentsTitle')).toBeVisible()
       expect(failedRequests).toBe(2)
+      const data = JSON.parse(loadedResponse)
+      delete data.onResponseReceivedEndpoints[0].reloadContinuationItemsCommand.continuationItems[0].commentsHeaderRenderer.sortMenu
+      loadedResponse = JSON.stringify(data)
     }
     fail = false
     await page.locator('.getCommentsTitle').click()
@@ -164,6 +167,14 @@ for (const trigger of ['initial load', 'header-only load', 'reload', 'sort', 'ne
     if (trigger === 'newest reload') {
       expect(lastContinuation).toBe(failedContinuation)
       await expect(page.locator('.commentHeaderActions .selectedValue')).toHaveText(/^newest first$/i)
+      await page.getByRole('button', { name: 'Reload Comments', exact: true }).click()
+      await expect(page.locator('.comment').first()).toBeVisible()
+      await expect(page.locator('.commentHeaderActions .selectedValue')).toHaveText(/^newest first$/i)
+      const newestContinuation = lastContinuation
+      await page.locator('.commentHeaderActions').getByRole('combobox').click()
+      await page.getByRole('option', { name: /^top comments$/i }).click()
+      await expect.poll(() => lastContinuation).not.toBe(newestContinuation)
+      await expect(page.locator('.comment').first()).toBeVisible()
     }
   })
 }
