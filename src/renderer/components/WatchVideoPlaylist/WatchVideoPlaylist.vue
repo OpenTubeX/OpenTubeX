@@ -1090,6 +1090,9 @@ function playNextVideo() {
     }
   }
 
+  // Looping a single-item playlist can keep the current route, so the push loads nothing
+  const staysOnRoute = router.resolve(routerPushPayload).fullPath === router.currentRoute.value.fullPath
+
   if (shuffleEnabled.value) {
     let doShufflePlaylistItems = false
 
@@ -1120,10 +1123,7 @@ function playNextVideo() {
     router.push(routerPushPayload)
     showToast({ message: t('Playing Next Video'), icon: ['fas', 'step-forward'] })
   }
-  // Looping a single-item playlist keeps the current route
-  const isCurrentItem = targetPlaylistItem.videoId === props.videoId &&
-    (targetPlaylistItem.playlistItemId ?? null) === props.playlistItemId
-  return isCurrentItem ? null : targetPlaylistItem.videoId
+  return staysOnRoute ? null : targetPlaylistItem.videoId
 }
 
 function playPreviousVideo() {

@@ -27,7 +27,11 @@ function harness({ laterPageError = null, backend = 'local' } = {}) {
   const errors = []
   const toasts = []
   let laterPageRequests = 0
-  const router = { push() {} }
+  const router = {
+    push() {},
+    resolve: route => ({ fullPath: route.path }),
+    currentRoute: computed(() => ({ fullPath: `/watch/${props.videoId}` })),
+  }
   let finishContinuation
   let failContinuation
   const continuation = new Promise((resolve, reject) => { finishContinuation = resolve; failContinuation = reject })

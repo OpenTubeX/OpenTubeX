@@ -19,7 +19,13 @@ const component = [
   'globalThis.actions = { playNextVideo, resetUnavailableSkipChain }',
 ].join('\n')
 
-function setup(t, items = ['A', 'B', 'C'].map(id => ({ videoId: id, playlistItemId: id }))) {
+/** @returns {{ fullPath: string }} */
+function routeFullPath({ path, query }) {
+  const params = new URLSearchParams(Object.entries(query).filter(([, value]) => value != null))
+  return { fullPath: `${path}?${params}` }
+}
+
+function setup(t, items = ['A', 'B', 'C'].map(id => ({ videoId: id, playlistItemId: id })), { downloadId, currentQuery = {} } = {}) {
   const last = items.at(-1)
   const props = reactive({
     videoId: last.videoId,
@@ -43,10 +49,17 @@ function setup(t, items = ['A', 'B', 'C'].map(id => ({ videoId: id, playlistItem
     isFetchingPlaylistContinuation: ref(false),
     hasUnloadedPlaylistVideos: ref(false),
     canPlayNextVideo: ref(true),
-    router: { push(payload) { navigations.push(payload) } },
+    router: {
+      push(payload) { navigations.push(payload) },
+      resolve: routeFullPath,
+      currentRoute: computed(() => routeFullPath({
+        path: `/watch/${props.videoId}`,
+        query: { playlistId: props.playlistId, playlistType: props.playlistType, playlistItemId: props.playlistItemId, ...currentQuery },
+      })),
+    },
     emit: (name, videoId) => { if (name === 'unavailable-video-skipped') skippedTo.push(videoId) },
     store: { getters: {} },
-    navigationDownloadId: () => undefined,
+    navigationDownloadId: () => downloadId,
     Math: Object.assign(Object.create(Math), { random: () => 0 }),
     showToast() {},
     t: key => key,
@@ -133,7 +146,9 @@ test('reports automatic skips so the watch view can keep a pending autoplay', as
   assert.deepEqual(playlist.skippedTo, [playlist.navigations[0].path.slice('/watch/'.length)])
 })
 
-test('does not report a navigation when looping a single-item playlist', async t => {
-  const playlist = setup(t, [{ videoId: 'only', playlistItemId: 'only' }])
-  assert.equal(playlist.actions.playNextVideo(), null)
+test('reports a single-item playlist loop as a navigation only when the route changes', async t => {
+  const item = { videoId: 'only', playlistItemId: 'only' }
+  assert.equal(setup(t, [item]).actions.playNextVideo(), null, 'the same route loads nothing new')
+  assert.equal(setup(t, [item], { downloadId: '42' }).actions.playNextVideo(), 'only', 'a finished download changes the source')
+  assert.equal(setup(t, [item], { downloadId: '42', currentQuery: { downloadId: '42' } }).actions.playNextVideo(), null, 'the download already plays')
 })
