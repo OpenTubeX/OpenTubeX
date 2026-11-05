@@ -1051,7 +1051,7 @@ Settings:
     Enable Watch Statistics: Ŝalti spektajn statistikojn
     Week Starts On: Semajno komenciĝas je
     Cache Video Metadata: Historio de metadatumoj
-    Cache Video Metadata Tooltip: Konservas ĉiun version de subtenataj metadatumoj de videaĵoj, kiujn vi vizitas, inkluzive de titoloj, bildetoj kaj priskriboj. Defaŭlte malŝaltita, ĉar konservi historion de metadatumoj pliigas la diskuzon.
+    Cache Video Metadata Tooltip: Konservas ĉiun version de subtenataj metadatumoj de videaĵoj, kiujn vi vizitas, inkluzive de titoloj, bildetoj kaj priskriboj. Ĝi ankaŭ konservas la titolojn montratajn en viaj abonfluoj. Defaŭlte malŝaltita, ĉar konservi historion de metadatumoj pliigas la diskuzon.
     Watched Percentage Threshold: Procenta sojlo de spektado
     Watched Percentage Threshold Tooltip: Videaĵoj estas markitaj kiel spektitaj post atingo de la elektita procento kaj kiam restas ne pli ol 2 minutoj. Je 0%, ili estas markitaj kiam la ludado komenciĝas. Je 100%, ili estas markitaj kiam la ludado finiĝas.
     Clear Video Metadata Cache: Viŝi kaŝmemoron de videaĵaj metadatumoj

@@ -1030,7 +1030,7 @@ Settings:
     Enable Watch Statistics: Ota katselutilastot käyttöön
     Week Starts On: Viikon ensimmäinen päivä
     Cache Video Metadata: Metatietohistoria
-    Cache Video Metadata Tooltip: Säilyttää tuettujen videoiden metatietojen kaikki versiot, kuten nimet, pikkukuvat ja kuvaukset. Tämä on oletuksena poissa käytöstä, koska metatietohistoria vie enemmän levytilaa.
+    Cache Video Metadata Tooltip: Säilyttää tuettujen videoiden metatietojen kaikki versiot, kuten nimet, pikkukuvat ja kuvaukset. Säilyttää myös tilausten syötteissä näkyvät nimet. Tämä on oletuksena poissa käytöstä, koska metatietohistoria vie enemmän levytilaa.
     Watched Percentage Threshold: Katsotuksi merkitsemisen raja
     Watched Percentage Threshold Tooltip: Video merkitään katsotuksi, kun valittu prosenttiosuus on saavutettu ja videota on jäljellä enintään 2 minuuttia. Jos rajaksi valitaan 0 %, video merkitään katsotuksi toiston alkaessa. Jos rajaksi valitaan 100 %, video merkitään katsotuksi toiston päättyessä.
     Clear Video Metadata Cache: Tyhjennä videon metatietovälimuisti

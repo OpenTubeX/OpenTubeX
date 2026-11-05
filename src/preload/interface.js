@@ -1013,7 +1013,7 @@ export default {
   videoMetadataCache: {
     /**
      * @param {{ videoId: string, title: string, description: string, thumbnailUrl: string, observedAt: number }} metadata
-     * @returns {Promise<{ revisions: object[] } | null>}
+     * @returns {Promise<{ revisions: object[], feedTitles: { title: string, observedAt: number }[] } | null>}
      */
     update: (metadata) => ipcRenderer.invoke(IpcChannels.VIDEO_METADATA_CACHE_UPDATE, metadata),
 

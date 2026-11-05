@@ -1030,7 +1030,7 @@ Settings:
     Enable Watch Statistics: Kijkstatistieken inschakelen
     Week Starts On: Week begint op
     Cache Video Metadata: Metadatageschiedenis
-    Cache Video Metadata Tooltip: Bewaart elke versie van ondersteunde videometadata voor video's die je bezoekt, waaronder titels, miniaturen en beschrijvingen. Dit is standaard uitgeschakeld omdat het bewaren van metadatageschiedenis meer schijfruimte gebruikt.
+    Cache Video Metadata Tooltip: Bewaart elke versie van ondersteunde videometadata voor video's die je bezoekt, waaronder titels, miniaturen en beschrijvingen. Bewaart ook de titels die in je abonnementsfeeds worden getoond. Dit is standaard uitgeschakeld omdat het bewaren van metadatageschiedenis meer schijfruimte gebruikt.
     Watched Percentage Threshold: Drempel voor percentage bekeken
     Watched Percentage Threshold Tooltip: Video's worden als bekeken gemarkeerd zodra het geselecteerde percentage is bereikt en er niet meer dan 2 minuten over zijn. Bij 0% gebeurt dit wanneer het afspelen begint. Bij 100% wanneer het afspelen eindigt.
     Clear Video Metadata Cache: Cache met videometadata wissen

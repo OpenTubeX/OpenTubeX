@@ -1015,7 +1015,7 @@ Settings:
     Enable Watch Statistics: Aktivera visningsstatistik
     Week Starts On: Veckan börjar på
     Cache Video Metadata: Metadatahistorik
-    Cache Video Metadata Tooltip: Sparar alla versioner av metadata som stöds för videor du besöker, inklusive titlar, miniatyrbilder och beskrivningar. Funktionen är inaktiverad som standard eftersom metadatahistoriken använder mer diskutrymme.
+    Cache Video Metadata Tooltip: Sparar alla versioner av metadata som stöds för videor du besöker, inklusive titlar, miniatyrbilder och beskrivningar. Sparar även titlarna som visas i dina prenumerationsflöden. Funktionen är inaktiverad som standard eftersom metadatahistoriken använder mer diskutrymme.
     Watched Percentage Threshold: Procentgräns för sedd video
     Watched Percentage Threshold Tooltip: Videor markeras som sedda när den valda procentandelen har nåtts och högst 2 minuter återstår. Vid 0 % markeras de när uppspelningen börjar. Vid 100 % markeras de när uppspelningen slutar.
     Clear Video Metadata Cache: Rensa cacheminnet för videometadata

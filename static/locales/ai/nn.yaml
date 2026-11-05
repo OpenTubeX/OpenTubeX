@@ -1119,7 +1119,7 @@ Settings:
     Week Starts On: Veka byrjar på
     Remember Search History: Hugs søkjehistorikken
     Cache Video Metadata: Metadatahistorikk
-    Cache Video Metadata Tooltip: Tek vare på alle versjonar av støtta videometadata for videoar du opnar, mellom anna titlar, miniatyrbilete og skildringar. Dette er slått av som standard fordi lagring av metadatahistorikk bruker meir diskplass.
+    Cache Video Metadata Tooltip: Tek vare på alle versjonar av støtta videometadata for videoar du opnar, mellom anna titlar, miniatyrbilete og skildringar. Tek òg vare på titlane som blir viste i abonnementsfeedane dine. Dette er slått av som standard fordi lagring av metadatahistorikk bruker meir diskplass.
     Watched Percentage Threshold: Grense for når videoar blir merkte som sette
     Watched Percentage Threshold Tooltip: Videoar blir merkte som sette når dei har nådd den valde prosentdelen og det står att høgst 2 minutt. Ved 0 % blir dei merkte når avspelinga tek til. Ved 100 % blir dei merkte når avspelinga er ferdig.
     Watched Progress Saving Mode:

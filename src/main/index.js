@@ -60,7 +60,7 @@ import { isShareableOpenTubeXRoute, transformOpenTubeXRouteUrl } from '../render
 import { DEFAULT_SEARCH_ENGINES_SETTING } from '../searchEngines'
 import { LiveReminderManager } from './LiveReminderManager'
 import { requestVoiceOverTranslation } from './voiceOverTranslation'
-import { setupVideoMetadataCacheIpc } from './videoMetadataCache'
+import { recordSubscriptionFeedTitles, setupVideoMetadataCacheIpc } from './videoMetadataCache'
 import { shouldAdvanceDockMediaSequence } from './dockMediaSession'
 import { setupStorageIpc } from './storage'
 import {
@@ -3672,6 +3672,7 @@ function runApp() {
         case DBActions.SUBSCRIPTION_CACHE.UPDATE_FEEDS: {
           const applied = await baseHandlers.subscriptionCache.updateFeeds(data)
           const updates = data.filter((_, index) => applied[index])
+          recordSubscriptionFeedTitles(updates)
           if (updates.length > 0) {
             syncOtherWindows(
               IpcChannels.SYNC_SUBSCRIPTION_CACHE,

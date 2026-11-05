@@ -1026,7 +1026,7 @@ Settings:
     Enable Watch Statistics: Ativar estatísticas de visualização
     Week Starts On: A semana começa em
     Cache Video Metadata: Histórico de metadados
-    Cache Video Metadata Tooltip: Mantém todas as versões dos metadados suportados dos vídeos visitados, incluindo títulos, miniaturas e descrições. Está desativado por predefinição porque guardar o histórico de metadados aumenta a utilização do disco.
+    Cache Video Metadata Tooltip: Mantém todas as versões dos metadados suportados dos vídeos visitados, incluindo títulos, miniaturas e descrições. Também mantém os títulos apresentados nos seus feeds de subscrições. Está desativado por predefinição porque guardar o histórico de metadados aumenta a utilização do disco.
     Watched Percentage Threshold: Percentagem para marcar como reproduzido
     Watched Percentage Threshold Tooltip: Os vídeos são marcados como reproduzidos depois de atingirem a percentagem selecionada e quando faltarem, no máximo, 2 minutos. Com 0%, são marcados quando a reprodução começa. Com 100%, são marcados quando a reprodução termina.
     Clear Video Metadata Cache: Limpar cache de metadados dos vídeos

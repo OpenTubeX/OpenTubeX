@@ -1018,7 +1018,7 @@ Settings:
     Enable Watch Statistics: Galluogi ystadegau gwylio
     Week Starts On: Mae'r wythnos yn dechrau ar
     Cache Video Metadata: Hanes metadata
-    Cache Video Metadata Tooltip: Mae'n cadw pob fersiwn o fetadata fideo a gynhelir ar gyfer fideos rydych yn ymweld â nhw, gan gynnwys teitlau, mân-luniau a disgrifiadau. Mae wedi'i analluogi yn ddiofyn oherwydd bod cadw hanes metadata yn defnyddio rhagor o le ar y ddisg.
+    Cache Video Metadata Tooltip: Mae'n cadw pob fersiwn o fetadata fideo a gynhelir ar gyfer fideos rydych yn ymweld â nhw, gan gynnwys teitlau, mân-luniau a disgrifiadau. Mae hefyd yn cadw'r teitlau a ddangosir yn eich ffrydiau tanysgrifio. Mae wedi'i analluogi yn ddiofyn oherwydd bod cadw hanes metadata yn defnyddio rhagor o le ar y ddisg.
     Watched Percentage Threshold: Trothwy canran gwylio
     Watched Percentage Threshold Tooltip: Caiff fideos eu marcio fel wedi'u gwylio ar ôl cyrraedd y ganran a ddewiswyd a phan nad oes mwy na 2 funud ar ôl. Ar 0%, cânt eu marcio pan fydd chwarae'n dechrau. Ar 100%, cânt eu marcio pan fydd chwarae'n gorffen.
     Clear Video Metadata Cache: Clirio storfa metadata fideo

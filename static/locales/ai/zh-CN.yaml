@@ -1015,7 +1015,7 @@ Settings:
     Enable Watch Statistics: 启用观看统计
     Week Starts On: 每周起始日
     Cache Video Metadata: 元数据历史记录
-    Cache Video Metadata Tooltip: 为访问过的视频保留各个版本的受支持视频元数据，包括标题、缩略图和说明。存储元数据历史记录会占用更多磁盘空间，因此默认禁用。
+    Cache Video Metadata Tooltip: 为访问过的视频保留各个版本的受支持视频元数据，包括标题、缩略图和说明。还会保留订阅源中显示的标题。存储元数据历史记录会占用更多磁盘空间，因此默认禁用。
     Watched Percentage Threshold: 已观看百分比阈值
     Watched Percentage Threshold Tooltip: 播放进度达到所选百分比且剩余时长不超过 2 分钟后，视频会标记为已观看。设为 0% 时，开始播放即会标记；设为 100% 时，播放结束才会标记。
     Clear Video Metadata Cache: 清除视频元数据缓存

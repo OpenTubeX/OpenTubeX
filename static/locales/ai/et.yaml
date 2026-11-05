@@ -1015,7 +1015,7 @@ Settings:
     Enable Watch Statistics: Luba vaatamisstatistika
     Week Starts On: Nädala alguspäev
     Cache Video Metadata: Metaandmete ajalugu
-    Cache Video Metadata Tooltip: Säilitab külastatud videote toetatud metaandmete kõik versioonid, sealhulgas pealkirjad, pisipildid ja kirjeldused. See on vaikimisi keelatud, sest metaandmete ajaloo säilitamine võtab kettal rohkem ruumi.
+    Cache Video Metadata Tooltip: Säilitab külastatud videote toetatud metaandmete kõik versioonid, sealhulgas pealkirjad, pisipildid ja kirjeldused. Säilitab ka tellimuste voogudes kuvatud pealkirjad. See on vaikimisi keelatud, sest metaandmete ajaloo säilitamine võtab kettal rohkem ruumi.
     Watched Percentage Threshold: Vaadatuks märkimise lävend
     Watched Percentage Threshold Tooltip: Video märgitakse vaadatuks, kui valitud protsent videost on vaadatud ja lõpuni on jäänud kuni 2 minutit. Väärtuse 0% korral märgitakse video vaadatuks esitamise alguses. Väärtuse 100% korral märgitakse see vaadatuks esitamise lõpus.
     Clear Video Metadata Cache: Tühjenda video metaandmete vahemälu

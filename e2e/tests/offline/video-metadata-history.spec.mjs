@@ -40,6 +40,53 @@ test('shows metadata history after loading a video with a previously recorded ti
     .toContainText('Previously recorded title')
 })
 
+async function storeFeedTitle(page, videoId, title, timestamp, channelId = 'UCfeedtitlechannel00000') {
+  await page.evaluate(({ action, channelId, videoId, title, timestamp }) => window.ftElectron.dbSubscriptionCache(action, [{
+    channelId,
+    field: 'videos',
+    entries: [{ type: 'video', videoId, title }],
+    timestamp: new Date(timestamp)
+  }]), { action: DBActions.SUBSCRIPTION_CACHE.UPDATE_FEEDS, channelId, videoId, title, timestamp })
+}
+
+test('shows a title that only the subscription feed delivered before the visit', async ({ app, page }) => {
+  const now = Date.now()
+  await storeFeedTitle(page, 'jNQXAC9IVRw', 'Title variant from the feed', now - 60_000)
+  await storeFeedTitle(page, 'jNQXAC9IVRw', 'Title the feed shows now', now - 30_000)
+  await mockPlayableWatchPage(app, page)
+  await openMockedVideo(page)
+
+  const historyButton = page.locator(`${activeTab} .infoArea`)
+    .getByRole('button', { name: 'Metadata history' })
+  await expect(historyButton).toBeVisible({ timeout: 25_000 })
+  await historyButton.click()
+  const dialog = page.getByRole('dialog', { name: 'Metadata history' })
+  await expect(dialog).toContainText('Title variant from the feed')
+  await expect(dialog).not.toContainText('Title the feed shows now')
+})
+
+test('compares feed titles only with each other', async ({ page }) => {
+  const now = Date.now()
+  const update = () => page.evaluate(() => window.ftElectron.videoMetadataCache.update({
+    videoId: 'feedtitle01',
+    title: 'Original title',
+    description: '',
+    thumbnailUrl: ''
+  }))
+
+  await storeFeedTitle(page, 'feedtitle01', 'Translated title', now - 60_000)
+  await storeFeedTitle(page, 'feedtitle01', 'Renamed translated title', now - 40_000)
+  await storeFeedTitle(page, 'feedtitle01', 'Translated title', now - 35_000)
+  await storeFeedTitle(page, 'feedtitle01', 'Renamed translated title', now - 30_000)
+  // Another channel's feed that was fetched earlier but stored later, as with
+  // a collaboration, must not record its older title as the latest.
+  await storeFeedTitle(page, 'feedtitle01', 'Stale title', now - 32_000, 'UCfeedtitlechannel00001')
+  // The feed may translate titles, so the title it shows now is not a previous
+  // title, even though it differs from the watch page.
+  await expect.poll(async () => (await update())?.feedTitles.map(({ title }) => title))
+    .toEqual(['Translated title', 'Translated title'])
+})
+
 test('detects a replaced thumbnail at the same cacheable URL', async ({ page }) => {
   let revision = 0
   let requests = 0

@@ -1015,7 +1015,7 @@ Settings:
     Enable Watch Statistics: Megtekintési statisztikák engedélyezése
     Week Starts On: A hét első napja
     Cache Video Metadata: Metaadatok előzményei
-    Cache Video Metadata Tooltip: Megőrzi a meglátogatott videók támogatott metaadatainak minden változatát, beleértve a címeket, a bélyegképeket és a leírásokat. Alapértelmezés szerint ki van kapcsolva, mert a metaadat-előzmények tárolása növeli a lemezhasználatot.
+    Cache Video Metadata Tooltip: Megőrzi a meglátogatott videók támogatott metaadatainak minden változatát, beleértve a címeket, a bélyegképeket és a leírásokat. A feliratkozási hírfolyamokban megjelenő címeket is megőrzi. Alapértelmezés szerint ki van kapcsolva, mert a metaadat-előzmények tárolása növeli a lemezhasználatot.
     Watched Percentage Threshold: Megtekintési százalék küszöbértéke
     Watched Percentage Threshold Tooltip: A videó akkor lesz megtekintettként megjelölve, ha eléri a kiválasztott százalékot, és legfeljebb 2 perc van hátra. 0%-nál a lejátszás kezdetekor, 100%-nál a lejátszás végén kap jelölést.
     Clear Video Metadata Cache: Videómetaadatok gyorsítótárának törlése

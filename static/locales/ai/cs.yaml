@@ -1015,7 +1015,7 @@ Settings:
     Enable Watch Statistics: Povolit statistiky sledování
     Week Starts On: Začátek týdne
     Cache Video Metadata: Historie metadat
-    Cache Video Metadata Tooltip: Uchovává všechny verze podporovaných metadat navštívených videí, včetně názvů, miniatur a popisů. Ve výchozím nastavení je vypnutá, protože ukládání historie metadat zabírá více místa na disku.
+    Cache Video Metadata Tooltip: Uchovává všechny verze podporovaných metadat navštívených videí, včetně názvů, miniatur a popisů. Uchovává také názvy zobrazené ve vašich odběrech. Ve výchozím nastavení je vypnutá, protože ukládání historie metadat zabírá více místa na disku.
     Watched Percentage Threshold: Hranice označení za zhlédnuté
     Watched Percentage Threshold Tooltip: Videa se označí jako zhlédnutá po dosažení vybraného procenta, pokud do konce nezbývají více než 2 minuty. Při 0 % se označí na začátku přehrávání. Při 100 % se označí po skončení přehrávání.
     Clear Video Metadata Cache: Vymazat mezipaměť metadat videí

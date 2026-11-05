@@ -1015,7 +1015,7 @@ Settings:
     Enable Watch Statistics: Gaitu ikustaldien estatistikak
     Week Starts On: Astearen lehen eguna
     Cache Video Metadata: Metadatuen historia
-    Cache Video Metadata Tooltip: Bisitatzen dituzun bideo bateragarrien metadatuen bertsio guztiak gordetzen ditu, izenburuak, koadro txikiak eta deskribapenak barne. Modu lehenetsian desgaituta dago, metadatuen historia gordetzeak disko-erabilera handitzen duelako.
+    Cache Video Metadata Tooltip: Bisitatzen dituzun bideo bateragarrien metadatuen bertsio guztiak gordetzen ditu, izenburuak, koadro txikiak eta deskribapenak barne. Zure harpidetzen jarioetan agertzen diren izenburuak ere gordetzen ditu. Modu lehenetsian desgaituta dago, metadatuen historia gordetzeak disko-erabilera handitzen duelako.
     Watched Percentage Threshold: Ikusitako ehunekoaren atalasea
     Watched Percentage Threshold Tooltip: Bideoak ikusita markatuko dira hautatutako ehunekora iritsi eta gehienez 2 minutu geratzen direnean. % 0 hautatuz gero, erreprodukzioa hastean markatuko dira; % 100 hautatuz gero, amaitzean.
     Clear Video Metadata Cache: Garbitu bideoen metadatuen cachea

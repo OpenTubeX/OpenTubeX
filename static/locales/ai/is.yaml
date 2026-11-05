@@ -1017,7 +1017,7 @@ Settings:
     Enable Watch Statistics: Virkja áhorfstölfræði
     Week Starts On: Vikan hefst á
     Cache Video Metadata: Lýsigagnaferill
-    Cache Video Metadata Tooltip: Geymir allar útgáfur af studdum lýsigögnum um myndbönd sem þú opnar, þar á meðal titla, smámyndir og lýsingar. Þetta er sjálfgefið óvirkt þar sem geymsla ferils lýsigagna eykur disknotkun.
+    Cache Video Metadata Tooltip: Geymir allar útgáfur af studdum lýsigögnum um myndbönd sem þú opnar, þar á meðal titla, smámyndir og lýsingar. Geymir einnig titlana sem birtast í áskriftastraumunum þínum. Þetta er sjálfgefið óvirkt þar sem geymsla ferils lýsigagna eykur disknotkun.
     Watched Percentage Threshold: Prósentumörk fyrir áhorf
     Watched Percentage Threshold Tooltip: Myndbönd eru merkt sem áhorfð þegar valinni prósentu er náð og ekki meira en 2 mínútur eru eftir. Við 0% eru þau merkt þegar spilun hefst. Við 100% eru þau merkt þegar spilun lýkur.
     Clear Video Metadata Cache: Hreinsa skyndiminni myndbandalýsigagna

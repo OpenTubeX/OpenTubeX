@@ -1020,7 +1020,7 @@ Settings:
     Enable Watch Statistics: Activează statisticile de vizionare
     Week Starts On: Săptămâna începe
     Cache Video Metadata: Istoricul metadatelor
-    Cache Video Metadata Tooltip: Păstrează toate versiunile metadatelor acceptate pentru videoclipurile vizitate, inclusiv titlurile, miniaturile și descrierile. Este dezactivată implicit deoarece stocarea istoricului metadatelor ocupă mai mult spațiu pe disc.
+    Cache Video Metadata Tooltip: Păstrează toate versiunile metadatelor acceptate pentru videoclipurile vizitate, inclusiv titlurile, miniaturile și descrierile. Păstrează și titlurile afișate în fluxurile de abonamente. Este dezactivată implicit deoarece stocarea istoricului metadatelor ocupă mai mult spațiu pe disc.
     Watched Percentage Threshold: Pragul procentual pentru vizionare
     Watched Percentage Threshold Tooltip: Videoclipurile sunt marcate ca vizionate după atingerea procentului selectat și când au rămas cel mult 2 minute. La 0%, sunt marcate când începe redarea. La 100%, sunt marcate la încheierea redării.
     Clear Video Metadata Cache: Golește memoria cache a metadatelor video
