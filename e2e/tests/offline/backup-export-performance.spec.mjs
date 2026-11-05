@@ -40,7 +40,7 @@ const playlist = {
 test.use({
   seed: {
     settings: {
-      landingPage: 'trending',
+      landingPage: 'subscriptions',
       fetchSubscriptionsAutomatically: false,
       enableHomeRecommendations: false,
       historyWatchedStatusMigrated: true,

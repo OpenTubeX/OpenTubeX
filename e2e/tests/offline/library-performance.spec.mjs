@@ -20,7 +20,7 @@ const videos = Array.from({ length: size }, (_, index) => ({
 test.use({
   seed: {
     settings: {
-      landingPage: 'trending',
+      landingPage: 'subscriptions',
       fetchSubscriptionsAutomatically: false,
       enableHomeRecommendations: false,
       uiScale: 95,

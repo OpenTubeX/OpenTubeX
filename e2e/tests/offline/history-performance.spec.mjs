@@ -18,7 +18,7 @@ const history = Array.from({ length: channelCount }, (_, index) => ({
 test.use({
   seed: {
     settings: {
-      landingPage: 'trending',
+      landingPage: 'subscriptions',
       fetchSubscriptionsAutomatically: false,
       enableHomeRecommendations: false,
       historyWatchedStatusMigrated: true,
