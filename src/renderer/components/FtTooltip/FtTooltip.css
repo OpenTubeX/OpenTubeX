@@ -9,39 +9,93 @@
   padding: 0;
 }
 
+/* Material 3 rich tooltip: a tonal surface for longer help text. */
 .text {
-  background-color: color-mix(in srgb, var(--primary-text-color) 80%, var(--card-bg-color));
-  border-radius: var(--shape-corner-large-increased);
+  background-color: var(--md-sys-color-surface-container, color-mix(in srgb, var(--card-bg-color) 94%, var(--primary-text-color)));
+  border-radius: var(--shape-corner-medium);
+  box-shadow: 0 1px 2px rgb(0 0 0 / 30%), 0 2px 6px 2px rgb(0 0 0 / 15%);
   box-sizing: border-box;
-  color: var(--card-bg-color);
-  display: block;
+  color: var(--md-sys-color-on-surface-variant, var(--primary-text-color));
+  display: none;
   font-family: var(--app-font-family);
-  font-size: 1rem;
+  font-size: 14px;
   inline-size: max-content;
-  line-height: 120%;
+  letter-spacing: 0.25px;
+  line-height: 20px;
   margin: 0;
-  max-inline-size: min(24em, calc(100vw - 16px));
-  min-inline-size: min(15em, calc(100vw - 16px));
-  padding-block: 10px;
-  padding-inline: 8px;
+  max-inline-size: min(320px, calc(100vw - 16px));
+  padding-block: 12px;
+  padding-inline: 16px;
   pointer-events: none;
   position: fixed;
-  text-align: center;
+  text-align: start;
+  transform-origin: top center;
 
   /* Above prompts, including the prompt layer in full-window playback. */
   z-index: 1002;
-  transition: opacity var(--motion-fast-effects);
+
+  /* Only opacity and transform animate, so the compositor runs the animation
+     at full frame rate even while the main thread is busy. */
+  opacity: 0;
+  transform: scale(0.8);
+  transition:
+    opacity var(--motion-fast-effects),
+    transform var(--motion-fast-effects),
+    display var(--motion-fast-effects) allow-discrete;
+}
+
+/* Any lighter tint of Hot Pink's card drops its white text below 4.5:1. */
+.hotPink .text {
+  background-color: var(--card-bg-color);
+}
+
+.text.open {
+  display: block;
+  opacity: 1;
+  transform: none;
+  transition:
+    opacity var(--motion-fast-effects),
+    transform var(--motion-fast-spatial),
+    display var(--motion-fast-effects) allow-discrete;
 }
 
 @starting-style {
-  .text {
+  .text.open {
     opacity: 0;
+    transform: scale(0.8);
   }
+}
+
+.text.top {
+  transform-origin: bottom center;
+}
+
+.text.left {
+  transform-origin: center right;
+}
+
+.text.right {
+  transform-origin: center left;
+}
+
+.text.left:dir(rtl) {
+  transform-origin: center left;
+}
+
+.text.right:dir(rtl) {
+  transform-origin: center right;
+}
+
+.text.bottom-left {
+  transform-origin: top right;
+}
+
+.text.bottom-left:dir(rtl) {
+  transform-origin: top left;
 }
 
 .text.allowNewlines {
   white-space: pre-wrap;
-  text-align: start;
   inline-size: 55vw;
 }
 

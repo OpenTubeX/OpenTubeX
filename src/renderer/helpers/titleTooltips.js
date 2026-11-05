@@ -239,9 +239,12 @@ function position() {
   const maxTop = window.innerHeight - height - VIEWPORT_MARGIN_PX
 
   let top = compact ? rect.bottom + ANCHOR_GAP_PX : origin.y + CURSOR_GAP_PX
-  if (top > maxTop) {
+  const above = top > maxTop
+  if (above) {
     top = (compact ? rect.top - ANCHOR_GAP_PX : origin.y - ANCHOR_GAP_PX) - height
   }
+  // The open animation grows the tooltip out of the side facing its anchor
+  tooltip.dataset.placement = above ? 'above' : 'below'
   const left = Math.min(Math.max(centerX - width / 2, VIEWPORT_MARGIN_PX), window.innerWidth - width - VIEWPORT_MARGIN_PX)
 
   tooltip.style.left = `${Math.round(left)}px`

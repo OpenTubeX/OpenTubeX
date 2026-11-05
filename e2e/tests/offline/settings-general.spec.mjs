@@ -583,6 +583,41 @@ test.describe('settings', () => {
     await expect(page.locator('[role="tooltip"]:visible')).toHaveCount(0)
   })
 
+  test('animates help tooltips open and closed in place on the compositor @scale', async ({ page }) => {
+    await goTo(page, 'settings')
+    // Slow motion keeps each transition running long enough to inspect it
+    await page.evaluate(() => {
+      document.body.style.setProperty('--motion-fast-effects', '5s linear')
+      document.body.style.setProperty('--motion-fast-spatial', '5s linear')
+    })
+    const button = page.locator('.settingsContent .selectTooltip .button').first()
+    const tooltip = page.locator(`body > [id="${await button.getAttribute('aria-labelledby')}"]`)
+    // Opacity and transform need no layout or paint while they animate
+    const animatedProperties = () => tooltip.evaluate(element => element.getAnimations()
+      .map(animation => animation.transitionProperty)
+      .filter(property => property !== 'display')
+      .sort())
+    // The point the tooltip scales around, which stays in place while it animates
+    const origin = () => tooltip.evaluate(element => {
+      const rect = element.getBoundingClientRect()
+      const scale = rect.width / element.offsetWidth
+      const [x, y] = getComputedStyle(element).transformOrigin.split(' ').map(Number.parseFloat)
+      return { x: Math.round(rect.left + x * scale), y: Math.round(rect.top + y * scale) }
+    })
+
+    await button.focus()
+    await expect(tooltip).toBeVisible()
+    await expect.poll(animatedProperties).toEqual(['opacity', 'transform'])
+    const open = await origin()
+
+    await button.blur()
+    // The tooltip stays rendered where it was while it fades out
+    await expect.poll(() => tooltip.evaluate(element => element.classList.contains('open'))).toBe(false)
+    await expect(tooltip).toBeVisible()
+    await expect.poll(animatedProperties).toEqual(['opacity', 'transform'])
+    expect(await origin()).toEqual(open)
+  })
+
   test('allows help tooltips outside the settings window', async ({ page }) => {
     await page.evaluate(() => {
       localStorage.setItem('opentubex-settings-window-bounds', JSON.stringify({
@@ -605,6 +640,7 @@ test.describe('settings', () => {
     await tooltipButton.evaluate(element => element.focus({ preventScroll: true }))
     const tooltip = page.locator('body > [role="tooltip"]:visible')
     await expect(tooltip).toBeVisible()
+    await expect.poll(() => tooltip.evaluate(element => element.getAnimations().length)).toBe(0)
 
     const [contentBounds, tooltipBounds, viewport, fontFamily] = await Promise.all([
       content.boundingBox(),
