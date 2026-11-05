@@ -32,7 +32,7 @@ test.describe('title tooltips', () => {
     const colors = await tooltip.evaluate(element => {
       const style = getComputedStyle(element)
       const probe = document.createElement('div')
-      probe.style.cssText = 'background-color: color-mix(in srgb, var(--primary-text-color) 90%, var(--card-bg-color)); color: var(--card-bg-color)'
+      probe.style.cssText = 'background-color: var(--primary-text-color); color: var(--card-bg-color)'
       document.body.append(probe)
       const expected = getComputedStyle(probe)
       const result = {

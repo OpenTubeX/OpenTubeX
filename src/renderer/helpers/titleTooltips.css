@@ -10,7 +10,7 @@
   padding-inline: 8px;
   border: 0;
   border-radius: var(--shape-corner-extra-small);
-  background-color: color-mix(in srgb, var(--primary-text-color) 90%, var(--card-bg-color));
+  background-color: var(--primary-text-color);
   color: var(--card-bg-color);
   font-family: var(--app-font-family);
   font-size: 12px;
