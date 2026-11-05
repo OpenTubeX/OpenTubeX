@@ -47,15 +47,17 @@
   background: var(--side-nav-hover-color);
 }
 
-/* Match selected navigation items: a subtle tint with readable text. */
+/* A tint at a fixed lightness, like other selected states, keeps the title and
+   description readable with every main color. Hover softens it instead of
+   strengthening it. */
 .title.active {
   color: var(--primary-text-color);
-  background: color-mix(in srgb, var(--primary-color) 20%, transparent);
+  background: color-mix(in srgb, oklch(from var(--primary-color) var(--tint-lightness) c h) 24%, transparent);
   font-weight: 600;
 }
 
 .title.active:is(:hover, :focus-visible) {
-  background: color-mix(in srgb, var(--primary-color) 28%, transparent);
+  background: color-mix(in srgb, oklch(from var(--primary-color) var(--tint-lightness) c h) 20%, transparent);
 }
 
 .settingsMenu.filtered .titleItem {

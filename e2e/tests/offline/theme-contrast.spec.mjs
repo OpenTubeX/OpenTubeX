@@ -296,7 +296,7 @@ test.describe('hotPink contrast', () => {
     await goToSettingsSection(page, 'theme')
     const pageColors = await page.locator('body').evaluate(element => {
       const style = getComputedStyle(element)
-      const rgb = color => color.match(/[\d.]+/g).slice(0, 3).map(Number)
+      const rgb = color => color.match(/-?[\d.]+(?:e[-+]?\d+)?/gi).slice(0, 3).map(Number).map(value => color.startsWith('color(srgb ') ? value * 255 : value)
       return { foreground: rgb(style.color), background: rgb(style.backgroundColor) }
     })
     expect.soft(contrastRatio(pageColors.foreground, pageColors.background), 'page text').toBeGreaterThanOrEqual(4.5)
@@ -348,7 +348,7 @@ test.describe('hotPink contrast', () => {
       // Sample the settled hover colors, not a frame of their fade.
       await Promise.all(element.getAnimations().map(animation => animation.finished))
       const style = getComputedStyle(element)
-      const rgb = color => color.match(/[\d.]+/g).slice(0, 3).map(Number)
+      const rgb = color => color.match(/-?[\d.]+(?:e[-+]?\d+)?/gi).slice(0, 3).map(Number).map(value => color.startsWith('color(srgb ') ? value * 255 : value)
       return { foreground: rgb(style.color), background: rgb(style.backgroundColor) }
     })
     expect.soft(contrastRatio(colors.foreground, colors.background), `header hover ${JSON.stringify(colors)}`).toBeGreaterThanOrEqual(3)
@@ -399,14 +399,22 @@ const THEME_COLORS = [
 test.describe('main color text contrast', () => {
   test.use({ seed: { settings: { currentLocale: 'en-US' } } })
 
-  test('text on every main color stays readable on filled primary controls', async ({ page }) => {
+  test('text on every main color stays readable on primary controls', async ({ page }) => {
     const privacy = await goToSettingsSection(page, 'privacy')
-    // Matching entries enable the primary Set Password button, which is filled.
+    // Matching entries enable the primary Set Password button, which is tonal.
     await privacy.getByLabel('Password', { exact: true }).fill('contrast')
     await privacy.getByLabel('Confirm password', { exact: true }).fill('contrast')
     const button = privacy.getByRole('button', { name: 'Set Password', exact: true })
     await expect(button).toBeEnabled()
-    await expect(button).toHaveClass(/\bvariant-filled\b/)
+    await expect(button).toHaveClass(/\bvariant-tonal\b/)
+    // Measure it pressed, its state with the strongest overlay.
+    await button.evaluate(element => { element.dataset.contrastTarget = '' })
+    const cdp = await page.context().newCDPSession(page)
+    await cdp.send('DOM.enable')
+    await cdp.send('CSS.enable')
+    const { root } = await cdp.send('DOM.getDocument', { depth: 0 })
+    const { nodeId } = await cdp.send('DOM.querySelector', { nodeId: root.nodeId, selector: '[data-contrast-target]' })
+    await cdp.send('CSS.forcePseudoState', { nodeId, forcedPseudoClasses: ['active'] })
     // Enabled header toggles use the selected-container color pair.
     const toggle = page.getByRole('button', { name: 'Highlight settings changed from defaults', exact: true })
     if (await toggle.getAttribute('aria-pressed') !== 'true') await toggle.click()
@@ -422,7 +430,7 @@ test.describe('main color text contrast', () => {
       // Swap the class the app applies for the main color setting directly;
       // saving the setting for every color exceeds the test timeout.
       const results = await page.evaluate(({ names, button, toggle }) => {
-        const rgb = color => color.match(/[\d.]+/g).slice(0, 3).map(Number)
+        const rgb = color => color.match(/-?[\d.]+(?:e[-+]?\d+)?/gi).slice(0, 3).map(Number).map(value => color.startsWith('color(srgb ') ? value * 255 : value)
         const probe = document.createElement('span')
         probe.style.color = 'var(--text-with-main-color)'
         probe.style.backgroundColor = 'var(--primary-color)'
@@ -441,7 +449,7 @@ test.describe('main color text contrast', () => {
           for (const animation of document.getAnimations()) {
             if (animation.effect?.getComputedTiming().endTime !== Infinity) animation.finish()
           }
-          return { name, palette: measure(probe), button: measure(button), 'selected toggle': measure(toggle) }
+          return { name, palette: measure(probe), 'pressed button': measure(button), 'selected toggle': measure(toggle) }
         })
         probe.remove()
         return results
@@ -467,7 +475,7 @@ async function measureStateColors(page, prefix, elements = {}) {
     ? ['--text-with-main-color', '--primary-color']
     : ['--text-with-accent-color', '--accent-color']
   return page.evaluate(({ names, prefix, text, fill, elements }) => {
-    const rgb = color => color.match(/[\d.]+/g).slice(0, 3).map(Number)
+    const rgb = color => color.match(/-?[\d.]+(?:e[-+]?\d+)?/gi).slice(0, 3).map(Number).map(value => color.startsWith('color(srgb ') ? value * 255 : value)
     const probes = Object.fromEntries(['hover', 'active'].map(state => {
       const probe = document.createElement('span')
       probe.style.color = `var(${text})`
@@ -505,7 +513,7 @@ test.describe('state color text contrast', () => {
 
   test('text on every main and secondary color stays readable on hover and pressed fills', async ({ page }) => {
     await goToSettingsSection(page, 'privacy')
-    // Enabled header toggles fill with the main hover color on hover.
+    // Enabled header toggles take the selected hover color on hover.
     const toggle = page.getByRole('button', { name: 'Highlight settings changed from defaults', exact: true })
     if (await toggle.getAttribute('aria-pressed') !== 'true') await toggle.click()
     await expect(toggle).toHaveAttribute('aria-pressed', 'true')
@@ -541,9 +549,16 @@ test.describe('state color text contrast', () => {
         }
       }
     }
-    // The forced hover fills the toggle with the hover color, not its rest color.
-    const { hover, 'hovered selected toggle': hovered } = (await measureStateColors(page, 'main', { 'hovered selected toggle': hoveredToggle }))[0]
-    expect(hovered.background).toEqual(hover.background)
+    // The forced hover fills the toggle with the selected hover color, not its rest color.
+    const probe = await hoveredToggle.evaluateHandle(element => {
+      const probe = document.createElement('span')
+      probe.style.backgroundColor = 'var(--selected-container-hover-color)'
+      element.after(probe)
+      return probe
+    })
+    const [{ 'hovered selected toggle': hovered, 'selected hover': selectedHover }] = await measureStateColors(page, 'main', { 'hovered selected toggle': hoveredToggle, 'selected hover': probe })
+    await probe.evaluate(element => element.remove())
+    expect(hovered.background).toEqual(selectedHover.background)
   })
 })
 
@@ -590,7 +605,7 @@ test.describe('secondary color text contrast', () => {
       // Swap the class the app applies for the secondary color setting directly;
       // saving the setting for every color exceeds the test timeout.
       const results = await warning.evaluate((warning, names) => {
-        const rgb = color => color.match(/[\d.]+/g).slice(0, 3).map(Number)
+        const rgb = color => color.match(/-?[\d.]+(?:e[-+]?\d+)?/gi).slice(0, 3).map(Number).map(value => color.startsWith('color(srgb ') ? value * 255 : value)
         const probe = document.createElement('span')
         probe.style.color = 'var(--text-with-accent-color)'
         probe.style.backgroundColor = 'var(--accent-color)'
@@ -635,7 +650,7 @@ test.describe('secondary color switch thumbs', () => {
       // Swap the class the app applies for the secondary color setting directly;
       // saving the setting for every color exceeds the test timeout.
       const results = await toggle.locator('..').locator('.switch-label-text').evaluate((text, names) => {
-        const rgb = color => color.match(/[\d.]+/g).slice(0, 3).map(Number)
+        const rgb = color => color.match(/-?[\d.]+(?:e[-+]?\d+)?/gi).slice(0, 3).map(Number).map(value => color.startsWith('color(srgb ') ? value * 255 : value)
         const thumb = text.querySelector('.switch-thumb')
         const measure = () => ({
           thumb: rgb(getComputedStyle(thumb).backgroundColor),
@@ -829,6 +844,51 @@ test.describe('selected tab label contrast', () => {
     }
     expect(failures).toEqual([])
   })
+
+  test('selected settings categories keep their title and description readable in every theme and accent', async ({ page }) => {
+    test.slow()
+    const combos = tintedSelectionCombos()
+    await goToSettingsSection(page, 'theme')
+    const category = page.locator('.settingsMenu .title.active')
+    const failures = []
+    for (const state of ['rest', 'hover']) {
+      if (state === 'hover') await category.hover()
+      else await page.mouse.move(0, 0)
+      const results = await category.evaluate(async (category, combos) => {
+        const context = new OffscreenCanvas(1, 1).getContext('2d', { willReadFrequently: true })
+        // Composite the layers like the renderer, so any color syntax resolves to sRGB bytes.
+        const paint = layers => {
+          context.fillStyle = '#fff'
+          context.fillRect(0, 0, 1, 1)
+          for (const color of layers) {
+            context.fillStyle = color
+            context.fillRect(0, 0, 1, 1)
+          }
+          return [...context.getImageData(0, 0, 1, 1).data].slice(0, 3)
+        }
+        const layers = []
+        for (let node = category; node; node = node.parentElement) layers.unshift(node)
+        const results = []
+        // Skip persistence: the theme watcher applies committed values on the next tick.
+        for (const { theme, mutation, color } of combos) {
+          window.$store.commit('setBaseTheme', theme)
+          if (mutation) window.$store.commit(mutation, color)
+          await new Promise(resolve => setTimeout(resolve))
+          document.getAnimations().forEach(animation => animation.effect?.getComputedTiming().endTime !== Infinity && animation.finish())
+          const background = paint(layers.map(node => getComputedStyle(node).backgroundColor))
+          for (const part of ['titleText', 'titleDescription']) {
+            results.push({ theme, color, part, foreground: paint([getComputedStyle(category.querySelector(`.${part}`)).color]), background })
+          }
+        }
+        return results
+      }, combos)
+      for (const { theme, color, part, foreground, background } of results) {
+        const ratio = contrastRatio(foreground, background)
+        if (ratio < 4.5) failures.push(`${state} ${theme} ${color ?? ''} ${part} ${ratio.toFixed(2)}:1 ${JSON.stringify({ foreground, background })}`)
+      }
+    }
+    expect(failures).toEqual([])
+  })
 })
 
 /** Label, icon and composited background of a context menu item in each theme and accent. */
@@ -967,7 +1027,8 @@ test.describe('filled button state contrast', () => {
       'showCreatePlaylistPrompt', { title: '', description: '', sourcePlaylistId: null }
     ))
     await page.locator('.playlistNameInput input').fill('Filled button states')
-    await page.locator('.promptCard .btn.primary.variant-filled').first().evaluate(element => {
+    await page.locator('.promptCard .btn.primary').first().evaluate(element => {
+      element.classList.replace('variant-tonal', 'variant-filled')
       element.dataset.stateTest = ''
       element.addEventListener('click', event => {
         event.preventDefault()

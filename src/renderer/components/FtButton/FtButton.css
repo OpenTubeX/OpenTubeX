@@ -64,7 +64,7 @@
 
 .btn.variant-tonal,
 .btn.variant-filled[aria-pressed='false'] {
-  --button-container: color-mix(in srgb, var(--button-base) 16%, var(--card-bg-color));
+  --button-container: color-mix(in srgb, oklch(from var(--button-base) var(--tint-lightness) c h) 16%, var(--card-bg-color));
   --button-foreground: var(--primary-text-color);
 }
 
@@ -86,8 +86,8 @@
 }
 
 .btn.selected {
-  --button-container: var(--button-base);
-  --button-foreground: var(--button-on-base);
+  --button-container: color-mix(in srgb, oklch(from var(--button-base) var(--tint-lightness) c h) 24%, var(--card-bg-color));
+  --button-foreground: var(--primary-text-color);
 }
 
 .btn.shape-square,
@@ -105,14 +105,19 @@
   outline-offset: -3px;
 }
 
-.btn:not(:disabled):is(:hover, :focus-visible) {
+/* Pressing keeps the hover layer, since a stronger one costs tonal labels
+   contrast; the corner morph and ripple show the press. */
+.btn:not(:disabled):is(:hover, :focus-visible, :active) {
   background-color: color-mix(in srgb, var(--button-foreground) 8%, var(--button-container));
 }
 
 .btn:not(:disabled):active {
   --button-radius: var(--shape-corner-small);
+}
 
-  background-color: color-mix(in srgb, var(--button-foreground) 12%, var(--button-container));
+/* Like other selected states, soften the tint instead of adding a text-colored layer. */
+.btn.selected:not(:disabled):is(:hover, :focus-visible, :active) {
+  background-color: color-mix(in srgb, oklch(from var(--button-base) var(--tint-lightness) c h) 20%, var(--card-bg-color));
 }
 
 /* Filled buttons use their color's hover and pressed shades, which keep the
@@ -120,14 +125,14 @@
    themes use them for every variant. They may be translucent, which would
    leave the label on the card behind, so draw them opaque. */
 .custom .btn:is(.primary, .secondary, .destructive):not(:disabled):is(:hover, :focus-visible, :active),
-.btn:is(.primary, .secondary, .destructive):is(.variant-filled:not([aria-pressed='false']), .selected):not(:disabled):is(:hover, :focus-visible, :active) {
+.btn:is(.primary, .secondary, .destructive).variant-filled:not([aria-pressed='false'], .selected, :disabled):is(:hover, :focus-visible, :active) {
   --button-foreground: var(--button-on-base);
 
   background-color: rgb(from var(--button-hover) r g b / 100%);
 }
 
 .custom .btn:is(.primary, .secondary, .destructive):not(:disabled):active,
-.btn:is(.primary, .secondary, .destructive):is(.variant-filled:not([aria-pressed='false']), .selected):not(:disabled):active {
+.btn:is(.primary, .secondary, .destructive).variant-filled:not([aria-pressed='false'], .selected, :disabled):active {
   background-color: rgb(from var(--button-active) r g b / 100%);
 }
 

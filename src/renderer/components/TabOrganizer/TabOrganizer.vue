@@ -135,7 +135,6 @@
             </button>
             <button
               type="button"
-              class="primaryButton"
               @click="openCreateGroupPrompt"
             >
               <FtIcon

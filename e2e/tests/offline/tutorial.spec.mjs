@@ -15,7 +15,7 @@ test('neutral tutorial buttons have the same visible height as colored buttons',
       await store.dispatch('updateBaseTheme', baseTheme)
     }, theme)
 
-    // Outlined Skip and filled Next share the same outer bounds; the
+    // Outlined Skip and tonal Next share the same outer bounds; the
     // outline is part of Skip's visible surface.
     const buttons = tutorial.locator('.tutorialActions .btn')
     await expect(buttons).toHaveCount(2)

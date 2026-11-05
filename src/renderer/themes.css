@@ -101,10 +101,15 @@ body {
   --header-button-pressed-color: var(--side-nav-active-color);
   --header-button-pressed-text-color: var(--side-nav-active-text-color);
 
-  /* Enabled toggles are filled so they stay distinct from neutral hover and focus colors. */
-  --selected-container-color: var(--primary-color);
-  --selected-container-hover-color: var(--primary-color-hover);
-  --on-selected-container-color: var(--text-with-main-color);
+  /* Tints keep a color's hue and chroma at a fixed lightness, so bright and
+     dark main colors shift the card's lightness, and the text contrast, alike. */
+  --tint-lightness: 0.6;
+
+  /* Enabled toggles are tonal, tinted more than tonal buttons. Hover softens
+     the tint instead of adding a text-colored layer that costs contrast. */
+  --selected-container-color: color-mix(in srgb, oklch(from var(--primary-color) var(--tint-lightness) c h) 24%, var(--card-bg-color));
+  --selected-container-hover-color: color-mix(in srgb, oklch(from var(--primary-color) var(--tint-lightness) c h) 20%, var(--card-bg-color));
+  --on-selected-container-color: var(--primary-text-color);
 }
 
 /* Chromium truncates zoomed border widths to whole device pixels, so a 2px
@@ -478,6 +483,8 @@ it can be safely elided. This looks quite pleasant on this theme. */
 }
 
 .hotPink {
+  /* Its black main color darkens tints, keeping the white text readable. */
+  --tint-lightness: 0;
   --toggle-track-color: #ddd;
   --toggle-thumb-color: #fff;
   --toggle-checked-thumb-color: #fff;

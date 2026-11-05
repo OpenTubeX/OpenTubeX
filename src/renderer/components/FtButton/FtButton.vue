@@ -82,7 +82,7 @@ const buttonTheme = computed(() => {
 })
 
 const buttonVariant = computed(() => props.variant || (
-  props.backgroundColor === null || props.backgroundColor === 'null' ? 'outlined' : buttonTheme.value === 'secondary' ? 'tonal' : 'filled'
+  props.backgroundColor === null || props.backgroundColor === 'null' ? 'outlined' : 'tonal'
 ))
 
 function click() {

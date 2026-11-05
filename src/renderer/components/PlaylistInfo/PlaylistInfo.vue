@@ -174,7 +174,6 @@
               :icon="['fas', 'save']"
               :disabled="playlistPersistenceDisabled"
               theme="primary"
-              variant="filled"
               @click="savePlaylistInfo"
             />
             <FtButton

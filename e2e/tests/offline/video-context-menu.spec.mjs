@@ -114,6 +114,15 @@ for (const iconPack of ['material', 'remix']) {
         const icon = button.querySelector('svg')
         return { color: getComputedStyle(icon).color, background: getComputedStyle(button).backgroundColor }
       }))
+      // The background checked actions take from the current main color.
+      const selectedBackground = () => menu.evaluate(element => {
+        const probe = document.createElement('span')
+        probe.style.backgroundColor = 'var(--selected-container-color)'
+        element.append(probe)
+        const color = getComputedStyle(probe).backgroundColor
+        probe.remove()
+        return color
+      })
       for (const viewport of [{ width: 375, height: 812 }, { width: 812, height: 375 }]) {
         await page.setViewportSize(viewport)
         await openMenu(false)
@@ -123,15 +132,16 @@ for (const iconPack of ['material', 'remix']) {
         await expect(menu.getByRole('menuitemcheckbox').first()).toHaveAttribute('aria-checked', 'true')
         const active = await colors()
         for (let index = 0; index < active.length; index++) {
-          expect(active[index].color).not.toBe(inactive[index].color)
-          await expect(menu.getByRole('menuitemcheckbox').nth(index)).toHaveCSS('background-color', 'rgb(244, 67, 54)')
+          await expect(menu.getByRole('menuitemcheckbox').nth(index)).toHaveCSS('background-color', await selectedBackground())
           expect(active[index].background).not.toBe(inactive[index].background)
           await menu.getByRole('menuitemcheckbox').nth(index).focus()
           expect((await colors())[index]).toEqual(active[index])
         }
         await attachScreenshot(`active mobile actions ${iconPack} ${viewport.width}`)
+        const redSelected = await selectedBackground()
         await page.evaluate(() => window.$store.commit('setMainColor', 'Purple'))
-        await expect(menu.getByRole('menuitemcheckbox').first()).toHaveCSS('background-color', 'rgb(156, 39, 176)')
+        await expect.poll(selectedBackground).not.toBe(redSelected)
+        await expect(menu.getByRole('menuitemcheckbox').first()).toHaveCSS('background-color', await selectedBackground())
         expect(await colors()).not.toEqual(active)
         await page.evaluate(() => window.$store.commit('setMainColor', 'Red'))
         await openMenu(false)
