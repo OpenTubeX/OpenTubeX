@@ -325,6 +325,7 @@ test('a superseded search page cannot pause the next search, and a new list load
     hideChannelPlaylists: ref(false),
     getInvidiousChannelSearchResultType: () => 'video',
     searchInvidiousChannel: () => new Promise(resolve => { pending.push(resolve) }),
+    backendPreference: ref('invidious'),
   }
   for (const name of ['video', 'short', 'live', 'release', 'podcast', 'courses', 'playlist', 'community', 'search']) {
     context[`${name}ContinuationData`] = shallowRef(null)
@@ -352,6 +353,15 @@ test('a superseded search page cannot pause the next search, and a new list load
   pending.shift()([video])
   await oldPageTwo
   assert.equal(context.autoLoadPaused.value, false, 'the new search keeps loading automatically')
+
+  // Yattee servers ignore the page number, so their results end after the first page.
+  context.backendPreference.value = 'yattee'
+  context.searchContinuationData.value = null
+  context.startElementListRequest('search')
+  const yatteeSearch = context.searchChannelInvidious()
+  pending.pop()([video])
+  await yatteeSearch
+  assert.equal(context.searchContinuationData.value, null, 'a Yattee search has no next page')
 
   context.autoLoadPaused.value = true
   context.startElementListRequest('videos')

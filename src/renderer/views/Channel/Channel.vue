@@ -2635,7 +2635,9 @@ async function searchChannelInvidious() {
     }
 
     // Invidious has no continuation token; the last page is the first empty one.
-    searchContinuationData.value = response.length > 0 ? { page: page + 1 } : null
+    // Yattee servers return the first page for every page number.
+    const hasMorePages = response.length > 0 && backendPreference.value !== 'yattee'
+    searchContinuationData.value = hasMorePages ? { page: page + 1 } : null
     isSearchTabLoading.value = false
     tabApiUsed.set('search', 'invidious')
   } catch (err) {
