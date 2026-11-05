@@ -224,6 +224,7 @@
       </div>
       <FtPrompt
         v-if="showAddChannelPrompt"
+        ref="addChannelPrompt"
         :label="t('Settings.Channel Settings.Add Subscribed Channel')"
         theme="readable-width"
         fixed-layout
@@ -262,7 +263,7 @@
             class="addSubscribedChannelList"
           >
             <li
-              v-for="channel in visibleAvailableSubscriptions"
+              v-for="channel in displayedAvailableSubscriptions"
               :key="channel.id"
             >
               <button
@@ -299,6 +300,21 @@
               </button>
             </li>
           </ul>
+          <FtAutoLoadNextPageWrapper
+            v-if="hasMoreAvailableSubscriptions"
+            :key="addChannelPage"
+            @load-next-page="addChannelPage++"
+          >
+            <FtFlexBox>
+              <FtButton
+                :label="t('Channels.Load More Channels')"
+                :icon="['fas', 'arrow-down']"
+                background-color="var(--primary-color)"
+                text-color="var(--text-with-main-color)"
+                @click="addChannelPage++"
+              />
+            </FtFlexBox>
+          </FtAutoLoadNextPageWrapper>
         </div>
         <template #footer>
           <FtFlexBox>
@@ -442,11 +458,15 @@ const addChannelSearchQuery = ref('')
 const addingSubscribedChannel = ref(false)
 const pendingPreferenceInitializations = new Map()
 const addChannelSearch = useTemplateRef('addChannelSearch')
+const addChannelPrompt = useTemplateRef('addChannelPrompt')
+const addChannelScroller = computed(() => addChannelPrompt.value?.contentScroller ?? null)
 
 watch(showAddChannelPrompt, async (open) => {
   if (!open) {
     return
   }
+
+  resetAddChannelPage()
 
   // FtPrompt assigns its initial focus after mounting. Wait for that pass,
   // then put keyboard users directly in the channel search.
@@ -613,6 +633,14 @@ const visibleAvailableSubscriptions = computed(() => {
   return availableSubscriptions.value.filter(({ id, name }) => (
     name.toLowerCase().includes(query) || id.toLowerCase().includes(query)
   ))
+})
+
+// Mount subscriptions in batches so the picker opens quickly with thousands of them.
+const { page: addChannelPage, hasMore: hasMoreAvailableSubscriptions, displayedItems: displayedAvailableSubscriptions, reset: resetAddChannelPage } = useListPagination(visibleAvailableSubscriptions, {
+  pageSize: 50,
+  append: true,
+  resetOn: addChannelSearchQuery,
+  scrollTarget: addChannelScroller
 })
 
 const visibleChannelEntries = computed(() => {

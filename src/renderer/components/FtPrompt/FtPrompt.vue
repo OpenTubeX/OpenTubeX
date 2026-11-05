@@ -172,6 +172,8 @@ const teleportTarget = useFullscreenTeleportTarget(() => emit('click', null),
 
 const promptCard = useTemplateRef('promptCard')
 const promptContentScroller = useTemplateRef('promptContentScroller')
+
+defineExpose({ contentScroller: promptContentScroller })
 const prompt = useTemplateRef('prompt')
 
 let lastActiveElement = null
