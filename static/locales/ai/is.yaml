@@ -512,6 +512,13 @@ Settings:
     Invalid Engine: Sláðu inn heiti og gilda HTTP- eða HTTPS-leitarslóð sem inniheldur %s.
     Engine Limit: Þú getur bætt við allt að {count} sérsniðnum leitarvélum.
   Theme Settings:
+    Sections:
+      Interface: "Viðmót"
+      Side Bar and Header: "Hliðarstika og haus"
+      Tabs: "Flipar"
+      Player: "Spilari"
+      Scrolling: "Skrun"
+      Notifications: "Tilkynningar"
     Only Show Important Notifications: Sýna aðeins mikilvægar tilkynningar
     Visible Search Suggestions: "Sýnilegar leitartillögur"
     Material Accent Color: "Material-áherslulitur"

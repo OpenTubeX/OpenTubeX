@@ -99,3 +99,23 @@ export function composeLocaleMessages({
 
   return messages
 }
+
+/**
+ * Resolve a message subtree like vue-i18n's `tm`, but fill each message the
+ * first catalog lacks from the later ones. `tm` falls back only when the whole
+ * key is missing, while `t` falls back per message.
+ *
+ * @param {unknown[]} catalogs in fallback order
+ * @param {string} key dot-separated message path
+ * @returns {unknown}
+ */
+export function resolveMessagesWithFallback(catalogs, key) {
+  const path = key.split('.')
+  const resolved = {}
+  for (const catalog of catalogs) {
+    fillMissingMessages(resolved, {
+      value: path.reduce((node, part) => (isMessageObject(node) ? node[part] : undefined), catalog)
+    })
+  }
+  return resolved.value
+}

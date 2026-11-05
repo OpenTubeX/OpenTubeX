@@ -513,6 +513,13 @@ Settings:
     Invalid Engine: Εισαγάγετε ένα όνομα και ένα έγκυρο URL αναζήτησης HTTP ή HTTPS που περιέχει %s.
     Engine Limit: Μπορείτε να προσθέσετε έως {count} προσαρμοσμένες μηχανές αναζήτησης.
   Theme Settings:
+    Sections:
+      Interface: "Διεπαφή"
+      Side Bar and Header: "Πλευρική στήλη και κεφαλίδα"
+      Tabs: "Καρτέλες"
+      Player: "Πρόγραμμα αναπαραγωγής"
+      Scrolling: "Κύλιση"
+      Notifications: "Ειδοποιήσεις"
     Only Show Important Notifications: Εμφάνιση μόνο σημαντικών ειδοποιήσεων
     Visible Search Suggestions: "Ορατές προτάσεις αναζήτησης"
     Material Accent Color: "Χρώμα έμφασης Material"

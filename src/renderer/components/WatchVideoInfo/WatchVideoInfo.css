@@ -174,12 +174,17 @@
 :global(.channelSettingsDropdown) {
   inline-size: max-content;
   max-inline-size: calc(100vw - 16px);
+  padding: 4px;
 }
 
 .channelSettingRow {
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: 4px;
+}
+
+.channelSettingRow + .channelSettingRow {
+  margin-block-start: 2px;
 }
 
 .channelSettingSave {
@@ -187,16 +192,24 @@
   flex: 1;
   align-items: center;
   gap: 12px;
-  min-block-size: 44px;
-  padding: 10px;
+  min-block-size: 40px;
+  padding-block: 8px;
+  padding-inline: 12px;
   border: 0;
   background: transparent;
   color: inherit;
   font: inherit;
   text-align: start;
   cursor: pointer;
-  border-radius: var(--shape-corner-small);
-  transition: background-color var(--motion-fast-effects);
+  border-radius: var(--shape-corner-medium);
+  transition: background-color var(--motion-fast-effects), border-radius var(--motion-fast-spatial);
+}
+
+.channelSettingSave > .ft-icon {
+  flex: none;
+  inline-size: 18px;
+  color: var(--secondary-text-color);
+  font-size: 16px;
 }
 
 .channelSettingSave:disabled {
@@ -204,7 +217,15 @@
   cursor: default;
 }
 
-.channelSettingSave:not(:disabled):hover {
+.channelSettingSave:not(:disabled):is(:hover, :focus-visible) {
   background: var(--side-nav-hover-color);
   color: var(--side-nav-hover-text-color);
+}
+
+.channelSettingSave:not(:disabled):is(:hover, :focus-visible) > .ft-icon {
+  color: inherit;
+}
+
+.channelSettingSave:not(:disabled):active {
+  border-radius: var(--shape-corner-extra-small);
 }

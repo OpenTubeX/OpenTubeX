@@ -501,6 +501,13 @@ Settings:
     Invalid Engine: Enter a name and a valid HTTP or HTTPS search URL containing %s.
     Engine Limit: You can add up to {count} custom search engines.
   Theme Settings:
+    Sections:
+      Interface: "Interface"
+      Side Bar and Header: "Side Bar & Header"
+      Tabs: "Tabs"
+      Player: "Player"
+      Scrolling: "Scrolling"
+      Notifications: "Notifications"
     Only Show Important Notifications: Only show important notifications
     Visible Search Suggestions: "Visible Search Suggestions"
     Material Accent Color: "Material accent colour"

@@ -517,6 +517,13 @@ Settings:
     Invalid Engine: Voer een naam en een geldige HTTP- of HTTPS-zoek-URL met %s in.
     Engine Limit: Je kunt maximaal {count} aangepaste zoekmachines toevoegen.
   Theme Settings:
+    Sections:
+      Interface: "Interface"
+      Side Bar and Header: "Zijbalk en koptekst"
+      Tabs: "Tabbladen"
+      Player: "Speler"
+      Scrolling: "Scrollen"
+      Notifications: "Meldingen"
     Only Show Important Notifications: Alleen belangrijke meldingen tonen
     Visible Search Suggestions: "Zichtbare zoeksuggesties"
     Material Accent Color: "Material-accentkleur"

@@ -42,8 +42,15 @@
 
 .channelManagerToolbar {
   display: flex;
+  flex-wrap: wrap;
+  align-items: center;
   justify-content: flex-end;
-  padding-block-end: 12px;
+  gap: 12px 16px;
+  margin-block-end: 1em;
+}
+
+.channelManagerToolbar .addSubscribedChannelButton {
+  margin: 0;
 }
 
 .addSubscribedChannelPicker {
@@ -112,10 +119,14 @@
 }
 
 .channelSearch {
-  inline-size: 100%;
-  margin-block-end: 1em;
-}
+  /* Share the row with the add button and take the space it leaves over;
+     wrap above it once the field would get narrower than this. */
+  flex: 1 1 240px;
 
+  /* The toolbar spaces the list below, so drop the field's own bottom margin
+     to center it with the button. */
+  --input-bottom-spacing: 0;
+}
 
 .channelListContainer {
   /* Use the height the search field and the close button leave over */

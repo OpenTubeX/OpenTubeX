@@ -615,6 +615,13 @@ Settings:
     Invalid Engine: 이름과 %s을(를) 포함하는 올바른 HTTP 또는 HTTPS 검색 URL을 입력하세요.
     Engine Limit: 사용자 지정 검색 엔진은 최대 {count}개까지 추가할 수 있습니다.
   Theme Settings:
+    Sections:
+      Interface: "인터페이스"
+      Side Bar and Header: "사이드바 및 헤더"
+      Tabs: "탭"
+      Player: "플레이어"
+      Scrolling: "스크롤"
+      Notifications: "알림"
     Only Show Important Notifications: 중요한 알림만 표시
     Visible Search Suggestions: "표시할 검색 추천 수"
     Material Accent Color: "Material 강조 색상"

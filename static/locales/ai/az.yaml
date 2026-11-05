@@ -514,6 +514,13 @@ Settings:
     Invalid Engine: Ad və %s ehtiva edən düzgün HTTP və ya HTTPS axtarış URL-si daxil edin.
     Engine Limit: Ən çox {count} fərdi axtarış sistemi əlavə edə bilərsiniz.
   Theme Settings:
+    Sections:
+      Interface: "İnterfeys"
+      Side Bar and Header: "Yan panel və başlıq"
+      Tabs: "Vərəqlər"
+      Player: "Oynadıcı"
+      Scrolling: "Sürüşdürmə"
+      Notifications: "Bildirişlər"
     Only Show Important Notifications: Yalnız vacib bildirişləri göstər
     Visible Search Suggestions: "Görünən axtarış təklifləri"
     Material Accent Color: "Material vurğu rəngi"

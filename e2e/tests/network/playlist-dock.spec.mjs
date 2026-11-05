@@ -200,9 +200,20 @@ test('large fullscreen playlist dock remains responsive and preserves its state'
     return Math.abs(restoredScrollTop - sidebarScrollTop)
   }).toBeLessThan(150)
 
-  const fullscreenStart = Date.now()
+  // Time it in the page: the helper's polling backs off to whole seconds.
+  const fullscreenPaint = await page.evaluateHandle(() => ({
+    duration: new Promise(resolve => {
+      document.addEventListener('keydown', () => {
+        const start = performance.now()
+        document.addEventListener('fullscreenchange', () => {
+          requestAnimationFrame(() => requestAnimationFrame(() => resolve(performance.now() - start)))
+        }, { once: true })
+      }, { capture: true, once: true })
+    })
+  }))
   await setPlayerFullscreen(page, true)
-  expect(Date.now() - fullscreenStart).toBeLessThan(3000)
+  expect(await fullscreenPaint.evaluate(value => value.duration)).toBeLessThan(3000)
+  await fullscreenPaint.dispose()
   await expect(playlistToggle).toHaveAttribute('aria-expanded', 'true')
   await expect(dock).toBeVisible()
   await expectSameVisibleRow(dock, dockRow)

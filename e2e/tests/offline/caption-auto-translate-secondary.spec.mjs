@@ -107,6 +107,17 @@ test.describe('remembered auto-translation into the video language', () => {
   })
 })
 
+test.describe('remembered auto-translation into another language than the preferred one', () => {
+  test.use({ seed: { settings: { ...SEED, enableSubtitlesByDefault: false, autoTranslatedCaptionLocale: 'fr' } } })
+
+  test('keeps the original captions in the preferred language', async ({ app, page }) => {
+    await mockPlayableWatchPage(app, page, CAPTIONS)
+    const video = await openMockedVideo(page)
+    await page.locator('body').press('c')
+    await expect.poll(() => activeTextTrack(video)).toBe('German')
+  })
+})
+
 test.describe('captions turned off right after the player enables them', () => {
   test.use({ seed: { settings: SEED } })
 

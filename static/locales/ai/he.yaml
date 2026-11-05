@@ -517,6 +517,13 @@ Settings:
     Invalid Engine: יש להזין שם וכתובת URL תקינה לחיפוש מסוג HTTP או HTTPS שמכילה את %s.
     Engine Limit: אפשר להוסיף עד {count} מנועי חיפוש מותאמים אישית.
   Theme Settings:
+    Sections:
+      Interface: "ממשק"
+      Side Bar and Header: "סרגל צד וכותרת"
+      Tabs: "לשוניות"
+      Player: "נגן"
+      Scrolling: "גלילה"
+      Notifications: "התראות"
     Only Show Important Notifications: הצגת התראות חשובות בלבד
     Visible Search Suggestions: "הצעות חיפוש גלויות"
     Material Accent Color: "צבע הדגשה של Material"

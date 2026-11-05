@@ -121,7 +121,8 @@ export const SETTINGS_SEARCH_SOURCES = {
   }],
   appearance: [{
     type: 'theme',
-    key: 'Settings.Theme Settings'
+    key: 'Settings.Theme Settings',
+    exclude: new Set(['Sections'])
   }, {
     type: 'general',
     key: 'Settings.General Settings',

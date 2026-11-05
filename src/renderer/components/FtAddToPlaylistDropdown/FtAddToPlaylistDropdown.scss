@@ -5,12 +5,10 @@
 }
 
 .dropdownHeader {
-  border-block-end: 1px solid var(--border-color);
-  font-size: 13px;
-  font-weight: bold;
+  font-weight: 600;
   margin: 0;
-  padding-block: 8px;
-  padding-inline: 10px;
+  padding-block: 12px 0;
+  padding-inline: 16px;
   text-align: start;
 }
 
@@ -21,7 +19,7 @@
   max-block-size: 300px;
   overflow-y: auto;
   overscroll-behavior: contain;
-  border-block-end: 1px solid var(--border-color);
+  border-block-end: 1px solid color-mix(in srgb, var(--border-color) 45%, transparent);
 }
 
 .playlistRow {
@@ -32,7 +30,7 @@
   justify-content: space-between;
   margin: 0;
   padding-block: 8px;
-  padding-inline: 10px;
+  padding-inline: 12px;
   text-align: start;
   border-radius: var(--shape-corner-medium);
   transition: background-color var(--motion-fast-effects), border-radius var(--motion-fast-spatial);
@@ -88,9 +86,18 @@
   border: 0;
   color: inherit;
   font: inherit;
-  gap: 8px;
+  gap: 12px;
   justify-content: flex-start;
+  min-block-size: 40px;
   margin: 4px;
+
+  > .ft-icon {
+    color: var(--secondary-text-color);
+  }
+
+  &:is(:hover, :focus-visible) > .ft-icon {
+    color: inherit;
+  }
 }
 
 .playlistSearch {
@@ -99,7 +106,7 @@
   box-sizing: border-box;
   flex: none;
   margin-block: 8px;
-  padding-inline: 10px;
+  padding-inline: 12px;
 }
 
 @media (any-pointer: fine) and (not (any-pointer: coarse)) {

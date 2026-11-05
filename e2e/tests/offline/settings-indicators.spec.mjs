@@ -50,15 +50,22 @@ test.describe('settings', () => {
     const appearance = await goToSettingsSection(page, 'appearance')
     const toggle = appearance.getByRole('checkbox', { name: 'Show thumbnail previews' })
 
+    // The switches share two columns that are centered as a block.
     const getCenterOffset = () => toggle.locator('..').evaluate(element => {
-      const setting = element.getBoundingClientRect()
+      const switches = [...element.closest('.appearanceSwitchGrid').querySelectorAll('.switch-ctn')]
+        .map(item => item.getBoundingClientRect())
+      const left = Math.min(...switches.map(bounds => bounds.left))
+      const right = Math.max(...switches.map(bounds => bounds.right))
       const content = element.closest('.sectionBody').getBoundingClientRect()
-      return Math.abs(
-        setting.left + setting.width / 2 -
-        (content.left + content.width / 2)
-      )
+      return Math.abs((left + right) / 2 - (content.left + content.width / 2))
     })
     expect(await getCenterOffset()).toBeLessThanOrEqual(1)
+    const [menuButtonBox, previewsBox] = await Promise.all([
+      appearance.getByRole('checkbox', { name: 'Show video menu button' }).boundingBox(),
+      toggle.boundingBox()
+    ])
+    expect(Math.abs(previewsBox.y - menuButtonBox.y)).toBeLessThanOrEqual(1)
+    expect(previewsBox.x).toBeGreaterThan(menuButtonBox.x)
 
     await page.evaluate(async () => {
       const store = window.$store
@@ -411,27 +418,21 @@ test.describe('synced setting indicators', () => {
     }, tooltipCenter)).toBe(true)
   })
 
-  test('spreads the theme sliders evenly over their rows', async ({ page }) => {
+  test('spreads the Interface sliders evenly over one row', async ({ page }) => {
     await goTo(page, 'settings')
     const themeSection = await goToSettingsSection(page, 'appearance')
-    // Video lists and thumbnails has its own slider grid on the same page.
+    // Other Layout groups and Video lists and thumbnails have their own slider grids on the same page.
     const sliders = themeSection.locator('.sliderGrid')
       .filter({ has: page.getByRole('slider', { name: /^UI Roundness:/ }) })
       .locator(':scope > *')
-    await expect(sliders).toHaveCount(7)
+    await expect(sliders).toHaveCount(3)
 
     const boxes = await sliders.evaluateAll((elements) => elements.map((element) => {
       const { y, width } = element.getBoundingClientRect()
       return { y: Math.round(y), width: Math.round(width) }
     }))
 
-    // Fill each row with three controls before starting another row.
-    const rowSizes = new Map()
-    for (const { y } of boxes) {
-      rowSizes.set(y, (rowSizes.get(y) ?? 0) + 1)
-    }
-    expect([...rowSizes.values()]).toEqual([3, 3, 1])
-    // The row they landed on doesn't change how much room they get.
+    expect(new Set(boxes.map(({ y }) => y)).size).toBe(1)
     expect(new Set(boxes.map(({ width }) => width)).size).toBe(1)
   })
 

@@ -277,6 +277,13 @@ Settings:
       System Only: Tylko systemowe
       Off: Wyłączone
   Theme Settings:
+    Sections:
+      Interface: "Interfejs"
+      Side Bar and Header: "Pasek boczny i nagłówek"
+      Tabs: "Karty"
+      Player: "Odtwarzacz"
+      Scrolling: "Przewijanie"
+      Notifications: "Powiadomienia"
     Vertical Tab Height: Wysokość pionowych kart
     Only Show Important Notifications: Pokazuj tylko ważne powiadomienia
     Visible Search Suggestions: "Widoczne sugestie wyszukiwania"

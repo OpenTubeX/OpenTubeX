@@ -418,6 +418,8 @@ test.describe('manual comment loading', () => {
       await line.click({ position: { x: 10, y: 5 } })
       await expect(line).toHaveAttribute('aria-expanded', 'true')
       await expect(thread.locator('.commentReplyContent').first()).toBeVisible()
+      // Replies sit on the page background; only the thread lines group them.
+      await expect(thread.locator(':scope > .commentReplies')).toHaveCSS('background-color', 'rgba(0, 0, 0, 0)')
       const replyCount = await thread.locator('.commentReplyContent').count()
 
       const connector = thread.locator('.commentReplyConnectorToggle').first()

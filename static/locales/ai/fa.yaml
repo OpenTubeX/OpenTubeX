@@ -536,6 +536,13 @@ Settings:
     Invalid Engine: نام و یک نشانی معتبر جست‌وجوی HTTP یا HTTPS حاوی %s وارد کنید.
     Engine Limit: می‌توانید حداکثر {count} موتور جست‌وجوی سفارشی بیفزایید.
   Theme Settings:
+    Sections:
+      Interface: "رابط کاربری"
+      Side Bar and Header: "نوار کناری و سرصفحه"
+      Tabs: "زبانه‌ها"
+      Player: "پخش‌کننده"
+      Scrolling: "پیمایش"
+      Notifications: "اعلان‌ها"
     Only Show Important Notifications: فقط اعلان‌های مهم نمایش داده شوند
     Visible Search Suggestions: "پیشنهادهای جستجوی قابل‌مشاهده"
     Material Accent Color: "رنگ تأکیدی Material"

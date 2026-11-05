@@ -56,26 +56,28 @@
         />
       </template>
       <div
-        v-if="availableSubscriptions.length > 0"
+        v-if="showChannelSearch || availableSubscriptions.length > 0"
         class="channelManagerToolbar"
       >
+        <FtInput
+          v-if="showChannelSearch"
+          class="channelSearch"
+          input-type="search"
+          :label="t('Settings.Channel Settings.Search Channels')"
+          :icon="['fas', 'search']"
+          :placeholder="t('Form Inputs.Search Text Hint')"
+          :show-action-button="false"
+          :value="searchQuery"
+          @input="value => searchQuery = value"
+        />
         <FtButton
+          v-if="availableSubscriptions.length > 0"
+          class="addSubscribedChannelButton"
           :label="t('Settings.Channel Settings.Add Subscribed Channel')"
           :icon="['fas', 'plus']"
           @click="showAddChannelPrompt = true"
         />
       </div>
-      <FtInput
-        v-if="channelEntries.length > SEARCH_THRESHOLD || searchQuery !== ''"
-        class="channelSearch"
-        input-type="search"
-        :label="t('Settings.Channel Settings.Search Channels')"
-        :icon="['fas', 'search']"
-        :placeholder="t('Form Inputs.Search Text Hint')"
-        :show-action-button="false"
-        :value="searchQuery"
-        @input="value => searchQuery = value"
-      />
       <div
         ref="channelListContainer"
         v-overlay-scrollbars
@@ -585,6 +587,8 @@ const channelEntries = computed(() => {
 
   return entries.sort((a, b) => collator.value.compare(a.name, b.name))
 })
+
+const showChannelSearch = computed(() => channelEntries.value.length > SEARCH_THRESHOLD || searchQuery.value !== '')
 
 /** Subscriptions that do not have any saved channel preference yet. */
 const availableSubscriptions = computed(() => {

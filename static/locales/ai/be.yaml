@@ -536,6 +536,13 @@ Settings:
     Invalid Engine: Увядзіце назву і дапушчальны URL пошуку HTTP або HTTPS, які змяшчае %s.
     Engine Limit: Можна дадаць не больш за {count} уласных пошукавых сістэм.
   Theme Settings:
+    Sections:
+      Interface: "Інтэрфейс"
+      Side Bar and Header: "Бакавая панэль і загаловак"
+      Tabs: "Укладкі"
+      Player: "Прайгравальнік"
+      Scrolling: "Пракрутка"
+      Notifications: "Апавяшчэнні"
     Only Show Important Notifications: Паказваць толькі важныя апавяшчэнні
     Visible Search Suggestions: "Бачныя прапановы пошуку"
     Material Accent Color: "Акцэнтны колер Material"

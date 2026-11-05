@@ -512,6 +512,13 @@ Settings:
     Invalid Engine: Sisestage nimi ja sobiv HTTP- või HTTPS-otsingu URL, mis sisaldab %s.
     Engine Limit: Saate lisada kuni {count} kohandatud otsingumootorit.
   Theme Settings:
+    Sections:
+      Interface: "Liides"
+      Side Bar and Header: "Külgriba ja päis"
+      Tabs: "Vahekaardid"
+      Player: "Pleier"
+      Scrolling: "Kerimine"
+      Notifications: "Teavitused"
     Only Show Important Notifications: Kuva ainult olulised teavitused
     Visible Search Suggestions: "Nähtavad otsingusoovitused"
     Material Accent Color: "Materiali aktsentvärv"

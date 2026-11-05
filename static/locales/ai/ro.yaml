@@ -513,6 +513,13 @@ Settings:
     Invalid Engine: Introduceți un nume și o adresă URL de căutare HTTP sau HTTPS validă, care conține %s.
     Engine Limit: Puteți adăuga până la {count} motoare de căutare personalizate.
   Theme Settings:
+    Sections:
+      Interface: "Interfață"
+      Side Bar and Header: "Bară laterală și antet"
+      Tabs: "File"
+      Player: "Player"
+      Scrolling: "Derulare"
+      Notifications: "Notificări"
     Only Show Important Notifications: Afișează doar notificările importante
     Visible Search Suggestions: "Sugestii de căutare vizibile"
     Material Accent Color: "Culoare de accent Material"

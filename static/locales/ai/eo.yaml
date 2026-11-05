@@ -548,6 +548,13 @@ Settings:
     Invalid Engine: Enigu nomon kaj validan HTTP- aŭ HTTPS-serĉan URL, kiu enhavas %s.
     Engine Limit: Vi povas aldoni ĝis {count} laŭmendajn serĉilojn.
   Theme Settings:
+    Sections:
+      Interface: "Fasado"
+      Side Bar and Header: "Flanka breto kaj kapo"
+      Tabs: "Langetoj"
+      Player: "Ludilo"
+      Scrolling: "Rulumado"
+      Notifications: "Sciigoj"
     Only Show Important Notifications: Montri nur gravajn sciigojn
     Material Accent Color: Material-akcenta koloro
     Signal Accent Color: Signal-akcenta koloro

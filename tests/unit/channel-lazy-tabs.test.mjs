@@ -77,6 +77,7 @@ function channelView({ routeTab, tabs = ['videos', 'shorts', 'live', 'playlists'
     YTNodes: {},
     store: { dispatch: (action, payload) => { dispatched.push(action) } },
     updateChannelDetails() {},
+    resetTabContinuations() {},
     t: key => key,
     autolinker: { link: text => text },
     youtubeImageUrlToInvidious: url => url,

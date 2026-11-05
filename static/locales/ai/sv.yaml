@@ -512,6 +512,13 @@ Settings:
     Invalid Engine: Ange ett namn och en giltig HTTP- eller HTTPS-söknings-URL som innehåller %s.
     Engine Limit: Du kan lägga till högst {count} egna sökmotorer.
   Theme Settings:
+    Sections:
+      Interface: "Gränssnitt"
+      Side Bar and Header: "Sidofält och sidhuvud"
+      Tabs: "Flikar"
+      Player: "Spelare"
+      Scrolling: "Rullning"
+      Notifications: "Aviseringar"
     Only Show Important Notifications: Visa endast viktiga aviseringar
     Visible Search Suggestions: "Synliga sökförslag"
     Material Accent Color: "Material-accentfärg"

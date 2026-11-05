@@ -513,6 +513,13 @@ Settings:
     Invalid Engine: Masukkan nama dan URL pencarian HTTP atau HTTPS valid yang berisi %s.
     Engine Limit: Anda dapat menambahkan hingga {count} mesin pencari khusus.
   Theme Settings:
+    Sections:
+      Interface: "Antarmuka"
+      Side Bar and Header: "Bilah Samping & Header"
+      Tabs: "Tab"
+      Player: "Pemutar"
+      Scrolling: "Gulir"
+      Notifications: "Notifikasi"
     Only Show Important Notifications: Hanya tampilkan notifikasi penting
     Visible Search Suggestions: "Saran pencarian yang terlihat"
     Material Accent Color: "Warna aksen Material"

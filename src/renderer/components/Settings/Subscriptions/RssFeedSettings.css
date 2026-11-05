@@ -87,8 +87,23 @@
   font-size: 0.85em;
 }
 
+/* The button leads the row on wide screens. Reversed, the description comes
+   first in the markup, so once the row wraps the button drops below it
+   instead of squeezing the text. */
+.rssHubRow {
+  display: flex;
+  flex-flow: row-reverse wrap;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 12px 16px;
+}
+
+.rssHubRow p {
+  flex: 1 1 16em;
+}
+
 .rssHubButton {
-  justify-self: start;
+  flex: none;
   margin: 0;
 }
 

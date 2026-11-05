@@ -513,6 +513,13 @@ Settings:
     Invalid Engine: Rhowch enw ac URL chwilio HTTP neu HTTPS dilys sy'n cynnwys %s.
     Engine Limit: Gallwch ychwanegu hyd at {count} o beiriannau chwilio personol.
   Theme Settings:
+    Sections:
+      Interface: "Rhyngwyneb"
+      Side Bar and Header: "Bar ochr a phennawd"
+      Tabs: "Tabiau"
+      Player: "Chwaraewr"
+      Scrolling: "Sgrolio"
+      Notifications: "Hysbysiadau"
     Only Show Important Notifications: Dangos hysbysiadau pwysig yn unig
     Visible Search Suggestions: "Awgrymiadau chwilio gweladwy"
     Material Accent Color: "Lliw acen Material"

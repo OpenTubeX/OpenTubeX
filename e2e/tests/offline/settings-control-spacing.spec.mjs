@@ -82,7 +82,7 @@ test.describe('settings control spacing', { tag: '@scale' }, () => {
 
   test('appearance switches flow across rows in the reading direction', async ({ app, page, uiScale }, testInfo) => {
     const appearance = await goToSettingsSection(page, 'appearance')
-    const grid = appearance.locator('.switchColumnGrid').first()
+    const grid = appearance.locator('.appearanceSwitchGrid').filter({ has: page.locator('[data-setting-key="expandSideBar"]') })
     for (const locale of ['en-US', 'de-DE']) {
       await page.evaluate(locale => window.$store.dispatch('updateCurrentLocale', locale), locale)
       for (const width of [1000, 800, 650, 400, 1000]) {
@@ -120,9 +120,9 @@ test.describe('settings control spacing', { tag: '@scale' }, () => {
     }
   })
 
-  test('tab width has a full slider and its icon action aligns with the row', async ({ app, page, uiScale }, testInfo) => {
+  test('tab size sliders share a row above a centered icon action', async ({ app, page, uiScale }, testInfo) => {
     const appearance = await goToSettingsSection(page, 'appearance')
-    const row = appearance.locator('.tabSettingsRow')
+    const grid = appearance.locator('.sliderGrid').filter({ has: page.getByRole('slider', { name: /^(Tab Width|Tab-Breite):/ }) })
     const content = page.locator('.settingsContent')
     for (const locale of ['en-US', 'de-DE']) {
       await page.evaluate(locale => window.$store.dispatch('updateCurrentLocale', locale), locale)
@@ -132,33 +132,31 @@ test.describe('settings control spacing', { tag: '@scale' }, () => {
         await content.evaluate((element, width) => { element.style.inlineSize = `${width}px` }, width)
         for (const direction of ['ltr', 'rtl']) {
           await page.evaluate(direction => { document.body.dir = direction }, direction)
-          const geometry = await row.evaluate(element => {
-            const row = element.getBoundingClientRect()
-            const slider = element.querySelector('.pure-material-slider').getBoundingClientRect()
-            const button = element.querySelector('.btn').getBoundingClientRect()
-            const style = getComputedStyle(element)
-            const container = element.closest('.settingsContent')
-            const containerStyle = getComputedStyle(container)
+          const geometry = await grid.evaluate(element => {
+            const grid = element.getBoundingClientRect()
+            const sliders = [...element.children].map(slider => slider.getBoundingClientRect())
+            const button = element.nextElementSibling.querySelector('.btn').getBoundingClientRect()
             return {
-              width: slider.width,
-              availableWidth: row.width - parseFloat(style.paddingLeft) - parseFloat(style.paddingRight),
-              containerWidth: container.clientWidth - parseFloat(containerStyle.paddingLeft) - parseFloat(containerStyle.paddingRight),
-              centerOffset: button.top + button.height / 2 - slider.top - slider.height / 2,
-              gap: button.top - slider.bottom,
-              horizontalOffset: button.left + button.width / 2 - row.left - row.width / 2,
-              overflow: element.scrollWidth - element.clientWidth
+              tops: sliders.map(slider => slider.top),
+              widths: sliders.map(slider => slider.width),
+              gap: button.top - Math.max(...sliders.map(slider => slider.bottom)),
+              horizontalOffset: button.left + button.width / 2 - grid.left - grid.width / 2,
+              overflow: element.parentElement.scrollWidth - element.parentElement.clientWidth
             }
           })
-          expect.soft(geometry.width, `${locale} ${width}px ${direction} slider width`).toBeCloseTo(Math.min(380, geometry.availableWidth), 0)
-          if (geometry.containerWidth > 760) {
-            expect.soft(Math.abs(geometry.centerOffset), `${locale} ${width}px ${direction} action alignment`).toBeLessThanOrEqual(1)
+          expect(geometry.tops).toHaveLength(2)
+          const [first, second] = geometry.tops
+          if (width >= 650) {
+            expect.soft(Math.abs(second - first), `${locale} ${width}px ${direction} sliders share a row`).toBeLessThanOrEqual(1)
           } else {
-            expect.soft(geometry.gap).toBeCloseTo(20, 1)
-            expect.soft(Math.abs(geometry.horizontalOffset)).toBeLessThanOrEqual(1)
+            expect.soft(second, `${locale} ${width}px ${direction} sliders stack`).toBeGreaterThan(first)
           }
+          expect.soft(Math.abs(geometry.widths[0] - geometry.widths[1])).toBeLessThanOrEqual(1)
+          expect.soft(geometry.gap, `${locale} ${width}px ${direction} action below sliders`).toBeGreaterThanOrEqual(0)
+          expect.soft(Math.abs(geometry.horizontalOffset), `${locale} ${width}px ${direction} action centered`).toBeLessThanOrEqual(1)
           expect(geometry.overflow).toBeLessThanOrEqual(1)
           if (locale === 'en-US' && uiScale === 100 && [800, 400].includes(width)) {
-            await row.scrollIntoViewIfNeeded()
+            await grid.scrollIntoViewIfNeeded()
             await captureAppFramebuffer(app, testInfo, `tab-settings-${width}-${direction}`)
           }
         }
