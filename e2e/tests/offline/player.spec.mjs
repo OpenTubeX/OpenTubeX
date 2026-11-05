@@ -375,7 +375,8 @@ test('hides configured paused interface elements until pointer activity', async 
       component.proxy.$store.dispatch('updateShowPlayerControlsWhenPaused', false),
       component.proxy.$store.dispatch('updateShowVideoTitleWhenPaused', false),
       component.proxy.$store.dispatch('updateShowFullscreenActionsWhenPaused', false),
-      component.proxy.$store.dispatch('updatePausedInterfaceHideDelay', 0.5),
+      // Long enough for the reveal to finish fading in on a busy machine.
+      component.proxy.$store.dispatch('updatePausedInterfaceHideDelay', 60),
     ])
     await component.proxy.$nextTick()
   })
@@ -406,6 +407,9 @@ test('hides configured paused interface elements until pointer activity', async 
   await expect(actions).toHaveCSS('opacity', '1')
   await expect(seekBar).toHaveCSS('opacity', '1')
 
+  // Each pointer move restarts the hide timer with the current delay.
+  await watchComponent.evaluate(component => component.proxy.$store.dispatch('updatePausedInterfaceHideDelay', 0.5))
+  await page.mouse.move(playerBounds.x + playerBounds.width / 2 + 10, playerBounds.y + playerBounds.height / 2)
   await expect(player).not.toHaveClass(/pausedInterfaceRevealed/, { timeout: 1500 })
   await expect(title).toHaveCSS('opacity', '0')
   await expect(actions).toHaveCSS('opacity', '0')
