@@ -1092,6 +1092,58 @@ test.describe('destructive button colors', () => {
     await expect(body).toHaveCSS('--destructive-color', '#f44336')
   })
 
+  test('error text stays red and readable on every surface in every theme and accent', async ({ page }) => {
+    test.slow()
+    const combos = tintedSelectionCombos()
+    const results = await page.evaluate(async combos => {
+      const context = new OffscreenCanvas(1, 1).getContext('2d', { willReadFrequently: true })
+      // Composite the layers like the renderer, so any color syntax resolves to sRGB bytes.
+      const paint = layers => {
+        context.fillStyle = '#fff'
+        context.fillRect(0, 0, 1, 1)
+        for (const color of layers) {
+          context.fillStyle = color
+          context.fillRect(0, 0, 1, 1)
+        }
+        return [...context.getImageData(0, 0, 1, 1).data].slice(0, 3)
+      }
+      const probe = document.createElement('span')
+      document.body.append(probe)
+      const resolve = value => {
+        probe.style.color = value
+        return getComputedStyle(probe).color
+      }
+      const results = []
+      // Skip persistence: the theme watcher applies committed values on the next tick.
+      for (const { theme, mutation, color } of combos) {
+        window.$store.commit('setBaseTheme', theme)
+        if (mutation) window.$store.commit(mutation, color)
+        await new Promise(resolve => setTimeout(resolve))
+        const surfaces = ['--bg-color', '--card-bg-color', '--secondary-card-bg-color'].map(name => resolve(`var(${name})`))
+        results.push({
+          theme,
+          color,
+          text: paint([resolve('var(--error-text-color)')]),
+          // Cards sit on the page and secondary cards on cards; some are translucent.
+          surfaces: { page: paint(surfaces.slice(0, 1)), card: paint(surfaces.slice(0, 2)), 'secondary card': paint(surfaces) }
+        })
+      }
+      probe.remove()
+      return results
+    }, combos)
+    const failures = []
+    for (const { theme, color, text, surfaces } of results) {
+      for (const [surface, background] of Object.entries(surfaces)) {
+        const ratio = contrastRatio(text, background)
+        if (ratio < 4.5) failures.push(`${theme} ${color ?? ''} ${surface} ${ratio.toFixed(2)}:1 ${JSON.stringify({ text, background })}`)
+      }
+      // A pink card leaves no room for red text, so it uses the text color there.
+      const [red, green, blue] = text
+      if (theme !== 'hotPink' && !(red > green + 40 && red > blue + 40)) failures.push(`${theme} ${color ?? ''} error text is not red ${JSON.stringify(text)}`)
+    }
+    expect(failures).toEqual([])
+  })
+
   test('tonal destructive buttons stay red and readable in every theme and accent', async ({ page }) => {
     test.slow()
     const combos = tintedSelectionCombos()

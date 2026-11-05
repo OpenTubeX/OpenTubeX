@@ -86,6 +86,10 @@ body {
   /* Lighter, away from the black label, so it stays readable */
   --destructive-hover-color: #ef5350;
   --destructive-active-color: #e57373;
+
+  /* Error text keeps most of the text color's lightness, so it stays readable
+     on every surface, and takes a red hue (the default destructive red's). */
+  --error-text-color: oklch(from color-mix(in oklab, var(--destructive-color) 20%, var(--primary-text-color)) l 0.14 29deg);
   --members-only-color: #1b7331;
   --favorite-icon-filter: grayscale(1) sepia(1) saturate(2.2) hue-rotate(68deg) brightness(0.9);
 
@@ -430,6 +434,11 @@ it can be safely elided. This looks quite pleasant on this theme. */
   --logo-text: url('../../_icons/textBlackSmall.svg');
 }
 
+/* Custom themes show errors in the destructive color they chose. */
+.custom {
+  --error-text-color: var(--destructive-color);
+}
+
 /* Custom, Tally, and dynamic themes tint the header logo instead of displaying the fixed-color
    theme assets. Keeping the assets as masks preserves their sharp edges. */
 :is(.custom, .openTubeXLight, .openTubeXDark, .dynamicColors) .topNav .logoIcon,
@@ -486,8 +495,10 @@ it can be safely elided. This looks quite pleasant on this theme. */
   /* Its black main color darkens tints, keeping the white text readable. */
   --tint-lightness: 0;
 
-  /* No red stands out on its pink cards, so destructive icons match their label. */
+  /* No red stands out on its pink cards, so destructive icons and error text
+     use the text color. */
   --destructive-icon-color: currentcolor;
+  --error-text-color: var(--primary-text-color);
   --toggle-track-color: #ddd;
   --toggle-thumb-color: #fff;
   --toggle-checked-thumb-color: #fff;

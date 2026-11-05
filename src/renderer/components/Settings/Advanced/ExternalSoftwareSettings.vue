@@ -1009,7 +1009,7 @@ async function chooseBrowserProfilePath() {
 }
 
 .ytDlpWarning {
-  color: var(--destructive-color);
+  color: var(--error-text-color);
   font-weight: bold;
   inline-size: 100%;
   padding-block: 8px;
