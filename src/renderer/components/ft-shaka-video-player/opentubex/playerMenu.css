@@ -289,6 +289,7 @@
 
 /* The playback speed and caption style sliders and their presets each fill a row, instead of shrinking to their content. */
 :deep(.shaka-sub-menu.ft-menu-grid > :is(.shaka-playback-rate-slider-section, .shaka-playback-rate-presets)) {
+  box-sizing: border-box;
   flex-basis: 100%;
 }
 
