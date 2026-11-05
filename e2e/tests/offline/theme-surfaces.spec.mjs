@@ -145,7 +145,7 @@ for (const [theme, scale] of [['openTubeXLight', 100], ['openTubeXDark', 125]]) 
           body, .app { background-image: var(--bg-image) !important; background-attachment: fixed !important; }
           .app { background-color: var(--bg-color) !important; }
           body::before, .fixedBackgroundLayer { display: none !important; }
-          .subscriptionsPage > .card { background-size: auto !important; background-attachment: fixed !important; }
+          .subscriptionsPage > .card { background-clip: border-box !important; background-attachment: fixed !important; }
         `
       })
       try {
