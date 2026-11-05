@@ -306,7 +306,6 @@
             v-if="activeDownload === null"
             :label="t('Downloads.Download')"
             :icon="['fas', 'download']"
-            theme="primary"
             :disabled="downloadFolderRequired"
             @click="startDownload"
           />

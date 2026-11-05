@@ -1,6 +1,4 @@
-/* A tonal callout surface, set apart from the plain cards around it. */
 .infoPanels.ft-card {
-  background-color: color-mix(in srgb, var(--primary-color) 16%, var(--card-bg-color));
   border-radius: var(--shape-corner-large-increased);
   padding-block: 16px;
   overflow-wrap: anywhere;
