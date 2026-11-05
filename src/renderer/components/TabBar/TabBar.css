@@ -105,7 +105,6 @@
 .collapsedTabGroup.active {
   border-color: color-mix(in srgb, var(--tab-group-color) 55%, var(--border-color));
   background-color: color-mix(in srgb, var(--tab-group-color) 28%, var(--card-bg-color));
-  box-shadow: inset 0 2px 0 var(--tab-group-color);
 }
 
 .collapsedTabGroup.noTransition {
