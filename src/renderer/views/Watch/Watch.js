@@ -5583,14 +5583,18 @@ export default defineComponent({
         this.watchRouteWithoutTimestamp(nextFullPath) ===
         this.watchRouteWithoutTimestamp(this.tabRoute.fullPath)
       ) {
-        this.$refs.player?.setCurrentTime(0)
-        this.$refs.player?.play()
+        this.restartCurrentVideo()
       } else {
         this.queuedPlaybackVideoId = nextVideo.videoId
         this.tabRouter.push(route)
       }
       showToast({ message: this.t('Playing Next Video'), icon: ['fas', 'step-forward'] })
       return true
+    },
+
+    restartCurrentVideo: function () {
+      this.$refs.player?.setCurrentTime(0)
+      this.$refs.player?.play()
     },
 
     /**

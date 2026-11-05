@@ -342,7 +342,7 @@ const props = defineProps({
   },
 })
 
-const emit = defineEmits(['close', 'pause-player', 'skip-availability-change', 'unavailable-video-skipped', 'upcoming-videos-change'])
+const emit = defineEmits(['close', 'pause-player', 'restart-current-video', 'skip-availability-change', 'unavailable-video-skipped', 'upcoming-videos-change'])
 
 const { locale, t } = useI18n()
 const phonePanelHeader = inject('phonePanelHeader', null)
@@ -1064,7 +1064,7 @@ function onMoveDraggedVideo(video, source) {
 }
 
 /**
- * @returns {string|null} the video ID it navigated to, or null when nothing new loads
+ * @returns {string|null} the video ID it navigated to, or null when it did not navigate
  */
 function playNextVideo() {
   if (isWaitingForNextVideo.value || currentVideoMayBeUnloaded.value) return null
@@ -1090,8 +1090,9 @@ function playNextVideo() {
     }
   }
 
-  // Looping a single-item playlist can keep the current route, so the push loads nothing
+  // Looping a single-item playlist can keep the current route, where a push loads nothing
   const staysOnRoute = router.resolve(routerPushPayload).fullPath === router.currentRoute.value.fullPath
+  const navigate = () => staysOnRoute ? emit('restart-current-video') : router.push(routerPushPayload)
 
   if (shuffleEnabled.value) {
     let doShufflePlaylistItems = false
@@ -1105,7 +1106,7 @@ function playNextVideo() {
       doShufflePlaylistItems = true
     }
 
-    router.push(routerPushPayload)
+    navigate()
 
     showToast({ message: t('Playing Next Video'), icon: ['fas', 'step-forward'] })
 
@@ -1120,7 +1121,7 @@ function playNextVideo() {
       return null
     }
 
-    router.push(routerPushPayload)
+    navigate()
     showToast({ message: t('Playing Next Video'), icon: ['fas', 'step-forward'] })
   }
   return staysOnRoute ? null : targetPlaylistItem.videoId

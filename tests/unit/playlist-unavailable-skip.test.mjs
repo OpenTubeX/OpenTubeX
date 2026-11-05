@@ -39,6 +39,7 @@ function setup(t, items = ['A', 'B', 'C'].map(id => ({ videoId: id, playlistItem
   const randomizedPlaylistItems = shallowRef(items.slice())
   const navigations = []
   const skippedTo = []
+  const restarts = []
   const context = vm.createContext({
     props, playlistItems, randomizedPlaylistItems, computed, ref, watch,
     playlistTotalVideoCount: ref(items.length),
@@ -57,7 +58,10 @@ function setup(t, items = ['A', 'B', 'C'].map(id => ({ videoId: id, playlistItem
         query: { playlistId: props.playlistId, playlistType: props.playlistType, playlistItemId: props.playlistItemId, ...currentQuery },
       })),
     },
-    emit: (name, videoId) => { if (name === 'unavailable-video-skipped') skippedTo.push(videoId) },
+    emit: (name, videoId) => {
+      if (name === 'unavailable-video-skipped') skippedTo.push(videoId)
+      if (name === 'restart-current-video') restarts.push(name)
+    },
     store: { getters: {} },
     navigationDownloadId: () => downloadId,
     Math: Object.assign(Object.create(Math), { random: () => 0 }),
@@ -85,7 +89,7 @@ function setup(t, items = ['A', 'B', 'C'].map(id => ({ videoId: id, playlistItem
     await nextTick()
   }
 
-  return { props, navigations, skippedTo, randomizedPlaylistItems, failCurrentVideo, finishNavigation, actions: context.actions }
+  return { props, navigations, skippedTo, restarts, randomizedPlaylistItems, failCurrentVideo, finishNavigation, actions: context.actions }
 }
 
 test('looping shuffled playback skips consecutive unavailable videos and reaches a playable item', async t => {
@@ -148,7 +152,10 @@ test('reports automatic skips so the watch view can keep a pending autoplay', as
 
 test('reports a single-item playlist loop as a navigation only when the route changes', async t => {
   const item = { videoId: 'only', playlistItemId: 'only' }
-  assert.equal(setup(t, [item]).actions.playNextVideo(), null, 'the same route loads nothing new')
+  const sameRoute = setup(t, [item])
+  assert.equal(sameRoute.actions.playNextVideo(), null, 'the same route loads nothing new')
+  assert.deepEqual(sameRoute.navigations, [], 'nothing navigates')
+  assert.deepEqual(sameRoute.restarts, ['restart-current-video'], 'the current video restarts instead')
   assert.equal(setup(t, [item], { downloadId: '42' }).actions.playNextVideo(), 'only', 'a finished download changes the source')
   assert.equal(setup(t, [item], { downloadId: '42', currentQuery: { downloadId: '42' } }).actions.playNextVideo(), null, 'the download already plays')
 })

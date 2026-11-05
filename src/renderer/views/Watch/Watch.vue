@@ -1262,6 +1262,7 @@
             :class="{ theatrePlaylist: useTheatreMode }"
             @close="closeFullscreenPlaylist"
             @pause-player="pausePlayer"
+            @restart-current-video="restartCurrentVideo"
             @skip-availability-change="handlePlaylistSkipAvailabilityChange"
             @unavailable-video-skipped="handleUnavailablePlaylistVideoSkipped"
             @upcoming-videos-change="handleUpcomingPlaylistVideosChange"

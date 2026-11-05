@@ -248,7 +248,7 @@ test('playlist and recommendation autoplay start the next video even when genera
 
 for (const timestamp of ['', '&timestamp=0.25']) test(`a queued duplicate of the current download replays${timestamp ? ' from a timestamped route' : ' without a route change'}`, async () => {
   const source = await readFile(new URL('../../src/renderer/views/Watch/Watch.js', import.meta.url), 'utf8')
-  const methods = watchMethods(source, ['playNextQueuedVideo', 'watchRouteWithoutTimestamp'])
+  const methods = watchMethods(source, ['playNextQueuedVideo', 'restartCurrentVideo', 'watchRouteWithoutTimestamp'])
   const route = { path: '/watch/saved', query: { downloadId: '42' } }
   const actions = []
   const watch = {

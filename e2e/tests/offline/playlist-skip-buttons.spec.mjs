@@ -51,6 +51,14 @@ const seed = {
     )),
     createdAt: Date.now() - 86_400_000,
     lastUpdatedAt: Date.now()
+  }, {
+    _id: 'e2esingleplaylist',
+    playlistName: 'Single video playlist',
+    protected: false,
+    description: 'Playlist with one video',
+    videos: [playlistVideo(VIDEO_TITLES[2], 2)],
+    createdAt: Date.now() - 86_400_000,
+    lastUpdatedAt: Date.now()
   }],
   history: ['Queued video', 'Standalone video'].map((title, index) => ({
     _id: `queuevideo${index}`,
@@ -271,3 +279,35 @@ for (const { name, defaultInterval } of [
     })
   })
 }
+
+test.describe('with a looping single-video playlist', () => {
+  test.use({ seed: { ...seed, settings: { ...seed.settings, autoplayVideos: false, defaultInterval: 1 } } })
+
+  test('replays the video when the countdown ends', async ({ app, page }) => {
+    await mockPlayableWatchPage(app, page)
+
+    await goTo(page, 'userplaylists')
+    await page.getByText('Single video playlist').click()
+    await page.getByText(VIDEO_TITLES[2]).first().click()
+    await expect(page).toHaveURL(/#\/watch\/skipvideo2\?/)
+    await page.locator(`${activeTab} .watchVideoPlaylist`).getByRole('button', { name: 'Loop Playlist' }).click()
+
+    const video = page.locator(`${activeTab} video`)
+    // The video waits for a cold watch page load, so allow as long as waitForPlayback does.
+    await expect
+      .poll(() => video.evaluate(element => element.readyState).catch(() => 0), { timeout: 60_000 })
+      .toBeGreaterThanOrEqual(1)
+    await playWhenLoaded(video)
+    await waitForPlayback(page)
+
+    // The first loop drops extra query parameters from the opened route, later loops keep the same route
+    for (let loop = 0; loop < 2; loop++) {
+      await video.evaluate(element => {
+        element.currentTime = Math.max(0, element.duration - 0.25)
+      })
+      await expect.poll(() => video.evaluate(element => element.ended)).toBe(true)
+      await expect.poll(() => video.evaluate(element => !element.paused && element.currentTime < element.duration / 2)).toBe(true)
+    }
+    await expect(page).toHaveURL(/#\/watch\/skipvideo2\?/)
+  })
+})
