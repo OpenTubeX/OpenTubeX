@@ -77,6 +77,25 @@ test.describe('large subscribed channel picker', { tag: '@scale' }, () => {
   })
 })
 
+test.describe('large subscribed channel picker without automatic loading', () => {
+  const seed = channelSettingsSeed(1)
+  seed.settings.generalAutoLoadMorePaginatedItemsEnabled = false
+  seed.profiles[0].subscriptions = subscriptions.slice(0, 120).map(channel => ({ ...channel }))
+  test.use({ seed })
+
+  test('keeps keyboard focus on the next batch after loading more', async ({ page }) => {
+    await goToSettingsSection(page, 'playback')
+    await page.getByRole('button', { name: 'Manage Saved Channels (1)' }).click()
+    await page.getByRole('button', { name: 'Add subscribed channel', exact: true }).click()
+    const picker = page.getByRole('dialog', { name: 'Add subscribed channel', exact: true })
+    await expect(picker.locator('.addSubscribedChannelOption')).toHaveCount(50)
+    await picker.getByRole('button', { name: 'Load more channels', exact: true }).focus()
+    await page.keyboard.press('Enter')
+    await expect(picker.locator('.addSubscribedChannelOption')).toHaveCount(100)
+    await expect(picker.getByRole('button', { name: 'Channel 051', exact: true })).toBeFocused()
+  })
+})
+
 test.describe('channel settings scroll layout', { tag: '@scale' }, () => {
   const seed = channelSettingsSeed(49)
   seed.settings.generalAutoLoadMorePaginatedItemsEnabled = false

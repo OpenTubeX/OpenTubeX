@@ -260,6 +260,7 @@
           </p>
           <ul
             v-else
+            ref="addChannelList"
             class="addSubscribedChannelList"
           >
             <li
@@ -311,7 +312,7 @@
                 :icon="['fas', 'arrow-down']"
                 background-color="var(--primary-color)"
                 text-color="var(--text-with-main-color)"
-                @click="addChannelPage++"
+                @click="loadMoreAvailableSubscriptions"
               />
             </FtFlexBox>
           </FtAutoLoadNextPageWrapper>
@@ -459,6 +460,7 @@ const addingSubscribedChannel = ref(false)
 const pendingPreferenceInitializations = new Map()
 const addChannelSearch = useTemplateRef('addChannelSearch')
 const addChannelPrompt = useTemplateRef('addChannelPrompt')
+const addChannelList = useTemplateRef('addChannelList')
 const addChannelScroller = computed(() => addChannelPrompt.value?.contentScroller ?? null)
 
 watch(showAddChannelPrompt, async (open) => {
@@ -642,6 +644,14 @@ const { page: addChannelPage, hasMore: hasMoreAvailableSubscriptions, displayedI
   resetOn: addChannelSearchQuery,
   scrollTarget: addChannelScroller
 })
+
+/** The button that requested the batch unmounts with it, so keep keyboard focus on the first new channel. */
+async function loadMoreAvailableSubscriptions() {
+  const firstNewIndex = displayedAvailableSubscriptions.value.length
+  addChannelPage.value++
+  await nextTick()
+  addChannelList.value?.children[firstNewIndex]?.querySelector('button')?.focus()
+}
 
 const visibleChannelEntries = computed(() => {
   const query = searchQuery.value.trim().toLowerCase()
