@@ -491,7 +491,7 @@ test('a redirect loop fails at once instead of retrying like a lost connection',
   let requests = 0
   const server = createServer((request, response) => {
     requests++
-    response.writeHead(302, { location: request.url }).end()
+    response.writeHead(302, { location: '/loop' }).end()
   })
   await new Promise(resolve => server.listen(0, '127.0.0.1', resolve))
   try {
