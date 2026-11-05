@@ -1684,6 +1684,8 @@ Tutorial:
     Action: Importar datos
     Not Now: Ahora no
 About:
+  Downloads: Descargas
+  Changelog: Registro de cambios
   Commit: Commit
   Licensed under the {licenseLink}: Licenciado bajo {licenseLink}
   AGPLv3: AGPLv3

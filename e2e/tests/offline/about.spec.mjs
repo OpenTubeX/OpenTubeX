@@ -66,3 +66,24 @@ test('about page shows the bundled runtime versions', async ({ app, page }) => {
     await expect(row.locator('dd')).toHaveText(version)
   }
 })
+
+test('about tiles stack in one column when the dialog is narrow', { tag: '@scale' }, async ({ page }) => {
+  await page.setViewportSize({ width: 1600, height: 900 })
+  await page.locator('.profileTrigger').click()
+  await page.getByRole('dialog', { name: 'Quick settings' }).getByRole('button', { name: 'About' }).click()
+  const aboutWindow = page.getByRole('dialog', { name: 'About' })
+  await expect(aboutWindow).toBeVisible()
+  const chunks = aboutWindow.locator('.about-chunks')
+  const columnCount = () => chunks.evaluate(element => new Set(
+    [...element.children].map(chunk => Math.round(chunk.getBoundingClientRect().left))
+  ).size)
+
+  await chunks.evaluate(element => { element.style.inlineSize = '860px' })
+  await expect.poll(columnCount).toBe(2)
+  // An even tile count keeps the two-column grid without a dangling last tile.
+  expect((await chunks.locator('.chunk').count()) % 2).toBe(0)
+
+  // The utility window can be much narrower than the viewport.
+  await chunks.evaluate(element => { element.style.inlineSize = '340px' })
+  await expect.poll(columnCount).toBe(1)
+})

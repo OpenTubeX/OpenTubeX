@@ -1602,13 +1602,14 @@ Tutorial:
     Action: Importar datos
     Not Now: Ahora no
 About:
+  Downloads: Descargas
+  Changelog: Registro de cambios
   About: Acerca de
   Beta: Beta
   Commit: Commit
   Source code: Código fuente
   Licensed under the {licenseLink}: Licenciado bajo {licenseLink}
   AGPLv3: AGPLv3
-  Downloads / Changelog: Descargas / Registro de cambios
   GitHub releases: Lanzamientos de GitHub
   Help: Ayuda
   OpenTubeX Wiki: Wiki de OpenTubeX

@@ -1503,6 +1503,8 @@ Tutorial:
     Action: Gegevens importeren
     Not Now: Niet nu
 About:
+  Downloads: Downloads
+  Changelog: Wijzigingslogboek
   Commit: Commit
   Licensed under the {licenseLink}: Uitgebracht onder de {licenseLink}
   Fluxer: Word lid van onze Fluxer-community
