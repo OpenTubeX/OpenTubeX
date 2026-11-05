@@ -16,3 +16,9 @@
   isolation: isolate;
   background-size: 0 0;
 }
+
+/* Lift the card while it holds an open dropdown, or the cards after it would
+   paint over the menu. */
+.ft-card:where(.fixedBackground):has(.iconDropdown) {
+  z-index: 1;
+}

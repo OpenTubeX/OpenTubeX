@@ -129,3 +129,20 @@ test('channel About YouTube links open in the app', async ({ app, page }) => {
   await expect(page.getByRole('dialog', { name: 'Are you sure you want to open this link?' })).toBeHidden()
   expect(await app.electronApp.evaluate(() => globalThis.channelAboutExternalUrls)).toEqual([])
 })
+
+test('the channel share menu stays above the channel content card', async ({ page }) => {
+  await openChannelAbout(page, WEBSITE_URL)
+  await page.locator('.channelDetails .shareIcon .iconButton').click()
+  const dropdown = page.locator('.channelDetails .iconDropdown')
+  await expect(dropdown).toBeVisible()
+  // The menu reaches below its own card. Cards are stacking contexts, so the
+  // one holding the menu must lift above the cards after it.
+  const covered = await dropdown.evaluate(element => {
+    const details = element.closest('.ft-card').getBoundingClientRect()
+    const { left, right, bottom } = element.getBoundingClientRect()
+    if (bottom <= details.bottom + 8) throw new Error('The menu does not reach the next card')
+    const hit = document.elementFromPoint((left + right) / 2, (details.bottom + bottom) / 2)
+    return !element.contains(hit)
+  })
+  expect(covered, 'A later card covers the share menu').toBe(false)
+})
