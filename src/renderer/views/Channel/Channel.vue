@@ -688,7 +688,6 @@ watch(route, () => {
   autoRefreshOnSortByChangeEnabled = false
 
   id.value = route.params.id
-  searchPage = 1
   elementListLoadingTabs.value = {}
   relatedChannels.value = []
   links.value = []
@@ -2488,9 +2487,9 @@ async function getCommunityPostsInvidious() {
   }
 }
 
-let searchPage = 1
 const lastSearchQuery = ref('')
 const searchResults = shallowRef([])
+/** The local API's search result, or the next page number for Invidious */
 const searchContinuationData = shallowRef(null)
 const channelSearchFilter = ref(CHANNEL_SEARCH_FILTERS.ALL)
 
@@ -2611,9 +2610,10 @@ async function searchChannelLocal() {
 
 async function searchChannelInvidious() {
   const isCurrentRequest = currentElementListRequest('search')
+  const page = searchContinuationData.value ?? 1
 
   try {
-    const response = await searchInvidiousChannel(id.value, lastSearchQuery.value, searchPage)
+    const response = await searchInvidiousChannel(id.value, lastSearchQuery.value, page)
     if (!isCurrentRequest()) return
     const typedResponse = response.map(item => ({
       ...item,
@@ -2626,8 +2626,9 @@ async function searchChannelInvidious() {
       searchResults.value = searchResults.value.concat(typedResponse)
     }
 
+    // Invidious has no continuation token; the last page is the first empty one.
+    searchContinuationData.value = response.length > 0 ? page + 1 : null
     isSearchTabLoading.value = false
-    searchPage++
     tabApiUsed.set('search', 'invidious')
   } catch (err) {
     if (!isCurrentRequest()) return
@@ -2636,7 +2637,7 @@ async function searchChannelInvidious() {
     const errorMessage = getInvidiousApiErrorMessage(backendPreference.value)
     showApiErrorToast(errorMessage, err)
 
-    if (process.env.SUPPORTS_LOCAL_API && usesInvidiousApi(backendPreference.value) && backendFallback.value) {
+    if (page === 1 && process.env.SUPPORTS_LOCAL_API && usesInvidiousApi(backendPreference.value) && backendFallback.value) {
       showInvidiousFallbackToast(backendPreference.value)
       searchChannelLocal()
     } else {
@@ -2657,7 +2658,6 @@ function newSearch(query) {
   lastSearchQuery.value = query
   searchContinuationData.value = null
   isSearchTabLoading.value = true
-  searchPage = 1
   searchResults.value = []
   // Supersede any search still in flight so its results cannot land in this one.
   startElementListRequest('search')
@@ -2683,7 +2683,6 @@ function clearSearch() {
   lastSearchQuery.value = ''
   searchContinuationData.value = null
   isSearchTabLoading.value = false
-  searchPage = 1
   searchResults.value = []
   startElementListRequest('search')
   channelSearchFilter.value = CHANNEL_SEARCH_FILTERS.ALL

@@ -154,6 +154,46 @@ test.describe('Invidious channel', () => {
     }
   })
 
+  test('channel search loads more Invidious pages until one comes back empty', async ({ page }) => {
+    const searchPages = []
+    await page.route(`https://invidious.test/api/v1/channels/${channelId}**`, route => {
+      const url = new URL(route.request().url())
+      if (url.pathname.endsWith('/search')) {
+        const searchPage = Number(url.searchParams.get('page'))
+        searchPages.push(searchPage)
+        return route.fulfill({
+          json: searchPage > 2
+            ? []
+            : [{ type: 'video', videoId: `invidious-p${searchPage}`, title: `Search page ${searchPage}`, author: 'Glitch', authorId: channelId, lengthSeconds: 60, videoThumbnails: [] }]
+        })
+      }
+      if (url.pathname.endsWith('/videos')) {
+        return route.fulfill({ json: { videos: [], continuation: null } })
+      }
+      return route.fulfill({ json: invidiousChannel(['videos']) })
+    })
+
+    await openChannel(page)
+    const search = page.locator('.channelSearch input')
+    await search.fill('glitch')
+    await search.press('Enter')
+    const results = page.locator('.channelSearchResults')
+    const fetchMore = page.getByRole('button', { name: 'Fetch more results' })
+    await expect(results.getByRole('heading', { name: 'Search page 1', exact: true })).toBeVisible()
+
+    await fetchMore.click()
+    await expect(results.getByRole('heading', { name: 'Search page 2', exact: true })).toBeVisible()
+    await expect(results.getByRole('heading', { name: 'Search page 1', exact: true })).toBeVisible()
+
+    const emptyPage = page.waitForResponse(response => new URL(response.url()).searchParams.get('page') === '3')
+    await fetchMore.click()
+    await (await emptyPage).finished()
+    // The button also hides while the page loads, so let the response render first.
+    await page.evaluate(() => new Promise(resolve => requestAnimationFrame(() => requestAnimationFrame(resolve))))
+    await expect(fetchMore).toBeHidden()
+    expect(searchPages).toEqual([1, 2, 3])
+  })
+
   test('a tab that fell back to the local API loads its next page from the local API', async ({ page }) => {
     // The recorded playlists tab has no next page, so add one with a copy of its first card.
     const playlistsTab = JSON.parse(gunzipSync(await readFile(new URL(`${PLAYLISTS_TAB_KEY}.0.json.gz`, fixtures))))
