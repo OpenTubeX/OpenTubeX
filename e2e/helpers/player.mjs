@@ -203,7 +203,11 @@ export async function clickFullscreenAction(player, action) {
  */
 export async function waitForPlaybackOrSkip(test, page) {
   const video = page.locator(`${activeTab} video`)
-  const blocked = page.locator(`${activeTab} .errorMessage`, { hasText: /blocked your IP address/i })
+  // YouTube often refuses blocked runners as an unplayable video or a bot check
+  // instead, and the error can appear after the player.
+  const blocked = page.locator(`${activeTab} .errorMessage`, {
+    hasText: /blocked your IP address|^\s*\[(UNPLAYABLE|LOGIN_REQUIRED)\]/i
+  })
 
   let state = 'waiting'
   await expect
@@ -221,7 +225,7 @@ export async function waitForPlaybackOrSkip(test, page) {
     }, { timeout: 60_000, message: 'waiting for playback to start or an IP-block error' })
     .toBe('done')
 
-  test.skip(state === 'blocked', 'YouTube blocked media streaming from this IP')
+  test.skip(state === 'blocked', `YouTube refused playback from this IP: ${await blocked.textContent().catch(() => '')}`)
   return video
 }
 
