@@ -187,7 +187,7 @@ test.describe('Invidious channel', () => {
 
     const emptyPage = page.waitForResponse(response => new URL(response.url()).searchParams.get('page') === '3')
     await fetchMore.click()
-    await (await emptyPage).finished()
+    expect(await (await emptyPage).finished()).toBeNull()
     // The button also hides while the page loads, so let the response render first.
     await page.evaluate(() => new Promise(resolve => requestAnimationFrame(() => requestAnimationFrame(resolve))))
     await expect(fetchMore).toBeHidden()
