@@ -2499,8 +2499,8 @@ function copyPackageManagerUpdateCommand() {
 
 function openDownloadsPage() {
   handleExternalLink('https://opentubex.org/downloads/')
-  // Keep the release notes when the link can't open, so the update stays reachable
-  if (resolveExternalLinkAction(externalLinkHandling.value) === 'disabled') return
+  // Keep the update reachable unless the link opened right away
+  if (resolveExternalLinkAction(externalLinkHandling.value) !== 'open') return
   dismissAvailableUpdate()
   showReleaseNotes.value = false
 }

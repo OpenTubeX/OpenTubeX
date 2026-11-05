@@ -368,11 +368,18 @@ test.describe('with external links behind a prompt', () => {
       release(`OpenTubeX ${newestUpdateVersion}`, `v${newestUpdateVersion}-beta`, NEWEST_NOTES)
     ])
 
-    await page.getByRole('button', { name: 'Download From Site' }).click()
+    const downloadButton = page.getByRole('button', { name: 'Download From Site' })
     const prompt = page.getByRole('dialog', { name: 'Are you sure you want to open this link?' })
+    await downloadButton.click()
     await expect(prompt).toContainText('https://opentubex.org/downloads/')
+
+    // Declining keeps the update available
+    await prompt.getByRole('button', { name: 'No', exact: true }).click()
+    await expect(prompt).toHaveCount(0)
+    await expect(page.locator('.changeLogTitle')).toBeVisible()
     expect(await app.electronApp.evaluate(() => globalThis.downloadExternalUrls)).toEqual([])
 
+    await downloadButton.click()
     await prompt.getByRole('button', { name: 'Yes, Open Link' }).click()
     await expect.poll(() => app.electronApp.evaluate(() => globalThis.downloadExternalUrls))
       .toEqual(['https://opentubex.org/downloads/'])
