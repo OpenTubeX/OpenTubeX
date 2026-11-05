@@ -224,21 +224,14 @@ const displayedChannels = computed(() => {
   return sortedChannels.value.filter(channel => channel.name.toLowerCase().includes(search))
 })
 
-const { page: channelPage, displayedItems: pagedChannels, hasMore: hasMoreChannels } = useListPagination(displayedChannels, {
+const { page: channelPage, displayedItems: pagedChannels, hasMore: hasMoreChannels, loadMore: loadMoreChannels } = useListPagination(displayedChannels, {
   pageSize: 100,
   append: true,
-  resetOn: query
+  resetOn: query,
+  focusItem: index => channelPicker.value?.$el.querySelectorAll('[role="checkbox"]')[index]?.focus()
 })
 
 const channelPicker = useTemplateRef('channelPicker')
-
-// The button is replaced by the next page's, so focus the first new channel instead.
-async function loadMoreChannels() {
-  const firstNewIndex = pagedChannels.value.length
-  channelPage.value++
-  await nextTick()
-  channelPicker.value?.$el.querySelectorAll('[role="checkbox"]')[firstNewIndex]?.focus()
-}
 
 const selectedSubscribedCount = computed(() => {
   return channels.value.reduce((count, channel) => count + Number(selected.has(channel.id)), 0)

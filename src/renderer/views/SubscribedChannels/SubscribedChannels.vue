@@ -1,5 +1,5 @@
 <template>
-  <div>
+  <div ref="channelsContainer">
     <ft-card class="card">
       <div class="heading">
         <h2 class="pageTitle">
@@ -144,7 +144,7 @@
               :icon="['fas', 'arrow-down']"
               background-color="var(--primary-color)"
               text-color="var(--text-with-main-color)"
-              @click="channelPage++"
+              @click="loadMoreChannels"
             />
           </ft-flex-box>
         </FtAutoLoadNextPageWrapper>
@@ -190,6 +190,7 @@ const re = {
 const ytBaseURL = 'https://yt3.ggpht.com'
 const thumbnailSize = 176
 const channelsPerPage = 50
+const channelsContainer = useTemplateRef('channelsContainer')
 let errorCount = 0
 /** @type {Set<ReturnType<typeof setTimeout>>} */
 const thumbnailRetryTimers = new Set()
@@ -280,10 +281,11 @@ const channelList = computed(() => {
   })
 })
 
-const { page: channelPage, displayedItems: displayedChannels, hasMore: hasMoreChannels } = useListPagination(channelList, {
+const { page: channelPage, displayedItems: displayedChannels, hasMore: hasMoreChannels, loadMore: loadMoreChannels } = useListPagination(channelList, {
   pageSize: channelsPerPage,
   append: true,
-  resetOn: [query, activeProfileId, activeGroupId]
+  resetOn: [query, activeProfileId, activeGroupId],
+  focusItem: index => channelsContainer.value?.querySelectorAll('.channel')[index]?.querySelector('[tabindex], a, button')?.focus()
 })
 
 const canReorder = computed(() => sortBy.value === SORT_BY_OPTIONS.Custom && query.value === '')

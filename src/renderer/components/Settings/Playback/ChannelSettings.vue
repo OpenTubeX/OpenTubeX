@@ -216,7 +216,7 @@
                 :icon="['fas', 'arrow-down']"
                 background-color="var(--primary-color)"
                 text-color="var(--text-with-main-color)"
-                @click="channelPage++"
+                @click="loadMoreChannels"
               />
             </FtFlexBox>
           </FtAutoLoadNextPageWrapper>
@@ -638,20 +638,13 @@ const visibleAvailableSubscriptions = computed(() => {
 })
 
 // Mount subscriptions in batches so the picker opens quickly with thousands of them.
-const { page: addChannelPage, hasMore: hasMoreAvailableSubscriptions, displayedItems: displayedAvailableSubscriptions, reset: resetAddChannelPage } = useListPagination(visibleAvailableSubscriptions, {
+const { page: addChannelPage, hasMore: hasMoreAvailableSubscriptions, displayedItems: displayedAvailableSubscriptions, reset: resetAddChannelPage, loadMore: loadMoreAvailableSubscriptions } = useListPagination(visibleAvailableSubscriptions, {
   pageSize: 50,
   append: true,
   resetOn: addChannelSearchQuery,
-  scrollTarget: addChannelScroller
+  scrollTarget: addChannelScroller,
+  focusItem: index => addChannelList.value?.children[index]?.querySelector('button')?.focus()
 })
-
-/** The button that requested the batch unmounts with it, so keep keyboard focus on the first new channel. */
-async function loadMoreAvailableSubscriptions() {
-  const firstNewIndex = displayedAvailableSubscriptions.value.length
-  addChannelPage.value++
-  await nextTick()
-  addChannelList.value?.children[firstNewIndex]?.querySelector('button')?.focus()
-}
 
 const visibleChannelEntries = computed(() => {
   const query = searchQuery.value.trim().toLowerCase()
@@ -666,11 +659,12 @@ const visibleChannelEntries = computed(() => {
 })
 
 // Mount editors in batches so large saved channel lists open quickly.
-const { page: channelPage, hasMore: hasMoreChannels, displayedItems: displayedChannelEntries, reset: resetChannelPage, restoreScroll: restoreChannelScroll } = useListPagination(visibleChannelEntries, {
+const { page: channelPage, hasMore: hasMoreChannels, displayedItems: displayedChannelEntries, reset: resetChannelPage, restoreScroll: restoreChannelScroll, loadMore: loadMoreChannels } = useListPagination(visibleChannelEntries, {
   pageSize: channelsPerPage,
   append: true,
   resetOn: searchQuery,
-  scrollTarget: channelListContainer
+  scrollTarget: channelListContainer,
+  focusItem: index => channelListContent.value?.querySelectorAll('.channelEntry')[index]?.querySelector('a, button, input')?.focus()
 })
 
 /** @param {string} channelId */
