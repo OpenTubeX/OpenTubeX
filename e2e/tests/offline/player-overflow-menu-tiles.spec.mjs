@@ -533,6 +533,113 @@ test.describe('phone options sheet', () => {
     expect(fullWindow.rowGap).not.toBeNull()
     expect(fullWindow.rowGap).toBeGreaterThanOrEqual(7.5)
   })
+
+  test('submenu options grow with the tiles, and the caption header and actions are sized and placed for touch', { tag: '@scale' }, async ({ app, page, uiScale }) => {
+    await page.evaluate(() => window.$store.dispatch('updateReducedMotion', 'on'))
+    await mockPlayableWatchPage(app, page, { captionTranslations: true })
+    await openMockedVideo(page)
+    // The same CSS viewport at every UI scale
+    const windowSize = (width, height) => setWindowSize(app, page, { width: Math.round(width * uiScale / 100), height: Math.round(height * uiScale / 100) })
+    await windowSize(390, 844)
+    const player = page.locator(`${activeTab} .ftVideoPlayer`)
+    const sheet = player.locator('.phonePlayerOptions')
+    const options = sheet.locator('.shaka-text-languages .ft-caption-list-options > button')
+    const openCaptions = async () => {
+      await player.locator('.shaka-controls-container').evaluate(element => element.setAttribute('shown', 'true'))
+      await player.locator('.shaka-overflow-menu-button').click({ force: true })
+      await sheet.locator('.shaka-overflow-menu > .shaka-caption-button').click()
+      await expect(options.first()).toBeVisible()
+    }
+    const measure = () => options.evaluateAll((buttons) => {
+      const tiles = buttons.filter(button => button.checkVisibility()).map(button => ({ box: button.getBoundingClientRect(), label: button.querySelector('span').getBoundingClientRect() }))
+      const neighbor = tiles.findIndex((tile, index) => index > 0 && Math.abs(tile.box.top - tiles[index - 1].box.top) < 0.5)
+      return {
+        height: Math.min(...tiles.map(tile => tile.box.height)),
+        fontSize: Number.parseFloat(getComputedStyle(buttons[0]).fontSize),
+        columnGap: neighbor > 0 ? tiles[neighbor].box.left - tiles[neighbor - 1].box.right : null,
+        // Names that leave their tile
+        overflowing: tiles.filter(({ box, label }) => label.top < box.top - 0.5 || label.bottom > box.bottom + 0.5).length,
+        // From the Load subtitle file and Adjust timing rows to the bottom of the sheet
+        actionsEnd: buttons[0].closest('.phonePlayerOptions').getBoundingClientRect().bottom -
+          buttons[0].closest('.shaka-text-languages').querySelector('.ft-caption-actions').getBoundingClientRect().bottom,
+        ...(() => {
+          const sheet = buttons[0].closest('.phonePlayerOptions')
+          const header = sheet.querySelector(':scope > .shaka-back-to-overflow-button').getBoundingClientRect()
+          const actions = sheet.querySelector('.shaka-text-languages .ft-caption-actions').getBoundingClientRect()
+          const close = sheet.querySelector('.phonePlayerOptionsClose > .shaka-ui-icon').getBoundingClientRect()
+          return {
+            // The header's divider runs as wide as the actions' one, beneath the close button
+            dividerOffsets: [Math.abs(header.left - actions.left), Math.abs(header.right - actions.right)],
+            closeInHeader: close.left >= header.left && close.right <= header.right && close.top >= header.top && close.bottom <= header.bottom,
+          }
+        })(),
+      }
+    })
+
+    await openCaptions()
+    const inline = await measure()
+    expect(inline.overflowing).toBe(0)
+    expect(inline.columnGap).toBeGreaterThanOrEqual(5.5)
+    expect(Math.max(...inline.dividerOffsets)).toBeLessThan(0.5)
+    expect(inline.closeInHeader).toBe(true)
+    await sheet.evaluate(element => element.querySelector('.phonePlayerOptionsClose').click())
+    await expect(sheet).toBeHidden()
+
+    await windowSize(844, 390)
+    await page.keyboard.press('s')
+    await expect(player).toHaveClass(/fullWindow/)
+    await openCaptions()
+    const fullWindow = await measure()
+    expect(fullWindow.overflowing).toBe(0)
+    expect(fullWindow.height).toBeGreaterThan(inline.height + 4)
+    expect(fullWindow.fontSize).toBeGreaterThan(inline.fontSize)
+    expect(fullWindow.columnGap).toBeGreaterThanOrEqual(7.5)
+    expect(Math.max(...fullWindow.dividerOffsets)).toBeLessThan(0.5)
+    expect(fullWindow.closeInHeader).toBe(true)
+    // The sheet's empty row below the menu would lift them off the bottom.
+    expect(fullWindow.actionsEnd).toBeLessThanOrEqual(inline.actionsEnd + 0.5)
+
+    // Wider than the tiles may grow, the submenu still spans the header.
+    await sheet.evaluate(element => element.querySelector('.phonePlayerOptionsClose').click())
+    await expect(sheet).toBeHidden()
+    await windowSize(932, 430)
+    await openCaptions()
+    const wide = await measure()
+    expect(Math.max(...wide.dividerOffsets)).toBeLessThan(0.5)
+    expect(wide.closeInHeader).toBe(true)
+
+    // The header is sized like its close button, and each action is centered in its part of the row.
+    const header = await sheet.evaluate((element) => {
+      const fontSize = selector => Number.parseFloat(getComputedStyle(element.querySelector(selector)).fontSize)
+      const actions = [...element.querySelectorAll('.shaka-text-languages .ft-caption-actions > button')].map((button) => {
+        const box = button.getBoundingClientRect()
+        const parts = [...button.children].map(part => part.getBoundingClientRect())
+        return Math.abs((Math.min(...parts.map(part => part.left)) - box.left) - (box.right - Math.max(...parts.map(part => part.right))))
+      })
+      return {
+        title: fontSize(':scope > .shaka-back-to-overflow-button'),
+        backIcon: element.querySelector(':scope > .shaka-back-to-overflow-button > .shaka-ui-icon').getBoundingClientRect().height,
+        closeIcon: element.querySelector('.phonePlayerOptionsClose > .shaka-ui-icon').getBoundingClientRect().height,
+        options: fontSize('.ft-caption-options-button'),
+        // From the middle of the title to the middle of the Options label
+        optionsOffset: (() => {
+          const middle = (node) => {
+            const range = document.createRange()
+            range.selectNodeContents(node)
+            const box = range.getBoundingClientRect()
+            return (box.top + box.bottom) / 2
+          }
+          return middle(element.querySelector('.ft-caption-options-button')) - middle(element.querySelector(':scope > .shaka-back-to-overflow-button > span'))
+        })(),
+        actionOffCenter: Math.max(...actions),
+      }
+    })
+    expect(header.title).toBeGreaterThanOrEqual(16)
+    expect(header.backIcon).toBeCloseTo(header.closeIcon, 0)
+    expect(header.options).toBeGreaterThanOrEqual(16)
+    expect(Math.abs(header.optionsOffset)).toBeLessThan(1)
+    expect(header.actionOffCenter).toBeLessThan(1)
+  })
 })
 
 test('playback speed tile is highlighted exactly while the speed is not 1x', async ({ app, page }) => {

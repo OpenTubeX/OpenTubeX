@@ -46,7 +46,7 @@
   max-block-size: none !important;
   margin-block: 0;
   margin-inline: auto;
-  padding: 8px;
+  padding: var(--phone-menu-padding, 8px);
   border-radius: 0;
   box-sizing: border-box;
   background: transparent;
@@ -54,6 +54,8 @@
 }
 
 :deep(.phonePlayerOptions > .shaka-overflow-menu.ft-menu-grid) {
+  --ft-option-gap: 6px;
+
   grid-template-columns: repeat(auto-fit, minmax(80px, 1fr));
   grid-auto-rows: 68px;
   gap: 6px;
@@ -63,15 +65,12 @@
 /* Match the phone menu's touch targets while keeping the desktop row compact. */
 :deep(.phonePlayerOptions) {
   --caption-timing-target-size: var(--phone-touch-target, 48px);
+
+  /* The caption actions span the sheet, so their labels sit in the middle of their halves. */
+  --ft-caption-action-justify: center;
 }
 
 :deep(.phonePlayerOptions .shaka-sub-menu) {
-  /* Submenus keep their own tile sizes in fullscreen. */
-  --ft-tile-icon-size: initial;
-  --ft-tile-label-size: initial;
-  --ft-tile-value-size: initial;
-  --ft-tile-radius: initial;
-
   max-block-size: none;
 }
 
@@ -80,21 +79,30 @@
   overflow: visible;
 }
 
+/*
+  The header and its divider run beneath the close button, which sits at its end,
+  and are inset like the menu's content, so that it lines up with the dividers in it.
+*/
 :deep(.phonePlayerOptions > .shaka-back-to-overflow-button) {
   display: flex;
   position: absolute;
   inset-block-start: 0;
-  inset-inline: 0 var(--phone-touch-target, 48px);
+  inset-inline: var(--phone-menu-padding, 8px);
   flex: none;
   align-items: center;
   justify-content: flex-start;
   min-block-size: var(--phone-touch-target, 48px);
   margin: 0;
   padding-block: 8px;
-  padding-inline: 12px;
+  padding-inline: calc(12px - var(--phone-menu-padding, 8px)) calc(var(--phone-touch-target, 48px) - var(--phone-menu-padding, 8px));
   border: 0;
   background: transparent;
   color: inherit;
+}
+
+/* Shaka's own size is important. */
+:deep(.phonePlayerOptions > .shaka-back-to-overflow-button > .shaka-ui-icon) {
+  font-size: var(--ft-header-icon-size, 18px) !important;
 }
 
 /* The header shows a copy of the open submenu's back button (`setupPhoneOptionsMenu`). */
@@ -117,6 +125,12 @@
   inset-inline-end: var(--phone-touch-target, 48px);
   z-index: 1;
   margin: 0;
+}
+
+/* The header has no divider below its title to line the label up with, unlike the grid menu's. */
+:deep(.phonePlayerOptions .shaka-sub-menu.ft-menu-grid > .ft-caption-options-button) {
+  padding-block: 0 !important;
+  border-block-end: 0;
 }
 
 /* Above the caption choices instead of over them, where it doesn't fit beside the title */
@@ -146,18 +160,38 @@
 }
 
 .ftVideoPlayer:is(:fullscreen, .fullWindow) :deep(.phonePlayerOptions[open]) {
+  /*
+    The header grows with the tiles, with the back icon as large as the close icon.
+    Inline, the narrow sheet keeps it compact so that header actions such as the
+    quality codecs still fit beside the title.
+  */
+  --ft-header-icon-size: 24px;
+  --ft-header-action-font-size: 16px;
+  --phone-menu-padding: 12px;
+
   padding-block: calc(var(--phone-touch-target, 48px) + var(--safe-area-inset-top, env(safe-area-inset-top, 0px))) calc(var(--phone-touch-target, 48px) + var(--safe-area-inset-bottom, env(safe-area-inset-bottom, 0px)));
+}
+
+/* The caption actions are pinned to the bottom of the menu, so they take the row kept free below it. */
+.ftVideoPlayer:is(:fullscreen, .fullWindow) :deep(.phonePlayerOptions[open]:has(.shaka-sub-menu:not(.shaka-hidden) > .ft-caption-actions)) {
+  padding-block-end: var(--safe-area-inset-bottom, env(safe-area-inset-bottom, 0));
 }
 
 .ftVideoPlayer:is(:fullscreen, .fullWindow) :deep(.phonePlayerOptions > :is(.phonePlayerOptionsClose, .shaka-back-to-overflow-button)) {
   inset-block-start: var(--safe-area-inset-top, env(safe-area-inset-top, 0));
 }
 
+/* With the larger icon and header actions set on the sheet */
+.ftVideoPlayer:is(:fullscreen, .fullWindow) :deep(.phonePlayerOptions > .shaka-back-to-overflow-button),
+.ftVideoPlayer:is(:fullscreen, .fullWindow) :deep(.phonePlayerOptions .ft-caption-options-button) {
+  font-size: 16px;
+}
+
 .ftVideoPlayer:is(:fullscreen, .fullWindow) :deep(.phonePlayerOptions[data-header-action] .ft-submenu-header-action) {
   inset-block-start: calc(var(--safe-area-inset-top, env(safe-area-inset-top, 0px)) + (var(--phone-touch-target, 48px) - 36px) / 2);
 }
 
-/* Fullscreen has room for larger tiles than the two rows that fit inline. */
+/* Fullscreen has room for larger tiles and submenu options than the two rows that fit inline. */
 .ftVideoPlayer:is(:fullscreen, .fullWindow) :deep(.phonePlayerOptions > .shaka-overflow-menu.ft-menu-grid) {
   --phone-tile-padding: 6px;
   --phone-tile-gap: 4px;
@@ -165,16 +199,24 @@
   --ft-tile-label-size: 13px;
   --ft-tile-value-size: 11px;
   --ft-tile-radius: 12px;
+  --ft-option-inline-size: 112px;
+  --ft-option-block-size: 56px;
+  --ft-option-font-size: 13px;
+  --ft-option-gap: 8px;
+  --ft-caption-action-font-size: 15px;
 
   inline-size: min(100%, 880px) !important;
-  padding: 12px;
   grid-template-columns: repeat(auto-fit, minmax(96px, 1fr));
   grid-auto-rows: 92px;
   gap: 8px;
 }
 
-/* Comes after the fullscreen tiles, whose selector has the same specificity */
+/*
+  Comes after the fullscreen tiles, whose selector has the same specificity.
+  A submenu fills the sheet, so its dividers line up with the header's.
+*/
 :deep(.phonePlayerOptions > .shaka-overflow-menu.ft-menu-grid:has(.shaka-sub-menu:not(.shaka-hidden))) {
+  inline-size: 100% !important;
   grid-auto-rows: minmax(min-content, 1fr);
 }
 
