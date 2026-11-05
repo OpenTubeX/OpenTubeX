@@ -416,11 +416,20 @@ onUnmounted(() => {
 <style scoped src="./themeSelectRow.css" />
 <style scoped>
 /* Loading every installed font to lay out the list stalls the first open, so
-   offscreen previews wait until they scroll into view. */
+   offscreen previews wait until they scroll into view and the menu measures
+   the labels in the app font. Unwrapped rows keep the estimated height. */
 .optionName > .fontPreview {
   display: block;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
   content-visibility: auto;
   contain-intrinsic-size: auto none auto 24px;
+}
+
+.measuringOptions .optionName > .fontPreview {
+  content-visibility: visible;
+  font-family: inherit !important;
 }
 
 .customThemeActions,

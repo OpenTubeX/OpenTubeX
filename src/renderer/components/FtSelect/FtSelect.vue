@@ -574,11 +574,14 @@ function updateDropdownPosition() {
   const buttonRect = button.getBoundingClientRect()
   // Measure the complete labels, including option visuals and padding, before
   // constraining the menu. Measuring clipped rows loses their intrinsic width.
+  // Option slots can swap costly content for plain labels while measuring.
+  menu.classList.add('measuringOptions')
   menu.style.inlineSize = 'max-content'
   const menuWidth = Math.min(
     Math.max(buttonRect.width, menu.getBoundingClientRect().width),
     window.innerWidth - viewportMargin * 2
   )
+  menu.classList.remove('measuringOptions')
   menu.style.inlineSize = `${menuWidth}px`
   const spaceBelow = Math.max(0, maximumBottom - buttonRect.bottom - menuGap)
   const spaceAbove = Math.max(0, buttonRect.top - menuGap - minimumTop)
