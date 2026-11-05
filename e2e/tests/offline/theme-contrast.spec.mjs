@@ -844,6 +844,51 @@ test.describe('selected tab label contrast', () => {
     }
     expect(failures).toEqual([])
   })
+
+  test('selected settings categories keep their title and description readable in every theme and accent', async ({ page }) => {
+    test.slow()
+    const combos = tintedSelectionCombos()
+    await goToSettingsSection(page, 'theme')
+    const category = page.locator('.settingsMenu .title.active')
+    const failures = []
+    for (const state of ['rest', 'hover']) {
+      if (state === 'hover') await category.hover()
+      else await page.mouse.move(0, 0)
+      const results = await category.evaluate(async (category, combos) => {
+        const context = new OffscreenCanvas(1, 1).getContext('2d', { willReadFrequently: true })
+        // Composite the layers like the renderer, so any color syntax resolves to sRGB bytes.
+        const paint = layers => {
+          context.fillStyle = '#fff'
+          context.fillRect(0, 0, 1, 1)
+          for (const color of layers) {
+            context.fillStyle = color
+            context.fillRect(0, 0, 1, 1)
+          }
+          return [...context.getImageData(0, 0, 1, 1).data].slice(0, 3)
+        }
+        const layers = []
+        for (let node = category; node; node = node.parentElement) layers.unshift(node)
+        const results = []
+        // Skip persistence: the theme watcher applies committed values on the next tick.
+        for (const { theme, mutation, color } of combos) {
+          window.$store.commit('setBaseTheme', theme)
+          if (mutation) window.$store.commit(mutation, color)
+          await new Promise(resolve => setTimeout(resolve))
+          document.getAnimations().forEach(animation => animation.effect?.getComputedTiming().endTime !== Infinity && animation.finish())
+          const background = paint(layers.map(node => getComputedStyle(node).backgroundColor))
+          for (const part of ['titleText', 'titleDescription']) {
+            results.push({ theme, color, part, foreground: paint([getComputedStyle(category.querySelector(`.${part}`)).color]), background })
+          }
+        }
+        return results
+      }, combos)
+      for (const { theme, color, part, foreground, background } of results) {
+        const ratio = contrastRatio(foreground, background)
+        if (ratio < 4.5) failures.push(`${state} ${theme} ${color ?? ''} ${part} ${ratio.toFixed(2)}:1 ${JSON.stringify({ foreground, background })}`)
+      }
+    }
+    expect(failures).toEqual([])
+  })
 })
 
 /** Label, icon and composited background of a context menu item in each theme and accent. */

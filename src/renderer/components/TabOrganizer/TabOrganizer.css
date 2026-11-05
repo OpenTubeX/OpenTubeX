@@ -17,7 +17,7 @@
    selected rows take a primary tint, like the current Sync session. */
 .tabOrganizer {
   --organizer-container: color-mix(in srgb, var(--primary-text-color) 5%, var(--card-bg-color));
-  --organizer-tonal: color-mix(in srgb, var(--primary-color) 16%, var(--card-bg-color));
+  --organizer-tonal: color-mix(in srgb, oklch(from var(--primary-color) var(--tint-lightness) c h) 16%, var(--card-bg-color));
   --organizer-selected: color-mix(in srgb, var(--primary-color) 22%, var(--card-bg-color));
 
   background: var(--card-bg-color);
@@ -54,8 +54,9 @@
 }
 
 /* Buttons are tonal pills by default. Each variant sets its container and
-   content colors; hover and press layer the content color on top. The corner
-   is half the height rather than full, so the press morph is smooth. */
+   content colors; hover and press layer the content color on top, at the same
+   strength so labels keep their contrast. The corner is half the height rather
+   than full, so the press morph is smooth. */
 .tabOrganizer button:where(:not([role='tab'])) {
   --organizer-button-height: 40px;
   --organizer-button-container: var(--organizer-tonal);
@@ -80,12 +81,11 @@
     border-radius var(--motion-fast-spatial);
 }
 
-.tabOrganizer button:where(:not([role='tab'], :disabled)):hover {
+.tabOrganizer button:where(:not([role='tab'], :disabled)):is(:hover, :active) {
   background-color: color-mix(in srgb, var(--organizer-button-foreground) 8%, var(--organizer-button-container));
 }
 
 .tabOrganizer button:where(:not([role='tab'], :disabled)):active {
-  background-color: color-mix(in srgb, var(--organizer-button-foreground) 12%, var(--organizer-button-container));
   border-radius: var(--shape-corner-small);
 }
 
