@@ -306,7 +306,6 @@
                     :aria-label="t('Downloads.Download Video')"
                     :icon="['fas', 'download']"
                     theme="secondary"
-                    variant="filled"
                     shape="square"
                     @click="showDownloadPrompt = true"
                   >

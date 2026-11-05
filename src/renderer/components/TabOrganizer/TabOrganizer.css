@@ -99,11 +99,6 @@
   outline-offset: 2px;
 }
 
-.tabOrganizer .primaryButton {
-  --organizer-button-container: var(--primary-color);
-  --organizer-button-foreground: var(--text-with-main-color);
-}
-
 .tabOrganizer .dangerButton {
   --organizer-button-container: color-mix(in srgb, var(--destructive-color) 16%, var(--card-bg-color));
 }
@@ -428,8 +423,7 @@
 }
 
 .tabOrganizer .groupIconPicker button[aria-pressed='true'] {
-  --organizer-button-container: var(--primary-color);
-  --organizer-button-foreground: var(--text-with-main-color);
+  --organizer-button-container: var(--selected-container-color);
 }
 
 .groupColorPicker,

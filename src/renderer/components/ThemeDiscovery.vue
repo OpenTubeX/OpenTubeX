@@ -534,8 +534,8 @@ async function install(entry) {
 }
 
 .screenshotChoices button[aria-pressed='true'] {
-  background: var(--accent-color);
-  color: var(--text-with-accent-color);
+  background: var(--selected-container-color);
+  color: var(--on-selected-container-color);
 }
 
 .screenshotChoices button:hover {
@@ -544,8 +544,8 @@ async function install(entry) {
 }
 
 .screenshotChoices button[aria-pressed='true']:hover {
-  background: color-mix(in oklab, var(--accent-color) 88%, white);
-  color: var(--text-with-accent-color);
+  background: var(--selected-container-hover-color);
+  color: var(--on-selected-container-color);
 }
 
 .screenshotChoices button:active {
