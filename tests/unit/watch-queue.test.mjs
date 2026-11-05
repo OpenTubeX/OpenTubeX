@@ -222,15 +222,24 @@ test('queued downloads explicitly start after loading even when general autoplay
 
 test('playlist and recommendation autoplay start the next video even when general autoplay is disabled', async () => {
   const source = await readFile(new URL('../../src/renderer/views/Watch/Watch.js', import.meta.url), 'utf8')
-  const methods = watchMethods(source, ['playNextVideoNow', 'handleUnavailablePlaylistVideoSkipped', 'watchRouteForVideo'])
+  const methods = watchMethods(source, ['playNextVideoNow', 'handleUnavailablePlaylistVideoSkipped', 'restartCurrentVideo', 'watchRouteForVideo'])
+  const actions = []
   const watch = {
     ...methods, watchingPlaylist: true, isOffline: false, videoId: 'current', queuedPlaybackVideoId: null,
     abortAutoplayCountdown() { this.autoplayCountdown = null },
     $store: { getters: {} }, tabRouter: { push() {} }, t: key => key,
-    $refs: { player: { isPaused: () => true }, watchVideoPlaylist: { playNextVideo: () => 'next' } },
+    $refs: {
+      player: { isPaused: () => true, setCurrentTime: time => actions.push(['seek', time]), play: () => actions.push(['play']) },
+      watchVideoPlaylist: { playNextVideo: options => { actions.push(['next', options]); return 'next' } },
+    },
   }
   watch.playNextVideoNow(false)
   assert.equal(watch.queuedPlaybackVideoId, 'next', 'the next playlist video starts')
+  assert.equal(actions[0][1].autoplay, true, 'a restart of the same video plays it too')
+
+  actions.length = 0
+  watch.restartCurrentVideo(false)
+  assert.deepEqual(actions, [['seek', 0]], 'a manual restart keeps the video paused')
 
   watch.videoId = 'next'
   watch.handleUnavailablePlaylistVideoSkipped('after')

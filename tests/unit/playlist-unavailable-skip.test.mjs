@@ -13,7 +13,7 @@ const component = [
   slice(source, 'function findIndexOfCurrentVideoInPlaylist(', 'function getPlaylistInfoWithDelay('),
   slice(source, 'const currentVideoIndexZeroBased =', 'const upcomingVideos ='),
   slice(source, 'function shuffleItems(', 'const playlistItemsWrapper ='),
-  slice(source, 'function playNextVideo() {', 'function playPreviousVideo() {'),
+  slice(source, 'function playNextVideo(', 'function playPreviousVideo() {'),
   slice(source, 'watch(() => props.videoId, (newId, oldId) => {', 'watch(() => props.playlistItemId,'),
   slice(source, 'watch(\n  [() => props.autoSkipUnavailable,', '// The watch view owns the skip actions'),
   'globalThis.actions = { playNextVideo, resetUnavailableSkipChain }',
@@ -59,7 +59,7 @@ function setup(t, items = ['A', 'B', 'C'].map(id => ({ videoId: id, playlistItem
     },
     emit: (name, videoId) => {
       if (name === 'unavailable-video-skipped') skippedTo.push(videoId)
-      if (name === 'restart-current-video') restarts.push(name)
+      if (name === 'restart-current-video') restarts.push({ autoplay: videoId })
     },
     store: { getters: {} },
     navigationDownloadId: () => downloadId,
@@ -154,10 +154,12 @@ test('reports a single-item playlist loop as a navigation only when the route ch
   const sameRoute = setup(t, [item])
   assert.equal(sameRoute.actions.playNextVideo(), null, 'the same route loads nothing new')
   assert.deepEqual(sameRoute.navigations, [], 'nothing navigates')
-  assert.deepEqual(sameRoute.restarts, ['restart-current-video'], 'the current video restarts instead')
+  assert.deepEqual(sameRoute.restarts, [{ autoplay: false }], 'the current video restarts instead')
+  sameRoute.actions.playNextVideo({ autoplay: true })
+  assert.deepEqual(sameRoute.restarts.at(-1), { autoplay: true }, 'only automatic advances ask the restart to play')
   assert.equal(setup(t, [item], { downloadId: '42' }).actions.playNextVideo(), 'only', 'a finished download changes the source')
   assert.equal(setup(t, [item], { downloadId: '42', currentQuery: { downloadId: '42' } }).actions.playNextVideo(), null, 'the download already plays')
   const timestamped = setup(t, [item], { currentQuery: { timestamp: '30' } })
   assert.equal(timestamped.actions.playNextVideo(), null, 'dropping the timestamp does not reload the video')
-  assert.deepEqual(timestamped.restarts, ['restart-current-video'])
+  assert.deepEqual(timestamped.restarts, [{ autoplay: false }])
 })

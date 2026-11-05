@@ -5548,7 +5548,7 @@ export default defineComponent({
       // Autoplay advances and Play Now start the next video even when Start
       // Videos Automatically keeps manually opened videos paused
       if (this.watchingPlaylist) {
-        this.queuedPlaybackVideoId = this.$refs.watchVideoPlaylist?.playNextVideo() ?? null
+        this.queuedPlaybackVideoId = this.$refs.watchVideoPlaylist?.playNextVideo({ autoplay: true }) ?? null
       } else if (!this.isOffline && nextVideo?.videoId) {
         this.queuedPlaybackVideoId = nextVideo.videoId
         this.tabRouter.push(this.watchRouteForVideo(nextVideo))
@@ -5592,9 +5592,13 @@ export default defineComponent({
       return true
     },
 
-    restartCurrentVideo: function () {
+    /**
+     * Manual skips keep the current play state, as manually opened videos do not start.
+     * @param {boolean} [autoplay]
+     */
+    restartCurrentVideo: function (autoplay = true) {
       this.$refs.player?.setCurrentTime(0)
-      this.$refs.player?.play()
+      if (autoplay) this.$refs.player?.play()
     },
 
     /**

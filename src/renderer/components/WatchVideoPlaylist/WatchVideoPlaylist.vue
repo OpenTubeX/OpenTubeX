@@ -1064,9 +1064,10 @@ function onMoveDraggedVideo(video, source) {
 }
 
 /**
+ * @param {{ autoplay?: boolean }} [options] whether a restart of the current video should play it
  * @returns {string|null} the video ID it navigated to, or null when it did not navigate
  */
-function playNextVideo() {
+function playNextVideo({ autoplay = false } = {}) {
   if (isWaitingForNextVideo.value || currentVideoMayBeUnloaded.value) return null
   const videoIndex = videoIndexInPlaylistItems.value
   const targetVideoIndex = (videoIsNotPlaylistItem.value || videoIsLastPlaylistItem.value) ? 0 : videoIndex + 1
@@ -1094,7 +1095,7 @@ function playNextVideo() {
   // nothing. The watch view also ignores a change that only drops the timestamp.
   const withoutTimestamp = ({ path, query }) => router.resolve({ path, query: { ...query, timestamp: undefined } }).fullPath
   const staysOnRoute = withoutTimestamp(router.resolve(routerPushPayload)) === withoutTimestamp(router.currentRoute.value)
-  const navigate = () => staysOnRoute ? emit('restart-current-video') : router.push(routerPushPayload)
+  const navigate = () => staysOnRoute ? emit('restart-current-video', autoplay) : router.push(routerPushPayload)
 
   if (shuffleEnabled.value) {
     let doShufflePlaylistItems = false

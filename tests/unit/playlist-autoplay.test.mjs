@@ -64,7 +64,7 @@ function harness({ laterPageError = null, backend = 'local' } = {}) {
   const state = vm.runInNewContext(`${extractSourceBetweenMarkers(playlistSource, 'const currentVideoIndexZeroBased =', '\nwatch(')}\n;({ nextVideo, upcomingVideos, playlistUnavailableVideoCount, isWaitingForNextVideo })`, context)
 
   const shouldStop = vm.runInNewContext(`${extractSourceBetweenMarkers(playlistSource, 'const videoIsLastInInPlaylistItems =', '\n/**\n * Index that')}\nshouldStopDueToPlaylistEnd`, context)
-  const playNext = vm.runInNewContext(`${extractSourceBetweenMarkers(playlistSource, 'function playNextVideo() {', '\nfunction playPreviousVideo() {')}\nplayNextVideo`, context)
+  const playNext = vm.runInNewContext(`${extractSourceBetweenMarkers(playlistSource, 'function playNextVideo(', '\nfunction playPreviousVideo() {')}\nplayNextVideo`, context)
   const watch = {
     isCurrentlyPresented: () => true, handleWatchProgressAutoSaveWhenProgressEnabled() {},
     customShortsPlayerActive: false, isStandaloneShort: false, playNextQueuedVideo: () => false,
