@@ -85,49 +85,83 @@ test('treats an empty comments response as no comments', { tag: '@scale' }, asyn
   expect(commentRequestCount).toBe(1)
 })
 
-for (const trigger of ['initial load', 'reload', 'sort']) {
+const headerOnlyResponse = JSON.parse(emptyCommentsResponse)
+headerOnlyResponse.onResponseReceivedEndpoints.pop()
+headerOnlyResponse.onResponseReceivedEndpoints[0].reloadContinuationItemsCommand.continuationItems[0].commentsHeaderRenderer.countText.simpleText = '123 Comments'
+
+for (const trigger of ['initial load', 'header-only load', 'reload', 'sort', 'newest reload']) {
   test(`incomplete comments during ${trigger} stay retryable instead of reporting no comments`, async ({ app, page }) => {
     await mockPlayableWatchPage(app, page)
     await page.evaluate(() => window.$store.dispatch('updateBackendFallback', false))
-    let fail = trigger === 'initial load'
+    const initialLoad = ['initial load', 'header-only load'].includes(trigger)
+    let fail = initialLoad
+    let headerOnly = trigger === 'header-only load'
     let failedRequests = 0
+    let failedContinuation
+    let lastContinuation
     let loadedResponse
-    const firstResponse = trigger === 'sort'
+    const firstResponse = ['sort', 'newest reload'].includes(trigger)
       ? page.waitForResponse(response =>
           response.url().includes('/youtubei/v1/next') && JSON.parse(response.request().postData() ?? '{}').continuation
         )
       : null
     await page.route(/\/youtubei\/v1\/next/, (route, request) => {
-      if (!JSON.parse(request.postData() ?? '{}').continuation) return route.fallback()
-      // The recordings contain the top-comments page, so replay that valid
-      // response when the failed sort request is retried.
+      const { continuation } = JSON.parse(request.postData() ?? '{}')
+      if (!continuation) return route.fallback()
+      lastContinuation = continuation
+      // Replay the recorded comments when retrying a sort whose page is not recorded.
       if (!fail) {
         return loadedResponse
           ? route.fulfill({ status: 200, contentType: 'application/json', body: loadedResponse })
           : route.fallback()
       }
       failedRequests++
-      return route.fulfill({ status: 200, contentType: 'application/json', body: '{}' })
+      failedContinuation = continuation
+      return route.fulfill({
+        status: 200,
+        contentType: 'application/json',
+        body: headerOnly ? JSON.stringify(headerOnlyResponse) : '{}'
+      })
     })
     await openMockedVideo(page)
     if (firstResponse) loadedResponse = await (await firstResponse).text()
-    if (trigger !== 'initial load') {
+    const sort = async () => {
+      await page.locator('.commentHeaderActions').getByRole('combobox').click()
+      await page.getByRole('option', { name: /^newest first$/i }).click()
+    }
+    if (trigger === 'newest reload') {
+      const data = JSON.parse(loadedResponse)
+      const items = data.onResponseReceivedEndpoints[0].reloadContinuationItemsCommand.continuationItems[0]
+        .commentsHeaderRenderer.sortMenu.sortFilterSubMenuRenderer.subMenuItems
+      items.forEach((item, index) => { item.selected = index === 1 })
+      loadedResponse = JSON.stringify(data)
+      await sort()
+      await expect(page.locator('.comment').first()).toBeVisible()
+    }
+    if (!initialLoad) {
       await expect(page.locator('.comment').first()).toBeVisible()
       fail = true
-      if (trigger === 'reload') await page.getByRole('button', { name: 'Reload Comments', exact: true }).click()
-      else {
-        await page.locator('.commentHeaderActions').getByRole('combobox').click()
-        await page.getByRole('option', { name: /^newest first$/i }).click()
-      }
+      if (trigger.endsWith('reload')) await page.getByRole('button', { name: 'Reload Comments', exact: true }).click()
+      else await sort()
     }
     await expect(page.locator('.getCommentsTitle')).toBeVisible()
     await expect(page.locator('.noCommentMsg')).toHaveCount(0)
     expect(failedRequests).toBe(1)
+    if (trigger === 'newest reload') {
+      headerOnly = true
+      await page.locator('.getCommentsTitle').click()
+      await expect(page.locator('.getCommentsTitle')).toBeVisible()
+      expect(failedRequests).toBe(2)
+    }
     fail = false
     await page.locator('.getCommentsTitle').click()
     await expect(page.locator('.comment').first()).toBeVisible()
     await expect(page.locator('.noCommentMsg')).toHaveCount(0)
     await expect(page.locator('.commentsTitle')).not.toHaveText(/^0 Comments/)
+    if (trigger === 'newest reload') {
+      expect(lastContinuation).toBe(failedContinuation)
+      await expect(page.locator('.commentHeaderActions .selectedValue')).toHaveText(/^newest first$/i)
+    }
   })
 }
 

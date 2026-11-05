@@ -1890,6 +1890,7 @@ async function getCommentDataLocal(more = false, preserveSort = false) {
   try {
     /** @type {import('youtubei.js').YT.Comments} */
     let comments
+    let loadedSortNewest
     if (more) {
       comments = await nextPageToken.value.getContinuation()
     } else if (localCommentsInstance && !props.highlightedCommentId) {
@@ -1898,20 +1899,24 @@ async function getCommentDataLocal(more = false, preserveSort = false) {
       if (props.isPostComments) {
         comments = await getLocalCommunityPostComments(props.id, props.postAuthorId)
       } else {
-        const sortBy = preserveSort ? (sortNewest.value ? 'NEWEST_FIRST' : 'TOP_COMMENTS') : undefined
+        const sortBy = sortNewest.value ? 'NEWEST_FIRST' : undefined
         comments = await getLocalComments(props.id, sortBy, getHighlightedRootCommentId() ?? undefined)
       }
 
       if (preserveSort && (props.isPostComments || !props.highlightedCommentId)) {
         comments = await comments.applySort(sortNewest.value ? 'NEWEST_FIRST' : 'TOP_COMMENTS')
       } else {
-        sortNewest.value = comments.header?.sort_menu?.sub_menu_items?.[1].selected ?? false
+        loadedSortNewest = comments.header?.sort_menu?.sub_menu_items?.[1].selected ?? false
       }
     }
 
     if (requestedHighlightedCommentId !== props.highlightedCommentId) {
       return
     }
+    if (!comments.page.on_response_received_endpoints?.[1]) {
+      throw new Error('The comments response is missing its content')
+    }
+    if (loadedSortNewest !== undefined) sortNewest.value = loadedSortNewest
 
     if (!more) {
       localCommentsInstance = comments

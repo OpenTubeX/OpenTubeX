@@ -100,14 +100,20 @@ test('restored Android Watch tabs retain comment previews and both panel entry p
       await expect(page.locator('.mobileSheet[open] .videoDescription')).toBeVisible()
       if (process.env.ANDROID_ARTIFACT_DIR) await page.screenshot({ path: `${process.env.ANDROID_ARTIFACT_DIR}/restored-description.png` })
       await page.locator('.mobileSheet[open]').getByRole('button', { name: 'Close', exact: true }).click()
+      await expect(page.locator('.mobileSheet[open]')).toHaveCount(0)
       watch = await page.evaluateHandle(findWatchComponent)
-      const playerBounds = await page.locator('.ftVideoPlayer').boundingBox()
-      await initScript.send('Input.dispatchTouchEvent', {
-        type: 'touchStart', touchPoints: [{ x: playerBounds.x + playerBounds.width / 2, y: playerBounds.y + playerBounds.height * 0.35 }]
-      })
-      await initScript.send('Input.dispatchTouchEvent', { type: 'touchEnd', touchPoints: [] })
       await page.locator('.ftVideoPlayer').evaluate(element => element.requestFullscreen())
+      await expect.poll(() => page.locator('.ftVideoPlayer').evaluate(element => document.fullscreenElement === element)).toBe(true)
       await page.mouse.move(0, 0)
+      const controls = page.locator('.shaka-controls-container')
+      if (await controls.getAttribute('shown') !== 'true') {
+        const playerBounds = await page.locator('.ftVideoPlayer').boundingBox()
+        await initScript.send('Input.dispatchTouchEvent', {
+          type: 'touchStart', touchPoints: [{ x: playerBounds.x + playerBounds.width / 2, y: playerBounds.y + playerBounds.height * 0.35 }]
+        })
+        await initScript.send('Input.dispatchTouchEvent', { type: 'touchEnd', touchPoints: [] })
+      }
+      await expect(controls).toHaveAttribute('shown', 'true')
       await page.locator('.fullscreenCommentsToggle').click()
       await expect(page.locator('.fullscreenCommentCard .comment').first()).toBeVisible()
       await watch.evaluate(component => component.proxy.$refs.player.setFullscreenMetadata(true))
