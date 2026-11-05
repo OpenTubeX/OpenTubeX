@@ -282,6 +282,7 @@
         </FtFlexBox>
         <FtAutoLoadNextPageWrapper
           v-if="showFetchMoreButton && !isFetchMoreLoading"
+          :paused="autoLoadPaused"
           @load-next-page="handleFetchMore"
         >
           <div
@@ -424,6 +425,8 @@ const elementListLoadingTabs = ref({})
 const elementListRequestIds = {}
 const isSearchTabLoading = ref(false)
 const isFetchMoreLoading = ref(false)
+/** Set when the last page failed, so automatic loading waits for a click instead of retrying it in a loop */
+const autoLoadPaused = ref(false)
 const currentTab = ref('videos')
 const isElementListLoading = computed(() => !!elementListLoadingTabs.value[currentTab.value])
 
@@ -433,6 +436,10 @@ function setElementListLoading(tab, loading) {
 
 function startElementListRequest(tab) {
   elementListRequestIds[tab] = (elementListRequestIds[tab] || 0) + 1
+  // A new list, for example after changing the sort order, loads automatically again.
+  if (tab === currentTab.value) {
+    autoLoadPaused.value = false
+  }
   return currentElementListRequest(tab)
 }
 
@@ -688,7 +695,6 @@ watch(route, () => {
   autoRefreshOnSortByChangeEnabled = false
 
   id.value = route.params.id
-  searchPage = 1
   elementListLoadingTabs.value = {}
   relatedChannels.value = []
   links.value = []
@@ -715,6 +721,7 @@ watch(route, () => {
   isArtistTopicChannel.value = false
   resetTabContinuations()
   searchContinuationData.value = null
+  autoLoadPaused.value = false
   tabApiUsed.clear()
   showSearchBar.value = true
   // Yattee servers ignore the sort order of channel tabs
@@ -2488,9 +2495,9 @@ async function getCommunityPostsInvidious() {
   }
 }
 
-let searchPage = 1
 const lastSearchQuery = ref('')
 const searchResults = shallowRef([])
+/** The local API's search result, or the next page for Invidious, as a new object per page so pages of different searches never match */
 const searchContinuationData = shallowRef(null)
 const channelSearchFilter = ref(CHANNEL_SEARCH_FILTERS.ALL)
 
@@ -2611,9 +2618,10 @@ async function searchChannelLocal() {
 
 async function searchChannelInvidious() {
   const isCurrentRequest = currentElementListRequest('search')
+  const page = searchContinuationData.value?.page ?? 1
 
   try {
-    const response = await searchInvidiousChannel(id.value, lastSearchQuery.value, searchPage)
+    const response = await searchInvidiousChannel(id.value, lastSearchQuery.value, page)
     if (!isCurrentRequest()) return
     const typedResponse = response.map(item => ({
       ...item,
@@ -2626,8 +2634,11 @@ async function searchChannelInvidious() {
       searchResults.value = searchResults.value.concat(typedResponse)
     }
 
+    // Invidious has no continuation token; the last page is the first empty one.
+    // Yattee servers return the first page for every page number.
+    const hasMorePages = response.length > 0 && backendPreference.value !== 'yattee'
+    searchContinuationData.value = hasMorePages ? { page: page + 1 } : null
     isSearchTabLoading.value = false
-    searchPage++
     tabApiUsed.set('search', 'invidious')
   } catch (err) {
     if (!isCurrentRequest()) return
@@ -2636,7 +2647,7 @@ async function searchChannelInvidious() {
     const errorMessage = getInvidiousApiErrorMessage(backendPreference.value)
     showApiErrorToast(errorMessage, err)
 
-    if (process.env.SUPPORTS_LOCAL_API && usesInvidiousApi(backendPreference.value) && backendFallback.value) {
+    if (page === 1 && process.env.SUPPORTS_LOCAL_API && usesInvidiousApi(backendPreference.value) && backendFallback.value) {
       showInvidiousFallbackToast(backendPreference.value)
       searchChannelLocal()
     } else {
@@ -2657,7 +2668,6 @@ function newSearch(query) {
   lastSearchQuery.value = query
   searchContinuationData.value = null
   isSearchTabLoading.value = true
-  searchPage = 1
   searchResults.value = []
   // Supersede any search still in flight so its results cannot land in this one.
   startElementListRequest('search')
@@ -2683,7 +2693,6 @@ function clearSearch() {
   lastSearchQuery.value = ''
   searchContinuationData.value = null
   isSearchTabLoading.value = false
-  searchPage = 1
   searchResults.value = []
   startElementListRequest('search')
   channelSearchFilter.value = CHANNEL_SEARCH_FILTERS.ALL
@@ -2761,37 +2770,44 @@ function setErrorMessage(message, responseHasNameAndThumbnail = false) {
   channelVerifiedArtist.value = false
 }
 
-const showFetchMoreButton = computed(() => {
-  switch (currentTab.value) {
+/**
+ * @param {string} tab
+ */
+function tabContinuation(tab) {
+  switch (tab) {
     case 'videos':
-      return !isNullOrEmpty(videoContinuationData.value)
+      return videoContinuationData.value
     case 'shorts':
-      return !isNullOrEmpty(shortContinuationData.value)
+      return shortContinuationData.value
     case 'live':
-      return !isNullOrEmpty(liveContinuationData.value)
+      return liveContinuationData.value
     case 'releases':
-      return !isNullOrEmpty(releaseContinuationData.value)
+      return releaseContinuationData.value
     case 'podcasts':
-      return !isNullOrEmpty(podcastContinuationData.value)
+      return podcastContinuationData.value
     case 'courses':
-      return !isNullOrEmpty(coursesContinuationData.value)
+      return coursesContinuationData.value
     case 'shows':
-      return !isNullOrEmpty(showsContinuationData.value)
+      return showsContinuationData.value
     case 'playlists':
-      return !isNullOrEmpty(playlistContinuationData.value)
+      return playlistContinuationData.value
     case 'community':
-      return !isNullOrEmpty(communityContinuationData.value)
+      return communityContinuationData.value
     case 'search':
-      return !isNullOrEmpty(searchContinuationData.value)
+      return searchContinuationData.value
     default:
-      return false
+      return null
   }
-})
+}
+
+const showFetchMoreButton = computed(() => !isNullOrEmpty(tabContinuation(currentTab.value)))
 
 async function handleFetchMore() {
   if (isFetchMoreLoading.value) return
 
   isFetchMoreLoading.value = true
+  const tab = currentTab.value
+  const continuation = tabContinuation(tab)
   const useLocalApi = process.env.SUPPORTS_LOCAL_API && tabApiUsed.get(currentTab.value) === 'local'
 
   switch (currentTab.value) {
@@ -2869,6 +2885,10 @@ async function handleFetchMore() {
       console.error(currentTab.value)
   }
 
+  // A page that failed to load keeps its continuation. Leave the pause alone for a tab selected meanwhile.
+  if (currentTab.value === tab) {
+    autoLoadPaused.value = tabContinuation(tab) === continuation
+  }
   isFetchMoreLoading.value = false
 }
 
@@ -3026,6 +3046,7 @@ function changeTab(tab, moveFocus = true) {
   // `newTabNode` can be `null` when `tab` === "search"
   const newTabNode = document.getElementById(`${tab}Tab`)
   currentTab.value = tab
+  autoLoadPaused.value = false
   fetchTab(tab)
 
   if (moveFocus && newTabNode != null) {

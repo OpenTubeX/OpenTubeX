@@ -56,6 +56,7 @@ function channelView({ routeTab, tabs = ['videos', 'shorts', 'live', 'playlists'
     errorMessage: ref(''),
     showSearchBar: ref(false),
     currentTab: ref('videos'),
+    autoLoadPaused: ref(false),
     channelTabs,
     subscriptionInfo: ref(null),
     currentInvidiousInstanceUrl: ref('https://invidious.test'),
@@ -265,4 +266,106 @@ test('switching backends invalidates tab requests from the earlier load', async 
   assert.ok(view.context.channelRouteGeneration > localGeneration)
   assert.equal(isCurrentLocalRequest(), false, 'a late local response is ignored')
   assert.equal(view.context.elementListLoadingTabs.value.about, undefined)
+})
+
+test('a failed page pauses automatic loading only while its tab is selected', async () => {
+  const continuations = { videos: 'videos-2', playlists: 'playlists-2' }
+  let finishVideos
+  const context = {
+    currentTab: ref('videos'),
+    autoLoadPaused: ref(false),
+    isFetchMoreLoading: ref(false),
+    tabApiUsed: new Map([['videos', 'invidious'], ['playlists', 'invidious']]),
+    process: { env: {} },
+    console,
+    // Fails: the continuation stays unchanged once the request settles.
+    channelInvidiousVideos: () => new Promise(resolve => { finishVideos = resolve }),
+    getPlaylistsInvidiousMore: async () => { continuations.playlists = 'playlists-3' },
+  }
+  for (const [name, tab] of [['video', 'videos'], ['short'], ['live'], ['release'], ['podcast'], ['courses'], ['playlist', 'playlists'], ['community'], ['search']]) {
+    Object.defineProperty(context, `${name}ContinuationData`, { get: () => ({ value: continuations[tab] ?? null }) })
+  }
+  vm.runInNewContext([
+    slice('function tabContinuation(', 'const showFetchMoreButton'),
+    slice('async function handleFetchMore() {', '/**\n * Handles a user-initiated tab change'),
+  ].join('\n'), context)
+
+  const videos = context.handleFetchMore()
+  context.currentTab.value = 'playlists'
+  finishVideos()
+  await videos
+  assert.equal(context.autoLoadPaused.value, false, 'the selected tab keeps loading automatically')
+
+  context.currentTab.value = 'videos'
+  const retry = context.handleFetchMore()
+  finishVideos()
+  await retry
+  assert.equal(context.autoLoadPaused.value, true, 'the failed tab waits for a click')
+
+  context.currentTab.value = 'playlists'
+  await context.handleFetchMore()
+  assert.equal(context.autoLoadPaused.value, false, 'a page that loads resumes automatic loading')
+})
+
+test('a superseded search page cannot pause the next search, and a new list loads automatically again', async () => {
+  const pending = []
+  const context = {
+    currentTab: ref('search'),
+    autoLoadPaused: ref(false),
+    isFetchMoreLoading: ref(false),
+    isSearchTabLoading: ref(false),
+    tabApiUsed: new Map([['search', 'invidious']]),
+    process: { env: {} },
+    console,
+    id: ref('UCchannel'),
+    channelRouteGeneration: 0,
+    elementListRequestIds: {},
+    lastSearchQuery: ref('old'),
+    searchResults: shallowRef([]),
+    hideChannelPlaylists: ref(false),
+    getInvidiousChannelSearchResultType: () => 'video',
+    searchInvidiousChannel: () => new Promise(resolve => { pending.push(resolve) }),
+    backendPreference: ref('invidious'),
+  }
+  for (const name of ['video', 'short', 'live', 'release', 'podcast', 'courses', 'playlist', 'community', 'search']) {
+    context[`${name}ContinuationData`] = shallowRef(null)
+  }
+  vm.runInNewContext([
+    slice('function startElementListRequest(', 'const isCurrentTabLoading'),
+    slice('function tabContinuation(', 'const showFetchMoreButton'),
+    slice('async function searchChannelInvidious() {', '/**\n * @param {string} query'),
+    slice('async function handleFetchMore() {', '/**\n * Handles a user-initiated tab change'),
+  ].join('\n'), context)
+  const video = { type: 'video', videoId: 'video' }
+
+  context.startElementListRequest('search')
+  const firstSearch = context.searchChannelInvidious()
+  pending.shift()([video])
+  await firstSearch
+  const oldPageTwo = context.handleFetchMore()
+
+  // A new search starts while page 2 of the old one is still loading.
+  context.searchContinuationData.value = null
+  context.startElementListRequest('search')
+  const newSearch = context.searchChannelInvidious()
+  pending.pop()([video])
+  await newSearch
+  pending.shift()([video])
+  await oldPageTwo
+  assert.equal(context.autoLoadPaused.value, false, 'the new search keeps loading automatically')
+
+  // Yattee servers ignore the page number, so their results end after the first page.
+  context.backendPreference.value = 'yattee'
+  context.searchContinuationData.value = null
+  context.startElementListRequest('search')
+  const yatteeSearch = context.searchChannelInvidious()
+  pending.pop()([video])
+  await yatteeSearch
+  assert.equal(context.searchContinuationData.value, null, 'a Yattee search has no next page')
+
+  context.autoLoadPaused.value = true
+  context.startElementListRequest('videos')
+  assert.equal(context.autoLoadPaused.value, true, 'a list loading in a hidden tab keeps the selected tab paused')
+  context.startElementListRequest('search')
+  assert.equal(context.autoLoadPaused.value, false, 'reloading a list, for example after sorting, resumes automatic loading')
 })
