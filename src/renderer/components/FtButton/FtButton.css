@@ -105,14 +105,20 @@
   outline-offset: -3px;
 }
 
-/* Pressing keeps the hover layer, since a stronger one costs tonal labels
-   contrast; the corner morph and ripple show the press. */
-.btn:not(:disabled):is(:hover, :focus-visible, :active) {
+.btn:not(:disabled):is(:hover, :focus-visible) {
   background-color: color-mix(in srgb, var(--button-foreground) 8%, var(--button-container));
 }
 
 .btn:not(:disabled):active {
   --button-radius: var(--shape-corner-small);
+
+  background-color: color-mix(in srgb, var(--button-foreground) 12%, var(--button-container));
+}
+
+/* A stronger layer would cost tonal labels contrast on their tint, so pressing
+   keeps the hover layer; the corner morph and ripple show the press. */
+.btn:is(.variant-tonal, .variant-filled[aria-pressed='false']):not(:disabled):active {
+  background-color: color-mix(in srgb, var(--button-foreground) 8%, var(--button-container));
 }
 
 /* Like other selected states, soften the tint instead of adding a text-colored layer. */
