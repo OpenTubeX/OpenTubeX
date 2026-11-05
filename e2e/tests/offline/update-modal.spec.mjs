@@ -311,6 +311,25 @@ test.describe('with external links enabled', () => {
     expect(page.url()).toBe(appUrl)
     await expect(page.locator('.changeLogTitle')).toBeVisible()
   })
+
+  test('the donate button opens the donation page and keeps the release notes open', async ({ app, page, attachScreenshot }) => {
+    await app.electronApp.evaluate(({ shell }) => {
+      globalThis.donateExternalUrls = []
+      shell.openExternal = async url => {
+        globalThis.donateExternalUrls.push(url)
+      }
+    })
+    await showUpdatePrompt(page, [
+      release(`OpenTubeX ${newestUpdateVersion}`, `v${newestUpdateVersion}-beta`, NEWEST_NOTES)
+    ])
+    await attachScreenshot('update prompt with donate button')
+
+    await page.getByRole('button', { name: 'Donate', exact: true }).click()
+
+    await expect.poll(() => app.electronApp.evaluate(() => globalThis.donateExternalUrls))
+      .toEqual(['https://opentubex.org/donate/'])
+    await expect(page.locator('.changeLogTitle')).toBeVisible()
+  })
 })
 
 test('skipped updates keep a heading per release', async ({ page, attachScreenshot }) => {

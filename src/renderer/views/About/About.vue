@@ -139,6 +139,11 @@ const chunks = computed(() => [
     title: t('About.Translate'),
     content: '<a href="https://weblate.opentubex.org/engage/opentubex/">https://weblate.opentubex.org/engage/opentubex/</a>',
   },
+  {
+    icon: ['fas', 'heart'],
+    title: t('About.Donate'),
+    content: `<a href="https://opentubex.org/donate/">${t('About.Support the development of OpenTubeX')}</a>`,
+  },
 ])
 </script>
 
