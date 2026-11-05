@@ -1064,7 +1064,7 @@ function onMoveDraggedVideo(video, source) {
 }
 
 /**
- * @returns {string|null} the video ID it navigated to
+ * @returns {string|null} the video ID it navigated to, or null when nothing new loads
  */
 function playNextVideo() {
   if (isWaitingForNextVideo.value || currentVideoMayBeUnloaded.value) return null
@@ -1120,7 +1120,10 @@ function playNextVideo() {
     router.push(routerPushPayload)
     showToast({ message: t('Playing Next Video'), icon: ['fas', 'step-forward'] })
   }
-  return targetPlaylistItem.videoId
+  // Looping a single-item playlist keeps the current route
+  const isCurrentItem = targetPlaylistItem.videoId === props.videoId &&
+    (targetPlaylistItem.playlistItemId ?? null) === props.playlistItemId
+  return isCurrentItem ? null : targetPlaylistItem.videoId
 }
 
 function playPreviousVideo() {

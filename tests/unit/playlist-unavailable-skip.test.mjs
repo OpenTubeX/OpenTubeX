@@ -132,3 +132,8 @@ test('reports automatic skips so the watch view can keep a pending autoplay', as
   await playlist.failCurrentVideo()
   assert.deepEqual(playlist.skippedTo, [playlist.navigations[0].path.slice('/watch/'.length)])
 })
+
+test('does not report a navigation when looping a single-item playlist', async t => {
+  const playlist = setup(t, [{ videoId: 'only', playlistItemId: 'only' }])
+  assert.equal(playlist.actions.playNextVideo(), null)
+})
