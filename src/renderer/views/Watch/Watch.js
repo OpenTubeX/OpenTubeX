@@ -340,7 +340,9 @@ export default defineComponent({
       shortsPlaybackAfterSeekSeconds: 0,
       shortsPlaybackCache: markRaw(new ShortsPlaybackCache()),
       shortsPreloadGeneration: 0,
-      shortsPlayerCacheGeneration: 0,
+      // Bumped per Short when its player is torn down, so the player cache
+      // never reactivates it while the other buffered Shorts stay cached.
+      shortsPlayerReloads: {},
       videoLoadGeneration: 0,
       playerLoadGeneration: 0,
       preparingVideoLoadGeneration: null,
@@ -2372,7 +2374,7 @@ export default defineComponent({
             await this.destroyPlayer()
             if (!this.isCurrentVideoLoad(loadGeneration, requestedVideoId)) { return }
             if (this.customShortsPlayerActive) {
-              this.shortsPlayerCacheGeneration++
+              this.shortsPlayerReloads[this.videoId] = (this.shortsPlayerReloads[this.videoId] ?? 0) + 1
             }
           }
         }

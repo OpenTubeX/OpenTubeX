@@ -957,6 +957,32 @@ test.describe('Shorts feed navigation', () => {
     )
   })
 
+  test('keeps the previous Short buffered when leaving the next one before it loads', async ({ app, page }) => {
+    const { player, previous, next } = await openFirstFeedShort(app, page)
+    const firstVideo = await waitForPlayback(page)
+    await firstVideo.evaluate(element => {
+      element.pause()
+      window.__retainedShortVideo = element
+    })
+    // Hold the next Short's media so its player is still loading when the user goes back.
+    await page.route(/googlevideo\.com\/videoplayback/, () => {})
+    await waitForShortsNavigationReady(page)
+    await next.click()
+    await expect(page).toHaveURL(/#\/watch\/captioned-short-2\?/)
+    const view = await watchViewHandle(page)
+    try {
+      await expect.poll(() => view.evaluate(view => view.videoId === 'captioned-short-2' && view.$refs.player?.hasLoaded === false))
+        .toBe(true)
+    } finally {
+      await view.dispose()
+    }
+    await waitForShortsNavigationReady(page)
+    await previous.click()
+    await expect(page).toHaveURL(/#\/watch\/jNQXAC9IVRw\?/)
+    await expect.poll(() => player.locator('video').evaluate(element => element === window.__retainedShortVideo && element.buffered.length > 0))
+      .toBe(true)
+  })
+
   test('does not show a stale loading indicator after leaving a loaded Shorts tab', async ({ app, page }) => {
     await mockPlayableWatchPage(app, page)
     await page.route('**/api/skipSegments**', route => route.fulfill({ status: 200, contentType: 'application/json', body: '[]' }))

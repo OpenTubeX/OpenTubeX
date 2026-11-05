@@ -104,13 +104,13 @@
             </div>
           </div>
           <KeepAlive
-            :key="customShortsPlayerActive ? `shorts:${shortsPlayerCacheGeneration}` : 'watch'"
+            :key="customShortsPlayerActive ? 'shorts' : 'watch'"
             :max="customShortsPlayerActive ? 4 : 1"
             :include="customShortsPlayerActive ? undefined : []"
           >
             <ft-shaka-video-player
               v-if="playerReady && (!isUpcoming || playabilityStatus === 'OK') && !errorMessage"
-              :key="customShortsPlayerActive ? `short:${videoId}` : `watch:${playerLoadGeneration}`"
+              :key="customShortsPlayerActive ? `short:${videoId}:${shortsPlayerReloads[videoId] ?? 0}` : `watch:${playerLoadGeneration}`"
               ref="player"
               :manifest-src="manifestSrc"
               :manifest-mime-type="manifestMimeType"
