@@ -109,6 +109,40 @@ test('loads initial comments with the video when automatic pagination is enabled
   expect(await page.evaluate(() => window.scrollY)).toBe(0)
 })
 
+test('does not retry a failed automatic comment load until asked', async ({ app, page }) => {
+  await mockPlayableWatchPage(app, page)
+  let commentRequestCount = 0
+  await page.route(/\/youtubei\/v1\/next/, (route, request) => {
+    if (!JSON.parse(request.postData() ?? '{}').continuation) return route.fallback()
+    commentRequestCount++
+    return route.fulfill({ status: 500, contentType: 'application/json', body: '{}' })
+  })
+  await page.evaluate(async () => {
+    const store = window.$store
+    store.commit('setGeneralAutoLoadMorePaginatedItemsEnabled', true)
+    await store.dispatch('updateBackendFallback', false)
+  })
+
+  await openMockedVideo(page)
+  const loadComments = page.locator('.getCommentsTitle')
+  await expect(loadComments).toBeVisible()
+  await page.locator('.commentAutoLoadSentinel').scrollIntoViewIfNeeded()
+  // The sentinel remounts with the button and reports itself visible within a
+  // few frames, which used to start the next attempt at once.
+  await page.evaluate(() => new Promise(resolve => {
+    let frames = 10
+    const step = () => (--frames ? requestAnimationFrame(step) : resolve())
+    requestAnimationFrame(step)
+  }))
+  await expect(page.locator('.commentLoader')).toHaveCount(0)
+  await expect(loadComments).toBeVisible()
+  expect(commentRequestCount).toBe(1)
+
+  await loadComments.click()
+  await expect.poll(() => commentRequestCount).toBe(2)
+  await expect(loadComments).toBeVisible()
+})
+
 test('pauses automatic comment pagination while filtering', async ({ app, page }) => {
   await mockPlayableWatchPage(app, page)
 

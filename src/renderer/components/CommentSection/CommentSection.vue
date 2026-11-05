@@ -1367,10 +1367,16 @@ const canPerformInitialCommentLoading = computed(() => {
 
 const sortNewest = ref(false)
 
+// A failed load brings back the Load comments button and, with it, the
+// auto-load sentinel, which reports itself visible again at once. Without this
+// flag, a failing first load would retry in a loop instead of waiting for a click.
+let automaticInitialLoadFailed = false
+
 watch(() => props.highlightedCommentId, (commentId, previousCommentId) => {
   const targetChanged = previousCommentId !== undefined && previousCommentId !== commentId
   if (targetChanged) {
     highlightedTargetGeneration++
+    automaticInitialLoadFailed = false
     isLoading.value = false
     isLoadingMoreComments.value = false
     loadingReplyIds.value = new Set()
@@ -1388,8 +1394,9 @@ watch(() => props.highlightedCommentId, (commentId, previousCommentId) => {
 }, { immediate: true })
 
 watch(generalAutoLoadMorePaginatedItemsEnabled, (autoLoadEnabled) => {
+  automaticInitialLoadFailed = false
   if (autoLoadEnabled && canPerformInitialCommentLoading.value) {
-    getCommentData()
+    loadInitialCommentsAutomatically()
   }
 }, { immediate: true })
 
@@ -1430,7 +1437,7 @@ const observeVisibilityOptions = computed(() => {
       if (!isVisible) { return }
       // It's possible the comments are being loaded/already loaded
       if (canPerformInitialCommentLoading.value) {
-        getCommentData()
+        loadInitialCommentsAutomatically()
       } else if (canAutomaticallyLoadMoreComments.value) {
         getMoreComments()
       }
@@ -1643,13 +1650,19 @@ function getCommentData({ preserveSort = false } = {}) {
 
   if (useInvidious) {
     if (!props.isPostComments) {
-      getCommentDataInvidious()
+      return getCommentDataInvidious()
     } else {
-      getPostCommentsInvidious()
+      return getPostCommentsInvidious()
     }
   } else {
-    getCommentDataLocal(false, preserveSort)
+    return getCommentDataLocal(false, preserveSort)
   }
+}
+
+async function loadInitialCommentsAutomatically() {
+  if (automaticInitialLoadFailed) return
+  await getCommentData()
+  automaticInitialLoadFailed = canPerformInitialCommentLoading.value
 }
 
 function getMoreComments() {
