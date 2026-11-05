@@ -9,17 +9,11 @@
   border-radius: var(--shape-corner-large);
 }
 
-/* Fly-outs are descendants, so they inherit these.
-
-   The accent is the main color's hue at a lightness that stands out from the
-   surface, light with capped chroma on dark themes and deep on light ones.
-   Icons use it, and so do the hover and press layers, since a Material state
-   layer takes the color of the content. light-dark() follows the theme. */
+/* Fly-outs are descendants, so they inherit these. Icons use the accent, and
+   so do the hover and press layers, since a Material state layer takes the
+   color of the content. */
 .contextMenu {
-  --menu-accent: light-dark(
-    rgb(from oklch(from var(--primary-color) min(l, 0.5) c h) clamp(0, r, 255) clamp(0, g, 255) clamp(0, b, 255)),
-    rgb(from oklch(from var(--primary-color) max(l, 0.8) min(c, 0.14) h) clamp(0, r, 255) clamp(0, g, 255) clamp(0, b, 255))
-  );
+  --menu-accent: var(--secondary-text-color);
   --menu-container-color: var(--md-sys-color-surface-container, color-mix(in srgb, var(--card-bg-color) 94%, var(--primary-text-color)));
   --menu-elevation: 0 1px 2px rgb(0 0 0 / 30%), 0 2px 6px 2px rgb(0 0 0 / 15%);
   --menu-state-layer: color-mix(in srgb, var(--menu-accent) 8%, transparent);
@@ -31,6 +25,18 @@
   display: flex;
   flex-direction: column;
   max-block-size: calc(100vh - 16px);
+}
+
+/* Where supported (not before iOS 18), the accent is the main color's hue at a
+   lightness that stands out from the surface: light with capped chroma on dark
+   themes, deep on light ones. light-dark() follows the theme. */
+@supports (color: light-dark(rgb(from oklch(from red max(l, 0.7) c h) clamp(0, r, 255) clamp(0, g, 255) clamp(0, b, 255)), red)) {
+  .contextMenu {
+    --menu-accent: light-dark(
+      rgb(from oklch(from var(--primary-color) min(l, 0.5) c h) clamp(0, r, 255) clamp(0, g, 255) clamp(0, b, 255)),
+      rgb(from oklch(from var(--primary-color) max(l, 0.8) min(c, 0.14) h) clamp(0, r, 255) clamp(0, g, 255) clamp(0, b, 255))
+    );
+  }
 }
 
 /* The surface is a pseudo-element so the open animation can scale it: a
