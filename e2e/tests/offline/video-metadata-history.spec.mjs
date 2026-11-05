@@ -77,6 +77,9 @@ test('detects a replaced thumbnail at the same cacheable URL', async ({ page }) 
     expect(history.revisions[0].thumbnail).not.toBe(history.revisions[1].thumbnail)
   } finally {
     thumbnailServer.close()
+    // Chromium can keep a connection open that never sent a request, which
+    // close() leaves alone, so the close event would never fire.
+    thumbnailServer.closeAllConnections()
     await once(thumbnailServer, 'close')
   }
 })
@@ -301,6 +304,9 @@ test('stores and presents every previous metadata version', async ({ app, page }
     await expect(historyButton).toHaveCount(0)
   } finally {
     thumbnailServer.close()
+    // Chromium can keep a connection open that never sent a request, which
+    // close() leaves alone, so the close event would never fire.
+    thumbnailServer.closeAllConnections()
     await once(thumbnailServer, 'close')
   }
 })
