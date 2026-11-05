@@ -109,6 +109,9 @@
                 <component
                   :is="disableChannelLinks ? 'span' : 'router-link'"
                   class="channelLink"
+                  :tabindex="disableChannelLinks ? -1 : null"
+                  :role="disableChannelLinks ? 'group' : null"
+                  :aria-label="channel.name"
                   :to="disableChannelLinks ? undefined : `/channel/${channel.id}`"
                   @click="handleChannelLinkClick"
                 >
@@ -664,7 +667,7 @@ const { page: channelPage, hasMore: hasMoreChannels, displayedItems: displayedCh
   append: true,
   resetOn: searchQuery,
   scrollTarget: channelListContainer,
-  focusItem: index => channelListContent.value?.querySelectorAll('.channelEntry')[index]?.querySelector('a, button, input')?.focus()
+  focusItem: index => channelListContent.value?.querySelectorAll('.channelEntry')[index]?.querySelector('.channelLink')?.focus()
 })
 
 /** @param {string} channelId */

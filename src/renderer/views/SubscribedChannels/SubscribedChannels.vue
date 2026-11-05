@@ -113,6 +113,9 @@
             <component
               :is="enableChannelLinks ? 'router-link' : 'span'"
               class="channelName"
+              :tabindex="enableChannelLinks ? null : -1"
+              :role="enableChannelLinks ? null : 'group'"
+              :aria-label="channel.name"
               dir="auto"
               :title="channel.name"
               :draggable="canReorder ? 'false' : null"
@@ -285,7 +288,7 @@ const { page: channelPage, displayedItems: displayedChannels, hasMore: hasMoreCh
   pageSize: channelsPerPage,
   append: true,
   resetOn: [query, activeProfileId, activeGroupId],
-  focusItem: index => channelsContainer.value?.querySelectorAll('.channel')[index]?.querySelector('[tabindex], a, button')?.focus()
+  focusItem: index => channelsContainer.value?.querySelectorAll('.channel')[index]?.querySelector('.channelName')?.focus()
 })
 
 const canReorder = computed(() => sortBy.value === SORT_BY_OPTIONS.Custom && query.value === '')

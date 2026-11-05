@@ -19,10 +19,14 @@ test.use({
 })
 
 for (const list of [
-  { section: 'playback', button: 'Manage Saved Channels (51)', entry: '.channelEntry', control: 'a, button, input' },
+  { section: 'playback', button: 'Manage Saved Channels (51)', entry: '.channelEntry', control: '.channelLink', disableLinks: false },
+  { section: 'playback', button: 'Manage Saved Channels (51)', entry: '.channelEntry', control: '.channelLink', disableLinks: true },
   { section: 'subscription', button: 'Subscription settings', entry: '.channelSettings', control: '.channelSelectionOption' }
 ]) {
-  test(`${list.section} Load more focuses the first new channel, including the final batch`, async ({ page }) => {
+  test(`${list.section}${list.disableLinks ? ' without channel links' : ''} Load more focuses the first new channel, including the final batch`, async ({ page }) => {
+    if (list.disableLinks) {
+      await page.evaluate(() => window.$store.dispatch('updateDisableChannelLinks', true))
+    }
     await goToSettingsSection(page, list.section)
     await page.getByRole('button', { name: list.button, exact: true }).click()
     const entries = page.locator(list.entry)
@@ -33,6 +37,7 @@ for (const list of [
       await page.keyboard.press('Enter')
       await expect(entries).toHaveCount(count)
       await expect(entries.nth(index).locator(list.control).first()).toBeFocused()
+      await expect(entries.nth(index).locator(list.control).first()).toHaveAccessibleName(`Channel ${String(index).padStart(3, '0')}`)
       await page.keyboard.press('Tab')
       await expect.poll(() => entries.nth(index).evaluate(element => element.contains(document.activeElement))).toBe(true)
     }
@@ -53,7 +58,9 @@ for (const hideChannelActions of [false, true]) {
     await page.getByRole('button', { name: 'Load more channels', exact: true }).focus()
     await page.keyboard.press('Enter')
     await expect(entries).toHaveCount(51)
-    await expect(entries.nth(50).locator('.thumbnailContainer')).toBeFocused()
+    await expect(entries.nth(50).locator('.channelName')).toBeFocused()
+    await expect(entries.nth(50).locator('.channelName')).toHaveAccessibleName('Channel 050')
+    await expect(entries.nth(50).locator('.channelName')).toHaveRole(hideChannelActions ? 'group' : 'link')
     await expect(page.getByRole('button', { name: 'Load more channels', exact: true })).toHaveCount(0)
   })
 }
