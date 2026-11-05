@@ -149,10 +149,13 @@ test('...', async ({ page, attachScreenshot }) => {
 To (re-)record fixtures after YouTube-facing changes or for new tests:
 
 ```bash
-E2E_RECORD=1 pnpm run test:e2e:network
+E2E_RECORD=1 NODE_OPTIONS=--max-http-header-size=131072 pnpm run test:e2e:network
 ```
 
-Commit the updated files under `fixtures/innertube/`. Player responses are
+YouTube's watch page headers exceed Node's default limit, which fails their
+recording with "Header overflow". Commit the updated files under
+`fixtures/innertube/`, but not changed `shared/` files that only differ in
+your IP address. Player responses are
 deliberately not recorded. To force replay mode
 locally (validate fixtures without touching the network):
 

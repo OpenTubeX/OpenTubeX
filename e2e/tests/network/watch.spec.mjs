@@ -1448,7 +1448,7 @@ test.describe('watch page', () => {
 test.describe('custom Shorts player', () => {
   const SHORTS_CHANNEL = 'UCshortsfeed000000000000'
   const FIRST_SHORT_THUMBNAIL = 'https://i.ytimg.com/vi/w1WKmSqwM8I/frame0.jpg?selected=1'
-  const SECOND_SHORT_THUMBNAIL = 'https://i.ytimg.com/vi/RZ6PG5QATg4/frame0.jpg?selected=1'
+  const SECOND_SHORT_THUMBNAIL = 'https://i.ytimg.com/vi/xSuIqigPUfg/frame0.jpg?selected=1'
 
   test.use({
     seed: {
@@ -1486,7 +1486,7 @@ test.describe('custom Shorts player', () => {
           },
           {
             type: 'video',
-            videoId: 'RZ6PG5QATg4',
+            videoId: 'xSuIqigPUfg',
             title: 'Second seeded Short',
             author: 'Shorts Channel',
             authorId: SHORTS_CHANNEL,
@@ -1528,7 +1528,7 @@ test.describe('custom Shorts player', () => {
     const previousTime = await firstVideo.evaluate(element => element.currentTime)
 
     await page.locator('.shortsNavigationButton').last().click()
-    await expect(page).toHaveURL(/#\/watch\/RZ6PG5QATg4/)
+    await expect(page).toHaveURL(/#\/watch\/xSuIqigPUfg/)
     await expect(firstPlayer.or(errorMessage)).toBeVisible({ timeout: 30_000 })
     if (await errorMessage.isVisible()) {
       test.skip(true, `Second Short unavailable: ${await errorMessage.textContent()}`)
