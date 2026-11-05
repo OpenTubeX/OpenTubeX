@@ -1090,8 +1090,10 @@ function playNextVideo() {
     }
   }
 
-  // Looping a single-item playlist can keep the current route, where a push loads nothing
-  const staysOnRoute = router.resolve(routerPushPayload).fullPath === router.currentRoute.value.fullPath
+  // Looping a single-item playlist can keep the current route, where a push loads
+  // nothing. The watch view also ignores a change that only drops the timestamp.
+  const withoutTimestamp = ({ path, query }) => router.resolve({ path, query: { ...query, timestamp: undefined } }).fullPath
+  const staysOnRoute = withoutTimestamp(router.resolve(routerPushPayload)) === withoutTimestamp(router.currentRoute.value)
   const navigate = () => staysOnRoute ? emit('restart-current-video') : router.push(routerPushPayload)
 
   if (shuffleEnabled.value) {

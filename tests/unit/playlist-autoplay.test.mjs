@@ -29,8 +29,8 @@ function harness({ laterPageError = null, backend = 'local' } = {}) {
   let laterPageRequests = 0
   const router = {
     push() {},
-    resolve: route => ({ fullPath: route.path }),
-    currentRoute: computed(() => ({ fullPath: `/watch/${props.videoId}` })),
+    resolve: ({ path }) => ({ path, query: {}, fullPath: path }),
+    currentRoute: computed(() => ({ path: `/watch/${props.videoId}`, query: {}, fullPath: `/watch/${props.videoId}` })),
   }
   let finishContinuation
   let failContinuation

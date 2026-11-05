@@ -19,10 +19,9 @@ const component = [
   'globalThis.actions = { playNextVideo, resetUnavailableSkipChain }',
 ].join('\n')
 
-/** @returns {{ fullPath: string }} */
-function routeFullPath({ path, query }) {
+function resolveRoute({ path, query }) {
   const params = new URLSearchParams(Object.entries(query).filter(([, value]) => value != null))
-  return { fullPath: `${path}?${params}` }
+  return { path, query, fullPath: `${path}?${params}` }
 }
 
 function setup(t, items = ['A', 'B', 'C'].map(id => ({ videoId: id, playlistItemId: id })), { downloadId, currentQuery = {} } = {}) {
@@ -52,8 +51,8 @@ function setup(t, items = ['A', 'B', 'C'].map(id => ({ videoId: id, playlistItem
     canPlayNextVideo: ref(true),
     router: {
       push(payload) { navigations.push(payload) },
-      resolve: routeFullPath,
-      currentRoute: computed(() => routeFullPath({
+      resolve: resolveRoute,
+      currentRoute: computed(() => resolveRoute({
         path: `/watch/${props.videoId}`,
         query: { playlistId: props.playlistId, playlistType: props.playlistType, playlistItemId: props.playlistItemId, ...currentQuery },
       })),
@@ -158,4 +157,7 @@ test('reports a single-item playlist loop as a navigation only when the route ch
   assert.deepEqual(sameRoute.restarts, ['restart-current-video'], 'the current video restarts instead')
   assert.equal(setup(t, [item], { downloadId: '42' }).actions.playNextVideo(), 'only', 'a finished download changes the source')
   assert.equal(setup(t, [item], { downloadId: '42', currentQuery: { downloadId: '42' } }).actions.playNextVideo(), null, 'the download already plays')
+  const timestamped = setup(t, [item], { currentQuery: { timestamp: '30' } })
+  assert.equal(timestamped.actions.playNextVideo(), null, 'dropping the timestamp does not reload the video')
+  assert.deepEqual(timestamped.restarts, ['restart-current-video'])
 })
