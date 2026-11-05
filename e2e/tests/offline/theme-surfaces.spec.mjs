@@ -131,6 +131,42 @@ for (const [theme, scale] of [['openTubeXLight', 100], ['openTubeXDark', 125]]) 
       await expect(dialog).toBeHidden()
     })
 
+    test('quick settings background does not change when its opening transition ends', async ({ app, page }) => {
+      await page.addStyleTag({ content: '.quick-settings-menu-enter-active { transition-duration: 1000s !important; }' })
+      await page.locator('.topNav .profileTrigger').click()
+      const menu = page.locator('.quickSettingsMenu')
+      await expect(menu).toBeVisible()
+      await menu.evaluate(element => {
+        const transitions = element.getAnimations()
+        if (transitions.length === 0) throw new Error('Missing quick settings opening transition')
+        // Sample just before the transform is removed, with effectively
+        // identical geometry and opacity to the settled menu.
+        for (const transition of transitions) {
+          transition.pause()
+          transition.currentTime = transition.effect.getComputedTiming().duration - 5
+        }
+      })
+      await expect(menu).not.toHaveCSS('transform', 'none')
+      const points = await menu.evaluate(element => {
+        const { width, height } = element.getBoundingClientRect()
+        // Clear of the large corner arcs, whose antialiasing shifts with the transform.
+        return [[4, 24], [width / 2, 4], [width - 4, height / 2], [4, height - 24]]
+      })
+      const opening = await sampleColors(app, menu, points, { finishAnimations: false })
+      const settled = await sampleColors(app, menu, points)
+      await expect(menu).toHaveCSS('transform', 'none')
+      const difference = maxColorDifference(opening, settled)
+      expect(difference, `Opening and settled backgrounds: ${JSON.stringify({ opening, settled })}`).toBeLessThanOrEqual(2)
+    })
+
+    test('notifications dropdown uses the card gradient', async ({ page }) => {
+      await page.locator('.notificationCenter').click()
+      const dropdown = page.locator('.notificationCenterDropdown')
+      await expect(dropdown).toBeVisible()
+      await expect(dropdown).toHaveCSS('background-image', /radial-gradient.*linear-gradient/)
+      await expect(dropdown).toHaveCSS('background-attachment', /^scroll(, scroll)*$/)
+    })
+
     test('description controls and fades blend into their card', async ({ app, page }, testInfo) => {
       await mockPlayableWatchPage(app, page)
       await openMockedVideo(page)
