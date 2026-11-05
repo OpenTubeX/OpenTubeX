@@ -198,6 +198,9 @@ export function recordFeedVideoTitles(observations) {
       Number.isSafeInteger(observedAt) && observedAt > 0
     )
     if (valid.length === 0) return
+    // One refresh can list a collaboration video in several channels' feeds,
+    // in any order, and an older observation must not be dropped.
+    valid.sort((a, b) => a.observedAt - b.observedAt)
 
     const ids = [...new Set(valid.map(({ videoId }) => feedTitlesId(videoId)))]
     const stored = await videoMetadataCache.findAsync({ _id: { $in: ids } })

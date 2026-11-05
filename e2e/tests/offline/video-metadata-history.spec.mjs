@@ -89,6 +89,21 @@ test('compares feed titles only with each other', async ({ page }) => {
     .toEqual(['Translated title', 'Translated title'])
 })
 
+test('keeps the older feed title when one refresh lists it after a newer one', async ({ page }) => {
+  const now = Date.now()
+  await page.evaluate(({ action, now }) => window.ftElectron.dbSubscriptionCache(action, [
+    { channelId: 'UCfeedtitlechannel00000', field: 'videos', entries: [{ type: 'video', videoId: 'feedtitle02', title: 'Newer title' }], timestamp: new Date(now - 10_000) },
+    { channelId: 'UCfeedtitlechannel00001', field: 'videos', entries: [{ type: 'video', videoId: 'feedtitle02', title: 'Older title' }], timestamp: new Date(now - 20_000) }
+  ]), { action: DBActions.SUBSCRIPTION_CACHE.UPDATE_FEEDS, now })
+
+  await expect.poll(async () => (await page.evaluate(() => window.ftElectron.videoMetadataCache.update({
+    videoId: 'feedtitle02',
+    title: 'Original title',
+    description: '',
+    thumbnailUrl: ''
+  })))?.feedTitles.map(({ title }) => title)).toEqual(['Older title'])
+})
+
 test('detects a replaced thumbnail at the same cacheable URL', async ({ page }) => {
   let revision = 0
   let requests = 0
