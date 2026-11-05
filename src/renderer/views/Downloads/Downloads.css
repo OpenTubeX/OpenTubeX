@@ -182,7 +182,7 @@
 }
 
 .downloadAvailability.missing {
-  color: var(--destructive-color);
+  color: var(--error-text-color);
 }
 
 .downloadSpaceWarning {
@@ -190,7 +190,7 @@
 }
 
 .downloadError {
-  color: var(--destructive-color);
+  color: var(--error-text-color);
   overflow-wrap: anywhere;
   white-space: pre-wrap;
 }

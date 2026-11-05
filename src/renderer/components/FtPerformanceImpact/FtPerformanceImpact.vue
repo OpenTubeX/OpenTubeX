@@ -134,6 +134,6 @@ const title = computed(() => props.compact ? fullText.value : description.value)
 }
 
 .high {
-  --impact-color: var(--destructive-color);
+  --impact-color: var(--error-text-color);
 }
 </style>

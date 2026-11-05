@@ -123,8 +123,7 @@ for (const [index, theme] of [...PALETTE_BASE_THEMES, 'catppuccinMacchiato'].ent
           baseTheme: theme,
           currentLocale: 'en-US',
           uiScale: scale,
-          // These normally activate destructive-color overrides. Fixed palettes
-          // must remain readable regardless of the user's previous accent choices.
+          // Fixed palettes must remain readable regardless of the user's previous accent choices.
           mainColor: theme === 'catppuccinMacchiato' ? 'CatppuccinMacchiatoMauve' : 'Red',
           secColor: theme === 'catppuccinMacchiato' ? 'CatppuccinMacchiatoTeal' : 'Purple',
           quickSettings: ['baseTheme'],

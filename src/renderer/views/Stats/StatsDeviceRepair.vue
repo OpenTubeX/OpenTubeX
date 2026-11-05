@@ -230,6 +230,6 @@ async function apply() {
 }
 
 .repairError {
-  color: var(--destructive-color);
+  color: var(--error-text-color);
 }
 </style>

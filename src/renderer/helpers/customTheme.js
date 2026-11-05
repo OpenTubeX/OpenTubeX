@@ -49,7 +49,7 @@ export function applyThemeToDocument(baseTheme, mainColor, secColor, customTheme
   const themeClass = isCustomThemeValue(baseTheme) ? 'custom' : (baseTheme || 'system')
   const themeClasses = [themeClass]
   if (dynamic) themeClasses.push('dynamicColors')
-  // Fixed palettes must not inherit selectable accent or destructive overrides.
+  // Fixed palettes must not inherit selectable accent colors.
   if (!dynamic && !PALETTE_BASE_THEMES.includes(themeClass)) {
     themeClasses.push(`main${mainColor || 'Red'}`, `sec${secColor || 'Blue'}`)
   }

@@ -35,7 +35,7 @@
 }
 
 .formMessage.error {
-  color: var(--destructive-color);
+  color: var(--error-text-color);
 }
 
 .feedUrlPreview {

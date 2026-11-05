@@ -241,7 +241,7 @@
 }
 
 .downloadErrorDetails {
-  color: var(--destructive-color);
+  color: var(--error-text-color);
   font-family: monospace;
   font-size: 12px;
   inline-size: min(600px, 100%);
