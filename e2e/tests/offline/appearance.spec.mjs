@@ -526,13 +526,14 @@ test.describe('default appearance', () => {
     await expect(headings.nth(1).locator('xpath=following-sibling::li[1]')).toHaveText('System default')
     await fontDropdown.screenshot({ path: testInfo.outputPath('font-picker.png') })
     await expect(headings.first()).toHaveCSS('border-top-width', '0px')
+    // A heading at the top of the list gets no extra space above it.
+    await expect(headings.first()).toHaveCSS('margin-top', '0px')
+    await expect(headings.nth(1)).toHaveCSS('margin-top', '4px')
     for (const heading of await headings.all()) {
-      await expect(heading).toHaveCSS('margin-top', '0px')
-      await expect(heading).toHaveCSS('margin-bottom', '0px')
+      await expect(heading).toHaveCSS('margin-bottom', '4px')
       expect(await heading.evaluate(element => {
         const style = getComputedStyle(element)
-        return style.paddingBlockStart === style.paddingBlockEnd &&
-          style.marginBlockStart === style.marginBlockEnd
+        return style.paddingBlockStart === style.paddingBlockEnd
       })).toBe(true)
     }
     await expect(fontDropdown).toHaveClass(/below/)
@@ -688,6 +689,10 @@ test.describe('custom theme editor', () => {
     await page.evaluate(theme => window.$store.commit('setCustomThemes', [theme]), theme)
     await baseTheme.click()
     await expect(headings).toHaveText(['Built-in themes', 'Custom themes'])
+    for (const heading of await headings.all()) {
+      await expect(heading).toHaveCSS('margin-top', '4px')
+      await expect(heading).toHaveCSS('margin-bottom', '4px')
+    }
     const options = dropdown.getByRole('option')
     await expect(options.first()).toHaveText('System default')
     await expect(options.first()).not.toHaveAttribute('aria-describedby')
