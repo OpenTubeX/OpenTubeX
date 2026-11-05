@@ -294,8 +294,10 @@ const itemIcons = {
   Cut: ['fas', 'scissors'],
   Default: ['fas', 'circle'],
   'Duplicate Tab': ['fas', 'clone'],
+  'Expand Group': ['fas', 'expand'],
   'Load Tab': ['fas', 'download'],
   'Load Tabs': ['fas', 'download'],
+  'Manage Tab Groups…': ['fas', 'edit'],
   'Mark All as Seen': ['fas', 'check'],
   'Move Tab': ['fas', 'exchange-alt'],
   'Move Tab to Group': ['fas', 'layer-group'],
@@ -328,6 +330,7 @@ const itemIcons = {
   'To the Right': ['fas', 'arrow-right'],
   'To the Top': ['fas', 'arrow-up'],
   'Unload Tab': ['fas', 'right-from-bracket'],
+  Ungroup: ['fas', 'link-slash'],
   'Unload Tabs': ['fas', 'right-from-bracket'],
   'Unpin Tab': ['fas', 'thumbtack-slash'],
   'Unpin Tabs': ['fas', 'thumbtack-slash']

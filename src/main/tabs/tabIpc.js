@@ -462,9 +462,13 @@ export async function setupTabsIPC(options = {}) {
     ) {
       manager.contextMenuSelectedTabIds = [manager.contextMenuTabId]
     }
-    manager.contextMenuSurface = ['tab', 'tabBar', 'content', 'subscriptionFeedTab'].includes(payload?.surface)
+    manager.contextMenuSurface = ['tab', 'tabBar', 'tabGroup', 'content', 'subscriptionFeedTab'].includes(payload?.surface)
       ? payload.surface
       : payload?.isTabBar === true ? 'tabBar' : 'content'
+    manager.contextMenuTabGroupId = manager.contextMenuSurface === 'tabGroup' &&
+      typeof payload?.groupId === 'string' && manager.tabGroups.has(payload.groupId)
+      ? payload.groupId
+      : null
     manager.contextMenuSubscriptionFeedTab = manager.contextMenuSurface === 'subscriptionFeedTab' &&
       ['videos', 'shorts', 'live', 'posts', 'all', 'feeds'].includes(payload?.feedTab)
       ? payload.feedTab

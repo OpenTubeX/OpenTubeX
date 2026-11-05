@@ -31,6 +31,7 @@ const sharedContextMenuLabelKeys = {
   Paste: 'Paste',
   Pink: 'Settings.Theme Settings.Main Color Theme.Pink',
   Red: 'Settings.Theme Settings.Main Color Theme.Red',
+  Ungroup: 'Tab Organizer.Ungroup',
   Ungrouped: 'Tab Organizer.Ungrouped',
   Yellow: 'Settings.Theme Settings.Main Color Theme.Yellow'
 }
@@ -353,6 +354,14 @@ export function setupContextMenu(contextMenuOptions, { createWindow, confirmClos
     const selectedTabGroup = typeof selectedTabGroupId === 'string'
       ? manager?.tabGroups.get(selectedTabGroupId)
       : null
+    const contextMenuTabGroup = manager?.contextMenuSurface === 'tabGroup' && manager.contextMenuTabGroupId != null
+      ? manager.tabGroups.get(manager.contextMenuTabGroupId) ?? null
+      : null
+    const contextMenuTabGroupTabIds = contextMenuTabGroup
+      ? Array.from(manager.tabs.values())
+          .filter(tab => tab.groupId === contextMenuTabGroup.id)
+          .map(tab => tab.id)
+      : []
     const hasSelectedUnloadedTab = contextMenuTabs.some(tab => tab.loadState === 'unloaded')
     const hasSelectedLoadedTab = contextMenuTabs.some(tab => !['unloaded', 'unloading'].includes(tab.loadState))
     /**
@@ -427,6 +436,44 @@ export function setupContextMenu(contextMenuOptions, { createWindow, confirmClos
       {
         type: 'separator',
         visible: subscriptionFeedTab != null
+      },
+      {
+        label: contextMenuLabel('Expand Group'),
+        visible: contextMenuTabGroup?.isCollapsed === true,
+        click: () => {
+          manager?.updateTabGroup(contextMenuTabGroup.id, { isCollapsed: false })
+        }
+      },
+      {
+        label: contextMenuTabGroupTabIds.length > 1
+          ? contextMenuLabel(
+              'Close Multiple Tabs',
+              { count: contextMenuTabGroupTabIds.length },
+              `Close ${contextMenuTabGroupTabIds.length} Tabs`
+            )
+          : contextMenuLabel('Close Tab'),
+        visible: contextMenuTabGroupTabIds.length > 0,
+        click: async () => {
+          await closeContextMenuTabs(contextMenuTabGroupTabIds)
+        }
+      },
+      {
+        label: contextMenuLabel('Ungroup'),
+        visible: contextMenuTabGroup != null,
+        click: () => {
+          manager?.deleteTabGroup(contextMenuTabGroup.id)
+        }
+      },
+      {
+        type: 'separator',
+        visible: contextMenuTabGroup != null
+      },
+      {
+        label: contextMenuLabel('Manage Tab Groups…'),
+        visible: contextMenuTabGroup != null,
+        click: () => {
+          manager?.bridge.send(IpcChannels.TABS_OPEN_ORGANIZER)
+        }
       },
       {
         label: isBulkTabAction
