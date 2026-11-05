@@ -137,6 +137,15 @@ test.describe('distraction and appearance settings', () => {
   })
 })
 
+/** Holds the installed font list until the returned function releases it. */
+async function holdSystemFonts(app) {
+  await app.electronApp.evaluate(({ ipcMain }) => {
+    ipcMain.removeHandler('get-system-fonts')
+    ipcMain.handle('get-system-fonts', () => new Promise(resolve => { globalThis.__releaseSystemFonts = resolve }))
+  })
+  return () => app.electronApp.evaluate(() => globalThis.__releaseSystemFonts(['Fixture Sans', 'Fixture Serif']))
+}
+
 test.describe('default appearance', () => {
   test('vertical tabs and the header have no shadows or divider lines', async ({ page, attachScreenshot }) => {
     for (const theme of ['light', 'dark']) {
@@ -502,6 +511,36 @@ test.describe('default appearance', () => {
     await page.keyboard.press('Escape')
     await expect(sheet).toHaveCount(0)
     await expect(appFont).toHaveAttribute('aria-expanded', 'false')
+  })
+
+  test('keeps the place in the phone app font list when installed fonts arrive late', async ({ app, page }) => {
+    const releaseSystemFonts = await holdSystemFonts(app)
+    await page.setViewportSize({ width: 600, height: 320 })
+    await goToSettingsSection(page, 'theme')
+    const appFont = page.getByRole('combobox', { name: 'App font' })
+    await appFont.click()
+    const fontDropdown = page.locator(`#${await appFont.getAttribute('aria-controls')}`)
+    await expect(fontDropdown).toBeFocused()
+    await fontDropdown.evaluate(menu => { menu.scrollTop = menu.scrollHeight })
+    const systemDefault = fontDropdown.getByRole('option', { name: 'System default', exact: true })
+    await expect(systemDefault).toBeInViewport()
+    await releaseSystemFonts()
+    await expect(fontDropdown.getByRole('option', { name: 'Fixture Serif', exact: true })).toHaveCount(1)
+    await expect(systemDefault).toBeInViewport()
+  })
+
+  test('keeps the highlighted app font when installed fonts arrive late', async ({ app, page }) => {
+    const releaseSystemFonts = await holdSystemFonts(app)
+    await goToSettingsSection(page, 'theme')
+    const appFont = page.getByRole('combobox', { name: 'App font' })
+    await appFont.click()
+    await page.keyboard.press('ArrowDown')
+    await page.keyboard.press('ArrowDown')
+    const highlighted = () => appFont.evaluate(button => document.getElementById(button.getAttribute('aria-activedescendant'))?.textContent.trim())
+    await expect.poll(highlighted).toBe('Figtree')
+    await releaseSystemFonts()
+    await expect(page.getByRole('option', { name: 'Fixture Serif', exact: true })).toHaveCount(1)
+    expect(await highlighted()).toBe('Figtree')
   })
 
   test('lists installed fonts and persists the selected app font', async ({ app, page }, testInfo) => {

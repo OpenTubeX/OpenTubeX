@@ -510,13 +510,18 @@ watch(() => props.disabled, (disabled) => {
   if (disabled) closeDropdown()
 })
 
-watch([() => props.selectNames, () => props.selectValues], async () => {
+watch([() => props.selectNames, () => props.selectValues], async (_, [, previousValues]) => {
   if (!dropdownShown.value) return
 
-  activeIndex.value = Math.max(0, selectedIndex.value)
+  // Options that arrive while the list is open, like system fonts, must not
+  // move the user back to the selected value. Follow the highlighted option
+  // unless it is gone or the selected value has just appeared.
+  const selectedAppeared = selectedIndex.value >= 0 && !previousValues.includes(props.value)
+  const keptIndex = selectedAppeared ? -1 : props.selectValues.indexOf(previousValues[activeIndex.value])
+  activeIndex.value = keptIndex >= 0 ? keptIndex : Math.max(0, selectedIndex.value)
   await nextTick()
   await refreshDropdownLayout()
-  scrollActiveOptionIntoView()
+  if (keptIndex < 0) scrollActiveOptionIntoView()
 }, { flush: 'post' })
 
 onBeforeUnmount(() => {
