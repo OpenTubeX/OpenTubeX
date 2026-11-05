@@ -3,7 +3,10 @@
     :to="fullscreenTarget || 'body'"
     :disabled="fullscreenTarget === null"
   >
-    <Transition name="context-menu">
+    <Transition
+      name="context-menu"
+      @leave="waitForFadeOut"
+    >
       <div
         v-if="isOpen"
         ref="menuRef"
@@ -212,6 +215,8 @@ const localItems = shallowRef(null)
 const touchFriendly = ref(false)
 const sessionId = ref(null)
 const position = ref({ x: 0, y: 0 })
+// The pointer position the menu opened at, which its open animation expands from
+const anchor = ref({ x: 0, y: 0 })
 const submenusOpenStart = ref(false)
 const verticalTabLayout = ref(false)
 let openRequest = 0
@@ -220,7 +225,8 @@ let previousFocus = null
 
 const menuStyle = computed(() => ({
   left: `${position.value.x}px`,
-  top: `${position.value.y}px`
+  top: `${position.value.y}px`,
+  '--menu-origin': `${anchor.value.x - position.value.x}px ${anchor.value.y - position.value.y}px`
 }))
 
 /**
@@ -431,6 +437,19 @@ async function open(event) {
   await showMenu(result.items, result.sessionId, event.clientX, event.clientY, request)
 }
 
+/**
+ * Ends the leave transition when the menu's fade-out does. Vue would also end
+ * it on the animationend of the surface's open animation, which the menu
+ * dispatches too, and cut the fade-out short after a quick dismissal.
+ * @param {HTMLElement} element
+ * @param {() => void} done
+ */
+function waitForFadeOut(element, done) {
+  const fadeOut = element.getAnimations().find(animation => animation.animationName.startsWith('context-menu-fade-out'))
+  if (fadeOut) fadeOut.finished.then(done, done)
+  else done()
+}
+
 function closeLocalMenu(event) {
   if (localItems.value === event.detail) close()
 }
@@ -461,6 +480,7 @@ async function showMenu(menuItems, menuSessionId, clientX, clientY, request) {
   resolveItemFavicons(items.value)
   sessionId.value = menuSessionId
   position.value = { x: clientX, y: clientY }
+  anchor.value = { x: clientX, y: clientY }
   submenusOpenStart.value = clientX > window.innerWidth / 2
   verticalTabLayout.value = document.querySelector('.app')?.classList.contains('verticalTabs') === true
   previousFocus = document.activeElement
