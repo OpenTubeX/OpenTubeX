@@ -33,6 +33,69 @@ test.describe('large channel playback settings', () => {
   })
 })
 
+test.describe('large subscribed channel picker', { tag: '@scale' }, () => {
+  const seed = channelSettingsSeed(1)
+  seed.profiles[0].subscriptions = subscriptions.map(channel => ({ ...channel }))
+  test.use({ seed })
+
+  test('mounts subscriptions in batches and starts over for each search and opening', async ({ page }) => {
+    await goToSettingsSection(page, 'playback')
+    await page.getByRole('button', { name: 'Manage Saved Channels (1)' }).click()
+    const openPicker = async () => {
+      await page.getByRole('button', { name: 'Add subscribed channel', exact: true }).click()
+      return page.getByRole('dialog', { name: 'Add subscribed channel', exact: true })
+    }
+    let picker = await openPicker()
+    const options = picker.locator('.addSubscribedChannelOption')
+    const scroller = picker.locator('.promptContentScroller')
+    const search = picker.getByLabel('Search channels')
+
+    await expect(options).toHaveCount(50)
+    await expect(options.first()).toHaveText('Channel 001')
+    await scroller.evaluate(element => { element.scrollTop = element.scrollHeight })
+    await expect(options).toHaveCount(100)
+
+    await search.fill('Channel 9')
+    await expect(options).toHaveCount(38)
+    await expect.poll(() => scroller.evaluate(element => element.scrollTop)).toBe(0)
+    await scroller.evaluate(element => { element.scrollTop = element.scrollHeight })
+    await search.fill('')
+    await expect(options).toHaveCount(50)
+    await expect.poll(() => scroller.evaluate(element => element.scrollTop)).toBe(0)
+    await scroller.evaluate(element => { element.scrollTop = element.scrollHeight })
+    await expect(options).toHaveCount(100)
+
+    await page.keyboard.press('Escape')
+    await expect(picker).toHaveCount(0)
+    picker = await openPicker()
+    await expect(picker.locator('.addSubscribedChannelOption')).toHaveCount(50)
+
+    await picker.getByLabel('Search channels').fill('Channel 937')
+    await picker.getByRole('button', { name: 'Channel 937', exact: true }).click()
+    await expect(picker).toHaveCount(0)
+    await expect(page.locator('.channelEntry', { hasText: 'Channel 937' })).toBeInViewport()
+  })
+})
+
+test.describe('large subscribed channel picker without automatic loading', () => {
+  const seed = channelSettingsSeed(1)
+  seed.settings.generalAutoLoadMorePaginatedItemsEnabled = false
+  seed.profiles[0].subscriptions = subscriptions.slice(0, 120).map(channel => ({ ...channel }))
+  test.use({ seed })
+
+  test('keeps keyboard focus on the next batch after loading more', async ({ page }) => {
+    await goToSettingsSection(page, 'playback')
+    await page.getByRole('button', { name: 'Manage Saved Channels (1)' }).click()
+    await page.getByRole('button', { name: 'Add subscribed channel', exact: true }).click()
+    const picker = page.getByRole('dialog', { name: 'Add subscribed channel', exact: true })
+    await expect(picker.locator('.addSubscribedChannelOption')).toHaveCount(50)
+    await picker.getByRole('button', { name: 'Load more channels', exact: true }).focus()
+    await page.keyboard.press('Enter')
+    await expect(picker.locator('.addSubscribedChannelOption')).toHaveCount(100)
+    await expect(picker.getByRole('button', { name: 'Channel 051', exact: true })).toBeFocused()
+  })
+})
+
 test.describe('channel settings scroll layout', { tag: '@scale' }, () => {
   const seed = channelSettingsSeed(49)
   seed.settings.generalAutoLoadMorePaginatedItemsEnabled = false
