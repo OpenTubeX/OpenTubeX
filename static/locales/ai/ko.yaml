@@ -625,7 +625,7 @@ Settings:
     Only Show Important Notifications: 중요한 알림만 표시
     Visible Search Suggestions: "표시할 검색 추천 수"
     Material Accent Color: "Material 강조 색상"
-    Signal Accent Color: "Signal 강조 색상"
+    Tally Accent Color: "Tally 강조 색상"
     Material Wallpaper Colors: "배경화면 색상"
     Material System Accent Color: "시스템 강조 색상"
     Tab Loading Indicator:
@@ -707,8 +707,8 @@ Settings:
       One Dark: One Dark
       Carbonfox: Carbonfox
       Catppuccin Macchiato: Catppuccin Macchiato
-      Signal Light: "Signal 밝은 테마"
-      Signal Dark: "Signal 어두운 테마"
+      Tally Light: "Tally 밝은 테마"
+      Tally Dark: "Tally 어두운 테마"
       Custom: 사용자 지정
       Catppuccin Frappe: Catppuccin Frappe
       Catppuccin Latte: Catppuccin Latte

@@ -546,7 +546,7 @@ Settings:
     Only Show Important Notifications: فقط اعلان‌های مهم نمایش داده شوند
     Visible Search Suggestions: "پیشنهادهای جستجوی قابل‌مشاهده"
     Material Accent Color: "رنگ تأکیدی Material"
-    Signal Accent Color: "رنگ تأکیدی Signal"
+    Tally Accent Color: "رنگ تأکیدی Tally"
     Material Wallpaper Colors: "رنگ‌های کاغذدیواری"
     Material System Accent Color: "رنگ تأکیدی سیستم"
     Tab Loading Indicator:
@@ -628,8 +628,8 @@ Settings:
       One Dark: One Dark
       Carbonfox: Carbonfox
       Catppuccin Macchiato: Catppuccin Macchiato
-      Signal Light: "Signal روشن"
-      Signal Dark: "Signal تاریک"
+      Tally Light: "Tally روشن"
+      Tally Dark: "Tally تاریک"
       Custom: سفارشی
       Catppuccin Latte: Catppuccin Latte
       Built-in Themes: پوسته‌های داخلی

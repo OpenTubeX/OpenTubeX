@@ -527,7 +527,7 @@ Settings:
     Only Show Important Notifications: Chỉ hiển thị thông báo quan trọng
     Visible Search Suggestions: "Số gợi ý tìm kiếm hiển thị"
     Material Accent Color: "Màu nhấn Material"
-    Signal Accent Color: "Màu nhấn Signal"
+    Tally Accent Color: "Màu nhấn Tally"
     Material Wallpaper Colors: "Màu hình nền"
     Material System Accent Color: "Màu nhấn của hệ thống"
     Tab Loading Indicator:
@@ -624,8 +624,8 @@ Settings:
       One Dark: One Dark
       Carbonfox: Carbonfox
       Catppuccin Macchiato: Catppuccin Macchiato
-      Signal Light: "Signal Sáng"
-      Signal Dark: "Signal Tối"
+      Tally Light: "Tally Sáng"
+      Tally Dark: "Tally Tối"
       Custom: Tùy chỉnh
       Built-in Themes: Chủ đề tích hợp sẵn
       Custom Themes: Chủ đề tùy chỉnh

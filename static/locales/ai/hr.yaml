@@ -525,7 +525,7 @@ Settings:
     Only Show Important Notifications: Prikaži samo važne obavijesti
     Visible Search Suggestions: "Vidljivi prijedlozi pretraživanja"
     Material Accent Color: "Material boja naglaska"
-    Signal Accent Color: "Signal boja naglaska"
+    Tally Accent Color: "Tally boja naglaska"
     Material Wallpaper Colors: "Boje pozadinske slike"
     Material System Accent Color: "Boja isticanja sustava"
     Tab Loading Indicator:
@@ -622,8 +622,8 @@ Settings:
       One Dark: One Dark
       Carbonfox: Carbonfox
       Catppuccin Macchiato: Catppuccin Macchiato
-      Signal Light: "Signal Svijetla"
-      Signal Dark: "Signal Tamna"
+      Tally Light: "Tally Svijetla"
+      Tally Dark: "Tally Tamna"
       Custom: Prilagođena
       Built-in Themes: Ugrađene teme
       Custom Themes: Prilagođene teme

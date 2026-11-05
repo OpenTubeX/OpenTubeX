@@ -522,7 +522,7 @@ Settings:
     Only Show Important Notifications: Erakutsi jakinarazpen garrantzitsuak soilik
     Visible Search Suggestions: "Bilaketa-iradokizun ikusgaiak"
     Material Accent Color: "Material azentu-kolorea"
-    Signal Accent Color: "Signal azentu-kolorea"
+    Tally Accent Color: "Tally azentu-kolorea"
     Material Wallpaper Colors: "Horma-paperaren koloreak"
     Material System Accent Color: "Sistemaren nabarmentze-kolorea"
     Tab Loading Indicator:
@@ -619,8 +619,8 @@ Settings:
       One Dark: One Dark
       Carbonfox: Carbonfox
       Catppuccin Macchiato: Catppuccin Macchiato
-      Signal Light: "Signal Argia"
-      Signal Dark: "Signal Iluna"
+      Tally Light: "Tally Argia"
+      Tally Dark: "Tally Iluna"
       Custom: Pertsonalizatua
       Built-in Themes: Gai integratuak
       Custom Themes: Gai pertsonalizatuak

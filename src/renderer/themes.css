@@ -425,7 +425,7 @@ it can be safely elided. This looks quite pleasant on this theme. */
   --logo-text: url('../../_icons/textBlackSmall.svg');
 }
 
-/* Custom, Signal, and dynamic themes tint the header logo instead of displaying the fixed-color
+/* Custom, Tally, and dynamic themes tint the header logo instead of displaying the fixed-color
    theme assets. Keeping the assets as masks preserves their sharp edges. */
 :is(.custom, .openTubeXLight, .openTubeXDark, .dynamicColors) .topNav .logoIcon,
 :is(.custom, .openTubeXLight, .openTubeXDark, .dynamicColors) .topNav .logoText {
@@ -2622,7 +2622,7 @@ a:visited {
 /* Signal palette from opentubex.github.io/src/styles/signal.css.
    Keep these after the selectable color palettes: the brand themes supply
    their own primary and secondary colors. Every accent shade derives from
-   --signal-accent, which the renderer sets from the Signal accent setting.
+   --signal-accent, which the renderer sets from the Tally accent setting.
    Lightness is clamped so any accent keeps its contrast, and each derived
    color resolves to in-gamut sRGB for code that reads computed colors. */
 .openTubeXLight,

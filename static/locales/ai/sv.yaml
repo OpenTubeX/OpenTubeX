@@ -522,7 +522,7 @@ Settings:
     Only Show Important Notifications: Visa endast viktiga aviseringar
     Visible Search Suggestions: "Synliga sökförslag"
     Material Accent Color: "Material-accentfärg"
-    Signal Accent Color: "Signal-accentfärg"
+    Tally Accent Color: "Tally-accentfärg"
     Material Wallpaper Colors: "Bakgrundsbildens färger"
     Material System Accent Color: "Systemets accentfärg"
     Tab Loading Indicator:
@@ -619,8 +619,8 @@ Settings:
       One Dark: One Dark
       Carbonfox: Carbonfox
       Catppuccin Macchiato: Catppuccin Macchiato
-      Signal Light: "Signal Ljust"
-      Signal Dark: "Signal Mörkt"
+      Tally Light: "Tally Ljust"
+      Tally Dark: "Tally Mörkt"
       Custom: Anpassat
       Built-in Themes: Inbyggda teman
       Custom Themes: Egna teman

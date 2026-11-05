@@ -525,7 +525,7 @@ Settings:
     Only Show Important Notifications: Показване само на важни известия
     Visible Search Suggestions: "Видими предложения за търсене"
     Material Accent Color: "Акцентен цвят на Material"
-    Signal Accent Color: "Акцентен цвят на Signal"
+    Tally Accent Color: "Акцентен цвят на Tally"
     Material Wallpaper Colors: "Цветове от тапета"
     Material System Accent Color: "Системен акцентен цвят"
     Tab Loading Indicator:
@@ -622,8 +622,8 @@ Settings:
       One Dark: One Dark
       Carbonfox: Carbonfox
       Catppuccin Macchiato: Catppuccin Macchiato
-      Signal Light: "Signal Светла"
-      Signal Dark: "Signal Тъмна"
+      Tally Light: "Tally Светла"
+      Tally Dark: "Tally Тъмна"
       Custom: Персонализирана
       Built-in Themes: Вградени теми
       Custom Themes: Персонализирани теми

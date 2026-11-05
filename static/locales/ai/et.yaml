@@ -522,7 +522,7 @@ Settings:
     Only Show Important Notifications: Kuva ainult olulised teavitused
     Visible Search Suggestions: "Nähtavad otsingusoovitused"
     Material Accent Color: "Materiali aktsentvärv"
-    Signal Accent Color: "Signali aktsentvärv"
+    Tally Accent Color: "Tallyi aktsentvärv"
     Material Wallpaper Colors: "Taustapildi värvid"
     Material System Accent Color: "Süsteemi rõhuvärv"
     Tab Loading Indicator:
@@ -619,8 +619,8 @@ Settings:
       One Dark: One Dark
       Carbonfox: Carbonfox
       Catppuccin Macchiato: Catppuccin Macchiato
-      Signal Light: "Signal Hele"
-      Signal Dark: "Signal Tume"
+      Tally Light: "Tally Hele"
+      Tally Dark: "Tally Tume"
       Custom: Kohandatud
       Built-in Themes: Sisseehitatud teemad
       Custom Themes: Kohandatud teemad

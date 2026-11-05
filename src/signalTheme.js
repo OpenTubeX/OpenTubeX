@@ -1,6 +1,6 @@
 import { MATERIAL_SYSTEM_SEED } from './materialTheme.js'
 
-/** Persisted IDs of the Signal themes, which match the website's palette. */
+/** Persisted IDs of the Tally themes, which use the website's Signal design palette. */
 export const SIGNAL_THEME_VALUES = ['openTubeXLight', 'openTubeXDark']
 export const DEFAULT_SIGNAL_ACCENT_COLOR = '#f34132'
 

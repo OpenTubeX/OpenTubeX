@@ -646,7 +646,7 @@ Settings:
     Only Show Important Notifications: Rodyti tik svarbius pranešimus
     Visible Search Suggestions: "Matomi paieškos pasiūlymai"
     Material Accent Color: "Material akcento spalva"
-    Signal Accent Color: "Signal akcento spalva"
+    Tally Accent Color: "Tally akcento spalva"
     Material Wallpaper Colors: "Ekrano fono spalvos"
     Material System Accent Color: "Sistemos akcento spalva"
     Tab Loading Indicator:
@@ -728,8 +728,8 @@ Settings:
       One Dark: One Dark
       Carbonfox: Carbonfox
       Catppuccin Macchiato: Catppuccin Macchiato
-      Signal Light: "Signal Šviesi"
-      Signal Dark: "Signal Tamsi"
+      Tally Light: "Tally Šviesi"
+      Tally Dark: "Tally Tamsi"
       Custom: Pasirinktinė
       Catppuccin Frappe: Catppuccin Frappe
       Catppuccin Latte: Catppuccin Latte

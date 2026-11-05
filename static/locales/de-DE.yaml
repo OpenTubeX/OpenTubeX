@@ -627,7 +627,7 @@ Settings:
       Scrolling: "Scrollen"
       Notifications: "Benachrichtigungen"
     Material Accent Color: "Material-Akzentfarbe"
-    Signal Accent Color: "Signal-Akzentfarbe"
+    Tally Accent Color: "Tally-Akzentfarbe"
     Material Wallpaper Colors: "Farben des Hintergrundbilds"
     Material System Accent Color: "Systemakzentfarbe"
     Tab Loading Indicator:
@@ -658,8 +658,8 @@ Settings:
       One Dark: One Dark
       Carbonfox: Carbonfox
       Catppuccin Macchiato: Catppuccin Macchiato
-      Signal Light: "Signal Hell"
-      Signal Dark: "Signal Dunkel"
+      Tally Light: "Tally Hell"
+      Tally Dark: "Tally Dunkel"
       Base Theme: Grundlegendes Farbschema
       Built-in Themes: Integrierte Designs
       Custom Themes: Eigene Designs

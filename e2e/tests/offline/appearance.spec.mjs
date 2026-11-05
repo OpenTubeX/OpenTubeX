@@ -1723,8 +1723,8 @@ async function stableSettingsBackgroundVariation(app) {
   return previous
 }
 
-test.describe('Signal themes', () => {
-  test('selects, persists, and follows the system with the Signal palettes', async ({ app, page, attachScreenshot }) => {
+test.describe('Tally themes', () => {
+  test('selects, persists, and follows the system with the Tally palettes', async ({ app, page, attachScreenshot }) => {
     // Launches the app twice and samples screenshots at two scales, which takes longer than the default under load.
     test.setTimeout(120_000)
     await goToSettingsSection(page, 'theme')
@@ -1733,7 +1733,7 @@ test.describe('Signal themes', () => {
       ['Dark', 'rgb(17, 17, 17)', [255, 110, 91]],
     ]) {
       await page.getByRole('combobox', { name: /^Base theme/i }).click()
-      await page.getByRole('option', { name: `Signal ${mode}`, exact: true }).click()
+      await page.getByRole('option', { name: `Tally ${mode}`, exact: true }).click()
       await expect(page.locator('body')).toHaveCSS('background-color', background)
       // The accent picker replaces the main and secondary colors.
       await expect(page.getByRole('combobox', { name: /Main colou?r theme/i })).toHaveCount(0)
@@ -1757,7 +1757,7 @@ test.describe('Signal themes', () => {
       }
       await page.evaluate(() => window.$store
         .dispatch('updateUiScale', 100))
-      await attachScreenshot(`Signal ${mode} settings`)
+      await attachScreenshot(`Tally ${mode} settings`)
     }
 
     ;({ page } = await app.relaunch())
@@ -1768,8 +1768,8 @@ test.describe('Signal themes', () => {
     await page.getByRole('option', { name: /^System default$/i }).click()
     for (const [mode, other] of [['Light', 'Dark'], ['Dark', 'Light']]) {
       await page.getByRole('combobox', { name: `${mode} theme`, exact: true }).click()
-      await expect(page.getByRole('option', { name: `Signal ${other}`, exact: true })).toHaveCount(0)
-      await page.getByRole('option', { name: `Signal ${mode}`, exact: true }).click()
+      await expect(page.getByRole('option', { name: `Tally ${other}`, exact: true })).toHaveCount(0)
+      await page.getByRole('option', { name: `Tally ${mode}`, exact: true }).click()
       await page.emulateMedia({ colorScheme: mode.toLowerCase() })
       await expect(page.locator('body')).toHaveClass(new RegExp(`openTubeX${mode}`))
     }
@@ -1784,10 +1784,10 @@ test.describe('Signal themes', () => {
     expect(await settingsBackgroundVariation(app)).toBe(0)
   })
 
-  test('follows the chosen and system Signal accent colors', async ({ app, page, attachScreenshot }) => {
+  test('follows the chosen and system Tally accent colors', async ({ app, page, attachScreenshot }) => {
     const section = await goToSettingsSection(page, 'theme')
     await page.evaluate(() => window.$store.dispatch('updateBaseTheme', 'openTubeXDark'))
-    const picker = section.getByRole('group', { name: 'Signal accent color' })
+    const picker = section.getByRole('group', { name: 'Tally accent color' })
     await expect(picker).toBeVisible()
     await expect(section.getByRole('group', { name: 'Material accent color' })).toHaveCount(0)
     await expect(picker.getByRole('button', { name: 'Red', exact: true })).toHaveAttribute('aria-pressed', 'true')
@@ -1798,7 +1798,7 @@ test.describe('Signal themes', () => {
     const [r, g, b] = await resolvedColor(page, 'var(--accent-color)')
     expect(b, `blue accent: ${[r, g, b]}`).toBeGreaterThan(Math.max(r, g) + 50)
     await expect.poll(() => latestSettings(readDatastore(app.userDataDir, 'settings')).signalAccentColor).toBe('#3b82f6')
-    await attachScreenshot('Signal Dark with a blue accent')
+    await attachScreenshot('Tally Dark with a blue accent')
 
     // Desktop accents appear as a system option and update live.
     await app.electronApp.evaluate(({ systemPreferences }) => {
@@ -1845,7 +1845,7 @@ test.describe('Signal themes', () => {
       await window.$store.dispatch('updateSignalAccentColor', '#ffff00')
     })
     await section.getByRole('button', { name: 'Create custom theme' }).click()
-    await expect(page.getByRole('combobox', { name: 'Based on' })).toHaveText('Signal Dark')
+    await expect(page.getByRole('combobox', { name: 'Based on' })).toHaveText('Tally Dark')
     const editorColor = label => page.locator('.customThemeEditor .ftColorPicker')
       .filter({ has: page.getByText(label, { exact: true }) }).locator('code')
     await expect(editorColor('Page background')).toHaveText('#111111')

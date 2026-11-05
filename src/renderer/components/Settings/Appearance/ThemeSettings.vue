@@ -319,7 +319,7 @@ function updateIconPack(value) {
   store.dispatch('updateIconPack', value)
 }
 
-// Material and Signal themes replace the main and secondary colors with their accent pickers.
+// Material and Tally themes replace the main and secondary colors with their accent pickers.
 const hasAccentPicker = computed(() => [...MATERIAL_THEME_VALUES, ...SIGNAL_THEME_VALUES].includes(baseTheme.value === 'system'
   ? (systemUsesDarkTheme.value ? systemDarkTheme.value : systemLightTheme.value)
   : baseTheme.value))

@@ -546,7 +546,7 @@ Settings:
     Only Show Important Notifications: Mostrar solo las notificaciones importantes
     Visible Search Suggestions: "Sugerencias de búsqueda visibles"
     Material Accent Color: "Color de acento de Material"
-    Signal Accent Color: "Color de acento de Signal"
+    Tally Accent Color: "Color de acento de Tally"
     Material Wallpaper Colors: "Colores del fondo de pantalla"
     Material System Accent Color: "Color de énfasis del sistema"
     Tab Loading Indicator:
@@ -628,8 +628,8 @@ Settings:
       One Dark: One Dark
       Carbonfox: Carbonfox
       Catppuccin Macchiato: Catppuccin Macchiato
-      Signal Light: "Signal Claro"
-      Signal Dark: "Signal Oscuro"
+      Tally Light: "Tally Claro"
+      Tally Dark: "Tally Oscuro"
       Custom: Personalizado
       Catppuccin Latte: Capuchino con leche
       Gruvbox Dark: Gruvbox oscuro

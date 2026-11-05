@@ -974,7 +974,7 @@ test.describe('profile manager', () => {
       await expect(page.locator('.profileColorPicker code')).toHaveText('#4caf50')
     })
 
-    test('resolves the derived Signal accent as the theme color', async ({ page }) => {
+    test('resolves the derived Tally accent as the theme color', async ({ page }) => {
       await page.evaluate(async () => {
         await window.$store.dispatch('updateBaseTheme', 'openTubeXLight')
         await window.$store.dispatch('updateSignalAccentColor', '#ffff00')

@@ -535,7 +535,7 @@ Settings:
     Only Show Important Notifications: முக்கியமான அறிவிப்புகளை மட்டும் காட்டு
     Visible Search Suggestions: "காணக்கூடிய தேடல் பரிந்துரைகள்"
     Material Accent Color: "Material சிறப்பம்ச நிறம்"
-    Signal Accent Color: "Signal சிறப்பம்ச நிறம்"
+    Tally Accent Color: "Tally சிறப்பம்ச நிறம்"
     Material Wallpaper Colors: "வால்பேப்பர் வண்ணங்கள்"
     Material System Accent Color: "கணினி சிறப்பம்ச நிறம்"
     Tab Loading Indicator:
@@ -632,8 +632,8 @@ Settings:
       One Dark: One Dark
       Carbonfox: Carbonfox
       Catppuccin Macchiato: Catppuccin Macchiato
-      Signal Light: "Signal ஒளி"
-      Signal Dark: "Signal இருண்ட"
+      Tally Light: "Tally ஒளி"
+      Tally Dark: "Tally இருண்ட"
       Custom: தனிப்பயன்
       Built-in Themes: உள்ளமைந்த அலங்காரங்கள்
       Custom Themes: தனிப்பயன் அலங்காரங்கள்

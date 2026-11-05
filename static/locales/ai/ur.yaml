@@ -571,7 +571,7 @@ Settings:
       Notifications: "اطلاعات"
     Only Show Important Notifications: صرف اہم اطلاعات دکھائیں
     Material Accent Color: Material ایکسنٹ رنگ
-    Signal Accent Color: Signal ایکسنٹ رنگ
+    Tally Accent Color: Tally ایکسنٹ رنگ
     Material Wallpaper Colors: وال پیپر کے رنگ
     Material System Accent Color: "سسٹم کا نمایاں رنگ"
     Tab Loading Indicator:
@@ -654,8 +654,8 @@ Settings:
       One Dark: One Dark
       Carbonfox: Carbonfox
       Catppuccin Macchiato: Catppuccin Macchiato
-      Signal Light: Signal لائٹ
-      Signal Dark: Signal ڈارک
+      Tally Light: Tally لائٹ
+      Tally Dark: Tally ڈارک
       Custom: حسب ضرورت
       Built-in Themes: بلٹ ان تھیمز
       Custom Themes: حسب ضرورت تھیمز

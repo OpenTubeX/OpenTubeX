@@ -25,7 +25,7 @@ export const SYNC_SETTING_LABELS = {
   backendPreference: 'Settings.General Settings.Preferred API Backend.Preferred API Backend',
   backendFallback: 'Settings.General Settings.Fallback to Non-Preferred Backend on Failure',
   materialSeedColor: 'Settings.Theme Settings.Material Accent Color',
-  signalAccentColor: 'Settings.Theme Settings.Signal Accent Color',
+  signalAccentColor: 'Settings.Theme Settings.Tally Accent Color',
   baseTheme: 'Settings.Theme Settings.Base Theme.Base Theme',
   blurThumbnails: 'Settings.General Settings.Blur Thumbnails',
   bufferAhead: 'Settings.Player Settings.Buffering.Buffer Ahead',
