@@ -51,6 +51,7 @@ import { createBackgroundExternalLinkOpener } from './backgroundExternalLink'
 import { isInvidiousInstanceUrl } from './invidiousAuthorization'
 import { normalizeYatteeServerUrl, usesInvidiousApi, usesInvidiousInstance } from '../apiBackends'
 import { RendererCors } from './rendererCors'
+import { RequestErrors } from './requestErrors'
 import { TabManager } from './tabs/TabManager'
 import { tabPreviewStorage } from './tabs/TabPreviewStorage'
 import { setupTabsIPC } from './tabs/tabIpc'
@@ -1270,6 +1271,9 @@ function runApp() {
       }
 
       rendererCors.rememberRequest({ ...details, requestHeaders }, originalOrigin)
+      if (details.resourceType === 'xhr' && webContents && isOpenTubeXUrl(webContents.getURL())) {
+        requestErrors.rememberRequest(details)
+      }
       // eslint-disable-next-line n/no-callback-literal
       callback({ requestHeaders })
     })
@@ -1299,10 +1303,12 @@ function runApp() {
     })
     session.defaultSession.webRequest.onCompleted(httpRequestFilter, details => {
       rendererCors.forgetRequest(details)
+      requestErrors.forgetRequest(details)
       storyboardRequestIds.delete(details.id)
     })
     session.defaultSession.webRequest.onErrorOccurred(httpRequestFilter, details => {
       rendererCors.forgetRequest(details)
+      requestErrors.recordError(details)
       storyboardRequestIds.delete(details.id)
     })
 
@@ -2867,6 +2873,16 @@ function runApp() {
 
   /** @type {Map<number, { url: string, authorization: string }>} */
   const invidiousAuthorizations = new Map()
+
+  const requestErrors = new RequestErrors()
+
+  ipcMain.handle(IpcChannels.GET_REQUEST_ERROR, (event, url) => {
+    if (!isOpenTubeXUrl(event.senderFrame.url) || typeof url !== 'string') {
+      return null
+    }
+
+    return requestErrors.getError(event.sender.id, url)
+  })
 
   ipcMain.on(IpcChannels.SET_INVIDIOUS_AUTHORIZATION, (event, authorization, url) => {
     if (!isOpenTubeXUrl(event.senderFrame.url)) {

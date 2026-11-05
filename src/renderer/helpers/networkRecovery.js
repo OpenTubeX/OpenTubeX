@@ -6,6 +6,17 @@ import { waitForRequest } from './api/requestWait.js'
 import { ensureAndroidLocalNetworkAccess } from './androidLocalNetwork.js'
 
 const nonNetworkErrors = new WeakSet()
+// Chromium errors that retrying the same request cannot fix
+const PERMANENT_REQUEST_ERRORS = new Set([
+  'net::ERR_TOO_MANY_REDIRECTS',
+  'net::ERR_UNSAFE_REDIRECT',
+  'net::ERR_INVALID_REDIRECT',
+  'net::ERR_BLOCKED_BY_CLIENT',
+  'net::ERR_BLOCKED_BY_RESPONSE',
+  'net::ERR_INVALID_URL',
+  'net::ERR_DISALLOWED_URL_SCHEME',
+  'net::ERR_UNKNOWN_URL_SCHEME',
+])
 export function isRecoverableNetworkError(error) {
   return !nonNetworkErrors.has(error) && classifyRequestFailure(error) === 'network'
 }
@@ -284,9 +295,32 @@ export function withoutNetworkRecovery(callback) {
   }
 }
 
-export function installNetworkFetch({ corsDisabled = false, checkInternet = false, internetChecksEnabled = true } = {}) {
-  const fetch = window.fetch.bind(window)
-  const probe = createInternetProbe(fetch)
+/**
+ * @param {object} [options]
+ * @param {boolean} [options.corsDisabled] a failed fetch cannot be a CORS failure
+ * @param {(url: string) => Promise<string | null>} [options.getRequestError] the network error behind a failed fetch
+ * @param {boolean} [options.checkInternet]
+ * @param {boolean} [options.internetChecksEnabled]
+ */
+export function installNetworkFetch({ corsDisabled = false, getRequestError, checkInternet = false, internetChecksEnabled = true } = {}) {
+  const nativeFetch = window.fetch.bind(window)
+  // Fetch hides the network error behind a TypeError. A redirect loop, for
+  // example, would otherwise be retried like a lost connection.
+  const fetch = async (input, init) => {
+    try {
+      return await nativeFetch(input, init)
+    } catch (error) {
+      if (getRequestError && error?.name === 'TypeError') {
+        let requestError = null
+        try {
+          requestError = await getRequestError(new URL(input instanceof Request ? input.url : input.toString(), location.href).href)
+        } catch {}
+        if (PERMANENT_REQUEST_ERRORS.has(requestError)) nonNetworkErrors.add(error)
+      }
+      throw error
+    }
+  }
+  const probe = createInternetProbe(nativeFetch)
   let requestLocalPermission = true
   initializeNetworkRecovery({
     checkInternet: checkInternet
@@ -320,7 +354,7 @@ export function installNetworkFetch({ corsDisabled = false, checkInternet = fals
     }
   }, {
     async isNetworkError(error) {
-      if (classifyRequestFailure(error) !== 'network') return false
+      if (nonNetworkErrors.has(error) || classifyRequestFailure(error) !== 'network') return false
       if (error.name !== 'TypeError' || navigator.onLine === false || corsDisabled) return true
       // Browsers hide CORS failures behind the same TypeError as a lost route.
       // Use the shared connectivity check to distinguish an internet outage.

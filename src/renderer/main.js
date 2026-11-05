@@ -29,7 +29,8 @@ installNetworkFetch({
   checkInternet: true,
   // Load the persisted privacy choice before sending the first probe.
   internetChecksEnabled: false,
-  corsDisabled: process.env.IS_ELECTRON
+  corsDisabled: process.env.IS_ELECTRON,
+  getRequestError: process.env.IS_ELECTRON ? url => window.ftElectron.getRequestError(url) : undefined
 })
 
 const app = createApp(App)

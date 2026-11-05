@@ -437,6 +437,11 @@ async function getHTMLPage(url, kind, fetchFunc) {
   // This returns session/tracking cookies but they get removed in onHeadersReceived in the main process before they are saved by Electron
   const htmlResponse = await fetchFunc(url,
     {
+      // These pages only redirect to YouTube's rate limit flow. Following it can
+      // loop between the captcha and exemption pages, because these requests
+      // do not keep cookies, and Electron retries the resulting fetch error as
+      // a lost connection, which stalls every YouTube request for minutes.
+      redirect: 'manual',
       headers: {
         // We need to be able to parse the localised strings in the /next response data (e.g. view counts and published dates)
         'Accept-Language': 'en-US',
@@ -453,10 +458,14 @@ async function getHTMLPage(url, kind, fetchFunc) {
     }
   )
 
-  const isIpBlockResponse = htmlResponse.status === 429 || htmlResponse.url.startsWith('https://www.google.com/sorry/')
+  // Browsers hide manual redirects behind an opaque status 0 response.
+  const redirected = htmlResponse.type === 'opaqueredirect' || (htmlResponse.status >= 300 && htmlResponse.status < 400)
+  const isIpBlockResponse = redirected || htmlResponse.status === 429
 
   if (!htmlResponse.ok) {
-    const error = new Error(`YouTube returned HTTP ${htmlResponse.status} for the ${kind} HTML page`)
+    const error = new Error(redirected
+      ? `YouTube redirected the ${kind} HTML page`
+      : `YouTube returned HTTP ${htmlResponse.status} for the ${kind} HTML page`)
     error.isIpBlock = isIpBlockResponse
     throw error
   }

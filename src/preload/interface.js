@@ -366,6 +366,13 @@ export default {
     ipcRenderer.send(IpcChannels.SET_INVIDIOUS_AUTHORIZATION, null)
   },
 
+  /**
+   * The network error behind a failed fetch of this URL, such as `net::ERR_TOO_MANY_REDIRECTS`
+   * @param {string} url
+   * @returns {Promise<string | null>}
+   */
+  getRequestError: (url) => ipcRenderer.invoke(IpcChannels.GET_REQUEST_ERROR, url),
+
   startPowerSaveBlocker: () => {
     ipcRenderer.send(IpcChannels.START_POWER_SAVE_BLOCKER)
   },

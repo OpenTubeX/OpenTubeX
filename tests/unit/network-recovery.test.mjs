@@ -278,6 +278,43 @@ test('Electron route failures recover while the OS still reports online', async 
   assert.equal(app.recovery.state, 'online')
 })
 
+test('Electron fails a redirect loop at once instead of retrying it as a lost route', async t => {
+  t.mock.timers.enable({ apis: ['setTimeout'] })
+  let requests = 0
+  const lookups = []
+  const app = await loadAppNetwork(t, async () => {
+    requests++
+    throw new TypeError('Failed to fetch')
+  }, undefined, {
+    corsDisabled: true,
+    getRequestError: async url => { lookups.push(url); return 'net::ERR_TOO_MANY_REDIRECTS' }
+  })
+  const error = await app.window.fetch('https://www.youtube.com').catch(error => error)
+  assert.equal(error.name, 'TypeError')
+  assert.equal(app.isRecoverableNetworkError(error), false)
+  assert.deepEqual(lookups, ['https://www.youtube.com/'])
+
+  // The origin must not queue later requests behind a retry probe.
+  const later = app.window.fetch('https://www.youtube.com/later').catch(error => error.name)
+  await flush()
+  assert.equal(await later, 'TypeError')
+  assert.equal(requests, 2)
+})
+
+test('Electron still retries a fetch whose network error is a lost connection', async t => {
+  t.mock.timers.enable({ apis: ['setTimeout'] })
+  let fail = true
+  const app = await loadAppNetwork(t, async () => {
+    if (fail) throw new TypeError('Failed to fetch')
+    return new Response('recovered')
+  }, undefined, { corsDisabled: true, getRequestError: async () => 'net::ERR_CONNECTION_RESET' })
+  const pending = app.window.fetch('https://www.youtube.com/feeds/videos.xml')
+  await flush()
+  fail = false
+  t.mock.timers.tick(5000)
+  assert.equal(await (await pending).text(), 'recovered')
+})
+
 test('a client with its own recovery reaches an origin that is waiting to retry another request', async t => {
   t.mock.timers.enable({ apis: ['setTimeout'] })
   const inits = new Map()
