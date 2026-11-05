@@ -20,6 +20,19 @@ const isDevMode = process.env.NODE_ENV === 'development'
 const isCapacitor = process.env.IS_CAPACITOR === 'true'
 const outputPath = path.join(__dirname, isCapacitor ? '../dist/capacitor' : '../dist/web')
 
+// WebKit needs -webkit-backdrop-filter before Safari 18. Keep the targets in
+// sync with IPHONEOS_DEPLOYMENT_TARGET in ios/App/App.xcodeproj.
+const prefixLoaders = process.env.CAPACITOR_PLATFORM === 'ios'
+  ? [{
+      loader: 'postcss-loader',
+      options: {
+        postcssOptions: {
+          plugins: [['autoprefixer', { overrideBrowserslist: ['ios_saf >= 17.4'], remove: false }]]
+        }
+      }
+    }]
+  : []
+
 const { version: swiperVersion } = JSON.parse(fs.readFileSync(path.join(__dirname, '../node_modules/swiper/package.json')))
 
 /** @type {import('webpack').Configuration} */
@@ -71,6 +84,7 @@ const config = {
               esModule: false
             }
           },
+          ...prefixLoaders,
           {
             loader: 'sass-loader',
             options: {
@@ -90,7 +104,8 @@ const config = {
             options: {
               esModule: false
             }
-          }
+          },
+          ...prefixLoaders
         ],
         rules: [
           {
