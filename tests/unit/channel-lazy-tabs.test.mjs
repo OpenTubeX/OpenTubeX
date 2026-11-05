@@ -56,6 +56,7 @@ function channelView({ routeTab, tabs = ['videos', 'shorts', 'live', 'playlists'
     errorMessage: ref(''),
     showSearchBar: ref(false),
     currentTab: ref('videos'),
+    autoLoadPaused: ref(false),
     channelTabs,
     subscriptionInfo: ref(null),
     currentInvidiousInstanceUrl: ref('https://invidious.test'),
@@ -265,4 +266,43 @@ test('switching backends invalidates tab requests from the earlier load', async 
   assert.ok(view.context.channelRouteGeneration > localGeneration)
   assert.equal(isCurrentLocalRequest(), false, 'a late local response is ignored')
   assert.equal(view.context.elementListLoadingTabs.value.about, undefined)
+})
+
+test('a failed page pauses automatic loading only while its tab is selected', async () => {
+  const continuations = { videos: 'videos-2', playlists: 'playlists-2' }
+  let finishVideos
+  const context = {
+    currentTab: ref('videos'),
+    autoLoadPaused: ref(false),
+    isFetchMoreLoading: ref(false),
+    tabApiUsed: new Map([['videos', 'invidious'], ['playlists', 'invidious']]),
+    process: { env: {} },
+    console,
+    // Fails: the continuation stays unchanged once the request settles.
+    channelInvidiousVideos: () => new Promise(resolve => { finishVideos = resolve }),
+    getPlaylistsInvidiousMore: async () => { continuations.playlists = 'playlists-3' },
+  }
+  for (const [name, tab] of [['video', 'videos'], ['short'], ['live'], ['release'], ['podcast'], ['courses'], ['playlist', 'playlists'], ['community'], ['search']]) {
+    Object.defineProperty(context, `${name}ContinuationData`, { get: () => ({ value: continuations[tab] ?? null }) })
+  }
+  vm.runInNewContext([
+    slice('function tabContinuation(', 'const showFetchMoreButton'),
+    slice('async function handleFetchMore() {', '/**\n * Handles a user-initiated tab change'),
+  ].join('\n'), context)
+
+  const videos = context.handleFetchMore()
+  context.currentTab.value = 'playlists'
+  finishVideos()
+  await videos
+  assert.equal(context.autoLoadPaused.value, false, 'the selected tab keeps loading automatically')
+
+  context.currentTab.value = 'videos'
+  const retry = context.handleFetchMore()
+  finishVideos()
+  await retry
+  assert.equal(context.autoLoadPaused.value, true, 'the failed tab waits for a click')
+
+  context.currentTab.value = 'playlists'
+  await context.handleFetchMore()
+  assert.equal(context.autoLoadPaused.value, false, 'a page that loads resumes automatic loading')
 })

@@ -282,6 +282,7 @@
         </FtFlexBox>
         <FtAutoLoadNextPageWrapper
           v-if="showFetchMoreButton && !isFetchMoreLoading"
+          :paused="autoLoadPaused"
           @load-next-page="handleFetchMore"
         >
           <div
@@ -714,6 +715,7 @@ watch(route, () => {
   isArtistTopicChannel.value = false
   resetTabContinuations()
   searchContinuationData.value = null
+  autoLoadPaused.value = false
   tabApiUsed.clear()
   showSearchBar.value = true
   // Yattee servers ignore the sort order of channel tabs
@@ -2760,37 +2762,47 @@ function setErrorMessage(message, responseHasNameAndThumbnail = false) {
   channelVerifiedArtist.value = false
 }
 
-const showFetchMoreButton = computed(() => {
-  switch (currentTab.value) {
+/**
+ * @param {string} tab
+ */
+function tabContinuation(tab) {
+  switch (tab) {
     case 'videos':
-      return !isNullOrEmpty(videoContinuationData.value)
+      return videoContinuationData.value
     case 'shorts':
-      return !isNullOrEmpty(shortContinuationData.value)
+      return shortContinuationData.value
     case 'live':
-      return !isNullOrEmpty(liveContinuationData.value)
+      return liveContinuationData.value
     case 'releases':
-      return !isNullOrEmpty(releaseContinuationData.value)
+      return releaseContinuationData.value
     case 'podcasts':
-      return !isNullOrEmpty(podcastContinuationData.value)
+      return podcastContinuationData.value
     case 'courses':
-      return !isNullOrEmpty(coursesContinuationData.value)
+      return coursesContinuationData.value
     case 'shows':
-      return !isNullOrEmpty(showsContinuationData.value)
+      return showsContinuationData.value
     case 'playlists':
-      return !isNullOrEmpty(playlistContinuationData.value)
+      return playlistContinuationData.value
     case 'community':
-      return !isNullOrEmpty(communityContinuationData.value)
+      return communityContinuationData.value
     case 'search':
-      return !isNullOrEmpty(searchContinuationData.value)
+      return searchContinuationData.value
     default:
-      return false
+      return null
   }
-})
+}
+
+const showFetchMoreButton = computed(() => !isNullOrEmpty(tabContinuation(currentTab.value)))
+
+/** Set when the last page failed, so automatic loading waits for a click instead of retrying it in a loop */
+const autoLoadPaused = ref(false)
 
 async function handleFetchMore() {
   if (isFetchMoreLoading.value) return
 
   isFetchMoreLoading.value = true
+  const tab = currentTab.value
+  const continuation = tabContinuation(tab)
   const useLocalApi = process.env.SUPPORTS_LOCAL_API && tabApiUsed.get(currentTab.value) === 'local'
 
   switch (currentTab.value) {
@@ -2868,6 +2880,10 @@ async function handleFetchMore() {
       console.error(currentTab.value)
   }
 
+  // A page that failed to load keeps its continuation. Leave the pause alone for a tab selected meanwhile.
+  if (currentTab.value === tab) {
+    autoLoadPaused.value = tabContinuation(tab) === continuation
+  }
   isFetchMoreLoading.value = false
 }
 
@@ -3025,6 +3041,7 @@ function changeTab(tab, moveFocus = true) {
   // `newTabNode` can be `null` when `tab` === "search"
   const newTabNode = document.getElementById(`${tab}Tab`)
   currentTab.value = tab
+  autoLoadPaused.value = false
   fetchTab(tab)
 
   if (moveFocus && newTabNode != null) {

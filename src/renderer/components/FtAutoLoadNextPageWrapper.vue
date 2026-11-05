@@ -10,7 +10,7 @@
       -->
     </div>
     <FtLoader
-      v-if="loading || generalAutoLoadMorePaginatedItemsEnabled"
+      v-if="loading || (generalAutoLoadMorePaginatedItemsEnabled && !paused)"
       :label="$t('Global.Loading More')"
       compact
       :tab-loading-indicator="false"
@@ -26,8 +26,13 @@ import { ObserveVisibility as vObserveVisibility } from 'vue-observe-visibility'
 import FtLoader from './FtLoader/FtLoader.vue'
 import store from '../store/index'
 
-defineProps({
+const props = defineProps({
   loading: {
+    type: Boolean,
+    default: false
+  },
+  /** Shows the slot and waits for it to request the next page, even with automatic loading enabled */
+  paused: {
     type: Boolean,
     default: false
   }
@@ -41,7 +46,7 @@ const generalAutoLoadMorePaginatedItemsEnabled = computed(() => {
 })
 
 const observeVisibilityOptions = computed(() => {
-  if (generalAutoLoadMorePaginatedItemsEnabled.value) {
+  if (generalAutoLoadMorePaginatedItemsEnabled.value && !props.paused) {
     return {
       callback: (isVisible, _entry) => {
         // This is also fired when **hidden**
