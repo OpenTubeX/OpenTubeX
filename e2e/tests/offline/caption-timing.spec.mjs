@@ -1,5 +1,5 @@
 import { test, expect, setWindowSize } from '../../helpers/app.mjs'
-import { findWatchComponent, openMockedVideo, openCaptionLanguages, openPlayerOptions } from '../../helpers/player.mjs'
+import { findWatchComponent, openMockedVideo, openCaptionLanguages, openPlayerOptions, settleMenuZoom } from '../../helpers/player.mjs'
 import { mockPlayableWatchPage } from '../../helpers/watch.mjs'
 
 /** @param {import('@playwright/test').Locator} locator */
@@ -150,6 +150,8 @@ for (const usePlayerMenuGrid of [true, false]) {
       }
       await player.locator('.shaka-text-languages').screenshot({ path: testInfo.outputPath('caption-timing-captions-entry.png') })
       await timingRow.click()
+      // Measured once the menu has zoomed to the timing view.
+      await settleMenuZoom(player)
       const menu = player.locator('.ft-caption-timing-menu')
       const scroller = menu.locator('.ft-caption-timing-controls')
       const input = menu.getByRole('spinbutton', { name: 'Offset (seconds)' })
@@ -277,6 +279,7 @@ for (const usePlayerMenuGrid of [true, false]) {
           // Fractional zoom can introduce tiny floating-point differences.
           expect((await getVisibleBounds(timingRow)).height).toBeGreaterThanOrEqual(48 - 0.01)
           await timingRow.click()
+          await settleMenuZoom(player)
         }
         await expect(input).toBeVisible()
         expect((await getVisibleBounds(input)).height).toBeGreaterThanOrEqual(48 - 0.01)
@@ -319,6 +322,7 @@ for (const usePlayerMenuGrid of [true, false]) {
       await openPlayerOptions(player)
       await openCaptionLanguages(player)
       await player.getByRole('button', { name: 'Adjust timing…', exact: true }).click()
+      await settleMenuZoom(player)
       const menu = player.locator('.ft-caption-timing-menu')
       const scroller = menu.locator('.ft-caption-timing-controls')
       const originalScroller = await scroller.elementHandle()

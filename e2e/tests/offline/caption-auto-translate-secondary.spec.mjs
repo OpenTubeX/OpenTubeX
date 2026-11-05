@@ -1,5 +1,5 @@
 import { test, expect } from '../../helpers/app.mjs'
-import { openMockedVideo, openCaptionLanguages, openPlayerOptions } from '../../helpers/player.mjs'
+import { openMockedVideo, openCaptionLanguages, openPlayerOptions, settleMenuZoom } from '../../helpers/player.mjs'
 import { mockPlayableWatchPage } from '../../helpers/watch.mjs'
 
 const SEED = {
@@ -170,6 +170,8 @@ test.describe('secondary captions', () => {
     const captionsMenu = await openCaptionsMenu(page)
     await attachScreenshot('captions menu')
     await captionsMenu.getByRole('button', { name: 'Secondary Captions', exact: true }).click()
+    // Measured once the menu has zoomed to the view.
+    await settleMenuZoom(player)
     const secondaryMenu = player.locator('.ft-caption-secondary-menu')
     const options = secondaryMenu.locator('.ft-caption-secondary-options')
     await expect(options.getByRole('button', { name: 'Off', exact: true })).toHaveAttribute('aria-selected', 'true')
