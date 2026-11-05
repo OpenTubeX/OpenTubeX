@@ -174,16 +174,61 @@ async function toggleSync() {
   vertical-align: middle;
 }
 
-.syncedSettingIndicator:hover,
+.syncedSettingIndicator,
+.changedSettingIndicator {
+  --indicator-state-color: var(--primary-text-color);
+  --indicator-state-layer: 0%;
+
+  position: relative;
+  isolation: isolate;
+  border-radius: 50%;
+}
+
+/* Material state layer: a circle around the glyph that extends past the
+   button box, so the indicators keep their inline size next to the label. */
+.syncedSettingIndicator::before,
+.changedSettingIndicator::before {
+  position: absolute;
+  z-index: -1;
+  top: 50%;
+  left: 50%;
+  width: 1.8em;
+  height: 1.8em;
+  border-radius: 50%;
+  background-color: color-mix(in srgb, var(--indicator-state-color) var(--indicator-state-layer), transparent);
+  content: '';
+  transition: background-color var(--motion-fast-effects);
+  translate: -50% -50%;
+}
+
+.syncedSettingIndicator:not(:disabled):hover,
+.changedSettingIndicator:not(:disabled):hover {
+  --indicator-state-layer: 8%;
+}
+
+.syncedSettingIndicator:not(:disabled):focus-visible,
+.changedSettingIndicator:not(:disabled):focus-visible,
+.syncedSettingIndicator:not(:disabled):active,
+.changedSettingIndicator:not(:disabled):active {
+  --indicator-state-layer: 10%;
+}
+
+/* Draw the focus ring around the state layer instead of the small glyph box. */
 .syncedSettingIndicator:focus-visible,
-.changedSettingIndicator:hover,
 .changedSettingIndicator:focus-visible {
-  color: var(--settings-changed-color, var(--primary-color));
-  outline: 2px solid var(--settings-changed-color, var(--primary-color));
-  outline-offset: 2px;
+  outline: none;
+  box-shadow: none;
+}
+
+:root:not(.hideOutlines) .syncedSettingIndicator:focus-visible:not(:disabled)::before,
+:root:not(.hideOutlines) .changedSettingIndicator:focus-visible:not(:disabled)::before {
+  outline: 2px solid var(--primary-color);
+  outline-offset: 0;
 }
 
 .changedSettingIndicator {
+  --indicator-state-color: var(--settings-changed-color, var(--primary-color));
+
   color: var(--settings-changed-color, var(--primary-color));
 }
 
@@ -192,8 +237,9 @@ async function toggleSync() {
   cursor: default;
 }
 
+/* Dim only the glyph so the state layer keeps its full strength. */
 .syncDisabled {
-  opacity: 0.55;
+  color: color-mix(in srgb, currentcolor 55%, transparent);
 }
 
 .indicatorDisabled {
