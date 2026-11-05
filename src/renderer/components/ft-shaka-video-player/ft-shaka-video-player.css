@@ -508,7 +508,7 @@
 }
 
 :root[data-reduced-transparency] .skippedSegment {
-  --skipped-segment-background: rgb(0 0 0 / 90%);
+  --skipped-segment-background: rgb(0 0 0);
 }
 
 /* stylelint-enable liberty/use-logical-spec */
