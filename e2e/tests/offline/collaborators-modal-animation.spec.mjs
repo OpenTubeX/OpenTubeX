@@ -187,6 +187,7 @@ test('middle-clicking a collaborator opens its channel in a background tab', asy
   await expect(page.locator(sel.tabs)).toHaveCount(2)
   await expect(page.locator(sel.tabs).first()).toHaveClass(/active/)
   await expect(prompt).toBeVisible()
+  await expect(prompt.locator('.collaboratorName')).toHaveText(['Channel A', 'Channel C', 'Channel D'])
   await expect(page).toHaveURL(/#\/subscriptions$/)
   await expect.poll(() => page.evaluate(async () => {
     const state = await window.ftElectron.tabs.getState()
@@ -251,6 +252,7 @@ test.describe('while collaborators are loading', () => {
     seed: {
       settings: {
         fetchSubscriptionsAutomatically: false,
+        showNewSubscriptionFeed: true,
         // Install request interception before avatars can prefetch collaborators.
         landingPage: 'history'
       },
@@ -271,7 +273,8 @@ test.describe('while collaborators are loading', () => {
           videos: [
             feedVideo('bbbbbbbbbb1', 'Uncached collab video', now - HOUR, {
               author: 'Channel A and others',
-              hasCollaborators: true
+              hasCollaborators: true,
+              isNewInSubscriptionFeed: true
             })
           ],
           videosTimestamp: new Date(now - 2 * HOUR).toISOString()
@@ -279,6 +282,95 @@ test.describe('while collaborators are loading', () => {
       ]
     }
   })
+
+  for (const refreshedCollaborators of [undefined, []]) {
+    test(`keeps fetched collaborators when a background channel refresh ${refreshedCollaborators ? 'returns an empty list' : 'omits the list'}`, async ({ app, page }) => {
+      await page.evaluate(async () => {
+        await window.$store.dispatch('updateBackendPreference', 'invidious')
+        await window.$store.dispatch('updateDefaultInvidiousInstance', 'https://invidious.test')
+      })
+      await app.electronApp.context().route('https://invidious.test/api/v1/channels/**', route => route.fulfill({
+        json: {
+          author: 'Updated Channel A',
+          authorId: CHANNEL_A,
+          authorThumbnails: [],
+          authorBanners: [],
+          description: '',
+          subCount: 0,
+          totalViews: 0,
+          joined: 0,
+          tabs: ['videos'],
+          relatedChannels: [],
+          videos: [feedVideo('bbbbbbbbbb1', 'Uncached collab video', now - HOUR, {
+            author: 'Updated Channel A',
+            collaborators: refreshedCollaborators
+          })],
+          continuation: null
+        }
+      }))
+      await page.route('**/youtubei/v1/next**', route => route.fulfill({
+        json: {
+          contents: {
+            twoColumnWatchNextResults: {
+              results: {
+                results: {
+                  contents: [{
+                    videoSecondaryInfoRenderer: {
+                      owner: {
+                        videoOwnerRenderer: {
+                          navigationEndpoint: {
+                            showDialogCommand: {
+                              panelLoadingStrategy: {
+                                inlineContent: {
+                                  dialogViewModel: {
+                                    customContent: {
+                                      listViewModel: {
+                                        listItems: collaborators.map(({ id, name }) => ({
+                                          listItemViewModel: {
+                                            title: { content: name },
+                                            rendererContext: {
+                                              commandContext: {
+                                                onTap: { innertubeCommand: { browseEndpoint: { browseId: id } } }
+                                              }
+                                            }
+                                          }
+                                        }))
+                                      }
+                                    }
+                                  }
+                                }
+                              }
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }]
+                }
+              }
+            }
+          }
+        }
+      }))
+      await goTo(page, 'subscriptions')
+      await page.locator('[data-subscription-feed-tab="all"]').click()
+      await page.locator('.channelResolverButton').click()
+      const prompt = page.locator('.prompt')
+      await expect(prompt.locator('.collaboratorName')).toHaveText(['Channel A', 'Channel C', 'Channel D'])
+      const feedUrl = page.url()
+
+      await prompt.getByRole('link', { name: 'Channel A' }).click({ button: 'middle' })
+
+      await expect(page.locator(sel.tabs)).toHaveCount(2)
+      await expect(page.locator(sel.tabs).nth(1)).toContainText('Updated Channel A')
+      await expect(page.locator(sel.tabs).nth(1)).not.toHaveClass(/loading/)
+      await expect(page.locator('.ft-list-video:visible .channelName')).toHaveText('Updated Channel A')
+      await expect(page.locator(sel.tabs).first()).toHaveClass(/active/)
+      await expect(prompt).toBeVisible()
+      await expect(prompt.locator('.collaboratorName')).toHaveText(['Channel A', 'Channel C', 'Channel D'])
+      await expect(page).toHaveURL(feedUrl)
+    })
+  }
 
   test('shows the loading cursor across the app', async ({ page, attachScreenshot }) => {
     let releaseRequests

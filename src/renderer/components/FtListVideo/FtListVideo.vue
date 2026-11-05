@@ -2410,6 +2410,10 @@ function updateUploadedTime() {
 }
 
 function parseVideoData() {
+  if (id.value !== props.data.videoId) {
+    channelCollaborators.value = []
+    showCollaboratorsPrompt.value = false
+  }
   relativeTimeDataLoadedAt.value = Date.now()
   relativeTimeClockAtLoad.value = relativeTimeNow.value
   id.value = props.data.videoId
@@ -2429,7 +2433,10 @@ function parseVideoData() {
   }
 
   channelName.value = props.data.author ?? null
-  channelCollaborators.value = props.data.collaborators ?? []
+  // A channel-page refresh can omit collaborators that the byline lookup resolved.
+  if (props.data.collaborators?.length > 0) {
+    channelCollaborators.value = props.data.collaborators
+  }
   // Collaboration videos have no authorId; the first collaborator is the main author
   channelId.value = props.data.authorId ?? channelCollaborators.value[0]?.id ?? null
 
