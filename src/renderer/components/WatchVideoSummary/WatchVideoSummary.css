@@ -9,10 +9,10 @@
 /* Matches FtCard, like the description and comments; phonePanelCard.css styles
    the phone card's surface. */
 .videoSummary:not(.phonePanelCard) {
+  position: relative;
+  isolation: isolate;
   border-radius: var(--shape-corner-medium);
   background-color: var(--card-bg-color);
-  background-image: var(--card-bg-image);
-  background-attachment: fixed;
   backdrop-filter: var(--card-bg-blur, none);
   box-shadow: 0 1px 2px rgb(0 0 0 / 10%);
   color: var(--primary-text-color);
@@ -27,6 +27,13 @@
   padding-block: 12px;
   cursor: pointer;
   list-style: none;
+}
+
+/* Closed details render only their summary, so the fixed background lives
+   in it and takes the card's image and corners. */
+.videoSummary summary > .fixedBackgroundLayer {
+  border-radius: var(--shape-corner-medium);
+  background-image: var(--card-bg-image);
 }
 
 .videoSummary summary::-webkit-details-marker {

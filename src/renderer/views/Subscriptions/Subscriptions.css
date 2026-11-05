@@ -27,7 +27,9 @@
   border-start-end-radius: var(--shape-corner-medium);
   background-color: var(--card-bg-color);
   background-image: var(--card-bg-image);
-  background-attachment: fixed;
+
+  /* FtFixedBackground paints the image fixed to the viewport. */
+  background-size: 0 0;
   backdrop-filter: var(--card-bg-blur, none);
   box-shadow: 0 1px 0 var(--primary-shadow-color);
 }

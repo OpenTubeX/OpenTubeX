@@ -4,8 +4,6 @@ body {
   font-family: var(--app-font-family);
   color: var(--primary-text-color);
   background-color: var(--bg-color);
-  background-image: var(--bg-image);
-  background-attachment: fixed;
 
   --app-font-family: 'Geist Variable', system-ui, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol', 'Noto Color Emoji';
   --ui-roundness: 1;
@@ -45,7 +43,9 @@ body {
   --switch-touch-height: 36px;
 
   /* Optional decorative layers, separate from colors used by contrast checks
-     and native windows. Fixed backgrounds keep the field aligned on scroll. */
+     and native windows. Fixed backgrounds keep the field aligned on scroll;
+     themes that set them also set --fixed-background-display, see
+     FtFixedBackground. */
   --bg-image: none;
   --card-bg-image: none;
   --scrollbar-thumb-width: 6px;
@@ -2474,11 +2474,20 @@ html[lang='ur'] [data-prefix='fas'][data-icon='circle-question'] {
 
 /*************** MAIN APP STYLING RULES ***************/
 
+/* The window's field, in a fixed layer like FtFixedBackground. */
+body::before {
+  content: '';
+  display: var(--fixed-background-display, none);
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  background-image: var(--bg-image);
+}
+
 .app {
   color: var(--primary-text-color);
   background-color: var(--bg-color);
-  background-image: var(--bg-image);
-  background-attachment: fixed;
 }
 
 
@@ -2652,6 +2661,10 @@ a:visited {
   --bg-glow-accent: rgb(from var(--signal-accent-color) r g b / 10%);
   --bg-glow-accent-soft: rgb(from var(--signal-accent-color) r g b / 7%);
 
+  /* Composite the layered fields instead of repainting them on every scroll
+     frame, at the cost of subpixel text over them on low-DPI screens. */
+  --fixed-background-display: block;
+
   /* Settings sections share the window's field instead of repeating it. */
   --settings-section-bg-color: transparent;
   --settings-changed-color: var(--accent-color);
@@ -2685,6 +2698,11 @@ a:visited {
   --logo-pressed-color: var(--accent-color-active);
   --logo-icon: url('../../_icons/iconWhiteSmall.svg');
   --logo-text: url('../../_icons/textWhiteSmall.svg');
+}
+
+/* Let the window's fixed field show through. */
+:is(.openTubeXLight, .openTubeXDark) .app {
+  background-color: transparent;
 }
 
 /* Resolve the color on the thread so fullscreen docks can supply their palette. */

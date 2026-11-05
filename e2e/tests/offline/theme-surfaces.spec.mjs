@@ -72,6 +72,20 @@ async function expectPanelOwnsBackground(app, card, points) {
   }
 }
 
+/**
+ * Chromium repaints everything over a background with a fixed attachment on
+ * every scroll frame, so the page must composite them with FtFixedBackground.
+ *
+ * @param {import('@playwright/test').Page} page
+ */
+async function repaintingFixedBackgrounds(page) {
+  return page.evaluate(() => [...document.querySelectorAll('*')].flatMap(element =>
+    [null, '::before', '::after'].filter(pseudo => {
+      const style = getComputedStyle(element, pseudo)
+      return style.backgroundAttachment.includes('fixed') && style.backgroundImage !== 'none'
+    }).map(pseudo => `${element.localName}.${[...element.classList].join('.')}${pseudo ?? ''}`)))
+}
+
 // These themes share layout rules; pair light/dark with regular/fractional zoom.
 for (const [theme, scale] of [['openTubeXLight', 100], ['openTubeXDark', 125]]) {
   test.describe(`${theme} continuous backgrounds at ${scale}%`, () => {
@@ -100,6 +114,46 @@ for (const [theme, scale] of [['openTubeXLight', 100], ['openTubeXDark', 125]]) 
       // Sample the empty gutter on both sides of the header's bottom edge.
       await expectContinuousBackground(app, header, [[5, height - 4], [5, height + 4]])
       await attachThemeScreenshot(app, testInfo, `${theme} subscription header at ${scale}%`)
+    })
+
+    test('Subscriptions feed fields stay composited and match fixed backgrounds', async ({ app, page }) => {
+      await goTo(page, 'subscriptions')
+      const card = page.locator('.subscriptionsPage > .card')
+      await expect(card.locator(':scope > .fixedBackgroundLayer')).toBeVisible()
+      expect(await repaintingFixedBackgrounds(page)).toEqual([])
+
+      // Scroll the card past the window, then compare the composited fields
+      // with the fixed attachments they replace at the same pixels.
+      await card.evaluate(element => { element.style.minBlockSize = '300vh' })
+      await page.evaluate(() => window.scrollTo(0, innerHeight))
+      await page.mouse.move(0, 0)
+      const topNav = page.locator('.topNav')
+      const points = async () => {
+        const [nav, field] = await Promise.all([topNav, card].map(locator =>
+          locator.evaluate(element => element.getBoundingClientRect())))
+        const viewportHeight = await page.evaluate(() => innerHeight)
+        return [
+          ...[0.4, 0.6, 0.9].map(fraction => [field.x + 24 - nav.x, viewportHeight * fraction - nav.y]),
+          [field.right - 24 - nav.x, viewportHeight * 0.8 - nav.y],
+          // The window's field beside the card.
+          [field.right + 4 - nav.x, viewportHeight * 0.7 - nav.y]
+        ]
+      }
+      const composited = await sampleColors(app, topNav, points)
+      const style = await page.addStyleTag({
+        content: `
+          body, .app { background-image: var(--bg-image) !important; background-attachment: fixed !important; }
+          .app { background-color: var(--bg-color) !important; }
+          body::before, .fixedBackgroundLayer { display: none !important; }
+          .subscriptionsPage > .card { background-size: auto !important; background-attachment: fixed !important; }
+        `
+      })
+      try {
+        const reference = await sampleColors(app, topNav, points)
+        expect(maxColorDifference(composited, reference), `Field pixels: ${JSON.stringify({ composited, reference })}`).toBeLessThanOrEqual(2)
+      } finally {
+        await style.evaluate(element => element.remove())
+      }
     })
 
     test('search filter background does not flash when its opening animation ends', async ({ app, page }) => {
@@ -379,6 +433,7 @@ for (const [theme, scale] of [['openTubeXLight', 100], ['openTubeXDark', 125]]) 
       const about = page.locator('#aboutPanel')
       const aboutWidth = await about.evaluate(element => element.getBoundingClientRect().width)
       await expectContinuousBackground(app, about, [[aboutWidth - 5, 40], [aboutWidth + 5, 40]])
+      expect(await repaintingFixedBackgrounds(page)).toEqual([])
       await attachThemeScreenshot(app, testInfo, `${theme} channel panels at ${scale}%`)
     })
   })

@@ -25,6 +25,8 @@
         :icon="['fas', 'angle-down']"
         aria-hidden="true"
       />
+      <!-- Closed details render only their summary. -->
+      <FtFixedBackground v-if="!phone" />
     </summary>
     <p
       v-for="(paragraph, index) in paragraphs"
@@ -38,6 +40,7 @@
 </template>
 
 <script setup>
+import FtFixedBackground from '../FtFixedBackground/FtFixedBackground.vue'
 import FtInlineMetadata from '../FtInlineMetadata/FtInlineMetadata.vue'
 
 defineProps({

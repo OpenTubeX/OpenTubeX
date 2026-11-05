@@ -1749,6 +1749,14 @@ function resolvedColor(page, value) {
   }, value)
 }
 
+/** The window field's image, or none when the theme doesn't paint one. */
+function windowField(page) {
+  return page.locator('body').evaluate(body => {
+    const style = getComputedStyle(body, '::before')
+    return style.display === 'none' ? 'none' : style.backgroundImage
+  })
+}
+
 function contrastRatio(first, second) {
   const luminance = rgb => rgb.map(value => value / 255)
     .map(value => value <= 0.04045 ? value / 12.92 : ((value + 0.055) / 1.055) ** 2.4)
@@ -1785,7 +1793,9 @@ test.describe('Tally themes', () => {
       await expect(page.getByRole('combobox', { name: /Secondary colou?r theme/i })).toHaveCount(0)
       // Read resolved colors so accidental inheritance from Red/Blue is detected.
       expect(await resolvedColor(page, 'var(--accent-color)')).toEqual(accent)
-      for (const selector of ['.app', '.ft-card', '.settingsWindow']) {
+      // The window's field is a fixed layer behind the app.
+      expect(await windowField(page)).not.toBe('none')
+      for (const selector of ['.ft-card', '.settingsWindow']) {
         await expect(page.locator(selector).first()).not.toHaveCSS('background-image', 'none')
       }
       await expect(page.locator('.sectionBody').first()).toHaveCSS('background-color', 'rgba(0, 0, 0, 0)')
@@ -1824,7 +1834,7 @@ test.describe('Tally themes', () => {
     await page.getByRole('option', { name: 'Light', exact: true }).click()
     await expect(page.getByRole('combobox', { name: /Main colou?r theme/i })).toBeEnabled()
     await expect(page.locator('body')).toHaveCSS('--primary-color', '#f44336')
-    await expect(page.locator('.app')).toHaveCSS('background-image', 'none')
+    expect(await windowField(page)).toBe('none')
     await expect(page.locator('.settingsWindow')).toHaveCSS('background-image', 'none')
     expect(await settingsBackgroundVariation(app)).toBe(0)
   })

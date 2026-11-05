@@ -1,7 +1,9 @@
 .about {
   background-color: var(--card-bg-color);
   background-image: var(--card-bg-image);
-  background-attachment: fixed;
+
+  /* FtFixedBackground paints the image fixed to the viewport. */
+  background-size: 0 0;
   backdrop-filter: var(--card-bg-blur, none);
   margin-block-start: 0;
   padding-block: 0 10px;

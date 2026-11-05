@@ -189,9 +189,6 @@
 }
 
 .ft-card.quickSettingsMenu {
-  /* A fixed background follows the viewport only while no transform applies,
-     so it would jump when the opening transition ends. */
-  background-attachment: scroll;
   border-radius: var(--shape-corner-large);
 }
 

@@ -1,11 +1,24 @@
 .ft-card {
   background-color: var(--card-bg-color);
   background-image: var(--card-bg-image);
-  background-attachment: fixed;
   backdrop-filter: var(--card-bg-blur, none);
   border-radius: var(--shape-corner-medium);
   margin: 8px;
   padding-block: 3px 16px;
   padding-inline: 16px;
   box-shadow: 0 1px 2px rgb(0 0 0 / 10%);
+}
+
+/* FtFixedBackground paints the image fixed to the viewport. Keep the base
+   specificity so pages can still position their cards. */
+.ft-card:where(.fixedBackground) {
+  position: relative;
+  isolation: isolate;
+  background-size: 0 0;
+}
+
+/* Lift the card while it holds an open dropdown, or the cards after it would
+   paint over the menu. */
+.ft-card:where(.fixedBackground):has(.iconDropdown) {
+  z-index: 1;
 }

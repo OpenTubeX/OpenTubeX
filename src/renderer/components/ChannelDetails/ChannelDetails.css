@@ -29,9 +29,12 @@
   flex-direction: column;
   gap: var(--channel-header-gap);
   position: relative;
+  isolation: isolate;
   background-color: var(--card-bg-color);
   background-image: var(--card-bg-image);
-  background-attachment: fixed;
+
+  /* FtFixedBackground paints the image fixed to the viewport. */
+  background-size: 0 0;
   backdrop-filter: var(--card-bg-blur, none);
   border-radius: 0 0 var(--shape-corner-large) var(--shape-corner-large);
   padding-block: var(--channel-header-gap);
