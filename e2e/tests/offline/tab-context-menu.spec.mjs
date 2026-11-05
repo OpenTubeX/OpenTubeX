@@ -292,3 +292,110 @@ for (const settings of [
     })
   })
 }
+
+test('the empty tab bar menu uses the compact tab menu rows @scale', async ({ page }) => {
+  await page.locator(sel.activeTab).click({ button: 'right' })
+  const tabMenuRow = page.locator('.compactTabMenu .menuScroll .menuItem').first()
+  await expect(tabMenuRow).toBeVisible()
+  const rowStyle = element => {
+    const style = getComputedStyle(element)
+    return { fontSize: style.fontSize, minBlockSize: style.minBlockSize, height: element.getBoundingClientRect().height }
+  }
+  const tabRow = await tabMenuRow.evaluate(rowStyle)
+  await page.keyboard.press('Escape')
+
+  const content = await page.locator('.tabsContent').boundingBox()
+  const container = await page.locator('.tabsContainer').boundingBox()
+  await page.mouse.click(container.x + container.width - 12, content.y + content.height / 2, { button: 'right' })
+  const newTab = page.locator('.contextMenu').getByRole('menuitem', { name: 'New Tab', exact: true })
+  await expect(newTab).toBeVisible()
+  expect(await newTab.evaluate(rowStyle)).toEqual(tabRow)
+})
+
+test('a collapsed tab group opens a group menu', async ({ page }) => {
+  const createCollapsedGroup = name => page.evaluate(async name => {
+    const tabs = await Promise.all([1, 2].map(index => window.ftElectron.tabs.create({
+      route: '/history', title: `${name} ${index}`, makeActive: false, lazyLoad: true
+    })))
+    const group = await window.ftElectron.tabs.createGroup({ name, color: 'blue' })
+    await window.ftElectron.tabs.setGroup(tabs.map(tab => tab.id), group.id)
+    await window.ftElectron.tabs.updateGroup(group.id, { isCollapsed: true })
+    return { groupId: group.id, tabIds: tabs.map(tab => tab.id) }
+  }, name)
+  const state = () => page.evaluate(() => window.ftElectron.tabs.getState())
+  const menu = page.locator('.contextMenu')
+  const group = page.locator('.collapsedTabGroup')
+
+  const research = await createCollapsedGroup('Research')
+  await group.click({ button: 'right' })
+  await expect(menu.getByRole('menuitem')).toHaveText([
+    'Expand Group', 'Close 2 Tabs', 'Ungroup', 'Manage Tab Groups…'
+  ])
+  await menu.getByRole('menuitem', { name: 'Expand Group', exact: true }).click()
+  await expect(group).toHaveCount(0)
+  await expect.poll(async () => (await state()).groups.find(group => group.id === research.groupId)?.isCollapsed).toBe(false)
+
+  await page.evaluate(id => window.ftElectron.tabs.updateGroup(id, { isCollapsed: true }), research.groupId)
+  await group.click({ button: 'right' })
+  await menu.getByRole('menuitem', { name: 'Ungroup', exact: true }).click()
+  await expect.poll(async () => {
+    const { tabs, groups } = await state()
+    return {
+      groupExists: groups.some(group => group.id === research.groupId),
+      groupIds: tabs.filter(tab => research.tabIds.includes(tab.id)).map(tab => tab.groupId)
+    }
+  }).toEqual({ groupExists: false, groupIds: [null, null] })
+
+  const music = await createCollapsedGroup('Music')
+  await group.click({ button: 'right' })
+  await menu.getByRole('menuitem', { name: 'Close 2 Tabs', exact: true }).click()
+  await expect.poll(async () => (await state()).tabs.filter(tab => music.tabIds.includes(tab.id))).toHaveLength(0)
+  await expect(page.locator(sel.tabs)).toHaveCount(3)
+})
+
+test('menus without a tab palette take focus from the keyboard and navigate with arrow keys', async ({ page }) => {
+  await page.evaluate(async () => {
+    const tabs = await Promise.all([1, 2].map(index => window.ftElectron.tabs.create({
+      route: '/history', title: `Research ${index}`, makeActive: false, lazyLoad: true
+    })))
+    const group = await window.ftElectron.tabs.createGroup({ name: 'Research' })
+    await window.ftElectron.tabs.setGroup(tabs.map(tab => tab.id), group.id)
+    await window.ftElectron.tabs.updateGroup(group.id, { isCollapsed: true })
+  })
+  const menu = page.locator('.contextMenu')
+  const item = name => menu.getByRole('menuitem', { name, exact: true })
+
+  // A pointer-opened menu leaves focus in place until an arrow key moves it in.
+  const container = await page.locator('.tabsContainer').boundingBox()
+  await page.mouse.click(container.x + container.width - 12, container.y + container.height / 2, { button: 'right' })
+  await expect(item('New Tab')).toBeVisible()
+  await expect(item('New Tab')).not.toBeFocused()
+  await page.keyboard.press('ArrowDown')
+  await expect(item('New Tab')).toBeFocused()
+  await page.keyboard.press('ArrowUp')
+  await expect(item('Reopen Closed Tab')).not.toBeFocused()
+  await page.keyboard.press('Escape')
+  await expect(menu).toHaveCount(0)
+
+  // A keyboard-opened menu focuses its first item, so Enter picks from the menu.
+  const group = page.locator('.collapsedTabGroup')
+  await group.focus()
+  await page.keyboard.press('Shift+F10')
+  await expect(item('Expand Group')).toBeFocused()
+  // Tab closes the menu like a native one, so it never lingers after focus leaves.
+  await page.keyboard.press('Tab')
+  await expect(menu).toHaveCount(0)
+  await expect(group).not.toBeFocused()
+  await group.focus()
+  await page.keyboard.press('Shift+F10')
+  await expect(item('Expand Group')).toBeFocused()
+  await page.keyboard.press('End')
+  await expect(item('Manage Tab Groups…')).toBeFocused()
+  await page.keyboard.press('Home')
+  await page.keyboard.press('ArrowDown')
+  await expect(item('Close 2 Tabs')).toBeFocused()
+  await page.keyboard.press('ArrowUp')
+  await page.keyboard.press('Enter')
+  await expect(menu).toHaveCount(0)
+  await expect(group).toHaveCount(0)
+})

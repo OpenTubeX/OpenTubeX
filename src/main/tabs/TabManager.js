@@ -362,6 +362,8 @@ export class TabManager {
     this.selectedTabIds = []
     this.lastReorderRequestId = null
     this.contextMenuSurface = 'content'
+    /** @type {string | null} */
+    this.contextMenuTabGroupId = null
     this.contextMenuSubscriptionFeedTab = null
     this.contextMenuSubscriptionNewFeedTab = false
     this.contextMenuSubscriptionFeedHasNewContent = false

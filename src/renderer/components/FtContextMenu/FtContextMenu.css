@@ -25,6 +25,8 @@
   display: flex;
   flex-direction: column;
   max-block-size: calc(100vh - 16px);
+  font-size: 13px;
+  line-height: 1.35;
 }
 
 /* Where supported (not before iOS 18), the accent is the main color's hue at a
@@ -109,8 +111,8 @@
   align-items: center;
   gap: 7px;
   inline-size: 100%;
-  min-block-size: 32px;
-  padding-block: 5px;
+  min-block-size: 28px;
+  padding-block: 4px;
   padding-inline: 7px;
   color: inherit;
   background: transparent;
@@ -125,14 +127,6 @@
 .compactTabMenu,
 .videoMenu {
   inline-size: 236px;
-  font-size: 13px;
-  line-height: 1.35;
-}
-
-.compactTabMenu .menuItem,
-.videoMenu .menuItem {
-  min-block-size: 28px;
-  padding-block: 4px;
 }
 
 .tabMenuHeader {

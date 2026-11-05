@@ -294,8 +294,10 @@ const itemIcons = {
   Cut: ['fas', 'scissors'],
   Default: ['fas', 'circle'],
   'Duplicate Tab': ['fas', 'clone'],
+  'Expand Group': ['fas', 'expand'],
   'Load Tab': ['fas', 'download'],
   'Load Tabs': ['fas', 'download'],
+  'Manage Tab Groups…': ['fas', 'edit'],
   'Mark All as Seen': ['fas', 'check'],
   'Move Tab': ['fas', 'exchange-alt'],
   'Move Tab to Group': ['fas', 'layer-group'],
@@ -328,6 +330,7 @@ const itemIcons = {
   'To the Right': ['fas', 'arrow-right'],
   'To the Top': ['fas', 'arrow-up'],
   'Unload Tab': ['fas', 'right-from-bracket'],
+  Ungroup: ['fas', 'link-slash'],
   'Unload Tabs': ['fas', 'right-from-bracket'],
   'Unpin Tab': ['fas', 'thumbtack-slash'],
   'Unpin Tabs': ['fas', 'thumbtack-slash']
@@ -434,7 +437,8 @@ async function open(event) {
 
   touchFriendly.value = false
   localItems.value = channel ? ref(getChannelLinkMenuItems(channel, t)) : null
-  await showMenu(result.items, result.sessionId, event.clientX, event.clientY, request)
+  // Chromium reports no button for menus opened with Shift+F10 or the Menu key
+  await showMenu(result.items, result.sessionId, event.clientX, event.clientY, request, event.button === -1)
 }
 
 /**
@@ -475,7 +479,7 @@ async function openLocalMenu(event) {
   await showMenu(contextualMenu.items, contextualMenu.sessionId, x, y, request)
 }
 
-async function showMenu(menuItems, menuSessionId, clientX, clientY, request) {
+async function showMenu(menuItems, menuSessionId, clientX, clientY, request, focusFirstItem = false) {
   items.value = menuItems
   resolveItemFavicons(items.value)
   sessionId.value = menuSessionId
@@ -517,7 +521,7 @@ async function showMenu(menuItems, menuSessionId, clientX, clientY, request) {
     x: Math.max(8, Math.min(x, window.innerWidth - menuWidth - 8)),
     y: Math.max(8, Math.min(clientY, window.innerHeight - menuHeight - 8))
   }
-  if (localItems.value) menuRef.value.querySelector('button:enabled')?.focus({ preventScroll: true })
+  if (localItems.value || focusFirstItem) menuRef.value.querySelector('button:enabled')?.focus({ preventScroll: true })
 }
 
 function close(event) {
@@ -616,7 +620,13 @@ function handleKeydown(event) {
     previousFocus?.focus({ preventScroll: true })
     return
   }
-  if ((!tabColorMenu.value && !localItems.value) || !['ArrowDown', 'ArrowUp', 'ArrowLeft', 'ArrowRight', 'Home', 'End'].includes(event.key)) return
+  // Like a native menu, the menu closes when focus moves on. Closing returns
+  // focus to the opener first, so Tab continues from there.
+  if (event.key === 'Tab') {
+    close()
+    return
+  }
+  if (!['ArrowDown', 'ArrowUp', 'ArrowLeft', 'ArrowRight', 'Home', 'End'].includes(event.key)) return
 
   event.preventDefault()
   event.stopPropagation()
@@ -629,7 +639,7 @@ function handleKeydown(event) {
     submenu.parentElement.querySelector(':scope > button').focus()
     return
   }
-  if (forward && focused?.getAttribute('aria-haspopup') === 'menu') {
+  if (forward && menuRef.value?.contains(focused) && focused.getAttribute('aria-haspopup') === 'menu') {
     focused.parentElement.querySelector('.submenu button:enabled')?.focus()
     return
   }

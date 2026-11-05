@@ -31,6 +31,7 @@ const sharedContextMenuLabelKeys = {
   Paste: 'Paste',
   Pink: 'Settings.Theme Settings.Main Color Theme.Pink',
   Red: 'Settings.Theme Settings.Main Color Theme.Red',
+  Ungroup: 'Tab Organizer.Ungroup',
   Ungrouped: 'Tab Organizer.Ungrouped',
   Yellow: 'Settings.Theme Settings.Main Color Theme.Yellow'
 }
@@ -224,11 +225,11 @@ function serializeContextMenuItems(items, actions, actionPrefix = 'item') {
  * @param {{ prepend: Function, append: Function }} contextMenuOptions
  * @param {object} options
  * @param {(options?: object) => Promise<import('electron').BrowserWindow>} options.createWindow
- * @param {(browserWindow: import('electron').BrowserWindow) => Promise<boolean>} options.confirmCloseApp
+ * @param {(browserWindow: import('electron').BrowserWindow) => boolean | Promise<boolean>} options.confirmCloseWindow Confirms closing the window, or quitting when it's (or becomes) the last one
  * @param {(manager: TabManager, count: number, action: 'close' | 'load' | 'unload') => Promise<boolean>} options.confirmMultipleTabsAction
  * @param {Set<number>} options.closeConfirmedWindowIds Windows that may close without another prompt
  */
-export function setupContextMenu(contextMenuOptions, { createWindow, confirmCloseApp, confirmMultipleTabsAction, closeConfirmedWindowIds }) {
+export function setupContextMenu(contextMenuOptions, { createWindow, confirmCloseWindow, confirmMultipleTabsAction, closeConfirmedWindowIds }) {
   const faviconPromises = new Map()
   let configuredSearchEngines = parseSearchEngines(DEFAULT_SEARCH_ENGINES_SETTING)
   // Menus must not queue a settings read behind unrelated writes on slow storage.
@@ -353,6 +354,14 @@ export function setupContextMenu(contextMenuOptions, { createWindow, confirmClos
     const selectedTabGroup = typeof selectedTabGroupId === 'string'
       ? manager?.tabGroups.get(selectedTabGroupId)
       : null
+    const contextMenuTabGroup = manager?.contextMenuSurface === 'tabGroup' && manager.contextMenuTabGroupId != null
+      ? manager.tabGroups.get(manager.contextMenuTabGroupId) ?? null
+      : null
+    const contextMenuTabGroupTabIds = contextMenuTabGroup
+      ? Array.from(manager.tabs.values())
+          .filter(tab => tab.groupId === contextMenuTabGroup.id)
+          .map(tab => tab.id)
+      : []
     const hasSelectedUnloadedTab = contextMenuTabs.some(tab => tab.loadState === 'unloaded')
     const hasSelectedLoadedTab = contextMenuTabs.some(tab => !['unloaded', 'unloading'].includes(tab.loadState))
     /**
@@ -370,18 +379,17 @@ export function setupContextMenu(contextMenuOptions, { createWindow, confirmClos
       const existingTabIds = tabIds.filter(tabId => manager.tabs.has(tabId))
       if (existingTabIds.length === 0) return
 
-      const isLastWindow = BrowserWindow.getAllWindows().length === 1
-      const closesWindow = await manager.closingTabsClosesWindow(existingTabIds.length)
-      if (closesWindow && isLastWindow) {
-        // The quit confirmation already covers this case
-        if (!await confirmCloseApp(manager.browserWindow)) return
+      if (await manager.closingTabsClosesWindow(existingTabIds.length)) {
+        // The window or quit confirmation already covers these tabs
+        if (!await confirmCloseWindow(manager.browserWindow)) return
       } else if (!await confirmMultipleTabsAction(manager, existingTabIds.length, 'close')) {
         return
       }
 
       const hasRemainingTabs = await manager.closeTabs(existingTabIds)
       if (!hasRemainingTabs) {
-        if (isLastWindow) closeConfirmedWindowIds.add(manager.browserWindow.id)
+        // confirmCloseWindow confirmed the quit if this became the last window
+        if (BrowserWindow.getAllWindows().length === 1) closeConfirmedWindowIds.add(manager.browserWindow.id)
         manager.browserWindow.close()
       }
     }
@@ -427,6 +435,44 @@ export function setupContextMenu(contextMenuOptions, { createWindow, confirmClos
       {
         type: 'separator',
         visible: subscriptionFeedTab != null
+      },
+      {
+        label: contextMenuLabel('Expand Group'),
+        visible: contextMenuTabGroup?.isCollapsed === true,
+        click: () => {
+          manager?.updateTabGroup(contextMenuTabGroup.id, { isCollapsed: false })
+        }
+      },
+      {
+        label: contextMenuTabGroupTabIds.length > 1
+          ? contextMenuLabel(
+              'Close Multiple Tabs',
+              { count: contextMenuTabGroupTabIds.length },
+              `Close ${contextMenuTabGroupTabIds.length} Tabs`
+            )
+          : contextMenuLabel('Close Tab'),
+        visible: contextMenuTabGroupTabIds.length > 0,
+        click: async () => {
+          await closeContextMenuTabs(contextMenuTabGroupTabIds)
+        }
+      },
+      {
+        label: contextMenuLabel('Ungroup'),
+        visible: contextMenuTabGroup != null,
+        click: () => {
+          manager?.deleteTabGroup(contextMenuTabGroup.id)
+        }
+      },
+      {
+        type: 'separator',
+        visible: contextMenuTabGroup != null
+      },
+      {
+        label: contextMenuLabel('Manage Tab Groups…'),
+        visible: contextMenuTabGroup != null,
+        click: () => {
+          manager?.bridge.send(IpcChannels.TABS_OPEN_ORGANIZER)
+        }
       },
       {
         label: isBulkTabAction

@@ -1203,7 +1203,7 @@ function createNewTab() {
 
 // ===== Context menu =====
 /**
- * @param {{ tabId: string | null, selectedTabIds?: string[], surface: 'tab' | 'tabBar' | 'content' | 'subscriptionFeedTab', feedTab?: 'videos' | 'shorts' | 'live' | 'posts' | 'all' | 'feeds' | null, isNewFeedTab?: boolean, hasNewContent?: boolean }} payload
+ * @param {{ tabId: string | null, selectedTabIds?: string[], groupId?: string, surface: 'tab' | 'tabBar' | 'tabGroup' | 'content' | 'subscriptionFeedTab', feedTab?: 'videos' | 'shorts' | 'live' | 'posts' | 'all' | 'feeds' | null, isNewFeedTab?: boolean, hasNewContent?: boolean }} payload
  */
 function updateContextMenuTab(payload) {
   window.ftElectron.tabs.setContextMenuTab({ ...payload, verticalLayout: vertical.value })
@@ -1220,10 +1220,12 @@ function updateContextMenuTarget(target) {
   const feedTab = target.closest('[data-subscription-feed-tab]')?.dataset.subscriptionFeedTab ??
     newFeedTab?.dataset.newFeedTab ?? (rssFeedsTab ? 'feeds' : null)
   const isTabBar = target.closest('.tabBar') != null
+  const groupId = target.closest('.collapsedTabGroup[data-group-id]')?.dataset.groupId
   updateContextMenuTab({
     tabId,
     selectedTabIds: contextMenuSelectedTabIds,
-    surface: tabId ? 'tab' : isTabBar ? 'tabBar' : feedTab ? 'subscriptionFeedTab' : 'content',
+    groupId,
+    surface: tabId ? 'tab' : groupId ? 'tabGroup' : isTabBar ? 'tabBar' : feedTab ? 'subscriptionFeedTab' : 'content',
     feedTab,
     isNewFeedTab: newFeedTab != null,
     hasNewContent: (newFeedTab ?? rssFeedsTab)?.dataset.hasNewContent === 'true'
