@@ -379,7 +379,6 @@ export function setupContextMenu(contextMenuOptions, { createWindow, confirmClos
       const existingTabIds = tabIds.filter(tabId => manager.tabs.has(tabId))
       if (existingTabIds.length === 0) return
 
-      const isLastWindow = BrowserWindow.getAllWindows().length === 1
       if (await manager.closingTabsClosesWindow(existingTabIds.length)) {
         // The window or quit confirmation already covers these tabs
         if (!await confirmCloseWindow(manager.browserWindow)) return
@@ -389,7 +388,8 @@ export function setupContextMenu(contextMenuOptions, { createWindow, confirmClos
 
       const hasRemainingTabs = await manager.closeTabs(existingTabIds)
       if (!hasRemainingTabs) {
-        if (isLastWindow) closeConfirmedWindowIds.add(manager.browserWindow.id)
+        // Other windows may have closed while the confirmation was open
+        if (BrowserWindow.getAllWindows().length === 1) closeConfirmedWindowIds.add(manager.browserWindow.id)
         manager.browserWindow.close()
       }
     }

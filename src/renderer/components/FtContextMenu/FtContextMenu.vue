@@ -620,6 +620,12 @@ function handleKeydown(event) {
     previousFocus?.focus({ preventScroll: true })
     return
   }
+  // Like a native menu, the menu closes when focus moves on. Closing returns
+  // focus to the opener first, so Tab continues from there.
+  if (event.key === 'Tab') {
+    close()
+    return
+  }
   if (!['ArrowDown', 'ArrowUp', 'ArrowLeft', 'ArrowRight', 'Home', 'End'].includes(event.key)) return
 
   event.preventDefault()
@@ -633,7 +639,7 @@ function handleKeydown(event) {
     submenu.parentElement.querySelector(':scope > button').focus()
     return
   }
-  if (forward && focused?.getAttribute('aria-haspopup') === 'menu') {
+  if (forward && menuRef.value?.contains(focused) && focused.getAttribute('aria-haspopup') === 'menu') {
     focused.parentElement.querySelector('.submenu button:enabled')?.focus()
     return
   }

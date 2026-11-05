@@ -382,6 +382,13 @@ test('menus without a tab palette take focus from the keyboard and navigate with
   await group.focus()
   await page.keyboard.press('Shift+F10')
   await expect(item('Expand Group')).toBeFocused()
+  // Tab closes the menu like a native one, so it never lingers after focus leaves.
+  await page.keyboard.press('Tab')
+  await expect(menu).toHaveCount(0)
+  await expect(group).not.toBeFocused()
+  await group.focus()
+  await page.keyboard.press('Shift+F10')
+  await expect(item('Expand Group')).toBeFocused()
   await page.keyboard.press('End')
   await expect(item('Manage Tab Groups…')).toBeFocused()
   await page.keyboard.press('Home')
