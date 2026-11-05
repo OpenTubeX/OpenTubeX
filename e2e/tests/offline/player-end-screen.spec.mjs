@@ -134,7 +134,8 @@ for (const dataSaver of [false, true]) {
     await page.evaluate(() => window.ftElectron.tabs.create({ route: '/watch/jNQXAC9IVRw' }))
     const video = page.locator('.ftVideoPlayer video')
     const startup = page.locator('.countdownPoster img:not(.retryImagePlaceholder)')
-    await expect(startup).toBeVisible()
+    // The poster waits for a cold watch page load, so allow as long as waitForPlayback does.
+    await expect(startup).toBeVisible({ timeout: 60_000 })
     await expect(startup).toHaveAttribute('src', new RegExp(`/${dataSaver ? 'mq' : 'hq'}default.jpg$`))
     await expect(video).not.toHaveAttribute('poster', /.+/)
     if (dataSaver) {
@@ -241,6 +242,8 @@ test('hides only end-screen recommendations when the focused setting is enabled'
 })
 
 test('shows recommended thumbnails over a darkened poster with working keyboard navigation', async ({ app, page, attachScreenshot }) => {
+  // Two cold video loads plus fullscreen and window size changes.
+  test.slow()
   const { video, watch } = await openVideo({ app, page })
   await watch.evaluate(async component => {
     await component.proxy.$store.dispatch('updateHideRecommendedVideos', false)
