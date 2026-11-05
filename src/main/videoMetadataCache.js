@@ -10,6 +10,8 @@ const MAX_DESCRIPTION_LENGTH = 1_000_000
 const MAX_THUMBNAIL_DATA_URL_LENGTH = 8_000_000
 
 let pendingOperation = Promise.resolve()
+// Feeds fetched before a clear may finish saving after it.
+let clearedAt = 0
 
 function enqueue(operation) {
   const result = pendingOperation.then(operation, operation)
@@ -195,7 +197,7 @@ export function recordFeedVideoTitles(observations) {
     const valid = observations.filter(({ videoId, title, observedAt }) =>
       typeof videoId === 'string' && /^[\w-]{11}$/.test(videoId) &&
       typeof title === 'string' && title !== '' &&
-      Number.isSafeInteger(observedAt) && observedAt > 0
+      Number.isSafeInteger(observedAt) && observedAt > clearedAt
     )
     if (valid.length === 0) return
     // One refresh can list a collaboration video in several channels' feeds,
@@ -265,6 +267,7 @@ export async function getVideoMetadataCacheSize() {
 }
 
 export function clearVideoMetadataCache() {
+  clearedAt = Date.now()
   return enqueue(async () => {
     await videoMetadataCache.dropDatabaseAsync()
   })

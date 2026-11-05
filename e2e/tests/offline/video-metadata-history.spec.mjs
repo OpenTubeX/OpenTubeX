@@ -104,6 +104,22 @@ test('keeps the older feed title when one refresh lists it after a newer one', a
   })))?.feedTitles.map(({ title }) => title)).toEqual(['Older title'])
 })
 
+test('skips feed titles fetched before the cache was cleared', async ({ page }) => {
+  const fetchedBeforeClear = Date.now() - 1000
+  await page.evaluate(() => window.ftElectron.videoMetadataCache.clear())
+  await storeFeedTitle(page, 'feedtitle03', 'Title fetched before the clear', fetchedBeforeClear)
+  const fetchedAfterClear = Date.now()
+  await storeFeedTitle(page, 'feedtitle03', 'Title fetched after the clear', fetchedAfterClear, 'UCfeedtitlechannel00001')
+  await storeFeedTitle(page, 'feedtitle03', 'Later title', fetchedAfterClear + 1, 'UCfeedtitlechannel00002')
+
+  await expect.poll(async () => (await page.evaluate(() => window.ftElectron.videoMetadataCache.update({
+    videoId: 'feedtitle03',
+    title: 'Original title',
+    description: '',
+    thumbnailUrl: ''
+  })))?.feedTitles.map(({ title }) => title)).toEqual(['Title fetched after the clear'])
+})
+
 test('detects a replaced thumbnail at the same cacheable URL', async ({ page }) => {
   let revision = 0
   let requests = 0
