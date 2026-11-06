@@ -1,3 +1,7 @@
+.communityPosts {
+  padding-block-start: 6px;
+}
+
 .message {
   margin-block: 16px 0;
   color: var(--tertiary-text-color);

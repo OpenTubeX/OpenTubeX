@@ -81,7 +81,7 @@ export function createInvidiousFeedParsers(instanceUrl, proxyImages = () => true
       publishedTime: calculatePublishedDate(data.publishedText),
       voteCount: data.likeCount,
       postContent: parseInvidiousCommunityAttachments(data.attachment),
-      commentCount: data?.replyCount ?? 0, // https://github.com/iv-org/invidious/pull/3635/
+      commentCount: data.replyCount ?? null,
       authorId: data.authorId,
       author: data.author,
       type: 'community'

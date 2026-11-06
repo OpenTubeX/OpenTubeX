@@ -16,6 +16,20 @@ const scheduledTime = firstFetch + 90 * DAY
 
 const { normalizeInvidiousSubscriptionFeed } = createInvidiousFeedParsers(() => 'https://invidious.example')
 
+test('preserves unknown Invidious post comment counts without losing known zero and one counts', () => {
+  const posts = normalizeInvidiousSubscriptionFeed('posts', {
+    comments: [undefined, null, 0, 1].map((replyCount, index) => ({
+      commentId: `post-${index}`,
+      contentHtml: 'A community update',
+      authorThumbnails: [],
+      publishedText: '1 day ago',
+      ...(replyCount !== undefined && { replyCount })
+    }))
+  }, CHANNEL_ID)
+
+  assert.deepEqual(posts.map(post => post.commentCount), [null, null, 0, 1])
+})
+
 /**
  * Invidious has no publication text for upcoming entries and reports the time
  * it parsed the channel page instead.
